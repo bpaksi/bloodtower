@@ -12,7 +12,7 @@ The `reviewer` agent reviews a branch diff against this file, the app's `spec.md
    - mechanics available before calibration
    - an unknown or stale value shown as current, or as zero
 3. **Spec and plan compliance.** The diff does what the plan step says and no more. Any deviation is recorded in the plan or spec in the same branch. Decision-log entries (D1…) are respected.
-4. **Repo rules.** No imports across app folders. Dependencies are exact pins. `ultimatedarktower` is unchanged. No edits under `apps/*/intent/`. No secrets.
+4. **Repo rules.** No imports across app folders. Dependencies are exact pins. `ultimatedarktower` and `scripts/pinned-versions.json` are unchanged. No edits under `apps/*/intent/`: check the diff itself, because the hook that guards intent reads shell commands only on a best-effort basis. No secrets.
 
 ## Severity
 

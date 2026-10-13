@@ -49,17 +49,19 @@ Promoting an Experiment to Full: write a spec from what was learned, then contin
 | Branches | `<type>/<app>-<slug>` (e.g. `feat/tower-poc-lights`); repo-wide work uses `chore/<slug>` |
 | Commits | Conventional commits with the app as scope: `feat(tower-poc): …` |
 
-## Guardrails (skills are advisory, hooks are deterministic)
+## Guardrails (skills are advisory, hooks and checks enforce)
+
+Hooks see Claude's edit tools exactly and read shell commands on a best-effort basis: they catch the ordinary ways to change a file (`sed -i`, `rm`, `mv`, redirects, scripts) but cannot follow everything a shell can do. Where a rule can be checked on the result, `pnpm check` does that too, and it gates every commit.
 
 | Guardrail | Mechanism |
 |---|---|
-| No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook → exit 2 |
-| No direct commits on `main` | PreToolUse hook on `git commit` while on `main` → exit 2 |
-| Pinned `ultimatedarktower` cannot be bumped silently | PreToolUse hook blocks edits to its version line in any `package.json` |
+| No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: the reviewer checks the diff. |
+| No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2 |
+| Pinned `ultimatedarktower` cannot be bumped silently | Pins live in `scripts/pinned-versions.json`. `scripts/check-pins.mjs` in `pnpm check` fails on any other version in a `package.json` or the lockfile. A PreToolUse hook warns earlier, on the edit or install command. |
 | No raw-bytes message type in a tower protocol | Protocol unit test plus a reviewer check |
-| Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits to `*.test.ts` on `fix/*` branches after the first commit. |
-| Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/` (lint rule + reviewer check) |
-| Format/lint | PostToolUse hook formats edited files |
+| Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits and shell changes to test files on `fix/*` branches after the first commit. |
+| Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/`. `scripts/check-imports.mjs` in `pnpm check` fails on a cross-app import; the reviewer checks too. |
+| Format/lint | PostToolUse hook runs `biome check --write` on edited files |
 | Secrets | `.env*` denied in permissions |
 
 ## Claude config (root, created in tower-poc M0, used by every app)
@@ -69,7 +71,7 @@ CLAUDE.md                       # < 1 page: repo map, commands, conventions, kno
 apps/<app>/CLAUDE.md            # optional, app-specific notes only (Claude loads it when working in that folder)
 REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; Important vs Nit; nit cap 5
 .claude/settings.json           # hooks + permissions
-.claude/hooks/*.sh
+.claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes
 .claude/agents/reviewer.md      # read-only diff review per REVIEW.md
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
@@ -82,7 +84,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 
 | From | Command | Runs |
 |---|---|---|
-| root | `pnpm check` | typecheck, lint, unit tests across every app and package |
+| root | `pnpm check` | lint, repo checks (pins, cross-app imports, hook tests), typecheck and unit tests across every app and package |
 | root | `pnpm build` | builds every app |
 | root | `pnpm -F <app> <script>` | one app's script (same as running it inside the app folder) |
 | app | `pnpm dev` / `pnpm start` / `pnpm e2e` | defined per app in its README |

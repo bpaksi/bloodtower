@@ -6,13 +6,13 @@ The repo started as a single deliverable (the tower controller POC), with `inten
 
 ## Decision
 - Every website lives in `apps/<name>/` and owns its own `README.md`, `intent/`, `spec.md` and `plans/`.
-- An app may be one package or several parts (`apps/<name>/<part>/`); the workspace globs cover both.
+- An app may be one package or several parts; the workspace globs cover both. (Amended 2026-10-13: parts live at `apps/<name>/src/<part>/`. See tower-poc spec D19.)
 - Repo-wide process, Claude config, hooks and toolchain live at the root and apply to every app.
 - Shared code moves to `packages/` only once a second app needs it.
 - Research is shared across apps in `research/`. Cross-app decisions go in `research/decisions/`; single-app decisions stay in that app's spec decision log.
 - Initial apps: `tower-poc`, `game-test`, `game`.
 
 ## Consequences
-- The POC's planned `apps/tower-service`, `apps/web` and `packages/protocol` become `apps/tower-poc/service`, `apps/tower-poc/web` and `apps/tower-poc/protocol`.
+- The POC's planned `apps/tower-service`, `apps/web` and `packages/protocol` become `apps/tower-poc/service`, `apps/tower-poc/web` and `apps/tower-poc/protocol`. (Amended 2026-10-13: now `apps/tower-poc/src/server`, `src/web` and `src/protocols`.)
 - POC spike and observability write-ups go to `research/tower/` so later apps can use them.
 - Hooks must protect `apps/*/intent/**` instead of a root `intent/`.

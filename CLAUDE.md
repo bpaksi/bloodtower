@@ -16,7 +16,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 
 | From | Command | Does |
 |---|---|---|
-| root | `pnpm check` | Biome, then typecheck and unit tests in every package |
+| root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
 | root | `pnpm build` | Builds every app |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |
@@ -33,8 +33,9 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 ## Conventions
 
 - Conventional commits with the app as scope: `feat(tower-poc): …`.
-- Dependencies are exact pins (`.npmrc` sets `save-exact`). `ultimatedarktower` stays at `7.1.2`.
-- Apps never import from another app's folder. Shared code goes through `packages/`.
+- Dependencies are exact pins (`.npmrc` sets `save-exact`). `ultimatedarktower` stays at `7.1.2`; `scripts/pinned-versions.json` lists the pins and only Bob changes it.
+- TypeScript is pinned to `6.0.3`. Version 7 was not evaluated; see the M0 plan.
+- Apps never import from another app's folder. Shared code goes through `packages/`. `pnpm check` enforces this.
 - Parts export TypeScript source with no build step. Relative imports use the `.ts` extension.
 - Biome formats and lints. There is no ESLint or Prettier.
 
@@ -48,10 +49,12 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 
 | Hook | Blocks |
 |---|---|
-| `protect-intent` | Any edit under `apps/*/intent/` |
-| `no-main-commit` | `git commit`, `merge`, `cherry-pick`, `revert` or `am` on `main` |
-| `pin-guard` | Changing or removing the `ultimatedarktower` version, or installing another version |
-| `test-lock` | Editing test files on a `fix/*` branch after its first commit |
+| `protect-intent` | Any edit under `apps/*/intent/`, and removing or moving an app folder |
+| `no-main-commit` | Committing on `main` (`commit`, `merge`, `cherry-pick`, `revert`, `am`, `rebase`, `pull`) or moving it (`reset`, `branch -f`, `update-ref`, a `:main` refspec) |
+| `pin-guard` | Changing or removing a pinned version, installing another one, `up --latest` with no package names, or editing `scripts/pinned-versions.json` |
+| `test-lock` | Changing test files on a `fix/*` branch after its first commit |
+
+The hooks also read shell commands, so `sed -i`, `rm`, `mv`, a redirect or a script aimed at a protected file is blocked too. That reading is best effort: a command the hook does not understand is not permission. The rules above hold either way.
 
 If a hook blocks you, do not work around it. Say what you were trying to do and ask Bob.
 

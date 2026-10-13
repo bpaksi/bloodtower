@@ -37,10 +37,10 @@ dark-tower/
 3. Pick the app's tier (Experiment or Full) in its README, then follow the loop.
 4. Add a row to the Apps table above.
 
-## Commands (once M0 scaffolding lands)
+## Commands
 
 | From | Command | Does |
 |---|---|---|
-| root | `pnpm check` | typecheck, lint and unit tests for every app and package |
+| root | `pnpm check` | lint, repo checks, typecheck and unit tests for every app and package |
 | root | `pnpm build` | builds every app |
 | root | `pnpm -F <app> dev` | runs one app in dev (same as `pnpm dev` inside its folder) |
