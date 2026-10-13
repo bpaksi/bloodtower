@@ -78,7 +78,13 @@ runGuard("no-main-commit", (input) => {
   // `LEFTHOOK=0`, set on the command or exported before it, turns lefthook off.
   let hooksOff = false;
 
-  for (const { words, dir: folder } of walkCommands(command, input.cwd)) {
+  const branchIn = (folder) => {
+    const repo = repoRoot(folder) || folder;
+    if (!branches.has(repo)) branches.set(repo, currentBranch(folder));
+    return branches.get(repo);
+  };
+
+  for (const { words, dir: folder, others } of walkCommands(command, input.cwd)) {
     hooksOff ||= words.some((word) => /^LEFTHOOK=(0|false)$/i.test(word));
     const git = gitCommand(words);
     if (!git) continue;
@@ -87,8 +93,11 @@ runGuard("no-main-commit", (input) => {
     if (skip) block(`git ${sub}: ${skip}. ${SKIP_WHY}`);
     const cwd = dir ? folderAt(folder, dir, input.cwd) : folder;
     const repo = repoRoot(cwd) || cwd;
-    if (!branches.has(repo)) branches.set(repo, currentBranch(cwd));
-    const here = branches.get(repo);
+    const here = branchIn(cwd);
+    // When the folder is not certain, the command may run in one of these instead.
+    const mayBeMain = others
+      .map((other) => (dir ? folderAt(other, dir, input.cwd) : other))
+      .some((other) => branchIn(other) === "main");
 
     if (sub === "checkout" || sub === "switch") {
       const next = branchAfterSwitch(sub, args, cwd);
@@ -99,6 +108,11 @@ runGuard("no-main-commit", (input) => {
     if (here === UNKNOWN_BRANCH && COMMITTING.has(sub)) {
       block(
         `git ${sub}: git could not say which branch this is, so it may be main. Run it from the repo folder or with git -C <path>. ${WHY}`,
+      );
+    }
+    if (mayBeMain && here !== "main" && COMMITTING.has(sub)) {
+      block(
+        `git ${sub}: the folder this runs in is not certain, and one it may run in is on main. Run it from the repo folder or with git -C <path>. ${WHY}`,
       );
     }
     if (here === "main") {

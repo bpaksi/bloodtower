@@ -53,6 +53,8 @@ Promoting an Experiment to Full: write a spec from what was learned, then contin
 
 Hooks see Claude's edit tools exactly and read shell commands on a best-effort basis: they catch the ordinary ways to change a file (`sed -i`, `rm`, `mv`, redirects, scripts) but cannot follow everything a shell can do. Where a rule can be checked on the result, `pnpm check` does that too, and it gates every commit.
 
+Reading a shell command is a guess about where it runs. When a `cd` or `git -C` cannot be read for certain (a variable, a glob, a pipe, a folder that is not there), the hooks check the command against every folder it might run in, including the one the call started in, and block if any of them is hit. Known limits, where the hooks do not see the change of folder at all: `pushd`, a `cd` inside `{ … }` or after `then`, a here-document, and a command substitution inside quotes. Pipelines are read the way zsh runs them. The limits matter most for git commands that discard uncommitted work, because nothing is left for the reviewer to see.
+
 | Guardrail | Mechanism |
 |---|---|
 | No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: the reviewer checks the diff. |

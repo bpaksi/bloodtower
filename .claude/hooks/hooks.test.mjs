@@ -134,6 +134,23 @@ describe("walkCommands", () => {
     assert.equal(there.pending, false);
   });
 
+  it("lists the other folders a command might run in when the folder is not certain", () => {
+    const others = (command) => walkCommands(command, repo).at(-1).others;
+    assert.deepEqual(others("cd a && y"), []);
+    assert.deepEqual(others('cd a && cd "$X" && y'), [a, repo]);
+    assert.deepEqual(others("cd a | cat; y"), [repo, a]);
+    assert.deepEqual(others("cd nope && true; y"), [repo, join(repo, "nope")]);
+    assert.deepEqual(others('cd "$X"; cd /; y'), []);
+    assert.deepEqual(others('cd "$X"; cd b; y'), [repo, b]);
+    assert.deepEqual(dirs("cd -q a && y"), [repo, UNKNOWN_FOLDER]);
+    assert.deepEqual(dirs("cd ~+ && y"), [repo, UNKNOWN_FOLDER]);
+  });
+
+  it("reads a folder whose real name has brackets as a folder, not a glob", () => {
+    mkdirSync(join(repo, "[id]"));
+    assert.deepEqual(dirs('cd "[id]" && y'), [repo, join(repo, "[id]")]);
+  });
+
   it("keeps an escaped quote inside double quotes in one word", () => {
     const [segment] = splitCommands('echo "say \\"cd x\\" && git commit"');
     assert.deepEqual(segment.words, ["echo", 'say "cd x" && git commit']);
@@ -355,7 +372,32 @@ describe("git commands that discard uncommitted work", () => {
     'git -C "$SOMEWHERE" reset --hard',
     "git -C nope reset --hard",
     "git -C apps/game rm intent/0001-first.md",
+    // The folder is not certain, so every folder the command might run in is checked.
+    "cd apps/gam? && rm intent/0001-first.md",
+    "cd apps/game | cat; rm intent/0001-first.md",
+    "cd apps/game & rm intent/0001-first.md",
+    'cd "$SOMEWHERE"; rm apps/game/spec.md intent/0001-first.md; cd apps/game && rm intent/0001-first.md',
+    'git -C "$ROOT" rm apps/game/intent/0001-first.md',
+    'git -C "$(git rev-parse --show-toplevel)" mv apps/game/intent/0001-first.md x.md',
+    "cd nope && true; git reset --hard",
+    "cd nope && ls || git reset --hard",
+    "cd nope && ls\ngit checkout -- .",
+    "cd ~+ && git reset --hard",
+    "cd -q apps && git checkout -- .",
+    "git switch -f -c tmp",
+    "git switch -f -c tmp HEAD",
+    "git switch --discard-changes -C tmp main",
   ]);
+
+  it("checks the pin list from every folder the command might run in", () => {
+    for (const command of [
+      'git -C "$(git rev-parse --show-toplevel)" rm scripts/pinned-versions.json',
+      "cd script? && rm pinned-versions.json",
+      "cd scripts | cat; rm pinned-versions.json",
+    ]) {
+      assert.equal(shell("pin-guard", command), BLOCKED, command);
+    }
+  });
 
   it("blocks from another folder: cd, git -C, ~ and $CLAUDE_PROJECT_DIR", () => {
     const from = (command, env = {}) =>
@@ -390,7 +432,8 @@ describe("git commands that discard uncommitted work", () => {
     "git status",
     "git restore --staged apps",
     "git restore -S apps",
-    "git switch -f -c tmp",
+    "git switch -c tmp",
+    'cd "$(git rev-parse --show-toplevel)" && git checkout main',
     "git switch main",
     "git checkout -b feat/y",
     "git clone https://example.com/x.git fresh && cd fresh && git checkout main",
