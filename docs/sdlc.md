@@ -75,8 +75,8 @@ apps/<app>/CLAUDE.md            # optional, app-specific notes only (Claude load
 REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; Important vs Nit; nit cap 5
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
-.claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes
-.claude/agents/reviewer.md      # read-only diff review per REVIEW.md
+.claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes (model: haiku)
+.claude/agents/reviewer.md      # read-only diff review per REVIEW.md (model: sonnet; pass an Opus override for hook or tower-safety changes)
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
 .claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
 .claude/skills/bugfix/SKILL.md             # failing test first
