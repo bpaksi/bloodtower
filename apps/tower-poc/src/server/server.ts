@@ -1,0 +1,120 @@
+import { randomUUID } from "node:crypto";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import {
+  CLIENT_MESSAGE_TYPES,
+  clientMessageSchema,
+  type Envelope,
+  type ErrorCode,
+  envelopeSchema,
+  PROTOCOL_VERSION,
+  type ServerMessage,
+} from "tower-poc-protocols";
+import { type RawData, type WebSocket, WebSocketServer } from "ws";
+import { serveStatic } from "./static.ts";
+
+export const WS_PATH = "/ws";
+
+export interface TowerServerOptions {
+  port: number;
+  host: string;
+  /** Folder holding the web part's static export. */
+  webRoot: string;
+  serverVersion: string;
+}
+
+export interface TowerServer {
+  port: number;
+  close: () => Promise<void>;
+}
+
+const send = (socket: WebSocket, message: ServerMessage) => socket.send(JSON.stringify(message));
+
+const sendError = (socket: WebSocket, code: ErrorCode, message: string, correlationId?: string) =>
+  send(socket, {
+    v: PROTOCOL_VERSION,
+    type: "error",
+    ...(correlationId ? { correlationId } : {}),
+    payload: { code, message },
+  });
+
+const handleMessage = (
+  socket: WebSocket,
+  clientId: string,
+  data: RawData,
+  serverVersion: string,
+) => {
+  let json: unknown;
+  try {
+    json = JSON.parse(data.toString());
+  } catch {
+    return sendError(socket, "invalid-json", "Message is not valid JSON.");
+  }
+
+  const envelope = envelopeSchema.safeParse(json);
+  if (!envelope.success) {
+    return sendError(socket, "invalid-envelope", "Message is not a valid protocol envelope.");
+  }
+  const { id, type }: Envelope = envelope.data;
+
+  if (!CLIENT_MESSAGE_TYPES.includes(type)) {
+    return sendError(socket, "unknown-type", `Unknown message type "${type}".`, id);
+  }
+  const message = clientMessageSchema.safeParse(envelope.data);
+  if (!message.success) {
+    return sendError(socket, "invalid-payload", `Invalid payload for "${type}".`, id);
+  }
+
+  switch (message.data.type) {
+    case "hello":
+      return send(socket, {
+        v: PROTOCOL_VERSION,
+        type: "welcome",
+        ...(id ? { correlationId: id } : {}),
+        payload: {
+          clientId,
+          versions: { protocol: PROTOCOL_VERSION, server: serverVersion, node: process.version },
+        },
+      });
+  }
+};
+
+/** Starts the HTTP server (static web UI) and the WebSocket endpoint on one port. */
+export const startTowerServer = async (options: TowerServerOptions): Promise<TowerServer> => {
+  const http = createServer((req, res) => {
+    serveStatic(options.webRoot, req, res).catch(() => res.destroy());
+  });
+
+  const wss = new WebSocketServer({ noServer: true });
+  wss.on("connection", (socket) => {
+    const clientId = randomUUID();
+    socket.on("message", (data) => handleMessage(socket, clientId, data, options.serverVersion));
+  });
+
+  http.on("upgrade", (req, socket, head) => {
+    const { pathname } = new URL(req.url ?? "/", "http://localhost");
+    if (pathname !== WS_PATH) {
+      socket.end("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
+      return;
+    }
+    wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    http.once("error", reject);
+    http.listen(options.port, options.host, () => {
+      http.off("error", reject);
+      resolve();
+    });
+  });
+
+  return {
+    port: (http.address() as AddressInfo).port,
+    close: () =>
+      new Promise<void>((resolve, reject) => {
+        for (const client of wss.clients) client.terminate();
+        wss.close();
+        http.close((error) => (error ? reject(error) : resolve()));
+      }),
+  };
+};

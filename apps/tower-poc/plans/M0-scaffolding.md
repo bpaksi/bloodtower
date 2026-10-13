@@ -13,9 +13,9 @@ package.json, pnpm-workspace.yaml (already exists), .npmrc, .nvmrc (22.13+), tsc
 biome.json, lefthook.yml, .gitignore
 # this app
 apps/tower-poc/package.json   # name "tower-poc", private, orchestrates dev/start/build/e2e for its parts
-apps/tower-poc/src/server/      package.json, tsconfig.json, index.ts (HTTP + /ws hello)
+apps/tower-poc/src/server/      package.json, tsconfig.json, index.ts (entry), server.ts (HTTP + /ws hello), static.ts, lanUrls.ts (+ test)
 apps/tower-poc/src/web/         Next.js App Router, output:'export', Tailwind v4, shadcn/ui init, page shells
-apps/tower-poc/src/protocols/   package.json, tsconfig.json, index.ts, envelope.ts (+ test)
+apps/tower-poc/src/protocols/   package.json, tsconfig.json, index.ts, envelope.ts, messages.ts (hello, welcome, error) (+ tests)
 CLAUDE.md, REVIEW.md
 .claude/settings.json, .claude/hooks/{protect-intent,no-main-commit,pin-guard,format}.sh
 .claude/agents/{verifier,reviewer}.md

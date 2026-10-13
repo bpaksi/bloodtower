@@ -1,0 +1,23 @@
+{
+  "name": "tower-poc-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Node tower service: serves the exported web UI and the /ws protocol endpoint.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "tower-poc-protocols": "workspace:*",
+    "tsx": "4.23.15",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/ws": "8.18.2",
+    "vitest": "5.0.4"
+  }
+}
