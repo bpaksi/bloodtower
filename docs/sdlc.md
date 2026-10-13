@@ -77,6 +77,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes (model: haiku)
 .claude/agents/reviewer.md      # read-only diff review per REVIEW.md (model: sonnet; pass an Opus override for hook or tower-safety changes)
+.claude/agents/developer.md     # builds one plan step on its own branch with tests; several can run in parallel in separate worktrees (model: sonnet; Opus override for work that needs more judgement)
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
 .claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
 .claude/skills/bugfix/SKILL.md             # failing test first
