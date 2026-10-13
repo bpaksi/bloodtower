@@ -140,7 +140,9 @@ describe("walkCommands", () => {
     assert.deepEqual(others('cd a && cd "$X" && y'), [a, repo]);
     assert.deepEqual(others("cd a | cat; y"), [repo, a]);
     assert.deepEqual(others("cd nope && true; y"), [repo, join(repo, "nope")]);
-    assert.deepEqual(others('cd "$X"; cd /; y'), []);
+    // A `cd` that works does not make an uncertain folder certain: an earlier one may have failed.
+    assert.deepEqual(others('cd "$X"; cd /; y'), [repo]);
+    assert.deepEqual(others("cd nope && cd /; y"), [repo, join(repo, "nope")]);
     assert.deepEqual(others('cd "$X"; cd b; y'), [repo, b]);
     assert.deepEqual(dirs("cd -q a && y"), [repo, UNKNOWN_FOLDER]);
     assert.deepEqual(dirs("cd ~+ && y"), [repo, UNKNOWN_FOLDER]);
@@ -258,6 +260,7 @@ describe("no-main-commit", () => {
       "LEFTHOOK=0 git commit -m x",
       "export LEFTHOOK=0; git add . && git commit -m x",
       "git -c core.hooksPath=/dev/null commit -m x",
+      "git commit --no-verif -m x",
     ]);
     cases("no-main-commit", onFeatureCase, ALLOWED, [
       "git commit --amend --no-edit",
@@ -266,6 +269,11 @@ describe("no-main-commit", () => {
       "git merge -n main",
       "git log -n 5 && git commit -m x",
       "LEFTHOOK=0 pnpm install",
+      "LEFTHOOK=0 pnpm install; git commit -m x",
+      "git commit -uno -m x",
+      "git commit -mrename",
+      'git commit -am "-n"',
+      'git commit -m "core.hooksPath=/x is the setting"',
     ]);
   });
 
@@ -388,6 +396,35 @@ describe("git commands that discard uncommitted work", () => {
     "git switch -f -c tmp HEAD",
     "git switch --discard-changes -C tmp main",
   ]);
+
+  it("refuses a wide discard whose folder only the shell can work out, even from a clean repo", () => {
+    for (const command of [
+      'cd "$SOMEWHERE" && git reset --hard',
+      'cd "$SOMEWHERE" && git stash -u',
+      "cd - && git clean -fd",
+      'git -C "$SOMEWHERE" checkout -- .',
+      'git -C "$(git rev-parse --show-toplevel)" restore apps',
+      'cd "$SOMEWHERE" && bash -c "git reset --hard"',
+    ]) {
+      assert.equal(shell("protect-intent", command, clean), BLOCKED, command);
+    }
+    for (const command of [
+      'cd "$SOMEWHERE" && git checkout main',
+      'cd "$(git rev-parse --show-toplevel)" && git status',
+      "cd nope; git reset --hard",
+      "git -C nope reset --hard",
+      "cd apps/gam[ && git status",
+    ]) {
+      assert.equal(shell("protect-intent", command, clean), ALLOWED, command);
+    }
+  });
+
+  it("keeps the folder uncertain after a cd that may have been skipped", () => {
+    assert.equal(
+      shell("protect-intent", "cd nope && cd /tmp && true; git reset --hard", dirty),
+      BLOCKED,
+    );
+  });
 
   it("checks the pin list from every folder the command might run in", () => {
     for (const command of [

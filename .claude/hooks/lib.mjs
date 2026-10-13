@@ -61,10 +61,8 @@ export const commitsAheadOfMain = (cwd) =>
  */
 export const uncommittedFiles = (cwd) => {
   const inside = gitTry(cwd || ".", ["rev-parse", "--is-inside-work-tree"]);
-  // A folder that is there but is not in a repo has nothing git could discard.
-  if (inside === undefined)
-    return existsSync(cwd || ".") ? { tracked: [], untracked: [] } : undefined;
-  if (inside.trim() !== "true") return { tracked: [], untracked: [] };
+  // Outside a work tree git cannot say: `--work-tree` or `GIT_DIR` may still point at a repo.
+  if (inside?.trim() !== "true") return undefined;
   // The way up to the repo root from `cwd`, so the paths keep the caller's spelling of the folder.
   const root = resolve(cwd || ".", git(cwd || ".", ["rev-parse", "--show-cdup"]));
   const status = gitTry(root, ["status", "--porcelain", "-z", "--untracked-files=all"]);
@@ -225,12 +223,18 @@ export const foldersMatching = (dir, word) => {
   if (!/[*?[]/.test(word) || /[$`~{}]/.test(word)) return [];
   let found = [word.startsWith("/") ? "/" : dir];
   for (const part of word.split("/").filter(Boolean)) {
-    const pattern = new RegExp(
-      `^${part
-        .replace(/[.+^$()|\\]/g, "\\$&")
-        .replace(/\*/g, ".*")
-        .replace(/\?/g, ".")}$`,
-    );
+    let pattern;
+    try {
+      pattern = new RegExp(
+        `^${part
+          .replace(/[.+^$()|\\]/g, "\\$&")
+          .replace(/\*/g, ".*")
+          .replace(/\?/g, ".")}$`,
+      );
+    } catch {
+      // An unbalanced `[` is not a pattern the shell would expand either.
+      return [];
+    }
     found = found.flatMap((folder) => {
       if (!/[*?[]/.test(part)) return [resolve(folder, part)];
       try {
@@ -273,18 +277,20 @@ const folderAfterCd = (dir, args, cwd) => {
  * so whenever the folder is not certain, `others` lists every other folder the command might run
  * in: the ones it was in before, and always the folder the call started in. A guard checks them
  * all. `pending` is true when `dir` does not exist yet and was reached by `cd <folder> &&`, as in
- * `git clone x && cd x && …`.
+ * `git clone x && cd x && …`. `unreadable` is true when a `cd` named a folder only the shell can
+ * work out (a variable, a command substitution, `cd -`), so the real folder may be none of these.
  */
 export const walkCommands = (command, cwd) => {
   const start = cwd || ".";
-  let at = { dir: start, pending: false, others: [] };
+  let at = { dir: start, pending: false, unreadable: false, others: [] };
   const real = (folders, dir) => [
     ...new Set(folders.filter((folder) => folder !== UNKNOWN_FOLDER && folder !== dir)),
   ];
   // The folder is no longer certain: keep every folder it might still be.
-  const unsure = (from, dir, pending, extra = []) => ({
+  const unsure = (from, dir, pending, extra = [], unreadable = from.unreadable) => ({
     dir,
     pending,
+    unreadable,
     others: real([...from.others, from.dir, ...extra, start], dir),
   });
 
@@ -307,18 +313,24 @@ export const walkCommands = (command, cwd) => {
         ...at.others.map((other) => folderAfterCd(other, args, cwd)),
         ...[at.dir, ...at.others].flatMap((from) => foldersMatching(from, target)),
       ].filter((folder) => folder !== UNKNOWN_FOLDER && existsSync(folder));
+      // Only the shell knows where this `cd` goes, as opposed to a `cd` that may simply fail.
+      const unreadable = at.unreadable || (dir === UNKNOWN_FOLDER && at.dir !== UNKNOWN_FOLDER);
       if (segment.end === "|" || segment.end === "&") {
         // Piped or sent to the background: whether the `cd` lasts depends on the shell.
-        at = unsure(at, UNKNOWN_FOLDER, false, [dir, ...fromOthers]);
+        at = unsure(at, UNKNOWN_FOLDER, false, [dir, ...fromOthers], unreadable);
       } else if (dir !== UNKNOWN_FOLDER && existsSync(dir)) {
-        const certain = at.others.length === 0 || fromOthers.every((folder) => folder === dir);
-        at = certain ? { dir, pending: false, others: [] } : unsure(at, dir, false, fromOthers);
+        // Certain only when the folder before it was. Otherwise an earlier `cd` may have failed
+        // and skipped this one, so the earlier folders stay in play.
+        at =
+          at.others.length === 0
+            ? { dir, pending: false, unreadable: false, others: [] }
+            : unsure(at, dir, false, fromOthers);
       } else if (dir !== UNKNOWN_FOLDER && segment.end === "&&") {
         // The folder is not there yet. Either an earlier step makes it, or the chain stops here.
         at = unsure(at, dir, true, fromOthers);
       } else {
         // Only the shell knows, or the `cd` fails and `;` carries on from where the shell was.
-        at = unsure(at, UNKNOWN_FOLDER, false, fromOthers);
+        at = unsure(at, UNKNOWN_FOLDER, false, fromOthers, unreadable);
       }
     } else if (here.pending && segment.end !== "&&") {
       // The `&&` chain ends here. If the `cd` failed, what follows runs in an earlier folder.
@@ -440,6 +452,12 @@ const filesGitWouldDiscard = (sub, args, dir, pending) => {
   const narrowed = (sub === "clean" || sub === "stash") && scopes.length > 0;
   // A folder that is yet to be made (`git clone x && cd x && …`) holds no work to lose.
   if (pending) return [];
+  // A folder only the shell can work out: a discard that reaches across it cannot be checked.
+  // Changing branch (`git checkout <branch>`) keeps the work, so that stays allowed.
+  if (dir === UNKNOWN_FOLDER) {
+    const reaches = everywhere || sub === "restore" || args.includes("--") || args.includes(".");
+    return reaches ? undefined : [];
+  }
   const files = uncommittedFiles(dir);
   if (files === undefined) return undefined;
   return kinds
@@ -477,7 +495,7 @@ const SHELLS = new Set(["bash", "sh", "zsh", "eval"]);
 export const findShellWrite = (command, cwd, isProtected, { discards = true } = {}) => {
   // `dir` follows `cd` through the command, so relative paths resolve from the right folder.
   // When the folder is not certain, a path is checked from every folder it might be.
-  for (const { words, redirects, dir, pending, others } of walkCommands(command, cwd)) {
+  for (const { words, redirects, dir, pending, unreadable, others } of walkCommands(command, cwd)) {
     const known = (folders) => [...new Set(folders.filter((folder) => folder !== UNKNOWN_FOLDER))];
     const folders = known([dir, ...others]);
     const protectedFrom = (bases, word, moves) =>
@@ -507,6 +525,11 @@ export const findShellWrite = (command, cwd, isProtected, { discards = true } = 
         if (hit) return `git ${git.sub} would change ${hit}`;
       }
       if (discards) {
+        // The target is a folder only the shell can work out, so it may be none of the candidates.
+        const blind = git.dir ? /[$`]/.test(git.dir) : unreadable || folders.length === 0;
+        if (blind && filesGitWouldDiscard(git.sub, git.args, UNKNOWN_FOLDER, false) === undefined) {
+          return `git ${git.sub} can discard uncommitted work, and the folder it runs in cannot be read from the command (run it from the repo folder or with git -C <literal path>)`;
+        }
         for (const folder of gitFolders) {
           const yetToBeMade = pending && !git.dir && folder === dir;
           const atRisk = filesGitWouldDiscard(git.sub, git.args, folder, yetToBeMade);
@@ -532,7 +555,7 @@ export const findShellWrite = (command, cwd, isProtected, { discards = true } = 
       if (hit) return `find would change files under ${hit}`;
     } else if (SHELLS.has(name)) {
       for (const script of args.filter((word) => !word.startsWith("-"))) {
-        for (const folder of folders) {
+        for (const folder of unreadable ? [...folders, UNKNOWN_FOLDER] : folders) {
           const reason = findShellWrite(script, folder, isProtected, { discards });
           if (reason) return reason;
         }

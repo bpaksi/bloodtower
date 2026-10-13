@@ -3,6 +3,7 @@
 import {
   block,
   branchExists,
+  commandOf,
   currentBranch,
   folderAt,
   gitCommand,
@@ -42,15 +43,24 @@ const COMMIT_OPTIONS_WITH_VALUE = new Set([
 const skipsPreCommit = (words, sub, args, hooksOff) => {
   if (!COMMITTING.has(sub)) return undefined;
   if (hooksOff) return "LEFTHOOK=0 turns the pre-commit hook off";
-  if (words.some((word) => /^core\.hookspath=/i.test(word))) {
+  // Only as a `-c` setting before the subcommand, not as text in a commit message.
+  const settings = words.slice(0, words.indexOf(sub));
+  if (settings.some((word) => /^core\.hookspath=/i.test(word))) {
     return "core.hooksPath points git away from the pre-commit hook";
   }
-  const flags = args.filter(
-    (word, i) => word.startsWith("-") && !COMMIT_OPTIONS_WITH_VALUE.has(args[i - 1] ?? ""),
-  );
-  if (flags.includes("--no-verify")) return "--no-verify skips the pre-commit hook";
-  // `-n` means --no-verify for `git commit` only; for `git merge` it means --no-stat.
-  if (sub === "commit" && flags.some((flag) => /^-[A-Za-z]*n[A-Za-z]*$/.test(flag))) {
+  // A word after `-m`, or after a cluster that ends in it such as `-am`, is a value, not a flag.
+  const takesValue = (word) =>
+    COMMIT_OPTIONS_WITH_VALUE.has(word) || /^-[A-Za-z]*[mFCct]$/.test(word);
+  const flags = args.filter((word, i) => word.startsWith("-") && !takesValue(args[i - 1] ?? ""));
+  // Git accepts any unambiguous start of a long option, so `--no-verif` counts.
+  if (flags.some((flag) => /^--no-v/.test(flag) && "--no-verify".startsWith(flag))) {
+    return "--no-verify skips the pre-commit hook";
+  }
+  // `-n` means --no-verify for `git commit` only; for `git merge` it means --no-stat. In a cluster
+  // the letters after `-u` or `-m` are that option's value (`-uno`, `-mrename`), not flags.
+  const shortFlags = (flag) =>
+    /^-[A-Za-z]+$/.test(flag) ? flag.slice(1).split(/[mFCctu]/)[0] : "";
+  if (sub === "commit" && flags.some((flag) => shortFlags(flag).includes("n"))) {
     return "-n skips the pre-commit hook";
   }
   return undefined;
@@ -85,11 +95,13 @@ runGuard("no-main-commit", (input) => {
   };
 
   for (const { words, dir: folder, others } of walkCommands(command, input.cwd)) {
-    hooksOff ||= words.some((word) => /^LEFTHOOK=(0|false)$/i.test(word));
+    // An assignment in front of a command lasts for that command; `export` lasts for the rest.
+    const setsHooksOff = words.some((word) => /^LEFTHOOK=(0|false)$/i.test(word));
+    if (setsHooksOff && commandOf(words).name === "export") hooksOff = true;
     const git = gitCommand(words);
     if (!git) continue;
     const { sub, args, dir } = git;
-    const skip = skipsPreCommit(words, sub, args, hooksOff);
+    const skip = skipsPreCommit(words, sub, args, hooksOff || setsHooksOff);
     if (skip) block(`git ${sub}: ${skip}. ${SKIP_WHY}`);
     const cwd = dir ? folderAt(folder, dir, input.cwd) : folder;
     const repo = repoRoot(cwd) || cwd;
