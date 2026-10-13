@@ -37,9 +37,9 @@ By kind:
 
 By availability:
 
-- available: 38
+- available: 37
 - requires-calibration: 8
-- not-exposed: 3
+- not-exposed: 4
 - unsupported: 3
 
 ## Entries
@@ -76,7 +76,7 @@ By availability:
 | `lighting.set` | Set lights | command | available | `lights`, `Lights` | `doorway?: list (1..12 items) of { position: one of north, east, south, west; level: one of top, middle, bottom; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }; ledge?: list (1..4 items) of { position: one of northeast, southeast, southwest, northwest; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }; base?: list (1..8 items) of { position: { side: one of north, east, south, west; level: one of top, bottom }; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }` | lights | untested |
 | `lighting.all-on` | All lights on | command | available | `allLightsOn` | `effect?: one of off, on, breathe, breatheFast, breathe50percent, flicker` | lights | untested |
 | `lighting.all-off` | All lights off | command | available | `allLightsOff` | `none` | lights | untested |
-| `lighting.sequence` | Play a light sequence | command | available | `lightOverrides` | `sequence: one of twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01, angryStrobe02, angryStrobe03, gloat01, gloat02, gloat03, defeat, victory, dungeonIdle, sealReveal, rotationAllDrums, rotationDrumTop, rotationDrumMiddle, rotationDrumBottom, monthStarted, wholeTowerBreathing, slowFlareThenFade; soundIndex?: int 1..113` | lights | untested |
+| `lighting.sequence` | Play a light sequence | command | available | `lightOverrides` | `sequence: one of twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01, angryStrobe02, angryStrobe03, gloat01, gloat02, gloat03, defeat, victory, dungeonIdle, sealReveal, monthStarted, wholeTowerBreathing, slowFlareThenFade; soundIndex?: int 1..113` | lights | untested |
 | `lighting.set-led` | Set one LED | command | available | `setLED` | `layerIndex: int 0..5; lightIndex: int 0..3; effect: one of off, on, breathe, breatheFast, breathe50percent, flicker; loop?: boolean` | lights | untested |
 
 ### sound
@@ -84,13 +84,13 @@ By availability:
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `sound.play` | Play a sound | command | available | `playSound` | `soundIndex: int 1..113` | sounds | untested |
-| `sound.play-stateful` | Play a sound with loop and volume | command | available | `playSoundStateful` | `soundIndex: int 1..113; loop?: boolean; volume?: int 0..3` | sounds | untested |
+| `sound.play-stateful` | Play a sound with volume | command | available | `playSoundStateful` | `soundIndex: int 1..113; volume?: int 0..3` | sounds | untested |
 
 ### mechanics
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `mechanics.rotate` | Rotate drums | command | requires-calibration | `Rotate` | `top: one of north, east, south, west; middle: one of north, east, south, west; bottom: one of north, east, south, west; soundIndex?: int 1..113` | mechanics | untested |
+| `mechanics.rotate` | Rotate drums | command | not-exposed | `Rotate` | `top: one of north, east, south, west; middle: one of north, east, south, west; bottom: one of north, east, south, west; soundIndex?: int 1..113` | none | untested |
 | `mechanics.rotate-with-state` | Rotate drums, keeping lights | command | requires-calibration | `rotateWithState` | `top: one of north, east, south, west; middle: one of north, east, south, west; bottom: one of north, east, south, west; soundIndex?: int 1..113` | mechanics | untested |
 | `mechanics.rotate-drum` | Rotate one drum | command | requires-calibration | `rotateDrumStateful` | `drumIndex: int 0..2; position: int 0..3; playSound?: boolean` | mechanics | untested |
 | `mechanics.random-rotate` | Rotate drums at random | command | requires-calibration | `randomRotateLevels` | `drums: one of all, top, middle, bottom, top-middle, top-bottom, middle-bottom` | mechanics | untested |
@@ -112,7 +112,7 @@ By availability:
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `seals.break` | Break a seal | command | available | `breakSeal` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
+| `seals.break` | Break a seal | command | requires-calibration | `breakSeal` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.mark-broken` | Mark a seal broken | command | available | `markSealBroken` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.mark-restored` | Mark a seal restored | command | available | `markSealRestored` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.reset` | Clear all broken seals | command | available | `resetBrokenSeals` | `none` | tower-state | untested |

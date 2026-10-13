@@ -8,8 +8,8 @@
     ".": "./index.ts"
   },
   "scripts": {
-    "inventory:doc": "tsx generateCapabilitiesDoc.ts",
-    "typecheck": "tsc --noEmit",
+    "inventory:doc": "tsx scripts/generateCapabilitiesDoc.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p scripts",
     "test": "vitest run"
   },
   "dependencies": {

@@ -97,6 +97,19 @@ type LightSequenceName = keyof typeof TOWER_LIGHT_SEQUENCES;
 export const lightSequenceSchema = z.enum(
   Object.keys(TOWER_LIGHT_SEQUENCES) as [LightSequenceName, ...LightSequenceName[]],
 );
+/**
+ * Catalog sequences the app does not accept yet. Held pending the M1 spike (GAP-HW-007):
+ * it is inferred, not verified, that the four rotation sequences are light animations
+ * that move nothing. Lifting the hold is emptying this list.
+ */
+export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = [
+  "rotationAllDrums",
+  "rotationDrumTop",
+  "rotationDrumMiddle",
+  "rotationDrumBottom",
+];
+/** The sequences `lighting.sequence` accepts: the catalog without the held ones. */
+export const offeredLightSequenceSchema = lightSequenceSchema.exclude(HELD_LIGHT_SEQUENCES);
 
 type GlyphName = keyof typeof GLYPHS;
 export const glyphSchema = z.enum(Object.keys(GLYPHS) as [GlyphName, ...GlyphName[]]);
@@ -504,13 +517,13 @@ export const inventory = [
     category: "lighting",
     apiMapping: ["lightOverrides"],
     params: z.strictObject({
-      sequence: lightSequenceSchema,
+      sequence: offeredLightSequenceSchema,
       soundIndex: soundIndexSchema.optional(),
     }),
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Whether it works before calibration is GAP-HW-001.`,
+    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Whether it works before calibration is GAP-HW-001. Held pending the M1 spike: the four rotation* sequences (HELD_LIGHT_SEQUENCES) are not accepted, because it is inferred, not verified, that they move nothing (GAP-HW-007).`,
   },
   {
     id: "lighting.set-led",
@@ -551,19 +564,18 @@ export const inventory = [
   },
   {
     id: "sound.play-stateful",
-    title: "Play a sound with loop and volume",
+    title: "Play a sound with volume",
     kind: "command",
     category: "sound",
     apiMapping: ["playSoundStateful"],
     params: z.strictObject({
       soundIndex: soundIndexSchema,
-      loop: z.boolean().optional(),
       volume: volumeSchema.optional(),
     }),
     availability: "available",
     uiLocation: "sounds",
     verification: "untested",
-    evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003. No way to stop a looped sound is documented.`,
+    evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003. Held pending the M1 spike: there is no loop parameter, because no way to stop a looped sound is known (GAP-HW-008).`,
   },
 
   // Mechanics
@@ -574,10 +586,10 @@ export const inventory = [
     category: "mechanics",
     apiMapping: ["Rotate"],
     params: rotateParamsSchema,
-    availability: "requires-calibration",
-    uiLocation: "mechanics",
+    availability: "not-exposed",
+    uiLocation: null,
     verification: "untested",
-    evidence: `${TYPES}. Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
+    evidence: `${TYPES}. Not offered: the legacy Rotate sends a bare packet with every light byte zero, so it turns the lights off as a side effect; mechanics.rotate-with-state keeps them. Held for good unless the spike shows otherwise (GAP-HW-009). Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
   },
   {
     id: "mechanics.rotate-with-state",
@@ -623,7 +635,7 @@ export const inventory = [
     availability: "requires-calibration",
     uiLocation: "mechanics",
     verification: "untested",
-    evidence: `${TYPES}: the library takes 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom (RANDOM_ROTATE_DRUMS maps the names to these). The library defaults to 0; drums is a required name here so that "all drums" is never implied. The UI asks for confirmation (spec §5).`,
+    evidence: `${TYPES}: the library takes 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom (RANDOM_ROTATE_DRUMS maps the names to these). The library defaults to 0; drums is a required name here so that "all drums" is never implied. The UI asks for confirmation (spec §5). The library routes it through the legacy Rotate path, so it turns the lights off as a side effect; it has no state-preserving alternative (GAP-HW-009).`,
   },
   {
     id: "mechanics.drum-position",
@@ -732,10 +744,10 @@ export const inventory = [
     category: "seals",
     apiMapping: ["breakSeal"],
     params: z.strictObject({ seal: sealSchema }),
-    availability: "available",
+    availability: "requires-calibration",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003.`,
+    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003. Held behind calibration pending the M1 spike: every stateful command also packs the library's tracked drum bytes (north/north/north, calibrated: false before calibration), and whether the tower acts on them is unknown (GAP-HW-006).`,
   },
   {
     id: "seals.mark-broken",
