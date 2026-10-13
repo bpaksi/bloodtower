@@ -43,8 +43,13 @@ runGuard("test-lock", (input) => {
     block(`${file} is a test file. ${WHY} The one edit allowed here is removing a .fails marker.`);
   }
 
-  const reason = findShellWrite(input.tool_input?.command ?? "", input.cwd, (path) =>
-    TEST_FILE.test(path),
+  // Discarding an uncommitted test edit only returns the file to the committed, locked test, and
+  // blocking it would stop the usual "stash the fix, watch the test fail, pop" loop.
+  const reason = findShellWrite(
+    input.tool_input?.command ?? "",
+    input.cwd,
+    (path) => TEST_FILE.test(path),
+    { discards: false },
   );
   if (reason) block(`${reason}, which is a test file. ${WHY}`);
 });

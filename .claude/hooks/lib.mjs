@@ -1,6 +1,7 @@
 // Shared helpers for the guard hooks. A hook reads the tool call as JSON on stdin and exits 2 to block it.
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { resolve } from "node:path";
 
 export const readInput = () => JSON.parse(readFileSync(0, "utf8") || "{}");
@@ -19,7 +20,8 @@ export const runGuard = (name, guard) => {
   }
 };
 
-const gitRaw = (cwd, args) => {
+/** Git's output, or undefined when the call fails. */
+const gitTry = (cwd, args) => {
   try {
     return execFileSync("git", args, {
       cwd,
@@ -27,10 +29,13 @@ const gitRaw = (cwd, args) => {
       stdio: ["ignore", "pipe", "ignore"],
     });
   } catch {
-    return "";
+    return undefined;
   }
 };
-const git = (cwd, args) => gitRaw(cwd, args).trim();
+const git = (cwd, args) => (gitTry(cwd, args) ?? "").trim();
+
+/** The top folder of the repo that holds `cwd`, or `""` when git cannot say. */
+export const repoRoot = (cwd) => git(cwd || ".", ["rev-parse", "--show-toplevel"]);
 
 /** What `currentBranch` returns when git gives no answer, so a guard can refuse instead of guessing. */
 export const UNKNOWN_BRANCH = "(unknown)";
@@ -52,21 +57,26 @@ export const commitsAheadOfMain = (cwd) =>
 /**
  * Absolute paths of files with uncommitted work in the repo at `cwd`.
  * `tracked` are changed files git knows; `untracked` are new files it does not.
+ * Returns undefined when git cannot say, so a guard can refuse instead of assuming there are none.
  */
 export const uncommittedFiles = (cwd) => {
-  const tracked = [];
-  const untracked = [];
-  if (git(cwd || ".", ["rev-parse", "--is-inside-work-tree"]) !== "true") {
-    return { tracked, untracked };
-  }
+  if (git(cwd || ".", ["rev-parse", "--is-inside-work-tree"]) !== "true") return undefined;
   // The way up to the repo root from `cwd`, so the paths keep the caller's spelling of the folder.
   const root = resolve(cwd || ".", git(cwd || ".", ["rev-parse", "--show-cdup"]));
-  const status = gitRaw(root, ["status", "--porcelain", "-z", "--untracked-files=all"]);
-  for (const entry of status.split("\0")) {
+  const status = gitTry(root, ["status", "--porcelain", "-z", "--untracked-files=all"]);
+  if (status === undefined) return undefined;
+
+  const tracked = [];
+  const untracked = [];
+  const entries = status.split("\0");
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
     if (!entry) continue;
-    // An entry is `XY <path>`. The old name of a rename follows as a bare path.
-    const path = resolve(root, /^.. /.test(entry) ? entry.slice(3) : entry);
-    (entry.startsWith("??") ? untracked : tracked).push(path);
+    // An entry is `XY <path>`. A rename or copy is followed by the old name as a bare path.
+    const code = entry.slice(0, 2);
+    const list = code === "??" ? untracked : tracked;
+    list.push(resolve(root, entry.slice(3)));
+    if (/[RC]/.test(code)) list.push(resolve(root, entries[++i] ?? ""));
   }
   return { tracked, untracked };
 };
@@ -91,7 +101,8 @@ export const textAfter = (input, before) => {
 
 /**
  * Splits a shell command into simple commands at `;`, `&`, `|`, newlines and parentheses.
- * Each has its words (quotes removed) and its output redirect targets. Best effort, not a full parser.
+ * Each has its words (quotes removed), its output redirect targets, the separator that ended it
+ * (`end`) and the subshells it sits in (`scope`). Best effort, not a full parser.
  */
 export const splitCommands = (command) => {
   const segments = [];
@@ -100,6 +111,9 @@ export const splitCommands = (command) => {
   let word = "";
   let hasWord = false;
   let expectRedirectTarget = false;
+  // One id per open parenthesis, so a reader can tell when a subshell has closed.
+  let scope = [];
+  let scopes = 0;
 
   const endWord = () => {
     if (!hasWord) return;
@@ -112,9 +126,9 @@ export const splitCommands = (command) => {
     word = "";
     hasWord = false;
   };
-  const endSegment = () => {
+  const endSegment = (end = "") => {
     endWord();
-    if (words.length > 0 || redirects.length > 0) segments.push({ words, redirects });
+    if (words.length > 0 || redirects.length > 0) segments.push({ words, redirects, end, scope });
     words = [];
     redirects = [];
     expectRedirectTarget = false;
@@ -148,7 +162,11 @@ export const splitCommands = (command) => {
         expectRedirectTarget = true;
       }
     } else if (";&|\n()".includes(char)) {
-      endSegment();
+      const doubled = (char === "&" || char === "|") && command[i + 1] === char;
+      endSegment(doubled ? char + char : char);
+      if (doubled) i++;
+      if (char === "(") scope = [...scope, ++scopes];
+      if (char === ")") scope = scope.slice(0, -1);
     } else if (/\s/.test(char)) {
       endWord();
     } else {
@@ -168,6 +186,47 @@ export const commandOf = (words) => {
   while (i < words.length && (/^[A-Za-z_]\w*=/.test(words[i]) || WRAPPERS.has(words[i]))) i++;
   const name = (words[i] ?? "").split("/").pop();
   return { name, args: words.slice(i + 1) };
+};
+
+/** Where a `cd` leads when the command does not say: a folder that cannot exist, so git fails there. */
+export const UNKNOWN_FOLDER = "/dev/null/unknown-folder";
+
+/** The folder a `cd` with these arguments leads to, from `dir`. */
+const folderAfterCd = (dir, args, cwd) => {
+  const target = args.find((word) => !/^-[LPe@]+$/.test(word));
+  if (target === undefined) return homedir();
+  const expanded = target
+    .replace(/^~(?=\/|$)/, homedir())
+    .replace(/\$\{?HOME\}?(?=\/|$)/, homedir())
+    .replace(/\$\{?PWD\}?(?=\/|$)/, dir)
+    .replace(/\$\{?CLAUDE_PROJECT_DIR\}?(?=\/|$)/, process.env.CLAUDE_PROJECT_DIR || cwd);
+  // `cd -`, another variable or a command substitution: only the shell knows where that goes.
+  if (expanded === "-" || /[$`]/.test(expanded)) return UNKNOWN_FOLDER;
+  return resolve(dir, expanded);
+};
+
+/**
+ * The simple commands of a shell command, each with `dir`: the folder it runs in once every `cd`
+ * before it is followed. A `cd` inside a subshell or a pipeline does not outlast it.
+ */
+export const walkCommands = (command, cwd) => {
+  let dir = cwd || ".";
+  const open = [];
+  let piped = false;
+  return splitCommands(command).map((segment) => {
+    // Leave the subshells that have closed, restoring the folder each one started in.
+    while (open.length > 0 && !segment.scope.includes(open.at(-1).id)) dir = open.pop().dir;
+    for (const id of segment.scope) {
+      if (!open.some((entry) => entry.id === id)) open.push({ id, dir });
+    }
+
+    const here = dir;
+    const { name, args } = commandOf(segment.words);
+    const inPipeline = piped || segment.end === "|" || segment.end === "&";
+    if (name === "cd" && !inPipeline) dir = folderAfterCd(dir, args, cwd || ".");
+    piped = segment.end === "|";
+    return { ...segment, dir: here };
+  });
 };
 
 const GIT_OPTIONS_WITH_VALUE = new Set(["-C", "-c", "--git-dir", "--work-tree", "--namespace"]);
@@ -230,7 +289,8 @@ const STASH_KEEPS_WORK = new Set([
 
 /**
  * For a git command that throws away uncommitted work across a folder or the whole repo
- * (`clean`, `stash`, `checkout -- .`, `restore <dir>`, `reset --hard`): the files it would hit.
+ * (`clean`, `stash`, `checkout -- .`, `restore <dir>`, `switch -f`, `reset --hard`): the files it
+ * would hit. Returns undefined when git cannot list the uncommitted files.
  */
 const filesGitWouldDiscard = (sub, args, dir) => {
   const flags = args.filter((word) => word.startsWith("-"));
@@ -250,26 +310,39 @@ const filesGitWouldDiscard = (sub, args, dir) => {
     kinds = all ? ["tracked", "untracked"] : ["tracked"];
     everywhere = true;
   } else if (sub === "reset") {
-    if (!has("--hard")) return [];
+    if (!has("--hard", "--merge")) return [];
     kinds = ["tracked"];
     everywhere = true;
-  } else if (sub === "checkout" || sub === "restore") {
+  } else if (sub === "checkout" || sub === "restore" || sub === "switch") {
+    // Making a branch keeps the work, and `restore --staged` alone only unstages.
+    if (has("-b", "-B", "-c", "-C", "--orphan", "--create", "--force-create")) return [];
+    if (sub === "restore" && has("--staged") && !has("--worktree") && !short("W")) return [];
     kinds = ["tracked"];
-    everywhere = has("--force") || short("f");
+    everywhere = has("--force", "--discard-changes") || short("f");
+    if (sub === "switch" && !everywhere) return [];
   } else {
     return [];
   }
 
   // Words that are not flags may be paths. A branch name resolves to a path that holds nothing.
   // `git stash` takes a message and a subcommand as words, so only what follows `--` counts there.
-  const words = sub === "stash" ? args.slice(args.indexOf("--") + 1 || args.length) : args;
-  const scopes = words.filter((word) => !word.startsWith("-")).map((word) => resolve(dir, word));
+  // The value of `git clean -e <pattern>` is not a path.
+  const words = (sub === "stash" ? args.slice(args.indexOf("--") + 1 || args.length) : args).filter(
+    (word, i, list) => !word.startsWith("-") && !/^(-e|--exclude)$/.test(list[i - 1] ?? ""),
+  );
+  // A glob or a `:(magic)` pathspec can reach anything, so it does not narrow the command.
+  const wide = words.some((word) => /[*?[]/.test(word) || word.startsWith(":"));
+  const scopes = words.map((word) => resolve(dir, word));
   const narrowed = (sub === "clean" || sub === "stash") && scopes.length > 0;
+  // A folder that does not exist yet (`git clone x && cd x && …`) holds no work to lose.
+  if (!dir.startsWith(UNKNOWN_FOLDER) && !existsSync(dir)) return [];
   const files = uncommittedFiles(dir);
+  if (files === undefined) return undefined;
   return kinds
     .flatMap((kind) => files[kind])
     .filter(
       (file) =>
+        wide ||
         (everywhere && !narrowed) ||
         scopes.some((scope) => file === scope || file.startsWith(`${scope}/`)),
     );
@@ -294,25 +367,21 @@ const SHELLS = new Set(["bash", "sh", "zsh", "eval"]);
  * Looks for a shell command that would change a protected path.
  * `isProtected(absolutePath, { moves })` decides; `moves` is true for commands that remove or move
  * whole trees, so a guard can also protect the folders above its files.
+ * `discards: false` leaves out git commands that throw away uncommitted work.
  * Returns a short reason, or undefined. Best effort: it reads the command, it does not run it.
  */
-export const findShellWrite = (command, cwd, isProtected) => {
-  // Follows `cd` through the command, so relative paths resolve from the right folder.
-  let dir = cwd || ".";
-  const at = (word) => resolve(dir, word);
-  const names = (word, moves = false) => !word.startsWith("-") && isProtected(at(word), { moves });
+export const findShellWrite = (command, cwd, isProtected, { discards = true } = {}) => {
+  // `dir` follows `cd` through the command, so relative paths resolve from the right folder.
+  for (const { words, redirects, dir } of walkCommands(command, cwd)) {
+    const at = (word) => resolve(dir, word);
+    const names = (word, moves = false) =>
+      !word.startsWith("-") && isProtected(at(word), { moves });
 
-  for (const { words, redirects } of splitCommands(command)) {
     const target = redirects.find((word) => names(word));
     if (target) return `it redirects output into ${target}`;
 
     const { name, args } = commandOf(words);
     const git = gitCommand(words);
-
-    if (name === "cd" && args[0]) {
-      dir = at(args[0]);
-      continue;
-    }
 
     if (git) {
       if (GIT_WRITE_SUBCOMMANDS.has(git.sub)) {
@@ -320,11 +389,14 @@ export const findShellWrite = (command, cwd, isProtected) => {
         const hit = git.args.find((word) => names(word, moves));
         if (hit) return `git ${git.sub} would change ${hit}`;
       }
-      const from = git.dir ? at(git.dir) : dir;
-      const lost = filesGitWouldDiscard(git.sub, git.args, from).find((file) =>
-        isProtected(file, { moves: false }),
-      );
-      if (lost) return `git ${git.sub} would discard uncommitted work in ${lost}`;
+      if (discards) {
+        const atRisk = filesGitWouldDiscard(git.sub, git.args, git.dir ? at(git.dir) : dir);
+        if (atRisk === undefined) {
+          return `git ${git.sub} can discard uncommitted work, and git could not list what is at risk there (run it from the repo folder or with git -C <path>)`;
+        }
+        const lost = atRisk.find((file) => isProtected(file, { moves: false }));
+        if (lost) return `git ${git.sub} would discard uncommitted work in ${lost}`;
+      }
     } else if (WRITE_COMMANDS.has(name)) {
       const moves = name === "rm" || name === "mv" || name === "rsync";
       const hit = args.find((word) => names(word, moves));
@@ -339,7 +411,7 @@ export const findShellWrite = (command, cwd, isProtected) => {
       if (hit) return `find would change files under ${hit}`;
     } else if (SHELLS.has(name)) {
       for (const script of args.filter((word) => !word.startsWith("-"))) {
-        const reason = findShellWrite(script, dir, isProtected);
+        const reason = findShellWrite(script, dir, isProtected, { discards });
         if (reason) return reason;
       }
     }

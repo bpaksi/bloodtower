@@ -1,15 +1,14 @@
 // PreToolUse (Bash): Claude never creates commits on main or moves it. Bob merges.
-import { homedir } from "node:os";
 import { resolve } from "node:path";
 import {
   block,
   branchExists,
-  commandOf,
   currentBranch,
   gitCommand,
+  repoRoot,
   runGuard,
-  splitCommands,
   UNKNOWN_BRANCH,
+  walkCommands,
 } from "./lib.mjs";
 
 const WHY = "Work on a <type>/<app>-<slug> branch; Bob merges to main (docs/sdlc.md).";
@@ -34,28 +33,22 @@ const branchAfterSwitch = (sub, args, cwd) => {
 
 runGuard("no-main-commit", (input) => {
   const command = input.tool_input?.command ?? "";
-  // Follows `cd`, `git checkout` and `git switch` through the command, so the folder and the branch
-  // are right at each step.
-  let cwd = input.cwd || ".";
-  let branch;
+  // The branch of each repo the command touches, read once and then moved by `git checkout` and
+  // `git switch`, so it is right at each step. `dir` already follows `cd`.
+  const branches = new Map();
 
-  for (const { words } of splitCommands(command)) {
-    const { name, args: cdArgs } = commandOf(words);
-    if (name === "cd" && cdArgs[0]) {
-      cwd = resolve(cwd, cdArgs[0].replace(/^~(?=\/|$)/, homedir()));
-      branch = undefined;
-      continue;
-    }
-
+  for (const { words, dir: folder } of walkCommands(command, input.cwd)) {
     const git = gitCommand(words);
     if (!git) continue;
     const { sub, args, dir } = git;
-    branch ??= currentBranch(cwd);
-    const here = dir ? currentBranch(resolve(cwd, dir)) : branch;
+    const cwd = dir ? resolve(folder, dir) : folder;
+    const repo = repoRoot(cwd) || cwd;
+    if (!branches.has(repo)) branches.set(repo, currentBranch(cwd));
+    const here = branches.get(repo);
 
     if (sub === "checkout" || sub === "switch") {
       const next = branchAfterSwitch(sub, args, cwd);
-      if (next !== undefined && !dir) branch = next;
+      if (next !== undefined) branches.set(repo, next);
       continue;
     }
 

@@ -54,7 +54,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 | `pin-guard` | Changing or removing a pinned version, installing another one, `up --latest` with no package names, or editing `scripts/pinned-versions.json` |
 | `test-lock` | Changing test files on a `fix/*` branch after its first commit, except removing a `.fails` marker |
 
-The hooks also read shell commands, so `sed -i`, `rm`, `mv`, a redirect or a script aimed at a protected file is blocked too. So is a git command that would throw away uncommitted work in a protected file (`git clean`, `git stash`, `git checkout -- .`, `git restore <folder>`, `git reset --hard`). A hook that crashes or cannot load blocks the call, and a commit is blocked when git cannot say which branch it is on. That reading is best effort: a command the hook does not understand is not permission. The rules above hold either way.
+The hooks also read shell commands, so `sed -i`, `rm`, `mv`, a redirect or a script aimed at a protected file is blocked too. So is a git command that would throw away uncommitted work in an intent file or the pin list, such as `git clean`, `git stash`, `git checkout -- .`, `git restore <folder>` or `git reset --hard`. A hook that crashes blocks the call, and a commit or a discarding command is blocked when git cannot say which branch or folder it applies to; run it from the repo folder or with `git -C <path>`. That reading is best effort: a command the hook does not understand is not permission. The rules above hold either way.
 
 If a hook blocks you, do not work around it. Say what you were trying to do and ask Bob.
 
