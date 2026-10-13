@@ -5,7 +5,7 @@
 | Purpose | Learn what the tower can do: a controller and investigation tool for every UltimateDarkTower capability, with diagnostics and a gap register |
 | Phase | Explore |
 | SDLC tier | Full (touches hardware; its findings feed later apps) |
-| Status | Spec v1 awaiting approval. Code starts at [plans/M0-scaffolding.md](plans/M0-scaffolding.md). |
+| Status | Spec v1 approved. M0 in progress: [plans/M0-scaffolding.md](plans/M0-scaffolding.md). |
 | Disposable? | Yes, unless promoted. Reusable parts (protocol, tower client) move to `packages/` when `game-test` needs them. |
 
 A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower](https://github.com/ChessMess/UltimateDarkTower)). Any browser on the LAN (Mac, iPad, phone) controls it over WebSocket.

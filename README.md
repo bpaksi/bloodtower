@@ -8,7 +8,7 @@ The project produces many small websites over its life. Each one lives in its ow
 
 | App | Folder | Phase | Status | Disposable? |
 |---|---|---|---|---|
-| Tower controller POC | [apps/tower-poc](apps/tower-poc/) | Explore | Spec v1 awaiting approval | Yes, unless promoted |
+| Tower controller POC | [apps/tower-poc](apps/tower-poc/) | Explore | Spec v1 approved, M0 in progress | Yes, unless promoted |
 | New game test | [apps/game-test](apps/game-test/) | Explore → Design | Not started | Yes |
 | Final game | [apps/game](apps/game/) | Build | Not started | No |
 

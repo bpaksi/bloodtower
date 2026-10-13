@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **Draft, awaiting approval** (approval gate before M0 code) |
+| Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
 | Spec version | 1.0 (2026-10-13) |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata` (version pinned in M1) |
