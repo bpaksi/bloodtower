@@ -43,7 +43,11 @@ export const resolveStaticFile = async (root: string, urlPath: string) => {
   const target = resolve(join(base, decoded));
   if (target !== base && !target.startsWith(base + sep)) return undefined;
 
-  const candidates = [target, `${target}.html`, join(target, "index.html")];
+  // For the root itself only index.html applies: `${target}.html` would be a sibling of the root.
+  const candidates =
+    target === base
+      ? [join(base, "index.html")]
+      : [target, `${target}.html`, join(target, "index.html")];
   for (const candidate of candidates) {
     if (await isFile(candidate)) return candidate;
   }
@@ -55,6 +59,15 @@ const sendText = (res: ServerResponse, status: number, text: string) => {
   res.end(text);
 };
 
+/** Path part of a request target, or undefined when the target is not a valid URL (for example `//`). */
+export const requestPath = (url: string | undefined) => {
+  try {
+    return new URL(url ?? "/", "http://localhost").pathname;
+  } catch {
+    return undefined;
+  }
+};
+
 /** Serves the exported web UI from `root`. Only GET and HEAD are allowed. */
 export const serveStatic = async (root: string, req: IncomingMessage, res: ServerResponse) => {
   if (req.method !== "GET" && req.method !== "HEAD") {
@@ -62,7 +75,8 @@ export const serveStatic = async (root: string, req: IncomingMessage, res: Serve
     return sendText(res, 405, "Method not allowed.\n");
   }
 
-  const { pathname } = new URL(req.url ?? "/", "http://localhost");
+  const pathname = requestPath(req.url);
+  if (pathname === undefined) return sendText(res, 400, "Bad request.\n");
   let status = 200;
   let file = await resolveStaticFile(root, pathname);
   if (!file) {

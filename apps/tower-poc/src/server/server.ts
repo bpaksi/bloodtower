@@ -11,7 +11,7 @@ import {
   type ServerMessage,
 } from "tower-poc-protocols";
 import { type RawData, type WebSocket, WebSocketServer } from "ws";
-import { serveStatic } from "./static.ts";
+import { requestPath, serveStatic } from "./static.ts";
 
 export const WS_PATH = "/ws";
 
@@ -88,13 +88,17 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
   const wss = new WebSocketServer({ noServer: true });
   wss.on("connection", (socket) => {
     const clientId = randomUUID();
+    // ws reports protocol violations (bad frames, invalid UTF-8) as `error`. Unhandled, that would
+    // take the whole service down, so drop just this client.
+    socket.on("error", () => socket.terminate());
     socket.on("message", (data) => handleMessage(socket, clientId, data, options.serverVersion));
   });
 
   http.on("upgrade", (req, socket, head) => {
-    const { pathname } = new URL(req.url ?? "/", "http://localhost");
-    if (pathname !== WS_PATH) {
-      socket.end("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n");
+    if (requestPath(req.url) !== WS_PATH) {
+      // Destroy after the reply is flushed, so a client that stays connected cannot hold close() open.
+      socket.on("error", () => socket.destroy());
+      socket.end("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n", () => socket.destroy());
       return;
     }
     wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
@@ -115,6 +119,7 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
         for (const client of wss.clients) client.terminate();
         wss.close();
         http.close((error) => (error ? reject(error) : resolve()));
+        http.closeAllConnections();
       }),
   };
 };
