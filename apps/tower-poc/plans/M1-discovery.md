@@ -1,5 +1,7 @@
 # M1 — Integration discovery
 
+**Status:** approved by Bob, 2026-10-13. Step 1 is built on `feat/tower-poc-pin-versions`.
+
 **Goal:** know exactly which controls and diagnostics are possible on the real tower from Node on Bob's Mac.
 **Exit condition (PRD):** pinned versions, a complete inventory with coverage test, seeded gaps, a hardware spike result, and an observability assessment.
 
@@ -19,6 +21,9 @@ research/tower/observability.md                  # what raw traffic is visible a
 ## Order of work
 
 1. Pin versions. Record the library's `package.json` version plus the `ultimatedarktowerdata` version and sound catalog count.
+   - Result: `ultimatedarktower@7.1.2`, `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0`, all exact, in `tower-poc-server`. The library declares `ultimatedarktowerdata: ^3.0.0` and a peer `@stoprocent/noble: ^2.0.0`; 3.0.0 and 2.8.0 were the latest of each on 2026-10-13. `TOWER_AUDIO_LIBRARY` has 113 entries.
+   - pnpm did not run the install scripts of `@stoprocent/noble`, `@stoprocent/bluetooth-hci-socket`, `usb` and `@serialport/bindings-cpp`, and none is approved. noble ships a prebuilt `darwin-x64+arm64` binary, so macOS needs no build; the other three serve Linux and Windows. Whether noble loads and sees the tower is the step 5 spike.
+   - The npm package holds only `README.md` and `CHANGELOG.md`. `API_REFERENCE.md`, `BLE_DIAGNOSTICS.md` and `TOWER_TECH_NOTES.md` for step 2 have to come from the library's source repo.
 2. Read the library's `API_REFERENCE.md`, `BLE_DIAGNOSTICS.md` and `TOWER_TECH_NOTES.md`, and diff them against the public surface listed in spec §4.
 3. Write `inventory.ts` (Zod param schemas from the library's types: `TowerSide`, `TowerLevels`, `SealIdentifier`, `Lights`, `LIGHT_EFFECTS`, sound index range).
 4. Coverage test: enumerate `Object.getOwnPropertyNames(UltimateDarkTower.prototype)` plus instance callbacks, and fail on any that are unmapped and not excluded.

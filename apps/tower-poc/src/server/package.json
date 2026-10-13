@@ -11,8 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@stoprocent/noble": "2.8.0",
     "tower-poc-protocols": "workspace:*",
     "tsx": "4.23.15",
+    "ultimatedarktower": "7.1.2",
+    "ultimatedarktowerdata": "3.0.0",
     "ws": "8.22.0"
   },
   "devDependencies": {

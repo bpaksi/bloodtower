@@ -5,7 +5,7 @@
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
 | Spec version | 1.2 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). |
-| Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata` (version pinned in M1) |
+| Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0` (exact, set in M1 step 1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
 
