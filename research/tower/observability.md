@@ -24,7 +24,7 @@ tower-poc M1 step 7. It compares two records of the same three spike runs on 202
 | How long it keeps | Everything we write down | The last 450 to 500 events |
 | Device identifiers | None | The serial number, in the incident report |
 
-Run 3 in numbers: the tap logged 688 records (16 writes, 662 notifications and 10 connection records). The recorder's export held 459 events and began at `calibration_complete`: the connect, the calibration start and the first 55 seconds had already been pushed out.
+Run 3 in numbers: the tap logged 688 adapter records (16 writes, 662 notifications and 10 connection records). The recorder's export held 459 events and began at `calibration_complete`: the connect, the calibration start and the first 55 seconds had already been pushed out.
 
 ## Findings
 
@@ -40,13 +40,13 @@ For the service this means an export taken at the end of a session is not a reco
 
 ### 3. The clocks agree
 
-The recorder stamps events with wall-clock milliseconds. The tap's `ms` plus the `at` time in the log's first record gives the same number: the `playSound(1)` write in run 3 is `1791926011401` in both. So the tap's `ms` counts from the moment `at` was taken, and one timeline can be built from both sources by time alone.
+The recorder stamps events with wall-clock milliseconds. The tap's `ms` plus the `at` time in the log's first record gives the same number for 14 of the 15 writes the recorder holds, and differs by 1 ms for the other: the `playSound(1)` write in run 3 is `1791926011401` in both. So `at` is the zero of the tap's `ms` (not the time of the first record, whose `ms` is 3245), and one timeline can be built from both sources by time alone.
 
 ### 4. Matching a response to a command
 
 What the logs support:
 
-- **Echoed commands match by content and time.** For every sound, light and rotate command the tower sent back a 20-byte state whose bytes equal what was written, 25 to 64 ms later for lights and sound and about 1.1 s later for a rotate. Nine of the sixteen writes in run 3 match this way.
+- **Echoed commands match by content and time.** For every sound, light and rotate command the tower sent back a 20-byte state 25 to 64 ms later for lights and sound and about 1.1 s later for a rotate. Nine of the sixteen writes in run 3 were answered this way: eight with bytes equal to what was written, and one, the looped sound, with the loop bit dropped.
 - **Calibration matches by state.** The write is one byte (`04`); the answer is the first state with the calibrated bits, about 21 s later.
 - **Six writes had no answer at all**: the four rotation sequences and two writes that changed nothing the tower reports (spike write-up, findings 7 and 10). For these there is nothing to match.
 - **The looped sound's echo did not equal the write** (`81` sent, `01` returned), so matching by exact content fails for that one and has to allow for the tower dropping a bit.
@@ -58,7 +58,7 @@ So GAP-DIAG-001 can be stated more exactly: matching is reliable for a command w
 
 ### 5. Some library calls bypass the queue, and the recorder shows which
 
-In run 3 the recorder has 15 `cmd_sent` events and 9 `cmd_enqueued`. The six without a queue entry are the `allLightsOn` and `allLightsOff` calls. This confirms from a second source what the spike write-up took from the code: those two are written directly, have no 30-second timeout and no description in the recorder. The service will need to name them itself.
+In run 3 the recorder has 15 `cmd_sent` events and 9 `cmd_enqueued`. By content, the six writes without a queue entry are the four all-lights-on and two all-lights-off packets. That is consistent with what the spike write-up took from the code, that `allLightsOn` and `allLightsOff` are written directly with no 30-second timeout; the recorder shows the missing queue entries, not the reason for them. They also have no description in the recorder. The service will need to name them itself.
 
 The recorder's 15 is one fewer than the tap's 16 writes. The missing one is the calibrate write, which is older than the export's first event.
 
@@ -68,7 +68,7 @@ It has four `cmd_timeout` events, `lightOverrides(15)` to `(18)`, each with an a
 
 ### 7. The library's heartbeat check does not fit this tower's battery messages
 
-The library expects a battery message about every 200 ms and warns after 3 s without one. This tower sent one every 2.1 s, so one late or missed message is enough to trip it. In run 3 it did: the tap shows a 4.0 s gap between two `07` messages during the watch, and the recorder has a `heartbeat_late` and a warning that says "expected every ~200ms". The library checked the connection, found it alive and carried on.
+The library expects a battery message about every 200 ms and warns after 3 s without one. This tower sent one about every 2.0 s, so one late or missed message is enough to trip it. In run 3 it did: the tap shows a 4.0 s gap between two `07` messages during the looped-sound step, about 26 s after the looped-sound write, and the recorder has a `heartbeat_late` and a warning that says "expected every ~200ms". The library checked the connection, found it alive and carried on.
 
 The tower also sent no `07` messages at all while calibrating: a gap of 24.0 s in run 3 and 22.0 s in run 2, with the `06` messages still arriving every second. No disconnect followed in either run. Whether the library warned then is not in the exports (run 3's had dropped that period, and run 2's shows no warning).
 
@@ -85,7 +85,7 @@ After the script's own disconnect in run 3 the recorder has `disconnect` with ca
 | `00` | 20 | Tower state | After most commands, and on each skull drop |
 | `04` | 5 | Rotation duration | Once per drum move, 1 to 2 ms before the state |
 | `06` | 5 | Differential readings | Every 1.0 s, always, including during calibration |
-| `07` | 5 | Battery | Every 2.1 s, except during calibration |
+| `07` | 5 | Battery | About every 2.0 s, except during calibration |
 
 The `06` payloads change from message to message and were not decoded. The library exports a `parseDifferentialReadings` function, which was not tried.
 
