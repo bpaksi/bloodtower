@@ -45,7 +45,9 @@ The first run failed because macOS was still asking for Bluetooth permission for
 
 ### 2. Lights, sound and the seal sequence work before calibration, and nothing moves (GAP-HW-001, GAP-HW-006)
 
-The tower was truly uncalibrated for these steps: every state it sent before the calibrate step has drum bytes `00 00`, and after calibration they are `10 42`. All three commands worked and Bob saw no drum move. This supports spec decision D9 as written and answers the worry behind holding `seals.break`: stateful packets do carry drum bytes, and an uncalibrated tower did not act on them.
+The tower was truly uncalibrated for these steps: every state it sent before the calibrate step has drum bytes `00 00`, and after calibration they are `10 42`. All three commands worked and Bob saw no drum move. This supports spec decision D9 as written.
+
+What it shows about the worry behind holding `seals.break` is narrower than it first looks. On a fresh connection the library's packets carried drum bytes `00 00`, and an uncalibrated tower did nothing with them. The log does not show what an uncalibrated tower does with *populated* drum bytes. That case could arise if the library still held calibrated positions from before a disconnect while the tower had been switched off and on in between. The service resets calibration on disconnect (D10), which should keep the library from sending stale positions, but that is a design intention for M2, not something this run tested. That the tower was uncalibrated is the tower's own report, not an independent check.
 
 ### 3. The tower answers a calibration with a state message
 
@@ -53,13 +55,13 @@ The reviewers could not tell from the code whether the tower sends a state when 
 
 ### 4. `rotationAllDrums` gets no answer, and that blocks the library for 30 seconds (GAP-HW-007)
 
-Every other command in the run was echoed by the tower within 25 to 63 ms. The `rotationAllDrums` sequence was written, the lights played, and no 20-byte state came back in the 44 seconds before the disconnect. The library holds its queue for 30 seconds waiting for that answer, then rejects the command. No drum moved.
+Every other command in the run was echoed by the tower within 25 to 63 ms. The `rotationAllDrums` sequence was written, the lights played, and no 20-byte state came back after the write in the 44 seconds the log covers. The library holds its queue for 30 seconds waiting for that answer, then rejects the command; the other 14 seconds were Bob answering the prompt. Nothing was written to the tower in that time. No drum moved.
 
 So the original question (do these sequences move a drum) has a first answer of "no" for one of the four, and there is a new problem: a sequence the tower does not acknowledge makes the command look failed and holds every later command for 30 seconds. The seal sequence (14) was acknowledged, so this is not true of every sequence.
 
 ### 5. Notifications are slower than the library's documents say
 
-The documents say battery notifications arrive about every 200 ms. In this run the tower sent two kinds of 5-byte message throughout: one starting `07` every 2 seconds, whose last two bytes read as a battery level around 4.9 V (`0x1349` = 4937), and one starting `06 ff` every second, whose meaning is not yet identified. That is about 1.5 messages a second, not 5.
+The documents say battery notifications arrive about every 200 ms. In this run the tower sent two kinds of 5-byte message throughout: one starting `07` every 2 seconds (78 in the run) and one starting `06 ff` every second (172). By the library's own byte formula the `07` messages are battery level, around 4.9 V (`0x1349` = 4937 mV), and the values sag while the drums move; that is the library's reading of the bytes, which this log is consistent with but does not confirm independently. The library names the `06` messages "differential voltage readings" and treats them as unsolicited, so they never count as the answer to a command. That is about 1.5 messages a second, not 5.
 
 ### 6. The command format changes once the tower is calibrated
 
@@ -75,6 +77,6 @@ A third run for: rotate with state, legacy rotate, random rotate (GAP-HW-009), t
 
 ## Not checked
 
-- The `06 ff` messages were counted, not decoded.
+- The `06 ff` messages were counted, not decoded beyond the library's name for them.
 - The library's own diagnostics export (`*.diagnostics.local.json`, not committed) was not compared with the adapter log; that is step 7.
 - Whether the 20.6-second calibration time is typical: one sample.
