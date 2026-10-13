@@ -4,7 +4,11 @@
 //
 // Safety rules the runner keeps (CLAUDE.md, tower safety):
 // - Nothing is sent until the person confirms that step. Skipping is always offered.
-// - Nothing is retried. A step that fails or times out is logged and the run moves on.
+// - Nothing is retried. A step that fails is logged and the run moves on.
+// - A step that times out ends the run. The library may still be holding that command, and
+//   disconnecting is what clears its queue, so nothing confirmed earlier can be written later.
+// - While the tower is calibrating the library drops every other command and still reports
+//   success (D22), so the runner skips a step instead of sending it.
 // - Whatever happens, the run ends by disconnecting.
 
 export type Side = "north" | "east" | "south" | "west";
@@ -14,6 +18,7 @@ export type SpikeTower = {
   retrySendCommandMax: number;
   readonly isConnected: boolean;
   readonly isCalibrated: boolean;
+  readonly performingCalibration: boolean;
   onCalibrationComplete: () => void;
   onSkullDrop: (count: number) => void;
   onBatteryLevelNotify: (millivolts: number) => void;
@@ -30,6 +35,7 @@ export type SpikeTower = {
   breakSeal(seal: { side: Side; level: "top" | "middle" | "bottom" }): Promise<void>;
   rotateWithState(top: Side, middle: Side, bottom: Side): Promise<void>;
   Rotate(top: Side, middle: Side, bottom: Side): Promise<void>;
+  randomRotateLevels(level?: number): Promise<void>;
 };
 
 export type Answer = "run" | "skip" | "quit";
@@ -60,17 +66,28 @@ export type SpikeStep = {
   run(context: Context): Promise<void>;
   /** Questions asked after the step ran, whether or not it failed. */
   observe: string[];
+  /** Questions asked once the tower is disconnected, if this step ran. */
+  afterDisconnect?: string[];
 };
 
 /** Numbers the steps need from the data package, so this file does not import it. */
 export type SpikeCatalog = {
   soundIndex: number;
+  /** A second, different sound, so a replay can be told apart from a loop. */
+  otherSoundIndex: number;
   lightEffectOn: number;
   rotationSequences: { name: string; value: number }[];
 };
 
-const COMMAND_TIMEOUT_MS = 15_000;
-const CALIBRATION_TIMEOUT_MS = 90_000;
+/**
+ * Longer than the 30 seconds the library's own queue waits for a response before it rejects a
+ * command. By the time this fires the library has given the command up, so none is left queued.
+ */
+export const COMMAND_TIMEOUT_MS = 35_000;
+/** Covers sending the calibration command and waiting for the tower to finish, as one limit. */
+export const CALIBRATION_TIMEOUT_MS = 120_000;
+/** `randomRotateLevels(1)` turns the top drum only. */
+const RANDOM_ROTATE_TOP_ONLY = 1;
 /** The library's advice is 300–500 ms between commands that move drums or play long audio. */
 const BETWEEN_COMMANDS_MS = 500;
 export const WATCH_MS = 60_000;
@@ -139,7 +156,7 @@ export const SPIKE_STEPS: SpikeStep[] = [
     title: "Break a seal before calibration (GAP-HW-006)",
     gap: "GAP-HW-006",
     warning:
-      "Sends the seal-reveal lights and sound for the north top seal. The tower is NOT calibrated yet. Watch the drums.",
+      "Sends the seal-reveal lights and sound (the tower gets the same packet for every seal). The tower is NOT calibrated yet. Watch the drums.",
     run: async ({ tower }) => {
       await send("breakSeal", tower.breakSeal({ side: "north", level: "top" }));
     },
@@ -153,8 +170,13 @@ export const SPIKE_STEPS: SpikeStep[] = [
       const done = new Promise<void>((resolve) => {
         tower.onCalibrationComplete = () => resolve();
       });
-      await send("calibrate", tower.calibrate());
-      await within(CALIBRATION_TIMEOUT_MS, "calibration", done);
+      // One limit for the command and the spin together. `calibrate()` itself only resolves once
+      // the tower answers, so two separate limits could report a timeout in the middle of a spin.
+      await within(
+        CALIBRATION_TIMEOUT_MS,
+        "calibration",
+        tower.calibrate().then(() => done),
+      );
     },
     observe: ["Did all three drums spin and stop? Anything unusual?"],
   },
@@ -216,39 +238,58 @@ export const SPIKE_STEPS: SpikeStep[] = [
     gap: "GAP-HW-009",
     needsCalibration: true,
     warning:
-      "The lights should still be on from the last step. THE TOP DRUM WILL TURN back to north. Keep hands and pieces clear.",
-    run: async ({ tower }) => {
-      await send("Rotate", tower.Rotate("north", "north", "north"));
+      "Turns every light on, then THE TOP DRUM WILL TURN to south with the legacy command. Keep hands and pieces clear.",
+    run: async ({ tower, io, catalog }) => {
+      // South differs from both north and east, so the drum turns whether or not the last step ran.
+      await send("allLightsOn", tower.allLightsOn(catalog.lightEffectOn));
+      await io.wait(2_000);
+      await send("Rotate", tower.Rotate("south", "north", "north"));
     },
-    observe: ["Did the top drum turn back?", "Did the lights go off when it turned?"],
+    observe: ["Did the top drum turn?", "Did the lights go off when it turned?"],
+  },
+  {
+    id: "random-rotate",
+    title: "Random rotate of the top drum, and the lights (GAP-HW-009)",
+    gap: "GAP-HW-009",
+    needsCalibration: true,
+    warning:
+      "Turns every light on, then THE TOP DRUM WILL TURN to a random side (it may pick the side it is on and not move). Keep hands and pieces clear.",
+    run: async ({ tower, io, catalog }) => {
+      await send("allLightsOn", tower.allLightsOn(catalog.lightEffectOn));
+      await io.wait(2_000);
+      await send("randomRotateLevels", tower.randomRotateLevels(RANDOM_ROTATE_TOP_ONLY));
+    },
+    observe: ["Did the top drum turn, and did only the top drum turn?", "Did the lights go off?"],
   },
   {
     id: "looped-sound",
     title: "A looped sound, and whether it can be stopped (GAP-HW-008)",
     gap: "GAP-HW-008",
     warning:
-      "Starts a sound on loop, then tries three ways to stop it. IT MAY KEEP PLAYING until you switch the tower off. Skip this step if that is not acceptable right now.",
+      "Starts a sound on loop, then tries two ways to stop it. IT MAY KEEP PLAYING until you switch the tower off. Skip this step if that is not acceptable right now.",
     run: async ({ tower, io, catalog }) => {
+      const ask = async (question: string) => {
+        const answer = await io.observe(question);
+        io.log({ type: "looped-sound", question, answer });
+        return answer;
+      };
       await send("playSoundStateful loop", tower.playSoundStateful(catalog.soundIndex, true));
-      await io.wait(6_000);
-      io.say("  trying to stop it: the same sound without loop");
-      io.log({ type: "stop-attempt", how: "playSoundStateful without loop" });
-      await send("playSoundStateful", tower.playSoundStateful(catalog.soundIndex, false));
-      await io.wait(6_000);
-      io.say("  trying to stop it: a plain playSound");
-      io.log({ type: "stop-attempt", how: "playSound" });
-      await send("playSound", tower.playSound(catalog.soundIndex));
-      await io.wait(6_000);
-      io.say("  trying to stop it: all lights off");
-      io.log({ type: "stop-attempt", how: "allLightsOff" });
+      await ask("Listen until it has started again at least twice, or 30 seconds. Did it loop?");
+
+      // First the state with the audio cleared, which is what "all lights off" sends.
+      io.say("  trying to stop it: all lights off (sends a state with no sound)");
       await send("allLightsOff", tower.allLightsOff());
-      await io.wait(4_000);
+      await io.wait(3_000);
+      const stopped = await ask("Did the sound stop? (yes/no)");
+      if (/^y/i.test(stopped)) return;
+
+      // Then a different sound without loop, so a replay cannot be mistaken for the loop.
+      io.say("  trying to stop it: a different sound, played once");
+      await send("playSound", tower.playSound(catalog.otherSoundIndex));
+      await ask("Listen for 15 seconds. Did the looped sound stop after the other one played?");
     },
-    observe: [
-      "Did the sound loop?",
-      "Which attempt stopped it, if any? (1 same sound without loop, 2 plain sound, 3 lights off, none)",
-      "Is it still playing now?",
-    ],
+    observe: ["Is any sound still playing now?"],
+    afterDisconnect: ["The tower is disconnected. Is any sound still playing?"],
   },
   {
     id: "watch",
@@ -303,6 +344,7 @@ export const runSpike = async (
   steps: SpikeStep[] = SPIKE_STEPS,
 ): Promise<Record<string, StepResult>> => {
   const results: Record<string, StepResult> = {};
+  const ran: SpikeStep[] = [];
   // Decision D21: the library must never re-send a command on its own.
   tower.retrySendCommandMax = 0;
   io.log({ type: "setup", retrySendCommandMax: tower.retrySendCommandMax });
@@ -318,6 +360,11 @@ export const runSpike = async (
 
       if (step.id !== "connect" && !tower.isConnected) {
         skip("the tower is not connected");
+        continue;
+      }
+      // Decision D22: the library would drop the command and still report success.
+      if (tower.performingCalibration) {
+        skip("the tower is still calibrating, so the library would drop the command");
         continue;
       }
       if (step.needsCalibration && !tower.isCalibrated) {
@@ -336,7 +383,10 @@ export const runSpike = async (
         continue;
       }
 
+      // `calibrated` is what the tower has reported so far. Right after connecting it may not have
+      // reported yet, and a tower can calibrate itself when it is switched on.
       io.log({ type: "step-start", id: step.id, gap: step.gap, calibrated: tower.isCalibrated });
+      ran.push(step);
       let result: StepResult = "passed";
       let error: string | undefined;
       try {
@@ -349,7 +399,22 @@ export const runSpike = async (
       const observations: Record<string, string> = {};
       for (const question of step.observe) observations[question] = await io.observe(question);
       results[step.id] = result;
-      io.log({ type: "step", id: step.id, gap: step.gap, result, error, observations });
+      io.log({
+        type: "step",
+        id: step.id,
+        gap: step.gap,
+        result,
+        error,
+        observations,
+        calibratedAfter: tower.isCalibrated,
+      });
+      if (result === "timed-out") {
+        // The library may still hold this command. Disconnecting clears its queue; carrying on
+        // could let it reach the tower in the middle of a later step.
+        io.say("  A step timed out, so the run ends here and disconnects.");
+        io.log({ type: "ended-on-timeout", at: step.id });
+        break;
+      }
       await io.wait(BETWEEN_COMMANDS_MS);
     }
   } finally {
@@ -362,6 +427,17 @@ export const runSpike = async (
       const error = caught instanceof Error ? caught.message : String(caught);
       io.say(`  disconnect failed: ${error}. Switch the tower off if it is still doing anything.`);
       io.log({ type: "disconnect", result: "failed", error });
+    }
+    for (const step of ran) {
+      for (const question of step.afterDisconnect ?? []) {
+        io.log({
+          type: "after-disconnect",
+          id: step.id,
+          gap: step.gap,
+          question,
+          answer: await io.observe(question),
+        });
+      }
     }
   }
   return results;

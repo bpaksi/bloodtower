@@ -36,7 +36,6 @@ const main = async () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const folder = resolve(here, "../../../../../research/tower/spikes");
   const logFile = join(folder, `spike-${stamp}.jsonl`);
-  mkdirSync(folder, { recursive: true });
 
   const log = (record: Record<string, unknown>) =>
     appendFileSync(logFile, `${JSON.stringify({ ms: Date.now() - started, ...record })}\n`);
@@ -44,6 +43,8 @@ const main = async () => {
   console.log("Dark Tower hardware spike (M1 steps 5 and 6)\n");
   console.log("This connects to the real tower. Drums will spin during calibration and rotation.");
   console.log("You are asked before every step and can skip any of them.");
+  console.log("The tower's power switch is the only real stop: this script cannot halt a drum.");
+  console.log("Ctrl-C disconnects and exits. Do not paste terminal output into the write-up.");
   console.log(`The log goes to ${logFile}\n`);
 
   const go = await prompt.question("Type YES to switch on Bluetooth and begin: ");
@@ -52,6 +53,8 @@ const main = async () => {
     prompt.close();
     return;
   }
+
+  mkdirSync(folder, { recursive: true });
 
   // Loaded only now. Importing the library is harmless; creating the Node adapter loads noble.
   const { UltimateDarkTower, BluetoothAdapterFactory, BluetoothPlatform, LIGHT_EFFECTS } =
@@ -70,6 +73,30 @@ const main = async () => {
     (event) => log({ type: "adapter", ...event }),
   );
   const tower = new UltimateDarkTower({ adapter, diagnostics: { enabled: true } });
+  // The library's console logger prints the serial number and writes over the prompts.
+  tower.setLoggerOutputs([]);
+
+  // Ctrl-C: disconnect, then exit. A second Ctrl-C exits at once.
+  let interrupted = false;
+  const interrupt = () => {
+    if (interrupted) process.exit(130);
+    interrupted = true;
+    log({ type: "interrupted" });
+    console.log(
+      "\nInterrupted. Disconnecting. Switch the tower off if it is still doing anything.",
+    );
+    const giveUp = setTimeout(() => process.exit(130), 10_000);
+    Promise.resolve()
+      .then(() => (tower.isConnected ? tower.disconnect() : undefined))
+      .then(() => tower.cleanup())
+      .catch((error) => log({ type: "interrupt-disconnect-failed", error: String(error) }))
+      .finally(() => {
+        clearTimeout(giveUp);
+        process.exit(130);
+      });
+  };
+  prompt.on("SIGINT", interrupt);
+  process.on("SIGINT", interrupt);
 
   const io: SpikeIo = {
     confirm: async (warning): Promise<Answer> => {
@@ -95,6 +122,7 @@ const main = async () => {
   const sequences = TOWER_LIGHT_SEQUENCES as Record<string, number>;
   const catalog = {
     soundIndex: known(Object.values(TOWER_AUDIO_LIBRARY)[0]?.value, "the first sound"),
+    otherSoundIndex: known(Object.values(TOWER_AUDIO_LIBRARY)[1]?.value, "the second sound"),
     lightEffectOn: known(LIGHT_EFFECTS.on, "the light effect 'on'"),
     rotationSequences: HELD_ROTATION_SEQUENCES.map((name) => ({
       name,
