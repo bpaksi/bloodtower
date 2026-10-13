@@ -34,6 +34,7 @@ research/tower/observability.md                  # what raw traffic is visible a
    - Result: 52 entries (22 commands, 3 lifecycle actions, 13 queries, 7 events, 7 properties) and 17 exclusions (3 raw senders, 6 service-internal, 6 logging, 2 helpers). 38 entries are `available`, 8 `requires-calibration`, 3 `not-exposed` (the monitoring settings) and 3 `unsupported` (`doorReset`, `unjamDrums`, `overwriteDrumStates`).
    - `inventory.ts` does not import the library, so the values it repeats (sides, levels, corners, the six effects, layer and volume counts) are written out and compared with the library in the coverage test. Catalog ranges come from `ultimatedarktowerdata@3.0.0`, now an exact dependency of `tower-poc-protocols`.
    - The schemas are stricter than the library in four places: the `a`/`b` base-light aliases are not offered, `randomRotateLevels` needs its level, a `lights` command must name at least one light and each light once, and an out-of-range volume is rejected where the library clamps it.
+   - Review changes (spec 1.5): `seals.break` lost its `volume` (the library discards it, so the schema is stricter than the library there: the fifth place) and `mechanics.random-rotate` takes a named `drums` enum instead of `level` 0 to 6 (the sixth; `RANDOM_ROTATE_DRUMS` maps names to the library's numbers).
    - The millisecond bounds on the three monitoring settings are ours; the library documents none. Those entries are `not-exposed`, so nothing uses the bounds yet.
 4. Coverage test: enumerate `Object.getOwnPropertyNames(UltimateDarkTower.prototype)` plus instance callbacks, and fail on any that are unmapped and not excluded.
    - Result: `apps/tower-poc/src/server/inventoryCoverage.test.ts`. It is in the server package because the library is installed there and `tower-poc-protocols` must not depend on it. The inventory's own tests stay in `protocols/inventory.test.ts`.
@@ -52,6 +53,8 @@ research/tower/observability.md                  # what raw traffic is visible a
 
    It dumps every tx/rx packet as hex to `spike-<ts>.jsonl`.
 6. Also in the spike: test whether lights and sounds work **before** calibration (GAP-HW-001).
+   - Watch for drum motion, not only for whether they work: every stateful command packs the library's tracked drum bytes, which before calibration are north/north/north with `calibrated: false`.
+   - Check whether the four `rotation*` light sequences (`rotationAllDrums`, `rotationDrumTop`, `rotationDrumMiddle`, `rotationDrumBottom`) move anything or are light animations only.
 7. Write the observability assessment. It covers what we get from the adapter tap compared with the library recorder, and whether responses can be correlated to commands.
 8. Update the gap seed and the spec decision log if anything changes.
 

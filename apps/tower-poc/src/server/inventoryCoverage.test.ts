@@ -69,7 +69,7 @@ const require = createRequire(import.meta.url);
 const packageRoot = path.resolve(path.dirname(require.resolve(LIBRARY_BASELINE.name)), "../..");
 
 type MemberKind = "method" | "accessor" | "field" | "callback";
-type Member = { kind: MemberKind; isPrivate: boolean };
+type Member = { kind: MemberKind; isPrivate: boolean; declaration: string };
 
 /**
  * Reads the members of `declare class UltimateDarkTower` from the type file. It throws on
@@ -82,7 +82,8 @@ const parseClassMembers = (source: string): Map<string, Member> => {
   if (start < 0 || end < 0) throw new Error("class UltimateDarkTower not found in the type file");
   const body = source
     .slice(source.indexOf("\n", start), end)
-    // Keep the line count of a comment so line-based matching still works.
+    // Remove comments. A multi-line comment collapses into the line it started on, which
+    // is empty (members start on their own line), and empty lines are skipped below.
     .replace(/\/\*[\s\S]*?\*\//g, "");
   const members = new Map<string, Member>();
   const memberLine = /^(private |protected )?(get |set )?([A-Za-z_$][\w$]*)(\??:|\(|;|<)/;
@@ -103,7 +104,7 @@ const parseClassMembers = (source: string): Map<string, Member> => {
     if (known && (known.kind !== "accessor" || kind !== "accessor")) {
       throw new Error(`type file declares ${name} twice`);
     }
-    members.set(name, { kind, isPrivate: Boolean(visibility) });
+    members.set(name, { kind, isPrivate: Boolean(visibility), declaration: text });
   }
   return members;
 };
@@ -235,13 +236,23 @@ describe("inventory coverage", () => {
   });
 
   it("has no entry for a member that takes a packet", () => {
-    // The three raw senders and the packet formatter are the only members whose
-    // declaration mentions Uint8Array as an argument. `onTowerResponse` hands bytes out.
-    for (const name of ["sendTowerCommandDirect", "sendTowerCommand", "commandToPacketString"]) {
+    // Derived: every public method with a Uint8Array parameter. `onTowerResponse` hands
+    // bytes out and is a callback, so it is not a method here.
+    const takesPacket = [...declared]
+      .filter(([, member]) => !member.isPrivate && member.kind === "method")
+      .filter(([, member]) => /\([^)]*Uint8Array/.test(member.declaration))
+      .map(([name]) => name)
+      .sort();
+    // Written out so that a library change which adds a packet-taking method is noticed.
+    expect(takesPacket).toEqual([
+      "commandToPacketString",
+      "sendTowerCommand",
+      "sendTowerCommandDirect",
+    ]);
+    for (const name of [...takesPacket, "sendTowerState"]) {
       expect(mapped, name).not.toContain(name);
       expect(excluded, name).toContain(name);
     }
-    expect(mapped).not.toContain("sendTowerState");
   });
 });
 

@@ -11,6 +11,8 @@ import {
   isCommandable,
   isOffered,
   lightSequenceSchema,
+  RANDOM_ROTATE_DRUMS,
+  RANDOM_ROTATE_MODE_COUNT,
   SOUND_COUNT,
   soundIndexSchema,
 } from "./index.ts";
@@ -88,7 +90,7 @@ const examples: Record<CapabilityId, { valid: unknown; invalid: unknown }> = {
     valid: { drumIndex: 2, position: 3, playSound: true },
     invalid: { drumIndex: 3, position: 0 },
   },
-  "mechanics.random-rotate": { valid: { level: 6 }, invalid: { level: 7 } },
+  "mechanics.random-rotate": { valid: { drums: "middle-bottom" }, invalid: { drums: 6 } },
   "mechanics.drum-position": { valid: { level: "middle" }, invalid: { level: "base" } },
   "mechanics.long-command-in-progress": { valid: {}, invalid: { refresh: true } },
   "mechanics.unjam-drums": { valid: {}, invalid: { drumIndex: 0 } },
@@ -97,7 +99,7 @@ const examples: Record<CapabilityId, { valid: unknown; invalid: unknown }> = {
   "glyphs.position": { valid: { glyph: "cleanse" }, invalid: { glyph: "sword" } },
   "glyphs.all-positions": { valid: {}, invalid: { glyph: "cleanse" } },
   "glyphs.facing": { valid: { direction: "south" }, invalid: { direction: "down" } },
-  "seals.break": { valid: { seal, volume: 0 }, invalid: { seal, volume: -1 } },
+  "seals.break": { valid: { seal }, invalid: { seal, volume: 1 } },
   "seals.mark-broken": { valid: { seal }, invalid: { seal: { side: north, level: "base" } } },
   "seals.mark-restored": { valid: { seal }, invalid: { seal: { side: "up", level: "top" } } },
   "seals.reset": { valid: {}, invalid: { seal } },
@@ -275,8 +277,22 @@ describe("params schemas", () => {
     expect(play?.safeParse({}).success).toBe(false);
   });
 
-  it("require the level for a random rotation, so that all drums is never implied", () => {
+  it("require the drums for a random rotation, so that all drums is never implied", () => {
     expect(findCapability("mechanics.random-rotate")?.params.safeParse({}).success).toBe(false);
+  });
+
+  it("accept each random-rotate drum name, reject a number, and map names to exactly 0 to 6", () => {
+    const random = findCapability("mechanics.random-rotate")?.params;
+    for (const drums of Object.keys(RANDOM_ROTATE_DRUMS)) {
+      expect(random?.safeParse({ drums }).success, drums).toBe(true);
+    }
+    expect(Object.keys(RANDOM_ROTATE_DRUMS)).toHaveLength(7);
+    for (const drums of [0, 1, 6, "0", "", "ALL"]) {
+      expect(random?.safeParse({ drums }).success, String(drums)).toBe(false);
+    }
+    expect(random?.safeParse({ level: 0 }).success).toBe(false);
+    expect(Object.values(RANDOM_ROTATE_DRUMS).sort()).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(RANDOM_ROTATE_MODE_COUNT).toBe(7);
   });
 
   it("accept each end of every documented index range and reject one past it", () => {
@@ -296,10 +312,6 @@ describe("params schemas", () => {
       false,
       false,
     ]);
-
-    const random = findCapability("mechanics.random-rotate")?.params;
-    expect([0, 6].map((level) => random?.safeParse({ level }).success)).toEqual([true, true]);
-    expect([-1, 7].map((level) => random?.safeParse({ level }).success)).toEqual([false, false]);
   });
 });
 

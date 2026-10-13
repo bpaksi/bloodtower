@@ -62,6 +62,26 @@ export const LEDS_PER_LAYER = 4;
 export const VOLUME_LEVEL_COUNT = 4;
 /** `randomRotateLevels` modes: 0 all, 1 top, 2 middle, 3 bottom, 4 top+middle, 5 top+bottom, 6 middle+bottom. */
 export const RANDOM_ROTATE_MODE_COUNT = 7;
+/**
+ * The drums `randomRotateLevels` can turn, by name, with the library's number for each.
+ * The service translates a name to its number; a number is never accepted from a client,
+ * so an untouched numeric field cannot mean "all drums" (0).
+ */
+export const RANDOM_ROTATE_DRUMS = {
+  all: 0,
+  top: 1,
+  middle: 2,
+  bottom: 3,
+  "top-middle": 4,
+  "top-bottom": 5,
+  "middle-bottom": 6,
+} as const;
+export const randomRotateDrumsSchema = z.enum(
+  Object.keys(RANDOM_ROTATE_DRUMS) as [
+    keyof typeof RANDOM_ROTATE_DRUMS,
+    ...(keyof typeof RANDOM_ROTATE_DRUMS)[],
+  ],
+);
 
 /** Number of sounds in the catalog. Sound indexes are 1-based and run 1..SOUND_COUNT with no gaps (tested). */
 export const SOUND_COUNT = Object.keys(TOWER_AUDIO_LIBRARY).length;
@@ -185,7 +205,8 @@ export type CapabilityCategory = z.infer<typeof capabilityCategorySchema>;
  *   view. `evidence` says why. It has no `uiLocation` and cannot be invoked.
  * - `unsupported`: the tower has it but the library has no method for it, so `apiMapping`
  *   is empty and it can only be reached through the raw senders, which the app never
- *   uses. It is listed so the UI can show it as unavailable instead of leaving it out.
+ *   uses. It is listed so the capability summary and the generated capabilities document
+ *   can account for it; it has no `uiLocation`, so the UI does not show it.
  *
  * The spec's "`availability ≠ unavailable`" (§3.2) means `available` or
  * `requires-calibration`; `isOffered` is that test.
@@ -462,7 +483,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the effect defaults to on. Whether it works before calibration is GAP-HW-001.`,
+    evidence: `${TYPES}: the effect defaults to on. Whether it works before calibration is GAP-HW-001. The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
   },
   {
     id: "lighting.all-off",
@@ -474,7 +495,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}. Whether it works before calibration is GAP-HW-001.`,
+    evidence: `${TYPES}. Whether it works before calibration is GAP-HW-001. The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
   },
   {
     id: "lighting.sequence",
@@ -598,16 +619,11 @@ export const inventory = [
     kind: "command",
     category: "mechanics",
     apiMapping: ["randomRotateLevels"],
-    params: z.strictObject({
-      level: z
-        .int()
-        .min(0)
-        .max(RANDOM_ROTATE_MODE_COUNT - 1),
-    }),
+    params: z.strictObject({ drums: randomRotateDrumsSchema }),
     availability: "requires-calibration",
     uiLocation: "mechanics",
     verification: "untested",
-    evidence: `${TYPES}: 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom. The library defaults to 0; the level is required here so that "all drums" is never implied. The UI asks for confirmation (spec §5).`,
+    evidence: `${TYPES}: the library takes 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom (RANDOM_ROTATE_DRUMS maps the names to these). The library defaults to 0; drums is a required name here so that "all drums" is never implied. The UI asks for confirmation (spec §5).`,
   },
   {
     id: "mechanics.drum-position",
@@ -715,11 +731,11 @@ export const inventory = [
     kind: "command",
     category: "seals",
     apiMapping: ["breakSeal"],
-    params: z.strictObject({ seal: sealSchema, volume: volumeSchema.optional() }),
+    params: z.strictObject({ seal: sealSchema }),
     availability: "available",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. Volume is GAP-HW-003.`,
+    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003.`,
   },
   {
     id: "seals.mark-broken",
@@ -1061,7 +1077,7 @@ export const exclusions: readonly Exclusion[] = [
     member: "retrySendCommandMax",
     kind: "service-internal",
     reason:
-      "How often the library re-sends a failed write; the default is 5. A safety setting the service owns, never a client control. The value is Bob's decision (research note, finding 1).",
+      "How often the library re-sends a failed write; the default is 5. A safety setting the service owns, never a client control. The service sets it to 0 (spec D21).",
   },
   {
     member: "logDetail",

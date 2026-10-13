@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.4 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). |
+| Spec version | 1.5 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). 1.5 applies the inventory review: GAP-HW-003 no longer says `breakSeal` can set volume (the library discards it), and GAP-LIB-007 is typed Unverified. |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0` (exact, set in M1 step 1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -189,13 +189,13 @@ Every page has a persistent header that shows tower connection, calibration, ser
 | GAP-LIB-001..003 | Library not exposed | `sendTowerCommandDirect`, `sendTowerCommand`, `sendTowerState`: no UI by design | deferred |
 | GAP-HW-001 | Unverified | Whether lights/sounds require calibration first. The library's documents say calibration is required before any command, which leans against D9; the M1 spike settles it. | unverified |
 | GAP-HW-002 | Unverified | Seal/glyph state is application-maintained, not device-reported | confirmed gap |
-| GAP-HW-003 | Unverified | Volume control semantics. Volume can be set through `breakSeal(seal, volume?)` and `playSoundStateful(index, loop?, volume?)`. The library accepts 0–3 (loud, medium, quiet, mute) and the tower state documents `audio.volume` as 0–15; how the two relate is not stated. | unverified |
+| GAP-HW-003 | Unverified | Volume control semantics. The library accepts a `volume` on `breakSeal(seal, volume?)` but discards it (it overwrites the audio volume with 0 before packing). The remaining candidates are `playSoundStateful(index, loop?, volume?)` and the state's `audio.volume` (0–15). The library accepts 0–3 (loud, medium, quiet, mute) there, and its own code comment says the firmware ignores volume in sound commands; how the values relate is not stated. | unverified |
 | GAP-DIAG-001 | Diagnostics | Correlating a tower response to a specific command is heuristic | investigating |
 | GAP-HW-004 | Hardware | No stop/abort for drum motion | confirmed gap (pending M1 evidence) |
 | GAP-LIB-004 | Library not exposed | `doorReset`: a firmware command in `TOWER_COMMANDS` with no public method. Reachable only through the raw senders (D12). | confirmed gap |
 | GAP-LIB-005 | Library not exposed | `unjamDrums`: a firmware command with no public method. A jam is reported in tower state but cannot be cleared from the app. | confirmed gap |
 | GAP-LIB-006 | Library not exposed | `overwriteDrumStates`: a firmware command with no public method. | confirmed gap |
-| GAP-LIB-007 | Library not exposed | No audio completion signal: `playSound` resolves when the sound starts, so the Sounds page's pending lock covers the send, not the playback. Whether the tower reports the end of a sound is not known. | unverified |
+| GAP-LIB-007 | Unverified | No audio completion signal: `playSound` resolves when the sound starts, so the Sounds page's pending lock covers the send, not the playback. Whether the tower reports the end of a sound is not known. | unverified |
 
 GAP-LIB-004 to 007 were added in M1 step 3. The rest of M1 (the hardware spike) may add more.
 
