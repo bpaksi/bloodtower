@@ -8,7 +8,8 @@
     "dev": "concurrently --kill-others --names server,web --prefix-colors blue,green \"pnpm -F tower-poc-server dev\" \"NEXT_PUBLIC_WS_URL=ws://localhost:4747/ws pnpm -F tower-poc-web dev\"",
     "build": "pnpm -F tower-poc-web build",
     "start": "pnpm -F tower-poc-server start",
-    "e2e": "pnpm -F tower-poc-e2e e2e"
+    "e2e": "pnpm -F tower-poc-e2e e2e",
+    "inventory:doc": "pnpm -F tower-poc-protocols inventory:doc"
   },
   "devDependencies": {
     "concurrently": "10.0.6"
