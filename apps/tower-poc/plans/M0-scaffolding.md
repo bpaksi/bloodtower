@@ -29,7 +29,7 @@ CLAUDE.md, REVIEW.md
 3. `apps/tower-poc/src/server`: Node HTTP server that serves `apps/tower-poc/src/web/out` statically, plus a `ws` endpoint answering `hello` with `welcome`. Binds `0.0.0.0` with a configurable port (default 4747) and prints LAN URLs on start.
 4. `apps/tower-poc/src/web`: Next.js static export, all page shells from spec §5 with nav, and a header placeholder.
 5. Scripts. Root: `check` and `build` (recursive across all apps). `apps/tower-poc/package.json`: `dev` (concurrently: `tsx watch` service + `next dev` with WS URL env), `start`, `build`, `e2e`.
-6. Lefthook pre-commit: `pnpm check` on staged workspaces.
+6. Lefthook pre-commit: the full `pnpm check` whenever code or config is staged; docs-only commits skip it. (Deviation: not scoped to staged workspaces, because a change to a shared root file would then go unchecked. Revisit if commits get slow.)
 7. Claude config: CLAUDE.md, REVIEW.md, hooks, agents and skills.
 8. Playwright config with 3 projects (phone 390×844, iPad 820×1180, desktop 1440×900), and one smoke test that loads each page shell.
 

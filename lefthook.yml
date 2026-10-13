@@ -1,0 +1,7 @@
+# Git hooks, installed by `pnpm install` (the root `prepare` script).
+pre-commit:
+  commands:
+    check:
+      # Runs the full check when code or config is staged. Docs-only commits skip it.
+      glob: "*.{ts,tsx,js,mjs,cjs,json,css,yaml,yml}"
+      run: pnpm check
