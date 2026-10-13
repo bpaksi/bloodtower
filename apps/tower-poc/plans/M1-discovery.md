@@ -1,6 +1,6 @@
 # M1 — Integration discovery
 
-**Status:** approved by Bob, 2026-10-13. Step 1 is built on `feat/tower-poc-pin-versions` and step 2 on `docs/tower-poc-api-surface`.
+**Status:** approved by Bob, 2026-10-13. Step 1 is built on `feat/tower-poc-pin-versions`, step 2 on `docs/tower-poc-api-surface`, and steps 3 and 4 together on `feat/tower-poc-inventory`.
 
 **Goal:** know exactly which controls and diagnostics are possible on the real tower from Node on Bob's Mac.
 **Exit condition (PRD):** pinned versions, a complete inventory with coverage test, seeded gaps, a hardware spike result, and an observability assessment.
@@ -10,7 +10,8 @@
 ```text
 apps/tower-poc/src/server/package.json        # ultimatedarktower@7.1.2 exact, ultimatedarktowerdata@<exact>, @stoprocent/noble
 apps/tower-poc/src/protocols/inventory.ts     # typed capability entries (spec §4)
-apps/tower-poc/src/protocols/inventory.test.ts# coverage test vs UltimateDarkTower public surface
+apps/tower-poc/src/protocols/inventory.test.ts# the inventory's own tests: ids, param schemas, no raw bytes
+apps/tower-poc/src/server/inventoryCoverage.test.ts # coverage test vs UltimateDarkTower public surface
 apps/tower-poc/src/server/gaps/seed.ts    # spec §7 + findings
 apps/tower-poc/src/server/scripts/spike.ts    # hardware spike (manual)
 apps/tower-poc/docs/capabilities.md                   # generated
@@ -29,7 +30,15 @@ research/tower/observability.md                  # what raw traffic is visible a
    - Five methods and about twenty properties are not in the spec §4 table. The spec changes are listed in the note and are made with the inventory in step 3.
    - Two findings need Bob's decision before M2: the library retries a failed command write up to five times by default, and a command sent during calibration is dropped but still resolves.
 3. Write `inventory.ts` (Zod param schemas from the library's types: `TowerSide`, `TowerLevels`, `SealIdentifier`, `Lights`, `LIGHT_EFFECTS`, sound index range).
+   - Result: 52 entries (22 commands, 3 lifecycle actions, 13 queries, 7 events, 7 properties) and 17 exclusions (3 raw senders, 6 service-internal, 6 logging, 2 helpers). 38 entries are `available`, 8 `requires-calibration`, 3 `not-exposed` (the monitoring settings) and 3 `unsupported` (`doorReset`, `unjamDrums`, `overwriteDrumStates`).
+   - `inventory.ts` does not import the library, so the values it repeats (sides, levels, corners, the six effects, layer and volume counts) are written out and compared with the library in the coverage test. Catalog ranges come from `ultimatedarktowerdata@3.0.0`, now an exact dependency of `tower-poc-protocols`.
+   - The schemas are stricter than the library in four places: the `a`/`b` base-light aliases are not offered, `randomRotateLevels` needs its level, a `lights` command must name at least one light and each light once, and an out-of-range volume is rejected where the library clamps it.
+   - The millisecond bounds on the three monitoring settings are ours; the library documents none. Those entries are `not-exposed`, so nothing uses the bounds yet.
 4. Coverage test: enumerate `Object.getOwnPropertyNames(UltimateDarkTower.prototype)` plus instance callbacks, and fail on any that are unmapped and not excluded.
+   - Result: `apps/tower-poc/src/server/inventoryCoverage.test.ts`. It is in the server package because the library is installed there and `tower-poc-protocols` must not depend on it. The inventory's own tests stay in `protocols/inventory.test.ts`.
+   - The public surface is read from `UltimateDarkTower.d.ts`, which marks the private members, and then compared in both directions with the prototype and an instance. It is 73 members: 46 methods, 7 callbacks, 16 accessors and 4 fields. The step 2 note says 53 methods; 46 is the count from the type file.
+   - Importing the library and constructing it with `BluetoothPlatform.NONE` does not load `@stoprocent/noble`: the only `require` of it is in the Node adapter, which the factory loads for the `NODE` platform only. The test also blocks `process.dlopen` while the library is in use and asserts that it was never called.
+   - Steps 3 and 4 share one branch, against the rule of one branch per step, because the test belongs with the code it tests.
 5. **Hardware spike, run by Bob on the Mac with the tower nearby.** `pnpm -F tower-poc-server spike` runs these steps through `InstrumentedAdapter(NodeBluetoothAdapter)`:
    1. connect
    2. read device info

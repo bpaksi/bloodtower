@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.2 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). |
+| Spec version | 1.3 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0` (exact, set in M1 step 1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -87,7 +87,7 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. All messages are valid
 - **Client → server**
   - `hello{clientLabel}`
   - `connect`, `disconnect`, `reconnect`, `calibrate`
-  - `command{capabilityId, params}`. This is the only hardware path, and `capabilityId` must exist in the inventory with `availability ≠ unavailable` and a UI mapping. There is no raw bytes message type.
+  - `command{capabilityId, params}`. This is the only hardware path, and `capabilityId` must name an inventory entry of kind `command` whose availability is `available` or `requires-calibration` and which has a UI mapping (`isCommandable` in the inventory). There is no raw bytes message type.
   - `restoreState{accept}`
   - `diag.subscribe{filters}`, `diag.saveSession`, `diag.export`
   - `gap.*` (CRUD/import/export)
@@ -117,27 +117,36 @@ Gap import/export uses a Zod-validated JSON schema with `schemaVersion`. Seed ga
 
 ## 4. Capability inventory (FR-02)
 
-- `apps/tower-poc/src/protocols/inventory.ts` holds typed entries: `id`, `category`, `apiMapping`, `params` (Zod), `availability`, `uiLocation`, `verification` (`untested | mock-tested`), `evidence`.
+- `apps/tower-poc/src/protocols/inventory.ts` holds typed entries: `id`, `title`, `kind`, `category`, `apiMapping`, `params` (Zod), `availability`, `uiLocation`, `verification` (`untested | mock-tested`), `evidence`.
+  - `kind` says how the capability reaches the UI: `command` (through `command{capabilityId, params}`), `lifecycle` (its own message: connect, disconnect, calibrate), `query`, `event` or `property` (the last three are published by the service in `state` and `diag.event`).
+  - `availability` is `available`, `requires-calibration` (D9), `not-exposed` (the library has it; the app deliberately offers nothing) or `unsupported` (the tower has it; the library has no method for it).
+  - `params` is the only validation between a client and the tower, because the library's own types are loose. Every schema is a strict object of enums, booleans and bounded integers. Sound, light-sequence and glyph ranges are read from `ultimatedarktowerdata` when the module loads.
+  - The module does not import `ultimatedarktower`, because the protocols package is bundled into the web UI. It names library members as strings.
+- Public members with no entry are in the `exclusions` list in the same module, each with a reason: the raw senders (D12), service plumbing, logging settings and pure helpers.
 - `hardware-verified` is overlaid at runtime from `verifications` (D14). Mock-tested status is asserted by tests.
-- **Coverage test:** it enumerates the public methods, properties and events of `UltimateDarkTower` at the pinned version and fails if any is neither mapped to an inventory entry nor listed in a gap/exclusion with a reason.
+- **Coverage test:** `apps/tower-poc/src/server/inventoryCoverage.test.ts`. It reads the public methods, properties and callbacks of `UltimateDarkTower` from the installed type file, checks them against the object at runtime, and fails if any is neither mapped by an inventory entry nor excluded with a reason, or if either list names a member the library does not have. It lives in the server package because that is where the library is installed. It constructs the tower object with no Bluetooth (`BluetoothPlatform.NONE`) and never connects.
 - `pnpm inventory:doc` generates `apps/tower-poc/docs/capabilities.md`.
 
-**Initial API surface found in 7.1.2** (to be confirmed in M1):
+**API surface in 7.1.2** (confirmed in M1 steps 2 to 4; 73 public members, see `research/tower/api-surface-7.1.2.md`):
 
 | Category | Library surface |
 |---|---|
-| Connection | `connect`, `disconnect`, `cleanup`, `isConnectedAndResponsive`, `getConnectionStatus`, `getDeviceInformation`, `setConnectionMonitoring`, `onTowerConnect`, `onTowerDisconnect` |
+| Connection | `connect`, `disconnect`, `cleanup`, `isConnectedAndResponsive`, `getConnectionStatus`, `getDeviceInformation`, `setConnectionMonitoring`, `configureConnectionMonitoring`, `configureBatteryHeartbeatMonitoring`, `onTowerConnect`, `onTowerDisconnect` |
 | Calibration | `calibrate`, `onCalibrationComplete` |
-| Lighting | `lights` / `Lights` (doorway: side × level; ledge: corner; base: position; effects: off, on, breathe, breatheFast, breathe50percent, flicker), `allLightsOn(effect)`, `allLightsOff`, `lightOverrides(light, sound?)` |
-| Sound | `playSound(index)` (1-based, catalog in `ultimatedarktowerdata` TOWER_AUDIO_LIBRARY), volume descriptions (firmware 0–3) |
-| Mechanics | `Rotate(top, middle, bottom, sound?)`, `rotateWithState`, `randomRotateLevels(level)`, `getCurrentDrumPosition` |
+| Lighting | `lights` / `Lights` (doorway: side × level; ledge: corner; base: position; effects: off, on, breathe, breatheFast, breathe50percent, flicker), `allLightsOn(effect)`, `allLightsOff`, `lightOverrides(light, sound?)`, `setLED(layer 0–5, light 0–3, effect, loop?)` |
+| Sound | `playSound(index)` (1-based, catalog in `ultimatedarktowerdata` TOWER_AUDIO_LIBRARY), `playSoundStateful(index, loop?, volume?)`, volume descriptions (0 loud to 3 mute) |
+| Mechanics | `Rotate(top, middle, bottom, sound?)`, `rotateWithState`, `rotateDrumStateful(drum 0–2, position 0–3, playSound?)`, `randomRotateLevels(level 0–6)`, `getCurrentDrumPosition` |
 | Glyphs | `getGlyphPosition`, `getAllGlyphPositions`, `getGlyphsFacingDirection` |
 | Seals | `breakSeal(seal, volume?)`, `isSealBroken`, `getBrokenSeals`, `markSealBroken`, `markSealRestored`, `resetBrokenSeals`, `getRandomUnbrokenSeal` |
 | Skulls | `resetTowerSkullCount`, `onSkullDrop` |
 | Battery | `onBatteryLevelNotify`, `milliVoltsToPercentage` |
 | State | `getCurrentTowerState`, `onTowerStateUpdate`, `onTowerResponse` |
 | Diagnostics | `getDiagnosticsRecorder`, `setDiagnosticsEnabled`, `isDiagnosticsEnabled`, `getLastIncident`, `exportDiagnosticsJSON`, `setLoggerOutputs`, `commandToPacketString` |
+| Status and battery properties (read-only) | `isConnected`, `isCalibrated`, `performingCalibration`, `performingLongCommand`, `towerSkullDropCount`, `currentBattery`, `previousBattery`, `currentBatteryPercent`, `previousBatteryPercent`, and the same four battery values as plain fields (`currentBatteryValue`, `previousBatteryValue`, `currentBatteryPercentage`, `previousBatteryPercentage`) |
+| Settings (no UI, excluded) | `retrySendCommandMax`, `logDetail`, `logTowerResponses`, `logTowerResponseConfig`, `batteryLogFrequency`, `batteryLogOnChangeOnly`, `batteryLogEnabled` |
 | Raw (no UI, D12) | `sendTowerCommandDirect`, `sendTowerCommand`, `sendTowerState` |
+
+The three monitoring methods have inventory entries with availability `not-exposed`: no page in §5 has a control for them, and the service keeps the library defaults.
 
 ## 5. Pages (apps/tower-poc/src/web)
 
@@ -176,13 +185,17 @@ Every page has a persistent header that shows tower connection, calibration, ser
 | GAP-PLAT-001 | Platform | Direct in-browser Web Bluetooth not supported (Mac service only) | deferred |
 | GAP-PLAT-002 | Platform | iOS browsers lack Web Bluetooth (mitigated by service architecture) | verified resolved |
 | GAP-LIB-001..003 | Library not exposed | `sendTowerCommandDirect`, `sendTowerCommand`, `sendTowerState`: no UI by design | deferred |
-| GAP-HW-001 | Unverified | Whether lights/sounds require calibration first | unverified |
+| GAP-HW-001 | Unverified | Whether lights/sounds require calibration first. The library's documents say calibration is required before any command, which leans against D9; the M1 spike settles it. | unverified |
 | GAP-HW-002 | Unverified | Seal/glyph state is application-maintained, not device-reported | confirmed gap |
-| GAP-HW-003 | Unverified | Volume control semantics (firmware 0–3) via `breakSeal(volume)` only | unverified |
+| GAP-HW-003 | Unverified | Volume control semantics. Volume can be set through `breakSeal(seal, volume?)` and `playSoundStateful(index, loop?, volume?)`. The library accepts 0–3 (loud, medium, quiet, mute) and the tower state documents `audio.volume` as 0–15; how the two relate is not stated. | unverified |
 | GAP-DIAG-001 | Diagnostics | Correlating a tower response to a specific command is heuristic | investigating |
 | GAP-HW-004 | Hardware | No stop/abort for drum motion | confirmed gap (pending M1 evidence) |
+| GAP-LIB-004 | Library not exposed | `doorReset`: a firmware command in `TOWER_COMMANDS` with no public method. Reachable only through the raw senders (D12). | confirmed gap |
+| GAP-LIB-005 | Library not exposed | `unjamDrums`: a firmware command with no public method. A jam is reported in tower state but cannot be cleared from the app. | confirmed gap |
+| GAP-LIB-006 | Library not exposed | `overwriteDrumStates`: a firmware command with no public method. | confirmed gap |
+| GAP-LIB-007 | Library not exposed | No audio completion signal: `playSound` resolves when the sound starts, so the Sounds page's pending lock covers the send, not the playback. Whether the tower reports the end of a sound is not known. | unverified |
 
-M1 will expand this list.
+GAP-LIB-004 to 007 were added in M1 step 3. The rest of M1 (the hardware spike) may add more.
 
 ## 8. Acceptance criteria (updated)
 
