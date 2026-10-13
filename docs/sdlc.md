@@ -81,6 +81,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
 .claude/skills/bugfix/SKILL.md             # failing test first
 .claude/skills/gap-entry/SKILL.md          # gap with evidence + confidence
+.claude/skills/stitch/SKILL.md             # third-party: drives the `stitch` CLI (Stitch designs, DESIGN.md); project bound in .stitch.json
 ```
 
 ## Commands
