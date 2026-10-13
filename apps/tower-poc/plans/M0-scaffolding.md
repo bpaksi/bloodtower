@@ -1,6 +1,6 @@
 # M0 — Repo and SDLC scaffolding
 
-**Status:** approved by Bob, 2026-10-13. Steps 1–8 are built; review fixes are on `chore/m0-review-fixes`.
+**Status:** approved by Bob, 2026-10-13. Steps 1–8 are built; review fixes are on `chore/m0-review-fixes`. All of M0 is stacked on that one branch, so it merges to `main` as a single fast-forward. Proof was collected on 2026-10-13 (see the end of this file); one item is outstanding.
 
 **Goal:** an empty-but-working workspace where every check command runs green and the Claude guardrails from the repo-root `docs/sdlc.md` are enforced.
 
@@ -48,3 +48,10 @@ CLAUDE.md, REVIEW.md
 - Paste output of `pnpm check`, `pnpm build`, and `pnpm e2e` (smoke).
 - Show each hook blocking: an edit to `apps/tower-poc/intent/0001…`, a commit on `main`, and a change to the `ultimatedarktower` version.
 - Screenshot of the Dashboard shell at three viewports.
+
+## Proof results (2026-10-13, at b09b7f8)
+
+- `pnpm check` exits 0 with 172 tests passing; `pnpm build` exits 0; `pnpm e2e` reports 30 passed. `pnpm start` and `pnpm dev` both come up, and `/ws` answers `hello` with `welcome`.
+- Blocked in a live Claude session, by file edit and by shell command: an edit to `apps/tower-poc/intent/0001-dark-tower-web.md` (`protect-intent`), a change to `scripts/pinned-versions.json` (`pin-guard`), and an edit to a test file on a `fix/*` branch (`test-lock`).
+- **Outstanding:** `no-main-commit` has not been seen blocking in a live session. Claude Code's own permission check refused the commit on `main` before the hook ran. Fed the same commands directly, the guard exits 2. `main` has no `.claude/` folder until this branch merges, so repeat the live check in a fresh session after the merge.
+- Dashboard screenshots at the three viewports were taken by the smoke test and checked by eye. They are not committed.
