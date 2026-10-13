@@ -222,24 +222,6 @@ export const SPIKE_STEPS: SpikeStep[] = [
     observe: ["Did the lights come on and go off?"],
   },
   {
-    id: "rotation-sequences",
-    title: "The four rotation light sequences (GAP-HW-007)",
-    gap: "GAP-HW-007",
-    warning:
-      "Plays four light sequences whose names mention rotation. They are believed to be lights only. Watch the drums.",
-    run: async ({ tower, io, catalog }) => {
-      for (const sequence of catalog.rotationSequences) {
-        io.say(`  sequence ${sequence.name}`);
-        io.log({ type: "sequence", name: sequence.name, value: sequence.value });
-        await send(`lightOverrides ${sequence.name}`, tower.lightOverrides(sequence.value));
-        await io.wait(3_000);
-      }
-    },
-    observe: [
-      "For each of the four sequences in order: did any drum move? (for example: no, no, no, no)",
-    ],
-  },
-  {
     id: "rotate-with-state",
     title: "Rotate one drum, keeping the lights (step 5.6, GAP-HW-009)",
     gap: "GAP-HW-009",
@@ -337,6 +319,40 @@ export const SPIKE_STEPS: SpikeStep[] = [
       io.say(`  ${battery} battery notifications, last ${lastMillivolts ?? "none"} mV`);
     },
     observe: ["Did you drop a skull, and how many?"],
+  },
+  {
+    // Last on purpose. The first run (2026-10-13) showed that the tower plays `rotationAllDrums`
+    // and sends no state response, so the library waits its full 30 seconds and rejects. That
+    // rejection is expected here and does not end the run: the packet was written (the lights
+    // played), nothing else is queued behind it, and the library has given the command up before
+    // the next one is sent. Any other error still ends the step.
+    id: "rotation-sequences",
+    title: "The four rotation light sequences (GAP-HW-007)",
+    gap: "GAP-HW-007",
+    warning:
+      "Plays four light sequences whose names mention rotation, one at a time. On the first run the tower did not answer the first of them, so each may take 30 seconds before the next question. Watch the drums.",
+    run: async ({ tower, io, catalog }) => {
+      for (const sequence of catalog.rotationSequences) {
+        io.say(`  sequence ${sequence.name} (wait up to 30 seconds)`);
+        let answered = true;
+        try {
+          await send(`lightOverrides ${sequence.name}`, tower.lightOverrides(sequence.value));
+        } catch (caught) {
+          if (!(caught instanceof Error && LIBRARY_TIMEOUT.test(caught.message))) throw caught;
+          answered = false;
+        }
+        io.log({
+          type: "sequence",
+          name: sequence.name,
+          value: sequence.value,
+          towerAnswered: answered,
+          lights: await io.observe(`  ${sequence.name}: did the lights play? (yes/no)`),
+          drums: await io.observe(`  ${sequence.name}: did any drum move? (yes/no, and which)`),
+        });
+        await io.wait(BETWEEN_COMMANDS_MS);
+      }
+    },
+    observe: [],
   },
 ];
 

@@ -1,0 +1,23 @@
+{"ms":29525,"type":"start","at":"2026-10-13T21:02:11.054Z","node":"v24.4.1","platform":"darwin"}
+{"ms":29931,"type":"setup","retrySendCommandMax":0}
+{"ms":41064,"type":"step-start","id":"connect","calibrated":false}
+{"ms":41065,"type":"adapter","kind":"lifecycle","name":"connect:start","detail":"ReturnToDarkTower"}
+{"ms":51077,"type":"adapter","kind":"lifecycle","name":"connect:error","detail":"Bluetooth adapter not ready: Timeout waiting for Noble to be powered on"}
+{"ms":74559,"type":"step","id":"connect","result":"failed","error":"Bluetooth adapter not ready: Timeout waiting for Noble to be powered on","observations":{"Did macOS ask for Bluetooth permission? Anything else on connect?":"yes"},"calibratedAfter":false}
+{"ms":75062,"type":"step","id":"device-info","result":"skipped","reason":"the tower is not connected"}
+{"ms":75063,"type":"step","id":"pre-calibration-lights","gap":"GAP-HW-001","result":"skipped","reason":"the tower is not connected"}
+{"ms":75063,"type":"step","id":"pre-calibration-sound","gap":"GAP-HW-001","result":"skipped","reason":"the tower is not connected"}
+{"ms":75063,"type":"step","id":"pre-calibration-break-seal","gap":"GAP-HW-006","result":"skipped","reason":"the tower is not connected"}
+{"ms":75063,"type":"step","id":"calibrate","result":"skipped","reason":"the tower is not connected"}
+{"ms":75064,"type":"step","id":"sound","result":"skipped","reason":"the tower is not connected"}
+{"ms":75064,"type":"step","id":"lights","result":"skipped","reason":"the tower is not connected"}
+{"ms":75064,"type":"step","id":"rotation-sequences","gap":"GAP-HW-007","result":"skipped","reason":"the tower is not connected"}
+{"ms":75064,"type":"step","id":"rotate-with-state","gap":"GAP-HW-009","result":"skipped","reason":"the tower is not connected"}
+{"ms":75064,"type":"step","id":"legacy-rotate","gap":"GAP-HW-009","result":"skipped","reason":"the tower is not connected"}
+{"ms":75064,"type":"step","id":"random-rotate","gap":"GAP-HW-009","result":"skipped","reason":"the tower is not connected"}
+{"ms":75065,"type":"step","id":"looped-sound","gap":"GAP-HW-008","result":"skipped","reason":"the tower is not connected"}
+{"ms":75065,"type":"step","id":"watch","result":"skipped","reason":"the tower is not connected"}
+{"ms":75065,"type":"adapter","kind":"lifecycle","name":"cleanup:start"}
+{"ms":75065,"type":"adapter","kind":"lifecycle","name":"cleanup:ok"}
+{"ms":75065,"type":"disconnect","result":"passed"}
+{"ms":75066,"type":"results","results":{"connect":"failed","device-info":"skipped","pre-calibration-lights":"skipped","pre-calibration-sound":"skipped","pre-calibration-break-seal":"skipped","calibrate":"skipped","sound":"skipped","lights":"skipped","rotation-sequences":"skipped","rotate-with-state":"skipped","legacy-rotate":"skipped","random-rotate":"skipped","looped-sound":"skipped","watch":"skipped"}}

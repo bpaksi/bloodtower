@@ -237,10 +237,39 @@ describe("the spike runner", () => {
     const { io, records } = fakeIo(() => "run");
     await runSpike(tower, io, catalog);
     expect(calls.filter((name) => name === "lightOverrides")).toHaveLength(2);
-    expect(records.filter((record) => record.type === "sequence")).toEqual([
-      { type: "sequence", name: "rotationAllDrums", value: 15 },
-      { type: "sequence", name: "rotationDrumTop", value: 16 },
+    expect(records.filter((record) => record.type === "sequence")).toMatchObject([
+      { name: "rotationAllDrums", value: 15, towerAnswered: true, lights: "noted", drums: "noted" },
+      { name: "rotationDrumTop", value: 16, towerAnswered: true },
     ]);
+  });
+
+  it("carries on to the next sequence when the tower does not answer one (first run)", async () => {
+    const { tower, calls, argsOf } = fakeTower({
+      failOn: "lightOverrides",
+      failWith: "Command timeout after 30000ms: lightOverrides(15)",
+    });
+    const { io, records } = fakeIo(() => "run");
+    const results = await runSpike(tower, io, catalog);
+    expect(argsOf("lightOverrides")).toEqual([[15], [16]]);
+    expect(results["rotation-sequences"]).toBe("passed");
+    expect(records.filter((record) => record.type === "sequence")).toMatchObject([
+      { name: "rotationAllDrums", towerAnswered: false },
+      { name: "rotationDrumTop", towerAnswered: false },
+    ]);
+    expect(records.some((record) => record.type === "ended-on-timeout")).toBe(false);
+    expect(calls.slice(-2)).toEqual(["disconnect", "cleanup"]);
+  });
+
+  it("still fails the sequence step on any other error, without trying the rest", async () => {
+    const { tower, argsOf } = fakeTower({ failOn: "lightOverrides", failWith: "write refused" });
+    const results = await runSpike(tower, fakeIo(() => "run").io, catalog);
+    expect(argsOf("lightOverrides")).toEqual([[15]]);
+    expect(results["rotation-sequences"]).toBe("failed");
+  });
+
+  it("runs the sequences last, after every other step has had its turn", () => {
+    expect(SPIKE_STEPS.at(-1)?.id).toBe("rotation-sequences");
+    expect(SPIKE_STEPS.at(-2)?.id).toBe("watch");
   });
 });
 
