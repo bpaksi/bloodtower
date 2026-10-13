@@ -10,6 +10,8 @@
     "pnpm": ">=10"
   },
   "scripts": {
+    "check": "biome check . && pnpm -r --if-present typecheck && pnpm -r --if-present test",
+    "build": "pnpm --filter \"./apps/*\" --if-present build",
     "lint": "biome check .",
     "format": "biome check --write ."
   },
