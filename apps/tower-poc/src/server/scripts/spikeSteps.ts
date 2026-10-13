@@ -5,8 +5,11 @@
 // Safety rules the runner keeps (CLAUDE.md, tower safety):
 // - Nothing is sent until the person confirms that step. Skipping is always offered.
 // - Nothing is retried. A step that fails is logged and the run moves on.
-// - A step that times out ends the run. The library may still be holding that command, and
-//   disconnecting is what clears its queue, so nothing confirmed earlier can be written later.
+// - A step that times out ends the run, whether this file's limit or the library's own 30-second
+//   queue timeout fired. The tower may still carry the command out, and a write stuck in the
+//   Bluetooth stack is only dropped by disconnecting.
+// - The rotate commands set all three drums to absolute sides. The steps read where the library
+//   believes the other two are and send those back, so only the top drum is asked to move.
 // - While the tower is calibrating the library drops every other command and still reports
 //   success (D22), so the runner skips a step instead of sending it.
 // - Whatever happens, the run ends by disconnecting.
@@ -36,6 +39,7 @@ export type SpikeTower = {
   rotateWithState(top: Side, middle: Side, bottom: Side): Promise<void>;
   Rotate(top: Side, middle: Side, bottom: Side): Promise<void>;
   randomRotateLevels(level?: number): Promise<void>;
+  getCurrentDrumPosition(level: "top" | "middle" | "bottom"): Side;
 };
 
 export type Answer = "run" | "skip" | "quit";
@@ -94,6 +98,12 @@ export const WATCH_MS = 60_000;
 
 class StepTimeout extends Error {}
 
+/** The library's own queue timeout rejects with this text (udtCommandQueue.js). */
+const LIBRARY_TIMEOUT = /^Command timeout after/;
+
+const isTimeout = (error: unknown) =>
+  error instanceof StepTimeout || (error instanceof Error && LIBRARY_TIMEOUT.test(error.message));
+
 const within = async <T>(ms: number, what: string, work: Promise<T>): Promise<T> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
@@ -107,6 +117,17 @@ const within = async <T>(ms: number, what: string, work: Promise<T>): Promise<T>
 };
 
 const send = (what: string, work: Promise<void>) => within(COMMAND_TIMEOUT_MS, what, work);
+
+/**
+ * A move of the top drum only: to `preferred`, or to `otherwise` when it is already there. The
+ * middle and bottom drums get the sides the library has tracked for them, so they are asked to
+ * stay put.
+ */
+const topDrumMove = (tower: SpikeTower, preferred: Side, otherwise: Side) => ({
+  target: tower.getCurrentDrumPosition("top") === preferred ? otherwise : preferred,
+  middle: tower.getCurrentDrumPosition("middle"),
+  bottom: tower.getCurrentDrumPosition("bottom"),
+});
 
 const DRUM_QUESTION = "Did any drum move? (yes/no, and which)";
 
@@ -224,11 +245,13 @@ export const SPIKE_STEPS: SpikeStep[] = [
     gap: "GAP-HW-009",
     needsCalibration: true,
     warning:
-      "Turns every light on, then THE TOP DRUM WILL TURN to east. Keep hands and pieces clear.",
+      "Turns every light on, then THE TOP DRUM WILL TURN one or two sides. The middle and bottom drums are told to stay where the tower reports them; if that report is wrong THEY MAY TURN TOO. Keep hands and pieces clear of all three.",
     run: async ({ tower, io, catalog }) => {
+      const { target, middle, bottom } = topDrumMove(tower, "east", "west");
+      io.log({ type: "rotate", command: "rotateWithState", top: target, middle, bottom });
       await send("allLightsOn", tower.allLightsOn(catalog.lightEffectOn));
       await io.wait(BETWEEN_COMMANDS_MS);
-      await send("rotateWithState", tower.rotateWithState("east", "north", "north"));
+      await send("rotateWithState", tower.rotateWithState(target, middle, bottom));
     },
     observe: ["Did only the top drum turn?", "Did the lights stay on during and after the turn?"],
   },
@@ -238,14 +261,16 @@ export const SPIKE_STEPS: SpikeStep[] = [
     gap: "GAP-HW-009",
     needsCalibration: true,
     warning:
-      "Turns every light on, then THE TOP DRUM WILL TURN to south with the legacy command. Keep hands and pieces clear.",
+      "Turns every light on, then THE TOP DRUM WILL TURN with the legacy command. The middle and bottom drums are told to stay where the tower reports them; if that report is wrong THEY MAY TURN TOO. Keep hands and pieces clear of all three.",
     run: async ({ tower, io, catalog }) => {
-      // South differs from both north and east, so the drum turns whether or not the last step ran.
+      // Never east: the library's legacy code for top-east lacks the calibrated bit.
+      const { target, middle, bottom } = topDrumMove(tower, "south", "north");
+      io.log({ type: "rotate", command: "Rotate", top: target, middle, bottom });
       await send("allLightsOn", tower.allLightsOn(catalog.lightEffectOn));
       await io.wait(2_000);
-      await send("Rotate", tower.Rotate("south", "north", "north"));
+      await send("Rotate", tower.Rotate(target, middle, bottom));
     },
-    observe: ["Did the top drum turn?", "Did the lights go off when it turned?"],
+    observe: ["Did only the top drum turn?", "Did the lights go off when it turned?"],
   },
   {
     id: "random-rotate",
@@ -253,7 +278,7 @@ export const SPIKE_STEPS: SpikeStep[] = [
     gap: "GAP-HW-009",
     needsCalibration: true,
     warning:
-      "Turns every light on, then THE TOP DRUM WILL TURN to a random side (it may pick the side it is on and not move). Keep hands and pieces clear.",
+      "Turns every light on, then THE TOP DRUM WILL TURN to a random side (it may pick the side it is on and not move). The other two are told to stay; if the tower's report of them is wrong THEY MAY TURN TOO. Keep hands and pieces clear of all three.",
     run: async ({ tower, io, catalog }) => {
       await send("allLightsOn", tower.allLightsOn(catalog.lightEffectOn));
       await io.wait(2_000);
@@ -392,7 +417,7 @@ export const runSpike = async (
       try {
         await step.run({ tower, io, catalog });
       } catch (caught) {
-        result = caught instanceof StepTimeout ? "timed-out" : "failed";
+        result = isTimeout(caught) ? "timed-out" : "failed";
         error = caught instanceof Error ? caught.message : String(caught);
         io.say(`  ${result}: ${error}`);
       }
@@ -409,9 +434,10 @@ export const runSpike = async (
         calibratedAfter: tower.isCalibrated,
       });
       if (result === "timed-out") {
-        // The library may still hold this command. Disconnecting clears its queue; carrying on
-        // could let it reach the tower in the middle of a later step.
+        // The tower may still carry the command out, and a write stuck in the Bluetooth stack is
+        // only dropped by disconnecting. Carrying on could overlap it with a later step.
         io.say("  A step timed out, so the run ends here and disconnects.");
+        io.say("  The tower may still carry that command out. Wait until it is still.");
         io.log({ type: "ended-on-timeout", at: step.id });
         break;
       }

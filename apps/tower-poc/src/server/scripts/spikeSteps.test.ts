@@ -23,17 +23,28 @@ const catalog = {
 
 /** A tower that records every call and never touches Bluetooth. */
 const fakeTower = (
-  options: { failOn?: string; hangOn?: string; calibratingOnceConnected?: boolean } = {},
+  options: {
+    failOn?: string;
+    failWith?: string;
+    hangOn?: string;
+    calibratingOnceConnected?: boolean;
+    drums?: Partial<Record<"top" | "middle" | "bottom", "north" | "east" | "south" | "west">>;
+  } = {},
 ) => {
   const calls: string[] = [];
+  /** Every call with its arguments, for the tests that pin what is sent. */
+  const sent: [string, unknown[]][] = [];
   let connected = false;
   let calibrated = false;
-  const call = (name: string, effect?: () => void) => async () => {
-    calls.push(name);
-    if (options.failOn === name) throw new Error(`${name} failed`);
-    if (options.hangOn === name) await new Promise(() => {});
-    effect?.();
-  };
+  const call =
+    (name: string, effect?: () => void) =>
+    async (...args: unknown[]) => {
+      calls.push(name);
+      sent.push([name, args]);
+      if (options.failOn === name) throw new Error(options.failWith ?? `${name} failed`);
+      if (options.hangOn === name) await new Promise(() => {});
+      effect?.();
+    };
   const tower: SpikeTower = {
     retrySendCommandMax: 5,
     get isConnected() {
@@ -69,8 +80,11 @@ const fakeTower = (
     rotateWithState: call("rotateWithState"),
     Rotate: call("Rotate"),
     randomRotateLevels: call("randomRotateLevels"),
+    getCurrentDrumPosition: (level) => options.drums?.[level] ?? "north",
   };
-  return { tower, calls };
+  const argsOf = (name: string) =>
+    sent.filter(([called]) => called === name).map(([, args]) => args);
+  return { tower, calls, argsOf };
 };
 
 /** Answers every confirmation from `answers` (by step order), then "skip". Waits take no time. */
@@ -279,6 +293,84 @@ describe("timeouts and calibration (the review's findings)", () => {
     expect(stepRecords(records).find((record) => record.id === "sound")).toMatchObject({
       reason: "the tower is still calibrating, so the library would drop the command",
     });
+  });
+});
+
+describe("what the drum steps send", () => {
+  it("moves the top drum only, sending the other two back where the tower reports them", async () => {
+    const { tower, argsOf } = fakeTower({ drums: { middle: "east", bottom: "west" } });
+    const { io, records } = fakeIo(() => "run");
+    await runSpike(tower, io, catalog);
+    expect(argsOf("rotateWithState")).toEqual([["east", "east", "west"]]);
+    expect(argsOf("Rotate")).toEqual([["south", "east", "west"]]);
+    expect(records.filter((record) => record.type === "rotate")).toEqual([
+      { type: "rotate", command: "rotateWithState", top: "east", middle: "east", bottom: "west" },
+      { type: "rotate", command: "Rotate", top: "south", middle: "east", bottom: "west" },
+    ]);
+  });
+
+  it("picks another side when the top drum is already at the usual target", async () => {
+    const atEast = fakeTower({ drums: { top: "east" } });
+    await runSpike(atEast.tower, fakeIo(() => "run").io, catalog);
+    expect(atEast.argsOf("rotateWithState")).toEqual([["west", "north", "north"]]);
+
+    const atSouth = fakeTower({ drums: { top: "south" } });
+    await runSpike(atSouth.tower, fakeIo(() => "run").io, catalog);
+    expect(atSouth.argsOf("Rotate")).toEqual([["north", "north", "north"]]);
+  });
+
+  it("never sends the legacy rotate to east", async () => {
+    for (const top of ["north", "east", "south", "west"] as const) {
+      const { tower, argsOf } = fakeTower({ drums: { top } });
+      await runSpike(tower, fakeIo(() => "run").io, catalog);
+      expect(argsOf("Rotate")[0]?.[0]).not.toBe("east");
+      expect(argsOf("Rotate")[0]?.[0]).not.toBe(top);
+    }
+  });
+
+  it("random-rotates the top drum only: level 1, never the default of all three", async () => {
+    const { tower, argsOf } = fakeTower();
+    await runSpike(tower, fakeIo(() => "run").io, catalog);
+    expect(argsOf("randomRotateLevels")).toEqual([[1]]);
+  });
+
+  it("sends the catalog values for sounds, lights, sequences and the seal", async () => {
+    const { tower, argsOf } = fakeTower();
+    const { io } = fakeIo(
+      () => "run",
+      (question) => (question.startsWith("Did the sound stop") ? "no" : "noted"),
+    );
+    await runSpike(tower, io, catalog);
+    // Two ordinary plays of the first sound, then the different one as the loop's stop attempt.
+    expect(argsOf("playSound")).toEqual([[1], [1], [2]]);
+    expect(argsOf("playSoundStateful")).toEqual([[1, true]]);
+    expect(argsOf("lightOverrides")).toEqual([[15], [16]]);
+    expect(argsOf("breakSeal")).toEqual([[{ side: "north", level: "top" }]]);
+    expect(new Set(argsOf("allLightsOn").map(([effect]) => effect))).toEqual(new Set([1]));
+    expect(argsOf("connect")).toEqual([[]]);
+  });
+});
+
+describe("the library's own queue timeout", () => {
+  it("ends the run like our own timeout, because the tower may still act", async () => {
+    const { tower, calls } = fakeTower({
+      failOn: "calibrate",
+      failWith: "Command timeout after 30000ms: calibrate",
+    });
+    const { io, records } = fakeIo(() => "run");
+    const results = await runSpike(tower, io, catalog);
+    expect(results.calibrate).toBe("timed-out");
+    expect(Object.keys(results).at(-1)).toBe("calibrate");
+    expect(calls).not.toContain("rotateWithState");
+    expect(calls.slice(-2)).toEqual(["disconnect", "cleanup"]);
+    expect(records).toContainEqual({ type: "ended-on-timeout", at: "calibrate" });
+  });
+
+  it("still carries on after an ordinary failure", async () => {
+    const { tower } = fakeTower({ failOn: "breakSeal", failWith: "Cannot send command" });
+    const results = await runSpike(tower, fakeIo(() => "run").io, catalog);
+    expect(results["pre-calibration-break-seal"]).toBe("failed");
+    expect(results.calibrate).toBe("passed");
   });
 });
 
