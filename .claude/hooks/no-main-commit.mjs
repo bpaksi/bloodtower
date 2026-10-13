@@ -1,9 +1,9 @@
 // PreToolUse (Bash): Claude never creates commits on main or moves it. Bob merges.
-import { resolve } from "node:path";
 import {
   block,
   branchExists,
   currentBranch,
+  folderAt,
   gitCommand,
   repoRoot,
   runGuard,
@@ -41,7 +41,7 @@ runGuard("no-main-commit", (input) => {
     const git = gitCommand(words);
     if (!git) continue;
     const { sub, args, dir } = git;
-    const cwd = dir ? resolve(folder, dir) : folder;
+    const cwd = dir ? folderAt(folder, dir, input.cwd) : folder;
     const repo = repoRoot(cwd) || cwd;
     if (!branches.has(repo)) branches.set(repo, currentBranch(cwd));
     const here = branches.get(repo);

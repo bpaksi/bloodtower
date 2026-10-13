@@ -96,21 +96,47 @@ describe("splitCommands", () => {
 });
 
 describe("walkCommands", () => {
-  const dirs = (command) => walkCommands(command, "/repo").map(({ dir }) => dir);
+  // A real tree, because a `cd` to a folder that is not there is handled differently.
+  let repo;
+  let a;
+  let b;
+  before(() => {
+    repo = join(tmp, "walk");
+    a = join(repo, "a");
+    b = join(repo, "b");
+    mkdirSync(join(a, "b"), { recursive: true });
+    mkdirSync(b);
+  });
+  const dirs = (command) => walkCommands(command, repo).map(({ dir }) => dir);
 
-  it("follows cd, and forgets one made in a subshell or a pipeline", () => {
-    assert.deepEqual(dirs("cd a && x; cd b; y"), ["/repo", "/repo/a", "/repo/a", "/repo/a/b"]);
-    assert.deepEqual(dirs("(cd a && x); y"), ["/repo", "/repo/a", "/repo"]);
-    assert.deepEqual(dirs("(cd a); (cd b && x); y"), ["/repo", "/repo", "/repo/b", "/repo"]);
-    assert.deepEqual(dirs("cd a | cat; y"), ["/repo", "/repo", "/repo"]);
-    assert.deepEqual(dirs("cd a & y"), ["/repo", "/repo"]);
-    assert.deepEqual(dirs("echo a | cd b; y"), ["/repo", "/repo", "/repo"]);
+  it("follows cd, and forgets one made in a subshell", () => {
+    assert.deepEqual(dirs("cd a && x; cd b; y"), [repo, a, a, join(a, "b")]);
+    assert.deepEqual(dirs("cd -- a && y"), [repo, a]);
+    assert.deepEqual(dirs("(cd a && x); y"), [repo, a, repo]);
+    assert.deepEqual(dirs("(cd a); (cd b && x); y"), [repo, repo, b, repo]);
+    assert.deepEqual(dirs("echo y | (cd a && x); y"), [repo, repo, a, repo]);
+    assert.deepEqual(dirs("echo a | cd b; y"), [repo, repo, b]);
   });
 
   it("gives an unknown folder when only the shell knows where cd goes", () => {
-    assert.deepEqual(dirs('cd "$SOMEWHERE" && y'), ["/repo", UNKNOWN_FOLDER]);
-    assert.deepEqual(dirs("cd - && y"), ["/repo", UNKNOWN_FOLDER]);
-    assert.deepEqual(dirs("cd -P /tmp/x && y"), ["/repo", "/tmp/x"]);
+    assert.deepEqual(dirs('cd "$SOMEWHERE" && y'), [repo, UNKNOWN_FOLDER]);
+    assert.deepEqual(dirs("cd - && y"), [repo, UNKNOWN_FOLDER]);
+    assert.deepEqual(dirs("cd a* && y"), [repo, UNKNOWN_FOLDER]);
+    assert.deepEqual(dirs("cd a | cat; y"), [repo, UNKNOWN_FOLDER, UNKNOWN_FOLDER]);
+    assert.deepEqual(dirs("cd a & y"), [repo, UNKNOWN_FOLDER]);
+    assert.deepEqual(dirs("cd nope; y"), [repo, UNKNOWN_FOLDER]);
+  });
+
+  it("marks a folder that is yet to be made, only after &&", () => {
+    const [, made] = walkCommands("cd fresh && y", repo);
+    assert.deepEqual([made.dir, made.pending], [join(repo, "fresh"), true]);
+    const [, there] = walkCommands("cd a && y", repo);
+    assert.equal(there.pending, false);
+  });
+
+  it("keeps an escaped quote inside double quotes in one word", () => {
+    const [segment] = splitCommands('echo "say \\"cd x\\" && git commit"');
+    assert.deepEqual(segment.words, ["echo", 'say "cd x" && git commit']);
   });
 });
 
@@ -223,6 +249,17 @@ describe("no-main-commit", () => {
     }
   });
 
+  it("follows a cd that comes after a pipe", () => {
+    for (const command of [
+      `echo y | (cd ${onMain} && git commit -m x)`,
+      `true | cd ${onMain}; git commit -m x`,
+      `cd -- ${onMain} && git commit -m x`,
+      'git -C "$SOMEWHERE" commit -m x',
+    ]) {
+      assert.equal(shell("no-main-commit", command, onFeature), BLOCKED, command);
+    }
+  });
+
   it("blocks a commit after a cd only the shell can resolve", () => {
     assert.equal(shell("no-main-commit", 'cd "$SOMEWHERE" && git commit -m x', onFeature), BLOCKED);
     assert.equal(shell("no-main-commit", "cd - && git commit -m x", onFeature), BLOCKED);
@@ -286,6 +323,18 @@ describe("git commands that discard uncommitted work", () => {
     "git clean -fd -e build",
     "git reset --merge",
     'cd "$SOMEWHERE" && git reset --hard',
+    "git checkout -f -b tmp",
+    "git checkout -fb tmp",
+    "true | (cd apps && git checkout -- .)",
+    "cd nope; git reset --hard",
+    "cd nope 2>/dev/null; git stash -u",
+    "cd -- apps && git checkout -- .",
+    "cd app* && git checkout -- .",
+    "git -C app* checkout -- .",
+    'git -C "$PWD" checkout -- .',
+    'git -C "$SOMEWHERE" reset --hard',
+    "git -C nope reset --hard",
+    "git -C apps/game rm intent/0001-first.md",
   ]);
 
   it("blocks from another folder: cd, git -C, ~ and $CLAUDE_PROJECT_DIR", () => {
@@ -296,6 +345,11 @@ describe("git commands that discard uncommitted work", () => {
       }).status;
     assert.equal(from(`cd ${dirty} && git reset --hard`), BLOCKED);
     assert.equal(from(`git -C ${dirty} stash`), BLOCKED);
+    assert.equal(from(`echo y | (cd ${dirty} && git clean -fd)`), BLOCKED);
+    assert.equal(
+      from('git -C "$CLAUDE_PROJECT_DIR" reset --hard', { CLAUDE_PROJECT_DIR: dirty }),
+      BLOCKED,
+    );
     assert.equal(from("cd ~/intent-dirty && git reset --hard", { HOME: tmp }), BLOCKED);
     assert.equal(
       from('cd "$CLAUDE_PROJECT_DIR" && git stash -u', { CLAUDE_PROJECT_DIR: dirty }),
@@ -315,6 +369,8 @@ describe("git commands that discard uncommitted work", () => {
     "git reset HEAD apps",
     "git status",
     "git restore --staged apps",
+    "git restore -S apps",
+    "git switch -f -c tmp",
     "git switch main",
     "git checkout -b feat/y",
     "git clone https://example.com/x.git fresh && cd fresh && git checkout main",
@@ -512,8 +568,8 @@ describe("the hook commands in settings.json", () => {
     return guards.map((command) => spawnSync("sh", ["-c", command], { cwd: dir, input }).status);
   };
 
-  it("finds the guard entries", () => {
-    assert.ok(guards.length > 0);
+  it("covers every guard entry: three on edits, four on shell commands", () => {
+    assert.equal(guards.length, 7);
   });
 
   it("blocks when a guard cannot load or crashes before it decides", () => {
