@@ -17,9 +17,9 @@ apps/tower-poc/src/server/      package.json, tsconfig.json, index.ts (entry), s
 apps/tower-poc/src/web/         Next.js App Router, output:'export', Tailwind v4, shadcn/ui init, page shells
 apps/tower-poc/src/protocols/   package.json, tsconfig.json, index.ts, envelope.ts, messages.ts (hello, welcome, error) (+ tests)
 CLAUDE.md, REVIEW.md
-.claude/settings.json, .claude/hooks/{protect-intent,no-main-commit,pin-guard,format}.sh
+.claude/settings.json, .claude/hooks/{protect-intent,no-main-commit,pin-guard,test-lock,format}.sh
 .claude/agents/{verifier,reviewer}.md
-.claude/skills/{tower-capability,bugfix,gap-entry}/SKILL.md
+.claude/skills/{new-app,tower-capability,bugfix,gap-entry}/SKILL.md
 ```
 
 ## Order of work
@@ -30,7 +30,7 @@ CLAUDE.md, REVIEW.md
 4. `apps/tower-poc/src/web`: Next.js static export, all page shells from spec §5 with nav, and a header placeholder.
 5. Scripts. Root: `check` and `build` (recursive across all apps). `apps/tower-poc/package.json`: `dev` (concurrently: `tsx watch` service + `next dev` with WS URL env), `start`, `build`, `e2e`.
 6. Lefthook pre-commit: the full `pnpm check` whenever code or config is staged; docs-only commits skip it. (Deviation: not scoped to staged workspaces, because a change to a shared root file would then go unchecked. Revisit if commits get slow.)
-7. Claude config: CLAUDE.md, REVIEW.md, hooks, agents and skills.
+7. Claude config: CLAUDE.md, REVIEW.md, hooks, agents and skills. This includes the `test-lock` hook and the `new-app` skill, which `docs/sdlc.md` lists but this plan first left out.
 8. Playwright config with 3 projects (phone 390×844, iPad 820×1180, desktop 1440×900), and one smoke test that loads each page shell.
 
 ## Risks
