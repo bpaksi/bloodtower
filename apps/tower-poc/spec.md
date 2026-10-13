@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.0 (2026-10-13) |
+| Spec version | 1.1 (2026-10-13). 1.1 adds D19 (folder layout). |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata` (version pinned in M1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -26,7 +26,7 @@ DarkTowerWeb is a local POC controller and investigation tool for the Return to 
 | D1 | Build a fresh app that depends on the npm `ultimatedarktower`, using upstream `apps/controller` only as a reference | n/a (upstream controller didn't exist in the PRD's framing) | Bob's stack plus the PRD-specific features (inventory, gap register, command layer) |
 | D2 | **The Mac tower service owns the tower.** Browsers use a semantic WebSocket API. | React app with direct Web Bluetooth; server bridge deferred | iPadOS has no Web Bluetooth. It also gives a single source of truth, multi-device access, state that survives page reloads, and no raw byte pipe on the LAN. |
 | D3 | Direct in-browser Web Bluetooth is **dropped** and recorded as a gap (GAP-PLAT-001) | Primary path | Avoids two code paths for the POC |
-| D4 | pnpm workspace: `apps/tower-poc/service`, `apps/tower-poc/web` (Next.js static export), `apps/tower-poc/protocol` | Single React app | — |
+| D4 | pnpm workspace with three parts: `apps/tower-poc/src/server`, `apps/tower-poc/src/web` (Next.js static export), `apps/tower-poc/src/protocols` (layout per D19) | Single React app | — |
 | D5 | `pnpm start` runs **one process on one port**: the tower service serves the exported UI plus the WebSocket. `pnpm dev` runs tower-service and `next dev` from one command. | — | BLE connection survives UI hot reloads |
 | D6 | **Open on the LAN over HTTP**, no token | HTTPS for LAN | No browser BLE means no secure-context requirement; trusted home network |
 | D7 | **All clients may command.** The server serializes commands, and every command records its client ID. | One tab owns the connection | Multi-device use |
@@ -41,15 +41,16 @@ DarkTowerWeb is a local POC controller and investigation tool for the Return to 
 | D16 | The library's own diagnostics recorder and logger are **ingested into our timeline** with source `library`. Export embeds the library's `exportDiagnosticsJSON()` output. | — | One timeline |
 | D17 | Persistence: **native SQLite** (`better-sqlite3`) with **Drizzle** in the tower service | Browser local storage | The service owns the data |
 | D18 | Acceptance environments: **Mac Chrome, iPad Safari, phone browser**, all on the LAN | "documented target environment" | — |
+| D19 | All source lives under `apps/tower-poc/src/`: `web`, `server` and `protocols`. Each is its own package (`tower-poc-web`, `tower-poc-server`, `tower-poc-protocols`) with its files at the part root, with no nested `src/`. The folder is `server`; the prose still calls the running process the tower service. | Spec 1.0 had `service/`, `web/`, `protocol/` directly under the app | Bob's layout choice, 2026-10-13 |
 
 ## 3. Architecture
 
 ```text
  Mac (Apple Silicon, Node ≥ 22.13)                      LAN clients
 ┌───────────────────────────────────────────────┐     ┌──────────────────┐
-│ apps/tower-poc/service  (single port, e.g. 4747)  │     │ Mac Chrome       │
+│ src/server  (single port, e.g. 4747)          │     │ Mac Chrome       │
 │                                               │ ws  │ iPad Safari      │
-│  HTTP: serves apps/tower-poc/web static export   ◄──────┼─────┤ Phone browser    │
+│  HTTP: serves src/web static export    ◄──────┼─────┤ Phone browser    │
 │  WS  : /ws  typed protocol (Zod)              │     └──────────────────┘
 │   │                                           │
 │   ├─ ClientHub (multi-client, broadcast)      │
@@ -63,8 +64,8 @@ DarkTowerWeb is a local POC controller and investigation tool for the Return to 
 │   ├─ DiagnosticsBus (ring buffer, ingest lib) │
 │   └─ Db (better-sqlite3 + Drizzle)            │
 └───────────────────────────────────────────────┘
-apps/tower-poc/protocol : Zod schemas + TS types shared by service and web
-apps/tower-poc/web          : Next.js (App Router, output:'export'), Tailwind, shadcn/ui, Zustand
+apps/tower-poc/src/protocols : Zod schemas + TS types shared by server and web
+apps/tower-poc/src/web       : Next.js (App Router, output:'export'), Tailwind, shadcn/ui, Zustand
 ```
 
 ### 3.1 Key components
@@ -78,7 +79,7 @@ apps/tower-poc/web          : Next.js (App Router, output:'export'), Tailwind, s
 - **StateStore** wraps every value as `{ value | unavailable, updatedAt, origin: device-reported | library-derived | application-maintained | unknown, freshness: current | stale | unavailable, verification? }`. It snapshots to SQLite on change (for D11).
 - **DiagnosticsBus** keeps a ring buffer of `TimelineEvent`s, broadcasts them to subscribed clients, and supports pause of *rendering* (client side) separately from capture (always on).
 
-### 3.2 WebSocket protocol (apps/tower-poc/protocol)
+### 3.2 WebSocket protocol (apps/tower-poc/src/protocols)
 
 Envelope: `{ v: 1, type, id?, correlationId?, payload }`. All messages are validated with Zod on both sides.
 
@@ -111,11 +112,11 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. All messages are valid
 | `diag_sessions` / `diag_events` | opt-in saved sessions |
 | `state_snapshots` | latest application-maintained state, for restore prompt |
 
-Gap import/export uses a Zod-validated JSON schema with `schemaVersion`. Seed gaps are loaded from `apps/tower-poc/service/src/gaps/seed.ts` on first run and are idempotent by gap ID.
+Gap import/export uses a Zod-validated JSON schema with `schemaVersion`. Seed gaps are loaded from `apps/tower-poc/src/server/gaps/seed.ts` on first run and are idempotent by gap ID.
 
 ## 4. Capability inventory (FR-02)
 
-- `apps/tower-poc/protocol/src/inventory.ts` holds typed entries: `id`, `category`, `apiMapping`, `params` (Zod), `availability`, `uiLocation`, `verification` (`untested | mock-tested`), `evidence`.
+- `apps/tower-poc/src/protocols/inventory.ts` holds typed entries: `id`, `category`, `apiMapping`, `params` (Zod), `availability`, `uiLocation`, `verification` (`untested | mock-tested`), `evidence`.
 - `hardware-verified` is overlaid at runtime from `verifications` (D14). Mock-tested status is asserted by tests.
 - **Coverage test:** it enumerates the public methods, properties and events of `UltimateDarkTower` at the pinned version and fails if any is neither mapped to an inventory entry nor listed in a gap/exclusion with a reason.
 - `pnpm inventory:doc` generates `apps/tower-poc/docs/capabilities.md`.
@@ -137,7 +138,7 @@ Gap import/export uses a Zod-validated JSON schema with `schemaVersion`. Seed ga
 | Diagnostics | `getDiagnosticsRecorder`, `setDiagnosticsEnabled`, `isDiagnosticsEnabled`, `getLastIncident`, `exportDiagnosticsJSON`, `setLoggerOutputs`, `commandToPacketString` |
 | Raw (no UI, D12) | `sendTowerCommandDirect`, `sendTowerCommand`, `sendTowerState` |
 
-## 5. Pages (apps/tower-poc/web)
+## 5. Pages (apps/tower-poc/src/web)
 
 Every page has a persistent header that shows tower connection, calibration, service socket, mock-mode banner, and battery.
 

@@ -19,9 +19,9 @@ Use the `tower-capability` skill for every control: inventory → protocol → e
 ## Files that change (typical per step)
 
 ```text
-apps/tower-poc/protocol/src/inventory.ts         # flip availability/uiLocation, mock-tested
-apps/tower-poc/service/src/capabilities/<cat>.ts  # capabilityId → library call
-apps/tower-poc/web/app/<page>/page.tsx, components/<cat>/*
+apps/tower-poc/src/protocols/inventory.ts         # flip availability/uiLocation, mock-tested
+apps/tower-poc/src/server/capabilities/<cat>.ts  # capabilityId → library call
+apps/tower-poc/src/web/app/<page>/page.tsx, components/<cat>/*
 tests: executor mapping test, component test, Playwright page test at 3 viewports
 ```
 

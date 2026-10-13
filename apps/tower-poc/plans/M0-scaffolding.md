@@ -13,9 +13,9 @@ package.json, pnpm-workspace.yaml (already exists), .npmrc, .nvmrc (22.13+), tsc
 biome.json, lefthook.yml, .gitignore
 # this app
 apps/tower-poc/package.json   # name "tower-poc", private, orchestrates dev/start/build/e2e for its parts
-apps/tower-poc/service/   package.json, tsconfig.json, src/index.ts (HTTP + /ws hello)
-apps/tower-poc/web/             Next.js App Router, output:'export', Tailwind v4, shadcn/ui init, page shells
-apps/tower-poc/protocol/    package.json, src/index.ts (envelope schema stub)
+apps/tower-poc/src/server/      package.json, tsconfig.json, index.ts (HTTP + /ws hello)
+apps/tower-poc/src/web/         Next.js App Router, output:'export', Tailwind v4, shadcn/ui init, page shells
+apps/tower-poc/src/protocols/   package.json, tsconfig.json, index.ts, envelope.ts (+ test)
 CLAUDE.md, REVIEW.md
 .claude/settings.json, .claude/hooks/{protect-intent,no-main-commit,pin-guard,format}.sh
 .claude/agents/{verifier,reviewer}.md
@@ -25,9 +25,9 @@ CLAUDE.md, REVIEW.md
 ## Order of work
 
 1. Workspace skeleton and toolchain pins (Node ≥ 22.13, pnpm ≥ 10).
-2. `apps/tower-poc/protocol` with Zod and an envelope schema, plus a unit test.
-3. `apps/tower-poc/service`: Node HTTP server that serves `apps/tower-poc/web/out` statically, plus a `ws` endpoint answering `hello` with `welcome`. Binds `0.0.0.0` with a configurable port (default 4747) and prints LAN URLs on start.
-4. `apps/tower-poc/web`: Next.js static export, all page shells from spec §5 with nav, and a header placeholder.
+2. `apps/tower-poc/src/protocols` with Zod and an envelope schema, plus a unit test.
+3. `apps/tower-poc/src/server`: Node HTTP server that serves `apps/tower-poc/src/web/out` statically, plus a `ws` endpoint answering `hello` with `welcome`. Binds `0.0.0.0` with a configurable port (default 4747) and prints LAN URLs on start.
+4. `apps/tower-poc/src/web`: Next.js static export, all page shells from spec §5 with nav, and a header placeholder.
 5. Scripts. Root: `check` and `build` (recursive across all apps). `apps/tower-poc/package.json`: `dev` (concurrently: `tsx watch` service + `next dev` with WS URL env), `start`, `build`, `e2e`.
 6. Lefthook pre-commit: `pnpm check` on staged workspaces.
 7. Claude config: CLAUDE.md, REVIEW.md, hooks, agents and skills.

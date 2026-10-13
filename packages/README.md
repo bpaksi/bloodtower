@@ -1,6 +1,6 @@
 # packages/
 
-Shared code lives here **only once a second app needs it**. Until then it stays inside the app that owns it (for example, the tower WebSocket protocol starts life as `apps/tower-poc/protocol`).
+Shared code lives here **only once a second app needs it**. Until then it stays inside the app that owns it (for example, the tower WebSocket protocol starts life as `apps/tower-poc/src/protocols`).
 
 Promoting code here:
 1. Write a decision record in `research/decisions/` saying what moves and which apps use it.

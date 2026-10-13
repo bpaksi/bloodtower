@@ -15,9 +15,9 @@ A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower]
 | Path | What |
 |---|---|
 | `intent/` | Ideas in Bob's words (the original PRD is `0001`) |
-| `spec.md` | Accepted design, including the decision log (D1–D18) |
+| `spec.md` | Accepted design, including the decision log (D1–D19) |
 | `plans/` | One plan per milestone (M0–M5) |
-| `service/`, `web/`, `protocol/` | Code parts, created in M0 |
+| `src/web/`, `src/server/`, `src/protocols/` | Code parts, each its own package, created in M0 |
 | `docs/` | App docs: capabilities, acceptance, troubleshooting (created M1–M5) |
 | `../../research/tower/` | Spike and observability write-ups shared with other apps |
 

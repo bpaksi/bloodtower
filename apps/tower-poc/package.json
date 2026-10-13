@@ -2,6 +2,6 @@
   "name": "tower-poc",
   "version": "0.0.0",
   "private": true,
-  "description": "Tower controller POC. Orchestrates its parts: service, web, protocol.",
+  "description": "Tower controller POC. Orchestrates its parts under src/: web, server, protocols.",
   "type": "module"
 }

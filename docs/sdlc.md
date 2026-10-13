@@ -44,7 +44,7 @@ Promoting an Experiment to Full: write a spec from what was learned, then contin
 | Thing | Convention |
 |---|---|
 | App folder | `apps/<kebab-name>/` |
-| App package | `<app>` (single package) or `<app>-<part>` (e.g. `tower-poc-service`) |
+| App package | `<app>` (single package) or `<app>-<part>` (e.g. `tower-poc-server`) |
 | Shared package | `packages/<name>/`, package `@dark-tower/<name>` |
 | Branches | `<type>/<app>-<slug>` (e.g. `feat/tower-poc-lights`); repo-wide work uses `chore/<slug>` |
 | Commits | Conventional commits with the app as scope: `feat(tower-poc): …` |
