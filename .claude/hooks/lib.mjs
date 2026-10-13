@@ -19,25 +19,57 @@ export const runGuard = (name, guard) => {
   }
 };
 
-const git = (cwd, args) => {
+const gitRaw = (cwd, args) => {
   try {
     return execFileSync("git", args, {
       cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
+    });
   } catch {
     return "";
   }
 };
+const git = (cwd, args) => gitRaw(cwd, args).trim();
 
-export const currentBranch = (cwd) => git(cwd || ".", ["rev-parse", "--abbrev-ref", "HEAD"]);
+/** What `currentBranch` returns when git gives no answer, so a guard can refuse instead of guessing. */
+export const UNKNOWN_BRANCH = "(unknown)";
+
+/** The branch name, `""` in a repo with no commits yet, or `UNKNOWN_BRANCH` when git cannot say. */
+export const currentBranch = (cwd) => {
+  const name = git(cwd || ".", ["rev-parse", "--abbrev-ref", "HEAD"]);
+  if (name) return name;
+  const inRepo = git(cwd || ".", ["rev-parse", "--is-inside-work-tree"]) === "true";
+  return inRepo ? "" : UNKNOWN_BRANCH;
+};
 
 export const branchExists = (cwd, name) =>
   git(cwd || ".", ["show-ref", "--verify", `refs/heads/${name}`]) !== "";
 
 export const commitsAheadOfMain = (cwd) =>
   Number(git(cwd || ".", ["rev-list", "--count", "main..HEAD"]) || 0);
+
+/**
+ * Absolute paths of files with uncommitted work in the repo at `cwd`.
+ * `tracked` are changed files git knows; `untracked` are new files it does not.
+ */
+export const uncommittedFiles = (cwd) => {
+  const tracked = [];
+  const untracked = [];
+  if (git(cwd || ".", ["rev-parse", "--is-inside-work-tree"]) !== "true") {
+    return { tracked, untracked };
+  }
+  // The way up to the repo root from `cwd`, so the paths keep the caller's spelling of the folder.
+  const root = resolve(cwd || ".", git(cwd || ".", ["rev-parse", "--show-cdup"]));
+  const status = gitRaw(root, ["status", "--porcelain", "-z", "--untracked-files=all"]);
+  for (const entry of status.split("\0")) {
+    if (!entry) continue;
+    // An entry is `XY <path>`. The old name of a rename follows as a bare path.
+    const path = resolve(root, /^.. /.test(entry) ? entry.slice(3) : entry);
+    (entry.startsWith("??") ? untracked : tracked).push(path);
+  }
+  return { tracked, untracked };
+};
 
 /** File paths an Edit, Write, MultiEdit or NotebookEdit call touches. */
 export const editedPath = (input) =>
@@ -184,6 +216,65 @@ const GIT_WRITE_SUBCOMMANDS = new Set([
   "stash",
   "clean",
 ]);
+// `git stash <one of these>` leaves the working files' uncommitted changes in place.
+const STASH_KEEPS_WORK = new Set([
+  "list",
+  "show",
+  "pop",
+  "apply",
+  "drop",
+  "branch",
+  "clear",
+  "create",
+]);
+
+/**
+ * For a git command that throws away uncommitted work across a folder or the whole repo
+ * (`clean`, `stash`, `checkout -- .`, `restore <dir>`, `reset --hard`): the files it would hit.
+ */
+const filesGitWouldDiscard = (sub, args, dir) => {
+  const flags = args.filter((word) => word.startsWith("-"));
+  const has = (...names) => flags.some((flag) => names.includes(flag));
+  const short = (letter) =>
+    flags.some((flag) => /^-[A-Za-z]+$/.test(flag) && flag.includes(letter));
+
+  let kinds;
+  let everywhere = false;
+  if (sub === "clean") {
+    if (has("--dry-run") || short("n")) return [];
+    kinds = ["untracked"];
+    everywhere = true;
+  } else if (sub === "stash") {
+    if (STASH_KEEPS_WORK.has(args[0])) return [];
+    const all = has("--include-untracked", "--all") || short("u") || short("a");
+    kinds = all ? ["tracked", "untracked"] : ["tracked"];
+    everywhere = true;
+  } else if (sub === "reset") {
+    if (!has("--hard")) return [];
+    kinds = ["tracked"];
+    everywhere = true;
+  } else if (sub === "checkout" || sub === "restore") {
+    kinds = ["tracked"];
+    everywhere = has("--force") || short("f");
+  } else {
+    return [];
+  }
+
+  // Words that are not flags may be paths. A branch name resolves to a path that holds nothing.
+  // `git stash` takes a message and a subcommand as words, so only what follows `--` counts there.
+  const words = sub === "stash" ? args.slice(args.indexOf("--") + 1 || args.length) : args;
+  const scopes = words.filter((word) => !word.startsWith("-")).map((word) => resolve(dir, word));
+  const narrowed = (sub === "clean" || sub === "stash") && scopes.length > 0;
+  const files = uncommittedFiles(dir);
+  return kinds
+    .flatMap((kind) => files[kind])
+    .filter(
+      (file) =>
+        (everywhere && !narrowed) ||
+        scopes.some((scope) => file === scope || file.startsWith(`${scope}/`)),
+    );
+};
+
 const INTERPRETERS = new Set([
   "python",
   "python3",
@@ -229,6 +320,11 @@ export const findShellWrite = (command, cwd, isProtected) => {
         const hit = git.args.find((word) => names(word, moves));
         if (hit) return `git ${git.sub} would change ${hit}`;
       }
+      const from = git.dir ? at(git.dir) : dir;
+      const lost = filesGitWouldDiscard(git.sub, git.args, from).find((file) =>
+        isProtected(file, { moves: false }),
+      );
+      if (lost) return `git ${git.sub} would discard uncommitted work in ${lost}`;
     } else if (WRITE_COMMANDS.has(name)) {
       const moves = name === "rm" || name === "mv" || name === "rsync";
       const hit = args.find((word) => names(word, moves));

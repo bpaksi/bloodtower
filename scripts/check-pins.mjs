@@ -52,6 +52,20 @@ export const checkPins = (root, pins) => {
           }
         }
       });
+
+      // Everything else: a `name@version:` key under `packages:` or `snapshots:`, and a
+      // `name: version` line where another package depends on it. These catch a second version
+      // that arrives through someone else's dependency range.
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const installed = new RegExp(`^\\s+'?${escaped}(?:@|:\\s+'?)(\\d[^'():\\s]*)`);
+      lines.forEach((line, i) => {
+        const match = line.match(installed);
+        if (match && match[1] !== pinned) {
+          errors.push(
+            `pnpm-lock.yaml:${i + 1}: ${name} ${match[1]} is installed, but it is pinned to "${pinned}".`,
+          );
+        }
+      });
     }
   }
 

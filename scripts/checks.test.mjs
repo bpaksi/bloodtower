@@ -63,6 +63,43 @@ describe("checkPins", () => {
     ]);
   });
 
+  it("fails when another package brings in a second version", () => {
+    fresh("pins-transitive");
+    write("package.json", manifest({ dependencies: { ultimatedarktower: "7.1.2" } }));
+    write(
+      "pnpm-lock.yaml",
+      [
+        "importers:",
+        "  .:",
+        "    dependencies:",
+        "      ultimatedarktower:",
+        "        specifier: 7.1.2",
+        "        version: 7.1.2",
+        "packages:",
+        "  ultimatedarktower@7.1.2:",
+        "    resolution: {integrity: sha512-a}",
+        "  ultimatedarktower@7.3.0:",
+        "    resolution: {integrity: sha512-b}",
+        "  ultimatedarktowerdata@1.0.0:",
+        "    resolution: {integrity: sha512-c}",
+        "    peerDependencies:",
+        "      ultimatedarktower: ^7.0.0",
+        "snapshots:",
+        "  ultimatedarktower@7.1.2: {}",
+        "  ultimatedarktower@7.3.0(zod@4.6.7): {}",
+        "  ultimatedarktowerdata@1.0.0:",
+        "    dependencies:",
+        "      ultimatedarktower: 7.3.0(zod@4.6.7)",
+        "",
+      ].join("\n"),
+    );
+    assert.deepEqual(checkPins(root, pins), [
+      'pnpm-lock.yaml:10: ultimatedarktower 7.3.0 is installed, but it is pinned to "7.1.2".',
+      'pnpm-lock.yaml:18: ultimatedarktower 7.3.0 is installed, but it is pinned to "7.1.2".',
+      'pnpm-lock.yaml:21: ultimatedarktower 7.3.0 is installed, but it is pinned to "7.1.2".',
+    ]);
+  });
+
   it("does not confuse a package whose name starts the same way", () => {
     fresh("pins-data");
     write("package.json", manifest({ dependencies: { ultimatedarktowerdata: "1.0.0" } }));

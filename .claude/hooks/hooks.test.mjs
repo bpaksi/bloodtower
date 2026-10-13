@@ -1,7 +1,7 @@
 // Feeds each guard hook the JSON a tool call would send and checks whether it blocks (exit 2).
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { after, before, describe, it } from "node:test";
@@ -161,6 +161,82 @@ describe("no-main-commit", () => {
   it("blocks: git -C <repo on main> commit, run from a feature branch", () => {
     assert.equal(shell("no-main-commit", `git -C ${onMain} commit -m x`, onFeature), BLOCKED);
   });
+
+  it("follows cd into a repo on main, and back out of one", () => {
+    assert.equal(shell("no-main-commit", `cd ${onMain} && git commit -m x`, onFeature), BLOCKED);
+    assert.equal(shell("no-main-commit", `cd ${onFeature} && git commit -m x`, onMain), ALLOWED);
+  });
+
+  it("blocks a commit when git cannot say which branch it is on", () => {
+    assert.equal(shell("no-main-commit", "git commit -m x", join(tmp, "no-such-folder")), BLOCKED);
+    assert.equal(shell("no-main-commit", "git commit -m x", tmp), BLOCKED);
+    assert.equal(shell("no-main-commit", "git status", tmp), ALLOWED);
+  });
+
+  it("allows the first commit in a repo that has none yet", () => {
+    const empty = join(tmp, "empty");
+    mkdirSync(empty);
+    gitIn(empty, "init", "-q", "-b", "trunk");
+    assert.equal(shell("no-main-commit", "git commit -m x", empty), ALLOWED);
+  });
+});
+
+describe("git commands that discard uncommitted work", () => {
+  // A repo where Bob has an edited intent file and a new one, neither committed.
+  let dirty;
+  let clean;
+  const intentRepo = (name) => {
+    const dir = makeRepo(name, "feat/app-thing");
+    mkdirSync(join(dir, "apps/game/intent"), { recursive: true });
+    writeFileSync(join(dir, "apps/game/intent/0001-first.md"), "first");
+    writeFileSync(join(dir, "apps/game/spec.md"), "spec");
+    gitIn(dir, "add", "apps");
+    gitIn(dir, "commit", "-q", "-m", "intent");
+    return dir;
+  };
+  before(() => {
+    clean = intentRepo("intent-clean");
+    dirty = intentRepo("intent-dirty");
+    writeFileSync(join(dirty, "apps/game/intent/0001-first.md"), "first, edited by Bob");
+    writeFileSync(join(dirty, "apps/game/intent/0002-new.md"), "new, not yet added");
+    writeFileSync(join(dirty, "apps/game/spec.md"), "spec, edited");
+  });
+
+  const inDirty = (hook, command) => shell(hook, command, dirty);
+  const inClean = (hook, command) => shell(hook, command, clean);
+
+  cases("protect-intent", inDirty, BLOCKED, [
+    "git clean -fd",
+    "git clean -fd apps",
+    "git stash",
+    "git stash -u",
+    'git stash push -m "wip"',
+    "git checkout -- .",
+    "git checkout .",
+    "git checkout -f main",
+    "git restore apps/game",
+    "git reset --hard",
+    "git reset --hard HEAD~1",
+    "cd apps && git restore .",
+  ]);
+  cases("protect-intent", inDirty, ALLOWED, [
+    "git clean -nd",
+    "git clean -fd docs",
+    "git stash list",
+    "git stash pop",
+    "git stash push -- apps/game/spec.md",
+    "git checkout main",
+    "git checkout -- apps/game/spec.md",
+    "git restore apps/game/spec.md",
+    "git reset HEAD apps",
+    "git status",
+  ]);
+  cases("protect-intent", inClean, ALLOWED, [
+    "git clean -fd",
+    "git stash -u",
+    "git checkout -- .",
+    "git reset --hard",
+  ]);
 });
 
 describe("pin-guard", () => {
@@ -321,5 +397,42 @@ describe("a guard that cannot read its input", () => {
   it("blocks instead of waving the call through", () => {
     const status = spawnSync("node", [join(HOOKS, "protect-intent.mjs")], { input: "not json" });
     assert.equal(status.status, BLOCKED);
+  });
+});
+
+describe("the hook commands in settings.json", () => {
+  const settings = JSON.parse(readFileSync(join(REPO, ".claude/settings.json"), "utf8"));
+  const guards = settings.hooks.PreToolUse.flatMap((group) => group.hooks).map(
+    (hook) => hook.command,
+  );
+  const input = JSON.stringify({ tool_name: "Bash", cwd: ".", tool_input: { command: "ls" } });
+  // Runs each settings command in a throwaway repo whose hook files hold `source`.
+  const runIn = (name, source) => {
+    const dir = makeRepo(name, "feat/app-thing");
+    if (source !== undefined) {
+      mkdirSync(join(dir, ".claude/hooks"), { recursive: true });
+      for (const hook of ["protect-intent", "no-main-commit", "pin-guard", "test-lock"]) {
+        writeFileSync(join(dir, `.claude/hooks/${hook}.mjs`), source);
+      }
+    }
+    return guards.map((command) => spawnSync("sh", ["-c", command], { cwd: dir, input }).status);
+  };
+
+  it("covers all seven guard entries", () => {
+    assert.equal(guards.length, 7);
+  });
+
+  it("blocks when a guard cannot load or crashes before it decides", () => {
+    assert.deepEqual(new Set(runIn("hook-syntax", "this is not javascript")), new Set([BLOCKED]));
+    assert.deepEqual(
+      new Set(runIn("hook-import", 'import "./missing-lib.mjs";')),
+      new Set([BLOCKED]),
+    );
+    assert.deepEqual(new Set(runIn("hook-exit", "process.exit(1);")), new Set([BLOCKED]));
+  });
+
+  it("allows when the guard allows, and in a checkout that has no hooks at all", () => {
+    assert.deepEqual(new Set(runIn("hook-ok", "")), new Set([ALLOWED]));
+    assert.deepEqual(new Set(runIn("hook-none", undefined)), new Set([ALLOWED]));
   });
 });

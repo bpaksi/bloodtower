@@ -1,6 +1,16 @@
 // PreToolUse (Bash): Claude never creates commits on main or moves it. Bob merges.
+import { homedir } from "node:os";
 import { resolve } from "node:path";
-import { block, branchExists, currentBranch, gitCommand, runGuard, splitCommands } from "./lib.mjs";
+import {
+  block,
+  branchExists,
+  commandOf,
+  currentBranch,
+  gitCommand,
+  runGuard,
+  splitCommands,
+  UNKNOWN_BRANCH,
+} from "./lib.mjs";
 
 const WHY = "Work on a <type>/<app>-<slug> branch; Bob merges to main (docs/sdlc.md).";
 
@@ -24,11 +34,19 @@ const branchAfterSwitch = (sub, args, cwd) => {
 
 runGuard("no-main-commit", (input) => {
   const command = input.tool_input?.command ?? "";
-  const cwd = input.cwd || ".";
-  // Follows `git checkout` and `git switch` through the command, so the branch is right at each step.
+  // Follows `cd`, `git checkout` and `git switch` through the command, so the folder and the branch
+  // are right at each step.
+  let cwd = input.cwd || ".";
   let branch;
 
   for (const { words } of splitCommands(command)) {
+    const { name, args: cdArgs } = commandOf(words);
+    if (name === "cd" && cdArgs[0]) {
+      cwd = resolve(cwd, cdArgs[0].replace(/^~(?=\/|$)/, homedir()));
+      branch = undefined;
+      continue;
+    }
+
     const git = gitCommand(words);
     if (!git) continue;
     const { sub, args, dir } = git;
@@ -41,6 +59,11 @@ runGuard("no-main-commit", (input) => {
       continue;
     }
 
+    if (here === UNKNOWN_BRANCH && COMMITTING.has(sub)) {
+      block(
+        `git ${sub}: git could not say which branch this is, so it may be main. Run it from the repo folder or with git -C <path>. ${WHY}`,
+      );
+    }
     if (here === "main") {
       if (COMMITTING.has(sub)) block(`git ${sub} would create commits on main. ${WHY}`);
       if (sub === "reset" && args.some((word) => RESET_MODES.has(word))) {

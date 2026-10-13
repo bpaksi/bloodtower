@@ -18,7 +18,8 @@ const PIN_FILE = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../../scripts/pinned-versions.json",
 );
-const PINS = JSON.parse(readFileSync(PIN_FILE, "utf8"));
+// Read inside the guard, so a pin file that cannot be parsed blocks the call instead of crashing.
+let PINS;
 
 const why = (name) =>
   `${name} is pinned to exactly ${PINS[name]} (scripts/pinned-versions.json). An upgrade needs a new intent from Bob.`;
@@ -89,6 +90,7 @@ const guardShell = (command, cwd) => {
 };
 
 runGuard("pin-guard", (input) => {
+  PINS = JSON.parse(readFileSync(PIN_FILE, "utf8"));
   if (input.tool_name === "Bash") return guardShell(input.tool_input?.command ?? "", input.cwd);
 
   const file = editedPath(input);
