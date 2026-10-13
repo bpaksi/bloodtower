@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.6 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). 1.5 applies the inventory review: GAP-HW-003 no longer says `breakSeal` can set volume (the library discards it), and GAP-LIB-007 is typed Unverified. 1.6 applies four cautious holds pending the M1 spike (GAP-HW-006 to 009): `seals.break` requires calibration, the four `rotation*` light sequences are not accepted, `sound.play-stateful` has no `loop`, and the legacy `mechanics.rotate` is not offered. |
+| Spec version | 1.7 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). 1.5 applies the inventory review: GAP-HW-003 no longer says `breakSeal` can set volume (the library discards it), and GAP-LIB-007 is typed Unverified. 1.6 applies four cautious holds pending the M1 spike (GAP-HW-006 to 009): `seals.break` requires calibration, the four `rotation*` light sequences are not accepted, `sound.play-stateful` has no `loop`, and the legacy `mechanics.rotate` is not offered. 1.7 adds `rejected` to the command lifecycle in §3.2 and a row for commands during calibration in §6, both following from D22. GAP-HW-005 is not used; the ids skip from 004 to 006. |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0` (exact, set in M1 step 1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -75,7 +75,7 @@ apps/tower-poc/src/web       : Next.js (App Router, output:'export'), Tailwind, 
 
 - **InstrumentedAdapter** wraps any `IBluetoothAdapter` and emits a `transport` event for every `writeCharacteristic`, `onCharacteristicValueChanged`, connect, disconnect and availability change. Each event carries raw bytes (hex) and the service/characteristic UUIDs from the library's adapter config. This satisfies FR-09 with no library fork.
 - **CommandExecutor** is the only path from the UI to the tower (FR-07).
-  - For each command it assigns a correlation ID, validates input against the inventory's Zod parameter schemas, and records the `queued → started → write-completed → (confirmed | indeterminate) | failed | timed-out` lifecycle along with the sender's client ID.
+  - For each command it assigns a correlation ID, validates input against the inventory's Zod parameter schemas, and records the `queued → started → write-completed → (confirmed | indeterminate) | failed | timed-out` lifecycle, or ends it as `rejected` before queueing when validation fails or the tower is calibrating (D22), along with the sender's client ID.
   - Mechanics share one serialization lane. Lights and sounds go through the library's own command queue, and the executor observes that queue.
   - It never retries physical actions automatically.
   - "Confirmed" means a correlated tower response or state update was observed. Otherwise the result is `write-completed` only.
@@ -178,6 +178,7 @@ Every page has a persistent header that shows tower connection, calibration, ser
 | Command timeout | Lifecycle `timed-out`, inline error, no retry |
 | Command failure | Lifecycle `failed` with library error |
 | Validation failure | Rejected before queueing, field-level error |
+| Command sent while the tower is calibrating | Rejected before the library is called, with the reason shown; nothing is queued for later (D22) |
 | Service unreachable (client) | Full-screen "service offline" banner with auto-retry of the **socket only** |
 
 ## 7. Seed gap register (initial)
