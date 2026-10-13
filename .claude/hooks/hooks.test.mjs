@@ -232,6 +232,26 @@ describe("no-main-commit", () => {
     assert.equal(shell("no-main-commit", `cd ${onFeature} && git commit -m x`, onMain), ALLOWED);
   });
 
+  describe("skipping the pre-commit check, on any branch", () => {
+    cases("no-main-commit", onFeatureCase, BLOCKED, [
+      "git commit --no-verify -m x",
+      "git commit -n -m x",
+      "git commit -anm x",
+      "git merge --no-verify feat/x",
+      "LEFTHOOK=0 git commit -m x",
+      "export LEFTHOOK=0; git add . && git commit -m x",
+      "git -c core.hooksPath=/dev/null commit -m x",
+    ]);
+    cases("no-main-commit", onFeatureCase, ALLOWED, [
+      "git commit --amend --no-edit",
+      'git commit -m "-n is not a flag here"',
+      "git commit -m -n",
+      "git merge -n main",
+      "git log -n 5 && git commit -m x",
+      "LEFTHOOK=0 pnpm install",
+    ]);
+  });
+
   it("keeps a branch switch in mind across a cd inside the same repo", () => {
     const moved = "git checkout main && cd . && git commit -m x";
     assert.equal(shell("no-main-commit", moved, onFeature), BLOCKED);

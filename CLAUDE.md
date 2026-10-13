@@ -50,7 +50,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 | Hook | Blocks |
 |---|---|
 | `protect-intent` | Any edit under `apps/*/intent/`, and removing or moving an app folder |
-| `no-main-commit` | Committing on `main` (`commit`, `merge`, `cherry-pick`, `revert`, `am`, `rebase`, `pull`) or moving it (`reset`, `branch -f`, `update-ref`, a `:main` refspec) |
+| `no-main-commit` | Committing on `main` (`commit`, `merge`, `cherry-pick`, `revert`, `am`, `rebase`, `pull`) or moving it (`reset`, `branch -f`, `update-ref`, a `:main` refspec). On every branch: a commit that skips the pre-commit check (`--no-verify`, `-n`, `LEFTHOOK=0`, `core.hooksPath`) |
 | `pin-guard` | Changing or removing a pinned version, installing another one, `up --latest` with no package names, or editing `scripts/pinned-versions.json` |
 | `test-lock` | Changing test files on a `fix/*` branch after its first commit, except removing a `.fails` marker |
 
