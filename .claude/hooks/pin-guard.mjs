@@ -4,7 +4,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { block, commandOf, editedPath, findShellWrite, runGuard, splitCommands } from "./lib.mjs";
+import {
+  block,
+  commandOf,
+  editedPath,
+  findShellWrite,
+  runGuard,
+  splitCommands,
+  textAfter,
+} from "./lib.mjs";
 
 const PIN_FILE = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -22,20 +30,6 @@ const versionsIn = (text, name) =>
   [...text.matchAll(new RegExp(`"${escapeRegExp(name)}"\\s*:\\s*"([^"]*)"`, "g"))].map(
     (match) => match[1],
   );
-
-/** The file's text after the tool call is applied. */
-const textAfter = (input, before) => {
-  const { content, old_string, new_string, replace_all, edits } = input.tool_input ?? {};
-  if (typeof content === "string") return content;
-  const steps = edits ?? [{ old_string, new_string, replace_all }];
-  return steps.reduce(
-    (text, step) =>
-      step.replace_all
-        ? text.split(step.old_string ?? "").join(step.new_string ?? "")
-        : text.replace(step.old_string ?? "", () => step.new_string ?? ""),
-    before,
-  );
-};
 
 const PACKAGE_MANAGERS = new Set(["pnpm", "npm", "yarn", "bun"]);
 const ADDING = new Set(["add", "install", "i"]);

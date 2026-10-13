@@ -25,6 +25,7 @@ apps/tower-poc/src/web/
 ## Order of work
 
 1. Protocol messages (spec §3.2), plus a test asserting that no message can carry arbitrary bytes.
+   - Before `command` is accepted: the `/ws` origin check from spec D20, with tests for the service's own origin (accepted), the `next dev` origin in dev mode (accepted), another origin (refused) and a missing `Origin` header.
 2. `MockTowerAdapter`: scripted responses for connect, device info, calibration complete (after a delay), battery notify, and an injectable skull drop. Deterministic clock for tests.
 3. `InstrumentedAdapter`: tx/rx/lifecycle taps that emit to a temporary in-memory event list. The full DiagnosticsBus comes in M4.
 4. `TowerSession` state machine (spec §3.2 states). Manual reconnect only (D10), and calibration resets on disconnect.

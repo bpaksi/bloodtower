@@ -59,7 +59,7 @@ Hooks see Claude's edit tools exactly and read shell commands on a best-effort b
 | No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2 |
 | Pinned `ultimatedarktower` cannot be bumped silently | Pins live in `scripts/pinned-versions.json`. `scripts/check-pins.mjs` in `pnpm check` fails on any other version in a `package.json` or the lockfile. A PreToolUse hook warns earlier, on the edit or install command. |
 | No raw-bytes message type in a tower protocol | Protocol unit test plus a reviewer check |
-| Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits and shell changes to test files on `fix/*` branches after the first commit. |
+| Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits and shell changes to test files on `fix/*` branches after the first commit. Removing a `.fails` marker, and nothing else, stays allowed so the fix can be proven. |
 | Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/`. `scripts/check-imports.mjs` in `pnpm check` fails on a cross-app import; the reviewer checks too. |
 | Format/lint | PostToolUse hook runs `biome check --write` on edited files |
 | Secrets | `.env*` denied in permissions |

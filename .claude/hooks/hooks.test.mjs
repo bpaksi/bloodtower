@@ -259,6 +259,45 @@ describe("test-lock", () => {
     assert.equal(edit("test-lock", "a.test.ts", "a", "b", onFeature), ALLOWED);
   });
 
+  describe("removing a .fails marker", () => {
+    const body = 'it.fails("adds", () => {\n  expect(add(1, 1)).toBe(2);\n});\n';
+    const lockedEdit = (old_string, new_string) => {
+      writeFileSync(join(fixCommitted, "marked.test.ts"), body);
+      return edit("test-lock", "marked.test.ts", old_string, new_string, fixCommitted);
+    };
+
+    it("allows: it.fails( → it( and nothing else", () => {
+      assert.equal(lockedEdit('it.fails("adds"', 'it("adds"'), ALLOWED);
+    });
+    it("blocks: removing the marker and changing the expectation", () => {
+      const status = lockedEdit(body, 'it("adds", () => {\n  expect(add(1, 1)).toBe(3);\n});\n');
+      assert.equal(status, BLOCKED);
+    });
+    it("blocks: changing the expectation and keeping the marker", () => {
+      assert.equal(lockedEdit("toBe(2)", "toBe(3)"), BLOCKED);
+    });
+    it("blocks: adding a marker", () => {
+      writeFileSync(join(fixCommitted, "plain.test.ts"), 'it("adds", () => {});\n');
+      const status = edit(
+        "test-lock",
+        "plain.test.ts",
+        'it("adds"',
+        'it.fails("adds"',
+        fixCommitted,
+      );
+      assert.equal(status, BLOCKED);
+    });
+    it("blocks: a Write that replaces the file, even without the marker", () => {
+      writeFileSync(join(fixCommitted, "marked.test.ts"), body);
+      const status = run("test-lock", {
+        tool_name: "Write",
+        cwd: fixCommitted,
+        tool_input: { file_path: "marked.test.ts", content: 'it("adds", () => {});\n' },
+      });
+      assert.equal(status, BLOCKED);
+    });
+  });
+
   const locked = (hook, command) => shell(hook, command, fixCommitted);
   cases("test-lock", locked, BLOCKED, [
     "sed -i '' 's/toBe(1)/toBe(2)/' src/a.test.ts",

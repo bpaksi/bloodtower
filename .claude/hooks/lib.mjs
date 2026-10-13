@@ -43,6 +43,20 @@ export const commitsAheadOfMain = (cwd) =>
 export const editedPath = (input) =>
   input.tool_input?.file_path ?? input.tool_input?.notebook_path ?? "";
 
+/** The file's text after the tool call is applied. */
+export const textAfter = (input, before) => {
+  const { content, old_string, new_string, replace_all, edits } = input.tool_input ?? {};
+  if (typeof content === "string") return content;
+  const steps = edits ?? [{ old_string, new_string, replace_all }];
+  return steps.reduce(
+    (text, step) =>
+      step.replace_all
+        ? text.split(step.old_string ?? "").join(step.new_string ?? "")
+        : text.replace(step.old_string ?? "", () => step.new_string ?? ""),
+    before,
+  );
+};
+
 /**
  * Splits a shell command into simple commands at `;`, `&`, `|`, newlines and parentheses.
  * Each has its words (quotes removed) and its output redirect targets. Best effort, not a full parser.

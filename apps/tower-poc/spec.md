@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.1 (2026-10-13). 1.1 adds D19 (folder layout). |
+| Spec version | 1.2 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata` (version pinned in M1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -42,6 +42,7 @@ DarkTowerWeb is a local POC controller and investigation tool for the Return to 
 | D17 | Persistence: **native SQLite** (`better-sqlite3`) with **Drizzle** in the tower service | Browser local storage | The service owns the data |
 | D18 | Acceptance environments: **Mac Chrome, iPad Safari, phone browser**, all on the LAN | "documented target environment" | — |
 | D19 | All source lives under `apps/tower-poc/src/`: `web`, `server` and `protocols`. Each is its own package (`tower-poc-web`, `tower-poc-server`, `tower-poc-protocols`) with its files at the part root, with no nested `src/`. The folder is `server`; the prose still calls the running process the tower service. Playwright tests are a fourth part, `e2e` (`tower-poc-e2e`). | Spec 1.0 had `service/`, `web/`, `protocol/` directly under the app | Bob's layout choice, 2026-10-13 |
+| D20 | The service accepts a `/ws` connection only when its `Origin` is the service's own host and port, or the `next dev` origin in dev mode. A request with another origin is refused. This lands in M2, before the `command` message exists. | Not addressed | D6 leaves the LAN open with no token. Without this check, any web page open in a browser on the LAN could connect and, from M2, send tower commands. Devices on the LAN are unaffected, because they load the UI from the service. Raised in the M0 review; Bob's decision, 2026-10-13. |
 
 ## 3. Architecture
 
@@ -203,4 +204,4 @@ Everything in PRD non-goals, plus: auth/tokens, HTTPS, direct browser BLE, upstr
 1. **noble on macOS.** Node needs Bluetooth permission (granted to the terminal app), and macOS hides MAC addresses, so the device ID is a UUID. This is validated in the M1 spike.
 2. **Response correlation.** The tower may not acknowledge every command, so "confirmed" may often be `indeterminate` (GAP-DIAG-001).
 3. **Library churn.** Upstream releases frequently. The exact pin stays, and upgrades go through a new intent.
-4. **Open LAN.** Anyone on the Wi-Fi can drive the tower. This is accepted for the POC (D6).
+4. **Open LAN.** Anyone on the Wi-Fi can drive the tower. This is accepted for the POC (D6). D20 narrows it: a page from another site cannot connect, but a person on the LAN who opens the UI still can.
