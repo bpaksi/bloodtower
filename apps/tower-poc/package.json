@@ -1,0 +1,7 @@
+{
+  "name": "tower-poc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tower controller POC. Orchestrates its parts: service, web, protocol.",
+  "type": "module"
+}

@@ -10,7 +10,7 @@
 ```text
 # repo root (shared by all apps)
 package.json, pnpm-workspace.yaml (already exists), .npmrc, .nvmrc (22.13+), tsconfig.base.json
-biome.json (or eslint+prettier), lefthook.yml, .gitignore
+biome.json, lefthook.yml, .gitignore
 # this app
 apps/tower-poc/package.json   # name "tower-poc", private, orchestrates dev/start/build/e2e for its parts
 apps/tower-poc/service/   package.json, tsconfig.json, src/index.ts (HTTP + /ws hello)
