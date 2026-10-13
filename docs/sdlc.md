@@ -1,65 +1,109 @@
-# How DarkTowerWeb applies the AI-Native SDLC Playbook
+# How Dark Tower applies the AI-Native SDLC Playbook
 
 Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner, tech lead and release manager, and Claude Code (running locally on the Mac) plans, builds and self-verifies.
 
-## The loop
+The repo holds many apps. **Process, guardrails and Claude config are shared at the root; intent, spec and plans belong to each app.**
+
+## The loop (per app)
 
 ```text
-intent/NNNN-*.md ──accept──► spec.md ──approve──► plans/Mx-*.md ──approve──► branch per step
-     ▲                                                                          │
-     │                                                       checks + verifier + reviewer
-     │                                                                          ▼
- new gap / finding ◄──────────── merge to main (Bob) ◄──────── evidence pasted in commit/PR notes
+apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──approve──► apps/<app>/plans/Mx-*.md ──approve──► branch per step
+     ▲                                                                                                    │
+     │                                                                          checks + verifier + reviewer
+     │                                                                                                    ▼
+ new gap / finding ◄───────────────────── merge to main (Bob) ◄────────────────── evidence in commit notes
 ```
 
 | Playbook stage | What we do here | Artifact | Gate (Bob) |
 |---|---|---|---|
-| 1. Plan | New ideas and changes get an intent file in Bob's words | `intent/NNNN-*.md` | Accept intent |
-| 2. Design | Claude drafts or updates the spec from the accepted intent and flags conflicts | `spec.md` (with decision log) | Approve spec |
-| 3. Build | Plan mode first. One plan per milestone, and each step is one branch. Deviations update the plan **in the same commit**. | `plans/Mx-*.md`, `CLAUDE.md`, `.claude/skills`, `.claude/agents`, hooks | Approve plan |
-| 4. Test | Claude runs `pnpm check` and the verifier agent before handing over, and pastes the output | Vitest, Playwright (mock mode, 3 viewports), screenshots | Judge evidence |
-| 5. Deploy → **Merge** | No remote or CI yet. Lefthook runs checks on commit, and the `reviewer` subagent reviews the branch diff against REVIEW.md, spec.md and the plan. | `REVIEW.md`, `.claude/settings.json` hooks | Bob merges to `main`. Claude never commits to `main`. |
-| 6. Maintain | **Skipped for the POC** (no bands.yaml or scheduled scans). Findings from hardware testing become gap entries, or a new intent if large. | Gap register | — |
+| 1. Plan | New ideas and changes get an intent file in Bob's words | `apps/<app>/intent/NNNN-*.md` | Accept intent |
+| 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
+| 3. Build | Plan mode first. One plan per milestone, each step is one branch. Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan |
+| 4. Test | Claude runs `pnpm check` and the verifier agent before handing over, and pastes the output | Vitest, Playwright, screenshots | Judge evidence |
+| 5. Deploy → **Merge** | No remote or CI yet. Lefthook runs checks on commit; the `reviewer` subagent reviews the branch diff against `REVIEW.md` and the app's spec and plan. | `REVIEW.md`, `.claude/settings.json` hooks | Bob merges to `main`. Claude never commits to `main`. |
+| 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
+
+## Tiers
+
+Every app README states its tier. Explore-phase experiments shouldn't carry the full ceremony.
+
+| | Experiment | Full |
+|---|---|---|
+| Use for | Throwaway prototypes, quick mechanic tests | Anything touching hardware, reused later, or shipping (`tower-poc`, `game`) |
+| Intent | One short `intent/0001-*.md` | Yes, one per change |
+| Spec | Optional; README is enough | Required, with decision log |
+| Plans | Optional single `plans/plan.md` | One per milestone |
+| Shared hooks + `pnpm check` | Yes | Yes |
+| Reviewer agent | Optional | Every branch |
+| Branch per step | Yes | Yes |
+
+Promoting an Experiment to Full: write a spec from what was learned, then continue with milestone plans.
+
+## Naming
+
+| Thing | Convention |
+|---|---|
+| App folder | `apps/<kebab-name>/` |
+| App package | `<app>` (single package) or `<app>-<part>` (e.g. `tower-poc-service`) |
+| Shared package | `packages/<name>/`, package `@dark-tower/<name>` |
+| Branches | `<type>/<app>-<slug>` (e.g. `feat/tower-poc-lights`); repo-wide work uses `chore/<slug>` |
+| Commits | Conventional commits with the app as scope: `feat(tower-poc): …` |
 
 ## Guardrails (skills are advisory, hooks are deterministic)
 
 | Guardrail | Mechanism |
 |---|---|
-| No edits to `intent/**` by Claude (Bob's words) | PreToolUse hook → exit 2 |
+| No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook → exit 2 |
 | No direct commits on `main` | PreToolUse hook on `git commit` while on `main` → exit 2 |
-| Pinned library cannot be bumped silently | PreToolUse hook blocks edits to the `ultimatedarktower` version line in any package.json |
-| No raw-bytes message type in protocol | Protocol unit test (deterministic) plus a reviewer check |
+| Pinned `ultimatedarktower` cannot be bumped silently | PreToolUse hook blocks edits to its version line in any `package.json` |
+| No raw-bytes message type in a tower protocol | Protocol unit test plus a reviewer check |
 | Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits to `*.test.ts` on `fix/*` branches after the first commit. |
-| Format/lint | PostToolUse hook runs `pnpm biome check --write` (or eslint/prettier) on edited files |
+| Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/` (lint rule + reviewer check) |
+| Format/lint | PostToolUse hook formats edited files |
 | Secrets | `.env*` denied in permissions |
 
-## Claude config to create in M0
+## Claude config (root, created in tower-poc M0, used by every app)
 
 ```text
-CLAUDE.md                       # < 1 page: commands, conventions, architecture map, known mistakes
-REVIEW.md                       # review passes: bugs, safety (physical actions), spec/plan compliance; Important vs Nit; nit cap 5
+CLAUDE.md                       # < 1 page: repo map, commands, conventions, known mistakes
+apps/<app>/CLAUDE.md            # optional, app-specific notes only (Claude loads it when working in that folder)
+REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; Important vs Nit; nit cap 5
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.sh
-.claude/agents/verifier.md      # runs pnpm check + Playwright mock suite + screenshots; reports, never fixes
+.claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes
 .claude/agents/reviewer.md      # read-only diff review per REVIEW.md
-.claude/skills/tower-capability/SKILL.md   # how to add a capability: inventory → protocol → executor → UI → test → gap
+.claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
+.claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
 .claude/skills/bugfix/SKILL.md             # failing test first
-.claude/skills/gap-entry/SKILL.md          # how to write a gap with evidence + confidence
+.claude/skills/gap-entry/SKILL.md          # gap with evidence + confidence
 ```
 
-## Single-command checks (listed in CLAUDE.md with healthy output)
+## Commands
 
-| Command | Runs |
+| From | Command | Runs |
+|---|---|---|
+| root | `pnpm check` | typecheck, lint, unit tests across every app and package |
+| root | `pnpm build` | builds every app |
+| root | `pnpm -F <app> <script>` | one app's script (same as running it inside the app folder) |
+| app | `pnpm dev` / `pnpm start` / `pnpm e2e` | defined per app in its README |
+
+## App README template
+
+```markdown
+# <Title> (`<folder>`)
+
+| | |
 |---|---|
-| `pnpm check` | typecheck, lint, unit tests (all workspaces), and the inventory coverage test |
-| `pnpm e2e` | Playwright against `pnpm start` in mock mode at phone, iPad and desktop viewports |
-| `pnpm build` | protocol → web export → tower-service bundle |
-| `pnpm start` | one-process run (`MOCK=1` for mock mode) |
-| `pnpm dev` | tower-service (tsx watch) + next dev, one command |
+| Purpose | |
+| Phase | Explore / Design / Build |
+| SDLC tier | Experiment / Full |
+| Status | |
+| Disposable? | |
+```
 
 ## Metrics we'll actually glance at
 
 - First-pass `pnpm check` success per step (leading)
 - Steps whose plan had to be rewritten mid-way (leading)
-- Hardware verification pass rate per capability (lagging)
-- Reviewer "Important" findings per merge (lagging). Recurring ones go into CLAUDE.md as known mistakes.
+- Hardware verification pass rate per capability (lagging, tower apps)
+- Reviewer "Important" findings per merge (lagging). Recurring ones go into `CLAUDE.md` as known mistakes.

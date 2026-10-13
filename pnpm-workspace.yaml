@@ -1,0 +1,7 @@
+# Every website lives in apps/<name>/. An app can be a single package
+# (apps/<name>/package.json) or several parts (apps/<name>/<part>/package.json).
+# Shared code moves to packages/ once more than one app needs it.
+packages:
+  - "apps/*"
+  - "apps/*/*"
+  - "packages/*"

@@ -1,16 +1,46 @@
-# DarkTowerWeb
+# Dark Tower
 
-A local proof-of-concept controller and investigation tool for the *Return to Dark Tower* tower. A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower](https://github.com/ChessMess/UltimateDarkTower)). Any browser on the LAN (Mac, iPad, phone) controls it over WebSocket.
+Designing a new game around the *Return to Dark Tower* tower. Unofficial and fan-made; *Return to Dark Tower* is © Restoration Games.
 
-Unofficial and fan-made. *Return to Dark Tower* is © Restoration Games.
+The project produces many small websites over its life. Each one lives in its own folder under `apps/` and moves through its own intent → spec → plan loop (see [docs/sdlc.md](docs/sdlc.md)).
 
-## Where things are
+## Apps
 
-| Path | What |
-|---|---|
-| `intent/` | Ideas in Bob's words (the original PRD is `0001`) |
-| `spec.md` | Accepted design, including the decision log |
-| `plans/` | One plan per milestone (M0–M5) |
-| `docs/sdlc.md` | How this repo applies the AI-Native SDLC Playbook |
+| App | Folder | Phase | Status | Disposable? |
+|---|---|---|---|---|
+| Tower controller POC | [apps/tower-poc](apps/tower-poc/) | Explore | Spec v1 awaiting approval | Yes, unless promoted |
+| New game test | [apps/game-test](apps/game-test/) | Explore → Design | Not started | Yes |
+| Final game | [apps/game](apps/game/) | Build | Not started | No |
 
-Status: **spec v1 awaiting approval**. Code starts at `plans/M0-scaffolding.md`.
+## Layout
+
+```text
+dark-tower/
+├── apps/                  # every website, one folder each
+│   ├── tower-poc/         # web controller POC (Mac service + Next.js UI)
+│   ├── game-test/         # prototype(s) of new game mechanics
+│   └── game/              # the final game
+├── packages/              # shared code, only once 2+ apps need it
+├── research/              # notes, findings, brainstorms — no code
+│   ├── tower/             # hardware, UltimateDarkTower API, Bluetooth findings, spikes
+│   ├── game-design/       # mechanics, themes, rules ideas
+│   ├── decisions/         # cross-app decision records (NNNN-*.md)
+│   └── return-to-dark-tower/  # reference material on the original game
+├── docs/sdlc.md           # how every app runs the AI-native SDLC loop
+└── pnpm-workspace.yaml
+```
+
+## Adding a new app
+
+1. `mkdir apps/<name>` and copy the README template from [docs/sdlc.md](docs/sdlc.md#app-readme-template).
+2. Write `apps/<name>/intent/0001-<name>.md` in your own words.
+3. Pick the app's tier (Experiment or Full) in its README, then follow the loop.
+4. Add a row to the Apps table above.
+
+## Commands (once M0 scaffolding lands)
+
+| From | Command | Does |
+|---|---|---|
+| root | `pnpm check` | typecheck, lint and unit tests for every app and package |
+| root | `pnpm build` | builds every app |
+| root | `pnpm -F <app> dev` | runs one app in dev (same as `pnpm dev` inside its folder) |

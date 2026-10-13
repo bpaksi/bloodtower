@@ -6,8 +6,8 @@
 ## Files that change
 
 ```text
-packages/protocol/src/{envelope,messages,connection,command,state}.ts (+ tests)
-apps/tower-service/src/
+apps/tower-poc/protocol/src/{envelope,messages,connection,command,state}.ts (+ tests)
+apps/tower-poc/service/src/
   server.ts            # HTTP static + ws upgrade
   clientHub.ts         # client registry, broadcast, clientId/label
   towerSession.ts      # owns UltimateDarkTower instance, lifecycle state machine, calibration state
@@ -16,7 +16,7 @@ apps/tower-service/src/
   stateStore.ts        # value+origin+freshness wrapper, snapshot to db
   db/{schema.ts,client.ts,migrations/}   # better-sqlite3 + Drizzle: settings, state_snapshots
   settings.ts
-apps/web/
+apps/tower-poc/web/
   lib/ws.ts (socket with service-reconnect), lib/store.ts (Zustand), lib/useCommand.ts
   components/ConnectionHeader.tsx, MockBanner.tsx, RestorePrompt.tsx
   app/(dashboard)/page.tsx (connect/disconnect/reconnect/calibrate + play test sound)
