@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.3 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). |
+| Spec version | 1.4 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0` (exact, set in M1 step 1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -43,6 +43,8 @@ DarkTowerWeb is a local POC controller and investigation tool for the Return to 
 | D18 | Acceptance environments: **Mac Chrome, iPad Safari, phone browser**, all on the LAN | "documented target environment" | — |
 | D19 | All source lives under `apps/tower-poc/src/`: `web`, `server` and `protocols`. Each is its own package (`tower-poc-web`, `tower-poc-server`, `tower-poc-protocols`) with its files at the part root, with no nested `src/`. The folder is `server`; the prose still calls the running process the tower service. Playwright tests are a fourth part, `e2e` (`tower-poc-e2e`). | Spec 1.0 had `service/`, `web/`, `protocol/` directly under the app | Bob's layout choice, 2026-10-13 |
 | D20 | The service accepts a `/ws` connection only when its `Origin` is the service's own host and port, or the `next dev` origin in dev mode. A request with another origin is refused. A request with no `Origin` header is accepted: browsers always send one on a WebSocket upgrade, so a missing header means a script or a test, not a web page. This lands in M2, before the `command` message exists. | Not addressed | D6 leaves the LAN open with no token. Without this check, any web page open in a browser on the LAN could connect and, from M2, send tower commands. Devices on the LAN are unaffected, because they load the UI from the service. Raised in the M0 review; Bob's decision, 2026-10-13. |
+| D21 | The service turns the library's automatic re-send off: it sets `retrySendCommandMax = 0` straight after constructing the tower, and a test asserts it. | Not addressed | The library re-sends a command whose write failed, up to five times by default. Nothing physical is retried automatically, and a failed write does not prove the first packet never arrived. Found in M1 step 2; Bob's decision, 2026-10-13. |
+| D22 | A command that arrives while the tower is calibrating is **rejected**. The executor checks `performingCalibration` before calling the library and ends the command's lifecycle as `rejected` with the reason. | Not addressed | The library drops such a command and still resolves its promise, so without the check the UI would show a command as sent that never was. Found in M1 step 2; Bob's decision, 2026-10-13. |
 
 ## 3. Architecture
 

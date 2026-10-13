@@ -17,9 +17,9 @@ Nothing here was checked against a real tower. Statements about tower behaviour 
 
 ## The public surface
 
-Everything public on an `UltimateDarkTower` instance at 7.1.2, from the type file. **New** means it is not in the spec §4 table.
+Everything public on an `UltimateDarkTower` instance at 7.1.2, from the type file: 73 members, made up of 46 methods, 7 callback properties, 16 accessors and 4 public fields. (An earlier version of this note said 53 methods; that was a miscount, found in review.) **New** means it is not in the spec §4 table.
 
-### Methods (53)
+### Methods (46)
 
 | Group | Methods |
 |---|---|
@@ -63,13 +63,17 @@ The coverage test in step 4 has to account for these as well as the methods. `Ob
 
 Our rule is that nothing physical is retried automatically (`CLAUDE.md`, tower safety; spec §6, "Command timeout … no retry"). The retry is of a write that failed, not of a command that timed out, so in most cases the first packet never arrived. That is still an automatic re-send of a physical command, and we cannot prove the first one did not arrive.
 
-**Proposal for Bob:** the service sets `tower.retrySendCommandMax = 0` straight after constructing the tower, a test asserts it, and the spec decision log records it. This is for M2 step 1, where the tower object is first created.
+The counter is shared and resets on any success, so the limit is five consecutive failures, not five per command. The 30-second queue timeout is separate: it rejects the command and moves on with no retry.
+
+**Decided by Bob, 2026-10-13 (spec D21):** the service sets `tower.retrySendCommandMax = 0` straight after constructing the tower, and a test asserts it. The setter pushes the value through to the command layer, so setting it after construction works.
 
 ### 2. A command sent during calibration is dropped and still resolves
 
 While `performingCalibration` is true, every other command "resolves immediately without sending anything" and logs a warning. A caller that only awaits the promise sees success.
 
-For M2: the executor must check `performingCalibration` before calling the library and report such a command as rejected, not as succeeded. With diagnostics on, the library also records a `cmd_ignored_calibration` event.
+The same guard is on the public `sendTowerCommandDirect`. Two more calls resolve without doing anything: `calibrate()` while a calibration is already running, and `playSound` with an index outside the catalog, which logs an error and returns. For the sound index, our own validation in the inventory is the only guard.
+
+**Decided by Bob, 2026-10-13 (spec D22):** the executor checks `performingCalibration` before calling the library and reports such a command as rejected, not as succeeded. With diagnostics on, the library also records a `cmd_ignored_calibration` event.
 
 ### 3. "Sound finished" does not exist
 
@@ -130,7 +134,7 @@ Changes proposed for `apps/tower-poc/spec.md`, to be made when the inventory lan
 
 1. §4 table: add `setLED`, `playSoundStateful`, `rotateDrumStateful`, `configureConnectionMonitoring`, `configureBatteryHeartbeatMonitoring`, and a row for the read-only status and battery properties.
 2. §7: reword GAP-HW-003; add gaps for `doorReset`, `unjamDrums` and `overwriteDrumStates`; add a gap for "no audio completion signal"; note that the documents lean against D9 under GAP-HW-001.
-3. Decision log: the retry setting (finding 1) and the calibration guard (finding 2), once Bob agrees.
+3. Decision log: the retry setting (finding 1) and the calibration guard (finding 2). Done as D21 and D22 in spec 1.4.
 4. §8: "no message type can carry raw bytes to the tower".
 
 ## Not checked

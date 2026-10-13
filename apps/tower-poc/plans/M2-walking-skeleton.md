@@ -28,8 +28,8 @@ apps/tower-poc/src/web/
    - Before `command` is accepted: the `/ws` origin check from spec D20, with tests for the service's own origin (accepted), the `next dev` origin in dev mode (accepted), another origin (refused) and a missing `Origin` header (accepted). The service binds `0.0.0.0`, so "its own origin" is checked against the request's `Host` header, not a fixed value.
 2. `MockTowerAdapter`: scripted responses for connect, device info, calibration complete (after a delay), battery notify, and an injectable skull drop. Deterministic clock for tests.
 3. `InstrumentedAdapter`: tx/rx/lifecycle taps that emit to a temporary in-memory event list. The full DiagnosticsBus comes in M4.
-4. `TowerSession` state machine (spec §3.2 states). Manual reconnect only (D10), and calibration resets on disconnect.
-5. `CommandExecutor` with lifecycle, lanes, per-capability timeouts from the inventory, and no auto-retry.
+4. `TowerSession` state machine (spec §3.2 states). It sets `retrySendCommandMax = 0` on the tower object as soon as it is constructed, with a test (D21). Manual reconnect only (D10), and calibration resets on disconnect.
+5. `CommandExecutor` with lifecycle, lanes, per-capability timeouts from the inventory, and no auto-retry. It validates `params` with the inventory schema and passes the parsed output to the library, never the input. A command that arrives while `performingCalibration` is true is rejected before the library is called, with a test (D22).
 6. `StateStore` plus snapshot and the restore prompt flow (D11).
 7. `ClientHub` broadcast. `welcome` carries versions, inventory and pendingRestore.
 8. Web: socket client, store, header (tower, calibration, service and mock states), and Dashboard controls.
