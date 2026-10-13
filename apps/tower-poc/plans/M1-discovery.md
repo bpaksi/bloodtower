@@ -1,6 +1,6 @@
 # M1 — Integration discovery
 
-**Status:** approved by Bob, 2026-10-13. Step 1 is built on `feat/tower-poc-pin-versions`.
+**Status:** approved by Bob, 2026-10-13. Step 1 is built on `feat/tower-poc-pin-versions` and step 2 on `docs/tower-poc-api-surface`.
 
 **Goal:** know exactly which controls and diagnostics are possible on the real tower from Node on Bob's Mac.
 **Exit condition (PRD):** pinned versions, a complete inventory with coverage test, seeded gaps, a hardware spike result, and an observability assessment.
@@ -25,6 +25,9 @@ research/tower/observability.md                  # what raw traffic is visible a
    - pnpm did not run the install scripts of `@stoprocent/noble`, `@stoprocent/bluetooth-hci-socket`, `usb` and `@serialport/bindings-cpp`, and none is approved. noble ships a prebuilt `darwin-x64+arm64` binary, so macOS needs no build; the other three serve Linux and Windows. Whether noble loads and sees the tower is the step 5 spike.
    - The npm package holds only `README.md` and `CHANGELOG.md`. `API_REFERENCE.md`, `BLE_DIAGNOSTICS.md` and `TOWER_TECH_NOTES.md` for step 2 have to come from the library's source repo.
 2. Read the library's `API_REFERENCE.md`, `BLE_DIAGNOSTICS.md` and `TOWER_TECH_NOTES.md`, and diff them against the public surface listed in spec §4.
+   - Result: `research/tower/api-surface-7.1.2.md`. The documents were read from the library's repo at tag `ultimatedarktower@7.1.2`; `API_REFERENCE.md` is only an index there, so the `api/` pages it points to were read instead. `BLE_DIAGNOSTICS.md` and the packet layout in `TOWER_TECH_NOTES.md` were read by heading only and are left for step 7.
+   - Five methods and about twenty properties are not in the spec §4 table. The spec changes are listed in the note and are made with the inventory in step 3.
+   - Two findings need Bob's decision before M2: the library retries a failed command write up to five times by default, and a command sent during calibration is dropped but still resolves.
 3. Write `inventory.ts` (Zod param schemas from the library's types: `TowerSide`, `TowerLevels`, `SealIdentifier`, `Lights`, `LIGHT_EFFECTS`, sound index range).
 4. Coverage test: enumerate `Object.getOwnPropertyNames(UltimateDarkTower.prototype)` plus instance callbacks, and fail on any that are unmapped and not excluded.
 5. **Hardware spike, run by Bob on the Mac with the tower nearby.** `pnpm -F tower-poc-server spike` runs these steps through `InstrumentedAdapter(NodeBluetoothAdapter)`:
