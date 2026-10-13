@@ -2,13 +2,13 @@
   "name": "tower-poc",
   "version": "0.0.0",
   "private": true,
-  "description": "Tower controller POC. Orchestrates its parts under src/: web, server, protocols.",
+  "description": "Tower controller POC. Orchestrates its parts under src/: web, server, protocols, e2e.",
   "type": "module",
   "scripts": {
     "dev": "concurrently --kill-others --names server,web --prefix-colors blue,green \"pnpm -F tower-poc-server dev\" \"NEXT_PUBLIC_WS_URL=ws://localhost:4747/ws pnpm -F tower-poc-web dev\"",
     "build": "pnpm -F tower-poc-web build",
     "start": "pnpm -F tower-poc-server start",
-    "e2e": "echo 'Playwright arrives in M0 step 8.' && exit 1"
+    "e2e": "pnpm -F tower-poc-e2e e2e"
   },
   "devDependencies": {
     "concurrently": "10.0.6"

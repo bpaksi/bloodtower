@@ -18,6 +18,7 @@ A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower]
 | `spec.md` | Accepted design, including the decision log (D1–D19) |
 | `plans/` | One plan per milestone (M0–M5) |
 | `src/web/`, `src/server/`, `src/protocols/` | Code parts, each its own package, created in M0 |
+| `src/e2e/` | Playwright tests: phone and iPad on WebKit, desktop on Chromium |
 | `docs/` | App docs: capabilities, acceptance, troubleshooting (created M1–M5) |
 | `../../research/tower/` | Spike and observability write-ups shared with other apps |
 
@@ -26,6 +27,7 @@ A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower]
 ```bash
 cd apps/tower-poc
 pnpm dev      # service (tsx watch) + next dev
-pnpm start    # one process, one port (MOCK=1 for mock mode)
-pnpm e2e      # Playwright, mock mode, 3 viewports
+pnpm build    # web static export
+pnpm start    # one process, one port (MOCK=1 for mock mode); run pnpm build first
+pnpm e2e      # Playwright, mock mode, 3 viewports (first time: pnpm -F tower-poc-e2e e2e:install)
 ```

@@ -41,7 +41,7 @@ DarkTowerWeb is a local POC controller and investigation tool for the Return to 
 | D16 | The library's own diagnostics recorder and logger are **ingested into our timeline** with source `library`. Export embeds the library's `exportDiagnosticsJSON()` output. | — | One timeline |
 | D17 | Persistence: **native SQLite** (`better-sqlite3`) with **Drizzle** in the tower service | Browser local storage | The service owns the data |
 | D18 | Acceptance environments: **Mac Chrome, iPad Safari, phone browser**, all on the LAN | "documented target environment" | — |
-| D19 | All source lives under `apps/tower-poc/src/`: `web`, `server` and `protocols`. Each is its own package (`tower-poc-web`, `tower-poc-server`, `tower-poc-protocols`) with its files at the part root, with no nested `src/`. The folder is `server`; the prose still calls the running process the tower service. | Spec 1.0 had `service/`, `web/`, `protocol/` directly under the app | Bob's layout choice, 2026-10-13 |
+| D19 | All source lives under `apps/tower-poc/src/`: `web`, `server` and `protocols`. Each is its own package (`tower-poc-web`, `tower-poc-server`, `tower-poc-protocols`) with its files at the part root, with no nested `src/`. The folder is `server`; the prose still calls the running process the tower service. Playwright tests are a fourth part, `e2e` (`tower-poc-e2e`). | Spec 1.0 had `service/`, `web/`, `protocol/` directly under the app | Bob's layout choice, 2026-10-13 |
 
 ## 3. Architecture
 

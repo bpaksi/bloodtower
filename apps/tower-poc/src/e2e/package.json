@@ -1,0 +1,16 @@
+{
+  "name": "tower-poc-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Playwright end-to-end tests. Builds the web export and runs it through the tower server.",
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium webkit",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/node": "22.20.5"
+  }
+}

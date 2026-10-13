@@ -7,7 +7,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 | Path | What |
 |---|---|
 | `apps/<app>/` | One app: `intent/` (Bob's words), `spec.md`, `plans/Mx-*.md`, `README.md` |
-| `apps/<app>/src/<part>/` | Code parts, each its own package (`tower-poc`: `web`, `server`, `protocols`) |
+| `apps/<app>/src/<part>/` | Code parts, each its own package (`tower-poc`: `web`, `server`, `protocols`, `e2e`) |
 | `packages/` | Shared code, only once a second app needs it |
 | `research/` | Notes and findings, no code |
 | `.claude/` | Hooks, agents and skills shared by every app |
@@ -20,7 +20,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 | root | `pnpm build` | Builds every app |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |
-| `apps/tower-poc` | `pnpm e2e` | Playwright, mock mode, three viewports |
+| `apps/tower-poc` | `pnpm e2e` | Builds, then runs Playwright on port 4748 at three viewports |
 
 ## How work flows
 
