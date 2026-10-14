@@ -184,3 +184,4 @@ Data model in [statistics.md](statistics.md).
 - Private moments go only to devices holding that hunter, never to the Dashboard. A device holding several hunters shows each hunter's private moment labeled with that hunter's name.
 - Holdings can be changed from the Dashboard at any time. If a change would leave a hunter unheld, the game pauses until that hunter is held again.
 - The stats record devices and holdings for each game.
+- Disconnect rule (Bob, 2026-10-14): if the only device holding a hunter disconnects, play pauses at once, the same as an unheld hunter, and resumes when a device holds that hunter again.

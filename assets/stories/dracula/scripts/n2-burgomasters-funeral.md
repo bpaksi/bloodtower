@@ -22,6 +22,100 @@
 [sfx: a fly, buzzing; then several]
 > **Emeric:** It's a wake. You don't nail it at a — oh. Oh, you nail it at a wake *here*.
 
+## Private investigation round (engine rule E17; plays after `.03`, before `.lid-choice`)
+
+Each hunter picks one action on their own iPad from the pick cards below (there are always more cards than hunters, and each card can be taken by one hunter only). Each finding is a private moment sent only to `ipad:<hunter>` for whoever picked that card; nobody else sees it until it is shared aloud at `.investigate.share`.
+
+**n2-burgomasters-funeral.investigate** [still]
+[music: plainchant, fading] [sfx: a single candle guttering] [tower: heartbeat]
+> **Narrator:** The mourners keep their vigil. You have one candle's length, no more, before something in this church happens. Use it.
+
+**n2-burgomasters-funeral.investigate.examine-body** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+Card 1: **Examine Dorka’s body**. Look closely at the girl in the wedding dress.
+
+**n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes** [still] `ipad:agnes` — agnes picked examine-body. Proposed advantage: **Ready Stake** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Agnes (thought):** Two bites. One old, one made after her heart stopped. Mother Ursula had the same pair, the morning she sat up. He sends the dead to fetch the living.
+
+**n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas** [still] `ipad:tomas` — tomas picked examine-body. Proposed advantage: **Ready Stake** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Tomas (thought):** Two wounds, lass. One she took alive. The other's cold work, done after. Like a sentry posted on a corpse. He's sending her somewhere.
+
+**n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren** [still] `ipad:wren` — wren picked examine-body. Proposed advantage: **Ready Stake** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Wren (thought):** Two bites. Second one's after death; no bruising. Mother taught me to read a body before you box it. This one's been sent.
+
+**n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric** [still] `ipad:emeric` — emeric picked examine-body. Proposed advantage: **Ready Stake** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Emeric (thought):** Two punctures, the second post-mortem. Gerhardt's treatise, chapter nine: "the sending." She isn't a victim. She's a messenger. Keep a stake ready.
+
+**n2-burgomasters-funeral.investigate.question-mother** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+Card 2: **Question Dorka’s mother**. Sit with the mother. Ask about last night.
+
+**n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes** [still] `ipad:agnes` — agnes picked question-mother. Story flag `mother-warned`. Proposed: the mother bars the window, so one fewer foe joins the fight (Gamewright to rule; maps to RtDT battle advantages.)
+> **Agnes (thought):** Her mother heard Dorka singing under the window last night. She opened it to let her daughter in. I told her what I should have told my sisters: bar it. She has.
+
+**n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas** [still] `ipad:tomas` — tomas picked question-mother. Story flag `mother-warned`. Proposed: the mother bars the window, so one fewer foe joins the fight (Gamewright to rule; maps to RtDT battle advantages.)
+> **Tomas (thought):** The mother heard her girl singing under the window, and left it open for her. I'd have done the same for Marta. I told her to bar it anyway. She did.
+
+**n2-burgomasters-funeral.investigate.question-mother.singing.private.wren** [still] `ipad:wren` — wren picked question-mother. Story flag `mother-warned`. Proposed: the mother bars the window, so one fewer foe joins the fight (Gamewright to rule; maps to RtDT battle advantages.)
+> **Wren (thought):** Mother heard Dorka singing under the window last night. Left it open. My mother would've nailed it shut. I told her to. She's barring it now.
+
+**n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric** [still] `ipad:emeric` — emeric picked question-mother. Story flag `mother-warned`. Proposed: the mother bars the window, so one fewer foe joins the fight (Gamewright to rule; maps to RtDT battle advantages.)
+> **Emeric (thought):** She heard her daughter singing outside the window, a wedding song, and she left the window open. Folklore, page forty: they sing to be let in. I asked her to bar it. She's doing it.
+
+**n2-burgomasters-funeral.investigate.anton-coat** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+Card 3: **Search Anton’s coat**. Go through the dead burgomaster’s pockets.
+
+**n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes** [still] `ipad:agnes` — agnes picked anton-coat. Gain: one holy water, carried by the hunter who picked this. Clue: "the lady's rooms".
+> **Agnes (thought):** In Anton's coat, a flask of holy water he never had the chance to use, and a scrap in his ledger hand: "the lady's rooms." He knew where he'd take her.
+
+**n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas** [still] `ipad:tomas` — tomas picked anton-coat. Gain: one holy water, carried by the hunter who picked this. Clue: "the lady's rooms".
+> **Tomas (thought):** Coat's heavy on one side: a flask of holy water, stopper sealed. And a note, the burgomaster's hand: "the lady's rooms." Castle talk. I know that wing.
+
+**n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren** [still] `ipad:wren` — wren picked anton-coat. Gain: one holy water, carried by the hunter who picked this. Clue: "the lady's rooms".
+> **Wren (thought):** Holy water in his coat. Full. Didn't get to use it. Scrap of paper too: "the lady's rooms." Keeping both.
+
+**n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric** [still] `ipad:emeric` — emeric picked anton-coat. Gain: one holy water, carried by the hunter who picked this. Clue: "the lady's rooms".
+> **Emeric (thought):** A flask of holy water, unopened, and a scrap: "the lady's rooms." A burgomaster's note, a ledger-keeper's hand. He was trying to work out where she'd be held.
+
+**n2-burgomasters-funeral.investigate.pray-over-coffins** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+Card 4: **Pray over the coffins**. Kneel between the two coffins and pray.
+
+**n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes** [still] `ipad:agnes` — agnes picked pray-over-coffins. Proposed advantage: **Consecrated Ground** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Agnes (thought):** I pray for Anton, and then for her, and then, God help me, for him, the way I did in the chapel. The prayer holds. Every candle leans away from Dorka's coffin.
+
+**n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas** [still] `ipad:tomas` — tomas picked pray-over-coffins. Proposed advantage: **Consecrated Ground** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Tomas (thought):** I'm no praying man. I say the guard's words for the dead, the short ones. It holds. The candlelight bends away from the girl's coffin, like it won't touch her.
+
+**n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren** [still] `ipad:wren` — wren picked pray-over-coffins. Proposed advantage: **Consecrated Ground** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Wren (thought):** Said the words Mother said over every grave-row. They hold. The light leans off Dorka's coffin. This floor's ours now.
+
+**n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric** [still] `ipad:emeric` — emeric picked pray-over-coffins. Proposed advantage: **Consecrated Ground** (Gamewright to rule; maps to RtDT battle advantages.)
+> **Emeric (thought):** I don't know the proper words, so I read the burial office from Oskar's book, very fast. The prayer holds. The candle flames lean away from Dorka's coffin. Consecrated. Ground. Noted.
+
+**n2-burgomasters-funeral.investigate.follow-the-mourner** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+Card 5: **Follow the cloaked mourner (risky)**. A mourner slips out. Go after them alone.
+
+**n2-burgomasters-funeral.investigate.follow-the-mourner.cue** [still] — plays on the dashboard once all picks are locked, if anyone picked this card (no voice). [tower: seal-sequence] [sfx: a door slamming in the wind] (screen fallback if no tower: the dashboard shows the church door swinging shut and one empty chair)
+[sfx: a door closing softly]
+
+**n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes** [still] `ipad:agnes` — agnes picked follow-the-mourner. **Cost (Gamewright), the picker chooses:** take 1 corruption (not offered if agnes is at 2: instant-loss guard), or miss the fight (absent from `.04`–`.07`; the scene's existing `~no-agnes` variants apply). Reward: proposed advantage **Forewarned** (Gamewright to rule; maps to RtDT battle advantages.), plus an early hint toward the lady's rooms.
+> **Agnes (thought):** I follow the cloaked mourner into the churchyard. A man in castle grey lays a pressed violet on Anton's grave and says to no one: "She still refuses." I know that bow. The traveler's servant bowed like that at Saint Ysolde.
+
+**n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas** [still] `ipad:tomas` — tomas picked follow-the-mourner. **Cost (Gamewright), the picker chooses:** take 1 corruption (not offered if tomas is at 2: instant-loss guard), or miss the fight (absent from `.04`–`.07`; the scene's existing `~no-tomas` variants apply). Reward: proposed advantage **Forewarned** (Gamewright to rule; maps to RtDT battle advantages.), plus an early hint toward the lady's rooms.
+> **Tomas (thought):** I tail the cloak to the churchyard, quiet, the way the guard taught us. Castle servant. He lays a violet on Anton's grave and says: "She still refuses." Then he goes up the hill road, toward the lady's rooms.
+
+**n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren** [still] `ipad:wren` — wren picked follow-the-mourner. **Cost (Gamewright), the picker chooses:** take 1 corruption (not offered if wren is at 2: instant-loss guard), or miss the fight (absent from `.04`–`.07`; the scene's existing `~no-wren` variants apply). Reward: proposed advantage **Forewarned** (Gamewright to rule; maps to RtDT battle advantages.), plus an early hint toward the lady's rooms.
+> **Wren (thought):** Followed the cloak out. Castle servant. Put a violet on Anton's grave. Said: "She still refuses." Went up toward the east wing. The lady's rooms.
+
+**n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric** [still] `ipad:emeric` — emeric picked follow-the-mourner. **Cost (Gamewright), the picker chooses:** take 1 corruption (not offered if emeric is at 2: instant-loss guard), or miss the fight (absent from `.04`–`.07`; the scene's existing `~no-emeric` variants apply). Reward: proposed advantage **Forewarned** (Gamewright to rule; maps to RtDT battle advantages.), plus an early hint toward the lady's rooms.
+> **Emeric (thought):** I followed. I don't know why I followed. A castle servant left a pressed violet on Anton's grave and said, "She still refuses." Then he walked up toward the east wing, where Gerhardt marked "the lady's rooms."
+
+**n2-burgomasters-funeral.investigate.share** [still]
+[sfx: the candle burns down to the socket]
+> **Narrator:** The candle is out. Share what you found, or keep it. Then look at the second coffin.
+
+**Absent hunters (`~no-<hunter>`):** a hunter who is not at the wake gets no pick and no finding; their findings are simply not sent. The round needs no other variant. A hunter who chose "miss the fight" after following the mourner is absent from `.04`–`.07` only and is back for `.08`.
+
+## Moments (continued)
+
 **n2-burgomasters-funeral.lid-choice** [still] — event moment, plays after `.03` and before `.04`. A Dashboard choice for the whole party: **Nail the lid** (spend one stake) or **Keep the stake and watch**. Effect on the fight is Gamewright's call (proposed: nailing weakens Dorka; watching keeps the stake but she rises at full strength). Either way she rises and the "lady's rooms" line still plays.
 [sfx: a fly, then silence] [tower: heartbeat]
 > **Narrator:** The flies have gone quiet. Every candle leans toward the second coffin. There is time, just, to put a stake through a girl in her wedding dress in front of her mother. Or there is time to wait and be sure.

@@ -101,3 +101,29 @@ See [open-questions.md](open-questions.md), especially: pack reach into code, sh
 - Scene costs, choices and rewards apply only to present hunters (e.g. "one hunter takes a corruption" picks from those present). Story items held by the party count only if a present hunter carries them.
 - Private moments for a scene go only to present hunters. The Dashboard still plays the scene for the whole table.
 - Stats log presence for each scene.
+
+- E15a. Phase-level moments (dusk, night start, dawn, and anything tagged `scope: global`) are exempt from presence. Their private lines go to every holder of the named hunter, wherever that hunter is on the board.
+
+## E16 Tower is never idle (Bob, 2026-10-14)
+The tower should nearly always be doing something. The engine runs a three-layer cue stack:
+1. **Ambient bed (always on):** a light pattern for each phase or mood (e.g. a slow breathe at dusk, a dim flicker at night), declared per story. Lights only. No drum moves (drums carry game meaning) and no looping sound (the tower can't loop).
+2. **Ambient accents:** occasional one-shot sounds or light pulses at randomized intervals (e.g. every 20–60 s, declared per story). They're suppressed during speech, choices and calibration.
+3. **Scene cues:** these override layers 1 and 2 while they run, then hand back to the ambient bed automatically.
+- The pack supplies the ambient sets, keyed by phase. The engine supplies generic defaults so a new story is never silent.
+- A host toggle offers Full, Lights only, or Off. Stats record the mode and the time spent in each.
+- Idle limit: no more than about 10 s with no tower activity during play, other than calibration or a pause.
+- Every entry is still capability-gated (Verified, Library or GAP) against the tower API doc. Once the tower test session confirms capabilities, revisit the intervals and patterns.
+
+## E17 Private investigation round
+- The pack declares a list of actions (usually 4–6). Each present hunter picks one, privately, on a device holding them. There's a timer, default 60 s, and an auto-pick if it runs out.
+- Each action yields a hidden finding for that hunter only, which may set flags or grant a story item to that hunter. Findings never go to the Dashboard. The Dashboard shows only "Agnes has chosen" ticks.
+- There are fewer hunters than actions, so the party can never cover everything. Two hunters may pick the same action, and each sees the finding.
+- Tower: ambient accents continue. One action may be marked risky. If picked, it fires a tower cue and a declared cost (story items or corruption, under the instant-loss guard).
+- Afterwards there is a table-talk beat. The Dashboard shows "Share what you found" with no timer, and the host taps Continue.
+- Stats log each pick, finding, flag and timeout.
+
+## E18 Advantages and companions
+- Story effects that help in a fight are always granted as RtDT Advantages (Beast, Magic, Humanoid, Melee, Undead, Stealth, Wild) or as the reveal of a battle card. Warriors stay base-game hit points.
+- Sources: base gear, potions, treasure and corruptions (base RtDT), plus story items, investigation findings (E17) and companions.
+- **Companions/NPCs:** RtDT companion and character cards (e.g. Gleb) are reskinned per story as people the hunters meet. A pack maps each physical card to a story role, recruit condition, advantage and loss condition. Base-card effects are kept where possible. This needs Bob's card list.
+- Stack cap: story advantages are limited to +2 per hunter per fight by default, overridable per pack within R-FUN-4.

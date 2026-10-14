@@ -36,4 +36,11 @@ Engine implications (now requirements): multiple devices, one private iPad per p
 - Dracula loss mapping (R-LF-9): Taken uses `~lost`, Turned uses `~plague` tune and `~cursed` slide.
 - Lid choice (Gamewright, 2026-10-14, `n2-burgomasters-funeral.lid-choice`): **Nailed** spends 1 stake (only offered if a stake is held). The fight spawns 1 fewer foe (min 1), and losing it costs 1 story item, with no skull drop. **Watched** keeps the stake for a full-strength fight. Losing it costs 1 corruption (instant-loss guard applies) plus 1 skull drop (counts toward the cap of 2 per night). The stats log the choice.
 
-- Variants rule (revised, 2026-10-14): hunters move independently, so `~no-<hunter>` variants are live (the hunter is away from the scene). Voice and render them.
+- Variants rule (revised, 2026-10-14): hunters move independently, so `~no-<hunter>` variants are live (the hunter is away from the scene). Voice and render them.- Investigation advantages (Gamewright, 2026-10-14). These use the RtDT Advantage traits, and warriors still work as hit points under base rules:
+  - `examine-body.two-bites`, **Ready Stake:** +1 Undead advantage for the picker in this fight.
+  - `anton-coat.holy-water`: grants holy water (a story item) to the picker. It can be spent in any fight for +1 Undead advantage, or as a fly-eater or `~blocked` price.
+  - `pray-over-coffins.consecrated`, **Consecrated Ground:** +1 Wild advantage for every present hunter in the first battle round only.
+  - `question-mother.singing`: the mother bars the window, so the fight has 1 fewer foe. This stacks with a nailed lid, minimum 1 foe.
+  - `follow-the-mourner.the-servant` (risky), **Forewarned:** the first battle card is revealed face-up before the party commits. The cost is paid by the picker, who chooses 1 corruption or sitting out the fight. A picker already at 2 corruptions must sit out.
+  - Cap: story advantages are limited to +2 per hunter per fight (R-FUN-4).
+  - Tower cue for the risky pick: replace `drum-top` with a seal flicker plus a sound, because drum positions carry board meaning and story cues don't move drums unless the base game would. It fires after all picks lock.
