@@ -18,6 +18,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 |---|---|---|
 | root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
 | root | `pnpm build` | Builds every app |
+| root | `pnpm land <branch>` | Bob only: runs `pnpm check` on the branch, fast-forwards `main` to it and deletes the branch. Refuses inside a Claude session |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |
 | `apps/tower-poc` | `pnpm e2e` | Builds, then runs Playwright on port 4748 at three viewports |
@@ -28,7 +29,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 2. One branch per plan step: `<type>/<app>-<slug>` (repo-wide work: `chore/<slug>`). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
 4. Before handing over, run `pnpm check` and the `verifier` agent, and paste the output as evidence in the commit message.
-5. Run the `reviewer` agent on the branch diff before asking Bob to merge.
+5. Run the `reviewer` agent on the branch diff before asking Bob to merge. Bob merges with `pnpm land <branch>`; never run it yourself.
 
 ## Conventions
 
