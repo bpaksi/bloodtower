@@ -109,6 +109,7 @@ export {
   type ParamForm,
   type ParamValues,
 } from "./paramFields.ts";
+export { SOUND_CATALOG, SOUND_CATEGORIES, type Sound, soundName } from "./soundCatalog.ts";
 export {
   type Origin,
   originSchema,

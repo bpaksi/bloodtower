@@ -2,6 +2,7 @@ import {
   type CommandLifecyclePayload,
   inventory,
   isCommandable,
+  SOUND_COUNT,
   type ValidatedCommand,
 } from "tower-poc-protocols";
 import { LIGHT_EFFECTS } from "ultimatedarktower";
@@ -275,6 +276,47 @@ describe("command executor: lighting on the mock (M3 step 3.2)", () => {
     await finish(done);
     expect(stages(commandId)).toEqual(["queued", "started", "write-completed", "indeterminate"]);
     expect(writes()).toHaveLength(1);
+  });
+});
+
+describe("command executor: sound on the mock (M3 step 3.3)", () => {
+  // Both sound controls on the Sounds page, at the ends of the catalog and with every volume.
+  const SOUNDS: [id: string, params: unknown][] = [
+    ["sound.play", { soundIndex: 1 }],
+    ["sound.play", { soundIndex: SOUND_COUNT }],
+    ["sound.play-stateful", { soundIndex: 12 }],
+    ...[0, 1, 2, 3].map((volume): [string, unknown] => [
+      "sound.play-stateful",
+      { soundIndex: 12, volume },
+    ]),
+  ];
+
+  for (const state of ["connected", "calibrated"] as const) {
+    it(`sends each sound command to a ${state} tower, and the tower answers`, async () => {
+      const { submit, stages, writes } = await setup(state);
+      for (const [id, params] of SOUNDS) {
+        const before = writes().length;
+        const { commandId, done } = submit(id, params);
+        await finish(done);
+        expect(stages(commandId), `${id} ${JSON.stringify(params)}`).toEqual([
+          "queued",
+          "started",
+          "write-completed",
+          "confirmed",
+        ]);
+        expect(writes().length, id).toBeGreaterThan(before);
+      }
+    });
+  }
+
+  it("refuses a sound outside the catalog, writing nothing", async () => {
+    const { submit, stages, writes } = await setup("connected");
+    for (const soundIndex of [0, SOUND_COUNT + 1]) {
+      const { commandId, done } = submit("sound.play", { soundIndex });
+      await finish(done);
+      expect(stages(commandId)).toEqual(["rejected"]);
+    }
+    expect(writes()).toEqual([]);
   });
 });
 

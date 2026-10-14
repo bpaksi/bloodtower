@@ -569,7 +569,7 @@ export const inventory = [
     params: z.strictObject({ soundIndex: soundIndexSchema }),
     availability: "available",
     uiLocation: "sounds",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: 1-based index into TOWER_AUDIO_LIBRARY. The library logs and resolves on an invalid index, and resolves when the sound starts; there is no completion signal (GAP-LIB-007). Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2).`,
   },
   {
@@ -584,7 +584,7 @@ export const inventory = [
     }),
     availability: "available",
     uiLocation: "sounds",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003. There is no loop parameter: in the M1 spike sound 1 was sent with the loop bit, the tower's echo came back without it, and it did not loop, so whether a looped sound can be stopped was not tested (GAP-HW-008; ${SPIKE}, finding 9).`,
   },
 

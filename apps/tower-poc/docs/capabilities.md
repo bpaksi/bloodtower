@@ -83,8 +83,8 @@ By availability:
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `sound.play` | Play a sound | command | available | `playSound` | `soundIndex: int 1..113` | sounds | untested |
-| `sound.play-stateful` | Play a sound with volume | command | available | `playSoundStateful` | `soundIndex: int 1..113; volume?: int 0..3` | sounds | untested |
+| `sound.play` | Play a sound | command | available | `playSound` | `soundIndex: int 1..113` | sounds | mock-tested |
+| `sound.play-stateful` | Play a sound with volume | command | available | `playSoundStateful` | `soundIndex: int 1..113; volume?: int 0..3` | sounds | mock-tested |
 
 ### mechanics
 

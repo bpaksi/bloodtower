@@ -185,6 +185,9 @@ describe("inventory entries", () => {
       "lighting.sequence",
       "lighting.set",
       "lighting.set-led",
+      // executor.test.ts, "sound on the mock"; the Sounds page (e2e sounds.spec.ts).
+      "sound.play",
+      "sound.play-stateful",
     ];
     expect(
       entries
