@@ -24,3 +24,6 @@ Added: 2026-10-13.
 - One-session length (90 min?) or a short two-night arc?
 - Co-op only, or a mode where one player secretly is the vampire's servant?
 - Does it share the [core mechanics](../../game-design/core-mechanics.md) (party, narrator NPC, shadow clock) or stand alone?
+| [rulings.md](rulings.md) | Bob's decided rulings for this story |
+| [dracula-asset-map.md](dracula-asset-map.md) | Every set piece, encounter and item mapped to DT assets |
+| [screen-assets.md](screen-assets.md) | Landing and screen assets this story needs |
