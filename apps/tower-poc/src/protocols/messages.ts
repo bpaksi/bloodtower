@@ -1,5 +1,8 @@
 import { z } from "zod";
+import { commandLifecyclePayloadSchema, commandPayloadSchema } from "./command.ts";
+import { connectionPayloadSchema } from "./connection.ts";
 import { envelopeSchema, PROTOCOL_VERSION } from "./envelope.ts";
+import { restoreStatePayloadSchema, statePayloadSchema } from "./state.ts";
 
 const message = <T extends string, P extends z.ZodType>(type: T, payload: P) =>
   envelopeSchema.extend({ type: z.literal(type), payload });
@@ -12,7 +15,28 @@ export const helloPayloadSchema = z.strictObject({
 
 export const helloMessageSchema = message("hello", helloPayloadSchema);
 
-export const clientMessageSchema = z.discriminatedUnion("type", [helloMessageSchema]);
+/** The four lifecycle actions carry nothing: each is a person pressing a button (D9, D10). */
+const noPayload = z.strictObject({});
+
+export const connectMessageSchema = message("connect", noPayload);
+export const disconnectMessageSchema = message("disconnect", noPayload);
+export const reconnectMessageSchema = message("reconnect", noPayload);
+export const calibrateMessageSchema = message("calibrate", noPayload);
+/** `id` is required: it is the command's correlation id in every `command.lifecycle` that follows. */
+export const commandMessageSchema = message("command", commandPayloadSchema).extend({
+  id: z.string().min(1).max(64),
+});
+export const restoreStateMessageSchema = message("restoreState", restoreStatePayloadSchema);
+
+export const clientMessageSchema = z.discriminatedUnion("type", [
+  helloMessageSchema,
+  connectMessageSchema,
+  disconnectMessageSchema,
+  reconnectMessageSchema,
+  calibrateMessageSchema,
+  commandMessageSchema,
+  restoreStateMessageSchema,
+]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 
@@ -32,6 +56,8 @@ export const errorCodeSchema = z.enum([
   "invalid-envelope",
   "unknown-type",
   "invalid-payload",
+  // The message is valid and the service has no handler for it yet (M2 builds them step by step).
+  "not-implemented",
 ]);
 
 export type ErrorCode = z.infer<typeof errorCodeSchema>;
@@ -46,9 +72,19 @@ export const errorPayloadSchema = z.strictObject({
 export const welcomeMessageSchema = message("welcome", welcomePayloadSchema);
 export const errorMessageSchema = message("error", errorPayloadSchema);
 
+export const connectionMessageSchema = message("connection", connectionPayloadSchema);
+export const stateMessageSchema = message("state", statePayloadSchema);
+export const commandLifecycleMessageSchema = message(
+  "command.lifecycle",
+  commandLifecyclePayloadSchema,
+);
+
 export const serverMessageSchema = z.discriminatedUnion("type", [
   welcomeMessageSchema,
   errorMessageSchema,
+  connectionMessageSchema,
+  stateMessageSchema,
+  commandLifecycleMessageSchema,
 ]);
 
 export type ServerMessage = z.infer<typeof serverMessageSchema>;

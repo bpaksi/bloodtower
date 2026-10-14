@@ -25,6 +25,14 @@ apps/tower-poc/src/web/
 ## Order of work
 
 1. Protocol messages (spec §3.2), plus a test asserting that no message can carry arbitrary bytes.
+   - Result, on `feat/tower-poc-protocol-messages` (spec 1.9):
+     - Client messages: `hello`, `connect`, `disconnect`, `reconnect`, `calibrate`, `command`, `restoreState`. Server messages: `welcome`, `error`, `connection`, `state`, `command.lifecycle`. The schemas are in `connection.ts`, `command.ts` and `state.ts`. The `diag.*`, `gap.*`, `verify.*`, `settings.*` and `data.clear` messages of spec §3.2 are left to the milestones that use them (M3, M4).
+     - `command.params` is the one open field a client can send. `validateCommand` (in `command.ts`) checks it against the inventory and returns the schema's parsed output or the fields that are wrong; the executor (step 5) must call it before anything else touches `params`. A test walks every client message schema and fails if another open field appears.
+     - Deviations from spec §3.2 as it stood, now written into it: `connection` carries `calibration`; a `command` must have an `id`.
+     - The service answers a valid message it has no handler for with the error `not-implemented`. That code is temporary: steps 4, 5 and 6 replace it, and step 7 removes it. Until step 5 a `command` reaches nothing.
+     - `welcome` is unchanged; step 7 adds the inventory and `pendingRestore`.
+     - The origin check is `isAllowedOrigin` in `server.ts`; a refused upgrade gets `403`. Dev mode is the `DEV_ORIGINS` variable, which only `pnpm dev` sets (to `http://localhost:3000` and `http://127.0.0.1:3000`). If `next dev` picks another port because 3000 is taken, the UI cannot connect until that port is added.
+     - Not covered by D20 as written, and not built: a page on another site whose name resolves to the Mac's address has an `Origin` equal to its `Host`, so it passes. Closing that means checking `Host` against the Mac's own names and addresses; it needs Bob's decision because it could lock out a name he uses.
    - Before `command` is accepted: the `/ws` origin check from spec D20, with tests for the service's own origin (accepted), the `next dev` origin in dev mode (accepted), another origin (refused) and a missing `Origin` header (accepted). The service binds `0.0.0.0`, so "its own origin" is checked against the request's `Host` header, not a fixed value.
 2. `MockTowerAdapter`: scripted responses for connect, device info, calibration complete (after a delay), battery notify, and an injectable skull drop. Deterministic clock for tests.
    - From the M1 spike: the mock answers a write with a state only when the real tower did. It stays silent for the four `rotation*` sequences and for a write that changes nothing in its state (GAP-HW-010). It sends battery messages about every 2 seconds and none while calibrating (GAP-LIB-008).

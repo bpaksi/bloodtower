@@ -1,3 +1,29 @@
+export {
+  type CommandIssue,
+  type CommandLifecyclePayload,
+  type CommandValidation,
+  commandLifecyclePayloadSchema,
+  commandPayloadSchema,
+  END_STAGES,
+  type LifecycleStage,
+  lifecycleStageSchema,
+  validateCommand,
+} from "./command.ts";
+export {
+  type CalibrationState,
+  type ClientSocketState,
+  type ConnectionErrorCode,
+  type ConnectionPayload,
+  type ConnectionState,
+  calibrationStateSchema,
+  clientSocketStateSchema,
+  connectionErrorCodeSchema,
+  connectionErrorSchema,
+  connectionPayloadSchema,
+  connectionStateSchema,
+  type Device,
+  deviceSchema,
+} from "./connection.ts";
 export { type Envelope, envelopeSchema, PROTOCOL_VERSION } from "./envelope.ts";
 export {
   type Availability,
@@ -46,15 +72,33 @@ export {
 export {
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
+  calibrateMessageSchema,
   clientMessageSchema,
+  commandLifecycleMessageSchema,
+  commandMessageSchema,
+  connectionMessageSchema,
+  connectMessageSchema,
+  disconnectMessageSchema,
   type ErrorCode,
   errorCodeSchema,
   errorMessageSchema,
   errorPayloadSchema,
   helloMessageSchema,
   helloPayloadSchema,
+  reconnectMessageSchema,
+  restoreStateMessageSchema,
   type ServerMessage,
   serverMessageSchema,
+  stateMessageSchema,
   welcomeMessageSchema,
   welcomePayloadSchema,
 } from "./messages.ts";
+export {
+  type Origin,
+  originSchema,
+  restoreStatePayloadSchema,
+  type StatePayload,
+  type StateValue,
+  statePayloadSchema,
+  stateValueSchema,
+} from "./state.ts";

@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { PROTOCOL_VERSION, serverMessageSchema } from "tower-poc-protocols";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
-import { startTowerServer, type TowerServer, WS_PATH } from "./server.ts";
+import { isAllowedOrigin, startTowerServer, type TowerServer, WS_PATH } from "./server.ts";
 
 let dir: string;
 let server: TowerServer;
@@ -94,9 +94,9 @@ const rawExchange = (
     socket.on("error", reject);
   });
 
-const openSocket = (path = WS_PATH) =>
+const openSocket = (path = WS_PATH, origin?: string, port = server.port) =>
   new Promise<WebSocket>((resolve, reject) => {
-    const socket = new WebSocket(`ws://127.0.0.1:${server.port}${path}`);
+    const socket = new WebSocket(`ws://127.0.0.1:${port}${path}`, origin ? { origin } : {});
     socket.once("open", () => resolve(socket));
     socket.once("error", reject);
   });
@@ -175,6 +175,88 @@ describe("static web UI before the first build", () => {
   });
 });
 
+describe("isAllowedOrigin (D20)", () => {
+  const host = "192.168.1.20:4747";
+
+  it("accepts the origin the request was sent to, whichever address that is", () => {
+    expect(isAllowedOrigin("http://192.168.1.20:4747", host)).toBe(true);
+    expect(isAllowedOrigin("http://localhost:4747", "localhost:4747")).toBe(true);
+    expect(isAllowedOrigin("http://towermac.local:4747", "towermac.local:4747")).toBe(true);
+  });
+
+  it("refuses another site, another port and another host", () => {
+    expect(isAllowedOrigin("https://evil.example", host)).toBe(false);
+    expect(isAllowedOrigin("http://192.168.1.20:3000", host)).toBe(false);
+    expect(isAllowedOrigin("http://192.168.1.21:4747", host)).toBe(false);
+    expect(isAllowedOrigin("http://192.168.1.20:4747.evil.example", host)).toBe(false);
+  });
+
+  it("refuses an origin that is not a web origin", () => {
+    expect(isAllowedOrigin("null", host)).toBe(false);
+    expect(isAllowedOrigin("", host)).toBe(false);
+    expect(isAllowedOrigin("file://", host)).toBe(false);
+    expect(isAllowedOrigin("chrome-extension://192.168.1.20:4747", host)).toBe(false);
+  });
+
+  it("accepts a request with no Origin header: that is a script or a test, not a web page", () => {
+    expect(isAllowedOrigin(undefined, host)).toBe(true);
+  });
+
+  it("refuses an origin when the request has no Host to compare it with", () => {
+    expect(isAllowedOrigin("http://192.168.1.20:4747", undefined)).toBe(false);
+  });
+
+  it("accepts a dev origin only when it is listed, and only on an exact match", () => {
+    const dev = ["http://localhost:3000"];
+    expect(isAllowedOrigin("http://localhost:3000", host, dev)).toBe(true);
+    expect(isAllowedOrigin("http://localhost:3000", host)).toBe(false);
+    expect(isAllowedOrigin("http://localhost:3001", host, dev)).toBe(false);
+    expect(isAllowedOrigin("http://localhost:3000.evil.example", host, dev)).toBe(false);
+  });
+});
+
+describe("WebSocket origin check (D20)", () => {
+  const refused = (origin: string, port = server.port) =>
+    openSocket(WS_PATH, origin, port).then(
+      (socket) => {
+        socket.close();
+        return "accepted";
+      },
+      (error: Error) => error.message,
+    );
+
+  it("accepts the service's own origin and a request with no Origin", async () => {
+    const own = await openSocket(WS_PATH, `http://127.0.0.1:${server.port}`);
+    own.close();
+    const none = await openSocket();
+    none.close();
+  });
+
+  it("refuses another origin with 403, before any message is read", async () => {
+    expect(await refused("https://evil.example")).toMatch(/403/);
+    expect(await refused(`http://localhost:${server.port}`)).toMatch(/403/);
+    expect(await refused("null")).toMatch(/403/);
+  });
+
+  it("accepts the next dev origin only on a service started with it", async () => {
+    const dev = "http://localhost:3000";
+    expect(await refused(dev)).toMatch(/403/);
+    const devServer = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      devOrigins: [dev],
+    });
+    try {
+      expect(await refused(dev, devServer.port)).toBe("accepted");
+      expect(await refused("https://evil.example", devServer.port)).toMatch(/403/);
+    } finally {
+      await devServer.close();
+    }
+  });
+});
+
 describe("WebSocket endpoint", () => {
   const hello = { v: PROTOCOL_VERSION, type: "hello", id: "m-1", payload: { clientLabel: "test" } };
 
@@ -201,6 +283,16 @@ describe("WebSocket endpoint", () => {
     ["invalid-envelope", JSON.stringify({ type: "hello", payload: {} })],
     ["unknown-type", JSON.stringify({ ...hello, type: "raw" })],
     ["invalid-payload", JSON.stringify({ ...hello, payload: { clientLabel: "" } })],
+    // No executor yet (M2 step 5): a valid command is answered, and goes nowhere.
+    [
+      "not-implemented",
+      JSON.stringify({
+        ...hello,
+        type: "command",
+        payload: { capabilityId: "sound.play", params: { soundIndex: 1 } },
+      }),
+    ],
+    ["not-implemented", JSON.stringify({ ...hello, type: "calibrate", payload: {} })],
   ])("answers a bad message with error %s", async (code, data) => {
     const reply = await exchange(data);
     expect(reply).toMatchObject({ type: "error", payload: { code } });

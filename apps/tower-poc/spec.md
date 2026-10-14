@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Approved** by Bob, 2026-10-13 |
 | Source intent | [intent/0001-dark-tower-web.md](intent/0001-dark-tower-web.md) (original PRD, unchanged) |
-| Spec version | 1.8 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). 1.5 applies the inventory review: GAP-HW-003 no longer says `breakSeal` can set volume (the library discards it), and GAP-LIB-007 is typed Unverified. 1.6 applies four cautious holds pending the M1 spike (GAP-HW-006 to 009): `seals.break` requires calibration, the four `rotation*` light sequences are not accepted, `sound.play-stateful` has no `loop`, and the legacy `mechanics.rotate` is not offered. 1.7 adds `rejected` to the command lifecycle in §3.2 and a row for commands during calibration in §6, both following from D22. 1.8 applies the M1 hardware spike and observability assessment (M1 step 8): `seals.break` is available before calibration again, D23 keeps the four `rotation*` sequences held until M2, the statuses of GAP-HW-001, 006, 007, 008, 009 and GAP-DIAG-001 change, and four gaps are added (GAP-HW-010, GAP-LIB-008, GAP-LIB-009, GAP-DIAG-002). GAP-HW-005 is not used; the ids skip from 004 to 006. |
+| Spec version | 1.9 (2026-10-13). 1.1 adds D19 (folder layout). 1.2 adds D20 (WebSocket origin check). 1.3 brings §4 and §7 in line with the library as installed (M1 steps 2 to 4): the full public surface, the inventory's entry shape and availability values, where the coverage test lives, and four new gaps (GAP-LIB-004 to 007). 1.4 adds D21 (no automatic re-send) and D22 (commands during calibration are rejected). 1.5 applies the inventory review: GAP-HW-003 no longer says `breakSeal` can set volume (the library discards it), and GAP-LIB-007 is typed Unverified. 1.6 applies four cautious holds pending the M1 spike (GAP-HW-006 to 009): `seals.break` requires calibration, the four `rotation*` light sequences are not accepted, `sound.play-stateful` has no `loop`, and the legacy `mechanics.rotate` is not offered. 1.7 adds `rejected` to the command lifecycle in §3.2 and a row for commands during calibration in §6, both following from D22. 1.8 applies the M1 hardware spike and observability assessment (M1 step 8): `seals.break` is available before calibration again, D23 keeps the four `rotation*` sequences held until M2, the statuses of GAP-HW-001, 006, 007, 008, 009 and GAP-DIAG-001 change, and four gaps are added (GAP-HW-010, GAP-LIB-008, GAP-LIB-009, GAP-DIAG-002). 1.9 brings §3.2 in line with the protocol as built in M2 step 1: `connection` carries the calibration state, a `command` must have an `id`, and `command.lifecycle` is spelled out. GAP-HW-005 is not used; the ids skip from 004 to 006. |
 | Library baseline | `ultimatedarktower@7.1.2` (exact pin), `ultimatedarktowerdata@3.0.0` and `@stoprocent/noble@2.8.0` (exact, set in M1 step 1) |
 
 This spec carries the PRD's requirements forward and records every decision made in the 2026-10-13 grilling session. **If the spec and the intent conflict, the spec wins.** All conflicts are listed in §2.
@@ -90,7 +90,7 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. All messages are valid
 - **Client → server**
   - `hello{clientLabel}`
   - `connect`, `disconnect`, `reconnect`, `calibrate`
-  - `command{capabilityId, params}`. This is the only hardware path, and `capabilityId` must name an inventory entry of kind `command` whose availability is `available` or `requires-calibration` and which has a UI mapping (`isCommandable` in the inventory). There is no raw bytes message type.
+  - `command{capabilityId, params}`, which must carry an envelope `id`: that id names the command in every `command.lifecycle` that follows. This is the only hardware path, and `capabilityId` must name an inventory entry of kind `command` whose availability is `available` or `requires-calibration` and which has a UI mapping (`isCommandable` in the inventory). There is no raw bytes message type.
   - `restoreState{accept}`
   - `diag.subscribe{filters}`, `diag.saveSession`, `diag.export`
   - `gap.*` (CRUD/import/export)
@@ -98,9 +98,9 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. All messages are valid
   - `settings.*`, `data.clear`
 - **Server → client**
   - `welcome{clientId, versions, inventory, verificationOverlay, settings, pendingRestore?}`
-  - `connection{state, device?, error?}`
+  - `connection{state, calibration, device?, error?}`. The calibration state travels with the connection state because it resets on disconnect (D10). A device field the tower did not report is null.
   - `state{snapshot}`
-  - `command.lifecycle{...}`
+  - `command.lifecycle{commandId, capabilityId, clientId, stage, at, reason?, issues?}`, sent to every client. `issues` names the fields that failed validation.
   - `diag.event{...}`
   - `gap.changed`, `error{code, message, actionable}`
 - Connection states (FR-01, adapted): `bluetooth-unavailable`, `disconnected`, `scanning`, `connecting`, `connected`, `disconnecting`, `error`. These are separate from **calibration state** (`uncalibrated`, `calibrating`, `calibrated`) and **client socket state** (`online`, `reconnecting-to-service`, `service-unreachable`).

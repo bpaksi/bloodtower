@@ -21,12 +21,41 @@ export interface TowerServerOptions {
   /** Folder holding the web part's static export. */
   webRoot: string;
   serverVersion: string;
+  /**
+   * Extra origins a `/ws` connection may come from, besides the service's own (D20). Only the
+   * `next dev` origin belongs here, and only in dev mode.
+   */
+  devOrigins?: readonly string[];
 }
 
 export interface TowerServer {
   port: number;
   close: () => Promise<void>;
 }
+
+/**
+ * Whether a `/ws` upgrade may proceed (D20). A page served by this service has an `Origin` whose
+ * host and port are the ones the request was sent to, which is the `Host` header: the service
+ * listens on every address, so it has no single origin of its own to compare with. A request with
+ * no `Origin` is not from a web page (browsers always send one on a WebSocket upgrade) and is let
+ * through.
+ */
+export const isAllowedOrigin = (
+  origin: string | undefined,
+  host: string | undefined,
+  devOrigins: readonly string[] = [],
+) => {
+  if (origin === undefined) return true;
+  if (devOrigins.includes(origin)) return true;
+  if (!host) return false;
+  try {
+    const url = new URL(origin);
+    return (url.protocol === "http:" || url.protocol === "https:") && url.host === host;
+  } catch {
+    // "null" (a sandboxed page or a file) and anything else that is not a URL.
+    return false;
+  }
+};
 
 const send = (socket: WebSocket, message: ServerMessage) => socket.send(JSON.stringify(message));
 
@@ -76,6 +105,10 @@ const handleMessage = (
           versions: { protocol: PROTOCOL_VERSION, server: serverVersion, node: process.version },
         },
       });
+    default:
+      // Valid, and nothing handles it yet. In particular a `command` goes nowhere until the
+      // executor exists (M2 step 5).
+      return sendError(socket, "not-implemented", `"${type}" is not handled yet.`, id);
   }
 };
 
@@ -99,6 +132,11 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
       // Destroy after the reply is flushed, so a client that stays connected cannot hold close() open.
       socket.on("error", () => socket.destroy());
       socket.end("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n", () => socket.destroy());
+      return;
+    }
+    if (!isAllowedOrigin(req.headers.origin, req.headers.host, options.devOrigins)) {
+      socket.on("error", () => socket.destroy());
+      socket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n", () => socket.destroy());
       return;
     }
     wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
