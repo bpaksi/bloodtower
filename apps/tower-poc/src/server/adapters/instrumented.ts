@@ -74,7 +74,7 @@ export type TimedAdapterEvent = AdapterEvent & { at: number };
 export interface AdapterEventList {
   /** Pass this to `instrumentAdapter`. */
   emit: (event: AdapterEvent) => void;
-  /** The events still held, oldest first. */
+  /** A copy of the events still held, oldest first. */
   events: () => readonly TimedAdapterEvent[];
   /** How many events were dropped to stay within the limit. */
   dropped: () => number;
@@ -90,20 +90,23 @@ export const createAdapterEventList = (
   limit = 5_000,
   now: () => number = Date.now,
 ): AdapterEventList => {
-  let held: TimedAdapterEvent[] = [];
+  if (!Number.isInteger(limit) || limit < 1) {
+    throw new Error(`The event list needs a limit of at least 1, got ${limit}.`);
+  }
+  const held: TimedAdapterEvent[] = [];
   let dropped = 0;
   return {
     emit: (event) => {
       held.push({ ...event, at: now() });
       if (held.length > limit) {
-        dropped += held.length - limit;
-        held = held.slice(-limit);
+        held.shift();
+        dropped += 1;
       }
     },
-    events: () => held,
+    events: () => [...held],
     dropped: () => dropped,
     clear: () => {
-      held = [];
+      held.length = 0;
       dropped = 0;
     },
   };

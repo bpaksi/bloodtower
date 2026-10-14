@@ -74,7 +74,7 @@ apps/tower-poc/src/web       : Next.js (App Router, output:'export'), Tailwind, 
 
 ### 3.1 Key components
 
-- **InstrumentedAdapter** wraps any `IBluetoothAdapter` and emits a `transport` event for every `writeCharacteristic`, `onCharacteristicValueChanged`, connect, disconnect and availability change. Each event carries raw bytes (hex) and the service/characteristic UUIDs from the library's adapter config. This satisfies FR-09 with no library fork.
+- **InstrumentedAdapter** wraps any `IBluetoothAdapter` and emits a `transport` event for every `writeCharacteristic`, `onCharacteristicValueChanged`, connect, disconnect and availability change. Each event carries raw bytes (hex). The service/characteristic UUIDs from the library's adapter config are added in M4 step 4.1; the tap as built in M2 does not carry them, because the adapter interface does not say which characteristic a write used. This satisfies FR-09 with no library fork.
 - **CommandExecutor** is the only path from the UI to the tower (FR-07).
   - For each command it assigns a correlation ID, validates input against the inventory's Zod parameter schemas, and records the `queued → started → write-completed → (confirmed | indeterminate) | failed | timed-out` lifecycle, or ends it as `rejected` before queueing when validation fails or the tower is calibrating (D22), along with the sender's client ID.
   - Mechanics share one serialization lane. Lights and sounds go through the library's own command queue, and the executor observes that queue.

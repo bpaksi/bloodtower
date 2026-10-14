@@ -141,6 +141,20 @@ describe("createAdapterEventList", () => {
     expect(list.dropped()).toBe(2);
   });
 
+  it("hands out a copy, so a reader's list does not change under it", () => {
+    const list = createAdapterEventList(2, () => 0);
+    list.emit({ kind: "rx", hex: "01", bytes: 1 });
+    const before = list.events();
+    list.emit({ kind: "rx", hex: "02", bytes: 1 });
+    list.emit({ kind: "rx", hex: "03", bytes: 1 });
+    expect(before).toHaveLength(1);
+    expect(list.events()).toHaveLength(2);
+  });
+
+  it.each([0, -1, 1.5, Number.NaN])("refuses a limit of %s", (limit) => {
+    expect(() => createAdapterEventList(limit)).toThrow(/limit of at least 1/);
+  });
+
   it("forgets everything on clear", () => {
     const list = createAdapterEventList(3, () => 0);
     for (const hex of ["01", "02", "03", "04"]) list.emit({ kind: "rx", hex, bytes: 1 });
