@@ -3,9 +3,10 @@ import { request } from "node:http";
 import { connect } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { PROTOCOL_VERSION, serverMessageSchema } from "tower-poc-protocols";
+import { PROTOCOL_VERSION, type ServerMessage, serverMessageSchema } from "tower-poc-protocols";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
+import { createMockTower } from "./adapters/mockTower.ts";
 import {
   isAllowedOrigin,
   parseDevOrigins,
@@ -13,6 +14,13 @@ import {
   type TowerServer,
   WS_PATH,
 } from "./server.ts";
+import { createTowerSession } from "./session.ts";
+
+/** A session on its own mock tower, which connects in 20 ms. */
+const mockSession = () => {
+  const mock = createMockTower({ timings: { connectMs: 20 } });
+  return createTowerSession({ createAdapter: () => mock.adapter });
+};
 
 let dir: string;
 let server: TowerServer;
@@ -28,7 +36,13 @@ beforeAll(async () => {
   await writeFile(join(dir, "secret.txt"), "outside the web root");
   // A sibling of the web root whose name is the root plus ".html".
   await writeFile(join(dir, "out.html"), "<h1>sibling of the web root</h1>");
-  server = await startTowerServer({ port: 0, host: "127.0.0.1", webRoot, serverVersion: "9.9.9" });
+  server = await startTowerServer({
+    port: 0,
+    host: "127.0.0.1",
+    webRoot,
+    serverVersion: "9.9.9",
+    session: mockSession(),
+  });
 });
 
 afterAll(async () => {
@@ -170,6 +184,7 @@ describe("static web UI before the first build", () => {
       host: "127.0.0.1",
       webRoot: join(dir, "not-built"),
       serverVersion: "9.9.9",
+      session: mockSession(),
     });
     try {
       const res = await get("/", "GET", empty.port);
@@ -283,6 +298,7 @@ describe("WebSocket origin check (D20)", () => {
       host: "127.0.0.1",
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
+      session: mockSession(),
       devOrigins: [dev],
     });
     try {
@@ -329,7 +345,8 @@ describe("WebSocket endpoint", () => {
         payload: { capabilityId: "sound.play", params: { soundIndex: 1 } },
       }),
     ],
-    ["not-implemented", JSON.stringify({ ...hello, type: "calibrate", payload: {} })],
+    ["invalid-state", JSON.stringify({ ...hello, type: "calibrate", payload: {} })],
+    ["invalid-state", JSON.stringify({ ...hello, type: "disconnect", payload: {} })],
   ])("answers a bad message with error %s", async (code, data) => {
     const reply = await exchange(data);
     expect(reply).toMatchObject({ type: "error", payload: { code } });
@@ -373,6 +390,7 @@ describe("WebSocket endpoint", () => {
       host: "127.0.0.1",
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
+      session: mockSession(),
     });
     const lingering = connect({ host: "127.0.0.1", port: own.port, allowHalfOpen: true });
     try {
@@ -388,6 +406,96 @@ describe("WebSocket endpoint", () => {
       expect(closed, "close() should not wait for the refused client").toBe(true);
     } finally {
       lingering.destroy();
+    }
+  });
+});
+
+describe("lifecycle messages", () => {
+  /** Collects every message a socket receives, parsed. */
+  const listen = (socket: WebSocket) => {
+    const received: ServerMessage[] = [];
+    socket.on("message", (raw) =>
+      received.push(serverMessageSchema.parse(JSON.parse(raw.toString()))),
+    );
+    const until = async (match: (all: ServerMessage[]) => boolean) => {
+      for (let waited = 0; !match(received); waited += 10) {
+        if (waited > 3000) throw new Error(`timed out; received ${JSON.stringify(received)}`);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+    };
+    return { received, until };
+  };
+  const states = (all: ServerMessage[]) =>
+    all.flatMap((message) => (message.type === "connection" ? [message.payload.state] : []));
+  const send = (socket: WebSocket, type: string, id: string) =>
+    socket.send(JSON.stringify({ v: PROTOCOL_VERSION, type, id, payload: {} }));
+
+  it("tells a new client where the tower stands, after welcome", async () => {
+    const own = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      session: mockSession(),
+    });
+    const socket = await openSocket(WS_PATH, undefined, own.port);
+    try {
+      const { received, until } = listen(socket);
+      socket.send(
+        JSON.stringify({ v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: "a" } }),
+      );
+      await until((all) => all.length >= 2);
+      expect(received.map((message) => message.type)).toEqual(["welcome", "connection"]);
+      expect(received[1]).toMatchObject({
+        payload: { state: "disconnected", calibration: "uncalibrated" },
+      });
+    } finally {
+      socket.close();
+      await own.close();
+    }
+  });
+
+  it("connects when one client asks, and every client sees it; a second connect is refused", async () => {
+    const session = mockSession();
+    const own = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      session,
+    });
+    const a = await openSocket(WS_PATH, undefined, own.port);
+    const b = await openSocket(WS_PATH, undefined, own.port);
+    try {
+      const fromA = listen(a);
+      const fromB = listen(b);
+      send(a, "connect", "c-1");
+      await fromB.until((all) => states(all).includes("connected"));
+      expect(states(fromB.received)).toEqual(["connecting", "connected"]);
+      expect(states(fromA.received)).toEqual(["connecting", "connected"]);
+
+      send(b, "connect", "c-2");
+      await fromB.until((all) => all.some((message) => message.type === "error"));
+      expect(fromB.received.at(-1)).toMatchObject({
+        type: "error",
+        correlationId: "c-2",
+        payload: { code: "invalid-state" },
+      });
+      expect(fromA.received.some((message) => message.type === "error")).toBe(false);
+
+      send(b, "disconnect", "c-3");
+      await fromA.until((all) => states(all).at(-1) === "disconnected");
+      expect(states(fromA.received)).toEqual([
+        "connecting",
+        "connected",
+        "disconnecting",
+        "disconnected",
+      ]);
+    } finally {
+      a.close();
+      b.close();
+      await own.close();
+      await session.close();
     }
   });
 });

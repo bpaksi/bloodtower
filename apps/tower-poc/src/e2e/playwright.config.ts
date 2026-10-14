@@ -33,7 +33,7 @@ export default defineConfig({
     // The same path as production: static export served by the tower server on one port.
     command: "pnpm -F tower-poc build && pnpm -F tower-poc-server start",
     url: baseURL,
-    // MOCK keeps end-to-end runs away from the real tower once Bluetooth lands in M2.
+    // MOCK keeps end-to-end runs away from the real tower, which is the service's default.
     env: { PORT: String(PORT), HOST: "127.0.0.1", MOCK: "1" },
     reuseExistingServer: false,
     timeout: 120_000,

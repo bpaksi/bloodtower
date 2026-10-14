@@ -11,6 +11,7 @@ import {
   type ServerMessage,
 } from "tower-poc-protocols";
 import { type RawData, type WebSocket, WebSocketServer } from "ws";
+import { SessionStateError, type TowerSession } from "./session.ts";
 import { requestPath, serveStatic } from "./static.ts";
 
 export const WS_PATH = "/ws";
@@ -23,6 +24,8 @@ export interface TowerServerOptions {
   /** Folder holding the web part's static export. */
   webRoot: string;
   serverVersion: string;
+  /** The tower connection the lifecycle messages act on. */
+  session: TowerSession;
   /**
    * Extra origins a `/ws` connection may come from, besides the service's own (D20). Only the
    * `next dev` origin belongs here, and only in dev mode.
@@ -94,12 +97,32 @@ const sendError = (socket: WebSocket, code: ErrorCode, message: string, correlat
     payload: { code, message },
   });
 
+const connectionMessage = (session: TowerSession): ServerMessage => ({
+  v: PROTOCOL_VERSION,
+  type: "connection",
+  payload: session.status(),
+});
+
+/**
+ * Runs one of the four lifecycle actions. Its outcome reaches every client as `connection`; only
+ * a refusal is answered here, to the client that asked.
+ */
+const runAction = (socket: WebSocket, action: Promise<void>, correlationId?: string) =>
+  action.catch((error) => {
+    if (error instanceof SessionStateError) {
+      return sendError(socket, "invalid-state", error.message, correlationId);
+    }
+    // The session reports its own failures in its status, so this is a bug in the service.
+    console.error("Tower session action failed:", error);
+  });
+
 const handleMessage = (
   socket: WebSocket,
   clientId: string,
   data: RawData,
-  serverVersion: string,
+  options: TowerServerOptions,
 ) => {
+  const { serverVersion, session } = options;
   let json: unknown;
   try {
     json = JSON.parse(data.toString());
@@ -123,7 +146,7 @@ const handleMessage = (
 
   switch (message.data.type) {
     case "hello":
-      return send(socket, {
+      send(socket, {
         v: PROTOCOL_VERSION,
         type: "welcome",
         ...(id ? { correlationId: id } : {}),
@@ -132,6 +155,16 @@ const handleMessage = (
           versions: { protocol: PROTOCOL_VERSION, server: serverVersion, node: process.version },
         },
       });
+      // Until `welcome` carries it (step 7), a new client learns where the tower stands here.
+      return send(socket, connectionMessage(session));
+    case "connect":
+      return runAction(socket, session.connect(), id);
+    case "reconnect":
+      return runAction(socket, session.reconnect(), id);
+    case "disconnect":
+      return runAction(socket, session.disconnect(), id);
+    case "calibrate":
+      return runAction(socket, session.calibrate(), id);
     default:
       // Valid, and nothing handles it yet. In particular a `command` goes nowhere until the
       // executor exists (M2 step 5).
@@ -151,7 +184,16 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
     // ws reports protocol violations (bad frames, invalid UTF-8) as `error`. Unhandled, that would
     // take the whole service down, so drop just this client.
     socket.on("error", () => socket.terminate());
-    socket.on("message", (data) => handleMessage(socket, clientId, data, options.serverVersion));
+    socket.on("message", (data) => handleMessage(socket, clientId, data, options));
+  });
+
+  // Every client sees every change of connection and calibration state, whoever caused it (D7).
+  // The client hub of step 7 takes this over.
+  const stopBroadcast = options.session.subscribe(() => {
+    const message = connectionMessage(options.session);
+    for (const client of wss.clients) {
+      if (client.readyState === client.OPEN) send(client, message);
+    }
   });
 
   http.on("upgrade", (req, socket, head) => {
@@ -181,6 +223,7 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
     port: (http.address() as AddressInfo).port,
     close: () =>
       new Promise<void>((resolve, reject) => {
+        stopBroadcast();
         for (const client of wss.clients) client.terminate();
         wss.close();
         http.close((error) => (error ? reject(error) : resolve()));

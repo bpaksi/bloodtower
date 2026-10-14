@@ -56,6 +56,9 @@ export const errorCodeSchema = z.enum([
   "invalid-envelope",
   "unknown-type",
   "invalid-payload",
+  // A lifecycle action the tower's current state does not allow, such as connecting while
+  // connected. Nothing was sent to the tower; the current state follows in `connection`.
+  "invalid-state",
   // The message is valid and the service has no handler for it yet (M2 builds them step by step).
   "not-implemented",
 ]);
