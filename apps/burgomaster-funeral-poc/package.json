@@ -8,7 +8,8 @@
     "dev": "concurrently --kill-others --names server,web --prefix-colors blue,green \"pnpm -F burgomaster-funeral-poc-server dev\" \"pnpm -F burgomaster-funeral-poc-web dev\"",
     "build": "pnpm -F burgomaster-funeral-poc-web build",
     "start": "pnpm -F burgomaster-funeral-poc-server start",
-    "e2e": "pnpm -F burgomaster-funeral-poc-e2e e2e"
+    "e2e": "pnpm -F burgomaster-funeral-poc-e2e e2e",
+    "demo": "pnpm build && pnpm start"
   },
   "devDependencies": {
     "concurrently": "10.0.6"
