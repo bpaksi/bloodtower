@@ -6,7 +6,7 @@ import { RestorePrompt } from "@/components/RestorePrompt";
 import { Button } from "@/components/ui/button";
 import { CALIBRATION_LABELS, CONNECTION_LABELS, STAGE_LABELS } from "@/lib/labels";
 import { PAGES } from "@/lib/pages";
-import { latestCommand } from "@/lib/service";
+import { isInterrupted, latestCommand } from "@/lib/service";
 import { sendToService, useService } from "@/lib/store";
 import { useCommand } from "@/lib/useCommand";
 
@@ -53,13 +53,16 @@ export function Dashboard() {
   const sound = useCommand("sound.play");
   // The last test sound from any device, so every screen shows the same lifecycle (D7).
   const lastSound = useService((view) => latestCommand(view.commands, "sound.play"));
-  const ownClientId = useService((view) => view.welcome?.clientId);
+  // Every id this page has had: the service gives each new socket a new one.
+  const ownClientIds = useService((view) => view.ownClientIds);
+  const lastSoundId = lastSound?.[0]?.commandId;
+  const soundInterrupted = useService((view) =>
+    lastSoundId ? isInterrupted(view, lastSoundId) : false,
+  );
   const sender =
-    lastSound?.[0] === undefined
-      ? undefined
-      : lastSound[0].clientId === ownClientId
-        ? "this device"
-        : "another device";
+    lastSound?.[0] && ownClientIds.includes(lastSound[0].clientId)
+      ? "this device"
+      : "another device";
   const can = allowed(online ? connection : undefined);
 
   const act = (action: Action) => setLastAction({ id: sendToService(action), action });
@@ -126,7 +129,7 @@ export function Dashboard() {
             {refusal}
           </p>
         )}
-        {connection?.calibration === "calibrating" && (
+        {online && connection?.calibration === "calibrating" && (
           <p className="mt-2 text-sm text-muted-foreground">
             Calibration turns every drum and takes about 20 seconds. Commands are refused until it
             ends.
@@ -166,22 +169,27 @@ export function Dashboard() {
           >
             {sound.pending ? "Playing…" : "Play test sound"}
           </Button>
-          {lastSound && (
-            <ol
-              aria-label={`Test sound lifecycle, from ${sender}`}
-              className="flex flex-wrap gap-x-2 text-sm"
-            >
-              <li className="text-muted-foreground">From {sender}:</li>
-              {lastSound.map((stage) => (
-                <li
-                  key={stage.stage}
-                  className="after:ml-2 after:content-['→'] last:after:content-none"
-                >
-                  {STAGE_LABELS[stage.stage]}
-                  {stage.reason ? `: ${stage.reason}` : ""}
-                </li>
-              ))}
-            </ol>
+          {lastSound?.[0] && (
+            <div className="flex flex-wrap gap-x-2 text-sm">
+              <span className="text-muted-foreground">From {sender}:</span>
+              <ol
+                aria-label={`Test sound lifecycle, from ${sender}`}
+                className="flex flex-wrap gap-x-2"
+              >
+                {lastSound.map((stage) => (
+                  <li
+                    key={stage.stage}
+                    className="after:ml-2 after:content-['→'] last:after:content-none"
+                  >
+                    {STAGE_LABELS[stage.stage]}
+                    {stage.reason ? `: ${stage.reason}` : ""}
+                  </li>
+                ))}
+                {soundInterrupted && (
+                  <li>Outcome unknown: the link to the service dropped before it ended</li>
+                )}
+              </ol>
+            </div>
           )}
         </div>
         {sound.unsent && (

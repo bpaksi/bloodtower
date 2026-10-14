@@ -104,6 +104,17 @@ describe("service socket", () => {
     expect(onSocketState.mock.calls.at(-1)).toEqual(["online"]);
   });
 
+  it("calls a service that accepts the socket but never welcomes it unreachable", () => {
+    vi.useFakeTimers();
+    const { onSocketState } = open();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      FakeSocket.made.at(-1)?.open();
+      FakeSocket.made.at(-1)?.drop();
+      vi.advanceTimersByTime(reconnectDelay(attempt));
+    }
+    expect(onSocketState.mock.calls.map(([state]) => state)).toContain("service-unreachable");
+  });
+
   it("stops reconnecting once closed", () => {
     vi.useFakeTimers();
     const { socket } = open();

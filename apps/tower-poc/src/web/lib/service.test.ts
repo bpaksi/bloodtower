@@ -5,8 +5,10 @@ import {
   applySocketState,
   COMMAND_HISTORY,
   initialView,
+  isInterrupted,
   isPending,
   latestCommand,
+  markSent,
 } from "./service.ts";
 
 const connection: ServerMessage = {
@@ -93,5 +95,59 @@ describe("latestCommand", () => {
     view = applyServerMessage(view, lifecycle("k-1", "confirmed"), 0);
     expect(latestCommand(view.commands, "sound.play")?.[0]?.commandId).toBe("k-2");
     expect(latestCommand(view.commands, "lighting.all-on")).toBeUndefined();
+  });
+});
+
+describe("a lost link to the service", () => {
+  it("unlocks a command cut off by the drop, and says its outcome is unknown", () => {
+    let view = applySocketState(initialView, "online");
+    view = markSent(view, "k-1");
+    expect(isPending(view.commands["k-1"], view.interrupted["k-1"])).toBe(true);
+    view = applyServerMessage(view, lifecycle("k-1", "queued"), 0);
+    view = applySocketState(view, "reconnecting-to-service");
+    view = applySocketState(view, "online");
+    // The service never replays the end stage, so waiting for it would lock the control forever.
+    expect(isPending(view.commands["k-1"], view.interrupted["k-1"])).toBe(false);
+    expect(isInterrupted(view, "k-1")).toBe(true);
+  });
+
+  it("marks a command sent just before the drop even if no stage had arrived", () => {
+    let view = markSent(applySocketState(initialView, "online"), "k-1");
+    view = applySocketState(view, "service-unreachable");
+    expect(isInterrupted(view, "k-1")).toBe(true);
+  });
+
+  it("leaves an ended command alone, and stops calling one interrupted once its end arrives", () => {
+    let view = applyServerMessage(initialView, lifecycle("k-1", "queued"), 0);
+    view = applyServerMessage(view, lifecycle("k-1", "confirmed"), 0);
+    view = applyServerMessage(view, lifecycle("k-2", "queued"), 0);
+    view = applySocketState(view, "reconnecting-to-service");
+    expect(isInterrupted(view, "k-1")).toBe(false);
+    view = applyServerMessage(applySocketState(view, "online"), lifecycle("k-2", "confirmed"), 0);
+    expect(isInterrupted(view, "k-2")).toBe(false);
+  });
+
+  it("keeps every client id the service has given this page", () => {
+    const welcome = (clientId: string): ServerMessage => ({
+      v: PROTOCOL_VERSION,
+      type: "welcome",
+      payload: {
+        clientId,
+        versions: {
+          protocol: PROTOCOL_VERSION,
+          server: "0",
+          node: "v",
+          library: "7.1.2",
+          data: "3",
+        },
+        inventory: [],
+        tower: "mock",
+      },
+    });
+    let view = applyServerMessage(initialView, welcome("c-1"), 0);
+    view = applySocketState(view, "reconnecting-to-service");
+    view = applyServerMessage(applySocketState(view, "online"), welcome("c-2"), 0);
+    view = applyServerMessage(view, welcome("c-2"), 0);
+    expect(view.ownClientIds).toEqual(["c-1", "c-2"]);
   });
 });

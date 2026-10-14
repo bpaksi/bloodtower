@@ -38,7 +38,9 @@ export function RestorePrompt() {
             <dd>
               {key === "battery.level"
                 ? batteryLabel(value)
-                : JSON.stringify("value" in value ? value.value : null)}
+                : "value" in value
+                  ? JSON.stringify(value.value)
+                  : "Unavailable"}
             </dd>
           </div>
         ))}

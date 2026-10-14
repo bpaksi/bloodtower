@@ -30,15 +30,30 @@ export interface ServiceView {
    */
   connection?: ConnectionPayload;
   state?: StatePayload;
-  /** Lifecycle stages per command id, oldest command first, at most `COMMAND_HISTORY`. */
+  /**
+   * Lifecycle stages per command id, oldest command first, at most `COMMAND_HISTORY`. A command
+   * this page sent is here, with no stages, from the moment it is sent.
+   */
   commands: Record<string, CommandLifecyclePayload[]>;
+  /**
+   * Commands that had not ended when the link to the service dropped. The service does not replay
+   * lifecycles, so their outcome may never arrive; they are no longer treated as under way.
+   */
+  interrupted: Record<string, true>;
+  /** Every client id the service has given this page: each new socket gets a new one. */
+  ownClientIds: readonly string[];
   lastError?: ServiceError;
 }
 
 /** Commands whose lifecycles are kept. Enough for the dashboard; the timeline is M4's. */
 export const COMMAND_HISTORY = 50;
 
-export const initialView: ServiceView = { socket: "reconnecting-to-service", commands: {} };
+export const initialView: ServiceView = {
+  socket: "reconnecting-to-service",
+  commands: {},
+  interrupted: {},
+  ownClientIds: [],
+};
 
 const keepLatest = (commands: ServiceView["commands"]) => {
   const ids = Object.keys(commands);
@@ -52,8 +67,13 @@ export const applyServerMessage = (
   now: number,
 ): ServiceView => {
   switch (message.type) {
-    case "welcome":
-      return { ...view, welcome: message.payload };
+    case "welcome": {
+      const { clientId } = message.payload;
+      const ownClientIds = view.ownClientIds.includes(clientId)
+        ? view.ownClientIds
+        : [...view.ownClientIds, clientId];
+      return { ...view, welcome: message.payload, ownClientIds };
+    }
     case "connection":
       return { ...view, connection: message.payload };
     case "state":
@@ -77,25 +97,48 @@ export const applyServerMessage = (
   }
 };
 
+const ended = (stages: readonly CommandLifecyclePayload[] | undefined) => {
+  const last = stages?.at(-1);
+  return last !== undefined && END_STAGES.includes(last.stage);
+};
+
+/** Records a command this page has just sent, so it counts as under way before any stage arrives. */
+export const markSent = (view: ServiceView, commandId: string): ServiceView => ({
+  ...view,
+  commands: keepLatest({ ...view.commands, [commandId]: view.commands[commandId] ?? [] }),
+});
+
 /**
  * The link to the service changed. Losing it forgets the tower's connection and state, which are
- * unknown until the service sends them again; the command history stays, as a record.
+ * unknown until the service sends them again, and marks every command that had not ended as
+ * interrupted. The command history stays, as a record.
  */
 export const applySocketState = (view: ServiceView, socket: ClientSocketState): ServiceView => {
   if (socket === "online") return { ...view, socket };
   const { welcome: _w, connection: _c, state: _s, ...rest } = view;
-  return { ...rest, socket };
+  const interrupted = { ...view.interrupted };
+  for (const [id, stages] of Object.entries(view.commands)) {
+    if (!ended(stages)) interrupted[id] = true;
+  }
+  return { ...rest, interrupted, socket };
 };
 
 /** The latest stage of a command, if the service has reported one. */
 export const latestStage = (stages: readonly CommandLifecyclePayload[] | undefined) =>
   stages?.at(-1);
 
-/** True while a command has been sent and has not reached an end stage. */
-export const isPending = (stages: readonly CommandLifecyclePayload[] | undefined) => {
-  const last = latestStage(stages);
-  return last === undefined || !END_STAGES.includes(last.stage);
-};
+/**
+ * True while a sent command has not reached an end stage and the link it was sent on has not
+ * dropped since.
+ */
+export const isPending = (
+  stages: readonly CommandLifecyclePayload[] | undefined,
+  interrupted = false,
+) => !interrupted && !ended(stages);
+
+/** True when the link dropped before a command ended, so its outcome is not known here. */
+export const isInterrupted = (view: ServiceView, commandId: string) =>
+  view.interrupted[commandId] === true && !ended(view.commands[commandId]);
 
 /**
  * The stages of the newest command for a capability, whoever sent it (D7: every client sees every

@@ -73,7 +73,6 @@ export const openServiceSocket = (options: ServiceSocketOptions): ServiceSocket 
     const current = create(options.url);
     socket = current;
     current.onopen = () => {
-      failures = 0;
       current.send(
         JSON.stringify({
           v: PROTOCOL_VERSION,
@@ -92,6 +91,9 @@ export const openServiceSocket = (options: ServiceSocketOptions): ServiceSocket 
         return;
       }
       const message = serverMessageSchema.safeParse(json);
+      // The link counts as working once the service has answered hello, not when the socket opens:
+      // a service that accepts and then drops every socket is unreachable, not reconnecting.
+      if (message.success && message.data.type === "welcome") failures = 0;
       // A message this build does not understand comes from another version of the service.
       if (message.success) options.onMessage(message.data);
       else console.warn("Ignoring a message from the service this page does not understand.");
