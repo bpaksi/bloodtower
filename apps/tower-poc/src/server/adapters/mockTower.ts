@@ -95,6 +95,8 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   let onValue: (data: Uint8Array) => void = () => {};
   let onGone: () => void = () => {};
   let connecting: Promise<void> | undefined;
+  /** Goes up on every connect attempt and on every disconnect, so a late connect can tell. */
+  let attempts = 0;
   const pending = new Set<ReturnType<typeof setTimeout>>();
   const repeating: ReturnType<typeof setInterval>[] = [];
 
@@ -115,6 +117,7 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
     for (const timer of repeating.splice(0)) clearInterval(timer);
   };
   const end = () => {
+    attempts += 1;
     if (!connected) return;
     connected = false;
     calibrating = false;
@@ -132,6 +135,11 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
       calibrating = false;
       state[DRUMS[0]] = CALIBRATED_DRUMS[0];
       state[DRUMS[1]] = CALIBRATED_DRUMS[1];
+      // In spike run 2 the tower held audio 70 from the seal sequence before calibrating, and the
+      // state it sent when calibration ended had 00 there. Inferred from that one exchange. The
+      // lights were off both times the spike calibrated, so what calibration does to them is not
+      // known; the mock leaves them.
+      state[AUDIO] = 0;
       sendState();
     });
   };
@@ -181,7 +189,10 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   };
 
   const open = async () => {
+    const attempt = ++attempts;
     await sleep(timings.connectMs);
+    // A disconnect or cleanup while this was connecting wins: the connect is given up.
+    if (attempt !== attempts) throw new BluetoothConnectionError("Connect was cancelled (mock)");
     if (options.failConnect === "bluetooth-unavailable") {
       throw new BluetoothConnectionError(
         "Bluetooth adapter not ready: Timeout waiting for Noble to be powered on",
@@ -243,6 +254,7 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
     readDeviceInformation: async () => ({ ...MOCK_DEVICE_INFORMATION, lastUpdated: new Date() }),
     // As the real adapter does: it ends disconnected, and does not report that as a disconnect.
     cleanup: async () => {
+      attempts += 1;
       connected = false;
       calibrating = false;
       stopTimers();

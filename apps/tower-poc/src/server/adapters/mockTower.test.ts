@@ -98,6 +98,32 @@ describe("mock tower: connection", () => {
     expect(mock.received.length).toBe(before);
   });
 
+  it.each(["disconnect", "cleanup", "dropConnection"] as const)(
+    "gives up a connect that %s interrupts, and starts no timers",
+    async (how) => {
+      const mock = createMockTower();
+      const received: string[] = [];
+      mock.adapter.onCharacteristicValueChanged((data) => received.push(toHex(data)));
+      const connecting = mock.adapter.connect("ReturnToDarkTower", []);
+      const outcome = expect(connecting).rejects.toThrow(/cancelled/);
+      await advance(T.connectMs / 2);
+      if (how === "dropConnection") mock.dropConnection();
+      else await mock.adapter[how]();
+      await advance(T.connectMs);
+      await outcome;
+      expect(mock.adapter.isConnected()).toBe(false);
+      await advance(60_000);
+      expect(received).toEqual([]);
+      expect(vi.getTimerCount()).toBe(0);
+
+      // And it can still be connected afterwards.
+      const again = mock.adapter.connect("ReturnToDarkTower", []);
+      await advance(T.connectMs);
+      await again;
+      expect(mock.adapter.isConnected()).toBe(true);
+    },
+  );
+
   it("treats a second connect during the first as the same connect", async () => {
     const mock = createMockTower();
     const received: string[] = [];
@@ -170,6 +196,18 @@ describe("mock tower: answers to writes, as the real tower gave them", () => {
     expect(mock.answers()).toEqual([[T.calibrationMs, `001042${"00".repeat(17)}`]]);
   });
 
+  it("reports audio 00 when calibration ends, whatever it held before", async () => {
+    // Spike run 2: the seal sequence left audio 70 in the tower's state; the state that ended the
+    // calibration after it was 00 10 42 and seventeen zero bytes.
+    const mock = await connectedMock();
+    await mock.adapter.writeCharacteristic(packet({ sequence: 0x0e, audio: 0x70 }));
+    await advance(T.echoMs + T.sequenceMs);
+    expect(mock.heldState()[15]).toBe(0x70);
+    await mock.adapter.writeCharacteristic(Uint8Array.of(0x04));
+    await advance(T.calibrationMs);
+    expect(mock.answers().at(-1)?.[1]).toBe(`001042${"00".repeat(17)}`);
+  });
+
   it("echoes a lights change and a sound within the echo delay", async () => {
     const mock = await connectedMock();
     const lightsOn = packet({ lights: "33" });
@@ -239,7 +277,7 @@ describe("mock tower: answers to writes, as the real tower gave them", () => {
     expect(mock.answers().at(-1)?.[1].slice(30, 36)).toBe("000001");
   });
 
-  it("reports a rotation after its travel time, with the duration message just before it", async () => {
+  it("reports a rotation after its travel time, together with the duration message", async () => {
     const mock = await connectedMock();
     await mock.adapter.writeCharacteristic(Uint8Array.of(0x04));
     await advance(T.calibrationMs);
