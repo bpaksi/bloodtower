@@ -18,7 +18,7 @@ Lenka Morosz, the burgomaster's foundling daughter, was taken by the Count the n
 
 ## Tower cue names
 Scripts use only these names (Illusionist maps them in `shared/tower/cues.json`; screen fallbacks live in the cue library and asset map §1b, not in the scripts):
-`dim-all` (all lights off) · `low` (one light on) · `all-on` · `heartbeat` (breathe) · `heartbeat-fast` (breatheFast) · `heartbeat-half` (breathe50percent) · `flicker` · `seal-sequence` (light sequence 14, no seal broken) · `break-seal` · `drum-top` / `drum-middle` / `drum-bottom` (rotateWithState; base game only, story cues never turn the drums) · `skull-drop` (players drop a skull).
+`dim-all` (all lights off) · `low` (one light on) · `all-on` · `heartbeat` (breathe) · `heartbeat-fast` (breatheFast) · `heartbeat-half` (breathe50percent) · `flicker` · `seal-sequence` (light sequence 14, no seal broken) · `break-seal` · `drum-top` / `drum-middle` / `drum-bottom` (rotateWithState; a story cue turns a drum only when the turn sets a glyph the game rules then read: the fortune reading, the open grave and the finale assault. Drum turns just for show become lights and sound) · `skull-drop` (players drop a skull).
 Rules: no calibration in any scene (it belongs to the setup wizard). Drum cues are calibrated-only and are skipped and logged otherwise. Successive drum moves are spaced from the previous move's state reply, not from when it was sent. A change of rate is written as "A then B", and the app times it. There are no red lights.
 **Story skull drops:** at most 2 per night. Before any story drop, if fewer than 6 skulls remain in supply, the drop becomes "+1 foe on night 5" instead.
 

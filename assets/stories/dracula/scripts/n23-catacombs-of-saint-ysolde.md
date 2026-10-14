@@ -12,7 +12,7 @@
 ## Moments
 
 **n23-catacombs-of-saint-ysolde.01** [clip] — one variant by building
-[music: low pulse] [sfx: dripping, stone grinding] [tower: drum-top] [tower: drum-middle] (calibrated only; the second move starts after the first move's state reply)
+[music: low pulse] [sfx: dripping, stone grinding] [tower: flicker] [tower: heartbeat-half]
 **n23-catacombs-of-saint-ysolde.01~village** [clip]
 > **Narrator:** The well-rope goes down into the plague dead, and further. Behind you, the wall closes like a mouth.
 **n23-catacombs-of-saint-ysolde.01~sanctuary** [clip]

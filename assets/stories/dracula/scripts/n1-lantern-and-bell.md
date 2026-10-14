@@ -46,7 +46,7 @@
 > **Hanne:** It does that when he wants company. Nobody leaves Vellmoor now, loves. Not since spring.
 
 **n1-lantern-and-bell.08** [clip]
-[tower: dim-all] [tower: heartbeat] [tower: drum-top] [sfx: stone grind]
+[tower: dim-all] [tower: heartbeat] [tower: flicker] [sfx: stone grind]
 > **Hanne:** You want to help this valley? Go up the hill to the burgomaster's house. Anton Morosz died last night, at his daughter's door. And the girl is gone.
 > **Agnes:** Gone where, innkeeper?
 

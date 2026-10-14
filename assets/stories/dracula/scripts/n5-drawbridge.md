@@ -15,7 +15,7 @@
 > **Narrator:** Five nights. Three keys. A brother's sword. The road to the castle is the only road left in Vellmoor; the mist has eaten every other one.
 
 **n5-drawbridge.02** [clip]
-[tower: drum-bottom] (calibrated only) [sfx: chains, creak, splash far below]
+[tower: seal-sequence] [sfx: chains, creak, splash far below]
 > **Narrator:** The keys turn, one after another, in locks no one can see. The drawbridge comes down, slow as a held breath.
 > **The Count (from the battlements):** "Welcome to my house! Enter freely and of your own will!" *(Stoker)*
 
