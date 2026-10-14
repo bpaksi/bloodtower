@@ -415,14 +415,15 @@ describe("catalog ranges from ultimatedarktowerdata", () => {
     }
   });
 
-  it("has no loop parameter on a stateful sound, and does not offer the legacy rotate", () => {
+  it("has no loop parameter on a stateful sound, does not offer the legacy rotate, and offers break seal before calibration", () => {
     const stateful = findCapability("sound.play-stateful")?.params;
     expect(stateful?.safeParse({ soundIndex: 1, loop: true }).success).toBe(false);
     expect(stateful?.safeParse({ soundIndex: 1, loop: false }).success).toBe(false);
     const rotate = findCapability("mechanics.rotate");
     expect(rotate?.availability).toBe("not-exposed");
     expect(rotate && isCommandable(rotate)).toBe(false);
-    expect(findCapability("seals.break")?.availability).toBe("requires-calibration");
+    // GAP-HW-006: the M1 spike showed it plays on an uncalibrated tower and moves nothing.
+    expect(findCapability("seals.break")?.availability).toBe("available");
   });
 
   it("limits glyphs to the 5 in the catalog", () => {

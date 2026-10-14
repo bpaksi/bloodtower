@@ -98,9 +98,10 @@ export const lightSequenceSchema = z.enum(
   Object.keys(TOWER_LIGHT_SEQUENCES) as [LightSequenceName, ...LightSequenceName[]],
 );
 /**
- * Catalog sequences the app does not accept yet. Held pending the M1 spike (GAP-HW-007):
- * it is inferred, not verified, that the four rotation sequences are light animations
- * that move nothing. Lifting the hold is emptying this list.
+ * Catalog sequences the app does not accept yet (GAP-HW-007). The M1 spike showed that
+ * none of the four moves a drum, and that the tower answers none of them, so the library
+ * reports each as failed after 30 seconds. Held until M2 can send them without waiting
+ * for an answer (D23). Lifting the hold is emptying this list.
  */
 export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = [
   "rotationAllDrums",
@@ -276,6 +277,8 @@ export type Capability = {
 
 const TYPES = "UltimateDarkTower.d.ts at 7.1.2";
 const NOTE = "research/tower/api-surface-7.1.2.md";
+const SPIKE = "research/tower/spikes/2026-10-13-noble-macos.md";
+const OBSERVABILITY = "research/tower/observability.md";
 
 // ---------------------------------------------------------------------------
 // The inventory
@@ -496,7 +499,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the effect defaults to on. Whether it works before calibration is GAP-HW-001. The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
+    evidence: `${TYPES}: the effect defaults to on. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
   },
   {
     id: "lighting.all-off",
@@ -508,7 +511,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}. Whether it works before calibration is GAP-HW-001. The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
+    evidence: `${TYPES}. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
   },
   {
     id: "lighting.sequence",
@@ -523,7 +526,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Whether it works before calibration is GAP-HW-001. Held pending the M1 spike: the four rotation* sequences (HELD_LIGHT_SEQUENCES) are not accepted, because it is inferred, not verified, that they move nothing (GAP-HW-007).`,
+    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (HELD_LIGHT_SEQUENCES) are not accepted: in the M1 spike each played its lights and moved no drum, but the tower sent no state back, so the library rejected each after 30 seconds (${SPIKE}, findings 4 and 7). Held until M2 can send them without waiting for an answer (D23, GAP-HW-007).`,
   },
   {
     id: "lighting.set-led",
@@ -546,7 +549,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the library takes plain numbers. Ranges from the method's documentation (${NOTE}, finding 10). Whether it works before calibration is GAP-HW-001.`,
+    evidence: `${TYPES}: the library takes plain numbers. Ranges from the method's documentation (${NOTE}, finding 10). Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2).`,
   },
 
   // Sound
@@ -560,7 +563,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "sounds",
     verification: "untested",
-    evidence: `${TYPES}: 1-based index into TOWER_AUDIO_LIBRARY. The library logs and resolves on an invalid index, and resolves when the sound starts; there is no completion signal (GAP-LIB-007). Whether it works before calibration is GAP-HW-001.`,
+    evidence: `${TYPES}: 1-based index into TOWER_AUDIO_LIBRARY. The library logs and resolves on an invalid index, and resolves when the sound starts; there is no completion signal (GAP-LIB-007). Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2).`,
   },
   {
     id: "sound.play-stateful",
@@ -575,7 +578,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "sounds",
     verification: "untested",
-    evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003. Held pending the M1 spike: there is no loop parameter, because no way to stop a looped sound is known (GAP-HW-008).`,
+    evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003. There is no loop parameter: in the M1 spike sound 1 was sent with the loop bit, the tower's echo came back without it, and it did not loop, so whether a looped sound can be stopped was not tested (GAP-HW-008; ${SPIKE}, finding 9).`,
   },
 
   // Mechanics
@@ -589,7 +592,7 @@ export const inventory = [
     availability: "not-exposed",
     uiLocation: null,
     verification: "untested",
-    evidence: `${TYPES}. Not offered: the legacy Rotate sends a bare packet with every light byte zero, so it turns the lights off as a side effect; mechanics.rotate-with-state keeps them. Held for good unless the spike shows otherwise (GAP-HW-009). Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
+    evidence: `${TYPES}. Not offered: the legacy Rotate sends a bare packet with every light byte zero, so it turns the lights off as a side effect; mechanics.rotate-with-state keeps them. The M1 spike confirmed it: the lights went off, and the packet and the tower's state after it had every light byte zero (GAP-HW-009; ${SPIKE}, finding 8). Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
   },
   {
     id: "mechanics.rotate-with-state",
@@ -635,7 +638,7 @@ export const inventory = [
     availability: "requires-calibration",
     uiLocation: "mechanics",
     verification: "untested",
-    evidence: `${TYPES}: the library takes 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom (RANDOM_ROTATE_DRUMS maps the names to these). The library defaults to 0; drums is a required name here so that "all drums" is never implied. The UI asks for confirmation (spec §5). The library routes it through the legacy Rotate path, so it turns the lights off as a side effect; it has no state-preserving alternative (GAP-HW-009).`,
+    evidence: `${TYPES}: the library takes 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom (RANDOM_ROTATE_DRUMS maps the names to these). The library defaults to 0; drums is a required name here so that "all drums" is never implied. The UI asks for confirmation (spec §5). The library routes it through the legacy Rotate path, so it turns the lights off as a side effect, which the M1 spike confirmed for the top drum; it has no state-preserving alternative (GAP-HW-009; ${SPIKE}, finding 8).`,
   },
   {
     id: "mechanics.drum-position",
@@ -744,10 +747,10 @@ export const inventory = [
     category: "seals",
     apiMapping: ["breakSeal"],
     params: z.strictObject({ seal: sealSchema }),
-    availability: "requires-calibration",
+    availability: "available",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003. Held behind calibration pending the M1 spike: every stateful command also packs the library's tracked drum bytes (north/north/north, calibrated: false before calibration), and whether the tower acts on them is unknown (GAP-HW-006).`,
+    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003. Available before calibration: in the M1 spike it played on an uncalibrated tower and no drum moved (GAP-HW-006; ${SPIKE}, finding 2). That was one seal, with drum bytes 00 00 in the packet; a packet carrying stale drum positions was not tested, and the service resets calibration on disconnect so that none is sent (D10).`,
   },
   {
     id: "seals.mark-broken",
@@ -871,7 +874,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}: callback with millivolts, about every 200 ms (${NOTE}, finding 12).`,
+    evidence: `${TYPES}: callback with millivolts. The library's documents say about every 200 ms (${NOTE}, finding 12); in the M1 spike the tower sent one about every 2 seconds and none while calibrating (GAP-LIB-008; ${OBSERVABILITY}, finding 7).`,
   },
   {
     id: "battery.level",

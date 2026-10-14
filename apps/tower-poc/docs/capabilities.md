@@ -37,8 +37,8 @@ By kind:
 
 By availability:
 
-- available: 37
-- requires-calibration: 8
+- available: 38
+- requires-calibration: 7
 - not-exposed: 4
 - unsupported: 3
 
@@ -112,7 +112,7 @@ By availability:
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `seals.break` | Break a seal | command | requires-calibration | `breakSeal` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
+| `seals.break` | Break a seal | command | available | `breakSeal` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.mark-broken` | Mark a seal broken | command | available | `markSealBroken` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.mark-restored` | Mark a seal restored | command | available | `markSealRestored` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.reset` | Clear all broken seals | command | available | `resetBrokenSeals` | `none` | tower-state | untested |
