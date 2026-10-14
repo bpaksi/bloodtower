@@ -57,6 +57,11 @@ export interface TowerSessionOptions {
  */
 export const CALIBRATION_LIMIT_MS = 30_000;
 
+export interface BatteryReading {
+  millivolts: number;
+  percent: number;
+}
+
 export interface TowerSession {
   status: () => ConnectionPayload;
   /** Calls `listener` with every new status. Returns a function that stops it. */
@@ -78,6 +83,11 @@ export interface TowerSession {
    * changes (a command it is about to send) are not reports. Returns a function that stops it.
    */
   onTowerReport: (listener: () => void) => () => void;
+  /**
+   * Calls `listener` with each battery reading from the current connection's tower, with the
+   * library's percentage for it. Returns a function that stops it.
+   */
+  onBattery: (listener: (reading: BatteryReading) => void) => () => void;
   events: AdapterEventList;
   /** Ends any connection and stops reporting. For shutting the service down. */
   close: () => Promise<void>;
@@ -139,6 +149,7 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
   const events = options.events ?? createAdapterEventList();
   const listeners = new Set<(status: ConnectionPayload) => void>();
   const reportListeners = new Set<() => void>();
+  const batteryListeners = new Set<(reading: BatteryReading) => void>();
   let writes = 0;
   const emit: typeof events.emit = (event) => {
     if (event.kind === "tx") writes += 1;
@@ -233,6 +244,12 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
     tower.onTowerStateUpdate = (_next, _previous, source) => {
       if (owner !== generation || source !== "tower response") return;
       for (const listener of reportListeners) listener();
+    };
+    // Called after the library has updated its own battery fields, so the percentage matches.
+    tower.onBatteryLevelNotify = (millivolts) => {
+      if (owner !== generation) return;
+      const reading = { millivolts, percent: tower.currentBatteryPercent };
+      for (const listener of batteryListeners) listener(reading);
     };
     return tower;
   };
@@ -356,6 +373,10 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
       reportListeners.add(listener);
       return () => reportListeners.delete(listener);
     },
+    onBattery: (listener) => {
+      batteryListeners.add(listener);
+      return () => batteryListeners.delete(listener);
+    },
     events,
     close: async () => {
       if (closed) return;
@@ -366,6 +387,7 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
       closed = true;
       listeners.clear();
       reportListeners.clear();
+      batteryListeners.clear();
       if (tower) {
         try {
           if (tower.isConnected) await tower.disconnect();

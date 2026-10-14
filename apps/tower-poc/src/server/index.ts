@@ -1,10 +1,13 @@
 import { resolve } from "node:path";
 import { BluetoothAdapterFactory, BluetoothPlatform } from "ultimatedarktower";
 import { createMockTower } from "./adapters/mockTower.ts";
+import { openDatabase } from "./db/client.ts";
+import { createSnapshotStorage } from "./db/snapshots.ts";
 import { lanUrls } from "./lanUrls.ts";
 import packageJson from "./package.json" with { type: "json" };
 import { parseDevOrigins, startTowerServer, WS_PATH } from "./server.ts";
 import { createTowerSession } from "./session.ts";
+import { createStateStore, feedStateStore } from "./stateStore.ts";
 
 const DEFAULT_PORT = 4747;
 
@@ -41,18 +44,30 @@ const session = createTowerSession({
     mockTower ? mockTower.adapter : BluetoothAdapterFactory.create(BluetoothPlatform.NODE),
 });
 
+// The mock tower keeps its own database, so a mock run never offers its values to a real one.
+const dbPath =
+  process.env.DB_PATH ||
+  resolve(import.meta.dirname, "../../data", mockTower ? "tower-poc.mock.db" : "tower-poc.db");
+const database = openDatabase(dbPath);
+// A snapshot left by the last run opens the restore prompt (D11). Nothing reaches the tower.
+const store = createStateStore({ storage: createSnapshotStorage(database.db) });
+const stopFeed = feedStateStore(session, store);
+
 const server = await startTowerServer({
   port: parsePort(process.env.PORT),
   host,
   webRoot,
   serverVersion: packageJson.version,
   session,
+  store,
   devOrigins,
 });
 
 console.log(`Tower service ${packageJson.version} listening (WebSocket at ${WS_PATH}):`);
 for (const url of lanUrls(host, server.port)) console.log(`  ${url}`);
 console.log(`Serving web UI from ${webRoot}`);
+console.log(`Data in ${dbPath}`);
+if (store.pendingRestore()) console.log("State saved by the last run is waiting to be restored.");
 console.log(
   mockTower ? "Tower: mock (MOCK=1)" : "Tower: real, over Bluetooth (MOCK=1 for the mock)",
 );
@@ -65,6 +80,10 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
     session
       .close()
       .then(() => server.close())
-      .finally(() => process.exit(0));
+      .finally(() => {
+        stopFeed();
+        database.close();
+        process.exit(0);
+      });
   });
 }

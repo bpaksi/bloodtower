@@ -99,9 +99,13 @@ export {
 export {
   type Origin,
   originSchema,
+  type PendingRestore,
+  pendingRestoreSchema,
   restoreStatePayloadSchema,
   type StatePayload,
+  type StateSnapshot,
   type StateValue,
   statePayloadSchema,
+  stateSnapshotSchema,
   stateValueSchema,
 } from "./state.ts";

@@ -29,9 +29,28 @@ export const stateValueSchema = z.discriminatedUnion("freshness", [
 ]);
 export type StateValue = z.infer<typeof stateValueSchema>;
 
-/** Payload of `state`: values keyed by the inventory id of the property or query they belong to. */
+/** State values keyed by the inventory id of the property or query they belong to. */
+export const stateSnapshotSchema = z.record(z.string().min(1).max(64), stateValueSchema);
+export type StateSnapshot = z.infer<typeof stateSnapshotSchema>;
+
+/**
+ * State saved by an earlier run of the service, waiting for a person to restore it or not (D11).
+ * The values are as they were saved; restoring one makes it `application-maintained` and `stale`.
+ */
+export const pendingRestoreSchema = z.strictObject({
+  /** When it was saved, in milliseconds since the epoch. */
+  savedAt: z.int().nonnegative(),
+  snapshot: stateSnapshotSchema,
+});
+export type PendingRestore = z.infer<typeof pendingRestoreSchema>;
+
+/**
+ * Payload of `state`. `pendingRestore` is there for as long as the restore prompt is open, so a
+ * client that sees a `state` without it closes the prompt, whoever answered it.
+ */
 export const statePayloadSchema = z.strictObject({
-  snapshot: z.record(z.string().min(1).max(64), stateValueSchema),
+  snapshot: stateSnapshotSchema,
+  pendingRestore: pendingRestoreSchema.optional(),
 });
 export type StatePayload = z.infer<typeof statePayloadSchema>;
 

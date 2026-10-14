@@ -15,6 +15,7 @@ import {
   WS_PATH,
 } from "./server.ts";
 import { createTowerSession } from "./session.ts";
+import { createStateStore } from "./stateStore.ts";
 
 /** A session on its own mock tower, which connects in 20 ms. */
 const mockSession = () => {
@@ -42,6 +43,7 @@ beforeAll(async () => {
     webRoot,
     serverVersion: "9.9.9",
     session: mockSession(),
+    store: createStateStore(),
   });
 });
 
@@ -185,6 +187,7 @@ describe("static web UI before the first build", () => {
       webRoot: join(dir, "not-built"),
       serverVersion: "9.9.9",
       session: mockSession(),
+      store: createStateStore(),
     });
     try {
       const res = await get("/", "GET", empty.port);
@@ -299,6 +302,7 @@ describe("WebSocket origin check (D20)", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session: mockSession(),
+      store: createStateStore(),
       devOrigins: [dev],
     });
     try {
@@ -336,9 +340,9 @@ describe("WebSocket endpoint", () => {
     ["invalid-envelope", JSON.stringify({ type: "hello", payload: {} })],
     ["unknown-type", JSON.stringify({ ...hello, type: "raw" })],
     ["invalid-payload", JSON.stringify({ ...hello, payload: { clientLabel: "" } })],
-    // Restoring state comes in M2 step 6.
+    // This server's store has nothing saved, so there is no prompt to answer.
     [
-      "not-implemented",
+      "invalid-state",
       JSON.stringify({ ...hello, type: "restoreState", payload: { accept: true } }),
     ],
     ["invalid-state", JSON.stringify({ ...hello, type: "calibrate", payload: {} })],
@@ -387,6 +391,7 @@ describe("WebSocket endpoint", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session: mockSession(),
+      store: createStateStore(),
     });
     const lingering = connect({ host: "127.0.0.1", port: own.port, allowHalfOpen: true });
     try {
@@ -433,6 +438,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session: mockSession(),
+      store: createStateStore(),
     });
     const socket = await openSocket(WS_PATH, undefined, own.port);
     try {
@@ -440,10 +446,16 @@ describe("lifecycle messages", () => {
       socket.send(
         JSON.stringify({ v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: "a" } }),
       );
-      await until((all) => all.length >= 2);
-      expect(received.map((message) => message.type)).toEqual(["welcome", "connection"]);
+      await until((all) => all.length >= 3);
+      expect(received.map((message) => message.type)).toEqual(["welcome", "connection", "state"]);
       expect(received[1]).toMatchObject({
         payload: { state: "disconnected", calibration: "uncalibrated" },
+      });
+      // Nothing saved, so no prompt; a value the service has not read is unavailable.
+      expect(received[2]).toEqual({
+        v: PROTOCOL_VERSION,
+        type: "state",
+        payload: { snapshot: { "battery.level": { freshness: "unavailable", origin: "unknown" } } },
       });
     } finally {
       socket.close();
@@ -459,6 +471,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session,
+      store: createStateStore(),
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
     const b = await openSocket(WS_PATH, undefined, own.port);
@@ -524,6 +537,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session,
+      store: createStateStore(),
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
     const b = await openSocket(WS_PATH, undefined, own.port);
@@ -552,6 +566,117 @@ describe("lifecycle messages", () => {
         "disconnecting",
         "disconnected",
       ]);
+    } finally {
+      a.close();
+      b.close();
+      await own.close();
+      await session.close();
+    }
+  });
+});
+
+describe("restore prompt (D11)", () => {
+  const saved = {
+    savedAt: 1_000,
+    snapshot: {
+      "battery.level": {
+        freshness: "current" as const,
+        value: { millivolts: 4_100, percent: 60 },
+        origin: "device-reported" as const,
+        updatedAt: 900,
+      },
+    },
+  };
+
+  const listen = (socket: WebSocket) => {
+    const received: ServerMessage[] = [];
+    socket.on("message", (raw) =>
+      received.push(serverMessageSchema.parse(JSON.parse(raw.toString()))),
+    );
+    const until = async (match: (all: ServerMessage[]) => boolean) => {
+      for (let waited = 0; !match(received); waited += 10) {
+        if (waited > 3000) throw new Error(`timed out; received ${JSON.stringify(received)}`);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+    };
+    return { received, until };
+  };
+  const statesOf = (all: ServerMessage[]) =>
+    all.flatMap((message) => (message.type === "state" ? [message.payload] : []));
+
+  it("offers saved state to every client, and closes the prompt for all when one answers", async () => {
+    // No battery reading during the test, so the restored value is not overwritten by a new one.
+    const mock = createMockTower({ timings: { connectMs: 20, batteryMs: 60_000 } });
+    const session = createTowerSession({ createAdapter: () => mock.adapter });
+    const store = createStateStore({ storage: { load: () => saved, save: () => {} } });
+    const own = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      session,
+      store,
+    });
+    const a = await openSocket(WS_PATH, undefined, own.port);
+    const b = await openSocket(WS_PATH, undefined, own.port);
+    try {
+      const fromA = listen(a);
+      const fromB = listen(b);
+      for (const socket of [a, b]) {
+        socket.send(
+          JSON.stringify({ v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: "x" } }),
+        );
+      }
+      await fromA.until((all) => statesOf(all).length === 1);
+      await fromB.until((all) => statesOf(all).length === 1);
+      expect(statesOf(fromB.received)[0]?.pendingRestore).toEqual({
+        savedAt: 1_000,
+        snapshot: { "battery.level": { ...saved.snapshot["battery.level"], freshness: "stale" } },
+      });
+
+      // Restoring with a tower connected still sends it nothing.
+      await session.connect();
+      const writesBefore = session.writes();
+      a.send(
+        JSON.stringify({
+          v: PROTOCOL_VERSION,
+          type: "restoreState",
+          id: "r-1",
+          payload: { accept: true },
+        }),
+      );
+      await fromB.until((all) => statesOf(all).some((state) => !state.pendingRestore));
+      for (const received of [fromA.received, fromB.received]) {
+        expect(statesOf(received).at(-1)).toEqual({
+          snapshot: {
+            "battery.level": {
+              freshness: "stale",
+              value: { millivolts: 4_100, percent: 60 },
+              origin: "application-maintained",
+              updatedAt: 900,
+            },
+          },
+        });
+      }
+
+      // The prompt has closed, so a second answer has nothing to act on.
+      b.send(
+        JSON.stringify({
+          v: PROTOCOL_VERSION,
+          type: "restoreState",
+          id: "r-2",
+          payload: { accept: false },
+        }),
+      );
+      await fromB.until((all) => all.some((message) => message.type === "error"));
+      expect(fromB.received.at(-1)).toMatchObject({
+        type: "error",
+        correlationId: "r-2",
+        payload: { code: "invalid-state" },
+      });
+      expect(fromA.received.some((message) => message.type === "error")).toBe(false);
+      // Restoring is bookkeeping: nothing was written to a tower.
+      expect(session.writes()).toBe(writesBefore);
     } finally {
       a.close();
       b.close();

@@ -34,7 +34,8 @@ export default defineConfig({
     command: "pnpm -F tower-poc build && pnpm -F tower-poc-server start",
     url: baseURL,
     // MOCK keeps end-to-end runs away from the real tower, which is the service's default.
-    env: { PORT: String(PORT), HOST: "127.0.0.1", MOCK: "1" },
+    // An in-memory database: each run starts with nothing saved, so no restore prompt (D11).
+    env: { PORT: String(PORT), HOST: "127.0.0.1", MOCK: "1", DB_PATH: ":memory:" },
     reuseExistingServer: false,
     timeout: 120_000,
   },

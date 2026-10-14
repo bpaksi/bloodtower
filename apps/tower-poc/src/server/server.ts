@@ -13,6 +13,7 @@ import {
 import { type RawData, type WebSocket, WebSocketServer } from "ws";
 import { type CommandExecutor, createCommandExecutor } from "./executor.ts";
 import { SessionStateError, type TowerSession } from "./session.ts";
+import { NoPendingRestoreError, type StateStore } from "./stateStore.ts";
 import { requestPath, serveStatic } from "./static.ts";
 
 export const WS_PATH = "/ws";
@@ -27,6 +28,8 @@ export interface TowerServerOptions {
   serverVersion: string;
   /** The tower connection the lifecycle messages and commands act on. */
   session: TowerSession;
+  /** The tower values every client is shown, and the restore prompt (D11). */
+  store: StateStore;
   /**
    * Extra origins a `/ws` connection may come from, besides the service's own (D20). Only the
    * `next dev` origin belongs here, and only in dev mode.
@@ -104,6 +107,15 @@ const connectionMessage = (session: TowerSession): ServerMessage => ({
   payload: session.status(),
 });
 
+const stateMessage = (store: StateStore): ServerMessage => {
+  const pendingRestore = store.pendingRestore();
+  return {
+    v: PROTOCOL_VERSION,
+    type: "state",
+    payload: { snapshot: store.snapshot(), ...(pendingRestore ? { pendingRestore } : {}) },
+  };
+};
+
 /**
  * Runs one of the four lifecycle actions. Its outcome reaches every client as `connection`; only
  * a refusal is answered here, to the client that asked.
@@ -124,7 +136,7 @@ const handleMessage = (
   options: TowerServerOptions,
   executor: CommandExecutor,
 ) => {
-  const { serverVersion, session } = options;
+  const { serverVersion, session, store } = options;
   let json: unknown;
   try {
     json = JSON.parse(data.toString());
@@ -158,7 +170,8 @@ const handleMessage = (
         },
       });
       // Until `welcome` carries it (step 7), a new client learns where the tower stands here.
-      return send(socket, connectionMessage(session));
+      send(socket, connectionMessage(session));
+      return send(socket, stateMessage(store));
     case "connect":
       return runAction(socket, session.connect(), id);
     case "reconnect":
@@ -175,9 +188,17 @@ const handleMessage = (
         capabilityId: message.data.payload.capabilityId,
         params: message.data.payload.params,
       });
-    default:
-      // Valid, and nothing handles it yet (`restoreState`, M2 step 6).
-      return sendError(socket, "not-implemented", `"${type}" is not handled yet.`, id);
+    case "restoreState":
+      // Bookkeeping only: nothing is sent to the tower (D11). Every client sees the outcome as
+      // `state`, without the prompt.
+      try {
+        return store.answerRestore(message.data.payload.accept);
+      } catch (error) {
+        if (error instanceof NoPendingRestoreError) {
+          return sendError(socket, "invalid-state", error.message, id);
+        }
+        throw error;
+      }
   }
 };
 
@@ -213,6 +234,8 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
   const stopBroadcast = options.session.subscribe(() =>
     broadcast(connectionMessage(options.session)),
   );
+  // Every value change and the restore prompt closing, likewise.
+  const stopStateBroadcast = options.store.subscribe(() => broadcast(stateMessage(options.store)));
 
   http.on("upgrade", (req, socket, head) => {
     if (requestPath(req.url) !== WS_PATH) {
@@ -242,6 +265,7 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
     close: () =>
       new Promise<void>((resolve, reject) => {
         stopBroadcast();
+        stopStateBroadcast();
         for (const client of wss.clients) client.terminate();
         wss.close();
         http.close((error) => (error ? reject(error) : resolve()));

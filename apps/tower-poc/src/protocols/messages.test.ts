@@ -353,6 +353,29 @@ describe("serverMessageSchema", () => {
     expect(serverMessageSchema.safeParse(state({ "skulls.count": noValue })).success).toBe(false);
   });
 
+  it("carries a pending restore with the state, and nothing else beside it", () => {
+    const stale = { freshness: "stale", value: 2, origin: "device-reported", updatedAt: 1 };
+    const message = {
+      v: PROTOCOL_VERSION,
+      type: "state",
+      payload: {
+        snapshot: {},
+        pendingRestore: { savedAt: 5, snapshot: { "battery.level": stale } },
+      },
+    };
+    expect(serverMessageSchema.safeParse(message).success).toBe(true);
+    expect(
+      serverMessageSchema.safeParse({
+        ...message,
+        payload: { ...message.payload, pendingRestore: { snapshot: {} } },
+      }).success,
+    ).toBe(false);
+    expect(
+      serverMessageSchema.safeParse({ ...message, payload: { ...message.payload, restored: true } })
+        .success,
+    ).toBe(false);
+  });
+
   it("accepts each lifecycle stage, and ends a command in one of five", () => {
     const lifecycle = (payload: object) => ({
       v: PROTOCOL_VERSION,
