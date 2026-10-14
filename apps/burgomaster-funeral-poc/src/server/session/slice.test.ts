@@ -3,8 +3,9 @@ import { HUNTER_IDS, isDashboardSafe } from "burgomaster-funeral-poc-protocols";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadCatalog } from "../assets/catalog.ts";
 import { appendEvent, type OpenLog, openLog, readEvents } from "../db/log.ts";
+import { ACCENT_ID, accentDelayMs } from "./accent.ts";
 import { FakeClock } from "./clock.ts";
-import { type DemoSession, DemoSession as Session } from "./slice.ts";
+import { DEMO_SEED, type DemoSession, DemoSession as Session } from "./slice.ts";
 
 const catalog = loadCatalog(join(import.meta.dirname, "../../../assets"));
 
@@ -152,6 +153,26 @@ describe("demo slice", () => {
         ?.privateMoment?.text,
     ).toContain("Two bites");
     expect(isDashboardSafe(session.dashboardState())).toBe(true);
+  });
+
+  it("logs the seeded screen-pulse accent and lets the investigate cue override it", () => {
+    const { session, clock, log } = start();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+
+    const delay = accentDelayMs(DEMO_SEED, 0);
+    expect(delay).toBeGreaterThanOrEqual(20_000);
+    expect(delay).toBeLessThanOrEqual(60_000);
+    clock.advance(delay);
+
+    const accent = readEvents(log.db).find((event) => event.type === "ambient_accent");
+    if (accent?.type !== "ambient_accent") throw new Error("missing accent");
+    expect(accent.payload.accentId).toBe(ACCENT_ID);
+    expect(accent.payload.seedDraw).toBe(`${DEMO_SEED}:0`);
+    expect(accent.payload.suppressed).toBe(true);
+    expect(accent.payload.reason).toBe("scene-cue");
   });
 
   it("pauses while a hunter has no connected holder and resumes on rejoin", () => {
