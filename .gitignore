@@ -5,6 +5,7 @@ dist/
 coverage/
 *.db
 *.db-*
+apps/burgomaster-funeral-poc/data/
 .env*
 .DS_Store
 playwright-report/

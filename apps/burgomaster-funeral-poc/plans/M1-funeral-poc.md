@@ -44,8 +44,9 @@ Stack (R-ENG-9, repo conventions): Next.js + React, pnpm workspace, SQLite throu
 
 ### Step 1: Scaffold the app and the protocols contract
 - Depends on: G0
-- Touches: `apps/burgomaster-funeral-poc/{package.json,README.md}`, `apps/burgomaster-funeral-poc/src/*/{package.json,tsconfig.json}`, `src/server/vitest.config.ts`, `src/protocols/vitest.config.ts`, `src/web/vitest.config.ts`, `src/protocols/{index.ts,types.ts,messages.ts,messages.test.ts}`, `src/server/{index.ts,config.ts,config.test.ts}`, `src/web/{next.config.ts,app/layout.tsx,app/page.tsx}`, `src/e2e/{playwright.config.ts,tests/smoke.spec.ts}`, `.gitignore` (`apps/burgomaster-funeral-poc/data/`), `pnpm-lock.yaml`
+- Touches: `apps/burgomaster-funeral-poc/{package.json,README.md,spec.md}`, `apps/burgomaster-funeral-poc/src/*/{package.json,tsconfig.json}`, `src/server/vitest.config.ts`, `src/protocols/vitest.config.ts`, `src/web/vitest.config.ts`, `src/protocols/{index.ts,types.ts,types.test.ts,messages.ts,messages.test.ts}`, `src/server/{index.ts,server.ts,server.test.ts,config.ts,config.test.ts,adapters/.gitkeep,db/.gitkeep,scripts/.gitkeep}`, `src/web/{next.config.ts,postcss.config.mjs,app/layout.tsx,app/page.tsx,app/globals.css,lib/door.ts,lib/door.test.ts,components/ui/.gitkeep}`, `src/e2e/{playwright.config.ts,tests/smoke.spec.ts}`, `.gitignore` (`apps/burgomaster-funeral-poc/data/`), `pnpm-lock.yaml`, this plan (the deviation below)
 - Deps change: **yes** (the only one in this plan; every dependency later steps need is added here)
+- Deviation: the G0 layout and the step brief also name `server.ts`, `adapters/`, `db/`, `scripts/`, `components/ui/` and `lib/`, plus the CSS and PostCSS the Next shell needs to build. `spec.md` is a stub that step 2 replaces. `server.ts` only serves the static export and `GET /health`. The cue sheet is untouched (step 3 is deferred). No tower code.
 - Scope: the four packages in the layout above. `config.ts` reads `.wt.json` for ports and `dataDir`. The Next.js shell shows the "Burgomaster's Funeral POC" door (flow step 1). `protocols` holds the shared contract from PRD §6–§8: hunter ids, per-hunter state, story items, moment ids and targets (`dashboard` | `ipad:<hunter>`), cue ids, event types and payloads, and the WS messages with Zod schemas. Later steps add their own modules only; changing `protocols/types.ts` or `messages.ts` after this step is a plan deviation.
 - Covers: PRD-1 (structure), R-ENG-9, G0 layout condition. SC: none directly.
 - Proof: `pnpm check` and `pnpm build` green; smoke e2e passes on the configured port.
@@ -236,3 +237,4 @@ Note on the cue sheet path: PRD-40 names `shared/tower/cues.json`; the asset kit
 ## Results
 
 - **G0** — approved by Bob, 2026-10-14 3:54 PM ET. The PRD (rev 3 at approval, rev 4 now) is the intent. Condition: the funeral POC uses the `apps/tower-poc` source layout (`src/{web,server,protocols,e2e}`, tests beside their files, `data/`, `docs/`, `plans/`, `spec.md`, `README`; `assets/` unchanged).
+- **Step 1** — scaffold and the protocols contract. `spec.md` is a stub for step 2. The cue sheet was not changed (step 3 is deferred). No tower code.

@@ -1,0 +1,16 @@
+{
+  "name": "burgomaster-funeral-poc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Burgomaster's Funeral POC. Orchestrates its parts under src/: web, server, protocols, e2e.",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently --kill-others --names server,web --prefix-colors blue,green \"pnpm -F burgomaster-funeral-poc-server dev\" \"pnpm -F burgomaster-funeral-poc-web dev\"",
+    "build": "pnpm -F burgomaster-funeral-poc-web build",
+    "start": "pnpm -F burgomaster-funeral-poc-server start",
+    "e2e": "pnpm -F burgomaster-funeral-poc-e2e e2e"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.6"
+  }
+}
