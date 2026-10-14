@@ -197,8 +197,14 @@ const handleMessage = (
         if (error instanceof NoPendingRestoreError) {
           return sendError(socket, "invalid-state", error.message, id);
         }
-        throw error;
+        // A bug in the service; thrown here it would stop the whole process.
+        return console.error("Restoring state failed:", error);
       }
+    default: {
+      // A client message type with no case here is a compile error, not a message left unanswered.
+      const unhandled: never = message.data;
+      return unhandled;
+    }
   }
 };
 
