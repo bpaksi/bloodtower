@@ -10,3 +10,7 @@ onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
   - lefthook
+# @types/better-sqlite3 asks for any @types/node and would take the newest in the workspace
+# (Visuals pins 26.x). The tower service is typed against Node 22, so hold that edge to its pin.
+overrides:
+  "@types/better-sqlite3>@types/node": "22.20.5"
