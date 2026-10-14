@@ -176,9 +176,22 @@ describe("inventory entries", () => {
   });
 
   it("claims no verification the repo cannot back", () => {
-    // `mock-tested` needs a test that drives the capability through the mock adapter,
-    // and the mock adapter does not exist before M2.
-    expect(entries.filter((entry) => entry.verification !== "untested")).toEqual([]);
+    // `mock-tested` needs a test that drives the capability through the mock adapter and a
+    // control on its page. Each id here names where that is done; add one only with both.
+    const backed = [
+      // executor.test.ts, "lighting on the mock"; the Lights page (e2e lights.spec.ts).
+      "lighting.all-off",
+      "lighting.all-on",
+      "lighting.sequence",
+      "lighting.set",
+      "lighting.set-led",
+    ];
+    expect(
+      entries
+        .filter((entry) => entry.verification !== "untested")
+        .map((entry) => entry.id)
+        .sort(),
+    ).toEqual(backed);
   });
 
   it("gates every mechanics command and every drum or glyph reading on calibration (D9)", () => {

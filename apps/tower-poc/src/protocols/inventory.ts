@@ -493,7 +493,7 @@ export const inventory = [
     params: lightsParamsSchema,
     availability: "available",
     uiLocation: "lights",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: \`Lights\` is the deprecated alias of \`lights\`; the service calls \`lights\`. The library turns an unknown style into off, so style is an enum here. Whether lights work before calibration is GAP-HW-001.`,
   },
   {
@@ -505,7 +505,7 @@ export const inventory = [
     params: z.strictObject({ effect: lightEffectSchema.optional() }),
     availability: "available",
     uiLocation: "lights",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: the effect defaults to on. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the executor serialises it with the other commands and spaces it 250 ms from them.`,
   },
   {
@@ -517,7 +517,7 @@ export const inventory = [
     params: noParams,
     availability: "available",
     uiLocation: "lights",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the executor serialises it with the other commands and spaces it 250 ms from them.`,
   },
   {
@@ -532,7 +532,7 @@ export const inventory = [
     }),
     availability: "available",
     uiLocation: "lights",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (SILENT_LIGHT_SEQUENCES) move no drum and the tower does not answer them (${SPIKE}, findings 4 and 7), so the executor sends them straight to the tower without waiting, only to a calibrated tower and never with a sound, and ends them as indeterminate (D23). In the M2 hardware smoke, rotationAllDrums, rotationDrumTop and rotationDrumBottom each lit its lights, and those lights stayed on until the next command (its clearing write and its own packet) turned them off; the sound sent after it played once (${SMOKE}). rotationDrumMiddle was not played there and is still not accepted (HELD_LIGHT_SEQUENCES, GAP-HW-007).`,
   },
   {
@@ -555,7 +555,7 @@ export const inventory = [
     }),
     availability: "available",
     uiLocation: "lights",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: the library takes plain numbers. Ranges from the method's documentation (${NOTE}, finding 10). Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2).`,
   },
 

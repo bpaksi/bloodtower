@@ -13,10 +13,9 @@ import {
 } from "tower-poc-protocols";
 import { CommandStatus } from "@/components/controls/CommandStatus";
 import { Button } from "@/components/ui/button";
-import { controlState, describeRequested, errorsByField } from "@/lib/controls";
-import { latestCommand } from "@/lib/service";
-import { useService } from "@/lib/store";
+import { describeRequested, errorsByField } from "@/lib/controls";
 import { useCommand } from "@/lib/useCommand";
+import { useControlState, useLatestCommand } from "@/lib/useControl";
 
 const FIELD_CLASS =
   "h-11 w-full rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 aria-invalid:border-destructive sm:text-sm";
@@ -153,18 +152,8 @@ export function CapabilityControl({
   const [editedSinceSend, setEditedSinceSend] = useState(false);
   const command = useCommand(capabilityId);
 
-  const online = useService((view) => view.socket === "online");
-  const connection = useService((view) => view.connection);
-  const entry = useService((view) =>
-    view.welcome?.inventory.find((candidate) => candidate.id === capabilityId),
-  );
-  const ownClientIds = useService((view) => view.ownClientIds);
-  // The newest command for this capability from any device, so every screen shows the same (D7).
-  const latest = useService((view) => latestCommand(view.commands, capabilityId));
-  const latestId = latest?.[0]?.commandId;
-  const latestInterrupted = useService((view) =>
-    latestId ? view.interrupted[latestId] === true : false,
-  );
+  const state = useControlState(capabilityId);
+  const latest = useLatestCommand(capabilityId, command.commandId);
 
   const name = title ?? capability?.title ?? capabilityId;
   if (!capability || !form?.ok) {
@@ -175,13 +164,9 @@ export function CapabilityControl({
   }
   const fields = form.fields;
 
-  const state = controlState({ online, connection, entry });
   const disabled = !state.enabled || command.pending;
 
-  const ownLatest = latestId !== undefined && latestId === command.commandId;
-  const sender =
-    latest?.[0] && ownClientIds.includes(latest[0].clientId) ? "this device" : "another device";
-  const serviceIssues = ownLatest && !editedSinceSend ? (latest?.at(-1)?.issues ?? []) : [];
+  const serviceIssues = latest.own && !editedSinceSend ? (latest.stages?.at(-1)?.issues ?? []) : [];
   const errors = errorsByField(fields, localIssues.length > 0 ? localIssues : serviceIssues);
 
   const submit = () => {
@@ -249,14 +234,14 @@ export function CapabilityControl({
           Not sent: the service is not reachable.
         </p>
       )}
-      {latest?.[0] && (
+      {latest.stages?.[0] && (
         <div className="mt-4">
           <CommandStatus
             name={statusName ?? name}
-            stages={latest}
-            interrupted={latestInterrupted}
-            sender={sender}
-            requested={ownLatest ? describeRequested(fields, command.requested) : undefined}
+            stages={latest.stages}
+            interrupted={latest.interrupted}
+            sender={latest.sender}
+            requested={latest.own ? describeRequested(fields, command.requested) : undefined}
           />
         </div>
       )}

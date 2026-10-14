@@ -38,9 +38,7 @@ test("two devices share one tower: connect, calibrate, play, disconnect", async 
   browser,
   playwright,
 }, testInfo) => {
-  // Every project shares the one mock tower behind the server, so this runs once, not per
-  // viewport. It opens both devices itself.
-  test.skip(testInfo.project.name !== "desktop", "one shared mock tower; runs in one project");
+  // It opens both devices itself; the tower project runs it once (playwright.config.ts).
   // Connect, 3 s of mock calibration, a sound, and two browsers starting.
   test.setTimeout(60_000);
 

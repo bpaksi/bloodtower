@@ -227,6 +227,57 @@ describe("command executor: what reaches the library", () => {
   });
 });
 
+describe("command executor: lighting on the mock (M3 step 3.2)", () => {
+  // Every lighting control on the Lights page, in the order a person might press them. Each one
+  // writes to the tower; how it ends is what the mock answers, as the tower did in the M1 spike.
+  const LIGHTING: [id: string, params: unknown][] = [
+    ["lighting.all-on", { effect: "breathe" }],
+    [
+      "lighting.set",
+      {
+        doorway: [{ position: "north", level: "top", style: "on" }],
+        ledge: [{ position: "southwest", style: "flicker" }],
+        base: [{ position: { side: "east", level: "bottom" }, style: "breatheFast" }],
+      },
+    ],
+    ["lighting.set-led", { layerIndex: 0, lightIndex: 1, effect: "breathe50percent", loop: true }],
+    ["lighting.sequence", { sequence: "twinkle", soundIndex: 1 }],
+    ["lighting.all-off", {}],
+  ];
+
+  for (const state of ["connected", "calibrated"] as const) {
+    it(`sends each lighting command to a ${state} tower, and the tower answers`, async () => {
+      const { submit, stages, writes } = await setup(state);
+      for (const [id, params] of LIGHTING) {
+        const before = writes().length;
+        const { commandId, done } = submit(id, params);
+        await finish(done);
+        expect(stages(commandId), id).toEqual([
+          "queued",
+          "started",
+          "write-completed",
+          "confirmed",
+        ]);
+        expect(writes().length, id).toBeGreaterThan(before);
+      }
+    });
+  }
+
+  it("plays a rotation sequence only on a calibrated tower, and ends it unanswered (D23)", async () => {
+    const uncalibrated = await setup("connected");
+    const refused = uncalibrated.submit("lighting.sequence", { sequence: "rotationDrumTop" });
+    await finish(refused.done);
+    expect(uncalibrated.stages(refused.commandId)).toEqual(["rejected"]);
+    expect(uncalibrated.writes()).toEqual([]);
+
+    const { submit, stages, writes } = await setup("calibrated");
+    const { commandId, done } = submit("lighting.sequence", { sequence: "rotationDrumTop" });
+    await finish(done);
+    expect(stages(commandId)).toEqual(["queued", "started", "write-completed", "indeterminate"]);
+    expect(writes()).toHaveLength(1);
+  });
+});
+
 describe("command executor: lifecycle", () => {
   it("confirms a sound the tower echoes, attributed to its sender", async () => {
     const { submit, seen, writes } = await setup();

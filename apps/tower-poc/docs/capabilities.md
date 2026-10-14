@@ -73,11 +73,11 @@ By availability:
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `lighting.set` | Set lights | command | available | `lights`, `Lights` | `doorway?: list (1..12 items) of { position: one of north, east, south, west; level: one of top, middle, bottom; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }; ledge?: list (1..4 items) of { position: one of northeast, southeast, southwest, northwest; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }; base?: list (1..8 items) of { position: { side: one of north, east, south, west; level: one of top, bottom }; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }` | lights | untested |
-| `lighting.all-on` | All lights on | command | available | `allLightsOn` | `effect?: one of off, on, breathe, breatheFast, breathe50percent, flicker` | lights | untested |
-| `lighting.all-off` | All lights off | command | available | `allLightsOff` | `none` | lights | untested |
-| `lighting.sequence` | Play a light sequence | command | available | `lightOverrides` | `sequence: one of twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01, angryStrobe02, angryStrobe03, gloat01, gloat02, gloat03, defeat, victory, dungeonIdle, sealReveal, rotationAllDrums, rotationDrumTop, rotationDrumBottom, monthStarted, wholeTowerBreathing, slowFlareThenFade; soundIndex?: int 1..113` | lights | untested |
-| `lighting.set-led` | Set one LED | command | available | `setLED` | `layerIndex: int 0..5; lightIndex: int 0..3; effect: one of off, on, breathe, breatheFast, breathe50percent, flicker; loop?: boolean` | lights | untested |
+| `lighting.set` | Set lights | command | available | `lights`, `Lights` | `doorway?: list (1..12 items) of { position: one of north, east, south, west; level: one of top, middle, bottom; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }; ledge?: list (1..4 items) of { position: one of northeast, southeast, southwest, northwest; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }; base?: list (1..8 items) of { position: { side: one of north, east, south, west; level: one of top, bottom }; style: one of off, on, breathe, breatheFast, breathe50percent, flicker }` | lights | mock-tested |
+| `lighting.all-on` | All lights on | command | available | `allLightsOn` | `effect?: one of off, on, breathe, breatheFast, breathe50percent, flicker` | lights | mock-tested |
+| `lighting.all-off` | All lights off | command | available | `allLightsOff` | `none` | lights | mock-tested |
+| `lighting.sequence` | Play a light sequence | command | available | `lightOverrides` | `sequence: one of twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01, angryStrobe02, angryStrobe03, gloat01, gloat02, gloat03, defeat, victory, dungeonIdle, sealReveal, rotationAllDrums, rotationDrumTop, rotationDrumBottom, monthStarted, wholeTowerBreathing, slowFlareThenFade; soundIndex?: int 1..113` | lights | mock-tested |
+| `lighting.set-led` | Set one LED | command | available | `setLED` | `layerIndex: int 0..5; lightIndex: int 0..3; effect: one of off, on, breathe, breatheFast, breathe50percent, flicker; loop?: boolean` | lights | mock-tested |
 
 ### sound
 
