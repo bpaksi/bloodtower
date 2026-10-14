@@ -1,7 +1,7 @@
 # M1 — Burgomaster's Funeral POC (build plan)
 
 **Status:** G0 approved by Bob, 2026-10-14 3:54 PM ET, with one condition (app layout, below). Nothing is built yet. Batch B1 may start.
-**Source:** `docs/PRD.md` rev 4 (R4-1..R4-3, 2026-10-14 16:00 ET), which keeps the rev 3 rulings R3-1..R3-12. The PRD is this app's intent (G0). Where this plan and the PRD differ, the PRD wins until the spec (step 2) is approved.
+**Source:** `docs/PRD.md` rev 5 (R5-1 timing, PRD-41..43, AT-31..32, 2026-10-14 16:15 ET), with rev 4 (R4-1..R4-3), which keeps the rev 3 rulings R3-1..R3-12. The PRD is this app's intent (G0). Where this plan and the PRD differ, the PRD wins until the spec (step 2) is approved.
 **Goal:** the scene `n2-burgomasters-funeral` plays end to end on the Mac host, the Dashboard and 1+ devices holding all 4 hunters, **with no tower**: every cue plays its screen half plus its fallback audio, and the Dashboard runs the E16 ambient bed. SC-1..SC-5 are met in that form.
 **Exit condition:** every POC acceptance test in PRD §11 passes (AT-18 by Bob's notes), and Bob signs off at G3.
 
@@ -63,6 +63,14 @@ Stack (R-ENG-9, repo conventions): Next.js + React, pnpm workspace, SQLite throu
 - Deps change: no
 - Scope: PRD-40. The cue sheet (`assets/cues/cue-sheet.json`, the file the asset kit already has; the PRD calls it `shared/tower/cues.json`, see note) is the contract. One entry per cue id used by the scene: `dim-all`, `heartbeat`, `skull-drop`, the investigation seal flicker (`seal-sequence`), and the E16 bed and accent ids. Each entry has its **screen half** (effect, duration) and its **fallback audio** (asset id from the manifest), plus an empty `tower` slot that Phase 2 fills without renaming the id. No colour, no waiting on a sound to end; all audio from the Mac (PRD-13 POC form). Data only.
 - Covers: PRD-12, PRD-13, PRD-39 (data), PRD-40, R4-2, R4-3. SC-1.
+
+### Step 2b: Timing contract follow-up (rev 5)
+- Owner: Wright
+- Depends on: 1, 2
+- Touches: `apps/burgomaster-funeral-poc/src/protocols/timing.ts`, `src/protocols/timing.test.ts`, `src/protocols/index.ts` (export only), `apps/burgomaster-funeral-poc/spec.md` (PRD-41/42 sections)
+- Deps change: no
+- Scope: adds the PRD-41 timing event types to `protocols` (phase, moment, investigation pick, table talk, battle screen, cue start/end; pause start/end with cause; monotonic + wall time) as an agreed deviation from step 1's frozen contract, and writes the PRD-41 and PRD-42 sections in `spec.md`. Steps 7, 11, 12 and 14 build the rows, summary and tests on these types.
+- Covers: PRD-41, PRD-42 (contract). PRD-43 is docs only (formula in the PRD; nothing built).
 
 ### Step 4: Party, presence and holdings state
 - Depends on: 1
@@ -175,6 +183,14 @@ Stack (R-ENG-9, repo conventions): Next.js + React, pnpm workspace, SQLite throu
 - Deps change: no
 - Bob confirms SC-1..SC-5 and closes M1. Phase 2 (tower control, PRD §13) is planned as a separate milestone.
 
+## Local demo slice
+
+- Owner: Wright (adds it); Bob runs it locally
+- Depends on: 1
+- Touches: `apps/burgomaster-funeral-poc/src/demo/**` and a `demo` script in the app's `package.json`, on its own branch on top of step 1
+- Deps change: no
+- Scope: an extra PR that shows join by QR, one device holding all 4 hunters, the opening moments with captions and the ambient pulse, and the investigation picks with one private finding. A throwaway slice for feel; the batched steps replace it, and nothing depends on it.
+
 ## Batches
 
 Every batch waits for all of its dependencies. Steps in a batch touch disjoint paths, and only step 1 changes dependencies. Wright runs at most three developers at once inside a batch; the merge order is the order listed.
@@ -182,7 +198,8 @@ Every batch waits for all of its dependencies. Steps in a batch touch disjoint p
 | Batch | Steps | Depends on | Merge order | Why it is grouped this way |
 |---|---|---|---|---|
 | G0 | Bob approves the plan | — | — | Gate. **Done 2026-10-14 3:54 PM ET** |
-| B1 | 1, 2, 3 | G0 | 1, 3, 2 | Everything that needs no app package yet. Step 1 is the only `Deps change: yes`; 2 is docs; 3 is data |
+| B1 | 1, 2, 3, 2b | G0 | 1, 3, 2, 2b | Everything that needs no app package yet. Step 1 is the only `Deps change: yes`; 2 is docs; 3 is data |
+| Demo | Local demo slice | 1 | after 1 | Extra PR for Bob to run locally; not a gate |
 | B2 | 4, 5, 6, 7, 8, 9, 10 | B1 | 4, 6, 5, 10, 7, 9, 8 | Server logic folders and the cue player, each in its own folder, built against `protocols` |
 | B3 | 11, 12, 13 | B2 | 11, 12, 13 | Integration on the server, and the two UIs in separate folders |
 | B4 | 14, 15 | B3 (15 needs only 11) | 15, 14 | Acceptance suite and log reconstruction |
@@ -203,7 +220,7 @@ Batch 1 cannot be wider: every code step needs step 1's package files and lockfi
 | SC-4 stats rows reconstruct the run | 5, 7, 11, 15 | AT-14, AT-15 |
 | SC-5 fight is tense | 6, **G2** | AT-18 |
 
-PRD → steps (POC IDs): PRD-1 (1, 4, 11), PRD-2 (12), PRD-3 (9, 12), PRD-4 (9, 13), PRD-7 (5), PRD-8 (5), PRD-9 (5), PRD-10 (6), PRD-11 (8, 11), PRD-12 (3, 8), PRD-13 (3, 8), PRD-14 (6, 12), PRD-15 (6), PRD-16 (6), PRD-17 (5), PRD-18 (9), PRD-19 (9), PRD-20 (9), PRD-21 (5), PRD-22 (6), PRD-23 (7, 15), PRD-24 (7, 8), PRD-25 (11, 12, 13), PRD-26 (10), PRD-27 (10), PRD-29 (5, 15), PRD-30 (13), PRD-31 (11, 12), PRD-32 (4), PRD-33 (4, 12), PRD-34 (4, 11), PRD-35 (9, 13), PRD-36 (4), PRD-37 (4, 6), PRD-38 (7), **PRD-39 (3, 8, 12)**, **PRD-40 (3, 8, 10)**.
+PRD → steps (POC IDs): PRD-1 (1, 4, 11), PRD-2 (12), PRD-3 (9, 12), PRD-4 (9, 13), PRD-7 (5), PRD-8 (5), PRD-9 (5), PRD-10 (6), PRD-11 (8, 11), PRD-12 (3, 8), PRD-13 (3, 8), PRD-14 (6, 12), PRD-15 (6), PRD-16 (6), PRD-17 (5), PRD-18 (9), PRD-19 (9), PRD-20 (9), PRD-21 (5), PRD-22 (6), PRD-23 (7, 15), PRD-24 (7, 8), PRD-25 (11, 12, 13), PRD-26 (10), PRD-27 (10), PRD-29 (5, 15), PRD-30 (13), PRD-31 (11, 12), PRD-32 (4), PRD-33 (4, 12), PRD-34 (4, 11), PRD-35 (9, 13), PRD-36 (4), PRD-37 (4, 6), PRD-38 (7), **PRD-39 (3, 8, 12)**, **PRD-40 (3, 8, 10)**, **PRD-41 (2b, 7, 11, 15)**, **PRD-42 (2b, 12)**, PRD-43 (docs only, nothing built). AT-31 (14), AT-32 (14).
 
 Phase 2, not in M1: PRD-5, PRD-6, PRD-28, the §13 tower halves of PRD-1, -2, -11, -12, -13, -24, -29, R3-3 suppression, R3-10 self-test, host tower mode, and AT-1 / AT-2 / AT-15 / AT-26 (tower), AT-13, AT-29, AT-30.
 
