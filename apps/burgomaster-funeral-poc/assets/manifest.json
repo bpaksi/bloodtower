@@ -1,0 +1,1366 @@
+{
+  "n2-burgomasters-funeral.01": {
+    "id": "n2-burgomasters-funeral.01",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.01@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Narrator: Vellmoor buries its burgomaster without a priest and without his daughter. Hanne reads the words, badly, from Oskar's book. Beside Anton lies Dorka Halasz, nineteen, in her wedding dress, because her mother said she'd waited long enough to wear it.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.01.vo-01": {
+    "id": "n2-burgomasters-funeral.01.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.01.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "Vellmoor buries its burgomaster without a priest and without his daughter. Hanne reads the words, badly, from Oskar's book. Beside Anton lies Dorka Halasz, nineteen, in her wedding dress, because her mother said she'd waited long enough to wear it.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.01"
+  },
+  "n2-burgomasters-funeral.02": {
+    "id": "n2-burgomasters-funeral.02",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.02@dashboard.png",
+    "status": "placeholder",
+    "text": "Agnes: She ran after Lenka, up the hill, in the dark. Alone. / Wren: Braver than the rest of this valley. Lid's not nailed.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.02.vo-01": {
+    "id": "n2-burgomasters-funeral.02.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.02.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "She ran after Lenka, up the hill, in the dark. Alone.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.02"
+  },
+  "n2-burgomasters-funeral.02.vo-02": {
+    "id": "n2-burgomasters-funeral.02.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.02.vo-02.wren.wav",
+    "status": "placeholder",
+    "text": "Braver than the rest of this valley. Lid's not nailed.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.02"
+  },
+  "n2-burgomasters-funeral.03": {
+    "id": "n2-burgomasters-funeral.03",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.03@dashboard.png",
+    "status": "placeholder",
+    "text": "Emeric: It's a wake. You don't nail it at a — oh. Oh, you nail it at a wake here.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.03.vo-01": {
+    "id": "n2-burgomasters-funeral.03.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.03.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "It's a wake. You don't nail it at a — oh. Oh, you nail it at a wake here.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.03"
+  },
+  "n2-burgomasters-funeral.investigate": {
+    "id": "n2-burgomasters-funeral.investigate",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.investigate@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: The mourners keep their vigil. You have one candle's length, no more, before something in this church happens. Use it.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.investigate.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "The mourners keep their vigil. You have one candle's length, no more, before something in this church happens. Use it.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.investigate"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body",
+    "type": "card",
+    "target": "ipad:all",
+    "path": "cards/n2-burgomasters-funeral.investigate.examine-body.png",
+    "status": "placeholder",
+    "text": "Card 1: Examine Dorka’s body. Look closely at the girl in the wedding dress."
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): Two bites. One old, one made after her heart stopped. Mother Ursula had the same pair, the morning she sat up. He sends the dead to fetch the living.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "Two bites. One old, one made after her heart stopped. Mother Ursula had the same pair, the morning she sat up. He sends the dead to fetch the living.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): Two wounds, lass. One she took alive. The other's cold work, done after. Like a sentry posted on a corpse. He's sending her somewhere.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "Two wounds, lass. One she took alive. The other's cold work, done after. Like a sentry posted on a corpse. He's sending her somewhere.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): Two bites. Second one's after death; no bruising. Mother taught me to read a body before you box it. This one's been sent.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Two bites. Second one's after death; no bruising. Mother taught me to read a body before you box it. This one's been sent.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): Two punctures, the second post-mortem. Gerhardt's treatise, chapter nine: \"the sending.\" She isn't a victim. She's a messenger. Keep a stake ready.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "Two punctures, the second post-mortem. Gerhardt's treatise, chapter nine: \"the sending.\" She isn't a victim. She's a messenger. Keep a stake ready.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother",
+    "type": "card",
+    "target": "ipad:all",
+    "path": "cards/n2-burgomasters-funeral.investigate.question-mother.png",
+    "status": "placeholder",
+    "text": "Card 2: Question Dorka’s mother. Sit with the mother. Ask about last night."
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): Her mother heard Dorka singing under the window last night. She opened it to let her daughter in. I told her what I should have told my sisters: bar it. She has.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "Her mother heard Dorka singing under the window last night. She opened it to let her daughter in. I told her what I should have told my sisters: bar it. She has.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): The mother heard her girl singing under the window, and left it open for her. I'd have done the same for Marta. I told her to bar it anyway. She did.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "The mother heard her girl singing under the window, and left it open for her. I'd have done the same for Marta. I told her to bar it anyway. She did.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.investigate.question-mother.singing.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): Mother heard Dorka singing under the window last night. Left it open. My mother would've nailed it shut. I told her to. She's barring it now.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.question-mother.singing.private.wren.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Mother heard Dorka singing under the window last night. Left it open. My mother would've nailed it shut. I told her to. She's barring it now.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): She heard her daughter singing outside the window, a wedding song, and she left the window open. Folklore, page forty: they sing to be let in. I asked her to bar it. She's doing it.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "She heard her daughter singing outside the window, a wedding song, and she left the window open. Folklore, page forty: they sing to be let in. I asked her to bar it. She's doing it.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat",
+    "type": "card",
+    "target": "ipad:all",
+    "path": "cards/n2-burgomasters-funeral.investigate.anton-coat.png",
+    "status": "placeholder",
+    "text": "Card 3: Search Anton’s coat. Go through the dead burgomaster’s pockets."
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): In Anton's coat, a flask of holy water he never had the chance to use, and a scrap in his ledger hand: \"the lady's rooms.\" He knew where he'd take her.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "In Anton's coat, a flask of holy water he never had the chance to use, and a scrap in his ledger hand: \"the lady's rooms.\" He knew where he'd take her.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): Coat's heavy on one side: a flask of holy water, stopper sealed. And a note, the burgomaster's hand: \"the lady's rooms.\" Castle talk. I know that wing.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "Coat's heavy on one side: a flask of holy water, stopper sealed. And a note, the burgomaster's hand: \"the lady's rooms.\" Castle talk. I know that wing.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): Holy water in his coat. Full. Didn't get to use it. Scrap of paper too: \"the lady's rooms.\" Keeping both.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Holy water in his coat. Full. Didn't get to use it. Scrap of paper too: \"the lady's rooms.\" Keeping both.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): A flask of holy water, unopened, and a scrap: \"the lady's rooms.\" A burgomaster's note, a ledger-keeper's hand. He was trying to work out where she'd be held.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "A flask of holy water, unopened, and a scrap: \"the lady's rooms.\" A burgomaster's note, a ledger-keeper's hand. He was trying to work out where she'd be held.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins",
+    "type": "card",
+    "target": "ipad:all",
+    "path": "cards/n2-burgomasters-funeral.investigate.pray-over-coffins.png",
+    "status": "placeholder",
+    "text": "Card 4: Pray over the coffins. Kneel between the two coffins and pray."
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): I pray for Anton, and then for her, and then, God help me, for him, the way I did in the chapel. The prayer holds. Every candle leans away from Dorka's coffin.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "I pray for Anton, and then for her, and then, God help me, for him, the way I did in the chapel. The prayer holds. Every candle leans away from Dorka's coffin.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): I'm no praying man. I say the guard's words for the dead, the short ones. It holds. The candlelight bends away from the girl's coffin, like it won't touch her.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "I'm no praying man. I say the guard's words for the dead, the short ones. It holds. The candlelight bends away from the girl's coffin, like it won't touch her.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): Said the words Mother said over every grave-row. They hold. The light leans off Dorka's coffin. This floor's ours now.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Said the words Mother said over every grave-row. They hold. The light leans off Dorka's coffin. This floor's ours now.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): I don't know the proper words, so I read the burial office from Oskar's book, very fast. The prayer holds. The candle flames lean away from Dorka's coffin. Consecrated. Ground. Noted.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "I don't know the proper words, so I read the burial office from Oskar's book, very fast. The prayer holds. The candle flames lean away from Dorka's coffin. Consecrated. Ground. Noted.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner",
+    "type": "card",
+    "target": "ipad:all",
+    "path": "cards/n2-burgomasters-funeral.investigate.follow-the-mourner.png",
+    "status": "placeholder",
+    "text": "Card 5: Follow the cloaked mourner (risky). A mourner slips out. Go after them alone."
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.cue": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.cue",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.investigate.follow-the-mourner.cue@dashboard.png",
+    "status": "placeholder",
+    "text": "",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): I follow the cloaked mourner into the churchyard. A man in castle grey lays a pressed violet on Anton's grave and says to no one: \"She still refuses.\" I know that bow. The traveler's servant bowed like that at Saint Ysolde.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "I follow the cloaked mourner into the churchyard. A man in castle grey lays a pressed violet on Anton's grave and says to no one: \"She still refuses.\" I know that bow. The traveler's servant bowed like that at Saint Ysolde.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): I tail the cloak to the churchyard, quiet, the way the guard taught us. Castle servant. He lays a violet on Anton's grave and says: \"She still refuses.\" Then he goes up the hill road, toward the lady's rooms.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "I tail the cloak to the churchyard, quiet, the way the guard taught us. Castle servant. He lays a violet on Anton's grave and says: \"She still refuses.\" Then he goes up the hill road, toward the lady's rooms.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): Followed the cloak out. Castle servant. Put a violet on Anton's grave. Said: \"She still refuses.\" Went up toward the east wing. The lady's rooms.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Followed the cloak out. Castle servant. Put a violet on Anton's grave. Said: \"She still refuses.\" Went up toward the east wing. The lady's rooms.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): I followed. I don't know why I followed. A castle servant left a pressed violet on Anton's grave and said, \"She still refuses.\" Then he walked up toward the east wing, where Gerhardt marked \"the lady's rooms.\"",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "I followed. I don't know why I followed. A castle servant left a pressed violet on Anton's grave and said, \"She still refuses.\" Then he walked up toward the east wing, where Gerhardt marked \"the lady's rooms.\"",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric"
+  },
+  "n2-burgomasters-funeral.investigate.share": {
+    "id": "n2-burgomasters-funeral.investigate.share",
+    "type": "card",
+    "target": "ipad:all",
+    "path": "cards/n2-burgomasters-funeral.investigate.share.png",
+    "status": "placeholder",
+    "text": ""
+  },
+  "n2-burgomasters-funeral.investigate.share.vo-01": {
+    "id": "n2-burgomasters-funeral.investigate.share.vo-01",
+    "type": "line",
+    "target": "ipad:all",
+    "path": "audio/lines/n2-burgomasters-funeral.investigate.share.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "The candle is out. Share what you found, or keep it. Then look at the second coffin.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.investigate.share"
+  },
+  "n2-burgomasters-funeral.lid-choice": {
+    "id": "n2-burgomasters-funeral.lid-choice",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.lid-choice@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: The flies have gone quiet. Every candle leans toward the second coffin. There is time, just, to put a stake through a girl in her wedding dress in front of her mother. Or there is time to wait and be sure.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.lid-choice.vo-01": {
+    "id": "n2-burgomasters-funeral.lid-choice.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "The flies have gone quiet. Every candle leans toward the second coffin. There is time, just, to put a stake through a girl in her wedding dress in front of her mother. Or there is time to wait and be sure.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.lid-choice"
+  },
+  "n2-burgomasters-funeral.lid-choice~nailed": {
+    "id": "n2-burgomasters-funeral.lid-choice~nailed",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.lid-choice~nailed@dashboard.png",
+    "status": "placeholder",
+    "text": "Wren: Sorry, Dorka. / Narrator: The hammer is very loud in the little church. The stake goes in crooked. Her mother does not scream; she just stops breathing for a while.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.lid-choice~nailed.vo-01": {
+    "id": "n2-burgomasters-funeral.lid-choice~nailed.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~nailed.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Sorry, Dorka.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed"
+  },
+  "n2-burgomasters-funeral.lid-choice~nailed.vo-02": {
+    "id": "n2-burgomasters-funeral.lid-choice~nailed.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~nailed.vo-02.narrator.wav",
+    "status": "placeholder",
+    "text": "The hammer is very loud in the little church. The stake goes in crooked. Her mother does not scream; she just stops breathing for a while.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed"
+  },
+  "n2-burgomasters-funeral.lid-choice~watched": {
+    "id": "n2-burgomasters-funeral.lid-choice~watched",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.lid-choice~watched@dashboard.png",
+    "status": "placeholder",
+    "text": "Agnes: We wait. If she's only a dead girl, she deserves to be buried whole. / Narrator: Nobody in the church looks away from the coffin, so nobody sees the candles go out one by one along the back wall.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.lid-choice~watched.vo-01": {
+    "id": "n2-burgomasters-funeral.lid-choice~watched.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~watched.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "We wait. If she's only a dead girl, she deserves to be buried whole.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.lid-choice~watched"
+  },
+  "n2-burgomasters-funeral.lid-choice~watched.vo-02": {
+    "id": "n2-burgomasters-funeral.lid-choice~watched.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~watched.vo-02.narrator.wav",
+    "status": "placeholder",
+    "text": "Nobody in the church looks away from the coffin, so nobody sees the candles go out one by one along the back wall.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.lid-choice~watched"
+  },
+  "n2-burgomasters-funeral.04": {
+    "id": "n2-burgomasters-funeral.04",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.04@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Narrator: The candles bow all at once. Dorka Halasz sits up in her wedding dress, and it is the sweetest smile anyone in the room has ever seen.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.04.vo-01": {
+    "id": "n2-burgomasters-funeral.04.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.04.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "The candles bow all at once. Dorka Halasz sits up in her wedding dress, and it is the sweetest smile anyone in the room has ever seen.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.04"
+  },
+  "n2-burgomasters-funeral.05": {
+    "id": "n2-burgomasters-funeral.05",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.05@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Dorka: Come to me. Leave these others and come to me. My arms are hungry for you. Lenka's waiting. She'll be so glad. / Agnes: Lenka is waiting for us, child. Not for you.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.05.vo-01": {
+    "id": "n2-burgomasters-funeral.05.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.05.vo-01.dorka.wav",
+    "status": "placeholder",
+    "text": "Come to me. Leave these others and come to me. My arms are hungry for you. Lenka's waiting. She'll be so glad.",
+    "speaker": "dorka",
+    "moment": "n2-burgomasters-funeral.05"
+  },
+  "n2-burgomasters-funeral.05.vo-02": {
+    "id": "n2-burgomasters-funeral.05.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.05.vo-02.agnes.wav",
+    "status": "placeholder",
+    "text": "Lenka is waiting for us, child. Not for you.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.05"
+  },
+  "n2-burgomasters-funeral.06": {
+    "id": "n2-burgomasters-funeral.06",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.06@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Tomas: Everyone out! Behind me! / Dorka: He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no. He's so patient with her.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.06.vo-01": {
+    "id": "n2-burgomasters-funeral.06.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.06.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "Everyone out! Behind me!",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.06"
+  },
+  "n2-burgomasters-funeral.06.vo-02": {
+    "id": "n2-burgomasters-funeral.06.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.06.vo-02.dorka.wav",
+    "status": "placeholder",
+    "text": "He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no. He's so patient with her.",
+    "speaker": "dorka",
+    "moment": "n2-burgomasters-funeral.06"
+  },
+  "n2-burgomasters-funeral.07": {
+    "id": "n2-burgomasters-funeral.07",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.07@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: When it is done, Dorka is only a girl in a wedding dress again, with garlic in her mouth and a peace on her face she did not have a minute ago. / Wren: \"She won't stop saying no.\" Good girl.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.07.vo-01": {
+    "id": "n2-burgomasters-funeral.07.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.07.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "When it is done, Dorka is only a girl in a wedding dress again, with garlic in her mouth and a peace on her face she did not have a minute ago.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.07"
+  },
+  "n2-burgomasters-funeral.07.vo-02": {
+    "id": "n2-burgomasters-funeral.07.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.07.vo-02.wren.wav",
+    "status": "placeholder",
+    "text": "\"She won't stop saying no.\" Good girl.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.07"
+  },
+  "n2-burgomasters-funeral.08": {
+    "id": "n2-burgomasters-funeral.08",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.08@dashboard.png",
+    "status": "placeholder",
+    "text": "Agnes: Hold on to that, all of you. Every night she refuses him is a night she's still ours.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.08.vo-01": {
+    "id": "n2-burgomasters-funeral.08.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.08.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "Hold on to that, all of you. Every night she refuses him is a night she's still ours.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.08"
+  },
+  "n2-burgomasters-funeral.09.private.agnes": {
+    "id": "n2-burgomasters-funeral.09.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.09.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): Mother Ursula sat up like that, on the fourth night. You didn't have a stake then. You do now.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.09.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.09.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.09.private.agnes.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "Mother Ursula sat up like that, on the fourth night. You didn't have a stake then. You do now.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.09.private.agnes"
+  },
+  "n2-burgomasters-funeral.09.private.tomas": {
+    "id": "n2-burgomasters-funeral.09.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.09.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): Dorka served at the castle last winter. Marta knew her. Marta has a wedding dress too, in the chest at the foot of her bed.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.09.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.09.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.09.private.tomas.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "Dorka served at the castle last winter. Marta knew her. Marta has a wedding dress too, in the chest at the foot of her bed.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.09.private.tomas"
+  },
+  "n2-burgomasters-funeral.09.private.wren": {
+    "id": "n2-burgomasters-funeral.09.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.09.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): New bolt: D-O-R-K-A. Your mother laid out every bride in this valley for thirty years. She'd have nailed that lid.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.09.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.09.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.09.private.wren.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "New bolt: D-O-R-K-A. Your mother laid out every bride in this valley for thirty years. She'd have nailed that lid.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.09.private.wren"
+  },
+  "n2-burgomasters-funeral.09.private.emeric": {
+    "id": "n2-burgomasters-funeral.09.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.09.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): Two bites, the second made after death. Gerhardt's treatise called it \"the sending.\" He sends the dead to fetch the living.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.09.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.09.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.09.private.emeric.vo-01.emeric.wav",
+    "status": "placeholder",
+    "text": "Two bites, the second made after death. Gerhardt's treatise called it \"the sending.\" He sends the dead to fetch the living.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.09.private.emeric"
+  },
+  "n2-burgomasters-funeral.10": {
+    "id": "n2-burgomasters-funeral.10",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.10@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: They bury Anton Morosz at dawn, properly. On the lid, someone has left a pressed violet. No one saw who.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.10.vo-01": {
+    "id": "n2-burgomasters-funeral.10.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.10.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "They bury Anton Morosz at dawn, properly. On the lid, someone has left a pressed violet. No one saw who.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.10"
+  },
+  "n2-burgomasters-funeral.lid-choice~nailed~no-wren": {
+    "id": "n2-burgomasters-funeral.lid-choice~nailed~no-wren",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.lid-choice~nailed~no-wren@dashboard.png",
+    "status": "placeholder",
+    "text": "Tomas: Forgive me, girl. / Narrator: The hammer is very loud in the little church. The stake goes in crooked. Her mother does not scream; she just stops breathing for a while.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-01": {
+    "id": "n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "Forgive me, girl.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed~no-wren"
+  },
+  "n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-02": {
+    "id": "n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-02.narrator.wav",
+    "status": "placeholder",
+    "text": "The hammer is very loud in the little church. The stake goes in crooked. Her mother does not scream; she just stops breathing for a while.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed~no-wren"
+  },
+  "n2-burgomasters-funeral.lid-choice~watched~no-agnes": {
+    "id": "n2-burgomasters-funeral.lid-choice~watched~no-agnes",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.lid-choice~watched~no-agnes@dashboard.png",
+    "status": "placeholder",
+    "text": "Tomas: We wait. If she's only a dead girl, she gets buried whole. / Narrator: Nobody in the church looks away from the coffin, so nobody sees the candles go out one by one along the back wall.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "We wait. If she's only a dead girl, she gets buried whole.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.lid-choice~watched~no-agnes"
+  },
+  "n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-02": {
+    "id": "n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-02.narrator.wav",
+    "status": "placeholder",
+    "text": "Nobody in the church looks away from the coffin, so nobody sees the candles go out one by one along the back wall.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.lid-choice~watched~no-agnes"
+  },
+  "n2-burgomasters-funeral.07~fight-lost": {
+    "id": "n2-burgomasters-funeral.07~fight-lost",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.07~fight-lost@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: Dorka is gone through the window, laughing, up the hill road. / Wren: She'll tell him we're coming.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.07~fight-lost.vo-01": {
+    "id": "n2-burgomasters-funeral.07~fight-lost.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.07~fight-lost.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "Dorka is gone through the window, laughing, up the hill road.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.07~fight-lost"
+  },
+  "n2-burgomasters-funeral.07~fight-lost.vo-02": {
+    "id": "n2-burgomasters-funeral.07~fight-lost.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.07~fight-lost.vo-02.wren.wav",
+    "status": "placeholder",
+    "text": "She'll tell him we're coming.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.07~fight-lost"
+  },
+  "n2-burgomasters-funeral.04~holy-symbol": {
+    "id": "n2-burgomasters-funeral.04~holy-symbol",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.04~holy-symbol@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Narrator: The candles bow. Dorka sits up in her wedding dress, and the saint's lamp flares, and she shields her eyes and smiles anyway.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.04~holy-symbol.vo-01": {
+    "id": "n2-burgomasters-funeral.04~holy-symbol.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.04~holy-symbol.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "The candles bow. Dorka sits up in her wedding dress, and the saint's lamp flares, and she shields her eyes and smiles anyway.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.04~holy-symbol"
+  },
+  "n2-burgomasters-funeral.05~no-agnes": {
+    "id": "n2-burgomasters-funeral.05~no-agnes",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.05~no-agnes@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Dorka: Come to me. My arms are hungry for you. Lenka's waiting. / Tomas: She's waiting for us, girl.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.05~no-agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.05~no-agnes.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.05~no-agnes.vo-01.dorka.wav",
+    "status": "placeholder",
+    "text": "Come to me. My arms are hungry for you. Lenka's waiting.",
+    "speaker": "dorka",
+    "moment": "n2-burgomasters-funeral.05~no-agnes"
+  },
+  "n2-burgomasters-funeral.05~no-agnes.vo-02": {
+    "id": "n2-burgomasters-funeral.05~no-agnes.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.05~no-agnes.vo-02.tomas.wav",
+    "status": "placeholder",
+    "text": "She's waiting for us, girl.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.05~no-agnes"
+  },
+  "n2-burgomasters-funeral.08~no-agnes": {
+    "id": "n2-burgomasters-funeral.08~no-agnes",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.08~no-agnes@dashboard.png",
+    "status": "placeholder",
+    "text": "Tomas: Every night she says no, she's still ours.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.08~no-agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.08~no-agnes.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.08~no-agnes.vo-01.tomas.wav",
+    "status": "placeholder",
+    "text": "Every night she says no, she's still ours.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.08~no-agnes"
+  },
+  "n2-burgomasters-funeral.06~no-tomas": {
+    "id": "n2-burgomasters-funeral.06~no-tomas",
+    "type": "clip",
+    "target": "dashboard",
+    "path": "clips/n2-burgomasters-funeral.06~no-tomas@dashboard.poster.png",
+    "status": "placeholder",
+    "text": "Wren: Out! Everyone out! / Dorka: He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no.",
+    "duration_s": 8,
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+  },
+  "n2-burgomasters-funeral.06~no-tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.06~no-tomas.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.06~no-tomas.vo-01.wren.wav",
+    "status": "placeholder",
+    "text": "Out! Everyone out!",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.06~no-tomas"
+  },
+  "n2-burgomasters-funeral.06~no-tomas.vo-02": {
+    "id": "n2-burgomasters-funeral.06~no-tomas.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.06~no-tomas.vo-02.dorka.wav",
+    "status": "placeholder",
+    "text": "He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no.",
+    "speaker": "dorka",
+    "moment": "n2-burgomasters-funeral.06~no-tomas"
+  },
+  "n2-burgomasters-funeral.02~no-wren": {
+    "id": "n2-burgomasters-funeral.02~no-wren",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.02~no-wren@dashboard.png",
+    "status": "placeholder",
+    "text": "Agnes: She ran after Lenka, up the hill, in the dark. Alone. And her lid is not nailed.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.02~no-wren.vo-01": {
+    "id": "n2-burgomasters-funeral.02~no-wren.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.02~no-wren.vo-01.agnes.wav",
+    "status": "placeholder",
+    "text": "She ran after Lenka, up the hill, in the dark. Alone. And her lid is not nailed.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.02~no-wren"
+  },
+  "n2-burgomasters-funeral.07~no-wren": {
+    "id": "n2-burgomasters-funeral.07~no-wren",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.07~no-wren@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: When it is done, Dorka is only a girl in a wedding dress again, with a peace on her face she did not have a minute ago.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.07~no-wren.vo-01": {
+    "id": "n2-burgomasters-funeral.07~no-wren.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.07~no-wren.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "When it is done, Dorka is only a girl in a wedding dress again, with a peace on her face she did not have a minute ago.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.07~no-wren"
+  },
+  "n2-burgomasters-funeral.03~no-emeric": {
+    "id": "n2-burgomasters-funeral.03~no-emeric",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.03~no-emeric@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: Nobody in Vellmoor has nailed a lid at a wake before tonight.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.03~no-emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.03~no-emeric.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.03~no-emeric.vo-01.narrator.wav",
+    "status": "placeholder",
+    "text": "Nobody in Vellmoor has nailed a lid at a wake before tonight.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.03~no-emeric"
+  },
+  "n2-burgomasters-funeral.sfx.candles": {
+    "id": "n2-burgomasters-funeral.sfx.candles",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/candles.wav",
+    "status": "placeholder",
+    "used_by": ".01"
+  },
+  "n2-burgomasters-funeral.sfx.weeping": {
+    "id": "n2-burgomasters-funeral.sfx.weeping",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/weeping.wav",
+    "status": "placeholder",
+    "used_by": ".01"
+  },
+  "n2-burgomasters-funeral.sfx.flies": {
+    "id": "n2-burgomasters-funeral.sfx.flies",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/flies.wav",
+    "status": "placeholder",
+    "used_by": ".03"
+  },
+  "n2-burgomasters-funeral.sfx.candle-gutter": {
+    "id": "n2-burgomasters-funeral.sfx.candle-gutter",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/candle-gutter.wav",
+    "status": "placeholder",
+    "used_by": ".investigate"
+  },
+  "n2-burgomasters-funeral.sfx.candle-out": {
+    "id": "n2-burgomasters-funeral.sfx.candle-out",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/candle-out.wav",
+    "status": "placeholder",
+    "used_by": ".investigate.share"
+  },
+  "n2-burgomasters-funeral.sfx.fly-then-silence": {
+    "id": "n2-burgomasters-funeral.sfx.fly-then-silence",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/fly-then-silence.wav",
+    "status": "placeholder",
+    "used_by": ".lid-choice"
+  },
+  "n2-burgomasters-funeral.sfx.hammer": {
+    "id": "n2-burgomasters-funeral.sfx.hammer",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/hammer.wav",
+    "status": "placeholder",
+    "used_by": ".lid-choice~nailed"
+  },
+  "n2-burgomasters-funeral.sfx.wood-creak": {
+    "id": "n2-burgomasters-funeral.sfx.wood-creak",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/wood-creak.wav",
+    "status": "placeholder",
+    "used_by": ".04"
+  },
+  "n2-burgomasters-funeral.sfx.screams-benches": {
+    "id": "n2-burgomasters-funeral.sfx.screams-benches",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/screams-benches.wav",
+    "status": "placeholder",
+    "used_by": ".06"
+  },
+  "n2-burgomasters-funeral.sfx.heartbeat-fallback": {
+    "id": "n2-burgomasters-funeral.sfx.heartbeat-fallback",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/heartbeat-fallback.wav",
+    "status": "placeholder",
+    "used_by": "cue heartbeat"
+  },
+  "n2-burgomasters-funeral.sfx.skull-drop-sting": {
+    "id": "n2-burgomasters-funeral.sfx.skull-drop-sting",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/skull-drop-sting.wav",
+    "status": "placeholder",
+    "used_by": "cue skull-drop"
+  },
+  "n2-burgomasters-funeral.sfx.seal-flicker": {
+    "id": "n2-burgomasters-funeral.sfx.seal-flicker",
+    "type": "sfx",
+    "target": "dashboard",
+    "path": "audio/sfx/seal-flicker.wav",
+    "status": "placeholder",
+    "used_by": "cue seal-sequence"
+  },
+  "n2-burgomasters-funeral.music.plainchant": {
+    "id": "n2-burgomasters-funeral.music.plainchant",
+    "type": "music",
+    "target": "dashboard",
+    "path": "audio/music/plainchant.wav",
+    "status": "placeholder",
+    "used_by": ".01"
+  },
+  "n2-burgomasters-funeral.music.plainchant-fading": {
+    "id": "n2-burgomasters-funeral.music.plainchant-fading",
+    "type": "music",
+    "target": "dashboard",
+    "path": "audio/music/plainchant-fading.wav",
+    "status": "placeholder",
+    "used_by": ".investigate"
+  },
+  "n2-burgomasters-funeral.music.low-drums": {
+    "id": "n2-burgomasters-funeral.music.low-drums",
+    "type": "music",
+    "target": "dashboard",
+    "path": "audio/music/low-drums.wav",
+    "status": "placeholder",
+    "used_by": ".06"
+  },
+  "dracula.cast.wren.portrait": {
+    "id": "dracula.cast.wren.portrait",
+    "type": "portrait",
+    "target": "ipad:all",
+    "path": "portraits/wren.png",
+    "status": "placeholder",
+    "role": "hunter"
+  },
+  "dracula.cast.tomas.portrait": {
+    "id": "dracula.cast.tomas.portrait",
+    "type": "portrait",
+    "target": "ipad:all",
+    "path": "portraits/tomas.png",
+    "status": "placeholder",
+    "role": "hunter"
+  },
+  "dracula.cast.agnes.portrait": {
+    "id": "dracula.cast.agnes.portrait",
+    "type": "portrait",
+    "target": "ipad:all",
+    "path": "portraits/agnes.png",
+    "status": "placeholder",
+    "role": "hunter"
+  },
+  "dracula.cast.emeric.portrait": {
+    "id": "dracula.cast.emeric.portrait",
+    "type": "portrait",
+    "target": "ipad:all",
+    "path": "portraits/emeric.png",
+    "status": "placeholder",
+    "role": "hunter"
+  },
+  "dracula.cast.dorka.portrait": {
+    "id": "dracula.cast.dorka.portrait",
+    "type": "portrait",
+    "target": "dashboard",
+    "path": "portraits/dorka.png",
+    "status": "placeholder",
+    "role": "npc"
+  },
+  "dracula.cast.anton.portrait": {
+    "id": "dracula.cast.anton.portrait",
+    "type": "portrait",
+    "target": "dashboard",
+    "path": "portraits/anton.png",
+    "status": "placeholder",
+    "role": "npc"
+  },
+  "dracula.cast.dorka-mother.portrait": {
+    "id": "dracula.cast.dorka-mother.portrait",
+    "type": "portrait",
+    "target": "dashboard",
+    "path": "portraits/dorka-mother.png",
+    "status": "placeholder",
+    "role": "npc"
+  },
+  "dracula.cast.castle-servant.portrait": {
+    "id": "dracula.cast.castle-servant.portrait",
+    "type": "portrait",
+    "target": "dashboard",
+    "path": "portraits/castle-servant.png",
+    "status": "placeholder",
+    "role": "npc"
+  },
+  "dracula.cast.hanne.portrait": {
+    "id": "dracula.cast.hanne.portrait",
+    "type": "portrait",
+    "target": "dashboard",
+    "path": "portraits/hanne.png",
+    "status": "placeholder",
+    "role": "npc"
+  },
+  "n2-burgomasters-funeral.lid-choice.option.nail": {
+    "id": "n2-burgomasters-funeral.lid-choice.option.nail",
+    "type": "card",
+    "target": "dashboard",
+    "path": "cards/n2-burgomasters-funeral.lid-choice.option.nail.png",
+    "status": "placeholder",
+    "text": "Nail the lid (spend 1 stake)"
+  },
+  "n2-burgomasters-funeral.lid-choice.option.watch": {
+    "id": "n2-burgomasters-funeral.lid-choice.option.watch",
+    "type": "card",
+    "target": "dashboard",
+    "path": "cards/n2-burgomasters-funeral.lid-choice.option.watch.png",
+    "status": "placeholder",
+    "text": "Keep the stake and watch"
+  },
+  "n2-burgomasters-funeral.script": {
+    "id": "n2-burgomasters-funeral.script",
+    "type": "script",
+    "target": "dashboard",
+    "path": "script/n2-burgomasters-funeral.md",
+    "status": "draft",
+    "note": "verbatim copy of assets/stories/dracula/scripts/n2-burgomasters-funeral.md"
+  },
+  "shared.dt1981-cold-open.tune": {
+    "id": "shared.dt1981-cold-open.tune",
+    "type": "audio",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-cold-open.slides": {
+    "id": "shared.dt1981-cold-open.slides",
+    "type": "slide",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-win.tune": {
+    "id": "shared.dt1981-win.tune",
+    "type": "audio",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-win.slide": {
+    "id": "shared.dt1981-win.slide",
+    "type": "slide",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-loss.tune~lost": {
+    "id": "shared.dt1981-loss.tune~lost",
+    "type": "audio",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-loss.tune~plague": {
+    "id": "shared.dt1981-loss.tune~plague",
+    "type": "audio",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-loss.slide~lost": {
+    "id": "shared.dt1981-loss.slide~lost",
+    "type": "slide",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "shared.dt1981-loss.slide~cursed": {
+    "id": "shared.dt1981-loss.slide~cursed",
+    "type": "slide",
+    "target": "dashboard",
+    "path": null,
+    "status": "draft",
+    "note": "R-LF-9 bookend slot. No recreation found in the tree (only Milton Bradley originals in research/dark-tower-1981, which never ship). File missing; see NEEDS-FROM-ILLUSIONIST.md"
+  },
+  "n2-burgomasters-funeral.cue-sheet": {
+    "id": "n2-burgomasters-funeral.cue-sheet",
+    "type": "cues",
+    "target": "dashboard",
+    "path": "cues/cue-sheet.json",
+    "status": "draft"
+  }
+}

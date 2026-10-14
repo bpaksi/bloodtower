@@ -1,0 +1,44 @@
+{
+  "scene": "n2-burgomasters-funeral",
+  "cues": [
+    {
+      "name": "heartbeat",
+      "capability": "setLED breathe (LIGHT_EFFECTS)",
+      "status": "Library",
+      "moments": [
+        "n2-burgomasters-funeral.investigate",
+        "n2-burgomasters-funeral.lid-choice",
+        "n2-burgomasters-funeral.04",
+        "n2-burgomasters-funeral.04~holy-symbol"
+      ],
+      "fallback": "screen pulse on the vignette + low heartbeat sfx from the Mac (sfx only without tower)",
+      "fallback_sfx": "n2-burgomasters-funeral.sfx.heartbeat-fallback"
+    },
+    {
+      "name": "dim-all",
+      "capability": "allLightsOff",
+      "status": "Library",
+      "moments": ["n2-burgomasters-funeral.04", "n2-burgomasters-funeral.04~holy-symbol"],
+      "fallback": "screen fades to near-black for 1.5 s"
+    },
+    {
+      "name": "seal-sequence",
+      "capability": "seal flicker + one tower sound",
+      "status": "Library",
+      "moments": ["n2-burgomasters-funeral.investigate.follow-the-mourner (risky pick)"],
+      "trigger": "after all investigation picks lock",
+      "drums": "none (replaces drum-top; story cues never move drums)",
+      "fallback": "screen seal flicker + seal sfx from the Mac",
+      "fallback_sfx": "n2-burgomasters-funeral.sfx.seal-flicker"
+    },
+    {
+      "name": "skull-drop",
+      "capability": "player physical step (onSkullDrop observed), not a tower command",
+      "status": "Library",
+      "moments": ["n2-burgomasters-funeral.07~fight-lost"],
+      "condition": "watched + lost; cap 2/night; supply<6 converts to +1 foe night 5",
+      "fallback": "Dashboard prompt + Done confirm; sting sfx only without tower",
+      "fallback_sfx": "n2-burgomasters-funeral.sfx.skull-drop-sting"
+    }
+  ]
+}
