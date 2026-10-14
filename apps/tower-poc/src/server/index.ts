@@ -1,8 +1,10 @@
 import { resolve } from "node:path";
 import { BluetoothAdapterFactory, BluetoothPlatform } from "ultimatedarktower";
+import { createAdapterEventList } from "./adapters/instrumented.ts";
 import { createMockTower } from "./adapters/mockTower.ts";
 import { openDatabase } from "./db/client.ts";
 import { createSnapshotStorage } from "./db/snapshots.ts";
+import { openDiagLog, teeEventList } from "./diagLog.ts";
 import { lanUrls } from "./lanUrls.ts";
 import packageJson from "./package.json" with { type: "json" };
 import { parseDevOrigins, startTowerServer, WS_PATH } from "./server.ts";
@@ -39,7 +41,11 @@ const parseMock = (value: string | undefined) => {
 // One mock tower for the life of the service, as there is one real one: each connection reaches
 // the same tower through a new connection to it.
 const mockTower = parseMock(process.env.MOCK) ? createMockTower() : undefined;
+// `DIAG_LOG=<path>` writes adapter events, connection changes and command lifecycles as JSONL.
+const diagLog = process.env.DIAG_LOG ? openDiagLog(resolve(process.env.DIAG_LOG)) : undefined;
+const events = createAdapterEventList();
 const session = createTowerSession({
+  events: diagLog ? teeEventList(events, diagLog) : events,
   createAdapter: () =>
     mockTower ? mockTower.adapter : BluetoothAdapterFactory.create(BluetoothPlatform.NODE),
 });
@@ -49,6 +55,7 @@ const dbPath =
   process.env.DB_PATH ||
   resolve(import.meta.dirname, "../../data", mockTower ? "tower-poc.mock.db" : "tower-poc.db");
 const database = openDatabase(dbPath);
+if (diagLog) session.subscribe((status) => diagLog.write({ source: "connection", status }));
 // A snapshot left by the last run opens the restore prompt (D11). Nothing reaches the tower.
 const store = createStateStore({ storage: createSnapshotStorage(database.db) });
 const stopFeed = feedStateStore(session, store);
@@ -62,12 +69,14 @@ const server = await startTowerServer({
   store,
   tower: mockTower ? "mock" : "bluetooth",
   devOrigins,
+  onLifecycle: diagLog && ((lifecycle) => diagLog.write({ source: "command", lifecycle })),
 });
 
 console.log(`Tower service ${packageJson.version} listening (WebSocket at ${WS_PATH}):`);
 for (const url of lanUrls(host, server.port)) console.log(`  ${url}`);
 console.log(`Serving web UI from ${webRoot}`);
 console.log(`Data in ${dbPath}`);
+if (process.env.DIAG_LOG) console.log(`Diagnostics log in ${resolve(process.env.DIAG_LOG)}`);
 if (store.pendingRestore()) console.log("State saved by the last run is waiting to be restored.");
 console.log(
   mockTower ? "Tower: mock (MOCK=1)" : "Tower: real, over Bluetooth (MOCK=1 for the mock)",

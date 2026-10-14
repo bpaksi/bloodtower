@@ -15,6 +15,7 @@ import {
   offeredLightSequenceSchema,
   RANDOM_ROTATE_DRUMS,
   RANDOM_ROTATE_MODE_COUNT,
+  SILENT_LIGHT_SEQUENCES,
   SOUND_COUNT,
   soundIndexSchema,
 } from "./index.ts";
@@ -396,11 +397,13 @@ describe("catalog ranges from ultimatedarktowerdata", () => {
     expect(lightSequenceSchema.options).toEqual(Object.keys(TOWER_LIGHT_SEQUENCES));
   });
 
-  it("holds back the four rotation sequences and accepts the other 17", () => {
+  it("holds back rotationDrumMiddle and accepts the other 20 (D23, M2 step 11)", () => {
     const sequence = findCapability("lighting.sequence")?.params;
-    expect([...HELD_LIGHT_SEQUENCES].sort()).toEqual(
+    expect(HELD_LIGHT_SEQUENCES).toEqual(["rotationDrumMiddle"]);
+    expect([...SILENT_LIGHT_SEQUENCES].sort()).toEqual(
       ["rotationAllDrums", "rotationDrumBottom", "rotationDrumMiddle", "rotationDrumTop"].sort(),
     );
+    expect(lightSequenceSchema.options).toHaveLength(21);
     for (const name of HELD_LIGHT_SEQUENCES) {
       expect(Object.keys(TOWER_LIGHT_SEQUENCES), name).toContain(name);
       expect(sequence?.safeParse({ sequence: name }).success, name).toBe(false);
@@ -408,7 +411,7 @@ describe("catalog ranges from ultimatedarktowerdata", () => {
     const others = lightSequenceSchema.options.filter(
       (name) => !HELD_LIGHT_SEQUENCES.includes(name),
     );
-    expect(others).toHaveLength(17);
+    expect(others).toHaveLength(20);
     expect(offeredLightSequenceSchema.options).toEqual(others);
     for (const name of others) {
       expect(sequence?.safeParse({ sequence: name }).success, name).toBe(true);

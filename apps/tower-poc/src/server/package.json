@@ -8,6 +8,7 @@
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
     "spike": "tsx scripts/spike.ts",
+    "d23-smoke": "tsx scripts/d23Smoke.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

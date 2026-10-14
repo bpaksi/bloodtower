@@ -14,6 +14,7 @@ import {
   isCommandable,
   lifecycleStageSchema,
   PROTOCOL_VERSION,
+  SILENT_LIGHT_SEQUENCES,
   serverMessageSchema,
   toInventoryEntry,
   validateCommand,
@@ -276,9 +277,10 @@ describe("validateCommand", () => {
     );
   });
 
-  it("refuses a held light sequence", () => {
-    for (const sequence of HELD_LIGHT_SEQUENCES) {
-      expect(validateCommand("lighting.sequence", { sequence }).ok, sequence).toBe(false);
+  it("accepts the silent light sequences played on the tower, and refuses a held one", () => {
+    for (const sequence of SILENT_LIGHT_SEQUENCES) {
+      const held = HELD_LIGHT_SEQUENCES.includes(sequence);
+      expect(validateCommand("lighting.sequence", { sequence }).ok, sequence).toBe(!held);
     }
   });
 });

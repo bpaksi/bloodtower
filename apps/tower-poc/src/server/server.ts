@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import {
   CLIENT_MESSAGE_TYPES,
+  type CommandLifecyclePayload,
   clientMessageSchema,
   type Envelope,
   type ErrorCode,
@@ -43,6 +44,8 @@ export interface TowerServerOptions {
    * `next dev` origin belongs here, and only in dev mode.
    */
   devOrigins?: readonly string[];
+  /** Also called with every command lifecycle stage, after it is broadcast. */
+  onLifecycle?: (payload: CommandLifecyclePayload) => void;
 }
 
 export interface TowerServer {
@@ -256,8 +259,10 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
   // Every client sees every command's lifecycle, whoever sent it (D7).
   const executor = createCommandExecutor({
     session: options.session,
-    onLifecycle: (payload) =>
-      hub.broadcast({ v: PROTOCOL_VERSION, type: "command.lifecycle", payload }),
+    onLifecycle: (payload) => {
+      hub.broadcast({ v: PROTOCOL_VERSION, type: "command.lifecycle", payload });
+      options.onLifecycle?.(payload);
+    },
   });
   const context: Context = {
     options,

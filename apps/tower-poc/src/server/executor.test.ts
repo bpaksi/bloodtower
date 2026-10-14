@@ -449,8 +449,8 @@ describe("command executor: known limits", () => {
 });
 
 describe("command executor: silent light sequences (D23)", () => {
-  // `lighting.sequence` does not accept these yet (HELD_LIGHT_SEQUENCES, until M2 step 11), so
-  // `validateCommand` cannot produce one. These tests build it by hand.
+  // These tests build the command by hand, so they can also send one with a sound, which
+  // `validateCommand` accepts and the executor must refuse.
   const silent = (sequence: string, soundIndex?: number) =>
     ({
       capabilityId: "lighting.sequence",

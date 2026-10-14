@@ -109,12 +109,12 @@ export const SILENT_LIGHT_SEQUENCES: readonly LightSequenceName[] = [
   "rotationDrumBottom",
 ];
 /**
- * Catalog sequences the app does not accept yet (GAP-HW-007). The M1 spike showed that
- * none of the four moves a drum, and that the tower answers none of them. The executor
- * can send them without waiting (D23, M2 step 5); they stay held until that has worked
- * on the tower (M2 step 11). Lifting the hold is emptying this list.
+ * Catalog sequences the app does not accept (GAP-HW-007). In the M2 hardware smoke (step 11),
+ * three of the four silent sequences, sent without waiting (D23), played on the tower and were
+ * turned off by the next command. `rotationDrumMiddle` was not played there, so it stays held
+ * until it has been. Lifting a hold is removing the name from this list.
  */
-export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = SILENT_LIGHT_SEQUENCES;
+export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = ["rotationDrumMiddle"];
 /** The sequences `lighting.sequence` accepts: the catalog without the held ones. */
 export const offeredLightSequenceSchema = lightSequenceSchema.exclude(HELD_LIGHT_SEQUENCES);
 
@@ -284,6 +284,7 @@ export type Capability = {
 const TYPES = "UltimateDarkTower.d.ts at 7.1.2";
 const NOTE = "research/tower/api-surface-7.1.2.md";
 const SPIKE = "research/tower/spikes/2026-10-13-noble-macos.md";
+const SMOKE = "research/tower/smoke/2026-10-14-m2-hardware-smoke.md";
 const OBSERVABILITY = "research/tower/observability.md";
 
 // ---------------------------------------------------------------------------
@@ -532,7 +533,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (HELD_LIGHT_SEQUENCES) are not accepted: in the M1 spike each played its lights and moved no drum, but the tower sent no state back, so the library rejected each after 30 seconds (${SPIKE}, findings 4 and 7). The M2 executor sends them straight to the tower without waiting for an answer, and only to a calibrated tower, since none was tried on an uncalibrated one; they stay held until that has worked on the tower (D23, GAP-HW-007).`,
+    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (SILENT_LIGHT_SEQUENCES) move no drum and the tower does not answer them (${SPIKE}, findings 4 and 7), so the executor sends them straight to the tower without waiting, only to a calibrated tower and never with a sound, and ends them as indeterminate (D23). In the M2 hardware smoke, rotationAllDrums, rotationDrumTop and rotationDrumBottom each lit its lights, and those lights stayed on until the next command (its clearing write and its own packet) turned them off; the sound sent after it played once (${SMOKE}). rotationDrumMiddle was not played there and is still not accepted (HELD_LIGHT_SEQUENCES, GAP-HW-007).`,
   },
   {
     id: "lighting.set-led",

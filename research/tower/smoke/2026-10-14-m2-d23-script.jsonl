@@ -1,0 +1,43 @@
+{"at":"2026-10-14T16:14:59.755Z","source":"connection","status":{"state":"disconnected","calibration":"uncalibrated"}}
+{"at":"2026-10-14T16:15:03.244Z","source":"connection","status":{"state":"connecting","calibration":"uncalibrated"}}
+{"at":"2026-10-14T16:15:07.756Z","source":"connection","status":{"state":"connected","calibration":"uncalibrated","device":{"manufacturerName":"Restoration Games LLC","modelNumber":"ReturnToDarkTower","serialNumber":"2E:E6:DD:1D:19:D5","hardwareRevision":"1.11","firmwareRevision":"79556657694099f3ca293f534b9cc5b55bfeaa31","softwareRevision":"1.0.0"}}}
+{"at":"2026-10-14T16:15:10.912Z","source":"connection","status":{"state":"connected","calibration":"calibrating","device":{"manufacturerName":"Restoration Games LLC","modelNumber":"ReturnToDarkTower","serialNumber":"2E:E6:DD:1D:19:D5","hardwareRevision":"1.11","firmwareRevision":"79556657694099f3ca293f534b9cc5b55bfeaa31","softwareRevision":"1.0.0"}}}
+{"at":"2026-10-14T16:15:33.336Z","source":"connection","status":{"state":"connected","calibration":"calibrated","device":{"manufacturerName":"Restoration Games LLC","modelNumber":"ReturnToDarkTower","serialNumber":"2E:E6:DD:1D:19:D5","hardwareRevision":"1.11","firmwareRevision":"79556657694099f3ca293f534b9cc5b55bfeaa31","softwareRevision":"1.0.0"}}}
+{"at":"2026-10-14T16:15:37.330Z","source":"sent","id":"d23-1","capabilityId":"lighting.sequence","params":{"sequence":"rotationAllDrums"}}
+{"at":"2026-10-14T16:15:37.349Z","source":"command","lifecycle":{"commandId":"d23-1","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"queued","at":1791994537345}}
+{"at":"2026-10-14T16:15:37.349Z","source":"command","lifecycle":{"commandId":"d23-1","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"started","at":1791994537346}}
+{"at":"2026-10-14T16:15:37.372Z","source":"command","lifecycle":{"commandId":"d23-1","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"write-completed","at":1791994537371}}
+{"at":"2026-10-14T16:15:37.372Z","source":"command","lifecycle":{"commandId":"d23-1","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"indeterminate","at":1791994537371,"reason":"The tower does not answer this light sequence (GAP-HW-010)."}}
+{"at":"2026-10-14T16:16:47.991Z","source":"observation","step":"rotationAllDrums: lights and drums","seen":"heard nothing, bottom outside lights are on. All inner rotating light on. "}
+{"at":"2026-10-14T16:16:54.889Z","source":"sent","id":"d23-2","capabilityId":"sound.play","params":{"soundIndex":1}}
+{"at":"2026-10-14T16:16:54.893Z","source":"command","lifecycle":{"commandId":"d23-2","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"queued","at":1791994614892}}
+{"at":"2026-10-14T16:16:54.894Z","source":"command","lifecycle":{"commandId":"d23-2","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"started","at":1791994614893}}
+{"at":"2026-10-14T16:16:55.237Z","source":"command","lifecycle":{"commandId":"d23-2","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"write-completed","at":1791994615236}}
+{"at":"2026-10-14T16:16:55.237Z","source":"command","lifecycle":{"commandId":"d23-2","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"confirmed","at":1791994615237}}
+{"at":"2026-10-14T16:17:44.391Z","source":"observation","step":"rotationAllDrums: then sound.play","seen":"lights turned off from previous step. heard sound"}
+{"at":"2026-10-14T16:17:53.825Z","source":"sent","id":"d23-3","capabilityId":"lighting.sequence","params":{"sequence":"rotationDrumTop"}}
+{"at":"2026-10-14T16:17:53.829Z","source":"command","lifecycle":{"commandId":"d23-3","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"queued","at":1791994673828}}
+{"at":"2026-10-14T16:17:53.829Z","source":"command","lifecycle":{"commandId":"d23-3","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"started","at":1791994673829}}
+{"at":"2026-10-14T16:17:53.857Z","source":"command","lifecycle":{"commandId":"d23-3","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"write-completed","at":1791994673856}}
+{"at":"2026-10-14T16:17:53.858Z","source":"command","lifecycle":{"commandId":"d23-3","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"indeterminate","at":1791994673857,"reason":"The tower does not answer this light sequence (GAP-HW-010)."}}
+{"at":"2026-10-14T16:19:13.698Z","source":"observation","step":"rotationDrumTop: lights and drums","seen":"heard nothing, no drums moved. bottom outside lights on, top inner rotating lights on "}
+{"at":"2026-10-14T16:19:23.358Z","source":"sent","id":"d23-4","capabilityId":"sound.play","params":{"soundIndex":1}}
+{"at":"2026-10-14T16:19:23.362Z","source":"command","lifecycle":{"commandId":"d23-4","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"queued","at":1791994763361}}
+{"at":"2026-10-14T16:19:23.363Z","source":"command","lifecycle":{"commandId":"d23-4","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"started","at":1791994763362}}
+{"at":"2026-10-14T16:19:23.710Z","source":"command","lifecycle":{"commandId":"d23-4","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"write-completed","at":1791994763709}}
+{"at":"2026-10-14T16:19:23.711Z","source":"command","lifecycle":{"commandId":"d23-4","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"confirmed","at":1791994763710}}
+{"at":"2026-10-14T16:19:29.734Z","source":"observation","step":"rotationDrumTop: then sound.play","seen":""}
+{"at":"2026-10-14T16:19:42.621Z","source":"sent","id":"d23-5","capabilityId":"lighting.sequence","params":{"sequence":"rotationDrumBottom"}}
+{"at":"2026-10-14T16:19:42.624Z","source":"command","lifecycle":{"commandId":"d23-5","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"queued","at":1791994782624}}
+{"at":"2026-10-14T16:19:42.625Z","source":"command","lifecycle":{"commandId":"d23-5","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"started","at":1791994782625}}
+{"at":"2026-10-14T16:19:42.651Z","source":"command","lifecycle":{"commandId":"d23-5","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"write-completed","at":1791994782651}}
+{"at":"2026-10-14T16:19:42.652Z","source":"command","lifecycle":{"commandId":"d23-5","capabilityId":"lighting.sequence","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"indeterminate","at":1791994782651,"reason":"The tower does not answer this light sequence (GAP-HW-010)."}}
+{"at":"2026-10-14T16:20:27.829Z","source":"observation","step":"rotationDrumBottom: lights and drums","seen":"heard nothing, no drums rotated. Bottom outside lights on. bottom inner rotating lights on"}
+{"at":"2026-10-14T16:20:30.861Z","source":"sent","id":"d23-6","capabilityId":"sound.play","params":{"soundIndex":1}}
+{"at":"2026-10-14T16:20:30.862Z","source":"command","lifecycle":{"commandId":"d23-6","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"queued","at":1791994830862}}
+{"at":"2026-10-14T16:20:30.862Z","source":"command","lifecycle":{"commandId":"d23-6","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"started","at":1791994830862}}
+{"at":"2026-10-14T16:20:31.207Z","source":"command","lifecycle":{"commandId":"d23-6","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"write-completed","at":1791994831206}}
+{"at":"2026-10-14T16:20:31.207Z","source":"command","lifecycle":{"commandId":"d23-6","capabilityId":"sound.play","clientId":"d7a02095-bbf5-4756-b110-8924b52eb4c3","stage":"confirmed","at":1791994831206}}
+{"at":"2026-10-14T16:20:57.136Z","source":"observation","step":"rotationDrumBottom: then sound.play","seen":"lights from previous step turned off. header sound only once."}
+{"at":"2026-10-14T16:20:57.139Z","source":"connection","status":{"state":"disconnecting","calibration":"uncalibrated"}}
+{"at":"2026-10-14T16:20:57.173Z","source":"connection","status":{"state":"disconnected","calibration":"uncalibrated"}}

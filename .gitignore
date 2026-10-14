@@ -14,3 +14,4 @@ next-env.d.ts
 .agents/
 .stitch/
 research/tower/spikes/*.local.json
+research/tower/smoke/d23-*.jsonl
