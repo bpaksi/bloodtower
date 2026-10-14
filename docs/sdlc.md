@@ -20,7 +20,7 @@ apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──appro
 | 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
 | 3. Build | Plan mode first. One plan per milestone, each step is one branch. Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan |
 | 4. Test | Claude runs `pnpm check` and the verifier agent before handing over, and pastes the output | Vitest, Playwright, screenshots | Judge evidence |
-| 5. Deploy → **Merge** | No remote or CI yet. Lefthook runs checks on commit; the `reviewer` subagent reviews the branch diff against `REVIEW.md` and the app's spec and plan. | `REVIEW.md`, `.claude/settings.json` hooks | Bob merges to `main` with `pnpm land <branch>` (`scripts/land.mjs`: check, fast-forward only, delete the branch). Claude never commits to `main` and never runs that command. |
+| 5. Deploy → **Merge** | No remote or CI yet. Lefthook runs checks on commit; the `reviewer` subagent reviews the branch diff against `REVIEW.md` and the app's spec and plan. | `REVIEW.md`, `.claude/settings.json` hooks | Bob merges to `main` with `pnpm land <branch>`. Claude never commits to `main` and never runs that command. |
 | 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
 
 ## Tiers

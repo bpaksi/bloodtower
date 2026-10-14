@@ -13,6 +13,7 @@ for (const name of Object.keys(process.env)) {
 }
 
 let cwd;
+// The -c settings keep the person's global git config (identity, signing, hooks) out of the tests.
 const git = (...args) =>
   execFileSync(
     "git",
@@ -23,6 +24,8 @@ const git = (...args) =>
       "user.email=test@example.com",
       "-c",
       "commit.gpgsign=false",
+      "-c",
+      "core.hooksPath=/dev/null",
       ...args,
     ],
     { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
@@ -33,8 +36,16 @@ const commit = (file, text) => {
   git("commit", "--quiet", "-m", `add ${file}`);
 };
 const head = (ref) => git("rev-parse", ref);
+const current = () => git("branch", "--show-current");
 const passes = () => {};
 const run = (options) => land({ cwd, runCheck: passes, env: {}, ...options });
+
+/** Asserts that the call refuses with `message` and leaves main, the branch and HEAD as they were. */
+const refuses = (options, message) => {
+  const before = { main: head("main"), work: head("work"), on: current() };
+  assert.throws(() => run(options), message);
+  assert.deepEqual({ main: head("main"), work: head("work"), on: current() }, before);
+};
 
 // A repo with main at one commit and a branch `work` two commits ahead, checked out on `work`.
 beforeEach(() => {
@@ -52,28 +63,60 @@ describe("land", () => {
     const tip = head("work");
     const lines = run({ branch: "work" });
     assert.equal(head("main"), tip);
-    assert.equal(git("branch", "--show-current"), "main");
+    assert.equal(current(), "main");
     assert.equal(git("branch", "--list", "work"), "");
     assert.match(lines[0], /Landed work on main: 2 commits\./);
   });
 
-  it("checks the branch before main moves, and leaves main alone when the check fails", () => {
+  it("lands from another branch too", () => {
+    git("checkout", "--quiet", "-b", "other", "main");
+    const tip = head("work");
+    run({ branch: "work" });
+    assert.equal(head("main"), tip);
+    assert.equal(current(), "main");
+  });
+
+  it("runs the check on the branch, before main moves", () => {
+    git("checkout", "--quiet", "main");
     const before = head("main");
-    let checkedOn;
-    assert.throws(
-      () =>
-        run({
-          branch: "work",
-          runCheck: () => {
-            checkedOn = git("branch", "--show-current");
-            throw new Error("check failed");
-          },
-        }),
-      /check failed/,
+    let seen;
+    run({
+      branch: "work",
+      runCheck: () => {
+        seen = { on: current(), main: head("main") };
+      },
+    });
+    assert.deepEqual(seen, { on: "work", main: before });
+  });
+
+  it("refuses when the check fails, and goes back to the branch it started on", () => {
+    git("checkout", "--quiet", "-b", "other", "main");
+    const fails = () => {
+      throw new Error("boom");
+    };
+    refuses(
+      { branch: "work", runCheck: fails },
+      /The check failed on work\. main was not changed\. You are on other\./,
     );
-    assert.equal(checkedOn, "work");
-    assert.equal(head("main"), before);
-    assert.notEqual(git("branch", "--list", "work"), "");
+  });
+
+  it("refuses when the check changes a tracked file, and stays on the branch with the change", () => {
+    git("checkout", "--quiet", "main");
+    const before = { main: head("main"), work: head("work") };
+    const rewrites = () => writeFileSync(join(cwd, "b.txt"), "rewritten by the check");
+    assert.throws(
+      () => run({ branch: "work", runCheck: rewrites }),
+      /changed tracked files on work.* main was not changed\. You are on work\./,
+    );
+    assert.deepEqual({ main: head("main"), work: head("work") }, before);
+    assert.match(git("status", "--porcelain"), /M b\.txt/);
+  });
+
+  it("merges the branch, not a tag of the same name", () => {
+    const tip = head("work");
+    git("tag", "work", "main");
+    run({ branch: "work" });
+    assert.equal(head("refs/heads/main"), tip);
   });
 
   it("leaves untracked files where they are", () => {
@@ -82,34 +125,36 @@ describe("land", () => {
     assert.match(git("status", "--porcelain"), /\?\? notes\.txt/);
   });
 
-  it("refuses inside a Claude session", () => {
-    const before = head("main");
-    assert.throws(() => run({ branch: "work", env: { CLAUDECODE: "1" } }), /Bob's to do/);
-    assert.equal(head("main"), before);
+  it("refuses inside a Claude session, even when the variable is empty", () => {
+    refuses({ branch: "work", env: { CLAUDECODE: "1" } }, /Bob's to do/);
+    refuses({ branch: "work", env: { CLAUDECODE: "" } }, /Bob's to do/);
   });
 
   it("refuses with no branch, with main, and with a branch that does not exist", () => {
-    assert.throws(() => run({ branch: undefined }), /Usage/);
-    assert.throws(() => run({ branch: "main" }), /cannot be landed on itself/);
-    assert.throws(() => run({ branch: "nope" }), /no local branch named nope/);
+    refuses({ branch: undefined }, /Usage/);
+    refuses({ branch: "main" }, /cannot be landed on itself/);
+    refuses({ branch: "nope" }, /no local branch named nope/);
   });
 
   it("refuses when tracked files have uncommitted changes", () => {
     writeFileSync(join(cwd, "b.txt"), "changed");
-    assert.throws(() => run({ branch: "work" }), /uncommitted changes/);
+    refuses({ branch: "work" }, /uncommitted changes/);
   });
 
-  it("refuses a branch that main has moved past, without merging", () => {
+  it("refuses when no branch is checked out", () => {
+    git("checkout", "--quiet", "--detach");
+    refuses({ branch: "work" }, /No branch is checked out/);
+  });
+
+  it("refuses a branch that main has moved past", () => {
     git("checkout", "--quiet", "main");
     commit("d.txt", "d");
-    const before = head("main");
-    assert.throws(() => run({ branch: "work" }), /cannot be fast-forwarded/);
-    assert.equal(head("main"), before);
+    refuses({ branch: "work" }, /cannot be fast-forwarded/);
   });
 
   it("refuses a branch with nothing new", () => {
     git("checkout", "--quiet", "main");
     git("branch", "empty");
-    assert.throws(() => run({ branch: "empty" }), /nothing that main lacks/);
+    refuses({ branch: "empty" }, /nothing that main lacks/);
   });
 });

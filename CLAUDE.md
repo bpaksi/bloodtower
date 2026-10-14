@@ -18,7 +18,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 |---|---|---|
 | root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
 | root | `pnpm build` | Builds every app |
-| root | `pnpm land <branch>` | Bob only: runs `pnpm check` on the branch, fast-forwards `main` to it and deletes the branch. Refuses inside a Claude session |
+| root | `pnpm land <branch>` | Bob only: runs `pnpm check` on the branch, fast-forwards `main` to it, deletes the branch and leaves you on `main`. It refuses when it sees a Claude session, but that is a courtesy check, not a lock: the rule is that Claude never runs it |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |
 | `apps/tower-poc` | `pnpm e2e` | Builds, then runs Playwright on port 4748 at three viewports |
