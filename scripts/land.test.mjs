@@ -11,6 +11,16 @@ import { land } from "./land.mjs";
 for (const name of Object.keys(process.env)) {
   if (name.startsWith("GIT_")) delete process.env[name];
 }
+// land.mjs runs git itself, and its rebase writes commits. A machine with no git identity (CI)
+// would refuse them, so give that git an identity and keep the person's config out of it.
+Object.assign(process.env, {
+  GIT_AUTHOR_NAME: "Test",
+  GIT_AUTHOR_EMAIL: "test@example.com",
+  GIT_COMMITTER_NAME: "Test",
+  GIT_COMMITTER_EMAIL: "test@example.com",
+  GIT_CONFIG_GLOBAL: "/dev/null",
+  GIT_CONFIG_NOSYSTEM: "1",
+});
 
 let cwd;
 // The -c settings keep the person's global git config (identity, signing, hooks) out of the tests.
