@@ -1,26 +1,27 @@
 # How Bloodtower applies the AI-Native SDLC Playbook
 
-Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner, tech lead and release manager, and Claude Code (running locally on the Mac) plans, builds and self-verifies.
+Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead, and Claude Code (running locally on the Mac) plans, builds, self-verifies and merges through pull requests on `bpaksi/bloodtower`. Bob's sign-off is required only at the named gates (below); merging is not one of them.
 
 The repo holds many apps. **Process, guardrails and Claude config are shared at the root; intent, spec and plans belong to each app.**
 
 ## The loop (per app)
 
 ```text
-apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──approve──► apps/<app>/plans/Mx-*.md ──approve──► branch per step
+apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──approve──► apps/<app>/plans/Mx-*.md ──approve──► batches of steps
      ▲                                                                                                    │
-     │                                                                          checks + verifier + reviewer
+     │                                                                   worktree + branch + PR per step
+     │                                                                   CI + verifier + adversaries on the PR (≤3 rounds)
      │                                                                                                    ▼
- new gap / finding ◄───────────────────── merge to main (Bob) ◄────────────────── evidence in commit notes
+ new gap / finding ◄──── Bob gates (playtest, judgement, sign-off) ◄──── squash merge, one PR at a time (coordinator)
 ```
 
 | Playbook stage | What we do here | Artifact | Gate (Bob) |
 |---|---|---|---|
 | 1. Plan | New ideas and changes get an intent file in Bob's words | `apps/<app>/intent/NNNN-*.md` | Accept intent |
 | 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
-| 3. Build | Plan mode first. One plan per milestone, each step is one branch. Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan |
-| 4. Test | Claude runs `pnpm check` and the verifier agent before handing over, and pastes the output | Vitest, Playwright, screenshots | Judge evidence |
-| 5. Deploy → **Merge** | No remote or CI yet. Lefthook runs checks on commit; the `reviewer` subagent reviews the branch diff against `REVIEW.md` and the app's spec and plan. | `REVIEW.md`, `.claude/settings.json` hooks | Bob merges to `main` with `pnpm land <branch>`. Claude never commits to `main` and never runs that command. |
+| 3. Build | Plan mode first. One plan per milestone; each step is one branch in its own worktree and one PR. Steps carry `Depends on`, `Touches` and `Deps change`, and the plan groups them into batches (see Parallel work). Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan (gate G-plan) |
+| 4. Test | The developer runs `pnpm check` in its worktree and puts the output in the PR body. GitHub Actions reruns `pnpm check` on the PR. The verifier runs on the PR branch and posts its result on the PR. | Vitest, Playwright, screenshots, `.github/workflows/check.yml` | Only at a named gate (playtest, judgement) |
+| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs checks on commit; CI runs `pnpm check` on the PR; the `adversary-bugs` and `adversary-prd` agents post findings on the PR, and the developer fixes them, for up to 3 rounds. The coordinator squash-merges, one PR at a time, once CI is green and both adversaries report no blocking findings (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
 | 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
 
 ## Tiers
@@ -34,7 +35,7 @@ Every app README states its tier. Explore-phase experiments shouldn't carry the 
 | Spec | Optional; README is enough | Required, with decision log |
 | Plans | Optional single `plans/plan.md` | One per milestone |
 | Shared hooks + `pnpm check` | Yes | Yes |
-| Reviewer agent | Optional | Every branch |
+| Adversary agents | Optional (`adversary-bugs` only) | Both, every PR |
 | Branch per step | Yes | Yes |
 
 Promoting an Experiment to Full: write a spec from what was learned, then continue with milestone plans.
@@ -57,13 +58,15 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 
 | Guardrail | Mechanism |
 |---|---|
-| No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: the reviewer checks the diff. |
-| No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2 |
+| No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: `adversary-bugs` checks the diff. |
+| No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2. `main` changes only by a squash-merged PR. |
+| A developer agent writes only inside its own worktree | `worktree-guard` PreToolUse hook on edits and shell writes, active in any checkout with a `.wt.json` → exit 2. Temp folders stay writable; the main checkout and other worktrees do not, even when they sit in a temp folder. |
+| A PR merges only on green CI | `check` workflow on every PR. Branch protection is not available on this private repo's plan (GitHub answered 403, 2026-10-14), so the coordinator enforces it: it merges only after `gh pr checks` is green and both adversaries' latest reports end in `Blocking: none`. |
 | The ordinary ways to skip `pnpm check` on a commit are blocked | The same hook blocks `--no-verify`, `-n`, `LEFTHOOK=0` and `core.hooksPath` on committing git commands, on every branch → exit 2. Docs-only commits skip the check by design (`lefthook.yml`). |
 | Pinned `ultimatedarktower` cannot be bumped silently | Pins live in `scripts/pinned-versions.json`. `scripts/check-pins.mjs` in `pnpm check` fails on any other version in a `package.json` or the lockfile. A PreToolUse hook warns earlier, on the edit or install command. |
-| No raw-bytes message type in a tower protocol | Protocol unit test plus a reviewer check |
+| No raw-bytes message type in a tower protocol | Protocol unit test plus an `adversary-bugs` check |
 | Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits and shell changes to test files on `fix/*` branches after the first commit. Removing a `.fails` marker, and nothing else, stays allowed so the fix can be proven. |
-| Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/`. `scripts/check-imports.mjs` in `pnpm check` fails on a cross-app import; the reviewer checks too. |
+| Cross-app imports | Apps never import from another app's folder; shared code goes through `packages/`. `scripts/check-imports.mjs` in `pnpm check` fails on a cross-app import; `adversary-bugs` checks too. |
 | Format/lint | PostToolUse hook runs `biome check --write` on edited files |
 | Secrets | `.env*` denied in permissions |
 
@@ -76,8 +79,10 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes (model: haiku)
-.claude/agents/reviewer.md      # read-only diff review per REVIEW.md (model: sonnet; pass an Opus override for hook or tower-safety changes)
-.claude/agents/developer.md     # builds one plan step on its own branch with tests; several can run in parallel in separate worktrees (model: sonnet; Opus override for work that needs more judgement)
+.claude/agents/adversary-bugs.md  # adversarial PR review: bugs, edge cases, security, spec holes, all REVIEW.md passes (model: opus). Replaced reviewer.md
+.claude/agents/adversary-prd.md   # adversarial PR review against PRD ids and SC-1..SC-5 (model: sonnet)
+.claude/agents/developer.md     # builds one plan step in its own worktree with tests, pushes, opens the PR (model: sonnet; Opus override for work that needs more judgement)
+.claude/agents/coordinator.md   # runs one approved batch: worktrees, developers, PR review, serial merges; stops at Bob's gates
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
 .claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
 .claude/skills/bugfix/SKILL.md             # failing test first
@@ -92,6 +97,8 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 |---|---|---|
 | root | `pnpm check` | lint, repo checks (pins, cross-app imports, hook tests), typecheck and unit tests across every app and package |
 | root | `pnpm build` | builds every app |
+| root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | make / remove a step worktree at `../DarkTower-wt/<branch>` with its own `.wt.json` (see Parallel work) |
+| root | `pnpm land <branch>` | optional local recheck: rebase on `main`, rerun `pnpm check`, fast-forward the local `main`. Not the merge path; PRs are. Refuses inside a Claude session. |
 | root | `pnpm -F <app> <script>` | one app's script (same as running it inside the app folder) |
 | app | `pnpm dev` / `pnpm start` / `pnpm e2e` | defined per app in its README |
 
@@ -109,9 +116,103 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 | Disposable? | |
 ```
 
+## Human gates (Bob)
+
+Bob signs off only at named gates. Each gate is a step in the plan, owned by Bob, and the next batch depends on it. Nothing after a gate starts until Bob records the sign-off (a line in the plan's Results with the date, or his words in the gate's PR/issue).
+
+| Gate | When | What Bob does |
+|---|---|---|
+| G-plan | Before batch 1 | Approves the plan: steps, batches, `Touches`, open questions |
+| G-playtest | After the first end-to-end run is buildable | Plays the full scene once with the tower and once with "Play without tower" (SC-1 style), writes notes |
+| G-judgement | Where a success criterion needs a human verdict | Records the verdict (e.g. SC-5 fight tension) in the playtest notes |
+| G-signoff | End of the milestone | Final sign-off |
+
+An app plan names which of these it uses. Batch evidence (below) is posted for Bob to look at whenever he likes; it is not a gate and does not block merging.
+
+## Parallel work (several developer agents at once)
+
+The loop runs plan steps in batches. Steps in a batch run at the same time, each in its own worktree; merging stays serial.
+
+### 1. Plans declare dependencies and touch-sets
+
+Every step in `apps/<app>/plans/Mx-*.md` carries three fields:
+
+```markdown
+### Step 3: <title>
+- Depends on: 1            # step ids, gate ids, or "none"
+- Touches: apps/game/src/combat/**, packages/dice/**
+- Deps change: no          # yes if it edits any package.json or pnpm-lock.yaml
+```
+
+A **batch** is a set of steps whose dependencies are already merged (or signed off, for gates), whose `Touches` globs do not overlap, and where at most one has `Deps change: yes`. The plan lists its batches and merge order:
+
+```markdown
+## Batches
+- B1: 1
+- B2: 2, 3, 4   (merge order: 3, 2, 4)
+- G1: Bob's gate step
+- B3: 5         (depends on G1)
+```
+
+Approving the plan (G-plan) approves its batches. A step may not start before its batch's dependencies are met. Deviations that change `Touches` or dependencies update the plan in the same commit, as now. The coordinator and `adversary-bugs` check that a PR changes only files inside its step's `Touches`, and that only the step marked `Deps change: yes` changes a `package.json` or `pnpm-lock.yaml`.
+
+### 2. One worktree per step
+
+- `pnpm wt <branch>` fetches `origin/main`, runs `git worktree add ../DarkTower-wt/<branch> -b <branch> origin/main` (local `main` when there is no remote), `pnpm install --frozen-lockfile` there, and writes `.wt.json`: the step's offset, its ports and its SQLite folder. Up to 9 worktrees at once.
+- `pnpm wt:rm <branch>` removes a clean worktree (node_modules, `.wt.json`, `.wt-data/` go with it) and deletes the branch once `main` holds it, including by squash-merged PR. It keeps a branch with unmerged work.
+- A developer agent works only inside its own worktree. The `worktree-guard` hook blocks edits and shell writes outside it (exit 2).
+- Hooks resolve the branch and repo root from the folder the command runs in, never from the main checkout. A hook test runs the main-commit guard from inside a worktree.
+
+### 3. No shared runtime state
+
+| Resource | Rule |
+|---|---|
+| Dev server / Playwright ports | `.wt.json` `ports`: dev 4747 + 10·n, e2e 4748 + 10·n. App configs read them from `.wt.json` when it is there, and fall back to 4747/4748 in the main checkout. |
+| SQLite files | Every database file of a step lives under `.wt.json` `dataDir` (`<worktree>/.wt-data/`); never a shared absolute path. |
+| `pnpm-lock.yaml` / any `package.json` | Only the one step per batch marked `Deps change: yes`. |
+| Generated files / snapshots | Stay inside the worktree; never written to the main checkout. |
+
+### 4. Merging: pull requests, serial
+
+1. The developer commits in its worktree, pushes the branch and opens a PR with `gh pr create`. The body names the plan step id and carries the evidence (the `pnpm check` exit code and test counts, what was not verified).
+2. CI (`.github/workflows/check.yml`) runs `pnpm check` on the PR.
+3. The verifier runs on the PR branch in its worktree and posts its result as a PR comment (it runs things; the adversaries read and attack).
+4. **Adversarial loop, at most 3 rounds.** Both adversaries review the PR and post with `gh pr review --comment`, each report ending in `Blocking: none` or `Blocking: <count>`:
+   - `adversary-bugs` (opus): bugs, edge cases, races, security and privacy, tower safety, weak tests, spec holes, plus every `REVIEW.md` pass. It replaced the `reviewer` agent, whose passes it runs.
+   - `adversary-prd` (sonnet): the PRD requirement IDs, acceptance tests and SC-1..SC-5 the step claims, and regressions in the ones it does not.
+   The developer fixes the blocking findings, pushes, and answers each finding on the PR; the next round starts. Different models on purpose, so the two do not share blind spots. Claude Code's agent `model:` field takes an alias (`opus`, `sonnet`, `haiku`) or a full Claude model id; it has no per-agent provider option. The provider (Anthropic API, Bedrock, Vertex, a gateway via `ANTHROPIC_BASE_URL`) is set for the whole session by environment variables, so a non-Claude second opinion would need a separate CLI called from Bash, which this repo does not do. (GitHub does not let an account approve its own PR and every agent posts as Bob, so the `Blocking:` lines are what count.)
+5. **Merge** when CI is green and the latest report from **both** adversaries says `Blocking: none`. The coordinator merges one PR at a time, in the batch's merge order: `gh pr update-branch` if `main` moved, wait for CI again, then `gh pr merge --squash --delete-branch`. A conflict or a red check after an update goes back to the developer and counts as a new round.
+6. **Escalation.** If round 3 ends with blocking findings still open, the coordinator labels the PR `needs-bob`, disables auto-merge on it (`gh pr merge --disable-auto`, a no-op while auto-merge is unavailable), stops that step, and reports it to Bob with the open findings. Steps that depend on it wait; the rest of the batch continues. Bob decides: fix himself, re-scope the step, override a finding, or drop it.
+7. `pnpm wt:rm <branch>` after the merge.
+
+Branch protection and GitHub auto-merge would enforce step 4 on the server. They are not available on this private repo's plan (GitHub answered 403 to the protection call, 2026-10-14). Once the repo is public or on Pro, require the `check` status on `main`, turn on "Require branches to be up to date", and switch the coordinator to `gh pr merge --auto --squash` once both adversaries report `Blocking: none` (it then disables auto-merge on escalation). `pnpm land` stays as an optional local recheck.
+
+### 5. Evidence per batch
+
+When a batch has merged, the coordinator posts one summary (as a comment on the last PR of the batch, and in its report): per PR the link, CI result, verifier result, adversary rounds used and findings fixed, any `needs-bob` escalation, and the merge order used. Bob may read it; nothing waits for him unless the next step is a gate.
+
+### 6. Coordinator
+
+`.claude/agents/coordinator.md`:
+
+- reads the approved plan and the next batch whose dependencies are met,
+- runs `pnpm wt` for each step and starts one developer agent per worktree,
+- runs the verifier and both adversaries on each PR for up to 3 rounds, merges PRs serially as in §4, and escalates with `needs-bob`,
+- writes the batch summary,
+- stops at a gate step and asks for Bob's sign-off,
+- never commits to `main`, never edits intent, never merges a PR without green CI and `Blocking: none` from both adversaries, and never starts a step outside the approved plan.
+
+Start with two or three agents per batch. Raise the cap once first-pass CI success stays high.
+
 ## Metrics we'll actually glance at
 
 - First-pass `pnpm check` success per step (leading)
 - Steps whose plan had to be rewritten mid-way (leading)
 - Hardware verification pass rate per capability (lagging, tower apps)
-- Reviewer "Important" findings per merge (lagging). Recurring ones go into `CLAUDE.md` as known mistakes.
+- Adversary blocking findings per merged PR, and rounds used (lagging). Recurring ones go into `CLAUDE.md` as known mistakes.
+- PRs escalated with `needs-bob` per batch (lagging). More than one per batch means steps are too big or the plan is unclear.
+- Rebase or update-branch conflicts per merged PR (leading). Recurring ones mean the `Touches` sets are too coarse.
+- First-pass CI success per PR (leading).
+- Batch wall-clock time vs. the same steps run serially (lagging).
+- Time a PR waits between green CI and merge (lagging). It shows whether serial merging is the bottleneck.
+- Gate turnaround: time from a gate step becoming ready to Bob's sign-off (lagging).

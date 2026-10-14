@@ -1,4 +1,4 @@
-// PreToolUse (Bash): Claude never creates commits on main or moves it. Bob merges.
+// PreToolUse (Bash): Claude never creates commits on main or moves it. Changes reach main by squash-merged PR.
 // On every branch, a commit may not skip the pre-commit check.
 import {
   block,
@@ -13,7 +13,8 @@ import {
   walkCommands,
 } from "./lib.mjs";
 
-const WHY = "Work on a <type>/<app>-<slug> branch; Bob merges to main (docs/sdlc.md).";
+const WHY =
+  "Work on a <type>/<app>-<slug> branch and open a PR; main changes only by merged PR (docs/sdlc.md).";
 
 const COMMITTING = new Set(["commit", "merge", "cherry-pick", "revert", "am", "rebase", "pull"]);
 const NEW_BRANCH_FLAGS = new Set(["-b", "-B", "-c", "-C", "--orphan"]);

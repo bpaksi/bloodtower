@@ -1,6 +1,6 @@
 # Review guide
 
-The `reviewer` agent reviews a branch diff against this file, the app's `spec.md` and the plan step the branch implements. It reads and reports. It never edits.
+The `adversary-bugs` agent (which replaced the `reviewer` agent) runs these passes on every PR, against this file, the app's `spec.md` and the plan step the PR implements, and then attacks the change further. Every "Important" here is a blocking finding in the adversarial loop (docs/sdlc.md). It reads and reports. It never edits.
 
 ## Passes, in order
 

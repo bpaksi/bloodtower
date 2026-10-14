@@ -18,7 +18,8 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 |---|---|---|
 | root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
 | root | `pnpm build` | Builds every app |
-| root | `pnpm land <branch>` | Bob only: runs `pnpm check` on the branch, fast-forwards `main` to it, deletes the branch and leaves you on `main`. It refuses when it sees a Claude session, but that is a courtesy check, not a lock: the rule is that Claude never runs it |
+| root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | Make / remove a step worktree at `../DarkTower-wt/<branch>` with its own ports and SQLite folder in `.wt.json` |
+| root | `pnpm land <branch>` | Optional local recheck for Bob (rebase on `main`, `pnpm check`, fast-forward the local `main`). Not the merge path. Refuses in a Claude session |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |
 | `apps/tower-poc` | `pnpm e2e` | Builds, then runs Playwright on port 4748 at three viewports |
@@ -28,8 +29,8 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 1. Read the app's `spec.md` and the current `plans/Mx-*.md` before changing code. If they conflict with the intent, the spec wins.
 2. One branch per plan step: `<type>/<app>-<slug>` (repo-wide work: `chore/<slug>`). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
-4. Before handing over, run `pnpm check` and the `verifier` agent, and paste the output as evidence in the commit message.
-5. Run the `reviewer` agent on the branch diff before asking Bob to merge. Bob merges with `pnpm land <branch>`; never run it yourself.
+4. Before handing over, run `pnpm check`, push the branch and open a PR with the evidence and the plan step id in the body.
+5. CI runs `pnpm check` on the PR; the `verifier` posts its run, and the two adversaries (`adversary-bugs`, `adversary-prd`) post findings. The developer fixes and they review again, for up to 3 rounds. The coordinator squash-merges one PR at a time once CI is green and both adversaries say `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
 
 ## Conventions
 

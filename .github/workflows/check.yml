@@ -1,0 +1,32 @@
+# Runs `pnpm check` on every pull request to main and on main itself. Branch protection on main
+# requires the `check` job, so a PR merges (auto-merge, squash) only when it passes.
+name: check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Bluetooth headers for the native tower library; nothing in CI connects to a tower.
+      - run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
