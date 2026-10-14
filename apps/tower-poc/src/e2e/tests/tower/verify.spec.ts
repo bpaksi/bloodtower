@@ -114,6 +114,13 @@ test("Verify mode records results in chunks and every device sees them", async (
       /Battery/,
       /Tower state/,
     ]);
+    // One group opens at a time, so a sitting stays one short chunk.
+    const stateGroups = panel(page).locator("details");
+    await stateGroups.nth(1).locator("summary").tap();
+    await expect(stateGroups.nth(1)).toHaveAttribute("open", "");
+    await stateGroups.nth(2).locator("summary").tap();
+    await expect(stateGroups.nth(2)).toHaveAttribute("open", "");
+    await expect(stateGroups.nth(1)).not.toHaveAttribute("open", "");
     await nav.getByRole("link", { name: "Sounds", exact: true }).tap();
     await expect(panel(page).locator("summary")).toHaveText([/Sounds\s*0 of 2 recorded/]);
     await nav.getByRole("link", { name: "Mechanics", exact: true }).tap();

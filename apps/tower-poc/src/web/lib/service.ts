@@ -45,6 +45,11 @@ export interface ServiceView {
    * `COMMAND_HISTORY`. A refusal arrives as `lastError` with the same id.
    */
   savedVerifications: readonly string[];
+  /**
+   * The message of every recent \`error\` that answered a message of this page, by that message's
+   * id, at most \`COMMAND_HISTORY\`. Unlike \`lastError\`, a later error does not replace it.
+   */
+  refusals: Record<string, string>;
   /** Every client id the service has given this page: each new socket gets a new one. */
   ownClientIds: readonly string[];
   lastError?: ServiceError;
@@ -58,6 +63,7 @@ export const initialView: ServiceView = {
   commands: {},
   interrupted: {},
   savedVerifications: [],
+  refusals: {},
   ownClientIds: [],
 };
 
@@ -110,15 +116,25 @@ export const applyServerMessage = (
         savedVerifications,
       };
     }
-    case "error":
+    case "error": {
+      const { correlationId } = message;
+      const refusals = correlationId
+        ? Object.fromEntries(
+            Object.entries({ ...view.refusals, [correlationId]: message.payload.message }).slice(
+              -COMMAND_HISTORY,
+            ),
+          )
+        : view.refusals;
       return {
         ...view,
+        refusals,
         lastError: {
           ...message.payload,
           ...(message.correlationId ? { correlationId: message.correlationId } : {}),
           at: now,
         },
       };
+    }
   }
 };
 

@@ -90,6 +90,8 @@ describe("Verify results (spec D14)", () => {
     // Unsupported and not exposed: the app shows nothing for them.
     "mechanics.unjam-drums",
     "seals.random-unbroken",
+    // On the Diagnostics page, which has no checklist until M4.
+    "diagnostics.export",
   ])("refuses %s and saves nothing", (capabilityId) => {
     const { db, close } = openDatabase(":memory:");
     const verifications = createVerifications({

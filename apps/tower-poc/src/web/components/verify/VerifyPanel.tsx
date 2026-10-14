@@ -8,6 +8,7 @@ import {
   VERIFICATION_NOTES_MAX,
   type VerificationRecord,
   type VerificationResult,
+  type WelcomePayload,
 } from "tower-poc-protocols";
 import { Button } from "@/components/ui/button";
 import { timeLabel } from "@/lib/labels";
@@ -19,28 +20,38 @@ const RESULTS: VerificationResult[] = ["pass", "partial", "fail"];
 
 /** Sends one `verify.record` and follows it until the service saves or refuses it. */
 const useRecord = () => {
-  const [sent, setSent] = useState<{ id?: string }>();
+  // `link` is how many sockets this page had opened when it sent: the service does not replay
+  // answers, so one sent on an earlier socket will never be answered.
+  const [sent, setSent] = useState<{ id?: string; link: number }>();
   const online = useService((view) => view.socket === "online");
+  const link = useService((view) => view.ownClientIds.length);
   const saved = useService((view) =>
     sent?.id ? view.savedVerifications.includes(sent.id) : false,
   );
-  const refusal = useService((view) =>
-    sent?.id && view.lastError?.correlationId === sent.id ? view.lastError.message : undefined,
-  );
+  // Kept by id, so a later error to this page does not make a refused record look under way.
+  const refusal = useService((view) => (sent?.id ? view.refusals[sent.id] : undefined));
   const answered = saved || refusal !== undefined;
+  const linkHeld = online && sent?.link === link;
   return {
     send: (payload: { capabilityId: string; result: VerificationResult; notes: string }) =>
-      setSent({ id: sendToService("verify.record", payload) }),
-    pending: sent?.id !== undefined && !answered && online,
+      setSent({ id: sendToService("verify.record", payload), link }),
+    pending: sent?.id !== undefined && !answered && linkHeld,
     saved,
     refusal,
     unsent: sent !== undefined && sent.id === undefined,
     // Sent, then the link dropped with no answer: the result shown is what the service has.
-    lost: sent?.id !== undefined && !answered && !online,
+    lost: sent?.id !== undefined && !answered && !linkHeld,
   };
 };
 
-function Latest({ record }: { record: VerificationRecord | undefined }) {
+function Latest({ record, known }: { record: VerificationRecord | undefined; known: boolean }) {
+  if (!known) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Last result unavailable until the service is reachable again.
+      </p>
+    );
+  }
   if (!record) return <p className="text-xs text-muted-foreground">No result recorded.</p>;
   return (
     <div className="text-xs text-muted-foreground">
@@ -62,10 +73,13 @@ function Latest({ record }: { record: VerificationRecord | undefined }) {
 function VerifyRow({
   entry,
   record,
+  known,
   mock,
 }: {
   entry: InventoryEntry;
   record: VerificationRecord | undefined;
+  /** False while the service is out of reach: the newest result is not known here then. */
+  known: boolean;
   mock: boolean;
 }) {
   const id = useId();
@@ -73,6 +87,8 @@ function VerifyRow({
   const [notes, setNotes] = useState("");
   const [problem, setProblem] = useState<string>();
   const recording = useRecord();
+  // "Saved" is about the last record; once the person starts the next one it would mislead.
+  const [savedShown, setSavedShown] = useState(false);
   const status = effectiveVerification(entry.verification, record);
 
   // Once saved, the form is cleared for the next result; the one saved shows as the latest.
@@ -80,6 +96,7 @@ function VerifyRow({
     if (recording.saved) {
       setResult(undefined);
       setNotes("");
+      setSavedShown(true);
     }
   }, [recording.saved]);
 
@@ -104,7 +121,7 @@ function VerifyRow({
         </p>
         <p className="text-xs">{VERIFICATION_LABELS[status]}</p>
       </div>
-      <Latest record={record} />
+      <Latest record={record} known={known} />
       <form
         noValidate
         className="flex flex-col gap-3"
@@ -130,6 +147,7 @@ function VerifyRow({
                 onChange={() => {
                   setResult(option);
                   setProblem(undefined);
+                  setSavedShown(false);
                 }}
               />
               {RESULT_LABELS[option]}
@@ -150,6 +168,7 @@ function VerifyRow({
             onChange={(event) => {
               setNotes(event.target.value);
               setProblem(undefined);
+              setSavedShown(false);
             }}
           />
         </div>
@@ -157,7 +176,7 @@ function VerifyRow({
           <Button type="submit" className="h-11 px-4" disabled={recording.pending}>
             {recording.pending ? "Recording…" : "Record result"}
           </Button>
-          {recording.saved && (
+          {recording.saved && savedShown && (
             <p role="status" className="text-sm text-muted-foreground">
               Saved{mock ? " (mock tower)" : ""}.
             </p>
@@ -193,13 +212,19 @@ export function VerifyPanel({ location }: { location: UiLocation }) {
   const on = useVerifyMode((mode) => mode.on);
   const headingId = useId();
   const welcome = useService((view) => view.welcome);
+  // The inventory and the tower last seen, so the rows (and what the person has typed in them)
+  // stay through a moment without the service. The results are not kept: they may have changed.
+  const [seen, setSeen] = useState<Pick<WelcomePayload, "inventory" | "tower">>();
+  useEffect(() => {
+    if (welcome) setSeen({ inventory: welcome.inventory, tower: welcome.tower });
+  }, [welcome]);
   useEffect(loadVerifyMode, []);
   if (!on) return null;
 
-  const mock = welcome?.tower === "mock";
-  const chunks = welcome
-    ? verifyChunks(welcome.inventory, welcome.verificationOverlay, location)
-    : [];
+  const known = welcome ?? seen;
+  const overlay = welcome?.verificationOverlay;
+  const mock = known?.tower === "mock";
+  const chunks = known ? verifyChunks(known.inventory, overlay ?? {}, location) : [];
 
   return (
     <section
@@ -211,7 +236,7 @@ export function VerifyPanel({ location }: { location: UiLocation }) {
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Use the controls on this page, watch the tower, then record what it did. Each result is
-        saved when you record it, so you can stop after any group and pick up later. Open one group
+        saved when you record it, so you can stop after any group and pick up later. One group opens
         at a time.
       </p>
       {mock && (
@@ -220,16 +245,23 @@ export function VerifyPanel({ location }: { location: UiLocation }) {
           hardware-verified.
         </p>
       )}
-      {!welcome ? (
+      {!known ? (
         <p className="mt-3 text-sm text-muted-foreground">Unavailable until the service answers.</p>
       ) : (
         <div className="mt-3 flex flex-col gap-2">
           {chunks.map((chunk) => (
-            <details key={chunk.category} className="rounded-lg border bg-background">
+            // One group open at a time (the shared name), so a sitting stays one short chunk.
+            <details
+              key={chunk.category}
+              name={`verify-${location}`}
+              className="rounded-lg border bg-background"
+            >
               <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 text-sm font-medium">
                 <span>{chunk.title}</span>
                 <span className="text-xs font-normal text-muted-foreground">
-                  {chunk.recorded} of {chunk.entries.length} recorded
+                  {overlay
+                    ? `${chunk.recorded} of ${chunk.entries.length} recorded`
+                    : "Unavailable"}
                 </span>
               </summary>
               <ul className="px-4" aria-label={`${chunk.title} to verify`}>
@@ -237,7 +269,8 @@ export function VerifyPanel({ location }: { location: UiLocation }) {
                   <VerifyRow
                     key={entry.id}
                     entry={entry}
-                    record={welcome.verificationOverlay[entry.id]}
+                    record={overlay?.[entry.id]}
+                    known={overlay !== undefined}
                     mock={mock}
                   />
                 ))}

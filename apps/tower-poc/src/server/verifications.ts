@@ -2,6 +2,7 @@
 // on the tower, and the overlay of the newest one per capability that every client is shown.
 import {
   findCapability,
+  VERIFY_LOCATIONS,
   type VerificationEnvironment,
   type VerificationOverlay,
   type VerificationRecord,
@@ -58,10 +59,10 @@ export const createVerifications = ({
     overlay: () => ({ ...overlay }),
     record: (payload, client) => {
       const capability = findCapability(payload.capabilityId);
-      if (!capability || capability.uiLocation === null) {
+      if (!capability?.uiLocation || !VERIFY_LOCATIONS.includes(capability.uiLocation)) {
         return {
           ok: false,
-          reason: `"${payload.capabilityId}" is not a capability the app shows, so it cannot be verified.`,
+          reason: `"${payload.capabilityId}" is not on a page with a Verify checklist, so it cannot be verified.`,
         };
       }
       const saved = storage.add({

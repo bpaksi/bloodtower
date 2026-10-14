@@ -23,7 +23,8 @@ export function CapabilitySummary() {
         <>
           <p className="mt-1 text-sm text-muted-foreground">
             {summary.total} in the inventory. Verify pass: {summary.recorded} of {summary.toVerify}{" "}
-            capabilities on the control pages have a result recorded on {tower}.
+            capabilities on the control pages have a result recorded on {tower} (any result: see By
+            verification for passes).
           </p>
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <dl

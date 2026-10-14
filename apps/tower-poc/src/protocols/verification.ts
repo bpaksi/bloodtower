@@ -1,8 +1,20 @@
 import { z } from "zod";
-import type { Verification } from "./inventory.ts";
+import type { UiLocation, Verification } from "./inventory.ts";
 
 // Verify mode (M3 step 3.6, spec D14): a person records what a capability did on the tower. The
 // records live in the service's SQLite only; the repo inventory never claims `hardware-verified`.
+
+/**
+ * The pages with a Verify checklist: the five control pages. The Diagnostics page's capabilities
+ * are verified once it is built (M4); until then the service refuses results for them.
+ */
+export const VERIFY_LOCATIONS: readonly UiLocation[] = [
+  "dashboard",
+  "lights",
+  "sounds",
+  "mechanics",
+  "tower-state",
+];
 
 export const verificationResultSchema = z.enum(["pass", "partial", "fail"]);
 export type VerificationResult = z.infer<typeof verificationResultSchema>;

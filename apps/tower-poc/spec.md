@@ -36,7 +36,7 @@ The Tower Web Controller is a local POC controller and investigation tool for th
 | D11 | On service startup, if a saved state snapshot exists, the UI **asks whether to restore it**. Restored values have origin `application-maintained` and freshness `stale`. Nothing is sent to the tower. | — | — |
 | D12 | `sendTowerCommandDirect`, `sendTowerCommand` and `sendTowerState` get **no UI**. They become gap entries with status `deferred`. | Raw injection out of scope | Satisfies FR-02 coverage without a raw console |
 | D13 | Capability inventory is a **typed TS module in the repo**, with a coverage test against the library's public API | — | Single source that drives the UI |
-| D14 | Hardware verification results live **in SQLite only**. The UI overlays `hardware-verified` onto the repo inventory at runtime. | — | — |
+| D14 | Hardware verification results live **in SQLite only**. The UI overlays `hardware-verified` onto the repo inventory at runtime, and `hardware-partial` or `hardware-failed` from a partial or failed result (M3 step 3.6). Only a result recorded against the real tower counts. | — | — |
 | D15 | Diagnostics use an **in-memory ring buffer** (default 5,000 events). An opt-in "Save session" writes to SQLite. JSON export is always available. | In-memory, export | Saved sessions can be linked as gap evidence |
 | D16 | The library's own diagnostics recorder and logger are **ingested into our timeline** with source `library`. Export embeds the library's `exportDiagnosticsJSON()` output. | — | One timeline |
 | D17 | Persistence: **native SQLite** (`better-sqlite3`) with **Drizzle** in the tower service | Browser local storage | The service owns the data |

@@ -194,4 +194,23 @@ describe("a lost link to the service", () => {
     // Before welcome there is no overlay to update; nothing is made up.
     expect(applyServerMessage(initialView, changed("v-2"), 0).welcome).toBeUndefined();
   });
+
+  it("keeps each refusal by the id it answers, so a later error does not replace it", () => {
+    const error = (correlationId: string | undefined, message: string): ServerMessage => ({
+      v: PROTOCOL_VERSION,
+      type: "error",
+      ...(correlationId ? { correlationId } : {}),
+      payload: { code: "invalid-state", message },
+    });
+    let view = applyServerMessage(initialView, error("v-1", "Not saved."), 0);
+    view = applyServerMessage(view, error("m-2", "Commands are still running."), 0);
+    view = applyServerMessage(view, error(undefined, "Message is not valid JSON."), 0);
+    expect(view.refusals).toEqual({ "v-1": "Not saved.", "m-2": "Commands are still running." });
+    expect(view.lastError?.message).toBe("Message is not valid JSON.");
+    for (let i = 0; i < COMMAND_HISTORY; i += 1) {
+      view = applyServerMessage(view, error(`n-${i}`, "x"), 0);
+    }
+    expect(Object.keys(view.refusals)).toHaveLength(COMMAND_HISTORY);
+    expect(view.refusals["v-1"]).toBeUndefined();
+  });
 });

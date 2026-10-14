@@ -8,6 +8,7 @@ import {
   effectiveVerification,
   type InventoryEntry,
   type UiLocation,
+  VERIFY_LOCATIONS,
   type VerificationOverlay,
   type VerificationResult,
 } from "tower-poc-protocols";
@@ -46,18 +47,6 @@ const CATEGORY_LABELS: Record<CapabilityCategory, string> = {
   state: "Tower state",
   diagnostics: "Diagnostics",
 };
-
-/**
- * The pages with a Verify checklist: the five control pages. The Diagnostics page's capabilities
- * are verified once it is built (M4).
- */
-export const VERIFY_LOCATIONS: readonly UiLocation[] = [
-  "dashboard",
-  "lights",
-  "sounds",
-  "mechanics",
-  "tower-state",
-];
 
 /** One short, self-contained part of a page's Verify pass: the capabilities of one category. */
 export interface VerifyChunk {

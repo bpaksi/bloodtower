@@ -148,6 +148,7 @@ export {
   type EffectiveVerification,
   effectiveVerification,
   VERIFICATION_NOTES_MAX,
+  VERIFY_LOCATIONS,
   type VerificationEnvironment,
   type VerificationOverlay,
   type VerificationRecord,
