@@ -5,7 +5,7 @@ import {
   type VerificationRecord,
 } from "tower-poc-protocols";
 import { describe, expect, it } from "vitest";
-import { capabilitySummary, verifyChunks } from "./verify.ts";
+import { capabilitySummary, verifyChunks, verifyStatusLabel } from "./verify.ts";
 
 const entries = inventory.map(toInventoryEntry);
 
@@ -99,5 +99,21 @@ describe("capabilitySummary", () => {
     expect(after.byVerification["hardware-failed"]).toBe(0);
     expect(after.byVerification["mock-tested"]).toBe(before.byVerification["mock-tested"] - 2);
     expect(after.recorded).toBe(3);
+  });
+});
+
+describe("verifyStatusLabel", () => {
+  const entry = entries.find((candidate) => candidate.id === "lighting.all-on");
+  if (!entry) throw new Error("lighting.all-on is in the inventory");
+
+  it("reads the newest result while the service is reachable", () => {
+    expect(verifyStatusLabel(entry, undefined, true)).toBe("Mock-tested");
+    expect(verifyStatusLabel(entry, saved("lighting.all-on", "bluetooth"), true)).toBe(
+      "Hardware-verified",
+    );
+  });
+
+  it("is unavailable while the service is out of reach, never the inventory's own claim", () => {
+    expect(verifyStatusLabel(entry, undefined, false)).toBe("Unavailable");
   });
 });

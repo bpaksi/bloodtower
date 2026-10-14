@@ -10,6 +10,7 @@ import {
   type UiLocation,
   VERIFY_LOCATIONS,
   type VerificationOverlay,
+  type VerificationRecord,
   type VerificationResult,
 } from "tower-poc-protocols";
 
@@ -47,6 +48,17 @@ const CATEGORY_LABELS: Record<CapabilityCategory, string> = {
   state: "Tower state",
   diagnostics: "Diagnostics",
 };
+
+/**
+ * A row's status in the Verify checklist. While the service is out of reach the newest result is
+ * not known, so neither is the status: the inventory's own claim would read as current.
+ */
+export const verifyStatusLabel = (
+  entry: InventoryEntry,
+  record: VerificationRecord | undefined,
+  known: boolean,
+) =>
+  known ? VERIFICATION_LABELS[effectiveVerification(entry.verification, record)] : "Unavailable";
 
 /** One short, self-contained part of a page's Verify pass: the capabilities of one category. */
 export interface VerifyChunk {

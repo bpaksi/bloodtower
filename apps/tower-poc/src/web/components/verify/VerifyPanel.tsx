@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useState } from "react";
 import {
-  effectiveVerification,
   type InventoryEntry,
   type UiLocation,
   VERIFICATION_NOTES_MAX,
@@ -13,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { timeLabel } from "@/lib/labels";
 import { sendToService, useService } from "@/lib/store";
-import { RESULT_LABELS, VERIFICATION_LABELS, verifyChunks } from "@/lib/verify";
+import { RESULT_LABELS, verifyChunks, verifyStatusLabel } from "@/lib/verify";
 import { loadVerifyMode, useVerifyMode } from "@/lib/verifyMode";
 
 const RESULTS: VerificationResult[] = ["pass", "partial", "fail"];
@@ -89,7 +88,7 @@ function VerifyRow({
   const recording = useRecord();
   // "Saved" is about the last record; once the person starts the next one it would mislead.
   const [savedShown, setSavedShown] = useState(false);
-  const status = effectiveVerification(entry.verification, record);
+  const status = verifyStatusLabel(entry, record, known);
 
   // Once saved, the form is cleared for the next result; the one saved shows as the latest.
   useEffect(() => {
@@ -119,7 +118,7 @@ function VerifyRow({
         <p id={`${id}-title`} className="text-sm font-medium">
           {entry.title} <span className="font-mono text-xs text-muted-foreground">{entry.id}</span>
         </p>
-        <p className="text-xs">{VERIFICATION_LABELS[status]}</p>
+        <p className="text-xs">{status}</p>
       </div>
       <Latest record={record} known={known} />
       <form
