@@ -99,7 +99,10 @@ export const parseDevOrigins = (value: string | undefined): string[] =>
       return url.origin;
     });
 
-const send = (socket: WebSocket, message: ServerMessage) => socket.send(JSON.stringify(message));
+/** Sends to one client. A socket that has started closing is skipped, as the hub's broadcast does. */
+const send = (socket: WebSocket, message: ServerMessage) => {
+  if (socket.readyState === socket.OPEN) socket.send(JSON.stringify(message));
+};
 
 const sendError = (socket: WebSocket, code: ErrorCode, message: string, correlationId?: string) =>
   send(socket, {

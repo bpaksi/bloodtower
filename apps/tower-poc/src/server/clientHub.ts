@@ -20,7 +20,6 @@ export interface ClientHub {
   get: (socket: WebSocket) => HubClient | undefined;
   /** The clients connected now, oldest first. */
   clients: () => readonly HubClient[];
-  send: (socket: WebSocket, message: ServerMessage) => void;
   /** Sends to every registered client whose socket is open. */
   broadcast: (message: ServerMessage) => void;
   /** Drops every client's connection. */
@@ -29,9 +28,6 @@ export interface ClientHub {
 
 export const createClientHub = (now: () => number = Date.now): ClientHub => {
   const sockets = new Map<WebSocket, HubClient>();
-  const send = (socket: WebSocket, message: ServerMessage) => {
-    if (socket.readyState === socket.OPEN) socket.send(JSON.stringify(message));
-  };
   return {
     add: (socket) => {
       const client: HubClient = { id: randomUUID(), connectedAt: now() };
@@ -43,7 +39,6 @@ export const createClientHub = (now: () => number = Date.now): ClientHub => {
     },
     get: (socket) => sockets.get(socket),
     clients: () => [...sockets.values()],
-    send,
     broadcast: (message) => {
       // Serialised once, whatever the number of clients.
       const data = JSON.stringify(message);

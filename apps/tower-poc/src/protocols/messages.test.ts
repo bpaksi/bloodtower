@@ -292,7 +292,12 @@ describe("serverMessageSchema", () => {
     expect(entries.map((entry) => entry.id)).toEqual(inventory.map((entry) => entry.id));
     // What arrives is what was sent: nothing in an entry is lost by JSON.
     expect(JSON.parse(JSON.stringify(entries))).toEqual(entries);
-    for (const entry of entries) expect(entry).not.toHaveProperty("params");
+    // Every field of a capability travels, except its schema, plus `commandable`. A field added to
+    // the inventory and not to the wire form fails here.
+    for (const [index, entry] of entries.entries()) {
+      const source = Object.keys(inventory[index] ?? {}).filter((key) => key !== "params");
+      expect(Object.keys(entry).sort()).toEqual([...source, "commandable"].sort());
+    }
     expect(entries.filter((entry) => entry.commandable).map((entry) => entry.id)).toEqual(
       inventory.filter(isCommandable).map((entry) => entry.id),
     );

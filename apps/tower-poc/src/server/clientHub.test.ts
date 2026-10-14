@@ -46,20 +46,6 @@ describe("client hub", () => {
     expect(closing.send).not.toHaveBeenCalled();
   });
 
-  it("sends to one client only, and not to a closed one", () => {
-    const hub = createClientHub();
-    const a = fakeSocket();
-    const b = fakeSocket();
-    hub.add(a);
-    hub.add(b);
-    hub.send(a, message);
-    expect(a.send).toHaveBeenCalledTimes(1);
-    expect(b.send).not.toHaveBeenCalled();
-    const closed = fakeSocket(false);
-    hub.send(closed, message);
-    expect(closed.send).not.toHaveBeenCalled();
-  });
-
   it("drops every connection on closeAll", () => {
     const hub = createClientHub();
     const a = fakeSocket();
