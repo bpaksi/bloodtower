@@ -9,6 +9,8 @@ import { sendToService, useService } from "./store.ts";
 export const useCommand = (capabilityId: string) => {
   const [commandId, setCommandId] = useState<string>();
   const [unsent, setUnsent] = useState(false);
+  // What this page asked for. The lifecycle does not carry params, so only the sender knows them.
+  const [requested, setRequested] = useState<unknown>();
   const stages = useService((view) => (commandId ? view.commands[commandId] : undefined));
   const interrupted = useService((view) =>
     commandId ? view.interrupted[commandId] === true : false,
@@ -21,7 +23,8 @@ export const useCommand = (capabilityId: string) => {
     if (id) useService.setState((view) => markSent(view, id), true);
     setUnsent(id === undefined);
     setCommandId(id);
+    setRequested(id === undefined ? undefined : params);
   };
 
-  return { send, pending, unsent };
+  return { send, pending, unsent, commandId, stages, interrupted, requested };
 };

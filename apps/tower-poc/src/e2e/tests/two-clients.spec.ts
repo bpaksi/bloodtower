@@ -26,6 +26,11 @@ const expectTower = async (page: Page, connection: string, calibration: string) 
   await expect(towerField(page, "Calibration")).toHaveText(calibration);
 };
 
+const testSound = (page: Page) => page.getByRole("region", { name: "Test sound" });
+
+const statusField = (page: Page, label: string) =>
+  testSound(page).locator("dt", { hasText: label }).locator("xpath=following-sibling::dd[1]");
+
 const lifecycle = (page: Page, sender: "this device" | "another device") =>
   page.getByRole("list", { name: `Test sound lifecycle, from ${sender}` }).getByRole("listitem");
 
@@ -58,6 +63,9 @@ test("two devices share one tower: connect, calibrate, play, disconnect", async 
     for (const page of [a, b]) {
       await expect(page.getByText("Mock tower:")).toBeVisible();
       await expectTower(page, "Not connected", "Not calibrated");
+      // The generated control says why it is disabled (M3 step 3.1).
+      await expect(page.getByRole("button", { name: "Play test sound" })).toBeDisabled();
+      await expect(testSound(page).getByText("Connect the tower first.")).toBeVisible();
     }
 
     // Connect from the Mac; the iPad sees it without doing anything.
@@ -72,6 +80,7 @@ test("two devices share one tower: connect, calibrate, play, disconnect", async 
     for (const page of [a, b]) {
       await expect(towerField(page, "Calibration")).toHaveText("Calibrating");
       await expect(page.getByRole("button", { name: "Play test sound" })).toBeDisabled();
+      await expect(testSound(page).getByText("The tower is calibrating.")).toBeVisible();
     }
     // The mock calibrates for 3 s, too close to the default 5 s wait on a slow machine.
     for (const page of [a, b]) {
@@ -79,10 +88,24 @@ test("two devices share one tower: connect, calibrate, play, disconnect", async 
       await expect(towerField(page, "Connection")).toHaveText("Connected");
     }
 
+    // A value outside the schema is refused on the page, with the field named, and nothing is
+    // sent: the iPad sees no command.
+    const macSound = a.getByLabel(/^Sound index/);
+    await macSound.fill("0");
+    await a.getByRole("button", { name: "Play test sound" }).click();
+    await expect(macSound).toHaveAttribute("aria-invalid", "true");
+    await expect(lifecycle(b, "another device")).toHaveCount(0);
+    await macSound.fill("1");
+    await expect(macSound).not.toHaveAttribute("aria-invalid");
+
     // Play from the iPad; both see every stage, each naming the right sender.
     await b.getByRole("button", { name: "Play test sound" }).tap();
     await expect(lifecycle(b, "this device")).toHaveText(PLAYED);
     await expect(lifecycle(a, "another device")).toHaveText(PLAYED);
+    // Requested and outcome apart; only the sender knows the values it asked for.
+    await expect(statusField(b, "Requested")).toHaveText("Sound index 1, from this device");
+    await expect(statusField(a, "Requested")).toHaveText("From another device");
+    for (const page of [a, b]) await expect(statusField(page, "Outcome")).toHaveText("Confirmed");
 
     await a.screenshot({ path: testInfo.outputPath("mac.png"), fullPage: true });
     await b.screenshot({ path: testInfo.outputPath("ipad.png"), fullPage: true });

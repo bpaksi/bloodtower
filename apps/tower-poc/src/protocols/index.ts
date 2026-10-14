@@ -103,6 +103,13 @@ export {
   welcomePayloadSchema,
 } from "./messages.ts";
 export {
+  buildParams,
+  describeParams,
+  type ParamField,
+  type ParamForm,
+  type ParamValues,
+} from "./paramFields.ts";
+export {
   type Origin,
   originSchema,
   type PendingRestore,

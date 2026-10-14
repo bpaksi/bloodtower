@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import type { ConnectionPayload, Device } from "tower-poc-protocols";
+import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { RestorePrompt } from "@/components/RestorePrompt";
 import { Button } from "@/components/ui/button";
-import { CALIBRATION_LABELS, CONNECTION_LABELS, STAGE_LABELS } from "@/lib/labels";
+import { CALIBRATION_LABELS, CONNECTION_LABELS } from "@/lib/labels";
 import { PAGES } from "@/lib/pages";
-import { isInterrupted, latestCommand } from "@/lib/service";
 import { sendToService, useService } from "@/lib/store";
-import { useCommand } from "@/lib/useCommand";
 
 type Action = "connect" | "reconnect" | "disconnect" | "calibrate";
 
@@ -40,8 +39,6 @@ const allowed = (connection: ConnectionPayload | undefined) => {
     reconnect: canOpen && dropped,
     disconnect: connected || state === "connecting",
     calibrate: connected && connection?.calibration !== "calibrating",
-    // D22: no command while the tower calibrates.
-    command: connected && connection?.calibration !== "calibrating",
   };
 };
 
@@ -50,19 +47,6 @@ export function Dashboard() {
   const connection = useService((view) => view.connection);
   const lastError = useService((view) => view.lastError);
   const [lastAction, setLastAction] = useState<{ id?: string; action: Action }>();
-  const sound = useCommand("sound.play");
-  // The last test sound from any device, so every screen shows the same lifecycle (D7).
-  const lastSound = useService((view) => latestCommand(view.commands, "sound.play"));
-  // Every id this page has had: the service gives each new socket a new one.
-  const ownClientIds = useService((view) => view.ownClientIds);
-  const lastSoundId = lastSound?.[0]?.commandId;
-  const soundInterrupted = useService((view) =>
-    lastSoundId ? isInterrupted(view, lastSoundId) : false,
-  );
-  const sender =
-    lastSound?.[0] && ownClientIds.includes(lastSound[0].clientId)
-      ? "this device"
-      : "another device";
   const can = allowed(online ? connection : undefined);
 
   const act = (action: Action) => setLastAction({ id: sendToService(action), action });
@@ -153,51 +137,14 @@ export function Dashboard() {
         </section>
       )}
 
-      <section aria-labelledby="test-heading" className="rounded-lg border p-4 sm:p-6">
-        <h2 id="test-heading" className="text-sm font-medium">
-          Test sound
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Plays sound {TEST_SOUND} through the whole path: this page, the service, the command
-          executor and the tower.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button
-            className="h-11 px-4"
-            disabled={!can.command || sound.pending}
-            onClick={() => sound.send({ soundIndex: TEST_SOUND })}
-          >
-            {sound.pending ? "Playing…" : "Play test sound"}
-          </Button>
-          {lastSound?.[0] && (
-            <div className="flex flex-wrap gap-x-2 text-sm">
-              <span className="text-muted-foreground">From {sender}:</span>
-              <ol
-                aria-label={`Test sound lifecycle, from ${sender}`}
-                className="flex flex-wrap gap-x-2"
-              >
-                {lastSound.map((stage) => (
-                  <li
-                    key={stage.stage}
-                    className="after:ml-2 after:content-['→'] last:after:content-none"
-                  >
-                    {STAGE_LABELS[stage.stage]}
-                    {stage.reason ? `: ${stage.reason}` : ""}
-                  </li>
-                ))}
-                {soundInterrupted && (
-                  <li>Outcome unknown: the link to the service dropped before it ended</li>
-                )}
-              </ol>
-            </div>
-          )}
-        </div>
-        {sound.unsent && (
-          <p role="alert" className="mt-2 text-sm text-destructive">
-            Not sent: the service is not reachable.
-          </p>
-        )}
-      </section>
+      <CapabilityControl
+        capabilityId="sound.play"
+        title="Test sound"
+        description={`Plays a sound through the whole path: this page, the service, the command executor and the tower. Sound ${TEST_SOUND} unless you choose another.`}
+        defaults={{ soundIndex: String(TEST_SOUND) }}
+        sendLabel="Play test sound"
+        pendingLabel="Playing…"
+      />
     </div>
   );
 }

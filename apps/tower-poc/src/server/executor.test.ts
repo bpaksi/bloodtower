@@ -425,8 +425,8 @@ describe("command executor: known limits", () => {
   // From the step 5 review, pinned at Bob's decision (M2 step 9): the library's queue takes any
   // state the tower reports as the answer to the command it is waiting on. A report that is not
   // that answer, such as a direct write's answer arriving more than 1.25 s late, would confirm the
-  // next queued command early. M1 echoes came in 25 to 64 ms. If this test starts failing, the
-  // library has learned to tell answers apart, and the note in the M2 plan can go.
+  // next queued command early (GAP-LIB-010). M1 echoes came in 25 to 64 ms. If this test starts
+  // failing, the library has learned to tell answers apart, and the gap can be resolved.
   it("confirms a queued command the tower did not answer when some other report arrives", async () => {
     const { mock, submit, stages, writes } = await setup();
     const lights = { doorway: [{ position: "west", level: "bottom", style: "on" }] };
