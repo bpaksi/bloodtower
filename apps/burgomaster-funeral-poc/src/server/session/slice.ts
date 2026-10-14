@@ -297,6 +297,9 @@ export class DemoSession {
     if (!device || device.connects <= 0) return fail("This device is not connected.");
     if (action === "take" && device.held.includes(hunter)) return { ok: true };
     if (action === "release" && !device.held.includes(hunter)) return { ok: true };
+    if (action === "take" && this.holdersOf(hunter).length >= 8) {
+      return fail("Eight devices already hold that hunter.");
+    }
     this.setHold(device, hunter, action);
     this.commit();
     return { ok: true };

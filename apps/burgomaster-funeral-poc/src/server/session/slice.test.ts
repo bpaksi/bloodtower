@@ -305,4 +305,36 @@ describe("demo slice", () => {
     expect(again.ok).toBe(true);
     expect(tokens).toHaveLength(16);
   });
+
+  it("refuses a ninth holder and leaves dashboard state publishable", () => {
+    const { session, clock } = start();
+    const dash = session.helloDashboard();
+    const ids: string[] = [];
+    const tokens: string[] = [];
+    for (let n = 0; n < 8; n += 1) {
+      const joined = session.helloDevice("ipad", session.joinCode, undefined);
+      if (!joined.ok) throw new Error("join failed");
+      takeAll(session, joined.hello.clientId);
+      ids.push(joined.hello.clientId);
+      tokens.push(joined.hello.token);
+    }
+    const ninth = session.helloDevice("phone", session.joinCode, undefined);
+    if (!ninth.ok) throw new Error("join failed");
+    expect(session.hold(ninth.hello.clientId, "agnes", "take").ok).toBe(false);
+    expect(session.hold(ninth.hello.clientId, "agnes", "take").ok).toBe(false);
+    expect(session.dashboardState().hunters.agnes.holders).toHaveLength(8);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(5_500);
+
+    for (const id of ids) session.detach(id);
+    expect(session.hold(ninth.hello.clientId, "agnes", "take").ok).toBe(false);
+    expect(session.dashboardState().hunters.agnes.holders).toHaveLength(8);
+    expect(session.dashboardView(dash.token).paused).toBe(true);
+
+    const back = session.helloDevice("ipad", undefined, tokens[0]);
+    expect(back.ok).toBe(true);
+    expect(session.dashboardView(dash.token).paused).toBe(false);
+    expect(session.dashboardView(dash.token).playback?.speaking).toBe(true);
+    expect(session.dashboardState().hunters.agnes.holders).toHaveLength(8);
+  });
 });
