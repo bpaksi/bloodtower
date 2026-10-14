@@ -85,6 +85,34 @@ describe("mock tower: connection", () => {
     }
   });
 
+  it("ends disconnected after cleanup, without reporting a disconnect", async () => {
+    const mock = await connectedMock();
+    const gone = vi.fn();
+    mock.adapter.onDisconnect(gone);
+    await mock.adapter.cleanup();
+    expect(mock.adapter.isConnected()).toBe(false);
+    expect(gone).not.toHaveBeenCalled();
+    await expect(mock.adapter.writeCharacteristic(packet({}))).rejects.toThrow(/Not connected/);
+    const before = mock.received.length;
+    await advance(60_000);
+    expect(mock.received.length).toBe(before);
+  });
+
+  it("treats a second connect during the first as the same connect", async () => {
+    const mock = createMockTower();
+    const received: string[] = [];
+    mock.adapter.onCharacteristicValueChanged((data) => received.push(toHex(data)));
+    const both = Promise.all([
+      mock.adapter.connect("ReturnToDarkTower", []),
+      mock.adapter.connect("ReturnToDarkTower", []),
+    ]);
+    await advance(T.connectMs);
+    await both;
+    await advance(10_000);
+    // One set of timers: five battery messages in ten seconds, not ten.
+    expect(received.filter((text) => text.startsWith("07")).length).toBe(5);
+  });
+
   it("forgets calibration, lights and skulls when it is connected again", async () => {
     const mock = await connectedMock();
     await mock.adapter.writeCharacteristic(Uint8Array.of(0x04));
@@ -153,8 +181,10 @@ describe("mock tower: answers to writes, as the real tower gave them", () => {
       [T.echoMs, toHex(lightsOn)],
       [2 * T.echoMs, toHex(packet({ lights: "33", audio: 1 }))],
     ]);
-    // The sound is not part of what the tower holds afterwards.
-    expect(toHex(mock.heldState())).toBe(toHex(lightsOn));
+    // The tower keeps the audio byte: its later states still carry it.
+    expect(toHex(mock.heldState())).toBe(toHex(packet({ lights: "33", audio: 1 })));
+    mock.dropSkull();
+    expect(mock.answers().at(-1)?.[1].slice(30, 36)).toBe("010001");
   });
 
   it("echoes a looped sound without the loop bit", async () => {
@@ -185,14 +215,28 @@ describe("mock tower: answers to writes, as the real tower gave them", () => {
     },
   );
 
-  it("echoes the seal sequence, then reports it cleared 3.6 s later", async () => {
+  it("echoes the seal sequence, then 3.6 s later reports it cleared with the audio byte kept", async () => {
+    // The bytes of spike run 2: audio 70, sequence 0e, then a state ending 70 00 00 00 00.
     const mock = await connectedMock();
-    await mock.adapter.writeCharacteristic(packet({ sequence: 14, audio: 5 }));
+    await mock.adapter.writeCharacteristic(packet({ sequence: 0x0e, audio: 0x70 }));
     await advance(T.echoMs + T.sequenceMs);
     expect(mock.answers()).toEqual([
-      [T.echoMs, toHex(packet({ sequence: 14, audio: 5 }))],
-      [T.echoMs + T.sequenceMs, toHex(packet({}))],
+      [T.echoMs, toHex(packet({ sequence: 0x0e, audio: 0x70 }))],
+      [T.echoMs + T.sequenceMs, toHex(packet({ audio: 0x70 }))],
     ]);
+  });
+
+  it("gives no answer when the audio byte goes back to 00, and reports 00 from then on", async () => {
+    // Spike run 3: the packet sent to stop the sound was not answered; the skull drops after it
+    // carried audio 00.
+    const mock = await connectedMock();
+    await mock.adapter.writeCharacteristic(packet({ audio: 1 }));
+    await advance(T.echoMs);
+    await mock.adapter.writeCharacteristic(packet({}));
+    await advance(60_000);
+    expect(mock.answers().length).toBe(1);
+    mock.dropSkull();
+    expect(mock.answers().at(-1)?.[1].slice(30, 36)).toBe("000001");
   });
 
   it("reports a rotation after its travel time, with the duration message just before it", async () => {

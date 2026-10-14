@@ -20,6 +20,8 @@ const DRUMS = [1, 2] as const;
 const LIGHTS_START = 3;
 const LIGHTS_END = 15;
 const AUDIO = 15;
+/** Drums, lights and audio: the bytes of a packet that the tower keeps. */
+const HELD_END = AUDIO + 1;
 const SKULL_COUNT = 17;
 const LED_SEQUENCE = 19;
 /** Drum bytes the tower reports after calibrating: every drum north, calibrated. */
@@ -38,7 +40,10 @@ export interface MockTowerTimings {
   rotationMs: number;
   /** A second state, with the sequence cleared, followed the seal sequence by 3.6 s. */
   sequenceMs: number;
-  /** One battery message about every 2 s, and none while calibrating (GAP-LIB-008). */
+  /**
+   * One battery message about every 2 s, and none while calibrating (GAP-LIB-008). A message due
+   * at the very millisecond calibration ends is also skipped.
+   */
   batteryMs: number;
   /** One differential-readings message every second, always. */
   differentialMs: number;
@@ -89,6 +94,7 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   let state = new Uint8Array(STATE_LENGTH);
   let onValue: (data: Uint8Array) => void = () => {};
   let onGone: () => void = () => {};
+  let connecting: Promise<void> | undefined;
   const pending = new Set<ReturnType<typeof setTimeout>>();
   const repeating: ReturnType<typeof setInterval>[] = [];
 
@@ -140,29 +146,33 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
 
     // Drum bytes that differ are taken as a rotation, also on an uncalibrated tower. What the real
     // tower does with them then is not known (GAP-HW-006); moving is the cautious thing to model.
-    // The tower keeps the drums and lights it was sent. The skull count is its own: what a
-    // packet says there is ignored. (Assumed: the spike never sent a count that differed.)
-    state.set(packet.subarray(DRUMS[0], LIGHTS_END), DRUMS[0]);
+    // The tower keeps the drums, lights and audio byte it was sent, and reports them in every
+    // later state: the state that followed the seal sequence still carried its audio byte, and
+    // the skull-drop states carried the 00 of the last packet. The loop bit is not kept: the one
+    // looped sound the spike sent was echoed without it. The skull count is the tower's own; what
+    // a packet says there is ignored. (Assumed: the spike never sent a count that differed.)
+    state.set(packet.subarray(DRUMS[0], HELD_END), DRUMS[0]);
+    state[AUDIO] = audio & ~LOOP_BIT;
 
     if (SILENT_SEQUENCES.has(sequence)) return;
 
-    // What comes back carries the sound and the sequence once, then they are gone. The loop bit
-    // does not come back: the one looped sound the spike sent was echoed without it.
+    // The echo carries the sequence; the states after it do not.
     const echo = Uint8Array.from(state);
-    echo[AUDIO] = audio & ~LOOP_BIT;
     echo[LED_SEQUENCE] = sequence;
 
     if (drumsChange) {
       later(timings.rotationMs, () => {
-        // "Rotation duration", 1 to 2 ms before the state. The value is milliseconds of travel
-        // as far as the spike could tell.
+        // "Rotation duration". On the real tower it came 1 to 2 ms before the state; here both
+        // arrive together. The value is milliseconds of travel as far as the spike could tell.
         const travel = Math.max(0, timings.rotationMs - 150);
         notify(Uint8Array.of(0x04, 0x00, 0x00, (travel >> 8) & 0xff, travel & 0xff));
         notify(echo);
       });
       return;
     }
-    // A write that changes nothing the tower reports gets no answer (GAP-HW-010).
+    // A write that changes no light and starts no sound or sequence gets no answer (GAP-HW-010).
+    // That includes a packet whose audio byte goes back to 00, as the spike's stop packet did.
+    // Assumed: a sound sent twice running is echoed both times. The spike never repeated one.
     if (!lightsChange && audio === 0 && sequence === 0) return;
 
     later(timings.echoMs, () => notify(echo));
@@ -170,30 +180,39 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
     if (sequence !== 0) later(timings.echoMs + timings.sequenceMs, sendState);
   };
 
-  const adapter: IBluetoothAdapter = {
-    connect: async () => {
-      if (connected) return;
-      await sleep(timings.connectMs);
-      if (options.failConnect === "bluetooth-unavailable") {
-        throw new BluetoothConnectionError(
-          "Bluetooth adapter not ready: Timeout waiting for Noble to be powered on",
-        );
-      }
-      if (options.failConnect === "not-found") {
-        throw new BluetoothDeviceNotFoundError("Tower not found (mock)");
-      }
-      connected = true;
-      // A tower that has just been found is uncalibrated and dark, with no skulls counted.
-      state = new Uint8Array(STATE_LENGTH);
-      repeating.push(
-        setInterval(() => {
-          if (!calibrating) notify(battery());
-        }, timings.batteryMs),
-        setInterval(
-          () => notify(Uint8Array.of(0x06, 0xff, 0x00, 0x00, 0x00)),
-          timings.differentialMs,
-        ),
+  const open = async () => {
+    await sleep(timings.connectMs);
+    if (options.failConnect === "bluetooth-unavailable") {
+      throw new BluetoothConnectionError(
+        "Bluetooth adapter not ready: Timeout waiting for Noble to be powered on",
       );
+    }
+    if (options.failConnect === "not-found") {
+      throw new BluetoothDeviceNotFoundError("Tower not found (mock)");
+    }
+    connected = true;
+    // A tower that has just been found is uncalibrated and dark, with no skulls counted.
+    state = new Uint8Array(STATE_LENGTH);
+    repeating.push(
+      setInterval(() => {
+        if (!calibrating) notify(battery());
+      }, timings.batteryMs),
+      // The real payload changes from message to message and was not decoded; this one is fixed.
+      setInterval(
+        () => notify(Uint8Array.of(0x06, 0xff, 0x00, 0x00, 0x00)),
+        timings.differentialMs,
+      ),
+    );
+  };
+
+  const adapter: IBluetoothAdapter = {
+    // A second call while the first is still connecting is the same connect.
+    connect: () => {
+      if (connected) return Promise.resolve();
+      connecting ??= open().finally(() => {
+        connecting = undefined;
+      });
+      return connecting;
     },
     disconnect: async () => end(),
     isConnected: () => connected,
@@ -222,7 +241,12 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
     },
     onBluetoothAvailabilityChanged: () => {},
     readDeviceInformation: async () => ({ ...MOCK_DEVICE_INFORMATION, lastUpdated: new Date() }),
-    cleanup: async () => stopTimers(),
+    // As the real adapter does: it ends disconnected, and does not report that as a disconnect.
+    cleanup: async () => {
+      connected = false;
+      calibrating = false;
+      stopTimers();
+    },
   };
 
   return {
