@@ -6,7 +6,13 @@ import { join } from "node:path";
 import { PROTOCOL_VERSION, serverMessageSchema } from "tower-poc-protocols";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
-import { isAllowedOrigin, startTowerServer, type TowerServer, WS_PATH } from "./server.ts";
+import {
+  isAllowedOrigin,
+  parseDevOrigins,
+  startTowerServer,
+  type TowerServer,
+  WS_PATH,
+} from "./server.ts";
 
 let dir: string;
 let server: TowerServer;
@@ -212,6 +218,37 @@ describe("isAllowedOrigin (D20)", () => {
     expect(isAllowedOrigin("http://localhost:3000", host)).toBe(false);
     expect(isAllowedOrigin("http://localhost:3001", host, dev)).toBe(false);
     expect(isAllowedOrigin("http://localhost:3000.evil.example", host, dev)).toBe(false);
+  });
+});
+
+describe("parseDevOrigins", () => {
+  it("returns nothing when the variable is unset or empty", () => {
+    expect(parseDevOrigins(undefined)).toEqual([]);
+    expect(parseDevOrigins(" , ")).toEqual([]);
+  });
+
+  it("reduces each entry to scheme, host and port", () => {
+    expect(parseDevOrigins("http://localhost:3000/, https://dev.local:3443/path?x=1")).toEqual([
+      "http://localhost:3000",
+      "https://dev.local:3443",
+    ]);
+  });
+
+  it.each([
+    "localhost:3000",
+    "localhost",
+    "null",
+    "file:///tmp/page.html",
+    "data:text/html,x",
+    "*",
+  ])("refuses %s instead of turning it into an origin every sandboxed page has", (entry) => {
+    expect(() => parseDevOrigins(`http://localhost:3000,${entry}`)).toThrow(/DEV_ORIGINS/);
+  });
+
+  it("never yields the origin null, which isAllowedOrigin would then accept", () => {
+    expect(
+      isAllowedOrigin("null", "127.0.0.1:4747", parseDevOrigins("http://localhost:3000")),
+    ).toBe(false);
   });
 });
 

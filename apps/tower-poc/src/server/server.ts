@@ -59,6 +59,31 @@ export const isAllowedOrigin = (
   }
 };
 
+/**
+ * Reads the comma-separated `DEV_ORIGINS` value. Each entry is reduced to scheme, host and port, so
+ * a trailing slash does not stop it matching. An entry that is not an http or https origin is an
+ * error, not something to skip: `localhost:3000` without a scheme parses as an origin of "null",
+ * and letting that through would admit every sandboxed and file page.
+ */
+export const parseDevOrigins = (value: string | undefined): string[] =>
+  (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry !== "")
+    .map((entry) => {
+      const url = URL.canParse(entry) ? new URL(entry) : undefined;
+      if (
+        !url ||
+        (url.protocol !== "http:" && url.protocol !== "https:") ||
+        url.origin === "null"
+      ) {
+        throw new Error(
+          `DEV_ORIGINS has an entry that is not an http or https origin: "${entry}". Write it like http://localhost:3000.`,
+        );
+      }
+      return url.origin;
+    });
+
 const send = (socket: WebSocket, message: ServerMessage) => socket.send(JSON.stringify(message));
 
 const sendError = (socket: WebSocket, code: ErrorCode, message: string, correlationId?: string) =>

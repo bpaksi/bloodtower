@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { lanUrls } from "./lanUrls.ts";
 import packageJson from "./package.json" with { type: "json" };
-import { startTowerServer, WS_PATH } from "./server.ts";
+import { parseDevOrigins, startTowerServer, WS_PATH } from "./server.ts";
 
 const DEFAULT_PORT = 4747;
 
@@ -18,12 +18,7 @@ const host = process.env.HOST || "0.0.0.0";
 const webRoot = resolve(process.env.WEB_ROOT || resolve(import.meta.dirname, "../web/out"));
 
 // Set by `pnpm dev` only: the origin of `next dev`, which serves the UI from another port (D20).
-// Each is reduced to scheme, host and port, so a trailing slash does not stop it matching.
-const devOrigins = (process.env.DEV_ORIGINS || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter((origin) => origin !== "")
-  .map((origin) => new URL(origin).origin);
+const devOrigins = parseDevOrigins(process.env.DEV_ORIGINS);
 
 const server = await startTowerServer({
   port: parsePort(process.env.PORT),
