@@ -163,6 +163,15 @@ Night 2's second set piece is done; with the site, the kingdom's key. Night 3 be
 **n2-burgomasters-funeral.10** [still] [prop: pressed-flower]
 > **Narrator:** They bury Anton Morosz at dawn, properly. On the lid, someone has left a pressed violet. No one saw who.
 
+**n2-burgomasters-funeral.end.private.wren** [still] `ipad:wren` — personal ending line (R3-9)
+> **Wren (thought):** Two graves filled by noon. Father's spade did the work. Mother was taken for hiding one girl. I'll fetch the other one home.
+**n2-burgomasters-funeral.end.private.tomas** [still] `ipad:tomas` — personal ending line (R3-9)
+> **Tomas (thought):** Twenty years I stood that wall. Marta's still behind it, half his. I'm not burying her too. I'll carry her out again, fingers or no.
+**n2-burgomasters-funeral.end.private.agnes** [still] `ipad:agnes` — personal ending line (R3-9)
+> **Agnes (thought):** He let me live because I prayed for him. I prayed over two coffins today instead. Lord, let that be the last mercy he ever gets from me.
+**n2-burgomasters-funeral.end.private.emeric** [still] `ipad:emeric` — personal ending line (R3-9)
+> **Emeric (thought):** Gerhardt's cipher is still in my coat, and Anton is in the ground. I need the Tome's first line to read it. I'm afraid of what it'll say.
+
 ## Variants
 **n2-burgomasters-funeral.lid-choice~nailed~no-wren** [still] — nailed, Wren not in play
 > **Tomas:** Forgive me, girl.
@@ -173,6 +182,8 @@ Night 2's second set piece is done; with the site, the kingdom's key. Night 3 be
 **n2-burgomasters-funeral.07~fight-lost** [still] — the fight was lost (outcome per mechanics)
 > **Narrator:** Dorka is gone through the window, laughing, up the hill road.
 > **Wren:** She'll tell him we're coming.
+**n2-burgomasters-funeral.07~fight-lost~no-wren** [still] — the fight was lost, Wren not in play (narrator only; R3-12)
+> **Narrator:** Dorka is gone through the window, laughing, up the hill road, toward the one who sent her. By the time anyone reaches the castle, he will know who is coming.
 **n2-burgomasters-funeral.04~holy-symbol** [clip] — Holy Symbol held (same cues)
 > **Narrator:** The candles bow. Dorka sits up in her wedding dress, and the saint's lamp flares, and she shields her eyes and smiles anyway.
 **n2-burgomasters-funeral.05~no-agnes** [clip] — Agnes not in play
