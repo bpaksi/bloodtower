@@ -1,6 +1,6 @@
 # Burgomaster's Funeral POC
 
-Status: PRD draft for Bob's review, 2026-10-14 (**rev 4, 16:00 ET: tower control moves to Phase 2 (R4-1..R4-3); the POC drives no physical tower, every cue plays its screen half plus fallback audio, and E16 becomes a Dashboard ambient bed.** Rev 3, 15:45 ET: Gamewright rulings R3-1..R3-12 resolve 12 build questions; conflicting text fixed in place. Rev 2, 12:07 ET: hunters and devices R-DEV-9, R-WIZ-11, scene presence E15, revised variants rule). This is a design doc only. It contains no code.
+Status: PRD draft for Bob's review, 2026-10-14 (**rev 5, ~16:15 ET, game length timing: the POC measures how long each part of the scene takes (PRD-41..43, R5-1) so full-game time per length can be extrapolated (R-LEN).** Rev 4, 16:00 ET: tower control moves to Phase 2 (R4-1..R4-3); the POC drives no physical tower, every cue plays its screen half plus fallback audio, and E16 becomes a Dashboard ambient bed.** Rev 3, 15:45 ET: Gamewright rulings R3-1..R3-12 resolve 12 build questions; conflicting text fixed in place. Rev 2, 12:07 ET: hunters and devices R-DEV-9, R-WIZ-11, scene presence E15, revised variants rule). This is a design doc only. It contains no code.
 Scene: `n2-burgomasters-funeral` (Dracula pack, night 2, the K2 Sanctuary). The script is used as reviewed, with no rewrite.
 Sources: `research/stories/dracula/poc-funeral.md`, `research/stories/dracula/rulings.md`, `assets/stories/dracula/scripts/{n2-burgomasters-funeral,README,cast,props}.md`, `research/game-design/*` (requirements, story-engine, sessions, statistics, setup-wizard-and-summary, landing-and-initial-screens, look-and-feel-harness, asset-organization), `research/tower/api-surface-7.1.2.md`.
 
@@ -40,6 +40,7 @@ Sources: `research/stories/dracula/poc-funeral.md`, `research/stories/dracula/ru
 - The full board setup checklist, random encounters, keys UI beyond a flag, the Count's agenda, other scenes, and the finale.
 - Warriors and spirit. Story mechanics never touch them (Bob's ruling).
 - Any work on `apps/tower-poc` internals.
+- **Game length picker (R5-1).** The POC is one scene, so it has no Short/Standard/Long option (R-LEN-1, R-WIZ-12). It only measures timing (PRD-41..43) to feed full-game estimates.
 
 ## 3. Devices and architecture
 - **Mac host (R-DEV-1, R-DEV-5).** Runs the Next.js server, holds the single authoritative game state, and writes SQLite. In the POC it has no tower link; the Bluetooth link through `apps/tower-poc` is Phase 2 (§13).
@@ -124,8 +125,11 @@ At any point, if a holdings change leaves a hunter unheld, the game **pauses** (
 | PRD-38 | Stats log device holdings (each join, change and release, with a snapshot at start), pauses for unheld hunters, and the locked presence set for the scene. | R-DEV-9, E15, R-STA-11 |
 | PRD-39 | E16 in the POC: the Dashboard is never idle. It runs an ambient bed per phase (screen light pulse plus ambient audio from the Mac) and one-shot accents (screen pulse plus sound) every 20–60 s, suppressed during speech, choices and pauses, and overridden by scene cues. Accent timing and choice come from the game seed and are logged. The quiet gap during play is ≤10 s. | E16, R3-4, R4-2 |
 | PRD-40 | The cue sheet (`shared/tower/cues.json`) stays the contract: each cue ID carries its screen half and fallback audio now, and Phase 2 maps the same cue IDs to tower commands without renaming them. | R4-3, E13 |
+| PRD-41 | Timing instrumentation (rev 5). Using a monotonic clock (wall time stored alongside for display only), the host timestamps: every phase start/end; every moment start/end; each investigation pick (time from prompt to lock, per hunter); table-talk duration; battle screen open to Won/Lost result; each cue's start/end (duration); and every pause start/end (any cause: unheld hunter, host pause, disconnect). Pauses are excluded from active time. Rows are stored in SQLite stats with the game record. | R-LEN-4, R-LEN-5, R-STA-2, R5-1 |
+| PRD-42 | End-of-POC timing summary on the Dashboard (in the mini summary): total, active and paused time, and time per phase. Exportable as CSV and JSON from the stored rows (no display-only numbers). | R-LEN-5, R-SUM-6, R-STA-8, R5-1 |
+| PRD-43 | Extrapolation formula, documented here, not built: **est. game time (per length) = Σ(set pieces in that length × measured set-piece time) + (expected encounters × measured encounter time) + (fights × measured fight time) + (nights × per-night overhead for dusk/dawn)**. Inputs come from POC runs (PRD-41 data; this scene gives set-piece, investigation, table-talk and fight times); encounter and dusk/dawn times are pending until measured. The formula lives in the docs, not the build. | R-LEN-4, R5-1 |
 
-Total: 40 requirement IDs (rev 2 adds PRD-32..38 and revises PRD-4, -8, -10, -15, -18, -19, -20). Rev 4 adds PRD-39, -40, moves PRD-5, -6, -28 to Phase 2, and rewrites PRD-1, -2, -11, -12, -13, -24, -29 for the POC (original text kept in §13).
+Total: 43 requirement IDs (rev 5 adds PRD-41..43; rev 2 adds PRD-32..38 and revises PRD-4, -8, -10, -15, -18, -19, -20). Rev 4 adds PRD-39, -40, moves PRD-5, -6, -28 to Phase 2, and rewrites PRD-1, -2, -11, -12, -13, -24, -29 for the POC (original text kept in §13).
 
 ## 6. Game state and rules
 
@@ -272,6 +276,8 @@ Tables (statistics.md): `games`, `sessions`, `devices`, `game_heroes`, `clock_ti
 - AT-24. Absent privacy: emeric's holder receives no `.09.private.emeric` while emeric is away, and `private_skipped_absent` is logged.
 - AT-25. Disconnect without release: killing the network of the only holder of tomas does not pause the game, and on reconnect the holdings are intact.
 - AT-18. Playtest: players rate the fight branch as tense (Bob's notes). (SC-5)
+- AT-31. Timing log (rev 5, PRD-41): after a full run, the timing rows contain every phase and every moment played, each with a start and end; investigation picks, table talk, the battle screen and cues have durations; and a forced pause (AT-22) appears as a pause row whose time is excluded from active time.
+- AT-32. Timing summary (rev 5, PRD-42): the summary's active time equals the sum of the phase times (pauses excluded), total = active + paused, and the CSV/JSON export matches the on-screen numbers.
 
 ## 12. Open questions and assumptions
 Each item is an **assumption** with a suggested default, which the build follows unless Bob overrides it.
@@ -372,3 +378,7 @@ Where these conflict with earlier text, these win; the conflicting text above ha
 1. **R4-1 Tower control is Phase 2 (Bob).** The tower control code isn't ready, so the POC will not control the physical tower. All tower requirements move to §13, kept, not deleted.
 2. **R4-2 Fallbacks are primary in the POC.** Every cue plays its screen half plus its fallback audio, always. E16 runs as a Dashboard ambient bed and accents (screen light pulse plus ambient audio), seeded and logged, idle gap ≤10 s.
 3. **R4-3 Cue IDs unchanged.** The cue sheet stays the contract; Phase 2 maps the same cue IDs to the tower.
+
+## Rev 5 rulings (Bob, Oct 14 2026, game length timing)
+Where these conflict with earlier text, these win. Consistent with rev 4: no tower in the POC, so cue durations are the screen half plus fallback audio.
+1. **R5-1 Measure, don't guess (Bob).** The full game gets a startup length option (Short/Standard/Long, R-LEN, R-WIZ-12), but the POC has no picker, since it is one scene. The POC's job is to measure: it times every phase, moment, pick, table talk, fight and cue, excludes pauses from active time (PRD-41), shows and exports a timing summary (PRD-42), and its data feeds the documented extrapolation formula (PRD-43) that sets each pack's per-length time estimates (e.g. D-DRA-13, provisional).
