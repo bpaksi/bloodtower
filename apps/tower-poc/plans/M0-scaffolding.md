@@ -52,6 +52,6 @@ CLAUDE.md, REVIEW.md
 ## Proof results (2026-10-13, at b09b7f8)
 
 - `pnpm check` exits 0 with 172 tests passing; `pnpm build` exits 0; `pnpm e2e` reports 30 passed. `pnpm start` and `pnpm dev` both come up, and `/ws` answers `hello` with `welcome`.
-- Blocked in a live Claude session, by file edit and by shell command: an edit to `apps/tower-poc/intent/0001-dark-tower-web.md` (`protect-intent`), a change to `scripts/pinned-versions.json` (`pin-guard`), and an edit to a test file on a `fix/*` branch (`test-lock`).
+- Blocked in a live Claude session, by file edit and by shell command: an edit to `apps/tower-poc/intent/0001-tower-web.md` (`protect-intent`), a change to `scripts/pinned-versions.json` (`pin-guard`), and an edit to a test file on a `fix/*` branch (`test-lock`).
 - **Outstanding:** `no-main-commit` has not been seen blocking in a live session. Claude Code's own permission check refused the commit on `main` before the hook ran. Fed the same commands directly, the guard exits 2. `main` has no `.claude/` folder until this branch merges, so repeat the live check in a fresh session after the merge.
 - Dashboard screenshots at the three viewports were taken by the smoke test and checked by eye. They are not committed.

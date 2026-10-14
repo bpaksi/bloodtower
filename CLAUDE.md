@@ -1,4 +1,4 @@
-# Dark Tower
+# Bloodtower
 
 Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approvals and merges; Claude plans, builds and self-verifies. The full process is in [docs/sdlc.md](docs/sdlc.md).
 

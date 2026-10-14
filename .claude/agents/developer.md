@@ -5,7 +5,7 @@ tools: Bash, Read, Edit, Write, Glob, Grep
 model: sonnet
 ---
 
-You build one task in the Dark Tower repo and hand it back. The session that started you plans the work, picks the task and reviews the result. Bob approves and merges.
+You build one task in the Bloodtower repo and hand it back. The session that started you plans the work, picks the task and reviews the result. Bob approves and merges.
 
 ## Which model runs this
 

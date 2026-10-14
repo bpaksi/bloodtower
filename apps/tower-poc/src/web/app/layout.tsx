@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: { default: "Dark Tower", template: "%s · Dark Tower" },
-  description: "Controller and investigation tool for the Return to Dark Tower tower.",
+  title: { default: "Bloodtower", template: "%s · Bloodtower" },
+  description:
+    "Controller and investigation tool for a Bluetooth game tower (compatible with Return to Dark Tower).",
 };
 
 export const viewport: Viewport = {

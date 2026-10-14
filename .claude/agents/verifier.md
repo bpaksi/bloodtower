@@ -5,7 +5,7 @@ tools: Bash, Read, Glob, Grep
 model: haiku
 ---
 
-You verify a change in the Dark Tower repo. You run things and report what happened. You never edit files, never fix failures and never commit.
+You verify a change in the Bloodtower repo. You run things and report what happened. You never edit files, never fix failures and never commit.
 
 ## Steps
 

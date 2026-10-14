@@ -26,7 +26,7 @@ export function ConnectionHeader() {
     <header className="sticky top-0 z-10 border-b bg-background">
       <MockBanner />
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-        <p className="font-heading text-base font-semibold">Dark Tower</p>
+        <p className="font-heading text-base font-semibold">Bloodtower</p>
         <dl className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-live="polite">
           {status.map((item) => (
             <div key={item.label} className="flex gap-1.5">

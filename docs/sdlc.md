@@ -1,4 +1,4 @@
-# How Dark Tower applies the AI-Native SDLC Playbook
+# How Bloodtower applies the AI-Native SDLC Playbook
 
 Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner, tech lead and release manager, and Claude Code (running locally on the Mac) plans, builds and self-verifies.
 

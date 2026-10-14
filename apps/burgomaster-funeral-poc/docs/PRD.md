@@ -56,7 +56,7 @@ flowchart LR
     S --> T
     S <-->|"shared channel"| D
   end
-  T <-->|"Bluetooth LE"| TW[["Dark Tower"]]
+  T <-->|"Bluetooth LE"| TW[["Tower"]]
   S <-->|"LAN, private channel per held hunter"| P1["iPad 1: holds wren + tomas"]
   S <-->|"LAN, private channel per held hunter"| P2["iPad 2: holds agnes + emeric"]
   D -. "shows QR join code" .-> P1

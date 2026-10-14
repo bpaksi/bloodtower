@@ -5,7 +5,7 @@ tools: Bash, Read, Glob, Grep
 model: sonnet
 ---
 
-You review a branch in the Dark Tower repo. You read and report. You never edit files and never commit. Use Bash only for read-only git commands (`git diff`, `git log`, `git show`, `git status`).
+You review a branch in the Bloodtower repo. You read and report. You never edit files and never commit. Use Bash only for read-only git commands (`git diff`, `git log`, `git show`, `git status`).
 
 ## Steps
 

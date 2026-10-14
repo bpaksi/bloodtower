@@ -1,4 +1,4 @@
-# PRD: Dark Tower Web Controller POC
+# PRD: Tower Web Controller POC
 
 ## 1. Product overview
 

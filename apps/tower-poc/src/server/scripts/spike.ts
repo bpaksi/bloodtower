@@ -40,7 +40,7 @@ const main = async () => {
   const log = (record: Record<string, unknown>) =>
     appendFileSync(logFile, `${JSON.stringify({ ms: Date.now() - started, ...record })}\n`);
 
-  console.log("Dark Tower hardware spike (M1 steps 5 and 6)\n");
+  console.log("Tower hardware spike (M1 steps 5 and 6)\n");
   console.log("This connects to the real tower. Drums will spin during calibration and rotation.");
   console.log("You are asked before every step and can skip any of them.");
   console.log("The tower's power switch is the only real stop: this script cannot halt a drum.");

@@ -1,4 +1,4 @@
-# Dark Tower
+# Bloodtower
 
 Designing a new game around the *Return to Dark Tower* tower. Unofficial and fan-made; *Return to Dark Tower* is © Restoration Games.
 

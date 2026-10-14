@@ -160,7 +160,7 @@ describe("walkCommands", () => {
 });
 
 describe("protect-intent", () => {
-  const intent = "apps/tower-poc/intent/0001-dark-tower-web.md";
+  const intent = "apps/tower-poc/intent/0001-tower-web.md";
 
   cases("protect-intent", edit, BLOCKED, [
     [join(REPO, intent)],

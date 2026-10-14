@@ -23,7 +23,7 @@ NEEDS-FROM-ILLUSIONIST.md
 - Privates carry the hunter: `.09.private.<hunter>`, `.investigate.<action>.<finding>.private.<hunter>`.
 - Lines: `<moment-id>.vo-NN`. SFX/music: `n2-burgomasters-funeral.sfx.<name>` / `.music.<name>`. Portraits: `dracula.cast.<name>.portrait`.
 - Render profiles: `@dashboard`, `@ipad`; `@phone` optional and falls back to `@ipad` or text (R-AST-ORG-14).
-- 1981 bookends (R-LF-9): `shared.dt1981-*`, belong in `assets/shared/dt1981/`; listed in the manifest as draft slots with no file yet.
+- 1981 bookends (R-LF-9): not in the repo. Homage recreations are kept locally only (`assets/shared/dt1981/` is gitignored).
 
 ## Privacy by target
 - `dashboard`: shared screen and speakers. Never carries a `.private.*` payload.
