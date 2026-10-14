@@ -67,3 +67,44 @@ export const instrumentAdapter = (
     cleanup: () => traced("cleanup", () => inner.cleanup()),
   };
 };
+
+/** An adapter event with the time the service saw it, in milliseconds since the epoch. */
+export type TimedAdapterEvent = AdapterEvent & { at: number };
+
+export interface AdapterEventList {
+  /** Pass this to `instrumentAdapter`. */
+  emit: (event: AdapterEvent) => void;
+  /** The events still held, oldest first. */
+  events: () => readonly TimedAdapterEvent[];
+  /** How many events were dropped to stay within the limit. */
+  dropped: () => number;
+  clear: () => void;
+}
+
+/**
+ * Keeps the most recent adapter events in memory. A stand-in until the diagnostics bus exists
+ * (M4 step 4.1): the session and the hardware smoke test read it, nothing sends it to a client.
+ * The tower sends about 1.5 messages a second when idle, so the default holds roughly an hour.
+ */
+export const createAdapterEventList = (
+  limit = 5_000,
+  now: () => number = Date.now,
+): AdapterEventList => {
+  let held: TimedAdapterEvent[] = [];
+  let dropped = 0;
+  return {
+    emit: (event) => {
+      held.push({ ...event, at: now() });
+      if (held.length > limit) {
+        dropped += held.length - limit;
+        held = held.slice(-limit);
+      }
+    },
+    events: () => held,
+    dropped: () => dropped,
+    clear: () => {
+      held = [];
+      dropped = 0;
+    },
+  };
+};

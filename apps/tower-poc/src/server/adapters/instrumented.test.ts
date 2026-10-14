@@ -1,6 +1,12 @@
 import type { IBluetoothAdapter } from "ultimatedarktower";
 import { describe, expect, it } from "vitest";
-import { type AdapterEvent, instrumentAdapter, toHex } from "./instrumentedAdapter.ts";
+import {
+  type AdapterEvent,
+  createAdapterEventList,
+  instrumentAdapter,
+  toHex,
+} from "./instrumented.ts";
+import { createMockTower } from "./mockTower.ts";
 
 /** An adapter that records calls and lets the test push notifications in. */
 const fakeAdapter = (options: { failWrite?: boolean } = {}) => {
@@ -107,5 +113,57 @@ describe("instrumentAdapter", () => {
     expect(adapter.isConnected()).toBe(true);
     expect(adapter.isGattConnected()).toBe(true);
     expect(calls).toEqual([]);
+  });
+});
+
+describe("createAdapterEventList", () => {
+  it("stamps each event with the time it was seen and keeps them in order", () => {
+    let clock = 1_000;
+    const list = createAdapterEventList(10, () => clock);
+    list.emit({ kind: "tx", hex: "04", bytes: 1 });
+    clock = 1_050;
+    list.emit({ kind: "rx", hex: "0710", bytes: 2 });
+    expect(list.events()).toEqual([
+      { kind: "tx", hex: "04", bytes: 1, at: 1_000 },
+      { kind: "rx", hex: "0710", bytes: 2, at: 1_050 },
+    ]);
+    expect(list.dropped()).toBe(0);
+  });
+
+  it("keeps only the newest events and counts what it dropped", () => {
+    const list = createAdapterEventList(3, () => 0);
+    for (const hex of ["01", "02", "03", "04", "05"]) list.emit({ kind: "rx", hex, bytes: 1 });
+    expect(list.events().map((event) => (event.kind === "lifecycle" ? "" : event.hex))).toEqual([
+      "03",
+      "04",
+      "05",
+    ]);
+    expect(list.dropped()).toBe(2);
+  });
+
+  it("forgets everything on clear", () => {
+    const list = createAdapterEventList(3, () => 0);
+    for (const hex of ["01", "02", "03", "04"]) list.emit({ kind: "rx", hex, bytes: 1 });
+    list.clear();
+    expect(list.events()).toEqual([]);
+    expect(list.dropped()).toBe(0);
+  });
+
+  it("records what the library and the mock tower exchange, with no call of its own", async () => {
+    const list = createAdapterEventList();
+    const mock = createMockTower({ timings: { connectMs: 0, echoMs: 0 } });
+    const adapter = instrumentAdapter(mock.adapter, list.emit);
+    adapter.onCharacteristicValueChanged(() => {});
+    await adapter.connect("ReturnToDarkTower", []);
+    const lightsOn = new Uint8Array(20).fill(0x33, 3, 15);
+    await adapter.writeCharacteristic(lightsOn);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await adapter.disconnect();
+    expect(
+      list.events().map((event) => (event.kind === "lifecycle" ? event.name : event.kind)),
+    ).toEqual(["connect:start", "connect:ok", "tx", "rx", "disconnect:start", "disconnect:ok"]);
+    const [tx, rx] = list.events().filter((event) => event.kind !== "lifecycle");
+    expect(tx).toMatchObject({ kind: "tx", hex: toHex(lightsOn) });
+    expect(rx).toMatchObject({ kind: "rx", hex: toHex(lightsOn) });
   });
 });

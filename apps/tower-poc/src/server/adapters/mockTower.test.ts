@@ -1,6 +1,6 @@
 import { BluetoothPlatform, UltimateDarkTower } from "ultimatedarktower";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { toHex } from "../instrumentedAdapter.ts";
+import { toHex } from "./instrumented.ts";
 import { createMockTower, DEFAULT_MOCK_TIMINGS, type MockTowerOptions } from "./mockTower.ts";
 
 beforeEach(() => {

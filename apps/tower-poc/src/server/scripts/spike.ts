@@ -11,7 +11,7 @@ import { dirname, join, resolve } from "node:path";
 import { stdin, stdout } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
-import { instrumentAdapter } from "../instrumentedAdapter.ts";
+import { instrumentAdapter } from "../adapters/instrumented.ts";
 import { type Answer, runSpike, type SpikeIo, type SpikeTower } from "./spikeSteps.ts";
 
 const HELD_ROTATION_SEQUENCES = [

@@ -11,7 +11,7 @@ apps/tower-poc/src/server/
   server.ts            # HTTP static + ws upgrade
   clientHub.ts         # client registry, broadcast, clientId/label
   towerSession.ts      # owns UltimateDarkTower instance, lifecycle state machine, calibration state
-  adapters/instrumented.ts, adapters/mockTower.ts
+  adapters/instrumented.ts (tap and event list), adapters/mockTower.ts
   commandExecutor.ts   # queue, correlation IDs, validation via inventory, timeouts, lanes, lifecycle events
   stateStore.ts        # value+origin+freshness wrapper, snapshot to db
   db/{schema.ts,client.ts,migrations/}   # better-sqlite3 + Drizzle: settings, state_snapshots
@@ -44,6 +44,9 @@ apps/tower-poc/src/web/
      - `cleanup()` ends disconnected without reporting a disconnect, as the real adapter's does. A packet the mock does not recognise (not 20 bytes, or an unknown one-byte command) is ignored without an error, so a malformed packet from a later step would show up as a timeout.
      - Not wired into the service yet: nothing constructs it outside tests until step 4.
 3. `InstrumentedAdapter`: tx/rx/lifecycle taps that emit to a temporary in-memory event list. The full DiagnosticsBus comes in M4.
+   - Result, on `feat/tower-poc-instrumented-adapter` (on top of the step 2 branch): the tap built for the spike moved from `src/server/instrumentedAdapter.ts` to `src/server/adapters/instrumented.ts`, unchanged, and gained `createAdapterEventList()`: the newest 5,000 events in memory, each with the time it was seen, and a count of what was dropped. Nothing reads the list yet; the session (step 4) owns one and the hardware smoke (step 11) reads it.
+     - Not added: the service and characteristic UUIDs that spec §3.1 says each transport event carries. The adapter interface does not tell the tap which characteristic a write went to, so the tap would be repeating the library's constants, not observing anything. M4 step 4.1 already lists them and is the place to decide.
+     - The spike script imports the tap from its new place; it was not run.
 4. `TowerSession` state machine (spec §3.2 states). It sets `retrySendCommandMax = 0` on the tower object as soon as it is constructed, with a test (D21). Manual reconnect only (D10), and calibration resets on disconnect.
    - From the M1 spike: a test asserts that the first stateful packet after a reconnect carries no drum positions from the earlier connection (the open part of GAP-HW-006). The library's heartbeat warning is recorded and is not treated as a lost connection, and nothing reconnects because of it (GAP-LIB-008). The session knows when it asked for the disconnect, so the library's incident for it is not reported as a fault (GAP-LIB-009).
 5. `CommandExecutor` with lifecycle, lanes, per-capability timeouts from the inventory, and no auto-retry. It validates `params` with the inventory schema and passes the parsed output to the library, never the input; a test asserts that the library receives the schema's parsed output. `lighting.all-on` and `lighting.all-off` bypass the library's queue (`sendTowerState` goes straight to `sendTowerCommandDirect`), so the executor serialises them with the other commands. A command that arrives while `performingCalibration` is true is rejected before the library is called, with a test (D22).
