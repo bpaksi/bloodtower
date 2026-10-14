@@ -1,8 +1,10 @@
 import { resolve } from "node:path";
+import { END_STAGES } from "tower-poc-protocols";
 import { BluetoothAdapterFactory, BluetoothPlatform } from "ultimatedarktower";
 import { createAdapterEventList } from "./adapters/instrumented.ts";
 import { createMockTower } from "./adapters/mockTower.ts";
 import { openDatabase } from "./db/client.ts";
+import { createRecordStorage } from "./db/records.ts";
 import { createSnapshotStorage } from "./db/snapshots.ts";
 import { openDiagLog, teeEventList } from "./diagLog.ts";
 import { lanUrls } from "./lanUrls.ts";
@@ -10,6 +12,7 @@ import packageJson from "./package.json" with { type: "json" };
 import { parseDevOrigins, startTowerServer, WS_PATH } from "./server.ts";
 import { createTowerSession } from "./session.ts";
 import { createStateStore, feedStateStore } from "./stateStore.ts";
+import { createTowerRecords } from "./towerRecords.ts";
 
 const DEFAULT_PORT = 4747;
 
@@ -56,9 +59,14 @@ const dbPath =
   resolve(import.meta.dirname, "../../data", mockTower ? "tower-poc.mock.db" : "tower-poc.db");
 const database = openDatabase(dbPath);
 if (diagLog) session.subscribe((status) => diagLog.write({ source: "connection", status }));
-// A snapshot left by the last run opens the restore prompt (D11). Nothing reaches the tower.
-const store = createStateStore({ storage: createSnapshotStorage(database.db) });
-const stopFeed = feedStateStore(session, store);
+// A snapshot left by the last run opens the restore prompt (D11). Nothing reaches the tower. The
+// service's own record of seals and skulls is loaded with no prompt (spec D24).
+const store = createStateStore({
+  storage: createSnapshotStorage(database.db),
+  records: createRecordStorage(database.db),
+});
+const records = createTowerRecords(store);
+const feed = feedStateStore(session, store, { skulls: records });
 
 const server = await startTowerServer({
   port: parsePort(process.env.PORT),
@@ -67,9 +75,14 @@ const server = await startTowerServer({
   serverVersion: packageJson.version,
   session,
   store,
+  records,
   tower: mockTower ? "mock" : "bluetooth",
   devOrigins,
-  onLifecycle: diagLog && ((lifecycle) => diagLog.write({ source: "command", lifecycle })),
+  onLifecycle: (lifecycle) => {
+    diagLog?.write({ source: "command", lifecycle });
+    // The library moves its glyphs once a rotation has ended, with no tower report after it.
+    if (END_STAGES.includes(lifecycle.stage)) feed.refresh();
+  },
 });
 
 console.log(`Tower service ${packageJson.version} listening (WebSocket at ${WS_PATH}):`);
@@ -91,7 +104,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
       .close()
       .then(() => server.close())
       .finally(() => {
-        stopFeed();
+        feed.stop();
         database.close();
         process.exit(0);
       });

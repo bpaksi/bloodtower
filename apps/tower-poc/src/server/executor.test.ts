@@ -1,5 +1,6 @@
 import {
   type CommandLifecyclePayload,
+  findCapability,
   inventory,
   isCommandable,
   RANDOM_ROTATE_DRUMS,
@@ -14,11 +15,14 @@ import {
   createCommandExecutor,
   LIBRARY_COMMAND_TIMEOUT_MS,
   LIGHT_EFFECT_NUMBERS,
+  LOCAL_IDS,
   MAX_WAITING,
   MIN_COMMAND_GAP_MS,
   PLANNED_IDS,
 } from "./executor.ts";
 import { createTowerSession } from "./session.ts";
+import { createStateStore } from "./stateStore.ts";
+import { createTowerRecords } from "./towerRecords.ts";
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -47,7 +51,13 @@ const setup = async (state: "disconnected" | "connected" | "calibrated" = "calib
   const mock = createMockTower();
   const session = createTowerSession({ createAdapter: () => mock.adapter });
   const seen: CommandLifecyclePayload[] = [];
-  const executor = createCommandExecutor({ session, onLifecycle: (stage) => seen.push(stage) });
+  const store = createStateStore({ now: Date.now });
+  const records = createTowerRecords(store);
+  const executor = createCommandExecutor({
+    session,
+    records,
+    onLifecycle: (stage) => seen.push(stage),
+  });
   if (state !== "disconnected") await finish(session.connect());
   if (state === "calibrated") await finish(session.calibrate());
   session.events.clear();
@@ -65,13 +75,21 @@ const setup = async (state: "disconnected" | "connected" | "calibrated" = "calib
   /** Every packet written to the tower since setup, as hex. */
   const writes = () =>
     session.events.events().flatMap((event) => (event.kind === "tx" ? [event.hex] : []));
-  return { mock, session, executor, seen, submit, stages, last, writes };
+  return { mock, session, executor, seen, submit, stages, last, writes, store };
 };
 
 /** The light sequence byte is the last of a 20-byte state packet. */
 const sequenceByte = (hex: string) => hex.slice(-2);
 
 describe("command executor: what it accepts", () => {
+  it("runs a command without the tower's checks exactly when it is the service's own", () => {
+    // The refusal is skipped for `serviceOnly`, and the plan's path decides what runs: the two
+    // must agree, or a tower command could skip the checks.
+    for (const id of PLANNED_IDS) {
+      expect(findCapability(id)?.serviceOnly === true, id).toBe(LOCAL_IDS.includes(id));
+    }
+  });
+
   it("has a plan for exactly the commandable capabilities", () => {
     const commandable = inventory.filter(isCommandable).map((entry) => entry.id);
     expect([...PLANNED_IDS].sort()).toEqual([...commandable].sort());
@@ -508,13 +526,16 @@ describe("command executor: lifecycle", () => {
     expect(writes()).toEqual([]);
   });
 
-  it("confirms a software-only command without writing to the tower (GAP-HW-002)", async () => {
-    const { session, submit, stages, writes } = await setup();
+  it("confirms a command of the service's own without writing to the tower (spec D24)", async () => {
+    const { session, submit, stages, last, writes, store } = await setup();
     const seal = { side: "north", level: "top" } as const;
     const { commandId, done } = submit("seals.mark-broken", { seal });
     await finish(done);
     expect(stages(commandId)).toEqual(["queued", "started", "confirmed"]);
-    expect(session.tower()?.isSealBroken(seal)).toBe(true);
+    expect(last(commandId)?.reason).toMatch(/nothing is sent to the tower/);
+    expect(store.record("seals.broken")).toEqual([seal]);
+    // The library's own record is neither written nor read.
+    expect(session.tower()?.isSealBroken(seal)).toBe(false);
     expect(writes()).toEqual([]);
   });
 
@@ -738,5 +759,87 @@ describe("command executor: silent light sequences (D23)", () => {
     );
     expect(last("s-1")).toMatchObject({ stage: "rejected", reason: expect.stringMatching(/D23/) });
     expect(writes()).toEqual([]);
+  });
+});
+
+describe("command executor: seals and skulls (M3 step 3.5)", () => {
+  const seal = { side: "east", level: "middle" } as const;
+  const other = { side: "north", level: "top" } as const;
+
+  for (const state of ["disconnected", "connected", "calibrated"] as const) {
+    it(`changes the service's record with the tower ${state}, and writes nothing`, async () => {
+      const { submit, stages, writes, store } = await setup(state);
+      const run = async (id: string, params: unknown) => {
+        const { commandId, done } = submit(id, params);
+        await finish(done);
+        expect(stages(commandId), id).toEqual(["queued", "started", "confirmed"]);
+      };
+      await run("seals.mark-broken", { seal });
+      await run("seals.mark-broken", { seal: other });
+      // Kept once each, in level then side order, whatever order they were marked in.
+      expect(store.record("seals.broken")).toEqual([other, seal]);
+      await run("seals.mark-broken", { seal });
+      expect(store.record("seals.broken")).toEqual([other, seal]);
+      await run("seals.mark-restored", { seal: other });
+      expect(store.record("seals.broken")).toEqual([seal]);
+      await run("seals.reset", {});
+      expect(store.record("seals.broken")).toEqual([]);
+
+      store.setRecord("skulls.count", { count: 4, since: 1 });
+      const resetAt = Date.now();
+      await run("skulls.reset-record", {});
+      expect(store.record("skulls.count")).toEqual({ count: 0, since: resetAt });
+      expect(writes()).toEqual([]);
+    });
+  }
+
+  for (const state of ["connected", "calibrated"] as const) {
+    it(`breaks a seal on a ${state} tower and records it once the tower confirms`, async () => {
+      const { submit, stages, writes, store } = await setup(state);
+      const { commandId, done } = submit("seals.break", { seal });
+      await finish(done);
+      expect(stages(commandId)).toEqual(["queued", "started", "write-completed", "confirmed"]);
+      expect(writes().length).toBeGreaterThan(0);
+      expect(store.record("seals.broken")).toEqual([seal]);
+    });
+  }
+
+  it("does not record a seal whose break the tower did not confirm", async () => {
+    const { mock, submit, stages, store } = await setup("connected");
+    const { commandId, done } = submit("seals.break", { seal });
+    await advance(10);
+    mock.dropConnection();
+    await finish(done);
+    expect(stages(commandId).at(-1)).toBe("failed");
+    expect(store.record("seals.broken")).toEqual([]);
+  });
+
+  it("refuses to break a seal with the tower disconnected, and records nothing", async () => {
+    const { submit, last, store } = await setup("disconnected");
+    const { commandId, done } = submit("seals.break", { seal });
+    await finish(done);
+    expect(last(commandId)).toMatchObject({
+      stage: "rejected",
+      reason: "The tower is not connected.",
+    });
+    expect(store.record("seals.broken")).toEqual([]);
+  });
+
+  it("sends the tower's skull counter reset as a state packet, leaving the app's count", async () => {
+    const { mock, submit, stages, writes, store } = await setup("connected");
+    mock.dropSkull();
+    await advance(100);
+    store.setRecord("skulls.count", { count: 3, since: 1 });
+    const { commandId, done } = submit("skulls.reset-count", {});
+    await finish(done);
+    // Not the firmware's resetCounter (03): a state packet with the beam count at 0 (GAP-LIB-012).
+    const [packet] = writes();
+    expect(writes()).toHaveLength(1);
+    expect(packet?.length).toBe(40);
+    expect(packet?.slice(0, 2)).toBe("00");
+    expect(packet?.slice(32, 34)).toBe("00");
+    // The mock ignores the count in a packet, so nothing changed and it does not answer.
+    expect(stages(commandId)).toEqual(["queued", "started", "write-completed", "indeterminate"]);
+    expect(store.record("skulls.count")).toEqual({ count: 3, since: 1 });
   });
 });

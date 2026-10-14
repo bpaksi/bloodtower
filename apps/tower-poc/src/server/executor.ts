@@ -22,6 +22,7 @@ import {
 } from "tower-poc-protocols";
 import type { UltimateDarkTower } from "ultimatedarktower";
 import { TOWER_LIGHT_SEQUENCES } from "ultimatedarktowerdata";
+import type { TowerRecords } from "./towerRecords.ts";
 
 /** What the executor needs from the session. `TowerSession` has all of it. */
 export interface ExecutorSession {
@@ -44,6 +45,8 @@ export interface CommandExecutorOptions {
   session: ExecutorSession;
   /** Every stage of every command, for every client (D7). */
   onLifecycle: (payload: CommandLifecyclePayload) => void;
+  /** The service's own record of seals and skulls (spec D24). */
+  records: TowerRecords;
   now?: () => number;
 }
 
@@ -66,7 +69,6 @@ export const LIBRARY_COMMAND_TIMEOUT_MS = 30_000;
 const QUEUED_TIMEOUT_MS = LIBRARY_COMMAND_TIMEOUT_MS + 5_000;
 /** A write that skips the library's queue waits for nothing but the write itself. */
 const DIRECT_TIMEOUT_MS = 5_000;
-const LOCAL_TIMEOUT_MS = 1_000;
 /** The tower echoed lights and sounds 25 to 64 ms after the write in the M1 spike. */
 export const CONFIRM_WINDOW_MS = 1_000;
 /**
@@ -80,30 +82,41 @@ export const MAX_WAITING = 20;
 /**
  * - `queue`: the library sends it through its queue, which settles when the tower answers.
  * - `direct`: the library writes it at once and settles when the write completes.
- * - `local`: the library records it and sends nothing (GAP-HW-002).
+ * - `local`: the service changes its own record; neither the tower nor the library is involved
+ *   (spec D24), so it needs no connected tower.
  */
-type Path = "queue" | "direct" | "local";
-
-interface Plan {
-  path: Path;
+interface TowerPlan {
+  path: "queue" | "direct";
   timeoutMs: number;
   /** The tower is known not to answer it (GAP-HW-010). */
   silent?: boolean;
   run: (tower: UltimateDarkTower) => Promise<void> | void;
+  /** Changes the service's record once the tower has confirmed the command, and only then. */
+  onConfirmed?: (records: TowerRecords) => void;
 }
+interface LocalPlan {
+  path: "local";
+  run: (records: TowerRecords) => void;
+}
+type Plan = TowerPlan | LocalPlan;
 
-const queued = (run: Plan["run"], packets = 1): Plan => ({
+const queued = (
+  run: TowerPlan["run"],
+  packets = 1,
+  onConfirmed?: TowerPlan["onConfirmed"],
+): Plan => ({
   path: "queue",
   timeoutMs: QUEUED_TIMEOUT_MS * packets,
   run,
+  ...(onConfirmed ? { onConfirmed } : {}),
 });
-const direct = (run: Plan["run"], silent = false): Plan => ({
+const direct = (run: TowerPlan["run"], silent = false): Plan => ({
   path: "direct",
   timeoutMs: DIRECT_TIMEOUT_MS,
   silent,
   run,
 });
-const local = (run: Plan["run"]): Plan => ({ path: "local", timeoutMs: LOCAL_TIMEOUT_MS, run });
+const local = (run: LocalPlan["run"]): Plan => ({ path: "local", run });
 
 /**
  * The library's `LIGHT_EFFECTS`, by the inventory's names. Its own table is typed so that a lookup
@@ -174,15 +187,31 @@ const PLANS: { [Id in CommandableId]: (params: CapabilityParams<Id>) => Plan } =
     ),
   "mechanics.random-rotate": (params) =>
     queued((tower) => tower.randomRotateLevels(RANDOM_ROTATE_DRUMS[params.drums])),
-  "seals.break": (params) => queued((tower) => tower.breakSeal(params.seal)),
-  "seals.mark-broken": (params) => local((tower) => tower.markSealBroken(params.seal)),
-  "seals.mark-restored": (params) => local((tower) => tower.markSealRestored(params.seal)),
-  "seals.reset": () => local((tower) => tower.resetBrokenSeals()),
+  // The library records the seal in its own set as well; that set is not read (spec D24).
+  "seals.break": (params) =>
+    queued(
+      (tower) => tower.breakSeal(params.seal),
+      1,
+      (records) => records.markSeal(params.seal, true),
+    ),
+  "seals.mark-broken": (params) => local((records) => records.markSeal(params.seal, true)),
+  "seals.mark-restored": (params) => local((records) => records.markSeal(params.seal, false)),
+  "seals.reset": () => local((records) => records.resetSeals()),
+  // The tower's own counter. The app's count has its own reset and is not changed here.
   "skulls.reset-count": () => queued((tower) => tower.resetTowerSkullCount()),
+  "skulls.reset-record": () => local((records) => records.resetSkulls()),
 };
 
 /** The ids the executor has a plan for. A test checks they are exactly the commandable ones. */
 export const PLANNED_IDS = Object.keys(PLANS);
+/**
+ * The ids whose plan changes only the service's record. A test checks they are exactly the
+ * inventory's `serviceOnly` ones, since `refusal` skips the tower's checks by that flag. Read from
+ * the plans with empty params: a local plan does not look at them until it runs.
+ */
+export const LOCAL_IDS = PLANNED_IDS.filter(
+  (id) => (PLANS[id as CommandableId] as (params: unknown) => Plan)({}).path === "local",
+);
 
 const planFor = (command: ValidatedCommand): Plan =>
   // The one place the id and its params are put back together. `validateCommand` parsed `params`
@@ -215,7 +244,7 @@ const REJECTIONS = {
 } as const;
 
 export const createCommandExecutor = (options: CommandExecutorOptions): CommandExecutor => {
-  const { session, onLifecycle } = options;
+  const { session, onLifecycle, records } = options;
   const now = options.now ?? Date.now;
   let tail: Promise<void> = Promise.resolve();
   let waiting = 0;
@@ -247,6 +276,8 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
 
   /** Why the command cannot run now, or undefined when it can. Checked on arrival and on start. */
   const refusal = (command: ValidatedCommand): string | undefined => {
+    // It changes the service's own record only (spec D24), so the tower's state does not matter.
+    if (findCapability(command.capabilityId)?.serviceOnly) return undefined;
     const status = session.status();
     const tower = session.tower();
     if (status.state !== "connected" || !tower) return "The tower is not connected.";
@@ -284,11 +315,26 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
     return state.led_sequence !== 0;
   };
 
+  /** Changes the service's record. It runs at once and sends nothing. */
+  const executeLocal = (request: Omit<CommandRequest, "params">, plan: LocalPlan) => {
+    report(request, "started");
+    try {
+      plan.run(records);
+    } catch (error) {
+      return report(request, "failed", { reason: describe(error) });
+    }
+    report(request, "confirmed", {
+      reason: "Recorded by the service; nothing is sent to the tower (spec D24).",
+    });
+  };
+
   const execute = async (request: Omit<CommandRequest, "params">, command: ValidatedCommand) => {
     const why = refusal(command);
-    const tower = session.tower();
-    if (why || !tower) return report(request, "rejected", { reason: why });
     const plan = planFor(command);
+    if (why) return report(request, "rejected", { reason: why });
+    if (plan.path === "local") return executeLocal(request, plan);
+    const tower = session.tower();
+    if (!tower) return report(request, "rejected", { reason: "The tower is not connected." });
     report(request, "started");
 
     const firstWrite = session.writes();
@@ -312,14 +358,12 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
     try {
       // Every plan that writes needs this, the direct ones too: `allLightsOn` and the others
       // build their packet from the same library state.
-      if (plan.path !== "local") {
-        try {
-          if (await clearSilentSequence(tower)) await sleep(MIN_COMMAND_GAP_MS);
-        } catch (error) {
-          return report(request, "failed", {
-            reason: `Could not clear the previous light sequence, so nothing else was sent: ${describe(error)}`,
-          });
-        }
+      try {
+        if (await clearSilentSequence(tower)) await sleep(MIN_COMMAND_GAP_MS);
+      } catch (error) {
+        return report(request, "failed", {
+          reason: `Could not clear the previous light sequence, so nothing else was sent: ${describe(error)}`,
+        });
       }
       const before = session.writes();
       reported = false;
@@ -351,11 +395,6 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
         return report(request, "failed", { reason: message });
       }
 
-      if (plan.path === "local") {
-        return report(request, "confirmed", {
-          reason: "Recorded by the service; nothing is sent to the tower (GAP-HW-002).",
-        });
-      }
       if (!wrote) {
         return report(request, "indeterminate", {
           reason:
@@ -364,7 +403,10 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
         });
       }
       report(request, "write-completed");
-      if (plan.path === "queue") return report(request, "confirmed");
+      if (plan.path === "queue") {
+        plan.onConfirmed?.(records);
+        return report(request, "confirmed");
+      }
       if (plan.silent) {
         return report(request, "indeterminate", {
           reason: "The tower does not answer this light sequence (GAP-HW-010).",

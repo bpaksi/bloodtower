@@ -110,6 +110,7 @@ const examples: Record<CapabilityId, { valid: unknown; invalid: unknown }> = {
   "seals.broken": { valid: {}, invalid: { seal } },
   "seals.random-unbroken": { valid: {}, invalid: { level: "top" } },
   "skulls.reset-count": { valid: {}, invalid: { count: 0 } },
+  "skulls.reset-record": { valid: {}, invalid: { count: 0 } },
   "skulls.on-drop": { valid: {}, invalid: { once: true } },
   "skulls.count": { valid: {}, invalid: { refresh: true } },
   "battery.on-level": { valid: {}, invalid: { once: true } },
@@ -163,10 +164,23 @@ describe("inventory entries", () => {
     }
   });
 
-  it("maps no library member exactly when the capability is unsupported", () => {
+  it("maps no library member only when the capability is unsupported or the service's own", () => {
     for (const entry of entries) {
-      expect(entry.apiMapping.length === 0, entry.id).toBe(entry.availability === "unsupported");
+      const capability: Capability = entry;
+      if (entry.availability === "unsupported") expect(entry.apiMapping, entry.id).toEqual([]);
+      else if (entry.apiMapping.length === 0) expect(capability.serviceOnly, entry.id).toBe(true);
     }
+  });
+
+  it("marks only offered commands as the service's own", () => {
+    const own = entries.filter((entry) => (entry as Capability).serviceOnly);
+    expect(own.map((entry) => entry.id).sort()).toEqual([
+      "seals.mark-broken",
+      "seals.mark-restored",
+      "seals.reset",
+      "skulls.reset-record",
+    ]);
+    for (const entry of own) expect(isCommandable(entry), entry.id).toBe(true);
   });
 
   it("places an entry on a page exactly when the app offers it", () => {
@@ -189,6 +203,14 @@ describe("inventory entries", () => {
       "mechanics.random-rotate",
       "mechanics.rotate-drum",
       "mechanics.rotate-with-state",
+      // executor.test.ts, "seals and skulls"; the Tower State page (e2e state.spec.ts). The
+      // service's own commands touch no tower; they run there with the mock connected and not.
+      "seals.break",
+      "seals.mark-broken",
+      "seals.mark-restored",
+      "seals.reset",
+      "skulls.reset-count",
+      "skulls.reset-record",
       // executor.test.ts, "sound on the mock"; the Sounds page (e2e sounds.spec.ts).
       "sound.play",
       "sound.play-stateful",
@@ -236,6 +258,7 @@ describe("commandable capabilities", () => {
       "seals.mark-restored",
       "seals.reset",
       "skulls.reset-count",
+      "skulls.reset-record",
       "sound.play",
       "sound.play-stateful",
     ]);

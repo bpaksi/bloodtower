@@ -32,6 +32,27 @@ const tower = (
 ): ConnectionPayload => ({ state, calibration });
 
 describe("controlState", () => {
+  it("enables a command of the service's own record with no tower, but not with no service", () => {
+    const mark = entryOf("seals.mark-broken");
+    for (const connection of [tower("disconnected"), tower("connected", "calibrating")]) {
+      expect(controlState({ online: true, connection, entry: mark })).toEqual({ enabled: true });
+    }
+    expect(controlState({ online: false, connection: tower("disconnected"), entry: mark })).toEqual(
+      {
+        enabled: false,
+        reason: "The service is not reachable.",
+      },
+    );
+    // Breaking a seal plays it on the tower, so it needs the tower.
+    expect(
+      controlState({
+        online: true,
+        connection: tower("disconnected"),
+        entry: entryOf("seals.break"),
+      }),
+    ).toEqual({ enabled: false, reason: "Connect the tower first." });
+  });
+
   it("is disabled while the service is unreachable, whatever was last known", () => {
     expect(
       controlState({ online: false, connection: tower("connected", "calibrated"), entry: sound }),

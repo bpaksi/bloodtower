@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CalibrateControl } from "@/components/controls/CalibrateControl";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { PageHeader } from "@/components/PageHeader";
+import { DrumPositions } from "@/components/state/TowerValues";
 import { PAGES } from "@/lib/pages";
 
 export const metadata: Metadata = { title: PAGES.mechanics.title };
@@ -19,6 +20,7 @@ export default function MechanicsPage() {
         sends one command and waits for it to end before it can be pressed again.
       </p>
       <CalibrateControl />
+      <DrumPositions />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <CapabilityControl
           capabilityId="mechanics.rotate-with-state"

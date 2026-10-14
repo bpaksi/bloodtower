@@ -5,6 +5,7 @@ import type {
   ClientSocketState,
   ConnectionState,
   LifecycleStage,
+  Origin,
   StateValue,
 } from "tower-poc-protocols";
 
@@ -53,4 +54,26 @@ export const batteryLabel = (value: StateValue | undefined) => {
   if (value.freshness === "unavailable" || !isBattery(value.value)) return "Unavailable";
   const text = `${Math.round(value.value.percent)}% (${(value.value.millivolts / 1000).toFixed(2)} V)`;
   return value.freshness === "stale" ? `${text}, stale` : text;
+};
+
+export const ORIGIN_LABELS: Record<Origin, string> = {
+  "device-reported": "Reported by the tower",
+  "library-derived": "Worked out by the library",
+  "application-maintained": "Kept by the app",
+  unknown: "Origin unknown",
+};
+
+export const FRESHNESS_LABELS: Record<StateValue["freshness"], string> = {
+  current: "Current",
+  stale: "Stale",
+  unavailable: "Unavailable",
+};
+
+/** A time of day to the second, with the date when it is not today. */
+export const timeLabel = (at: number, now: number = Date.now()) => {
+  const date = new Date(at);
+  const time = date.toLocaleTimeString(undefined, { hour12: false });
+  return date.toDateString() === new Date(now).toDateString()
+    ? time
+    : `${date.toLocaleDateString()} ${time}`;
 };

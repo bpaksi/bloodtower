@@ -6,4 +6,10 @@ export const MIGRATIONS: readonly string[] = [
     saved_at INTEGER NOT NULL,
     snapshot TEXT NOT NULL
   )`,
+  // The service's own record, apart from the snapshot (spec D24): one row per value.
+  `CREATE TABLE app_records (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+  )`,
 ];

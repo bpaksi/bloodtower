@@ -27,6 +27,8 @@ export const inventoryEntrySchema = z.strictObject({
   evidence: z.string(),
   /** `isCommandable`: whether a `command` may name it. */
   commandable: z.boolean(),
+  /** Changes only the service's own record, so it needs no connected tower (spec D24). */
+  serviceOnly: z.boolean(),
 });
 export type InventoryEntry = z.infer<typeof inventoryEntrySchema>;
 
@@ -41,4 +43,5 @@ export const toInventoryEntry = (capability: Capability): InventoryEntry => ({
   verification: capability.verification,
   evidence: capability.evidence,
   commandable: isCommandable(capability),
+  serviceOnly: capability.serviceOnly === true,
 });

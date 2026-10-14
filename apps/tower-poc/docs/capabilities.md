@@ -11,7 +11,7 @@ This file is generated from `apps/tower-poc/src/protocols/inventory.ts` by `pnpm
 
 ## Counts
 
-52 entries and 17 exclusions.
+53 entries and 17 exclusions.
 
 By category:
 
@@ -22,14 +22,14 @@ By category:
 - mechanics: 9
 - glyphs: 3
 - seals: 7
-- skulls: 3
+- skulls: 4
 - battery: 3
 - state: 3
 - diagnostics: 2
 
 By kind:
 
-- command: 22
+- command: 23
 - lifecycle: 3
 - query: 13
 - event: 7
@@ -39,7 +39,7 @@ By availability:
 
 - available: 38
 - requires-calibration: 7
-- not-exposed: 4
+- not-exposed: 5
 - unsupported: 3
 
 ## Entries
@@ -112,19 +112,20 @@ By availability:
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `seals.break` | Break a seal | command | available | `breakSeal` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
-| `seals.mark-broken` | Mark a seal broken | command | available | `markSealBroken` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
-| `seals.mark-restored` | Mark a seal restored | command | available | `markSealRestored` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
-| `seals.reset` | Clear all broken seals | command | available | `resetBrokenSeals` | `none` | tower-state | untested |
+| `seals.break` | Break a seal | command | available | `breakSeal` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | mock-tested |
+| `seals.mark-broken` | Mark a seal broken | command | available | `markSealBroken` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | mock-tested |
+| `seals.mark-restored` | Mark a seal restored | command | available | `markSealRestored` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | mock-tested |
+| `seals.reset` | Clear all broken seals | command | available | `resetBrokenSeals` | `none` | tower-state | mock-tested |
 | `seals.is-broken` | Seal broken | query | available | `isSealBroken` | `seal: { side: one of north, east, south, west; level: one of top, middle, bottom }` | tower-state | untested |
 | `seals.broken` | Broken seals | query | available | `getBrokenSeals` | `none` | tower-state | untested |
-| `seals.random-unbroken` | Pick a random unbroken seal | query | available | `getRandomUnbrokenSeal` | `none` | tower-state | untested |
+| `seals.random-unbroken` | Pick a random unbroken seal | query | not-exposed | `getRandomUnbrokenSeal` | `none` | none | untested |
 
 ### skulls
 
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `skulls.reset-count` | Reset skull count | command | available | `resetTowerSkullCount` | `none` | tower-state | untested |
+| `skulls.reset-count` | Reset the tower's skull counter | command | available | `resetTowerSkullCount` | `none` | tower-state | mock-tested |
+| `skulls.reset-record` | Reset skull count | command | available | none | `none` | tower-state | mock-tested |
 | `skulls.on-drop` | Skull dropped | event | available | `onSkullDrop` | `none` | tower-state | untested |
 | `skulls.count` | Skull count | property | available | `towerSkullDropCount` | `none` | tower-state | untested |
 

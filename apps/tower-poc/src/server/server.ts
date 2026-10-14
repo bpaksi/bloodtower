@@ -18,6 +18,7 @@ import { type CommandExecutor, createCommandExecutor } from "./executor.ts";
 import { SessionStateError, type TowerSession } from "./session.ts";
 import { NoPendingRestoreError, type StateStore } from "./stateStore.ts";
 import { requestPath, serveStatic } from "./static.ts";
+import type { TowerRecords } from "./towerRecords.ts";
 import { installedVersion } from "./versions.ts";
 
 export const WS_PATH = "/ws";
@@ -37,6 +38,8 @@ export interface TowerServerOptions {
   session: TowerSession;
   /** The tower values every client is shown, and the restore prompt (D11). */
   store: StateStore;
+  /** The service's own record of seals and skulls, which some commands change (spec D24). */
+  records: TowerRecords;
   /** Which tower the session drives, for `welcome`. */
   tower: "mock" | "bluetooth";
   /**
@@ -259,6 +262,7 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
   // Every client sees every command's lifecycle, whoever sent it (D7).
   const executor = createCommandExecutor({
     session: options.session,
+    records: options.records,
     onLifecycle: (payload) => {
       hub.broadcast({ v: PROTOCOL_VERSION, type: "command.lifecycle", payload });
       options.onLifecycle?.(payload);

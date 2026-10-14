@@ -266,7 +266,10 @@ export type Capability = {
   readonly title: string;
   readonly kind: CapabilityKind;
   readonly category: CapabilityCategory;
-  /** Public members of `UltimateDarkTower` this entry covers. Empty only for `unsupported`. */
+  /**
+   * Public members of `UltimateDarkTower` this entry covers. Empty only for `unsupported`, and for
+   * a `serviceOnly` command the library has no counterpart for.
+   */
   readonly apiMapping: readonly string[];
   /**
    * Validation for the parameters. An empty strict object when there are none. The service
@@ -279,6 +282,11 @@ export type Capability = {
   readonly verification: Verification;
   /** Where the claim comes from, and what is still unknown. */
   readonly evidence: string;
+  /**
+   * The service does it to its own record: nothing reaches the tower or the library, so it needs
+   * no connected tower (spec D24). Only a `command` has it.
+   */
+  readonly serviceOnly?: true;
 };
 
 const TYPES = "UltimateDarkTower.d.ts at 7.1.2";
@@ -286,6 +294,8 @@ const NOTE = "research/tower/api-surface-7.1.2.md";
 const SPIKE = "research/tower/spikes/2026-10-13-noble-macos.md";
 const SMOKE = "research/tower/smoke/2026-10-14-m2-hardware-smoke.md";
 const OBSERVABILITY = "research/tower/observability.md";
+const APP_RECORD =
+  "Application-maintained: the service keeps its own record in SQLite, which a reconnect does not change and only a person clears (spec D24). The library's record is not read or seeded: each connection gets a new library object, whose record starts empty.";
 
 // ---------------------------------------------------------------------------
 // The inventory
@@ -756,8 +766,8 @@ export const inventory = [
     params: z.strictObject({ seal: sealSchema }),
     availability: "available",
     uiLocation: "tower-state",
-    verification: "untested",
-    evidence: `${TYPES}. At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003. Available before calibration: in the M1 spike it played on an uncalibrated tower and no drum moved (GAP-HW-006; ${SPIKE}, finding 2). That was one seal, with drum bytes 00 00 in the packet; a packet carrying stale drum positions was not tested. The M2 session is to reset calibration on disconnect so that none is sent (D10); M2 step 4 has the test, and nothing does it yet.`,
+    verification: "mock-tested",
+    evidence: `${TYPES}. When the tower confirms it, the service adds the seal to its own record (spec D24). At 7.1.2 it plays the sealReveal light sequence and the TowerSeal sound and records the seal in software; the packet does not depend on which seal is named (udtTowerCommands.js). It moves nothing, so D9 does not gate it. There is no volume parameter: the library accepts one but overwrites the audio volume with 0 before packing, so it never reaches the wire, and it sends an extra full-state packet when the volume is 1 to 3 (udtTowerCommands.js). Volume is GAP-HW-003. Available before calibration: in the M1 spike it played on an uncalibrated tower and no drum moved (GAP-HW-006; ${SPIKE}, finding 2). That was one seal, with drum bytes 00 00 in the packet; a packet carrying stale drum positions was not tested. The M2 session is to reset calibration on disconnect so that none is sent (D10); M2 step 4 has the test, and nothing does it yet.`,
   },
   {
     id: "seals.mark-broken",
@@ -768,8 +778,9 @@ export const inventory = [
     params: sealParams,
     availability: "available",
     uiLocation: "tower-state",
-    verification: "untested",
-    evidence: `${TYPES}: software tracking only; nothing is sent to the tower (GAP-HW-002).`,
+    verification: "mock-tested",
+    evidence: `${TYPES}: software tracking only (GAP-HW-002). ${APP_RECORD} The service records the seal itself; the library's method is not called.`,
+    serviceOnly: true,
   },
   {
     id: "seals.mark-restored",
@@ -780,8 +791,9 @@ export const inventory = [
     params: sealParams,
     availability: "available",
     uiLocation: "tower-state",
-    verification: "untested",
-    evidence: `${TYPES}: software tracking only; nothing is sent to the tower (GAP-HW-002).`,
+    verification: "mock-tested",
+    evidence: `${TYPES}: software tracking only (GAP-HW-002). ${APP_RECORD} The service records the seal itself; the library's method is not called.`,
+    serviceOnly: true,
   },
   {
     id: "seals.reset",
@@ -792,8 +804,9 @@ export const inventory = [
     params: noParams,
     availability: "available",
     uiLocation: "tower-state",
-    verification: "untested",
-    evidence: `${TYPES}: software tracking only; nothing is sent to the tower (GAP-HW-002).`,
+    verification: "mock-tested",
+    evidence: `${TYPES}: software tracking only (GAP-HW-002). ${APP_RECORD} Clears the service's record; the library's method is not called.`,
+    serviceOnly: true,
   },
   {
     id: "seals.is-broken",
@@ -805,7 +818,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}. Application-maintained: the firmware does not track seals (GAP-HW-002).`,
+    evidence: `${TYPES}. The firmware does not track seals (GAP-HW-002). ${APP_RECORD} Shown from the seals.broken value; the library is not asked.`,
   },
   {
     id: "seals.broken",
@@ -817,7 +830,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}. Application-maintained: the firmware does not track seals (GAP-HW-002).`,
+    evidence: `${TYPES}. The firmware does not track seals (GAP-HW-002). ${APP_RECORD} Published as this value, in level then side order. A seal is added when a person marks it or when the tower confirms Break a seal.`,
   },
   {
     id: "seals.random-unbroken",
@@ -826,24 +839,37 @@ export const inventory = [
     category: "seals",
     apiMapping: ["getRandomUnbrokenSeal"],
     params: noParams,
-    availability: "available",
-    uiLocation: "tower-state",
+    availability: "not-exposed",
+    uiLocation: null,
     verification: "untested",
-    evidence: `${TYPES}: null when every seal is broken. Reads software tracking only; it does not break the seal.`,
+    evidence: `${TYPES}: null when every seal is broken. It reads the library's record, which the service does not keep (spec D24), so it has no page.`,
   },
 
   // Skulls
   {
     id: "skulls.reset-count",
-    title: "Reset skull count",
+    title: "Reset the tower's skull counter",
     kind: "command",
     category: "skulls",
     apiMapping: ["resetTowerSkullCount"],
     params: noParams,
     availability: "available",
     uiLocation: "tower-state",
-    verification: "untested",
-    evidence: `${TYPES}: sends the firmware's resetCounter command.`,
+    verification: "mock-tested",
+    evidence: `${TYPES}. At 7.1.2 it does not send the firmware's resetCounter command (TOWER_COMMANDS.resetCounter has no public sender): it queues a full state packet, the library's current state with the beam count, which is the skull counter, set to 0 (udtTowerCommands.js). Whether the tower takes its counter from that packet is not known, and the mock ignores the count in a packet and does not answer one that changes nothing else, so on the mock it ends as written with no answer after 30 s (GAP-LIB-012, GAP-HW-010). It does not change the app's skull count, which has its own reset (skulls.reset-record, spec D24).`,
+  },
+  {
+    id: "skulls.reset-record",
+    title: "Reset skull count",
+    kind: "command",
+    category: "skulls",
+    apiMapping: [],
+    params: noParams,
+    availability: "available",
+    uiLocation: "tower-state",
+    verification: "mock-tested",
+    evidence: `Not a library member: sets the app's skull count to 0 from now. ${APP_RECORD} Nothing reaches the tower, whose own counter is skulls.reset-count.`,
+    serviceOnly: true,
   },
   {
     id: "skulls.on-drop",
@@ -867,7 +893,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "tower-state",
     verification: "untested",
-    evidence: `${TYPES}: the count the firmware reports. The library holds -1 until the tower has reported one; that is unavailable, never a count.`,
+    evidence: `${TYPES}: the count the firmware reports, -1 until the tower has reported one. The app shows its own count instead: the skulls dropped since its last reset, with that time (spec D24). The firmware count is read only to see drops: the first report of each connection sets where counting starts, and each later rise adds to the app's count. A drop before that first report is not counted (GAP-LIB-011). ${APP_RECORD}`,
   },
 
   // Battery

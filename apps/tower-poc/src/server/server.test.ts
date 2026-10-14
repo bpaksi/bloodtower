@@ -23,12 +23,16 @@ import {
 } from "./server.ts";
 import { createTowerSession } from "./session.ts";
 import { createStateStore } from "./stateStore.ts";
+import { createTowerRecords } from "./towerRecords.ts";
 
 /** A session on its own mock tower, which connects in 20 ms. */
 const mockSession = () => {
   const mock = createMockTower({ timings: { connectMs: 20 } });
   return createTowerSession({ createAdapter: () => mock.adapter });
 };
+
+/** A store with the service's record of seals and skulls on it, as the server takes them. */
+const withRecords = (store = createStateStore()) => ({ store, records: createTowerRecords(store) });
 
 let dir: string;
 let server: TowerServer;
@@ -50,7 +54,7 @@ beforeAll(async () => {
     webRoot,
     serverVersion: "9.9.9",
     session: mockSession(),
-    store: createStateStore(),
+    ...withRecords(),
     tower: "mock",
   });
 });
@@ -195,7 +199,7 @@ describe("static web UI before the first build", () => {
       webRoot: join(dir, "not-built"),
       serverVersion: "9.9.9",
       session: mockSession(),
-      store: createStateStore(),
+      ...withRecords(),
       tower: "mock",
     });
     try {
@@ -311,7 +315,7 @@ describe("WebSocket origin check (D20)", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session: mockSession(),
-      store: createStateStore(),
+      ...withRecords(),
       tower: "mock",
       devOrigins: [dev],
     });
@@ -436,7 +440,7 @@ describe("WebSocket endpoint", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session: mockSession(),
-      store: createStateStore(),
+      ...withRecords(),
       tower: "mock",
     });
     const lingering = connect({ host: "127.0.0.1", port: own.port, allowHalfOpen: true });
@@ -484,7 +488,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session: mockSession(),
-      store: createStateStore(),
+      ...withRecords(createStateStore({ keys: ["battery.level"] })),
       tower: "mock",
     });
     const socket = await openSocket(WS_PATH, undefined, own.port);
@@ -518,7 +522,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session,
-      store: createStateStore(),
+      ...withRecords(),
       tower: "mock",
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
@@ -586,7 +590,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session,
-      store: createStateStore(),
+      ...withRecords(),
       tower: "mock",
     });
     const socket = await openSocket(WS_PATH, undefined, own.port);
@@ -650,7 +654,7 @@ describe("lifecycle messages", () => {
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session,
-      store: createStateStore(),
+      ...withRecords(),
       tower: "mock",
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
@@ -722,14 +726,17 @@ describe("restore prompt (D11)", () => {
     // No battery reading during the test, so the restored value is not overwritten by a new one.
     const mock = createMockTower({ timings: { connectMs: 20, batteryMs: 60_000 } });
     const session = createTowerSession({ createAdapter: () => mock.adapter });
-    const store = createStateStore({ storage: { load: () => saved, save: () => {} } });
+    const store = createStateStore({
+      keys: ["battery.level"],
+      storage: { load: () => saved, save: () => {} },
+    });
     const own = await startTowerServer({
       port: 0,
       host: "127.0.0.1",
       webRoot: join(dir, "out"),
       serverVersion: "9.9.9",
       session,
-      store,
+      ...withRecords(store),
       tower: "mock",
     });
     const a = await openSocket(WS_PATH, undefined, own.port);

@@ -22,7 +22,7 @@ export type ControlState = { enabled: true } | { enabled: false; reason: string 
 /**
  * Whether a command control is usable now, and if not, why, in words for the person. The order
  * matches the executor's checks: connected, not calibrating (D22), calibrated when the capability
- * needs it (D9).
+ * needs it (D9). A command of the service's own record needs only the service.
  */
 export const controlState = ({ online, connection, entry }: ControlContext): ControlState => {
   if (!online || !connection || !entry) {
@@ -31,6 +31,8 @@ export const controlState = ({ online, connection, entry }: ControlContext): Con
   if (!entry.commandable) {
     return { enabled: false, reason: "This service does not offer it." };
   }
+  // It changes the service's own record only (spec D24), so the tower does not matter.
+  if (entry.serviceOnly) return { enabled: true };
   if (connection.state !== "connected") {
     return { enabled: false, reason: "Connect the tower first." };
   }
