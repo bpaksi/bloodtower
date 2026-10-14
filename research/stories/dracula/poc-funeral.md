@@ -1,4 +1,4 @@
-# POC: n2-burgomasters-funeral (Gamewright, 2026-10-14)
+# Burgomaster's Funeral POC (n2-burgomasters-funeral, Gamewright, 2026-10-14)
 Goal: prove the engine end to end on one set piece in about 10 minutes, using the Mac, the tower, the Dashboard, and 2 or more iPads/phones. Uses the reviewed script as written (not a rewrite).
 
 ## Moment IDs (cue sheet source)
