@@ -64,6 +64,10 @@ test("one device holds all four, the opening plays, and a finding stays on that 
       .poll(async () => voice.evaluate((audio: HTMLAudioElement) => audio.currentTime))
       .toBeGreaterThan(0);
 
+    await expect(page.getByTestId("accent-pulse")).toHaveAttribute("data-live", "true", {
+      timeout: 50_000,
+    });
+
     await expect(caption).toContainText("The mourners keep their vigil", { timeout: 90_000 });
     await expect(page.getByTestId("cue-pulse")).toHaveAttribute("data-live", "true");
     const cueAudio = page.getByTestId("cue-audio");

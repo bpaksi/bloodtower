@@ -37,7 +37,11 @@ const REVEAL_MS = 4_000;
 const GAP_MS = 800;
 const ACCENT_FLASH_MS = 2_000;
 
-export const DEMO_SEED = "funeral-demo";
+/**
+ * Chosen so the first accent falls in the `.03` reveal: an open moment, not speech
+ * and not the investigate cue, so the screen pulse is visible before the picks.
+ */
+export const DEMO_SEED = "funeral-demo-10";
 const PACK_VERSION = "n2-burgomasters-funeral-assets";
 
 export const OPENING_MOMENTS: readonly MomentId[] = [
@@ -157,6 +161,8 @@ interface Deps {
   joinUrlFor: (code: string) => string;
   log: (event: LoggedEvent) => void;
   onChange?: () => void;
+  /** Defaults to {@link DEMO_SEED}. Tests pass another seed to land an accent in a cue. */
+  seed?: string;
 }
 
 const fail = (message: string): { ok: false; error: SliceError } => ({
@@ -192,13 +198,15 @@ export class DemoSession {
   private cueQueued: CuePlay[] = [];
   private bed: { suppressed: boolean; reason: string | null } | null = null;
   private seq = 0;
+  private readonly seed: string;
 
   constructor(deps: Deps) {
     this.deps = deps;
+    this.seed = deps.seed ?? DEMO_SEED;
     this.code = randomInt(0, 1_000_000).toString().padStart(6, "0");
     this.url = deps.joinUrlFor(this.code);
     this.write("session_started", {
-      seed: DEMO_SEED,
+      seed: this.seed,
       packVersion: PACK_VERSION,
       towerUsed: false,
     });
@@ -737,7 +745,7 @@ export class DemoSession {
   private armAccent() {
     this.accentTimer?.cancel();
     if (this.phase.kind === "lobby" || this.paused) return;
-    const delay = accentDelayMs(DEMO_SEED, this.accentIndex);
+    const delay = accentDelayMs(this.seed, this.accentIndex);
     this.accentTimer = this.deps.clock.schedule(delay, () => this.fireAccent());
   }
 
@@ -747,7 +755,7 @@ export class DemoSession {
     this.write("ambient_accent", {
       phase: START_NIGHT,
       accentId: ACCENT_ID,
-      seedDraw: `${DEMO_SEED}:${this.accentIndex}`,
+      seedDraw: `${this.seed}:${this.accentIndex}`,
       startedAt: this.stamp(),
       suppressed: decision.suppressed,
       reason: decision.reason,

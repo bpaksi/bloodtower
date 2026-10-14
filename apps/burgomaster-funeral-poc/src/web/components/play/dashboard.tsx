@@ -136,6 +136,7 @@ export function DashboardScreen() {
 
   const ambientLive = Boolean(view?.ambient.live && !view.ambient.suppressed);
   const cueLive = view?.playback?.cue?.effect === "pulse";
+  const accentLive = Boolean(view?.ambient.accent);
 
   return (
     <main className="relative flex h-dvh flex-col overflow-hidden">
@@ -146,6 +147,11 @@ export function DashboardScreen() {
         data-reason={view?.ambient.reason ?? ""}
       />
       <div className="cue-pulse" data-testid="cue-pulse" data-live={cueLive ? "true" : "false"} />
+      <div
+        className="accent-pulse"
+        data-testid="accent-pulse"
+        data-live={accentLive ? "true" : "false"}
+      />
       <header className="relative z-10 flex items-end justify-between gap-6 px-8 pt-6">
         <div>
           <p className="text-sm uppercase tracking-widest text-amber-200/80">Night 2 · Sanctuary</p>
@@ -190,9 +196,11 @@ export function DashboardScreen() {
               ))}
             </ul>
             <p data-testid="unheld" className="text-[1.75rem]">
-              {view?.gate.unheld.length
-                ? `Still to hold: ${view.gate.unheld.join(", ")}`
-                : "All four hunters are held."}
+              {view == null
+                ? "Waiting for the host."
+                : view.gate.unheld.length
+                  ? `Still to hold: ${view.gate.unheld.join(", ")}`
+                  : "All four hunters are held."}
             </p>
             <button
               type="button"

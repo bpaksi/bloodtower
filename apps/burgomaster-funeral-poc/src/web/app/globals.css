@@ -16,9 +16,10 @@ button {
   cursor: pointer;
 }
 
-/* E16 bed: a slow light pulse. Scene cues use a quicker one. Neither crops the still. */
+/* E16 bed: a slow light pulse. Scene cues and the one-shot accent use a quicker one. */
 .ambient-bed,
-.cue-pulse {
+.cue-pulse,
+.accent-pulse {
   pointer-events: none;
   position: fixed;
   inset: 0;
@@ -30,6 +31,11 @@ button {
 
 .cue-pulse[data-live="true"] {
   animation: funeral-pulse 1.6s ease-in-out infinite;
+}
+
+/* Matches the server's 2s accent flash. */
+.accent-pulse[data-live="true"] {
+  animation: funeral-pulse 2s ease-in-out 1;
 }
 
 @keyframes funeral-pulse {

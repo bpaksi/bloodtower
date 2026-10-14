@@ -15,7 +15,7 @@ interface Harness {
   session: DemoSession;
 }
 
-const open = (): Harness => {
+const open = (seed?: string): Harness => {
   const clock = new FakeClock();
   const log = openLog(":memory:");
   const session = new Session({
@@ -23,6 +23,7 @@ const open = (): Harness => {
     clock,
     joinUrlFor: (code) => `http://127.0.0.1:9/join?code=${code}`,
     log: (event) => appendEvent(log.db, event),
+    ...(seed ? { seed } : {}),
   });
   return { clock, log, session };
 };
@@ -30,8 +31,8 @@ const open = (): Harness => {
 const logs: OpenLog[] = [];
 const sessions: DemoSession[] = [];
 
-const start = () => {
-  const harness = open();
+const start = (seed?: string) => {
+  const harness = open(seed);
   logs.push(harness.log);
   sessions.push(harness.session);
   return harness;
@@ -155,8 +156,9 @@ describe("demo slice", () => {
     expect(isDashboardSafe(session.dashboardState())).toBe(true);
   });
 
-  it("logs the seeded screen-pulse accent and lets the investigate cue override it", () => {
+  it("paints the seeded screen-pulse accent during the .03 reveal", () => {
     const { session, clock, log } = start();
+    const dash = session.helloDashboard();
     const joined = session.helloDevice("ipad", session.joinCode, undefined);
     if (!joined.ok) throw new Error("join failed");
     takeAll(session, joined.hello.clientId);
@@ -167,16 +169,38 @@ describe("demo slice", () => {
     expect(delay).toBeLessThanOrEqual(60_000);
     clock.advance(delay);
 
+    const view = session.dashboardView(dash.token);
+    expect(view.playback?.momentId).toBe("n2-burgomasters-funeral.03");
+    expect(view.playback?.speaking).toBe(false);
+    expect(view.ambient.accent).toBe(true);
+    expect(view.ambient.suppressed).toBe(false);
+
     const accent = readEvents(log.db).find((event) => event.type === "ambient_accent");
     if (accent?.type !== "ambient_accent") throw new Error("missing accent");
     expect(accent.payload.accentId).toBe(ACCENT_ID);
     expect(accent.payload.seedDraw).toBe(`${DEMO_SEED}:0`);
+    expect(accent.payload.suppressed).toBe(false);
+    expect(accent.payload.reason).toBeNull();
+  });
+
+  it("lets the investigate cue override the accent", () => {
+    const seed = "funeral-demo";
+    const { session, clock, log } = start(seed);
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(accentDelayMs(seed, 0));
+
+    const accent = readEvents(log.db).find((event) => event.type === "ambient_accent");
+    if (accent?.type !== "ambient_accent") throw new Error("missing accent");
     expect(accent.payload.suppressed).toBe(true);
     expect(accent.payload.reason).toBe("scene-cue");
+    expect(accent.payload.accentId).toBe(ACCENT_ID);
   });
 
   it("pauses while a hunter has no connected holder and resumes on rejoin", () => {
-    const { session, clock } = start();
+    const { session, clock, log } = start();
     const joined = session.helloDevice("ipad", session.joinCode, undefined);
     if (!joined.ok) throw new Error("join failed");
     takeAll(session, joined.hello.clientId);
@@ -184,11 +208,25 @@ describe("demo slice", () => {
     clock.advance(400);
     session.detach(joined.hello.clientId);
     const dash = session.helloDashboard();
-    expect(session.dashboardView(dash.token).paused).toBe(true);
-    expect(session.dashboardView(dash.token).playback?.speaking).toBe(false);
+    const paused = session.dashboardView(dash.token);
+    expect(paused.paused).toBe(true);
+    expect(paused.playback?.speaking).toBe(false);
+    expect(paused.ambient.live).toBe(true);
+    expect(paused.ambient.suppressed).toBe(true);
+    expect(paused.ambient.reason).toBe("pause");
+    expect(paused.ambient.accent).toBe(false);
     clock.advance(30_000);
-    expect(session.dashboardView(dash.token).playback?.momentId).toBe("n2-burgomasters-funeral.01");
-    expect(session.dashboardView(dash.token).playback?.speaking).toBe(false);
+    const held = session.dashboardView(dash.token);
+    expect(held.playback?.momentId).toBe("n2-burgomasters-funeral.01");
+    expect(held.playback?.speaking).toBe(false);
+    expect(held.ambient.suppressed).toBe(true);
+    expect(held.ambient.reason).toBe("pause");
+    const duringPause = readEvents(log.db).filter((event) => event.type === "ambient_accent");
+    expect(duringPause).toEqual([]);
+    const bed = readEvents(log.db).filter((event) => event.type === "ambient_bed");
+    expect(bed.some((event) => event.payload.suppressed && event.payload.reason === "pause")).toBe(
+      true,
+    );
 
     const back = session.helloDevice("ipad", undefined, joined.hello.token);
     expect(back.ok).toBe(true);
