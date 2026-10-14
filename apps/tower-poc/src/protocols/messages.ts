@@ -55,7 +55,10 @@ export const welcomePayloadSchema = z.strictObject({
   }),
   /** The service's capability inventory, in inventory order. */
   inventory: z.array(inventoryEntrySchema),
+  /** Which tower the service drives: its mock (`MOCK=1`, D8) or a real one over Bluetooth. */
+  tower: z.enum(["mock", "bluetooth"]),
 });
+export type WelcomePayload = z.infer<typeof welcomePayloadSchema>;
 
 export const errorCodeSchema = z.enum([
   "invalid-json",

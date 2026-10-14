@@ -60,6 +60,7 @@ const server = await startTowerServer({
   serverVersion: packageJson.version,
   session,
   store,
+  tower: mockTower ? "mock" : "bluetooth",
   devOrigins,
 });
 

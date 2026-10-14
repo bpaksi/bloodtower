@@ -98,6 +98,7 @@ export {
   type ServerMessage,
   serverMessageSchema,
   stateMessageSchema,
+  type WelcomePayload,
   welcomeMessageSchema,
   welcomePayloadSchema,
 } from "./messages.ts";

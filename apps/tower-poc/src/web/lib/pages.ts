@@ -12,11 +12,9 @@ export const PAGES = {
     title: "Dashboard",
     summary: "Connect to the tower and see its state at a glance.",
     planned: [
-      "Connect, disconnect, reconnect and calibrate",
-      "Device info and state summary",
+      "State summary",
       "Capability summary by availability and verification",
       "Last 20 timeline events",
-      "Restore-state prompt",
     ],
   },
   lights: {

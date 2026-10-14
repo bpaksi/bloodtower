@@ -36,6 +36,8 @@ export interface TowerServerOptions {
   session: TowerSession;
   /** The tower values every client is shown, and the restore prompt (D11). */
   store: StateStore;
+  /** Which tower the session drives, for `welcome`. */
+  tower: "mock" | "bluetooth";
   /**
    * Extra origins a `/ws` connection may come from, besides the service's own (D20). Only the
    * `next dev` origin belongs here, and only in dev mode.
@@ -191,6 +193,7 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
             ...versions,
           },
           inventory: INVENTORY,
+          tower: options.tower,
         },
       });
       // Then where the tower stands and what the service knows of it.

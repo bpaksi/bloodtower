@@ -35,6 +35,7 @@ const welcome = {
       data: "3.0.0",
     },
     inventory: inventory.map(toInventoryEntry),
+    tower: "mock",
   },
 };
 

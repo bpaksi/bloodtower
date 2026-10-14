@@ -51,6 +51,7 @@ beforeAll(async () => {
     serverVersion: "9.9.9",
     session: mockSession(),
     store: createStateStore(),
+    tower: "mock",
   });
 });
 
@@ -195,6 +196,7 @@ describe("static web UI before the first build", () => {
       serverVersion: "9.9.9",
       session: mockSession(),
       store: createStateStore(),
+      tower: "mock",
     });
     try {
       const res = await get("/", "GET", empty.port);
@@ -310,6 +312,7 @@ describe("WebSocket origin check (D20)", () => {
       serverVersion: "9.9.9",
       session: mockSession(),
       store: createStateStore(),
+      tower: "mock",
       devOrigins: [dev],
     });
     try {
@@ -434,6 +437,7 @@ describe("WebSocket endpoint", () => {
       serverVersion: "9.9.9",
       session: mockSession(),
       store: createStateStore(),
+      tower: "mock",
     });
     const lingering = connect({ host: "127.0.0.1", port: own.port, allowHalfOpen: true });
     try {
@@ -481,6 +485,7 @@ describe("lifecycle messages", () => {
       serverVersion: "9.9.9",
       session: mockSession(),
       store: createStateStore(),
+      tower: "mock",
     });
     const socket = await openSocket(WS_PATH, undefined, own.port);
     try {
@@ -514,6 +519,7 @@ describe("lifecycle messages", () => {
       serverVersion: "9.9.9",
       session,
       store: createStateStore(),
+      tower: "mock",
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
     const b = await openSocket(WS_PATH, undefined, own.port);
@@ -580,6 +586,7 @@ describe("lifecycle messages", () => {
       serverVersion: "9.9.9",
       session,
       store: createStateStore(),
+      tower: "mock",
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
     const b = await openSocket(WS_PATH, undefined, own.port);
@@ -658,6 +665,7 @@ describe("restore prompt (D11)", () => {
       serverVersion: "9.9.9",
       session,
       store,
+      tower: "mock",
     });
     const a = await openSocket(WS_PATH, undefined, own.port);
     const b = await openSocket(WS_PATH, undefined, own.port);
