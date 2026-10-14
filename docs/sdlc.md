@@ -61,7 +61,7 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 | No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: `adversary-bugs` checks the diff. |
 | No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2. `main` changes only by a squash-merged PR. |
 | A developer agent writes only inside its own worktree | `worktree-guard` PreToolUse hook on edits and shell writes, active in any checkout with a `.wt.json` → exit 2. Temp folders stay writable; the main checkout and other worktrees do not, even when they sit in a temp folder. |
-| A PR merges only on green CI | `check` workflow on every PR. Branch protection is not available on this private repo's plan (GitHub answered 403, 2026-10-14), so the coordinator enforces it: it merges only after `gh pr checks` is green and both adversaries' latest reports end in `Blocking: none`. |
+| A PR merges only on green CI | `check` workflow on every PR. Branch protection on `main` requires the `check` status and an up-to-date branch. The coordinator also merges only when both adversaries' latest reports end in `Blocking: none`. |
 | The ordinary ways to skip `pnpm check` on a commit are blocked | The same hook blocks `--no-verify`, `-n`, `LEFTHOOK=0` and `core.hooksPath` on committing git commands, on every branch → exit 2. Docs-only commits skip the check by design (`lefthook.yml`). |
 | Pinned `ultimatedarktower` cannot be bumped silently | Pins live in `scripts/pinned-versions.json`. `scripts/check-pins.mjs` in `pnpm check` fails on any other version in a `package.json` or the lockfile. A PreToolUse hook warns earlier, on the edit or install command. |
 | No raw-bytes message type in a tower protocol | Protocol unit test plus an `adversary-bugs` check |
@@ -129,6 +129,12 @@ Bob signs off only at named gates. Each gate is a step in the plan, owned by Bob
 
 An app plan names which of these it uses. Batch evidence (below) is posted for Bob to look at whenever he likes; it is not a gate and does not block merging.
 
+## Who runs the agents
+
+- **Coding agents are Cursor cloud agents.** Wright (Bob's Grok Bot build partner) launches one per plan step, each on its own branch. Each cloud agent follows `.claude/agents/developer.md`, runs `pnpm check`, and opens a PR on `bpaksi/bloodtower` with the plan step id and evidence.
+- **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and he merges when CI is green and nothing is blocking.
+- **Claude Code on the Mac** stays valid for tower and hardware work, which needs the Bluetooth link. Local agents use the `pnpm wt` worktree flow below; cloud agents already run in their own clones, so they skip it.
+
 ## Parallel work (several developer agents at once)
 
 The loop runs plan steps in batches. Steps in a batch run at the same time, each in its own worktree; merging stays serial.
@@ -185,7 +191,7 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 6. **Escalation.** If round 3 ends with blocking findings still open, the coordinator labels the PR `needs-bob`, disables auto-merge on it (`gh pr merge --disable-auto`, a no-op while auto-merge is unavailable), stops that step, and reports it to Bob with the open findings. Steps that depend on it wait; the rest of the batch continues. Bob decides: fix himself, re-scope the step, override a finding, or drop it.
 7. `pnpm wt:rm <branch>` after the merge.
 
-Branch protection and GitHub auto-merge would enforce step 4 on the server. They are not available on this private repo's plan (GitHub answered 403 to the protection call, 2026-10-14). Once the repo is public or on Pro, require the `check` status on `main`, turn on "Require branches to be up to date", and switch the coordinator to `gh pr merge --auto --squash` once both adversaries report `Blocking: none` (it then disables auto-merge on escalation). `pnpm land` stays as an optional local recheck.
+Branch protection on `main` requires the `check` status and an up-to-date branch, so a red or stale PR cannot merge. The adversary condition stays the coordinator's to enforce. `pnpm land` stays as an optional local recheck.
 
 ### 5. Evidence per batch
 

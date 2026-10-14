@@ -1,7 +1,7 @@
 # M1 — Burgomaster's Funeral POC (build plan)
 
 **Status:** draft for Bob's review, 2026-10-14. Nothing is built. No step starts before gate G0.
-**Source:** `docs/PRD.md` rev 2, including "Decisions after review (2026-10-14)" (OQ-12 resolved, E15a, E16, E17, investigation advantages). Where this plan and the PRD differ, the PRD wins until the spec (step 2) is approved.
+**Source:** `docs/PRD.md` rev 3 (Gamewright rulings R3-1..R3-12, 2026-10-14), including "Decisions after review (2026-10-14)" (OQ-12 resolved, E15a, E16, E17, investigation advantages). Where this plan and the PRD differ, the PRD wins until the spec (step 2) is approved.
 **Goal:** the scene `n2-burgomasters-funeral` plays end to end on the Mac host, the Dashboard and 1+ devices holding all 4 hunters, with and without the tower, and every success criterion SC-1..SC-5 is met.
 **Exit condition:** AT-1..AT-28 pass (AT-18 by Bob's notes), and Bob signs off at G3.
 
@@ -32,7 +32,7 @@ Stack (R-ENG-9, repo conventions): Next.js + React, pnpm workspace, SQLite throu
 - Depends on: none
 - Touches: this file (the sign-off line in Results)
 - Deps change: no
-- Bob reviews the steps, batches, `Touches` and the open questions, and decides which open questions need Gamewright's answer before batch 2. Covers: process gate (sdlc G-plan).
+- Bob reviews the steps, batches and `Touches`. **The PRD (rev 3) is this app's intent** in place of an `intent/` file; approving G0 accepts it. B1 is held until Bob has read the plan and records G0 in Results. Covers: process gate (sdlc G-plan).
 
 ### Step 1: Scaffold the app parts and the type contract
 - Depends on: G0
@@ -197,24 +197,26 @@ Batch 1 cannot be wider: every code step needs step 1's package.json files and l
 
 Every PRD requirement maps to at least one step: PRD-1 (1, 4, 11), PRD-2 (12), PRD-3 (9, 12), PRD-4 (9, 13), PRD-5 (8, 12), PRD-6 (8), PRD-7 (5), PRD-8 (5), PRD-9 (5), PRD-10 (6), PRD-11 (8, 11), PRD-12 (3, 8), PRD-13 (3, 8), PRD-14 (6, 12), PRD-15 (6), PRD-16 (6), PRD-17 (5), PRD-18 (9), PRD-19 (9), PRD-20 (9), PRD-21 (5), PRD-22 (6), PRD-23 (7, 15), PRD-24 (7, 8), PRD-25 (11, 12, 13), PRD-26 (10), PRD-27 (10), PRD-28 (8, 11), PRD-29 (5, 15), PRD-30 (13), PRD-31 (11, 12), PRD-32 (4), PRD-33 (4, 12), PRD-34 (4, 11), PRD-35 (9, 13), PRD-36 (4), PRD-37 (4, 6), PRD-38 (7).
 
-## Open questions for Gamewright
+## Open questions for Gamewright: resolved (PRD rev 3)
 
-The PRD's own assumptions (OQ-1..OQ-14) stand as defaults unless listed here. These are places where the PRD is ambiguous or contradicts itself; the build does not guess at them. Step 2 records each one as pending.
+All twelve questions this plan raised were answered by Gamewright's rulings in PRD rev 3, and the PRD text was fixed in place. The build follows the rulings; nothing is pending.
 
-1. **In-app battle vs table battle.** OQ-1 says there is no in-app battle engine and the host enters Won/Lost, but the investigation advantages (+1 Undead, +1 Wild per present hunter in round 1, Forewarned revealing the first battle card) and AT-28 ("advantage totals shown on the battle screen") need battle rounds and battle cards. What does the battle screen show, and where does "the first battle card" come from?
-2. **Disconnects: pause or not.** The OQ-12 decision says a sole holder disconnecting pauses play, but PRD-20 ("shared play never blocks on a disconnected device"), §9 ("a disconnected device keeps its holdings, so it doesn't trigger the unheld pause") and AT-5 (kill a device's network at `.05`, shared play continues) were not updated. Does AT-5 hold only when the device is not a sole holder? Can the host override the pause?
-3. **Heartbeat and skull-drop sound with the tower on.** The post-review decision says these play only without the tower, while §7 says the screen half of each cue (pulse plus heartbeat sfx from the Mac) always plays (R-UI-8). Does the screen pulse still play with the tower on, without the sound?
-4. **Ambient accents vs determinism.** E16's random accents every 20–60 s: are they seeded and part of the deterministic run (PRD-29, AT-15), or outside it and left out of the comparison?
-5. **E15a presence exemption.** Which moments of this scene count as "dusk and night-start"? Is `.01` one, so that it ignores presence? Is anything in the investigation round?
-6. **Investigation round (E17) content.** The actions and findings are still being written. How many picks does each present hunter get, can two hunters pick the same action, does an absent hunter pick, and how does the table-talk beat end (host Next)?
-7. **What counts as a story item for costs.** Is each stake one item, so that losing "1 story item" can mean one stake? If holy water is spent for +1 Undead, is it gone before fight-lost costs are picked? Does a spent holy water count toward the +2 cap?
-8. **Forewarned cost.** "1 corruption or sit out the fight": who chooses, does that corruption go through the instant-loss guard, and does it count as a fight-lost corruption for stats?
-9. **Fun rating and personal line, per player or per hunter.** PRD-25 says per player; the `fun_rating` event is keyed by hunter. A device holding several hunters: one rating or one per hunter? Where does the "personal line" text come from?
-10. **Self-test pair (OQ-7).** Which sound and which light does the self-test use until a Verified pair exists?
-11. **`.08` still.** Reuse `.07` or a new group still? Asset choice blocks the readiness check.
-12. **`.07~fight-lost` with wren absent (OQ-5).** Confirm "narrator only" and whether Loremaster will write `~fight-lost~no-wren`.
+| Ruling | Answer, in short | Steps |
+|---|---|---|
+| R3-1 | No in-app battle. The Dashboard battle screen shows present hunters, foe count after modifiers (min 1), advantages by trait with the +2 cap, and the Forewarned card; host taps Won / Lost (AT-28) | 6, 12 |
+| R3-2 | Pause wins: a hunter with no connected holder pauses play; no force-continue; resume by Dashboard reassignment or rejoin (PRD-20, §9, AT-5 amended) | 4, 9, 11, 12 |
+| R3-3 | The screen half of a cue always plays; only fallback audio (heartbeat, skull-drop sting) is muted while the tower is connected and its sound works | 3, 8, 12 |
+| R3-4 | E16 accents are seeded and logged; host tower-mode changes are logged inputs; both are in the determinism check | 7, 8, 15 |
+| R3-5 | No funeral moment is a dusk / night-start / dawn phase moment; E15a applies to none; only `scope: global` would exempt | 5 |
+| R3-6 | Investigation: one pick per present hunter, unique picks (first lock wins, taken cards grey out), private until all lock, host Continue ends table talk, then the seal sequence | 5, 6, 13 |
+| R3-7 | Each stake is one item; holy water spent as a price is removed at once; carried as +1 Undead it counts toward the +2 cap | 6 |
+| R3-8 | Forewarned: the picker's holder chooses on the device, first answer wins for a shared hunter, forced sit-out at 2 corruption; logged `n2-burgomasters-funeral.forewarned.choice` | 6, 7, 13 |
+| R3-9 | End of scene per hunter: one rating and one personal line per held hunter, stored per hunter + device; lines from `n2-burgomasters-funeral.end.private.<hunter>` (placeholder from the manifest until written) | 7, 10, 11, 13 |
+| R3-10 | Self-test: `dim-all`, then `heartbeat` lights, then the skull-drop sound; host confirms each; a failed step switches that channel to screen fallback; verify at tower test (G1) | 3, 8, 12 |
+| R3-11 | `.08` reuses the `.07` still (manifest updated) | 10 |
+| R3-12 | `.07~fight-lost~no-wren` plays narrator only | 5, 10 |
 
-Process note for Bob (not Gamewright): the app has a PRD but no `intent/` file. The sdlc loop starts from an intent in Bob's words. Bob may write `intent/0001-funeral-poc.md` (or name the PRD as the intent) at G0; step 2 then drafts the spec from it.
+Still open, and not blocking the build: Loremaster writes `.07~fight-lost~no-wren` and the `end.private.<hunter>` lines (R3-9, R3-12). The readiness check (step 10) reports them as missing until then; placeholders are allowed (OQ-11).
 
 ## Results
 
