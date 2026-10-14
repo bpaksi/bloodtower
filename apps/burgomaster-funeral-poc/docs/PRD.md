@@ -1,6 +1,6 @@
 # Burgomaster's Funeral POC
 
-Status: PRD draft for Bob's review, 2026-10-14 (rev 2, 12:07 ET: hunters and devices R-DEV-9, R-WIZ-11, scene presence E15, revised variants rule). This is a design doc only. It contains no code.
+Status: PRD draft for Bob's review, 2026-10-14 (rev 3, 15:45 ET: Gamewright rulings R3-1..R3-12 resolve 12 build questions; conflicting text fixed in place. Rev 2, 12:07 ET: hunters and devices R-DEV-9, R-WIZ-11, scene presence E15, revised variants rule). This is a design doc only. It contains no code.
 Scene: `n2-burgomasters-funeral` (Dracula pack, night 2, the K2 Sanctuary). The script is used as reviewed, with no rewrite.
 Sources: `research/stories/dracula/poc-funeral.md`, `research/stories/dracula/rulings.md`, `assets/stories/dracula/scripts/{n2-burgomasters-funeral,README,cast,props}.md`, `research/game-design/*` (requirements, story-engine, sessions, statistics, setup-wizard-and-summary, landing-and-initial-screens, look-and-feel-harness, asset-organization), `research/tower/api-surface-7.1.2.md`.
 
@@ -105,7 +105,7 @@ At any point, if a holdings change leaves a hunter unheld, the game **pauses** (
 | PRD-17 | `.06` sets the story flag `dracula.lead.ladys-rooms = true` (Dorka's lead) whatever the fight result, because the line plays in both branches. | poc-funeral, R-SP-1 |
 | PRD-18 | Private moments `.09.private.<hunter>` go only to devices holding that hunter, and to all of them when several devices hold it. The server rejects any private payload sent to the Dashboard, and the Dashboard shows a neutral placeholder instead. | R-DEV-4, R-DEV-6, R-DEV-9, R-AV-4, R-LF-8, E10 |
 | PRD-19 | A private moment for a hunter not present at the scene is not shown anywhere, even on devices holding that hunter. It is logged as `private_skipped_absent`. | E15, R-DEV-4 |
-| PRD-20 | Rejoin: a device that disconnects and scans again, or reloads, reclaims its holdings with a device token, and the server restores, for each held hunter, the current private moment, status line and pending choice. A dropped connection does not release the holdings. Shared play never blocks on a disconnected device (the host can override). | R-DEV-4, R-SES-17 |
+| PRD-20 | Rejoin: a device that disconnects and scans again, or reloads, reclaims its holdings with a device token, and the server restores, for each held hunter, the current private moment, status line and pending choice. A dropped connection does not release the holdings. If a disconnect leaves a hunter with no connected holder, play pauses (R3-2). The host can't force play on with an unheld hunter; play resumes when a holder rejoins or the host reassigns the hunter to any connected device from the Dashboard. Pause and resume are logged. | R-DEV-4, R-SES-17, R3-2 |
 | PRD-21 | Phase clock: completing the scene advances night 2 → night 3 and shows the phase card. The POC ends at the night 3 card. | E1, R-ENG-17, R-ENG-22 |
 | PRD-22 | Win/loss check after every state change. A third corruption would be Turned, but the guard prevents it in this scene. The check still runs and is logged. | R-SES-5, R-ENG-31 |
 | PRD-23 | Append-only SQLite event log, plus the summary tables in §8. Times stored in UTC. Unknown values stored as null. Seed and pack version recorded. | R-STA-1, R-STA-2, R-STA-9, R-STA-10 |
@@ -114,7 +114,7 @@ At any point, if a holdings change leaves a hunter unheld, the game **pauses** (
 | PRD-26 | Media is pre-rendered and played from the asset index by stable ID. Nothing is generated live. Draft renders are allowed. Dashboard assets use `@dashboard` and devices use `@ipad`. A missing `@phone` falls back to `@ipad` or to text. | R-AV-5, R-AST-ORG-1, -7, -9, -14, R-DEV-7 |
 | PRD-27 | A readiness check before play: every moment ID needed for the joined party resolves in the index, every private moment has a line for each joined hunter, every cue resolves with a fallback, and no private moment targets the Dashboard. | R-AST-ORG-8, R-DEV-6, R-ENG-10 |
 | PRD-28 | Disconnect during play pauses tower cues (fallbacks play), shows a manual Reconnect (with recalibrate) on the Dashboard, and never loses state. | R-SES-7 |
-| PRD-29 | The run is deterministic: the same seed + party + choices + fight results give the same moments and state. | R-ENG-8 |
+| PRD-29 | The run is deterministic: the same seed + party + choices + fight results + host tower-mode changes give the same moments, state and E16 accents (accent timing and choice come from the game seed and are logged). | R-ENG-8, R3-4 |
 | PRD-30 | Touch targets on the devices are ≥44 pt with primary actions in the thumb zone. The phone view shows one decision at a time and gives a haptic tap on a private cue. | R-LF-6, R-LF-10, R-FUN-11 |
 | PRD-31 | "End for now" and "Concede" can be reached from the Dashboard during play, and both are logged. | R-SES-16 |
 | PRD-32 | All 4 hunters are always in play, whatever the number of humans or devices. One device holding all 4 hunters is a valid game. | R-DEV-9 |
@@ -181,7 +181,7 @@ Asset status for every row: **not rendered** (no `assets/rendered/dracula/` or `
 | `.07` | still | won, wren present | dashboard | none | Dorka-at-peace still; narrator + wren VO |
 | `.07~no-wren` | still | won, wren absent | dashboard | none | same still; narrator VO |
 | `.07~fight-lost` | still | lost | dashboard | `skull-drop` (player physical step, not a tower command) → Dashboard prompt + confirm; only when watched | window/escape still; narrator + wren VO (see OQ-5 for wren absent) |
-| `.08` | still | agnes present | dashboard | none | still (reuse `.07` or a group still); agnes VO |
+| `.08` | still | agnes present | dashboard | none | reuses the `.07` still, no new asset (R3-11); agnes VO |
 | `.08~no-agnes` | still | agnes absent | dashboard | none | same; tomas VO |
 | `.09.private.agnes` | still | agnes present | `ipad:agnes` (all devices holding agnes) | none | private still `@ipad` (`@phone` optional); agnes VO (thought) |
 | `.09.private.tomas` | still | tomas present | `ipad:tomas` (all devices holding tomas) | none | same pattern; tomas VO |
@@ -191,7 +191,7 @@ Asset status for every row: **not rendered** (no `assets/rendered/dracula/` or `
 
 All IDs carry the `n2-burgomasters-funeral` prefix. The Dashboard neutral line during `.09` is UI text, not a moment. The `pressed-flower` private dusk clue comes from the engine (`nx-pressed-flower`) and isn't part of this POC.
 
-**Cue status notes.** `dim-all` = `allLightsOff`, and `heartbeat` = the breathe effect from `LIGHT_EFFECTS`. Both are library capabilities and neither has been confirmed on Bob's tower in this repo, so they are marked **Library** until a spike marks them Verified. No cue in this scene is a GAP. Calibration is done before play. During calibration, or with the tower off, the fallback always plays. The screen half of each cue plays even when the tower is on (R-UI-8).
+**Cue status notes.** `dim-all` = `allLightsOff`, and `heartbeat` = the breathe effect from `LIGHT_EFFECTS`. Both are library capabilities and neither has been confirmed on Bob's tower in this repo, so they are marked **Library** until a spike marks them Verified. No cue in this scene is a GAP. Calibration is done before play. During calibration, or with the tower off, the fallback always plays. The screen half of each cue (including the screen pulse) always plays, tower or not (R-UI-8). Only the fallback audio (heartbeat, skull-drop sting) is suppressed, and only while the tower is connected and its sound works (R3-3).
 
 ## 8. Statistics events to log
 Tables (statistics.md): `games`, `sessions`, `devices`, `game_heroes`, `clock_ticks`, `events`, `encounters`, `combats`, `resource_snapshots`, `inventory_changes`, `tower_activity`, `flags`, `outcomes`. `events` is the source of truth.
@@ -226,14 +226,14 @@ Tables (statistics.md): `games`, `sessions`, `devices`, `game_heroes`, `clock_ti
 - The Dashboard during `.09` shows only "Each hunter has a private thought." It never shows text, a still, or audio from a private moment.
 - The QR and join pages show no hunter-private data. The hunter picker shows names and portraits only.
 - Rejoin: on its first join a device gets a token tied to (session, device). On reload or a new scan, the token restores its holdings. A new device can always take an extra hold on any hunter, and the host must confirm if it is mid-scene. The server pushes the current private moment (if any), the status line and the pending decision.
-- A disconnected device keeps its holdings, so it doesn't trigger the unheld pause (see OQ-12). Only an explicit release or a Dashboard change can leave a hunter unheld.
-- A missing device never blocks shared play. The host can advance, and the private moment waits for the device until the scene ends, then is logged as undelivered.
+- A disconnected device keeps its holdings, but if it was a hunter's only connected holder, play pauses (OQ-12 as resolved, R3-2). The host can't force play on; they resume by reassigning the hunter to any connected device from the Dashboard, or the device rejoins. Pause and resume are logged.
+- A missing device blocks shared play only while it leaves a hunter unheld (R3-2). A device whose hunters are also held by another connected device doesn't block play: the host can advance, and its private moment waits for the device until the scene ends, then is logged as undelivered.
 - Private audio plays on the device only (earbuds recommended).
 
 ## 10. Assets needed and status
 | Group | Items | Status |
 |---|---|---|
-| Stills `@dashboard` | `.02`, `.03`, `.lid-choice`, `~nailed`, `~watched`, `.07`, `.07~fight-lost`, `.08`, `.10`. `~no-<hunter>` variants are rendered too (revised rule): an absent hunter must not appear in the frame, so a variant can reuse a base still only when that hunter isn't in it | Not started. Draft OK. **Needs image-generation billing enabled before rendering.** |
+| Stills `@dashboard` | `.02`, `.03`, `.lid-choice`, `~nailed`, `~watched`, `.07`, `.07~fight-lost`, `.10` (`.08` reuses the `.07` still, R3-11). `~no-<hunter>` variants are rendered too (revised rule): an absent hunter must not appear in the frame, so a variant can reuse a base still only when that hunter isn't in it | Not started. Draft OK. **Needs image-generation billing enabled before rendering.** |
 | Stills `@ipad` | 4 × `.09.private.<hunter>` | Not started. Draft OK. Needs image billing. |
 | Clips `@dashboard` | `.01`, `.04`, `.04~holy-symbol`, `.05`, `.06` | Not started. Draft OK. Fallback: a still with code-driven parallax. |
 | Voice | narrator, agnes, tomas, wren, emeric (assigned), dorka (*new*, audition), covering every base line **and every `~no-<hunter>` variant** | Not rendered |
@@ -249,7 +249,7 @@ Tables (statistics.md): `games`, `sessions`, `devices`, `game_heroes`, `clock_ti
 - AT-2. The same run with "Play without tower": every cue row shows `fallback` and the screen fallbacks are visible. (SC-1)
 - AT-3. Over a full run, capture every Dashboard payload. None contains any `.private.*` moment ID or its text. (SC-2)
 - AT-4. Reload a device holding two hunters during `.09`. Within 5 s it shows the same labelled private moments and status lines, keeps its holdings, and logs `device_rejoined`. (SC-3)
-- AT-5. Kill a device's network at `.05`. Shared play continues, and on rejoin the hunter's state is intact. (R-DEV-4)
+- AT-5. Kill a device's network at `.05`. If it was a hunter's only holder, play pauses and the host has no force-continue; reassigning that hunter to another connected device from the Dashboard, or the device rejoining, resumes play with the hunter's state intact. If another connected device also holds the hunter, play continues. Pause and resume are logged. (R-DEV-4, R3-2)
 - AT-6. With the only stake carried by an absent hunter (tomas), Nail is not offered. With a stake carried by a present hunter, Nail sets stake to 0 and the fight shows base −1 foes (min 1).
 - AT-7. Nailed + lost: 1 chosen item carried by a present hunter is removed (items carried by tomas/emeric can't be picked), no skull prompt appears, and `cost_applied kind=item` is logged.
 - AT-8. Watched + lost with a present hunter at 0: that hunter goes to 1 corruption (absent hunters aren't offered as the victim), a skull drop prompt waits for confirm, and the drop is logged.
@@ -257,10 +257,10 @@ Tables (statistics.md): `games`, `sessions`, `devices`, `game_heroes`, `clock_ti
 - AT-10. With `story_skull_drops[2]=2` already, the drop is skipped and logged as `skull_drop_capped`. With supply 5, it converts to `+1 foe night 5`.
 - AT-11. Both fight outcomes set `dracula.lead.ladys-rooms=true`.
 - AT-12. Variants, test default (wren + agnes present, tomas + emeric away): plays `.02`, `.03~no-emeric`, `.lid-choice~nailed` or `~watched`, `.05`, `.06~no-tomas`, `.07`, `.08`, and private `.09` for wren and agnes only. A present carrier with the holy symbol plays `.04~holy-symbol`.
-- AT-12b. Variants, alternate presence (tomas + emeric present, wren + agnes away): plays `.02~no-wren`, `.03`, `.lid-choice~nailed~no-wren` / `~watched~no-agnes`, `.05~no-agnes`, `.06`, `.07~no-wren`, `.08~no-agnes`, and the fight-lost narrator-only line (OQ-5). Together, AT-12 and AT-12b play every `~no-<hunter>` variant in the script.
+- AT-12b. Variants, alternate presence (tomas + emeric present, wren + agnes away): plays `.02~no-wren`, `.03`, `.lid-choice~nailed~no-wren` / `~watched~no-agnes`, `.05~no-agnes`, `.06`, `.07~no-wren`, `.08~no-agnes`, and `.07~fight-lost~no-wren` (narrator only; R3-12, OQ-5). Together, AT-12 and AT-12b play every `~no-<hunter>` variant in the script.
 - AT-13. Pressing Calibrate, then a cue during calibration, logs `rejected/fallback` and sends no command. Nothing auto-retries after a forced connect failure.
 - AT-14. From the event log alone, a script can reconstruct the moment sequence, the lid choice, the fight result, the costs and the skull outcome. (SC-4)
-- AT-15. Two runs with the same seed, party, choices and results produce identical event payloads, apart from times and ids. (R-ENG-8)
+- AT-15. Two runs with the same seed, party, choices, fight results and host tower-mode changes produce identical event payloads, including logged E16 accent timing and choice, apart from wall-clock times and ids. (R-ENG-8, R3-4)
 - AT-16. A phone join shows the R-LF-10 single-column view with one decision at a time, and buzzes on a private cue.
 - AT-17. The readiness check fails if any `.09.private.<hunter>` or any `~no-<hunter>` variant is missing voice or render, or a cue has no fallback.
 - AT-19. Start gate: with 3 of 4 hunters held, Begin is disabled and the wizard names the unheld hunter. Once a device takes it, Begin enables. `start_gate_blocked` and a `holdings_snapshot` are logged.
@@ -281,14 +281,14 @@ Each item is an **assumption** with a suggested default, which the build follows
 | OQ-2 | Test configuration (replaces the old 2-player Wren + Agnes party) | Assumption: all 4 hunters on 2 iPads (iPad 1: wren + tomas; iPad 2: agnes + emeric). Wren + agnes are present at the funeral, and tomas + emeric are away. A second pass with the presence flipped (AT-12b) covers the other variants. All `~no-<hunter>` variants are voiced and rendered. |
 | OQ-3 | Starting kit when the scene is played stand-alone | Assumption: wren carries 1 stake, agnes 1 holy water, and tomas 1 stake (away, so it can't be used, as a test of that rule). No host. The holy symbol is a test toggle (default off). Corruption is 0 for everyone, with a debug preset of "one hunter at 2" for the guard test. Skull supply is 12 (debug: 5). |
 | OQ-4 | Who picks the corruption victim and the lost item | Assumption: the party decides at the table and the host taps the choice on the Dashboard, from present hunters only. Phone/iPad voting is out of scope. |
-| OQ-5 | `.07~fight-lost` has a Wren line but no `~no-wren` variant | Assumption: cut Wren's line and play the narrator line only (README rule). Ask Loremaster for `~fight-lost~no-wren`. |
+| OQ-5 | `.07~fight-lost` has a Wren line but no `~no-wren` variant | **Resolved (R3-12):** with wren absent, `.07~fight-lost~no-wren` plays narrator only. Open script item: Loremaster writes it. |
 | OQ-6 | Does the funeral's skull drop advance the clock (R-ASSET-3), and does it count as the phase trigger? | Assumption: log it as a clock input but don't advance the phase. Only scene completion advances night 2 → 3 in this POC. |
-| OQ-7 | Cue status: are `dim-all` and `heartbeat` Verified on Bob's tower? | Assumption: Library until a tower-poc spike confirms them. The fallbacks play alongside in every case, so the POC doesn't depend on it. The self-test also uses a Library sound and light until a Verified pair is named. |
+| OQ-7 | Cue status: are `dim-all` and `heartbeat` Verified on Bob's tower? | **Resolved (R3-10):** Library until a tower-poc spike confirms them. The self-test runs `dim-all`, then `heartbeat` lights, then the skull-drop sound; the host confirms seen/heard per step, and a failed step switches that channel to screen fallback. Screen halves always play (R-UI-8). Verify at tower test. |
 | OQ-8 | Does the `.10` outcome award K2's key? ("with the site, the kingdom's key") | Assumption: no keys in this POC. Log `key_eligible=false` and show nothing. |
 | OQ-9 | Does the 1981 bookend play? | Assumption: a silent stub slot only (out of scope). |
 | OQ-10 | Advance rule for stills | Assumption: the host taps Next on the Dashboard, with no auto-advance timer. A clip advances when it ends. |
 | OQ-11 | Image billing for draft stills | Assumption: Bob enables image billing before the render pass. Until then, use placeholder frames with caption text, so the flow can be built and tested. |
-| OQ-12 | Does a disconnected sole holder count as "unheld" for the pause? | Assumption: no. Holdings persist through a disconnect, and only an explicit release or a Dashboard change pauses the game. This keeps R-DEV-4 (play never depends on one iPad). |
+| OQ-12 | Does a disconnected sole holder count as "unheld" for the pause? | **Resolved (Bob; R3-2):** yes. Holdings persist, but a hunter with no connected holder pauses play until a holder rejoins or the host reassigns the hunter from the Dashboard. |
 | OQ-13 | How is presence set without board tracking? | Assumption: the Dashboard step "Who is at the Sanctuary" before `.01`, defaulting to wren + agnes. At least 1 must be present. |
 | OQ-14 | Can a hunter change holders during a pending private choice? | Assumption: yes. The pending choice moves to the new holders, and the first answer wins. |
 
@@ -296,7 +296,7 @@ Each item is an **assumption** with a suggested default, which the build follows
 - **OQ-12 resolved (Bob):** if the only device holding a hunter disconnects, play pauses immediately, the same as PRD-34. **AT-25 is replaced:** disconnecting a hunter's only holder pauses play, and reconnecting or a new holder resumes it.
 - **Presence exemption (E15a):** dusk and night-start moments, including the pressed-flower clue, ignore presence. They go to every holder of the named hunter.
 - **Tower never idle (E16):** the POC runs an ambient light bed for each phase (dusk breathe, wake flicker) plus random one-shot accents every 20–60 s. These are suppressed during speech, choices and calibration, and scene cues override them. The quiet gap during play must be no more than about 10 s. The host toggle offers Full, Lights only and Off. AT-26: over a full run, the tower log shows no gap longer than 10 s outside of calibration and pauses.
-- **Effects when the tower is connected:** the skull-drop sting and the heartbeat sound play only without the tower. The iPad hunter card shows the items that hunter carries, with the stake first.
+- **Effects when the tower is connected:** the skull-drop sting and the heartbeat sound play only without the tower, or when the self-test shows the tower's sound failing; the screen pulse always plays (R3-3). The iPad hunter card shows the items that hunter carries, with the stake first.
 
 - **Investigation round (E17), added by request:** before `.lid-choice`, each present hunter makes one private pick on their iPad (Loremaster is writing the actions and findings). Then comes a table-talk beat, then the lid choice. AT-27: findings appear only on the picking hunter's holders.
 - **Investigation advantages (rulings.md, 2026-10-14):**
@@ -307,4 +307,22 @@ Each item is an **assumption** with a suggested default, which the build follows
   - Forewarned: reveals the first battle card. It costs the picker 1 corruption or sitting out the fight (at 2 corruption they must sit out).
   - Story advantages are capped at +2 per hunter per fight.
   - The risky cue is a seal flicker plus a sound, with no drum move, and it fires after all picks lock.
-  - AT-28: the advantage totals shown on the battle screen match these rules and the cap.
+  - AT-28 (rev 3, R3-1): the Dashboard battle status screen shows the present hunters, the foe count after modifiers (minimum 1), each hunter's advantages by trait with the +2 cap applied, and the Forewarned card if active; these match the rules above. The app runs no battle simulation; the host's Won / Lost tap is recorded and costs applied.
+
+## Rev 3 rulings (Gamewright, Oct 14 2026)
+Answers to 12 build questions. Where these conflict with earlier text, these win; the conflicting text above has been fixed in place.
+
+**Process note.** At gate G0 this PRD serves as the intent, unless Bob writes a file under `intent/`, which then takes precedence.
+
+1. **R3-1 No in-app battle.** Fights use the physical RtDT battle cards and tower as normal. The "battle screen" is a Dashboard status-and-entry screen showing: the present hunters in the fight; the foe count after modifiers (lid, mother bars the window; minimum 1); each hunter's advantages by trait with the +2 per-hunter cap applied; and the Forewarned card face up if active (the host draws the physical card and enters it, and the screen shows it). Host buttons: **Won** / **Lost**. The app only records the outcome and applies costs. AT-28 is reworded to match.
+2. **R3-2 Pause wins (Bob).** If a hunter has no connected holder, play pauses. The host can't force play on with an unheld hunter, but can resume by reassigning the hunter to any connected device from the Dashboard, or the device rejoins. Pause and resume are logged. Amends PRD-20, §9 and AT-5.
+3. **R3-3 R-UI-8 wins.** The screen half of a cue, including the screen pulse, always plays. Only the fallback audio (heartbeat, skull-drop sting) is suppressed, and only while the tower is connected and its sound works.
+4. **R3-4 Seeded accents.** E16 accent timing and choice come from the game seed and are logged. Host mode changes (Full, Lights only, Off) are logged inputs. Both are part of the determinism check (PRD-29, AT-15).
+5. **R3-5 E15a in this scene.** No moment in `n2-burgomasters-funeral` is a dusk, night-start or dawn phase moment, and none is tagged `scope: global` (`.01` is a scene clip set at a wake and `.10` is a scene still that mentions dawn; neither is a phase moment, and neither has private lines). So the E15a exemption applies to no funeral moments, and `scope: global` would be the only exemption. The pressed-flower dusk clue (`nx-pressed-flower`) is engine-side and outside this POC.
+6. **R3-6 Investigation (E17).** One pick per present hunter; absent hunters don't pick. No two hunters may pick the same action: the first lock wins and taken cards grey out. Picks are private until all lock. The table-talk beat ends when the host taps **Continue** on the Dashboard (no timer in the POC). Then the seal sequence fires.
+7. **R3-7 Items.** Each stake is one story item for item loss. Holy water spent as a price is removed immediately when spent, before any later cost is picked. Holy water carried as +1 Undead counts toward the +2 cap; spent as a price, it gives no advantage.
+8. **R3-8 Forewarned.** The picker hunter's holder chooses on their iPad; if the hunter is shared, the first answer from any holder locks and the others see it. At 2 corruptions the choice is forced to sit out (instant-loss guard: Forewarned can never cause the third corruption). Log `n2-burgomasters-funeral.forewarned.choice` with `hunter`, `choice` (`corruption` | `sit-out`) and `forced` (true/false).
+9. **R3-9 End-of-scene, per hunter.** A device holding several hunters shows one fun rating and one personal line per hunter held. Stats are stored per hunter plus device id. Personal-line text comes from the script as moments `n2-burgomasters-funeral.end.private.<hunter>`, written by Loremaster; until then, use placeholder text from the manifest.
+10. **R3-10 Self-test (resolves OQ-7).** Run the Library cues `dim-all`, then `heartbeat` lights, then the skull-drop sound. The host confirms seen/heard per step; a failed step switches that channel to screen fallback. **Verify at tower test.**
+11. **R3-11 `.08` still.** `.08` reuses the `.07` still; no new asset. If `assets/manifest.json` has a separate `.08` still entry (placeholder only), point its path at the `.07` still and say so in its notes. (Applied: `apps/burgomaster-funeral-poc/assets/manifest.json` entry `.08` now points at the `.07` still, with a note.)
+12. **R3-12 `.07~fight-lost~no-wren`.** With wren absent, `.07~fight-lost~no-wren` plays narrator only (E15 `~no-<hunter>` convention). **Open script item:** Loremaster writes it (also `n2-burgomasters-funeral.end.private.<hunter>` per R3-9).

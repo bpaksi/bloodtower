@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
@@ -11,6 +11,16 @@ import { land } from "./land.mjs";
 for (const name of Object.keys(process.env)) {
   if (name.startsWith("GIT_")) delete process.env[name];
 }
+// land.mjs runs git itself, and its rebase writes commits. A machine with no git identity (CI)
+// would refuse them, so give that git an identity and keep the person's config out of it.
+Object.assign(process.env, {
+  GIT_AUTHOR_NAME: "Test",
+  GIT_AUTHOR_EMAIL: "test@example.com",
+  GIT_COMMITTER_NAME: "Test",
+  GIT_COMMITTER_EMAIL: "test@example.com",
+  GIT_CONFIG_GLOBAL: "/dev/null",
+  GIT_CONFIG_NOSYSTEM: "1",
+});
 
 let cwd;
 // The -c settings keep the person's global git config (identity, signing, hooks) out of the tests.
@@ -96,7 +106,7 @@ describe("land", () => {
     };
     refuses(
       { branch: "work", runCheck: fails },
-      /The check failed on work\. main was not changed\. You are on other\./,
+      /The check failed on work after the rebase\. main was not changed\. You are on other\./,
     );
   });
 
@@ -146,10 +156,74 @@ describe("land", () => {
     refuses({ branch: "work" }, /No branch is checked out/);
   });
 
-  it("refuses a branch that main has moved past", () => {
+  it("rebases a branch that main has moved past, checks the result, then lands it", () => {
     git("checkout", "--quiet", "main");
     commit("d.txt", "d");
-    refuses({ branch: "work" }, /cannot be fast-forwarded/);
+    const mainTip = head("main");
+    let checkedOn;
+    const lines = run({
+      branch: "work",
+      runCheck: () => {
+        checkedOn = { on: current(), base: git("merge-base", "main", "work") };
+      },
+    });
+    assert.deepEqual(checkedOn, { on: "work", base: mainTip });
+    assert.equal(git("rev-list", "--count", `${mainTip}..main`), "2");
+    assert.match(lines[0], /2 commits, rebased\./);
+  });
+
+  it("refuses a branch that does not rebase cleanly, and leaves it as it was", () => {
+    git("checkout", "--quiet", "main");
+    commit("b.txt", "main wrote b too");
+    refuses(
+      { branch: "work" },
+      /does not rebase cleanly.* main was not changed\. You are on main\./,
+    );
+    assert.equal(git("status", "--porcelain"), "");
+  });
+
+  it("refuses when the check fails after the rebase", () => {
+    git("checkout", "--quiet", "main");
+    commit("d.txt", "d");
+    const fails = () => {
+      throw new Error("boom");
+    };
+    assert.throws(
+      () => run({ branch: "work", runCheck: fails }),
+      /check failed on work after the rebase/,
+    );
+    assert.notEqual(git("rev-parse", "main"), git("rev-parse", "work"));
+    assert.equal(current(), "main");
+  });
+
+  describe("a branch in a step worktree", () => {
+    let wt;
+    beforeEach(() => {
+      git("checkout", "--quiet", "main");
+      commit("d.txt", "d");
+      wt = `${cwd}-wt`;
+      git("worktree", "add", "--quiet", wt, "work");
+    });
+    afterEach(() => rmSync(wt, { recursive: true, force: true }));
+
+    it("rebases and checks in the worktree, lands, and keeps the worktree for wt:rm", () => {
+      let checkedIn;
+      const lines = run({
+        branch: "work",
+        runCheck: (dir) => {
+          checkedIn = dir;
+        },
+      });
+      assert.equal(realpathSync(checkedIn), realpathSync(wt));
+      assert.equal(head("main"), head("work"));
+      assert.equal(current(), "main");
+      assert.match(lines.at(-1), /pnpm wt:rm work/);
+    });
+
+    it("refuses when the worktree has uncommitted changes", () => {
+      writeFileSync(join(wt, "b.txt"), "changed");
+      refuses({ branch: "work" }, /worktree .* has uncommitted changes/);
+    });
   });
 
   it("refuses a branch with nothing new", () => {

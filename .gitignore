@@ -22,3 +22,7 @@ research/dark-tower-1981/sounds/
 research/dark-tower-1981/contact-sheet.png
 apps/*/assets/shared/dt1981/
 apps/*/assets/inbox/
+
+# Step worktree files (pnpm wt)
+.wt.json
+.wt-data/

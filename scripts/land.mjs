@@ -1,30 +1,55 @@
-// `pnpm land <branch>`: Bob's command for merging a reviewed branch into main. It fast-forwards
-// main to the branch and deletes the branch, and refuses anything that is not a plain fast-forward.
-// It switches branches while it works and ends on main.
+// `pnpm land <branch>`: an optional local recheck for Bob. The merge path is a GitHub PR
+// (docs/sdlc.md); this is for checking a branch against the current main on the Mac. It rebases the
+// branch on the current main, reruns the checks on the rebased result, then fast-forwards main to
+// it. Landing is serial: one branch per run, in the order the plan's batch lists.
+// A branch checked out in a step worktree (`pnpm wt`) is rebased and checked there, and the
+// worktree is left for `pnpm wt:rm`. Any other branch is rebased and checked in this checkout and
+// deleted after landing. On a conflict or a failed check nothing on main moves.
 // Bob owns merges (docs/sdlc.md), so it refuses when it can tell it is inside a Claude session.
 // That refusal is a courtesy, not a lock: it reads one environment variable.
 import { execFileSync } from "node:child_process";
+import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const MAIN = "main";
 
+/** The worktree path that has `branch` checked out, other than `cwd`, or undefined. */
+export const worktreeOf = (cwd, branch) => {
+  const out = execFileSync("git", ["worktree", "list", "--porcelain"], {
+    cwd,
+    encoding: "utf8",
+  });
+  const here = realpathSync(cwd);
+  for (const block of out.split("\n\n")) {
+    const path = block.match(/^worktree (.+)$/m)?.[1];
+    const ref = block.match(/^branch (.+)$/m)?.[1];
+    if (path && ref === `refs/heads/${branch}` && realpathSync(path) !== here) return path;
+  }
+  return undefined;
+};
+
 /**
- * Lands `branch` on main in the repo at `cwd`. `runCheck` runs the repo's checks and throws when
- * they fail. Returns the lines to print. Throws an Error with the reason when it refuses; main
- * has not moved in that case.
+ * Lands `branch` on main in the repo at `cwd`. `runCheck(dir)` runs the repo's checks in `dir`
+ * and throws when they fail. Returns the lines to print. Throws an Error with the reason when it
+ * refuses; main has not moved in that case.
  */
 export const land = ({ cwd, branch, runCheck, env = process.env }) => {
-  const git = (...args) =>
-    execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
-  const succeeds = (...args) => {
+  const gitIn = (dir, ...args) =>
+    execFileSync("git", args, {
+      cwd: dir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  const git = (...args) => gitIn(cwd, ...args);
+  const succeeds = (dir, ...args) => {
     try {
-      git(...args);
+      gitIn(dir, ...args);
       return true;
     } catch {
       return false;
     }
   };
-  const dirty = () => git("status", "--porcelain", "--untracked-files=no") !== "";
+  const dirtyIn = (dir) => gitIn(dir, "status", "--porcelain", "--untracked-files=no") !== "";
 
   if ("CLAUDECODE" in env) {
     throw new Error(
@@ -35,56 +60,74 @@ export const land = ({ cwd, branch, runCheck, env = process.env }) => {
   if (branch === MAIN) throw new Error(`${MAIN} cannot be landed on itself.`);
   // The full ref, so that a tag with the same name is never what gets checked or merged.
   const ref = `refs/heads/${branch}`;
-  if (!succeeds("rev-parse", "--verify", "--quiet", ref)) {
+  if (!succeeds(cwd, "rev-parse", "--verify", "--quiet", ref)) {
     throw new Error(`There is no local branch named ${branch}.`);
   }
   const start = git("branch", "--show-current");
   if (start === "") throw new Error("No branch is checked out. Check one out first.");
   // Untracked files are not counted. Git refuses a switch that would overwrite one, unless the
   // file is ignored.
-  if (dirty()) {
+  if (dirtyIn(cwd)) {
     throw new Error("There are uncommitted changes. Commit them or put them aside first.");
   }
-  if (!succeeds("merge-base", "--is-ancestor", MAIN, ref)) {
-    throw new Error(
-      `${branch} does not sit on top of ${MAIN}, so it cannot be fast-forwarded. Rebase it or merge it by hand.`,
-    );
+  const worktree = worktreeOf(cwd, branch);
+  if (worktree && dirtyIn(worktree)) {
+    throw new Error(`The worktree ${worktree} has uncommitted changes on ${branch}.`);
+  }
+  if (!worktree && worktreeOf(cwd, MAIN)) {
+    throw new Error(`${MAIN} is checked out in another worktree. Land from that checkout.`);
   }
   const commits = Number(git("rev-list", "--count", `${MAIN}..${ref}`));
   if (commits === 0) throw new Error(`${branch} has nothing that ${MAIN} lacks.`);
-  const tip = git("rev-parse", ref);
+  const before = git("rev-parse", ref);
 
-  // A fast-forward leaves main with exactly the branch's files, so checking the branch checks
-  // what main will hold. A failure here stops before main is touched.
-  git("switch", "--quiet", branch);
+  // Where the branch is rebased and checked: its own worktree, or this checkout.
+  const dir = worktree ?? cwd;
+  const restore = () => {
+    if (!worktree && !dirtyIn(cwd) && git("branch", "--show-current") !== start) {
+      git("switch", "--quiet", start);
+    }
+  };
+  if (!worktree) git("switch", "--quiet", branch);
   try {
     try {
-      runCheck();
+      gitIn(dir, "-c", "core.editor=true", "rebase", "--quiet", MAIN);
     } catch {
-      throw new Error(`The check failed on ${branch}.`);
+      succeeds(dir, "rebase", "--abort");
+      throw new Error(
+        `${branch} does not rebase cleanly on ${MAIN}. It was left as it was; send it back to its developer.`,
+      );
     }
-    if (dirty()) {
+    try {
+      runCheck(dir);
+    } catch {
+      throw new Error(`The check failed on ${branch} after the rebase.`);
+    }
+    if (dirtyIn(dir)) {
       throw new Error(
         `The check changed tracked files on ${branch}. Look at them with git status, then commit or discard them.`,
       );
     }
   } catch (error) {
-    // Go back to where Bob started, unless the check left changes that a switch would carry along.
-    if (!dirty() && start !== branch) git("switch", "--quiet", start);
-    throw new Error(
-      `${error.message} ${MAIN} was not changed. You are on ${git("branch", "--show-current")}.`,
-    );
+    restore();
+    const where = worktree ? `in ${worktree}` : `You are on ${git("branch", "--show-current")}`;
+    throw new Error(`${error.message} ${MAIN} was not changed. ${where}.`);
   }
 
-  git("switch", "--quiet", MAIN);
+  const tip = git("rev-parse", ref);
+  if (git("branch", "--show-current") !== MAIN) git("switch", "--quiet", MAIN);
   git("merge", "--ff-only", "--quiet", tip);
-  git("branch", "--delete", "--quiet", branch);
-
-  return [
-    `Landed ${branch} on ${MAIN}: ${commits} commit${commits === 1 ? "" : "s"}.`,
+  const lines = [
+    `Landed ${branch} on ${MAIN}: ${commits} commit${commits === 1 ? "" : "s"}${tip === before ? "" : ", rebased"}.`,
     `${MAIN} is now at ${git("log", "--oneline", "-1")}`,
-    `Deleted the branch ${branch}. You are on ${MAIN}.`,
   ];
+  if (worktree) {
+    lines.push(`The worktree is still at ${worktree}. Remove it with pnpm wt:rm ${branch}.`);
+  } else {
+    git("branch", "--delete", "--quiet", branch);
+    lines.push(`Deleted the branch ${branch}. You are on ${MAIN}.`);
+  }
+  return lines;
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -93,7 +136,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const lines = land({
       cwd,
       branch: process.argv[2],
-      runCheck: () => execFileSync("pnpm", ["check"], { cwd, stdio: "inherit" }),
+      runCheck: (dir) => execFileSync("pnpm", ["check"], { cwd: dir, stdio: "inherit" }),
     });
     console.log(`\n${lines.join("\n")}`);
   } catch (error) {

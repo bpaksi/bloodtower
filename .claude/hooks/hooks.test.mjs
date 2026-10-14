@@ -8,6 +8,12 @@ import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { splitCommands, UNKNOWN_FOLDER, walkCommands } from "./lib.mjs";
 
+// Git sets GIT_DIR and GIT_INDEX_FILE when it runs a hook, and the pre-commit hook runs these
+// tests. Left in place they would point every git call below at the real repo.
+for (const name of Object.keys(process.env)) {
+  if (name.startsWith("GIT_")) delete process.env[name];
+}
+
 const HOOKS = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HOOKS, "../..");
 const BLOCKED = 2;
@@ -661,15 +667,21 @@ describe("the hook commands in settings.json", () => {
     const dir = makeRepo(name, "feat/app-thing");
     if (source !== undefined) {
       mkdirSync(join(dir, ".claude/hooks"), { recursive: true });
-      for (const hook of ["protect-intent", "no-main-commit", "pin-guard", "test-lock"]) {
+      for (const hook of [
+        "worktree-guard",
+        "protect-intent",
+        "no-main-commit",
+        "pin-guard",
+        "test-lock",
+      ]) {
         writeFileSync(join(dir, `.claude/hooks/${hook}.mjs`), source);
       }
     }
     return guards.map((command) => spawnSync("sh", ["-c", command], { cwd: dir, input }).status);
   };
 
-  it("covers every guard entry: three on edits, four on shell commands", () => {
-    assert.equal(guards.length, 7);
+  it("covers every guard entry: four on edits, five on shell commands", () => {
+    assert.equal(guards.length, 9);
   });
 
   it("blocks when a guard cannot load or crashes before it decides", () => {
@@ -684,5 +696,69 @@ describe("the hook commands in settings.json", () => {
   it("allows when the guard allows, and in a checkout that has no hooks at all", () => {
     assert.deepEqual(new Set(runIn("hook-ok", "")), new Set([ALLOWED]));
     assert.deepEqual(new Set(runIn("hook-none", undefined)), new Set([ALLOWED]));
+  });
+});
+
+// A main checkout plus two step worktrees made the way `pnpm wt` makes them (.wt.json at the root).
+describe("worktree-guard and hooks inside a step worktree", () => {
+  let home;
+  let mainCheckout;
+  let mine;
+  let theirs;
+  before(() => {
+    home = mkdtempSync(join(tmpdir(), "dark-tower-wtguard-"));
+    mainCheckout = join(home, "Repo");
+    mkdirSync(mainCheckout);
+    gitIn(mainCheckout, "init", "-q", "-b", "main");
+    gitIn(mainCheckout, "commit", "-q", "--allow-empty", "-m", "init");
+    mine = join(home, "Repo-wt", "feat", "app-a");
+    theirs = join(home, "Repo-wt", "feat", "app-b");
+    for (const [dir, branch] of [
+      [mine, "feat/app-a"],
+      [theirs, "feat/app-b"],
+    ]) {
+      gitIn(mainCheckout, "worktree", "add", "-q", "-b", branch, dir, "main");
+      writeFileSync(join(dir, ".wt.json"), JSON.stringify({ branch, root: dir }));
+      mkdirSync(join(dir, "src"));
+    }
+  });
+  after(() => rmSync(home, { recursive: true, force: true }));
+
+  const inMine = (hook, command) => shell(hook, command, mine);
+  const editFromMine = (hook, file) => edit(hook, file, "a", "b", mine);
+
+  it("blocks edits outside the worktree and allows edits inside it", () => {
+    assert.equal(editFromMine("worktree-guard", join(mine, "src/a.ts")), ALLOWED);
+    assert.equal(editFromMine("worktree-guard", "src/new/b.ts"), ALLOWED);
+    assert.equal(editFromMine("worktree-guard", join(mainCheckout, "a.ts")), BLOCKED);
+    assert.equal(editFromMine("worktree-guard", join(theirs, "src/a.ts")), BLOCKED);
+    assert.equal(editFromMine("worktree-guard", "../app-b/src/a.ts"), BLOCKED);
+    assert.equal(editFromMine("worktree-guard", join(tmpdir(), "scratch.txt")), ALLOWED);
+  });
+
+  cases("worktree-guard", inMine, ALLOWED, [
+    "echo x > src/a.ts",
+    "pnpm check > /tmp/check.log 2>&1",
+    "rm -rf src/old",
+    "git add -A && git commit -m x",
+    "cat ../../../Repo/README.md",
+  ]);
+  cases("worktree-guard", inMine, BLOCKED, [
+    "echo x > ../app-b/src/a.ts",
+    "cp src/a.ts ../../../Repo/a.ts",
+    "cd ../../../Repo && rm notes.txt",
+    "sed -i '' s/a/b/ ../app-b/src/a.ts",
+    "git -C ../../../Repo checkout -- .",
+  ]);
+
+  it("does nothing outside a step worktree", () => {
+    assert.equal(shell("worktree-guard", "echo x > ../elsewhere.txt", mainCheckout), ALLOWED);
+    assert.equal(edit("worktree-guard", join(mine, "src/a.ts"), "a", "b", mainCheckout), ALLOWED);
+  });
+
+  it("no-main-commit reads the worktree's own branch, not the main checkout's", () => {
+    // The main checkout is on main; a commit from the worktree is on feat/app-a and allowed.
+    assert.equal(inMine("no-main-commit", "git commit -m x"), ALLOWED);
+    assert.equal(shell("no-main-commit", "git commit -m x", mainCheckout), BLOCKED);
   });
 });

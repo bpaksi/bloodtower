@@ -723,8 +723,9 @@
     "id": "n2-burgomasters-funeral.08",
     "type": "still",
     "target": "dashboard",
-    "path": "stills/n2-burgomasters-funeral.08@dashboard.png",
+    "path": "stills/n2-burgomasters-funeral.07@dashboard.png",
     "status": "placeholder",
+    "notes": "PRD R3-11: .08 reuses the .07 still; no new asset. Former placeholder stills/n2-burgomasters-funeral.08@dashboard.png is unused.",
     "text": "Agnes: Hold on to that, all of you. Every night she refuses him is a night she's still ours.",
     "profile": "@dashboard"
   },
