@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { findCapability, isCommandable } from "./inventory.ts";
+import { findCapability, type inventory, isCommandable, type UiLocation } from "./inventory.ts";
 
 const ID = z.string().min(1).max(64);
 
@@ -27,8 +27,34 @@ export interface CommandIssue {
   message: string;
 }
 
+/**
+ * The ids `command{capabilityId}` may name: commands the app offers with a page holding their
+ * control. The type-level twin of `isCommandable`; a test checks the two agree.
+ */
+export type CommandableId = Extract<
+  (typeof inventory)[number],
+  {
+    kind: "command";
+    availability: "available" | "requires-calibration";
+    uiLocation: UiLocation;
+  }
+>["id"];
+
+// Never given a value: it exists so that only `validateCommand` can make a `ValidatedCommand`.
+declare const validated: unique symbol;
+
+/**
+ * A command whose `params` are the capability schema's parsed output. Only `validateCommand`
+ * produces one, so the executor cannot be handed a message's raw `params` by mistake.
+ */
+export type ValidatedCommand = {
+  readonly capabilityId: CommandableId;
+  readonly params: unknown;
+  readonly [validated]: true;
+};
+
 export type CommandValidation =
-  | { ok: true; capabilityId: string; params: unknown }
+  | { ok: true; command: ValidatedCommand }
   | {
       ok: false;
       reason: "unknown-capability" | "not-commandable" | "invalid-params";
@@ -36,15 +62,18 @@ export type CommandValidation =
     };
 
 /**
- * Checks a `command` payload against the inventory. On success `params` is the schema's parsed
- * output, which is what the executor passes on; the input is never forwarded.
+ * Checks a `command` payload against the inventory. On success `command.params` is the schema's
+ * parsed output, which is what the executor passes on; the input is never forwarded.
  */
 export const validateCommand = (capabilityId: string, params: unknown): CommandValidation => {
   const capability = findCapability(capabilityId);
   if (!capability) return { ok: false, reason: "unknown-capability", issues: [] };
   if (!isCommandable(capability)) return { ok: false, reason: "not-commandable", issues: [] };
   const parsed = capability.params.safeParse(params);
-  if (parsed.success) return { ok: true, capabilityId: capability.id, params: parsed.data };
+  if (parsed.success) {
+    const command = { capabilityId: capability.id, params: parsed.data };
+    return { ok: true, command: command as ValidatedCommand };
+  }
   return {
     ok: false,
     reason: "invalid-params",

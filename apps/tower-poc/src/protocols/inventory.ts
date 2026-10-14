@@ -98,17 +98,23 @@ export const lightSequenceSchema = z.enum(
   Object.keys(TOWER_LIGHT_SEQUENCES) as [LightSequenceName, ...LightSequenceName[]],
 );
 /**
- * Catalog sequences the app does not accept yet (GAP-HW-007). The M1 spike showed that
- * none of the four moves a drum, and that the tower answers none of them, so the library
- * reports each as failed after 30 seconds. Held until M2 can send them without waiting
- * for an answer (D23). Lifting the hold is emptying this list.
+ * Sequences the tower plays and never answers (GAP-HW-010). The library's queue would wait
+ * 30 seconds for each and then report it as failed, so the executor sends these straight to
+ * the tower instead (D23).
  */
-export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = [
+export const SILENT_LIGHT_SEQUENCES: readonly LightSequenceName[] = [
   "rotationAllDrums",
   "rotationDrumTop",
   "rotationDrumMiddle",
   "rotationDrumBottom",
 ];
+/**
+ * Catalog sequences the app does not accept yet (GAP-HW-007). The M1 spike showed that
+ * none of the four moves a drum, and that the tower answers none of them. The executor
+ * can send them without waiting (D23, M2 step 5); they stay held until that has worked
+ * on the tower (M2 step 11). Lifting the hold is emptying this list.
+ */
+export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = SILENT_LIGHT_SEQUENCES;
 /** The sequences `lighting.sequence` accepts: the catalog without the held ones. */
 export const offeredLightSequenceSchema = lightSequenceSchema.exclude(HELD_LIGHT_SEQUENCES);
 
@@ -499,7 +505,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the effect defaults to on. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
+    evidence: `${TYPES}: the effect defaults to on. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the executor serialises it with the other commands and spaces it 250 ms from them.`,
   },
   {
     id: "lighting.all-off",
@@ -511,7 +517,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the M2 executor must serialise it with the other commands itself.`,
+    evidence: `${TYPES}. Worked before calibration, with no drum motion, in the M1 spike (GAP-HW-001; ${SPIKE}, finding 2). The library sends this with sendTowerState to sendTowerCommandDirect, bypassing its command queue (no 250 ms spacing, no wait for a response), so the executor serialises it with the other commands and spaces it 250 ms from them.`,
   },
   {
     id: "lighting.sequence",
@@ -526,7 +532,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "lights",
     verification: "untested",
-    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (HELD_LIGHT_SEQUENCES) are not accepted: in the M1 spike each played its lights and moved no drum, but the tower sent no state back, so the library rejected each after 30 seconds (${SPIKE}, findings 4 and 7). Held until M2 can send them without waiting for an answer (D23, GAP-HW-007).`,
+    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (HELD_LIGHT_SEQUENCES) are not accepted: in the M1 spike each played its lights and moved no drum, but the tower sent no state back, so the library rejected each after 30 seconds (${SPIKE}, findings 4 and 7). The M2 executor sends them straight to the tower without waiting for an answer, and only to a calibrated tower, since none was tried on an uncalibrated one; they stay held until that has worked on the tower (D23, GAP-HW-007).`,
   },
   {
     id: "lighting.set-led",
@@ -1046,7 +1052,7 @@ export const exclusions: readonly Exclusion[] = [
     member: "sendTowerState",
     kind: "raw-bytes",
     reason:
-      "Writes a whole caller-built tower state, which can set anything a packet can, with no per-field validation (D12).",
+      "Writes a whole caller-built tower state, which can set anything a packet can, with no per-field validation (D12). No client reaches it. The executor calls it itself for the silent light sequences, on the library's own current state with only the sequence changed (D23).",
     gapId: "GAP-LIB-003",
   },
   {

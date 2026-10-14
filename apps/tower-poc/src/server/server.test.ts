@@ -336,14 +336,10 @@ describe("WebSocket endpoint", () => {
     ["invalid-envelope", JSON.stringify({ type: "hello", payload: {} })],
     ["unknown-type", JSON.stringify({ ...hello, type: "raw" })],
     ["invalid-payload", JSON.stringify({ ...hello, payload: { clientLabel: "" } })],
-    // No executor yet (M2 step 5): a valid command is answered, and goes nowhere.
+    // Restoring state comes in M2 step 6.
     [
       "not-implemented",
-      JSON.stringify({
-        ...hello,
-        type: "command",
-        payload: { capabilityId: "sound.play", params: { soundIndex: 1 } },
-      }),
+      JSON.stringify({ ...hello, type: "restoreState", payload: { accept: true } }),
     ],
     ["invalid-state", JSON.stringify({ ...hello, type: "calibrate", payload: {} })],
     ["invalid-state", JSON.stringify({ ...hello, type: "disconnect", payload: {} })],
@@ -452,6 +448,71 @@ describe("lifecycle messages", () => {
     } finally {
       socket.close();
       await own.close();
+    }
+  });
+
+  it("runs a command from one client and shows its lifecycle to every client (D7)", async () => {
+    const session = mockSession();
+    const own = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      session,
+    });
+    const a = await openSocket(WS_PATH, undefined, own.port);
+    const b = await openSocket(WS_PATH, undefined, own.port);
+    try {
+      const fromA = listen(a);
+      const fromB = listen(b);
+      const welcomed = (all: ServerMessage[]) => all.some((m) => m.type === "welcome");
+      b.send(JSON.stringify({ v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: "b" } }));
+      await fromB.until(welcomed);
+      const welcome = fromB.received.find((m) => m.type === "welcome");
+      if (welcome?.type !== "welcome") throw new Error("expected welcome");
+
+      send(a, "connect", "c-1");
+      await fromA.until((all) => states(all).includes("connected"));
+      const command = (id: string, capabilityId: string, params: unknown) =>
+        b.send(
+          JSON.stringify({
+            v: PROTOCOL_VERSION,
+            type: "command",
+            id,
+            payload: { capabilityId, params },
+          }),
+        );
+      const stagesOf = (all: ServerMessage[], id: string) =>
+        all.flatMap((m) =>
+          m.type === "command.lifecycle" && m.payload.commandId === id ? [m.payload] : [],
+        );
+
+      command("k-1", "sound.play", { soundIndex: 1 });
+      await fromA.until((all) => stagesOf(all, "k-1").some((p) => p.stage === "confirmed"));
+      for (const received of [fromA.received, fromB.received]) {
+        expect(stagesOf(received, "k-1").map((p) => p.stage)).toEqual([
+          "queued",
+          "started",
+          "write-completed",
+          "confirmed",
+        ]);
+        expect(stagesOf(received, "k-1")[0]).toMatchObject({
+          capabilityId: "sound.play",
+          clientId: welcome.payload.clientId,
+        });
+      }
+
+      command("k-2", "sound.play", { soundIndex: 0 });
+      await fromA.until((all) => stagesOf(all, "k-2").length > 0);
+      expect(stagesOf(fromA.received, "k-2")).toMatchObject([
+        { stage: "rejected", issues: [{ path: ["soundIndex"] }] },
+      ]);
+      expect(fromB.received.some((m) => m.type === "error")).toBe(false);
+    } finally {
+      a.close();
+      b.close();
+      await own.close();
+      await session.close();
     }
   });
 

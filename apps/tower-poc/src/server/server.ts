@@ -11,6 +11,7 @@ import {
   type ServerMessage,
 } from "tower-poc-protocols";
 import { type RawData, type WebSocket, WebSocketServer } from "ws";
+import { type CommandExecutor, createCommandExecutor } from "./executor.ts";
 import { SessionStateError, type TowerSession } from "./session.ts";
 import { requestPath, serveStatic } from "./static.ts";
 
@@ -24,7 +25,7 @@ export interface TowerServerOptions {
   /** Folder holding the web part's static export. */
   webRoot: string;
   serverVersion: string;
-  /** The tower connection the lifecycle messages act on. */
+  /** The tower connection the lifecycle messages and commands act on. */
   session: TowerSession;
   /**
    * Extra origins a `/ws` connection may come from, besides the service's own (D20). Only the
@@ -121,6 +122,7 @@ const handleMessage = (
   clientId: string,
   data: RawData,
   options: TowerServerOptions,
+  executor: CommandExecutor,
 ) => {
   const { serverVersion, session } = options;
   let json: unknown;
@@ -165,9 +167,16 @@ const handleMessage = (
       return runAction(socket, session.disconnect(), id);
     case "calibrate":
       return runAction(socket, session.calibrate(), id);
+    case "command":
+      // Its outcome, rejections included, reaches every client as `command.lifecycle`.
+      return void executor.submit({
+        commandId: message.data.id,
+        clientId,
+        capabilityId: message.data.payload.capabilityId,
+        params: message.data.payload.params,
+      });
     default:
-      // Valid, and nothing handles it yet. In particular a `command` goes nowhere until the
-      // executor exists (M2 step 5).
+      // Valid, and nothing handles it yet (`restoreState`, M2 step 6).
       return sendError(socket, "not-implemented", `"${type}" is not handled yet.`, id);
   }
 };
@@ -179,22 +188,31 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
   });
 
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
+  const broadcast = (message: ServerMessage) => {
+    for (const client of wss.clients) {
+      if (client.readyState === client.OPEN) send(client, message);
+    }
+  };
+  // Every client sees every command's lifecycle, whoever sent it (D7). The client hub of step 7
+  // takes this over.
+  const executor = createCommandExecutor({
+    session: options.session,
+    onLifecycle: (payload) =>
+      broadcast({ v: PROTOCOL_VERSION, type: "command.lifecycle", payload }),
+  });
   wss.on("connection", (socket) => {
     const clientId = randomUUID();
     // ws reports protocol violations (bad frames, invalid UTF-8) as `error`. Unhandled, that would
     // take the whole service down, so drop just this client.
     socket.on("error", () => socket.terminate());
-    socket.on("message", (data) => handleMessage(socket, clientId, data, options));
+    socket.on("message", (data) => handleMessage(socket, clientId, data, options, executor));
   });
 
   // Every client sees every change of connection and calibration state, whoever caused it (D7).
   // The client hub of step 7 takes this over.
-  const stopBroadcast = options.session.subscribe(() => {
-    const message = connectionMessage(options.session);
-    for (const client of wss.clients) {
-      if (client.readyState === client.OPEN) send(client, message);
-    }
-  });
+  const stopBroadcast = options.session.subscribe(() =>
+    broadcast(connectionMessage(options.session)),
+  );
 
   http.on("upgrade", (req, socket, head) => {
     if (requestPath(req.url) !== WS_PATH) {

@@ -1,4 +1,5 @@
 export {
+  type CommandableId,
   type CommandIssue,
   type CommandLifecyclePayload,
   type CommandValidation,
@@ -7,6 +8,7 @@ export {
   END_STAGES,
   type LifecycleStage,
   lifecycleStageSchema,
+  type ValidatedCommand,
   validateCommand,
 } from "./command.ts";
 export {
@@ -56,6 +58,7 @@ export {
   RANDOM_ROTATE_DRUMS,
   RANDOM_ROTATE_MODE_COUNT,
   randomRotateDrumsSchema,
+  SILENT_LIGHT_SEQUENCES,
   SOUND_COUNT,
   sealSchema,
   soundIndexSchema,

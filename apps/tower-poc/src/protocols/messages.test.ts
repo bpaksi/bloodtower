@@ -205,8 +205,7 @@ describe("validateCommand", () => {
   it("returns the parsed params for a commandable capability", () => {
     expect(validateCommand("sound.play", { soundIndex: 1 })).toEqual({
       ok: true,
-      capabilityId: "sound.play",
-      params: { soundIndex: 1 },
+      command: { capabilityId: "sound.play", params: { soundIndex: 1 } },
     });
   });
 

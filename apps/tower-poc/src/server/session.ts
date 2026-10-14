@@ -71,6 +71,13 @@ export interface TowerSession {
   calibrate: () => Promise<void>;
   /** The library object of the current connection, from the moment it is constructed. */
   tower: () => UltimateDarkTower | undefined;
+  /** How many packets have been written to the tower, over every connection. */
+  writes: () => number;
+  /**
+   * Calls `listener` whenever the current connection's tower reports its state. Library-side
+   * changes (a command it is about to send) are not reports. Returns a function that stops it.
+   */
+  onTowerReport: (listener: () => void) => () => void;
   events: AdapterEventList;
   /** Ends any connection and stops reporting. For shutting the service down. */
   close: () => Promise<void>;
@@ -131,6 +138,12 @@ const CAN_CONNECT: readonly ConnectionState[] = ["disconnected", "error", "bluet
 export const createTowerSession = (options: TowerSessionOptions): TowerSession => {
   const events = options.events ?? createAdapterEventList();
   const listeners = new Set<(status: ConnectionPayload) => void>();
+  const reportListeners = new Set<() => void>();
+  let writes = 0;
+  const emit: typeof events.emit = (event) => {
+    if (event.kind === "tx") writes += 1;
+    events.emit(event);
+  };
   let status = NOT_CONNECTED;
   let current: UltimateDarkTower | undefined;
   // Goes up whenever a connection ends or is given up. A callback or a connect that belongs to an
@@ -204,7 +217,7 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
 
   const build = (owner: number) => {
     const tower = new UltimateDarkTower({
-      adapter: instrumentAdapter(options.createAdapter(), events.emit),
+      adapter: instrumentAdapter(options.createAdapter(), emit),
     });
     // D21: the library would otherwise re-send a failed write up to five times.
     tower.retrySendCommandMax = 0;
@@ -214,6 +227,12 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
     tower.onTowerDisconnect = () => lost(owner);
     tower.onCalibrationComplete = () => {
       if (owner === generation && status.state === "connected") connected("calibrated");
+    };
+    // "tower response" is the library's name for a state the tower sent, as opposed to one it
+    // is about to send.
+    tower.onTowerStateUpdate = (_next, _previous, source) => {
+      if (owner !== generation || source !== "tower response") return;
+      for (const listener of reportListeners) listener();
     };
     return tower;
   };
@@ -332,6 +351,11 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
     disconnect,
     calibrate,
     tower: () => current,
+    writes: () => writes,
+    onTowerReport: (listener) => {
+      reportListeners.add(listener);
+      return () => reportListeners.delete(listener);
+    },
     events,
     close: async () => {
       if (closed) return;
@@ -341,6 +365,7 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
       status = NOT_CONNECTED;
       closed = true;
       listeners.clear();
+      reportListeners.clear();
       if (tower) {
         try {
           if (tower.isConnected) await tower.disconnect();

@@ -159,7 +159,7 @@ Public library members that have no entry, and why.
 | --- | --- | --- | --- |
 | `sendTowerCommandDirect` | raw-bytes | Sends a caller-built packet. No message type may carry raw bytes to the tower (D12). | GAP-LIB-001 |
 | `sendTowerCommand` | raw-bytes | Sends a caller-built packet. No message type may carry raw bytes to the tower (D12). | GAP-LIB-002 |
-| `sendTowerState` | raw-bytes | Writes a whole caller-built tower state, which can set anything a packet can, with no per-field validation (D12). | GAP-LIB-003 |
+| `sendTowerState` | raw-bytes | Writes a whole caller-built tower state, which can set anything a packet can, with no per-field validation (D12). No client reaches it. The executor calls it itself for the silent light sequences, on the library's own current state with only the sequence changed (D23). | GAP-LIB-003 |
 | `commandToPacketString` | helper | Formats a packet as hex for debugging. It takes a packet, and the timeline has its own hex view. | none |
 | `milliVoltsToPercentage` | helper | Converts millivolts to a percent string. The battery.level entry already carries the percent. | none |
 | `cleanup` | service-internal | Final and irreversible: the tower object cannot connect again. The service calls it on shutdown only. | none |
