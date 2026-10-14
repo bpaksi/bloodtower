@@ -5,7 +5,7 @@
 | Status | M1 step 2, 2026-10-14. Docs only. This file is the build contract for the app once the step merges. Bob's gates stay G1 (playtest, no tower), G2 (SC-5) and G3 (sign-off). |
 | Source intent | [docs/PRD.md](docs/PRD.md) rev 4 (R4-1..R4-3, 2026-10-14 16:00 ET), which keeps rev 3 rulings R3-1..R3-12. G0 (Bob, 2026-10-14 3:54 PM ET) made that PRD the intent. |
 | Plan | [plans/M1-funeral-poc.md](plans/M1-funeral-poc.md) |
-| Spec version | 1 (2026-10-14) |
+| Spec version | 1.1 (2026-10-14). 1.1 applies the round-1 review: cue inheritance, end lines, investigation moments, host channel, determinism clock, and the decision-log rows those needed. |
 | Scene | `n2-burgomasters-funeral` (Dracula pack, night 2, the K2 Sanctuary) |
 
 This spec carries PRD rev 4 forward for the M1 build. **If this spec and the PRD conflict, this spec wins, and the conflict is a row in §2.** The plan said the PRD wins over the plan until this spec exists. Step 2 touches only this file, so a conflict with the plan is recorded here and the plan file is not edited in this step.
@@ -40,16 +40,22 @@ Success criteria, all required:
 | D4 | Bob deferred plan step 3 (the cue-sheet contract edit) to Phase 2. M1 does not edit `assets/cues/cue-sheet.json`. Steps 8 and 10 read that file in place and do not wait on a step 3 PR. Phase 2 may add an empty `tower` slot and a stricter schema; it does not rename cue ids (R4-3). | Plan step 3 would reshape the sheet in B1: one entry per cue with a screen half, a fallback-audio asset id, an empty tower slot, and E16 bed and accent ids. | Bob, in the step 2 brief (2026-10-14). PRD-40 still holds: the existing file is the contract, and the ids already in it stay. |
 | D5 | Assets are read in place from `apps/burgomaster-funeral-poc/assets/`. Nothing is copied into `src/` or into `packages/` for M1. | G0: `assets/` stays exactly where it is. | Same. |
 | D6 | Portraits and stills are first-pass art. No code, test, layout or readiness check depends on their exact pixel size, crop or image contents. A file present at the manifest path is enough. The sizes named in `assets/README.md` (1920×1080, iPad stills) are an art target for a later pass, not a runtime contract. | PRD §10 still said stills were not started. The files are now in `assets/portraits/` and `assets/stills/`. | Bob, step 2 brief. First-pass art will be replaced in place. |
-| D7 | The app's script copy does not yet contain the five new moments. They are synced into `assets/script/n2-burgomasters-funeral.md` and `assets/manifest.json` before batch B2. This step does not copy them. Placeholder voice and render paths are allowed after the sync (PRD-26). | The plan said step 10's readiness check reports them until voice, renders and entries exist. | Bob, step 2 brief: the sync happens before B2, so B2 starts with the entries present. The words already exist in the Loremaster script (see §8). |
-| D8 | Ports and the SQLite folder come from `.wt.json` in a worktree (dev, e2e, `dataDir`). With no `.wt.json`, dev is **4767**, e2e is **4768**, and SQLite files live under `apps/burgomaster-funeral-poc/data/` (gitignored). The app never binds 4747 or 4748. | Not in the PRD. The plan set these so the app does not collide with tower-poc. | G0 layout, plan. |
+| D7 | The app's script copy does not yet contain the five new moments. Bob syncs them into `assets/script/n2-burgomasters-funeral.md` and `assets/manifest.json` before batch B2. No M1 step's `Touches` includes those files, so this spec does not assign the copy to step 3 or step 10. Step 10 fails closed if an id is missing. Placeholder voice and render paths are allowed after the sync (PRD-26). This step does not copy them. | The plan said step 10's readiness check reports them until voice, renders and entries exist. | Bob, step 2 brief: the sync happens before B2. The words already exist in the Loremaster script at the repo root (see §8). |
+| D8 | Ports and the SQLite folder come from `.wt.json` in a worktree (dev, e2e, `dataDir`). With no `.wt.json`, dev is **4767**, e2e is **4768**, and SQLite files live under `apps/burgomaster-funeral-poc/data/` (gitignored). The app never binds 4747 or 4748. A worktree's `.wt.json` wins over these defaults. The known limit: worktree offset 2 in `scripts/wt.mjs` is also 4767/4768, so the main checkout and that one worktree must not run at the same time. | Not in the PRD. The plan set 4767/4768 so the app does not collide with tower-poc. | G0 layout, plan. The offset clash is recorded here rather than changing the plan's ports. |
 | D9 | R3-1..R3-12 and R4-1..R4-3 are binding. Where the asset script still says "Gamewright to rule", the PRD ruling wins. | PRD rev 3 and rev 4. | The build follows the rulings, not the proposal notes in the script. |
 | D10 | **AT-25's binding text is the replacement** in the PRD's "Decisions after review": disconnecting a hunter's only connected holder pauses play, and reconnecting or a new holder resumes it. The §11 sentence that says killing tomas's only holder does **not** pause is stale. | Both sentences are in the PRD. Rev 3 says later rulings win, and the decisions list says AT-25 is replaced. | R3-2 and the replacement agree. The §11 sentence does not. |
 | D11 | Forewarned sit-out does not change the locked presence set and does not select `~no-<hunter>` variants. Sit-out is a fight flag: the hunter is marked sitting out on the battle status, is still present, and still counts in the foe base. | The asset script's follow-the-mourner note says the sitter is "absent from `.04`–`.07`" and that `~no-<hunter>` variants apply. R3-8 says sit out the fight. PRD-36 locks presence at scene start. | R3-8 plus PRD-36. The script note was a proposal ("Gamewright to rule"). |
 | D12 | The investigation seal cue (`seal-sequence`) fires when the host taps Continue, and only if a present hunter locked `follow-the-mourner`. It does not fire at the moment of the last lock. | R3-6 puts the seal sequence after Continue. The cue sheet's `trigger` string and the script say "once all picks are locked". | R3-6 is the later ruling. The sheet is not edited in M1 (D4), so the player follows this row, not the stale trigger string. |
-| D13 | E16 in M1 is Dashboard behaviour (PRD-39), not new rows in the cue sheet. Step 3 would have added bed and accent ids; that edit is Phase 2 (D4). Step 8 chooses the Mac audio ids from entries already in `assets/manifest.json` and records those ids in this spec in the step 8 commit. The screen pulse does not wait on that choice. | Plan step 3 listed E16 ids as cue-sheet data. | The behaviour is in M1. The file edit is not. |
-| D14 | E16 suppression windows are speech, choices and pauses. Inside a window the bed and accents are suppressed (they do not play over the foreground, and no new accent starts). A suppression window is not a quiet gap. Outside windows, the bed is on (screen pulse + Mac audio) and accents fire on the seeded 20–60 s draw. A scene cue overrides the bed and accents, then the bed returns. AT-26's ≤10 s check ignores pauses, speech and choices, because those are the suppression windows PRD-39 names. The screen pulse is on whenever the bed is on, so the play view is never an idle still outside a window. | PRD-39 says both "suppressed during speech, choices and pauses" and "quiet gap ≤10 s". AT-26 names pauses only. | A long lid choice has to be allowed to suppress the bed without failing AT-26. Bob can override this row. |
-| D15 | The +2 cap counts trait pips only: Ready Stake, carried holy water, Consecrated Ground. Mother-bars-the-window is a foe-count change (−1, min 1), not a pip. Forewarned is a revealed card, not a pip, and does not consume the cap. | PRD lists the cap and the five advantages in one block, without saying which of them are pips. | The battle status has to show a number. This is the reading of "advantages by trait" (R3-1) against "reveals the first battle card" (Forewarned) and "−1 foe" (mother). Bob can override this row. |
+| D13 | E16 in M1 is Dashboard behaviour (PRD-39), not new rows in the cue sheet. Step 3 would have added bed and accent ids; that edit is Phase 2 (D4). The manifest has no E16 bed or accent id. M1 does not borrow a scene track to fill the gap, and step 8 does not edit this spec (that file is outside step 8's `Touches`). The screen pulse is the bed. Mac bed and accent audio are unavailable until an asset change adds ids; the log says `audio: unavailable`, never a silent success. | Plan step 3 listed E16 ids as cue-sheet data, and an earlier draft of this spec told step 8 to write the ids back here. | The pulse is specified. Inventing an audio id, or sending step 8 outside its `Touches`, is not. |
+| D14 | E16 suppression windows are speech, choices and an R3-2 pause (a hunter with no connected holder). Inside a window the bed and accents are suppressed. A suppression window is not a quiet gap. Outside windows the screen pulse is on. Accents use a virtual clock (D22), not the wall clock. AT-26 ignores those windows. | PRD-39 says both "suppressed during speech, choices and pauses" and "quiet gap ≤10 s". AT-26 names pauses only. | A long lid choice has to suppress the bed without failing AT-26, and without depending on how long the humans wait. |
+| D15 | The +2 cap counts trait pips only. Ready Stake is +1 Undead for the fight. Consecrated Ground is +1 Wild for each present hunter in the **first battle round only** (the status says so; the app does not simulate rounds). Holy water grants +1 Undead only when the host spends it for this fight, before Won / Lost: it is removed at once and the pip counts toward the cap. Unspent holy water grants no pip and can still be lost as an item or used as a price. Mother-bars-the-window is −1 foe for the whole fight, not a pip. Forewarned is a revealed card, not a pip. | PRD: Consecrated Ground is "round 1 only". Holy water is "spent for +1 Undead or used as a price". R3-7 also says holy water "carried as +1 Undead" counts, and holy water spent as a price does not. | The battle status has to show a number and a round limit. Spending is the host's tap, same as the other table choices (OQ-4). |
 | D16 | The POC investigation has no 60 s pick timer and no auto-pick. The round waits until every present hunter has locked a unique action. | Engine rule E17 has a 60 s timer and an auto-pick. R3-6 and plan step 5 do not. R3-6's "no timer" is attached to the table-talk Continue. | Auto-pick would choose a finding the player did not take. M1 does not add that. Bob can override this row. |
+| D17 | `dim-all` has a screen half and no `fallback_sfx`. That matches the sheet and PRD §7, which give this cue the fade and give the heartbeat to the cue beside it. Readiness passes `dim-all` on a non-empty `fallback` string. Every cue that has `fallback_sfx` must resolve that id in the manifest, or readiness fails. | PRD-12 says every cue has a screen half and fallback audio, and a missing fallback fails readiness. Plan step 10 says the same. The sheet has no audio id for `dim-all`, and step 3 (which would have added one) is deferred (D4). | M1 does not invent a file. It does fail closed when a named audio id is missing. |
+| D18 | `end.private.<hunter>` is delivered to every current holder of that hunter, present or absent. It does not use the present-only fan-out. It is still refused on the Dashboard. Scene `.private.` moments (`.09`, investigation findings) stay present-only. | R3-9 is one end line per held hunter. The router rule is present-only. All 4 hunters are held, and the test default has two away. | Without the exemption, absent hunters lose the end line R3-9 requires. |
+| D19 | A finding stays on the picker's holders for the whole scene. It is not broadcast when the last hunter locks. Until all have locked, other devices are not shown which card was taken; a duplicate lock is rejected with "already taken" and no hunter name. After all have locked, cards may show as taken (R3-6: picks are private only until then). Finding text stays put. The Dashboard shows "has chosen" per hunter and never the action, the finding, or a `.private.` id. Item gains and the mother-bars modifier apply at Continue, so the story-items zone does not change during the private window. The battle status later shows trait, round limit and the Forewarned card, not the finding sentence (R3-1). | An earlier sentence said findings stay private only until all lock. AT-27 has no time limit. The script's share line is "share what you found, or keep it". | Grey-out before the last lock would tell the other hunter which card was picked. |
+| D20 | Targets are `dashboard`, `ipad:<hunter>` and `ipad:all`. `ipad:all` goes to every connected device and never to the Dashboard. It is for pick cards, portraits and `.investigate.share`. A `.private.` moment is never sent as `ipad:all`. | §3 named only `dashboard` and `ipad:<hunter>`. The manifest has `target: "ipad:all"` on the pick cards, the share card and its line, and the four hunter portraits. | Step 1 freezes the target enum. Leaving `ipad:all` out makes the picker unrepresentable. |
+| D21 | The Dashboard role is accepted only when the TCP peer is loopback (`127.0.0.1` or `::1`). Any other connection is a device, even if it claims the Dashboard. Host actions are accepted only on that Dashboard connection. A device socket that sends one is rejected and logged `host_action_rejected`. One loopback connection holds host rights; a second loopback client's host actions are rejected `host_busy` until the first disconnects. Two actions on the same decision: the first applies, the second is rejected `already_resolved` and logged. Opening the Dashboard on the Mac is enough to be host. A phone on the LAN is not. | The PRD says the Dashboard is a browser on the Mac and does not name a token. It also does not say a device may send Next or reassign. | A LAN client must not be trusted with host actions. This is the rule that enforces that. |
+| D22 | E16 accent timing uses a virtual clock driven by the seed, not the wall clock. The seed draws delays of 20–60 s. The clock advances only while the bed is allowed to play. Speech, a choice, an R3-2 pause and a scene-cue override do not advance it, so a long choice adds no accents and does not move later ones. An accent fires when the virtual clock reaches the next delay, and is logged not suppressed. Wall-clock waits do not appear in the accent rows. Two runs with the same seed, party, choices and fight results, and the same sequence of moments and pauses, produce the same accent payloads (AT-15). | PRD-39's 20–60 s is wall-clock language. AT-15 requires identical payloads apart from times and ids. Human hesitation would otherwise change `suppressed` and the row count. | Determinism has to be a function of the seed and the inputs, not of how long the table talks. |
 
 ---
 
@@ -83,7 +89,7 @@ Conventions, matching tower-poc and the repo:
 - `pnpm dev` runs the server and `next dev`. `pnpm build` builds the web UI. `pnpm start` serves that build and `/ws` from the server on the dev port (D8). `pnpm e2e` runs Playwright on the e2e port.
 - Step 1 owns the package files, the lockfile and the protocols module. Later steps add modules only. Changing `src/protocols/types.ts` or `messages.ts` after step 1 is a plan deviation.
 
-`src/protocols` must be able to express: hunter ids `agnes` \| `tomas` \| `wren` \| `emeric`; per-hunter state (corruption, holders, location, present, carried items); story items `stake`, `holy-water`, `host`, `holy-symbol`; moment ids and targets `dashboard` \| `ipad:<hunter>`; cue ids; the §10 event types and payloads; the WS messages, validated with Zod on both sides. No message type carries raw bytes. M1 has no `command` message and no tower payload. Step 1 chooses the field names. This spec does not.
+`src/protocols` must be able to express: hunter ids `agnes` \| `tomas` \| `wren` \| `emeric`; per-hunter state (corruption, holders, location, present, carried items); story items `stake`, `holy-water`, `host`, `holy-symbol`; moment ids and targets `dashboard` \| `ipad:<hunter>` \| `ipad:all` (D20); cue ids; the §10 event types and payloads; the WS messages, validated with Zod on both sides. No message type carries raw bytes. M1 has no `command` message and no tower payload. Step 1 chooses the field names. This spec does not.
 
 Unknown values are shown as unavailable, never as zero. The event log stores unknowns as null (PRD-23).
 
@@ -109,7 +115,9 @@ src/protocols : Zod schemas + TS types shared by server and web
 
 There is no tower process, no Bluetooth, and no import of `apps/tower-poc` (D2). The skull drop is a table step into the unpowered tower: the Dashboard asks, then waits for Done. Nothing physical runs automatically, and nothing is retried.
 
-Routing: the server sends every moment to one target, `dashboard` or `ipad:<hunter>`. `ipad:<hunter>` fans out to every device currently holding that hunter, and only while that hunter is present. The Dashboard channel never carries a payload whose moment id contains `.private.` (including `end.private.<hunter>`). The server refuses that payload. The UI does not get a second copy to filter.
+Routing: the server sends every moment to one target, `dashboard`, `ipad:<hunter>`, or `ipad:all` (D20). `ipad:<hunter>` fans out to every device currently holding that hunter, and only while that hunter is present, except `end.private.<hunter>`, which fans out to every current holder whether or not that hunter was present (D18). `ipad:all` fans out to every connected device and never to the Dashboard. The Dashboard channel never carries a payload whose moment id contains `.private.` (including `end.private.<hunter>`), nor an investigation action, a finding, a Forewarned choice, or a pending private choice (D19). The server refuses that payload. The UI does not get a second copy to filter.
+
+Host actions are accepted only from the loopback Dashboard connection (D21). The list is: Next, presence, party-kit confirm, investigation Continue, lid choice, holy-water spend, Won, Lost, victim, lost item, skull Done, reassign, mid-scene hold confirm, the `.09` override, End for now, Concede.
 
 ---
 
@@ -128,7 +136,7 @@ Routing: the server sends every moment to one target, `dashboard` or `ipad:<hunt
 
 A 1981 bookend slot exists and stays silent (out of scope). No key is awarded (`key_eligible=false`, nothing shown).
 
-**Pause (R3-2, D10).** If any hunter has no connected holder, play pauses. No moment advances, no cue fires, choices lock. The Dashboard says "Waiting for someone to hold <Name>" using the hunter's display name. The host cannot force-continue. Resume is a Dashboard reassignment to any connected device, or the holder rejoining. Pause and resume are logged. A device whose hunters are also held by another connected device does not block play; its private moment waits until the scene ends, then is logged undelivered.
+**Pause (R3-2, D10).** If any hunter has no connected holder, play pauses. No moment advances, no cue fires, choices lock. The Dashboard says "Waiting for someone to hold <Name>" using the hunter's display name. The host cannot force-continue. Play resumes when any of these happens: the host reassigns that hunter to a connected device; the holder rejoins; a connected device takes the hunter (a mid-scene take still needs the host's confirm). Pause and resume are logged. A device whose hunters are also held by another connected device does not block play; its private moment waits until the scene ends, then is logged `private_undelivered`. The host may override the `.09` wait; that logs `private_wait_overridden`.
 
 ---
 
@@ -155,21 +163,21 @@ Either way Dorka rises and the `.06` line plays. The choice is stored.
 
 **Foe count.** Base = number of hunters present (OQ-1). Then nailed −1 if that was the choice. Then −1 if a present hunter locked question-mother (mother bars the window). Minimum 1. Sit-out does not change the base (D11). The mother modifier is a foe-count change, not a trait pip, so it sits outside the +2 cap (D15).
 
-**Fight (R3-1).** No in-app battle and no battle simulation. Players use the physical cards at the table. The Dashboard battle status shows: present hunters (sitters marked sitting out); foe count after modifiers (min 1); each hunter's advantages by trait with the +2 cap applied; the Forewarned card face up if active (the host enters the physical card). Buttons: Won / Lost. The result chooses `.07` or `.07~fight-lost`.
+**Fight (R3-1).** No in-app battle and no battle simulation. Players use the physical cards at the table. The Dashboard battle status shows: present hunters (sitters marked sitting out); foe count after modifiers (min 1); each hunter's advantages by trait with the +2 cap applied, Consecrated Ground marked first round only; the Forewarned card face up if active (the host enters the physical card). It does not show the finding sentence or the action name (D19). Buttons: holy-water spend, Won, Lost. The result chooses `.07` or `.07~fight-lost` (and the `~no-wren` variant when wren is absent). `skull-drop` fires on that fight-lost moment, including `.07~fight-lost~no-wren`, when §6 says a physical drop is due.
 
-**Investigation (E17, R3-6, D16), after `.03` and before `.lid-choice`.** One pick per present hunter. Absent hunters do not pick. No two hunters pick the same action: the first lock wins, and taken cards grey out. A hunter held by several devices shows the picker on each; the first lock from any of them wins (same first-answer rule as OQ-14). No pick timer and no auto-pick. Picks and findings stay on the picking hunter's holders until all present hunters have locked (AT-27). The Dashboard shows only that a hunter has chosen, never the finding. The host taps Continue (no timer). Then `seal-sequence` fires if anyone locked `follow-the-mourner` (D12).
+**Investigation (E17, R3-6, D16, D19), after `.03` and before `.lid-choice`.** One pick per present hunter. Absent hunters do not pick. No two hunters pick the same action: the first lock wins. Until all have locked, other devices are not shown which card was taken; a duplicate is rejected with "already taken" and no hunter name (D19). A hunter held by several devices shows the picker on each; the first lock from any of them wins (same first-answer rule as OQ-14). No pick timer and no auto-pick. The finding is delivered at lock to that hunter's holders only, and it stays there for the whole scene (AT-27). The Dashboard shows only that a hunter has chosen. When all have locked, `.investigate.share` plays on `ipad:all` and the Dashboard shows "Share what you found" with no finding text. The host taps Continue (no timer). Item gains and mother-bars apply at Continue. Then, if anyone locked `follow-the-mourner`, the Dashboard plays `.investigate.follow-the-mourner.cue` and `seal-sequence` together (D12). Forewarned's corruption-or-sit-out choice is offered on the picker's devices at lock, before Continue.
 
 | Action | Finding | Mechanical result |
 |---|---|---|
 | `examine-body` | two bites, private | Ready Stake: +1 Undead to the picker |
 | `question-mother` | singing, private | Sets `mother-warned`. Mother bars the window: −1 foe |
 | `anton-coat` | holy water, private | The picker gains 1 holy water. Clue text mentions the lady's rooms. This does not set `dracula.lead.ladys-rooms` |
-| `pray-over-coffins` | consecrated, private | Consecrated Ground: +1 Wild for each present hunter, this fight |
+| `pray-over-coffins` | consecrated, private | Consecrated Ground: +1 Wild for each present hunter, first battle round only (D15) |
 | `follow-the-mourner` | the servant, private | Forewarned, below. Risky cue: `seal-sequence` after Continue |
 
-Story advantages are capped at +2 pips per hunter per fight (D15). Ready Stake, carried holy water and Consecrated Ground are pips. Forewarned is a revealed card, not a pip, and does not consume the cap. Holy water spent as a price is removed at once, before any later cost is picked, and then gives no advantage (R3-7). Holy water still carried counts toward the cap.
+Story advantages are capped at +2 pips per hunter per fight (D15). Ready Stake and a holy-water spend are pips for the fight. Consecrated Ground is a pip for the first battle round only; the battle status says "first round only" and does not apply it as a whole-fight bonus. Forewarned is a revealed card, not a pip, and does not consume the cap. Before Won / Lost the host may spend a present hunter's holy water for +1 Undead; the item is removed at once and the pip counts. Unspent holy water grants no pip. Holy water spent as a price is removed at once, before any later cost is picked, and gives no advantage (R3-7).
 
-**Forewarned (R3-8, D11).** The picker's holders choose on the device: `corruption` (+1) or `sit-out`. Shared hunter: the first answer locks, and the others see it. At 2 corruption the choice is forced to `sit-out` (it cannot cause the third corruption). Log `n2-burgomasters-funeral.forewarned.choice` with `hunter`, `choice` (`corruption` \| `sit-out`) and `forced`.
+**Forewarned (R3-8, D11).** Offered on the picker's devices when that pick locks, before Continue. The choice is `corruption` (+1) or `sit-out`. Shared hunter: the first answer locks, and the others see it. At 2 corruption the choice is forced to `sit-out` (it cannot cause the third corruption). Log `n2-burgomasters-funeral.forewarned.choice` with `hunter`, `choice` (`corruption` \| `sit-out`) and `forced`. If every present hunter is sitting out, the battle status shows no active fighter and at least 1 foe, and the host still taps Won or Lost. Nothing is auto-lost.
 
 **Item loss.** Each stake is one item (R3-7). The party chooses at the table; the host taps, from items carried by present hunters (OQ-4). Device voting is out of scope. If no present hunter carries an item, nothing is lost and the event is `cost_unpayable`.
 
@@ -192,8 +200,12 @@ Ids use the prefix `n2-burgomasters-funeral`. Variants replace the base of the s
 | `.01` | always | dashboard |
 | `.02` / `.02~no-wren` | wren present / absent | dashboard |
 | `.03` / `.03~no-emeric` | emeric present / absent | dashboard |
-| investigate round | after `.03`, present hunters only | picker on `ipad:<hunter>`; status on dashboard |
-| `.lid-choice` | after the investigation Continue | dashboard |
+| `.investigate` | after `.03` | dashboard. Fires `heartbeat` |
+| `.investigate.<action>` | the five pick cards, while the round is open | `ipad:all` (D20). Not a `.private.` moment. The picker is enabled only for a present hunter that device holds |
+| `.investigate.<action>.<finding>.private.<hunter>` | that present hunter locked the action | `ipad:<hunter>`, that hunter's holders only, for the whole scene (D19) |
+| `.investigate.share` | all present hunters have locked, before Continue | `ipad:all`. Narrator line only. Dashboard shows the neutral share prompt, not this payload |
+| `.investigate.follow-the-mourner.cue` | after Continue, and only if the risky action was locked | dashboard, together with `seal-sequence` (D12) |
+| `.lid-choice` | after that cue, or after Continue when the risky action was not locked | dashboard |
 | `.lid-choice~nailed` / `~nailed~no-wren` | nailed, wren present / absent | dashboard |
 | `.lid-choice~watched` / `~watched~no-agnes` | watched, agnes present / absent | dashboard |
 | `.04` / `.04~holy-symbol` | no holy symbol / party holds it | dashboard |
@@ -204,16 +216,16 @@ Ids use the prefix `n2-burgomasters-funeral`. Variants replace the base of the s
 | `.08` / `.08~no-agnes` | agnes present / absent. `.08` reuses the `.07` still (R3-11); the manifest already points there | dashboard |
 | `.09.private.<hunter>` | that hunter present | `ipad:<hunter>`, every holder |
 | `.10` | always | dashboard |
-| `end.private.<hunter>` | summary, for each held hunter | `ipad:<hunter>` (R3-9) |
+| `end.private.<hunter>` | summary, for each held hunter, present or absent (D18) | `ipad:<hunter>`, every current holder. Refused on the Dashboard |
 
 **Cues (R4-2, D3, D4).** M1 fires cues from the moment with no per-cue confirm. Each one plays its screen half on the Dashboard. Where the sheet has `fallback_sfx`, that Mac audio plays too, every time. There is no tower, so nothing is suppressed because a tower sound worked (R3-3's suppression is Phase 2). No cue waits for a sound to end. Music, ambience and fallback audio come from the Mac only (PRD-13). Colour is not used.
 
-The player reads `assets/cues/cue-sheet.json` and does not write it. Which moments fire `heartbeat` and `dim-all` comes from each entry's `moments` array (that list includes the investigation still for `heartbeat`, which the PRD §7 table does not repeat). `seal-sequence` and `skull-drop` also obey §6: the seal only after Continue when the risky action was locked (D12), the skull only when a physical drop is actually due.
+The player reads `assets/cues/cue-sheet.json` and does not write it. A cue fires on every moment id in its `moments` array. A `~no-<hunter>` variant inherits the cues listed on its base moment when the sheet does not name that variant. So `skull-drop`, listed only on `.07~fight-lost`, also fires on `.07~fight-lost~no-wren`. `heartbeat` on `.investigate` comes from the sheet (the PRD §7 table does not repeat it). `seal-sequence` and `skull-drop` also obey §6: the seal only after Continue when the risky action was locked (D12), the skull only when a physical drop is actually due.
 
 | Cue id | Screen half (the entry's `fallback` text) | Mac audio |
 |---|---|---|
 | `heartbeat` | screen pulse on the vignette | `fallback_sfx` `n2-burgomasters-funeral.sfx.heartbeat-fallback` |
-| `dim-all` | screen fades to near-black for 1.5 s | none on the entry. §7 of the PRD gives this cue no separate sound; the same moments also fire `heartbeat`. M1 does not invent an audio file. |
+| `dim-all` | screen fades to near-black for 1.5 s | none on the entry (D17). The same moments also fire `heartbeat`, which carries the audio. M1 does not invent a file. |
 | `seal-sequence` | screen seal flicker | `n2-burgomasters-funeral.sfx.seal-flicker` |
 | `skull-drop` | Dashboard prompt, waits for Done. Not a tower command | `n2-burgomasters-funeral.sfx.skull-drop-sting` |
 
@@ -221,9 +233,9 @@ The player reads `assets/cues/cue-sheet.json` and does not write it. Which momen
 
 Every fired cue logs `cue_fired` with result `fallback` and reason `no_tower` (PRD-24). Status on the sheet today is `Library`; M1 still logs `fallback` / `no_tower`, not `sent`.
 
-**Readiness and cues (step 10, with D4).** A cue id the scene fires must name an entry in the sheet whose `fallback` string is non-empty. `dim-all` passes. An id that is missing, or whose `fallback` is empty, fails readiness (AT-17). M1 does not fail `dim-all` for a missing `fallback_sfx`, and it does not require E16 rows in the sheet.
+**Readiness and cues (step 10, D4, D17).** A cue id the scene fires must name an entry whose `fallback` string is non-empty. `dim-all` passes on that rule. If `fallback_sfx` is present, that id must resolve in the manifest; a missing or unknown id fails readiness (AT-17). M1 does not require E16 rows in the sheet.
 
-**E16 (PRD-39, D13, D14).** From party-kit confirm through the night card. Outside a suppression window the bed is on (screen pulse + Mac audio) and seeded one-shot accents fire every 20–60 s. Speech, choices and pauses suppress the bed and the accents. Scene cues override them, then the bed returns. Accent timing and choice come from the game seed and are logged (`ambient_bed`, `ambient_accent`), including suppressed draws. A suppression window is not a quiet gap. Outside those windows the gap is ≤10 s (AT-26). Step 8 writes the chosen manifest audio ids into this spec.
+**E16 (PRD-39, D13, D14, D22).** From party-kit confirm through the night card. Outside a suppression window the screen pulse is on. Speech, choices and an R3-2 pause suppress the bed and the accents. Scene cues override them, then the bed returns. Accent delays are a seeded 20–60 s sequence on the virtual clock: the clock advances only while the bed is allowed to play, so a long choice or pause adds no rows and does not move later accents. Each fire is logged `ambient_accent` with the seed draw. Mac audio is `unavailable` until an asset id exists (D13); the pulse still runs, and a missing audio id is not logged as played. A suppression window is not a quiet gap. Outside those windows the screen gap is ≤10 s (AT-26).
 
 ---
 
@@ -235,7 +247,7 @@ Folders already there: `script/`, `stills/`, `clips/`, `cards/`, `portraits/`, `
 
 **First-pass art (D6).** Portraits and stills may change size, crop and contents later. Layout uses the file as an image in its frame. Tests identify a moment by its id and its manifest path, not by bitmap size or pixels.
 
-**Five moments not in the app copy yet (D7).** They are written in `assets/stories/dracula/scripts/n2-burgomasters-funeral.md` and absent from both `apps/burgomaster-funeral-poc/assets/script/n2-burgomasters-funeral.md` and `assets/manifest.json`:
+**Five moments not in the app copy yet (D7).** They are written in the Loremaster script at the repo root, `assets/stories/dracula/scripts/n2-burgomasters-funeral.md` (there is no `apps/burgomaster-funeral-poc/assets/stories/`). They are absent from both `apps/burgomaster-funeral-poc/assets/script/n2-burgomasters-funeral.md` and `apps/burgomaster-funeral-poc/assets/manifest.json`:
 
 - `n2-burgomasters-funeral.07~fight-lost~no-wren`
 - `n2-burgomasters-funeral.end.private.agnes`
@@ -243,23 +255,23 @@ Folders already there: `script/`, `stills/`, `clips/`, `cards/`, `portraits/`, `
 - `n2-burgomasters-funeral.end.private.wren`
 - `n2-burgomasters-funeral.end.private.emeric`
 
-They are synced into the app script and the manifest before B2. Until that sync, a readiness check would report them missing. B2 does not start on that gap. Placeholder voice and still paths satisfy PRD-26 after the sync. This step does not edit `assets/`.
+Bob syncs them into the app script and the manifest before B2. No M1 step's `Touches` includes those two files (step 3 is `assets/cues/**` only, and D4 defers it), so this spec does not assign the copy to a build step and does not do it. Step 10 fails closed if any of the five ids is missing: the server log names the id, and the Dashboard readiness payload does not (D19). Placeholder voice and still paths satisfy PRD-26 after the sync. B2 does not start on that gap. This step does not edit `assets/`.
 
-**Readiness (PRD-27, AT-17), before play.** Every reachable moment id resolves in the manifest (`@dashboard` / `@ipad`, `@phone` → `@ipad` → text). Every private moment and every `end.private.<hunter>` has a line per joined hunter who can receive it. Every `~no-<hunter>` variant the scene can play, including `.07~fight-lost~no-wren`, has voice and a render entry. Every fired cue id resolves as §7 says. No private moment targets the Dashboard. `.08` resolving to the `.07` still passes (R3-11).
+**Readiness (PRD-27, AT-17), before play.** Every reachable moment id resolves in the manifest (`@dashboard` / `@ipad` / `ipad:all`, `@phone` → `@ipad` → text). The reachable set includes `.investigate`, the five pick cards, the finding ids for hunters who can pick them, `.investigate.share`, `.investigate.follow-the-mourner.cue`, and the five D7 ids. A missing D7 id fails the check. Every scene-private moment has a line for each present hunter who can receive it. Every `end.private.<hunter>` has a line for each held hunter (D18). Every `~no-<hunter>` variant the scene can play, including `.07~fight-lost~no-wren`, has voice and a render entry. Every fired cue id resolves as §7 says, including `fallback_sfx` when the sheet has one (D17). No private moment targets the Dashboard. The Dashboard's readiness payload is `{ok, failureCount}` only. `.08` resolving to the `.07` still passes (R3-11).
 
 ---
 
 ## 9. Privacy, channels, rejoin
 
-- One Dashboard channel. One private channel per held hunter. `ipad:<hunter>` goes to every current holder, only while that hunter is present.
+- One Dashboard channel. One private channel per held hunter. `ipad:<hunter>` goes to every current holder, only while that hunter is present, except `end.private.<hunter>`, which goes to every current holder even when that hunter was absent (D18). `ipad:all` goes to every connected device and never to the Dashboard (D20).
 - The server drops any `.private.` payload aimed at the Dashboard, including `end.private.*`. A test asserts no Dashboard payload contains a `.private.` moment id or its text (AT-3).
-- The Dashboard channel does not receive private line text, a private still path, private audio, or a moment id that contains `.private.` (AT-3). That includes the mini summary, errors and the readiness result pushed to the Dashboard. The server log may record the id. The personal end line is sent on the hunter channel, not rendered on the Dashboard.
+- The Dashboard channel does not receive private line text, a private still path, private audio, a moment id that contains `.private.`, an investigation action, a finding, a Forewarned choice, or a pending private choice (AT-3, AT-27, D19). That includes the mini summary, errors and readiness. The readiness payload on the Dashboard is `{ok, failureCount}` only. The server log may record the id. The personal end line is sent on the hunter channel, not rendered on the Dashboard.
 - The QR and the join page show no hunter-private data.
-- On first join a device gets a token bound to (session, device). Reload or a new scan with that token restores holdings, and for each held hunter the current private moment, the status line and the pending choice (PRD-20, SC-3). A disconnect does not release holdings.
+- On first join a device gets a token of 128 cryptographically random bits, bound to (session, device). Presenting that token rejoins the same device; it does not create a second set of holdings. Reload or a new scan with the token restores holdings, and for each held hunter the current private moment, the status line and the pending choice (PRD-20, SC-3). A disconnect does not release holdings.
+- The numeric join code is 6 digits from a cryptographic generator. It rotates when a device joins, and the QR updates to the new code (PRD-3). The QR view shows that code and nothing private. Guessing a code or a token is not the join path this spec relies on.
 - If the disconnect leaves a hunter with no connected holder, play pauses (D10, AT-5, AT-25). If another connected device still holds that hunter, play continues (AT-5).
 - A pending choice survives a change of holders. The first answer wins (OQ-14, R3-8).
-- Private audio plays on the device only.
-- The join token rotates, and the QR refreshes. The QR view never shows private data (PRD-3).
+- Private audio plays on the device only. The device token itself does not rotate; the numeric code does, and that is what the QR shows.
 
 ---
 
@@ -271,17 +283,23 @@ M1 writes every POC event type below. It does not write `tower_connect`, `tower_
 
 | Event type | What it must carry |
 |---|---|
-| `session_started` / `session_ended` | seed, pack_version, `tower_used` always false, end_reason |
+| `session_started` / `session_ended` | seed, pack_version, `tower_used` always false, end_reason. `session_ended` also carries `key_eligible: false` (OQ-8) |
 | `device_joined` / `device_left` / `device_rejoined` | device_id, form_factor (`ipad` \| `phone`), held hunters |
 | `holding_changed` | device_id, hunter, action (`take` \| `release`), by (`device` \| `dashboard`), holders_after |
 | `holdings_snapshot` | at start: hunter → device ids, all 4 |
-| `start_gate_blocked` | unheld hunters |
+| `start_gate_blocked` | unheld hunters. Logged on each holdings change that leaves the gate closed |
 | `paused_unheld` / `resumed_held` | hunter, paused_ms |
 | `presence_locked` | scene_id, present, absent, locations |
 | `moment_played` | moment_id including variant, target, started_at, skipped |
-| `private_delivered` / `private_acknowledged` / `private_skipped_absent` | moment_id, hunter, device_id (one row per receiving device) |
+| `private_delivered` / `private_acknowledged` | moment_id, hunter, device_id. One row per device that was sent the moment |
+| `private_skipped_absent` | moment_id, hunter, device_id. One row per holder device. The hunter was absent, so that device was not sent the scene-private moment |
+| `private_undelivered` | moment_id, hunter, device_id. The device was disconnected through the end of the scene while another holder kept play moving |
+| `private_wait_overridden` | hunter ids still waiting when the host overrode the `.09` wait |
+| `investigation_pick` | hunter, action, device_id. One row per lock. This is what AT-14 rebuilds the picks from |
+| `investigation_continue` | logged when the host taps Continue |
+| `host_action_rejected` | action, reason (`not_dashboard` \| `host_busy` \| `already_resolved`) |
 | `cue_fired` | cue name, capability, status, result `fallback`, reason `no_tower` |
-| `ambient_bed` / `ambient_accent` | phase, accent id, seed draw, started_at, suppressed, reason |
+| `ambient_bed` / `ambient_accent` | phase, seed draw, virtual offset, `audio` (`unavailable` until an id exists, D13), suppressed, reason (`speech` \| `choice` \| `pause` \| `scene_cue`). A draw held by a window is `suppressed: true` and does not depend on how long the window lasted (D22) |
 | `lid_choice` | choice (`nailed` \| `watched`), stake_before, stake_after, nail_offered |
 | `fight_started` / `fight_resolved` | base_foes, foes, hunters, result (`won` \| `lost`) |
 | `cost_applied` | kind (`corruption` \| `item` \| `redirected` \| `unpayable`), hunter, item, guard_triggered |
@@ -295,13 +313,13 @@ M1 writes every POC event type below. It does not write `tower_connect`, `tower_
 
 `fun_rating` and the end line are stored per hunter and per device (R3-9).
 
-A script (step 15) rebuilds the moment sequence, investigation picks, lid choice, fight result, costs, skull outcome, cue rows, ambient accents and device holdings from `events` alone (AT-14). Two runs with the same seed, party, choices and fight results produce identical event payloads, including E16 accent timing and choice, apart from wall-clock times and ids (AT-15). Tower-mode is not part of the input.
+A script (step 15) rebuilds the moment sequence, investigation picks (from `investigation_pick`), lid choice, fight result, costs, skull outcome, cue rows, ambient accents and device holdings from `events` alone (AT-14). Two runs with the same seed, party, choices and fight results produce identical event payloads, including E16 accent virtual offsets and suppressed flags, apart from wall-clock times and ids (AT-15, D22). Tower-mode is not part of the input.
 
 ---
 
 ## 11. Screens
 
-**Dashboard (PRD-2).** Mac browser, 1080p 16:9 play view. Zones: phase/night, story items, corruption per hunter, skulls (supply and dropped tonight). No tower status chip. Text ≥28 px. Key numbers ≥48 px. Also: QR + numeric join ("Join iPad" at any time), roster and start gate, "Who is at the Sanctuary", party kit, moment player (stills, clips, Mac audio) using the cue player, investigation status and Continue, lid choice, battle status (R3-1), skull-drop prompt, the neutral `.09` line, the unheld-pause banner with reassign, the night phase card, the mini summary, End for now, Concede.
+**Dashboard (PRD-2, D21).** Opened on the Mac at `http://127.0.0.1:<dev-port>/dashboard`. 1080p 16:9 play view. Zones: phase/night, story items, corruption per hunter, skulls (supply and dropped tonight). No tower status chip. Text ≥28 px. Key numbers ≥48 px. Step 14 asserts those computed sizes in the DOM, and asserts that rotating the join code changes the QR. Also: QR + numeric join ("Join iPad" at any time), roster and start gate, "Who is at the Sanctuary", party kit, moment player (stills, clips, Mac audio) using the cue player, investigation status ("has chosen" only) and Continue, lid choice, holy-water spend, battle status (R3-1, with "first round only" on Consecrated Ground), skull-drop prompt, the neutral `.09` line, the unheld-pause banner with reassign, the night phase card, the mini summary, End for now, Concede.
 
 **Device (PRD-30, PRD-35).** Join and hunter picker. One card per held hunter, headed with name and portrait. Private moments, status and pending choice per hunter. Investigation picks with taken cards greyed. Forewarned choice. Carried items, stake first. Phone: one decision at a time, hunter switcher, haptic tap on a private cue when the browser exposes vibration. Touch targets ≥44 pt, primary actions in the thumb zone. Per-hunter end line and fun rating. Rejoin by token.
 
@@ -311,7 +329,7 @@ The door, the Dashboard and the device views are Next.js App Router pages in `sr
 
 ## 12. Traceability
 
-This step is the mapping. It adds no code and no test. A row is specified when §1–§11 state the behaviour and this table names the later step and the test. Executable proof is that later step's job. Step 14 runs every POC acceptance test except AT-18 (Bob's notes) and AT-13 (Phase 2), with screenshots at Dashboard, iPad and phone sizes.
+This step is the mapping. It adds no code and no test. A row is specified when §1–§11 state the behaviour and this table names the later step and the test. Executable proof is that later step's job. Step 14 runs Playwright for every POC acceptance test except AT-13 (Phase 2) and AT-18 (Bob's notes), with screenshots at Dashboard, iPad and phone sizes. AT-14 and AT-15 are also step 15. AT-17 is also step 10.
 
 ### PRD ids
 
@@ -328,7 +346,7 @@ This step is the mapping. It adds no code and no test. A row is specified when �
 | PRD-9 | yes | §6, §7 | 5 | AT-12 (holy symbol) |
 | PRD-10 | yes | §6 | 6 | AT-6 |
 | PRD-11 | POC half | §7 | 8, 11 | AT-1, AT-2 |
-| PRD-12 | POC half. Path is D3. Sheet edit is D4 | §7 | 8, 10 | AT-2, AT-17 |
+| PRD-12 | POC half. Path is D3. `dim-all` audio exemption is D17. Sheet edit is D4 | §7 | 8, 10 | AT-2, AT-17 |
 | PRD-13 | POC half: no wait, Mac audio only | §7 | 8 | AT-2 |
 | PRD-14 | yes | §6, §11 | 6, 12 | AT-28; outcome selects `.07` or `.07~fight-lost` (AT-12, AT-12b) |
 | PRD-15 | yes | §6 | 6 | AT-7, AT-8, AT-9 |
@@ -355,14 +373,14 @@ This step is the mapping. It adds no code and no test. A row is specified when �
 | PRD-36 | yes | §5, §6 | 4 | AT-23 |
 | PRD-37 | yes | §6 | 4, 6 | AT-6, AT-7, AT-8 |
 | PRD-38 | yes | §10 | 7 | AT-19, AT-22, AT-23 (the logged rows) |
-| PRD-39 | yes. Cue-sheet rows for the bed are Phase 2 (D4, D13) | §7, D14 | 8, 12 | AT-26 |
+| PRD-39 | yes for the screen pulse, the virtual clock and the gap rule (D14, D22). Mac bed audio is unavailable until an asset id exists (D13). Cue-sheet rows for the bed are Phase 2 | §7 | 8, 12 | AT-26 |
 | PRD-40 | yes, as D3 and D4. The contract is the existing file. The step 3 rewrite is Phase 2 | §2, §7 | 8, 10 | AT-2, AT-17 |
 
 ### Acceptance tests
 
 | Test | In M1 | Steps |
 |---|---|---|
-| AT-1 | POC form: no tower, screen half visible, fallback audio heard, night 3 card | 14, G1 |
+| AT-1 | POC form: no tower, screen half visible, fallback audio heard where the cue has `fallback_sfx` (D17: `dim-all` is the fade, and `heartbeat` on the same moments carries the audio), night 3 card | 14, G1 |
 | AT-2 | POC form: every cue row `fallback` / `no_tower` | 14 |
 | AT-3 | Dashboard payloads have no private id or text | 14 |
 | AT-4 | Reload during `.09` restores both hunters' private state within 5 s | 14 |
@@ -376,10 +394,10 @@ This step is the mapping. It adds no code and no test. A row is specified when �
 | AT-12 | Test-default variants, plus holy symbol | 5, 14 |
 | AT-12b | Flipped presence, including `.07~fight-lost~no-wren` narrator only | 5, 14 |
 | AT-13 | Phase 2 | — |
-| AT-14 | Reconstruct from the log | 15 |
-| AT-15 | POC form: determinism includes E16 accents, not tower mode | 15 |
+| AT-14 | Reconstruct from the log, including picks from `investigation_pick` | 15, 14 |
+| AT-15 | POC form: determinism includes E16 virtual-clock accents (D22), not tower mode | 15, 14 |
 | AT-16 | Phone layout, one decision, haptic on a private cue | 13, 14 |
-| AT-17 | Readiness fails closed on missing voice, render or cue fallback (§7's rule) | 10 |
+| AT-17 | Readiness fails closed on missing voice, render, cue fallback, or a `fallback_sfx` that does not resolve (D17). The five D7 ids fail the check until Bob syncs them | 10, 14 |
 | AT-18 | Bob's playtest notes. Not automated | G2 |
 | AT-19 | Start gate | 4, 12, 14 |
 | AT-20 | Shared hunter: both devices, nothing on the Dashboard | 9, 14 |
