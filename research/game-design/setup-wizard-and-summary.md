@@ -60,3 +60,4 @@ The Dashboard shows a QR join screen so each iPad can connect without typing a c
 - After setup, any player can bring it back from the Dashboard at any time (e.g. a "Join iPad" control on D2–D10), including mid-game when a player re-joins (R-DEV-4).
 - The QR refreshes if the session token rotates. It never shows private hunter data.
 - Fallback: a short numeric join code is shown under the QR for typing by hand.
+- R-WIZ-11. Wizard step "Who holds whom": each joined device picks its hunter(s). Start is blocked until every hunter is held (R-DEV-9).

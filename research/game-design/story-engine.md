@@ -93,3 +93,11 @@ See [open-questions.md](open-questions.md), especially: pack reach into code, sh
 - R-ENG (outcome tiers): a story may declare several win and loss outcomes with a rank (e.g. full win, lesser win, loss). The summary screen and stats record the exact outcome, not just win or lose.
 
 - E (carried key items): a story item can be bound to a carrying hunter. If the carrier is defeated, the item is lost for the rest of the scene. Outcome rules may test for whether the item is held.
+
+## E15 Scene presence (hunters move independently)
+- Hunters move individually on the board as in base RtDT. Each hunter has a location.
+- A set piece or encounter triggers when a hunter enters its site. **Present** means the hunters at that site when the scene starts. Presence is locked for the scene; there are no late arrivals in v1.
+- The engine passes presence flags to the pack, and `~no-<hunter>` variants fire for absent hunters.
+- Scene costs, choices and rewards apply only to present hunters (e.g. "one hunter takes a corruption" picks from those present). Story items held by the party count only if a present hunter carries them.
+- Private moments for a scene go only to present hunters. The Dashboard still plays the scene for the whole table.
+- Stats log presence for each scene.

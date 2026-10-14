@@ -175,3 +175,12 @@ Data model in [statistics.md](statistics.md).
 - R-DEV-7. Two render targets from one source: the Dashboard gets 1080p 16:9, and the iPads get portrait or 4:3 crops. The asset index stores a variant per target (`<id>@dashboard`, `<id>@ipad`), and the readiness check requires the variant that each cue's target needs.
 
 - R-DEV-8. A phone can stand in for a player iPad. Join is the same QR (R-WIZ-10). The device is detected at join, and the player can switch to the full layout.
+
+## R-DEV-9 Hunters and devices (Bob, 2026-10-14)
+- All of the story's hunters are always in play (4 for Dracula). The number of humans and devices can vary.
+- When a device joins (QR, R-WIZ-10), it selects which hunter or hunters it holds. One device can hold several hunters.
+- **Start gate:** the game cannot start until every hunter is held by at least one device. The wizard shows unheld hunters.
+- More devices than hunters is fine. A hunter held by several devices shows its private moments on all of them.
+- Private moments go only to devices holding that hunter, never to the Dashboard. A device holding several hunters shows each hunter's private moment labeled with that hunter's name.
+- Holdings can be changed from the Dashboard at any time. If a change would leave a hunter unheld, the game pauses until that hunter is held again.
+- The stats record devices and holdings for each game.

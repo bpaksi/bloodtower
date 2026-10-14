@@ -35,3 +35,5 @@ Engine implications (now requirements): multiple devices, one private iPad per p
 
 - Dracula loss mapping (R-LF-9): Taken uses `~lost`, Turned uses `~plague` tune and `~cursed` slide.
 - Lid choice (Gamewright, 2026-10-14, `n2-burgomasters-funeral.lid-choice`): **Nailed** spends 1 stake (only offered if a stake is held). The fight spawns 1 fewer foe (min 1), and losing it costs 1 story item, with no skull drop. **Watched** keeps the stake for a full-strength fight. Losing it costs 1 corruption (instant-loss guard applies) plus 1 skull drop (counts toward the cap of 2 per night). The stats log the choice.
+
+- Variants rule (revised, 2026-10-14): hunters move independently, so `~no-<hunter>` variants are live (the hunter is away from the scene). Voice and render them.
