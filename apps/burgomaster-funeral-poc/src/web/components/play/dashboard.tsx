@@ -67,13 +67,22 @@ export function DashboardScreen() {
   const lineKey = view?.playback?.lineKey ?? null;
   const captionUrl = view?.playback?.caption?.audioUrl ?? null;
   const elapsed = view?.playback?.caption?.elapsedMs ?? 0;
+  const paused = view?.paused ?? false;
   useEffect(() => {
     const audio = voiceRef.current;
-    if (!audio || !lineKey || !captionUrl) return;
-    if (audio.dataset.line === lineKey) return;
+    if (!audio) return;
+    if (paused || !lineKey || !captionUrl) {
+      audio.pause();
+      audio.dataset.hold = "1";
+      return;
+    }
+    const sameLine = audio.dataset.line === lineKey;
+    const held = audio.dataset.hold === "1";
+    if (sameLine && !held) return;
     audio.dataset.line = lineKey;
+    audio.dataset.hold = "0";
     audio.muted = false;
-    audio.src = captionUrl;
+    if (!sameLine) audio.src = captionUrl;
     const start = () => {
       const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
       const target = elapsed / 1000;
@@ -82,33 +91,50 @@ export function DashboardScreen() {
     };
     if (audio.readyState >= 1) start();
     else audio.addEventListener("loadedmetadata", start, { once: true });
-  }, [lineKey, captionUrl, elapsed]);
+  }, [lineKey, captionUrl, elapsed, paused]);
 
   const musicUrl = view?.playback?.musicUrl ?? null;
   useEffect(() => {
     const audio = musicRef.current;
     if (!audio) return;
-    if ((audio.dataset.src ?? "") === (musicUrl ?? "")) return;
-    audio.dataset.src = musicUrl ?? "";
-    if (!musicUrl) {
+    if (paused || !musicUrl) {
       audio.pause();
+      if (paused) audio.dataset.hold = "1";
+      if (!musicUrl) {
+        audio.dataset.src = "";
+        audio.dataset.hold = "0";
+      }
       return;
     }
-    audio.src = musicUrl;
-    audio.loop = true;
+    const resume = audio.dataset.hold === "1" && audio.dataset.src === musicUrl;
+    audio.dataset.hold = "0";
+    if (audio.dataset.src === musicUrl && !resume) return;
+    audio.dataset.src = musicUrl;
+    if (!resume) {
+      audio.src = musicUrl;
+      audio.loop = true;
+    }
     void audio.play().catch(() => undefined);
-  }, [musicUrl]);
+  }, [musicUrl, paused]);
 
   const cue = view?.playback?.cue ?? null;
   useEffect(() => {
     const audio = cueRef.current;
-    if (!audio || !cue) return;
-    if (audio.dataset.key === cue.key) return;
+    if (!audio) return;
+    if (paused) {
+      audio.pause();
+      return;
+    }
+    if (!cue) return;
+    if (audio.dataset.key === cue.key) {
+      if (audio.paused && !audio.ended) void audio.play().catch(() => undefined);
+      return;
+    }
     audio.dataset.key = cue.key;
     audio.src = cue.audioUrl;
     audio.loop = false;
     void audio.play().catch(() => undefined);
-  }, [cue]);
+  }, [cue, paused]);
 
   const begin = () => {
     const audio = voiceRef.current;

@@ -38,12 +38,12 @@ test("one device holds all four, the opening plays, and a finding stays on that 
     viewport: { width: 820, height: 1180 },
     hasTouch: true,
   });
-  const ipad = await device.newPage();
-  const deviceErrors = collectErrors(ipad);
+  const tablet = await device.newPage();
+  const deviceErrors = collectErrors(tablet);
   try {
-    await ipad.goto(joinUrl);
-    await expect(ipad.getByTestId("take-all")).toBeEnabled();
-    await ipad.getByTestId("take-all").click();
+    await tablet.goto(joinUrl);
+    await expect(tablet.getByTestId("take-all")).toBeEnabled();
+    await tablet.getByTestId("take-all").click();
     await expect(page.getByTestId("begin")).toBeEnabled();
     await expect(page.getByTestId("unheld")).toHaveText("All four hunters are held.");
 
@@ -64,6 +64,26 @@ test("one device holds all four, the opening plays, and a finding stays on that 
       .poll(async () => voice.evaluate((audio: HTMLAudioElement) => audio.currentTime))
       .toBeGreaterThan(0);
 
+    await tablet.goto("about:blank");
+    await expect(
+      page.getByText("Play is paused until every hunter has a connected device."),
+    ).toBeVisible();
+    await expect
+      .poll(async () => voice.evaluate((audio: HTMLAudioElement) => audio.paused))
+      .toBe(true);
+    await expect
+      .poll(async () =>
+        page.getByTestId("moment-music").evaluate((audio: HTMLAudioElement) => audio.paused),
+      )
+      .toBe(true);
+    await tablet.goto(joinUrl);
+    await expect(
+      page.getByText("Play is paused until every hunter has a connected device."),
+    ).toHaveCount(0);
+    await expect
+      .poll(async () => voice.evaluate((audio: HTMLAudioElement) => audio.paused))
+      .toBe(false);
+
     await expect(page.getByTestId("accent-pulse")).toHaveAttribute("data-live", "true", {
       timeout: 50_000,
     });
@@ -76,14 +96,14 @@ test("one device holds all four, the opening plays, and a finding stays on that 
       .poll(async () => cueAudio.evaluate((audio: HTMLAudioElement) => audio.currentTime))
       .toBeGreaterThan(0);
 
-    await ipad.getByRole("button", { name: "Agnes", exact: true }).click();
-    const pick = ipad.getByRole("button", { name: /Examine Dorka/ });
+    await tablet.getByRole("button", { name: "Agnes", exact: true }).click();
+    const pick = tablet.getByRole("button", { name: /Examine Dorka/ });
     await expect(pick).toBeEnabled({ timeout: 20_000 });
     await pick.click();
-    await expect(ipad.getByTestId("finding-text")).toContainText("Two bites");
-    const findingStill = ipad.getByTestId("finding-still");
+    await expect(tablet.getByTestId("finding-text")).toContainText("Two bites");
+    const findingStill = tablet.getByTestId("finding-still");
     await expect(findingStill).toHaveAttribute("src", /private\.agnes/);
-    await expect(ipad.getByTestId("finding-audio")).toHaveAttribute("src", /private\.agnes/);
+    await expect(tablet.getByTestId("finding-audio")).toHaveAttribute("src", /private\.agnes/);
     await expect
       .poll(async () => findingStill.evaluate((img: HTMLImageElement) => img.naturalWidth))
       .toBeGreaterThan(0);
@@ -96,9 +116,9 @@ test("one device holds all four, the opening plays, and a finding stays on that 
     );
     expect(leaked).toBe(false);
 
-    await ipad.getByRole("button", { name: "Tomas", exact: true }).click();
-    await expect(ipad.getByTestId("finding")).toHaveCount(0);
-    await expect(ipad.getByText("Two bites")).toHaveCount(0);
+    await tablet.getByRole("button", { name: "Tomas", exact: true }).click();
+    await expect(tablet.getByTestId("finding")).toHaveCount(0);
+    await expect(tablet.getByText("Two bites")).toHaveCount(0);
 
     expect(errors).toEqual([]);
     expect(deviceErrors).toEqual([]);

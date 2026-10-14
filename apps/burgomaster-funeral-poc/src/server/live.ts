@@ -110,36 +110,40 @@ export const createLive = (options: LiveOptions): LiveServer => {
 
   let session: DemoSession;
   const broadcast = () => {
-    const cues = session.pullCues();
-    for (const client of clients) {
-      if (!client.hello || !client.token) continue;
-      if (client.role === "dashboard") {
-        for (const cue of cues) {
+    try {
+      const cues = session.pullCues();
+      for (const client of clients) {
+        if (!client.hello || !client.token) continue;
+        if (client.role === "dashboard") {
+          for (const cue of cues) {
+            send(
+              client.socket,
+              cueMessageSchema.parse({ v: PROTOCOL_VERSION, type: "cue", payload: cue }),
+            );
+          }
           send(
             client.socket,
-            cueMessageSchema.parse({ v: PROTOCOL_VERSION, type: "cue", payload: cue }),
+            dashboardStateMessageSchema.parse({
+              v: PROTOCOL_VERSION,
+              type: "dashboardState",
+              payload: session.dashboardState(),
+            }),
+          );
+          continue;
+        }
+        if (client.role === "device" && client.deviceId) {
+          send(
+            client.socket,
+            deviceStateMessageSchema.parse({
+              v: PROTOCOL_VERSION,
+              type: "deviceState",
+              payload: session.deviceState(client.deviceId),
+            }),
           );
         }
-        send(
-          client.socket,
-          dashboardStateMessageSchema.parse({
-            v: PROTOCOL_VERSION,
-            type: "dashboardState",
-            payload: session.dashboardState(),
-          }),
-        );
-        continue;
       }
-      if (client.role === "device" && client.deviceId) {
-        send(
-          client.socket,
-          deviceStateMessageSchema.parse({
-            v: PROTOCOL_VERSION,
-            type: "deviceState",
-            payload: session.deviceState(client.deviceId),
-          }),
-        );
-      }
+    } catch (error) {
+      console.error(error);
     }
   };
 

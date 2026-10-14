@@ -234,4 +234,75 @@ describe("demo slice", () => {
     clock.advance(4_000);
     expect(session.dashboardView(dash.token).playback?.speaking).toBe(true);
   });
+
+  it("stops the spoken line while paused and keeps the remainder for rejoin", () => {
+    const { session, clock } = start();
+    const dash = session.helloDashboard();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(5_500);
+    const spoken = session.dashboardView(dash.token);
+    expect(spoken.playback?.speaking).toBe(true);
+    const elapsed = spoken.playback?.caption?.elapsedMs ?? 0;
+    expect(elapsed).toBeGreaterThan(1_000);
+
+    session.detach(joined.hello.clientId);
+    const paused = session.dashboardView(dash.token);
+    expect(paused.paused).toBe(true);
+    expect(paused.playback?.speaking).toBe(false);
+    expect(paused.playback?.lineKey).toBeNull();
+    clock.advance(10_000);
+    expect(session.dashboardView(dash.token).playback?.caption?.elapsedMs).toBe(elapsed);
+
+    const back = session.helloDevice("ipad", undefined, joined.hello.token);
+    expect(back.ok).toBe(true);
+    const resumed = session.dashboardView(dash.token);
+    expect(resumed.paused).toBe(false);
+    expect(resumed.playback?.speaking).toBe(true);
+    expect(resumed.playback?.lineKey).toContain("n2-burgomasters-funeral.01");
+    clock.advance(500);
+    expect(session.dashboardView(dash.token).playback?.caption?.elapsedMs).toBeGreaterThan(elapsed);
+  });
+
+  it("keeps the pause list to hunters that still have no connected holder", () => {
+    const { session, clock } = start();
+    const holder = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!holder.ok) throw new Error("join failed");
+    takeAll(session, holder.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(5_500);
+    session.detach(holder.hello.clientId);
+
+    const other = session.helloDevice("phone", session.joinCode, undefined);
+    if (!other.ok) throw new Error("join failed");
+    expect(session.hold(other.hello.clientId, "agnes", "take").ok).toBe(true);
+    const state = session.dashboardState();
+    expect(state.paused.map((row) => row.hunter)).toEqual(["tomas", "wren", "emeric"]);
+    expect(
+      state.devices.some((device) => device.connected && device.heldHunters.includes("agnes")),
+    ).toBe(true);
+  });
+
+  it("refuses a 17th device and forgets a disconnected device that holds nobody", () => {
+    const { session } = start();
+    const tokens: string[] = [];
+    const ids: string[] = [];
+    for (let n = 0; n < 16; n += 1) {
+      const joined = session.helloDevice("phone", session.joinCode, undefined);
+      expect(joined.ok).toBe(true);
+      if (!joined.ok) return;
+      tokens.push(joined.hello.token);
+      ids.push(joined.hello.clientId);
+    }
+    expect(session.helloDevice("phone", session.joinCode, undefined).ok).toBe(false);
+    expect(session.dashboardState().devices).toHaveLength(16);
+
+    for (const id of ids) session.detach(id);
+    expect(session.dashboardState().devices).toHaveLength(0);
+    const again = session.helloDevice("phone", session.joinCode, undefined);
+    expect(again.ok).toBe(true);
+    expect(tokens).toHaveLength(16);
+  });
 });

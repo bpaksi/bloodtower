@@ -191,6 +191,8 @@ export class DemoSession {
   private phaseEndsAt = 0;
   private phaseTimer: { cancel: () => void } | null = null;
   private accentTimer: { cancel: () => void } | null = null;
+  private accentDueAt = 0;
+  private frozenAccentRemaining = 0;
   private accentIndex = 0;
   private accentUntil = 0;
   private revision = 0;
@@ -253,6 +255,9 @@ export class DemoSession {
     if (!joinCode || !sameCode(joinCode, this.code)) {
       return fail("That join code is not the one on the Dashboard.");
     }
+    if (this.rosterDevices().length >= 16) {
+      return fail("Sixteen devices are already joined.");
+    }
     const device: Device = {
       id: `d${randomBytes(8).toString("hex")}`,
       token: randomBytes(24).toString("hex"),
@@ -279,6 +284,7 @@ export class DemoSession {
     if (this.phase.kind === "lobby") {
       for (const hunter of [...device.held]) this.setHold(device, hunter, "release");
     }
+    if (device.held.length === 0) this.devices.delete(device.id);
     this.commit();
   }
 
@@ -371,7 +377,7 @@ export class DemoSession {
       storyFlag: null,
       moment,
       paused: this.paused ? this.pausedHunters.map((hunter) => ({ hunter, pausedMs: null })) : [],
-      devices: [...this.devices.values()]
+      devices: this.rosterDevices()
         .map((device) => ({
           deviceId: device.id,
           formFactor: device.formFactor,
@@ -583,7 +589,7 @@ export class DemoSession {
     const momentId = OPENING_MOMENTS[momentIndex];
     if (!momentId) return null;
     const moment = requireMoment(this.deps.catalog, momentId);
-    const speaking = this.phase.kind === "speech";
+    const speaking = this.phase.kind === "speech" && !this.paused;
     const line =
       this.phase.kind === "speech" ? moment.lines[this.phase.lineIndex] : this.lastCaption;
     const caption = line
@@ -745,8 +751,15 @@ export class DemoSession {
   private armAccent() {
     this.accentTimer?.cancel();
     if (this.phase.kind === "lobby" || this.paused) return;
-    const delay = accentDelayMs(this.seed, this.accentIndex);
-    this.accentTimer = this.deps.clock.schedule(delay, () => this.fireAccent());
+    this.scheduleAccent(accentDelayMs(this.seed, this.accentIndex));
+  }
+
+  /** Keeps the seeded delay. A pause freezes whatever is left instead of drawing again. */
+  private scheduleAccent(delay: number) {
+    this.accentTimer?.cancel();
+    const wait = Math.max(0, delay);
+    this.accentDueAt = this.deps.clock.now().getTime() + wait;
+    this.accentTimer = this.deps.clock.schedule(wait, () => this.fireAccent());
   }
 
   private fireAccent() {
@@ -791,6 +804,13 @@ export class DemoSession {
     return { suppressed: false, reason: null };
   }
 
+  /** Connected devices, plus disconnected ones that still hold a hunter. Empty dropouts are gone. */
+  private rosterDevices(): Device[] {
+    return [...this.devices.values()].filter(
+      (device) => device.connects > 0 || device.held.length > 0,
+    );
+  }
+
   private syncHold() {
     const blocked = this.blockedHunters();
     if (blocked.length > 0 && !this.paused) {
@@ -804,10 +824,24 @@ export class DemoSession {
         this.speechStartedAt = null;
       }
       this.phaseTimer?.cancel();
+      this.frozenAccentRemaining = Math.max(0, this.accentDueAt - now);
       this.accentTimer?.cancel();
       for (const hunter of blocked) {
         this.write("paused_unheld", { hunter, pausedMs: null });
       }
+      return;
+    }
+    if (blocked.length > 0 && this.paused) {
+      const added = blocked.filter((hunter) => !this.pausedHunters.includes(hunter));
+      const removed = this.pausedHunters.filter((hunter) => !blocked.includes(hunter));
+      if (added.length === 0 && removed.length === 0) return;
+      this.pausedHunters = blocked;
+      const waited =
+        this.pauseStartedAt === null
+          ? 0
+          : Math.max(0, this.deps.clock.now().getTime() - this.pauseStartedAt);
+      for (const hunter of added) this.write("paused_unheld", { hunter, pausedMs: null });
+      for (const hunter of removed) this.write("resumed_held", { hunter, pausedMs: waited });
       return;
     }
     if (blocked.length === 0 && this.paused) {
@@ -821,7 +855,7 @@ export class DemoSession {
         this.speechStartedAt = now - this.frozenElapsed;
       }
       this.armPhase(this.frozenRemaining);
-      this.armAccent();
+      this.scheduleAccent(this.frozenAccentRemaining);
       for (const hunter of hunters) {
         this.write("resumed_held", { hunter, pausedMs: waited });
       }
