@@ -251,10 +251,12 @@ describe("command executor: lifecycle", () => {
     const { session, submit, stages, writes } = await setup();
     const tower = session.tower();
     if (!tower) throw new Error("expected a tower");
-    vi.spyOn(tower, "playSound").mockReturnValue(new Promise(() => {}));
+    const playSound = vi.spyOn(tower, "playSound").mockReturnValue(new Promise(() => {}));
     const { commandId, done } = submit("sound.play", { soundIndex: 1 });
     await finish(done);
     expect(stages(commandId)).toEqual(["queued", "started", "timed-out"]);
+    await advance(120_000);
+    expect(playSound).toHaveBeenCalledTimes(1);
     expect(writes()).toEqual([]);
   });
 
@@ -299,7 +301,6 @@ describe("command executor: one lane", () => {
   it("runs commands one at a time in arrival order, spaced at least 250 ms apart", async () => {
     const { session, submit, seen } = await setup();
     const sentAt: number[] = [];
-    const stop = session.onTowerReport(() => {});
     const original = session.events.emit;
     session.events.emit = (event) => {
       if (event.kind === "tx") sentAt.push(Date.now());
@@ -310,7 +311,6 @@ describe("command executor: one lane", () => {
     const lights = submit("lighting.all-on", {});
     const another = submit("sound.play", { soundIndex: 2 });
     await finish(Promise.all([sound.done, lights.done, another.done]));
-    stop();
 
     const order = seen
       .filter((stage) => stage.stage === "started" || stage.stage === "confirmed")
@@ -369,6 +369,47 @@ describe("command executor: silent light sequences (D23)", () => {
     expect(stages(sound.commandId)).toEqual(["queued", "started", "write-completed", "confirmed"]);
     // The sequence, the clearing state, then the sound, which carries no sequence.
     expect(writes().map(sequenceByte)).toEqual(["10", "00", "00"]);
+  });
+
+  it("clears after a silent send that failed, since the library recorded the sequence first", async () => {
+    const { mock, executor, submit, stages, writes } = await setup();
+    const write = vi.spyOn(mock.adapter, "writeCharacteristic");
+    write.mockRejectedValueOnce(new Error("GATT write failed"));
+    await finish(
+      executor.run(
+        { commandId: "s-1", clientId: "c-1", capabilityId: "lighting.sequence" },
+        silent("rotationAllDrums"),
+      ),
+    );
+    expect(stages("s-1")).toEqual(["queued", "started", "failed"]);
+    const sound = submit("sound.play", { soundIndex: 1 });
+    await finish(sound.done);
+    expect(stages(sound.commandId).at(-1)).toBe("confirmed");
+    // The failed sequence, the clearing state, then the sound with no sequence in it.
+    expect(writes().map(sequenceByte)).toEqual(["0f", "00", "00"]);
+  });
+
+  it("fails the command when the clearing write fails, and sends no sequence after it", async () => {
+    const { mock, session, executor, submit, stages, last, writes } = await setup();
+    await finish(
+      executor.run(
+        { commandId: "s-1", clientId: "c-1", capabilityId: "lighting.sequence" },
+        silent("rotationDrumTop"),
+      ),
+    );
+    const write = vi.spyOn(mock.adapter, "writeCharacteristic");
+    write.mockRejectedValueOnce(new Error("GATT write failed"));
+    const first = submit("sound.play", { soundIndex: 1 });
+    await finish(first.done);
+    expect(stages(first.commandId)).toEqual(["queued", "started", "failed"]);
+    expect(last(first.commandId)?.reason).toMatch(/Could not clear/);
+    const second = submit("sound.play", { soundIndex: 2 });
+    await finish(second.done);
+    expect(stages(second.commandId).at(-1)).toBe("confirmed");
+    // The sequence, the clear that failed, then the sound. `sendTowerState` recorded the cleared
+    // state before its write failed, so the library holds no sequence and none is sent again.
+    expect(writes().map(sequenceByte)).toEqual(["10", "00", "00"]);
+    expect(session.tower()?.getCurrentTowerState().led_sequence).toBe(0);
   });
 
   it("does not clear when the tower has reported its state since", async () => {

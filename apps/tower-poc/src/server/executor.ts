@@ -262,14 +262,17 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
     return undefined;
   };
 
-  /** Writes the state once more without the silent sequence, before anything else is sent. */
+  /**
+   * Writes the state once more without the silent sequence, before anything else is sent. The
+   * mark stays until that write succeeds, so a clear that fails is tried again before the next
+   * command, never skipped.
+   */
   const clearSilentSequence = async (tower: UltimateDarkTower) => {
     if (unclearedSequence !== tower) return false;
-    unclearedSequence = undefined;
     const state = tower.getCurrentTowerState();
-    if (state.led_sequence === 0) return false;
-    await tower.sendTowerState({ ...state, led_sequence: 0 });
-    return true;
+    if (state.led_sequence !== 0) await tower.sendTowerState({ ...state, led_sequence: 0 });
+    unclearedSequence = undefined;
+    return state.led_sequence !== 0;
   };
 
   const execute = async (request: Omit<CommandRequest, "params">, command: ValidatedCommand) => {
@@ -298,6 +301,8 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
           });
 
     try {
+      // Every plan that writes needs this, the direct ones too: `allLightsOn` and the others
+      // build their packet from the same library state.
       if (plan.path !== "local") {
         try {
           if (await clearSilentSequence(tower)) await sleep(MIN_COMMAND_GAP_MS);
@@ -309,6 +314,9 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
       }
       const before = session.writes();
       reported = false;
+      // Marked before sending: `sendTowerState` records the sequence in the library's state
+      // before it writes, so even a send that fails or times out leaves it there.
+      if (plan.silent) unclearedSequence = tower;
       const outcome = await settle(() => plan.run(tower), plan.timeoutMs);
       const wrote = session.writes() > before;
 
@@ -348,7 +356,6 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
       report(request, "write-completed");
       if (plan.path === "queue") return report(request, "confirmed");
       if (plan.silent) {
-        unclearedSequence = tower;
         return report(request, "indeterminate", {
           reason: "The tower does not answer this light sequence (GAP-HW-010).",
         });
