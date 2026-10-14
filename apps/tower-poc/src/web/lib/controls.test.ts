@@ -10,7 +10,13 @@ import {
   validateCommand,
 } from "tower-poc-protocols";
 import { describe, expect, it } from "vitest";
-import { controlState, describeRequested, errorsByField, outcomeOf } from "./controls.ts";
+import {
+  applyChoices,
+  controlState,
+  describeRequested,
+  errorsByField,
+  outcomeOf,
+} from "./controls.ts";
 
 const entryOf = (id: string): InventoryEntry => {
   const capability = findCapability(id);
@@ -100,9 +106,18 @@ describe("outcomeOf", () => {
   });
 
   it("keeps a write the tower did not answer apart from a failure (GAP-HW-010)", () => {
-    expect(outcomeOf(stages("queued", "started", "indeterminate"), false)).toEqual({
+    expect(
+      outcomeOf(stages("queued", "started", "write-completed", "indeterminate"), false),
+    ).toEqual({ kind: "unconfirmed", label: "Sent, no answer: No answer." });
+    // A page that missed the earlier stages does not guess that nothing was written.
+    expect(outcomeOf(stages("indeterminate"), false).label).toBe("Sent, no answer: No answer.");
+    // The service says so when nothing was written: the library judged the tower already there.
+    const unwritten = stages("queued", "started", "indeterminate").map((stage) =>
+      stage.stage === "indeterminate" ? { ...stage, written: false as const } : stage,
+    );
+    expect(outcomeOf(unwritten, false)).toEqual({
       kind: "unconfirmed",
-      label: "Sent, no answer: No answer.",
+      label: "Not sent: No answer.",
     });
     for (const end of ["failed", "timed-out", "rejected"] as const) {
       expect(outcomeOf(stages("queued", end), false).kind).toBe("failed");
@@ -179,5 +194,41 @@ describe("errorsByField", () => {
     expect(
       errorsByField(sealFields(), [{ path: [], message: "Name at least one light." }]),
     ).toEqual({ "": "Name at least one light." });
+  });
+});
+
+describe("applyChoices", () => {
+  const fieldsOf = (id: string) => {
+    const capability = findCapability(id);
+    if (!capability) throw new Error(`no capability ${id}`);
+    const form = describeParams(capability.params);
+    if (!form.ok) throw new Error(form.reason);
+    return form.fields;
+  };
+  const drum = fieldsOf("mechanics.rotate-drum");
+
+  it("names an integer field's values, and the requested text uses the names", () => {
+    const fields = applyChoices(drum, {
+      drumIndex: { label: "Drum", names: ["top", "middle", "bottom"] },
+      position: { label: "Side", names: ["north", "east", "south", "west"] },
+    });
+    expect(fields.find((field) => field.key === "drumIndex")).toMatchObject({
+      label: "Drum",
+      names: ["top", "middle", "bottom"],
+    });
+    // What is sent is still the number, so the service's schema is unchanged.
+    const params = buildParams(fields, { drumIndex: "2", position: "1", playSound: true });
+    expect(validateCommand("mechanics.rotate-drum", params).ok).toBe(true);
+    expect(describeRequested(fields, params)).toBe("Drum bottom, Side east, Play sound yes");
+  });
+
+  it("refuses names that do not fit the field", () => {
+    expect(() => applyChoices(drum, { drumIndex: { names: ["top", "middle"] } })).toThrow(
+      /do not match/,
+    );
+    expect(() => applyChoices(drum, { playSound: { names: ["no", "yes"] } })).toThrow(
+      /do not match/,
+    );
+    expect(() => applyChoices(drum, { nothing: { names: [] } })).toThrow(/No field/);
   });
 });

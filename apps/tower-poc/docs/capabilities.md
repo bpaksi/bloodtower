@@ -91,9 +91,9 @@ By availability:
 | Id | Title | Kind | Availability | Library member | Parameters | UI page | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `mechanics.rotate` | Rotate drums | command | not-exposed | `Rotate` | `top: one of north, east, south, west; middle: one of north, east, south, west; bottom: one of north, east, south, west; soundIndex?: int 1..113` | none | untested |
-| `mechanics.rotate-with-state` | Rotate drums, keeping lights | command | requires-calibration | `rotateWithState` | `top: one of north, east, south, west; middle: one of north, east, south, west; bottom: one of north, east, south, west; soundIndex?: int 1..113` | mechanics | untested |
-| `mechanics.rotate-drum` | Rotate one drum | command | requires-calibration | `rotateDrumStateful` | `drumIndex: int 0..2; position: int 0..3; playSound?: boolean` | mechanics | untested |
-| `mechanics.random-rotate` | Rotate drums at random | command | requires-calibration | `randomRotateLevels` | `drums: one of all, top, middle, bottom, top-middle, top-bottom, middle-bottom` | mechanics | untested |
+| `mechanics.rotate-with-state` | Rotate drums, keeping lights | command | requires-calibration | `rotateWithState` | `top: one of north, east, south, west; middle: one of north, east, south, west; bottom: one of north, east, south, west; soundIndex?: int 1..113` | mechanics | mock-tested |
+| `mechanics.rotate-drum` | Rotate one drum | command | requires-calibration | `rotateDrumStateful` | `drumIndex: int 0..2; position: int 0..3; playSound?: boolean` | mechanics | mock-tested |
+| `mechanics.random-rotate` | Rotate drums at random | command | requires-calibration | `randomRotateLevels` | `drums: one of all, top, middle, bottom, top-middle, top-bottom, middle-bottom` | mechanics | mock-tested |
 | `mechanics.drum-position` | Drum position | query | requires-calibration | `getCurrentDrumPosition` | `level: one of top, middle, bottom` | mechanics | untested |
 | `mechanics.long-command-in-progress` | Long command in progress | property | available | `performingLongCommand` | `none` | mechanics | untested |
 | `mechanics.unjam-drums` | Unjam drums | command | unsupported | none | `none` | none | untested |

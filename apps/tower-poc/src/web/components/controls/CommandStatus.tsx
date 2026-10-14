@@ -1,6 +1,5 @@
 import type { CommandLifecyclePayload } from "tower-poc-protocols";
-import { outcomeOf } from "@/lib/controls";
-import { STAGE_LABELS } from "@/lib/labels";
+import { outcomeOf, stageName } from "@/lib/controls";
 import { cn } from "@/lib/utils";
 
 const OUTCOME_STYLES = {
@@ -50,7 +49,7 @@ export function CommandStatus({
       >
         {stages.map((stage) => (
           <li key={stage.stage} className="after:ml-2 after:content-['→'] last:after:content-none">
-            {STAGE_LABELS[stage.stage]}
+            {stageName(stage)}
           </li>
         ))}
       </ol>

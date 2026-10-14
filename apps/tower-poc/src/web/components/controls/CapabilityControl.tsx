@@ -1,19 +1,24 @@
 "use client";
 
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import {
   buildParams,
   type CommandableId,
   type CommandIssue,
   describeParams,
   findCapability,
-  type ParamField,
   type ParamValues,
   validateCommand,
 } from "tower-poc-protocols";
 import { CommandStatus } from "@/components/controls/CommandStatus";
 import { Button } from "@/components/ui/button";
-import { describeRequested, errorsByField } from "@/lib/controls";
+import {
+  applyChoices,
+  type ControlField,
+  describeRequested,
+  errorsByField,
+  type FieldChoices,
+} from "@/lib/controls";
 import { useCommand } from "@/lib/useCommand";
 import { useControlState, useLatestCommand } from "@/lib/useControl";
 
@@ -27,7 +32,7 @@ function Field({
   disabled,
   onChange,
 }: {
-  field: ParamField;
+  field: ControlField;
   value: string | boolean | undefined;
   error: string | undefined;
   disabled: boolean;
@@ -68,10 +73,26 @@ function Field({
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm font-medium">
         {field.label}
-        {field.kind === "integer" ? ` (${field.min}–${field.max})` : ""}
+        {field.kind === "integer" && !field.names ? ` (${field.min}–${field.max})` : ""}
         {hint}
       </label>
-      {field.kind === "enum" ? (
+      {field.kind === "integer" && field.names ? (
+        <select
+          id={id}
+          className={FIELD_CLASS}
+          value={typeof value === "string" ? value : ""}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.value)}
+          {...described}
+        >
+          <option value="">{field.optional ? "Library default" : "Choose…"}</option>
+          {field.names.map((name, index) => (
+            <option key={name} value={String(field.min + index)}>
+              {name}
+            </option>
+          ))}
+        </select>
+      ) : field.kind === "enum" ? (
         <select
           id={id}
           className={FIELD_CLASS}
@@ -122,6 +143,8 @@ function Field({
  * - What the person entered is checked with the service's own validation before it is sent; the
  *   service checks again, and its field errors are shown the same way.
  * - Nothing is sent again by itself.
+ * - With `confirm`, a valid command is not sent until the person confirms it here, for a command
+ *   with a physical effect they might not expect (spec §5).
  */
 export function CapabilityControl({
   capabilityId,
@@ -131,6 +154,8 @@ export function CapabilityControl({
   sendLabel = "Send",
   pendingLabel = "Sending…",
   statusName,
+  choices = {},
+  confirm,
 }: {
   capabilityId: CommandableId;
   /** Defaults to the inventory title. */
@@ -142,6 +167,10 @@ export function CapabilityControl({
   pendingLabel?: string;
   /** Names the lifecycle list; defaults to the title. */
   statusName?: string;
+  /** Names for integer fields, so the person picks a name and the number is sent. */
+  choices?: FieldChoices;
+  /** Asked before sending, with Confirm and Cancel. */
+  confirm?: ReactNode;
 }) {
   const headingId = useId();
   const capability = findCapability(capabilityId);
@@ -150,10 +179,30 @@ export function CapabilityControl({
   const [localIssues, setLocalIssues] = useState<CommandIssue[]>([]);
   // The service's field errors are about the values sent; once the person edits, they are stale.
   const [editedSinceSend, setEditedSinceSend] = useState(false);
+  // The validated params waiting for the person to confirm them.
+  const [confirming, setConfirming] = useState<{ params: unknown }>();
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const sendRef = useRef<HTMLButtonElement>(null);
   const command = useCommand(capabilityId);
 
   const state = useControlState(capabilityId);
   const latest = useLatestCommand(capabilityId, command.commandId);
+
+  // Cancel, not Confirm, takes the focus: Enter or a stray tap should not start the action. When
+  // the dialog closes, focus goes back to the send button, so the person keeps their place.
+  const wasConfirming = useRef(false);
+  useEffect(() => {
+    if (confirming) cancelRef.current?.focus();
+    else if (wasConfirming.current) sendRef.current?.focus();
+    wasConfirming.current = confirming !== undefined;
+  }, [confirming]);
+
+  // A confirmation is for the tower as it was when it was asked. Once the control cannot be used
+  // (the tower dropped, calibration was lost, the service went away) it is withdrawn, so it cannot
+  // be confirmed later in a session the person did not choose to act in.
+  useEffect(() => {
+    if (!state.enabled) setConfirming(undefined);
+  }, [state.enabled]);
 
   const name = title ?? capability?.title ?? capabilityId;
   if (!capability || !form?.ok) {
@@ -162,7 +211,7 @@ export function CapabilityControl({
       `${capabilityId} needs its own control: ${form?.ok === false ? form.reason : "unknown capability"}`,
     );
   }
-  const fields = form.fields;
+  const fields = applyChoices(form.fields, choices);
 
   const disabled = !state.enabled || command.pending;
 
@@ -180,8 +229,19 @@ export function CapabilityControl({
       return;
     }
     setLocalIssues([]);
+    if (confirm) {
+      setConfirming({ params: validation.command.params });
+      return;
+    }
     setEditedSinceSend(false);
     command.send(validation.command.params);
+  };
+
+  const confirmSend = () => {
+    if (disabled || !confirming) return;
+    setConfirming(undefined);
+    setEditedSinceSend(false);
+    command.send(confirming.params);
   };
 
   return (
@@ -207,7 +267,7 @@ export function CapabilityControl({
                 field={field}
                 value={values[field.key]}
                 error={errors[field.key]}
-                disabled={disabled}
+                disabled={disabled || confirming !== undefined}
                 onChange={(value) => {
                   setValues((current) => ({ ...current, [field.key]: value }));
                   setLocalIssues([]);
@@ -223,12 +283,49 @@ export function CapabilityControl({
           </p>
         )}
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" className="h-11 px-4" disabled={disabled}>
+          <Button
+            ref={sendRef}
+            type="submit"
+            className="h-11 px-4"
+            disabled={disabled || confirming !== undefined}
+          >
             {command.pending ? pendingLabel : sendLabel}
           </Button>
           {!state.enabled && <p className="text-sm text-muted-foreground">{state.reason}</p>}
         </div>
       </form>
+      {confirming && (
+        <div
+          role="alertdialog"
+          aria-label={`Confirm: ${name}`}
+          aria-describedby={`${headingId}-confirm`}
+          className="mt-4 flex flex-col gap-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-4"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setConfirming(undefined);
+          }}
+        >
+          <div id={`${headingId}-confirm`} className="text-sm">
+            {confirm}
+            <p className="mt-1 text-muted-foreground">
+              {describeRequested(fields, confirming.params) || "No values"}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" className="h-11 px-4" disabled={disabled} onClick={confirmSend}>
+              Confirm
+            </Button>
+            <Button
+              ref={cancelRef}
+              type="button"
+              variant="outline"
+              className="h-11 px-4"
+              onClick={() => setConfirming(undefined)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
       {command.unsent && (
         <p role="alert" className="mt-2 text-sm text-destructive">
           Not sent: the service is not reachable.

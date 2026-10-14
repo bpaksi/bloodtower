@@ -254,6 +254,22 @@ describe("validateCommand", () => {
     }
   });
 
+  it("carries `written: false` only on an indeterminate stage (spec §3.2)", () => {
+    const base = { commandId: "m-8", capabilityId: "sound.play", clientId: "c-1", at: 1 };
+    expect(
+      commandLifecyclePayloadSchema.safeParse({ ...base, stage: "indeterminate", written: false })
+        .success,
+    ).toBe(true);
+    expect(
+      commandLifecyclePayloadSchema.safeParse({ ...base, stage: "confirmed", written: false })
+        .success,
+    ).toBe(false);
+    expect(
+      commandLifecyclePayloadSchema.safeParse({ ...base, stage: "indeterminate", written: true })
+        .success,
+    ).toBe(false);
+  });
+
   it("refuses an id that is not in the inventory", () => {
     expect(validateCommand("tower.raw", {})).toEqual({
       ok: false,

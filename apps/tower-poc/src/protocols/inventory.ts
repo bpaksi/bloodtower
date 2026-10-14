@@ -610,7 +610,7 @@ export const inventory = [
     params: rotateParamsSchema,
     availability: "requires-calibration",
     uiLocation: "mechanics",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: the library's recommended rotate; it keeps LEDs and other state. Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
   },
   {
@@ -632,7 +632,7 @@ export const inventory = [
     }),
     availability: "requires-calibration",
     uiLocation: "mechanics",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: drumIndex is an index into the levels (top, middle, bottom) and position into the sides (north, east, south, west). Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
   },
   {
@@ -644,7 +644,7 @@ export const inventory = [
     params: z.strictObject({ drums: randomRotateDrumsSchema }),
     availability: "requires-calibration",
     uiLocation: "mechanics",
-    verification: "untested",
+    verification: "mock-tested",
     evidence: `${TYPES}: the library takes 0 all, 1 top, 2 middle, 3 bottom, 4 top and middle, 5 top and bottom, 6 middle and bottom (RANDOM_ROTATE_DRUMS maps the names to these). The library defaults to 0; drums is a required name here so that "all drums" is never implied. The UI asks for confirmation (spec §5). The library routes it through the legacy Rotate path, so it turns the lights off as a side effect, which the M1 spike confirmed for the top drum; it has no state-preserving alternative (GAP-HW-009; ${SPIKE}, finding 8).`,
   },
   {

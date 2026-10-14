@@ -2,6 +2,7 @@ import {
   type CommandLifecyclePayload,
   inventory,
   isCommandable,
+  RANDOM_ROTATE_DRUMS,
   SOUND_COUNT,
   type ValidatedCommand,
 } from "tower-poc-protocols";
@@ -320,6 +321,81 @@ describe("command executor: sound on the mock (M3 step 3.3)", () => {
   });
 });
 
+describe("command executor: mechanics on the mock (M3 step 3.4)", () => {
+  // Every rotation control on the Mechanics page. After calibration every drum faces north, so
+  // each of these moves at least one drum, and the tower answers when the rotation ends.
+  const ROTATIONS: [id: string, params: unknown][] = [
+    ["mechanics.rotate-with-state", { top: "east", middle: "south", bottom: "west" }],
+    [
+      "mechanics.rotate-with-state",
+      { top: "north", middle: "north", bottom: "north", soundIndex: 3 },
+    ],
+    ["mechanics.rotate-drum", { drumIndex: 2, position: 1 }],
+    ["mechanics.rotate-drum", { drumIndex: 0, position: 3, playSound: true }],
+  ];
+
+  it("rotates on a calibrated tower, and the tower answers", async () => {
+    const { submit, stages, writes } = await setup("calibrated");
+    for (const [id, params] of ROTATIONS) {
+      const before = writes().length;
+      const { commandId, done } = submit(id, params);
+      await finish(done);
+      expect(stages(commandId), `${id} ${JSON.stringify(params)}`).toEqual([
+        "queued",
+        "started",
+        "write-completed",
+        "confirmed",
+      ]);
+      expect(writes().length, id).toBeGreaterThan(before);
+    }
+  });
+
+  it("rotates each set of drums at random, with the side the library picks", async () => {
+    // 0.3 picks east, the second of the four sides; every drum faces north after calibration.
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.3);
+    try {
+      for (const drums of Object.keys(RANDOM_ROTATE_DRUMS)) {
+        const { submit, stages } = await setup("calibrated");
+        const { commandId, done } = submit("mechanics.random-rotate", { drums });
+        await finish(done);
+        expect(stages(commandId), drums).toEqual([
+          "queued",
+          "started",
+          "write-completed",
+          "confirmed",
+        ]);
+      }
+    } finally {
+      random.mockRestore();
+    }
+  });
+
+  it("sends nothing for a rotation to where the drums already are, and says so", async () => {
+    const { submit, stages, last, writes } = await setup("calibrated");
+    const { commandId, done } = submit("mechanics.rotate-drum", { drumIndex: 1, position: 0 });
+    await finish(done);
+    expect(stages(commandId)).toEqual(["queued", "started", "indeterminate"]);
+    expect(last(commandId)).toMatchObject({
+      written: false,
+      reason: expect.stringMatching(/already in that state/),
+    });
+    expect(writes()).toEqual([]);
+  });
+
+  it("refuses every rotation before calibration, writing nothing (D9)", async () => {
+    const { submit, stages, writes } = await setup("connected");
+    for (const [id, params] of [
+      ...ROTATIONS,
+      ["mechanics.random-rotate", { drums: "all" }] as [string, unknown],
+    ]) {
+      const { commandId, done } = submit(id, params);
+      await finish(done);
+      expect(stages(commandId), id).toEqual(["rejected"]);
+    }
+    expect(writes()).toEqual([]);
+  });
+});
+
 describe("command executor: lifecycle", () => {
   it("confirms a sound the tower echoes, attributed to its sender", async () => {
     const { submit, seen, writes } = await setup();
@@ -352,6 +428,8 @@ describe("command executor: lifecycle", () => {
       "indeterminate",
     ]);
     expect(last(second.commandId)?.reason).toMatch(/no state back within 1 s/);
+    // It was written, so it must not read as "Not sent".
+    expect(last(second.commandId)).not.toHaveProperty("written");
   });
 
   it("maps the library's 30-second rejection of a written command to indeterminate (GAP-HW-010)", async () => {
@@ -371,6 +449,7 @@ describe("command executor: lifecycle", () => {
     ]);
     expect(last(again.commandId)?.reason).toMatch(/30 s/);
     expect(writes()).toHaveLength(2);
+    expect(last(again.commandId)).not.toHaveProperty("written");
   });
 
   it("ends as timed-out when the library never settles, and sends nothing again", async () => {

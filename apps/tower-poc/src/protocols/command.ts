@@ -118,26 +118,39 @@ export const END_STAGES: readonly LifecycleStage[] = [
 ];
 
 /** Payload of `command.lifecycle`. Sent to every client, so it names the command and its sender. */
-export const commandLifecyclePayloadSchema = z.strictObject({
-  /** The `id` of the `command` message this is about. */
-  commandId: ID,
-  capabilityId: ID,
-  /** The client that sent the command (D7). */
-  clientId: ID,
-  stage: lifecycleStageSchema,
-  /** When the service recorded the stage, in milliseconds since the epoch. */
-  at: z.int().nonnegative(),
-  /** Why, for `failed`, `timed-out`, `indeterminate` and `rejected`. */
-  reason: z.string().min(1).max(500).optional(),
-  /** The fields that failed validation, for `rejected`. */
-  issues: z
-    .array(
-      z.strictObject({
-        path: z.array(z.union([z.string().max(MAX_PATH_PART_LENGTH), z.int()])).max(MAX_PATH_PARTS),
-        message: z.string().max(MAX_ISSUE_MESSAGE_LENGTH),
-      }),
-    )
-    .max(MAX_ISSUES)
-    .optional(),
-});
+export const commandLifecyclePayloadSchema = z
+  .strictObject({
+    /** The `id` of the `command` message this is about. */
+    commandId: ID,
+    capabilityId: ID,
+    /** The client that sent the command (D7). */
+    clientId: ID,
+    stage: lifecycleStageSchema,
+    /** When the service recorded the stage, in milliseconds since the epoch. */
+    at: z.int().nonnegative(),
+    /** Why, for `failed`, `timed-out`, `indeterminate` and `rejected`. */
+    reason: z.string().min(1).max(500).optional(),
+    /** The fields that failed validation, for `rejected`. */
+    issues: z
+      .array(
+        z.strictObject({
+          path: z
+            .array(z.union([z.string().max(MAX_PATH_PART_LENGTH), z.int()]))
+            .max(MAX_PATH_PARTS),
+          message: z.string().max(MAX_ISSUE_MESSAGE_LENGTH),
+        }),
+      )
+      .max(MAX_ISSUES)
+      .optional(),
+    /**
+     * `false` on an `indeterminate` that wrote nothing to the tower: the library judged it already
+     * in that state. Stated here because a client that joined late, or lost its link for a moment,
+     * may not have seen the stages before it.
+     */
+    written: z.literal(false).optional(),
+  })
+  .refine((payload) => payload.written === undefined || payload.stage === "indeterminate", {
+    message: "`written` is only set on an indeterminate stage.",
+    path: ["written"],
+  });
 export type CommandLifecyclePayload = z.infer<typeof commandLifecyclePayloadSchema>;

@@ -232,7 +232,7 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
   const report = (
     request: Omit<CommandRequest, "params">,
     stage: LifecycleStage,
-    extra: Pick<CommandLifecyclePayload, "reason" | "issues"> = {},
+    extra: Pick<CommandLifecyclePayload, "reason" | "issues" | "written"> = {},
   ) =>
     onLifecycle({
       commandId: request.commandId,
@@ -242,6 +242,7 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
       at: now(),
       ...(extra.reason ? { reason: limit(extra.reason) } : {}),
       ...(extra.issues ? { issues: extra.issues } : {}),
+      ...(extra.written === false ? { written: false as const } : {}),
     });
 
   /** Why the command cannot run now, or undefined when it can. Checked on arrival and on start. */
@@ -359,6 +360,7 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
         return report(request, "indeterminate", {
           reason:
             "The library sent nothing to the tower: by its own record the tower was already in that state.",
+          written: false,
         });
       }
       report(request, "write-completed");

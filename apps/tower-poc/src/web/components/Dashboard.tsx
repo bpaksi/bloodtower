@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { ConnectionPayload, Device } from "tower-poc-protocols";
+import type { Device } from "tower-poc-protocols";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { RestorePrompt } from "@/components/RestorePrompt";
 import { Button } from "@/components/ui/button";
 import { CALIBRATION_LABELS, CONNECTION_LABELS } from "@/lib/labels";
 import { PAGES } from "@/lib/pages";
 import { sendToService, useService } from "@/lib/store";
-
-type Action = "connect" | "reconnect" | "disconnect" | "calibrate";
+import { type TowerAction, towerActions } from "@/lib/towerActions";
 
 /** The sound the dashboard plays to prove the path end to end: catalog entry 1. */
 const TEST_SOUND = 1;
@@ -23,39 +22,20 @@ const DEVICE_FIELDS: { key: keyof Device; label: string }[] = [
   { key: "softwareRevision", label: "Software" },
 ];
 
-/**
- * Which of the four lifecycle actions the tower's state allows, as the service decides (it
- * refuses the others anyway). Reconnect is offered instead of Connect after the tower dropped the
- * link by itself (D10): nothing reconnects without a person pressing it.
- */
-const allowed = (connection: ConnectionPayload | undefined) => {
-  const state = connection?.state;
-  const canOpen =
-    state === "disconnected" || state === "error" || state === "bluetooth-unavailable";
-  const dropped = connection?.error?.code === "unexpected-disconnect";
-  const connected = state === "connected";
-  return {
-    connect: canOpen && !dropped,
-    reconnect: canOpen && dropped,
-    disconnect: connected || state === "connecting",
-    calibrate: connected && connection?.calibration !== "calibrating",
-  };
-};
-
 export function Dashboard() {
   const online = useService((view) => view.socket === "online");
   const connection = useService((view) => view.connection);
   const lastError = useService((view) => view.lastError);
-  const [lastAction, setLastAction] = useState<{ id?: string; action: Action }>();
-  const can = allowed(online ? connection : undefined);
+  const [lastAction, setLastAction] = useState<{ id?: string; action: TowerAction }>();
+  const can = towerActions(online ? connection : undefined);
 
-  const act = (action: Action) => setLastAction({ id: sendToService(action), action });
+  const act = (action: TowerAction) => setLastAction({ id: sendToService(action), action });
   const refusal =
     lastAction?.id !== undefined && lastError?.correlationId === lastAction.id
       ? lastError.message
       : undefined;
 
-  const actions: { action: Action; label: string; enabled: boolean }[] = [
+  const actions: { action: TowerAction; label: string; enabled: boolean }[] = [
     can.reconnect
       ? { action: "reconnect", label: "Reconnect", enabled: true }
       : { action: "connect", label: "Connect", enabled: can.connect },

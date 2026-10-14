@@ -185,6 +185,10 @@ describe("inventory entries", () => {
       "lighting.sequence",
       "lighting.set",
       "lighting.set-led",
+      // executor.test.ts, "mechanics on the mock"; the Mechanics page (e2e mechanics.spec.ts).
+      "mechanics.random-rotate",
+      "mechanics.rotate-drum",
+      "mechanics.rotate-with-state",
       // executor.test.ts, "sound on the mock"; the Sounds page (e2e sounds.spec.ts).
       "sound.play",
       "sound.play-stateful",

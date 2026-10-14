@@ -44,9 +44,19 @@ export const controlState = ({ online, connection, entry }: ControlContext): Con
 };
 
 /**
+ * A lifecycle stage's name for the person. An `indeterminate` the service marks `written: false`
+ * sent nothing (by the library's record the tower was already in that state), so it reads
+ * "Not sent", not "Sent, no answer".
+ */
+export const stageName = (stage: CommandLifecyclePayload) =>
+  stage.stage === "indeterminate" && stage.written === false
+    ? "Not sent"
+    : STAGE_LABELS[stage.stage];
+
+/**
  * What the tower is known to have done with a command, kept apart from what was asked for. Only
  * `confirmed` means the tower answered; `indeterminate` was written and not answered, which is not
- * a failure (GAP-HW-010).
+ * a failure (GAP-HW-010), or was not written at all (`written: false`).
  */
 export type Outcome =
   | { kind: "waiting"; label: string }
@@ -60,8 +70,10 @@ export const outcomeOf = (
   interrupted: boolean,
 ): Outcome => {
   const last = stages?.at(-1);
-  const label = (stage: CommandLifecyclePayload) =>
-    stage.reason ? `${STAGE_LABELS[stage.stage]}: ${stage.reason}` : STAGE_LABELS[stage.stage];
+  const label = (stage: CommandLifecyclePayload) => {
+    const name = stageName(stage);
+    return stage.reason ? `${name}: ${stage.reason}` : name;
+  };
   switch (last?.stage) {
     case "confirmed":
       return { kind: "confirmed", label: label(last) };
@@ -82,10 +94,42 @@ export const outcomeOf = (
 };
 
 /**
- * What was asked for, as the person reads it: each field's label and the value sent, in the
- * form's order. A field left out (the library's default) is not listed. Empty means no params.
+ * A field as a control shows it. An integer field may carry `names`, one per allowed number from
+ * `min`, so the person picks "top" rather than 0; the number is still what is sent.
  */
-export const describeRequested = (fields: readonly ParamField[], params: unknown) => {
+export type ControlField = ParamField & { names?: readonly string[] };
+
+/** Names for an integer field, by field key, with an optional label to replace the generated one. */
+export type FieldChoices = Readonly<Record<string, { label?: string; names: readonly string[] }>>;
+
+/**
+ * The fields with their choices applied. A choice for a field that is not an integer, or with a
+ * name count that does not match the field's range, is a programming error and throws, so a
+ * schema change cannot leave a number unnamed or a name pointing nowhere.
+ */
+export const applyChoices = (
+  fields: readonly ParamField[],
+  choices: FieldChoices,
+): ControlField[] => {
+  for (const key of Object.keys(choices)) {
+    if (!fields.some((field) => field.key === key)) throw new Error(`No field "${key}" to name.`);
+  }
+  return fields.map((field) => {
+    const choice = choices[field.key];
+    if (!choice) return field;
+    if (field.kind !== "integer" || choice.names.length !== field.max - field.min + 1) {
+      throw new Error(`The names for "${field.key}" do not match its values.`);
+    }
+    return { ...field, label: choice.label ?? field.label, names: choice.names };
+  });
+};
+
+/**
+ * What was asked for, as the person reads it: each field's label and the value sent, in the
+ * form's order, by name where the field has names. A field left out (the library's default) is
+ * not listed. Empty means no params.
+ */
+export const describeRequested = (fields: readonly ControlField[], params: unknown) => {
   const parts: string[] = [];
   for (const field of fields) {
     let value: unknown = params;
@@ -96,8 +140,14 @@ export const describeRequested = (fields: readonly ParamField[], params: unknown
           : undefined;
     }
     if (value === undefined) continue;
+    const named =
+      field.kind === "integer" && field.names && typeof value === "number"
+        ? field.names[value - field.min]
+        : undefined;
     parts.push(
-      `${field.label} ${field.kind === "boolean" ? (value ? "yes" : "no") : String(value)}`,
+      `${field.label} ${
+        field.kind === "boolean" ? (value ? "yes" : "no") : (named ?? String(value))
+      }`,
     );
   }
   return parts.join(", ");
