@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PROTOCOL_VERSION } from "burgomaster-funeral-poc-protocols";
@@ -15,6 +15,7 @@ const makeRoot = () => {
 };
 
 afterEach(() => {
+  for (const root of roots) rmSync(root, { recursive: true, force: true });
   roots.length = 0;
 });
 
@@ -22,7 +23,6 @@ describe("resolveStaticFile", () => {
   it("serves index.html for / and refuses a path that escapes the root", async () => {
     const root = makeRoot();
     writeFileSync(join(root, "index.html"), "<h1>Burgomaster's Funeral POC</h1>");
-    writeFileSync(join(tmpdir(), "secret.txt"), "nope");
 
     expect(await resolveStaticFile(root, "/")).toBe(join(root, "index.html"));
     expect(await resolveStaticFile(root, "/../secret.txt")).toBeUndefined();

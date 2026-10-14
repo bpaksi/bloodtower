@@ -110,7 +110,7 @@ export const advantageTraitSchema = z.enum(ADVANTAGE_TRAITS);
 export const hunterAdvantageSchema = z.strictObject({
   hunter: hunterIdSchema,
   trait: advantageTraitSchema,
-  /** After the +2 cap. Null when it has not been worked out. */
+  /** Known amount for this trait, already inside 0–2. Null when it has not been worked out. */
   amount: z.number().int().min(0).max(ADVANTAGE_CAP).nullable(),
 });
 
@@ -118,24 +118,50 @@ export const FOREWARNED_CHOICES = ["corruption", "sit-out"] as const;
 export const forewarnedChoiceSchema = z.enum(FOREWARNED_CHOICES);
 export type ForewarnedChoice = z.infer<typeof forewarnedChoiceSchema>;
 
-/** Battle status the Dashboard shows (R3-1). The app does not simulate the fight. */
-export const battleStatusSchema = z.strictObject({
-  presentHunters: z
-    .array(hunterIdSchema)
-    .min(1)
-    .max(4)
-    .superRefine((hunters, ctx) => unique(hunters, "hunter", ctx)),
-  foes: z.number().int().min(1),
-  advantages: z.array(hunterAdvantageSchema).max(16),
-  forewarned: z
-    .strictObject({
-      hunter: hunterIdSchema,
-      /** Card the host typed in. Null until then. */
-      card: z.string().min(1).max(120).nullable(),
-      sittingOut: z.boolean(),
-    })
-    .nullable(),
-});
+const issue = (ctx: z.RefinementCtx, message: string) => {
+  ctx.addIssue({ code: "custom", message });
+};
+
+/**
+ * Battle status the Dashboard shows (R3-1). The app does not simulate the fight.
+ * `presentHunters` may be empty when the only present hunter sits the fight out.
+ * Known advantage amounts for one hunter sum to at most +2. A null amount is unknown, not zero.
+ */
+export const battleStatusSchema = z
+  .strictObject({
+    presentHunters: z
+      .array(hunterIdSchema)
+      .max(4)
+      .superRefine((hunters, ctx) => unique(hunters, "hunter", ctx)),
+    foes: z.number().int().min(1),
+    advantages: z.array(hunterAdvantageSchema).max(16),
+    forewarned: z
+      .strictObject({
+        hunter: hunterIdSchema,
+        /** Card the host typed in. Null until then. */
+        card: z.string().min(1).max(120).nullable(),
+        sittingOut: z.boolean(),
+      })
+      .nullable(),
+  })
+  .superRefine((value, ctx) => {
+    const traits = new Set<string>();
+    const known = new Map<string, number>();
+    for (const advantage of value.advantages) {
+      const key = `${advantage.hunter}:${advantage.trait}`;
+      if (traits.has(key)) issue(ctx, `${advantage.hunter} lists ${advantage.trait} twice.`);
+      traits.add(key);
+      if (!value.presentHunters.includes(advantage.hunter)) {
+        issue(ctx, `${advantage.hunter} has an advantage but is not in the fight.`);
+      }
+      if (advantage.amount === null) continue;
+      const total = (known.get(advantage.hunter) ?? 0) + advantage.amount;
+      known.set(advantage.hunter, total);
+      if (total > ADVANTAGE_CAP) {
+        issue(ctx, `${advantage.hunter} is over the +${ADVANTAGE_CAP} advantage cap.`);
+      }
+    }
+  });
 export type BattleStatus = z.infer<typeof battleStatusSchema>;
 
 /**
@@ -353,18 +379,43 @@ export const RESOURCE_NAMES = [
   "finale-extra-foes",
 ] as const;
 
-/** UTC timestamp with a Z suffix. Offsets and missing zones are rejected. */
+const UTC_TIMESTAMP = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?Z$/;
+
+/**
+ * UTC timestamp with a Z suffix. Offsets and missing zones are rejected.
+ * A clock that does not exist (30 February, 24:00) is rejected rather than rolled over.
+ */
 export const utcTimestampSchema = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/)
-  .refine((value) => !Number.isNaN(Date.parse(value)), { message: "Times are UTC." });
+  .regex(UTC_TIMESTAMP)
+  .refine((value) => {
+    const match = UTC_TIMESTAMP.exec(value);
+    if (!match) return false;
+    const [, year, month, day, hour, minute, second, fraction] = match;
+    const milliseconds = fraction ? Number(fraction.padEnd(3, "0").slice(0, 3)) : 0;
+    const date = new Date(
+      Date.UTC(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second),
+        milliseconds,
+      ),
+    );
+    return (
+      date.getUTCFullYear() === Number(year) &&
+      date.getUTCMonth() === Number(month) - 1 &&
+      date.getUTCDate() === Number(day) &&
+      date.getUTCHours() === Number(hour) &&
+      date.getUTCMinutes() === Number(minute) &&
+      date.getUTCSeconds() === Number(second)
+    );
+  }, "Times are UTC.");
 
 const eventIdSchema = z.string().min(1).max(64);
 const countOrUnknown = z.number().int().nonnegative().nullable();
-
-const issue = (ctx: z.RefinementCtx, message: string) => {
-  ctx.addIssue({ code: "custom", message });
-};
 
 export const sessionStartedPayloadSchema = z.strictObject({
   seed: z.string().min(1).max(128),
@@ -447,12 +498,18 @@ export const presenceLockedPayloadSchema = z
     }
   });
 
-export const momentPlayedPayloadSchema = z.strictObject({
-  momentId: momentIdSchema,
-  target: momentTargetSchema,
-  startedAt: utcTimestampSchema,
-  skipped: z.boolean(),
-});
+export const momentPlayedPayloadSchema = z
+  .strictObject({
+    momentId: momentIdSchema,
+    target: momentTargetSchema,
+    startedAt: utcTimestampSchema,
+    skipped: z.boolean(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.target !== targetForMoment(value.momentId)) {
+      issue(ctx, `${value.momentId} is logged to ${targetForMoment(value.momentId)}.`);
+    }
+  });
 
 export const privateDeliveryPayloadSchema = z
   .strictObject({
@@ -468,6 +525,8 @@ export const privateDeliveryPayloadSchema = z
 
 export const cueFiredPayloadSchema = z.strictObject({
   cue: cueIdSchema,
+  /** Moment that fired the cue. Null when the row is not tied to one moment. */
+  momentId: momentIdSchema.nullable(),
   capability: z.string().min(1).max(120),
   status: z.enum(CUE_STATUSES),
   /** POC: nothing is sent to a tower (PRD-24, R4-1). */
@@ -498,10 +557,18 @@ export const lidChoicePayloadSchema = z
     stakeBefore: countOrUnknown,
     stakeAfter: countOrUnknown,
     nailOffered: z.boolean(),
+    /**
+     * Present carrier who spent the stake. Null when the choice is watched,
+     * or when nailing was stored before the carrier was known.
+     */
+    stakeCarrier: hunterIdSchema.nullable(),
   })
   .superRefine((value, ctx) => {
     if (value.choice === "nailed" && !value.nailOffered) {
       issue(ctx, "Nail is stored only when it was offered.");
+    }
+    if (value.choice === "watched" && value.stakeCarrier) {
+      issue(ctx, "Watching does not name a stake carrier.");
     }
     if (value.stakeBefore === null || value.stakeAfter === null) return;
     if (value.choice === "nailed" && value.stakeAfter !== value.stakeBefore - 1) {
@@ -623,6 +690,7 @@ export const loggedEventSchema = z.discriminatedUnion("type", [
   logged("private_delivered", privateDeliveryPayloadSchema),
   logged("private_acknowledged", privateDeliveryPayloadSchema),
   logged("private_skipped_absent", privateDeliveryPayloadSchema),
+  logged("private_undelivered", privateDeliveryPayloadSchema),
   logged("cue_fired", cueFiredPayloadSchema),
   logged("ambient_bed", ambientBedPayloadSchema),
   logged("ambient_accent", ambientAccentPayloadSchema),
@@ -651,18 +719,21 @@ export const PERSONAL_EVENT_TYPES = [
   "private_delivered",
   "private_acknowledged",
   "private_skipped_absent",
+  "private_undelivered",
   "fun_rating",
   FOREWARNED_CHOICE_EVENT,
 ] as const;
 
 export const EVENT_TYPES = loggedEventSchema.options.map((option) => option.shape.type.value);
 
-/** True when a JSON value carries a private moment id. */
+/** True when a JSON value carries a private moment id, including one used as an object key. */
 export const containsPrivateMoment = (value: unknown): boolean => {
   if (typeof value === "string") return isPrivateMomentId(value) || value.includes(".private.");
   if (Array.isArray(value)) return value.some(containsPrivateMoment);
   if (typeof value === "object" && value !== null) {
-    return Object.values(value).some(containsPrivateMoment);
+    return Object.entries(value).some(
+      ([key, child]) => containsPrivateMoment(key) || containsPrivateMoment(child),
+    );
   }
   return false;
 };
@@ -670,11 +741,23 @@ export const containsPrivateMoment = (value: unknown): boolean => {
 export const isPersonalEventType = (type: string): boolean =>
   (PERSONAL_EVENT_TYPES as readonly string[]).includes(type);
 
-/** A value the Dashboard channel may carry: no private moment id and no personal event. */
+const isPersonalEventNode = (value: object): boolean => {
+  if (!("type" in value)) return false;
+  const type = value.type;
+  return typeof type === "string" && isPersonalEventType(type);
+};
+
+/**
+ * A value the Dashboard channel may carry: no private moment id, in a key or a value,
+ * and no personal event at any depth.
+ */
 export const isDashboardSafe = (value: unknown): boolean => {
-  if (!value || typeof value !== "object") return !containsPrivateMoment(value);
-  if ("type" in value && typeof value.type === "string" && isPersonalEventType(value.type)) {
-    return false;
+  if (Array.isArray(value)) return value.every(isDashboardSafe);
+  if (typeof value === "object" && value !== null) {
+    if (isPersonalEventNode(value)) return false;
+    return Object.entries(value).every(
+      ([key, child]) => isDashboardSafe(key) && isDashboardSafe(child),
+    );
   }
   return !containsPrivateMoment(value);
 };

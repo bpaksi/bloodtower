@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { MomentId } from "./index.ts";
 import {
+  ADVANTAGE_CAP,
+  battleStatusSchema,
   CORRUPTION_MAX,
   CUE_IDS,
   carriedItemsSchema,
@@ -20,6 +22,7 @@ import {
   loggedEventSchema,
   MOMENT_IDS,
   momentIdSchema,
+  momentPlayedPayloadSchema,
   presenceLockedPayloadSchema,
   privateHunterOf,
   routedMomentSchema,
@@ -130,6 +133,7 @@ describe("moments, targets and cues", () => {
     expect(
       cueFiredPayloadSchema.parse({
         cue: "heartbeat",
+        momentId: null,
         capability: "screen pulse",
         status: "Library",
         result: "fallback",
@@ -139,6 +143,7 @@ describe("moments, targets and cues", () => {
     expect(
       cueFiredPayloadSchema.safeParse({
         cue: "heartbeat",
+        momentId: null,
         capability: "setLED",
         status: "Library",
         result: "sent",
@@ -190,14 +195,16 @@ describe("rules that the payloads already enforce", () => {
         stakeBefore: 1,
         stakeAfter: 0,
         nailOffered: true,
-      }).choice,
-    ).toBe("nailed");
+        stakeCarrier: "wren",
+      }).stakeCarrier,
+    ).toBe("wren");
     expect(
       lidChoicePayloadSchema.safeParse({
         choice: "nailed",
         stakeBefore: 1,
         stakeAfter: 1,
         nailOffered: true,
+        stakeCarrier: "wren",
       }).success,
     ).toBe(false);
     expect(
@@ -206,6 +213,7 @@ describe("rules that the payloads already enforce", () => {
         stakeBefore: 1,
         stakeAfter: 0,
         nailOffered: true,
+        stakeCarrier: null,
       }).success,
     ).toBe(false);
     expect(
@@ -214,8 +222,18 @@ describe("rules that the payloads already enforce", () => {
         stakeBefore: null,
         stakeAfter: null,
         nailOffered: false,
+        stakeCarrier: null,
       }).stakeBefore,
     ).toBeNull();
+    expect(
+      lidChoicePayloadSchema.safeParse({
+        choice: "watched",
+        stakeBefore: 1,
+        stakeAfter: 1,
+        nailOffered: true,
+        stakeCarrier: "wren",
+      }).success,
+    ).toBe(false);
   });
 
   it("rejects an unpayable cost that still names a hunter or an item", () => {
@@ -258,10 +276,13 @@ describe("rules that the payloads already enforce", () => {
 });
 
 describe("the event log", () => {
-  it("stores UTC and rejects a zone offset", () => {
+  it("stores UTC and rejects a zone offset or a rolled-over clock", () => {
     expect(utcTimestampSchema.parse(at)).toBe(at);
+    expect(utcTimestampSchema.parse("2026-10-14T20:00:00Z")).toBe("2026-10-14T20:00:00Z");
     expect(utcTimestampSchema.safeParse("2026-10-14T20:00:00+00:00").success).toBe(false);
     expect(utcTimestampSchema.safeParse("2026-10-14T20:00:00").success).toBe(false);
+    expect(utcTimestampSchema.safeParse("2026-02-30T00:00:00Z").success).toBe(false);
+    expect(utcTimestampSchema.safeParse("2026-10-14T24:00:00Z").success).toBe(false);
   });
 
   it("has no tower event, and keeps personal events off the dashboard", () => {
@@ -316,7 +337,85 @@ describe("the event log", () => {
       stakeBefore: 1,
       stakeAfter: 1,
       nailOffered: true,
+      stakeCarrier: null,
     });
     expect(isDashboardSafe(loggedEventSchema.parse(choice))).toBe(true);
+
+    const undelivered = event("private_undelivered", {
+      momentId: `${SCENE_ID}.09.private.wren`,
+      hunter: "wren",
+      deviceId: "pad-1",
+    });
+    expect(loggedEventSchema.parse(undelivered).type).toBe("private_undelivered");
+    expect(isDashboardSafe(undelivered)).toBe(false);
+    expect(EVENT_TYPES).toContain("private_undelivered");
+  });
+
+  it("rejects a private moment logged as if it played on the dashboard", () => {
+    const momentId = `${SCENE_ID}.09.private.wren`;
+    expect(
+      momentPlayedPayloadSchema.safeParse({
+        momentId,
+        target: "dashboard",
+        startedAt: at,
+        skipped: false,
+      }).success,
+    ).toBe(false);
+    expect(
+      momentPlayedPayloadSchema.parse({
+        momentId,
+        target: "ipad:wren",
+        startedAt: at,
+        skipped: false,
+      }).target,
+    ).toBe("ipad:wren");
+  });
+
+  it("caps known advantages at +2 per hunter and allows an empty fight", () => {
+    const base = {
+      presentHunters: ["agnes"] as const,
+      foes: 1,
+      forewarned: null,
+    };
+    expect(
+      battleStatusSchema.safeParse({
+        ...base,
+        advantages: [
+          { hunter: "agnes", trait: "undead", amount: ADVANTAGE_CAP },
+          { hunter: "agnes", trait: "wild", amount: ADVANTAGE_CAP },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(
+      battleStatusSchema.parse({
+        ...base,
+        presentHunters: [],
+        advantages: [],
+        forewarned: { hunter: "agnes", card: null, sittingOut: true },
+      }).presentHunters,
+    ).toEqual([]);
+    expect(
+      battleStatusSchema.parse({
+        ...base,
+        advantages: [
+          { hunter: "agnes", trait: "undead", amount: 1 },
+          { hunter: "agnes", trait: "wild", amount: null },
+        ],
+      }).advantages,
+    ).toHaveLength(2);
+  });
+});
+
+describe("dashboard safety", () => {
+  it("rejects a private moment id used as an object key", () => {
+    const key = `${SCENE_ID}.09.private.wren`;
+    expect(containsPrivateMoment({ [key]: "Wren's secret" })).toBe(true);
+    expect(isDashboardSafe({ [key]: "Wren's secret" })).toBe(false);
+  });
+
+  it("rejects a personal event nested under another object", () => {
+    expect(
+      isDashboardSafe({ wrap: { type: "fun_rating", payload: { hunter: "wren", rating: 5 } } }),
+    ).toBe(false);
   });
 });

@@ -7,6 +7,8 @@ import {
   dashboardStatePayloadSchema,
   deviceStatePayloadSchema,
   envelopeSchema,
+  errorPayloadSchema,
+  forewarnedCardPayloadSchema,
   helloPayloadSchema,
   hostHealthSchema,
   lidChoiceMessagePayloadSchema,
@@ -45,12 +47,20 @@ const dashboardState = {
   skullDropsTonight: null,
   storyFlag: null,
   moment: null,
-  paused: null,
+  paused: [] as { hunter: string; pausedMs: number | null }[],
+  devices: [] as {
+    deviceId: string;
+    formFactor: "ipad" | "phone";
+    connected: boolean;
+    heldHunters: string[];
+  }[],
   join: { code: "4821", url: "http://127.0.0.1:4767/join" },
   battle: null,
   lidChoice: null,
   fightResult: null,
+  summary: null,
   gate: { canBegin: false, unheld: ["agnes", "tomas", "wren", "emeric"] },
+  stage: "door" as const,
 };
 
 describe("envelope", () => {
@@ -75,12 +85,14 @@ describe("client messages", () => {
       "lidChoice",
       "fightResult",
       "costPick",
+      "spendHolyWater",
       "skullDone",
       "reassign",
       "endSession",
       "investigationPick",
       "investigationContinue",
       "forewarnedChoice",
+      "forewarnedCard",
       "privateContinue",
       "funRating",
     ]);
@@ -249,6 +261,7 @@ describe("server messages", () => {
         type: "cue_fired",
         payload: {
           cue: "dim-all",
+          momentId: null,
           capability: "screen fade",
           status: "Library",
           result: "fallback",
@@ -258,20 +271,107 @@ describe("server messages", () => {
     ).toBe("cue_fired");
   });
 
-  it("shows a private card only to a device that holds that hunter", () => {
-    const card = {
-      hunter: "agnes",
-      momentId: `${SCENE_ID}.09.private.agnes`,
-      text: "A private line for Agnes.",
-      statusLine: null,
-      pendingChoice: null,
+  it("restores a held hunter without inventing a private moment", () => {
+    const view = {
+      hunter: "wren",
+      corruption: 0,
+      carriedItems: STARTING_CARRIED_ITEMS.wren,
+      statusLine: "Choose one card.",
+      pendingChoice: { kind: "investigation" as const, actions: ["examine-body" as const] },
+      privateMoment: null,
+      endLine: null,
+      funRating: null,
     };
     expect(
-      deviceStatePayloadSchema.parse({ heldHunters: ["agnes"], cards: [card] }).cards,
+      deviceStatePayloadSchema.parse({ heldHunters: ["wren"], views: [view] }).views,
     ).toHaveLength(1);
     expect(
-      deviceStatePayloadSchema.safeParse({ heldHunters: ["wren"], cards: [card] }).success,
+      deviceStatePayloadSchema.safeParse({
+        heldHunters: ["wren"],
+        views: [
+          {
+            ...view,
+            privateMoment: { momentId: `${SCENE_ID}.investigate`, text: "Not a finding." },
+          },
+        ],
+      }).success,
     ).toBe(false);
+    expect(
+      deviceStatePayloadSchema.safeParse({ heldHunters: ["agnes"], views: [view] }).success,
+    ).toBe(false);
+  });
+
+  it("names every hunter who has no connected holder", () => {
+    expect(
+      dashboardStatePayloadSchema.parse({
+        ...dashboardState,
+        paused: [
+          { hunter: "wren", pausedMs: null },
+          { hunter: "tomas", pausedMs: null },
+        ],
+        devices: [
+          {
+            deviceId: "pad-1",
+            formFactor: "ipad",
+            connected: false,
+            heldHunters: ["wren", "tomas"],
+          },
+          {
+            deviceId: "pad-2",
+            formFactor: "ipad",
+            connected: true,
+            heldHunters: ["agnes", "emeric"],
+          },
+        ],
+      }).paused,
+    ).toHaveLength(2);
+    expect(
+      dashboardStatePayloadSchema.safeParse({
+        ...dashboardState,
+        paused: [{ hunter: "agnes", pausedMs: null }],
+        devices: [
+          { deviceId: "pad-2", formFactor: "ipad", connected: true, heldHunters: ["agnes"] },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts the Forewarned card and a holy-water spend from the host", () => {
+    expect(
+      clientMessageSchema.parse(
+        envelope("forewarnedCard", { hunter: "agnes", card: "The crypt door" }),
+      ).type,
+    ).toBe("forewarnedCard");
+    expect(forewarnedCardPayloadSchema.safeParse({ hunter: "agnes", card: "" }).success).toBe(
+      false,
+    );
+    expect(
+      clientMessageSchema.parse(envelope("spendHolyWater", { hunter: "agnes", purpose: "price" }))
+        .type,
+    ).toBe("spendHolyWater");
+    expect(
+      helloPayloadSchema.parse({
+        role: "device",
+        clientLabel: "iPad",
+        formFactor: "ipad",
+        joinCode: "4821",
+      }).joinCode,
+    ).toBe("4821");
+  });
+
+  it("keeps a private moment id out of an error payload", () => {
+    expect(
+      errorPayloadSchema.safeParse({
+        code: "private-on-dashboard",
+        message: `${SCENE_ID}.09.private.wren`,
+      }).success,
+    ).toBe(false);
+    expect(
+      errorPayloadSchema.parse({
+        code: "private-on-dashboard",
+        message: "That moment stays on the hunter's device.",
+      }).code,
+    ).toBe("private-on-dashboard");
   });
 
   it("reports the host up and not using a tower", () => {

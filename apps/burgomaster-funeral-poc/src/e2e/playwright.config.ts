@@ -1,10 +1,15 @@
-import { tmpdir } from "node:os";
+import { mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig } from "@playwright/test";
-import { loadConfig } from "../server/config.ts";
+import { e2eDataDir, loadConfig } from "../server/config.ts";
 
-// The e2e port from `.wt.json` when this checkout is a worktree, otherwise 4768.
-const port = loadConfig({ env: {} }).ports.e2e;
+// Ports and the SQLite folder come from `.wt.json` in a worktree, otherwise 4768 and `data/e2e`.
+// `env: {}` keeps a stray PORT or DATA_DIR in this process from moving the run.
+const config = loadConfig({ env: {} });
+const port = config.ports.e2e;
+const dataDir = e2eDataDir(config.dataDir);
+rmSync(dataDir, { recursive: true, force: true });
+mkdirSync(dataDir, { recursive: true });
 const baseURL = `http://127.0.0.1:${port}`;
 const repoRoot = join(import.meta.dirname, "../../../..");
 
@@ -41,7 +46,7 @@ export default defineConfig({
     env: {
       PORT: String(port),
       HOST: "127.0.0.1",
-      DATA_DIR: join(tmpdir(), "burgomaster-funeral-poc-e2e"),
+      DATA_DIR: dataDir,
     },
     reuseExistingServer: false,
     timeout: 120_000,

@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -6,6 +6,7 @@ import {
   DEFAULT_DATA_DIR,
   DEFAULT_DEV_PORT,
   DEFAULT_E2E_PORT,
+  e2eDataDir,
   findWtFile,
   loadConfig,
 } from "./config.ts";
@@ -20,6 +21,7 @@ const makeDir = () => {
 };
 
 afterEach(() => {
+  for (const dir of scratch) rmSync(dir, { recursive: true, force: true });
   scratch.length = 0;
 });
 
@@ -92,6 +94,12 @@ describe("loadConfig", () => {
     const root = makeDir();
     writeFileSync(join(root, ".wt.json"), "[]");
     expect(() => loadConfig({ startDir: root, env: {} })).toThrow(/JSON object/);
+  });
+
+  it("puts the e2e database under the configured data dir", () => {
+    const config = loadConfig({ startDir: makeDir(), env: {} });
+    expect(e2eDataDir(config.dataDir)).toBe(join(DEFAULT_DATA_DIR, "e2e"));
+    expect(e2eDataDir(config.dataDir)).not.toBe(join(tmpdir(), "burgomaster-funeral-poc-e2e"));
   });
 
   it("resolves a relative dataDir from the worktree file", () => {

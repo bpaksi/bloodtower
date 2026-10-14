@@ -1,11 +1,16 @@
 import { z } from "zod";
 import {
   battleStatusSchema,
+  carriedItemsSchema,
   containsPrivateMoment,
+  corruptionValueSchema,
+  costAppliedPayloadSchema,
   cuePlaySchema,
   deviceIdSchema,
+  endReasonSchema,
   fightResultSchema,
   forewarnedChoiceSchema,
+  formFactorSchema,
   holdPausePayloadSchema,
   hunterIdSchema,
   investigationActionSchema,
@@ -67,6 +72,8 @@ export const helloPayloadSchema = z
     formFactor: z.enum(["mac", "ipad", "phone"]),
     /** Set when a device is rejoining with the token from its first welcome. */
     token: tokenSchema.optional(),
+    /** Numeric code from the Dashboard QR, when the device is joining rather than rejoining. */
+    joinCode: joinCodeSchema.optional(),
   })
   .superRefine((value, ctx) => {
     if (value.role === "dashboard" && value.formFactor !== "mac") {
@@ -113,6 +120,12 @@ export const fightResultMessagePayloadSchema = z.strictObject({
   result: fightResultSchema,
 });
 
+export const spendHolyWaterPayloadSchema = z.strictObject({
+  hunter: hunterIdSchema,
+  /** +1 Undead toward the cap, or a price removed before a later cost is picked (R3-7). */
+  purpose: z.enum(["advantage", "price"]),
+});
+
 export const costPickPayloadSchema = z
   .strictObject({
     kind: z.enum(["corruption", "item"]),
@@ -147,6 +160,12 @@ export const forewarnedChoiceMessagePayloadSchema = z.strictObject({
   choice: forewarnedChoiceSchema,
 });
 
+/** The host types the physical Forewarned card so the battle status can show it (R3-1). */
+export const forewarnedCardPayloadSchema = z.strictObject({
+  hunter: hunterIdSchema,
+  card: z.string().min(1).max(120),
+});
+
 export const privateContinuePayloadSchema = z
   .strictObject({
     hunter: hunterIdSchema,
@@ -176,6 +195,7 @@ export const advanceMessageSchema = message("advance", emptyPayloadSchema);
 export const lidChoiceMessageSchema = message("lidChoice", lidChoiceMessagePayloadSchema);
 export const fightResultMessageSchema = message("fightResult", fightResultMessagePayloadSchema);
 export const costPickMessageSchema = message("costPick", costPickPayloadSchema);
+export const spendHolyWaterMessageSchema = message("spendHolyWater", spendHolyWaterPayloadSchema);
 export const skullDoneMessageSchema = message("skullDone", emptyPayloadSchema);
 export const reassignMessageSchema = message("reassign", reassignPayloadSchema);
 export const endSessionMessageSchema = message("endSession", endSessionPayloadSchema);
@@ -191,6 +211,7 @@ export const forewarnedChoiceMessageSchema = message(
   "forewarnedChoice",
   forewarnedChoiceMessagePayloadSchema,
 );
+export const forewarnedCardMessageSchema = message("forewarnedCard", forewarnedCardPayloadSchema);
 export const privateContinueMessageSchema = message(
   "privateContinue",
   privateContinuePayloadSchema,
@@ -207,12 +228,14 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
   lidChoiceMessageSchema,
   fightResultMessageSchema,
   costPickMessageSchema,
+  spendHolyWaterMessageSchema,
   skullDoneMessageSchema,
   reassignMessageSchema,
   endSessionMessageSchema,
   investigationPickMessageSchema,
   investigationContinueMessageSchema,
   forewarnedChoiceMessageSchema,
+  forewarnedCardMessageSchema,
   privateContinueMessageSchema,
   funRatingMessageSchema,
 ]);
@@ -235,11 +258,13 @@ export const errorCodeSchema = z.enum([
 ]);
 export type ErrorCode = z.infer<typeof errorCodeSchema>;
 
-export const errorPayloadSchema = z.strictObject({
-  code: errorCodeSchema,
-  message: z.string().min(1).max(300),
-  actionable: z.string().min(1).max(300).optional(),
-});
+export const errorPayloadSchema = z
+  .strictObject({
+    code: errorCodeSchema,
+    message: z.string().min(1).max(300),
+    actionable: z.string().min(1).max(300).optional(),
+  })
+  .superRefine((value, ctx) => refusePrivate(value, ctx));
 
 export const welcomePayloadSchema = z
   .strictObject({
@@ -294,8 +319,49 @@ export const publicMomentSchema = z
     }
   });
 
+/** Screens in PRD §4. One value, so a null moment is not also the join screen and the summary. */
+export const FLOW_STAGES = [
+  "door",
+  "join",
+  "holdings",
+  "presence",
+  "kit",
+  "scene",
+  "night-card",
+  "summary",
+  "ended",
+] as const;
+export const flowStageSchema = z.enum(FLOW_STAGES);
+
+/** Mini summary computed from stored stats (PRD-25). No private text and no fun ratings. */
+export const publicSummarySchema = z.strictObject({
+  outcome: endReasonSchema.nullable(),
+  lidChoice: lidChoiceSchema.nullable(),
+  fightResult: fightResultSchema.nullable(),
+  costs: z.array(costAppliedPayloadSchema).max(16),
+  skullsDropped: z.number().int().nonnegative().nullable(),
+  storyFlag: z.boolean().nullable(),
+  cuesFallback: z.number().int().nonnegative().nullable(),
+});
+
+/** A player device the Dashboard can reassign a hunter onto (R3-2, PRD-20). */
+export const deviceRosterEntrySchema = z.strictObject({
+  deviceId: deviceIdSchema,
+  formFactor: formFactorSchema,
+  connected: z.boolean(),
+  heldHunters: z
+    .array(hunterIdSchema)
+    .max(4)
+    .superRefine((hunters, ctx) => {
+      if (new Set(hunters).size !== hunters.length) {
+        ctx.addIssue({ code: "custom", message: "A hunter is listed twice." });
+      }
+    }),
+});
+
 export const dashboardStatePayloadSchema = z
   .strictObject({
+    stage: flowStageSchema,
     night: nightSchema,
     hunters: partyHuntersSchema,
     skullSupply: z.number().int().nonnegative().nullable(),
@@ -307,7 +373,9 @@ export const dashboardStatePayloadSchema = z
       })
       .nullable(),
     moment: publicMomentSchema.nullable(),
-    paused: holdPausePayloadSchema.pick({ hunter: true }).nullable(),
+    /** Every hunter whose holdings have no connected device. Empty while play is running. */
+    paused: z.array(holdPausePayloadSchema).max(4),
+    devices: z.array(deviceRosterEntrySchema).max(16),
     join: z
       .strictObject({
         code: joinCodeSchema,
@@ -317,12 +385,35 @@ export const dashboardStatePayloadSchema = z
     battle: battleStatusSchema.nullable(),
     lidChoice: lidChoiceSchema.nullable(),
     fightResult: fightResultSchema.nullable(),
+    /** Set on the summary and ended screens. Null before then. */
+    summary: publicSummarySchema.nullable(),
     gate: z.strictObject({
       canBegin: z.boolean(),
       unheld: z.array(hunterIdSchema).max(4),
     }),
   })
-  .superRefine((value, ctx) => refusePrivate(value, ctx));
+  .superRefine((value, ctx) => {
+    refusePrivate(value, ctx);
+    const pausedHunters = value.paused.map((row) => row.hunter);
+    if (new Set(pausedHunters).size !== pausedHunters.length) {
+      ctx.addIssue({ code: "custom", message: "A paused hunter is listed twice." });
+    }
+    const deviceIds = value.devices.map((device) => device.deviceId);
+    if (new Set(deviceIds).size !== deviceIds.length) {
+      ctx.addIssue({ code: "custom", message: "A device is listed twice." });
+    }
+    for (const row of value.paused) {
+      const stillHeld = value.devices.some(
+        (device) => device.connected && device.heldHunters.includes(row.hunter),
+      );
+      if (stillHeld) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${row.hunter} is paused, but a connected device still holds them.`,
+        });
+      }
+    }
+  });
 export type DashboardState = z.infer<typeof dashboardStatePayloadSchema>;
 
 export const pendingChoiceSchema = z.discriminatedUnion("kind", [
@@ -335,19 +426,32 @@ export const pendingChoiceSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("fun-rating") }),
 ]);
 
-export const privateCardSchema = z
+/**
+ * One held hunter on a device (PRD-20, PRD-35). Status and a pending choice stand on their own.
+ * `privateMoment` is set only when that hunter has a real private moment to read.
+ */
+export const hunterViewSchema = z
   .strictObject({
     hunter: hunterIdSchema,
-    momentId: momentIdSchema,
-    text: z.string().min(1).max(2000),
+    corruption: corruptionValueSchema,
+    carriedItems: carriedItemsSchema,
     statusLine: z.string().min(1).max(300).nullable(),
     pendingChoice: pendingChoiceSchema.nullable(),
+    privateMoment: z
+      .strictObject({
+        momentId: momentIdSchema,
+        text: z.string().min(1).max(2000),
+      })
+      .nullable(),
+    /** Personal end line (R3-9). Null until the summary. */
+    endLine: z.string().min(1).max(2000).nullable(),
+    funRating: z.number().int().min(1).max(5).nullable(),
   })
   .superRefine((value, ctx) => {
-    if (privateHunterOf(value.momentId) !== value.hunter) {
+    if (value.privateMoment && privateHunterOf(value.privateMoment.momentId) !== value.hunter) {
       ctx.addIssue({
         code: "custom",
-        message: "A private card's moment belongs to the hunter it names.",
+        message: "A private moment belongs to the hunter it names.",
       });
     }
   });
@@ -355,19 +459,24 @@ export const privateCardSchema = z
 export const deviceStatePayloadSchema = z
   .strictObject({
     heldHunters: z.array(hunterIdSchema).max(4),
-    cards: z.array(privateCardSchema).max(8),
+    views: z.array(hunterViewSchema).max(4),
   })
   .superRefine((value, ctx) => {
     if (new Set(value.heldHunters).size !== value.heldHunters.length) {
       ctx.addIssue({ code: "custom", message: "A hunter is listed twice." });
     }
-    for (const card of value.cards) {
-      if (!value.heldHunters.includes(card.hunter)) {
-        ctx.addIssue({
-          code: "custom",
-          message: "A device state shows a private card only for a hunter it holds.",
-        });
-      }
+    const viewed = value.views.map((view) => view.hunter);
+    if (new Set(viewed).size !== viewed.length) {
+      ctx.addIssue({ code: "custom", message: "A hunter view is listed twice." });
+    }
+    if (
+      viewed.length !== value.heldHunters.length ||
+      viewed.some((hunter) => !value.heldHunters.includes(hunter))
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "A device state has one view for each hunter it holds.",
+      });
     }
   });
 

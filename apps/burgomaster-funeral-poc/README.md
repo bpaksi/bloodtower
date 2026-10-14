@@ -15,7 +15,7 @@ The Mac host owns the game. The Dashboard is the shared screen and plays the sha
 | Path | What |
 |---|---|
 | `docs/PRD.md` | Product requirements, rev 4 (the intent until Bob writes `intent/`) |
-| `spec.md` | Stub. Step 2 writes the spec. |
+| `spec.md` | Written by step 2. This step does not add the file. |
 | `plans/` | Milestone plans |
 | `assets/` | Manifest, script, stills, portraits, cue sheet. Read in place; do not move. |
 | `src/web/`, `src/server/`, `src/protocols/` | Code parts, each its own package |

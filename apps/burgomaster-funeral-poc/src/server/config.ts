@@ -8,6 +8,9 @@ export const DEFAULT_E2E_PORT = 4768;
 const APP_ROOT = resolve(import.meta.dirname, "../..");
 export const DEFAULT_DATA_DIR = join(APP_ROOT, "data");
 
+/** Playwright's SQLite folder: under the checkout's data dir, never a shared temp path. */
+export const e2eDataDir = (dataDir: string): string => join(dataDir, "e2e");
+
 export interface AppConfig {
   /** Port this process binds. `PORT` overrides it; otherwise it is `ports.dev`. */
   port: number;
