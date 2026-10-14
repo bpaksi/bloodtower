@@ -109,6 +109,17 @@ describe("command executor: what it accepts", () => {
     expect(writes()).toEqual([]);
   });
 
+  it("rejects a capability that is not a command, and calls nothing", async () => {
+    const { submit, last, writes } = await setup();
+    const { commandId, done } = submit("connection.connected", {});
+    await done;
+    expect(last(commandId)).toMatchObject({
+      stage: "rejected",
+      reason: "This capability cannot be sent as a command.",
+    });
+    expect(writes()).toEqual([]);
+  });
+
   it("rejects every command while the tower is not connected", async () => {
     const { submit, last } = await setup("disconnected");
     const { commandId, done } = submit("sound.play", { soundIndex: 1 });
@@ -131,6 +142,28 @@ describe("command executor: what it accepts", () => {
     expect(last(commandId)?.reason).toMatch(/calibrating/);
     expect(playSound).not.toHaveBeenCalled();
     // Only the calibration packet went out.
+    expect(writes()).toEqual(["04"]);
+    await finish(calibrating);
+  });
+
+  it("checks again when a command starts: one queued before calibration began is rejected (D22)", async () => {
+    const { session, submit, stages, last, writes } = await setup();
+    const tower = session.tower();
+    if (!tower) throw new Error("expected a tower");
+    const playSound = vi.spyOn(tower, "playSound");
+    // Both pass the arrival check. Neither has started when calibration begins: the session is
+    // calibrating at once, before the lane gets to them. The service refuses this calibrate while
+    // commands are in the lane; the executor does not rely on that.
+    const first = submit("sound.play", { soundIndex: 1 });
+    const second = submit("sound.play", { soundIndex: 2 });
+    expect(stages(first.commandId)).toEqual(["queued"]);
+    const calibrating = session.calibrate();
+    await finish(Promise.all([first.done, second.done]));
+    for (const { commandId } of [first, second]) {
+      expect(stages(commandId)).toEqual(["queued", "rejected"]);
+      expect(last(commandId)?.reason).toMatch(/calibrating/);
+    }
+    expect(playSound).not.toHaveBeenCalled();
     expect(writes()).toEqual(["04"]);
     await finish(calibrating);
   });
@@ -260,6 +293,39 @@ describe("command executor: lifecycle", () => {
     expect(writes()).toEqual([]);
   });
 
+  it("ends a direct write the library never settles as timed-out after 5 s, and sends nothing again", async () => {
+    const { session, submit, stages, last, writes } = await setup();
+    const tower = session.tower();
+    if (!tower) throw new Error("expected a tower");
+    const allLightsOn = vi.spyOn(tower, "allLightsOn").mockReturnValue(new Promise(() => {}));
+    const startedAt = Date.now();
+    const { commandId, done } = submit("lighting.all-on", {});
+    await finish(done);
+    expect(Date.now() - startedAt).toBeLessThan(6_000);
+    expect(stages(commandId)).toEqual(["queued", "started", "timed-out"]);
+    expect(last(commandId)?.reason).toMatch(/within 5 s/);
+    await advance(120_000);
+    expect(allLightsOn).toHaveBeenCalledTimes(1);
+    expect(writes()).toEqual([]);
+  });
+
+  it("attributes every stage to the client that sent the command, when clients interleave", async () => {
+    const { submit, seen } = await setup();
+    const fromA = submit("sound.play", { soundIndex: 1 }, "c-a");
+    const fromB = submit("sound.play", { soundIndex: 999 }, "c-b");
+    const fromC = submit("lighting.all-off", {}, "c-c");
+    const againA = submit("sound.play", { soundIndex: 2 }, "c-a");
+    await finish(Promise.all([fromA.done, fromB.done, fromC.done, againA.done]));
+    const senders = (commandId: string) =>
+      new Set(seen.filter((stage) => stage.commandId === commandId).map((stage) => stage.clientId));
+    expect(senders(fromA.commandId)).toEqual(new Set(["c-a"]));
+    expect(senders(fromB.commandId)).toEqual(new Set(["c-b"]));
+    expect(senders(fromC.commandId)).toEqual(new Set(["c-c"]));
+    expect(senders(againA.commandId)).toEqual(new Set(["c-a"]));
+    // Every stage of every command, the rejection included, names its sender.
+    expect(seen.every((stage) => stage.clientId.length > 0)).toBe(true);
+  });
+
   it("calls a command the library sent nothing for indeterminate", async () => {
     const { submit, stages, last, writes } = await setup();
     // Calibration leaves every drum north, so the library skips this rotation.
@@ -326,6 +392,59 @@ describe("command executor: one lane", () => {
     expect(sentAt).toHaveLength(3);
     const gaps = sentAt.slice(1).map((at, index) => at - (sentAt[index] ?? at));
     for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(MIN_COMMAND_GAP_MS);
+  });
+});
+
+describe("command executor: busy", () => {
+  it("is busy from the first queued command until the spacing after the last write has passed", async () => {
+    const { executor, submit, stages } = await setup();
+    expect(executor.busy()).toBe(false);
+    const first = submit("sound.play", { soundIndex: 1 });
+    const second = submit("sound.play", { soundIndex: 2 });
+    expect(executor.busy()).toBe(true);
+    // Run until the second command is confirmed: its lifecycle has ended, the spacing has not.
+    for (let waited = 0; stages(second.commandId).at(-1) !== "confirmed"; waited += 10) {
+      if (waited > 10_000) throw new Error("the second command did not finish");
+      await advance(10);
+    }
+    expect(executor.busy()).toBe(true);
+    await finish(Promise.all([first.done, second.done]));
+    expect(executor.busy()).toBe(false);
+  });
+
+  it("is not busy for a command rejected on arrival", async () => {
+    const { executor, submit } = await setup("connected");
+    const { done } = submit("mechanics.rotate-drum", { drumIndex: 0, position: 1 });
+    expect(executor.busy()).toBe(false);
+    await done;
+    expect(executor.busy()).toBe(false);
+  });
+});
+
+describe("command executor: known limits", () => {
+  // From the step 5 review, pinned at Bob's decision (M2 step 9): the library's queue takes any
+  // state the tower reports as the answer to the command it is waiting on. A report that is not
+  // that answer, such as a direct write's answer arriving more than 1.25 s late, would confirm the
+  // next queued command early. M1 echoes came in 25 to 64 ms. If this test starts failing, the
+  // library has learned to tell answers apart, and the note in the M2 plan can go.
+  it("confirms a queued command the tower did not answer when some other report arrives", async () => {
+    const { mock, submit, stages, writes } = await setup();
+    const lights = { doorway: [{ position: "west", level: "bottom", style: "on" }] };
+    await finish(submit("lighting.set", lights).done);
+    // The same lights again change nothing, so the tower does not answer this one.
+    const unanswered = submit("lighting.set", lights);
+    await advance(2_000);
+    expect(stages(unanswered.commandId)).toEqual(["queued", "started"]);
+    // Stands in for a late answer to an earlier write: a report the command did not cause.
+    mock.dropSkull();
+    await finish(unanswered.done);
+    expect(stages(unanswered.commandId)).toEqual([
+      "queued",
+      "started",
+      "write-completed",
+      "confirmed",
+    ]);
+    expect(writes()).toHaveLength(2);
   });
 });
 

@@ -52,6 +52,12 @@ export interface CommandExecutor {
   submit: (request: CommandRequest) => Promise<void>;
   /** The same, for a command `validateCommand` has already passed. */
   run: (request: Omit<CommandRequest, "params">, command: ValidatedCommand) => Promise<void>;
+  /**
+   * True while a command is waiting or running, including the spacing after its last write. The
+   * service refuses to calibrate until it is false. A command that ended `timed-out` no longer
+   * counts, though the library call it stopped waiting for may still write.
+   */
+  busy: () => boolean;
 }
 
 /** The library waits this long for the tower to answer a queued command, then rejects it. */
@@ -213,6 +219,8 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
   const now = options.now ?? Date.now;
   let tail: Promise<void> = Promise.resolve();
   let waiting = 0;
+  /** Waiting plus running. */
+  let inLane = 0;
   // The tower object a silent sequence was last sent on, until the tower next reports its state.
   // The library keeps that sequence in the state it builds every packet from, and only a report
   // from the tower resets it; until then each packet would ask the tower to play it again.
@@ -384,10 +392,13 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
       return Promise.resolve();
     }
     waiting += 1;
+    inLane += 1;
     report(request, "queued");
     const done = tail.then(() => {
       waiting -= 1;
-      return execute(request, command);
+      return execute(request, command).finally(() => {
+        inLane -= 1;
+      });
     });
     tail = done.catch((error: unknown) => {
       // `execute` reports its own failures, so this is a bug in the service.
@@ -398,6 +409,7 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
 
   return {
     run,
+    busy: () => inLane > 0,
     submit: (request) => {
       const validation = validateCommand(request.capabilityId, request.params);
       if (!validation.ok) {

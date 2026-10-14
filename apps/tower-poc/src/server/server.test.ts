@@ -577,6 +577,71 @@ describe("lifecycle messages", () => {
     }
   });
 
+  it("refuses to calibrate while a command is in the lane, and calibrates once it has ended", async () => {
+    const mock = createMockTower({ timings: { connectMs: 20, calibrationMs: 50 } });
+    const session = createTowerSession({ createAdapter: () => mock.adapter });
+    const own = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      session,
+      store: createStateStore(),
+      tower: "mock",
+    });
+    const socket = await openSocket(WS_PATH, undefined, own.port);
+    try {
+      const { received, until } = listen(socket);
+      const calibrations = () =>
+        received.flatMap((m) => (m.type === "connection" ? [m.payload.calibration] : []));
+      send(socket, "connect", "c-1");
+      await until((all) => states(all).includes("connected"));
+      socket.send(
+        JSON.stringify({
+          v: PROTOCOL_VERSION,
+          type: "command",
+          id: "k-1",
+          payload: { capabilityId: "sound.play", params: { soundIndex: 1 } },
+        }),
+      );
+      // Handled in order on one socket, so the command is in the lane when this arrives.
+      send(socket, "calibrate", "c-2");
+      await until((all) => all.some((m) => m.type === "error"));
+      expect(received.find((m) => m.type === "error")).toMatchObject({
+        correlationId: "c-2",
+        payload: { code: "invalid-state", message: expect.stringMatching(/still running/) },
+      });
+      expect(calibrations()).not.toContain("calibrating");
+      const calibrationSent = session.events
+        .events()
+        .some((event) => event.kind === "tx" && event.hex === "04");
+      expect(calibrationSent).toBe(false);
+
+      await until((all) =>
+        all.some((m) => m.type === "command.lifecycle" && m.payload.stage === "confirmed"),
+      );
+      // The 250 ms spacing after the sound's write is still part of the command's turn, so ask
+      // again until the service accepts, rather than guessing how long that takes here.
+      for (let attempt = 0; !calibrations().includes("calibrating"); attempt += 1) {
+        if (attempt > 20) throw new Error("calibrate was never accepted");
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        send(socket, "calibrate", `c-${attempt + 3}`);
+        await until(
+          (all) =>
+            calibrations().includes("calibrating") ||
+            all.some((m) => m.type === "error" && m.correlationId === `c-${attempt + 3}`),
+        );
+      }
+      await until(() => calibrations().includes("calibrated"));
+      const errors = received.flatMap((m) => (m.type === "error" ? [m.payload.code] : []));
+      expect(new Set(errors)).toEqual(new Set(["invalid-state"]));
+    } finally {
+      socket.close();
+      await own.close();
+      await session.close();
+    }
+  });
+
   it("connects when one client asks, and every client sees it; a second connect is refused", async () => {
     const session = mockSession();
     const own = await startTowerServer({

@@ -206,6 +206,16 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
     case "disconnect":
       return runAction(socket, session.disconnect(), id);
     case "calibrate":
+      // The calibration packet would land in the middle of a command and make its lifecycle
+      // wrong. Nothing waits: the person calibrates again when the commands have ended.
+      if (executor.busy()) {
+        return sendError(
+          socket,
+          "invalid-state",
+          "Commands are still running or waiting. Calibrate when they have finished.",
+          id,
+        );
+      }
       return runAction(socket, session.calibrate(), id);
     case "command":
       // Its outcome, rejections included, reaches every client as `command.lifecycle`.

@@ -105,6 +105,21 @@ describe("tower session: connecting", () => {
     },
   );
 
+  it("reports any other connect failure as an error, and can connect again from it", async () => {
+    const { session, mock } = setup();
+    vi.spyOn(mock.adapter, "connect").mockRejectedValueOnce(new Error("GATT server refused"));
+    await connect(session);
+    expect(session.status()).toMatchObject({
+      state: "error",
+      calibration: "uncalibrated",
+      error: { code: "connect-failed", message: expect.stringMatching(/GATT server refused/) },
+    });
+    expect(session.tower()).toBeUndefined();
+    await connect(session);
+    expect(session.status().state).toBe("connected");
+    expect(session.status().error).toBeUndefined();
+  });
+
   it("can connect again after a failed connect", async () => {
     const { session, createAdapter } = setup({ failConnect: "not-found" });
     await connect(session);
