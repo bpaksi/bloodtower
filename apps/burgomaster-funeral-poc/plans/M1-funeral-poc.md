@@ -188,8 +188,9 @@ Stack (R-ENG-9, repo conventions): Next.js + React, pnpm workspace, SQLite throu
 
 - Owner: Wright (adds it); Bob runs it locally
 - Depends on: 1
-- Touches: `apps/burgomaster-funeral-poc/src/demo/**` and a `demo` script in the app's `package.json`, on its own branch on top of step 1
+- Touches: `apps/burgomaster-funeral-poc/src/web/**`, `apps/burgomaster-funeral-poc/src/server/**`, `apps/burgomaster-funeral-poc/src/e2e/**`, `apps/burgomaster-funeral-poc/package.json`, `apps/burgomaster-funeral-poc/README.md`, and this plan section. Not `src/protocols/**`. Not `apps/tower-poc/**`.
 - Deps change: no
+- Deviation: built in the existing web, server and e2e packages, because the launch required that layout. `src/demo/**` is not added. Protocols are unchanged. No new dependencies. The demo script is the one local command (`pnpm -F burgomaster-funeral-poc demo`, which builds the static UI and starts the host). The slice locks all four hunters present when the host begins (there is no sanctuary step). E16 accents pulse the screen; the asset kit has no separate accent audio, so none is substituted (the accent id is `screen-pulse`). The demo seed is `funeral-demo-10` so that first accent falls in the `.03` reveal, where it is not suppressed, and the Dashboard paints it for 2 seconds. Spoken captions strip the script's emphasis asterisks.
 - Scope: an extra PR that shows join by QR, one device holding all 4 hunters, the opening moments with captions and the ambient pulse, and the investigation picks with one private finding. A throwaway slice for feel; the batched steps replace it, and nothing depends on it.
 
 ## Batches

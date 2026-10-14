@@ -35,7 +35,12 @@ export default defineConfig({
     },
     {
       name: "desktop",
-      use: { browserName: "chromium", viewport: { width: 1440, height: 900 } },
+      use: {
+        browserName: "chromium",
+        viewport: { width: 1440, height: 900 },
+        // The opening lines start from a socket message, after the Begin click has returned.
+        launchOptions: { args: ["--autoplay-policy=no-user-gesture-required"] },
+      },
     },
   ],
   webServer: {

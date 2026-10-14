@@ -7,3 +7,43 @@ body {
   color: #f4efe6;
   font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
 }
+
+button {
+  border: 1px solid rgb(244 239 230 / 35%);
+  background: rgb(244 239 230 / 6%);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* E16 bed: a slow light pulse. Scene cues and the one-shot accent use a quicker one. */
+.ambient-bed,
+.cue-pulse,
+.accent-pulse {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+}
+
+.ambient-bed[data-live="true"] {
+  animation: funeral-pulse 4s ease-in-out infinite;
+}
+
+.cue-pulse[data-live="true"] {
+  animation: funeral-pulse 1.6s ease-in-out infinite;
+}
+
+/* Matches the server's 2s accent flash. */
+.accent-pulse[data-live="true"] {
+  animation: funeral-pulse 2s ease-in-out 1;
+}
+
+@keyframes funeral-pulse {
+  0%,
+  100% {
+    background-color: rgb(20 14 12 / 0%);
+  }
+  50% {
+    background-color: rgb(120 24 16 / 45%);
+  }
+}

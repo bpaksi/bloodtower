@@ -1,0 +1,340 @@
+import { join } from "node:path";
+import { HUNTER_IDS, isDashboardSafe } from "burgomaster-funeral-poc-protocols";
+import { afterEach, describe, expect, it } from "vitest";
+import { loadCatalog } from "../assets/catalog.ts";
+import { appendEvent, type OpenLog, openLog, readEvents } from "../db/log.ts";
+import { ACCENT_ID, accentDelayMs } from "./accent.ts";
+import { FakeClock } from "./clock.ts";
+import { DEMO_SEED, type DemoSession, DemoSession as Session } from "./slice.ts";
+
+const catalog = loadCatalog(join(import.meta.dirname, "../../../assets"));
+
+interface Harness {
+  clock: FakeClock;
+  log: OpenLog;
+  session: DemoSession;
+}
+
+const open = (seed?: string): Harness => {
+  const clock = new FakeClock();
+  const log = openLog(":memory:");
+  const session = new Session({
+    catalog,
+    clock,
+    joinUrlFor: (code) => `http://127.0.0.1:9/join?code=${code}`,
+    log: (event) => appendEvent(log.db, event),
+    ...(seed ? { seed } : {}),
+  });
+  return { clock, log, session };
+};
+
+const logs: OpenLog[] = [];
+const sessions: DemoSession[] = [];
+
+const start = (seed?: string) => {
+  const harness = open(seed);
+  logs.push(harness.log);
+  sessions.push(harness.session);
+  return harness;
+};
+
+afterEach(() => {
+  for (const session of sessions) session.close();
+  sessions.length = 0;
+  for (const log of logs) log.close();
+  logs.length = 0;
+});
+
+const takeAll = (session: DemoSession, deviceId: string) => {
+  for (const hunter of HUNTER_IDS) {
+    const result = session.hold(deviceId, hunter, "take");
+    expect(result.ok).toBe(true);
+  }
+};
+
+describe("demo slice", () => {
+  it("keeps Begin shut until one device holds all four hunters", () => {
+    const { session } = start();
+    const dash = session.helloDashboard();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    expect(joined.ok).toBe(true);
+    if (!joined.ok) return;
+    const blocked = session.dashboardView(dash.token);
+    expect(blocked.gate.canBegin).toBe(false);
+    expect(blocked.gate.unheld).toEqual([...HUNTER_IDS]);
+    expect(blocked.join.url).toContain(session.joinCode);
+    expect(blocked.roster.every((hunter) => hunter.corruption === null)).toBe(true);
+    expect(blocked.skulls).toBe("unavailable");
+
+    expect(session.begin().ok).toBe(false);
+    takeAll(session, joined.hello.clientId);
+    const openGate = session.dashboardView(dash.token);
+    expect(openGate.gate.canBegin).toBe(true);
+    expect(openGate.gate.unheld).toEqual([]);
+    expect(session.begin().ok).toBe(true);
+  });
+
+  it("plays the opening lines from the script, pulses between them, and stops at the picks", () => {
+    const { session, clock, log } = start();
+    const dash = session.helloDashboard();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+
+    const reveal = session.dashboardView(dash.token);
+    expect(reveal.playback?.momentId).toBe("n2-burgomasters-funeral.01");
+    expect(reveal.playback?.caption).toBeNull();
+    expect(reveal.playback?.stillUrl).toContain("n2-burgomasters-funeral.01");
+    expect(reveal.ambient.live).toBe(true);
+    expect(reveal.ambient.suppressed).toBe(false);
+    expect(isDashboardSafe(reveal)).toBe(true);
+    expect(isDashboardSafe(session.dashboardState())).toBe(true);
+
+    clock.advance(4_000);
+    const spoken = session.dashboardView(dash.token);
+    expect(spoken.playback?.speaking).toBe(true);
+    expect(spoken.playback?.caption?.text).toContain("Vellmoor buries its burgomaster");
+    expect(spoken.playback?.caption?.audioUrl).toContain("01.vo-01.narrator.wav");
+    expect(spoken.ambient.suppressed).toBe(true);
+    expect(spoken.ambient.reason).toBe("speech");
+
+    clock.advance(120_000);
+    const picks = session.dashboardView(dash.token);
+    expect(picks.choosing).toBe(true);
+    expect(picks.ambient.reason).toBe("choice");
+    expect(picks.playback?.momentId).toBe("n2-burgomasters-funeral.investigate");
+    expect(JSON.stringify(picks)).not.toContain("Two bites");
+    expect(JSON.stringify(picks)).not.toContain(".private.");
+    expect(isDashboardSafe(session.dashboardState())).toBe(true);
+
+    const types = readEvents(log.db).map((event) => event.type);
+    expect(types).toContain("moment_played");
+    expect(types).toContain("cue_fired");
+    expect(types).toContain("ambient_bed");
+    expect(types).not.toContain("private_delivered");
+    const cues = readEvents(log.db).filter((event) => event.type === "cue_fired");
+    expect(
+      cues.every(
+        (event) => event.payload.result === "fallback" && event.payload.reason === "no_tower",
+      ),
+    ).toBe(true);
+  });
+
+  it("shows one private finding only on a device that holds the hunter who picked it", () => {
+    const { session, clock } = start();
+    const dash = session.helloDashboard();
+    const holder = session.helloDevice("ipad", session.joinCode, undefined);
+    const other = session.helloDevice("phone", session.joinCode, undefined);
+    if (!holder.ok || !other.ok) throw new Error("join failed");
+    takeAll(session, holder.hello.clientId);
+    expect(session.hold(other.hello.clientId, "tomas", "take").ok).toBe(true);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(120_000);
+
+    expect(session.pick(holder.hello.clientId, "agnes", "examine-body").ok).toBe(true);
+    expect(session.pick(other.hello.clientId, "tomas", "examine-body").ok).toBe(false);
+
+    const agnes = session.actorFor(holder.hello.token);
+    const tomas = session.actorFor(other.hello.token);
+    if (agnes?.role !== "device" || tomas?.role !== "device") throw new Error("missing device");
+    const onAgnes = session.deviceView(agnes.device);
+    const onTomas = session.deviceView(tomas.device);
+    expect(onAgnes.findings.map((item) => item.hunter)).toEqual(["agnes"]);
+    expect(onAgnes.findings[0]?.text).toContain("Two bites");
+    expect(onAgnes.findings[0]?.stillUrl).toContain("private.agnes");
+    expect(onTomas.findings).toEqual([]);
+    expect(JSON.stringify(onTomas)).not.toContain("Two bites");
+
+    const dashboard = JSON.stringify(session.dashboardView(dash.token));
+    expect(dashboard).not.toContain("Two bites");
+    expect(dashboard).not.toContain(".private.");
+    expect(
+      session.deviceState(holder.hello.clientId).views.find((view) => view.hunter === "agnes")
+        ?.privateMoment?.text,
+    ).toContain("Two bites");
+    expect(isDashboardSafe(session.dashboardState())).toBe(true);
+  });
+
+  it("paints the seeded screen-pulse accent during the .03 reveal", () => {
+    const { session, clock, log } = start();
+    const dash = session.helloDashboard();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+
+    const delay = accentDelayMs(DEMO_SEED, 0);
+    expect(delay).toBeGreaterThanOrEqual(20_000);
+    expect(delay).toBeLessThanOrEqual(60_000);
+    clock.advance(delay);
+
+    const view = session.dashboardView(dash.token);
+    expect(view.playback?.momentId).toBe("n2-burgomasters-funeral.03");
+    expect(view.playback?.speaking).toBe(false);
+    expect(view.ambient.accent).toBe(true);
+    expect(view.ambient.suppressed).toBe(false);
+
+    const accent = readEvents(log.db).find((event) => event.type === "ambient_accent");
+    if (accent?.type !== "ambient_accent") throw new Error("missing accent");
+    expect(accent.payload.accentId).toBe(ACCENT_ID);
+    expect(accent.payload.seedDraw).toBe(`${DEMO_SEED}:0`);
+    expect(accent.payload.suppressed).toBe(false);
+    expect(accent.payload.reason).toBeNull();
+  });
+
+  it("lets the investigate cue override the accent", () => {
+    const seed = "funeral-demo";
+    const { session, clock, log } = start(seed);
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(accentDelayMs(seed, 0));
+
+    const accent = readEvents(log.db).find((event) => event.type === "ambient_accent");
+    if (accent?.type !== "ambient_accent") throw new Error("missing accent");
+    expect(accent.payload.suppressed).toBe(true);
+    expect(accent.payload.reason).toBe("scene-cue");
+    expect(accent.payload.accentId).toBe(ACCENT_ID);
+  });
+
+  it("pauses while a hunter has no connected holder and resumes on rejoin", () => {
+    const { session, clock, log } = start();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(400);
+    session.detach(joined.hello.clientId);
+    const dash = session.helloDashboard();
+    const paused = session.dashboardView(dash.token);
+    expect(paused.paused).toBe(true);
+    expect(paused.playback?.speaking).toBe(false);
+    expect(paused.ambient.live).toBe(true);
+    expect(paused.ambient.suppressed).toBe(true);
+    expect(paused.ambient.reason).toBe("pause");
+    expect(paused.ambient.accent).toBe(false);
+    clock.advance(30_000);
+    const held = session.dashboardView(dash.token);
+    expect(held.playback?.momentId).toBe("n2-burgomasters-funeral.01");
+    expect(held.playback?.speaking).toBe(false);
+    expect(held.ambient.suppressed).toBe(true);
+    expect(held.ambient.reason).toBe("pause");
+    const duringPause = readEvents(log.db).filter((event) => event.type === "ambient_accent");
+    expect(duringPause).toEqual([]);
+    const bed = readEvents(log.db).filter((event) => event.type === "ambient_bed");
+    expect(bed.some((event) => event.payload.suppressed && event.payload.reason === "pause")).toBe(
+      true,
+    );
+
+    const back = session.helloDevice("ipad", undefined, joined.hello.token);
+    expect(back.ok).toBe(true);
+    expect(session.dashboardView(dash.token).paused).toBe(false);
+    clock.advance(4_000);
+    expect(session.dashboardView(dash.token).playback?.speaking).toBe(true);
+  });
+
+  it("stops the spoken line while paused and keeps the remainder for rejoin", () => {
+    const { session, clock } = start();
+    const dash = session.helloDashboard();
+    const joined = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!joined.ok) throw new Error("join failed");
+    takeAll(session, joined.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(5_500);
+    const spoken = session.dashboardView(dash.token);
+    expect(spoken.playback?.speaking).toBe(true);
+    const elapsed = spoken.playback?.caption?.elapsedMs ?? 0;
+    expect(elapsed).toBeGreaterThan(1_000);
+
+    session.detach(joined.hello.clientId);
+    const paused = session.dashboardView(dash.token);
+    expect(paused.paused).toBe(true);
+    expect(paused.playback?.speaking).toBe(false);
+    expect(paused.playback?.lineKey).toBeNull();
+    clock.advance(10_000);
+    expect(session.dashboardView(dash.token).playback?.caption?.elapsedMs).toBe(elapsed);
+
+    const back = session.helloDevice("ipad", undefined, joined.hello.token);
+    expect(back.ok).toBe(true);
+    const resumed = session.dashboardView(dash.token);
+    expect(resumed.paused).toBe(false);
+    expect(resumed.playback?.speaking).toBe(true);
+    expect(resumed.playback?.lineKey).toContain("n2-burgomasters-funeral.01");
+    clock.advance(500);
+    expect(session.dashboardView(dash.token).playback?.caption?.elapsedMs).toBeGreaterThan(elapsed);
+  });
+
+  it("keeps the pause list to hunters that still have no connected holder", () => {
+    const { session, clock } = start();
+    const holder = session.helloDevice("ipad", session.joinCode, undefined);
+    if (!holder.ok) throw new Error("join failed");
+    takeAll(session, holder.hello.clientId);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(5_500);
+    session.detach(holder.hello.clientId);
+
+    const other = session.helloDevice("phone", session.joinCode, undefined);
+    if (!other.ok) throw new Error("join failed");
+    expect(session.hold(other.hello.clientId, "agnes", "take").ok).toBe(true);
+    const state = session.dashboardState();
+    expect(state.paused.map((row) => row.hunter)).toEqual(["tomas", "wren", "emeric"]);
+    expect(
+      state.devices.some((device) => device.connected && device.heldHunters.includes("agnes")),
+    ).toBe(true);
+  });
+
+  it("refuses a 17th device and forgets a disconnected device that holds nobody", () => {
+    const { session } = start();
+    const tokens: string[] = [];
+    const ids: string[] = [];
+    for (let n = 0; n < 16; n += 1) {
+      const joined = session.helloDevice("phone", session.joinCode, undefined);
+      expect(joined.ok).toBe(true);
+      if (!joined.ok) return;
+      tokens.push(joined.hello.token);
+      ids.push(joined.hello.clientId);
+    }
+    expect(session.helloDevice("phone", session.joinCode, undefined).ok).toBe(false);
+    expect(session.dashboardState().devices).toHaveLength(16);
+
+    for (const id of ids) session.detach(id);
+    expect(session.dashboardState().devices).toHaveLength(0);
+    const again = session.helloDevice("phone", session.joinCode, undefined);
+    expect(again.ok).toBe(true);
+    expect(tokens).toHaveLength(16);
+  });
+
+  it("refuses a ninth holder and leaves dashboard state publishable", () => {
+    const { session, clock } = start();
+    const dash = session.helloDashboard();
+    const ids: string[] = [];
+    const tokens: string[] = [];
+    for (let n = 0; n < 8; n += 1) {
+      const joined = session.helloDevice("ipad", session.joinCode, undefined);
+      if (!joined.ok) throw new Error("join failed");
+      takeAll(session, joined.hello.clientId);
+      ids.push(joined.hello.clientId);
+      tokens.push(joined.hello.token);
+    }
+    const ninth = session.helloDevice("phone", session.joinCode, undefined);
+    if (!ninth.ok) throw new Error("join failed");
+    expect(session.hold(ninth.hello.clientId, "agnes", "take").ok).toBe(false);
+    expect(session.hold(ninth.hello.clientId, "agnes", "take").ok).toBe(false);
+    expect(session.dashboardState().hunters.agnes.holders).toHaveLength(8);
+    expect(session.begin().ok).toBe(true);
+    clock.advance(5_500);
+
+    for (const id of ids) session.detach(id);
+    expect(session.hold(ninth.hello.clientId, "agnes", "take").ok).toBe(false);
+    expect(session.dashboardState().hunters.agnes.holders).toHaveLength(8);
+    expect(session.dashboardView(dash.token).paused).toBe(true);
+
+    const back = session.helloDevice("ipad", undefined, tokens[0]);
+    expect(back.ok).toBe(true);
+    expect(session.dashboardView(dash.token).paused).toBe(false);
+    expect(session.dashboardView(dash.token).playback?.speaking).toBe(true);
+    expect(session.dashboardState().hunters.agnes.holders).toHaveLength(8);
+  });
+});
