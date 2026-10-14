@@ -3,9 +3,11 @@ import type { z } from "zod";
 import {
   CLIENT_MESSAGE_TYPES,
   clientMessageSchema,
+  commandLifecyclePayloadSchema,
   commandMessageSchema,
   commandPayloadSchema,
   END_STAGES,
+  envelopeSchema,
   HELD_LIGHT_SEQUENCES,
   helloPayloadSchema,
   inventory,
@@ -165,6 +167,8 @@ describe("no client message carries raw bytes", () => {
     expect(helloPayloadSchema.shape.clientLabel.maxLength).toBe(64);
     expect(commandPayloadSchema.shape.capabilityId.maxLength).toBe(64);
     expect(commandMessageSchema.shape.id.maxLength).toBe(64);
+    expect(envelopeSchema.shape.id.unwrap().maxLength).toBe(64);
+    expect(envelopeSchema.shape.correlationId.unwrap().maxLength).toBe(64);
   });
 
   it("lets params through only as the inventory schema's own output", () => {
@@ -178,9 +182,21 @@ describe("no client message carries raw bytes", () => {
     ]) {
       expect(validateCommand("sound.play", params).ok, JSON.stringify(params)).toBe(false);
     }
-    for (const entry of inventory.filter(isCommandable)) {
-      const extra = validateCommand(entry.id, { bytes, hex: "0010", data: "AAEC" });
-      expect(extra.ok, entry.id).toBe(false);
+    // Params that are valid on their own are refused once an extra key rides along.
+    const valid: [string, object][] = [
+      ["sound.play", { soundIndex: 1 }],
+      ["lighting.all-on", {}],
+      ["mechanics.rotate-with-state", { top: "east", middle: "north", bottom: "north" }],
+      ["seals.break", { seal: { side: "north", level: "top" } }],
+    ];
+    for (const [id, params] of valid) {
+      expect(validateCommand(id, params).ok, id).toBe(true);
+      for (const extra of [{ bytes }, { hex: "0010" }, { data: "AAEC" }]) {
+        expect(validateCommand(id, { ...params, ...extra }), id).toMatchObject({
+          ok: false,
+          reason: "invalid-params",
+        });
+      }
     }
   });
 });
@@ -200,6 +216,33 @@ describe("validateCommand", () => {
     if (result.ok) throw new Error("expected a rejection");
     expect(result.issues.map((issue) => issue.path)).toEqual([["soundIndex"]]);
     expect(result.issues[0]?.message).toBeTruthy();
+  });
+
+  it("reports nothing of the client's own text, and always fits a rejected lifecycle", () => {
+    const hostile = [
+      { soundIndex: 1, ["k".repeat(5000)]: 1 },
+      Object.fromEntries(Array.from({ length: 200 }, (_, i) => [`key-${i}`, "x".repeat(1000)])),
+      { soundIndex: "9".repeat(5000) },
+      "x".repeat(5000),
+      { seal: { side: "n".repeat(5000), level: { deep: { deeper: { deepest: [1, 2, 3] } } } } },
+    ];
+    for (const id of ["sound.play", "seals.break", "lighting.set"]) {
+      for (const params of hostile) {
+        const result = validateCommand(id, params);
+        if (result.ok) throw new Error("expected a rejection");
+        expect(JSON.stringify(result.issues)).not.toMatch(/kkkk|xxxx|nnnn|9999/);
+        const lifecycle = commandLifecyclePayloadSchema.safeParse({
+          commandId: "m-7",
+          capabilityId: id,
+          clientId: "c-1",
+          stage: "rejected",
+          at: 1,
+          reason: result.reason,
+          issues: result.issues,
+        });
+        expect(lifecycle.success, id).toBe(true);
+      }
+    }
   });
 
   it("refuses an id that is not in the inventory", () => {

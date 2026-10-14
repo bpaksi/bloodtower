@@ -11,7 +11,8 @@ export type Origin = z.infer<typeof originSchema>;
 
 /**
  * One value in the state snapshot. A value the service does not have is `unavailable` and carries
- * no `value` at all, so it cannot be shown as zero or as empty.
+ * no `value` at all, so it cannot be shown as zero or as empty. A `value` of null is a real
+ * reading (for example "no seal is left to break"); it never stands for unknown.
  */
 export const stateValueSchema = z.discriminatedUnion("freshness", [
   z.strictObject({

@@ -9,8 +9,8 @@ export const PROTOCOL_VERSION = 1;
 export const envelopeSchema = z.strictObject({
   v: z.literal(PROTOCOL_VERSION),
   type: z.string().min(1),
-  id: z.string().min(1).optional(),
-  correlationId: z.string().min(1).optional(),
+  id: z.string().min(1).max(64).optional(),
+  correlationId: z.string().min(1).max(64).optional(),
   payload: z.unknown(),
 });
 

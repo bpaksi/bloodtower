@@ -18,10 +18,12 @@ const host = process.env.HOST || "0.0.0.0";
 const webRoot = resolve(process.env.WEB_ROOT || resolve(import.meta.dirname, "../web/out"));
 
 // Set by `pnpm dev` only: the origin of `next dev`, which serves the UI from another port (D20).
+// Each is reduced to scheme, host and port, so a trailing slash does not stop it matching.
 const devOrigins = (process.env.DEV_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
-  .filter((origin) => origin !== "");
+  .filter((origin) => origin !== "")
+  .map((origin) => new URL(origin).origin);
 
 const server = await startTowerServer({
   port: parsePort(process.env.PORT),

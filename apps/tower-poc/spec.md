@@ -99,7 +99,7 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. All messages are valid
 - **Server → client**
   - `welcome{clientId, versions, inventory, verificationOverlay, settings, pendingRestore?}`
   - `connection{state, calibration, device?, error?}`. The calibration state travels with the connection state because it resets on disconnect (D10). A device field the tower did not report is null.
-  - `state{snapshot}`
+  - `state{snapshot}`. A value the service does not have is `unavailable` and carries no value. A value of null is a real reading, never "unknown".
   - `command.lifecycle{commandId, capabilityId, clientId, stage, at, reason?, issues?}`, sent to every client. `issues` names the fields that failed validation.
   - `diag.event{...}`
   - `gap.changed`, `error{code, message, actionable}`
@@ -229,4 +229,4 @@ Everything in PRD non-goals, plus: auth/tokens, HTTPS, direct browser BLE, upstr
 1. **noble on macOS.** Node needs Bluetooth permission (granted to the terminal app), and macOS hides MAC addresses, so the device ID is a UUID. The M1 spike settled it: once the terminal has Bluetooth permission, noble connects in 2 to 5 seconds. The first run fails while macOS is still asking.
 2. **Response correlation.** The tower may not acknowledge every command, so "confirmed" may often be `indeterminate` (GAP-DIAG-001). The M1 spike showed which: the tower was silent for the four rotation sequences and for writes that changed nothing it reports (GAP-HW-010).
 3. **Library churn.** Upstream releases frequently. The exact pin stays, and upgrades go through a new intent.
-4. **Open LAN.** Anyone on the Wi-Fi can drive the tower. This is accepted for the POC (D6). D20 narrows it: a page from another site cannot connect, but a person on the LAN who opens the UI still can.
+4. **Open LAN.** Anyone on the Wi-Fi can drive the tower. This is accepted for the POC (D6). D20 narrows it: a page from another site cannot connect, but a person on the LAN who opens the UI still can. One case gets past D20 as written: a site that first serves its page on the service's port and then re-points its own name at the Mac's address (DNS rebinding) has an `Origin` equal to its `Host`. Closing that means checking `Host` against the Mac's own names and addresses, which is Bob's decision (M2 plan, step 1).

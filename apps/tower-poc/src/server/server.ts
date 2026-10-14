@@ -14,6 +14,8 @@ import { type RawData, type WebSocket, WebSocketServer } from "ws";
 import { requestPath, serveStatic } from "./static.ts";
 
 export const WS_PATH = "/ws";
+/** Far above any protocol message. The `ws` default is 100 MiB, all of it parsed as JSON. */
+const MAX_MESSAGE_BYTES = 64 * 1024;
 
 export interface TowerServerOptions {
   port: number;
@@ -118,7 +120,7 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
     serveStatic(options.webRoot, req, res).catch(() => res.destroy());
   });
 
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
   wss.on("connection", (socket) => {
     const clientId = randomUUID();
     // ws reports protocol violations (bad frames, invalid UTF-8) as `error`. Unhandled, that would

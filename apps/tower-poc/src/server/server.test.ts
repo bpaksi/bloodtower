@@ -298,6 +298,16 @@ describe("WebSocket endpoint", () => {
     expect(reply).toMatchObject({ type: "error", payload: { code } });
   });
 
+  it("drops a client that sends a message larger than any protocol message", async () => {
+    const socket = await openSocket();
+    const closed = new Promise<number>((resolve) => socket.once("close", resolve));
+    socket.on("error", () => {});
+    socket.send(JSON.stringify({ ...hello, payload: { clientLabel: "x".repeat(70_000) } }));
+    expect(await closed).toBe(1009);
+
+    expect(await exchange(JSON.stringify(hello))).toMatchObject({ type: "welcome" });
+  });
+
   it("refuses WebSocket upgrades on other paths", async () => {
     await expect(openSocket("/other")).rejects.toThrow();
   });
