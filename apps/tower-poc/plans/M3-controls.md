@@ -78,6 +78,29 @@ Branch names follow the repo convention, `feat/tower-poc-<slug>`; this table fir
 - **Tests**: executor "seals and skulls" (the record with the tower disconnected, connected and calibrated, nothing written; a confirmed break recorded and an unconfirmed one not; the tower counter packet); state store record tests (first run, load with no prompt, unusable row, never stale, not in the snapshot, failing save); the feed's battery history, drums and glyphs, and skull counting across a reconnect; `db/records.test.ts` across a restart; web `towerState.test.ts` and the service-only rule in `controls.test.ts`. The e2e test `tests/tower/state.spec.ts` runs on the iPad first: the record before connecting, a reload, readings unavailable then current, the break cancelled and confirmed, the tower counter, the record unchanged and the readings stale after a disconnect, and screenshots at the three viewports with no sideways scroll.
 - **On the tower**: Break a seal plays the seal lights and sound; no drum moves. Reset tower counter writes a state packet; what the tower does with it is for the Verify pass. Nothing else on the page reaches the tower.
 
+### 3.6 Verify mode (`feat/tower-poc-verify-mode`)
+
+- **Protocol**: `verify.record{capabilityId, result, notes}` (client, with an `id`) and `verify.changed{verificationOverlay}` (to every client, correlated to the recording `id`); `welcome` gains `verificationOverlay` (`src/protocols/verification.ts`). A `partial` or `fail` needs notes, which is what its gap entry is written from. `sessionId` is left out until saved diagnostics sessions exist (M4); the column is there and null. The raw-bytes guard test now lists the two new text fields; neither reaches the tower.
+- **Database**: migration 3 adds `verifications`, rows only added (`db/verifications.ts`). A row that cannot be read is skipped with a warning. `environment` is `{tower, client}`: which tower the service drove and the device's label.
+- **Overlay** (`src/server/verifications.ts`): the newest result per capability for the tower the service drives now, so a mock result never shows on the real tower nor hides a real one (the mock already has its own database; this also holds if one is shared). `effectiveVerification` reads `hardware-verified`, `hardware-partial` or `hardware-failed` only from a `bluetooth` result; the inventory never claims them (D14). Only capabilities with a `uiLocation` can be recorded.
+- **UI**: a Verify mode toggle on the Dashboard, Lights, Sounds, Mechanics and Tower State pages, kept per device in the browser. On, the page shows its checklist (`VerifyPanel`): the page's capabilities split by category into closed groups, each with "n of m recorded", every row with its status, newest result (result, time, device, library version, notes) and a Pass/Partial/Fail form. One checklist per page rather than a form inside each control, because most rows (events, properties, queries) have no control of their own. On the mock it says results never count as hardware-verified.
+- **Dashboard**: the capability summary, counts by availability and by verification, and "Verify pass: n of m capabilities on the control pages" recorded. The Diagnostics page's three entries wait for that page (M4).
+- **Tests**: protocol (`verification.test.ts`, `messages.test.ts`), server (`verifications.test.ts`: newest per capability across a restart, the other tower's results, refusals, unreadable rows; `server.test.ts` "Verify mode (D14)": broadcast to every client, `welcome` for a late client, refusals to the sender only, a failed save), web (`verify.test.ts`, `service.test.ts`). The e2e test `tests/tower/verify.spec.ts` runs on the iPad first with a Mac beside it: off by default, a fail refused without notes, saved with notes, seen on the Mac, a pass from the Mac seen on the iPad, kept across a reload, a checklist on every control page, the Dashboard count, and screenshots at the three viewports with no sideways scroll.
+
+**Bob's Verify pass, in chunks.** Run the service on the real tower (`pnpm build && pnpm start`), turn Verify mode on, and do one group at a time; each result is saved as it is recorded, so stop whenever a group ends. A suggested order, each a short sitting:
+
+| Chunk | Page, group | Needs |
+|---|---|---|
+| 1 | Dashboard, Connection | Connect, Disconnect, Reconnect |
+| 2 | Dashboard, Calibration | Connected tower |
+| 3 | Lights, Lights | Connected; the rotation sequences need calibration |
+| 4 | Sounds, Sounds | Connected |
+| 5 | Mechanics, Mechanics | Calibrated; random rotate turns the lights off |
+| 6 | Tower State, Seals and Skulls | Connected for Break a seal and the tower counter |
+| 7 | Tower State, Glyphs, Battery and Tower state | Calibrated for glyphs |
+
+Record a `partial` or `fail` with what was seen; Claude writes the gap entries from the notes. A `confirmed` the tower did not earn goes to the bugfix skill (GAP-LIB-010).
+
 ## Files that change (typical per step)
 
 ```text

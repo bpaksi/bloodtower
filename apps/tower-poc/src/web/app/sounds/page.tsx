@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { SoundCatalog } from "@/components/controls/SoundCatalog";
 import { PageHeader } from "@/components/PageHeader";
+import { VerifyPanel } from "@/components/verify/VerifyPanel";
 import { PAGES } from "@/lib/pages";
 
 export const metadata: Metadata = { title: PAGES.sounds.title };
@@ -9,7 +10,8 @@ export const metadata: Metadata = { title: PAGES.sounds.title };
 export default function SoundsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader page={PAGES.sounds} />
+      <PageHeader page={PAGES.sounds} verify />
+      <VerifyPanel location="sounds" />
       <CapabilityControl
         capabilityId="sound.play-stateful"
         title="Play with volume"

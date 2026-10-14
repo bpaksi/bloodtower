@@ -17,7 +17,10 @@ import {
   SILENT_LIGHT_SEQUENCES,
   serverMessageSchema,
   toInventoryEntry,
+  VERIFICATION_NOTES_MAX,
   validateCommand,
+  verifyRecordMessageSchema,
+  verifyRecordPayloadSchema,
 } from "./index.ts";
 
 const hello = { v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: "iPad" } };
@@ -36,6 +39,7 @@ const welcome = {
       data: "3.0.0",
     },
     inventory: inventory.map(toInventoryEntry),
+    verificationOverlay: {},
     tower: "mock",
   },
 };
@@ -72,6 +76,7 @@ describe("clientMessageSchema", () => {
       "calibrate",
       "command",
       "restoreState",
+      "verify.record",
     ]);
   });
 
@@ -158,7 +163,8 @@ const openFields = (schema: z.ZodType, path: string): string[] => {
 };
 
 describe("no client message carries raw bytes", () => {
-  it("has no open field except the envelope ids, the client label and command.params", () => {
+  // `verify.record` carries a person's notes, which the service saves and never sends to the tower.
+  it("has no open field except the envelope ids, the client label, command.params and Verify notes", () => {
     const open = clientMessageSchema.options.flatMap((option) =>
       openFields(option, option.shape.type.value),
     );
@@ -169,6 +175,8 @@ describe("no client message carries raw bytes", () => {
         "hello.payload.clientLabel",
         "command.payload.capabilityId",
         "command.payload.params",
+        "verify.record.payload.capabilityId",
+        "verify.record.payload.notes",
       ].sort(),
     );
   });
@@ -177,6 +185,9 @@ describe("no client message carries raw bytes", () => {
     expect(helloPayloadSchema.shape.clientLabel.maxLength).toBe(64);
     expect(commandPayloadSchema.shape.capabilityId.maxLength).toBe(64);
     expect(commandMessageSchema.shape.id.maxLength).toBe(64);
+    expect(verifyRecordPayloadSchema.shape.capabilityId.maxLength).toBe(64);
+    expect(verifyRecordPayloadSchema.shape.notes.maxLength).toBe(VERIFICATION_NOTES_MAX);
+    expect(verifyRecordMessageSchema.shape.id.maxLength).toBe(64);
     expect(envelopeSchema.shape.id.unwrap().maxLength).toBe(64);
     expect(envelopeSchema.shape.correlationId.unwrap().maxLength).toBe(64);
   });

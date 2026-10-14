@@ -8,6 +8,7 @@ import {
   SealRecord,
   SkullCount,
 } from "@/components/state/TowerValues";
+import { VerifyPanel } from "@/components/verify/VerifyPanel";
 import { PAGES } from "@/lib/pages";
 
 export const metadata: Metadata = { title: PAGES.state.title };
@@ -15,7 +16,8 @@ export const metadata: Metadata = { title: PAGES.state.title };
 export default function TowerStatePage() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader page={PAGES.state} />
+      <PageHeader page={PAGES.state} verify />
+      <VerifyPanel location="tower-state" />
       <p className="text-sm text-muted-foreground">
         Each value says where it came from, whether it is current or stale, and when it was set. A
         value the app does not have is shown as unavailable, never as zero.

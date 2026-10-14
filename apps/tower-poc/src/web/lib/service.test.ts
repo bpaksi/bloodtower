@@ -141,6 +141,7 @@ describe("a lost link to the service", () => {
           data: "3",
         },
         inventory: [],
+        verificationOverlay: {},
         tower: "mock",
       },
     });
@@ -149,5 +150,48 @@ describe("a lost link to the service", () => {
     view = applyServerMessage(applySocketState(view, "online"), welcome("c-2"), 0);
     view = applyServerMessage(view, welcome("c-2"), 0);
     expect(view.ownClientIds).toEqual(["c-1", "c-2"]);
+  });
+
+  it("takes a newer Verify overlay and remembers which of its own records were saved", () => {
+    const record = {
+      id: 1,
+      capabilityId: "sound.play",
+      result: "pass" as const,
+      notes: "",
+      diagnosticSessionId: null,
+      libraryVersion: "7.1.2",
+      appVersion: "0",
+      testedAt: 1,
+      environment: { tower: "bluetooth" as const, client: "iPad" },
+    };
+    const changed = (correlationId?: string): ServerMessage => ({
+      v: PROTOCOL_VERSION,
+      type: "verify.changed",
+      ...(correlationId ? { correlationId } : {}),
+      payload: { verificationOverlay: { "sound.play": record } },
+    });
+    const welcomed = applyServerMessage(
+      initialView,
+      {
+        v: PROTOCOL_VERSION,
+        type: "welcome",
+        payload: {
+          clientId: "c-1",
+          versions: { protocol: PROTOCOL_VERSION, server: "0", node: "v", library: "7", data: "3" },
+          inventory: [],
+          verificationOverlay: {},
+          tower: "bluetooth",
+        },
+      },
+      0,
+    );
+    let view = applyServerMessage(welcomed, changed("v-1"), 0);
+    expect(view.welcome?.verificationOverlay).toEqual({ "sound.play": record });
+    expect(view.savedVerifications).toEqual(["v-1"]);
+    // Another device's record: shown, but not one of this page's.
+    view = applyServerMessage(view, changed(), 0);
+    expect(view.savedVerifications).toEqual(["v-1"]);
+    // Before welcome there is no overlay to update; nothing is made up.
+    expect(applyServerMessage(initialView, changed("v-2"), 0).welcome).toBeUndefined();
   });
 });

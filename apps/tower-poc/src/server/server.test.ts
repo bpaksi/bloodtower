@@ -13,6 +13,8 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { createMockTower } from "./adapters/mockTower.ts";
+import { openDatabase } from "./db/client.ts";
+import { createVerificationStorage } from "./db/verifications.ts";
 import packageJson from "./package.json" with { type: "json" };
 import {
   isAllowedOrigin,
@@ -24,6 +26,7 @@ import {
 import { createTowerSession } from "./session.ts";
 import { createStateStore } from "./stateStore.ts";
 import { createTowerRecords } from "./towerRecords.ts";
+import { createVerifications, type VerificationStorage } from "./verifications.ts";
 
 /** A session on its own mock tower, which connects in 20 ms. */
 const mockSession = () => {
@@ -31,8 +34,19 @@ const mockSession = () => {
   return createTowerSession({ createAdapter: () => mock.adapter });
 };
 
-/** A store with the service's record of seals and skulls on it, as the server takes them. */
-const withRecords = (store = createStateStore()) => ({ store, records: createTowerRecords(store) });
+/** Verify results in a database of their own that lasts as long as the test run. */
+const verificationsOn = (storage = createVerificationStorage(openDatabase(":memory:").db)) =>
+  createVerifications({ storage, tower: "mock", libraryVersion: "7.1.2", appVersion: "9.9.9" });
+
+/**
+ * A store with the service's record of seals and skulls on it, and the Verify results, as the
+ * server takes them.
+ */
+const withRecords = (store = createStateStore()) => ({
+  store,
+  records: createTowerRecords(store),
+  verifications: verificationsOn(),
+});
 
 let dir: string;
 let server: TowerServer;
@@ -689,6 +703,164 @@ describe("lifecycle messages", () => {
       b.close();
       await own.close();
       await session.close();
+    }
+  });
+});
+
+describe("Verify mode (D14)", () => {
+  const listen = (socket: WebSocket) => {
+    const received: ServerMessage[] = [];
+    socket.on("message", (raw) =>
+      received.push(serverMessageSchema.parse(JSON.parse(raw.toString()))),
+    );
+    const until = async (match: (all: ServerMessage[]) => boolean) => {
+      for (let waited = 0; !match(received); waited += 10) {
+        if (waited > 3000) throw new Error(`timed out; received ${JSON.stringify(received)}`);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+    };
+    return { received, until };
+  };
+  const hello = (label: string) =>
+    JSON.stringify({ v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: label } });
+  const record = (id: string, payload: unknown) =>
+    JSON.stringify({ v: PROTOCOL_VERSION, type: "verify.record", id, payload });
+
+  const start = async (storage?: VerificationStorage) => {
+    const own = await startTowerServer({
+      port: 0,
+      host: "127.0.0.1",
+      webRoot: join(dir, "out"),
+      serverVersion: "9.9.9",
+      session: mockSession(),
+      ...withRecords(),
+      verifications: verificationsOn(storage),
+      tower: "mock",
+    });
+    const a = await openSocket(WS_PATH, undefined, own.port);
+    const b = await openSocket(WS_PATH, undefined, own.port);
+    const close = async () => {
+      a.close();
+      b.close();
+      await own.close();
+    };
+    return { own, a, b, close };
+  };
+
+  it("records a result, shows it to every client, and gives it to a new one in welcome", async () => {
+    const { own, a, b, close } = await start();
+    try {
+      const fromA = listen(a);
+      const fromB = listen(b);
+      a.send(hello("iPad Safari"));
+      b.send(hello("Mac Chrome"));
+      await fromA.until((all) => all.some((m) => m.type === "welcome"));
+      await fromB.until((all) => all.some((m) => m.type === "welcome"));
+      const welcome = fromA.received.find((m) => m.type === "welcome");
+      expect(welcome).toMatchObject({ payload: { verificationOverlay: {} } });
+
+      a.send(record("v-1", { capabilityId: "lighting.all-on", result: "pass", notes: "  " }));
+      const changed = (all: ServerMessage[]) => all.find((m) => m.type === "verify.changed");
+      await fromA.until((all) => changed(all) !== undefined);
+      await fromB.until((all) => changed(all) !== undefined);
+      const expected = {
+        capabilityId: "lighting.all-on",
+        result: "pass",
+        notes: "",
+        diagnosticSessionId: null,
+        libraryVersion: "7.1.2",
+        appVersion: "9.9.9",
+        environment: { tower: "mock", client: "iPad Safari" },
+      };
+      expect(changed(fromA.received)).toMatchObject({
+        correlationId: "v-1",
+        payload: { verificationOverlay: { "lighting.all-on": expected } },
+      });
+      expect(changed(fromB.received)).toEqual(changed(fromA.received));
+
+      const late = await openSocket(WS_PATH, undefined, own.port);
+      try {
+        const fromLate = listen(late);
+        late.send(hello("Phone"));
+        await fromLate.until((all) => all.some((m) => m.type === "welcome"));
+        expect(fromLate.received[0]).toMatchObject({
+          payload: { verificationOverlay: { "lighting.all-on": expected } },
+        });
+      } finally {
+        late.close();
+      }
+    } finally {
+      await close();
+    }
+  });
+
+  it.each([
+    ["an unknown capability", { capabilityId: "lighting.nope", result: "pass", notes: "" }],
+    [
+      "a capability the app does not show",
+      { capabilityId: "mechanics.unjam-drums", result: "pass", notes: "" },
+    ],
+  ])("refuses %s to the sender only, and saves nothing", async (_name, payload) => {
+    const { a, b, close } = await start();
+    try {
+      const fromA = listen(a);
+      const fromB = listen(b);
+      a.send(hello("a"));
+      b.send(hello("b"));
+      await fromB.until((all) => all.some((m) => m.type === "welcome"));
+      a.send(record("v-2", payload));
+      await fromA.until((all) => all.some((m) => m.type === "error"));
+      expect(fromA.received.find((m) => m.type === "error")).toMatchObject({
+        correlationId: "v-2",
+        payload: { code: "invalid-payload" },
+      });
+      expect([...fromA.received, ...fromB.received].map((m) => m.type)).not.toContain(
+        "verify.changed",
+      );
+    } finally {
+      await close();
+    }
+  });
+
+  it.each([
+    ["a partial with no notes", { capabilityId: "sound.play", result: "partial", notes: " " }],
+    ["a fail with no notes", { capabilityId: "sound.play", result: "fail", notes: "" }],
+    ["an unknown result", { capabilityId: "sound.play", result: "maybe", notes: "x" }],
+    ["no id", undefined],
+  ])("answers %s with invalid-payload", async (_name, payload) => {
+    const reply = await exchange(
+      payload
+        ? record("v-3", payload)
+        : JSON.stringify({
+            v: PROTOCOL_VERSION,
+            type: "verify.record",
+            payload: { capabilityId: "sound.play", result: "pass", notes: "" },
+          }),
+    );
+    expect(reply).toMatchObject({ type: "error", payload: { code: "invalid-payload" } });
+  });
+
+  it("says so when the database cannot save the result", async () => {
+    const { a, close } = await start({
+      add: () => {
+        throw new Error("disk full");
+      },
+      all: () => ({ records: [], unusable: 0 }),
+    });
+    const quiet = console.error;
+    console.error = () => {};
+    try {
+      const fromA = listen(a);
+      a.send(hello("a"));
+      a.send(record("v-4", { capabilityId: "sound.play", result: "pass", notes: "" }));
+      await fromA.until((all) => all.some((m) => m.type === "error"));
+      expect(fromA.received.find((m) => m.type === "error")).toMatchObject({
+        correlationId: "v-4",
+        payload: { code: "invalid-state", message: expect.stringContaining("not saved") },
+      });
+    } finally {
+      console.error = quiet;
+      await close();
     }
   });
 });

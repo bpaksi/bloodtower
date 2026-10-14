@@ -19,6 +19,7 @@ import { SessionStateError, type TowerSession } from "./session.ts";
 import { NoPendingRestoreError, type StateStore } from "./stateStore.ts";
 import { requestPath, serveStatic } from "./static.ts";
 import type { TowerRecords } from "./towerRecords.ts";
+import type { Verifications } from "./verifications.ts";
 import { installedVersion } from "./versions.ts";
 
 export const WS_PATH = "/ws";
@@ -40,6 +41,8 @@ export interface TowerServerOptions {
   store: StateStore;
   /** The service's own record of seals and skulls, which some commands change (spec D24). */
   records: TowerRecords;
+  /** Verify mode's results, overlaid on the inventory in `welcome` (D14). */
+  verifications: Verifications;
   /** Which tower the session drives, for `welcome`. */
   tower: "mock" | "bluetooth";
   /**
@@ -199,6 +202,7 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
             ...versions,
           },
           inventory: INVENTORY,
+          verificationOverlay: options.verifications.overlay(),
           tower: options.tower,
         },
       });
@@ -243,6 +247,32 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
         // A bug in the service; thrown here it would stop the whole process.
         return console.error("Restoring state failed:", error);
       }
+    case "verify.record": {
+      // A person's account of what the tower did. Nothing is sent to the tower.
+      let outcome: ReturnType<Verifications["record"]>;
+      try {
+        outcome = options.verifications.record(
+          message.data.payload,
+          client.label ?? "Unnamed device",
+        );
+      } catch (error) {
+        console.error("Saving a Verify result failed:", error);
+        return sendError(
+          socket,
+          "invalid-state",
+          "The result was not saved: the service could not write it.",
+          id,
+        );
+      }
+      if (!outcome.ok) return sendError(socket, "invalid-payload", outcome.reason, id);
+      // Every client sees it; the id tells the device that recorded it that it was saved.
+      return hub.broadcast({
+        v: PROTOCOL_VERSION,
+        type: "verify.changed",
+        correlationId: id,
+        payload: { verificationOverlay: outcome.overlay },
+      });
+    }
     default: {
       // A client message type with no case here is a compile error, not a message left unanswered.
       const unhandled: never = message.data;

@@ -12,4 +12,16 @@ export const MIGRATIONS: readonly string[] = [
     value TEXT NOT NULL,
     updated_at INTEGER NOT NULL
   )`,
+  // Verify mode's results (spec D14, M3 step 3.6): one row per result recorded, never changed.
+  `CREATE TABLE verifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    capability_id TEXT NOT NULL,
+    result TEXT NOT NULL,
+    notes TEXT NOT NULL,
+    diagnostic_session_id TEXT,
+    library_version TEXT NOT NULL,
+    app_version TEXT NOT NULL,
+    tested_at INTEGER NOT NULL,
+    environment TEXT NOT NULL
+  )`,
 ];
