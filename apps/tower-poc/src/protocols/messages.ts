@@ -2,6 +2,7 @@ import { z } from "zod";
 import { commandLifecyclePayloadSchema, commandPayloadSchema } from "./command.ts";
 import { connectionPayloadSchema } from "./connection.ts";
 import { envelopeSchema, PROTOCOL_VERSION } from "./envelope.ts";
+import { inventoryEntrySchema } from "./inventoryWire.ts";
 import { restoreStatePayloadSchema, statePayloadSchema } from "./state.ts";
 
 const message = <T extends string, P extends z.ZodType>(type: T, payload: P) =>
@@ -48,7 +49,12 @@ export const welcomePayloadSchema = z.strictObject({
     protocol: z.literal(PROTOCOL_VERSION),
     server: z.string().min(1),
     node: z.string().min(1),
+    /** The installed `ultimatedarktower` and `ultimatedarktowerdata`, read from their manifests. */
+    library: z.string().min(1),
+    data: z.string().min(1),
   }),
+  /** The service's capability inventory, in inventory order. */
+  inventory: z.array(inventoryEntrySchema),
 });
 
 export const errorCodeSchema = z.enum([

@@ -73,6 +73,11 @@ export {
   volumeSchema,
 } from "./inventory.ts";
 export {
+  type InventoryEntry,
+  inventoryEntrySchema,
+  toInventoryEntry,
+} from "./inventoryWire.ts";
+export {
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
   calibrateMessageSchema,

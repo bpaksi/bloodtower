@@ -15,6 +15,7 @@ import {
   lifecycleStageSchema,
   PROTOCOL_VERSION,
   serverMessageSchema,
+  toInventoryEntry,
   validateCommand,
 } from "./index.ts";
 
@@ -26,7 +27,14 @@ const welcome = {
   correlationId: "m-1",
   payload: {
     clientId: "c-1",
-    versions: { protocol: PROTOCOL_VERSION, server: "0.0.0", node: "v24.4.1" },
+    versions: {
+      protocol: PROTOCOL_VERSION,
+      server: "0.0.0",
+      node: "v24.4.1",
+      library: "7.1.2",
+      data: "3.0.0",
+    },
+    inventory: inventory.map(toInventoryEntry),
   },
 };
 
@@ -277,6 +285,17 @@ describe("validateCommand", () => {
 describe("serverMessageSchema", () => {
   it("accepts welcome", () => {
     expect(serverMessageSchema.parse(welcome)).toEqual(welcome);
+  });
+
+  it("sends every inventory entry in welcome as JSON, without its params schema", () => {
+    const entries = welcome.payload.inventory;
+    expect(entries.map((entry) => entry.id)).toEqual(inventory.map((entry) => entry.id));
+    // What arrives is what was sent: nothing in an entry is lost by JSON.
+    expect(JSON.parse(JSON.stringify(entries))).toEqual(entries);
+    for (const entry of entries) expect(entry).not.toHaveProperty("params");
+    expect(entries.filter((entry) => entry.commandable).map((entry) => entry.id)).toEqual(
+      inventory.filter(isCommandable).map((entry) => entry.id),
+    );
   });
 
   it("accepts error with and without actionable text", () => {

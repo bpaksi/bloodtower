@@ -3,10 +3,17 @@ import { request } from "node:http";
 import { connect } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { PROTOCOL_VERSION, type ServerMessage, serverMessageSchema } from "tower-poc-protocols";
+import {
+  inventory,
+  LIBRARY_BASELINE,
+  PROTOCOL_VERSION,
+  type ServerMessage,
+  serverMessageSchema,
+} from "tower-poc-protocols";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { createMockTower } from "./adapters/mockTower.ts";
+import packageJson from "./package.json" with { type: "json" };
 import {
   isAllowedOrigin,
   parseDevOrigins,
@@ -322,8 +329,43 @@ describe("WebSocket endpoint", () => {
     expect(reply).toMatchObject({
       type: "welcome",
       correlationId: "m-1",
-      payload: { versions: { protocol: PROTOCOL_VERSION, server: "9.9.9", node: process.version } },
+      payload: {
+        versions: {
+          protocol: PROTOCOL_VERSION,
+          server: "9.9.9",
+          node: process.version,
+          library: LIBRARY_BASELINE.version,
+          data: packageJson.dependencies.ultimatedarktowerdata,
+        },
+      },
     });
+    if (reply.type !== "welcome") throw new Error("expected welcome");
+    expect(reply.payload.inventory.map((entry) => entry.id)).toEqual(
+      inventory.map((entry) => entry.id),
+    );
+  });
+
+  it("knows each client by its id and label until it goes", async () => {
+    const socket = await openSocket();
+    const reply = new Promise<ServerMessage>((resolve) => {
+      socket.once("message", (raw) =>
+        resolve(serverMessageSchema.parse(JSON.parse(raw.toString()))),
+      );
+    });
+    socket.send(JSON.stringify({ ...hello, payload: { clientLabel: "iPad" } }));
+    const welcome = await reply;
+    if (welcome.type !== "welcome") throw new Error("expected welcome");
+    expect(server.hub.clients()).toContainEqual(
+      expect.objectContaining({ id: welcome.payload.clientId, label: "iPad" }),
+    );
+    const closed = new Promise((resolve) => socket.once("close", resolve));
+    socket.close();
+    await closed;
+    for (let waited = 0; waited < 1000; waited += 10) {
+      if (!server.hub.clients().some((client) => client.id === welcome.payload.clientId)) break;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    expect(server.hub.clients().map((client) => client.id)).not.toContain(welcome.payload.clientId);
   });
 
   it("gives each connection its own clientId", async () => {

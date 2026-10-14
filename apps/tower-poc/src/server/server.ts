@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import {
@@ -7,18 +6,25 @@ import {
   type Envelope,
   type ErrorCode,
   envelopeSchema,
+  inventory,
   PROTOCOL_VERSION,
   type ServerMessage,
+  toInventoryEntry,
 } from "tower-poc-protocols";
 import { type RawData, type WebSocket, WebSocketServer } from "ws";
+import { type ClientHub, createClientHub } from "./clientHub.ts";
 import { type CommandExecutor, createCommandExecutor } from "./executor.ts";
 import { SessionStateError, type TowerSession } from "./session.ts";
 import { NoPendingRestoreError, type StateStore } from "./stateStore.ts";
 import { requestPath, serveStatic } from "./static.ts";
+import { installedVersion } from "./versions.ts";
 
 export const WS_PATH = "/ws";
 /** Far above any protocol message. The `ws` default is 100 MiB, all of it parsed as JSON. */
 const MAX_MESSAGE_BYTES = 64 * 1024;
+
+/** The inventory as `welcome` carries it. It cannot change while the service runs. */
+const INVENTORY = inventory.map(toInventoryEntry);
 
 export interface TowerServerOptions {
   port: number;
@@ -39,6 +45,8 @@ export interface TowerServerOptions {
 
 export interface TowerServer {
   port: number;
+  /** The connected clients and the broadcast to them. */
+  hub: ClientHub;
   close: () => Promise<void>;
 }
 
@@ -129,14 +137,20 @@ const runAction = (socket: WebSocket, action: Promise<void>, correlationId?: str
     console.error("Tower session action failed:", error);
   });
 
-const handleMessage = (
-  socket: WebSocket,
-  clientId: string,
-  data: RawData,
-  options: TowerServerOptions,
-  executor: CommandExecutor,
-) => {
+interface Context {
+  options: TowerServerOptions;
+  hub: ClientHub;
+  executor: CommandExecutor;
+  versions: { library: string; data: string };
+}
+
+const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
+  const { options, hub, executor, versions } = context;
   const { serverVersion, session, store } = options;
+  const client = hub.get(socket);
+  // A message can still arrive in the moment between the socket closing and its removal.
+  if (!client) return;
+  const clientId = client.id;
   let json: unknown;
   try {
     json = JSON.parse(data.toString());
@@ -160,16 +174,23 @@ const handleMessage = (
 
   switch (message.data.type) {
     case "hello":
+      client.label = message.data.payload.clientLabel;
       send(socket, {
         v: PROTOCOL_VERSION,
         type: "welcome",
         ...(id ? { correlationId: id } : {}),
         payload: {
           clientId,
-          versions: { protocol: PROTOCOL_VERSION, server: serverVersion, node: process.version },
+          versions: {
+            protocol: PROTOCOL_VERSION,
+            server: serverVersion,
+            node: process.version,
+            ...versions,
+          },
+          inventory: INVENTORY,
         },
       });
-      // Until `welcome` carries it (step 7), a new client learns where the tower stands here.
+      // Then where the tower stands and what the service knows of it.
       send(socket, connectionMessage(session));
       return send(socket, stateMessage(store));
     case "connect":
@@ -215,33 +236,39 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
   });
 
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
-  const broadcast = (message: ServerMessage) => {
-    for (const client of wss.clients) {
-      if (client.readyState === client.OPEN) send(client, message);
-    }
-  };
-  // Every client sees every command's lifecycle, whoever sent it (D7). The client hub of step 7
-  // takes this over.
+  const hub = createClientHub();
+  // Every client sees every command's lifecycle, whoever sent it (D7).
   const executor = createCommandExecutor({
     session: options.session,
     onLifecycle: (payload) =>
-      broadcast({ v: PROTOCOL_VERSION, type: "command.lifecycle", payload }),
+      hub.broadcast({ v: PROTOCOL_VERSION, type: "command.lifecycle", payload }),
   });
+  const context: Context = {
+    options,
+    hub,
+    executor,
+    versions: {
+      library: installedVersion("ultimatedarktower"),
+      data: installedVersion("ultimatedarktowerdata"),
+    },
+  };
   wss.on("connection", (socket) => {
-    const clientId = randomUUID();
+    hub.add(socket);
+    socket.on("close", () => hub.remove(socket));
     // ws reports protocol violations (bad frames, invalid UTF-8) as `error`. Unhandled, that would
     // take the whole service down, so drop just this client.
     socket.on("error", () => socket.terminate());
-    socket.on("message", (data) => handleMessage(socket, clientId, data, options, executor));
+    socket.on("message", (data) => handleMessage(socket, data, context));
   });
 
   // Every client sees every change of connection and calibration state, whoever caused it (D7).
-  // The client hub of step 7 takes this over.
   const stopBroadcast = options.session.subscribe(() =>
-    broadcast(connectionMessage(options.session)),
+    hub.broadcast(connectionMessage(options.session)),
   );
   // Every value change and the restore prompt closing, likewise.
-  const stopStateBroadcast = options.store.subscribe(() => broadcast(stateMessage(options.store)));
+  const stopStateBroadcast = options.store.subscribe(() =>
+    hub.broadcast(stateMessage(options.store)),
+  );
 
   http.on("upgrade", (req, socket, head) => {
     if (requestPath(req.url) !== WS_PATH) {
@@ -268,11 +295,12 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
 
   return {
     port: (http.address() as AddressInfo).port,
+    hub,
     close: () =>
       new Promise<void>((resolve, reject) => {
         stopBroadcast();
         stopStateBroadcast();
-        for (const client of wss.clients) client.terminate();
+        hub.closeAll();
         wss.close();
         http.close((error) => (error ? reject(error) : resolve()));
         http.closeAllConnections();
