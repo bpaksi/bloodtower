@@ -15,19 +15,19 @@ Files in this folder:
 | `tokens.css` | Drop-in CSS tokens, frames and keyframes for Wright |
 | `fonts/fetch-fonts.sh` | Downloads the font files (not committed; `.ttf` is gitignored) |
 
-Rebuild the PNGs: `docs/art-direction/fonts/fetch-fonts.sh && cd docs/art-direction/mocks && python render.py` (needs `pip install playwright==1.* && playwright install chromium`).
-Note: `assets/shared/dt1981/` is gitignored, so the 1981 tower slide only shows where that local kit exists.
+Rebuild the PNGs: `docs/art-direction/fonts/fetch-fonts.sh && cd docs/art-direction/mocks && python3 render.py` (needs `pip install playwright==1.* && playwright install chromium`).
+Note: the 1981 tower slide is the tracked file `apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png`. The copyrighted reference tree `research/dark-tower-1981/` is gitignored; this path is not.
 
 ## 1. Fonts (all free, SIL Open Font License 1.1, from github.com/google/fonts `ofl/`)
 
 | Role | Family | Exact file | Use |
 | --- | --- | --- | --- |
-| Body, captions, VO subtitles | Cormorant Garamond (already in use) | `CormorantGaramond[wght].ttf`, `CormorantGaramond-Italic[wght].ttf` (variable 300–700) | Captions italic 500; body roman 500. Never below 22 px on Dashboard, 28 px on iPad. |
+| Body, captions, VO subtitles | Cormorant Garamond | Upstream `CormorantGaramond[wght].ttf`, `CormorantGaramond-Italic[wght].ttf` (variable 300–700). `fetch-fonts.sh` saves `CormorantGaramond-VF.ttf` and `CormorantGaramond-Italic-VF.ttf`, and `tokens.css` loads those. | Captions italic 500; body roman 500. Never below 22 px on Dashboard, 28 px on iPad. |
 | Titles, hunter names, choice verbs | Cormorant SC | `CormorantSC-Bold.ttf` | Small caps, tracking 0.04–0.08em. |
 | Labels, stats, tabs, kickers | IM Fell English SC | `IMFeENsc28P.ttf` (roman `IMFeENrm28P.ttf` as fallback body) | Letterpress grit; tracking 0.12–0.3em. Replaces every sans-serif label. |
 | Drop caps / seals only | UnifrakturMaguntia | `UnifrakturMaguntia-Book.ttf` | One initial per page, wax-seal glyphs. Never for words. |
 
-In Next.js load them with `next/font/local` from the app's own `public/fonts/` (copy via `fetch-fonts.sh`), `display: "swap"`, and expose them as the CSS variables in `tokens.css`. No Google Fonts CDN at runtime (the table runs offline).
+In Next.js load them with `next/font/local`, `display: "swap"`, and expose them as the CSS variables in `tokens.css`. `fetch-fonts.sh` writes the files under `docs/art-direction/fonts/`; copy those into the app's own `public/fonts/`. No Google Fonts CDN at runtime (the table runs offline).
 
 ## 2. Palette
 
@@ -100,7 +100,7 @@ All UI sounds sit around −20 LUFS, under VO (lines currently measure ≈ −18
 
 ## 8. Implementation notes for Wright
 
-- Import `docs/art-direction/tokens.css` (or copy into `src/web/styles/tokens.css`) once at the root layout; fonts via `next/font/local` mapped to `--bt-font-*`.
+- Import `docs/art-direction/tokens.css` once at the root layout. Its `@font-face` urls are relative to that file (`fonts/…`, the names `fetch-fonts.sh` writes, not the upstream bracket names). In the app, load those same files with `next/font/local` and map them to `--bt-font-*`.
 - Primitives to build as components: `<Parchment>`, `<InkPanel>`, `<Plate>` (framed art), `<Cartouche hunter selected waiting absent>`, `<WaxSeal>`, `<RibbonTabs>`, `<ChoiceCard verb line art hot>`, `<DropCapParagraph>`, `<CutScene src captions>`.
 - Keyframes `bt-ink-in`, `bt-candle`, `bt-badge` are in `tokens.css`; page turn: add a `bt-page-turn` keyframe with the values in §5.
 - Textures are inline SVG data URIs (`--bt-grain`, `--bt-foxing`), so no extra image files. Keep them as background layers, not `<img>`.
