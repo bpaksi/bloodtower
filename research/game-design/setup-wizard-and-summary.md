@@ -43,6 +43,7 @@ Status: draft for Bob's review, 2026-10-14. Design only. Builds on sessions.md (
   - party totals: battles won/lost, encounters, items used, buildings saved/fallen, gold, play time
   - a highlight reel of 3–5 auto-picked moments (biggest swing, closest call, best roll)
   - the seed and difficulty, so the game can be replayed
+  - time (R-LEN-5): total time, active time (play time with pauses excluded), paused time, and time per phase (setup, each night/chapter and its dusk/day/dawn phases, set pieces, encounters, fights), with the chosen game length
 - R-SUM-3. Each iPad's summary shows that hunter's personal stats, their private storyline outcome, whether their secret goal succeeded, and a story-flavored title (e.g. "the one who never flinched").
 - R-SUM-4. Campaign games also show what carries over to the next part (R-SES) and a teaser for the next chapter.
 - R-SUM-5. Optional quick feedback: a fun rating 1–5 per player and one note, saved with the game's stats (R-STA).
@@ -60,4 +61,5 @@ The Dashboard shows a QR join screen so each iPad can connect without typing a c
 - After setup, any player can bring it back from the Dashboard at any time (e.g. a "Join iPad" control on D2–D10), including mid-game when a player re-joins (R-DEV-4).
 - The QR refreshes if the session token rotates. It never shows private hunter data.
 - Fallback: a short numeric join code is shown under the QR for typing by hand.
+- R-WIZ-12. Wizard step "Game length" (R-LEN-1): the host picks Short / Standard / Long (default Standard), next to difficulty in step 1. Each option shows what it means in story terms (e.g. number of nights) and an estimated play time once measured timing data exists (R-LEN-4); otherwise it shows "estimate pending". The choice is fixed for the game and logged.
 - R-WIZ-11. Wizard step "Who holds whom": each joined device picks its hunter(s). Start is blocked until every hunter is held (R-DEV-9).
