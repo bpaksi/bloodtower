@@ -14,6 +14,7 @@ const CONTENT_TYPES: Record<string, string> = {
   ".json": "application/json; charset=utf-8",
   ".map": "application/json; charset=utf-8",
   ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
@@ -68,6 +69,16 @@ export const resolveStaticFile = async (root: string, urlPath: string) => {
   return undefined;
 };
 
+/** Sends a file and drops the read stream if the client leaves before the end. */
+const pipeFile = (file: string, res: ServerResponse) => {
+  const stream = createReadStream(file);
+  res.on("close", () => stream.destroy());
+  stream.on("error", () => {
+    if (!res.destroyed) res.destroy();
+  });
+  stream.pipe(res);
+};
+
 const sendText = (res: ServerResponse, status: number, text: string) => {
   res.writeHead(status, { "content-type": "text/plain; charset=utf-8" });
   res.end(text);
@@ -108,9 +119,7 @@ export const serveStatic = async (root: string, req: IncomingMessage, res: Serve
     "content-type": CONTENT_TYPES[extname(file)] ?? "application/octet-stream",
   });
   if (req.method === "HEAD") return res.end();
-  createReadStream(file)
-    .on("error", () => res.destroy())
-    .pipe(res);
+  pipeFile(file, res);
 };
 
 export interface HostOptions {
@@ -171,22 +180,30 @@ export const startHost = async (options: HostOptions): Promise<Host> => {
     releaseReady();
   } catch (error) {
     failReady(error);
+    server.closeAllConnections();
     server.close();
     throw error;
   }
+  let closing: Promise<void> | undefined;
   return {
     port,
     ...(live ? { joinUrl: live.joinUrl } : {}),
-    close: () =>
-      new Promise((resolveClose, reject) => {
+    close: () => {
+      if (closing) return closing;
+      closing = new Promise((resolveClose, reject) => {
         const done = () => {
+          // close() waits for keep-alive. An unread portrait sits for the 5s timeout
+          // and a paused clip never goes idle, so the 10s hook can fire. Drop the sockets first.
           server.close((error) => (error ? reject(error) : resolveClose()));
+          server.closeAllConnections();
         };
         if (!live) {
           done();
           return;
         }
         live.close().then(done, reject);
-      }),
+      });
+      return closing;
+    },
   };
 };

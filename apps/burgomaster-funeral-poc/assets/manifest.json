@@ -3,11 +3,12 @@
     "id": "n2-burgomasters-funeral.01",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.01@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.01@dashboard.mp4",
+    "status": "draft",
     "text": "Narrator: Vellmoor buries its burgomaster without a priest and without his daughter. Hanne reads the words, badly, from Oskar's book. Beside Anton lies Dorka Halasz, nineteen, in her wedding dress, because her mother said she'd waited long enough to wear it.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.01@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.01.vo-01": {
     "id": "n2-burgomasters-funeral.01.vo-01",
@@ -54,7 +55,7 @@
     "target": "dashboard",
     "path": "stills/n2-burgomasters-funeral.03@dashboard.png",
     "status": "placeholder",
-    "text": "Emeric: It's a wake. You don't nail it at a — oh. Oh, you nail it at a wake here.",
+    "text": "Emeric: It's a wake. You don't nail it at a \u2014 oh. Oh, you nail it at a wake here.",
     "profile": "@dashboard"
   },
   "n2-burgomasters-funeral.03.vo-01": {
@@ -63,7 +64,7 @@
     "target": "dashboard",
     "path": "audio/lines/n2-burgomasters-funeral.03.vo-01.emeric.wav",
     "status": "placeholder",
-    "text": "It's a wake. You don't nail it at a — oh. Oh, you nail it at a wake here.",
+    "text": "It's a wake. You don't nail it at a \u2014 oh. Oh, you nail it at a wake here.",
     "speaker": "emeric",
     "moment": "n2-burgomasters-funeral.03"
   },
@@ -92,7 +93,7 @@
     "target": "ipad:all",
     "path": "cards/n2-burgomasters-funeral.investigate.examine-body.png",
     "status": "placeholder",
-    "text": "Card 1: Examine Dorka’s body. Look closely at the girl in the wedding dress."
+    "text": "Card 1: Examine Dorka\u2019s body. Look closely at the girl in the wedding dress."
   },
   "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes": {
     "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes",
@@ -176,7 +177,7 @@
     "target": "ipad:all",
     "path": "cards/n2-burgomasters-funeral.investigate.question-mother.png",
     "status": "placeholder",
-    "text": "Card 2: Question Dorka’s mother. Sit with the mother. Ask about last night."
+    "text": "Card 2: Question Dorka\u2019s mother. Sit with the mother. Ask about last night."
   },
   "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes": {
     "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes",
@@ -260,7 +261,7 @@
     "target": "ipad:all",
     "path": "cards/n2-burgomasters-funeral.investigate.anton-coat.png",
     "status": "placeholder",
-    "text": "Card 3: Search Anton’s coat. Go through the dead burgomaster’s pockets."
+    "text": "Card 3: Search Anton\u2019s coat. Go through the dead burgomaster\u2019s pockets."
   },
   "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes": {
     "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes",
@@ -614,11 +615,12 @@
     "id": "n2-burgomasters-funeral.04",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.04@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.04@dashboard.mp4",
+    "status": "draft",
     "text": "Narrator: The candles bow all at once. Dorka Halasz sits up in her wedding dress, and it is the sweetest smile anyone in the room has ever seen.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.04@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.04.vo-01": {
     "id": "n2-burgomasters-funeral.04.vo-01",
@@ -634,11 +636,12 @@
     "id": "n2-burgomasters-funeral.05",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.05@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.05@dashboard.mp4",
+    "status": "draft",
     "text": "Dorka: Come to me. Leave these others and come to me. My arms are hungry for you. Lenka's waiting. She'll be so glad. / Agnes: Lenka is waiting for us, child. Not for you.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.05@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.05.vo-01": {
     "id": "n2-burgomasters-funeral.05.vo-01",
@@ -664,11 +667,12 @@
     "id": "n2-burgomasters-funeral.06",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.06@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.06@dashboard.mp4",
+    "status": "draft",
     "text": "Tomas: Everyone out! Behind me! / Dorka: He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no. He's so patient with her.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.06@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.06.vo-01": {
     "id": "n2-burgomasters-funeral.06.vo-01",
@@ -925,11 +929,12 @@
     "id": "n2-burgomasters-funeral.04~holy-symbol",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.04~holy-symbol@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.04~holy-symbol@dashboard.mp4",
+    "status": "draft",
     "text": "Narrator: The candles bow. Dorka sits up in her wedding dress, and the saint's lamp flares, and she shields her eyes and smiles anyway.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.04~holy-symbol@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.04~holy-symbol.vo-01": {
     "id": "n2-burgomasters-funeral.04~holy-symbol.vo-01",
@@ -945,11 +950,12 @@
     "id": "n2-burgomasters-funeral.05~no-agnes",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.05~no-agnes@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.05~no-agnes@dashboard.mp4",
+    "status": "draft",
     "text": "Dorka: Come to me. My arms are hungry for you. Lenka's waiting. / Tomas: She's waiting for us, girl.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.05~no-agnes@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.05~no-agnes.vo-01": {
     "id": "n2-burgomasters-funeral.05~no-agnes.vo-01",
@@ -994,11 +1000,12 @@
     "id": "n2-burgomasters-funeral.06~no-tomas",
     "type": "clip",
     "target": "dashboard",
-    "path": "clips/n2-burgomasters-funeral.06~no-tomas@dashboard.poster.png",
-    "status": "placeholder",
+    "path": "clips/n2-burgomasters-funeral.06~no-tomas@dashboard.mp4",
+    "status": "draft",
     "text": "Wren: Out! Everyone out! / Dorka: He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no.",
     "duration_s": 8,
-    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub"
+    "note": "ffmpeg not installed: poster still stands in for the 8 s clip stub",
+    "poster": "clips/n2-burgomasters-funeral.06~no-tomas@dashboard.poster.png"
   },
   "n2-burgomasters-funeral.06~no-tomas.vo-01": {
     "id": "n2-burgomasters-funeral.06~no-tomas.vo-01",
@@ -1299,5 +1306,73 @@
     "target": "dashboard",
     "path": "cues/cue-sheet.json",
     "status": "draft"
+  },
+  "shared.dt1981-cold-open.tune": {
+    "id": "shared.dt1981-cold-open.tune",
+    "type": "tune",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/audio/dt1981-cold-open.wav",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json",
+    "duration_s": 4.93
+  },
+  "shared.dt1981-win.tune": {
+    "id": "shared.dt1981-win.tune",
+    "type": "tune",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/audio/dt1981-win.wav",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json",
+    "duration_s": 3.17
+  },
+  "shared.dt1981-loss.tune~lost": {
+    "id": "shared.dt1981-loss.tune~lost",
+    "type": "tune",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/audio/dt1981-loss~lost.wav",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json",
+    "duration_s": 2.23
+  },
+  "shared.dt1981-loss.tune~plague": {
+    "id": "shared.dt1981-loss.tune~plague",
+    "type": "tune",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/audio/dt1981-loss~plague.wav",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json",
+    "duration_s": 3.43
+  },
+  "shared.dt1981-cold-open.slides": {
+    "id": "shared.dt1981-cold-open.slides",
+    "type": "slides",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/index.json#shared.dt1981-cold-open.slides",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json"
+  },
+  "shared.dt1981-win.slide": {
+    "id": "shared.dt1981-win.slide",
+    "type": "slides",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/index.json#shared.dt1981-win.slide",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json"
+  },
+  "shared.dt1981-loss.slide~lost": {
+    "id": "shared.dt1981-loss.slide~lost",
+    "type": "slides",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/index.json#shared.dt1981-loss.slide~lost",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json"
+  },
+  "shared.dt1981-loss.slide~cursed": {
+    "id": "shared.dt1981-loss.slide~cursed",
+    "type": "slides",
+    "target": "dashboard",
+    "status": "draft",
+    "path": "shared/dt1981/index.json#shared.dt1981-loss.slide~cursed",
+    "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json"
   }
 }

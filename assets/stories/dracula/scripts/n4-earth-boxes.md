@@ -2,7 +2,7 @@
 
 - **Scene ID:** n4-earth-boxes
 - **Night:** 4 (day into dusk, before the Tome), second set piece
-- **Kingdom slot / building:** K4 (Tome kingdom, always night 4) / box sites in its buildings (count and places per mechanics)
+- **Kingdom slot / building:** K4 (Tome kingdom, always night 4) / 3 boxes (D-DRA-12): 1 in the K4 sanctuary (the desecrated chapel) and 2 in the K4 village (the Szgany carts). The objective token sits at one site at a time: the sanctuary at dusk, then the village once the sanctuary box is destroyed. If the Tome is on a box's building, that box moves to the K4 bazaar and the token follows. Clips ~a/~b/~c are one per box, in any order; ~last plays on whichever box is destroyed last
 - **Setting:** Long boxes of black earth, nailed shut, stencilled in Jakob Brenner's neat ledger hand: "Garden soil. Handle with care." The soil is from the castle's oldest grave.
 - **Mood:** Grim, physical work against the dark coming on.
 - **Cast:** Narrator, Emeric Lutz, Wren Kessel, Tomas Varga, Sister Agnes Hallow, The Count (voice only)

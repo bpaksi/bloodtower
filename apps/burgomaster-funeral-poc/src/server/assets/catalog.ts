@@ -95,6 +95,7 @@ interface ManifestEntry {
   used_by?: unknown;
   status?: unknown;
   capability?: unknown;
+  poster?: unknown;
 }
 
 const SCREEN_EFFECT = {
@@ -152,6 +153,14 @@ export const parseScriptLines = (
   return lines;
 };
 
+const publishPath = (byPath: Map<string, AssetRecord>, path: string, record: AssetRecord) => {
+  const existing = byPath.get(path);
+  if (existing && (existing.target !== record.target || existing.type !== record.type)) {
+    throw new Error(`Two manifest entries use ${path} for different audiences.`);
+  }
+  if (!existing) byPath.set(path, record);
+};
+
 const fileOk = (root: string, relativePath: string, label: string) => {
   if (relativePath.includes("..") || relativePath.startsWith("/")) {
     throw new Error(`${label} path escapes the asset folder: ${relativePath}`);
@@ -191,11 +200,21 @@ export const loadCatalog = (assetsRoot: string): Catalog => {
           ? { momentId: id }
           : {}),
     };
-    const existing = byPath.get(entry.path);
-    if (existing && (existing.target !== record.target || existing.type !== record.type)) {
-      throw new Error(`Two manifest entries use ${entry.path} for different audiences.`);
+    publishPath(byPath, entry.path, record);
+    if (entry.type === "clip") {
+      fileOk(assetsRoot, entry.path, `${id} clip`);
+      const poster = typeof entry.poster === "string" ? entry.poster : "";
+      if (poster !== "") {
+        fileOk(assetsRoot, poster, `${id} poster`);
+        publishPath(byPath, poster, {
+          id,
+          path: poster,
+          type: "still",
+          target: record.target,
+          ...(record.momentId ? { momentId: record.momentId } : {}),
+        });
+      }
     }
-    if (!existing) byPath.set(entry.path, record);
   }
 
   const cuesByMoment = new Map<string, CatalogCue>();
@@ -278,7 +297,9 @@ export const loadCatalog = (assetsRoot: string): Catalog => {
 
   const stillFor = (momentId: string): string => {
     const entry = entries.get(momentId);
-    const path = needString(entry?.path, `${momentId} still`);
+    // The current player draws an image. A clip's mp4 is the moving picture; its poster is the still.
+    const poster = entry?.type === "clip" && typeof entry.poster === "string" ? entry.poster : "";
+    const path = needString(poster !== "" ? poster : entry?.path, `${momentId} still`);
     fileOk(assetsRoot, path, `${momentId} still`);
     return path;
   };
