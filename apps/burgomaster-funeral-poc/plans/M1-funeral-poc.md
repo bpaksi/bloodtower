@@ -62,7 +62,7 @@ Stack (R-ENG-9, repo conventions): Next.js + React, pnpm workspace, SQLite throu
 - Depends on: G0
 - Touches: `apps/burgomaster-funeral-poc/assets/cues/**`
 - Deps change: no
-- Scope: PRD-40. The cue sheet (`assets/cues/cue-sheet.json`, the file the asset kit already has; the PRD calls it `shared/tower/cues.json`, see note) is the contract. One entry per cue id used by the scene: `dim-all`, `heartbeat`, `skull-drop`, the investigation seal flicker (`seal-sequence`), and the E16 bed and accent ids. Each entry has its **screen half** (effect, duration) and its **fallback audio** (asset id from the manifest), plus an empty `tower` slot that Phase 2 fills without renaming the id. No colour, no waiting on a sound to end; all audio from the Mac (PRD-13 POC form). Data only.
+- Scope: PRD-40. The cue sheet (`apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`, the path PRD-40 names) is the contract. One entry per cue id used by the scene: `dim-all`, `heartbeat`, `skull-drop`, the investigation seal flicker (`seal-sequence`), and the E16 bed and accent ids. Each entry has its **screen half** (effect, duration) and its **fallback audio** (asset id from the manifest), plus an empty `tower` slot that Phase 2 fills without renaming the id. No colour, no waiting on a sound to end; all audio from the Mac (PRD-13 POC form). Data only.
 - Covers: PRD-12, PRD-13, PRD-39 (data), PRD-40, R4-2, R4-3. SC-1.
 
 ### Step 2b: Timing contract follow-up (rev 5)
@@ -250,7 +250,7 @@ All questions this plan raised are answered in the PRD. Nothing is pending for G
 
 Script status: Loremaster's five moments (`.07~fight-lost~no-wren` and `end.private.<hunter>` ×4) are written in `assets/stories/dracula/scripts/n2-burgomasters-funeral.md`. The app's copy (`assets/script/n2-burgomasters-funeral.md`) and the manifest entries for them still need voice, renders and entries; the readiness check (step 10) reports them until then.
 
-Note on the cue sheet path: PRD-40 names `shared/tower/cues.json`; the asset kit already has `assets/cues/cue-sheet.json`, and assets stay where they are (G0). Step 3 uses the existing file and the spec (step 2) records the mapping.
+Note on the cue sheet path: PRD-40 names `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`. Assets stay where they are (G0). The old name `shared/tower/cues.json` is not a file in this repo. The shared-screen target id is `storyboard`; the frozen protocols value remains `dashboard` (spec D25).
 
 ## Results
 

@@ -176,5 +176,5 @@ Kit is at `assets/shared/dt1981/` (code-synth square waves at −16 LUFS + proce
 - `dracula.cast.hanne.portrait` → `portraits/hanne.png`
 
 ## Also
-- Tower cue map `shared/tower/cues.json` entries for heartbeat, dim-all, seal-sequence (all Library, unverified on Bob's tower).
+- Tower cue map `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json` entries for heartbeat, dim-all, seal-sequence (all Library, unverified on Bob's tower).
 - Dorka voice (Laomedeia) needs audition; `pressed-flower` prop ref sheet; cast ref sheets.
