@@ -775,7 +775,7 @@ describe("command executor: silent light sequences (D23)", () => {
 
 describe("command executor: flash one light", () => {
   it("toggles one light for the burst and does not sit for the library's 30 s", async () => {
-    const { submit, stages, last, writes } = await setup();
+    const { submit, stages, last, writes, seen } = await setup();
     const started = Date.now();
     const { commandId, done } = submit("lighting.flash", {
       layerIndex: 0,
@@ -788,6 +788,10 @@ describe("command executor: flash one light", () => {
     expect(last(commandId)?.stage).not.toBe("timed-out");
     expect(stages(commandId)).toContain("write-completed");
     expect(writes().length).toBeGreaterThan(1);
+    const life = seen.filter((stage) => stage.commandId === commandId);
+    const sent = life.find((stage) => stage.stage === "write-completed");
+    const ended = life.find((stage) => stage.stage === last(commandId)?.stage);
+    expect(sent && ended && ended.at - sent.at).toBeGreaterThan(4_000);
   });
 
   it("refuses a rate that is not 2, 4, 6 or 8", async () => {

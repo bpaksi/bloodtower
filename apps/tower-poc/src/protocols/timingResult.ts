@@ -49,7 +49,11 @@ export const sequenceObservationSchema = z
     sentWithoutWaiting: z.boolean(),
     sentAt: optionalEpoch,
     acknowledgedAt: optionalEpoch,
-    /** When Bob tapped Done, after the lights stopped. Null when he did not. */
+    /**
+     * When Bob tapped Done. A rotation sequence leaves its lights on until the next command,
+     * so for those this is his judgement that the sequence finished, not the clearing write.
+     * Null when he did not tap Done.
+     */
     doneAt: optionalEpoch,
     outcome: endStageSchema.nullable(),
   })

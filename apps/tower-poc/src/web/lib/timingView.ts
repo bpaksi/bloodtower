@@ -40,7 +40,7 @@ export const showTime = (at: number | null) =>
 
 /**
  * Gap recorded for an overlap trial. Both sent times give the gap the tower actually saw.
- * A missing time keeps the planned pause, and a clock that runs backwards is stored as 0.
+ * A missing time, or a second time earlier than the first, keeps the planned pause.
  */
 export const measuredGapMs = (
   plannedMs: number,
@@ -48,5 +48,6 @@ export const measuredGapMs = (
   secondSentAt: number | null | undefined,
 ) => {
   if (typeof firstSentAt !== "number" || typeof secondSentAt !== "number") return plannedMs;
-  return Math.max(0, secondSentAt - firstSentAt);
+  if (secondSentAt < firstSentAt) return plannedMs;
+  return secondSentAt - firstSentAt;
 };

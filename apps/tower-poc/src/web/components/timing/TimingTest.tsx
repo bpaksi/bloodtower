@@ -256,8 +256,11 @@ export function TimingTest() {
           outcome: times?.outcome ?? null,
         });
         setRates([...done]);
-        if ("error" in outcome) {
-          setFlashError(outcome.error);
+        const endedClean = times?.outcome === "confirmed" || times?.outcome === "indeterminate";
+        if (!endedClean) {
+          setFlashError(
+            outcome.error ?? "This rate did not finish, so the faster rates were not sent.",
+          );
           break;
         }
       }
@@ -398,7 +401,9 @@ export function TimingTest() {
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Each of the 21 built-in sequences, one at a time. The four rotation sequences are sent
-          without waiting for a reply. Press Done when the lights stop.
+          without waiting for a reply. Press Done when the lights stop. A rotation sequence leaves
+          its lights on, so Done there is when you judge it finished, and the next sequence turns
+          those lights off.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
@@ -426,7 +431,10 @@ export function TimingTest() {
               </p>
             )}
             {current.sentWithoutWaiting && (
-              <p className="mt-1">Sent without waiting for a reply.</p>
+              <p className="mt-1">
+                Sent without waiting for a reply. These lights stay on until the next sequence. Done
+                is when you judge this one finished. The next sequence turns the lights off.
+              </p>
             )}
           </div>
         )}

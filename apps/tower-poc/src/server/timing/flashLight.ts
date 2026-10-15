@@ -44,6 +44,8 @@ export interface FlashParams {
 export interface FlashClock {
   now: () => number;
   sleep: (ms: number) => Promise<void>;
+  /** After each packet is written. The executor uses the first call as the sent time. */
+  onWrite?: () => void;
 }
 
 const withTimeout = (call: Promise<void>, ms: number) =>
@@ -61,10 +63,13 @@ const withTimeout = (call: Promise<void>, ms: number) =>
   });
 
 /**
- * Toggles one light for the burst. Every write changes that light's effect, so a no-op cannot
- * hold the library queue. Writes go through `sendTowerState`, which skips that queue; each one
- * gives up after `writeTimeoutMs` instead of waiting 30 s.
- * The light is left off when the burst ends, if that is itself a change.
+ * Toggles one light for the burst. Writes go through `sendTowerState`, which skips the library
+ * queue, so a packet the tower does not answer cannot hold that queue for 30 s. Each one gives
+ * up after `writeTimeoutMs`.
+ * The effect sent is the edge we mean, not whatever the library copy says. A late echo replaces
+ * that copy with an older effect, and skipping a write that already matches the copy then drops
+ * the following edge too.
+ * The light is left off when the burst ends, if that is itself a change from the last packet.
  */
 export const flashOneLight = async (
   tower: UltimateDarkTower,
@@ -87,13 +92,10 @@ export const flashOneLight = async (
     if (!light) {
       throw new Error(`Light ${layerIndex}/${lightIndex} is not in the tower state.`);
     }
-    const effect = on ? LIGHT_ON : LIGHT_OFF;
-    // A write that changes nothing is not sent. The tower stays silent for those, and a
-    // queued command would then sit for 30 s.
-    if (light.effect === effect) return false;
-    light.effect = effect;
+    light.effect = on ? LIGHT_ON : LIGHT_OFF;
     light.loop = on;
     await withTimeout(tower.sendTowerState(state), writeTimeoutMs);
+    clock.onWrite?.();
     return true;
   };
 

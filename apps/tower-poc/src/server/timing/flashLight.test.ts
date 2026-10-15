@@ -67,6 +67,31 @@ describe("flashOneLight", () => {
     }
   });
 
+  it("sends every edge when a late echo rewrites the library copy", async () => {
+    let effect = 0;
+    const sent: number[] = [];
+    const tower = {
+      getCurrentTowerState: () => ({
+        layer: [{ light: [{ effect, loop: false }] }],
+      }),
+      sendTowerState: async (state: { layer: { light: { effect: number }[] }[] }) => {
+        const next = state.layer[0]?.light[0]?.effect ?? effect;
+        sent.push(next);
+        // The echo of the previous effect arrives before the next read.
+        effect = next === 1 ? 0 : 1;
+      },
+    };
+    await flashOneLight(
+      tower as unknown as UltimateDarkTower,
+      { layerIndex: 0, lightIndex: 0, flashesPerSecond: 8, durationMs: 1_000 },
+      clockFrom(0),
+    );
+    expect(sent).toHaveLength(16);
+    for (let i = 0; i < sent.length; i += 1) {
+      expect(sent[i]).toBe(i % 2 === 0 ? 1 : 0);
+    }
+  });
+
   it("abandons a write that does not finish, well short of 30 seconds", async () => {
     const { tower } = towerWith(0, () => new Promise(() => {}));
     const started = Date.now();

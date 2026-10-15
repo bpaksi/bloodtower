@@ -51,6 +51,6 @@ describe("timing view", () => {
     expect(measuredGapMs(0, 8_000, 8_012)).toBe(12);
     expect(measuredGapMs(1_000, 5_000, null)).toBe(1_000);
     expect(measuredGapMs(0, null, 8_000)).toBe(0);
-    expect(measuredGapMs(1_000, 6_000, 5_000)).toBe(0);
+    expect(measuredGapMs(1_000, 6_000, 5_000)).toBe(1_000);
   });
 });
