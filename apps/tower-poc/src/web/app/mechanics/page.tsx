@@ -33,7 +33,7 @@ export default function MechanicsPage() {
         />
         <CapabilityControl
           capabilityId="mechanics.rotate-drum"
-          description="Turns one drum to face a side, keeping the lights. If the drum is already there, nothing is sent."
+          description="Turns one drum to face a side, keeping the lights. If the drum is already there, nothing is sent, unless the sound is on: then a command is still sent, the tower does not answer it, and it ends as “Sent, no answer” after 30 seconds."
           choices={{
             drumIndex: { label: "Drum", names: DRUMS },
             position: { label: "Side", names: SIDES },

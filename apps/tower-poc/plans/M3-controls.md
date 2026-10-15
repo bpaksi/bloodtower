@@ -104,6 +104,8 @@ Branch names follow the repo convention, `feat/tower-poc-<slug>`; this table fir
 
 Record a `partial` or `fail` with what was seen; Claude writes the gap entries from the notes. A `confirmed` the tower did not earn goes to the bugfix skill (GAP-LIB-010).
 
+**Pass done (2026-10-15)**: chunks 1 to 7 run, all 42 capabilities on the control pages recorded on the real tower: 41 pass and `sound.play-stateful` partial, which has its gap entry (GAP-HW-003: volume 3 is silent). The Proof condition below is met (`research/tower/smoke/2026-10-15-m3-verify-pass.md`). From the pass: GAP-LIB-013 and GAP-HW-011 are new, GAP-HW-003 and GAP-HW-006 have tower evidence, and the Mechanics and Sounds pages say what was seen. No `confirmed` the tower did not earn was found (GAP-LIB-010).
+
 ## Files that change (typical per step)
 
 ```text

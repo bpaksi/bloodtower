@@ -18,9 +18,9 @@ export default function SoundsPage() {
         description={
           <>
             A sound by its number in the catalog below, with a volume: 0 loud, 1 medium, 2 quiet, 3
-            mute, as the library names them. Left empty, the library's default. What each level does
-            on the tower is not yet known. There is no loop: the tower did not loop a sound sent
-            with it.
+            mute, as the library names them. Left empty, the library's default. On the tower 3 plays
+            nothing; whether 0, 1 and 2 differ is not yet known. There is no loop: the tower did not
+            loop a sound sent with it.
           </>
         }
         sendLabel="Play"
