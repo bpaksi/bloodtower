@@ -10,7 +10,7 @@ The first run had no `DIAG_LOG`, so it left only its recorded results.
 
 ## Results
 
-39 of the 42 capabilities on the control pages have a result from the real tower. 38 have a newest result of pass. `sound.play-stateful` is partial: "Volume only works with 0-2 (text says, 0-3)". Not yet recorded: `seals.broken`, `battery.level`, `battery.previous-level`.
+All 42 capabilities on the control pages have a result from the real tower. 41 have a newest result of pass. `sound.play-stateful` is partial: "Volume only works with 0-2 (text says, 0-3)". `seals.broken`, `battery.level` and `battery.previous-level` were recorded in a short third sitting at 10:50 UTC, outside this log.
 
 ## Findings
 
