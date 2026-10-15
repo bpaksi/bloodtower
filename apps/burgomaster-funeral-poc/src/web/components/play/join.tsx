@@ -3,6 +3,7 @@
 import { type HunterId, PROTOCOL_VERSION } from "burgomaster-funeral-poc-protocols";
 import { useEffect, useRef, useState } from "react";
 import { deviceFormFactor, helloDevice, holdMessage, pickMessage, socketUrl } from "@/lib/messages";
+import { fetchPreloadList, loadAsset, preloadScene } from "@/lib/preload";
 import { type DeviceView, isDeviceView, isHunterList, type PublicHunter } from "@/lib/view";
 
 const TOKEN_KEY = "funeral.device.token";
@@ -15,6 +16,7 @@ export function JoinScreen() {
   const [active, setActive] = useState<HunterId | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [needsPlay, setNeedsPlay] = useState(false);
+  const [loadingAssets, setLoadingAssets] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const tokenRef = useRef<string | null>(null);
   const revision = useRef(0);
@@ -75,9 +77,19 @@ export function JoinScreen() {
         return;
       }
       if (message.type === "welcome" && message.payload?.token) {
-        tokenRef.current = message.payload.token;
-        sessionStorage.setItem(TOKEN_KEY, message.payload.token);
+        const token = message.payload.token;
+        tokenRef.current = token;
+        sessionStorage.setItem(TOKEN_KEY, token);
         if (message.payload.clientId) setDeviceId(message.payload.clientId);
+        if (!closed) {
+          void preloadScene(
+            () => fetchPreloadList(token),
+            loadAsset,
+            (phase) => {
+              if (!closed) setLoadingAssets(phase === "loading");
+            },
+          );
+        }
       }
       if (message.type === "error" && message.payload?.message) {
         setProblem(message.payload.message);
@@ -131,6 +143,11 @@ export function JoinScreen() {
         <h1 className="text-3xl">Hunters</h1>
       </header>
 
+      {loadingAssets ? (
+        <p data-testid="asset-loading" aria-live="polite" className="text-lg text-amber-200/80">
+          Loading the scene…
+        </p>
+      ) : null}
       {problem ? <p className="text-lg text-amber-200">{problem}</p> : null}
       {view?.paused ? <p className="text-lg">Play is paused.</p> : null}
 
