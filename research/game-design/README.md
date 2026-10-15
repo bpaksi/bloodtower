@@ -18,3 +18,5 @@ Mechanics, themes and rules ideas for the new game. Ideas that become a prototyp
 | [landing-and-initial-screens.md](landing-and-initial-screens.md) | Landing, title, setup and join screens, plus the asset wish list |
 | [setup-wizard-and-summary.md](setup-wizard-and-summary.md) | Guided setup wizard for board and pieces, and the end-of-game summary screen |
 | [look-and-feel-harness.md](look-and-feel-harness.md) | Story-neutral screen list, layout zones, story slots and invariants |
+| [tower-effects-library.md](tower-effects-library.md) | Named tower effects built from verified capabilities, with fallbacks and funeral cue mapping |
+| [tower-sound-inventory.md](tower-sound-inventory.md) | The 113 sounds already on the tower, by index, so they are reused rather than recreated |
