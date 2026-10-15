@@ -15,7 +15,7 @@ Placed at dusk on the site of the night's next set piece. Where a night has two 
 | 1 | K1 Sanctuary (church and churchyard) | `n1-open-grave` | K1 Bazaar (Old Vadoma's wagon), at dawn | `n1-fortune-reading` |
 | 2 | K2 fortune building (Blade or Holy Symbol, by seed) | `n23-sergius-blade` or `n23-catacombs-of-saint-ysolde` | K2 Sanctuary (Anton's wake) | `n2-burgomasters-funeral` |
 | 3 | K3 fortune building (the other artifact) | the other of `n23-sergius-blade` / `n23-catacombs-of-saint-ysolde` | K3 Citadel (the lockhouse) | `n3-fly-eaters-cell` |
-| 4 | K4 sanctuary (1 box) and K4 village (2 boxes), per D-DRA-12; a box on the Tome building moves to the K4 bazaar | `n4-earth-boxes` | K4 fortune building (the Tome) | `n4-finding-the-tome` |
+| 4 | K4 Sanctuary (1 box) at dusk, per D-DRA-12. After that box is destroyed, the token moves to the K4 Village (2 boxes). If the Tome is on a box's building, that box moves to the K4 Bazaar and the token follows. One site at a time | `n4-earth-boxes` | K4 fortune building (the Tome) | `n4-finding-the-tome` |
 | 5 | The tower. No tokens. | — | — | — |
 
 ## 2. Lure list
@@ -247,7 +247,7 @@ Choice: **Wash the stone** (spend one holy water) or **Leave it** (story skull d
 - **Nights:** 1–3.
 - **Beat:** A page of fine ledger paper blows against a hunter's boot, written in Jakob Brenner's neat bookkeeper's hand: shipping orders for "garden soil, handle with care". The Count's house has been planning this for a long time; it has done all of it before.
 - **Cost / stake:** follow the trail of pages: one present hunter takes 1 corruption (something waits where the pages lead; instant-loss guard) or the party ignores it.
-- **Outcome (proposed):** Read it = finding (how many earth boxes go to K4; feeds `n4-earth-boxes`). Follow the trail = that finding plus a stake, from a crate lid prised loose.
+- **Outcome (proposed):** Read it = finding (where the earth boxes are in K4, not how many; feeds `n4-earth-boxes`). Follow the trail = that finding plus a stake, from a crate lid prised loose.
 - **Still prompt:** A single sheet of neat ledger paper caught against a muddy boot in the fog, columns reading "garden soil, handle with care".
 
 **enc-ledger-page.01** [still]
