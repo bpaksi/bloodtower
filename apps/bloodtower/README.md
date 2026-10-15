@@ -28,10 +28,12 @@ The Mac runs this host. The Story board is a display-only page. iPads join later
 
 From the repo root. One process serves the Story board. It binds `0.0.0.0:4787` unless `PORT` is set. SQLite will live under `apps/bloodtower/data/` once step 4 adds the tables; the folder is created on start and is gitignored.
 
+The workspace root package is also named `bloodtower`, so `pnpm -F bloodtower` selects both and its `build` runs every app. `--dir apps/bloodtower` selects this app.
+
 ```bash
 pnpm install
-pnpm -F bloodtower build
-pnpm -F bloodtower start
+pnpm --dir apps/bloodtower build
+pnpm --dir apps/bloodtower start
 ```
 
 Open http://127.0.0.1:4787/

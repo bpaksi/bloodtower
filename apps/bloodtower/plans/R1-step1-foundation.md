@@ -184,6 +184,7 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - `apps/bloodtower/docs/README.md` is the `docs/` folder from the app layout. It points at `spec.md` and this plan. Step 1 Touches includes it.
 - `pack:lint` is not a script yet. Step 3 owns `src/server/scripts/packLint.ts` and adds the orchestrator script. A stub that always fails is not a linter.
 - Steps 1 and 2 ship in one pull request for batch B1. The commits are step 1, then step 2.
+- The app package is named `bloodtower`, and so is the workspace root. `pnpm -F bloodtower build` runs both, and the root script builds every app at once. Bob runs this app with `pnpm --dir apps/bloodtower`. The package name stays the one in the layout above.
 
 ## Results
 

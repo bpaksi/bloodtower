@@ -38,7 +38,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm -F bloodtower build && pnpm -F bloodtower-server start",
+    command: "pnpm --dir apps/bloodtower build && pnpm -F bloodtower-server start",
     cwd: repoRoot,
     url: `${baseURL}/health`,
     env: {
