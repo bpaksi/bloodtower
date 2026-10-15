@@ -1,7 +1,7 @@
 # Return to Dark Tower: tower sound inventory
 
 For the art and sound designer: these 113 sounds are **already on the tower**. Don't recreate them; reuse where listed.
-Source: `ultimatedarktowerdata` 3.0.0 `TOWER_AUDIO_LIBRARY` (pinned for tower-poc), played by index with `sound.play` / `sound.play-stateful`. Verified playable on Bob's tower 2026-10-15.
+Source: `ultimatedarktowerdata` 3.0.0 `TOWER_AUDIO_LIBRARY` (pinned for tower-poc), played by index with `sound.play` / `sound.play-stateful`. The M3 verify pass on 2026-10-15 recorded `sound.play` as a capability pass. It did not record that each of the 113 indexes was heard.
 
 **Facts that apply to every sound**
 - Played by number 1–113. Volume 0, 1, 2 audible; 3 is mute. Whether 0–2 differ in loudness is unknown.
@@ -139,7 +139,7 @@ Reuse: low, tied to RtDT adversaries; maybe one for "minions arrive" after liste
 | 93 | Tower Angry 4 | hunter strikes T3 |
 Reuse: **high**: "the tower is angry" = generic menace, story-neutral.
 
-## State (13 + 1 unlisted)
+## State (14) and Unlisted (1)
 | # | Name | Reuse |
 |---|---|---|
 | 94 | Tower Connected | connect confirmation (setup only) |
@@ -174,4 +174,4 @@ Reuse: **highest**: Idle 1–5 are the E16 ambient accent pool; Gloats for villa
 - Any looped ambience (the tower can't loop; all beds are Mac-side anyway).
 
 ## Counts check
-Total 113. Adversary 8, Ally 10, Battle 23, Classic 11, Dungeon 12, Foe 15, Spawn 8, Quest 2, Glyph 5, State 13, Unlisted 1, Seals 4. (The tower-poc final report says "State 14": it counts Idle 5, which the data labels "Unlisted".)
+Total 113. Adversary 8, Ally 10, Battle 23, Classic 11, Dungeon 12, Foe 15, Spawn 8, Quest 2, Glyph 5, State 14, Unlisted 1, Seals 4. Those parts sum to 113. State in the data is 14 and includes #113 Tower Skull Dropped; it does not include #104 Tower Idle 5 (category Unlisted). The final report's State count of 14 matches that category. Its examples also name Idle 1–5, which folds the Unlisted row into the examples.

@@ -4,7 +4,7 @@ Status: proposal for Phase 2 (funeral PRD §13) and the story engine (E13, E16, 
 Sources: `apps/tower-poc/docs/{final-report,capabilities,reuse-guide}.md`, `apps/tower-poc/spec.md` §2/§7 gap entries (referenced by the docs), `ultimatedarktowerdata` 3.0.0 sound table, `research/game-design/story-engine.md` (E13, E16, E19c), `story-pack-format.md` §6, funeral `cue-sheet.json`, funeral PRD §13.
 Hardware basis: one tower, rev 1.11, library `ultimatedarktower` 7.1.2, Verify pass 2026-10-15 (42 capabilities passed).
 
-Status labels follow E13: **Verified** = passed the M3 Verify pass on Bob's tower; **Library** = in the library, not hands-on verified; **GAP** = not usable or held.
+Status labels follow E13: **Verified** = passed the M3 Verify pass on Bob's tower; **Partial** = that pass recorded partial; **Library** = in the library, not hands-on verified; **GAP** = not usable or held.
 
 ---
 
@@ -15,17 +15,18 @@ Status labels follow E13: **Verified** = passed the M3 Verify pass on Bob's towe
 | Capability | Params | Timing | Status | Limits / risks |
 |---|---|---|---|---|
 | `lighting.set` | Up to 24 lights. Doorway 12 (N/E/S/W × top/middle/bottom), ledge 4 (NE/SE/SW/NW), base 8 (N/E/S/W × top/bottom). Style per light: `off`, `on`, `breathe`, `breatheFast`, `breathe50percent`, `flicker` | Tower answers in 25–65 ms | Verified | **No colour** (single-colour LEDs). Lights hold until changed. **No-op trap:** a write that changes nothing gets no answer, so the library queue stalls 30 s (GAP-HW-010). The engine must diff against the state store and skip no-ops |
-| `lighting.all-on` | optional style | ~50 ms | Verified | All-on when already all-on is a no-op stall |
+| `lighting.all-on` | optional `effect` | ~50 ms | Verified | All-on when already all-on is a no-op stall |
 | `lighting.all-off` | none | ~50 ms | Verified | Same no-op trap when already dark |
 | `lighting.set-led` | layer 0–5, light 0–3, style, loop | ~50 ms | Verified | Low-level; the layer map (doorway/ledge/base) should be confirmed before packs reference it directly. Prefer `lighting.set` |
-| `lighting.sequence` | one of 20 built-ins (twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01–03, gloat01–03, defeat, victory, dungeonIdle, sealReveal, monthStarted, wholeTowerBreathing, slowFlareThenFade, rotationAllDrums/Top/Bottom/Middle) + optional `soundIndex` 1–113 | ~50 ms to answer; sequence length unknown/not reported | Verified (except rotationDrumMiddle) | Sequence + sound in **one packet**: the best way to sync a sting with light. Durations are not documented; measure. `rotation*` sequences: tower never answers, sent fire-and-forget (D23), **require calibration**, **cannot carry a sound**, and stay lit until the next command; `rotationDrumMiddle` is **held** (GAP-HW-007). Note the final report says "21 sequences"; the enum lists 20 |
+| `lighting.flash` | one light, a rate, a fixed 5 s | not measured | GAP | Timing page only, and untested on the tower. It toggles one light by writing state, because `setLED` cannot flash at 2–8 Hz. Story effects do not use it |
+| `lighting.sequence` | 21 in `TOWER_LIGHT_SEQUENCES`: twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01–03, gloat01–03, defeat, victory, dungeonIdle, sealReveal, rotationAllDrums, rotationDrumTop, rotationDrumMiddle, rotationDrumBottom, monthStarted, wholeTowerBreathing, slowFlareThenFade. Optional `soundIndex` 1–113 on sequences that answer | ~50 ms to answer; sequence length unknown/not reported | Verified for the 20 the Lights page offers. `rotationDrumMiddle` held (GAP-HW-007) | The service schema accepts all 21, including `rotationDrumMiddle`, so the timing test can send it. The Lights page offers 20 and hides Middle. Story effects use those 20 and skip Middle until the hold lifts. Sequence + sound in **one packet** is the sync path. Durations are not documented; measure. `rotation*` sequences: tower never answers, sent fire-and-forget (D23), **require calibration**, **cannot carry a sound**, and stay lit until the next command |
 
 ### A2. Sound
 
 | Capability | Params | Timing | Status | Limits / risks |
 |---|---|---|---|---|
 | `sound.play` | index 1–113 | echo in 50–60 ms | Verified | One-shot. **No loop** (GAP-HW-008). **No end event** (GAP-LIB-007): never wait for sound end. Lengths unknown |
-| `sound.play-stateful` | index, volume 0–3 | same | Verified | 0, 1, 2 audible; **3 is mute**. Whether 0–2 differ in loudness is open (GAP-HW-003) |
+| `sound.play-stateful` | index, volume 0–3 | same | Partial | 0, 1 and 2 were heard; **3 is mute**. Whether 0–2 differ in loudness was not recorded (GAP-HW-003). The M3 pass did not mark this capability pass |
 | (overlap) | | | Risk | Overlap behaviour (a new sound cutting off vs layering the current one) is **not documented**. Assume the new sound replaces the old; design so stings never stack faster than ~1.5 s |
 | (link drop) | | | Risk | GAP-HW-011: once the link dropped mid-sound and needed a power cycle. Cause unknown (low battery guessed). Sound-heavy effects should be tolerant of a disconnect mid-cue |
 
@@ -67,14 +68,14 @@ Status labels follow E13: **Verified** = passed the M3 Verify pass on Bob's towe
 1. **Diff before send** (no-op stall).
 2. **Fire and forget audio**; never await end.
 3. **Fallback always defined**; used on disconnect, calibration, `rejected`/`failed`/`timed-out`/`indeterminate` where it matters.
-4. **One command at a time** through the executor lane; a composite effect is a short script of commands with gaps ≥ ~100 ms.
+4. **One command at a time** through the executor lane. After a write, the lane waits 250 ms before the next command starts (tower-poc spec §3). A composite effect's gaps are at least that.
 5. **No colour**; express intent by location (which side, which level), style (breathe vs flicker vs on) and rhythm.
 
 ---
 
 ## (b) Effects library
 
-Conventions. Times are offsets from effect start. "Bed" = the current E16 ambient light pattern, restored at the end (`restore-bed`). Intensity tiers: **T1 subtle**, **T2 normal**, **T3 climax**. Fallback = Story board (Dashboard) visual + Mac audio; per R3-3, screen half always plays, fallback audio only when the tower or its sound is unavailable. Sound numbers refer to `/tmp/tower-sound-inventory.md`. Every effect: `drums: none` unless stated.
+Conventions. Times are offsets from effect start. "Bed" = the current E16 ambient light pattern, restored at the end (`restore-bed`). Intensity tiers: **T1 subtle**, **T2 normal**, **T3 climax**. Fallback = Story board (Dashboard) visual + Mac audio; per R3-3, screen half always plays, fallback audio only when the tower or its sound is unavailable. Sound numbers refer to [`tower-sound-inventory.md`](tower-sound-inventory.md) in this folder. Every effect: `drums: none` unless stated.
 
 ### Ambient / bed (E16 layer 1)
 
@@ -185,14 +186,14 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 
 **FX-20 `skull-drop`** (cue sheet `skull-drop`; player step)
 - Purpose: a loss costs the party; physical skull through the tower.
-- Recipe: board prompts "Drop a skull"; wait for `skulls.on-drop` **or** host Done; then +1 s `lighting.sequence flareThenFadeBase` (no extra sound if the tower played its own; else Tower Skull Dropped #113).
-- Used by: `.07~fight-lost` (cap 2/night; capped/converted drops do not fire).
+- Recipe: board prompts "Drop a skull"; wait for the first of `skulls.on-drop` and host Done, and ignore the other; then +1 s `lighting.sequence flareThenFadeBase` (no extra sound if the tower played its own; else Tower Skull Dropped #113).
+- Used by: `.07~fight-lost` only when the lid choice was watched. Nailed + lost does not drop a skull (AT-7). Cap 2/night; capped or converted drops do not fire.
 - Tiers: one tier; T3 adds `angryStrobe01` when the drop hits a threshold.
 - Fallback: Story board prompt + Done confirm; `sfx.skull-drop-sting` only without tower.
 
 **FX-21 `room-reveal`** (dungeon/crypt room)
 - Purpose: entering a new room in a crypt/dungeon sequence.
-- Recipe: FX-11 dim (T1 600 ms) → room sound (Dungeon Tomb #64 / Ruins #62 / Caves #57 / Shrine #63 / Fortress #61 / Encampment #59 by room type) with `lighting.sequence dungeonIdle`; leave `dungeonIdle` as the bed while in the room.
+- Recipe: FX-11 at T1 (doorway off, base stays `breathe50percent`, hold 1.5 s) → room sound (Dungeon Tomb #64 / Ruins #62 / Caves #57 / Shrine #63 / Fortress #61 / Encampment #59 by room type) with `lighting.sequence dungeonIdle`; leave `dungeonIdle` as the bed while in the room.
 - Used by: n23 Catacombs of Saint Ysolde rooms, tower assault floors.
 - Fallback: room card flip + Mac room ambience.
 
@@ -226,7 +227,7 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 
 **Utility effects (not story):**
 - **FX-U1 `self-test`** (R3-10): `dim-all` → `heartbeat` T2 → Tower Skull Dropped (#113). Host confirms each step.
-- **FX-U2 `tower-awake`** after connect: Tower Connected (#94). **FX-U3 `calibration-cover`**: no tower commands (D22); Mac "castle stirs" loop.
+- **FX-U2 `tower-awake`**: the host presses Awake after connect has succeeded, and only then does the tower play Tower Connected (#94). Nothing plays on connect by itself (PRD-5, E13). **FX-U3 `calibration-cover`**: no tower commands (D22); Mac "castle stirs" loop.
 - **FX-U4 `restore-bed`**: re-send the current bed **only if** the store says lights differ.
 
 ---
@@ -238,7 +239,7 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 - Within L3, a new cue of equal or higher priority may cut a running cue only at a step boundary; lower-priority cues queue max 1 deep (drop the older). Never queue behind a drum move.
 - Accent reason logging stays R5-2: `choice > scene_cue > moment > ambient`; `choice` and `scene_cue` suppress accents.
 
-**C2. Command pacing.** ≥100 ms between commands; a sound-bearing step ≥1.5 s after the previous sound (overlap behaviour unknown). `restore-bed` after every L2/L3 effect, diffed (no-op stall rule). Any command that ends `indeterminate`/timed-out → switch that effect to its fallback immediately; don't retry (safety rule).
+**C2. Command pacing.** The executor waits 250 ms after a write before the next command starts (tower-poc spec §3), so a composite effect cannot go faster than that. A sound-bearing step is ≥1.5 s after the previous sound (overlap behaviour unknown). `restore-bed` after every L2/L3 effect, diffed (no-op stall rule). Any command that ends `indeterminate`/timed-out → switch that effect to its fallback immediately; don't retry (safety rule).
 
 **C3. Cooldowns.**
 | Effect | Cooldown |
@@ -276,7 +277,7 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 | `heartbeat` | `.investigate`, `.lid-choice`, `.04`, `.04~holy-symbol` | FX-10 | T2 (T3 at `.04`) | Logged reason `choice` for investigate/lid-choice (R5-2) |
 | `dim-all` | `.04`, `.04~holy-symbol` | FX-11 | T2 | Run before heartbeat at `.04`: dim 1.5 s → heartbeat T3 |
 | `seal-sequence` | `.investigate.follow-the-mourner.cue` | FX-18 | T2 | sealReveal + #112 in one packet; **not** `seals.break` |
-| `skull-drop` | `.07~fight-lost` | FX-20 | one | Player step; cap 2/night; capped/converted not fired |
+| `skull-drop` | `.07~fight-lost` | FX-20 | one | Watched + lost only. Nailed + lost does not fire (AT-7). Player step; cap 2/night; capped/converted not fired |
 | (proposed) bed | dusk / night phases | FX-01 / FX-02 | | Matches `amb.dusk-breathe`, `amb.wake-flicker` |
 | (proposed) battle | `.06`, `.06~no-tomas` | FX-23/25/26 | | Tomas has an Ally voice (#15); see sound inventory |
 | (proposed) self-test | setup | FX-U1 | | Matches R3-10 order |
@@ -284,17 +285,19 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 ---
 
 ## (e) Open questions
-1. Sound lengths: none are documented (data has name/category only). Need a timing pass (record each of 113).
-2. Overlap: does a new sound cut off the current one or layer? Does a light command cut a sound?
-3. Built-in sequence durations (twinkle, victory, gloat…) and whether a sequence's lights end by themselves or hold.
+
+Settled, so it is not a question: the cue sheet is `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json` (PRD-40, funeral spec D3). The seal moment in that file is `n2-burgomasters-funeral.investigate.follow-the-mourner.cue`. Funeral PRD OQ-5 is the resolved wren line on `.07~fight-lost` (R3-12). OQ-6 is whether a skull drop advances the clock. Neither decides where these effect names live.
+
+1. Sound lengths: none are documented (data has name/category only). `pnpm timing` in `apps/tower-poc` records overlap, a skull drop and the light sequences under `docs/timing-results/`; it does not yet time all 113 sounds. No result file is in the tree. Lengths stay "?" until that pass.
+2. Overlap: does a new sound cut off the current one or layer? Does a light command cut a sound? The timing page is the place to record it.
+3. Built-in sequence durations (twinkle, victory, gloat…) and whether a sequence's lights end by themselves or hold. Same timing page; `rotation*` lights stay on until the next command (D23).
 4. Volume 0/1/2 loudness (GAP-HW-003).
-5. Skull drop: does the tower firmware play its own sound/lights on a drop under app control?
+5. Skull drop: does the tower firmware play its own sound/lights on a drop under app control? The timing page has a skull-drop step for this. Nothing is saved yet.
 6. `rotationDrumMiddle` still held (GAP-HW-007); fine to ignore for story use.
 7. `set-led` layer index map (which layer is doorway/ledge/base?).
-8. Rate limit: how fast can light writes go before the tower drops or queues? (Bell-toll and bed-breath rely on ~3–5 commands/s at most.)
+8. Does the tower accept light writes faster than the executor's 250 ms lane? Bell-toll does not need that (its gap is 300 ms). `lighting.flash` on the timing page is the unverified probe, and story effects do not use it. No result is saved yet.
 9. Does the 8 s "bed breath" watchdog satisfy AT-26, or does Gamewright want a perceptible change each time?
 10. Is any Dracula moment allowed to move a drum (night-5 assault)? Proposed default: no.
 11. Will the no-answer stall (30 s) be fixed upstream or worked around in the executor (send-without-wait for diffed lights)? It is the biggest risk to tight cue timing.
 12. Bell: commission a Mac bell, or accept a tower sound stand-in (none is a bell)?
 13. Low-battery threshold to warn, given GAP-HW-011.
-14. Canonical cue sheet location (PRD OQ 5) and the invalid moment id (OQ 6) affect where these effect names live.
