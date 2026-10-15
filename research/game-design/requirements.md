@@ -194,6 +194,6 @@ Bob wants a handle on total game length. Story-neutral: each pack supplies its o
 - **Start gate:** the game cannot start until every hunter is held by at least one device. The wizard shows unheld hunters.
 - More devices than hunters is fine. A hunter held by several devices shows its private moments on all of them.
 - Private moments go only to devices holding that hunter, never to the Dashboard. A device holding several hunters shows each hunter's private moment labeled with that hunter's name.
-- Holdings can be changed from the Dashboard at any time. If a change would leave a hunter unheld, the game pauses until that hunter is held again.
+- Holdings can be changed from the iPads only, at any time (Bob, 2026-10-15: the Story board is display only). If a change would leave a hunter unheld, the game pauses until that hunter is held again.
 - The stats record devices and holdings for each game.
 - Disconnect rule (Bob, 2026-10-14): if the only device holding a hunter disconnects, play pauses at once, the same as an unheld hunter, and resumes when a device holds that hunter again.

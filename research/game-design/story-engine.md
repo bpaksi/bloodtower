@@ -129,7 +129,7 @@ The tower should nearly always be doing something. The engine runs a three-layer
 - Stack cap: story advantages are limited to +2 per hunter per fight by default, overridable per pack within R-FUN-4.
 
 ## E19 Quest tokens (objective, lure, hunter)
-Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art.
+Gamewright, 2026-10-14; rewritten 2026-10-15 (Bob's rulings) to match RtDT. Story-neutral; a pack supplies the sites, icons and art.
 
 **RtDT grounding.** The base game ships 3 quest markers (companion quest, adversary quest, main goal). The app tells players to place them "in the spaces on the board where they can be completed", and a marker is removed when its quest is done ([official rulebook](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf)). E19 reuses those three physical markers (or Dark Horde minis) for three story roles. Board terms used here are RtDT's own: four **kingdoms** (north, east, south, west) separated by **rivers**; 15 **spaces** per kingdom, each with a terrain (desert, hills, mountains, lake, forest, grasslands); one **building** of each type per kingdom: **citadel, sanctuary, village, bazaar**. Movement is one move per adjacent space, and crossing a river does not let you slide along it. A **site** in this rule means a space, usually one with a building.
 
@@ -162,14 +162,14 @@ Gamewright, 2026-10-14. Story-neutral; a pack supplies the dungeon, its room dec
 **Rule.**
 - **E20a Entry.** A pack places a dungeon at a site (an E19 objective). It starts when a hunter enters the site. Presence is locked as in E15, so only present hunters crawl.
 - **E20b Layout.** At game start the engine deals a seeded layout from the pack's room deck: an ordered chain (optionally with branches) of N rooms, with the target room always last. Room types are **trap**, **foe**, **treasure**, **deeper/stairs** (advances depth with no other effect, or opens a branch), and **story room** (bound to one hunter; if that hunter is absent, use its `~no-<hunter>` variant). Rooms are face down until entered, and the Dashboard shows the room map RtDT-style.
-- **E20c Per room.** Reveal the room, then the present hunters may spend **one** E18 Advantage (the trait the pack declares) to improve it, once per room. Then resolve it. Foe rooms run through the existing Dashboard battle screen using E18 advantages, with the battle cards' warrior costs left as base RtDT.
+- **E20c Per room (Bob, 2026-10-15).** Reveal the room, then resolve its cost (E20d). The present hunters may apply E18 Advantages they already hold to reduce that cost. Clearing a room never grants an Advantage; the reward is loot (E20f) and depth (E20g). Foe rooms run through the existing Dashboard battle screen using E18 advantages, with the battle cards' warrior costs left as base RtDT.
 - **E20d Costs.** Room costs come from story items and story tracks, or a corruption to a present hunter. Never warriors or spirit (story-mechanics ruling). Unpayable cost: pay what you can and take one corruption. At most one corruption per room, and the instant-loss guard applies (E9/E19f): never a third corruption from a crawl.
 - **E20e Push on or retreat.** After each room the present hunters vote (host breaks ties) to go deeper or leave. Leaving keeps cleared rooms cleared, and the party may re-enter on a later turn or night if the pack allows it.
 - **E20f Loot.** Treasure rooms and the target room grant story items, bound to a present hunter (carried key items rule, "E (carried key items)" above).
 - **E20g Depth track.** The Dashboard shows depth (rooms cleared out of N). A pack may key the outcome to the depth reached.
 - **E20h End.** The crawl ends when the target room is cleared (success flag), on retreat (partial, with depth recorded), or when the length cap is hit (treated as retreat).
-- **E20i Length.** N rooms and the per-visit room cap scale with game length (R-LEN). The pack declares them, and real times come from measurement.
-- **E20j Logging.** Log the seed, layout, each room (type, improve used, cost paid, corruption, loot), the choice, and start/end timestamps per room and crawl (PRD-41 style).
+- **E20i Length (Bob, 2026-10-15).** Crypt rooms per length: **Short 2, Standard 4, Long 6** (N includes the target room). The per-visit room cap also scales with length (R-LEN); the pack declares it, and real times come from measurement.
+- **E20j Logging.** Log the seed, layout, each room (type, Advantages applied, cost paid, corruption, loot), the choice, and start/end timestamps per room and crawl (PRD-41 style).
 - **E20k Tower.** No tower control in the POC (Phase 2). Ambient E16 continues, and scene cues are only a later option.
 
 **Divergences from RtDT.**

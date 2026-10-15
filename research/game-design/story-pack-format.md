@@ -440,7 +440,6 @@ A dungeon is placed at a site as an E19 objective and starts when a hunter enter
 |---|---|---|---|
 | `dungeon.id` | id | yes | |
 | `site` | objective ref (9.1) | yes | E20a |
-| `trait` | RtDT Advantage trait | yes | the one trait that may improve a room (E20c, E18) |
 | `deck` | list room ref | yes | |
 | `layout` | `chain` \| `chain+branches` | yes | seeded deal at game start, target room always last (E20b) |
 | `target_room` | room ref | yes | always last; clearing it = success (E20h) |
@@ -450,25 +449,25 @@ A dungeon is placed at a site as an E19 objective and starts when a hunter enter
 | `room.id`, `room.moments` | id, list | yes | |
 | `room.type` | `trap` \| `foe` \| `treasure` \| `deeper` \| `story` | yes | E20b |
 | `room.hunter` | hunter ref | story rooms | with `~no-<hunter>` variant if absent (E20b) |
-| `room.improve` | effects | no | applied if a present hunter spends one `trait` (or Wild) Advantage, once per room (E20c) |
-| `room.cost` | story items, story tracks, or corruption to a present hunter | no | never warriors or spirit (E20d) |
+| `room.reduce_with` | list RtDT trait | no | held Advantages (or Wild) the present hunters may apply to reduce `room.cost`; clearing a room never grants an Advantage (E20c) |
+| `room.cost` | a story item, a story-track step, or a corruption to a present hunter | yes | never warriors or spirit (E20d) |
 | `room.foe` | foe ref | foe rooms | Story board battle screen, base RtDT warrior costs (E20c) |
 | `room.loot` | story items | treasure/target | bound to a present hunter (E20f) |
 
 Rules:
 - Rooms are face down until entered; the Story board shows the room map and depth (rooms cleared of N) (E20b, E20g).
-- Per room: reveal, optional improve, resolve (E20c). Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
+- Per room: reveal, apply held Advantages to reduce the cost, resolve (E20c). The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
 - After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5). A tie means retreat: dungeon votes use `vote.tie: retreat` (ruling 5). That replaces the host tiebreak and a first-press tie.
 - Cleared rooms stay cleared after leaving (E20e).
 - End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
-- Logging: seed, layout, each room (type, improve, cost, corruption, loot), the choice, start/end per room and crawl (E20j, PRD-41).
+- Logging: seed, layout, each room (type, Advantages applied, cost, corruption, loot), the choice, start/end per room and crawl (E20j, PRD-41).
 - No tower control in the POC; ambient E16 continues (E20k). Story cues never move drums.
 
 ```yaml
 dungeons:                           # D-DRA-14
   - id: crypt-under-church
     site: n2-crypt-entry            # objective after n2-burgomasters-funeral
-    trait: <RtDT trait>            # which advantage improves a room is not ruled
+    # rooms per length: short 2, standard 4, long 6 (E20i, Bob 2026-10-15)
     layout: chain
     deck: [room.ossuary, room.flooded-passage, room.old-burgomasters-tomb, room.szgany-cache]
     target_room: room.sealed-door
@@ -613,8 +612,8 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
 17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
 18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
-19. **D-DRA-13/14 open values:** set pieces per length, hunter-token pace, encounter frequency, crypt room count per length and the crypt's improve trait are not ruled yet.
-20. **D-DRA-11 site name:** no source names the tower-adjacent spaces; the app names it by terrain and position until the board is checked.
+19. **D-DRA-13/14 open values:** crypt rooms per length and the improve trait are settled by rulings 7 and 8. Still open: set pieces per length, hunter-token pace, encounter frequency.
+20. **D-DRA-11 site name:** settled by ruling 9. The space is "The Tower's Shadow".
 
 ## Gamewright rulings (Oct 15 2026)
 
@@ -628,4 +627,11 @@ These settle the matching open questions above and take precedence over any earl
 6. **`enc-the-window.03`:** the choice moves to the iPads.
 
 Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lantern` to 2-3 moments.
-Still open: set pieces per length, crypt room count per length, which advantage the crypt rooms improve, and a name for the tower-adjacent space.
+## Bob's rulings (Oct 15 2026)
+
+7. **E20 crypt rooms per length:** Short 2, Standard 4, Long 6.
+8. **E20 rooms, rewritten to match RtDT:** cleared rooms don't grant Advantages. Each room has a cost (a story item, a track step or a corruption), and the hunters can apply the Advantages they already hold to reduce it. Loot and depth are the reward. The pack-level `trait` field is removed.
+9. **D-DRA-11:** the space next to the Tower is named "The Tower's Shadow".
+10. **Hunter holdings** (R-DEV-9) change on the iPads only, because the Story board is display only.
+
+Still open: set pieces per length (Loremaster proposes, Gamewright reviews).
