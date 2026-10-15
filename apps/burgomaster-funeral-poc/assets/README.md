@@ -26,7 +26,7 @@ NEEDS-FROM-ILLUSIONIST.md
 - 1981 bookends (R-LF-9): not in the repo. Homage recreations are kept locally only (`assets/shared/dt1981/` is gitignored).
 
 ## Privacy by target
-- `dashboard`: shared screen and speakers. Never carries a `.private.*` payload.
+- `storyboard`: shared screen and speakers (the Story board). Never carries a `.private.*` payload. The manifest still stores this audience as `dashboard` while the POC code is frozen (spec D25).
 - `ipad:<hunter>`: every device holding that hunter, only while the hunter is present.
 - `ipad:all`: shown on every hunter's device (pick cards, hunter portraits).
 - `phone`: phone view of the same content (no separate assets yet).

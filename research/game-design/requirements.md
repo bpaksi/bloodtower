@@ -9,7 +9,7 @@ Status: **draft for Bob's review**, 2026-10-14. Nothing here is decided until Bo
 
 Every requirement below serves one of these. When they conflict, fun wins.
 
-"MUST" = required for the first playable; "SHOULD" = expected; "MAY" = optional. Detail lives in: [story-engine.md](story-engine.md) (R-ENG, R-AV detail), [asset-catalog.md](asset-catalog.md) (R-ASSET), [encounters-and-set-pieces.md](encounters-and-set-pieces.md) (R-SP, R-RE), [sessions.md](sessions.md) (R-SES), [statistics.md](statistics.md) (R-STA), [open-questions.md](open-questions.md). [core-mechanics.md](core-mechanics.md) holds the shared systems.
+"MUST" = required for the first playable; "SHOULD" = expected; "MAY" = optional. Detail lives in: [story-engine.md](story-engine.md) (R-ENG, R-AV detail), [asset-catalog.md](asset-catalog.md) (R-ASSET), [encounters-and-set-pieces.md](encounters-and-set-pieces.md) (R-SP, R-RE), [sessions.md](sessions.md) (R-SES), [statistics.md](statistics.md) (R-STA), [setup-wizard-and-summary.md](setup-wizard-and-summary.md) (R-WIZ, R-SUM), §9 below (R-LEN), [open-questions.md](open-questions.md). [core-mechanics.md](core-mechanics.md) holds the shared systems.
 
 ## 0. Story-specific rulings
 
@@ -165,13 +165,25 @@ Data model in [statistics.md](statistics.md).
 | R-STA-10 | MUST: each game records its seed and pack version. |
 | R-STA-11 | SHOULD: per-player stats are attributed to the player's device/hero. |
 
+## 9. Game length (R-LEN) (requested by Bob, 2026-10-14)
+
+Bob wants a handle on total game length. Story-neutral: each pack supplies its own mapping. Draft for review.
+
+| ID | Requirement |
+|---|---|
+| R-LEN-1 | MUST: game length is a startup option with three values, **Short / Standard / Long**, chosen by the host during setup (R-WIZ-12) and fixed for the game. Default: Standard. It is recorded with the game (R-LEN-5). |
+| R-LEN-2 | MUST: length sets the number of nights (or chapters/clock length, R-ENG-3, R-ENG-17), the hunter-token pace (E19), and encounter frequency (R-RE-8). |
+| R-LEN-3 | MUST: each story pack declares, per length, which nights and set pieces are included, so the plot stays whole at every length: the opening, every set piece the win condition depends on, and the finale are present at every length. Lint fails a length whose win condition is unreachable. |
+| R-LEN-4 | MUST: target play times per length are **measured, not guessed**: they come from timed playtests (POC timing, then full-game runs) and are stored as pack data with the number of runs behind them. Until enough data exists, the estimate is shown as pending. |
+| R-LEN-5 | MUST: the end summary (R-SUM) and stats (R-STA) record actual duration: total, active, paused, and per phase/night, alongside the chosen length, so estimates can be refined from real games. |
+
 ## R-DEV: Device topology (decided by Bob, 2026-10-14)
 - R-DEV-1. The Mac is the host. It holds the Bluetooth connection to the tower, runs the game state, and keeps the SQLite saves and stats.
 - R-DEV-2. A browser on the Mac shows the running-game Dashboard, which all players can see. It is the shared screen: map and kingdom state, the clock and night, party resources, corruption, keys, skulls and seals, the current scene, and tower status.
 - R-DEV-3. Each player has their own iPad, which joins the Mac's game over the local network. It shows that player's hunter, private scenes and lines, private choices, and any secret goal.
 - R-DEV-4. Nothing private ever appears on the Dashboard. Nothing shared depends on a single iPad being present; a player who drops out can rejoin and their iPad restores their view.
 - R-DEV-5. The tower is driven only by the Mac. The iPads never talk to the tower.
-- R-DEV-6. Audio routing: narration, music, and shared sound effects play from the Mac with the Dashboard. Private lines play only on their owner's iPad (earbuds or low volume recommended). Every script cue carries a target: `dashboard` or `ipad:<hunter>`. If no target is given, the cue goes to the Dashboard. The readiness check rejects a private line targeted at the Dashboard.
+- R-DEV-6. Audio routing: narration, music, and shared sound effects play from the Mac with the Story board. Private lines play only on their owner's iPad (earbuds or low volume recommended). Every script cue carries a target: `storyboard` or `ipad:<hunter>`. If no target is given, the cue goes to the Story board. The readiness check rejects a private line targeted at the Story board. A scene line that still says `dashboard` means `storyboard`. The frozen funeral POC still sends the wire value `dashboard` for this target (spec D25).
 - R-DEV-7. Two render targets from one source: the Dashboard gets 1080p 16:9, and the iPads get portrait or 4:3 crops. The asset index stores a variant per target (`<id>@dashboard`, `<id>@ipad`), and the readiness check requires the variant that each cue's target needs.
 
 - R-DEV-8. A phone can stand in for a player iPad. Join is the same QR (R-WIZ-10). The device is detected at join, and the player can switch to the full layout.

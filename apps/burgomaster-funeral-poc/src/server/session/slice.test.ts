@@ -5,7 +5,14 @@ import { loadCatalog } from "../assets/catalog.ts";
 import { appendEvent, type OpenLog, openLog, readEvents } from "../db/log.ts";
 import { ACCENT_ID, accentDelayMs } from "./accent.ts";
 import { FakeClock } from "./clock.ts";
-import { DEMO_SEED, type DemoSession, DemoSession as Session } from "./slice.ts";
+import {
+  DEMO_SEED,
+  type DemoSession,
+  firstDemoAccentDelay,
+  OPENING_MOMENTS,
+  revealWindow,
+  DemoSession as Session,
+} from "./slice.ts";
 
 const catalog = loadCatalog(join(import.meta.dirname, "../../../assets"));
 
@@ -167,7 +174,9 @@ describe("demo slice", () => {
     const delay = accentDelayMs(DEMO_SEED, 0);
     expect(delay).toBeGreaterThanOrEqual(20_000);
     expect(delay).toBeLessThanOrEqual(60_000);
-    clock.advance(delay);
+    // Follows the clips: the seeded draw when it sits in the reveal, otherwise
+    // the point inside that reveal the session schedules.
+    clock.advance(firstDemoAccentDelay(catalog, DEMO_SEED));
 
     const view = session.dashboardView(dash.token);
     expect(view.playback?.momentId).toBe("n2-burgomasters-funeral.03");
@@ -184,13 +193,27 @@ describe("demo slice", () => {
   });
 
   it("lets the investigate cue override the accent", () => {
-    const seed = "funeral-demo";
+    const investigate = OPENING_MOMENTS.find((id) => id.endsWith(".investigate"));
+    if (!investigate) throw new Error("The opening has no investigate moment.");
+    const window = revealWindow(catalog, investigate);
+    let seed: string | undefined;
+    let delay = 0;
+    for (let i = 0; i < 4_000; i++) {
+      const candidate = `funeral-cue-${i}`;
+      const draw = accentDelayMs(candidate, 0);
+      if (draw >= window.start && draw < window.end) {
+        seed = candidate;
+        delay = draw;
+        break;
+      }
+    }
+    if (!seed) throw new Error("No seed lands in the investigate reveal for these clips.");
     const { session, clock, log } = start(seed);
     const joined = session.helloDevice("ipad", session.joinCode, undefined);
     if (!joined.ok) throw new Error("join failed");
     takeAll(session, joined.hello.clientId);
     expect(session.begin().ok).toBe(true);
-    clock.advance(accentDelayMs(seed, 0));
+    clock.advance(delay);
 
     const accent = readEvents(log.db).find((event) => event.type === "ambient_accent");
     if (accent?.type !== "ambient_accent") throw new Error("missing accent");

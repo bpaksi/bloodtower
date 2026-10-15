@@ -25,7 +25,7 @@
       "name": "seal-sequence",
       "capability": "seal flicker + one tower sound",
       "status": "Library",
-      "moments": ["n2-burgomasters-funeral.investigate.follow-the-mourner (risky pick)"],
+      "moments": ["n2-burgomasters-funeral.investigate.follow-the-mourner.cue"],
       "trigger": "after all investigation picks lock",
       "drums": "none (replaces drum-top; story cues never move drums)",
       "fallback": "screen seal flicker + seal sfx from the Mac",
@@ -37,7 +37,7 @@
       "status": "Library",
       "moments": ["n2-burgomasters-funeral.07~fight-lost"],
       "condition": "watched + lost; cap 2/night; supply<6 converts to +1 foe night 5",
-      "fallback": "Dashboard prompt + Done confirm; sting sfx only without tower",
+      "fallback": "Story board prompt + Done confirm; sting sfx only without tower",
       "fallback_sfx": "n2-burgomasters-funeral.sfx.skull-drop-sting"
     }
   ]
