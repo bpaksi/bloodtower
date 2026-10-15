@@ -247,7 +247,7 @@ Rules: `party` mode locks on the first press from any device; others see it lock
 | `reveal` | `after-all-lock` | yes | picks private until all lock |
 | `share_moment` | moment | yes | table-talk; Continue from an iPad |
 
-Investigation has no timer and no auto-pick (ruling 1, spec D16). The round waits until every present hunter has locked a unique action.
+Investigation has no timer and no auto-pick (ruling 1, spec D16). The round waits until every present hunter has locked a unique action. The finding goes only to the devices holding the hunter who picked it (E17).
 
 ```yaml
 choices:
@@ -552,7 +552,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 - V-14. Encounters have 2-3 moments and 2-3 choices (E19e, R-RE-9); at most 1 hunter-token encounter per full table round (ruling 4).
 - V-15. All three lengths declared; each keeps the opening, every set piece the win condition needs, and the finale; fail a length whose win condition is unreachable (R-LEN-3).
 - V-16. Endings: at least one win and one loss; `check_order` unique; there is always a matching ending at game end.
-- V-17. Investigation: actions > number of hunters; each action has a private finding for every hunter; no timeout and no auto-pick (ruling 1).
+- V-17. Investigation: more actions than hunters; each action has a private finding for the hunter who picks it, authored per hunter, and only that hunter's holders receive it; no timeout and no auto-pick (ruling 1).
 - V-18. Choices: every option with a `cond` has a sibling that is always available (no dead-end prompt).
 - V-19. Components: minimum asset set check (R-WIZ-3), warning or error per open question.
 - V-20. Determinism: all randomness names a seeded table.
