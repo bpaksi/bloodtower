@@ -36,3 +36,6 @@ A story cue may turn a drum only to set a glyph the rules read. Otherwise drums 
 
 ## Replacing placeholders
 Placeholders are replaced in place: keep the same ID and path, overwrite the file, and change `status` from `placeholder` to `draft` (or `final`).
+
+## Voice lines: regeneration rule
+Speak the manifest `text` field verbatim. Do **not** prepend a marker such as "Placeholder line." to the spoken audio (placeholder status lives only in `manifest.json` `status`). On 2026-10-15 all 59 `audio/lines/*.wav` were re-cut with ffmpeg to remove a spoken "Placeholder line" lead-in (cut point from faster-whisper base.en word timestamps, 20 ms fade-in, original integrated loudness kept within ±0.1 LU, ≈ −16.4 to −20.1 LUFS) and verified by re-transcription.
