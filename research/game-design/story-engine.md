@@ -145,7 +145,7 @@ Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art.
 - **E19h Pace and game length.** Hunter-token pace scales with the game length (R-LEN-2) as declared by the story pack: per length, the pack sets how often the token moves (e.g. every round vs. every other round) and how many hunter-token encounters a night allows. Defaults are the rules above (Standard).
 
 ## E20 Dungeon crawl
-Gamewright, 2026-10-14. Story-neutral; a pack supplies the dungeon, its room deck, text and art. First use: Dracula crypt (D-DRA-14).
+Gamewright, 2026-10-14; E20c and E20i rewritten 2026-10-15 (Bob's rulings). Story-neutral; a pack supplies the dungeon, its room deck, text and art. First use: Dracula crypt (D-DRA-14).
 
 **RtDT grounding** (official rulebook, [two-page](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf) and [v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf)):
 - Dungeons spawn as part of certain quests and are marked by a dungeon token showing the dungeon's trait. You explore one with the Quest action on its space. The token is removed when the dungeon is completed or an event says so.
@@ -161,15 +161,15 @@ Gamewright, 2026-10-14. Story-neutral; a pack supplies the dungeon, its room dec
 
 **Rule.**
 - **E20a Entry.** A pack places a dungeon at a site (an E19 objective). It starts when a hunter enters the site. Presence is locked as in E15, so only present hunters crawl.
-- **E20b Layout.** At game start the engine deals a seeded layout from the pack's room deck: an ordered chain (optionally with branches) of N rooms, with the target room always last. Room types are **trap**, **foe**, **treasure**, **deeper/stairs** (advances depth with no other effect, or opens a branch), and **story room** (bound to one hunter; if that hunter is absent, use its `~no-<hunter>` variant). Rooms are face down until entered, and the Dashboard shows the room map RtDT-style.
-- **E20c Per room.** Reveal the room, then the present hunters may spend **one** E18 Advantage (the trait the pack declares) to improve it, once per room. Then resolve it. Foe rooms run through the existing Dashboard battle screen using E18 advantages, with the battle cards' warrior costs left as base RtDT.
+- **E20b Layout.** At game start the engine deals a seeded layout from the pack's room deck: an ordered chain (optionally with branches) of N rooms, with the target room always last. Room types are **trap**, **foe**, **treasure**, **deeper/stairs** (advances depth, or opens a branch; it still pays `room.cost`, and it grants no loot and no Advantage), and **story room** (bound to one hunter; if that hunter is absent, use its `~no-<hunter>` variant). Rooms are face down until entered, and the Dashboard shows the room map RtDT-style.
+- **E20c Per room (Bob, 2026-10-15).** Reveal the room. The present hunters may then apply E18 Advantages they already hold to reduce its cost (E20d). If the room lists `room.reduce_with`, only a held Advantage of those traits applies, and a held Wild Advantage counts too; if it omits the list, any held Advantage may. Then resolve the reduced cost. Clearing a room never grants an Advantage; the reward is loot (E20f) and depth (E20g). Foe rooms run through the existing Dashboard battle screen using E18 advantages, with the battle cards' warrior costs left as base RtDT. Whether that battle use is the same application as the cost reduction is not ruled.
 - **E20d Costs.** Room costs come from story items and story tracks, or a corruption to a present hunter. Never warriors or spirit (story-mechanics ruling). Unpayable cost: pay what you can and take one corruption. At most one corruption per room, and the instant-loss guard applies (E9/E19f): never a third corruption from a crawl.
-- **E20e Push on or retreat.** After each room the present hunters vote (host breaks ties) to go deeper or leave. Leaving keeps cleared rooms cleared, and the party may re-enter on a later turn or night if the pack allows it.
+- **E20e Push on or retreat.** After each room the present hunters vote to go deeper or leave. A tie retreats (ruling 5, `vote.tie: retreat`); the host does not break it. Leaving keeps cleared rooms cleared, and the party may re-enter on a later turn or night if the pack allows it.
 - **E20f Loot.** Treasure rooms and the target room grant story items, bound to a present hunter (carried key items rule, "E (carried key items)" above).
 - **E20g Depth track.** The Dashboard shows depth (rooms cleared out of N). A pack may key the outcome to the depth reached.
 - **E20h End.** The crawl ends when the target room is cleared (success flag), on retreat (partial, with depth recorded), or when the length cap is hit (treated as retreat).
-- **E20i Length.** N rooms and the per-visit room cap scale with game length (R-LEN). The pack declares them, and real times come from measurement.
-- **E20j Logging.** Log the seed, layout, each room (type, improve used, cost paid, corruption, loot), the choice, and start/end timestamps per room and crawl (PRD-41 style).
+- **E20i Length (Bob, 2026-10-15).** N, the dealt chain including the target room, is **Short 2, Standard 4, Long 6**. That is the ruled E20 count and the Dracula crypt count (D-DRA-14). The per-visit room cap also scales with length (R-LEN); the pack declares it, and real times come from measurement. A chain shorter than N for the chosen length cannot be dealt.
+- **E20j Logging.** Log the seed, layout, each room (type, Advantages applied, cost paid, corruption, loot), the choice, and start/end timestamps per room and crawl (PRD-41 style).
 - **E20k Tower.** No tower control in the POC (Phase 2). Ambient E16 continues, and scene cues are only a later option.
 
 **Divergences from RtDT.**
@@ -179,3 +179,4 @@ Gamewright, 2026-10-14. Story-neutral; a pack supplies the dungeon, its room dec
 4. Corruption guard: RtDT allows a third corruption (loss). We redirect it instead.
 5. A depth track and time cap are new; they make pacing measurable.
 6. Story rooms tied to hunters are new, to support private/personal beats.
+7. RtDT spends one Advantage matching the dungeon's trait (or Wild) to improve a room, once. We do not. Held Advantages reduce a story cost (E20c), and clearing a room does not grant an Advantage.
