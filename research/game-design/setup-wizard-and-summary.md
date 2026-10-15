@@ -8,7 +8,7 @@ Status: draft for Bob's review, 2026-10-14. Design only. Builds on sessions.md (
 - R-WIZ-3. Asset use: a story need not use every DT asset, but it should use many. The manifest lists each asset group as used, optional, or unused (box away), and the content checker warns when a story uses fewer than a minimum set (proposed minimum: tower, board, all 4 kingdoms and their buildings, hero minis, skulls, seals). The wizard's first physical step tells players which components to leave in the box.
 - R-WIZ-4. Every placement step shows an illustration or highlighted board diagram (which kingdom, which building, how many) and a one-line instruction, with an optional narrator line.
 - R-WIZ-5. Steps follow a fixed order:
-  1. Story, chapter/night, difficulty, and seed (fortune card).
+  1. Story, chapter/night, difficulty and game length together (Short, Standard or Long, defaulting to Standard), and seed (fortune card).
   2. Players join on their iPads and pick hunters (R-DEV-3); the Dashboard fills the roster.
   3. Components check: what you need and what stays in the box.
   4. Board: lay out the board and orient the kingdoms. Any random starting kingdom is revealed with a flourish.
