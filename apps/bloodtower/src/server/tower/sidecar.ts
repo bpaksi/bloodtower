@@ -105,6 +105,8 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
     connect: () => {
       if (snapshot.connection === "connected" || connecting || wantConnect) return;
       wantConnect = true;
+      connecting = true;
+      snapshot = { ...snapshot, connection: "connecting" };
       if (socket && socket.readyState === WebSocket.OPEN) {
         send("hello", { clientLabel: "bloodtower" });
         return;

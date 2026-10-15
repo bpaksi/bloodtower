@@ -265,15 +265,24 @@ describe("session", () => {
         { deviceId: alpha.deviceId, promptId: "tower-connect", action: "tower-connect" },
       ]);
       expect(connect.map((result) => (result.ok ? result.winner : false))).toEqual([true, false]);
-      expect(engine.lockFor("tower-connect")?.winnerDeviceId).toBe(beta.deviceId);
-      connection = "disconnected";
       expect(engine.lockFor("tower-connect")).toBeNull();
+      connection = "disconnected";
       expect(engine.press(alpha.deviceId, "tower-connect", "tower-connect")).toMatchObject({
         ok: true,
         winner: true,
       });
-      connection = "connected";
       expect(engine.press(beta.deviceId, "tower-connect", "tower-connect")).toMatchObject({
+        ok: true,
+        winner: true,
+      });
+      connection = "connecting";
+      expect(engine.lockFor("tower-connect")?.winnerDeviceId).toBe(beta.deviceId);
+      expect(engine.press(alpha.deviceId, "tower-connect", "tower-connect")).toMatchObject({
+        ok: true,
+        winner: false,
+      });
+      connection = "connected";
+      expect(engine.press(alpha.deviceId, "tower-connect", "tower-connect")).toMatchObject({
         ok: true,
         winner: false,
       });

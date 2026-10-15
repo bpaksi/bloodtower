@@ -71,10 +71,10 @@ export interface SessionOptions {
   saveRoster: (snapshot: RosterSnapshot) => void;
   startedWall: string;
   /**
-   * Live tower reading. A connect lock stays while this reading is the one the
-   * press saw, or while the tower is connecting or connected. A dropped attempt
-   * (the reading changes to disconnected or unavailable) releases it.
-   * Calibrate is legal only while the reading is connected.
+   * Live tower reading. A connect lock is kept only while this reading is
+   * `connecting` or `connected`. Any other reading releases it, including when
+   * a failed attempt ends on the same word it started on. Calibrate is legal
+   * only while the reading is `connected`.
    */
   tower?: () => TowerSnapshot;
 }
@@ -117,17 +117,14 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       battery: { state: "unavailable" },
       calibrated: { state: "unavailable" },
     }));
-  /** Connection at the moment the current connect press won. */
-  let connectSeen: TowerSnapshot["connection"] | null = null;
+  /** True while `pressAll` is deciding one batch, so the first press keeps the lock. */
+  let inBatch = false;
 
   const reconcileTowerLocks = () => {
+    if (inBatch) return;
     const connection = readTower().connection;
-    if (locks["tower-connect"] && connectSeen !== null && connection !== connectSeen) {
-      if (connection === "connected" || connection === "connecting") connectSeen = connection;
-      else {
-        delete locks["tower-connect"];
-        connectSeen = null;
-      }
+    if (locks["tower-connect"] && connection !== "connected" && connection !== "connecting") {
+      delete locks["tower-connect"];
     }
     if (locks["tower-calibrate"] && connection !== "connected") delete locks["tower-calibrate"];
   };
@@ -316,11 +313,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       openPause("host-pause", null, `host-pause:${pauseSerial}`, deviceId);
       return;
     }
-    if (action === "resume") {
-      closePause();
-      return;
-    }
-    if (action === "tower-connect") connectSeen = readTower().connection;
+    if (action === "resume") closePause();
   };
 
   const legal = (promptId: string, action: ControlAction) => {
@@ -414,8 +407,13 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
 
     pressAll: (batch) => {
       const results: Array<PressOk | Fail> = [];
-      for (const press of batch)
-        results.push(engine.press(press.deviceId, press.promptId, press.action));
+      inBatch = true;
+      try {
+        for (const press of batch)
+          results.push(engine.press(press.deviceId, press.promptId, press.action));
+      } finally {
+        inBatch = false;
+      }
       return results;
     },
 
