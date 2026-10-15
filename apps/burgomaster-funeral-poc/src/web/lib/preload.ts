@@ -5,6 +5,12 @@ export interface PreloadAsset {
 
 export type PreloadPhase = "loading" | "ready";
 
+/**
+ * How long the indicator waits on one file. A phone often never fires
+ * `canplaythrough` for audio started outside a tap, so audio must not hold the banner.
+ */
+export const PRELOAD_WAIT_MS = { image: 15_000, audio: 2_000 } as const;
+
 const isAsset = (value: unknown): value is PreloadAsset => {
   if (typeof value !== "object" || value === null) return false;
   const record = value as { url?: unknown; kind?: unknown };
@@ -29,12 +35,29 @@ export const preloadScene = async (
   onPhase("loading");
   try {
     const assets = await fetchList();
-    await Promise.allSettled(assets.map((asset) => load(asset)));
+    await Promise.allSettled(assets.map((asset) => settle(asset, load)));
   } finally {
     onPhase("ready");
   }
   return "ready";
 };
+
+const settle = (asset: PreloadAsset, load: (asset: PreloadAsset) => Promise<void>): Promise<void> =>
+  new Promise((resolve) => {
+    const timer = setTimeout(resolve, PRELOAD_WAIT_MS[asset.kind]);
+    Promise.resolve()
+      .then(() => load(asset))
+      .then(
+        () => {
+          clearTimeout(timer);
+          resolve();
+        },
+        () => {
+          clearTimeout(timer);
+          resolve();
+        },
+      );
+  });
 
 /** Pulls one asset into the browser cache. Missing `Image` (tests, no window) resolves. */
 export const loadAsset = (asset: PreloadAsset): Promise<void> => {

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { isPreloadList, preloadScene } from "./preload.ts";
+import { describe, expect, it, vi } from "vitest";
+import { isPreloadList, PRELOAD_WAIT_MS, preloadScene } from "./preload.ts";
 
 describe("preloadScene", () => {
   it("shows loading while every listed asset is fetched, then ready", async () => {
@@ -36,6 +36,30 @@ describe("preloadScene", () => {
     );
     expect(phases).toEqual(["loading", "ready"]);
     expect(result).toBe("ready");
+  });
+
+  it("reaches ready when a load never settles", async () => {
+    vi.useFakeTimers();
+    try {
+      const phases: string[] = [];
+      const done = preloadScene(
+        async () => [
+          { url: "/hang.png", kind: "image" },
+          { url: "/hang.wav", kind: "audio" },
+        ],
+        () => new Promise(() => {}),
+        (phase) => {
+          phases.push(phase);
+        },
+      );
+      await vi.advanceTimersByTimeAsync(PRELOAD_WAIT_MS.audio);
+      expect(phases).toEqual(["loading"]);
+      await vi.advanceTimersByTimeAsync(PRELOAD_WAIT_MS.image - PRELOAD_WAIT_MS.audio);
+      await expect(done).resolves.toBe("ready");
+      expect(phases).toEqual(["loading", "ready"]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
