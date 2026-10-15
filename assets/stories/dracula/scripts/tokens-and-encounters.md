@@ -284,6 +284,7 @@ Choice: **Pocket it** (finding) or **Follow the pages** (one present hunter take
 > **Narrator:** The veiled girl does not look back. The two at the end of the train do. They smile, and keep smiling.
 Fight: 2 foes (brides), per mechanics.
 
+**enc-wedding-uphill.03** [still] — one variant by fight result
 **enc-wedding-uphill.03~won** [still] — the fight is won
 [tower: low]
 > **Narrator:** They come apart like wet paper. Where the veil trailed, a single gold thread lies in the road.

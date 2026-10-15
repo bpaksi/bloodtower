@@ -9,7 +9,7 @@ Status: **draft for Bob's review**, 2026-10-14. Nothing here is decided until Bo
 
 Every requirement below serves one of these. When they conflict, fun wins.
 
-"MUST" = required for the first playable; "SHOULD" = expected; "MAY" = optional. Detail lives in: [story-engine.md](story-engine.md) (R-ENG, R-AV detail), [asset-catalog.md](asset-catalog.md) (R-ASSET), [encounters-and-set-pieces.md](encounters-and-set-pieces.md) (R-SP, R-RE), [sessions.md](sessions.md) (R-SES), [statistics.md](statistics.md) (R-STA), [setup-wizard-and-summary.md](setup-wizard-and-summary.md) (R-WIZ, R-SUM, game length R-LEN), [open-questions.md](open-questions.md). [core-mechanics.md](core-mechanics.md) holds the shared systems.
+"MUST" = required for the first playable; "SHOULD" = expected; "MAY" = optional. Detail lives in: [story-engine.md](story-engine.md) (R-ENG, R-AV detail), [asset-catalog.md](asset-catalog.md) (R-ASSET), [encounters-and-set-pieces.md](encounters-and-set-pieces.md) (R-SP, R-RE), [sessions.md](sessions.md) (R-SES), [statistics.md](statistics.md) (R-STA), [setup-wizard-and-summary.md](setup-wizard-and-summary.md) (R-WIZ, R-SUM), §9 below (R-LEN), [open-questions.md](open-questions.md). [core-mechanics.md](core-mechanics.md) holds the shared systems.
 
 ## 0. Story-specific rulings
 
@@ -171,7 +171,7 @@ Bob wants a handle on total game length. Story-neutral: each pack supplies its o
 
 | ID | Requirement |
 |---|---|
-| R-LEN-1 | MUST: game length is a startup option with three values, **Short / Standard / Long**, chosen by the host during setup (R-WIZ-12) and fixed for the game. Default: Standard. It is recorded with the game (R-STA-10). |
+| R-LEN-1 | MUST: game length is a startup option with three values, **Short / Standard / Long**, chosen by the host during setup (R-WIZ-12) and fixed for the game. Default: Standard. It is recorded with the game (R-LEN-5). |
 | R-LEN-2 | MUST: length sets the number of nights (or chapters/clock length, R-ENG-3, R-ENG-17), the hunter-token pace (E19), and encounter frequency (R-RE-8). |
 | R-LEN-3 | MUST: each story pack declares, per length, which nights and set pieces are included, so the plot stays whole at every length: the opening, every set piece the win condition depends on, and the finale are present at every length. Lint fails a length whose win condition is unreachable. |
 | R-LEN-4 | MUST: target play times per length are **measured, not guessed**: they come from timed playtests (POC timing, then full-game runs) and are stored as pack data with the number of runs behind them. Until enough data exists, the estimate is shown as pending. |
