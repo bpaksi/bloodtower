@@ -77,7 +77,7 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ### Step 3: Story loader and pack lint
 - Depends on: 1
-- Touches: `src/server/pack/**`, `packs/test/**`, `src/server/scripts/packLint.ts`
+- Touches: `src/server/pack/**`, `packs/test/**`, `src/server/scripts/packLint.ts`, `apps/bloodtower/package.json` (the `pack:lint` script only), `apps/bloodtower/src/server/package.json` (the `pack:lint` script only), `apps/bloodtower/README.md` (commands)
 - Deps change: no
 - Scope: load folder → Zod parse → validation subset → typed pack; clear error list with file and path; CLI. The loader reads `packsDir` from `.wt.json` (default `packs/`), overridable by `PACKS_DIR`. R1 ships the test pack at `packs/test/`: 4 hunters, 1 night, 1 set piece, shared + private moments + `~no-<hunter>` variants and one cue with screen half and fallback. The test pack is a long-lived proving ground for new ideas. The Dracula pack is not loaded in R1.
 - Covers: R-ENG-1, R-ENG-10 (lint part), R-ENG-11 (version recorded), V-1..V-5, V-8, V-20. Proof: unit tests per rule, the test pack and one bad pack per rule.
@@ -177,6 +177,18 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - Q7: holdings change only from iPads. Already settled by Gamewright's rulings in PR #21.
 
 ## Deviations
+
+### B2 (steps 3, 4, 5, 6, 8 and 9)
+
+- The six steps ship in one pull request. The commits follow the batch merge order 4, 3, 5, 6, 8, 9. Step 7 (the socket hub) is still the next batch, so the pages render against the protocol and do not open a session socket. The host process still does not connect to tower-poc.
+- `pack:lint` is the script step 3 was already going to add. It lives on `apps/bloodtower` and `bloodtower-server`. No dependency version changes. With no argument it lints `<packsDir>/test`.
+- `README.md` now names that command and the `/board`, `/join` and `/device` routes.
+- A pack-level schema issue has no field path in the frozen contract. The loader points it at the file and line that contain the offending token.
+- Presence is fixed when the session is created (`absent` hunters). R1 has no board movement. `~no-<hunter>` plays for that set. A private moment whose `scope` is `global` is still delivered when that hunter is absent.
+- Host pause uses its own prompt id (`pause-1`, then `pause-2`, …) because the frozen state has one gameplay prompt and a locked `pause` id could not be pressed again. A hunter with no connected holder replaces a host pause, and rejoin ends that pause. Resume does not force play while a hunter is blocked.
+- The device screen takes the tower locks as props. `deviceState` still has one `lock`, the gameplay prompt. Step 7 has to send the tower locks beside it, or the protocol changes, which this batch does not do.
+- Calibrate is refused until a connect press has won. A press before that does not consume the calibrate lock, and the sidecar sends calibrate only while the tower reports connected.
+- Spec §6 matches D10: this client sends `hello`, `connect` and `calibrate` to tower-poc. It does not send `command`. D4 now describes the proving-ground pack step 3 added.
 
 ### B1 (steps 1 and 2)
 

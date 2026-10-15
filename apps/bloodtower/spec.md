@@ -6,7 +6,7 @@
 | Source | [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). This spec follows that plan. A choice the plan left open is a decision in §1. |
 | Spec version | 1 (2026-10-15) |
 
-R1 is the thin foundation. It loads a story pack, shows a display-only Story board, lets devices join and press, and writes timing marks. It plays no story beyond the loaded pack's moment list, and that list is not loaded yet (step 3). The tower is connection only: no cue is sent.
+R1 is the thin foundation. It loads a story pack, shows a display-only Story board, lets devices join and press, and writes timing marks. It plays no story beyond the loaded pack's moment list. The tower is connection only: no cue is sent. The socket hub that joins the pages to a live session is the next batch.
 
 ## 1. Decisions
 
@@ -15,7 +15,7 @@ R1 is the thin foundation. It loads a story pack, shows a display-only Story boa
 | D1 | The app is `apps/bloodtower`, with packages `bloodtower-web`, `bloodtower-server`, `bloodtower-protocols` and `bloodtower-e2e`. | Bob, 2026-10-15 (plan Q1). |
 | D2 | Reuse-guide option A. tower-poc runs as a sidecar on `ws://localhost:4747/ws`. No tower code moves into `packages/` in R1. This app does not import `apps/tower-poc`. | Bob, 2026-10-15 (plan Q2). Two owners of one Bluetooth radio would break the one-owner rule. |
 | D3 | Packs live in a top-level `packs/` folder. The host reads `packsDir` from `.wt.json` (a relative path is resolved from that file). `PACKS_DIR` overrides it. A blank override does not. The default is the repo's `packs/`. | Bob, 2026-10-15 (plan Q3). |
-| D4 | R1 loads `packs/test/` only. That pack is a proving ground. The Dracula pack is a later step. The folder is a **placeholder README** until step 3, because Gamewright's test pack content is not in the repo. | Bob, 2026-10-15 (plan Q4), plus the missing content. |
+| D4 | R1 loads `packs/test/` only. That pack is a proving ground: four hunters, one night, one set piece, shared and private moments, one `~no-<hunter>` variant, and one cue with a screen half and a fallback. The Dracula pack is a later step. | Bob, 2026-10-15 (plan Q4). Step 3 replaced the placeholder README. |
 | D5 | Any joined iPad (or a phone standing in for one) can connect and calibrate. The first press wins, the same lock as Begin, Continue, Pause and Resume. Nothing connects, calibrates or reconnects by itself. | Bob, 2026-10-15 (plan Q5). Root tower-safety rules. |
 | D6 | Timing rows match the funeral POC's PRD-41 rows: phase, moment, pick, table talk, battle screen, cue start/end, pause start/end with cause (`unheld-hunter`, `host-pause`, `disconnect`). Each row has monotonic milliseconds from session start and a UTC wall time. Pauses are excluded from active time. Overlapping pauses count once. An open pause makes active time unknown, not zero. | Bob, 2026-10-15 (plan Q6). |
 | D7 | Holdings change only from a joined iPad or phone. The Story board cannot send `hold` or `control`. The server rejects those on a storyboard socket with `storyboard-control` (enforced when the hub lands in step 7). | Bob, 2026-10-15 (plan Q7), and Gamewright's PR #21 ruling. |
@@ -34,7 +34,7 @@ Four packages under `apps/bloodtower/src/`, orchestrated by `apps/bloodtower/pac
 
 The host serves the static export and `GET /health`. It does not open a socket to tower-poc, does not construct the tower library, and does not start a WebSocket hub (that is step 7). `src/server/index.ts` and `server.ts` do not import `ultimatedarktower`, `@stoprocent/noble` or `ws`. Those packages are dependencies now so later steps do not change the lockfile; step 1 is the only `Deps change: yes` step in the plan.
 
-SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables (`sessions`, `devices`, `holdings`, `control_presses`, `timing_marks`) are step 4. This step only checks that an in-memory database opens. The folder is `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`.
+SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`, and does not open a database until the hub batch. Tests use `:memory:`.
 
 ## 3. Protocols contract (frozen)
 
@@ -111,7 +111,7 @@ TypeScript `TimingMark` and the SQLite columns step 4 will create:
 
 Copied here so the app spec states them. The code that connects is step 6; this step's host does none of it.
 
-- The Story board and the devices do not talk to the tower. The Mac host will, through tower-poc, and only by `command{capabilityId, params}` on that sidecar.
+- The Story board and the devices do not talk to the tower. The Mac host will, as a client of tower-poc. Outbound messages are `hello`, `connect` and `calibrate` only (D10). It does not send `command`.
 - No bloodtower message carries raw bytes.
 - Nothing physical happens automatically: no auto-calibrate, no auto-reconnect, no automatic retry.
 - Mechanics that need calibration stay unavailable until a person calibrates. R1 does not offer mechanics.
@@ -125,24 +125,24 @@ Copied here so the app spec states them. The code that connects is step 6; this 
 | Requirement | Step | Proved now | Later |
 |---|---|---|---|
 | R-ENG-9, app layout | 1 | `pnpm check`, `pnpm build`, `src/e2e/tests/smoke.spec.ts` | — |
-| R-ENG-1 | 3 | Pack is data (`pack.test.ts` parses a pack and does not run `choices`) | Loader reads `packs/test/` |
-| R-ENG-10 | 3 | — | `pack:lint` names the file, path and rule |
-| R-ENG-11 | 3, 4 | `version` is required on the pack | Session stores it |
-| V-1, V-2, V-3, V-4, V-5, V-8, V-20 | 1 schema, 3 files | `src/protocols/pack.test.ts` | One bad pack per rule, with file and path |
-| PRD-41 | 1 types, 4 rows | `src/protocols/timing.test.ts` | Reconstruct a run from SQLite |
-| R-STA base rows, R-DEV-9 device/holding stats | 4 | Types in `devices.ts`, `control.ts`, `timing.ts` | Tables and a sample run |
-| V2-2 first press | 5 | Press shape records winner and loser | Two presses, one winner |
-| R-DEV-4, V-4 at runtime | 5, 7 | `storyboardState` rejects a private moment (`messages.test.ts`) | Hub never sends one |
-| R-WIZ-11 start gate | 5 | `canBegin` is tied to an empty `unheld` list | Reducer |
-| E15 presence | 5 | `~no-<hunter>` grammar and V-5 | Play the variant when absent |
-| R-DEV-1 | 6 | The host process is the Mac server; it does not open the tower | Sidecar client |
-| R-DEV-5 | 6, 1 | No `command` message (`messages.test.ts`) | iPad presses become sidecar commands only for connect and calibrate |
-| R-ENG-7 | 6 | Health reports no effects | Mock tower in CI |
-| R-SES-2 | 6 | Connect and calibrate are named presses; the host does not call them | Explicit press on a device |
-| R-ENG-16, R-DEV-6, R-WIZ-10 | 7 | Channels, targets, six-digit code, QR library pinned | Hub, QR on the board |
-| V2-1 display only | 8 | Smoke: the scaffold page has no button, input, textarea, select or link | Full board page |
-| V2-3 prompt only, V2-8 static list | 8 | `prompt` and `hunters` on `storyboardState` | Board UI. Cycling the sidebar stays out of scope |
-| V2-2, R-DEV-3, R-DEV-8, R-DEV-9 join | 9 | `hello` / `hold` schemas | Join and control UI |
+| R-ENG-1 | 3 | `src/server/pack/load.test.ts` loads `packs/test/` and does not run `choices` | — |
+| R-ENG-10 | 3 | `load.test.ts` lint lines name the file, path and rule | — |
+| R-ENG-11 | 3, 4 | `engine.test.ts` stores pack version `0.1.0` on the session row | A warning when a pack version changes is later |
+| V-1, V-2, V-3, V-4, V-5, V-8, V-20 | 1 schema, 3 files | `pack.test.ts` and one bad pack per rule in `load.test.ts` | — |
+| PRD-41 | 1 types, 4 rows | `timing/log.test.ts` reconstructs a sample run from SQLite | The timing report script is step 10 |
+| R-STA base rows, R-DEV-9 device/holding stats | 4 | `db/store.test.ts` round-trips devices and holdings | The stats summary is out of scope |
+| V2-2 first press | 5 | `engine.test.ts`: two presses, one winner, both rows stored | Live screens updating together is step 7 |
+| R-DEV-4, V-4 at runtime | 5, 7 | `engine.test.ts`: the storyboard projection has no private line and no `ipad:` | The hub still has to be the only sender |
+| R-WIZ-11 start gate | 5 | `engine.test.ts`: Begin stays closed until every hunter is held | — |
+| E15 presence | 5 | `engine.test.ts`: `~no-delta` plays when delta is absent, and is absent when delta is present | Board movement is later |
+| R-DEV-1 | 6 | `server.test.ts`: the host process does not open the tower. `tower/sidecar.ts` is the client | The host process calls it in step 7 |
+| R-DEV-5 | 6, 1 | `tower.test.ts`: a winning connect or calibrate is the only call, and the sources contain no `command` | Step 7 wires a device press to that call |
+| R-ENG-7 | 6 | `tower.test.ts` mock. Health reports no effects | — |
+| R-SES-2 | 6 | `engine.test.ts` and `port.ts`: connect and calibrate run only from a winning press. No reconnect action (D15) | A live iPad press is step 7 |
+| R-ENG-16, R-DEV-6, R-WIZ-10 | 7 | Channels, targets, six-digit code. `StoryBoard` draws the QR from a state that already has a code | The hub still has to publish that state |
+| V2-1 display only | 8 | `boardView.test.ts`: the board markup has no button, input, textarea, select or link | — |
+| V2-3 prompt only, V2-8 static list | 8 | `boardView.test.ts` renders one prompt and the hunter list | Cycling the sidebar stays out of scope |
+| V2-2, R-DEV-3, R-DEV-8, R-DEV-9 join | 9 | `controls.test.ts`: hold and control messages, locked copy, private line, calibrate stays off until connected | A live session is step 7 |
 | AC-1..AC-9 | 10 | AC-1 in part: check, build, smoke, and no edit under `apps/tower-poc` or `apps/burgomaster-funeral-poc` | The rest of the acceptance list |
 
 The plan's step 8 shorthand "V-1, V-3, V-8" is the flow rules V2-1, V2-3 and V2-8 in `apps/burgomaster-funeral-poc/docs/poc-v2-flow.md` (prompt only, static hunter list). The story-pack rules with the same numbers are the step 3 rows above. They are different checks.
@@ -151,6 +151,6 @@ The plan's step 8 shorthand "V-1, V-3, V-8" is the flow rules V2-1, V2-3 and V2-
 
 Live tower effects and the cue-to-tower map. Setup wizard beyond QR and holdings. Choices, votes, investigation, queue, replay, hunter tabs, sidebar cycling, battle status, advantages, quest tokens, dungeon, encounters, endings, the stats summary. Saves across restarts beyond holdings. The Dracula pack. Any change to `apps/tower-poc` or `apps/burgomaster-funeral-poc`.
 
-## 9. Placeholder pack
+## 9. Test pack
 
-`packs/test/README.md` is not a pack. The schema tests use an inline fixture (hunters `alpha` and `beta`, set piece `proving-ground`). Step 3 replaces the placeholder. Nothing in this app reads a Dracula id.
+`packs/test/` is the proving ground from D4. Schema tests still use an inline fixture. Nothing in this app reads a Dracula id.
