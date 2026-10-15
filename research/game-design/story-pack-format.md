@@ -452,14 +452,14 @@ A dungeon is placed at a site as an E19 objective and starts when a hunter enter
 | `room.id`, `room.moments` | id, list | yes | |
 | `room.type` | `trap` \| `foe` \| `treasure` \| `deeper` \| `story` | yes | E20b |
 | `room.hunter` | hunter ref | story rooms | with `~no-<hunter>` variant if absent (E20b) |
-| `room.reduce_with` | list RtDT trait | no | traits that may reduce `room.cost`. Wild always may. Omitted means any held Advantage. Clearing a room never grants an Advantage (E20c) |
+| `room.reduce_with` | list RtDT trait | no | traits a held Advantage must match to reduce `room.cost`. A held Wild Advantage counts even when Wild is not listed. Omitted means any held Advantage. Clearing a room never grants an Advantage (E20c) |
 | `room.cost` | a story item, a story-track step, or a corruption to a present hunter | yes | never warriors or spirit (E20d) |
 | `room.foe` | foe ref | foe rooms | Story board battle screen, base RtDT warrior costs (E20c) |
 | `room.loot` | story items | treasure/target | bound to a present hunter (E20f) |
 
 Rules:
 - Rooms are face down until entered; the Story board shows the room map and depth (rooms cleared of N) (E20b, E20g).
-- Per room: reveal, apply held Advantages to reduce the cost, then resolve the reduced cost (E20c). `room.reduce_with` limits the traits; if it is omitted, any held Advantage applies; Wild always may. The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
+- Per room: reveal, apply held Advantages to reduce the cost, then resolve the reduced cost (E20c). `room.reduce_with` limits which held traits apply; a held Wild Advantage counts even when Wild is not listed; if the list is omitted, any held Advantage applies. The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
 - After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5). A tie means retreat: dungeon votes use `vote.tie: retreat` (ruling 5). That replaces the host tiebreak and a first-press tie.
 - Cleared rooms stay cleared after leaving (E20e).
 - End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
@@ -635,7 +635,7 @@ Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lante
 ## Bob's rulings (Oct 15 2026)
 
 7. **E20 crypt rooms per length:** Short 2, Standard 4, Long 6. N includes the target room.
-8. **E20 rooms, rewritten to match RtDT:** cleared rooms don't grant Advantages. Each room has a cost (a story item, a track step or a corruption), and the hunters can apply the Advantages they already hold to reduce it. Loot and depth are the reward. The pack-level `trait` field is removed. A room may list `room.reduce_with` to limit which traits apply; Wild always may, and an omitted list means any held Advantage. What the reduction changes is still open (below).
+8. **E20 rooms, rewritten to match RtDT:** cleared rooms don't grant Advantages. Each room has a cost (a story item, a track step or a corruption), and the hunters can apply the Advantages they already hold to reduce it. Loot and depth are the reward. The pack-level `trait` field is removed. A room may list `room.reduce_with` to limit which held traits apply; a held Wild Advantage counts even when Wild is not listed, and an omitted list means any held Advantage. What the reduction changes is still open (below).
 9. **D-DRA-11:** the space next to the Tower is named "The Tower's Shadow". The app uses that name; it does not label the space by terrain and position.
 10. **Hunter holdings** (R-DEV-9) change on player devices only (an iPad, or a phone standing in), never on the Story board, because the Story board is display only. The frozen funeral POC still reassigns from the Dashboard (ruling 2, PRD-20, PRD-34).
 
