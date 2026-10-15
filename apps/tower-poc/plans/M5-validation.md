@@ -1,5 +1,7 @@
 # M5 — POC validation
 
+**Status:** deferred, 2026-10-15 (Bob closed the POC after M3). The first app built on the tower runs its own acceptance; see the [final report](../docs/final-report.md#what-was-not-done).
+
 **Goal:** demonstrate every acceptance criterion (PRD §10 plus spec §8) with evidence.
 **Exit condition:** acceptance table fully passed or each failure recorded as a gap. Bob signs off.
 

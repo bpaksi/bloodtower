@@ -5,8 +5,8 @@
 | Purpose | Learn what the tower can do: a controller and investigation tool for every UltimateDarkTower capability, with diagnostics and a gap register |
 | Phase | Explore |
 | SDLC tier | Full (touches hardware; its findings feed later apps) |
-| Status | Spec v1 approved. M0 in progress: [plans/M0-scaffolding.md](plans/M0-scaffolding.md). |
-| Disposable? | Yes, unless promoted. Reusable parts (protocol, tower client) move to `packages/` when `game-test` needs them. |
+| Status | **Closed after M3, 2026-10-15.** All 42 controls passed on the real tower. M4 and M5 are deferred. Read [docs/final-report.md](docs/final-report.md) for what the tower offers, and [docs/reuse-guide.md](docs/reuse-guide.md) for taking the code into another app. |
+| Disposable? | No: its protocol and tower service are to move to `packages/` for the funeral app's Phase 2 ([reuse guide](docs/reuse-guide.md)). Until then it runs as the Mac-side tower service. |
 
 A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower](https://github.com/ChessMess/UltimateDarkTower)). Any browser on the LAN (Mac, iPad, phone) controls it over WebSocket.
 

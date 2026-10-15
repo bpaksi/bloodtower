@@ -1,5 +1,7 @@
 # M3 — Functional coverage (Lights, Sounds, Mechanics, Tower State, Verify)
 
+**Status:** done, 2026-10-15. Steps 3.1 to 3.6 are merged, and Bob's Verify pass passed all 42 controls on the real tower. The last milestone of the POC: it closed after M3 ([final report](../docs/final-report.md)).
+
 **Goal:** every inventory entry with `availability ≠ unavailable` has a UI control on its page. Every entry has `mock-tested` status, and the Verify mode records hardware results to SQLite.
 **Exit condition:** coverage test plus "UI mapping" test green. Bob has run the Verify pass on hardware for each page.
 

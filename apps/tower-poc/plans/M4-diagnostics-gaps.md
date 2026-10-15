@@ -1,5 +1,7 @@
 # M4 — Diagnostics and gap management
 
+**Status:** deferred, 2026-10-15 (Bob closed the POC after M3). Nothing here was built. Where each part goes instead is in the [final report](../docs/final-report.md#what-was-not-done).
+
 **Goal:** a full diagnostics timeline (FR-08 to FR-10) and a persistent gap register (FR-11, FR-12).
 **Exit condition:** every command has a correlated lifecycle in the timeline. Export JSON validates against the schema. Gaps support CRUD, import and export and persist across service restarts.
 
