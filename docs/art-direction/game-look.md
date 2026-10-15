@@ -16,7 +16,7 @@ Files in this folder:
 | `fonts/fetch-fonts.sh` | Downloads the font files (not committed; `.ttf` is gitignored) |
 
 Rebuild the PNGs: `docs/art-direction/fonts/fetch-fonts.sh && cd docs/art-direction/mocks && python3 render.py` (needs `pip install playwright==1.* && playwright install chromium`).
-Note: the 1981 tower slide is the tracked file `apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png`. The copyrighted reference tree `research/dark-tower-1981/` is gitignored; this path is not.
+Note: the 1981 tower slide is the tracked file `apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png`. That path is not gitignored. `.gitignore` ignores only `research/dark-tower-1981/images/`, `research/dark-tower-1981/sounds/`, and `research/dark-tower-1981/contact-sheet.png`.
 
 ## 1. Fonts (all free, SIL Open Font License 1.1, from github.com/google/fonts `ofl/`)
 
