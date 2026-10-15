@@ -44,6 +44,10 @@
   .satchel .row b { display:block; font-family: var(--bt-font-title); font-size:52px; color: var(--bt-bone); }
   .tower { height: 210px; background: url(../../../apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png) center/cover; border:2px solid var(--bt-candle); filter: sepia(.7) brightness(.75) contrast(1.2); position:relative; }
   .tower span { position:absolute; top:12px; left:24px; font-family: var(--bt-font-title); color: var(--bt-iron-gall); font-size:30px; }
+.next { text-align:center; font-family: var(--bt-font-title); font-size:36px; color: var(--bt-parchment-dark); padding:16px; border-top:1px solid var(--bt-candle); border-bottom:1px solid var(--bt-candle); background: linear-gradient(90deg, transparent, rgb(142 27 27 / .4), transparent); }
+  .next mark { background:none; color: var(--bt-candle); }
+  .host { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px; }
+  .hb { text-align:center; padding:20px 8px; font-family: var(--bt-font-label); font-size:30px; letter-spacing:.08em; color: var(--bt-candle); }
 </style></head><body>
 <nav>
   <div class="tab on"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"></div><div class="nm">Wren</div><div class="badge">!</div></div>
@@ -66,8 +70,8 @@
     <div class="card bt-panel hot"><div class="ill" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/stills/n2-burgomasters-funeral.02@dashboard.png)"></div><div><div class="vb">Share It</div><div class="ds">Tell the others what the body says.</div></div></div>
     <div class="card bt-panel"><div class="ill" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"></div><div><div class="vb">Keep It</div><div class="ds">Some truths are a gravedigger’s alone.</div></div></div>
     <div class="satchel bt-panel"><h4>Wren’s Satchel</h4><div class="row"><span><b>3</b>Wounds</span><span><b>2</b>Stakes</span><span><b>1</b>Garlic</span><span><b>✠</b>Ward</span></div></div>
-    <div class="tower"><span>The Tower Waits</span></div>
-    <div class="hint">The candle burns low. <mark>Tomas</mark> has yet to choose.</div>
+    <div class="next">Next · <mark>Waiting on you (Wren)</mark>, Tomas</div>
+    <div class="host"><div class="bt-panel hb">↺ Replay last</div><div class="bt-panel hb">Story log</div><div class="bt-panel hb">❚❚ Pause</div></div>
   </aside>
 </main>
 <div class="vignette"></div>

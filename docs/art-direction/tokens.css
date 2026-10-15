@@ -48,9 +48,11 @@
   --bt-font-label: "IM Fell English SC", "Cormorant SC", serif;
   --bt-font-title: "Cormorant SC", "IM Fell English SC", serif;
   --bt-font-initial: "UnifrakturMaguntia", "Cormorant SC", serif;
-  --bt-size-caption: clamp(1.6rem, 2.2vw, 2.6rem);
-  --bt-size-body: 1.35rem;
-  --bt-size-label: 1.05rem;
+  --bt-size-caption: clamp(1.75rem, 2.3vw, 2.75rem);
+  --bt-size-body: 1.75rem; /* 28px floor (PRD-2) */
+  --bt-size-number: 3rem; /* 48px floor for key numbers */
+  --bt-size-prompt: 3.75rem; /* next-step prompt */
+  --bt-size-label: 1.75rem;
   --bt-tracking-label: 0.12em;
 
   /* frames */
@@ -177,9 +179,23 @@
 .bt-flicker {
   animation: bt-candle 3.7s steps(1, end) infinite;
 }
+.bt-badge {
+  animation: bt-badge var(--bt-dur-badge-pulse) ease-in-out infinite;
+}
+@keyframes bt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .bt-ink-in,
-  .bt-flicker {
+  .bt-ink-in {
+    animation: bt-fade-in 300ms ease-out both;
+  }
+  .bt-flicker,
+  .bt-badge {
     animation: none;
   }
 }
