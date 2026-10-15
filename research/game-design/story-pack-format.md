@@ -4,7 +4,7 @@ Status: draft for Bob's review, 2026-10-15. Design only, no code.
 Scope: the data a new app's **story loader** reads. A story (the Dracula funeral night, the crypt crawl under the church, future stories) must be pure data: adding or changing one needs no code change.
 
 Sources: `research/game-design/story-engine.md` (R-ENG, E1-E18; E15 presence, E16 never idle, E17 investigation, E18 advantages), `requirements.md`, `setup-wizard-and-summary.md` (R-WIZ, R-SUM), `research/stories/dracula/rulings.md`, `apps/burgomaster-funeral-poc/docs/PRD.md` (rev 5, R3-x/R4-x/R5-1), `apps/burgomaster-funeral-poc/assets/manifest.json` and `assets/cues/cue-sheet.json`, scripts `n2-burgomasters-funeral.md`, `n23-catacombs-of-saint-ysolde.md`, `n4-earth-boxes.md`.
-Not found in the repo: E19 and E20 text, the R-LEN rules, R-WIZ-12, `tokens-and-encounters.md`, the POC `spec.md`. Sections 10, 11, 12 and 4.3 are therefore **proposals** built from the brief and must be checked against Bob's intent (see Open questions).
+Rule sources for sections 3.2, 9, 10 and 11: E19 (a-h) and E20 (a-k) in `story-engine.md`, R-LEN-1..5 and R-RE-1..12 in `requirements.md`, R-WIZ-12 in `setup-wizard-and-summary.md`, D-DRA-11..14 in `rulings.md`, PRD rev 5 (R5-1, PRD-41..43), and `assets/stories/dracula/scripts/tokens-and-encounters.md` (Dracula objective sites, lures, hunter-token encounter table).
 
 ## 0. Conventions
 
@@ -110,16 +110,36 @@ cast:
 | `key` | ref | no | granted when required set pieces finish |
 | `end` | cond | yes | |
 
-### 3.2 Per-length selection (proposal; R-LEN text not found)
+### 3.2 Per-length selection (R-LEN-1..5, R-WIZ-12)
 
-Each night lists which set pieces run at each length. The loader picks the list for the chosen length at setup; nothing else changes.
+Length is a setup option, **Short / Standard / Long**, default Standard, picked by the host in wizard step 1 next to difficulty and fixed for the game (R-LEN-1, R-WIZ-12). The pack declares everything a length changes (R-LEN-2, R-LEN-3); the loader picks the block for the chosen length at setup. A pack must declare all three lengths.
 
 | Field | Type | Req | Notes |
 |---|---|---|---|
-| `by_length.<len>.nights` | list night ref | yes | e.g. Short may merge nights |
-| `by_length.<len>.set_pieces.<night>` | list ref | yes | every `required: true` set piece must appear in all lengths |
-| `by_length.<len>.encounters_per_night` | int | no | expected count, for timing estimate (PRD-43) |
-| `by_length.<len>.target_minutes` | int | no | checked against measured timing (PRD-41..43) |
+| `by_length.<len>` | `short` \| `standard` \| `long` | yes | all three present (R-LEN-1) |
+| `.label` | text | yes | what the length means in story terms, e.g. "3 nights" (R-WIZ-12) |
+| `.nights` | list night ref | yes | number and order of nights or chapters/clock length (R-LEN-2, R-ENG-3, R-ENG-17) |
+| `.set_pieces.<night>` | list set-piece ref | yes | set pieces kept that night (R-LEN-3) |
+| `.hunter_token.move_every` | int rounds | no | E19h; default 1 (every round, the Standard rule) |
+| `.hunter_token.max_encounters_per_night` | int | no | E19h; default: no cap beyond E19e's one per round |
+| `.encounter_frequency` | per R-RE-8 (rate per phase, by difficulty) | yes | R-LEN-2, R-RE-8; logged per session |
+| `.dungeons.<dungeon>.rooms` | int N | if pack has dungeons | E20i (see 11) |
+| `.dungeons.<dungeon>.room_cap_per_visit` | int | if pack has dungeons | E20i |
+| `.timing` | {estimate_minutes, runs, measured_at} \| `pending` | yes | R-LEN-4: measured, never guessed; `pending` until enough runs; written from PRD-41..43 data, not hand-authored |
+
+Rules:
+- R-LEN-3: the opening, every set piece the win condition depends on, and the finale appear at every length. The loader (V-15) fails a length whose win condition is unreachable.
+- R-WIZ-12: the wizard shows `label` and, if `timing` is measured, the estimate; otherwise "estimate pending".
+- R-LEN-5: the game record stores the chosen length with total, active and paused time and time per phase/night (14). Pauses are excluded from active time (PRD-41).
+- The extrapolation behind `timing` is PRD-43: set pieces × set-piece time + expected encounters × encounter time + fights × fight time + nights × dusk/dawn overhead.
+
+```yaml
+by_length:                       # Dracula, D-DRA-13 (provisional)
+  short:    {label: "3 nights", nights: [<2 of n1-n4>, n5], timing: pending}   # which 2: Loremaster proposes, Bob rules
+  standard: {label: "4 nights", nights: [<3 of n1-n4>, n5], timing: pending}
+  long:     {label: "5 nights (full game)", nights: [n1, n2, n3, n4, n5], timing: pending}
+```
+D-DRA-13: the night-5 tower assault is always played; set pieces per length, hunter-token pace and encounter frequency are not decided yet.
 
 ### 3.3 Set pieces
 
@@ -222,7 +242,7 @@ Rules: `party` mode locks on the first press from any device; others see it lock
 | Field | Type | Req | Notes |
 |---|---|---|---|
 | `actions` | list {id, card moment, finding: {id, private moments per hunter, effects}, risky: {cue, cost options}} | yes | 4-6 actions, more than present hunters |
-| `exclusive` | bool | yes | **true** per R3-6 (first lock wins, taken cards grey out); E17 text says false. See open questions |
+| `exclusive` | bool | yes | default **true** (R3-6: one unique pick per present hunter, first lock wins, taken cards grey out) |
 | `reveal` | `after-all-lock` | yes | picks private until all lock |
 | `share_moment` | moment | yes | table-talk; Continue from an iPad |
 
@@ -320,75 +340,137 @@ hooks:
   - {id: forewarned, when: "picked(follow-the-mourner)", victim: picker, amount: 1, alt: sit_out, forced_alt_at: 2}
 ```
 
-## 9. Quest tokens (E19, proposal)
+## 9. Quest tokens (E19)
 
-RtDT has **3 quest markers** (asset AST-B08). The pack reuses them; it adds no new physical token. At most 3 are on the board at once; the loader checks every night's peak.
+The pack reuses RtDT's 3 physical quest markers (asset AST-B08) or Dark Horde minis for three roles, at most one of each per night: **objective**, **lure**, **hunter** (E19). It adds no new physical token. The pack supplies sites, icons and art; the engine owns placement and movement. A **site** is an RtDT space, usually one with a building (citadel, sanctuary, village, bazaar).
+
+**9.1 Objective (E19a).**
 
 | Field | Type | Req | Notes |
 |---|---|---|---|
-| `id` | id | yes | |
-| `type` | `objective` \| `lure` \| `hunter` | yes | objective: a place the party must reach; lure: an adversary bait that triggers when entered or ignored; hunter: marks a hunter-specific private goal site (shown only on that hunter's iPad) |
-| `place` | building ref \| seed rule | yes | wizard step 6 places it |
-| `visible_to` | `all` \| `ipad:<hunter>` | yes | hunter-type: private |
-| `on_enter` | set piece / encounter / effects | yes | |
-| `expires` | phase ref | no | lure: on expiry, effects (e.g. ledger_add) |
-| `marker_slot` | 1..3 | yes | which physical marker |
+| `objective.<night>` | list {site, set_piece} | yes (nights with set pieces) | ordered; at dusk on the first site |
+
+The set piece starts when a hunter enters the site, and presence (E15) applies. With two set pieces, the token moves to the second site when the first scene ends. Sites may be `fortune-building` (seeded). A pack rule may move the token within a set piece, but only one site at a time (D-DRA-12, n4 boxes).
+
+**9.2 Lure (E19b), optional.**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `lures` | list {id, site, reward, nights, hook moment} | no | omit to skip lures |
+| `.reward` | one story item \| one finding | yes | exactly one |
+
+At dusk the engine makes one seeded draw from the lures valid that night; it never sits on the objective's site (redraw). The first hunter to reach it gets the reward, revealed privately to the iPads holding that hunter (`ipad:<hunter>`), with a neutral Story board line. Then it is removed.
+
+**9.3 Hunter token (E19c, E19d).**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `hunter_token.start` | `citadel` (default) \| building type \| `tower-adjacent` | no | E19d |
+| `hunter_token.encounters` | encounter table ref (10) | yes | seeded draw on landing |
+| `hunter_token.move_cue` / `land_cue` | cue | yes | lights/sound only (6); never drums (E13) |
+| pace | see `by_length.<len>.hunter_token` (3.2) | | E19h |
+
+Placed at dusk on its start site. Default start: the active kingdom's citadel; if that space holds the objective or a hunter at dusk, a space next to the Tower in the active kingdom (E19d). At the end of each round, before hunters move, it moves one space toward the nearest hunter by RtDT adjacency and river rules, ties by seeded pick (E19c). Landing on a hunter's space draws one hunter encounter; only hunters on that space are present (E15). It then returns to start, and is removed at dawn.
+
+Guards and logging: a token encounter or lure never gives a third corruption; a corruption aimed at a hunter at 2 is redirected under E9 (E19f). Every placement, move (from, to, round), draw, removal, lure claim and result is logged with the seed (E19g).
 
 ```yaml
-quest_tokens:
-  - {id: holy-symbol-site, type: objective, place: "seed(holy-symbol-building)", visible_to: all, marker_slot: 1,
-     on_enter: n23-catacombs-of-saint-ysolde}
-  - {id: decoy-crypt, type: hunter, place: seed(decoy), visible_to: "ipad:role(lookalike)", marker_slot: 2}
+quest_tokens:                       # Dracula (tokens-and-encounters.md §1-3)
+  objective:
+    n2: [{site: "K2 fortune-building", set_piece: seed(n23-sergius-blade|n23-catacombs-of-saint-ysolde)},
+         {site: "K2 sanctuary", set_piece: n2-burgomasters-funeral}]
+  lures:
+    - {id: lure-font-violet, site: sanctuary, reward: {item: holy-water}, nights: [2, 3, 4], hook: lure-font-violet.01}
+  hunter_token:
+    start: tower-adjacent           # D-DRA-11 override (K3 Citadel is the n3 objective)
+    encounters: enc-hunter-token
+    move_cue: heartbeat
+    land_cue: heartbeat-fast
 ```
 
-## 10. Encounters (proposal)
+## 10. Encounters (E11, E19e, R-RE)
 
-An encounter is a small scene of **2-3 moments**, drawn **at most 1 per round**, and **added to** the normal RtDT event for that round (it never replaces it).
+Encounters are seeded, weighted table draws (R-RE-1, R-RE-2, E11). The hunter-token encounter (E19c) is one source; packs may add others (per phase, kingdom, terrain, building) under R-RE-1.
 
 | Field | Type | Req | Notes |
 |---|---|---|---|
-| `id` | id | yes | moment prefix |
-| `tables` | list {table, weight} | yes | per phase/kingdom (E11) |
-| `trigger` | `round-draw` \| `enter-building` | yes | |
-| `cond` | cond | no | |
-| `moments` | list (2-3) | yes | |
-| `resolution` | `choice` \| `check` \| `battle` \| `none` | yes | battle uses physical RtDT cards |
-| `outcomes` | map result → effects | yes | pack resources only |
-| `once` | bool | no | |
+| `tables.<id>` | list {encounter, weight, cond} | yes | keyed by kingdom, terrain, building type, phase, story part, threat (R-RE-1) |
+| `id` | id | yes | moment prefix `enc-<id>` |
+| `source` | `hunter-token` \| `table` | yes | |
+| `nights` | list int | no | validity |
+| `cond` | cond | no | e.g. not spotlit tonight |
+| `moments` | list, 2-3 | yes | E19e |
+| `choices` | 2-3 options with different costs/risks | yes, unless `hazard` with `counter` | R-RE-9 |
+| `counter` | item/hunter ref | no | 1981 counter pattern (R-RE-10) |
+| `resolution` | `choice` \| `check` \| `trade` \| `haggle` \| `battle` | yes | R-RE-3; battle on the Story board battle screen, physical RtDT cards |
+| `outcomes` | map result → {line, effects} | yes | one line plus resource deltas, logged (R-RE-12); pack resources only (E11) |
+| `clock_cost` | int | yes | R-RE-11 |
+| `cooldown` / `session_cap` | int | no | never the same encounter twice in a row (R-RE-4) |
+
+Rules (E19e, ruled by Bob Oct 14 2026: **add**):
+- A hunter-token encounter plays **in addition to** that turn's normal RtDT event, never instead of it. The normal event resolves first, then the encounter.
+- At most one hunter-token encounter per round, 2-3 moments each.
+- The corruption guard applies (E19f): a cost aimed at a hunter at 2 corruption is redirected under E9, never a third corruption.
+- The normal event and the encounter are logged separately (E19e, E19g).
+- Frequency is per pack, difficulty and length (R-RE-8, R-LEN-2, 3.2).
+- Choices are made on iPads (5); the Story board only shows the prompt and result.
 
 ```yaml
 encounters:
-  - id: enc-wolves-on-the-road
-    tables: [{table: night, weight: 3}]
-    moments: [enc-wolves-on-the-road.01, enc-wolves-on-the-road.02]
-    resolution: battle
-    outcomes: {won: [], lost: [skull_drop: 1]}
+  - id: enc-the-window              # tokens-and-encounters.md
+    source: hunter-token
+    nights: [1, 2, 3, 4]
+    moments: [enc-the-window.01, enc-the-window.02, enc-the-window.03]   # .04 outro: see 17
+    resolution: choice
+    choices:
+      - {id: watch, effects: [corruption: {to: present, amount: 1}], outcome: finding(high-room)}
+      - {id: look-away, effects: []}
+    clock_cost: 0
 ```
 
-## 11. Dungeon rooms deck (E20, proposal)
+## 11. Dungeon rooms deck (E20)
 
-The crypt crawl is a seeded deck of rooms. Rooms clear and stay cleared (R-ASSET-7); drums don't move for story reasons.
+A dungeon is placed at a site as an E19 objective and starts when a hunter enters it; presence locks as in E15, so only present hunters crawl (E20a). First use: the Dracula crypt under the night-2 church, entered right after the funeral (D-DRA-14).
 
 | Field | Type | Req | Notes |
 |---|---|---|---|
 | `dungeon.id` | id | yes | |
+| `site` | objective ref (9.1) | yes | E20a |
+| `trait` | RtDT Advantage trait | yes | the one trait that may improve a room (E20c, E18) |
 | `deck` | list room ref | yes | |
-| `draw` | `seeded-shuffle` \| `fixed` | yes | |
-| `goal_room` | room ref \| `after:n` | yes | goal room inserted after n rooms |
-| `split` | bool | no | party may split (n23 .02-.03) |
+| `layout` | `chain` \| `chain+branches` | yes | seeded deal at game start, target room always last (E20b) |
+| `target_room` | room ref | yes | always last; clearing it = success (E20h) |
+| `rooms` / `room_cap_per_visit` | per length, `by_length.<len>.dungeons` (3.2) | yes | E20i |
+| `reentry` | bool | no | may the party re-enter on a later turn/night after retreat (E20e) |
+| `outcome_by_depth` | map depth → effects | no | E20g |
 | `room.id`, `room.moments` | id, list | yes | |
-| `room.resolution` | as encounters | yes | |
-| `room.effects` | effect list | no | darkness: next room blind |
-| `room.repeatable` | bool | no | |
+| `room.type` | `trap` \| `foe` \| `treasure` \| `deeper` \| `story` | yes | E20b |
+| `room.hunter` | hunter ref | story rooms | with `~no-<hunter>` variant if absent (E20b) |
+| `room.improve` | effects | no | applied if a present hunter spends one `trait` (or Wild) Advantage, once per room (E20c) |
+| `room.cost` | story items, story tracks, or corruption to a present hunter | no | never warriors or spirit (E20d) |
+| `room.foe` | foe ref | foe rooms | Story board battle screen, base RtDT warrior costs (E20c) |
+| `room.loot` | story items | treasure/target | bound to a present hunter (E20f) |
+
+Rules:
+- Rooms are face down until entered; the Story board shows the room map and depth (rooms cleared of N) (E20b, E20g).
+- Per room: reveal, optional improve, resolve (E20c). Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
+- After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5); E20e's "host breaks ties" becomes `vote.tie: first-press` because the Story board is display only (see 17).
+- Cleared rooms stay cleared after leaving (E20e).
+- End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
+- Logging: seed, layout, each room (type, improve, cost, corruption, loot), the choice, start/end per room and crawl (E20j, PRD-41).
+- No tower control in the POC; ambient E16 continues (E20k). Story cues never move drums.
 
 ```yaml
-dungeons:
-  - id: crypt-saint-ysolde
-    draw: seeded-shuffle
-    deck: [room.bone-passage, room.false-chant, room.coffin-steps, room.livery-wall, room.bat-swarm]
-    goal_room: {room: room.lantern-niche, after: 3}
-    split: true
+dungeons:                           # D-DRA-14
+  - id: crypt-under-church
+    site: n2-crypt-entry            # objective after n2-burgomasters-funeral
+    trait: undead                   # pack choice, not yet ruled
+    layout: chain
+    deck: [room.ossuary, room.flooded-passage, room.old-burgomasters-tomb, room.szgany-cache]
+    target_room: room.sealed-door
+    reentry: false
 ```
+`n23-catacombs-of-saint-ysolde` is a linear set piece (3.3), not an E20 crawl.
 
 ## 12. Endings
 
@@ -462,9 +544,9 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 - V-10. Advantage effects use only RtDT traits; the static max per hunter per fight is ≤ `advantage_cap`, otherwise a warning (runtime caps anyway).
 - V-11. Foe modifiers floor at 1.
 - V-12. No effect names warriors or spirit.
-- V-13. Quest tokens on board at once ≤ 3 per night and phase.
-- V-14. Encounters have 2-3 moments; at most 1 encounter per round by construction.
-- V-15. Each length lists all required set pieces; each night's `end` is reachable.
+- V-13. Quest tokens: at most one objective, one lure, one hunter token per night (E19); a lure is never on the objective's site (E19b).
+- V-14. Encounters have 2-3 moments and 2-3 choices (E19e, R-RE-9); at most 1 hunter-token encounter per round.
+- V-15. All three lengths declared; each keeps the opening, every set piece the win condition needs, and the finale; fail a length whose win condition is unreachable (R-LEN-3).
 - V-16. Endings: at least one win and one loss; `check_order` unique; there is always a matching ending at game end.
 - V-17. Investigation: actions > number of hunters; each action has a private finding for every hunter.
 - V-18. Choices: every option with a `cond` has a sibling that is always available (no dead-end prompt).
@@ -482,7 +564,7 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 | `~no-wren`, `~no-emeric`, `~no-agnes`, `~no-tomas` | 4.1 | yes |
 | `.lid-choice~nailed~no-wren` stacked | 4.1 stacking | yes |
 | `.04~holy-symbol` | variant with `holds(holy-symbol)` | yes |
-| Investigation, 5 cards, risky follow-the-mourner | 5.1 | yes, `exclusive` setting needs a ruling |
+| Investigation, 5 cards, risky follow-the-mourner | 5.1 | yes, `exclusive: true` (R3-6) |
 | `.investigate.follow-the-mourner.cue` + `seal-sequence` after lock | 6, `accent_reason: choice` | yes; cue-sheet moment id has "(risky pick)" text that must become the real moment id |
 | Lid choice (party) | 5 | yes; now an iPad first press, not a host tap |
 | Ready Stake, Consecrated Ground (first round), holy water | 0.2 `advantage`, 7 | yes |
@@ -494,34 +576,52 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 | heartbeat, dim-all, skull-drop cues | 6 | yes |
 | Manifest ids `@dashboard` | 13 | rename to `storyboard` |
 
-### 16.2 Crypt crawl (`n23-catacombs-of-saint-ysolde`)
+### 16.2 Catacombs set piece (`n23-catacombs-of-saint-ysolde`)
 | Source element | Format section | Fit |
 |---|---|---|
 | Night 2 or 3 by fortune | 3.3 `night` list + `seed` | yes |
 | `.01~village/~sanctuary/~bazaar/~citadel` | `cond: building = ...` | yes |
-| Split party `.02`-`.03`, passages redraw | 11 `split`, room deck | partly: script is linear; the room deck is new design |
+| Split party `.02`-`.03`, passages redraw | 3.3 set piece flow | yes; linear set piece, not an E20 crawl (E20 is D-DRA-14's crypt) |
 | `.04.private.<h>` + `~lookalike` + secret card | 4.1, `role(lookalike)` | yes; RR2-2 targeting of `secret-card.lose-consumable` must be `ipad:<hunter>` |
 | Lookalike persists until holy water/Sanctuary rest | track or role + flag | yes |
 | `.06` break-seal cue, key granted | 6, 3.1 `key` | yes |
 | `.07` unmasking only if holy water used | choice + `spend_item` | yes |
 | `.07~lookalike-is-tomas`, `.06~night3` | 4.1 | yes |
-| Decoy crypt secret goal | 9 `hunter` quest token | yes (proposal) |
+| Decoy crypt secret goal | 4.2 private secret card + flag | yes; a secret card, not a quest token (E19 tokens are objective/lure/hunter) |
 
 ## 17. Open questions
 
-1. **E19 and E20 aren't in story-engine.md** (it stops at E18). Sections 9 and 11 are built from the brief. Where is the E19/E20 text?
-2. **R-LEN rules and R-WIZ-12 aren't in requirements.md / setup-wizard-and-summary.md** (only cited from PRD rev 5). What does each length change: nights, set pieces, encounters?
-3. **`tokens-and-encounters.md` and the POC `spec.md` don't exist.** Is encounter content written somewhere else?
-4. **E17 vs R3-6:** E17 says two hunters may pick the same action, with a 60 s timer and auto-pick; R3-6 says first lock wins, taken cards grey out, no timer. Pack field `exclusive`: which default?
-5. **Control model change:** the PRD has the host tap choices, Won/Lost, Next and Continue on the Dashboard (OQ-4, OQ-10, §4 steps 8-9, R3-2 reassignment). With the Story board display only, all of these move to iPads (first press). Who reassigns a hunter during an unheld pause?
-6. **Vote vs party first press:** should the lid choice be a first press (fast) or a vote of present hunters?
-7. **Cue sheet location:** PRD-40 says `shared/tower/cues.json`; the POC uses `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`. Which one is canonical for packs?
-8. **Cue sheet moment id** `"n2-burgomasters-funeral.investigate.follow-the-mourner (risky pick)"` isn't a valid id; the script uses `...follow-the-mourner.cue`.
-9. **Encounters "at most 1 per round" vs E11 tables:** is "round" an RtDT player turn or a full table round?
-10. **Quest marker limit:** does the 3-marker cap clash with RtDT's own use of quest markers in the same round?
-11. **Accent enum:** is `choice > scene_cue > moment > ambient` a priority order (as written here) or just a log field?
-12. **`phone` target:** a separate audience, or only a layout? This doc treats it as a layout.
-13. **Minimum asset set (R-WIZ-3):** warning or block?
-14. **Skull drop as a story mechanic:** allowed (skulls aren't warriors/spirit), but confirm.
-15. **Variant stacking order** (`~nailed~no-wren` vs `~no-wren~nailed`): this doc fixes condition first, presence last.
-16. **R-ENG-25 lists "warriors and spirit as base game" for Dracula**, which fits the no-warriors/spirit rule only if story effects never change them. Confirm no script does (none found in n2, n23, n4).
+1. **POC `spec.md`** (`apps/burgomaster-funeral-poc/spec.md`) exists but was not used for this draft; check it for clashes with the PRD.
+2. **E17 vs R3-6, ruled:** `exclusive` defaults to **true** (one unique pick per present hunter, first lock wins, R3-6). E17's text ("two hunters may pick the same action", 60 s timer, auto-pick) is out of date and should be updated in story-engine.md.
+3. **Control model, ruled:** the Story board is display only, so all host taps in the PRD (OQ-4, OQ-10, §4 steps 8-9, Won/Lost, Next, Continue) move to iPads (first press). During an unheld pause any joined iPad can reassign the hunter; the first press counts. PRD-20, AT-5, OQ-12 and the R3-2 text still say "host reassigns from the Dashboard" and need updating.
+4. **Vote vs party first press:** should the lid choice be a first press (fast) or a vote of present hunters?
+5. **Cue sheet location:** PRD-40 says `shared/tower/cues.json`; the POC uses `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`. Which one is canonical for packs?
+6. **Cue sheet moment id** `"n2-burgomasters-funeral.investigate.follow-the-mourner (risky pick)"` isn't a valid id; the script uses `...follow-the-mourner.cue`.
+7. **Encounters "at most 1 per round" (E19e) vs E11 tables:** is "round" an RtDT player turn or a full table round? E19c moves the token "at the end of each round, before hunters move", which reads as a full table round; confirm.
+8. **Quest marker clash:** E19 uses the 3 RtDT quest markers (or Dark Horde minis). Does that clash with RtDT's own quest markers in the same game?
+9. **Accent enum:** is `choice > scene_cue > moment > ambient` a priority order (as written here) or just a log field?
+10. **`phone` target:** a separate audience, or only a layout? This doc treats it as a layout.
+11. **Minimum asset set (R-WIZ-3):** warning or block?
+12. **Skull drop as a story mechanic:** allowed (skulls aren't warriors/spirit), but confirm.
+13. **Variant stacking order** (`~nailed~no-wren` vs `~no-wren~nailed`): this doc fixes condition first, presence last.
+14. **R-ENG-25 lists "warriors and spirit as base game" for Dracula**, which fits the no-warriors/spirit rule only if story effects never change them. Confirm no script does (none found in n2, n23, n4).
+15. **E19f vs tokens-and-encounters.md:** the script's guard makes a blocked corruption `~blocked` (the party loses one story item); E19f says "redirected under E9". Is `~blocked` the Dracula E9 redirect?
+16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
+17. **"Choice on the dashboard"** in tokens-and-encounters.md (`enc-the-window.03`) conflicts with the display-only Story board; it should be an iPad choice.
+18. **E20e tie-break:** "host breaks ties" needs a non-Story-board rule; this doc proposes first press.
+19. **D-DRA-13/14 open values:** set pieces per length, hunter-token pace, encounter frequency, crypt room count per length and the crypt's improve trait are not ruled yet.
+20. **D-DRA-11 site name:** no source names the tower-adjacent spaces; the app names it by terrain and position until the board is checked.
+
+## Gamewright rulings (Oct 15 2026)
+
+These settle the matching open questions above and take precedence over any earlier wording in this doc.
+
+1. **E17 investigation** follows R3-6: each present hunter takes a different pick, the first lock wins, and there is no timer or auto-pick.
+2. **Reassigning a hunter** (PRD-20, AT-5, OQ-12, R3-2) stays as built from the old Dashboard in the frozen POC. In the real app, any joined iPad can reassign.
+3. **`~blocked`** (lose one story item) is the Dracula form of the E19f corruption redirect.
+4. **Round** means a full table round.
+5. **E20e tie votes:** a tie means retreat (leave the dungeon). This replaces the host tiebreak and the `vote.tie: first-press` proposal; dungeon votes use `vote.tie: retreat`.
+6. **`enc-the-window.03`:** the choice moves to the iPads.
+
+Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lantern` to 2-3 moments.
+Still open: set pieces per length, crypt room count per length, which advantage the crypt rooms improve, and a name for the tower-adjacent space.
