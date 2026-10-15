@@ -123,8 +123,8 @@ Length is a setup option, **Short / Standard / Long**, default Standard, picked 
 | `.hunter_token.move_every` | int rounds | no | E19h; default 1 (every round, the Standard rule) |
 | `.hunter_token.max_encounters_per_night` | int | no | E19h; default: no cap beyond E19e's one per round |
 | `.encounter_frequency` | per R-RE-8 (rate per phase, by difficulty) | yes | R-LEN-2, R-RE-8; logged per session |
-| `.dungeons.<dungeon>.rooms` | int N | if pack has dungeons | E20i (see 11) |
-| `.dungeons.<dungeon>.room_cap_per_visit` | int | if pack has dungeons | E20i |
+| `.dungeons.<dungeon>.rooms` | int N | if pack has dungeons | E20i: short 2, standard 4, long 6, target included (see 11) |
+| `.dungeons.<dungeon>.room_cap_per_visit` | int | no | E20i; the pack declares it, not ruled yet |
 | `.timing` | {estimate_minutes, runs, measured_at} \| `pending` | yes | R-LEN-4: measured, never guessed; `pending` until enough runs; written from PRD-41..43 data, not hand-authored |
 
 Rules:
@@ -134,12 +134,12 @@ Rules:
 - The extrapolation behind `timing` is PRD-43: set pieces × set-piece time + expected encounters × encounter time + fights × fight time + nights × dusk/dawn overhead.
 
 ```yaml
-by_length:                       # Dracula, D-DRA-13 (provisional)
-  short:    {label: "3 nights", nights: [<2 of n1-n4>, n5], timing: pending}   # which 2: Loremaster proposes, Bob rules
-  standard: {label: "4 nights", nights: [<3 of n1-n4>, n5], timing: pending}
-  long:     {label: "5 nights (full game)", nights: [n1, n2, n3, n4, n5], timing: pending}
+by_length:                       # Dracula, D-DRA-13 (provisional); crypt N is ruled (E20i)
+  short:    {label: "3 nights", nights: [<2 of n1-n4>, n5], dungeons: {crypt-under-church: {rooms: 2}}, timing: pending}   # which 2 nights: Loremaster proposes, Bob rules
+  standard: {label: "4 nights", nights: [<3 of n1-n4>, n5], dungeons: {crypt-under-church: {rooms: 4}}, timing: pending}
+  long:     {label: "5 nights (full game)", nights: [n1, n2, n3, n4, n5], dungeons: {crypt-under-church: {rooms: 6}}, timing: pending}
 ```
-D-DRA-13: the night-5 tower assault is always played; set pieces per length, hunter-token pace and encounter frequency are not decided yet.
+D-DRA-13: the night-5 tower assault is always played; set pieces per length, hunter-token pace and encounter frequency are not decided yet. Crypt `rooms` is ruled (E20i). `room_cap_per_visit` is not.
 
 ### 3.3 Set pieces
 
@@ -370,11 +370,12 @@ At dusk the engine makes one seeded draw from the lures valid that night; it nev
 | Field | Type | Req | Notes |
 |---|---|---|---|
 | `hunter_token.start` | `citadel` (default) \| building type \| `tower-adjacent` | no | E19d |
+| `hunter_token.start_label` | text | no | name shown for `start`. Dracula's tower-adjacent space is "The Tower's Shadow" (D-DRA-11, ruling 9) |
 | `hunter_token.encounters` | encounter table ref (10) | yes | seeded draw on landing |
 | `hunter_token.move_cue` / `land_cue` | cue | yes | lights/sound only (6); never drums (E13) |
 | pace | see `by_length.<len>.hunter_token` (3.2) | | E19h |
 
-Placed at dusk on its start site. Default start: the active kingdom's citadel; if that space holds the objective or a hunter at dusk, a space next to the Tower in the active kingdom (E19d). A round is a full table round (ruling 4). At the end of each round, before hunters move, it moves one space toward the nearest hunter by RtDT adjacency and river rules, ties by seeded pick (E19c). Landing on a hunter's space draws one hunter encounter; only hunters on that space are present (E15). It then returns to start, and is removed at dawn.
+Placed at dusk on its start site. Default start: the active kingdom's citadel; if that space holds the objective or a hunter at dusk, a space next to the Tower in the active kingdom (E19d). When `start_label` is set, the Story board shows that name. Dracula sets it to "The Tower's Shadow" (D-DRA-11). A round is a full table round (ruling 4). At the end of each round, before hunters move, it moves one space toward the nearest hunter by RtDT adjacency and river rules, ties by seeded pick (E19c). Landing on a hunter's space draws one hunter encounter; only hunters on that space are present (E15). It then returns to start, and is removed at dawn.
 
 Guards and logging: a token encounter or lure never gives a third corruption; a corruption aimed at a hunter at 2 is redirected under E9 (E19f). Every placement, move (from, to, round), draw, removal, lure claim and result is logged with the seed (E19g).
 
@@ -387,6 +388,7 @@ quest_tokens:                       # Dracula (tokens-and-encounters.md §1-3)
     - {id: lure-font-violet, site: sanctuary, reward: {item: holy-water}, nights: [2, 3, 4], hook: lure-font-violet.01}
   hunter_token:
     start: tower-adjacent           # D-DRA-11 override (K3 Citadel is the n3 objective)
+    start_label: "The Tower's Shadow"
     encounters: enc-hunter-token
     move_cue: heartbeat
     land_cue: heartbeat-fast
@@ -443,20 +445,21 @@ A dungeon is placed at a site as an E19 objective and starts when a hunter enter
 | `deck` | list room ref | yes | |
 | `layout` | `chain` \| `chain+branches` | yes | seeded deal at game start, target room always last (E20b) |
 | `target_room` | room ref | yes | always last; clearing it = success (E20h) |
-| `rooms` / `room_cap_per_visit` | per length, `by_length.<len>.dungeons` (3.2) | yes | E20i |
+| `rooms` | per length, `by_length.<len>.dungeons.<id>.rooms` (3.2) | yes | N from E20i: short 2, standard 4, long 6, target included |
+| `room_cap_per_visit` | per length, same block | no | pack-declared (E20i); not ruled |
 | `reentry` | bool | no | may the party re-enter on a later turn/night after retreat (E20e) |
 | `outcome_by_depth` | map depth → effects | no | E20g |
 | `room.id`, `room.moments` | id, list | yes | |
 | `room.type` | `trap` \| `foe` \| `treasure` \| `deeper` \| `story` | yes | E20b |
 | `room.hunter` | hunter ref | story rooms | with `~no-<hunter>` variant if absent (E20b) |
-| `room.reduce_with` | list RtDT trait | no | held Advantages (or Wild) the present hunters may apply to reduce `room.cost`; clearing a room never grants an Advantage (E20c) |
+| `room.reduce_with` | list RtDT trait | no | traits that may reduce `room.cost`. Wild always may. Omitted means any held Advantage. Clearing a room never grants an Advantage (E20c) |
 | `room.cost` | a story item, a story-track step, or a corruption to a present hunter | yes | never warriors or spirit (E20d) |
 | `room.foe` | foe ref | foe rooms | Story board battle screen, base RtDT warrior costs (E20c) |
 | `room.loot` | story items | treasure/target | bound to a present hunter (E20f) |
 
 Rules:
 - Rooms are face down until entered; the Story board shows the room map and depth (rooms cleared of N) (E20b, E20g).
-- Per room: reveal, apply held Advantages to reduce the cost, resolve (E20c). The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
+- Per room: reveal, apply held Advantages to reduce the cost, then resolve the reduced cost (E20c). `room.reduce_with` limits the traits; if it is omitted, any held Advantage applies; Wild always may. The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
 - After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5). A tie means retreat: dungeon votes use `vote.tie: retreat` (ruling 5). That replaces the host tiebreak and a first-press tie.
 - Cleared rooms stay cleared after leaving (E20e).
 - End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
@@ -467,10 +470,11 @@ Rules:
 dungeons:                           # D-DRA-14
   - id: crypt-under-church
     site: n2-crypt-entry            # objective after n2-burgomasters-funeral
-    # rooms per length: short 2, standard 4, long 6 (E20i, Bob 2026-10-15)
     layout: chain
     deck: [room.ossuary, room.flooded-passage, room.old-burgomasters-tomb, room.szgany-cache]
-    target_room: room.sealed-door
+    target_room: room.sealed-door   # always last; included in N
+    # N lives in by_length.*.dungeons.crypt-under-church.rooms (short 2, standard 4, long 6).
+    # This deck plus the target is 5 rooms, one short of Long (D-DRA-14).
     # reentry is not ruled (E20e: only if the pack allows it)
 ```
 `n23-catacombs-of-saint-ysolde` is a linear set piece (3.3), not an E20 crawl.
@@ -612,7 +616,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
 17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
 18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
-19. **D-DRA-13/14 open values:** crypt rooms per length and the improve trait are settled by rulings 7 and 8. Still open: set pieces per length, hunter-token pace, encounter frequency.
+19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Still open: set pieces per length, hunter-token pace, encounter frequency, the per-visit crypt room cap, one more crypt room so Long can be dealt, and what an applied Advantage does to a room cost.
 20. **D-DRA-11 site name:** settled by ruling 9. The space is "The Tower's Shadow".
 
 ## Gamewright rulings (Oct 15 2026)
@@ -627,11 +631,12 @@ These settle the matching open questions above and take precedence over any earl
 6. **`enc-the-window.03`:** the choice moves to the iPads.
 
 Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lantern` to 2-3 moments.
+
 ## Bob's rulings (Oct 15 2026)
 
-7. **E20 crypt rooms per length:** Short 2, Standard 4, Long 6.
-8. **E20 rooms, rewritten to match RtDT:** cleared rooms don't grant Advantages. Each room has a cost (a story item, a track step or a corruption), and the hunters can apply the Advantages they already hold to reduce it. Loot and depth are the reward. The pack-level `trait` field is removed.
-9. **D-DRA-11:** the space next to the Tower is named "The Tower's Shadow".
-10. **Hunter holdings** (R-DEV-9) change on the iPads only, because the Story board is display only.
+7. **E20 crypt rooms per length:** Short 2, Standard 4, Long 6. N includes the target room.
+8. **E20 rooms, rewritten to match RtDT:** cleared rooms don't grant Advantages. Each room has a cost (a story item, a track step or a corruption), and the hunters can apply the Advantages they already hold to reduce it. Loot and depth are the reward. The pack-level `trait` field is removed. A room may list `room.reduce_with` to limit which traits apply; Wild always may, and an omitted list means any held Advantage. What the reduction changes is still open (below).
+9. **D-DRA-11:** the space next to the Tower is named "The Tower's Shadow". The app uses that name; it does not label the space by terrain and position.
+10. **Hunter holdings** (R-DEV-9) change on player devices only (an iPad, or a phone standing in), never on the Story board, because the Story board is display only. The frozen funeral POC still reassigns from the Dashboard (ruling 2, PRD-20, PRD-34).
 
-Still open: set pieces per length (Loremaster proposes, Gamewright reviews).
+Still open: set pieces per length, hunter-token pace, and encounter frequency (Loremaster proposes, Gamewright reviews). Also open: the per-visit crypt room cap, one more crypt room so a Long chain of 6 can be dealt, and what an applied Advantage does to a room cost (spent or kept, how many, and the effect on a story item, a track step, or a corruption), including whether a foe room's battle Advantages are that same application.
