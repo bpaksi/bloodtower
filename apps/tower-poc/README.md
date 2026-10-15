@@ -41,6 +41,6 @@ cd apps/tower-poc
 pnpm timing
 ```
 
-Open http://localhost:3000/timing. Connect, then calibrate, from the header. Run the four tests and press Save results. The service writes `docs/timing-results/timing-<timestamp>.json`, including the notes. `pnpm timing` is the real tower (`MOCK` is not set). Nothing on the page runs until its button is pressed.
+Open http://localhost:3000/timing. Connect, then calibrate, with the buttons on that page. Run the four tests and press Save results. The service writes `docs/timing-results/timing-<timestamp>.json`, including the notes. `pnpm timing` is the real tower (`MOCK` is not set). Nothing on the page runs until its button is pressed.
 
 The service keeps its data in `data/tower-poc.db` (`data/tower-poc.mock.db` with `MOCK=1`); `DB_PATH` points it elsewhere. Delete the file to start with nothing saved.

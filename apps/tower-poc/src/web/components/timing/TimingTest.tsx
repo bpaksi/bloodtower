@@ -16,8 +16,9 @@ import {
 } from "tower-poc-protocols";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
+import { CALIBRATION_LABELS, CONNECTION_LABELS } from "@/lib/labels";
 import { PAGES } from "@/lib/pages";
-import { useService } from "@/lib/store";
+import { sendToService, useService } from "@/lib/store";
 import { sendCommand, sleep, waitForCommand } from "@/lib/timingClient";
 import {
   measuredGapMs,
@@ -27,6 +28,7 @@ import {
   showTime,
   skullDropAt,
 } from "@/lib/timingView";
+import { type TowerAction, towerActions } from "@/lib/towerActions";
 
 const PLAN = lightSequencePlan();
 const OVERLAPS = overlapPlan() ?? [];
@@ -83,8 +85,12 @@ const runOne = async (capabilityId: string, params: unknown): Promise<CommandRun
 
 export function TimingTest() {
   const online = useService((view) => view.socket === "online");
-  const connected = useService((view) => view.connection?.state === "connected");
+  const connection = useService((view) => view.connection);
+  const connected = connection?.state === "connected";
+  const lastError = useService((view) => view.lastError);
   const snapshot = useService((view) => view.state?.snapshot);
+  const [lastAction, setLastAction] = useState<{ id?: string; action: TowerAction }>();
+  const can = towerActions(online ? connection : undefined);
   const [startedAt] = useState(() => new Date().toISOString());
   const [notes, setNotes] = useState("");
   const [locked, setLocked] = useState(false);
@@ -132,6 +138,11 @@ export function TimingTest() {
   };
 
   const canStart = online && connected && !locked;
+  const linkRefusal =
+    lastAction?.id !== undefined && lastError?.correlationId === lastAction.id
+      ? lastError.message
+      : undefined;
+  const act = (action: TowerAction) => setLastAction({ id: sendToService(action), action });
 
   const answerDone = (sawTheEnd: boolean) => {
     const resolve = doneRequest.current;
@@ -323,12 +334,63 @@ export function TimingTest() {
     <div className="flex flex-col gap-6">
       <PageHeader page={PAGES.timing} />
       <p className="text-sm text-muted-foreground">
-        Connect, then calibrate, from the header. Rotation sequences need a calibrated tower, and
-        nothing on this page runs until you press its button. Each command is sent once.
+        Connect, then calibrate, with the buttons below. Rotation sequences need a calibrated tower,
+        and nothing else on this page runs until you press its button. Each command is sent once.
       </p>
-      {!connected && (
-        <p className="text-sm">The tower is not connected. Connect it before a test.</p>
-      )}
+      <section className="rounded-lg border p-4 sm:p-6" aria-labelledby="link-heading">
+        <h2 id="link-heading" className="text-sm font-medium">
+          Tower
+        </h2>
+        <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
+          <dt className="text-muted-foreground">Connection</dt>
+          <dd>{connection && online ? CONNECTION_LABELS[connection.state] : "Unknown"}</dd>
+          <dt className="text-muted-foreground">Calibration</dt>
+          <dd>{connection && online ? CALIBRATION_LABELS[connection.calibration] : "Unknown"}</dd>
+        </dl>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            className="h-11 px-4"
+            disabled={can.reconnect ? false : !can.connect}
+            onClick={() => act(can.reconnect ? "reconnect" : "connect")}
+          >
+            {can.reconnect ? "Reconnect" : "Connect"}
+          </Button>
+          <Button
+            type="button"
+            className="h-11 px-4"
+            variant="outline"
+            disabled={!can.disconnect}
+            onClick={() => act("disconnect")}
+          >
+            Disconnect
+          </Button>
+          <Button
+            type="button"
+            className="h-11 px-4"
+            disabled={!can.calibrate}
+            onClick={() => act("calibrate")}
+          >
+            Calibrate
+          </Button>
+        </div>
+        {connection && online && connection.calibration === "calibrating" && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Calibration turns every drum and takes about 20 seconds. Commands are refused until it
+            ends. Nothing starts it but this button.
+          </p>
+        )}
+        {lastAction && lastAction.id === undefined && (
+          <p role="alert" className="mt-2 text-sm text-destructive">
+            Not sent: the service is not reachable.
+          </p>
+        )}
+        {linkRefusal && (
+          <p role="alert" className="mt-2 text-sm text-destructive">
+            {linkRefusal}
+          </p>
+        )}
+      </section>
 
       <section className="rounded-lg border p-4 sm:p-6" aria-labelledby="seq-heading">
         <h2 id="seq-heading" className="text-sm font-medium">
