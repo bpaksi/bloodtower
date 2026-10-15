@@ -10,4 +10,4 @@ V2-6 Story log. A recap of every moment played so far, in order. Any shared mome
 V2-7 Hunter tabs. A device with more than one hunter shows one tab per hunter, with a badge when that hunter has a choice waiting.
 V2-8 Story board sidebar. Hunter list on the left, display only: it follows the hunter currently acting, or cycles through hunters when no one is acting, and shows that hunter's public view on the right. The main area is the story view. Private content never appears on the Story board.
 V2-9 After the POC (already designed, R-WIZ): splash screen, then the setup wizard.
-Open: what went wrong with the "Examine Dorka's body" scene (waiting on Bob's answer).
+Resolved: the "Examine Dorka's body" private scene works as designed; it needs visual polish only.
