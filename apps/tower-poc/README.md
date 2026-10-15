@@ -19,7 +19,7 @@ A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower]
 | `plans/` | One plan per milestone (M0–M5) |
 | `src/web/`, `src/server/`, `src/protocols/` | Code parts, each its own package, created in M0 |
 | `src/e2e/` | Playwright tests: phone and iPad on WebKit, desktop on Chromium |
-| `docs/` | App docs: capabilities, acceptance, troubleshooting (created M1–M5) |
+| `docs/` | Final report, reuse guide, generated capabilities, and timing results |
 | `../../research/tower/` | Spike and observability write-ups shared with other apps |
 
 ## Running (after M0)
