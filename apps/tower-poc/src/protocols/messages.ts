@@ -4,6 +4,11 @@ import { connectionPayloadSchema } from "./connection.ts";
 import { envelopeSchema, PROTOCOL_VERSION } from "./envelope.ts";
 import { inventoryEntrySchema } from "./inventoryWire.ts";
 import { restoreStatePayloadSchema, statePayloadSchema } from "./state.ts";
+import {
+  verificationOverlaySchema,
+  verifyChangedPayloadSchema,
+  verifyRecordPayloadSchema,
+} from "./verification.ts";
 
 const message = <T extends string, P extends z.ZodType>(type: T, payload: P) =>
   envelopeSchema.extend({ type: z.literal(type), payload });
@@ -28,6 +33,12 @@ export const commandMessageSchema = message("command", commandPayloadSchema).ext
   id: z.string().min(1).max(64),
 });
 export const restoreStateMessageSchema = message("restoreState", restoreStatePayloadSchema);
+/** `id` is required: an `error` refusing the record names it, and so does the `verify.changed` it causes. */
+export const verifyRecordMessageSchema = message("verify.record", verifyRecordPayloadSchema).extend(
+  {
+    id: z.string().min(1).max(64),
+  },
+);
 
 export const clientMessageSchema = z.discriminatedUnion("type", [
   helloMessageSchema,
@@ -37,6 +48,7 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
   calibrateMessageSchema,
   commandMessageSchema,
   restoreStateMessageSchema,
+  verifyRecordMessageSchema,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
@@ -55,6 +67,11 @@ export const welcomePayloadSchema = z.strictObject({
   }),
   /** The service's capability inventory, in inventory order. */
   inventory: z.array(inventoryEntrySchema),
+  /**
+   * The newest Verify result per capability, recorded against the tower the service drives now
+   * (D14). The inventory's own `verification` never says `hardware-verified`; this does.
+   */
+  verificationOverlay: verificationOverlaySchema,
   /** Which tower the service drives: its mock (`MOCK=1`, D8) or a real one over Bluetooth. */
   tower: z.enum(["mock", "bluetooth"]),
 });
@@ -90,12 +107,19 @@ export const commandLifecycleMessageSchema = message(
   commandLifecyclePayloadSchema,
 );
 
+/**
+ * Sent to every client when a Verify result is recorded. Its `correlationId` is the recording
+ * `verify.record`'s id, so the device that recorded it knows it was saved.
+ */
+export const verifyChangedMessageSchema = message("verify.changed", verifyChangedPayloadSchema);
+
 export const serverMessageSchema = z.discriminatedUnion("type", [
   welcomeMessageSchema,
   errorMessageSchema,
   connectionMessageSchema,
   stateMessageSchema,
   commandLifecycleMessageSchema,
+  verifyChangedMessageSchema,
 ]);
 
 export type ServerMessage = z.infer<typeof serverMessageSchema>;

@@ -11,11 +11,7 @@ export const PAGES = {
     href: "/",
     title: "Dashboard",
     summary: "Connect to the tower and see its state at a glance.",
-    planned: [
-      "State summary",
-      "Capability summary by availability and verification",
-      "Last 20 timeline events",
-    ],
+    planned: ["State summary", "Last 20 timeline events"],
   },
   lights: {
     href: "/lights",

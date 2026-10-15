@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { LightsControl } from "@/components/controls/LightsControl";
 import { PageHeader } from "@/components/PageHeader";
+import { VerifyPanel } from "@/components/verify/VerifyPanel";
 import { PAGES } from "@/lib/pages";
 
 export const metadata: Metadata = { title: PAGES.lights.title };
@@ -9,7 +10,8 @@ export const metadata: Metadata = { title: PAGES.lights.title };
 export default function LightsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader page={PAGES.lights} />
+      <PageHeader page={PAGES.lights} verify />
+      <VerifyPanel location="lights" />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <CapabilityControl
           capabilityId="lighting.all-on"

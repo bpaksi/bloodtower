@@ -3,6 +3,7 @@ import { CalibrateControl } from "@/components/controls/CalibrateControl";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { PageHeader } from "@/components/PageHeader";
 import { DrumPositions } from "@/components/state/TowerValues";
+import { VerifyPanel } from "@/components/verify/VerifyPanel";
 import { PAGES } from "@/lib/pages";
 
 export const metadata: Metadata = { title: PAGES.mechanics.title };
@@ -14,7 +15,8 @@ const SIDES = ["north", "east", "south", "west"] as const;
 export default function MechanicsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader page={PAGES.mechanics} />
+      <PageHeader page={PAGES.mechanics} verify />
+      <VerifyPanel location="mechanics" />
       <p className="text-sm text-muted-foreground">
         A rotation cannot be stopped once it is sent: the tower has no stop command. Each control
         sends one command and waits for it to end before it can be pressed again.

@@ -6,6 +6,7 @@ import { createMockTower } from "./adapters/mockTower.ts";
 import { openDatabase } from "./db/client.ts";
 import { createRecordStorage } from "./db/records.ts";
 import { createSnapshotStorage } from "./db/snapshots.ts";
+import { createVerificationStorage } from "./db/verifications.ts";
 import { openDiagLog, teeEventList } from "./diagLog.ts";
 import { lanUrls } from "./lanUrls.ts";
 import packageJson from "./package.json" with { type: "json" };
@@ -13,6 +14,8 @@ import { parseDevOrigins, startTowerServer, WS_PATH } from "./server.ts";
 import { createTowerSession } from "./session.ts";
 import { createStateStore, feedStateStore } from "./stateStore.ts";
 import { createTowerRecords } from "./towerRecords.ts";
+import { createVerifications } from "./verifications.ts";
+import { installedVersion } from "./versions.ts";
 
 const DEFAULT_PORT = 4747;
 
@@ -67,6 +70,13 @@ const store = createStateStore({
 });
 const records = createTowerRecords(store);
 const feed = feedStateStore(session, store, { skulls: records });
+const tower = mockTower ? "mock" : "bluetooth";
+const verifications = createVerifications({
+  storage: createVerificationStorage(database.db),
+  tower,
+  libraryVersion: installedVersion("ultimatedarktower"),
+  appVersion: packageJson.version,
+});
 
 const server = await startTowerServer({
   port: parsePort(process.env.PORT),
@@ -76,7 +86,8 @@ const server = await startTowerServer({
   session,
   store,
   records,
-  tower: mockTower ? "mock" : "bluetooth",
+  verifications,
+  tower,
   devOrigins,
   onLifecycle: (lifecycle) => {
     diagLog?.write({ source: "command", lifecycle });

@@ -40,6 +40,16 @@ export interface ServiceView {
    * lifecycles, so their outcome may never arrive; they are no longer treated as under way.
    */
   interrupted: Record<string, true>;
+  /**
+   * Ids of this page's `verify.record`s the service has saved, newest last, at most
+   * `COMMAND_HISTORY`. A refusal arrives as `lastError` with the same id.
+   */
+  savedVerifications: readonly string[];
+  /**
+   * The message of every recent \`error\` that answered a message of this page, by that message's
+   * id, at most \`COMMAND_HISTORY\`. Unlike \`lastError\`, a later error does not replace it.
+   */
+  refusals: Record<string, string>;
   /** Every client id the service has given this page: each new socket gets a new one. */
   ownClientIds: readonly string[];
   lastError?: ServiceError;
@@ -52,6 +62,8 @@ export const initialView: ServiceView = {
   socket: "reconnecting-to-service",
   commands: {},
   interrupted: {},
+  savedVerifications: [],
+  refusals: {},
   ownClientIds: [],
 };
 
@@ -85,15 +97,44 @@ export const applyServerMessage = (
       const commands = { ...view.commands, [commandId]: stages };
       return { ...view, commands: keepLatest(commands) };
     }
-    case "error":
+    case "verify.changed": {
+      // The overlay travels in `welcome`; this is its newer version.
+      const { correlationId } = message;
+      const savedVerifications = correlationId
+        ? [...view.savedVerifications, correlationId].slice(-COMMAND_HISTORY)
+        : view.savedVerifications;
       return {
         ...view,
+        ...(view.welcome
+          ? {
+              welcome: {
+                ...view.welcome,
+                verificationOverlay: message.payload.verificationOverlay,
+              },
+            }
+          : {}),
+        savedVerifications,
+      };
+    }
+    case "error": {
+      const { correlationId } = message;
+      const refusals = correlationId
+        ? Object.fromEntries(
+            Object.entries({ ...view.refusals, [correlationId]: message.payload.message }).slice(
+              -COMMAND_HISTORY,
+            ),
+          )
+        : view.refusals;
+      return {
+        ...view,
+        refusals,
         lastError: {
           ...message.payload,
           ...(message.correlationId ? { correlationId: message.correlationId } : {}),
           at: now,
         },
       };
+    }
   }
 };
 

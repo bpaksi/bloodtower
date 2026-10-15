@@ -3,8 +3,11 @@
 import { useState } from "react";
 import type { Device } from "tower-poc-protocols";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
+import { PageHeader } from "@/components/PageHeader";
 import { RestorePrompt } from "@/components/RestorePrompt";
 import { Button } from "@/components/ui/button";
+import { CapabilitySummary } from "@/components/verify/CapabilitySummary";
+import { VerifyPanel } from "@/components/verify/VerifyPanel";
 import { CALIBRATION_LABELS, CONNECTION_LABELS } from "@/lib/labels";
 import { PAGES } from "@/lib/pages";
 import { sendToService, useService } from "@/lib/store";
@@ -45,12 +48,8 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          {PAGES.dashboard.title}
-        </h1>
-        <p className="text-muted-foreground">{PAGES.dashboard.summary}</p>
-      </div>
+      <PageHeader page={PAGES.dashboard} verify />
+      <VerifyPanel location="dashboard" />
 
       <RestorePrompt />
 
@@ -116,6 +115,8 @@ export function Dashboard() {
           </dl>
         </section>
       )}
+
+      <CapabilitySummary />
 
       <CapabilityControl
         capabilityId="sound.play"

@@ -23,3 +23,23 @@ export const appRecords = sqliteTable("app_records", {
   /** Milliseconds since the epoch. */
   updatedAt: integer("updated_at").notNull(),
 });
+
+/**
+ * Verify mode's results (spec D14): one row per result a person recorded, oldest first. Rows are
+ * only added; the newest per capability is the one shown.
+ */
+export const verifications = sqliteTable("verifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  capabilityId: text("capability_id").notNull(),
+  /** pass, partial or fail. */
+  result: text("result").notNull(),
+  notes: text("notes").notNull(),
+  /** Null until saved diagnostics sessions exist (M4). */
+  diagnosticSessionId: text("diagnostic_session_id"),
+  libraryVersion: text("library_version").notNull(),
+  appVersion: text("app_version").notNull(),
+  /** Milliseconds since the epoch. */
+  testedAt: integer("tested_at").notNull(),
+  /** `{tower, client}` as JSON. */
+  environment: text("environment").notNull(),
+});
