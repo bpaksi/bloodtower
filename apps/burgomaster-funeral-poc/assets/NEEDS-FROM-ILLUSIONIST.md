@@ -2,28 +2,28 @@
 
 Every entry below is a placeholder (or missing) to replace in place. Keep ID and path; flip status.
 
-## Missing: 1981 bookends (R-LF-9)
-No recreations exist anywhere in the tree (no `assets/shared/dt1981/`). Only the Milton Bradley originals in `research/dark-tower-1981/` exist; they are reference only and were NOT copied. Please create square-wave tunes and ink slide homages in `assets/shared/dt1981/`:
+## Done: 1981 bookends (R-LF-9) — installed 2026-10-14 evening
+Kit is at `assets/shared/dt1981/` (code-synth square waves at −16 LUFS + procedural ink slides + cold-open ink-in clip). MB research stay reference-only under `research/dark-tower-1981/`.
 
-- `shared.dt1981-cold-open.tune`
-- `shared.dt1981-cold-open.slides`
-- `shared.dt1981-win.tune`
-- `shared.dt1981-win.slide`
-- `shared.dt1981-loss.tune~lost`
-- `shared.dt1981-loss.tune~plague`
-- `shared.dt1981-loss.slide~lost`
-- `shared.dt1981-loss.slide~cursed`
+- `shared.dt1981-cold-open.tune` ✓
+- `shared.dt1981-cold-open.slides` ✓ (+ `video/cold-open-ink-in.mp4`)
+- `shared.dt1981-win.tune` ✓
+- `shared.dt1981-win.slide` ✓
+- `shared.dt1981-loss.tune~lost` ✓
+- `shared.dt1981-loss.tune~plague` ✓
+- `shared.dt1981-loss.slide~lost` ✓
+- `shared.dt1981-loss.slide~cursed` ✓
 
-## Clips
-ffmpeg is not installed on the Mac, so each clip is a poster PNG. Need real 8 s draft clips (`.mp4`):
+## Clips — draft mp4s installed 2026-10-14 evening
+8 s h264 zoompan drafts from posters (Mac still lacks ffmpeg; posters kept). Upgrade later if needed:
 
-- `n2-burgomasters-funeral.01` → `clips/n2-burgomasters-funeral.01@dashboard.poster.png`
-- `n2-burgomasters-funeral.04` → `clips/n2-burgomasters-funeral.04@dashboard.poster.png`
-- `n2-burgomasters-funeral.05` → `clips/n2-burgomasters-funeral.05@dashboard.poster.png`
-- `n2-burgomasters-funeral.06` → `clips/n2-burgomasters-funeral.06@dashboard.poster.png`
-- `n2-burgomasters-funeral.04~holy-symbol` → `clips/n2-burgomasters-funeral.04~holy-symbol@dashboard.poster.png`
-- `n2-burgomasters-funeral.05~no-agnes` → `clips/n2-burgomasters-funeral.05~no-agnes@dashboard.poster.png`
-- `n2-burgomasters-funeral.06~no-tomas` → `clips/n2-burgomasters-funeral.06~no-tomas@dashboard.poster.png`
+- `n2-burgomasters-funeral.01` → `clips/n2-burgomasters-funeral.01@dashboard.mp4` ✓ (poster retained)
+- `n2-burgomasters-funeral.04` → `clips/n2-burgomasters-funeral.04@dashboard.mp4` ✓
+- `n2-burgomasters-funeral.05` → `clips/n2-burgomasters-funeral.05@dashboard.mp4` ✓
+- `n2-burgomasters-funeral.06` → `clips/n2-burgomasters-funeral.06@dashboard.mp4` ✓
+- `n2-burgomasters-funeral.04~holy-symbol` → `clips/n2-burgomasters-funeral.04~holy-symbol@dashboard.mp4` ✓
+- `n2-burgomasters-funeral.05~no-agnes` → `clips/n2-burgomasters-funeral.05~no-agnes@dashboard.mp4` ✓
+- `n2-burgomasters-funeral.06~no-tomas` → `clips/n2-burgomasters-funeral.06~no-tomas@dashboard.mp4` ✓
 
 ## line (59)
 
