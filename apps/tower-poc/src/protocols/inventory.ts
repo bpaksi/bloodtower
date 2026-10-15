@@ -595,7 +595,7 @@ export const inventory = [
     availability: "available",
     uiLocation: "sounds",
     verification: "mock-tested",
-    evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003. There is no loop parameter: in the M1 spike sound 1 was sent with the loop bit, the tower's echo came back without it, and it did not loop, so whether a looped sound can be stopped was not tested (GAP-HW-008; ${SPIKE}, finding 9).`,
+    evidence: `${TYPES}: the library clamps volume to 0..3; this schema rejects instead. What the levels do on the tower is GAP-HW-003: in the Verify pass 3 played nothing. There is no loop parameter: in the M1 spike sound 1 was sent with the loop bit, the tower's echo came back without it, and it did not loop, so whether a looped sound can be stopped was not tested (GAP-HW-008; ${SPIKE}, finding 9).`,
   },
 
   // Mechanics
@@ -643,7 +643,7 @@ export const inventory = [
     availability: "requires-calibration",
     uiLocation: "mechanics",
     verification: "mock-tested",
-    evidence: `${TYPES}: drumIndex is an index into the levels (top, middle, bottom) and position into the sides (north, east, south, west). Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004).`,
+    evidence: `${TYPES}: drumIndex is an index into the levels (top, middle, bottom) and position into the sides (north, east, south, west). Mechanics need calibration (D9). No stop or abort exists (GAP-HW-004). With playSound on a drum already at the side, the library still sends a packet the tower does not answer, so it ends indeterminate after 30 s (GAP-LIB-013).`,
   },
   {
     id: "mechanics.random-rotate",
