@@ -5,27 +5,27 @@ Goal: prove the engine end to end on one set piece in about 10 minutes, using th
 
 | Moment ID | Kind | Target | Tower / props | POC covers |
 |---|---|---|---|---|
-| `n2-burgomasters-funeral.01` | clip | dashboard | music, sfx | dusk open still/clip |
-| `n2-burgomasters-funeral.02` | still | dashboard | — | two-speaker talk |
-| `n2-burgomasters-funeral.02~no-wren` | still | dashboard | — | cast variant |
-| `n2-burgomasters-funeral.03` | still | dashboard | sfx | two-speaker talk |
-| `n2-burgomasters-funeral.03~no-emeric` | still | dashboard | — | cast variant |
-| `n2-burgomasters-funeral.04` | clip | dashboard | `dim-all`, `heartbeat`, sfx | auto tower cues + screen fallback |
-| `n2-burgomasters-funeral.04~holy-symbol` | clip | dashboard | same cues | item-gated variant |
-| `n2-burgomasters-funeral.05` | clip | dashboard | — | two-speaker (Dorka / Agnes) |
-| `n2-burgomasters-funeral.05~no-agnes` | clip | dashboard | — | cast variant |
-| `n2-burgomasters-funeral.06` | clip | dashboard | sfx, music | fight spawn; Dorka's lead ("lady's rooms… won't stop saying no") → story flag |
-| `n2-burgomasters-funeral.06~no-tomas` | clip | dashboard | same | cast variant |
-| `n2-burgomasters-funeral.07` | still | dashboard | — | win-the-fight branch |
-| `n2-burgomasters-funeral.07~fight-lost` | still | dashboard | — | cost branch (corruption / item / skull drop per mechanics) |
-| `n2-burgomasters-funeral.07~no-wren` | still | dashboard | — | cast variant |
-| `n2-burgomasters-funeral.08` | still | dashboard | — | carry-forward line |
-| `n2-burgomasters-funeral.08~no-agnes` | still | dashboard | — | cast variant |
+| `n2-burgomasters-funeral.01` | clip | storyboard | music, sfx | dusk open still/clip |
+| `n2-burgomasters-funeral.02` | still | storyboard | — | two-speaker talk |
+| `n2-burgomasters-funeral.02~no-wren` | still | storyboard | — | cast variant |
+| `n2-burgomasters-funeral.03` | still | storyboard | sfx | two-speaker talk |
+| `n2-burgomasters-funeral.03~no-emeric` | still | storyboard | — | cast variant |
+| `n2-burgomasters-funeral.04` | clip | storyboard | `dim-all`, `heartbeat`, sfx | auto tower cues + screen fallback |
+| `n2-burgomasters-funeral.04~holy-symbol` | clip | storyboard | same cues | item-gated variant |
+| `n2-burgomasters-funeral.05` | clip | storyboard | — | two-speaker (Dorka / Agnes) |
+| `n2-burgomasters-funeral.05~no-agnes` | clip | storyboard | — | cast variant |
+| `n2-burgomasters-funeral.06` | clip | storyboard | sfx, music | fight spawn; Dorka's lead ("lady's rooms… won't stop saying no") → story flag |
+| `n2-burgomasters-funeral.06~no-tomas` | clip | storyboard | same | cast variant |
+| `n2-burgomasters-funeral.07` | still | storyboard | — | win-the-fight branch |
+| `n2-burgomasters-funeral.07~fight-lost` | still | storyboard | — | cost branch (corruption / item / skull drop per mechanics) |
+| `n2-burgomasters-funeral.07~no-wren` | still | storyboard | — | cast variant |
+| `n2-burgomasters-funeral.08` | still | storyboard | — | carry-forward line |
+| `n2-burgomasters-funeral.08~no-agnes` | still | storyboard | — | cast variant |
 | `n2-burgomasters-funeral.09.private.agnes` | still | `ipad:agnes` | — | private |
 | `n2-burgomasters-funeral.09.private.tomas` | still | `ipad:tomas` | — | private |
 | `n2-burgomasters-funeral.09.private.wren` | still | `ipad:wren` | — | private |
 | `n2-burgomasters-funeral.09.private.emeric` | still | `ipad:emeric` | — | private |
-| `n2-burgomasters-funeral.10` | still | dashboard | prop: `pressed-flower` | dusk/dawn clue still (Dashboard); pressed-flower private clue is the night's dusk clue from the engine, not a funeral-only line |
+| `n2-burgomasters-funeral.10` | still | storyboard | prop: `pressed-flower` | dusk/dawn clue still (Story board); pressed-flower private clue is the night's dusk clue from the engine, not a funeral-only line |
 
 ## POC mapping vs Loremaster's verbal sketch
 The reviewed script already packs the systems we need: open clip, two-speaker talks, auto tower cues on `.04`, a real branch on `.07` / `.07~fight-lost`, Dorka's lead on `.06`, private thoughts on `.09.*`, pressed flower on `.10`. There is no separate "watch coffin / follow mourner" choice in the script; the engine test for a costly choice is the fight outcome (and `.04~holy-symbol`). If we want that verbal choice as well, Loremaster would add an event moment; until then, build against this table.

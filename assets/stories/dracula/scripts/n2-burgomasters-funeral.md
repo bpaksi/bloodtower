@@ -6,7 +6,7 @@
 - **Setting:** A wake by candlelight. Anton's coffin on trestles, the village on benches, and a second coffin: Dorka Halasz, Lenka's dearest friend, who ran up the hill road after her the night she was taken and was found white at dawn.
 - **Mood:** Grief, then the Lucy horror: something loved, made hungry.
 - **Cast:** Narrator, Sister Agnes Hallow, Wren Kessel, Emeric Lutz, Dorka Halasz, Tomas Varga
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -30,7 +30,7 @@ Each hunter picks one action on their own iPad from the pick cards below (there 
 [music: plainchant, fading] [sfx: a single candle guttering] [tower: heartbeat]
 > **Narrator:** The mourners keep their vigil. You have one candle's length, no more, before something in this church happens. Use it.
 
-**n2-burgomasters-funeral.investigate.examine-body** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+**n2-burgomasters-funeral.investigate.examine-body** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the Story board, no voice
 Card 1: **Examine Dorka’s body**. Look closely at the girl in the wedding dress.
 
 **n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes** [still] `ipad:agnes` — agnes picked examine-body. Proposed advantage: **Ready Stake** (Gamewright to rule; maps to RtDT battle advantages.)
@@ -45,7 +45,7 @@ Card 1: **Examine Dorka’s body**. Look closely at the girl in the wedding dres
 **n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric** [still] `ipad:emeric` — emeric picked examine-body. Proposed advantage: **Ready Stake** (Gamewright to rule; maps to RtDT battle advantages.)
 > **Emeric (thought):** Two punctures, the second post-mortem. Gerhardt's treatise, chapter nine: "the sending." She isn't a victim. She's a messenger. Keep a stake ready.
 
-**n2-burgomasters-funeral.investigate.question-mother** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+**n2-burgomasters-funeral.investigate.question-mother** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the Story board, no voice
 Card 2: **Question Dorka’s mother**. Sit with the mother. Ask about last night.
 
 **n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes** [still] `ipad:agnes` — agnes picked question-mother. Story flag `mother-warned`. Proposed: the mother bars the window, so one fewer foe joins the fight (Gamewright to rule; maps to RtDT battle advantages.)
@@ -60,7 +60,7 @@ Card 2: **Question Dorka’s mother**. Sit with the mother. Ask about last night
 **n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric** [still] `ipad:emeric` — emeric picked question-mother. Story flag `mother-warned`. Proposed: the mother bars the window, so one fewer foe joins the fight (Gamewright to rule; maps to RtDT battle advantages.)
 > **Emeric (thought):** She heard her daughter singing outside the window, a wedding song, and she left the window open. Folklore, page forty: they sing to be let in. I asked her to bar it. She's doing it.
 
-**n2-burgomasters-funeral.investigate.anton-coat** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+**n2-burgomasters-funeral.investigate.anton-coat** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the Story board, no voice
 Card 3: **Search Anton’s coat**. Go through the dead burgomaster’s pockets.
 
 **n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes** [still] `ipad:agnes` — agnes picked anton-coat. Gain: one holy water, carried by the hunter who picked this. Clue: "the lady's rooms".
@@ -75,7 +75,7 @@ Card 3: **Search Anton’s coat**. Go through the dead burgomaster’s pockets.
 **n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric** [still] `ipad:emeric` — emeric picked anton-coat. Gain: one holy water, carried by the hunter who picked this. Clue: "the lady's rooms".
 > **Emeric (thought):** A flask of holy water, unopened, and a scrap: "the lady's rooms." A burgomaster's note, a ledger-keeper's hand. He was trying to work out where she'd be held.
 
-**n2-burgomasters-funeral.investigate.pray-over-coffins** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+**n2-burgomasters-funeral.investigate.pray-over-coffins** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the Story board, no voice
 Card 4: **Pray over the coffins**. Kneel between the two coffins and pray.
 
 **n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes** [still] `ipad:agnes` — agnes picked pray-over-coffins. Proposed advantage: **Consecrated Ground** (Gamewright to rule; maps to RtDT battle advantages.)
@@ -90,10 +90,10 @@ Card 4: **Pray over the coffins**. Kneel between the two coffins and pray.
 **n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric** [still] `ipad:emeric` — emeric picked pray-over-coffins. Proposed advantage: **Consecrated Ground** (Gamewright to rule; maps to RtDT battle advantages.)
 > **Emeric (thought):** I don't know the proper words, so I read the burial office from Oskar's book, very fast. The prayer holds. The candle flames lean away from Dorka's coffin. Consecrated. Ground. Noted.
 
-**n2-burgomasters-funeral.investigate.follow-the-mourner** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the dashboard, no voice
+**n2-burgomasters-funeral.investigate.follow-the-mourner** [still] — pick card, shown on every hunter's iPad picker (`ipad:agnes`, `ipad:tomas`, `ipad:wren`, `ipad:emeric`); not on the Story board, no voice
 Card 5: **Follow the cloaked mourner (risky)**. A mourner slips out. Go after them alone.
 
-**n2-burgomasters-funeral.investigate.follow-the-mourner.cue** [still] — plays on the dashboard once all picks are locked, if anyone picked this card (no voice). [tower: seal-sequence] [sfx: a door slamming in the wind] (screen fallback if no tower: the dashboard shows the church door swinging shut and one empty chair)
+**n2-burgomasters-funeral.investigate.follow-the-mourner.cue** [still] — plays on the Story board once all picks are locked, if anyone picked this card (no voice). [tower: seal-sequence] [sfx: a door slamming in the wind] (screen fallback if no tower: the Story board shows the church door swinging shut and one empty chair)
 [sfx: a door closing softly]
 
 **n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes** [still] `ipad:agnes` — agnes picked follow-the-mourner. **Cost (Gamewright), the picker chooses:** take 1 corruption (not offered if agnes is at 2: instant-loss guard), or miss the fight (absent from `.04`–`.07`; the scene's existing `~no-agnes` variants apply). Reward: proposed advantage **Forewarned** (Gamewright to rule; maps to RtDT battle advantages.), plus an early hint toward the lady's rooms.

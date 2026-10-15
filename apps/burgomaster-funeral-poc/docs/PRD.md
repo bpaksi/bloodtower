@@ -1,6 +1,6 @@
 # Burgomaster's Funeral POC
 
-Status: PRD draft for Bob's review, 2026-10-14 (**rev 5: ~16:15 ET, game length timing (R5-1, Bob): the POC measures how long each part of the scene takes (PRD-41..43) so full-game time per length can be extrapolated (R-LEN). Oct 15, Gamewright: accent reasons (R5-2) and pause-overlay host actions (R5-3).** Rev 4, 16:00 ET: tower control moves to Phase 2 (R4-1..R4-3); the POC drives no physical tower, every cue plays its screen half plus fallback audio, and E16 becomes a Dashboard ambient bed.** Rev 3, 15:45 ET: Gamewright rulings R3-1..R3-12 resolve 12 build questions; conflicting text fixed in place. Rev 2, 12:07 ET: hunters and devices R-DEV-9, R-WIZ-11, scene presence E15, revised variants rule). This is a design doc only. It contains no code.
+Status: PRD draft for Bob's review, 2026-10-14 (**rev 6, 2026-10-15: the shared-screen target id is `storyboard` (the Story board, display only). PRD-40 names `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`. Rev 5: ~16:15 ET, game length timing (R5-1, Bob): the POC measures how long each part of the scene takes (PRD-41..43) so full-game time per length can be extrapolated (R-LEN). Oct 15, Gamewright: accent reasons (R5-2) and pause-overlay host actions (R5-3).** Rev 4, 16:00 ET: tower control moves to Phase 2 (R4-1..R4-3); the POC drives no physical tower, every cue plays its screen half plus fallback audio, and E16 becomes a Dashboard ambient bed.** Rev 3, 15:45 ET: Gamewright rulings R3-1..R3-12 resolve 12 build questions; conflicting text fixed in place. Rev 2, 12:07 ET: hunters and devices R-DEV-9, R-WIZ-11, scene presence E15, revised variants rule). This is a design doc only. It contains no code.
 Scene: `n2-burgomasters-funeral` (Dracula pack, night 2, the K2 Sanctuary). The script is used as reviewed, with no rewrite.
 Sources: `research/stories/dracula/poc-funeral.md`, `research/stories/dracula/rulings.md`, `assets/stories/dracula/scripts/{n2-burgomasters-funeral,README,cast,props}.md`, `research/game-design/*` (requirements, story-engine, sessions, statistics, setup-wizard-and-summary, landing-and-initial-screens, look-and-feel-harness, asset-organization), `research/tower/api-surface-7.1.2.md`.
 
@@ -62,7 +62,7 @@ flowchart LR
   D -. "shows QR join code" .-> P2
 ```
 
-Routing rule: the server sends every moment to one target, either `dashboard` or `ipad:<hunter>`. `ipad:<hunter>` fans out to every device currently holding that hunter, and only if that hunter is present. The Dashboard channel never carries a `.private.*` payload. This is enforced on the server, not in the UI.
+Routing rule: the server sends every moment to one target, either `storyboard` or `ipad:<hunter>`. `ipad:<hunter>` fans out to every device currently holding that hunter, and only if that hunter is present. The Story board channel never carries a `.private.*` payload. This is enforced on the server, not in the UI. The frozen POC still sends the wire value `dashboard` for this `storyboard` target; code, routes and tests are unchanged.
 
 ## 4. User flow
 1. Bob starts the host app on the Mac and opens the Dashboard in a browser. The Dashboard shows a stub landing page with a "Burgomaster's Funeral POC" door.
@@ -124,7 +124,7 @@ At any point, if a holdings change leaves a hunter unheld, the game **pauses** (
 | PRD-37 | All present-hunter effects (choices offered, costs, rewards, items counted) use only present hunters and the items they carry. Items carried by absent hunters are untouched. | E15, R-ENG-28 |
 | PRD-38 | Stats log device holdings (each join, change and release, with a snapshot at start), pauses for unheld hunters, and the locked presence set for the scene. | R-DEV-9, E15, R-STA-11 |
 | PRD-39 | E16 in the POC: the Dashboard is never idle. It runs an ambient bed per phase (screen light pulse plus ambient audio from the Mac) and one-shot accents (screen pulse plus sound) every 20–60 s, suppressed during speech, choices and pauses, and overridden by scene cues. Accent timing and choice come from the game seed and are logged. The quiet gap during play is ≤10 s. | E16, R3-4, R4-2 |
-| PRD-40 | The cue sheet (`shared/tower/cues.json`) stays the contract: each cue ID carries its screen half and fallback audio now, and Phase 2 maps the same cue IDs to tower commands without renaming them. | R4-3, E13 |
+| PRD-40 | The cue sheet (`apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`) stays the contract: each cue ID carries its screen half and fallback audio now, and Phase 2 maps the same cue IDs to tower commands without renaming them. | R4-3, E13 |
 | PRD-41 | Timing instrumentation (rev 5). Using a monotonic clock (wall time stored alongside for display only), the host timestamps: every phase start/end; every moment start/end; each investigation pick (time from prompt to lock, per hunter); table-talk duration; battle screen open to Won/Lost result; each cue's start/end (duration); and every pause start/end (any cause: unheld hunter, host pause, disconnect). Pauses are excluded from active time. Rows are stored in SQLite stats with the game record. | R-LEN-4, R-LEN-5, R-STA-2, R5-1 |
 | PRD-42 | End-of-POC timing summary on the Dashboard (in the mini summary): total, active and paused time, and time per phase. Exportable as CSV and JSON from the stored rows (no display-only numbers). | R-LEN-5, R-SUM-6, R-STA-8, R5-1 |
 | PRD-43 | Extrapolation formula, documented here, not built: **est. game time (per length) = Σ(set pieces in that length × measured set-piece time) + (expected encounters × measured encounter time) + (fights × measured fight time) + (nights × per-night overhead for dusk/dawn)**. Inputs come from POC runs (PRD-41 data; this scene gives set-piece, investigation, table-talk and fight times); encounter and dusk/dawn times are pending until measured. The formula lives in the docs, not the build. | R-LEN-4, R5-1 |
@@ -166,32 +166,32 @@ Asset status for every row: **not rendered** (no `assets/rendered/dracula/` or `
 
 | Moment ID | Kind | Condition | Target | Cue (Phase 2 tower status) → screen half + fallback audio (both always play in the POC) | Assets needed |
 |---|---|---|---|---|---|
-| `.01` | clip | always | dashboard | none | dusk wake clip `@dashboard`; music: plainchant; sfx: candles, weeping; narrator VO |
-| `.02` | still | wren present | dashboard | none | wake still; agnes + wren VO |
-| `.02~no-wren` | still | wren absent | dashboard | none | same still; agnes VO |
-| `.03` | still | emeric present | dashboard | none | coffin/flies still; sfx: flies; emeric VO |
-| `.03~no-emeric` | still | emeric absent | dashboard | none | same still; narrator VO |
-| `.lid-choice` | still (event) | after `.03` | dashboard | `heartbeat` (Library: breathe effect) → screen pulse on the vignette + low heartbeat sfx from the Mac | leaning-candles still; sfx: fly then silence; narrator VO; choice UI |
-| `.lid-choice~nailed` | still | nailed, wren present | dashboard | none | hammer/stake still; sfx: hammer; wren + narrator VO |
-| `.lid-choice~nailed~no-wren` | still | nailed, wren absent | dashboard | none | same still; tomas + narrator VO |
-| `.lid-choice~watched` | still | watched, agnes present | dashboard | none | watching still (candles out at the back); agnes + narrator VO |
-| `.lid-choice~watched~no-agnes` | still | watched, agnes absent | dashboard | none | same still; tomas + narrator VO |
-| `.04` | clip | no holy symbol | dashboard | `dim-all` (Library: all lights off) → screen fades to near-black for 1.5 s; `heartbeat` (Library) → screen pulse + heartbeat sfx | Dorka-sits-up clip; sfx: wood creak; narrator VO |
-| `.04~holy-symbol` | clip | holy symbol held | dashboard | same cues and fallbacks | variant clip with lamp flare; narrator VO |
-| `.05` | clip | agnes present | dashboard | none | Dorka coaxing clip; dorka + agnes VO |
-| `.05~no-agnes` | clip | agnes absent | dashboard | none | same clip; dorka + tomas VO |
-| `.06` | clip + fight | tomas present | dashboard | none (tower sound is stinger-only, and no fight stinger is scripted) | chaos clip; sfx: screams, benches; music: low drums; tomas + dorka VO; fight panel; sets flag |
-| `.06~no-tomas` | clip + fight | tomas absent | dashboard | same | same clip; wren + dorka VO |
-| `.07` | still | won, wren present | dashboard | none | Dorka-at-peace still; narrator + wren VO |
-| `.07~no-wren` | still | won, wren absent | dashboard | none | same still; narrator VO |
-| `.07~fight-lost` | still | lost | dashboard | `skull-drop` (player physical step, not a tower command) → Dashboard prompt + confirm; only when watched | window/escape still; narrator + wren VO (see OQ-5 for wren absent) |
-| `.08` | still | agnes present | dashboard | none | reuses the `.07` still, no new asset (R3-11); agnes VO |
-| `.08~no-agnes` | still | agnes absent | dashboard | none | same; tomas VO |
+| `.01` | clip | always | storyboard | none | dusk wake clip `@dashboard`; music: plainchant; sfx: candles, weeping; narrator VO |
+| `.02` | still | wren present | storyboard | none | wake still; agnes + wren VO |
+| `.02~no-wren` | still | wren absent | storyboard | none | same still; agnes VO |
+| `.03` | still | emeric present | storyboard | none | coffin/flies still; sfx: flies; emeric VO |
+| `.03~no-emeric` | still | emeric absent | storyboard | none | same still; narrator VO |
+| `.lid-choice` | still (event) | after `.03` | storyboard | `heartbeat` (Library: breathe effect) → screen pulse on the vignette + low heartbeat sfx from the Mac | leaning-candles still; sfx: fly then silence; narrator VO; choice UI |
+| `.lid-choice~nailed` | still | nailed, wren present | storyboard | none | hammer/stake still; sfx: hammer; wren + narrator VO |
+| `.lid-choice~nailed~no-wren` | still | nailed, wren absent | storyboard | none | same still; tomas + narrator VO |
+| `.lid-choice~watched` | still | watched, agnes present | storyboard | none | watching still (candles out at the back); agnes + narrator VO |
+| `.lid-choice~watched~no-agnes` | still | watched, agnes absent | storyboard | none | same still; tomas + narrator VO |
+| `.04` | clip | no holy symbol | storyboard | `dim-all` (Library: all lights off) → screen fades to near-black for 1.5 s; `heartbeat` (Library) → screen pulse + heartbeat sfx | Dorka-sits-up clip; sfx: wood creak; narrator VO |
+| `.04~holy-symbol` | clip | holy symbol held | storyboard | same cues and fallbacks | variant clip with lamp flare; narrator VO |
+| `.05` | clip | agnes present | storyboard | none | Dorka coaxing clip; dorka + agnes VO |
+| `.05~no-agnes` | clip | agnes absent | storyboard | none | same clip; dorka + tomas VO |
+| `.06` | clip + fight | tomas present | storyboard | none (tower sound is stinger-only, and no fight stinger is scripted) | chaos clip; sfx: screams, benches; music: low drums; tomas + dorka VO; fight panel; sets flag |
+| `.06~no-tomas` | clip + fight | tomas absent | storyboard | same | same clip; wren + dorka VO |
+| `.07` | still | won, wren present | storyboard | none | Dorka-at-peace still; narrator + wren VO |
+| `.07~no-wren` | still | won, wren absent | storyboard | none | same still; narrator VO |
+| `.07~fight-lost` | still | lost | storyboard | `skull-drop` (player physical step, not a tower command) → Story board prompt + confirm; only when watched | window/escape still; narrator + wren VO (see OQ-5 for wren absent) |
+| `.08` | still | agnes present | storyboard | none | reuses the `.07` still, no new asset (R3-11); agnes VO |
+| `.08~no-agnes` | still | agnes absent | storyboard | none | same; tomas VO |
 | `.09.private.agnes` | still | agnes present | `ipad:agnes` (all devices holding agnes) | none | private still `@ipad` (`@phone` optional); agnes VO (thought) |
 | `.09.private.tomas` | still | tomas present | `ipad:tomas` (all devices holding tomas) | none | same pattern; tomas VO |
 | `.09.private.wren` | still | wren present | `ipad:wren` (all devices holding wren) | none | same pattern; wren VO |
 | `.09.private.emeric` | still | emeric present | `ipad:emeric` (all devices holding emeric) | none | same pattern; emeric VO |
-| `.10` | still | always | dashboard | none | dawn burial still with `pressed-flower` prop (needs the prop ref sheet); narrator VO |
+| `.10` | still | always | storyboard | none | dawn burial still with `pressed-flower` prop (needs the prop ref sheet); narrator VO |
 
 All IDs carry the `n2-burgomasters-funeral` prefix. The Dashboard neutral line during `.09` is UI text, not a moment. The `pressed-flower` private dusk clue comes from the engine (`nx-pressed-flower`) and isn't part of this POC.
 
@@ -246,7 +246,7 @@ Tables (statistics.md): `games`, `sessions`, `devices`, `game_heroes`, `clock_ti
 | SFX | candles, weeping, flies, fly then silence, hammer, wood creak, screams/benches, heartbeat (fallback), skull-drop sting (fallback), E16 ambient bed + accent sounds | Not started. Generic sounds may come from `assets/shared/sfx/` |
 | Props | `pressed-flower` ref sheet (`props/pressed-flower/ref/`) | Not started |
 | Cast refs | agnes, tomas, wren, emeric, dorka reference sheets | Not started |
-| Cue sheet | `shared/tower/cues.json` entries for `dim-all`, `heartbeat`, `skull-drop`, each with screen half + fallback audio (tower mapping is Phase 2, R4-3) | Not started |
+| Cue sheet | `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json` entries for `dim-all`, `heartbeat`, `skull-drop`, `seal-sequence`, each with screen half + fallback audio (tower mapping is Phase 2, R4-3) | The file is in the asset kit |
 | UI | QR join overlay, fight panel, lid-choice panel, D8 phase card, mini summary, P1/P3/P6/P7, phone view | Not started (engine look, R-LF-2) |
 
 ## 11. Acceptance tests
