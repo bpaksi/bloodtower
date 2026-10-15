@@ -1,0 +1,222 @@
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { loadConfig } from "../config.ts";
+import { lintPath } from "../scripts/packLint.ts";
+import { loadPackDir, loadR1Pack, type PackLoadIssue } from "./load.ts";
+
+const testPack = () => join(loadConfig().packsDir, "test");
+
+const copyPack = () => {
+  const dir = mkdtempSync(join(tmpdir(), "bloodtower-pack-"));
+  cpSync(testPack(), dir, { recursive: true });
+  return dir;
+};
+
+const rules = (issues: readonly PackLoadIssue[]) => issues.map((item) => item.rule);
+
+describe("story loader", () => {
+  it("loads the test pack, records its version, and keeps choices without running them", () => {
+    const result = loadR1Pack(loadConfig().packsDir);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.pack.pack_id).toBe("test");
+    expect(result.pack.version).toBe("0.1.0");
+    expect(result.pack.hunters.map((hunter) => hunter.id)).toEqual([
+      "alpha",
+      "beta",
+      "gamma",
+      "delta",
+    ]);
+    expect(result.pack.nights).toHaveLength(1);
+    expect(result.pack.set_pieces).toHaveLength(1);
+    expect(result.pack.cues[0]?.screen).toBe("fx.bell");
+    expect(result.pack.cues[0]?.fallback_sfx).toBe("sfx.bell");
+    expect(result.pack.cues[0]?.drums).toBe("none");
+    expect(result.pack.moments.some((moment) => moment.id.endsWith("~no-delta"))).toBe(true);
+    expect(result.pack.moments.some((moment) => moment.id.includes(".private."))).toBe(true);
+    expect(result.pack.choices).toEqual([{ id: "kept", label: "not run" }]);
+    expect(JSON.stringify(result.pack).toLowerCase()).not.toContain("dracula");
+  });
+
+  it("round-trips the test pack through one JSON file", () => {
+    const loaded = loadR1Pack(loadConfig().packsDir);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+    const dir = mkdtempSync(join(tmpdir(), "bloodtower-json-"));
+    try {
+      writeFileSync(join(dir, "pack.json"), JSON.stringify(loaded.pack));
+      const again = loadPackDir(dir);
+      expect(again.ok).toBe(true);
+      if (!again.ok) return;
+      expect(again.pack.version).toBe(loaded.pack.version);
+      expect(again.pack.moments.map((moment) => moment.id)).toEqual(
+        loaded.pack.moments.map((moment) => moment.id),
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("names the file, path and rule for each bad pack", () => {
+    const cases: Array<{
+      file: string;
+      write: (text: string) => string;
+      rule: string;
+      path: string;
+    }> = [
+      {
+        file: "pack.yaml",
+        rule: "V-1",
+        path: "title",
+        write: (text) => text.replace("title: Proving ground\n", ""),
+      },
+      {
+        file: "moments.yaml",
+        rule: "V-2",
+        path: "",
+        write: (text) => text.replace("cue: bell", "cue: missing-bell"),
+      },
+      {
+        file: "moments.yaml",
+        rule: "V-3",
+        path: "0.id",
+        write: (text) => text.replace("id: proving-ground.01\n", "id: NOT A MOMENT\n"),
+      },
+      {
+        file: "moments.yaml",
+        rule: "V-4",
+        path: "2",
+        write: (text) => text.replace("target: ipad:alpha", "target: storyboard"),
+      },
+      {
+        file: "moments.yaml",
+        rule: "V-5",
+        path: "",
+        write: (text) => text.replace("~no-delta", "~no-ghost"),
+      },
+      {
+        file: "cues.yaml",
+        rule: "V-8",
+        path: "0",
+        write: (text) => text.replace("drums: none", "drums: top"),
+      },
+      {
+        file: "nights.yaml",
+        rule: "V-20",
+        path: "",
+        write: (text) => text.replace("night_end(n1)", "random end"),
+      },
+    ];
+
+    for (const item of cases) {
+      const dir = copyPack();
+      try {
+        const file = join(dir, item.file);
+        writeFileSync(file, item.write(readFileSync(file, "utf8")));
+        const result = loadPackDir(dir);
+        expect(result.ok, item.rule).toBe(false);
+        if (result.ok) continue;
+        expect(rules(result.issues), item.rule).toContain(item.rule);
+        const match = result.issues.find(
+          (issue) => issue.rule === item.rule && issue.file === item.file,
+        );
+        expect(match, `${item.rule} ${JSON.stringify(result.issues)}`).toBeDefined();
+        if (item.path) expect(match?.path, item.rule).toBe(item.path);
+        else expect(match?.path, item.rule).toMatch(/^\d+$/);
+        expect(match?.message, item.rule).toContain(item.rule);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("names a YAML syntax error and an unknown file", () => {
+    const broken = copyPack();
+    try {
+      writeFileSync(join(broken, "nights.yaml"), "nights: [\n");
+      const result = loadPackDir(broken);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues[0]?.file).toBe("nights.yaml");
+        expect(result.issues[0]?.rule).toBe("V-1");
+        expect(result.issues[0]?.path).toBe("(file)");
+      }
+    } finally {
+      rmSync(broken, { recursive: true, force: true });
+    }
+
+    const extra = copyPack();
+    try {
+      writeFileSync(join(extra, "notes.yaml"), "hello: true\n");
+      const result = loadPackDir(extra);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(
+          result.issues.some((item) => item.file === "notes.yaml" && item.rule === "V-1"),
+        ).toBe(true);
+      }
+    } finally {
+      rmSync(extra, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses a symlink that leaves the pack folder", () => {
+    const dir = copyPack();
+    const outside = mkdtempSync(join(tmpdir(), "bloodtower-outside-"));
+    try {
+      writeFileSync(join(outside, "secret.yaml"), "title: hidden\n");
+      rmSync(join(dir, "hunters.yaml"));
+      symlinkSync(join(outside, "secret.yaml"), join(dir, "hunters.yaml"));
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues.some((item) => item.file === "hunters.yaml")).toBe(true);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
+  it("does not load a pack that is not the test pack through loadR1Pack", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bloodtower-packs-"));
+    try {
+      mkdirSync(join(dir, "other"));
+      writeFileSync(join(dir, "other", "pack.yaml"), "pack_id: other\n");
+      const result = loadR1Pack(dir);
+      expect(result.ok).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("pack:lint", () => {
+  it("passes the test pack and rejects a bad folder with file, path and rule", () => {
+    const ok = lintPath(undefined, process.cwd());
+    expect(ok.exitCode).toBe(0);
+    expect(ok.lines).toEqual(["OK test 0.1.0"]);
+
+    const dir = copyPack();
+    try {
+      writeFileSync(join(dir, "cues.yaml"), "[]\n");
+      const bad = lintPath(dir, process.cwd());
+      expect(bad.exitCode).toBe(1);
+      expect(
+        bad.lines.some((line) => line.includes("file=cues.yaml") && line.includes("rule=V-")),
+      ).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

@@ -1,0 +1,32 @@
+- id: proving-ground.01
+  kind: still
+  target: storyboard
+  asset: fx.hall
+  lines:
+    - {speaker: narrator, text: "The proving ground is quiet.", voice: vo.line}
+- id: proving-ground.01~no-delta
+  kind: still
+  target: storyboard
+  asset: fx.hall
+  cond: absent(delta)
+  lines:
+    - {speaker: narrator, text: "Delta is not in the hall.", voice: vo.line}
+- id: proving-ground.02.private.alpha
+  kind: text-card
+  target: ipad:alpha
+  placeholder: "Each hunter reads alone."
+  lines:
+    - {speaker: alpha, text: "Only Alpha hears this.", voice: vo.alpha-line}
+- id: proving-ground.02.private.delta
+  kind: text-card
+  target: ipad:delta
+  placeholder: "Each hunter reads alone."
+  lines:
+    - {speaker: delta, text: "Only Delta hears this.", voice: vo.delta-line}
+- id: proving-ground.03
+  kind: text-card
+  target: storyboard
+  lines:
+    - {speaker: narrator, text: "A bell marks the step.", voice: vo.line}
+  cues:
+    - {cue: bell, at: start}

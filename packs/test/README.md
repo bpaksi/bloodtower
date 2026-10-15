@@ -1,5 +1,13 @@
-# Test pack
+# Test pack (`packs/test`)
 
-**Placeholder.** Gamewright's test pack content is not in this repo yet (checked 2026-10-15).
+The proving ground R1 loads. It is not a published story, and it is the only pack this step loads.
 
-This folder is the only pack R1 loads (`packs/test/`). It is not a valid pack, and it is not a Dracula pack. Step 3 of `apps/bloodtower/plans/R1-step1-foundation.md` replaces this note with the proving-ground pack: 4 hunters, 1 night, 1 set piece, shared and private moments, one `~no-<hunter>` variant, and one cue with a screen half and a fallback.
+| | |
+|---|---|
+| Hunters | alpha, beta, gamma, delta |
+| Nights | n1 |
+| Set piece | proving-ground |
+| Moments | a shared still, its `~no-delta` variant, private moments for alpha and delta, a shared line with one cue |
+| Cue | `bell`: screen `fx.bell`, fallback `sfx.bell`, drums `none` |
+
+`pnpm --dir apps/bloodtower pack:lint` checks this folder. A `choices` file is parsed and kept. Nothing runs it.

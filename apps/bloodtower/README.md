@@ -5,10 +5,10 @@
 | Purpose | The real app: a story pack on the Story board, iPads joining by QR, first press wins, and a timing log. R1 connects to the tower and sends no effects. |
 | Phase | Build |
 | SDLC tier | Full |
-| Status | R1 step 1. Scaffold and the protocols contract. [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). [spec.md](spec.md). |
+| Status | R1 batch B2. Loader, timing log, session lock, tower port, Story board and device screens. The socket hub is the next batch. [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). [spec.md](spec.md). |
 | Disposable? | No. |
 
-The Mac runs this host. The Story board is a display-only page. iPads join later (steps 7–9) and are the only controls. tower-poc stays a sidecar on port 4747 (reuse-guide option A). This build does not open that connection and does not send a light, a sound or a drum.
+The Mac runs this host. The Story board is a display-only page at `/board`. iPad join is `/join` and the device controls are `/device`. Those pages do not open a session socket yet (that is the next batch). tower-poc stays a sidecar on port 4747 (reuse-guide option A). This host does not open that connection and does not send a light, a sound or a drum.
 
 ## Where things are
 
@@ -20,13 +20,17 @@ The Mac runs this host. The Story board is a display-only page. iPads join later
 | `src/web/`, `src/server/`, `src/protocols/` | Code parts, each its own package |
 | `src/e2e/` | Playwright: phone and iPad on WebKit, desktop on Chromium |
 | `data/` | SQLite files in the main checkout (gitignored). A worktree uses the `dataDir` in `.wt.json`. Created when the host starts. |
-| `../../packs/test/` | The only pack R1 loads. **Placeholder** until step 3. Not the Dracula pack. |
+| `../../packs/test/` | The only pack R1 loads. A proving ground: four hunters, one night, one set piece. Not a Dracula pack. |
 
-`pack:lint` arrives in step 3, with the loader. It is not a script in this step.
+```bash
+pnpm --dir apps/bloodtower pack:lint
+```
+
+That checks `packs/test`. `pnpm --dir apps/bloodtower pack:lint -- <dir>` checks another folder, and the path is resolved from the server package's working directory.
 
 ## Running on the Mac
 
-From the repo root. One process serves the Story board. It binds `0.0.0.0:4787` unless `PORT` is set. SQLite will live under `apps/bloodtower/data/` once step 4 adds the tables; the folder is created on start and is gitignored.
+From the repo root. One process serves the Story board. It binds `0.0.0.0:4787` unless `PORT` is set. It creates `apps/bloodtower/data/` on start (gitignored) and does not open a database until the hub batch.
 
 The workspace root package is also named `bloodtower`, so `pnpm -F bloodtower` selects both and its `build` runs every app. `--dir apps/bloodtower` selects this app.
 
@@ -36,7 +40,7 @@ pnpm --dir apps/bloodtower build
 pnpm --dir apps/bloodtower start
 ```
 
-Open http://127.0.0.1:4787/
+Open http://127.0.0.1:4787/ for the scaffold page, http://127.0.0.1:4787/board for the Story board, http://127.0.0.1:4787/join for join, and http://127.0.0.1:4787/device for the device controls. The board has no buttons. Join and device say the session host is unavailable until the hub lands.
 
 The page has no buttons. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
 

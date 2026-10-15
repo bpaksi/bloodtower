@@ -8,7 +8,8 @@
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "pack:lint": "tsx scripts/packLint.ts"
   },
   "dependencies": {
     "@stoprocent/noble": "2.8.0",

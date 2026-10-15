@@ -8,7 +8,8 @@
     "dev": "concurrently --kill-others --names server,web --prefix-colors blue,green \"pnpm -F bloodtower-server dev\" \"pnpm -F bloodtower-web dev\"",
     "build": "pnpm -F bloodtower-web build",
     "start": "pnpm -F bloodtower-server start",
-    "e2e": "pnpm -F bloodtower-e2e e2e"
+    "e2e": "pnpm -F bloodtower-e2e e2e",
+    "pack:lint": "pnpm -F bloodtower-server pack:lint"
   },
   "devDependencies": {
     "concurrently": "10.0.6"

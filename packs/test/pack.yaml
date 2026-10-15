@@ -1,0 +1,25 @@
+pack_id: test
+title: Proving ground
+version: 0.1.0
+engine_min: 0.1.0
+tone: A long-lived proving ground for new ideas.
+structure: one-shot
+players: {min: 1, max: 4}
+lengths: [standard]
+difficulties:
+  - {id: standard, label: Standard, mods: {}}
+systems: {clock: nights, corruption: false}
+components:
+  - {asset-group: stills, use: used}
+setup: [join]
+av_theme:
+  art_style: plain
+  clip_style: none
+  palette: ink
+  narrator_voice: narrator
+  music_mood: quiet
+  sfx_set: basic
+ambient:
+  night: {bed: amb.night, accents: [acc.tick], interval_s: [20, 60]}
+cast:
+  - {id: narrator, name: Narrator, voice: vo.narrator, role: narrator}
