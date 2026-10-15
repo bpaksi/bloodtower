@@ -69,7 +69,9 @@ const emptyOverlap = (trial: PlannedOverlap): OverlapRow => ({
   result: null,
 });
 
-const runOne = async (capabilityId: string, params: unknown) => {
+type CommandRun = { times: CommandTimes; error?: undefined } | { times?: undefined; error: string };
+
+const runOne = async (capabilityId: string, params: unknown): Promise<CommandRun> => {
   const id = sendCommand(capabilityId, params);
   if (!id) return { error: "The service is not reachable. Nothing was sent." };
   const stages = await waitForCommand(id);
@@ -172,7 +174,7 @@ export function TimingTest() {
                 : null,
           },
         ]);
-        if ("error" in outcome && outcome.error.startsWith("The link")) break;
+        if (outcome.error?.startsWith("The link")) break;
       }
       setSeqLabel(undefined);
     } finally {
@@ -189,7 +191,7 @@ export function TimingTest() {
     try {
       const began = Date.now();
       const first = await runOne(trial.first.capabilityId, trial.first.params);
-      if ("error" in first) {
+      if (!first.times) {
         setOverlaps((rows) =>
           rows.map((row, i) => (i === index ? { ...row, error: first.error } : row)),
         );
@@ -198,18 +200,13 @@ export function TimingTest() {
       const remain = trial.gapMs - (Date.now() - began);
       if (remain > 0) await sleep(remain);
       const second = await runOne(trial.second.capabilityId, trial.second.params);
-      setOverlaps((rows) =>
-        rows.map((row, i) =>
-          i === index
-            ? {
-                ...row,
-                firstTimes: first.times,
-                secondTimes: "times" in second ? second.times : null,
-                error: "error" in second ? second.error : undefined,
-              }
-            : row,
-        ),
-      );
+      const next: OverlapRow = {
+        ...emptyOverlap(trial),
+        firstTimes: first.times,
+        secondTimes: second.times ?? null,
+        error: second.error,
+      };
+      setOverlaps((rows) => rows.map((row, i) => (i === index ? next : row)));
     } finally {
       release();
     }
