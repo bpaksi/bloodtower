@@ -18,7 +18,7 @@ Status labels follow E13: **Verified** = passed the M3 Verify pass on Bob's towe
 | `lighting.all-on` | optional `effect` | ~50 ms | Verified | All-on when already all-on is a no-op stall |
 | `lighting.all-off` | none | ~50 ms | Verified | Same no-op trap when already dark |
 | `lighting.set-led` | layer 0–5, light 0–3, style, loop | ~50 ms | Verified | Low-level; the layer map (doorway/ledge/base) should be confirmed before packs reference it directly. Prefer `lighting.set` |
-| `lighting.flash` | one light, a rate, a fixed 5 s | not measured | GAP | Timing page only, and untested on the tower. It toggles one light by writing state, because `setLED` cannot flash at 2–8 Hz. Story effects do not use it |
+| `lighting.flash` | one light, a rate, a fixed 5 s | not measured | Library | In the app for the timing page, and untested on the tower. It toggles one light by writing state, because `setLED` cannot flash at 2–8 Hz. Story effects do not use it |
 | `lighting.sequence` | 21 in `TOWER_LIGHT_SEQUENCES`: twinkle, flareThenFade, flareThenFadeBase, flareThenFlicker, angryStrobe01–03, gloat01–03, defeat, victory, dungeonIdle, sealReveal, rotationAllDrums, rotationDrumTop, rotationDrumMiddle, rotationDrumBottom, monthStarted, wholeTowerBreathing, slowFlareThenFade. Optional `soundIndex` 1–113 on sequences that answer | ~50 ms to answer; sequence length unknown/not reported | Verified for the 20 the Lights page offers. `rotationDrumMiddle` held (GAP-HW-007) | The service schema accepts all 21, including `rotationDrumMiddle`, so the timing test can send it. The Lights page offers 20 and hides Middle. Story effects use those 20 and skip Middle until the hold lifts. Sequence + sound in **one packet** is the sync path. Durations are not documented; measure. `rotation*` sequences: tower never answers, sent fire-and-forget (D23), **require calibration**, **cannot carry a sound**, and stay lit until the next command |
 
 ### A2. Sound
@@ -227,7 +227,7 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 
 **Utility effects (not story):**
 - **FX-U1 `self-test`** (R3-10): `dim-all` → `heartbeat` T2 → Tower Skull Dropped (#113). Host confirms each step.
-- **FX-U2 `tower-awake`**: the host presses Awake after connect has succeeded, and only then does the tower play Tower Connected (#94). Nothing plays on connect by itself (PRD-5, E13). **FX-U3 `calibration-cover`**: no tower commands (D22); Mac "castle stirs" loop.
+- **FX-U2 `tower-awake`**: a separate host step, after connect has succeeded, plays Tower Connected (#94). Connect itself sends nothing (PRD-5, E13). **FX-U3 `calibration-cover`**: no tower commands (D22); Mac "castle stirs" loop.
 - **FX-U4 `restore-bed`**: re-send the current bed **only if** the store says lights differ.
 
 ---
