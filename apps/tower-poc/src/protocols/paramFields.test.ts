@@ -93,10 +93,10 @@ describe("describeParams", () => {
     });
   });
 
-  it("offers only the light sequences the schema accepts, not held ones", () => {
+  it("lists every catalog sequence, including the one the Lights page hides", () => {
     const sequence = fieldsOf("lighting.sequence").find((field) => field.key === "sequence");
     expect(sequence).toMatchObject({ kind: "enum" });
-    expect(sequence?.kind === "enum" && sequence.options).not.toContain("rotationDrumMiddle");
+    expect(sequence?.kind === "enum" && sequence.options).toContain("rotationDrumMiddle");
   });
 
   it("refuses what it cannot render instead of guessing", () => {

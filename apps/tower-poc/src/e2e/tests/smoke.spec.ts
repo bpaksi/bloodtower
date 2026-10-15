@@ -10,6 +10,7 @@ const PAGES = [
   { path: "/diagnostics", title: "Diagnostics" },
   { path: "/gaps", title: "Feature Gaps" },
   { path: "/settings", title: "Settings" },
+  { path: "/timing", title: "Timing" },
 ] as const;
 
 const collectErrors = (page: Page) => {

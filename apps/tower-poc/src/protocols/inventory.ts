@@ -28,6 +28,13 @@ import { z } from "zod";
 /** The library version this inventory was written against. The coverage test compares it with the installed one. */
 export const LIBRARY_BASELINE = { name: "ultimatedarktower", version: "7.1.2" } as const;
 
+/**
+ * Library methods named by more than one entry. `setLED` is `lighting.set-led` (one write through
+ * the queue) and `lighting.flash` (a timed burst that does not call `setLED`; see that entry).
+ * The coverage tests allow exactly these repeats and still require every public member once.
+ */
+export const SHARED_LIBRARY_MEMBERS = ["setLED"] as const;
+
 // ---------------------------------------------------------------------------
 // Value schemas shared by the entries
 // ---------------------------------------------------------------------------
@@ -115,8 +122,33 @@ export const SILENT_LIGHT_SEQUENCES: readonly LightSequenceName[] = [
  * until it has been. Lifting a hold is removing the name from this list.
  */
 export const HELD_LIGHT_SEQUENCES: readonly LightSequenceName[] = ["rotationDrumMiddle"];
-/** The sequences `lighting.sequence` accepts: the catalog without the held ones. */
+/**
+ * Sequences the Lights page offers. The service still accepts the held name, so the timing test
+ * can play it and flag it; the Lights control hides it until that trial has been done.
+ */
 export const offeredLightSequenceSchema = lightSequenceSchema.exclude(HELD_LIGHT_SEQUENCES);
+
+/** How long each flash-rate step runs. Fixed, so a client cannot ask for a longer burst. */
+export const FLASH_DURATION_MS = 5_000;
+/** The rates the flash test runs, slowest first. */
+export const FLASH_RATES_HZ = [2, 4, 6, 8] as const;
+export const flashParamsSchema = z
+  .strictObject({
+    layerIndex: z
+      .int()
+      .min(0)
+      .max(LED_LAYER_COUNT - 1),
+    lightIndex: z
+      .int()
+      .min(0)
+      .max(LEDS_PER_LAYER - 1),
+    flashesPerSecond: z.int().min(2).max(8),
+    durationMs: z.int().min(FLASH_DURATION_MS).max(FLASH_DURATION_MS),
+  })
+  .refine((params) => (FLASH_RATES_HZ as readonly number[]).includes(params.flashesPerSecond), {
+    path: ["flashesPerSecond"],
+    message: "Flash rate must be 2, 4, 6 or 8 a second.",
+  });
 
 type GlyphName = keyof typeof GLYPHS;
 export const glyphSchema = z.enum(Object.keys(GLYPHS) as [GlyphName, ...GlyphName[]]);
@@ -248,6 +280,7 @@ export const uiLocationSchema = z.enum([
   "tower-state",
   "diagnostics",
   "settings",
+  "timing",
 ]);
 export type UiLocation = z.infer<typeof uiLocationSchema>;
 
@@ -537,13 +570,25 @@ export const inventory = [
     category: "lighting",
     apiMapping: ["lightOverrides"],
     params: z.strictObject({
-      sequence: offeredLightSequenceSchema,
+      sequence: lightSequenceSchema,
       soundIndex: soundIndexSchema.optional(),
     }),
     availability: "available",
     uiLocation: "lights",
     verification: "mock-tested",
-    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (SILENT_LIGHT_SEQUENCES) move no drum and the tower does not answer them (${SPIKE}, findings 4 and 7), so the executor sends them straight to the tower without waiting, only to a calibrated tower and never with a sound, and ends them as indeterminate (D23). In the M2 hardware smoke, rotationAllDrums, rotationDrumTop and rotationDrumBottom each lit its lights, and those lights stayed on until the next command (its clearing write and its own packet) turned them off; the sound sent after it played once (${SMOKE}). rotationDrumMiddle was not played there and is still not accepted (HELD_LIGHT_SEQUENCES, GAP-HW-007).`,
+    evidence: `${TYPES}: the library takes any number; the names come from TOWER_LIGHT_SEQUENCES in ultimatedarktowerdata. Not itself tried before calibration; lighting.all-on, lighting.all-off, sound.play and seals.break were, and worked with no drum motion (GAP-HW-001; ${SPIKE}, finding 2). The four rotation* sequences (SILENT_LIGHT_SEQUENCES) move no drum and the tower does not answer them (${SPIKE}, findings 4 and 7), so the executor sends them straight to the tower without waiting, only to a calibrated tower and never with a sound, and ends them as indeterminate (D23). In the M2 hardware smoke, rotationAllDrums, rotationDrumTop and rotationDrumBottom each lit its lights, and those lights stayed on until the next command (its clearing write and its own packet) turned them off; the sound sent after it played once (${SMOKE}). rotationDrumMiddle was not played there. The Lights page still hides it (offeredLightSequenceSchema). The timing test sends it through this same command and flags it (GAP-HW-007).`,
+  },
+  {
+    id: "lighting.flash",
+    title: "Flash one light",
+    kind: "command",
+    category: "lighting",
+    apiMapping: ["setLED"],
+    params: flashParamsSchema,
+    availability: "available",
+    uiLocation: "timing",
+    verification: "untested",
+    evidence: `${TYPES}: setLED is the library method for one light, and lighting.set-led already calls it. This command does not. setLED waits on the library queue, which leaves 250 ms between writes and holds that queue for 30 s when a write changes nothing, so it cannot flash at 2 to 8 Hz. The executor toggles one light by writing the library's current state with only that light's effect changed, through sendTowerState, which skips the queue. The client names a layer, a light, a rate and a fixed 5 s; it never sends a state or a packet (D12). Each write differs from the one before it, and a write that does not finish is abandoned well short of 30 s. Nothing starts it but the timing page, after a photosensitivity warning.`,
   },
   {
     id: "lighting.set-led",

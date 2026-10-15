@@ -79,10 +79,15 @@ describe("capabilitySummary", () => {
       entries.filter((entry) => entry.verification === "mock-tested").length,
     );
     expect(summary.byVerification["hardware-verified"]).toBe(0);
-    // Every capability on the five control pages; the Diagnostics page's wait for M4.
+    // Every capability on the five control pages. Diagnostics waits for M4. The timing page
+    // keeps its own notes and is not a Verify checklist.
     expect(summary.toVerify).toBe(
-      entries.filter((entry) => entry.uiLocation !== null && entry.uiLocation !== "diagnostics")
-        .length,
+      entries.filter(
+        (entry) =>
+          entry.uiLocation !== null &&
+          entry.uiLocation !== "diagnostics" &&
+          entry.uiLocation !== "timing",
+      ).length,
     );
     expect(summary.recorded).toBe(0);
   });

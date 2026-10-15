@@ -89,6 +89,7 @@ const server = await startTowerServer({
   verifications,
   tower,
   devOrigins,
+  timingResultsDir: resolve(import.meta.dirname, "../../docs/timing-results"),
   onLifecycle: (lifecycle) => {
     diagLog?.write({ source: "command", lifecycle });
     // The library moves its glyphs once a rotation has ended, with no tower report after it.

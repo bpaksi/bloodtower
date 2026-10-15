@@ -22,6 +22,7 @@ import {
 } from "tower-poc-protocols";
 import type { UltimateDarkTower } from "ultimatedarktower";
 import { TOWER_LIGHT_SEQUENCES } from "ultimatedarktowerdata";
+import { flashOneLight } from "./timing/flashLight.ts";
 import type { TowerRecords } from "./towerRecords.ts";
 
 /** What the executor needs from the session. `TowerSession` has all of it. */
@@ -110,9 +111,9 @@ const queued = (
   run,
   ...(onConfirmed ? { onConfirmed } : {}),
 });
-const direct = (run: TowerPlan["run"], silent = false): Plan => ({
+const direct = (run: TowerPlan["run"], silent = false, timeoutMs = DIRECT_TIMEOUT_MS): Plan => ({
   path: "direct",
-  timeoutMs: DIRECT_TIMEOUT_MS,
+  timeoutMs,
   silent,
   run,
 });
@@ -171,6 +172,14 @@ const PLANS: { [Id in CommandableId]: (params: CapabilityParams<Id>) => Plan } =
         LIGHT_EFFECT_NUMBERS[params.effect],
         params.loop,
       ),
+    ),
+  // One command for the whole burst. The writes inside it skip the library queue and the
+  // lane's 250 ms gap, or 8 flashes a second could not happen. The gap still applies after.
+  "lighting.flash": (params) =>
+    direct(
+      (tower) => flashOneLight(tower, params, { now: Date.now, sleep }),
+      false,
+      params.durationMs + 2_000,
     ),
   "sound.play": (params) => queued((tower) => tower.playSound(params.soundIndex)),
   "sound.play-stateful": (params) =>

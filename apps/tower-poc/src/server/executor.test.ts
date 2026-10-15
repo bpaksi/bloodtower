@@ -751,6 +751,17 @@ describe("command executor: silent light sequences (D23)", () => {
     expect(writes()).toEqual([]);
   });
 
+  it("accepts rotationDrumMiddle, sends it without waiting, and flags nothing in the lifecycle", async () => {
+    const { submit, stages, last, writes } = await setup();
+    const started = Date.now();
+    const { commandId, done } = submit("lighting.sequence", { sequence: "rotationDrumMiddle" });
+    await finish(done);
+    expect(Date.now() - started).toBeLessThan(1_000);
+    expect(stages(commandId)).toEqual(["queued", "started", "write-completed", "indeterminate"]);
+    expect(last(commandId)?.reason).toMatch(/does not answer/);
+    expect(writes().map(sequenceByte)).toEqual(["11"]);
+  });
+
   it("rejects one on an uncalibrated tower, where none was tried", async () => {
     const { executor, last, writes } = await setup("connected");
     await executor.run(
@@ -758,6 +769,37 @@ describe("command executor: silent light sequences (D23)", () => {
       silent("rotationDrumBottom"),
     );
     expect(last("s-1")).toMatchObject({ stage: "rejected", reason: expect.stringMatching(/D23/) });
+    expect(writes()).toEqual([]);
+  });
+});
+
+describe("command executor: flash one light", () => {
+  it("toggles one light for the burst and does not sit for the library's 30 s", async () => {
+    const { submit, stages, last, writes } = await setup();
+    const started = Date.now();
+    const { commandId, done } = submit("lighting.flash", {
+      layerIndex: 0,
+      lightIndex: 0,
+      flashesPerSecond: 2,
+      durationMs: 5_000,
+    });
+    await finish(done);
+    expect(Date.now() - started).toBeLessThan(10_000);
+    expect(last(commandId)?.stage).not.toBe("timed-out");
+    expect(stages(commandId)).toContain("write-completed");
+    expect(writes().length).toBeGreaterThan(1);
+  });
+
+  it("refuses a rate that is not 2, 4, 6 or 8", async () => {
+    const { submit, last, writes } = await setup();
+    const { commandId, done } = submit("lighting.flash", {
+      layerIndex: 0,
+      lightIndex: 0,
+      flashesPerSecond: 3,
+      durationMs: 5_000,
+    });
+    await finish(done);
+    expect(last(commandId)?.stage).toBe("rejected");
     expect(writes()).toEqual([]);
   });
 });

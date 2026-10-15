@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HELD_LIGHT_SEQUENCES } from "tower-poc-protocols";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { LightsControl } from "@/components/controls/LightsControl";
 import { PageHeader } from "@/components/PageHeader";
@@ -35,12 +36,13 @@ export default function LightsPage() {
             <>
               A light override from the tower's catalog, with a sound if you choose one. The four
               rotation sequences need a calibrated tower and no sound; the tower does not answer
-              them, so they end as “Sent, no answer”. Rotation drum middle is not offered until it
-              has been tried on the tower.
+              them, so they end as “Sent, no answer”. Rotation drum middle stays off this page until
+              the timing test has played it; that page sends it and flags it.
             </>
           }
           sendLabel="Play sequence"
           pendingLabel="Playing…"
+          hideSequences={HELD_LIGHT_SEQUENCES}
         />
         <CapabilityControl
           capabilityId="lighting.set-led"
