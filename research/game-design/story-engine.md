@@ -127,3 +127,55 @@ The tower should nearly always be doing something. The engine runs a three-layer
 - Sources: base gear, potions, treasure and corruptions (base RtDT), plus story items, investigation findings (E17) and companions.
 - **Companions/NPCs:** RtDT companion and character cards (e.g. Gleb) are reskinned per story as people the hunters meet. A pack maps each physical card to a story role, recruit condition, advantage and loss condition. Base-card effects are kept where possible. This needs Bob's card list.
 - Stack cap: story advantages are limited to +2 per hunter per fight by default, overridable per pack within R-FUN-4.
+
+## E19 Quest tokens (objective, lure, hunter)
+Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art.
+
+**RtDT grounding.** The base game ships 3 quest markers (companion quest, adversary quest, main goal). The app tells players to place them "in the spaces on the board where they can be completed", and a marker is removed when its quest is done ([official rulebook](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf)). E19 reuses those three physical markers (or Dark Horde minis) for three story roles. Board terms used here are RtDT's own: four **kingdoms** (north, east, south, west) separated by **rivers**; 15 **spaces** per kingdom, each with a terrain (desert, hills, mountains, lake, forest, grasslands); one **building** of each type per kingdom: **citadel, sanctuary, village, bazaar**. Movement is one move per adjacent space, and crossing a river does not let you slide along it. A **site** in this rule means a space, usually one with a building.
+
+**Base-game contrast.** In base RtDT foes do not chase heroes. The app says when and on which spaces foes appear, they stay there, their status escalates the longer they stay (panicked → lethal), and they hit through strike events. The hunter token is a new story mechanic, not a reskin of a base rule.
+
+- **E19a Objective.** At dusk the app places the objective on the site of the night's next set piece. The set piece starts when a hunter enters that site, and presence (E15) applies. If the night has two set pieces, the token moves to the second site when the first scene ends.
+- **E19b Lure (optional).** At dusk the engine draws one lure from the pack's lure list, using the game seed, from the entries valid that night. It never sits on the objective's site; if it would, redraw. The first hunter to reach it gains one story item or one finding. The reward is revealed privately to the iPad(s) holding that hunter, with a neutral line on the Dashboard. Then the lure is removed. A pack may skip lures.
+- **E19c Hunter.** Placed at dusk on its start site (E19d). At the end of each round, before hunters move, it moves one space toward the nearest hunter, using RtDT adjacency and river rules. Ties go by seeded pick. When it lands on a hunter's space, the engine makes a seeded draw from the pack's hunter encounter table. Presence (E15) applies, so only the hunters on that space are present. After the encounter it returns to its start site. It is removed at dawn. Each move pulses tower lights (a pack cue, e.g. a heartbeat). It never moves the drum, because drum positions carry board meaning (E13).
+- **E19d Hunter start site.** Default: the **citadel of the active kingdom**. Every kingdom has exactly one, so placement is always unambiguous. If that space holds the objective or a hunter at dusk, use a **space next to the Tower in the active kingdom** instead (RtDT's own term from the main-goal relic quest). A pack may override with any building type or tower-adjacent space.
+- **E19e Encounter vs. normal RtDT event.** **Ruled by Bob (Oct 14 2026): add.** A hunter-token encounter plays in addition to that turn's normal RtDT event, never instead of it. The normal event resolves first, then the encounter. To keep turns moving: an encounter is 2–3 moments; at most one hunter-token encounter per round; the E19 corruption guard still applies (no third corruption from an encounter). Both are logged separately for stats.
+- **E19f Corruption guard.** A hunter-token encounter or lure never gives a third corruption. A corruption aimed at a hunter who already has 2 is redirected under E9 (the instant-loss guard).
+- **E19g Logging.** Every placement, move (from, to, round), draw, removal, lure claim and encounter result is logged with the seed, for stats and deterministic replay.
+- **E19h Pace and game length.** Hunter-token pace scales with the game length (R-LEN-2) as declared by the story pack: per length, the pack sets how often the token moves (e.g. every round vs. every other round) and how many hunter-token encounters a night allows. Defaults are the rules above (Standard).
+
+## E20 Dungeon crawl
+Gamewright, 2026-10-14. Story-neutral; a pack supplies the dungeon, its room deck, text and art. First use: Dracula crypt (D-DRA-14).
+
+**RtDT grounding** (official rulebook, [two-page](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf) and [v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf)):
+- Dungeons spawn as part of certain quests and are marked by a dungeon token showing the dungeon's trait. You explore one with the Quest action on its space. The token is removed when the dungeon is completed or an event says so.
+- The goal is to find the **target room** (e.g. where someone hides or an item is hidden). Clearing it completes the dungeon and its quest.
+- Entering: press the dungeon button and pick a dungeon. The app shows the starting room and the unentered rooms you can reach. Pick one, and the app reveals what happens there.
+- Per room: you may spend one Advantage (matching the dungeon's trait, or Wild) via "improve" for a better result. Each room can be improved only once, and spent Advantages can't be undone. Then you resolve the room (rulebook example: lose 5 warriors; lose 1 spirit, improved to gain 1). Items can also be gained from dungeons.
+- Losses you can't pay: pay what you can and gain one corruption (at most one per room). A third corruption loses the co-op game.
+- After each room it is cleared and you choose: enter a new room or leave. Rooms you cleared stay cleared for the next hero who explores that dungeon.
+- Ends when the target room is cleared, or when you leave.
+- Tower dungeon (competitive relic mode): access after 3 heroic tests; entered by the Quest action on any space adjacent to the Tower; find the relic room to win; you may leave and re-enter on a later turn. The tower itself is not driven by a dungeon in any rule we found.
+- Companion app notes (local research/return-to-dark-tower/companion-app.md): the dungeon screen goes room by room, one improvement per room, and remembers cleared rooms. In v1.2.2 the skull sensor was disabled on dungeon screens.
+- Expansions: no dungeon rules in the Alliances rulebook. Covenant mentions "explore a dungeon" only on card/monument effect text ([Covenant rulebook](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Covenant_Rulebook-web.pdf)). **Unverified:** how room graphs and room contents are generated, what room types exist, and the exact loot tables. These live only in the app and are not documented.
+
+**Rule.**
+- **E20a Entry.** A pack places a dungeon at a site (an E19 objective). It starts when a hunter enters the site. Presence is locked as in E15, so only present hunters crawl.
+- **E20b Layout.** At game start the engine deals a seeded layout from the pack's room deck: an ordered chain (optionally with branches) of N rooms, with the target room always last. Room types are **trap**, **foe**, **treasure**, **deeper/stairs** (advances depth with no other effect, or opens a branch), and **story room** (bound to one hunter; if that hunter is absent, use its `~no-<hunter>` variant). Rooms are face down until entered, and the Dashboard shows the room map RtDT-style.
+- **E20c Per room.** Reveal the room, then the present hunters may spend **one** E18 Advantage (the trait the pack declares) to improve it, once per room. Then resolve it. Foe rooms run through the existing Dashboard battle screen using E18 advantages, with the battle cards' warrior costs left as base RtDT.
+- **E20d Costs.** Room costs come from story items and story tracks, or a corruption to a present hunter. Never warriors or spirit (story-mechanics ruling). Unpayable cost: pay what you can and take one corruption. At most one corruption per room, and the instant-loss guard applies (E9/E19f): never a third corruption from a crawl.
+- **E20e Push on or retreat.** After each room the present hunters vote (host breaks ties) to go deeper or leave. Leaving keeps cleared rooms cleared, and the party may re-enter on a later turn or night if the pack allows it.
+- **E20f Loot.** Treasure rooms and the target room grant story items, bound to a present hunter (carried key items rule, "E (carried key items)" above).
+- **E20g Depth track.** The Dashboard shows depth (rooms cleared out of N). A pack may key the outcome to the depth reached.
+- **E20h End.** The crawl ends when the target room is cleared (success flag), on retreat (partial, with depth recorded), or when the length cap is hit (treated as retreat).
+- **E20i Length.** N rooms and the per-visit room cap scale with game length (R-LEN). The pack declares them, and real times come from measurement.
+- **E20j Logging.** Log the seed, layout, each room (type, improve used, cost paid, corruption, loot), the choice, and start/end timestamps per room and crawl (PRD-41 style).
+- **E20k Tower.** No tower control in the POC (Phase 2). Ambient E16 continues, and scene cues are only a later option.
+
+**Divergences from RtDT.**
+1. Group crawl by present hunters instead of a single hero's action. This follows E15, so the whole table plays it.
+2. Costs are story items/tracks and corruption, not warriors/spirit. This follows the story-mechanics ruling. Foe battles keep base warrior costs.
+3. Room types are explicit and pack-authored, and the layout comes from a seeded deck. RtDT's generator is undocumented, so we can't copy it.
+4. Corruption guard: RtDT allows a third corruption (loss). We redirect it instead.
+5. A depth track and time cap are new; they make pacing measurable.
+6. Story rooms tied to hunters are new, to support private/personal beats.
