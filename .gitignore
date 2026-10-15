@@ -26,3 +26,6 @@ apps/*/assets/inbox/
 # Step worktree files (pnpm wt)
 .wt.json
 .wt-data/
+
+# tower-poc diagnostics log (DIAG_LOG=data/diag.jsonl), relative to where the server runs
+apps/tower-poc/**/diag*.jsonl
