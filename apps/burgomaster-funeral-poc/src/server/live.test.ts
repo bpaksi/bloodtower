@@ -11,7 +11,10 @@ const roots: string[] = [];
 const closers: (() => Promise<void>)[] = [];
 
 afterEach(async () => {
+  const started = Date.now();
   for (const close of closers) await close();
+  // An unread asset body must not hold the host open until the hook times out.
+  expect(Date.now() - started).toBeLessThan(2_000);
   closers.length = 0;
   for (const root of roots) rmSync(root, { recursive: true, force: true });
   roots.length = 0;
@@ -159,6 +162,18 @@ describe("live slice", () => {
       }
     }
     expect(canBegin).toBe(true);
+
+    const clip = await fetch(`${base}/assets/clips/n2-burgomasters-funeral.01@dashboard.mp4`, {
+      headers: { Authorization: `Bearer ${welcome.payload.token}` },
+    });
+    expect(clip.status).toBe(200);
+    expect(clip.headers.get("content-type")).toBe("video/mp4");
+    const poster = await fetch(
+      `${base}/assets/clips/n2-burgomasters-funeral.01@dashboard.poster.png`,
+      { headers: { Authorization: `Bearer ${welcome.payload.token}` } },
+    );
+    expect(poster.status).toBe(200);
+    expect(poster.headers.get("content-type")).toContain("image/png");
 
     dashboard.socket.close();
     device.socket.close();

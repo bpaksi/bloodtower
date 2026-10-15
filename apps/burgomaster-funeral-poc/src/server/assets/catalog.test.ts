@@ -11,7 +11,9 @@ describe("loadCatalog", () => {
     const opening = catalog.moments.get("n2-burgomasters-funeral.01");
     expect(opening?.lines[0]?.text).toContain("Vellmoor buries its burgomaster");
     expect(opening?.lines[0]?.durationMs).toBeGreaterThan(1_000);
-    expect(opening?.stillPath).toContain("n2-burgomasters-funeral.01");
+    expect(opening?.stillPath).toBe("clips/n2-burgomasters-funeral.01@dashboard.poster.png");
+    expect(catalog.byPath.get("clips/n2-burgomasters-funeral.01@dashboard.mp4")?.type).toBe("clip");
+    expect(catalog.byPath.get(opening?.stillPath ?? "")?.target).toBe("dashboard");
     expect(opening?.musicPath).toContain("plainchant.wav");
 
     const second = catalog.moments.get("n2-burgomasters-funeral.02");

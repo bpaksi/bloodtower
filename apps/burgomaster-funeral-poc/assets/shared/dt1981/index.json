@@ -1,0 +1,77 @@
+{
+  "shared.dt1981-cold-open.tune": {
+    "wav": "audio/dt1981-cold-open.wav",
+    "ogg": "audio/dt1981-cold-open.ogg",
+    "warm_wav": "audio/dt1981-cold-open.warm.wav",
+    "warm_ogg": "audio/dt1981-cold-open.warm.ogg",
+    "duration_s": 4.93
+  },
+  "shared.dt1981-win.tune": {
+    "wav": "audio/dt1981-win.wav",
+    "ogg": "audio/dt1981-win.ogg",
+    "warm_wav": "audio/dt1981-win.warm.wav",
+    "warm_ogg": "audio/dt1981-win.warm.ogg",
+    "duration_s": 3.17
+  },
+  "shared.dt1981-loss.tune~lost": {
+    "wav": "audio/dt1981-loss~lost.wav",
+    "ogg": "audio/dt1981-loss~lost.ogg",
+    "warm_wav": "audio/dt1981-loss~lost.warm.wav",
+    "warm_ogg": "audio/dt1981-loss~lost.warm.ogg",
+    "duration_s": 2.23
+  },
+  "shared.dt1981-loss.tune~plague": {
+    "wav": "audio/dt1981-loss~plague.wav",
+    "ogg": "audio/dt1981-loss~plague.ogg",
+    "warm_wav": "audio/dt1981-loss~plague.warm.wav",
+    "warm_ogg": "audio/dt1981-loss~plague.warm.ogg",
+    "duration_s": 3.43
+  },
+  "shared.dt1981-cold-open.slides": {
+    "items": [
+      {
+        "id": "brigands",
+        "png_1920x1080": "slides/brigands.png",
+        "png_2048x1536": "slides/brigands@ipad.png"
+      },
+      {
+        "id": "dragon",
+        "png_1920x1080": "slides/dragon.png",
+        "png_2048x1536": "slides/dragon@ipad.png"
+      },
+      {
+        "id": "wizard",
+        "png_1920x1080": "slides/wizard.png",
+        "png_2048x1536": "slides/wizard@ipad.png"
+      },
+      {
+        "id": "warriors",
+        "png_1920x1080": "slides/warriors.png",
+        "png_2048x1536": "slides/warriors@ipad.png"
+      },
+      {
+        "id": "keys",
+        "png_1920x1080": "slides/keys.png",
+        "png_2048x1536": "slides/keys@ipad.png"
+      },
+      {
+        "id": "tower",
+        "png_1920x1080": "slides/tower.png",
+        "png_2048x1536": "slides/tower@ipad.png"
+      }
+    ],
+    "ink_in_mp4": "video/cold-open-ink-in.mp4"
+  },
+  "shared.dt1981-win.slide": {
+    "png_1920x1080": "slides/victory.png",
+    "png_2048x1536": "slides/victory@ipad.png"
+  },
+  "shared.dt1981-loss.slide~lost": {
+    "png_1920x1080": "slides/lost.png",
+    "png_2048x1536": "slides/lost@ipad.png"
+  },
+  "shared.dt1981-loss.slide~cursed": {
+    "png_1920x1080": "slides/cursed.png",
+    "png_2048x1536": "slides/cursed@ipad.png"
+  }
+}

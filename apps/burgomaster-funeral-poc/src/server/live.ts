@@ -24,6 +24,7 @@ import { type Clock, systemClock } from "./session/clock.ts";
 import { DemoSession, publicHunters } from "./session/slice.ts";
 
 const ASSET_TYPES: Record<string, string> = {
+  ".mp4": "video/mp4",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".wav": "audio/wav",
@@ -430,9 +431,12 @@ export const createLive = (options: LiveOptions): LiveServer => {
         res.end();
         return true;
       }
-      createReadStream(absolute)
-        .on("error", () => res.destroy())
-        .pipe(res);
+      const stream = createReadStream(absolute);
+      res.on("close", () => stream.destroy());
+      stream.on("error", () => {
+        if (!res.destroyed) res.destroy();
+      });
+      stream.pipe(res);
       return true;
     }
     return false;
