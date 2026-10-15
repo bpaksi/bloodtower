@@ -1,0 +1,259 @@
+import { describe, expect, it } from "vitest";
+import {
+  CLIENT_MESSAGE_TYPES,
+  CONTROL_ACTIONS,
+  clientMessageSchema,
+  containsPrivateChannel,
+  controlPressSchema,
+  deviceRecordSchema,
+  envelopeSchema,
+  helloPayloadSchema,
+  holdPayloadSchema,
+  hostHealthSchema,
+  PROTOCOL_VERSION,
+  SERVER_MESSAGE_TYPES,
+  serverMessageSchema,
+  storyboardStatePayloadSchema,
+  towerBatterySchema,
+} from "./index.ts";
+
+const envelope = (type: string, payload: unknown) => ({
+  v: PROTOCOL_VERSION,
+  type,
+  payload,
+});
+
+const tower = {
+  connection: "unavailable" as const,
+  battery: { state: "unavailable" as const },
+  calibrated: { state: "unavailable" as const },
+};
+
+const board = {
+  stage: "lobby" as const,
+  hunters: [
+    { id: "alpha", name: "Alpha", holders: [] as string[] },
+    { id: "beta", name: "Beta", holders: ["device-1"] },
+  ],
+  join: { code: "048213", url: "http://127.0.0.1:4787/join?code=048213" },
+  prompt: { id: "hold-all", label: "Waiting on Alpha" },
+  moment: null,
+  pause: null,
+  tower,
+  gate: { canBegin: false, unheld: ["alpha"] },
+  lock: null,
+};
+
+describe("envelope", () => {
+  it("rejects a bad version, an empty type and extra keys such as bytes", () => {
+    const hello = envelope("hello", {
+      role: "storyboard",
+      clientLabel: "Mac",
+      formFactor: "mac",
+    });
+    expect(envelopeSchema.parse(hello)).toEqual(hello);
+    expect(envelopeSchema.safeParse({ ...hello, v: 2 }).success).toBe(false);
+    expect(envelopeSchema.safeParse({ ...hello, type: "" }).success).toBe(false);
+    expect(envelopeSchema.safeParse({ ...hello, bytes: "0a0b" }).success).toBe(false);
+  });
+});
+
+describe("client messages", () => {
+  it("lists hello, hold and control, and not a tower command", () => {
+    expect(CLIENT_MESSAGE_TYPES).toEqual(["hello", "hold", "control"]);
+    expect(CLIENT_MESSAGE_TYPES).not.toContain("command");
+    expect(CONTROL_ACTIONS).toEqual([
+      "begin",
+      "continue",
+      "pause",
+      "resume",
+      "tower-connect",
+      "tower-calibrate",
+    ]);
+  });
+
+  it("joins a device with a code and refuses a mac story board that is not the host", () => {
+    expect(
+      helloPayloadSchema.parse({
+        role: "device",
+        clientLabel: "iPad",
+        formFactor: "ipad",
+        joinCode: "048213",
+      }).role,
+    ).toBe("device");
+    expect(
+      helloPayloadSchema.safeParse({
+        role: "storyboard",
+        clientLabel: "iPad",
+        formFactor: "ipad",
+      }).success,
+    ).toBe(false);
+    expect(
+      helloPayloadSchema.safeParse({
+        role: "device",
+        clientLabel: "phone",
+        formFactor: "phone",
+      }).success,
+    ).toBe(false);
+    expect(
+      clientMessageSchema.safeParse(envelope("control", { promptId: "p1", action: "command" }))
+        .success,
+    ).toBe(false);
+  });
+
+  it("does not accept a storyboard actor on a hold", () => {
+    expect(holdPayloadSchema.parse({ hunter: "alpha", action: "take" }).action).toBe("take");
+    expect(
+      holdPayloadSchema.safeParse({ hunter: "alpha", action: "take", by: "storyboard" }).success,
+    ).toBe(false);
+  });
+
+  it("records a winning press and a losing press with device and time", () => {
+    const press = {
+      promptId: "continue-1",
+      action: "continue" as const,
+      deviceId: "device-1",
+      atMonoMs: 40,
+      atWall: "2026-10-15T17:00:00.000Z",
+      winner: true,
+    };
+    expect(controlPressSchema.parse(press).winner).toBe(true);
+    expect(controlPressSchema.parse({ ...press, deviceId: "device-2", winner: false }).winner).toBe(
+      false,
+    );
+  });
+});
+
+describe("story board state", () => {
+  it("shows unavailable tower values without coercing them to zero", () => {
+    expect(storyboardStatePayloadSchema.parse(board).tower.battery).toEqual({
+      state: "unavailable",
+    });
+    expect(towerBatterySchema.parse({ state: "known", percent: 0 })).toEqual({
+      state: "known",
+      percent: 0,
+    });
+    expect(towerBatterySchema.safeParse({ state: "unavailable", percent: 0 }).success).toBe(false);
+    expect(
+      hostHealthSchema.parse({ protocol: 1, tower: "connection-only", effects: "none" }),
+    ).toEqual({
+      protocol: 1,
+      tower: "connection-only",
+      effects: "none",
+    });
+  });
+
+  it("refuses a private moment, an ipad target and a tower command on the story board", () => {
+    expect(
+      storyboardStatePayloadSchema.safeParse({
+        ...board,
+        moment: {
+          id: "proving-ground.02.private.alpha",
+          kind: "text-card",
+          text: "Only Alpha hears this.",
+          still: null,
+          fallbackAudio: null,
+        },
+      }).success,
+    ).toBe(false);
+    expect(containsPrivateChannel({ note: "ipad:alpha" })).toBe(true);
+    expect(containsPrivateChannel({ bytes: "0a" })).toBe(true);
+    expect(containsPrivateChannel({ capabilityId: "lights.on", params: {} })).toBe(true);
+    expect(
+      storyboardStatePayloadSchema.safeParse({
+        ...board,
+        prompt: { id: "p", label: "ipad:alpha" },
+      }).success,
+    ).toBe(false);
+    const shared = storyboardStatePayloadSchema.parse({
+      ...board,
+      moment: {
+        id: "proving-ground.01",
+        kind: "text-card",
+        text: "Each hunter has a private thought.",
+        still: null,
+        fallbackAudio: "sfx.bell",
+      },
+    });
+    expect(shared.moment?.fallbackAudio).toBe("sfx.bell");
+  });
+
+  it("opens Begin only when nobody is unheld", () => {
+    expect(
+      storyboardStatePayloadSchema.safeParse({
+        ...board,
+        gate: { canBegin: true, unheld: ["alpha"] },
+      }).success,
+    ).toBe(false);
+    expect(
+      storyboardStatePayloadSchema.parse({
+        ...board,
+        stage: "playing",
+        hunters: [
+          { id: "alpha", name: "Alpha", holders: ["device-1"] },
+          { id: "beta", name: "Beta", holders: ["device-1"] },
+        ],
+        gate: { canBegin: true, unheld: [] },
+      }).gate.canBegin,
+    ).toBe(true);
+  });
+});
+
+describe("server messages", () => {
+  it("lists the server types and gives a device its private view only", () => {
+    expect(SERVER_MESSAGE_TYPES).toEqual(["welcome", "error", "storyboardState", "deviceState"]);
+    const token = "device-token-1234";
+    const state = serverMessageSchema.parse(
+      envelope("deviceState", {
+        heldHunters: ["alpha"],
+        views: [
+          {
+            hunter: "alpha",
+            name: "Alpha",
+            privateMoment: {
+              momentId: "proving-ground.02.private.alpha",
+              text: "Only Alpha hears this.",
+              still: null,
+            },
+          },
+        ],
+        prompt: null,
+        lock: null,
+        won: null,
+      }),
+    );
+    expect(state.type).toBe("deviceState");
+    expect(
+      serverMessageSchema.safeParse(
+        envelope("welcome", {
+          clientId: "board",
+          role: "storyboard",
+          token,
+          channels: ["storyboard", "ipad:alpha"],
+          versions: { protocol: 1, server: "0.0.0", node: "22.13.0" },
+        }),
+      ).success,
+    ).toBe(false);
+  });
+});
+
+describe("devices", () => {
+  it("records an iPad holding several hunters and refuses a mac as a holder", () => {
+    expect(
+      deviceRecordSchema.parse({
+        deviceId: "device-1",
+        formFactor: "ipad",
+        connected: true,
+        heldHunters: ["alpha", "beta"],
+      }).heldHunters,
+    ).toEqual(["alpha", "beta"]);
+    expect(
+      deviceRecordSchema.safeParse({
+        deviceId: "device-1",
+        formFactor: "mac",
+        connected: true,
+        heldHunters: [],
+      }).success,
+    ).toBe(false);
+  });
+});

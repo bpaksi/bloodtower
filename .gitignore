@@ -6,6 +6,7 @@ coverage/
 *.db
 *.db-*
 apps/burgomaster-funeral-poc/data/
+apps/bloodtower/data/
 .env*
 .DS_Store
 playwright-report/

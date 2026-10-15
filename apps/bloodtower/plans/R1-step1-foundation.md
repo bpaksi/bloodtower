@@ -64,7 +64,7 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ### Step 1: Scaffold the app and the protocols contract
 - Depends on: G0
-- Touches: `apps/bloodtower/{package.json,README.md}`, `src/*/{package.json,tsconfig.json,vitest.config.ts}`, `src/protocols/{index.ts,pack.ts,pack.test.ts,messages.ts,messages.test.ts,devices.ts,control.ts,timing.ts,timing.test.ts}`, `src/server/{index.ts,server.ts,server.test.ts,config.ts,config.test.ts}`, `src/web/{next.config.ts,postcss.config.mjs,app/layout.tsx,app/page.tsx,app/globals.css}`, `src/e2e/{playwright.config.ts,tests/smoke.spec.ts}`, `.gitignore` (`apps/bloodtower/data/`), `pnpm-lock.yaml`
+- Touches: `apps/bloodtower/{package.json,README.md}`, `src/*/{package.json,tsconfig.json,vitest.config.ts}`, `src/protocols/{index.ts,pack.ts,pack.test.ts,messages.ts,messages.test.ts,devices.ts,control.ts,timing.ts,timing.test.ts}`, `src/server/{index.ts,server.ts,server.test.ts,config.ts,config.test.ts}`, `src/web/{next.config.ts,postcss.config.mjs,app/layout.tsx,app/page.tsx,app/globals.css}`, `src/e2e/{playwright.config.ts,tests/smoke.spec.ts}`, `.gitignore` (`apps/bloodtower/data/`), `pnpm-lock.yaml`, `apps/bloodtower/docs/README.md`, `packs/test/README.md` (flagged placeholder, see Deviations)
 - Deps change: **yes** (the only one; adds every dependency later steps need, incl. `yaml`, `qrcode`, Drizzle, and the tower packages at the tower-poc pins: `ultimatedarktower` 7.1.2, `ultimatedarktowerdata` 3.0.0, `@stoprocent/noble` 2.8.0)
 - Scope: the four packages (`bloodtower-web`, `bloodtower-server`, `bloodtower-protocols`, `bloodtower-e2e`), orchestrator scripts, `.wt.json` config including `packsDir` (default top-level `packs/`, overridable by `PACKS_DIR`), the full protocols contract including timing types. `types`/`messages` frozen after this step; a change later is a plan deviation.
 - Covers: R-ENG-9, layout. Proof: `pnpm check`, `pnpm build`, smoke e2e on the configured port.
@@ -175,6 +175,16 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - Q5: any joined iPad can connect and calibrate the tower, and the first press wins (the same lock as the other controls).
 - Q6: the timing log schema matches the funeral POC's PRD-41 timing rows exactly, so one report can compare both.
 - Q7: holdings change only from iPads. Already settled by Gamewright's rulings in PR #21.
+
+## Deviations
+
+### B1 (steps 1 and 2)
+
+- `packs/test/README.md` is a flagged placeholder. Gamewright's test pack content is not in the repo. Step 3 still replaces it with the proving-ground pack (4 hunters, 1 night, 1 set piece, shared and private moments, one `~no-<hunter>` variant, one cue with a screen half and a fallback). Step 1 Touches includes this file only so the placeholder has a home.
+- `apps/bloodtower/docs/README.md` is the `docs/` folder from the app layout. It points at `spec.md` and this plan. Step 1 Touches includes it.
+- `pack:lint` is not a script yet. Step 3 owns `src/server/scripts/packLint.ts` and adds the orchestrator script. A stub that always fails is not a linter.
+- Steps 1 and 2 ship in one pull request for batch B1. The commits are step 1, then step 2.
+- The app package is named `bloodtower`, and so is the workspace root. `pnpm -F bloodtower build` runs both, and the root script builds every app at once. Bob runs this app with `pnpm --dir apps/bloodtower`. The package name stays the one in the layout above.
 
 ## Results
 
