@@ -1,6 +1,6 @@
 # Tokens and encounters: Dracula (Vellmoor)
 
-> **Header note.** Story only (Loremaster). Engine-side placement and movement rules for the three quest tokens (objective, lure, hunter) belong to Gamewright; anything below that reads like a rule is a story-side proposal. **Pending Bob:** whether a hunter-token encounter replaces the normal RtDT event for that turn or is added to it.
+> **Header note.** Story only (Loremaster). Engine-side placement and movement rules for the three quest tokens (objective, lure, hunter) belong to Gamewright; anything below that reads like a rule is a story-side proposal. **Ruled by Bob (Oct 14 2026): add.** A hunter-token encounter plays in addition to that turn's normal RtDT event, never instead of it (E19e). The normal event resolves first, then the encounter.
 
 Format follows [README.md](README.md): moment IDs `enc-<id>.NN`, [still] or [clip], at most two speakers per exchange, `[tower:]` cues are light and sound only (no drum turns, no seal breaks), private lines only as `ipad:<hunter>`. Costs use only story vocabulary from [rulings](../../../../research/stories/dracula/rulings.md): corruption (instant-loss guard: a hunter already at 2 is never asked; the cost becomes `~blocked`, the party loses one story item), story items (holy water, the host, a stake), findings (journal clues), foes, and story skull drops (cap 2 per night; under 6 skulls in supply the drop becomes "+1 foe on night 5").
 
