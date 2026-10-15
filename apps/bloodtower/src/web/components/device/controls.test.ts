@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { deviceControls } from "./controls";
 import { DeviceScreen } from "./DeviceScreen";
+import { detectFormFactor, layoutFor } from "./formFactor";
 import { JoinScreen } from "./JoinScreen";
 import { controlMessage, holdMessage } from "./messages";
 
@@ -142,6 +143,46 @@ describe("device screens", () => {
     expect(join).toContain("Release Alpha");
     expect(join).toContain("Rejoin");
     expect(join).not.toContain("Only Alpha hears this.");
+    expect(join).not.toContain("Use the full layout");
+  });
+
+  it("detects a phone and offers the full layout", () => {
+    expect(detectFormFactor("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)")).toBe(
+      "phone",
+    );
+    expect(detectFormFactor("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X)")).toBe("ipad");
+    expect(layoutFor("phone", null)).toBe("phone");
+    expect(layoutFor("phone", "full")).toBe("full");
+    expect(layoutFor("ipad", null)).toBe("full");
+
+    const join = renderToStaticMarkup(
+      createElement(JoinScreen, {
+        live: true,
+        code: "048213",
+        hunters: [{ id: "alpha", name: "Alpha" }],
+        held: [],
+        formFactor: "phone",
+      }),
+    );
+    expect(join).toContain('data-layout="phone"');
+    expect(join).toContain("Use the full layout");
+    expect(join).toContain("Hold Alpha");
+
+    const device = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        live: true,
+        deviceId: "device-1",
+        state: playing(),
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+        formFactor: "phone",
+      }),
+    );
+    expect(device).toContain('data-layout="phone"');
+    expect(device).toContain("Use the full layout");
+    expect(device).toContain("Only Alpha hears this.");
   });
 
   it("says the session host is unavailable and shows no fake hunters", () => {

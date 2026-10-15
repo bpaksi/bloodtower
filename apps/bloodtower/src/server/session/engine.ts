@@ -70,6 +70,13 @@ export interface SessionOptions {
   presses: PressLog;
   saveRoster: (snapshot: RosterSnapshot) => void;
   startedWall: string;
+  /**
+   * Live tower reading. A connect lock stays while this reading is the one the
+   * press saw, or while the tower is connecting or connected. A dropped attempt
+   * (the reading changes to disconnected or unavailable) releases it.
+   * Calibrate is legal only while the reading is connected.
+   */
+  tower?: () => TowerSnapshot;
 }
 
 const newToken = () => randomBytes(16).toString("base64url");
@@ -103,6 +110,27 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
   let openMoment: string | null = null;
   let openCue: string | null = null;
   let openPhase: string | null = null;
+  const readTower =
+    options.tower ??
+    ((): TowerSnapshot => ({
+      connection: "unavailable",
+      battery: { state: "unavailable" },
+      calibrated: { state: "unavailable" },
+    }));
+  /** Connection at the moment the current connect press won. */
+  let connectSeen: TowerSnapshot["connection"] | null = null;
+
+  const reconcileTowerLocks = () => {
+    const connection = readTower().connection;
+    if (locks["tower-connect"] && connectSeen !== null && connection !== connectSeen) {
+      if (connection === "connected" || connection === "connecting") connectSeen = connection;
+      else {
+        delete locks["tower-connect"];
+        connectSeen = null;
+      }
+    }
+    if (locks["tower-calibrate"] && connection !== "connected") delete locks["tower-calibrate"];
+  };
 
   const heldBy = (deviceId: string) =>
     hunters
@@ -292,14 +320,17 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       closePause();
       return;
     }
-    void deviceId;
+    if (action === "tower-connect") connectSeen = readTower().connection;
   };
 
   const legal = (promptId: string, action: ControlAction) => {
-    if (action === "tower-connect") return promptId === "tower-connect";
-    // A calibrate press before connect would consume the only calibrate lock and send nothing.
+    if (action === "tower-connect") {
+      if (promptId !== "tower-connect") return false;
+      const connection = readTower().connection;
+      return connection !== "connected" && connection !== "connecting";
+    }
     if (action === "tower-calibrate") {
-      return promptId === "tower-calibrate" && locks["tower-connect"] !== undefined;
+      return promptId === "tower-calibrate" && readTower().connection === "connected";
     }
     if (action === "pause") {
       return stage === "playing" && !finished && promptId === `pause-${pauseSerial + 1}`;
@@ -363,6 +394,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
 
     press: (deviceId, promptId, action) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };
+      reconcileTowerLocks();
       const existing = locks[promptId];
       if (existing) {
         options.presses.record({ promptId, action, deviceId, winner: false });
@@ -388,6 +420,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     },
 
     projectStoryboard: (tower, joinUrl) => {
+      reconcileTowerLocks();
       const beat = stage === "lobby" || finished ? undefined : currentBeat();
       const prompt = gameplayPrompt();
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
@@ -410,6 +443,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     },
 
     projectDevice: (deviceId) => {
+      reconcileTowerLocks();
       const prompt = gameplayPrompt();
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
       const mine = heldBy(deviceId);
@@ -432,7 +466,10 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       });
     },
 
-    lockFor: (promptId) => locks[promptId] ?? null,
+    lockFor: (promptId) => {
+      reconcileTowerLocks();
+      return locks[promptId] ?? null;
+    },
 
     pausePromptId: () => (stage === "playing" && !finished ? `pause-${pauseSerial + 1}` : null),
 

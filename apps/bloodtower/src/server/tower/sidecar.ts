@@ -92,7 +92,12 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
     wantConnect = false;
     connecting = false;
     socket = undefined;
-    snapshot = unavailableTower();
+    // Disconnected, not unavailable: the attempt ended, so a later press can try again.
+    snapshot = {
+      connection: "disconnected",
+      battery: { state: "unavailable" },
+      calibrated: { state: "unavailable" },
+    };
   };
 
   return {

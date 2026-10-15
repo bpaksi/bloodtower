@@ -22,7 +22,11 @@ const packOrThrow = (absent?: readonly string[]) => {
   return { pack: loaded.pack, absent };
 };
 
-const setup = (options?: { absent?: readonly string[]; pack?: Pack }) => {
+const setup = (options?: {
+  absent?: readonly string[];
+  pack?: Pack;
+  tower?: () => TowerSnapshot;
+}) => {
   const opened = openDatabase(":memory:");
   const store = createSessionStore(opened.db);
   const clock = stepClock();
@@ -41,6 +45,7 @@ const setup = (options?: { absent?: readonly string[]; pack?: Pack }) => {
     presses,
     saveRoster: (roster) => store.saveRoster(roster),
     tokens: () => `rejoin-token-${String(++tokens).padStart(4, "0")}`,
+    tower: options?.tower,
   });
   return { opened, store, clock, engine };
 };
@@ -92,6 +97,9 @@ describe("session", () => {
       engine.hold(beta.deviceId, "gamma", "take");
       engine.hold(beta.deviceId, "delta", "take");
       expect(engine.press(alpha.deviceId, "begin", "begin").ok).toBe(true);
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe(
+        "The proving ground is quiet.",
+      );
       clock.advance(10);
       const results = engine.pressAll([
         { deviceId: alpha.deviceId, promptId: "continue-0", action: "continue" },
@@ -131,9 +139,10 @@ describe("session", () => {
       holdAll(engine, joined.deviceId);
       engine.press(joined.deviceId, "begin", "begin");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe("Delta is not in the hall.");
-      expect(JSON.stringify(engine.projectDevice(joined.deviceId))).not.toContain(
-        "Only Delta hears this.",
-      );
+      engine.press(joined.deviceId, "continue-0", "continue");
+      const duringPrivate = JSON.stringify(engine.projectDevice(joined.deviceId));
+      expect(duringPrivate).not.toContain("Only Delta hears this.");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe("Each hunter reads alone.");
     } finally {
       opened.close();
     }
@@ -238,7 +247,10 @@ describe("session", () => {
   });
 
   it("locks tower connect and calibrate the same way, and steps the cue without sending one", () => {
-    const { opened, store, engine } = setup();
+    let connection: TowerSnapshot["connection"] = "unavailable";
+    const { opened, store, engine } = setup({
+      tower: () => ({ ...TOWER, connection }),
+    });
     try {
       const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
       const beta = engine.join({ joinCode: "048213", formFactor: "phone" });
@@ -254,11 +266,32 @@ describe("session", () => {
       ]);
       expect(connect.map((result) => (result.ok ? result.winner : false))).toEqual([true, false]);
       expect(engine.lockFor("tower-connect")?.winnerDeviceId).toBe(beta.deviceId);
+      connection = "disconnected";
+      expect(engine.lockFor("tower-connect")).toBeNull();
+      expect(engine.press(alpha.deviceId, "tower-connect", "tower-connect")).toMatchObject({
+        ok: true,
+        winner: true,
+      });
+      connection = "connected";
+      expect(engine.press(beta.deviceId, "tower-connect", "tower-connect")).toMatchObject({
+        ok: true,
+        winner: false,
+      });
       const calibrate = engine.pressAll([
         { deviceId: alpha.deviceId, promptId: "tower-calibrate", action: "tower-calibrate" },
         { deviceId: beta.deviceId, promptId: "tower-calibrate", action: "tower-calibrate" },
       ]);
       expect(calibrate.map((result) => (result.ok ? result.winner : false))).toEqual([true, false]);
+      connection = "disconnected";
+      expect(engine.press(beta.deviceId, "tower-calibrate", "tower-calibrate")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      connection = "connected";
+      expect(engine.press(beta.deviceId, "tower-calibrate", "tower-calibrate")).toMatchObject({
+        ok: true,
+        winner: true,
+      });
       engine.press(alpha.deviceId, "begin", "begin");
       engine.press(alpha.deviceId, "continue-0", "continue");
       engine.press(alpha.deviceId, "continue-1", "continue");

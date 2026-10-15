@@ -36,6 +36,12 @@ describe("tower snapshot", () => {
       state: "known",
       percent: 0,
     });
+    expect(mapBattery({ freshness: "stale", value: { percent: 0 } })).toEqual({
+      state: "unavailable",
+    });
+    expect(mapBattery({ freshness: "stale", value: { percent: 40 } })).toEqual({
+      state: "unavailable",
+    });
   });
 });
 
@@ -150,7 +156,7 @@ describe("sidecar", () => {
       );
       expect(received).toEqual(["hello", "connect", "calibrate"]);
       for (const client of server.clients) client.close();
-      await waitFor(() => tower.snapshot().connection === "unavailable");
+      await waitFor(() => tower.snapshot().connection === "disconnected");
       await new Promise((resolve) => setTimeout(resolve, 30));
       expect(received.filter((type) => type === "hello")).toEqual(["hello"]);
       tower.connect();

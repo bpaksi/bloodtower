@@ -1,8 +1,10 @@
 "use client";
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
+import { useEffect, useState } from "react";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { deviceControls } from "./controls";
+import { detectFormFactor, layoutFor, type PlayerLayout } from "./formFactor";
 
 /**
  * The joined device: private lines for hunters it holds, and the only controls.
@@ -17,6 +19,7 @@ export function DeviceScreen({
   calibrateLock,
   tower,
   onControl,
+  formFactor,
 }: {
   live: boolean;
   deviceId: string | null;
@@ -26,6 +29,8 @@ export function DeviceScreen({
   calibrateLock: ControlLock | null;
   tower: TowerSnapshot;
   onControl?: (promptId: string, action: ControlAction) => void;
+  /** Pass a form factor in tests. Omitted, the screen reads the browser. */
+  formFactor?: "ipad" | "phone";
 }) {
   const controls = deviceControls({
     live,
@@ -37,13 +42,31 @@ export function DeviceScreen({
     deviceId,
   });
   const status = towerStatusLines(tower);
+  const [detected, setDetected] = useState<"ipad" | "phone">(formFactor ?? "ipad");
+  const [preference, setPreference] = useState<PlayerLayout | null>(null);
+  useEffect(() => {
+    if (!formFactor) setDetected(detectFormFactor(navigator.userAgent));
+  }, [formFactor]);
+  const layout = layoutFor(formFactor ?? detected, preference);
   const press = (promptId: string | null, action: ControlAction, enabled: boolean) => {
     if (!enabled || !promptId) return;
     onControl?.(promptId, action);
   };
   return (
-    <main className="mx-auto flex min-h-dvh max-w-xl flex-col gap-6 px-6 py-10">
+    <main
+      className={`mx-auto flex min-h-dvh flex-col gap-6 px-6 py-10 ${layout === "phone" ? "max-w-sm" : "max-w-xl"}`}
+      data-layout={layout}
+    >
       <h1 className="text-3xl">Device</h1>
+      {detected === "phone" ? (
+        <button
+          type="button"
+          data-action="layout"
+          onClick={() => setPreference(layout === "phone" ? "full" : "phone")}
+        >
+          {layout === "phone" ? "Use the full layout" : "Use the phone layout"}
+        </button>
+      ) : null}
       {live ? null : <p>Session host unavailable.</p>}
       <p>
         Tower {status.connection}. Battery {status.battery}. Calibration {status.calibration}.

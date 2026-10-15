@@ -26,9 +26,8 @@ export const mapCalibration = (state: string | undefined): TowerSnapshot["calibr
 export const mapBattery = (level: unknown): TowerSnapshot["battery"] => {
   if (!level || typeof level !== "object") return { state: "unavailable" };
   const record = level as Record<string, unknown>;
-  if (record.freshness !== "current" && record.freshness !== "stale") {
-    return { state: "unavailable" };
-  }
+  // A stale percent is not a current reading, including a stale 0.
+  if (record.freshness !== "current") return { state: "unavailable" };
   const value = record.value;
   if (!value || typeof value !== "object") return { state: "unavailable" };
   const percent = (value as Record<string, unknown>).percent;

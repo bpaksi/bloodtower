@@ -189,6 +189,9 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - The device screen takes the tower locks as props. `deviceState` still has one `lock`, the gameplay prompt. Step 7 has to send the tower locks beside it, or the protocol changes, which this batch does not do.
 - Calibrate is refused until a connect press has won. A press before that does not consume the calibrate lock, and the sidecar sends calibrate only while the tower reports connected.
 - Spec §6 matches D10: this client sends `hello`, `connect` and `calibrate` to tower-poc. It does not send `command`. D4 now describes the proving-ground pack step 3 added.
+- A stale battery reading is `unavailable` (D11). Only `freshness: current` becomes a known percent.
+- A connect lock is released when the tower reading changes to `disconnected` or `unavailable` after the press. A dropped sidecar socket reports `disconnected`, so the next explicit press can connect. Calibrate is legal only while the reading is `connected`, and that lock is released when it is not. Step 7 still has to pass the sidecar snapshot into the session.
+- A phone is detected from the user agent (R-DEV-8). Join and the device screen start on a compact layout and offer a switch to the full layout. An iPad stays on the full layout.
 
 ### B1 (steps 1 and 2)
 
