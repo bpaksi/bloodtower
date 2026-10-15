@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Bloodtower mood board</title>
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  html,body { margin:0; width:2400px; height:1320px; overflow:hidden; background: var(--bt-void); color: var(--bt-bone); font-family: var(--bt-font-body); }
+  .A { --p: "../../../apps/burgomaster-funeral-poc/assets/"; }
+  h1 { font-family: var(--bt-font-title); color: var(--bt-candle); font-size:64px; text-align:center; margin: 30px 0 0; letter-spacing:.08em; }
+  .sub { text-align:center; font-family: var(--bt-font-label); letter-spacing:.3em; color: var(--bt-parchment-dark); font-size:24px; margin-bottom:28px; }
+  .grid { display:grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 262px; grid-auto-flow: dense; gap:22px; padding: 0 50px; }
+  .tile { background-size:cover; background-position:center 20%; border:2px solid var(--bt-iron-gall); outline:1px solid var(--bt-candle); outline-offset:4px; position:relative; }
+  .tile span { position:absolute; left:0; right:0; bottom:0; padding:6px 10px; background: linear-gradient(transparent, rgb(11 8 6 / .9)); font-family: var(--bt-font-label); font-size:20px; letter-spacing:.12em; color: var(--bt-parchment); }
+  .wide { grid-column: span 2; } .tall { grid-row: span 2; }
+  .sw { display:flex; gap:0; grid-column: span 3; border:3px double var(--bt-candle); }
+  .sw div { flex:1; display:flex; align-items:flex-end; justify-content:center; padding-bottom:12px; font-family: var(--bt-font-label); font-size:17px; letter-spacing:.05em; text-align:center; line-height:1.25; }
+  .type { grid-column: span 3; padding: 18px 36px; box-sizing:border-box; }
+  .type div { margin: 4px 0; }
+</style></head><body>
+<h1>Bloodtower · The Look</h1>
+<div class="sub">AD&amp;D 1978 ink · Bakshi 1978 · Dark Tower 1981 · candle and parchment</div>
+<div class="grid">
+  <div class="tile tall" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"><span>Wren · portrait</span></div>
+  <div class="tile" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/tomas.png)"><span>Tomas</span></div>
+  <div class="tile" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/agnes.png)"><span>Agnes</span></div>
+  <div class="tile wide" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/stills/n2-burgomasters-funeral.lid-choice@dashboard.png);background-position:center"><span>Still · the lid</span></div>
+  <div class="tile tall" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/dorka.png)"><span>Dorka</span></div>
+  <div class="tile" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/emeric.png)"><span>Emeric</span></div>
+  <div class="tile wide" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/stills/n2-burgomasters-funeral.02@dashboard.png);background-position:center"><span>Still · the wake</span></div>
+  <div class="tile wide" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png);background-position:center"><span>1981 ink slide · tower</span></div>
+  <div class="tile wide" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/stills/n2-burgomasters-funeral.10@dashboard.png);background-position:center"><span>Still · dawn burial</span></div>
+  <div class="tile" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/dorka-mother.png)"><span>Dorka’s mother</span></div>
+  <div class="tile" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/castle-servant.png)"><span>Castle servant</span></div>
+  <div class="tile" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/hanne.png)"><span>Hanne</span></div>
+  <div class="sw">
+    <div style="background:#0b0806">Void<br>#0b0806</div><div style="background:#1a1310">Soot<br>#1a1310</div><div style="background:#3b2a1e">Umber<br>#3b2a1e</div>
+    <div style="background:#e9d9b4;color:#2a1d14">Parchment<br>#e9d9b4</div><div style="background:#c9b182;color:#2a1d14">Foxed<br>#c9b182</div><div style="background:#2a1d14">Iron-gall<br>#2a1d14</div>
+    <div style="background:#f5c451;color:#2a1d14">Candle<br>#f5c451</div><div style="background:#e8892b;color:#2a1d14">Flame<br>#e8892b</div><div style="background:#8e1b1b">Blood<br>#8e1b1b</div><div style="background:#4f7a6a">Verdigris<br>#4f7a6a</div><div style="background:#f3ead2;color:#2a1d14">Bone<br>#f3ead2</div>
+  </div>
+  <div class="type bt-parchment">
+    <div style="font-family:var(--bt-font-title);font-size:44px">Cormorant SC — The Second Coffin</div>
+    <div style="font-family:var(--bt-font-body);font-style:italic;font-size:34px">Cormorant Garamond — The flies have gone <span style="color:#8e1b1b;font-style:normal;font-weight:600">quiet</span>.</div>
+    <div style="font-family:var(--bt-font-label);font-size:30px;letter-spacing:.12em">IM Fell English SC — Wounds · Stakes · Ward</div>
+    <div style="font-family:var(--bt-font-initial);font-size:44px;color:#8e1b1b">Unifraktur — T D W</div>
+  </div>
+</div>
+</body></html>

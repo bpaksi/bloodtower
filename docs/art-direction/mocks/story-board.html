@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Bloodtower Story board mock (1920x1080, TV, display only)</title>
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  /* TV-distance rule: every glyph >= 28px, key numbers >= 48px (PRD-2). Display only: no buttons, no hover, no choices. */
+  html,body { margin:0; width:1920px; height:1080px; overflow:hidden; font-family: var(--bt-font-body); color: var(--bt-bone); font-size:28px; }
+  body { background: radial-gradient(ellipse at 50% 35%, #2b1d12 0%, var(--bt-void) 72%), var(--bt-void); }
+  .vignette { position:fixed; inset:0; pointer-events:none; background: radial-gradient(ellipse at center, transparent 58%, rgb(0 0 0 / .7) 100%); }
+  .lbl { font-family: var(--bt-font-label); font-size:28px; letter-spacing:.1em; color: var(--bt-parchment-dark); }
+  .num { font-family: var(--bt-font-title); font-size:64px; line-height:1; color: var(--bt-candle); }
+  header { display:grid; grid-template-columns: 420px 1fr 420px; align-items:center; height:132px; padding: 0 36px; gap:24px; border-bottom: 3px double color-mix(in srgb, var(--bt-candle) 55%, transparent); }
+  .zone { display:flex; align-items:center; gap:20px; padding: 10px 22px; height:96px; box-sizing:border-box; }
+  .zone .t { display:flex; flex-direction:column; }
+  .zone .t b { font-family: var(--bt-font-title); font-size:34px; color: var(--bt-bone); font-weight:700; line-height:1.1; }
+  header h1 { margin:0; text-align:center; font-family: var(--bt-font-title); color: var(--bt-candle); font-size:52px; letter-spacing:.06em; line-height:1.05; text-shadow: 0 0 18px rgb(245 196 81 / .35); }
+  header h1 small { display:block; font-family: var(--bt-font-label); font-size:28px; letter-spacing:.25em; color: var(--bt-parchment-dark); }
+  .skulls { justify-content:flex-end; }
+  .skulls .pair { text-align:center; }
+  .skulls .pair .num { display:block; }
+  main { display:grid; grid-template-columns: 440px 1fr 400px; gap:30px; padding: 26px 36px 30px; height: 948px; box-sizing:border-box; }
+  .roll { display:flex; flex-direction:column; gap:22px; }
+  .roll .cart { height:170px; }
+  .pub { display:flex; flex-direction:column; padding:18px; gap:14px; }
+  .pub .img { flex:1; background-size:cover; background-position:center 15%; border:2px solid var(--bt-iron-gall); filter: sepia(.2); }
+  .pub .nm { font-family: var(--bt-font-title); font-size:52px; color: var(--bt-candle); text-align:center; line-height:1; }
+  .pub .row { display:flex; justify-content:space-around; text-align:center; }
+  .pub .row .num { display:block; }
+  .pub .row .num.r { color: var(--bt-flame); }
+  .pub .carry { text-align:center; font-size:30px; font-style:italic; }
+  .cart { position:relative; display:grid; grid-template-columns: 108px 1fr 84px; gap:16px; align-items:center; height:150px; padding: 0 20px 0 16px; box-sizing:border-box;
+     background: var(--bt-grain), var(--bt-foxing), radial-gradient(ellipse at 40% 50%, var(--bt-parchment) 50%, var(--bt-parchment-dark) 100%);
+     color: var(--bt-iron-gall); border: 2px solid var(--bt-iron-gall); outline:1px solid var(--bt-vellum-shadow); outline-offset:-8px;
+     clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px), 0 20px); box-shadow: inset 0 0 40px rgb(90 60 25 / .6); }
+  .cart.act { outline: 3px solid var(--bt-blood); outline-offset:-10px; }
+  .cart.away { filter: sepia(.4) brightness(.6); }
+  .cart .ph { width:104px; height:104px; border-radius:50%; border:3px double var(--bt-iron-gall); background-size:cover; background-position:center 20%; }
+  .cart .nm { font-family: var(--bt-font-title); font-size:40px; line-height:1; }
+  .cart .st { font-family: var(--bt-font-label); font-size:28px; letter-spacing:.06em; margin-top:8px; }
+  .cart .st.choosing { color: var(--bt-blood); }
+  .cart .cor { text-align:center; }
+  .cart .cor .num { color: var(--bt-blood); font-size:56px; }
+  .cart .cor .lbl { color:#5a4128; font-size:28px; letter-spacing:0; }
+  .story { display:grid; grid-template-rows: 1fr auto auto; gap:22px; }
+  .page { display:grid; grid-template-rows: auto 1fr; gap:18px; padding: 24px 32px 28px; }
+  .page .kicker { font-family: var(--bt-font-label); letter-spacing:.2em; color: var(--bt-blood); font-size:28px; }
+  .page h2 { font-family: var(--bt-font-title); font-size:48px; margin: 2px 0 10px; line-height:1.05; }
+  .page p { font-size:32px; line-height:1.32; margin:0; }
+  .page p::first-letter { font-family: var(--bt-font-initial); float:left; font-size:100px; line-height:.8; padding: 8px 10px 0 0; color: var(--bt-blood); }
+  .page .still { background-size:cover; background-position:center; border:2px solid var(--bt-iron-gall); outline:1px solid var(--bt-iron-gall); outline-offset:5px; filter: sepia(.5) contrast(1.1); }
+  .items { display:flex; align-items:center; gap:30px; padding: 14px 28px; height:96px; box-sizing:border-box; }
+  .items .it { display:flex; align-items:baseline; gap:12px; }
+  .items .it .num { font-size:52px; }
+  .items .it span { font-size:30px; }
+  .items .it i { font-size:28px; color: var(--bt-parchment-dark); }
+  .next { text-align:center; padding: 14px 20px; border-top:1px solid var(--bt-candle); border-bottom:1px solid var(--bt-candle); background: linear-gradient(90deg, transparent, rgb(142 27 27 / .35), transparent); }
+  .next .lbl { display:block; font-size:28px; color: var(--bt-parchment-dark); letter-spacing:.3em; }
+  .next b { font-family: var(--bt-font-title); font-size:60px; color: var(--bt-candle); letter-spacing:.04em; text-shadow: 0 0 22px rgb(245 196 81 / .4); }
+</style></head><body>
+<header>
+  <div class="zone bt-panel"><div class="num">II</div><div class="t"><span class="lbl">Night · Phase</span><b>The Lid</b></div></div>
+  <h1><small>The Funeral</small>Vellmoor Church</h1>
+  <div class="zone bt-panel skulls"><span class="lbl">Skulls</span><div class="pair"><span class="num">7</span><span class="lbl">supply</span></div><div class="pair"><span class="num" style="color:var(--bt-flame)">1</span><span class="lbl">tonight</span></div></div>
+</header>
+<main>
+  <aside class="roll">
+    <div class="cart act"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"></div><div><div class="nm">Wren</div><div class="st choosing">Choosing</div></div><div class="cor"><div class="num">0</div><div class="lbl">corr.</div></div></div>
+    <div class="cart"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/tomas.png)"></div><div><div class="nm">Tomas</div><div class="st choosing">Choosing</div></div><div class="cor"><div class="num">1</div><div class="lbl">corr.</div></div></div>
+    <div class="cart"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/agnes.png)"></div><div><div class="nm">Agnes</div><div class="st">Locked</div></div><div class="cor"><div class="num">0</div><div class="lbl">corr.</div></div></div>
+    <div class="cart away"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/emeric.png)"></div><div><div class="nm">Emeric</div><div class="st">Away</div></div><div class="cor"><div class="num">2</div><div class="lbl">corr.</div></div></div>
+  </aside>
+  <section class="story">
+    <div class="page bt-parchment">
+      <div><div class="kicker">✠ The Second Coffin ✠</div><h2>Every Candle Leans</h2>
+      <p>The flies have gone quiet. Every candle leans toward the second coffin. There is time to put a stake through a girl in her wedding dress, or time to wait and be sure.</p></div>
+      <div class="still" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/stills/n2-burgomasters-funeral.lid-choice@dashboard.png)"></div>
+    </div>
+    <div class="items bt-panel"><span class="lbl">Party</span>
+      <div class="it"><span class="num">1</span><span>Stake</span><i>Tomas</i></div>
+      <div class="it"><span class="num">1</span><span>Holy symbol</span><i>Agnes</i></div>
+      <div class="it"><span class="num">2</span><span>Garlic</span><i>Wren</i></div></div>
+    <div class="next"><span class="lbl">Next</span><b>Waiting on Wren, Tomas</b></div>
+  </section>
+  <aside class="pub bt-panel"><span class="lbl" style="text-align:center">Now acting</span><div class="img" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"></div>
+    <div class="nm">Wren</div>
+    <div class="row"><div><span class="num r">0</span><span class="lbl">corruption</span></div><div><span class="num">2</span><span class="lbl">carried</span></div></div>
+    <div class="carry">Garlic ×2 · spade</div></aside>
+</main>
+<div class="vignette"></div>
+</body></html>

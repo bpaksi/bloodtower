@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Bloodtower iPad mock (2048x1536)</title>
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  html,body { margin:0; width:2048px; height:1536px; overflow:hidden; background: var(--bt-void); font-family: var(--bt-font-body); color: var(--bt-bone); }
+  body { background: radial-gradient(ellipse at 50% 20%, #2e1f13 0%, var(--bt-void) 75%); }
+  .vignette { position:fixed; inset:0; pointer-events:none; background: radial-gradient(ellipse at center, transparent 60%, rgb(0 0 0 / .7) 100%); }
+  /* bookmark ribbon tabs, one per hunter */
+  nav { display:flex; gap:22px; padding: 0 70px; height:190px; align-items:flex-start; border-bottom: 3px double color-mix(in srgb, var(--bt-candle) 55%, transparent); }
+  .tab { position:relative; width: 300px; height: 170px; display:flex; align-items:center; gap:18px; padding: 0 22px 22px; box-sizing:border-box;
+     background: var(--bt-grain), linear-gradient(#3b2a1e, #22170f); color: var(--bt-parchment-dark);
+     clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); }
+  .tab .ph { width:96px; height:96px; border-radius:50%; background-size:cover; background-position:center 20%; border:3px double var(--bt-parchment-dark); filter: sepia(.4) brightness(.8); flex:none; }
+  .tab .nm { font-family: var(--bt-font-title); font-size:42px; }
+  .tab.on { background: var(--bt-grain), var(--bt-foxing), linear-gradient(var(--bt-parchment), var(--bt-parchment-dark)); color: var(--bt-iron-gall); height:186px; }
+  .tab.on .ph { filter: sepia(.15); border-color: var(--bt-iron-gall); }
+  .badge { position:absolute; top:14px; right:16px; width:50px; height:50px; border-radius:50%; display:grid; place-items:center;
+     background: radial-gradient(circle at 35% 30%, #c43a2a, var(--bt-blood) 55%, #4a0b0b); color: var(--bt-candle); font-family: var(--bt-font-title); font-size:30px;
+     box-shadow: inset 0 -3px 6px rgb(0 0 0 / .5), 0 0 18px 5px rgb(245 196 81 / .55); }
+  nav .title { margin-left:auto; align-self:center; text-align:right; font-family: var(--bt-font-label); letter-spacing:.25em; color: var(--bt-parchment-dark); font-size:24px; }
+  nav .title b { display:block; font-family: var(--bt-font-title); font-weight:700; color: var(--bt-candle); font-size:40px; letter-spacing:.06em; }
+  main { display:grid; grid-template-columns: 1fr 760px; gap:60px; padding: 60px 80px 0; }
+  .page { padding: 56px 70px 60px; min-height: 1250px; box-sizing:border-box; position:relative; }
+  .page .kicker { font-family: var(--bt-font-label); letter-spacing:.3em; color: var(--bt-blood); font-size:26px; text-align:center; }
+  .page h2 { font-family: var(--bt-font-title); font-size:62px; text-align:center; margin: 8px 0 6px; }
+  .page .orn { text-align:center; color: var(--bt-vellum-shadow); font-size:28px; letter-spacing:.6em; margin-bottom:26px; }
+  .page .art { width:100%; height:700px; background-size:cover; background-position:center 30%; border:2px solid var(--bt-iron-gall); outline:1px solid var(--bt-iron-gall); outline-offset:6px; filter: sepia(.5) contrast(1.1); }
+  .page p { font-size:38px; line-height:1.4; margin: 36px 0 0; text-align:justify; }
+  .page p::first-letter { font-family: var(--bt-font-initial); float:left; font-size:124px; line-height:.8; padding: 10px 12px 0 0; color: var(--bt-blood); }
+  .page .private { position:absolute; top:28px; right:34px; font-family: var(--bt-font-label); color: var(--bt-blood); font-size:22px; letter-spacing:.2em; border:2px solid var(--bt-blood); padding: 4px 14px; transform: rotate(4deg); opacity:.85; }
+  .side { display:flex; flex-direction:column; gap:34px; }
+  .side h3 { font-family: var(--bt-font-label); font-weight:400; text-align:center; letter-spacing:.3em; color: var(--bt-candle); font-size:30px; margin: 10px 0 0; }
+  .side h3::before, .side h3::after { content:" \2E3A "; }
+  .card { padding: 34px 40px 30px; display:grid; grid-template-columns: 170px 1fr; gap:28px; align-items:center; }
+  .card .ill { width:170px; height:170px; background-size:cover; background-position:center; border:2px solid var(--bt-candle); filter: sepia(.6) contrast(1.15) brightness(.9); }
+  .card .vb { font-family: var(--bt-font-title); font-size:46px; color: var(--bt-candle); }
+  .card .ds { font-style:italic; font-size:30px; opacity:.88; margin-top:6px; }
+  .card.hot { box-shadow: 0 0 0 1px var(--bt-candle), 0 0 40px rgb(245 196 81 / .3); }
+  .hint { text-align:center; font-style:italic; font-size:28px; color: var(--bt-parchment-dark); }
+  .hint mark { background:none; color: var(--bt-candle); font-style:normal; font-weight:600; }
+  .satchel { padding: 30px 40px; }
+  .satchel h4 { font-family: var(--bt-font-label); font-weight:400; letter-spacing:.25em; color: var(--bt-parchment-dark); font-size:26px; margin:0 0 18px; text-align:center; }
+  .satchel .row { display:flex; justify-content:space-around; text-align:center; font-family: var(--bt-font-label); font-size:24px; letter-spacing:.08em; }
+  .satchel .row b { display:block; font-family: var(--bt-font-title); font-size:52px; color: var(--bt-bone); }
+  .tower { height: 210px; background: url(../../../apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png) center/cover; border:2px solid var(--bt-candle); filter: sepia(.7) brightness(.75) contrast(1.2); position:relative; }
+  .tower span { position:absolute; top:12px; left:24px; font-family: var(--bt-font-title); color: var(--bt-iron-gall); font-size:30px; }
+.next { text-align:center; font-family: var(--bt-font-title); font-size:36px; color: var(--bt-parchment-dark); padding:16px; border-top:1px solid var(--bt-candle); border-bottom:1px solid var(--bt-candle); background: linear-gradient(90deg, transparent, rgb(142 27 27 / .4), transparent); }
+  .next mark { background:none; color: var(--bt-candle); }
+  .host { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px; }
+  .hb { text-align:center; padding:20px 8px; font-family: var(--bt-font-label); font-size:30px; letter-spacing:.08em; color: var(--bt-candle); }
+</style></head><body>
+<nav>
+  <div class="tab on"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"></div><div class="nm">Wren</div><div class="badge">!</div></div>
+  <div class="tab"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/tomas.png)"></div><div class="nm">Tomas</div><div class="badge">!</div></div>
+  <div class="tab"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/agnes.png)"></div><div class="nm">Agnes</div></div>
+  <div class="tab"><div class="ph" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/emeric.png)"></div><div class="nm">Emeric</div></div>
+  <div class="title">The Funeral<b>Investigation</b></div>
+</nav>
+<main>
+  <article class="page bt-parchment">
+    <div class="private">For Wren Alone</div>
+    <div class="kicker">✠ What You Found ✠</div>
+    <h2>Two Bites</h2>
+    <div class="orn">❦ ❦ ❦</div>
+    <div class="art" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/dorka.png)"></div>
+    <p>Two bites, second one’s after death, no bruising. Mother taught me to read a body before you box it. This one’s been sent.</p>
+  </article>
+  <aside class="side">
+    <h3>Choose Thy Deed</h3>
+    <div class="card bt-panel hot"><div class="ill" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/stills/n2-burgomasters-funeral.02@dashboard.png)"></div><div><div class="vb">Share It</div><div class="ds">Tell the others what the body says.</div></div></div>
+    <div class="card bt-panel"><div class="ill" style="background-image:url(../../../apps/burgomaster-funeral-poc/assets/portraits/wren.png)"></div><div><div class="vb">Keep It</div><div class="ds">Some truths are a gravedigger’s alone.</div></div></div>
+    <div class="satchel bt-panel"><h4>Wren’s Satchel</h4><div class="row"><span><b>3</b>Wounds</span><span><b>2</b>Stakes</span><span><b>1</b>Garlic</span><span><b>✠</b>Ward</span></div></div>
+    <div class="next">Next · <mark>Waiting on you (Wren)</mark>, Tomas</div>
+    <div class="host"><div class="bt-panel hb">↺ Replay last</div><div class="bt-panel hb">Story log</div><div class="bt-panel hb">❚❚ Pause</div></div>
+  </aside>
+</main>
+<div class="vignette"></div>
+</body></html>
