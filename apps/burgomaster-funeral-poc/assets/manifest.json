@@ -18,7 +18,8 @@
     "status": "placeholder",
     "text": "Vellmoor buries its burgomaster without a priest and without his daughter. Hanne reads the words, badly, from Oskar's book. Beside Anton lies Dorka Halasz, nineteen, in her wedding dress, because her mother said she'd waited long enough to wear it.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.01"
+    "moment": "n2-burgomasters-funeral.01",
+    "duration_s": 14.711
   },
   "n2-burgomasters-funeral.02": {
     "id": "n2-burgomasters-funeral.02",
@@ -37,7 +38,8 @@
     "status": "placeholder",
     "text": "She ran after Lenka, up the hill, in the dark. Alone.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.02"
+    "moment": "n2-burgomasters-funeral.02",
+    "duration_s": 3.869
   },
   "n2-burgomasters-funeral.02.vo-02": {
     "id": "n2-burgomasters-funeral.02.vo-02",
@@ -47,7 +49,8 @@
     "status": "placeholder",
     "text": "Braver than the rest of this valley. Lid's not nailed.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.02"
+    "moment": "n2-burgomasters-funeral.02",
+    "duration_s": 3.482
   },
   "n2-burgomasters-funeral.03": {
     "id": "n2-burgomasters-funeral.03",
@@ -66,7 +69,8 @@
     "status": "placeholder",
     "text": "It's a wake. You don't nail it at a \u2014 oh. Oh, you nail it at a wake here.",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.03"
+    "moment": "n2-burgomasters-funeral.03",
+    "duration_s": 5.219
   },
   "n2-burgomasters-funeral.investigate": {
     "id": "n2-burgomasters-funeral.investigate",
@@ -85,7 +89,8 @@
     "status": "placeholder",
     "text": "The mourners keep their vigil. You have one candle's length, no more, before something in this church happens. Use it.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.investigate"
+    "moment": "n2-burgomasters-funeral.investigate",
+    "duration_s": 7.579
   },
   "n2-burgomasters-funeral.investigate.examine-body": {
     "id": "n2-burgomasters-funeral.investigate.examine-body",
@@ -112,7 +117,8 @@
     "status": "placeholder",
     "text": "Two bites. One old, one made after her heart stopped. Mother Ursula had the same pair, the morning she sat up. He sends the dead to fetch the living.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes"
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.agnes",
+    "duration_s": 9.817
   },
   "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas": {
     "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas",
@@ -131,7 +137,8 @@
     "status": "placeholder",
     "text": "Two wounds, lass. One she took alive. The other's cold work, done after. Like a sentry posted on a corpse. He's sending her somewhere.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas"
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.tomas",
+    "duration_s": 9.627
   },
   "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren": {
     "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren",
@@ -150,7 +157,8 @@
     "status": "placeholder",
     "text": "Two bites. Second one's after death; no bruising. Mother taught me to read a body before you box it. This one's been sent.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren"
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.wren",
+    "duration_s": 9.038
   },
   "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric": {
     "id": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric",
@@ -169,7 +177,8 @@
     "status": "placeholder",
     "text": "Two punctures, the second post-mortem. Gerhardt's treatise, chapter nine: \"the sending.\" She isn't a victim. She's a messenger. Keep a stake ready.",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric"
+    "moment": "n2-burgomasters-funeral.investigate.examine-body.two-bites.private.emeric",
+    "duration_s": 11.033
   },
   "n2-burgomasters-funeral.investigate.question-mother": {
     "id": "n2-burgomasters-funeral.investigate.question-mother",
@@ -196,7 +205,8 @@
     "status": "placeholder",
     "text": "Her mother heard Dorka singing under the window last night. She opened it to let her daughter in. I told her what I should have told my sisters: bar it. She has.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes"
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.agnes",
+    "duration_s": 10.361
   },
   "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas": {
     "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas",
@@ -215,7 +225,8 @@
     "status": "placeholder",
     "text": "The mother heard her girl singing under the window, and left it open for her. I'd have done the same for Marta. I told her to bar it anyway. She did.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas"
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.tomas",
+    "duration_s": 9.027
   },
   "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren": {
     "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren",
@@ -234,7 +245,8 @@
     "status": "placeholder",
     "text": "Mother heard Dorka singing under the window last night. Left it open. My mother would've nailed it shut. I told her to. She's barring it now.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren"
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.wren",
+    "duration_s": 9.295
   },
   "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric": {
     "id": "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric",
@@ -253,7 +265,8 @@
     "status": "placeholder",
     "text": "She heard her daughter singing outside the window, a wedding song, and she left the window open. Folklore, page forty: they sing to be let in. I asked her to bar it. She's doing it.",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric"
+    "moment": "n2-burgomasters-funeral.investigate.question-mother.singing.private.emeric",
+    "duration_s": 11.961
   },
   "n2-burgomasters-funeral.investigate.anton-coat": {
     "id": "n2-burgomasters-funeral.investigate.anton-coat",
@@ -280,7 +293,8 @@
     "status": "placeholder",
     "text": "In Anton's coat, a flask of holy water he never had the chance to use, and a scrap in his ledger hand: \"the lady's rooms.\" He knew where he'd take her.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes"
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.agnes",
+    "duration_s": 9.289
   },
   "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas": {
     "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas",
@@ -299,7 +313,8 @@
     "status": "placeholder",
     "text": "Coat's heavy on one side: a flask of holy water, stopper sealed. And a note, the burgomaster's hand: \"the lady's rooms.\" Castle talk. I know that wing.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas"
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.tomas",
+    "duration_s": 11.847
   },
   "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren": {
     "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren",
@@ -318,7 +333,8 @@
     "status": "placeholder",
     "text": "Holy water in his coat. Full. Didn't get to use it. Scrap of paper too: \"the lady's rooms.\" Keeping both.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren"
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.wren",
+    "duration_s": 8.517
   },
   "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric": {
     "id": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric",
@@ -337,7 +353,8 @@
     "status": "placeholder",
     "text": "A flask of holy water, unopened, and a scrap: \"the lady's rooms.\" A burgomaster's note, a ledger-keeper's hand. He was trying to work out where she'd be held.",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric"
+    "moment": "n2-burgomasters-funeral.investigate.anton-coat.holy-water.private.emeric",
+    "duration_s": 10.819
   },
   "n2-burgomasters-funeral.investigate.pray-over-coffins": {
     "id": "n2-burgomasters-funeral.investigate.pray-over-coffins",
@@ -364,7 +381,8 @@
     "status": "placeholder",
     "text": "I pray for Anton, and then for her, and then, God help me, for him, the way I did in the chapel. The prayer holds. Every candle leans away from Dorka's coffin.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes"
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.agnes",
+    "duration_s": 11.001
   },
   "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas": {
     "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas",
@@ -383,7 +401,8 @@
     "status": "placeholder",
     "text": "I'm no praying man. I say the guard's words for the dead, the short ones. It holds. The candlelight bends away from the girl's coffin, like it won't touch her.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas"
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.tomas",
+    "duration_s": 9.839
   },
   "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren": {
     "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren",
@@ -402,7 +421,8 @@
     "status": "placeholder",
     "text": "Said the words Mother said over every grave-row. They hold. The light leans off Dorka's coffin. This floor's ours now.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren"
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.wren",
+    "duration_s": 8.518
   },
   "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric": {
     "id": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric",
@@ -421,7 +441,8 @@
     "status": "placeholder",
     "text": "I don't know the proper words, so I read the burial office from Oskar's book, very fast. The prayer holds. The candle flames lean away from Dorka's coffin. Consecrated. Ground. Noted.",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric"
+    "moment": "n2-burgomasters-funeral.investigate.pray-over-coffins.consecrated.private.emeric",
+    "duration_s": 13.137
   },
   "n2-burgomasters-funeral.investigate.follow-the-mourner": {
     "id": "n2-burgomasters-funeral.investigate.follow-the-mourner",
@@ -457,7 +478,8 @@
     "status": "placeholder",
     "text": "I follow the cloaked mourner into the churchyard. A man in castle grey lays a pressed violet on Anton's grave and says to no one: \"She still refuses.\" I know that bow. The traveler's servant bowed like that at Saint Ysolde.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes"
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.agnes",
+    "duration_s": 15.109
   },
   "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas": {
     "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas",
@@ -476,7 +498,8 @@
     "status": "placeholder",
     "text": "I tail the cloak to the churchyard, quiet, the way the guard taught us. Castle servant. He lays a violet on Anton's grave and says: \"She still refuses.\" Then he goes up the hill road, toward the lady's rooms.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas"
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.tomas",
+    "duration_s": 13.681
   },
   "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren": {
     "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren",
@@ -495,7 +518,8 @@
     "status": "placeholder",
     "text": "Followed the cloak out. Castle servant. Put a violet on Anton's grave. Said: \"She still refuses.\" Went up toward the east wing. The lady's rooms.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren"
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.wren",
+    "duration_s": 11.803
   },
   "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric": {
     "id": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric",
@@ -514,7 +538,8 @@
     "status": "placeholder",
     "text": "I followed. I don't know why I followed. A castle servant left a pressed violet on Anton's grave and said, \"She still refuses.\" Then he walked up toward the east wing, where Gerhardt marked \"the lady's rooms.\"",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric"
+    "moment": "n2-burgomasters-funeral.investigate.follow-the-mourner.the-servant.private.emeric",
+    "duration_s": 13.295
   },
   "n2-burgomasters-funeral.investigate.share": {
     "id": "n2-burgomasters-funeral.investigate.share",
@@ -532,7 +557,8 @@
     "status": "placeholder",
     "text": "The candle is out. Share what you found, or keep it. Then look at the second coffin.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.investigate.share"
+    "moment": "n2-burgomasters-funeral.investigate.share",
+    "duration_s": 5.894
   },
   "n2-burgomasters-funeral.lid-choice": {
     "id": "n2-burgomasters-funeral.lid-choice",
@@ -551,7 +577,8 @@
     "status": "placeholder",
     "text": "The flies have gone quiet. Every candle leans toward the second coffin. There is time, just, to put a stake through a girl in her wedding dress in front of her mother. Or there is time to wait and be sure.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.lid-choice"
+    "moment": "n2-burgomasters-funeral.lid-choice",
+    "duration_s": 12.664
   },
   "n2-burgomasters-funeral.lid-choice~nailed": {
     "id": "n2-burgomasters-funeral.lid-choice~nailed",
@@ -570,7 +597,8 @@
     "status": "placeholder",
     "text": "Sorry, Dorka.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.lid-choice~nailed"
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed",
+    "duration_s": 0.954
   },
   "n2-burgomasters-funeral.lid-choice~nailed.vo-02": {
     "id": "n2-burgomasters-funeral.lid-choice~nailed.vo-02",
@@ -580,7 +608,8 @@
     "status": "placeholder",
     "text": "The hammer is very loud in the little church. The stake goes in crooked. Her mother does not scream; she just stops breathing for a while.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.lid-choice~nailed"
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed",
+    "duration_s": 8.526
   },
   "n2-burgomasters-funeral.lid-choice~watched": {
     "id": "n2-burgomasters-funeral.lid-choice~watched",
@@ -599,7 +628,8 @@
     "status": "placeholder",
     "text": "We wait. If she's only a dead girl, she deserves to be buried whole.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.lid-choice~watched"
+    "moment": "n2-burgomasters-funeral.lid-choice~watched",
+    "duration_s": 4.163
   },
   "n2-burgomasters-funeral.lid-choice~watched.vo-02": {
     "id": "n2-burgomasters-funeral.lid-choice~watched.vo-02",
@@ -609,7 +639,8 @@
     "status": "placeholder",
     "text": "Nobody in the church looks away from the coffin, so nobody sees the candles go out one by one along the back wall.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.lid-choice~watched"
+    "moment": "n2-burgomasters-funeral.lid-choice~watched",
+    "duration_s": 6.519
   },
   "n2-burgomasters-funeral.04": {
     "id": "n2-burgomasters-funeral.04",
@@ -630,7 +661,8 @@
     "status": "placeholder",
     "text": "The candles bow all at once. Dorka Halasz sits up in her wedding dress, and it is the sweetest smile anyone in the room has ever seen.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.04"
+    "moment": "n2-burgomasters-funeral.04",
+    "duration_s": 8.387
   },
   "n2-burgomasters-funeral.05": {
     "id": "n2-burgomasters-funeral.05",
@@ -651,7 +683,8 @@
     "status": "placeholder",
     "text": "Come to me. Leave these others and come to me. My arms are hungry for you. Lenka's waiting. She'll be so glad.",
     "speaker": "dorka",
-    "moment": "n2-burgomasters-funeral.05"
+    "moment": "n2-burgomasters-funeral.05",
+    "duration_s": 7.998
   },
   "n2-burgomasters-funeral.05.vo-02": {
     "id": "n2-burgomasters-funeral.05.vo-02",
@@ -661,7 +694,8 @@
     "status": "placeholder",
     "text": "Lenka is waiting for us, child. Not for you.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.05"
+    "moment": "n2-burgomasters-funeral.05",
+    "duration_s": 3.326
   },
   "n2-burgomasters-funeral.06": {
     "id": "n2-burgomasters-funeral.06",
@@ -682,7 +716,8 @@
     "status": "placeholder",
     "text": "Everyone out! Behind me!",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.06"
+    "moment": "n2-burgomasters-funeral.06",
+    "duration_s": 2.079
   },
   "n2-burgomasters-funeral.06.vo-02": {
     "id": "n2-burgomasters-funeral.06.vo-02",
@@ -692,7 +727,8 @@
     "status": "placeholder",
     "text": "He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no. He's so patient with her.",
     "speaker": "dorka",
-    "moment": "n2-burgomasters-funeral.06"
+    "moment": "n2-burgomasters-funeral.06",
+    "duration_s": 7.754
   },
   "n2-burgomasters-funeral.07": {
     "id": "n2-burgomasters-funeral.07",
@@ -711,7 +747,8 @@
     "status": "placeholder",
     "text": "When it is done, Dorka is only a girl in a wedding dress again, with garlic in her mouth and a peace on her face she did not have a minute ago.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.07"
+    "moment": "n2-burgomasters-funeral.07",
+    "duration_s": 8.801
   },
   "n2-burgomasters-funeral.07.vo-02": {
     "id": "n2-burgomasters-funeral.07.vo-02",
@@ -721,7 +758,8 @@
     "status": "placeholder",
     "text": "\"She won't stop saying no.\" Good girl.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.07"
+    "moment": "n2-burgomasters-funeral.07",
+    "duration_s": 2.654
   },
   "n2-burgomasters-funeral.08": {
     "id": "n2-burgomasters-funeral.08",
@@ -741,7 +779,8 @@
     "status": "placeholder",
     "text": "Hold on to that, all of you. Every night she refuses him is a night she's still ours.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.08"
+    "moment": "n2-burgomasters-funeral.08",
+    "duration_s": 5.422
   },
   "n2-burgomasters-funeral.09.private.agnes": {
     "id": "n2-burgomasters-funeral.09.private.agnes",
@@ -760,7 +799,8 @@
     "status": "placeholder",
     "text": "Mother Ursula sat up like that, on the fourth night. You didn't have a stake then. You do now.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.09.private.agnes"
+    "moment": "n2-burgomasters-funeral.09.private.agnes",
+    "duration_s": 5.858
   },
   "n2-burgomasters-funeral.09.private.tomas": {
     "id": "n2-burgomasters-funeral.09.private.tomas",
@@ -779,7 +819,8 @@
     "status": "placeholder",
     "text": "Dorka served at the castle last winter. Marta knew her. Marta has a wedding dress too, in the chest at the foot of her bed.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.09.private.tomas"
+    "moment": "n2-burgomasters-funeral.09.private.tomas",
+    "duration_s": 7.617
   },
   "n2-burgomasters-funeral.09.private.wren": {
     "id": "n2-burgomasters-funeral.09.private.wren",
@@ -798,7 +839,8 @@
     "status": "placeholder",
     "text": "New bolt: D-O-R-K-A. Your mother laid out every bride in this valley for thirty years. She'd have nailed that lid.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.09.private.wren"
+    "moment": "n2-burgomasters-funeral.09.private.wren",
+    "duration_s": 8.655
   },
   "n2-burgomasters-funeral.09.private.emeric": {
     "id": "n2-burgomasters-funeral.09.private.emeric",
@@ -817,7 +859,8 @@
     "status": "placeholder",
     "text": "Two bites, the second made after death. Gerhardt's treatise called it \"the sending.\" He sends the dead to fetch the living.",
     "speaker": "emeric",
-    "moment": "n2-burgomasters-funeral.09.private.emeric"
+    "moment": "n2-burgomasters-funeral.09.private.emeric",
+    "duration_s": 7.547
   },
   "n2-burgomasters-funeral.10": {
     "id": "n2-burgomasters-funeral.10",
@@ -836,7 +879,8 @@
     "status": "placeholder",
     "text": "They bury Anton Morosz at dawn, properly. On the lid, someone has left a pressed violet. No one saw who.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.10"
+    "moment": "n2-burgomasters-funeral.10",
+    "duration_s": 7.703
   },
   "n2-burgomasters-funeral.lid-choice~nailed~no-wren": {
     "id": "n2-burgomasters-funeral.lid-choice~nailed~no-wren",
@@ -855,7 +899,8 @@
     "status": "placeholder",
     "text": "Forgive me, girl.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.lid-choice~nailed~no-wren"
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed~no-wren",
+    "duration_s": 0.954
   },
   "n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-02": {
     "id": "n2-burgomasters-funeral.lid-choice~nailed~no-wren.vo-02",
@@ -865,7 +910,8 @@
     "status": "placeholder",
     "text": "The hammer is very loud in the little church. The stake goes in crooked. Her mother does not scream; she just stops breathing for a while.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.lid-choice~nailed~no-wren"
+    "moment": "n2-burgomasters-funeral.lid-choice~nailed~no-wren",
+    "duration_s": 8.526
   },
   "n2-burgomasters-funeral.lid-choice~watched~no-agnes": {
     "id": "n2-burgomasters-funeral.lid-choice~watched~no-agnes",
@@ -884,7 +930,8 @@
     "status": "placeholder",
     "text": "We wait. If she's only a dead girl, she gets buried whole.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.lid-choice~watched~no-agnes"
+    "moment": "n2-burgomasters-funeral.lid-choice~watched~no-agnes",
+    "duration_s": 3.55
   },
   "n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-02": {
     "id": "n2-burgomasters-funeral.lid-choice~watched~no-agnes.vo-02",
@@ -894,7 +941,8 @@
     "status": "placeholder",
     "text": "Nobody in the church looks away from the coffin, so nobody sees the candles go out one by one along the back wall.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.lid-choice~watched~no-agnes"
+    "moment": "n2-burgomasters-funeral.lid-choice~watched~no-agnes",
+    "duration_s": 6.519
   },
   "n2-burgomasters-funeral.07~fight-lost": {
     "id": "n2-burgomasters-funeral.07~fight-lost",
@@ -913,7 +961,8 @@
     "status": "placeholder",
     "text": "Dorka is gone through the window, laughing, up the hill road.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.07~fight-lost"
+    "moment": "n2-burgomasters-funeral.07~fight-lost",
+    "duration_s": 3.353
   },
   "n2-burgomasters-funeral.07~fight-lost.vo-02": {
     "id": "n2-burgomasters-funeral.07~fight-lost.vo-02",
@@ -923,7 +972,8 @@
     "status": "placeholder",
     "text": "She'll tell him we're coming.",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.07~fight-lost"
+    "moment": "n2-burgomasters-funeral.07~fight-lost",
+    "duration_s": 1.621
   },
   "n2-burgomasters-funeral.04~holy-symbol": {
     "id": "n2-burgomasters-funeral.04~holy-symbol",
@@ -944,7 +994,8 @@
     "status": "placeholder",
     "text": "The candles bow. Dorka sits up in her wedding dress, and the saint's lamp flares, and she shields her eyes and smiles anyway.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.04~holy-symbol"
+    "moment": "n2-burgomasters-funeral.04~holy-symbol",
+    "duration_s": 8.306
   },
   "n2-burgomasters-funeral.05~no-agnes": {
     "id": "n2-burgomasters-funeral.05~no-agnes",
@@ -965,7 +1016,8 @@
     "status": "placeholder",
     "text": "Come to me. My arms are hungry for you. Lenka's waiting.",
     "speaker": "dorka",
-    "moment": "n2-burgomasters-funeral.05~no-agnes"
+    "moment": "n2-burgomasters-funeral.05~no-agnes",
+    "duration_s": 4.143
   },
   "n2-burgomasters-funeral.05~no-agnes.vo-02": {
     "id": "n2-burgomasters-funeral.05~no-agnes.vo-02",
@@ -975,7 +1027,8 @@
     "status": "placeholder",
     "text": "She's waiting for us, girl.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.05~no-agnes"
+    "moment": "n2-burgomasters-funeral.05~no-agnes",
+    "duration_s": 1.438
   },
   "n2-burgomasters-funeral.08~no-agnes": {
     "id": "n2-burgomasters-funeral.08~no-agnes",
@@ -994,7 +1047,8 @@
     "status": "placeholder",
     "text": "Every night she says no, she's still ours.",
     "speaker": "tomas",
-    "moment": "n2-burgomasters-funeral.08~no-agnes"
+    "moment": "n2-burgomasters-funeral.08~no-agnes",
+    "duration_s": 2.962
   },
   "n2-burgomasters-funeral.06~no-tomas": {
     "id": "n2-burgomasters-funeral.06~no-tomas",
@@ -1015,7 +1069,8 @@
     "status": "placeholder",
     "text": "Out! Everyone out!",
     "speaker": "wren",
-    "moment": "n2-burgomasters-funeral.06~no-tomas"
+    "moment": "n2-burgomasters-funeral.06~no-tomas",
+    "duration_s": 2.113
   },
   "n2-burgomasters-funeral.06~no-tomas.vo-02": {
     "id": "n2-burgomasters-funeral.06~no-tomas.vo-02",
@@ -1025,7 +1080,8 @@
     "status": "placeholder",
     "text": "He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no.",
     "speaker": "dorka",
-    "moment": "n2-burgomasters-funeral.06~no-tomas"
+    "moment": "n2-burgomasters-funeral.06~no-tomas",
+    "duration_s": 5.962
   },
   "n2-burgomasters-funeral.02~no-wren": {
     "id": "n2-burgomasters-funeral.02~no-wren",
@@ -1044,7 +1100,8 @@
     "status": "placeholder",
     "text": "She ran after Lenka, up the hill, in the dark. Alone. And her lid is not nailed.",
     "speaker": "agnes",
-    "moment": "n2-burgomasters-funeral.02~no-wren"
+    "moment": "n2-burgomasters-funeral.02~no-wren",
+    "duration_s": 6.269
   },
   "n2-burgomasters-funeral.07~no-wren": {
     "id": "n2-burgomasters-funeral.07~no-wren",
@@ -1063,7 +1120,8 @@
     "status": "placeholder",
     "text": "When it is done, Dorka is only a girl in a wedding dress again, with a peace on her face she did not have a minute ago.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.07~no-wren"
+    "moment": "n2-burgomasters-funeral.07~no-wren",
+    "duration_s": 7.347
   },
   "n2-burgomasters-funeral.03~no-emeric": {
     "id": "n2-burgomasters-funeral.03~no-emeric",
@@ -1082,7 +1140,8 @@
     "status": "placeholder",
     "text": "Nobody in Vellmoor has nailed a lid at a wake before tonight.",
     "speaker": "narrator",
-    "moment": "n2-burgomasters-funeral.03~no-emeric"
+    "moment": "n2-burgomasters-funeral.03~no-emeric",
+    "duration_s": 3.406
   },
   "n2-burgomasters-funeral.sfx.candles": {
     "id": "n2-burgomasters-funeral.sfx.candles",
