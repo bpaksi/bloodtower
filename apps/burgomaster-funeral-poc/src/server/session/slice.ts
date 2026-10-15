@@ -38,8 +38,9 @@ const GAP_MS = 800;
 const ACCENT_FLASH_MS = 2_000;
 
 /**
- * Chosen so the first accent falls in the `.03` reveal: an open moment, not speech
- * and not the investigate cue, so the screen pulse is visible before the picks.
+ * The demo's first accent uses this seed. The draw is kept when it already falls
+ * in the `.03` reveal; otherwise the pulse is placed inside that reveal, using the
+ * line durations, so a shorter clip cannot push it into speech or the investigate cue.
  */
 export const DEMO_SEED = "funeral-demo-10";
 const PACK_VERSION = "n2-burgomasters-funeral-assets";
@@ -52,6 +53,43 @@ export const OPENING_MOMENTS: readonly MomentId[] = [
 ].map((id) => momentIdSchema.parse(id));
 
 const INVESTIGATE = momentIdSchema.parse("n2-burgomasters-funeral.investigate");
+const MOMENT_03 = momentIdSchema.parse("n2-burgomasters-funeral.03");
+
+/**
+ * Milliseconds from Begin until `momentId`'s reveal.
+ * Each earlier line contributes its own duration, then the gap that follows it.
+ */
+export const openingRevealAt = (catalog: Catalog, momentId: MomentId): number => {
+  let elapsed = 0;
+  for (const id of OPENING_MOMENTS) {
+    if (id === momentId) return elapsed;
+    const moment = requireMoment(catalog, id);
+    elapsed += REVEAL_MS;
+    for (const line of moment.lines) elapsed += line.durationMs + GAP_MS;
+  }
+  throw new Error(`The opening has no ${momentId}.`);
+};
+
+/** The reveal is the open stretch before the line: not speech, and not the picks. */
+export const revealWindow = (
+  catalog: Catalog,
+  momentId: MomentId,
+): { start: number; end: number } => {
+  const start = openingRevealAt(catalog, momentId);
+  return { start, end: start + REVEAL_MS };
+};
+
+/**
+ * When the demo's first accent fires. The seeded delay, when that delay is already
+ * inside the `.03` reveal; otherwise a point inside the reveal derived from it.
+ */
+export const firstDemoAccentDelay = (catalog: Catalog, seed: string): number => {
+  const natural = accentDelayMs(seed, 0);
+  const { start, end } = revealWindow(catalog, MOMENT_03);
+  if (natural >= start && natural < end) return natural;
+  const span = Math.max(1, end - start);
+  return start + (natural % span);
+};
 
 export const hunterName = (id: HunterId): string => id.slice(0, 1).toUpperCase() + id.slice(1);
 
@@ -754,7 +792,11 @@ export class DemoSession {
   private armAccent() {
     this.accentTimer?.cancel();
     if (this.phase.kind === "lobby" || this.paused) return;
-    this.scheduleAccent(accentDelayMs(this.seed, this.accentIndex));
+    const delay =
+      this.accentIndex === 0 && this.seed === DEMO_SEED
+        ? firstDemoAccentDelay(this.deps.catalog, this.seed)
+        : accentDelayMs(this.seed, this.accentIndex);
+    this.scheduleAccent(delay);
   }
 
   /** Keeps the seeded delay. A pause freezes whatever is left instead of drawing again. */

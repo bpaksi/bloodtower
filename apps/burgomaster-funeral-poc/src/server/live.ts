@@ -18,6 +18,8 @@ import {
 import QRCode from "qrcode";
 import { WebSocket, WebSocketServer } from "ws";
 import { authorizeAsset, loadCatalog } from "./assets/catalog.ts";
+import { preloadFor } from "./assets/preload.ts";
+import { cachedWebImage, isRasterImage } from "./assets/web-image.ts";
 import { appendEvent, openLog } from "./db/log.ts";
 import { advertiseHost, joinUrl, type NetAddress } from "./net/join-url.ts";
 import { type Clock, systemClock } from "./session/clock.ts";
@@ -378,6 +380,23 @@ export const createLive = (options: LiveOptions): LiveServer => {
       res.end(head ? undefined : svg);
       return true;
     }
+    if (url.pathname === "/preload") {
+      const token = bearer(req, url);
+      const actor = session.actorFor(token);
+      if (!actor || !token) {
+        sendText(res, 401, "Join again.\n");
+        return true;
+      }
+      const assets = preloadFor(
+        catalog,
+        actor.role === "dashboard"
+          ? { role: "dashboard" }
+          : { role: "device", held: actor.device.held, delivered: actor.delivered },
+        token,
+      );
+      sendJson(res, 200, { assets }, head);
+      return true;
+    }
     if (url.pathname === "/view") {
       const actor = session.actorFor(bearer(req, url));
       if (!actor) {
@@ -422,16 +441,26 @@ export const createLive = (options: LiveOptions): LiveServer => {
         sendText(res, 404, "Not found.\n");
         return true;
       }
+      let file = absolute;
+      let type = ASSET_TYPES[extname(absolute)] ?? "application/octet-stream";
+      if (isRasterImage(absolute)) {
+        file = await cachedWebImage(
+          absolute,
+          join(options.dataDir, "web-images", `${relative}.webp`),
+        );
+        type = "image/webp";
+      }
+      const served = await stat(file);
       res.writeHead(200, {
-        "content-type": ASSET_TYPES[extname(absolute)] ?? "application/octet-stream",
-        "content-length": info.size,
+        "content-type": type,
+        "content-length": served.size,
         "cache-control": "private, max-age=3600",
       });
       if (head) {
         res.end();
         return true;
       }
-      const stream = createReadStream(absolute);
+      const stream = createReadStream(file);
       res.on("close", () => stream.destroy());
       stream.on("error", () => {
         if (!res.destroyed) res.destroy();

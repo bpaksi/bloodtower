@@ -3,6 +3,7 @@
 import { PROTOCOL_VERSION } from "burgomaster-funeral-poc-protocols";
 import { useEffect, useRef, useState } from "react";
 import { helloDashboard, socketUrl, startMessage } from "@/lib/messages";
+import { fetchPreloadList, loadAsset, preloadScene } from "@/lib/preload";
 import { type DashboardView, isDashboardView } from "@/lib/view";
 
 const TOKEN_KEY = "funeral.dashboard.token";
@@ -14,6 +15,7 @@ const TOKEN_KEY = "funeral.dashboard.token";
 export function DashboardScreen() {
   const [view, setView] = useState<DashboardView | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  const [loadingAssets, setLoadingAssets] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const tokenRef = useRef<string | null>(null);
   const revision = useRef(0);
@@ -48,8 +50,18 @@ export function DashboardScreen() {
         return;
       }
       if (message.type === "welcome" && message.payload?.token) {
-        tokenRef.current = message.payload.token;
-        sessionStorage.setItem(TOKEN_KEY, message.payload.token);
+        const token = message.payload.token;
+        tokenRef.current = token;
+        sessionStorage.setItem(TOKEN_KEY, token);
+        if (!closed) {
+          void preloadScene(
+            () => fetchPreloadList(token),
+            loadAsset,
+            (phase) => {
+              if (!closed) setLoadingAssets(phase === "loading");
+            },
+          );
+        }
       }
       if (message.type === "error" && message.payload?.message) setProblem(message.payload.message);
       const token = tokenRef.current;
@@ -178,6 +190,15 @@ export function DashboardScreen() {
         data-testid="accent-pulse"
         data-live={accentLive ? "true" : "false"}
       />
+      {loadingAssets ? (
+        <p
+          data-testid="asset-loading"
+          aria-live="polite"
+          className="relative z-10 px-8 pt-4 text-lg text-amber-200/80"
+        >
+          Loading the scene…
+        </p>
+      ) : null}
       <header className="relative z-10 flex items-end justify-between gap-6 px-8 pt-6">
         <div>
           <p className="text-sm uppercase tracking-widest text-amber-200/80">Night 2 · Sanctuary</p>
@@ -240,33 +261,37 @@ export function DashboardScreen() {
           </div>
         </section>
       ) : (
-        <section className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-8 pb-8">
-          {view.playback?.stillUrl ? (
-            <img
-              src={view.playback.stillUrl}
-              alt=""
-              data-testid="moment-still"
-              className="h-auto max-h-full max-w-full object-contain"
-            />
-          ) : null}
-          {view.playback?.caption ? (
-            <figure className="max-w-4xl text-center">
-              <figcaption data-testid="spoken-caption" className="text-[1.75rem] leading-snug">
-                <span className="text-amber-200/90">{view.playback.caption.speaker}. </span>
-                {view.playback.caption.text}
-              </figcaption>
-            </figure>
-          ) : null}
-          {view.choosing ? (
-            <p data-testid="choosing" className="text-[1.75rem]">
-              Choose on your device.
-            </p>
-          ) : null}
-          {view.paused ? (
-            <p className="text-[1.75rem]">
-              Play is paused until every hunter has a connected device.
-            </p>
-          ) : null}
+        <section className="relative z-10 min-h-0 flex-1 overflow-y-auto px-8 pb-8">
+          <div className="flex min-h-full flex-col items-center justify-center gap-4">
+            {view.playback?.stillUrl ? (
+              <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+                <img
+                  src={view.playback.stillUrl}
+                  alt=""
+                  data-testid="moment-still"
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            ) : null}
+            {view.playback?.caption ? (
+              <figure className="w-full max-w-4xl shrink-0 text-center">
+                <figcaption data-testid="spoken-caption" className="text-[1.75rem] leading-snug">
+                  <span className="text-amber-200/90">{view.playback.caption.speaker}. </span>
+                  {view.playback.caption.text}
+                </figcaption>
+              </figure>
+            ) : null}
+            {view.choosing ? (
+              <p data-testid="choosing" className="shrink-0 text-[1.75rem]">
+                Choose on your device.
+              </p>
+            ) : null}
+            {view.paused ? (
+              <p className="shrink-0 text-[1.75rem]">
+                Play is paused until every hunter has a connected device.
+              </p>
+            ) : null}
+          </div>
         </section>
       )}
 

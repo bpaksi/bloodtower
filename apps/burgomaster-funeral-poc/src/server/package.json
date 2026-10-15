@@ -15,6 +15,7 @@
     "burgomaster-funeral-poc-protocols": "workspace:*",
     "drizzle-orm": "0.45.3",
     "qrcode": "1.5.4",
+    "sharp": "0.35.5",
     "tsx": "4.23.15",
     "ws": "8.22.0"
   },

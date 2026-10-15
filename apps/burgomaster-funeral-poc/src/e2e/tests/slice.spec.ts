@@ -57,6 +57,43 @@ test("one device holds all four, the opening plays, and a finding stays on that 
 
     const caption = page.getByTestId("spoken-caption");
     await expect(caption).toContainText("Vellmoor buries its burgomaster", { timeout: 15_000 });
+    const narratorReachable = (el: HTMLElement) => {
+      const text = (el.textContent ?? "").trim();
+      if (!text.includes("Vellmoor buries its burgomaster")) return false;
+      const scroller = (node: HTMLElement | null): HTMLElement | null => {
+        while (node) {
+          const overflow = getComputedStyle(node).overflowY;
+          if (overflow === "auto" || overflow === "scroll") return node;
+          node = node.parentElement;
+        }
+        return null;
+      };
+      const boxClipped = (node: HTMLElement) => {
+        let parent = node.parentElement;
+        while (parent) {
+          const overflow = getComputedStyle(parent).overflowY;
+          if (overflow === "hidden" || overflow === "clip") {
+            const box = node.getBoundingClientRect();
+            const frame = parent.getBoundingClientRect();
+            if (box.top < frame.top - 1 || box.bottom > frame.bottom + 1) return true;
+          }
+          parent = parent.parentElement;
+        }
+        return false;
+      };
+      const scroll = scroller(el);
+      if (scroll) return !boxClipped(scroll);
+      return !boxClipped(el);
+    };
+    for (const size of [
+      { width: 1440, height: 900 },
+      { width: 390, height: 500 },
+      { width: 820, height: 400 },
+    ]) {
+      await page.setViewportSize(size);
+      expect(await caption.evaluate(narratorReachable)).toBe(true);
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
     await expect(page.getByTestId("ambient-bed")).toHaveAttribute("data-reason", "speech");
     const voice = page.getByTestId("spoken-line");
     await expect(voice).toHaveAttribute("src", /01\.vo-01\.narrator\.wav/);
