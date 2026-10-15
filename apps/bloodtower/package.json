@@ -1,0 +1,16 @@
+{
+  "name": "bloodtower",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bloodtower. Orchestrates its parts under src/: web, server, protocols, e2e.",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently --kill-others --names server,web --prefix-colors blue,green \"pnpm -F bloodtower-server dev\" \"pnpm -F bloodtower-web dev\"",
+    "build": "pnpm -F bloodtower-web build",
+    "start": "pnpm -F bloodtower-server start",
+    "e2e": "pnpm -F bloodtower-e2e e2e"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.6"
+  }
+}
