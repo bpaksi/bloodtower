@@ -7,7 +7,7 @@ Lenka Morosz, the burgomaster's foundling daughter, was taken by the Count the n
 
 ## Format rules
 - One scene per file. Moment IDs are `scene.moment`; each is marked [still] or [clip].
-- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers). `ipad:<hunter>` plays only on that iPad. Private moments (`.private.<hunter>`) never play on the Story board and always have a line for all four hunters.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers). `ipad:<hunter>` plays only on that iPad. Private moments (`.private.<hunter>`) never play on the Story board and always have a line for all four hunters. A scene line that still says `dashboard` means `storyboard`.
 - **Variants (R-AST-ORG-10):** `scene.moment~variant` replaces the base moment of the same number when its condition (written after the dash) holds. Private and variant combine as `scene.moment.private.<hunter>~<variant>`. A base moment that lists only cues and "one variant by …" has no line of its own; one variant always plays. No speaker or text placeholders remain in any script: kingdoms and lair rooms are shown, never spoken, and buildings, objectives, nights and absent hunters each have their own variant.
 - **Event moments:** `scene.<event-name>` (e.g. `n5-final-confrontation.blade-lost`) plays once when its trigger happens and replaces nothing.
 - **Spotlight (R-AST-ORG-11):** the procession uses concrete IDs per hunter: `.04.private.<hunter>` (choice), `~answer`, `~turn-away`, and `.04.private.<hunter>-watched`.
