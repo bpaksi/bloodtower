@@ -4,7 +4,7 @@ Status: draft for Bob's review, 2026-10-15. Design only, no code.
 Scope: the data a new app's **story loader** reads. A story (the Dracula funeral night, the crypt crawl under the church, future stories) must be pure data: adding or changing one needs no code change.
 
 Sources: `research/game-design/story-engine.md` (R-ENG, E1-E18; E15 presence, E16 never idle, E17 investigation, E18 advantages), `requirements.md`, `setup-wizard-and-summary.md` (R-WIZ, R-SUM), `research/stories/dracula/rulings.md`, `apps/burgomaster-funeral-poc/docs/PRD.md` (rev 5, R3-x/R4-x/R5-1), `apps/burgomaster-funeral-poc/assets/manifest.json` and `assets/cues/cue-sheet.json`, scripts `n2-burgomasters-funeral.md`, `n23-catacombs-of-saint-ysolde.md`, `n4-earth-boxes.md`.
-Rule sources for sections 3.2, 9, 10 and 11: E19 (a-h) and E20 (a-k) in `story-engine.md`, R-LEN-1..5 and R-RE-1..12 in `requirements.md`, R-WIZ-12 in `setup-wizard-and-summary.md`, D-DRA-11..14 in `rulings.md`, PRD rev 5 (R5-1, PRD-41..43), and `assets/stories/dracula/scripts/tokens-and-encounters.md` (Dracula objective sites, lures, hunter-token encounter table).
+Rule sources for sections 3.2, 9, 10 and 11: E19 (a-h) and E20 (a-k) in `story-engine.md`, R-LEN-1..5 and R-RE-1..12 in `requirements.md`, R-WIZ-12 in `setup-wizard-and-summary.md`, D-DRA-11..14 in `rulings.md`, PRD rev 5 (R5-1, R5-2, PRD-41..43), and `assets/stories/dracula/scripts/tokens-and-encounters.md` (Dracula objective sites, lures, hunter-token encounter table).
 
 ## 0. Conventions
 
@@ -16,7 +16,7 @@ Rule sources for sections 3.2, 9, 10 and 11: E19 (a-h) and E20 (a-k) in `story-e
 
 ### 0.1 Condition expressions (`cond`)
 A small closed grammar so variants and gates stay data:
-`present(<hunter>)`, `absent(<hunter>)`, `holds(<item>)` (a present hunter carries it), `carrier(<item>) = <hunter>`, `flag(<name>)`, `track(<id>) >= n`, `corruption(<hunter>) >= n`, `choice(<choice-id>) = <option>`, `result(<fight-id>) = won|lost`, `night = n`, `length = short|standard|long`, `building = village|sanctuary|bazaar|citadel`, `seed(<table>) = <value>`, `role(<role>) = <hunter>`; combined with `and`, `or`, `not`.
+`present(<hunter>)`, `absent(<hunter>)`, `holds(<item>)` (a present hunter carries it), `carrier(<item>) = <hunter>`, `flag(<name>)`, `track(<id>) >= n`, `corruption(<hunter>) >= n`, `corruption(<hunter>) = n`, `any corruption(*) >= n`, `choice(<choice-id>) = <option>`, `picked(<action>)`, `result(<fight-id>) = won|lost`, `night = n`, `night_end(<night>)`, `length = short|standard|long`, `building = village|sanctuary|bazaar|citadel`, `seed(<table>) = <value>`, `role(<role>) = <hunter>`; combined with `and`, `or`, `not`.
 
 ### 0.2 Effects (`effect`)
 `grant_item`, `spend_item`, `lose_item`, `set_flag`, `track_add`, `corruption` (always through the guard, section 8), `advantage` (trait, amount, scope: picker | present | hunter, duration: fight | first-round), `foe_mod` (±n, min 1), `reveal_battle_card`, `sit_out`, `skull_drop` (through the skull ledger), `ledger_add` (finale escalation, E12), `quest_token` (section 9), `goto` (moment or set piece), `stat` (custom stat event).
@@ -34,7 +34,7 @@ A small closed grammar so variants and gates stay data:
 | `tone` | text | no | one line |
 | `structure` | `one-shot` \| `campaign` | yes | campaign carries state between parts (R-ENG-2) |
 | `players` | {min,max} | yes | humans; hunters are separate (section 2) |
-| `lengths` | list of `short`/`standard`/`long` | yes | at least one; see 3.2 |
+| `lengths` | list of `short`/`standard`/`long` | yes | all three (R-LEN-1); see 3.2 |
 | `difficulties` | list {id, label, mods} | yes | |
 | `systems` | map system → on/off + settings | yes | R-ENG-3/21: clock, corruption, encounters, dungeon, investigation, quest-tokens... |
 | `rule_modules` | list of names | no | R-ENG-4 |
@@ -165,6 +165,7 @@ by_length:
   standard: {set_pieces: {n2: [n23-catacombs-of-saint-ysolde, n2-burgomasters-funeral]}}
   long:     {set_pieces: {n2: [n23-catacombs-of-saint-ysolde, nx-midnight-procession, n2-burgomasters-funeral]}}
 ```
+The `by_length` lists in that example show the field shape only. Which set pieces each length keeps is not ruled (D-DRA-13).
 
 ## 4. Moments
 
@@ -203,7 +204,7 @@ variant    := name | "no-" hunter
 Targets:
 - `storyboard`: shared screen and speakers. Never carries a `.private.*` payload (enforced server side, PRD §3).
 - `ipad:all`: every connected player device (shared controls, pick cards). No voice by default.
-- `ipad:<hunter>`: every device holding that hunter, only while that hunter is present (except `scope: global`). Labelled with the hunter's name.
+- `ipad:<hunter>`: every device holding that hunter, only while that hunter is present (except `scope: global`). Labelled with the hunter's name. `end.private.<hunter>` is the other exception (R3-9, spec D18): it goes to every current holder, present or absent, and is still refused on the Story board. It is not `scope: global`.
 - `phone`: phone-layout override of an `ipad:*` asset (R-LF-10); never a separate audience. A phone holding a hunter receives that hunter's `ipad:<hunter>` content in phone layout.
 
 ```yaml
@@ -231,8 +232,8 @@ Every decision is a prompt on iPads; the Story board only shows the prompt and t
 | `askers` | `present` \| `all` \| `role:<r>` \| hunter | yes | absent hunters never decide scene choices |
 | `options` | list {id, label, cond, effects, moment} | yes | option hidden if `cond` false (e.g. nail needs `holds(stake)`) |
 | `vote.rule` | `majority` \| `unanimous` | vote | |
-| `vote.tie` | `first-press` \| option id \| `seeded` | vote | |
-| `timeout_s` + `default` | int, option | no | E17 default 60 s auto-pick |
+| `vote.tie` | `first-press` \| `retreat` \| option id \| `seeded` | vote | `retreat`: the tie leaves (dungeon votes, ruling 5) |
+| `timeout_s` + `default` | int, option | no | not used by investigation (ruling 1): no timer and no auto-pick |
 | `stat` | stat id | yes | choices are always logged |
 
 Rules: `party` mode locks on the first press from any device; others see it locked. `hunter` mode with a shared hunter: first answer from any holder (R3-8). A vote counts one ballot per **hunter**, cast by the first press among that hunter's holders.
@@ -245,6 +246,8 @@ Rules: `party` mode locks on the first press from any device; others see it lock
 | `exclusive` | bool | yes | default **true** (R3-6: one unique pick per present hunter, first lock wins, taken cards grey out) |
 | `reveal` | `after-all-lock` | yes | picks private until all lock |
 | `share_moment` | moment | yes | table-talk; Continue from an iPad |
+
+Investigation has no timer and no auto-pick (ruling 1, spec D16). The round waits until every present hunter has locked a unique action.
 
 ```yaml
 choices:
@@ -269,13 +272,14 @@ Cues are referenced by name from the shared cue library (E13); the pack may add 
 | `fallback_sfx` | asset | yes | |
 | `drums` | `none` \| position | yes | story cues use `none` unless the base game would move them |
 | `confirm` | bool | no | physical steps (skull drop) wait for Done from an iPad |
-| `accent_reason` | enum | yes | see below |
+| `trigger` | {after: moment ref, when: cond} | no | when the cue fires, if a moment does not list it under `cues` |
 
-**Accent reason enum and priority:** `choice > scene_cue > moment > ambient`. When two outputs compete for the tower/screen accent channel, the higher reason wins and the lower is suppressed (logged in `ambient_accent.suppressed` with `reason`).
-- `choice`: feedback for a lock/vote/pick (e.g. the risky-pick seal sequence after all picks lock).
-- `scene_cue`: authored `[tower: ...]` cue in a moment.
-- `moment`: the default start/end accent of a moment with no authored cue.
-- `ambient`: E16 bed and accents; suppressed during speech, choices and pauses; idle gap ≤10 s.
+**Accent reason (R5-2).** Each logged accent has exactly one reason: `choice`, `scene_cue`, `moment`, or `ambient`. Precedence is that order, and the first match wins. This classifies that one accent. It is not a contest between two outputs. The reason is derived; a pack does not set it on the cue.
+- `choice`: the moment is waiting on player input. In the funeral that is `.investigate` and every `.investigate.*` id (including `.investigate.follow-the-mourner.cue`), `.lid-choice` and every `.lid-choice*` id, the Forewarned choice, and the battle screen. Those log `choice` even when they also fire a cue such as `heartbeat`.
+- `scene_cue`: a cue-sheet cue that actually fires on that moment, including a variant that inherits the cue. A capped or converted skull drop does not fire `skull-drop`, so that moment is not `scene_cue`.
+- `moment`: a plain moment start with no cue, such as `.01`.
+- `ambient`: an E16 seeded filler accent. Suppressed during speech, choices and pauses; idle gap ≤10 s.
+`choice` and `scene_cue` set the E16 accent suppressed. The cue's screen half and fallback still play. `moment` and `ambient` do not suppress that accent.
 
 ```yaml
 cues:
@@ -285,8 +289,8 @@ cues:
     drums: none
     screen: fx.seal-flicker
     fallback_sfx: n2-burgomasters-funeral.sfx.seal-flicker
-    accent_reason: choice
     trigger: {after: "n2-burgomasters-funeral.investigate", when: "picked(follow-the-mourner)"}
+    # the follow-the-mourner cue moment logs reason choice (R5-2): it is an .investigate.* id
 ```
 
 ## 7. Story items and tracks
@@ -326,7 +330,7 @@ tracks:
 | `corruption.limit` | int | yes | Dracula: 3rd corruption loses (Turned) |
 | `corruption.sources` | list | yes | all base-game sources count (E3) |
 | `corruption.cures` | list ref | yes | holy water, host, Sanctuary rest |
-| `hooks` | list {id, when, victim: picker \| party-pick \| hunter, amount} | no | |
+| `hooks` | list {id, when, victim: picker \| party-pick \| hunter, amount, alt, forced_alt_at} | no | `alt` is the other payment (Forewarned: `sit_out`). `forced_alt_at` is the corruption count that leaves only `alt` (2) |
 | `guard.threshold` | int | yes | limit - 1 |
 | `guard.fallback` | ordered list: `sit_out` \| `lose_item` \| `block:<variant>` \| `redirect:<target>` | yes | E9 |
 
@@ -370,7 +374,7 @@ At dusk the engine makes one seeded draw from the lures valid that night; it nev
 | `hunter_token.move_cue` / `land_cue` | cue | yes | lights/sound only (6); never drums (E13) |
 | pace | see `by_length.<len>.hunter_token` (3.2) | | E19h |
 
-Placed at dusk on its start site. Default start: the active kingdom's citadel; if that space holds the objective or a hunter at dusk, a space next to the Tower in the active kingdom (E19d). At the end of each round, before hunters move, it moves one space toward the nearest hunter by RtDT adjacency and river rules, ties by seeded pick (E19c). Landing on a hunter's space draws one hunter encounter; only hunters on that space are present (E15). It then returns to start, and is removed at dawn.
+Placed at dusk on its start site. Default start: the active kingdom's citadel; if that space holds the objective or a hunter at dusk, a space next to the Tower in the active kingdom (E19d). A round is a full table round (ruling 4). At the end of each round, before hunters move, it moves one space toward the nearest hunter by RtDT adjacency and river rules, ties by seeded pick (E19c). Landing on a hunter's space draws one hunter encounter; only hunters on that space are present (E15). It then returns to start, and is removed at dawn.
 
 Guards and logging: a token encounter or lure never gives a third corruption; a corruption aimed at a hunter at 2 is redirected under E9 (E19f). Every placement, move (from, to, round), draw, removal, lure claim and result is logged with the seed (E19g).
 
@@ -409,7 +413,7 @@ Encounters are seeded, weighted table draws (R-RE-1, R-RE-2, E11). The hunter-to
 
 Rules (E19e, ruled by Bob Oct 14 2026: **add**):
 - A hunter-token encounter plays **in addition to** that turn's normal RtDT event, never instead of it. The normal event resolves first, then the encounter.
-- At most one hunter-token encounter per round, 2-3 moments each.
+- At most one hunter-token encounter per full table round (ruling 4), 2-3 moments each.
 - The corruption guard applies (E19f): a cost aimed at a hunter at 2 corruption is redirected under E9, never a third corruption.
 - The normal event and the encounter are logged separately (E19e, E19g).
 - Frequency is per pack, difficulty and length (R-RE-8, R-LEN-2, 3.2).
@@ -454,7 +458,7 @@ A dungeon is placed at a site as an E19 objective and starts when a hunter enter
 Rules:
 - Rooms are face down until entered; the Story board shows the room map and depth (rooms cleared of N) (E20b, E20g).
 - Per room: reveal, optional improve, resolve (E20c). Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
-- After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5); E20e's "host breaks ties" becomes `vote.tie: first-press` because the Story board is display only (see 17).
+- After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5). A tie means retreat: dungeon votes use `vote.tie: retreat` (ruling 5). That replaces the host tiebreak and a first-press tie.
 - Cleared rooms stay cleared after leaving (E20e).
 - End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
 - Logging: seed, layout, each room (type, improve, cost, corruption, loot), the choice, start/end per room and crawl (E20j, PRD-41).
@@ -464,11 +468,11 @@ Rules:
 dungeons:                           # D-DRA-14
   - id: crypt-under-church
     site: n2-crypt-entry            # objective after n2-burgomasters-funeral
-    trait: undead                   # pack choice, not yet ruled
+    trait: <RtDT trait>            # which advantage improves a room is not ruled
     layout: chain
     deck: [room.ossuary, room.flooded-passage, room.old-burgomasters-tomb, room.szgany-cache]
     target_room: room.sealed-door
-    reentry: false
+    # reentry is not ruled (E20e: only if the pack allows it)
 ```
 `n23-catacombs-of-saint-ysolde` is a linear set piece (3.3), not an E20 crawl.
 
@@ -520,14 +524,14 @@ Example (POC manifest shape, renamed target):
 | `stats.highlight_weights` | map stat → weight | R-SUM-2 highlight reel |
 | `timing.marks` | auto | engine timestamps every phase, moment, pick, table talk, battle screen, cue, pause (PRD-41); packs add none |
 | `timing.estimate` | per length | inputs to PRD-43 formula |
-| `titles` | list {cond, text} | per-hunter summary titles (R-SUM-3) |
+| `titles` | list {cond, text} | per-hunter summary titles (R-SUM-3). In the cond, `hunter` is that hunter |
 
 Engine events every pack gets: `presence_locked`, `private_delivered` / `_skipped_absent`, `choice_locked`, `pick_locked`, `cost_applied` (guard_triggered), `resource_changed`, `ambient_accent` (reason, suppressed), `skull_drop`, `paused_unheld` / `resumed_held`.
 
 ```yaml
 stats:
   custom: [{id: boxes-burned, type: counter, scope: party}, {id: lid-choice, type: event, scope: party}]
-titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
+titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  # hunter is the one being titled
 ```
 
 ## 15. Validation rules the loader must enforce
@@ -536,7 +540,7 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 - V-2. Every `ref` resolves; every `asset` exists in the manifest; every cue name exists in the library or pack.
 - V-3. Moment ids match the grammar (4.1) and their `scene` prefix equals their set piece id.
 - V-4. `.private.<hunter>` uses a declared hunter and `target: ipad:<hunter>`; no `.private.*` moment, asset or text may be reachable by a `storyboard` target.
-- V-5. Every base moment whose lines or still include hunter H has a `~no-H` variant, unless marked `presence_safe` (H not in frame or voice). Every `~no-<x>` names a declared hunter.
+- V-5. Every `~no-<x>` names a declared hunter. When hunter H is absent, play `~no-H` if that variant exists. If it does not, and H would speak, cut that line (PRD-8). `presence_safe` marks a base that does not depict H, so no variant is expected. A missing variant is not by itself a load error.
 - V-6. No two variants of a moment are equally specific with overlapping conditions; a header-only base has variants that cover all cases.
 - V-7. At most 2 speakers per exchange.
 - V-8. Every cue has a screen half and a fallback; story cues have `drums: none` unless flagged base-game.
@@ -545,10 +549,10 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 - V-11. Foe modifiers floor at 1.
 - V-12. No effect names warriors or spirit.
 - V-13. Quest tokens: at most one objective, one lure, one hunter token per night (E19); a lure is never on the objective's site (E19b).
-- V-14. Encounters have 2-3 moments and 2-3 choices (E19e, R-RE-9); at most 1 hunter-token encounter per round.
+- V-14. Encounters have 2-3 moments and 2-3 choices (E19e, R-RE-9); at most 1 hunter-token encounter per full table round (ruling 4).
 - V-15. All three lengths declared; each keeps the opening, every set piece the win condition needs, and the finale; fail a length whose win condition is unreachable (R-LEN-3).
 - V-16. Endings: at least one win and one loss; `check_order` unique; there is always a matching ending at game end.
-- V-17. Investigation: actions > number of hunters; each action has a private finding for every hunter.
+- V-17. Investigation: actions > number of hunters; each action has a private finding for every hunter; no timeout and no auto-pick (ruling 1).
 - V-18. Choices: every option with a `cond` has a sibling that is always available (no dead-end prompt).
 - V-19. Components: minimum asset set check (R-WIZ-3), warning or error per open question.
 - V-20. Determinism: all randomness names a seeded table.
@@ -565,13 +569,13 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 | `.lid-choice~nailed~no-wren` stacked | 4.1 stacking | yes |
 | `.04~holy-symbol` | variant with `holds(holy-symbol)` | yes |
 | Investigation, 5 cards, risky follow-the-mourner | 5.1 | yes, `exclusive: true` (R3-6) |
-| `.investigate.follow-the-mourner.cue` + `seal-sequence` after lock | 6, `accent_reason: choice` | yes; cue-sheet moment id has "(risky pick)" text that must become the real moment id |
+| `.investigate.follow-the-mourner.cue` + `seal-sequence` after lock | 6; the moment logs `choice` (R5-2) | yes; cue-sheet moment id has "(risky pick)" text that must become the real moment id |
 | Lid choice (party) | 5 | yes; now an iPad first press, not a host tap |
 | Ready Stake, Consecrated Ground (first round), holy water | 0.2 `advantage`, 7 | yes |
 | Mother bars window, nailed lid | `foe_mod` min 1 | yes |
 | Forewarned: reveal card, cost corruption or sit out | 0.2, 8 | yes |
 | Fight via physical RtDT cards, Won/Lost entry | 3.3 flow `fight` | yes; result entered on an iPad |
-| Watched+lost: corruption + skull drop (cap 2, supply <6 → +1 foe n5) | 8, ledger | yes |
+| Watched+lost: corruption + skull drop (cap 2). Supply < 6 becomes finale ledger +1 foe instead of a drop | corruption, cap, and drop in 8; the supply swap has no field (named rule module, R-ENG-4) | partial |
 | `.09.private.*`, `.end.private.*` | 4.2 | yes |
 | heartbeat, dim-all, skull-drop cues | 6 | yes |
 | Manifest ids `@dashboard` | 13 | rename to `storyboard` |
@@ -591,24 +595,24 @@ titles: [{cond: "hunter.corruption = 0", text: "the one who never flinched"}]
 
 ## 17. Open questions
 
-1. **POC `spec.md`** (`apps/burgomaster-funeral-poc/spec.md`) exists but was not used for this draft; check it for clashes with the PRD.
+1. **POC spec.** Checked against `apps/burgomaster-funeral-poc/spec.md` and the POC PRD. Factual clashes corrected in this doc: D18 end lines, D16 no investigation timer, R5-2 accent reasons, PRD-8 missing variants. D19 (no live grey-out of picks) stays marked for Gamewright.
 2. **E17 vs R3-6, ruled:** `exclusive` defaults to **true** (one unique pick per present hunter, first lock wins, R3-6). E17's text ("two hunters may pick the same action", 60 s timer, auto-pick) is out of date and should be updated in story-engine.md.
-3. **Control model, ruled:** the Story board is display only, so all host taps in the PRD (OQ-4, OQ-10, §4 steps 8-9, Won/Lost, Next, Continue) move to iPads (first press). During an unheld pause any joined iPad can reassign the hunter; the first press counts. PRD-20, AT-5, OQ-12 and the R3-2 text still say "host reassigns from the Dashboard" and need updating.
+3. **Control model, ruled:** the Story board is display only, so in the real app the host taps in the PRD (OQ-4, OQ-10, §4 steps 8-9, Won/Lost, Next, Continue) are iPad presses and the first press counts. Reassigning a hunter stays as built from the old Dashboard in the frozen POC (PRD-20, AT-5, OQ-12, R3-2). In the real app, any joined iPad can reassign (ruling 2).
 4. **Vote vs party first press:** should the lid choice be a first press (fast) or a vote of present hunters?
 5. **Cue sheet location:** PRD-40 says `shared/tower/cues.json`; the POC uses `apps/burgomaster-funeral-poc/assets/cues/cue-sheet.json`. Which one is canonical for packs?
 6. **Cue sheet moment id** `"n2-burgomasters-funeral.investigate.follow-the-mourner (risky pick)"` isn't a valid id; the script uses `...follow-the-mourner.cue`.
-7. **Encounters "at most 1 per round" (E19e) vs E11 tables:** is "round" an RtDT player turn or a full table round? E19c moves the token "at the end of each round, before hunters move", which reads as a full table round; confirm.
+7. **Round:** settled by ruling 4. A round is a full table round, not one hunter's turn.
 8. **Quest marker clash:** E19 uses the 3 RtDT quest markers (or Dark Horde minis). Does that clash with RtDT's own quest markers in the same game?
-9. **Accent enum:** is `choice > scene_cue > moment > ambient` a priority order (as written here) or just a log field?
+9. **Accent enum:** settled by R5-2. Each logged accent has one reason. The order `choice > scene_cue > moment > ambient` is which label applies (first match wins).
 10. **`phone` target:** a separate audience, or only a layout? This doc treats it as a layout.
 11. **Minimum asset set (R-WIZ-3):** warning or block?
 12. **Skull drop as a story mechanic:** allowed (skulls aren't warriors/spirit), but confirm.
 13. **Variant stacking order** (`~nailed~no-wren` vs `~no-wren~nailed`): this doc fixes condition first, presence last.
 14. **R-ENG-25 lists "warriors and spirit as base game" for Dracula**, which fits the no-warriors/spirit rule only if story effects never change them. Confirm no script does (none found in n2, n23, n4).
-15. **E19f vs tokens-and-encounters.md:** the script's guard makes a blocked corruption `~blocked` (the party loses one story item); E19f says "redirected under E9". Is `~blocked` the Dracula E9 redirect?
+15. **E19f redirect:** settled by ruling 3. `~blocked` (lose one story item) is the Dracula form of that redirect.
 16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
-17. **"Choice on the dashboard"** in tokens-and-encounters.md (`enc-the-window.03`) conflicts with the display-only Story board; it should be an iPad choice.
-18. **E20e tie-break:** "host breaks ties" needs a non-Story-board rule; this doc proposes first press.
+17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
+18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
 19. **D-DRA-13/14 open values:** set pieces per length, hunter-token pace, encounter frequency, crypt room count per length and the crypt's improve trait are not ruled yet.
 20. **D-DRA-11 site name:** no source names the tower-adjacent spaces; the app names it by terrain and position until the board is checked.
 
