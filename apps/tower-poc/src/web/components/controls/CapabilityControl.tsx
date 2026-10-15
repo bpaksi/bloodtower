@@ -156,6 +156,7 @@ export function CapabilityControl({
   statusName,
   choices = {},
   confirm,
+  hideSequences,
 }: {
   capabilityId: CommandableId;
   /** Defaults to the inventory title. */
@@ -171,6 +172,11 @@ export function CapabilityControl({
   choices?: FieldChoices;
   /** Asked before sending, with Confirm and Cancel. */
   confirm?: ReactNode;
+  /**
+   * Sequence names left out of the dropdown. The service may still accept them; the timing
+   * page is what sends a held one.
+   */
+  hideSequences?: readonly string[];
 }) {
   const headingId = useId();
   const capability = findCapability(capabilityId);
@@ -211,7 +217,14 @@ export function CapabilityControl({
       `${capabilityId} needs its own control: ${form?.ok === false ? form.reason : "unknown capability"}`,
     );
   }
-  const fields = applyChoices(form.fields, choices);
+  const fields = applyChoices(form.fields, choices).map((field) =>
+    field.kind === "enum" && field.key === "sequence" && hideSequences
+      ? {
+          ...field,
+          options: field.options.filter((option) => !hideSequences.includes(option)),
+        }
+      : field,
+  );
 
   const disabled = !state.enabled || command.pending;
 

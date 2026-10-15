@@ -79,6 +79,12 @@ export const PAGES = {
     summary: "Service options and version information.",
     planned: ["Mock mode", "Ring-buffer size and logging", "Clear local data, with confirmation"],
   },
+  timing: {
+    href: "/timing",
+    title: "Timing",
+    summary: "Four tests of light, sound and flash timing on the tower in front of you.",
+    planned: [],
+  },
 } as const satisfies Record<string, PageInfo>;
 
 export const NAV_PAGES: readonly PageInfo[] = Object.values(PAGES);

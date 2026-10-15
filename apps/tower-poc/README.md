@@ -19,7 +19,7 @@ A Node service on the Mac owns the tower over Bluetooth (via [UltimateDarkTower]
 | `plans/` | One plan per milestone (M0–M5) |
 | `src/web/`, `src/server/`, `src/protocols/` | Code parts, each its own package, created in M0 |
 | `src/e2e/` | Playwright tests: phone and iPad on WebKit, desktop on Chromium |
-| `docs/` | App docs: capabilities, acceptance, troubleshooting (created M1–M5) |
+| `docs/` | Final report, reuse guide, generated capabilities, and timing results |
 | `../../research/tower/` | Spike and observability write-ups shared with other apps |
 
 ## Running (after M0)
@@ -31,5 +31,16 @@ pnpm build    # web static export
 pnpm start    # one process, one port (MOCK=1 for mock mode); run pnpm build first
 pnpm e2e      # Playwright, mock mode, 3 viewports (first time: pnpm -F tower-poc-e2e e2e:install)
 ```
+
+## Timing test
+
+On the Mac, with the tower in front of you and Bluetooth available to the terminal:
+
+```bash
+cd apps/tower-poc
+pnpm timing
+```
+
+Open http://localhost:3000/timing. Connect, then calibrate, with the buttons on that page. Run the four tests and press Save results. The service writes `docs/timing-results/timing-<timestamp>.json`, including the notes. `pnpm timing` is the real tower (`MOCK` is not set). Nothing on the page runs until its button is pressed.
 
 The service keeps its data in `data/tower-poc.db` (`data/tower-poc.mock.db` with `MOCK=1`); `DB_PATH` points it elsewhere. Delete the file to start with nothing saved.

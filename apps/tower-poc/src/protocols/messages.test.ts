@@ -304,11 +304,11 @@ describe("validateCommand", () => {
     );
   });
 
-  it("accepts the silent light sequences played on the tower, and refuses a held one", () => {
+  it("accepts every silent light sequence, including the one the Lights page still hides", () => {
     for (const sequence of SILENT_LIGHT_SEQUENCES) {
-      const held = HELD_LIGHT_SEQUENCES.includes(sequence);
-      expect(validateCommand("lighting.sequence", { sequence }).ok, sequence).toBe(!held);
+      expect(validateCommand("lighting.sequence", { sequence }).ok, sequence).toBe(true);
     }
+    expect(HELD_LIGHT_SEQUENCES).toEqual(["rotationDrumMiddle"]);
   });
 });
 

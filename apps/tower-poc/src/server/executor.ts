@@ -22,6 +22,7 @@ import {
 } from "tower-poc-protocols";
 import type { UltimateDarkTower } from "ultimatedarktower";
 import { TOWER_LIGHT_SEQUENCES } from "ultimatedarktowerdata";
+import { flashOneLight } from "./timing/flashLight.ts";
 import type { TowerRecords } from "./towerRecords.ts";
 
 /** What the executor needs from the session. `TowerSession` has all of it. */
@@ -85,12 +86,16 @@ export const MAX_WAITING = 20;
  * - `local`: the service changes its own record; neither the tower nor the library is involved
  *   (spec D24), so it needs no connected tower.
  */
+interface TowerHooks {
+  /** The first time a plan writes, so a long burst can record that moment before it ends. */
+  onWrite?: () => void;
+}
 interface TowerPlan {
   path: "queue" | "direct";
   timeoutMs: number;
   /** The tower is known not to answer it (GAP-HW-010). */
   silent?: boolean;
-  run: (tower: UltimateDarkTower) => Promise<void> | void;
+  run: (tower: UltimateDarkTower, hooks?: TowerHooks) => Promise<void> | void;
   /** Changes the service's record once the tower has confirmed the command, and only then. */
   onConfirmed?: (records: TowerRecords) => void;
 }
@@ -110,9 +115,9 @@ const queued = (
   run,
   ...(onConfirmed ? { onConfirmed } : {}),
 });
-const direct = (run: TowerPlan["run"], silent = false): Plan => ({
+const direct = (run: TowerPlan["run"], silent = false, timeoutMs = DIRECT_TIMEOUT_MS): Plan => ({
   path: "direct",
-  timeoutMs: DIRECT_TIMEOUT_MS,
+  timeoutMs,
   silent,
   run,
 });
@@ -171,6 +176,19 @@ const PLANS: { [Id in CommandableId]: (params: CapabilityParams<Id>) => Plan } =
         LIGHT_EFFECT_NUMBERS[params.effect],
         params.loop,
       ),
+    ),
+  // One command for the whole burst. The writes inside it skip the library queue and the
+  // lane's 250 ms gap, or 8 flashes a second could not happen. The gap still applies after.
+  "lighting.flash": (params) =>
+    direct(
+      (tower, hooks) =>
+        flashOneLight(tower, params, {
+          now: Date.now,
+          sleep,
+          onWrite: () => hooks?.onWrite?.(),
+        }),
+      false,
+      params.durationMs + 2_000,
     ),
   "sound.play": (params) => queued((tower) => tower.playSound(params.soundIndex)),
   "sound.play-stateful": (params) =>
@@ -370,7 +388,18 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
       // Marked before sending: `sendTowerState` records the sequence in the library's state
       // before it writes, so even a send that fails or times out leaves it there.
       if (plan.silent) unclearedSequence = tower;
-      const outcome = await settle(() => plan.run(tower), plan.timeoutMs);
+      let notedWrite = false;
+      const outcome = await settle(
+        () =>
+          plan.run(tower, {
+            onWrite: () => {
+              if (notedWrite) return;
+              notedWrite = true;
+              report(request, "write-completed");
+            },
+          }),
+        plan.timeoutMs,
+      );
       const wrote = session.writes() > before;
 
       if (outcome.kind === "timeout") {
@@ -402,7 +431,8 @@ export const createCommandExecutor = (options: CommandExecutorOptions): CommandE
           written: false,
         });
       }
-      report(request, "write-completed");
+      // A burst records this at its first packet. Reporting it again would look like a second send.
+      if (!notedWrite) report(request, "write-completed");
       if (plan.path === "queue") {
         plan.onConfirmed?.(records);
         return report(request, "confirmed");

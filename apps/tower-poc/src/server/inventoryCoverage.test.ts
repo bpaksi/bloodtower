@@ -9,6 +9,7 @@ import {
   LEDS_PER_LAYER,
   LIBRARY_BASELINE,
   lightEffectSchema,
+  SHARED_LIBRARY_MEMBERS,
   towerCornerSchema,
   towerLevelSchema,
   towerSideSchema,
@@ -207,10 +208,11 @@ describe("inventory coverage", () => {
     expect([...mapped, ...excluded].filter((name) => privateNames.includes(name))).toEqual([]);
   });
 
-  it("accounts for every member once", () => {
+  it("accounts for every member, repeating only the shared ones", () => {
     const names = [...mapped, ...excluded];
-    expect(names.filter((name, index) => names.indexOf(name) !== index)).toEqual([]);
-    expect(names).toHaveLength(publicNames.length);
+    const repeated = names.filter((name, index) => names.indexOf(name) !== index);
+    expect(repeated).toEqual([...SHARED_LIBRARY_MEMBERS]);
+    expect(new Set(names).size).toBe(publicNames.length);
   });
 
   it("maps each kind of entry to the matching kind of member", () => {

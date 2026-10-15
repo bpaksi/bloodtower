@@ -15,6 +15,7 @@ import {
   offeredLightSequenceSchema,
   RANDOM_ROTATE_DRUMS,
   RANDOM_ROTATE_MODE_COUNT,
+  SHARED_LIBRARY_MEMBERS,
   SILENT_LIGHT_SEQUENCES,
   SOUND_COUNT,
   soundIndexSchema,
@@ -75,6 +76,10 @@ const examples: Record<CapabilityId, { valid: unknown; invalid: unknown }> = {
   "lighting.set-led": {
     valid: { layerIndex: 5, lightIndex: 3, effect: "on", loop: true },
     invalid: { layerIndex: 6, lightIndex: 0, effect: "on" },
+  },
+  "lighting.flash": {
+    valid: { layerIndex: 0, lightIndex: 0, flashesPerSecond: 2, durationMs: 5000 },
+    invalid: { layerIndex: 0, lightIndex: 0, flashesPerSecond: 3, durationMs: 5000 },
   },
   "sound.play": { valid: { soundIndex: SOUND_COUNT }, invalid: { soundIndex: SOUND_COUNT + 1 } },
   "sound.play-stateful": {
@@ -155,7 +160,7 @@ describe("inventory entries", () => {
       ...exclusions.map((exclusion) => exclusion.member),
     ];
     const repeated = names.filter((name, index) => names.indexOf(name) !== index);
-    expect(repeated).toEqual([]);
+    expect(repeated).toEqual([...SHARED_LIBRARY_MEMBERS]);
   });
 
   it("gives every exclusion a reason", () => {
@@ -247,6 +252,7 @@ describe("commandable capabilities", () => {
     ).toEqual([
       "lighting.all-off",
       "lighting.all-on",
+      "lighting.flash",
       "lighting.sequence",
       "lighting.set",
       "lighting.set-led",
@@ -440,25 +446,24 @@ describe("catalog ranges from ultimatedarktowerdata", () => {
     expect(lightSequenceSchema.options).toEqual(Object.keys(TOWER_LIGHT_SEQUENCES));
   });
 
-  it("holds back rotationDrumMiddle and accepts the other 20 (D23, M2 step 11)", () => {
+  it("flags rotationDrumMiddle and still accepts it, while the Lights page does not offer it", () => {
     const sequence = findCapability("lighting.sequence")?.params;
     expect(HELD_LIGHT_SEQUENCES).toEqual(["rotationDrumMiddle"]);
     expect([...SILENT_LIGHT_SEQUENCES].sort()).toEqual(
       ["rotationAllDrums", "rotationDrumBottom", "rotationDrumMiddle", "rotationDrumTop"].sort(),
     );
     expect(lightSequenceSchema.options).toHaveLength(21);
-    for (const name of HELD_LIGHT_SEQUENCES) {
-      expect(Object.keys(TOWER_LIGHT_SEQUENCES), name).toContain(name);
-      expect(sequence?.safeParse({ sequence: name }).success, name).toBe(false);
+    // The timing test sends the held name through lighting.sequence and flags it. The Lights
+    // page uses offeredLightSequenceSchema, which still leaves it out.
+    for (const name of lightSequenceSchema.options) {
+      expect(sequence?.safeParse({ sequence: name }).success, name).toBe(true);
     }
     const others = lightSequenceSchema.options.filter(
       (name) => !HELD_LIGHT_SEQUENCES.includes(name),
     );
     expect(others).toHaveLength(20);
     expect(offeredLightSequenceSchema.options).toEqual(others);
-    for (const name of others) {
-      expect(sequence?.safeParse({ sequence: name }).success, name).toBe(true);
-    }
+    expect(offeredLightSequenceSchema.options).not.toContain("rotationDrumMiddle");
   });
 
   it("has no loop parameter on a stateful sound, does not offer the legacy rotate, and offers break seal before calibration", () => {

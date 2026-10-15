@@ -18,6 +18,7 @@ import { type CommandExecutor, createCommandExecutor } from "./executor.ts";
 import { SessionStateError, type TowerSession } from "./session.ts";
 import { NoPendingRestoreError, type StateStore } from "./stateStore.ts";
 import { requestPath, serveStatic } from "./static.ts";
+import { handleTimingResults } from "./timing/http.ts";
 import type { TowerRecords } from "./towerRecords.ts";
 import type { Verifications } from "./verifications.ts";
 import { installedVersion } from "./versions.ts";
@@ -52,6 +53,11 @@ export interface TowerServerOptions {
   devOrigins?: readonly string[];
   /** Also called with every command lifecycle stage, after it is broadcast. */
   onLifecycle?: (payload: CommandLifecyclePayload) => void;
+  /**
+   * Where a saved timing result is written. Unset, `POST /api/timing-results` answers 404
+   * and writes nothing.
+   */
+  timingResultsDir?: string;
 }
 
 export interface TowerServer {
@@ -284,7 +290,18 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
 /** Starts the HTTP server (static web UI) and the WebSocket endpoint on one port. */
 export const startTowerServer = async (options: TowerServerOptions): Promise<TowerServer> => {
   const http = createServer((req, res) => {
-    serveStatic(options.webRoot, req, res).catch(() => res.destroy());
+    const origin = Array.isArray(req.headers.origin) ? req.headers.origin[0] : req.headers.origin;
+    const host = Array.isArray(req.headers.host) ? req.headers.host[0] : req.headers.host;
+    handleTimingResults(
+      req,
+      res,
+      options.timingResultsDir,
+      isAllowedOrigin(origin, host, options.devOrigins),
+    )
+      .then((handled) => {
+        if (!handled) return serveStatic(options.webRoot, req, res);
+      })
+      .catch(() => res.destroy());
   });
 
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });

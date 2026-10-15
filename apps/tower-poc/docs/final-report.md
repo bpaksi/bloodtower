@@ -10,7 +10,7 @@ Everything the library offers through its public API works on the real tower. Al
 
 ## What the tower offers
 
-53 capabilities are in the inventory. 42 have a control and passed on the hardware. 3 are diagnostics with a page that M4 never built. 8 are not offered: 5 by design, 3 because the library has no public method for them.
+54 capabilities are in the inventory: 53 at the M3 close, plus `lighting.flash` for the timing test, which has not been verified on the tower. 42 have a control and passed on the hardware. 3 are diagnostics with a page that M4 never built. 8 are not offered: 5 by design, 3 because the library has no public method for them.
 
 ### Connection and calibration: 13 passed
 
@@ -30,7 +30,7 @@ Everything the library offers through its public API works on the real tower. Al
 | Set one LED | One LED by layer (6) and light (4), with an effect and a loop flag |
 | Light sequence | 21 built-in sequences (twinkle, flareThenFade, angryStrobe 1–3, gloat 1–3, defeat, victory, dungeonIdle, sealReveal, monthStarted, wholeTowerBreathing, …), with an optional sound. The four `rotation*` sequences light the drums without moving them; the tower never answers them, so they are sent without waiting (D23). `rotationDrumMiddle` is still held because it was never played (GAP-HW-007) |
 
-Lights stay as set until a later command changes them. Rotating with state keeps them; the legacy rotate and the random rotate turn them all off (GAP-HW-009).
+Lights stay as set until a later command changes them. Rotating with state keeps them; the legacy rotate and the random rotate turn them all off (GAP-HW-009). `lighting.flash` is not one of the five that passed: the timing page uses it to toggle one light, and it is unverified on the tower.
 
 ### Sounds: 2 passed
 
@@ -119,6 +119,6 @@ These are the findings any later app on the tower has to respect. Each one is ba
 | M4 diagnostics timeline (in-app event view, saved sessions, export) | The `DIAG_LOG` file served the Verify pass; reading it took minutes | Build it if a later app needs live diagnostics. The adapter tap (`InstrumentedAdapter`) is the part to keep |
 | M4 gap register as data (CRUD, import, export) | The spec §7 table worked as the register | A `packages/` gap list, if two apps need it |
 | M5 acceptance run (environment matrix, restart run, error matrix) | M2's smoke covered multiple devices; the pass covered every control | The first app on the tower runs its own acceptance |
-| Open questions | Volume 0 to 2 loudness (GAP-HW-003), `rotationDrumMiddle` (GAP-HW-007), the cause of the drop (GAP-HW-011), the tower's skull counter across a power cycle (GAP-LIB-011) | Short tower tests, when an app needs the answer |
+| Open questions | Volume 0 to 2 loudness (GAP-HW-003), `rotationDrumMiddle` (GAP-HW-007), the cause of the drop (GAP-HW-011), the tower's skull counter across a power cycle (GAP-LIB-011). Whether sounds and light sequences overlap, whether a skull drop makes its own sound, and the fastest clean flash are open too | `pnpm timing` (see the README) records `rotationDrumMiddle`, overlap, the skull-drop sound and flash rate under `docs/timing-results/`. Volume, the drop's cause and the skull counter across a power cycle are still open |
 
 How to reuse the code is in [reuse-guide.md](reuse-guide.md).
