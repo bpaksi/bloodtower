@@ -33,10 +33,10 @@ Touches: `apps/bloodtower/src/e2e/tests/**`, `apps/bloodtower/src/server/scripts
    - AC-8: every moment, press, pause and fallback cue has a timing mark with monotonic and wall time; the timing report reconstructs the run.
    - AC-9 (mock part only): connect and calibrate from either device, first press wins, status/battery on the board, and no light/sound/drum command is sent (assert on the mock). The real-tower part is G-R1, manual.
    - AC-1 / AC-2 are already covered by check/build/smoke and `pack:lint` tests; reference them, do not duplicate.
-2. **`timingReport.ts`**: given a session id (default: latest session) and the SQLite file from config, print that session's timing rows as a readable timeline (relative monotonic time, wall time, kind, moment/prompt, device, cause). Add an orchestrator script only if it needs no `package.json` change; otherwise run it via `pnpm -F bloodtower-server exec tsx src/server/scripts/timingReport.ts` (or whatever runner `pack:lint` uses) and document that in the README is out of Touches, so put the command in the PR body instead.
-3. **B3 review nits** (fix only if they stay inside Touches or are tiny and recorded as a deviation; otherwise list them in the PR body as follow-ups):
-   - The join page shows the device token. It should not be displayed (rejoin still works via storage/paste). Touches `src/web/components/device/**` → deviation.
-   - The QR is wrong when the board is opened at `127.0.0.1`/`localhost`: the join URL must use a LAN address. Either pick a non-loopback IPv4 interface when the local address is loopback, or show a clear board warning. Touches `src/server/hub/**` → deviation. Add a unit test.
+2. **`timingReport.ts`**: given a session id (default: latest session) and the SQLite file from config, print that session's timing rows as a readable timeline (relative monotonic time, wall time, kind, moment/prompt, device, cause). Do not add a `package.json` script. `pack:lint` is `tsx scripts/packLint.ts` in `src/server/package.json` (forwarded by `apps/bloodtower`), so run the report the same way: `pnpm -F bloodtower-server exec tsx scripts/timingReport.ts [sessionId]` (pnpm runs it from `apps/bloodtower/src/server`). Put this run command in the PR body, not the README.
+3. **B3 review nits are out of B4 scope.** Do not fix them in this PR; they go to a separate small follow-up PR (they touch `src/web/components/device/**` and `src/server/hub/**`, outside step 10). List them under "Follow-ups" in the PR body:
+   - The join page shows the device token; it should not be displayed (rejoin still works via storage/paste).
+   - The QR fails when the board is opened at `127.0.0.1`/`localhost`; the join URL must use a LAN address (pick a non-loopback IPv4 interface when the local address is loopback, or warn on the board).
 4. Update `spec.md` §7 traceability: the AC rows now proved, with test file names. Add `### B4 (step 10)` under Deviations and keep Results for Bob's G-R1.
 
 ## Out of scope
@@ -56,22 +56,22 @@ pnpm build
 pnpm --dir apps/bloodtower pack:lint
 pnpm --dir apps/bloodtower e2e        # = pnpm -F bloodtower-e2e e2e
 # timing report against the e2e session database
-pnpm -F bloodtower-server exec tsx src/server/scripts/timingReport.ts   # adjust to the runner pack:lint uses
+pnpm -F bloodtower-server exec tsx scripts/timingReport.ts [sessionId]   # same runner as pack:lint
 git diff --stat origin/main -- apps/tower-poc apps/burgomaster-funeral-poc   # must be empty
 git diff --stat origin/main -- '**/package.json' pnpm-lock.yaml             # must be empty
 ```
 
 Manual checks (record results in the PR body; mark anything not done as "not verified"):
 
-- `pnpm --dir apps/bloodtower dev`, open `/board` at `http://127.0.0.1:<dev port>` and at the LAN address; the QR must point at the LAN address in both cases (or the board warns).
-- Scan the QR with a phone or iPad on the same Wi-Fi, join, hold a hunter; the device token is not shown on screen.
+- `pnpm --dir apps/bloodtower dev`, open `/board` at the Mac's LAN address (not `127.0.0.1`, a known B3 issue left for the follow-up PR).
+- Scan the QR with a phone or iPad on the same Wi-Fi, join, and hold a hunter.
 - Run one night to the end; run the timing report and check the timeline matches what happened.
 
 ## PR
 
 - Branch `cursor/bloodtower-r1-b4` (B3 used `cursor/bloodtower-r1-b3-…`).
 - Title: `feat(bloodtower): R1 foundation batch B4 (step 10)`.
-- Body: plan step id (`R1 step 10, batch B4`), what was built, AC-1..AC-9 table (automated / manual / not verified, with test names), exit-test commands with exit codes and test counts, deviations (link the plan section), B3 nits fixed or deferred, open questions, and review rounds used.
+- Body: plan step id (`R1 step 10, batch B4`), what was built, AC-1..AC-9 table (automated / manual / not verified, with test names), exit-test commands with exit codes and test counts, deviations (link the plan section), Follow-ups (the two B3 nits), open questions, and review rounds used.
 - Open with `gh pr create --base main`. Do not merge. Wright reviews and merges.
 
 ## Local review loop (replaces the cloud reviewers)
@@ -79,7 +79,7 @@ Manual checks (record results in the PR body; mark anything not done as "not ver
 After the PR is open and `check` is green, run up to **3 rounds**:
 
 1. Start two subagents on the PR branch:
-   - **reviewer** (`.claude/agents/adversary-bugs.md`): bugs, edge cases, races, security/privacy (device token, LAN address), tower safety, weak or flaky tests, scope creep. Adversarial.
+   - **reviewer** (`.claude/agents/adversary-bugs.md`): bugs, edge cases, races, security/privacy, tower safety, weak or flaky tests, scope creep. Adversarial.
    - **verifier** (`.claude/agents/verifier.md` + `adversary-prd.md`): conformance to plan step 10, AC-1..AC-9, spec §3/§5/§6/§7/§8, out-of-scope list; it **runs** the exit tests above and reports exit codes.
    Each posts its report on the PR with `gh pr review --comment` (or `gh pr comment`), ending in `Blocking: none` or `Blocking: <n>`.
 2. Models: round 1 default model; round 2 Opus with high effort; round 3 Opus with max effort.
