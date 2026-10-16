@@ -195,7 +195,7 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 |---|---|---|---|
 | `.01~night1` (:15) | the sill violet from n1-burgomasters-house.08, turned over: **a thread of white castle plaster pressed in it** | "high up, plastered walls, a lady's rooms" (:20–29) | dusk |
 | `.00~night2` (:31) / `~no-tomas` (:35) — **Marta's summons** | no violet yet: **Marta's room, shutters hanging open, nails pried and laid in a neat row on the sill, bed empty, cream `come-home-letter` on the pillow**; Tomas in the doorway (not in `~no-tomas`). Marta **absent** | `.00.private.tomas~night2` (:39): Tomas's reading (she drew the nails herself) | dusk |
-| `.01~night2` (:43) | violet on a lintel, **wrapped in a scrap of painted canvas** | "near pictures, a gallery" (:36–45) | dusk |
+| `.01~night2` (:42) | violet on a lintel, **wrapped in a scrap of painted canvas** | "near pictures, a gallery" (:36–45) | dusk |
 | `.01~night3` (:47) | violet in the dust, **stem tied with one gold thread from a wedding veil** | "above the gallery, where the stair goes up" (:52–61) | dusk |
 | `.01~night4` (:63) | **violet pressed into a torn page in an old girl's hand** (Ludmila's; tok:33) — page text not legible on dashboard | "the high room, the window I opened" (:68–77) | dusk |
 
