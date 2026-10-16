@@ -7,7 +7,7 @@
 - **Mood:** Quiet, tender, a thread of hope.
 - **Cast:** Narrator; one hunter's private thought per night
 - **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
-- **Props:** [prop: pressed-flower]
+- **Props:** [prop: pressed-flower]; night 2 only: [prop: come-home-letter] (Marta's summons, `.00~night2`)
 - **Recipient:** one hunter per night gets the private clue: night 1 Wren, night 2 Agnes, night 3 Tomas, night 4 Emeric; if that hunter is absent, the next present one in that order. The others see only the dashboard still. Each private line is written for every hunter so any of them can receive it.
 
 ## Moments
@@ -27,6 +27,17 @@
 
 **nx-pressed-flower.02.private.emeric~night1** [still] `ipad:emeric` [prop: pressed-flower]
 > **Emeric (thought):** She's high up. Plastered walls, not stone. A lady's rooms. *(noted, noted, I'm noting it.)*
+
+**nx-pressed-flower.00~night2** [still] [prop: come-home-letter] — Marta's summons (plays before .01~night2; night 2 only)
+[music: solo violin, one held note] [sfx: wind; a loose shutter knocking]
+> **Narrator:** Dusk on the second night. Tomas Varga goes home first. Marta's shutters hang open, the nails pried out and laid in a neat row on the sill. Her bed is cold. On the pillow lies a letter on heavy cream paper: "Come home."
+
+**nx-pressed-flower.00~night2~no-tomas** [still] [prop: come-home-letter] — Tomas not in play
+[music: solo violin, one held note] [sfx: wind; a loose shutter knocking]
+> **Narrator:** Dusk on the second night. At the edge of the village a girl's shutters hang open, the nails pried out and laid in a neat row on the sill. Marta Varga is gone. On her pillow lies a letter on heavy cream paper: "Come home."
+
+**nx-pressed-flower.00.private.tomas~night2** [still] `ipad:tomas` [prop: come-home-letter]
+> **Tomas (thought):** I nailed those shutters myself. He didn't break them. She drew the nails for him, one by one, and laid them out tidy, the way I taught her. *(I'm coming, lass.)*
 
 **nx-pressed-flower.01~night2** [still] [prop: pressed-flower]
 [music: solo violin, two notes] [sfx: wind; faint heartbeat] [tower: heartbeat]

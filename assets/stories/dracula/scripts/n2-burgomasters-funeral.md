@@ -166,7 +166,7 @@ Night 2's second set piece is done; with the site, the kingdom's key. Night 3 be
 **n2-burgomasters-funeral.end.private.wren** [still] `ipad:wren` — personal ending line (R3-9)
 > **Wren (thought):** Two graves filled by noon. Father's spade did the work. Mother was taken for hiding one girl. I'll fetch the other one home.
 **n2-burgomasters-funeral.end.private.tomas** [still] `ipad:tomas` — personal ending line (R3-9)
-> **Tomas (thought):** Twenty years I stood that wall. Marta's still behind it, half his. I'm not burying her too. I'll carry her out again, fingers or no.
+> **Tomas (thought):** Twenty years I stood that wall. Tonight she walked back behind it on her own feet, to pour his wine. I'm not burying her too. I'll carry her out again, fingers or no.
 **n2-burgomasters-funeral.end.private.agnes** [still] `ipad:agnes` — personal ending line (R3-9)
 > **Agnes (thought):** He let me live because I prayed for him. I prayed over two coffins today instead. Lord, let that be the last mercy he ever gets from me.
 **n2-burgomasters-funeral.end.private.emeric** [still] `ipad:emeric` — personal ending line (R3-9)
