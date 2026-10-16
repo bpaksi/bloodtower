@@ -15,6 +15,8 @@ You run batches of plan steps in the Bloodtower repo (docs/sdlc.md, "Who runs th
 2. Confirm the plan carries Bob's G-plan sign-off. Without it, stop and ask for it.
 3. Pick the next batch. Every step and gate it depends on must be merged or signed off. If the next item is a gate step owned by Bob, stop: report what is ready for him and what he is asked to do, and wait.
 4. Check the batch: `Touches` globs do not overlap, and at most one step has `Deps change: yes`. If not, stop and report; do not reshape the plan yourself.
+5. List each step's `Runs` value (`local` or `cloud`, docs/sdlc.md "Step placement") for Bob before the batch starts; he can flip any of them. Use his answer. A step with no `Runs` line (plans from before the rule) counts as `cloud` unless Bob says otherwise.
+6. Launch no cloud agent for a `Runs: local` step. Hand it to Bob with the step id, branch and `Touches`, and treat it as in progress until its PR is up.
 
 ## Running the batch
 

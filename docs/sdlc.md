@@ -19,7 +19,7 @@ apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──appro
 |---|---|---|---|
 | 1. Plan | New ideas and changes get an intent file in Bob's words | `apps/<app>/intent/NNNN-*.md` | Accept intent |
 | 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
-| 3. Build | Plan mode first. One plan per milestone; each step is one branch in its own worktree and one PR. Steps carry `Depends on`, `Touches` and `Deps change`, and the plan groups them into batches (see Parallel work). Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan (gate G-plan) |
+| 3. Build | Plan mode first. One plan per milestone; each step is one branch in its own worktree and one PR. Steps carry `Depends on`, `Touches`, `Deps change` and `Runs`, and the plan groups them into batches (see Parallel work). Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan (gate G-plan) |
 | 4. Test | The developer runs `pnpm check` in its worktree and puts the output in the PR body. GitHub Actions reruns `pnpm check` on the PR. The verifier runs on the PR branch and posts its result on the PR. | Vitest, Playwright, screenshots, `.github/workflows/check.yml` | Only at a named gate (playtest, judgement) |
 | 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs checks on commit; CI runs `pnpm check` on the PR; the `adversary-bugs` and `adversary-prd` agents post findings on the PR, and the developer fixes them, for up to 3 rounds. The coordinator squash-merges, one PR at a time, once CI is green and both adversaries report no blocking findings (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
 | 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
@@ -152,13 +152,14 @@ The loop runs plan steps in batches. Steps in a batch run at the same time, each
 
 ### 1. Plans declare dependencies and touch-sets
 
-Every step in `apps/<app>/plans/Mx-*.md` carries three fields:
+Every step in `apps/<app>/plans/Mx-*.md` carries four fields:
 
 ```markdown
 ### Step 3: <title>
 - Depends on: 1            # step ids, gate ids, or "none"
 - Touches: apps/game/src/combat/**, packages/dice/**
 - Deps change: no          # yes if it edits any package.json or pnpm-lock.yaml
+- Runs: cloud              # local or cloud, set by the plan author (see Step placement)
 ```
 
 A **batch** is a set of steps whose dependencies are already merged (or signed off, for gates), whose `Touches` globs do not overlap, and where at most one has `Deps change: yes`. The plan lists its batches and merge order:
@@ -172,6 +173,8 @@ A **batch** is a set of steps whose dependencies are already merged (or signed o
 ```
 
 Approving the plan (G-plan) approves its batches. A step may not start before its batch's dependencies are met. Deviations that change `Touches` or dependencies update the plan in the same commit, as now. The coordinator and `adversary-bugs` check that a PR changes only files inside its step's `Touches`, and that only the step marked `Deps change: yes` changes a `package.json` or `pnpm-lock.yaml`.
+
+**Step placement (`Runs`).** The plan author sets `Runs: local` (Bob and Claude Code on the Mac) when the step touches the core engine or session state, protocol contracts, security or tokens, the tower or other hardware, is a Bob gate, or a cloud attempt at it already ended in `needs-bob`. Everything else (UI, docs, tests, asset wiring) is `Runs: cloud` and runs on cloud agents when they are available. Before a batch starts, Wright lists each step's `Runs` value for Bob, who can flip any of them. The coordinator launches no cloud agent for a `Runs: local` step; it hands that step to Bob. Plans written before this rule are not retrofitted.
 
 ### 2. One worktree per step
 
