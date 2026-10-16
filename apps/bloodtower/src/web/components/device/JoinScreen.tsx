@@ -90,7 +90,7 @@ export function JoinScreen({
           <input
             name="token"
             value={token}
-            disabled={!live}
+            disabled={!live && !onRejoin}
             onChange={(event) => setToken(event.target.value)}
           />
         </label>

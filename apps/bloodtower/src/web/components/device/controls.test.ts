@@ -192,5 +192,21 @@ describe("device screens", () => {
     expect(join).toContain("Session host unavailable.");
     expect(join).toContain("Join code unavailable.");
     expect(join).toContain("Hunters unavailable.");
+    expect(join).toContain('disabled="" name="token"');
+  });
+
+  it("lets a token be pasted before the socket is up when rejoin is wired", () => {
+    const join = renderToStaticMarkup(
+      createElement(JoinScreen, {
+        live: false,
+        code: null,
+        hunters: [],
+        held: [],
+        onRejoin: () => undefined,
+      }),
+    );
+    expect(join).toContain("Session host unavailable.");
+    expect(join).toContain('name="token"');
+    expect(join).not.toContain('disabled="" name="token"');
   });
 });
