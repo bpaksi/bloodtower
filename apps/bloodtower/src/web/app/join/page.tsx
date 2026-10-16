@@ -1,7 +1,5 @@
-"use client";
-
-import { JoinScreen } from "../../components/device/JoinScreen";
+import { LiveJoin } from "../../components/device/LiveJoin";
 
 export default function JoinPage() {
-  return <JoinScreen live={false} code={null} hunters={[]} held={[]} />;
+  return <LiveJoin />;
 }

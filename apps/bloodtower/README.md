@@ -5,10 +5,10 @@
 | Purpose | The real app: a story pack on the Story board, iPads joining by QR, first press wins, and a timing log. R1 connects to the tower and sends no effects. |
 | Phase | Build |
 | SDLC tier | Full |
-| Status | R1 batch B2. Loader, timing log, session lock, tower port, Story board and device screens. The socket hub is the next batch. [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). [spec.md](spec.md). |
+| Status | R1 batch B3. The socket hub joins the Story board and the devices to one session. [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). [spec.md](spec.md). |
 | Disposable? | No. |
 
-The Mac runs this host. The Story board is a display-only page at `/board`. iPad join is `/join` and the device controls are `/device`. Those pages do not open a session socket yet (that is the next batch). tower-poc stays a sidecar on port 4747 (reuse-guide option A). This host does not open that connection and does not send a light, a sound or a drum.
+The Mac runs this host. The Story board is a display-only page at `/board`. iPad join is `/join` and the device controls are `/device`. Those pages open `/ws` on this host. tower-poc stays a sidecar on port 4747 (reuse-guide option A). This host uses a mock tower unless `TOWER_URL` points at that sidecar. It does not connect until a joined device presses connect, and it does not send a light, a sound or a drum.
 
 ## Where things are
 
@@ -30,7 +30,7 @@ That checks `packs/test`. `pnpm --dir apps/bloodtower pack:lint -- <dir>` checks
 
 ## Running on the Mac
 
-From the repo root. One process serves the Story board. It binds `0.0.0.0:4787` unless `PORT` is set. It creates `apps/bloodtower/data/` on start (gitignored) and does not open a database until the hub batch.
+From the repo root. One process serves the Story board and the session socket. It binds `0.0.0.0:4787` unless `PORT` is set. It creates `apps/bloodtower/data/` on start (gitignored) and opens `session.sqlite` there.
 
 The workspace root package is also named `bloodtower`, so `pnpm -F bloodtower` selects both and its `build` runs every app. `--dir apps/bloodtower` selects this app.
 
@@ -40,9 +40,9 @@ pnpm --dir apps/bloodtower build
 pnpm --dir apps/bloodtower start
 ```
 
-Open http://127.0.0.1:4787/ for the scaffold page, http://127.0.0.1:4787/board for the Story board, http://127.0.0.1:4787/join for join, and http://127.0.0.1:4787/device for the device controls. The board has no buttons. Join and device say the session host is unavailable until the hub lands.
+Open http://127.0.0.1:4787/board for the Story board (no buttons; the join code and QR come from the session), http://127.0.0.1:4787/join?code= followed by that code to hold hunters, then Open controls for `/device`. A phone on the same network should open the board by the Mac's LAN address so the QR points at that address. The home page has no buttons. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
 
-The page has no buttons. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
+`TOWER_URL=ws://127.0.0.1:4747/ws` uses tower-poc instead of the mock. Start tower-poc yourself. This host still waits for a connect press. `DIAG_LOG=/path/to/log` records sidecar message types only.
 
 A worktree reads ports, the SQLite folder and `packsDir` from `.wt.json` (`pnpm wt`). `PORT`, `DATA_DIR` and `PACKS_DIR` override those for one run. With no worktree file, packs are the repo's `packs/` directory.
 
@@ -58,6 +58,6 @@ pnpm start    # one process serving the export; run pnpm build first
 pnpm e2e      # Playwright on port 4788 (first time: pnpm -F bloodtower-e2e e2e:install)
 ```
 
-`pnpm dev` is the split process for UI work. The page Bob opens is `pnpm start` after `pnpm build`.
+`pnpm dev` is the split process for UI work. The page is on port 3000 and the socket defaults to `ws://127.0.0.1:4787/ws`. The page Bob opens for a session is `pnpm start` after `pnpm build`.
 
-To run tower-poc beside this app later, start it on 4747. This host does not start it and does not connect to it.
+To run tower-poc beside this app, start it on 4747 and set `TOWER_URL`. This host does not start it.

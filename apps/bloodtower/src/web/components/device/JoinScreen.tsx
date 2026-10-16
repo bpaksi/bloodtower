@@ -10,7 +10,6 @@ export interface JoinHunter {
 
 /**
  * Join landing. Holdings change only from here, and only once a session host is connected.
- * The host itself arrives in a later step; until then every control is off.
  */
 export function JoinScreen({
   live,
@@ -81,7 +80,9 @@ export function JoinScreen({
         className="flex flex-col gap-2"
         onSubmit={(event) => {
           event.preventDefault();
-          if (live && token) onRejoin?.(token);
+          const next = token.trim();
+          if (next.length === 0) return;
+          onRejoin?.(next);
         }}
       >
         <label>
@@ -93,7 +94,7 @@ export function JoinScreen({
             onChange={(event) => setToken(event.target.value)}
           />
         </label>
-        <button type="submit" disabled={!live || token.length === 0}>
+        <button type="submit" disabled={token.trim().length === 0 || (!live && !onRejoin)}>
           Rejoin
         </button>
       </form>

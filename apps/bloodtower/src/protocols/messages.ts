@@ -166,7 +166,12 @@ export const welcomePayloadSchema = z
     clientId: z.string().min(1).max(64),
     role: roleSchema,
     token: tokenSchema,
-    channels: z.array(channelSchema).min(1).max(16),
+    /**
+     * Story board: exactly `storyboard`.
+     * Device: one `ipad:<hunter>` for each hunter it holds at hello, or none yet.
+     * A device that has not taken a hunter has an empty list. That is not the storyboard channel.
+     */
+    channels: z.array(channelSchema).max(16),
     versions: z.strictObject({
       protocol: z.literal(PROTOCOL_VERSION),
       server: z.string().min(1).max(32),
@@ -315,6 +320,11 @@ export const hunterViewSchema = z
     }
   });
 
+const rosterEntrySchema = z.strictObject({
+  id: hunterIdSchema,
+  name: z.string().min(1).max(80),
+});
+
 export const deviceStatePayloadSchema = z
   .strictObject({
     heldHunters: z.array(hunterIdSchema).max(16),
@@ -323,6 +333,16 @@ export const deviceStatePayloadSchema = z
     lock: controlLockSchema.nullable(),
     /** This device won the current lock, or it lost. Null when nothing is locked. */
     won: z.boolean().nullable(),
+    /**
+     * Beside the gameplay lock, so a device can draw the tower, the pause prompt
+     * and the connect and calibrate locks without a second message type.
+     * The roster is id and name only. It carries no private line.
+     */
+    tower: towerSnapshotSchema.optional(),
+    pausePromptId: promptIdSchema.nullable().optional(),
+    connectLock: controlLockSchema.nullable().optional(),
+    calibrateLock: controlLockSchema.nullable().optional(),
+    roster: z.array(rosterEntrySchema).max(16).optional(),
   })
   .superRefine((value, ctx) => {
     if (new Set(value.heldHunters).size !== value.heldHunters.length) {
@@ -338,6 +358,12 @@ export const deviceStatePayloadSchema = z
     }
     if ((value.lock === null) !== (value.won === null)) {
       issue(ctx, "A lock and its won flag are set together.");
+    }
+    if (
+      value.roster &&
+      new Set(value.roster.map((hunter) => hunter.id)).size !== value.roster.length
+    ) {
+      issue(ctx, "A hunter is listed twice.");
     }
   });
 export type DeviceState = z.infer<typeof deviceStatePayloadSchema>;

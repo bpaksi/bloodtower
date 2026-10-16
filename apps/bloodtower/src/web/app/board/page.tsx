@@ -1,6 +1,5 @@
-import { StoryBoard } from "../../components/board/StoryBoard";
-import { waitingStoryboard } from "../../lib/boardView";
+import { LiveBoard } from "../../components/board/LiveBoard";
 
 export default function BoardPage() {
-  return <StoryBoard state={waitingStoryboard()} />;
+  return <LiveBoard />;
 }

@@ -223,6 +223,32 @@ describe("server messages", () => {
       }),
     );
     expect(state.type).toBe("deviceState");
+    const withLocks = serverMessageSchema.parse(
+      envelope("deviceState", {
+        heldHunters: [],
+        views: [],
+        prompt: { id: "begin", label: "Begin" },
+        lock: null,
+        won: null,
+        tower,
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        roster: [{ id: "alpha", name: "Alpha" }],
+      }),
+    );
+    expect(withLocks.type === "deviceState" && withLocks.payload.roster?.[0]?.name).toBe("Alpha");
+    expect(
+      serverMessageSchema.safeParse(
+        envelope("welcome", {
+          clientId: "device-1",
+          role: "device",
+          token,
+          channels: [],
+          versions: { protocol: 1, server: "0.0.0", node: "22.13.0" },
+        }),
+      ).success,
+    ).toBe(true);
     expect(
       serverMessageSchema.safeParse(
         envelope("welcome", {

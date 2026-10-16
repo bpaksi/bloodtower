@@ -105,7 +105,7 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ### Step 7: Server integration and WS hub
 - Depends on: 3, 4, 5, 6
-- Touches: `src/server/{index.ts,hub/**}`
+- Touches: `src/server/{index.ts,hub/**}`, and the step 7 deviations below (protocol fields the device screen already needed, and the page clients that open `/ws`)
 - Deps change: no
 - Scope: wire loader, session, timing log and tower into the WS host; per-device views (Story board gets only `storyboard` targets; devices get shared + their hunters' privates); join token + QR URL + numeric code; origin check as tower-poc D20.
 - Covers: R-ENG-16, R-DEV-4, R-DEV-6, R-WIZ-10, V-4 at runtime.
@@ -177,6 +177,15 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - Q7: holdings change only from iPads. Already settled by Gamewright's rulings in PR #21.
 
 ## Deviations
+
+### B3 (step 7)
+
+- One pull request. The hub is `src/server/hub/**`. `index.ts` starts it. No dependency version changes. The `dev` script sets `DEV_ORIGINS` and `NEXT_PUBLIC_WS_URL` so `pnpm dev` can reach the socket from `next dev`. `pnpm start` still serves the page and the socket on one port.
+- D16. A device with no hunter is welcomed with `channels: []`. The frozen welcome required one channel, and `storyboard` is not allowed on a device.
+- D17. `deviceState` gains `tower`, `pausePromptId`, `connectLock`, `calibrateLock` and `roster` (id and name only). B2 left the tower locks beside the one gameplay lock. The frozen message had no field for them. Private lines stay in `views`.
+- The board, join and device pages open `/ws`. Step 8 and step 9 rendered against props and left the socket for this step. The join URL is taken from the connection's local address, not the Host header.
+- The tower stays the mock unless `TOWER_URL` is set. A winning press is the only connect or calibrate. The snapshot is passed into the session before each projection, and a change is published on a short watch.
+- Gamewright's pack notes are not this step. The loader already merges split pack files (step 3). Section 11 of the pack format (dungeon rooms) stays opaque data (D13). A real schema for it would change the frozen pack contract, and B1's subset is still V-1, V-2, V-3, V-4, V-5, V-8 and V-20.
 
 ### B2 (steps 3, 4, 5, 6, 8 and 9)
 

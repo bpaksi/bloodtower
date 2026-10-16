@@ -6,7 +6,7 @@
 | Source | [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). This spec follows that plan. A choice the plan left open is a decision in §1. |
 | Spec version | 1 (2026-10-15) |
 
-R1 is the thin foundation. It loads a story pack, shows a display-only Story board, lets devices join and press, and writes timing marks. It plays no story beyond the loaded pack's moment list. The tower is connection only: no cue is sent. The socket hub that joins the pages to a live session is the next batch.
+R1 is the thin foundation. It loads a story pack, shows a display-only Story board, lets devices join and press, and writes timing marks. It plays no story beyond the loaded pack's moment list. The tower is connection only: no cue is sent. The socket hub publishes one session to the board and the devices.
 
 ## 1. Decisions
 
@@ -27,18 +27,22 @@ R1 is the thin foundation. It loads a story pack, shows a display-only Story boa
 | D13 | Sections R1 does not run (choices, items, tracks, corruption, quest tokens, encounters, dungeons, endings, `by_length`, and the rest listed on `packSchema`) are parsed and kept. They are not executed. | Plan risk note. Pack schema lives in `pack.ts`. |
 | D14 | Story-pack rules V-15 (all three lengths, reachable win) and V-6, V-7, V-9 through V-14, V-16 through V-19 and V-21 are not R1 loader rules. The schema does not enforce them. | The plan's subset is V-1, V-2, V-3, V-4, V-5, V-8, V-20. |
 | D15 | `tower-reconnect` is not an R1 control action. R-SES-2 names reconnect; the approved control list is Begin, Continue, Pause, Resume, connect and calibrate. Adding reconnect later changes the frozen protocol and is a plan deviation. There is still no automatic reconnect. | The plan's control list, frozen in step 1. |
+| D16 | A device that holds nobody is welcomed with an empty channel list. A channel is `ipad:<hunter>` for a hunter it holds at hello, never `storyboard`. A later hold does not send another welcome. Each `deviceState` is filtered to the hunters that socket holds. | The frozen welcome required one channel, and a new device has no hunter yet. Step 7. |
+| D17 | `deviceState` carries, beside the gameplay lock, the tower snapshot, the pause prompt id, the connect and calibrate locks, and a public roster of hunter id and name. None of those fields carry a private line. | B2 left the tower locks for step 7. The frozen message had nowhere else to put them, and the device screen already takes them as props. |
 
 ## 2. Layout and run
 
 Four packages under `apps/bloodtower/src/`, orchestrated by `apps/bloodtower/package.json`. See [README.md](README.md) for the commands Bob runs.
 
-The host serves the static export and `GET /health`. It does not open a socket to tower-poc, does not construct the tower library, and does not start a WebSocket hub (that is step 7). `src/server/index.ts` and `server.ts` do not import `ultimatedarktower`, `@stoprocent/noble` or `ws`. Those packages are dependencies now so later steps do not change the lockfile; step 1 is the only `Deps change: yes` step in the plan.
+The host serves the static export, `GET /health`, and `/ws`. It loads `packs/test` before it listens. It opens SQLite at `session.sqlite` in the data folder. It does not import `ultimatedarktower` or `@stoprocent/noble`. The hub imports `ws`. The tower library packages stay pinned from step 1; this step does not change a version.
 
-SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`, and does not open a database until the hub batch. Tests use `:memory:`.
+The tower port is the mock unless `TOWER_URL` is set, in which case it is a client of that tower-poc socket. Nothing connects, calibrates or reconnects until a joined device wins that press. `DIAG_LOG` is passed through to the sidecar when it is set. `DEV_ORIGINS` lists extra page origins for `next dev`, exact match only.
+
+SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`. Hub tests use a temporary file. Other tests still use `:memory:`.
 
 ## 3. Protocols contract (frozen)
 
-`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation.
+`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes.
 
 Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
 
@@ -54,10 +58,10 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 
 | Type | What it carries |
 |---|---|
-| `welcome` | `clientId`, `role`, `token`, `channels`, `versions`. A story board channel list is exactly `["storyboard"]`. A device lists `ipad:<hunter>` and never `storyboard`. The token is bound to that role: a storyboard token cannot `hello` as a device (step 7). |
+| `welcome` | `clientId`, `role`, `token`, `channels`, `versions`. A story board channel list is exactly `["storyboard"]`. A device lists `ipad:<hunter>` for each hunter it holds at hello, or an empty list when it holds nobody, and never `storyboard` (D16). The token is bound to that role: a storyboard token cannot `hello` as a device, and a device token cannot open the story board. |
 | `error` | `code` one of `invalid-json`, `invalid-envelope`, `unknown-type`, `invalid-payload`, `invalid-state`, `private-on-storyboard`, `storyboard-control`. |
 | `storyboardState` | Stage `lobby`, `playing` or `paused`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); pause banner; tower snapshot; start gate; lock. |
-| `deviceState` | Held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. |
+| `deviceState` | Held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). |
 
 A losing press is a `control_presses` row with `winner: false`, not an error. The locked result is the `lock` on both states.
 
@@ -109,7 +113,7 @@ TypeScript `TimingMark` and the SQLite columns step 4 will create:
 
 ## 6. Tower safety
 
-Copied here so the app spec states them. The code that connects is step 6; this step's host does none of it.
+Copied here so the app spec states them. The host wires the port from step 6. A winning press is the only call.
 
 - The Story board and the devices do not talk to the tower. The Mac host will, as a client of tower-poc. Outbound messages are `hello`, `connect` and `calibrate` only (D10). It does not send `command`.
 - No bloodtower message carries raw bytes.
@@ -131,18 +135,18 @@ Copied here so the app spec states them. The code that connects is step 6; this 
 | V-1, V-2, V-3, V-4, V-5, V-8, V-20 | 1 schema, 3 files | `pack.test.ts` and one bad pack per rule in `load.test.ts` | — |
 | PRD-41 | 1 types, 4 rows | `timing/log.test.ts` reconstructs a sample run from SQLite | The timing report script is step 10 |
 | R-STA base rows, R-DEV-9 device/holding stats | 4 | `db/store.test.ts` round-trips devices and holdings | The stats summary is out of scope |
-| V2-2 first press | 5 | `engine.test.ts`: two presses, one winner, both rows stored | Live screens updating together is step 7 |
-| R-DEV-4, V-4 at runtime | 5, 7 | `engine.test.ts`: the storyboard projection has no private line and no `ipad:` | The hub still has to be the only sender |
+| V2-2 first press | 5, 7 | `engine.test.ts` and `hub/host.test.ts`: two presses, one winner, both rows stored | — |
+| R-DEV-4, V-4 at runtime | 5, 7 | `engine.test.ts` and `hub/host.test.ts`: storyboard frames have no private line and no `ipad:` | — |
 | R-WIZ-11 start gate | 5 | `engine.test.ts`: Begin stays closed until every hunter is held | — |
 | E15 presence | 5 | `engine.test.ts`: `~no-delta` plays when delta is absent, and is absent when delta is present | Board movement is later |
-| R-DEV-1 | 6 | `server.test.ts`: the host process does not open the tower. `tower/sidecar.ts` is the client | The host process calls it in step 7 |
-| R-DEV-5 | 6, 1 | `tower.test.ts`: a winning connect or calibrate is the only call, and the sources contain no `command` | Step 7 wires a device press to that call |
+| R-DEV-1 | 6, 7 | `hub/host.test.ts`: the host does not open the tower until a winning connect. `tower/sidecar.ts` is the client | — |
+| R-DEV-5 | 6, 7 | `tower.test.ts` and `hub/host.test.ts`: a winning connect or calibrate is the only call, and the sources contain no `command` | — |
 | R-ENG-7 | 6 | `tower.test.ts` mock. Health reports no effects | — |
-| R-SES-2 | 6 | `engine.test.ts` and `port.ts`: connect and calibrate run only from a winning press. No reconnect action (D15) | A live iPad press is step 7 |
-| R-ENG-16, R-DEV-6, R-WIZ-10 | 7 | Channels, targets, six-digit code. `StoryBoard` draws the QR from a state that already has a code | The hub still has to publish that state |
+| R-SES-2 | 6, 7 | `engine.test.ts`, `port.ts` and `hub/host.test.ts`: connect and calibrate run only from a winning press. No reconnect action (D15) | — |
+| R-ENG-16, R-DEV-6, R-WIZ-10 | 7 | `hub/host.test.ts`: six-digit code, join URL, storyboard channel, device channels. `LiveBoard` draws the QR from the live state | — |
 | V2-1 display only | 8 | `boardView.test.ts`: the board markup has no button, input, textarea, select or link | — |
 | V2-3 prompt only, V2-8 static list | 8 | `boardView.test.ts` renders one prompt and the hunter list | Cycling the sidebar stays out of scope |
-| V2-2, R-DEV-3, R-DEV-8, R-DEV-9 join | 9 | `controls.test.ts`: hold and control messages, locked copy, private line, calibrate stays off until connected. A phone user agent gets the compact layout and a switch to the full one | A live session is step 7 |
+| V2-2, R-DEV-3, R-DEV-8, R-DEV-9 join | 7, 9 | `hub/host.test.ts`: two continues, one winner, both rows. `controls.test.ts`: hold and control messages, locked copy, private line, calibrate stays off until connected. A phone user agent gets the compact layout and a switch to the full one | — |
 | AC-1..AC-9 | 10 | AC-1 in part: check, build, smoke, and no edit under `apps/tower-poc` or `apps/burgomaster-funeral-poc` | The rest of the acceptance list |
 
 The plan's step 8 shorthand "V-1, V-3, V-8" is the flow rules V2-1, V2-3 and V2-8 in `apps/burgomaster-funeral-poc/docs/poc-v2-flow.md` (prompt only, static hunter list). The story-pack rules with the same numbers are the step 3 rows above. They are different checks.
