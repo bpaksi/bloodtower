@@ -1,6 +1,6 @@
 # Dracula (Vellmoor): Continuity Guide
 
-Owner: **Loremaster** · Created 2026-10-16 · Status: draft. Settled calls are Loremaster's; items marked **BOB** wait on Bob.
+Owner: **Loremaster** · Created 2026-10-16 · Status: draft. Settled calls are Loremaster's; Bob's rulings in §4.2.
 Built from Gamewright's draft art bible (`dracula-art-continuity.md`, "bible") and art audit (`dracula-art-audit.md`, "audit"), both 2026-10-16. Their `file:line` citations are kept.
 Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets/stories/dracula/scripts/cast.md · `props` = assets/stories/dracula/scripts/props.md · `tok` = assets/stories/dracula/scripts/tokens-and-encounters.md · `open` = research/stories/dracula/opening-scene.md · `mech` = research/stories/dracula/mechanics-map.md · scene scripts by file name (all in assets/stories/dracula/scripts/).
 
@@ -55,14 +55,14 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 - **Funeral:** in a shut coffin on trestles; his coat (inside the coffin with him, searched at `anton-coat`) holds a sealed holy-water flask and the "lady's rooms" scrap. Heard only as remembered voice.
 
 ### 1.7 Lenka Morosz
-- **Fixed:** 19, foundling, presses mountain violets (cast:37). **Ludmila's face** (n5-portrait-gallery.md:26–27). Hair/eyes/build unspecified → **BOB Q5**.
+- **Fixed:** 19, foundling, presses mountain violets (cast:37). **Ludmila's face** (n5-portrait-gallery.md:26–27). Hair/eyes/build: **Illusionist decides alone** (Bob), one shared Lenka/Ludmila face sheet.
 - **Before taken:** never on screen. **Captive:** white dress, high room; never bitten, no marks (rulings.md:33). Final: holds the last violets, opens the window.
 - **Where held (C-8, settled):** "the lady's rooms" = the high room at the top of the stair behind the gallery, in the east wing.
-- **Spoilers:** no Lenka face on the dashboard before captivity art, and any earlier face is the Ludmila spoiler → **BOB Q2**. No open window with Lenka in pre-ending art.
+- **Spoilers (Bob):** Lenka's face is **never shown until the reveal**: only from behind, at a window, in shadow, through a doorway. Her voice carries warmth. Ludmila's portrait stays covered until the reveal. No open window with Lenka in pre-ending art.
 
 ### 1.8 The Count (Vlad)
 - **Fixed:** tall, all in black, pale long fingers (tok:141); one ageless face across 400 years of portraits (n5-portrait-gallery.md:6); the dark-haired brother (tok:110,117). Beautiful very old handwriting (cream letter, Tome).
-- **Age by night:** **BOB Q1** (default until ruled: Stoker, one face, old/white-moustached when hungry nights 1–3, younger and darker after feeding).
+- **Age (Bob, C-6):** old throughout: aged, white moustache. Young (dark-haired) only in memories and portraits.
 - **History (C-7, settled):** he is the 400-year lord who **came back** in Tomas's guard years.
 - **Spoilers:** face hidden before `n23-sergius-blade.03` (hand, mist, silhouette, castle only). At the funeral he is **not shown at all**; only his servant.
 
@@ -73,7 +73,7 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 - **Mourners:** the village on benches; anonymous.
 
 ### 1.10 Other speakers
-Oskar, Vadoma, Jakob, Marta, Ilka, Ludmila, Ursula, Dorn, Jozef, Gerhardt, Sergiu, narrator: use bible §1.9 facts as written. Marta's location → **BOB Q3**. Narrator face → **BOB Q6**.
+Oskar, Vadoma, Jakob, Marta, Ilka, Ludmila, Ursula, Dorn, Jozef, Gerhardt, Sergiu, narrator: use bible §1.9 facts as written. Marta: at home night 1, summoned to the castle later (§4.2, beat TODO). Narrator: voice only, lantern emblem, no face.
 
 ### 1.11 Spoiler rules (what can't show before its reveal)
 | Secret | Reveal | Earlier art must avoid |
@@ -127,18 +127,18 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 
 ### 2.2 Other scenes — TODO
 Each needs the §2.1 table. Known anchors to carry in:
-- n1-lantern-and-bell — TODO (inn, night 1; Emeric soaked; black-wax letters; Marta line pending BOB Q3).
+- n1-lantern-and-bell — TODO (inn, night 1; Emeric soaked; black-wax letters; Marta at home, shutters nailed).
 - n1-burgomasters-house — TODO (Anton in parlour with poker per C-5; Lenka's room window open, latch scratched outside; violet on the sill).
 - n1-open-grave — TODO (Oskar's grave dug from below, lid split outward).
 - n1-fortune-reading — TODO.
 - nx-midnight-procession — TODO (ghosts in old coats, lanterns that give no light).
 - nx-pressed-flower — TODO.
 - n23-catacombs-of-saint-ysolde — TODO (lookalike tells; reliquary niche).
-- n23-sergius-blade — TODO (Count's face first shown `.03`; look per BOB Q1).
+- n23-sergius-blade — TODO (Count's face first shown `.03`; old, white moustache per Bob C-6).
 - n3-fly-eaters-cell — TODO.
 - n4-earth-boxes — TODO (stencil text allowed).
 - n4-finding-the-tome — TODO.
-- n5-drawbridge — TODO (keys per BOB Q4; Marta at the little gate).
+- n5-drawbridge — TODO (keys are physical RtDT components, §6; Marta at the little gate).
 - n5-portrait-gallery — TODO (covered canvas until reveal).
 - n5-final-confrontation — TODO (window shut; Lenka in white; Ilka half-seen until gallery).
 - n5-ending-rescued / endures / taken / turned — TODO (bible audit B4 ending checks).
@@ -157,7 +157,7 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 | oskar | Umbriel | hollow, distant, sorrowful | — |
 | count | Algieba | smooth, courtly, menacing | "Marta pours my wine now, Varga." |
 | ilka | Achernar | soft, dreamy, eerie | "My little Wren." |
-| lenka *new* | Leda | young, earnest, stubborn | — |
+| lenka *new* | Leda | young, earnest, stubborn; warm (Bob) | — |
 | ludmila *new* | Leda (processed softer) | hushed, resolute, a letter read aloud | — |
 | anton *new* | Iapetus (processed, remembered) | desperate, fatherly, breaking | — |
 | vadoma *new* | Gacrux | old, husky, amused | — |
@@ -185,34 +185,13 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 | C-12 | Dorka's mother and the castle servant are **non-speaking NPCs**: they get NPC stills/ref sheets, not cast.yaml ids. Missing cast portraits are a production list (Gamewright), not a contradiction. | manifest vs packs/dracula/cast.yaml | none in scripts; Gamewright to label them NPC in the manifest |
 | C-13 | Intended: the burn vanishing in Turned shows she is turned. Scar is permanent otherwise. | n5-ending-turned.md:19 vs chars:15 | none |
 
-### 4.2 Needs Bob (most important first; recommended option first)
-**Q1 (C-6) How does the Count look by night?**
-- a) **One ageless face; old and white-moustached when hungry (nights 1–3), younger and dark-haired after feeding (nights 4–5).** — Stoker, and reconciles all three sources.
-- b) Always the same ageless dark-haired face; drop the "old man" line (n23-sergius-blade.md:30). — simplest art, one ref sheet.
-- c) Old with a white moustache throughout; young only in the duel memory and portraits. — most Stoker-literal, weakest tie to "same face".
-
-**Q2 Does Lenka get a speaking portrait before the gallery, and how is Ludmila's face hidden?**
-- a) **No face until the reveal: Lenka speaks over a back-turned/silhouette-at-the-window portrait; Ludmila's canvas stays covered.** — protects the core twist with no new art rules.
-- b) Lenka is veiled (bridal veil) in her portrait until the gallery. — fits the bridal imagery (tok:277), but a veil may read as a clue.
-- c) Show Lenka's face freely; only Ludmila is hidden. — easiest, but the gallery reveal loses its punch.
-
-**Q3 (C-4) Where is Marta during play?**
-- a) **At the castle, keeping the little gate and pouring his wine; Tomas's night-1 line changes.** — three shipped scripts depend on it (n23-sergius-blade.md:53, n5-drawbridge.md, cast:31). Edit n1-lantern-and-bell.md:60: "Marta is at home, asleep, with the shutters nailed. She will wake at dusk and ask what the lights mean." → "Marta went back up the hill a month ago. You nailed her shutters; she went anyway."
-- b) At home on night 1, summoned to the castle by night 2–3. — keeps the n1 line, but needs a new beat to show her taken.
-- c) At home all game; drop the gate/wine lines. — breaks the drawbridge scene.
-
-**Q4 (C-11) Are the three keys physical objects in the art?**
-- a) **No: the keys are the artifacts; only the locks turning is shown, "in locks no one can see".** — matches mech:16 and n5-drawbridge.md:19.
-- b) Yes, three distinct keys, one awarded per kingdom. — tangible reward, but needs three new props and conflicts with "no one can see".
-
-**Q5 Who decides Lenka's (and Ludmila's) hair, eyes and build?**
-- a) **Illusionist proposes a shared face sheet; Bob approves it once, then it's locked.** — fast, and Bob still controls it.
-- b) Bob specifies them up front. — most control, slower.
-- c) Illusionist decides alone. — fastest; risky for the central face.
-
-**Q6 Does the narrator get a face?**
-- a) **No: narrator is voice only; the cast.yaml portrait id points to a neutral emblem (e.g. a lantern).** — a storyteller face competes with the cast.
-- b) Yes, a hooded storyteller seen only in the bookends. — fits the 1981 homage framing.
+### 4.2 Bob's rulings (2026-10-16)
+- **C-6 Count's look (Q1): old throughout.** Aged, white moustache, all in black, tall, pale long fingers, every night. He is shown **young only in memories** (e.g. the Sergiu duel memory, tok:110,117) **and in the gallery portraits** (n5-portrait-gallery.md:6). No feeding/hunger change. n23-sergius-blade.md:30 stands as written.
+- **Lenka / Ludmila (Q2): Lenka's face is never shown until the reveal.** Show her only from behind, at a window, in shadow, or through a doorway. Her voice carries warmth (direct `lenka` reads warm; add "warm" to the style). **Ludmila's portrait stays covered** until the gallery reveal.
+- **Lenka / Ludmila look (Q5): Illusionist decides alone.** One shared face sheet, locked once made; no Bob sign-off needed.
+- **C-4 Marta (Q3): at home on night 1** (n1-lantern-and-bell.md:60 stands; do **not** apply the earlier 3a edit). **The Count summons her to the castle later.** **TODO (Loremaster): write the summons beat.** Likely fits: (a) a cream letter "Come home" left for Marta (the same letter Marta has in her apron, n1-burgomasters-house.md:87) found or felt by Tomas on night 2 at `n2-burgomasters-funeral.09.private.tomas` / `.end.private.tomas`, then (b) a confirming private beat on night 3 (Tomas finds the shutters pried and Marta gone) before `n23-sergius-blade.md:53` ("Marta pours my wine now"). Art until written: Marta at home, shutters nailed, asleep by day, nights 1–2; at the castle gate from n23-sergius-blade on. Also check `.end.private.tomas` ("Marta's still behind it") — that line assumes she's already at the castle on night 2 and must be revised with the beat.
+- **Narrator (Q6): voice only, no face.** `por.narrator` = a neutral **lantern emblem**.
+- **C-11 Keys (Q4): physical objects players hold**, using **only existing Return to Dark Tower components** (no new pieces). **Which component: pending** (see §6). n5-drawbridge.md:19 "in locks no one can see" still works (the locks are unseen, the keys are held). Until chosen, art draws no key objects.
 
 **Pending with Gamewright → Bob (not asked here):** corruption visible on faces (0/1/2) or meter only; single portrait vs arc portraits (risen Dorka, turned variants). Until ruled: no visual corruption; one portrait per character, Dorka's = risen look.
 
@@ -232,3 +211,17 @@ From the audit (65 assets checked; 53 are text placeholders, 3 pass). Base path 
 | `stills/n2-burgomasters-funeral.lid-choice@dashboard.png` | 3 unidentifiable hunters (need 4); candles don't lean toward Dorka (n2:121); Anton's coffin open; palette jump | four identifiable hunters; clear candle lean; Anton's coffin shut; scene palette |
 
 Also check `.10`: violet must read deep purple and pressed flat, not a red fresh flower (props:8).
+
+## 6. Keys: candidate RtDT components (pending choice)
+Bob: keys are physical things players hold, existing Return to Dark Tower components only. Sources fetched 2026-10-16:
+[base rulebook v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) ("RB"), [base contents](https://restorationgames.com/shop/return-to-dark-tower/), [Alliances contents](https://restorationgames.com/shop/return-to-dark-tower-alliances/), [Alliances rulebook](https://restorationgames.com/wp-content/uploads/2021/11/RTDT_Alliances-Rulebook.pdf), [Covenant contents](https://restorationgames.com/shop/return-to-dark-tower-covenant/), [Covenant rulebook](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Covenant_Rulebook-web.pdf).
+
+| Rank | Real component (official name) | Exists? | Fit as a kingdom key | Tradeoff |
+|---|---|---|---|---|
+| 1 | **Quest Item cards** (base: 20 small cards) | yes | RB: "When you gain a quest item, find and take it from the quest item deck in the box"; carry limit **unlimited**; spent/lost ones go back to the box | Built for exactly this (named item fetched on a quest reward, kept in front of the hero). Card names won't say "key"; must pick three and forbid spending them. |
+| 2 | **Treasure cards** held out of the deck (base 22, Alliances 20, Covenant 20) | yes | named cards, held | Count against the **four-treasure** carry limit and carry live abilities; held-out cards shrink the market. |
+| 3 | **Companion cards** (base 10, Alliances 12 guild companions) | yes (cards; placed next to the hero board) | held | Companions are people with app-driven events; reads as allies, not keys. Gamewright's "Virtue card" doesn't exist: virtues are **Virtue tiles** (base 16 = hero + one **kingdom virtue tile** per kingdom), slotted on hero boards and already in use. |
+| 4 | **Quest markers** (base: 3 standees; Alliances +1) | yes, as standees, not "quest tokens" | placed on board spaces, **removed when the quest completes** | Exactly three in the base box, but rules put them back, not on the hero board; four are needed for kingdom rotation only if every kingdom has one. |
+| 5 | **Building miniature** lifted off the board (16: 4 each Citadel/Sanctuary/Village/Bazaar) | yes | big, kingdom-tied | The board needs the building for skulls/cleansing/reinforce; removing it changes play. Covenant **monument miniatures** (8) are kingdom-tied too, but monuments can't be used with Alliances guilds. |
+
+Recommendation for Gamewright/Bob: three named **Quest Item cards**, one per completed kingdom, unspendable. Art: draw the chosen card's object.
