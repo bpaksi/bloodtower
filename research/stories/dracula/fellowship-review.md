@@ -53,8 +53,13 @@ New moments use named ids (`scene.<name>`), like the existing event moments, so 
 - **E. earth-boxes:** a Wren + Tomas beat. Ilka's weave and Marta's stencil: he puts a box beside each woman he keeps. The Count could also whisper a split ("Varga carried these for me, ask him").
 - **F. final-confrontation (T3):** one Count line, tied to the guard pick, that sets the guard against the carrier ("Give her to me and I'll give you back your mother, Kessel").
 
+## Gamewright rulings (Oct 16 2026)
+- **Journal clues have no game effect.** The new clues (high meadow, one house, garrison moved, no portrait) are story only.
+- **Combine trigger:** there is no Dashboard. The Story board (Mac) is display only, and every tap is on an iPad. A shared or combine moment auto-plays on the Story board once every present hunter in it has tapped done on their private line.
+- **Lookalike and regroup:** a rejoining lookalike gets no +1; its fake reunion has no game effect and is a clue for observant players. The real hunter's +1 is granted once, on return or on unmasking.
+
 ## Open questions
-1. **Regroup rule wording:** "+1 to the next fight" is Gamewright's. These scripts only cite it ("per mechanics"). Does a rejoining lookalike also grant the +1?
-2. **Combine trigger:** the storyboard combine moments play "once the hunters have compared". Is that a Dashboard tap, or automatic after the privates? (Gamewright/engine.)
-3. **New journal clues** (high meadow, one house, garrison moved, no portrait) are flavour, with no mechanical effect unless Gamewright attaches one.
-4. Should proposal B (split pressed-flower clues) go ahead, given its voice cost?
+1. ~~Regroup rule and a rejoining lookalike.~~ **Resolved:** no +1 for the lookalike (see above).
+2. ~~Combine trigger.~~ **Resolved:** auto-play once all hunters in it tap done on their iPads.
+3. ~~Journal clue effects.~~ **Resolved:** no game effect.
+4. Should proposal B go ahead? It splits each dusk's pressed-violet clue across two iPads and changes 16 existing lines, so it needs re-voicing.

@@ -6,7 +6,7 @@
 - **Setting:** A long sword wrapped in rotted banner-cloth, the steel bright as if forged this morning, warm to the touch. Outside, wolves in a ring that do not come closer.
 - **Mood:** Wonder, then the Count's first face-to-face visit.
 - **Cast:** Narrator, Wren Kessel, Tomas Varga, The Count, Sister Agnes Hallow, Emeric Lutz
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -34,7 +34,7 @@
 **n23-sergius-blade.grip.private.emeric** [still] `ipad:emeric` [prop: sergiu-blade]
 > **Emeric (thought):** A knot is worked into the grip-wrap. It's the weave from Lenka's shawl, the one Gerhardt labelled "the old house, before the fall."
 
-**n23-sergius-blade.grip-shared** [still] [prop: sergiu-blade] — plays once the hunters have compared the sword (before `.03`)
+**n23-sergius-blade.grip-shared** [still] [prop: sergiu-blade] — Story board; auto-plays once every present hunter in it has tapped done on their `.grip.private` line (before `.03`)
 Journal: "Lenka's shawl and Sergiu's sword are of one house. He kept a window."
 > **Emeric:** The grip's wrapped in the weave from Lenka's shawl. Gerhardt called it the old house.
 > **Tomas:** And the guard drank to the son who kept the window. Her shawl, his sword. One house.
@@ -85,7 +85,7 @@ The Blade is held (key 1 or 2); the carrier is chosen on the Mac. Then the midni
 > **The Count:** Miss Morosz sends her regrets. She is resting. She refuses me every evening.
 > **Tomas:** Then she's alive, and she's winning.
 
-**n23-sergius-blade.09~guard** [still] — any hunter is at 2 corruptions: that hunter's private .08 still plays, then this dashboard line replaces .09; the taunt has no effect on them (the Count never strikes a hunter at 2)
+**n23-sergius-blade.09~guard** [still] — any hunter is at 2 corruptions: that hunter's private .08 still plays, then this Story board line replaces .09; the taunt has no effect on them (the Count never strikes a hunter at 2)
 > **Narrator:** He looks past you, up at the castle, as if someone there had called him. The sword keeps its light all the way back to the road.
 
 **n23-sergius-blade.06~no-tomas** [clip] — Tomas not in play (same cues) [prop: sergiu-blade]

@@ -116,7 +116,7 @@ Card 5: **Follow the cloaked mourner (risky)**. A mourner slips out. Go after th
 
 ## Moments (continued)
 
-**n2-burgomasters-funeral.lid-choice** [still] — event moment, plays after `.03` and before `.04`. A Dashboard choice for the whole party: **Nail the lid** (spend one stake) or **Keep the stake and watch**. Effect on the fight is Gamewright's call (proposed: nailing weakens Dorka; watching keeps the stake but she rises at full strength). Either way she rises and the "lady's rooms" line still plays.
+**n2-burgomasters-funeral.lid-choice** [still] — event moment, plays after `.03` and before `.04`. A choice for the whole party, voted on each iPad (the Story board only shows the result): **Nail the lid** (spend one stake) or **Keep the stake and watch**. Effect on the fight is Gamewright's call (proposed: nailing weakens Dorka; watching keeps the stake but she rises at full strength). Either way she rises and the "lady's rooms" line still plays.
 [sfx: a fly, then silence] [tower: heartbeat]
 > **Narrator:** The flies have gone quiet. Every candle leans toward the second coffin. There is time, just, to put a stake through a girl in her wedding dress in front of her mother. Or there is time to wait and be sure.
 

@@ -6,7 +6,7 @@
 - **Setting:** Father Oskar's fresh grave, dug open from below, the coffin lid split outward. His study in the vestry, ransacked. A map pinned under the altar cloth.
 - **Mood:** Investigation, then sorrow turning to horror.
 - **Cast:** Narrator, Wren Kessel, Emeric Lutz, Sister Agnes Hallow, Father Oskar, Tomas Varga (variants)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -45,7 +45,7 @@
 **n1-open-grave.map.private.emeric** [still] `ipad:emeric`
 > **Emeric (thought):** Gerhardt's margin, beside the old weave: "the high meadow, where the first house fell." One of Oskar's four parishes is blotted out. Which one?
 
-**n1-open-grave.map-shared** [still] — plays once the hunters have compared what they know about the blotted parish (before `.07`)
+**n1-open-grave.map-shared** [still] — Story board; auto-plays once every present hunter in it has tapped done on their `.map.private` line (before `.07`)
 [sfx: paper rustle] Journal: "The blotted parish is the high meadow: the violets' home, and his."
 > **Agnes:** The ink hides the high meadow. He signed my ledger from there.
 > **Wren:** Violets grow up there. Nowhere else. It's where she comes from. And him.

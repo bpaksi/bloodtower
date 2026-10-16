@@ -2310,6 +2310,14 @@
   source: tokens-and-encounters.md
   lines:
     - {id: "enc-wedding-uphill.03~lost-blocked.vo-01", speaker: narrator, text: "The train closes over one of you and opens again, as if it found nothing it wanted. It takes something from your packs, and someone from the village. Drop a skull."}
+- id: "enc-wedding-uphill.03~lost-cap-reached"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wedding-uphill.03~lost-cap-reached.vo-01", speaker: narrator, text: "The train closes over one of you, cold and sweet, and moves on up the hill. Nobody from the village follows it tonight. It takes something from your packs instead."}
+- id: "enc-wedding-uphill.03~lost-blocked-cap-reached"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wedding-uphill.03~lost-blocked-cap-reached.vo-01", speaker: narrator, text: "The train closes over one of you and opens again, as if it found nothing it wanted. It takes something from your packs and goes on up the hill alone."}
 - id: "enc-wedding-uphill.03~avoided"
   source: tokens-and-encounters.md
   lines:

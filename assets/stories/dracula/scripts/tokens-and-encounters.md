@@ -4,7 +4,7 @@
 
 Format follows [README.md](README.md): moment IDs `enc-<id>.NN`, [still] or [clip], at most two speakers per exchange, `[tower:]` cues are light and sound only (no drum turns, no seal breaks), private lines only as `ipad:<hunter>`. Costs use only story vocabulary from [rulings](../../../../research/stories/dracula/rulings.md): corruption, story items (holy water, the host, a stake), findings (journal clues), foes, and story skull drops (cap 2 per night; under 6 skulls in supply the drop becomes "+1 foe on night 5"). No encounter costs or grants warriors or spirit; the base game tracks those.
 
-**Softer outcome rule (Bob, Oct 16 2026).** An encounter can never give a hunter their 3rd corruption. A hunter already at 2 is never asked to pay one; every encounter cost that can corrupt has a `~blocked` variant that plays instead, with a softer cost named in that encounter: the party loses one story item, loses a finding (the newest journal clue), or takes only a scare (no cost, no reward). Which one is set per encounter below.
+**Soft cost rule (Gamewright, Oct 16 2026).** The rule caps an encounter's cost; it does not set it. An encounter can never give a hunter their 3rd corruption. A hunter already at 2 pays at most one soft cost in its place, and never corruption, warriors or spirit. The soft costs are: the party loses one story item, loses its newest finding (the newest journal clue), or takes a scare (no stat effect). Every encounter cost that can corrupt has a `~blocked` variant that plays instead and names which soft cost applies. Costs that are not corruption (for example a story skull drop) still apply as written, unless a cap replaces them.
 
 **Site names.** Vellmoor uses only the RtDT board: four kingdoms (K1–K4), each with a Village, Sanctuary, Bazaar and Citadel, plus the tower. Kingdoms are shown, never spoken. Where the fortune draws a building (d4 Village / Sanctuary / Bazaar / Citadel), the site is written "fortune building".
 
@@ -91,7 +91,7 @@ Then: `nx-midnight-procession.03.private.<hunter>` and `nx-midnight-procession.0
 > **Narrator:** The mist parts on a window that is not in this valley, or is in it every night. A woman in white climbs onto the sill.
 
 **enc-the-window.02** [clip]
-Choice on the dashboard: **Watch** (one present hunter takes 1 corruption; finding) or **Look away**.
+Choice voted on each iPad (ruling 6; the Story board shows the result): **Watch** (one present hunter takes 1 corruption; finding) or **Look away**.
 > **The Count (far off):** Ludmila. Not the window. Anything but the window.
 > **Ludmila (hushed):** Then do not come in.
 
@@ -155,7 +155,7 @@ Choice on the dashboard: **Watch** (one present hunter takes 1 corruption; findi
 > **The Count (whisper):** Your master sold me a name through a door like this one. Ask me what he got for it.
 
 **enc-at-the-door.03** [still]
-Choice on the dashboard: **Ward the door** (spend holy water or the host) or **Hold it shut** (one present hunter takes 1 corruption).
+Choice voted on each iPad (ruling 6; the Story board shows the result): **Ward the door** (spend holy water or the host) or **Hold it shut** (one present hunter takes 1 corruption).
 [tower: low]
 > **Narrator:** The latch stops moving. The voice goes away up the hill, still polite. She refuses him every evening, he said. He said it as a complaint.
 
@@ -279,6 +279,7 @@ Choice: **Pocket it** (finding) or **Follow the pages** (one present hunter take
 - **Beat:** A bridal procession climbs the hill road in the mist: a veiled girl in front, pale women behind, no groom. The brides at the back turn to look.
 - **Cost / stake:** Fight: 2 foes (brides; Striga minis as proposed in the asset map). Losing costs one present hunter 1 corruption and one story skull drop. Or let it pass: spend a stake or holy water, no fight.
 - **At 2 corruptions (`~blocked`):** if the fight is lost and the hunter it falls on is at 2, they take no corruption; the skull still drops and the party loses one story item.
+- **Skull cap (Gamewright, Oct 16 2026):** the skull dropped on a lost fight counts toward the cap of 2 story drops per night. If the cap is already reached, no skull drops: the loss pays one soft cost instead (the party loses one story item), with `~cap-reached` variants. The under-6-skulls rule (+1 foe on night 5) applies only when a drop would happen.
 - **Outcome (proposed):** Win = the veil's gold thread (finding: "He dresses her above the gallery") and one stake. Let it pass = no finding, no fight.
 - **Still prompt:** A ghostly bridal procession climbing a misty mountain road toward a castle, a veiled girl at the front, pale women in white turning their heads backward.
 
@@ -300,6 +301,12 @@ Choice: **Fight** (2 foes, brides, per mechanics) or **Let it pass** (spend a st
 
 **enc-wedding-uphill.03~lost-blocked** [still] — the fight is lost and the hunter it falls on is at 2 corruptions (same cues)
 > **Narrator:** The train closes over one of you and opens again, as if it found nothing it wanted. It takes something from your packs, and someone from the village. Drop a skull.
+
+**enc-wedding-uphill.03~lost-cap-reached** [still] — the fight is lost and tonight's 2 story skull drops are already used: the hunter takes 1 corruption, no skull drops, and the party loses one story item instead (same cues)
+> **Narrator:** The train closes over one of you, cold and sweet, and moves on up the hill. Nobody from the village follows it tonight. It takes something from your packs instead.
+
+**enc-wedding-uphill.03~lost-blocked-cap-reached** [still] — the fight is lost, the hunter it falls on is at 2 corruptions, and the cap is reached: no corruption, no skull; the party loses one story item (one soft cost only) (same cues)
+> **Narrator:** The train closes over one of you and opens again, as if it found nothing it wanted. It takes something from your packs and goes on up the hill alone.
 
 **enc-wedding-uphill.03~avoided** [still] — the party let it pass (cues: [tower: low])
 > **Narrator:** You stand aside with your heads bowed, as you would for any wedding. The brides at the back stop smiling. The procession goes on up the hill without you.
