@@ -290,8 +290,90 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.10` clip (:63) | Count's voice **from everywhere** (no figure); Lenka's voice far off | — | — | — | — | tower dim → silence |
 | `.11` (:71) | — | — | — | — | castle above, **every window lit** | grey non-dawn |
 
-### 2.x Remaining scenes — TODO
-- n5-drawbridge, n5-portrait-gallery, n5-final-confrontation, n5-ending-rescued / endures / taken / turned — TODO.
+### 2.13 n5-drawbridge (night 5, the castle gate) — DONE
+**Constants.** Chasm with no bottom, raised drawbridge, little side gate for deliveries, wolves on the road behind, castle above (n5-drawbridge.md:6). Night, mist, castle windows lit. Needs all three keys: the three key Treasure cards are held by their keepers (§6); art may show the three artifacts (sword, lamp, Tome), not cards. **Marta** first seen in person here: young woman, **castle maid's apron over faded castle livery**, lamp turned low (:28; tok:299) — no fangs (half-turned shows only as pallor/sleepiness, if at all).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:13) / `~boxes-left` (:56) | all present on the road | facing the chasm | sword carrier with the glowing blade | — | `~boxes-left`: **no smoke** on the hill | night, mist |
+| `.02` clip (:17) / `~boxes-left` (:58) | Count **on the battlements** (old, white moustache) | high above | — | — | drawbridge coming down; keys turn "in locks no one can see" (no key objects at the gate) | — |
+| `.03` (:22) / `~no-tomas` (:61) / `~no-wren` (:69) | Tomas, Wren | at the bridgehead | — | — | little gate 20 yards left | — |
+| `.04` (:26) / `~no-tomas` (:63) | **Marta** behind the little gate, opened a hand's width | — | apron, lamp turned low | — | — | lamp-glow |
+| `.05` (:31) / `~no-tomas` (:66) | Tomas, Marta | at the gate | — | — | — | — |
+| `.06.private.*` (:35–42) | picker | — | Tomas: Marta hands him the lamp, **hands warm**; Wren: **mother bolt in her hand, still illegible** | — | — | iPad |
+| `.07~gate` (:49) / `~drawbridge` (:51) | all present | the long way / the front | — | — | drawbridge: something on the battlements turns its head | — |
+
+### 2.14 n5-portrait-gallery (night 5, the long gallery) — DONE
+**Constants.** 400 years of house portraits; **every Vlad portrait the same face — young** (Bob: young only in portraits/memories) (n5-portrait-gallery.md:6). At the end, a **covered canvas** (Ludmila) until `.04`. Some eyes blink; one hostile portrait. **The reveal moment is `.04`**: from here on Lenka's/Ludmila's face may be shown. Night, candle-sconces, music-box waltz.
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:13) | all present | walking the gallery | — | — | portraits' eyes following | sconces |
+| `.02` (:17) / `~no-emeric` (:56) | Emeric, Wren | — | — | — | same young face in many fashions; covered canvas at the end | — |
+| `.03` clip (:21) | hostile portrait | a painted arm reaching out | — | — | frame splintering | — |
+| `.04` (:25) / `~no-agnes` (:50) | Agnes pulls the cloth (`~no-agnes`: canvas uncovered, Wren speaks) | at the last canvas | — | — | **REVEAL: girl in a white dress holding mountain violets — Lenka's face, 400-year-old paint** | — |
+| `.05` (:29) / `~no-tomas` (:53) | Count's **voice through every painted mouth** (no figure), Tomas | — | — | — | — | — |
+| `.06.private.*` (:34–41) | picker | — | — | — | Agnes: "The one who prayed" (asleep in a chapel with reliquary); Tomas: young guard at the gate looking at his boots; Wren: fresh tacky portrait of **Ilka** (chestnut hair, funeral ribbon, bride's veil); Emeric: Gerhardt at a desk, wine with no reflection | iPad |
+| `.07` (:46) | all present | the wall turning | — | — | stair up into the dark | dark |
+
+### 2.15 n5-final-confrontation (night 5, the high room) — DONE
+**Constants.** The high room where Ludmila stepped from the window; **window shut** until `.06` (n5-final-confrontation.md:6). **Lenka** (face now allowed: post-reveal) in a **white dress**, sitting "bound by nothing", never bitten, no marks (rulings.md:33). On the stair: **three brides**, barefoot — two pale sisters (Striga minis) and **Ilka** (app only; face fully shown from here). Count: old, white moustache. Sword carrier ≠ Lenka's guard (`guard-chosen` :73).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.guard-chosen` (:73) | all present | one hunter beside Lenka, another with the sword | — | — | sword | — |
+| `.01` clip (:14) | brides on the stair | coming down together | barefoot, bridal white | pale | bats, thunder | storm-dark |
+| `.02` (:18) / `~no-wren` (:85) | Ilka, Wren | Ilka on the stair | Ilka: chestnut hair, funeral ribbon, veil | — | — | — |
+| `.03` (:22) | Ilka, Wren turning the bolt | — | **mother bolt now legible: I-L-K-A** (first time) | — | — | — |
+| `.04` clip (:26) / `~boxes-left` (:80) | the Count | between Lenka and the party | — | — | — | drums turn |
+| `.05` (:30) / `~boxes-left` (:82) / `~no-agnes` (:87) | Agnes praying, Count held | Agnes facing him | reliquary / lamp | scar | Holy Symbol light holds him | gold-white on him |
+| `.06` (:34) / `~no-agnes` (:89) | **Lenka stands** | at the window | **the last of her violets** in hand | — | **she opens the window** | **grey dawn** through it |
+| `.07` clip (:38) | sword carrier strikes | — | Sergiu's sword | — | — | gold, all-on |
+| `.blade-lost` (:62) / `.07~blade-lost` (:78) | carrier down | — | **sword skids into the dark under the window** | — | Count leaves **as mist** | — |
+| `.strike-redirected` (:66) / `~blocked` (:70) | guard takes the blow / a story item shatters in his hand | — | — | (no visual corruption) | — | — |
+| `.08.private.*` (:42–49) | picker | — | Wren: loading the named bolt | — | Tomas: Marta running out of the little gate | iPad |
+
+### 2.16 n5-ending-rescued (dawn, high room → valley) — DONE
+| Moment | Present | Key visuals | Light |
+|---|---|---|---|
+| `.01` clip (n5-ending-rescued.md:13) | all present, Lenka | window open; **the Count's dust keeping a kneeling shape for a moment**; sword cool in its carrier's hand | **first real sunlight** |
+| `.02` clip (:17) | + **Ludmila and Sergiu**, faint in the light (Sergiu: the fair brother, sword like the carrier's; Ludmila: violets, Lenka's face) | Ludmila nods to Lenka | sun |
+| `.03` (:21) / `~no-agnes` (:46) | Agnes (or Tomas), Lenka | — | sun |
+| `.04` (:25) / `~no-wren` (:49) / `~no-tomas` (:51) | Wren, Tomas | **brides are ash; one funeral ribbon on the stair** | — |
+| `.05` (:29) / `~no-tomas` (:54) / `~no-emeric` (:57) | Emeric, Tomas | satchel, treatise | — |
+| `.06.private.*` (:33–40) / `tomas~marta-lost` (:59) | picker | Agnes: palm scar still there, no ache; Tomas: **Marta at the bottom of the hill in the sun, squinting, eating an apple** (or `~marta-lost`: asleep in a patch of sun behind the gate); Wren: **every bolt named** | sun |
+| `.07` (:42) | — | mist lifting; the road out visible | morning |
+
+### 2.17 n5-ending-endures (thin grey dawn) — DONE
+| Moment | Present | Key visuals | Light |
+|---|---|---|---|
+| `.01` clip (n5-ending-endures.md:14) | Lenka at the **open window**, free | the Count as **a long scarf of mist going up the mountain**; **no sword in the room** | thin grey dawn |
+| `.02` (:18) / `~no-agnes` (:40) | Lenka, Agnes (or Wren) | broken high room | grey |
+| `.03` clip (:22) / `~no-wren` (:43) | Count's voice far off | mist on the mountain | — |
+| `.04.private.*` (:27–34) | picker | Tomas: **Marta at the gate blinking at grey light**; Wren: **named bolt still in the bandolier, unfired** | grey |
+| `.05` (:36) | Lenka walking down the hill road | mist thickening again on the mountain | morning |
+
+### 2.18 n5-ending-taken (dawn, loss) — DONE
+| Moment | Present | Key visuals | Light |
+|---|---|---|---|
+| `.01` clip (n5-ending-taken.md:14) / `~retreat` (:39) | hunters on the road down | **high window closing**; a **girl in white behind it** (face may show: post-reveal, but small/behind glass); **a pressed violet on the road, still warm** | dawn |
+| `.02` clip (:18) / `~no-agnes` (:41) | Count **on the battlements** | old, white moustache | — |
+| `.03` (:22) / variants (:44–51) | Wren, Agnes (or Tomas/Emeric) | — | — |
+| `.04.private.*` (:26–33) | picker | Tomas: **little gate bolted, Marta's lamp out**; Wren: named bolt unfired; Emeric: Tome's last page, a new wet line | — |
+| `.05` (:35) | — | mist down over the road; **every castle window lit** | — |
+
+### 2.19 n5-ending-turned (any night, loss) — DONE
+**Rule:** a third corruption loses the whole game (D-DRA-5; :59). The turned hunter is the only one with **eyes gone the wrong colour** (n5-ending-turned.md:6) — this is the ending, not a corruption stage, so it does not break "no visible corruption" on portraits.
+| Moment | Present | Key visuals | Light |
+|---|---|---|---|
+| `.01` clip (:14) | the turned hunter | standing very still | tower dim |
+| `.02~agnes` (:18) | Agnes | **reliquary drops; the burn on her palm is gone** | — |
+| `.02~tomas` (:22) | Tomas | lowers the axe, faces the hunters like the gate | — |
+| `.02~wren` (:26) | Wren | **crossbow drops**; smells the air, smiles | — |
+| `.02~emeric` (:30) | Emeric | **spectacles fall, not picked up** | — |
+| `.03` clip (:34) | the Count (old) | — | window latch, wings |
+| `.04.private.*` / `~turned` (:38–56) | each iPad | Wren~turned: a bolt with her own name | — |
+| `.05` (:61) / `~night5` (:65) | — / Lenka at the window (night 5 only; face allowed only if after the gallery) | **one more castle window lit** | — |
 
 ## 3. Voice sheet (from cast.md)
 Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a new voice. "Narrator (private)" = `narrator` on one iPad.
@@ -344,6 +426,17 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 - **C-11 Keys (Q4): physical objects players hold**, using **only existing Return to Dark Tower components**. **Bob chose Treasure cards held out of the deck**; which three cards: pending (§6). n5-drawbridge.md:19 "in locks no one can see" still works (the locks are unseen, the keys are held). Until chosen, art draws no key objects.
 
 **Pending with Gamewright → Bob (not asked here):** corruption visible on faces (0/1/2) or meter only; single portrait vs arc portraits (risen Dorka, turned variants). Until ruled: no visual corruption; one portrait per character, Dorka's = risen look.
+
+### 4.3 New contradictions found while filling scenes (proposed defaults; Loremaster)
+| # | Contradiction | Sources | Proposed default |
+|---|---|---|---|
+| N-1 | Night-1 procession shows "a girl in a nightdress… walking up the hill, **looking back**" — Lenka on screen before the reveal, facing the camera | nx-midnight-procession.md:112 vs Bob's Lenka rule | Draw her from behind / far off; "looking back" = head turned, face lost in mist. No line change. |
+| N-2 | **Marta summons timing.** The Count says "Marta pours my wine now" in `n23-sergius-blade.08.private.tomas`, which can play on **night 2**; Jakob (night 3) says she has the gate key; Tomas's funeral end-line (night 2) says "Marta's still behind it". Bob: home on night 1, summoned later | n23-sergius-blade.md:53; n3-fly-eaters-cell.md:49; n2-burgomasters-funeral.md:166 vs n1-lantern-and-bell.md:60 | The summons beat must land **between the end of night 1 and the first night-2 scene**: e.g. a Tomas private at `nx-pressed-flower.01~night2` (dusk, night 2): her shutters pried, the cream letter gone from her apron. Still TODO (Loremaster to write). |
+| N-3 | When is "the reveal" for Lenka's face? The Tome (night 4) confirms she is Ludmila; the gallery (night 5) shows the face | n4-finding-the-tome.md:44 vs n5-portrait-gallery.md:26 | Reveal = **`n5-portrait-gallery.04`** (the cloth comes off). Tome scene stays voice-only for Lenka/Ludmila. |
+| N-4 | Marta's dress: "faded castle livery" vs "a castle maid's apron" | tok:299; cast:31 vs n5-drawbridge.md:28 | Both: maid's apron over faded livery. |
+| N-5 | Variant id style differs: `n1-open-grave.08~fight-lost-no-wren` (hyphen) vs `n2-burgomasters-funeral.07~fight-lost~no-wren` (tilde) | n1-open-grave.md:65; packs/dracula/script.yaml:429 vs :680 | Use `~fight-lost~no-wren`; ids are stable (script.yaml:2), so Gamewright decides whether to retire/rename. Flag only. |
+| N-6 | n1 scripts still say targets play on `dashboard`; the funeral and script.yaml say `storyboard` / Story board | n1-lantern-and-bell.md:9 vs n2-burgomasters-funeral.md:9; script.yaml:3 | Wording only: Story board. (Bob's rename commit may not have reached these files on this branch.) |
+| N-7 | Count's age in portraits: gallery says "the same **ageless** face"; Bob says young in portraits | n5-portrait-gallery.md:6 vs §4.2 C-6 | Portraits show him young; "ageless" = unchanging across 400 years. No line change. |
 
 ## 5. Art audit: the 9 problem assets
 From the audit (65 assets checked; 53 are text placeholders, 3 pass). Base path `apps/burgomaster-funeral-poc/assets/`. Root cause: no cast ref sheets; make them first. All 9 painted portraits + 3 painted stills are wrongly `status: placeholder` in manifest.json; flip to `draft`.
