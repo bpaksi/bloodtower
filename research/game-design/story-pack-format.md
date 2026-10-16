@@ -106,8 +106,8 @@ Talking-avatar lines live in two pack files, `cast.yaml` and `script.yaml`. They
 | `name` | text | yes | |
 | `voice` | {provider, name, style} | yes | TTS provider, voice name, style prompt |
 | `portrait` | asset | yes | base face |
-| `mouths` | {rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv} | yes | eight mouth assets, one per Rhubarb shape (REST, MBP, CONS/EE, EH/AE, AH, OH/ER, OO/W, FV), all required; same size, transparent, aligned to the anchor |
-| `anchor` | {x, y} | yes | where the mouth sits on the portrait (0-1 of width/height) |
+| `mouths` | {rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv} | yes | eight mouth assets, one per Rhubarb shape (REST, MBP, CONS/EE, EH/AE, AH, OH/ER, OO/W, FV), all required; in `frame` mode (the default) each is a full copy of the portrait at its exact pixel size, changing only pixels inside the anchor box |
+| `anchor` | {x, y, w, h} | yes | all four are fractions (0-1) of the portrait; `x, y` is the mouth center, `w, h` the mouth box size; the box must sit fully inside the portrait (`x ± w/2` and `y ± h/2` within 0-1). Matches the talking-avatar contract |
 
 A voice shift (whisper, possessed, shouting) is a **separate cast entry** with its own id, e.g. `keeper` and `keeper-whisper`; a line never switches voice mid-text.
 
