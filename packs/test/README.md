@@ -211,7 +211,7 @@ Format 2.1. Checked by V-22/V-23.
 ```yaml
 # cast.yaml
 - {id: keeper, name: "The Keeper", voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}, portrait: por.keeper,
-   mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}, anchor: {x: 0.52, y: 0.71}}
+   mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}, anchor: {x: 0.508, y: 0.649}}
 # script.yaml
 - id: grey-stair.03
   lines: [{id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."},
