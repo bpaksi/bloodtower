@@ -6,7 +6,7 @@
 - **Setting:** A whitewashed cell freckled with dead flies. Jakob Brenner, once the castle's bookkeeper, sits cross-legged in the centre, catching flies from the air and eating them with neat little bites.
 - **Mood:** Comic dread, then a bargain with something worse than a madman.
 - **Cast:** Narrator, Jakob Brenner, Emeric Lutz, Tomas Varga, Wren Kessel, Sister Agnes Hallow
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 

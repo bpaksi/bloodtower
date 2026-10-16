@@ -6,7 +6,7 @@
 - **Setting:** A heavy book bound in faded green leather, clasped with a brass lock shaped like a closed eye. The pages are in the Count's beautiful old hand. Between them, flowers pressed four hundred years ago.
 - **Mood:** Revelation, pity, and a cold certainty.
 - **Cast:** Narrator, Emeric Lutz, Sister Agnes Hallow, Tomas Varga, Ludmila (read from the page), Wren Kessel, The Count, Lenka Morosz (her voice, far off, in the final call)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Props:** [prop: ludmila-tome] in every moment of this scene.
 
 ## Moments
