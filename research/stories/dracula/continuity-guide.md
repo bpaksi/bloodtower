@@ -224,12 +224,15 @@ Also check `.10`: violet must read deep purple and pressed flat, not a red fresh
 | **Sergiu's Blade** | **Axe of Soul Rending** | Weapon treasure (spent in the cited game via Zaida for 3 wild); exact text not sourced | The only base weapon treasure confirmed with a soul/undead flavour; "soul rending" fits the blade that ends the Count | **Golden Mace of Azkol** (base; spend spirit equal to a foe's level to remove it, not usable on the adversary [blog FAQ]) · **Crystal Blade** (Alliances, "Crystal" treasure set, usable in base games [Dodo app notes; BGG thread]): best name fit but needs the expansion |
 | **The Tome** | **Scroll of Burning Sands** | "Spend to gain +4 MAGIC Advantages" [BGG FAQ thread] | The only confirmed base written-object treasure | **Crown of Azkol** / **Azkol's Idol** (base Azkol relics [blog]; fit "old lord's treasure", but see rules issue 4) |
 
-**Rules issues (for Gamewright):**
-1. **Carry limit:** treasures cap at **four per hero**; a fifth forces a loss (RB "Treasure: up to four… If you ever gain… fifth treasure, lose one"). Rule: key cards don't count toward the limit, or split the three keys across hunters.
-2. **No effect use:** rule that a key card **can't be spent or used for its printed effect** (and can't be traded away or chosen for "lose a treasure", e.g. Dragon Strike, Brigand theft, Zaida). Otherwise a player can burn the Lamp of Hope and lose the key.
-3. **Held out of the deck:** remove the three before shuffling the market (RB setup 6); spent/lost treasures normally go to the bottom of the treasure deck (RB) — keys instead go back beside the board.
-4. **Azkol cards:** the Crown/Idol/Horn/Doll are the base "Recover Azkol's Treasures" goal set (Reddit; blog); using one as a key is fine in our story-driven app, but don't pair them with that goal.
-5. **No expansion required** with the three base picks; Crystal Blade is the only alternate needing Alliances.
+**Rules (Gamewright, C-11, settled):**
+1. **Carry limit:** keys do **not** count toward the four-treasure carry limit.
+2. **No use, no sale, no loss:** a key can't be spent for its printed effect, sold, or traded at a market. "Lose a treasure" effects (Dragon Strike, Brigand theft, Zaida) never take a key: the hunter loses a different treasure, or nothing if they have none.
+3. **Handing over:** a hunter may hand a key to another hunter on the same space at no cost. The story treats each key as having **one keeper at a time** (art/VO show the keeper holding it).
+4. **Keeper defeated:** the key drops on that space; any hunter entering the space can pick it up. (A turned hunter loses the whole game per Bob's rule, so the "turned keeper" case is moot.)
+5. **Setup:** pull the three key cards before shuffling the treasure market.
+6. **Azkol goal:** when "Recover Azkol's Treasures" is in play, don't use Azkol cards as keys; for the Blade use **Axe of Soul Rending**, not the Golden Mace of Azkol alternate.
+
+**Card picks still pending** Bob verifying the printed text in his box.
 
 **Sources fetched 2026-10-16:**
 - Base rulebook v2: https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf
