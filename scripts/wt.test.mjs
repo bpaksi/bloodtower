@@ -47,10 +47,10 @@ beforeEach(() => {
 afterEach(() => rmSync(base, { recursive: true, force: true }));
 
 describe("pnpm wt", () => {
-  it("makes ../<repo>-wt/<branch> on a new branch from main, installs there, writes .wt.json", () => {
+  it("makes ../BloodTower-work/<branch> on a new branch from main, installs there, writes .wt.json", () => {
     const { config, lines } = add("feat/poc-thing");
     const path = join(worktreesHome(root), "feat/poc-thing");
-    assert.equal(worktreesHome(root), join(base, "Repo-wt"));
+    assert.equal(worktreesHome(root), join(base, "BloodTower-work"));
     assert.equal(git(path, "branch", "--show-current"), "feat/poc-thing");
     assert.equal(git(path, "rev-parse", "HEAD"), git(root, "rev-parse", "main"));
     assert.deepEqual(installs, [path]);

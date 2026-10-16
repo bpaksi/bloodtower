@@ -1,11 +1,19 @@
 // `pnpm wt <branch>` and `pnpm wt:rm <branch>`: one git worktree per plan step (docs/sdlc.md,
-// "Parallel work"). `wt` makes `../<repo>-wt/<branch>` on a new branch from origin/main (or main), installs from
+// "Parallel work"). `wt` makes `../BloodTower-work/<branch>` on a new branch from origin/main (or main), installs from
 // the lockfile there and writes `.wt.json` with the step's own ports and SQLite folder, so that
 // parallel steps never share a port or a database. `wt:rm` removes a clean worktree and deletes
 // its branch once main holds it (a squash-merged PR counts).
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, relative } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const MAIN = "main";
@@ -19,8 +27,11 @@ export const MAX_OFFSET = 9;
 const gitIn = (cwd, ...args) =>
   execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
 
-/** The folder that holds every worktree of the repo at `root`: `<parent>/<repo>-wt`. */
-export const worktreesHome = (root) => join(dirname(root), `${basename(root)}-wt`);
+/** The folder, next to the main checkout, that holds every step worktree. */
+export const WORKTREES_FOLDER = "BloodTower-work";
+
+/** The folder that holds every worktree of the repo at `root`: `<parent>/BloodTower-work`. */
+export const worktreesHome = (root) => join(dirname(root), WORKTREES_FOLDER);
 
 /** Reads `.wt.json` in `dir`, or undefined when `dir` is not a step worktree. */
 export const readWtConfig = (dir) => {
@@ -142,7 +153,8 @@ const landedOn = (root, branch) => {
 /** Removes the worktree for `branch`. Refuses one with uncommitted or unlanded work. */
 export const removeWorktree = ({ root, branch }) => {
   checkBranchName(root, branch);
-  const path = join(worktreesHome(root), branch);
+  const home = worktreesHome(root);
+  const path = join(home, branch);
   if (!existsSync(path)) throw new Error(`There is no worktree at ${path}.`);
   if (gitIn(path, "status", "--porcelain", "--untracked-files=no") !== "") {
     throw new Error(`${path} has uncommitted changes. Commit them or put them aside first.`);
@@ -151,6 +163,11 @@ export const removeWorktree = ({ root, branch }) => {
   // --force only covers the ignored and untracked files git would otherwise keep it for:
   // `node_modules`, `.wt.json` and the step's SQLite folder.
   gitIn(root, "worktree", "remove", "--force", path);
+  // Branch names can hold slashes; drop the folders they leave empty, but keep the home folder.
+  for (let dir = dirname(path); dir !== home && dir.startsWith(home + sep); dir = dirname(dir)) {
+    if (readdirSync(dir).length > 0) break;
+    rmdirSync(dir);
+  }
   const lines = [`Removed the worktree at ${path}.`];
   if (landed) {
     gitIn(root, "branch", "--delete", "--force", "--quiet", branch);

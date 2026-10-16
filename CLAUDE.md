@@ -18,7 +18,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 |---|---|---|
 | root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
 | root | `pnpm build` | Builds every app |
-| root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | Make / remove a step worktree at `../DarkTower-wt/<branch>` with its own ports and SQLite folder in `.wt.json` |
+| root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | Make / remove a step worktree at `../BloodTower-work/<branch>` with its own ports and SQLite folder in `.wt.json` |
 | root | `pnpm land <branch>` | Optional local recheck for Bob (rebase on `main`, `pnpm check`, fast-forward the local `main`). Not the merge path. Refuses in a Claude session |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |

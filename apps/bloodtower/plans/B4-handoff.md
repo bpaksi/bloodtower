@@ -8,7 +8,7 @@ You are building batch **B4** of `apps/bloodtower/plans/R1-step1-foundation.md` 
 
 ## Rules
 
-- Never edit, stash, or switch branches in the main checkout. Create a worktree: `pnpm wt cursor/bloodtower-r1-b4` (or `git fetch origin && git worktree add ../DarkTower-wt/cursor/bloodtower-r1-b4 -b cursor/bloodtower-r1-b4 origin/main`, then `pnpm install --frozen-lockfile` there). Work only inside it.
+- Never edit, stash, or switch branches in the main checkout. Create a worktree: `pnpm wt cursor/bloodtower-r1-b4` (or `git fetch origin && git worktree add ../BloodTower-work/cursor/bloodtower-r1-b4 -b cursor/bloodtower-r1-b4 origin/main`, then `pnpm install --frozen-lockfile` there). Work only inside it.
 - Use pnpm, never npm. No dependency changes (`Deps change: no`): do not touch any `package.json` or `pnpm-lock.yaml`. If Playwright browsers are missing, run `pnpm -F bloodtower-e2e exec playwright install chromium`; that is not a dependency change.
 - Follow `.claude/agents/developer.md`, `REVIEW.md` and `docs/sdlc.md`.
 - Ports and SQLite come from `.wt.json` (e2e port, `dataDir`). Never use a shared absolute path.

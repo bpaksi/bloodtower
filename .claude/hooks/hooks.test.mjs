@@ -711,8 +711,8 @@ describe("worktree-guard and hooks inside a step worktree", () => {
     mkdirSync(mainCheckout);
     gitIn(mainCheckout, "init", "-q", "-b", "main");
     gitIn(mainCheckout, "commit", "-q", "--allow-empty", "-m", "init");
-    mine = join(home, "Repo-wt", "feat", "app-a");
-    theirs = join(home, "Repo-wt", "feat", "app-b");
+    mine = join(home, "BloodTower-work", "feat", "app-a");
+    theirs = join(home, "BloodTower-work", "feat", "app-b");
     for (const [dir, branch] of [
       [mine, "feat/app-a"],
       [theirs, "feat/app-b"],
