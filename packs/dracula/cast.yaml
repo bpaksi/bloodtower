@@ -1,0 +1,165 @@
+# Dracula pack: talking-avatar cast (story-pack-format 2.1, V-22).
+# Voices from assets/stories/dracula/scripts/cast.md (Gemini TTS). audition: true = proposed voice, not yet auditioned.
+# portrait and mouths are manifest ids (placeholders); anchor is a placeholder until art exists.
+# Whisper entries are separate cast ids per format 2.1 (a voice shift is its own entry); they share the base portrait and mouths.
+
+- id: agnes
+  name: "Sister Agnes Hallow"
+  voice: {provider: gemini-tts, name: Kore, style: "calm, dry, quietly stern"}
+  portrait: por.agnes
+  mouths: {rest: m.agnes.rest, mbp: m.agnes.mbp, cons_ee: m.agnes.cons_ee, eh_ae: m.agnes.eh_ae, ah: m.agnes.ah, oh_er: m.agnes.oh_er, oo_w: m.agnes.oo_w, fv: m.agnes.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: anton
+  name: "Anton Morosz"
+  voice: {provider: gemini-tts, name: Iapetus, style: "desperate, fatherly, breaking; processed, remembered", audition: true}
+  portrait: por.anton
+  mouths: {rest: m.anton.rest, mbp: m.anton.mbp, cons_ee: m.anton.cons_ee, eh_ae: m.anton.eh_ae, ah: m.anton.ah, oh_er: m.anton.oh_er, oo_w: m.anton.oo_w, fv: m.anton.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: count
+  name: "The Count (Vlad)"
+  voice: {provider: gemini-tts, name: Algieba, style: "smooth, courtly, menacing"}
+  portrait: por.count
+  mouths: {rest: m.count.rest, mbp: m.count.mbp, cons_ee: m.count.cons_ee, eh_ae: m.count.eh_ae, ah: m.count.ah, oh_er: m.count.oh_er, oo_w: m.count.oo_w, fv: m.count.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: count-whisper
+  name: "The Count (Vlad) (whisper)"
+  voice: {provider: gemini-tts, name: Algieba, style: "smooth, courtly, menacing; whispered"}
+  portrait: por.count
+  mouths: {rest: m.count.rest, mbp: m.count.mbp, cons_ee: m.count.cons_ee, eh_ae: m.count.eh_ae, ah: m.count.ah, oh_er: m.count.oh_er, oo_w: m.count.oo_w, fv: m.count.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: dorka
+  name: "Dorka Halasz"
+  voice: {provider: gemini-tts, name: Laomedeia, style: "sweet, coaxing, wrong", audition: true}
+  portrait: por.dorka
+  mouths: {rest: m.dorka.rest, mbp: m.dorka.mbp, cons_ee: m.dorka.cons_ee, eh_ae: m.dorka.eh_ae, ah: m.dorka.ah, oh_er: m.dorka.oh_er, oo_w: m.dorka.oo_w, fv: m.dorka.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: dorn
+  name: "Sergeant Pavel Dorn"
+  voice: {provider: gemini-tts, name: Schedar, style: "plain, tired, accusing", audition: true}
+  portrait: por.dorn
+  mouths: {rest: m.dorn.rest, mbp: m.dorn.mbp, cons_ee: m.dorn.cons_ee, eh_ae: m.dorn.eh_ae, ah: m.dorn.ah, oh_er: m.dorn.oh_er, oo_w: m.dorn.oo_w, fv: m.dorn.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: emeric
+  name: "Emeric Lutz"
+  voice: {provider: gemini-tts, name: Fenrir, style: "nervous, fast, breathless"}
+  portrait: por.emeric
+  mouths: {rest: m.emeric.rest, mbp: m.emeric.mbp, cons_ee: m.emeric.cons_ee, eh_ae: m.emeric.eh_ae, ah: m.emeric.ah, oh_er: m.emeric.oh_er, oo_w: m.emeric.oo_w, fv: m.emeric.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: gerhardt
+  name: "Gerhardt Albrecht"
+  voice: {provider: gemini-tts, name: Rasalgethi, style: "precise, lecturing, sorry", audition: true}
+  portrait: por.gerhardt
+  mouths: {rest: m.gerhardt.rest, mbp: m.gerhardt.mbp, cons_ee: m.gerhardt.cons_ee, eh_ae: m.gerhardt.eh_ae, ah: m.gerhardt.ah, oh_er: m.gerhardt.oh_er, oo_w: m.gerhardt.oo_w, fv: m.gerhardt.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: hanne
+  name: "Hanne"
+  voice: {provider: gemini-tts, name: Sulafat, style: "wry, warm, tired"}
+  portrait: por.hanne
+  mouths: {rest: m.hanne.rest, mbp: m.hanne.mbp, cons_ee: m.hanne.cons_ee, eh_ae: m.hanne.eh_ae, ah: m.hanne.ah, oh_er: m.hanne.oh_er, oo_w: m.hanne.oo_w, fv: m.hanne.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: ilka
+  name: "Ilka"
+  voice: {provider: gemini-tts, name: Achernar, style: "soft, dreamy, eerie"}
+  portrait: por.ilka
+  mouths: {rest: m.ilka.rest, mbp: m.ilka.mbp, cons_ee: m.ilka.cons_ee, eh_ae: m.ilka.eh_ae, ah: m.ilka.ah, oh_er: m.ilka.oh_er, oo_w: m.ilka.oo_w, fv: m.ilka.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: jakob
+  name: "Jakob Brenner"
+  voice: {provider: gemini-tts, name: Puck, style: "giggling, quick, suddenly flat", audition: true}
+  portrait: por.jakob
+  mouths: {rest: m.jakob.rest, mbp: m.jakob.mbp, cons_ee: m.jakob.cons_ee, eh_ae: m.jakob.eh_ae, ah: m.jakob.ah, oh_er: m.jakob.oh_er, oo_w: m.jakob.oo_w, fv: m.jakob.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: jakob-whisper
+  name: "Jakob Brenner (whisper)"
+  voice: {provider: gemini-tts, name: Puck, style: "giggling, quick, suddenly flat; whispered", audition: true}
+  portrait: por.jakob
+  mouths: {rest: m.jakob.rest, mbp: m.jakob.mbp, cons_ee: m.jakob.cons_ee, eh_ae: m.jakob.eh_ae, ah: m.jakob.ah, oh_er: m.jakob.oh_er, oo_w: m.jakob.oo_w, fv: m.jakob.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: jozef
+  name: "Jozef Kessel"
+  voice: {provider: gemini-tts, name: Achird, style: "gentle, rough-edged, at peace", audition: true}
+  portrait: por.jozef
+  mouths: {rest: m.jozef.rest, mbp: m.jozef.mbp, cons_ee: m.jozef.cons_ee, eh_ae: m.jozef.eh_ae, ah: m.jozef.ah, oh_er: m.jozef.oh_er, oo_w: m.jozef.oo_w, fv: m.jozef.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: lenka
+  name: "Lenka Morosz"
+  voice: {provider: gemini-tts, name: Leda, style: "young, earnest, stubborn", audition: true}
+  portrait: por.lenka
+  mouths: {rest: m.lenka.rest, mbp: m.lenka.mbp, cons_ee: m.lenka.cons_ee, eh_ae: m.lenka.eh_ae, ah: m.lenka.ah, oh_er: m.lenka.oh_er, oo_w: m.lenka.oo_w, fv: m.lenka.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: ludmila
+  name: "Ludmila"
+  voice: {provider: gemini-tts, name: Leda, style: "hushed, resolute, a letter read aloud; processed softer", audition: true}
+  portrait: por.ludmila
+  mouths: {rest: m.ludmila.rest, mbp: m.ludmila.mbp, cons_ee: m.ludmila.cons_ee, eh_ae: m.ludmila.eh_ae, ah: m.ludmila.ah, oh_er: m.ludmila.oh_er, oo_w: m.ludmila.oo_w, fv: m.ludmila.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: marta
+  name: "Marta Varga"
+  voice: {provider: gemini-tts, name: Aoede, style: "soft, frightened, loving", audition: true}
+  portrait: por.marta
+  mouths: {rest: m.marta.rest, mbp: m.marta.mbp, cons_ee: m.marta.cons_ee, eh_ae: m.marta.eh_ae, ah: m.marta.ah, oh_er: m.marta.oh_er, oo_w: m.marta.oo_w, fv: m.marta.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: narrator
+  name: "Narrator"
+  voice: {provider: gemini-tts, name: Charon, style: "slow, low, ominous storyteller"}
+  portrait: por.narrator
+  mouths: {rest: m.narrator.rest, mbp: m.narrator.mbp, cons_ee: m.narrator.cons_ee, eh_ae: m.narrator.eh_ae, ah: m.narrator.ah, oh_er: m.narrator.oh_er, oo_w: m.narrator.oo_w, fv: m.narrator.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: oskar
+  name: "Father Oskar"
+  voice: {provider: gemini-tts, name: Umbriel, style: "hollow, distant, sorrowful"}
+  portrait: por.oskar
+  mouths: {rest: m.oskar.rest, mbp: m.oskar.mbp, cons_ee: m.oskar.cons_ee, eh_ae: m.oskar.eh_ae, ah: m.oskar.ah, oh_er: m.oskar.oh_er, oo_w: m.oskar.oo_w, fv: m.oskar.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: tomas
+  name: "Tomas Varga"
+  voice: {provider: gemini-tts, name: Algenib, style: "gruff, low, unhurried"}
+  portrait: por.tomas
+  mouths: {rest: m.tomas.rest, mbp: m.tomas.mbp, cons_ee: m.tomas.cons_ee, eh_ae: m.tomas.eh_ae, ah: m.tomas.ah, oh_er: m.tomas.oh_er, oo_w: m.tomas.oo_w, fv: m.tomas.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: ursula
+  name: "Mother Ursula"
+  voice: {provider: gemini-tts, name: Vindemiatrix, style: "stern, cold, grieving", audition: true}
+  portrait: por.ursula
+  mouths: {rest: m.ursula.rest, mbp: m.ursula.mbp, cons_ee: m.ursula.cons_ee, eh_ae: m.ursula.eh_ae, ah: m.ursula.ah, oh_er: m.ursula.oh_er, oo_w: m.ursula.oo_w, fv: m.ursula.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: vadoma
+  name: "Old Vadoma"
+  voice: {provider: gemini-tts, name: Gacrux, style: "old, husky, amused", audition: true}
+  portrait: por.vadoma
+  mouths: {rest: m.vadoma.rest, mbp: m.vadoma.mbp, cons_ee: m.vadoma.cons_ee, eh_ae: m.vadoma.eh_ae, ah: m.vadoma.ah, oh_er: m.vadoma.oh_er, oo_w: m.vadoma.oo_w, fv: m.vadoma.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: vadoma-whisper
+  name: "Old Vadoma (whisper)"
+  voice: {provider: gemini-tts, name: Gacrux, style: "old, husky, amused; whispered", audition: true}
+  portrait: por.vadoma
+  mouths: {rest: m.vadoma.rest, mbp: m.vadoma.mbp, cons_ee: m.vadoma.cons_ee, eh_ae: m.vadoma.eh_ae, ah: m.vadoma.ah, oh_er: m.vadoma.oh_er, oo_w: m.vadoma.oo_w, fv: m.vadoma.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: wren
+  name: "Wren Kessel"
+  voice: {provider: gemini-tts, name: Erinome, style: "flat, terse, matter-of-fact"}
+  portrait: por.wren
+  mouths: {rest: m.wren.rest, mbp: m.wren.mbp, cons_ee: m.wren.cons_ee, eh_ae: m.wren.eh_ae, ah: m.wren.ah, oh_er: m.wren.oh_er, oo_w: m.wren.oo_w, fv: m.wren.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
