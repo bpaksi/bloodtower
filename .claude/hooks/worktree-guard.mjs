@@ -6,7 +6,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, resolve, sep } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { block, editedPath, findShellWrite, repoRoot, runGuard } from "./lib.mjs";
 
 const real = (path) => {
@@ -20,6 +20,8 @@ const inside = (path, folder) => path === folder || path.startsWith(folder + sep
 const SCRATCH = [
   ...new Set([tmpdir(), "/tmp", "/private/tmp", "/var/folders", "/private/var/folders"].map(real)),
 ];
+// Every step worktree lives in this folder next to the main checkout (scripts/wt.mjs).
+const WORKTREES_FOLDER = "BloodTower-work";
 const DEVICES = new Set(["/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"]);
 
 const WHY =
@@ -36,7 +38,7 @@ runGuard("worktree-guard", (input) => {
     encoding: "utf8",
   }).trim();
   const mainCheckout = real(dirname(common));
-  const team = [mainCheckout, real(join(dirname(mainCheckout), `${basename(mainCheckout)}-wt`))];
+  const team = [mainCheckout, real(join(dirname(mainCheckout), WORKTREES_FOLDER))];
   // The nearest existing folder decides, so a path that is not made yet still resolves for real.
   const outside = (path) => {
     if (DEVICES.has(path)) return false;

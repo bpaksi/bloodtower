@@ -97,7 +97,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 |---|---|---|
 | root | `pnpm check` | lint, repo checks (pins, cross-app imports, hook tests), typecheck and unit tests across every app and package |
 | root | `pnpm build` | builds every app |
-| root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | make / remove a step worktree at `../DarkTower-wt/<branch>` with its own `.wt.json` (see Parallel work) |
+| root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | make / remove a step worktree at `../BloodTower-work/<branch>` with its own `.wt.json` (see Parallel work) |
 | root | `pnpm land <branch>` | optional local recheck: rebase on `main`, rerun `pnpm check`, fast-forward the local `main`. Not the merge path; PRs are. Refuses inside a Claude session. |
 | root | `pnpm -F <app> <script>` | one app's script (same as running it inside the app folder) |
 | app | `pnpm dev` / `pnpm start` / `pnpm e2e` | defined per app in its README |
@@ -175,7 +175,8 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 
 ### 2. One worktree per step
 
-- `pnpm wt <branch>` fetches `origin/main`, runs `git worktree add ../DarkTower-wt/<branch> -b <branch> origin/main` (local `main` when there is no remote), `pnpm install --frozen-lockfile` there, and writes `.wt.json`: the step's offset, its ports and its SQLite folder. Up to 9 worktrees at once.
+- `pnpm wt <branch>` fetches `origin/main`, runs `git worktree add ../BloodTower-work/<branch> -b <branch> origin/main` (local `main` when there is no remote), `pnpm install --frozen-lockfile` there, and writes `.wt.json`: the step's offset, its ports and its SQLite folder. Up to 9 worktrees at once.
+- Worktrees live in `~/Development/Personal/BloodTower-work/<branch>`, are removed with `pnpm wt:rm <branch>` after the PR merges, and the empty folder is removed too.
 - `pnpm wt:rm <branch>` removes a clean worktree (node_modules, `.wt.json`, `.wt-data/` go with it) and deletes the branch once `main` holds it, including by squash-merged PR. It keeps a branch with unmerged work.
 - A developer agent works only inside its own worktree. The `worktree-guard` hook blocks edits and shell writes outside it (exit 2).
 - Hooks resolve the branch and repo root from the folder the command runs in, never from the main checkout. A hook test runs the main-commit guard from inside a worktree.
