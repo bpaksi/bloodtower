@@ -191,7 +191,7 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 - **Lenka / Ludmila look (Q5): Illusionist decides alone.** One shared face sheet, locked once made; no Bob sign-off needed.
 - **C-4 Marta (Q3): at home on night 1** (n1-lantern-and-bell.md:60 stands; do **not** apply the earlier 3a edit). **The Count summons her to the castle later.** **TODO (Loremaster): write the summons beat.** Likely fits: (a) a cream letter "Come home" left for Marta (the same letter Marta has in her apron, n1-burgomasters-house.md:87) found or felt by Tomas on night 2 at `n2-burgomasters-funeral.09.private.tomas` / `.end.private.tomas`, then (b) a confirming private beat on night 3 (Tomas finds the shutters pried and Marta gone) before `n23-sergius-blade.md:53` ("Marta pours my wine now"). Art until written: Marta at home, shutters nailed, asleep by day, nights 1–2; at the castle gate from n23-sergius-blade on. Also check `.end.private.tomas` ("Marta's still behind it") — that line assumes she's already at the castle on night 2 and must be revised with the beat.
 - **Narrator (Q6): voice only, no face.** `por.narrator` = a neutral **lantern emblem**.
-- **C-11 Keys (Q4): physical objects players hold**, using **only existing Return to Dark Tower components** (no new pieces). **Which component: pending** (see §6). n5-drawbridge.md:19 "in locks no one can see" still works (the locks are unseen, the keys are held). Until chosen, art draws no key objects.
+- **C-11 Keys (Q4): physical objects players hold**, using **only existing Return to Dark Tower components**. **Bob chose Treasure cards held out of the deck**; which three cards: pending (§6). n5-drawbridge.md:19 "in locks no one can see" still works (the locks are unseen, the keys are held). Until chosen, art draws no key objects.
 
 **Pending with Gamewright → Bob (not asked here):** corruption visible on faces (0/1/2) or meter only; single portrait vs arc portraits (risen Dorka, turned variants). Until ruled: no visual corruption; one portrait per character, Dorka's = risen look.
 
@@ -212,16 +212,31 @@ From the audit (65 assets checked; 53 are text placeholders, 3 pass). Base path 
 
 Also check `.10`: violet must read deep purple and pressed flat, not a red fresh flower (props:8).
 
-## 6. Keys: candidate RtDT components (pending choice)
-Bob: keys are physical things players hold, existing Return to Dark Tower components only. Sources fetched 2026-10-16:
-[base rulebook v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) ("RB"), [base contents](https://restorationgames.com/shop/return-to-dark-tower/), [Alliances contents](https://restorationgames.com/shop/return-to-dark-tower-alliances/), [Alliances rulebook](https://restorationgames.com/wp-content/uploads/2021/11/RTDT_Alliances-Rulebook.pdf), [Covenant contents](https://restorationgames.com/shop/return-to-dark-tower-covenant/), [Covenant rulebook](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Covenant_Rulebook-web.pdf).
+## 6. Keys: three Treasure cards held out of the deck (Bob, option B; card choice pending Bob)
 
-| Rank | Real component (official name) | Exists? | Fit as a kingdom key | Tradeoff |
+**Story mapping** (mech:14–16; research/stories/dracula/mechanics-map.md §2b): each kingdom's set pieces award its key = its artifact. K2/K3 (order by seed): **Sergiu's Blade** and the **Holy Symbol (Lantern of Saint Ysolde)**; K4, always last: **the Tome**. The tower opens only with all three (n5-drawbridge.md:15,19). Art draws the story artifact (props:7,9; n23-catacombs-of-saint-ysolde.md:6); the physical card is the token players hold.
+
+**Verification note.** No official full card list is published (Restoration's parts sheet lists tokens only). Names below are confirmed from fetched play reports and FAQs; effects are quoted only where a source states them. Before Bob locks a pick, read the printed card in Bob's box and paste its text here.
+
+| Artifact | Pick (base game) | Printed effect (as sourced) | Why | Alternates |
 |---|---|---|---|---|
-| 1 | **Quest Item cards** (base: 20 small cards) | yes | RB: "When you gain a quest item, find and take it from the quest item deck in the box"; carry limit **unlimited**; spent/lost ones go back to the box | Built for exactly this (named item fetched on a quest reward, kept in front of the hero). Card names won't say "key"; must pick three and forbid spending them. |
-| 2 | **Treasure cards** held out of the deck (base 22, Alliances 20, Covenant 20) | yes | named cards, held | Count against the **four-treasure** carry limit and carry live abilities; held-out cards shrink the market. |
-| 3 | **Companion cards** (base 10, Alliances 12 guild companions) | yes (cards; placed next to the hero board) | held | Companions are people with app-driven events; reads as allies, not keys. Gamewright's "Virtue card" doesn't exist: virtues are **Virtue tiles** (base 16 = hero + one **kingdom virtue tile** per kingdom), slotted on hero boards and already in use. |
-| 4 | **Quest markers** (base: 3 standees; Alliances +1) | yes, as standees, not "quest tokens" | placed on board spaces, **removed when the quest completes** | Exactly three in the base box, but rules put them back, not on the hero board; four are needed for kingdom rotation only if every kingdom has one. |
-| 5 | **Building miniature** lifted off the board (16: 4 each Citadel/Sanctuary/Village/Bazaar) | yes | big, kingdom-tied | The board needs the building for skulls/cleansing/reinforce; removing it changes play. Covenant **monument miniatures** (8) are kingdom-tied too, but monuments can't be used with Alliances guilds. |
+| **Holy Symbol / Lantern of Saint Ysolde** | **Lamp of Hope** | Take the Cleanse action as if you were on any space; a discard-for-a-big-effect late option (designer: "makes cleansing more potent and offers a late-game bomb") [FAQ, BackerKit] | A holy lamp that cleanses: near-exact match for an oil-less saint's lamp | **Circlet of Conviction** (discard to take a whole extra turn free of the Tower's meddling [BackerKit]; set — base vs Alliances — unverified) · **Lamp of Darkness** (base; removes a foe, not mid-battle [FAQ]; tone is wrong, use only if Hope is needed elsewhere) |
+| **Sergiu's Blade** | **Axe of Soul Rending** | Weapon treasure (spent in the cited game via Zaida for 3 wild); exact text not sourced | The only base weapon treasure confirmed with a soul/undead flavour; "soul rending" fits the blade that ends the Count | **Golden Mace of Azkol** (base; spend spirit equal to a foe's level to remove it, not usable on the adversary [blog FAQ]) · **Crystal Blade** (Alliances, "Crystal" treasure set, usable in base games [Dodo app notes; BGG thread]): best name fit but needs the expansion |
+| **The Tome** | **Scroll of Burning Sands** | "Spend to gain +4 MAGIC Advantages" [BGG FAQ thread] | The only confirmed base written-object treasure | **Crown of Azkol** / **Azkol's Idol** (base Azkol relics [blog]; fit "old lord's treasure", but see rules issue 4) |
 
-Recommendation for Gamewright/Bob: three named **Quest Item cards**, one per completed kingdom, unspendable. Art: draw the chosen card's object.
+**Rules issues (for Gamewright):**
+1. **Carry limit:** treasures cap at **four per hero**; a fifth forces a loss (RB "Treasure: up to four… If you ever gain… fifth treasure, lose one"). Rule: key cards don't count toward the limit, or split the three keys across hunters.
+2. **No effect use:** rule that a key card **can't be spent or used for its printed effect** (and can't be traded away or chosen for "lose a treasure", e.g. Dragon Strike, Brigand theft, Zaida). Otherwise a player can burn the Lamp of Hope and lose the key.
+3. **Held out of the deck:** remove the three before shuffling the market (RB setup 6); spent/lost treasures normally go to the bottom of the treasure deck (RB) — keys instead go back beside the board.
+4. **Azkol cards:** the Crown/Idol/Horn/Doll are the base "Recover Azkol's Treasures" goal set (Reddit; blog); using one as a key is fine in our story-driven app, but don't pair them with that goal.
+5. **No expansion required** with the three base picks; Crystal Blade is the only alternate needing Alliances.
+
+**Sources fetched 2026-10-16:**
+- Base rulebook v2: https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf
+- Base / Alliances / Covenant contents (22 / 20 / 20 treasure cards): https://restorationgames.com/shop/return-to-dark-tower/ · https://restorationgames.com/shop/return-to-dark-tower-alliances/ · https://restorationgames.com/shop/return-to-dark-tower-covenant/
+- Play report + FAQ naming Golden Mace of Azkol, Axe of Soul Rending, Crown/Horn/Idol/Doll of Azkol, Lamp of Hope, Kamaria's Carpet, Oakstone Bow, Lamp of Darkness: http://yetanotherfriggingamingblog.blogspot.com/2022/04/solo-quest-return-to-dark-tower.html
+- BGG Collected FAQ (Lamp of Hope, Oakstone Bow, Lamp of Darkness, Scroll of Burning Sands text): https://boardgamegeek.com/thread/2847900/collected-faq-rules-clarifications
+- BGG Covenant thread (Alliances "Crystal" treasures usable in base): https://boardgamegeek.com/thread/3179137/18-treasure-cards-that-could-be-used-in-any-mode
+- Kickstarter/BackerKit update (Lamp of Hope, Circlet of Conviction, White Cauldron): https://return-to-dark-tower.backerkit.com/hosted_preorders/project_updates?page=17
+- Dodo Apps assistant release notes (Crystal Blade, Necklace of Haggling): https://apps.apple.com/tm/app/return-to-dark-tower-assistant/id1659406816
+- Azkol goal set: https://www.reddit.com/r/Returntodarktower/comments/twzi14/rules_questions_recover_azkols_treasures/
