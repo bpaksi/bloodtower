@@ -106,7 +106,7 @@ Talking-avatar lines live in two pack files, `cast.yaml` and `script.yaml`. They
 | `name` | text | yes | |
 | `voice` | {provider, name, style} | yes | TTS provider, voice name, style prompt |
 | `portrait` | asset | yes | base face |
-| `mouths` | {rest, slight, open, wide, oo} | yes | five mouth assets, all required |
+| `mouths` | {rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv} | yes | eight mouth assets, one per Rhubarb shape (REST, MBP, CONS/EE, EH/AE, AH, OH/ER, OO/W, FV), all required; same size, transparent, aligned to the anchor |
 | `anchor` | {x, y} | yes | where the mouth sits on the portrait (0-1 of width/height) |
 
 A voice shift (whisper, possessed, shouting) is a **separate cast entry** with its own id, e.g. `keeper` and `keeper-whisper`; a line never switches voice mid-text.
@@ -134,7 +134,7 @@ Rules:
   name: "The Keeper"
   voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}
   portrait: por.keeper
-  mouths: {rest: m.keeper.rest, slight: m.keeper.slight, open: m.keeper.open, wide: m.keeper.wide, oo: m.keeper.oo}
+  mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}
   anchor: {x: 0.52, y: 0.71}
 # script.yaml
 - id: grey-stair.03
@@ -609,7 +609,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 - V-18. Choices: every option with a `cond` has a sibling that is always available (no dead-end prompt).
 - V-19. Components: minimum asset set check (R-WIZ-3), warning or error per open question.
 - V-20. Determinism: all randomness names a seeded table.
-- V-22. Cast and script: every `script.yaml` speaker exists in `cast.yaml`; every cast entry has all five mouths (rest, slight, open, wide, oo) and an anchor.
+- V-22. Cast and script: every `script.yaml` speaker exists in `cast.yaml`; every cast entry has all eight mouths (rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv) and an anchor.
 - V-23. Lines: line ids are unique in the pack and stable across builds (checked against the previous build's id list: a shipped id is never renamed or reused); every `[pause N]` has N a positive number; estimated length (words at ~2.5 per second plus pauses) is at most 20 s, and rendered audio, once it exists, is at most 20 s.
 - V-21. Readiness (AT-17): every private moment and `~no-` variant has voice and render at status ≥ draft before a "ready" build.
 
