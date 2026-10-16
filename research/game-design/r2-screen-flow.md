@@ -76,7 +76,7 @@ Devices can join from Tower Connect onward (the join QR is on the board from the
 Common to every screen (all screens below inherit these):
 - R2-01. The Story board shows, on every screen after Splash, a status strip: tower state (connected / calibrating / lost / no tower), joined devices, and the current step name. Test: each screen's Story board snapshot contains the three fields.
 - R2-02. Every iPad screen has exactly one primary button (see §5) and shows the step name and "what happens next" text. Test: UI audit per screen counts one primary button.
-- R2-03. Flow buttons (Next, Choose story, Begin, Quit, Reconnect, Done for tonight) appear on every joined iPad. The first press wins; the other iPads move on with the flow and their press is ignored with no error, and the board names the device that pressed (as in R1). There is no host role. Test: two device contexts press at once; one transition, one log row.
+- R2-03. Flow buttons (Next, Choose story, Begin, Quit, Reconnect, Done for tonight) appear on every joined iPad. The first press wins; the other iPads move on with the flow and their press is ignored with no error, and the board names the device that pressed (as in R1). There is no host role. Test: two device contexts press at once; both control_presses rows (winner and loser, per R1 AC-5) plus one transition row.
 - R2-04. Every press that changes the flow is logged with device and screen (extends R1 timing log). Test: timing rows exist for each transition.
 
 ### 3.1 Splash / Loading
@@ -117,7 +117,7 @@ Common to every screen (all screens below inherit these):
 - iPad: device name, the story's hunters as large toggle cards ("Mine" / held by X). Primary: "Next: set up the story" (disabled with reason until all held); any joined iPad may press it.
 - Entry: story chosen (or Back from Begin Story step 1). Exit: all hunters held + Next -> Begin Story. Back -> Pick Story.
 - Errors: device drops -> its hunters show "disconnected" on board, stay held for 60 s then become unclaimed; two devices claim same hunter -> first press wins, loser sees "Taken by X".
-- On "Play again", whatever the next story's hunter list, no holdings carry over: every hunter starts unclaimed and everyone claims again (R2-91, D8).
+- On "Play again", joined devices stay; every hunter starts unclaimed and re-claims, whether the next story's hunter list is the same or different (R2-91, D8).
 - R2-30. The Next button stays disabled and states the reason ("Claim Mina") until every hunter is held. Test: e2e.
 - R2-31. One device can claim all hunters in two taps or fewer ("Take all"). Test: UI count.
 - R2-32. The join page never shows the device token (B3 follow-up). Test: DOM check.
@@ -129,7 +129,7 @@ Common to every screen (all screens below inherit these):
 - Entry: Party Join complete. Exit: all steps Done + Begin -> Play. Back steps back (step 1 Back -> Party Join); "Cancel setup" -> Pick Story (confirm).
 - Errors: device drops mid-setup -> setup continues on the remaining iPads; if every iPad drops, R2-104 applies.
 - R2-50. Length is fixed once Begin is pressed and recorded (R-LEN-1, R-LEN-5). Test: no control to change it in Play.
-- R2-51. Every length plays exactly 5 nights; the length option text never states a different night count and names what changes (set pieces, crypt rooms). Test: lint + UI text check. (C1, resolved by ruling 12.)
+- R2-51. Every Dracula length plays exactly 5 nights; the length option text never states a different night count and names what changes (set pieces, crypt rooms). Test: lint + UI text check. (C1, resolved by ruling 12.)
 - R2-52. Every physical step needs its own Done; Begin is unavailable until all are Done. Test: e2e.
 
 ### 3.6 Play (summary level)
@@ -173,7 +173,7 @@ Common to every screen (all screens below inherit these):
 - Story board: thank-you card, teardown checklist (display only), tower state.
 - iPad (any joined): checklist ticks; primary "Done for tonight" (tower to idle, session closed); secondary "Play again" -> Pick Story with the same devices.
 - R2-90. "Done for tonight" sets the tower to idle and closes the session; devices get a closed screen. Test: mock idle command + session state.
-- R2-91. "Play again" keeps the joined devices but no holdings: whatever the next story's hunter list (same or different), every hunter starts unclaimed and everyone claims again in Party Join (D8). Test: e2e, same-hunter and different-hunter replays.
+- R2-91. On "Play again", joined devices stay; every hunter starts unclaimed and re-claims, whether the next story's hunter list is the same or different (D8). Test: e2e, same-hunter and different-hunter replays.
 
 ## 4. Device modes
 
@@ -211,7 +211,7 @@ Bob's answers, folded into the sections above:
 - D5. Quit offers three choices: Save and quit, Abandon, Keep playing (R2-64). Answers old Q7.
 - D6. No phone support yet, iPads only. Phone view dropped; its ids are marked removed, not renumbered (§4, R2-111). Answers old Q8.
 - D7. Game-length question dropped: ruling 12 settles it. Every Dracula length plays 5 nights; length changes set pieces and crypt rooms (§3.5, R2-51). Answers old Q4.
-- D8. Play again: if the new story has a different hunter list, everyone claims hunters again from scratch (Bob, Oct 16 2026). Folded into one rule: on Play again, whatever the hunter list, no holdings carry over and everyone claims from scratch (R2-91, §3.4). Answers Q9.
+- D8. On Play again, joined devices stay; every hunter starts unclaimed and re-claims, whether the next story's hunter list is the same or different (R2-91, §3.4). Bob confirmed the same-hunter case too (Oct 16, 2026). Answers Q9.
 
 ## 7. Open questions for Bob
 
@@ -221,7 +221,7 @@ None.
 
 | # | Existing | Conflict | Resolution |
 |---|---|---|---|
-| C1 | R-LEN-2 "length sets the number of nights"; R-WIZ-12 "number of nights" as option meaning | All lengths play 5 nights | Resolved by ruling 12 (D7). Amend R-LEN-2 and R-WIZ-12: length changes set pieces and crypt rooms, never night count; R-LEN-3 per-length set piece lists stay. |
+| C1 | R-LEN-2 "length sets the number of nights"; R-WIZ-12 "number of nights" as option meaning | Every Dracula length plays 5 nights | Resolved by ruling 12 (D7). For Dracula, amend R-LEN-2 and R-WIZ-12: length changes set pieces and crypt rooms, never night count; R-LEN-3 per-length set piece lists stay. |
 | C2 | R-WIZ-1 "wizard on the Dashboard ... with Next/Back" | Story board is display only | Resolved by standing ruling (board display only, iPads do all control). Wizard is driven from any joined iPad (first press wins) and mirrored on the board. |
 | C3 | R-WIZ-9 "Tower initialization ... run from the Mac" | Control is on iPads; tower connect placed before story | Resolved by D4 plus standing ruling. Tower link runs on the Mac (R-DEV-5) but is pressed from an iPad, and the step moves to right after Splash, out of the setup wizard. |
 | C4 | R-UI-5 shared screen "TV, Mac, or host iPad"; R-UI-11 "Dashboard Join iPad" button | Board has no buttons; there is no host iPad | Resolved by standing ruling and D1. The Story board (Mac on TV) is the only shared screen; drop "host iPad". Join QR is always on the board, and "Join another iPad" lives in the iPad pause menu. |
