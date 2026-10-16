@@ -94,6 +94,54 @@ cast:
   - {id: count,    role: adversary, voice: vo.count}
 ```
 
+### 2.1 Cast and script files (talking-avatar lines)
+
+Talking-avatar lines live in two pack files, `cast.yaml` and `script.yaml`. They extend the cast table above; a cast `id` here is the speaker id everywhere.
+
+**`cast.yaml`**, one entry per speaker voice:
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `id` | id | yes | speaker id used by `script.yaml` and moment `lines` |
+| `name` | text | yes | |
+| `voice` | {provider, name, style} | yes | TTS provider, voice name, style prompt |
+| `portrait` | asset | yes | base face |
+| `mouths` | {rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv} | yes | eight mouth assets, one per Rhubarb shape (REST, MBP, CONS/EE, EH/AE, AH, OH/ER, OO/W, FV), all required; same size, transparent, aligned to the anchor |
+| `anchor` | {x, y} | yes | where the mouth sits on the portrait (0-1 of width/height) |
+
+A voice shift (whisper, possessed, shouting) is a **separate cast entry** with its own id, e.g. `keeper` and `keeper-whisper`; a line never switches voice mid-text.
+
+**`script.yaml`**, one entry per moment that speaks:
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `id` | moment id | yes | the moment the lines belong to |
+| `lines` | list | yes | in play order |
+| `lines[].id` | id | yes | stable line id; **never changes** once shipped (retire it, never reuse or renumber) |
+| `lines[].speaker` | cast ref | yes | |
+| `lines[].note` | text | no | delivery note for the voice |
+| `lines[].text` | text | yes | `[pause N]` inserts N seconds of silence (N a number > 0) |
+
+Rules:
+- Each line's audio is at most **20 s**, pauses included.
+- The story log lists every played line by line id. Replay (from an iPad) plays that line again by id on the Story board and changes no game state.
+- Avatars play on the **Story board only**. iPads show the line as a caption, never the avatar.
+- An avatar line never overlaps a tower sound: the engine waits out any running sound's `hold_s` (6) before a line starts and holds tower sounds until the line ends.
+
+```yaml
+# cast.yaml
+- id: keeper
+  name: "The Keeper"
+  voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}
+  portrait: por.keeper
+  mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}
+  anchor: {x: 0.52, y: 0.71}
+# script.yaml
+- id: grey-stair.03
+  lines:
+    - {id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom."}
+```
+
 ## 3. Nights and set pieces
 
 ### 3.1 Nights (chapters)
@@ -173,11 +221,12 @@ The `by_length` lists in that example show the field shape only. Which set piece
 
 ```
 moment-id  := scene "." moment [ ".private." hunter ] { "~" variant }
-scene      := set-piece id (kebab-case)
+scene      := set-piece id (kebab-case) | "crypt" | "end"
 moment     := "01".."99" | name { "." name }      e.g. 04, lid-choice, investigate.examine-body
 variant    := name | "no-" hunter
 ```
 
+- `crypt.` and `end.` are reserved prefixes for dungeon-room moments (11, e.g. `crypt.wet-steps`) and ending moments (12, e.g. `end.lit.01`), which have no set piece. No set piece may be named `crypt` or `end`.
 - `scene.moment` is the base. `scene.moment.private.<hunter>` targets only that hunter (always `ipad:<hunter>`).
 - `~variant` **replaces** the base of the same moment when its `cond` holds. `~no-<hunter>` is the presence variant: it plays when that hunter is absent (E15, voiced and rendered).
 - Variants stack left to right, condition first then presence: `lid-choice~nailed~no-wren`, `07~fight-lost~no-wren`. Private then variant: `04.private.agnes~lookalike`.
@@ -273,6 +322,7 @@ Cues are referenced by name from the shared cue library (E13); the pack may add 
 | `drums` | `none` \| position | yes | story cues use `none` unless the base game would move them |
 | `confirm` | bool | no | physical steps (skull drop) wait for Done from an iPad |
 | `trigger` | {after: moment ref, when: cond} | no | when the cue fires, if a moment does not list it under `cues` |
+| `hold_s` | number | no | seconds the queue waits after the cue's tower sound before the next sound or avatar line. The tower never reports sound end (GAP-LIB-007), so this is a measured length. Without it the engine uses the 1.5 s minimum gap |
 
 **Accent reason (R5-2).** Each logged accent has exactly one reason: `choice`, `scene_cue`, `moment`, or `ambient`. Precedence is that order, and the first match wins. This classifies that one accent. It is not a contest between two outputs. The reason is derived; a pack does not set it on the cue.
 - `choice`: the moment is waiting on player input. In the funeral that is `.investigate` and every `.investigate.*` id (including `.investigate.follow-the-mourner.cue`), `.lid-choice` and every `.lid-choice*` id, the Forewarned choice, and the battle screen. Those log `choice` even when they also fire a cue such as `heartbeat`.
@@ -452,14 +502,14 @@ A dungeon is placed at a site as an E19 objective and starts when a hunter enter
 | `room.id`, `room.moments` | id, list | yes | |
 | `room.type` | `trap` \| `foe` \| `treasure` \| `deeper` \| `story` | yes | E20b |
 | `room.hunter` | hunter ref | story rooms | with `~no-<hunter>` variant if absent (E20b) |
-| `room.reduce_with` | list RtDT trait | no | traits a held Advantage must match to reduce `room.cost`. A held Wild Advantage counts even when Wild is not listed. Omitted means any held Advantage. Clearing a room never grants an Advantage (E20c) |
+| `room.reduce_with` | list RtDT trait | no | traits a held Advantage must match to reduce `room.cost`. A held Wild Advantage counts even when Wild is not listed. Omitted means any held Advantage. Each matching Advantage applied cancels one cost step and is spent. Clearing a room never grants an Advantage (E20c) |
 | `room.cost` | a story item, a story-track step, or a corruption to a present hunter | yes | never warriors or spirit (E20d) |
 | `room.foe` | foe ref | foe rooms | Story board battle screen, base RtDT warrior costs (E20c) |
 | `room.loot` | story items | treasure/target | bound to a present hunter (E20f) |
 
 Rules:
 - Rooms are face down until entered; the Story board shows the room map and depth (rooms cleared of N) (E20b, E20g).
-- Per room: reveal, apply held Advantages to reduce the cost, then resolve the reduced cost (E20c). `room.reduce_with` limits which held traits apply; a held Wild Advantage counts even when Wild is not listed; if the list is omitted, any held Advantage applies. The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
+- Per room: reveal, apply held Advantages to reduce the cost, then resolve the reduced cost (E20c). **Each matching held Advantage cancels one cost step and is spent** (Bob's ruling 11). One item, one track step or one corruption is one step; an n-step cost needs n Advantages to cancel fully. Rooms per length: Short 2, Standard 4, Long 6, target included. `room.reduce_with` limits which held traits apply; a held Wild Advantage counts even when Wild is not listed; if the list is omitted, any held Advantage applies. The reward is loot and depth, never an Advantage. Unpayable cost: pay what you can and take one corruption; at most one per room, never a third (E20d, E9/E19f).
 - After each room the present hunters vote, go deeper or leave (E20e). The format uses `mode: vote` (5). A tie means retreat: dungeon votes use `vote.tie: retreat` (ruling 5). That replaces the host tiebreak and a first-press tie.
 - Cleared rooms stay cleared after leaving (E20e).
 - End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
@@ -541,7 +591,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 
 - V-1. Schema: every required field present; unknown fields are errors in strict mode.
 - V-2. Every `ref` resolves; every `asset` exists in the manifest; every cue name exists in the library or pack.
-- V-3. Moment ids match the grammar (4.1) and their `scene` prefix equals their set piece id.
+- V-3. Moment ids match the grammar (4.1) and their `scene` prefix equals their set piece id, or is the reserved `crypt.` (dungeon rooms) or `end.` (endings) prefix. No set piece is named `crypt` or `end`.
 - V-4. `.private.<hunter>` uses a declared hunter and `target: ipad:<hunter>`; no `.private.*` moment, asset or text may be reachable by a `storyboard` target.
 - V-5. Every `~no-<x>` names a declared hunter. When hunter H is absent, play `~no-H` if that variant exists. If it does not, and H would speak, cut that line (PRD-8). `presence_safe` marks a base that does not depict H, so no variant is expected. A missing variant is not by itself a load error.
 - V-6. No two variants of a moment are equally specific with overlapping conditions; a header-only base has variants that cover all cases.
@@ -559,6 +609,8 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 - V-18. Choices: every option with a `cond` has a sibling that is always available (no dead-end prompt).
 - V-19. Components: minimum asset set check (R-WIZ-3), warning or error per open question.
 - V-20. Determinism: all randomness names a seeded table.
+- V-22. Cast and script: every `script.yaml` speaker exists in `cast.yaml`; every cast entry has all eight mouths (rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv) and an anchor.
+- V-23. Lines: line ids are unique in the pack and stable across builds (checked against the previous build's id list: a shipped id is never renamed or reused); every `[pause N]` has N a positive number; estimated length (words at ~2.5 per second plus pauses) is at most 20 s, and rendered audio, once it exists, is at most 20 s.
 - V-21. Readiness (AT-17): every private moment and `~no-` variant has voice and render at status ≥ draft before a "ready" build.
 
 ## 16. Check: mapping onto the format
@@ -616,7 +668,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
 17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
 18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
-19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Still open: set pieces per length, hunter-token pace, encounter frequency, the per-visit crypt room cap, one more crypt room so Long can be dealt, and what an applied Advantage does to a room cost.
+19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Still open: set pieces per length, hunter-token pace, encounter frequency, the per-visit crypt room cap, one more crypt room so Long can be dealt. What an applied Advantage does to a room cost is settled by ruling 11.
 20. **D-DRA-11 site name:** settled by ruling 9. The space is "The Tower's Shadow".
 
 ## Gamewright rulings (Oct 15 2026)
@@ -639,4 +691,11 @@ Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lante
 9. **D-DRA-11:** the space next to the Tower is named "The Tower's Shadow". The app uses that name; it does not label the space by terrain and position.
 10. **Hunter holdings** (R-DEV-9) change on player devices only (an iPad, or a phone standing in), never on the Story board, because the Story board is display only. The frozen funeral POC still reassigns from the Dashboard (ruling 2, PRD-20, PRD-34).
 
-Still open: set pieces per length, hunter-token pace, and encounter frequency (Loremaster proposes, Gamewright reviews). Also open: the per-visit crypt room cap, one more crypt room so a Long chain of 6 can be dealt, and what an applied Advantage does to a room cost (spent or kept, how many, and the effect on a story item, a track step, or a corruption), including whether a foe room's battle Advantages are that same application.
+11. **E20 room costs:** each matching held Advantage cancels one cost step and is spent. Rooms never grant Advantages. Rooms per length stay Short 2, Standard 4, Long 6 (ruling 7).
+
+Still open: set pieces per length, hunter-token pace, and encounter frequency (Loremaster proposes, Gamewright reviews). Also open: the per-visit crypt room cap, one more crypt room so a Long chain of 6 can be dealt, and whether a foe room's battle Advantages count as the room-cost application (ruling 11 settles the rest).
+
+## Design decisions (Gamewright, Oct 15 2026)
+
+- **Talking avatars** use `cast.yaml` + `script.yaml` (2.1, V-22, V-23): Story board only, captions on iPads, never over a tower sound.
+- **V-3** accepts the reserved `crypt.` and `end.` prefixes. **Cues** may set `hold_s` (6).
