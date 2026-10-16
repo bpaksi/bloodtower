@@ -163,3 +163,31 @@
   portrait: por.wren
   mouths: {rest: m.wren.rest, mbp: m.wren.mbp, cons_ee: m.wren.cons_ee, eh_ae: m.wren.eh_ae, ah: m.wren.ah, oh_er: m.wren.oh_er, oo_w: m.wren.oo_w, fv: m.wren.fv}
   anchor: {x: 0.5, y: 0.7}   # placeholder
+- id: agnes-whisper
+  name: "Sister Agnes Hallow (whisper)"
+  voice: {provider: gemini-tts, name: Kore, style: "calm, dry, quietly stern; whispered inner aside"}
+  portrait: por.agnes
+  mouths: {rest: m.agnes.rest, mbp: m.agnes.mbp, cons_ee: m.agnes.cons_ee, eh_ae: m.agnes.eh_ae, ah: m.agnes.ah, oh_er: m.agnes.oh_er, oo_w: m.agnes.oo_w, fv: m.agnes.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: tomas-whisper
+  name: "Tomas Varga (whisper)"
+  voice: {provider: gemini-tts, name: Algenib, style: "gruff, low, unhurried; whispered inner aside"}
+  portrait: por.tomas
+  mouths: {rest: m.tomas.rest, mbp: m.tomas.mbp, cons_ee: m.tomas.cons_ee, eh_ae: m.tomas.eh_ae, ah: m.tomas.ah, oh_er: m.tomas.oh_er, oo_w: m.tomas.oo_w, fv: m.tomas.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: wren-whisper
+  name: "Wren Kessel (whisper)"
+  voice: {provider: gemini-tts, name: Erinome, style: "flat, terse, matter-of-fact; whispered inner aside"}
+  portrait: por.wren
+  mouths: {rest: m.wren.rest, mbp: m.wren.mbp, cons_ee: m.wren.cons_ee, eh_ae: m.wren.eh_ae, ah: m.wren.ah, oh_er: m.wren.oh_er, oo_w: m.wren.oo_w, fv: m.wren.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
+- id: emeric-whisper
+  name: "Emeric Lutz (whisper)"
+  voice: {provider: gemini-tts, name: Fenrir, style: "nervous, fast, breathless; whispered inner aside"}
+  portrait: por.emeric
+  mouths: {rest: m.emeric.rest, mbp: m.emeric.mbp, cons_ee: m.emeric.cons_ee, eh_ae: m.emeric.eh_ae, ah: m.emeric.ah, oh_er: m.emeric.oh_er, oo_w: m.emeric.oo_w, fv: m.emeric.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+

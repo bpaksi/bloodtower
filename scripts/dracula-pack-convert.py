@@ -31,29 +31,46 @@ for f in files:
       else: notes.append(style)
     s=src.search(text)
     if s: notes.append('source: '+s.group(1)); text=src.sub('',text)
-    if '—' in text: flags.append(f'{os.path.basename(f)}:{i} em dash replaced in {cur}'); text=re.sub(r'\s*—\s*','... ',text).strip()
+    if '—' in text:
+      flags.append(f'{os.path.basename(f)}:{i} {cur} em dash replaced')
+      text=text.replace('you — with','you, with')  # Stoker's own comma
+      text=re.sub(r'\s*—\s*','... ',text).strip()
+    text=re.sub(r'\*\(beat\)\*|\(beat\)','[pause 1]',text)
+    segs=[];base=[x for x in notes]
+    # italic aside ending the line, e.g. *(child, I hear you.)*: inner thought, whispered (separate line)
+    a=re.search(r'\s*\*\(([^)]*[.!?])\)\*\s*$',text);aside=None
+    if a:
+      aside=a.group(1);aside=aside[0].upper()+aside[1:];text=text[:a.start()]
+      flags.append(f'{os.path.basename(f)}:{i} {cur} italic aside -> separate whispered line ({sp.replace("-whisper","")}-whisper)')
     text=text.replace('*','').strip()
-    d=re.match(r'^\(([^)]*)\)\s*',text)
-    if d: notes.append(d.group(1)); text=text[d.end():]
-    text=re.sub(r'\s*\(beat\)\s*',' [pause 1] ',text).strip()
-    if re.search(r'\(([^)]*[.!?])\)\s*$',text):
-      flags.append(f'{os.path.basename(f)}:{i} {cur} italic aside kept as spoken text (parentheses dropped)')
-      text=re.sub(r'\(([^)]*[.!?])\)\s*$',lambda m: m.group(1)[0].upper()+m.group(1)[1:],text)
-    for d in re.findall(r'\(([^)]*)\)',text):
-      notes.append('direction: '+d); flags.append(f'{os.path.basename(f)}:{i} {cur} inline stage direction moved to note: ({d})')
-    text=re.sub(r'\s*\([^)]*\)\s*',' ',text).strip()
-    speakers[sp]+=1
+    # stage directions: leading/trailing -> note on that segment; mid-line -> split the line there
+    parts=re.split(r'\s*\(([^)]*)\)\s*',text)
+    cur_notes=list(base);buf=parts[0]
+    for k in range(1,len(parts),2):
+      d,after=parts[k],parts[k+1]
+      if buf.strip() and after.strip():
+        segs.append((sp,cur_notes,buf.strip()));cur_notes=list(base)+[d];buf=after
+        flags.append(f'{os.path.basename(f)}:{i} {cur} mid-line direction ({d}): line split, direction is the note of the second part')
+      elif buf.strip():
+        cur_notes=cur_notes+['after: '+d];buf=buf
+        flags.append(f'{os.path.basename(f)}:{i} {cur} trailing direction ({d}) moved to note')
+      else:
+        cur_notes=cur_notes+[d];buf=after
+    if buf.strip(): segs.append((sp,cur_notes,buf.strip()))
+    if len(segs)>1: segs=[(a_,[n for n in nt if not n.startswith('source:')],t_) for a_,nt,t_ in segs[:-1]]+segs[-1:]  # quote tag belongs to the last part
+    if aside: segs.append((sp.replace('-whisper','')+'-whisper',['thought, aside'],aside))
     mo=moments.setdefault(cur,{'file':os.path.basename(f),'target':tgt,'lines':[]})
-    # split if >20s
-    chunks=[text]
-    if secs(text)>20:
-      sents=re.split(r'(?<=[.!?"])\s+',text);chunks=[];c=''
-      for s_ in sents:
-        if c and secs(c+' '+s_)>20: chunks.append(c);c=s_
-        else: c=(c+' '+s_).strip()
-      chunks.append(c)
-      flags.append(f'{os.path.basename(f)}:{i} {cur} line ~{secs(text):.0f}s split into {len(chunks)} lines'+(' (a chunk still >20s)' if any(secs(x)>20 for x in chunks) else ''))
-    for c in chunks: mo['lines'].append({'speaker':sp,'note':'; '.join(notes) or None,'text':c})
+    for sp2,nt,text in segs:
+      speakers[sp2]+=1
+      chunks=[text]
+      if secs(text)>20:
+        sents=re.split(r'(?<=[.!?"])\s+',text);chunks=[];c=''
+        for s_ in sents:
+          if c and secs(c+' '+s_)>20: chunks.append(c);c=s_
+          else: c=(c+' '+s_).strip()
+        chunks.append(c)
+        flags.append(f'{os.path.basename(f)}:{i} {cur} line ~{secs(text):.0f}s split into {len(chunks)} lines at sentence breaks'+(' (a chunk still >20s)' if any(secs(x)>20 for x in chunks) else ''))
+      for c in chunks: mo['lines'].append({'speaker':sp2,'note':'; '.join(nt) or None,'text':c})
 out=['# Dracula pack: talking-avatar script (story-pack-format 2.1).','# Generated from assets/stories/dracula/scripts/*.md. Line ids are stable: never renumber; retire, do not reuse.','# target is added for private moments (ipad:<hunter>); untagged moments play on storyboard.','']
 tot=0
 for mid,mo in moments.items():

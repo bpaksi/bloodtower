@@ -392,7 +392,8 @@
   source: n1-open-grave.md
   lines:
     - {id: "n1-open-grave.05.vo-01", speaker: agnes, text: "Father Oskar. Step into the lantern light."}
-    - {id: "n1-open-grave.05.vo-02", speaker: oskar, note: "source: Stoker; direction: softly", text: "I can't, Sister. He says the light is not for me. \"The blood is the life.\" I used to read that as scripture. It isn't."}
+    - {id: "n1-open-grave.05.vo-02", speaker: oskar, text: "I can't, Sister. He says the light is not for me."}
+    - {id: "n1-open-grave.05.vo-03", speaker: oskar, note: "source: Stoker; softly", text: "\"The blood is the life.\" I used to read that as scripture. It isn't."}
 - id: "n1-open-grave.06"
   source: n1-open-grave.md
   lines:
@@ -878,7 +879,7 @@
   source: n23-sergius-blade.md
   lines:
     - {id: "n23-sergius-blade.07.vo-01", speaker: emeric, text: "It hurts him. It actually hurts him. I'm writing it down."}
-    - {id: "n23-sergius-blade.07.vo-02", speaker: count, note: "direction: he is gone; the wolves howl again", text: "Write well, Herr Lutz. Your master's handwriting was dreadful."}
+    - {id: "n23-sergius-blade.07.vo-02", speaker: count, note: "after: he is gone; the wolves howl again", text: "Write well, Herr Lutz. Your master's handwriting was dreadful."}
 - id: "n23-sergius-blade.08.private.agnes"
   source: n23-sergius-blade.md
   target: ipad:agnes
@@ -940,7 +941,7 @@
   source: n23-sergius-blade.md
   lines:
     - {id: "n23-sergius-blade.07~no-emeric.vo-01", speaker: wren, text: "It hurts him."}
-    - {id: "n23-sergius-blade.07~no-emeric.vo-02", speaker: count, note: "direction: he is gone; the wolves howl again", text: "Remember that, if it helps you sleep."}
+    - {id: "n23-sergius-blade.07~no-emeric.vo-02", speaker: count, note: "after: he is gone; the wolves howl again", text: "Remember that, if it helps you sleep."}
 - id: "n3-fly-eaters-cell.01"
   source: n3-fly-eaters-cell.md
   lines:
@@ -974,7 +975,8 @@
   source: n3-fly-eaters-cell.md
   lines:
     - {id: "n3-fly-eaters-cell.07.vo-01", speaker: emeric, text: "How many boxes?"}
-    - {id: "n3-fly-eaters-cell.07.vo-02", speaker: jakob, note: "direction: giggles", text: "I wrote the shipping orders. Fifty years of earth. You won't find them all. I didn't."}
+    - {id: "n3-fly-eaters-cell.07.vo-02", speaker: jakob, text: "I wrote the shipping orders. Fifty years of earth."}
+    - {id: "n3-fly-eaters-cell.07.vo-03", speaker: jakob, note: "giggles", text: "You won't find them all. I didn't."}
 - id: "n3-fly-eaters-cell.08"
   source: n3-fly-eaters-cell.md
   lines:
@@ -1087,7 +1089,7 @@
 - id: "n4-earth-boxes.06"
   source: n4-earth-boxes.md
   lines:
-    - {id: "n4-earth-boxes.06.vo-01", speaker: count, note: "source: Stoker", text: "You think to baffle me, you... with your pale faces all in a row, like sheep in a butcher's."}
+    - {id: "n4-earth-boxes.06.vo-01", speaker: count, note: "source: Stoker", text: "You think to baffle me, you, with your pale faces all in a row, like sheep in a butcher's."}
     - {id: "n4-earth-boxes.06.vo-02", speaker: wren, note: "striking a match", text: "Baa."}
 - id: "n4-earth-boxes.07.private.agnes"
   source: n4-earth-boxes.md
@@ -1146,7 +1148,7 @@
 - id: "n4-earth-boxes.06~no-wren"
   source: n4-earth-boxes.md
   lines:
-    - {id: "n4-earth-boxes.06~no-wren.vo-01", speaker: count, note: "source: Stoker", text: "You think to baffle me, you... with your pale faces all in a row, like sheep in a butcher's."}
+    - {id: "n4-earth-boxes.06~no-wren.vo-01", speaker: count, note: "source: Stoker", text: "You think to baffle me, you, with your pale faces all in a row, like sheep in a butcher's."}
     - {id: "n4-earth-boxes.06~no-wren.vo-02", speaker: tomas, text: "Baa, my lord."}
 - id: "n4-finding-the-tome.01~village"
   source: n4-finding-the-tome.md
@@ -1245,7 +1247,8 @@
 - id: "n4-finding-the-tome.06~no-emeric"
   source: n4-finding-the-tome.md
   lines:
-    - {id: "n4-finding-the-tome.06~no-emeric.vo-01", speaker: agnes, note: "direction: looking up", text: "\"She has come again, in the burgomaster's house. Every evening she says: I am not her, and even if I were, no.\" She is his Ludmila. And she is refusing him."}
+    - {id: "n4-finding-the-tome.06~no-emeric.vo-01", speaker: agnes, text: "\"She has come again, in the burgomaster's house. Every evening she says: I am not her, and even if I were, no.\""}
+    - {id: "n4-finding-the-tome.06~no-emeric.vo-02", speaker: agnes, note: "looking up", text: "She is his Ludmila. And she is refusing him."}
 - id: "n4-finding-the-tome.08~no-emeric"
   source: n4-finding-the-tome.md
   lines:
@@ -1605,7 +1608,8 @@
 - id: "n5-ending-turned.05~night5"
   source: n5-ending-turned.md
   lines:
-    - {id: "n5-ending-turned.05~night5.vo-01", speaker: lenka, note: "from the window, very quietly; direction: to the Count", text: "No. Not them too. My answer is still no."}
+    - {id: "n5-ending-turned.05~night5.vo-01", speaker: lenka, note: "from the window, very quietly", text: "No. Not them too."}
+    - {id: "n5-ending-turned.05~night5.vo-02", speaker: lenka, note: "to the Count", text: "My answer is still no."}
 - id: "n5-final-confrontation.01"
   source: n5-final-confrontation.md
   lines:
@@ -1633,7 +1637,8 @@
   source: n5-final-confrontation.md
   lines:
     - {id: "n5-final-confrontation.06.vo-01", speaker: narrator, text: "While he is held, Lenka stands. In her hand, the last of her violets."}
-    - {id: "n5-final-confrontation.06.vo-02", speaker: lenka, note: "direction: she opens the window to the grey dawn", text: "My name is Lenka Morosz. I am not her. And if I were, I would say what she said. No."}
+    - {id: "n5-final-confrontation.06.vo-02", speaker: lenka, text: "My name is Lenka Morosz. I am not her. And if I were, I would say what she said."}
+    - {id: "n5-final-confrontation.06.vo-03", speaker: lenka, note: "she opens the window to the grey dawn", text: "No."}
 - id: "n5-final-confrontation.07"
   source: n5-final-confrontation.md
   lines:
@@ -1686,7 +1691,7 @@
   source: n5-final-confrontation.md
   lines:
     - {id: "n5-final-confrontation.05~boxes-left.vo-01", speaker: agnes, text: "I prayed for you once, traveler. I am praying for you now. Rest."}
-    - {id: "n5-final-confrontation.05~boxes-left.vo-02", speaker: count, note: "direction: he shrugs off the light once; per mechanics the battle is harder", text: "Not yet."}
+    - {id: "n5-final-confrontation.05~boxes-left.vo-02", speaker: count, note: "after: he shrugs off the light once; per mechanics the battle is harder", text: "Not yet."}
 - id: "n5-final-confrontation.02~no-wren"
   source: n5-final-confrontation.md
   lines:
@@ -1699,7 +1704,8 @@
   source: n5-final-confrontation.md
   lines:
     - {id: "n5-final-confrontation.06~no-agnes.vo-01", speaker: narrator, text: "Lenka stands, against all of his will in the room. In her hand, the last of her violets."}
-    - {id: "n5-final-confrontation.06~no-agnes.vo-02", speaker: lenka, note: "direction: she opens the window to the grey dawn", text: "My name is Lenka Morosz. I am not her. And if I were, I would say what she said. No."}
+    - {id: "n5-final-confrontation.06~no-agnes.vo-02", speaker: lenka, text: "My name is Lenka Morosz. I am not her. And if I were, I would say what she said."}
+    - {id: "n5-final-confrontation.06~no-agnes.vo-03", speaker: lenka, note: "she opens the window to the grey dawn", text: "No."}
 - id: "n5-portrait-gallery.01"
   source: n5-portrait-gallery.md
   lines:
@@ -1881,22 +1887,26 @@
   source: nx-pressed-flower.md
   target: ipad:agnes
   lines:
-    - {id: "nx-pressed-flower.02.private.agnes~night1.vo-01", speaker: agnes, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms. Child, I hear you."}
+    - {id: "nx-pressed-flower.02.private.agnes~night1.vo-01", speaker: agnes, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms."}
+    - {id: "nx-pressed-flower.02.private.agnes~night1.vo-02", speaker: agnes-whisper, note: "thought, aside", text: "Child, I hear you."}
 - id: "nx-pressed-flower.02.private.tomas~night1"
   source: nx-pressed-flower.md
   target: ipad:tomas
   lines:
-    - {id: "nx-pressed-flower.02.private.tomas~night1.vo-01", speaker: tomas, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms. Lass, I hear you."}
+    - {id: "nx-pressed-flower.02.private.tomas~night1.vo-01", speaker: tomas, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms."}
+    - {id: "nx-pressed-flower.02.private.tomas~night1.vo-02", speaker: tomas-whisper, note: "thought, aside", text: "Lass, I hear you."}
 - id: "nx-pressed-flower.02.private.wren~night1"
   source: nx-pressed-flower.md
   target: ipad:wren
   lines:
-    - {id: "nx-pressed-flower.02.private.wren~night1.vo-01", speaker: wren, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms. Got it."}
+    - {id: "nx-pressed-flower.02.private.wren~night1.vo-01", speaker: wren, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms."}
+    - {id: "nx-pressed-flower.02.private.wren~night1.vo-02", speaker: wren-whisper, note: "thought, aside", text: "Got it."}
 - id: "nx-pressed-flower.02.private.emeric~night1"
   source: nx-pressed-flower.md
   target: ipad:emeric
   lines:
-    - {id: "nx-pressed-flower.02.private.emeric~night1.vo-01", speaker: emeric, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms. Noted, noted, I'm noting it."}
+    - {id: "nx-pressed-flower.02.private.emeric~night1.vo-01", speaker: emeric, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms."}
+    - {id: "nx-pressed-flower.02.private.emeric~night1.vo-02", speaker: emeric-whisper, note: "thought, aside", text: "Noted, noted, I'm noting it."}
 - id: "nx-pressed-flower.01~night2"
   source: nx-pressed-flower.md
   lines:
@@ -1905,22 +1915,26 @@
   source: nx-pressed-flower.md
   target: ipad:agnes
   lines:
-    - {id: "nx-pressed-flower.02.private.agnes~night2.vo-01", speaker: agnes, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery. Child, I hear you."}
+    - {id: "nx-pressed-flower.02.private.agnes~night2.vo-01", speaker: agnes, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery."}
+    - {id: "nx-pressed-flower.02.private.agnes~night2.vo-02", speaker: agnes-whisper, note: "thought, aside", text: "Child, I hear you."}
 - id: "nx-pressed-flower.02.private.tomas~night2"
   source: nx-pressed-flower.md
   target: ipad:tomas
   lines:
-    - {id: "nx-pressed-flower.02.private.tomas~night2.vo-01", speaker: tomas, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery. Lass, I hear you."}
+    - {id: "nx-pressed-flower.02.private.tomas~night2.vo-01", speaker: tomas, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery."}
+    - {id: "nx-pressed-flower.02.private.tomas~night2.vo-02", speaker: tomas-whisper, note: "thought, aside", text: "Lass, I hear you."}
 - id: "nx-pressed-flower.02.private.wren~night2"
   source: nx-pressed-flower.md
   target: ipad:wren
   lines:
-    - {id: "nx-pressed-flower.02.private.wren~night2.vo-01", speaker: wren, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery. Got it."}
+    - {id: "nx-pressed-flower.02.private.wren~night2.vo-01", speaker: wren, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery."}
+    - {id: "nx-pressed-flower.02.private.wren~night2.vo-02", speaker: wren-whisper, note: "thought, aside", text: "Got it."}
 - id: "nx-pressed-flower.02.private.emeric~night2"
   source: nx-pressed-flower.md
   target: ipad:emeric
   lines:
-    - {id: "nx-pressed-flower.02.private.emeric~night2.vo-01", speaker: emeric, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery. Noted, noted, I'm noting it."}
+    - {id: "nx-pressed-flower.02.private.emeric~night2.vo-01", speaker: emeric, note: "thought", text: "Painted canvas. She's being kept near pictures. A gallery."}
+    - {id: "nx-pressed-flower.02.private.emeric~night2.vo-02", speaker: emeric-whisper, note: "thought, aside", text: "Noted, noted, I'm noting it."}
 - id: "nx-pressed-flower.01~night3"
   source: nx-pressed-flower.md
   lines:
@@ -1929,22 +1943,26 @@
   source: nx-pressed-flower.md
   target: ipad:agnes
   lines:
-    - {id: "nx-pressed-flower.02.private.agnes~night3.vo-01", speaker: agnes, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up. Child, I hear you."}
+    - {id: "nx-pressed-flower.02.private.agnes~night3.vo-01", speaker: agnes, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up."}
+    - {id: "nx-pressed-flower.02.private.agnes~night3.vo-02", speaker: agnes-whisper, note: "thought, aside", text: "Child, I hear you."}
 - id: "nx-pressed-flower.02.private.tomas~night3"
   source: nx-pressed-flower.md
   target: ipad:tomas
   lines:
-    - {id: "nx-pressed-flower.02.private.tomas~night3.vo-01", speaker: tomas, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up. Lass, I hear you."}
+    - {id: "nx-pressed-flower.02.private.tomas~night3.vo-01", speaker: tomas, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up."}
+    - {id: "nx-pressed-flower.02.private.tomas~night3.vo-02", speaker: tomas-whisper, note: "thought, aside", text: "Lass, I hear you."}
 - id: "nx-pressed-flower.02.private.wren~night3"
   source: nx-pressed-flower.md
   target: ipad:wren
   lines:
-    - {id: "nx-pressed-flower.02.private.wren~night3.vo-01", speaker: wren, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up. Got it."}
+    - {id: "nx-pressed-flower.02.private.wren~night3.vo-01", speaker: wren, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up."}
+    - {id: "nx-pressed-flower.02.private.wren~night3.vo-02", speaker: wren-whisper, note: "thought, aside", text: "Got it."}
 - id: "nx-pressed-flower.02.private.emeric~night3"
   source: nx-pressed-flower.md
   target: ipad:emeric
   lines:
-    - {id: "nx-pressed-flower.02.private.emeric~night3.vo-01", speaker: emeric, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up. Noted, noted, I'm noting it."}
+    - {id: "nx-pressed-flower.02.private.emeric~night3.vo-01", speaker: emeric, note: "thought", text: "A veil. He's dressing her. Above the gallery, where the stair goes up."}
+    - {id: "nx-pressed-flower.02.private.emeric~night3.vo-02", speaker: emeric-whisper, note: "thought, aside", text: "Noted, noted, I'm noting it."}
 - id: "nx-pressed-flower.01~night4"
   source: nx-pressed-flower.md
   lines:
@@ -1953,22 +1971,26 @@
   source: nx-pressed-flower.md
   target: ipad:agnes
   lines:
-    - {id: "nx-pressed-flower.02.private.agnes~night4.vo-01", speaker: agnes, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell. Child, I hear you."}
+    - {id: "nx-pressed-flower.02.private.agnes~night4.vo-01", speaker: agnes, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell."}
+    - {id: "nx-pressed-flower.02.private.agnes~night4.vo-02", speaker: agnes-whisper, note: "thought, aside", text: "Child, I hear you."}
 - id: "nx-pressed-flower.02.private.tomas~night4"
   source: nx-pressed-flower.md
   target: ipad:tomas
   lines:
-    - {id: "nx-pressed-flower.02.private.tomas~night4.vo-01", speaker: tomas, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell. Lass, I hear you."}
+    - {id: "nx-pressed-flower.02.private.tomas~night4.vo-01", speaker: tomas, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell."}
+    - {id: "nx-pressed-flower.02.private.tomas~night4.vo-02", speaker: tomas-whisper, note: "thought, aside", text: "Lass, I hear you."}
 - id: "nx-pressed-flower.02.private.wren~night4"
   source: nx-pressed-flower.md
   target: ipad:wren
   lines:
-    - {id: "nx-pressed-flower.02.private.wren~night4.vo-01", speaker: wren, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell. Got it."}
+    - {id: "nx-pressed-flower.02.private.wren~night4.vo-01", speaker: wren, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell."}
+    - {id: "nx-pressed-flower.02.private.wren~night4.vo-02", speaker: wren-whisper, note: "thought, aside", text: "Got it."}
 - id: "nx-pressed-flower.02.private.emeric~night4"
   source: nx-pressed-flower.md
   target: ipad:emeric
   lines:
-    - {id: "nx-pressed-flower.02.private.emeric~night4.vo-01", speaker: emeric, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell. Noted, noted, I'm noting it."}
+    - {id: "nx-pressed-flower.02.private.emeric~night4.vo-01", speaker: emeric, note: "thought", text: "The page says: 'the high room, the window I opened.' She's in the room where Ludmila fell."}
+    - {id: "nx-pressed-flower.02.private.emeric~night4.vo-02", speaker: emeric-whisper, note: "thought, aside", text: "Noted, noted, I'm noting it."}
 - id: "enc-early-lantern.01"
   source: tokens-and-encounters.md
   lines:
