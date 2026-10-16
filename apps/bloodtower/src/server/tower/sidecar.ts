@@ -1,5 +1,6 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import type { TowerSnapshot } from "bloodtower-protocols";
 import { WebSocket } from "ws";
 import { mapBattery, mapCalibration, mapConnection, unavailableTower } from "./snapshot.ts";
 import type { TowerPort, TowerSent } from "./types.ts";
@@ -32,6 +33,12 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
   let socket: WebSocket | undefined;
   let wantConnect = false;
   let connecting = false;
+  /** Welcome arrived; the next `connection` frame is tower-poc's reading from before connect. */
+  let helloReply = false;
+  /** Connect was sent and no `connection` frame has answered it yet. */
+  let connectSent = false;
+  /** The last connection tower-poc reported. */
+  let reported: TowerSnapshot["connection"] = "unavailable";
   let chain: Promise<void> = Promise.resolve();
 
   const track = (step: Promise<void>) => {
@@ -62,21 +69,36 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
         ? (message.payload as Record<string, unknown>)
         : {};
     if (type === "welcome" && wantConnect) {
+      // tower-poc follows welcome with where the tower stands. Connect only after reading it.
       wantConnect = false;
-      connecting = true;
-      snapshot = { ...snapshot, connection: "connecting" };
-      send("connect", {});
+      helloReply = true;
       return;
     }
     if (type === "connection") {
-      connecting = false;
       const state = typeof payload.state === "string" ? payload.state : undefined;
       const calibration = typeof payload.calibration === "string" ? payload.calibration : undefined;
-      snapshot = {
-        ...snapshot,
-        connection: mapConnection(state),
-        calibrated: mapCalibration(calibration),
-      };
+      reported = mapConnection(state);
+      const calibrated = mapCalibration(calibration);
+      if (helloReply) {
+        helloReply = false;
+        if (reported !== "connected" && reported !== "connecting") {
+          // The reading from before our connect. Stay connecting until the connect is answered.
+          snapshot = { ...snapshot, calibrated };
+          connectSent = true;
+          send("connect", {});
+          return;
+        }
+      }
+      connecting = false;
+      connectSent = false;
+      snapshot = { ...snapshot, connection: reported, calibrated };
+      return;
+    }
+    if (type === "error" && connectSent) {
+      // tower-poc refused the connect. Nothing changed, so go back to the last reading.
+      connecting = false;
+      connectSent = false;
+      snapshot = { ...snapshot, connection: reported };
       return;
     }
     if (type === "state") {
@@ -91,6 +113,9 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
   const drop = () => {
     wantConnect = false;
     connecting = false;
+    helloReply = false;
+    connectSent = false;
+    reported = "disconnected";
     socket = undefined;
     // Disconnected, not unavailable: the attempt ended, so a later press can try again.
     snapshot = {

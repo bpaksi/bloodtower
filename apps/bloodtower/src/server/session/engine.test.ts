@@ -246,6 +246,31 @@ describe("session", () => {
     }
   });
 
+  it("releases a connect lock the reading has dropped before deciding a batch", () => {
+    let connection: TowerSnapshot["connection"] = "disconnected";
+    const { opened, engine } = setup({ tower: () => ({ ...TOWER, connection }) });
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      const beta = engine.join({ joinCode: "048213", formFactor: "phone" });
+      if (!alpha.ok || !beta.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      expect(engine.press(alpha.deviceId, "tower-connect", "tower-connect")).toMatchObject({
+        winner: true,
+      });
+      connection = "connecting";
+      expect(engine.lockFor("tower-connect")?.winnerDeviceId).toBe(alpha.deviceId);
+      // The attempt failed. No other call reconciles before the batch.
+      connection = "disconnected";
+      const batch = engine.pressAll([
+        { deviceId: beta.deviceId, promptId: "tower-connect", action: "tower-connect" },
+        { deviceId: alpha.deviceId, promptId: "tower-connect", action: "tower-connect" },
+      ]);
+      expect(batch.map((result) => (result.ok ? result.winner : false))).toEqual([true, false]);
+    } finally {
+      opened.close();
+    }
+  });
+
   it("locks tower connect and calibrate the same way, and steps the cue without sending one", () => {
     let connection: TowerSnapshot["connection"] = "unavailable";
     const { opened, store, engine } = setup({

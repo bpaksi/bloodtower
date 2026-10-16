@@ -188,6 +188,17 @@ describe("story loader", () => {
     }
   });
 
+  it("loads a pack folder that is itself a symlink", () => {
+    const parent = mkdtempSync(join(tmpdir(), "bloodtower-link-"));
+    try {
+      const link = join(parent, "pack");
+      symlinkSync(testPack(), link);
+      expect(loadPackDir(link).ok).toBe(true);
+    } finally {
+      rmSync(parent, { recursive: true, force: true });
+    }
+  });
+
   it("does not load a pack that is not the test pack through loadR1Pack", () => {
     const dir = mkdtempSync(join(tmpdir(), "bloodtower-packs-"));
     try {

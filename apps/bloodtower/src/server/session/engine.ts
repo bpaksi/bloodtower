@@ -407,6 +407,8 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
 
     pressAll: (batch) => {
       const results: Array<PressOk | Fail> = [];
+      // Once, before the batch: a lock the reading has already dropped must not decide it.
+      reconcileTowerLocks();
       inBatch = true;
       try {
         for (const press of batch)

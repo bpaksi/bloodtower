@@ -99,7 +99,12 @@ describe("sidecar", () => {
         const message = JSON.parse(String(raw)) as { type?: string };
         received.push(message.type ?? "");
         if (message.type === "hello") {
+          // tower-poc's reply to hello: welcome, where the tower stands, then state.
           socket.send(JSON.stringify({ v: 1, type: "welcome", payload: {} }));
+          socket.send(
+            JSON.stringify({ v: 1, type: "connection", payload: { state: "disconnected" } }),
+          );
+          socket.send(JSON.stringify({ v: 1, type: "state", payload: { snapshot: {} } }));
         }
         if (message.type === "connect") {
           socket.send(
@@ -173,6 +178,107 @@ describe("sidecar", () => {
       tower.close();
       await new Promise<void>((resolve) => server.close(() => resolve()));
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  const fakeTowerPoc = async (
+    hello: { state: string },
+    onConnect: (socket: import("ws").WebSocket) => void,
+  ) => {
+    const received: string[] = [];
+    const server = new WebSocketServer({ port: 0, host: "127.0.0.1" });
+    await new Promise<void>((resolve) => server.once("listening", () => resolve()));
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("port");
+    server.on("connection", (socket) => {
+      socket.on("message", (raw) => {
+        const message = JSON.parse(String(raw)) as { type?: string };
+        received.push(message.type ?? "");
+        if (message.type === "hello") {
+          socket.send(JSON.stringify({ v: 1, type: "welcome", payload: {} }));
+          socket.send(JSON.stringify({ v: 1, type: "connection", payload: hello }));
+          socket.send(
+            JSON.stringify({
+              v: 1,
+              type: "state",
+              payload: {
+                snapshot: {
+                  "battery.level": { freshness: "current", value: { percent: 80 } },
+                },
+              },
+            }),
+          );
+        }
+        if (message.type === "connect") onConnect(socket);
+      });
+    });
+    const stop = () => new Promise<void>((resolve) => server.close(() => resolve()));
+    return { received, url: `ws://127.0.0.1:${address.port}`, server, stop };
+  };
+
+  it("stays connecting through tower-poc's hello reply until the connect is answered", async () => {
+    let answer: (() => void) | undefined;
+    const fake = await fakeTowerPoc({ state: "disconnected" }, (socket) => {
+      answer = () =>
+        socket.send(JSON.stringify({ v: 1, type: "connection", payload: { state: "connected" } }));
+    });
+    const tower = createSidecarTower({ url: fake.url });
+    const trace: string[] = [];
+    try {
+      tower.connect();
+      await waitFor(() => {
+        const connection = tower.snapshot().connection;
+        if (trace.at(-1) !== connection) trace.push(connection);
+        return tower.snapshot().battery.state === "known" && fake.received.includes("connect");
+      });
+      expect(tower.snapshot().connection).toBe("connecting");
+      answer?.();
+      await waitFor(() => {
+        const connection = tower.snapshot().connection;
+        if (trace.at(-1) !== connection) trace.push(connection);
+        return connection === "connected";
+      });
+      expect(trace).not.toContain("disconnected");
+      expect(fake.received).toEqual(["hello", "connect"]);
+    } finally {
+      tower.close();
+      await fake.stop();
+    }
+  });
+
+  it("does not send connect when tower-poc already has the tower", async () => {
+    const fake = await fakeTowerPoc({ state: "connected" }, () => undefined);
+    const tower = createSidecarTower({ url: fake.url });
+    try {
+      tower.connect();
+      await waitFor(() => tower.snapshot().connection === "connected");
+      await waitFor(() => tower.snapshot().battery.state === "known");
+      expect(fake.received).toEqual(["hello"]);
+    } finally {
+      tower.close();
+      await fake.stop();
+    }
+  });
+
+  it("returns to the reported reading when tower-poc refuses the connect", async () => {
+    const fake = await fakeTowerPoc({ state: "disconnected" }, (socket) => {
+      socket.send(
+        JSON.stringify({
+          v: 1,
+          type: "error",
+          payload: { code: "invalid-state", message: "Busy." },
+        }),
+      );
+    });
+    const tower = createSidecarTower({ url: fake.url });
+    try {
+      tower.connect();
+      await waitFor(() => fake.received.includes("connect"));
+      await waitFor(() => tower.snapshot().connection === "disconnected");
+      expect(fake.received).toEqual(["hello", "connect"]);
+    } finally {
+      tower.close();
+      await fake.stop();
     }
   });
 });

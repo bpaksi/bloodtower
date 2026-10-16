@@ -121,9 +121,11 @@ const locate = (
 
 /** Loads any one pack folder. The CLI uses this for a bad pack as well as the test pack. */
 export const loadPackDir = (dir: string): PackLoadResult => {
-  const root = resolve(dir);
+  // The jail compares real paths, so the folder itself is resolved too (macOS tmp is a symlink).
+  let root = resolve(dir);
   let names: string[];
   try {
+    root = realpathSync(root);
     names = readdirSync(root);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
