@@ -47,7 +47,7 @@ Sources: `research/game-design/story-pack-format.md` (sections 0-15, V-1..V-21, 
 | F-7 | Vote after each room, tie = retreat | `.deeper-vote` |
 | F-8 | One tower effect from the library, only real tower sounds | cue `room-cleared` (FX-22) |
 | F-9 | Story items and a story track, never warriors or spirit | `lamp-oil`, `brass-key`, `lamps-lit` |
-| F-10 | One talking-avatar line (cast.yaml + script.yaml) | line `ts-keeper-001` |
+| F-10 | Talking-avatar lines (cast.yaml + script.yaml) | lines `ts-keeper-001`..`003` |
 | F-11 | Replay from the story log by line id | any voiced line; tested on `ts-keeper-001` |
 | F-12 | Pause overlay: Reassign / Concede / End for now | engine; pack declares nothing |
 | F-13 | Win ending and loss ending | `endings.yaml` |
@@ -116,7 +116,7 @@ Only the crypt changes with length, so every length keeps the opening, the set p
 | `grey-stair.02` | still | storyboard | Narrator: "At the top, a door. Below it, a draught from the crypt." Dell: "I hear water down there." | `next` |
 | `grey-stair.02~no-dell` | still | storyboard | `cond: absent(dell)`; narrator line only, Dell's line cut | `next` |
 | `grey-stair.02.private.<h>` (x4) | text-card | ipad:<h> | One private thought each, e.g. ash: "Your oil flask is half full." `placeholder: "Each hunter has a private thought."` | `next` |
-| `grey-stair.03` | clip | storyboard | Talking avatar: the Keeper, line `ts-keeper-001` (F-10) | `clip-end` |
+| `grey-stair.03` | clip | storyboard | Talking avatar: the Keeper, lines `ts-keeper-001`, `-002`, `-003` in order (F-10) | `clip-end` |
 | `grey-stair.door-choice` | pick-card | ipad:all | prompt for choice 5 | `step` |
 | `grey-stair.04` | still | storyboard | Narrator: "The lamps are lit, or they are not. The stair is quiet." | `next` |
 | `crypt.<room>` | still | storyboard | one per room: reveal line + cost (section 11) | `step` |
@@ -211,10 +211,12 @@ Format 2.1. Checked by V-22/V-23.
 ```yaml
 # cast.yaml
 - {id: keeper, name: "The Keeper", voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}, portrait: por.keeper,
-   mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}, anchor: {x: 0.52, y: 0.71}}
+   mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}, anchor: {x: 0.502, y: 0.6133, w: 0.3418, h: 0.25}}
 # script.yaml
 - id: grey-stair.03
-  lines: [{id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."}]
+  lines: [{id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."},
+          {id: ts-keeper-002, speaker: keeper, note: "dry, half a smile", text: "Mind the third step. It remembers everyone who ever fell on it."},
+          {id: ts-keeper-003, speaker: keeper, note: "warm, slow", text: "Go on, then. I'll keep the lamp lit until you're back. I always do."}]
 ```
 Rules: the line id is stable forever (never renumber; retire, don't reuse); speaker is a cast or hunter id; text ≤20 s spoken (est. ~2.5 words/s, so ≤45 words; this line ≈4 s + 0.5 s pause); `[pause N]` is seconds. The story log lists each played line by line id; a replay press on an iPad replays it on the Story board without changing game state. The avatar is Story board only; iPads show the caption.
 ## F-12. Pause overlay
@@ -239,7 +241,7 @@ Engine-owned, no pack data. Any iPad opens it; buttons Reassign (holdings change
 | V-19 components | warning-level until open question 11 is ruled |
 | V-20 determinism | pass: room deal uses seeded table `grey-crypt.deal` |
 | V-22 cast/script | pass: `keeper` has 8 mouths + anchor |
-| V-23 lines | pass: one id, valid `[pause 0.5]`, ~5 s |
+| V-23 lines | pass: three unique ids (`ts-keeper-001`..`003`); `[pause 0.5]` valid in 001; est. ~6 s / ~5 s / ~6 s (2.5 words/s + pauses), all under 20 s |
 | V-21 readiness | fails until private moments, `~no-` variants reach `draft`; expected for placeholders |
 ## Gaps and conflicts
 - G-1. Resolved: format 2.1, V-22, V-23.
