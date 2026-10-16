@@ -125,23 +125,99 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.10` still | anonymous mourners only; hunters optional at a distance | churchyard, Anton's grave; castle on the hill | — | — | **Anton's coffin lid with one pressed violet** (deep purple, flat, brown edges — not a fresh red flower; props:8); Dorka's grave beside it ("two graves filled by noon") | **dawn**: grey with soft pink |
 | `.end.private.*` | picker | personal | — | — | — | morning |
 
-### 2.2 Other scenes — TODO
-Each needs the §2.1 table. Known anchors to carry in:
-- n1-lantern-and-bell — TODO (inn, night 1; Emeric soaked; black-wax letters; Marta at home, shutters nailed).
-- n1-burgomasters-house — TODO (Anton in parlour with poker per C-5; Lenka's room window open, latch scratched outside; violet on the sill).
-- n1-open-grave — TODO (Oskar's grave dug from below, lid split outward).
-- n1-fortune-reading — TODO.
-- nx-midnight-procession — TODO (ghosts in old coats, lanterns that give no light).
-- nx-pressed-flower — TODO.
-- n23-catacombs-of-saint-ysolde — TODO (lookalike tells; reliquary niche).
-- n23-sergius-blade — TODO (Count's face first shown `.03`; old, white moustache per Bob C-6).
-- n3-fly-eaters-cell — TODO.
-- n4-earth-boxes — TODO (stencil text allowed).
-- n4-finding-the-tome — TODO.
-- n5-drawbridge — TODO (keys are physical RtDT components, §6; Marta at the little gate).
-- n5-portrait-gallery — TODO (covered canvas until reveal).
-- n5-final-confrontation — TODO (window shut; Lenka in white; Ilka half-seen until gallery).
-- n5-ending-rescued / endures / taken / turned — TODO (bible audit B4 ending checks).
+### 2.2 n1-lantern-and-bell (night 1, dusk, K1 Village: the Lantern & Bell inn) — DONE
+**Constants.** Interior of the only inn at the crossroads: low beams, roaring fire, garlic over every window; outside the road is going white (n1-lantern-and-bell.md:6). Night-interior palette, firelight warm against blue-black windows. Hunters arrive one by one; each has a black-wax-sealed letter from Oskar (open:7; :30). Hanne: stout, cleaver in apron. No Count, no Lenka. Marta not present (at home, shutters nailed, :60).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:13) | exterior: village, castle on the hill lit | — | — | — | castle windows lit "for the first time in a generation" | dusk, mist rising; castle lit |
+| `.02` (:17) | Hanne, Tomas (`~no-tomas` :81: empty stool by the wall, untouched full tankard; no Tomas) | Tomas back to the wall, eyes on the door (chars) | Tomas taps the axe haft | Tomas left hand two fingers missing | tankard | fire |
+| `.03` (:22) | + Agnes, rain-wet (`~no-agnes` :92: grey cloak dripping on a peg, no Agnes) | Agnes at the fire | habit, coif, staff | palm scar if right hand shows | — | fire; rain at the door |
+| `.04` (:27) | + Emeric, soaked (open:43) (`~no-emeric` :99: empty doorway, soaked satchel on the step with a black-sealed letter) | in the doorway | satchel clinks, spectacles, garlic string | — | Tomas lays a black-sealed letter on the table (`~no-tomas` :84: Agnes lays hers on the fire-ledge) | fire |
+| `.05` (:32) | + Wren, muddy to the knees (`~no-wren` :77: a fourth sealed letter already on the table) | Wren in the doorway, smelling the room | crossbow, oilskin, ribbon | dirt in knuckles | **four** black-sealed letters on the table | fire |
+| `.06` (:38) | all present | round the table | letters opened, margins in Oskar's hand | — | 4 letters | fire |
+| `.07` clip (:43) | + a stable boy, white to the lips | at the door | — | — | — | mist "like a lid" over the road |
+| `.08` clip (:48) | Hanne, Agnes (`~no-agnes` :95: Tomas asks) | — | — | — | — | tower dim; fire low |
+| `.09` (:53) | Hanne | — | — | — | — | fire |
+| `.10.private.*` (:56–66) | picker only | — | Wren: six cloves, one blank bolt (illegible); Emeric: cipher page in satchel | — | Tomas's private: castle windows lit in the old feast pattern | iPad, firelight |
+| `.11` (:73) | all present | — | — | — | — | mist at the windows |
+
+### 2.3 n1-burgomasters-house (night 1, late afternoon → first dusk, K1 Citadel) — DONE
+**Constants.** Tall stone house on the hill road, black crepe on the door (n1-burgomasters-house.md:6). Downstairs parlour: **Anton** on his back where they laid him from the stair (C-5), **poker still in his hand**, burgomaster's chain. Upstairs: Lenka's room, window **wide on the castle**, bed empty, pressed flowers in every book, latch scratched from outside (:6,24,81). **Lenka never shown** (taken the night before, :10). Light: grey late afternoon going to dusk.
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:14) | exterior/stair | the stair | — | Anton: white and still | crepe on the door; stair | late afternoon |
+| `.02` (:18) | Agnes kneeling by the body, Tomas (`~no-agnes` :67 Tomas kneels; `~no-tomas` :73) | parlour | Anton holds the poker | skin under Anton's nails | poker | grey window light |
+| `.03` (:22) | Wren upstairs (`~no-wren` :80: empty room only) | at the window | — | — | **window open on the castle; latch scratched from outside**; dried violets | wind through window |
+| `.04` (:27) | Emeric, Agnes (`~no-emeric` :84: diary lying open) | Lenka's room | Emeric holds Lenka's diary | — | diary, pressed-flower books | grey |
+| `.05` clip (:31) | Emeric reading (`~no-emeric` :86) | at the dresser | **cream letter, heavy paper, unsigned, no seal**, old beautiful hand | — | cream letter (≠ black-wax letters) | grey |
+| `.06` (:36) | **still of the stair**, the maid in the kitchen door; Anton's remembered voice (no hunters required) | Anton at Lenka's door with a poker | Anton: poker | — | the stair; Lenka's door | night (memory), candle |
+| `.07` (:40) | Tomas, Agnes thumb on scar (`~no-agnes` :71, `~no-tomas` :75, `~no-agnes-no-tomas` :78) | Lenka's room / window | — | Agnes scar | castle visible | dusk coming |
+| `.08` (:44) | Wren (`~no-wren` :82) | at the sill | — | — | **one pressed mountain violet on the sill**, deliberately laid | dusk |
+| `.09.private.*` (:49–56) | picker | — | Emeric: the foundling shawl from Lenka's chest | — | ledger hand / shawl / violet | iPad |
+| `.10` (:63) | — | below the window, in the mud | — | — | **a single bare footprint pointing up the hill, a girl's dragged heel-mark beside it** | first dusk |
+
+### 2.4 n1-open-grave (night 1, after dusk, K1 Sanctuary: church and churchyard) — DONE
+**Constants.** Churchyard with yews; Oskar's fresh grave **dug open from below, coffin lid split outward, soil heaped outward in a ring** (n1-open-grave.md:6,15). Vestry: Oskar's study ransacked; map pinned under the altar cloth. Night; lanterns only. This is the same church as the funeral only if K1 = K2 by seed (it isn't: different kingdoms) — keep the two churches distinct.
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:13) | — | grave | — | — | ring of outward-heaped soil, split lid | night, wind in yews, lantern |
+| `.02` (:17) | Wren, Emeric (`~no-wren` :58 Agnes; `~no-emeric` :69 Agnes replies) | at the grave edge | — | — | **shroud folded neatly** in the coffin | lantern |
+| `.03` (:21) | Emeric, Agnes (`~no-emeric` :73; `~no-agnes` :77 Wren) | vestry | Emeric holds Oskar's map + note | — | map: 3 parishes with a bell, 1 inked out; ransacked study; second (vestry) reliquary on a shelf (used in n23 `~no-agnes`) | candle/lantern |
+| `.04` clip (:26) | all present + **Oskar** | Oskar standing in the next row of graves | priest's cassock **gone black with earth** | gentle face, pale | — | lantern |
+| `.05` (:31) | Agnes (`~no-agnes` :81 Tomas), Oskar | Oskar stays **outside the lantern light** | — | — | lantern | edge of lantern light |
+| `.06` (:35) | Oskar, Wren (`~no-wren` :85 Agnes) | same | — | — | — | same |
+| `.07` clip (:39) | battle | Oskar lunges | — | **gentle face split into hunger** (first fangs allowed here) | — | lantern swinging |
+| `.08` (:43) won | Wren scratching a bolt (`~no-wren` :62: Agnes prays; `~no-agnes` :89) | over the grave | Wren: knife on a bolt, O-S-K-A-R legible (it's not the mother bolt) | — | Oskar laid down | lantern |
+| `.08~fight-lost` (:54, `~fight-lost-no-wren` :65) | hunters | — | — | — | Oskar back in his grave | **all lanterns out**: darkness, moon only |
+| `.09` (:50) | — | — | — | — | bell rope moving by itself | night |
+
+### 2.5 nx-midnight-procession (nights 1–4, midnight, wherever the party is) — DONE
+**Constants.** Bell strikes twelve; a line of dead hunters in old coats and older armour walks through walls and streets, carrying **lanterns that give no light** (nx-midnight-procession.md:6). Palette: mist white, ghosts desaturated grey, no light from their lanterns. The scene's location = the party's current building. Spotlit ghost per night: Ursula (Agnes), Sgt Pavel Dorn (Tomas), Jozef Kessel (Wren), Gerhardt (Emeric) (:8).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:14) | all present hunters, the line of dead | the line passing through | ghosts' lanterns | — | — | midnight, tower dim; mist |
+| `.01~night1` (:111) | + **a girl in a white nightdress walking up the hill, looking back** (Lenka) | far, on the hill road | nightdress | — | — | **Lenka's face must not show**: back view or face lost in mist/shadow (Bob rule; see §4.3 N-1) |
+| `.01~no-drop` (:114) | as `.01` | — | — | — | — | — |
+| `.02` dashboard text (:18) | — | — | — | — | — | — |
+| `.03.private.<h>` clips (:21–39) | spotlit hunter + their ghost only | ghost stopped, facing them | Ursula: abbess's habit; Dorn: castle livery; Jozef: gravedigger; Gerhardt: scholar's coat | **Ursula: two bites at the neck** (n2:37); Jozef "smiling and pale" | Emeric scene: Tome referenced, not shown | iPad, ghost-grey |
+| `.04.private.<h>~answer / ~turn-away` (:44–96) | same | ghost walking on | turn-away: **a stoppered holy-water vial and a scrap in Oskar's hand** drop from the lantern-hand | — | vial, scrap | — |
+| `.04.private.<h>-watched` (:53…) | non-spotlit hunter | dead walking through them | — | — | — | cold, grey |
+| `.05` (:101) / `.05~night4` (:117) | line walking into the mist toward the castle / night 4: **waiting at the gate** | — | — | — | — | mist |
+
+### 2.6 nx-pressed-flower (nights 1–4, dusk, the party's building) — DONE
+**Constants.** One pressed violet per dusk (props:8: paper-flat, deep purple to brown edges). Recipient: night 1 Wren, 2 Agnes, 3 Tomas, 4 Emeric, else next present (nx-pressed-flower.md:11). Dashboard still shows only the violet and its clue; privates show the recipient's reading. Dusk light, warm low sun through mist.
+
+| Moment | Prop state (dashboard still) | Private clue | Light |
+|---|---|---|---|
+| `.01~night1` (:15) | the sill violet from n1-burgomasters-house.08, turned over: **a thread of white castle plaster pressed in it** | "high up, plastered walls, a lady's rooms" (:20–29) | dusk |
+| `.01~night2` (:31) | violet on a lintel, **wrapped in a scrap of painted canvas** | "near pictures, a gallery" (:36–45) | dusk |
+| `.01~night3` (:47) | violet in the dust, **stem tied with one gold thread from a wedding veil** | "above the gallery, where the stair goes up" (:52–61) | dusk |
+| `.01~night4` (:63) | **violet pressed into a torn page in an old girl's hand** (Ludmila's; tok:33) — page text not legible on dashboard | "the high room, the window I opened" (:68–77) | dusk |
+
+### 2.7 n1-fortune-reading (night 1 → grey dawn, K1 Bazaar: Vadoma's wagon) — DONE
+**Constants.** Painted wagon sunk to the hubs in mud for 40 years; candles, accordion on a hook, cards worn soft as cloth (n1-fortune-reading.md:6). Interior candle palette; grey dawn at the door. Old Vadoma: old, husky, amused. Present: Agnes, Emeric (Tomas in variants; Wren may sit silently). Kingdoms are never spoken; drums/board show them (:10). Draws: Blade, Holy Symbol, Tome, lair, objective.
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:14) | Vadoma | in her wagon | — | — | accordion, cards | candle, pre-dawn |
+| `.02` (:18) | Vadoma, Agnes (`~no-agnes` :121 Tomas) | round her small table | Agnes hands over **Lenka's pressed violet** | — | violet | candle |
+| `.03~<bldg>` clips (:23–33) | Vadoma | card slapped down | — | — | card art may show **the sword** (props:7), its resting place per building | candle + tower flicker |
+| `.04~<bldg>` clips (:35–45) | Vadoma | — | — | — | card art: a saint's light under the dead | — |
+| `.05` (:47) | Agnes very still (`~no-agnes` :118) | — | — | **Agnes's palm scar visible** (Vadoma names it) | — | — |
+| `.06~<bldg>` clips (:51–61) | Vadoma | — | — | — | card art: **the Tome closed** (green leather, closed-eye clasp) — never open | — |
+| `.07` clip (:63) | — | — | — | — | lair card **face up, room shown on screen** (shut window; no Lenka) | seal light |
+| `.08~obj1–4` (:67–75) | Vadoma | — | — | — | — | — |
+| `.09` (:77) | Agnes, Vadoma (`~no-agnes` :125 Tomas) | Vadoma turning the violet over | violet | — | violet; Tome card | drone, one candle |
+| `.10` (:82) | Emeric, Vadoma (`~no-emeric` :129) | — | — | — | — | — |
+| `.11.private.*` (:86–100; `~turned-away` :109–116) | picker + Vadoma whispering | — | — | — | Emeric: Tome card | iPad |
+| `.12` (:105) | all present leaving | wagon door | — | — | — | **grey dawn**, no warmth |
+
+### 2.x Remaining scenes — TODO
+- n23-catacombs-of-saint-ysolde, n23-sergius-blade, n3-fly-eaters-cell, n4-earth-boxes, n4-finding-the-tome, n5-drawbridge, n5-portrait-gallery, n5-final-confrontation, n5-ending-rescued / endures / taken / turned — TODO.
 
 ## 3. Voice sheet (from cast.md)
 Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a new voice. "Narrator (private)" = `narrator` on one iPad.
