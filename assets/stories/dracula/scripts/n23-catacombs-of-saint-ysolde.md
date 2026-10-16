@@ -78,6 +78,20 @@ Card: "Lose one of the party's consumables (holy water, garlic, a silver bolt). 
 **n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.emeric** [still] `ipad:emeric` — only if emeric is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
 Card: "Lose one of the party's consumables (holy water, garlic, a silver bolt). You win if it is gone before dawn."
 
+**n23-catacombs-of-saint-ysolde.rejoin.agnes** [still] — event moment (fellowship test 2): plays when the groups meet at the niche, once per rejoining hunter, before `.05`. Gamewright's regroup rule applies: each rejoining hunter shares their `.04` finding, and everyone present gets +1 to the next fight. A lookalike's rejoin line plays the same; it heard what the real hunter would have heard.
+> **Agnes:** There was plainchant in my passage, in my own voice. Something down here has learned how we sound. Trust faces before voices tonight.
+**n23-catacombs-of-saint-ysolde.rejoin.tomas** [still] — as above
+> **Tomas:** Guard bones in my wall, lass, with the notch in the teeth we filed for luck. Any of us who doesn't know that notch isn't one of us.
+**n23-catacombs-of-saint-ysolde.rejoin.wren** [still] — as above
+> **Wren:** Fresh earth on my steps. A coffin went down and back up this week. Whatever it carried is at the castle now.
+**n23-catacombs-of-saint-ysolde.rejoin.emeric** [still] — as above
+> **Emeric:** Gerhardt's chalk, all the way down. Arrows, then "BACK." He reached the saint and turned round. Follow his arrows out, not the walls.
+
+**n23-catacombs-of-saint-ysolde.rejoin-combined** [still] — plays after the rejoin lines if both Tomas and Wren rejoined (fellowship test 1); otherwise skipped
+Journal: "He is moving the old guard's dead up to the castle for the last night."
+> **Tomas:** Guard bones with the notch, and a coffin carried up this week.
+> **Wren:** Then he's moving his old garrison up the hill. For the last night.
+
 **n23-catacombs-of-saint-ysolde.05** [still] (groups rejoin at the niche)
 > **Emeric:** Sister. Your hand is bleeding.
 > **Agnes:** My hand is always bleeding near this saint. Give me room.

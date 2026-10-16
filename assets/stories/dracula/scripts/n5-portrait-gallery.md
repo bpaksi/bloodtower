@@ -40,6 +40,11 @@
 **n5-portrait-gallery.06.private.emeric** [still] `ipad:emeric`
 > **Narrator (private):** A scholar at a desk, a cup of wine at his elbow. Gerhardt. In the wine, a reflection with no man in it. He was poisoned with an invitation.
 
+**n5-portrait-gallery.combine** [still] [prop: pressed-flower] — plays after the `.06` privates, before `.07` (fellowship test 1)
+Journal: "Lenka has no portrait here. He has not got her yet."
+> **Agnes:** Mine is labelled "The one who prayed." He paints the ones he keeps.
+> **Wren:** Mother's is still wet. And there's nothing of Lenka. Only Ludmila. He hasn't got her.
+
 ## Outcome
 `galleryRevealSeen`. Behind Ludmila's portrait, the stair to the high room opens → `n5-final-confrontation`.
 
@@ -55,3 +60,12 @@
 > **Wren:** Read it. Brought a stake.
 **n5-portrait-gallery.02~no-emeric** [still] — Emeric not in play
 > **Wren:** Same face. Every frame. That one's moving.
+**n5-portrait-gallery.combine~no-agnes** [still] [prop: pressed-flower] — Agnes not in play (same journal clue)
+> **Tomas:** He painted me at the gate, looking at my boots. He paints the ones he keeps.
+> **Wren:** Mother's is still wet. And there's nothing of Lenka. Only Ludmila. He hasn't got her.
+**n5-portrait-gallery.combine~no-wren** [still] [prop: pressed-flower] — Wren not in play (same journal clue)
+> **Agnes:** Mine is labelled "The one who prayed." He paints the ones he keeps.
+> **Emeric:** Gerhardt's here. Lenka isn't. Only Ludmila. Then he hasn't got her.
+**n5-portrait-gallery.combine~no-agnes-no-wren** [still] [prop: pressed-flower] — neither in play (same journal clue)
+> **Tomas:** He painted me at the gate, looking at my boots. He paints the ones he keeps.
+> **Emeric:** Gerhardt's here. Lenka isn't. Only Ludmila. Then he hasn't got her.
