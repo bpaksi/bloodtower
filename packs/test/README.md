@@ -214,7 +214,9 @@ Format 2.1. Checked by V-22/V-23.
    mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}, anchor: {x: 0.52, y: 0.71}}
 # script.yaml
 - id: grey-stair.03
-  lines: [{id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."}]
+  lines: [{id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."},
+          {id: ts-keeper-002, speaker: keeper, note: "dry, half a smile", text: "Mind the third step. It remembers everyone who ever fell on it."},
+          {id: ts-keeper-003, speaker: keeper, note: "warm, slow", text: "Go on, then. I'll keep the lamp lit until you're back. I always do."}]
 ```
 Rules: the line id is stable forever (never renumber; retire, don't reuse); speaker is a cast or hunter id; text ≤20 s spoken (est. ~2.5 words/s, so ≤45 words; this line ≈4 s + 0.5 s pause); `[pause N]` is seconds. The story log lists each played line by line id; a replay press on an iPad replays it on the Story board without changing game state. The avatar is Story board only; iPads show the caption.
 ## F-12. Pause overlay

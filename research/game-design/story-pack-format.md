@@ -139,7 +139,7 @@ Rules:
 # script.yaml
 - id: grey-stair.03
   lines:
-    - {id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom."}
+    - {id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."}
 ```
 
 `script.yaml` lines may set `target`: `storyboard` (the default) or `ipad:<hunter>`. A line with an `ipad:` target is private. It plays only on the iPads that hold that hunter, shows there as a caption, and never reaches the Story board's avatar (V-4, V-25).
