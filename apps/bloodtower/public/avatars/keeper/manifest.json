@@ -57,8 +57,8 @@
       "voice": "Algenib",
       "audio": "lines/ts-keeper-003.m4a",
       "timing": "lines/ts-keeper-003.json",
-      "duration_s": 6.04,
-      "loudness_lufs": -17
+      "duration_s": 6.0,
+      "loudness_lufs": -16
     }
   ]
 }

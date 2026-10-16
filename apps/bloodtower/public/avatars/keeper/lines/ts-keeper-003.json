@@ -1,7 +1,7 @@
 {
   "metadata": {
     "soundFile": "ts-keeper-003.wav",
-    "duration": 6.04
+    "duration": 6.0
   },
   "mouthCues": [
     {
@@ -96,52 +96,57 @@
     },
     {
       "start": 3.58,
-      "end": 3.83,
+      "end": 3.77,
       "value": "C"
     },
     {
-      "start": 3.83,
-      "end": 4.04,
+      "start": 3.77,
+      "end": 4.05,
       "value": "B"
     },
     {
-      "start": 4.04,
-      "end": 4.87,
+      "start": 4.05,
+      "end": 4.82,
       "value": "X"
     },
     {
-      "start": 4.87,
-      "end": 4.95,
+      "start": 4.82,
+      "end": 4.9,
+      "value": "A"
+    },
+    {
+      "start": 4.9,
+      "end": 4.98,
       "value": "C"
     },
     {
-      "start": 4.95,
-      "end": 5.02,
+      "start": 4.98,
+      "end": 5.05,
       "value": "B"
     },
     {
-      "start": 5.02,
-      "end": 5.16,
+      "start": 5.05,
+      "end": 5.12,
       "value": "E"
     },
     {
-      "start": 5.16,
-      "end": 5.3,
+      "start": 5.12,
+      "end": 5.26,
       "value": "F"
     },
     {
-      "start": 5.3,
-      "end": 5.37,
+      "start": 5.26,
+      "end": 5.33,
       "value": "B"
     },
     {
-      "start": 5.37,
-      "end": 5.79,
+      "start": 5.33,
+      "end": 5.68,
       "value": "F"
     },
     {
-      "start": 5.79,
-      "end": 6.04,
+      "start": 5.68,
+      "end": 6.0,
       "value": "X"
     }
   ]
