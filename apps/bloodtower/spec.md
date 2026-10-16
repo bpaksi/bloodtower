@@ -83,10 +83,10 @@ Rules the schema enforces, with the id in the issue message (`packIssues` maps a
 |---|---|
 | V-1 | A required field missing, an unknown key, a duplicate id, players min above max, an empty ambient map, a still or clip with no asset. |
 | V-2 | An asset id that is a path; a missing manifest id; a set-piece or night ref that is not declared; a cue named by a moment that is not in the pack; a speaker who is not a hunter or a cast member. Item refs, `phase_moments`, and a phase `on_event` are not resolved in R1. |
-| V-3 | A moment id outside the §4.1 grammar, or a scene prefix that is not a set piece id. `scene.private.hunter` is not valid: the moment part is required, as in `scene.02.private.hunter`. |
+| V-3 | A moment id outside the §4.1 grammar, or a scene prefix that is not a set piece id and not the reserved `crypt` or `end` prefix. A set piece named `crypt` or `end`. `scene.private.hunter` is not valid: the moment part is required, as in `scene.02.private.hunter`. `end.lit.01` and `crypt.wet-steps` are valid ids. |
 | V-4 | `.private.<hunter>` whose hunter is not declared, or whose target is not `ipad:<hunter>`. A shared moment targeted at one hunter. A private asset whose manifest target is `storyboard`. |
 | V-5 | A `~no-<hunter>` variant whose hunter is not declared. A missing variant is not a load error. Which variant plays is step 5, not the schema. |
-| V-8 | A story cue whose `drums` is not `none`, unless `base_game` is true. Screen and fallback are required asset ids. |
+| V-8 | A story cue whose `drums` is not `none`, unless `base_game` is true. Screen and fallback are required asset ids. `hold_s`, when present, is a positive number of seconds. R1 stores it and does not wait on it. |
 | V-20 | The word `random`, or a `seed(...)` call that does not name a table id. The kingdom value `seed` is the format's seeded-order keyword and is allowed. |
 
 `stats.timing.marks` is the literal `auto`. A pack does not author timing rows.

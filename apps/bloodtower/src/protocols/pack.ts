@@ -14,9 +14,15 @@ const issue = (ctx: z.RefinementCtx, message: string) => {
 };
 
 const KEBAB = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
-const MOMENT_PART =
-  /^(?:0[1-9]|[1-9]\d|[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*)*)$/;
+/** `01`–`99`, or a kebab name with further name or number segments (`lit.01`). */
+const MOMENT_NUMBER = "0[1-9]|[1-9]\\d";
+const MOMENT_NAME = "[a-z][a-z0-9]*(?:-[a-z0-9]+)*";
+const MOMENT_PART = new RegExp(
+  `^(?:${MOMENT_NUMBER}|(?:${MOMENT_NAME})(?:\\.(?:${MOMENT_NAME}|${MOMENT_NUMBER}))*)$`,
+);
 const VARIANT = /^(?:no-[a-z][a-z0-9]*(?:-[a-z0-9]+)*|[a-z][a-z0-9]*(?:-[a-z0-9]+)*)$/;
+/** Dungeon-room and ending moments have no set piece. No set piece uses these ids. */
+const RESERVED_SCENES = new Set(["crypt", "end"]);
 
 export const idSchema = z.string().regex(KEBAB);
 
@@ -156,6 +162,11 @@ export const cueSchema = z
     screen: assetIdSchema,
     fallback_sfx: assetIdSchema,
     drums: z.union([z.literal("none"), idSchema]),
+    /**
+     * Seconds after this cue's sound before the next sound or spoken line.
+     * R1 keeps the number and does not wait on it.
+     */
+    hold_s: z.number().finite().positive().optional(),
     confirm: z.boolean().optional(),
     base_game: z.boolean().optional(),
     trigger: z
@@ -422,6 +433,9 @@ export const packSchema = z
     const cast = new Set((pack.cast ?? []).map((member) => member.id));
     const nights = new Set(pack.nights.map((night) => night.id));
     const pieces = new Set(pack.set_pieces.map((piece) => piece.id));
+    for (const name of RESERVED_SCENES) {
+      if (pieces.has(name)) issue(ctx, `V-3: a set piece is not named ${name}.`);
+    }
     const cues = new Set(pack.cues.map((cue) => cue.name));
     const assets = new Set(pack.assets.map((asset) => asset.id));
     const speakers = new Set([...hunters, ...cast]);
@@ -441,7 +455,7 @@ export const packSchema = z
     }
     for (const moment of pack.moments) {
       const parsed = parseMomentId(moment.id);
-      if (parsed && !pieces.has(parsed.scene)) {
+      if (parsed && !RESERVED_SCENES.has(parsed.scene) && !pieces.has(parsed.scene)) {
         issue(ctx, `V-3: ${moment.id} does not start with a set piece id.`);
       }
       if (parsed?.hunter && !hunters.has(parsed.hunter)) {
