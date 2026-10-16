@@ -48,12 +48,27 @@ describe("story board", () => {
     expect(html).toContain("Continue");
     expect(html).toContain("The proving ground is quiet.");
     expect(html).toContain("Fallback sfx.bell");
-    expect(html).toContain("Waiting for someone to hold alpha.");
+    expect(html).toContain("Waiting for someone to hold Alpha.");
     expect(html).toContain("Battery 0%");
     expect(html).toContain("Calibration unavailable");
     expect(html).not.toContain("ipad:");
-    expect(html).not.toContain("Only Alpha hears this.");
     expect(html).not.toContain("data-action");
+  });
+
+  it("cannot be handed a private line", () => {
+    const base = state();
+    const parse = (value: unknown) => storyboardStatePayloadSchema.safeParse(value).success;
+    expect(parse(base)).toBe(true);
+    expect(
+      parse({ ...base, moment: { ...base.moment, id: "proving-ground.02.private.alpha" } }),
+    ).toBe(false);
+    expect(
+      parse({
+        ...base,
+        moment: { ...base.moment, lines: [{ speaker: "alpha", text: "Only Alpha hears this." }] },
+      }),
+    ).toBe(false);
+    expect(parse({ ...base, private: ["Only Alpha hears this."] })).toBe(false);
   });
 
   it("shows unavailable when the session has not started", () => {

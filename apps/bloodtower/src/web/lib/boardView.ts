@@ -18,10 +18,14 @@ export const waitingStoryboard = (): StoryboardState =>
     lock: null,
   });
 
-export const pauseText = (pause: StoryboardState["pause"]): string | null => {
+export const pauseText = (
+  pause: StoryboardState["pause"],
+  hunters: StoryboardState["hunters"] = [],
+): string | null => {
   if (!pause) return null;
   if ((pause.cause === "disconnect" || pause.cause === "unheld-hunter") && pause.hunter) {
-    return `Waiting for someone to hold ${pause.hunter}.`;
+    const name = hunters.find((hunter) => hunter.id === pause.hunter)?.name ?? pause.hunter;
+    return `Waiting for someone to hold ${name}.`;
   }
   return "Paused.";
 };

@@ -9,7 +9,7 @@ import { towerStatusLines } from "../../lib/towerStatus";
  */
 export function StoryBoard({ state }: { state: StoryboardState }) {
   const tower = towerStatusLines(state.tower);
-  const paused = pauseText(state.pause);
+  const paused = pauseText(state.pause, state.hunters);
   return (
     <main className="mx-auto flex min-h-dvh max-w-5xl flex-col gap-8 px-8 py-10">
       <header className="flex items-end justify-between gap-6">
