@@ -27,6 +27,8 @@ You run batches of plan steps in the Bloodtower repo (docs/sdlc.md, "Who runs th
 
 For round r = 1, 2, 3:
 
+Models in local mode: rounds 1 and 2 use Sonnet (`adversary-bugs` and the developer fixes) and Haiku (`adversary-prd`). Round 3 runs both adversaries and the developer fix with an Opus override. Blockers still open after round 3 get the `needs-bob` label (below). This differs from the cloud ladder (round 2 Opus high effort, round 3 Opus max effort).
+
 1. Start `adversary-bugs` and `adversary-prd` on the PR in parallel, telling each the PR number, the worktree and r. Each posts a review that ends in `Blocking: none` or `Blocking: <count>`.
 2. If both say `Blocking: none` and CI is green, the PR is ready to merge (below).
 3. Otherwise send the developer back with links to both reports and the CI result. It fixes, pushes and answers each finding on the PR. Then start the next round. A red CI with no adversary blockers also uses a round.
