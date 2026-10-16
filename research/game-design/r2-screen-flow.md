@@ -117,7 +117,7 @@ Common to every screen (all screens below inherit these):
 - iPad: device name, the story's hunters as large toggle cards ("Mine" / held by X). Primary: "Next: set up the story" (disabled with reason until all held); any joined iPad may press it.
 - Entry: story chosen (or Back from Begin Story step 1). Exit: all hunters held + Next -> Begin Story. Back -> Pick Story.
 - Errors: device drops -> its hunters show "disconnected" on board, stay held for 60 s then become unclaimed; two devices claim same hunter -> first press wins, loser sees "Taken by X".
-- On "Play again" with a different story, holdings carry over for hunters present in both stories; others start unclaimed.
+- On "Play again" with a different story (a different hunter list), no holdings carry over: every hunter starts unclaimed and everyone claims again (D8).
 - R2-30. The Next button stays disabled and states the reason ("Claim Mina") until every hunter is held. Test: e2e.
 - R2-31. One device can claim all hunters in two taps or fewer ("Take all"). Test: UI count.
 - R2-32. The join page never shows the device token (B3 follow-up). Test: DOM check.
@@ -215,7 +215,7 @@ Bob's answers, folded into the sections above:
 ## 7. Open questions for Bob
 
 None from the original list; all eight are answered (§6). New, minor:
-- Q9. When "Play again" picks a different story with a different hunter list, is carrying over holdings for shared hunters (§3.4) right, or should everyone re-claim? Default in this doc: carry over shared hunters.
+- D8. On "Play again" with a different hunter list, everyone re-claims from scratch; no holdings carry over (§3.4). Answers Q9 (Bob, Oct 16 2026).
 
 ## 8. Conflicts with existing requirements (resolved)
 
