@@ -1,0 +1,318 @@
+import { writeFileSync } from "node:fs";
+import { type BrowserContext, expect, type Page, test } from "@playwright/test";
+import { formatTimingReport, readRun } from "../../server/scripts/timingReport.ts";
+import { joinQrSvg } from "../../web/lib/qr.ts";
+import {
+  captureFrames,
+  gateControls,
+  releaseTogether,
+  startAcceptanceHost,
+} from "./support/acceptance.ts";
+
+// R1 step 10. One Story board and two devices play the test pack's first night with the mock tower.
+// Each AC id below is a step. AC-1 and AC-2 are check, build, smoke and pack:lint (not repeated here).
+
+const TOKEN_KEY = "bloodtower.deviceToken";
+
+const device = (page: Page) => ({
+  button: (action: string) => page.locator(`button[data-action="${action}"]`),
+  hold: (hunter: string) => page.locator(`button[data-hunter="${hunter}"]`),
+});
+
+const boardStates = (frames: readonly string[]) =>
+  frames
+    .map((frame) => JSON.parse(frame) as { type: string; payload: Record<string, unknown> })
+    .filter((message) => message.type === "storyboardState")
+    .map((message) => message.payload);
+
+test("the test pack's first night, end to end, on one board and two devices", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(90_000);
+  const session = await startAcceptanceHost(testInfo);
+  const { baseURL, host, tower } = session;
+  const viewport = testInfo.project.use.viewport ?? { width: 820, height: 1180 };
+  const hasTouch = testInfo.project.use.hasTouch ?? false;
+  const contexts: BrowserContext[] = [];
+  const newPage = async (size = viewport, touch = hasTouch) => {
+    const context = await browser.newContext({ baseURL, viewport: size, hasTouch: touch });
+    contexts.push(context);
+    return context.newPage();
+  };
+
+  try {
+    const board = await newPage({ width: 1440, height: 900 }, false);
+    const boardFrames = captureFrames(board);
+    const pageA = await newPage();
+    const pageB = await newPage();
+    const gateA = await gateControls(pageA);
+    const gateB = await gateControls(pageB);
+    const a = device(pageA);
+    const b = device(pageB);
+    let joinUrl = "";
+
+    await test.step("AC-3: the board is display only and shows the QR and a six-digit code", async () => {
+      await board.goto("/board");
+      await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
+      await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
+      expect(host.joinCode).toMatch(/^\d{6}$/);
+      expect(await board.locator("button, input, textarea, select, a, [onclick]").count()).toBe(0);
+      await expect(board.getByText(/Battery unavailable/)).toBeVisible();
+
+      await expect.poll(() => boardStates(boardFrames).length).toBeGreaterThan(0);
+      const join = boardStates(boardFrames).at(-1)?.join as { code: string; url: string };
+      joinUrl = join.url;
+      expect(join).toEqual({ code: host.joinCode, url: `${baseURL}/join?code=${host.joinCode}` });
+
+      // The QR on the page is the join URL's QR, cell for cell.
+      const cells = await board
+        .getByRole("img", { name: "Join code" })
+        .evaluate((svg) =>
+          [...svg.querySelectorAll("rect")].map(
+            (rect) => `${rect.getAttribute("x")},${rect.getAttribute("y")}`,
+          ),
+        );
+      const expected = [...joinQrSvg(joinUrl).matchAll(/<rect x="(\d+)" y="(\d+)"/g)].map(
+        (match) => `${match[1]},${match[2]}`,
+      );
+      expect(cells).toEqual(expected);
+    });
+
+    await test.step("AC-4: join by the QR target, hold several hunters, Begin waits for all", async () => {
+      await pageA.goto(joinUrl);
+      await pageB.goto(joinUrl);
+      await a.hold("alpha").click();
+      await expect(a.hold("alpha")).toHaveAttribute("data-action", "release");
+      await a.hold("beta").click();
+      await expect(a.hold("beta")).toHaveAttribute("data-action", "release");
+      await b.hold("gamma").click();
+      await expect(b.hold("gamma")).toHaveAttribute("data-action", "release");
+
+      await pageA.getByRole("link", { name: "Open controls" }).click();
+      await expect(pageA.getByRole("heading", { name: "Device" })).toBeVisible();
+      await expect(pageA.getByRole("heading", { name: "Alpha" })).toBeVisible();
+      await expect(pageA.getByRole("heading", { name: "Beta" })).toBeVisible();
+      await expect(a.button("pause")).toBeDisabled();
+      await expect(board.getByText("Delta — waiting")).toBeVisible();
+      await expect(a.button("begin")).toBeDisabled();
+      expect(boardStates(boardFrames).at(-1)?.gate).toEqual({ canBegin: false, unheld: ["delta"] });
+
+      await b.hold("delta").click();
+      await expect(b.hold("delta")).toHaveAttribute("data-action", "release");
+      await pageB.getByRole("link", { name: "Open controls" }).click();
+      await expect(pageB.getByRole("heading", { name: "Delta" })).toBeVisible();
+      await expect(a.button("begin")).toBeEnabled();
+      await expect(b.button("begin")).toBeEnabled();
+      await expect(board.getByText("Begin", { exact: true })).toBeVisible();
+    });
+
+    const holdings = host.loadRun().holdings;
+    const idA = holdings.find((holding) => holding.hunter === "alpha")?.deviceId ?? "";
+    const idB = holdings.find((holding) => holding.hunter === "delta")?.deviceId ?? "";
+    expect(idA).not.toBe(idB);
+    expect(holdings.find((holding) => holding.hunter === "beta")?.deviceId).toBe(idA);
+    expect(holdings.find((holding) => holding.hunter === "gamma")?.deviceId).toBe(idB);
+
+    await test.step("AC-9 (mock): connect from both devices at once, one wins, then calibrate", async () => {
+      await expect(board.getByText(/Tower unavailable/)).toBeVisible();
+      gateA.hold();
+      gateB.hold();
+      await a.button("tower-connect").click();
+      await b.button("tower-connect").click();
+      await gateA.held(1);
+      await gateB.held(1);
+      expect(releaseTogether(gateA, gateB)).toBe(2);
+
+      await expect(board.getByText(/Tower connected/)).toBeVisible();
+      const statuses = [
+        await pageA
+          .getByText(/Your press counted|Locked\. Another player pressed first/)
+          .first()
+          .textContent(),
+        await pageB
+          .getByText(/Your press counted|Locked\. Another player pressed first/)
+          .first()
+          .textContent(),
+      ].sort();
+      expect(statuses).toEqual(["Locked. Another player pressed first.", "Your press counted."]);
+      const connects = host.loadRun().presses.filter((press) => press.promptId === "tower-connect");
+      expect(connects.map((press) => press.winner).sort()).toEqual([false, true]);
+      expect(new Set(connects.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
+
+      await expect(a.button("tower-calibrate")).toBeEnabled();
+      await expect(b.button("tower-calibrate")).toBeEnabled();
+      await b.button("tower-calibrate").click();
+      await expect(board.getByText(/Calibration calibrated/)).toBeVisible();
+      await expect(a.button("tower-calibrate")).toBeDisabled();
+
+      tower.setBattery(76);
+      await expect(board.getByText(/Battery 76%/)).toBeVisible();
+      await expect(pageA.getByText(/Battery 76%/)).toBeVisible();
+    });
+
+    await test.step("Begin starts the night on the board", async () => {
+      await a.button("begin").click();
+      await expect(board.getByText("The proving ground is quiet.")).toBeVisible();
+      await expect(a.button("continue")).toBeEnabled();
+      await expect(b.button("continue")).toBeEnabled();
+    });
+
+    await test.step("AC-5: two Continue presses in one tick, exactly one wins", async () => {
+      gateA.hold();
+      gateB.hold();
+      await a.button("continue").click();
+      await b.button("continue").click();
+      await gateA.held(1);
+      await gateB.held(1);
+      expect(releaseTogether(gateA, gateB)).toBe(2);
+
+      await expect(board.getByText("Each hunter reads alone.")).toBeVisible();
+      await expect(pageA.getByText("Only Alpha hears this.")).toBeVisible();
+      await expect(pageB.getByText("Only Delta hears this.")).toBeVisible();
+      await expect
+        .poll(
+          () => host.loadRun().presses.filter((press) => press.promptId === "continue-0").length,
+        )
+        .toBe(2);
+      const presses = host.loadRun().presses.filter((press) => press.promptId === "continue-0");
+      expect(presses.filter((press) => press.winner)).toHaveLength(1);
+      expect(new Set(presses.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
+      for (const press of presses) {
+        expect(press.action).toBe("continue");
+        expect(press.atMonoMs).toBeGreaterThan(0);
+        expect(press.atWall).toMatch(/Z$/);
+      }
+    });
+
+    await test.step("AC-6: a private line reaches only the holder's device", async () => {
+      await expect(pageA.getByText("Only Delta hears this.")).toHaveCount(0);
+      await expect(pageB.getByText("Only Alpha hears this.")).toHaveCount(0);
+      await expect(board.getByText(/Only (Alpha|Delta) hears this/)).toHaveCount(0);
+      // Beta and Gamma have no private line in this moment.
+      await expect(pageA.getByText("No private line.")).toBeVisible();
+      await expect(pageB.getByText("No private line.")).toBeVisible();
+    });
+
+    await test.step("AC-7: losing the only holder pauses at once; rejoin by token resumes", async () => {
+      const tokenB = await pageB.evaluate((key) => sessionStorage.getItem(key), TOKEN_KEY);
+      expect(tokenB).toBeTruthy();
+      await contexts[2]?.close();
+      await expect(board.getByText("Waiting for someone to hold Gamma.")).toBeVisible({
+        timeout: 2_000,
+      });
+      await expect(a.button("continue")).toBeDisabled();
+      await expect(a.button("pause")).toBeDisabled();
+
+      const pageC = await newPage();
+      await pageC.goto("/join");
+      await pageC.getByLabel("Rejoin token").fill(tokenB ?? "");
+      await pageC.getByRole("button", { name: "Rejoin" }).click();
+      await expect(pageC.locator('button[data-hunter="delta"]')).toHaveAttribute(
+        "data-action",
+        "release",
+      );
+      await expect(board.getByText("Waiting for someone to hold Gamma.")).toHaveCount(0);
+      await expect(a.button("continue")).toBeEnabled();
+
+      const pauses = host.loadRun().marks.filter((mark) => mark.kind === "pause");
+      expect(pauses).toHaveLength(1);
+      expect(pauses[0]).toMatchObject({ cause: "disconnect", hunter: "gamma" });
+      expect(pauses[0]?.endMonoMs).not.toBeNull();
+
+      // A host pause and Resume. The rejoined page stays on join: leaving it drops its socket.
+      await a.button("pause").click();
+      await expect(board.getByText("Paused.", { exact: true })).toBeVisible();
+      await expect(a.button("continue")).toBeDisabled();
+      await a.button("resume").click();
+      await expect(board.getByText("Paused.", { exact: true })).toHaveCount(0);
+      const hostPause = host.loadRun().marks.find((mark) => mark.cause === "host-pause");
+      expect(hostPause).toMatchObject({ kind: "pause", hunter: null, deviceId: idA });
+      expect(hostPause?.endMonoMs).not.toBeNull();
+    });
+
+    await test.step("The cue moment shows its screen half and fallback, then the night ends", async () => {
+      await a.button("continue").click();
+      await expect(board.getByText("A bell marks the step.")).toBeVisible();
+      await expect(board.getByText("Still fx.bell. Fallback sfx.bell.")).toBeVisible();
+      await a.button("continue").click();
+      await expect(board.getByText("Moment unavailable.")).toBeVisible();
+      await expect(a.button("continue")).toBeDisabled();
+    });
+
+    await test.step("AC-8: every moment, press, pause and cue has a timing mark; the report rebuilds the run", async () => {
+      const run = readRun(session.databasePath, host.loadRun().session.id);
+      const subjects = (kind: string) =>
+        run.marks.filter((mark) => mark.kind === kind).map((mark) => mark.subject);
+      expect(subjects("phase")).toEqual(["night"]);
+      expect(subjects("moment")).toEqual([
+        "proving-ground.01",
+        "proving-ground.02",
+        "proving-ground.03",
+      ]);
+      expect(subjects("cue")).toEqual(["bell"]);
+      expect(subjects("pause")).toEqual(["disconnect:gamma", "host-pause:1"]);
+      for (const mark of run.marks) {
+        expect(mark.endMonoMs, `${mark.kind} ${mark.subject} closed`).not.toBeNull();
+        expect(mark.endMonoMs ?? -1).toBeGreaterThanOrEqual(mark.startMonoMs);
+        expect(mark.startWall).toMatch(/Z$/);
+        expect(mark.endWall).toMatch(/Z$/);
+      }
+      expect(run.presses.map((press) => `${press.promptId}:${press.winner}`)).toEqual([
+        "tower-connect:true",
+        "tower-connect:false",
+        "tower-calibrate:true",
+        "begin:true",
+        "continue-0:true",
+        "continue-0:false",
+        "pause-1:true",
+        "resume-1:true",
+        "continue-1:true",
+        "continue-2:true",
+      ]);
+
+      const report = formatTimingReport(run);
+      const path = testInfo.outputPath("timing-report.txt");
+      writeFileSync(path, `${report.join("\n")}\n`);
+      await testInfo.attach("timing-report", { path, contentType: "text/plain" });
+      const body = report.join("\n");
+      for (const line of [
+        "press won       begin begin",
+        "moment start    proving-ground.01",
+        "cue start       bell",
+        "cue end         bell",
+        "pause start     disconnect:gamma  cause disconnect  hunter gamma",
+        "pause start     host-pause:1",
+        "phase end       night",
+        "Open marks none.",
+      ]) {
+        expect(body).toContain(line);
+      }
+      expect(report.at(-1)).toMatch(/^Span \d+ ms\. Paused \d+ ms\. Active \d+ ms\.$/);
+    });
+
+    await test.step("AC-9 (mock): only connect and calibrate reached the tower", async () => {
+      expect(tower.sent()).toEqual([{ type: "connect" }, { type: "calibrate" }]);
+    });
+
+    await test.step("AC-3: no board frame carried a private line or an ipad: payload", async () => {
+      expect(boardFrames.length).toBeGreaterThan(5);
+      const types = new Set(
+        boardFrames.map((frame) => (JSON.parse(frame) as { type: string }).type),
+      );
+      expect([...types].sort()).toEqual(["storyboardState", "welcome"]);
+      for (const frame of boardFrames) {
+        expect(frame).not.toContain("ipad:");
+        expect(frame).not.toContain(".private.");
+        expect(frame).not.toMatch(/Only (Alpha|Delta) hears this/);
+        expect(frame).not.toContain("privateMoment");
+      }
+      // The board saw the private moment's shared placeholder, so it was connected throughout.
+      expect(boardFrames.some((frame) => frame.includes("Each hunter reads alone."))).toBe(true);
+    });
+
+    await board.screenshot({ path: testInfo.outputPath("board-end.png"), fullPage: true });
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await host.close();
+  }
+});

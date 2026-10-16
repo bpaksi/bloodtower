@@ -178,6 +178,15 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ## Deviations
 
+### B4 (step 10)
+
+- Built in Local mode from `B4-handoff.md`. No dependency, protocol or server change. Files: `src/e2e/tests/acceptance.spec.ts`, `src/e2e/tests/support/acceptance.ts`, `src/server/scripts/timingReport.ts` and its test.
+- The acceptance test starts its own session host in the Playwright worker (`startSessionHost` with the mock tower, port 0), serving the export the `webServer` step builds. The mock lives in that process, so the test can read what it was sent (AC-9). Each run has its own session and its own SQLite file at `<dataDir>/e2e-acceptance/<project>.sqlite`. The config clears `<dataDir>/e2e` in every worker, so these files live outside that folder. The `webServer` still builds the export and serves the smoke test.
+- "Same tick" (AC-5, and connect for AC-9): the test routes each device's socket through Playwright and holds its `control` frames. Both devices press, then the test releases both frames in one synchronous loop. The server's arrival order picks the winner.
+- AC-6 `~no-` part: the host never passes `absent`, and Begin needs every hunter held, so no hunter can be absent at runtime in R1. Bob ruled (2026-10-16) that the variant stays proved by `engine.test.ts` until a hunter can be marked absent.
+- AC-8 "every press has a timing mark": PRD-41 has no press kind. A press carries its own monotonic and wall time in `control_presses`, and the report merges presses and marks into one timeline.
+- `timingReport.ts` takes `[sessionId] [--db <file>]`. With no `--db` it reads `session.sqlite` in the configured data folder. It opens the file read-only, so a wrong path is not created. With no id it reports the latest session.
+
 ### B3 (step 7)
 
 - One pull request. The hub is `src/server/hub/**`. `index.ts` starts it. No dependency version changes. The `dev` script sets `DEV_ORIGINS` and `NEXT_PUBLIC_WS_URL` so `pnpm dev` can reach the socket from `next dev`. `pnpm start` still serves the page and the socket on one port.

@@ -133,7 +133,7 @@ Copied here so the app spec states them. The host wires the port from step 6. A 
 | R-ENG-10 | 3 | `load.test.ts` lint lines name the file, path and rule | — |
 | R-ENG-11 | 3, 4 | `engine.test.ts` stores pack version `0.1.0` on the session row | A warning when a pack version changes is later |
 | V-1, V-2, V-3, V-4, V-5, V-8, V-20 | 1 schema, 3 files | `pack.test.ts` and one bad pack per rule in `load.test.ts` | — |
-| PRD-41 | 1 types, 4 rows | `timing/log.test.ts` reconstructs a sample run from SQLite | The timing report script is step 10 |
+| PRD-41 | 1 types, 4 rows, 10 report | `timing/log.test.ts` reconstructs a sample run from SQLite. `scripts/timingReport.test.ts` prints a run as one timeline with paused and active totals; an open pause leaves them unknown | — |
 | R-STA base rows, R-DEV-9 device/holding stats | 4 | `db/store.test.ts` round-trips devices and holdings | The stats summary is out of scope |
 | V2-2 first press | 5, 7 | `engine.test.ts` and `hub/host.test.ts`: two presses, one winner, both rows stored | — |
 | R-DEV-4, V-4 at runtime | 5, 7 | `engine.test.ts` and `hub/host.test.ts`: storyboard frames have no private line and no `ipad:` | — |
@@ -147,7 +147,15 @@ Copied here so the app spec states them. The host wires the port from step 6. A 
 | V2-1 display only | 8 | `boardView.test.ts`: the board markup has no button, input, textarea, select or link | — |
 | V2-3 prompt only, V2-8 static list | 8 | `boardView.test.ts` renders one prompt and the hunter list | Cycling the sidebar stays out of scope |
 | V2-2, R-DEV-3, R-DEV-8, R-DEV-9 join | 7, 9 | `hub/host.test.ts`: two continues, one winner, both rows. `controls.test.ts`: hold and control messages, locked copy, private line, calibrate stays off until connected. A phone user agent gets the compact layout and a switch to the full one | — |
-| AC-1..AC-9 | 10 | AC-1 in part: check, build, smoke, and no edit under `apps/tower-poc` or `apps/burgomaster-funeral-poc` | The rest of the acceptance list |
+| AC-1 | 1, 10 | `pnpm check`, `pnpm build`, `pnpm -F bloodtower-e2e e2e` (`smoke.spec.ts`, `acceptance.spec.ts`), and no edit under `apps/tower-poc` or `apps/burgomaster-funeral-poc` | — |
+| AC-2 | 3 | `pack/load.test.ts`: the test pack passes, and one bad pack per rule names the file, path and rule | — |
+| AC-3 | 10 | `acceptance.spec.ts`: the board has no interactive element, its QR is the join URL's QR cell for cell, the code has six digits, and no captured board frame carries `ipad:`, `.private.` or a private line | — |
+| AC-4 | 10 | `acceptance.spec.ts`: two devices open the QR target, one holds two hunters, and Begin stays off until the fourth hunter is held | — |
+| AC-5 | 10 | `acceptance.spec.ts`: both devices' Continue frames are released in one tick; one wins, the board and both screens move on, and both rows are in `control_presses` with device ids and winner flags | — |
+| AC-6 | 5, 10 | `acceptance.spec.ts`: each private line reaches only its holder's device. The `~no-delta` variant: `session/engine.test.ts` only | End to end once a hunter can be marked absent (setup wizard). Bob, 2026-10-16 |
+| AC-7 | 10 | `acceptance.spec.ts`: closing the only holder's context pauses at once with cause `disconnect` and the hunter; rejoin by pasted token resumes; a host pause is stored with its device | — |
+| AC-8 | 4, 10 | `acceptance.spec.ts`: every moment, the cue, both pauses and every press have monotonic and wall time, and `timingReport.ts` rebuilds the run (attached to the test) | — |
+| AC-9 | 6, 10 | Mock part, `acceptance.spec.ts`: a same-tick connect from two devices has one winner, either device calibrates, status and battery reach the board, and the mock received only `connect` and `calibrate` | The real tower is G-R1 (Bob) |
 
 The plan's step 8 shorthand "V-1, V-3, V-8" is the flow rules V2-1, V2-3 and V2-8 in `apps/burgomaster-funeral-poc/docs/poc-v2-flow.md` (prompt only, static hunter list). The story-pack rules with the same numbers are the step 3 rows above. They are different checks.
 
