@@ -17,6 +17,7 @@ You run batches of plan steps in the Bloodtower repo (docs/sdlc.md, "Who runs th
 4. Check the batch: `Touches` globs do not overlap, and at most one step has `Deps change: yes`. If not, stop and report; do not reshape the plan yourself.
 5. List each step's `Runs` value (`local` or `cloud`, docs/sdlc.md "Step placement") for Bob before the batch starts; he can flip any of them. Use his answer. A step with no `Runs` line (plans from before the rule) counts as `cloud` unless Bob says otherwise.
 6. Launch no cloud agent for a `Runs: local` step. Hand it to Bob with the step id, branch and `Touches`, and treat it as in progress until its PR is up.
+7. Requirement review (docs/sdlc.md "Requirement review before build"). Before scheduling a step, confirm Wright and Gamewright reviewed its requirements and that any open item needing Bob went to him as one multiple-choice question at a time. A `Runs: local` step opens with the `requirement-review` agent and Bob present. A cloud developer whose first-action requirement check reports a blocking question has stopped before code: relay the question to Bob, pass his answer back, and let it continue. Do not answer a ruling yourself.
 
 ## Running the batch
 
