@@ -159,7 +159,7 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.10` (:63) | — | below the window, in the mud | — | — | **a single bare footprint pointing up the hill, a girl's dragged heel-mark beside it** | first dusk |
 
 ### 2.4 n1-open-grave (night 1, after dusk, K1 Sanctuary: church and churchyard) — DONE
-**Constants.** Churchyard with yews; Oskar's fresh grave **dug open from below, coffin lid split outward, soil heaped outward in a ring** (n1-open-grave.md:6,15). Vestry: Oskar's study ransacked; map pinned under the altar cloth. Night; lanterns only. This is the same church as the funeral only if K1 = K2 by seed (it isn't: different kingdoms) — keep the two churches distinct.
+**Constants.** Churchyard with yews; Oskar's fresh grave **dug open from below, coffin lid split outward, soil heaped outward in a ring** (n1-open-grave.md:6,15). Vestry: Oskar's study ransacked; map pinned under the altar cloth. Night; lanterns only. Not the funeral church: this is the K1 Sanctuary, the funeral is the K2 Sanctuary. Keep the two churches visibly different.
 
 | Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
 |---|---|---|---|---|---|---|
@@ -216,8 +216,82 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.11.private.*` (:86–100; `~turned-away` :109–116) | picker + Vadoma whispering | — | — | — | Emeric: Tome card | iPad |
 | `.12` (:105) | all present leaving | wagon door | — | — | — | **grey dawn**, no warmth |
 
+### 2.8 n23-catacombs-of-saint-ysolde (night 2 or 3, Holy Symbol site + crypts) — DONE
+**Constants.** Entrance per building (well-rope / bricked stair behind the altar / reliquary-seller's cellar / lord's chapel floor-ring) (n23-catacombs-of-saint-ysolde.md:16–23). **Bone-lined passages that move when unwatched**; bones in castle livery; at the bottom the **Lantern of Saint Ysolde**: small silver lamp, flame without oil, in a niche shaped exactly like Agnes's reliquary (:6). Palette: cold dark, single lamp-glow. Lookalike: at most one (:10); dashboard art never singles anyone out, never shows ten-fingered Tomas or plain-glass Emeric. If night 3 and Blade held, the carrier has the sword wrapped on their back (:118).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01~<bldg>` clips (:14–23) | all present | descending | lanterns | — | wall closing behind | dark |
+| `.02` (:25) | Wren, Tomas (`~no-tomas` :120, `~no-wren` :122) | at a fork | — | — | left passage oily, right empty | lantern |
+| `.03` clip (:29) | party splitting | two groups | — | — | map redraws | footsteps out of count |
+| `.04.private.<h>` (:33–52) | picker alone in a passage | — | — | Tomas passage: livery bones, skull with the guard's tooth-notch; Wren: fresh earth on steps; Emeric: Gerhardt's chalk arrows, "BACK" (text allowed, private) | — | iPad, very dark |
+| `.04.private.<h>~lookalike` + `secret-card.*` (:36–79) | lookalike's iPad only | — | **lookalike tells only here**: ten fingers, plain-glass spectacles, etc. | — | text card | iPad |
+| `.05` (:81) groups rejoin | all present; Emeric speaks (`~no-emeric` :115 Wren; `~no-agnes` :113) | at the niche | — | **Agnes's right hand bleeding** at the scar | niche | lamp-glow |
+| `.06` clip (:85) | Agnes sets her **empty reliquary** in the niche (`~no-agnes` :111: Emeric or Wren sets the vestry reliquary) | at the niche | — | — | **flame leans toward Agnes** | gold-white |
+| `.07` clip (:90) unmasking | all + lookalike (`~lookalike-is-tomas` :108: Wren speaks) | Tomas axe up | holy water flung | lookalike hisses | — | — |
+| `.08` (:95) | lookalike comes apart into grave-dirt; real one found tied up, alive | back of the passage | real hunter bound | — | grave-dirt heap | — |
+| `.09` (:102) / `~lookalike-hidden` (:106) | all present | climbing out | — | — | Holy Symbol (a key: Treasure card per §6) held by its keeper | mist above |
+
+### 2.9 n23-sergius-blade (night 2 or 3, Blade site) — DONE
+**Constants.** The sword: long, plain hilt, bright unrusted steel, "Sergiu" on the cross-guard, half-wrapped in rotted crimson banner-cloth, faint sourceless gold light, warm (props:7; n23-sergius-blade.md:6). Location per building (burned house's lead chest / ossuary across smiths' skulls / cold anvil / armoury behind the squeaking door) (:15–22). Outside: **wolves in a ring** that don't come closer. **First on-screen Count: `.03`** — tall **old man, white moustache, black head to foot** (Bob C-6; :30). If night 3 and Holy Symbol held, Agnes's lamp is with the party (:66).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01~<bldg>` clips (:13–22) | all present | around the sword | cloth falling away | — | sword throws light on the ceiling | dark except blade-light |
+| `.02` (:24) | Wren, Tomas (`~no-tomas` :81 Agnes; `~no-wren` :85) | — | — | — | "Sergiu" on the guard (text allowed) | blade-light |
+| `.03` clip (:28) | **the Count in the doorway** (face shown from here on) | doorway, wolves silent behind | all black | pale long fingers | — | dim, blade-light on him |
+| `.04` (:33) | Count, Agnes (`~no-agnes` :70 Tomas) | — | — | — | — | — |
+| `.05` (:37) | Agnes steps between, thumb on scar (`~no-agnes` :88 Tomas steps between) | between the Count and the party | — | scar | — | — |
+| `.06` clip (:41) | **Tomas lifts the sword** (`~no-tomas` :77 Wren) | — | the carrier holds the sword | — | light turns gold; the Count steps back once | gold |
+| `.07` (:46) | Emeric writing (`~no-emeric` :92 Wren) | — | notebook | — | Count gone; wolves howl | — |
+| `.08.private.*` (:50–57) | picker + Count close (iPad) | Count very near | — | — | — | iPad, dark. Agnes private: **no young-Count flashback** needed; if the chapel memory is drawn, the traveler may be young (memory rule) |
+| `.09` (:62) / `~guard` (:74) | all present on the road | walking back | carrier holds the glowing sword | — | something on four legs far behind | night road, blade-light |
+
+### 2.10 n3-fly-eaters-cell (night 3, K3 Citadel lockhouse) — DONE
+**Constants.** Whitewashed cell freckled with dead flies; **Jakob Brenner** cross-legged in the centre catching flies and eating them in neat bites (n3-fly-eaters-cell.md:6). Daylight-less interior, a hard flat lamp; flies in the air. Present: all four (variants: :74–90). Marta is **not** here (only spoken of, :49).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:13) | Jakob | centre of the cell | — | — | flies | flat lamp |
+| `.02` (:17) | Jakob, Emeric (`~no-emeric` :89) | hunters at the door | — | — | — | — |
+| `.03` (:22) | Tomas (`~no-tomas` :74 Agnes) | — | — | — | — | — |
+| `.04` (:26) | Jakob, Wren (`~no-wren` :77 Tomas) | — | — | — | — | heartbeat |
+| `.05` (:31) + `~paid-blood` / `~paid-item` (:66–69) | Jakob, cupped hand out | — | paid item (holy water / host / stake) **in Jakob's hands** | blood: a small cut on the chosen hunter's hand (no corruption visuals) | — | — |
+| `.06` (:34) / `~refused` (:70) / `~obj3` (:72) | Jakob | — | — | — | — | — |
+| `.07` (:37) | Emeric (`~no-emeric` :86 Wren) | — | — | — | — | — |
+| `.08` clip (:41) | Jakob suddenly calm; Agnes (`~no-wren` :80, `~no-agnes` :83 Tomas) | — | — | — | **all flies stop** | low |
+| `.09.private.*` (:46–53) | picker + Jakob whispering | — | — | — | — | iPad |
+| `.10` (:62) | party leaving | door | — | — | cell full of flies again | — |
+
+### 2.11 n4-earth-boxes (night 4, day into dusk, K4 sanctuary + village) — DONE
+**Constants.** 3 boxes: 1 in the K4 sanctuary (desecrated chapel), 2 in the K4 village (Szgany carts) (n4-earth-boxes.md:5). **Mist so thick noon looks like evening** (:16). Long boxes of black earth, nailed, stencilled in Jakob's ledger hand "Garden soil. Handle with care." (text allowed) (:6). The Count is **voice only** (:8) — no figure. Boxes left/burned persist into night 5 (`~boxes-left`).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01` clip (:14) | all present | prising lids | crowbars | — | nails shrieking | evening-dark noon |
+| `.02` (:18) / `~unmarked` (:70) / `~no-emeric` (:78) | Emeric, Wren | — | Wren with lamp oil | — | open box of black earth | — |
+| `.03~a/b/c/last` clips (:22–34) | — | — | — | — | box burning like peat / screaming earth / **bats pouring from smoke** / last box: **one castle window goes dark** | firelight; last: dim |
+| `.04` (:36) / `~no-tomas` (:76) | Tomas, Agnes | carrying boxes | — | — | — | — |
+| `.05` (:40) / `~no-wren` (:80) | Wren | over a box | — | — | **dried violet pressed into the earth "as if by a sleeping cheek"** | — |
+| `.06` clip (:44) / `~unmarked` (:73) / `~no-wren` (:82) | voice of the Count; Wren strikes a match (`~no-wren`: Tomas answers) | — | match | — | — | tower dim |
+| `.07.private.*` (:49–56) | picker | — | — | — | Tomas: stencil **"Little gate. M.V."**; Wren: a box lined with the foundling-shawl weave; Emeric: crates numbered in cipher symbols | iPad |
+| `.08~all-burned / some-left / none-burned` (:61–67) | — | — | — | — | ash / boxes still standing | dusk |
+
+### 2.12 n4-finding-the-tome (night 4, after midnight, K4 Tome building) — DONE
+**Constants.** The Tome: heavy, faded green leather, brass clasp shaped like a **closed eye**, pages in the Count's beautiful old hand, violets pressed in the gutter (props:9; n4-finding-the-tome.md:6). In every moment (:10). Location per building (burned archive / chained abbey library / fence's crate under velvet / lord's study desk) (:16–23). Blade and Holy Symbol held by their keepers. **No Ludmila or Lenka face anywhere in this scene** (no illustrations of her in the Tome; reveal is the gallery). Ludmila and Lenka are **voices only** (:37, :66).
+
+| Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
+|---|---|---|---|---|---|---|
+| `.01~<bldg>` clips (:14–23) | all present | — | — | — | **lock opens by itself** | candle/lantern |
+| `.02`–`.03` clips (:25–32) | Emeric reading, Agnes, Tomas (`~no-emeric` :75–80 Agnes reads; `~no-tomas` :89 Wren) | reader holding the open Tome | sword carrier nearby | — | Tome open, his hand | lantern |
+| `.04` clip (:34) | — | — | — | — | **a page in a small quick girl's hand; a violet pressed in the gutter** | wind through a high window; dim |
+| `.05`–`.08` (:39–52) (`~no-emeric` :81–88, `~no-wren` :92) | Emeric, Agnes, Wren | — | — | — | Tome; last page "fresh ink" | — |
+| `.09.private.*` (:54–61; `~fainted` :95) | picker | Emeric may be on the floor (fainted) | — | — | margin note / household list / Gerhardt's decoded page | iPad |
+| `.10` clip (:63) | Count's voice **from everywhere** (no figure); Lenka's voice far off | — | — | — | — | tower dim → silence |
+| `.11` (:71) | — | — | — | — | castle above, **every window lit** | grey non-dawn |
+
 ### 2.x Remaining scenes — TODO
-- n23-catacombs-of-saint-ysolde, n23-sergius-blade, n3-fly-eaters-cell, n4-earth-boxes, n4-finding-the-tome, n5-drawbridge, n5-portrait-gallery, n5-final-confrontation, n5-ending-rescued / endures / taken / turned — TODO.
+- n5-drawbridge, n5-portrait-gallery, n5-final-confrontation, n5-ending-rescued / endures / taken / turned — TODO.
 
 ## 3. Voice sheet (from cast.md)
 Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a new voice. "Narrator (private)" = `narrator` on one iPad.
