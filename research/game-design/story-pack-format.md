@@ -142,6 +142,10 @@ Rules:
     - {id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom."}
 ```
 
+`script.yaml` lines may set `target`: `storyboard` (the default) or `ipad:<hunter>`. A line with an `ipad:` target is private. It plays only on the iPads that hold that hunter, shows there as a caption, and never reaches the Story board's avatar (V-4, V-25).
+
+
+
 ## 3. Nights and set pieces
 
 ### 3.1 Nights (chapters)
@@ -182,12 +186,15 @@ Rules:
 - The extrapolation behind `timing` is PRD-43: set pieces × set-piece time + expected encounters × encounter time + fights × fight time + nights × dusk/dawn overhead.
 
 ```yaml
-by_length:                       # Dracula, D-DRA-13 (provisional); crypt N is ruled (E20i)
-  short:    {label: "3 nights", nights: [<2 of n1-n4>, n5], dungeons: {crypt-under-church: {rooms: 2}}, timing: pending}   # which 2 nights: Loremaster proposes, Bob rules
-  standard: {label: "4 nights", nights: [<3 of n1-n4>, n5], dungeons: {crypt-under-church: {rooms: 4}}, timing: pending}
-  long:     {label: "5 nights (full game)", nights: [n1, n2, n3, n4, n5], dungeons: {crypt-under-church: {rooms: 6}}, timing: pending}
+by_length:                       # Dracula, Bob's ruling 12 (replaces D-DRA-13)
+  short:    {label: "Short", nights: [n1, n2, n3, n4, n5], dungeons: {crypt-under-church: {rooms: 2}}, encounters: "2-4", timing: pending}
+  standard: {label: "Standard", nights: [n1, n2, n3, n4, n5], dungeons: {crypt-under-church: {rooms: 4}}, encounters: "5-8", timing: pending}
+  long:     {label: "Long", nights: [n1, n2, n3, n4, n5], dungeons: {crypt-under-church: {rooms: 6}}, encounters: "8-12", timing: pending}
 ```
-D-DRA-13: the night-5 tower assault is always played; set pieces per length, hunter-token pace and encounter frequency are not decided yet. Crypt `rooms` is ruled (E20i). `room_cap_per_visit` is not.
+
+Bob's ruling 12: every length plays all 5 nights. Short keeps 10 set pieces, and Standard and Long keep all 13; the per-night lists go in `.set_pieces.<night>`. Length changes what fills them, meaning the set pieces, crypt rooms and encounters. Encounter ranges are estimates until playtest.
+
+A set-piece slot in `by_length` may be a seeded pick: `{one_of: [<set piece>, <set piece>], by: seed}`. The pick uses the game's seed (V-20), is made once at game start, and is logged with the seed. V-15 checks every possible result.
 
 ### 3.3 Set pieces
 
@@ -529,6 +536,44 @@ dungeons:                           # D-DRA-14
 ```
 `n23-catacombs-of-saint-ysolde` is a linear set piece (3.3), not an E20 crawl.
 
+### 11.1 Room schema
+
+Rooms live in the pack's `rooms:` list and are referenced as `room.<id>` from a dungeon's `deck` and `target_room`. A room's moments use the reserved `crypt.` prefix (4.1, V-3).
+
+`room.cost` is an ordered list of **cost steps**. Each step is exactly one of the following:
+- `{item: <story item ref>}`: a present hunter gives up that item.
+- `{track: <story track ref>, delta: <+1 or -1>}`: one step on a story track.
+- `{corruption: 1}`: one corruption to a present hunter, routed through the guard (8).
+
+There is one step per list entry, so a 3-step cost has three entries. Each matching held Advantage cancels one step and is spent (ruling 11). The present hunters choose which steps to cancel, and the rest are resolved in list order. If a step can't be paid, pay the steps you can and take one corruption, at most once per room (E20d).
+
+```yaml
+rooms:
+  - id: wet-steps
+    type: trap                    # trap | foe | treasure | deeper | story
+    moments: [crypt.wet-steps.01, crypt.wet-steps.02]
+    reduce_with: [lore, wild]     # optional; omitted = any held Advantage
+    cost:
+      - {track: dread, delta: +1}
+      - {corruption: 1}
+  - id: szgany-cache
+    type: treasure
+    moments: [crypt.szgany-cache.01]
+    cost:
+      - {item: candle}
+    loot: [item.silver-icon]      # bound to a present hunter (E20f)
+  - id: sealed-door
+    type: story
+    hunter: bryn                  # needs a crypt.sealed-door.01~no-bryn variant (V-5)
+    moments: [crypt.sealed-door.01]
+    cost:
+      - {item: crypt-key}
+      - {corruption: 1}
+    loot: [item.lenka-locket]
+```
+
+Foe rooms (`type: foe`) set `room.foe` and fight on the Story board's battle screen with base RtDT warrior costs. `room.cost`, if present, is paid after the fight. Whether battle Advantages count toward the room cost is still open (17).
+
 ## 12. Endings
 
 Each pack declares ranked outcomes and the order they are checked (R-ENG-31).
@@ -611,6 +656,8 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 - V-20. Determinism: all randomness names a seeded table.
 - V-22. Cast and script: every `script.yaml` speaker exists in `cast.yaml`; every cast entry has all eight mouths (rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv) and an anchor.
 - V-23. Lines: line ids are unique in the pack and stable across builds (checked against the previous build's id list: a shipped id is never renamed or reused); every `[pause N]` has N a positive number; estimated length (words at ~2.5 per second plus pauses) is at most 20 s, and rendered audio, once it exists, is at most 20 s.
+- V-24. Dungeons and rooms: every `deck` and `target_room` entry resolves to a declared room; `target_room` is not in `deck`; `deck` plus the target has at least as many rooms as the largest `rooms` value in `by_length` (otherwise that length can't be dealt); every non-foe room has 1 to 3 cost steps (a foe room has 0 to 3), each step is exactly one of `item`, `track` or `corruption`, and no step names warriors or spirit (V-12); `reduce_with` uses only RtDT traits; `foe` is set exactly when `type: foe`; `hunter` is set on `story` rooms; no room effect grants an Advantage.
+- V-25. Line targets: `target` is `storyboard` or `ipad:<declared hunter>`; no `ipad:` line is reachable by a `storyboard` target.
 - V-21. Readiness (AT-17): every private moment and `~no-` variant has voice and render at status ≥ draft before a "ready" build.
 
 ## 16. Check: mapping onto the format
@@ -694,6 +741,9 @@ Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lante
 11. **E20 room costs:** each matching held Advantage cancels one cost step and is spent. Rooms never grant Advantages. Rooms per length stay Short 2, Standard 4, Long 6 (ruling 7).
 
 Still open: set pieces per length, hunter-token pace, and encounter frequency (Loremaster proposes, Gamewright reviews). Also open: the per-visit crypt room cap, one more crypt room so a Long chain of 6 can be dealt, and whether a foe room's battle Advantages count as the room-cost application (ruling 11 settles the rest).
+
+12. **Game lengths (replaces D-DRA-13):** every length plays 5 nights. Short has 10 set pieces and a 2-room crypt, Standard 13 and 4 rooms, Long 13 and 6 rooms, with encounters rising by length.
+13. **Sixth crypt room:** the Ossuary of the Unnamed.
 
 ## Design decisions (Gamewright, Oct 15 2026)
 
