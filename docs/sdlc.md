@@ -79,8 +79,8 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes (model: haiku)
-.claude/agents/adversary-bugs.md  # adversarial PR review: bugs, edge cases, security, spec holes, all REVIEW.md passes (model: opus). Replaced reviewer.md
-.claude/agents/adversary-prd.md   # adversarial PR review against PRD ids and SC-1..SC-5 (model: sonnet)
+.claude/agents/adversary-bugs.md  # adversarial PR review: bugs, edge cases, security, spec holes, all REVIEW.md passes (model: sonnet; Opus override in round 3). Replaced reviewer.md
+.claude/agents/adversary-prd.md   # adversarial PR review against PRD ids and SC-1..SC-5 (model: haiku; Opus override in round 3)
 .claude/agents/developer.md     # builds one plan step in its own worktree with tests, pushes, opens the PR (model: sonnet; Opus override for work that needs more judgement)
 .claude/agents/coordinator.md   # runs one approved batch: worktrees, developers, PR review, serial merges; stops at Bob's gates
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
@@ -142,8 +142,8 @@ When Cursor cloud agents cannot run, a batch is built in Claude Code on Bob's Ma
 - Work only in a worktree on a new branch off `origin/main` (`pnpm wt <branch>`). Never edit, stash, or switch branches in Bob's main checkout.
 - Deliver as a PR to `main`. The required `check` still gates it.
 - Two Claude Code subagents replace the two cloud reviewers: a **reviewer** (`adversary-bugs`: bugs, edge cases, adversarial) and a **verifier** (spec/PRD conformance as `adversary-prd`, and it runs the exit tests). Each ends its PR report with `Blocking: none` or `Blocking: <n>`.
-- Same cap of 3 rounds. Round 1 uses the default model; rounds 2 and 3 use Opus (round 2 high effort, round 3 max effort).
-- If blockers remain after round 3, label the PR `needs-bob` and stop.
+- Same cap of 3 rounds. Rounds 1 and 2 use Sonnet (`adversary-bugs` and the developer fixes) and Haiku (`adversary-prd`). Round 3 runs both adversaries and the developer fix with an Opus override. This differs from the cloud ladder (round 2 Opus high effort, round 3 Opus max effort).
+- Blockers still open after round 3 get the `needs-bob` label, and the step stops.
 - Claude Code never merges. Wright reviews and merges as in §4.
 
 ## Parallel work (several developer agents at once)
@@ -196,8 +196,8 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 2. CI (`.github/workflows/check.yml`) runs `pnpm check` on the PR.
 3. The verifier runs on the PR branch in its worktree and posts its result as a PR comment (it runs things; the adversaries read and attack).
 4. **Adversarial loop, at most 3 rounds.** Both adversaries review the PR and post with `gh pr review --comment`, each report ending in `Blocking: none` or `Blocking: <count>`:
-   - `adversary-bugs` (opus): bugs, edge cases, races, security and privacy, tower safety, weak tests, spec holes, plus every `REVIEW.md` pass. It replaced the `reviewer` agent, whose passes it runs.
-   - `adversary-prd` (sonnet): the PRD requirement IDs, acceptance tests and SC-1..SC-5 the step claims, and regressions in the ones it does not.
+   - `adversary-bugs` (sonnet; Opus override in round 3): bugs, edge cases, races, security and privacy, tower safety, weak tests, spec holes, plus every `REVIEW.md` pass. It replaced the `reviewer` agent, whose passes it runs.
+   - `adversary-prd` (haiku; Opus override in round 3): the PRD requirement IDs, acceptance tests and SC-1..SC-5 the step claims, and regressions in the ones it does not.
    The developer fixes the blocking findings, pushes, and answers each finding on the PR; the next round starts. Different models on purpose, so the two do not share blind spots. Claude Code's agent `model:` field takes an alias (`opus`, `sonnet`, `haiku`) or a full Claude model id; it has no per-agent provider option. The provider (Anthropic API, Bedrock, Vertex, a gateway via `ANTHROPIC_BASE_URL`) is set for the whole session by environment variables, so a non-Claude second opinion would need a separate CLI called from Bash, which this repo does not do. (GitHub does not let an account approve its own PR and every agent posts as Bob, so the `Blocking:` lines are what count.)
 5. **Merge** when CI is green and the latest report from **both** adversaries says `Blocking: none`. The coordinator merges one PR at a time, in the batch's merge order: `gh pr update-branch` if `main` moved, wait for CI again, then `gh pr merge --squash --delete-branch`. A conflict or a red check after an update goes back to the developer and counts as a new round.
 6. **Escalation.** If round 3 ends with blocking findings still open, the coordinator labels the PR `needs-bob`, disables auto-merge on it (`gh pr merge --disable-auto`, a no-op while auto-merge is unavailable), stops that step, and reports it to Bob with the open findings. Steps that depend on it wait; the rest of the batch continues. Bob decides: fix himself, re-scope the step, override a finding, or drop it.
