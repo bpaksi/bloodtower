@@ -6,7 +6,7 @@
 - **Setting:** A long sword wrapped in rotted banner-cloth, the steel bright as if forged this morning, warm to the touch. Outside, wolves in a ring that do not come closer.
 - **Mood:** Wonder, then the Count's first face-to-face visit.
 - **Cast:** Narrator, Wren Kessel, Tomas Varga, The Count, Sister Agnes Hallow, Emeric Lutz
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -24,6 +24,20 @@
 **n23-sergius-blade.02** [still] [prop: sergiu-blade]
 > **Wren:** There's a name on the cross-guard. "Sergiu."
 > **Tomas:** The old lords had a younger son by that name. The guard used to drink to him. Nobody remembered why.
+
+**n23-sergius-blade.grip.private.agnes** [still] `ipad:agnes` [prop: sergiu-blade] — plays after `.02` (fellowship test 1)
+> **Agnes (thought):** The steel is warm under your scarred palm, the way the saint's reliquary was warm. Whoever carried this was prayed for.
+**n23-sergius-blade.grip.private.tomas** [still] `ipad:tomas` [prop: sergiu-blade]
+> **Tomas (thought):** The old guard's toast for this name: "To the younger son, who kept the window." Nobody ever told you which window.
+**n23-sergius-blade.grip.private.wren** [still] `ipad:wren` [prop: sergiu-blade]
+> **Wren (thought):** Violet stems, dried brown, bound under the cross-guard. Somebody buried this like a bridegroom.
+**n23-sergius-blade.grip.private.emeric** [still] `ipad:emeric` [prop: sergiu-blade]
+> **Emeric (thought):** A knot is worked into the grip-wrap. It's the weave from Lenka's shawl, the one Gerhardt labelled "the old house, before the fall."
+
+**n23-sergius-blade.grip-shared** [still] [prop: sergiu-blade] — Story board; auto-plays once every present hunter in it has tapped done on their `.grip.private` line (before `.03`)
+Journal: "Lenka's shawl and Sergiu's sword are of one house. He kept a window."
+> **Emeric:** The grip's wrapped in the weave from Lenka's shawl. Gerhardt called it the old house.
+> **Tomas:** And the guard drank to the son who kept the window. Her shawl, his sword. One house.
 
 **n23-sergius-blade.03** [clip] [prop: sergiu-blade]
 [tower: dim-all] [tower: heartbeat] [sfx: wolves fall silent at once]
@@ -71,7 +85,7 @@ The Blade is held (key 1 or 2); the carrier is chosen on the Mac. Then the midni
 > **The Count:** Miss Morosz sends her regrets. She is resting. She refuses me every evening.
 > **Tomas:** Then she's alive, and she's winning.
 
-**n23-sergius-blade.09~guard** [still] — any hunter is at 2 corruptions: that hunter's private .08 still plays, then this dashboard line replaces .09; the taunt has no effect on them (the Count never strikes a hunter at 2)
+**n23-sergius-blade.09~guard** [still] — any hunter is at 2 corruptions: that hunter's private .08 still plays, then this Story board line replaces .09; the taunt has no effect on them (the Count never strikes a hunter at 2)
 > **Narrator:** He looks past you, up at the castle, as if someone there had called him. The sword keeps its light all the way back to the road.
 
 **n23-sergius-blade.06~no-tomas** [clip] — Tomas not in play (same cues) [prop: sergiu-blade]
@@ -92,3 +106,12 @@ The Blade is held (key 1 or 2); the carrier is chosen on the Mac. Then the midni
 **n23-sergius-blade.07~no-emeric** [still] — Emeric not in play [prop: sergiu-blade]
 > **Wren:** It hurts him.
 > **The Count:** Remember that, if it helps you sleep. *(he is gone; the wolves howl again)*
+**n23-sergius-blade.grip-shared~no-tomas** [still] [prop: sergiu-blade] — Tomas not in play (same journal clue)
+> **Emeric:** The grip's wrapped in the weave from Lenka's shawl. Gerhardt called it the old house.
+> **Wren:** And violets under the guard. Somebody buried him like a bridegroom. Her house.
+**n23-sergius-blade.grip-shared~no-emeric** [still] [prop: sergiu-blade] — Emeric not in play (same journal clue)
+> **Wren:** Violets under the guard. Somebody buried this like a bridegroom.
+> **Tomas:** The guard drank to the son who kept the window. Bridegroom fits.
+**n23-sergius-blade.grip-shared~no-tomas-no-emeric** [still] [prop: sergiu-blade] — neither in play (same journal clue)
+> **Wren:** Violets under the guard. Somebody buried this like a bridegroom.
+> **Agnes:** Then it was loved. Carry it as if it still is.

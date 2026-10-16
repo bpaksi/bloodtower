@@ -6,7 +6,7 @@
 - **Setting:** A chasm with no bottom, a drawbridge raised, and a little side gate the guard used for deliveries. Wolves on the road behind. The castle breathing above.
 - **Mood:** Resolve; the last walk up the hill.
 - **Cast:** Narrator, The Count, Tomas Varga, Wren Kessel, Marta Varga
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
