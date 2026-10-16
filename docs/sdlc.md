@@ -83,6 +83,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/agents/adversary-prd.md   # adversarial PR review against PRD ids and SC-1..SC-5 (model: haiku; Opus override in round 3)
 .claude/agents/developer.md     # builds one plan step in its own worktree with tests, pushes, opens the PR (model: sonnet; Opus override for work that needs more judgement)
 .claude/agents/coordinator.md   # runs one approved batch: worktrees, developers, PR review, serial merges; stops at Bob's gates
+.claude/agents/requirement-review.md  # reviews one step's requirements before build: conflicts, gaps, untestable criteria, open rulings, out-of-scope Touches (model: sonnet)
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
 .claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
 .claude/skills/bugfix/SKILL.md             # failing test first
@@ -175,6 +176,13 @@ A **batch** is a set of steps whose dependencies are already merged (or signed o
 Approving the plan (G-plan) approves its batches. A step may not start before its batch's dependencies are met. Deviations that change `Touches` or dependencies update the plan in the same commit, as now. The coordinator and `adversary-bugs` check that a PR changes only files inside its step's `Touches`, and that only the step marked `Deps change: yes` changes a `package.json` or `pnpm-lock.yaml`.
 
 **Step placement (`Runs`).** The plan author sets `Runs: local` (Bob and Claude Code on the Mac) when the step touches the core engine or session state, protocol contracts, security or tokens, the tower or other hardware, is a Bob gate, or a cloud attempt at it already ended in `needs-bob`. Everything else (UI, docs, tests, asset wiring) is `Runs: cloud` and runs on cloud agents when they are available. Before a batch starts, Wright lists each step's `Runs` value for Bob, who can flip any of them. The coordinator launches no cloud agent for a `Runs: local` step; it hands that step to Bob. Plans written before this rule are not retrofitted.
+
+**Requirement review before build.** Requirements are checked before code, so building does not stall on a question that was answerable earlier.
+
+- **Planning.** Before a step is scheduled, Wright and Gamewright review its requirements (PRD refs, acceptance criteria, rulings) and resolve conflicts or gaps between them. Only open items that need Bob's ruling go to Bob, as one multiple-choice question at a time.
+- **`Runs: local` steps.** The session opens with a requirement review by Claude Code (the `requirement-review` agent) with Bob present: conflicts, missing or untestable acceptance criteria, open rulings, and `Touches` outside the step's scope. Bob's answers are recorded before building starts.
+- **`Runs: cloud` steps.** The cloud agent's first action is a short requirement check against the PRD and the step. If it finds a genuine blocking question, it stops before writing code and reports the question; the coordinator relays it to Bob. Otherwise it proceeds without stopping. Escalation to Bob should be rare.
+- **Record.** The findings and answers go in the PR body under `Requirement review`.
 
 ### 2. One worktree per step
 
