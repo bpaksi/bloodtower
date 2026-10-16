@@ -56,8 +56,10 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
       await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
       expect(host.joinCode).toMatch(/^\d{6}$/);
-      expect(await board.locator("button, input, textarea, select, a, [onclick]").count()).toBe(0);
       await expect(board.getByText(/Battery unavailable/)).toBeVisible();
+      // Counted once the live state (and its QR) has rendered.
+      await expect(board.getByRole("img", { name: "Join code" })).toBeVisible();
+      await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
 
       await expect.poll(() => boardStates(boardFrames).length).toBeGreaterThan(0);
       const join = boardStates(boardFrames).at(-1)?.join as { code: string; url: string };
@@ -139,11 +141,32 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(connects.map((press) => press.winner).sort()).toEqual([false, true]);
       expect(new Set(connects.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
 
+      // Either device may calibrate: both press, the first arrival wins, the other is locked out.
       await expect(a.button("tower-calibrate")).toBeEnabled();
       await expect(b.button("tower-calibrate")).toBeEnabled();
+      gateA.hold();
+      gateB.hold();
+      await a.button("tower-calibrate").click();
       await b.button("tower-calibrate").click();
+      await gateA.held(1);
+      await gateB.held(1);
+      expect(releaseTogether(gateA, gateB)).toBe(2);
       await expect(board.getByText(/Calibration calibrated/)).toBeVisible();
       await expect(a.button("tower-calibrate")).toBeDisabled();
+      await expect(b.button("tower-calibrate")).toBeDisabled();
+      await expect
+        .poll(
+          () =>
+            host.loadRun().presses.filter((press) => press.promptId === "tower-calibrate").length,
+        )
+        .toBe(2);
+      const calibrates = host
+        .loadRun()
+        .presses.filter((press) => press.promptId === "tower-calibrate");
+      expect(calibrates.map((press) => press.winner).sort()).toEqual([false, true]);
+      expect(new Set(calibrates.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
+      // The losing presses did not reach the tower: one connect and one calibrate only.
+      expect(tower.sent()).toEqual([{ type: "connect" }, { type: "calibrate" }]);
 
       tower.setBattery(76);
       await expect(board.getByText(/Battery 76%/)).toBeVisible();
@@ -191,6 +214,17 @@ test("the test pack's first night, end to end, on one board and two devices", as
       // Beta and Gamma have no private line in this moment.
       await expect(pageA.getByText("No private line.")).toBeVisible();
       await expect(pageB.getByText("No private line.")).toBeVisible();
+      // On the wire, not just on screen: each device was sent only its own hunters' lines.
+      expect(gateA.received.some((frame) => frame.includes("Only Alpha hears this."))).toBe(true);
+      expect(gateB.received.some((frame) => frame.includes("Only Delta hears this."))).toBe(true);
+      for (const frame of gateA.received) {
+        expect(frame).not.toContain("Only Delta hears this.");
+        expect(frame).not.toContain(".private.delta");
+      }
+      for (const frame of gateB.received) {
+        expect(frame).not.toContain("Only Alpha hears this.");
+        expect(frame).not.toContain(".private.alpha");
+      }
     });
 
     await test.step("AC-7: losing the only holder pauses at once; rejoin by token resumes", async () => {
@@ -261,6 +295,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "tower-connect:true",
         "tower-connect:false",
         "tower-calibrate:true",
+        "tower-calibrate:false",
         "begin:true",
         "continue-0:true",
         "continue-0:false",
@@ -269,6 +304,12 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "continue-1:true",
         "continue-2:true",
       ]);
+      let previous = -1;
+      for (const press of run.presses) {
+        expect(press.atMonoMs, `${press.promptId} monotonic`).toBeGreaterThan(previous);
+        expect(press.atWall, `${press.promptId} wall`).toMatch(/^\d{4}-\d\d-\d\dT.*Z$/);
+        previous = press.atMonoMs;
+      }
 
       const report = formatTimingReport(run);
       const path = testInfo.outputPath("timing-report.txt");
@@ -287,7 +328,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
       ]) {
         expect(body).toContain(line);
       }
-      expect(report.at(-1)).toMatch(/^Span \d+ ms\. Paused \d+ ms\. Active \d+ ms\.$/);
+      expect(report.at(-1)).toMatch(
+        /^Lobby \d+ ms\. Night \d+ ms\. Paused \d+ ms\. Active \d+ ms\.$/,
+      );
     });
 
     await test.step("AC-9 (mock): only connect and calibrate reached the tower", async () => {

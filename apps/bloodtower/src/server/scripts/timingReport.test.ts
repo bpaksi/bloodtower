@@ -146,7 +146,8 @@ describe("timing report", () => {
     );
     expect(lines).toContain("Marks 5, presses 4 (3 won).");
     expect(lines).toContain("Open marks none.");
-    expect(lines.at(-1)).toBe("Span 9000 ms. Paused 4000 ms. Active 5000 ms.");
+    // Begin at 1000 ms; the night closes at 9000 ms.
+    expect(lines.at(-1)).toBe("Lobby 1000 ms. Night 8000 ms. Paused 4000 ms. Active 4000 ms.");
   });
 
   it("reports an open pause and leaves the totals unknown, not zero", () => {
@@ -157,7 +158,7 @@ describe("timing report", () => {
     expect(lines).toContain(
       "Open marks phase night, moment proving-ground.03, cue bell, pause disconnect:alpha.",
     );
-    expect(lines.at(-1)).toBe("Span unknown. Paused unknown. Active unknown.");
+    expect(lines.at(-1)).toBe("Lobby 1000 ms. Night unknown. Paused unknown. Active unknown.");
   });
 
   it("reads the latest session when no id is given", () => {
@@ -170,7 +171,9 @@ describe("timing report", () => {
       opened.close();
     }
     expect(readRun(path).session.id).toBe("run-new");
-    expect(formatTimingReport(readRun(path))).toContain("No timing rows.");
+    const empty = formatTimingReport(readRun(path));
+    expect(empty).toContain("No timing rows.");
+    expect(empty.at(-1)).toBe("Lobby unknown. Night unknown. Paused 0 ms. Active unknown.");
   });
 
   it("does not create a database at a wrong path, and names a missing session", () => {

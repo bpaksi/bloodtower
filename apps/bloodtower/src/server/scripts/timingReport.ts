@@ -94,8 +94,14 @@ export const formatTimingReport = (run: StoredRun): string[] => {
     );
   }
   const open = run.marks.filter((mark) => mark.endMonoMs === null);
-  const last = events.reduce((max, event) => Math.max(max, event.monoMs), 0);
-  const total = events.length === 0 || open.length > 0 ? null : last;
+  // Active time counts from Begin (the phase start) to the phase end, not from host start
+  // (Bob, 2026-10-16). The lobby before Begin is its own figure.
+  const phase = run.marks.find((mark) => mark.kind === "phase");
+  const lobby = phase ? phase.startMonoMs : null;
+  const night =
+    phase && phase.endMonoMs !== null && open.length === 0
+      ? phase.endMonoMs - phase.startMonoMs
+      : null;
   lines.push("");
   lines.push(
     `Marks ${run.marks.length}, presses ${run.presses.length} (${run.presses.filter((press) => press.winner).length} won).`,
@@ -106,7 +112,7 @@ export const formatTimingReport = (run: StoredRun): string[] => {
       : `Open marks ${open.map((mark) => `${mark.kind} ${mark.subject}`).join(", ")}.`,
   );
   lines.push(
-    `Span ${millisText(total)}. Paused ${millisText(pausedMillis(run.marks))}. Active ${millisText(total === null ? null : activeMillis(total, run.marks))}.`,
+    `Lobby ${millisText(lobby)}. Night ${millisText(night)}. Paused ${millisText(pausedMillis(run.marks))}. Active ${millisText(night === null ? null : activeMillis(night, run.marks))}.`,
   );
   return lines;
 };

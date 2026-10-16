@@ -62,17 +62,24 @@ export interface ControlGate {
   held: (count: number) => Promise<void>;
   /** Stop holding, and hand back the held sends without running them. */
   take: () => Array<() => void>;
+  /** Every text frame the server sent this page, as it arrived. */
+  received: string[];
 }
 
 /**
  * Routes the page's session socket through the test so `control` frames can be held and
- * released together. Other frames pass straight through; the server side is not touched.
+ * released together, and records what the server sent. Frames are not changed.
  */
 export const gateControls = async (page: Page): Promise<ControlGate> => {
   const queue: Array<() => void> = [];
+  const received: string[] = [];
   let holding = false;
   await page.routeWebSocket(/\/ws$/, (socket) => {
     const server = socket.connectToServer();
+    server.onMessage((message) => {
+      if (typeof message === "string") received.push(message);
+      socket.send(message);
+    });
     socket.onMessage((message) => {
       if (holding && typeof message === "string" && JSON.parse(message).type === "control") {
         queue.push(() => server.send(message));
@@ -92,6 +99,7 @@ export const gateControls = async (page: Page): Promise<ControlGate> => {
       holding = false;
       return queue.splice(0);
     },
+    received,
   };
 };
 
