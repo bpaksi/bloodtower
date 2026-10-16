@@ -6,7 +6,7 @@
 - **Setting:** Father Oskar's fresh grave, dug open from below, the coffin lid split outward. His study in the vestry, ransacked. A map pinned under the altar cloth.
 - **Mood:** Investigation, then sorrow turning to horror.
 - **Cast:** Narrator, Wren Kessel, Emeric Lutz, Sister Agnes Hallow, Father Oskar, Tomas Varga (variants)
-- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -35,6 +35,20 @@
 **n1-open-grave.06** [still]
 > **Oskar:** He has little Lenka. He'll call her by another name up there. Tell her not to answer to it.
 > **Wren:** What name? Oskar. *What name?*
+
+**n1-open-grave.map.private.agnes** [still] `ipad:agnes` — plays after `.06`, on every present hunter's iPad (fellowship test 1)
+> **Agnes (thought):** The fever-ledger at Saint Ysolde. The traveler wrote his home as "the high meadow." You never found it on any map. Oskar has blotted out one parish.
+**n1-open-grave.map.private.tomas** [still] `ipad:tomas`
+> **Tomas (thought):** One parish the guard never walked. "The lady's meadow," the old sergeants called it, and spat. Oskar has inked it out.
+**n1-open-grave.map.private.wren** [still] `ipad:wren`
+> **Wren (thought):** Violets. Mother's grave-rows by the castle wall, and the meadow above them she'd never let you climb to. That's the parish Oskar blotted.
+**n1-open-grave.map.private.emeric** [still] `ipad:emeric`
+> **Emeric (thought):** Gerhardt's margin, beside the old weave: "the high meadow, where the first house fell." One of Oskar's four parishes is blotted out. Which one?
+
+**n1-open-grave.map-shared** [still] — Story board; auto-plays once every present hunter in it has tapped done on their `.map.private` line (before `.07`)
+[sfx: paper rustle] Journal: "The blotted parish is the high meadow: the violets' home, and his."
+> **Agnes:** The ink hides the high meadow. He signed my ledger from there.
+> **Wren:** Violets grow up there. Nowhere else. It's where she comes from. And him.
 
 **n1-open-grave.07** [clip]
 [sfx: a snarl] [music: low drums] Battle begins (battle-card shape, per mechanics).
@@ -89,4 +103,14 @@ Riddle fragments and map are in the journal; Oskar is laid down. Midnight → `n
 **n1-open-grave.08~no-agnes** [still] — Agnes not in play
 > **Wren:** *(scratching a bolt)* O-S-K-A-R. He'd want it spelled right.
 
-No private moments in this scene. (Lines for Tomas appear only in variants.)
+Private moments: `.map.private.<hunter>` only; absent hunters' are skipped. (Tomas speaks only in variants.)
+
+**n1-open-grave.map-shared~no-agnes** [still] — Agnes not in play (same journal clue)
+> **Tomas:** The ink hides the lady's meadow. The guard never went up there.
+> **Wren:** Violets grow up there. Nowhere else. It's where she comes from. And him.
+**n1-open-grave.map-shared~no-wren** [still] — Wren not in play (same journal clue)
+> **Agnes:** The ink hides the high meadow. He signed my ledger from there.
+> **Emeric:** Gerhardt marked it too. "Where the first house fell." It's his. And hers.
+**n1-open-grave.map-shared~no-agnes-no-wren** [still] — neither in play (same journal clue)
+> **Tomas:** The ink hides the lady's meadow. The guard never went up there.
+> **Emeric:** Gerhardt marked it too. "Where the first house fell." It's his. And hers.

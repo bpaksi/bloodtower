@@ -6,7 +6,7 @@
 - **Setting:** The bell strikes twelve. A line of dead hunters in old coats and older armour walks through walls and streets, carrying lanterns that give no light. They do not look at the living, except for one.
 - **Mood:** Cold silence, grief, an accusation.
 - **Cast:** Narrator; the spotlit hunter and their ghost: Mother Ursula (Agnes), Sergeant Pavel Dorn (Tomas), Jozef Kessel (Wren), Master Gerhardt Albrecht (Emeric)
-- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Spotlight:** the app picks one hunter per night (unresolved tie first, never the same hunter twice in a row). That hunter's iPad plays `.03.private.<hunter>` and `.04.private.<hunter>`; every other present hunter's iPad plays `.04.private.<hunter>-watched`.
 
 ## Moments

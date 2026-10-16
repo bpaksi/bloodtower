@@ -6,7 +6,7 @@
 - **Setting:** A painted wagon that has not moved in forty years, wheels sunk in the mud. Candles, an accordion on a hook, a deck of cards worn soft as cloth.
 - **Mood:** Hushed, uncanny, the first real hope.
 - **Cast:** Narrator, Old Vadoma, Sister Agnes Hallow, Emeric Lutz, Tomas Varga (variant)
-- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Kingdoms are never spoken.** The drawn kingdom is shown by the drum glyph and the board image; Vadoma names only the building, as a variant per draw.
 
 ## Moments

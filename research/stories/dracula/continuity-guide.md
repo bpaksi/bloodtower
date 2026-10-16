@@ -19,15 +19,15 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 
 ### 1.1 Sister Agnes Hallow
 - **Fixed:** tall, gaunt, mid-40s; grey habit browned at the hem; **plain coif** (not a veil) over cropped iron-grey hair; pale grey eyes; battered tin reliquary on a leather strap (empty); silver-shod walking staff; **cross-shaped burn scar on the RIGHT palm** whenever that hand shows (chars:15). No crucifix (no source names one).
-- **Gesture:** thumb on the scar before she lies / at tense moments (chars:20; n1-burgomasters-house.md:42; n23-sergius-blade.md:38).
-- **Arc:** night 2–3 Holy Symbol site sets reliquary in the niche (n23-catacombs-of-saint-ysolde.md:87). Rescued: scar stays, pain goes (n5-ending-rescued.md:34). Turned: reliquary drops, **burn gone** (n5-ending-turned.md:19; intended, C-13).
+- **Gesture:** thumb on the scar before she lies / at tense moments (chars:20; n1-burgomasters-house.md:42; n23-sergius-blade.md:52).
+- **Arc:** night 2–3 Holy Symbol site sets reliquary in the niche (n23-catacombs-of-saint-ysolde.md:101). Rescued: scar stays, pain goes (n5-ending-rescued.md:34). Turned: reliquary drops, **burn gone** (n5-ending-turned.md:19; intended, C-13).
 - **Corruption:** pending (Gamewright/Bob). Until ruled, none drawn.
 - **Spoilers:** never show the traveler's face in her memories before `n23-sergius-blade.05`; never show "The one who prayed" painting before the gallery (n5-portrait-gallery.md:35).
 
 ### 1.2 Tomas Varga
-- **Fixed:** broad, heavy-shouldered, 50s; grey-shot **black** beard; face like a split log; **wolf-pelt cloak** over castle livery **dyed black, no visible crest**; long axe + short sword (chars:35). **LEFT hand missing the last two fingers, always** (chars:35; tok:154,208).
+- **Fixed:** broad, heavy-shouldered, 50s; grey-shot **black** beard; face like a split log; **wolf-pelt cloak** over castle livery **dyed black, no visible crest**; long axe + short sword (chars:35). **LEFT hand missing the last two fingers, always** (chars:35; tok:149,212).
 - **Gesture:** taps the axe haft three times before speaking to a stranger (chars; n1-lantern-and-bell.md:20).
-- **Arc:** may carry Sergiu's sword (n23-sergius-blade.md:43). Turned: lowers the axe, faces the hunters like the gate (n5-ending-turned.md:23).
+- **Arc:** may carry Sergiu's sword (n23-sergius-blade.md:57). Turned: lowers the axe, faces the hunters like the gate (n5-ending-turned.md:23).
 - **Spoilers:** ten fingers = lookalike only (n23-catacombs-of-saint-ysolde.md:43,93). Story board never shows a ten-fingered Tomas.
 
 ### 1.3 Wren Kessel
@@ -50,7 +50,7 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 - Flower crown on the delivered portrait: not in any source; drop it (if kept, it must persist into every still).
 
 ### 1.6 Anton Morosz
-- **Fixed:** ledger-keeper burgomaster (30 years), chain of office; round, soft face, not a fighter. **Not mistakable for the Count** (no tall gaunt figure, avoid the white-moustache old-man read; n23-sergius-blade.md:30).
+- **Fixed:** ledger-keeper burgomaster (30 years), chain of office; round, soft face, not a fighter. **Not mistakable for the Count** (no tall gaunt figure, avoid the white-moustache old-man read; n23-sergius-blade.md:44).
 - **Death (C-5, settled):** fell on the stair at Lenka's door; carried down to the parlour; poker still in his hand at the house.
 - **Funeral:** in a shut coffin on trestles; his coat (inside the coffin with him, searched at `anton-coat`) holds a sealed holy-water flask and the "lady's rooms" scrap. Heard only as remembered voice.
 
@@ -61,7 +61,7 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 - **Spoilers (Bob):** Lenka's face is **never shown until the reveal**: only from behind, at a window, in shadow, through a doorway. Her voice carries warmth. Ludmila's portrait stays covered until the reveal. No open window with Lenka in pre-ending art.
 
 ### 1.8 The Count (Vlad)
-- **Fixed:** tall, all in black, pale long fingers (tok:141); one ageless face across 400 years of portraits (n5-portrait-gallery.md:6); the dark-haired brother (tok:110,117). Beautiful very old handwriting (cream letter, Tome).
+- **Fixed:** tall, all in black, pale long fingers (tok:138); one ageless face across 400 years of portraits (n5-portrait-gallery.md:6); the dark-haired brother (tok:109,116). Beautiful very old handwriting (cream letter, Tome).
 - **Age (Bob, C-6):** old throughout: aged, white moustache. Young (dark-haired) only in memories and portraits.
 - **History (C-7, settled):** he is the 400-year lord who **came back** in Tomas's guard years.
 - **Spoilers:** face hidden before `n23-sergius-blade.03` (hand, mist, silhouette, castle only). At the funeral he is **not shown at all**; only his servant.
@@ -80,12 +80,12 @@ Oskar, Vadoma, Jakob, Marta, Ilka, Ludmila, Ursula, Dorn, Jozef, Gerhardt, Sergi
 |---|---|---|
 | Count's face | `n23-sergius-blade.03` | any clear face |
 | Count = Agnes's traveler | `n23-sergius-blade.05` | traveler's face in Agnes flashbacks |
-| Lenka = Ludmila | Tome / gallery canvas | Ludmila's face anywhere; bridal "veiled girl" stays veiled (tok:277) |
+| Lenka = Ludmila | Tome / gallery canvas | Ludmila's face anywhere; bridal "veiled girl" stays veiled (tok:293) |
 | Lookalike | catacombs unmask | ten-fingered Tomas / plain-glass Emeric on the Story board |
-| Ilka = third bride | gallery / final | full face of the singing woman (tok:328) |
+| Ilka = third bride | gallery / final | full face of the singing woman (tok:358) |
 | Mother bolt = Ilka | n5-final-confrontation.md:24 | legible name |
 | Agnes prayed for him | procession / gallery | "The one who prayed" painting |
-| Marta half-turned | n23-sergius-blade.md:53 | fangs, pallor in Tomas memory art |
+| Marta half-turned | n23-sergius-blade.md:67 | fangs, pallor in Tomas memory art |
 | Gerhardt sold the name | Tome cipher | legible receipt on Story board |
 | Dorka rises | `n2-…04` | open eyes, smile, fangs before `.04` |
 | Endings | ending | Lenka at an open window pre-ending |
@@ -197,7 +197,7 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.00~night2` (:31) / `~no-tomas` (:35) — **Marta's summons** | no violet yet: **Marta's room, shutters hanging open, nails pried and laid in a neat row on the sill, bed empty, cream `come-home-letter` on the pillow**; Tomas in the doorway (not in `~no-tomas`). Marta **absent** | `.00.private.tomas~night2` (:39): Tomas's reading (she drew the nails herself) | dusk |
 | `.01~night2` (:42) | violet on a lintel, **wrapped in a scrap of painted canvas** | "near pictures, a gallery" (:47–56) | dusk |
 | `.01~night3` (:58) | violet in the dust, **stem tied with one gold thread from a wedding veil** | "above the gallery, where the stair goes up" (:63–72) | dusk |
-| `.01~night4` (:74) | **violet pressed into a torn page in an old girl's hand** (Ludmila's; tok:33) — page text not legible on Story board | "the high room, the window I opened" (:79–88) | dusk |
+| `.01~night4` (:74) | **violet pressed into a torn page in an old girl's hand** (Ludmila's; tok:35) — page text not legible on Story board | "the high room, the window I opened" (:79–88) | dusk |
 
 ### 2.7 n1-fortune-reading (night 1 → grey dawn, K1 Bazaar: Vadoma's wagon) — DONE
 **Constants.** Painted wagon sunk to the hubs in mud for 40 years; candles, accordion on a hook, cards worn soft as cloth (n1-fortune-reading.md:6). Interior candle palette; grey dawn at the door. Old Vadoma: old, husky, amused. Present: Agnes, Emeric (Tomas in variants; Wren may sit silently). Kingdoms are never spoken; drums/board show them (:10). Draws: Blade, Holy Symbol, Tome, lair, objective.
@@ -292,7 +292,7 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.11` (:71) | — | — | — | — | castle above, **every window lit** | grey non-dawn |
 
 ### 2.13 n5-drawbridge (night 5, the castle gate) — DONE
-**Constants.** Chasm with no bottom, raised drawbridge, little side gate for deliveries, wolves on the road behind, castle above (n5-drawbridge.md:6). Night, mist, castle windows lit. Needs all three keys: the three key Treasure cards are held by their keepers (§6); art may show the three artifacts (sword, lamp, Tome), not cards. **Marta** first seen in person here: young woman, **castle maid's apron over faded castle livery**, lamp turned low (:28; tok:299) — no fangs (half-turned shows only as pallor/sleepiness, if at all).
+**Constants.** Chasm with no bottom, raised drawbridge, little side gate for deliveries, wolves on the road behind, castle above (n5-drawbridge.md:6). Night, mist, castle windows lit. Needs all three keys: the three key Treasure cards are held by their keepers (§6); art may show the three artifacts (sword, lamp, Tome), not cards. **Marta** first seen in person here: young woman, **castle maid's apron over faded castle livery**, lamp turned low (:28; tok:327) — no fangs (half-turned shows only as pallor/sleepiness, if at all).
 
 | Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
 |---|---|---|---|---|---|---|
@@ -409,20 +409,20 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 |---|---|---|---|
 | C-1 | Both true: Agnes doesn't know why at the start; that he spared her because she prayed for him is the reveal (procession/gallery). Her funeral `.end.private.agnes` already knows it — acceptable as it is private and after the procession on night 2. | chars:25 vs cast:30; nx-midnight-procession.md:45 | none |
 | C-2 | The mother bolt carries Ilka's name, scratched faintly by Ilka; it **reads blank** until n5-final-confrontation.md:24. | chars:65 vs cast:32 | chars:65 "One bolt is blank" → "One bolt looks blank" |
-| C-3 | Ilka was taken **19 years ago** (Wren ~9), for hiding infant Lenka; the father's death is a later, separate week. | chars:65 vs cast:32, tok:349 | n2-burgomasters-funeral.md `.09.private.wren` (line 156): "Your mother laid out every bride in this valley for thirty years." → "Your mother laid out every bride in this valley till he took her." · chars:65 "who disappeared the same week" → "who disappeared when Wren was nine" |
+| C-3 | Ilka was taken **19 years ago** (Wren ~9), for hiding infant Lenka; the father's death is a later, separate week. | chars:65 vs cast:32, tok:376 | n2-burgomasters-funeral.md `.09.private.wren` (line 156): "Your mother laid out every bride in this valley for thirty years." → "Your mother laid out every bride in this valley till he took her." · chars:65 "who disappeared the same week" → "who disappeared when Wren was nine" |
 | C-5 | Anton fell on the stair at Lenka's door, was carried down to the parlour; poker still in hand. | n1-burgomasters-house.md:6 vs cast:38, n1-lantern-and-bell.md:50 | n1-burgomasters-house.md:6 "lies in the parlour where he fell" → "lies in the parlour where they carried him from the stair" |
 | C-7 | The Count is the 400-year lord who **came back** during Tomas's guard years. | chars:43 vs n5-portrait-gallery.md:6, cast:36 | chars:43 "Then the Count came" → "Then the Count came back" |
 | C-8 | "The lady's rooms" (east wing) **is** the high room at the top of the stair behind the gallery. One room. | n2-burgomasters-funeral.md:67,106,142 vs n5-drawbridge.md:33 | none |
-| C-9 | The Tome is in the Count's hand (he copied her letters into it, which is how Ludmila is "heard through the Tome"); loose torn pages are in her own girl's hand (tok:33). The Count's hand = the cream-letter hand. | props:9, cast:39 vs n4-finding-the-tome.md:6,44 | none |
+| C-9 | The Tome is in the Count's hand (he copied her letters into it, which is how Ludmila is "heard through the Tome"); loose torn pages are in her own girl's hand (tok:35). The Count's hand = the cream-letter hand. | props:9, cast:39 vs n4-finding-the-tome.md:6,44 | none |
 | C-10 | Wren's hair was cut short years ago (since childhood) but is long enough to tie with the ribbon; constant all game. | chars:55 vs n5-final-confrontation.md:19 | none |
 | C-12 | Dorka's mother and the castle servant are **non-speaking NPCs**: they get NPC stills/ref sheets, not cast.yaml ids. Missing cast portraits are a production list (Gamewright), not a contradiction. | manifest vs packs/dracula/cast.yaml | none in scripts; Gamewright to label them NPC in the manifest |
 | C-13 | Intended: the burn vanishing in Turned shows she is turned. Scar is permanent otherwise. | n5-ending-turned.md:19 vs chars:15 | none |
 
 ### 4.2 Bob's rulings (2026-10-16)
-- **C-6 Count's look (Q1): old throughout.** Aged, white moustache, all in black, tall, pale long fingers, every night. He is shown **young only in memories** (e.g. the Sergiu duel memory, tok:110,117) **and in the gallery portraits** (n5-portrait-gallery.md:6). No feeding/hunger change. n23-sergius-blade.md:30 stands as written.
+- **C-6 Count's look (Q1): old throughout.** Aged, white moustache, all in black, tall, pale long fingers, every night. He is shown **young only in memories** (e.g. the Sergiu duel memory, tok:109,116) **and in the gallery portraits** (n5-portrait-gallery.md:6). No feeding/hunger change. n23-sergius-blade.md:44 stands as written.
 - **Lenka / Ludmila (Q2): Lenka's face is never shown until the reveal.** Show her only from behind, at a window, in shadow, or through a doorway. Her voice carries warmth (direct `lenka` reads warm; add "warm" to the style). **Ludmila's portrait stays covered** until the gallery reveal.
 - **Lenka / Ludmila look (Q5): Illusionist decides alone.** One shared face sheet, locked once made; no Bob sign-off needed.
-- **C-4 Marta (Q3): at home on night 1** (n1-lantern-and-bell.md:60 stands; do **not** apply the earlier 3a edit). **The Count summons her at night-2 dusk:** `nx-pressed-flower.00~night2` (+ `~no-tomas`, `.00.private.tomas~night2`; nx-pressed-flower.md:31–40): shutters pried, nails in a row on the sill, cream `come-home-letter` on her pillow, Marta gone. Funeral `.end.private.tomas` already revised (n2-burgomasters-funeral.md:169). **Art (one answer):** night 1 at home, shutters nailed, asleep by day; night-2 dusk on, her room empty; at the castle from then on (pours his wine, keeps the little gate); first seen in person at n5-drawbridge. See N-2.
+- **C-4 Marta (Q3): at home on night 1** (n1-lantern-and-bell.md:60 stands; do **not** apply the earlier 3a edit). **The Count summons her at night-2 dusk:** `nx-pressed-flower.00~night2` (+ `~no-tomas`, `.00.private.tomas~night2`; nx-pressed-flower.md:31–40): shutters pried, nails in a row on the sill, cream `come-home-letter` on her pillow, Marta gone. Funeral `.end.private.tomas` already revised (n2-burgomasters-funeral.md:178). **Art (one answer):** night 1 at home, shutters nailed, asleep by day; night-2 dusk on, her room empty; at the castle from then on (pours his wine, keeps the little gate); first seen in person at n5-drawbridge. See N-2.
 - **Narrator (Q6): voice only, no face.** `por.narrator` = a neutral **lantern emblem**.
 - **C-11 Keys (Q4): physical objects players hold**, using **only existing Return to Dark Tower components**. **Bob chose Treasure cards held out of the deck**; which three cards: pending (§6). n5-drawbridge.md:19 "in locks no one can see" still works (the locks are unseen, the keys are held). Until chosen, art draws no key objects.
 
@@ -432,10 +432,10 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 | # | Contradiction | Sources | Proposed default |
 |---|---|---|---|
 | N-1 | Night-1 procession shows "a girl in a nightdress… walking up the hill, **looking back**" — Lenka on screen before the reveal, facing the camera | nx-midnight-procession.md:112 vs Bob's Lenka rule | Draw her from behind / far off; "looking back" = head turned, face lost in mist. No line change. **Resolved:** Illusionist accepted; Lenka drawn from behind / lost in mist, no line change. |
-| N-2 | **Marta summons timing.** The Count says "Marta pours my wine now" in `n23-sergius-blade.08.private.tomas`, which can play on **night 2**; Jakob (night 3) says she has the gate key; Tomas's funeral end-line (night 2) says "Marta's still behind it". Bob: home on night 1, summoned later | n23-sergius-blade.md:53; n3-fly-eaters-cell.md:49; n2-burgomasters-funeral.md:169 vs n1-lantern-and-bell.md:60 | The summons beat must land **between the end of night 1 and the first night-2 scene**: **RESOLVED:** `nx-pressed-flower.00~night2` (first night-2 moment, before `.01~night2`): Tomas finds shutters pried, Marta gone, cream `come-home-letter` on her pillow; `~no-tomas` narrator variant; `.00.private.tomas~night2`. Funeral `.end.private.tomas` rewritten (she went back on her own feet). Art: Marta at home night 1; absent (empty room) at night-2 dusk; at the castle afterwards. |
+| N-2 | **Marta summons timing.** The Count says "Marta pours my wine now" in `n23-sergius-blade.08.private.tomas`, which can play on **night 2**; Jakob (night 3) says she has the gate key; Tomas's funeral end-line (night 2) says "Marta's still behind it". Bob: home on night 1, summoned later | n23-sergius-blade.md:67; n3-fly-eaters-cell.md:49; n2-burgomasters-funeral.md:178 vs n1-lantern-and-bell.md:60 | The summons beat must land **between the end of night 1 and the first night-2 scene**: **RESOLVED:** `nx-pressed-flower.00~night2` (first night-2 moment, before `.01~night2`): Tomas finds shutters pried, Marta gone, cream `come-home-letter` on her pillow; `~no-tomas` narrator variant; `.00.private.tomas~night2`. Funeral `.end.private.tomas` rewritten (she went back on her own feet). Art: Marta at home night 1; absent (empty room) at night-2 dusk; at the castle afterwards. |
 | N-3 | When is "the reveal" for Lenka's face? The Tome (night 4) confirms she is Ludmila; the gallery (night 5) shows the face | n4-finding-the-tome.md:44 vs n5-portrait-gallery.md:26 | Reveal = **`n5-portrait-gallery.04`** (the cloth comes off). Tome scene stays voice-only for Lenka/Ludmila. **Resolved:** reveal = `n5-portrait-gallery.04`; Tome scene voice-only. |
-| N-4 | Marta's dress: "faded castle livery" vs "a castle maid's apron" | tok:299; cast:31 vs n5-drawbridge.md:28 | Both: maid's apron over faded livery. **Resolved:** sources aligned to "maid's apron over faded castle livery" (n5-drawbridge.04 + `~no-tomas`, tokens-and-encounters wine-for-no-one beat/prompt/line, script.yaml). |
-| N-5 | Variant id style differs: `n1-open-grave.08~fight-lost-no-wren` (hyphen) vs `n2-burgomasters-funeral.07~fight-lost~no-wren` (tilde) | n1-open-grave.md:65; packs/dracula/script.yaml:429 vs :680 | Use `~fight-lost~no-wren`; ids are stable (script.yaml:2), so **Resolved:** Gamewright ruled 2026-10-16 that the tilde wins (`base~variant`), so the id is renamed in the script and script.yaml. |
+| N-4 | Marta's dress: "faded castle livery" vs "a castle maid's apron" | tok:327; cast:31 vs n5-drawbridge.md:28 | Both: maid's apron over faded livery. **Resolved:** sources aligned to "maid's apron over faded castle livery" (n5-drawbridge.04 + `~no-tomas`, tokens-and-encounters wine-for-no-one beat/prompt/line, script.yaml). |
+| N-5 | Variant id style differs: `n1-open-grave.08~fight-lost-no-wren` (hyphen) vs `n2-burgomasters-funeral.07~fight-lost~no-wren` (tilde) | n1-open-grave.md:79; packs/dracula/script.yaml:429 vs :680 | Use `~fight-lost~no-wren`; ids are stable (script.yaml:2), so **Resolved:** Gamewright ruled 2026-10-16 that the tilde wins (`base~variant`), so the id is renamed in the script and script.yaml. |
 | N-6 | n1 scripts still say targets play on `dashboard`; the funeral and script.yaml say `storyboard` / Story board | n1-lantern-and-bell.md:9 vs n2-burgomasters-funeral.md:9; script.yaml:3 | Wording only: Story board. (Bob's rename commit may not have reached these files on this branch.) **Resolved:** all story scripts now say `storyboard` / Story board (Targets line matches the funeral's); code untouched. |
 | N-7 | Count's age in portraits: gallery says "the same **ageless** face"; Bob says young in portraits | n5-portrait-gallery.md:6 vs §4.2 C-6 | Portraits show him young; "ageless" = unchanging across 400 years. No line change. **Resolved:** portraits show him young; "ageless" = unchanged; no line change. |
 
@@ -449,7 +449,7 @@ From the audit (65 assets checked; 53 are text placeholders, 3 pass). Base path 
 | `portraits/wren.png` | spade not crossbow; no bolts; cropped hair, no ribbon; brown vest (chars:55) | crossbow on back; named-bolt bandolier; tied chestnut hair with black ribbon; dark green oilskin |
 | `portraits/emeric.png` | waistcoat, no tweed; no garlic; no ink; reads as Harry Potter (chars:75) | too-big patched tweed coat; garlic string; inky fingers; change hair/face away from the IP read |
 | `portraits/dorka.png` | living bride, smiling, flower crown, high collar hiding bites | risen look: pale, no cheek colour, too-sweet smile, wedding dress, neck visible; drop crown |
-| `portraits/anton.png` (minor) | old white-moustached man reads as the Count (n23-sergius-blade.md:30) | rounder, softer ledger-keeper face |
+| `portraits/anton.png` (minor) | old white-moustached man reads as the Count (n23-sergius-blade.md:44) | rounder, softer ledger-keeper face |
 | `portraits/castle-servant.png` (minor) | brown/black coat, no cloak (n2-burgomasters-funeral.md:100) | castle grey, cloaked; keep lantern |
 | `stills/n2-burgomasters-funeral.02@dashboard.png` | Agnes and Wren not identifiable; sepia palette | redraw with signature kit; night-interior palette matching `.lid-choice` |
 | `stills/n2-burgomasters-funeral.lid-choice@dashboard.png` | 3 unidentifiable hunters (need 4); candles don't lean toward Dorka (n2:121); Anton's coffin open; palette jump | four identifiable hunters; clear candle lean; Anton's coffin shut; scene palette |

@@ -6,7 +6,7 @@
 - **Setting:** The hunters driven back down the stair. Above, the window shut again, and a girl in white behind it.
 - **Mood:** Loss; the tragedy repeating, but not finished.
 - **Cast:** Narrator, The Count, Sister Agnes Hallow, Wren Kessel
-- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Trigger:** the final battle is lost or the party retreats before Lenka is freed.
 
 ## Moments

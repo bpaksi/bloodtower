@@ -6,8 +6,8 @@
 - **Setting:** Each dusk, a pressed mountain violet turns up where the hunters are (on night 1 it is the one found on Lenka's sill in `n1-burgomasters-house.08`). Lenka is pressing them in her prison and sending them out the only way she can; the Count lets them through because he thinks they are love-tokens for him. Each carries a clue to where she is held.
 - **Mood:** Quiet, tender, a thread of hope.
 - **Cast:** Narrator; one hunter's private thought per night
-- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
-- **Props:** [prop: pressed-flower]; night 2 only: [prop: come-home-letter] (Marta's summons, `.00~night2`)
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Props:** [prop: pressed-flower]
 - **Recipient:** one hunter per night gets the private clue: night 1 Wren, night 2 Agnes, night 3 Tomas, night 4 Emeric; if that hunter is absent, the next present one in that order. The others see only the Story board still. Each private line is written for every hunter so any of them can receive it.
 
 ## Moments

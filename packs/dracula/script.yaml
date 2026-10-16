@@ -399,6 +399,31 @@
   lines:
     - {id: "n1-open-grave.06.vo-01", speaker: oskar, text: "He has little Lenka. He'll call her by another name up there. Tell her not to answer to it."}
     - {id: "n1-open-grave.06.vo-02", speaker: wren, text: "What name? Oskar. What name?"}
+- id: "n1-open-grave.map.private.agnes"
+  source: n1-open-grave.md
+  target: ipad:agnes
+  lines:
+    - {id: "n1-open-grave.map.private.agnes.vo-01", speaker: agnes, note: "thought", text: "The fever-ledger at Saint Ysolde. The traveler wrote his home as \"the high meadow.\" You never found it on any map. Oskar has blotted out one parish."}
+- id: "n1-open-grave.map.private.tomas"
+  source: n1-open-grave.md
+  target: ipad:tomas
+  lines:
+    - {id: "n1-open-grave.map.private.tomas.vo-01", speaker: tomas, note: "thought", text: "One parish the guard never walked. \"The lady's meadow,\" the old sergeants called it, and spat. Oskar has inked it out."}
+- id: "n1-open-grave.map.private.wren"
+  source: n1-open-grave.md
+  target: ipad:wren
+  lines:
+    - {id: "n1-open-grave.map.private.wren.vo-01", speaker: wren, note: "thought", text: "Violets. Mother's grave-rows by the castle wall, and the meadow above them she'd never let you climb to. That's the parish Oskar blotted."}
+- id: "n1-open-grave.map.private.emeric"
+  source: n1-open-grave.md
+  target: ipad:emeric
+  lines:
+    - {id: "n1-open-grave.map.private.emeric.vo-01", speaker: emeric, note: "thought", text: "Gerhardt's margin, beside the old weave: \"the high meadow, where the first house fell.\" One of Oskar's four parishes is blotted out. Which one?"}
+- id: "n1-open-grave.map-shared"
+  source: n1-open-grave.md
+  lines:
+    - {id: "n1-open-grave.map-shared.vo-01", speaker: agnes, text: "The ink hides the high meadow. He signed my ledger from there."}
+    - {id: "n1-open-grave.map-shared.vo-02", speaker: wren, text: "Violets grow up there. Nowhere else. It's where she comes from. And him."}
 - id: "n1-open-grave.07"
   source: n1-open-grave.md
   lines:
@@ -460,6 +485,21 @@
   source: n1-open-grave.md
   lines:
     - {id: "n1-open-grave.08~no-agnes.vo-01", speaker: wren, note: "scratching a bolt", text: "O-S-K-A-R. He'd want it spelled right."}
+- id: "n1-open-grave.map-shared~no-agnes"
+  source: n1-open-grave.md
+  lines:
+    - {id: "n1-open-grave.map-shared~no-agnes.vo-01", speaker: tomas, text: "The ink hides the lady's meadow. The guard never went up there."}
+    - {id: "n1-open-grave.map-shared~no-agnes.vo-02", speaker: wren, text: "Violets grow up there. Nowhere else. It's where she comes from. And him."}
+- id: "n1-open-grave.map-shared~no-wren"
+  source: n1-open-grave.md
+  lines:
+    - {id: "n1-open-grave.map-shared~no-wren.vo-01", speaker: agnes, text: "The ink hides the high meadow. He signed my ledger from there."}
+    - {id: "n1-open-grave.map-shared~no-wren.vo-02", speaker: emeric, text: "Gerhardt marked it too. \"Where the first house fell.\" It's his. And hers."}
+- id: "n1-open-grave.map-shared~no-agnes-no-wren"
+  source: n1-open-grave.md
+  lines:
+    - {id: "n1-open-grave.map-shared~no-agnes-no-wren.vo-01", speaker: tomas, text: "The ink hides the lady's meadow. The guard never went up there."}
+    - {id: "n1-open-grave.map-shared~no-agnes-no-wren.vo-02", speaker: emeric, text: "Gerhardt marked it too. \"Where the first house fell.\" It's his. And hers."}
 - id: "n2-burgomasters-funeral.01"
   source: n2-burgomasters-funeral.md
   lines:
@@ -614,6 +654,22 @@
   lines:
     - {id: "n2-burgomasters-funeral.07.vo-01", speaker: narrator, text: "When it is done, Dorka is only a girl in a wedding dress again, with garlic in her mouth and a peace on her face she did not have a minute ago."}
     - {id: "n2-burgomasters-funeral.07.vo-02", speaker: wren, text: "\"She won't stop saying no.\" Good girl."}
+- id: "n2-burgomasters-funeral.mourner-returns.agnes"
+  source: n2-burgomasters-funeral.md
+  lines:
+    - {id: "n2-burgomasters-funeral.mourner-returns.agnes.vo-01", speaker: agnes, text: "I followed the cloak. A castle servant, laying a violet on Anton's grave. He said, \"She still refuses,\" and went up to the east wing. The lady's rooms."}
+- id: "n2-burgomasters-funeral.mourner-returns.tomas"
+  source: n2-burgomasters-funeral.md
+  lines:
+    - {id: "n2-burgomasters-funeral.mourner-returns.tomas.vo-01", speaker: tomas, text: "Followed him to the grave. Castle livery. Left a violet for Anton and said, \"She still refuses.\" Then up the hill to the east wing. The lady's rooms."}
+- id: "n2-burgomasters-funeral.mourner-returns.wren"
+  source: n2-burgomasters-funeral.md
+  lines:
+    - {id: "n2-burgomasters-funeral.mourner-returns.wren.vo-01", speaker: wren, text: "Castle servant. Violet on Anton's grave. Said \"She still refuses.\" Went up to the east wing. Lady's rooms. That's where she is."}
+- id: "n2-burgomasters-funeral.mourner-returns.emeric"
+  source: n2-burgomasters-funeral.md
+  lines:
+    - {id: "n2-burgomasters-funeral.mourner-returns.emeric.vo-01", speaker: emeric, text: "I'm back, I'm sorry, I followed him. A castle servant. He left a violet on Anton's grave and said, \"She still refuses.\" East wing. The lady's rooms."}
 - id: "n2-burgomasters-funeral.08"
   source: n2-burgomasters-funeral.md
   lines:
@@ -776,6 +832,27 @@
   target: ipad:emeric
   lines:
     - {id: "n23-catacombs-of-saint-ysolde.04.private.emeric~lookalike.vo-01", speaker: narrator, text: "You are not Emeric. Your spectacles are plain glass. Read the card that follows. Do not let them see you read it."}
+- id: "n23-catacombs-of-saint-ysolde.rejoin.agnes"
+  source: n23-catacombs-of-saint-ysolde.md
+  lines:
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin.agnes.vo-01", speaker: agnes, text: "There was plainchant in my passage, in my own voice. Something down here has learned how we sound. Trust faces before voices tonight."}
+- id: "n23-catacombs-of-saint-ysolde.rejoin.tomas"
+  source: n23-catacombs-of-saint-ysolde.md
+  lines:
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin.tomas.vo-01", speaker: tomas, text: "Guard bones in my wall, lass, with the notch in the teeth we filed for luck. Any of us who doesn't know that notch isn't one of us."}
+- id: "n23-catacombs-of-saint-ysolde.rejoin.wren"
+  source: n23-catacombs-of-saint-ysolde.md
+  lines:
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin.wren.vo-01", speaker: wren, text: "Fresh earth on my steps. A coffin went down and back up this week. Whatever it carried is at the castle now."}
+- id: "n23-catacombs-of-saint-ysolde.rejoin.emeric"
+  source: n23-catacombs-of-saint-ysolde.md
+  lines:
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin.emeric.vo-01", speaker: emeric, text: "Gerhardt's chalk, all the way down. Arrows, then \"BACK.\" He reached the saint and turned round. Follow his arrows out, not the walls."}
+- id: "n23-catacombs-of-saint-ysolde.rejoin-combined"
+  source: n23-catacombs-of-saint-ysolde.md
+  lines:
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin-combined.vo-01", speaker: tomas, text: "Guard bones with the notch, and a coffin carried up this week."}
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin-combined.vo-02", speaker: wren, text: "Then he's moving his old garrison up the hill. For the last night."}
 - id: "n23-catacombs-of-saint-ysolde.05"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
@@ -855,6 +932,31 @@
   lines:
     - {id: "n23-sergius-blade.02.vo-01", speaker: wren, text: "There's a name on the cross-guard. \"Sergiu.\""}
     - {id: "n23-sergius-blade.02.vo-02", speaker: tomas, text: "The old lords had a younger son by that name. The guard used to drink to him. Nobody remembered why."}
+- id: "n23-sergius-blade.grip.private.agnes"
+  source: n23-sergius-blade.md
+  target: ipad:agnes
+  lines:
+    - {id: "n23-sergius-blade.grip.private.agnes.vo-01", speaker: agnes, note: "thought", text: "The steel is warm under your scarred palm, the way the saint's reliquary was warm. Whoever carried this was prayed for."}
+- id: "n23-sergius-blade.grip.private.tomas"
+  source: n23-sergius-blade.md
+  target: ipad:tomas
+  lines:
+    - {id: "n23-sergius-blade.grip.private.tomas.vo-01", speaker: tomas, note: "thought", text: "The old guard's toast for this name: \"To the younger son, who kept the window.\" Nobody ever told you which window."}
+- id: "n23-sergius-blade.grip.private.wren"
+  source: n23-sergius-blade.md
+  target: ipad:wren
+  lines:
+    - {id: "n23-sergius-blade.grip.private.wren.vo-01", speaker: wren, note: "thought", text: "Violet stems, dried brown, bound under the cross-guard. Somebody buried this like a bridegroom."}
+- id: "n23-sergius-blade.grip.private.emeric"
+  source: n23-sergius-blade.md
+  target: ipad:emeric
+  lines:
+    - {id: "n23-sergius-blade.grip.private.emeric.vo-01", speaker: emeric, note: "thought", text: "A knot is worked into the grip-wrap. It's the weave from Lenka's shawl, the one Gerhardt labelled \"the old house, before the fall.\""}
+- id: "n23-sergius-blade.grip-shared"
+  source: n23-sergius-blade.md
+  lines:
+    - {id: "n23-sergius-blade.grip-shared.vo-01", speaker: emeric, text: "The grip's wrapped in the weave from Lenka's shawl. Gerhardt called it the old house."}
+    - {id: "n23-sergius-blade.grip-shared.vo-02", speaker: tomas, text: "And the guard drank to the son who kept the window. Her shawl, his sword. One house."}
 - id: "n23-sergius-blade.03"
   source: n23-sergius-blade.md
   lines:
@@ -942,6 +1044,21 @@
   lines:
     - {id: "n23-sergius-blade.07~no-emeric.vo-01", speaker: wren, text: "It hurts him."}
     - {id: "n23-sergius-blade.07~no-emeric.vo-02", speaker: count, note: "after: he is gone; the wolves howl again", text: "Remember that, if it helps you sleep."}
+- id: "n23-sergius-blade.grip-shared~no-tomas"
+  source: n23-sergius-blade.md
+  lines:
+    - {id: "n23-sergius-blade.grip-shared~no-tomas.vo-01", speaker: emeric, text: "The grip's wrapped in the weave from Lenka's shawl. Gerhardt called it the old house."}
+    - {id: "n23-sergius-blade.grip-shared~no-tomas.vo-02", speaker: wren, text: "And violets under the guard. Somebody buried him like a bridegroom. Her house."}
+- id: "n23-sergius-blade.grip-shared~no-emeric"
+  source: n23-sergius-blade.md
+  lines:
+    - {id: "n23-sergius-blade.grip-shared~no-emeric.vo-01", speaker: wren, text: "Violets under the guard. Somebody buried this like a bridegroom."}
+    - {id: "n23-sergius-blade.grip-shared~no-emeric.vo-02", speaker: tomas, text: "The guard drank to the son who kept the window. Bridegroom fits."}
+- id: "n23-sergius-blade.grip-shared~no-tomas-no-emeric"
+  source: n23-sergius-blade.md
+  lines:
+    - {id: "n23-sergius-blade.grip-shared~no-tomas-no-emeric.vo-01", speaker: wren, text: "Violets under the guard. Somebody buried this like a bridegroom."}
+    - {id: "n23-sergius-blade.grip-shared~no-tomas-no-emeric.vo-02", speaker: agnes, text: "Then it was loved. Carry it as if it still is."}
 - id: "n3-fly-eaters-cell.01"
   source: n3-fly-eaters-cell.md
   lines:
@@ -1749,6 +1866,11 @@
   target: ipad:emeric
   lines:
     - {id: "n5-portrait-gallery.06.private.emeric.vo-01", speaker: narrator, text: "A scholar at a desk, a cup of wine at his elbow. Gerhardt. In the wine, a reflection with no man in it. He was poisoned with an invitation."}
+- id: "n5-portrait-gallery.combine"
+  source: n5-portrait-gallery.md
+  lines:
+    - {id: "n5-portrait-gallery.combine.vo-01", speaker: agnes, text: "Mine is labelled \"The one who prayed.\" He paints the ones he keeps."}
+    - {id: "n5-portrait-gallery.combine.vo-02", speaker: wren, text: "Mother's is still wet. And there's nothing of Lenka. Only Ludmila. He hasn't got her."}
 - id: "n5-portrait-gallery.07"
   source: n5-portrait-gallery.md
   lines:
@@ -1767,6 +1889,21 @@
   source: n5-portrait-gallery.md
   lines:
     - {id: "n5-portrait-gallery.02~no-emeric.vo-01", speaker: wren, text: "Same face. Every frame. That one's moving."}
+- id: "n5-portrait-gallery.combine~no-agnes"
+  source: n5-portrait-gallery.md
+  lines:
+    - {id: "n5-portrait-gallery.combine~no-agnes.vo-01", speaker: tomas, text: "He painted me at the gate, looking at my boots. He paints the ones he keeps."}
+    - {id: "n5-portrait-gallery.combine~no-agnes.vo-02", speaker: wren, text: "Mother's is still wet. And there's nothing of Lenka. Only Ludmila. He hasn't got her."}
+- id: "n5-portrait-gallery.combine~no-wren"
+  source: n5-portrait-gallery.md
+  lines:
+    - {id: "n5-portrait-gallery.combine~no-wren.vo-01", speaker: agnes, text: "Mine is labelled \"The one who prayed.\" He paints the ones he keeps."}
+    - {id: "n5-portrait-gallery.combine~no-wren.vo-02", speaker: emeric, text: "Gerhardt's here. Lenka isn't. Only Ludmila. Then he hasn't got her."}
+- id: "n5-portrait-gallery.combine~no-agnes-no-wren"
+  source: n5-portrait-gallery.md
+  lines:
+    - {id: "n5-portrait-gallery.combine~no-agnes-no-wren.vo-01", speaker: tomas, text: "He painted me at the gate, looking at my boots. He paints the ones he keeps."}
+    - {id: "n5-portrait-gallery.combine~no-agnes-no-wren.vo-02", speaker: emeric, text: "Gerhardt's here. Lenka isn't. Only Ludmila. Then he hasn't got her."}
 - id: "nx-midnight-procession.01"
   source: nx-midnight-procession.md
   lines:
@@ -2012,11 +2149,7 @@
 - id: "enc-early-lantern.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-early-lantern.02.vo-01", speaker: narrator, text: "It stops in front of one of you. The rest of the procession will be one short tonight."}
-- id: "enc-early-lantern.03"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-early-lantern.03.vo-01", speaker: narrator, text: "The ghost walks on, toward the castle, to wait for the others."}
+    - {id: "enc-early-lantern.02.vo-01", speaker: narrator, text: "It stops in front of one of you. The procession will be one short tonight."}
 - id: "enc-the-window.01"
   source: tokens-and-encounters.md
   lines:
@@ -2029,73 +2162,62 @@
 - id: "enc-the-window.03"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-the-window.03.vo-01", speaker: narrator, text: "Every night he asks. Every night she answers. Every night the mist makes the valley watch."}
+    - {id: "enc-the-window.03.vo-01", speaker: narrator, text: "She steps. The mist closes. Somewhere in that room, tonight, another girl is sitting by the same window."}
 - id: "enc-the-window.03~blocked"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-the-window.03~blocked.vo-01", speaker: narrator, text: "The grief reaches for one of you and finds no room left. It takes something from your packs instead."}
-- id: "enc-the-window.04"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-the-window.04.vo-01", speaker: narrator, text: "She steps. The mist closes. Somewhere in that room, tonight, another girl is sitting by the same window."}
+    - {id: "enc-the-window.03~blocked.vo-01", speaker: narrator, text: "The grief reaches for one of you and finds no room left. It takes something from your packs instead, and the window goes dark."}
 - id: "enc-brothers.01"
   source: tokens-and-encounters.md
   lines:
     - {id: "enc-brothers.01.vo-01", speaker: narrator, text: "Two men fight in the fog below the castle. Brothers, by the faces. The dark one takes the bright sword from the fair one, and uses it."}
+    - {id: "enc-brothers.01.vo-02", speaker: count, note: "close, low", text: "I was only meant to take her. Not you. Never you."}
+- id: "enc-brothers.01~carrier"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-brothers.01~carrier.vo-01", speaker: narrator, text: "Two men fight in the fog below the castle. The dark one takes the bright sword from his brother, and uses it. At your back, the sword is warm as a hand."}
+    - {id: "enc-brothers.01~carrier.vo-02", speaker: count, note: "close, low", text: "I was only meant to take her. Not you. Never you."}
 - id: "enc-brothers.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-brothers.02.vo-01", speaker: count, note: "close, low", text: "I was only meant to take her. Not you. Never you."}
-    - {id: "enc-brothers.02.vo-02", speaker: narrator, text: "He kneels in the road. The fog takes them both, and somewhere up the hill it starts again."}
-- id: "enc-brothers.02~carrier"
+    - {id: "enc-brothers.02.vo-01", speaker: narrator, text: "The fog takes them both, to begin again up the hill. A villager who stopped to watch does not come out of it. Drop a skull."}
+- id: "enc-brothers.02~no-drop"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-brothers.02~carrier.vo-01", speaker: count, note: "close, low", text: "I was only meant to take her. Not you. Never you."}
-    - {id: "enc-brothers.02~carrier.vo-02", speaker: narrator, text: "At your back, wrapped in rotted crimson, the sword is warm as a hand. It knows that road."}
-- id: "enc-brothers.03"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-brothers.03.vo-01", speaker: narrator, text: "A villager who stopped to watch does not come out of the fog. Drop a skull."}
-- id: "enc-brothers.03~no-drop"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-brothers.03~no-drop.vo-01", speaker: narrator, text: "No one else stopped to watch tonight. The fog keeps its count for the castle."}
+    - {id: "enc-brothers.02~no-drop.vo-01", speaker: narrator, text: "The fog takes them both, to begin again up the hill. No one else stopped to watch tonight."}
 - id: "enc-at-the-door.01"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-at-the-door.01.vo-01", speaker: narrator, text: "Three knocks. The mist is coming under the door, but it stops at the sill, waiting to be asked."}
-- id: "enc-at-the-door.02"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-at-the-door.02.vo-01", speaker: count, note: "through the door", text: "Only open it. I have asked so many doors tonight. One of them always opens, in the end."}
-- id: "enc-at-the-door.03.private.agnes"
+    - {id: "enc-at-the-door.01.vo-01", speaker: narrator, text: "Three knocks. The mist comes under the door and stops at the sill, waiting to be asked."}
+    - {id: "enc-at-the-door.01.vo-02", speaker: count, note: "through the door", text: "Only open it. One door always opens, in the end."}
+- id: "enc-at-the-door.02.private.agnes"
   source: tokens-and-encounters.md
   target: ipad:agnes
   lines:
-    - {id: "enc-at-the-door.03.private.agnes.vo-01", speaker: count-whisper, text: "Sister. You prayed for me once. Pray with the door open."}
-- id: "enc-at-the-door.03.private.tomas"
+    - {id: "enc-at-the-door.02.private.agnes.vo-01", speaker: count-whisper, text: "Sister. You prayed for me once. Pray with the door open."}
+- id: "enc-at-the-door.02.private.tomas"
   source: tokens-and-encounters.md
   target: ipad:tomas
   lines:
-    - {id: "enc-at-the-door.03.private.tomas.vo-01", speaker: count-whisper, text: "Varga. You still owe me two fingers' worth of gate duty."}
-- id: "enc-at-the-door.03.private.wren"
+    - {id: "enc-at-the-door.02.private.tomas.vo-01", speaker: count-whisper, text: "Varga. You still owe me two fingers' worth of gate duty."}
+- id: "enc-at-the-door.02.private.wren"
   source: tokens-and-encounters.md
   target: ipad:wren
   lines:
-    - {id: "enc-at-the-door.03.private.wren.vo-01", speaker: count-whisper, text: "Your mother sings for me now. Would you hear her? Open."}
-- id: "enc-at-the-door.03.private.emeric"
+    - {id: "enc-at-the-door.02.private.wren.vo-01", speaker: count-whisper, text: "Your mother sings for me now. Would you hear her? Open."}
+- id: "enc-at-the-door.02.private.emeric"
   source: tokens-and-encounters.md
   target: ipad:emeric
   lines:
-    - {id: "enc-at-the-door.03.private.emeric.vo-01", speaker: count-whisper, text: "Your master sold me a name through a door like this one. Ask me what he got for it."}
-- id: "enc-at-the-door.04"
+    - {id: "enc-at-the-door.02.private.emeric.vo-01", speaker: count-whisper, text: "Your master sold me a name through a door like this one. Ask me what he got for it."}
+- id: "enc-at-the-door.03"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-at-the-door.04.vo-01", speaker: narrator, text: "The latch stops moving. The voice goes away up the hill, still polite. She refuses him every evening, he said. He said it as a complaint."}
-- id: "enc-at-the-door.04~blocked"
+    - {id: "enc-at-the-door.03.vo-01", speaker: narrator, text: "The latch stops moving. The voice goes away up the hill, still polite. She refuses him every evening, he said. He said it as a complaint."}
+- id: "enc-at-the-door.03~blocked"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-at-the-door.04~blocked.vo-01", speaker: narrator, text: "His breath finds the crack and nothing left to bite. The cold takes one thing from your packs instead, and the voice goes up the hill."}
+    - {id: "enc-at-the-door.03~blocked.vo-01", speaker: narrator, text: "His breath finds the crack and nothing left to bite. The cold takes one thing from your packs instead, and the voice goes up the hill."}
 - id: "enc-wrong-face.01"
   source: tokens-and-encounters.md
   lines:
@@ -2103,11 +2225,23 @@
 - id: "enc-wrong-face.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-wrong-face.02.vo-01", speaker: narrator, text: "Count heads. Count them again. Lookalike moments follow, by mechanics, on one iPad only."}
-- id: "enc-wrong-face.03"
+    - {id: "enc-wrong-face.02.vo-01", speaker: narrator, text: "Count heads. Count them again. Everyone is accounted for. That is what worries you."}
+- id: "enc-wrong-face.02~lookalike-is-agnes"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-wrong-face.03.vo-01", speaker: narrator, text: "Everyone is accounted for. That is what worries you."}
+    - {id: "enc-wrong-face.02~lookalike-is-agnes.vo-01", speaker: narrator, text: "The thing wearing the Sister's face never once crossed itself. The real Agnes is found in the church porch, praying, cold to the elbows."}
+- id: "enc-wrong-face.02~lookalike-is-tomas"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wrong-face.02~lookalike-is-tomas.vo-01", speaker: narrator, text: "The thing wearing Tomas's face had ten whole fingers. The real Tomas is found behind the well, swearing, his axe still in his hand."}
+- id: "enc-wrong-face.02~lookalike-is-wren"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wrong-face.02~lookalike-is-wren.vo-01", speaker: narrator, text: "The thing wearing Wren's face hummed her mother's song, and Wren never hums it. The real Wren is found in the lychgate, crossbow cocked at the dark."}
+- id: "enc-wrong-face.02~lookalike-is-emeric"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wrong-face.02~lookalike-is-emeric.vo-01", speaker: narrator, text: "The thing wearing Emeric's face wrote nothing down all night. The real Emeric is found in a shuttered shop, writing by feel in the dark."}
 - id: "enc-mist-remembers.01"
   source: tokens-and-encounters.md
   lines:
@@ -2116,7 +2250,7 @@
   source: tokens-and-encounters.md
   target: ipad:agnes
   lines:
-    - {id: "enc-mist-remembers.02.private.agnes.vo-01", speaker: narrator, text: "Twelve infirmary beds in the fog, each one empty, each one still warm. The traveler's cot at the end has a pressed violet on the pillow. Face it, or walk through."}
+    - {id: "enc-mist-remembers.02.private.agnes.vo-01", speaker: narrator, text: "Twelve infirmary beds in the fog, each one empty, each one still warm. The traveler's cot has a pressed violet on the pillow. Face it, or walk through."}
 - id: "enc-mist-remembers.02.private.tomas"
   source: tokens-and-encounters.md
   target: ipad:tomas
@@ -2132,6 +2266,26 @@
   target: ipad:emeric
   lines:
     - {id: "enc-mist-remembers.02.private.emeric.vo-01", speaker: narrator, text: "Gerhardt's shop, every jar labelled in his hand. On the counter, a receipt: one name, sold. Face it, or walk through."}
+- id: "enc-mist-remembers.02.private.agnes~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:agnes
+  lines:
+    - {id: "enc-mist-remembers.02.private.agnes~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+- id: "enc-mist-remembers.02.private.tomas~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:tomas
+  lines:
+    - {id: "enc-mist-remembers.02.private.tomas~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+- id: "enc-mist-remembers.02.private.wren~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:wren
+  lines:
+    - {id: "enc-mist-remembers.02.private.wren~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+- id: "enc-mist-remembers.02.private.emeric~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:emeric
+  lines:
+    - {id: "enc-mist-remembers.02.private.emeric~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
 - id: "enc-mist-remembers.03"
   source: tokens-and-encounters.md
   lines:
@@ -2139,37 +2293,33 @@
 - id: "enc-road-returns.01"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-road-returns.01.vo-01", speaker: narrator, text: "The road out of the parish goes on for an hour. Then the milestone again. The shrine again. The same crow, on the same stone."}
+    - {id: "enc-road-returns.01.vo-01", speaker: narrator, text: "The road out of the parish goes on for an hour. Then the milestone again. The shrine again. The same crow. An empty cart stands by the shrine, the driver's coat folded on the seat."}
 - id: "enc-road-returns.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-road-returns.02.vo-01", speaker: narrator, text: "An empty cart stands by the shrine, its horse gone, the driver's coat folded on the seat. He tried the road too."}
-- id: "enc-road-returns.03"
+    - {id: "enc-road-returns.02.vo-01", speaker: narrator, text: "No one leaves Vellmoor while he holds it. The road, at least, is honest about that."}
+- id: "enc-road-returns.02~drop"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-road-returns.03.vo-01", speaker: narrator, text: "No one leaves Vellmoor while he holds it. The road, at least, is honest about that."}
-- id: "enc-road-returns.03~drop"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-road-returns.03~drop.vo-01", speaker: narrator, text: "By morning the driver will be standing in the square with the others, very pale. Drop a skull."}
+    - {id: "enc-road-returns.02~drop.vo-01", speaker: narrator, text: "By morning the driver will be standing in the square with the others, very pale. Drop a skull."}
 - id: "enc-ledger-page.01"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-ledger-page.01.vo-01", speaker: narrator, text: "A page of good paper comes along the road on its own and stops at your feet. Neat columns. A careful hand."}
+    - {id: "enc-ledger-page.01.vo-01", speaker: jakob, note: "from the page", text: "Garden soil. Handle with care. Forty boxes, as last time. And the time before."}
+    - {id: "enc-ledger-page.01.vo-02", speaker: emeric, text: "As last time. He has done all of this before."}
+- id: "enc-ledger-page.01~no-emeric"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-ledger-page.01~no-emeric.vo-01", speaker: jakob, note: "from the page", text: "Garden soil. Handle with care. Forty boxes, as last time. And the time before."}
+    - {id: "enc-ledger-page.01~no-emeric.vo-02", speaker: wren, text: "Last time. Somebody's been here doing this before us."}
 - id: "enc-ledger-page.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-ledger-page.02.vo-01", speaker: jakob, note: "from the page", text: "Garden soil. Handle with care. Forty boxes, as last time. And the time before."}
-    - {id: "enc-ledger-page.02.vo-02", speaker: emeric, text: "As last time. He has done this before. He's done all of this before."}
-- id: "enc-ledger-page.02~no-emeric"
+    - {id: "enc-ledger-page.02.vo-01", speaker: narrator, text: "More pages lie up the road, one every few yards, toward somewhere dark."}
+- id: "enc-ledger-page.02~blocked"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-ledger-page.02~no-emeric.vo-01", speaker: jakob, note: "from the page", text: "Garden soil. Handle with care. Forty boxes, as last time. And the time before."}
-    - {id: "enc-ledger-page.02~no-emeric.vo-02", speaker: wren, text: "Last time. Somebody's been here doing this before us."}
-- id: "enc-ledger-page.03"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-ledger-page.03.vo-01", speaker: narrator, text: "More pages lie up the road, one every few yards, toward somewhere dark."}
+    - {id: "enc-ledger-page.02~blocked.vo-01", speaker: narrator, text: "You follow the pages a little way. Then the wind takes them all at once, and the page in your pocket with them."}
 - id: "enc-wedding-uphill.01"
   source: tokens-and-encounters.md
   lines:
@@ -2186,49 +2336,65 @@
   source: tokens-and-encounters.md
   lines:
     - {id: "enc-wedding-uphill.03~lost.vo-01", speaker: narrator, text: "The train closes over one of you, cold and sweet, and moves on up the hill. Someone in the village follows it. Drop a skull."}
+- id: "enc-wedding-uphill.03~lost-blocked"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wedding-uphill.03~lost-blocked.vo-01", speaker: narrator, text: "The train closes over one of you and opens again, as if it found nothing it wanted. It takes something from your packs, and someone from the village. Drop a skull."}
+- id: "enc-wedding-uphill.03~lost-cap-reached"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wedding-uphill.03~lost-cap-reached.vo-01", speaker: narrator, text: "The train closes over one of you, cold and sweet, and moves on up the hill. Nobody from the village follows it tonight. It takes something from your packs instead."}
+- id: "enc-wedding-uphill.03~lost-blocked-cap-reached"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wedding-uphill.03~lost-blocked-cap-reached.vo-01", speaker: narrator, text: "The train closes over one of you and opens again, as if it found nothing it wanted. It takes something from your packs and goes on up the hill alone."}
+- id: "enc-wedding-uphill.03~avoided"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wedding-uphill.03~avoided.vo-01", speaker: narrator, text: "You stand aside with your heads bowed, as you would for any wedding. The brides at the back stop smiling. The procession goes on up the hill without you."}
 - id: "enc-wine-for-no-one.01"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-wine-for-no-one.01.vo-01", speaker: narrator, text: "The room is empty but for a table laid for one. A girl in an apron over castle livery pours the wine and stands back to wait."}
+    - {id: "enc-wine-for-no-one.01.vo-01", speaker: marta, text: "Uncle? You shouldn't be here. He drinks at midnight, and he counts the glasses."}
+    - {id: "enc-wine-for-no-one.01.vo-02", speaker: tomas, text: "I came back for you, lass. I always meant to."}
+- id: "enc-wine-for-no-one.01~no-tomas"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-wine-for-no-one.01~no-tomas.vo-01", speaker: marta, text: "You shouldn't be here. He drinks at midnight, and he counts the glasses."}
+    - {id: "enc-wine-for-no-one.01~no-tomas.vo-02", speaker: agnes, text: "Who are you pouring for, child?"}
 - id: "enc-wine-for-no-one.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-wine-for-no-one.02.vo-01", speaker: marta, text: "Uncle? You shouldn't be here. He drinks at midnight, and he counts the glasses."}
-    - {id: "enc-wine-for-no-one.02.vo-02", speaker: tomas, text: "I came back for you, lass. I always meant to."}
-- id: "enc-wine-for-no-one.02~no-tomas"
+    - {id: "enc-wine-for-no-one.02.vo-01", speaker: narrator, text: "When you look again there is only the table, and the glass, and the wine going dark."}
+- id: "enc-wine-for-no-one.02~blocked"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-wine-for-no-one.02~no-tomas.vo-01", speaker: marta, text: "You shouldn't be here. He drinks at midnight, and he counts the glasses."}
-    - {id: "enc-wine-for-no-one.02~no-tomas.vo-02", speaker: agnes, text: "Who are you pouring for, child?"}
-- id: "enc-wine-for-no-one.03"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-wine-for-no-one.03.vo-01", speaker: narrator, text: "When you look again there is only the table, and the glass, and the wine going dark."}
-- id: "enc-third-hums.01"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-third-hums.01.vo-01", speaker: narrator, text: "Someone is humming in the fog. An old lullaby, the kind sung at a door to a baby left on the step."}
-- id: "enc-third-hums.02.private.agnes"
+    - {id: "enc-wine-for-no-one.02~blocked.vo-01", speaker: narrator, text: "She looks at you and sets a second glass. Then she is gone, and both glasses are full."}
+- id: "enc-third-hums.01.private.agnes"
   source: tokens-and-encounters.md
   target: ipad:agnes
   lines:
-    - {id: "enc-third-hums.02.private.agnes.vo-01", speaker: agnes, note: "thought", text: "That is a mother's song. Whoever she was, part of her still is."}
-- id: "enc-third-hums.02.private.tomas"
+    - {id: "enc-third-hums.01.private.agnes.vo-01", speaker: agnes, note: "thought", text: "That is a mother's song. Whoever she was, part of her still is."}
+- id: "enc-third-hums.01.private.tomas"
   source: tokens-and-encounters.md
   target: ipad:tomas
   lines:
-    - {id: "enc-third-hums.02.private.tomas.vo-01", speaker: tomas, note: "thought", text: "I heard that on the castle stair, years back. The third one. She always sang."}
-- id: "enc-third-hums.02.private.wren"
+    - {id: "enc-third-hums.01.private.tomas.vo-01", speaker: tomas, note: "thought", text: "I heard that on the castle stair, years back. The third one. She always sang."}
+- id: "enc-third-hums.01.private.wren"
   source: tokens-and-encounters.md
   target: ipad:wren
   lines:
-    - {id: "enc-third-hums.02.private.wren.vo-01", speaker: ilka, note: "far off", text: "Hush now, little bird. Mother's at the door. Mother's always at the door."}
-- id: "enc-third-hums.02.private.emeric"
+    - {id: "enc-third-hums.01.private.wren.vo-01", speaker: ilka, note: "far off", text: "Hush now, little bird. Mother's at the door. Mother's always at the door."}
+- id: "enc-third-hums.01.private.emeric"
   source: tokens-and-encounters.md
   target: ipad:emeric
   lines:
-    - {id: "enc-third-hums.02.private.emeric.vo-01", speaker: emeric, note: "thought", text: "Gerhardt wrote that his brides sing to the ones they lost. He said it like a footnote."}
-- id: "enc-third-hums.03"
+    - {id: "enc-third-hums.01.private.emeric.vo-01", speaker: emeric, note: "thought", text: "Gerhardt wrote that his brides sing to the ones they lost. He said it like a footnote."}
+- id: "enc-third-hums.02"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-third-hums.03.vo-01", speaker: narrator, text: "The song moves off toward the castle stair, where it has been going every night for nineteen years."}
+    - {id: "enc-third-hums.02.vo-01", speaker: narrator, text: "The song moves off toward the castle stair, where it has been going every night for nineteen years."}
+- id: "enc-third-hums.02~blocked"
+  source: tokens-and-encounters.md
+  lines:
+    - {id: "enc-third-hums.02~blocked.vo-01", speaker: narrator, text: "The tune comes through and the words do not. When it is gone, so is something you had written down."}

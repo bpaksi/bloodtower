@@ -106,8 +106,8 @@ Talking-avatar lines live in two pack files, `cast.yaml` and `script.yaml`. They
 | `name` | text | yes | |
 | `voice` | {provider, name, style} | yes | TTS provider, voice name, style prompt |
 | `portrait` | asset | yes | base face |
-| `mouths` | {rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv} | yes | eight mouth assets, one per Rhubarb shape (REST, MBP, CONS/EE, EH/AE, AH, OH/ER, OO/W, FV), all required; same size, transparent, aligned to the anchor |
-| `anchor` | {x, y} | yes | where the mouth sits on the portrait (0-1 of width/height) |
+| `mouths` | {rest, mbp, cons_ee, eh_ae, ah, oh_er, oo_w, fv} | yes | eight mouth assets, one per Rhubarb shape (REST, MBP, CONS/EE, EH/AE, AH, OH/ER, OO/W, FV), all required; in `frame` mode (the default) each is a full copy of the portrait at its exact pixel size, changing only pixels inside the anchor box |
+| `anchor` | {x, y, w, h} | yes | all four are fractions (0-1) of the portrait; `x, y` is the mouth center, `w, h` the mouth box size; the box must sit fully inside the portrait (`x ± w/2` and `y ± h/2` within 0-1). Matches the talking-avatar contract |
 
 A voice shift (whisper, possessed, shouting) is a **separate cast entry** with its own id, e.g. `keeper` and `keeper-whisper`; a line never switches voice mid-text.
 
@@ -128,6 +128,8 @@ Rules:
 - Avatars play on the **Story board only**. iPads show the line as a caption, never the avatar.
 - An avatar line never overlaps a tower sound: the engine waits out any running sound's `hold_s` (6) before a line starts and holds tower sounds until the line ends.
 
+Example: the test pack's Keeper, as in `packs/test/README.md` (F-10).
+
 ```yaml
 # cast.yaml
 - id: keeper
@@ -135,11 +137,13 @@ Rules:
   voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}
   portrait: por.keeper
   mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}
-  anchor: {x: 0.52, y: 0.71}
+  anchor: {x: 0.502, y: 0.6133, w: 0.3418, h: 0.25}
 # script.yaml
 - id: grey-stair.03
   lines:
-    - {id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom."}
+    - {id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."}
+    - {id: ts-keeper-002, speaker: keeper, note: "dry, half a smile", text: "Mind the third step. It remembers everyone who ever fell on it."}
+    - {id: ts-keeper-003, speaker: keeper, note: "warm, slow", text: "Go on, then. I'll keep the lamp lit until you're back. I always do."}
 ```
 
 `script.yaml` lines may set `target`: `storyboard` (the default) or `ipad:<hunter>`. A line with an `ipad:` target is private. It plays only on the iPads that hold that hunter, shows there as a caption, and never reaches the Story board's avatar (V-4, V-25).
@@ -483,7 +487,7 @@ encounters:
   - id: enc-the-window              # tokens-and-encounters.md
     source: hunter-token
     nights: [1, 2, 3, 4]
-    moments: [enc-the-window.01, enc-the-window.02, enc-the-window.03]   # .04 outro: see 17
+    moments: [enc-the-window.01, enc-the-window.02, enc-the-window.03]
     resolution: choice
     choices:
       - {id: watch, effects: [corruption: {to: present, amount: 1}], outcome: finding(high-room)}
@@ -712,7 +716,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 13. **Variant stacking order** (`~nailed~no-wren` vs `~no-wren~nailed`): this doc fixes condition first, presence last.
 14. **R-ENG-25 lists "warriors and spirit as base game" for Dracula**, which fits the no-warriors/spirit rule only if story effects never change them. Confirm no script does (none found in n2, n23, n4).
 15. **E19f redirect:** settled by ruling 3. `~blocked` (lose one story item) is the Dracula form of that redirect.
-16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
+16. **Encounter length:** settled by Bob (Oct 16 2026). Every Dracula hunter-token encounter is now 2-3 moments (`enc-early-lantern` is 2 plus the inserted procession moments). Variants replace a moment, they do not add one.
 17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
 18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
 19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Set pieces per length are settled by ruling 12, and the sixth crypt room by ruling 13. Still open: hunter-token pace and the per-visit crypt room cap. What an applied Advantage does to a room cost is settled by ruling 11.

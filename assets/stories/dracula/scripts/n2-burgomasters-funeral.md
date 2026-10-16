@@ -116,7 +116,7 @@ Card 5: **Follow the cloaked mourner (risky)**. A mourner slips out. Go after th
 
 ## Moments (continued)
 
-**n2-burgomasters-funeral.lid-choice** [still] — event moment, plays after `.03` and before `.04`. A Story board choice for the whole party: **Nail the lid** (spend one stake) or **Keep the stake and watch**. Effect on the fight is Gamewright's call (proposed: nailing weakens Dorka; watching keeps the stake but she rises at full strength). Either way she rises and the "lady's rooms" line still plays.
+**n2-burgomasters-funeral.lid-choice** [still] — event moment, plays after `.03` and before `.04`. A choice for the whole party, voted on each iPad (the Story board only shows the result): **Nail the lid** (spend one stake) or **Keep the stake and watch**. Effect on the fight is Gamewright's call (proposed: nailing weakens Dorka; watching keeps the stake but she rises at full strength). Either way she rises and the "lady's rooms" line still plays.
 [sfx: a fly, then silence] [tower: heartbeat]
 > **Narrator:** The flies have gone quiet. Every candle leans toward the second coffin. There is time, just, to put a stake through a girl in her wedding dress in front of her mother. Or there is time to wait and be sure.
 
@@ -144,6 +144,15 @@ Card 5: **Follow the cloaked mourner (risky)**. A mourner slips out. Go after th
 **n2-burgomasters-funeral.07** [still] (after)
 > **Narrator:** When it is done, Dorka is only a girl in a wedding dress again, with garlic in her mouth and a peace on her face she did not have a minute ago.
 > **Wren:** "She won't stop saying no." Good girl.
+
+**n2-burgomasters-funeral.mourner-returns.agnes** [still] — event moment (fellowship test 2): plays after `.07`, before `.08`, only if agnes followed the mourner and chose to miss the fight. Gamewright's regroup rule: she shares the finding, and everyone present gets +1 to the next fight.
+> **Agnes:** I followed the cloak. A castle servant, laying a violet on Anton's grave. He said, "She still refuses," and went up to the east wing. The lady's rooms.
+**n2-burgomasters-funeral.mourner-returns.tomas** [still] — as above, for tomas
+> **Tomas:** Followed him to the grave. Castle livery. Left a violet for Anton and said, "She still refuses." Then up the hill to the east wing. The lady's rooms.
+**n2-burgomasters-funeral.mourner-returns.wren** [still] — as above, for wren
+> **Wren:** Castle servant. Violet on Anton's grave. Said "She still refuses." Went up to the east wing. Lady's rooms. That's where she is.
+**n2-burgomasters-funeral.mourner-returns.emeric** [still] — as above, for emeric
+> **Emeric:** I'm back, I'm sorry, I followed him. A castle servant. He left a violet on Anton's grave and said, "She still refuses." East wing. The lady's rooms.
 
 **n2-burgomasters-funeral.08** [still]
 > **Agnes:** Hold on to that, all of you. Every night she refuses him is a night she's still ours.
