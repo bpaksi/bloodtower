@@ -169,7 +169,7 @@ Length is a setup option, **Short / Standard / Long**, default Standard, picked 
 | Field | Type | Req | Notes |
 |---|---|---|---|
 | `by_length.<len>` | `short` \| `standard` \| `long` | yes | all three present (R-LEN-1) |
-| `.label` | text | yes | what the length means in story terms, e.g. "3 nights" (R-WIZ-12) |
+| `.label` | text | yes | what the length means in story terms, e.g. "Short" (R-WIZ-12) |
 | `.nights` | list night ref | yes | number and order of nights or chapters/clock length (R-LEN-2, R-ENG-3, R-ENG-17) |
 | `.set_pieces.<night>` | list set-piece ref | yes | set pieces kept that night (R-LEN-3) |
 | `.hunter_token.move_every` | int rounds | no | E19h; default 1 (every round, the Standard rule) |
@@ -528,10 +528,10 @@ dungeons:                           # D-DRA-14
   - id: crypt-under-church
     site: n2-crypt-entry            # objective after n2-burgomasters-funeral
     layout: chain
-    deck: [room.ossuary, room.flooded-passage, room.old-burgomasters-tomb, room.szgany-cache]
+    deck: [room.reliquary, room.flooded-passage, room.old-burgomasters-tomb, room.szgany-cache, room.ossuary-of-the-unnamed]
     target_room: room.sealed-door   # always last; included in N
     # N lives in by_length.*.dungeons.crypt-under-church.rooms (short 2, standard 4, long 6).
-    # This deck plus the target is 5 rooms, one short of Long (D-DRA-14).
+    # This deck plus the target is 6 rooms, enough to deal Long (ruling 13).
     # reentry is not ruled (E20e: only if the pack allows it)
 ```
 `n23-catacombs-of-saint-ysolde` is a linear set piece (3.3), not an E20 crawl.
@@ -715,7 +715,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
 17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
 18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
-19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Still open: set pieces per length, hunter-token pace, encounter frequency, the per-visit crypt room cap, one more crypt room so Long can be dealt. What an applied Advantage does to a room cost is settled by ruling 11.
+19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Set pieces per length are settled by ruling 12, and the sixth crypt room by ruling 13. Still open: hunter-token pace and the per-visit crypt room cap. What an applied Advantage does to a room cost is settled by ruling 11.
 20. **D-DRA-11 site name:** settled by ruling 9. The space is "The Tower's Shadow".
 
 ## Gamewright rulings (Oct 15 2026)
@@ -740,12 +740,15 @@ Follow-up (not blocking): Loremaster trims `enc-the-window` and `enc-early-lante
 
 11. **E20 room costs:** each matching held Advantage cancels one cost step and is spent. Rooms never grant Advantages. Rooms per length stay Short 2, Standard 4, Long 6 (ruling 7).
 
-Still open: set pieces per length, hunter-token pace, and encounter frequency (Loremaster proposes, Gamewright reviews). Also open: the per-visit crypt room cap, one more crypt room so a Long chain of 6 can be dealt, and whether a foe room's battle Advantages count as the room-cost application (ruling 11 settles the rest).
+Set pieces per length and encounter ranges are settled by ruling 12, and the sixth room by ruling 13. Still open: hunter-token pace, the per-visit crypt room cap, and whether a foe room's battle Advantages count as the room-cost application (ruling 11 settles the rest).
 
 12. **Game lengths (replaces D-DRA-13):** every length plays 5 nights. Short has 10 set pieces and a 2-room crypt, Standard 13 and 4 rooms, Long 13 and 6 rooms, with encounters rising by length.
 13. **Sixth crypt room:** the Ossuary of the Unnamed.
 
 ## Design decisions (Gamewright, Oct 15 2026)
+
+- **Optional beats need no per-length field.** A beat such as the midnight procession or the pressed-flower prop is kept or cut through the set pieces and moments listed in `by_length.<len>.set_pieces`. A prop follows the moment that carries it. V-15 still checks that every length can reach the win condition.
+- **The old crypt ossuary is renamed `room.reliquary`** (a saints' relic chamber), so it reads as a different place from the Ossuary of the Unnamed.
 
 - **Talking avatars** use `cast.yaml` + `script.yaml` (2.1, V-22, V-23): Story board only, captions on iPads, never over a tower sound.
 - **V-3** accepts the reserved `crypt.` and `end.` prefixes. **Cues** may set `hold_s` (6).
