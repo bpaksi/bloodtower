@@ -91,11 +91,11 @@ All `n2-burgomasters-funeral` spoken lines now have wavs under `audio/lines/` (i
 - `n2-burgomasters-funeral.07~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.07~no-wren.vo-01.narrator.wav` (narrator)
 - `n2-burgomasters-funeral.03~no-emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.03~no-emeric.vo-01.narrator.wav` (narrator)
 
-- `n2-burgomasters-funeral.end.private.wren.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.wren.vo-01.wav` (wren) ✓ TTS 2026-10-16
-- `n2-burgomasters-funeral.end.private.tomas.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.tomas.vo-01.wav` (tomas) ✓ TTS 2026-10-16
-- `n2-burgomasters-funeral.end.private.agnes.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.agnes.vo-01.wav` (agnes) ✓ TTS 2026-10-16
-- `n2-burgomasters-funeral.end.private.emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.emeric.vo-01.wav` (emeric) ✓ TTS 2026-10-16
-- `n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.wav` (narrator) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.wren.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.wren.vo-01.wren.wav` (wren) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.tomas.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.tomas.vo-01.tomas.wav` (tomas) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.agnes.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.agnes.vo-01.agnes.wav` (agnes) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.emeric.vo-01.emeric.wav` (emeric) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav` (narrator) ✓ TTS 2026-10-16
 
 ## still (41)
 
