@@ -77,7 +77,7 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ### Step 3: Story loader and pack lint
 - Depends on: 1
-- Touches: `src/server/pack/**`, `packs/test/**`, `src/server/scripts/packLint.ts`
+- Touches: `src/server/pack/**`, `packs/test/**`, `src/server/scripts/packLint.ts`, `apps/bloodtower/package.json` (the `pack:lint` script only), `apps/bloodtower/src/server/package.json` (the `pack:lint` script only), `apps/bloodtower/README.md` (commands)
 - Deps change: no
 - Scope: load folder → Zod parse → validation subset → typed pack; clear error list with file and path; CLI. The loader reads `packsDir` from `.wt.json` (default `packs/`), overridable by `PACKS_DIR`. R1 ships the test pack at `packs/test/`: 4 hunters, 1 night, 1 set piece, shared + private moments + `~no-<hunter>` variants and one cue with screen half and fallback. The test pack is a long-lived proving ground for new ideas. The Dracula pack is not loaded in R1.
 - Covers: R-ENG-1, R-ENG-10 (lint part), R-ENG-11 (version recorded), V-1..V-5, V-8, V-20. Proof: unit tests per rule, the test pack and one bad pack per rule.
@@ -105,7 +105,7 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ### Step 7: Server integration and WS hub
 - Depends on: 3, 4, 5, 6
-- Touches: `src/server/{index.ts,hub/**}`
+- Touches: `src/server/{index.ts,hub/**}`, and the step 7 deviations below (protocol fields the device screen already needed, and the page clients that open `/ws`)
 - Deps change: no
 - Scope: wire loader, session, timing log and tower into the WS host; per-device views (Story board gets only `storyboard` targets; devices get shared + their hunters' privates); join token + QR URL + numeric code; origin check as tower-poc D20.
 - Covers: R-ENG-16, R-DEV-4, R-DEV-6, R-WIZ-10, V-4 at runtime.
@@ -177,6 +177,31 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - Q7: holdings change only from iPads. Already settled by Gamewright's rulings in PR #21.
 
 ## Deviations
+
+### B3 (step 7)
+
+- One pull request. The hub is `src/server/hub/**`. `index.ts` starts it. No dependency version changes. The `dev` script sets `DEV_ORIGINS` and `NEXT_PUBLIC_WS_URL` so `pnpm dev` can reach the socket from `next dev`. `pnpm start` still serves the page and the socket on one port.
+- D16. A device with no hunter is welcomed with `channels: []`. The frozen welcome required one channel, and `storyboard` is not allowed on a device.
+- D17. `deviceState` gains `tower`, `pausePromptId`, `connectLock`, `calibrateLock` and `roster` (id and name only). B2 left the tower locks beside the one gameplay lock. The frozen message had no field for them. Private lines stay in `views`.
+- The board, join and device pages open `/ws`. Step 8 and step 9 rendered against props and left the socket for this step. The join URL is taken from the connection's local address, not the Host header. A rejoin token can be pasted before that socket is up; submitting it stores the token and the page joins with it.
+- The tower stays the mock unless `TOWER_URL` is set. A winning press is the only connect or calibrate. The snapshot is passed into the session before each projection, and a change is published on a short watch.
+- Gamewright added two lines to the pack contract in this batch. V-3 accepts moment ids prefixed `crypt.` and `end.`, and a set piece is not given either name. A cue may set `hold_s`, a positive number of seconds. The loader already merges split pack files (step 3). Section 11 (dungeon rooms) stays opaque data (D13). R1 does not run those moments, and it does not wait on `hold_s`. The Grey Stair design doc on main stays in `packs/test/README.md` under a note that the YAML in that folder is still the proving ground. A Grey Stair pack is a later content-only change.
+
+### B2 (steps 3, 4, 5, 6, 8 and 9)
+
+- The six steps ship in one pull request. The commits follow the batch merge order 4, 3, 5, 6, 8, 9. Step 7 (the socket hub) is still the next batch, so the pages render against the protocol and do not open a session socket. The host process still does not connect to tower-poc.
+- `pack:lint` is the script step 3 was already going to add. It lives on `apps/bloodtower` and `bloodtower-server`. No dependency version changes. With no argument it lints `<packsDir>/test`.
+- `README.md` now names that command and the `/board`, `/join` and `/device` routes.
+- A pack-level schema issue has no field path in the frozen contract. The loader points it at the file and line that contain the offending token.
+- Presence is fixed when the session is created (`absent` hunters). R1 has no board movement. `~no-<hunter>` plays for that set. A private moment whose `scope` is `global` is still delivered when that hunter is absent.
+- Host pause uses its own prompt id (`pause-1`, then `pause-2`, …) because the frozen state has one gameplay prompt and a locked `pause` id could not be pressed again. A hunter with no connected holder replaces a host pause, and rejoin ends that pause. Resume does not force play while a hunter is blocked.
+- The device screen takes the tower locks as props. `deviceState` still has one `lock`, the gameplay prompt. Step 7 has to send the tower locks beside it, or the protocol changes, which this batch does not do.
+- Calibrate is refused until a connect press has won. A press before that does not consume the calibrate lock, and the sidecar sends calibrate only while the tower reports connected.
+- Spec §6 matches D10: this client sends `hello`, `connect` and `calibrate` to tower-poc. It does not send `command`. D4 now describes the proving-ground pack step 3 added.
+- A stale battery reading is `unavailable` (D11). Only `freshness: current` becomes a known percent.
+- A connect lock is kept only while the tower reading is `connecting` or `connected`. A failed attempt that stays `disconnected` can be pressed again. Two presses in one batch still have one winner, and a batch first releases a lock the reading has dropped. The sidecar marks `connecting` as soon as connect is asked, and a dropped socket reports `disconnected`. It sends `connect` only after tower-poc's reply to `hello` says where the tower stands, so that earlier `disconnected` does not end the attempt; it does not send `connect` when that reply is already `connected` or `connecting`. Until tower-poc answers that `connect`, a `disconnected` or `unavailable` broadcast (such as another client's disconnect) does not end the attempt, because tower-poc answers `connect` with an error or with `connecting`. If it answers with an error, the reading goes back to what tower-poc last reported. An attempt has no timeout: one tower-poc never answers stays `connecting` until the socket closes, since a timeout would be an automatic action (open question for Bob). Calibrate is legal only while the reading is `connected`. Step 7 still has to pass the sidecar snapshot into the session before it projects state.
+- The pack loader compares real paths for its folder jail, including the pack folder itself, so a pack folder reached through a symlink loads and a file that leaves it is still refused.
+- A phone is detected from the user agent (R-DEV-8). Join and the device screen start on a compact layout and offer a switch to the full layout. An iPad stays on the full layout.
 
 ### B1 (steps 1 and 2)
 

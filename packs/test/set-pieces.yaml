@@ -1,0 +1,7 @@
+- id: proving-ground
+  night: n1
+  site: {building: fixed}
+  trigger: enter-site
+  flow:
+    - {kind: moment}
+  outcome: {next: done}

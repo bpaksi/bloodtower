@@ -16,6 +16,7 @@ interface Fixture {
   cues: Array<Record<string, unknown>>;
   moments: Array<Record<string, unknown>>;
   nights: Array<{ end: string } & Record<string, unknown>>;
+  set_pieces: Array<{ id: string } & Record<string, unknown>>;
   [key: string]: unknown;
 }
 
@@ -156,7 +157,16 @@ describe("moment ids", () => {
     expect(absentHuntersOf("proving-ground.01~no-beta~nailed")).toEqual(["beta"]);
     expect(parseMomentId("proving-ground.private.alpha")).toBeUndefined();
     expect(parseMomentId("proving-ground.00")).toBeUndefined();
+    expect(parseMomentId("proving-ground.01.02")).toBeUndefined();
     expect(parseMomentId("Proving.01")).toBeUndefined();
+    expect(parseMomentId("crypt.wet-steps")).toEqual({
+      scene: "crypt",
+      moment: "wet-steps",
+      variants: [],
+    });
+    expect(parseMomentId("end.lit.01")).toEqual({ scene: "end", moment: "lit.01", variants: [] });
+    expect(parseMomentId("crypt.cold-niche~no-bryn")?.variants).toEqual(["no-bryn"]);
+    expect(privateHunterOf("end.lit.private.alpha")).toBe("alpha");
   });
 });
 
@@ -208,6 +218,58 @@ describe("pack schema", () => {
     if (!moment) throw new Error("fixture");
     moment.id = "other-scene.01";
     expect(rules(pack)).toContain("V-3");
+  });
+
+  it("accepts crypt. and end. moments without a set piece of that name (V-3)", () => {
+    const pack = validPack();
+    pack.moments.push(
+      { id: "crypt.wet-steps", kind: "text-card" as const, target: "storyboard" },
+      { id: "end.lit.01", kind: "text-card" as const, target: "storyboard" },
+      {
+        id: "end.lit.private.alpha",
+        kind: "text-card" as const,
+        target: "ipad:alpha",
+        lines: [{ speaker: "alpha", text: "A last line.", voice: "vo.alpha-line" }],
+      },
+    );
+    expect(rules(pack)).not.toContain("V-3");
+    expect(packSchema.parse(pack).moments.map((moment) => moment.id)).toEqual(
+      expect.arrayContaining(["crypt.wet-steps", "end.lit.01", "end.lit.private.alpha"]),
+    );
+  });
+
+  it("rejects a set piece named crypt or end (V-3)", () => {
+    const reserved = {
+      night: "n1",
+      site: { building: "fixed" },
+      trigger: "enter-site",
+      flow: [{ kind: "moment" as const }],
+      outcome: { next: "done" },
+    };
+    const namedCrypt = validPack();
+    namedCrypt.set_pieces.push({ ...reserved, id: "crypt" });
+    expect(rules(namedCrypt)).toContain("V-3");
+    const namedEnd = validPack();
+    namedEnd.set_pieces.push({ ...reserved, id: "end" });
+    expect(rules(namedEnd)).toContain("V-3");
+  });
+
+  it("keeps an optional positive hold_s on a cue", () => {
+    const pack = validPack();
+    const cue = pack.cues[0];
+    if (!cue) throw new Error("fixture");
+    pack.cues[0] = { ...cue, hold_s: 3 };
+    expect(packSchema.parse(pack).cues[0]?.hold_s).toBe(3);
+    pack.cues[0] = { ...cue, hold_s: 1.5 };
+    expect(packSchema.parse(pack).cues[0]?.hold_s).toBe(1.5);
+
+    const refused = validPack();
+    const bad = refused.cues[0];
+    if (!bad) throw new Error("fixture");
+    refused.cues[0] = { ...bad, hold_s: 0 };
+    expect(rules(refused)).toContain("V-1");
+    refused.cues[0] = { ...bad, hold_s: -1 };
+    expect(rules(refused)).toContain("V-1");
   });
 
   it("rejects a private moment on the story board and an unknown hunter (V-4)", () => {

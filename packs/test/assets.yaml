@@ -1,0 +1,17 @@
+- {id: amb.night, type: ambient, target: storyboard, status: placeholder, path: amb-night.txt}
+- {id: acc.tick, type: sfx, target: storyboard, status: placeholder, path: acc-tick.txt}
+- {id: por.alpha, type: portrait, target: ipad, status: placeholder, path: por-alpha.txt}
+- {id: por.beta, type: portrait, target: ipad, status: placeholder, path: por-beta.txt}
+- {id: por.gamma, type: portrait, target: ipad, status: placeholder, path: por-gamma.txt}
+- {id: por.delta, type: portrait, target: ipad, status: placeholder, path: por-delta.txt}
+- {id: vo.alpha, type: line, target: ipad, status: placeholder, path: vo-alpha.txt}
+- {id: vo.beta, type: line, target: ipad, status: placeholder, path: vo-beta.txt}
+- {id: vo.gamma, type: line, target: ipad, status: placeholder, path: vo-gamma.txt}
+- {id: vo.delta, type: line, target: ipad, status: placeholder, path: vo-delta.txt}
+- {id: vo.narrator, type: line, target: storyboard, status: placeholder, path: vo-narrator.txt}
+- {id: vo.line, type: line, target: storyboard, status: placeholder, path: vo-line.txt}
+- {id: vo.alpha-line, type: line, target: ipad, status: placeholder, path: vo-alpha-line.txt}
+- {id: vo.delta-line, type: line, target: ipad, status: placeholder, path: vo-delta-line.txt}
+- {id: fx.hall, type: still, target: storyboard, status: placeholder, path: fx-hall.txt}
+- {id: fx.bell, type: still, target: storyboard, status: placeholder, path: fx-bell.txt}
+- {id: sfx.bell, type: sfx, target: storyboard, status: placeholder, path: sfx-bell.txt}

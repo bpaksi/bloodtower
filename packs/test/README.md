@@ -1,13 +1,27 @@
+# Test pack (`packs/test`)
+
+The files in this folder are the proving ground R1 loads. They are not a published story, and they are the only pack this step loads. The Grey Stair content spec below is a design draft. It does not replace these files until a later content-only change.
+
+| | |
+|---|---|
+| Hunters | alpha, beta, gamma, delta |
+| Nights | n1 |
+| Set piece | proving-ground |
+| Moments | a shared still, its `~no-delta` variant, private moments for alpha and delta, a shared line with one cue |
+| Cue | `bell`: screen `fx.bell`, fallback `sfx.bell`, drums `none` |
+
+`pnpm --dir apps/bloodtower pack:lint` checks this folder. A `choices` file is parsed and kept. Nothing runs it.
+
 # Test pack (`packs/test/`) content spec
 
-Status: design draft for Bob, 2026-10-15. Nothing in the repo is changed by this doc.
+Status: design draft for Bob, 2026-10-15. The YAML in this folder is still the proving ground above. This spec is not what the loader reads.
 Sources: `research/game-design/story-pack-format.md` (sections 0-15, V-1..V-21, rulings 1-10), `story-engine.md`, `tower-effects-library.md`, `tower-sound-inventory.md`, `apps/bloodtower/plans/R1-step1-foundation.md`, `apps/bloodtower/spec.md` (D3, D4), `src/protocols/pack.ts`, `src/server/config.ts`.
 ## Purpose
 - Long-lived proving ground for new engine ideas. Ideas are proven here first; the Dracula pack holds only proven work.
 - Story-neutral: no Dracula names, places, items or art. Theme: "The Grey Stair", a nameless tower lit by lamps.
 - Tiny: 4 hunters, 1 night, 1 set piece, 2-room crypt at Short. A full Short run takes about 10 minutes.
 - Exercises every engine feature listed below. Each feature gets one feature tag (`F-x`) so tests can point at it.
-- Loads from `packsDir` (`.wt.json`), with `PACKS_DIR` as override; default `packs/test/`. Replaces the B1 placeholder `packs/test/README.md`.
+- Loads from `packsDir` (`.wt.json`), with `PACKS_DIR` as override; default `packs/test/`. This spec does not replace the proving-ground YAML yet.
 ## Files
 | File | Holds |
 |---|---|
@@ -230,8 +244,8 @@ Engine-owned, no pack data. Any iPad opens it; buttons Reassign (holdings change
 ## Gaps and conflicts
 - G-1. Resolved: format 2.1, V-22, V-23.
 - G-2. Splash, wizard step order, pause overlay buttons and story-log replay have no pack fields (engine-owned). Fine, but no V-check can prove a pack "exercises" them; test via e2e, not lint.
-- G-3. Resolved: `crypt.`/`end.` prefixes (V-3 relaxed). B1 `pack.ts` still rejects them until updated.
-- G-4. Partly resolved: cues have `hold_s`; #58 still needs measuring (3 s is a placeholder).
+- G-3. Resolved: `crypt.`/`end.` prefixes (V-3). The schema accepts them. R1 does not run dungeon or ending moments.
+- G-4. Partly resolved: cues may set `hold_s` and the schema keeps it. R1 does not wait on it. #58 still needs measuring (3 s is a placeholder).
 - G-5. Kept out to stay tiny: investigation (E17), encounters, hunter token, lure, foe room/battle, `foe_mod`, skulls. Those checks are n/a, so the pack doesn't exercise "every engine feature" yet. Add a later Long-only room or set piece if wanted.
 - G-6. `guard.fallback` grammar has no track-step redirect; `redirect:<target>` is undefined. Need a ruling.
 - G-7. Resolved: ruling 11, matching held Advantage cancels one step and is spent.
