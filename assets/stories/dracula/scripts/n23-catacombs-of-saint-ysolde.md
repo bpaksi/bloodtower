@@ -6,7 +6,7 @@
 - **Setting:** A stair into bone-lined passages that move when no one looks. At the bottom, the Lantern of Saint Ysolde: a small silver lamp whose flame burns without oil, in a niche shaped exactly like Agnes's reliquary.
 - **Mood:** Claustrophobic, paranoid, then a relief that does not last.
 - **Cast:** Narrator, Wren Kessel, Tomas Varga, Sister Agnes Hallow, Emeric Lutz
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Lookalike:** at most one at a time. The app picks one present hunter (or none, by mechanics). That hunter's iPad plays `.04.private.<hunter>` then `.04.private.<hunter>~lookalike` and one secret card (`.secret-card.<goal>.private.<hunter>`, on that iPad only); the others play only `.04.private.<hunter>`. A lookalike is unmasked by holy water or a Sanctuary rest, which ends it.
 
 ## Moments
@@ -54,28 +54,28 @@
 **n23-catacombs-of-saint-ysolde.04.private.emeric~lookalike** [still] `ipad:emeric` — only if emeric is tonight's lookalike
 > **Narrator (private):** You are not Emeric. Your spectacles are plain glass. Read the card that follows. Do not let them see you read it.
 
-**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.agnes** [still] `ipad:agnes` — only if agnes is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.agnes** [still] `ipad:agnes` — only if agnes is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lead them to a decoy crypt. You win if the party spends one visit there."
 
-**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.tomas** [still] `ipad:tomas` — only if tomas is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.tomas** [still] `ipad:tomas` — only if tomas is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lead them to a decoy crypt. You win if the party spends one visit there."
 
-**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.wren** [still] `ipad:wren` — only if wren is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.wren** [still] `ipad:wren` — only if wren is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lead them to a decoy crypt. You win if the party spends one visit there."
 
-**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.emeric** [still] `ipad:emeric` — only if emeric is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.decoy-crypt.private.emeric** [still] `ipad:emeric` — only if emeric is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lead them to a decoy crypt. You win if the party spends one visit there."
 
-**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.agnes** [still] `ipad:agnes` — only if agnes is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.agnes** [still] `ipad:agnes` — only if agnes is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lose one of the party's consumables (holy water, garlic, a silver bolt). You win if it is gone before dawn."
 
-**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.tomas** [still] `ipad:tomas` — only if tomas is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.tomas** [still] `ipad:tomas` — only if tomas is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lose one of the party's consumables (holy water, garlic, a silver bolt). You win if it is gone before dawn."
 
-**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.wren** [still] `ipad:wren` — only if wren is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.wren** [still] `ipad:wren` — only if wren is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lose one of the party's consumables (holy water, garlic, a silver bolt). You win if it is gone before dawn."
 
-**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.emeric** [still] `ipad:emeric` — only if emeric is the lookalike and was dealt this goal; text card, no voice; never on the dashboard
+**n23-catacombs-of-saint-ysolde.secret-card.lose-consumable.private.emeric** [still] `ipad:emeric` — only if emeric is the lookalike and was dealt this goal; text card, no voice; never on the Story board
 Card: "Lose one of the party's consumables (holy water, garlic, a silver bolt). You win if it is gone before dawn."
 
 **n23-catacombs-of-saint-ysolde.05** [still] (groups rejoin at the niche)

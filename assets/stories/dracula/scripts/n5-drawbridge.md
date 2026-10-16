@@ -6,7 +6,7 @@
 - **Setting:** A chasm with no bottom, a drawbridge raised, and a little side gate the guard used for deliveries. Wolves on the road behind. The castle breathing above.
 - **Mood:** Resolve; the last walk up the hill.
 - **Cast:** Narrator, The Count, Tomas Varga, Wren Kessel, Marta Varga
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -25,7 +25,7 @@
 
 **n5-drawbridge.04** [still]
 [sfx: a bolt drawn on the far side]
-> **Narrator:** The little gate opens a hand's width. A girl in a castle maid's apron stands behind it with a lamp turned low.
+> **Narrator:** The little gate opens a hand's width. A girl in a maid's apron over faded castle livery stands behind it with a lamp turned low.
 > **Marta:** Uncle Tomas. You came back over the wall.
 
 **n5-drawbridge.05** [still]
@@ -61,7 +61,7 @@ Vote on each iPad, a real tradeoff:
 **n5-drawbridge.03~no-tomas** [still] — Tomas not in play
 > **Wren:** He's said the words. Front door's his. There's a servants' gate, left. Slow, though.
 **n5-drawbridge.04~no-tomas** [still] — Tomas not in play
-> **Narrator:** The little gate opens a hand's width. A girl in a maid's apron stands behind it with a lamp turned low.
+> **Narrator:** The little gate opens a hand's width. A girl in a maid's apron over faded castle livery stands behind it with a lamp turned low.
 > **Marta:** You're the hunters. My uncle said you'd come, before he went away.
 **n5-drawbridge.05~no-tomas** [still] — Tomas not in play
 > **Wren:** Where's the burgomaster's girl?

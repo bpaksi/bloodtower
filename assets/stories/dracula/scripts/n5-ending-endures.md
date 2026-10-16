@@ -6,7 +6,7 @@
 - **Setting:** The open window, the broken high room, and a long scarf of mist sliding up the mountain away from the castle. No sword in the room to finish it.
 - **Mood:** Relief with a splinter in it.
 - **Cast:** Narrator, Lenka Morosz, Sister Agnes Hallow, Wren Kessel, The Count (voice, far off)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Trigger:** Lenka was freed while at least one hunter was still standing, after `n5-final-confrontation.blade-lost` played (see that scene's routing).
 
 ## Moments

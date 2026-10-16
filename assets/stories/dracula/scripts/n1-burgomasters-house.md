@@ -6,7 +6,7 @@
 - **Setting:** A tall stone house on the hill road, black crepe on the door. Anton Morosz lies in the parlour where he fell, a poker still in his hand. Upstairs, his daughter's room: the window wide, the bed empty, pressed flowers between the pages of every book.
 - **Mood:** Grief, a crime scene, the first sight of what he wants.
 - **Cast:** Narrator, Sister Agnes Hallow, Tomas Varga, Wren Kessel, Emeric Lutz, Anton Morosz (dying words, remembered by the maid in a still; voiced)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Story state (D-DRA-10):** Lenka Morosz was taken by the Count the night before play begins. The hunters win by rescuing her in the final confrontation; there is no mid-game snatch.
 
 ## Moments

@@ -6,7 +6,7 @@
 - **Setting:** The high room where Ludmila stepped from the window four hundred years ago. The window is shut. Lenka, in a white dress, sits bound by nothing at all before it: she cannot stand while he is in the room. On the stair, three brides: two pale sisters of the house (the Striga minis) and Ilka Kessel (app only).
 - **Mood:** Dread to fury to a single held breath.
 - **Cast:** Narrator, Ilka Kessel, Wren Kessel, The Count, Sister Agnes Hallow, Lenka Morosz
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Win (D-DRA-10):** rescuing Lenka and destroying Vlad are one goal. She is freed in this battle; her refusal plus Sergiu's sword breaks him.
 
 ## Moments
@@ -70,7 +70,7 @@ Checked in this order:
 **n5-final-confrontation.strike-redirected~blocked** [still] — the guarding hunter is also at 2 corruptions: no corruption is given, but the party loses one story item (holy water, the host, or a stake) (same cues)
 > **Narrator:** He turns toward the girl at the window, and you throw the last thing you have between them. It shatters in his hand. The blow falls on nothing, and you are poorer for it.
 
-**n5-final-confrontation.guard-chosen** [still] — on the Dashboard at the start of the finale, the party picks one hunter to guard Lenka. It can't be the hunter carrying `sergiu-blade`. The guard keeps the role for the whole finale. [prop: sergiu-blade]
+**n5-final-confrontation.guard-chosen** [still] — on the Story board at the start of the finale, the party picks one hunter to guard Lenka. It can't be the hunter carrying `sergiu-blade`. The guard keeps the role for the whole finale. [prop: sergiu-blade]
 [tower: heartbeat]
 > **Narrator:** Someone must stand at the girl's side, and someone else must carry the sword. It cannot be the same pair of hands.
 

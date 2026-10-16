@@ -6,7 +6,7 @@
 - **Setting:** The only inn at the crossroads under the castle. Low beams, a roaring fire, garlic over every window. Outside, the road the hunters came in on is going white.
 - **Mood:** Wary warmth, then the trap closing.
 - **Cast:** Narrator, Hanne, Tomas Varga, Sister Agnes Hallow, Emeric Lutz, Wren Kessel
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 

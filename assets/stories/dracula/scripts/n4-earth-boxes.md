@@ -6,8 +6,8 @@
 - **Setting:** Long boxes of black earth, nailed shut, stencilled in Jakob Brenner's neat ledger hand: "Garden soil. Handle with care." The soil is from the castle's oldest grave.
 - **Mood:** Grim, physical work against the dark coming on.
 - **Cast:** Narrator, Emeric Lutz, Wren Kessel, Tomas Varga, Sister Agnes Hallow, The Count (voice only)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
-- **Dashboard counter:** "Boxes left: n" is shown as text on the dashboard and never voiced.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Story board counter:** "Boxes left: n" is shown as text on the Story board and never voiced.
 
 ## Moments
 

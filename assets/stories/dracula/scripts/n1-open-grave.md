@@ -6,7 +6,7 @@
 - **Setting:** Father Oskar's fresh grave, dug open from below, the coffin lid split outward. His study in the vestry, ransacked. A map pinned under the altar cloth.
 - **Mood:** Investigation, then sorrow turning to horror.
 - **Cast:** Narrator, Wren Kessel, Emeric Lutz, Sister Agnes Hallow, Father Oskar, Tomas Varga (variants)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 

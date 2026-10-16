@@ -93,7 +93,7 @@ Then: `nx-midnight-procession.03.private.<hunter>` and `nx-midnight-procession.0
 > **Ludmila (hushed):** Then do not come in.
 
 **enc-the-window.03** [still]
-Choice on the dashboard: **Watch** (one present hunter takes 1 corruption; finding) or **Look away**.
+Choice on the Story board: **Watch** (one present hunter takes 1 corruption; finding) or **Look away**.
 > **Narrator:** Every night he asks. Every night she answers. Every night the mist makes the valley watch.
 
 **enc-the-window.03~blocked** [still] — the chosen watcher is at 2 corruptions
@@ -160,7 +160,7 @@ Choice on the dashboard: **Watch** (one present hunter takes 1 corruption; findi
 > **The Count (whisper):** Your master sold me a name through a door like this one. Ask me what he got for it.
 
 **enc-at-the-door.04** [still]
-Choice on the dashboard: **Ward the door** (spend holy water or the host) or **Hold it shut** (one present hunter takes 1 corruption).
+Choice on the Story board: **Ward the door** (spend holy water or the host) or **Hold it shut** (one present hunter takes 1 corruption).
 [tower: low]
 > **Narrator:** The latch stops moving. The voice goes away up the hill, still polite. She refuses him every evening, he said. He said it as a complaint.
 
@@ -296,14 +296,14 @@ Fight: 2 foes (brides), per mechanics.
 
 ### enc-wine-for-no-one: Wine Poured for No One
 - **Nights:** 2–4. (Tomas's past.)
-- **Beat:** In an empty room, a young woman in castle livery lays a table for one and pours the Count's wine, as she does every night. It is Marta, or the part of her the mist can carry. She does not see the hunters until she sees Tomas.
+- **Beat:** In an empty room, a young woman in a maid's apron over faded castle livery lays a table for one and pours the Count's wine, as she does every night. It is Marta, or the part of her the mist can carry. She does not see the hunters until she sees Tomas.
 - **Cost / stake:** speak to her: one present hunter takes 1 corruption (her wine is his; instant-loss guard), or leave her be.
 - **Outcome (proposed):** Speak = finding: "The little gate is on the left of the chasm; she keeps the key" (feeds `n5-drawbridge`). If Tomas is present, he takes the finding to his journal as a tie clue. Leave = nothing.
-- **Still prompt:** A candlelit table laid for one in an empty stone room, a young woman in faded castle livery pouring dark wine, fog at the windows.
+- **Still prompt:** A candlelit table laid for one in an empty stone room, a young woman in a maid's apron over faded castle livery pouring dark wine, fog at the windows.
 
 **enc-wine-for-no-one.01** [clip]
 [sfx: wine poured; a chair drawn back for no one] [tower: low]
-> **Narrator:** The room is empty but for a table laid for one. A girl in castle livery pours the wine and stands back to wait.
+> **Narrator:** The room is empty but for a table laid for one. A girl in an apron over castle livery pours the wine and stands back to wait.
 
 **enc-wine-for-no-one.02** [still]
 > **Marta:** Uncle? You shouldn't be here. He drinks at midnight, and he counts the glasses.

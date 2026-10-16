@@ -7,7 +7,7 @@ Lenka Morosz, the burgomaster's foundling daughter, was taken by the Count the n
 
 ## Format rules
 - One scene per file. Moment IDs are `scene.moment`; each is marked [still] or [clip].
-- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers). `ipad:<hunter>` plays only on that iPad. Private moments (`.private.<hunter>`) never play on the Story board and always have a line for all four hunters. A scene line that still says `dashboard` means `storyboard`.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers). `ipad:<hunter>` plays only on that iPad. Private moments (`.private.<hunter>`) never play on the Story board and always have a line for all four hunters. A scene line that still says `Story board` means `storyboard`.
 - **Variants (R-AST-ORG-10):** `scene.moment~variant` replaces the base moment of the same number when its condition (written after the dash) holds. Private and variant combine as `scene.moment.private.<hunter>~<variant>`. A base moment that lists only cues and "one variant by …" has no line of its own; one variant always plays. No speaker or text placeholders remain in any script: kingdoms and lair rooms are shown, never spoken, and buildings, objectives, nights and absent hunters each have their own variant.
 - **Event moments:** `scene.<event-name>` (e.g. `n5-final-confrontation.blade-lost`) plays once when its trigger happens and replaces nothing.
 - **Spotlight (R-AST-ORG-11):** the procession uses concrete IDs per hunter: `.04.private.<hunter>` (choice), `~answer`, `~turn-away`, and `.04.private.<hunter>-watched`.
@@ -31,7 +31,7 @@ Recurring props have stable IDs and are tagged `[prop: <id>]` on every moment th
 |---|---|---|---|
 | 1 | [n1-lantern-and-bell](n1-lantern-and-bell.md) | 1 / K1 Village | Four hunters, four letters from a dead priest, the margin riddle; the mist swallows the road; the burgomaster's girl is gone. |
 | 2 | [n1-burgomasters-house](n1-burgomasters-house.md) | 1 / K1 Citadel | Anton Morosz died at his daughter's door; Lenka was carried off; she left a pressed violet on the sill. |
-| 3 | [nx-pressed-flower](nx-pressed-flower.md) | 1–4 dusk | A violet she smuggles out each dusk: a dashboard still plus one hunter's private clue to where she is held. |
+| 3 | [nx-pressed-flower](nx-pressed-flower.md) | 1–4 dusk | A violet she smuggles out each dusk: a Story board still plus one hunter's private clue to where she is held. |
 | 4 | [n1-open-grave](n1-open-grave.md) | 1 / K1 Sanctuary | Oskar's grave dug from inside, his map, then Oskar risen, warning that the Count will call Lenka by another name. |
 | 5 | [nx-midnight-procession](nx-midnight-procession.md) | 1–4 midnight | The dead hunters walk; one ghost stops for one hunter. Answer: a tie clue. Turn away: a Tome-order clue and one holy water. |
 | 6 | [n1-fortune-reading](n1-fortune-reading.md) | 1 dawn / K1 Bazaar | Vadoma reads Lenka's violet: the Blade, the Holy Symbol, the Tome, the lair; "alive, and saying no." |

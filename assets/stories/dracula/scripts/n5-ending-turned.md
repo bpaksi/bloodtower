@@ -6,7 +6,7 @@
 - **Setting:** One of the hunters, standing very still, with eyes gone the wrong colour.
 - **Mood:** Horror softened by tenderness; the cruelest version of the old story.
 - **Cast:** Narrator, the turned hunter (one variant per hunter), The Count, Lenka Morosz (variant ~night5)
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 - **Variant rule:** moments .02 and .03 play the variant for the hunter who took the third corruption. Private .04 lines play on every present iPad; the turned hunter's own iPad plays `.04.private.<hunter>~turned`.
 
 ## Moments

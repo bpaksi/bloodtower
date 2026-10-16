@@ -6,7 +6,7 @@
 - **Setting:** A gallery of the house's portraits, four hundred years of them. Every painting of Vlad is the same ageless face. At the end, a covered canvas.
 - **Mood:** Eerie, then unbearable recognition.
 - **Cast:** Narrator, Emeric Lutz, Wren Kessel, Sister Agnes Hallow, The Count (voice), Tomas Varga
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
