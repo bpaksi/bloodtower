@@ -27,7 +27,7 @@ Sources: `research/game-design/story-pack-format.md` (sections 0-15, V-1..V-21, 
 | F-1 | Splash, then setup wizard; game length is in wizard step 1 next to difficulty | `setup`, `by_length` labels |
 | F-2 | Story board is display only; every press comes from an iPad, first press wins | `.01` Next, `.door-choice` |
 | F-3 | Short narrated scene (narrator, 3 lines) | `grey-stair.01`-`.02` |
-| F-4 | Shared + private moments, one `~no-<hunter>` variant | `.02.private.*`, `.02~no-wren` |
+| F-4 | Shared + private moments, one `~no-<hunter>` variant | `.02.private.*`, `.02~no-dell` |
 | F-5 | iPad party choice (first press) | `.door-choice` |
 | F-6 | Crypt crawl, rooms per length 2/4/6, held Advantages reduce room cost, no Advantage granted | `dungeon.yaml` |
 | F-7 | Vote after each room, tie = retreat | `.deeper-vote` |
@@ -68,12 +68,11 @@ hunters:
   - {id: ash,  name: "Ash",  portrait: por.ash,  voice: vo.ash,  start_location: "K1 citadel", start_items: [lamp-oil]}
   - {id: bryn, name: "Bryn", portrait: por.bryn, voice: vo.bryn, start_location: "K1 citadel"}
   - {id: cole, name: "Cole", portrait: por.cole, voice: vo.cole, start_location: "K1 citadel"}
-  - {id: wren, name: "Wren", portrait: por.wren, voice: vo.wren, start_location: "K1 citadel"}
+  - {id: dell, name: "Dell", portrait: por.dell, voice: vo.dell, start_location: "K1 citadel"}
 cast:
   - {id: narrator, name: "Narrator", role: narrator, voice: vo.narrator}
   - {id: keeper,   name: "The Keeper", role: npc, voice: vo.keeper}
 ```
-Note: `wren` is also a Dracula hunter id. Rename to `dell` if Bob wants zero id overlap.
 ## 3. Night, set piece, lengths
 ```yaml
 nights:
@@ -100,17 +99,17 @@ Only the crypt changes with length, so every length keeps the opening, the set p
 | Id | Kind | Target | Content | Advance |
 |---|---|---|---|---|
 | `grey-stair.01` | still | storyboard | Narrator: "A grey stair climbs into the dark. [pause 1] Someone has left the lamps unlit." | `next` (iPad, first press, F-2) |
-| `grey-stair.02` | still | storyboard | Narrator: "At the top, a door. Below it, a draught from the crypt." Wren: "I hear water down there." | `next` |
-| `grey-stair.02~no-wren` | still | storyboard | `cond: absent(wren)`; narrator line only, Wren's line cut | `next` |
+| `grey-stair.02` | still | storyboard | Narrator: "At the top, a door. Below it, a draught from the crypt." Dell: "I hear water down there." | `next` |
+| `grey-stair.02~no-dell` | still | storyboard | `cond: absent(dell)`; narrator line only, Dell's line cut | `next` |
 | `grey-stair.02.private.<h>` (x4) | text-card | ipad:<h> | One private thought each, e.g. ash: "Your oil flask is half full." `placeholder: "Each hunter has a private thought."` | `next` |
 | `grey-stair.03` | clip | storyboard | Talking avatar: the Keeper, line `ts-keeper-001` (F-10) | `clip-end` |
 | `grey-stair.door-choice` | pick-card | ipad:all | prompt for choice 5 | `step` |
 | `grey-stair.04` | still | storyboard | Narrator: "The lamps are lit, or they are not. The stair is quiet." | `next` |
-| `grey-crypt.room.*` | still | storyboard | one per room: reveal line + cost (section 11) | `step` |
-| `ending-lit.01` / `ending-dark.01` | still | storyboard | endings (section 12) | `next` |
-| `ending-lit.end.private.<h>` (x4) | text-card | ipad:<h> | one closing line per hunter (D18 rule: every holder, present or absent) | `next` |
+| `crypt.<room>` | still | storyboard | one per room: reveal line + cost (section 11) | `step` |
+| `end.lit.01` / `end.dark.01` | still | storyboard | endings (section 12) | `next` |
+| `end.lit.private.<h>` (x4) | text-card | ipad:<h> | one closing line per hunter (D18 rule: every holder, present or absent) | `next` |
 Every voiced line has a manifest `line` asset `<moment>.vo-NN`. Lines ≤2 speakers per moment (V-7).
-Moment ids for rooms and endings use their own scene prefix; see gap G-3.
+Room and ending moments use the reserved `crypt.` and `end.` prefixes (format 4.1, relaxed V-3).
 ## 5. Choice and vote (`choices.yaml`)
 ```yaml
 choices:
@@ -140,9 +139,10 @@ cues:
     drums: none
     screen: fx.room-stamp
     fallback_sfx: grey-crypt.sfx.room-cleared
-    trigger: {after: "grey-crypt.room", when: "flag(room-cleared)"}
+    trigger: {after: "crypt.*", when: "flag(room-cleared)"}
+    hold_s: 3          # placeholder until #58 is measured
 ```
-Engine rules this cue proves: diff lights before send (a no-op write stalls the queue 30 s); one command at a time, 250 ms after each write; #56 starts ≥1.5 s after #58; never wait for a sound end (the tower doesn't report it). Use a fixed hold per sound (`hold_s`) instead. Fallback plays on disconnect, calibration, or any failed/timed-out command.
+Engine rules this cue proves: diff lights before send (a no-op write stalls the queue 30 s); one command at a time, 250 ms after each write; #56 starts ≥1.5 s after #58; never wait for a sound end (the tower doesn't report it). The cue's `hold_s` sets the wait instead; the talking-avatar line never starts inside it. Fallback plays on disconnect, calibration, or any failed/timed-out command.
 ## 7-8. Items, track, corruption (`items.yaml`)
 ```yaml
 items:
@@ -172,14 +172,14 @@ rooms:
   - {id: room.lamp-alcove, type: treasure, cost: {track: lamps-lit, step: -1}, loot: [lamp-oil]}
   - {id: room.key-vault,   type: story,    cost: {track: lamps-lit, step: -1}, loot: [brass-key]}
 ```
-Short deals 1 room + target (2); Standard 3 + target; Long 5 + target (deck is 5, so Long can be dealt). Per room: reveal (`grey-crypt.room.<id>`), apply held Advantages to reduce the cost, pay, fire `room-cleared`, then `deeper-vote`. Clearing a room never grants an Advantage. Unpayable cost: pay what you can + one corruption, through the guard. The Stealth Advantage from "oil the hinge" is how the test shows a held Advantage reducing a room cost. `room.cold-niche` needs `grey-crypt.room.cold-niche~no-bryn`.
+Short deals 1 room + target (2); Standard 3 + target; Long 5 + target (deck is 5, so Long can be dealt). Per room: reveal (`crypt.<room>`), apply held Advantages to reduce the cost, pay, fire `room-cleared`, then `deeper-vote`. Each matching held Advantage cancels one cost step and is spent (ruling 11). Clearing a room never grants an Advantage. Unpayable cost: pay what you can + one corruption, through the guard. The Stealth Advantage from "oil the hinge" cancels the one-step cost of `wet-steps` and is then gone, so a later Stealth room costs full price: that is the spent-Advantage test. `room.cold-niche` needs `crypt.cold-niche~no-bryn`.
 ## 12. Endings (`endings.yaml`)
 ```yaml
 endings:
-  - {id: dark, tier: loss,     check_order: 1, cond: "any corruption(*) >= 3 or track(lamps-lit) = 0", scene: ending-dark,
+  - {id: dark, tier: loss,     check_order: 1, cond: "any corruption(*) >= 3 or track(lamps-lit) = 0", scene: end.dark,
      loss_cue: [room-cleared-fallback], summary_line: "The lamps went out on the Grey Stair."}
-  - {id: lit,  tier: full-win, check_order: 2, cond: "flag(key-found)", scene: ending-lit, summary_line: "The key came up the stair."}
-  - {id: left, tier: loss,     check_order: 3, cond: "night_end(n1)", scene: ending-dark, summary_line: "The party left the crypt without the key."}
+  - {id: lit,  tier: full-win, check_order: 2, cond: "flag(key-found)", scene: end.lit, summary_line: "The key came up the stair."}
+  - {id: left, tier: loss,     check_order: 3, cond: "night_end(n1)", scene: end.dark, summary_line: "The party left the crypt without the key."}
 ```
 `left` catches every other end, so a game always matches an ending (V-16). A retreat or a lost crypt ends in a loss; quick to test both.
 ## 14. Stats
@@ -193,21 +193,22 @@ titles: [{cond: "corruption(hunter) = 0", text: "steady hand"}]
 ```
 Engine events (presence, private delivery, choice lock, cost_applied with guard_triggered, pauses) record with no pack field. The record stores chosen length, total/active/paused time (R-LEN-5).
 ## F-10/F-11. Talking avatar (`cast.yaml`, `script.yaml`)
-Not in the format yet (G-1). Proposed shape:
+Format 2.1. Checked by V-22/V-23.
 ```yaml
 # cast.yaml
-- {id: keeper, avatar: av.keeper, voice: vo.keeper}
+- {id: keeper, name: "The Keeper", voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}, portrait: por.keeper,
+   mouths: {rest: m.keeper.rest, slight: m.keeper.slight, open: m.keeper.open, wide: m.keeper.wide, oo: m.keeper.oo}, anchor: {x: 0.52, y: 0.71}}
 # script.yaml
-- {line_id: ts-keeper-001, speaker: keeper, moment: grey-stair.03, note: "tired, kind, low",
-   text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."}
+- id: grey-stair.03
+  lines: [{id: ts-keeper-001, speaker: keeper, note: "slow", text: "Light them if you can. [pause 0.5] The key is at the bottom. It always is."}]
 ```
-Rules: `line_id` is stable forever (never renumber; retire, don't reuse); speaker is a cast or hunter id; text ≤20 s spoken (est. ~2.5 words/s, so ≤45 words; this line ≈4 s + 0.5 s pause); `[pause N]` is seconds. The story log lists each played line by `line_id`; a replay press on an iPad replays that line's clip and voice on the Story board without changing game state.
+Rules: the line id is stable forever (never renumber; retire, don't reuse); speaker is a cast or hunter id; text ≤20 s spoken (est. ~2.5 words/s, so ≤45 words; this line ≈4 s + 0.5 s pause); `[pause N]` is seconds. The story log lists each played line by line id; a replay press on an iPad replays it on the Story board without changing game state. The avatar is Story board only; iPads show the caption.
 ## F-12. Pause overlay
 Engine-owned, no pack data. Any iPad opens it; buttons Reassign (holdings change on iPads only, ruling 10), Concede (R-SES-16, ends with the `left` loss summary), End for now. Paused time is excluded from active time.
 ## Validation pass (V-1..V-21)
 | Check | Status |
 |---|---|
-| V-1 schema, V-2 refs, V-3 ids, V-4 private, V-5 `~no-wren` | pass by construction; R1 loader checks these |
+| V-1 schema, V-2 refs, V-3 ids, V-4 private, V-5 `~no-dell` | pass by construction; R1 loader checks these |
 | V-6 variants | pass: one variant each, distinct conds |
 | V-7 ≤2 speakers | pass: max 2 (`.02`) |
 | V-8 cue halves, drums none | pass |
@@ -223,15 +224,17 @@ Engine-owned, no pack data. Any iPad opens it; buttons Reassign (holdings change
 | V-18 no dead-end | pass |
 | V-19 components | warning-level until open question 11 is ruled |
 | V-20 determinism | pass: room deal uses seeded table `grey-crypt.deal` |
+| V-22 cast/script | pass: `keeper` has 5 mouths + anchor |
+| V-23 lines | pass: one id, valid `[pause 0.5]`, ~5 s |
 | V-21 readiness | fails until private moments, `~no-` variants reach `draft`; expected for placeholders |
 ## Gaps and conflicts
-- G-1. Format has no cast.yaml/script.yaml, `line_id`, `[pause N]`, `note`, 20 s limit, avatar asset, or story-log replay. Format 2/4.2/13 use `lines` + `<moment>.vo-NN`. Proposal: add section 2.1 "Script" with `line_id` keyed to manifest; V-22 `line_id` unique and stable; V-23 estimated length ≤20 s.
+- G-1. Resolved: format 2.1, V-22, V-23.
 - G-2. Splash, wizard step order, pause overlay buttons and story-log replay have no pack fields (engine-owned). Fine, but no V-check can prove a pack "exercises" them; test via e2e, not lint.
-- G-3. Format 4.1 says every moment's scene prefix is a set piece id (V-3; B1 `pack.ts` enforces it). Dungeon rooms (`grey-crypt.room.*`) and endings (`ending-lit.*`) have no set-piece home. Either declare them as set pieces or let V-3 accept dungeon and ending ids.
-- G-4. Tower sound lengths are all "?" in `tower-sound-inventory.md`, and the format has no `hold_s` on cues. "Use known lengths" needs a measuring pass for #56 and #58 first, plus a cue field.
+- G-3. Resolved: `crypt.`/`end.` prefixes (V-3 relaxed). B1 `pack.ts` still rejects them until updated.
+- G-4. Partly resolved: cues have `hold_s`; #58 still needs measuring (3 s is a placeholder).
 - G-5. Kept out to stay tiny: investigation (E17), encounters, hunter token, lure, foe room/battle, `foe_mod`, skulls. Those checks are n/a, so the pack doesn't exercise "every engine feature" yet. Add a later Long-only room or set piece if wanted.
 - G-6. `guard.fallback` grammar has no track-step redirect; `redirect:<target>` is undefined. Need a ruling.
-- G-7. What a held Advantage does to a room cost is still open (Bob's rulings). Test assumes: each matching held Advantage cancels one cost step and stays held.
+- G-7. Resolved: ruling 11, matching held Advantage cancels one step and is spent.
 - G-8. Room `cost` shape and `rooms` list are not schema-defined in 11 (only described); B1 keeps `dungeons`, `choices`, `items`, `endings`, `by_length` as `z.unknown()`, so lint passes them unchecked.
 - G-9. B1: `packs/test/` is only a README; plan step 3 asks for one `~no-` variant and one cue; this spec covers that. B1 schema requires `moments`, `cues`, `assets` arrays in one parsed object; split files must be merged by the loader (confirm step 3 does that). R1 doesn't run choices, crypt, endings or replay, so most features stay inert until later steps.
 - G-10. `systems` and `difficulties` key names (`encounters: off`, `mods: {}`) aren't defined anywhere; guessed.
