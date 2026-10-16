@@ -117,7 +117,7 @@ Common to every screen (all screens below inherit these):
 - iPad: device name, the story's hunters as large toggle cards ("Mine" / held by X). Primary: "Next: set up the story" (disabled with reason until all held); any joined iPad may press it.
 - Entry: story chosen (or Back from Begin Story step 1). Exit: all hunters held + Next -> Begin Story. Back -> Pick Story.
 - Errors: device drops -> its hunters show "disconnected" on board, stay held for 60 s then become unclaimed; two devices claim same hunter -> first press wins, loser sees "Taken by X".
-- On "Play again" with a different story (a different hunter list), no holdings carry over: every hunter starts unclaimed and everyone claims again (D8).
+- On "Play again", whatever the next story's hunter list, no holdings carry over: every hunter starts unclaimed and everyone claims again (R2-91, D8).
 - R2-30. The Next button stays disabled and states the reason ("Claim Mina") until every hunter is held. Test: e2e.
 - R2-31. One device can claim all hunters in two taps or fewer ("Take all"). Test: UI count.
 - R2-32. The join page never shows the device token (B3 follow-up). Test: DOM check.
@@ -173,7 +173,7 @@ Common to every screen (all screens below inherit these):
 - Story board: thank-you card, teardown checklist (display only), tower state.
 - iPad (any joined): checklist ticks; primary "Done for tonight" (tower to idle, session closed); secondary "Play again" -> Pick Story with the same devices.
 - R2-90. "Done for tonight" sets the tower to idle and closes the session; devices get a closed screen. Test: mock idle command + session state.
-- R2-91. "Play again" keeps devices and, where the next story has the same hunters, holdings. Test: e2e.
+- R2-91. "Play again" keeps the joined devices but no holdings: whatever the next story's hunter list (same or different), every hunter starts unclaimed and everyone claims again in Party Join (D8). Test: e2e, same-hunter and different-hunter replays.
 
 ## 4. Device modes
 
@@ -211,11 +211,11 @@ Bob's answers, folded into the sections above:
 - D5. Quit offers three choices: Save and quit, Abandon, Keep playing (R2-64). Answers old Q7.
 - D6. No phone support yet, iPads only. Phone view dropped; its ids are marked removed, not renumbered (§4, R2-111). Answers old Q8.
 - D7. Game-length question dropped: ruling 12 settles it. Every Dracula length plays 5 nights; length changes set pieces and crypt rooms (§3.5, R2-51). Answers old Q4.
+- D8. Play again: if the new story has a different hunter list, everyone claims hunters again from scratch (Bob, Oct 16 2026). Folded into one rule: on Play again, whatever the hunter list, no holdings carry over and everyone claims from scratch (R2-91, §3.4). Answers Q9.
 
 ## 7. Open questions for Bob
 
-None from the original list; all eight are answered (§6). New, minor:
-- D8. On "Play again" with a different hunter list, everyone re-claims from scratch; no holdings carry over (§3.4). Answers Q9 (Bob, Oct 16 2026).
+None.
 
 ## 8. Conflicts with existing requirements (resolved)
 
@@ -227,7 +227,7 @@ None from the original list; all eight are answered (§6). New, minor:
 | C4 | R-UI-5 shared screen "TV, Mac, or host iPad"; R-UI-11 "Dashboard Join iPad" button | Board has no buttons; there is no host iPad | Resolved by standing ruling and D1. The Story board (Mac on TV) is the only shared screen; drop "host iPad". Join QR is always on the board, and "Join another iPad" lives in the iPad pause menu. |
 | C5 | V2-2 any joined iPad presses host controls | Draft proposed a host role | Resolved by D1: V2-2 stands. Any joined iPad presses flow buttons, first press wins; no host role. |
 | C6 | R-WIZ-5 fixed step order / R-WIZ-11 "who holds whom" as a wizard step | Draft had Party Join before Pick Story | Resolved by D2: Pick Story, then Party Join, then the rest of setup. Amend R-WIZ-5 order to match; R-WIZ-11 stays a step, placed after story choice. |
-| C7 | Docs still say "Dashboard" (R-DEV-2, R-WIZ, R-SUM) | Renamed Story board | Resolved as a naming fix: rename "Dashboard" to "Story board" in a doc pass. No design question left. |
+| C7 | Docs still say "Dashboard" (R-DEV-2, R-WIZ, R-SUM) | Renamed Story board | Resolved as a naming fix. #36 already renamed "Dashboard" to "Story board" in the Dracula scripts; only the older design docs (R-DEV-2, R-WIZ, R-SUM) still need the rename in a doc pass. No design question left. |
 | C8 | R-SUM-5 feedback / R-SUM-7 box-it-up on the Dashboard | Inputs must be on iPads | Resolved by standing ruling: rating entered on iPads; checklist shown on the board, ticked on any iPad. |
 
 Also note for the doc pass: R-DEV-8 (phone as simplified stand-in) is deferred for R2 by D6.
