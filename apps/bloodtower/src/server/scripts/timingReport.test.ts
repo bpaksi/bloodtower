@@ -161,6 +161,67 @@ describe("timing report", () => {
     expect(lines.at(-1)).toBe("Lobby 1000 ms. Night unknown. Paused unknown. Active unknown.");
   });
 
+  it("leaves a pause after the night out of Paused and Active, closed or still open", () => {
+    for (const close of [true, false]) {
+      const path = tempDb();
+      const opened = openDatabase(path);
+      try {
+        const store = createSessionStore(opened.db);
+        const clock = stepClock();
+        roster(store, "run-late", clock.wall());
+        const log = createTimingLog(store, clock, "run-late");
+        clock.advance(1000);
+        log.open({ kind: "phase", subject: "night", deviceId: null, cause: null, hunter: null });
+        clock.advance(8000);
+        log.close("phase", "night");
+        clock.advance(500);
+        log.open({
+          kind: "pause",
+          subject: "disconnect:alpha",
+          deviceId: null,
+          cause: "disconnect",
+          hunter: "alpha",
+        });
+        clock.advance(2000);
+        if (close) log.close("pause", "disconnect:alpha");
+      } finally {
+        opened.close();
+      }
+      expect(formatTimingReport(readRun(path, "run-late")).at(-1)).toBe(
+        "Lobby 1000 ms. Night 8000 ms. Paused 0 ms. Active 8000 ms.",
+      );
+    }
+  });
+
+  it("clips a pause that runs past the night's end to the night", () => {
+    const path = tempDb();
+    const opened = openDatabase(path);
+    try {
+      const store = createSessionStore(opened.db);
+      const clock = stepClock();
+      roster(store, "run-clip", clock.wall());
+      const log = createTimingLog(store, clock, "run-clip");
+      log.open({ kind: "phase", subject: "night", deviceId: null, cause: null, hunter: null });
+      clock.advance(3000);
+      log.open({
+        kind: "pause",
+        subject: "disconnect:alpha",
+        deviceId: null,
+        cause: "disconnect",
+        hunter: "alpha",
+      });
+      clock.advance(1000);
+      log.close("phase", "night");
+      clock.advance(1000);
+      log.close("pause", "disconnect:alpha");
+    } finally {
+      opened.close();
+    }
+    expect(formatTimingReport(readRun(path, "run-clip")).at(-1)).toBe(
+      "Lobby 0 ms. Night 4000 ms. Paused 1000 ms. Active 3000 ms.",
+    );
+  });
+
   it("reads the latest session when no id is given", () => {
     const path = tempDb();
     writeRun(path, "run-old");

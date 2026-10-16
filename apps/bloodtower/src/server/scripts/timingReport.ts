@@ -98,10 +98,23 @@ export const formatTimingReport = (run: StoredRun): string[] => {
   // (Bob, 2026-10-16). The lobby before Begin is its own figure.
   const phase = run.marks.find((mark) => mark.kind === "phase");
   const lobby = phase ? phase.startMonoMs : null;
-  const night =
-    phase && phase.endMonoMs !== null && open.length === 0
-      ? phase.endMonoMs - phase.startMonoMs
-      : null;
+  const nightEnd = phase?.endMonoMs ?? null;
+  const night = phase && nightEnd !== null ? nightEnd - phase.startMonoMs : null;
+  // Paused and Active cover the night only: a pause is clipped to Begin..night end, and one
+  // that starts after the night (a device leaving at the end) does not count.
+  const pauses = run.marks.filter((mark) => mark.kind === "pause");
+  const nightPauses =
+    phase && nightEnd !== null
+      ? pauses
+          .filter((mark) => mark.startMonoMs < nightEnd)
+          .map((mark) => ({
+            ...mark,
+            startMonoMs: Math.max(mark.startMonoMs, phase.startMonoMs),
+            endMonoMs: Math.min(mark.endMonoMs ?? nightEnd, nightEnd),
+          }))
+      : pauses;
+  const paused = pausedMillis(nightPauses);
+  const active = night === null ? null : activeMillis(night, nightPauses);
   lines.push("");
   lines.push(
     `Marks ${run.marks.length}, presses ${run.presses.length} (${run.presses.filter((press) => press.winner).length} won).`,
@@ -112,7 +125,7 @@ export const formatTimingReport = (run: StoredRun): string[] => {
       : `Open marks ${open.map((mark) => `${mark.kind} ${mark.subject}`).join(", ")}.`,
   );
   lines.push(
-    `Lobby ${millisText(lobby)}. Night ${millisText(night)}. Paused ${millisText(pausedMillis(run.marks))}. Active ${millisText(night === null ? null : activeMillis(night, run.marks))}.`,
+    `Lobby ${millisText(lobby)}. Night ${millisText(night)}. Paused ${millisText(paused)}. Active ${millisText(active)}.`,
   );
   return lines;
 };

@@ -133,7 +133,7 @@ Copied here so the app spec states them. The host wires the port from step 6. A 
 | R-ENG-10 | 3 | `load.test.ts` lint lines name the file, path and rule | — |
 | R-ENG-11 | 3, 4 | `engine.test.ts` stores pack version `0.1.0` on the session row | A warning when a pack version changes is later |
 | V-1, V-2, V-3, V-4, V-5, V-8, V-20 | 1 schema, 3 files | `pack.test.ts` and one bad pack per rule in `load.test.ts` | — |
-| PRD-41 | 1 types, 4 rows, 10 report | `timing/log.test.ts` reconstructs a sample run from SQLite. `scripts/timingReport.test.ts` prints a run as one timeline with lobby, night, paused and active totals. Active counts from Begin to the night's end (Bob, 2026-10-16). An open mark leaves the totals unknown | — |
+| PRD-41 | 1 types, 4 rows, 10 report | `timing/log.test.ts` reconstructs a sample run from SQLite. `scripts/timingReport.test.ts` prints a run as one timeline with lobby, night, paused and active totals. Active counts from Begin to the night's end (Bob, 2026-10-16). Paused and Active cover the night only: a pause is clipped to it, and one after the night does not count. An open night leaves them unknown | — |
 | R-STA base rows, R-DEV-9 device/holding stats | 4 | `db/store.test.ts` round-trips devices and holdings | The stats summary is out of scope |
 | V2-2 first press | 5, 7 | `engine.test.ts` and `hub/host.test.ts`: two presses, one winner, both rows stored | — |
 | R-DEV-4, V-4 at runtime | 5, 7 | `engine.test.ts` and `hub/host.test.ts`: storyboard frames have no private line and no `ipad:` | — |

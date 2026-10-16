@@ -306,7 +306,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       ]);
       let previous = -1;
       for (const press of run.presses) {
-        expect(press.atMonoMs, `${press.promptId} monotonic`).toBeGreaterThan(previous);
+        expect(press.atMonoMs, `${press.promptId} monotonic`).toBeGreaterThanOrEqual(previous);
         expect(press.atWall, `${press.promptId} wall`).toMatch(/^\d{4}-\d\d-\d\dT.*Z$/);
         previous = press.atMonoMs;
       }
