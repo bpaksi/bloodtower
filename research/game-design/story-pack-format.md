@@ -483,7 +483,7 @@ encounters:
   - id: enc-the-window              # tokens-and-encounters.md
     source: hunter-token
     nights: [1, 2, 3, 4]
-    moments: [enc-the-window.01, enc-the-window.02, enc-the-window.03]   # .04 outro: see 17
+    moments: [enc-the-window.01, enc-the-window.02, enc-the-window.03]
     resolution: choice
     choices:
       - {id: watch, effects: [corruption: {to: present, amount: 1}], outcome: finding(high-room)}
@@ -712,7 +712,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 13. **Variant stacking order** (`~nailed~no-wren` vs `~no-wren~nailed`): this doc fixes condition first, presence last.
 14. **R-ENG-25 lists "warriors and spirit as base game" for Dracula**, which fits the no-warriors/spirit rule only if story effects never change them. Confirm no script does (none found in n2, n23, n4).
 15. **E19f redirect:** settled by ruling 3. `~blocked` (lose one story item) is the Dracula form of that redirect.
-16. **Encounter length:** several Dracula encounters have 4 moments (`enc-the-window.01-.04`, plus inserted `nx-midnight-procession` moments in `enc-early-lantern`), against E19e's 2-3. Cut them, or does an outro still count?
+16. **Encounter length:** settled by Bob (Oct 16 2026). Every Dracula hunter-token encounter is now 2-3 moments (`enc-early-lantern` is 2 plus the inserted procession moments). Variants replace a moment, they do not add one.
 17. **`enc-the-window.03`:** settled by ruling 6. The choice moves to the iPads. The Story board shows the prompt and the result.
 18. **E20e tie-break:** settled by ruling 5. A tie means retreat (`vote.tie: retreat`).
 19. **D-DRA-13/14 open values:** crypt rooms per length are settled by ruling 7 (Short 2, Standard 4, Long 6, target included). The improve trait is settled by ruling 8: it is removed, and a cleared room grants no Advantage. Set pieces per length are settled by ruling 12, and the sixth crypt room by ruling 13. Still open: hunter-token pace and the per-visit crypt room cap. What an applied Advantage does to a room cost is settled by ruling 11.
