@@ -2115,10 +2115,26 @@
   target: ipad:emeric
   lines:
     - {id: "enc-mist-remembers.02.private.emeric.vo-01", speaker: narrator, text: "Gerhardt's shop, every jar labelled in his hand. On the counter, a receipt: one name, sold. Face it, or walk through."}
-- id: "enc-mist-remembers.02~blocked"
+- id: "enc-mist-remembers.02.private.agnes~blocked"
   source: tokens-and-encounters.md
+  target: ipad:agnes
   lines:
-    - {id: "enc-mist-remembers.02~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+    - {id: "enc-mist-remembers.02.private.agnes~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+- id: "enc-mist-remembers.02.private.tomas~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:tomas
+  lines:
+    - {id: "enc-mist-remembers.02.private.tomas~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+- id: "enc-mist-remembers.02.private.wren~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:wren
+  lines:
+    - {id: "enc-mist-remembers.02.private.wren~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
+- id: "enc-mist-remembers.02.private.emeric~blocked"
+  source: tokens-and-encounters.md
+  target: ipad:emeric
+  lines:
+    - {id: "enc-mist-remembers.02.private.emeric~blocked.vo-01", speaker: narrator, text: "The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour."}
 - id: "enc-mist-remembers.03"
   source: tokens-and-encounters.md
   lines:
