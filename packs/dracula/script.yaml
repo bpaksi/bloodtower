@@ -426,11 +426,11 @@
   source: n1-open-grave.md
   lines:
     - {id: "n1-open-grave.08~no-wren.vo-01", speaker: agnes, text: "He'd want us to pray. So we pray."}
-- id: "n1-open-grave.08~fight-lost-no-wren"
+- id: "n1-open-grave.08~fight-lost~no-wren"
   source: n1-open-grave.md
   lines:
-    - {id: "n1-open-grave.08~fight-lost-no-wren.vo-01", speaker: narrator, text: "Oskar drags himself back into his grave, sated, and the hunters' lanterns are all out."}
-    - {id: "n1-open-grave.08~fight-lost-no-wren.vo-02", speaker: agnes, text: "We failed him twice now. Not a third time."}
+    - {id: "n1-open-grave.08~fight-lost~no-wren.vo-01", speaker: narrator, text: "Oskar drags himself back into his grave, sated, and the hunters' lanterns are all out."}
+    - {id: "n1-open-grave.08~fight-lost~no-wren.vo-02", speaker: agnes, text: "We failed him twice now. Not a third time."}
 - id: "n1-open-grave.02~no-emeric"
   source: n1-open-grave.md
   lines:

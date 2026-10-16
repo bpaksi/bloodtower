@@ -62,7 +62,7 @@ Riddle fragments and map are in the journal; Oskar is laid down. Midnight → `n
 **n1-open-grave.08~no-wren** [still] — Wren not in play
 > **Agnes:** He'd want us to pray. So we pray.
 
-**n1-open-grave.08~fight-lost-no-wren** [still] — fight lost and Wren not in play
+**n1-open-grave.08~fight-lost~no-wren** [still] — fight lost and Wren not in play
 > **Narrator:** Oskar drags himself back into his grave, sated, and the hunters' lanterns are all out.
 > **Agnes:** We failed him twice now. Not a third time.
 
