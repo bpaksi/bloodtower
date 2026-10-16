@@ -6,7 +6,7 @@
 - **Setting:** A gallery of the house's portraits, four hundred years of them. Every painting of Vlad is the same ageless face. At the end, a covered canvas.
 - **Mood:** Eerie, then unbearable recognition.
 - **Cast:** Narrator, Emeric Lutz, Wren Kessel, Sister Agnes Hallow, The Count (voice), Tomas Varga
-- **Targets:** untagged moments, lines and cues play on `dashboard` (Mac screen and speakers; tower cues fire from the Mac). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the dashboard. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
+- **Targets:** untagged moments, lines and cues play on `storyboard` (the Story board: Mac screen and speakers, display only; tower cues fire from the Mac; all taps and votes are on the iPads). Moments tagged `ipad:<hunter>` play only on that hunter's iPad, never on the Story board. Variant moments (`scene.moment~variant`) replace the base moment of the same number when their condition holds.
 
 ## Moments
 
@@ -40,6 +40,11 @@
 **n5-portrait-gallery.06.private.emeric** [still] `ipad:emeric`
 > **Narrator (private):** A scholar at a desk, a cup of wine at his elbow. Gerhardt. In the wine, a reflection with no man in it. He was poisoned with an invitation.
 
+**n5-portrait-gallery.combine** [still] [prop: pressed-flower] — Story board; auto-plays once every present hunter in it has tapped done on their `.06` private line, before `.07` (fellowship test 1)
+Journal: "Lenka has no portrait here. He has not got her yet."
+> **Agnes:** Mine is labelled "The one who prayed." He paints the ones he keeps.
+> **Wren:** Mother's is still wet. And there's nothing of Lenka. Only Ludmila. He hasn't got her.
+
 ## Outcome
 `galleryRevealSeen`. Behind Ludmila's portrait, the stair to the high room opens → `n5-final-confrontation`.
 
@@ -55,3 +60,12 @@
 > **Wren:** Read it. Brought a stake.
 **n5-portrait-gallery.02~no-emeric** [still] — Emeric not in play
 > **Wren:** Same face. Every frame. That one's moving.
+**n5-portrait-gallery.combine~no-agnes** [still] [prop: pressed-flower] — Agnes not in play (same journal clue)
+> **Tomas:** He painted me at the gate, looking at my boots. He paints the ones he keeps.
+> **Wren:** Mother's is still wet. And there's nothing of Lenka. Only Ludmila. He hasn't got her.
+**n5-portrait-gallery.combine~no-wren** [still] [prop: pressed-flower] — Wren not in play (same journal clue)
+> **Agnes:** Mine is labelled "The one who prayed." He paints the ones he keeps.
+> **Emeric:** Gerhardt's here. Lenka isn't. Only Ludmila. Then he hasn't got her.
+**n5-portrait-gallery.combine~no-agnes-no-wren** [still] [prop: pressed-flower] — neither in play (same journal clue)
+> **Tomas:** He painted me at the gate, looking at my boots. He paints the ones he keeps.
+> **Emeric:** Gerhardt's here. Lenka isn't. Only Ludmila. Then he hasn't got her.
