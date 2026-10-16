@@ -36,7 +36,7 @@
 [music: solo violin, one held note] [sfx: wind; a loose shutter knocking]
 > **Narrator:** Dusk on the second night. At the edge of the village a girl's shutters hang open, the nails pried out and laid in a neat row on the sill. Marta Varga is gone. On her pillow lies a letter on heavy cream paper: "Come home."
 
-**nx-pressed-flower.00~night2.private.tomas** [still] `ipad:tomas` [prop: come-home-letter]
+**nx-pressed-flower.00.private.tomas~night2** [still] `ipad:tomas` [prop: come-home-letter]
 > **Tomas (thought):** I nailed those shutters myself. He didn't break them. She drew the nails for him, one by one, and laid them out tidy, the way I taught her. *(I'm coming, lass.)*
 
 **nx-pressed-flower.01~night2** [still] [prop: pressed-flower]
