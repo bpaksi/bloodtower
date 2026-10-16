@@ -197,7 +197,7 @@ Choice voted on each iPad (ruling 6; the Story board shows the result): **Ward t
 - **Nights:** 1–4.
 - **Beat:** The fog takes the shape of each present hunter's worst night. The valley does not let anyone forget why they came.
 - **Cost / stake:** each present hunter chooses privately: **Face it** (take 1 corruption) or **Walk through it** (no cost).
-- **At 2 corruptions (`~blocked`):** that hunter is not offered Face it; they get a scare only (`.02~blocked`), no cost and no clue.
+- **At 2 corruptions (`~blocked`):** that hunter is not offered Face it; they get a scare only (`.02.private.<hunter>~blocked`), no cost and no clue.
 - **Outcome (proposed):** Face it = that hunter's tie advances (a tie clue in their journal, same targets as the procession: Agnes → gallery and Tome, Tomas → fly-eater, Wren → final confrontation, Emeric → the Tome). Walk through = nothing.
 - **Still prompt:** A hunter alone in dense white fog, faint shapes of a ruined infirmary, a castle wall, a grave and a cluttered apothecary shop forming in the mist around them.
 
@@ -217,7 +217,16 @@ Choice voted on each iPad (ruling 6; the Story board shows the result): **Ward t
 **enc-mist-remembers.02.private.emeric** [still] `ipad:emeric`
 > **Narrator (private):** Gerhardt's shop, every jar labelled in his hand. On the counter, a receipt: one name, sold. Face it, or walk through.
 
-**enc-mist-remembers.02~blocked** [still] — on the iPad of a present hunter at 2 corruptions, instead of their private moment
+**enc-mist-remembers.02.private.agnes~blocked** [still] `ipad:agnes` — when Agnes is present at 2 corruptions, instead of their private moment
+> **Narrator (private):** The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour.
+
+**enc-mist-remembers.02.private.tomas~blocked** [still] `ipad:tomas` — when Tomas is present at 2 corruptions, instead of their private moment
+> **Narrator (private):** The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour.
+
+**enc-mist-remembers.02.private.wren~blocked** [still] `ipad:wren` — when Wren is present at 2 corruptions, instead of their private moment
+> **Narrator (private):** The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour.
+
+**enc-mist-remembers.02.private.emeric~blocked** [still] `ipad:emeric` — when Emeric is present at 2 corruptions, instead of their private moment
 > **Narrator (private):** The mist begins to show you something, then draws back, as if it knows you have paid enough. You walk through. Your hands shake for an hour.
 
 **enc-mist-remembers.03** [still]
