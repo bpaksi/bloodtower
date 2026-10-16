@@ -246,6 +246,42 @@ describe("sidecar", () => {
     }
   });
 
+  it("keeps connecting through a broadcast that is not the answer to its connect", async () => {
+    const frame = (state: string) =>
+      JSON.stringify({ v: 1, type: "connection", payload: { state } });
+    let next: ((state: string) => void) | undefined;
+    // Another client's disconnect lands after our connect is sent, before tower-poc reads it.
+    const fake = await fakeTowerPoc({ state: "disconnected" }, (socket) => {
+      next = (state) => socket.send(frame(state));
+      socket.send(frame("disconnected"));
+    });
+    const tower = createSidecarTower({ url: fake.url });
+    const trace: string[] = [];
+    const watch = (until: () => boolean) =>
+      waitFor(() => {
+        const connection = tower.snapshot().connection;
+        if (trace.at(-1) !== connection) trace.push(connection);
+        return until();
+      });
+    try {
+      tower.connect();
+      await watch(() => fake.received.includes("connect"));
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      await watch(() => true);
+      expect(tower.snapshot().connection).toBe("connecting");
+      next?.("connecting");
+      next?.("connected");
+      await watch(() => tower.snapshot().connection === "connected");
+      expect(trace).not.toContain("disconnected");
+      // Once answered, a later drop is reported as usual.
+      next?.("disconnected");
+      await watch(() => tower.snapshot().connection === "disconnected");
+    } finally {
+      tower.close();
+      await fake.stop();
+    }
+  });
+
   it("does not send connect when tower-poc already has the tower", async () => {
     const fake = await fakeTowerPoc({ state: "connected" }, () => undefined);
     const tower = createSidecarTower({ url: fake.url });

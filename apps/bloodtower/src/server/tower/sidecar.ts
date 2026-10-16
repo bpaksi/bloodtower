@@ -79,15 +79,21 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
       const calibration = typeof payload.calibration === "string" ? payload.calibration : undefined;
       reported = mapConnection(state);
       const calibrated = mapCalibration(calibration);
+      const moving = reported === "connected" || reported === "connecting";
       if (helloReply) {
         helloReply = false;
-        if (reported !== "connected" && reported !== "connecting") {
+        if (!moving) {
           // The reading from before our connect. Stay connecting until the connect is answered.
           snapshot = { ...snapshot, calibrated };
           connectSent = true;
           send("connect", {});
           return;
         }
+      } else if ((wantConnect || connectSent) && !moving) {
+        // A broadcast from before tower-poc read our connect, such as another client's disconnect.
+        // tower-poc answers connect with an error or with connecting, so keep waiting for that.
+        snapshot = { ...snapshot, calibrated };
+        return;
       }
       connecting = false;
       connectSent = false;

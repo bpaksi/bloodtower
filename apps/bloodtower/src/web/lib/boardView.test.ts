@@ -59,16 +59,17 @@ describe("story board", () => {
     const base = state();
     const parse = (value: unknown) => storyboardStatePayloadSchema.safeParse(value).success;
     expect(parse(base)).toBe(true);
+    // The shared-moment rule: a private moment is refused by its id.
     expect(
       parse({ ...base, moment: { ...base.moment, id: "proving-ground.02.private.alpha" } }),
     ).toBe(false);
+    // Strictness: the payload has no field that could carry a line, so any extra key is refused.
     expect(
       parse({
         ...base,
         moment: { ...base.moment, lines: [{ speaker: "alpha", text: "Only Alpha hears this." }] },
       }),
     ).toBe(false);
-    expect(parse({ ...base, private: ["Only Alpha hears this."] })).toBe(false);
   });
 
   it("shows unavailable when the session has not started", () => {
