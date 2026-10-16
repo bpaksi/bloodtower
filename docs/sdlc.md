@@ -135,6 +135,17 @@ An app plan names which of these it uses. Batch evidence (below) is posted for B
 - **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and he merges when CI is green and nothing is blocking.
 - **Claude Code on the Mac** stays valid for tower and hardware work, which needs the Bluetooth link. Local agents use the `pnpm wt` worktree flow below; cloud agents already run in their own clones, so they skip it.
 
+## Local mode (cloud agents unavailable)
+
+When Cursor cloud agents cannot run, a batch is built in Claude Code on Bob's Mac from a hand-off prompt in the app's `plans/` folder (for example `apps/bloodtower/plans/B4-handoff.md`).
+
+- Work only in a worktree on a new branch off `origin/main` (`pnpm wt <branch>`). Never edit, stash, or switch branches in Bob's main checkout.
+- Deliver as a PR to `main`. The required `check` still gates it.
+- Two Claude Code subagents replace the two cloud reviewers: a **reviewer** (`adversary-bugs`: bugs, edge cases, adversarial) and a **verifier** (spec/PRD conformance as `adversary-prd`, and it runs the exit tests). Each ends its PR report with `Blocking: none` or `Blocking: <n>`.
+- Same cap of 3 rounds. Round 1 uses the default model; rounds 2 and 3 use Opus (round 2 high effort, round 3 max effort).
+- If blockers remain after round 3, label the PR `needs-bob` and stop.
+- Claude Code never merges. Wright reviews and merges as in §4.
+
 ## Parallel work (several developer agents at once)
 
 The loop runs plan steps in batches. Steps in a batch run at the same time, each in its own worktree; merging stays serial.
