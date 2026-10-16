@@ -1,0 +1,64 @@
+{
+  "id": "keeper",
+  "name": "The Keeper",
+  "status": "approved",
+  "portrait": "portrait.png",
+  "anchor": "anchor.json",
+  "mouthMode": "frame",
+  "mouths": {
+    "X": "mouths/REST.png",
+    "A": "mouths/MBP.png",
+    "B": "mouths/CONS-EE.png",
+    "C": "mouths/EH-AE.png",
+    "D": "mouths/AH.png",
+    "E": "mouths/OH-ER.png",
+    "F": "mouths/OO-W.png",
+    "G": "mouths/FV.png",
+    "H": "mouths/CONS-EE.png"
+  },
+  "voice": {
+    "provider": "Gemini TTS (free tier)",
+    "model": "gemini-3.8-flash-tts",
+    "voice": "Algenib",
+    "note": "slow"
+  },
+  "rhubarb": {
+    "version": "1.14.0",
+    "extendedShapes": "GHX"
+  },
+  "lines": [
+    {
+      "line_id": "ts-keeper-001",
+      "text": "Light them if you can. [pause 0.5] The key is at the bottom. It always is.",
+      "style": "old caretaker who has watched many go down the stair; tired, kind, low, slow",
+      "status": "approved",
+      "voice": "Algenib",
+      "audio": "lines/ts-keeper-001.m4a",
+      "timing": "lines/ts-keeper-001.json",
+      "duration_s": 7.4,
+      "loudness_lufs": -16
+    },
+    {
+      "line_id": "ts-keeper-002",
+      "text": "Mind the third step. It remembers everyone who ever fell on it.",
+      "style": "old caretaker who has watched many go down the stair; tired, kind, low, slow; delivered dry, with half a smile",
+      "status": "approved",
+      "voice": "Algenib",
+      "audio": "lines/ts-keeper-002.m4a",
+      "timing": "lines/ts-keeper-002.json",
+      "duration_s": 6.33,
+      "loudness_lufs": -16
+    },
+    {
+      "line_id": "ts-keeper-003",
+      "text": "Go on, then. I'll keep the lamp lit until you're back. I always do.",
+      "style": "old caretaker who has watched many go down the stair; tired, kind, low, slow; delivered warm and slow",
+      "status": "approved",
+      "voice": "Algenib",
+      "audio": "lines/ts-keeper-003.m4a",
+      "timing": "lines/ts-keeper-003.json",
+      "duration_s": 6.04,
+      "loudness_lufs": -17
+    }
+  ]
+}
