@@ -25,7 +25,7 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
   const tower = towerStatusLines(state.tower);
   const paused = pauseText(state.pause, state.hunters);
   const warning = joinWarning(state.join);
-  const chapter = state.screen === "play" ? TABLE_STORY.title : SCREEN_TITLE[state.screen];
+  const chapter = TABLE_STORY.title;
   return (
     <main className="bt-board" data-screen={state.screen} data-moment={state.moment?.id ?? ""}>
       <div className="bt-board-vignette" aria-hidden="true" />
@@ -139,8 +139,7 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
     ) : (
       <p className="bt-join-missing">Join code unavailable.</p>
     )}
-    <p className="bt-join-code">{join ? join.code : "unavailable"}</p>
-    {join ? <p className="bt-join-url">{join.url}</p> : null}
+    {join ? <p className="bt-join-url">{join.url}</p> : <p className="bt-join-code">unavailable</p>}
   </section>
 );
 
