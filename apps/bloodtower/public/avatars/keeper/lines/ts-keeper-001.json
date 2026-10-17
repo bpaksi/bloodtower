@@ -1,0 +1,163 @@
+{
+  "metadata": {
+    "soundFile": "ts-keeper-001.wav",
+    "duration": 7.4
+  },
+  "mouthCues": [
+    {
+      "start": 0.0,
+      "end": 0.03,
+      "value": "X"
+    },
+    {
+      "start": 0.03,
+      "end": 0.14,
+      "value": "H"
+    },
+    {
+      "start": 0.14,
+      "end": 0.21,
+      "value": "C"
+    },
+    {
+      "start": 0.21,
+      "end": 0.28,
+      "value": "B"
+    },
+    {
+      "start": 0.28,
+      "end": 0.4,
+      "value": "X"
+    },
+    {
+      "start": 0.4,
+      "end": 0.52,
+      "value": "B"
+    },
+    {
+      "start": 0.52,
+      "end": 0.59,
+      "value": "C"
+    },
+    {
+      "start": 0.59,
+      "end": 0.83,
+      "value": "A"
+    },
+    {
+      "start": 0.83,
+      "end": 1.01,
+      "value": "B"
+    },
+    {
+      "start": 1.01,
+      "end": 1.08,
+      "value": "G"
+    },
+    {
+      "start": 1.08,
+      "end": 1.15,
+      "value": "F"
+    },
+    {
+      "start": 1.15,
+      "end": 1.85,
+      "value": "C"
+    },
+    {
+      "start": 1.85,
+      "end": 1.99,
+      "value": "B"
+    },
+    {
+      "start": 1.99,
+      "end": 2.49,
+      "value": "X"
+    },
+    {
+      "start": 2.49,
+      "end": 2.55,
+      "value": "B"
+    },
+    {
+      "start": 2.55,
+      "end": 2.61,
+      "value": "C"
+    },
+    {
+      "start": 2.61,
+      "end": 3.94,
+      "value": "B"
+    },
+    {
+      "start": 3.94,
+      "end": 4.01,
+      "value": "C"
+    },
+    {
+      "start": 4.01,
+      "end": 4.15,
+      "value": "B"
+    },
+    {
+      "start": 4.15,
+      "end": 4.23,
+      "value": "A"
+    },
+    {
+      "start": 4.23,
+      "end": 4.45,
+      "value": "D"
+    },
+    {
+      "start": 4.45,
+      "end": 4.59,
+      "value": "B"
+    },
+    {
+      "start": 4.59,
+      "end": 4.67,
+      "value": "A"
+    },
+    {
+      "start": 4.67,
+      "end": 4.9,
+      "value": "B"
+    },
+    {
+      "start": 4.9,
+      "end": 5.71,
+      "value": "X"
+    },
+    {
+      "start": 5.71,
+      "end": 5.79,
+      "value": "B"
+    },
+    {
+      "start": 5.79,
+      "end": 6.0,
+      "value": "E"
+    },
+    {
+      "start": 6.0,
+      "end": 6.28,
+      "value": "H"
+    },
+    {
+      "start": 6.28,
+      "end": 6.35,
+      "value": "F"
+    },
+    {
+      "start": 6.35,
+      "end": 7.12,
+      "value": "B"
+    },
+    {
+      "start": 7.12,
+      "end": 7.4,
+      "value": "X"
+    }
+  ]
+}

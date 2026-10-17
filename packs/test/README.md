@@ -210,7 +210,7 @@ Engine events (presence, private delivery, choice lock, cost_applied with guard_
 Format 2.1. Checked by V-22/V-23.
 ```yaml
 # cast.yaml
-- {id: keeper, name: "The Keeper", voice: {provider: elevenlabs, name: keeper-v1, style: "tired, kind, low"}, portrait: por.keeper,
+- {id: keeper, name: "The Keeper", voice: {provider: gemini-tts, model: gemini-3.8-flash-tts, name: Algenib, style: "tired, kind, low"}, portrait: por.keeper,
    mouths: {rest: m.keeper.rest, mbp: m.keeper.mbp, cons_ee: m.keeper.cons_ee, eh_ae: m.keeper.eh_ae, ah: m.keeper.ah, oh_er: m.keeper.oh_er, oo_w: m.keeper.oo_w, fv: m.keeper.fv}, anchor: {x: 0.502, y: 0.6133, w: 0.3418, h: 0.25}}
 # script.yaml
 - id: grey-stair.03
