@@ -284,6 +284,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
           issues: [
             issue(id, "(folder)", "V-1", `The folder name is over ${STORY_ID_MAX} characters.`),
           ],
+          assets: null,
         };
       }
       const loaded = loadPackDir(join(packsDir, id));
