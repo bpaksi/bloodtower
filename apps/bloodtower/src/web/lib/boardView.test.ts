@@ -172,7 +172,7 @@ describe("story board", () => {
           screen: "pick-story",
           stage: "lobby",
           pause: null,
-          prompt: { id: "continue-pick-story", label: "Choose the story" },
+          prompt: { id: "continue-pick-story", label: "Choose Proving ground" },
           moment: null,
         }),
       }),
