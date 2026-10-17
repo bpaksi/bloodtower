@@ -1,7 +1,7 @@
 "use client";
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
-import { SCREEN_NEXT, SCREEN_TITLE, TABLE_STORY } from "../../lib/screens";
+import { SCREEN_NEXT, SCREEN_TITLE, TABLE_STORY, towerReady } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { deviceControls } from "./controls";
 
@@ -47,20 +47,32 @@ export function DeviceScreen({
   const roster = state.roster ?? [];
   const partyReason =
     state.screen === "party-join" && !controls.continue ? "Claim all hunters first" : null;
+  const ready = towerReady(tower);
   const primaryContinue =
     controls.continue &&
     (state.screen === "pick-story" ||
       state.screen === "party-join" ||
       (state.screen === "play" && !controls.resume) ||
-      (state.screen === "tower-connect" && !controls.towerConnect && !controls.towerCalibrate));
+      (state.screen === "tower-connect" && ready));
   const primaryBegin = state.screen === "begin" && controls.begin;
 
   return (
     <main
-      className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-10"
+      className="relative mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-10"
       data-layout="ipad"
       data-screen={state.screen}
     >
+      {state.screen === "play" ? (
+        <button
+          type="button"
+          className="bt-ghost bt-menu"
+          data-action="pause"
+          disabled={!controls.pause}
+          onClick={() => press(pausePromptId, "pause", controls.pause)}
+        >
+          Menu
+        </button>
+      ) : null}
       <header className="space-y-2">
         <p className="bt-kicker">iPad</p>
         <h1 className="text-4xl">{SCREEN_TITLE[state.screen]}</h1>
@@ -75,7 +87,12 @@ export function DeviceScreen({
 
       {state.screen === "splash" ? <SplashDevice /> : null}
       {state.screen === "tower-connect" ? (
-        <TowerConnectDevice controls={controls} press={press} promptId={state.prompt?.id ?? null} />
+        <TowerConnectDevice
+          controls={controls}
+          press={press}
+          promptId={state.prompt?.id ?? null}
+          skip={controls.continue && !ready}
+        />
       ) : null}
       {state.screen === "pick-story" ? <PickStoryDevice /> : null}
       {state.screen === "party-join" ? (
@@ -102,26 +119,6 @@ export function DeviceScreen({
       <section className="flex flex-col gap-3">
         <button
           type="button"
-          className="bt-secondary"
-          data-action="tower-connect"
-          hidden={state.screen !== "begin"}
-          disabled={!controls.towerConnect}
-          onClick={() => press("tower-connect", "tower-connect", controls.towerConnect)}
-        >
-          Connect tower
-        </button>
-        <button
-          type="button"
-          className="bt-secondary"
-          data-action="tower-calibrate"
-          hidden={state.screen !== "begin"}
-          disabled={!controls.towerCalibrate}
-          onClick={() => press("tower-calibrate", "tower-calibrate", controls.towerCalibrate)}
-        >
-          Calibrate
-        </button>
-        <button
-          type="button"
           className={primaryBegin ? "bt-primary" : "bt-ghost"}
           data-action="begin"
           data-primary={primaryBegin ? "true" : undefined}
@@ -140,6 +137,7 @@ export function DeviceScreen({
             state.screen === "begin" ||
             state.screen === "splash" ||
             state.screen === "quit" ||
+            (state.screen === "tower-connect" && !ready) ||
             (state.screen === "play" && controls.resume)
           }
           disabled={!controls.continue}
@@ -150,16 +148,6 @@ export function DeviceScreen({
         {partyReason && !controls.continue ? (
           <p className="text-lg text-[var(--bt-muted)]">Disabled: {partyReason}.</p>
         ) : null}
-        <button
-          type="button"
-          className="bt-ghost"
-          data-action="pause"
-          hidden={state.screen !== "play"}
-          disabled={!controls.pause}
-          onClick={() => press(pausePromptId, "pause", controls.pause)}
-        >
-          Menu
-        </button>
         <button
           type="button"
           className={controls.resume ? "bt-primary" : "bt-ghost"}
@@ -195,10 +183,12 @@ const TowerConnectDevice = ({
   controls,
   press,
   promptId,
+  skip,
 }: {
   controls: ReturnType<typeof deviceControls>;
   press: (promptId: string | null, action: ControlAction, enabled: boolean) => void;
   promptId: string | null;
+  skip: boolean;
 }) => {
   const connectPrimary = controls.towerConnect;
   const calibratePrimary = !connectPrimary && controls.towerCalibrate;
@@ -224,15 +214,17 @@ const TowerConnectDevice = ({
       >
         Calibrate
       </button>
-      <button
-        type="button"
-        className={!connectPrimary && !calibratePrimary ? "bt-primary" : "bt-secondary"}
-        data-action="play-without-tower"
-        disabled={!controls.continue}
-        onClick={() => press(promptId, "continue", controls.continue)}
-      >
-        Play without tower
-      </button>
+      {skip ? (
+        <button
+          type="button"
+          className="bt-secondary"
+          data-action="play-without-tower"
+          disabled={!controls.continue}
+          onClick={() => press(promptId, "continue", controls.continue)}
+        >
+          Play without tower
+        </button>
+      ) : null}
     </section>
   );
 };

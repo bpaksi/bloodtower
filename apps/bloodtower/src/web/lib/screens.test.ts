@@ -7,6 +7,7 @@ import {
   SCREEN_NEXT,
   SCREEN_TITLE,
   TABLE_STORY,
+  towerReady,
   towerStripState,
 } from "./screens";
 
@@ -20,10 +21,35 @@ describe("opening screen copy", () => {
   });
 
   it("maps tower connection to the status-strip words", () => {
-    expect(towerStripState("connected")).toBe("connected");
-    expect(towerStripState("connecting")).toBe("connecting");
-    expect(towerStripState("disconnected")).toBe("lost");
-    expect(towerStripState("unavailable")).toBe("no tower");
+    const reading = (
+      connection: "connected" | "connecting" | "disconnected" | "unavailable",
+      calibrated: { state: "unavailable" } | { state: "known"; calibrated: boolean },
+    ) =>
+      towerStripState({
+        connection,
+        battery: { state: "unavailable" },
+        calibrated,
+      });
+    expect(reading("connected", { state: "unavailable" })).toBe("connected");
+    expect(reading("connected", { state: "known", calibrated: true })).toBe("connected");
+    expect(reading("connected", { state: "known", calibrated: false })).toBe("calibrating");
+    expect(reading("connecting", { state: "unavailable" })).toBe("connecting");
+    expect(reading("disconnected", { state: "unavailable" })).toBe("lost");
+    expect(reading("unavailable", { state: "unavailable" })).toBe("no tower");
+    expect(
+      towerReady({
+        connection: "connected",
+        battery: { state: "unavailable" },
+        calibrated: { state: "known", calibrated: true },
+      }),
+    ).toBe(true);
+    expect(
+      towerReady({
+        connection: "connected",
+        battery: { state: "unavailable" },
+        calibrated: { state: "known", calibrated: false },
+      }),
+    ).toBe(false);
   });
 
   it("counts claimed hunters and unique joined devices", () => {

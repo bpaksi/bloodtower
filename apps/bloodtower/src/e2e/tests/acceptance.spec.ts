@@ -88,26 +88,91 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(cells).toEqual(expected);
     });
 
-    await test.step("AC-4: join by the QR target, hold several hunters, Begin waits for all", async () => {
+    await test.step("AC-4: join by the QR target, then Tower Connect", async () => {
       await pageA.goto(joinPage);
       await pageB.goto(joinPage);
+      await expect(pageA).toHaveURL(/\/device/);
+      await expect(pageB).toHaveURL(/\/device/);
+      await expect(pageA.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
+      await expect(pageB.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
+      await expect(a.button("play-without-tower")).toBeVisible();
+      await expect(a.button("continue")).toBeHidden();
+    });
+
+    await test.step("AC-9 (mock): connect from both devices at once, one wins, then calibrate", async () => {
+      await expect(board.getByText(/Tower unavailable/)).toBeVisible();
+      gateA.hold();
+      gateB.hold();
+      await a.button("tower-connect").click();
+      await b.button("tower-connect").click();
+      await gateA.held(1);
+      await gateB.held(1);
+      expect(releaseTogether(gateA, gateB)).toBe(2);
+
+      await expect(board.getByText(/Tower connected/)).toBeVisible();
+      await expect(board.locator("[data-status='tower']")).toContainText("calibrating");
+      const statuses = [
+        await pageA
+          .getByText(/Your press counted|Locked\. Another player pressed first/)
+          .first()
+          .textContent(),
+        await pageB
+          .getByText(/Your press counted|Locked\. Another player pressed first/)
+          .first()
+          .textContent(),
+      ].sort();
+      expect(statuses).toEqual(["Locked. Another player pressed first.", "Your press counted."]);
+      const connects = host.loadRun().presses.filter((press) => press.promptId === "tower-connect");
+      expect(connects.map((press) => press.winner).sort()).toEqual([false, true]);
+
+      // Either device may calibrate: both press, the first arrival wins, the other is locked out.
+      await expect(a.button("tower-calibrate")).toBeEnabled();
+      await expect(b.button("tower-calibrate")).toBeEnabled();
+      gateA.hold();
+      gateB.hold();
+      await a.button("tower-calibrate").click();
+      await b.button("tower-calibrate").click();
+      await gateA.held(1);
+      await gateB.held(1);
+      expect(releaseTogether(gateA, gateB)).toBe(2);
+      await expect(board.getByText(/Calibration calibrated/)).toBeVisible();
+      await expect(board.locator("[data-status='tower']")).toContainText("connected");
+      await expect(a.button("tower-calibrate")).toBeDisabled();
+      await expect(b.button("tower-calibrate")).toBeDisabled();
+      await expect
+        .poll(
+          () =>
+            host.loadRun().presses.filter((press) => press.promptId === "tower-calibrate").length,
+        )
+        .toBe(2);
+      const calibrates = host
+        .loadRun()
+        .presses.filter((press) => press.promptId === "tower-calibrate");
+      expect(calibrates.map((press) => press.winner).sort()).toEqual([false, true]);
+      // The losing presses did not reach the tower: one connect and one calibrate only.
+      expect(tower.sent()).toEqual([{ type: "connect" }, { type: "calibrate" }]);
+
+      tower.setBattery(76);
+      await expect(board.getByText(/Battery 76%/)).toBeVisible();
+      await expect(pageA.getByText(/Battery 76%/)).toBeVisible();
+    });
+
+    await test.step("AC-4: hold several hunters; Begin waits for all", async () => {
+      await expect(a.button("continue")).toHaveText("Next: pick a story");
+      await expect(a.locator('[data-primary="true"]')).toHaveCount(1);
+      await expect(a.button("play-without-tower")).toHaveCount(0);
+      await a.button("continue").click();
+      await expect(a.button("continue")).toHaveText("Choose the story");
+      await a.button("continue").click();
+      await expect(pageA.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await a.hold("alpha").click();
       await expect(a.hold("alpha")).toHaveAttribute("data-action", "release");
       await a.hold("beta").click();
       await expect(a.hold("beta")).toHaveAttribute("data-action", "release");
       await b.hold("gamma").click();
       await expect(b.hold("gamma")).toHaveAttribute("data-action", "release");
-
-      await pageA.getByRole("link", { name: "Open controls" }).click();
-      await expect(pageA.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Alpha" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Beta" })).toBeVisible();
-      await expect(a.button("pause")).toBeDisabled();
-      // Tower connect is the first step, so Continue offers it before any hunter is held.
-      await expect(a.button("continue")).toHaveText("Next: pick a story");
-      await a.button("continue").click();
-      await expect(a.button("continue")).toHaveText("Choose the story");
-      await a.button("continue").click();
       // Party join: the next step waits until every hunter is held.
       await expect(board.getByText("Delta — waiting")).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();
@@ -116,7 +181,6 @@ test("the test pack's first night, end to end, on one board and two devices", as
 
       await b.hold("delta").click();
       await expect(b.hold("delta")).toHaveAttribute("data-action", "release");
-      await pageB.getByRole("link", { name: "Open controls" }).click();
       await expect(pageB.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await expect(pageB.getByRole("heading", { name: "Delta" })).toBeVisible();
       await expect(a.button("continue")).toHaveText("Next: set up the story");
@@ -134,64 +198,12 @@ test("the test pack's first night, end to end, on one board and two devices", as
     expect(idA).not.toBe(idB);
     expect(holdings.find((holding) => holding.hunter === "beta")?.deviceId).toBe(idA);
     expect(holdings.find((holding) => holding.hunter === "gamma")?.deviceId).toBe(idB);
-
-    await test.step("AC-9 (mock): connect from both devices at once, one wins, then calibrate", async () => {
-      await expect(board.getByText(/Tower unavailable/)).toBeVisible();
-      gateA.hold();
-      gateB.hold();
-      await a.button("tower-connect").click();
-      await b.button("tower-connect").click();
-      await gateA.held(1);
-      await gateB.held(1);
-      expect(releaseTogether(gateA, gateB)).toBe(2);
-
-      await expect(board.getByText(/Tower connected/)).toBeVisible();
-      const statuses = [
-        await pageA
-          .getByText(/Your press counted|Locked\. Another player pressed first/)
-          .first()
-          .textContent(),
-        await pageB
-          .getByText(/Your press counted|Locked\. Another player pressed first/)
-          .first()
-          .textContent(),
-      ].sort();
-      expect(statuses).toEqual(["Locked. Another player pressed first.", "Your press counted."]);
-      const connects = host.loadRun().presses.filter((press) => press.promptId === "tower-connect");
-      expect(connects.map((press) => press.winner).sort()).toEqual([false, true]);
-      expect(new Set(connects.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
-
-      // Either device may calibrate: both press, the first arrival wins, the other is locked out.
-      await expect(a.button("tower-calibrate")).toBeEnabled();
-      await expect(b.button("tower-calibrate")).toBeEnabled();
-      gateA.hold();
-      gateB.hold();
-      await a.button("tower-calibrate").click();
-      await b.button("tower-calibrate").click();
-      await gateA.held(1);
-      await gateB.held(1);
-      expect(releaseTogether(gateA, gateB)).toBe(2);
-      await expect(board.getByText(/Calibration calibrated/)).toBeVisible();
-      await expect(a.button("tower-calibrate")).toBeDisabled();
-      await expect(b.button("tower-calibrate")).toBeDisabled();
-      await expect
-        .poll(
-          () =>
-            host.loadRun().presses.filter((press) => press.promptId === "tower-calibrate").length,
-        )
-        .toBe(2);
-      const calibrates = host
-        .loadRun()
-        .presses.filter((press) => press.promptId === "tower-calibrate");
-      expect(calibrates.map((press) => press.winner).sort()).toEqual([false, true]);
-      expect(new Set(calibrates.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
-      // The losing presses did not reach the tower: one connect and one calibrate only.
-      expect(tower.sent()).toEqual([{ type: "connect" }, { type: "calibrate" }]);
-
-      tower.setBattery(76);
-      await expect(board.getByText(/Battery 76%/)).toBeVisible();
-      await expect(pageA.getByText(/Battery 76%/)).toBeVisible();
-    });
+    const connects = host.loadRun().presses.filter((press) => press.promptId === "tower-connect");
+    expect(new Set(connects.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
+    const calibrates = host
+      .loadRun()
+      .presses.filter((press) => press.promptId === "tower-calibrate");
+    expect(new Set(calibrates.map((press) => press.deviceId))).toEqual(new Set([idA, idB]));
 
     await test.step("Begin starts the night on the board", async () => {
       await a.button("begin").click();
@@ -261,10 +273,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await pageC.goto("/join");
       await pageC.getByLabel("Rejoin token").fill(tokenB ?? "");
       await pageC.getByRole("button", { name: "Rejoin" }).click();
-      await expect(pageC.locator('button[data-hunter="delta"]')).toHaveAttribute(
-        "data-action",
-        "release",
-      );
+      await expect(pageC).toHaveURL(/\/device/);
+      await expect(pageC.locator("main")).toHaveAttribute("data-screen", "play");
+      await expect(pageC.getByRole("heading", { name: "Delta" })).toBeVisible();
       await expect(board.getByText("Waiting for someone to hold Gamma.")).toHaveCount(0);
       await expect(a.button("continue")).toBeEnabled();
 
@@ -273,7 +284,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(pauses[0]).toMatchObject({ cause: "disconnect", hunter: "gamma" });
       expect(pauses[0]?.endMonoMs).not.toBeNull();
 
-      // A host pause and Resume. The rejoined page stays on join: leaving it drops its socket.
+      // A host pause and Resume. The rejoined page stays on /device so its holdings stay live.
       await a.button("pause").click();
       await expect(board.getByText("Paused.", { exact: true })).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();
@@ -351,13 +362,13 @@ test("the test pack's first night, end to end, on one board and two devices", as
       });
       expect(won("begin")).toMatchObject({ winner: true, screen: "begin", nextScreen: "play" });
       expect(run.presses.map((press) => `${press.promptId}:${press.winner}`)).toEqual([
-        "continue-tower-connect:true",
-        "continue-pick-story:true",
-        "continue-party-join:true",
         "tower-connect:true",
         "tower-connect:false",
         "tower-calibrate:true",
         "tower-calibrate:false",
+        "continue-tower-connect:true",
+        "continue-pick-story:true",
+        "continue-party-join:true",
         "begin:true",
         "continue-0:true",
         "continue-0:false",

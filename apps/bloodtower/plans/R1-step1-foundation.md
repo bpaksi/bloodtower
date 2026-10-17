@@ -181,8 +181,9 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 ### R2 opening screens (branch `cursor/r2-opening-screens-77a7`)
 
 - Web-only. The board and iPad render the server-held `screen` from D20. No change to `engine.ts`, protocols, `pack.ts`, tokens, or tower hardware.
-- iPads only; the phone layout toggle is gone. The join page no longer shows the device token (R2-32). Party Join shows the LAN join URL and QR.
-- The R2-01 status strip (tower / devices / step) is on every board screen after splash. Pre-play steps keep the existing `continue-<screen>` and `begin` prompts.
+- iPads only; the phone layout toggle is gone. The join page no longer shows the device token (R2-32). A joined iPad enters Tower Connect on `/device` without a claim page or Open controls. Party Join shows the LAN join URL and QR.
+- The R2-01 status strip (tower / devices / step) is on every board screen after splash, including `calibrating`. Pre-play steps keep the existing `continue-<screen>` and `begin` prompts.
+- Tower Connect has one primary: Connect, then Calibrate, then Next. Play without tower is the secondary skip until the tower is ready. Play keeps `KeeperScene` for `grey-stair.03` (D21). Opening screens are D22.
 
 ### R2 flow state (branch `feat/r2-flow-state`)
 

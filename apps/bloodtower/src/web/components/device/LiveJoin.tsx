@@ -1,30 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DEVICE_TOKEN_KEY,
   deviceHello,
   forgetStoredToken,
   openSession,
-  type SessionClient,
   sessionUrl,
 } from "../../lib/session";
 import { detectFormFactor } from "./formFactor";
-import { type JoinHunter, JoinScreen } from "./JoinScreen";
+import { JoinScreen } from "./JoinScreen";
 
 const codeFromLocation = () => {
   const value = new URLSearchParams(window.location.search).get("code");
   return value && /^\d{6}$/.test(value) ? value : null;
 };
 
-/** Join, holdings and the rejoin token. Presses go to the session host. */
+const enterDevice = () => {
+  window.location.assign("/device");
+};
+
+/** Join and rejoin. Once welcomed, the iPad enters Tower Connect. */
 export function LiveJoin() {
   const [live, setLive] = useState(false);
   const [code, setCode] = useState<string | null>(null);
-  const [hunters, setHunters] = useState<JoinHunter[]>([]);
-  const [held, setHeld] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
-  const client = useRef<SessionClient | null>(null);
 
   useEffect(() => {
     const urlCode = codeFromLocation();
@@ -56,11 +56,10 @@ export function LiveJoin() {
         if (welcome.role !== "device") return;
         welcomed = true;
         sessionStorage.setItem(DEVICE_TOKEN_KEY, welcome.token);
+        enterDevice();
       },
       onStoryboard: () => undefined,
-      onDevice: (state) => {
-        setHeld(state.heldHunters);
-        if (state.roster) setHunters(state.roster);
+      onDevice: () => {
         setNotice(null);
       },
       onError: (error) => {
@@ -72,7 +71,6 @@ export function LiveJoin() {
         if (urlCode) window.location.reload();
       },
     });
-    client.current = session;
     return () => session.close();
   }, []);
 
@@ -81,22 +79,12 @@ export function LiveJoin() {
       <JoinScreen
         live={live}
         code={code}
-        hunters={hunters}
-        held={held}
-        onHold={(hunter, action) => {
-          client.current?.sendHold(hunter, action);
-        }}
         onRejoin={(next) => {
           sessionStorage.setItem(DEVICE_TOKEN_KEY, next);
-          window.location.assign("/join");
+          enterDevice();
         }}
       />
       {notice ? <p role="status">{notice}</p> : null}
-      <p>
-        <a className="bt-primary mt-4 inline-flex no-underline" href="/device">
-          Open controls
-        </a>
-      </p>
     </>
   );
 }

@@ -61,6 +61,20 @@ describe("story board", () => {
     expect(html).toContain("connected");
     expect(html).not.toContain("ipad:");
     expect(html).not.toContain("data-action");
+
+    const calibrating = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: {
+          ...state(),
+          tower: {
+            connection: "connected",
+            battery: { state: "unavailable" },
+            calibrated: { state: "known", calibrated: false },
+          },
+        },
+      }),
+    );
+    expect(calibrating).toContain("calibrating");
   });
 
   it("cannot be handed a private line", () => {
@@ -98,6 +112,7 @@ describe("story board", () => {
     expect(html).toContain("Light them if you can. The key is at the bottom. It always is.");
     expect(html).toContain("Mind the third step.");
     expect(html).toContain("keep the lamp lit until you");
+    expect(html).not.toContain("Text unavailable.");
     expect(html).not.toContain("ipad:");
     expect(html).not.toMatch(interactive);
   });

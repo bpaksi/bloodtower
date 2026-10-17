@@ -2,28 +2,17 @@
 
 import { useEffect, useState } from "react";
 
-export interface JoinHunter {
-  id: string;
-  name: string;
-}
-
 /**
- * Join landing. Holdings change only from here or the party-join screen,
- * and only once a session host is connected. The device token is never shown.
+ * Join landing. A device with a code waits, then the host opens /device.
+ * Holdings change only from Party Join. The device token is never shown.
  */
 export function JoinScreen({
   live,
   code,
-  hunters,
-  held,
-  onHold,
   onRejoin,
 }: {
   live: boolean;
   code: string | null;
-  hunters: readonly JoinHunter[];
-  held: readonly string[];
-  onHold?: (hunter: string, action: "take" | "release") => void;
   onRejoin?: (token: string) => void;
 }) {
   const [urlCode, setUrlCode] = useState<string | null>(null);
@@ -38,57 +27,50 @@ export function JoinScreen({
       <header className="space-y-2">
         <p className="bt-kicker">iPad</p>
         <h1 className="text-4xl">Join</h1>
-        <p className="text-xl text-[var(--bt-muted)]">Scan the board QR, then claim hunters.</p>
+        <p className="text-xl text-[var(--bt-muted)]">
+          {shown
+            ? "Game is loading..."
+            : "Paste a rejoin token if this iPad was already at the table."}
+        </p>
       </header>
       {live ? null : <p>Session host unavailable.</p>}
-      <p className="text-5xl tracking-widest">{shown ?? "Join code unavailable."}</p>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm uppercase tracking-wide">Hunters</h2>
-        {hunters.length === 0 ? <p>Hunters unavailable.</p> : null}
-        {hunters.map((hunter) => {
-          const mine = held.includes(hunter.id);
-          return (
-            <button
-              key={hunter.id}
-              type="button"
-              className="bt-ghost"
-              disabled={!live}
-              data-action={mine ? "release" : "take"}
-              data-hunter={hunter.id}
-              onClick={() => onHold?.(hunter.id, mine ? "release" : "take")}
-            >
-              {mine ? `Release ${hunter.name}` : `Hold ${hunter.name}`}
-            </button>
-          );
-        })}
-      </section>
-      <form
-        className="flex flex-col gap-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const next = token.trim();
-          if (next.length === 0) return;
-          onRejoin?.(next);
-        }}
-      >
-        <label className="flex flex-col gap-2 text-lg">
-          Rejoin token
-          <input
-            className="min-h-14 bg-[var(--bt-card)] px-3 text-xl"
-            name="token"
-            value={token}
-            disabled={!live && !onRejoin}
-            onChange={(event) => setToken(event.target.value)}
-          />
-        </label>
-        <button
-          type="submit"
-          className="bt-secondary"
-          disabled={token.trim().length === 0 || (!live && !onRejoin)}
+      {shown ? (
+        <article className="bt-card space-y-3 text-2xl">
+          <p>Game is loading...</p>
+          <p className="text-5xl tracking-widest">{shown}</p>
+        </article>
+      ) : (
+        <p className="text-5xl tracking-widest">Join code unavailable.</p>
+      )}
+      {shown ? null : (
+        <form
+          className="flex flex-col gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const next = token.trim();
+            if (next.length === 0) return;
+            onRejoin?.(next);
+          }}
         >
-          Rejoin
-        </button>
-      </form>
+          <label className="flex flex-col gap-2 text-lg">
+            Rejoin token
+            <input
+              className="min-h-14 bg-[var(--bt-card)] px-3 text-xl"
+              name="token"
+              value={token}
+              disabled={!live && !onRejoin}
+              onChange={(event) => setToken(event.target.value)}
+            />
+          </label>
+          <button
+            type="submit"
+            className="bt-secondary"
+            disabled={token.trim().length === 0 || (!live && !onRejoin)}
+          >
+            Rejoin
+          </button>
+        </form>
+      )}
     </main>
   );
 }

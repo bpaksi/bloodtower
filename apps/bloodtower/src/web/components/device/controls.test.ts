@@ -149,27 +149,19 @@ describe("device screens", () => {
     expect(device).toContain("Only Alpha hears this.");
     expect(device).toContain("Alpha:");
     expect(device).toContain("Continue");
-    expect(device).toContain("Connect tower");
-    expect(device).toContain("Calibrate");
+    expect(device).toContain("Menu");
+    expect(device).toContain("bt-menu");
+    expect(device).not.toContain("Connect tower");
+    expect(device).not.toContain("Calibrate");
     expect(device).toContain('data-screen="play"');
     expect(device).toContain('data-layout="ipad"');
     expect(device).not.toContain("Only Delta hears this.");
 
-    const join = renderToStaticMarkup(
-      createElement(JoinScreen, {
-        live: true,
-        code: "048213",
-        hunters: [
-          { id: "alpha", name: "Alpha" },
-          { id: "beta", name: "Beta" },
-        ],
-        held: ["alpha"],
-      }),
-    );
+    const join = renderToStaticMarkup(createElement(JoinScreen, { live: true, code: "048213" }));
     expect(join).toContain("048213");
-    expect(join).toContain("Hold Beta");
-    expect(join).toContain("Release Alpha");
-    expect(join).toContain("Rejoin");
+    expect(join).toContain("Game is loading...");
+    expect(join).not.toContain("Hold Beta");
+    expect(join).not.toContain("Open controls");
     expect(join).not.toContain("Only Alpha hears this.");
     expect(join).not.toContain("Device token");
     expect(join).not.toContain("Use the full layout");
@@ -189,13 +181,12 @@ describe("device screens", () => {
       createElement(JoinScreen, {
         live: true,
         code: "048213",
-        hunters: [{ id: "alpha", name: "Alpha" }],
-        held: [],
       }),
     );
     expect(join).toContain('data-layout="ipad"');
     expect(join).not.toContain("Use the full layout");
-    expect(join).toContain("Hold Alpha");
+    expect(join).toContain("Game is loading...");
+    expect(join).not.toContain("Hold Alpha");
 
     const device = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -214,12 +205,11 @@ describe("device screens", () => {
   });
 
   it("says the session host is unavailable and shows no fake hunters", () => {
-    const join = renderToStaticMarkup(
-      createElement(JoinScreen, { live: false, code: null, hunters: [], held: [] }),
-    );
+    const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: null }));
     expect(join).toContain("Session host unavailable.");
     expect(join).toContain("Join code unavailable.");
-    expect(join).toContain("Hunters unavailable.");
+    expect(join).toContain("Rejoin");
+    expect(join).not.toContain("Hunters unavailable.");
     expect(join).not.toContain("Device token");
     expect(join).toContain('disabled="" name="token"');
   });
@@ -265,8 +255,44 @@ describe("device screens", () => {
     );
     expect(connect).toContain("Connect tower");
     expect(connect).toContain("Play without tower");
-    expect(connect).toContain("Next: pick a story");
     expect(connect).toContain("Tower Connect");
+    expect(connect).toContain('data-primary="true">Connect tower');
+    expect(connect.match(/data-primary="true"/g)).toHaveLength(1);
+    expect(connect).not.toContain('data-primary="true">Play without tower');
+    expect(connect).not.toContain('data-primary="true">Next: pick a story');
+
+    const ready = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        tower: {
+          connection: "connected",
+          battery: { state: "unavailable" },
+          calibrated: { state: "known", calibrated: true },
+        },
+        connectLock: {
+          promptId: "tower-connect",
+          action: "tower-connect",
+          winnerDeviceId: "device-1",
+        },
+        calibrateLock: {
+          promptId: "tower-calibrate",
+          action: "tower-calibrate",
+          winnerDeviceId: "device-1",
+        },
+        state: deviceStatePayloadSchema.parse({
+          screen: "tower-connect",
+          heldHunters: [],
+          views: [],
+          prompt: { id: "continue-tower-connect", label: "Next: pick a story" },
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(ready).toContain("Next: pick a story");
+    expect(ready).not.toContain("Play without tower");
+    expect(ready.match(/data-primary="true"/g)).toHaveLength(1);
+    expect(ready).toContain('data-primary="true">Next: pick a story');
 
     const party = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -297,8 +323,6 @@ describe("device screens", () => {
       createElement(JoinScreen, {
         live: false,
         code: null,
-        hunters: [],
-        held: [],
         onRejoin: () => undefined,
       }),
     );

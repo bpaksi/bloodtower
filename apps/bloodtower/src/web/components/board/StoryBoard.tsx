@@ -61,7 +61,7 @@ const StatusStrip = ({ state }: { state: StoryboardState }) => {
   return (
     <p className="bt-status" data-status-strip="">
       <span data-status="tower">
-        State <strong>{towerStripState(state.tower.connection)}</strong>
+        State <strong>{towerStripState(state.tower)}</strong>
       </span>
       <span data-status="devices">
         Devices <strong>{devices.length === 0 ? "none yet" : devices.join(", ")}</strong>

@@ -32,12 +32,25 @@ export const SCREEN_NEXT: Record<FlowScreen, string> = {
 export const FORTUNE_LINE = "The night is gathering. The tower is not yet awake.";
 
 /** R2-01 tower words. Unknown stays "no tower", never a fake connected state. */
-export const towerStripState = (connection: StoryboardState["tower"]["connection"]): string => {
-  if (connection === "connected") return "connected";
-  if (connection === "connecting") return "connecting";
-  if (connection === "disconnected") return "lost";
+export const towerStripState = (tower: StoryboardState["tower"]): string => {
+  if (
+    tower.connection === "connected" &&
+    tower.calibrated.state === "known" &&
+    !tower.calibrated.calibrated
+  ) {
+    return "calibrating";
+  }
+  if (tower.connection === "connected") return "connected";
+  if (tower.connection === "connecting") return "connecting";
+  if (tower.connection === "disconnected") return "lost";
   return "no tower";
 };
+
+/** Connect + calibrate are done; Tower Connect may offer Next. */
+export const towerReady = (tower: StoryboardState["tower"]): boolean =>
+  tower.connection === "connected" &&
+  tower.calibrated.state === "known" &&
+  tower.calibrated.calibrated;
 
 export const joinedDeviceIds = (hunters: StoryboardState["hunters"]): string[] => [
   ...new Set(hunters.flatMap((hunter) => hunter.holders)),
