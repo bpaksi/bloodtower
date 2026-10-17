@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bloodtower",
-  description: "Story board. Display only. Tower connection is not open in this build.",
+  title: "Blood Tower",
+  description: "Blood Tower — open the Story board on the Mac or join as a hunter on iPad.",
 };
 
 export const viewport: Viewport = {

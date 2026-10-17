@@ -44,7 +44,11 @@ const privateTexts = (hunter: string) => {
 
 const start = async (
   tower: MockTower = createMockTower(),
-  extra?: { devOrigins?: string[]; lanHost?: () => string | undefined },
+  extra?: {
+    devOrigins?: string[];
+    lanHost?: () => string | undefined;
+    joinPagePort?: number;
+  },
 ) => {
   const root = tempDir();
   writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
@@ -58,6 +62,7 @@ const start = async (
     towerWatchMs: 0,
     devOrigins: extra?.devOrigins,
     lanHost: extra?.lanHost,
+    joinPagePort: extra?.joinPagePort,
   });
   hosts.push(host);
   return { host, tower };
@@ -633,6 +638,17 @@ describe("session hub", () => {
       url: `http://192.168.1.20:${host.port}/join?code=${host.joinCode}`,
       reachable: true,
     });
+  });
+
+  it("uses joinPagePort for the join QR when next dev serves the page on another port", async () => {
+    const { host } = await start(createMockTower(), {
+      lanHost: () => "192.168.1.20",
+      joinPagePort: 3000,
+    });
+    const board = await helloBoard(host.port);
+    const state = latest(board.log, "storyboardState");
+    if (state?.type !== "storyboardState") throw new Error("board");
+    expect(state.payload.join?.url).toBe(`http://192.168.1.20:3000/join?code=${host.joinCode}`);
   });
 
   it("says the join address is unreachable when only loopback is available", async () => {

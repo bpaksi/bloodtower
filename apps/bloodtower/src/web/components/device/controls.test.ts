@@ -241,7 +241,8 @@ describe("device screens", () => {
   it("says the session host is unavailable and shows no fake hunters", () => {
     const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: null }));
     expect(join).toContain("Session host unavailable.");
-    expect(join).toContain("Join code unavailable.");
+    expect(join).toContain("Join code");
+    expect(join).toContain("Enter the table");
     expect(join).toContain("Rejoin");
     expect(join).not.toContain("Hunters unavailable.");
     expect(join).not.toContain("Device token");

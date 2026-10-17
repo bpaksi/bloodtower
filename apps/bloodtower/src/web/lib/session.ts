@@ -28,13 +28,36 @@ export const forgetStoredToken = (input: {
   code: string;
 }) => input.hadStoredToken && !input.welcomed && input.code === "invalid-state";
 
+/** Session socket port in `pnpm dev` while `next dev` serves the page on port 3000. */
+export const DEV_SESSION_WS_PORT = 4787;
+
+/** `next dev` serves the UI on this port; the socket stays on {@link DEV_SESSION_WS_PORT}. */
+export const DEV_PAGE_PORT = 3000;
+
+const isLoopbackHostname = (hostname: string) =>
+  hostname === "localhost" || hostname === "::1" || hostname.startsWith("127.");
+
 /**
- * Where `/ws` is. A page this host served uses its own host.
- * `next dev` serves the page from another port, so `pnpm dev` sets `NEXT_PUBLIC_WS_URL`.
+ * Where `/ws` is. A page this host served uses its own host and port.
+ * `next dev` serves the page on another port; the socket stays on {@link SESSION_WS_PORT}.
+ * When the page is opened on the LAN but `NEXT_PUBLIC_WS_URL` still points at loopback,
+ * the socket URL follows the page hostname so an iPad does not connect to itself.
  */
 export const sessionUrl = (location: { protocol: string; host: string }, configured?: string) => {
-  if (configured) return configured;
+  const page = new URL(`${location.protocol}//${location.host}`);
   const scheme = location.protocol === "https:" ? "wss:" : "ws:";
+
+  if (configured) {
+    const ws = new URL(configured);
+    if (!isLoopbackHostname(page.hostname) && isLoopbackHostname(ws.hostname)) {
+      return `${scheme}//${page.hostname}:${DEV_SESSION_WS_PORT}/ws`;
+    }
+    return configured;
+  }
+
+  if (page.port === String(DEV_PAGE_PORT)) {
+    return `${scheme}//${page.hostname}:${DEV_SESSION_WS_PORT}/ws`;
+  }
   return `${scheme}//${location.host}/ws`;
 };
 

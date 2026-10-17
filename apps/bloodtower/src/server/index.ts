@@ -23,6 +23,15 @@ const chosen = towerFromEnv(process.env);
 
 let server: Awaited<ReturnType<typeof startSessionHost>>;
 try {
+  const joinPagePort =
+    process.env.DEV_PAGE_PORT === undefined || process.env.DEV_PAGE_PORT === ""
+      ? undefined
+      : Number(process.env.DEV_PAGE_PORT);
+  if (joinPagePort !== undefined && (!Number.isInteger(joinPagePort) || joinPagePort < 0)) {
+    console.error("DEV_PAGE_PORT must be a non-negative integer.");
+    process.exit(1);
+  }
+
   server = await startSessionHost({
     port: config.port,
     host: hostName,
@@ -31,6 +40,7 @@ try {
     databasePath: join(config.dataDir, "session.sqlite"),
     tower: chosen.tower,
     devOrigins,
+    joinPagePort,
   });
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

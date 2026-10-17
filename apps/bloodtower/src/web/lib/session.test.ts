@@ -50,14 +50,29 @@ describe("stored token", () => {
 });
 
 describe("session url", () => {
-  it("uses the page host, or the dev url when one is set", () => {
+  it("uses the page host on the session port, or port 4787 when next dev splits the page", () => {
     expect(sessionUrl({ protocol: "http:", host: "192.168.1.5:4787" })).toBe(
       "ws://192.168.1.5:4787/ws",
     );
     expect(sessionUrl({ protocol: "https:", host: "play.example" })).toBe("wss://play.example/ws");
+    expect(sessionUrl({ protocol: "http:", host: "127.0.0.1:4788" })).toBe(
+      "ws://127.0.0.1:4788/ws",
+    );
+    expect(sessionUrl({ protocol: "http:", host: "localhost:3000" })).toBe(
+      "ws://localhost:4787/ws",
+    );
+    expect(sessionUrl({ protocol: "http:", host: "192.168.1.20:3000" })).toBe(
+      "ws://192.168.1.20:4787/ws",
+    );
+  });
+
+  it("keeps a loopback dev url on the Mac, but follows the LAN hostname on an iPad", () => {
     expect(
       sessionUrl({ protocol: "http:", host: "localhost:3000" }, "ws://127.0.0.1:4787/ws"),
     ).toBe("ws://127.0.0.1:4787/ws");
+    expect(
+      sessionUrl({ protocol: "http:", host: "192.168.1.20:3000" }, "ws://127.0.0.1:4787/ws"),
+    ).toBe("ws://192.168.1.20:4787/ws");
   });
 });
 
