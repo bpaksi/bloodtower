@@ -35,6 +35,7 @@ const warn = (file: string, path: string, message: string): PackLoadIssue => ({
   message: message.startsWith("W-asset:") ? message : `W-asset: ${message}`,
 });
 
+/** `assetsDir` must already be real, so a symlinked parent (macOS `/var` → `/private/var`) cannot fail the containment test. */
 const resolveInsideAssets = (assetsDir: string, name: string): string | undefined => {
   const path = join(assetsDir, name);
   if (!existsSync(path)) return undefined;
@@ -68,8 +69,14 @@ export const assetImageCandidates = (asset: Asset): string[] => {
 };
 
 export const resolveAssetImage = (assetsDir: string, asset: Asset): string | undefined => {
+  let realAssetsDir: string;
+  try {
+    realAssetsDir = realpathSync(assetsDir);
+  } catch {
+    return undefined;
+  }
   for (const name of assetImageCandidates(asset)) {
-    const resolved = resolveInsideAssets(assetsDir, name);
+    const resolved = resolveInsideAssets(realAssetsDir, name);
     if (resolved) return resolved;
   }
   return undefined;
