@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  captionFromLine,
-  KEEPER_LINE_IDS,
-  keeperCaption,
-  nextKeeperLineIndex,
-} from "./keeperLines.ts";
+import { KEEPER_LINE_IDS, keeperCaption, nextKeeperLineIndex } from "./keeperLines.ts";
 
 describe("keeper lines", () => {
   it("plays ts-keeper-001 then 002 then 003, and strips pause markup", () => {
@@ -15,6 +10,11 @@ describe("keeper lines", () => {
     expect(keeperCaption("ts-keeper-001")).toBe(
       "Light them if you can. The key is at the bottom. It always is.",
     );
-    expect(captionFromLine("Go on. [pause 0.5] I'll wait.")).toBe("Go on. I'll wait.");
+    expect(keeperCaption("ts-keeper-002")).toBe(
+      "Mind the third step. It remembers everyone who ever fell on it.",
+    );
+    expect(keeperCaption("ts-keeper-003")).toBe(
+      "Go on, then. I'll keep the lamp lit until you're back. I always do.",
+    );
   });
 });

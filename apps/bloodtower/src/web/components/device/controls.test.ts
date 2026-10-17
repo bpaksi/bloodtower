@@ -168,6 +168,40 @@ describe("device screens", () => {
     expect(join).toContain('data-layout="ipad"');
   });
 
+  it("strips [pause N] tags from a private line caption", () => {
+    const device = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        live: true,
+        deviceId: "device-1",
+        state: deviceStatePayloadSchema.parse({
+          screen: "play",
+          quitPromptId: "quit",
+          heldHunters: ["alpha"],
+          views: [
+            {
+              hunter: "alpha",
+              name: "Alpha",
+              privateMoment: {
+                momentId: "proving-ground.02.private.alpha",
+                text: "Go on. [pause 0.5] I'll wait.",
+                still: null,
+              },
+            },
+          ],
+          prompt: { id: "continue-1", label: "Continue" },
+          lock: null,
+          won: null,
+        }),
+        pausePromptId: "pause-1",
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+      }),
+    );
+    expect(device).toContain("Alpha: Go on. I&#x27;ll wait.");
+    expect(device).not.toContain("[pause");
+  });
+
   it("detects a phone for hello, and keeps the iPad layout", () => {
     expect(detectFormFactor("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)")).toBe(
       "phone",

@@ -94,6 +94,27 @@ describe("story board", () => {
     ).toBe(false);
   });
 
+  it("strips [pause N] tags from the shared moment caption", () => {
+    const html = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: {
+          ...state(),
+          stage: "playing",
+          pause: null,
+          moment: {
+            id: "grey-stair.01",
+            kind: "still",
+            text: "A grey stair climbs into the dark. [pause 1] Someone has left the lamps unlit.",
+            still: "fx.stair",
+            fallbackAudio: null,
+          },
+        },
+      }),
+    );
+    expect(html).toContain("A grey stair climbs into the dark. Someone has left the lamps unlit.");
+    expect(html).not.toContain("[pause");
+  });
+
   it("renders the Keeper captions for grey-stair.03 before the avatar loads", () => {
     const html = renderToStaticMarkup(
       createElement(StoryBoard, {

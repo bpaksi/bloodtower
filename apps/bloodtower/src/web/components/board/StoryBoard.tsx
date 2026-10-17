@@ -1,5 +1,6 @@
 import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
+import { displayCaption } from "../../lib/caption.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
@@ -197,7 +198,9 @@ const PlayPanel = ({ state }: { state: StoryboardState }) => (
         <KeeperScene />
       ) : state.moment ? (
         <>
-          <p>{state.moment.text ?? "Text unavailable."}</p>
+          <p>
+            {state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text)}
+          </p>
           <p className="mt-2 text-lg" data-fallback={state.moment.fallbackAudio ?? ""}>
             Still {state.moment.still ?? "unavailable"}. Fallback{" "}
             {state.moment.fallbackAudio ?? "unavailable"}.

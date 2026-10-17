@@ -300,15 +300,20 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.getByText("A bell marks the step.")).toBeVisible();
       await expect(board.getByText("Still fx.bell. Fallback sfx.bell.")).toBeVisible();
       await a.button("continue").click();
-      await expect(board.getByText(/A grey stair climbs into the dark/)).toBeVisible();
+      await expect(
+        board.getByText("A grey stair climbs into the dark. Someone has left the lamps unlit."),
+      ).toBeVisible();
+      await expect(board.locator("main")).not.toContainText("[pause");
       await a.button("continue").click();
       await expect(board.getByText(/At the top, a door/)).toBeVisible();
+      await expect(board.locator("main")).not.toContainText("[pause");
       await a.button("continue").click();
       await expect(
         board.getByText("Light them if you can. The key is at the bottom. It always is."),
       ).toBeVisible();
       await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
       await expect(board.getByRole("img", { name: "The Keeper" })).toBeVisible();
+      await expect(board.locator("main")).not.toContainText("[pause");
       await a.button("continue").click();
       await expect(board.getByText("Oil the hinge, or force it.")).toBeVisible();
       await a.button("continue").click();
