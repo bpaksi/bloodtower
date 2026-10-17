@@ -54,8 +54,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
     const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
     await test.step("AC-3: the board is display only and shows the QR and a six-digit code", async () => {
-      await board.goto("/board");
-      await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
+      await board.goto("/board?debug=1");
+      await expect(board.locator("main.bt-board")).toBeVisible();
       await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
       expect(host.joinCode).toMatch(/^\d{6}$/);
       await expect(board.getByText(/Battery unavailable/)).toBeVisible();
@@ -174,7 +174,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(pageA.getByRole("heading", { name: "Agnes" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Tomas" })).toBeVisible();
       // Party join: the next step waits until every hunter is held.
-      await expect(board.getByText("Emeric — waiting")).toBeVisible();
+      await expect(board.locator('.bt-cart[data-hunter="delta"] .bt-cart-st')).toHaveText(
+        "waiting",
+      );
       await expect(a.button("continue")).toBeDisabled();
       await expect(a.button("begin")).toBeDisabled();
       expect(boardStates(boardFrames).at(-1)?.gate).toEqual({ canBegin: false, unheld: ["delta"] });

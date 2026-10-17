@@ -34,7 +34,7 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
     await board.goto("/board", { waitUntil: "domcontentloaded" });
-    await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
+    await expect(board.locator("main.bt-board")).toBeVisible();
     await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
 
     await pad.goto(joinPage);
