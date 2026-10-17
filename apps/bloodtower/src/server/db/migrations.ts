@@ -47,4 +47,7 @@ export const MIGRATIONS: readonly string[] = [
     hunter TEXT,
     result TEXT
   )`,
+  // R2 flow state. Null on presses recorded before it: unknown, never guessed.
+  `ALTER TABLE control_presses ADD COLUMN screen TEXT`,
+  `ALTER TABLE control_presses ADD COLUMN next_screen TEXT`,
 ];

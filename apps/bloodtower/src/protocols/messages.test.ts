@@ -7,11 +7,13 @@ import {
   controlPressSchema,
   deviceRecordSchema,
   envelopeSchema,
+  type FlowScreen,
   helloPayloadSchema,
   holdPayloadSchema,
   hostHealthSchema,
   PROTOCOL_VERSION,
   SERVER_MESSAGE_TYPES,
+  type StoryboardState,
   serverMessageSchema,
   storyboardStatePayloadSchema,
   towerBatterySchema,
@@ -30,6 +32,7 @@ const tower = {
 };
 
 const board = {
+  screen: "tower-connect" as const,
   stage: "lobby" as const,
   hunters: [
     { id: "alpha", name: "Alpha", holders: [] as string[], disconnected: false },
@@ -71,12 +74,13 @@ describe("client messages", () => {
       "continue",
       "pause",
       "resume",
+      "quit",
       "tower-connect",
       "tower-calibrate",
     ]);
   });
 
-  it("joins a device with a code and refuses a mac story board that is not the host", () => {
+  it("joins a device with a code and refuses a mac as a player", () => {
     expect(
       helloPayloadSchema.parse({
         role: "device",
@@ -112,7 +116,7 @@ describe("client messages", () => {
     ).toBe(false);
   });
 
-  it("records a winning press and a losing press with device and time", () => {
+  it("records a winning press and a losing press with device, time and screen", () => {
     const press = {
       promptId: "continue-1",
       action: "continue" as const,
@@ -120,11 +124,35 @@ describe("client messages", () => {
       atMonoMs: 40,
       atWall: "2026-10-15T17:00:00.000Z",
       winner: true,
+      screen: "play" as const,
+      nextScreen: null,
     };
     expect(controlPressSchema.parse(press).winner).toBe(true);
     expect(controlPressSchema.parse({ ...press, deviceId: "device-2", winner: false }).winner).toBe(
       false,
     );
+  });
+
+  it("records the screen a winning press moved the flow to, and accepts a press from before the flow state", () => {
+    const press = {
+      promptId: "continue-tower-connect",
+      action: "continue" as const,
+      deviceId: "device-1",
+      atMonoMs: 40,
+      atWall: "2026-10-15T17:00:00.000Z",
+      winner: true,
+      screen: "tower-connect" as const,
+      nextScreen: "pick-story" as const,
+    };
+    expect(controlPressSchema.parse(press)).toMatchObject({
+      screen: "tower-connect",
+      nextScreen: "pick-story",
+    });
+    expect(
+      controlPressSchema.parse({ ...press, screen: null, nextScreen: null }).screen,
+    ).toBeNull();
+    expect(controlPressSchema.safeParse({ ...press, screen: "lobby" }).success).toBe(false);
+    expect(controlPressSchema.parse({ ...press, action: "quit" }).action).toBe("quit");
   });
 });
 
@@ -182,6 +210,18 @@ describe("story board state", () => {
     expect(shared.moment?.fallbackAudio).toBe("sfx.bell");
   });
 
+  it("keeps the stage and the flow screen in step", () => {
+    const accepts = (screen: FlowScreen, stage: StoryboardState["stage"]) =>
+      storyboardStatePayloadSchema.safeParse({ ...board, screen, stage }).success;
+    expect(accepts("splash", "lobby")).toBe(true);
+    expect(accepts("begin", "lobby")).toBe(true);
+    expect(accepts("play", "lobby")).toBe(false);
+    expect(accepts("tower-connect", "playing")).toBe(false);
+    expect(accepts("quit", "lobby")).toBe(false);
+    expect(accepts("quit", "ended")).toBe(true);
+    expect(accepts("play", "ended")).toBe(false);
+  });
+
   it("opens Begin only when nobody is unheld", () => {
     expect(
       storyboardStatePayloadSchema.safeParse({
@@ -192,6 +232,7 @@ describe("story board state", () => {
     expect(
       storyboardStatePayloadSchema.parse({
         ...board,
+        screen: "play",
         stage: "playing",
         hunters: [
           { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: false },
@@ -219,6 +260,7 @@ describe("story board state", () => {
   it("keeps a held, disconnected hunter off the unheld list", () => {
     const parsed = storyboardStatePayloadSchema.parse({
       ...board,
+      screen: "play",
       stage: "paused",
       hunters: [
         { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: true },
@@ -237,6 +279,7 @@ describe("server messages", () => {
     const token = "device-token-1234";
     const state = serverMessageSchema.parse(
       envelope("deviceState", {
+        screen: "play",
         heldHunters: ["alpha"],
         views: [
           {
@@ -257,6 +300,7 @@ describe("server messages", () => {
     expect(state.type).toBe("deviceState");
     const withLocks = serverMessageSchema.parse(
       envelope("deviceState", {
+        screen: "begin",
         heldHunters: [],
         views: [],
         prompt: { id: "begin", label: "Begin" },

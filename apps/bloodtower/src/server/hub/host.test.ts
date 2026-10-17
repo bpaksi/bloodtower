@@ -162,6 +162,30 @@ const helloDevice = async (
 const latest = (log: ServerMessage[], type: ServerMessage["type"]) =>
   [...log].reverse().find((message) => message.type === type);
 
+type Client = Awaited<ReturnType<typeof connect>>;
+
+/** One flow press, then wait until this device's state shows the screen the flow moved to. */
+const step = async (
+  client: Client,
+  promptId: string,
+  action: "continue" | "begin",
+  next: string,
+) => {
+  send(client.socket, "control", { promptId, action });
+  await until(client.inbox, client.log, (messages) => {
+    const state = [...messages].reverse().find((message) => message.type === "deviceState");
+    return state?.type === "deviceState" && state.payload.screen === next;
+  });
+};
+
+/** The three steps before play, then Begin. Any joined iPad may send each one. */
+const walkToPlay = async (client: Client) => {
+  await step(client, "continue-tower-connect", "continue", "pick-story");
+  await step(client, "continue-pick-story", "continue", "party-join");
+  await step(client, "continue-party-join", "continue", "begin");
+  await step(client, "begin", "begin", "play");
+};
+
 describe("session hub", () => {
   it("serves the page and connection-only health, and refuses another origin", async () => {
     const { host } = await start();
@@ -337,7 +361,7 @@ describe("session hub", () => {
     expect(shown.payload.join.code).toMatch(/^\d{6}$/);
     expect(shown.payload.gate.canBegin).toBe(true);
 
-    send(alpha.socket, "control", { promptId: "begin", action: "begin" });
+    await walkToPlay(alpha);
     await until(alpha.inbox, alpha.log, (messages) => {
       const state = [...messages].reverse().find((message) => message.type === "deviceState");
       return state?.type === "deviceState" && state.payload.prompt?.id === "continue-0";
@@ -418,6 +442,41 @@ describe("session hub", () => {
     );
   });
 
+  it("moves the flow on the first press of a step, logs both presses with their screen, and sends the loser no error", async () => {
+    const { host } = await start();
+    const board = await helloBoard(host.port);
+    expect(latest(board.log, "storyboardState")).toMatchObject({
+      payload: { screen: "tower-connect" },
+    });
+    const alpha = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    const beta = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+
+    send(alpha.socket, "control", { promptId: "continue-tower-connect", action: "continue" });
+    send(beta.socket, "control", { promptId: "continue-tower-connect", action: "continue" });
+    const presses = await waitFor(
+      () => host.loadRun().presses.filter((press) => press.promptId === "continue-tower-connect"),
+      (found) => found.length >= 2,
+    );
+    expect(presses.filter((press) => press.winner)).toHaveLength(1);
+    expect(presses.find((press) => press.winner)).toMatchObject({
+      screen: "tower-connect",
+      nextScreen: "pick-story",
+    });
+    expect(
+      presses.filter((press) => !press.winner).every((press) => press.nextScreen === null),
+    ).toBe(true);
+    expect(new Set(presses.map((press) => press.deviceId)).size).toBe(2);
+
+    await until(board.inbox, board.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
+      return state?.type === "storyboardState" && state.payload.screen === "pick-story";
+    });
+    expect(latest(beta.log, "error")).toBeUndefined();
+    expect(latest(beta.log, "deviceState")).toMatchObject({
+      payload: { screen: "pick-story" },
+    });
+  });
+
   it("pauses when the only holder drops and resumes on rejoin, and a spare socket does not", async () => {
     const pack = packOrThrow();
     const { host } = await start();
@@ -432,7 +491,7 @@ describe("session hub", () => {
         return state?.type === "deviceState" && state.payload.heldHunters.includes(hunter.id);
       });
     }
-    send(device.socket, "control", { promptId: "begin", action: "begin" });
+    await walkToPlay(device);
     await until(board.inbox, board.log, (messages) => {
       const state = [...messages].reverse().find((message) => message.type === "storyboardState");
       return state?.type === "storyboardState" && state.payload.stage === "playing";

@@ -20,6 +20,8 @@ const tower = (connection: TowerSnapshot["connection"]): TowerSnapshot => ({
 
 const playing = (): DeviceState =>
   deviceStatePayloadSchema.parse({
+    screen: "play",
+    quitPromptId: "quit",
     heldHunters: ["alpha"],
     views: [
       {
@@ -50,8 +52,31 @@ describe("device messages", () => {
 });
 
 describe("device controls", () => {
+  it("enables Quit only while its prompt is open, even when a step is locked", () => {
+    const state = playing();
+    const controls = (quitPromptId: string | null) =>
+      deviceControls({
+        live: true,
+        state: {
+          ...state,
+          quitPromptId,
+          lock: { promptId: "continue-1", action: "continue", winnerDeviceId: "device-2" },
+          won: false,
+        },
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+        deviceId: "device-1",
+      });
+    expect(controls("quit").quit).toBe(true);
+    expect(controls("quit").continue).toBe(false);
+    expect(controls(null).quit).toBe(false);
+  });
+
   it("enables Begin only when that prompt is open, and locks a losing press", () => {
     const begin = deviceStatePayloadSchema.parse({
+      screen: "begin",
       heldHunters: [],
       views: [],
       prompt: { id: "begin", label: "Begin" },

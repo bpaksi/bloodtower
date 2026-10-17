@@ -8,6 +8,7 @@ import { joinQrSvg } from "./qr";
 
 const state = (): StoryboardState =>
   storyboardStatePayloadSchema.parse({
+    screen: "play",
     stage: "paused",
     hunters: [
       { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: false },

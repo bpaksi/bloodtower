@@ -17,6 +17,7 @@ import { DeviceScreen } from "./DeviceScreen";
 import { detectFormFactor } from "./formFactor";
 
 const waiting = deviceStatePayloadSchema.parse({
+  screen: "splash",
   heldHunters: [],
   views: [],
   prompt: null,

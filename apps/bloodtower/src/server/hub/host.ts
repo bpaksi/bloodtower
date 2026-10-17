@@ -108,6 +108,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       tower: () => tower.snapshot(),
       onChange: () => broadcast(),
     });
+    // The pack loaded and the session exists, so the splash is done. It is not a press.
+    engine.finishSplash();
   } catch (error) {
     opened.close();
     throw error;

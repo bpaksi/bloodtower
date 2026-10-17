@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { controlActionSchema, controlLockSchema, promptIdSchema } from "./control.ts";
+import {
+  controlActionSchema,
+  controlLockSchema,
+  flowScreenSchema,
+  promptIdSchema,
+} from "./control.ts";
 import {
   deviceIdSchema,
   formFactorSchema,
@@ -246,10 +251,12 @@ export const pauseBannerSchema = z.strictObject({
   hunter: hunterIdSchema.nullable(),
 });
 
-export const STORYBOARD_STAGES = ["lobby", "playing", "paused"] as const;
+/** `lobby` is every screen before play. `ended` is the quit screen. */
+export const STORYBOARD_STAGES = ["lobby", "playing", "paused", "ended"] as const;
 
 export const storyboardStatePayloadSchema = z
   .strictObject({
+    screen: flowScreenSchema,
     stage: z.enum(STORYBOARD_STAGES),
     hunters: z.array(publicHunterSchema).max(16),
     join: z
@@ -291,6 +298,13 @@ export const storyboardStatePayloadSchema = z
     for (const id of value.gate.unheld) {
       if (!ids.includes(id)) issue(ctx, `${id} is unheld but not in the hunter list.`);
       if (heldIds.has(id)) issue(ctx, `${id} is unheld but a device holds them.`);
+    }
+    if (value.screen === "play") {
+      if (value.stage === "lobby" || value.stage === "ended") {
+        issue(ctx, "The play screen is playing or paused.");
+      }
+    } else if (value.stage !== (value.screen === "quit" ? "ended" : "lobby")) {
+      issue(ctx, "The stage does not match the flow screen.");
     }
     if (value.stage === "paused" && !value.pause) issue(ctx, "A paused board names the cause.");
     if (value.stage !== "paused" && value.pause)
@@ -334,6 +348,7 @@ const rosterEntrySchema = z.strictObject({
 
 export const deviceStatePayloadSchema = z
   .strictObject({
+    screen: flowScreenSchema,
     heldHunters: z.array(hunterIdSchema).max(16),
     views: z.array(hunterViewSchema).max(16),
     prompt: promptSchema.nullable(),
@@ -347,6 +362,8 @@ export const deviceStatePayloadSchema = z
      */
     tower: towerSnapshotSchema.optional(),
     pausePromptId: promptIdSchema.nullable().optional(),
+    /** Quit is its own prompt, so it stays pressable while a step prompt is locked. */
+    quitPromptId: promptIdSchema.nullable().optional(),
     connectLock: controlLockSchema.nullable().optional(),
     calibrateLock: controlLockSchema.nullable().optional(),
     roster: z.array(rosterEntrySchema).max(16).optional(),

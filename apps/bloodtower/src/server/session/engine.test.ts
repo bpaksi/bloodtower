@@ -1,4 +1,4 @@
-import type { Pack, TowerSnapshot } from "bloodtower-protocols";
+import type { ControlAction, Pack, TowerSnapshot } from "bloodtower-protocols";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../config.ts";
 import { createPressLog } from "../control/lock.ts";
@@ -65,21 +65,53 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+/** One step's press, which must win. */
+const winStep = (
+  engine: SessionEngine,
+  deviceId: string,
+  promptId: string,
+  action: ControlAction,
+) => {
+  const result = engine.press(deviceId, promptId, action);
+  if (!result.ok || !result.winner) throw new Error(`${promptId} did not win.`);
+};
+
+/** Leaves splash, walks the three steps before play, and presses Begin on the begin screen. */
+const startPlay = (engine: SessionEngine, deviceId: string) => {
+  engine.finishSplash();
+  winStep(engine, deviceId, "continue-tower-connect", "continue");
+  winStep(engine, deviceId, "continue-pick-story", "continue");
+  winStep(engine, deviceId, "continue-party-join", "continue");
+  winStep(engine, deviceId, "begin", "begin");
+};
+
 describe("session", () => {
-  it("blocks Begin until every hunter is held, including when one device holds all four", () => {
+  it("blocks Begin until every hunter is held, and offers Begin only on the begin screen", () => {
     const { opened, engine } = setup();
     try {
       const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
       expect(joined.ok).toBe(true);
       if (!joined.ok) return;
+      engine.finishSplash();
       expect(engine.press(joined.deviceId, "begin", "begin")).toEqual({
         ok: false,
         code: "invalid-state",
       });
+      winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
+      winStep(engine, joined.deviceId, "continue-pick-story", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(false);
+      expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
+      expect(engine.press(joined.deviceId, "continue-party-join", "continue")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
       holdAll(engine, joined.deviceId);
+      const party = engine.projectStoryboard(TOWER, JOIN);
+      expect(party.gate).toEqual({ canBegin: true, unheld: [] });
+      expect(party.prompt).toEqual({ id: "continue-party-join", label: "Next: set up the story" });
+      winStep(engine, joined.deviceId, "continue-party-join", "continue");
       const board = engine.projectStoryboard(TOWER, JOIN);
-      expect(board.gate).toEqual({ canBegin: true, unheld: [] });
+      expect(board.screen).toBe("begin");
       expect(board.prompt).toEqual({ id: "begin", label: "Begin" });
       expect(engine.join({ joinCode: "000000", formFactor: "phone" })).toMatchObject({
         ok: false,
@@ -104,7 +136,7 @@ describe("session", () => {
       engine.hold(alpha.deviceId, "beta", "take");
       engine.hold(beta.deviceId, "gamma", "take");
       engine.hold(beta.deviceId, "delta", "take");
-      expect(engine.press(alpha.deviceId, "begin", "begin").ok).toBe(true);
+      startPlay(engine, alpha.deviceId);
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe(
         "The proving ground is quiet.",
       );
@@ -145,7 +177,7 @@ describe("session", () => {
       const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
       if (!joined.ok) throw new Error("join");
       holdAll(engine, joined.deviceId);
-      engine.press(joined.deviceId, "begin", "begin");
+      startPlay(engine, joined.deviceId);
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe("Delta is not in the hall.");
       engine.press(joined.deviceId, "continue-0", "continue");
       const duringPrivate = JSON.stringify(engine.projectDevice(joined.deviceId));
@@ -166,7 +198,7 @@ describe("session", () => {
       const joined = global.engine.join({ joinCode: "048213", formFactor: "ipad" });
       if (!joined.ok) throw new Error("join");
       holdAll(global.engine, joined.deviceId);
-      global.engine.press(joined.deviceId, "begin", "begin");
+      startPlay(global.engine, joined.deviceId);
       global.engine.press(joined.deviceId, "continue-0", "continue");
       expect(
         global.engine.projectDevice(joined.deviceId).views.find((view) => view.hunter === "delta")
@@ -188,7 +220,7 @@ describe("session", () => {
       if (!alpha.ok || !beta.ok) throw new Error("join");
       engine.hold(alpha.deviceId, "alpha", "take");
       for (const hunter of ["beta", "gamma", "delta"]) engine.hold(beta.deviceId, hunter, "take");
-      engine.press(beta.deviceId, "begin", "begin");
+      startPlay(engine, beta.deviceId);
       engine.disconnect(alpha.deviceId);
       const paused = engine.projectStoryboard(TOWER, JOIN);
       expect(paused.stage).toBe("paused");
@@ -218,7 +250,7 @@ describe("session", () => {
       if (!alpha.ok || !beta.ok) throw new Error("join");
       holdAll(engine, alpha.deviceId);
       engine.hold(beta.deviceId, "alpha", "take");
-      engine.press(alpha.deviceId, "begin", "begin");
+      startPlay(engine, alpha.deviceId);
       engine.hold(alpha.deviceId, "alpha", "release");
       expect(engine.projectStoryboard(TOWER, JOIN).stage).toBe("playing");
       engine.hold(beta.deviceId, "alpha", "release");
@@ -334,7 +366,7 @@ describe("session", () => {
         ok: true,
         winner: true,
       });
-      engine.press(alpha.deviceId, "begin", "begin");
+      startPlay(engine, alpha.deviceId);
       engine.press(alpha.deviceId, "continue-0", "continue");
       engine.press(alpha.deviceId, "continue-1", "continue");
       const board = engine.projectStoryboard(TOWER, JOIN);
@@ -425,7 +457,7 @@ describe("session", () => {
       if (!alpha.ok || !beta.ok) throw new Error("join");
       engine.hold(alpha.deviceId, "alpha", "take");
       for (const hunter of ["beta", "gamma", "delta"]) engine.hold(beta.deviceId, hunter, "take");
-      engine.press(beta.deviceId, "begin", "begin");
+      startPlay(engine, beta.deviceId);
       engine.disconnect(alpha.deviceId);
       expect(engine.projectStoryboard(TOWER, JOIN).pause).toEqual({
         cause: "disconnect",
@@ -460,6 +492,150 @@ describe("session", () => {
       vi.advanceTimersByTime(120_000);
       expect(engine.roster().holdings).toHaveLength(4);
       expect(onChange).not.toHaveBeenCalled();
+    } finally {
+      engine.close();
+      opened.close();
+    }
+  });
+
+  it("walks splash, tower-connect, pick-story, party-join and begin in order, and refuses Quit before play", () => {
+    const { opened, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok) throw new Error("join");
+      expect(engine.screen()).toBe("splash");
+      expect(engine.projectStoryboard(TOWER, JOIN)).toMatchObject({
+        screen: "splash",
+        stage: "lobby",
+        prompt: null,
+      });
+      engine.finishSplash();
+      expect(engine.screen()).toBe("tower-connect");
+      expect(engine.projectStoryboard(TOWER, JOIN).prompt).toEqual({
+        id: "continue-tower-connect",
+        label: "Next: pick a story",
+      });
+      expect(engine.press(alpha.deviceId, "quit", "quit")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.projectDevice(alpha.deviceId)).toMatchObject({
+        screen: "tower-connect",
+        quitPromptId: null,
+      });
+      holdAll(engine, alpha.deviceId);
+      winStep(engine, alpha.deviceId, "continue-tower-connect", "continue");
+      expect(engine.screen()).toBe("pick-story");
+      winStep(engine, alpha.deviceId, "continue-pick-story", "continue");
+      expect(engine.screen()).toBe("party-join");
+      winStep(engine, alpha.deviceId, "continue-party-join", "continue");
+      expect(engine.screen()).toBe("begin");
+      winStep(engine, alpha.deviceId, "begin", "begin");
+      expect(engine.screen()).toBe("play");
+      expect(engine.projectStoryboard(TOWER, JOIN)).toMatchObject({
+        screen: "play",
+        stage: "playing",
+      });
+      expect(engine.projectDevice(alpha.deviceId).quitPromptId).toBe("quit");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("lets the first press win on each step, ignores a later press for that step, and logs every press with its screen", () => {
+    const { opened, store, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      const beta = engine.join({ joinCode: "048213", formFactor: "phone" });
+      if (!alpha.ok || !beta.ok) throw new Error("join");
+      engine.finishSplash();
+      const batch = engine.pressAll([
+        { deviceId: alpha.deviceId, promptId: "continue-tower-connect", action: "continue" },
+        { deviceId: beta.deviceId, promptId: "continue-tower-connect", action: "continue" },
+      ]);
+      expect(batch.map((result) => (result.ok ? result.winner : result.code))).toEqual([
+        true,
+        false,
+      ]);
+      expect(engine.screen()).toBe("pick-story");
+      // The flow moved on. A press on the step it left is ignored, not an error.
+      expect(engine.press(beta.deviceId, "continue-tower-connect", "continue")).toMatchObject({
+        ok: true,
+        winner: false,
+      });
+      expect(engine.screen()).toBe("pick-story");
+
+      const presses = store
+        .loadRun("run")
+        .presses.filter((press) => press.promptId === "continue-tower-connect");
+      expect(
+        presses.map((press) => ({
+          device: press.deviceId,
+          winner: press.winner,
+          screen: press.screen,
+          nextScreen: press.nextScreen,
+        })),
+      ).toEqual([
+        {
+          device: alpha.deviceId,
+          winner: true,
+          screen: "tower-connect",
+          nextScreen: "pick-story",
+        },
+        // Arrived after the flow moved in the same batch, so it records the screen then held.
+        { device: beta.deviceId, winner: false, screen: "pick-story", nextScreen: null },
+        { device: beta.deviceId, winner: false, screen: "pick-story", nextScreen: null },
+      ]);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("quits play on the first press, closes every open mark, and ignores a later quit", () => {
+    const { opened, store, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      const beta = engine.join({ joinCode: "048213", formFactor: "phone" });
+      if (!alpha.ok || !beta.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      startPlay(engine, alpha.deviceId);
+      expect(store.loadRun("run").marks.some((mark) => mark.endMonoMs === null)).toBe(true);
+
+      const quit = engine.pressAll([
+        { deviceId: beta.deviceId, promptId: "quit", action: "quit" },
+        { deviceId: alpha.deviceId, promptId: "quit", action: "quit" },
+      ]);
+      expect(quit.map((result) => (result.ok ? result.winner : result.code))).toEqual([
+        true,
+        false,
+      ]);
+      expect(engine.screen()).toBe("quit");
+      expect(engine.projectStoryboard(TOWER, JOIN)).toMatchObject({
+        screen: "quit",
+        stage: "ended",
+        prompt: null,
+        moment: null,
+        pause: null,
+      });
+      expect(engine.projectDevice(alpha.deviceId)).toMatchObject({
+        screen: "quit",
+        quitPromptId: null,
+      });
+      expect(engine.press(alpha.deviceId, "continue-0", "continue")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+
+      const run = store.loadRun("run");
+      expect(run.marks.filter((mark) => mark.endMonoMs === null)).toEqual([]);
+      expect(
+        run.presses
+          .filter((press) => press.promptId === "quit")
+          .map((press) => [press.deviceId, press.winner, press.screen, press.nextScreen]),
+      ).toEqual([
+        [beta.deviceId, true, "play", "quit"],
+        [alpha.deviceId, false, "quit", null],
+      ]);
     } finally {
       opened.close();
     }

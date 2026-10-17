@@ -30,7 +30,8 @@ export const timelineOf = (run: StoredRun): TimelineEvent[] => {
     monoMs: press.atMonoMs,
     wall: press.atWall,
     what: press.winner ? "press won" : "press lost",
-    subject: `${press.promptId} ${press.action}`,
+    // The screen it was made on, and the screen a winning press moved the flow to.
+    subject: `${press.promptId} ${press.action}${press.screen ? ` on ${press.screen}` : ""}${press.nextScreen ? ` -> ${press.nextScreen}` : ""}`,
     deviceId: press.deviceId,
     cause: null,
     hunter: null,

@@ -5,6 +5,7 @@ export interface DeviceControls {
   continue: boolean;
   pause: boolean;
   resume: boolean;
+  quit: boolean;
   towerConnect: boolean;
   towerCalibrate: boolean;
   gameplayLock: string | null;
@@ -40,6 +41,8 @@ export const deviceControls = (input: {
     continue: input.live && promptId.startsWith("continue-") && !locked,
     pause: input.live && input.pausePromptId !== null,
     resume: input.live && promptId.startsWith("resume-") && !locked,
+    // Quit has its own prompt, so a locked step does not block it.
+    quit: input.live && (input.state.quitPromptId ?? null) !== null,
     towerConnect: input.live && input.connectLock === null,
     towerCalibrate:
       input.live &&

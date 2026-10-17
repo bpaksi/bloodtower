@@ -3,6 +3,7 @@ import { type StoryboardState, storyboardStatePayloadSchema } from "bloodtower-p
 /** What the board shows before a session exists. Every reading is unavailable. */
 export const waitingStoryboard = (): StoryboardState =>
   storyboardStatePayloadSchema.parse({
+    screen: "splash",
     stage: "lobby",
     hunters: [],
     join: null,

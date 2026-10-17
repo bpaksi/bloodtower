@@ -31,6 +31,7 @@ R1 is the thin foundation. It loads a story pack, shows a display-only Story boa
 | D17 | `deviceState` carries, beside the gameplay lock, the tower snapshot, the pause prompt id, the connect and calibrate locks, and a public roster of hunter id and name. None of those fields carry a private line. | B2 left the tower locks for step 7. The frozen message had nowhere else to put them, and the device screen already takes them as props. |
 | D18 | A device that drops keeps its hunters claimed for 60 s (`GRACE_MS`), shown as `disconnected` on the Story board (`hunters[].disconnected`). A rejoin with its token inside that time restores them and cancels the release. At the end of it the device's holdings are removed and the board updates. The pause for a dropped holder still starts at once (R2-65). | R2 §3.4 and R2-104 (Gamewright, Oct 16 2026). Bob asked for the claim grace in the R2 disconnect step. The R1 plan's "pauses only after a short grace" ruling is not applied here; see the PR. |
 | D19 | The join QR uses the LAN IPv4 address: the first non-internal address when the host binds every interface, or the bound address when it is a LAN address. When only loopback is available, the URL uses `127.0.0.1` and `join.reachable` is `false`; the board then shows "iPads can't reach this address". The startup log prints the same address. | R2-12 (closes the B3 follow-up). |
+| D20 | The server holds the flow screen: `splash`, `tower-connect`, `pick-story`, `party-join`, `begin`, `play`, `quit`. Splash ends when the pack and socket host are ready, with no press. Each step before play is a `continue-<screen>` prompt, and Begin is the `begin` prompt. Quit is the `quit` prompt, legal on play only. Each prompt is one lock, so the first press wins and a later press for that step is logged and ignored with no error. Every press is logged with its device and the screen the server held on arrival. A winning press also logs the screen it moved to. Any joined iPad may send any control. There is no host role. | R2 requirements R2-03 and R2-04, and Bob's ruling D1 (Oct 16, 2026). This change is a plan deviation; see the R1 plan's Deviations, "R2 flow state". |
 
 ## 2. Layout and run
 
@@ -40,7 +41,7 @@ The host serves the static export, `GET /health`, and `/ws`. It loads `packs/tes
 
 The tower port is the mock unless `TOWER_URL` is set, in which case it is a client of that tower-poc socket. Nothing connects, calibrates or reconnects until a joined device wins that press. `DIAG_LOG` is passed through to the sidecar when it is set. `DEV_ORIGINS` lists extra page origins for `next dev`, exact match only.
 
-SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`. Hub tests use a temporary file. Other tests still use `:memory:`.
+SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. `control_presses` has `screen` and `next_screen` from the R2 flow state (migration steps 6 and 7). They are null on presses recorded before it. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`. Hub tests use a temporary file. Other tests still use `:memory:`.
 
 ## 3. Protocols contract (frozen)
 
@@ -54,7 +55,7 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 |---|---|---|
 | `hello` | `role` `storyboard` or `device`; `clientLabel`; `formFactor` `mac`, `ipad` or `phone`; optional `token`; optional `joinCode` | Story board: mac, and neither token nor code. Device: iPad or phone, and a code or a token. |
 | `hold` | `hunter`, `action` `take` or `release` | Device socket only (step 7). |
-| `control` | `promptId`, `action` one of `begin`, `continue`, `pause`, `resume`, `tower-connect`, `tower-calibrate` | Device socket only (step 7). First arrival wins (step 5). |
+| `control` | `promptId`, `action` one of `begin`, `continue`, `pause`, `resume`, `quit`, `tower-connect`, `tower-calibrate` | Device socket only (step 7). First arrival wins (step 5). The flow steps are D18. |
 
 **Server → client**
 
@@ -62,10 +63,10 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 |---|---|
 | `welcome` | `clientId`, `role`, `token`, `channels`, `versions`. A story board channel list is exactly `["storyboard"]`. A device lists `ipad:<hunter>` for each hunter it holds at hello, or an empty list when it holds nobody, and never `storyboard` (D16). The token is bound to that role: a storyboard token cannot `hello` as a device, and a device token cannot open the story board. |
 | `error` | `code` one of `invalid-json`, `invalid-envelope`, `unknown-type`, `invalid-payload`, `invalid-state`, `private-on-storyboard`, `storyboard-control`. |
-| `storyboardState` | Stage `lobby`, `playing` or `paused`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); pause banner; tower snapshot; start gate; lock. |
-| `deviceState` | Held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). |
+| `storyboardState` | The flow `screen` (D20); stage `lobby`, `playing`, `paused` or `ended`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); pause banner; tower snapshot; start gate; lock. The stage is `lobby` on every pre-play screen, `playing` or `paused` on `play`, and `ended` on `quit`. |
+| `deviceState` | The flow `screen`; held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the quit prompt id, the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). |
 
-A losing press is a `control_presses` row with `winner: false`, not an error. The locked result is the `lock` on both states.
+A losing press is a `control_presses` row with `winner: false`, not an error. The locked result is the `lock` on both states. Each press row also has the `screen` it arrived on and, for a winning press that moved the flow, `nextScreen`.
 
 `storyboardState` rejects a `.private.` moment id, any string containing `ipad:`, and the keys `privateMoment`, `bytes`, `raw`, `packet`, `capabilityId` and `params`. A shared line may contain the word "private". Fallback audio is an asset id on the shared moment. R1 plays that fallback from the Mac only; the private view has no audio field.
 

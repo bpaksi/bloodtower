@@ -37,6 +37,8 @@ export const controlPresses = sqliteTable("control_presses", {
   atMonoMs: real("at_mono_ms").notNull(),
   atWall: text("at_wall").notNull(),
   winner: integer("winner", { mode: "boolean" }).notNull(),
+  screen: text("screen"),
+  nextScreen: text("next_screen"),
 });
 
 /**

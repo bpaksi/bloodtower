@@ -103,7 +103,14 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(pageA.getByRole("heading", { name: "Alpha" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Beta" })).toBeVisible();
       await expect(a.button("pause")).toBeDisabled();
+      // Tower connect is the first step, so Continue offers it before any hunter is held.
+      await expect(a.button("continue")).toHaveText("Next: pick a story");
+      await a.button("continue").click();
+      await expect(a.button("continue")).toHaveText("Choose the story");
+      await a.button("continue").click();
+      // Party join: the next step waits until every hunter is held.
       await expect(board.getByText("Delta — waiting")).toBeVisible();
+      await expect(a.button("continue")).toBeDisabled();
       await expect(a.button("begin")).toBeDisabled();
       expect(boardStates(boardFrames).at(-1)?.gate).toEqual({ canBegin: false, unheld: ["delta"] });
 
@@ -111,6 +118,10 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(b.hold("delta")).toHaveAttribute("data-action", "release");
       await pageB.getByRole("link", { name: "Open controls" }).click();
       await expect(pageB.getByRole("heading", { name: "Delta" })).toBeVisible();
+      await expect(a.button("continue")).toHaveText("Next: set up the story");
+      await expect(a.button("continue")).toBeEnabled();
+      await a.button("continue").click();
+      // The begin screen: any joined device may press Begin.
       await expect(a.button("begin")).toBeEnabled();
       await expect(b.button("begin")).toBeEnabled();
       await expect(board.getByText("Begin", { exact: true })).toBeVisible();
@@ -299,7 +310,28 @@ test("the test pack's first night, end to end, on one board and two devices", as
         expect(mark.startWall).toMatch(/Z$/);
         expect(mark.endWall).toMatch(/Z$/);
       }
+      // Each flow step's winning press records the screen it was on and the one it moved to.
+      const won = (promptId: string) => run.presses.find((press) => press.promptId === promptId);
+      expect(won("continue-tower-connect")).toMatchObject({
+        winner: true,
+        screen: "tower-connect",
+        nextScreen: "pick-story",
+      });
+      expect(won("continue-pick-story")).toMatchObject({
+        winner: true,
+        screen: "pick-story",
+        nextScreen: "party-join",
+      });
+      expect(won("continue-party-join")).toMatchObject({
+        winner: true,
+        screen: "party-join",
+        nextScreen: "begin",
+      });
+      expect(won("begin")).toMatchObject({ winner: true, screen: "begin", nextScreen: "play" });
       expect(run.presses.map((press) => `${press.promptId}:${press.winner}`)).toEqual([
+        "continue-tower-connect:true",
+        "continue-pick-story:true",
+        "continue-party-join:true",
         "tower-connect:true",
         "tower-connect:false",
         "tower-calibrate:true",

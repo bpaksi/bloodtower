@@ -44,7 +44,14 @@ const writeRun = (path: string, sessionId: string, options: { leavePauseOpen?: b
     const log = createTimingLog(store, clock, sessionId);
     const presses = createPressLog(clock, (press) => store.insertPress(sessionId, press));
     clock.advance(1000);
-    presses.record({ promptId: "begin", action: "begin", deviceId: "device-1", winner: true });
+    presses.record({
+      promptId: "begin",
+      action: "begin",
+      deviceId: "device-1",
+      winner: true,
+      screen: "begin",
+      nextScreen: "play",
+    });
     log.open({ kind: "phase", subject: "night", deviceId: null, cause: null, hunter: null });
     log.open({
       kind: "moment",
@@ -59,12 +66,16 @@ const writeRun = (path: string, sessionId: string, options: { leavePauseOpen?: b
       action: "continue",
       deviceId: "device-2",
       winner: true,
+      screen: "play",
+      nextScreen: null,
     });
     presses.record({
       promptId: "continue-0",
       action: "continue",
       deviceId: "device-1",
       winner: false,
+      screen: "play",
+      nextScreen: null,
     });
     log.close("moment", "proving-ground.01");
     log.open({
@@ -92,6 +103,8 @@ const writeRun = (path: string, sessionId: string, options: { leavePauseOpen?: b
       action: "continue",
       deviceId: "device-1",
       winner: true,
+      screen: "play",
+      nextScreen: null,
     });
     log.close("cue", "bell");
     log.close("moment", "proving-ground.03");
@@ -109,17 +122,17 @@ describe("timing report", () => {
     const events = timelineOf(run);
 
     expect(events.map((event) => `${event.what} ${event.subject}`)).toEqual([
-      "press won begin begin",
+      "press won begin begin on begin -> play",
       "phase start night",
       "moment start proving-ground.01",
-      "press won continue-0 continue",
-      "press lost continue-0 continue",
+      "press won continue-0 continue on play",
+      "press lost continue-0 continue on play",
       "moment end proving-ground.01",
       "moment start proving-ground.03",
       "cue start bell",
       "pause start disconnect:alpha",
       "pause end disconnect:alpha",
-      "press won continue-1 continue",
+      "press won continue-1 continue on play",
       // Same instant: stored row order.
       "phase end night",
       "moment end proving-ground.03",
@@ -139,7 +152,7 @@ describe("timing report", () => {
 
     expect(lines[0]).toBe("Session run-1");
     expect(lines).toContain(
-      "+0:03.500  2026-10-15T18:00:03.500Z  press lost      continue-0 continue  device device-1",
+      "+0:03.500  2026-10-15T18:00:03.500Z  press lost      continue-0 continue on play  device device-1",
     );
     expect(lines).toContain(
       "+0:04.000  2026-10-15T18:00:04.000Z  pause start     disconnect:alpha  cause disconnect  hunter alpha",
