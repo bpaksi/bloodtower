@@ -2,6 +2,7 @@ import { copyFileSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { startAcceptanceHost } from "./support/acceptance.ts";
+import { settlePageAnimations } from "./support/animations.ts";
 
 const screenshotDir = process.env.SCREENSHOT_DIR?.trim();
 const ARTIFACTS = screenshotDir
@@ -25,6 +26,7 @@ const titleViewports = [
 ] as const;
 
 const assertTitleLayout = async (page: Page, viewport: { width: number; height: number }) => {
+  await settlePageAnimations(page);
   const shell = page.locator(".bt-title-shell");
   const h1 = page.getByRole("heading", { level: 1, name: "Blood Tower" });
   const story = page.getByRole("link", { name: /Story board/i });
@@ -48,6 +50,7 @@ const assertTitleLayout = async (page: Page, viewport: { width: number; height: 
 test("the title page offers Story board and Hunter paths and health stays connection-only", async ({
   page,
 }, testInfo) => {
+  test.setTimeout(120_000);
   const errors = collectErrors(page);
   mkdirSync(ARTIFACTS, { recursive: true });
   const response = await page.goto("/");

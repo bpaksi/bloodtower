@@ -5,13 +5,13 @@ export function TitleScreen() {
   return (
     <div className="bt-title-page" data-screen="title">
       <div className="bt-title-backdrop" aria-hidden="true" />
-      <div className="bt-title-shell">
+      <div className="bt-title-shell bt-ink-in">
         <img
           className="bt-title-keeper"
           src="/avatars/keeper/portrait.png"
           alt="The Keeper"
-          width={88}
-          height={88}
+          width={176}
+          height={176}
         />
         <p className="bt-title-kicker">Return to Dark Tower</p>
         <h1 className="bt-title-heading bt-flicker">Blood Tower</h1>
