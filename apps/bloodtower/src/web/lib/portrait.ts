@@ -1,9 +1,16 @@
+import { pageServerOrigin } from "./serverOrigin.ts";
+
 /**
  * Where a hunter's portrait image lives: the pack asset-id route
  * (`/packs/<pack>/asset/<asset-id>`), which serves any asset the pack declares.
+ * Under `pnpm dev` the page and the session host are on different ports, so the link
+ * carries the host's origin; in production it stays relative.
  */
-export const portraitUrl = (packId: string, assetId: string): string =>
-  `/packs/${encodeURIComponent(packId)}/asset/${encodeURIComponent(assetId)}`;
+export const portraitUrl = (
+  packId: string,
+  assetId: string,
+  origin: string = pageServerOrigin(),
+): string => `${origin}/packs/${encodeURIComponent(packId)}/asset/${encodeURIComponent(assetId)}`;
 
 /**
  * The image URL for a hunter, or undefined when the pack is unknown or the hunter has no

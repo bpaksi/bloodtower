@@ -6,6 +6,12 @@ describe("portraitUrl", () => {
     expect(portraitUrl("test", "por.alpha")).toBe("/packs/test/asset/por.alpha");
   });
 
+  it("prefixes the session host origin when one is given", () => {
+    expect(portraitUrl("test", "por.alpha", "http://192.168.1.22:4787")).toBe(
+      "http://192.168.1.22:4787/packs/test/asset/por.alpha",
+    );
+  });
+
   it("escapes ids so they cannot change the path", () => {
     expect(portraitUrl("a/b", "../x")).toBe("/packs/a%2Fb/asset/..%2Fx");
   });
