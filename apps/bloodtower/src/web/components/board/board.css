@@ -544,7 +544,7 @@
 
 .bt-keeper {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 0.5rem;
   min-height: 0;
@@ -558,18 +558,18 @@
 
 .bt-keeper [data-talking-avatar] {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 0.45rem;
   min-height: 0;
   overflow: hidden;
 }
 
+/* TalkingAvatar inlines width:100%; height:auto on the portrait. Pin every
+   frame to this flex slot so the layout box cannot outgrow the board. */
 .bt-keeper [data-talking-avatar] > div {
-  display: flex;
+  position: relative;
   flex: 1 1 0;
-  align-items: center;
-  justify-content: center;
   min-height: 0;
   overflow: hidden;
 }
@@ -590,9 +590,13 @@
   display: none;
 }
 
-.bt-keeper img {
+.bt-keeper [data-talking-avatar] > div img {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
   max-width: 100%;
-  max-height: min(28vh, 14rem);
+  max-height: 100%;
   object-fit: contain;
   object-position: center top;
   filter: sepia(0.28) contrast(1.1);
@@ -751,10 +755,6 @@
 
   .bt-keeper [data-talking-avatar] {
     gap: 0.25rem;
-  }
-
-  .bt-keeper img {
-    max-height: min(22vh, 10rem);
   }
 }
 
