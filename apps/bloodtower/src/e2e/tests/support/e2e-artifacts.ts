@@ -3,12 +3,13 @@ import { join, resolve } from "node:path";
 import type { TestInfo } from "@playwright/test";
 
 const repoLocalScreenshotsDir = () =>
-  join(import.meta.dirname, "../../../test-results/screenshots");
+  join(import.meta.dirname, "../../../../test-results/screenshots");
 
 /**
  * Stable screenshot copies for walkthroughs and visual review.
  * `E2E_ARTIFACTS_DIR` when set (e.g. `/opt/cursor/artifacts/screenshots` on a cloud agent VM);
  * otherwise `apps/bloodtower/test-results/screenshots` (gitignored via root `test-results/`).
+ * Specs live in `tests/`; this helper is under `tests/support/`, so the relative path uses one extra `..`.
  */
 export const e2eArtifactsDir = (_testInfo?: TestInfo): string => {
   const fromEnv = process.env.E2E_ARTIFACTS_DIR?.trim();
