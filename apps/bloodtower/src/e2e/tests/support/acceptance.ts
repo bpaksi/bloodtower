@@ -45,7 +45,6 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
   return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath };
 };
 
-/** Every text frame the page receives on any socket, from before the first navigation. */
 /** Let bt-ink-in (and other finite animations) finish before board screenshots. */
 export const waitForBoardAnimationsSettled = async (page: Page) => {
   await page.waitForFunction(() => {
@@ -54,7 +53,7 @@ export const waitForBoardAnimationsSettled = async (page: Page) => {
       const effect = animation.effect;
       if (!effect || typeof effect.getTiming !== "function") return true;
       const timing = effect.getTiming();
-      const iterations = timing.iterations ?? timing.iterationCount ?? 1;
+      const iterations = timing.iterations ?? 1;
       return iterations !== Number.POSITIVE_INFINITY;
     });
     return finiteStillRunning.length === 0;
@@ -62,6 +61,7 @@ export const waitForBoardAnimationsSettled = async (page: Page) => {
   await page.waitForTimeout(1500);
 };
 
+/** Every text frame the page receives on any socket, from before the first navigation. */
 export const captureFrames = (page: Page): string[] => {
   const frames: string[] = [];
   page.on("websocket", (socket) => {

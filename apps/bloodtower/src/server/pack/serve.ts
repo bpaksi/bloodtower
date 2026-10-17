@@ -93,7 +93,6 @@ const sendPackFile = async (
   res.writeHead(200, {
     "content-type": type,
     "content-length": String(size),
-    "accept-ranges": "bytes",
   });
   if (req.method === "HEAD") {
     res.end();

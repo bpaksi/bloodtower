@@ -47,6 +47,7 @@ describe("pack asset HTTP", () => {
 
     const byFile = await fetch(`${base}/packs/test/assets/fx-hall.png`);
     expect(byFile.status).toBe(200);
+    expect(byFile.headers.get("content-type")).toBe("image/png");
 
     const traversal = await fetch(`${base}/packs/test/assets/%2e%2e%2fsecret.png`);
     expect(traversal.status).toBe(404);
