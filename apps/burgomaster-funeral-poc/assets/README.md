@@ -39,3 +39,19 @@ Placeholders are replaced in place: keep the same ID and path, overwrite the fil
 
 ## Voice lines: regeneration rule
 Speak the manifest `text` field verbatim. Do **not** prepend a marker such as "Placeholder line." to the spoken audio (placeholder status lives only in `manifest.json` `status`). On 2026-10-15 all 59 `audio/lines/*.wav` were re-cut with ffmpeg to remove a spoken "Placeholder line" lead-in (cut point from faster-whisper base.en word timestamps, 20 ms fade-in, original integrated loudness kept within ±0.1 LU, ≈ −16.4 to −20.1 LUFS) and verified by re-transcription.
+
+## Voice map
+Canonical Gemini TTS voices (`gemini-3.8-flash-tts`) for this POC, matching `assets/stories/dracula/scripts/cast.md`, `packs/dracula/cast.yaml`, and the 2026-10-16 batch in `audio/tts-cache.json`. A parenthesis after a speaker label ("(thought)", "(whisper)") is a style suffix, not a different voice.
+
+| Speaker | Voice | Style |
+|---|---|---|
+| narrator | Charon | slow, low, ominous storyteller |
+| agnes | Kore | calm, dry, quietly stern |
+| tomas | Algenib | gruff, low, unhurried |
+| wren | Erinome | flat, terse, matter-of-fact |
+| emeric | Fenrir | nervous, fast, breathless |
+| hanne | Sulafat | wry, warm, tired |
+
+Delivery format for `audio/lines/*.wav`: PCM s16le, 22050 Hz, mono, loudness-normalized with `loudnorm=I=-18:TP=-1.5:LRA=11` (two-pass).
+
+Older lines (cut 2026-10-14) have no recorded voice: unverified against this map; Bob will spot-check them by ear.

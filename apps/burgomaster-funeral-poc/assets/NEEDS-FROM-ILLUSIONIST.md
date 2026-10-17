@@ -25,7 +25,11 @@ Kit is at `assets/shared/dt1981/` (code-synth square waves at −16 LUFS + proce
 - `n2-burgomasters-funeral.05~no-agnes` → `clips/n2-burgomasters-funeral.05~no-agnes@dashboard.mp4` ✓
 - `n2-burgomasters-funeral.06~no-tomas` → `clips/n2-burgomasters-funeral.06~no-tomas@dashboard.mp4` ✓
 
-## line (59)
+
+## Done: funeral TTS complete (2026-10-16)
+All `n2-burgomasters-funeral` spoken lines now have wavs under `audio/lines/` (including `.end.private.*` and `.07~fight-lost~no-wren`). Status in manifest remains `placeholder` to match prior convention.
+
+## line (64)
 
 - `n2-burgomasters-funeral.01.vo-01` → `audio/lines/n2-burgomasters-funeral.01.vo-01.narrator.wav` (narrator)
 - `n2-burgomasters-funeral.02.vo-01` → `audio/lines/n2-burgomasters-funeral.02.vo-01.agnes.wav` (agnes)
@@ -86,6 +90,12 @@ Kit is at `assets/shared/dt1981/` (code-synth square waves at −16 LUFS + proce
 - `n2-burgomasters-funeral.02~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.02~no-wren.vo-01.agnes.wav` (agnes)
 - `n2-burgomasters-funeral.07~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.07~no-wren.vo-01.narrator.wav` (narrator)
 - `n2-burgomasters-funeral.03~no-emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.03~no-emeric.vo-01.narrator.wav` (narrator)
+
+- `n2-burgomasters-funeral.end.private.wren.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.wren.vo-01.wren.wav` (wren) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.tomas.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.tomas.vo-01.tomas.wav` (tomas) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.agnes.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.agnes.vo-01.agnes.wav` (agnes) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.end.private.emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.emeric.vo-01.emeric.wav` (emeric) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav` (narrator) ✓ TTS 2026-10-16
 
 ## still (41)
 

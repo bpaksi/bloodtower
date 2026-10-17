@@ -1433,5 +1433,176 @@
     "status": "draft",
     "path": "shared/dt1981/index.json#shared.dt1981-loss.slide~cursed",
     "notes": "R-LF-9 1981 bookend, code-synth by Illusionist; see shared/dt1981/index.json"
+  },
+  "n2-burgomasters-funeral.end.private.wren": {
+    "id": "n2-burgomasters-funeral.end.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n2-burgomasters-funeral.end.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren (thought): Two graves filled by noon. Father's spade did the work. Mother was taken for hiding one girl. I'll fetch the other one home.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.end.private.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.end.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n2-burgomasters-funeral.end.private.wren.vo-01.wren.wav",
+    "status": "draft",
+    "text": "Two graves filled by noon. Father's spade did the work. Mother was taken for hiding one girl. I'll fetch the other one home.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.end.private.wren",
+    "duration_s": 10.88
+  },
+  "n2-burgomasters-funeral.end.private.tomas": {
+    "id": "n2-burgomasters-funeral.end.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n2-burgomasters-funeral.end.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas (thought): Twenty years I stood that wall. Marta's still behind it, half his. I'm not burying her too. I'll carry her out again, fingers or no.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.end.private.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.end.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n2-burgomasters-funeral.end.private.tomas.vo-01.tomas.wav",
+    "status": "draft",
+    "text": "Twenty years I stood that wall. Tonight she walked back behind it on her own feet, to pour his wine. I'm not burying her too. I'll carry her out again, fingers or no.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.end.private.tomas",
+    "duration_s": 16.04
+  },
+  "n2-burgomasters-funeral.end.private.agnes": {
+    "id": "n2-burgomasters-funeral.end.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n2-burgomasters-funeral.end.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes (thought): He let me live because I prayed for him. I prayed over two coffins today instead. Lord, let that be the last mercy he ever gets from me.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.end.private.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.end.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n2-burgomasters-funeral.end.private.agnes.vo-01.agnes.wav",
+    "status": "draft",
+    "text": "He let me live because I prayed for him. I prayed over two coffins today instead. Lord, let that be the last mercy he ever gets from me.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.end.private.agnes",
+    "duration_s": 12.32
+  },
+  "n2-burgomasters-funeral.end.private.emeric": {
+    "id": "n2-burgomasters-funeral.end.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n2-burgomasters-funeral.end.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric (thought): Gerhardt's cipher is still in my coat, and Anton is in the ground. I need the Tome's first line to read it. I'm afraid of what it'll say.",
+    "profile": "@ipad"
+  },
+  "n2-burgomasters-funeral.end.private.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.end.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n2-burgomasters-funeral.end.private.emeric.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "Gerhardt's cipher is still in my coat, and Anton is in the ground. I need the Tome's first line to read it. I'm afraid of what it'll say.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.end.private.emeric",
+    "duration_s": 8.16
+  },
+  "n2-burgomasters-funeral.07~fight-lost~no-wren": {
+    "id": "n2-burgomasters-funeral.07~fight-lost~no-wren",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.07~fight-lost~no-wren@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: Dorka is gone through the window, laughing, up the hill road, toward the one who sent her. By the time anyone reaches the castle, he will know who is coming.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01": {
+    "id": "n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "Dorka is gone through the window, laughing, up the hill road, toward the one who sent her. By the time anyone reaches the castle, he will know who is coming.",
+    "speaker": "narrator",
+    "moment": "n2-burgomasters-funeral.07~fight-lost~no-wren",
+    "duration_s": 17.16
+  },
+  "n1-lantern-and-bell.01": {
+    "id": "n1-lantern-and-bell.01",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.01@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: Vellmoor has buried more of its own this year than in the ten before it. Tonight is All Hallows' Eve, and the castle on the hill is lit for the first time in a generation.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.01.vo-01": {
+    "id": "n1-lantern-and-bell.01.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.01.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "Vellmoor has buried more of its own this year than in the ten before it. Tonight is All Hallows' Eve, and the castle on the hill is lit for the first time in a generation.",
+    "speaker": "narrator",
+    "moment": "n1-lantern-and-bell.01",
+    "duration_s": 18.24
+  },
+  "n1-lantern-and-bell.02": {
+    "id": "n1-lantern-and-bell.02",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.02@dashboard.png",
+    "status": "placeholder",
+    "text": "Hanne: Varga. I'd heard you were dead.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.02.vo-01": {
+    "id": "n1-lantern-and-bell.02.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.02.vo-01.hanne.wav",
+    "status": "draft",
+    "text": "Varga. I'd heard you were dead.",
+    "speaker": "hanne",
+    "moment": "n1-lantern-and-bell.02",
+    "duration_s": 3.08
+  },
+  "n1-lantern-and-bell.02.vo-02": {
+    "id": "n1-lantern-and-bell.02.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.02.vo-02.tomas.wav",
+    "status": "draft",
+    "text": "Not for lack of trying, lass.",
+    "speaker": "tomas",
+    "moment": "n1-lantern-and-bell.02",
+    "duration_s": 2.88
+  },
+  "n1-lantern-and-bell.03": {
+    "id": "n1-lantern-and-bell.03",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.03@dashboard.png",
+    "status": "placeholder",
+    "text": "Agnes: You keep a fire burning all night, innkeeper. What are you afraid of?",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.03.vo-01": {
+    "id": "n1-lantern-and-bell.03.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.03.vo-01.agnes.wav",
+    "status": "draft",
+    "text": "You keep a fire burning all night, innkeeper. What are you afraid of?",
+    "speaker": "agnes",
+    "moment": "n1-lantern-and-bell.03",
+    "duration_s": 5.28
   }
 }
