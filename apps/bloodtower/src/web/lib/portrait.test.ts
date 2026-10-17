@@ -3,11 +3,11 @@ import { portraitInitial, portraitUrl } from "./portrait";
 
 describe("portraitUrl", () => {
   it("points at the pack asset route", () => {
-    expect(portraitUrl("test", "por.alpha")).toBe("/packs/test/assets/por.alpha");
+    expect(portraitUrl("test", "por.alpha")).toBe("/packs/test/asset/por.alpha");
   });
 
   it("escapes ids so they cannot change the path", () => {
-    expect(portraitUrl("a/b", "../x")).toBe("/packs/a%2Fb/assets/..%2Fx");
+    expect(portraitUrl("a/b", "../x")).toBe("/packs/a%2Fb/asset/..%2Fx");
   });
 });
 
