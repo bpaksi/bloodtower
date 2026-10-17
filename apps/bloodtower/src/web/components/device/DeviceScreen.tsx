@@ -113,6 +113,14 @@ export function DeviceScreen({
         >
           Resume
         </button>
+        <button
+          type="button"
+          data-action="quit"
+          disabled={!controls.quit}
+          onClick={() => press(state.quitPromptId ?? null, "quit", controls.quit)}
+        >
+          Quit
+        </button>
         {controls.connectLock ? <p role="status">{controls.connectLock}</p> : null}
         <button
           type="button"

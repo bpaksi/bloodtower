@@ -4,6 +4,7 @@ import {
   type ControlLock,
   type DeviceState,
   deviceStatePayloadSchema,
+  type FlowScreen,
   type Pack,
   type PauseCause,
   type StoryboardState,
@@ -60,6 +61,10 @@ export interface SessionEngine {
   lockFor: (promptId: string) => ControlLock | null;
   /** Prompt id for a host pause, or null when play is not running. */
   pausePromptId: () => string | null;
+  /** The screen the server holds right now. */
+  screen: () => FlowScreen;
+  /** Leaves the splash screen once the pack and the socket host are ready. Not a press. */
+  finishSplash: () => void;
   roster: () => RosterSnapshot;
   /** Clears the grace timers. Call it when the host closes. */
   close: () => void;
@@ -93,6 +98,13 @@ export interface SessionOptions {
 
 const newToken = () => randomBytes(16).toString("base64url");
 
+/** Each step before play moves to the next screen. Play, quit and splash are handled apart. */
+const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
+  "tower-connect": "pick-story",
+  "pick-story": "party-join",
+  "party-join": "begin",
+};
+
 const holdingKey = (deviceId: string, hunter: string) => `${deviceId}\0${hunter}`;
 
 export const createSession = (pack: Pack, options: SessionOptions): SessionEngine => {
@@ -116,7 +128,9 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
   let seq = 0;
   let tokenSeq = 0;
   const tokens = options.tokens ?? newToken;
-  let stage: "lobby" | "playing" | "paused" = "lobby";
+  /** `lobby` covers every screen before play. `ended` is set by Quit. */
+  let stage: "lobby" | "playing" | "paused" | "ended" = "lobby";
+  let screen: FlowScreen = "splash";
   let beatIndex = 0;
   let finished = false;
   let pause: PauseRow | null = null;
@@ -207,8 +221,20 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
 
   const currentBeat = (): Beat | undefined => beats[beatIndex];
 
+  /** The step the iPads may press next, or null. Quit has its own prompt (`quitPromptId`). */
   const gameplayPrompt = (): { id: string; action: ControlAction; label: string } | null => {
-    if (stage === "lobby") {
+    if (screen === "splash" || screen === "quit") return null;
+    if (screen === "tower-connect") {
+      return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
+    }
+    if (screen === "pick-story") {
+      return { id: "continue-pick-story", action: "continue", label: "Choose the story" };
+    }
+    if (screen === "party-join") {
+      if (unheldHunters().length > 0) return null;
+      return { id: "continue-party-join", action: "continue", label: "Next: set up the story" };
+    }
+    if (screen === "begin") {
       if (unheldHunters().length > 0) return null;
       return { id: "begin", action: "begin", label: "Begin" };
     }
@@ -287,7 +313,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
    * A host pause stays until Resume, and Resume is refused while a hunter is blocked.
    */
   const refreshPause = (trigger: "disconnect" | "unheld-hunter") => {
-    if (stage === "lobby") return;
+    if (stage === "lobby" || stage === "ended") return;
     const blocked = blockedHunters();
     if (blocked.length > 0) {
       const hunter = blocked[0]?.id ?? null;
@@ -315,7 +341,29 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     if (stage === "paused" && pause && pause.cause !== "host-pause") closePause();
   };
 
+  /** The screen a winning press of this action moves the flow to. */
+  const screenAfter = (action: ControlAction): FlowScreen => {
+    if (action === "begin") return "play";
+    if (action === "quit") return "quit";
+    if (action === "continue" && screen !== "play") {
+      return NEXT_BEFORE_PLAY[screen] ?? screen;
+    }
+    return screen;
+  };
+
   const applyWin = (action: ControlAction, deviceId: string) => {
+    screen = screenAfter(action);
+    if (action === "quit") {
+      closeBeat();
+      if (pause) closePause();
+      if (openPhase) {
+        options.timing.close("phase", openPhase);
+        openPhase = null;
+      }
+      stage = "ended";
+      finished = true;
+      return;
+    }
     if (action === "begin") {
       stage = "playing";
       options.timing.open({
@@ -332,6 +380,8 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       refreshPause("disconnect");
       return;
     }
+    // A step before play only moves the screen. Story beats start at Begin.
+    if (action === "continue" && screen !== "play") return;
     if (action === "continue") {
       closeBeat();
       beatIndex += 1;
@@ -367,6 +417,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     if (action === "pause") {
       return stage === "playing" && !finished && promptId === `pause-${pauseSerial + 1}`;
     }
+    if (action === "quit") return promptId === "quit" && screen === "play";
     const prompt = gameplayPrompt();
     return prompt !== null && prompt.id === promptId && prompt.action === action;
   };
@@ -429,16 +480,34 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     press: (deviceId, promptId, action) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };
       reconcileTowerLocks();
+      // Logged with the screen it was made on. A win also logs the screen it moved to, before
+      // applyWin opens any mark, so a winning press always precedes the marks it opened.
+      const pressedOn = screen;
       const existing = locks[promptId];
       if (existing) {
-        options.presses.record({ promptId, action, deviceId, winner: false });
+        options.presses.record({
+          promptId,
+          action,
+          deviceId,
+          winner: false,
+          screen: pressedOn,
+          nextScreen: null,
+        });
         return { ok: true, winner: false, lock: existing, action: existing.action };
       }
       if (!legal(promptId, action)) return { ok: false, code: "invalid-state" };
       const decided = lockPresses(locks, [{ promptId, action, deviceId }]);
       const winner = decided.winners[0] === true;
       Object.assign(locks, decided.locks);
-      options.presses.record({ promptId, action, deviceId, winner });
+      const movedTo = winner ? screenAfter(action) : pressedOn;
+      options.presses.record({
+        promptId,
+        action,
+        deviceId,
+        winner,
+        screen: pressedOn,
+        nextScreen: movedTo === pressedOn ? null : movedTo,
+      });
       const lock = locks[promptId];
       if (!lock) return { ok: false, code: "invalid-state" };
       if (winner) applyWin(action, deviceId);
@@ -467,6 +536,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
       const unheld = unheldHunters().map((hunter) => hunter.id);
       return storyboardStatePayloadSchema.parse({
+        screen,
         stage,
         hunters: hunters.map((hunter) => {
           const holders = holdersOf(hunter.id);
@@ -494,6 +564,8 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       const mine = heldBy(deviceId);
       const beat = stage === "lobby" || finished ? undefined : currentBeat();
       return deviceStatePayloadSchema.parse({
+        screen,
+        quitPromptId: screen === "play" ? "quit" : null,
         heldHunters: mine,
         views: mine.map((hunter) => {
           const moment = beat?.privates.get(hunter);
@@ -517,6 +589,12 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     },
 
     pausePromptId: () => (stage === "playing" && !finished ? `pause-${pauseSerial + 1}` : null),
+
+    screen: () => screen,
+
+    finishSplash: () => {
+      if (screen === "splash") screen = "tower-connect";
+    },
 
     roster,
 

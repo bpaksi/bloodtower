@@ -3,6 +3,7 @@ import {
   type ControlLock,
   type ControlPress,
   controlPressSchema,
+  type FlowScreen,
 } from "bloodtower-protocols";
 import type { Clock } from "../timing/clock.ts";
 
@@ -12,8 +13,15 @@ export interface PressInput {
   deviceId: string;
 }
 
+/** A press as the flow saw it: the screen it was made on, and the screen a win moved to. */
+export interface PressRecord extends PressInput {
+  winner: boolean;
+  screen: FlowScreen;
+  nextScreen: FlowScreen | null;
+}
+
 export interface PressLog {
-  record: (input: PressInput & { winner: boolean }) => ControlPress;
+  record: (input: PressRecord) => ControlPress;
 }
 
 /**

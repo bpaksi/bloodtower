@@ -152,6 +152,7 @@ describe("openSession", () => {
       v: 1,
       type: "storyboardState",
       payload: {
+        screen: "play",
         stage: "playing",
         hunters: [],
         join: null,

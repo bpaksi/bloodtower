@@ -105,6 +105,8 @@ describe("timing log", () => {
         atMonoMs: 1000,
         atWall: "2026-10-15T18:00:01.000Z",
         winner: true,
+        screen: "play",
+        nextScreen: null,
       });
       store.insertPress("run-1", {
         promptId: "continue-0",
@@ -113,6 +115,8 @@ describe("timing log", () => {
         atMonoMs: 1000,
         atWall: "2026-10-15T18:00:01.000Z",
         winner: false,
+        screen: "play",
+        nextScreen: null,
       });
 
       const run = store.loadRun("run-1");

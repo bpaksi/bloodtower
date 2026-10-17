@@ -178,6 +178,14 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ## Deviations
 
+### R2 flow state (branch `feat/r2-flow-state`)
+
+- A deviation from the frozen contract (spec §3, D20). The R2 requirements (`research/game-design/r2-screen-flow.md`, R2-03 and R2-04) need a server-held flow screen, and the first press wins for each step. Splash, Tower Connect, Pick Story, Party Join and Begin are steps before play. The protocol gains: the `screen` on `storyboardState` and `deviceState`, the `quitPromptId` on `deviceState`, the `quit` control action, `stage: "ended"`, and the `screen` and `nextScreen` on each press.
+- Pre-play steps are `continue-<screen>` prompts, so the device screen's existing prompt matching works unchanged. Begin keeps the `begin` prompt id. Quit is its own prompt, so a locked step does not block it. Tower connect and calibrate are unchanged and do not depend on the screen.
+- The press log is `control_presses`, with two new columns (migration steps 6 and 7). Presses from before them read as null. The PRD-41 timing kinds are not extended: the funeral POC's rows must still match exactly (AC-8). A flow transition is the winning press row's `nextScreen`.
+- `Quit` ends play: open marks close, and a later press is refused. The R2 Quit confirmation (Save and quit, Abandon, Keep playing; R2-64), Pick Story choices, and the screen strip on the board are not in this change.
+- "No host role" (R2-03): the code had none. Any joined device may send any control, and the first press wins. The `host-pause` cause keeps its name because the PRD-41 rows must match the funeral POC.
+
 ### B4 (step 10)
 
 - Built in Local mode from `B4-handoff.md`. No dependency, protocol or server change. Files: `src/e2e/tests/acceptance.spec.ts`, `src/e2e/tests/support/acceptance.ts`, `src/server/scripts/timingReport.ts` and its test.

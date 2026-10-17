@@ -71,6 +71,8 @@ const pressFromRow = (row: typeof controlPresses.$inferSelect): ControlPress =>
     atMonoMs: row.atMonoMs,
     atWall: row.atWall,
     winner: row.winner,
+    screen: row.screen,
+    nextScreen: row.nextScreen,
   });
 
 export interface SessionStore {
@@ -139,6 +141,8 @@ export const createSessionStore = (db: Db): SessionStore => ({
         atMonoMs: parsed.atMonoMs,
         atWall: parsed.atWall,
         winner: parsed.winner,
+        screen: parsed.screen,
+        nextScreen: parsed.nextScreen,
       })
       .run();
   },
