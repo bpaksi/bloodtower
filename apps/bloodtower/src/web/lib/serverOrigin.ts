@@ -1,20 +1,31 @@
+import { DEV_PAGE_PORT, DEV_SESSION_WS_PORT } from "./session.ts";
+
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "::1"]);
+
+export type PageLocation = { protocol: string; host: string; hostname: string };
 
 /**
  * The http(s) origin of the session host, for links the page loads over plain http
- * (pack assets). Empty when `NEXT_PUBLIC_WS_URL` is unset: the page and the host share
- * an origin, so a relative path is right.
+ * (pack assets). Empty when the page and the host share an origin, so a relative path is right.
  *
- * `pnpm dev` points `NEXT_PUBLIC_WS_URL` at `127.0.0.1`, which is the iPad itself when a
- * page is opened from the LAN. When the page is not on loopback, the page's hostname
- * replaces the loopback one and the configured port is kept.
+ * Under `pnpm dev`, `next dev` serves the page on {@link DEV_PAGE_PORT} while the session host
+ * listens on {@link DEV_SESSION_WS_PORT}; asset URLs follow the same rule as {@link sessionUrl}.
+ * When `NEXT_PUBLIC_WS_URL` points at loopback but the page is opened from the LAN, the page's
+ * hostname replaces loopback and the configured port is kept.
  */
 export const serverAssetOrigin = (
-  location?: { hostname: string },
+  location?: PageLocation,
   configured: string | undefined = process.env.NEXT_PUBLIC_WS_URL,
 ): string => {
   const raw = configured?.trim();
-  if (!raw) return "";
+  if (!raw) {
+    if (!location) return "";
+    const page = new URL(`${location.protocol}//${location.host}`);
+    if (page.port === String(DEV_PAGE_PORT)) {
+      return `${page.protocol}//${page.hostname}:${DEV_SESSION_WS_PORT}`;
+    }
+    return "";
+  }
   let url: URL;
   try {
     url = new URL(raw.replace(/^ws/i, "http"));
