@@ -10,19 +10,19 @@
   asset: fx.hall
   cond: absent(delta)
   lines:
-    - {speaker: narrator, text: "Delta is not in the hall.", voice: vo.line}
+    - {speaker: narrator, text: "Emeric is not in the hall.", voice: vo.line}
 - id: proving-ground.02.private.alpha
   kind: text-card
   target: ipad:alpha
   placeholder: "Each hunter reads alone."
   lines:
-    - {speaker: alpha, text: "Only Alpha hears this.", voice: vo.alpha-line}
+    - {speaker: alpha, text: "Only Agnes hears this.", voice: vo.alpha-line}
 - id: proving-ground.02.private.delta
   kind: text-card
   target: ipad:delta
   placeholder: "Each hunter reads alone."
   lines:
-    - {speaker: delta, text: "Only Delta hears this.", voice: vo.delta-line}
+    - {speaker: delta, text: "Only Emeric hears this.", voice: vo.delta-line}
 - id: proving-ground.03
   kind: text-card
   target: storyboard

@@ -235,24 +235,33 @@ const PlayPanel = ({
       <p className="text-5xl leading-tight">{state.prompt ? state.prompt.label : "Waiting."}</p>
       <section className="max-w-3xl text-2xl leading-relaxed">
         {state.moment ? (
-          <div className="relative overflow-hidden rounded-sm bg-stone-900">
-            {state.moment.still ? (
-              // biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export.
-              <img
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover opacity-40"
-                data-still={state.moment.still}
-                src={packStillImageUrl(state.moment.still)}
-              />
-            ) : null}
-            <p
-              className="relative"
-              data-fallback={state.moment.fallbackAudio ?? ""}
-              data-still={state.moment.still ?? ""}
-            >
-              {state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text)}
-            </p>
-          </div>
+          (() => {
+            const caption = (
+              <p
+                className={state.moment.still ? "relative" : undefined}
+                data-fallback={state.moment.fallbackAudio ?? ""}
+                data-moment-caption=""
+                data-still={state.moment.still ?? ""}
+              >
+                {state.moment.text == null
+                  ? "Text unavailable."
+                  : displayCaption(state.moment.text)}
+              </p>
+            );
+            if (!state.moment.still) return caption;
+            return (
+              <div className="relative overflow-hidden rounded-sm bg-stone-900">
+                {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
+                <img
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover opacity-40"
+                  data-still={state.moment.still}
+                  src={packStillImageUrl(state.moment.still)}
+                />
+                {caption}
+              </div>
+            );
+          })()
         ) : (
           <p>Moment unavailable.</p>
         )}

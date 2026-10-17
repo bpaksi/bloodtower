@@ -165,15 +165,15 @@ describe("session", () => {
       expect(new Set(continues.map((press) => press.deviceId)).size).toBe(2);
 
       const board = engine.projectStoryboard(TOWER, JOIN);
-      expect(JSON.stringify(board)).not.toContain("Only Alpha hears this.");
+      expect(JSON.stringify(board)).not.toContain("Only Agnes hears this.");
       expect(JSON.stringify(board)).not.toContain("ipad:");
       expect(board.moment?.text).toBe("Each hunter reads alone.");
       const alphaView = engine.projectDevice(alpha.deviceId);
       const betaView = engine.projectDevice(beta.deviceId);
       expect(alphaView.views.find((view) => view.hunter === "alpha")?.privateMoment?.text).toBe(
-        "Only Alpha hears this.",
+        "Only Agnes hears this.",
       );
-      expect(JSON.stringify(betaView)).not.toContain("Only Alpha hears this.");
+      expect(JSON.stringify(betaView)).not.toContain("Only Agnes hears this.");
       expect(engine.projectDevice("missing").heldHunters).toEqual([]);
     } finally {
       opened.close();
@@ -187,10 +187,10 @@ describe("session", () => {
       if (!joined.ok) throw new Error("join");
       holdAll(engine, joined.deviceId);
       startPlay(engine, joined.deviceId);
-      expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe("Delta is not in the hall.");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe("Emeric is not in the hall.");
       engine.press(joined.deviceId, "continue-0", "continue");
       const duringPrivate = JSON.stringify(engine.projectDevice(joined.deviceId));
-      expect(duringPrivate).not.toContain("Only Delta hears this.");
+      expect(duringPrivate).not.toContain("Only Emeric hears this.");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.text).toBe("Each hunter reads alone.");
     } finally {
       opened.close();
@@ -212,9 +212,9 @@ describe("session", () => {
       expect(
         global.engine.projectDevice(joined.deviceId).views.find((view) => view.hunter === "delta")
           ?.privateMoment?.text,
-      ).toBe("Only Delta hears this.");
+      ).toBe("Only Emeric hears this.");
       expect(JSON.stringify(global.engine.projectStoryboard(TOWER, JOIN))).not.toContain(
-        "Only Delta hears this.",
+        "Only Emeric hears this.",
       );
     } finally {
       global.opened.close();

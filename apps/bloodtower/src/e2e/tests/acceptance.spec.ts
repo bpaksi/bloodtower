@@ -222,8 +222,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(releaseTogether(gateA, gateB)).toBe(2);
 
       await expect(board.getByText("Each hunter reads alone.")).toBeVisible();
-      await expect(pageA.getByText("Only Alpha hears this.")).toBeVisible();
-      await expect(pageB.getByText("Only Delta hears this.")).toBeVisible();
+      await expect(pageA.getByText("Only Agnes hears this.")).toBeVisible();
+      await expect(pageB.getByText("Only Emeric hears this.")).toBeVisible();
       await expect
         .poll(
           () => host.loadRun().presses.filter((press) => press.promptId === "continue-0").length,
@@ -240,21 +240,21 @@ test("the test pack's first night, end to end, on one board and two devices", as
     });
 
     await test.step("AC-6: a private line reaches only the holder's device", async () => {
-      await expect(pageA.getByText("Only Delta hears this.")).toHaveCount(0);
-      await expect(pageB.getByText("Only Alpha hears this.")).toHaveCount(0);
-      await expect(board.getByText(/Only (Alpha|Delta) hears this/)).toHaveCount(0);
+      await expect(pageA.getByText("Only Emeric hears this.")).toHaveCount(0);
+      await expect(pageB.getByText("Only Agnes hears this.")).toHaveCount(0);
+      await expect(board.getByText(/Only (Agnes|Emeric) hears this/)).toHaveCount(0);
       // Beta and Gamma have no private line in this moment.
       await expect(pageA.getByText("No private line.")).toBeVisible();
       await expect(pageB.getByText("No private line.")).toBeVisible();
       // On the wire, not just on screen: each device was sent only its own hunters' lines.
-      expect(gateA.received.some((frame) => frame.includes("Only Alpha hears this."))).toBe(true);
-      expect(gateB.received.some((frame) => frame.includes("Only Delta hears this."))).toBe(true);
+      expect(gateA.received.some((frame) => frame.includes("Only Agnes hears this."))).toBe(true);
+      expect(gateB.received.some((frame) => frame.includes("Only Emeric hears this."))).toBe(true);
       for (const frame of gateA.received) {
-        expect(frame).not.toContain("Only Delta hears this.");
+        expect(frame).not.toContain("Only Emeric hears this.");
         expect(frame).not.toContain(".private.delta");
       }
       for (const frame of gateB.received) {
-        expect(frame).not.toContain("Only Alpha hears this.");
+        expect(frame).not.toContain("Only Agnes hears this.");
         expect(frame).not.toContain(".private.alpha");
       }
     });
@@ -334,7 +334,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       // The last line is done, so the door choice comes up: one button per option, on the iPad.
       // The board shows the prompt twice (the prompt line and the moment), so match the moment.
       await expect(
-        board.locator("section > p", { hasText: "Oil the hinge, or force it." }),
+        board.locator("[data-moment-caption]", { hasText: "Oil the hinge, or force it." }),
       ).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();
       await expect(a.button("pick")).toHaveCount(2);
@@ -456,7 +456,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       for (const frame of boardFrames) {
         expect(frame).not.toContain("ipad:");
         expect(frame).not.toContain(".private.");
-        expect(frame).not.toMatch(/Only (Alpha|Delta) hears this/);
+        expect(frame).not.toMatch(/Only (Agnes|Emeric) hears this/);
         expect(frame).not.toContain("privateMoment");
       }
       // The board saw the private moment's shared placeholder, so it was connected throughout.

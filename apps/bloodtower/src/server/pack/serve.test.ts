@@ -1,9 +1,10 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
+import { resolveAssetImage } from "./assets.ts";
 import { loadPackDir } from "./load.ts";
 import { tryServePackAssets } from "./serve.ts";
 
@@ -59,13 +60,22 @@ describe("pack asset HTTP", () => {
 });
 
 describe("resolveAssetImage", () => {
-  it("resolves by manifest path stem", () => {
+  it("resolves by manifest path stem in an isolated assets folder", () => {
     const dir = join(tmpdir(), `bloodtower-resolve-${Date.now()}`);
-    mkdirSync(join(dir, "assets"), { recursive: true });
-    writeFileSync(join(dir, "assets", "fx-hall.png"), "png");
-    const loaded = loadPackDir(join(loadConfig().packsDir, "test"));
-    expect(loaded.ok).toBe(true);
-    if (!loaded.ok) return;
-    expect(loaded.assets.byId.get("fx.hall")?.basename).toBe("fx-hall.png");
+    const assetsDir = join(dir, "assets");
+    mkdirSync(assetsDir, { recursive: true });
+    writeFileSync(join(assetsDir, "fx-hall.png"), "png");
+    try {
+      const resolved = resolveAssetImage(assetsDir, {
+        id: "fx.hall",
+        type: "still",
+        target: "storyboard",
+        status: "placeholder",
+        path: "fx-hall.txt",
+      });
+      expect(resolved).toBe(join(assetsDir, "fx-hall.png"));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

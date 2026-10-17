@@ -255,6 +255,22 @@ describe("story loader", () => {
     }
   });
 
+  it("warns only for still and portrait assets without image files", () => {
+    const dir = copyPack();
+    try {
+      const assetsDir = join(dir, "assets");
+      rmSync(assetsDir, { recursive: true, force: true });
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.assets.warnings.every((item) => item.rule === "W-asset")).toBe(true);
+      expect(result.assets.warnings.some((item) => item.path === "vo.alpha")).toBe(false);
+      expect(result.assets.warnings.some((item) => item.path === "fx.hall")).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("warns when a declared asset has no image file", () => {
     const dir = copyPack();
     try {
@@ -293,10 +309,7 @@ describe("pack:lint", () => {
   it("passes the test pack and rejects a bad folder with file, path and rule", () => {
     const ok = lintPath(undefined, process.cwd());
     expect(ok.exitCode).toBe(0);
-    expect(ok.lines[0]).toBe("OK test 0.1.0");
-    expect(ok.lines.every((line) => line.startsWith("OK ") || line.includes("rule=W-asset"))).toBe(
-      true,
-    );
+    expect(ok.lines).toEqual(["OK test 0.1.0"]);
 
     const dir = copyPack();
     try {

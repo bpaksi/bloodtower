@@ -51,6 +51,7 @@ describe("story board", () => {
     expect(html).toContain('data-fallback="sfx.bell"');
     expect(html).toContain('data-still="fx.hall"');
     expect(html).toContain("/packs/test/asset/fx.hall");
+    expect(html).toContain('data-moment-caption=""');
     expect(html).not.toContain("Still fx.hall");
     expect(html).not.toContain("Fallback sfx.bell");
     expect(html).toContain('data-board-layout="standard"');

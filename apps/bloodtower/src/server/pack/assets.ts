@@ -157,12 +157,15 @@ export const validateAssetsFolder = (
   }
 };
 
+const expectsImageFile = (type: Asset["type"]) => type === "still" || type === "portrait";
+
 export const indexPackAssets = (packRoot: string, pack: Pack): PackAssetIndex => {
   const assetsDir = join(packRoot, PACK_ASSETS_DIR);
   const warnings: PackLoadIssue[] = [];
   const byId = new Map<string, ResolvedPackAsset>();
   const byBasename = new Map<string, string>();
   for (const asset of pack.assets) {
+    if (!expectsImageFile(asset.type)) continue;
     const absolute = resolveAssetImage(assetsDir, asset);
     if (!absolute) {
       warnings.push(warn("assets.yaml", asset.id, `No image file for asset ${asset.id}.`));
