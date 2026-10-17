@@ -13,8 +13,8 @@ Conventions: line id = `<moment>.vo-NN` (matches manifest line ids); `(thought)`
 - n1-lantern-and-bell.md:89 n1-lantern-and-bell.06~no-tomas em dash replaced
 - n1-open-grave.md:33 n1-open-grave.05 mid-line direction (softly): line split, direction is the note of the second part
 - n2-burgomasters-funeral.md:23 n2-burgomasters-funeral.03 em dash replaced
-- n23-sergius-blade.md:48 n23-sergius-blade.07 trailing direction (he is gone; the wolves howl again) moved to note
-- n23-sergius-blade.md:94 n23-sergius-blade.07~no-emeric trailing direction (he is gone; the wolves howl again) moved to note
+- n23-sergius-blade.md:62 n23-sergius-blade.07 trailing direction (he is gone; the wolves howl again) moved to note
+- n23-sergius-blade.md:108 n23-sergius-blade.07~no-emeric trailing direction (he is gone; the wolves howl again) moved to note
 - n3-fly-eaters-cell.md:35 n3-fly-eaters-cell.06 line ~21s split into 2 lines at sentence breaks
 - n3-fly-eaters-cell.md:39 n3-fly-eaters-cell.07 mid-line direction (giggles): line split, direction is the note of the second part
 - n4-earth-boxes.md:46 n4-earth-boxes.06 em dash replaced
@@ -29,18 +29,19 @@ Conventions: line id = `<moment>.vo-NN` (matches manifest line ids); `(thought)`
 - nx-pressed-flower.md:23 nx-pressed-flower.02.private.tomas~night1 italic aside -> separate whispered line (tomas-whisper)
 - nx-pressed-flower.md:26 nx-pressed-flower.02.private.wren~night1 italic aside -> separate whispered line (wren-whisper)
 - nx-pressed-flower.md:29 nx-pressed-flower.02.private.emeric~night1 italic aside -> separate whispered line (emeric-whisper)
-- nx-pressed-flower.md:36 nx-pressed-flower.02.private.agnes~night2 italic aside -> separate whispered line (agnes-whisper)
-- nx-pressed-flower.md:39 nx-pressed-flower.02.private.tomas~night2 italic aside -> separate whispered line (tomas-whisper)
-- nx-pressed-flower.md:42 nx-pressed-flower.02.private.wren~night2 italic aside -> separate whispered line (wren-whisper)
-- nx-pressed-flower.md:45 nx-pressed-flower.02.private.emeric~night2 italic aside -> separate whispered line (emeric-whisper)
-- nx-pressed-flower.md:52 nx-pressed-flower.02.private.agnes~night3 italic aside -> separate whispered line (agnes-whisper)
-- nx-pressed-flower.md:55 nx-pressed-flower.02.private.tomas~night3 italic aside -> separate whispered line (tomas-whisper)
-- nx-pressed-flower.md:58 nx-pressed-flower.02.private.wren~night3 italic aside -> separate whispered line (wren-whisper)
-- nx-pressed-flower.md:61 nx-pressed-flower.02.private.emeric~night3 italic aside -> separate whispered line (emeric-whisper)
-- nx-pressed-flower.md:68 nx-pressed-flower.02.private.agnes~night4 italic aside -> separate whispered line (agnes-whisper)
-- nx-pressed-flower.md:71 nx-pressed-flower.02.private.tomas~night4 italic aside -> separate whispered line (tomas-whisper)
-- nx-pressed-flower.md:74 nx-pressed-flower.02.private.wren~night4 italic aside -> separate whispered line (wren-whisper)
-- nx-pressed-flower.md:77 nx-pressed-flower.02.private.emeric~night4 italic aside -> separate whispered line (emeric-whisper)
+- nx-pressed-flower.md:40 nx-pressed-flower.00.private.tomas~night2 italic aside -> separate whispered line (tomas-whisper)
+- nx-pressed-flower.md:47 nx-pressed-flower.02.private.agnes~night2 italic aside -> separate whispered line (agnes-whisper)
+- nx-pressed-flower.md:50 nx-pressed-flower.02.private.tomas~night2 italic aside -> separate whispered line (tomas-whisper)
+- nx-pressed-flower.md:53 nx-pressed-flower.02.private.wren~night2 italic aside -> separate whispered line (wren-whisper)
+- nx-pressed-flower.md:56 nx-pressed-flower.02.private.emeric~night2 italic aside -> separate whispered line (emeric-whisper)
+- nx-pressed-flower.md:63 nx-pressed-flower.02.private.agnes~night3 italic aside -> separate whispered line (agnes-whisper)
+- nx-pressed-flower.md:66 nx-pressed-flower.02.private.tomas~night3 italic aside -> separate whispered line (tomas-whisper)
+- nx-pressed-flower.md:69 nx-pressed-flower.02.private.wren~night3 italic aside -> separate whispered line (wren-whisper)
+- nx-pressed-flower.md:72 nx-pressed-flower.02.private.emeric~night3 italic aside -> separate whispered line (emeric-whisper)
+- nx-pressed-flower.md:79 nx-pressed-flower.02.private.agnes~night4 italic aside -> separate whispered line (agnes-whisper)
+- nx-pressed-flower.md:82 nx-pressed-flower.02.private.tomas~night4 italic aside -> separate whispered line (tomas-whisper)
+- nx-pressed-flower.md:85 nx-pressed-flower.02.private.wren~night4 italic aside -> separate whispered line (wren-whisper)
+- nx-pressed-flower.md:88 nx-pressed-flower.02.private.emeric~night4 italic aside -> separate whispered line (emeric-whisper)
 
 ## Ambiguities
 - `target` is not a script.yaml field in format 2.1; added so private lines stay targeted (the moment id also carries it).
