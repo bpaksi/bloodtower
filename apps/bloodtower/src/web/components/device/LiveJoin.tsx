@@ -25,7 +25,6 @@ export function LiveJoin() {
   const [live, setLive] = useState(false);
   const [code, setCode] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-
   useEffect(() => {
     const urlCode = codeFromLocation();
     setCode(urlCode);

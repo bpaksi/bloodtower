@@ -23,6 +23,7 @@ export function JoinScreen({
     if (value && /^\d{6}$/.test(value)) setUrlCode(value);
   }, []);
   const shown = code ?? urlCode;
+  const waitingOnHost = Boolean(shown) && !live;
   return (
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-10" data-layout="ipad">
       <header className="space-y-2">
@@ -34,7 +35,7 @@ export function JoinScreen({
             : "Type the six-digit join code shown on the Story board, or paste a rejoin token."}
         </p>
       </header>
-      {live ? null : <p>Session host unavailable.</p>}
+      {waitingOnHost ? <p>Session host unavailable.</p> : null}
       {shown ? (
         <article className="bt-card space-y-3 text-2xl">
           <p>Game is loading...</p>

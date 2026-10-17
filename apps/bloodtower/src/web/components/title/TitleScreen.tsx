@@ -10,8 +10,8 @@ export function TitleScreen() {
           className="bt-title-keeper"
           src="/avatars/keeper/portrait.png"
           alt="The Keeper"
-          width={176}
-          height={176}
+          width={88}
+          height={88}
         />
         <p className="bt-title-kicker">Return to Dark Tower</p>
         <h1 className="bt-title-heading bt-flicker">Blood Tower</h1>

@@ -1,4 +1,12 @@
+import { copyFileSync, mkdirSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { startAcceptanceHost } from "./support/acceptance.ts";
+
+const screenshotDir = process.env.SCREENSHOT_DIR?.trim();
+const ARTIFACTS = screenshotDir
+  ? resolve(screenshotDir)
+  : join(import.meta.dirname, "../../../test-results/screenshots");
 
 const collectErrors = (page: Page) => {
   const errors: string[] = [];
@@ -19,6 +27,7 @@ test("the title page offers Story board and Hunter paths and health stays connec
   page,
 }, testInfo) => {
   const errors = collectErrors(page);
+  mkdirSync(ARTIFACTS, { recursive: true });
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
 
@@ -47,10 +56,16 @@ test("the title page offers Story board and Hunter paths and health stays connec
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Blood Tower" })).toBeVisible();
-    await page.screenshot({
-      path: testInfo.outputPath(`title-${viewport.name}.png`),
-      fullPage: true,
-    });
+    await expect(page.getByRole("link", { name: /Story board/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Hunter/i })).toBeVisible();
+    const hunter = page.getByRole("link", { name: /Hunter/i });
+    const box = await hunter.boundingBox();
+    expect(box, "Hunter button must be visible").not.toBeNull();
+    const viewportHeight = viewport.height;
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(viewportHeight + 1);
+    const dest = testInfo.outputPath(`title-${viewport.name}.png`);
+    await page.screenshot({ path: dest, fullPage: false });
+    copyFileSync(dest, join(ARTIFACTS, `title-${viewport.name}.png`));
   }
 
   await page.setViewportSize({ width: 820, height: 1180 });
@@ -58,7 +73,26 @@ test("the title page offers Story board and Hunter paths and health stays connec
   await expect(page.getByRole("heading", { name: "Join" })).toBeVisible();
   await expect(page.getByLabel("Join code")).toBeVisible();
   await expect(page.getByText("Join code unavailable")).toHaveCount(0);
+  await expect(page.getByText("Session host unavailable.")).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath("join-no-code-ipad.png"), fullPage: true });
 
   expect(errors).toEqual([]);
+});
+
+test("typing a join code on /join lands on /device", async ({ browser }, testInfo) => {
+  test.setTimeout(60_000);
+  const session = await startAcceptanceHost(testInfo);
+  const context = await browser.newContext({ baseURL: session.baseURL });
+  const page = await context.newPage();
+  try {
+    await page.goto("/join");
+    await expect(page.getByLabel("Join code")).toBeVisible();
+    await page.getByLabel("Join code").fill(session.host.joinCode);
+    await page.getByRole("button", { name: "Enter the table" }).click();
+    await expect(page).toHaveURL(/\/device/);
+    await expect(page.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+  } finally {
+    await context.close().catch(() => undefined);
+    await session.host.close();
+  }
 });
