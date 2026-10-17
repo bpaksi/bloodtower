@@ -20,3 +20,4 @@ Mechanics, themes and rules ideas for the new game. Ideas that become a prototyp
 | [look-and-feel-harness.md](look-and-feel-harness.md) | Story-neutral screen list, layout zones, story slots and invariants |
 | [tower-effects-library.md](tower-effects-library.md) | Named tower effects built from verified capabilities, with fallbacks and funeral cue mapping |
 | [tower-sound-inventory.md](tower-sound-inventory.md) | The 113 sounds already on the tower, by index, so they are reused rather than recreated |
+| [playthrough-ui-notes-2026-10-17.md](playthrough-ui-notes-2026-10-17.md) | Bob's Oct 17 playthrough notes (TV + remote board, start-up dialogs, phones, menu, debug overlay) and proposed R3-UI requirements |
