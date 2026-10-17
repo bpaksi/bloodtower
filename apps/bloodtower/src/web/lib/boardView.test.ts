@@ -48,7 +48,11 @@ describe("story board", () => {
     expect(html).toContain("Beta");
     expect(html).toContain("Continue");
     expect(html).toContain("The proving ground is quiet.");
-    expect(html).toContain("Fallback sfx.bell");
+    expect(html).toContain('data-fallback="sfx.bell"');
+    expect(html).toContain('data-still="fx.hall"');
+    expect(html).not.toContain("Still fx.hall");
+    expect(html).not.toContain("Fallback sfx.bell");
+    expect(html).toContain('data-board-layout="standard"');
     expect(html).toContain("Waiting for someone to hold Alpha.");
     expect(html).toContain("Alpha — device-1");
     expect(html).toContain("Beta — waiting");
@@ -133,6 +137,10 @@ describe("story board", () => {
     expect(html).toContain("Light them if you can. The key is at the bottom. It always is.");
     expect(html).toContain("Mind the third step.");
     expect(html).toContain("keep the lamp lit until you");
+    expect(html).toContain('data-board-layout="keeper"');
+    expect(html).toContain("data-keeper-stage");
+    expect(html).not.toContain("Join code");
+    expect(html).not.toContain("<h2");
     expect(html).not.toContain("Text unavailable.");
     expect(html).not.toContain("ipad:");
     expect(html).not.toMatch(interactive);

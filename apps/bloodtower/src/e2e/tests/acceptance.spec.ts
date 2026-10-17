@@ -298,7 +298,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
     await test.step("The cue moment shows its screen half and fallback, then Grey Stair and the night ends", async () => {
       await a.button("continue").click();
       await expect(board.getByText("A bell marks the step.")).toBeVisible();
-      await expect(board.getByText("Still fx.bell. Fallback sfx.bell.")).toBeVisible();
+      await expect(board.locator('[data-fallback="sfx.bell"]')).toBeVisible();
+      await expect(board.locator("main")).not.toContainText("Still fx.bell");
       await a.button("continue").click();
       await expect(
         board.getByText("A grey stair climbs into the dark. Someone has left the lamps unlit."),

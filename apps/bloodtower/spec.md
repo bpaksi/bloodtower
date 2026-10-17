@@ -49,7 +49,7 @@ SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game table
 
 ## 3. Protocols contract (frozen)
 
-`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes. D18 and D19 are the R2 changes: `hunters[].disconnected` and `join.reachable` are added fields, and the frozen contract otherwise stands.
+`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes. D18 and D19 are the R2 changes: `hunters[].disconnected` and `join.reachable` are added fields. D23 adds `pick` / `option` and `deviceState.pick`. D24 adds `keeper-line-ended` and `storyboardState.keeperLine`. The frozen contract otherwise stands.
 
 Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
 
@@ -59,7 +59,8 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 |---|---|---|
 | `hello` | `role` `storyboard` or `device`; `clientLabel`; `formFactor` `mac`, `ipad` or `phone`; optional `token`; optional `joinCode` | Story board: mac, and neither token nor code. Device: iPad or phone, and a code or a token. |
 | `hold` | `hunter`, `action` `take` or `release` | Device socket only (step 7). |
-| `control` | `promptId`, `action` one of `begin`, `continue`, `pause`, `resume`, `quit`, `tower-connect`, `tower-calibrate` | Device socket only (step 7). First arrival wins (step 5). The flow steps are D18. |
+| `control` | `promptId`, `action` one of `begin`, `continue`, `pause`, `resume`, `quit`, `tower-connect`, `tower-calibrate`, `pick`. A `pick` names its `option`; no other action may. | Device socket only (step 7). First arrival wins (step 5). The flow steps are D20. A pick is D23. |
+| `keeper-line-ended` | `momentId`, `line` (0 to `KEEPER_LINE_COUNT`-1) | Story board only (D7 exception). The server acts only when `line` is the current `keeperLine` (D24). |
 
 **Server → client**
 
@@ -67,8 +68,8 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 |---|---|
 | `welcome` | `clientId`, `role`, `token`, `channels`, `versions`. A story board channel list is exactly `["storyboard"]`. A device lists `ipad:<hunter>` for each hunter it holds at hello, or an empty list when it holds nobody, and never `storyboard` (D16). The token is bound to that role: a storyboard token cannot `hello` as a device, and a device token cannot open the story board. |
 | `error` | `code` one of `invalid-json`, `invalid-envelope`, `unknown-type`, `invalid-payload`, `invalid-state`, `private-on-storyboard`, `storyboard-control`. |
-| `storyboardState` | The flow `screen` (D20); stage `lobby`, `playing`, `paused` or `ended`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); pause banner; tower snapshot; start gate; lock. The stage is `lobby` on every pre-play screen, `playing` or `paused` on `play`, and `ended` on `quit`. |
-| `deviceState` | The flow `screen`; held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the quit prompt id, the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). |
+| `storyboardState` | The flow `screen` (D20); stage `lobby`, `playing`, `paused` or `ended`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); `keeperLine` (D24), the Keeper line index or null outside that scene; pause banner; tower snapshot; start gate; lock. The stage is `lobby` on every pre-play screen, `playing` or `paused` on `play`, and `ended` on `quit`. |
+| `deviceState` | The flow `screen`; held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the quit prompt id, the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). `pick` (D23) is the current pick-card (moment id, prompt, pack options) on each joined iPad, or null. |
 
 A losing press is a `control_presses` row with `winner: false`, not an error. The locked result is the `lock` on both states. Each press row also has the `screen` it arrived on and, for a winning press that moved the flow, `nextScreen`.
 

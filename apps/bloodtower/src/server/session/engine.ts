@@ -248,6 +248,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
     }
     if (screen === "pick-story") {
+      // Pack `title` is the story name (e.g. Dracula), not a scene or set-piece id.
       return { id: "continue-pick-story", action: "continue", label: `Choose ${pack.title}` };
     }
     if (screen === "party-join") {
@@ -644,7 +645,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
         lock: promptLock,
         won: promptLock ? promptLock.winnerDeviceId === deviceId : null,
         pick:
-          prompt?.action === "pick" && beat?.pick
+          prompt?.action === "pick" && beat?.pick && devices.get(deviceId)?.formFactor === "ipad"
             ? { momentId: beat.pick.momentId, prompt: beat.pick.prompt, options: beat.pick.options }
             : null,
       });
