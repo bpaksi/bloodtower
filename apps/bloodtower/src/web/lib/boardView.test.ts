@@ -155,7 +155,10 @@ describe("story board", () => {
     expect(html).toContain("Mind the third step.");
     expect(html).toContain("keep the lamp lit until you");
     expect(html).toContain('data-board-layout="keeper"');
-    expect(html).toContain("data-keeper-stage");
+    expect(html).toContain('data-keeper-stage=""');
+    expect(html).toContain("bt-page-keeper");
+    expect(html).toContain('class="bt-keeper"');
+    expect(html).not.toContain("bt-keeper-stage");
     expect(html).not.toContain("Join code unavailable");
     expect(html).not.toContain("<h2>The Keeper");
     expect(html).not.toContain("Text unavailable.");

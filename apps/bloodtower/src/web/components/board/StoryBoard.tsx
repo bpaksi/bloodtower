@@ -308,12 +308,12 @@ const PlayPanel = ({
 }) => {
   if (state.moment?.id === KEEPER_MOMENT_ID) {
     return (
-      <section className="bt-keeper-stage bt-page-keeper" data-keeper-stage="">
+      <article className="bt-page bt-parchment bt-ink-in bt-page-keeper" data-keeper-stage="">
         <KeeperScene
           keeperLine={state.keeperLine ?? 0}
           onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
         />
-      </section>
+      </article>
     );
   }
   if (!state.moment) {
