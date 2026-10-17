@@ -476,6 +476,10 @@ describe("session hub", () => {
       const state = [...messages].reverse().find((message) => message.type === "storyboardState");
       return state?.type === "storyboardState" && state.payload.screen === "pick-story";
     });
+    await until(beta.inbox, beta.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "deviceState");
+      return state?.type === "deviceState" && state.payload.screen === "pick-story";
+    });
     expect(latest(beta.log, "error")).toBeUndefined();
     expect(latest(beta.log, "deviceState")).toMatchObject({
       payload: { screen: "pick-story" },
