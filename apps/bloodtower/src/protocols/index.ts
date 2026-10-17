@@ -10,7 +10,10 @@ export {
   type FlowScreen,
   flowScreenSchema,
   optionIdSchema,
+  PICK_STORY_PROMPT_PREFIX,
+  PROMPT_ID_MAX,
   promptIdSchema,
+  STORY_ID_MAX,
 } from "./control.ts";
 export {
   type DeviceId,

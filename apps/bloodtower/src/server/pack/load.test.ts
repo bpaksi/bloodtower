@@ -302,7 +302,7 @@ describe("story list", () => {
     }
   });
 
-  it.fails("shows a 45-character story id as a greyed card that cannot be chosen (#64)", () => {
+  it("shows a 45-character story id as a greyed card that cannot be chosen (#64)", () => {
     const { dir, entry } = storyOfLength(45);
     try {
       expect(entry?.card.loadable).toBe(false);

@@ -36,7 +36,13 @@ export const FLOW_SCREENS = [
 export const flowScreenSchema = z.enum(FLOW_SCREENS);
 export type FlowScreen = z.infer<typeof flowScreenSchema>;
 
-export const promptIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
+export const PROMPT_ID_MAX = 64;
+export const promptIdSchema = z.string().regex(new RegExp(`^[A-Za-z0-9_-]{1,${PROMPT_ID_MAX}}$`));
+
+/** The Choose prompt id on Pick Story is this prefix plus the story id. */
+export const PICK_STORY_PROMPT_PREFIX = "continue-pick-story-";
+/** Longest story id whose Choose prompt id still fits `promptIdSchema`. */
+export const STORY_ID_MAX = PROMPT_ID_MAX - PICK_STORY_PROMPT_PREFIX.length;
 
 /** A pick option id from the pack's choices, such as `oil-the-hinge`. */
 export const optionIdSchema = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/);
