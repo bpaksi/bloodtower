@@ -26,10 +26,10 @@ Kit is at `assets/shared/dt1981/` (code-synth square waves at −16 LUFS + proce
 - `n2-burgomasters-funeral.06~no-tomas` → `clips/n2-burgomasters-funeral.06~no-tomas@dashboard.mp4` ✓
 
 
-## Done: funeral TTS complete (2026-10-16)
-All `n2-burgomasters-funeral` spoken lines now have wavs under `audio/lines/` (including `.end.private.*` and `.07~fight-lost~no-wren`). Status in manifest remains `placeholder` to match prior convention.
+## Done: funeral TTS complete (2026-10-17)
+All `n2-burgomasters-funeral` spoken lines now have wavs under `audio/lines/` (including `.end.private.*`, `.07~fight-lost~no-wren`, and the four `.mourner-returns.<hunter>` event lines added 2026-10-17). Lines from the 2026-10-16 and later batches carry manifest status `draft`; older lines stay `placeholder`.
 
-## line (64)
+## line (68)
 
 - `n2-burgomasters-funeral.01.vo-01` → `audio/lines/n2-burgomasters-funeral.01.vo-01.narrator.wav` (narrator)
 - `n2-burgomasters-funeral.02.vo-01` → `audio/lines/n2-burgomasters-funeral.02.vo-01.agnes.wav` (agnes)
@@ -96,6 +96,10 @@ All `n2-burgomasters-funeral` spoken lines now have wavs under `audio/lines/` (i
 - `n2-burgomasters-funeral.end.private.agnes.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.agnes.vo-01.agnes.wav` (agnes) ✓ TTS 2026-10-16
 - `n2-burgomasters-funeral.end.private.emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.end.private.emeric.vo-01.emeric.wav` (emeric) ✓ TTS 2026-10-16
 - `n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01` → `audio/lines/n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav` (narrator) ✓ TTS 2026-10-16
+- `n2-burgomasters-funeral.mourner-returns.agnes.vo-01` → `audio/lines/n2-burgomasters-funeral.mourner-returns.agnes.vo-01.agnes.wav` (agnes)
+- `n2-burgomasters-funeral.mourner-returns.tomas.vo-01` → `audio/lines/n2-burgomasters-funeral.mourner-returns.tomas.vo-01.tomas.wav` (tomas)
+- `n2-burgomasters-funeral.mourner-returns.wren.vo-01` → `audio/lines/n2-burgomasters-funeral.mourner-returns.wren.vo-01.wren.wav` (wren)
+- `n2-burgomasters-funeral.mourner-returns.emeric.vo-01` → `audio/lines/n2-burgomasters-funeral.mourner-returns.emeric.vo-01.emeric.wav` (emeric)
 
 ## still (41)
 
