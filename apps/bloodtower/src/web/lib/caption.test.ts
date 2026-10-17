@@ -14,6 +14,7 @@ describe("displayCaption", () => {
     expect(displayCaption("Go on. [pause 0.5] I'll wait.")).toBe("Go on. I'll wait.");
     expect(displayCaption("[pause 1] First.")).toBe("First.");
     expect(displayCaption("Last. [pause 2]")).toBe("Last.");
+    expect(displayCaption("Hi [pause 1][pause 0.5] there.")).toBe("Hi there.");
   });
 
   it("leaves copy without a pause tag unchanged", () => {
@@ -21,5 +22,7 @@ describe("displayCaption", () => {
     expect(displayCaption("Keep [lamp] brackets that are not a pause.")).toBe(
       "Keep [lamp] brackets that are not a pause.",
     );
+    expect(displayCaption("The [paused] film.")).toBe("The [paused] film.");
+    expect(displayCaption("Speak [quietly] now.")).toBe("Speak [quietly] now.");
   });
 });

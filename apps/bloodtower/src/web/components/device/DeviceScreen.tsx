@@ -1,7 +1,7 @@
 "use client";
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
-import { displayCaption } from "../../lib/caption";
+import { displayCaption } from "../../lib/caption.ts";
 import { SCREEN_NEXT, SCREEN_TITLE, TABLE_STORY, towerReady } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { deviceControls } from "./controls";

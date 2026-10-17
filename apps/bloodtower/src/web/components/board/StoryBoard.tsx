@@ -1,6 +1,6 @@
 import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
-import { displayCaption } from "../../lib/caption";
+import { displayCaption } from "../../lib/caption.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
