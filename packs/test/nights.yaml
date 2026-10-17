@@ -6,4 +6,5 @@
       advance: {after_actions: 1, on_event: dawn}
   set_pieces:
     - {ref: proving-ground, required: true}
+    - {ref: grey-stair, required: true}
   end: night_end(n1)

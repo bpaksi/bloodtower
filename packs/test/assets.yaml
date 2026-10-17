@@ -15,3 +15,7 @@
 - {id: fx.hall, type: still, target: storyboard, status: placeholder, path: fx-hall.txt}
 - {id: fx.bell, type: still, target: storyboard, status: placeholder, path: fx-bell.txt}
 - {id: sfx.bell, type: sfx, target: storyboard, status: placeholder, path: sfx-bell.txt}
+- {id: vo.keeper, type: line, target: storyboard, status: draft, path: vo-keeper.txt}
+- {id: por.keeper, type: portrait, target: storyboard, status: draft, path: keeper-portrait.txt}
+- {id: av.keeper, type: clip, target: storyboard, status: draft, path: keeper-clip.txt}
+- {id: fx.stair, type: still, target: storyboard, status: placeholder, path: fx-stair.txt}

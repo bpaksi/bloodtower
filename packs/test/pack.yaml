@@ -23,3 +23,4 @@ ambient:
   night: {bed: amb.night, accents: [acc.tick], interval_s: [20, 60]}
 cast:
   - {id: narrator, name: Narrator, voice: vo.narrator, role: narrator}
+  - {id: keeper, name: The Keeper, voice: vo.keeper, role: npc}

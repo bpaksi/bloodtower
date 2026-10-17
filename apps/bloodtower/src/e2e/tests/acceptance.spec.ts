@@ -283,10 +283,24 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(hostPause?.endMonoMs).not.toBeNull();
     });
 
-    await test.step("The cue moment shows its screen half and fallback, then the night ends", async () => {
+    await test.step("The cue moment shows its screen half and fallback, then Grey Stair and the night ends", async () => {
       await a.button("continue").click();
       await expect(board.getByText("A bell marks the step.")).toBeVisible();
       await expect(board.getByText("Still fx.bell. Fallback sfx.bell.")).toBeVisible();
+      await a.button("continue").click();
+      await expect(board.getByText(/A grey stair climbs into the dark/)).toBeVisible();
+      await a.button("continue").click();
+      await expect(board.getByText(/At the top, a door/)).toBeVisible();
+      await a.button("continue").click();
+      await expect(
+        board.getByText("Light them if you can. The key is at the bottom. It always is."),
+      ).toBeVisible();
+      await a.button("continue").click();
+      await expect(board.getByText("Oil the hinge, or force it.")).toBeVisible();
+      await a.button("continue").click();
+      await expect(
+        board.getByText("The lamps are lit, or they are not. The stair is quiet."),
+      ).toBeVisible();
       await a.button("continue").click();
       await expect(board.getByText("Moment unavailable.")).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();
@@ -301,6 +315,11 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "proving-ground.01",
         "proving-ground.02",
         "proving-ground.03",
+        "grey-stair.01",
+        "grey-stair.02",
+        "grey-stair.03",
+        "grey-stair.door-choice",
+        "grey-stair.04",
       ]);
       expect(subjects("cue")).toEqual(["bell"]);
       expect(subjects("pause")).toEqual(["disconnect:gamma", "host-pause:1"]);
@@ -343,6 +362,11 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "resume-1:true",
         "continue-1:true",
         "continue-2:true",
+        "continue-3:true",
+        "continue-4:true",
+        "continue-5:true",
+        "continue-6:true",
+        "continue-7:true",
       ]);
       let previous = -1;
       for (const press of run.presses) {

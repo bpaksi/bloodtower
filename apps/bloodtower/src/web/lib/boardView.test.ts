@@ -76,6 +76,28 @@ describe("story board", () => {
     ).toBe(false);
   });
 
+  it("renders the Keeper captions for grey-stair.03 before the avatar loads", () => {
+    const html = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: {
+          ...state(),
+          moment: {
+            id: "grey-stair.03",
+            kind: "clip",
+            text: null,
+            still: "av.keeper",
+            fallbackAudio: null,
+          },
+        },
+      }),
+    );
+    expect(html).toContain("Light them if you can. The key is at the bottom. It always is.");
+    expect(html).toContain("Mind the third step.");
+    expect(html).toContain("keep the lamp lit until you");
+    expect(html).not.toContain("ipad:");
+    expect(html).not.toMatch(interactive);
+  });
+
   it("shows unavailable when the session has not started", () => {
     const html = renderToStaticMarkup(createElement(StoryBoard, { state: waitingStoryboard() }));
     expect(html).not.toMatch(interactive);

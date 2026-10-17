@@ -38,7 +38,13 @@ describe("story loader", () => {
       "delta",
     ]);
     expect(result.pack.nights).toHaveLength(1);
-    expect(result.pack.set_pieces).toHaveLength(1);
+    expect(result.pack.set_pieces.map((piece) => piece.id)).toEqual([
+      "proving-ground",
+      "grey-stair",
+    ]);
+    const keeper = result.pack.moments.find((moment) => moment.id === "grey-stair.03");
+    expect(keeper).toMatchObject({ kind: "clip", asset: "av.keeper", advance: "clip-end" });
+    expect(keeper?.lines).toBeUndefined();
     expect(result.pack.cues[0]?.screen).toBe("fx.bell");
     expect(result.pack.cues[0]?.fallback_sfx).toBe("sfx.bell");
     expect(result.pack.cues[0]?.drums).toBe("none");
