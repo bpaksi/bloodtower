@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -74,9 +74,50 @@ describe("resolveAssetImage", () => {
         status: "placeholder",
         path: "fx-hall.txt",
       });
-      expect(resolved).toBe(join(assetsDir, "fx-hall.png"));
+      expect(resolved).toBe(join(realpathSync(assetsDir), "fx-hall.png"));
     } finally {
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  const asset = {
+    id: "fx.hall",
+    type: "still",
+    target: "storyboard",
+    status: "placeholder",
+    path: "fx-hall.png",
+  } as const;
+
+  it("resolves when the assets folder is reached through a symlinked parent", () => {
+    const dir = realpathSync(join(tmpdir()));
+    const base = join(dir, `bloodtower-link-${Date.now()}`);
+    const real = join(base, "real");
+    const link = join(base, "link");
+    mkdirSync(join(real, "assets"), { recursive: true });
+    writeFileSync(join(real, "assets", "fx-hall.png"), "png");
+    symlinkSync(real, link);
+    try {
+      expect(resolveAssetImage(join(link, "assets"), asset)).toBe(
+        join(realpathSync(real), "assets", "fx-hall.png"),
+      );
+    } finally {
+      rmSync(base, { recursive: true, force: true });
+    }
+  });
+
+  it("still rejects ../ escapes and symlinks pointing outside the assets folder", () => {
+    const base = join(tmpdir(), `bloodtower-escape-${Date.now()}`);
+    const assetsDir = join(base, "assets");
+    mkdirSync(assetsDir, { recursive: true });
+    writeFileSync(join(base, "secret.png"), "png");
+    symlinkSync(join(base, "secret.png"), join(assetsDir, "leak.png"));
+    try {
+      expect(resolveAssetImage(assetsDir, { ...asset, path: "../secret.png" })).toBeUndefined();
+      expect(
+        resolveAssetImage(assetsDir, { ...asset, id: "leak", path: "leak.png" }),
+      ).toBeUndefined();
+    } finally {
+      rmSync(base, { recursive: true, force: true });
     }
   });
 });
