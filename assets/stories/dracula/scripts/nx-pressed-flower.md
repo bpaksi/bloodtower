@@ -28,6 +28,17 @@
 **nx-pressed-flower.02.private.emeric~night1** [still] `ipad:emeric` [prop: pressed-flower]
 > **Emeric (thought):** She's high up. Plastered walls, not stone. A lady's rooms. *(noted, noted, I'm noting it.)*
 
+**nx-pressed-flower.00~night2** [still] [prop: come-home-letter] — Marta's summons (plays before .01~night2; night 2 only)
+[music: solo violin, one held note] [sfx: wind; a loose shutter knocking]
+> **Narrator:** Dusk on the second night. Tomas Varga goes home first. Marta's shutters hang open, the nails pried out and laid in a neat row on the sill. Her bed is cold. On the pillow lies a letter on heavy cream paper: "Come home."
+
+**nx-pressed-flower.00~night2~no-tomas** [still] [prop: come-home-letter] — Tomas not in play
+[music: solo violin, one held note] [sfx: wind; a loose shutter knocking]
+> **Narrator:** Dusk on the second night. At the edge of the village a girl's shutters hang open, the nails pried out and laid in a neat row on the sill. Marta Varga is gone. On her pillow lies a letter on heavy cream paper: "Come home."
+
+**nx-pressed-flower.00.private.tomas~night2** [still] `ipad:tomas` [prop: come-home-letter]
+> **Tomas (thought):** I nailed those shutters myself. He didn't break them. She drew the nails for him, one by one, and laid them out tidy, the way I taught her. *(I'm coming, lass.)*
+
 **nx-pressed-flower.01~night2** [still] [prop: pressed-flower]
 [music: solo violin, two notes] [sfx: wind; faint heartbeat] [tower: heartbeat]
 > **Narrator:** A violet on the lintel at dusk, wrapped in a scrap of painted canvas.

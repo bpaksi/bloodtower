@@ -451,11 +451,11 @@
   source: n1-open-grave.md
   lines:
     - {id: "n1-open-grave.08~no-wren.vo-01", speaker: agnes, text: "He'd want us to pray. So we pray."}
-- id: "n1-open-grave.08~fight-lost-no-wren"
+- id: "n1-open-grave.08~fight-lost~no-wren"
   source: n1-open-grave.md
   lines:
-    - {id: "n1-open-grave.08~fight-lost-no-wren.vo-01", speaker: narrator, text: "Oskar drags himself back into his grave, sated, and the hunters' lanterns are all out."}
-    - {id: "n1-open-grave.08~fight-lost-no-wren.vo-02", speaker: agnes, text: "We failed him twice now. Not a third time."}
+    - {id: "n1-open-grave.08~fight-lost~no-wren.vo-01", speaker: narrator, text: "Oskar drags himself back into his grave, sated, and the hunters' lanterns are all out."}
+    - {id: "n1-open-grave.08~fight-lost~no-wren.vo-02", speaker: agnes, text: "We failed him twice now. Not a third time."}
 - id: "n1-open-grave.02~no-emeric"
   source: n1-open-grave.md
   lines:
@@ -707,7 +707,7 @@
   source: n2-burgomasters-funeral.md
   target: ipad:tomas
   lines:
-    - {id: "n2-burgomasters-funeral.end.private.tomas.vo-01", speaker: tomas, note: "thought", text: "Twenty years I stood that wall. Marta's still behind it, half his. I'm not burying her too. I'll carry her out again, fingers or no."}
+    - {id: "n2-burgomasters-funeral.end.private.tomas.vo-01", speaker: tomas, note: "thought", text: "Twenty years I stood that wall. Tonight she walked back behind it on her own feet, to pour his wine. I'm not burying her too. I'll carry her out again, fingers or no."}
 - id: "n2-burgomasters-funeral.end.private.agnes"
   source: n2-burgomasters-funeral.md
   target: ipad:agnes
@@ -1403,7 +1403,7 @@
 - id: "n5-drawbridge.04"
   source: n5-drawbridge.md
   lines:
-    - {id: "n5-drawbridge.04.vo-01", speaker: narrator, text: "The little gate opens a hand's width. A girl in a castle maid's apron stands behind it with a lamp turned low."}
+    - {id: "n5-drawbridge.04.vo-01", speaker: narrator, text: "The little gate opens a hand's width. A girl in a maid's apron over faded castle livery stands behind it with a lamp turned low."}
     - {id: "n5-drawbridge.04.vo-02", speaker: marta, text: "Uncle Tomas. You came back over the wall."}
 - id: "n5-drawbridge.05"
   source: n5-drawbridge.md
@@ -1454,7 +1454,7 @@
 - id: "n5-drawbridge.04~no-tomas"
   source: n5-drawbridge.md
   lines:
-    - {id: "n5-drawbridge.04~no-tomas.vo-01", speaker: narrator, text: "The little gate opens a hand's width. A girl in a maid's apron stands behind it with a lamp turned low."}
+    - {id: "n5-drawbridge.04~no-tomas.vo-01", speaker: narrator, text: "The little gate opens a hand's width. A girl in a maid's apron over faded castle livery stands behind it with a lamp turned low."}
     - {id: "n5-drawbridge.04~no-tomas.vo-02", speaker: marta, text: "You're the hunters. My uncle said you'd come, before he went away."}
 - id: "n5-drawbridge.05~no-tomas"
   source: n5-drawbridge.md
@@ -2044,6 +2044,20 @@
   lines:
     - {id: "nx-pressed-flower.02.private.emeric~night1.vo-01", speaker: emeric, note: "thought", text: "She's high up. Plastered walls, not stone. A lady's rooms."}
     - {id: "nx-pressed-flower.02.private.emeric~night1.vo-02", speaker: emeric-whisper, note: "thought, aside", text: "Noted, noted, I'm noting it."}
+- id: "nx-pressed-flower.00~night2"
+  source: nx-pressed-flower.md
+  lines:
+    - {id: "nx-pressed-flower.00~night2.vo-01", speaker: narrator, text: "Dusk on the second night. Tomas Varga goes home first. Marta's shutters hang open, the nails pried out and laid in a neat row on the sill. Her bed is cold. On the pillow lies a letter on heavy cream paper: \"Come home.\""}
+- id: "nx-pressed-flower.00~night2~no-tomas"
+  source: nx-pressed-flower.md
+  lines:
+    - {id: "nx-pressed-flower.00~night2~no-tomas.vo-01", speaker: narrator, text: "Dusk on the second night. At the edge of the village a girl's shutters hang open, the nails pried out and laid in a neat row on the sill. Marta Varga is gone. On her pillow lies a letter on heavy cream paper: \"Come home.\""}
+- id: "nx-pressed-flower.00.private.tomas~night2"
+  source: nx-pressed-flower.md
+  target: ipad:tomas
+  lines:
+    - {id: "nx-pressed-flower.00.private.tomas~night2.vo-01", speaker: tomas, note: "thought", text: "I nailed those shutters myself. He didn't break them. She drew the nails for him, one by one, and laid them out tidy, the way I taught her."}
+    - {id: "nx-pressed-flower.00.private.tomas~night2.vo-02", speaker: tomas-whisper, note: "thought, aside", text: "I'm coming, lass."}
 - id: "nx-pressed-flower.01~night2"
   source: nx-pressed-flower.md
   lines:

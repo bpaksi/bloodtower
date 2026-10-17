@@ -324,11 +324,11 @@ Choice: **Fight** (2 foes, brides, per mechanics) or **Let it pass** (spend a st
 
 ### enc-wine-for-no-one: Wine Poured for No One
 - **Nights:** 2–4. (Tomas's past.)
-- **Beat:** In an empty room, Marta, or the part of her the mist can carry, lays a table for one and pours the Count's wine. She does not see the hunters until she sees Tomas.
+- **Beat:** In an empty room, Marta, in a maid's apron over faded castle livery, or the part of her the mist can carry, lays a table for one and pours the Count's wine. She does not see the hunters until she sees Tomas.
 - **Cost / stake:** Speak to her: one present hunter takes 1 corruption (her wine is his). Leave her be: nothing.
 - **At 2 corruptions (`~blocked`):** the speaker pays nothing; she will not speak to someone already his, so there is no finding (scare only).
 - **Outcome (proposed):** Speak = finding: "The little gate is on the left of the chasm; she keeps the key" (feeds `n5-drawbridge`). If Tomas is present, it goes to his journal as a tie clue. Leave = nothing.
-- **Still prompt:** A candlelit table laid for one in an empty stone room, a young woman in faded castle livery pouring dark wine, fog at the windows.
+- **Still prompt:** A candlelit table laid for one in an empty stone room, a young woman in a maid's apron over faded castle livery pouring dark wine, fog at the windows.
 
 **enc-wine-for-no-one.01** [clip]
 [sfx: wine poured; a chair drawn back for no one] [tower: low]
