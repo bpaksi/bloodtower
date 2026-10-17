@@ -79,8 +79,10 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await d.button("continue").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
       await expect(pad.getByRole("heading", { name: "Pick Story" })).toBeVisible();
-      await expect(pad.getByText("Proving ground")).toBeVisible();
-      await expect(board.getByText("Proving ground")).toBeVisible();
+      await expect(pad.getByRole("heading", { name: "Proving ground", exact: true })).toBeVisible();
+      await expect(
+        board.getByRole("heading", { name: "Proving ground", exact: true }),
+      ).toBeVisible();
       await expect(board.locator("[data-status='step']")).toContainText("Pick Story");
       await shot(pad, "device-pick-story");
       await shot(board, "board-pick-story");
