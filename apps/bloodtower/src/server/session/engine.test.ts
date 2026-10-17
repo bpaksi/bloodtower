@@ -4,7 +4,7 @@ import { loadConfig } from "../config.ts";
 import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore } from "../db/store.ts";
-import { loadR1Pack } from "../pack/load.ts";
+import { loadR1Pack, type StoryEntry } from "../pack/load.ts";
 import { stepClock } from "../timing/clock.ts";
 import { createTimingLog } from "../timing/log.ts";
 import { createSession, type SessionEngine } from "./engine.ts";
@@ -28,6 +28,8 @@ const setup = (options?: {
   tower?: () => TowerSnapshot;
   graceMs?: number;
   onChange?: () => void;
+  stories?: readonly StoryEntry[];
+  storyId?: string;
 }) => {
   const opened = openDatabase(":memory:");
   const store = createSessionStore(opened.db);
@@ -50,6 +52,8 @@ const setup = (options?: {
     tower: options?.tower,
     graceMs: options?.graceMs,
     onChange: options?.onChange,
+    stories: options?.stories,
+    storyId: options?.storyId,
   });
   return { opened, store, clock, engine };
 };
@@ -81,7 +85,7 @@ const winStep = (
 const startPlay = (engine: SessionEngine, deviceId: string) => {
   engine.finishSplash();
   winStep(engine, deviceId, "continue-tower-connect", "continue");
-  winStep(engine, deviceId, "continue-pick-story", "continue");
+  winStep(engine, deviceId, "continue-pick-story-test", "continue");
   winStep(engine, deviceId, "continue-party-join", "continue");
   winStep(engine, deviceId, "begin", "begin");
 };
@@ -107,7 +111,7 @@ describe("session", () => {
         code: "invalid-state",
       });
       winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
-      winStep(engine, joined.deviceId, "continue-pick-story", "continue");
+      winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(false);
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
       expect(engine.press(joined.deviceId, "continue-party-join", "continue")).toEqual({
@@ -555,10 +559,10 @@ describe("session", () => {
       expect(pack.set_pieces.map((piece) => piece.id)).not.toContain(pack.title);
       expect(pack.moments.map((moment) => moment.id)).not.toContain(pack.title);
       expect(engine.projectDevice(alpha.deviceId).prompt).toEqual({
-        id: "continue-pick-story",
+        id: "continue-pick-story-test",
         label: `Choose ${pack.title}`,
       });
-      winStep(engine, alpha.deviceId, "continue-pick-story", "continue");
+      winStep(engine, alpha.deviceId, "continue-pick-story-test", "continue");
       expect(engine.screen()).toBe("party-join");
       winStep(engine, alpha.deviceId, "continue-party-join", "continue");
       expect(engine.screen()).toBe("begin");
@@ -819,6 +823,208 @@ describe("session", () => {
       expect(engine.projectStoryboard(TOWER, JOIN).stage).toBe("paused");
       expect(engine.keeperLineEnded("grey-stair.03", 0)).toBe(false);
       expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(0);
+    } finally {
+      opened.close();
+    }
+  });
+});
+
+describe("pick story", () => {
+  /** The test pack as the door "test", a second door with other hunter names, and a greyed one. */
+  const doors = (): { stories: StoryEntry[]; first: Pack; second: Pack } => {
+    const first = packOrThrow().pack;
+    const second: Pack = {
+      ...first,
+      pack_id: "second",
+      title: "Second story",
+      hunters: first.hunters.map((hunter) => ({ ...hunter, name: `${hunter.name} the Second` })),
+    };
+    const card = (pack: Pack, id: string) => ({
+      id,
+      title: pack.title,
+      blurb: null,
+      players: pack.players,
+      loadable: true,
+    });
+    return {
+      first,
+      second,
+      stories: [
+        { card: card(first, "test"), pack: first, issues: [] },
+        { card: card(second, "second"), pack: second, issues: [] },
+        {
+          card: { id: "zzz", title: "zzz", blurb: null, players: null, loadable: false },
+          pack: null,
+          issues: [],
+        },
+      ],
+    };
+  };
+
+  /** Joined iPad on the Pick Story screen. */
+  const atPickStory = (options?: Parameters<typeof setup>[0]) => {
+    const made = setup(options);
+    const joined = made.engine.join({ joinCode: "048213", formFactor: "ipad" });
+    if (!joined.ok) throw new Error("join");
+    made.engine.finishSplash();
+    winStep(made.engine, joined.deviceId, "continue-tower-connect", "continue");
+    return { ...made, deviceId: joined.deviceId };
+  };
+
+  it("lists the one loaded pack as a preselected door when no list is given", () => {
+    const { opened, engine, deviceId } = atPickStory();
+    try {
+      const expected = {
+        cards: [
+          {
+            id: "test",
+            title: "Proving ground",
+            blurb: "A long-lived proving ground for new ideas.",
+            players: { min: 1, max: 4 },
+            loadable: true,
+          },
+        ],
+        focus: "test",
+        current: "test",
+      };
+      expect(engine.projectStoryboard(TOWER, JOIN).stories).toEqual(expected);
+      expect(engine.projectDevice(deviceId).stories).toEqual(expected);
+      expect(engine.projectDevice(deviceId).prompt).toEqual({
+        id: "continue-pick-story-test",
+        label: "Choose Proving ground",
+      });
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("moves the highlight on Pick Story only, without a press, a lock or a screen change", () => {
+    const { stories } = doors();
+    const { opened, store, engine, deviceId } = atPickStory({ stories, storyId: "test" });
+    try {
+      expect(engine.focusStory(deviceId, "second")).toEqual({ ok: true });
+      const board = engine.projectStoryboard(TOWER, JOIN);
+      expect(board.stories?.focus).toBe("second");
+      expect(board.stories?.current).toBe("test");
+      expect(board.prompt).toEqual({
+        id: "continue-pick-story-second",
+        label: "Choose Second story",
+      });
+      expect(engine.screen()).toBe("pick-story");
+      expect(engine.focusStory(deviceId, "nope")).toEqual({ ok: false, code: "invalid-state" });
+      expect(engine.focusStory("device-99", "test")).toEqual({
+        ok: false,
+        code: "unknown-device",
+      });
+      expect(engine.projectStoryboard(TOWER, JOIN).stories?.focus).toBe("second");
+      // Only the tower-connect press and nothing for the highlight.
+      expect(store.loadRun("run").presses.map((press) => press.promptId)).toEqual([
+        "continue-tower-connect",
+      ]);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("refuses to move the highlight off Pick Story", () => {
+    const { stories } = doors();
+    const { opened, engine } = setup({ stories, storyId: "test" });
+    try {
+      const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!joined.ok) throw new Error("join");
+      engine.finishSplash();
+      expect(engine.focusStory(joined.deviceId, "second")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
+      winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
+      expect(engine.focusStory(joined.deviceId, "second")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.projectStoryboard(TOWER, JOIN).stories?.focus).toBe("test");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("refuses a Choose made for a story that is no longer highlighted", () => {
+    const { stories } = doors();
+    const { opened, engine, deviceId } = atPickStory({ stories, storyId: "test" });
+    try {
+      engine.focusStory(deviceId, "second");
+      expect(engine.press(deviceId, "continue-pick-story-test", "continue")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.screen()).toBe("pick-story");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("offers no Choose on a door that can't load", () => {
+    const { stories } = doors();
+    const { opened, engine, deviceId } = atPickStory({ stories, storyId: "test" });
+    try {
+      engine.focusStory(deviceId, "zzz");
+      expect(engine.projectDevice(deviceId).prompt).toBeNull();
+      expect(engine.press(deviceId, "continue-pick-story-zzz", "continue")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.screen()).toBe("pick-story");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("binds the chosen story: its hunters, a clean roster, and the pack id in the saved roster", () => {
+    const { stories } = doors();
+    const { opened, engine, deviceId } = atPickStory({ stories, storyId: "test" });
+    try {
+      holdAll(engine, deviceId);
+      expect(engine.roster().holdings).toHaveLength(4);
+      engine.focusStory(deviceId, "second");
+      winStep(engine, deviceId, "continue-pick-story-second", "continue");
+      expect(engine.screen()).toBe("party-join");
+      expect(engine.hunterRoster().map((hunter) => hunter.name)).toContain("Alpha the Second");
+      const board = engine.projectStoryboard(TOWER, JOIN);
+      expect(board.stories?.current).toBe("second");
+      expect(board.hunters.every((hunter) => hunter.holders.length === 0)).toBe(true);
+      expect(board.gate.canBegin).toBe(false);
+      expect(engine.roster().packId).toBe("second");
+      expect(engine.roster().holdings).toEqual([]);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("keeps the holdings when the table chooses the story it is already on", () => {
+    const { stories } = doors();
+    const { opened, engine, deviceId } = atPickStory({ stories, storyId: "test" });
+    try {
+      holdAll(engine, deviceId);
+      winStep(engine, deviceId, "continue-pick-story-test", "continue");
+      expect(engine.screen()).toBe("party-join");
+      expect(engine.roster().packId).toBe("test");
+      expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(true);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("starts the chosen story at its own first beat on Begin", () => {
+    const { stories } = doors();
+    const { opened, engine, deviceId } = atPickStory({ stories, storyId: "test" });
+    try {
+      engine.focusStory(deviceId, "second");
+      winStep(engine, deviceId, "continue-pick-story-second", "continue");
+      holdAll(engine, deviceId);
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      winStep(engine, deviceId, "begin", "begin");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("proving-ground.01");
     } finally {
       opened.close();
     }

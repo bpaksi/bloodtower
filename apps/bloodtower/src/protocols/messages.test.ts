@@ -17,6 +17,7 @@ import {
   SERVER_MESSAGE_TYPES,
   type StoryboardState,
   serverMessageSchema,
+  storiesSchema,
   storyboardStatePayloadSchema,
   towerBatterySchema,
 } from "./index.ts";
@@ -68,8 +69,14 @@ describe("envelope", () => {
 });
 
 describe("client messages", () => {
-  it("lists hello, hold, control and the Keeper line report, and not a tower command", () => {
-    expect(CLIENT_MESSAGE_TYPES).toEqual(["hello", "hold", "control", "keeper-line-ended"]);
+  it("lists hello, hold, control, the story highlight and the Keeper line report, and not a tower command", () => {
+    expect(CLIENT_MESSAGE_TYPES).toEqual([
+      "hello",
+      "hold",
+      "control",
+      "focus-story",
+      "keeper-line-ended",
+    ]);
     expect(CLIENT_MESSAGE_TYPES).not.toContain("command");
     expect(CONTROL_ACTIONS).toEqual([
       "begin",
@@ -89,6 +96,36 @@ describe("client messages", () => {
     expect(control({ promptId: "pick-6", action: "pick", option: "force-it" })).toBe(true);
     expect(control({ promptId: "pick-6", action: "pick" })).toBe(false);
     expect(control({ promptId: "continue-0", action: "continue", option: "force-it" })).toBe(false);
+  });
+
+  it("moves the story highlight with a story id and nothing else", () => {
+    const focus = (payload: unknown) =>
+      clientMessageSchema.safeParse({ v: 1, type: "focus-story", payload }).success;
+    expect(focus({ story: "dracula" })).toBe(true);
+    expect(focus({ story: "Not An Id" })).toBe(false);
+    expect(focus({})).toBe(false);
+    expect(focus({ story: "dracula", bytes: "0a" })).toBe(false);
+  });
+
+  it("lists each story once and keeps focus and current inside the list", () => {
+    const card = (id: string, loadable = true) => ({
+      id,
+      title: id,
+      blurb: null,
+      players: { min: 1, max: 4 },
+      loadable,
+    });
+    const parse = (value: unknown) => storiesSchema.safeParse(value).success;
+    expect(parse({ cards: [card("alpha"), card("beta")], focus: "beta", current: "alpha" })).toBe(
+      true,
+    );
+    expect(parse({ cards: [card("alpha"), card("alpha")], focus: "alpha", current: "alpha" })).toBe(
+      false,
+    );
+    expect(parse({ cards: [card("alpha")], focus: "beta", current: "alpha" })).toBe(false);
+    expect(parse({ cards: [card("alpha")], focus: "alpha", current: "beta" })).toBe(false);
+    // The bound story always loaded, so it is never a greyed card.
+    expect(parse({ cards: [card("alpha", false)], focus: "alpha", current: "alpha" })).toBe(false);
   });
 
   it("accepts the Keeper line report only with a moment id and a line index", () => {

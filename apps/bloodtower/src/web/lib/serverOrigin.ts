@@ -1,4 +1,4 @@
-const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
+const LOOPBACK = new Set(["localhost", "127.0.0.1", "::1"]);
 
 /**
  * The http(s) origin of the session host, for links the page loads over plain http

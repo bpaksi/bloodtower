@@ -130,6 +130,12 @@ export const controlPayloadSchema = z
   });
 
 /**
+ * Moves the highlight on Pick Story. Not a press: it takes no lock and changes no screen.
+ * The server accepts it only on a device socket, and only while the flow is on Pick Story.
+ */
+export const focusStoryPayloadSchema = z.strictObject({ story: optionIdSchema });
+
+/**
  * The story board's one message (D7 exception). It says the Keeper line that just finished
  * playing on the board. The server acts only when `line` is the current `keeperLine`.
  */
@@ -145,6 +151,7 @@ export const keeperLineEndedPayloadSchema = z.strictObject({
 export const helloMessageSchema = message("hello", helloPayloadSchema);
 export const holdMessageSchema = message("hold", holdPayloadSchema);
 export const controlMessageSchema = message("control", controlPayloadSchema);
+export const focusStoryMessageSchema = message("focus-story", focusStoryPayloadSchema);
 export const keeperLineEndedMessageSchema = message(
   "keeper-line-ended",
   keeperLineEndedPayloadSchema,
@@ -154,6 +161,7 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
   helloMessageSchema,
   holdMessageSchema,
   controlMessageSchema,
+  focusStoryMessageSchema,
   keeperLineEndedMessageSchema,
 ]);
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
@@ -283,6 +291,41 @@ export const pauseBannerSchema = z.strictObject({
   hunter: hunterIdSchema.nullable(),
 });
 
+/**
+ * One door on Pick Story (R2 §3.3). `loadable` is false for a pack that failed validation;
+ * the card is shown greyed and cannot be chosen. No card carries a file path or a lint message.
+ */
+export const storyCardSchema = z.strictObject({
+  id: optionIdSchema,
+  title: z.string().min(1).max(120),
+  blurb: z.string().min(1).max(200).nullable(),
+  players: z
+    .strictObject({ min: z.number().int().min(1), max: z.number().int().min(1) })
+    .nullable(),
+  loadable: z.boolean(),
+});
+export type StoryCard = z.infer<typeof storyCardSchema>;
+
+/**
+ * The doors. `focus` is the highlighted card on Pick Story, held by the server so every
+ * screen shows the same one. `current` is the story the session is bound to.
+ */
+export const storiesSchema = z
+  .strictObject({
+    cards: z.array(storyCardSchema).min(1).max(32),
+    focus: optionIdSchema,
+    current: optionIdSchema,
+  })
+  .superRefine((value, ctx) => {
+    const ids = value.cards.map((card) => card.id);
+    if (new Set(ids).size !== ids.length) issue(ctx, "A story is listed twice.");
+    if (!ids.includes(value.focus)) issue(ctx, "The focused story is not in the list.");
+    if (!value.cards.some((card) => card.id === value.current && card.loadable)) {
+      issue(ctx, "The current story is a loadable card in the list.");
+    }
+  });
+export type Stories = z.infer<typeof storiesSchema>;
+
 /** `lobby` is every screen before play. `ended` is the quit screen. */
 export const STORYBOARD_STAGES = ["lobby", "playing", "paused", "ended"] as const;
 
@@ -310,6 +353,8 @@ export const storyboardStatePayloadSchema = z
       unheld: z.array(hunterIdSchema).max(16),
     }),
     lock: controlLockSchema.nullable(),
+    /** The doors on Pick Story, and the story the session is bound to. */
+    stories: storiesSchema.optional(),
     /** The line the Keeper scene is on (0..KEEPER_LINE_COUNT-1), or null outside that scene. */
     keeperLine: z
       .number()
@@ -437,6 +482,8 @@ export const deviceStatePayloadSchema = z
     roster: z.array(rosterEntrySchema).max(16).optional(),
     /** The bound pack, so the iPad can build asset URLs such as a hunter portrait. */
     packId: idSchema.optional(),
+    /** The doors on Pick Story, and the story the session is bound to. */
+    stories: storiesSchema.optional(),
     /** The pick this device is offered, or null. Set on every joined iPad, not one hunter. */
     pick: pickPayloadSchema.nullable().optional(),
   })

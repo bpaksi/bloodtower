@@ -9,12 +9,15 @@ import {
   KEEPER_MOMENT_ID,
   type Pack,
   type PauseCause,
+  type Stories,
   type StoryboardState,
+  type StoryCard,
   storyboardStatePayloadSchema,
   type TowerSnapshot,
 } from "bloodtower-protocols";
 import { lockPresses, type PressInput, type PressLog } from "../control/lock.ts";
 import type { RosterSnapshot } from "../db/store.ts";
+import type { StoryEntry } from "../pack/load.ts";
 import type { TimingLog } from "../timing/log.ts";
 import { type Beat, beatsForNight, privateText } from "./beats.ts";
 
@@ -74,6 +77,15 @@ export interface SessionEngine {
     join: { url: string; reachable: boolean } | null,
   ) => StoryboardState;
   projectDevice: (deviceId: string) => DeviceState;
+  /** The hunters of the story the session is bound to: id and name only. */
+  hunterRoster: () => { id: string; name: string; portrait?: string }[];
+  /** The id of the pack the session is bound to. */
+  packId: () => string;
+  /**
+   * Moves the highlight on Pick Story. Not a press: no lock, no screen change. Refused off
+   * Pick Story, from a device that is not connected, and for a story that is not in the list.
+   */
+  focusStory: (deviceId: string, storyId: string) => { ok: true } | Fail;
   lockFor: (promptId: string) => ControlLock | null;
   /** Prompt id for a host pause, or null when play is not running. */
   pausePromptId: () => string | null;
@@ -98,6 +110,13 @@ export interface SessionOptions {
   joinCode: string;
   /** Hunters absent when the night starts. Presence then stays fixed (E15). */
   absent?: readonly string[];
+  /**
+   * The doors on Pick Story. `storyId` names the entry whose pack is the one passed to
+   * `createSession`, the story the session starts bound to. Without this the list is that
+   * one pack, preselected.
+   */
+  stories?: readonly StoryEntry[];
+  storyId?: string;
   tokens?: () => string;
   timing: TimingLog;
   presses: PressLog;
@@ -123,21 +142,56 @@ const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
 
 const holdingKey = (deviceId: string, hunter: string) => `${deviceId}\0${hunter}`;
 
-export const createSession = (pack: Pack, options: SessionOptions): SessionEngine => {
+/** The pack-bound parts of a session. They change only when Pick Story binds another story. */
+interface Binding {
+  pack: Pack;
+  hunters: { id: string; name: string; portrait?: string }[];
+  hunterIds: Set<string>;
+  phase: { id: string };
+  beats: Beat[];
+}
+
+const bindPack = (pack: Pack, absent: ReadonlySet<string>): Binding => {
   const hunters = pack.hunters.map((hunter) => ({
     id: hunter.id,
     name: hunter.name,
     portrait: hunter.portrait,
   }));
   const hunterIds = new Set(hunters.map((hunter) => hunter.id));
-  const absent = new Set(options.absent ?? []);
   for (const id of absent) {
     if (!hunterIds.has(id)) throw new Error(`${id} is not a hunter in this pack.`);
   }
-  const night = pack.nights[0];
-  const phase = night?.phases[0];
-  if (!night || !phase) throw new Error("The pack has no night.");
-  const beats = beatsForNight(pack, absent);
+  const phase = pack.nights[0]?.phases[0];
+  if (!phase) throw new Error("The pack has no night.");
+  return { pack, hunters, hunterIds, phase, beats: beatsForNight(pack, absent) };
+};
+
+export const createSession = (initialPack: Pack, options: SessionOptions): SessionEngine => {
+  let { pack, hunters, hunterIds, phase, beats } = bindPack(
+    initialPack,
+    new Set(options.absent ?? []),
+  );
+  const initialId = options.storyId ?? initialPack.pack_id;
+  const entries: readonly StoryEntry[] = options.stories ?? [
+    {
+      card: {
+        id: initialId,
+        title: initialPack.title,
+        blurb: initialPack.tone ?? null,
+        players: initialPack.players,
+        loadable: true,
+      },
+      pack: initialPack,
+      issues: [],
+    },
+  ];
+  if (!entries.some((entry) => entry.card.id === initialId && entry.pack)) {
+    throw new Error(`${initialId} is not a loadable story in the list.`);
+  }
+  let currentStory = initialId;
+  /** The highlighted door on Pick Story. It starts on the bound story. */
+  let focusedStory = initialId;
+  const storyEntry = (id: string) => entries.find((entry) => entry.card.id === id);
   const sessionId = options.sessionId ?? `session-${randomBytes(8).toString("hex")}`;
 
   const devices = new Map<string, DeviceRow>();
@@ -162,6 +216,11 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
   let keeperLine: number | null = null;
   /** Pick moment id to the option the winning iPad chose. */
   const picked = new Map<string, string>();
+  const storiesState = (): Stories => ({
+    cards: entries.map((entry): StoryCard => entry.card),
+    focus: focusedStory,
+    current: currentStory,
+  });
   const readTower =
     options.tower ??
     ((): TowerSnapshot => ({
@@ -252,8 +311,14 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
     }
     if (screen === "pick-story") {
-      // Pack `title` is the story name (e.g. Dracula), not a scene or set-piece id.
-      return { id: "continue-pick-story", action: "continue", label: `Choose ${pack.title}` };
+      // The prompt names the story, so a press made on a stale highlight is refused (R2 §3.3).
+      const card = storyEntry(focusedStory)?.card;
+      if (!card?.loadable) return null;
+      return {
+        id: `continue-pick-story-${card.id}`,
+        action: "continue",
+        label: `Choose ${card.title}`,
+      };
     }
     if (screen === "party-join") {
       if (unheldHunters().length > 0) return null;
@@ -399,7 +464,19 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     openBeat(beat);
   };
 
+  /** Binds the focused story. A different story starts with no holdings: its hunters differ. */
+  const bindFocusedStory = () => {
+    if (focusedStory === currentStory) return;
+    const next = storyEntry(focusedStory)?.pack;
+    if (!next) return;
+    ({ pack, hunters, hunterIds, phase, beats } = bindPack(next, new Set()));
+    currentStory = focusedStory;
+    beatIndex = 0;
+    held.clear();
+  };
+
   const applyWin = (action: ControlAction, deviceId: string, option?: string) => {
+    if (action === "continue" && screen === "pick-story") bindFocusedStory();
     screen = screenAfter(action);
     if (action === "quit") {
       closeBeat();
@@ -620,6 +697,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
         moment: beat?.storyboard ?? null,
         keeperLine,
+        stories: storiesState(),
         pause: pause ? { cause: pause.cause, hunter: pause.hunter } : null,
         tower,
         gate: { canBegin: unheld.length === 0, unheld },
@@ -648,6 +726,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
           };
         }),
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
+        stories: storiesState(),
         lock: promptLock,
         won: promptLock ? promptLock.winnerDeviceId === deviceId : null,
         pick:
@@ -655,6 +734,19 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
             ? { momentId: beat.pick.momentId, prompt: beat.pick.prompt, options: beat.pick.options }
             : null,
       });
+    },
+
+    hunterRoster: () => hunters.map((hunter) => ({ ...hunter })),
+
+    packId: () => pack.pack_id,
+
+    focusStory: (deviceId, storyId) => {
+      if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };
+      if (screen !== "pick-story" || !storyEntry(storyId)) {
+        return { ok: false, code: "invalid-state" };
+      }
+      focusedStory = storyId;
+      return { ok: true };
     },
 
     lockFor: (promptId) => {

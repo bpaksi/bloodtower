@@ -182,8 +182,16 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 - Web-only. The board and iPad render the server-held `screen` from D20. No change to `engine.ts`, protocols, `pack.ts`, tokens, or tower hardware.
 - iPads only; the phone layout toggle is gone. The join page no longer shows the device token (R2-32). A joined iPad enters Tower Connect on `/device` without a claim page or Open controls. Party Join shows the LAN join URL and QR.
-- The R2-01 status strip (tower / devices / step) is on every board screen after splash, including `calibrating`. Pre-play steps keep the existing `continue-<screen>` and `begin` prompts.
+- The R2-01 status strip (tower / devices / step) and the tower battery/calibration line are debug-only on `/board` (`?debug=1`). The styled board hides them so the hunter roll and Keeper plate fit the viewport. Pre-play steps keep the existing `continue-<screen>` and `begin` prompts.
 - Tower Connect has one primary: Connect, then Calibrate, then Next. Play without tower is the secondary skip until the tower is ready. Play keeps `KeeperScene` for `grey-stair.03` (D21). Opening screens are D22.
+
+### R2 Pick Story (branch `feat/story-pick-wizard`)
+
+- Replaces the one hard-coded Pick Story card (`TABLE_STORY`) with the stories on disk. See spec D25. Behavior only: board and iPad markup keep their existing classes, because #53 restyles the panels. The title page (`app/page.tsx`) and `/join` are not touched.
+- Protocol: `stories` on `storyboardState` and `deviceState`, and the `focus-story` client message. The Choose prompt id becomes `continue-pick-story-<story id>` (it was `continue-pick-story`). `loadR1Pack` stays; the host and the CLI lint use it differently (the host now loads every story).
+- A folder with no `pack.*` manifest is not a story, so `packs/dracula` (an unconverted script) does not show up as a greyed door.
+- The repo holds one playable pack (`test`), so Pick Story shows one preselected door. Choosing between two real stories is covered by `engine.test.ts`, `host.test.ts` and `controls.test.ts` with generated packs, not by a browser e2e.
+- Not in this change: saved-game cards (R2-41), the theme switch on choose (R2-40), Back to Tower Connect, and the wizard steps after Party Join.
 
 ### R2 flow state (branch `feat/r2-flow-state`)
 
