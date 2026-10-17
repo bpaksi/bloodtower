@@ -19,7 +19,7 @@ import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
 import { joinHost } from "../lanUrls.ts";
 import type { PackAssetIndex } from "../pack/assets.ts";
-import { formatLoadIssues, loadR1Pack } from "../pack/load.ts";
+import { formatLoadIssues, loadStories } from "../pack/load.ts";
 import { tryServePackAssets } from "../pack/serve.ts";
 import { requestPath, serveStatic } from "../server.ts";
 import { createSession, type SessionEngine } from "../session/engine.ts";
@@ -80,18 +80,32 @@ interface ClientState {
 
 /**
  * HTTP, the static UI, and the session socket on one port.
- * The test pack is loaded before the port opens. The tower is not connected here.
+ * The story packs are loaded before the port opens. The tower is not connected here.
  * Arrival order on this process is the lock order. Client clocks are not read.
  */
 export const startSessionHost = async (options: SessionHostOptions): Promise<SessionHost> => {
-  const loaded = loadR1Pack(options.packsDir);
-  if (!loaded.ok) {
-    throw new Error(`The test pack did not load.\n${formatLoadIssues(loaded.issues).join("\n")}`);
+  const stories = loadStories(options.packsDir);
+  // The session starts on the first story that loads. The rest wait on Pick Story.
+  const first = stories.find((entry) => entry.pack);
+  if (!first?.pack) {
+    const issues = stories.flatMap((entry) => formatLoadIssues(entry.issues));
+    throw new Error(`No story pack loaded.\n${issues.join("\n")}`);
   }
-  const pack = loaded.pack;
-  const packAssets: PackAssetIndex = loaded.assets;
-  if (packAssets.warnings.length > 0) {
-    console.warn(formatLoadIssues(packAssets.warnings).join("\n"));
+  for (const entry of stories) {
+    if (!entry.pack) {
+      console.error(
+        `Story ${entry.card.id} can't load.\n${formatLoadIssues(entry.issues).join("\n")}`,
+      );
+    }
+  }
+  const pack = first.pack;
+  const packAssetCatalogs: PackAssetIndex[] = stories
+    .map((entry) => entry.assets)
+    .filter((catalog): catalog is PackAssetIndex => catalog !== null);
+  for (const catalog of packAssetCatalogs) {
+    if (catalog.warnings.length > 0) {
+      console.warn(formatLoadIssues(catalog.warnings).join("\n"));
+    }
   }
   const joinCode =
     options.joinCode ?? String(randomBytes(3).readUIntBE(0, 3) % 1_000_000).padStart(6, "0");
@@ -105,6 +119,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   let engine: SessionEngine;
   try {
     engine = createSession(pack, {
+      stories,
+      storyId: first.card.id,
       sessionId,
       joinCode,
       startedWall: clock.wall(),
@@ -121,7 +137,6 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     throw error;
   }
 
-  const roster = pack.hunters.map((hunter) => ({ id: hunter.id, name: hunter.name }));
   const clients = new Map<WebSocket, ClientState>();
   const deviceSockets = new Map<string, Set<WebSocket>>();
   const boardTokens = new Set<string>();
@@ -179,7 +194,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         pausePromptId: engine.pausePromptId(),
         connectLock: engine.lockFor("tower-connect"),
         calibrateLock: engine.lockFor("tower-calibrate"),
-        roster,
+        roster: engine.hunterRoster(),
       });
       return { v: PROTOCOL_VERSION, type: "deviceState", payload };
     } catch {
@@ -388,6 +403,25 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     broadcast();
   };
 
+  const onFocusStory = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
+    if (message.type !== "focus-story") return;
+    const correlationId = message.id;
+    if (client.role === "pending") {
+      sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
+      return;
+    }
+    if (client.role !== "device" || !client.deviceId) {
+      sendError(socket, "storyboard-control", "The story board is display only.", correlationId);
+      return;
+    }
+    const result = engine.focusStory(client.deviceId, message.payload.story);
+    if (!result.ok) {
+      sendError(socket, "invalid-state", "That story was not accepted.", correlationId);
+      return;
+    }
+    broadcast();
+  };
+
   const onControl = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
     if (message.type !== "control") return;
     const correlationId = message.id;
@@ -478,6 +512,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     }
     if (message.data.type === "hello") onHello(socket, client, message.data);
     else if (message.data.type === "hold") onHold(socket, client, message.data);
+    else if (message.data.type === "focus-story") onFocusStory(socket, client, message.data);
     else if (message.data.type === "keeper-line-ended")
       onKeeperLineEnded(socket, client, message.data);
     else onControl(socket, client, message.data);
@@ -485,7 +520,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const http = createServer((req, res) => {
     void (async () => {
-      if (await tryServePackAssets([packAssets], req, res)) return;
+      if (await tryServePackAssets(packAssetCatalogs, req, res)) return;
       return serveStatic(options.webRoot, req, res);
     })().catch(() => {
       if (!res.headersSent) {

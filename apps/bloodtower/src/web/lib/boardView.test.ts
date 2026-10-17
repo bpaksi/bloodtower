@@ -199,23 +199,48 @@ describe("story board", () => {
     ).toBe("device-2");
   });
 
-  it("shows the proving-ground door on pick-story and the LAN join URL on party-join", () => {
-    const pick = renderToStaticMarkup(
-      createElement(StoryBoard, {
-        state: storyboardStatePayloadSchema.parse({
-          ...state(),
-          screen: "pick-story",
-          stage: "lobby",
-          pause: null,
-          prompt: { id: "continue-pick-story", label: "Choose Proving ground" },
-          moment: null,
-        }),
-      }),
-    );
+  it("shows the highlighted door on pick-story and the LAN join URL on party-join", () => {
+    const door = (id: string, title: string, loadable = true) => ({
+      id,
+      title,
+      blurb: loadable ? `${title} blurb` : null,
+      players: loadable ? { min: 1, max: 4 } : null,
+      loadable,
+    });
+    const pickState = (focus: string) =>
+      storyboardStatePayloadSchema.parse({
+        ...state(),
+        screen: "pick-story",
+        stage: "lobby",
+        pause: null,
+        prompt: { id: `continue-pick-story-${focus}`, label: "Choose a story" },
+        moment: null,
+        stories: {
+          cards: [door("test", "Proving ground"), door("zzz", "zzz", false)],
+          focus,
+          current: "test",
+        },
+      });
+    const pick = renderToStaticMarkup(createElement(StoryBoard, { state: pickState("test") }));
     expect(pick).toContain('data-screen="pick-story"');
-    expect(pick).toContain("Proving ground");
+    expect(pick).toContain('data-story="test"');
+    expect(pick).toContain("Proving ground blurb");
     expect(pick).toContain("1–4 hunters");
     expect(pick).not.toContain("data-status-strip");
+    // Both doors are listed, the greyed one marked, and the board still has no controls.
+    expect(pick).toContain('data-story-door="zzz"');
+    expect(pick).toContain("(can&#x27;t load)");
+    expect(pick).not.toMatch(interactive);
+    const greyed = renderToStaticMarkup(createElement(StoryBoard, { state: pickState("zzz") }));
+    expect(greyed).toContain('data-story="zzz"');
+    expect(greyed).toContain("Can&#x27;t load");
+    // Before the list arrives the board does not invent a story.
+    const waiting = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: storyboardStatePayloadSchema.parse({ ...pickState("test"), stories: undefined }),
+      }),
+    );
+    expect(waiting).toContain("Stories unavailable.");
 
     const party = renderToStaticMarkup(
       createElement(StoryBoard, {

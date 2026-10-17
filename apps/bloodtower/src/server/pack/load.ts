@@ -1,6 +1,12 @@
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import { type Pack, packIssues, packSchema } from "bloodtower-protocols";
+import {
+  optionIdSchema,
+  type Pack,
+  packIssues,
+  packSchema,
+  type StoryCard,
+} from "bloodtower-protocols";
 import { parse as parseYaml } from "yaml";
 import {
   indexPackAssets,
@@ -16,6 +22,8 @@ import {
  */
 
 const MAX_FILE_BYTES = 1_000_000;
+
+const MANIFEST_FILES: ReadonlySet<string> = new Set(["pack.yaml", "pack.yml", "pack.json"]);
 
 /** File stem → pack field. A stem not listed here is not a pack file. */
 const SPLIT_KEYS: Readonly<Record<string, string>> = {
@@ -231,6 +239,69 @@ export const loadPackDir = (dir: string): PackLoadResult => {
 
 /** R1 loads the test pack only. `packsDir` is the packs root, not the test folder itself. */
 export const loadR1Pack = (packsDir: string): PackLoadResult => loadPackDir(join(packsDir, "test"));
+
+/** One door on Pick Story: the card the UIs show, and the pack behind it when it loads. */
+export interface StoryEntry {
+  card: StoryCard;
+  pack: Pack | null;
+  issues: PackLoadIssue[];
+  /** Resolved asset index when the pack folder parsed; null when load failed. */
+  assets: PackAssetIndex | null;
+}
+
+/**
+ * Every folder under `packsDir` is a story. A folder that fails the pack lint, or has no night
+ * to play, stays in the list as a card that cannot be chosen (R2 §3.3). The card never carries
+ * the lint messages; they stay on the server. A folder with no `pack.*` manifest is work in
+ * progress, not a story, and neither is a plain file or a folder whose name is not a valid id.
+ */
+export const loadStories = (packsDir: string): StoryEntry[] => {
+  let names: string[];
+  try {
+    names = readdirSync(packsDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() || entry.isSymbolicLink())
+      .map((entry) => entry.name);
+  } catch {
+    return [];
+  }
+  const hasManifest = (id: string) => {
+    try {
+      return readdirSync(join(packsDir, id)).some((file) => MANIFEST_FILES.has(file));
+    } catch {
+      return false;
+    }
+  };
+  return names
+    .filter((name) => optionIdSchema.safeParse(name).success && hasManifest(name))
+    .sort()
+    .map((id): StoryEntry => {
+      const loaded = loadPackDir(join(packsDir, id));
+      if (loaded.ok && loaded.pack.nights[0]?.phases[0]) {
+        const { pack } = loaded;
+        return {
+          card: {
+            id,
+            title: pack.title,
+            blurb: pack.tone ?? null,
+            players: pack.players,
+            loadable: true,
+          },
+          pack,
+          issues: [],
+          assets: loaded.assets,
+        };
+      }
+      const issues = loaded.ok
+        ? [issue(id, "nights", "V-1", "The pack has no night to play.")]
+        : loaded.issues;
+      return {
+        card: { id, title: id, blurb: null, players: null, loadable: false },
+        pack: null,
+        issues,
+        assets: loaded.ok ? loaded.assets : null,
+      };
+    });
+};
 
 export const formatLoadIssues = (issues: readonly PackLoadIssue[]): string[] =>
   issues.map(

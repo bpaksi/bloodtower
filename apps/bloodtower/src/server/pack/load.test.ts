@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
 import { lintPath } from "../scripts/packLint.ts";
-import { loadPackDir, loadR1Pack, type PackLoadIssue } from "./load.ts";
+import { loadPackDir, loadR1Pack, loadStories, type PackLoadIssue } from "./load.ts";
 
 const testPack = () => join(loadConfig().packsDir, "test");
 
@@ -302,6 +302,69 @@ describe("story loader", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe("story list", () => {
+  const storiesDir = () => {
+    const dir = mkdtempSync(join(tmpdir(), "bloodtower-stories-"));
+    cpSync(testPack(), join(dir, "test"), { recursive: true });
+    return dir;
+  };
+
+  it("lists the test pack as one loadable card with its title, tone and player range", () => {
+    const [entry, ...rest] = loadStories(loadConfig().packsDir);
+    expect(rest).toEqual([]);
+    expect(entry?.card).toEqual({
+      id: "test",
+      title: "Proving ground",
+      blurb: "A long-lived proving ground for new ideas.",
+      players: { min: 1, max: 4 },
+      loadable: true,
+    });
+    expect(entry?.pack?.pack_id).toBe("test");
+  });
+
+  it("keeps a pack that fails the lint as a greyed card with no lint text on it", () => {
+    const dir = storiesDir();
+    try {
+      cpSync(testPack(), join(dir, "broken"), { recursive: true });
+      writeFileSync(join(dir, "broken", "pack.yaml"), "pack_id: broken\n");
+      const entries = loadStories(dir);
+      expect(entries.map((entry) => entry.card.id)).toEqual(["broken", "test"]);
+      const broken = entries[0];
+      expect(broken?.card).toEqual({
+        id: "broken",
+        title: "broken",
+        blurb: null,
+        players: null,
+        loadable: false,
+      });
+      expect(broken?.pack).toBeNull();
+      expect(broken?.issues.length).toBeGreaterThan(0);
+      expect(entries[1]?.card.loadable).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("skips files, hidden folders and folder names that are not ids", () => {
+    const dir = storiesDir();
+    try {
+      writeFileSync(join(dir, "notes.txt"), "not a story");
+      mkdirSync(join(dir, ".hidden"));
+      mkdirSync(join(dir, "Not A Story"));
+      // Work in progress: files, but no manifest yet.
+      mkdirSync(join(dir, "draft"));
+      writeFileSync(join(dir, "draft", "script.yaml"), "lines: []\n");
+      expect(loadStories(dir).map((entry) => entry.card.id)).toEqual(["test"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("is empty when the packs folder is missing", () => {
+    expect(loadStories(join(tmpdir(), "bloodtower-no-such-packs-folder"))).toEqual([]);
   });
 });
 
