@@ -1,6 +1,6 @@
 # Playthrough UI notes (Bob, 2026-10-17) and design responses
 
-Author: Gamewright. Design only, no code. Status: captured for Bob's review; open questions in §4.
+Author: Gamewright. Design only, no code. Status: captured; Bob answered Q1-Q3 (Oct 17 2026).
 Source: Bob's notes in the Blood Tower room, Oct 17 2026, 7:41 PM ET, after the R2 milestone playthrough.
 Builds on: [r2-screen-flow.md](r2-screen-flow.md) (R2 ids), [landing-and-initial-screens.md](landing-and-initial-screens.md), splash research in `docs/research/splash-animation/` (#73, wish list #72).
 
@@ -59,13 +59,13 @@ When action is required. Mutliple choice options are presented in large centered
 - R3-UI-10. The board has three presentation layers, top to bottom: (1) action-needed dialogs, (2) full-screen visuals and cut scenes, (3) small dialogs (status, wizard, waiting) over the background. Only one layer-2 item shows at a time. Test: state audit.
 - R3-UI-11. Status and wizard screens (Tower Connect, Pick Game, Claim Hunters, setup steps) are centered dialogs over the background, not full pages. The R2-01 status strip moves into the dialog and the debug overlay (R3-UI-40). Test: snapshot.
 - R3-UI-12. Cut scenes play full screen and hide all dialogs and the debug overlay except action-needed dialogs. Test: snapshot during a clip.
-- Ruling kept: the board still has no buttons. "Continue" and "Back" on start-up dialogs are shown on the board as the step's state but pressed on the iPads (R2-03, first press wins).
+- Flow buttons stay on the devices: "Continue" and "Back" on start-up dialogs are shown on the board as the step's state but pressed on the iPads/phones (R2-03, first press wins). The one exception is the board Menu (R3-UI-39).
 
 ### 2.3 Start-up dialogs
 Order: Connect Tower, then Pick Game, then Claim Hunters, each with Continue and Back on the iPads.
 - R3-UI-20. Pick Game shows each story's hunters (names and avatars) as the story defines them; players never name or pick avatars (matches D2). Test: hunter cards come from the pack.
 - R3-UI-21. Claim Hunters keeps R2-30 (Continue disabled with reason until all held) and R2-31 ("Take all"). Test: as R2.
-- Open: where the setup steps (length, then one physical step per screen) go now. See Q1.
+- R3-UI-22 (Bob, Q1, Oct 17 7:49 PM ET). Game length (Short / Standard / Long, plus difficulty) is chosen inside Pick Game, on the chosen story's card, before Continue. Each physical setup step stays its own dialog with Done, after Claim Hunters; "Begin the story" follows the last one (R2-50..52 kept). Order: Connect Tower, Pick Game (+ length), Claim Hunters, setup step dialogs, Begin. Test: e2e order; length locked at Begin.
 
 ### 2.4 In game
 - R3-UI-30. With nothing to show, the board shows a small centered waiting dialog over the background naming who the table waits for ("Waiting for Mina to choose"), per R2-112/R2-115. Test: snapshot.
@@ -75,19 +75,22 @@ Order: Connect Tower, then Pick Game, then Claim Hunters, each with Continue and
 - R3-UI-34. The last visual can be replayed from the iPad menu ("Replay last video", §2.6). The board replays it with the same zoom and returns to the state it left. Replay never changes game state or stats beyond a replay count. Test: e2e.
 
 ### 2.5 Action needed
-- R3-UI-35. Tower lost and hunter disconnected show as a top dialog on the board and on every iPad, and block flow buttons until answered. This changes R2-66: tower loss now stops play until answered. Choices: tower lost = Reconnect / Play without tower / Abandon; hunter lost = Wait (rejoin clears it, R2-65) / Reassign hunter to another device / Abandon. Test: mock disconnects; flow buttons inert while open.
+- R3-UI-35. Tower lost and hunter disconnected show as a top dialog on the board and on every iPad, and block flow buttons until answered. This changes R2-66: tower loss now stops play until answered. Choices: tower lost = Reconnect / Play without tower / Abandon; hunter lost = Wait (rejoin clears it, R2-65) / Reassign hunter to another device / Abandon. Confirmed by Bob (Q3, Oct 17 7:51 PM ET); Loremaster notes three beats need a drum turn (fortune reading, open grave, finale), so "Play without tower" uses the R2-22 fallbacks for those beats. Test: mock disconnects; flow buttons inert while open.
 - R3-UI-36. If both happen, one dialog lists both; the tower is answered first. Test: e2e.
 
 ### 2.6 Control menu (iPad and phone, always available)
-Bob listed the control-menu items under the Story board, but the board has no buttons, so the menu lives on every device and its views show on the board. Combined list:
+The menu lives on every device and on the Story board (Bob, Oct 17 7:46 PM ET: "The story board needs to support the menu... when all ipads are disconnected but the game is still running. Need a way to exit gracefully."). Combined list:
 - Abandon game (confirm: Save and quit / Abandon / Keep playing, R2-64).
-- Go back one step (see Q2).
+- Go back one step (R3-UI-37).
 - Replay last video (R3-UI-34).
 - Tower information (state, battery, calibration, Reconnect).
 - Version information (app build, pack version).
 - Statistics/Debug view (toggles the R3-UI-40 overlay).
 - Kept from the R2 pause menu: Resume, Join another device, Change who holds whom.
+- R3-UI-37 (Bob, Q2, Oct 17 7:50 PM ET). "Go back one step" moves back one screen during start-up (Back). In play it re-shows the last choice and its outcome, read-only; it never undoes a choice, since the table has already heard the result. Test: e2e; game state unchanged after use in play.
 - R3-UI-38. The menu button is visible on every device screen, top corner, text label "Menu" (R2-111, R2-113). Test: audit.
+
+- R3-UI-39. The Story board has its own Menu, opened with the mouse or keyboard on the Mac (a small "Menu" button in a corner plus the Esc key), available on every screen. It offers the same items minus "Go back one step" and "Change who holds whom". It is the graceful exit when every device has dropped (R2-104): the board shows "All devices disconnected" with the rejoin QR, Menu, and Save and quit / Abandon; Save and quit stores the game for the Pick Game resume card (R2-41), then goes to Game Stats and Goodbye. Board-sent actions (a second exception to the board-sends-only-`keeper-line-ended` rule): save-and-quit and abandon (both confirmed), resume, replay last video, reconnect tower, debug-overlay toggle; tower and version info are read-only. Board menu presses go through the same first-press-wins path as device presses and are logged with device "board" (R2-04). This ends the "board has no buttons" ruling for the menu only. Test: drop all devices mid-game, exit via the board menu, resume card present after relaunch.
 
 ### 2.7 Statistics/Debug overlay
 - R3-UI-40. A debug overlay in the board's top-right corner, toggled from the menu, off by default. Shows tower state, joined devices and held hunters, current step/scene id, night and turn, last press (device, latency), and frame/load timing. Hidden during cut scenes unless pinned. Never shows `ipad:*` content (R2-63). Test: toggle; WS capture.
@@ -107,8 +110,12 @@ Bob listed the control-menu items under the Story board, but the board has no bu
 | D6 / R2 §4 phones out | Reversed by R3-UI-50 |
 | §3.6 Pause menu | Becomes the Control menu (§2.6) |
 | §4 hunter switcher tabs | Replaced for choices by R3-UI-53 |
+| Standing ruling "Story board: no buttons, ever" | Amended: the board has a Menu (R3-UI-39); all other controls stay on devices |
+| R2-104 all devices drop | Adds the board-menu exit (R3-UI-39) |
 
 ## 4. Open questions for Bob (one at a time, in this order)
-- Q1. Setup steps (length, then physical steps) after Claim Hunters: (a) a fourth start-up dialog "Set up the story" with Continue/Back, (b) fold length into Pick Game and keep physical steps as their own dialogs, (c) drop the physical steps from the app, (d) write-in.
-- Q2. "Go back 1 step" in play: (a) back one screen in start-up only, in play it re-shows the last choice without undoing it, (b) undo the last choice in play too, (c) start-up only, hidden in play, (d) write-in.
-- Q3. Tower lost dialog in play: (a) blocks until answered (as written), (b) banner only, play continues on fallbacks (R2-66 as was), (c) write-in.
+- Q1. Answered: (b), see R3-UI-22.
+- Q2. Answered: (a), see R3-UI-37.
+- Q3. Answered: (a), see R3-UI-35.
+
+None open.
