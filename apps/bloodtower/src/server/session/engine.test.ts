@@ -648,4 +648,40 @@ describe("session", () => {
       opened.close();
     }
   });
+
+  /**
+   * QA: at grey-stair.door-choice (pick-card, target ipad:all) the iPad has no Oil/Force
+   * options. beatsForNight never reads moment.target, so the pick-card is copied onto
+   * the storyboard (beats.ts shared-moment select), and projectDevice only emits
+   * per-hunter private lines (engine.ts). DeviceState has no pick field.
+   */
+  it.fails("sends the door pick-card targeting ipad:all to a joined iPad with Oil and Force options", () => {
+    const { pack } = packOrThrow();
+    const door = pack.moments.find((moment) => moment.id === "grey-stair.door-choice");
+    expect(door).toMatchObject({ kind: "pick-card", target: "ipad:all" });
+
+    const { opened, engine } = setup();
+    try {
+      const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!joined.ok) throw new Error("join");
+      holdAll(engine, joined.deviceId);
+      startPlay(engine, joined.deviceId);
+      for (const promptId of [
+        "continue-0",
+        "continue-1",
+        "continue-2",
+        "continue-3",
+        "continue-4",
+        "continue-5",
+      ]) {
+        winStep(engine, joined.deviceId, promptId, "continue");
+      }
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.door-choice");
+      const shown = JSON.stringify(engine.projectDevice(joined.deviceId));
+      expect(shown).toMatch(/Oil/i);
+      expect(shown).toMatch(/Force/i);
+    } finally {
+      opened.close();
+    }
+  });
 });
