@@ -5,7 +5,7 @@ export function TitleScreen() {
   return (
     <div className="bt-title-page" data-screen="title">
       <div className="bt-title-backdrop" aria-hidden="true" />
-      <div className="bt-title-shell bt-ink-in">
+      <div className="bt-title-shell">
         <img
           className="bt-title-keeper"
           src="/avatars/keeper/portrait.png"

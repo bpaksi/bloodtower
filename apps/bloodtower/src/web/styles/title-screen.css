@@ -3,26 +3,29 @@
 .bt-title-page {
   position: relative;
   min-height: 100dvh;
-  max-height: 100dvh;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: clamp(0.75rem, 2vw, 1.75rem);
+  padding: clamp(0.75rem, 2.5vw, 1.75rem);
   box-sizing: border-box;
   color: var(--bt-bone);
   font-family: var(--bt-font-body);
   font-size: 1.75rem;
   font-weight: 500;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 .bt-title-backdrop {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background:
-    var(--bt-grain),
-    url("/landing/hero.webp") left top / cover no-repeat;
+  background-color: rgb(11 8 6);
+  background-image: var(--bt-grain), url("/landing/hero.webp");
+  background-repeat: repeat, no-repeat;
+  background-size: auto, cover;
+  background-position:
+    0 0,
+    left top;
   filter: sepia(0.12) contrast(1.05);
 }
 
@@ -32,10 +35,10 @@
   inset: 0;
   background: linear-gradient(
     125deg,
-    rgb(11 8 6 / 0.82) 0%,
-    rgb(11 8 6 / 0.55) 38%,
-    rgb(11 8 6 / 0.12) 62%,
-    transparent 78%
+    rgb(11 8 6 / 0.86) 0%,
+    rgb(11 8 6 / 0.58) 36%,
+    rgb(11 8 6 / 0.15) 58%,
+    transparent 76%
   );
   pointer-events: none;
 }
@@ -43,15 +46,16 @@
 .bt-title-shell {
   position: relative;
   z-index: 1;
-  width: min(34rem, 92vw);
+  width: min(40rem, calc(100vw - 1.5rem));
+  max-width: 100%;
   display: grid;
   gap: clamp(0.5rem, 1.6vh, 1rem);
-  justify-items: start;
+  justify-items: stretch;
   text-align: left;
 }
 
 .bt-title-keeper {
-  width: min(5.5rem, 14vw);
+  width: min(5.5rem, 18vw);
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 50%;
@@ -65,19 +69,20 @@
 .bt-title-kicker {
   margin: 0;
   font-family: var(--bt-font-label);
-  letter-spacing: 0.28em;
-  font-size: clamp(0.85rem, 1.8vw, 1.15rem);
+  letter-spacing: 0.22em;
+  font-size: clamp(0.8rem, 2.2vw, 1.1rem);
   color: var(--bt-parchment-dark);
 }
 
 .bt-title-heading {
   margin: 0;
   font-family: var(--bt-font-title);
-  font-size: clamp(2.25rem, 6.5vw, 3.75rem);
-  letter-spacing: 0.08em;
+  font-size: clamp(2.1rem, 7vw, 3.5rem);
+  letter-spacing: 0.06em;
   color: var(--bt-candle);
   line-height: 1.05;
   text-shadow: 0 2px 18px rgb(0 0 0 / 0.55);
+  white-space: nowrap;
 }
 
 .bt-title-actions {
@@ -87,7 +92,11 @@
   grid-template-columns: 1fr;
 }
 
-@media (min-width: 40rem) {
+@media (min-width: 48rem) and (orientation: landscape) {
+  .bt-title-shell {
+    width: min(52rem, calc(100vw - 2rem));
+  }
+
   .bt-title-actions {
     grid-template-columns: 1fr 1fr;
   }
@@ -99,8 +108,11 @@
   align-items: flex-start;
   justify-content: center;
   gap: 0.35rem;
-  min-height: clamp(4.75rem, 12vh, 6.5rem);
+  min-width: 0;
+  width: 100%;
+  min-height: clamp(4.5rem, 11vh, 6.25rem);
   padding: clamp(0.75rem, 1.5vh, 1rem) clamp(0.85rem, 1.5vw, 1.1rem);
+  box-sizing: border-box;
   text-align: left;
   text-decoration: none;
   color: var(--bt-iron-gall);
@@ -129,56 +141,63 @@
 
 .bt-title-action-label {
   font-family: var(--bt-font-title);
-  font-size: clamp(1.35rem, 3vw, 1.85rem);
-  letter-spacing: 0.06em;
+  font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+  letter-spacing: 0.05em;
 }
 
 .bt-title-action-hint {
   margin: 0;
-  max-width: 14rem;
+  max-width: 100%;
   font-family: var(--bt-font-body);
   font-style: italic;
-  font-size: clamp(0.95rem, 2vw, 1.1rem);
-  line-height: 1.2;
+  font-size: clamp(0.9rem, 2.1vw, 1.05rem);
+  line-height: 1.25;
   color: var(--bt-vellum-shadow);
 }
 
-@media (max-aspect-ratio: 3 / 4) {
+@media (orientation: portrait) {
+  .bt-title-backdrop {
+    background-position:
+      0 0,
+      72% center;
+  }
+
   .bt-title-backdrop::after {
     background: linear-gradient(
       180deg,
-      rgb(11 8 6 / 0.88) 0%,
-      rgb(11 8 6 / 0.72) 42%,
-      rgb(11 8 6 / 0.35) 68%,
-      transparent 88%
+      rgb(11 8 6 / 0.9) 0%,
+      rgb(11 8 6 / 0.75) 38%,
+      rgb(11 8 6 / 0.4) 62%,
+      rgb(11 8 6 / 0.15) 82%,
+      transparent 100%
     );
   }
 
   .bt-title-shell {
-    width: min(28rem, 94vw);
+    width: min(26rem, calc(100vw - 1.25rem));
   }
 
-  .bt-title-actions {
-    grid-template-columns: 1fr;
+  .bt-title-heading {
+    white-space: normal;
   }
 }
 
 @media (max-height: 52rem) and (orientation: landscape) {
   .bt-title-keeper {
-    width: min(4.5rem, 10vw);
+    width: min(4.25rem, 12vw);
   }
 
   .bt-title-heading {
-    font-size: clamp(2rem, 5.5vw, 3rem);
+    font-size: clamp(1.9rem, 5vw, 2.75rem);
   }
 
   .bt-title-action {
-    min-height: clamp(4.25rem, 11vh, 5.5rem);
-    padding: 0.65rem 0.85rem;
+    min-height: clamp(4rem, 10vh, 5.25rem);
+    padding: 0.6rem 0.75rem;
   }
 
   .bt-title-action-hint {
-    font-size: clamp(0.85rem, 1.8vw, 1rem);
-    line-height: 1.15;
+    font-size: clamp(0.8rem, 1.7vw, 0.95rem);
+    line-height: 1.2;
   }
 }

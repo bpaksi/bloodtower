@@ -21,7 +21,29 @@ const titleViewports = [
   { name: "mac-1280x800", width: 1280, height: 800 },
   { name: "ipad-landscape-1024x768", width: 1024, height: 768 },
   { name: "ipad-portrait-768x1024", width: 768, height: 1024 },
+  { name: "phone-390x844", width: 390, height: 844 },
 ] as const;
+
+const assertTitleLayout = async (page: Page, viewport: { width: number; height: number }) => {
+  const shell = page.locator(".bt-title-shell");
+  const h1 = page.getByRole("heading", { level: 1, name: "Blood Tower" });
+  const story = page.getByRole("link", { name: /Story board/i });
+  const hunter = page.getByRole("link", { name: /Hunter/i });
+  for (const locator of [h1, story, hunter]) {
+    const box = await locator.boundingBox();
+    expect(box, "title control must have a box").not.toBeNull();
+    expect(box?.width ?? 0).toBeGreaterThan(280);
+    expect(box?.x ?? -1).toBeGreaterThanOrEqual(-1);
+    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(viewport.width + 1);
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(viewport.height + 1);
+  }
+  const overflow = await shell.evaluate((node) => node.scrollWidth <= node.clientWidth);
+  expect(overflow, "title shell must not clip horizontally").toBe(true);
+  const pageOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+  );
+  expect(pageOverflow, "page must not overflow horizontally").toBe(true);
+};
 
 test("the title page offers Story board and Hunter paths and health stays connection-only", async ({
   page,
@@ -58,11 +80,7 @@ test("the title page offers Story board and Hunter paths and health stays connec
     await expect(page.getByRole("heading", { name: "Blood Tower" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Story board/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Hunter/i })).toBeVisible();
-    const hunter = page.getByRole("link", { name: /Hunter/i });
-    const box = await hunter.boundingBox();
-    expect(box, "Hunter button must be visible").not.toBeNull();
-    const viewportHeight = viewport.height;
-    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(viewportHeight + 1);
+    await assertTitleLayout(page, viewport);
     const dest = testInfo.outputPath(`title-${viewport.name}.png`);
     await page.screenshot({ path: dest, fullPage: false });
     copyFileSync(dest, join(ARTIFACTS, `title-${viewport.name}.png`));

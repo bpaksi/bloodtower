@@ -669,6 +669,11 @@
   animation: bt-ink-in var(--bt-dur-ink) var(--bt-ease-ink) both;
 }
 
+/* Keeper mouth frames decode large; clip-path ink-in crashes WebKit on iPad projects. */
+.bt-page-keeper.bt-ink-in {
+  animation: bt-fade-in var(--bt-dur-ink) var(--bt-ease-ink) both;
+}
+
 .bt-board .bt-flicker {
   animation: bt-candle 3.7s steps(1, end) infinite;
 }
