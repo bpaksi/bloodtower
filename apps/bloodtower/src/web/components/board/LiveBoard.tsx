@@ -21,6 +21,12 @@ export function LiveBoard() {
       onStoryboard: (next) => {
         setNotice(null);
         setState(next);
+        if (next.moment) {
+          console.info("[bloodtower] storyboard moment assets", {
+            still: next.moment.still,
+            fallbackAudio: next.moment.fallbackAudio,
+          });
+        }
       },
       onDevice: () => undefined,
       onError: (error) => setNotice(error.message),

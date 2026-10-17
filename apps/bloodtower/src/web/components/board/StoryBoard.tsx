@@ -30,25 +30,39 @@ export function StoryBoard({
   const tower = towerStatusLines(state.tower);
   const paused = pauseText(state.pause, state.hunters);
   const warning = joinWarning(state.join);
+  const keeperMoment = state.screen === "play" && state.moment?.id === KEEPER_MOMENT_ID;
   return (
     <main
-      className="mx-auto flex min-h-dvh max-w-5xl flex-col gap-8 px-8 py-10"
+      className={
+        keeperMoment
+          ? "mx-auto flex h-dvh max-w-5xl flex-col gap-3 overflow-hidden px-6 py-3"
+          : "mx-auto flex min-h-dvh max-w-5xl flex-col gap-8 px-8 py-10"
+      }
       data-screen={state.screen}
+      data-board-layout={keeperMoment ? "keeper" : "standard"}
     >
-      <header className="flex items-end justify-between gap-6">
-        <h1 className="text-4xl">Story board</h1>
-        <p className="text-right leading-relaxed">
-          Tower {tower.connection}. Battery {tower.battery}. Calibration {tower.calibration}.
-        </p>
+      <header className="flex shrink-0 items-end justify-between gap-6">
+        <h1 className={keeperMoment ? "text-2xl" : "text-4xl"}>Story board</h1>
+        {keeperMoment ? null : (
+          <p className="text-right leading-relaxed">
+            Tower {tower.connection}. Battery {tower.battery}. Calibration {tower.calibration}.
+          </p>
+        )}
       </header>
       {state.screen !== "splash" ? <StatusStrip state={state} /> : null}
       {paused ? (
-        <p className="bg-stone-800 px-4 py-3 text-2xl" role="status">
+        <p
+          className={`shrink-0 bg-stone-800 px-4 py-3 ${keeperMoment ? "text-lg" : "text-2xl"}`}
+          role="status"
+        >
           {paused}
         </p>
       ) : null}
       {warning ? (
-        <p className="bg-stone-800 px-4 py-3 text-2xl" role="alert">
+        <p
+          className={`shrink-0 bg-stone-800 px-4 py-3 ${keeperMoment ? "text-lg" : "text-2xl"}`}
+          role="alert"
+        >
           {warning}
         </p>
       ) : null}
@@ -68,7 +82,7 @@ export function StoryBoard({
 const StatusStrip = ({ state }: { state: StoryboardState }) => {
   const devices = joinedDeviceIds(state.hunters);
   return (
-    <p className="bt-status" data-status-strip="">
+    <p className="bt-status shrink-0" data-status-strip="">
       <span data-status="tower">
         State <strong>{towerStripState(state.tower)}</strong>
       </span>
@@ -202,33 +216,34 @@ const PlayPanel = ({
 }: {
   state: StoryboardState;
   onKeeperLineEnded?: (momentId: string, line: number) => void;
-}) => (
-  <>
-    <JoinBlock join={state.join} />
-    <HunterList hunters={state.hunters} />
-    <p className="text-5xl leading-tight">{state.prompt ? state.prompt.label : "Waiting."}</p>
-    <section className="max-w-3xl text-2xl leading-relaxed">
-      {state.moment?.id === KEEPER_MOMENT_ID ? (
+}) => {
+  if (state.moment?.id === KEEPER_MOMENT_ID) {
+    return (
+      <section className="bt-keeper-stage" data-keeper-stage="">
         <KeeperScene
           keeperLine={state.keeperLine ?? 0}
           onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
         />
-      ) : state.moment ? (
-        <>
-          <p>
+      </section>
+    );
+  }
+  return (
+    <>
+      <JoinBlock join={state.join} />
+      <HunterList hunters={state.hunters} />
+      <p className="text-5xl leading-tight">{state.prompt ? state.prompt.label : "Waiting."}</p>
+      <section className="max-w-3xl text-2xl leading-relaxed">
+        {state.moment ? (
+          <p data-still={state.moment.still ?? ""} data-fallback={state.moment.fallbackAudio ?? ""}>
             {state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text)}
           </p>
-          <p className="mt-2 text-lg" data-fallback={state.moment.fallbackAudio ?? ""}>
-            Still {state.moment.still ?? "unavailable"}. Fallback{" "}
-            {state.moment.fallbackAudio ?? "unavailable"}.
-          </p>
-        </>
-      ) : (
-        <p>Moment unavailable.</p>
-      )}
-    </section>
-  </>
-);
+        ) : (
+          <p>Moment unavailable.</p>
+        )}
+      </section>
+    </>
+  );
+};
 
 const QuitPanel = () => (
   <article className="bt-card max-w-2xl space-y-3 text-2xl">

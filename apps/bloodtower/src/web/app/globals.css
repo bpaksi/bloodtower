@@ -103,3 +103,58 @@ body {
   width: auto;
   min-width: 8rem;
 }
+
+.bt-keeper-stage {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bt-keeper-stage [data-talking-avatar] {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  max-width: 100%;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bt-keeper-stage [data-talking-avatar] > div {
+  aspect-ratio: 1;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 0;
+}
+
+.bt-keeper-stage [data-talking-avatar] img {
+  width: auto !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.bt-keeper-stage [data-talking-avatar] figcaption {
+  flex: 0 0 auto;
+  max-width: 40rem;
+  padding-top: 0.4rem;
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.bt-keeper-stage [data-keeper-captions] {
+  max-width: 40rem;
+  overflow: auto;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}

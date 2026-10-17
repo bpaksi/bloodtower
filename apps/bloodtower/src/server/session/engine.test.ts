@@ -546,6 +546,13 @@ describe("session", () => {
       holdAll(engine, alpha.deviceId);
       winStep(engine, alpha.deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("pick-story");
+      const pack = packOrThrow().pack;
+      expect(pack.set_pieces.map((piece) => piece.id)).not.toContain(pack.title);
+      expect(pack.moments.map((moment) => moment.id)).not.toContain(pack.title);
+      expect(engine.projectDevice(alpha.deviceId).prompt).toEqual({
+        id: "continue-pick-story",
+        label: `Choose ${pack.title}`,
+      });
       winStep(engine, alpha.deviceId, "continue-pick-story", "continue");
       expect(engine.screen()).toBe("party-join");
       winStep(engine, alpha.deviceId, "continue-party-join", "continue");
@@ -767,6 +774,46 @@ describe("session", () => {
       expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBeNull();
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.door-choice");
       expect(engine.keeperLineEnded("grey-stair.03", 2)).toBe(false);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("does not project an ipad:all pick onto a joined phone", () => {
+    const { opened, engine } = setup();
+    try {
+      const ipad = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      const phone = engine.join({ joinCode: "048213", formFactor: "phone" });
+      if (!ipad.ok || !phone.ok) throw new Error("join");
+      holdAll(engine, ipad.deviceId);
+      toKeeper(engine, ipad.deviceId);
+      for (const line of [0, 1, 2]) {
+        winStep(engine, ipad.deviceId, `continue-5-${line}`, "continue");
+      }
+      expect(engine.projectDevice(ipad.deviceId).pick?.options.map((option) => option.id)).toEqual([
+        "oil-the-hinge",
+        "force-it",
+      ]);
+      expect(engine.projectDevice(phone.deviceId).pick).toBeNull();
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("ignores keeperLineEnded while the session is paused", () => {
+    const { opened, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      toKeeper(engine, alpha.deviceId);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(0);
+      const pauseId = engine.pausePromptId();
+      if (!pauseId) throw new Error("pause");
+      winStep(engine, alpha.deviceId, pauseId, "pause");
+      expect(engine.projectStoryboard(TOWER, JOIN).stage).toBe("paused");
+      expect(engine.keeperLineEnded("grey-stair.03", 0)).toBe(false);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(0);
     } finally {
       opened.close();
     }
