@@ -1,6 +1,7 @@
 import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
+import { portraitSrc } from "../../lib/portrait.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
@@ -132,7 +133,13 @@ const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => (
   </section>
 );
 
-const PartyPortraits = ({ hunters }: { hunters: StoryboardState["hunters"] }) =>
+const PartyPortraits = ({
+  hunters,
+  packId,
+}: {
+  hunters: StoryboardState["hunters"];
+  packId: StoryboardState["packId"];
+}) =>
   hunters.length === 0 ? (
     <HunterList hunters={hunters} />
   ) : (
@@ -142,6 +149,7 @@ const PartyPortraits = ({ hunters }: { hunters: StoryboardState["hunters"] }) =>
           <PortraitCard
             compact
             name={hunter.name}
+            src={portraitSrc(packId, hunter.portrait)}
             label={`${hunter.name} — ${holdingText(hunter)}`}
           />
         </li>
@@ -202,7 +210,7 @@ const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
         {total === 0 ? "Hunters unavailable." : `${claimed} of ${total} hunters claimed`}
       </p>
       <JoinBlock join={state.join} large />
-      <PartyPortraits hunters={state.hunters} />
+      <PartyPortraits hunters={state.hunters} packId={state.packId} />
       <p className="text-5xl leading-tight">
         {state.prompt
           ? state.prompt.label

@@ -440,6 +440,11 @@ describe("session hub", () => {
     expect(roster.payload.roster?.map((hunter) => hunter.id)).toEqual(
       pack.hunters.map((hunter) => hunter.id),
     );
+    // The portrait comes from the pack's hunter data, not from the hunter id.
+    expect(roster.payload.roster?.map((hunter) => hunter.portrait)).toEqual(
+      pack.hunters.map((hunter) => hunter.portrait),
+    );
+    expect(roster.payload.packId).toBe(pack.pack_id);
   });
 
   it("moves the flow on the first press of a step, logs both presses with their screen, and sends the loser no error", async () => {

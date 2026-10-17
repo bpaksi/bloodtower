@@ -115,7 +115,11 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     throw error;
   }
 
-  const roster = pack.hunters.map((hunter) => ({ id: hunter.id, name: hunter.name }));
+  const roster = pack.hunters.map((hunter) => ({
+    id: hunter.id,
+    name: hunter.name,
+    portrait: hunter.portrait,
+  }));
   const clients = new Map<WebSocket, ClientState>();
   const deviceSockets = new Map<string, Set<WebSocket>>();
   const boardTokens = new Set<string>();
@@ -174,6 +178,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         connectLock: engine.lockFor("tower-connect"),
         calibrateLock: engine.lockFor("tower-calibrate"),
         roster,
+        packId: pack.pack_id,
       });
       return { v: PROTOCOL_VERSION, type: "deviceState", payload };
     } catch {

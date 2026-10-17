@@ -124,7 +124,11 @@ const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
 const holdingKey = (deviceId: string, hunter: string) => `${deviceId}\0${hunter}`;
 
 export const createSession = (pack: Pack, options: SessionOptions): SessionEngine => {
-  const hunters = pack.hunters.map((hunter) => ({ id: hunter.id, name: hunter.name }));
+  const hunters = pack.hunters.map((hunter) => ({
+    id: hunter.id,
+    name: hunter.name,
+    portrait: hunter.portrait,
+  }));
   const hunterIds = new Set(hunters.map((hunter) => hunter.id));
   const absent = new Set(options.absent ?? []);
   for (const id of absent) {
@@ -606,10 +610,12 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
           return {
             id: hunter.id,
             name: hunter.name,
+            portrait: hunter.portrait,
             holders,
             disconnected: holders.length > 0 && connectedHolders(hunter.id).length === 0,
           };
         }),
+        packId: pack.pack_id,
         join: join ? { code: options.joinCode, url: join.url, reachable: join.reachable } : null,
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
         moment: beat?.storyboard ?? null,
