@@ -12,6 +12,18 @@ The files in this folder are the proving ground R1 loads. They are not a publish
 
 `pnpm --dir apps/bloodtower pack:lint` checks this folder. A `choices` file is parsed and kept. Nothing runs it.
 
+## Art files (`assets/`)
+
+Illusionist drops storyboard stills and other pack images here. The loader allows only this subfolder under `packs/test/`, and only `png`, `jpg`, `jpeg`, or `webp` files (no nested folders).
+
+| Asset id (from `assets.yaml`) | Suggested file |
+|---|---|
+| `fx.hall` | `assets/fx-hall.png` (matches the manifest `path` stem) |
+| `fx.stair` | `assets/fx-stair.png` |
+| `fx.bell` | `assets/fx-bell.png` |
+
+If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
+
 # Test pack (`packs/test/`) content spec
 
 Status: design draft for Bob, 2026-10-15. The YAML in this folder is still the proving ground above. This spec is not what the loader reads.

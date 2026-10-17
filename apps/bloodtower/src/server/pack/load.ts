@@ -2,6 +2,12 @@ import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { type Pack, packIssues, packSchema } from "bloodtower-protocols";
 import { parse as parseYaml } from "yaml";
+import {
+  indexPackAssets,
+  PACK_ASSETS_DIR,
+  type PackAssetIndex,
+  validateAssetsFolder,
+} from "./assets.ts";
 
 /**
  * Reads one pack folder (YAML or JSON) into the frozen pack schema.
@@ -42,7 +48,9 @@ export interface PackLoadIssue {
   message: string;
 }
 
-export type PackLoadResult = { ok: true; pack: Pack } | { ok: false; issues: PackLoadIssue[] };
+export type PackLoadResult =
+  | { ok: true; pack: Pack; assets: PackAssetIndex }
+  | { ok: false; issues: PackLoadIssue[] };
 
 const issue = (file: string, path: string, rule: string, message: string): PackLoadIssue => ({
   rule,
@@ -139,6 +147,10 @@ export const loadPackDir = (dir: string): PackLoadResult => {
 
   for (const name of names.sort()) {
     if (name === "README.md") continue;
+    if (name === PACK_ASSETS_DIR) {
+      validateAssetsFolder(root, (item) => issues.push(item));
+      continue;
+    }
     const dot = name.lastIndexOf(".");
     const stem = dot > 0 ? name.slice(0, dot) : name;
     const ext = dot > 0 ? name.slice(dot) : "";
@@ -213,7 +225,8 @@ export const loadPackDir = (dir: string): PackLoadResult => {
       }),
     };
   }
-  return { ok: true, pack: parsed.data };
+  const assets = indexPackAssets(root, parsed.data);
+  return { ok: true, pack: parsed.data, assets };
 };
 
 /** R1 loads the test pack only. `packsDir` is the packs root, not the test folder itself. */

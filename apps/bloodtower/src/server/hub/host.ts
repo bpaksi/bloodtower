@@ -18,7 +18,9 @@ import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
 import { joinHost } from "../lanUrls.ts";
+import type { PackAssetIndex } from "../pack/assets.ts";
 import { formatLoadIssues, loadR1Pack } from "../pack/load.ts";
+import { tryServePackAssets } from "../pack/serve.ts";
 import { requestPath, serveStatic } from "../server.ts";
 import { createSession, type SessionEngine } from "../session/engine.ts";
 import { type Clock, systemClock } from "../timing/clock.ts";
@@ -87,6 +89,10 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     throw new Error(`The test pack did not load.\n${formatLoadIssues(loaded.issues).join("\n")}`);
   }
   const pack = loaded.pack;
+  const packAssets: PackAssetIndex = loaded.assets;
+  if (packAssets.warnings.length > 0) {
+    console.warn(formatLoadIssues(packAssets.warnings).join("\n"));
+  }
   const joinCode =
     options.joinCode ?? String(randomBytes(3).readUIntBE(0, 3) % 1_000_000).padStart(6, "0");
   const clock = options.clock ?? systemClock();
@@ -478,7 +484,10 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   const http = createServer((req, res) => {
-    void serveStatic(options.webRoot, req, res).catch(() => {
+    void (async () => {
+      if (await tryServePackAssets([packAssets], req, res)) return;
+      return serveStatic(options.webRoot, req, res);
+    })().catch(() => {
       if (!res.headersSent) {
         res.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
         res.end("Internal error.\n");
