@@ -1,18 +1,10 @@
-import { copyFileSync, mkdirSync } from "node:fs";
-import { join, resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import {
   captureFrames,
   startAcceptanceHost,
   waitForBoardAnimationsSettled,
 } from "./support/acceptance.ts";
-
-// SCREENSHOT_DIR for cloud/walkthrough copies; otherwise a gitignored repo path
-// (covered by root `test-results/`). `/opt/cursor/artifacts/screenshots` is not writable on a Mac.
-const screenshotDir = process.env.SCREENSHOT_DIR?.trim();
-const ARTIFACTS = screenshotDir
-  ? resolve(screenshotDir)
-  : join(import.meta.dirname, "../../../test-results/screenshots");
+import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 const device = (page: Page) => ({
   button: (action: string) => page.locator(`button[data-action="${action}"]`),
@@ -37,7 +29,6 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
     contexts.push(context);
     return context.newPage();
   };
-  mkdirSync(ARTIFACTS, { recursive: true });
   const shot = async (page: Page, name: string) => {
     if (name.startsWith("board-")) {
       await waitForBoardAnimationsSettled(page);
@@ -46,7 +37,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
     await page.screenshot({ path: dest, fullPage: true });
     const keepBoard = name.startsWith("board-") && testInfo.project.name === "desktop";
     const keepDevice = name.startsWith("device-") && testInfo.project.name === "ipad";
-    if (keepBoard || keepDevice) copyFileSync(dest, `${ARTIFACTS}/${name}.png`);
+    if (keepBoard || keepDevice) copyToE2eArtifacts(testInfo, dest, `${name}.png`);
   };
 
   try {

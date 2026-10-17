@@ -1,13 +1,7 @@
-import { copyFileSync, mkdirSync } from "node:fs";
-import { join, resolve } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { startAcceptanceHost } from "./support/acceptance.ts";
 import { settlePageAnimations } from "./support/animations.ts";
-
-const screenshotDir = process.env.SCREENSHOT_DIR?.trim();
-const ARTIFACTS = screenshotDir
-  ? resolve(screenshotDir)
-  : join(import.meta.dirname, "../../../test-results/screenshots");
+import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 const collectErrors = (page: Page) => {
   const errors: string[] = [];
@@ -52,7 +46,6 @@ test("the title page offers Story board and Hunter paths and health stays connec
 }, testInfo) => {
   test.setTimeout(120_000);
   const errors = collectErrors(page);
-  mkdirSync(ARTIFACTS, { recursive: true });
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
 
@@ -86,7 +79,7 @@ test("the title page offers Story board and Hunter paths and health stays connec
     await assertTitleLayout(page, viewport);
     const dest = testInfo.outputPath(`title-${viewport.name}.png`);
     await page.screenshot({ path: dest, fullPage: false });
-    copyFileSync(dest, join(ARTIFACTS, `title-${viewport.name}.png`));
+    copyToE2eArtifacts(testInfo, dest, `title-${viewport.name}.png`);
   }
 
   await page.setViewportSize({ width: 820, height: 1180 });

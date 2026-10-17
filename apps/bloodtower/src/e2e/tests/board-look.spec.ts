@@ -1,8 +1,6 @@
-import { copyFileSync, mkdirSync } from "node:fs";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { startAcceptanceHost, waitForBoardAnimationsSettled } from "./support/acceptance.ts";
-
-const ARTIFACTS = "/opt/cursor/artifacts/screenshots";
+import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 const device = (page: Page) => ({
   button: (action: string) => page.locator(`button[data-action="${action}"]`),
@@ -41,12 +39,11 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
   const session = await startAcceptanceHost(testInfo);
   const { baseURL, host } = session;
   const contexts: BrowserContext[] = [];
-  mkdirSync(ARTIFACTS, { recursive: true });
   const shot = async (page: Page, name: string) => {
     await waitForBoardAnimationsSettled(page);
     const dest = testInfo.outputPath(`${name}.png`);
     await page.screenshot({ path: dest, fullPage: false });
-    copyFileSync(dest, `${ARTIFACTS}/${name}.png`);
+    copyToE2eArtifacts(testInfo, dest, `${name}.png`);
   };
 
   try {
