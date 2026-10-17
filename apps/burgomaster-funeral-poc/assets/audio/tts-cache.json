@@ -31,14 +31,6 @@
     "style": "flat, terse, matter-of-fact",
     "voice": "Erinome"
   },
-  "2255c6ab2f14b95ef15be52237bce15665a4445448cc2194fae0131c9f7bbd5e": {
-    "file": "n1-lantern-and-bell.04.vo-01.emeric.wav",
-    "generated_at": "2026-10-17T07:52:10.685666+00:00",
-    "hash": "2255c6ab2f14b95ef15be52237bce15665a4445448cc2194fae0131c9f7bbd5e",
-    "speaker": "emeric",
-    "style": "nervous, fast, breathless",
-    "voice": "Fenrir"
-  },
   "31c3cbd19235b9ca2aa60e642dc6b98b2a221d2d2c78ab0fad02c6f8b75267b4": {
     "file": "n1-lantern-and-bell.02.vo-02.tomas.wav",
     "generated_at": "2026-10-16T07:58:26.034860+00:00",
@@ -134,6 +126,14 @@
     "speaker": "wren",
     "style": "flat, terse, matter-of-fact",
     "voice": "Erinome"
+  },
+  "d9bbb8b811f6ee1cb31e1a2229359d6d785658e12de70218f8740dbf19ac6793": {
+    "file": "n1-lantern-and-bell.04.vo-01.emeric.wav",
+    "generated_at": "2026-10-17T07:59:42.045935+00:00",
+    "hash": "d9bbb8b811f6ee1cb31e1a2229359d6d785658e12de70218f8740dbf19ac6793",
+    "speaker": "emeric",
+    "style": "nervous and breathless, but slower and more careful than usual. Take a small hesitant pause before the name, then say the name Oskar clearly as two syllables, OS-kar, stress on the first syllable.",
+    "voice": "Fenrir"
   },
   "e4c1cae46c5848a00cebbcd8033d6e6ea1789f646f9d9f5f17c36fb5e7571c47": {
     "file": "n1-lantern-and-bell.05.vo-03.emeric.wav",
