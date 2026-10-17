@@ -174,7 +174,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(pageA.getByRole("heading", { name: "Alpha" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Beta" })).toBeVisible();
       // Party join: the next step waits until every hunter is held.
-      await expect(board.getByText("Delta — waiting")).toBeVisible();
+      await expect(board.locator('.bt-cart[data-hunter="delta"] .bt-cart-st')).toHaveText(
+        "waiting",
+      );
       await expect(a.button("continue")).toBeDisabled();
       await expect(a.button("begin")).toBeDisabled();
       expect(boardStates(boardFrames).at(-1)?.gate).toEqual({ canBegin: false, unheld: ["delta"] });

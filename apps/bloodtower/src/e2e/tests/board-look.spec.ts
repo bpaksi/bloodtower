@@ -97,12 +97,12 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       expect(status).not.toMatch(/—/);
       expect(status.length).toBeGreaterThan(0);
     }
-    await expect(board.getByRole("alert")).toContainText("iPads can't reach this address");
+    await expect(board.locator(".bt-banner")).toContainText("iPads can't reach this address");
     await assertBoardFits(board);
     await shot(board, "board-proving-ground-landscape");
 
     await board.setViewportSize({ width: 1024, height: 594 });
-    await expect(board.getByRole("alert")).toContainText("iPads can't reach this address");
+    await expect(board.locator(".bt-banner")).toContainText("iPads can't reach this address");
     await expect(board.getByText("Delta")).toBeVisible();
     await assertBoardFits(board);
     await shot(board, "board-join-warning-1024x594");
