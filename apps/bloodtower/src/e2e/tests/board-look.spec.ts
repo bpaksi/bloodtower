@@ -1,6 +1,6 @@
 import { copyFileSync, mkdirSync } from "node:fs";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { startAcceptanceHost } from "./support/acceptance.ts";
+import { startAcceptanceHost, waitForBoardAnimationsSettled } from "./support/acceptance.ts";
 
 const ARTIFACTS = "/opt/cursor/artifacts/screenshots";
 
@@ -43,11 +43,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
   const contexts: BrowserContext[] = [];
   mkdirSync(ARTIFACTS, { recursive: true });
   const shot = async (page: Page, name: string) => {
-    const frame = page.locator(".bt-ink-in, [data-keeper-stage]").first();
-    await frame.waitFor({ state: "visible" });
-    await frame.evaluate((node) => {
-      for (const animation of node.getAnimations()) animation.finish();
-    });
+    await waitForBoardAnimationsSettled(page);
     const dest = testInfo.outputPath(`${name}.png`);
     await page.screenshot({ path: dest, fullPage: false });
     copyFileSync(dest, `${ARTIFACTS}/${name}.png`);

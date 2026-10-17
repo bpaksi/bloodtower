@@ -46,6 +46,22 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
 };
 
 /** Every text frame the page receives on any socket, from before the first navigation. */
+/** Let bt-ink-in (and other finite animations) finish before board screenshots. */
+export const waitForBoardAnimationsSettled = async (page: Page) => {
+  await page.waitForFunction(() => {
+    const finiteStillRunning = document.getAnimations().filter((animation) => {
+      if (animation.playState !== "running") return false;
+      const effect = animation.effect;
+      if (!effect || typeof effect.getTiming !== "function") return true;
+      const timing = effect.getTiming();
+      const iterations = timing.iterations ?? timing.iterationCount ?? 1;
+      return iterations !== Number.POSITIVE_INFINITY;
+    });
+    return finiteStillRunning.length === 0;
+  });
+  await page.waitForTimeout(1500);
+};
+
 export const captureFrames = (page: Page): string[] => {
   const frames: string[] = [];
   page.on("websocket", (socket) => {
