@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
+    "@talking-avatar/formats": "0.1.0",
+    "@talking-avatar/player": "0.1.0",
     "bloodtower-protocols": "workspace:*",
     "class-variance-authority": "0.7.1",
     "cn": "0.4.0",

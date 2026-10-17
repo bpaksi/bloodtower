@@ -131,6 +131,12 @@ importers:
       '@base-ui/react':
         specifier: 1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@talking-avatar/formats':
+        specifier: 0.1.0
+        version: 0.1.0
+      '@talking-avatar/player':
+        specifier: 0.1.0
+        version: 0.1.0(react@19.3.0)
       bloodtower-protocols:
         specifier: workspace:*
         version: link:../protocols
@@ -1398,6 +1404,16 @@ packages:
 
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
+
+  '@talking-avatar/formats@0.1.0':
+    resolution: {integrity: sha512-7vnDfTBffDUw3C0hSpbR6QXjzSkSFax3ztsAv4xlDI+0uaP/lmiuszm7qS3r2tE94kOFM5JYLtGmsliz4EwylQ==}
+    engines: {node: '>=22'}
+
+  '@talking-avatar/player@0.1.0':
+    resolution: {integrity: sha512-vPf/E2zXa2Q8/m9zJWCGGJ0FPQk9mZMAUTmNR75nDdzGd4gkAFB4owBLgdwDCSA/Db1PZ8Q7YTzWXQ0IvCXSjQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   '@ts-morph/common@0.27.0':
     resolution: {integrity: sha512-Wf29UqxWDpc+i61k3oIOzcUfQt79PIT9y/MWfAGlrkjg6lBC1hwDECLXPVJAhWjiGbfBCxZd65F/LIZF3+jeJQ==}
@@ -4178,6 +4194,15 @@ snapshots:
       '@tailwindcss/oxide': 4.3.3
       postcss: 8.5.30
       tailwindcss: 4.3.3
+
+  '@talking-avatar/formats@0.1.0':
+    dependencies:
+      zod: 4.6.7
+
+  '@talking-avatar/player@0.1.0(react@19.3.0)':
+    dependencies:
+      '@talking-avatar/formats': 0.1.0
+      react: 19.3.0
 
   '@ts-morph/common@0.27.0':
     dependencies:

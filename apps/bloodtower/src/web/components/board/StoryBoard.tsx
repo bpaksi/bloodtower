@@ -2,10 +2,12 @@ import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { JoinQr } from "../../lib/qr";
 import { towerStatusLines } from "../../lib/towerStatus";
+import { KeeperScene } from "./KeeperScene";
+import { KEEPER_MOMENT_ID } from "./keeperLines";
 
 /**
- * Display only. No buttons, links, or inputs. Holdings do not change here.
- * The fallback asset is named. This page does not start playback.
+ * Display only for game controls. Holdings do not change here.
+ * grey-stair.03 plays the Keeper; Tap to play appears only if the browser blocks autoplay.
  */
 export function StoryBoard({ state }: { state: StoryboardState }) {
   const tower = towerStatusLines(state.tower);
@@ -55,7 +57,9 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
       </section>
       <p className="text-5xl leading-tight">{state.prompt ? state.prompt.label : "Waiting."}</p>
       <section className="max-w-3xl text-2xl leading-relaxed">
-        {state.moment ? (
+        {state.moment?.id === KEEPER_MOMENT_ID ? (
+          <KeeperScene />
+        ) : state.moment ? (
           <>
             <p>{state.moment.text ?? "Text unavailable."}</p>
             <p className="mt-2 text-lg" data-fallback={state.moment.fallbackAudio ?? ""}>

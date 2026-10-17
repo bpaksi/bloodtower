@@ -10,12 +10,44 @@ const CONTENT_TYPES: Record<string, string> = {
   ".ico": "image/x-icon",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".m4a": "audio/mp4",
   ".map": "application/json; charset=utf-8",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
   ".webp": "image/webp",
   ".woff2": "font/woff2",
+};
+
+const AVATARS_ROOT = resolve(import.meta.dirname, "../../public");
+
+export const contentTypeFor = (file: string): string =>
+  CONTENT_TYPES[extname(file).toLowerCase()] ?? "application/octet-stream";
+
+/**
+ * One `bytes=start-end` range. Inclusive end. `unsatisfiable` is a 416.
+ * Missing or malformed headers leave the full file (200).
+ */
+export const parseByteRange = (
+  header: string | undefined,
+  size: number,
+): { start: number; end: number } | "unsatisfiable" | undefined => {
+  if (!header) return undefined;
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(header.trim());
+  if (!match) return undefined;
+  const rawStart = match[1] ?? "";
+  const rawEnd = match[2] ?? "";
+  if (rawStart === "" && rawEnd === "") return undefined;
+  if (rawStart === "") {
+    const suffix = Number(rawEnd);
+    if (!Number.isInteger(suffix) || suffix <= 0 || size === 0) return "unsatisfiable";
+    return { start: Math.max(0, size - suffix), end: size - 1 };
+  }
+  const start = Number(rawStart);
+  if (!Number.isInteger(start) || start < 0) return "unsatisfiable";
+  const end = rawEnd === "" ? size - 1 : Number(rawEnd);
+  if (!Number.isInteger(end) || end < start || start >= size) return "unsatisfiable";
+  return { start, end: Math.min(end, size - 1) };
 };
 
 const HEALTH = hostHealthSchema.parse({
@@ -68,14 +100,16 @@ export const resolveStaticFile = async (root: string, urlPath: string) => {
   return undefined;
 };
 
-const pipeFile = (file: string, res: ServerResponse) => {
-  const stream = createReadStream(file);
+const pipeFile = (file: string, res: ServerResponse, range?: { start: number; end: number }) => {
+  const stream = createReadStream(file, range);
   res.on("close", () => stream.destroy());
   stream.on("error", () => {
     if (!res.destroyed) res.destroy();
   });
   stream.pipe(res);
 };
+
+const header = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
 const sendText = (res: ServerResponse, status: number, text: string) => {
   res.writeHead(status, { "content-type": "text/plain; charset=utf-8" });
@@ -100,6 +134,9 @@ export const serveStatic = async (root: string, req: IncomingMessage, res: Serve
 
   let status = 200;
   let file = await resolveStaticFile(root, pathname);
+  if (!file && pathname.startsWith("/avatars/")) {
+    file = await resolveStaticFile(AVATARS_ROOT, pathname);
+  }
   if (!file) {
     status = 404;
     file = await resolveStaticFile(root, "/404.html");
@@ -113,8 +150,40 @@ export const serveStatic = async (root: string, req: IncomingMessage, res: Serve
     );
   }
 
-  res.writeHead(status, {
-    "content-type": CONTENT_TYPES[extname(file)] ?? "application/octet-stream",
+  const type = contentTypeFor(file);
+  if (status === 404) {
+    res.writeHead(404, { "content-type": type });
+    if (req.method === "HEAD") return res.end();
+    pipeFile(file, res);
+    return;
+  }
+
+  const size = (await stat(file)).size;
+  const range = parseByteRange(header(req.headers.range), size);
+  if (range === "unsatisfiable") {
+    res.writeHead(416, {
+      "content-type": type,
+      "content-range": `bytes */${size}`,
+      "accept-ranges": "bytes",
+    });
+    return res.end();
+  }
+  if (range) {
+    res.writeHead(206, {
+      "content-type": type,
+      "content-range": `bytes ${range.start}-${range.end}/${size}`,
+      "content-length": String(range.end - range.start + 1),
+      "accept-ranges": "bytes",
+    });
+    if (req.method === "HEAD") return res.end();
+    pipeFile(file, res, range);
+    return;
+  }
+
+  res.writeHead(200, {
+    "content-type": type,
+    "content-length": String(size),
+    "accept-ranges": "bytes",
   });
   if (req.method === "HEAD") return res.end();
   pipeFile(file, res);

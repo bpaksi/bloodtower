@@ -373,6 +373,14 @@ describe("session", () => {
       expect(board.moment?.fallbackAudio).toBe("sfx.bell");
       expect(board.moment?.text).toBe("A bell marks the step.");
       engine.press(alpha.deviceId, "continue-2", "continue");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.01");
+      engine.press(alpha.deviceId, "continue-3", "continue");
+      engine.press(alpha.deviceId, "continue-4", "continue");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.03");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.kind).toBe("clip");
+      engine.press(alpha.deviceId, "continue-5", "continue");
+      engine.press(alpha.deviceId, "continue-6", "continue");
+      engine.press(alpha.deviceId, "continue-7", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
       const marks = store.loadRun("run").marks;
       expect(marks.some((mark) => mark.kind === "cue" && mark.subject === "bell")).toBe(true);

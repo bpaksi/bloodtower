@@ -36,6 +36,31 @@ describe("resolveStaticFile", () => {
   });
 });
 
+describe("m4a and Range", () => {
+  it("sends audio/mp4 for .m4a and 206 for a byte range", async () => {
+    const root = makeRoot();
+    writeFileSync(join(root, "clip.m4a"), "abcdefghij");
+    const host = await startHost({ port: 0, host: "127.0.0.1", webRoot: root });
+    try {
+      const full = await fetch(`http://127.0.0.1:${host.port}/clip.m4a`);
+      expect(full.status).toBe(200);
+      expect(full.headers.get("content-type")).toBe("audio/mp4");
+      expect(full.headers.get("accept-ranges")).toBe("bytes");
+      expect(await full.text()).toBe("abcdefghij");
+
+      const ranged = await fetch(`http://127.0.0.1:${host.port}/clip.m4a`, {
+        headers: { Range: "bytes=0-1" },
+      });
+      expect(ranged.status).toBe(206);
+      expect(ranged.headers.get("content-type")).toBe("audio/mp4");
+      expect(ranged.headers.get("content-range")).toBe("bytes 0-1/10");
+      expect(await ranged.text()).toBe("ab");
+    } finally {
+      await host.close();
+    }
+  });
+});
+
 describe("startHost", () => {
   it("serves the page, reports connection-only health, and rejects other methods", async () => {
     const root = makeRoot();

@@ -5,3 +5,10 @@
   flow:
     - {kind: moment}
   outcome: {next: done}
+- id: grey-stair
+  night: n1
+  site: {kingdom: K1, building: sanctuary}
+  trigger: enter-site
+  flow:
+    - {kind: moment}
+  outcome: {next: done}
