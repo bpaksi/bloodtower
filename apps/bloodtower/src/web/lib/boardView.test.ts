@@ -94,7 +94,7 @@ describe("story board", () => {
     ).toBe(false);
   });
 
-  it.fails("strips [pause N] tags from the shared moment caption", () => {
+  it("strips [pause N] tags from the shared moment caption", () => {
     const html = renderToStaticMarkup(
       createElement(StoryBoard, {
         state: {

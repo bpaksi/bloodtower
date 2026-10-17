@@ -1,6 +1,7 @@
 "use client";
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
+import { displayCaption } from "../../lib/caption";
 import { SCREEN_NEXT, SCREEN_TITLE, TABLE_STORY, towerReady } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { deviceControls } from "./controls";
@@ -301,7 +302,9 @@ const PlayDevice = ({ views }: { views: DeviceState["views"] }) => (
       <article key={view.hunter} className="bt-card">
         <h2 className="text-2xl">{view.name}</h2>
         <p>
-          {view.privateMoment ? `${view.name}: ${view.privateMoment.text}` : "No private line."}
+          {view.privateMoment
+            ? `${view.name}: ${displayCaption(view.privateMoment.text)}`
+            : "No private line."}
         </p>
       </article>
     ))}

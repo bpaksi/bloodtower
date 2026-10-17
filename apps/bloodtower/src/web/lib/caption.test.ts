@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { displayCaption } from "./caption.ts";
 
 describe("displayCaption", () => {
-  it.fails("strips [pause N] tags and collapses the leftover spaces", () => {
+  it("strips [pause N] tags and collapses the leftover spaces", () => {
     expect(
       displayCaption(
         "A grey stair climbs into the dark. [pause 1] Someone has left the lamps unlit.",

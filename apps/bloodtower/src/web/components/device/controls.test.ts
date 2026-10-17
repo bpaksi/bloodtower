@@ -168,7 +168,7 @@ describe("device screens", () => {
     expect(join).toContain('data-layout="ipad"');
   });
 
-  it.fails("strips [pause N] tags from a private line caption", () => {
+  it("strips [pause N] tags from a private line caption", () => {
     const device = renderToStaticMarkup(
       createElement(DeviceScreen, {
         live: true,
@@ -198,7 +198,7 @@ describe("device screens", () => {
         tower: tower("disconnected"),
       }),
     );
-    expect(device).toContain("Alpha: Go on. I'll wait.");
+    expect(device).toContain("Alpha: Go on. I&#x27;ll wait.");
     expect(device).not.toContain("[pause");
   });
 
