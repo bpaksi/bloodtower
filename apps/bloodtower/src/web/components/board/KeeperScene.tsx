@@ -19,9 +19,9 @@ const preloadMouths = (manifest: AvatarManifest, baseUrl: string) => {
 };
 
 const Captions = () => (
-  <div data-keeper-captions="">
+  <div className="bt-keeper-captions" data-keeper-captions="">
     {KEEPER_LINE_IDS.map((id) => (
-      <p key={id} data-keeper-line={id}>
+      <p key={id} className="bt-caption" data-keeper-line={id}>
         {keeperCaption(id)}
       </p>
     ))}
@@ -70,16 +70,22 @@ export function KeeperScene({ onEnded }: { onEnded?: () => void }) {
   }, [lineIndex, onEnded]);
 
   if (failed || !manifest || lineId === undefined) {
-    return <Captions />;
+    return (
+      <div className="bt-keeper">
+        <Captions />
+      </div>
+    );
   }
 
   return (
-    <TalkingAvatar
-      manifest={manifest}
-      lineId={lineId}
-      baseUrl={KEEPER_BASE_URL}
-      onError={fail}
-      onEnd={advance}
-    />
+    <div className="bt-keeper">
+      <TalkingAvatar
+        manifest={manifest}
+        lineId={lineId}
+        baseUrl={KEEPER_BASE_URL}
+        onError={fail}
+        onEnd={advance}
+      />
+    </div>
   );
 }

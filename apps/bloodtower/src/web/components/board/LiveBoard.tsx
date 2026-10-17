@@ -29,7 +29,11 @@ export function LiveBoard() {
 
   return (
     <>
-      {notice ? <p role="status">{notice}</p> : null}
+      {notice ? (
+        <p className="bt-board-notice" role="status">
+          {notice}
+        </p>
+      ) : null}
       <StoryBoard state={state} />
     </>
   );
