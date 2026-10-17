@@ -1,5 +1,5 @@
 import type { StoryboardState } from "bloodtower-protocols";
-import { pauseText } from "../../lib/boardView";
+import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { JoinQr } from "../../lib/qr";
 import { towerStatusLines } from "../../lib/towerStatus";
 
@@ -10,6 +10,7 @@ import { towerStatusLines } from "../../lib/towerStatus";
 export function StoryBoard({ state }: { state: StoryboardState }) {
   const tower = towerStatusLines(state.tower);
   const paused = pauseText(state.pause, state.hunters);
+  const warning = joinWarning(state.join);
   return (
     <main className="mx-auto flex min-h-dvh max-w-5xl flex-col gap-8 px-8 py-10">
       <header className="flex items-end justify-between gap-6">
@@ -21,6 +22,11 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
       {paused ? (
         <p className="bg-stone-800 px-4 py-3 text-2xl" role="status">
           {paused}
+        </p>
+      ) : null}
+      {warning ? (
+        <p className="bg-stone-800 px-4 py-3 text-2xl" role="alert">
+          {warning}
         </p>
       ) : null}
       <section className="flex items-center gap-8">
@@ -41,8 +47,7 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
           <ul className="mt-2 space-y-1 text-xl">
             {state.hunters.map((hunter) => (
               <li key={hunter.id}>
-                {hunter.name}
-                {hunter.holders.length === 0 ? " — waiting" : ` — ${hunter.holders.join(", ")}`}
+                {hunter.name} — {holdingText(hunter)}
               </li>
             ))}
           </ul>

@@ -32,10 +32,14 @@ const tower = {
 const board = {
   stage: "lobby" as const,
   hunters: [
-    { id: "alpha", name: "Alpha", holders: [] as string[] },
-    { id: "beta", name: "Beta", holders: ["device-1"] },
+    { id: "alpha", name: "Alpha", holders: [] as string[], disconnected: false },
+    { id: "beta", name: "Beta", holders: ["device-1"], disconnected: false },
   ],
-  join: { code: "048213", url: "http://127.0.0.1:4787/join?code=048213" },
+  join: {
+    code: "048213",
+    url: "http://127.0.0.1:4787/join?code=048213",
+    reachable: false,
+  },
   prompt: { id: "hold-all", label: "Waiting on Alpha" },
   moment: null,
   pause: null,
@@ -190,12 +194,40 @@ describe("story board state", () => {
         ...board,
         stage: "playing",
         hunters: [
-          { id: "alpha", name: "Alpha", holders: ["device-1"] },
-          { id: "beta", name: "Beta", holders: ["device-1"] },
+          { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: false },
+          { id: "beta", name: "Beta", holders: ["device-1"], disconnected: false },
         ],
         gate: { canBegin: true, unheld: [] },
       }).gate.canBegin,
     ).toBe(true);
+  });
+
+  it("refuses a disconnected hunter nobody holds", () => {
+    const hunters = [
+      { id: "alpha", name: "Alpha", holders: [] as string[], disconnected: true },
+      { id: "beta", name: "Beta", holders: ["device-1"], disconnected: false },
+    ];
+    expect(
+      storyboardStatePayloadSchema.safeParse({
+        ...board,
+        hunters,
+        gate: { canBegin: false, unheld: ["alpha"] },
+      }).success,
+    ).toBe(false);
+  });
+
+  it("keeps a held, disconnected hunter off the unheld list", () => {
+    const parsed = storyboardStatePayloadSchema.parse({
+      ...board,
+      stage: "paused",
+      hunters: [
+        { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: true },
+        { id: "beta", name: "Beta", holders: ["device-1"], disconnected: false },
+      ],
+      pause: { cause: "disconnect", hunter: "alpha" },
+      gate: { canBegin: true, unheld: [] },
+    });
+    expect(parsed.hunters[0]?.disconnected).toBe(true);
   });
 });
 

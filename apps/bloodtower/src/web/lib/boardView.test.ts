@@ -3,17 +3,17 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { StoryBoard } from "../components/board/StoryBoard";
-import { pauseText, waitingStoryboard } from "./boardView";
+import { holdingText, joinWarning, pauseText, waitingStoryboard } from "./boardView";
 import { joinQrSvg } from "./qr";
 
 const state = (): StoryboardState =>
   storyboardStatePayloadSchema.parse({
     stage: "paused",
     hunters: [
-      { id: "alpha", name: "Alpha", holders: ["device-1"] },
-      { id: "beta", name: "Beta", holders: [] },
+      { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: false },
+      { id: "beta", name: "Beta", holders: [], disconnected: false },
     ],
-    join: { code: "048213", url: "http://127.0.0.1:4787/join?code=048213" },
+    join: { code: "048213", url: "http://127.0.0.1:4787/join?code=048213", reachable: false },
     prompt: { id: "continue-0", label: "Continue" },
     moment: {
       id: "proving-ground.01",
@@ -49,6 +49,9 @@ describe("story board", () => {
     expect(html).toContain("The proving ground is quiet.");
     expect(html).toContain("Fallback sfx.bell");
     expect(html).toContain("Waiting for someone to hold Alpha.");
+    expect(html).toContain("Alpha — device-1");
+    expect(html).toContain("Beta — waiting");
+    expect(html).toContain("iPads can&#x27;t reach this address.");
     expect(html).toContain("Battery 0%");
     expect(html).toContain("Calibration unavailable");
     expect(html).not.toContain("ipad:");
@@ -80,5 +83,24 @@ describe("story board", () => {
     expect(html).toContain("Battery unavailable");
     expect(html).not.toContain("0%");
     expect(pauseText(null)).toBeNull();
+  });
+
+  it("names a disconnected holder and a hunter nobody holds", () => {
+    expect(
+      holdingText({ id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: true }),
+    ).toBe("disconnected (device-1)");
+    expect(holdingText({ id: "beta", name: "Beta", holders: [], disconnected: false })).toBe(
+      "waiting",
+    );
+    expect(
+      holdingText({ id: "gamma", name: "Gamma", holders: ["device-2"], disconnected: false }),
+    ).toBe("device-2");
+  });
+
+  it("warns only when the join address is loopback-only", () => {
+    const join = { code: "048213", url: "http://192.168.1.20:4787/join?code=048213" };
+    expect(joinWarning({ ...join, reachable: true })).toBeNull();
+    expect(joinWarning({ ...join, reachable: false })).toContain("Connect this Mac to Wi-Fi");
+    expect(joinWarning(null)).toBeNull();
   });
 });

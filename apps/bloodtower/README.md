@@ -40,7 +40,7 @@ pnpm --dir apps/bloodtower build
 pnpm --dir apps/bloodtower start
 ```
 
-Open http://127.0.0.1:4787/board for the Story board (no buttons; the join code and QR come from the session), http://127.0.0.1:4787/join?code= followed by that code to hold hunters, then Open controls for `/device`. A phone on the same network should open the board by the Mac's LAN address so the QR points at that address. The home page has no buttons. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
+Open http://127.0.0.1:4787/board for the Story board (no buttons; the join code and QR come from the session), http://127.0.0.1:4787/join?code= followed by that code to hold hunters, then Open controls for `/device`. The QR points at the Mac's LAN address, which the startup log prints. If the log warns that only loopback is available, connect the Mac to Wi-Fi and restart; the board shows the same warning until then. The home page has no buttons. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
 
 `TOWER_URL=ws://127.0.0.1:4747/ws` uses tower-poc instead of the mock. Start tower-poc yourself. This host still waits for a connect press. `DIAG_LOG=/path/to/log` records sidecar message types only.
 

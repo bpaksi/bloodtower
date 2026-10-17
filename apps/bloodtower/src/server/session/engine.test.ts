@@ -1,5 +1,5 @@
 import type { Pack, TowerSnapshot } from "bloodtower-protocols";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../config.ts";
 import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
@@ -9,7 +9,7 @@ import { stepClock } from "../timing/clock.ts";
 import { createTimingLog } from "../timing/log.ts";
 import { createSession, type SessionEngine } from "./engine.ts";
 
-const JOIN = "http://127.0.0.1:4787/join?code=048213";
+const JOIN = { url: "http://127.0.0.1:4787/join?code=048213", reachable: false };
 const TOWER: TowerSnapshot = {
   connection: "unavailable",
   battery: { state: "unavailable" },
@@ -26,6 +26,8 @@ const setup = (options?: {
   absent?: readonly string[];
   pack?: Pack;
   tower?: () => TowerSnapshot;
+  graceMs?: number;
+  onChange?: () => void;
 }) => {
   const opened = openDatabase(":memory:");
   const store = createSessionStore(opened.db);
@@ -46,6 +48,8 @@ const setup = (options?: {
     saveRoster: (roster) => store.saveRoster(roster),
     tokens: () => `rejoin-token-${String(++tokens).padStart(4, "0")}`,
     tower: options?.tower,
+    graceMs: options?.graceMs,
+    onChange: options?.onChange,
   });
   return { opened, store, clock, engine };
 };
@@ -56,6 +60,10 @@ const holdAll = (engine: SessionEngine, deviceId: string) => {
     if (!result.ok) throw new Error(result.code);
   }
 };
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("session", () => {
   it("blocks Begin until every hunter is held, including when one device holds all four", () => {
@@ -338,6 +346,120 @@ describe("session", () => {
       expect(marks.some((mark) => mark.kind === "cue" && mark.subject === "bell")).toBe(true);
       expect(marks.some((mark) => mark.kind === "phase" && mark.endMonoMs !== null)).toBe(true);
       expect(store.loadRun("run").session.packVersion).toBe("0.1.0");
+    } finally {
+      opened.close();
+    }
+  });
+  it("keeps a dropped device's hunters claimed for the grace period, shown as disconnected, then unclaims them", () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const { opened, engine } = setup({ onChange });
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      engine.disconnect(alpha.deviceId);
+
+      const dropped = engine.projectStoryboard(TOWER, JOIN);
+      expect(dropped.gate).toEqual({ canBegin: true, unheld: [] });
+      for (const hunter of dropped.hunters) {
+        expect(hunter).toMatchObject({ holders: [alpha.deviceId], disconnected: true });
+      }
+
+      vi.advanceTimersByTime(60_000 - 1);
+      expect(engine.projectStoryboard(TOWER, JOIN).hunters[0]?.holders).toEqual([alpha.deviceId]);
+      expect(onChange).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(1);
+      const released = engine.projectStoryboard(TOWER, JOIN);
+      expect(released.gate).toEqual({
+        canBegin: false,
+        unheld: ["alpha", "beta", "gamma", "delta"],
+      });
+      for (const hunter of released.hunters) {
+        expect(hunter).toMatchObject({ holders: [], disconnected: false });
+      }
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(engine.roster().holdings).toEqual([]);
+    } finally {
+      engine.close();
+      opened.close();
+    }
+  });
+
+  it("restores the same hunters on a rejoin inside the grace period and cancels the release", () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const { opened, engine } = setup({ onChange });
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      engine.disconnect(alpha.deviceId);
+      vi.advanceTimersByTime(30_000);
+
+      const back = engine.rejoin(alpha.token);
+      expect(back).toEqual({
+        ok: true,
+        deviceId: alpha.deviceId,
+        held: ["alpha", "beta", "gamma", "delta"],
+      });
+      const restored = engine.projectStoryboard(TOWER, JOIN);
+      expect(restored.hunters.every((hunter) => !hunter.disconnected)).toBe(true);
+
+      vi.advanceTimersByTime(120_000);
+      expect(engine.projectStoryboard(TOWER, JOIN).gate.unheld).toEqual([]);
+      expect(onChange).not.toHaveBeenCalled();
+    } finally {
+      engine.close();
+      opened.close();
+    }
+  });
+
+  it("pauses on the unclaimed hunter when a dropped holder's grace ends during play", () => {
+    vi.useFakeTimers();
+    const { opened, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      const beta = engine.join({ joinCode: "048213", formFactor: "phone" });
+      if (!alpha.ok || !beta.ok) throw new Error("join");
+      engine.hold(alpha.deviceId, "alpha", "take");
+      for (const hunter of ["beta", "gamma", "delta"]) engine.hold(beta.deviceId, hunter, "take");
+      engine.press(beta.deviceId, "begin", "begin");
+      engine.disconnect(alpha.deviceId);
+      expect(engine.projectStoryboard(TOWER, JOIN).pause).toEqual({
+        cause: "disconnect",
+        hunter: "alpha",
+      });
+
+      vi.advanceTimersByTime(60_000);
+      const board = engine.projectStoryboard(TOWER, JOIN);
+      expect(board.stage).toBe("paused");
+      expect(board.pause).toEqual({ cause: "disconnect", hunter: "alpha" });
+      expect(board.gate.unheld).toEqual(["alpha"]);
+      expect(engine.press(beta.deviceId, "resume-1", "resume")).toMatchObject({
+        ok: false,
+        code: "invalid-state",
+      });
+    } finally {
+      engine.close();
+      opened.close();
+    }
+  });
+
+  it("does not release hunters after close, so the host can shut down with timers pending", () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const { opened, engine } = setup({ onChange });
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      engine.disconnect(alpha.deviceId);
+      engine.close();
+      vi.advanceTimersByTime(120_000);
+      expect(engine.roster().holdings).toHaveLength(4);
+      expect(onChange).not.toHaveBeenCalled();
     } finally {
       opened.close();
     }
