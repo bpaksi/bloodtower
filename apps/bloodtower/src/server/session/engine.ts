@@ -79,7 +79,9 @@ export interface SessionEngine {
   ) => StoryboardState;
   projectDevice: (deviceId: string) => DeviceState;
   /** The hunters of the story the session is bound to: id and name only. */
-  hunterRoster: () => { id: string; name: string }[];
+  hunterRoster: () => { id: string; name: string; portrait?: string }[];
+  /** The id of the pack the session is bound to. */
+  packId: () => string;
   /**
    * Moves the highlight on Pick Story. Not a press: no lock, no screen change. Refused off
    * Pick Story, from a device that is not connected, and for a story that is not in the list.
@@ -144,14 +146,18 @@ const holdingKey = (deviceId: string, hunter: string) => `${deviceId}\0${hunter}
 /** The pack-bound parts of a session. They change only when Pick Story binds another story. */
 interface Binding {
   pack: Pack;
-  hunters: { id: string; name: string }[];
+  hunters: { id: string; name: string; portrait?: string }[];
   hunterIds: Set<string>;
   phase: { id: string };
   beats: Beat[];
 }
 
 const bindPack = (pack: Pack, absent: ReadonlySet<string>): Binding => {
-  const hunters = pack.hunters.map((hunter) => ({ id: hunter.id, name: hunter.name }));
+  const hunters = pack.hunters.map((hunter) => ({
+    id: hunter.id,
+    name: hunter.name,
+    portrait: hunter.portrait,
+  }));
   const hunterIds = new Set(hunters.map((hunter) => hunter.id));
   for (const id of absent) {
     if (!hunterIds.has(id)) throw new Error(`${id} is not a hunter in this pack.`);
@@ -683,10 +689,12 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
           return {
             id: hunter.id,
             name: hunter.name,
+            portrait: hunter.portrait,
             holders,
             disconnected: holders.length > 0 && connectedHolders(hunter.id).length === 0,
           };
         }),
+        packId: pack.pack_id,
         join: join ? { code: options.joinCode, url: join.url, reachable: join.reachable } : null,
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
         moment: beat?.storyboard ?? null,
@@ -731,6 +739,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     },
 
     hunterRoster: () => hunters.map((hunter) => ({ ...hunter })),
+
+    packId: () => pack.pack_id,
 
     focusStory: (deviceId, storyId) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };

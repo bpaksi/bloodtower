@@ -2,6 +2,7 @@
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
 import { displayCaption } from "../../lib/caption.ts";
+import { portraitSrc } from "../../lib/portrait.ts";
 import {
   focusedStory,
   neighborStory,
@@ -109,7 +110,13 @@ export function DeviceScreen({
         <PickStoryDevice stories={state.stories} live={live} onFocusStory={onFocusStory} />
       ) : null}
       {state.screen === "party-join" ? (
-        <PartyJoinDevice roster={roster} held={state.heldHunters} live={live} onHold={onHold} />
+        <PartyJoinDevice
+          packId={state.packId}
+          roster={roster}
+          held={state.heldHunters}
+          live={live}
+          onHold={onHold}
+        />
       ) : null}
       {state.screen === "begin" ? <BeginDevice /> : null}
       {state.views.length > 0 && (state.screen === "play" || state.screen === "quit") ? (
@@ -301,12 +308,14 @@ const PickStoryDevice = ({
 };
 
 const PartyJoinDevice = ({
+  packId,
   roster,
   held,
   live,
   onHold,
 }: {
-  roster: readonly { id: string; name: string }[];
+  packId: string | undefined;
+  roster: readonly { id: string; name: string; portrait?: string }[];
   held: readonly string[];
   live: boolean;
   onHold?: (hunter: string, action: "take" | "release") => void;
@@ -346,6 +355,7 @@ const PartyJoinDevice = ({
             >
               <PortraitCard
                 name={hunter.name}
+                src={portraitSrc(packId, hunter.portrait)}
                 label={mineHunter ? `${hunter.name}: Mine` : `Claim ${hunter.name}`}
               />
             </button>

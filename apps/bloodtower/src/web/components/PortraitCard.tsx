@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { portraitInitial } from "../lib/portrait";
 
 /**
- * A framed hunter portrait. With no `src` it is the placeholder: the hunter's initial on the
- * frame. `label` is the visible text beside the frame and defaults to the name.
+ * A framed hunter portrait. With no `src`, or when the image fails to load, it is the
+ * placeholder: the hunter's initial on the frame. `label` is the visible text beside the frame
+ * and defaults to the name.
  */
 export const PortraitCard = ({
   name,
@@ -21,16 +25,24 @@ export const PortraitCard = ({
   /** Spoken label when `frameOnly` (defaults to `label` or `name`). */
   accessibleLabel?: string;
 }) => {
+  // The failure belongs to the URL that failed, so a new URL gets a fresh try with no reset step.
+  const [failedSrc, setFailedSrc] = useState<string | undefined>();
+  const showImage = Boolean(src) && failedSrc !== src;
   const spoken = accessibleLabel ?? label ?? name;
   const frame = (
     <span
       aria-hidden="true"
       className={`flex ${compact ? "h-16 w-14" : "h-28 w-24"} shrink-0 items-center justify-center overflow-hidden rounded-lg border-4 border-double border-[var(--bt-accent)] bg-[var(--bt-bg)]`}
-      data-portrait-frame={src ? "image" : "placeholder"}
+      data-portrait-frame={showImage ? "image" : "placeholder"}
     >
-      {src ? (
+      {showImage ? (
         // biome-ignore lint/performance/noImgElement: static export, no next/image loader
-        <img src={src} alt="" className="h-full w-full object-cover" />
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setFailedSrc(src)}
+        />
       ) : (
         <span
           className={`${compact ? "text-3xl" : "text-5xl"} font-semibold text-[var(--bt-accent)]`}

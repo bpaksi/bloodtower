@@ -2,6 +2,7 @@ import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
 import { packStillImageUrl } from "../../lib/packAsset.ts";
+import { portraitSrc } from "../../lib/portrait.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
@@ -83,7 +84,11 @@ export function StoryBoard({
         </p>
       ) : null}
       <div className="bt-board-main">
-        <HunterList hunters={state.hunters} portraits={state.screen === "party-join"} />
+        <HunterList
+          hunters={state.hunters}
+          packId={state.packId}
+          portraits={state.screen === "party-join"}
+        />
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
@@ -193,9 +198,11 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
 
 const HunterList = ({
   hunters,
+  packId,
   portraits = false,
 }: {
   hunters: StoryboardState["hunters"];
+  packId?: StoryboardState["packId"];
   portraits?: boolean;
 }) => {
   const acting = actingHunterId(hunters);
@@ -221,6 +228,7 @@ const HunterList = ({
                       compact
                       frameOnly
                       name={hunter.name}
+                      src={portraitSrc(packId, hunter.portrait)}
                       accessibleLabel={accessibleLabel}
                     />
                     <span className="bt-cart-copy">

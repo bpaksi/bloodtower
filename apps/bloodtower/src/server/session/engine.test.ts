@@ -120,6 +120,11 @@ describe("session", () => {
       });
       holdAll(engine, joined.deviceId);
       const party = engine.projectStoryboard(TOWER, JOIN);
+      const { pack } = packOrThrow();
+      expect(party.packId).toBe(pack.pack_id);
+      expect(party.hunters.map((hunter) => hunter.portrait)).toEqual(
+        pack.hunters.map((hunter) => hunter.portrait),
+      );
       expect(party.gate).toEqual({ canBegin: true, unheld: [] });
       expect(party.prompt).toEqual({ id: "continue-party-join", label: "Next: set up the story" });
       winStep(engine, joined.deviceId, "continue-party-join", "continue");

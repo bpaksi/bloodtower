@@ -200,6 +200,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         connectLock: engine.lockFor("tower-connect"),
         calibrateLock: engine.lockFor("tower-calibrate"),
         roster: engine.hunterRoster(),
+        packId: engine.packId(),
       });
       return { v: PROTOCOL_VERSION, type: "deviceState", payload };
     } catch {

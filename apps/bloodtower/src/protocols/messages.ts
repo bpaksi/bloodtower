@@ -15,7 +15,7 @@ import {
   tokenSchema,
 } from "./devices.ts";
 import { KEEPER_LINE_COUNT, KEEPER_MOMENT_ID } from "./keeper.ts";
-import { assetIdSchema, momentIdSchema, privateHunterOf } from "./pack.ts";
+import { assetIdSchema, idSchema, momentIdSchema, privateHunterOf } from "./pack.ts";
 import { pauseCauseSchema } from "./timing.ts";
 
 export const PROTOCOL_VERSION = 1;
@@ -274,6 +274,8 @@ export const sharedMomentSchema = z
 export const publicHunterSchema = z.strictObject({
   id: hunterIdSchema,
   name: z.string().min(1).max(80),
+  /** The pack's portrait asset id for this hunter, or absent when the pack names none. */
+  portrait: assetIdSchema.optional(),
   holders: z.array(deviceIdSchema).max(8),
   /** Held, but every holder has dropped. The claim lasts a grace period (R2-104, §3.4). */
   disconnected: z.boolean(),
@@ -332,6 +334,8 @@ export const storyboardStatePayloadSchema = z
     screen: flowScreenSchema,
     stage: z.enum(STORYBOARD_STAGES),
     hunters: z.array(publicHunterSchema).max(16),
+    /** The bound pack, so the board can build asset URLs such as a hunter portrait. */
+    packId: idSchema.optional(),
     join: z
       .strictObject({
         code: joinCodeSchema,
@@ -432,6 +436,8 @@ export const hunterViewSchema = z
 const rosterEntrySchema = z.strictObject({
   id: hunterIdSchema,
   name: z.string().min(1).max(80),
+  /** The pack's portrait asset id for this hunter, or absent when the pack names none. */
+  portrait: assetIdSchema.optional(),
 });
 
 /**
@@ -465,7 +471,7 @@ export const deviceStatePayloadSchema = z
     /**
      * Beside the gameplay lock, so a device can draw the tower, the pause prompt
      * and the connect and calibrate locks without a second message type.
-     * The roster is id and name only. It carries no private line.
+     * The roster is id, name and portrait only. It carries no private line.
      */
     tower: towerSnapshotSchema.optional(),
     pausePromptId: promptIdSchema.nullable().optional(),
@@ -474,6 +480,8 @@ export const deviceStatePayloadSchema = z
     connectLock: controlLockSchema.nullable().optional(),
     calibrateLock: controlLockSchema.nullable().optional(),
     roster: z.array(rosterEntrySchema).max(16).optional(),
+    /** The bound pack, so the iPad can build asset URLs such as a hunter portrait. */
+    packId: idSchema.optional(),
     /** The doors on Pick Story, and the story the session is bound to. */
     stories: storiesSchema.optional(),
     /** The pick this device is offered, or null. Set on every joined iPad, not one hunter. */

@@ -231,6 +231,30 @@ describe("story board state", () => {
     });
   });
 
+  it("carries a hunter portrait asset id and the pack id on the board, and refuses a bad one", () => {
+    const parsed = storyboardStatePayloadSchema.parse({
+      ...board,
+      packId: "test",
+      hunters: [{ ...board.hunters[0], portrait: "por.alpha" }, board.hunters[1]],
+    });
+    expect(parsed.packId).toBe("test");
+    expect(parsed.hunters[0]?.portrait).toBe("por.alpha");
+    expect(parsed.hunters[1]?.portrait).toBeUndefined();
+    expect(storyboardStatePayloadSchema.parse(board).packId).toBeUndefined();
+    for (const portrait of ["../x", "Por Alpha", ""]) {
+      expect(
+        storyboardStatePayloadSchema.safeParse({
+          ...board,
+          hunters: [{ ...board.hunters[0], portrait }],
+        }).success,
+        portrait,
+      ).toBe(false);
+    }
+    expect(storyboardStatePayloadSchema.safeParse({ ...board, packId: "Not Kebab" }).success).toBe(
+      false,
+    );
+  });
+
   it("refuses a private moment, an ipad target and a tower command on the story board", () => {
     expect(
       storyboardStatePayloadSchema.safeParse({
@@ -370,6 +394,36 @@ describe("server messages", () => {
       }),
     );
     expect(withLocks.type === "deviceState" && withLocks.payload.roster?.[0]?.name).toBe("Alpha");
+    const deviceBase = {
+      screen: "party-join",
+      heldHunters: [],
+      views: [],
+      prompt: null,
+      lock: null,
+      won: null,
+    };
+    const withPortrait = serverMessageSchema.parse(
+      envelope("deviceState", {
+        ...deviceBase,
+        packId: "test",
+        roster: [
+          { id: "alpha", name: "Alpha", portrait: "por.alpha" },
+          { id: "beta", name: "Beta" },
+        ],
+      }),
+    );
+    expect(withPortrait.type === "deviceState" && withPortrait.payload.packId).toBe("test");
+    expect(
+      withPortrait.type === "deviceState" && withPortrait.payload.roster?.map((h) => h.portrait),
+    ).toEqual(["por.alpha", undefined]);
+    expect(
+      serverMessageSchema.safeParse(
+        envelope("deviceState", {
+          ...deviceBase,
+          roster: [{ id: "alpha", name: "Alpha", portrait: "../etc/passwd" }],
+        }),
+      ).success,
+    ).toBe(false);
     expect(
       serverMessageSchema.safeParse(
         envelope("welcome", {
