@@ -1,4 +1,48 @@
 {
+  "enc-wine-for-no-one.01.vo-01": {
+    "id": "enc-wine-for-no-one.01.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/enc-wine-for-no-one.01.vo-01.marta.wav",
+    "status": "draft",
+    "text": "Uncle? You shouldn't be here. He drinks at midnight, and he counts the glasses.",
+    "speaker": "marta",
+    "moment": "enc-wine-for-no-one.01",
+    "duration_s": 6.68
+  },
+  "enc-wine-for-no-one.01.vo-02": {
+    "id": "enc-wine-for-no-one.01.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/enc-wine-for-no-one.01.vo-02.tomas.wav",
+    "status": "draft",
+    "text": "I came back for you, lass. I always meant to.",
+    "speaker": "tomas",
+    "moment": "enc-wine-for-no-one.01",
+    "duration_s": 4.52
+  },
+  "enc-wine-for-no-one.01~no-tomas.vo-01": {
+    "id": "enc-wine-for-no-one.01~no-tomas.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/enc-wine-for-no-one.01~no-tomas.vo-01.marta.wav",
+    "status": "draft",
+    "text": "You shouldn't be here. He drinks at midnight, and he counts the glasses.",
+    "speaker": "marta",
+    "moment": "enc-wine-for-no-one.01~no-tomas",
+    "duration_s": 5.6
+  },
+  "enc-wine-for-no-one.01~no-tomas.vo-02": {
+    "id": "enc-wine-for-no-one.01~no-tomas.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/enc-wine-for-no-one.01~no-tomas.vo-02.agnes.wav",
+    "status": "draft",
+    "text": "Who are you pouring for, child?",
+    "speaker": "agnes",
+    "moment": "enc-wine-for-no-one.01~no-tomas",
+    "duration_s": 2.56
+  },
   "n2-burgomasters-funeral.01": {
     "id": "n2-burgomasters-funeral.01",
     "type": "clip",
