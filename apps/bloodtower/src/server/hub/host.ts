@@ -1,6 +1,5 @@
 import { randomBytes } from "node:crypto";
 import { createServer, type IncomingMessage } from "node:http";
-import type { Socket } from "node:net";
 import {
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
@@ -18,6 +17,7 @@ import { type RawData, WebSocket, WebSocketServer } from "ws";
 import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
+import { joinHost } from "../lanUrls.ts";
 import { formatLoadIssues, loadR1Pack } from "../pack/load.ts";
 import { requestPath, serveStatic } from "../server.ts";
 import { createSession, type SessionEngine } from "../session/engine.ts";
@@ -45,6 +45,8 @@ export interface SessionHostOptions {
   clock?: Clock;
   /** How often a changed tower snapshot is published. 0 reads it only on syncTower. */
   towerWatchMs?: number;
+  /** The address iPads open for the join QR. Undefined when only loopback is reachable. Defaults to the LAN address for `host`. */
+  lanHost?: () => string | undefined;
 }
 
 export interface SessionHost {
@@ -66,20 +68,6 @@ const textOf = (raw: RawData): string | undefined => {
   if (Array.isArray(raw)) return Buffer.concat(raw).toString("utf8");
   return undefined;
 };
-
-/** The address the TCP connection arrived on, not the Host header a client can set. */
-const advertisedHost = (socket: Socket): string | undefined => {
-  const port = socket.localPort;
-  const raw = socket.localAddress;
-  if (!raw || !port) return undefined;
-  let address = raw.startsWith("::ffff:") ? raw.slice("::ffff:".length) : raw;
-  if (address === "0.0.0.0" || address === "::") return undefined;
-  if (address.includes(":") && !address.startsWith("[")) address = `[${address}]`;
-  return `${address}:${port}`;
-};
-
-const loopback = (host: string) =>
-  host.startsWith("127.") || host.startsWith("[::1]") || host.startsWith("localhost");
 
 const freshToken = () => randomBytes(16).toString("base64url");
 
@@ -107,6 +95,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const sessionId = `session-${randomBytes(8).toString("hex")}`;
   const devOrigins = options.devOrigins ?? [];
   const tower = options.tower;
+  const lanHost = options.lanHost ?? (() => joinHost(options.host));
   let engine: SessionEngine;
   try {
     engine = createSession(pack, {
@@ -117,6 +106,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       presses: createPressLog(clock, (press) => store.insertPress(sessionId, press)),
       saveRoster: (roster) => store.saveRoster(roster),
       tower: () => tower.snapshot(),
+      onChange: () => broadcast(),
     });
   } catch (error) {
     opened.close();
@@ -128,16 +118,18 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const deviceSockets = new Map<string, Set<WebSocket>>();
   const boardTokens = new Set<string>();
   let boardSeq = 0;
-  let joinHost: string | null = null;
+  /** Known once the port is open. Until then the configured port is only a placeholder. */
+  let boundPort = options.port;
   let closing = false;
   let lastSnapshot = JSON.stringify(tower.snapshot());
 
-  const rememberHost = (host: string) => {
-    if (joinHost === null || (loopback(joinHost) && !loopback(host))) joinHost = host;
+  const joinAt = (): { url: string; reachable: boolean } => {
+    const host = lanHost();
+    return {
+      url: `http://${host ?? "127.0.0.1"}:${boundPort}/join?code=${joinCode}`,
+      reachable: host !== undefined,
+    };
   };
-
-  const joinUrl = (): string | null =>
-    joinHost ? `http://${joinHost}/join?code=${joinCode}` : null;
 
   const send = (socket: WebSocket, message: ServerMessage) => {
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
@@ -161,7 +153,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const storyboardMessage = (): ServerMessage | undefined => {
     try {
       const payload = storyboardStatePayloadSchema.parse(
-        engine.projectStoryboard(tower.snapshot(), joinUrl()),
+        engine.projectStoryboard(tower.snapshot(), joinAt()),
       );
       return { v: PROTOCOL_VERSION, type: "storyboardState", payload };
     } catch {
@@ -495,8 +487,6 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       fail("403 Forbidden");
       return;
     }
-    const advertised = advertisedHost(req.socket);
-    if (advertised) rememberHost(advertised);
     wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
   });
 
@@ -526,6 +516,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const address = http.address();
   const port = address && typeof address === "object" ? address.port : options.port;
+  boundPort = port;
   let closingPromise: Promise<void> | undefined;
 
   return {
@@ -540,6 +531,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       closingPromise = (async () => {
         try {
           for (const id of deviceSockets.keys()) engine.disconnect(id);
+          engine.close();
           deviceSockets.clear();
           for (const socket of clients.keys()) socket.close();
           clients.clear();

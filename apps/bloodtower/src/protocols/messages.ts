@@ -232,6 +232,8 @@ export const publicHunterSchema = z.strictObject({
   id: hunterIdSchema,
   name: z.string().min(1).max(80),
   holders: z.array(deviceIdSchema).max(8),
+  /** Held, but every holder has dropped. The claim lasts a grace period (R2-104, §3.4). */
+  disconnected: z.boolean(),
 });
 
 export const promptSchema = z.strictObject({
@@ -254,6 +256,8 @@ export const storyboardStatePayloadSchema = z
       .strictObject({
         code: joinCodeSchema,
         url: httpUrlSchema,
+        /** False when only loopback is available: iPads cannot open `url` (R2-12). */
+        reachable: z.boolean(),
       })
       .nullable(),
     prompt: promptSchema.nullable(),
@@ -273,6 +277,9 @@ export const storyboardStatePayloadSchema = z
     for (const hunter of value.hunters) {
       if (new Set(hunter.holders).size !== hunter.holders.length) {
         issue(ctx, `${hunter.id} lists a device twice.`);
+      }
+      if (hunter.disconnected && hunter.holders.length === 0) {
+        issue(ctx, `${hunter.id} is disconnected but nobody holds them.`);
       }
     }
     const heldIds = new Set(

@@ -42,7 +42,10 @@ const privateTexts = (hunter: string) => {
   });
 };
 
-const start = async (tower: MockTower = createMockTower(), extra?: { devOrigins?: string[] }) => {
+const start = async (
+  tower: MockTower = createMockTower(),
+  extra?: { devOrigins?: string[]; lanHost?: () => string | undefined },
+) => {
   const root = tempDir();
   writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
   const host = await startSessionHost({
@@ -54,6 +57,7 @@ const start = async (tower: MockTower = createMockTower(), extra?: { devOrigins?
     tower,
     towerWatchMs: 0,
     devOrigins: extra?.devOrigins,
+    lanHost: extra?.lanHost,
   });
   hosts.push(host);
   return { host, tower };
@@ -558,6 +562,56 @@ describe("session hub", () => {
         state?.type === "storyboardState" && state.payload.tower.battery.state === "unavailable"
       );
     });
+  });
+
+  it("puts the LAN address in the join QR and marks it reachable", async () => {
+    const { host } = await start(createMockTower(), { lanHost: () => "192.168.1.20" });
+    const board = await helloBoard(host.port);
+    const state = latest(board.log, "storyboardState");
+    if (state?.type !== "storyboardState") throw new Error("board");
+    expect(state.payload.join).toEqual({
+      code: host.joinCode,
+      url: `http://192.168.1.20:${host.port}/join?code=${host.joinCode}`,
+      reachable: true,
+    });
+  });
+
+  it("says the join address is unreachable when only loopback is available", async () => {
+    const { host } = await start();
+    const board = await helloBoard(host.port);
+    const state = latest(board.log, "storyboardState");
+    if (state?.type !== "storyboardState") throw new Error("board");
+    expect(state.payload.join).toEqual({
+      code: host.joinCode,
+      url: `http://127.0.0.1:${host.port}/join?code=${host.joinCode}`,
+      reachable: false,
+    });
+  });
+
+  it("shows a dropped device's hunters as disconnected, still claimed, during the grace period", async () => {
+    const pack = packOrThrow();
+    const { host } = await start();
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    for (const hunter of pack.hunters) {
+      send(device.socket, "hold", { hunter: hunter.id, action: "take" });
+      await until(device.inbox, device.log, (messages) => {
+        const state = [...messages].reverse().find((message) => message.type === "deviceState");
+        return state?.type === "deviceState" && state.payload.heldHunters.includes(hunter.id);
+      });
+    }
+    device.socket.close();
+    await until(board.inbox, board.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
+      return (
+        state?.type === "storyboardState" &&
+        state.payload.hunters.every((hunter) => hunter.disconnected)
+      );
+    });
+    const state = latest(board.log, "storyboardState");
+    if (state?.type !== "storyboardState") throw new Error("board");
+    expect(state.payload.hunters.every((hunter) => hunter.holders.length === 1)).toBe(true);
+    expect(state.payload.gate).toEqual({ canBegin: true, unheld: [] });
   });
 
   it("does not open a port when the test pack is missing", async () => {

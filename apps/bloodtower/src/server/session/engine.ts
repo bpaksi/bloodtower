@@ -52,15 +52,27 @@ export interface SessionEngine {
   hold: (deviceId: string, hunter: string, action: "take" | "release") => { ok: true } | Fail;
   press: (deviceId: string, promptId: string, action: ControlAction) => PressOk | Fail;
   pressAll: (presses: readonly (PressInput & { deviceId: string })[]) => Array<PressOk | Fail>;
-  projectStoryboard: (tower: TowerSnapshot, joinUrl: string | null) => StoryboardState;
+  projectStoryboard: (
+    tower: TowerSnapshot,
+    join: { url: string; reachable: boolean } | null,
+  ) => StoryboardState;
   projectDevice: (deviceId: string) => DeviceState;
   lockFor: (promptId: string) => ControlLock | null;
   /** Prompt id for a host pause, or null when play is not running. */
   pausePromptId: () => string | null;
   roster: () => RosterSnapshot;
+  /** Clears the grace timers. Call it when the host closes. */
+  close: () => void;
 }
 
+/** How long a dropped device's hunters stay claimed before they become unclaimed (R2-104, §3.4). */
+export const GRACE_MS = 60_000;
+
 export interface SessionOptions {
+  /** Claim hold after a device drops. Defaults to GRACE_MS. */
+  graceMs?: number;
+  /** Called when a grace timer releases hunters, so the host can publish the change. */
+  onChange?: () => void;
   sessionId?: string;
   joinCode: string;
   /** Hunters absent when the night starts. Presence then stays fixed (E15). */
@@ -98,6 +110,8 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
 
   const devices = new Map<string, DeviceRow>();
   const held = new Set<string>();
+  const graceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  const graceMs = options.graceMs ?? GRACE_MS;
   const locks: Record<string, ControlLock> = {};
   let seq = 0;
   let tokenSeq = 0;
@@ -165,6 +179,31 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
   });
 
   const persist = () => options.saveRoster(roster());
+
+  const cancelGrace = (deviceId: string) => {
+    const timer = graceTimers.get(deviceId);
+    if (!timer) return;
+    clearTimeout(timer);
+    graceTimers.delete(deviceId);
+  };
+
+  /** A device still gone after the grace period: its hunters become unclaimed. */
+  const releaseDropped = (deviceId: string) => {
+    graceTimers.delete(deviceId);
+    const device = devices.get(deviceId);
+    if (!device || device.connected) return;
+    for (const hunter of heldBy(deviceId)) held.delete(holdingKey(deviceId, hunter));
+    refreshPause("unheld-hunter");
+    persist();
+    options.onChange?.();
+  };
+
+  const startGrace = (deviceId: string) => {
+    cancelGrace(deviceId);
+    const timer = setTimeout(() => releaseDropped(deviceId), graceMs);
+    timer.unref?.();
+    graceTimers.set(deviceId, timer);
+  };
 
   const currentBeat = (): Beat | undefined => beats[beatIndex];
 
@@ -361,6 +400,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       const device = [...devices.values()].find((item) => item.token === token);
       if (!device) return { ok: false, code: "bad-token" };
       device.connected = true;
+      cancelGrace(device.deviceId);
       refreshPause("disconnect");
       persist();
       return { ok: true, deviceId: device.deviceId, held: heldBy(device.deviceId) };
@@ -368,8 +408,9 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
 
     disconnect: (deviceId) => {
       const device = devices.get(deviceId);
-      if (!device) return;
+      if (!device?.connected) return;
       device.connected = false;
+      if (heldBy(deviceId).length > 0) startGrace(deviceId);
       refreshPause("disconnect");
       persist();
     },
@@ -419,7 +460,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       return results;
     },
 
-    projectStoryboard: (tower, joinUrl) => {
+    projectStoryboard: (tower, join) => {
       reconcileTowerLocks();
       const beat = stage === "lobby" || finished ? undefined : currentBeat();
       const prompt = gameplayPrompt();
@@ -427,12 +468,16 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       const unheld = unheldHunters().map((hunter) => hunter.id);
       return storyboardStatePayloadSchema.parse({
         stage,
-        hunters: hunters.map((hunter) => ({
-          id: hunter.id,
-          name: hunter.name,
-          holders: holdersOf(hunter.id),
-        })),
-        join: joinUrl ? { code: options.joinCode, url: joinUrl } : null,
+        hunters: hunters.map((hunter) => {
+          const holders = holdersOf(hunter.id);
+          return {
+            id: hunter.id,
+            name: hunter.name,
+            holders,
+            disconnected: holders.length > 0 && connectedHolders(hunter.id).length === 0,
+          };
+        }),
+        join: join ? { code: options.joinCode, url: join.url, reachable: join.reachable } : null,
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
         moment: beat?.storyboard ?? null,
         pause: pause ? { cause: pause.cause, hunter: pause.hunter } : null,
@@ -474,6 +519,10 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     pausePromptId: () => (stage === "playing" && !finished ? `pause-${pauseSerial + 1}` : null),
 
     roster,
+
+    close: () => {
+      for (const deviceId of [...graceTimers.keys()]) cancelGrace(deviceId);
+    },
   };
 
   return engine;

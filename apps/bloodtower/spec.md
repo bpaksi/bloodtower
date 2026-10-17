@@ -29,6 +29,8 @@ R1 is the thin foundation. It loads a story pack, shows a display-only Story boa
 | D15 | `tower-reconnect` is not an R1 control action. R-SES-2 names reconnect; the approved control list is Begin, Continue, Pause, Resume, connect and calibrate. Adding reconnect later changes the frozen protocol and is a plan deviation. There is still no automatic reconnect. | The plan's control list, frozen in step 1. |
 | D16 | A device that holds nobody is welcomed with an empty channel list. A channel is `ipad:<hunter>` for a hunter it holds at hello, never `storyboard`. A later hold does not send another welcome. Each `deviceState` is filtered to the hunters that socket holds. | The frozen welcome required one channel, and a new device has no hunter yet. Step 7. |
 | D17 | `deviceState` carries, beside the gameplay lock, the tower snapshot, the pause prompt id, the connect and calibrate locks, and a public roster of hunter id and name. None of those fields carry a private line. | B2 left the tower locks for step 7. The frozen message had nowhere else to put them, and the device screen already takes them as props. |
+| D18 | A device that drops keeps its hunters claimed for 60 s (`GRACE_MS`), shown as `disconnected` on the Story board (`hunters[].disconnected`). A rejoin with its token inside that time restores them and cancels the release. At the end of it the device's holdings are removed and the board updates. The pause for a dropped holder still starts at once (R2-65). | R2 §3.4 and R2-104 (Gamewright, Oct 16 2026). Bob asked for the claim grace in the R2 disconnect step. The R1 plan's "pauses only after a short grace" ruling is not applied here; see the PR. |
+| D19 | The join QR uses the LAN IPv4 address: the first non-internal address when the host binds every interface, or the bound address when it is a LAN address. When only loopback is available, the URL uses `127.0.0.1` and `join.reachable` is `false`; the board then shows "iPads can't reach this address". The startup log prints the same address. | R2-12 (closes the B3 follow-up). |
 
 ## 2. Layout and run
 
@@ -42,7 +44,7 @@ SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game table
 
 ## 3. Protocols contract (frozen)
 
-`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes.
+`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes. D18 and D19 are the R2 changes: `hunters[].disconnected` and `join.reachable` are added fields, and the frozen contract otherwise stands.
 
 Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
 

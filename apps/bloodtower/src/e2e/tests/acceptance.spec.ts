@@ -50,6 +50,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
     const a = device(pageA);
     const b = device(pageB);
     let joinUrl = "";
+    // The page on this machine. The QR encodes the board's join URL, which is the LAN address when one exists.
+    const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
     await test.step("AC-3: the board is display only and shows the QR and a six-digit code", async () => {
       await board.goto("/board");
@@ -62,9 +64,15 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
 
       await expect.poll(() => boardStates(boardFrames).length).toBeGreaterThan(0);
-      const join = boardStates(boardFrames).at(-1)?.join as { code: string; url: string };
+      const join = boardStates(boardFrames).at(-1)?.join as {
+        code: string;
+        url: string;
+        reachable: boolean;
+      };
       joinUrl = join.url;
-      expect(join).toEqual({ code: host.joinCode, url: `${baseURL}/join?code=${host.joinCode}` });
+      expect(join.code).toBe(host.joinCode);
+      expect(join.url).toMatch(new RegExp(`/join\\?code=${host.joinCode}$`));
+      expect(typeof join.reachable).toBe("boolean");
 
       // The QR on the page is the join URL's QR, cell for cell.
       const cells = await board
@@ -81,8 +89,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
     });
 
     await test.step("AC-4: join by the QR target, hold several hunters, Begin waits for all", async () => {
-      await pageA.goto(joinUrl);
-      await pageB.goto(joinUrl);
+      await pageA.goto(joinPage);
+      await pageB.goto(joinPage);
       await a.hold("alpha").click();
       await expect(a.hold("alpha")).toHaveAttribute("data-action", "release");
       await a.hold("beta").click();

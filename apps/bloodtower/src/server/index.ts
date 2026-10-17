@@ -4,6 +4,7 @@ import { loadConfig } from "./config.ts";
 import { startSessionHost } from "./hub/host.ts";
 import { parseDevOrigins } from "./hub/origin.ts";
 import { towerFromEnv } from "./hub/tower.ts";
+import { joinHost, lanUrls } from "./lanUrls.ts";
 
 const config = loadConfig();
 const hostName = process.env.HOST || "0.0.0.0";
@@ -42,9 +43,18 @@ const towerLine =
     ? `Tower: sidecar ${chosen.url ?? ""}. Nothing connects until a joined device presses connect.`
     : "Tower: mock. Nothing connects until a joined device presses connect.";
 
+// iPads open the join QR's address, so the log shows the LAN address (R2-12).
+const lan = joinHost(hostName);
+const shownHost = lan ?? "127.0.0.1";
 console.log(`Bloodtower listening on port ${server.port}`);
-console.log(`Story board http://127.0.0.1:${server.port}/board`);
-console.log(`Join http://127.0.0.1:${server.port}/join`);
+for (const url of lanUrls(hostName, server.port)) console.log(`  ${url}`);
+console.log(`Story board http://${shownHost}:${server.port}/board`);
+console.log(`Join http://${shownHost}:${server.port}/join`);
+if (lan === undefined) {
+  console.warn(
+    `iPads can't reach ${shownHost}: only loopback is available. Connect this Mac to Wi-Fi, then restart Bloodtower.`,
+  );
+}
 console.log(`Socket shares port ${server.port} with the page.`);
 console.log(`Serving web UI from ${webRoot}`);
 console.log(`Data folder ${config.dataDir}`);
