@@ -55,6 +55,14 @@
     "style": "flat, terse, matter-of-fact. thought",
     "voice": "Erinome"
   },
+  "8af8585613d7c239b24e13851c65104fc7725098f048d2ce68a76bc2f267c202": {
+    "file": "n2-burgomasters-funeral.end.private.tomas.vo-01.tomas.wav",
+    "generated_at": "2026-10-17T00:50:06.779523+00:00",
+    "hash": "8af8585613d7c239b24e13851c65104fc7725098f048d2ce68a76bc2f267c202",
+    "speaker": "tomas",
+    "style": "gruff, low, unhurried. thought",
+    "voice": "Algenib"
+  },
   "f8a517667609fe9e41400db77ca836fc90f38c77d7e7bce4e9150f4b2fb4f0d4": {
     "file": "n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav",
     "generated_at": "2026-10-16T07:55:59.805447+00:00",
@@ -62,13 +70,5 @@
     "speaker": "narrator",
     "style": "slow, low, ominous storyteller",
     "voice": "Charon"
-  },
-  "f8b53a924b0204524595eba5c6cc9b8a1ee0f0ca85f6e2e19c9eee1c5a4bdc4f": {
-    "file": "n2-burgomasters-funeral.end.private.tomas.vo-01.tomas.wav",
-    "generated_at": "2026-10-16T07:53:57.157740+00:00",
-    "hash": "f8b53a924b0204524595eba5c6cc9b8a1ee0f0ca85f6e2e19c9eee1c5a4bdc4f",
-    "speaker": "tomas",
-    "style": "gruff, low, unhurried. thought",
-    "voice": "Algenib"
   }
 }
