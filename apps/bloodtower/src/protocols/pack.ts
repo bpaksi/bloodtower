@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { optionIdSchema } from "./control.ts";
 import { hunterIdSchema } from "./devices.ts";
 
 /**
@@ -153,6 +154,32 @@ export const momentSchema = z
     }
   });
 export type Moment = z.infer<typeof momentSchema>;
+
+/**
+ * A pick's options, from `choices.yaml`. An entry is `{id: <pick moment id>, options: [{id, label}]}`.
+ * Other entries in the list are parsed and kept, and are not read here (D13).
+ */
+const pickChoiceSchema = z.strictObject({
+  id: z.string(),
+  options: z
+    .array(z.strictObject({ id: optionIdSchema, label: z.string().min(1).max(120) }))
+    .min(1),
+});
+
+/** The options for one pick moment, or none when the choices file has no entry for it. */
+export const pickOptionsFor = (
+  choices: unknown,
+  momentId: string,
+): Array<{ id: string; label: string }> => {
+  if (!Array.isArray(choices)) return [];
+  const entry = choices.find(
+    (item) => typeof item === "object" && item !== null && "id" in item && item.id === momentId,
+  );
+  if (entry === undefined) return [];
+  const parsed = pickChoiceSchema.safeParse(entry);
+  if (!parsed.success) throw new Error(`choices for ${momentId} are not valid pick options.`);
+  return parsed.data.options;
+};
 
 export const cueSchema = z
   .strictObject({

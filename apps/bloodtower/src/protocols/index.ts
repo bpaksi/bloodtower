@@ -9,6 +9,7 @@ export {
   FLOW_SCREENS,
   type FlowScreen,
   flowScreenSchema,
+  optionIdSchema,
   promptIdSchema,
 } from "./control.ts";
 export {
@@ -30,6 +31,7 @@ export {
   tokenSchema,
   utcTimestampSchema,
 } from "./devices.ts";
+export { KEEPER_LINE_COUNT, KEEPER_MOMENT_ID } from "./keeper.ts";
 export {
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
@@ -53,8 +55,12 @@ export {
   holdPayloadSchema,
   hostHealthSchema,
   hunterViewSchema,
+  keeperLineEndedMessageSchema,
+  keeperLineEndedPayloadSchema,
+  type Pick,
   PROTOCOL_VERSION,
   pauseBannerSchema,
+  pickPayloadSchema,
   privateMomentSchema,
   promptSchema,
   publicHunterSchema,
@@ -92,6 +98,7 @@ export {
   packIssues,
   packSchema,
   parseMomentId,
+  pickOptionsFor,
   privateHunterOf,
   randomnessIssue,
   sceneOf,

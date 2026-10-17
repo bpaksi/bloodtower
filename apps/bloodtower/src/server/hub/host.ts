@@ -393,13 +393,41 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       sendError(socket, "storyboard-control", "The story board is display only.", correlationId);
       return;
     }
-    const result = engine.press(client.deviceId, message.payload.promptId, message.payload.action);
+    const result = engine.press(
+      client.deviceId,
+      message.payload.promptId,
+      message.payload.action,
+      message.payload.option,
+    );
     if (!result.ok) {
       sendError(socket, "invalid-state", "That press was not accepted.", correlationId);
       return;
     }
     runTowerPress(result, tower);
     broadcast();
+  };
+
+  /**
+   * The story board's one message (D7 exception). Only the storyboard socket may send it.
+   * The engine acts only when the line matches the current Keeper line, so a late one is a no-op.
+   */
+  const onKeeperLineEnded = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
+    if (message.type !== "keeper-line-ended") return;
+    const correlationId = message.id;
+    if (client.role === "pending") {
+      sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
+      return;
+    }
+    if (client.role !== "storyboard") {
+      sendError(
+        socket,
+        "invalid-state",
+        "Only the story board reports a Keeper line.",
+        correlationId,
+      );
+      return;
+    }
+    if (engine.keeperLineEnded(message.payload.momentId, message.payload.line)) broadcast();
   };
 
   const handle = (socket: WebSocket, raw: RawData) => {
@@ -444,6 +472,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     }
     if (message.data.type === "hello") onHello(socket, client, message.data);
     else if (message.data.type === "hold") onHold(socket, client, message.data);
+    else if (message.data.type === "keeper-line-ended")
+      onKeeperLineEnded(socket, client, message.data);
     else onControl(socket, client, message.data);
   };
 

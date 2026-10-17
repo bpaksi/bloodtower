@@ -3,6 +3,7 @@ import {
   controlMessageSchema,
   helloPayloadSchema,
   holdMessageSchema,
+  keeperLineEndedMessageSchema,
   PROTOCOL_VERSION,
   type ServerMessage,
   serverMessageSchema,
@@ -62,7 +63,10 @@ type HelloPayload = ReturnType<typeof storyboardHello> | ReturnType<typeof devic
 export interface SessionClient {
   /** False when the link is down. Nothing is kept to send later. */
   sendHold: (hunter: string, action: "take" | "release") => boolean;
-  sendControl: (promptId: string, action: ControlAction) => boolean;
+  /** `option` is set only for a `pick`. */
+  sendControl: (promptId: string, action: ControlAction, option?: string) => boolean;
+  /** The story board only: the Keeper line that finished on the board (D7 exception). */
+  sendKeeperLineEnded: (momentId: string, line: number) => boolean;
   close: () => void;
 }
 
@@ -173,11 +177,20 @@ export const openSession = (options: SessionOptions): SessionClient => {
       if (!message.success) return false;
       return sendRaw(message.data);
     },
-    sendControl: (promptId, action) => {
+    sendControl: (promptId, action, option) => {
       const message = controlMessageSchema.safeParse({
         v: PROTOCOL_VERSION,
         type: "control",
-        payload: { promptId, action },
+        payload: option === undefined ? { promptId, action } : { promptId, action, option },
+      });
+      if (!message.success) return false;
+      return sendRaw(message.data);
+    },
+    sendKeeperLineEnded: (momentId, line) => {
+      const message = keeperLineEndedMessageSchema.safeParse({
+        v: PROTOCOL_VERSION,
+        type: "keeper-line-ended",
+        payload: { momentId, line },
       });
       if (!message.success) return false;
       return sendRaw(message.data);

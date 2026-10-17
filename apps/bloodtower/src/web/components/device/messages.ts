@@ -9,9 +9,9 @@ export const holdMessage = (hunter: string, action: "take" | "release") =>
   });
 
 /** A control press. The payload has a prompt and an action, never a tower command. */
-export const controlMessage = (promptId: string, action: ControlAction) =>
+export const controlMessage = (promptId: string, action: ControlAction, option?: string) =>
   controlMessageSchema.parse({
     v: 1,
     type: "control",
-    payload: { promptId, action },
+    payload: option === undefined ? { promptId, action } : { promptId, action, option },
   });

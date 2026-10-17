@@ -65,14 +65,15 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-/** One step's press, which must win. */
+/** One step's press, which must win. A pick names its option. */
 const winStep = (
   engine: SessionEngine,
   deviceId: string,
   promptId: string,
   action: ControlAction,
+  option?: string,
 ) => {
-  const result = engine.press(deviceId, promptId, action);
+  const result = engine.press(deviceId, promptId, action, option);
   if (!result.ok || !result.winner) throw new Error(`${promptId} did not win.`);
 };
 
@@ -83,6 +84,14 @@ const startPlay = (engine: SessionEngine, deviceId: string) => {
   winStep(engine, deviceId, "continue-pick-story", "continue");
   winStep(engine, deviceId, "continue-party-join", "continue");
   winStep(engine, deviceId, "begin", "begin");
+};
+
+/** Plays from Begin to the Keeper at grey-stair.03, which is beat 5. */
+const toKeeper = (engine: SessionEngine, deviceId: string) => {
+  startPlay(engine, deviceId);
+  for (let beat = 0; beat < 5; beat += 1) {
+    winStep(engine, deviceId, `continue-${beat}`, "continue");
+  }
 };
 
 describe("session", () => {
@@ -378,8 +387,11 @@ describe("session", () => {
       engine.press(alpha.deviceId, "continue-4", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.03");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.kind).toBe("clip");
-      engine.press(alpha.deviceId, "continue-5", "continue");
-      engine.press(alpha.deviceId, "continue-6", "continue");
+      // The Keeper has three lines: one Continue each, and the last one ends the scene.
+      engine.press(alpha.deviceId, "continue-5-0", "continue");
+      engine.press(alpha.deviceId, "continue-5-1", "continue");
+      engine.press(alpha.deviceId, "continue-5-2", "continue");
+      engine.press(alpha.deviceId, "pick-6", "pick", "oil-the-hinge");
       engine.press(alpha.deviceId, "continue-7", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
       const marks = store.loadRun("run").marks;
@@ -650,12 +662,10 @@ describe("session", () => {
   });
 
   /**
-   * QA: at grey-stair.door-choice (pick-card, target ipad:all) the iPad has no Oil/Force
-   * options. beatsForNight never reads moment.target, so the pick-card is copied onto
-   * the storyboard (beats.ts shared-moment select), and projectDevice only emits
-   * per-hunter private lines (engine.ts). DeviceState has no pick field.
+   * The door pick-card targets ipad:all (D23): every joined iPad gets its options from
+   * choices.yaml, and the board shows only the prompt text.
    */
-  it.fails("sends the door pick-card targeting ipad:all to a joined iPad with Oil and Force options", () => {
+  it("sends the door pick-card targeting ipad:all to a joined iPad with Oil and Force options", () => {
     const { pack } = packOrThrow();
     const door = pack.moments.find((moment) => moment.id === "grey-stair.door-choice");
     expect(door).toMatchObject({ kind: "pick-card", target: "ipad:all" });
@@ -665,21 +675,98 @@ describe("session", () => {
       const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
       if (!joined.ok) throw new Error("join");
       holdAll(engine, joined.deviceId);
-      startPlay(engine, joined.deviceId);
-      for (const promptId of [
-        "continue-0",
-        "continue-1",
-        "continue-2",
-        "continue-3",
-        "continue-4",
-        "continue-5",
-      ]) {
-        winStep(engine, joined.deviceId, promptId, "continue");
-      }
+      toKeeper(engine, joined.deviceId);
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.03");
+      // The Keeper's three lines take three Continue presses; the door waits for the last.
+      winStep(engine, joined.deviceId, "continue-5-0", "continue");
+      winStep(engine, joined.deviceId, "continue-5-1", "continue");
+      winStep(engine, joined.deviceId, "continue-5-2", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.door-choice");
       const shown = JSON.stringify(engine.projectDevice(joined.deviceId));
       expect(shown).toMatch(/Oil/i);
       expect(shown).toMatch(/Force/i);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("routes a pick to the iPads, lets the first pick win, and refuses an option that is not offered", () => {
+    const { opened, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      const beta = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok || !beta.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      toKeeper(engine, alpha.deviceId);
+      for (const line of [0, 1, 2]) {
+        winStep(engine, alpha.deviceId, `continue-5-${line}`, "continue");
+      }
+      const alphaState = engine.projectDevice(alpha.deviceId);
+      const betaState = engine.projectDevice(beta.deviceId);
+      expect(alphaState.pick?.options.map((option) => option.id)).toEqual([
+        "oil-the-hinge",
+        "force-it",
+      ]);
+      expect(betaState.pick).toEqual(alphaState.pick);
+      expect(alphaState.prompt).toEqual({ id: "pick-6", label: "Oil the hinge, or force it." });
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.kind).toBe("pick-card");
+
+      expect(engine.press(alpha.deviceId, "pick-6", "pick", "kept")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.press(alpha.deviceId, "pick-6", "pick")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.press(alpha.deviceId, "pick-6", "continue")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+
+      expect(engine.press(beta.deviceId, "pick-6", "pick", "force-it")).toMatchObject({
+        ok: true,
+        winner: true,
+      });
+      expect(engine.pickedOption("grey-stair.door-choice")).toBe("force-it");
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.04");
+      expect(engine.projectDevice(alpha.deviceId).pick).toBeNull();
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("moves the Keeper one line per Continue, takes a line-ended report only for the current line, and ends on the last line", () => {
+    const { opened, engine } = setup();
+    try {
+      const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!alpha.ok) throw new Error("join");
+      holdAll(engine, alpha.deviceId);
+      toKeeper(engine, alpha.deviceId);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(0);
+
+      // A line that is not the current one does nothing, and so does the wrong moment.
+      expect(engine.keeperLineEnded("grey-stair.03", 1)).toBe(false);
+      expect(engine.keeperLineEnded("grey-stair.02", 0)).toBe(false);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(0);
+
+      // Line 0 ends on the board: the server moves to line 1, and a repeat does nothing.
+      expect(engine.keeperLineEnded("grey-stair.03", 0)).toBe(true);
+      expect(engine.keeperLineEnded("grey-stair.03", 0)).toBe(false);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(1);
+      expect(engine.projectDevice(alpha.deviceId).prompt?.id).toBe("continue-5-1");
+
+      // Continue moves line 1 to 2, so a late report for line 1 is ignored.
+      winStep(engine, alpha.deviceId, "continue-5-1", "continue");
+      expect(engine.keeperLineEnded("grey-stair.03", 1)).toBe(false);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBe(2);
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.03");
+
+      // The last line finishing ends the scene, and the door comes up.
+      expect(engine.keeperLineEnded("grey-stair.03", 2)).toBe(true);
+      expect(engine.projectStoryboard(TOWER, JOIN).keeperLine).toBeNull();
+      expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("grey-stair.door-choice");
+      expect(engine.keeperLineEnded("grey-stair.03", 2)).toBe(false);
     } finally {
       opened.close();
     }

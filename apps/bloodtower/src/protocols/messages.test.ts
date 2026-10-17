@@ -4,6 +4,7 @@ import {
   CONTROL_ACTIONS,
   clientMessageSchema,
   containsPrivateChannel,
+  controlMessageSchema,
   controlPressSchema,
   deviceRecordSchema,
   envelopeSchema,
@@ -11,6 +12,7 @@ import {
   helloPayloadSchema,
   holdPayloadSchema,
   hostHealthSchema,
+  keeperLineEndedMessageSchema,
   PROTOCOL_VERSION,
   SERVER_MESSAGE_TYPES,
   type StoryboardState,
@@ -66,8 +68,8 @@ describe("envelope", () => {
 });
 
 describe("client messages", () => {
-  it("lists hello, hold and control, and not a tower command", () => {
-    expect(CLIENT_MESSAGE_TYPES).toEqual(["hello", "hold", "control"]);
+  it("lists hello, hold, control and the Keeper line report, and not a tower command", () => {
+    expect(CLIENT_MESSAGE_TYPES).toEqual(["hello", "hold", "control", "keeper-line-ended"]);
     expect(CLIENT_MESSAGE_TYPES).not.toContain("command");
     expect(CONTROL_ACTIONS).toEqual([
       "begin",
@@ -77,7 +79,24 @@ describe("client messages", () => {
       "quit",
       "tower-connect",
       "tower-calibrate",
+      "pick",
     ]);
+  });
+
+  it("requires a pick to name its option, and refuses an option on any other action", () => {
+    const control = (payload: unknown) =>
+      controlMessageSchema.safeParse({ v: 1, type: "control", payload }).success;
+    expect(control({ promptId: "pick-6", action: "pick", option: "force-it" })).toBe(true);
+    expect(control({ promptId: "pick-6", action: "pick" })).toBe(false);
+    expect(control({ promptId: "continue-0", action: "continue", option: "force-it" })).toBe(false);
+  });
+
+  it("accepts the Keeper line report only with a moment id and a line index", () => {
+    const report = (payload: unknown) =>
+      keeperLineEndedMessageSchema.safeParse({ v: 1, type: "keeper-line-ended", payload }).success;
+    expect(report({ momentId: "grey-stair.03", line: 2 })).toBe(true);
+    expect(report({ momentId: "grey-stair.03", line: 3 })).toBe(false);
+    expect(report({ momentId: "grey-stair.03", line: 0, extra: true })).toBe(false);
   });
 
   it("joins a device with a code and refuses a mac as a player", () => {
