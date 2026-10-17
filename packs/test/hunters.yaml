@@ -1,20 +1,20 @@
 - id: alpha
-  name: Alpha
+  name: Agnes
   portrait: por.alpha
   voice: vo.alpha
   start_location: hall
 - id: beta
-  name: Beta
+  name: Tomas
   portrait: por.beta
   voice: vo.beta
   start_location: hall
 - id: gamma
-  name: Gamma
+  name: Wren
   portrait: por.gamma
   voice: vo.gamma
   start_location: hall
 - id: delta
-  name: Delta
+  name: Emeric
   portrait: por.delta
   voice: vo.delta
   start_location: hall

@@ -26,7 +26,7 @@ const playing = (): DeviceState =>
     views: [
       {
         hunter: "alpha",
-        name: "Alpha",
+        name: "Agnes",
         privateMoment: {
           momentId: "proving-ground.02.private.alpha",
           text: "Only Alpha hears this.",
@@ -147,7 +147,7 @@ describe("device screens", () => {
       }),
     );
     expect(device).toContain("Only Alpha hears this.");
-    expect(device).toContain("Alpha:");
+    expect(device).toContain("Agnes:");
     expect(device).toContain("Continue");
     expect(device).toContain("Menu");
     expect(device).toContain("bt-menu");
@@ -160,7 +160,7 @@ describe("device screens", () => {
     const join = renderToStaticMarkup(createElement(JoinScreen, { live: true, code: "048213" }));
     expect(join).toContain("048213");
     expect(join).toContain("Game is loading...");
-    expect(join).not.toContain("Hold Beta");
+    expect(join).not.toContain("Hold Tomas");
     expect(join).not.toContain("Open controls");
     expect(join).not.toContain("Only Alpha hears this.");
     expect(join).not.toContain("Device token");
@@ -180,7 +180,7 @@ describe("device screens", () => {
           views: [
             {
               hunter: "alpha",
-              name: "Alpha",
+              name: "Agnes",
               privateMoment: {
                 momentId: "proving-ground.02.private.alpha",
                 text: "Go on. [pause 0.5] I'll wait.",
@@ -198,7 +198,7 @@ describe("device screens", () => {
         tower: tower("disconnected"),
       }),
     );
-    expect(device).toContain("Alpha: Go on. I&#x27;ll wait.");
+    expect(device).toContain("Agnes: Go on. I&#x27;ll wait.");
     expect(device).not.toContain("[pause");
   });
 
@@ -220,7 +220,7 @@ describe("device screens", () => {
     expect(join).toContain('data-layout="ipad"');
     expect(join).not.toContain("Use the full layout");
     expect(join).toContain("Game is loading...");
-    expect(join).not.toContain("Hold Alpha");
+    expect(join).not.toContain("Hold Agnes");
 
     const device = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -334,21 +334,21 @@ describe("device screens", () => {
         state: deviceStatePayloadSchema.parse({
           screen: "party-join",
           heldHunters: ["alpha"],
-          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          views: [{ hunter: "alpha", name: "Agnes", privateMoment: null }],
           prompt: null,
           lock: null,
           won: null,
           roster: [
-            { id: "alpha", name: "Alpha" },
-            { id: "beta", name: "Beta" },
+            { id: "alpha", name: "Agnes" },
+            { id: "beta", name: "Tomas" },
           ],
         }),
       }),
     );
     expect(party).toContain("Take all");
     expect(party).toContain("Claim all hunters first");
-    expect(party).toContain("Alpha: Mine");
-    expect(party).toContain("Claim Beta");
+    expect(party).toContain("Agnes: Mine");
+    expect(party).toContain("Claim Tomas");
     expect(party).toContain('data-action="continue"');
   });
 
@@ -365,7 +365,7 @@ describe("device screens", () => {
           screen: "play",
           quitPromptId: "quit",
           heldHunters: ["alpha"],
-          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          views: [{ hunter: "alpha", name: "Agnes", privateMoment: null }],
           prompt: { id: "pick-6", label: "Oil the hinge, or force it." },
           pick: {
             momentId: "grey-stair.door-choice",

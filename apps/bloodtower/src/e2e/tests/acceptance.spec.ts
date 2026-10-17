@@ -171,10 +171,10 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(a.hold("beta")).toHaveAttribute("data-action", "release");
       await b.hold("gamma").click();
       await expect(b.hold("gamma")).toHaveAttribute("data-action", "release");
-      await expect(pageA.getByRole("heading", { name: "Alpha" })).toBeVisible();
-      await expect(pageA.getByRole("heading", { name: "Beta" })).toBeVisible();
+      await expect(pageA.getByRole("heading", { name: "Agnes" })).toBeVisible();
+      await expect(pageA.getByRole("heading", { name: "Tomas" })).toBeVisible();
       // Party join: the next step waits until every hunter is held.
-      await expect(board.getByText("Delta — waiting")).toBeVisible();
+      await expect(board.getByText("Emeric — waiting")).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();
       await expect(a.button("begin")).toBeDisabled();
       expect(boardStates(boardFrames).at(-1)?.gate).toEqual({ canBegin: false, unheld: ["delta"] });
@@ -182,7 +182,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await b.hold("delta").click();
       await expect(b.hold("delta")).toHaveAttribute("data-action", "release");
       await expect(pageB.getByRole("heading", { name: "Party Join" })).toBeVisible();
-      await expect(pageB.getByRole("heading", { name: "Delta" })).toBeVisible();
+      await expect(pageB.getByRole("heading", { name: "Emeric" })).toBeVisible();
       await expect(a.button("continue")).toHaveText("Next: set up the story");
       await expect(a.button("continue")).toBeEnabled();
       await a.button("continue").click();
@@ -263,7 +263,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       const tokenB = await pageB.evaluate((key) => sessionStorage.getItem(key), TOKEN_KEY);
       expect(tokenB).toBeTruthy();
       await contexts[2]?.close();
-      await expect(board.getByText("Waiting for someone to hold Gamma.")).toBeVisible({
+      await expect(board.getByText("Waiting for someone to hold Wren.")).toBeVisible({
         timeout: 2_000,
       });
       await expect(a.button("continue")).toBeDisabled();
@@ -275,8 +275,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await pageC.getByRole("button", { name: "Rejoin" }).click();
       await expect(pageC).toHaveURL(/\/device/);
       await expect(pageC.locator("main")).toHaveAttribute("data-screen", "play");
-      await expect(pageC.getByRole("heading", { name: "Delta" })).toBeVisible();
-      await expect(board.getByText("Waiting for someone to hold Gamma.")).toHaveCount(0);
+      await expect(pageC.getByRole("heading", { name: "Emeric" })).toBeVisible();
+      await expect(board.getByText("Waiting for someone to hold Wren.")).toHaveCount(0);
       await expect(a.button("continue")).toBeEnabled();
 
       const pauses = host.loadRun().marks.filter((mark) => mark.kind === "pause");

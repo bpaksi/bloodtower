@@ -22,6 +22,17 @@ Illusionist drops storyboard stills and other pack images here. The loader allow
 | `fx.stair` | `assets/fx-stair.png` |
 | `fx.bell` | `assets/fx-bell.png` |
 
+Portrait assets (`por.alpha` … `por.delta` in `assets.yaml`) map to iPad hunter art:
+
+| Asset id | Suggested file |
+|---|---|
+| `por.alpha` | `assets/por-alpha.png` |
+| `por.beta` | `assets/por-beta.png` |
+| `por.gamma` | `assets/por-gamma.png` |
+| `por.delta` | `assets/por-delta.png` |
+
+Hunter ids stay `alpha`–`delta`; display names in `hunters.yaml` are Agnes, Tomas, Wren, and Emeric for the demo.
+
 If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
 
 # Test pack (`packs/test/`) content spec
