@@ -9,6 +9,22 @@ const device = (page: Page) => ({
   hold: (hunter: string) => page.locator(`button[data-hunter="${hunter}"]`),
 });
 
+/** Portrait and caption sit fully in the viewport; the document does not scroll. */
+const assertKeeperFits = async (page: Page) => {
+  const portrait = page.getByRole("img", { name: "The Keeper" });
+  const caption = page.locator('[data-talking-avatar="keeper"] figcaption');
+  await expect(portrait).toBeVisible();
+  await expect(caption).toBeVisible();
+  await expect(portrait).toBeInViewport({ ratio: 1 });
+  await expect(caption).toBeInViewport({ ratio: 1 });
+  const overflow = await page.evaluate(() => ({
+    x: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    y: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+  }));
+  expect(overflow.y, "board must not scroll vertically").toBeLessThanOrEqual(0);
+  expect(overflow.x, "board must not scroll sideways").toBeLessThanOrEqual(0);
+};
+
 test("story board look at proving ground, grey-stair, and the Keeper", async ({
   browser,
   browserName,
@@ -77,7 +93,13 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       board.getByText("Light them if you can. The key is at the bottom. It always is."),
     ).toBeVisible();
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
+    await assertKeeperFits(board);
     await shot(board, "board-keeper-moment-landscape");
+
+    await board.setViewportSize({ width: 1024, height: 594 });
+    await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.03");
+    await assertKeeperFits(board);
+    await shot(board, "board-keeper-1024x594");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await host.close();

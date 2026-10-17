@@ -147,7 +147,7 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
 const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => {
   const acting = actingHunterId(hunters);
   return (
-    <aside>
+    <aside className="bt-hunters">
       <h2 className="bt-roll-title">Hunters</h2>
       {hunters.length === 0 ? (
         <p className="bt-roll-empty">Hunters unavailable.</p>
