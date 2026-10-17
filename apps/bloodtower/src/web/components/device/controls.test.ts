@@ -147,31 +147,28 @@ describe("device screens", () => {
       }),
     );
     expect(device).toContain("Only Alpha hears this.");
+    expect(device).toContain("Alpha:");
     expect(device).toContain("Continue");
-    expect(device).toContain("Connect the tower");
-    expect(device).toContain("Calibrate");
+    expect(device).toContain("Menu");
+    expect(device).toContain("bt-menu");
+    expect(device).not.toContain("Connect tower");
+    expect(device).not.toContain("Calibrate");
+    expect(device).toContain('data-screen="play"');
+    expect(device).toContain('data-layout="ipad"');
     expect(device).not.toContain("Only Delta hears this.");
 
-    const join = renderToStaticMarkup(
-      createElement(JoinScreen, {
-        live: true,
-        code: "048213",
-        hunters: [
-          { id: "alpha", name: "Alpha" },
-          { id: "beta", name: "Beta" },
-        ],
-        held: ["alpha"],
-      }),
-    );
+    const join = renderToStaticMarkup(createElement(JoinScreen, { live: true, code: "048213" }));
     expect(join).toContain("048213");
-    expect(join).toContain("Hold Beta");
-    expect(join).toContain("Release Alpha");
-    expect(join).toContain("Rejoin");
+    expect(join).toContain("Game is loading...");
+    expect(join).not.toContain("Hold Beta");
+    expect(join).not.toContain("Open controls");
     expect(join).not.toContain("Only Alpha hears this.");
+    expect(join).not.toContain("Device token");
     expect(join).not.toContain("Use the full layout");
+    expect(join).toContain('data-layout="ipad"');
   });
 
-  it("detects a phone and offers the full layout", () => {
+  it("detects a phone for hello, and keeps the iPad layout", () => {
     expect(detectFormFactor("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)")).toBe(
       "phone",
     );
@@ -184,14 +181,12 @@ describe("device screens", () => {
       createElement(JoinScreen, {
         live: true,
         code: "048213",
-        hunters: [{ id: "alpha", name: "Alpha" }],
-        held: [],
-        formFactor: "phone",
       }),
     );
-    expect(join).toContain('data-layout="phone"');
-    expect(join).toContain("Use the full layout");
-    expect(join).toContain("Hold Alpha");
+    expect(join).toContain('data-layout="ipad"');
+    expect(join).not.toContain("Use the full layout");
+    expect(join).toContain("Game is loading...");
+    expect(join).not.toContain("Hold Alpha");
 
     const device = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -202,22 +197,125 @@ describe("device screens", () => {
         connectLock: null,
         calibrateLock: null,
         tower: tower("disconnected"),
-        formFactor: "phone",
       }),
     );
-    expect(device).toContain('data-layout="phone"');
-    expect(device).toContain("Use the full layout");
+    expect(device).toContain('data-layout="ipad"');
+    expect(device).not.toContain("Use the full layout");
     expect(device).toContain("Only Alpha hears this.");
   });
 
   it("says the session host is unavailable and shows no fake hunters", () => {
-    const join = renderToStaticMarkup(
-      createElement(JoinScreen, { live: false, code: null, hunters: [], held: [] }),
-    );
+    const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: null }));
     expect(join).toContain("Session host unavailable.");
     expect(join).toContain("Join code unavailable.");
-    expect(join).toContain("Hunters unavailable.");
+    expect(join).toContain("Rejoin");
+    expect(join).not.toContain("Hunters unavailable.");
+    expect(join).not.toContain("Device token");
     expect(join).toContain('disabled="" name="token"');
+  });
+
+  it("renders each opening screen with one primary action and no phone layout", () => {
+    const base = {
+      live: true,
+      deviceId: "device-1",
+      pausePromptId: null as string | null,
+      connectLock: null,
+      calibrateLock: null,
+      tower: tower("disconnected"),
+    };
+    const splash = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        state: deviceStatePayloadSchema.parse({
+          screen: "splash",
+          heldHunters: [],
+          views: [],
+          prompt: null,
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(splash).toContain("Game is loading...");
+    expect(splash).toContain('data-screen="splash"');
+    expect(splash).not.toContain('data-primary="true"');
+
+    const connect = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        state: deviceStatePayloadSchema.parse({
+          screen: "tower-connect",
+          heldHunters: [],
+          views: [],
+          prompt: { id: "continue-tower-connect", label: "Next: pick a story" },
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(connect).toContain("Connect tower");
+    expect(connect).toContain("Play without tower");
+    expect(connect).toContain("Tower Connect");
+    expect(connect).toContain('data-primary="true">Connect tower');
+    expect(connect.match(/data-primary="true"/g)).toHaveLength(1);
+    expect(connect).not.toContain('data-primary="true">Play without tower');
+    expect(connect).not.toContain('data-primary="true">Next: pick a story');
+
+    const ready = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        tower: {
+          connection: "connected",
+          battery: { state: "unavailable" },
+          calibrated: { state: "known", calibrated: true },
+        },
+        connectLock: {
+          promptId: "tower-connect",
+          action: "tower-connect",
+          winnerDeviceId: "device-1",
+        },
+        calibrateLock: {
+          promptId: "tower-calibrate",
+          action: "tower-calibrate",
+          winnerDeviceId: "device-1",
+        },
+        state: deviceStatePayloadSchema.parse({
+          screen: "tower-connect",
+          heldHunters: [],
+          views: [],
+          prompt: { id: "continue-tower-connect", label: "Next: pick a story" },
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(ready).toContain("Next: pick a story");
+    expect(ready).not.toContain("Play without tower");
+    expect(ready.match(/data-primary="true"/g)).toHaveLength(1);
+    expect(ready).toContain('data-primary="true">Next: pick a story');
+
+    const party = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        state: deviceStatePayloadSchema.parse({
+          screen: "party-join",
+          heldHunters: ["alpha"],
+          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          prompt: null,
+          lock: null,
+          won: null,
+          roster: [
+            { id: "alpha", name: "Alpha" },
+            { id: "beta", name: "Beta" },
+          ],
+        }),
+      }),
+    );
+    expect(party).toContain("Take all");
+    expect(party).toContain("Claim all hunters first");
+    expect(party).toContain("Alpha: Mine");
+    expect(party).toContain("Claim Beta");
+    expect(party).toContain('data-action="continue"');
   });
 
   it("lets a token be pasted before the socket is up when rejoin is wired", () => {
@@ -225,8 +323,6 @@ describe("device screens", () => {
       createElement(JoinScreen, {
         live: false,
         code: null,
-        hunters: [],
-        held: [],
         onRejoin: () => undefined,
       }),
     );

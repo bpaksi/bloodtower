@@ -26,6 +26,7 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
   // One file per run, so repeats and retries in parallel workers never share one.
   const run = [
     testInfo.project.name,
+    testInfo.title.replace(/\W+/g, "-").slice(0, 48),
     testInfo.repeatEachIndex > 0 ? `repeat${testInfo.repeatEachIndex}` : null,
     testInfo.retry > 0 ? `retry${testInfo.retry}` : null,
   ].filter(Boolean);
