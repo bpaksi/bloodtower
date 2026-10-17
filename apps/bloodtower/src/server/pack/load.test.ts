@@ -285,6 +285,34 @@ describe("story list", () => {
     }
   });
 
+  const storyOfLength = (length: number) => {
+    const dir = storiesDir();
+    const id = `a${"b".repeat(length - 1)}`;
+    cpSync(testPack(), join(dir, id), { recursive: true });
+    return { dir, entry: loadStories(dir).find((item) => item.card.id === id) };
+  };
+
+  it("loads a 44-character story id, the longest whose Choose prompt id fits 64", () => {
+    const { dir, entry } = storyOfLength(44);
+    try {
+      expect(entry?.card.loadable).toBe(true);
+      expect(`continue-pick-story-${entry?.card.id}`.length).toBe(64);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it.fails("shows a 45-character story id as a greyed card that cannot be chosen (#64)", () => {
+    const { dir, entry } = storyOfLength(45);
+    try {
+      expect(entry?.card.loadable).toBe(false);
+      expect(entry?.pack).toBeNull();
+      expect(entry?.issues.length).toBeGreaterThan(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("is empty when the packs folder is missing", () => {
     expect(loadStories(join(tmpdir(), "bloodtower-no-such-packs-folder"))).toEqual([]);
   });
