@@ -75,15 +75,15 @@ for (const size of SIZES) {
         const cards = page.locator("[data-portrait-card]");
         await expect(cards, where).toHaveCount(4);
         await expect(page.locator('[data-portrait-frame="placeholder"]'), where).toHaveCount(4);
-        for (const [name, initial] of [
-          ["Alpha", "A"],
-          ["Beta", "B"],
-          ["Gamma", "G"],
-          ["Delta", "D"],
+        for (const [id, name, initial] of [
+          ["alpha", "Agnes", "A"],
+          ["beta", "Tomas", "T"],
+          ["gamma", "Wren", "W"],
+          ["delta", "Emeric", "E"],
         ] as const) {
           const card = page.locator(`[data-portrait-card="${name}"]`);
           if (where === "board") {
-            const cart = page.locator(`.bt-cart[data-hunter="${name.toLowerCase()}"]`);
+            const cart = page.locator(`.bt-cart[data-hunter="${id}"]`);
             await expect(cart.locator(".bt-cart-nm"), `${where} ${name}`).toHaveText(name);
             await expect(card.locator("[data-portrait-frame]")).toHaveText(initial);
             await expect(cart).toBeInViewport();
@@ -105,7 +105,7 @@ for (const size of SIZES) {
         "data-action",
         "release",
       );
-      await expect(pad.locator('button[data-hunter="alpha"]')).toContainText("Alpha: Mine");
+      await expect(pad.locator('button[data-hunter="alpha"]')).toContainText("Agnes: Mine");
       await expect(board.locator('.bt-cart[data-hunter="alpha"] .bt-cart-st')).not.toHaveText(
         "waiting",
       );

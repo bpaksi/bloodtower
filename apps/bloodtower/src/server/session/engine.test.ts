@@ -985,7 +985,7 @@ describe("pick story", () => {
       engine.focusStory(deviceId, "second");
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
       expect(engine.screen()).toBe("party-join");
-      expect(engine.hunterRoster().map((hunter) => hunter.name)).toContain("Alpha the Second");
+      expect(engine.hunterRoster().map((hunter) => hunter.name)).toContain("Agnes the Second");
       const board = engine.projectStoryboard(TOWER, JOIN);
       expect(board.stories?.current).toBe("second");
       expect(board.hunters.every((hunter) => hunter.holders.length === 0)).toBe(true);
