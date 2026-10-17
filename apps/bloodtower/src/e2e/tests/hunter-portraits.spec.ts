@@ -82,9 +82,16 @@ for (const size of SIZES) {
           ["Delta", "D"],
         ] as const) {
           const card = page.locator(`[data-portrait-card="${name}"]`);
-          await expect(card, `${where} ${name}`).toContainText(name);
-          await expect(card.locator("[data-portrait-frame]")).toHaveText(initial);
-          await expect(card).toBeInViewport();
+          if (where === "board") {
+            const cart = page.locator(`.bt-cart[data-hunter="${name.toLowerCase()}"]`);
+            await expect(cart.locator(".bt-cart-nm"), `${where} ${name}`).toHaveText(name);
+            await expect(card.locator("[data-portrait-frame]")).toHaveText(initial);
+            await expect(cart).toBeInViewport();
+          } else {
+            await expect(card, `${where} ${name}`).toContainText(name);
+            await expect(card.locator("[data-portrait-frame]")).toHaveText(initial);
+            await expect(card).toBeInViewport();
+          }
         }
         const overflow = await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -99,7 +106,9 @@ for (const size of SIZES) {
         "release",
       );
       await expect(pad.locator('button[data-hunter="alpha"]')).toContainText("Alpha: Mine");
-      await expect(board.locator('[data-portrait-card="Alpha"]')).not.toContainText("waiting");
+      await expect(board.locator('.bt-cart[data-hunter="alpha"] .bt-cart-st')).not.toHaveText(
+        "waiting",
+      );
       // Portrait frames fit above the fold with the Take all and Continue controls reachable.
       await expect(pad.locator('button[data-action="take-all"]')).toBeInViewport();
       await expect(pad.locator('button[data-action="continue"]')).toBeVisible();

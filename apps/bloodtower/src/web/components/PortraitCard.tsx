@@ -9,16 +9,20 @@ export const PortraitCard = ({
   label,
   src,
   compact,
+  frameOnly,
+  accessibleLabel,
 }: {
   name: string;
   label?: string;
   src?: string;
   compact?: boolean;
-}) => (
-  <span
-    className={`flex items-center ${compact ? "gap-3" : "gap-4"} text-left`}
-    data-portrait-card={name}
-  >
+  /** Portrait frame only; pair with board cartouche copy beside the frame. */
+  frameOnly?: boolean;
+  /** Spoken label when `frameOnly` (defaults to `label` or `name`). */
+  accessibleLabel?: string;
+}) => {
+  const spoken = accessibleLabel ?? label ?? name;
+  const frame = (
     <span
       aria-hidden="true"
       className={`flex ${compact ? "h-16 w-14" : "h-28 w-24"} shrink-0 items-center justify-center overflow-hidden rounded-lg border-4 border-double border-[var(--bt-accent)] bg-[var(--bt-bg)]`}
@@ -35,6 +39,22 @@ export const PortraitCard = ({
         </span>
       )}
     </span>
-    <span className={compact ? "text-lg" : "text-xl"}>{label ?? name}</span>
-  </span>
-);
+  );
+  if (frameOnly) {
+    return (
+      <span className="bt-cart-portrait-frame" data-portrait-card={name}>
+        <span className="sr-only">{spoken}</span>
+        {frame}
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`flex items-center ${compact ? "gap-3" : "gap-4"} text-left`}
+      data-portrait-card={name}
+    >
+      {frame}
+      <span className={compact ? "text-lg" : "text-xl"}>{label ?? name}</span>
+    </span>
+  );
+};

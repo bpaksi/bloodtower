@@ -209,11 +209,22 @@ const HunterList = ({
             if (portraits) classes.push("bt-cart-portrait");
             if (hunter.id === acting) classes.push("bt-cart-act");
             if (away) classes.push("bt-cart-away");
-            const label = `${hunter.name} — ${holdingText(hunter)}`;
+            const accessibleLabel = `${hunter.name} — ${holdingText(hunter)}`;
             return (
               <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
                 {portraits ? (
-                  <PortraitCard compact name={hunter.name} label={label} />
+                  <>
+                    <PortraitCard
+                      compact
+                      frameOnly
+                      name={hunter.name}
+                      accessibleLabel={accessibleLabel}
+                    />
+                    <span className="bt-cart-copy">
+                      <span className="bt-cart-nm">{hunter.name}</span>
+                      <span className="bt-cart-st">{holdingText(hunter)}</span>
+                    </span>
+                  </>
                 ) : (
                   <>
                     <span className="bt-cart-ph" aria-hidden="true">

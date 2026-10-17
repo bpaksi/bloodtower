@@ -350,8 +350,9 @@
   filter: sepia(0.4) brightness(0.62);
 }
 
-.bt-cart-portrait {
-  grid-template-columns: minmax(0, 1fr);
+.bt-cart-portrait-frame {
+  display: flex;
+  align-items: center;
 }
 
 .bt-cart-ph {
