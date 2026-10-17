@@ -128,6 +128,7 @@
 
 .bt-board-header {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: minmax(18rem, 32%) minmax(0, 1fr) minmax(11rem, 22%);
   gap: clamp(0.75rem, 1.6vw, 1.5rem);
   align-items: stretch;
@@ -175,16 +176,6 @@
 
 .bt-board-title h1 {
   margin: 0;
-  color: var(--bt-parchment-dark);
-  font-family: var(--bt-font-label);
-  font-size: 1.75rem;
-  font-weight: 400;
-  letter-spacing: 0.25em;
-  text-transform: none;
-}
-
-.bt-chapter {
-  margin: 0.15rem 0 0;
   color: var(--bt-candle);
   font-family: var(--bt-font-title);
   font-size: clamp(2rem, 3.4vw, 3.25rem);
@@ -192,6 +183,16 @@
   letter-spacing: 0.06em;
   line-height: 1.05;
   text-shadow: 0 0 18px rgb(245 196 81 / 0.35);
+}
+
+.bt-board-title h1 small {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--bt-parchment-dark);
+  font-family: var(--bt-font-label);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
 }
 
 .bt-join-zone {
@@ -225,6 +226,7 @@
 }
 
 .bt-banner {
+  flex-shrink: 0;
   margin: 0;
   padding: 0.35rem 1rem;
   border-top: 1px solid var(--bt-candle);
@@ -262,15 +264,24 @@
   min-height: 0;
 }
 
-.bt-hunters,
+.bt-hunters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .bt-pub {
   overflow: auto;
 }
 
 .bt-roll {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
-  gap: clamp(0.55rem, 1.2vh, 1.1rem);
+  gap: clamp(0.4rem, 1.1vh, 1.1rem);
+  min-height: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -293,11 +304,13 @@
 
 .bt-cart {
   display: grid;
-  grid-template-columns: 3.4rem minmax(0, 1fr);
+  flex: 1 1 0;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.7rem;
   align-items: center;
   box-sizing: border-box;
-  min-height: 4.6rem;
+  min-height: 0;
+  overflow: hidden;
   padding: 0.45rem 0.85rem 0.45rem 0.65rem;
   background:
     var(--bt-grain), var(--bt-foxing),
@@ -342,21 +355,31 @@
   line-height: 1;
 }
 
+.bt-cart-copy {
+  min-width: 0;
+}
+
 .bt-cart-nm {
   display: block;
+  overflow: hidden;
   font-family: var(--bt-font-title);
   font-size: clamp(1.75rem, 2.2vw, 2.35rem);
   line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bt-cart-st {
   display: block;
   margin-top: 0.25rem;
+  overflow: hidden;
   color: #5a4128;
   font-family: var(--bt-font-label);
   font-size: 1.75rem;
   letter-spacing: 0.06em;
   line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bt-cart-act .bt-cart-st {
@@ -389,6 +412,12 @@
 
 .bt-page > div:first-child {
   flex: 0 0 auto;
+}
+
+.bt-page-keeper {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 0.25rem;
 }
 
 .bt-page h2 {
@@ -597,7 +626,7 @@
   height: 100% !important;
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center top;
   filter: sepia(0.28) contrast(1.1);
 }
@@ -706,8 +735,31 @@
     padding: 0.28rem 0.7rem;
   }
 
-  .bt-chapter {
+  .bt-board-title h1 {
     font-size: clamp(1.75rem, 2.6vw, 2.4rem);
+  }
+
+  .bt-board-title h1 small {
+    font-size: 1.75rem;
+  }
+
+  .bt-roll-title {
+    display: none;
+  }
+
+  .bt-cart-ph {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .bt-page-keeper {
+    padding: 0.1rem;
+  }
+
+  .bt-keeper figcaption,
+  .bt-board .bt-caption {
+    font-size: 1.75rem;
+    line-height: 1.15;
   }
 
   .bt-status {
@@ -716,12 +768,52 @@
   }
 
   .bt-banner {
-    padding: 0.2rem 0.75rem;
+    padding: 0.08rem 0.6rem;
+    line-height: 1.1;
   }
 
   .bt-cart {
     min-height: 0;
     padding: 0.28rem 0.6rem 0.28rem 0.5rem;
+  }
+
+  .bt-board:has(.bt-banner) {
+    gap: 0.18rem;
+    padding: 0.28rem 0.75rem 0.28rem;
+  }
+
+  .bt-board:has(.bt-banner) .bt-roll {
+    gap: 0.25rem;
+  }
+
+  .bt-board:has(.bt-banner) .bt-cart {
+    gap: 0.4rem;
+    padding: 0.12rem 0.45rem 0.12rem 0.35rem;
+    outline-offset: -6px;
+    clip-path: polygon(
+      8px 0,
+      calc(100% - 8px) 0,
+      100% 8px,
+      100% calc(100% - 8px),
+      calc(100% - 8px) 100%,
+      8px 100%,
+      0 calc(100% - 8px),
+      0 8px
+    );
+  }
+
+  .bt-board:has(.bt-banner) .bt-cart-ph {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.75rem;
+  }
+
+  .bt-board:has(.bt-banner) .bt-cart-st {
+    margin-top: 0.08rem;
+  }
+
+  .bt-board:has(.bt-banner) .bt-zone {
+    padding: 0.12rem 0.5rem;
   }
 
   .bt-page {

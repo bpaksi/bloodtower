@@ -21,11 +21,11 @@ import { KEEPER_MOMENT_ID } from "./keeperLines";
  * grey-stair.03 plays the Keeper; Tap to play appears only if the browser blocks autoplay.
  * Look: Illusionist R2 draft in docs/art-direction (game-look.md, tokens.css, mocks/story-board.html).
  */
-export function StoryBoard({ state }: { state: StoryboardState }) {
+export function StoryBoard({ state, debug = false }: { state: StoryboardState; debug?: boolean }) {
   const tower = towerStatusLines(state.tower);
   const paused = pauseText(state.pause, state.hunters);
   const warning = joinWarning(state.join);
-  const chapter = TABLE_STORY.title;
+  const header = headerCopy(state);
   return (
     <main className="bt-board" data-screen={state.screen} data-moment={state.moment?.id ?? ""}>
       <div className="bt-board-vignette" aria-hidden="true" />
@@ -38,18 +38,22 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
           </div>
         </div>
         <div className="bt-board-title">
-          <h1>Story board</h1>
-          <p className="bt-chapter bt-flicker">{chapter}</p>
+          <h1 className="bt-flicker">
+            <small>{header.scene}</small>
+            {header.place}
+          </h1>
         </div>
         <div className="bt-zone bt-panel bt-join-zone">
           <span className="bt-lbl">Join</span>
           <p className="bt-num">{state.join ? state.join.code : "————"}</p>
         </div>
       </header>
-      <p className="bt-tower-line">
-        Tower {tower.connection}. Battery {tower.battery}. Calibration {tower.calibration}.
-      </p>
-      {state.screen !== "splash" ? <StatusStrip state={state} /> : null}
+      {debug ? (
+        <p className="bt-tower-line">
+          Tower {tower.connection}. Battery {tower.battery}. Calibration {tower.calibration}.
+        </p>
+      ) : null}
+      {debug && state.screen !== "splash" ? <StatusStrip state={state} /> : null}
       {paused ? (
         <p className="bt-banner" role="status">
           {paused}
@@ -109,6 +113,29 @@ const sceneCopy = (moment: NonNullable<StoryboardState["moment"]>) => {
   return { kicker: "✠ The Night ✠", title: "The Moment" };
 };
 
+/** Header: kicker is the scene, large title is the place (Illusionist mock). */
+const headerCopy = (state: StoryboardState): { scene: string; place: string } => {
+  if (state.moment) {
+    if (state.moment.id === KEEPER_MOMENT_ID) {
+      return { scene: "The Grey Stair", place: "The Keeper" };
+    }
+    if (state.moment.id.startsWith("grey-stair")) {
+      return { scene: "The Grey Stair", place: "A Grey Stair" };
+    }
+    if (state.moment.id.startsWith("proving-ground")) {
+      return { scene: "The Proving Ground", place: "The Hall" };
+    }
+    return { scene: "The Night", place: "The Moment" };
+  }
+  if (state.screen === "splash") return { scene: "Bloodtower", place: "The Table" };
+  if (state.screen === "tower-connect") return { scene: "The Tower", place: "On the Table" };
+  if (state.screen === "pick-story") return { scene: "The Door", place: "Choose a Story" };
+  if (state.screen === "party-join") return { scene: "The Party", place: "Gather" };
+  if (state.screen === "begin") return { scene: "The Night", place: "The Table is Set" };
+  if (state.screen === "quit") return { scene: "The Table", place: "Paused" };
+  return { scene: "The Night", place: "The Moment" };
+};
+
 const actingHunterId = (hunters: StoryboardState["hunters"]): string | null =>
   hunters.find((hunter) => hunter.holders.length > 0 && !hunter.disconnected)?.id ??
   hunters.find((hunter) => hunter.holders.length > 0)?.id ??
@@ -154,20 +181,18 @@ const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => {
       ) : (
         <ul className="bt-roll">
           {hunters.map((hunter) => {
-            const away = hunter.holders.length === 0;
+            const away = hunter.holders.length === 0 || hunter.disconnected;
             const classes = ["bt-cart"];
             if (hunter.id === acting) classes.push("bt-cart-act");
             if (away) classes.push("bt-cart-away");
             return (
-              <li key={hunter.id} className={classes.join(" ")}>
+              <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
                 <span className="bt-cart-ph" aria-hidden="true">
                   {hunter.name.slice(0, 1)}
                 </span>
-                <span>
+                <span className="bt-cart-copy">
                   <span className="bt-cart-nm">{hunter.name}</span>
-                  <span className="bt-cart-st">
-                    {hunter.name} — {holdingText(hunter)}
-                  </span>
+                  <span className="bt-cart-st">{holdingText(hunter)}</span>
                 </span>
               </li>
             );
@@ -251,13 +276,8 @@ const BeginPanel = () => (
 
 const PlayPanel = ({ state }: { state: StoryboardState }) => {
   if (state.moment?.id === KEEPER_MOMENT_ID) {
-    const scene = sceneCopy(state.moment);
     return (
-      <article className="bt-page bt-parchment bt-ink-in">
-        <div>
-          <p className="bt-kicker">{scene.kicker}</p>
-          <h2>{scene.title}</h2>
-        </div>
+      <article className="bt-page bt-page-keeper bt-ink-in">
         <KeeperScene />
       </article>
     );
@@ -272,25 +292,13 @@ const PlayPanel = ({ state }: { state: StoryboardState }) => {
   const scene = sceneCopy(state.moment);
   const text = state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text);
   return (
-    <>
-      <article className="bt-page bt-parchment bt-ink-in">
-        <div>
-          <p className="bt-kicker">{scene.kicker}</p>
-          <h2>{scene.title}</h2>
-          <p className="bt-narration">{text}</p>
-        </div>
-        <div className="bt-still" aria-hidden="true">
-          {state.moment.still ?? "unavailable"}
-        </div>
-      </article>
-      <div className="bt-items bt-panel">
-        <span className="bt-lbl">Still</span>
-        <p data-fallback={state.moment.fallbackAudio ?? ""}>
-          Still {state.moment.still ?? "unavailable"}. Fallback{" "}
-          {state.moment.fallbackAudio ?? "unavailable"}.
-        </p>
+    <article className="bt-page bt-parchment bt-ink-in">
+      <div>
+        <p className="bt-kicker">{scene.kicker}</p>
+        <h2>{scene.title}</h2>
+        <p className="bt-narration">{text}</p>
       </div>
-    </>
+    </article>
   );
 };
 

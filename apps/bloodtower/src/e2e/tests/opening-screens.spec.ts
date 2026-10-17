@@ -44,8 +44,8 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
     const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
     await test.step("splash, then tower-connect on the board", async () => {
-      await board.goto("/board", { waitUntil: "domcontentloaded" });
-      await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
+      await board.goto("/board?debug=1", { waitUntil: "domcontentloaded" });
+      await expect(board.locator("main.bt-board")).toBeVisible();
       // First paint is the waiting splash. The host then publishes tower-connect.
       if ((await board.locator('[data-screen="splash"]').count()) > 0) {
         await shot(board, "board-splash");

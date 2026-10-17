@@ -9,14 +9,21 @@ const device = (page: Page) => ({
   hold: (hunter: string) => page.locator(`button[data-hunter="${hunter}"]`),
 });
 
-/** Portrait and caption sit fully in the viewport; the document does not scroll. */
-const assertKeeperFits = async (page: Page) => {
-  const portrait = page.getByRole("img", { name: "The Keeper" });
-  const caption = page.locator('[data-talking-avatar="keeper"] figcaption');
-  await expect(portrait).toBeVisible();
-  await expect(caption).toBeVisible();
-  await expect(portrait).toBeInViewport({ ratio: 1 });
-  await expect(caption).toBeInViewport({ ratio: 1 });
+/** Portrait, caption, and all four cartouches sit fully in the viewport; the document does not scroll. */
+const assertBoardFits = async (page: Page, opts?: { keeper?: boolean }) => {
+  const carts = page.locator(".bt-cart");
+  await expect(carts).toHaveCount(4);
+  for (let i = 0; i < 4; i += 1) {
+    await expect(carts.nth(i)).toBeInViewport({ ratio: 1 });
+  }
+  if (opts?.keeper) {
+    const portrait = page.getByRole("img", { name: "The Keeper" });
+    const caption = page.locator('[data-talking-avatar="keeper"] figcaption');
+    await expect(portrait).toBeVisible();
+    await expect(caption).toBeVisible();
+    await expect(portrait).toBeInViewport({ ratio: 1 });
+    await expect(caption).toBeInViewport({ ratio: 1 });
+  }
   const overflow = await page.evaluate(() => ({
     x: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     y: document.documentElement.scrollHeight - document.documentElement.clientHeight,
@@ -76,7 +83,30 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await d.button("begin").click();
 
     await expect(board.getByText("The proving ground is quiet.")).toBeVisible();
+    await expect(board.locator(".bt-board-title h1")).toContainText("The Hall");
+    await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Proving Ground");
+    await expect(board.locator("[data-status-strip]")).toHaveCount(0);
+    await expect(board.getByText(/Fallback/)).toHaveCount(0);
+    const cartNames = board.locator(".bt-cart-nm");
+    const cartStatus = board.locator(".bt-cart-st");
+    await expect(cartStatus).toHaveCount(4);
+    for (let i = 0; i < 4; i += 1) {
+      const name = await cartNames.nth(i).innerText();
+      const status = await cartStatus.nth(i).innerText();
+      expect(status, "cartouche status is the holder id, not the hunter name").not.toContain(name);
+      expect(status).not.toMatch(/—/);
+      expect(status.length).toBeGreaterThan(0);
+    }
+    await expect(board.getByRole("alert")).toContainText("iPads can't reach this address");
+    await assertBoardFits(board);
     await shot(board, "board-proving-ground-landscape");
+
+    await board.setViewportSize({ width: 1024, height: 594 });
+    await expect(board.getByRole("alert")).toContainText("iPads can't reach this address");
+    await expect(board.getByText("Delta")).toBeVisible();
+    await assertBoardFits(board);
+    await shot(board, "board-join-warning-1024x594");
+    await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();
     await expect(board.getByText("Each hunter reads alone.")).toBeVisible();
@@ -84,6 +114,9 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.getByText("A bell marks the step.")).toBeVisible();
     await d.button("continue").click();
     await expect(board.getByText(/A grey stair climbs into the dark/)).toBeVisible();
+    await expect(board.locator(".bt-board-title h1")).toContainText("A Grey Stair");
+    await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
+    await assertBoardFits(board);
     await shot(board, "board-grey-stair-landscape");
 
     await d.button("continue").click();
@@ -92,13 +125,15 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(
       board.getByText("Light them if you can. The key is at the bottom. It always is."),
     ).toBeVisible();
+    await expect(board.locator(".bt-board-title h1")).toContainText("The Keeper");
+    await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
-    await assertKeeperFits(board);
+    await assertBoardFits(board, { keeper: true });
     await shot(board, "board-keeper-moment-landscape");
 
     await board.setViewportSize({ width: 1024, height: 594 });
     await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.03");
-    await assertKeeperFits(board);
+    await assertBoardFits(board, { keeper: true });
     await shot(board, "board-keeper-1024x594");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);

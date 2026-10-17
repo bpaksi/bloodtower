@@ -54,8 +54,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
     const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
     await test.step("AC-3: the board is display only and shows the QR and a six-digit code", async () => {
-      await board.goto("/board");
-      await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
+      await board.goto("/board?debug=1");
+      await expect(board.locator("main.bt-board")).toBeVisible();
       await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
       expect(host.joinCode).toMatch(/^\d{6}$/);
       await expect(board.getByText(/Battery unavailable/)).toBeVisible();

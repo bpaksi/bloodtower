@@ -48,19 +48,31 @@ describe("story board", () => {
     expect(html).toContain("Beta");
     expect(html).toContain("Continue");
     expect(html).toContain("The proving ground is quiet.");
-    expect(html).toContain("Fallback sfx.bell");
+    expect(html).toContain("The Proving Ground");
+    expect(html).toContain("The Hall");
+    expect(html).not.toContain("Story board");
+    expect(html).not.toContain("Fallback sfx.bell");
+    expect(html).not.toContain("fx.hall");
     expect(html).toContain("Waiting for someone to hold Alpha.");
-    expect(html).toContain("Alpha — device-1");
-    expect(html).toContain("Beta — waiting");
+    expect(html).toContain("device-1");
+    expect(html).toContain("waiting");
+    expect(html).not.toContain("Alpha — device-1");
+    expect(html).not.toContain("Beta — waiting");
+    expect(html).not.toContain("Alpha —");
     expect(html).toContain("iPads can&#x27;t reach this address.");
-    expect(html).toContain("Battery 0%");
-    expect(html).toContain("Calibration unavailable");
-    expect(html).toContain("data-status-strip");
-    expect(html).toContain("Step");
-    expect(html).toContain("Play");
+    expect(html).not.toContain("Battery 0%");
+    expect(html).not.toContain("Calibration unavailable");
+    expect(html).not.toContain("data-status-strip");
     expect(html).toContain("connected");
     expect(html).not.toContain("ipad:");
     expect(html).not.toContain("data-action");
+
+    const debug = renderToStaticMarkup(createElement(StoryBoard, { state: state(), debug: true }));
+    expect(debug).toContain("Battery 0%");
+    expect(debug).toContain("Calibration unavailable");
+    expect(debug).toContain("data-status-strip");
+    expect(debug).toContain("Step");
+    expect(debug).toContain("Play");
 
     const calibrating = renderToStaticMarkup(
       createElement(StoryBoard, {
@@ -112,7 +124,11 @@ describe("story board", () => {
       }),
     );
     expect(html).toContain("A grey stair climbs into the dark. Someone has left the lamps unlit.");
+    expect(html).toContain("The Grey Stair");
+    expect(html).toContain("A Grey Stair");
+    expect(html).not.toContain("Proving ground");
     expect(html).not.toContain("[pause");
+    expect(html).not.toContain("fx.stair");
   });
 
   it("renders the Keeper captions for grey-stair.03 before the avatar loads", () => {
@@ -130,6 +146,8 @@ describe("story board", () => {
         },
       }),
     );
+    expect(html).toContain("The Grey Stair");
+    expect(html).toContain("The Keeper");
     expect(html).toContain("Light them if you can. The key is at the bottom. It always is.");
     expect(html).toContain("Mind the third step.");
     expect(html).toContain("keep the lamp lit until you");
@@ -143,13 +161,18 @@ describe("story board", () => {
     expect(html).not.toMatch(interactive);
     expect(html).toContain("Join code unavailable.");
     expect(html).toContain("Hunters unavailable.");
-    expect(html).toContain("Battery unavailable");
+    expect(html).not.toContain("Battery unavailable");
     expect(html).toContain("Bloodtower");
+    expect(html).toContain("The Table");
     expect(html).toContain("The night is gathering.");
     expect(html).toContain('data-screen="splash"');
     expect(html).not.toContain("data-status-strip");
     expect(html).not.toContain("0%");
     expect(pauseText(null)).toBeNull();
+    const debugSplash = renderToStaticMarkup(
+      createElement(StoryBoard, { state: waitingStoryboard(), debug: true }),
+    );
+    expect(debugSplash).toContain("Battery unavailable");
   });
 
   it("names a disconnected holder and a hunter nobody holds", () => {
@@ -180,7 +203,7 @@ describe("story board", () => {
     expect(pick).toContain('data-screen="pick-story"');
     expect(pick).toContain("Proving ground");
     expect(pick).toContain("1–4 hunters");
-    expect(pick).toContain("data-status-strip");
+    expect(pick).not.toContain("data-status-strip");
 
     const party = renderToStaticMarkup(
       createElement(StoryBoard, {
