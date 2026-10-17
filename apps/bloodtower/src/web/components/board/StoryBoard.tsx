@@ -276,8 +276,13 @@ const BeginPanel = () => (
 
 const PlayPanel = ({ state }: { state: StoryboardState }) => {
   if (state.moment?.id === KEEPER_MOMENT_ID) {
+    const scene = sceneCopy(state.moment);
     return (
-      <article className="bt-page bt-page-keeper bt-ink-in">
+      <article className="bt-page bt-parchment bt-ink-in">
+        <div>
+          <p className="bt-kicker">{scene.kicker}</p>
+          <h2>{scene.title}</h2>
+        </div>
         <KeeperScene />
       </article>
     );

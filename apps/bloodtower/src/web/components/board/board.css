@@ -414,18 +414,6 @@
   flex: 0 0 auto;
 }
 
-.bt-page-keeper {
-  flex: 1 1 0;
-  min-height: 0;
-  padding: 0.25rem;
-}
-
-.bt-page-keeper > div:first-child,
-.bt-page-keeper > .bt-keeper {
-  flex: 1 1 0;
-  min-height: 0;
-}
-
 .bt-page h2 {
   margin: 0.1rem 0 0.45rem;
   font-family: var(--bt-font-title);
@@ -606,7 +594,6 @@
   position: relative;
   flex: 1 1 0;
   min-height: 0;
-  max-height: min(36rem, 52vh);
   overflow: hidden;
 }
 
