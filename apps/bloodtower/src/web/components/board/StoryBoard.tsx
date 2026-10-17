@@ -253,22 +253,13 @@ const PlayPanel = ({ state }: { state: StoryboardState }) => {
   if (state.moment?.id === KEEPER_MOMENT_ID) {
     const scene = sceneCopy(state.moment);
     return (
-      <>
-        <article className="bt-page bt-parchment bt-ink-in">
-          <div>
-            <p className="bt-kicker">{scene.kicker}</p>
-            <h2>{scene.title}</h2>
-          </div>
-          <KeeperScene />
-        </article>
-        <div className="bt-items bt-panel">
-          <span className="bt-lbl">Still</span>
-          <p data-fallback={state.moment.fallbackAudio ?? ""}>
-            Still {state.moment.still ?? "unavailable"}. Fallback{" "}
-            {state.moment.fallbackAudio ?? "unavailable"}.
-          </p>
+      <article className="bt-page bt-parchment bt-ink-in">
+        <div>
+          <p className="bt-kicker">{scene.kicker}</p>
+          <h2>{scene.title}</h2>
         </div>
-      </>
+        <KeeperScene />
+      </article>
     );
   }
   if (!state.moment) {

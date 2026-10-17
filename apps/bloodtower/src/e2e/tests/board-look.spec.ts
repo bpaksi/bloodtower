@@ -77,7 +77,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       board.getByText("Light them if you can. The key is at the bottom. It always is."),
     ).toBeVisible();
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
-    await shot(board, "board-keeper-landscape");
+    await shot(board, "board-keeper-moment-landscape");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await host.close();

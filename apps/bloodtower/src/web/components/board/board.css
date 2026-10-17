@@ -563,7 +563,7 @@
 
 .bt-keeper img {
   max-width: 100%;
-  max-height: min(52vh, 28rem);
+  max-height: min(38vh, 20rem);
   object-fit: contain;
   filter: sepia(0.28) contrast(1.1);
 }
