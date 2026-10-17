@@ -350,6 +350,11 @@
   filter: sepia(0.4) brightness(0.62);
 }
 
+.bt-cart-portrait-frame {
+  display: flex;
+  align-items: center;
+}
+
 .bt-cart-ph {
   display: grid;
   width: 3.25rem;

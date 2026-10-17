@@ -11,6 +11,7 @@ import {
   towerReady,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
+import { PortraitCard } from "../PortraitCard";
 import { deviceControls } from "./controls";
 
 /**
@@ -330,22 +331,27 @@ const PartyJoinDevice = ({
           Take all
         </button>
       ) : null}
-      {roster.map((hunter) => {
-        const mineHunter = held.includes(hunter.id);
-        return (
-          <button
-            key={hunter.id}
-            type="button"
-            className="bt-ghost"
-            disabled={!live}
-            data-action={mineHunter ? "release" : "take"}
-            data-hunter={hunter.id}
-            onClick={() => onHold?.(hunter.id, mineHunter ? "release" : "take")}
-          >
-            {mineHunter ? `${hunter.name}: Mine` : `Claim ${hunter.name}`}
-          </button>
-        );
-      })}
+      <div className="grid grid-cols-2 gap-3">
+        {roster.map((hunter) => {
+          const mineHunter = held.includes(hunter.id);
+          return (
+            <button
+              key={hunter.id}
+              type="button"
+              className="bt-ghost"
+              disabled={!live}
+              data-action={mineHunter ? "release" : "take"}
+              data-hunter={hunter.id}
+              onClick={() => onHold?.(hunter.id, mineHunter ? "release" : "take")}
+            >
+              <PortraitCard
+                name={hunter.name}
+                label={mineHunter ? `${hunter.name}: Mine` : `Claim ${hunter.name}`}
+              />
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 };

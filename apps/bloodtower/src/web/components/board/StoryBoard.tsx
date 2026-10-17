@@ -16,6 +16,7 @@ import {
   towerStripState,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
+import { PortraitCard } from "../PortraitCard";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
 
@@ -82,7 +83,7 @@ export function StoryBoard({
         </p>
       ) : null}
       <div className="bt-board-main">
-        <HunterList hunters={state.hunters} />
+        <HunterList hunters={state.hunters} portraits={state.screen === "party-join"} />
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
@@ -190,7 +191,13 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
   </section>
 );
 
-const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => {
+const HunterList = ({
+  hunters,
+  portraits = false,
+}: {
+  hunters: StoryboardState["hunters"];
+  portraits?: boolean;
+}) => {
   const acting = actingHunterId(hunters);
   return (
     <aside className="bt-hunters">
@@ -202,17 +209,36 @@ const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => {
           {hunters.map((hunter) => {
             const away = hunter.holders.length === 0 || hunter.disconnected;
             const classes = ["bt-cart"];
+            if (portraits) classes.push("bt-cart-portrait");
             if (hunter.id === acting) classes.push("bt-cart-act");
             if (away) classes.push("bt-cart-away");
+            const accessibleLabel = `${hunter.name} — ${holdingText(hunter)}`;
             return (
               <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
-                <span className="bt-cart-ph" aria-hidden="true">
-                  {hunter.name.slice(0, 1)}
-                </span>
-                <span className="bt-cart-copy">
-                  <span className="bt-cart-nm">{hunter.name}</span>
-                  <span className="bt-cart-st">{holdingText(hunter)}</span>
-                </span>
+                {portraits ? (
+                  <>
+                    <PortraitCard
+                      compact
+                      frameOnly
+                      name={hunter.name}
+                      accessibleLabel={accessibleLabel}
+                    />
+                    <span className="bt-cart-copy">
+                      <span className="bt-cart-nm">{hunter.name}</span>
+                      <span className="bt-cart-st">{holdingText(hunter)}</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="bt-cart-ph" aria-hidden="true">
+                      {hunter.name.slice(0, 1)}
+                    </span>
+                    <span className="bt-cart-copy">
+                      <span className="bt-cart-nm">{hunter.name}</span>
+                      <span className="bt-cart-st">{holdingText(hunter)}</span>
+                    </span>
+                  </>
+                )}
               </li>
             );
           })}
