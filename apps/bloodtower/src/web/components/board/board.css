@@ -150,11 +150,21 @@
   gap: 0.15rem;
 }
 
-.bt-zone-copy p {
+.bt-zone-copy p,
+.bt-zone-copy b {
   margin: 0;
+  color: var(--bt-bone);
+  font-family: var(--bt-font-title);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.bt-tower-line {
+  margin: 0;
+  color: var(--bt-parchment-dark);
   font-size: 1.75rem;
   line-height: 1.2;
-  color: var(--bt-bone);
 }
 
 .bt-board-title {
@@ -420,6 +430,7 @@
 
 .bt-items {
   display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.75rem 1.25rem;
@@ -434,6 +445,7 @@
 }
 
 .bt-next {
+  flex-shrink: 0;
   padding: 0.45rem 0.9rem 0.55rem;
   border-top: 1px solid var(--bt-candle);
   border-bottom: 1px solid var(--bt-candle);

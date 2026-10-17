@@ -33,10 +33,8 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
         <div className="bt-zone bt-panel">
           <div className="bt-num">{towerStripState(state.tower)}</div>
           <div className="bt-zone-copy">
-            <span className="bt-lbl">Tower · Battery · Calibration</span>
-            <p>
-              Tower {tower.connection}. Battery {tower.battery}. Calibration {tower.calibration}.
-            </p>
+            <span className="bt-lbl">Tower</span>
+            <b>{tower.connection}</b>
           </div>
         </div>
         <div className="bt-board-title">
@@ -48,6 +46,9 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
           <p className="bt-num">{state.join ? state.join.code : "————"}</p>
         </div>
       </header>
+      <p className="bt-tower-line">
+        Tower {tower.connection}. Battery {tower.battery}. Calibration {tower.calibration}.
+      </p>
       {state.screen !== "splash" ? <StatusStrip state={state} /> : null}
       {paused ? (
         <p className="bt-banner" role="status">

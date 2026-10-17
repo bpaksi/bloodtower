@@ -20,6 +20,13 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
   const contexts: BrowserContext[] = [];
   mkdirSync(ARTIFACTS, { recursive: true });
   const shot = async (page: Page, name: string) => {
+    await page.locator(".bt-ink-in").first().waitFor({ state: "visible" });
+    await page
+      .locator(".bt-ink-in")
+      .first()
+      .evaluate((node) => {
+        for (const animation of node.getAnimations()) animation.finish();
+      });
     const dest = testInfo.outputPath(`${name}.png`);
     await page.screenshot({ path: dest, fullPage: false });
     copyFileSync(dest, `${ARTIFACTS}/${name}.png`);
@@ -53,7 +60,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await d.button("begin").click();
 
     await expect(board.getByText("The proving ground is quiet.")).toBeVisible();
-    await shot(board, "board-proving-ground");
+    await shot(board, "board-proving-ground-landscape");
 
     await d.button("continue").click();
     await expect(board.getByText("Each hunter reads alone.")).toBeVisible();
@@ -61,7 +68,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.getByText("A bell marks the step.")).toBeVisible();
     await d.button("continue").click();
     await expect(board.getByText(/A grey stair climbs into the dark/)).toBeVisible();
-    await shot(board, "board-grey-stair");
+    await shot(board, "board-grey-stair-landscape");
 
     await d.button("continue").click();
     await expect(board.getByText(/At the top, a door/)).toBeVisible();
@@ -70,7 +77,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       board.getByText("Light them if you can. The key is at the bottom. It always is."),
     ).toBeVisible();
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
-    await shot(board, "board-keeper");
+    await shot(board, "board-keeper-landscape");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await host.close();
