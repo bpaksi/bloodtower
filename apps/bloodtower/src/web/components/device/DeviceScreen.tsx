@@ -75,12 +75,7 @@ export function DeviceScreen({
 
       {state.screen === "splash" ? <SplashDevice /> : null}
       {state.screen === "tower-connect" ? (
-        <TowerConnectDevice
-          controls={controls}
-          press={press}
-          promptId={state.prompt?.id ?? null}
-          promptLabel={state.prompt?.label ?? "Next: pick a story"}
-        />
+        <TowerConnectDevice controls={controls} press={press} promptId={state.prompt?.id ?? null} />
       ) : null}
       {state.screen === "pick-story" ? <PickStoryDevice /> : null}
       {state.screen === "party-join" ? (
@@ -137,7 +132,7 @@ export function DeviceScreen({
           {state.prompt?.id.startsWith("continue-") ? state.prompt.label : "Continue"}
         </button>
         {partyReason && !controls.continue ? (
-          <p className="text-lg text-[var(--bt-muted)]">{partyReason}</p>
+          <p className="text-lg text-[var(--bt-muted)]">Disabled: {partyReason}.</p>
         ) : null}
         {state.screen === "play" ? (
           <>
@@ -215,12 +210,10 @@ const TowerConnectDevice = ({
   controls,
   press,
   promptId,
-  promptLabel,
 }: {
   controls: ReturnType<typeof deviceControls>;
   press: (promptId: string | null, action: ControlAction, enabled: boolean) => void;
   promptId: string | null;
-  promptLabel: string;
 }) => {
   const connectPrimary = controls.towerConnect;
   const calibratePrimary = !connectPrimary && controls.towerCalibrate;
@@ -255,7 +248,6 @@ const TowerConnectDevice = ({
       >
         Play without tower
       </button>
-      <p className="text-lg text-[var(--bt-muted)]">{promptLabel}</p>
     </section>
   );
 };

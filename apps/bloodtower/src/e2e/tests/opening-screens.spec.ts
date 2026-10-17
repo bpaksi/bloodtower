@@ -71,7 +71,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await pad.getByRole("link", { name: "Open controls" }).click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
       await expect(pad.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
-      await expect(pad.getByText("Next: pick a story")).toBeVisible();
+      await expect(d.button("continue")).toHaveText("Next: pick a story");
       await expect(pad.locator('[data-primary="true"]')).toHaveCount(1);
       await shot(pad, "device-tower-connect");
       await shot(board, "board-tower-connect-joined");
@@ -89,7 +89,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(pad.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await expect(d.button("continue")).toBeDisabled();
-      await expect(pad.getByText("Claim all hunters first")).toBeVisible();
+      await expect(pad.getByText("Disabled: Claim all hunters first.")).toBeVisible();
       await expect(board.getByText(/0 of 4 hunters claimed|hunters claimed/)).toBeVisible();
       await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
       const join = boardStates(boardFrames).at(-1)?.join as { url: string };
