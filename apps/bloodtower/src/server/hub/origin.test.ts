@@ -39,6 +39,13 @@ describe("isAllowedOrigin", () => {
     expect(isAllowedOrigin("http://localhost:3001", host, dev)).toBe(false);
     expect(isAllowedOrigin("http://localhost:3000.evil.example", host, dev)).toBe(false);
   });
+
+  it("accepts a private LAN origin in dev when allowDevPrivateOrigins is set", () => {
+    const dev = ["http://localhost:3000"];
+    expect(isAllowedOrigin("http://192.168.1.20:3000", host, dev, true)).toBe(true);
+    expect(isAllowedOrigin("http://192.168.1.20:3000", host, dev, false)).toBe(false);
+    expect(isAllowedOrigin("http://8.8.8.8:3000", host, dev, true)).toBe(false);
+  });
 });
 
 describe("parseDevOrigins", () => {

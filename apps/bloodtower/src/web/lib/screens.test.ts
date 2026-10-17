@@ -98,9 +98,9 @@ describe("opening screen copy", () => {
 
   it("counts claimed hunters and unique joined devices", () => {
     const hunters = [
-      { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: false },
-      { id: "beta", name: "Beta", holders: ["device-1"], disconnected: false },
-      { id: "gamma", name: "Gamma", holders: [], disconnected: false },
+      { id: "alpha", name: "Agnes", holders: ["device-1"], disconnected: false },
+      { id: "beta", name: "Tomas", holders: ["device-1"], disconnected: false },
+      { id: "gamma", name: "Wren", holders: [], disconnected: false },
     ];
     expect(claimedCount(hunters)).toBe(2);
     expect(joinedDeviceIds(hunters)).toEqual(["device-1"]);
@@ -108,11 +108,11 @@ describe("opening screen copy", () => {
       partyJoinNextReason(
         ["gamma"],
         new Map([
-          ["alpha", "Alpha"],
-          ["gamma", "Gamma"],
+          ["alpha", "Agnes"],
+          ["gamma", "Wren"],
         ]),
       ),
-    ).toBe("Claim Gamma first");
+    ).toBe("Claim Wren first");
     expect(partyJoinNextReason([], new Map())).toBeNull();
   });
 });

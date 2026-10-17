@@ -26,10 +26,10 @@ const playing = (): DeviceState =>
     views: [
       {
         hunter: "alpha",
-        name: "Alpha",
+        name: "Agnes",
         privateMoment: {
           momentId: "proving-ground.02.private.alpha",
-          text: "Only Alpha hears this.",
+          text: "Only Agnes hears this.",
           still: null,
         },
       },
@@ -146,8 +146,8 @@ describe("device screens", () => {
         tower: tower("disconnected"),
       }),
     );
-    expect(device).toContain("Only Alpha hears this.");
-    expect(device).toContain("Alpha:");
+    expect(device).toContain("Only Agnes hears this.");
+    expect(device).toContain("Agnes:");
     expect(device).toContain("Continue");
     expect(device).toContain("Menu");
     expect(device).toContain("bt-menu");
@@ -155,14 +155,14 @@ describe("device screens", () => {
     expect(device).not.toContain("Calibrate");
     expect(device).toContain('data-screen="play"');
     expect(device).toContain('data-layout="ipad"');
-    expect(device).not.toContain("Only Delta hears this.");
+    expect(device).not.toContain("Only Emeric hears this.");
 
     const join = renderToStaticMarkup(createElement(JoinScreen, { live: true, code: "048213" }));
     expect(join).toContain("048213");
     expect(join).toContain("Game is loading...");
-    expect(join).not.toContain("Hold Beta");
+    expect(join).not.toContain("Hold Tomas");
     expect(join).not.toContain("Open controls");
-    expect(join).not.toContain("Only Alpha hears this.");
+    expect(join).not.toContain("Only Agnes hears this.");
     expect(join).not.toContain("Device token");
     expect(join).not.toContain("Use the full layout");
     expect(join).toContain('data-layout="ipad"');
@@ -180,7 +180,7 @@ describe("device screens", () => {
           views: [
             {
               hunter: "alpha",
-              name: "Alpha",
+              name: "Agnes",
               privateMoment: {
                 momentId: "proving-ground.02.private.alpha",
                 text: "Go on. [pause 0.5] I'll wait.",
@@ -198,7 +198,7 @@ describe("device screens", () => {
         tower: tower("disconnected"),
       }),
     );
-    expect(device).toContain("Alpha: Go on. I&#x27;ll wait.");
+    expect(device).toContain("Agnes: Go on. I&#x27;ll wait.");
     expect(device).not.toContain("[pause");
   });
 
@@ -220,7 +220,7 @@ describe("device screens", () => {
     expect(join).toContain('data-layout="ipad"');
     expect(join).not.toContain("Use the full layout");
     expect(join).toContain("Game is loading...");
-    expect(join).not.toContain("Hold Alpha");
+    expect(join).not.toContain("Hold Agnes");
 
     const device = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -235,17 +235,24 @@ describe("device screens", () => {
     );
     expect(device).toContain('data-layout="ipad"');
     expect(device).not.toContain("Use the full layout");
-    expect(device).toContain("Only Alpha hears this.");
+    expect(device).toContain("Only Agnes hears this.");
   });
 
-  it("says the session host is unavailable and shows no fake hunters", () => {
+  it("shows the join form without a host error when no code is present", () => {
     const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: null }));
-    expect(join).toContain("Session host unavailable.");
-    expect(join).toContain("Join code unavailable.");
-    expect(join).toContain("Rejoin");
+    expect(join).not.toContain("Session host unavailable.");
+    expect(join).toContain("Join code");
+    expect(join).toContain("Enter the table");
+    expect(join).toContain("Rejoin token");
     expect(join).not.toContain("Hunters unavailable.");
     expect(join).not.toContain("Device token");
-    expect(join).toContain('disabled="" name="token"');
+  });
+
+  it("says the session host is unavailable while waiting with a join code", () => {
+    const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: "123456" }));
+    expect(join).toContain("Session host unavailable.");
+    expect(join).toContain("123456");
+    expect(join).not.toContain("Join code");
   });
 
   it("renders each opening screen with one primary action and no phone layout", () => {
@@ -334,21 +341,21 @@ describe("device screens", () => {
         state: deviceStatePayloadSchema.parse({
           screen: "party-join",
           heldHunters: ["alpha"],
-          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          views: [{ hunter: "alpha", name: "Agnes", privateMoment: null }],
           prompt: null,
           lock: null,
           won: null,
           roster: [
-            { id: "alpha", name: "Alpha" },
-            { id: "beta", name: "Beta" },
+            { id: "alpha", name: "Agnes" },
+            { id: "beta", name: "Tomas" },
           ],
         }),
       }),
     );
     expect(party).toContain("Take all");
     expect(party).toContain("Claim all hunters first");
-    expect(party).toContain("Alpha: Mine");
-    expect(party).toContain("Claim Beta");
+    expect(party).toContain("Agnes: Mine");
+    expect(party).toContain("Claim Tomas");
     expect(party).toContain('data-action="continue"');
   });
 
@@ -410,7 +417,7 @@ describe("device screens", () => {
           screen: "play",
           quitPromptId: "quit",
           heldHunters: ["alpha"],
-          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          views: [{ hunter: "alpha", name: "Agnes", privateMoment: null }],
           prompt: { id: "pick-6", label: "Oil the hinge, or force it." },
           pick: {
             momentId: "grey-stair.door-choice",
@@ -439,7 +446,7 @@ describe("device screens", () => {
         onRejoin: () => undefined,
       }),
     );
-    expect(join).toContain("Session host unavailable.");
+    expect(join).not.toContain("Session host unavailable.");
     expect(join).toContain('name="token"');
     expect(join).not.toContain('disabled="" name="token"');
   });

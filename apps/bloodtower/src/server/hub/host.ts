@@ -18,7 +18,9 @@ import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
 import { joinHost } from "../lanUrls.ts";
+import type { PackAssetIndex } from "../pack/assets.ts";
 import { formatLoadIssues, loadStories } from "../pack/load.ts";
+import { tryServePackAssets } from "../pack/serve.ts";
 import { requestPath, serveStatic } from "../server.ts";
 import { createSession, type SessionEngine } from "../session/engine.ts";
 import { type Clock, systemClock } from "../timing/clock.ts";
@@ -40,6 +42,8 @@ export interface SessionHostOptions {
   databasePath: string;
   tower: TowerPort;
   devOrigins?: readonly string[];
+  /** When set, join URLs use this HTTP port (for example `next dev` on 3000) while `/ws` stays on `port`. */
+  joinPagePort?: number;
   /** Six digits. Omitted, a code is chosen for this process. */
   joinCode?: string;
   clock?: Clock;
@@ -97,6 +101,14 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     }
   }
   const pack = first.pack;
+  const packAssetCatalogs: PackAssetIndex[] = stories
+    .map((entry) => entry.assets)
+    .filter((catalog): catalog is PackAssetIndex => catalog !== null);
+  for (const catalog of packAssetCatalogs) {
+    if (catalog.warnings.length > 0) {
+      console.warn(formatLoadIssues(catalog.warnings).join("\n"));
+    }
+  }
   const joinCode =
     options.joinCode ?? String(randomBytes(3).readUIntBE(0, 3) % 1_000_000).padStart(6, "0");
   const clock = options.clock ?? systemClock();
@@ -104,6 +116,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const store = createSessionStore(opened.db);
   const sessionId = `session-${randomBytes(8).toString("hex")}`;
   const devOrigins = options.devOrigins ?? [];
+  const allowDevPrivateOrigins = devOrigins.length > 0;
+  const joinPagePort = options.joinPagePort;
   const tower = options.tower;
   const lanHost = options.lanHost ?? (() => joinHost(options.host));
   let engine: SessionEngine;
@@ -138,8 +152,9 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const joinAt = (): { url: string; reachable: boolean } => {
     const host = lanHost();
+    const pagePort = joinPagePort ?? boundPort;
     return {
-      url: `http://${host ?? "127.0.0.1"}:${boundPort}/join?code=${joinCode}`,
+      url: `http://${host ?? "127.0.0.1"}:${pagePort}/join?code=${joinCode}`,
       reachable: host !== undefined,
     };
   };
@@ -510,7 +525,10 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   const http = createServer((req, res) => {
-    void serveStatic(options.webRoot, req, res).catch(() => {
+    void (async () => {
+      if (await tryServePackAssets(packAssetCatalogs, req, res)) return;
+      return serveStatic(options.webRoot, req, res);
+    })().catch(() => {
       if (!res.headersSent) {
         res.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
         res.end("Internal error.\n");
@@ -547,7 +565,14 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       fail("404 Not Found");
       return;
     }
-    if (!isAllowedOrigin(header(req.headers.origin), header(req.headers.host), devOrigins)) {
+    if (
+      !isAllowedOrigin(
+        header(req.headers.origin),
+        header(req.headers.host),
+        devOrigins,
+        allowDevPrivateOrigins,
+      )
+    ) {
       fail("403 Forbidden");
       return;
     }

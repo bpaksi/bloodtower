@@ -5,9 +5,16 @@ import {
   type Pack,
   packIssues,
   packSchema,
+  STORY_ID_MAX,
   type StoryCard,
 } from "bloodtower-protocols";
 import { parse as parseYaml } from "yaml";
+import {
+  indexPackAssets,
+  PACK_ASSETS_DIR,
+  type PackAssetIndex,
+  validateAssetsFolder,
+} from "./assets.ts";
 
 /**
  * Reads one pack folder (YAML or JSON) into the frozen pack schema.
@@ -50,7 +57,9 @@ export interface PackLoadIssue {
   message: string;
 }
 
-export type PackLoadResult = { ok: true; pack: Pack } | { ok: false; issues: PackLoadIssue[] };
+export type PackLoadResult =
+  | { ok: true; pack: Pack; assets: PackAssetIndex }
+  | { ok: false; issues: PackLoadIssue[] };
 
 const issue = (file: string, path: string, rule: string, message: string): PackLoadIssue => ({
   rule,
@@ -147,6 +156,10 @@ export const loadPackDir = (dir: string): PackLoadResult => {
 
   for (const name of names.sort()) {
     if (name === "README.md") continue;
+    if (name === PACK_ASSETS_DIR) {
+      validateAssetsFolder(root, (item) => issues.push(item));
+      continue;
+    }
     const dot = name.lastIndexOf(".");
     const stem = dot > 0 ? name.slice(0, dot) : name;
     const ext = dot > 0 ? name.slice(dot) : "";
@@ -221,7 +234,8 @@ export const loadPackDir = (dir: string): PackLoadResult => {
       }),
     };
   }
-  return { ok: true, pack: parsed.data };
+  const assets = indexPackAssets(root, parsed.data);
+  return { ok: true, pack: parsed.data, assets };
 };
 
 /** R1 loads the test pack only. `packsDir` is the packs root, not the test folder itself. */
@@ -232,6 +246,8 @@ export interface StoryEntry {
   card: StoryCard;
   pack: Pack | null;
   issues: PackLoadIssue[];
+  /** Resolved asset index when the pack folder parsed; null when load failed. */
+  assets: PackAssetIndex | null;
 }
 
 /**
@@ -239,6 +255,7 @@ export interface StoryEntry {
  * to play, stays in the list as a card that cannot be chosen (R2 §3.3). The card never carries
  * the lint messages; they stay on the server. A folder with no `pack.*` manifest is work in
  * progress, not a story, and neither is a plain file or a folder whose name is not a valid id.
+ * A valid id longer than `STORY_ID_MAX` is a greyed card too: its Choose prompt id would not fit.
  */
 export const loadStories = (packsDir: string): StoryEntry[] => {
   let names: string[];
@@ -260,6 +277,16 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
     .filter((name) => optionIdSchema.safeParse(name).success && hasManifest(name))
     .sort()
     .map((id): StoryEntry => {
+      if (id.length > STORY_ID_MAX) {
+        return {
+          card: { id, title: id, blurb: null, players: null, loadable: false },
+          pack: null,
+          issues: [
+            issue(id, "(folder)", "V-1", `The folder name is over ${STORY_ID_MAX} characters.`),
+          ],
+          assets: null,
+        };
+      }
       const loaded = loadPackDir(join(packsDir, id));
       if (loaded.ok && loaded.pack.nights[0]?.phases[0]) {
         const { pack } = loaded;
@@ -273,6 +300,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
           },
           pack,
           issues: [],
+          assets: loaded.assets,
         };
       }
       const issues = loaded.ok
@@ -282,6 +310,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
         card: { id, title: id, blurb: null, players: null, loadable: false },
         pack: null,
         issues,
+        assets: loaded.ok ? loaded.assets : null,
       };
     });
 };

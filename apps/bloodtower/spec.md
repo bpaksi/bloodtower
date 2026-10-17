@@ -45,7 +45,7 @@ Four packages under `apps/bloodtower/src/`, orchestrated by `apps/bloodtower/pac
 
 The host serves the static export, `GET /health`, and `/ws`. It scans `packsDir` for story folders (D25), binds the session to the first pack that loads, and listens once the socket host and that binding are ready. It opens SQLite at `session.sqlite` in the data folder. It does not import `ultimatedarktower` or `@stoprocent/noble`. The hub imports `ws`. The tower library packages stay pinned from step 1; this step does not change a version.
 
-The tower port is the mock unless `TOWER_URL` is set, in which case it is a client of that tower-poc socket. Nothing connects, calibrates or reconnects until a joined device wins that press. `DIAG_LOG` is passed through to the sidecar when it is set. `DEV_ORIGINS` lists extra page origins for `next dev`, exact match only.
+The tower port is the mock unless `TOWER_URL` is set, in which case it is a client of that tower-poc socket. Nothing connects, calibrates or reconnects until a joined device wins that press. `DIAG_LOG` is passed through to the sidecar when it is set. `pnpm dev` sets `DEV_ORIGINS` to the `next dev` page origins on port 3000 and `DEV_PAGE_PORT=3000` so the board QR and startup log use that port while the socket stays on 4787. Listed `DEV_ORIGINS` are an exact match for `/ws`; when any are set, private-range LAN page origins are also accepted. `next.config.ts` lists private hostnames in `allowedDevOrigins` so HMR from an iPad on the LAN is not blocked.
 
 SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. `control_presses` has `screen` and `next_screen` from the R2 flow state (migration steps 6 and 7). They are null on presses recorded before it. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`. Hub tests use a temporary file. Other tests still use `:memory:`.
 
@@ -101,6 +101,8 @@ Rules the schema enforces, with the id in the issue message (`packIssues` maps a
 | V-20 | The word `random`, or a `seed(...)` call that does not name a table id. The kingdom value `seed` is the format's seeded-order keyword and is allowed. |
 
 `stats.timing.marks` is the literal `auto`. A pack does not author timing rows.
+
+The loader adds folder rules on top of the schema (same `V-1` id in issues). A pack folder holds `pack.yaml` or split YAML/JSON stems, optional `README.md`, and optionally exactly one subfolder `assets/`. That folder holds only image files (`.png`, `.jpg`, `.jpeg`, `.webp`) with no nested folders. Any other top-level entry is refused. Missing image files for declared still and portrait assets are `W-asset` warnings; the pack still loads.
 
 ## 5. Timing rows
 

@@ -11,8 +11,8 @@ const state = (): StoryboardState =>
     screen: "play",
     stage: "paused",
     hunters: [
-      { id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: false },
-      { id: "beta", name: "Beta", holders: [], disconnected: false },
+      { id: "alpha", name: "Agnes", holders: ["device-1"], disconnected: false },
+      { id: "beta", name: "Tomas", holders: [], disconnected: false },
     ],
     join: { code: "048213", url: "http://127.0.0.1:4787/join?code=048213", reachable: false },
     prompt: { id: "continue-0", label: "Continue" },
@@ -44,8 +44,8 @@ describe("story board", () => {
     const html = renderToStaticMarkup(createElement(StoryBoard, { state: state() }));
     expect(html).not.toMatch(interactive);
     expect(html).toContain("048213");
-    expect(html).toContain("Alpha");
-    expect(html).toContain("Beta");
+    expect(html).toContain("Agnes");
+    expect(html).toContain("Tomas");
     expect(html).toContain("Continue");
     expect(html).toContain("The proving ground is quiet.");
     expect(html).toContain("The Proving Ground");
@@ -53,15 +53,17 @@ describe("story board", () => {
     expect(html).not.toContain("Story board");
     expect(html).toContain('data-fallback="sfx.bell"');
     expect(html).toContain('data-still="fx.hall"');
+    expect(html).toContain("/packs/test/asset/fx.hall");
+    expect(html).toContain('data-moment-caption=""');
     expect(html).not.toContain("Still fx.hall");
     expect(html).not.toContain("Fallback sfx.bell");
     expect(html).toContain('data-board-layout="standard"');
-    expect(html).toContain("Waiting for someone to hold Alpha.");
+    expect(html).toContain("Waiting for someone to hold Agnes.");
     expect(html).toContain("device-1");
     expect(html).toContain("waiting");
-    expect(html).not.toContain("Alpha — device-1");
-    expect(html).not.toContain("Beta — waiting");
-    expect(html).not.toContain("Alpha —");
+    expect(html).not.toContain("Agnes — device-1");
+    expect(html).not.toContain("Tomas — waiting");
+    expect(html).not.toContain("Agnes —");
     expect(html).toContain("iPads can&#x27;t reach this address.");
     expect(html).not.toContain("Battery 0%");
     expect(html).not.toContain("Calibration unavailable");
@@ -187,13 +189,13 @@ describe("story board", () => {
 
   it("names a disconnected holder and a hunter nobody holds", () => {
     expect(
-      holdingText({ id: "alpha", name: "Alpha", holders: ["device-1"], disconnected: true }),
+      holdingText({ id: "alpha", name: "Agnes", holders: ["device-1"], disconnected: true }),
     ).toBe("disconnected (device-1)");
-    expect(holdingText({ id: "beta", name: "Beta", holders: [], disconnected: false })).toBe(
+    expect(holdingText({ id: "beta", name: "Tomas", holders: [], disconnected: false })).toBe(
       "waiting",
     );
     expect(
-      holdingText({ id: "gamma", name: "Gamma", holders: ["device-2"], disconnected: false }),
+      holdingText({ id: "gamma", name: "Wren", holders: ["device-2"], disconnected: false }),
     ).toBe("device-2");
   });
 
@@ -259,7 +261,7 @@ describe("story board", () => {
     );
     expect(party).toContain("1 of 2 hunters claimed");
     expect(party).toContain("http://192.168.1.20:4787/join?code=048213");
-    expect(party).toContain("Claim Beta first");
+    expect(party).toContain("Claim Tomas first");
     expect(party).not.toMatch(interactive);
   });
 
