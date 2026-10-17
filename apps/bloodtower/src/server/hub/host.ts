@@ -40,6 +40,8 @@ export interface SessionHostOptions {
   databasePath: string;
   tower: TowerPort;
   devOrigins?: readonly string[];
+  /** When set, join URLs use this HTTP port (for example `next dev` on 3000) while `/ws` stays on `port`. */
+  joinPagePort?: number;
   /** Six digits. Omitted, a code is chosen for this process. */
   joinCode?: string;
   clock?: Clock;
@@ -104,6 +106,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const store = createSessionStore(opened.db);
   const sessionId = `session-${randomBytes(8).toString("hex")}`;
   const devOrigins = options.devOrigins ?? [];
+  const allowDevPrivateOrigins = devOrigins.length > 0;
+  const joinPagePort = options.joinPagePort;
   const tower = options.tower;
   const lanHost = options.lanHost ?? (() => joinHost(options.host));
   let engine: SessionEngine;
@@ -138,8 +142,9 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const joinAt = (): { url: string; reachable: boolean } => {
     const host = lanHost();
+    const pagePort = joinPagePort ?? boundPort;
     return {
-      url: `http://${host ?? "127.0.0.1"}:${boundPort}/join?code=${joinCode}`,
+      url: `http://${host ?? "127.0.0.1"}:${pagePort}/join?code=${joinCode}`,
       reachable: host !== undefined,
     };
   };
@@ -546,7 +551,14 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       fail("404 Not Found");
       return;
     }
-    if (!isAllowedOrigin(header(req.headers.origin), header(req.headers.host), devOrigins)) {
+    if (
+      !isAllowedOrigin(
+        header(req.headers.origin),
+        header(req.headers.host),
+        devOrigins,
+        allowDevPrivateOrigins,
+      )
+    ) {
       fail("403 Forbidden");
       return;
     }

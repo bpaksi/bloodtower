@@ -1,0 +1,109 @@
+/* Bloodtower game-look tokens. Source: docs/art-direction/tokens.css */
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/CormorantGaramond-VF.ttf") format("truetype");
+  font-weight: 300 700;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/CormorantGaramond-Italic-VF.ttf") format("truetype");
+  font-weight: 300 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Cormorant SC";
+  src: url("/fonts/CormorantSC-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "IM Fell English SC";
+  src: url("/fonts/IMFeENsc28P.ttf") format("truetype");
+}
+@font-face {
+  font-family: "IM Fell English";
+  src: url("/fonts/IMFeENrm28P.ttf") format("truetype");
+}
+@font-face {
+  font-family: "UnifrakturMaguntia";
+  src: url("/fonts/UnifrakturMaguntia-Book.ttf") format("truetype");
+}
+
+:root {
+  --bt-void: #0b0806;
+  --bt-soot: #1a1310;
+  --bt-umber: #3b2a1e;
+  --bt-iron-gall: #2a1d14;
+  --bt-parchment: #e9d9b4;
+  --bt-parchment-dark: #c9b182;
+  --bt-vellum-shadow: #8a6f47;
+  --bt-candle: #f5c451;
+  --bt-flame: #e8892b;
+  --bt-blood: #8e1b1b;
+  --bt-verdigris: #4f7a6a;
+  --bt-bone: #f3ead2;
+  --bt-font-body: "Cormorant Garamond", "IM Fell English", Georgia, serif;
+  --bt-font-label: "IM Fell English SC", "Cormorant SC", serif;
+  --bt-font-title: "Cormorant SC", "IM Fell English SC", serif;
+  --bt-font-initial: "UnifrakturMaguntia", "Cormorant SC", serif;
+  --bt-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .16 0 0 0 0 .11 0 0 0 0 .07 0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --bt-foxing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .12 0 0 0 .55 -.18'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+  --bt-ease-ink: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --bt-dur-ink: 900ms;
+}
+
+@keyframes bt-candle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.86;
+  }
+  23% {
+    opacity: 0.97;
+  }
+  41% {
+    opacity: 0.9;
+  }
+  67% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.93;
+  }
+}
+
+@keyframes bt-ink-in {
+  from {
+    opacity: 0;
+    filter: blur(6px) contrast(2.2) brightness(1.6);
+    clip-path: inset(0 100% 0 0);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(1px) contrast(1.4);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.bt-flicker {
+  animation: bt-candle 3.7s steps(1, end) infinite;
+}
+
+.bt-ink-in {
+  animation: bt-ink-in var(--bt-dur-ink) var(--bt-ease-ink) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-flicker {
+    animation: none;
+  }
+  .bt-ink-in {
+    animation: none;
+    opacity: 1;
+  }
+}

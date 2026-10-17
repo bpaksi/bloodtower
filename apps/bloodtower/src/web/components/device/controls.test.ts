@@ -238,14 +238,21 @@ describe("device screens", () => {
     expect(device).toContain("Only Alpha hears this.");
   });
 
-  it("says the session host is unavailable and shows no fake hunters", () => {
+  it("shows the join form without a host error when no code is present", () => {
     const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: null }));
-    expect(join).toContain("Session host unavailable.");
-    expect(join).toContain("Join code unavailable.");
-    expect(join).toContain("Rejoin");
+    expect(join).not.toContain("Session host unavailable.");
+    expect(join).toContain("Join code");
+    expect(join).toContain("Enter the table");
+    expect(join).toContain("Rejoin token");
     expect(join).not.toContain("Hunters unavailable.");
     expect(join).not.toContain("Device token");
-    expect(join).toContain('disabled="" name="token"');
+  });
+
+  it("says the session host is unavailable while waiting with a join code", () => {
+    const join = renderToStaticMarkup(createElement(JoinScreen, { live: false, code: "123456" }));
+    expect(join).toContain("Session host unavailable.");
+    expect(join).toContain("123456");
+    expect(join).not.toContain("Join code");
   });
 
   it("renders each opening screen with one primary action and no phone layout", () => {
@@ -439,7 +446,7 @@ describe("device screens", () => {
         onRejoin: () => undefined,
       }),
     );
-    expect(join).toContain("Session host unavailable.");
+    expect(join).not.toContain("Session host unavailable.");
     expect(join).toContain('name="token"');
     expect(join).not.toContain('disabled="" name="token"');
   });
