@@ -185,6 +185,14 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 - The R2-01 status strip (tower / devices / step) is on every board screen after splash, including `calibrating`. Pre-play steps keep the existing `continue-<screen>` and `begin` prompts.
 - Tower Connect has one primary: Connect, then Calibrate, then Next. Play without tower is the secondary skip until the tower is ready. Play keeps `KeeperScene` for `grey-stair.03` (D21). Opening screens are D22.
 
+### R2 Pick Story (branch `feat/story-pick-wizard`)
+
+- Replaces the one hard-coded Pick Story card (`TABLE_STORY`) with the stories on disk. See spec D25. Behavior only: board and iPad markup keep their existing classes, because #53 restyles the panels. The title page (`app/page.tsx`) and `/join` are not touched.
+- Protocol: `stories` on `storyboardState` and `deviceState`, and the `focus-story` client message. The Choose prompt id becomes `continue-pick-story-<story id>` (it was `continue-pick-story`). `loadR1Pack` stays; the host and the CLI lint use it differently (the host now loads every story).
+- A folder with no `pack.*` manifest is not a story, so `packs/dracula` (an unconverted script) does not show up as a greyed door.
+- The repo holds one playable pack (`test`), so Pick Story shows one preselected door. Choosing between two real stories is covered by `engine.test.ts`, `host.test.ts` and `controls.test.ts` with generated packs, not by a browser e2e.
+- Not in this change: saved-game cards (R2-41), the theme switch on choose (R2-40), Back to Tower Connect, and the wizard steps after Party Join.
+
 ### R2 flow state (branch `feat/r2-flow-state`)
 
 - A deviation from the frozen contract (spec §3, D20). The R2 requirements (`research/game-design/r2-screen-flow.md`, R2-03 and R2-04) need a server-held flow screen, and the first press wins for each step. Splash, Tower Connect, Pick Story, Party Join and Begin are steps before play. The protocol gains: the `screen` on `storyboardState` and `deviceState`, the `quitPromptId` on `deviceState`, the `quit` control action, `stage: "ended"`, and the `screen` and `nextScreen` on each press.

@@ -4,12 +4,14 @@ import { displayCaption } from "../../lib/caption.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
+  currentStory,
   FORTUNE_LINE,
+  focusedStory,
   joinedDeviceIds,
   partyJoinNextReason,
+  playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
-  TABLE_STORY,
   towerStripState,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
@@ -162,18 +164,39 @@ const TowerConnectPanel = ({ state }: { state: StoryboardState }) => (
   </>
 );
 
-const PickStoryPanel = ({ state }: { state: StoryboardState }) => (
-  <>
-    <article className="bt-card max-w-2xl space-y-3">
-      <p className="bt-kicker">The door</p>
-      <h2 className="text-5xl">{TABLE_STORY.title}</h2>
-      <p className="text-2xl leading-relaxed">{TABLE_STORY.blurb}</p>
-      <p className="text-xl text-[var(--bt-muted)]">{TABLE_STORY.players}</p>
-      <p className="text-3xl">{SCREEN_NEXT["pick-story"]}</p>
-    </article>
-    <JoinBlock join={state.join} />
-  </>
-);
+const PickStoryPanel = ({ state }: { state: StoryboardState }) => {
+  const focus = focusedStory(state.stories);
+  const players = focus ? playersText(focus.players) : null;
+  return (
+    <>
+      <article className="bt-card max-w-2xl space-y-3" data-story={focus?.id}>
+        <p className="bt-kicker">The door</p>
+        <h2 className="text-5xl">{focus ? focus.title : "Stories unavailable."}</h2>
+        {focus?.blurb ? <p className="text-2xl leading-relaxed">{focus.blurb}</p> : null}
+        {players ? <p className="text-xl text-[var(--bt-muted)]">{players}</p> : null}
+        {focus && !focus.loadable ? <p className="text-2xl">Can't load</p> : null}
+        <p className="text-3xl">{SCREEN_NEXT["pick-story"]}</p>
+      </article>
+      {state.stories && state.stories.cards.length > 1 ? (
+        <ul className="flex flex-wrap gap-3 text-xl" aria-label="Stories">
+          {state.stories.cards.map((card) => (
+            <li
+              key={card.id}
+              data-story-door={card.id}
+              aria-current={card.id === state.stories?.focus ? "true" : undefined}
+              className={card.loadable ? undefined : "text-[var(--bt-muted)]"}
+            >
+              {card.id === state.stories?.focus ? "› " : ""}
+              {card.title}
+              {card.loadable ? "" : " (can't load)"}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <JoinBlock join={state.join} />
+    </>
+  );
+};
 
 const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
   const claimed = claimedCount(state.hunters);
@@ -200,7 +223,7 @@ const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
 const BeginPanel = ({ state }: { state: StoryboardState }) => (
   <>
     <article className="bt-card space-y-3 text-2xl">
-      <p className="bt-kicker">{TABLE_STORY.title}</p>
+      <p className="bt-kicker">{currentStory(state.stories)?.title ?? "The story"}</p>
       <p>The table is set. Any iPad can begin.</p>
       <p className="text-[var(--bt-muted)]">{SCREEN_NEXT.begin}</p>
     </article>

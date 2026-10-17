@@ -380,7 +380,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
         screen: "tower-connect",
         nextScreen: "pick-story",
       });
-      expect(won("continue-pick-story")).toMatchObject({
+      expect(won("continue-pick-story-test")).toMatchObject({
         winner: true,
         screen: "pick-story",
         nextScreen: "party-join",
@@ -397,7 +397,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "tower-calibrate:true",
         "tower-calibrate:false",
         "continue-tower-connect:true",
-        "continue-pick-story:true",
+        "continue-pick-story-test:true",
         "continue-party-join:true",
         "begin:true",
         "continue-0:true",
