@@ -398,7 +398,7 @@ const PlayPanel = ({
       {still ? (
         <div className="bt-still">
           {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
-          <img alt="" data-still={still} src={packStillImageUrl(still)} />
+          <img alt="" data-still={still} src={packStillImageUrl(still, state.packId)} />
         </div>
       ) : null}
     </article>
