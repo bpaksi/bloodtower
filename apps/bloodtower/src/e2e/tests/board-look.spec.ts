@@ -43,13 +43,11 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
   const contexts: BrowserContext[] = [];
   mkdirSync(ARTIFACTS, { recursive: true });
   const shot = async (page: Page, name: string) => {
-    await page.locator(".bt-ink-in").first().waitFor({ state: "visible" });
-    await page
-      .locator(".bt-ink-in")
-      .first()
-      .evaluate((node) => {
-        for (const animation of node.getAnimations()) animation.finish();
-      });
+    const frame = page.locator(".bt-ink-in, [data-keeper-stage]").first();
+    await frame.waitFor({ state: "visible" });
+    await frame.evaluate((node) => {
+      for (const animation of node.getAnimations()) animation.finish();
+    });
     const dest = testInfo.outputPath(`${name}.png`);
     await page.screenshot({ path: dest, fullPage: false });
     copyFileSync(dest, `${ARTIFACTS}/${name}.png`);
@@ -128,9 +126,11 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1")).toContainText("The Keeper");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
+    await board.evaluate(() => {
+      for (const audio of document.querySelectorAll("audio")) audio.pause();
+    });
     await assertBoardFits(board, { keeper: true });
     await shot(board, "board-keeper-moment-landscape");
-
     await board.setViewportSize({ width: 1024, height: 594 });
     await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.03");
     await assertBoardFits(board, { keeper: true });

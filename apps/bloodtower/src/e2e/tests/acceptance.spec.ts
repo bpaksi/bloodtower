@@ -336,7 +336,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       // The last line is done, so the door choice comes up: one button per option, on the iPad.
       // The board shows the prompt twice (the prompt line and the moment), so match the moment.
       await expect(
-        board.locator("section > p", { hasText: "Oil the hinge, or force it." }),
+        board.locator(".bt-narration", { hasText: "Oil the hinge, or force it." }),
       ).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();
       await expect(a.button("pick")).toHaveCount(2);
