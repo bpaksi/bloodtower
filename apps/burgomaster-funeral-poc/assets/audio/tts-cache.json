@@ -39,6 +39,22 @@
     "style": "calm, dry, quietly stern",
     "voice": "Kore"
   },
+  "4713e9e904f78ce8c557e91d381ff1a9a014898d2f0d2879194495d68b9ae363": {
+    "file": "enc-wine-for-no-one.01~no-tomas.vo-02.agnes.wav",
+    "generated_at": "2026-10-17T01:27:32.478250+00:00",
+    "hash": "4713e9e904f78ce8c557e91d381ff1a9a014898d2f0d2879194495d68b9ae363",
+    "speaker": "agnes",
+    "style": "calm, dry, quietly stern",
+    "voice": "Kore"
+  },
+  "500316baa911cc363c2899be94c9f27b6f9bb515c5932d997124ac77321f1634": {
+    "file": "enc-wine-for-no-one.01.vo-01.marta.wav",
+    "generated_at": "2026-10-17T01:27:32.478250+00:00",
+    "hash": "500316baa911cc363c2899be94c9f27b6f9bb515c5932d997124ac77321f1634",
+    "speaker": "marta",
+    "style": "soft, frightened, loving; still human",
+    "voice": "Aoede"
+  },
   "5865c6c747bf1c7448ab1e94ca20faae6d8979269f18dd80113de27ea0ad9cd5": {
     "file": "n2-burgomasters-funeral.end.private.agnes.vo-01.agnes.wav",
     "generated_at": "2026-10-16T07:54:37.540453+00:00",
@@ -62,6 +78,22 @@
     "speaker": "tomas",
     "style": "gruff, low, unhurried. thought",
     "voice": "Algenib"
+  },
+  "938abc08b08042880df4f96eeeb006f90f68ca265a2a0c8aea4bc5d7254d79ed": {
+    "file": "enc-wine-for-no-one.01.vo-02.tomas.wav",
+    "generated_at": "2026-10-17T01:27:32.478250+00:00",
+    "hash": "938abc08b08042880df4f96eeeb006f90f68ca265a2a0c8aea4bc5d7254d79ed",
+    "speaker": "tomas",
+    "style": "gruff, low, unhurried",
+    "voice": "Algenib"
+  },
+  "df6329dfdc6f2238db898c99365291baea6ada0b5c6eaa0f12aeb1aef60b458c": {
+    "file": "enc-wine-for-no-one.01~no-tomas.vo-01.marta.wav",
+    "generated_at": "2026-10-17T01:27:32.478250+00:00",
+    "hash": "df6329dfdc6f2238db898c99365291baea6ada0b5c6eaa0f12aeb1aef60b458c",
+    "speaker": "marta",
+    "style": "soft, frightened, loving; still human",
+    "voice": "Aoede"
   },
   "f8a517667609fe9e41400db77ca836fc90f38c77d7e7bce4e9150f4b2fb4f0d4": {
     "file": "n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav",
