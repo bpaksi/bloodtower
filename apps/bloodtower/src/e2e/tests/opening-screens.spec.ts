@@ -1,7 +1,11 @@
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { captureFrames, startAcceptanceHost } from "./support/acceptance.ts";
+import {
+  captureFrames,
+  startAcceptanceHost,
+  waitForBoardAnimationsSettled,
+} from "./support/acceptance.ts";
 
 // SCREENSHOT_DIR for cloud/walkthrough copies; otherwise a gitignored repo path
 // (covered by root `test-results/`). `/opt/cursor/artifacts/screenshots` is not writable on a Mac.
@@ -35,6 +39,9 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
   };
   mkdirSync(ARTIFACTS, { recursive: true });
   const shot = async (page: Page, name: string) => {
+    if (name.startsWith("board-")) {
+      await waitForBoardAnimationsSettled(page);
+    }
     const dest = testInfo.outputPath(`${testInfo.project.name}-${name}.png`);
     await page.screenshot({ path: dest, fullPage: true });
     const keepBoard = name.startsWith("board-") && testInfo.project.name === "desktop";
@@ -129,6 +136,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "play");
       await expect(pad.getByRole("heading", { name: "Play" })).toBeVisible();
       await expect(board.getByText("The proving ground is quiet.")).toBeVisible();
+      await expect(board.locator('img[data-still="fx.hall"]')).toBeVisible();
       await expect(board.locator("[data-status='step']")).toContainText("Play");
       await expect(d.button("continue")).toBeEnabled();
       await shot(pad, "device-play");

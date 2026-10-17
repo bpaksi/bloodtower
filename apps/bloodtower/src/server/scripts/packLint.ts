@@ -14,7 +14,13 @@ export const lintPath = (dir: string | undefined, cwd: string): LintReport => {
     ? loadPackDir(resolve(cwd, dir))
     : loadR1Pack(loadConfig().packsDir);
   if (result.ok) {
-    return { exitCode: 0, lines: [`OK ${result.pack.pack_id} ${result.pack.version}`] };
+    const lines = [`OK ${result.pack.pack_id} ${result.pack.version}`];
+    for (const warning of result.assets.warnings) {
+      lines.push(
+        `file=${warning.file} path=${warning.path} rule=${warning.rule} message=${warning.message}`,
+      );
+    }
+    return { exitCode: 0, lines };
   }
   return { exitCode: 1, lines: formatLoadIssues(result.issues) };
 };

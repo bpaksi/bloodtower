@@ -1,6 +1,7 @@
 import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
+import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
@@ -375,14 +376,23 @@ const PlayPanel = ({
   }
   const scene = sceneCopy(state.moment);
   const text = state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text);
+  const still = state.moment.still;
   return (
     <article className="bt-page bt-parchment bt-ink-in">
       <MomentMeta moment={state.moment} />
       <div>
         <p className="bt-kicker">{scene.kicker}</p>
         <h2>{scene.title}</h2>
-        <p className="bt-narration">{text}</p>
+        <p className="bt-narration" data-moment-caption="">
+          {text}
+        </p>
       </div>
+      {still ? (
+        <div className="bt-still">
+          {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
+          <img alt="" data-still={still} src={packStillImageUrl(still)} />
+        </div>
+      ) : null}
     </article>
   );
 };

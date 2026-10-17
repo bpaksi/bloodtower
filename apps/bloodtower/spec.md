@@ -101,6 +101,8 @@ Rules the schema enforces, with the id in the issue message (`packIssues` maps a
 
 `stats.timing.marks` is the literal `auto`. A pack does not author timing rows.
 
+The loader adds folder rules on top of the schema (same `V-1` id in issues). A pack folder holds `pack.yaml` or split YAML/JSON stems, optional `README.md`, and optionally exactly one subfolder `assets/`. That folder holds only image files (`.png`, `.jpg`, `.jpeg`, `.webp`) with no nested folders. Any other top-level entry is refused. Missing image files for declared still and portrait assets are `W-asset` warnings; the pack still loads.
+
 ## 5. Timing rows
 
 TypeScript `TimingMark` and the SQLite columns step 4 will create:

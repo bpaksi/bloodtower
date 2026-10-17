@@ -178,6 +178,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       },
       pack: initialPack,
       issues: [],
+      assets: null,
     },
   ];
   if (!entries.some((entry) => entry.card.id === initialId && entry.pack)) {
