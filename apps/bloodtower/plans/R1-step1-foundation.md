@@ -178,6 +178,12 @@ Tests sit next to their files; e2e in `src/e2e/tests/`. Game logic is pure TS in
 
 ## Deviations
 
+### R2 opening screens (branch `cursor/r2-opening-screens-77a7`)
+
+- Web-only. The board and iPad render the server-held `screen` from D20. No change to `engine.ts`, protocols, `pack.ts`, tokens, or tower hardware.
+- iPads only; the phone layout toggle is gone. The join page no longer shows the device token (R2-32). Party Join shows the LAN join URL and QR.
+- The R2-01 status strip (tower / devices / step) is on every board screen after splash. Pre-play steps keep the existing `continue-<screen>` and `begin` prompts.
+
 ### R2 flow state (branch `feat/r2-flow-state`)
 
 - A deviation from the frozen contract (spec §3, D20). The R2 requirements (`research/game-design/r2-screen-flow.md`, R2-03 and R2-04) need a server-held flow screen, and the first press wins for each step. Splash, Tower Connect, Pick Story, Party Join and Begin are steps before play. The protocol gains: the `screen` on `storyboardState` and `deviceState`, the `quitPromptId` on `deviceState`, the `quit` control action, `stage: "ended"`, and the `screen` and `nextScreen` on each press.

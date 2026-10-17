@@ -99,7 +99,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(b.hold("gamma")).toHaveAttribute("data-action", "release");
 
       await pageA.getByRole("link", { name: "Open controls" }).click();
-      await expect(pageA.getByRole("heading", { name: "Device" })).toBeVisible();
+      await expect(pageA.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Alpha" })).toBeVisible();
       await expect(pageA.getByRole("heading", { name: "Beta" })).toBeVisible();
       await expect(a.button("pause")).toBeDisabled();
@@ -117,6 +117,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await b.hold("delta").click();
       await expect(b.hold("delta")).toHaveAttribute("data-action", "release");
       await pageB.getByRole("link", { name: "Open controls" }).click();
+      await expect(pageB.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await expect(pageB.getByRole("heading", { name: "Delta" })).toBeVisible();
       await expect(a.button("continue")).toHaveText("Next: set up the story");
       await expect(a.button("continue")).toBeEnabled();

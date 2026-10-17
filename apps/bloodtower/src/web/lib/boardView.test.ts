@@ -55,6 +55,10 @@ describe("story board", () => {
     expect(html).toContain("iPads can&#x27;t reach this address.");
     expect(html).toContain("Battery 0%");
     expect(html).toContain("Calibration unavailable");
+    expect(html).toContain("data-status-strip");
+    expect(html).toContain("Step");
+    expect(html).toContain("Play");
+    expect(html).toContain("connected");
     expect(html).not.toContain("ipad:");
     expect(html).not.toContain("data-action");
   });
@@ -104,6 +108,10 @@ describe("story board", () => {
     expect(html).toContain("Join code unavailable.");
     expect(html).toContain("Hunters unavailable.");
     expect(html).toContain("Battery unavailable");
+    expect(html).toContain("Bloodtower");
+    expect(html).toContain("The night is gathering.");
+    expect(html).toContain('data-screen="splash"');
+    expect(html).not.toContain("data-status-strip");
     expect(html).not.toContain("0%");
     expect(pauseText(null)).toBeNull();
   });
@@ -118,6 +126,47 @@ describe("story board", () => {
     expect(
       holdingText({ id: "gamma", name: "Gamma", holders: ["device-2"], disconnected: false }),
     ).toBe("device-2");
+  });
+
+  it("shows the proving-ground door on pick-story and the LAN join URL on party-join", () => {
+    const pick = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: storyboardStatePayloadSchema.parse({
+          ...state(),
+          screen: "pick-story",
+          stage: "lobby",
+          pause: null,
+          prompt: { id: "continue-pick-story", label: "Choose the story" },
+          moment: null,
+        }),
+      }),
+    );
+    expect(pick).toContain('data-screen="pick-story"');
+    expect(pick).toContain("Proving ground");
+    expect(pick).toContain("1–4 hunters");
+    expect(pick).toContain("data-status-strip");
+
+    const party = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: storyboardStatePayloadSchema.parse({
+          ...state(),
+          screen: "party-join",
+          stage: "lobby",
+          pause: null,
+          prompt: null,
+          moment: null,
+          join: {
+            code: "048213",
+            url: "http://192.168.1.20:4787/join?code=048213",
+            reachable: true,
+          },
+        }),
+      }),
+    );
+    expect(party).toContain("1 of 2 hunters claimed");
+    expect(party).toContain("http://192.168.1.20:4787/join?code=048213");
+    expect(party).toContain("Claim Beta first");
+    expect(party).not.toMatch(interactive);
   });
 
   it("warns only when the join address is loopback-only", () => {

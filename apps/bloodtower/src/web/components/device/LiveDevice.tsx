@@ -75,6 +75,9 @@ export function LiveDevice() {
         onControl={(promptId, action) => {
           client.current?.sendControl(promptId, action);
         }}
+        onHold={(hunter, action) => {
+          client.current?.sendHold(hunter, action);
+        }}
       />
       <p>
         <a href="/join">Back to join</a>

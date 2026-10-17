@@ -147,9 +147,12 @@ describe("device screens", () => {
       }),
     );
     expect(device).toContain("Only Alpha hears this.");
+    expect(device).toContain("Alpha:");
     expect(device).toContain("Continue");
-    expect(device).toContain("Connect the tower");
+    expect(device).toContain("Connect tower");
     expect(device).toContain("Calibrate");
+    expect(device).toContain('data-screen="play"');
+    expect(device).toContain('data-layout="ipad"');
     expect(device).not.toContain("Only Delta hears this.");
 
     const join = renderToStaticMarkup(
@@ -168,10 +171,12 @@ describe("device screens", () => {
     expect(join).toContain("Release Alpha");
     expect(join).toContain("Rejoin");
     expect(join).not.toContain("Only Alpha hears this.");
+    expect(join).not.toContain("Device token");
     expect(join).not.toContain("Use the full layout");
+    expect(join).toContain('data-layout="ipad"');
   });
 
-  it("detects a phone and offers the full layout", () => {
+  it("detects a phone for hello, and keeps the iPad layout", () => {
     expect(detectFormFactor("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)")).toBe(
       "phone",
     );
@@ -186,11 +191,10 @@ describe("device screens", () => {
         code: "048213",
         hunters: [{ id: "alpha", name: "Alpha" }],
         held: [],
-        formFactor: "phone",
       }),
     );
-    expect(join).toContain('data-layout="phone"');
-    expect(join).toContain("Use the full layout");
+    expect(join).toContain('data-layout="ipad"');
+    expect(join).not.toContain("Use the full layout");
     expect(join).toContain("Hold Alpha");
 
     const device = renderToStaticMarkup(
@@ -202,11 +206,10 @@ describe("device screens", () => {
         connectLock: null,
         calibrateLock: null,
         tower: tower("disconnected"),
-        formFactor: "phone",
       }),
     );
-    expect(device).toContain('data-layout="phone"');
-    expect(device).toContain("Use the full layout");
+    expect(device).toContain('data-layout="ipad"');
+    expect(device).not.toContain("Use the full layout");
     expect(device).toContain("Only Alpha hears this.");
   });
 
@@ -217,7 +220,76 @@ describe("device screens", () => {
     expect(join).toContain("Session host unavailable.");
     expect(join).toContain("Join code unavailable.");
     expect(join).toContain("Hunters unavailable.");
+    expect(join).not.toContain("Device token");
     expect(join).toContain('disabled="" name="token"');
+  });
+
+  it("renders each opening screen with one primary action and no phone layout", () => {
+    const base = {
+      live: true,
+      deviceId: "device-1",
+      pausePromptId: null as string | null,
+      connectLock: null,
+      calibrateLock: null,
+      tower: tower("disconnected"),
+    };
+    const splash = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        state: deviceStatePayloadSchema.parse({
+          screen: "splash",
+          heldHunters: [],
+          views: [],
+          prompt: null,
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(splash).toContain("Game is loading...");
+    expect(splash).toContain('data-screen="splash"');
+    expect(splash).not.toContain('data-primary="true"');
+
+    const connect = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        state: deviceStatePayloadSchema.parse({
+          screen: "tower-connect",
+          heldHunters: [],
+          views: [],
+          prompt: { id: "continue-tower-connect", label: "Next: pick a story" },
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(connect).toContain("Connect tower");
+    expect(connect).toContain("Play without tower");
+    expect(connect).toContain("Next: pick a story");
+    expect(connect).toContain("Tower Connect");
+
+    const party = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        ...base,
+        state: deviceStatePayloadSchema.parse({
+          screen: "party-join",
+          heldHunters: ["alpha"],
+          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          prompt: null,
+          lock: null,
+          won: null,
+          roster: [
+            { id: "alpha", name: "Alpha" },
+            { id: "beta", name: "Beta" },
+          ],
+        }),
+      }),
+    );
+    expect(party).toContain("Take all");
+    expect(party).toContain("Claim all hunters first");
+    expect(party).toContain("Alpha: Mine");
+    expect(party).toContain("Claim Beta");
+    expect(party).toContain('data-action="continue"');
   });
 
   it("lets a token be pasted before the socket is up when rejoin is wired", () => {

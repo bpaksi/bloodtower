@@ -23,7 +23,6 @@ export function LiveJoin() {
   const [code, setCode] = useState<string | null>(null);
   const [hunters, setHunters] = useState<JoinHunter[]>([]);
   const [held, setHeld] = useState<string[]>([]);
-  const [token, setToken] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const client = useRef<SessionClient | null>(null);
 
@@ -57,7 +56,6 @@ export function LiveJoin() {
         if (welcome.role !== "device") return;
         welcomed = true;
         sessionStorage.setItem(DEVICE_TOKEN_KEY, welcome.token);
-        setToken(welcome.token);
       },
       onStoryboard: () => undefined,
       onDevice: (state) => {
@@ -93,10 +91,11 @@ export function LiveJoin() {
           window.location.assign("/join");
         }}
       />
-      {token ? <p>Device token {token}</p> : null}
       {notice ? <p role="status">{notice}</p> : null}
       <p>
-        <a href="/device">Open controls</a>
+        <a className="bt-primary mt-4 inline-flex no-underline" href="/device">
+          Open controls
+        </a>
       </p>
     </>
   );
