@@ -1,8 +1,6 @@
-import { copyFileSync, mkdirSync } from "node:fs";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { startAcceptanceHost } from "./support/acceptance.ts";
-
-const ARTIFACTS = "/opt/cursor/artifacts/screenshots";
+import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 // iPad sizes, both orientations. The three projects set the browser; the size comes from here.
 const SIZES = [
@@ -35,7 +33,6 @@ for (const size of SIZES) {
       contexts.push(context);
       return context.newPage();
     };
-    if (size.name === "landscape") mkdirSync(ARTIFACTS, { recursive: true });
     try {
       const board = await newPage(boardViewport, false);
       const pad = await newPage(padViewport, true);
@@ -51,11 +48,11 @@ for (const size of SIZES) {
         await settleBoardInk(board);
         const boardShot = testInfo.outputPath("board-party-join.png");
         await board.screenshot({ path: boardShot, fullPage: false });
-        copyFileSync(boardShot, `${ARTIFACTS}/board-party-join.png`);
+        copyToE2eArtifacts(testInfo, boardShot, "board-party-join.png");
         await pad.waitForTimeout(1500);
         const padShot = testInfo.outputPath("device-party-join.png");
         await pad.screenshot({ path: padShot, fullPage: true });
-        copyFileSync(padShot, `${ARTIFACTS}/device-party-join.png`);
+        copyToE2eArtifacts(testInfo, padShot, "device-party-join.png");
       } else {
         for (const [page, where] of [
           [pad, "ipad"],

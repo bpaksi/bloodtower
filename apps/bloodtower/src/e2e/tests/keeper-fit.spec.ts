@@ -1,12 +1,7 @@
-import { copyFileSync, mkdirSync } from "node:fs";
-import { join, resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { startAcceptanceHost } from "./support/acceptance.ts";
+import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
-const screenshotDir = process.env.SCREENSHOT_DIR?.trim();
-const ARTIFACTS = screenshotDir
-  ? resolve(screenshotDir)
-  : join(import.meta.dirname, "../../../test-results/screenshots");
 const SHOT_NAME = process.env.KEEPER_SHOT_NAME?.trim() || "keeper_moment_1024x594";
 
 const device = (page: Page) => ({
@@ -25,8 +20,6 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     contexts.push(context);
     return context.newPage();
   };
-  mkdirSync(ARTIFACTS, { recursive: true });
-
   try {
     const board = await newPage({ width: 1024, height: 594 }, false);
     const pad = await newPage({ width: 820, height: 1180 }, true);
@@ -67,7 +60,7 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     const dest = testInfo.outputPath(`${testInfo.project.name}-${SHOT_NAME}.png`);
     await board.screenshot({ path: dest, fullPage: false });
     if (testInfo.project.name === "desktop") {
-      copyFileSync(dest, `${ARTIFACTS}/${SHOT_NAME}.png`);
+      copyToE2eArtifacts(testInfo, dest, `${SHOT_NAME}.png`);
     }
 
     const viewport = board.viewportSize();

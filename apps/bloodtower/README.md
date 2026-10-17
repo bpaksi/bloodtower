@@ -58,6 +58,8 @@ pnpm start    # one process serving the export; run pnpm build first
 pnpm e2e      # Playwright on port 4788 (first time: pnpm -F bloodtower-e2e e2e:install)
 ```
 
+Visual specs also copy stable PNG names into `apps/bloodtower/test-results/screenshots` (gitignored). On a Cursor cloud agent VM, set `E2E_ARTIFACTS_DIR=/opt/cursor/artifacts/screenshots` so those copies land beside walkthrough artifacts.
+
 `pnpm dev` is the split process for UI work. Open http://localhost:3000/ on the Mac for the title page (Story board and Hunter links). The session socket stays on port 4787; the page picks `ws://<this-host>:4787/ws`, so an iPad that opens the join QR on the Mac's LAN address also reaches the socket on that address. The board QR and join URL use the LAN IPv4 on port 3000. Private-range origins on the LAN are allowed for `/ws` while `DEV_ORIGINS` is set. For a table session with one port, use `pnpm start` after `pnpm build`.
 
 To run tower-poc beside this app, start it on 4747 and set `TOWER_URL`. This host does not start it.
