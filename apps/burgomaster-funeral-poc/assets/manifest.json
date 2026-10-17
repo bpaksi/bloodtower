@@ -1648,5 +1648,169 @@
     "speaker": "agnes",
     "moment": "n1-lantern-and-bell.03",
     "duration_s": 5.28
+  },
+  "n2-burgomasters-funeral.mourner-returns.agnes": {
+    "id": "n2-burgomasters-funeral.mourner-returns.agnes",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.mourner-returns.agnes@dashboard.png",
+    "status": "placeholder",
+    "text": "Agnes: I followed the cloak. A castle servant, laying a violet on Anton's grave. He said, \"She still refuses,\" and went up to the east wing. The lady's rooms.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.mourner-returns.agnes.vo-01": {
+    "id": "n2-burgomasters-funeral.mourner-returns.agnes.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.mourner-returns.agnes.vo-01.agnes.wav",
+    "status": "draft",
+    "text": "I followed the cloak. A castle servant, laying a violet on Anton's grave. He said, \"She still refuses,\" and went up to the east wing. The lady's rooms.",
+    "speaker": "agnes",
+    "moment": "n2-burgomasters-funeral.mourner-returns.agnes",
+    "duration_s": 13.8
+  },
+  "n2-burgomasters-funeral.mourner-returns.tomas": {
+    "id": "n2-burgomasters-funeral.mourner-returns.tomas",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.mourner-returns.tomas@dashboard.png",
+    "status": "placeholder",
+    "text": "Tomas: Followed him to the grave. Castle livery. Left a violet for Anton and said, \"She still refuses.\" Then up the hill to the east wing. The lady's rooms.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.mourner-returns.tomas.vo-01": {
+    "id": "n2-burgomasters-funeral.mourner-returns.tomas.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.mourner-returns.tomas.vo-01.tomas.wav",
+    "status": "draft",
+    "text": "Followed him to the grave. Castle livery. Left a violet for Anton and said, \"She still refuses.\" Then up the hill to the east wing. The lady's rooms.",
+    "speaker": "tomas",
+    "moment": "n2-burgomasters-funeral.mourner-returns.tomas",
+    "duration_s": 15.72
+  },
+  "n2-burgomasters-funeral.mourner-returns.wren": {
+    "id": "n2-burgomasters-funeral.mourner-returns.wren",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.mourner-returns.wren@dashboard.png",
+    "status": "placeholder",
+    "text": "Wren: Castle servant. Violet on Anton's grave. Said \"She still refuses.\" Went up to the east wing. Lady's rooms. That's where she is.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.mourner-returns.wren.vo-01": {
+    "id": "n2-burgomasters-funeral.mourner-returns.wren.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.mourner-returns.wren.vo-01.wren.wav",
+    "status": "draft",
+    "text": "Castle servant. Violet on Anton's grave. Said \"She still refuses.\" Went up to the east wing. Lady's rooms. That's where she is.",
+    "speaker": "wren",
+    "moment": "n2-burgomasters-funeral.mourner-returns.wren",
+    "duration_s": 9.52
+  },
+  "n2-burgomasters-funeral.mourner-returns.emeric": {
+    "id": "n2-burgomasters-funeral.mourner-returns.emeric",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n2-burgomasters-funeral.mourner-returns.emeric@dashboard.png",
+    "status": "placeholder",
+    "text": "Emeric: I'm back, I'm sorry, I followed him. A castle servant. He left a violet on Anton's grave and said, \"She still refuses.\" East wing. The lady's rooms.",
+    "profile": "@dashboard"
+  },
+  "n2-burgomasters-funeral.mourner-returns.emeric.vo-01": {
+    "id": "n2-burgomasters-funeral.mourner-returns.emeric.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n2-burgomasters-funeral.mourner-returns.emeric.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "I'm back, I'm sorry, I followed him. A castle servant. He left a violet on Anton's grave and said, \"She still refuses.\" East wing. The lady's rooms.",
+    "speaker": "emeric",
+    "moment": "n2-burgomasters-funeral.mourner-returns.emeric",
+    "duration_s": 10.32
+  },
+  "n1-lantern-and-bell.03.vo-02": {
+    "id": "n1-lantern-and-bell.03.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.03.vo-02.hanne.wav",
+    "status": "draft",
+    "text": "Same as you, Sister, or you wouldn't have asked.",
+    "speaker": "hanne",
+    "moment": "n1-lantern-and-bell.03",
+    "duration_s": 3.96
+  },
+  "n1-lantern-and-bell.04": {
+    "id": "n1-lantern-and-bell.04",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.04@dashboard.png",
+    "status": "placeholder",
+    "text": "Emeric: I'm looking for Father Oskar? I have a letter. That is, he sent me a letter. That is, I'm expected. I think.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.04.vo-01": {
+    "id": "n1-lantern-and-bell.04.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.04.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "I'm looking for Father Oskar? I have a letter. That is, he sent me a letter. That is, I'm expected. I think.",
+    "speaker": "emeric",
+    "moment": "n1-lantern-and-bell.04",
+    "duration_s": 6.8
+  },
+  "n1-lantern-and-bell.04.vo-02": {
+    "id": "n1-lantern-and-bell.04.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.04.vo-02.tomas.wav",
+    "status": "draft",
+    "text": "So am I, lad.",
+    "speaker": "tomas",
+    "moment": "n1-lantern-and-bell.04",
+    "duration_s": 2.04
+  },
+  "n1-lantern-and-bell.05": {
+    "id": "n1-lantern-and-bell.05",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.05@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: Agnes lays down a third letter. Then the door opens on a woman muddy to the knees, who smells the room and drops a fourth.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.05.vo-01": {
+    "id": "n1-lantern-and-bell.05.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.05.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "Agnes lays down a third letter. Then the door opens on a woman muddy to the knees, who smells the room and drops a fourth.",
+    "speaker": "narrator",
+    "moment": "n1-lantern-and-bell.05",
+    "duration_s": 13.76
+  },
+  "n1-lantern-and-bell.05.vo-02": {
+    "id": "n1-lantern-and-bell.05.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.05.vo-02.wren.wav",
+    "status": "draft",
+    "text": "Father Oskar's not coming. They buried him this morning.",
+    "speaker": "wren",
+    "moment": "n1-lantern-and-bell.05",
+    "duration_s": 3.4
+  },
+  "n1-lantern-and-bell.05.vo-03": {
+    "id": "n1-lantern-and-bell.05.vo-03",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.05.vo-03.emeric.wav",
+    "status": "draft",
+    "text": "Then who's \u2014 then he wrote these from \u2014",
+    "speaker": "emeric",
+    "moment": "n1-lantern-and-bell.05",
+    "duration_s": 2.4
   }
 }
