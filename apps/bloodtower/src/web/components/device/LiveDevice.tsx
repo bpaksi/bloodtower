@@ -79,7 +79,7 @@ export function LiveDevice() {
           client.current?.sendHold(hunter, action);
         }}
       />
-      <p>
+      <p className="px-6 pb-8 text-[var(--bt-muted)]">
         <a href="/join">Back to join</a>
       </p>
     </>

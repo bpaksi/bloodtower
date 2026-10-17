@@ -82,40 +82,50 @@ export function DeviceScreen({
         <PartyJoinDevice roster={roster} held={state.heldHunters} live={live} onHold={onHold} />
       ) : null}
       {state.screen === "begin" ? <BeginDevice /> : null}
-      {state.views.length > 0 ? <PlayDevice views={state.views} /> : null}
+      {state.views.length > 0 && (state.screen === "play" || state.screen === "quit") ? (
+        <PlayDevice views={state.views} />
+      ) : null}
+      {state.views.length > 0 && state.screen !== "play" && state.screen !== "quit" ? (
+        <section className="flex flex-wrap gap-2">
+          {state.views.map((view) => (
+            <h2 key={view.hunter} className="bt-card py-2 text-xl">
+              {view.name}
+            </h2>
+          ))}
+        </section>
+      ) : null}
 
       {controls.gameplayLock ? <p role="status">{controls.gameplayLock}</p> : null}
       {controls.connectLock ? <p role="status">{controls.connectLock}</p> : null}
       {controls.calibrateLock ? <p role="status">{controls.calibrateLock}</p> : null}
 
       <section className="flex flex-col gap-3">
-        {state.screen === "tower-connect" ? null : (
-          <>
-            <button
-              type="button"
-              className="bt-secondary"
-              data-action="tower-connect"
-              disabled={!controls.towerConnect}
-              onClick={() => press("tower-connect", "tower-connect", controls.towerConnect)}
-            >
-              Connect tower
-            </button>
-            <button
-              type="button"
-              className="bt-secondary"
-              data-action="tower-calibrate"
-              disabled={!controls.towerCalibrate}
-              onClick={() => press("tower-calibrate", "tower-calibrate", controls.towerCalibrate)}
-            >
-              Calibrate
-            </button>
-          </>
-        )}
+        <button
+          type="button"
+          className="bt-secondary"
+          data-action="tower-connect"
+          hidden={state.screen !== "begin"}
+          disabled={!controls.towerConnect}
+          onClick={() => press("tower-connect", "tower-connect", controls.towerConnect)}
+        >
+          Connect tower
+        </button>
+        <button
+          type="button"
+          className="bt-secondary"
+          data-action="tower-calibrate"
+          hidden={state.screen !== "begin"}
+          disabled={!controls.towerCalibrate}
+          onClick={() => press("tower-calibrate", "tower-calibrate", controls.towerCalibrate)}
+        >
+          Calibrate
+        </button>
         <button
           type="button"
           className={primaryBegin ? "bt-primary" : "bt-ghost"}
           data-action="begin"
           data-primary={primaryBegin ? "true" : undefined}
+          hidden={state.screen !== "begin"}
           disabled={!controls.begin}
           onClick={() => press(state.prompt?.id ?? null, "begin", controls.begin)}
         >
@@ -126,6 +136,12 @@ export function DeviceScreen({
           className={primaryContinue ? "bt-primary" : "bt-ghost"}
           data-action="continue"
           data-primary={primaryContinue ? "true" : undefined}
+          hidden={
+            state.screen === "begin" ||
+            state.screen === "splash" ||
+            state.screen === "quit" ||
+            (state.screen === "play" && controls.resume)
+          }
           disabled={!controls.continue}
           onClick={() => press(state.prompt?.id ?? null, "continue", controls.continue)}
         >
@@ -134,67 +150,36 @@ export function DeviceScreen({
         {partyReason && !controls.continue ? (
           <p className="text-lg text-[var(--bt-muted)]">Disabled: {partyReason}.</p>
         ) : null}
-        {state.screen === "play" ? (
-          <>
-            <button
-              type="button"
-              className="bt-ghost"
-              data-action="pause"
-              disabled={!controls.pause}
-              onClick={() => press(pausePromptId, "pause", controls.pause)}
-            >
-              Menu
-            </button>
-            <button
-              type="button"
-              className="bt-primary"
-              data-action="resume"
-              disabled={!controls.resume}
-              onClick={() => press(state.prompt?.id ?? null, "resume", controls.resume)}
-            >
-              Resume
-            </button>
-            <button
-              type="button"
-              className="bt-secondary"
-              data-action="quit"
-              disabled={!controls.quit}
-              onClick={() => press(state.quitPromptId ?? null, "quit", controls.quit)}
-            >
-              Quit
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              className="bt-ghost"
-              data-action="pause"
-              disabled={!controls.pause}
-              onClick={() => press(pausePromptId, "pause", controls.pause)}
-            >
-              Menu
-            </button>
-            <button
-              type="button"
-              className="bt-ghost"
-              data-action="resume"
-              disabled={!controls.resume}
-              onClick={() => press(state.prompt?.id ?? null, "resume", controls.resume)}
-            >
-              Resume
-            </button>
-            <button
-              type="button"
-              className="bt-ghost"
-              data-action="quit"
-              disabled={!controls.quit}
-              onClick={() => press(state.quitPromptId ?? null, "quit", controls.quit)}
-            >
-              Quit
-            </button>
-          </>
-        )}
+        <button
+          type="button"
+          className="bt-ghost"
+          data-action="pause"
+          hidden={state.screen !== "play"}
+          disabled={!controls.pause}
+          onClick={() => press(pausePromptId, "pause", controls.pause)}
+        >
+          Menu
+        </button>
+        <button
+          type="button"
+          className={controls.resume ? "bt-primary" : "bt-ghost"}
+          data-action="resume"
+          hidden={state.screen !== "play"}
+          disabled={!controls.resume}
+          onClick={() => press(state.prompt?.id ?? null, "resume", controls.resume)}
+        >
+          Resume
+        </button>
+        <button
+          type="button"
+          className="bt-secondary"
+          data-action="quit"
+          hidden={state.screen !== "play"}
+          disabled={!controls.quit}
+          onClick={() => press(state.quitPromptId ?? null, "quit", controls.quit)}
+        >
+          Quit
+        </button>
       </section>
     </main>
   );
