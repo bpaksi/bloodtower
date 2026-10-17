@@ -28,7 +28,7 @@ for (const size of SIZES) {
     test.setTimeout(90_000);
     const { baseURL, host } = await startAcceptanceHost(testInfo);
     const padViewport = { width: size.width, height: size.height };
-    const boardViewport = size.name === "landscape" ? BOARD_VIEWPORT : padViewport;
+    const boardViewport = BOARD_VIEWPORT;
     const contexts: BrowserContext[] = [];
     const newPage = async (viewport: { width: number; height: number }, hasTouch: boolean) => {
       const context = await browser.newContext({ baseURL, viewport, hasTouch });
