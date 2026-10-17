@@ -287,7 +287,9 @@ const PlayPanel = ({ state }: { state: StoryboardState }) => {
           <h2>{scene.title}</h2>
           <p className="bt-narration">{text}</p>
         </div>
-        <div className="bt-still">{state.moment.still ?? "unavailable"}</div>
+        <div className="bt-still" aria-hidden="true">
+          {state.moment.still ?? "unavailable"}
+        </div>
       </article>
       <div className="bt-items bt-panel">
         <span className="bt-lbl">Still</span>
