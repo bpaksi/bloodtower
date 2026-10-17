@@ -352,6 +352,40 @@ describe("device screens", () => {
     expect(party).toContain('data-action="continue"');
   });
 
+  it("shows Oil and Force pick options on the iPad at the door-choice pick-card", () => {
+    const html = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        live: true,
+        deviceId: "device-1",
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+        state: deviceStatePayloadSchema.parse({
+          screen: "play",
+          quitPromptId: "quit",
+          heldHunters: ["alpha"],
+          views: [{ hunter: "alpha", name: "Alpha", privateMoment: null }],
+          prompt: { id: "pick-6", label: "Oil the hinge, or force it." },
+          pick: {
+            momentId: "grey-stair.door-choice",
+            prompt: "Oil the hinge, or force it.",
+            options: [
+              { id: "oil-the-hinge", label: "Oil the hinge" },
+              { id: "force-it", label: "Force it" },
+            ],
+          },
+          lock: null,
+          won: null,
+        }),
+      }),
+    );
+    expect(html).toContain("Oil the hinge");
+    expect(html).toContain("Force it");
+    expect(html).toMatch(/data-pick="oil-the-hinge"/);
+    expect(html).toMatch(/data-pick="force-it"/);
+  });
+
   it("lets a token be pasted before the socket is up when rejoin is wired", () => {
     const join = renderToStaticMarkup(
       createElement(JoinScreen, {

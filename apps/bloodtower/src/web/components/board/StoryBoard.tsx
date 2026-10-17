@@ -20,7 +20,13 @@ import { KEEPER_MOMENT_ID } from "./keeperLines";
  * Display only for game controls. Holdings do not change here.
  * grey-stair.03 plays the Keeper; Tap to play appears only if the browser blocks autoplay.
  */
-export function StoryBoard({ state }: { state: StoryboardState }) {
+export function StoryBoard({
+  state,
+  onKeeperLineEnded,
+}: {
+  state: StoryboardState;
+  onKeeperLineEnded?: (momentId: string, line: number) => void;
+}) {
   const tower = towerStatusLines(state.tower);
   const paused = pauseText(state.pause, state.hunters);
   const warning = joinWarning(state.join);
@@ -51,7 +57,9 @@ export function StoryBoard({ state }: { state: StoryboardState }) {
       {state.screen === "pick-story" ? <PickStoryPanel state={state} /> : null}
       {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
       {state.screen === "begin" ? <BeginPanel state={state} /> : null}
-      {state.screen === "play" ? <PlayPanel state={state} /> : null}
+      {state.screen === "play" ? (
+        <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
+      ) : null}
       {state.screen === "quit" ? <QuitPanel /> : null}
     </main>
   );
@@ -188,14 +196,23 @@ const BeginPanel = ({ state }: { state: StoryboardState }) => (
   </>
 );
 
-const PlayPanel = ({ state }: { state: StoryboardState }) => (
+const PlayPanel = ({
+  state,
+  onKeeperLineEnded,
+}: {
+  state: StoryboardState;
+  onKeeperLineEnded?: (momentId: string, line: number) => void;
+}) => (
   <>
     <JoinBlock join={state.join} />
     <HunterList hunters={state.hunters} />
     <p className="text-5xl leading-tight">{state.prompt ? state.prompt.label : "Waiting."}</p>
     <section className="max-w-3xl text-2xl leading-relaxed">
       {state.moment?.id === KEEPER_MOMENT_ID ? (
-        <KeeperScene />
+        <KeeperScene
+          keeperLine={state.keeperLine ?? 0}
+          onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
+        />
       ) : state.moment ? (
         <>
           <p>

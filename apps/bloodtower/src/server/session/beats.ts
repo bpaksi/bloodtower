@@ -4,6 +4,7 @@ import {
   type Moment,
   type Pack,
   parseMomentId,
+  pickOptionsFor,
 } from "bloodtower-protocols";
 
 export interface StoryboardMoment {
@@ -14,11 +15,20 @@ export interface StoryboardMoment {
   fallbackAudio: string | null;
 }
 
+/** The choice an iPad pick offers (D23). Options come from the pack's `choices.yaml`. */
+export interface BeatPick {
+  momentId: string;
+  prompt: string;
+  options: Array<{ id: string; label: string }>;
+}
+
 export interface Beat {
   key: string;
   /** Shared moment after present/absent filtering. Private lines are not copied here. */
   storyboard: StoryboardMoment | null;
   privates: ReadonlyMap<string, Moment>;
+  /** A pick moment with `target: ipad:all`. Every joined iPad gets its options. */
+  pick: BeatPick | null;
   cue: string | null;
   momentSubject: string;
 }
@@ -43,6 +53,15 @@ const textOf = (moment: Moment): string | null => {
     return moment.lines.map((line) => line.text).join("\n");
   }
   return moment.placeholder ?? null;
+};
+
+/** A pick moment must have text and options in the pack, or the beat cannot be played. */
+const pickOf = (pack: Pack, moment: Moment): BeatPick => {
+  const options = pickOptionsFor(pack.choices, moment.id);
+  const prompt = textOf(moment);
+  if (options.length === 0) throw new Error(`${moment.id} has no options in choices.yaml.`);
+  if (!prompt) throw new Error(`${moment.id} has no prompt text.`);
+  return { momentId: moment.id, prompt, options };
 };
 
 const cueNamed = (pack: Pack, name: string | undefined): Cue | undefined =>
@@ -74,10 +93,20 @@ export const beatsForNight = (pack: Pack, absent: ReadonlySet<string>): Beat[] =
   const beats: Beat[] = [];
   for (const key of order) {
     const moments = groups.get(key) ?? [];
+    // Routed by target (D23): a storyboard moment is shared, an ipad:all pick goes to the iPads.
     const shared = select(
-      moments.filter((moment) => !parseMomentId(moment.id)?.hunter),
+      moments.filter(
+        (moment) => !parseMomentId(moment.id)?.hunter && moment.target === "storyboard",
+      ),
       absent,
     );
+    const pickMoment = moments.find(
+      (moment) =>
+        !parseMomentId(moment.id)?.hunter &&
+        moment.target === "ipad:all" &&
+        moment.kind === "pick-card",
+    );
+    const pick = pickMoment ? pickOf(pack, pickMoment) : null;
     const byHunter = new Map<string, Moment[]>();
     for (const moment of moments) {
       const hunter = parseMomentId(moment.id)?.hunter;
@@ -93,12 +122,21 @@ export const beatsForNight = (pack: Pack, absent: ReadonlySet<string>): Beat[] =
       if (absent.has(hunter) && chosen.scope !== "global") continue;
       privates.set(hunter, chosen);
     }
-    if (!shared && privates.size === 0) continue;
+    if (!shared && !pick && privates.size === 0) continue;
 
     const cue = cueNamed(pack, shared?.cues?.[0]?.cue);
     const placeholder = [...privates.values()].map((moment) => moment.placeholder).find(Boolean);
     let storyboard: StoryboardMoment | null = null;
-    if (shared) {
+    if (pick) {
+      // The board shows the pick's prompt text. The options are for the iPads only.
+      storyboard = {
+        id: pick.momentId,
+        kind: "pick-card",
+        text: pick.prompt,
+        still: null,
+        fallbackAudio: null,
+      };
+    } else if (shared) {
       storyboard = {
         id: shared.id,
         kind: shared.kind,
@@ -119,8 +157,9 @@ export const beatsForNight = (pack: Pack, absent: ReadonlySet<string>): Beat[] =
       key,
       storyboard,
       privates,
+      pick,
       cue: cue?.name ?? null,
-      momentSubject: shared?.id ?? key,
+      momentSubject: pick?.momentId ?? shared?.id ?? key,
     });
   }
   return beats;

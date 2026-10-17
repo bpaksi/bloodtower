@@ -314,9 +314,33 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
       await expect(board.getByRole("img", { name: "The Keeper" })).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");
+      // The Keeper's three lines take three Continue presses. The audio is paused here, so a line
+      // cannot end on its own and skew the count; the door waits for the last press.
+      const holdKeeperAudio = () =>
+        board.evaluate(() => {
+          for (const audio of document.querySelectorAll("audio")) audio.pause();
+        });
+      await holdKeeperAudio();
+      await expect(a.button("continue")).toHaveAttribute("data-primary", "true");
       await a.button("continue").click();
-      await expect(board.getByText("Oil the hinge, or force it.")).toBeVisible();
+      await holdKeeperAudio();
+      await expect(board.getByText("Oil the hinge, or force it.")).toHaveCount(0);
       await a.button("continue").click();
+      await holdKeeperAudio();
+      await expect(board.getByText("Oil the hinge, or force it.")).toHaveCount(0);
+      await expect(a.button("pick")).toHaveCount(0);
+      await a.button("continue").click();
+      // The last line is done, so the door choice comes up: one button per option, on the iPad.
+      // The board shows the prompt twice (the prompt line and the moment), so match the moment.
+      await expect(
+        board.locator("section > p", { hasText: "Oil the hinge, or force it." }),
+      ).toBeVisible();
+      await expect(a.button("continue")).toBeDisabled();
+      await expect(a.button("pick")).toHaveCount(2);
+      await expect(a.button("pick").filter({ hasText: "Oil the hinge" })).toBeEnabled();
+      await expect(a.button("pick").filter({ hasText: "Force it" })).toBeEnabled();
+      // Tapping an option advances the flow to the next moment.
+      await a.button("pick").filter({ hasText: "Oil the hinge" }).click();
       await expect(
         board.getByText("The lamps are lit, or they are not. The stair is quiet."),
       ).toBeVisible();
@@ -383,8 +407,10 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "continue-2:true",
         "continue-3:true",
         "continue-4:true",
-        "continue-5:true",
-        "continue-6:true",
+        "continue-5-0:true",
+        "continue-5-1:true",
+        "continue-5-2:true",
+        "pick-6:true",
         "continue-7:true",
       ]);
       let previous = -1;

@@ -28,7 +28,7 @@ export function DeviceScreen({
   connectLock: ControlLock | null;
   calibrateLock: ControlLock | null;
   tower: TowerSnapshot;
-  onControl?: (promptId: string, action: ControlAction) => void;
+  onControl?: (promptId: string, action: ControlAction, option?: string) => void;
   onHold?: (hunter: string, action: "take" | "release") => void;
 }) {
   const controls = deviceControls({
@@ -103,6 +103,15 @@ export function DeviceScreen({
       {state.views.length > 0 && (state.screen === "play" || state.screen === "quit") ? (
         <PlayDevice views={state.views} />
       ) : null}
+      {state.pick ? (
+        <PickDevice
+          pick={state.pick}
+          enabled={controls.pick}
+          onChoose={(option) => {
+            if (controls.pick && state.prompt) onControl?.(state.prompt.id, "pick", option);
+          }}
+        />
+      ) : null}
       {state.views.length > 0 && state.screen !== "play" && state.screen !== "quit" ? (
         <section className="flex flex-wrap gap-2">
           {state.views.map((view) => (
@@ -138,6 +147,7 @@ export function DeviceScreen({
             state.screen === "begin" ||
             state.screen === "splash" ||
             state.screen === "quit" ||
+            (state.pick !== null && state.pick !== undefined) ||
             (state.screen === "tower-connect" && !ready) ||
             (state.screen === "play" && controls.resume)
           }
@@ -294,6 +304,34 @@ const BeginDevice = () => (
   <article className="bt-card text-xl">
     <p>Any joined iPad can begin. First press wins.</p>
   </article>
+);
+
+/** One button per option from the pack. Tapping one is a `pick` press; the server decides it. */
+const PickDevice = ({
+  pick,
+  enabled,
+  onChoose,
+}: {
+  pick: NonNullable<DeviceState["pick"]>;
+  enabled: boolean;
+  onChoose: (option: string) => void;
+}) => (
+  <section className="flex flex-col gap-3 text-xl" aria-label="Choice">
+    <p className="text-2xl">{pick.prompt}</p>
+    {pick.options.map((option) => (
+      <button
+        key={option.id}
+        type="button"
+        className="bt-primary"
+        data-action="pick"
+        data-pick={option.id}
+        disabled={!enabled}
+        onClick={() => onChoose(option.id)}
+      >
+        {option.label}
+      </button>
+    ))}
+  </section>
 );
 
 const PlayDevice = ({ views }: { views: DeviceState["views"] }) => (

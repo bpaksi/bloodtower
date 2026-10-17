@@ -3,6 +3,7 @@ import {
   controlActionSchema,
   controlLockSchema,
   flowScreenSchema,
+  optionIdSchema,
   promptIdSchema,
 } from "./control.ts";
 import {
@@ -13,6 +14,7 @@ import {
   roleSchema,
   tokenSchema,
 } from "./devices.ts";
+import { KEEPER_LINE_COUNT, KEEPER_MOMENT_ID } from "./keeper.ts";
 import { assetIdSchema, momentIdSchema, privateHunterOf } from "./pack.ts";
 import { pauseCauseSchema } from "./timing.ts";
 
@@ -23,6 +25,7 @@ export const PROTOCOL_VERSION = 1;
  * No message carries raw bytes, a capability id, or tower parameters.
  * Tower connect and calibrate are control actions. The story board is display only:
  * its payloads never carry an `ipad:*` target or a `.private.` moment.
+ * The one exception (D7): the story board may send `keeper-line-ended`, and nothing else.
  */
 
 const issue = (ctx: z.RefinementCtx, message: string) => {
@@ -111,20 +114,47 @@ export const holdPayloadSchema = z.strictObject({
   action: z.enum(["take", "release"]),
 });
 
-/** A press. The server accepts this only on a device socket and locks the first arrival. */
-export const controlPayloadSchema = z.strictObject({
-  promptId: promptIdSchema,
-  action: controlActionSchema,
+/**
+ * A press. The server accepts this only on a device socket and locks the first arrival.
+ * A `pick` names the option it chooses; no other action does.
+ */
+export const controlPayloadSchema = z
+  .strictObject({
+    promptId: promptIdSchema,
+    action: controlActionSchema,
+    option: optionIdSchema.optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.action === "pick" && !value.option) issue(ctx, "A pick names its option.");
+    if (value.action !== "pick" && value.option) issue(ctx, "Only a pick names an option.");
+  });
+
+/**
+ * The story board's one message (D7 exception). It says the Keeper line that just finished
+ * playing on the board. The server acts only when `line` is the current `keeperLine`.
+ */
+export const keeperLineEndedPayloadSchema = z.strictObject({
+  momentId: momentIdSchema,
+  line: z
+    .number()
+    .int()
+    .min(0)
+    .max(KEEPER_LINE_COUNT - 1),
 });
 
 export const helloMessageSchema = message("hello", helloPayloadSchema);
 export const holdMessageSchema = message("hold", holdPayloadSchema);
 export const controlMessageSchema = message("control", controlPayloadSchema);
+export const keeperLineEndedMessageSchema = message(
+  "keeper-line-ended",
+  keeperLineEndedPayloadSchema,
+);
 
 export const clientMessageSchema = z.discriminatedUnion("type", [
   helloMessageSchema,
   holdMessageSchema,
   controlMessageSchema,
+  keeperLineEndedMessageSchema,
 ]);
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 
@@ -276,9 +306,22 @@ export const storyboardStatePayloadSchema = z
       unheld: z.array(hunterIdSchema).max(16),
     }),
     lock: controlLockSchema.nullable(),
+    /** The line the Keeper scene is on (0..KEEPER_LINE_COUNT-1), or null outside that scene. */
+    keeperLine: z
+      .number()
+      .int()
+      .min(0)
+      .max(KEEPER_LINE_COUNT - 1)
+      .nullable()
+      .optional(),
   })
   .superRefine((value, ctx) => {
     refusePrivate(value, ctx);
+    if (value.keeperLine !== undefined && value.keeperLine !== null) {
+      if (value.moment?.id !== KEEPER_MOMENT_ID) {
+        issue(ctx, "A Keeper line belongs to the Keeper scene.");
+      }
+    }
     const ids = value.hunters.map((hunter) => hunter.id);
     if (new Set(ids).size !== ids.length) issue(ctx, "A hunter is listed twice.");
     for (const hunter of value.hunters) {
@@ -346,6 +389,25 @@ const rosterEntrySchema = z.strictObject({
   name: z.string().min(1).max(80),
 });
 
+/**
+ * A pick on the iPad (D23): the moment it belongs to, the prompt text and one button per
+ * option. The option ids and labels come from the pack's choices, never from the device.
+ */
+export const pickPayloadSchema = z
+  .strictObject({
+    momentId: momentIdSchema,
+    prompt: z.string().min(1).max(200),
+    options: z
+      .array(z.strictObject({ id: optionIdSchema, label: z.string().min(1).max(120) }))
+      .min(1)
+      .max(8),
+  })
+  .superRefine((value, ctx) => {
+    const ids = value.options.map((option) => option.id);
+    if (new Set(ids).size !== ids.length) issue(ctx, "A pick lists an option twice.");
+  });
+export type Pick = z.infer<typeof pickPayloadSchema>;
+
 export const deviceStatePayloadSchema = z
   .strictObject({
     screen: flowScreenSchema,
@@ -367,6 +429,8 @@ export const deviceStatePayloadSchema = z
     connectLock: controlLockSchema.nullable().optional(),
     calibrateLock: controlLockSchema.nullable().optional(),
     roster: z.array(rosterEntrySchema).max(16).optional(),
+    /** The pick this device is offered, or null. Set on every joined iPad, not one hunter. */
+    pick: pickPayloadSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     if (new Set(value.heldHunters).size !== value.heldHunters.length) {

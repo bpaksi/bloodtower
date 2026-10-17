@@ -50,7 +50,16 @@ describe("story loader", () => {
     expect(result.pack.cues[0]?.drums).toBe("none");
     expect(result.pack.moments.some((moment) => moment.id.endsWith("~no-delta"))).toBe(true);
     expect(result.pack.moments.some((moment) => moment.id.includes(".private."))).toBe(true);
-    expect(result.pack.choices).toEqual([{ id: "kept", label: "not run" }]);
+    expect(result.pack.choices).toEqual([
+      { id: "kept", label: "not run" },
+      {
+        id: "grey-stair.door-choice",
+        options: [
+          { id: "oil-the-hinge", label: "Oil the hinge" },
+          { id: "force-it", label: "Force it" },
+        ],
+      },
+    ]);
     expect(JSON.stringify(result.pack).toLowerCase()).not.toContain("dracula");
   });
 
