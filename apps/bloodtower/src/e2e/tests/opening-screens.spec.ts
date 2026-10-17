@@ -61,15 +61,16 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
     });
 
     await test.step("iPad joins and walks each pre-play screen", async () => {
-      await pad.goto(joinPage);
-      await expect(pad.getByText("Game is loading...")).toBeVisible();
-      await expect(pad.getByText(host.joinCode)).toBeVisible();
-      const body = await pad.locator("body").innerText();
-      expect(body).not.toMatch(/Device token/);
-      expect(body).not.toMatch(/Open controls/);
+      await pad.goto("/join");
+      await expect(pad.getByRole("heading", { name: "Join" })).toBeVisible();
+      const joinBody = await pad.locator("body").innerText();
+      expect(joinBody).not.toMatch(/Device token/);
+      expect(joinBody).not.toMatch(/Open controls/);
       await shot(pad, "device-join");
 
+      await pad.goto(joinPage);
       await expect(pad).toHaveURL(/\/device/);
+      expect(await pad.locator("body").innerText()).not.toMatch(/Device token/);
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
       await expect(pad.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
       await expect(d.button("play-without-tower")).toBeVisible();

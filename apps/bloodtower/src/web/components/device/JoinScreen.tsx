@@ -29,7 +29,7 @@ export function JoinScreen({
         <h1 className="text-4xl">Join</h1>
         <p className="text-xl text-[var(--bt-muted)]">
           {shown
-            ? "Game is loading..."
+            ? "This iPad enters the table when the host is ready."
             : "Paste a rejoin token if this iPad was already at the table."}
         </p>
       </header>
