@@ -36,12 +36,13 @@ R1 is the thin foundation. It loads a story pack, shows a display-only Story boa
 | D22 | Opening screens are web-only. The board and iPad render `screen` from the existing storyboard and device state. iPads only; no phone layout. The join page does not show the device token; a code enters Tower Connect on `/device`. Party Join shows the LAN join URL and QR from the live `join` field. | R2 step 3 (`research/game-design/r2-screen-flow.md`). No protocol or engine change. |
 | D23 | A pick-card with `target: ipad:all` is routed to every joined iPad, not to the storyboard. Beats route by `moment.target`: `storyboard` moments are shared, `ipad:all` pick-cards are picks. The board shows the pick prompt text. `deviceState.pick` carries the moment id, the prompt and the options from `choices.yaml`. A `pick` control names its option. The first pick wins the lock, and the flow moves on. The test pack has no branch targets, so both door options lead to the next beat. | Oct 2026 bug (`docs/ipad-door-pick-diagnosis.md`). Bob, Oct 17. |
 | D24 | `storyboardState.keeperLine` is the line the Keeper scene is on (0 to `KEEPER_LINE_COUNT`-1), or null outside it. A Continue on a Keeper line moves one line on; the last line's Continue ends the scene. Each Keeper line has its own prompt (`continue-<beat>-<line>`), so each press locks separately. A `keeper-line-ended` report from the board does the same as a Continue, but only for the current line (D7). The door pick appears only after the scene ends. | Same bug, Oct 17. The line count is `KEEPER_LINE_COUNT` in `src/protocols/keeper.ts`. |
+| D25 | Pick Story lists real stories. Every folder under `packs/` with a `pack.*` manifest is a door; one that fails the pack lint (or has no night) stays in the list as a greyed card and cannot be chosen. `storyboardState` and `deviceState` gain `stories` (`cards`, the server-held `focus`, and `current`, the story the session is bound to). A device moves the highlight with the new `focus-story` message, which is not a press: no lock, no screen change, no press row. The Choose prompt is `continue-pick-story-<story id>`, so a press made on a stale highlight is refused; the winning press binds the story (hunters, beats) and clears holdings when it differs from `current`. The session starts bound to the first story that loads. The board stays display only. | R2 requirements §3.3 (R2-40, R2-41 saved games not yet), D2 and D20. A plan deviation; see the R1 plan's Deviations, "R2 Pick Story". |
 
 ## 2. Layout and run
 
 Four packages under `apps/bloodtower/src/`, orchestrated by `apps/bloodtower/package.json`. See [README.md](README.md) for the commands Bob runs.
 
-The host serves the static export, `GET /health`, and `/ws`. It loads `packs/test` before it listens. It opens SQLite at `session.sqlite` in the data folder. It does not import `ultimatedarktower` or `@stoprocent/noble`. The hub imports `ws`. The tower library packages stay pinned from step 1; this step does not change a version.
+The host serves the static export, `GET /health`, and `/ws`. It scans `packsDir` for story folders (D25), binds the session to the first pack that loads, and listens once the socket host and that binding are ready. It opens SQLite at `session.sqlite` in the data folder. It does not import `ultimatedarktower` or `@stoprocent/noble`. The hub imports `ws`. The tower library packages stay pinned from step 1; this step does not change a version.
 
 The tower port is the mock unless `TOWER_URL` is set, in which case it is a client of that tower-poc socket. Nothing connects, calibrates or reconnects until a joined device wins that press. `DIAG_LOG` is passed through to the sidecar when it is set. `DEV_ORIGINS` lists extra page origins for `next dev`, exact match only.
 
@@ -49,7 +50,7 @@ SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game table
 
 ## 3. Protocols contract (frozen)
 
-`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes. D18 and D19 are the R2 changes: `hunters[].disconnected` and `join.reachable` are added fields. D23 adds `pick` / `option` and `deviceState.pick`. D24 adds `keeper-line-ended` and `storyboardState.keeperLine`. The frozen contract otherwise stands.
+`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes. D18 and D19 are the R2 changes: `hunters[].disconnected` and `join.reachable` are added fields. D23 adds `pick` / `option` and `deviceState.pick`. D24 adds `keeper-line-ended` and `storyboardState.keeperLine`. D25 adds `stories` on both states and the `focus-story` client message. The frozen contract otherwise stands.
 
 Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
 
@@ -61,6 +62,7 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 | `hold` | `hunter`, `action` `take` or `release` | Device socket only (step 7). |
 | `control` | `promptId`, `action` one of `begin`, `continue`, `pause`, `resume`, `quit`, `tower-connect`, `tower-calibrate`, `pick`. A `pick` names its `option`; no other action may. | Device socket only (step 7). First arrival wins (step 5). The flow steps are D20. A pick is D23. |
 | `keeper-line-ended` | `momentId`, `line` (0 to `KEEPER_LINE_COUNT`-1) | Story board only (D7 exception). The server acts only when `line` is the current `keeperLine` (D24). |
+| `focus-story` | `story` (story id) | Device socket only (D25). Moves the Pick Story highlight only; not a press and not accepted from the story board. |
 
 **Server → client**
 
@@ -68,8 +70,8 @@ Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An ext
 |---|---|
 | `welcome` | `clientId`, `role`, `token`, `channels`, `versions`. A story board channel list is exactly `["storyboard"]`. A device lists `ipad:<hunter>` for each hunter it holds at hello, or an empty list when it holds nobody, and never `storyboard` (D16). The token is bound to that role: a storyboard token cannot `hello` as a device, and a device token cannot open the story board. |
 | `error` | `code` one of `invalid-json`, `invalid-envelope`, `unknown-type`, `invalid-payload`, `invalid-state`, `private-on-storyboard`, `storyboard-control`. |
-| `storyboardState` | The flow `screen` (D20); stage `lobby`, `playing`, `paused` or `ended`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); `keeperLine` (D24), the Keeper line index or null outside that scene; pause banner; tower snapshot; start gate; lock. The stage is `lobby` on every pre-play screen, `playing` or `paused` on `play`, and `ended` on `quit`. |
-| `deviceState` | The flow `screen`; held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the quit prompt id, the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). `pick` (D23) is the current pick-card (moment id, prompt, pack options) on each joined iPad, or null. |
+| `storyboardState` | The flow `screen` (D20); stage `lobby`, `playing`, `paused` or `ended`; public hunters and holders; join code and URL; one prompt; the shared moment (text, still, fallback audio asset); `keeperLine` (D24), the Keeper line index or null outside that scene; `stories` (D25), the Pick Story door list with `focus` and `current`, or omitted before the list is ready; pause banner; tower snapshot; start gate; lock. The stage is `lobby` on every pre-play screen, `playing` or `paused` on `play`, and `ended` on `quit`. |
+| `deviceState` | The flow `screen`; held hunters, one view each, private moment text for that hunter only, the same prompt and lock, and whether this device won. Beside that lock: the quit prompt id, the tower snapshot, the pause prompt id, the connect and calibrate locks, and the public roster (D17). `pick` (D23) is the current pick-card (moment id, prompt, pack options) on each joined iPad, or null. `stories` (D25) matches the board's Pick Story list when present. |
 
 A losing press is a `control_presses` row with `winner: false`, not an error. The locked result is the `lock` on both states. Each press row also has the `screen` it arrived on and, for a winning press that moved the flow, `nextScreen`.
 

@@ -1,12 +1,27 @@
-import type { FlowScreen, StoryboardState } from "bloodtower-protocols";
+import type { FlowScreen, Stories, StoryboardState, StoryCard } from "bloodtower-protocols";
 
-/** The one story this build loads. Copy only; the pack id stays on the server. */
-export const TABLE_STORY = {
-  id: "test",
-  title: "Proving ground",
-  blurb: "A long-lived proving ground for new ideas.",
-  players: "1–4 hunters",
-} as const;
+/** The card for the story the session is bound to, or null before the server has sent the list. */
+export const currentStory = (stories: Stories | undefined): StoryCard | null =>
+  stories?.cards.find((card) => card.id === stories.current) ?? null;
+
+/** The highlighted door on Pick Story, or null before the server has sent the list. */
+export const focusedStory = (stories: Stories | undefined): StoryCard | null =>
+  stories?.cards.find((card) => card.id === stories.focus) ?? null;
+
+/** The card `step` places from the highlight, wrapping at both ends. Null with fewer than two. */
+export const neighborStory = (stories: Stories | undefined, step: 1 | -1): StoryCard | null => {
+  if (!stories || stories.cards.length < 2) return null;
+  const at = stories.cards.findIndex((card) => card.id === stories.focus);
+  const count = stories.cards.length;
+  return stories.cards[(at + step + count) % count] ?? null;
+};
+
+/** "1–4 hunters", or the single number when min equals max. Null when the pack did not load. */
+export const playersText = (players: StoryCard["players"]): string | null => {
+  if (!players) return null;
+  const range = players.min === players.max ? `${players.min}` : `${players.min}–${players.max}`;
+  return `${range} ${players.max === 1 ? "hunter" : "hunters"}`;
+};
 
 export const SCREEN_TITLE: Record<FlowScreen, string> = {
   splash: "Loading",

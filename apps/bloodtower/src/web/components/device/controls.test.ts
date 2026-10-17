@@ -352,6 +352,51 @@ describe("device screens", () => {
     expect(party).toContain('data-action="continue"');
   });
 
+  it("shows the highlighted story with arrows and a Choose button that names it", () => {
+    const door = (id: string, title: string, loadable = true) => ({
+      id,
+      title,
+      blurb: null,
+      players: { min: 1, max: 4 },
+      loadable,
+    });
+    const render = (focus: string, cards = [door("alpha", "Alpha"), door("beta", "Beta")]) =>
+      renderToStaticMarkup(
+        createElement(DeviceScreen, {
+          live: true,
+          deviceId: "device-1",
+          pausePromptId: null,
+          connectLock: null,
+          calibrateLock: null,
+          tower: tower("connected"),
+          state: deviceStatePayloadSchema.parse({
+            screen: "pick-story",
+            heldHunters: [],
+            views: [],
+            prompt: cards.find((card) => card.id === focus)?.loadable
+              ? { id: `continue-pick-story-${focus}`, label: `Choose ${focus}` }
+              : null,
+            lock: null,
+            won: null,
+            stories: { cards, focus, current: cards[0]?.id ?? focus },
+          }),
+        }),
+      );
+    const two = render("beta");
+    expect(two).toContain('data-story="beta"');
+    expect(two).toContain('data-action="story-previous"');
+    expect(two).toContain('data-action="story-next"');
+    expect(two).toContain('data-primary="true">Choose beta');
+    // One story: no arrows, and the story is still shown.
+    const one = render("alpha", [door("alpha", "Alpha")]);
+    expect(one).toContain('data-story="alpha"');
+    expect(one).not.toContain("story-next");
+    // A door that can't load says so and the Choose button is disabled.
+    const greyed = render("zzz", [door("alpha", "Alpha"), door("zzz", "zzz", false)]);
+    expect(greyed).toContain("Can&#x27;t load");
+    expect(greyed).toMatch(/<button[^>]*data-action="continue"[^>]*disabled/);
+  });
+
   it("shows Oil and Force pick options on the iPad at the door-choice pick-card", () => {
     const html = renderToStaticMarkup(
       createElement(DeviceScreen, {

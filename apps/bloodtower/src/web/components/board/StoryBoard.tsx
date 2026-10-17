@@ -4,12 +4,14 @@ import { displayCaption } from "../../lib/caption.ts";
 import { JoinQr } from "../../lib/qr";
 import {
   claimedCount,
+  currentStory,
   FORTUNE_LINE,
+  focusedStory,
   joinedDeviceIds,
   partyJoinNextReason,
+  playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
-  TABLE_STORY,
   towerStripState,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
@@ -83,9 +85,9 @@ export function StoryBoard({
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
-          {state.screen === "pick-story" ? <PickStoryPanel /> : null}
+          {state.screen === "pick-story" ? <PickStoryPanel state={state} /> : null}
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
-          {state.screen === "begin" ? <BeginPanel /> : null}
+          {state.screen === "begin" ? <BeginPanel state={state} /> : null}
           {state.screen === "play" ? (
             <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
           ) : null}
@@ -260,17 +262,39 @@ const TowerConnectPanel = ({ state }: { state: StoryboardState }) => (
   </article>
 );
 
-const PickStoryPanel = () => (
-  <article className="bt-page bt-parchment bt-ink-in">
-    <div>
-      <p className="bt-kicker">The door</p>
-      <h2>{TABLE_STORY.title}</h2>
-      <p className="bt-narration">{TABLE_STORY.blurb}</p>
-      <p className="bt-muted">{TABLE_STORY.players}</p>
-      <p className="bt-lede">{SCREEN_NEXT["pick-story"]}</p>
-    </div>
-  </article>
-);
+const PickStoryPanel = ({ state }: { state: StoryboardState }) => {
+  const focus = focusedStory(state.stories);
+  const players = focus ? playersText(focus.players) : null;
+  return (
+    <>
+      <article className="bt-page bt-parchment bt-ink-in" data-story={focus?.id}>
+        <div>
+          <p className="bt-kicker">The door</p>
+          <h2>{focus ? focus.title : "Stories unavailable."}</h2>
+          {focus?.blurb ? <p className="bt-narration">{focus.blurb}</p> : null}
+          {players ? <p className="bt-muted">{players}</p> : null}
+          {focus && !focus.loadable ? <p className="bt-narration">Can't load</p> : null}
+          <p className="bt-lede">{SCREEN_NEXT["pick-story"]}</p>
+        </div>
+      </article>
+      {state.stories && state.stories.cards.length > 1 ? (
+        <ul className="bt-muted" aria-label="Stories">
+          {state.stories.cards.map((card) => (
+            <li
+              key={card.id}
+              data-story-door={card.id}
+              aria-current={card.id === state.stories?.focus ? "true" : undefined}
+            >
+              {card.id === state.stories?.focus ? "› " : ""}
+              {card.title}
+              {card.loadable ? "" : " (can't load)"}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  );
+};
 
 const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
   const claimed = claimedCount(state.hunters);
@@ -288,10 +312,10 @@ const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
   );
 };
 
-const BeginPanel = () => (
+const BeginPanel = ({ state }: { state: StoryboardState }) => (
   <article className="bt-page bt-parchment bt-ink-in">
     <div>
-      <p className="bt-kicker">{TABLE_STORY.title}</p>
+      <p className="bt-kicker">{currentStory(state.stories)?.title ?? "The story"}</p>
       <h2>The table is set</h2>
       <p className="bt-narration">The table is set. Any iPad can begin.</p>
       <p className="bt-muted">{SCREEN_NEXT.begin}</p>
