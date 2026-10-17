@@ -162,7 +162,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(pageA.locator('[data-primary="true"]')).toHaveCount(1);
       await expect(a.button("play-without-tower")).toHaveCount(0);
       await a.button("continue").click();
-      await expect(a.button("continue")).toHaveText("Choose the story");
+      await expect(a.button("continue")).toHaveText("Choose Proving ground");
       await a.button("continue").click();
       await expect(pageA.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await a.hold("alpha").click();

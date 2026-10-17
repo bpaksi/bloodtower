@@ -228,7 +228,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
     }
     if (screen === "pick-story") {
-      return { id: "continue-pick-story", action: "continue", label: "Choose the story" };
+      return { id: "continue-pick-story", action: "continue", label: `Choose ${pack.title}` };
     }
     if (screen === "party-join") {
       if (unheldHunters().length > 0) return null;
