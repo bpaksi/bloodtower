@@ -43,7 +43,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
   };
 
   try {
-    const board = await newPage({ width: 1440, height: 900 }, false);
+    const board = await newPage({ width: 1280, height: 800 }, false);
     const boardFrames = captureFrames(board);
     const pad = await newPage();
     const d = device(pad);
@@ -133,6 +133,11 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(d.button("continue")).toBeEnabled();
       await shot(pad, "device-play");
       await shot(board, "board-play");
+
+      await d.button("quit").click();
+      await expect(pad.locator("main")).toHaveAttribute("data-screen", "quit");
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "quit");
+      await shot(board, "board-quit");
     });
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);

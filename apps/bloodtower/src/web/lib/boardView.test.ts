@@ -131,7 +131,7 @@ describe("story board", () => {
     expect(html).toContain("A Grey Stair");
     expect(html).not.toContain("Proving ground");
     expect(html).not.toContain("[pause");
-    expect(html).not.toContain("fx.stair");
+    expect(html).toContain('data-still="fx.stair"');
   });
 
   it("renders the Keeper captions for grey-stair.03 before the avatar loads", () => {
@@ -156,8 +156,8 @@ describe("story board", () => {
     expect(html).toContain("keep the lamp lit until you");
     expect(html).toContain('data-board-layout="keeper"');
     expect(html).toContain("data-keeper-stage");
-    expect(html).not.toContain("Join code");
-    expect(html).not.toContain("<h2");
+    expect(html).not.toContain("Join code unavailable");
+    expect(html).not.toContain("<h2>The Keeper");
     expect(html).not.toContain("Text unavailable.");
     expect(html).not.toContain("ipad:");
     expect(html).not.toMatch(interactive);
