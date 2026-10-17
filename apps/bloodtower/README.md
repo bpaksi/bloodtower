@@ -40,7 +40,7 @@ pnpm --dir apps/bloodtower build
 pnpm --dir apps/bloodtower start
 ```
 
-Open http://127.0.0.1:4787/board for the Story board (no buttons; the join code and QR come from the session), then http://127.0.0.1:4787/join?code= followed by that code. The iPad shows "Game is loading..." and enters Tower Connect on `/device`. Hunters are claimed on Party Join. The QR points at the Mac's LAN address, which the startup log prints. If the log warns that only loopback is available, connect the Mac to Wi-Fi and restart; the board shows the same warning until then. The home page has no buttons. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
+Open http://127.0.0.1:4787/ for the title page, then **Story board** for the Mac/TV display (no buttons; the join code and QR come from the session) or **Hunter** on an iPad for `/join` (type the six-digit code from the board if the QR is not used). With a code in the URL, the iPad shows "Game is loading..." and enters Tower Connect on `/device`. Hunters are claimed on Party Join. The QR points at the Mac's LAN address, which the startup log prints. If the log warns that only loopback is available, connect the Mac to Wi-Fi and restart; the board shows the same warning until then. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
 
 `TOWER_URL=ws://127.0.0.1:4747/ws` uses tower-poc instead of the mock. Start tower-poc yourself. This host still waits for a connect press. `DIAG_LOG=/path/to/log` records sidecar message types only.
 
@@ -52,12 +52,12 @@ These ports sit away from tower-poc (4747/4748) and the funeral POC (4767/4768).
 
 ```bash
 cd apps/bloodtower
-pnpm dev      # server (tsx watch, port 4787) + next dev on port 3000
+pnpm dev      # server (tsx watch, port 4787) + next dev on port 3000; open http://localhost:3000/
 pnpm build    # web static export
 pnpm start    # one process serving the export; run pnpm build first
 pnpm e2e      # Playwright on port 4788 (first time: pnpm -F bloodtower-e2e e2e:install)
 ```
 
-`pnpm dev` is the split process for UI work. The page is on port 3000 and the socket defaults to `ws://127.0.0.1:4787/ws`. The page Bob opens for a session is `pnpm start` after `pnpm build`.
+`pnpm dev` is the split process for UI work. Open http://localhost:3000/ on the Mac for the title page (Story board and Hunter links). The session socket stays on port 4787; the page picks `ws://<this-host>:4787/ws`, so an iPad that opens the join QR on the Mac's LAN address also reaches the socket on that address. The board QR and join URL use the LAN IPv4 on port 3000. Private-range origins on the LAN are allowed for `/ws` while `DEV_ORIGINS` is set. For a table session with one port, use `pnpm start` after `pnpm build`.
 
 To run tower-poc beside this app, start it on 4747 and set `TOWER_URL`. This host does not start it.

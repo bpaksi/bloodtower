@@ -21,8 +21,18 @@ try {
 mkdirSync(config.dataDir, { recursive: true });
 const chosen = towerFromEnv(process.env);
 
+const joinPagePort =
+  process.env.DEV_PAGE_PORT === undefined || process.env.DEV_PAGE_PORT === ""
+    ? undefined
+    : Number(process.env.DEV_PAGE_PORT);
+
 let server: Awaited<ReturnType<typeof startSessionHost>>;
 try {
+  if (joinPagePort !== undefined && (!Number.isInteger(joinPagePort) || joinPagePort < 0)) {
+    console.error("DEV_PAGE_PORT must be a non-negative integer.");
+    process.exit(1);
+  }
+
   server = await startSessionHost({
     port: config.port,
     host: hostName,
@@ -31,6 +41,7 @@ try {
     databasePath: join(config.dataDir, "session.sqlite"),
     tower: chosen.tower,
     devOrigins,
+    joinPagePort,
   });
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
@@ -48,8 +59,9 @@ const lan = joinHost(hostName);
 const shownHost = lan ?? "127.0.0.1";
 console.log(`Bloodtower listening on port ${server.port}`);
 for (const url of lanUrls(hostName, server.port)) console.log(`  ${url}`);
-console.log(`Story board http://${shownHost}:${server.port}/board`);
-console.log(`Join http://${shownHost}:${server.port}/join`);
+const pagePort = joinPagePort ?? server.port;
+console.log(`Story board http://${shownHost}:${pagePort}/board`);
+console.log(`Join http://${shownHost}:${pagePort}/join`);
 if (lan === undefined) {
   console.warn(
     `iPads can't reach ${shownHost}: only loopback is available. Connect this Mac to Wi-Fi, then restart Bloodtower.`,

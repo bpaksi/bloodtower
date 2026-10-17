@@ -9,6 +9,7 @@ import {
   KEEPER_MOMENT_ID,
   type Pack,
   type PauseCause,
+  PICK_STORY_PROMPT_PREFIX,
   type Stories,
   type StoryboardState,
   type StoryCard,
@@ -310,7 +311,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       const card = storyEntry(focusedStory)?.card;
       if (!card?.loadable) return null;
       return {
-        id: `continue-pick-story-${card.id}`,
+        id: `${PICK_STORY_PROMPT_PREFIX}${card.id}`,
         action: "continue",
         label: `Choose ${card.title}`,
       };

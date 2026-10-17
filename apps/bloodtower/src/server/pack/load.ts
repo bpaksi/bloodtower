@@ -5,6 +5,7 @@ import {
   type Pack,
   packIssues,
   packSchema,
+  STORY_ID_MAX,
   type StoryCard,
 } from "bloodtower-protocols";
 import { parse as parseYaml } from "yaml";
@@ -254,6 +255,7 @@ export interface StoryEntry {
  * to play, stays in the list as a card that cannot be chosen (R2 §3.3). The card never carries
  * the lint messages; they stay on the server. A folder with no `pack.*` manifest is work in
  * progress, not a story, and neither is a plain file or a folder whose name is not a valid id.
+ * A valid id longer than `STORY_ID_MAX` is a greyed card too: its Choose prompt id would not fit.
  */
 export const loadStories = (packsDir: string): StoryEntry[] => {
   let names: string[];
@@ -275,6 +277,15 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
     .filter((name) => optionIdSchema.safeParse(name).success && hasManifest(name))
     .sort()
     .map((id): StoryEntry => {
+      if (id.length > STORY_ID_MAX) {
+        return {
+          card: { id, title: id, blurb: null, players: null, loadable: false },
+          pack: null,
+          issues: [
+            issue(id, "(folder)", "V-1", `The folder name is over ${STORY_ID_MAX} characters.`),
+          ],
+        };
+      }
       const loaded = loadPackDir(join(packsDir, id));
       if (loaded.ok && loaded.pack.nights[0]?.phases[0]) {
         const { pack } = loaded;
