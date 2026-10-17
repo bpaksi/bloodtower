@@ -3,6 +3,8 @@ import type { ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protoco
 export interface DeviceControls {
   begin: boolean;
   continue: boolean;
+  /** The pick options are live on the iPad: the prompt is a pick and nothing has locked. */
+  pick: boolean;
   pause: boolean;
   resume: boolean;
   quit: boolean;
@@ -39,6 +41,7 @@ export const deviceControls = (input: {
   return {
     begin: input.live && promptId === "begin" && !locked,
     continue: input.live && promptId.startsWith("continue-") && !locked,
+    pick: input.live && promptId.startsWith("pick-") && !locked,
     pause: input.live && input.pausePromptId !== null,
     resume: input.live && promptId.startsWith("resume-") && !locked,
     // Quit has its own prompt, so a locked step does not block it.

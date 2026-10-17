@@ -5,6 +5,8 @@ import {
   type DeviceState,
   deviceStatePayloadSchema,
   type FlowScreen,
+  KEEPER_LINE_COUNT,
+  KEEPER_MOMENT_ID,
   type Pack,
   type PauseCause,
   type StoryboardState,
@@ -51,8 +53,22 @@ export interface SessionEngine {
   rejoin: (token: string) => { ok: true; deviceId: string; held: string[] } | Fail;
   disconnect: (deviceId: string) => void;
   hold: (deviceId: string, hunter: string, action: "take" | "release") => { ok: true } | Fail;
-  press: (deviceId: string, promptId: string, action: ControlAction) => PressOk | Fail;
+  /** `option` is required for a `pick` and refused for any other action. */
+  press: (
+    deviceId: string,
+    promptId: string,
+    action: ControlAction,
+    option?: string,
+  ) => PressOk | Fail;
   pressAll: (presses: readonly (PressInput & { deviceId: string })[]) => Array<PressOk | Fail>;
+  /**
+   * The story board finished Keeper line `line` (D7 exception). Acts only when the scene is on
+   * that line and `momentId` is the Keeper. Returns false for anything else, so late or
+   * duplicate messages do nothing.
+   */
+  keeperLineEnded: (momentId: string, line: number) => boolean;
+  /** The option a pick moment was resolved with, or null if it has not been picked. */
+  pickedOption: (momentId: string) => string | null;
   projectStoryboard: (
     tower: TowerSnapshot,
     join: { url: string; reachable: boolean } | null,
@@ -138,6 +154,10 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
   let openMoment: string | null = null;
   let openCue: string | null = null;
   let openPhase: string | null = null;
+  /** The Keeper line on screen, or null outside the Keeper scene. */
+  let keeperLine: number | null = null;
+  /** Pick moment id to the option the winning iPad chose. */
+  const picked = new Map<string, string>();
   const readTower =
     options.tower ??
     ((): TowerSnapshot => ({
@@ -228,7 +248,8 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
     }
     if (screen === "pick-story") {
-      return { id: "continue-pick-story", action: "continue", label: "Choose the story" };
+      // Pack `title` is the story name (e.g. Dracula), not a scene or set-piece id.
+      return { id: "continue-pick-story", action: "continue", label: `Choose ${pack.title}` };
     }
     if (screen === "party-join") {
       if (unheldHunters().length > 0) return null;
@@ -247,10 +268,16 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     if (finished) return null;
     const beat = currentBeat();
     if (!beat) return null;
+    if (beat.pick) return { id: `pick-${beatIndex}`, action: "pick", label: beat.pick.prompt };
+    // Each Keeper line has its own prompt, so each Continue is a fresh lock.
+    if (keeperLine !== null) {
+      return { id: `continue-${beatIndex}-${keeperLine}`, action: "continue", label: "Continue" };
+    }
     return { id: `continue-${beatIndex}`, action: "continue", label: "Continue" };
   };
 
   const openBeat = (beat: Beat) => {
+    keeperLine = beat.storyboard?.id === KEEPER_MOMENT_ID ? 0 : null;
     options.timing.open({
       kind: "moment",
       subject: beat.momentSubject,
@@ -272,6 +299,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
   };
 
   const closeBeat = () => {
+    keeperLine = null;
     if (openCue) {
       options.timing.close("cue", openCue);
       openCue = null;
@@ -351,7 +379,23 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     return screen;
   };
 
-  const applyWin = (action: ControlAction, deviceId: string) => {
+  /** Moves to the next beat. The Keeper's last line ends the scene the same way. */
+  const advanceBeat = () => {
+    closeBeat();
+    beatIndex += 1;
+    const beat = currentBeat();
+    if (!beat) {
+      finished = true;
+      if (openPhase) {
+        options.timing.close("phase", openPhase);
+        openPhase = null;
+      }
+      return;
+    }
+    openBeat(beat);
+  };
+
+  const applyWin = (action: ControlAction, deviceId: string, option?: string) => {
     screen = screenAfter(action);
     if (action === "quit") {
       closeBeat();
@@ -383,18 +427,18 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     // A step before play only moves the screen. Story beats start at Begin.
     if (action === "continue" && screen !== "play") return;
     if (action === "continue") {
-      closeBeat();
-      beatIndex += 1;
-      const beat = currentBeat();
-      if (!beat) {
-        finished = true;
-        if (openPhase) {
-          options.timing.close("phase", openPhase);
-          openPhase = null;
-        }
+      // A Keeper line moves on one line; the last line's Continue skips the scene.
+      if (keeperLine !== null && keeperLine < KEEPER_LINE_COUNT - 1) {
+        keeperLine += 1;
         return;
       }
-      openBeat(beat);
+      advanceBeat();
+      return;
+    }
+    if (action === "pick") {
+      const beat = currentBeat();
+      if (beat?.pick && option) picked.set(beat.pick.momentId, option);
+      advanceBeat();
       return;
     }
     if (action === "pause") {
@@ -420,6 +464,12 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
     if (action === "quit") return promptId === "quit" && screen === "play";
     const prompt = gameplayPrompt();
     return prompt !== null && prompt.id === promptId && prompt.action === action;
+  };
+
+  /** True when `option` is one of the current pick's options. */
+  const pickOptionOk = (option: string | undefined) => {
+    const beat = currentBeat();
+    return !!option && (beat?.pick?.options.some((item) => item.id === option) ?? false);
   };
 
   const connectedDevice = (deviceId: string) => {
@@ -477,7 +527,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       return { ok: true };
     },
 
-    press: (deviceId, promptId, action) => {
+    press: (deviceId, promptId, action, option) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };
       reconcileTowerLocks();
       // Logged with the screen it was made on. A win also logs the screen it moved to, before
@@ -496,6 +546,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
         return { ok: true, winner: false, lock: existing, action: existing.action };
       }
       if (!legal(promptId, action)) return { ok: false, code: "invalid-state" };
+      if (action === "pick" && !pickOptionOk(option)) return { ok: false, code: "invalid-state" };
       const decided = lockPresses(locks, [{ promptId, action, deviceId }]);
       const winner = decided.winners[0] === true;
       Object.assign(locks, decided.locks);
@@ -510,10 +561,22 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
       });
       const lock = locks[promptId];
       if (!lock) return { ok: false, code: "invalid-state" };
-      if (winner) applyWin(action, deviceId);
+      if (winner) applyWin(action, deviceId, option);
       persist();
       return { ok: true, winner, lock, action };
     },
+
+    keeperLineEnded: (momentId, line) => {
+      const beat = currentBeat();
+      if (stage !== "playing" || finished || keeperLine === null) return false;
+      if (momentId !== KEEPER_MOMENT_ID || beat?.storyboard?.id !== momentId) return false;
+      if (line !== keeperLine) return false;
+      if (keeperLine < KEEPER_LINE_COUNT - 1) keeperLine += 1;
+      else advanceBeat();
+      return true;
+    },
+
+    pickedOption: (momentId) => picked.get(momentId) ?? null,
 
     pressAll: (batch) => {
       const results: Array<PressOk | Fail> = [];
@@ -550,6 +613,7 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
         join: join ? { code: options.joinCode, url: join.url, reachable: join.reachable } : null,
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
         moment: beat?.storyboard ?? null,
+        keeperLine,
         pause: pause ? { cause: pause.cause, hunter: pause.hunter } : null,
         tower,
         gate: { canBegin: unheld.length === 0, unheld },
@@ -580,6 +644,10 @@ export const createSession = (pack: Pack, options: SessionOptions): SessionEngin
         prompt: prompt ? { id: prompt.id, label: prompt.label } : null,
         lock: promptLock,
         won: promptLock ? promptLock.winnerDeviceId === deviceId : null,
+        pick:
+          prompt?.action === "pick" && beat?.pick && devices.get(deviceId)?.formFactor === "ipad"
+            ? { momentId: beat.pick.momentId, prompt: beat.pick.prompt, options: beat.pick.options }
+            : null,
       });
     },
 

@@ -3,12 +3,7 @@
 import { type AvatarManifest, avatarManifestSchema } from "@talking-avatar/formats";
 import { mouthFiles, TalkingAvatar } from "@talking-avatar/player";
 import { useCallback, useEffect, useState } from "react";
-import {
-  KEEPER_BASE_URL,
-  KEEPER_LINE_IDS,
-  keeperCaption,
-  nextKeeperLineIndex,
-} from "./keeperLines.ts";
+import { KEEPER_BASE_URL, KEEPER_LINE_IDS, keeperCaption } from "./keeperLines.ts";
 
 const preloadMouths = (manifest: AvatarManifest, baseUrl: string) => {
   if (typeof Image === "undefined") return;
@@ -29,12 +24,18 @@ const Captions = () => (
 );
 
 /**
- * Story-board Keeper at grey-stair.03.
- * Line ids come from the avatar folder. Pack moments have no lineId field.
+ * Story-board Keeper at grey-stair.03. It plays the line the server holds (`keeperLine`).
+ * A changed line is a new player, so the old audio stops. When a line ends, the board tells
+ * the server (D7 exception); the server acts only if that line is still the current one.
  */
-export function KeeperScene({ onEnded }: { onEnded?: () => void }) {
+export function KeeperScene({
+  keeperLine,
+  onLineEnded,
+}: {
+  keeperLine: number;
+  onLineEnded?: (line: number) => void;
+}) {
   const [manifest, setManifest] = useState<AvatarManifest | null>(null);
-  const [lineIndex, setLineIndex] = useState(0);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -58,16 +59,8 @@ export function KeeperScene({ onEnded }: { onEnded?: () => void }) {
     };
   }, []);
 
-  const lineId = KEEPER_LINE_IDS[lineIndex] ?? KEEPER_LINE_IDS[0];
+  const lineId = KEEPER_LINE_IDS[keeperLine] ?? KEEPER_LINE_IDS[0];
   const fail = useCallback(() => setFailed(true), []);
-  const advance = useCallback(() => {
-    const next = nextKeeperLineIndex(lineIndex);
-    if (next === null) {
-      onEnded?.();
-      return;
-    }
-    setLineIndex(next);
-  }, [lineIndex, onEnded]);
 
   if (failed || !manifest || lineId === undefined) {
     return (
@@ -80,11 +73,12 @@ export function KeeperScene({ onEnded }: { onEnded?: () => void }) {
   return (
     <div className="bt-keeper">
       <TalkingAvatar
+        key={keeperLine}
         manifest={manifest}
         lineId={lineId}
         baseUrl={KEEPER_BASE_URL}
         onError={fail}
-        onEnd={advance}
+        onEnd={() => onLineEnded?.(keeperLine)}
       />
     </div>
   );

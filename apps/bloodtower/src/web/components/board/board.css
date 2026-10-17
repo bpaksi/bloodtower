@@ -250,6 +250,15 @@
   text-align: center;
 }
 
+.bt-board .bt-moment-meta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 .bt-board-main {
   display: grid;
   grid-template-columns: minmax(14rem, 24%) minmax(0, 1fr) minmax(13rem, 22%);

@@ -1,8 +1,14 @@
 import { copyFileSync, mkdirSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { captureFrames, startAcceptanceHost } from "./support/acceptance.ts";
 
-const ARTIFACTS = "/opt/cursor/artifacts/screenshots";
+// SCREENSHOT_DIR for cloud/walkthrough copies; otherwise a gitignored repo path
+// (covered by root `test-results/`). `/opt/cursor/artifacts/screenshots` is not writable on a Mac.
+const screenshotDir = process.env.SCREENSHOT_DIR?.trim();
+const ARTIFACTS = screenshotDir
+  ? resolve(screenshotDir)
+  : join(import.meta.dirname, "../../../test-results/screenshots");
 
 const device = (page: Page) => ({
   button: (action: string) => page.locator(`button[data-action="${action}"]`),

@@ -673,6 +673,23 @@ describe("session hub", () => {
     expect(state.payload.gate).toEqual({ canBegin: true, unheld: [] });
   });
 
+  it("ignores keeper-line-ended from a device socket", async () => {
+    const { host } = await start();
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    send(device.socket, "keeper-line-ended", { momentId: "grey-stair.03", line: 0 });
+    await until(device.inbox, device.log, (messages) =>
+      messages.some((message) => message.type === "error"),
+    );
+    expect(latest(device.log, "error")).toMatchObject({
+      type: "error",
+      payload: { code: "invalid-state" },
+    });
+    const state = latest(board.log, "storyboardState");
+    if (state?.type !== "storyboardState") throw new Error("board");
+    expect(state.payload.keeperLine ?? null).not.toBe(1);
+  });
+
   it("does not open a port when the test pack is missing", async () => {
     const tower = createMockTower();
     const root = tempDir();

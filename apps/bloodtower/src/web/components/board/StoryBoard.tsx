@@ -21,13 +21,27 @@ import { KEEPER_MOMENT_ID } from "./keeperLines";
  * grey-stair.03 plays the Keeper; Tap to play appears only if the browser blocks autoplay.
  * Look: Illusionist R2 draft in docs/art-direction (game-look.md, tokens.css, mocks/story-board.html).
  */
-export function StoryBoard({ state, debug = false }: { state: StoryboardState; debug?: boolean }) {
+export function StoryBoard({
+  state,
+  debug = false,
+  onKeeperLineEnded,
+}: {
+  state: StoryboardState;
+  debug?: boolean;
+  onKeeperLineEnded?: (momentId: string, line: number) => void;
+}) {
   const tower = towerStatusLines(state.tower);
   const paused = pauseText(state.pause, state.hunters);
   const warning = joinWarning(state.join);
   const header = headerCopy(state);
+  const keeperMoment = state.screen === "play" && state.moment?.id === KEEPER_MOMENT_ID;
   return (
-    <main className="bt-board" data-screen={state.screen} data-moment={state.moment?.id ?? ""}>
+    <main
+      className="bt-board"
+      data-screen={state.screen}
+      data-moment={state.moment?.id ?? ""}
+      data-board-layout={keeperMoment ? "keeper" : "standard"}
+    >
       <div className="bt-board-vignette" aria-hidden="true" />
       <header className="bt-board-header">
         <div className="bt-zone bt-panel">
@@ -72,7 +86,9 @@ export function StoryBoard({ state, debug = false }: { state: StoryboardState; d
           {state.screen === "pick-story" ? <PickStoryPanel /> : null}
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
           {state.screen === "begin" ? <BeginPanel /> : null}
-          {state.screen === "play" ? <PlayPanel state={state} /> : null}
+          {state.screen === "play" ? (
+            <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
+          ) : null}
           {state.screen === "quit" ? <QuitPanel /> : null}
           <NextPrompt label={nextPrompt(state)} />
         </section>
@@ -210,6 +226,15 @@ const NextPrompt = ({ label }: { label: string }) => (
   </div>
 );
 
+const MomentMeta = ({ moment }: { moment: NonNullable<StoryboardState["moment"]> }) => (
+  <span
+    className="bt-moment-meta"
+    aria-hidden="true"
+    data-still={moment.still ?? ""}
+    data-fallback={moment.fallbackAudio ?? ""}
+  />
+);
+
 const SplashPanel = ({ state }: { state: StoryboardState }) => (
   <article className="bt-page bt-parchment bt-ink-in" data-fortune="">
     <div>
@@ -274,17 +299,21 @@ const BeginPanel = () => (
   </article>
 );
 
-const PlayPanel = ({ state }: { state: StoryboardState }) => {
+const PlayPanel = ({
+  state,
+  onKeeperLineEnded,
+}: {
+  state: StoryboardState;
+  onKeeperLineEnded?: (momentId: string, line: number) => void;
+}) => {
   if (state.moment?.id === KEEPER_MOMENT_ID) {
-    const scene = sceneCopy(state.moment);
     return (
-      <article className="bt-page bt-parchment bt-ink-in">
-        <div>
-          <p className="bt-kicker">{scene.kicker}</p>
-          <h2>{scene.title}</h2>
-        </div>
-        <KeeperScene />
-      </article>
+      <section className="bt-keeper-stage bt-page-keeper" data-keeper-stage="">
+        <KeeperScene
+          keeperLine={state.keeperLine ?? 0}
+          onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
+        />
+      </section>
     );
   }
   if (!state.moment) {
@@ -298,6 +327,7 @@ const PlayPanel = ({ state }: { state: StoryboardState }) => {
   const text = state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text);
   return (
     <article className="bt-page bt-parchment bt-ink-in">
+      <MomentMeta moment={state.moment} />
       <div>
         <p className="bt-kicker">{scene.kicker}</p>
         <h2>{scene.title}</h2>

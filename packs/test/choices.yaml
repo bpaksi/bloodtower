@@ -1,1 +1,5 @@
 - {id: kept, label: "not run"}
+- id: grey-stair.door-choice
+  options:
+    - {id: oil-the-hinge, label: "Oil the hinge"}
+    - {id: force-it, label: "Force it"}

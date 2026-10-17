@@ -51,8 +51,11 @@ describe("story board", () => {
     expect(html).toContain("The Proving Ground");
     expect(html).toContain("The Hall");
     expect(html).not.toContain("Story board");
+    expect(html).toContain('data-fallback="sfx.bell"');
+    expect(html).toContain('data-still="fx.hall"');
+    expect(html).not.toContain("Still fx.hall");
     expect(html).not.toContain("Fallback sfx.bell");
-    expect(html).not.toContain("fx.hall");
+    expect(html).toContain('data-board-layout="standard"');
     expect(html).toContain("Waiting for someone to hold Alpha.");
     expect(html).toContain("device-1");
     expect(html).toContain("waiting");
@@ -151,6 +154,10 @@ describe("story board", () => {
     expect(html).toContain("Light them if you can. The key is at the bottom. It always is.");
     expect(html).toContain("Mind the third step.");
     expect(html).toContain("keep the lamp lit until you");
+    expect(html).toContain('data-board-layout="keeper"');
+    expect(html).toContain("data-keeper-stage");
+    expect(html).not.toContain("Join code");
+    expect(html).not.toContain("<h2");
     expect(html).not.toContain("Text unavailable.");
     expect(html).not.toContain("ipad:");
     expect(html).not.toMatch(interactive);
@@ -195,7 +202,7 @@ describe("story board", () => {
           screen: "pick-story",
           stage: "lobby",
           pause: null,
-          prompt: { id: "continue-pick-story", label: "Choose the story" },
+          prompt: { id: "continue-pick-story", label: "Choose Proving ground" },
           moment: null,
         }),
       }),
