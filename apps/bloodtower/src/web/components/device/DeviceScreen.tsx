@@ -2,7 +2,14 @@
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
 import { displayCaption } from "../../lib/caption.ts";
-import { SCREEN_NEXT, SCREEN_TITLE, TABLE_STORY, towerReady } from "../../lib/screens";
+import {
+  focusedStory,
+  neighborStory,
+  playersText,
+  SCREEN_NEXT,
+  SCREEN_TITLE,
+  towerReady,
+} from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { PortraitCard } from "../PortraitCard";
 import { deviceControls } from "./controls";
@@ -21,6 +28,7 @@ export function DeviceScreen({
   tower,
   onControl,
   onHold,
+  onFocusStory,
 }: {
   live: boolean;
   deviceId: string | null;
@@ -31,6 +39,7 @@ export function DeviceScreen({
   tower: TowerSnapshot;
   onControl?: (promptId: string, action: ControlAction, option?: string) => void;
   onHold?: (hunter: string, action: "take" | "release") => void;
+  onFocusStory?: (story: string) => void;
 }) {
   const controls = deviceControls({
     live,
@@ -96,7 +105,9 @@ export function DeviceScreen({
           skip={controls.continue && !ready}
         />
       ) : null}
-      {state.screen === "pick-story" ? <PickStoryDevice /> : null}
+      {state.screen === "pick-story" ? (
+        <PickStoryDevice stories={state.stories} live={live} onFocusStory={onFocusStory} />
+      ) : null}
       {state.screen === "party-join" ? (
         <PartyJoinDevice roster={roster} held={state.heldHunters} live={live} onHold={onHold} />
       ) : null}
@@ -241,14 +252,53 @@ const TowerConnectDevice = ({
   );
 };
 
-const PickStoryDevice = () => (
-  <article className="bt-card space-y-2">
-    <p className="bt-kicker">Story</p>
-    <h2 className="text-3xl">{TABLE_STORY.title}</h2>
-    <p className="text-xl">{TABLE_STORY.blurb}</p>
-    <p className="text-[var(--bt-muted)]">{TABLE_STORY.players}</p>
-  </article>
-);
+const PickStoryDevice = ({
+  stories,
+  live,
+  onFocusStory,
+}: {
+  stories: DeviceState["stories"];
+  live: boolean;
+  onFocusStory?: (story: string) => void;
+}) => {
+  const focus = focusedStory(stories);
+  const previous = neighborStory(stories, -1);
+  const next = neighborStory(stories, 1);
+  const players = focus ? playersText(focus.players) : null;
+  return (
+    <section className="flex flex-col gap-3">
+      <article className="bt-card space-y-2" data-story={focus?.id}>
+        <p className="bt-kicker">Story</p>
+        <h2 className="text-3xl">{focus ? focus.title : "Stories unavailable."}</h2>
+        {focus?.blurb ? <p className="text-xl">{focus.blurb}</p> : null}
+        {players ? <p className="text-[var(--bt-muted)]">{players}</p> : null}
+        {focus && !focus.loadable ? <p className="text-xl">Can't load</p> : null}
+      </article>
+      {previous && next ? (
+        <div className="flex gap-3">
+          <button
+            type="button"
+            className="bt-secondary"
+            data-action="story-previous"
+            disabled={!live}
+            onClick={() => onFocusStory?.(previous.id)}
+          >
+            Previous story
+          </button>
+          <button
+            type="button"
+            className="bt-secondary"
+            data-action="story-next"
+            disabled={!live}
+            onClick={() => onFocusStory?.(next.id)}
+          >
+            Next story
+          </button>
+        </div>
+      ) : null}
+    </section>
+  );
+};
 
 const PartyJoinDevice = ({
   roster,
