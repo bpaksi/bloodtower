@@ -43,15 +43,15 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
   };
 
   try {
-    const board = await newPage({ width: 1440, height: 900 }, false);
+    const board = await newPage({ width: 1280, height: 800 }, false);
     const boardFrames = captureFrames(board);
     const pad = await newPage();
     const d = device(pad);
     const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
     await test.step("splash, then tower-connect on the board", async () => {
-      await board.goto("/board", { waitUntil: "domcontentloaded" });
-      await expect(board.getByRole("heading", { name: "Story board" })).toBeVisible();
+      await board.goto("/board?debug=1", { waitUntil: "domcontentloaded" });
+      await expect(board.locator("main.bt-board")).toBeVisible();
       // First paint is the waiting splash. The host then publishes tower-connect.
       if ((await board.locator('[data-screen="splash"]').count()) > 0) {
         await shot(board, "board-splash");
@@ -133,6 +133,11 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(d.button("continue")).toBeEnabled();
       await shot(pad, "device-play");
       await shot(board, "board-play");
+
+      await d.button("quit").click();
+      await expect(pad.locator("main")).toHaveAttribute("data-screen", "quit");
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "quit");
+      await shot(board, "board-quit");
     });
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
