@@ -159,7 +159,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
 
     await test.step("AC-4: hold several hunters; Begin waits for all", async () => {
       await expect(a.button("continue")).toHaveText("Next: pick a story");
-      await expect(a.locator('[data-primary="true"]')).toHaveCount(1);
+      await expect(pageA.locator('[data-primary="true"]')).toHaveCount(1);
       await expect(a.button("play-without-tower")).toHaveCount(0);
       await a.button("continue").click();
       await expect(a.button("continue")).toHaveText("Choose the story");
