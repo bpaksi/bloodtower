@@ -122,8 +122,14 @@ describe("openSession", () => {
         versions,
       },
     });
-    expect(session.sendHold("alpha", "take")).toBe(true);
+    expect(session.sendFocusStory("dracula")).toBe(true);
+    expect(session.sendFocusStory("Not An Id")).toBe(false);
     expect(JSON.parse(first.sent[1] ?? "{}")).toMatchObject({
+      type: "focus-story",
+      payload: { story: "dracula" },
+    });
+    expect(session.sendHold("alpha", "take")).toBe(true);
+    expect(JSON.parse(first.sent[2] ?? "{}")).toMatchObject({
       type: "hold",
       payload: { hunter: "alpha", action: "take" },
     });

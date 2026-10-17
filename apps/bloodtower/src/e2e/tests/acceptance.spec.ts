@@ -1,12 +1,5 @@
 import { writeFileSync } from "node:fs";
-import {
-  type Browser,
-  type BrowserContext,
-  chromium,
-  expect,
-  type Page,
-  test,
-} from "@playwright/test";
+import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { formatTimingReport, readRun } from "../../server/scripts/timingReport.ts";
 import { joinQrSvg } from "../../web/lib/qr.ts";
 import {
@@ -32,17 +25,8 @@ const boardStates = (frames: readonly string[]) =>
     .filter((message) => message.type === "storyboardState")
     .map((message) => message.payload);
 
-const finishBoardInk = async (page: Page) => {
-  const frame = page.locator(".bt-page-keeper, [data-keeper-stage]").first();
-  await frame.waitFor({ state: "visible" });
-  await frame.evaluate((node) => {
-    for (const animation of node.getAnimations()) animation.finish();
-  });
-};
-
 test("the test pack's first night, end to end, on one board and two devices", async ({
   browser,
-  browserName,
 }, testInfo) => {
   test.setTimeout(90_000);
   const session = await startAcceptanceHost(testInfo);
@@ -50,7 +34,6 @@ test("the test pack's first night, end to end, on one board and two devices", as
   const viewport = testInfo.project.use.viewport ?? { width: 820, height: 1180 };
   const hasTouch = testInfo.project.use.hasTouch ?? false;
   const contexts: BrowserContext[] = [];
-  let boardBrowser: Browser | undefined;
   const newPage = async (size = viewport, touch = hasTouch) => {
     const context = await browser.newContext({ baseURL, viewport: size, hasTouch: touch });
     contexts.push(context);
@@ -58,15 +41,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
   };
 
   try {
-    // Story board runs on the Mac; WebKit on Linux crashes on the Keeper mouth frames.
-    if (browserName === "webkit") boardBrowser = await chromium.launch();
-    const boardContext = await (boardBrowser ?? browser).newContext({
-      baseURL,
-      viewport: { width: 1440, height: 900 },
-      hasTouch: false,
-    });
-    contexts.push(boardContext);
-    const board = await boardContext.newPage();
+    const board = await newPage({ width: 1440, height: 900 }, false);
     const boardFrames = captureFrames(board);
     const pageA = await newPage();
     const pageB = await newPage();
@@ -339,10 +314,6 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(
         board.getByText("Light them if you can. The key is at the bottom. It always is."),
       ).toBeVisible();
-      await finishBoardInk(board);
-      await board.evaluate(() => {
-        for (const audio of document.querySelectorAll("audio")) audio.pause();
-      });
       await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
       await expect(board.getByRole("img", { name: "The Keeper" })).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");
@@ -352,6 +323,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
         board.evaluate(() => {
           for (const audio of document.querySelectorAll("audio")) audio.pause();
         });
+      await holdKeeperAudio();
       await expect(a.button("continue")).toHaveAttribute("data-primary", "true");
       await a.button("continue").click();
       await holdKeeperAudio();
@@ -410,7 +382,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
         screen: "tower-connect",
         nextScreen: "pick-story",
       });
-      expect(won("continue-pick-story")).toMatchObject({
+      expect(won("continue-pick-story-test")).toMatchObject({
         winner: true,
         screen: "pick-story",
         nextScreen: "party-join",
@@ -427,7 +399,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "tower-calibrate:true",
         "tower-calibrate:false",
         "continue-tower-connect:true",
-        "continue-pick-story:true",
+        "continue-pick-story-test:true",
         "continue-party-join:true",
         "begin:true",
         "continue-0:true",
@@ -496,7 +468,6 @@ test("the test pack's first night, end to end, on one board and two devices", as
     await board.screenshot({ path: testInfo.outputPath("board-end.png"), fullPage: true });
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
-    await boardBrowser?.close().catch(() => undefined);
     await host.close();
   }
 });

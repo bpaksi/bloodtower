@@ -78,6 +78,9 @@ export function LiveDevice() {
         onHold={(hunter, action) => {
           client.current?.sendHold(hunter, action);
         }}
+        onFocusStory={(story) => {
+          client.current?.sendFocusStory(story);
+        }}
       />
       <p className="px-6 pb-8 text-[var(--bt-muted)]">
         <a href="/join">Back to join</a>

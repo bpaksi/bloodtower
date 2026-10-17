@@ -1,4 +1,12 @@
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { privateHunterOf, type ServerMessage, serverMessageSchema } from "bloodtower-protocols";
@@ -48,6 +56,7 @@ const start = async (
     devOrigins?: string[];
     lanHost?: () => string | undefined;
     joinPagePort?: number;
+    packsDir?: string;
   },
 ) => {
   const root = tempDir();
@@ -56,7 +65,7 @@ const start = async (
     port: 0,
     host: "127.0.0.1",
     webRoot: root,
-    packsDir: loadConfig().packsDir,
+    packsDir: extra?.packsDir ?? loadConfig().packsDir,
     databasePath: join(tempDir(), "session.sqlite"),
     tower,
     towerWatchMs: 0,
@@ -186,7 +195,7 @@ const step = async (
 /** The three steps before play, then Begin. Any joined iPad may send each one. */
 const walkToPlay = async (client: Client) => {
   await step(client, "continue-tower-connect", "continue", "pick-story");
-  await step(client, "continue-pick-story", "continue", "party-join");
+  await step(client, "continue-pick-story-test", "continue", "party-join");
   await step(client, "continue-party-join", "continue", "begin");
   await step(client, "begin", "begin", "play");
 };
@@ -710,7 +719,56 @@ describe("session hub", () => {
     expect(state.payload.keeperLine ?? null).not.toBe(1);
   });
 
-  it("does not open a port when the test pack is missing", async () => {
+  it("lists every story, moves the highlight for the board, and binds the one chosen", async () => {
+    const packs = tempDir();
+    cpSync(join(loadConfig().packsDir, "test"), join(packs, "test"), { recursive: true });
+    cpSync(join(loadConfig().packsDir, "test"), join(packs, "second"), { recursive: true });
+    const manifest = join(packs, "second", "pack.yaml");
+    writeFileSync(
+      manifest,
+      readFileSync(manifest, "utf8")
+        .replace("pack_id: test", "pack_id: second")
+        .replace("title: Proving ground", "title: Second story"),
+    );
+    mkdirSync(join(packs, "broken"));
+    writeFileSync(join(packs, "broken", "pack.yaml"), "pack_id: broken\n");
+    const { host } = await start(createMockTower(), { packsDir: packs });
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await step(device, "continue-tower-connect", "continue", "pick-story");
+
+    const boardStories = () => {
+      const state = latest(board.log, "storyboardState");
+      return state?.type === "storyboardState" ? state.payload.stories : undefined;
+    };
+    await waitFor(boardStories, (stories) => stories?.cards.length === 3);
+    expect(boardStories()?.cards.map((card) => [card.id, card.loadable])).toEqual([
+      ["broken", false],
+      ["second", true],
+      ["test", true],
+    ]);
+    // The session starts on the first story that loads; the greyed door is never current.
+    expect(boardStories()?.current).toBe("second");
+
+    send(device.socket, "focus-story", { story: "test" });
+    await waitFor(boardStories, (stories) => stories?.focus === "test");
+    expect(boardStories()?.current).toBe("second");
+    await step(device, "continue-pick-story-test", "continue", "party-join");
+    await waitFor(boardStories, (stories) => stories?.current === "test");
+    const deviceState = latest(device.log, "deviceState");
+    if (deviceState?.type !== "deviceState") throw new Error("device");
+    expect(deviceState.payload.roster?.map((hunter) => hunter.id)).toContain("alpha");
+
+    // Off Pick Story the highlight no longer moves, and the board cannot move it at all.
+    send(device.socket, "focus-story", { story: "second" });
+    send(board.socket, "focus-story", { story: "second" });
+    await until(board.inbox, board.log, (messages) =>
+      messages.some((message) => message.type === "error"),
+    );
+    expect(boardStories()?.focus).toBe("test");
+  });
+
+  it("does not open a port when no story pack loads", async () => {
     const tower = createMockTower();
     const root = tempDir();
     writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
@@ -725,7 +783,7 @@ describe("session hub", () => {
         tower,
         towerWatchMs: 0,
       }),
-    ).rejects.toThrow(/test pack/);
+    ).rejects.toThrow(/No story pack/);
     tower.close();
   });
 

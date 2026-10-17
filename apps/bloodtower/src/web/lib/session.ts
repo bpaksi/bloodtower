@@ -1,6 +1,7 @@
 import {
   type ControlAction,
   controlMessageSchema,
+  focusStoryMessageSchema,
   helloPayloadSchema,
   holdMessageSchema,
   keeperLineEndedMessageSchema,
@@ -88,6 +89,8 @@ export interface SessionClient {
   sendHold: (hunter: string, action: "take" | "release") => boolean;
   /** `option` is set only for a `pick`. */
   sendControl: (promptId: string, action: ControlAction, option?: string) => boolean;
+  /** Moves the highlight on Pick Story. Not a press: it takes no lock. */
+  sendFocusStory: (story: string) => boolean;
   /** The story board only: the Keeper line that finished on the board (D7 exception). */
   sendKeeperLineEnded: (momentId: string, line: number) => boolean;
   close: () => void;
@@ -205,6 +208,15 @@ export const openSession = (options: SessionOptions): SessionClient => {
         v: PROTOCOL_VERSION,
         type: "control",
         payload: option === undefined ? { promptId, action } : { promptId, action, option },
+      });
+      if (!message.success) return false;
+      return sendRaw(message.data);
+    },
+    sendFocusStory: (story) => {
+      const message = focusStoryMessageSchema.safeParse({
+        v: PROTOCOL_VERSION,
+        type: "focus-story",
+        payload: { story },
       });
       if (!message.success) return false;
       return sendRaw(message.data);
