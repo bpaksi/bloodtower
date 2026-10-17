@@ -13,6 +13,7 @@ import {
   towerStripState,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
+import { PortraitCard } from "../PortraitCard";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
 
@@ -131,6 +132,23 @@ const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => (
   </section>
 );
 
+const PartyPortraits = ({ hunters }: { hunters: StoryboardState["hunters"] }) =>
+  hunters.length === 0 ? (
+    <HunterList hunters={hunters} />
+  ) : (
+    <ul className="grid grid-cols-4 gap-3">
+      {hunters.map((hunter) => (
+        <li key={hunter.id} className="bt-card min-w-0 !px-3 !py-2">
+          <PortraitCard
+            compact
+            name={hunter.name}
+            label={`${hunter.name} — ${holdingText(hunter)}`}
+          />
+        </li>
+      ))}
+    </ul>
+  );
+
 const SplashPanel = ({ state }: { state: StoryboardState }) => (
   <>
     <p className="text-6xl leading-tight">Bloodtower</p>
@@ -184,7 +202,7 @@ const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
         {total === 0 ? "Hunters unavailable." : `${claimed} of ${total} hunters claimed`}
       </p>
       <JoinBlock join={state.join} large />
-      <HunterList hunters={state.hunters} />
+      <PartyPortraits hunters={state.hunters} />
       <p className="text-5xl leading-tight">
         {state.prompt
           ? state.prompt.label
