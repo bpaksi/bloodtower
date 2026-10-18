@@ -378,14 +378,28 @@ export const coverSchema = z
     message: "V-1: cover is a file directly inside assets/, such as assets/cover.png.",
   });
 
-const labelSchema = z.string().min(1).max(80);
+/**
+ * Limits on manifest `settings`. The board and device states carry the settings with the same
+ * limits (`gameSettingsSchema`), so a pack over them fails the lint instead of breaking a frame.
+ */
+export const SETTINGS_MAX = 16;
+export const SETTING_OPTIONS_MAX = 16;
+/** A setting or option id travels in a `set` press, so it fits the control option id (64). */
+export const SETTING_ID_MAX = 64;
+export const SETTING_LABEL_MAX = 80;
+
+const settingIdSchema = idSchema.max(SETTING_ID_MAX);
+const settingLabelSchema = z.string().min(1).max(SETTING_LABEL_MAX);
 
 /** A game setting the player picks on Game settings (R3-UI-22). */
 export const settingSchema = z.strictObject({
-  id: idSchema,
-  label: labelSchema,
-  options: z.array(z.strictObject({ id: idSchema, label: labelSchema })).min(1),
-  default: idSchema,
+  id: settingIdSchema,
+  label: settingLabelSchema,
+  options: z
+    .array(z.strictObject({ id: settingIdSchema, label: settingLabelSchema }))
+    .min(1)
+    .max(SETTING_OPTIONS_MAX),
+  default: settingIdSchema,
 });
 export type GameSetting = z.infer<typeof settingSchema>;
 
@@ -430,7 +444,7 @@ const metadataShape = {
   tagline: z.string().min(1).max(200).optional(),
   cover: coverSchema.optional(),
   tower: z.enum(["required", "optional", "none"]).default("optional"),
-  settings: z.array(settingSchema).default([]),
+  settings: z.array(settingSchema).max(SETTINGS_MAX).default([]),
   playable: z.boolean().default(true),
 };
 

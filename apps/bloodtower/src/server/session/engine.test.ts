@@ -1,4 +1,14 @@
-import type { ControlAction, GameSetting, Pack, TowerSnapshot } from "bloodtower-protocols";
+import {
+  type ControlAction,
+  type GameSetting,
+  type Pack,
+  packSchema,
+  SETTING_ID_MAX,
+  SETTING_LABEL_MAX,
+  SETTING_OPTIONS_MAX,
+  SETTINGS_MAX,
+  type TowerSnapshot,
+} from "bloodtower-protocols";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../config.ts";
 import { createPressLog } from "../control/lock.ts";
@@ -1307,6 +1317,35 @@ describe("game settings", () => {
         "lantern",
       ]);
       expect(shown?.chosen.lantern).toBe("dark");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("sends board and device state for a pack at every settings limit the manifest allows", () => {
+    const longId = (index: number) =>
+      `${"s".repeat(SETTING_ID_MAX - 3)}${String(index).padStart(3, "0")}`;
+    const options = Array.from({ length: SETTING_OPTIONS_MAX }, (_, index) => ({
+      id: longId(index),
+      label: "x".repeat(SETTING_LABEL_MAX),
+    }));
+    const settings = Array.from({ length: SETTINGS_MAX }, (_, index) => ({
+      id: longId(index),
+      label: "y".repeat(SETTING_LABEL_MAX),
+      options,
+      default: longId(0),
+    }));
+    const pack = packSchema.parse({ ...packOrThrow().pack, settings });
+    const { opened, engine, deviceId } = atGameSettings(pack);
+    try {
+      expect(engine.projectStoryboard(TOWER, JOIN).gameSettings?.settings).toHaveLength(
+        SETTINGS_MAX,
+      );
+      const last = longId(SETTING_OPTIONS_MAX - 1);
+      winStep(engine, deviceId, "set-0", "set", last, longId(SETTINGS_MAX - 1));
+      expect(engine.projectDevice(deviceId).gameSettings?.chosen[longId(SETTINGS_MAX - 1)]).toBe(
+        last,
+      );
     } finally {
       opened.close();
     }

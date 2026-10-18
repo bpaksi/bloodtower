@@ -15,7 +15,15 @@ import {
   tokenSchema,
 } from "./devices.ts";
 import { KEEPER_LINE_COUNT, KEEPER_MOMENT_ID } from "./keeper.ts";
-import { assetIdSchema, idSchema, momentIdSchema, privateHunterOf } from "./pack.ts";
+import {
+  assetIdSchema,
+  idSchema,
+  momentIdSchema,
+  privateHunterOf,
+  SETTING_LABEL_MAX,
+  SETTING_OPTIONS_MAX,
+  SETTINGS_MAX,
+} from "./pack.ts";
 import { pauseCauseSchema } from "./timing.ts";
 
 export const PROTOCOL_VERSION = 1;
@@ -353,14 +361,19 @@ export const gameSettingsSchema = z
       .array(
         z.strictObject({
           id: optionIdSchema,
-          label: z.string().min(1).max(80),
+          label: z.string().min(1).max(SETTING_LABEL_MAX),
           options: z
-            .array(z.strictObject({ id: optionIdSchema, label: z.string().min(1).max(80) }))
+            .array(
+              z.strictObject({
+                id: optionIdSchema,
+                label: z.string().min(1).max(SETTING_LABEL_MAX),
+              }),
+            )
             .min(1)
-            .max(16),
+            .max(SETTING_OPTIONS_MAX),
         }),
       )
-      .max(16),
+      .max(SETTINGS_MAX),
     chosen: z.record(optionIdSchema, optionIdSchema),
   })
   .superRefine((value, ctx) => {
