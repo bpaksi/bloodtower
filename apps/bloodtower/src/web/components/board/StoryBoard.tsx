@@ -1,7 +1,6 @@
 import type { StoryboardState } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
-import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { portraitSrc } from "../../lib/portrait.ts";
 import { JoinQr } from "../../lib/qr";
 import {
@@ -18,6 +17,7 @@ import {
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { PortraitCard } from "../PortraitCard";
+import { CameraStill } from "./CameraStill";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
 
@@ -396,10 +396,12 @@ const PlayPanel = ({
         </p>
       </div>
       {still ? (
-        <div className="bt-still">
-          {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
-          <img alt="" data-still={still} src={packStillImageUrl(still, state.packId)} />
-        </div>
+        <CameraStill
+          momentId={state.moment.id}
+          packId={state.packId}
+          assetId={still}
+          spokenText={state.moment.text ?? ""}
+        />
       ) : null}
     </article>
   );

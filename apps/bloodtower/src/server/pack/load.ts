@@ -15,6 +15,7 @@ import {
   type PackAssetIndex,
   validateAssetsFolder,
 } from "./assets.ts";
+import { PACK_CAMERA_DIR, validateCameraFolder } from "./camera.ts";
 
 /**
  * Reads one pack folder (YAML or JSON) into the frozen pack schema.
@@ -158,6 +159,10 @@ export const loadPackDir = (dir: string): PackLoadResult => {
     if (name === "README.md") continue;
     if (name === PACK_ASSETS_DIR) {
       validateAssetsFolder(root, (item) => issues.push(item));
+      continue;
+    }
+    if (name === PACK_CAMERA_DIR) {
+      validateCameraFolder(root, (item) => issues.push(item));
       continue;
     }
     const dot = name.lastIndexOf(".");

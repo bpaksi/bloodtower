@@ -1,0 +1,13 @@
+{
+  "id": "grey-stair.04",
+  "still": "fx-stair.png",
+  "cues": [
+    {
+      "start": 0,
+      "end": 10,
+      "from": { "x": 0.5, "y": 0.38, "w": 0.5, "h": 0.36 },
+      "to": { "x": 0.5, "y": 0.52, "w": 0.98, "h": 0.88 },
+      "ease": "ease-in-out"
+    }
+  ]
+}

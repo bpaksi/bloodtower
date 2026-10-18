@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, join, sep } from "node:path";
 import type { Asset, Pack } from "bloodtower-protocols";
+import type { PackCameraIndex } from "./camera.ts";
+import { indexPackCamera } from "./camera.ts";
 import type { PackLoadIssue } from "./load.ts";
 
 export const PACK_ASSETS_DIR = "assets";
@@ -25,6 +27,8 @@ export interface PackAssetIndex {
   byId: ReadonlyMap<string, ResolvedPackAsset>;
   /** Basename → absolute path. Only declared assets that resolved. */
   byBasename: ReadonlyMap<string, string>;
+  /** Optional camera-track sidecars under `<pack>/camera/`. */
+  camera: PackCameraIndex;
   warnings: readonly PackLoadIssue[];
 }
 
@@ -183,5 +187,13 @@ export const indexPackAssets = (packRoot: string, pack: Pack): PackAssetIndex =>
     byId.set(asset.id, entry);
     byBasename.set(base, absolute);
   }
-  return { packId: pack.pack_id, packRoot, byId, byBasename, warnings };
+  const camera = indexPackCamera(packRoot);
+  return {
+    packId: pack.pack_id,
+    packRoot,
+    byId,
+    byBasename,
+    camera,
+    warnings: [...warnings, ...camera.warnings],
+  };
 };

@@ -19,3 +19,4 @@
 - {id: por.keeper, type: portrait, target: storyboard, status: draft, path: keeper-portrait.txt}
 - {id: av.keeper, type: clip, target: storyboard, status: draft, path: keeper-clip.txt}
 - {id: fx.stair, type: still, target: storyboard, status: final, path: fx-stair.png}
+- {id: fx.stair-n2, type: still, target: storyboard, status: final, path: fx-stair-n2.png}
