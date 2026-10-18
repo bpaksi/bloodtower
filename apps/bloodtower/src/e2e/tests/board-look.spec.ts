@@ -16,9 +16,10 @@ const assertBoardFits = async (page: Page, opts?: { keeper?: boolean }) => {
   }
   if (opts?.keeper) {
     const portrait = page.getByRole("img", { name: "The Keeper" });
-    const caption = page.locator('[data-talking-avatar="keeper"] figcaption');
+    const caption = page.locator("[data-board-caption]");
     await expect(portrait).toBeVisible();
     await expect(caption).toBeVisible();
+    await expect(caption).toContainText("The Keeper:");
     await expect(portrait).toBeInViewport({ ratio: 1 });
     await expect(caption).toBeInViewport({ ratio: 1 });
   }
@@ -113,12 +114,28 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await d.button("continue").click();
     await expect(board.getByText(/At the top, a door/)).toBeVisible();
     await d.button("continue").click();
-    await expect(
-      board.getByText("Light them if you can. The key is at the bottom. It always is."),
-    ).toBeVisible();
+    await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
+    const keeperCaption = board.locator("[data-board-caption]");
+    await expect(keeperCaption).toBeVisible();
+    await expect(keeperCaption).toContainText(
+      "The Keeper: Light them if you can. The key is at the bottom. It always is.",
+    );
     await expect(board.locator(".bt-board-title h1")).toContainText("The Keeper");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
-    await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
+    const linePlaying = await board
+      .waitForFunction(
+        () => {
+          const audio = document.querySelector<HTMLAudioElement>("[data-keeper-plate] audio");
+          return audio !== null && !audio.paused && audio.currentTime > 0;
+        },
+        { timeout: 8_000 },
+      )
+      .then(() => true)
+      .catch(() => false);
+    if (linePlaying) {
+      await expect(keeperCaption).toBeVisible();
+      await expect(keeperCaption).not.toBeEmpty();
+    }
     await board.evaluate(() => {
       for (const audio of document.querySelectorAll("audio")) audio.pause();
     });

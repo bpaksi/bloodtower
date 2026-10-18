@@ -136,11 +136,12 @@ describe("story board", () => {
     expect(html).toContain('data-still="fx.stair"');
   });
 
-  it("renders the Keeper captions for grey-stair.03 before the avatar loads", () => {
+  it("renders the Keeper caption for the current line before the avatar loads", () => {
     const html = renderToStaticMarkup(
       createElement(StoryBoard, {
         state: {
           ...state(),
+          keeperLine: 0,
           moment: {
             id: "grey-stair.03",
             kind: "clip",
@@ -153,9 +154,13 @@ describe("story board", () => {
     );
     expect(html).toContain("The Grey Stair");
     expect(html).toContain("The Keeper");
-    expect(html).toContain("Light them if you can. The key is at the bottom. It always is.");
-    expect(html).toContain("Mind the third step.");
-    expect(html).toContain("keep the lamp lit until you");
+    expect(html).toContain(
+      "The Keeper: Light them if you can. The key is at the bottom. It always is.",
+    );
+    expect(html).toContain('data-board-caption=""');
+    expect(html).toContain('data-keeper-line="ts-keeper-001"');
+    expect(html).not.toContain("Mind the third step.");
+    expect(html).not.toContain("keep the lamp lit until you");
     expect(html).toContain('data-board-layout="keeper"');
     expect(html).toContain('data-keeper-stage=""');
     expect(html).toContain("bt-page-keeper");
@@ -165,7 +170,12 @@ describe("story board", () => {
     expect(html).not.toContain("<h2>The Keeper");
     expect(html).not.toContain("Text unavailable.");
     expect(html).not.toContain("ipad:");
-    expect(html).not.toMatch(interactive);
+    expect(html).toContain('data-caption-toggle=""');
+    const withoutCaptionToggle = html.replace(
+      /<button[^>]*data-caption-toggle=""[^>]*>[\s\S]*?<\/button>/gi,
+      "",
+    );
+    expect(withoutCaptionToggle).not.toMatch(interactive);
   });
 
   it("shows unavailable when the session has not started", () => {

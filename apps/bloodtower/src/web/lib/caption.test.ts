@@ -17,6 +17,12 @@ describe("displayCaption", () => {
     expect(displayCaption("Hi [pause 1][pause 0.5] there.")).toBe("Hi there.");
   });
 
+  it("strips parenthetical stage directions", () => {
+    expect(displayCaption("Stay close. (whisper) The stair is narrow.")).toBe(
+      "Stay close. The stair is narrow.",
+    );
+  });
+
   it("leaves copy without a pause tag unchanged", () => {
     expect(displayCaption("No tags here.")).toBe("No tags here.");
     expect(displayCaption("Keep [lamp] brackets that are not a pause.")).toBe(
