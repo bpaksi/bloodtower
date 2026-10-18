@@ -606,6 +606,7 @@
 }
 
 .bt-keeper {
+  position: relative;
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
@@ -638,16 +639,46 @@
   overflow: hidden;
 }
 
-.bt-keeper figcaption {
+/* The player figcaption is clipped inside the avatar flex slot; board copy uses data-board-caption. */
+.bt-keeper [data-talking-avatar] > figcaption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.bt-keeper-captions .bt-caption {
   flex-shrink: 0;
   margin: 0;
   color: var(--bt-candle);
   font-family: var(--bt-font-body);
-  font-size: 1.75rem;
+  font-size: var(--bt-size-caption);
   font-style: italic;
   font-weight: 500;
   line-height: 1.25;
   text-align: center;
+}
+
+.bt-caption-toggle {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  z-index: 2;
+  padding: 0.15rem 0.45rem;
+  color: var(--bt-parchment-dark);
+  font-family: var(--bt-font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgb(20 16 12 / 0.72);
+  border: 1px solid var(--bt-iron-gall);
+  cursor: pointer;
 }
 
 .bt-keeper audio {
@@ -791,7 +822,7 @@
     padding: 0.1rem;
   }
 
-  .bt-keeper figcaption,
+  .bt-keeper-captions .bt-caption,
   .bt-board .bt-caption {
     font-size: 1.75rem;
     line-height: 1.15;

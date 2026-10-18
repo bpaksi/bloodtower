@@ -311,9 +311,12 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.getByText(/At the top, a door/)).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");
       await a.button("continue").click();
-      await expect(
-        board.getByText("Light them if you can. The key is at the bottom. It always is."),
-      ).toBeVisible();
+      const keeperCaption = board.locator("[data-board-caption]");
+      await expect(keeperCaption).toBeVisible();
+      await expect(keeperCaption).toHaveAttribute("data-keeper-line", "ts-keeper-001");
+      await expect(keeperCaption).toContainText(
+        "The Keeper: Light them if you can. The key is at the bottom. It always is.",
+      );
       await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
       await expect(board.getByRole("img", { name: "The Keeper" })).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");

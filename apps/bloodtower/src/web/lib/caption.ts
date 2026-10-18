@@ -6,6 +6,13 @@ const PAUSE_TAG = /\[pause\s+\d+(?:\.\d+)?\]/gi;
 const stripPauseTags = (text: string): string =>
   text.replace(PAUSE_TAG, " ").replace(/\s+/g, " ").trim();
 
+/** Stage directions like `(whisper)` never reach the board or a device caption. */
+const stripStyleDirections = (text: string): string =>
+  text
+    .replace(/\s*\([^)]*\)\s*/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+
 /**
  * Copy shown on the Story board or a device.
  * `[pause N]` pacing tags stay in the pack and the avatar source; they never reach the screen.
@@ -13,8 +20,8 @@ const stripPauseTags = (text: string): string =>
  */
 export const displayCaption = (text: string): string => {
   try {
-    return captionText(text);
+    return stripStyleDirections(captionText(text));
   } catch {
-    return stripPauseTags(text);
+    return stripStyleDirections(stripPauseTags(text));
   }
 };
