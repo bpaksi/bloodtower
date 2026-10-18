@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="120" viewBox="0 0 120 120">
+  <title>Bloodtower dialog frame (9-slice, slice 40)</title>
+  <desc>Illusionist asset dialog-frame. Ink double rule (iron-gall #2a1d14), thin blood rule (#8e1b1b), corner lozenge and trefoil (vellum-shadow accents). Transparent ground: the parchment comes from the element background. border-image-slice: 40 (all sides). Edges contain only straight rules, so stretch and repeat are both lossless.</desc>
+  <defs>
+    <g id="corner">
+      <!-- lozenge where the blood rule turns, with a cut-out eye -->
+      <path fill="#2a1d14" fill-rule="evenodd" d="M20 11.5 L28.5 20 L20 28.5 L11.5 20 Z M20 16.5 L23.5 20 L20 23.5 L16.5 20 Z"/>
+      <!-- blood seed in the eye -->
+      <rect x="18.6" y="18.6" width="2.8" height="2.8" transform="rotate(45 20 20)" fill="#8e1b1b"/>
+      <!-- stem and trefoil reaching inward -->
+      <path d="M25.5 25.5 L30.5 30.5" stroke="#2a1d14" stroke-width="1.5"/>
+      <path fill="#2a1d14" d="M29.6 29.6 C31.2 28.4 34.6 30.2 37 37 C30.2 34.6 28.4 31.2 29.6 29.6 Z"/>
+      <ellipse cx="33.6" cy="27.6" rx="2.6" ry="1.4" transform="rotate(-25 33.6 27.6)" fill="#2a1d14"/>
+      <ellipse cx="27.6" cy="33.6" rx="2.6" ry="1.4" transform="rotate(-65 27.6 33.6)" fill="#2a1d14"/>
+      <!-- small ink block binding the double rule at the outer corner -->
+      <rect x="0" y="0" width="9" height="9" fill="#2a1d14"/>
+      <rect x="4.5" y="4.5" width="2.2" height="2.2" fill="#8a6f47"/>
+    </g>
+  </defs>
+  <!-- outer thick rule -->
+  <rect x="2" y="2" width="116" height="116" fill="none" stroke="#2a1d14" stroke-width="4"/>
+  <!-- inner hairline of the double rule -->
+  <rect x="7.75" y="7.75" width="104.5" height="104.5" fill="none" stroke="#2a1d14" stroke-width="1.5"/>
+  <!-- blood inner rule -->
+  <path d="M28 20 H92 M28 100 H92 M20 28 V92 M100 28 V92" fill="none" stroke="#8e1b1b" stroke-width="2"/>
+  <use xlink:href="#corner"/>
+  <use xlink:href="#corner" transform="matrix(-1 0 0 1 120 0)"/>
+  <use xlink:href="#corner" transform="matrix(1 0 0 -1 0 120)"/>
+  <use xlink:href="#corner" transform="matrix(-1 0 0 -1 120 120)"/>
+</svg>
