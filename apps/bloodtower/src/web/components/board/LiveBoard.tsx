@@ -33,7 +33,7 @@ const localStore = (): Storage | undefined => {
 
 /** After the first input: the landing sting, and the Sound dialog before Pick Game. */
 const afterFirstInput = (current: FlowScreen, player: BoardAudio | null, openSound: () => void) => {
-  if (current === "splash") player?.play(SIGNATURE.sting, "music", 6.5);
+  if (isBeforePickGame(current)) player?.play(SIGNATURE.sting, "music", 6.5);
   if (isBeforePickGame(current)) openSound();
 };
 
@@ -86,8 +86,8 @@ export function LiveBoard() {
     return () => session.close();
   }, []);
 
-  // The first click or keypress unlocks audio. On the landing screen it is the moment the window
-  // lights come on, so it plays the sting. Before Pick Game it opens the Sound dialog.
+  // The first click or keypress unlocks audio. Before Pick Game it is the moment the window
+  // lights come on, so it plays the sting and opens the Sound dialog.
   // Listeners go once the audio is unlocked.
   useEffect(() => {
     const onFirstInput = () => {
