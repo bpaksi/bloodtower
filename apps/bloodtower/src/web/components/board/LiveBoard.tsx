@@ -88,22 +88,29 @@ export function LiveBoard() {
 
   // The first click or keypress unlocks audio. Before Pick Game it is the moment the window
   // lights come on, so it plays the sting and opens the Sound dialog.
-  // Listeners go once the audio is unlocked.
+  // A key such as Escape is not a user activation and leaves the context suspended, so every
+  // input resumes it, and the listeners go only once the audio is running.
   useEffect(() => {
-    const onFirstInput = () => {
-      window.removeEventListener("pointerdown", onFirstInput);
-      window.removeEventListener("keydown", onFirstInput);
+    let first = true;
+    const onInput = () => {
       const player = audio.current;
       if (!player) return;
+      if (player.running) {
+        window.removeEventListener("pointerdown", onInput);
+        window.removeEventListener("keydown", onInput);
+        return;
+      }
       player.unlock();
+      if (!first) return;
+      first = false;
       if (received.current) afterFirstInput(screen.current, player, () => setSoundOpen(true));
       else inputBeforeState.current = true;
     };
-    window.addEventListener("pointerdown", onFirstInput);
-    window.addEventListener("keydown", onFirstInput);
+    window.addEventListener("pointerdown", onInput);
+    window.addEventListener("keydown", onInput);
     return () => {
-      window.removeEventListener("pointerdown", onFirstInput);
-      window.removeEventListener("keydown", onFirstInput);
+      window.removeEventListener("pointerdown", onInput);
+      window.removeEventListener("keydown", onInput);
     };
   }, []);
 

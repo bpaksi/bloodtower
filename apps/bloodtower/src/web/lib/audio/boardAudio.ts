@@ -36,9 +36,20 @@ export class BoardAudio {
     this.origin = origin;
   }
 
-  /** Call from a click or keypress. Safe to call again. */
+  /** True once the context exists and is playing. */
+  get running(): boolean {
+    return this.context?.state === "running";
+  }
+
+  /**
+   * Call from a click or keypress. Safe to call again. A key such as Escape is not a user
+   * activation, so the context can start suspended; a later call resumes it.
+   */
   unlock(): void {
-    if (this.context) return;
+    if (this.context) {
+      this.resume();
+      return;
+    }
     const Context =
       window.AudioContext ??
       (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -51,9 +62,17 @@ export class BoardAudio {
       gain.connect(context.destination);
       this.gains.set(channel, gain);
     }
-    void context.resume();
+    this.resume();
     this.mixer = new LayerMixer(this.backend(context));
     if (this.pending) this.mixer.apply(this.pending);
+  }
+
+  private resume(): void {
+    const context = this.context;
+    if (!context || context.state === "running") return;
+    context.resume().catch((error: unknown) => {
+      console.warn("[bloodtower] audio still suspended", error);
+    });
   }
 
   setLevels(levels: Levels): void {
@@ -74,6 +93,7 @@ export class BoardAudio {
 
   /** The short test clip behind a Sound dialog slider. It stops by itself. */
   test(channel: Channel): void {
+    this.resume();
     const context = this.context;
     const gain = this.gains.get(channel);
     if (!context || !gain) return;

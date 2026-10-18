@@ -54,8 +54,15 @@ export const pickLayers = (input: LayerInput): Layers => {
       music: moodFile(input.packId, "waiting") ?? null,
     };
   }
-  // The landing, the Sound dialog and Pick Game all play the signature bed (layer 1).
-  if (isBeforePickGame(input.screen) || input.screen === "pick-story") return signatureOnly();
+  // The landing, the Sound dialog, Pick Game and Not playable yet all play the signature bed
+  // (layer 1). Not playable yet binds no pack, so no game has been chosen.
+  if (
+    isBeforePickGame(input.screen) ||
+    input.screen === "pick-story" ||
+    input.screen === "not-playable"
+  ) {
+    return signatureOnly();
+  }
   // Game settings, Connect Tower, Claim Hunters and setup: the pack's start-up mood (layer 2).
   return {
     ambient: moodFile(input.packId, "startup") ?? SIGNATURE.bed,
@@ -63,6 +70,9 @@ export const pickLayers = (input: LayerInput): Layers => {
   };
 };
 
-/** True on the one transition that means a game was chosen: Pick Game to the next screen. */
+/**
+ * True on the one transition that means a game was chosen: Pick Game to the next screen.
+ * Pick Game to Not playable yet is not a choice; the pack stays unbound.
+ */
 export const isGameChosen = (from: FlowScreen | null, to: FlowScreen): boolean =>
-  from === "pick-story" && to !== "pick-story";
+  from === "pick-story" && to !== "pick-story" && to !== "not-playable";

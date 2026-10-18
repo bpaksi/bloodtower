@@ -18,6 +18,13 @@ describe("pickLayers (stage to file)", () => {
     });
   });
 
+  it("keeps the signature bed on Not playable yet, since no pack is bound", () => {
+    expect(pickLayers({ ...base, screen: "not-playable" })).toEqual({
+      ambient: SIGNATURE.bed,
+      music: null,
+    });
+  });
+
   it("crossfades to the pack's start-up mood once a game is chosen (layer 2)", () => {
     for (const screen of ["party-join", "begin"] as const) {
       expect(pickLayers({ ...base, screen })).toEqual({
@@ -82,6 +89,8 @@ describe("pickLayers (stage to file)", () => {
   it("detects the game-chosen moment only when leaving Pick Game", () => {
     expect(isGameChosen("pick-story", "party-join")).toBe(true);
     expect(isGameChosen("pick-story", "pick-story")).toBe(false);
+    expect(isGameChosen("pick-story", "not-playable")).toBe(false);
+    expect(isGameChosen("not-playable", "pick-story")).toBe(false);
     expect(isGameChosen("splash", "pick-story")).toBe(false);
     expect(isGameChosen(null, "tower-connect")).toBe(false);
   });
