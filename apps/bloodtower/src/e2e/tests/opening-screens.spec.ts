@@ -47,21 +47,20 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
     const d = device(pad);
     const joinPage = `${baseURL}/join?code=${host.joinCode}`;
 
-    await test.step("splash, then tower-connect on the board", async () => {
+    await test.step("splash, then Pick Story on the board", async () => {
       await board.goto("/board?debug=1", { waitUntil: "domcontentloaded" });
       await expect(board.locator("main.bt-board")).toBeVisible();
-      // First paint is the waiting splash. The host then publishes tower-connect.
+      // First paint is the waiting splash. The host then publishes Pick Story: Connect Tower
+      // now comes after Game settings (R3-UI-22).
       if ((await board.locator('[data-screen="splash"]').count()) > 0) {
         await shot(board, "board-splash");
       }
-      await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-      await expect(board.getByText("Tower Connect")).toBeVisible();
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
       await expect(board.locator("[data-status-strip]")).toBeVisible();
       await expect(board.locator("[data-status='tower']")).toContainText("no tower");
-      await expect(board.locator("[data-status='step']")).toContainText("Tower Connect");
+      await expect(board.locator("[data-status='step']")).toContainText("Pick Story");
       await expect(board.getByRole("img", { name: "Join code" })).toBeVisible();
       await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
-      await shot(board, "board-tower-connect");
     });
 
     await test.step("iPad joins and walks each pre-play screen", async () => {
@@ -75,16 +74,6 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await pad.goto(joinPage);
       await expect(pad).toHaveURL(/\/device/);
       expect(await pad.locator("body").innerText()).not.toMatch(/Device token/);
-      await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-      await expect(pad.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
-      await expect(d.button("play-without-tower")).toBeVisible();
-      await expect(d.button("continue")).toBeHidden();
-      await expect(pad.locator('[data-primary="true"]')).toHaveCount(1);
-      await expect(pad.locator('[data-primary="true"]')).toHaveText("Connect tower");
-      await shot(pad, "device-tower-connect");
-      await shot(board, "board-tower-connect-joined");
-
-      await d.button("play-without-tower").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
       await expect(pad.getByRole("heading", { name: "Pick Story" })).toBeVisible();
       await expect(pad.getByRole("heading", { name: "Proving ground", exact: true })).toBeVisible();
@@ -163,7 +152,37 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(board.locator("[data-setting]")).toHaveCount(2);
       await shot(pad, "device-game-settings");
       await shot(board, "board-game-settings");
+      await pad.locator('[data-setting="length"] button[data-option="long"]').click();
+      await expect(board.locator('[data-setting="length"] [data-setting-value]')).toHaveText(
+        "Long",
+      );
       await d.button("continue").click();
+
+      await test.step("Connect Tower follows Game settings: skip allowed, Back keeps the settings", async () => {
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+        await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+        await expect(pad.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
+        await expect(board.locator("[data-status='step']")).toContainText("Tower Connect");
+        await expect(d.button("play-without-tower")).toBeVisible();
+        await expect(d.button("continue")).toBeHidden();
+        await expect(d.button("back")).toBeEnabled();
+        await expect(pad.locator('[data-primary="true"]')).toHaveCount(1);
+        await expect(pad.locator('[data-primary="true"]')).toHaveText("Connect tower");
+        await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
+        await shot(pad, "device-tower-connect");
+        await shot(board, "board-tower-connect");
+
+        // Back returns to Game settings with the chosen length; the tower is not touched.
+        await d.button("back").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
+        await expect(board.locator('[data-setting="length"] [data-setting-value]')).toHaveText(
+          "Long",
+        );
+        await d.button("continue").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+        await d.button("play-without-tower").click();
+      });
+
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(pad.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await expect(d.button("continue")).toBeDisabled();

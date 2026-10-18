@@ -243,6 +243,7 @@ describe("story board", () => {
             players: { min: 1, max: 4 },
             playable: true,
             loadable: true,
+            tower: "optional",
           },
         ],
         focus: "test",
@@ -298,6 +299,7 @@ describe("story board", () => {
       players: loadable ? { min: 1, max: 4 } : null,
       playable: loadable,
       loadable,
+      tower: "optional",
     });
     const pickState = (focus: string) =>
       storyboardStatePayloadSchema.parse({

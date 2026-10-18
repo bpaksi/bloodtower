@@ -65,13 +65,14 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     const d = device(pad);
 
     await board.goto("/board", { waitUntil: "domcontentloaded" });
-    await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await pad.goto(`${baseURL}/join?code=${host.joinCode}`);
-    await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-    await d.button("play-without-tower").click();
+    await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await d.button("continue").click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await d.button("continue").click();
+    await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+    await d.button("play-without-tower").click();
     await d.button("take-all").click();
     await d.button("continue").click();
     await d.button("begin").click();

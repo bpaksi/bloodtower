@@ -347,6 +347,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
             players: null,
             playable: false,
             loadable: true,
+            tower: pack.tower,
           },
           pack: null,
           settings: pack.settings,
@@ -366,6 +367,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
             players: pack.players,
             playable: true,
             loadable: true,
+            tower: pack.tower,
           },
           pack,
           settings: pack.settings,
@@ -396,6 +398,7 @@ const greyedCard = (id: string, title: string): StoryCard => ({
   players: null,
   playable: false,
   loadable: false,
+  tower: null,
 });
 
 /**

@@ -23,6 +23,7 @@ import {
   SETTING_LABEL_MAX,
   SETTING_OPTIONS_MAX,
   SETTINGS_MAX,
+  towerModeSchema,
 } from "./pack.ts";
 import { pauseCauseSchema } from "./timing.ts";
 
@@ -326,6 +327,8 @@ export const storyCardSchema = z.strictObject({
     .nullable(),
   playable: z.boolean(),
   loadable: z.boolean(),
+  /** The pack's `tower` field (R3-UI-23). Null only on a card whose manifest did not load. */
+  tower: towerModeSchema.nullable(),
 });
 export type StoryCard = z.infer<typeof storyCardSchema>;
 

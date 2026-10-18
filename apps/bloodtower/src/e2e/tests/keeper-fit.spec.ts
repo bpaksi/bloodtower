@@ -28,16 +28,17 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
 
     await board.goto("/board", { waitUntil: "domcontentloaded" });
     await expect(board.locator("main.bt-board")).toBeVisible();
-    await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
 
     await pad.goto(joinPage);
     await expect(pad).toHaveURL(/\/device/);
-    await d.button("play-without-tower").click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await expect(d.button("continue")).toHaveText("Choose Proving ground");
     await d.button("continue").click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await d.button("continue").click();
+    await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+    await d.button("play-without-tower").click();
     await d.button("take-all").click();
     await d.button("continue").click();
     await d.button("begin").click();

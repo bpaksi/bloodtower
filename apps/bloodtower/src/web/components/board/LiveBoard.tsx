@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { BoardAudio } from "../../lib/audio/boardAudio.ts";
 import {
   audioPackId,
-  isBeforePickGame,
   isGameChosen,
+  isLanding,
   isVisualMoment,
   pickLayers,
 } from "../../lib/audio/layers.ts";
@@ -32,10 +32,10 @@ const localStore = (): Storage | undefined => {
   }
 };
 
-/** After the first input: the landing sting, and the Sound dialog before Pick Game. */
+/** After the first input on the landing: the sting, and the Sound dialog before a game is picked. */
 const afterFirstInput = (current: FlowScreen, player: BoardAudio | null, openSound: () => void) => {
-  if (isBeforePickGame(current)) player?.play(SIGNATURE.sting, "music", 6.5);
-  if (isBeforePickGame(current)) openSound();
+  if (isLanding(current)) player?.play(SIGNATURE.sting, "music", 6.5);
+  if (isLanding(current)) openSound();
 };
 
 /** The story board for a live session. It has no controls, except the Sound dialog (R3-UI-03). */
@@ -87,7 +87,7 @@ export function LiveBoard() {
     return () => session.close();
   }, []);
 
-  // The first click or keypress unlocks audio. Before Pick Game it is the moment the window
+  // The first click or keypress unlocks audio. On the landing it is the moment the window
   // lights come on, so it plays the sting and opens the Sound dialog.
   // A key such as Escape is not a user activation and leaves the context suspended, so every
   // input resumes it, and the listeners go only once the audio is running.

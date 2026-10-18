@@ -25,14 +25,15 @@ export type ControlAction = z.infer<typeof controlActionSchema>;
 
 /**
  * The flow screens, in order. The server holds the current one; no client sends it.
- * Splash is the first screen after load. Quit is the end once play has been quit.
+ * Splash is the first screen after load. Connect Tower follows Game settings (R3-UI-22), and a
+ * story with `tower: none` skips it. Quit is the end once play has been quit.
  */
 export const FLOW_SCREENS = [
   "splash",
-  "tower-connect",
   "pick-story",
   "game-settings",
   "not-playable",
+  "tower-connect",
   "party-join",
   "begin",
   "play",
@@ -52,6 +53,9 @@ export const STORY_ID_MAX = PROMPT_ID_MAX - PICK_STORY_PROMPT_PREFIX.length;
 /** Continue and Back on Game settings (R3-UI-22, R3-UI-37). */
 export const GAME_SETTINGS_CONTINUE_ID = "continue-game-settings";
 export const GAME_SETTINGS_BACK_ID = "back-game-settings";
+/** Continue and Back on Connect Tower. Back never disconnects the tower. */
+export const TOWER_CONNECT_CONTINUE_ID = "continue-tower-connect";
+export const TOWER_CONNECT_BACK_ID = "back-tower-connect";
 /**
  * A setting change on Game settings is this prefix plus a serial. Each winning change moves the
  * serial on, so the next change is a fresh first-press-wins lock.

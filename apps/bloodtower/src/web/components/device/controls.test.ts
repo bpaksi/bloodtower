@@ -137,6 +137,7 @@ describe("device controls", () => {
               players: { min: 1, max: 4 },
               playable: true,
               loadable: true,
+              tower: "optional",
             },
           ],
           focus: "test",
@@ -448,7 +449,7 @@ describe("device screens", () => {
           screen: "tower-connect",
           heldHunters: [],
           views: [],
-          prompt: { id: "continue-tower-connect", label: "Next: pick a story" },
+          prompt: { id: "continue-tower-connect", label: "Next: gather the party" },
           lock: null,
           won: null,
         }),
@@ -460,7 +461,7 @@ describe("device screens", () => {
     expect(connect).toContain('data-primary="true">Connect tower');
     expect(connect.match(/data-primary="true"/g)).toHaveLength(1);
     expect(connect).not.toContain('data-primary="true">Play without tower');
-    expect(connect).not.toContain('data-primary="true">Next: pick a story');
+    expect(connect).not.toContain('data-primary="true">Next: gather the party');
 
     const ready = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -484,16 +485,16 @@ describe("device screens", () => {
           screen: "tower-connect",
           heldHunters: [],
           views: [],
-          prompt: { id: "continue-tower-connect", label: "Next: pick a story" },
+          prompt: { id: "continue-tower-connect", label: "Next: gather the party" },
           lock: null,
           won: null,
         }),
       }),
     );
-    expect(ready).toContain("Next: pick a story");
+    expect(ready).toContain("Next: gather the party");
     expect(ready).not.toContain("Play without tower");
     expect(ready.match(/data-primary="true"/g)).toHaveLength(1);
-    expect(ready).toContain('data-primary="true">Next: pick a story');
+    expect(ready).toContain('data-primary="true">Next: gather the party');
 
     const party = renderToStaticMarkup(
       createElement(DeviceScreen, {
@@ -519,6 +520,83 @@ describe("device screens", () => {
     expect(party).toContain('data-action="continue"');
   });
 
+  it("shows Connect Tower by the chosen story's tower field, with Back beside Continue", () => {
+    const connectState = (
+      mode: "required" | "optional",
+      prompt: { id: string; label: string } | null,
+    ): DeviceState =>
+      deviceStatePayloadSchema.parse({
+        screen: "tower-connect",
+        heldHunters: [],
+        views: [],
+        prompt,
+        lock: null,
+        won: null,
+        stories: {
+          cards: [
+            {
+              id: "test",
+              title: "Proving ground",
+              blurb: null,
+              tagline: null,
+              cover: null,
+              players: { min: 1, max: 4 },
+              playable: true,
+              loadable: true,
+              tower: mode,
+            },
+          ],
+          focus: "test",
+          current: "test",
+        },
+        gameSettings: { story: "test", settings: [], chosen: {} },
+        backPromptId: "back-tower-connect",
+        backLock: null,
+      });
+    const render = (state: DeviceState, reading: TowerSnapshot) =>
+      renderToStaticMarkup(
+        createElement(DeviceScreen, {
+          live: true,
+          deviceId: "device-1",
+          pausePromptId: null,
+          connectLock: null,
+          calibrateLock: null,
+          tower: reading,
+          state,
+        }),
+      );
+    const prompt = { id: "continue-tower-connect", label: "Next: gather the party" };
+    const reason = "Connect and calibrate the tower first";
+    const back = /<button[^>]*data-action="back"[^>]*>Back<\/button>/;
+
+    // Optional: skipping is allowed, and Back returns to Game settings.
+    const optional = render(connectState("optional", prompt), tower("unavailable"));
+    expect(optional).toContain("Play without tower");
+    expect(optional).not.toContain(reason);
+    expect(optional.match(back)?.[0]).not.toContain("hidden");
+    expect(optional.match(back)?.[0]).not.toContain("disabled");
+
+    // Required, not ready: the server sends no prompt. No skip; Continue shows, disabled, with why.
+    const held = render(connectState("required", null), tower("connected"));
+    expect(held).not.toContain("Play without tower");
+    expect(held).toContain(`Waiting: ${reason}`);
+    expect(held).toContain(`Disabled: ${reason}.`);
+    const continueButton = held.match(/<button[^>]*data-action="continue"[^>]*>/)?.[0] ?? "";
+    expect(continueButton).toContain("disabled");
+    expect(continueButton).not.toContain("hidden");
+    expect(held.match(back)?.[0]).not.toContain("disabled");
+
+    // Required and ready: Continue is the one primary action.
+    const ready = render(connectState("required", prompt), {
+      connection: "connected",
+      battery: { state: "unavailable" },
+      calibrated: { state: "known", calibrated: true },
+    });
+    expect(ready).not.toContain("Play without tower");
+    expect(ready).not.toContain(reason);
+    expect(ready).toContain('data-primary="true">Next: gather the party');
+  });
+
   it("shows the highlighted story with arrows and a Choose button that names it", () => {
     const door = (id: string, title: string, loadable = true) => ({
       id,
@@ -529,6 +607,7 @@ describe("device screens", () => {
       players: { min: 1, max: 4 },
       playable: true,
       loadable,
+      tower: "optional",
     });
     const render = (focus: string, cards = [door("alpha", "Alpha"), door("beta", "Beta")]) =>
       renderToStaticMarkup(

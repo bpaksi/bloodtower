@@ -41,7 +41,7 @@ pnpm --dir apps/bloodtower build
 pnpm --dir apps/bloodtower start
 ```
 
-Open http://127.0.0.1:4787/ for the title page, then **Story board** for the Mac/TV display (no buttons; the join code and QR come from the session) or **Hunter** on an iPad for `/join` (type the six-digit code from the board if the QR is not used). With a code in the URL, the iPad shows "Game is loading..." and enters Tower Connect on `/device`. Hunters are claimed on Party Join. The QR points at the Mac's LAN address, which the startup log prints. If the log warns that only loopback is available, connect the Mac to Wi-Fi and restart; the board shows the same warning until then. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
+Open http://127.0.0.1:4787/ for the title page, then **Story board** for the Mac/TV display (no buttons; the join code and QR come from the session) or **Hunter** on an iPad for `/join` (type the six-digit code from the board if the QR is not used). With a code in the URL, the iPad shows "Game is loading..." and enters Pick Story on `/device`. The order is Pick Story, Game settings, Connect Tower (skipped when the pack says `tower: none`), then Party Join, where hunters are claimed. The QR points at the Mac's LAN address, which the startup log prints. If the log warns that only loopback is available, connect the Mac to Wi-Fi and restart; the board shows the same warning until then. Health is http://127.0.0.1:4787/health and reports `tower: "connection-only"` and `effects: "none"`.
 
 `TOWER_URL=ws://127.0.0.1:4747/ws` uses tower-poc instead of the mock. Start tower-poc yourself. This host still waits for a connect press. `DIAG_LOG=/path/to/log` records sidecar message types only.
 
