@@ -23,6 +23,9 @@ import {
   SETTING_LABEL_MAX,
   SETTING_OPTIONS_MAX,
   SETTINGS_MAX,
+  SETUP_LABEL_MAX,
+  SETUP_STEPS_MAX,
+  setupStepSchema,
   towerModeSchema,
 } from "./pack.ts";
 import { pauseCauseSchema } from "./timing.ts";
@@ -312,16 +315,18 @@ export const pauseBannerSchema = z.strictObject({
  * `cover` is the host path of the pack's image (`/packs/<id>/assets/<file>`), or null.
  * No card carries a file path on disk or a lint message.
  */
+const coverUrlSchema = z
+  .string()
+  .max(300)
+  .regex(/^\/packs\/[^/]+\/assets\/[^/]+$/)
+  .nullable();
+
 export const storyCardSchema = z.strictObject({
   id: optionIdSchema,
   title: z.string().min(1).max(120),
   blurb: z.string().min(1).max(200).nullable(),
   tagline: z.string().min(1).max(200).nullable(),
-  cover: z
-    .string()
-    .max(300)
-    .regex(/^\/packs\/[^/]+\/assets\/[^/]+$/)
-    .nullable(),
+  cover: coverUrlSchema,
   players: z
     .strictObject({ min: z.number().int().min(1), max: z.number().int().min(1) })
     .nullable(),
@@ -396,6 +401,78 @@ export const gameSettingsSchema = z
   });
 export type GameSettings = z.infer<typeof gameSettingsSchema>;
 
+/**
+ * The setup step dialog on screen (R-WIZ-6): the pack step, its place in the list (0-based) and
+ * the number of steps. Text only; the board adds the illustration.
+ */
+export const setupStepStateSchema = z
+  .strictObject({
+    id: setupStepSchema.shape.id,
+    label: z.string().min(1).max(SETUP_LABEL_MAX),
+    index: z.number().int().min(0),
+    count: z.number().int().min(1).max(SETUP_STEPS_MAX),
+  })
+  .superRefine((value, ctx) => {
+    if (value.index >= value.count) issue(ctx, "The setup step is inside the list.");
+  });
+export type SetupStepState = z.infer<typeof setupStepStateSchema>;
+
+/**
+ * How Connect Tower was left, for the start-up summary: with the tower connected and calibrated,
+ * with "Play without tower", or skipped because the story does not use the tower.
+ */
+export const TOWER_CHOICES = ["connected", "without", "not-used"] as const;
+export const towerChoiceSchema = z.enum(TOWER_CHOICES);
+export type TowerChoice = z.infer<typeof towerChoiceSchema>;
+
+/**
+ * The running summary beside each start-up dialog (R3-UI-25). Every item echoes a choice as it
+ * is made, and null (or an empty list) is "not chosen yet". Back clears the item it undoes.
+ * `game` is the chosen card. `settings` holds each setting's chosen label. `tower` is how Connect
+ * Tower was left. `hunters` lists the bound story's hunters and the devices holding each, once a
+ * playable story is chosen. `setup` lists the pack's setup steps and which are done.
+ */
+export const startupSummarySchema = z.strictObject({
+  game: z
+    .strictObject({
+      id: optionIdSchema,
+      title: z.string().min(1).max(120),
+      cover: coverUrlSchema,
+    })
+    .nullable(),
+  settings: z
+    .array(
+      z.strictObject({
+        id: optionIdSchema,
+        label: z.string().min(1).max(SETTING_LABEL_MAX),
+        value: z.string().min(1).max(SETTING_LABEL_MAX).nullable(),
+      }),
+    )
+    .max(SETTINGS_MAX)
+    .nullable(),
+  tower: towerChoiceSchema.nullable(),
+  hunters: z
+    .array(
+      z.strictObject({
+        id: hunterIdSchema,
+        name: z.string().min(1).max(80),
+        holders: z.array(deviceIdSchema).max(8),
+      }),
+    )
+    .max(16)
+    .nullable(),
+  setup: z
+    .array(
+      z.strictObject({
+        id: setupStepSchema.shape.id,
+        label: z.string().min(1).max(SETUP_LABEL_MAX),
+        done: z.boolean(),
+      }),
+    )
+    .max(SETUP_STEPS_MAX),
+});
+export type StartupSummary = z.infer<typeof startupSummarySchema>;
+
 /** `lobby` is every screen before play. `ended` is the quit screen. */
 export const STORYBOARD_STAGES = ["lobby", "playing", "paused", "ended"] as const;
 
@@ -427,6 +504,19 @@ export const storyboardStatePayloadSchema = z
     stories: storiesSchema.optional(),
     /** The chosen story's game settings, from Game settings on. Null before a story is chosen. */
     gameSettings: gameSettingsSchema.nullable().optional(),
+    /** The start-up summary panel (R3-UI-25). Null on splash, in play and after quit. */
+    summary: startupSummarySchema.nullable().optional(),
+    /**
+     * The setup step dialog on screen, on the setup screen only. `illustration` is the step's
+     * still asset id, or null when the pack names none or its file has not landed yet.
+     */
+    setupStep: z
+      .strictObject({
+        step: setupStepStateSchema,
+        illustration: assetIdSchema.nullable(),
+      })
+      .nullable()
+      .optional(),
     /** The line the Keeper scene is on (0..KEEPER_LINE_COUNT-1), or null outside that scene. */
     keeperLine: z
       .number()
@@ -560,10 +650,13 @@ export const deviceStatePayloadSchema = z
     pick: pickPayloadSchema.nullable().optional(),
     /** The chosen story's game settings, from Game settings on. Null before a story is chosen. */
     gameSettings: gameSettingsSchema.nullable().optional(),
+    /** The setup step dialog on screen, on the setup screen only. Text only (R3-UI-51). */
+    setupStep: setupStepStateSchema.nullable().optional(),
     /** The prompt a setting change is pressed under, on Game settings only. */
     setPromptId: promptIdSchema.nullable().optional(),
     /**
-     * Back beside Continue, on a screen that has both (Game settings). Its own prompt, so a
+     * Back beside Continue, on a screen that has both (Game settings, Connect Tower, Claim
+     * Hunters, a setup step and Begin). Its own prompt, so a
      * Continue lock does not block it. Not playable yet uses `prompt` for Back instead.
      */
     backPromptId: promptIdSchema.nullable().optional(),

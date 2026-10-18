@@ -1123,3 +1123,74 @@
   background: var(--bt-blood);
   color: var(--bt-bone);
 }
+
+/* Start-up summary (R3-UI-25): "Tonight's game" beside each start-up dialog. */
+.bt-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.bt-summary .bt-roll-title {
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+}
+
+.bt-summary dl {
+  display: grid;
+  gap: clamp(0.3rem, 0.9vh, 0.7rem);
+  margin: 0;
+}
+
+.bt-summary .bt-summary-item dt.bt-lbl {
+  margin-bottom: 0.05rem;
+  font-size: clamp(0.95rem, 1.15vw, 1.25rem);
+}
+
+.bt-summary-item dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--bt-bone);
+  font-size: clamp(1.15rem, 1.5vw, 1.55rem);
+  line-height: 1.2;
+}
+
+.bt-summary-item[data-empty="true"] dd {
+  color: var(--bt-parchment-dark);
+  font-style: italic;
+}
+
+.bt-summary-cover {
+  display: block;
+  width: min(100%, 9rem);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: var(--bt-rule-gold);
+}
+
+/* Claim Hunters: the portrait cartouches sit in the dialog, side by side. */
+.bt-claim .bt-roll {
+  display: grid;
+  flex: 0 1 auto;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin-top: 0.8rem;
+}
+
+.bt-claim .bt-cart {
+  min-height: 5.5rem;
+}
+
+.bt-claim .bt-cart-st {
+  font-size: clamp(1rem, 1.3vw, 1.4rem);
+}
+
+/* A setup step: the step text, and its illustration once the file has landed. */
+.bt-setup-illustration {
+  display: block;
+  max-width: 100%;
+  max-height: 40vh;
+  margin: 0.8rem auto;
+  object-fit: contain;
+  border: var(--bt-rule-gold);
+}

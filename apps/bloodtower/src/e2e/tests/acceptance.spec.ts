@@ -199,7 +199,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(pageA.locator('[data-primary="true"]')).toHaveCount(1);
       await expect(a.button("play-without-tower")).toHaveCount(0);
       await a.button("continue").click();
-      await expect(pageA.getByRole("heading", { name: "Party Join" })).toBeVisible();
+      await expect(pageA.getByRole("heading", { name: "Claim Hunters" })).toBeVisible();
       await a.hold("alpha").click();
       await expect(a.hold("alpha")).toHaveAttribute("data-action", "release");
       await a.hold("beta").click();
@@ -218,11 +218,25 @@ test("the test pack's first night, end to end, on one board and two devices", as
 
       await b.hold("delta").click();
       await expect(b.hold("delta")).toHaveAttribute("data-action", "release");
-      await expect(pageB.getByRole("heading", { name: "Party Join" })).toBeVisible();
+      await expect(pageB.getByRole("heading", { name: "Claim Hunters" })).toBeVisible();
       await expect(pageB.getByRole("heading", { name: "Emeric" })).toBeVisible();
       await expect(a.button("continue")).toHaveText("Next: set up the story");
       await expect(a.button("continue")).toBeEnabled();
       await a.button("continue").click();
+    });
+
+    await test.step("Setup steps: each its own dialog with Done; the summary fills in", async () => {
+      const summary = (item: string) => board.locator(`[data-summary-item="${item}"]`);
+      await expect(summary("tower")).toContainText("Connected");
+      await expect(summary("hunters")).toContainText("Agnes:");
+      for (const step of ["lay-out-board", "place-hunters", "ready-decks"]) {
+        await expect(board.locator(`[data-setup-step="${step}"]`)).toBeVisible();
+        await expect(pageA.locator(`[data-setup-step="${step}"]`)).toBeVisible();
+        await expect(a.button("continue")).toHaveText("Done");
+        await expect(b.button("back")).toBeEnabled();
+        await a.button("continue").click();
+      }
+      await expect(summary("setup")).toContainText("3 of 3 done");
       // The begin screen: any joined device may press Begin.
       await expect(a.button("begin")).toBeEnabled();
       await expect(b.button("begin")).toBeEnabled();
@@ -451,8 +465,15 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(won("continue-party-join")).toMatchObject({
         winner: true,
         screen: "party-join",
+        nextScreen: "setup",
+      });
+      expect(won("continue-setup-ready-decks")).toMatchObject({
+        winner: true,
+        screen: "setup",
         nextScreen: "begin",
       });
+      // One closed mark per setup step (R-WIZ-6).
+      expect(subjects("setup-step")).toEqual(["lay-out-board", "place-hunters", "ready-decks"]);
       expect(won("begin")).toMatchObject({ winner: true, screen: "begin", nextScreen: "play" });
       expect(run.presses.map((press) => `${press.promptId}:${press.winner}`)).toEqual([
         "continue-pick-story-test:true",
@@ -464,6 +485,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "tower-calibrate:false",
         "continue-tower-connect:true",
         "continue-party-join:true",
+        "continue-setup-lay-out-board:true",
+        "continue-setup-place-hunters:true",
+        "continue-setup-ready-decks:true",
         "begin:true",
         "continue-0:true",
         "continue-0:false",

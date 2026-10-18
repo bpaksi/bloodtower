@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { optionIdSchema } from "./control.ts";
+import { optionIdSchema, SETUP_STEP_ID_MAX } from "./control.ts";
 import { hunterIdSchema } from "./devices.ts";
 
 /**
@@ -435,6 +435,32 @@ const settingIssues = (
   return messages;
 };
 
+/** Limits on manifest `setup`. The board and device states carry the steps with the same limits. */
+export const SETUP_STEPS_MAX = 16;
+export const SETUP_LABEL_MAX = 200;
+
+/**
+ * Steps the engine runs itself. They are flow screens, not pack setup steps, so `setup` never
+ * names them (R3-UI-22).
+ */
+export const ENGINE_SETUP_STEPS = [
+  "join",
+  "party-join",
+  "tower-connect",
+  "tower-volume-test",
+] as const;
+
+/**
+ * One physical setup step (R-WIZ-5, R-WIZ-6): its own board dialog with Done and Back on the
+ * devices. `illustration` names a `still` asset shown on the board only.
+ */
+export const setupStepSchema = z.strictObject({
+  id: idSchema.max(SETUP_STEP_ID_MAX),
+  label: z.string().min(1).max(SETUP_LABEL_MAX),
+  illustration: assetIdSchema.optional(),
+});
+export type SetupStep = z.infer<typeof setupStepSchema>;
+
 /**
  * Whether a story needs the tower (R3-UI-23). `optional` offers "Play without tower" on Connect
  * Tower, `required` holds Continue until the tower is connected and calibrated, and `none` skips
@@ -492,7 +518,7 @@ export const packSchema = z
         }),
       )
       .min(1),
-    setup: z.array(z.unknown()).min(1),
+    setup: z.array(setupStepSchema).max(SETUP_STEPS_MAX).default([]),
     av_theme: z.strictObject({
       art_style: z.string().min(1).max(80),
       clip_style: z.string().min(1).max(80),
@@ -551,6 +577,7 @@ export const packSchema = z
       ["moment", pack.moments.map((moment) => moment.id)],
       ["cue", pack.cues.map((cue) => cue.name)],
       ["asset", pack.assets.map((asset) => asset.id)],
+      ["setup step", pack.setup.map((step) => step.id)],
     ];
     for (const [label, ids] of groups) {
       const id = duplicate(ids);
@@ -628,6 +655,19 @@ export const packSchema = z
     for (const phase of Object.values(pack.ambient)) {
       for (const id of [phase.bed, ...phase.accents]) {
         if (missingAsset(id)) issue(ctx, `V-2: asset ${id} is not in the manifest.`);
+      }
+    }
+    const engineSteps: readonly string[] = ENGINE_SETUP_STEPS;
+    for (const step of pack.setup) {
+      if (engineSteps.includes(step.id)) {
+        issue(ctx, `V-1: setup step ${step.id} is run by the engine, not listed in setup.`);
+      }
+      if (!step.illustration) continue;
+      const asset = pack.assets.find((item) => item.id === step.illustration);
+      if (!asset) {
+        issue(ctx, `V-2: asset ${step.illustration} is not in the manifest.`);
+      } else if (asset.type !== "still") {
+        issue(ctx, `V-1: setup illustration ${step.illustration} is a still.`);
       }
     }
     for (const asset of pack.assets) {

@@ -197,7 +197,11 @@ const walkToPlay = async (client: Client) => {
   await step(client, "continue-pick-story-test", "continue", "game-settings");
   await step(client, "continue-game-settings", "continue", "tower-connect");
   await step(client, "continue-tower-connect", "continue", "party-join");
-  await step(client, "continue-party-join", "continue", "begin");
+  // The test pack's setup steps, one Done each, then Begin (R-WIZ-6).
+  await step(client, "continue-party-join", "continue", "setup");
+  await step(client, "continue-setup-lay-out-board", "continue", "setup");
+  await step(client, "continue-setup-place-hunters", "continue", "setup");
+  await step(client, "continue-setup-ready-decks", "continue", "begin");
   await step(client, "begin", "begin", "play");
 };
 

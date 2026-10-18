@@ -2,7 +2,6 @@
 
 import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
 import { displayCaption } from "../../lib/caption.ts";
-import { portraitSrc } from "../../lib/portrait.ts";
 import {
   chosenStory,
   focusedStory,
@@ -11,11 +10,11 @@ import {
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
+  setupStepTitle,
   towerReady,
   towerRequiredReason,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
-import { PortraitCard } from "../PortraitCard";
 import { deviceControls } from "./controls";
 
 /**
@@ -76,6 +75,7 @@ export function DeviceScreen({
     (state.screen === "pick-story" ||
       state.screen === "game-settings" ||
       state.screen === "party-join" ||
+      state.screen === "setup" ||
       (state.screen === "play" && !controls.resume) ||
       (state.screen === "tower-connect" && (ready || towerRequired)));
   const primaryBegin = state.screen === "begin" && controls.begin;
@@ -138,14 +138,9 @@ export function DeviceScreen({
         />
       ) : null}
       {state.screen === "party-join" ? (
-        <PartyJoinDevice
-          packId={state.packId}
-          roster={roster}
-          held={state.heldHunters}
-          live={live}
-          onHold={onHold}
-        />
+        <PartyJoinDevice roster={roster} held={state.heldHunters} live={live} onHold={onHold} />
       ) : null}
+      {state.screen === "setup" ? <SetupDevice step={state.setupStep ?? null} /> : null}
       {state.screen === "begin" ? <BeginDevice /> : null}
       {state.views.length > 0 && (state.screen === "play" || state.screen === "quit") ? (
         <PlayDevice views={state.views} />
@@ -208,11 +203,7 @@ export function DeviceScreen({
           type="button"
           className="bt-secondary"
           data-action="back"
-          hidden={
-            state.screen !== "not-playable" &&
-            state.screen !== "game-settings" &&
-            state.screen !== "tower-connect"
-          }
+          hidden={!BACK_SCREENS.has(state.screen)}
           disabled={!controls.back}
           onClick={() => press(controls.backPromptId, "back", controls.back)}
         >
@@ -245,6 +236,16 @@ export function DeviceScreen({
     </main>
   );
 }
+
+/** The start-up screens with Back (R3-UI-37). */
+const BACK_SCREENS: ReadonlySet<DeviceState["screen"]> = new Set([
+  "not-playable",
+  "game-settings",
+  "tower-connect",
+  "party-join",
+  "setup",
+  "begin",
+]);
 
 const SplashDevice = () => (
   <article className="bt-card text-2xl">
@@ -401,14 +402,16 @@ const GameSettingsDevice = ({
   );
 };
 
+/**
+ * Claim Hunters (R3-UI-21): hunter names from the pack, text buttons only. Portraits show on the
+ * board, never on a device (R3-UI-51).
+ */
 const PartyJoinDevice = ({
-  packId,
   roster,
   held,
   live,
   onHold,
 }: {
-  packId: string | undefined;
   roster: readonly { id: string; name: string; portrait?: string }[];
   held: readonly string[];
   live: boolean;
@@ -441,17 +444,14 @@ const PartyJoinDevice = ({
             <button
               key={hunter.id}
               type="button"
-              className="bt-ghost"
+              className={mineHunter ? "bt-primary" : "bt-secondary"}
               disabled={!live}
               data-action={mineHunter ? "release" : "take"}
               data-hunter={hunter.id}
+              aria-pressed={mineHunter}
               onClick={() => onHold?.(hunter.id, mineHunter ? "release" : "take")}
             >
-              <PortraitCard
-                name={hunter.name}
-                src={portraitSrc(packId, hunter.portrait)}
-                label={mineHunter ? `${hunter.name}: Mine` : `Claim ${hunter.name}`}
-              />
+              {mineHunter ? `${hunter.name}: Mine` : `Claim ${hunter.name}`}
             </button>
           );
         })}
@@ -459,6 +459,20 @@ const PartyJoinDevice = ({
     </section>
   );
 };
+
+/** One setup step (R-WIZ-6): the step text, then Done and Back below. No illustration here. */
+const SetupDevice = ({ step }: { step: DeviceState["setupStep"] }) => (
+  <article className="bt-card space-y-2" data-setup-step={step?.id ?? ""}>
+    {step ? (
+      <>
+        <p className="bt-kicker">{setupStepTitle(step)}</p>
+        <p className="text-2xl">{step.label}</p>
+      </>
+    ) : (
+      <p className="text-2xl">Setup step unavailable.</p>
+    )}
+  </article>
+);
 
 const BeginDevice = () => (
   <article className="bt-card text-xl">

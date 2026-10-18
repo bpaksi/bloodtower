@@ -18,6 +18,8 @@ import {
   SERVER_MESSAGE_TYPES,
   type StoryboardState,
   serverMessageSchema,
+  setupStepStateSchema,
+  startupSummarySchema,
   storiesSchema,
   storyboardStatePayloadSchema,
   towerBatterySchema,
@@ -535,5 +537,21 @@ describe("devices", () => {
         heldHunters: [],
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("setup step and start-up summary", () => {
+  it("keeps the setup step inside its list", () => {
+    const step = { id: "lay-out-board", label: "Lay out the board.", index: 2, count: 3 };
+    expect(setupStepStateSchema.safeParse(step).success).toBe(true);
+    expect(setupStepStateSchema.safeParse({ ...step, index: 3 }).success).toBe(false);
+    expect(setupStepStateSchema.safeParse({ ...step, illustration: "x" }).success).toBe(false);
+  });
+
+  it("accepts an empty summary and refuses an unknown tower outcome", () => {
+    const empty = { game: null, settings: null, tower: null, hunters: null, setup: [] };
+    expect(startupSummarySchema.safeParse(empty).success).toBe(true);
+    expect(startupSummarySchema.safeParse({ ...empty, tower: "maybe" }).success).toBe(false);
+    expect(startupSummarySchema.safeParse({ ...empty, tower: "without" }).success).toBe(true);
   });
 });

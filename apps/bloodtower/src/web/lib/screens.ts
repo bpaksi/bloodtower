@@ -1,4 +1,10 @@
-import type { FlowScreen, Stories, StoryboardState, StoryCard } from "bloodtower-protocols";
+import type {
+  FlowScreen,
+  StartupSummary,
+  Stories,
+  StoryboardState,
+  StoryCard,
+} from "bloodtower-protocols";
 
 /** The card for the story the session is bound to, or null before the server has sent the list. */
 export const currentStory = (stories: Stories | undefined): StoryCard | null =>
@@ -31,7 +37,8 @@ export const SCREEN_TITLE: Record<FlowScreen, string> = {
   "pick-story": "Pick Story",
   "game-settings": "Game settings",
   "not-playable": "Not playable yet",
-  "party-join": "Party Join",
+  "party-join": "Claim Hunters",
+  setup: "Setup",
   begin: "Begin Story",
   play: "Play",
   quit: "Quit",
@@ -45,6 +52,7 @@ export const SCREEN_NEXT: Record<FlowScreen, string> = {
   "game-settings": "Next: connect the tower",
   "not-playable": "This story is listed, but it cannot be played yet.",
   "party-join": "Next: set up the story",
+  setup: "Press Done on any device",
   begin: "Next: begin the story",
   play: "The night is underway.",
   quit: "The table is closed.",
@@ -124,4 +132,84 @@ export const partyJoinNextReason = (
   const first = unheld[0];
   if (!first) return null;
   return `Claim ${names.get(first) ?? first} first`;
+};
+
+/** "Setup · step 2 of 3": the setup dialog heading, counting from one. */
+export const setupStepTitle = (step: { index: number; count: number }): string =>
+  `${SCREEN_TITLE.setup} · step ${step.index + 1} of ${step.count}`;
+
+/** What an empty summary item reads (R3-UI-25). */
+export const NOT_CHOSEN = "not chosen yet";
+
+export type SummaryItemId = "game" | "settings" | "tower" | "hunters" | "setup";
+
+export interface SummaryItem {
+  id: SummaryItemId;
+  label: string;
+  /** The lines under the label. An empty item has one line, "not chosen yet". */
+  lines: string[];
+  empty: boolean;
+}
+
+const item = (id: SummaryItemId, label: string, lines: readonly string[]): SummaryItem =>
+  lines.length === 0
+    ? { id, label, lines: [NOT_CHOSEN], empty: true }
+    : { id, label, lines: [...lines], empty: false };
+
+/** The tower line: how Connect Tower was left, with the live reading once it was connected. */
+const towerLine = (
+  choice: StartupSummary["tower"],
+  tower: StoryboardState["tower"],
+): string | null => {
+  if (choice === "without") return "Playing without tower";
+  if (choice === "not-used") return "Not used by this story";
+  if (choice === "connected") {
+    return towerReady(tower) ? "Connected" : `Connected, now ${towerStripState(tower)}`;
+  }
+  return null;
+};
+
+/**
+ * The start-up summary panel's rows (R3-UI-25): game, settings, tower, hunters with the devices
+ * holding each, and the setup steps done. Each empty row reads "not chosen yet".
+ */
+export const summaryItems = (
+  summary: StartupSummary,
+  tower: StoryboardState["tower"],
+): SummaryItem[] => {
+  const settings = summary.settings;
+  const towerText = towerLine(summary.tower, tower);
+  const hunters = summary.hunters ?? [];
+  const held = hunters.filter((hunter) => hunter.holders.length > 0);
+  const done = summary.setup.filter((step) => step.done);
+  return [
+    item("game", "Game", summary.game ? [summary.game.title] : []),
+    item(
+      "settings",
+      "Settings",
+      settings === null
+        ? []
+        : settings.length === 0
+          ? ["No settings"]
+          : settings.map((setting) => `${setting.label}: ${setting.value ?? "unavailable"}`),
+    ),
+    item("tower", "Tower", towerText ? [towerText] : []),
+    item(
+      "hunters",
+      "Hunters",
+      held.length === 0
+        ? []
+        : hunters.map(
+            (hunter) =>
+              `${hunter.name}: ${hunter.holders.length > 0 ? hunter.holders.join(", ") : NOT_CHOSEN}`,
+          ),
+    ),
+    item(
+      "setup",
+      "Setup",
+      done.length === 0
+        ? []
+        : [`${done.length} of ${summary.setup.length} done`, ...done.map((step) => step.label)],
+    ),
+  ];
 };

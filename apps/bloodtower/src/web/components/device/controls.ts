@@ -5,7 +5,8 @@ export interface DeviceControls {
   continue: boolean;
   /**
    * Back on a start-up screen (R3-UI-37). Only a prompt named `back-…` enables it: the step
-   * prompt on Not playable yet, or `backPromptId` beside Continue on Game settings.
+   * prompt on Not playable yet, or `backPromptId` beside Continue on Game settings, Connect
+   * Tower, Claim Hunters, a setup step and Begin.
    */
   back: boolean;
   /** The id Back is pressed under, or null when this screen has no Back. */
@@ -47,7 +48,7 @@ export const deviceControls = (input: {
 }): DeviceControls => {
   const promptId = input.state.prompt?.id ?? "";
   const locked = input.state.lock !== null;
-  // Game settings names its own Back beside Continue; Not playable yet uses the step prompt.
+  // Screens with Continue name their own Back beside it; Not playable yet uses the step prompt.
   const ownBack = input.state.backPromptId ?? null;
   const stepBack = promptId.startsWith("back-") ? promptId : null;
   const backPromptId = ownBack?.startsWith("back-") ? ownBack : stepBack;
