@@ -1088,6 +1088,37 @@ describe("pick story", () => {
     }
   });
 
+  it("lets the same story be chosen again, and Back pressed again, after Back", () => {
+    const { opened, engine, deviceId } = atPickStory({
+      stories: doorsWithVellmoor(),
+      storyId: "test",
+    });
+    try {
+      engine.focusStory(deviceId, "vellmoor");
+      for (let visit = 0; visit < 2; visit += 1) {
+        expect(engine.projectDevice(deviceId).lock).toBeNull();
+        expect(engine.press(deviceId, "continue-pick-story-vellmoor", "continue")).toMatchObject({
+          winner: true,
+        });
+        expect(engine.screen()).toBe("not-playable");
+        expect(engine.projectDevice(deviceId).lock).toBeNull();
+        expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({
+          winner: true,
+        });
+        expect(engine.screen()).toBe("pick-story");
+        // A late Back from this visit still loses and moves nothing.
+        expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({
+          ok: true,
+          winner: false,
+        });
+        expect(engine.screen()).toBe("pick-story");
+      }
+      expect(engine.roster().packId).toBe("test");
+    } finally {
+      opened.close();
+    }
+  });
+
   it("refuses Back anywhere but Not playable yet", () => {
     const { opened, engine, deviceId } = atPickStory({
       stories: doorsWithVellmoor(),

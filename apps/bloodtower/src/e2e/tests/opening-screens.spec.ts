@@ -123,6 +123,14 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
 
         await d.button("back").click();
         await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
+
+        // Back opens a new visit: the same story can be chosen again, and Back works again.
+        await expect(d.button("continue")).toBeEnabled();
+        await d.button("continue").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "not-playable");
+        await expect(d.button("back")).toBeEnabled();
+        await d.button("back").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
         await d.button("story-next").click();
         await expect(
           board.getByRole("heading", { name: "Proving ground", exact: true }),
