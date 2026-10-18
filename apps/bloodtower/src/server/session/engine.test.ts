@@ -1,4 +1,4 @@
-import type { ControlAction, Pack, TowerSnapshot } from "bloodtower-protocols";
+import type { ControlAction, GameSetting, Pack, TowerSnapshot } from "bloodtower-protocols";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../config.ts";
 import { createPressLog } from "../control/lock.ts";
@@ -14,6 +14,17 @@ const TOWER: TowerSnapshot = {
   connection: "unavailable",
   battery: { state: "unavailable" },
   calibrated: { state: "unavailable" },
+};
+
+const LENGTH_SETTING: GameSetting = {
+  id: "length",
+  label: "Length",
+  options: [
+    { id: "short", label: "Short" },
+    { id: "standard", label: "Standard" },
+    { id: "long", label: "Long" },
+  ],
+  default: "standard",
 };
 
 const packOrThrow = (absent?: readonly string[]) => {
@@ -69,15 +80,16 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-/** One step's press, which must win. A pick names its option. */
+/** One step's press, which must win. A pick names its option; a set its option and setting. */
 const winStep = (
   engine: SessionEngine,
   deviceId: string,
   promptId: string,
   action: ControlAction,
   option?: string,
+  setting?: string,
 ) => {
-  const result = engine.press(deviceId, promptId, action, option);
+  const result = engine.press(deviceId, promptId, action, option, setting);
   if (!result.ok || !result.winner) throw new Error(`${promptId} did not win.`);
 };
 
@@ -86,6 +98,7 @@ const startPlay = (engine: SessionEngine, deviceId: string) => {
   engine.finishSplash();
   winStep(engine, deviceId, "continue-tower-connect", "continue");
   winStep(engine, deviceId, "continue-pick-story-test", "continue");
+  winStep(engine, deviceId, "continue-game-settings", "continue");
   winStep(engine, deviceId, "continue-party-join", "continue");
   winStep(engine, deviceId, "begin", "begin");
 };
@@ -112,6 +125,7 @@ describe("session", () => {
       });
       winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
       winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
+      winStep(engine, joined.deviceId, "continue-game-settings", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(false);
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
       expect(engine.press(joined.deviceId, "continue-party-join", "continue")).toEqual({
@@ -527,7 +541,7 @@ describe("session", () => {
     }
   });
 
-  it("walks splash, tower-connect, pick-story, party-join and begin in order, and refuses Quit before play", () => {
+  it("walks splash, tower-connect, pick-story, game-settings, party-join and begin in order, and refuses Quit before play", () => {
     const { opened, engine } = setup();
     try {
       const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
@@ -563,6 +577,12 @@ describe("session", () => {
         label: `Choose ${pack.title}`,
       });
       winStep(engine, alpha.deviceId, "continue-pick-story-test", "continue");
+      expect(engine.screen()).toBe("game-settings");
+      expect(engine.projectDevice(alpha.deviceId).prompt).toEqual({
+        id: "continue-game-settings",
+        label: "Continue",
+      });
+      winStep(engine, alpha.deviceId, "continue-game-settings", "continue");
       expect(engine.screen()).toBe("party-join");
       winStep(engine, alpha.deviceId, "continue-party-join", "continue");
       expect(engine.screen()).toBe("begin");
@@ -853,8 +873,20 @@ describe("pick story", () => {
       first,
       second,
       stories: [
-        { card: card(first, "test"), pack: first, issues: [], assets: null },
-        { card: card(second, "second"), pack: second, issues: [], assets: null },
+        {
+          card: card(first, "test"),
+          pack: first,
+          settings: first.settings,
+          issues: [],
+          assets: null,
+        },
+        {
+          card: card(second, "second"),
+          pack: second,
+          settings: second.settings,
+          issues: [],
+          assets: null,
+        },
         {
           card: {
             id: "zzz",
@@ -867,6 +899,7 @@ describe("pick story", () => {
             loadable: false,
           },
           pack: null,
+          settings: [],
           issues: [],
           assets: null,
         },
@@ -955,6 +988,7 @@ describe("pick story", () => {
       });
       winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
       winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
+      winStep(engine, joined.deviceId, "continue-game-settings", "continue");
       expect(engine.focusStory(joined.deviceId, "second")).toEqual({
         ok: false,
         code: "invalid-state",
@@ -1004,6 +1038,7 @@ describe("pick story", () => {
       expect(engine.roster().holdings).toHaveLength(4);
       engine.focusStory(deviceId, "second");
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.hunterRoster().map((hunter) => hunter.name)).toContain("Agnes the Second");
       const board = engine.projectStoryboard(TOWER, JOIN);
@@ -1023,6 +1058,7 @@ describe("pick story", () => {
     try {
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-pick-story-test", "continue");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.roster().packId).toBe("test");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(true);
@@ -1046,12 +1082,13 @@ describe("pick story", () => {
         loadable: true,
       },
       pack: null,
+      settings: [LENGTH_SETTING],
       issues: [],
       assets: null,
     },
   ];
 
-  it("stops a chosen playable: false story at Not playable yet, binds nothing, and Back returns", () => {
+  it("stops a chosen playable: false story at Not playable yet after Game settings, binds nothing, and Back returns", () => {
     const { opened, engine, deviceId } = atPickStory({
       stories: doorsWithVellmoor(),
       storyId: "test",
@@ -1063,6 +1100,24 @@ describe("pick story", () => {
         label: "Choose The Count of Vellmoor",
       });
       winStep(engine, deviceId, "continue-pick-story-vellmoor", "continue");
+      expect(engine.screen()).toBe("game-settings");
+      expect(engine.projectStoryboard(TOWER, JOIN).gameSettings).toEqual({
+        story: "vellmoor",
+        settings: [
+          {
+            id: "length",
+            label: "Length",
+            options: [
+              { id: "short", label: "Short" },
+              { id: "standard", label: "Standard" },
+              { id: "long", label: "Long" },
+            ],
+          },
+        ],
+        chosen: { length: "standard" },
+      });
+      winStep(engine, deviceId, "set-0", "set", "long", "length");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
       expect(engine.screen()).toBe("not-playable");
       const board = engine.projectStoryboard(TOWER, JOIN);
       expect(board.screen).toBe("not-playable");
@@ -1070,14 +1125,23 @@ describe("pick story", () => {
       expect(board.prompt).toEqual({ id: "back-not-playable", label: "Back" });
       expect(engine.roster().packId).toBe("test");
 
-      // Only Back is offered here: no Continue. The Choose press that won is locked, so a
+      // Only Back is offered here: no Continue. The Continue press that won is locked, so a
       // repeat is recorded as a losing press and changes nothing.
-      expect(engine.press(deviceId, "continue-pick-story-vellmoor", "continue")).toMatchObject({
+      expect(engine.press(deviceId, "continue-game-settings", "continue")).toMatchObject({
         ok: true,
         winner: false,
       });
       expect(engine.screen()).toBe("not-playable");
       expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({ winner: true });
+      // Back from Not playable yet returns to Game settings, with the choice kept.
+      expect(engine.screen()).toBe("game-settings");
+      expect(engine.chosenSettings()).toEqual({ length: "long" });
+      expect(engine.projectDevice(deviceId).prompt).toEqual({
+        id: "continue-game-settings",
+        label: "Continue",
+      });
+      expect(engine.projectDevice(deviceId).lock).toBeNull();
+      winStep(engine, deviceId, "back-game-settings", "back");
       expect(engine.screen()).toBe("pick-story");
       expect(engine.projectDevice(deviceId).prompt).toEqual({
         id: "continue-pick-story-vellmoor",
@@ -1100,14 +1164,27 @@ describe("pick story", () => {
         expect(engine.press(deviceId, "continue-pick-story-vellmoor", "continue")).toMatchObject({
           winner: true,
         });
+        expect(engine.screen()).toBe("game-settings");
+        expect(engine.press(deviceId, "continue-game-settings", "continue")).toMatchObject({
+          winner: true,
+        });
         expect(engine.screen()).toBe("not-playable");
         expect(engine.projectDevice(deviceId).lock).toBeNull();
         expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({
           winner: true,
         });
-        expect(engine.screen()).toBe("pick-story");
+        expect(engine.screen()).toBe("game-settings");
         // A late Back from this visit still loses and moves nothing.
         expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({
+          ok: true,
+          winner: false,
+        });
+        expect(engine.screen()).toBe("game-settings");
+        expect(engine.press(deviceId, "back-game-settings", "back")).toMatchObject({
+          winner: true,
+        });
+        expect(engine.screen()).toBe("pick-story");
+        expect(engine.press(deviceId, "back-game-settings", "back")).toMatchObject({
           ok: true,
           winner: false,
         });
@@ -1119,13 +1196,17 @@ describe("pick story", () => {
     }
   });
 
-  it("refuses Back anywhere but Not playable yet", () => {
+  it("refuses Back on Pick Story", () => {
     const { opened, engine, deviceId } = atPickStory({
       stories: doorsWithVellmoor(),
       storyId: "test",
     });
     try {
       expect(engine.press(deviceId, "back-not-playable", "back")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.press(deviceId, "back-game-settings", "back")).toEqual({
         ok: false,
         code: "invalid-state",
       });
@@ -1141,10 +1222,268 @@ describe("pick story", () => {
     try {
       engine.focusStory(deviceId, "second");
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
       winStep(engine, deviceId, "begin", "begin");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("proving-ground.01");
+    } finally {
+      opened.close();
+    }
+  });
+});
+
+describe("game settings", () => {
+  /** Joined iPad on Game settings for the test pack. `pack` swaps in another manifest. */
+  const atGameSettings = (pack?: Pack) => {
+    const made = setup(pack ? { pack } : undefined);
+    const joined = made.engine.join({ joinCode: "048213", formFactor: "ipad" });
+    if (!joined.ok) throw new Error("join");
+    made.engine.finishSplash();
+    winStep(made.engine, joined.deviceId, "continue-tower-connect", "continue");
+    winStep(made.engine, joined.deviceId, "continue-pick-story-test", "continue");
+    return { ...made, deviceId: joined.deviceId };
+  };
+
+  it("lists Proving Ground's length and difficulty from its manifest, each at its default", () => {
+    const { opened, engine, deviceId } = atGameSettings();
+    try {
+      expect(engine.screen()).toBe("game-settings");
+      const expected = {
+        story: "test",
+        settings: [
+          {
+            id: "length",
+            label: "Length",
+            options: [
+              { id: "short", label: "Short" },
+              { id: "standard", label: "Standard" },
+              { id: "long", label: "Long" },
+            ],
+          },
+          {
+            id: "difficulty",
+            label: "Difficulty",
+            options: [{ id: "standard", label: "Standard" }],
+          },
+        ],
+        chosen: { length: "standard", difficulty: "standard" },
+      };
+      expect(engine.projectStoryboard(TOWER, JOIN).gameSettings).toEqual(expected);
+      const device = engine.projectDevice(deviceId);
+      expect(device.gameSettings).toEqual(expected);
+      expect(device.setPromptId).toBe("set-0");
+      expect(device.backPromptId).toBe("back-game-settings");
+      expect(device.backLock).toBeNull();
+      expect(engine.chosenSettings()).toEqual({ length: "standard", difficulty: "standard" });
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("shows a third setting when the pack has one, and nothing it does not list", () => {
+    const base = packOrThrow().pack;
+    const pack: Pack = {
+      ...base,
+      settings: [
+        ...base.settings,
+        {
+          id: "lantern",
+          label: "Lantern",
+          options: [
+            { id: "lit", label: "Lit" },
+            { id: "dark", label: "Dark" },
+          ],
+          default: "dark",
+        },
+      ],
+    };
+    const { opened, engine } = atGameSettings(pack);
+    try {
+      const shown = engine.projectStoryboard(TOWER, JOIN).gameSettings;
+      expect(shown?.settings.map((setting) => setting.id)).toEqual([
+        "length",
+        "difficulty",
+        "lantern",
+      ]);
+      expect(shown?.chosen.lantern).toBe("dark");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("shows an empty list for a pack with no settings, and Continue still moves on", () => {
+    const pack: Pack = { ...packOrThrow().pack, settings: [] };
+    const { opened, engine, deviceId } = atGameSettings(pack);
+    try {
+      expect(engine.projectStoryboard(TOWER, JOIN).gameSettings).toEqual({
+        story: "test",
+        settings: [],
+        chosen: {},
+      });
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("party-join");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("lets the first press win each change, logs every press, and refuses a value the pack does not offer", () => {
+    const { opened, store, engine } = atGameSettings();
+    try {
+      const beta = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!beta.ok) throw new Error("join");
+      const alpha = "device-1";
+      const batch = [
+        engine.press(alpha, "set-0", "set", "short", "length"),
+        engine.press(beta.deviceId, "set-0", "set", "long", "length"),
+      ];
+      expect(batch.map((result) => result.ok && result.winner)).toEqual([true, false]);
+      expect(engine.chosenSettings()?.length).toBe("short");
+      // The next change is a fresh lock, so the other iPad can win it.
+      expect(engine.projectDevice(beta.deviceId).setPromptId).toBe("set-1");
+      winStep(engine, beta.deviceId, "set-1", "set", "long", "length");
+      expect(engine.chosenSettings()?.length).toBe("long");
+      expect(engine.screen()).toBe("game-settings");
+
+      for (const [option, setting] of [
+        ["epic", "length"],
+        ["standard", "speed"],
+        ["standard", undefined],
+        [undefined, "length"],
+      ] as const) {
+        expect(engine.press(alpha, "set-2", "set", option, setting)).toEqual({
+          ok: false,
+          code: "invalid-state",
+        });
+      }
+      // A stale serial is a lost press, not a change.
+      expect(engine.press(alpha, "set-0", "set", "standard", "length")).toMatchObject({
+        ok: true,
+        winner: false,
+      });
+      expect(engine.press(alpha, "set-9", "set", "standard", "length")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.chosenSettings()?.length).toBe("long");
+
+      const sets = store
+        .loadRun("run")
+        .presses.filter((press) => press.action === "set")
+        .map((press) => ({
+          promptId: press.promptId,
+          device: press.deviceId,
+          winner: press.winner,
+          screen: press.screen,
+          nextScreen: press.nextScreen,
+        }));
+      expect(sets).toEqual([
+        {
+          promptId: "set-0",
+          device: alpha,
+          winner: true,
+          screen: "game-settings",
+          nextScreen: null,
+        },
+        {
+          promptId: "set-0",
+          device: beta.deviceId,
+          winner: false,
+          screen: "game-settings",
+          nextScreen: null,
+        },
+        {
+          promptId: "set-1",
+          device: beta.deviceId,
+          winner: true,
+          screen: "game-settings",
+          nextScreen: null,
+        },
+        {
+          promptId: "set-0",
+          device: alpha,
+          winner: false,
+          screen: "game-settings",
+          nextScreen: null,
+        },
+      ]);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("Back returns to Pick Story and clears the chosen settings; choosing again starts at the defaults", () => {
+    const { opened, engine, deviceId } = atGameSettings();
+    try {
+      winStep(engine, deviceId, "set-0", "set", "short", "length");
+      winStep(engine, deviceId, "back-game-settings", "back");
+      expect(engine.screen()).toBe("pick-story");
+      expect(engine.chosenSettings()).toBeNull();
+      expect(engine.projectStoryboard(TOWER, JOIN).gameSettings).toBeNull();
+      const device = engine.projectDevice(deviceId);
+      expect(device.gameSettings).toBeNull();
+      expect(device.setPromptId).toBeNull();
+      expect(device.backPromptId).toBeNull();
+      expect(engine.press(deviceId, "set-1", "set", "long", "length")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      winStep(engine, deviceId, "continue-pick-story-test", "continue");
+      expect(engine.screen()).toBe("game-settings");
+      expect(engine.chosenSettings()).toEqual({ length: "standard", difficulty: "standard" });
+      // Re-entering drops the last visit's Back lock, so Back can be pressed again.
+      expect(engine.projectDevice(deviceId).backLock).toBeNull();
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("keeps Back pressable while Continue is the step prompt, and Continue goes on to Party Join", () => {
+    const { opened, engine, deviceId } = atGameSettings();
+    try {
+      const device = engine.projectDevice(deviceId);
+      expect(device.prompt).toEqual({ id: "continue-game-settings", label: "Continue" });
+      expect(device.lock).toBeNull();
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("party-join");
+      expect(engine.press(deviceId, "back-game-settings", "back")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.projectDevice(deviceId)).toMatchObject({
+        setPromptId: null,
+        backPromptId: null,
+        backLock: null,
+        gameSettings: { story: "test", chosen: { length: "standard" } },
+      });
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("locks the settings at Begin and records each chosen value in the timing log", () => {
+    const { opened, store, engine, deviceId } = atGameSettings();
+    try {
+      winStep(engine, deviceId, "set-0", "set", "long", "length");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      holdAll(engine, deviceId);
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      expect(store.loadRun("run").marks.some((mark) => mark.kind === "setting")).toBe(false);
+      winStep(engine, deviceId, "begin", "begin");
+      expect(engine.press(deviceId, "set-1", "set", "short", "length")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.chosenSettings()).toEqual({ length: "long", difficulty: "standard" });
+      const settings = store
+        .loadRun("run")
+        .marks.filter((mark) => mark.kind === "setting")
+        .map((mark) => ({ subject: mark.subject, closed: mark.endMonoMs !== null }));
+      expect(settings).toEqual([
+        { subject: "length:long", closed: true },
+        { subject: "difficulty:standard", closed: true },
+      ]);
     } finally {
       opened.close();
     }

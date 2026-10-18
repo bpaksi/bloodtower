@@ -116,17 +116,22 @@ export const holdPayloadSchema = z.strictObject({
 
 /**
  * A press. The server accepts this only on a device socket and locks the first arrival.
- * A `pick` names the option it chooses; no other action does.
+ * A `pick` names the option it chooses. A `set` names the game setting and the option it
+ * chooses for it. No other action names either.
  */
 export const controlPayloadSchema = z
   .strictObject({
     promptId: promptIdSchema,
     action: controlActionSchema,
     option: optionIdSchema.optional(),
+    setting: optionIdSchema.optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.action === "pick" && !value.option) issue(ctx, "A pick names its option.");
-    if (value.action !== "pick" && value.option) issue(ctx, "Only a pick names an option.");
+    const choosing = value.action === "pick" || value.action === "set";
+    if (choosing && !value.option) issue(ctx, `A ${value.action} names its option.`);
+    if (!choosing && value.option) issue(ctx, "Only a pick or a set names an option.");
+    if (value.action === "set" && !value.setting) issue(ctx, "A set names its setting.");
+    if (value.action !== "set" && value.setting) issue(ctx, "Only a set names a setting.");
   });
 
 /**
@@ -336,6 +341,45 @@ export const storiesSchema = z
   });
 export type Stories = z.infer<typeof storiesSchema>;
 
+/**
+ * Game settings for the chosen story (R3-UI-22), built only from that pack's manifest
+ * `settings`. `story` is the chosen card, which a `playable: false` pack can be even though the
+ * session never binds it. `chosen` holds one option id per setting; it starts at each default.
+ */
+export const gameSettingsSchema = z
+  .strictObject({
+    story: optionIdSchema,
+    settings: z
+      .array(
+        z.strictObject({
+          id: optionIdSchema,
+          label: z.string().min(1).max(80),
+          options: z
+            .array(z.strictObject({ id: optionIdSchema, label: z.string().min(1).max(80) }))
+            .min(1)
+            .max(16),
+        }),
+      )
+      .max(16),
+    chosen: z.record(optionIdSchema, optionIdSchema),
+  })
+  .superRefine((value, ctx) => {
+    const ids = value.settings.map((setting) => setting.id);
+    if (new Set(ids).size !== ids.length) issue(ctx, "A setting is listed twice.");
+    for (const setting of value.settings) {
+      const option = value.chosen[setting.id];
+      if (!option) {
+        issue(ctx, `Setting ${setting.id} has no chosen option.`);
+      } else if (!setting.options.some((item) => item.id === option)) {
+        issue(ctx, `Setting ${setting.id} chose ${option}, which is not one of its options.`);
+      }
+    }
+    for (const id of Object.keys(value.chosen)) {
+      if (!ids.includes(id)) issue(ctx, `${id} is chosen but not in the settings list.`);
+    }
+  });
+export type GameSettings = z.infer<typeof gameSettingsSchema>;
+
 /** `lobby` is every screen before play. `ended` is the quit screen. */
 export const STORYBOARD_STAGES = ["lobby", "playing", "paused", "ended"] as const;
 
@@ -365,6 +409,8 @@ export const storyboardStatePayloadSchema = z
     lock: controlLockSchema.nullable(),
     /** The doors on Pick Story, and the story the session is bound to. */
     stories: storiesSchema.optional(),
+    /** The chosen story's game settings, from Game settings on. Null before a story is chosen. */
+    gameSettings: gameSettingsSchema.nullable().optional(),
     /** The line the Keeper scene is on (0..KEEPER_LINE_COUNT-1), or null outside that scene. */
     keeperLine: z
       .number()
@@ -496,6 +542,16 @@ export const deviceStatePayloadSchema = z
     stories: storiesSchema.optional(),
     /** The pick this device is offered, or null. Set on every joined iPad, not one hunter. */
     pick: pickPayloadSchema.nullable().optional(),
+    /** The chosen story's game settings, from Game settings on. Null before a story is chosen. */
+    gameSettings: gameSettingsSchema.nullable().optional(),
+    /** The prompt a setting change is pressed under, on Game settings only. */
+    setPromptId: promptIdSchema.nullable().optional(),
+    /**
+     * Back beside Continue, on a screen that has both (Game settings). Its own prompt, so a
+     * Continue lock does not block it. Not playable yet uses `prompt` for Back instead.
+     */
+    backPromptId: promptIdSchema.nullable().optional(),
+    backLock: controlLockSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     if (new Set(value.heldHunters).size !== value.heldHunters.length) {

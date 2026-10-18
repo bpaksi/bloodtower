@@ -9,10 +9,13 @@ export {
   FLOW_SCREENS,
   type FlowScreen,
   flowScreenSchema,
+  GAME_SETTINGS_BACK_ID,
+  GAME_SETTINGS_CONTINUE_ID,
   optionIdSchema,
   PICK_STORY_PROMPT_PREFIX,
   PROMPT_ID_MAX,
   promptIdSchema,
+  SET_PROMPT_PREFIX,
   STORY_ID_MAX,
 } from "./control.ts";
 export {
@@ -53,6 +56,8 @@ export {
   errorPayloadSchema,
   focusStoryMessageSchema,
   focusStoryPayloadSchema,
+  type GameSettings,
+  gameSettingsSchema,
   type HostHealth,
   helloMessageSchema,
   helloPayloadSchema,
@@ -95,6 +100,7 @@ export {
   assetSchema,
   type Cue,
   cueSchema,
+  type GameSetting,
   idSchema,
   type Moment,
   momentIdSchema,
@@ -114,6 +120,7 @@ export {
   randomnessIssue,
   sceneOf,
   semverSchema,
+  settingSchema,
 } from "./pack.ts";
 export {
   activeMillis,

@@ -29,6 +29,7 @@ export const SCREEN_TITLE: Record<FlowScreen, string> = {
   splash: "Loading",
   "tower-connect": "Tower Connect",
   "pick-story": "Pick Story",
+  "game-settings": "Game settings",
   "not-playable": "Not playable yet",
   "party-join": "Party Join",
   begin: "Begin Story",
@@ -40,12 +41,30 @@ export const SCREEN_TITLE: Record<FlowScreen, string> = {
 export const SCREEN_NEXT: Record<FlowScreen, string> = {
   splash: "Next: connect the tower",
   "tower-connect": "Next: pick a story",
-  "pick-story": "Next: gather the party",
+  "pick-story": "Next: game settings",
+  "game-settings": "Next: gather the party",
   "not-playable": "This story is listed, but it cannot be played yet.",
   "party-join": "Next: set up the story",
   begin: "Next: begin the story",
   play: "The night is underway.",
   quit: "The table is closed.",
+};
+
+/** The card chosen on Pick Story (Game settings and on), or null before one is chosen. */
+export const chosenStory = (
+  stories: Stories | undefined,
+  settings: StoryboardState["gameSettings"],
+): StoryCard | null =>
+  settings ? (stories?.cards.find((card) => card.id === settings.story) ?? null) : null;
+
+/** The label of the option chosen for each setting, such as "Standard". Unknown stays null. */
+export const chosenLabel = (
+  settings: NonNullable<StoryboardState["gameSettings"]>,
+  settingId: string,
+): string | null => {
+  const setting = settings.settings.find((item) => item.id === settingId);
+  const chosen = settings.chosen[settingId];
+  return setting?.options.find((option) => option.id === chosen)?.label ?? null;
 };
 
 export const FORTUNE_LINE = "The night is gathering. The tower is not yet awake.";

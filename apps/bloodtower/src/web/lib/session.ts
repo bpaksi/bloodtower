@@ -87,8 +87,13 @@ type HelloPayload = ReturnType<typeof storyboardHello> | ReturnType<typeof devic
 export interface SessionClient {
   /** False when the link is down. Nothing is kept to send later. */
   sendHold: (hunter: string, action: "take" | "release") => boolean;
-  /** `option` is set only for a `pick`. */
-  sendControl: (promptId: string, action: ControlAction, option?: string) => boolean;
+  /** `option` is set only for a `pick` or a `set`; `setting` only for a `set`. */
+  sendControl: (
+    promptId: string,
+    action: ControlAction,
+    option?: string,
+    setting?: string,
+  ) => boolean;
   /** Moves the highlight on Pick Story. Not a press: it takes no lock. */
   sendFocusStory: (story: string) => boolean;
   /** The story board only: the Keeper line that finished on the board (D7 exception). */
@@ -203,11 +208,16 @@ export const openSession = (options: SessionOptions): SessionClient => {
       if (!message.success) return false;
       return sendRaw(message.data);
     },
-    sendControl: (promptId, action, option) => {
+    sendControl: (promptId, action, option, setting) => {
       const message = controlMessageSchema.safeParse({
         v: PROTOCOL_VERSION,
         type: "control",
-        payload: option === undefined ? { promptId, action } : { promptId, action, option },
+        payload: {
+          promptId,
+          action,
+          ...(option === undefined ? {} : { option }),
+          ...(setting === undefined ? {} : { setting }),
+        },
       });
       if (!message.success) return false;
       return sendRaw(message.data);

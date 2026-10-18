@@ -4,6 +4,7 @@ import type { FlowScreen, StoryboardState } from "bloodtower-protocols";
 import { useEffect, useRef, useState } from "react";
 import { BoardAudio } from "../../lib/audio/boardAudio.ts";
 import {
+  audioPackId,
   isBeforePickGame,
   isGameChosen,
   isVisualMoment,
@@ -115,17 +116,16 @@ export function LiveBoard() {
   }, []);
 
   const visual = state.screen === "play" && isVisualMoment(state.moment);
+  const soundPack = audioPackId(state);
   useEffect(() => {
     screen.current = state.screen;
-    audio.current?.update(
-      pickLayers({ screen: state.screen, packId: state.packId ?? null, visual }),
-    );
+    audio.current?.update(pickLayers({ screen: state.screen, packId: soundPack, visual }));
     const from = lastScreen.current;
     lastScreen.current = state.screen;
     if (from !== null && isGameChosen(from, state.screen)) {
       audio.current?.play(SIGNATURE.soft, "music", 6.5);
     }
-  }, [state.screen, state.packId, visual]);
+  }, [state.screen, soundPack, visual]);
 
   const onLevelChange = (channel: Channel, level: number) => {
     const next = { ...levels, [channel]: level };

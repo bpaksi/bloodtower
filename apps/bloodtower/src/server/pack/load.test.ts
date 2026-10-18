@@ -338,6 +338,12 @@ describe("story list", () => {
       loadable: true,
     });
     expect(test?.pack?.pack_id).toBe("test");
+    // Game settings come from each manifest, including the pack that is never bound.
+    expect(dracula?.settings.map((setting) => setting.id)).toEqual(["length"]);
+    expect(test?.settings.map((setting) => [setting.id, setting.default])).toEqual([
+      ["length", "standard"],
+      ["difficulty", "standard"],
+    ]);
   });
 
   it("keeps a pack that fails the lint as a greyed card with no lint text on it", () => {

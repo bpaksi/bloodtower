@@ -4,7 +4,8 @@ import { deviceIdSchema, utcTimestampSchema } from "./devices.ts";
 /**
  * The only controls accepted on a joined device.
  * Tower connect and calibrate are named presses. `pick` is a choice press on an iPad pick prompt,
- * and it carries the chosen option id. There is no command message and no raw bytes.
+ * and it carries the chosen option id. `set` changes one game setting on Game settings, and it
+ * carries the setting id and the option id. There is no command message and no raw bytes.
  * The server decides the winner by arrival order (step 5). This module is the record shape.
  */
 export const CONTROL_ACTIONS = [
@@ -17,6 +18,7 @@ export const CONTROL_ACTIONS = [
   "tower-connect",
   "tower-calibrate",
   "pick",
+  "set",
 ] as const;
 export const controlActionSchema = z.enum(CONTROL_ACTIONS);
 export type ControlAction = z.infer<typeof controlActionSchema>;
@@ -29,6 +31,7 @@ export const FLOW_SCREENS = [
   "splash",
   "tower-connect",
   "pick-story",
+  "game-settings",
   "not-playable",
   "party-join",
   "begin",
@@ -45,6 +48,15 @@ export const promptIdSchema = z.string().regex(new RegExp(`^[A-Za-z0-9_-]{1,${PR
 export const PICK_STORY_PROMPT_PREFIX = "continue-pick-story-";
 /** Longest story id whose Choose prompt id still fits `promptIdSchema`. */
 export const STORY_ID_MAX = PROMPT_ID_MAX - PICK_STORY_PROMPT_PREFIX.length;
+
+/** Continue and Back on Game settings (R3-UI-22, R3-UI-37). */
+export const GAME_SETTINGS_CONTINUE_ID = "continue-game-settings";
+export const GAME_SETTINGS_BACK_ID = "back-game-settings";
+/**
+ * A setting change on Game settings is this prefix plus a serial. Each winning change moves the
+ * serial on, so the next change is a fresh first-press-wins lock.
+ */
+export const SET_PROMPT_PREFIX = "set-";
 
 /** A pick option id from the pack's choices, such as `oil-the-hinge`. */
 export const optionIdSchema = z.string().regex(/^[a-z][a-z0-9-]{0,63}$/);

@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, join, resolve, sep } from "node:path";
 import {
+  type GameSetting,
   optionIdSchema,
   type Pack,
   type PackMetadata,
@@ -282,6 +283,11 @@ export const loadR1Pack = (packsDir: string): PlayableLoadResult => {
 export interface StoryEntry {
   card: StoryCard;
   pack: Pack | null;
+  /**
+   * The manifest's game settings, shown on Game settings once the card is chosen. Kept here
+   * because a `playable: false` pack has no `pack` but still has settings. Empty for a greyed card.
+   */
+  settings: readonly GameSetting[];
   issues: PackLoadIssue[];
   /** Resolved asset index when the pack folder parsed; null when load failed. */
   assets: PackAssetIndex | null;
@@ -320,6 +326,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
         return {
           card: greyedCard(id, id),
           pack: null,
+          settings: [],
           issues: [
             issue(id, "(folder)", "V-1", `The folder name is over ${STORY_ID_MAX} characters.`),
           ],
@@ -342,6 +349,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
             loadable: true,
           },
           pack: null,
+          settings: pack.settings,
           issues: [],
           assets: loaded.assets,
         };
@@ -360,6 +368,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
             loadable: true,
           },
           pack,
+          settings: pack.settings,
           issues: [],
           assets: loaded.assets,
         };
@@ -370,6 +379,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
       return {
         card: greyedCard(id, id),
         pack: null,
+        settings: [],
         issues,
         assets: loaded.ok ? loaded.assets : null,
       };

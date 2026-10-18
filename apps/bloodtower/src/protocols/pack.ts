@@ -387,6 +387,7 @@ export const settingSchema = z.strictObject({
   options: z.array(z.strictObject({ id: idSchema, label: labelSchema })).min(1),
   default: idSchema,
 });
+export type GameSetting = z.infer<typeof settingSchema>;
 
 /**
  * Setting rules that need a list. A `length` setting uses `lengths`; a `difficulty` setting uses

@@ -446,6 +446,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       message.payload.promptId,
       message.payload.action,
       message.payload.option,
+      message.payload.setting,
     );
     if (!result.ok) {
       sendError(socket, "invalid-state", "That press was not accepted.", correlationId);

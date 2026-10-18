@@ -4,6 +4,8 @@ import { displayCaption } from "../../lib/caption.ts";
 import { portraitSrc } from "../../lib/portrait.ts";
 import { JoinQr } from "../../lib/qr";
 import {
+  chosenLabel,
+  chosenStory,
   claimedCount,
   currentStory,
   FORTUNE_LINE,
@@ -96,6 +98,7 @@ export function StoryBoard({
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
           {state.screen === "pick-story" ? <PickStoryPanel state={state} /> : null}
+          {state.screen === "game-settings" ? <GameSettingsPanel state={state} /> : null}
           {state.screen === "not-playable" ? <NotPlayablePanel state={state} /> : null}
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
           {state.screen === "begin" ? <BeginPanel state={state} /> : null}
@@ -159,6 +162,7 @@ const headerCopy = (state: StoryboardState): { scene: string; place: string } =>
   if (state.screen === "splash") return { scene: "Bloodtower", place: "The Table" };
   if (state.screen === "tower-connect") return { scene: "The Tower", place: "On the Table" };
   if (state.screen === "pick-story") return { scene: "The Door", place: "Choose a Story" };
+  if (state.screen === "game-settings") return { scene: "The Door", place: "Game Settings" };
   if (state.screen === "not-playable") return { scene: "The Door", place: "Not Yet Playable" };
   if (state.screen === "party-join") return { scene: "The Party", place: "Gather" };
   if (state.screen === "begin") return { scene: "The Night", place: "The Table is Set" };
@@ -349,9 +353,53 @@ const CarouselPeek = ({ card, side }: { card: StoryCard; side: "previous" | "nex
   </article>
 );
 
-/** "Not playable yet" (R3-UI-24): a dialog over the landing background; Back returns to the doors. */
+/**
+ * Game settings (R3-UI-22): a dialog listing each of the chosen pack's settings, its options and
+ * the current value. The devices change them; the board has no buttons.
+ */
+const GameSettingsPanel = ({ state }: { state: StoryboardState }) => {
+  const settings = state.gameSettings ?? null;
+  const story = chosenStory(state.stories, settings);
+  return (
+    <article className="bt-page bt-parchment bt-ink-in" data-game-settings={settings?.story ?? ""}>
+      <div>
+        <p className="bt-kicker">{story ? story.title : "The story"}</p>
+        <h2>{SCREEN_TITLE["game-settings"]}</h2>
+        {!settings || settings.settings.length === 0 ? (
+          <p className="bt-narration">This story has no settings.</p>
+        ) : (
+          <dl className="bt-settings">
+            {settings.settings.map((setting) => (
+              <div key={setting.id} className="bt-setting" data-setting={setting.id}>
+                <dt>{setting.label}</dt>
+                <dd>
+                  <b data-setting-value="">{chosenLabel(settings, setting.id) ?? "unavailable"}</b>
+                  <span className="bt-setting-options">
+                    {setting.options.map((option) => (
+                      <span
+                        key={option.id}
+                        data-option={option.id}
+                        data-chosen={settings.chosen[setting.id] === option.id ? "true" : undefined}
+                      >
+                        {option.label}
+                      </span>
+                    ))}
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        <p className="bt-lede">{SCREEN_NEXT["game-settings"]}</p>
+      </div>
+    </article>
+  );
+};
+
+/** "Not playable yet" (R3-UI-24): a dialog over the landing background; Back returns to Game settings. */
 const NotPlayablePanel = ({ state }: { state: StoryboardState }) => {
-  const focus = focusedStory(state.stories);
+  const focus =
+    chosenStory(state.stories, state.gameSettings ?? null) ?? focusedStory(state.stories);
   return (
     <article className="bt-page bt-parchment bt-ink-in">
       <div>

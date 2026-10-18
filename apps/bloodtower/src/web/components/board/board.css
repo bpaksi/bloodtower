@@ -1012,6 +1012,47 @@
   border: var(--bt-rule-gold);
 }
 
+/* Game settings (R3-UI-22): each setting, its options, and the chosen one marked. */
+.bt-settings {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.bt-setting {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) 1fr;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+}
+
+.bt-setting dt {
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  color: var(--bt-vellum-shadow);
+}
+
+.bt-setting dd {
+  margin: 0;
+  display: grid;
+  gap: 0.2rem;
+  font-size: var(--bt-size-body);
+}
+
+.bt-setting-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  font-size: var(--bt-size-label);
+  color: var(--bt-vellum-shadow);
+}
+
+.bt-setting-options [data-chosen="true"] {
+  color: var(--bt-blood);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 /* Sound dialog (R3-UI-03): the Mac board's only control besides the Menu. */
 .bt-sound-backdrop {
   position: fixed;

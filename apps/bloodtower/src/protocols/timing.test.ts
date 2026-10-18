@@ -39,6 +39,11 @@ describe("timing marks", () => {
     ).toBe("alpha");
     expect(mark({ kind: "table-talk", subject: "share" }).kind).toBe("table-talk");
     expect(mark({ kind: "cue", subject: "bell" }).kind).toBe("cue");
+    expect(mark({ kind: "setting", subject: "length:long" }).kind).toBe("setting");
+    expect(
+      timingMarkSchema.safeParse(raw({ kind: "setting", subject: "length:long", hunter: "alpha" }))
+        .success,
+    ).toBe(false);
     expect(
       mark({
         kind: "battle-screen",
