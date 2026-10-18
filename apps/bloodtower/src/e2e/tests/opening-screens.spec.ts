@@ -1,6 +1,7 @@
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import {
   captureFrames,
+  doneEverySetupStep,
   startAcceptanceHost,
   waitForBoardAnimationsSettled,
 } from "./support/acceptance.ts";
@@ -184,7 +185,20 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       });
 
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
-      await expect(pad.getByRole("heading", { name: "Party Join" })).toBeVisible();
+      await expect(pad.getByRole("heading", { name: "Claim Hunters" })).toBeVisible();
+      await expect(
+        board.getByRole("heading", { name: "Claim Hunters", exact: true }),
+      ).toBeVisible();
+      // The summary echoes every choice so far; nothing is claimed or set up yet (R3-UI-25).
+      const summary = (item: string) => board.locator(`[data-summary-item="${item}"]`);
+      await expect(summary("game")).toContainText("Proving ground");
+      await expect(summary("settings")).toContainText("Length: Long");
+      await expect(summary("tower")).toContainText("Playing without tower");
+      await expect(summary("hunters")).toContainText("not chosen yet");
+      await expect(summary("setup")).toContainText("not chosen yet");
+      // Devices show no images: no portrait on Claim Hunters (R3-UI-51).
+      await expect(pad.locator("img")).toHaveCount(0);
+      await expect(d.button("back")).toBeEnabled();
       await expect(d.button("continue")).toBeDisabled();
       await expect(pad.getByText("Disabled: Claim all hunters first.")).toBeVisible();
       await expect(board.getByText(/0 of 4 hunters claimed|hunters claimed/)).toBeVisible();
@@ -202,7 +216,34 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await shot(pad, "device-party-join-claimed");
       await shot(board, "board-party-join-claimed");
 
-      await d.button("continue").click();
+      await expect(summary("hunters")).toContainText("Agnes:");
+
+      await test.step("Setup steps: one dialog each, Done and Back on the device, Back undoes a step", async () => {
+        await d.button("continue").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "setup");
+        await expect(board.locator("main")).toHaveAttribute("data-screen", "setup");
+        await expect(board.getByText("Lay out the board and orient the kingdoms.")).toBeVisible();
+        await expect(board.getByRole("heading", { name: "Setup · step 1 of 3" })).toBeVisible();
+        // The illustration is declared as a placeholder: no image until its file lands.
+        await expect(board.locator("[data-setup-illustration]")).toHaveCount(0);
+        await expect(d.button("continue")).toHaveText("Done");
+        await expect(d.button("back")).toBeEnabled();
+        await expect(pad.locator("img")).toHaveCount(0);
+        await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
+        await shot(pad, "device-setup-step");
+        await shot(board, "board-setup-step");
+        await d.button("continue").click();
+        await expect(pad.locator('[data-setup-step="place-hunters"]')).toBeVisible();
+        await expect(summary("setup")).toContainText("1 of 3 done");
+        await d.button("back").click();
+        await expect(pad.locator('[data-setup-step="lay-out-board"]')).toBeVisible();
+        await expect(summary("setup")).toContainText("not chosen yet");
+        await d.button("back").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
+        await d.button("continue").click();
+        await doneEverySetupStep(pad);
+        await expect(summary("setup")).toContainText("3 of 3 done");
+      });
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "begin");
       await expect(pad.getByRole("heading", { name: "Begin Story" })).toBeVisible();
       await expect(d.button("begin")).toBeEnabled();

@@ -15,6 +15,7 @@ import { loadConfig } from "../config.ts";
 import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore } from "../db/store.ts";
+import type { PackAssetIndex } from "../pack/assets.ts";
 import { loadR1Pack, type StoryEntry } from "../pack/load.ts";
 import { stepClock } from "../timing/clock.ts";
 import { createTimingLog } from "../timing/log.ts";
@@ -104,13 +105,23 @@ const winStep = (
   if (!result.ok || !result.winner) throw new Error(`${promptId} did not win.`);
 };
 
-/** Leaves splash, walks the three steps before play, and presses Begin on the begin screen. */
+/** Presses Done on each of the bound pack's setup steps, from the first to Begin. */
+const doSetup = (engine: SessionEngine, deviceId: string) => {
+  while (engine.screen() === "setup") {
+    const step = engine.projectStoryboard(TOWER, null).setupStep?.step;
+    if (!step) throw new Error("The setup screen has no step.");
+    winStep(engine, deviceId, `continue-setup-${step.id}`, "continue");
+  }
+};
+
+/** Leaves splash, walks the steps before play, and presses Begin on the begin screen. */
 const startPlay = (engine: SessionEngine, deviceId: string) => {
   engine.finishSplash();
   winStep(engine, deviceId, "continue-pick-story-test", "continue");
   winStep(engine, deviceId, "continue-game-settings", "continue");
   winStep(engine, deviceId, "continue-tower-connect", "continue");
   winStep(engine, deviceId, "continue-party-join", "continue");
+  doSetup(engine, deviceId);
   winStep(engine, deviceId, "begin", "begin");
 };
 
@@ -153,6 +164,7 @@ describe("session", () => {
       expect(party.gate).toEqual({ canBegin: true, unheld: [] });
       expect(party.prompt).toEqual({ id: "continue-party-join", label: "Next: set up the story" });
       winStep(engine, joined.deviceId, "continue-party-join", "continue");
+      doSetup(engine, joined.deviceId);
       const board = engine.projectStoryboard(TOWER, JOIN);
       expect(board.screen).toBe("begin");
       expect(board.prompt).toEqual({ id: "begin", label: "Begin" });
@@ -603,6 +615,7 @@ describe("session", () => {
       winStep(engine, alpha.deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("party-join");
       winStep(engine, alpha.deviceId, "continue-party-join", "continue");
+      doSetup(engine, alpha.deviceId);
       expect(engine.screen()).toBe("begin");
       winStep(engine, alpha.deviceId, "begin", "begin");
       expect(engine.screen()).toBe("play");
@@ -1250,6 +1263,7 @@ describe("pick story", () => {
       winStep(engine, deviceId, "continue-tower-connect", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
+      doSetup(engine, deviceId);
       winStep(engine, deviceId, "begin", "begin");
       expect(engine.projectStoryboard(TOWER, JOIN).moment?.id).toBe("proving-ground.01");
     } finally {
@@ -1506,9 +1520,10 @@ describe("game settings", () => {
         ok: false,
         code: "invalid-state",
       });
+      // Claim Hunters names its own Back, which goes to Connect Tower, not Game settings.
       expect(engine.projectDevice(deviceId)).toMatchObject({
         setPromptId: null,
-        backPromptId: null,
+        backPromptId: "back-party-join",
         backLock: null,
         gameSettings: { story: "test", chosen: { length: "standard" } },
       });
@@ -1525,6 +1540,7 @@ describe("game settings", () => {
       winStep(engine, deviceId, "continue-tower-connect", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
+      doSetup(engine, deviceId);
       expect(store.loadRun("run").marks.some((mark) => mark.kind === "setting")).toBe(false);
       winStep(engine, deviceId, "begin", "begin");
       expect(engine.press(deviceId, "set-1", "set", "short", "length")).toEqual({
@@ -1733,6 +1749,352 @@ describe("Connect Tower after Game settings (R3-UI-23)", () => {
       }
       expect(engine.lockFor("tower-connect")).toBeNull();
       expect(engine.lockFor("tower-calibrate")).toBeNull();
+    } finally {
+      opened.close();
+    }
+  });
+});
+
+describe("claim hunters and setup steps", () => {
+  const READY: TowerSnapshot = {
+    connection: "connected",
+    battery: { state: "unavailable" },
+    calibrated: { state: "known", calibrated: true },
+  };
+  const STEPS = ["lay-out-board", "place-hunters", "ready-decks"];
+
+  /** The test pack as the only door, with its asset index so an illustration can resolve. */
+  const entry = (pack: Pack, illustrated: readonly string[] = []): StoryEntry => ({
+    card: {
+      id: "test",
+      title: pack.title,
+      blurb: null,
+      tagline: null,
+      cover: "/packs/test/assets/cover.png",
+      players: pack.players,
+      playable: true,
+      loadable: true,
+      tower: pack.tower,
+    },
+    pack,
+    settings: pack.settings,
+    issues: [],
+    assets: {
+      byId: new Map(illustrated.map((id) => [id, { absolute: `/x/${id}.png`, basename: id }])),
+    } as unknown as PackAssetIndex,
+  });
+
+  /** Joined iPad holding every hunter, on Claim Hunters. */
+  const atClaim = (options?: {
+    pack?: Pack;
+    tower?: () => TowerSnapshot;
+    illustrated?: readonly string[];
+  }) => {
+    const pack = options?.pack ?? packOrThrow().pack;
+    const made = setup({
+      pack,
+      tower: options?.tower,
+      stories: [entry(pack, options?.illustrated)],
+      storyId: "test",
+    });
+    const joined = made.engine.join({ joinCode: "048213", formFactor: "ipad" });
+    if (!joined.ok) throw new Error("join");
+    made.engine.finishSplash();
+    const deviceId = joined.deviceId;
+    winStep(made.engine, deviceId, "continue-pick-story-test", "continue");
+    winStep(made.engine, deviceId, "continue-game-settings", "continue");
+    if (made.engine.screen() === "tower-connect") {
+      winStep(made.engine, deviceId, "continue-tower-connect", "continue");
+    }
+    holdAll(made.engine, deviceId);
+    return { ...made, deviceId };
+  };
+
+  const board = (engine: SessionEngine) => engine.projectStoryboard(TOWER, JOIN);
+
+  it("takes the test pack's setup steps from its manifest, one dialog each", () => {
+    expect(packOrThrow().pack.setup.map((step) => step.id)).toEqual(STEPS);
+    expect(packOrThrow().pack.setup[0]).toEqual({
+      id: "lay-out-board",
+      label: "Lay out the board and orient the kingdoms.",
+      illustration: "ill.setup-board",
+    });
+  });
+
+  it("walks Claim Hunters, each step with Done, then Begin, and logs time per step", () => {
+    const { opened, store, engine, deviceId } = atClaim();
+    try {
+      expect(engine.screen()).toBe("party-join");
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      for (const [index, id] of STEPS.entries()) {
+        expect(engine.screen()).toBe("setup");
+        const state = board(engine);
+        expect(state.setupStep?.step).toEqual({
+          id,
+          label: packOrThrow().pack.setup[index]?.label,
+          index,
+          count: 3,
+        });
+        expect(state.prompt).toEqual({ id: `continue-setup-${id}`, label: "Done" });
+        expect(engine.projectDevice(deviceId)).toMatchObject({
+          screen: "setup",
+          setupStep: { id, index, count: 3 },
+          prompt: { id: `continue-setup-${id}`, label: "Done" },
+          backPromptId: `back-setup-${id}`,
+        });
+        // Begin is refused until every step is done (R2-52).
+        expect(engine.press(deviceId, "begin", "begin")).toEqual({
+          ok: false,
+          code: "invalid-state",
+        });
+        winStep(engine, deviceId, `continue-setup-${id}`, "continue");
+      }
+      expect(engine.screen()).toBe("begin");
+      expect(board(engine).prompt).toEqual({ id: "begin", label: "Begin" });
+      expect(board(engine).setupStep).toBeNull();
+      winStep(engine, deviceId, "begin", "begin");
+      const marks = store
+        .loadRun("run")
+        .marks.filter((mark) => mark.kind === "setup-step")
+        .map((mark) => ({ subject: mark.subject, closed: mark.endMonoMs !== null }));
+      expect(marks).toEqual(STEPS.map((subject) => ({ subject, closed: true })));
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("goes back one step at a time, undoing the step it returns to, and never assumes a step", () => {
+    const { opened, store, engine, deviceId } = atClaim();
+    try {
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      winStep(engine, deviceId, "continue-setup-lay-out-board", "continue");
+      winStep(engine, deviceId, "continue-setup-place-hunters", "continue");
+      // Back from step 3 re-opens step 2, which is no longer done.
+      winStep(engine, deviceId, "back-setup-ready-decks", "back");
+      expect(board(engine).setupStep?.step.id).toBe("place-hunters");
+      expect(board(engine).summary?.setup.map((step) => step.done)).toEqual([true, false, false]);
+      // Its Done is a fresh lock on the revisit; the Back that just won stays locked.
+      winStep(engine, deviceId, "continue-setup-place-hunters", "continue");
+      expect(engine.press(deviceId, "back-setup-ready-decks", "back")).toMatchObject({
+        ok: true,
+        winner: true,
+      });
+      expect(board(engine).setupStep?.step.id).toBe("place-hunters");
+      winStep(engine, deviceId, "back-setup-place-hunters", "back");
+      winStep(engine, deviceId, "back-setup-lay-out-board", "back");
+      expect(engine.screen()).toBe("party-join");
+      expect(board(engine).summary?.setup.every((step) => !step.done)).toBe(true);
+      // Back from Begin re-opens the last step.
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      doSetup(engine, deviceId);
+      expect(engine.screen()).toBe("begin");
+      winStep(engine, deviceId, "back-begin", "back");
+      expect(board(engine).setupStep?.step.id).toBe("ready-decks");
+      expect(board(engine).prompt?.id).toBe("continue-setup-ready-decks");
+      winStep(engine, deviceId, "continue-setup-ready-decks", "continue");
+      expect(engine.screen()).toBe("begin");
+      // Every visit is its own mark, and none is left open.
+      const marks = store.loadRun("run").marks.filter((mark) => mark.kind === "setup-step");
+      expect(marks.every((mark) => mark.endMonoMs !== null)).toBe(true);
+      expect(marks.map((mark) => mark.subject)).toEqual([
+        "lay-out-board",
+        "place-hunters",
+        "ready-decks",
+        "place-hunters",
+        "ready-decks",
+        "place-hunters",
+        "lay-out-board",
+        "lay-out-board",
+        "place-hunters",
+        "ready-decks",
+        "ready-decks",
+      ]);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("refuses a Done or Back for a step that is not on screen", () => {
+    const { opened, engine, deviceId } = atClaim();
+    try {
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      for (const [promptId, action] of [
+        ["continue-setup-place-hunters", "continue"],
+        ["back-setup-place-hunters", "back"],
+        ["back-party-join", "back"],
+        ["back-begin", "back"],
+      ] as const) {
+        expect(engine.press(deviceId, promptId, action), promptId).toEqual({
+          ok: false,
+          code: "invalid-state",
+        });
+      }
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("goes from Claim Hunters straight to Begin when the pack has no setup steps", () => {
+    const pack = { ...packOrThrow().pack, setup: [] };
+    const { opened, engine, deviceId } = atClaim({ pack });
+    try {
+      expect(board(engine).prompt).toEqual({
+        id: "continue-party-join",
+        label: "Next: begin the story",
+      });
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      expect(engine.screen()).toBe("begin");
+      winStep(engine, deviceId, "back-begin", "back");
+      expect(engine.screen()).toBe("party-join");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("shows the illustration only once its file has landed", () => {
+    const placeholder = atClaim();
+    try {
+      winStep(placeholder.engine, placeholder.deviceId, "continue-party-join", "continue");
+      expect(board(placeholder.engine).setupStep).toMatchObject({
+        step: { id: "lay-out-board" },
+        illustration: null,
+      });
+    } finally {
+      placeholder.opened.close();
+    }
+    const landed = atClaim({ illustrated: ["ill.setup-board"] });
+    try {
+      winStep(landed.engine, landed.deviceId, "continue-party-join", "continue");
+      expect(board(landed.engine).setupStep?.illustration).toBe("ill.setup-board");
+      // The device gets the step text only, never the image (R3-UI-51).
+      expect(JSON.stringify(landed.engine.projectDevice(landed.deviceId))).not.toContain(
+        "ill.setup-board",
+      );
+      winStep(landed.engine, landed.deviceId, "continue-setup-lay-out-board", "continue");
+      expect(board(landed.engine).setupStep?.illustration).toBeNull();
+    } finally {
+      landed.opened.close();
+    }
+  });
+
+  it("Back from Claim Hunters returns to Connect Tower, keeps every claim and clears the tower item", () => {
+    const { opened, engine, deviceId } = atClaim();
+    try {
+      expect(board(engine).summary?.tower).toBe("without");
+      winStep(engine, deviceId, "back-party-join", "back");
+      expect(engine.screen()).toBe("tower-connect");
+      expect(board(engine).summary?.tower).toBeNull();
+      expect(board(engine).gate).toEqual({ canBegin: true, unheld: [] });
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("Back from Claim Hunters returns to Game settings when the story does not use the tower", () => {
+    const pack: Pack = { ...packOrThrow().pack, tower: "none" };
+    const { opened, engine, deviceId } = atClaim({ pack });
+    try {
+      expect(board(engine).summary?.tower).toBe("not-used");
+      winStep(engine, deviceId, "back-party-join", "back");
+      expect(engine.screen()).toBe("game-settings");
+      expect(board(engine).summary?.tower).toBeNull();
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("builds the summary as each choice is made and clears what Back undoes", () => {
+    const pack = packOrThrow().pack;
+    const made = setup({ pack, tower: () => READY, stories: [entry(pack)], storyId: "test" });
+    const { opened, engine } = made;
+    try {
+      const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!joined.ok) throw new Error("join");
+      const deviceId = joined.deviceId;
+      expect(board(engine).summary).toBeNull();
+      engine.finishSplash();
+      const empty = { game: null, settings: null, tower: null, hunters: null, setup: [] };
+      expect(board(engine).summary).toEqual(empty);
+
+      winStep(engine, deviceId, "continue-pick-story-test", "continue");
+      expect(board(engine).summary).toMatchObject({
+        game: { id: "test", title: "Proving ground", cover: "/packs/test/assets/cover.png" },
+        settings: [
+          { id: "length", label: "Length", value: "Standard" },
+          { id: "difficulty", label: "Difficulty", value: "Standard" },
+        ],
+        tower: null,
+        hunters: [
+          { id: "alpha", name: "Agnes", holders: [] },
+          { id: "beta", name: "Tomas", holders: [] },
+          { id: "gamma", name: "Wren", holders: [] },
+          { id: "delta", name: "Emeric", holders: [] },
+        ],
+        setup: STEPS.map((id) => ({ id, done: false })),
+      });
+      winStep(engine, deviceId, "set-0", "set", "long", "length");
+      expect(board(engine).summary?.settings?.[0]?.value).toBe("Long");
+
+      // Back to Pick Game clears the game and its settings.
+      winStep(engine, deviceId, "back-game-settings", "back");
+      expect(board(engine).summary).toEqual(empty);
+      winStep(engine, deviceId, "continue-pick-story-test", "continue");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(board(engine).summary?.tower).toBeNull();
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
+      expect(board(engine).summary?.tower).toBe("connected");
+
+      engine.hold(deviceId, "alpha", "take");
+      expect(board(engine).summary?.hunters?.[0]).toEqual({
+        id: "alpha",
+        name: "Agnes",
+        holders: [deviceId],
+      });
+      holdAll(engine, deviceId);
+      winStep(engine, deviceId, "continue-party-join", "continue");
+      winStep(engine, deviceId, "continue-setup-lay-out-board", "continue");
+      expect(board(engine).summary?.setup.map((step) => step.done)).toEqual([true, false, false]);
+      doSetup(engine, deviceId);
+      expect(board(engine).summary?.setup.every((step) => step.done)).toBe(true);
+      winStep(engine, deviceId, "begin", "begin");
+      expect(board(engine).summary).toBeNull();
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("does not list hunters or setup steps for a story that is not playable", () => {
+    const pack = packOrThrow().pack;
+    const vellmoor: StoryEntry = {
+      card: {
+        id: "dracula",
+        title: "The Count of Vellmoor",
+        blurb: null,
+        tagline: null,
+        cover: null,
+        players: null,
+        playable: false,
+        loadable: true,
+        tower: "optional",
+      },
+      pack: null,
+      settings: [LENGTH_SETTING],
+      issues: [],
+      assets: null,
+    };
+    const { opened, engine } = setup({ pack, stories: [vellmoor, entry(pack)], storyId: "test" });
+    try {
+      const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
+      if (!joined.ok) throw new Error("join");
+      engine.finishSplash();
+      engine.focusStory(joined.deviceId, "dracula");
+      winStep(engine, joined.deviceId, "continue-pick-story-dracula", "continue");
+      expect(board(engine).summary).toMatchObject({
+        game: { id: "dracula", title: "The Count of Vellmoor" },
+        settings: [{ id: "length", value: "Standard" }],
+        hunters: null,
+        setup: [],
+      });
     } finally {
       opened.close();
     }

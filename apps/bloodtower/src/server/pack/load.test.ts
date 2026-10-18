@@ -271,6 +271,24 @@ describe("story loader", () => {
     }
   });
 
+  it("does not warn for a placeholder still with no file, and indexes it once the file lands", () => {
+    const dir = copyPack();
+    try {
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.assets.warnings).toEqual([]);
+      expect(result.assets.byId.has("ill.setup-board")).toBe(false);
+      writeFileSync(join(dir, "assets", "ill-setup-board.png"), "png");
+      const landed = loadPackDir(dir);
+      expect(landed.ok).toBe(true);
+      if (!landed.ok) return;
+      expect(landed.assets.byId.get("ill.setup-board")?.basename).toBe("ill-setup-board.png");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("warns when a declared asset has no image file", () => {
     const dir = copyPack();
     try {

@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import {
+  BEGIN_BACK_ID,
   type ControlAction,
   type ControlLock,
   type DeviceState,
@@ -10,16 +11,22 @@ import {
   type GameSettings,
   KEEPER_LINE_COUNT,
   KEEPER_MOMENT_ID,
+  PARTY_JOIN_BACK_ID,
+  PARTY_JOIN_CONTINUE_ID,
   type Pack,
   type PauseCause,
   PICK_STORY_PROMPT_PREFIX,
   SET_PROMPT_PREFIX,
+  SETUP_BACK_PREFIX,
+  SETUP_DONE_PREFIX,
+  type StartupSummary,
   type Stories,
   type StoryboardState,
   type StoryCard,
   storyboardStatePayloadSchema,
   TOWER_CONNECT_BACK_ID,
   TOWER_CONNECT_CONTINUE_ID,
+  type TowerChoice,
   type TowerMode,
   type TowerSnapshot,
 } from "bloodtower-protocols";
@@ -156,7 +163,9 @@ const newToken = () => randomBytes(16).toString("base64url");
 /**
  * Each step before play moves to the next screen. Play, quit and splash are handled apart. Game
  * settings goes to "Not playable yet" instead when the chosen pack is `playable: false`, and
- * straight to Party Join when its `tower` is `none` (R3-UI-23).
+ * straight to Claim Hunters when its `tower` is `none` (R3-UI-23). Claim Hunters goes to the
+ * pack's setup steps, one dialog each, and the last one to Begin; with no steps it goes straight
+ * to Begin (R3-UI-22).
  */
 const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "pick-story": "game-settings",
@@ -165,7 +174,10 @@ const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "party-join": "begin",
 };
 
-/** Back from a start-up screen (R3-UI-37). Back from Connect Tower never disconnects it. */
+/**
+ * Back from a start-up screen (R3-UI-37). Back from Connect Tower never disconnects it. Claim
+ * Hunters, the setup steps and Begin are decided in `screenAfter`, since they depend on the pack.
+ */
 const BACK_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "game-settings": "pick-story",
   "not-playable": "game-settings",
@@ -254,6 +266,15 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   const chosenTower = (): TowerMode =>
     (chosen ? storyEntry(chosen.story)?.card.tower : null) ?? "optional";
   const sessionId = options.sessionId ?? `session-${randomBytes(8).toString("hex")}`;
+  /**
+   * The setup step on screen, and the number done: steps before it are done, it and the rest are
+   * not (R-WIZ-6). Begin holds it at the step count. Back lowers it, so Back undoes a step.
+   */
+  let setupAt = 0;
+  /** The setup step whose timing mark is open, or null. */
+  let openSetupStep: string | null = null;
+  /** How Connect Tower was left, for the summary. Null until it is, and again after Back. */
+  let towerChoice: TowerChoice | null = null;
 
   const devices = new Map<string, DeviceRow>();
   const held = new Set<string>();
@@ -365,6 +386,29 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
 
   const currentBeat = (): Beat | undefined => beats[beatIndex];
 
+  const setupSteps = () => pack.setup;
+  const currentSetupStep = () => (screen === "setup" ? setupSteps()[setupAt] : undefined);
+
+  /** Each setup step visit is one timing mark: opened on show, closed by Done or Back (R-WIZ-6). */
+  const openSetupMark = () => {
+    const step = currentSetupStep();
+    if (!step) return;
+    options.timing.open({
+      kind: "setup-step",
+      subject: step.id,
+      deviceId: null,
+      cause: null,
+      hunter: null,
+    });
+    openSetupStep = step.id;
+  };
+
+  const closeSetupMark = () => {
+    if (!openSetupStep) return;
+    options.timing.close("setup-step", openSetupStep);
+    openSetupStep = null;
+  };
+
   /** The step the iPads may press next, or null. Quit has its own prompt (`quitPromptId`). */
   const gameplayPrompt = (): { id: string; action: ControlAction; label: string } | null => {
     if (screen === "splash" || screen === "quit") return null;
@@ -391,10 +435,20 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     }
     if (screen === "party-join") {
       if (unheldHunters().length > 0) return null;
-      return { id: "continue-party-join", action: "continue", label: "Next: set up the story" };
+      return {
+        id: PARTY_JOIN_CONTINUE_ID,
+        action: "continue",
+        label: setupSteps().length > 0 ? "Next: set up the story" : "Next: begin the story",
+      };
+    }
+    if (screen === "setup") {
+      const step = currentSetupStep();
+      if (!step) return null;
+      return { id: `${SETUP_DONE_PREFIX}${step.id}`, action: "continue", label: "Done" };
     }
     if (screen === "begin") {
-      if (unheldHunters().length > 0) return null;
+      // Every hunter held and every setup step done (R2-30, R2-52).
+      if (unheldHunters().length > 0 || setupAt < setupSteps().length) return null;
       return { id: "begin", action: "begin", label: "Begin" };
     }
     if (stage === "paused") {
@@ -511,13 +565,26 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   const screenAfter = (action: ControlAction): FlowScreen => {
     if (action === "begin") return "play";
     if (action === "quit") return "quit";
-    if (action === "back") return BACK_BEFORE_PLAY[screen] ?? screen;
+    if (action === "back") {
+      if (screen === "party-join") {
+        return chosenTower() === "none" ? "game-settings" : "tower-connect";
+      }
+      if (screen === "setup") return setupAt > 0 ? "setup" : "party-join";
+      if (screen === "begin") return setupSteps().length > 0 ? "setup" : "party-join";
+      return BACK_BEFORE_PLAY[screen] ?? screen;
+    }
     // A `playable: false` pack is chosen but never bound: its stop is "Not playable yet".
     if (action === "continue" && screen === "game-settings" && !chosenPlayable()) {
       return "not-playable";
     }
     if (action === "continue" && screen === "game-settings" && chosenTower() === "none") {
       return "party-join";
+    }
+    if (action === "continue" && screen === "party-join" && setupSteps().length > 0) {
+      return "setup";
+    }
+    if (action === "continue" && screen === "setup") {
+      return setupAt + 1 < setupSteps().length ? "setup" : "begin";
     }
     if (action === "continue" && screen !== "play") {
       return NEXT_BEFORE_PLAY[screen] ?? screen;
@@ -549,6 +616,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     ({ pack, hunters, hunterIds, phase, beats } = bindPack(next, new Set()));
     currentStory = focusedStory;
     beatIndex = 0;
+    setupAt = 0;
     held.clear();
   };
 
@@ -573,6 +641,21 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       ) {
         delete locks[id];
       }
+      if (
+        entered === "party-join" &&
+        (id === PARTY_JOIN_CONTINUE_ID || id === PARTY_JOIN_BACK_ID)
+      ) {
+        delete locks[id];
+      }
+      const step = currentSetupStep();
+      if (
+        entered === "setup" &&
+        step &&
+        (id === `${SETUP_DONE_PREFIX}${step.id}` || id === `${SETUP_BACK_PREFIX}${step.id}`)
+      ) {
+        delete locks[id];
+      }
+      if (entered === "begin" && id === BEGIN_BACK_ID) delete locks[id];
     }
   };
 
@@ -605,6 +688,36 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     };
   };
 
+  /**
+   * The summary items a winning press makes or undoes (R3-UI-25). Runs before the screen moves.
+   * Back clears the item of the screen it returns to: the game and its settings on Pick Story,
+   * the tower on Connect Tower, a setup step on that step.
+   */
+  const applyStartupItems = (action: ControlAction, next: FlowScreen) => {
+    if (action === "continue") {
+      if (screen === "tower-connect")
+        towerChoice = towerReady(readTower()) ? "connected" : "without";
+      if (screen === "game-settings" && next === "party-join") towerChoice = "not-used";
+      if (screen === "setup") {
+        closeSetupMark();
+        setupAt += 1;
+      }
+      return;
+    }
+    if (action !== "back") return;
+    if (screen === "game-settings") {
+      chosen = null;
+      towerChoice = null;
+      setupAt = 0;
+    }
+    if (screen === "party-join") towerChoice = null;
+    if (screen === "setup") {
+      closeSetupMark();
+      setupAt = Math.max(0, setupAt - 1);
+    }
+    if (screen === "begin") setupAt = Math.max(0, setupSteps().length - 1);
+  };
+
   const applyWin = (action: ControlAction, deviceId: string, option?: string, setting?: string) => {
     if (action === "set") {
       if (chosen && setting && option) chosen.values.set(setting, option);
@@ -615,11 +728,13 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       bindFocusedStory();
       chooseFocusedStory();
     }
-    // Back to Pick Story clears the choice and its settings.
-    if (action === "back" && screen === "game-settings") chosen = null;
     const left = screen;
-    screen = screenAfter(action);
-    if (screen !== left) releaseRevisitLocks(screen);
+    const next = screenAfter(action);
+    applyStartupItems(action, next);
+    screen = next;
+    // A setup step moves to another step on the same screen, so it re-opens its locks too.
+    if (screen !== left || screen === "setup") releaseRevisitLocks(screen);
+    if (screen === "setup") openSetupMark();
     if (action === "quit") {
       closeBeat();
       if (pause) closePause();
@@ -690,9 +805,83 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       if (action === "set") return promptId === setPromptId();
       if (action === "back") return promptId === GAME_SETTINGS_BACK_ID;
     }
-    if (screen === "tower-connect" && action === "back") return promptId === TOWER_CONNECT_BACK_ID;
+    if (action === "back") {
+      if (screen === "tower-connect") return promptId === TOWER_CONNECT_BACK_ID;
+      if (screen === "party-join") return promptId === PARTY_JOIN_BACK_ID;
+      if (screen === "setup") return promptId === setupBackId();
+      if (screen === "begin") return promptId === BEGIN_BACK_ID;
+    }
     const prompt = gameplayPrompt();
     return prompt !== null && prompt.id === promptId && prompt.action === action;
+  };
+
+  /** Back on the setup step on screen, or null off the setup screen. */
+  const setupBackId = () => {
+    const step = currentSetupStep();
+    return step ? `${SETUP_BACK_PREFIX}${step.id}` : null;
+  };
+
+  /** Back beside Continue on the screens that have both, or null. */
+  const ownBackId = (): string | null => {
+    if (screen === "game-settings") return GAME_SETTINGS_BACK_ID;
+    if (screen === "tower-connect") return TOWER_CONNECT_BACK_ID;
+    if (screen === "party-join") return PARTY_JOIN_BACK_ID;
+    if (screen === "setup") return setupBackId();
+    if (screen === "begin") return BEGIN_BACK_ID;
+    return null;
+  };
+
+  /** The setup step dialog on screen, text only, or null off the setup screen. */
+  const setupStepState = () => {
+    const step = currentSetupStep();
+    if (!step) return null;
+    return { id: step.id, label: step.label, index: setupAt, count: setupSteps().length };
+  };
+
+  /**
+   * The step's illustration, only once its file has landed: a declared placeholder has no file,
+   * so the dialog shows no image until it does.
+   */
+  const setupIllustration = (): string | null => {
+    const id = currentSetupStep()?.illustration;
+    if (!id) return null;
+    return storyEntry(currentStory)?.assets?.byId.has(id) ? id : null;
+  };
+
+  /** The running summary beside each start-up dialog (R3-UI-25), or null outside start-up. */
+  const summaryState = (): StartupSummary | null => {
+    if (stage !== "lobby" || screen === "splash") return null;
+    const card = chosen ? storyEntry(chosen.story)?.card : undefined;
+    // Hunters and setup steps belong to the bound pack, so they show once a playable story is.
+    const bound = card?.playable === true && card.id === currentStory;
+    return {
+      game: card ? { id: card.id, title: card.title, cover: card.cover } : null,
+      settings: chosen
+        ? settingsOf(chosen.story).map((item) => {
+            const value = chosen?.values.get(item.id);
+            return {
+              id: item.id,
+              label: item.label,
+              value: item.options.find((option) => option.id === value)?.label ?? null,
+            };
+          })
+        : null,
+      tower: towerChoice,
+      hunters: bound
+        ? hunters.map((hunter) => ({
+            id: hunter.id,
+            name: hunter.name,
+            holders: holdersOf(hunter.id),
+          }))
+        : null,
+      setup: bound
+        ? setupSteps().map((step, index) => ({
+            id: step.id,
+            label: step.label,
+            done: index < setupAt,
+          }))
+        : [],
+    };
   };
 
   /** True when `setting` is one of the chosen story's settings and `option` one of its options. */
@@ -840,6 +1029,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       const prompt = gameplayPrompt();
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
       const unheld = unheldHunters().map((hunter) => hunter.id);
+      const setupStep = setupStepState();
       return storyboardStatePayloadSchema.parse({
         screen,
         stage,
@@ -860,6 +1050,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         keeperLine,
         stories: storiesState(),
         gameSettings: gameSettingsState(),
+        summary: summaryState(),
+        setupStep: setupStep ? { step: setupStep, illustration: setupIllustration() } : null,
         pause: pause ? { cause: pause.cause, hunter: pause.hunter } : null,
         tower,
         gate: { canBegin: unheld.length === 0, unheld },
@@ -873,12 +1065,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
       const mine = heldBy(deviceId);
       const onSettings = screen === "game-settings";
-      // Game settings and Connect Tower name their own Back beside Continue.
-      const ownBack = onSettings
-        ? GAME_SETTINGS_BACK_ID
-        : screen === "tower-connect"
-          ? TOWER_CONNECT_BACK_ID
-          : null;
+      // The start-up screens with Continue name their own Back beside it.
+      const ownBack = ownBackId();
       const beat = stage === "lobby" || finished ? undefined : currentBeat();
       return deviceStatePayloadSchema.parse({
         screen,
@@ -904,6 +1092,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
             : null,
         gameSettings: gameSettingsState(),
         setPromptId: onSettings ? setPromptId() : null,
+        setupStep: setupStepState(),
         backPromptId: ownBack,
         backLock: ownBack ? (locks[ownBack] ?? null) : null,
       });

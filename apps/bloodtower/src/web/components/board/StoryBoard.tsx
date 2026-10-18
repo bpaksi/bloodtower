@@ -1,6 +1,7 @@
 import type { StoryboardState, StoryCard } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
+import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { portraitSrc } from "../../lib/portrait.ts";
 import { JoinQr } from "../../lib/qr";
 import {
@@ -17,6 +18,8 @@ import {
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
+  setupStepTitle,
+  summaryItems,
   towerRequiredReason,
   towerStripState,
 } from "../../lib/screens";
@@ -91,11 +94,11 @@ export function StoryBoard({
         </p>
       ) : null}
       <div className="bt-board-main">
-        <HunterList
-          hunters={state.hunters}
-          packId={state.packId}
-          portraits={state.screen === "party-join"}
-        />
+        {state.summary ? (
+          <SummaryPanel summary={state.summary} tower={state.tower} />
+        ) : (
+          <HunterList hunters={state.hunters} />
+        )}
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
@@ -103,6 +106,7 @@ export function StoryBoard({
           {state.screen === "game-settings" ? <GameSettingsPanel state={state} /> : null}
           {state.screen === "not-playable" ? <NotPlayablePanel state={state} /> : null}
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
+          {state.screen === "setup" ? <SetupPanel state={state} /> : null}
           {state.screen === "begin" ? <BeginPanel state={state} /> : null}
           {state.screen === "play" ? (
             <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
@@ -129,6 +133,7 @@ const nextPrompt = (state: StoryboardState): string => {
       "Waiting."
     );
   }
+  if (state.screen === "setup") return SCREEN_NEXT.setup;
   if (state.screen === "party-join" && !state.prompt) {
     return (
       partyJoinNextReason(
@@ -172,7 +177,8 @@ const headerCopy = (state: StoryboardState): { scene: string; place: string } =>
   if (state.screen === "pick-story") return { scene: "The Door", place: "Choose a Story" };
   if (state.screen === "game-settings") return { scene: "The Door", place: "Game Settings" };
   if (state.screen === "not-playable") return { scene: "The Door", place: "Not Yet Playable" };
-  if (state.screen === "party-join") return { scene: "The Party", place: "Gather" };
+  if (state.screen === "party-join") return { scene: "The Party", place: "Claim Hunters" };
+  if (state.screen === "setup") return { scene: "The Table", place: "Setup" };
   if (state.screen === "begin") return { scene: "The Night", place: "The Table is Set" };
   if (state.screen === "quit") return { scene: "The Table", place: "Paused" };
   return { scene: "The Night", place: "The Moment" };
@@ -213,7 +219,19 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
   </section>
 );
 
-const HunterList = ({
+const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => (
+  <aside className="bt-hunters">
+    <h2 className="bt-roll-title">Hunters</h2>
+    {hunters.length === 0 ? (
+      <p className="bt-roll-empty">Hunters unavailable.</p>
+    ) : (
+      <HunterCarts hunters={hunters} />
+    )}
+  </aside>
+);
+
+/** One cartouche per hunter. With `portraits` (Claim Hunters) each shows the pack portrait. */
+const HunterCarts = ({
   hunters,
   packId,
   portraits = false,
@@ -224,51 +242,71 @@ const HunterList = ({
 }) => {
   const acting = actingHunterId(hunters);
   return (
-    <aside className="bt-hunters">
-      <h2 className="bt-roll-title">Hunters</h2>
-      {hunters.length === 0 ? (
-        <p className="bt-roll-empty">Hunters unavailable.</p>
-      ) : (
-        <ul className="bt-roll">
-          {hunters.map((hunter) => {
-            const away = hunter.holders.length === 0 || hunter.disconnected;
-            const classes = ["bt-cart"];
-            if (portraits) classes.push("bt-cart-portrait");
-            if (hunter.id === acting) classes.push("bt-cart-act");
-            if (away) classes.push("bt-cart-away");
-            const accessibleLabel = `${hunter.name} — ${holdingText(hunter)}`;
-            return (
-              <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
-                {portraits ? (
-                  <>
-                    <PortraitCard
-                      compact
-                      frameOnly
-                      name={hunter.name}
-                      src={portraitSrc(packId, hunter.portrait)}
-                      accessibleLabel={accessibleLabel}
-                    />
-                    <span className="bt-cart-copy">
-                      <span className="bt-cart-nm">{hunter.name}</span>
-                      <span className="bt-cart-st">{holdingText(hunter)}</span>
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="bt-cart-ph" aria-hidden="true">
-                      {hunter.name.slice(0, 1)}
-                    </span>
-                    <span className="bt-cart-copy">
-                      <span className="bt-cart-nm">{hunter.name}</span>
-                      <span className="bt-cart-st">{holdingText(hunter)}</span>
-                    </span>
-                  </>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+    <ul className="bt-roll">
+      {hunters.map((hunter) => {
+        const away = hunter.holders.length === 0 || hunter.disconnected;
+        const classes = ["bt-cart"];
+        if (portraits) classes.push("bt-cart-portrait");
+        if (hunter.id === acting) classes.push("bt-cart-act");
+        if (away) classes.push("bt-cart-away");
+        const accessibleLabel = `${hunter.name} — ${holdingText(hunter)}`;
+        return (
+          <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
+            {portraits ? (
+              <PortraitCard
+                compact
+                frameOnly
+                name={hunter.name}
+                src={portraitSrc(packId, hunter.portrait)}
+                accessibleLabel={accessibleLabel}
+              />
+            ) : (
+              <span className="bt-cart-ph" aria-hidden="true">
+                {hunter.name.slice(0, 1)}
+              </span>
+            )}
+            <span className="bt-cart-copy">
+              <span className="bt-cart-nm">{hunter.name}</span>
+              <span className="bt-cart-st">{holdingText(hunter)}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+/**
+ * "Tonight's game" (R3-UI-25): beside every start-up dialog, each choice as it is made. An item
+ * with nothing chosen reads "not chosen yet"; Back clears the item it undoes.
+ */
+const SummaryPanel = ({
+  summary,
+  tower,
+}: {
+  summary: NonNullable<StoryboardState["summary"]>;
+  tower: StoryboardState["tower"];
+}) => {
+  const cover = summary.game ? coverSrc(summary.game.cover) : undefined;
+  return (
+    <aside className="bt-summary bt-panel" data-summary="">
+      <h2 className="bt-roll-title">Tonight's game</h2>
+      {cover ? <img className="bt-summary-cover" src={cover} alt="" /> : null}
+      <dl>
+        {summaryItems(summary, tower).map((item) => (
+          <div
+            key={item.id}
+            className="bt-summary-item"
+            data-summary-item={item.id}
+            data-empty={item.empty ? "true" : undefined}
+          >
+            <dt className="bt-lbl">{item.label}</dt>
+            {item.lines.map((line) => (
+              <dd key={line}>{line}</dd>
+            ))}
+          </div>
+        ))}
+      </dl>
     </aside>
   );
 };
@@ -427,18 +465,57 @@ const NotPlayablePanel = ({ state }: { state: StoryboardState }) => {
   );
 };
 
+/**
+ * Claim Hunters (R3-UI-21): the pack's hunters with their portraits and the device holding each.
+ * Portraits show here on the board only, never on a device (R3-UI-51).
+ */
 const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
   const claimed = claimedCount(state.hunters);
   const total = state.hunters.length;
   return (
-    <article className="bt-page bt-parchment bt-ink-in">
+    <article className="bt-page bt-parchment bt-ink-in bt-claim">
       <div>
         <p className="bt-kicker">The party</p>
-        <h2>Gather the hunters</h2>
+        <h2>{SCREEN_TITLE["party-join"]}</h2>
         <p className="bt-claimed">
           {total === 0 ? "Hunters unavailable." : `${claimed} of ${total} hunters claimed`}
         </p>
       </div>
+      {total > 0 ? <HunterCarts hunters={state.hunters} packId={state.packId} portraits /> : null}
+    </article>
+  );
+};
+
+/**
+ * One physical setup step (R-WIZ-6): its own dialog, Done and Back on the devices. The
+ * illustration shows only once its file has landed.
+ */
+const SetupPanel = ({ state }: { state: StoryboardState }) => {
+  const current = state.setupStep;
+  if (!current) {
+    return (
+      <article className="bt-page bt-parchment">
+        <p className="bt-narration">Setup step unavailable.</p>
+      </article>
+    );
+  }
+  const { step, illustration } = current;
+  return (
+    <article className="bt-page bt-parchment bt-ink-in bt-setup" data-setup-step={step.id}>
+      <div>
+        <p className="bt-kicker">{currentStory(state.stories)?.title ?? "The story"}</p>
+        <h2>{setupStepTitle(step)}</h2>
+        <p className="bt-narration">{step.label}</p>
+      </div>
+      {illustration ? (
+        <img
+          className="bt-setup-illustration"
+          src={packStillImageUrl(illustration, state.packId)}
+          alt=""
+          data-setup-illustration={illustration}
+        />
+      ) : null}
+      <p className="bt-lede">{SCREEN_NEXT.setup}</p>
     </article>
   );
 };
@@ -448,7 +525,9 @@ const BeginPanel = ({ state }: { state: StoryboardState }) => (
     <div>
       <p className="bt-kicker">{currentStory(state.stories)?.title ?? "The story"}</p>
       <h2>The table is set</h2>
-      <p className="bt-narration">The table is set. Any iPad can begin.</p>
+      <p className="bt-narration">
+        {state.prompt ? "The table is set. Any iPad can begin." : "Waiting for the table."}
+      </p>
       <p className="bt-muted">{SCREEN_NEXT.begin}</p>
     </div>
   </article>

@@ -8,6 +8,7 @@ The files in this folder are the proving ground R1 loads. They are not a publish
 | Cover | `assets/cover.png` (served at `/packs/test/assets/cover.png`) |
 | Tower | `optional` (Connect Tower can be skipped) |
 | Settings | Length: short, standard (default), long. Difficulty: standard. |
+| Setup steps | `lay-out-board` (illustration `ill.setup-board`, placeholder), `place-hunters`, `ready-decks`. One board dialog each, Done and Back on the devices. |
 | Hunters | alpha, beta, gamma, delta |
 | Nights | n1 |
 | Set piece | proving-ground |
@@ -26,6 +27,7 @@ Illusionist drops storyboard stills and other pack images here. The loader allow
 | `fx.stair` | `assets/fx-stair.png` |
 | `fx.stair-n2` | `assets/fx-stair-n2.png` (night 2 master; camera track `grey-stair-n2.01` only until the moment ships) |
 | `fx.bell` | `assets/fx-bell.png` |
+| `ill.setup-board` | `assets/ill-setup-board.png` (setup step `lay-out-board`; placeholder until delivered) |
 
 Portrait assets (`por.alpha` … `por.delta` in `assets.yaml`) map to iPad hunter art:
 
@@ -38,7 +40,7 @@ Portrait assets (`por.alpha` … `por.delta` in `assets.yaml`) map to iPad hunte
 
 Hunter ids stay `alpha`–`delta`; display names in `hunters.yaml` are Agnes, Tomas, Wren, and Emeric for the demo.
 
-If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
+If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. A `placeholder` asset with no file does not warn: its art has not landed, and the board shows no image until it does. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
 
 ## Audio (`audio/`)
 

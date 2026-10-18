@@ -126,3 +126,18 @@ export const releaseTogether = (...gates: ControlGate[]) => {
   for (const send of sends) send();
   return sends.length;
 };
+
+/** The test pack's setup steps, in order (packs/test/pack.yaml `setup`). */
+export const SETUP_STEPS = ["lay-out-board", "place-hunters", "ready-decks"] as const;
+
+/**
+ * From the first setup step to Begin: presses Done on each step once its dialog shows, so no
+ * press lands on the step before.
+ */
+export const doneEverySetupStep = async (pad: Page) => {
+  for (const step of SETUP_STEPS) {
+    await expect(pad.locator(`[data-setup-step="${step}"]`)).toBeVisible();
+    await pad.locator('button[data-action="continue"]').click();
+  }
+  await expect(pad.locator("main")).toHaveAttribute("data-screen", "begin");
+};

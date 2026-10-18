@@ -10,6 +10,8 @@ import {
   SETTING_ID_MAX,
   SETTING_OPTIONS_MAX,
   SETTINGS_MAX,
+  SETUP_STEP_ID_MAX,
+  SETUP_STEPS_MAX,
   sceneOf,
 } from "./index.ts";
 
@@ -47,7 +49,7 @@ const validPack = (): Fixture => ({
   difficulties: [{ id: "standard", label: "Standard", mods: {} }],
   systems: { clock: "nights", corruption: "off" },
   components: [{ "asset-group": "stills", use: "used" as const }],
-  setup: ["join"],
+  setup: [{ id: "lay-out-board", label: "Lay out the board and orient the kingdoms." }],
   av_theme: {
     art_style: "plain",
     clip_style: "none",
@@ -475,5 +477,60 @@ describe("manifest fields", () => {
       settings: [length(["medium"])],
     });
     expect(parsed.success).toBe(false);
+  });
+});
+
+describe("setup steps", () => {
+  const step = (id: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    label: `Do ${id}.`,
+    ...extra,
+  });
+
+  it("parses steps with an id, a label and an optional still illustration", () => {
+    const pack = validPack();
+    const parsed = packSchema.parse({
+      ...pack,
+      setup: [step("lay-out-board", { illustration: "fx.bell" }), step("ready-decks")],
+    });
+    expect(parsed.setup).toEqual([
+      { id: "lay-out-board", label: "Do lay-out-board.", illustration: "fx.bell" },
+      { id: "ready-decks", label: "Do ready-decks." },
+    ]);
+  });
+
+  it("defaults to no steps", () => {
+    const { setup: _unused, ...pack } = validPack();
+    expect(packSchema.parse(pack).setup).toEqual([]);
+  });
+
+  it("rejects the old list of names, an empty label and an unknown field (V-1)", () => {
+    expect(rules({ ...validPack(), setup: ["join"] })).toContain("V-1");
+    expect(rules({ ...validPack(), setup: [{ id: "a", label: "" }] })).toContain("V-1");
+    expect(rules({ ...validPack(), setup: [step("a", { image: "fx.bell" })] })).toContain("V-1");
+  });
+
+  it("rejects a step listed twice and a step the engine runs (V-1)", () => {
+    expect(rules({ ...validPack(), setup: [step("a"), step("a")] })).toContain("V-1");
+    for (const id of ["join", "party-join", "tower-connect", "tower-volume-test"]) {
+      expect(rules({ ...validPack(), setup: [step(id)] }), id).toContain("V-1");
+    }
+  });
+
+  it("rejects an illustration that is not in the manifest (V-2) or is not a still (V-1)", () => {
+    expect(rules({ ...validPack(), setup: [step("a", { illustration: "fx.missing" })] })).toContain(
+      "V-2",
+    );
+    expect(rules({ ...validPack(), setup: [step("a", { illustration: "por.alpha" })] })).toEqual([
+      "V-1",
+    ]);
+  });
+
+  it("caps the step count and the id length at what a prompt id carries (V-1)", () => {
+    const many = Array.from({ length: SETUP_STEPS_MAX + 1 }, (_, index) => step(`s${index}`));
+    expect(rules({ ...validPack(), setup: many })).toContain("V-1");
+    const longest = `s${"a".repeat(SETUP_STEP_ID_MAX - 1)}`;
+    expect(rules({ ...validPack(), setup: [step(longest)] })).toEqual([]);
+    expect(rules({ ...validPack(), setup: [step(`${longest}a`)] })).toContain("V-1");
   });
 });

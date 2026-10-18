@@ -27,7 +27,16 @@ difficulties:
 systems: {clock: nights, corruption: false}
 components:
   - {asset-group: stills, use: used}
-setup: [join]
+# Physical setup steps, one board dialog each with Done and Back on the devices (R-WIZ-5, R-WIZ-6).
+# Claim Hunters and Connect Tower are engine screens, not listed here.
+setup:
+  - id: lay-out-board
+    label: Lay out the board and orient the kingdoms.
+    illustration: ill.setup-board
+  - id: place-hunters
+    label: Stand each hunter's figure on the hall's start building.
+  - id: ready-decks
+    label: Shuffle the decks and set the tokens beside the board.
 av_theme:
   art_style: plain
   clip_style: none

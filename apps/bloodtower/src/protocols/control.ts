@@ -26,7 +26,8 @@ export type ControlAction = z.infer<typeof controlActionSchema>;
 /**
  * The flow screens, in order. The server holds the current one; no client sends it.
  * Splash is the first screen after load. Connect Tower follows Game settings (R3-UI-22), and a
- * story with `tower: none` skips it. Quit is the end once play has been quit.
+ * story with `tower: none` skips it. Claim Hunters (`party-join`) is followed by one `setup` dialog
+ * per pack setup step, then Begin (R3-UI-22, R2-50..52). Quit is the end once play has been quit.
  */
 export const FLOW_SCREENS = [
   "splash",
@@ -35,6 +36,7 @@ export const FLOW_SCREENS = [
   "not-playable",
   "tower-connect",
   "party-join",
+  "setup",
   "begin",
   "play",
   "quit",
@@ -56,6 +58,19 @@ export const GAME_SETTINGS_BACK_ID = "back-game-settings";
 /** Continue and Back on Connect Tower. Back never disconnects the tower. */
 export const TOWER_CONNECT_CONTINUE_ID = "continue-tower-connect";
 export const TOWER_CONNECT_BACK_ID = "back-tower-connect";
+/** Continue and Back on Claim Hunters. Back keeps every claim. */
+export const PARTY_JOIN_CONTINUE_ID = "continue-party-join";
+export const PARTY_JOIN_BACK_ID = "back-party-join";
+/**
+ * Done and Back on a setup step dialog are these prefixes plus the step id, so each step is its
+ * own first-press-wins lock (R-WIZ-6).
+ */
+export const SETUP_DONE_PREFIX = "continue-setup-";
+export const SETUP_BACK_PREFIX = "back-setup-";
+/** Longest setup step id whose Done prompt id still fits `promptIdSchema`. */
+export const SETUP_STEP_ID_MAX = PROMPT_ID_MAX - SETUP_DONE_PREFIX.length;
+/** Back on Begin returns to the last setup step, or to Claim Hunters when there is none. */
+export const BEGIN_BACK_ID = "back-begin";
 /**
  * A setting change on Game settings is this prefix plus a serial. Each winning change moves the
  * serial on, so the next change is a fresh first-press-wins lock.

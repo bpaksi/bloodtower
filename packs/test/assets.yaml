@@ -24,3 +24,4 @@
 - {id: mus.night-1, type: ambient, target: storyboard, status: final, path: audio/night1-ambient.m4a}
 - {id: mus.night-2, type: ambient, target: storyboard, status: final, path: audio/night2-ambient.m4a}
 - {id: mus.waiting, type: music, target: storyboard, status: final, path: audio/pg-music.m4a}
+- {id: ill.setup-board, type: still, target: storyboard, status: placeholder, path: ill-setup-board.png}

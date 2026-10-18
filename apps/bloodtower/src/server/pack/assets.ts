@@ -197,7 +197,10 @@ export const indexPackAssets = (
     if (!expectsImageFile(asset.type)) continue;
     const absolute = resolveAssetImage(assetsDir, asset);
     if (!absolute) {
-      warnings.push(warn("assets.yaml", asset.id, `No image file for asset ${asset.id}.`));
+      // A placeholder declares art that has not landed yet, so its missing file is expected.
+      if (asset.status !== "placeholder") {
+        warnings.push(warn("assets.yaml", asset.id, `No image file for asset ${asset.id}.`));
+      }
       continue;
     }
     const base = basename(absolute);

@@ -1,5 +1,5 @@
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
-import { startAcceptanceHost } from "./support/acceptance.ts";
+import { doneEverySetupStep, startAcceptanceHost } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 const SHOT_NAME = process.env.KEEPER_SHOT_NAME?.trim() || "keeper_moment_1024x594";
@@ -41,6 +41,7 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     await d.button("play-without-tower").click();
     await d.button("take-all").click();
     await d.button("continue").click();
+    await doneEverySetupStep(pad);
     await d.button("begin").click();
     await expect(board.getByText("The proving ground is quiet.")).toBeVisible();
     await d.button("continue").click();

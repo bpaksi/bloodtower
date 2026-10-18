@@ -6,11 +6,14 @@ import {
   focusedStory,
   gameSettingsNext,
   joinedDeviceIds,
+  NOT_CHOSEN,
   neighborStory,
   partyJoinNextReason,
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
+  setupStepTitle,
+  summaryItems,
   TOWER_REQUIRED_REASON,
   towerReady,
   towerRequiredReason,
@@ -184,5 +187,87 @@ describe("Connect Tower by the pack's tower field (R3-UI-23)", () => {
       expect(towerRequiredReason(card(mode), held[0] ?? ready)).toBeNull();
     }
     expect(towerRequiredReason(null, held[0] ?? ready)).toBeNull();
+  });
+});
+
+describe("Claim Hunters and setup steps", () => {
+  it("names the screens Claim Hunters and Setup, and counts steps from one", () => {
+    expect(SCREEN_TITLE["party-join"]).toBe("Claim Hunters");
+    expect(SCREEN_TITLE.setup).toBe("Setup");
+    expect(SCREEN_NEXT.setup).toBe("Press Done on any device");
+    expect(setupStepTitle({ index: 0, count: 3 })).toBe("Setup · step 1 of 3");
+    expect(setupStepTitle({ index: 2, count: 3 })).toBe("Setup · step 3 of 3");
+  });
+});
+
+describe("start-up summary (R3-UI-25)", () => {
+  const NO_TOWER = {
+    connection: "unavailable" as const,
+    battery: { state: "unavailable" as const },
+    calibrated: { state: "unavailable" as const },
+  };
+  const READY = {
+    connection: "connected" as const,
+    battery: { state: "unavailable" as const },
+    calibrated: { state: "known" as const, calibrated: true },
+  };
+  const empty = { game: null, settings: null, tower: null, hunters: null, setup: [] };
+  const lines = (
+    summary: Parameters<typeof summaryItems>[0],
+    tower: Parameters<typeof summaryItems>[1] = NO_TOWER,
+  ) => Object.fromEntries(summaryItems(summary, tower).map((item) => [item.id, item.lines]));
+
+  it("reads not chosen yet for every empty item, in panel order", () => {
+    const items = summaryItems(empty, NO_TOWER);
+    expect(items.map((item) => item.id)).toEqual(["game", "settings", "tower", "hunters", "setup"]);
+    expect(items.every((item) => item.empty && item.lines[0] === NOT_CHOSEN)).toBe(true);
+  });
+
+  it("echoes each choice as it is made", () => {
+    const summary = {
+      game: { id: "test", title: "Proving ground", cover: null },
+      settings: [
+        { id: "length", label: "Length", value: "Long" },
+        { id: "difficulty", label: "Difficulty", value: null },
+      ],
+      tower: "without" as const,
+      hunters: [
+        { id: "alpha", name: "Agnes", holders: ["device-1"] },
+        { id: "beta", name: "Tomas", holders: [] },
+      ],
+      setup: [
+        { id: "a", label: "Lay out the board.", done: true },
+        { id: "b", label: "Ready the decks.", done: false },
+      ],
+    };
+    expect(lines(summary)).toEqual({
+      game: ["Proving ground"],
+      settings: ["Length: Long", "Difficulty: unavailable"],
+      tower: ["Playing without tower"],
+      hunters: ["Agnes: device-1", `Tomas: ${NOT_CHOSEN}`],
+      setup: ["1 of 2 done", "Lay out the board."],
+    });
+  });
+
+  it("names the tower outcome with the live reading once connected", () => {
+    expect(lines({ ...empty, tower: "connected" }, READY).tower).toEqual(["Connected"]);
+    expect(lines({ ...empty, tower: "connected" }, NO_TOWER).tower).toEqual([
+      "Connected, now no tower",
+    ]);
+    expect(lines({ ...empty, tower: "not-used" }).tower).toEqual(["Not used by this story"]);
+  });
+
+  it("keeps an item empty until something is in it", () => {
+    const summary = {
+      ...empty,
+      settings: [],
+      hunters: [{ id: "alpha", name: "Agnes", holders: [] }],
+      setup: [{ id: "a", label: "Lay out the board.", done: false }],
+    };
+    expect(lines(summary)).toMatchObject({
+      settings: ["No settings"],
+      hunters: [NOT_CHOSEN],
+      setup: [NOT_CHOSEN],
+    });
   });
 });

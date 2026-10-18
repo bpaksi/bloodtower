@@ -8,6 +8,8 @@ import { deviceIdSchema, hunterIdSchema, utcTimestampSchema } from "./devices.ts
  * Pauses are excluded from active time.
  * `setting` is Bloodtower's own kind, not PRD-41: one closed mark per game setting chosen,
  * written at Begin when the settings lock (R-WIZ-12). The subject is `<setting>:<option>`.
+ * `setup-step` is Bloodtower's own kind too: one mark per visit to a setup step dialog, opened
+ * when the dialog shows and closed by Done or Back (R-WIZ-6). The subject is the step id.
  */
 
 export const TIMING_KINDS = [
@@ -19,6 +21,7 @@ export const TIMING_KINDS = [
   "cue",
   "pause",
   "setting",
+  "setup-step",
 ] as const;
 export const timingKindSchema = z.enum(TIMING_KINDS);
 export type TimingKind = z.infer<typeof timingKindSchema>;
