@@ -10,12 +10,14 @@ import {
   currentStory,
   FORTUNE_LINE,
   focusedStory,
+  gameSettingsNext,
   joinedDeviceIds,
   neighborStory,
   partyJoinNextReason,
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
+  towerRequiredReason,
   towerStripState,
 } from "../../lib/screens";
 import { pageServerOrigin } from "../../lib/serverOrigin.ts";
@@ -121,6 +123,12 @@ const nextPrompt = (state: StoryboardState): string => {
   if (state.screen === "splash") return SCREEN_NEXT.splash;
   if (state.screen === "quit") return SCREEN_NEXT.quit;
   if (state.screen === "pick-story") return state.prompt?.label ?? SCREEN_NEXT["pick-story"];
+  if (state.screen === "tower-connect" && !state.prompt) {
+    return (
+      towerRequiredReason(chosenStory(state.stories, state.gameSettings ?? null), state.tower) ??
+      "Waiting."
+    );
+  }
   if (state.screen === "party-join" && !state.prompt) {
     return (
       partyJoinNextReason(
@@ -288,23 +296,30 @@ const SplashPanel = ({ state }: { state: StoryboardState }) => (
       <h2>Bloodtower</h2>
       <p className="bt-narration">{FORTUNE_LINE}</p>
     </div>
-    <p className="bt-lede">
-      {state.join ? "Ready. Opening the tower step." : "Loading the table…"}
-    </p>
+    <p className="bt-lede">{state.join ? "Ready. Opening the stories." : "Loading the table…"}</p>
   </article>
 );
 
-const TowerConnectPanel = ({ state }: { state: StoryboardState }) => (
-  <article className="bt-page bt-parchment bt-ink-in">
-    <div>
-      <p className="bt-kicker">The tower</p>
-      <h2>
-        {state.tower.connection === "connected" ? "Tower is on the table." : "Wake the tower."}
-      </h2>
-      <p className="bt-muted">{SCREEN_NEXT["tower-connect"]}</p>
-    </div>
-  </article>
-);
+const TowerConnectPanel = ({ state }: { state: StoryboardState }) => {
+  const story = chosenStory(state.stories, state.gameSettings ?? null);
+  const reason = towerRequiredReason(story, state.tower);
+  return (
+    <article className="bt-page bt-parchment bt-ink-in">
+      <div>
+        <p className="bt-kicker">{story ? story.title : "The tower"}</p>
+        <h2>
+          {state.tower.connection === "connected" ? "Tower is on the table." : "Wake the tower."}
+        </h2>
+        {story?.tower === "required" ? (
+          <p className="bt-narration">This story needs the tower.</p>
+        ) : null}
+        <p className="bt-muted" data-tower-reason={reason ? "" : undefined}>
+          {reason ?? SCREEN_NEXT["tower-connect"]}
+        </p>
+      </div>
+    </article>
+  );
+};
 
 /** The pack's cover on the host, or undefined when the card has none. Board only: devices show no images. */
 const coverSrc = (cover: StoryCard["cover"]): string | undefined =>
@@ -390,7 +405,7 @@ const GameSettingsPanel = ({ state }: { state: StoryboardState }) => {
             ))}
           </dl>
         )}
-        <p className="bt-lede">{SCREEN_NEXT["game-settings"]}</p>
+        <p className="bt-lede">{gameSettingsNext(story)}</p>
       </div>
     </article>
   );

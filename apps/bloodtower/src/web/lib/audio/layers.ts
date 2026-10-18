@@ -41,9 +41,17 @@ export const isVisualMoment = (moment: StoryboardState["moment"]): boolean =>
     moment.still !== null ||
     moment.id === KEEPER_MOMENT_ID);
 
-/** Strictly before the Pick Game screen: the Sound dialog opens here (R3-UI-03). */
+/** Strictly before the Pick Game screen. */
 export const isBeforePickGame = (screen: FlowScreen) =>
   FLOW_SCREENS.indexOf(screen) < FLOW_SCREENS.indexOf("pick-story");
+
+/**
+ * The landing: nothing is chosen yet, so the first board input lights the windows and opens the
+ * Sound dialog over it, before the table picks a game (R3-UI-03). Splash goes straight to Pick
+ * Game now that Connect Tower follows Game settings, so Pick Game itself counts.
+ */
+export const isLanding = (screen: FlowScreen) =>
+  isBeforePickGame(screen) || screen === "pick-story";
 
 const signatureOnly = (): Layers => ({ ambient: SIGNATURE.bed, music: null });
 

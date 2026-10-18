@@ -1,8 +1,9 @@
 import { type BrowserContext, expect, test } from "@playwright/test";
 import { startAcceptanceHost } from "./support/acceptance.ts";
 
-// R3-UI-03. The Mac board shows the Sound dialog after its first click or keypress, before Pick
-// Game, and the levels survive a reload. Audio exists only on the Mac, so this runs on desktop.
+// R3-UI-03. The Mac board shows the Sound dialog after its first click or keypress on the
+// landing, before a game is picked, and the levels survive a reload. Audio exists only on the
+// Mac, so this runs on desktop.
 
 test("the first board click opens the Sound dialog, and its levels survive a reload", async ({
   browser,

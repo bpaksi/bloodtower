@@ -17,6 +17,8 @@ export {
   promptIdSchema,
   SET_PROMPT_PREFIX,
   STORY_ID_MAX,
+  TOWER_CONNECT_BACK_ID,
+  TOWER_CONNECT_CONTINUE_ID,
 } from "./control.ts";
 export {
   type DeviceId,
@@ -125,6 +127,9 @@ export {
   sceneOf,
   semverSchema,
   settingSchema,
+  TOWER_MODES,
+  type TowerMode,
+  towerModeSchema,
 } from "./pack.ts";
 export {
   activeMillis,

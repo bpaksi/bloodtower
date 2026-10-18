@@ -39,10 +39,10 @@ export const SCREEN_TITLE: Record<FlowScreen, string> = {
 
 /** What the table is waiting for. Shown on the board and as iPad "what happens next". */
 export const SCREEN_NEXT: Record<FlowScreen, string> = {
-  splash: "Next: connect the tower",
-  "tower-connect": "Next: pick a story",
+  splash: "Next: pick a story",
+  "tower-connect": "Next: gather the party",
   "pick-story": "Next: game settings",
-  "game-settings": "Next: gather the party",
+  "game-settings": "Next: connect the tower",
   "not-playable": "This story is listed, but it cannot be played yet.",
   "party-join": "Next: set up the story",
   begin: "Next: begin the story",
@@ -66,6 +66,26 @@ export const chosenLabel = (
   const chosen = settings.chosen[settingId];
   return setting?.options.find((option) => option.id === chosen)?.label ?? null;
 };
+
+/**
+ * What follows Game settings for the chosen card: Connect Tower, or the party when the story
+ * does not use the tower (`tower: none`).
+ */
+export const gameSettingsNext = (card: StoryCard | null): string =>
+  card?.tower === "none" ? "Next: gather the party" : SCREEN_NEXT["game-settings"];
+
+/** Why Continue waits on Connect Tower for a story that needs the tower (R3-UI-23). */
+export const TOWER_REQUIRED_REASON = "Connect and calibrate the tower first";
+
+/**
+ * The reason Continue is held on Connect Tower, or null when it is not: the chosen story needs
+ * the tower and the tower is not yet connected and calibrated.
+ */
+export const towerRequiredReason = (
+  card: StoryCard | null,
+  tower: StoryboardState["tower"],
+): string | null =>
+  card?.tower === "required" && !towerReady(tower) ? TOWER_REQUIRED_REASON : null;
 
 export const FORTUNE_LINE = "The night is gathering. The tower is not yet awake.";
 

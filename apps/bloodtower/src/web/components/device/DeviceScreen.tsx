@@ -6,11 +6,13 @@ import { portraitSrc } from "../../lib/portrait.ts";
 import {
   chosenStory,
   focusedStory,
+  gameSettingsNext,
   neighborStory,
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
   towerReady,
+  towerRequiredReason,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { PortraitCard } from "../PortraitCard";
@@ -61,13 +63,21 @@ export function DeviceScreen({
   const partyReason =
     state.screen === "party-join" && !controls.continue ? "Claim all hunters first" : null;
   const ready = towerReady(tower);
+  const chosen = chosenStory(state.stories, state.gameSettings ?? null);
+  // A story that needs the tower has no "Play without tower" (R3-UI-23).
+  const towerRequired = chosen?.tower === "required";
+  const towerReason =
+    state.screen === "tower-connect" && !controls.continue
+      ? towerRequiredReason(chosen, tower)
+      : null;
+  const waitReason = partyReason ?? towerReason;
   const primaryContinue =
     controls.continue &&
     (state.screen === "pick-story" ||
       state.screen === "game-settings" ||
       state.screen === "party-join" ||
       (state.screen === "play" && !controls.resume) ||
-      (state.screen === "tower-connect" && ready));
+      (state.screen === "tower-connect" && (ready || towerRequired)));
   const primaryBegin = state.screen === "begin" && controls.begin;
 
   return (
@@ -91,7 +101,11 @@ export function DeviceScreen({
         <p className="bt-kicker">iPad</p>
         <h1 className="text-4xl">{SCREEN_TITLE[state.screen]}</h1>
         <p className="text-xl text-[var(--bt-muted)]">
-          {partyReason ? `Waiting: ${partyReason}` : SCREEN_NEXT[state.screen]}
+          {waitReason
+            ? `Waiting: ${waitReason}`
+            : state.screen === "game-settings"
+              ? gameSettingsNext(chosen)
+              : SCREEN_NEXT[state.screen]}
         </p>
       </header>
       {live ? null : <p>Session host unavailable.</p>}
@@ -105,7 +119,7 @@ export function DeviceScreen({
           controls={controls}
           press={press}
           promptId={state.prompt?.id ?? null}
-          skip={controls.continue && !ready}
+          skip={controls.continue && !ready && !towerRequired}
         />
       ) : null}
       {state.screen === "pick-story" ? (
@@ -182,7 +196,7 @@ export function DeviceScreen({
             state.screen === "quit" ||
             state.screen === "not-playable" ||
             (state.pick !== null && state.pick !== undefined) ||
-            (state.screen === "tower-connect" && !ready) ||
+            (state.screen === "tower-connect" && !ready && !towerRequired) ||
             (state.screen === "play" && controls.resume)
           }
           disabled={!controls.continue}
@@ -194,14 +208,18 @@ export function DeviceScreen({
           type="button"
           className="bt-secondary"
           data-action="back"
-          hidden={state.screen !== "not-playable" && state.screen !== "game-settings"}
+          hidden={
+            state.screen !== "not-playable" &&
+            state.screen !== "game-settings" &&
+            state.screen !== "tower-connect"
+          }
           disabled={!controls.back}
           onClick={() => press(controls.backPromptId, "back", controls.back)}
         >
           Back
         </button>
-        {partyReason && !controls.continue ? (
-          <p className="text-lg text-[var(--bt-muted)]">Disabled: {partyReason}.</p>
+        {waitReason && !controls.continue ? (
+          <p className="text-lg text-[var(--bt-muted)]">Disabled: {waitReason}.</p>
         ) : null}
         <button
           type="button"

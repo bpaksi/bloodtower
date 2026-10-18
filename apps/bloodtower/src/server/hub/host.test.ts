@@ -182,7 +182,7 @@ type Client = Awaited<ReturnType<typeof connect>>;
 const step = async (
   client: Client,
   promptId: string,
-  action: "continue" | "begin",
+  action: "continue" | "begin" | "back",
   next: string,
 ) => {
   send(client.socket, "control", { promptId, action });
@@ -192,11 +192,11 @@ const step = async (
   });
 };
 
-/** The three steps before play, then Begin. Any joined iPad may send each one. */
+/** The steps before play, then Begin. Any joined iPad may send each one. */
 const walkToPlay = async (client: Client) => {
-  await step(client, "continue-tower-connect", "continue", "pick-story");
   await step(client, "continue-pick-story-test", "continue", "game-settings");
-  await step(client, "continue-game-settings", "continue", "party-join");
+  await step(client, "continue-game-settings", "continue", "tower-connect");
+  await step(client, "continue-tower-connect", "continue", "party-join");
   await step(client, "continue-party-join", "continue", "begin");
   await step(client, "begin", "begin", "play");
 };
@@ -465,11 +465,14 @@ describe("session hub", () => {
   it("moves the flow on the first press of a step, logs both presses with their screen, and sends the loser no error", async () => {
     const { host } = await start();
     const board = await helloBoard(host.port);
+    // Splash goes straight to Pick Story; Connect Tower follows Game settings.
     expect(latest(board.log, "storyboardState")).toMatchObject({
-      payload: { screen: "tower-connect" },
+      payload: { screen: "pick-story" },
     });
     const alpha = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
     const beta = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await step(alpha, "continue-pick-story-test", "continue", "game-settings");
+    await step(alpha, "continue-game-settings", "continue", "tower-connect");
 
     send(alpha.socket, "control", { promptId: "continue-tower-connect", action: "continue" });
     send(beta.socket, "control", { promptId: "continue-tower-connect", action: "continue" });
@@ -480,7 +483,7 @@ describe("session hub", () => {
     expect(presses.filter((press) => press.winner)).toHaveLength(1);
     expect(presses.find((press) => press.winner)).toMatchObject({
       screen: "tower-connect",
-      nextScreen: "pick-story",
+      nextScreen: "party-join",
     });
     expect(
       presses.filter((press) => !press.winner).every((press) => press.nextScreen === null),
@@ -489,15 +492,15 @@ describe("session hub", () => {
 
     await until(board.inbox, board.log, (messages) => {
       const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.screen === "pick-story";
+      return state?.type === "storyboardState" && state.payload.screen === "party-join";
     });
     await until(beta.inbox, beta.log, (messages) => {
       const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.screen === "pick-story";
+      return state?.type === "deviceState" && state.payload.screen === "party-join";
     });
     expect(latest(beta.log, "error")).toBeUndefined();
     expect(latest(beta.log, "deviceState")).toMatchObject({
-      payload: { screen: "pick-story" },
+      payload: { screen: "party-join" },
     });
   });
 
@@ -562,6 +565,22 @@ describe("session hub", () => {
     expect(pause?.startWall.endsWith("Z")).toBe(true);
     expect(pause?.endWall?.endsWith("Z")).toBe(true);
     expect(pause?.endMonoMs).not.toBeNull();
+  });
+
+  it("reaches Connect Tower after Game settings, and Back and Play without tower send the tower nothing", async () => {
+    const tower = createMockTower();
+    const { host } = await start(tower);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await step(device, "continue-pick-story-test", "continue", "game-settings");
+    await step(device, "continue-game-settings", "continue", "tower-connect");
+    const onConnect = latest(device.log, "deviceState");
+    if (onConnect?.type !== "deviceState") throw new Error("device");
+    expect(onConnect.payload.backPromptId).toBe("back-tower-connect");
+    await step(device, "back-tower-connect", "back", "game-settings");
+    await step(device, "continue-game-settings", "continue", "tower-connect");
+    await step(device, "continue-tower-connect", "continue", "party-join");
+    expect(tower.sent()).toEqual([]);
+    expect(host.loadRun().presses.every((press) => !press.action.startsWith("tower-"))).toBe(true);
   });
 
   it("connects and calibrates only from a winning press, and keeps an unknown battery unavailable", async () => {
@@ -741,7 +760,10 @@ describe("session hub", () => {
     const { host } = await start(createMockTower(), { packsDir: packs });
     const board = await helloBoard(host.port);
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await step(device, "continue-tower-connect", "continue", "pick-story");
+    await until(device.inbox, device.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "deviceState");
+      return state?.type === "deviceState" && state.payload.screen === "pick-story";
+    });
 
     const boardStories = () => {
       const state = latest(board.log, "storyboardState");
@@ -760,7 +782,7 @@ describe("session hub", () => {
     await waitFor(boardStories, (stories) => stories?.focus === "test");
     expect(boardStories()?.current).toBe("second");
     await step(device, "continue-pick-story-test", "continue", "game-settings");
-    await step(device, "continue-game-settings", "continue", "party-join");
+    await step(device, "continue-game-settings", "continue", "tower-connect");
     await waitFor(boardStories, (stories) => stories?.current === "test");
     const deviceState = latest(device.log, "deviceState");
     if (deviceState?.type !== "deviceState") throw new Error("device");

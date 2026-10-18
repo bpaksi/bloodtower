@@ -18,6 +18,9 @@ import {
   type StoryboardState,
   type StoryCard,
   storyboardStatePayloadSchema,
+  TOWER_CONNECT_BACK_ID,
+  TOWER_CONNECT_CONTINUE_ID,
+  type TowerMode,
   type TowerSnapshot,
 } from "bloodtower-protocols";
 import { lockPresses, type PressInput, type PressLog } from "../control/lock.ts";
@@ -105,7 +108,10 @@ export interface SessionEngine {
   pausePromptId: () => string | null;
   /** The screen the server holds right now. */
   screen: () => FlowScreen;
-  /** Leaves the splash screen once the pack and the socket host are ready. Not a press. */
+  /**
+   * Leaves the splash screen for Pick Story once the pack and the socket host are ready. Not a
+   * press. Connect Tower comes later, after Game settings.
+   */
   finishSplash: () => void;
   roster: () => RosterSnapshot;
   /** Clears the grace timers. Call it when the host closes. */
@@ -148,21 +154,29 @@ export interface SessionOptions {
 const newToken = () => randomBytes(16).toString("base64url");
 
 /**
- * Each step before play moves to the next screen. Play, quit and splash are handled apart, and
- * Game settings goes to "Not playable yet" instead when the chosen pack is `playable: false`.
+ * Each step before play moves to the next screen. Play, quit and splash are handled apart. Game
+ * settings goes to "Not playable yet" instead when the chosen pack is `playable: false`, and
+ * straight to Party Join when its `tower` is `none` (R3-UI-23).
  */
 const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
-  "tower-connect": "pick-story",
   "pick-story": "game-settings",
-  "game-settings": "party-join",
+  "game-settings": "tower-connect",
+  "tower-connect": "party-join",
   "party-join": "begin",
 };
 
-/** Back from a start-up screen (R3-UI-37). */
+/** Back from a start-up screen (R3-UI-37). Back from Connect Tower never disconnects it. */
 const BACK_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "game-settings": "pick-story",
   "not-playable": "game-settings",
+  "tower-connect": "game-settings",
 };
+
+/** The tower is connected and its calibration is known to be done. Unknown is not ready. */
+const towerReady = (tower: TowerSnapshot) =>
+  tower.connection === "connected" &&
+  tower.calibrated.state === "known" &&
+  tower.calibrated.calibrated;
 
 const NOT_PLAYABLE_BACK_ID = "back-not-playable";
 
@@ -209,6 +223,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         players: initialPack.players,
         playable: true,
         loadable: true,
+        tower: initialPack.tower,
       },
       pack: initialPack,
       settings: initialPack.settings,
@@ -235,6 +250,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   const chosenPlayable = () =>
     chosen ? (storyEntry(chosen.story)?.card.playable ?? false) : false;
   const settingsOf = (storyId: string) => storyEntry(storyId)?.settings ?? [];
+  /** The chosen pack's `tower` field. Only a loaded card can be chosen, so it is never null. */
+  const chosenTower = (): TowerMode =>
+    (chosen ? storyEntry(chosen.story)?.card.tower : null) ?? "optional";
   const sessionId = options.sessionId ?? `session-${randomBytes(8).toString("hex")}`;
 
   const devices = new Map<string, DeviceRow>();
@@ -351,7 +369,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   const gameplayPrompt = (): { id: string; action: ControlAction; label: string } | null => {
     if (screen === "splash" || screen === "quit") return null;
     if (screen === "tower-connect") {
-      return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
+      // A required tower holds Continue until it is connected and calibrated (R3-UI-23).
+      if (chosenTower() === "required" && !towerReady(readTower())) return null;
+      return { id: TOWER_CONNECT_CONTINUE_ID, action: "continue", label: "Next: gather the party" };
     }
     if (screen === "game-settings") {
       return { id: GAME_SETTINGS_CONTINUE_ID, action: "continue", label: "Continue" };
@@ -496,6 +516,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (action === "continue" && screen === "game-settings" && !chosenPlayable()) {
       return "not-playable";
     }
+    if (action === "continue" && screen === "game-settings" && chosenTower() === "none") {
+      return "party-join";
+    }
     if (action === "continue" && screen !== "play") {
       return NEXT_BEFORE_PLAY[screen] ?? screen;
     }
@@ -538,6 +561,12 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     for (const id of Object.keys(locks)) {
       if (entered === "pick-story" && id.startsWith(PICK_STORY_PROMPT_PREFIX)) delete locks[id];
       if (entered === "not-playable" && id === NOT_PLAYABLE_BACK_ID) delete locks[id];
+      if (
+        entered === "tower-connect" &&
+        (id === TOWER_CONNECT_CONTINUE_ID || id === TOWER_CONNECT_BACK_ID)
+      ) {
+        delete locks[id];
+      }
       if (
         entered === "game-settings" &&
         (id === GAME_SETTINGS_CONTINUE_ID || id === GAME_SETTINGS_BACK_ID)
@@ -661,6 +690,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       if (action === "set") return promptId === setPromptId();
       if (action === "back") return promptId === GAME_SETTINGS_BACK_ID;
     }
+    if (screen === "tower-connect" && action === "back") return promptId === TOWER_CONNECT_BACK_ID;
     const prompt = gameplayPrompt();
     return prompt !== null && prompt.id === promptId && prompt.action === action;
   };
@@ -843,6 +873,12 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
       const mine = heldBy(deviceId);
       const onSettings = screen === "game-settings";
+      // Game settings and Connect Tower name their own Back beside Continue.
+      const ownBack = onSettings
+        ? GAME_SETTINGS_BACK_ID
+        : screen === "tower-connect"
+          ? TOWER_CONNECT_BACK_ID
+          : null;
       const beat = stage === "lobby" || finished ? undefined : currentBeat();
       return deviceStatePayloadSchema.parse({
         screen,
@@ -868,8 +904,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
             : null,
         gameSettings: gameSettingsState(),
         setPromptId: onSettings ? setPromptId() : null,
-        backPromptId: onSettings ? GAME_SETTINGS_BACK_ID : null,
-        backLock: onSettings ? (locks[GAME_SETTINGS_BACK_ID] ?? null) : null,
+        backPromptId: ownBack,
+        backLock: ownBack ? (locks[ownBack] ?? null) : null,
       });
     },
 
@@ -896,7 +932,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     screen: () => screen,
 
     finishSplash: () => {
-      if (screen === "splash") screen = "tower-connect";
+      if (screen === "splash") screen = "pick-story";
     },
 
     roster,

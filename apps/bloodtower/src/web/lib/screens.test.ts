@@ -4,13 +4,16 @@ import {
   currentStory,
   FORTUNE_LINE,
   focusedStory,
+  gameSettingsNext,
   joinedDeviceIds,
   neighborStory,
   partyJoinNextReason,
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
+  TOWER_REQUIRED_REASON,
   towerReady,
+  towerRequiredReason,
   towerStripState,
 } from "./screens";
 
@@ -24,6 +27,7 @@ describe("story doors", () => {
     players: { min: 1, max: 4 },
     playable: true,
     loadable,
+    tower: "optional" as const,
   });
   const stories = (focus: string) => ({
     cards: [card("alpha"), card("beta"), card("gamma", false)],
@@ -77,7 +81,9 @@ describe("story doors", () => {
 describe("opening screen copy", () => {
   it("names every flow step and what happens next", () => {
     expect(SCREEN_TITLE["tower-connect"]).toBe("Tower Connect");
-    expect(SCREEN_NEXT.splash).toBe("Next: connect the tower");
+    expect(SCREEN_NEXT.splash).toBe("Next: pick a story");
+    expect(SCREEN_NEXT["game-settings"]).toBe("Next: connect the tower");
+    expect(SCREEN_NEXT["tower-connect"]).toBe("Next: gather the party");
     expect(SCREEN_NEXT["party-join"]).toBe("Next: set up the story");
     expect(FORTUNE_LINE).toContain("tower");
   });
@@ -132,5 +138,51 @@ describe("opening screen copy", () => {
       ),
     ).toBe("Claim Wren first");
     expect(partyJoinNextReason([], new Map())).toBeNull();
+  });
+});
+
+describe("Connect Tower by the pack's tower field (R3-UI-23)", () => {
+  const card = (tower: "required" | "optional" | "none" | null) => ({
+    id: "alpha",
+    title: "Alpha",
+    blurb: null,
+    tagline: null,
+    cover: null,
+    players: { min: 1, max: 4 },
+    playable: true,
+    loadable: true,
+    tower,
+  });
+  const tower = (
+    connection: "connected" | "connecting" | "disconnected" | "unavailable",
+    calibrated: { state: "unavailable" } | { state: "known"; calibrated: boolean },
+  ) => ({ connection, battery: { state: "unavailable" as const }, calibrated });
+  const ready = tower("connected", { state: "known", calibrated: true });
+
+  it("names Connect Tower after Game settings unless the story does not use the tower", () => {
+    expect(gameSettingsNext(card("optional"))).toBe("Next: connect the tower");
+    expect(gameSettingsNext(card("required"))).toBe("Next: connect the tower");
+    expect(gameSettingsNext(card("none"))).toBe("Next: gather the party");
+    expect(gameSettingsNext(null)).toBe("Next: connect the tower");
+  });
+
+  it("holds Continue with the reason only for a required tower that is not connected and calibrated", () => {
+    expect(TOWER_REQUIRED_REASON).toBe("Connect and calibrate the tower first");
+    const held = [
+      tower("unavailable", { state: "unavailable" }),
+      tower("connecting", { state: "unavailable" }),
+      tower("disconnected", { state: "unavailable" }),
+      // Connected but calibration unknown or not done is not ready.
+      tower("connected", { state: "unavailable" }),
+      tower("connected", { state: "known", calibrated: false }),
+    ];
+    for (const reading of held) {
+      expect(towerRequiredReason(card("required"), reading)).toBe(TOWER_REQUIRED_REASON);
+    }
+    expect(towerRequiredReason(card("required"), ready)).toBeNull();
+    for (const mode of ["optional", "none", null] as const) {
+      expect(towerRequiredReason(card(mode), held[0] ?? ready)).toBeNull();
+    }
+    expect(towerRequiredReason(null, held[0] ?? ready)).toBeNull();
   });
 });

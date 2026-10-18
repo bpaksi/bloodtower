@@ -435,6 +435,15 @@ const settingIssues = (
   return messages;
 };
 
+/**
+ * Whether a story needs the tower (R3-UI-23). `optional` offers "Play without tower" on Connect
+ * Tower, `required` holds Continue until the tower is connected and calibrated, and `none` skips
+ * Connect Tower.
+ */
+export const TOWER_MODES = ["required", "optional", "none"] as const;
+export const towerModeSchema = z.enum(TOWER_MODES);
+export type TowerMode = z.infer<typeof towerModeSchema>;
+
 /** Manifest fields every pack has. A `playable: false` pack carries only these. */
 const metadataShape = {
   pack_id: idSchema,
@@ -443,7 +452,7 @@ const metadataShape = {
   engine_min: semverSchema,
   tagline: z.string().min(1).max(200).optional(),
   cover: coverSchema.optional(),
-  tower: z.enum(["required", "optional", "none"]).default("optional"),
+  tower: towerModeSchema.default("optional"),
   settings: z.array(settingSchema).max(SETTINGS_MAX).default([]),
   playable: z.boolean().default(true),
 };

@@ -52,12 +52,13 @@ for (const size of SIZES) {
       const board = await newPage(BOARD_VIEWPORT, false);
       const pad = await newPage(padViewport, true);
       await board.goto("/board", { waitUntil: "domcontentloaded" });
-      await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
       await pad.goto(`${baseURL}/join?code=${host.joinCode}`);
-      await pad.locator('button[data-action="play-without-tower"]').click();
       await pad.locator('button[data-action="continue"]').click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
       await pad.locator('button[data-action="continue"]').click();
+      await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+      await pad.locator('button[data-action="play-without-tower"]').click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(board.locator("main")).toHaveAttribute("data-screen", "party-join");
 
@@ -150,12 +151,13 @@ test("party join falls back to the initial when a portrait fails to load", async
     const board = await newPage(BOARD_VIEWPORT, false);
     const pad = await newPage({ width: 1024, height: 768 }, true);
     await board.goto("/board", { waitUntil: "domcontentloaded" });
-    await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await pad.goto(`${baseURL}/join?code=${host.joinCode}`);
-    await pad.locator('button[data-action="play-without-tower"]').click();
     await pad.locator('button[data-action="continue"]').click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await pad.locator('button[data-action="continue"]').click();
+    await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
+    await pad.locator('button[data-action="play-without-tower"]').click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "party-join");
     for (const [page, where] of [

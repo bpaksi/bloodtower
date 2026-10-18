@@ -175,6 +175,7 @@ describe("client messages", () => {
       players: { min: 1, max: 4 },
       playable: true,
       loadable,
+      tower: "optional" as string | null,
     });
     const parse = (value: unknown) => storiesSchema.safeParse(value).success;
     expect(parse({ cards: [card("alpha"), card("beta")], focus: "beta", current: "alpha" })).toBe(
@@ -187,6 +188,12 @@ describe("client messages", () => {
     expect(parse({ cards: [card("alpha")], focus: "alpha", current: "beta" })).toBe(false);
     // The bound story always loaded, so it is never a greyed card.
     expect(parse({ cards: [card("alpha", false)], focus: "alpha", current: "alpha" })).toBe(false);
+    // The card carries the pack's `tower` field (R3-UI-23); null only when it did not load.
+    const withTower = (tower: unknown) =>
+      parse({ cards: [{ ...card("alpha"), tower }], focus: "alpha", current: "alpha" });
+    for (const tower of ["required", "optional", "none", null]) expect(withTower(tower)).toBe(true);
+    expect(withTower("sometimes")).toBe(false);
+    expect(withTower(undefined)).toBe(false);
   });
 
   it("accepts the Keeper line report only with a moment id and a line index", () => {

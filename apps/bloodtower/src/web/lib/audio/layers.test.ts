@@ -5,6 +5,7 @@ import {
   audioPackId,
   isBeforePickGame,
   isGameChosen,
+  isLanding,
   isVisualMoment,
   pickLayers,
 } from "./layers.ts";
@@ -32,7 +33,8 @@ describe("pickLayers (stage to file)", () => {
   });
 
   it("crossfades to the pack's start-up mood once a game is chosen (layer 2)", () => {
-    for (const screen of ["game-settings", "party-join", "begin"] as const) {
+    // Connect Tower now follows Game settings, so it plays the start-up mood too.
+    for (const screen of ["game-settings", "tower-connect", "party-join", "begin"] as const) {
       expect(pickLayers({ ...base, screen })).toEqual({
         ambient: moodFile("test", "startup"),
         music: null,
@@ -118,10 +120,27 @@ describe("pickLayers (stage to file)", () => {
     expect(isGameChosen(null, "tower-connect")).toBe(false);
   });
 
-  it("opens the Sound dialog only before Pick Game, never on or after it", () => {
+  it("places only the splash strictly before Pick Game", () => {
     expect(isBeforePickGame("splash")).toBe(true);
-    expect(isBeforePickGame("tower-connect")).toBe(true);
+    expect(isBeforePickGame("tower-connect")).toBe(false);
     expect(isBeforePickGame("pick-story")).toBe(false);
     expect(isBeforePickGame("party-join")).toBe(false);
+  });
+
+  it("treats splash and Pick Game as the landing, where the first input opens the Sound dialog", () => {
+    // Splash goes straight to Pick Game; Connect Tower now follows Game settings.
+    expect(isLanding("splash")).toBe(true);
+    expect(isLanding("pick-story")).toBe(true);
+    for (const screen of [
+      "game-settings",
+      "not-playable",
+      "tower-connect",
+      "party-join",
+      "begin",
+      "play",
+      "quit",
+    ] as const) {
+      expect(isLanding(screen)).toBe(false);
+    }
   });
 });

@@ -325,6 +325,7 @@ describe("story list", () => {
       players: null,
       playable: false,
       loadable: true,
+      tower: "optional",
     });
     expect(dracula?.pack).toBeNull();
     expect(test?.card).toEqual({
@@ -336,6 +337,7 @@ describe("story list", () => {
       players: { min: 1, max: 4 },
       playable: true,
       loadable: true,
+      tower: "optional",
     });
     expect(test?.pack?.pack_id).toBe("test");
     // Game settings come from each manifest, including the pack that is never bound.
@@ -363,6 +365,7 @@ describe("story list", () => {
         players: null,
         playable: false,
         loadable: false,
+        tower: null,
       });
       expect(broken?.pack).toBeNull();
       expect(broken?.issues.length).toBeGreaterThan(0);

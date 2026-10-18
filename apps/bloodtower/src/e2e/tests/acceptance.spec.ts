@@ -104,11 +104,31 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(cells).toEqual(expected);
     });
 
-    await test.step("AC-4: join by the QR target, then Tower Connect", async () => {
+    await test.step("AC-4: join by the QR target, pick the story and its settings, then Tower Connect", async () => {
       await pageA.goto(joinPage);
       await pageB.goto(joinPage);
       await expect(pageA).toHaveURL(/\/device/);
       await expect(pageB).toHaveURL(/\/device/);
+      // Splash goes to Pick Story; Connect Tower follows Game settings (R3-UI-22).
+      await expect(pageA.getByRole("heading", { name: "Pick Story" })).toBeVisible();
+      await expect(a.button("continue")).toHaveText("Choose Proving ground");
+      await a.button("continue").click();
+      // Game settings (R3-UI-22): the pack's settings, each at its default, changed from an iPad.
+      await expect(pageA.getByRole("heading", { name: "Game settings" })).toBeVisible();
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "game-settings");
+      const length = board.locator('[data-setting="length"] [data-setting-value]');
+      await expect(length).toHaveText("Standard");
+      await expect(board.locator('[data-setting="difficulty"] [data-setting-value]')).toHaveText(
+        "Standard",
+      );
+      await pageB.locator('[data-setting="length"] button[data-option="short"]').click();
+      await expect(length).toHaveText("Short");
+      await expect(
+        pageA.locator('[data-setting="length"] button[data-option="short"]'),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(a.button("back")).toBeVisible();
+      await expect(a.button("continue")).toHaveText("Continue");
+      await a.button("continue").click();
       await expect(pageA.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
       await expect(pageB.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
       await expect(a.button("play-without-tower")).toBeVisible();
@@ -174,27 +194,10 @@ test("the test pack's first night, end to end, on one board and two devices", as
     });
 
     await test.step("AC-4: hold several hunters; Begin waits for all", async () => {
-      await expect(a.button("continue")).toHaveText("Next: pick a story");
+      // Connected and calibrated: Continue replaces "Play without tower".
+      await expect(a.button("continue")).toHaveText("Next: gather the party");
       await expect(pageA.locator('[data-primary="true"]')).toHaveCount(1);
       await expect(a.button("play-without-tower")).toHaveCount(0);
-      await a.button("continue").click();
-      await expect(a.button("continue")).toHaveText("Choose Proving ground");
-      await a.button("continue").click();
-      // Game settings (R3-UI-22): the pack's settings, each at its default, changed from an iPad.
-      await expect(pageA.getByRole("heading", { name: "Game settings" })).toBeVisible();
-      await expect(board.locator("main")).toHaveAttribute("data-screen", "game-settings");
-      const length = board.locator('[data-setting="length"] [data-setting-value]');
-      await expect(length).toHaveText("Standard");
-      await expect(board.locator('[data-setting="difficulty"] [data-setting-value]')).toHaveText(
-        "Standard",
-      );
-      await pageB.locator('[data-setting="length"] button[data-option="short"]').click();
-      await expect(length).toHaveText("Short");
-      await expect(
-        pageA.locator('[data-setting="length"] button[data-option="short"]'),
-      ).toHaveAttribute("aria-pressed", "true");
-      await expect(a.button("back")).toBeVisible();
-      await expect(a.button("continue")).toHaveText("Continue");
       await a.button("continue").click();
       await expect(pageA.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await a.hold("alpha").click();
@@ -422,11 +425,6 @@ test("the test pack's first night, end to end, on one board and two devices", as
       }
       // Each flow step's winning press records the screen it was on and the one it moved to.
       const won = (promptId: string) => run.presses.find((press) => press.promptId === promptId);
-      expect(won("continue-tower-connect")).toMatchObject({
-        winner: true,
-        screen: "tower-connect",
-        nextScreen: "pick-story",
-      });
       expect(won("continue-pick-story-test")).toMatchObject({
         winner: true,
         screen: "pick-story",
@@ -441,6 +439,11 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(won("continue-game-settings")).toMatchObject({
         winner: true,
         screen: "game-settings",
+        nextScreen: "tower-connect",
+      });
+      expect(won("continue-tower-connect")).toMatchObject({
+        winner: true,
+        screen: "tower-connect",
         nextScreen: "party-join",
       });
       // The settings locked at Begin, and the chosen length is in the timing log.
@@ -452,14 +455,14 @@ test("the test pack's first night, end to end, on one board and two devices", as
       });
       expect(won("begin")).toMatchObject({ winner: true, screen: "begin", nextScreen: "play" });
       expect(run.presses.map((press) => `${press.promptId}:${press.winner}`)).toEqual([
+        "continue-pick-story-test:true",
+        "set-0:true",
+        "continue-game-settings:true",
         "tower-connect:true",
         "tower-connect:false",
         "tower-calibrate:true",
         "tower-calibrate:false",
         "continue-tower-connect:true",
-        "continue-pick-story-test:true",
-        "set-0:true",
-        "continue-game-settings:true",
         "continue-party-join:true",
         "begin:true",
         "continue-0:true",

@@ -7,6 +7,7 @@ import {
   SETTING_LABEL_MAX,
   SETTING_OPTIONS_MAX,
   SETTINGS_MAX,
+  type TowerMode,
   type TowerSnapshot,
 } from "bloodtower-protocols";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -106,9 +107,9 @@ const winStep = (
 /** Leaves splash, walks the three steps before play, and presses Begin on the begin screen. */
 const startPlay = (engine: SessionEngine, deviceId: string) => {
   engine.finishSplash();
-  winStep(engine, deviceId, "continue-tower-connect", "continue");
   winStep(engine, deviceId, "continue-pick-story-test", "continue");
   winStep(engine, deviceId, "continue-game-settings", "continue");
+  winStep(engine, deviceId, "continue-tower-connect", "continue");
   winStep(engine, deviceId, "continue-party-join", "continue");
   winStep(engine, deviceId, "begin", "begin");
 };
@@ -133,9 +134,9 @@ describe("session", () => {
         ok: false,
         code: "invalid-state",
       });
-      winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
       winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
       winStep(engine, joined.deviceId, "continue-game-settings", "continue");
+      winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(false);
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
       expect(engine.press(joined.deviceId, "continue-party-join", "continue")).toEqual({
@@ -551,7 +552,7 @@ describe("session", () => {
     }
   });
 
-  it("walks splash, tower-connect, pick-story, game-settings, party-join and begin in order, and refuses Quit before play", () => {
+  it("walks splash, pick-story, game-settings, tower-connect, party-join and begin in order, and refuses Quit before play", () => {
     const { opened, engine } = setup();
     try {
       const alpha = engine.join({ joinCode: "048213", formFactor: "ipad" });
@@ -562,23 +563,14 @@ describe("session", () => {
         stage: "lobby",
         prompt: null,
       });
+      // Splash goes straight to Pick Story. Connect Tower comes after Game settings (R3-UI-22).
       engine.finishSplash();
-      expect(engine.screen()).toBe("tower-connect");
-      expect(engine.projectStoryboard(TOWER, JOIN).prompt).toEqual({
-        id: "continue-tower-connect",
-        label: "Next: pick a story",
-      });
-      expect(engine.press(alpha.deviceId, "quit", "quit")).toEqual({
+      expect(engine.screen()).toBe("pick-story");
+      expect(engine.press(alpha.deviceId, "continue-tower-connect", "continue")).toEqual({
         ok: false,
         code: "invalid-state",
       });
-      expect(engine.projectDevice(alpha.deviceId)).toMatchObject({
-        screen: "tower-connect",
-        quitPromptId: null,
-      });
       holdAll(engine, alpha.deviceId);
-      winStep(engine, alpha.deviceId, "continue-tower-connect", "continue");
-      expect(engine.screen()).toBe("pick-story");
       const pack = packOrThrow().pack;
       expect(pack.set_pieces.map((piece) => piece.id)).not.toContain(pack.title);
       expect(pack.moments.map((moment) => moment.id)).not.toContain(pack.title);
@@ -593,6 +585,22 @@ describe("session", () => {
         label: "Continue",
       });
       winStep(engine, alpha.deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("tower-connect");
+      expect(engine.projectStoryboard(TOWER, JOIN).prompt).toEqual({
+        id: "continue-tower-connect",
+        label: "Next: gather the party",
+      });
+      expect(engine.press(alpha.deviceId, "quit", "quit")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.projectDevice(alpha.deviceId)).toMatchObject({
+        screen: "tower-connect",
+        quitPromptId: null,
+        backPromptId: "back-tower-connect",
+        backLock: null,
+      });
+      winStep(engine, alpha.deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("party-join");
       winStep(engine, alpha.deviceId, "continue-party-join", "continue");
       expect(engine.screen()).toBe("begin");
@@ -615,6 +623,8 @@ describe("session", () => {
       const beta = engine.join({ joinCode: "048213", formFactor: "phone" });
       if (!alpha.ok || !beta.ok) throw new Error("join");
       engine.finishSplash();
+      winStep(engine, alpha.deviceId, "continue-pick-story-test", "continue");
+      winStep(engine, alpha.deviceId, "continue-game-settings", "continue");
       const batch = engine.pressAll([
         { deviceId: alpha.deviceId, promptId: "continue-tower-connect", action: "continue" },
         { deviceId: beta.deviceId, promptId: "continue-tower-connect", action: "continue" },
@@ -623,13 +633,13 @@ describe("session", () => {
         true,
         false,
       ]);
-      expect(engine.screen()).toBe("pick-story");
+      expect(engine.screen()).toBe("party-join");
       // The flow moved on. A press on the step it left is ignored, not an error.
       expect(engine.press(beta.deviceId, "continue-tower-connect", "continue")).toMatchObject({
         ok: true,
         winner: false,
       });
-      expect(engine.screen()).toBe("pick-story");
+      expect(engine.screen()).toBe("party-join");
 
       const presses = store
         .loadRun("run")
@@ -646,11 +656,11 @@ describe("session", () => {
           device: alpha.deviceId,
           winner: true,
           screen: "tower-connect",
-          nextScreen: "pick-story",
+          nextScreen: "party-join",
         },
         // Arrived after the flow moved in the same batch, so it records the screen then held.
-        { device: beta.deviceId, winner: false, screen: "pick-story", nextScreen: null },
-        { device: beta.deviceId, winner: false, screen: "pick-story", nextScreen: null },
+        { device: beta.deviceId, winner: false, screen: "party-join", nextScreen: null },
+        { device: beta.deviceId, winner: false, screen: "party-join", nextScreen: null },
       ]);
     } finally {
       opened.close();
@@ -878,6 +888,7 @@ describe("pick story", () => {
       players: pack.players,
       playable: true,
       loadable: true,
+      tower: pack.tower,
     });
     return {
       first,
@@ -907,6 +918,7 @@ describe("pick story", () => {
             players: null,
             playable: false,
             loadable: false,
+            tower: null,
           },
           pack: null,
           settings: [],
@@ -923,7 +935,6 @@ describe("pick story", () => {
     const joined = made.engine.join({ joinCode: "048213", formFactor: "ipad" });
     if (!joined.ok) throw new Error("join");
     made.engine.finishSplash();
-    winStep(made.engine, joined.deviceId, "continue-tower-connect", "continue");
     return { ...made, deviceId: joined.deviceId };
   };
 
@@ -941,6 +952,7 @@ describe("pick story", () => {
             players: { min: 1, max: 4 },
             playable: true,
             loadable: true,
+            tower: "optional",
           },
         ],
         focus: "test",
@@ -976,10 +988,8 @@ describe("pick story", () => {
         code: "unknown-device",
       });
       expect(engine.projectStoryboard(TOWER, JOIN).stories?.focus).toBe("second");
-      // Only the tower-connect press and nothing for the highlight.
-      expect(store.loadRun("run").presses.map((press) => press.promptId)).toEqual([
-        "continue-tower-connect",
-      ]);
+      // Moving the highlight is not a press.
+      expect(store.loadRun("run").presses).toEqual([]);
     } finally {
       opened.close();
     }
@@ -991,14 +1001,15 @@ describe("pick story", () => {
     try {
       const joined = engine.join({ joinCode: "048213", formFactor: "ipad" });
       if (!joined.ok) throw new Error("join");
-      engine.finishSplash();
+      // On the splash, and later on Connect Tower.
       expect(engine.focusStory(joined.deviceId, "second")).toEqual({
         ok: false,
         code: "invalid-state",
       });
-      winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
+      engine.finishSplash();
       winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
       winStep(engine, joined.deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("tower-connect");
       expect(engine.focusStory(joined.deviceId, "second")).toEqual({
         ok: false,
         code: "invalid-state",
@@ -1049,6 +1060,7 @@ describe("pick story", () => {
       engine.focusStory(deviceId, "second");
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
       winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.hunterRoster().map((hunter) => hunter.name)).toContain("Agnes the Second");
       const board = engine.projectStoryboard(TOWER, JOIN);
@@ -1069,6 +1081,7 @@ describe("pick story", () => {
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-pick-story-test", "continue");
       winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.roster().packId).toBe("test");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(true);
@@ -1090,6 +1103,7 @@ describe("pick story", () => {
         players: null,
         playable: false,
         loadable: true,
+        tower: "optional",
       },
       pack: null,
       settings: [LENGTH_SETTING],
@@ -1233,6 +1247,7 @@ describe("pick story", () => {
       engine.focusStory(deviceId, "second");
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
       winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
       winStep(engine, deviceId, "begin", "begin");
@@ -1250,7 +1265,6 @@ describe("game settings", () => {
     const joined = made.engine.join({ joinCode: "048213", formFactor: "ipad" });
     if (!joined.ok) throw new Error("join");
     made.engine.finishSplash();
-    winStep(made.engine, joined.deviceId, "continue-tower-connect", "continue");
     winStep(made.engine, joined.deviceId, "continue-pick-story-test", "continue");
     return { ...made, deviceId: joined.deviceId };
   };
@@ -1361,6 +1375,7 @@ describe("game settings", () => {
         chosen: {},
       });
       winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("party-join");
     } finally {
       opened.close();
@@ -1485,6 +1500,7 @@ describe("game settings", () => {
       expect(device.prompt).toEqual({ id: "continue-game-settings", label: "Continue" });
       expect(device.lock).toBeNull();
       winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.press(deviceId, "back-game-settings", "back")).toEqual({
         ok: false,
@@ -1506,6 +1522,7 @@ describe("game settings", () => {
     try {
       winStep(engine, deviceId, "set-0", "set", "long", "length");
       winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
       expect(store.loadRun("run").marks.some((mark) => mark.kind === "setting")).toBe(false);
@@ -1523,6 +1540,199 @@ describe("game settings", () => {
         { subject: "length:long", closed: true },
         { subject: "difficulty:standard", closed: true },
       ]);
+    } finally {
+      opened.close();
+    }
+  });
+});
+
+describe("Connect Tower after Game settings (R3-UI-23)", () => {
+  const unavailable = TOWER;
+  const connected = (calibrated: boolean): TowerSnapshot => ({
+    connection: "connected",
+    battery: { state: "unavailable" },
+    calibrated: { state: "known", calibrated },
+  });
+
+  /** Proving Ground with its `tower` field set to `mode`, on its card and its pack. */
+  const towerStory = (mode: TowerMode): StoryEntry[] => {
+    const { pack } = packOrThrow();
+    return [
+      {
+        card: {
+          id: "test",
+          title: pack.title,
+          blurb: null,
+          tagline: null,
+          cover: null,
+          players: pack.players,
+          playable: true,
+          loadable: true,
+          tower: mode,
+        },
+        pack: { ...pack, tower: mode },
+        settings: pack.settings,
+        issues: [],
+        assets: null,
+      },
+    ];
+  };
+
+  /** A joined iPad on Game settings, with a tower reading the test can change. */
+  const atSettings = (mode: TowerMode) => {
+    let reading = unavailable;
+    const stories = towerStory(mode);
+    const made = setup({
+      pack: stories[0]?.pack ?? undefined,
+      stories,
+      storyId: "test",
+      tower: () => reading,
+    });
+    const joined = made.engine.join({ joinCode: "048213", formFactor: "ipad" });
+    if (!joined.ok) throw new Error("join");
+    made.engine.finishSplash();
+    winStep(made.engine, joined.deviceId, "continue-pick-story-test", "continue");
+    expect(made.engine.screen()).toBe("game-settings");
+    const setTower = (next: TowerSnapshot) => {
+      reading = next;
+    };
+    return { ...made, deviceId: joined.deviceId, setTower };
+  };
+
+  it("goes from Game settings to Connect Tower for an optional tower, and Play without tower skips it", () => {
+    const { opened, engine, deviceId } = atSettings("optional");
+    try {
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("tower-connect");
+      // "Play without tower" is the Continue prompt while no tower is connected (R2-22).
+      expect(engine.projectDevice(deviceId).prompt).toEqual({
+        id: "continue-tower-connect",
+        label: "Next: gather the party",
+      });
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
+      expect(engine.screen()).toBe("party-join");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("skips Connect Tower for a story with tower: none", () => {
+    const { opened, store, engine, deviceId } = atSettings("none");
+    try {
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("party-join");
+      expect(engine.press(deviceId, "continue-tower-connect", "continue")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      const won = store
+        .loadRun("run")
+        .presses.find((press) => press.promptId === "continue-game-settings");
+      expect(won).toMatchObject({
+        winner: true,
+        screen: "game-settings",
+        nextScreen: "party-join",
+      });
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("holds Continue for a required tower until it is connected and calibrated", () => {
+    const { opened, engine, deviceId, setTower } = atSettings("required");
+    try {
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("tower-connect");
+      const notReady: TowerSnapshot[] = [
+        unavailable,
+        { ...unavailable, connection: "connecting" },
+        { ...unavailable, connection: "disconnected" },
+        // Connected with calibration unknown or not done is not ready.
+        { ...unavailable, connection: "connected" },
+        connected(false),
+      ];
+      for (const reading of notReady) {
+        setTower(reading);
+        expect(engine.projectStoryboard(reading, JOIN).prompt).toBeNull();
+        expect(engine.projectDevice(deviceId).prompt).toBeNull();
+        expect(engine.press(deviceId, "continue-tower-connect", "continue")).toEqual({
+          ok: false,
+          code: "invalid-state",
+        });
+        expect(engine.screen()).toBe("tower-connect");
+      }
+      // Back stays pressable while Continue is held.
+      expect(engine.projectDevice(deviceId).backPromptId).toBe("back-tower-connect");
+
+      setTower(connected(true));
+      expect(engine.projectDevice(deviceId).prompt).toEqual({
+        id: "continue-tower-connect",
+        label: "Next: gather the party",
+      });
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
+      expect(engine.screen()).toBe("party-join");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("Back from Connect Tower returns to Game settings with the chosen values, and Connect Tower can be passed again", () => {
+    const { opened, store, engine, deviceId, setTower } = atSettings("optional");
+    try {
+      winStep(engine, deviceId, "set-0", "set", "long", "length");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.press(deviceId, "back-game-settings", "back")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      // The tower is connected and calibrated here; Back must leave it so.
+      setTower(connected(true));
+      winStep(engine, deviceId, "back-tower-connect", "back");
+      expect(engine.screen()).toBe("game-settings");
+      expect(engine.chosenSettings()).toEqual({ length: "long", difficulty: "standard" });
+      expect(engine.projectDevice(deviceId).backPromptId).toBe("back-game-settings");
+
+      // Back again on the second visit, then on through: each visit is a fresh lock.
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      expect(engine.screen()).toBe("tower-connect");
+      winStep(engine, deviceId, "back-tower-connect", "back");
+      winStep(engine, deviceId, "continue-game-settings", "continue");
+      winStep(engine, deviceId, "continue-tower-connect", "continue");
+      expect(engine.screen()).toBe("party-join");
+      // Off Connect Tower, Back is refused like Back from Game settings once it is left.
+      expect(engine.press(deviceId, "back-tower-connect", "back")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.screen()).toBe("party-join");
+
+      const backs = store
+        .loadRun("run")
+        .presses.filter((press) => press.promptId === "back-tower-connect" && press.winner);
+      expect(backs.map((press) => [press.screen, press.nextScreen])).toEqual([
+        ["tower-connect", "game-settings"],
+        ["tower-connect", "game-settings"],
+      ]);
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("never connects or calibrates on a flow press: Back, Continue and Play without tower are not tower presses", () => {
+    const { opened, engine, deviceId } = atSettings("optional");
+    try {
+      const results = [
+        engine.press(deviceId, "continue-game-settings", "continue"),
+        engine.press(deviceId, "back-tower-connect", "back"),
+        engine.press(deviceId, "continue-game-settings", "continue"),
+        engine.press(deviceId, "continue-tower-connect", "continue"),
+      ];
+      for (const result of results) {
+        expect(result).toMatchObject({ ok: true, winner: true });
+        if (result.ok) expect(result.action).not.toMatch(/^tower-/);
+      }
+      expect(engine.lockFor("tower-connect")).toBeNull();
+      expect(engine.lockFor("tower-calibrate")).toBeNull();
     } finally {
       opened.close();
     }
