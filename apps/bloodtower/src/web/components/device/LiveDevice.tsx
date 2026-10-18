@@ -72,8 +72,8 @@ export function LiveDevice() {
         connectLock={state.connectLock ?? null}
         calibrateLock={state.calibrateLock ?? null}
         tower={state.tower ?? unavailable}
-        onControl={(promptId, action, option, setting) => {
-          client.current?.sendControl(promptId, action, option, setting);
+        onControl={(promptId, action, option, setting, note) => {
+          client.current?.sendControl(promptId, action, option, setting, note);
         }}
         onHold={(hunter, action) => {
           client.current?.sendHold(hunter, action);

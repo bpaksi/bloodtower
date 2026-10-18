@@ -25,6 +25,7 @@ import {
 } from "../../lib/screens";
 import { pageServerOrigin } from "../../lib/serverOrigin.ts";
 import { towerStatusLines } from "../../lib/towerStatus";
+import { VOLUME_ANSWER_LABEL, volumeBoardCopy } from "../../lib/volumeTest.ts";
 import { PortraitCard } from "../PortraitCard";
 import { CameraStill } from "./CameraStill";
 import { KeeperScene } from "./KeeperScene";
@@ -83,6 +84,7 @@ export function StoryBoard({
         </p>
       ) : null}
       {debug && state.screen !== "splash" ? <StatusStrip state={state} /> : null}
+      {debug && state.volumeTest?.logged ? <VolumeLogged logged={state.volumeTest.logged} /> : null}
       {paused ? (
         <p className="bt-banner" role="status">
           {paused}
@@ -102,6 +104,7 @@ export function StoryBoard({
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
+          {state.screen === "tower-volume-test" ? <VolumeTestPanel state={state} /> : null}
           {state.screen === "pick-story" ? <PickStoryPanel state={state} /> : null}
           {state.screen === "game-settings" ? <GameSettingsPanel state={state} /> : null}
           {state.screen === "not-playable" ? <NotPlayablePanel state={state} /> : null}
@@ -358,6 +361,61 @@ const TowerConnectPanel = ({ state }: { state: StoryboardState }) => {
     </article>
   );
 };
+
+/**
+ * The tower volume test (Proving Ground section 6a). The board shows the level playing, the
+ * balance check and the question; it has no buttons, so the answer is pressed on an iPad.
+ */
+const VolumeTestPanel = ({ state }: { state: StoryboardState }) => {
+  const test = state.volumeTest;
+  if (!test) return null;
+  const copy = volumeBoardCopy(test);
+  return (
+    <article
+      className="bt-page bt-parchment bt-ink-in"
+      data-volume-phase={test.phase}
+      data-volume-mode={test.mode}
+      data-volume-level={test.level ?? undefined}
+    >
+      <div>
+        <p className="bt-kicker">{SCREEN_TITLE["tower-volume-test"]}</p>
+        <h2>{copy.title}</h2>
+        <p className="bt-narration">{copy.line}</p>
+        {test.phase === "levels" ? (
+          <ol className="bt-levels" aria-label="Levels">
+            {[0, 1, 2].map((level) => (
+              <li key={level} data-level={level} data-current={test.level === level || undefined}>
+                Level {level}
+              </li>
+            ))}
+          </ol>
+        ) : null}
+      </div>
+    </article>
+  );
+};
+
+/** The debug overlay's line for the logged volume stat (R3-UI-40): what was answered, and when. */
+const VolumeLogged = ({
+  logged,
+}: {
+  logged: NonNullable<NonNullable<StoryboardState["volumeTest"]>["logged"]>;
+}) => (
+  <p className="bt-status" data-volume-logged="">
+    <span>
+      Volume test <strong>{VOLUME_ANSWER_LABEL[logged.answer]}</strong>
+    </span>
+    <span>
+      Note <strong>{logged.note ?? "none"}</strong>
+    </span>
+    <span>
+      Firmware <strong>{logged.firmware ?? "unavailable"}</strong>
+    </span>
+    <span>
+      At <strong>{logged.at}</strong>
+    </span>
+  </p>
+);
 
 /** The pack's cover on the host, or undefined when the card has none. Board only: devices show no images. */
 const coverSrc = (cover: StoryCard["cover"]): string | undefined =>

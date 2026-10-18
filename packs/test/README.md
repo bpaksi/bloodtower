@@ -231,6 +231,7 @@ Runs right after Connect Tower, only if a tower is connected; skipped silently w
 3. One iPad (first press) asks "Did the levels sound different?": All three differ / Only one level is louder / All the same / write-in. A "Play again" button repeats step 1.
 4. The answer, the write-in text, the tower firmware/version and the time are logged as stat `tower-volume-test` (event, scope session) and shown in the debug overlay.
 Labels stay neutral (no quiet/loud names) because the library's "2 is quietest" is unconfirmed until this result is in.
+Built in shell step 7 (`apps/bloodtower`): the engine owns this step, so it is not in `setup`. It follows Connect Tower and goes on to Claim Hunters. Nothing plays until an iPad presses Play levels; the first run is levels 0, 1, 2 then the balance check, and Play again repeats the levels only. The balance check plays #58 at tier 2 (there is no volume picker yet, R3-UI-63), with the room sound alone for 3 s first and then ducked, not silent, while the tower plays. A failed sound ends the run and nothing is sent again. With no tower the screen is only a room-sound check and sends nothing. Continue is open without an answer. The write-in text is length-capped (200) and appears only in the stat and the board's `?debug=1` line, never on a device.
 ## 7-8. Items, track, corruption (`items.yaml`)
 ```yaml
 items:

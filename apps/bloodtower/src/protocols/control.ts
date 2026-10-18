@@ -5,7 +5,9 @@ import { deviceIdSchema, utcTimestampSchema } from "./devices.ts";
  * The only controls accepted on a joined device.
  * Tower connect and calibrate are named presses. `pick` is a choice press on an iPad pick prompt,
  * and it carries the chosen option id. `set` changes one game setting on Game settings, and it
- * carries the setting id and the option id. There is no command message and no raw bytes.
+ * carries the setting id and the option id. `volume-play` starts (or repeats) the tower volume
+ * test, and `volume-answer` gives its answer with an optional write-in note. There is no command
+ * message and no raw bytes.
  * The server decides the winner by arrival order (step 5). This module is the record shape.
  */
 export const CONTROL_ACTIONS = [
@@ -19,6 +21,8 @@ export const CONTROL_ACTIONS = [
   "tower-calibrate",
   "pick",
   "set",
+  "volume-play",
+  "volume-answer",
 ] as const;
 export const controlActionSchema = z.enum(CONTROL_ACTIONS);
 export type ControlAction = z.infer<typeof controlActionSchema>;
@@ -26,8 +30,9 @@ export type ControlAction = z.infer<typeof controlActionSchema>;
 /**
  * The flow screens, in order. The server holds the current one; no client sends it.
  * Splash is the first screen after load. Connect Tower follows Game settings (R3-UI-22), and a
- * story with `tower: none` skips it. Claim Hunters (`party-join`) is followed by one `setup` dialog
- * per pack setup step, then Begin (R3-UI-22, R2-50..52). Quit is the end once play has been quit.
+ * story with `tower: none` skips it. The tower volume test (Proving Ground section 6a) follows
+ * Connect Tower. Claim Hunters (`party-join`) is followed by one `setup` dialog per pack setup
+ * step, then Begin (R3-UI-22, R2-50..52). Quit is the end once play has been quit.
  */
 export const FLOW_SCREENS = [
   "splash",
@@ -35,6 +40,7 @@ export const FLOW_SCREENS = [
   "game-settings",
   "not-playable",
   "tower-connect",
+  "tower-volume-test",
   "party-join",
   "setup",
   "begin",
@@ -71,6 +77,22 @@ export const SETUP_BACK_PREFIX = "back-setup-";
 export const SETUP_STEP_ID_MAX = PROMPT_ID_MAX - SETUP_DONE_PREFIX.length;
 /** Back on Begin returns to the last setup step, or to Claim Hunters when there is none. */
 export const BEGIN_BACK_ID = "back-begin";
+/** Continue and Back on the tower volume test. Back returns to Connect Tower. */
+export const VOLUME_TEST_CONTINUE_ID = "continue-tower-volume-test";
+export const VOLUME_TEST_BACK_ID = "back-tower-volume-test";
+/**
+ * Starting the level test is this prefix plus a serial. Each winning press moves the serial on,
+ * so "Play again" is a fresh first-press-wins lock.
+ */
+export const VOLUME_PLAY_PROMPT_PREFIX = "volume-play-";
+/** The one iPad answer to "Did the levels sound different?" (first press wins). */
+export const VOLUME_ANSWER_PROMPT_ID = "volume-answer";
+/** The answers to "Did the levels sound different?". Neutral wording (section 6a). */
+export const VOLUME_ANSWERS = ["all-differ", "one-louder", "all-same", "write-in"] as const;
+export const volumeAnswerSchema = z.enum(VOLUME_ANSWERS);
+export type VolumeAnswer = z.infer<typeof volumeAnswerSchema>;
+/** Longest write-in text. It is length-capped and never sent to other devices. */
+export const VOLUME_NOTE_MAX = 200;
 /**
  * A setting change on Game settings is this prefix plus a serial. Each winning change moves the
  * serial on, so the next change is a fresh first-press-wins lock.

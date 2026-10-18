@@ -306,7 +306,7 @@ const statsSchema = z.strictObject({
     z.strictObject({
       id: idSchema,
       type: z.enum(["counter", "event"]),
-      scope: z.enum(["party", "hunter"]),
+      scope: z.enum(["party", "hunter", "session"]),
     }),
   ),
   highlight_weights: z.record(z.string(), z.number()).optional(),

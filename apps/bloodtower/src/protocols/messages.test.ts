@@ -23,6 +23,9 @@ import {
   storiesSchema,
   storyboardStatePayloadSchema,
   towerBatterySchema,
+  towerSnapshotSchema,
+  volumeTestBoardSchema,
+  volumeTestSchema,
 } from "./index.ts";
 
 const envelope = (type: string, payload: unknown) => ({
@@ -92,6 +95,8 @@ describe("client messages", () => {
       "tower-calibrate",
       "pick",
       "set",
+      "volume-play",
+      "volume-answer",
     ]);
   });
 
@@ -118,6 +123,84 @@ describe("client messages", () => {
     expect(control({ promptId: "set-0", action: "set", setting: "Length", option: "long" })).toBe(
       false,
     );
+  });
+
+  it("takes a volume answer with its option, and the write-in text only with the write-in answer", () => {
+    const control = (payload: unknown) =>
+      controlMessageSchema.safeParse({ v: 1, type: "control", payload }).success;
+    const answer = { promptId: "volume-answer", action: "volume-answer" };
+    expect(control({ promptId: "volume-play-0", action: "volume-play" })).toBe(true);
+    expect(control({ ...answer, option: "all-differ" })).toBe(true);
+    expect(control({ ...answer, option: "one-louder" })).toBe(true);
+    expect(control({ ...answer, option: "all-same" })).toBe(true);
+    expect(control({ ...answer, option: "write-in", note: "Only the middle one" })).toBe(true);
+    // The answer names its option, from the list, and the write-in carries its text.
+    expect(control(answer)).toBe(false);
+    expect(control({ ...answer, option: "very-loud" })).toBe(false);
+    expect(control({ ...answer, option: "write-in" })).toBe(false);
+    expect(control({ ...answer, option: "all-same", note: "extra" })).toBe(false);
+    expect(control({ ...answer, option: "write-in", note: "   " })).toBe(false);
+    expect(control({ ...answer, option: "write-in", note: "x".repeat(201) })).toBe(false);
+    expect(control({ ...answer, option: "write-in", note: "x".repeat(200) })).toBe(true);
+    // Nothing else takes a note or an option, and a play press names neither.
+    expect(control({ promptId: "continue-0", action: "continue", note: "hi" })).toBe(false);
+    expect(control({ promptId: "volume-play-0", action: "volume-play", option: "all-same" })).toBe(
+      false,
+    );
+  });
+
+  it("checks the volume test: a level only while the levels play, an answer only once answered", () => {
+    const base = {
+      mode: "tower",
+      phase: "idle",
+      level: null,
+      runs: 0,
+      failed: false,
+      answer: null,
+    };
+    expect(volumeTestSchema.safeParse(base).success).toBe(true);
+    expect(
+      volumeTestSchema.safeParse({ ...base, phase: "levels", level: 2, runs: 1 }).success,
+    ).toBe(true);
+    expect(volumeTestSchema.safeParse({ ...base, phase: "levels", level: 3 }).success).toBe(false);
+    expect(volumeTestSchema.safeParse({ ...base, phase: "levels" }).success).toBe(false);
+    expect(volumeTestSchema.safeParse({ ...base, level: 1 }).success).toBe(false);
+    expect(
+      volumeTestSchema.safeParse({ ...base, phase: "answered", answer: "all-same" }).success,
+    ).toBe(true);
+    expect(volumeTestSchema.safeParse({ ...base, phase: "answered" }).success).toBe(false);
+    expect(volumeTestSchema.safeParse({ ...base, answer: "all-same" }).success).toBe(false);
+    // The shared shape has no place for the write-in text; only the board's debug fields do.
+    expect(volumeTestSchema.safeParse({ ...base, note: "x" }).success).toBe(false);
+    expect(volumeTestBoardSchema.safeParse({ ...base, logged: null }).success).toBe(true);
+    expect(
+      volumeTestBoardSchema.safeParse({
+        ...base,
+        phase: "answered",
+        answer: "write-in",
+        logged: { answer: "write-in", note: "x", firmware: null, at: "2026-10-18T10:00:00.000Z" },
+      }).success,
+    ).toBe(true);
+  });
+
+  it("keeps an absent or unavailable tower firmware apart from a known one, never blank", () => {
+    const tower = {
+      connection: "connected",
+      battery: { state: "unavailable" },
+      calibrated: { state: "unavailable" },
+    };
+    expect(towerSnapshotSchema.safeParse(tower).success).toBe(true);
+    expect(
+      towerSnapshotSchema.safeParse({ ...tower, firmware: { state: "unavailable" } }).success,
+    ).toBe(true);
+    expect(
+      towerSnapshotSchema.safeParse({ ...tower, firmware: { state: "known", version: "1.4.0" } })
+        .success,
+    ).toBe(true);
+    expect(
+      towerSnapshotSchema.safeParse({ ...tower, firmware: { state: "known", version: "" } })
+        .success,
+    ).toBe(false);
   });
 
   it("checks game settings: one chosen option per listed setting, each one of its options", () => {
@@ -293,11 +376,11 @@ describe("story board state", () => {
     });
     expect(towerBatterySchema.safeParse({ state: "unavailable", percent: 0 }).success).toBe(false);
     expect(
-      hostHealthSchema.parse({ protocol: 1, tower: "connection-only", effects: "none" }),
+      hostHealthSchema.parse({ protocol: 1, tower: "connection-and-sound", effects: "sound-only" }),
     ).toEqual({
       protocol: 1,
-      tower: "connection-only",
-      effects: "none",
+      tower: "connection-and-sound",
+      effects: "sound-only",
     });
   });
 

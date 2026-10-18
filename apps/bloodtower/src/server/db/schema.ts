@@ -59,3 +59,14 @@ export const timingMarks = sqliteTable("timing_marks", {
   hunter: text("hunter"),
   result: text("result"),
 });
+
+/** Pack stats of type event. `data` is a JSON object of text or null values. */
+export const statEvents = sqliteTable("stat_events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  sessionId: text("session_id").notNull(),
+  statId: text("stat_id").notNull(),
+  atMonoMs: real("at_mono_ms").notNull(),
+  atWall: text("at_wall").notNull(),
+  deviceId: text("device_id"),
+  data: text("data").notNull(),
+});

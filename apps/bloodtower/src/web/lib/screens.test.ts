@@ -86,7 +86,9 @@ describe("opening screen copy", () => {
     expect(SCREEN_TITLE["tower-connect"]).toBe("Tower Connect");
     expect(SCREEN_NEXT.splash).toBe("Next: pick a story");
     expect(SCREEN_NEXT["game-settings"]).toBe("Next: connect the tower");
-    expect(SCREEN_NEXT["tower-connect"]).toBe("Next: gather the party");
+    expect(SCREEN_NEXT["tower-connect"]).toBe("Next: tower volume test");
+    expect(SCREEN_TITLE["tower-volume-test"]).toBe("Tower volume test");
+    expect(SCREEN_NEXT["tower-volume-test"]).toBe("Next: gather the party");
     expect(SCREEN_NEXT["party-join"]).toBe("Next: set up the story");
     expect(FORTUNE_LINE).toContain("tower");
   });

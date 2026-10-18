@@ -50,4 +50,14 @@ export const MIGRATIONS: readonly string[] = [
   // R2 flow state. Null on presses recorded before it: unknown, never guessed.
   `ALTER TABLE control_presses ADD COLUMN screen TEXT`,
   `ALTER TABLE control_presses ADD COLUMN next_screen TEXT`,
+  // Pack stats of type event (the tower volume test is the first). \`data\` is JSON.
+  `CREATE TABLE stat_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL REFERENCES sessions(id),
+    stat_id TEXT NOT NULL,
+    at_mono_ms REAL NOT NULL,
+    at_wall TEXT NOT NULL,
+    device_id TEXT,
+    data TEXT NOT NULL
+  )`,
 ];

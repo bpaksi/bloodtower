@@ -62,7 +62,7 @@ describe("m4a and Range", () => {
 });
 
 describe("startHost", () => {
-  it("serves the page, reports connection-only health, and rejects other methods", async () => {
+  it("serves the page, reports connection-and-sound health, and rejects other methods", async () => {
     const root = makeRoot();
     writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
     const host = await startHost({ port: 0, host: "127.0.0.1", webRoot: root });
@@ -75,8 +75,8 @@ describe("startHost", () => {
       expect(health.status).toBe(200);
       expect(await health.json()).toEqual({
         protocol: PROTOCOL_VERSION,
-        tower: "connection-only",
-        effects: "none",
+        tower: "connection-and-sound",
+        effects: "sound-only",
       });
 
       const posted = await fetch(`http://127.0.0.1:${host.port}/health`, { method: "POST" });

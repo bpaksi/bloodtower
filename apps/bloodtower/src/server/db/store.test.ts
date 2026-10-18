@@ -9,7 +9,7 @@ import { MIGRATIONS } from "./migrations.ts";
 import { createSessionStore } from "./store.ts";
 
 describe("session store", () => {
-  it("creates the five game tables", () => {
+  it("creates the six game tables", () => {
     const opened = openDatabase(":memory:");
     try {
       const names = opened.db.all<{ name: string }>(
@@ -20,6 +20,7 @@ describe("session store", () => {
         "devices",
         "holdings",
         "sessions",
+        "stat_events",
         "timing_marks",
       ]);
       const version = opened.db.get<{ user_version: number }>(sql`pragma user_version`);

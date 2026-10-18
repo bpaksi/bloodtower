@@ -2,13 +2,26 @@ import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { TowerSnapshot } from "bloodtower-protocols";
 import { WebSocket } from "ws";
-import { mapBattery, mapCalibration, mapConnection, unavailableTower } from "./snapshot.ts";
-import type { TowerPort, TowerSent } from "./types.ts";
+import {
+  mapBattery,
+  mapCalibration,
+  mapConnection,
+  mapFirmware,
+  unavailableTower,
+} from "./snapshot.ts";
+import type { SoundResult, TowerPort, TowerSent } from "./types.ts";
 
 /** tower-poc's socket. This process does not start tower-poc. */
 export const DEFAULT_SIDECAR_URL = "ws://127.0.0.1:4747/ws";
 
-const OUTBOUND = new Set(["hello", "connect", "calibrate"]);
+const OUTBOUND = new Set(["hello", "connect", "calibrate", "command"]);
+
+/** tower-poc's capability for a sound with a volume tier. It is the only command this sends. */
+const SOUND_CAPABILITY = "sound.play-stateful";
+/** A command that has not ended by now is treated as failed. The executor has its own timeouts. */
+const SOUND_TIMEOUT_MS = 15_000;
+const WRITTEN_STAGES = new Set(["write-completed", "confirmed", "indeterminate"]);
+const FAILED_STAGES = new Set(["failed", "timed-out", "rejected"]);
 
 export interface SidecarOptions {
   url: string;
@@ -25,7 +38,9 @@ const diag = (path: string | undefined, dir: "in" | "out", type: string) => {
 /**
  * A client of tower-poc. The socket stays closed until `connect()`.
  * A dropped socket is not reopened. Calibrate is sent only while the tower is connected.
- * Outbound types are hello, connect and calibrate. Never `command`.
+ * Outbound types are hello, connect, calibrate and `command`. The only command is
+ * `sound.play-stateful` (a library sound index and a volume tier), sent by `playSound`. No light
+ * cue and no raw bytes. A sound is never sent again after a failure.
  */
 export const createSidecarTower = (options: SidecarOptions): TowerPort => {
   let snapshot = unavailableTower();
@@ -40,16 +55,31 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
   /** The last connection tower-poc reported. */
   let reported: TowerSnapshot["connection"] = "unavailable";
   let chain: Promise<void> = Promise.resolve();
+  /** Sounds sent and not yet answered, by command id. */
+  const pendingSounds = new Map<string, (result: SoundResult) => void>();
+  let commandSerial = 0;
 
   const track = (step: Promise<void>) => {
     chain = chain.then(() => step).catch(() => undefined);
   };
 
-  const send = (type: "hello" | "connect" | "calibrate", payload: unknown) => {
-    if (!OUTBOUND.has(type) || !socket || socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ v: 1, type, payload }));
-    sent.push({ type });
+  const send = (
+    type: "hello" | "connect" | "calibrate" | "command",
+    payload: unknown,
+    extra?: { id: string; entry: TowerSent },
+  ): boolean => {
+    if (!OUTBOUND.has(type) || !socket || socket.readyState !== WebSocket.OPEN) return false;
+    socket.send(JSON.stringify({ v: 1, type, ...(extra ? { id: extra.id } : {}), payload }));
+    sent.push(extra?.entry ?? { type });
     diag(options.diagLogPath, "out", type);
+    return true;
+  };
+
+  const endSounds = (result: SoundResult) => {
+    for (const [id, finish] of [...pendingSounds]) {
+      pendingSounds.delete(id);
+      finish(result);
+    }
   };
 
   const onMessage = (raw: WebSocket.RawData) => {
@@ -98,6 +128,26 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
       connecting = false;
       connectSent = false;
       snapshot = { ...snapshot, connection: reported, calibrated };
+      // The tower reports its firmware once, on connect. A tower that is not connected has none.
+      if (reported !== "connected") snapshot = { ...snapshot, firmware: { state: "unavailable" } };
+      else if (payload.device !== undefined) {
+        snapshot = { ...snapshot, firmware: mapFirmware(payload.device) };
+      }
+      if (reported !== "connected") endSounds("failed");
+      return;
+    }
+    if (type === "command.lifecycle") {
+      const id = typeof payload.commandId === "string" ? payload.commandId : "";
+      const stage = typeof payload.stage === "string" ? payload.stage : "";
+      const finish = pendingSounds.get(id);
+      if (!finish) return;
+      if (WRITTEN_STAGES.has(stage)) {
+        pendingSounds.delete(id);
+        finish("written");
+      } else if (FAILED_STAGES.has(stage)) {
+        pendingSounds.delete(id);
+        finish("failed");
+      }
       return;
     }
     if (type === "error" && connectSent) {
@@ -117,6 +167,7 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
   };
 
   const drop = () => {
+    endSounds("failed");
     wantConnect = false;
     connecting = false;
     helloReply = false;
@@ -167,6 +218,32 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
     calibrate: () => {
       if (snapshot.connection !== "connected") return;
       send("calibrate", {});
+    },
+    playSound: (soundIndex, volume) => {
+      if (snapshot.connection !== "connected") return Promise.resolve("failed");
+      commandSerial += 1;
+      const id = `bt-sound-${commandSerial}`;
+      return new Promise<SoundResult>((resolve) => {
+        const timer = setTimeout(() => {
+          pendingSounds.delete(id);
+          resolve("failed");
+        }, SOUND_TIMEOUT_MS);
+        timer.unref?.();
+        pendingSounds.set(id, (result) => {
+          clearTimeout(timer);
+          resolve(result);
+        });
+        const wrote = send(
+          "command",
+          { capabilityId: SOUND_CAPABILITY, params: { soundIndex, volume } },
+          { id, entry: { type: "sound", soundIndex, volume } },
+        );
+        if (!wrote) {
+          pendingSounds.delete(id);
+          clearTimeout(timer);
+          resolve("failed");
+        }
+      });
     },
     close: () => {
       const current = socket;

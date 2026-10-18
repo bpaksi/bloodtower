@@ -57,6 +57,7 @@ const start = async (
     lanHost?: () => string | undefined;
     joinPagePort?: number;
     packsDir?: string;
+    sleep?: (ms: number) => Promise<void>;
   },
 ) => {
   const root = tempDir();
@@ -72,6 +73,7 @@ const start = async (
     devOrigins: extra?.devOrigins,
     lanHost: extra?.lanHost,
     joinPagePort: extra?.joinPagePort,
+    sleep: extra?.sleep,
   });
   hosts.push(host);
   return { host, tower };
@@ -196,7 +198,8 @@ const step = async (
 const walkToPlay = async (client: Client) => {
   await step(client, "continue-pick-story-test", "continue", "game-settings");
   await step(client, "continue-game-settings", "continue", "tower-connect");
-  await step(client, "continue-tower-connect", "continue", "party-join");
+  await step(client, "continue-tower-connect", "continue", "tower-volume-test");
+  await step(client, "continue-tower-volume-test", "continue", "party-join");
   // The test pack's setup steps, one Done each, then Begin (R-WIZ-6).
   await step(client, "continue-party-join", "continue", "setup");
   await step(client, "continue-setup-lay-out-board", "continue", "setup");
@@ -206,13 +209,17 @@ const walkToPlay = async (client: Client) => {
 };
 
 describe("session hub", () => {
-  it("serves the page and connection-only health, and refuses another origin", async () => {
+  it("serves the page and connection-and-sound health, and refuses another origin", async () => {
     const { host } = await start();
     const page = await fetch(`http://127.0.0.1:${host.port}/`);
     expect(page.status).toBe(200);
     expect(await page.text()).toContain("Bloodtower");
     const health = await fetch(`http://127.0.0.1:${host.port}/health`);
-    expect(await health.json()).toEqual({ protocol: 1, tower: "connection-only", effects: "none" });
+    expect(await health.json()).toEqual({
+      protocol: 1,
+      tower: "connection-and-sound",
+      effects: "sound-only",
+    });
 
     await expect(connect(host.port, "https://evil.example")).rejects.toThrow(/403/);
     const allowed = await connect(host.port, `http://127.0.0.1:${host.port}`);
@@ -487,7 +494,7 @@ describe("session hub", () => {
     expect(presses.filter((press) => press.winner)).toHaveLength(1);
     expect(presses.find((press) => press.winner)).toMatchObject({
       screen: "tower-connect",
-      nextScreen: "party-join",
+      nextScreen: "tower-volume-test",
     });
     expect(
       presses.filter((press) => !press.winner).every((press) => press.nextScreen === null),
@@ -496,15 +503,15 @@ describe("session hub", () => {
 
     await until(board.inbox, board.log, (messages) => {
       const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.screen === "party-join";
+      return state?.type === "storyboardState" && state.payload.screen === "tower-volume-test";
     });
     await until(beta.inbox, beta.log, (messages) => {
       const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.screen === "party-join";
+      return state?.type === "deviceState" && state.payload.screen === "tower-volume-test";
     });
     expect(latest(beta.log, "error")).toBeUndefined();
     expect(latest(beta.log, "deviceState")).toMatchObject({
-      payload: { screen: "party-join" },
+      payload: { screen: "tower-volume-test" },
     });
   });
 
@@ -582,9 +589,96 @@ describe("session hub", () => {
     expect(onConnect.payload.backPromptId).toBe("back-tower-connect");
     await step(device, "back-tower-connect", "back", "game-settings");
     await step(device, "continue-game-settings", "continue", "tower-connect");
-    await step(device, "continue-tower-connect", "continue", "party-join");
+    await step(device, "continue-tower-connect", "continue", "tower-volume-test");
+    await step(device, "continue-tower-volume-test", "continue", "party-join");
     expect(tower.sent()).toEqual([]);
     expect(host.loadRun().presses.every((press) => !press.action.startsWith("tower-"))).toBe(true);
+  });
+
+  it("plays the volume test only after a winning press, one sound at a time, and logs the answer", async () => {
+    const tower = createMockTower();
+    const slept: number[] = [];
+    const { host } = await start(tower, {
+      sleep: async (ms) => {
+        slept.push(ms);
+      },
+    });
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await step(device, "continue-pick-story-test", "continue", "game-settings");
+    await step(device, "continue-game-settings", "continue", "tower-connect");
+    send(device.socket, "control", { promptId: "tower-connect", action: "tower-connect" });
+    await until(board.inbox, board.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
+      return state?.type === "storyboardState" && state.payload.tower.connection === "connected";
+    });
+    await step(device, "continue-tower-connect", "continue", "tower-volume-test");
+    // Reaching the screen plays nothing.
+    expect(tower.sent().map((item) => item.type)).toEqual(["connect"]);
+
+    send(device.socket, "control", { promptId: "volume-play-0", action: "volume-play" });
+    await until(device.inbox, device.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "deviceState");
+      return state?.type === "deviceState" && state.payload.volumeTest?.phase === "asking";
+    });
+    expect(
+      tower
+        .sent()
+        .filter((item) => item.type === "sound")
+        .map((item) => [item.soundIndex, item.volume]),
+    ).toEqual([
+      [58, 0],
+      [58, 1],
+      [58, 2],
+      [58, 2],
+    ]);
+    // 250 ms after each of the four writes.
+    expect(slept.filter((ms) => ms === 250)).toHaveLength(4);
+    const asking = latest(board.log, "storyboardState");
+    expect(asking).toMatchObject({ payload: { volumeTest: { mode: "tower", phase: "asking" } } });
+
+    // The write-in text is stored, shown on the board's debug state, and not sent to the device.
+    send(device.socket, "control", {
+      promptId: "volume-answer",
+      action: "volume-answer",
+      option: "write-in",
+      note: "Only the middle one rang",
+    });
+    await until(board.inbox, board.log, (messages) => {
+      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
+      return state?.type === "storyboardState" && state.payload.volumeTest?.phase === "answered";
+    });
+    const answered = latest(board.log, "storyboardState");
+    if (answered?.type !== "storyboardState") throw new Error("board");
+    expect(answered.payload.volumeTest?.logged).toMatchObject({
+      answer: "write-in",
+      note: "Only the middle one rang",
+      firmware: "mock",
+    });
+    expect(JSON.stringify(latest(device.log, "deviceState"))).not.toContain("middle one");
+    expect(host.loadRun().stats).toMatchObject([
+      {
+        statId: "tower-volume-test",
+        data: { answer: "write-in", note: "Only the middle one rang", firmware: "mock" },
+      },
+    ]);
+    expect(tower.sent().some((item) => item.type === "command")).toBe(false);
+  });
+
+  it("sends the tower no sound when the volume test is reached with no tower", async () => {
+    const tower = createMockTower();
+    const { host } = await start(tower, { sleep: async () => {} });
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await step(device, "continue-pick-story-test", "continue", "game-settings");
+    await step(device, "continue-game-settings", "continue", "tower-connect");
+    await step(device, "continue-tower-connect", "continue", "tower-volume-test");
+    send(device.socket, "control", { promptId: "volume-play-0", action: "volume-play" });
+    await until(device.inbox, device.log, (messages) =>
+      messages.some((message) => message.type === "error"),
+    );
+    const state = latest(device.log, "deviceState");
+    expect(state).toMatchObject({ payload: { volumeTest: { mode: "room", phase: "idle" } } });
+    expect(tower.sent()).toEqual([]);
   });
 
   it("connects and calibrates only from a winning press, and keeps an unknown battery unavailable", async () => {

@@ -36,3 +36,14 @@ export const mapBattery = (level: unknown): TowerSnapshot["battery"] => {
   }
   return { state: "known", percent };
 };
+
+/**
+ * The firmware revision from a `connection` frame's `device`. A missing or blank revision is
+ * unavailable, never an empty string.
+ */
+export const mapFirmware = (device: unknown): NonNullable<TowerSnapshot["firmware"]> => {
+  if (!device || typeof device !== "object") return { state: "unavailable" };
+  const revision = (device as Record<string, unknown>).firmwareRevision;
+  if (typeof revision !== "string" || revision.trim() === "") return { state: "unavailable" };
+  return { state: "known", version: revision.slice(0, 200) };
+};

@@ -13,6 +13,10 @@ export interface DeviceControls {
   backPromptId: string | null;
   /** A game setting may change: the device is on Game settings with a set prompt. */
   set: boolean;
+  /** Play levels (or Play again) is live on the tower volume test. */
+  volumePlay: boolean;
+  /** The volume answer buttons are live: the test is asking and nothing has been answered. */
+  volumeAnswer: boolean;
   /** The pick options are live on the iPad: the prompt is a pick and nothing has locked. */
   pick: boolean;
   pause: boolean;
@@ -63,6 +67,14 @@ export const deviceControls = (input: {
       input.state.screen === "game-settings" &&
       (input.state.setPromptId ?? null) !== null &&
       !!input.state.gameSettings,
+    volumePlay:
+      input.live &&
+      input.state.screen === "tower-volume-test" &&
+      (input.state.volumePlayPromptId ?? null) !== null,
+    volumeAnswer:
+      input.live &&
+      input.state.screen === "tower-volume-test" &&
+      (input.state.volumeAnswerPromptId ?? null) !== null,
     pick: input.live && promptId.startsWith("pick-") && !locked,
     pause: input.live && input.pausePromptId !== null,
     resume: input.live && promptId.startsWith("resume-") && !locked,

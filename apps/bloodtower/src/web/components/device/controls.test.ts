@@ -51,6 +51,130 @@ describe("device messages", () => {
   });
 });
 
+const volumeState = (
+  phase: "idle" | "levels" | "asking" | "answered",
+  mode: "tower" | "room" = "tower",
+): DeviceState =>
+  deviceStatePayloadSchema.parse({
+    screen: "tower-volume-test",
+    heldHunters: [],
+    views: [],
+    prompt:
+      phase === "levels"
+        ? null
+        : { id: "continue-tower-volume-test", label: "Next: gather the party" },
+    lock: null,
+    won: null,
+    backPromptId: "back-tower-volume-test",
+    volumeTest: {
+      mode,
+      phase,
+      level: phase === "levels" ? 1 : null,
+      runs: phase === "idle" ? 0 : 1,
+      failed: false,
+      answer: phase === "answered" ? "all-same" : null,
+    },
+    volumePlayPromptId:
+      mode === "tower" && (phase === "idle" || phase === "asking") ? "volume-play-0" : null,
+    volumeAnswerPromptId: phase === "asking" ? "volume-answer" : null,
+  });
+
+const volumeHtml = (state: DeviceState) =>
+  renderToStaticMarkup(
+    createElement(DeviceScreen, {
+      live: true,
+      deviceId: "device-1",
+      state,
+      pausePromptId: null,
+      connectLock: null,
+      calibrateLock: null,
+      tower: tower("connected"),
+    }),
+  );
+
+describe("tower volume test on a device", () => {
+  const controls = (state: DeviceState) =>
+    deviceControls({
+      live: true,
+      state,
+      pausePromptId: null,
+      connectLock: null,
+      calibrateLock: null,
+      tower: tower("connected"),
+      deviceId: "device-1",
+    });
+
+  it("offers Play levels, then the question and Play again, and Back beside Continue", () => {
+    expect(controls(volumeState("idle"))).toMatchObject({
+      volumePlay: true,
+      volumeAnswer: false,
+      continue: true,
+      back: true,
+      backPromptId: "back-tower-volume-test",
+    });
+    expect(controls(volumeState("levels"))).toMatchObject({
+      volumePlay: false,
+      volumeAnswer: false,
+      continue: false,
+    });
+    expect(controls(volumeState("asking"))).toMatchObject({ volumePlay: true, volumeAnswer: true });
+    expect(controls(volumeState("answered"))).toMatchObject({
+      volumePlay: false,
+      volumeAnswer: false,
+    });
+    expect(controls({ ...volumeState("idle"), volumePlayPromptId: null }).volumePlay).toBe(false);
+  });
+
+  it("shows text and buttons only, with neutral level and answer words and a write-in field", () => {
+    const idle = volumeHtml(volumeState("idle"));
+    expect(idle).toContain('data-screen="tower-volume-test"');
+    expect(idle).toMatch(/data-action="volume-play"[^>]*>Play levels</);
+    expect(idle).not.toContain("<img");
+    expect(volumeHtml(volumeState("levels"))).toContain("Level 1 is playing.");
+
+    const asking = volumeHtml(volumeState("asking"));
+    expect(asking).toContain("Did the levels sound different?");
+    expect(asking).toContain("All three differ");
+    expect(asking).toContain("Only one level is louder");
+    expect(asking).toContain("All the same");
+    expect(asking).toContain("data-volume-note");
+    expect(asking).toMatch(/data-action="volume-play"[^>]*>Play again</);
+    // The library's tier names are unconfirmed, so no word says which level is quiet or loud.
+    for (const html of [idle, asking, volumeHtml(volumeState("levels"))]) {
+      expect(html.toLowerCase()).not.toMatch(/quiet|quietest|loudest/);
+    }
+    expect(volumeHtml(volumeState("answered"))).toContain("Answered: All the same.");
+  });
+
+  it("with no tower shows only the room-sound note: no Play, no question", () => {
+    const html = volumeHtml(volumeState("idle", "room"));
+    expect(html).toContain('data-volume-mode="room"');
+    expect(html).not.toContain('data-action="volume-play"');
+    expect(html).not.toContain("Did the levels sound different?");
+    expect(html).toMatch(/data-action="continue"/);
+  });
+
+  it("builds an answer press with its option, and the write-in text only for the write-in", () => {
+    const write = controlMessage(
+      "volume-answer",
+      "volume-answer",
+      "write-in",
+      undefined,
+      "Level 1",
+    );
+    expect(write.payload).toEqual({
+      promptId: "volume-answer",
+      action: "volume-answer",
+      option: "write-in",
+      note: "Level 1",
+    });
+    expect(() =>
+      controlMessage("volume-answer", "volume-answer", "all-same", undefined, "x"),
+    ).toThrow();
+    expect(JSON.stringify(write)).not.toContain("capabilityId");
+  });
+});
+
 describe("device controls", () => {
   it("enables Quit only while its prompt is open, even when a step is locked", () => {
     const state = playing();

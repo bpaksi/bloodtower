@@ -4,16 +4,21 @@ import type { TowerPort, TowerSent } from "./types.ts";
 
 export interface MockTower extends TowerPort {
   setBattery: (percent: number | "unavailable") => void;
+  /** `null` is a tower that reports no firmware. The mock reports "mock" until a test says. */
+  setFirmware: (version: string | null) => void;
+  /** The next playSound fails once, as a tower that did not take the command. */
+  failNextSound: () => void;
 }
 
 /**
- * In-memory tower for CI. It records connect and calibrate and never a cue.
+ * In-memory tower for CI. It records connect, calibrate and sounds, and never a light cue.
  * Battery stays unavailable until a test sets a reading. Zero is a reading only when set.
  */
 export const createMockTower = (): MockTower => {
   let snapshot: TowerSnapshot = unavailableTower();
   const sent: TowerSent[] = [];
   let opened = false;
+  let failSound = false;
 
   return {
     snapshot: () => snapshot,
@@ -25,12 +30,31 @@ export const createMockTower = (): MockTower => {
         ...snapshot,
         connection: "connected",
         calibrated: { state: "known", calibrated: false },
+        firmware: { state: "known", version: "mock" },
       };
     },
     calibrate: () => {
       if (snapshot.connection !== "connected") return;
       sent.push({ type: "calibrate" });
       snapshot = { ...snapshot, calibrated: { state: "known", calibrated: true } };
+    },
+    playSound: async (soundIndex, volume) => {
+      if (snapshot.connection !== "connected") return "failed";
+      if (failSound) {
+        failSound = false;
+        return "failed";
+      }
+      sent.push({ type: "sound", soundIndex, volume });
+      return "written";
+    },
+    setFirmware: (version) => {
+      snapshot = {
+        ...snapshot,
+        firmware: version === null ? { state: "unavailable" } : { state: "known", version },
+      };
+    },
+    failNextSound: () => {
+      failSound = true;
     },
     setBattery: (percent) => {
       snapshot = {

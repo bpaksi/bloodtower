@@ -34,6 +34,7 @@ export const playersText = (players: StoryCard["players"]): string | null => {
 export const SCREEN_TITLE: Record<FlowScreen, string> = {
   splash: "Loading",
   "tower-connect": "Tower Connect",
+  "tower-volume-test": "Tower volume test",
   "pick-story": "Pick Story",
   "game-settings": "Game settings",
   "not-playable": "Not playable yet",
@@ -47,7 +48,8 @@ export const SCREEN_TITLE: Record<FlowScreen, string> = {
 /** What the table is waiting for. Shown on the board and as iPad "what happens next". */
 export const SCREEN_NEXT: Record<FlowScreen, string> = {
   splash: "Next: pick a story",
-  "tower-connect": "Next: gather the party",
+  "tower-connect": "Next: tower volume test",
+  "tower-volume-test": "Next: gather the party",
   "pick-story": "Next: game settings",
   "game-settings": "Next: connect the tower",
   "not-playable": "This story is listed, but it cannot be played yet.",

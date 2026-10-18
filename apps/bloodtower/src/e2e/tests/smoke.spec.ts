@@ -41,7 +41,7 @@ const assertTitleLayout = async (page: Page, viewport: { width: number; height: 
   expect(pageOverflow, "page must not overflow horizontally").toBe(true);
 };
 
-test("the title page offers Story board and Hunter paths and health stays connection-only", async ({
+test("the title page offers Story board and Hunter paths and health reports connection and sound only", async ({
   page,
 }, testInfo) => {
   test.setTimeout(120_000);
@@ -66,8 +66,8 @@ test("the title page offers Story board and Hunter paths and health stays connec
   expect(health.status()).toBe(200);
   expect(await health.json()).toEqual({
     protocol: 1,
-    tower: "connection-only",
-    effects: "none",
+    tower: "connection-and-sound",
+    effects: "sound-only",
   });
 
   for (const viewport of titleViewports) {

@@ -21,7 +21,7 @@ R1 is the thin foundation. It loads a story pack, shows a display-only Story boa
 | D7 | Holdings change only from a joined iPad or phone. The Story board cannot send `hold` or `control`. The server rejects those on a storyboard socket with `storyboard-control` (enforced when the hub lands in step 7). Exception (Oct 2026, Bob): the story board may send exactly one message, `keeper-line-ended`, with the moment id and the line index. The server acts on it only when that line is the current `keeperLine` of the Keeper scene; any other report does nothing. The board sends nothing else. | Bob, 2026-10-15 (plan Q7), and Gamewright's PR #21 ruling. |
 | D8 | The shared-screen target id is `storyboard`. `dashboard` is not a target. A private moment's target is `ipad:<hunter>`. | Plan step 2. R-DEV-6. The frozen funeral POC still says `dashboard`; this app does not. |
 | D9 | Main-checkout ports are 4787 (dev) and 4788 (e2e). A worktree's `.wt.json` `ports` replace them. | Plan. They do not collide with 4747/4748 or 4767/4768. |
-| D10 | The bloodtower protocol has no `command` message and no field for raw bytes, a capability id or tower parameters. Connect and calibrate are the control actions `tower-connect` and `tower-calibrate`. The sidecar's own `command{capabilityId, params}` stays inside tower-poc. This app does not speak it in R1. | Tower safety. R1 sends no effects. The protocol freezes in step 1. |
+| D10 | The bloodtower protocol has no `command` message and no field for raw bytes, a capability id or tower parameters. Connect and calibrate are the control actions `tower-connect` and `tower-calibrate`. The sidecar's own `command{capabilityId, params}` stays between this server and tower-poc. The one command the server sends is `sound.play-stateful` (a library sound and a volume tier 0-3) for the tower volume test (shell step 7), after a winning `volume-play` press. No device or board message carries it. | Tower safety. R1 sends no lights; the only tower sound is the volume test. The protocol freezes in step 1. |
 | D11 | A tower reading the host does not have is `unavailable`, a different state from a known value. Battery `0` is a real reading only as `{ state: "known", percent: 0 }`. A stale percent, including a stale `0`, is `unavailable`. Health `effects` is the literal `"none"` (this build sends none), not a count. | Root rule: unknown is never shown as zero. |
 | D12 | The join code is six digits. The rejoin token is 16–128 URL-safe characters. A client message does not carry a device id; the server takes it from the socket. | R-WIZ-10 asks for a short code. The socket is the thing that cannot be spoofed by a payload field. |
 | D13 | Sections R1 does not run (choices, items, tracks, corruption, quest tokens, encounters, dungeons, endings, `by_length`, and the rest listed on `packSchema`) are parsed and kept. They are not executed. Exception for the door pick (D23): `grey-stair.door-choice` options come from `choices.yaml`. Other choice entries stay parsed and not executed. | Plan risk note. Pack schema lives in `pack.ts`. |
@@ -87,7 +87,7 @@ Begin is open only when `unheld` is empty. A paused stage has a pause banner; an
 
 Tower snapshot: `connection` is `unavailable`, `disconnected`, `connecting` or `connected`. Battery and calibration are `{ state: "unavailable" }` or `{ state: "known", ... }`.
 
-Health: `{ protocol: 1, tower: "connection-only", effects: "none" }`.
+Health: `{ protocol: 1, tower: "connection-and-sound", effects: "sound-only" }`.
 
 ## 4. Pack schema
 
@@ -158,8 +158,8 @@ Copied here so the app spec states them. The host wires the port from step 6. A 
 | R-WIZ-11 start gate | 5 | `engine.test.ts`: Begin stays closed until every hunter is held | — |
 | E15 presence | 5 | `engine.test.ts`: `~no-delta` plays when delta is absent, and is absent when delta is present | Board movement is later |
 | R-DEV-1 | 6, 7 | `hub/host.test.ts`: the host does not open the tower until a winning connect. `tower/sidecar.ts` is the client | — |
-| R-DEV-5 | 6, 7 | `tower.test.ts` and `hub/host.test.ts`: a winning connect or calibrate is the only call, and the sources contain no `command` | — |
-| R-ENG-7 | 6 | `tower.test.ts` mock. Health reports no effects | — |
+| R-DEV-5 | 6, 7 | `tower.test.ts` and `hub/host.test.ts`: a winning connect or calibrate is the only call. The sidecar sends one `command`, `sound.play-stateful`, only from the volume test after a winning `volume-play` press (`tower/volumeTest.test.ts`) | — |
+| R-ENG-7 | 6 | `tower.test.ts` mock. Health reports sound-only effects (no lights) | — |
 | R-SES-2 | 6, 7 | `engine.test.ts`, `port.ts` and `hub/host.test.ts`: connect and calibrate run only from a winning press. No reconnect action (D15) | — |
 | R-ENG-16, R-DEV-6, R-WIZ-10 | 7 | `hub/host.test.ts`: six-digit code, join URL, storyboard channel, device channels. `LiveBoard` draws the QR from the live state | — |
 | V2-1 display only | 8 | `boardView.test.ts`: the board markup has no button, input, textarea, select or link | — |
