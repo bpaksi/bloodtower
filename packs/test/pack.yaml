@@ -2,10 +2,26 @@ pack_id: test
 title: Proving ground
 version: 0.1.0
 engine_min: 0.1.0
+tagline: A long-lived proving ground for new ideas.
 tone: A long-lived proving ground for new ideas.
+cover: assets/cover.png
+tower: optional
+settings:
+  - id: length
+    label: Length
+    options:
+      - {id: short, label: Short}
+      - {id: standard, label: Standard}
+      - {id: long, label: Long}
+    default: standard
+  - id: difficulty
+    label: Difficulty
+    options:
+      - {id: standard, label: Standard}
+    default: standard
 structure: one-shot
 players: {min: 1, max: 4}
-lengths: [standard]
+lengths: [short, standard, long]
 difficulties:
   - {id: standard, label: Standard, mods: {}}
 systems: {clock: nights, corruption: false}

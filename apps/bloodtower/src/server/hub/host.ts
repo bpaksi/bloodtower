@@ -94,7 +94,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     throw new Error(`No story pack loaded.\n${issues.join("\n")}`);
   }
   for (const entry of stories) {
-    if (!entry.pack) {
+    // A metadata-only pack (`playable: false`) has no issues and is not an error.
+    if (!entry.pack && entry.issues.length > 0) {
       console.error(
         `Story ${entry.card.id} can't load.\n${formatLoadIssues(entry.issues).join("\n")}`,
       );

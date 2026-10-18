@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, join, sep } from "node:path";
-import type { Asset, Pack } from "bloodtower-protocols";
+import type { Asset } from "bloodtower-protocols";
 import type { PackCameraIndex } from "./camera.ts";
 import { indexPackCamera } from "./camera.ts";
 import type { PackLoadIssue } from "./load.ts";
@@ -170,7 +170,21 @@ export const validateAssetsFolder = (
 
 const expectsImageFile = (type: Asset["type"]) => type === "still" || type === "portrait";
 
-export const indexPackAssets = (packRoot: string, pack: Pack): PackAssetIndex => {
+/** The manifest `cover` file under `<pack>/assets/`, or undefined when it is missing or outside the folder. */
+export const resolveCover = (packRoot: string, cover: string): string | undefined => {
+  let assetsDir: string;
+  try {
+    assetsDir = realpathSync(join(packRoot, PACK_ASSETS_DIR));
+  } catch {
+    return undefined;
+  }
+  return resolveInsideAssets(assetsDir, basename(cover));
+};
+
+export const indexPackAssets = (
+  packRoot: string,
+  pack: { pack_id: string; assets: readonly Asset[]; cover?: string },
+): PackAssetIndex => {
   const assetsDir = join(packRoot, PACK_ASSETS_DIR);
   const warnings: PackLoadIssue[] = [];
   const byId = new Map<string, ResolvedPackAsset>();
@@ -186,6 +200,12 @@ export const indexPackAssets = (packRoot: string, pack: Pack): PackAssetIndex =>
     const entry = { absolute, basename: base };
     byId.set(asset.id, entry);
     byBasename.set(base, absolute);
+  }
+  // The cover is served by its file name, like an asset file. A missing file warns, as an asset does.
+  if (pack.cover) {
+    const cover = resolveCover(packRoot, pack.cover);
+    if (cover) byBasename.set(basename(cover), cover);
+    else warnings.push(warn("pack.yaml", "cover", `No image file for cover ${pack.cover}.`));
   }
   const camera = indexPackCamera(packRoot);
   return {

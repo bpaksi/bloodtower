@@ -3,7 +3,9 @@ import { join, resolve, sep } from "node:path";
 import {
   optionIdSchema,
   type Pack,
+  type PackMetadata,
   packIssues,
+  packMetadataSchema,
   packSchema,
   STORY_ID_MAX,
   type StoryCard,
@@ -58,8 +60,10 @@ export interface PackLoadIssue {
   message: string;
 }
 
+/** A `playable: false` pack carries only its metadata, so it is never a session's story. */
 export type PackLoadResult =
-  | { ok: true; pack: Pack; assets: PackAssetIndex }
+  | { ok: true; playable: true; pack: Pack; assets: PackAssetIndex }
+  | { ok: true; playable: false; pack: PackMetadata; assets: PackAssetIndex }
   | { ok: false; issues: PackLoadIssue[] };
 
 const issue = (file: string, path: string, rule: string, message: string): PackLoadIssue => ({
@@ -151,16 +155,40 @@ export const loadPackDir = (dir: string): PackLoadResult => {
   }
 
   const issues: PackLoadIssue[] = [];
-  let packFile: string | undefined;
   const split = new Map<string, { file: string; value: unknown }>();
   const texts = new Map<string, string>();
+  const assembled: Record<string, unknown> = {};
+  const sources = new Map<string, string>();
+  const sortedNames = names.sort();
+  const packFile = sortedNames.find((name) => MANIFEST_FILES.has(name));
+  const manifestName = packFile ?? "(none)";
 
-  for (const name of names.sort()) {
-    if (name === "README.md") continue;
+  // The manifest is read first: a `playable: false` pack reads only it and assets/.
+  if (packFile) {
+    const read = readPackFile(root, packFile);
+    if (!("ok" in read)) return { ok: false, issues: [read] };
+    texts.set(packFile, readFileSync(join(root, packFile), "utf8"));
+    if (!read.value || typeof read.value !== "object" || Array.isArray(read.value)) {
+      return {
+        ok: false,
+        issues: [issue(packFile, "(file)", "V-1", "The pack manifest is a JSON object.")],
+      };
+    }
+    Object.assign(assembled, read.value);
+  }
+  const metadataOnly = assembled.playable === false;
+
+  for (const name of sortedNames) {
+    if (name === "README.md" || name === packFile) continue;
+    if (MANIFEST_FILES.has(name)) {
+      issues.push(issue(name, "(file)", "V-1", "The pack has two manifest files."));
+      continue;
+    }
     if (name === PACK_ASSETS_DIR) {
       validateAssetsFolder(root, (item) => issues.push(item));
       continue;
     }
+    if (metadataOnly) continue;
     if (name === PACK_CAMERA_DIR) {
       validateCameraFolder(root, (item) => issues.push(item));
       continue;
@@ -168,14 +196,6 @@ export const loadPackDir = (dir: string): PackLoadResult => {
     const dot = name.lastIndexOf(".");
     const stem = dot > 0 ? name.slice(0, dot) : name;
     const ext = dot > 0 ? name.slice(dot) : "";
-    if (stem === "pack" && (ext === ".yaml" || ext === ".yml" || ext === ".json")) {
-      if (packFile) {
-        issues.push(issue(name, "(file)", "V-1", "The pack has two manifest files."));
-        continue;
-      }
-      packFile = name;
-      continue;
-    }
     const field = SPLIT_KEYS[stem];
     if (!field || (ext !== ".yaml" && ext !== ".yml" && ext !== ".json")) {
       issues.push(issue(name, "(file)", "V-1", "This file is not part of the pack."));
@@ -192,23 +212,6 @@ export const loadPackDir = (dir: string): PackLoadResult => {
     issues.push(issue(root, "(file)", "V-1", "The folder has no pack file."));
   }
   if (issues.length > 0) return { ok: false, issues };
-
-  const assembled: Record<string, unknown> = {};
-  const sources = new Map<string, string>();
-  const manifestName = packFile ?? "(none)";
-
-  if (packFile) {
-    const read = readPackFile(root, packFile);
-    if (!("ok" in read)) return { ok: false, issues: [read] };
-    texts.set(packFile, readFileSync(join(root, packFile), "utf8"));
-    if (!read.value || typeof read.value !== "object" || Array.isArray(read.value)) {
-      return {
-        ok: false,
-        issues: [issue(packFile, "(file)", "V-1", "The pack manifest is a JSON object.")],
-      };
-    }
-    Object.assign(assembled, read.value);
-  }
 
   for (const [field, entry] of split) {
     if (Object.hasOwn(assembled, field)) {
@@ -228,23 +231,47 @@ export const loadPackDir = (dir: string): PackLoadResult => {
   }
   if (issues.length > 0) return { ok: false, issues };
 
-  const parsed = packSchema.safeParse(assembled);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      issues: packIssues(parsed.error).map((item) => {
-        const place = locate(item.path, sources, manifestName);
-        const blamed = place.path === "(file)" ? blame(item.message, texts, place.file) : place;
-        return issue(blamed.file, blamed.path, item.rule, item.message);
-      }),
-    };
+  const failed = (error: Parameters<typeof packIssues>[0]): PackLoadResult => ({
+    ok: false,
+    issues: packIssues(error).map((item) => {
+      const place = locate(item.path, sources, manifestName);
+      const blamed = place.path === "(file)" ? blame(item.message, texts, place.file) : place;
+      return issue(blamed.file, blamed.path, item.rule, item.message);
+    }),
+  });
+  if (metadataOnly) {
+    const meta = packMetadataSchema.safeParse(assembled);
+    if (!meta.success) return failed(meta.error);
+    const assets = indexPackAssets(root, {
+      pack_id: meta.data.pack_id,
+      assets: [],
+      cover: meta.data.cover,
+    });
+    return { ok: true, playable: false, pack: meta.data, assets };
   }
+
+  const parsed = packSchema.safeParse(assembled);
+  if (!parsed.success) return failed(parsed.error);
   const assets = indexPackAssets(root, parsed.data);
-  return { ok: true, pack: parsed.data, assets };
+  return { ok: true, playable: true, pack: parsed.data, assets };
 };
 
-/** R1 loads the test pack only. `packsDir` is the packs root, not the test folder itself. */
-export const loadR1Pack = (packsDir: string): PackLoadResult => loadPackDir(join(packsDir, "test"));
+export type PlayableLoadResult =
+  | Extract<PackLoadResult, { playable: true }>
+  | { ok: false; issues: PackLoadIssue[] };
+
+/** R1 loads the test pack only, and it must be playable. `packsDir` is the packs root, not the test folder itself. */
+export const loadR1Pack = (packsDir: string): PlayableLoadResult => {
+  const result = loadPackDir(join(packsDir, "test"));
+  if (!result.ok) return result;
+  if (!result.playable) {
+    return {
+      ok: false,
+      issues: [issue("pack.yaml", "playable", "V-1", "The test pack must be playable.")],
+    };
+  }
+  return result;
+};
 
 /** One door on Pick Story: the card the UIs show, and the pack behind it when it loads. */
 export interface StoryEntry {
@@ -261,6 +288,8 @@ export interface StoryEntry {
  * the lint messages; they stay on the server. A folder with no `pack.*` manifest is work in
  * progress, not a story, and neither is a plain file or a folder whose name is not a valid id.
  * A valid id longer than `STORY_ID_MAX` is a greyed card too: its Choose prompt id would not fit.
+ * A `playable: false` pack is a card with its title and tagline that cannot be chosen; only its
+ * manifest and `assets/` are read.
  */
 export const loadStories = (packsDir: string): StoryEntry[] => {
   let names: string[];
@@ -293,13 +322,27 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
         };
       }
       const loaded = loadPackDir(join(packsDir, id));
+      if (loaded.ok && !loaded.playable) {
+        return {
+          card: {
+            id,
+            title: loaded.pack.title,
+            blurb: loaded.pack.tagline ?? null,
+            players: null,
+            loadable: false,
+          },
+          pack: null,
+          issues: [],
+          assets: loaded.assets,
+        };
+      }
       if (loaded.ok && loaded.pack.nights[0]?.phases[0]) {
         const { pack } = loaded;
         return {
           card: {
             id,
             title: pack.title,
-            blurb: pack.tone ?? null,
+            blurb: pack.tagline ?? pack.tone ?? null,
             players: pack.players,
             loadable: true,
           },
