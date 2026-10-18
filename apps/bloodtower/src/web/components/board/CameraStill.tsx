@@ -2,11 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cameraStillImageStyle } from "../../lib/cameraStillStyle.ts";
-import {
-  type CameraTrack,
-  prefersReducedMotion,
-  STILL_ASPECT_DEFAULT,
-} from "../../lib/cameraTrack.ts";
+import type { CameraTrack } from "../../lib/cameraTrack.ts";
 import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { fetchCameraTrack, packTrackStillUrl, preloadStill } from "../../lib/packCamera.ts";
 
@@ -28,9 +24,7 @@ export function CameraStill({
   const [track, setTrack] = useState<CameraTrack | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [reduced, setReduced] = useState(false);
-  const [containerAspect, setContainerAspect] = useState(STILL_ASPECT_DEFAULT);
   const mountAt = useRef(performance.now());
-  const shellRef = useRef<HTMLDivElement>(null);
 
   const fallbackSrc = packStillImageUrl(assetId, packId);
 
@@ -63,19 +57,6 @@ export function CameraStill({
   }, []);
 
   useEffect(() => {
-    const shell = shellRef.current;
-    if (!shell || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const { width, height } = entry.contentRect;
-      if (width > 0 && height > 0) setContainerAspect(width / height);
-    });
-    observer.observe(shell);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     if (reduced) return;
     let frame = 0;
     const tick = (now: number) => {
@@ -86,12 +67,12 @@ export function CameraStill({
     return () => cancelAnimationFrame(frame);
   }, [reduced]);
 
-  const imageStyle = cameraStillImageStyle(track, seconds, reduced, containerAspect);
+  const imageStyle = cameraStillImageStyle(track, seconds, reduced);
 
   const src = track ? packTrackStillUrl(track.still, packId) : fallbackSrc;
 
   return (
-    <div className="bt-still" data-camera-still="" ref={shellRef}>
+    <div className="bt-still" data-camera-still="">
       {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
       <img
         alt=""

@@ -1,9 +1,4 @@
-import {
-  type CameraTrack,
-  frameAtTime,
-  frameToTransform,
-  STILL_ASPECT_DEFAULT,
-} from "./cameraTrack.ts";
+import { type CameraTrack, frameAtTime, frameToTransform } from "./cameraTrack.ts";
 
 export type CameraStillImageStyle = {
   transform: string;
@@ -15,14 +10,12 @@ export const cameraStillImageStyle = (
   track: CameraTrack | null,
   seconds: number,
   reducedMotion: boolean,
-  containerAspect: number,
-  stillAspect: number = STILL_ASPECT_DEFAULT,
 ): CameraStillImageStyle | undefined => {
   if (!track) return undefined;
   const frame = reducedMotion
     ? frameAtTime(track, Number.POSITIVE_INFINITY)
     : frameAtTime(track, seconds);
   return {
-    transform: frameToTransform(frame, containerAspect, stillAspect),
+    transform: frameToTransform(frame),
   };
 };

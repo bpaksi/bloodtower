@@ -506,6 +506,10 @@
   will-change: transform;
 }
 
+.bt-still img[data-camera-track] {
+  object-fit: contain;
+}
+
 .bt-items {
   display: flex;
   flex-shrink: 0;

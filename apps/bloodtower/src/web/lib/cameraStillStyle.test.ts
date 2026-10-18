@@ -20,15 +20,15 @@ const track: CameraTrack = {
 describe("cameraStillImageStyle", () => {
   it("uses the final cue frame with no transition when reduced motion is on", () => {
     const end = frameAtTime(track, Number.POSITIVE_INFINITY);
-    const style = cameraStillImageStyle(track, 2, true, 1);
+    const style = cameraStillImageStyle(track, 2, true);
     expect(style).toEqual({
-      transform: frameToTransform(end, 1),
+      transform: frameToTransform(end),
     });
   });
 
   it("follows the track clock while motion is allowed", () => {
-    const early = cameraStillImageStyle(track, 1, false, 1);
-    const later = cameraStillImageStyle(track, 6, false, 1);
+    const early = cameraStillImageStyle(track, 1, false);
+    const later = cameraStillImageStyle(track, 6, false);
     expect(early?.transform).not.toBe(later?.transform);
   });
 });

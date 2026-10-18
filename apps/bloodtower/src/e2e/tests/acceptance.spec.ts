@@ -25,6 +25,17 @@ const boardStates = (frames: readonly string[]) =>
     .filter((message) => message.type === "storyboardState")
     .map((message) => message.payload);
 
+/** Story-board camera tracks (desktop project only). */
+const expectCameraTrackMoves = async (board: Page, momentId: string) => {
+  const cameraStill = board.locator(`[data-camera-still] img[data-camera-track="${momentId}"]`);
+  await expect(cameraStill).toBeVisible();
+  const readTransform = () => cameraStill.evaluate((img) => getComputedStyle(img).transform);
+  const atOneSecond = await readTransform();
+  await board.waitForTimeout(2000);
+  const atThreeSeconds = await readTransform();
+  expect(atOneSecond).not.toBe(atThreeSeconds);
+};
+
 test("the test pack's first night, end to end, on one board and two devices", async ({
   browser,
 }, testInfo) => {
@@ -309,19 +320,14 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.locator("main")).not.toContainText("[pause");
       // Camera pan-and-zoom runs only on the Mac story board. Phone/iPad projects drive hunters, not board visuals.
       if (testInfo.project.name === "desktop") {
-        const cameraStill = board.locator(
-          '[data-camera-still] img[data-camera-track="grey-stair.01"]',
-        );
-        await expect(cameraStill).toBeVisible();
-        const readTransform = () => cameraStill.evaluate((img) => getComputedStyle(img).transform);
-        const atOneSecond = await readTransform();
-        await board.waitForTimeout(2000);
-        const atThreeSeconds = await readTransform();
-        expect(atOneSecond).not.toBe(atThreeSeconds);
+        await expectCameraTrackMoves(board, "grey-stair.01");
       }
       await a.button("continue").click();
       await expect(board.getByText(/At the top, a door/)).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");
+      if (testInfo.project.name === "desktop") {
+        await expectCameraTrackMoves(board, "grey-stair.02");
+      }
       await a.button("continue").click();
       await expect(
         board.getByText("Light them if you can. The key is at the bottom. It always is."),
@@ -359,6 +365,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(
         board.getByText("The lamps are lit, or they are not. The stair is quiet."),
       ).toBeVisible();
+      if (testInfo.project.name === "desktop") {
+        await expectCameraTrackMoves(board, "grey-stair.04");
+      }
       await a.button("continue").click();
       await expect(board.getByText("Moment unavailable.")).toBeVisible();
       await expect(a.button("continue")).toBeDisabled();

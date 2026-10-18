@@ -58,9 +58,20 @@ export const coverVisibleFraction = (
   stillAspect: number = STILL_ASPECT_DEFAULT,
 ): CameraFrame => {
   if (containerAspect >= stillAspect) {
-    return { x: 0.5, y: 0.5, w: stillAspect / containerAspect, h: 1 };
+    return { x: 0.5, y: 0.5, w: 1, h: stillAspect / containerAspect };
   }
-  return { x: 0.5, y: 0.5, w: 1, h: containerAspect / stillAspect };
+  return { x: 0.5, y: 0.5, w: containerAspect / stillAspect, h: 1 };
+};
+
+/** Visible still fraction under `object-fit: contain` with no extra transform. */
+export const containVisibleFraction = (
+  containerAspect: number,
+  stillAspect: number = STILL_ASPECT_DEFAULT,
+): CameraFrame => {
+  if (containerAspect >= stillAspect) {
+    return { x: 0.5, y: 0.5, w: 1, h: stillAspect / containerAspect };
+  }
+  return { x: 0.5, y: 0.5, w: containerAspect / stillAspect, h: 1 };
 };
 
 /** Frame at `seconds` on the track clock. Gaps hold the previous cue's `to`. */
@@ -89,19 +100,43 @@ export const frameAtTime = (track: CameraTrack, seconds: number): CameraFrame =>
 };
 
 /**
- * CSS transform for an image with width/height 100% and `object-fit: cover`.
- * Frames are fractions of the still bitmap (1920×1080); container aspect may differ.
+ * CSS transform for a camera still (`object-fit: contain`) filling its well.
+ * Frames are fractions of the still bitmap; crop is container-invariant in still space.
  */
 export const frameToTransform = (
   frame: CameraFrame,
-  containerAspect: number,
-  stillAspect: number = STILL_ASPECT_DEFAULT,
+  _containerAspect: number = STILL_ASPECT_DEFAULT,
+  _stillAspect: number = STILL_ASPECT_DEFAULT,
 ): string => {
-  const cover = coverVisibleFraction(containerAspect, stillAspect);
-  const scale = Math.max(cover.w / frame.w, cover.h / frame.h);
-  const tx = ((0.5 - frame.x) / cover.w) * scale * 100;
-  const ty = ((0.5 - frame.y) / cover.h) * scale * 100;
-  return `translate(${tx}%, ${ty}%) scale(${scale})`;
+  const scaleX = 1 / frame.w;
+  const scaleY = 1 / frame.h;
+  const tx = (0.5 - frame.x) * scaleX * 100;
+  const ty = (0.5 - frame.y) * scaleY * 100;
+  return `translate(${tx}%, ${ty}%) scale(${scaleX}, ${scaleY})`;
+};
+
+const TRANSFORM_RE = /translate\(([-\d.e]+)%, ([-\d.e]+)%\) scale\(([-\d.e]+)(?:, ([-\d.e]+))?\)/;
+
+/** Decodes a {@link frameToTransform} string back into the still-space crop (for tests). */
+export const stillFrameFromTransform = (
+  transform: string,
+  _containerAspect: number = STILL_ASPECT_DEFAULT,
+  _stillAspect: number = STILL_ASPECT_DEFAULT,
+): CameraFrame => {
+  const match = TRANSFORM_RE.exec(transform);
+  if (!match) {
+    throw new Error(`Unrecognized camera transform: ${transform}`);
+  }
+  const tx = Number(match[1]);
+  const ty = Number(match[2]);
+  const scaleX = Number(match[3]);
+  const scaleY = match[4] === undefined ? scaleX : Number(match[4]);
+  return {
+    x: 0.5 - tx / (100 * scaleX),
+    y: 0.5 - ty / (100 * scaleY),
+    w: 1 / scaleX,
+    h: 1 / scaleY,
+  };
 };
 
 const PAUSE_TAG = /\[pause\s+(\d+(?:\.\d+)?)\]/gi;

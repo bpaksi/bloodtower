@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   applyEase,
+  type CameraFrame,
   type CameraTrack,
   coverVisibleFraction,
   estimateSpeechDurationSeconds,
   frameAtTime,
   frameToTransform,
   STILL_ASPECT_DEFAULT,
+  stillFrameFromTransform,
 } from "./cameraTrack.ts";
 
 const track: CameraTrack = {
@@ -44,6 +46,48 @@ const gapTrack: CameraTrack = {
   ],
 };
 
+const expectFrameClose = (actual: CameraFrame, expected: CameraFrame) => {
+  expect(actual.x).toBeCloseTo(expected.x, 5);
+  expect(actual.y).toBeCloseTo(expected.y, 5);
+  expect(actual.w).toBeCloseTo(expected.w, 5);
+  expect(actual.h).toBeCloseTo(expected.h, 5);
+};
+
+describe("coverVisibleFraction", () => {
+  const rs = STILL_ASPECT_DEFAULT;
+
+  it("crops height on a wide container (21:9)", () => {
+    expect(coverVisibleFraction(21 / 9, rs)).toEqual({
+      x: 0.5,
+      y: 0.5,
+      w: 1,
+      h: rs / (21 / 9),
+    });
+  });
+
+  it("crops width on a square container", () => {
+    expect(coverVisibleFraction(1, rs)).toEqual({
+      x: 0.5,
+      y: 0.5,
+      w: 1 / rs,
+      h: 1,
+    });
+  });
+
+  it("crops width on a tall container (9:16)", () => {
+    expect(coverVisibleFraction(9 / 16, rs)).toEqual({
+      x: 0.5,
+      y: 0.5,
+      w: 9 / 16 / rs,
+      h: 1,
+    });
+  });
+
+  it("shows the full still on a 16:9 container", () => {
+    expect(coverVisibleFraction(rs, rs)).toEqual({ x: 0.5, y: 0.5, w: 1, h: 1 });
+  });
+});
+
 describe("cameraTrack", () => {
   it("advances within a single cue over time", () => {
     const atStart = frameToTransform(frameAtTime(track, 0.5), STILL_ASPECT_DEFAULT);
@@ -61,17 +105,37 @@ describe("cameraTrack", () => {
     expect(frameAtTime(gapTrack, 3)).not.toEqual(gapTrack.cues[1]?.from);
   });
 
-  it("maps still-space frames differently for non-16:9 containers", () => {
-    const frame = { x: 0.5, y: 0.63, w: 0.42, h: 0.28 };
-    const square = frameToTransform(frame, 1, STILL_ASPECT_DEFAULT);
-    const wide = frameToTransform(frame, 16 / 9, STILL_ASPECT_DEFAULT);
-    expect(square).not.toBe(wide);
+  it("round-trips a crop on a 16:9 container", () => {
+    const frame = { x: 0.5, y: 0.5, w: 0.5, h: 0.5 };
+    const transform = frameToTransform(frame, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT);
+    expectFrameClose(
+      stillFrameFromTransform(transform, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT),
+      frame,
+    );
   });
 
-  it("uses cover baseline at the default full frame", () => {
-    const cover = coverVisibleFraction(1, STILL_ASPECT_DEFAULT);
-    const identity = frameToTransform(cover, 1, STILL_ASPECT_DEFAULT);
-    expect(identity).toContain("scale(1");
+  it("maps a track rect to the same still-space region across container aspects", () => {
+    const frame = { x: 0.5, y: 0.63, w: 0.42, h: 0.28 };
+    const aspects = [21 / 9, 1, 9 / 16, STILL_ASPECT_DEFAULT];
+    const crops = aspects.map((aspect) =>
+      stillFrameFromTransform(frameToTransform(frame, aspect, STILL_ASPECT_DEFAULT), aspect),
+    );
+    const first = crops[0];
+    expect(first).toBeDefined();
+    if (!first) return;
+    for (let index = 1; index < crops.length; index++) {
+      const next = crops[index];
+      expect(next).toBeDefined();
+      if (!next) return;
+      expectFrameClose(next, first);
+    }
+    expectFrameClose(first, frame);
+  });
+
+  it("uses a neutral transform at the full still frame", () => {
+    const full = { x: 0.5, y: 0.5, w: 1, h: 1 };
+    const identity = frameToTransform(full, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT);
+    expect(identity).toContain("scale(1, 1)");
   });
 
   it("estimates speech duration from words and pause tags", () => {
