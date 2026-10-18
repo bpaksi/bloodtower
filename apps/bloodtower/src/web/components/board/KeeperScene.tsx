@@ -3,7 +3,11 @@
 import { type AvatarManifest, avatarManifestSchema } from "@talking-avatar/formats";
 import { mouthFiles, TalkingAvatar } from "@talking-avatar/player";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { readBoardCaptionsEnabled, writeBoardCaptionsEnabled } from "../../lib/boardCaptions.ts";
+import {
+  readBoardCaptionsEnabled,
+  shouldToggleBoardCaptionsFromKeyboard,
+  writeBoardCaptionsEnabled,
+} from "../../lib/boardCaptions.ts";
 import { KeeperBoardCaption } from "./KeeperBoardCaption.tsx";
 import {
   KEEPER_BASE_URL,
@@ -80,16 +84,7 @@ export function KeeperScene({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "c" && event.key !== "C") return;
-      const target = event.target;
-      if (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement ||
-        (target instanceof HTMLElement && target.isContentEditable)
-      ) {
-        return;
-      }
+      if (!shouldToggleBoardCaptionsFromKeyboard(event)) return;
       event.preventDefault();
       toggleCaptions();
     };
@@ -118,6 +113,7 @@ export function KeeperScene({
         <FallbackCaption lineId={lineId} enabled={captionsEnabled} />
       ) : (
         <KeeperBoardCaption
+          key={lineId}
           speakerName={manifest.name}
           lineId={lineId}
           scriptText={scriptText}

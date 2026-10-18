@@ -23,6 +23,29 @@ export const writeBoardCaptionsEnabled = (enabled: boolean): void => {
   localStorage.setItem(BOARD_CAPTIONS_STORAGE_KEY, enabled ? "1" : "0");
 };
 
+/** True when C should toggle board captions (not Cmd/Ctrl/Alt+C and not from an editable field). */
+export const shouldToggleBoardCaptionsFromKeyboard = (event: {
+  key: string;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  altKey: boolean;
+  target: EventTarget | null;
+}): boolean => {
+  if (event.key !== "c" && event.key !== "C") return false;
+  if (event.ctrlKey || event.metaKey || event.altKey) return false;
+  const target = event.target;
+  if (
+    typeof Element !== "undefined" &&
+    target instanceof Element &&
+    target.closest("input, textarea, select, [contenteditable='true']")
+  ) {
+    return false;
+  }
+  return true;
+};
+
+const vttTimestampToken = (part: string): string => part.trim().split(/\s+/u)[0] ?? "";
+
 /** Same path as the line audio with a `.vtt` extension (sibling file). */
 export const vttPathForAudio = (audioPath: string): string =>
   audioPath.replace(/\.[^./]+$/u, ".vtt");
@@ -69,7 +92,9 @@ export const parseVtt = (body: string): BoardCaptionCue[] => {
     if (timingIndex < 0) continue;
     const timing = lines[timingIndex];
     if (timing === undefined) continue;
-    const [startRaw, endRaw] = timing.split("-->").map((part) => part.trim());
+    const [startPart, endPart] = timing.split("-->").map((part) => part.trim());
+    const startRaw = startPart ? vttTimestampToken(startPart) : "";
+    const endRaw = endPart ? vttTimestampToken(endPart) : "";
     if (!startRaw || !endRaw) continue;
     const text = lines
       .slice(timingIndex + 1)
@@ -93,6 +118,28 @@ export const captionAtTime = (
     if (time >= cue.start && time < cue.end) return cue;
   }
   return undefined;
+};
+
+/**
+ * Caption string for a playback time: active VTT cue, else the last cue that ended (gap hold),
+ * else the full line.
+ */
+export const captionDisplayAtTime = (
+  cues: BoardCaptionCue[],
+  time: number,
+  speakerName: string,
+  fullCaption: string,
+): string => {
+  if (cues.length === 0) return fullCaption;
+  const active = captionAtTime(cues, time);
+  if (active) return formatBoardCaption(speakerName, active.text);
+  let held: BoardCaptionCue | undefined;
+  for (const cue of cues) {
+    if (cue.end <= time) held = cue;
+    else break;
+  }
+  if (held) return formatBoardCaption(speakerName, held.text);
+  return fullCaption;
 };
 
 export const loadVttCues = async (

@@ -3,7 +3,7 @@
 import { type RefObject, useEffect, useState } from "react";
 import {
   type BoardCaptionCue,
-  captionAtTime,
+  captionDisplayAtTime,
   formatBoardCaption,
   loadVttCues,
 } from "../../lib/boardCaptions.ts";
@@ -30,14 +30,13 @@ export function KeeperBoardCaption({
   plateRef: RefObject<HTMLDivElement | null>;
 }) {
   const [cues, setCues] = useState<BoardCaptionCue[]>([]);
-  const [timedText, setTimedText] = useState<string | null>(null);
+  const [visible, setVisible] = useState<string>("");
   const fullCaption = formatBoardCaption(speakerName, scriptText);
 
   useEffect(() => {
-    if (!audioPath) {
-      setCues([]);
-      return;
-    }
+    setCues([]);
+    setVisible(fullCaption);
+    if (!audioPath) return;
     let cancelled = false;
     void loadVttCues(baseUrl, audioPath).then((loaded) => {
       if (!cancelled) setCues(loaded);
@@ -45,20 +44,15 @@ export function KeeperBoardCaption({
     return () => {
       cancelled = true;
     };
-  }, [audioPath, baseUrl]);
+  }, [audioPath, baseUrl, fullCaption]);
 
   useEffect(() => {
-    setTimedText(null);
+    setVisible(fullCaption);
     const audio = plateRef.current?.querySelector("audio");
     if (audio === null || audio === undefined) return;
 
     const sync = () => {
-      if (cues.length > 0) {
-        const active = captionAtTime(cues, audio.currentTime);
-        setTimedText(active ? formatBoardCaption(speakerName, active.text) : null);
-        return;
-      }
-      setTimedText(fullCaption);
+      setVisible(captionDisplayAtTime(cues, audio.currentTime, speakerName, fullCaption));
     };
 
     audio.addEventListener("timeupdate", sync);
@@ -78,11 +72,9 @@ export function KeeperBoardCaption({
 
   if (!enabled) return null;
 
-  const visible = cues.length > 0 ? timedText : fullCaption;
-
   return (
     <p className="bt-caption" data-board-caption="" data-keeper-line={lineId} aria-live="polite">
-      {visible ?? ""}
+      {visible}
     </p>
   );
 }

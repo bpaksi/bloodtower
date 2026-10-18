@@ -2,6 +2,7 @@ import { type StoryboardState, storyboardStatePayloadSchema } from "bloodtower-p
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { KEEPER_LINE_IDS, keeperCaption } from "../components/board/keeperLines.ts";
 import { StoryBoard } from "../components/board/StoryBoard";
 import { holdingText, joinWarning, pauseText, waitingStoryboard } from "./boardView";
 import { joinQrSvg } from "./qr";
@@ -136,27 +137,26 @@ describe("story board", () => {
     expect(html).toContain('data-still="fx.stair"');
   });
 
+  const keeperMomentState = (keeperLine: number) => ({
+    ...state(),
+    keeperLine,
+    moment: {
+      id: "grey-stair.03",
+      kind: "clip" as const,
+      text: null,
+      still: "av.keeper",
+      fallbackAudio: null,
+    },
+  });
+
+  const renderKeeperBoard = (keeperLine: number) =>
+    renderToStaticMarkup(createElement(StoryBoard, { state: keeperMomentState(keeperLine) }));
+
   it("renders the Keeper caption for the current line before the avatar loads", () => {
-    const html = renderToStaticMarkup(
-      createElement(StoryBoard, {
-        state: {
-          ...state(),
-          keeperLine: 0,
-          moment: {
-            id: "grey-stair.03",
-            kind: "clip",
-            text: null,
-            still: "av.keeper",
-            fallbackAudio: null,
-          },
-        },
-      }),
-    );
+    const html = renderKeeperBoard(0);
     expect(html).toContain("The Grey Stair");
     expect(html).toContain("The Keeper");
-    expect(html).toContain(
-      "The Keeper: Light them if you can. The key is at the bottom. It always is.",
-    );
+    expect(html).toContain(`The Keeper: ${keeperCaption(KEEPER_LINE_IDS[0])}`);
     expect(html).toContain('data-board-caption=""');
     expect(html).toContain('data-keeper-line="ts-keeper-001"');
     expect(html).not.toContain("Mind the third step.");
@@ -171,11 +171,26 @@ describe("story board", () => {
     expect(html).not.toContain("Text unavailable.");
     expect(html).not.toContain("ipad:");
     expect(html).toContain('data-caption-toggle=""');
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("Captions on");
     const withoutCaptionToggle = html.replace(
       /<button[^>]*data-caption-toggle=""[^>]*>[\s\S]*?<\/button>/gi,
       "",
     );
     expect(withoutCaptionToggle).not.toMatch(interactive);
+  });
+
+  it("updates Keeper caption data for keeperLine 1 and 2", () => {
+    const line1 = renderKeeperBoard(1);
+    expect(line1).toContain('data-keeper-line="ts-keeper-002"');
+    expect(line1).toContain(`The Keeper: ${keeperCaption(KEEPER_LINE_IDS[1])}`);
+    expect(line1).not.toContain('data-keeper-line="ts-keeper-001"');
+
+    const line2 = renderKeeperBoard(2);
+    expect(line2).toContain('data-keeper-line="ts-keeper-003"');
+    expect(line2).toContain("The Keeper: Go on, then.");
+    expect(line2).toContain("keep the lamp lit until you");
+    expect(line2).not.toContain('data-keeper-line="ts-keeper-002"');
   });
 
   it("shows unavailable when the session has not started", () => {

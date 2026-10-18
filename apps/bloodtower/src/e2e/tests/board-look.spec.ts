@@ -117,25 +117,22 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
     const keeperCaption = board.locator("[data-board-caption]");
     await expect(keeperCaption).toBeVisible();
-    await expect(keeperCaption).toContainText(
+    await expect(keeperCaption).toHaveAttribute("data-keeper-line", "ts-keeper-001");
+    await expect(keeperCaption).toHaveText(
       "The Keeper: Light them if you can. The key is at the bottom. It always is.",
     );
     await expect(board.locator(".bt-board-title h1")).toContainText("The Keeper");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
-    const linePlaying = await board
-      .waitForFunction(
-        () => {
-          const audio = document.querySelector<HTMLAudioElement>("[data-keeper-plate] audio");
-          return audio !== null && !audio.paused && audio.currentTime > 0;
-        },
-        { timeout: 8_000 },
-      )
-      .then(() => true)
-      .catch(() => false);
-    if (linePlaying) {
-      await expect(keeperCaption).toBeVisible();
-      await expect(keeperCaption).not.toBeEmpty();
-    }
+    await board.evaluate(() => {
+      const audio = document.querySelector<HTMLAudioElement>("[data-keeper-plate] audio");
+      if (!audio) throw new Error("Keeper audio element missing");
+      audio.pause();
+      audio.currentTime = 0;
+      audio.dispatchEvent(new Event("timeupdate", { bubbles: true }));
+    });
+    await expect(keeperCaption).toHaveText(
+      "The Keeper: Light them if you can. The key is at the bottom. It always is.",
+    );
     await board.evaluate(() => {
       for (const audio of document.querySelectorAll("audio")) audio.pause();
     });
