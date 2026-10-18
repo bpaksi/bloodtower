@@ -1817,6 +1817,7 @@ describe("claim hunters and setup steps", () => {
     winStep(made.engine, deviceId, "continue-game-settings", "continue");
     if (made.engine.screen() === "tower-connect") {
       winStep(made.engine, deviceId, "continue-tower-connect", "continue");
+      winStep(made.engine, deviceId, "continue-tower-volume-test", "continue");
     }
     holdAll(made.engine, deviceId);
     return { ...made, deviceId };
@@ -1989,11 +1990,14 @@ describe("claim hunters and setup steps", () => {
     }
   });
 
-  it("Back from Claim Hunters returns to Connect Tower, keeps every claim and clears the tower item", () => {
+  it("Back from Claim Hunters returns to the tower volume test, and Back again to Connect Tower, clearing the tower item", () => {
     const { opened, engine, deviceId } = atClaim();
     try {
       expect(board(engine).summary?.tower).toBe("without");
       winStep(engine, deviceId, "back-party-join", "back");
+      expect(engine.screen()).toBe("tower-volume-test");
+      expect(board(engine).summary?.tower).toBe("without");
+      winStep(engine, deviceId, "back-tower-volume-test", "back");
       expect(engine.screen()).toBe("tower-connect");
       expect(board(engine).summary?.tower).toBeNull();
       expect(board(engine).gate).toEqual({ canBegin: true, unheld: [] });
@@ -2054,6 +2058,7 @@ describe("claim hunters and setup steps", () => {
       winStep(engine, deviceId, "continue-game-settings", "continue");
       expect(board(engine).summary?.tower).toBeNull();
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(board(engine).summary?.tower).toBe("connected");
 
       engine.hold(deviceId, "alpha", "take");
