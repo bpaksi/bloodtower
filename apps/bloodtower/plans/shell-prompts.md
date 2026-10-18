@@ -11,7 +11,7 @@ Visual target: `research/game-design/mockups/2026-10-17/v2-mac.png`, `v2-ipad.pn
 |---|---|---|---|---|---|
 | 1 | `feat/shell-01-vellmoor-stub` | none | 8 | merged | #80 |
 | 2 | `feat/shell-02-landing-carousel` | 1 | 6 | merged | #82 |
-| 3 | `feat/shell-03-game-settings` | 2 | none | in review | |
+| 3 | `feat/shell-03-game-settings` | 2 | none | in review | #84 |
 | 4 | `feat/shell-04-connect-tower` | 3 | none | todo | |
 | 5 | `feat/shell-05-claim-and-setup` | 4 | 7 | todo | |
 | 6 | `feat/shell-06-sound` | 1 | 2 | merged | #83 |
