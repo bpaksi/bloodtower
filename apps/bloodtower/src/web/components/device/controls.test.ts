@@ -117,6 +117,123 @@ describe("device controls", () => {
     expect(html).toMatch(/data-action="back"[^>]*>Back</);
   });
 
+  it("shows Game settings as one button group per setting, with Continue and Back, and no image", () => {
+    const settings = (overrides: Partial<DeviceState> = {}): DeviceState =>
+      deviceStatePayloadSchema.parse({
+        screen: "game-settings",
+        heldHunters: [],
+        views: [],
+        prompt: { id: "continue-game-settings", label: "Continue" },
+        lock: null,
+        won: null,
+        stories: {
+          cards: [
+            {
+              id: "test",
+              title: "Proving ground",
+              blurb: null,
+              tagline: null,
+              cover: "/packs/test/assets/cover.png",
+              players: { min: 1, max: 4 },
+              playable: true,
+              loadable: true,
+            },
+          ],
+          focus: "test",
+          current: "test",
+        },
+        gameSettings: {
+          story: "test",
+          settings: [
+            {
+              id: "length",
+              label: "Length",
+              options: [
+                { id: "short", label: "Short" },
+                { id: "standard", label: "Standard" },
+                { id: "long", label: "Long" },
+              ],
+            },
+            {
+              id: "difficulty",
+              label: "Difficulty",
+              options: [{ id: "standard", label: "Standard" }],
+            },
+          ],
+          chosen: { length: "long", difficulty: "standard" },
+        },
+        setPromptId: "set-3",
+        backPromptId: "back-game-settings",
+        backLock: null,
+        ...overrides,
+      });
+    const controls = (state: DeviceState) =>
+      deviceControls({
+        live: true,
+        state,
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+        deviceId: "device-1",
+      });
+    const open = controls(settings());
+    expect(open).toMatchObject({ set: true, continue: true, back: true });
+    expect(open.backPromptId).toBe("back-game-settings");
+    // A Continue lock leaves Back alone, and a Back lock leaves Continue alone.
+    const continued = controls(
+      settings({
+        lock: {
+          promptId: "continue-game-settings",
+          action: "continue",
+          winnerDeviceId: "device-2",
+        },
+        won: false,
+      }),
+    );
+    expect(continued).toMatchObject({ continue: false, back: true });
+    const backed = controls(
+      settings({
+        backLock: { promptId: "back-game-settings", action: "back", winnerDeviceId: "device-2" },
+      }),
+    );
+    expect(backed).toMatchObject({ continue: true, back: false });
+    expect(controls(settings({ setPromptId: null })).set).toBe(false);
+
+    const html = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        live: true,
+        deviceId: "device-1",
+        state: settings(),
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+      }),
+    );
+    expect(html).toContain('data-screen="game-settings"');
+    expect(html).toContain("Game settings");
+    expect(html).toContain("Proving ground");
+    expect(html.match(/data-action="set"/g)).toHaveLength(4);
+    expect(html).toMatch(/data-option="long" aria-pressed="true"[^>]*>Long</);
+    expect(html).toMatch(/data-option="short" aria-pressed="false"[^>]*>Short</);
+    expect(html).toMatch(/data-action="continue"[^>]*>Continue</);
+    expect(html).not.toMatch(/data-action="back"[^>]*hidden/);
+    // Devices show no images (R3-UI-51): no cover on the device.
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("cover.png");
+  });
+
+  it("builds a set press with its setting and option and nothing else", () => {
+    expect(controlMessage("set-0", "set", "long", "length").payload).toEqual({
+      promptId: "set-0",
+      action: "set",
+      option: "long",
+      setting: "length",
+    });
+    expect(() => controlMessage("set-0", "set", "long")).toThrow();
+  });
+
   it("enables Begin only when that prompt is open, and locks a losing press", () => {
     const begin = deviceStatePayloadSchema.parse({
       screen: "begin",

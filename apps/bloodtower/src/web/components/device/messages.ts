@@ -8,10 +8,23 @@ export const holdMessage = (hunter: string, action: "take" | "release") =>
     payload: { hunter, action },
   });
 
-/** A control press. The payload has a prompt and an action, never a tower command. */
-export const controlMessage = (promptId: string, action: ControlAction, option?: string) =>
+/**
+ * A control press. The payload has a prompt and an action, never a tower command. A pick adds
+ * its option; a set adds its setting and option.
+ */
+export const controlMessage = (
+  promptId: string,
+  action: ControlAction,
+  option?: string,
+  setting?: string,
+) =>
   controlMessageSchema.parse({
     v: 1,
     type: "control",
-    payload: option === undefined ? { promptId, action } : { promptId, action, option },
+    payload: {
+      promptId,
+      action,
+      ...(option === undefined ? {} : { option }),
+      ...(setting === undefined ? {} : { setting }),
+    },
   });

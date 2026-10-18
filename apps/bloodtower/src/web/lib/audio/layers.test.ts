@@ -1,7 +1,13 @@
 import type { StoryboardState } from "bloodtower-protocols";
 import { KEEPER_MOMENT_ID } from "bloodtower-protocols";
 import { describe, expect, it } from "vitest";
-import { isBeforePickGame, isGameChosen, isVisualMoment, pickLayers } from "./layers.ts";
+import {
+  audioPackId,
+  isBeforePickGame,
+  isGameChosen,
+  isVisualMoment,
+  pickLayers,
+} from "./layers.ts";
 import { moodFile, SIGNATURE } from "./tracks.ts";
 
 const base = { packId: "test", visual: false } as const;
@@ -26,7 +32,7 @@ describe("pickLayers (stage to file)", () => {
   });
 
   it("crossfades to the pack's start-up mood once a game is chosen (layer 2)", () => {
-    for (const screen of ["party-join", "begin"] as const) {
+    for (const screen of ["game-settings", "party-join", "begin"] as const) {
       expect(pickLayers({ ...base, screen })).toEqual({
         ambient: moodFile("test", "startup"),
         music: null,
@@ -86,8 +92,25 @@ describe("pickLayers (stage to file)", () => {
     });
   });
 
-  it("detects the game-chosen moment only when leaving Pick Game", () => {
-    expect(isGameChosen("pick-story", "party-join")).toBe(true);
+  it("keeps the signature bed on Game settings for a pack with no moods", () => {
+    expect(pickLayers({ ...base, packId: "dracula", screen: "game-settings" })).toEqual({
+      ambient: SIGNATURE.bed,
+      music: null,
+    });
+  });
+
+  it("takes the moods from the chosen story from Game settings on, else the bound pack", () => {
+    const state = (gameSettings: StoryboardState["gameSettings"]) =>
+      ({ packId: "test", gameSettings }) as StoryboardState;
+    expect(audioPackId(state(null))).toBe("test");
+    expect(audioPackId(state({ story: "dracula", settings: [], chosen: {} }))).toBe("dracula");
+    expect(audioPackId({ packId: undefined } as StoryboardState)).toBeNull();
+  });
+
+  it("detects the game-chosen moment only when leaving Pick Game for Game settings", () => {
+    expect(isGameChosen("pick-story", "game-settings")).toBe(true);
+    expect(isGameChosen("game-settings", "party-join")).toBe(false);
+    expect(isGameChosen("game-settings", "pick-story")).toBe(false);
     expect(isGameChosen("pick-story", "pick-story")).toBe(false);
     expect(isGameChosen("pick-story", "not-playable")).toBe(false);
     expect(isGameChosen("not-playable", "pick-story")).toBe(false);

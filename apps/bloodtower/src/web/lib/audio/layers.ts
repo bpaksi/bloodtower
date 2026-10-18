@@ -18,7 +18,10 @@ export interface Layers {
 
 export interface LayerInput {
   screen: FlowScreen;
-  /** The pack the session is bound to. */
+  /**
+   * The pack whose moods play: the chosen story from Game settings on (see {@link audioPackId}),
+   * otherwise the pack the session is bound to.
+   */
   packId: string | null;
   /** Night 1 is the only night in the test pack. Night 2 is picked when a pack has it. */
   night?: 1 | 2;
@@ -55,7 +58,7 @@ export const pickLayers = (input: LayerInput): Layers => {
     };
   }
   // The landing, the Sound dialog, Pick Game and Not playable yet all play the signature bed
-  // (layer 1). Not playable yet binds no pack, so no game has been chosen.
+  // (layer 1). Not playable yet binds no pack, so no game plays its mood.
   if (
     isBeforePickGame(input.screen) ||
     input.screen === "pick-story" ||
@@ -71,8 +74,15 @@ export const pickLayers = (input: LayerInput): Layers => {
 };
 
 /**
- * True on the one transition that means a game was chosen: Pick Game to the next screen.
- * Pick Game to Not playable yet is not a choice; the pack stays unbound.
+ * The pack the board's moods come from. From Game settings on it is the chosen story, which a
+ * `playable: false` pack can be without being bound; with no moods it falls back to the signature.
+ */
+export const audioPackId = (state: StoryboardState): string | null =>
+  state.gameSettings?.story ?? state.packId ?? null;
+
+/**
+ * True on the one transition that means a game was chosen: Pick Game to Game settings.
+ * Back to Pick Game is not a choice.
  */
 export const isGameChosen = (from: FlowScreen | null, to: FlowScreen): boolean =>
-  from === "pick-story" && to !== "pick-story" && to !== "not-playable";
+  from === "pick-story" && to === "game-settings";

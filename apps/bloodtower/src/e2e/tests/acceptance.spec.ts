@@ -180,6 +180,22 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await a.button("continue").click();
       await expect(a.button("continue")).toHaveText("Choose Proving ground");
       await a.button("continue").click();
+      // Game settings (R3-UI-22): the pack's settings, each at its default, changed from an iPad.
+      await expect(pageA.getByRole("heading", { name: "Game settings" })).toBeVisible();
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "game-settings");
+      const length = board.locator('[data-setting="length"] [data-setting-value]');
+      await expect(length).toHaveText("Standard");
+      await expect(board.locator('[data-setting="difficulty"] [data-setting-value]')).toHaveText(
+        "Standard",
+      );
+      await pageB.locator('[data-setting="length"] button[data-option="short"]').click();
+      await expect(length).toHaveText("Short");
+      await expect(
+        pageA.locator('[data-setting="length"] button[data-option="short"]'),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(a.button("back")).toBeVisible();
+      await expect(a.button("continue")).toHaveText("Continue");
+      await a.button("continue").click();
       await expect(pageA.getByRole("heading", { name: "Party Join" })).toBeVisible();
       await a.hold("alpha").click();
       await expect(a.hold("alpha")).toHaveAttribute("data-action", "release");
@@ -414,8 +430,21 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(won("continue-pick-story-test")).toMatchObject({
         winner: true,
         screen: "pick-story",
+        nextScreen: "game-settings",
+      });
+      expect(won("set-0")).toMatchObject({
+        winner: true,
+        action: "set",
+        screen: "game-settings",
+        nextScreen: null,
+      });
+      expect(won("continue-game-settings")).toMatchObject({
+        winner: true,
+        screen: "game-settings",
         nextScreen: "party-join",
       });
+      // The settings locked at Begin, and the chosen length is in the timing log.
+      expect(subjects("setting")).toEqual(["length:short", "difficulty:standard"]);
       expect(won("continue-party-join")).toMatchObject({
         winner: true,
         screen: "party-join",
@@ -429,6 +458,8 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "tower-calibrate:false",
         "continue-tower-connect:true",
         "continue-pick-story-test:true",
+        "set-0:true",
+        "continue-game-settings:true",
         "continue-party-join:true",
         "begin:true",
         "continue-0:true",

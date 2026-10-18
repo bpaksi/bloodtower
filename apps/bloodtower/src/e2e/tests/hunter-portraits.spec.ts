@@ -56,6 +56,8 @@ for (const size of SIZES) {
       await pad.goto(`${baseURL}/join?code=${host.joinCode}`);
       await pad.locator('button[data-action="play-without-tower"]').click();
       await pad.locator('button[data-action="continue"]').click();
+      await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
+      await pad.locator('button[data-action="continue"]').click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(board.locator("main")).toHaveAttribute("data-screen", "party-join");
 
@@ -151,6 +153,8 @@ test("party join falls back to the initial when a portrait fails to load", async
     await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
     await pad.goto(`${baseURL}/join?code=${host.joinCode}`);
     await pad.locator('button[data-action="play-without-tower"]').click();
+    await pad.locator('button[data-action="continue"]').click();
+    await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await pad.locator('button[data-action="continue"]').click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "party-join");

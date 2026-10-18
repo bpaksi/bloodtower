@@ -195,7 +195,8 @@ const step = async (
 /** The three steps before play, then Begin. Any joined iPad may send each one. */
 const walkToPlay = async (client: Client) => {
   await step(client, "continue-tower-connect", "continue", "pick-story");
-  await step(client, "continue-pick-story-test", "continue", "party-join");
+  await step(client, "continue-pick-story-test", "continue", "game-settings");
+  await step(client, "continue-game-settings", "continue", "party-join");
   await step(client, "continue-party-join", "continue", "begin");
   await step(client, "begin", "begin", "play");
 };
@@ -758,7 +759,8 @@ describe("session hub", () => {
     send(device.socket, "focus-story", { story: "test" });
     await waitFor(boardStories, (stories) => stories?.focus === "test");
     expect(boardStories()?.current).toBe("second");
-    await step(device, "continue-pick-story-test", "continue", "party-join");
+    await step(device, "continue-pick-story-test", "continue", "game-settings");
+    await step(device, "continue-game-settings", "continue", "party-join");
     await waitFor(boardStories, (stories) => stories?.current === "test");
     const deviceState = latest(device.log, "deviceState");
     if (deviceState?.type !== "deviceState") throw new Error("device");

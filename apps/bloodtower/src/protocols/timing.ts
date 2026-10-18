@@ -6,6 +6,8 @@ import { deviceIdSchema, hunterIdSchema, utcTimestampSchema } from "./devices.ts
  * Monotonic time is milliseconds from session start. Wall time is UTC, for display.
  * An open row has a null end. Unknown is null, never zero.
  * Pauses are excluded from active time.
+ * `setting` is Bloodtower's own kind, not PRD-41: one closed mark per game setting chosen,
+ * written at Begin when the settings lock (R-WIZ-12). The subject is `<setting>:<option>`.
  */
 
 export const TIMING_KINDS = [
@@ -16,6 +18,7 @@ export const TIMING_KINDS = [
   "battle-screen",
   "cue",
   "pause",
+  "setting",
 ] as const;
 export const timingKindSchema = z.enum(TIMING_KINDS);
 export type TimingKind = z.infer<typeof timingKindSchema>;

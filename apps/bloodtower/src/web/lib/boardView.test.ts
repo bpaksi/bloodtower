@@ -224,6 +224,70 @@ describe("story board", () => {
     ).toBe("device-2");
   });
 
+  it("lists each game setting with its options and the chosen value, with no controls", () => {
+    const settings = storyboardStatePayloadSchema.parse({
+      ...state(),
+      screen: "game-settings",
+      stage: "lobby",
+      pause: null,
+      prompt: { id: "continue-game-settings", label: "Continue" },
+      moment: null,
+      stories: {
+        cards: [
+          {
+            id: "test",
+            title: "Proving ground",
+            blurb: null,
+            tagline: null,
+            cover: "/packs/test/assets/cover.png",
+            players: { min: 1, max: 4 },
+            playable: true,
+            loadable: true,
+          },
+        ],
+        focus: "test",
+        current: "test",
+      },
+      gameSettings: {
+        story: "test",
+        settings: [
+          {
+            id: "length",
+            label: "Length",
+            options: [
+              { id: "short", label: "Short" },
+              { id: "standard", label: "Standard" },
+              { id: "long", label: "Long" },
+            ],
+          },
+          {
+            id: "difficulty",
+            label: "Difficulty",
+            options: [{ id: "standard", label: "Standard" }],
+          },
+        ],
+        chosen: { length: "long", difficulty: "standard" },
+      },
+    });
+    const html = renderToStaticMarkup(createElement(StoryBoard, { state: settings }));
+    expect(html).toContain('data-screen="game-settings"');
+    expect(html).toContain("Game settings");
+    expect(html).toContain("Proving ground");
+    expect(html).toMatch(/data-setting="length".*Length.*data-setting-value="">Long</);
+    expect(html).toMatch(/data-option="long" data-chosen="true"/);
+    expect(html).toContain('data-setting="difficulty"');
+    expect(html).not.toMatch(interactive);
+    const none = renderToStaticMarkup(
+      createElement(StoryBoard, {
+        state: storyboardStatePayloadSchema.parse({
+          ...settings,
+          gameSettings: { story: "test", settings: [], chosen: {} },
+        }),
+      }),
+    );
+    expect(none).toContain("This story has no settings.");
+  });
+
   it("shows the highlighted door on pick-story and the LAN join URL on party-join", () => {
     const door = (id: string, title: string, loadable = true) => ({
       id,

@@ -4,6 +4,7 @@ import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "blo
 import { displayCaption } from "../../lib/caption.ts";
 import { portraitSrc } from "../../lib/portrait.ts";
 import {
+  chosenStory,
   focusedStory,
   neighborStory,
   playersText,
@@ -38,7 +39,7 @@ export function DeviceScreen({
   connectLock: ControlLock | null;
   calibrateLock: ControlLock | null;
   tower: TowerSnapshot;
-  onControl?: (promptId: string, action: ControlAction, option?: string) => void;
+  onControl?: (promptId: string, action: ControlAction, option?: string, setting?: string) => void;
   onHold?: (hunter: string, action: "take" | "release") => void;
   onFocusStory?: (story: string) => void;
 }) {
@@ -63,6 +64,7 @@ export function DeviceScreen({
   const primaryContinue =
     controls.continue &&
     (state.screen === "pick-story" ||
+      state.screen === "game-settings" ||
       state.screen === "party-join" ||
       (state.screen === "play" && !controls.resume) ||
       (state.screen === "tower-connect" && ready));
@@ -108,6 +110,18 @@ export function DeviceScreen({
       ) : null}
       {state.screen === "pick-story" ? (
         <PickStoryDevice stories={state.stories} live={live} onFocusStory={onFocusStory} />
+      ) : null}
+      {state.screen === "game-settings" ? (
+        <GameSettingsDevice
+          stories={state.stories}
+          settings={state.gameSettings ?? null}
+          enabled={controls.set}
+          onSet={(setting, option) => {
+            if (controls.set && state.setPromptId) {
+              onControl?.(state.setPromptId, "set", option, setting);
+            }
+          }}
+        />
       ) : null}
       {state.screen === "party-join" ? (
         <PartyJoinDevice
@@ -180,9 +194,9 @@ export function DeviceScreen({
           type="button"
           className="bt-secondary"
           data-action="back"
-          hidden={state.screen !== "not-playable"}
+          hidden={state.screen !== "not-playable" && state.screen !== "game-settings"}
           disabled={!controls.back}
-          onClick={() => press(state.prompt?.id ?? null, "back", controls.back)}
+          onClick={() => press(controls.backPromptId, "back", controls.back)}
         >
           Back
         </button>
@@ -315,6 +329,56 @@ const PickStoryDevice = ({
           </button>
         </div>
       ) : null}
+    </section>
+  );
+};
+
+/**
+ * Game settings (R3-UI-22): one group of large buttons per setting, one button per option.
+ * Text and buttons only: no cover on the device (R3-UI-51). Each tap is a `set` press.
+ */
+const GameSettingsDevice = ({
+  stories,
+  settings,
+  enabled,
+  onSet,
+}: {
+  stories: DeviceState["stories"];
+  settings: NonNullable<DeviceState["gameSettings"]> | null;
+  enabled: boolean;
+  onSet: (setting: string, option: string) => void;
+}) => {
+  const story = chosenStory(stories, settings);
+  return (
+    <section className="flex flex-col gap-4" data-game-settings={settings?.story ?? ""}>
+      <h2 className="text-3xl">{story ? story.title : "Story unavailable."}</h2>
+      {!settings || settings.settings.length === 0 ? (
+        <p className="text-xl">This story has no settings.</p>
+      ) : null}
+      {settings?.settings.map((setting) => (
+        <fieldset key={setting.id} className="flex flex-col gap-2" data-setting={setting.id}>
+          <legend className="bt-kicker">{setting.label}</legend>
+          <div className="flex flex-wrap gap-3">
+            {setting.options.map((option) => {
+              const chosen = settings.chosen[setting.id] === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={chosen ? "bt-primary" : "bt-secondary"}
+                  data-action="set"
+                  data-option={option.id}
+                  aria-pressed={chosen}
+                  disabled={!enabled}
+                  onClick={() => onSet(setting.id, option.id)}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      ))}
     </section>
   );
 };

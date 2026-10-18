@@ -3,8 +3,15 @@ import type { ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protoco
 export interface DeviceControls {
   begin: boolean;
   continue: boolean;
-  /** Back on a start-up screen (R3-UI-37). Only the prompt named `back-…` enables it. */
+  /**
+   * Back on a start-up screen (R3-UI-37). Only a prompt named `back-…` enables it: the step
+   * prompt on Not playable yet, or `backPromptId` beside Continue on Game settings.
+   */
   back: boolean;
+  /** The id Back is pressed under, or null when this screen has no Back. */
+  backPromptId: string | null;
+  /** A game setting may change: the device is on Game settings with a set prompt. */
+  set: boolean;
   /** The pick options are live on the iPad: the prompt is a pick and nothing has locked. */
   pick: boolean;
   pause: boolean;
@@ -40,10 +47,21 @@ export const deviceControls = (input: {
 }): DeviceControls => {
   const promptId = input.state.prompt?.id ?? "";
   const locked = input.state.lock !== null;
+  // Game settings names its own Back beside Continue; Not playable yet uses the step prompt.
+  const ownBack = input.state.backPromptId ?? null;
+  const stepBack = promptId.startsWith("back-") ? promptId : null;
+  const backPromptId = ownBack?.startsWith("back-") ? ownBack : stepBack;
+  const backLocked = ownBack ? (input.state.backLock ?? null) !== null : locked;
   return {
     begin: input.live && promptId === "begin" && !locked,
     continue: input.live && promptId.startsWith("continue-") && !locked,
-    back: input.live && promptId.startsWith("back-") && !locked,
+    back: input.live && backPromptId !== null && !backLocked,
+    backPromptId,
+    set:
+      input.live &&
+      input.state.screen === "game-settings" &&
+      (input.state.setPromptId ?? null) !== null &&
+      !!input.state.gameSettings,
     pick: input.live && promptId.startsWith("pick-") && !locked,
     pause: input.live && input.pausePromptId !== null,
     resume: input.live && promptId.startsWith("resume-") && !locked,

@@ -95,7 +95,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await shot(pad, "device-pick-story");
       await shot(board, "board-pick-story");
 
-      await test.step("the carousel lists both packs; Vellmoor stops at Not playable yet", async () => {
+      await test.step("the carousel lists both packs; Vellmoor stops at Not playable yet after Game settings", async () => {
         // Two cards: the focus is Proving ground and the other pack peeks on the right.
         await expect(board.locator('[data-story-peek="dracula"]')).toBeVisible();
         await expect(
@@ -114,6 +114,23 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
         ).toBeVisible();
         await expect(d.button("continue")).toHaveText("Choose The Count of Vellmoor");
         await d.button("continue").click();
+        // Game settings for Vellmoor: only its length, from its manifest. No image on the device.
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
+        await expect(pad.getByRole("heading", { name: "Game settings" })).toBeVisible();
+        await expect(board.locator("main")).toHaveAttribute("data-screen", "game-settings");
+        await expect(board.locator("[data-setting]")).toHaveCount(1);
+        await expect(board.locator('[data-setting="length"] [data-setting-value]')).toHaveText(
+          "Standard",
+        );
+        await expect(pad.locator('[data-setting="length"] button[data-action="set"]')).toHaveText([
+          "Short",
+          "Standard",
+          "Long",
+        ]);
+        await expect(pad.locator("img")).toHaveCount(0);
+        await shot(pad, "device-game-settings-vellmoor");
+        await shot(board, "board-game-settings-vellmoor");
+        await d.button("continue").click();
         await expect(pad.locator("main")).toHaveAttribute("data-screen", "not-playable");
         await expect(pad.getByRole("heading", { name: "Not playable yet" })).toBeVisible();
         await expect(board.locator("main")).toHaveAttribute("data-screen", "not-playable");
@@ -121,13 +138,17 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
         await shot(pad, "device-not-playable");
         await shot(board, "board-not-playable");
 
+        // Back from Not playable yet returns to Game settings; Back again returns to the doors.
+        await d.button("back").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
+        await expect(d.button("back")).toBeEnabled();
         await d.button("back").click();
         await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
 
         // Back opens a new visit: the same story can be chosen again, and Back works again.
         await expect(d.button("continue")).toBeEnabled();
         await d.button("continue").click();
-        await expect(pad.locator("main")).toHaveAttribute("data-screen", "not-playable");
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
         await expect(d.button("back")).toBeEnabled();
         await d.button("back").click();
         await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
@@ -137,6 +158,11 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
         ).toBeVisible();
       });
 
+      await d.button("continue").click();
+      await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
+      await expect(board.locator("[data-setting]")).toHaveCount(2);
+      await shot(pad, "device-game-settings");
+      await shot(board, "board-game-settings");
       await d.button("continue").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(pad.getByRole("heading", { name: "Party Join" })).toBeVisible();

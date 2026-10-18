@@ -21,7 +21,7 @@ The Mac runs this host. The Story board is a display-only page at `/board`. iPad
 | `src/e2e/` | Playwright: phone and iPad on WebKit, desktop on Chromium |
 | `data/` | SQLite files in the main checkout (gitignored). A worktree uses the `dataDir` in `.wt.json`. Created when the host starts. |
 | `../../packs/test/` | The only pack R1 loads. A proving ground: four hunters, one night, one set piece. Not a Dracula pack. |
-| `../../packs/dracula/` | "The Count of Vellmoor": metadata only (`playable: false`). Listed on Pick Game as a card that can be chosen; choosing it stops at "Not playable yet" and binds nothing. Its other files are not read. |
+| `../../packs/dracula/` | "The Count of Vellmoor": metadata only (`playable: false`). Listed on Pick Game as a card that can be chosen; choosing it shows Game settings (length only), then stops at "Not playable yet" and binds nothing. Its other files are not read. |
 
 ```bash
 pnpm --dir apps/bloodtower pack:lint

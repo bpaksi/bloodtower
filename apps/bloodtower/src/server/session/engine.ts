@@ -5,11 +5,15 @@ import {
   type DeviceState,
   deviceStatePayloadSchema,
   type FlowScreen,
+  GAME_SETTINGS_BACK_ID,
+  GAME_SETTINGS_CONTINUE_ID,
+  type GameSettings,
   KEEPER_LINE_COUNT,
   KEEPER_MOMENT_ID,
   type Pack,
   type PauseCause,
   PICK_STORY_PROMPT_PREFIX,
+  SET_PROMPT_PREFIX,
   type Stories,
   type StoryboardState,
   type StoryCard,
@@ -57,12 +61,16 @@ export interface SessionEngine {
   rejoin: (token: string) => { ok: true; deviceId: string; held: string[] } | Fail;
   disconnect: (deviceId: string) => void;
   hold: (deviceId: string, hunter: string, action: "take" | "release") => { ok: true } | Fail;
-  /** `option` is required for a `pick` and refused for any other action. */
+  /**
+   * `option` is required for a `pick` or a `set` and refused for any other action. `setting` is
+   * required for a `set` and refused for any other action.
+   */
   press: (
     deviceId: string,
     promptId: string,
     action: ControlAction,
     option?: string,
+    setting?: string,
   ) => PressOk | Fail;
   pressAll: (presses: readonly (PressInput & { deviceId: string })[]) => Array<PressOk | Fail>;
   /**
@@ -73,6 +81,11 @@ export interface SessionEngine {
   keeperLineEnded: (momentId: string, line: number) => boolean;
   /** The option a pick moment was resolved with, or null if it has not been picked. */
   pickedOption: (momentId: string) => string | null;
+  /**
+   * The chosen story's game settings, setting id to option id, or null before a story is chosen.
+   * They change only on Game settings, so they are locked once Begin wins (R-WIZ-12).
+   */
+  chosenSettings: () => Record<string, string> | null;
   projectStoryboard: (
     tower: TowerSnapshot,
     join: { url: string; reachable: boolean } | null,
@@ -134,16 +147,21 @@ export interface SessionOptions {
 
 const newToken = () => randomBytes(16).toString("base64url");
 
-/** Each step before play moves to the next screen. Play, quit and splash are handled apart. */
+/**
+ * Each step before play moves to the next screen. Play, quit and splash are handled apart, and
+ * Game settings goes to "Not playable yet" instead when the chosen pack is `playable: false`.
+ */
 const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "tower-connect": "pick-story",
-  "pick-story": "party-join",
+  "pick-story": "game-settings",
+  "game-settings": "party-join",
   "party-join": "begin",
 };
 
-/** Back from a start-up screen. Only "Not playable yet" goes back today (R3-UI-37). */
+/** Back from a start-up screen (R3-UI-37). */
 const BACK_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
-  "not-playable": "pick-story",
+  "game-settings": "pick-story",
+  "not-playable": "game-settings",
 };
 
 const NOT_PLAYABLE_BACK_ID = "back-not-playable";
@@ -193,6 +211,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         loadable: true,
       },
       pack: initialPack,
+      settings: initialPack.settings,
       issues: [],
       assets: null,
     },
@@ -204,7 +223,18 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   /** The highlighted door on Pick Story. It starts on the bound story. */
   let focusedStory = initialId;
   const storyEntry = (id: string) => entries.find((entry) => entry.card.id === id);
-  const focusedPlayable = () => storyEntry(focusedStory)?.card.playable ?? false;
+  /**
+   * The card chosen on Pick Story and its game settings, setting id to option id. Null until a
+   * Choose press wins, and again after Back from Game settings. A `playable: false` card can be
+   * chosen; it is never bound, so this can differ from `currentStory`.
+   */
+  let chosen: { story: string; values: Map<string, string> } | null = null;
+  /** Moves on with each winning setting change, so every change is a fresh lock. */
+  let setSerial = 0;
+  const setPromptId = () => `${SET_PROMPT_PREFIX}${setSerial}`;
+  const chosenPlayable = () =>
+    chosen ? (storyEntry(chosen.story)?.card.playable ?? false) : false;
+  const settingsOf = (storyId: string) => storyEntry(storyId)?.settings ?? [];
   const sessionId = options.sessionId ?? `session-${randomBytes(8).toString("hex")}`;
 
   const devices = new Map<string, DeviceRow>();
@@ -322,6 +352,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (screen === "splash" || screen === "quit") return null;
     if (screen === "tower-connect") {
       return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
+    }
+    if (screen === "game-settings") {
+      return { id: GAME_SETTINGS_CONTINUE_ID, action: "continue", label: "Continue" };
     }
     if (screen === "not-playable") {
       return { id: NOT_PLAYABLE_BACK_ID, action: "back", label: "Back" };
@@ -460,7 +493,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (action === "quit") return "quit";
     if (action === "back") return BACK_BEFORE_PLAY[screen] ?? screen;
     // A `playable: false` pack is chosen but never bound: its stop is "Not playable yet".
-    if (action === "continue" && screen === "pick-story" && !focusedPlayable()) {
+    if (action === "continue" && screen === "game-settings" && !chosenPlayable()) {
       return "not-playable";
     }
     if (action === "continue" && screen !== "play") {
@@ -505,11 +538,56 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     for (const id of Object.keys(locks)) {
       if (entered === "pick-story" && id.startsWith(PICK_STORY_PROMPT_PREFIX)) delete locks[id];
       if (entered === "not-playable" && id === NOT_PLAYABLE_BACK_ID) delete locks[id];
+      if (
+        entered === "game-settings" &&
+        (id === GAME_SETTINGS_CONTINUE_ID || id === GAME_SETTINGS_BACK_ID)
+      ) {
+        delete locks[id];
+      }
     }
   };
 
-  const applyWin = (action: ControlAction, deviceId: string, option?: string) => {
-    if (action === "continue" && screen === "pick-story") bindFocusedStory();
+  /** Chooses the highlighted card: its settings start at each default (R3-UI-22, §2.9). */
+  const chooseFocusedStory = () => {
+    const values = new Map(settingsOf(focusedStory).map((item) => [item.id, item.default]));
+    chosen = { story: focusedStory, values };
+  };
+
+  /** Settings lock at Begin (R-WIZ-12). The timing log keeps one mark per chosen value. */
+  const recordSettings = () => {
+    if (!chosen) return;
+    for (const [setting, option] of chosen.values) {
+      const subject = `${setting}:${option}`;
+      options.timing.open({ kind: "setting", subject, deviceId: null, cause: null, hunter: null });
+      options.timing.close("setting", subject);
+    }
+  };
+
+  const gameSettingsState = (): GameSettings | null => {
+    if (!chosen) return null;
+    return {
+      story: chosen.story,
+      settings: settingsOf(chosen.story).map((item) => ({
+        id: item.id,
+        label: item.label,
+        options: item.options.map((option) => ({ id: option.id, label: option.label })),
+      })),
+      chosen: Object.fromEntries(chosen.values),
+    };
+  };
+
+  const applyWin = (action: ControlAction, deviceId: string, option?: string, setting?: string) => {
+    if (action === "set") {
+      if (chosen && setting && option) chosen.values.set(setting, option);
+      setSerial += 1;
+      return;
+    }
+    if (action === "continue" && screen === "pick-story") {
+      bindFocusedStory();
+      chooseFocusedStory();
+    }
+    // Back to Pick Story clears the choice and its settings.
+    if (action === "back" && screen === "game-settings") chosen = null;
     const left = screen;
     screen = screenAfter(action);
     if (screen !== left) releaseRevisitLocks(screen);
@@ -526,6 +604,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     }
     if (action === "begin") {
       stage = "playing";
+      recordSettings();
       options.timing.open({
         kind: "phase",
         subject: phase.id,
@@ -578,9 +657,21 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       return stage === "playing" && !finished && promptId === `pause-${pauseSerial + 1}`;
     }
     if (action === "quit") return promptId === "quit" && screen === "play";
+    if (screen === "game-settings") {
+      if (action === "set") return promptId === setPromptId();
+      if (action === "back") return promptId === GAME_SETTINGS_BACK_ID;
+    }
     const prompt = gameplayPrompt();
     return prompt !== null && prompt.id === promptId && prompt.action === action;
   };
+
+  /** True when `setting` is one of the chosen story's settings and `option` one of its options. */
+  const setOptionOk = (setting: string | undefined, option: string | undefined) =>
+    !!chosen &&
+    !!option &&
+    settingsOf(chosen.story).some(
+      (item) => item.id === setting && item.options.some((choice) => choice.id === option),
+    );
 
   /** True when `option` is one of the current pick's options. */
   const pickOptionOk = (option: string | undefined) => {
@@ -643,7 +734,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       return { ok: true };
     },
 
-    press: (deviceId, promptId, action, option) => {
+    press: (deviceId, promptId, action, option, setting) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };
       reconcileTowerLocks();
       // Logged with the screen it was made on. A win also logs the screen it moved to, before
@@ -663,6 +754,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       }
       if (!legal(promptId, action)) return { ok: false, code: "invalid-state" };
       if (action === "pick" && !pickOptionOk(option)) return { ok: false, code: "invalid-state" };
+      if (action === "set" && !setOptionOk(setting, option)) {
+        return { ok: false, code: "invalid-state" };
+      }
       const decided = lockPresses(locks, [{ promptId, action, deviceId }]);
       const winner = decided.winners[0] === true;
       Object.assign(locks, decided.locks);
@@ -677,7 +771,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       });
       const lock = locks[promptId];
       if (!lock) return { ok: false, code: "invalid-state" };
-      if (winner) applyWin(action, deviceId, option);
+      if (winner) applyWin(action, deviceId, option, setting);
       persist();
       return { ok: true, winner, lock, action };
     },
@@ -693,6 +787,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     },
 
     pickedOption: (momentId) => picked.get(momentId) ?? null,
+
+    chosenSettings: () => (chosen ? Object.fromEntries(chosen.values) : null),
 
     pressAll: (batch) => {
       const results: Array<PressOk | Fail> = [];
@@ -733,6 +829,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         moment: beat?.storyboard ?? null,
         keeperLine,
         stories: storiesState(),
+        gameSettings: gameSettingsState(),
         pause: pause ? { cause: pause.cause, hunter: pause.hunter } : null,
         tower,
         gate: { canBegin: unheld.length === 0, unheld },
@@ -745,6 +842,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       const prompt = gameplayPrompt();
       const promptLock = prompt ? (locks[prompt.id] ?? null) : null;
       const mine = heldBy(deviceId);
+      const onSettings = screen === "game-settings";
       const beat = stage === "lobby" || finished ? undefined : currentBeat();
       return deviceStatePayloadSchema.parse({
         screen,
@@ -768,6 +866,10 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
           prompt?.action === "pick" && beat?.pick && devices.get(deviceId)?.formFactor === "ipad"
             ? { momentId: beat.pick.momentId, prompt: beat.pick.prompt, options: beat.pick.options }
             : null,
+        gameSettings: gameSettingsState(),
+        setPromptId: onSettings ? setPromptId() : null,
+        backPromptId: onSettings ? GAME_SETTINGS_BACK_ID : null,
+        backLock: onSettings ? (locks[GAME_SETTINGS_BACK_ID] ?? null) : null,
       });
     },
 

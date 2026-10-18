@@ -36,6 +36,8 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await expect(d.button("continue")).toHaveText("Choose Proving ground");
     await d.button("continue").click();
+    await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
+    await d.button("continue").click();
     await d.button("take-all").click();
     await d.button("continue").click();
     await d.button("begin").click();

@@ -9,6 +9,7 @@ import {
   deviceRecordSchema,
   envelopeSchema,
   type FlowScreen,
+  gameSettingsSchema,
   helloPayloadSchema,
   holdPayloadSchema,
   hostHealthSchema,
@@ -88,6 +89,7 @@ describe("client messages", () => {
       "tower-connect",
       "tower-calibrate",
       "pick",
+      "set",
     ]);
   });
 
@@ -97,6 +99,61 @@ describe("client messages", () => {
     expect(control({ promptId: "pick-6", action: "pick", option: "force-it" })).toBe(true);
     expect(control({ promptId: "pick-6", action: "pick" })).toBe(false);
     expect(control({ promptId: "continue-0", action: "continue", option: "force-it" })).toBe(false);
+  });
+
+  it("requires a set to name its setting and option, and refuses a setting on any other action", () => {
+    const control = (payload: unknown) =>
+      controlMessageSchema.safeParse({ v: 1, type: "control", payload }).success;
+    expect(control({ promptId: "set-0", action: "set", setting: "length", option: "long" })).toBe(
+      true,
+    );
+    expect(control({ promptId: "set-0", action: "set", option: "long" })).toBe(false);
+    expect(control({ promptId: "set-0", action: "set", setting: "length" })).toBe(false);
+    expect(
+      control({ promptId: "pick-6", action: "pick", option: "force-it", setting: "length" }),
+    ).toBe(false);
+    expect(control({ promptId: "continue-0", action: "continue", setting: "length" })).toBe(false);
+    expect(control({ promptId: "set-0", action: "set", setting: "Length", option: "long" })).toBe(
+      false,
+    );
+  });
+
+  it("checks game settings: one chosen option per listed setting, each one of its options", () => {
+    const settings = {
+      story: "test",
+      settings: [
+        {
+          id: "length",
+          label: "Length",
+          options: [
+            { id: "short", label: "Short" },
+            { id: "long", label: "Long" },
+          ],
+        },
+      ],
+      chosen: { length: "short" },
+    };
+    expect(gameSettingsSchema.safeParse(settings).success).toBe(true);
+    expect(gameSettingsSchema.safeParse({ ...settings, chosen: {} }).success).toBe(false);
+    expect(gameSettingsSchema.safeParse({ ...settings, chosen: { length: "epic" } }).success).toBe(
+      false,
+    );
+    expect(
+      gameSettingsSchema.safeParse({ ...settings, chosen: { length: "short", speed: "fast" } })
+        .success,
+    ).toBe(false);
+    expect(
+      gameSettingsSchema.safeParse({
+        ...settings,
+        settings: [...settings.settings, ...settings.settings],
+      }).success,
+    ).toBe(false);
+    expect(
+      storyboardStatePayloadSchema.safeParse({ ...board, gameSettings: settings }).success,
+    ).toBe(true);
+    expect(storyboardStatePayloadSchema.safeParse({ ...board, gameSettings: null }).success).toBe(
+      true,
+    );
   });
 
   it("moves the story highlight with a story id and nothing else", () => {

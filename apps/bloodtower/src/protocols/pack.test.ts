@@ -7,6 +7,9 @@ import {
   parseMomentId,
   privateHunterOf,
   randomnessIssue,
+  SETTING_ID_MAX,
+  SETTING_OPTIONS_MAX,
+  SETTINGS_MAX,
   sceneOf,
 } from "./index.ts";
 
@@ -387,6 +390,44 @@ describe("manifest fields", () => {
       default: "brutal",
     };
     expect(rules({ ...validPack(), settings: [difficulty] })).toContain("V-1");
+  });
+
+  it("caps settings, options per setting and id length at what the board and device states carry (V-1)", () => {
+    /** A free setting (not length or difficulty), `options` long, with ids padded to `idLength`. */
+    const free = (id: string, options: number, idLength = 2) => {
+      const ids = Array.from({ length: options }, (_, index) => `o${index}`.padEnd(idLength, "x"));
+      return {
+        id,
+        label: "Free",
+        options: ids.map((option) => ({ id: option, label: option })),
+        default: ids[0],
+      };
+    };
+    const settings = (count: number) =>
+      Array.from({ length: count }, (_, index) => free(`s${index}`, 1));
+    expect(rules({ ...validPack(), settings: settings(SETTINGS_MAX) })).toEqual([]);
+    expect(rules({ ...validPack(), settings: settings(SETTINGS_MAX + 1) })).toContain("V-1");
+    expect(rules({ ...validPack(), settings: [free("lantern", SETTING_OPTIONS_MAX)] })).toEqual([]);
+    expect(
+      rules({ ...validPack(), settings: [free("lantern", SETTING_OPTIONS_MAX + 1)] }),
+    ).toContain("V-1");
+    const longId = "a".repeat(SETTING_ID_MAX);
+    expect(rules({ ...validPack(), settings: [free(longId, 1, SETTING_ID_MAX)] })).toEqual([]);
+    expect(rules({ ...validPack(), settings: [free(`${longId}a`, 1)] })).toContain("V-1");
+    expect(rules({ ...validPack(), settings: [free("lantern", 1, SETTING_ID_MAX + 1)] })).toContain(
+      "V-1",
+    );
+    // A metadata-only pack has the same limits.
+    expect(
+      packMetadataSchema.safeParse({
+        pack_id: "vellmoor",
+        title: "Vellmoor",
+        version: "0.1.0",
+        engine_min: "0.1.0",
+        playable: false,
+        settings: settings(SETTINGS_MAX + 1),
+      }).success,
+    ).toBe(false);
   });
 
   it("rejects two settings with the same id (V-1)", () => {
