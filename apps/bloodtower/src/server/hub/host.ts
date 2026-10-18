@@ -19,6 +19,7 @@ import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
 import { joinHost } from "../lanUrls.ts";
 import type { PackAssetIndex } from "../pack/assets.ts";
+import { devAudioAllowOrigin } from "../pack/audio.ts";
 import { formatLoadIssues, loadStories } from "../pack/load.ts";
 import { tryServePackAssets } from "../pack/serve.ts";
 import { requestPath, serveStatic } from "../server.ts";
@@ -526,6 +527,11 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   const http = createServer((req, res) => {
+    const allowOrigin = devAudioAllowOrigin(requestPath(req.url), req.headers.origin, devOrigins);
+    if (allowOrigin) {
+      res.setHeader("access-control-allow-origin", allowOrigin);
+      res.setHeader("vary", "origin");
+    }
     void (async () => {
       if (await tryServePackAssets(packAssetCatalogs, req, res)) return;
       return serveStatic(options.webRoot, req, res);

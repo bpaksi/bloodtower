@@ -18,7 +18,7 @@ The files in this folder are the proving ground R1 loads. They are not a publish
 
 ## Art files (`assets/`)
 
-Illusionist drops storyboard stills and other pack images here. The loader allows only this subfolder under `packs/test/`, and only `png`, `jpg`, `jpeg`, or `webp` files (no nested folders).
+Illusionist drops storyboard stills and other pack images here. The loader allows only this subfolder under `packs/test/` (plus `audio/` and `camera/`, below), and only `png`, `jpg`, `jpeg`, or `webp` files (no nested folders).
 
 | Asset id (from `assets.yaml`) | Suggested file |
 |---|---|
@@ -39,6 +39,19 @@ Portrait assets (`por.alpha` … `por.delta` in `assets.yaml`) map to iPad hunte
 Hunter ids stay `alpha`–`delta`; display names in `hunters.yaml` are Agnes, Tomas, Wren, and Emeric for the demo.
 
 If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
+
+## Audio (`audio/`)
+
+Seamless loops for the Mac board (R3-UI-60, R3-UI-64). The folder is flat `.m4a` only (AAC, 48 kHz, no subfolders, no WAV masters). The host serves each file at `/packs/test/audio/<file>`. Loops are declared in `assets.yaml` (types `ambient` and `music`); the board maps them to moods in `apps/bloodtower/src/web/lib/audio/tracks.ts`.
+
+| Mood | Asset id | File | Channel | Loop length |
+|---|---|---|---|---|
+| Start-up mood (Game settings through setup) | `mus.startup` | `startup-ambient.m4a` | ambient | 96 s |
+| Night 1 bed | `mus.night-1` | `night1-ambient.m4a` | ambient | 100 s |
+| Night 2 bed (no night 2 in this pack yet) | `mus.night-2` | `night2-ambient.m4a` | ambient | 90 s |
+| Waiting music (under the waiting dialog) | `mus.waiting` | `pg-music.m4a` | music | 150 s |
+
+The signature bed and one-shots are app-level (`apps/bloodtower/public/audio/signature/`), not in any pack.
 
 ## Camera tracks (`camera/`)
 

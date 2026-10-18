@@ -21,7 +21,8 @@ const pipeFile = (file: string, res: ServerResponse) => {
 
 /**
  * `/packs/<packId>/assets/<file>`, `/packs/<packId>/asset/<assetId>`, and
- * `/packs/<packId>/camera/<momentId>.json` for optional camera-track sidecars.
+ * `/packs/<packId>/camera/<momentId>.json` for optional camera-track sidecars, and
+ * `/packs/<packId>/audio/<file>.m4a` for the pack's mood and music loops.
  * Only declared assets that resolved at load time are served. Traversal is refused.
  */
 export const tryServePackAssets = async (
@@ -59,6 +60,22 @@ export const tryServePackAssets = async (
     }
     const absolute = catalog.camera.byMomentId.get(momentId);
     if (!absolute) {
+      sendText(res, 404, "Not found.\n");
+      return true;
+    }
+    return sendPackFile(absolute, req, res);
+  }
+
+  if (parts[2] === "audio" && parts.length === 4) {
+    let fileName: string;
+    try {
+      fileName = decodeURIComponent(parts[3] ?? "");
+    } catch {
+      sendText(res, 400, "Bad request.\n");
+      return true;
+    }
+    const absolute = catalog.audio.byFile.get(fileName);
+    if (!absolute || fileName.includes("/") || fileName.includes("\\")) {
       sendText(res, 404, "Not found.\n");
       return true;
     }

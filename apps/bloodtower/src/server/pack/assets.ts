@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, join, sep } from "node:path";
 import type { Asset } from "bloodtower-protocols";
+import type { PackAudioIndex } from "./audio.ts";
+import { indexPackAudio } from "./audio.ts";
 import type { PackCameraIndex } from "./camera.ts";
 import { indexPackCamera } from "./camera.ts";
 import type { PackLoadIssue } from "./load.ts";
@@ -29,6 +31,8 @@ export interface PackAssetIndex {
   byBasename: ReadonlyMap<string, string>;
   /** Optional camera-track sidecars under `<pack>/camera/`. */
   camera: PackCameraIndex;
+  /** Mood and music files under `<pack>/audio/`. */
+  audio: PackAudioIndex;
   warnings: readonly PackLoadIssue[];
 }
 
@@ -208,12 +212,14 @@ export const indexPackAssets = (
     else warnings.push(warn("pack.yaml", "cover", `No image file for cover ${pack.cover}.`));
   }
   const camera = indexPackCamera(packRoot);
+  const audio = indexPackAudio(packRoot);
   return {
     packId: pack.pack_id,
     packRoot,
     byId,
     byBasename,
     camera,
+    audio,
     warnings: [...warnings, ...camera.warnings],
   };
 };

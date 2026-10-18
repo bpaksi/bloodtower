@@ -14,7 +14,7 @@ Visual target: `research/game-design/mockups/2026-10-17/v2-mac.png`, `v2-ipad.pn
 | 3 | `feat/shell-03-game-settings` | 2 | none | todo | |
 | 4 | `feat/shell-04-connect-tower` | 3 | none | todo | |
 | 5 | `feat/shell-05-claim-and-setup` | 4 | 7 | todo | |
-| 6 | `feat/shell-06-sound` | 1 | 2 | todo | |
+| 6 | `feat/shell-06-sound` | 1 | 2 | in review | #83 |
 | 7 | `feat/shell-07-tower-volume-test` | 4, 6 (tower: level test; no tower: sound-dialog check from 6) | 5 | todo | |
 | 8 | `feat/shell-08-serve-test-flake` | none | 1 | PR open | #81 |
 
@@ -143,7 +143,7 @@ Run pnpm check and the tests, then open a PR.
 
 ```text
 Branch: feat/shell-06-sound
-Depends on: step 1 (pack loader). Can run with step 2. Step 6 owns new files (src/web/lib/audio/, src/web/components/board/SoundDialog.tsx, src/server/pack/audio.ts) and the /audio/ line in src/server/server.ts. It mounts the dialog in LiveBoard.tsx and adds only one hook line in load.ts. Do not edit TitleScreen.tsx, StoryBoard.tsx or DeviceScreen.tsx (step 2 owns them).
+Depends on: step 1 (pack loader). Can run with step 2. Step 6 owns new files (src/web/lib/audio/, src/web/components/board/SoundDialog.tsx, src/server/pack/audio.ts) and the /audio/ line in src/server/server.ts. Under pnpm dev the board fetches audio from the session host on another port, so step 6 also adds one dev-only CORS call for the audio routes in src/server/hub/host.ts (review round 1). It mounts the dialog in LiveBoard.tsx and adds only one hook line in load.ts. Do not edit TitleScreen.tsx, StoryBoard.tsx or DeviceScreen.tsx (step 2 owns them).
 
 Read CLAUDE.md, research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-03, R3-UI-51, R3-UI-60, R3-UI-61, R3-UI-64), docs/deliveries/2026-10-17-shell-audio-and-covers.md. Visual target: research/game-design/mockups/2026-10-17/frames-mac-0-sound.png.
 
