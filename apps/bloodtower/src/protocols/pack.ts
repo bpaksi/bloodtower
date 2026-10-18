@@ -369,12 +369,79 @@ export const randomnessIssue = (value: unknown): string | undefined => {
   return walk(value);
 };
 
+export const LENGTH_IDS = ["short", "standard", "long"] as const;
+
+/** Cover image: a file directly inside `<pack>/assets/`, the same folder jail as the other assets. */
+export const coverSchema = z
+  .string()
+  .regex(/^assets\/[A-Za-z0-9][A-Za-z0-9._-]*\.(?:png|jpe?g|webp)$/i, {
+    message: "V-1: cover is a file directly inside assets/, such as assets/cover.png.",
+  });
+
+const labelSchema = z.string().min(1).max(80);
+
+/** A game setting the player picks on Game settings (R3-UI-22). */
+export const settingSchema = z.strictObject({
+  id: idSchema,
+  label: labelSchema,
+  options: z.array(z.strictObject({ id: idSchema, label: labelSchema })).min(1),
+  default: idSchema,
+});
+
+/**
+ * Setting rules that need a list. A `length` setting uses `lengths`; a `difficulty` setting uses
+ * the pack's difficulty ids. A metadata-only pack has no difficulty list, so that check is skipped.
+ */
+const settingIssues = (
+  settings: readonly z.infer<typeof settingSchema>[],
+  lengths: readonly string[],
+  difficulties?: readonly string[],
+): string[] => {
+  const messages: string[] = [];
+  const dup = duplicate(settings.map((setting) => setting.id));
+  if (dup) messages.push(`V-1: setting ${dup} is listed twice.`);
+  for (const setting of settings) {
+    const optionIds = setting.options.map((option) => option.id);
+    if (duplicate(optionIds)) messages.push(`V-1: setting ${setting.id} lists an option twice.`);
+    if (!optionIds.includes(setting.default)) {
+      messages.push(
+        `V-1: setting ${setting.id} default ${setting.default} is not one of its options.`,
+      );
+    }
+    const allowed =
+      setting.id === "length" ? lengths : setting.id === "difficulty" ? difficulties : undefined;
+    if (!allowed) continue;
+    for (const id of optionIds) {
+      if (!allowed.includes(id)) {
+        messages.push(`V-1: setting ${setting.id} option ${id} is not in the pack's list.`);
+      }
+    }
+  }
+  return messages;
+};
+
+/** Manifest fields every pack has. A `playable: false` pack carries only these. */
+const metadataShape = {
+  pack_id: idSchema,
+  title: z.string().min(1).max(120),
+  version: semverSchema,
+  engine_min: semverSchema,
+  tagline: z.string().min(1).max(200).optional(),
+  cover: coverSchema.optional(),
+  tower: z.enum(["required", "optional", "none"]).default("optional"),
+  settings: z.array(settingSchema).default([]),
+  playable: z.boolean().default(true),
+};
+
+/** A pack listed on Pick Game that cannot be chosen yet (`playable: false`). */
+export const packMetadataSchema = z.strictObject(metadataShape).superRefine((pack, ctx) => {
+  for (const message of settingIssues(pack.settings, LENGTH_IDS)) issue(ctx, message);
+});
+export type PackMetadata = z.infer<typeof packMetadataSchema>;
+
 export const packSchema = z
   .strictObject({
-    pack_id: idSchema,
-    title: z.string().min(1).max(120),
-    version: semverSchema,
-    engine_min: semverSchema,
+    ...metadataShape,
     tone: z.string().min(1).max(200).optional(),
     structure: z.enum(["one-shot", "campaign"]),
     players: z.strictObject({
@@ -436,6 +503,16 @@ export const packSchema = z
     titles: z.unknown().optional(),
   })
   .superRefine((pack, ctx) => {
+    if (!pack.playable) {
+      issue(ctx, "V-1: a playable: false pack carries only its metadata.");
+    }
+    for (const message of settingIssues(
+      pack.settings,
+      pack.lengths,
+      pack.difficulties.map((difficulty) => difficulty.id),
+    )) {
+      issue(ctx, message);
+    }
     if (pack.players.min > pack.players.max) {
       issue(ctx, "V-1: players.min is above players.max.");
     }

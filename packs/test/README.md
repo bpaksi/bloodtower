@@ -4,6 +4,10 @@ The files in this folder are the proving ground R1 loads. They are not a publish
 
 | | |
 |---|---|
+| Tagline | A long-lived proving ground for new ideas. |
+| Cover | `assets/cover.png` (served at `/packs/test/assets/cover.png`) |
+| Tower | `optional` (Connect Tower can be skipped) |
+| Settings | Length: short, standard (default), long. Difficulty: standard. |
 | Hunters | alpha, beta, gamma, delta |
 | Nights | n1 |
 | Set piece | proving-ground |

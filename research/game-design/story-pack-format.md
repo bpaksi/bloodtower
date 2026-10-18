@@ -32,6 +32,11 @@ A small closed grammar so variants and gates stay data:
 | `version` | semver | yes | saves pin it (R-ENG-11) |
 | `engine_min` | semver | yes | loader refuses older engines |
 | `tone` | text | no | one line |
+| `tagline` | text | no | one line on the Pick Game card; the R1 card shows `tagline`, else `tone` |
+| `cover` | path | no | a file directly inside `assets/`, such as `assets/cover.png`. A missing file warns |
+| `tower` | `required` \| `optional` \| `none` | no | default `optional` (Connect Tower; see shell step 4) |
+| `settings` | list {id, label, options: [{id, label}], default} | no | default `[]`. A `length` setting uses ids from `lengths`; a `difficulty` setting uses ids from `difficulties` |
+| `playable` | boolean | no | default `true`. `false` makes a metadata-only pack: only the fields in this table are read, plus `assets/`; every other file is ignored |
 | `structure` | `one-shot` \| `campaign` | yes | campaign carries state between parts (R-ENG-2) |
 | `players` | {min,max} | yes | humans; hunters are separate (section 2) |
 | `lengths` | list of `short`/`standard`/`long` | yes | all three (R-LEN-1); see 3.2 |

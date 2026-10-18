@@ -72,7 +72,7 @@ describe("story loader", () => {
       writeFileSync(join(dir, "pack.json"), JSON.stringify(loaded.pack));
       const again = loadPackDir(dir);
       expect(again.ok).toBe(true);
-      if (!again.ok) return;
+      if (!again.ok || !again.playable) return;
       expect(again.pack.version).toBe(loaded.pack.version);
       expect(again.pack.moments.map((moment) => moment.id)).toEqual(
         loaded.pack.moments.map((moment) => moment.id),
@@ -312,17 +312,25 @@ describe("story list", () => {
     return dir;
   };
 
-  it("lists the test pack as one loadable card with its title, tone and player range", () => {
-    const [entry, ...rest] = loadStories(loadConfig().packsDir);
+  it("lists both packs in order: the metadata-only dracula card, then the playable test pack", () => {
+    const [dracula, test, ...rest] = loadStories(loadConfig().packsDir);
     expect(rest).toEqual([]);
-    expect(entry?.card).toEqual({
+    expect(dracula?.card).toEqual({
+      id: "dracula",
+      title: "The Count of Vellmoor",
+      blurb: "The Count has taken Lenka. Bring her home before she's his.",
+      players: null,
+      loadable: false,
+    });
+    expect(dracula?.pack).toBeNull();
+    expect(test?.card).toEqual({
       id: "test",
       title: "Proving ground",
       blurb: "A long-lived proving ground for new ideas.",
       players: { min: 1, max: 4 },
       loadable: true,
     });
-    expect(entry?.pack?.pack_id).toBe("test");
+    expect(test?.pack?.pack_id).toBe("test");
   });
 
   it("keeps a pack that fails the lint as a greyed card with no lint text on it", () => {
@@ -409,6 +417,119 @@ describe("pack:lint", () => {
       expect(bad.exitCode).toBe(1);
       expect(
         bad.lines.some((line) => line.includes("file=cues.yaml") && line.includes("rule=V-")),
+      ).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("manifest fields on the repo packs", () => {
+  const packsDir = () => loadConfig().packsDir;
+
+  it("loads the test pack with its cover, tower and settings", () => {
+    const result = loadR1Pack(packsDir());
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.pack.tower).toBe("optional");
+    expect(result.pack.lengths).toEqual(["short", "standard", "long"]);
+    expect(result.pack.settings.map((setting) => setting.id)).toEqual(["length", "difficulty"]);
+    expect(result.assets.byBasename.get("cover.png")).toMatch(/packs\/test\/assets\/cover\.png$/);
+    expect(result.assets.warnings.some((item) => item.path === "cover")).toBe(false);
+  });
+
+  it("loads dracula as a metadata-only pack and resolves its cover", () => {
+    const result = loadPackDir(join(packsDir(), "dracula"));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.playable).toBe(false);
+    expect(result.pack).toEqual({
+      pack_id: "dracula",
+      title: "The Count of Vellmoor",
+      version: "0.1.0",
+      engine_min: "0.1.0",
+      tagline: "The Count has taken Lenka. Bring her home before she's his.",
+      cover: "assets/cover.png",
+      tower: "optional",
+      settings: [
+        {
+          id: "length",
+          label: "Length",
+          options: [
+            { id: "short", label: "Short" },
+            { id: "standard", label: "Standard" },
+            { id: "long", label: "Long" },
+          ],
+          default: "standard",
+        },
+      ],
+      playable: false,
+    });
+    expect(result.assets.byBasename.get("cover.png")).toMatch(/dracula\/assets\/cover\.png$/);
+  });
+
+  it("lets a metadata-only pack ignore every other file in its folder", () => {
+    const dir = mkdtempSync(join(tmpdir(), "bloodtower-dracula-"));
+    try {
+      cpSync(join(packsDir(), "dracula"), dir, { recursive: true });
+      writeFileSync(join(dir, "notes.txt"), "not a pack file");
+      writeFileSync(join(dir, "hunters.yaml"), "not: [valid\n");
+      writeFileSync(join(dir, "random.bin"), "\u0000\u0001");
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.playable).toBe(false);
+      expect(result.assets.warnings).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a metadata-only pack that carries story fields", () => {
+    const dir = copyPack();
+    try {
+      writeFileSync(
+        join(dir, "pack.yaml"),
+        "pack_id: test\ntitle: T\nversion: 0.1.0\nengine_min: 0.1.0\nplayable: false\nhunters: []\n",
+      );
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a cover path that is not a file directly inside assets/", () => {
+    const dir = copyPack();
+    try {
+      const manifest = readFileSync(join(dir, "pack.yaml"), "utf8");
+      writeFileSync(
+        join(dir, "pack.yaml"),
+        manifest.replace("cover: assets/cover.png", "cover: cover.png"),
+      );
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(
+        result.issues.some(
+          (item) => item.file === "pack.yaml" && item.path === "cover" && item.rule === "V-1",
+        ),
+      ).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("warns, and does not block, when the cover file is missing", () => {
+    const dir = copyPack();
+    try {
+      rmSync(join(dir, "assets", "cover.png"));
+      const result = loadPackDir(dir);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.assets.byBasename.has("cover.png")).toBe(false);
+      expect(
+        result.assets.warnings.some((item) => item.rule === "W-asset" && item.path === "cover"),
       ).toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });

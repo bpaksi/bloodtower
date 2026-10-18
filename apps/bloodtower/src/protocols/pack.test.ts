@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   absentHuntersOf,
   packIssues,
+  packMetadataSchema,
   packSchema,
   parseMomentId,
   privateHunterOf,
@@ -312,5 +313,126 @@ describe("pack schema", () => {
     if (!night) throw new Error("fixture");
     night.end = "random end";
     expect(rules(pack)).toContain("V-20");
+  });
+});
+
+describe("manifest fields", () => {
+  const metadata = () => ({
+    pack_id: "dracula",
+    title: "The Count of Vellmoor",
+    version: "0.1.0",
+    engine_min: "0.1.0",
+  });
+  const length = (options: string[], value = "standard") => ({
+    id: "length",
+    label: "Length",
+    options: options.map((id) => ({ id, label: id })),
+    default: value,
+  });
+
+  it("gives a pack the optional tower default and no settings", () => {
+    const parsed = packSchema.parse(validPack());
+    expect(parsed.tower).toBe("optional");
+    expect(parsed.settings).toEqual([]);
+    expect(parsed.playable).toBe(true);
+    expect(parsed.tagline).toBeUndefined();
+  });
+
+  it("accepts a tagline of 1 to 200 characters and rejects an empty or longer one", () => {
+    expect(rules({ ...validPack(), tagline: "A bell." })).toEqual([]);
+    expect(rules({ ...validPack(), tagline: "" })).toContain("V-1");
+    expect(rules({ ...validPack(), tagline: "x".repeat(201) })).toContain("V-1");
+  });
+
+  it("accepts the three tower values and rejects any other", () => {
+    for (const tower of ["required", "optional", "none"]) {
+      expect(rules({ ...validPack(), tower })).toEqual([]);
+    }
+    expect(rules({ ...validPack(), tower: "maybe" })).toContain("V-1");
+  });
+
+  it("accepts a cover directly inside assets/ and rejects a path outside it", () => {
+    expect(rules({ ...validPack(), cover: "assets/cover.png" })).toEqual([]);
+    expect(rules({ ...validPack(), cover: "assets/cover.webp" })).toEqual([]);
+    expect(rules({ ...validPack(), cover: "cover.png" })).toContain("V-1");
+    expect(rules({ ...validPack(), cover: "../cover.png" })).toContain("V-1");
+    expect(rules({ ...validPack(), cover: "assets/sub/cover.png" })).toContain("V-1");
+    expect(rules({ ...validPack(), cover: "assets/cover.gif" })).toContain("V-1");
+  });
+
+  it("accepts a length setting whose options are in lengths, with a default that is one of them", () => {
+    const pack = {
+      ...validPack(),
+      lengths: ["short", "standard"],
+      settings: [length(["short", "standard"])],
+    };
+    expect(rules(pack)).toEqual([]);
+  });
+
+  it("rejects a length option outside lengths (V-1)", () => {
+    const pack = { ...validPack(), settings: [length(["standard", "long"])] };
+    expect(rules(pack)).toContain("V-1");
+  });
+
+  it("rejects a setting whose default is not one of its options (V-1)", () => {
+    const pack = { ...validPack(), settings: [length(["standard"], "long")] };
+    expect(rules(pack)).toContain("V-1");
+  });
+
+  it("rejects a difficulty option that the pack does not list (V-1)", () => {
+    const difficulty = {
+      id: "difficulty",
+      label: "Difficulty",
+      options: [{ id: "brutal", label: "Brutal" }],
+      default: "brutal",
+    };
+    expect(rules({ ...validPack(), settings: [difficulty] })).toContain("V-1");
+  });
+
+  it("rejects two settings with the same id (V-1)", () => {
+    const pack = {
+      ...validPack(),
+      lengths: ["standard"],
+      settings: [length(["standard"]), length(["standard"])],
+    };
+    expect(rules(pack)).toContain("V-1");
+  });
+
+  it("rejects playable: false on the playable schema, which needs the full pack (V-1)", () => {
+    expect(rules({ ...validPack(), playable: false })).toContain("V-1");
+  });
+
+  it("parses a metadata-only pack with the defaults filled in", () => {
+    const parsed = packMetadataSchema.parse({
+      ...metadata(),
+      tagline: "The Count has taken Lenka.",
+      cover: "assets/cover.png",
+      playable: false,
+      settings: [length(["short", "standard", "long"])],
+    });
+    expect(parsed.playable).toBe(false);
+    expect(parsed.tower).toBe("optional");
+    expect(parsed.cover).toBe("assets/cover.png");
+  });
+
+  it("defaults a metadata-only pack to no settings and playable true", () => {
+    const parsed = packMetadataSchema.parse(metadata());
+    expect(parsed.settings).toEqual([]);
+    expect(parsed.playable).toBe(true);
+  });
+
+  it("rejects a story field in a metadata-only pack", () => {
+    expect(
+      packMetadataSchema.safeParse({ ...metadata(), playable: false, hunters: [] }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a metadata-only length option outside the three lengths", () => {
+    const parsed = packMetadataSchema.safeParse({
+      ...metadata(),
+      playable: false,
+      settings: [length(["medium"])],
+    });
+    expect(parsed.success).toBe(false);
   });
 });
