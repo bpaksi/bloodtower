@@ -76,6 +76,7 @@ Order (Bob, 8:06 PM ET): Pick Game, Game settings, Connect Tower, Claim Hunters,
 - R3-UI-31. A visual enters with a zoom from the waiting dialog to full screen; the art is shown uncropped (letterboxed if needed). Zoom lasts about 0.6-1.0 s and is skipped under reduced motion. Test: timing + reduced-motion check.
 - R3-UI-32. A visual exits only by an iPad action (Continue, first press wins). On exit it crossfades straight into the next visual if one is queued, or zooms back to the waiting dialog. Test: e2e both paths.
 - R3-UI-33. Talking-avatar scenes count as visuals: they follow R3-UI-31/32; captions stay on (R-AV fallback).
+- R3-UI-33b (Bob, 8:29 PM ET; R2 playthrough bug). Every talking-avatar line shows a caption on the board: the speaker's name and the line's script text, shown for the length of the line and cleared when it ends or is skipped. Captions are on by default (R2 standing ruling: captions are the avatar's only fallback), sit in the lower third clear of the face, and are readable from across the room (at least 1/25 of screen height). A Captions on/off toggle lives in the Control menu. Caption text must match the voiced line (asset review). Test: each avatar line in the funeral POC shows its caption in sync.
 - R3-UI-34. The last visual can be replayed from the iPad menu ("Replay last video", §2.6). The board replays it with the same zoom and returns to the state it left. Replay never changes game state or stats beyond a replay count. Test: e2e.
 
 ### 2.5 Action needed
@@ -108,12 +109,27 @@ The menu lives on every device and on the Story board (Bob, Oct 17 7:46 PM ET: "
 
 ## 2.8b Waiting audio and tower sound (Bob, 8:21 PM ET)
 - R3-UI-60. While the board shows start-up dialogs or the waiting dialog, the Mac plays a looping ambient bed plus quiet music, mixed well under game play: ambient about -30 LUFS, music about -26 LUFS, against voice and scenes at -18 LUFS. It fades out over about 1 s when a visual or cut scene zooms in and fades back in when play returns to the waiting dialog. The bed ducks hard (or pauses) whenever the tower plays a sound. A pack may give one ambient/music mood per night instead of one per story (Loremaster writes the mood notes). Audio starts after the first board click or keypress on the landing screen (R3-UI-03). Never under an action-needed dialog's alert sound. Test: loudness check on the loops; fade on zoom in/out.
+- R3-UI-64 (Bob, 8:28 PM ET). Three sound layers by stage:
+  1. **Blood Tower signature** (app-level, not in any pack): plays from the landing screen through the Sound dialog and Pick Game, before a game is chosen. It is the house sound of Blood Tower: one recognizable motif (Illusionist proposes; a short phrase that can recur) over an ambient bed. The Sound dialog's test clips come from it.
+  2. **Game start-up mood** (per pack): replaces the signature with a crossfade once a game is chosen, through Game settings, Connect Tower, Claim Hunters and setup.
+  3. **Chapter/night mood** (per pack, per night): the waiting audio during play; Loremaster writes one mood note per night (Dracula: Oct 17 notes, nights 1-5, no voices).
+  Every change between layers is a crossfade of 2-3 s, never a hard cut. A pack with no moods falls back to the signature bed. Test: layer matches stage; crossfade on game choice and on night change.
 - R3-UI-61. Assets (Illusionist): per story, one seamless ambient loop (60-120 s; wind, distant bells or similar) and one waiting music loop (2-3 min, seamless), plus one shared default pair for packs that declare none. Declared in the pack manifest; mono 22050 Hz like the other audio unless Illusionist needs stereo for music.
 - R3-UI-62. Tower on connect: after connect and calibration succeed, the tower plays Tower Connected (#94, FX-U2) once, then the story's idle light bed (FX-04 by default). During waiting the tower is lights only: no repeating tower sounds, and ambient accents (FX-06) are off, because the tower is loud. Tower sounds are kept for meaningful cues. Test: no tower sound commands while waiting, after #94.
 - R3-UI-63. Tower volume: Connect Tower offers the tower volume (quiet / medium / loud = tiers 2 / 1 / 0, plus mute = 3) with a "Test sound" button once connected; default quiet. Also in the Control menu under Tower info. Mac audio has separate music, ambient and voice sliders in the Control menu. Open hardware gap: whether tiers 0-2 differ in loudness is unknown (GAP-HW-003); if they don't, the choice shrinks to On / Mute and Lights only (C7). Test: volume tier sent on every tower sound; GAP-HW-003 measured before this ships.
 
 ## 2.9 Mockups
 Rough first-pass frames by Illusionist (Oct 17), nine per device: `mockups/2026-10-17/v2-mac.png`, `v2-ipad.png`, `v2-iphone.png`, plus `frames-mac-0-sound.png` (Sound dialog, R3-UI-03). Flow only; look is not final. Known fixes: hook reads "The Count has taken Lenka. Bring her home before she's his." (Loremaster); the setup frame uses a real step, "Lay out the board and orient the kingdoms" (R-WIZ-5 step 4), not the coffin line; card reads "4 hunters" (all four always in play), one "Quit game" menu item opening the three-way confirm on every device, board menu icon top-left (debug overlay is top-right), settings default Standard.
+
+## 2.10 Where it is built (Bob, 8:32 PM ET)
+All of this is built and proven in the Proving Ground pack (`packs/test/`) in `apps/bloodtower`, not in the funeral POC; Dracula takes it once proven. Proving Ground needs, as pack data and assets:
+- cover image (16:9) and tagline; tower: optional; a settings list (length Short/Standard/Long + difficulty);
+- a second short night (night 2: one shared moment, one choice, end-of-night summary) so night-mood crossfades can be tested; Loremaster writes its words;
+- a start-up mood and two night moods (nights 1 and 2), plus the app-level Blood Tower signature;
+- two or three setup steps with Done (one with an illustration);
+- at least two visuals (one still, one talking-avatar line with a `.vtt` caption) to exercise zoom, chaining, replay and captions;
+- one choice needing "who acts" (for the hunter row) and one private line: `grey-stair.door-choice` / "Oil the hinge" asks "Who spends their oil?" when two or more present hunters hold lamp oil (Ash and Cole start with it; spec in `packs/test/README.md` §5).
+The carousel needs two or more packs to test; until Dracula loads, a second stub card (cover + title only, marked "Coming soon", not choosable) stands in.
 
 ## 3. Changes to R2 (for the doc pass)
 | R2 item | Change |

@@ -91,7 +91,7 @@ components:
   - {asset-group: rtdt-core, use: used}
   - {asset-group: rtdt-quest-markers, use: used}
   - {asset-group: rtdt-skulls, use: unused}
-setup: [length-and-difficulty, hunters-and-devices, tower-connect, placements]   # step 1 = length + difficulty (R-WIZ-12)
+setup: [length-and-difficulty, hunters-and-devices, tower-connect, tower-volume-test, placements]   # tower-volume-test only when a tower is connected (section 6a)   # step 1 = length + difficulty (R-WIZ-12)
 av_theme: {art_style: flat-grey, clip_style: none, palette: grey-amber, narrator_voice: vo.narrator, music_mood: still, sfx_set: test}
 ambient:
   night: {bed: amb.test-hum, accents: [acc.test-drip, acc.test-creak], interval_s: [20, 60]}
@@ -104,7 +104,7 @@ Neutral ids so no Dracula id ever appears. All four are always in play; one devi
 hunters:
   - {id: ash,  name: "Ash",  portrait: por.ash,  voice: vo.ash,  start_location: "K1 citadel", start_items: [lamp-oil]}
   - {id: bryn, name: "Bryn", portrait: por.bryn, voice: vo.bryn, start_location: "K1 citadel"}
-  - {id: cole, name: "Cole", portrait: por.cole, voice: vo.cole, start_location: "K1 citadel"}
+  - {id: cole, name: "Cole", portrait: por.cole, voice: vo.cole, start_location: "K1 citadel", start_items: [lamp-oil]}
   - {id: dell, name: "Dell", portrait: por.dell, voice: vo.dell, start_location: "K1 citadel"}
 cast:
   - {id: narrator, name: "Narrator", role: narrator, voice: vo.narrator}
@@ -114,7 +114,9 @@ cast:
 ```yaml
 nights:
   - {id: n1, index: 1, kingdom: fixed:K1, phases: [{id: night, advance: {after_actions: 99, on_event: grey-stair.done}}],
-     set_pieces: [{ref: grey-stair, required: true}], end: "flag(stair-done)"}
+     set_pieces: [{ref: grey-stair, required: true}], end: "flag(stair-done)", mood: mus.night-1}
+  - {id: n2, index: 2, kingdom: fixed:K1, phases: [{id: night, advance: {after_actions: 99, on_event: grey-stair-n2.done}}],
+     set_pieces: [{ref: grey-stair-n2, required: true}], end: "flag(knock-done)", mood: mus.night-2}
 set_pieces:
   - id: grey-stair
     night: n1
@@ -124,14 +126,21 @@ set_pieces:
            dungeon: grey-crypt, moment: grey-stair.04]
     outcome: {effects: [set_flag: stair-done], next: end}
     stats: [door-choice, crypt-depth]
+  - id: grey-stair-n2         # short second night: exists to test the night-mood crossfade (R3-UI notes §2.10)
+    night: n2
+    site: {kingdom: K1, building: sanctuary}
+    trigger: night-start
+    flow: [moment: grey-stair-n2.01, choice: grey-stair-n2.knock-choice, moment: grey-stair-n2.end]
+    outcome: {effects: [set_flag: knock-done], next: end}
+    stats: [knock-choice]
 quest_tokens:
   objective: {n1: [{site: "K1 sanctuary", set_piece: grey-stair}]}
 by_length:
-  short:    {label: "2 crypt rooms",  nights: [n1], set_pieces: {n1: [grey-stair]}, encounter_frequency: none, dungeons: {grey-crypt: {rooms: 2}}, timing: pending}
-  standard: {label: "4 crypt rooms",  nights: [n1], set_pieces: {n1: [grey-stair]}, encounter_frequency: none, dungeons: {grey-crypt: {rooms: 4}}, timing: pending}
-  long:     {label: "6 crypt rooms",  nights: [n1], set_pieces: {n1: [grey-stair]}, encounter_frequency: none, dungeons: {grey-crypt: {rooms: 6}}, timing: pending}
+  short:    {label: "2 crypt rooms",  nights: [n1, n2], set_pieces: {n1: [grey-stair], n2: [grey-stair-n2]}, encounter_frequency: none, dungeons: {grey-crypt: {rooms: 2}}, timing: pending}
+  standard: {label: "4 crypt rooms",  nights: [n1, n2], set_pieces: {n1: [grey-stair], n2: [grey-stair-n2]}, encounter_frequency: none, dungeons: {grey-crypt: {rooms: 4}}, timing: pending}
+  long:     {label: "6 crypt rooms",  nights: [n1, n2], set_pieces: {n1: [grey-stair], n2: [grey-stair-n2]}, encounter_frequency: none, dungeons: {grey-crypt: {rooms: 6}}, timing: pending}
 ```
-Only the crypt changes with length, so every length keeps the opening, the set piece and the ending (V-15).
+Only the crypt changes with length, so every length keeps the opening, the set piece, night 2 and the ending (V-15). Night 2 has no crypt, fight or items; the mood bed crossfades from `mus.night-1` to `mus.night-2` over 2-3 s at the night change.
 ## 4. Moments (`moments.yaml`)
 | Id | Kind | Target | Content | Advance |
 |---|---|---|---|---|
@@ -142,6 +151,10 @@ Only the crypt changes with length, so every length keeps the opening, the set p
 | `grey-stair.03` | clip | storyboard | Talking avatar: the Keeper, lines `ts-keeper-001`, `-002`, `-003` in order (F-10) | `clip-end` |
 | `grey-stair.door-choice` | pick-card | ipad:all | prompt for choice 5 | `step` |
 | `grey-stair.04` | still | storyboard | Narrator: "The lamps are lit, or they are not. The stair is quiet." | `next` |
+| `grey-stair-n2.01` | still | storyboard | Narrator: "Night again on the grey stair. The lamps are burning low." Keeper: "Something is knocking under the third step. I'd rather not open it alone." | `next` |
+| `grey-stair-n2.knock-choice` | pick-card | ipad:all | "Lift the step" / "Leave it be" (party, first press) | `step` |
+| `grey-stair-n2.end~lifted` | still | storyboard | `cond: chose(lift)`; Narrator: "Under the step, an old lamp, still warm. The knocking stops." | `next` |
+| `grey-stair-n2.end~left` | still | storyboard | `cond: chose(leave)`; Narrator: "The knocking fades by dawn. Nobody sleeps." | `next` |
 | `crypt.<room>` | still | storyboard | one per room: reveal line + cost (section 11) | `step` |
 | `end.lit.01` / `end.dark.01` | still | storyboard | endings (section 12) | `next` |
 | `end.lit.private.<h>` (x4) | text-card | ipad:<h> | one closing line per hunter (D18 rule: every holder, present or absent) | `next` |
@@ -155,9 +168,16 @@ choices:
     askers: present
     options:
       - {id: oil-the-hinge, label: "Oil the hinge (spend lamp oil)", cond: "holds(lamp-oil)",
-         effects: [spend_item: lamp-oil, advantage: {trait: Stealth, amount: 1, scope: present, duration: fight}]}
+         actor: {ask: "Who spends their oil?", from: "present & holds(lamp-oil)"},
+         effects: [spend_item: lamp-oil, advantage: {trait: Stealth, amount: 1, scope: present, duration: fight}],
+         stat: oil-spent}
       - {id: force-it, label: "Force it", effects: [track_add: {lamps-lit: -1}]}
     stat: door-choice
+  - id: grey-stair-n2.knock-choice
+    mode: party
+    askers: present
+    options: [{id: lift, label: "Lift the step"}, {id: leave, label: "Leave it be"}]
+    stat: knock-choice
   - id: grey-crypt.deeper-vote
     mode: vote
     askers: present
@@ -165,7 +185,7 @@ choices:
     options: [{id: deeper, label: "Go deeper"}, {id: leave, label: "Leave the crypt"}]
     stat: crypt-vote
 ```
-`force-it` has no cond, so the prompt never dead-ends (V-18). A tie with 2 or 4 hunters present leaves the crypt.
+`force-it` has no cond, so the prompt never dead-ends (V-18). `oil-the-hinge` names its actor (R3-UI-53): after the option is pressed, the eligible hunters are those present who hold lamp oil. One eligible hunter is assumed. Two or more (Ash and Cole both start with oil, so the test hits this) shows "Who spends their oil?" with one button per eligible hunter on the device that pressed the option, first press wins; Back returns to the options. The oil comes from the chosen hunter and `oil-spent` counts against them. A tie with 2 or 4 hunters present leaves the crypt.
 ## 6. Tower effect (`cues.yaml`)
 One library effect, FX-22 `room-cleared`. Only tower sounds that exist: Dungeon Complete (#58), Dungeon Footsteps (#56). No bell (tower has none), no Mac-synced bell.
 ```yaml
@@ -180,6 +200,13 @@ cues:
     hold_s: 3          # placeholder until #58 is measured
 ```
 Engine rules this cue proves: diff lights before send (a no-op write stalls the queue 30 s); one command at a time, 250 ms after each write; #56 starts ≥1.5 s after #58; never wait for a sound end (the tower doesn't report it). The cue's `hold_s` sets the wait instead; the talking-avatar line never starts inside it. Fallback plays on disconnect, calibration, or any failed/timed-out command.
+## 6a. Tower volume test (setup step `tower-volume-test`)
+Runs right after Connect Tower, only if a tower is connected; skipped silently with no tower. Closes GAP-HW-003 (do volumes 0-2 differ?).
+1. Board dialog "Tower volume test". The tower plays Dungeon Complete (#58) at volume 0, then 1, then 2, about 4 s apart (one command at a time, 250 ms after each write). The board shows "Level 0", "Level 1", "Level 2" as each plays. Lights unchanged.
+2. Balance check (optional, on by default): the start-up ambient bed plays at -30 LUFS, then #58 plays once at the host's chosen tier over it, with the bed ducked as in R3-UI audio rules. Board label: "Tower over the room sound".
+3. One iPad (first press) asks "Did the levels sound different?": All three differ / Only one level is louder / All the same / write-in. A "Play again" button repeats step 1.
+4. The answer, the write-in text, the tower firmware/version and the time are logged as stat `tower-volume-test` (event, scope session) and shown in the debug overlay.
+Labels stay neutral (no quiet/loud names) because the library's "2 is quietest" is unconfirmed until this result is in.
 ## 7-8. Items, track, corruption (`items.yaml`)
 ```yaml
 items:
@@ -222,7 +249,7 @@ endings:
 ## 14. Stats
 ```yaml
 stats:
-  custom: [{id: door-choice, type: event, scope: party}, {id: crypt-vote, type: event, scope: party},
+  custom: [{id: door-choice, type: event, scope: party}, {id: knock-choice, type: event, scope: party}, {id: tower-volume-test, type: event, scope: session}, {id: crypt-vote, type: event, scope: party},
            {id: crypt-depth, type: counter, scope: party}, {id: oil-spent, type: counter, scope: hunter}]
   highlight_weights: {crypt-depth: 2, door-choice: 1}
   timing: {marks: auto}
