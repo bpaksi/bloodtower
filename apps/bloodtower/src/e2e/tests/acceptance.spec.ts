@@ -72,7 +72,12 @@ test("the test pack's first night, end to end, on one board and two devices", as
       await expect(board.getByText(/Battery unavailable/)).toBeVisible();
       // Counted once the live state (and its QR) has rendered.
       await expect(board.getByRole("img", { name: "Join code" })).toBeVisible();
-      await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
+      // The only board controls are the Sound dialog's own (R3-UI-03), and it is closed here.
+      await expect(
+        board.locator(
+          "main :is(button, input, textarea, select, a, [onclick]):not([data-sound-dialog] *)",
+        ),
+      ).toHaveCount(0);
 
       await expect.poll(() => boardStates(boardFrames).length).toBeGreaterThan(0);
       const join = boardStates(boardFrames).at(-1)?.join as {

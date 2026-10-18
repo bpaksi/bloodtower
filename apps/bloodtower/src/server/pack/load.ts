@@ -17,6 +17,7 @@ import {
   type PackAssetIndex,
   validateAssetsFolder,
 } from "./assets.ts";
+import { PACK_AUDIO_DIR, validateAudioFolder } from "./audio.ts";
 import { PACK_CAMERA_DIR, validateCameraFolder } from "./camera.ts";
 
 /**
@@ -191,6 +192,10 @@ export const loadPackDir = (dir: string): PackLoadResult => {
     if (metadataOnly) continue;
     if (name === PACK_CAMERA_DIR) {
       validateCameraFolder(root, (item) => issues.push(item));
+      continue;
+    }
+    if (name === PACK_AUDIO_DIR) {
+      validateAudioFolder(root, (item) => issues.push(item));
       continue;
     }
     const dot = name.lastIndexOf(".");
