@@ -10,31 +10,43 @@ Bob runs these prompts in Claude Code on the Mac, one per branch. Wright tracks 
 
 **Hard constraints (every step):** No change to `bloodtower-protocols` message types or fields, engine session rules, or hub routing. The Story board still sends only `keeper-line-ended` (D7). Do not break camera tracks (`CameraStill`, `cameraStillImageStyle`, `data-camera-still`, acceptance camera assertions). Do not break audio layers (`BoardAudio`, `pickLayers`, `isVisualMoment` ducking/fade hooks in `LiveBoard.tsx`). Use pnpm and Next.js; scoped CSS on `.bt-board` for the TV layout.
 
+**Missing Illusionist assets (in progress, not delivered):**
+
+| Asset | Used for | Single swap point (create on first step that needs it) |
+|---|---|---|
+| **Dialog frame** | Centred board dialogs (Sound, startup/wizard, in-game waiting) | `src/web/components/board/DialogFrame.tsx` — export `DialogFrame` with `data-illusionist-asset="dialog-frame"`. Until delivery, render children inside `.bt-dialog-frame-placeholder` (CSS double-rule from `tokens.css`, labelled in code comment `ILLUSIONIST_PLACEHOLDER_DIALOG_FRAME`). No other file may draw its own modal chrome; import `DialogFrame` only. |
+| **Window mask** | R3-UI-02 motion-still glow on `/landing/hero.webp` | `src/web/components/board/boardWindowMask.ts` — export `BOARD_WINDOW_MASK_URL` (placeholder: inline SVG data URI in that file only, comment `ILLUSIONIST_PLACEHOLDER_WINDOW_MASK`). `board.css` references the mask only via `var(--bt-window-mask, …)` set from that module or a `data-window-mask` attribute on `.bt-board-backdrop`. |
+
+**Follow-up (after Illusionist delivery):** one small PR per asset — swap in final dialog frame / window mask from Illusionist at the swap point above; remove placeholder comments; no layout refactors.
+
+Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend on placeholder startup chrome. Do not start a step marked **blocked on asset** until the asset is delivered *or* Bob explicitly approves building the swap-point placeholder in that step (called out in the prompt).
+
 ## Status
 
 | Step | Branch | Depends on | Can run with | Status | PR # |
 |---|---|---|---|---|---|
-| 1 | `feat/visuals-01-sound-dialog` | none | 2 | todo | |
-| 2 | `feat/visuals-02-backdrop-flicker` | none | 1 | todo | |
-| 3 | `feat/visuals-03-startup-shell` | none | 4 | todo | |
-| 4 | `feat/visuals-04-carousel-dialog` | 3 | none | todo | |
-| 5 | `feat/visuals-05-startup-summary` | 3 | 6 | todo | |
-| 6 | `feat/visuals-06-play-chrome` | 3 | 5 | todo | |
+| 1 | `feat/visuals-01-sound-dialog` | none | — | blocked on asset (dialog frame) | |
+| 2 | `feat/visuals-02-backdrop-flicker` | none | — | blocked on asset (window mask) | |
+| 3 | `feat/visuals-03-startup-shell` | none | — | blocked on asset (dialog frame) | |
+| 4 | `feat/visuals-04-carousel-dialog` | 3 | — | blocked on asset (dialog frame) | |
+| 5 | `feat/visuals-05-startup-summary` | 3 | — | todo (after 3; ink panel, no dialog frame) | |
+| 6 | `feat/visuals-06-play-chrome` | none | 7 | todo | |
 | 7 | `feat/visuals-07-hunter-roll` | 6 | none | todo | |
-| 8 | `feat/visuals-08-play-parchment` | 6 | 9 | todo | |
-| 9 | `feat/visuals-09-waiting-dialog` | 8 | none | todo | |
-| 10 | `feat/visuals-10-visual-zoom` | 9 | none | todo | |
+| 8 | `feat/visuals-08-play-parchment` | 6 | 7 | todo | |
+| 9 | `feat/visuals-09-waiting-dialog` | 8 | — | blocked on asset (dialog frame) | |
+| 10 | `feat/visuals-10-visual-zoom` | 8 | none | todo | |
 | 11 | `feat/visuals-11-keeper-cinema` | 10 | none | todo | |
 
 ## Parallel waves
 
-- **Wave A:** 1 and 2. Step 1 owns `SoundDialog.tsx` and the `.bt-sound-*` block at the bottom of `board.css`. Step 2 owns only `.bt-board > .bt-board-backdrop` (and optional `::before` mask) in `board.css`; it does not edit `SoundDialog.tsx` or `StoryBoard.tsx`.
-- **Wave B:** 3. Step 3 owns startup vs play layout switching on `main.bt-board` (`data-board-mode`), `StoryBoard.tsx` structure for pre-`play` screens, and the related `board.css` grid rules. It must not edit `PlayPanel`, `CameraStill.tsx`, or `KeeperScene.tsx`.
-- **Wave C (after 3):** 4 and 5. Step 4 owns Pick Game markup/CSS (`PickStoryPanel`, `.bt-carousel*`) inside the centered shell. Step 5 owns the running summary aside (`R3-UI-25`) and startup dialog panels other than the carousel; whichever merges second rebases `StoryBoard.tsx` around the centered main column.
-- **Wave D (after 3):** 6. Step 6 owns the play-screen header (`bt-board-header`), the right `bt-pub` column during `play`, and hiding join/tower chrome per mock §4. Do not run with 4 or 5 (all touch `StoryBoard.tsx`).
-- **Wave E (after 6):** 7 then 8 (sequential: both edit `PlayPanel` and hunter/story CSS). Step 7 is hunter roll only; step 8 is parchment, still plate, and `NextPrompt` band.
-- **Wave F (after 8):** 9 then 10 (sequential: both edit play presentation and `LiveBoard.tsx` wrapper). Step 9 adds the small waiting dialog (R3-UI-30); step 10 adds full-screen visual layer and zoom (R3-UI-31/32) and wires `visual` from `LiveBoard` without changing layer picker logic.
-- **Wave G (after 10):** 11. Keeper full-layer polish (`KeeperScene.tsx`, keeper CSS, captions lower third R3-UI-33b).
+Bob should run **play TV track first** (no Illusionist frame/mask). **Startup / Sound / flicker last**, after assets land or via an approved placeholder-only PR for that step.
+
+- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (and `quit` if you keep play chrome there); it does not require step 3. Do not run 6 with 4 or 5.
+- **Wave P2 (after 8):** 10 then 11 (visual zoom, then Keeper). Step 10 does not require step 9 (waiting dialog is separate).
+- **Wave P3 (after 10, optional before assets):** 9 only after **dialog frame** is delivered (or Bob approves placeholder in step 9).
+- **Wave S (startup, after dialog frame):** 3, then 4 and 5 (4 and 5 rebase `StoryBoard.tsx`; 5 uses `.bt-panel` summary, not `DialogFrame`).
+- **Wave S2 (after window mask):** 2 alone (`.bt-board-backdrop` mask only).
+- **Wave S3 (after dialog frame, with or after 3):** 1 (`SoundDialog` wrapped in `DialogFrame`; can run with 3 if files conflict—prefer after 3 merges).
 
 When shell steps 5–7 from `shell-prompts.md` land (`setup` flow screens, Claim Hunters rename, running-summary data), step 5 should gain follow-up rows in a small patch PR or a step-5b prompt—do not block the visuals track on shell, but leave summary hooks ready (see step 5).
 
@@ -49,13 +61,15 @@ When shell steps 5–7 from `shell-prompts.md` land (`setup` flow screens, Claim
 
 ```text
 Branch: feat/visuals-01-sound-dialog
-Depends on: none. Can run with step 2 (do not edit .bt-board-backdrop rules).
+Depends on: step 3 merged (recommended) or dialog frame delivered. Do not run until dialog frame is delivered unless Bob approves placeholder-only work. Do not edit .bt-board-backdrop (step 2).
 
-Read CLAUDE.md, docs/art-direction/game-look.md (§2–3 frames, §4a type, §7 avoid), research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-03). Visual target: research/game-design/mockups/2026-10-17/frames-mac-0-sound.png. Code: src/web/components/board/SoundDialog.tsx, board.css (.bt-sound-backdrop through .bt-sound-continue).
+Missing asset: Illusionist **dialog frame** (in progress). Wrap the dialog in `DialogFrame` from `src/web/components/board/DialogFrame.tsx` (create swap point on first use). Until delivery, `DialogFrame` renders `.bt-dialog-frame-placeholder` only inside that file. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`; remove `ILLUSIONIST_PLACEHOLDER_DIALOG_FRAME`.
 
-Goal: the Sound dialog matches the Illusionist frame language (parchment or inked panel over the landing painting), TV-readable type (≥ 28px labels), candle focus rings—not browser default grey card.
+Read CLAUDE.md, docs/art-direction/game-look.md (§2–3 frames, §4a type, §7 avoid), research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-03). Visual target: research/game-design/mockups/2026-10-17/frames-mac-0-sound.png. Code: SoundDialog.tsx, DialogFrame.tsx, board.css (.bt-sound-*; no duplicate frame chrome outside DialogFrame).
 
-1. Restyle the dialog: double candle rule, grain/foxing, Cormorant SC title, IM Fell SC labels, blood Continue band per tokens. Keep the same DOM hooks (`data-sound-dialog`, `#bt-sound-music`, etc.) so sound-dialog.spec.ts and acceptance "board has no buttons except Sound" keep working.
+Goal: the Sound dialog matches the Illusionist frame language over the landing painting, TV-readable type (≥ 28px labels), candle focus rings—not browser default grey card.
+
+1. Restyle inner content: Cormorant SC title, IM Fell SC labels, blood Continue band per tokens. Outer chrome comes only from `DialogFrame`. Keep the same DOM hooks (`data-sound-dialog`, `#bt-sound-music`, etc.) so sound-dialog.spec.ts and acceptance "board has no buttons except Sound" keep working.
 2. Sliders: custom track/thumb or styled range that reads as physical, not Material. Test buttons stay board-local controls (only allowed buttons on the board).
 3. Backdrop: void scrim over the landing painting; do not block the painting entirely (match mock transparency).
 4. Reduced motion: no ink-in animation on open; optional 300ms opacity fade only.
@@ -73,13 +87,15 @@ Open a PR titled "feat(bloodtower): Sound dialog visuals (visuals step 1)".
 
 ```text
 Branch: feat/visuals-02-backdrop-flicker
-Depends on: none. Can run with step 1 (touch only .bt-board-backdrop in board.css).
+Depends on: none. Do not run until **window mask** is delivered unless Bob approves placeholder-only work. Touch only `.bt-board-backdrop` and `boardWindowMask.ts`; do not edit SoundDialog or DialogFrame.
 
-Read CLAUDE.md, research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-01, R3-UI-02), docs/research/splash-animation/README.md (motion-still technique, wish list). Code: board.css (.bt-board > .bt-board-backdrop), optional tiny helper only if unit-testable without DOM.
+Missing asset: Illusionist **window mask** (in progress). Use `BOARD_WINDOW_MASK_URL` from `src/web/components/board/boardWindowMask.ts` as the only mask source (`ILLUSIONIST_PLACEHOLDER_WINDOW_MASK` until delivery). Wire `board.css` through `var(--bt-window-mask)` set from that export. Follow-up: swap in final window mask from Illusionist in `boardWindowMask.ts`; remove placeholder.
+
+Read CLAUDE.md, research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-01, R3-UI-02), docs/research/splash-animation/README.md (motion-still technique, wish list). Code: board.css (.bt-board > .bt-board-backdrop), boardWindowMask.ts.
 
 Goal: the hero painting on the Story board (`/landing/hero.webp`) has slow, irregular window-glow flicker (motion-still: static art + mask layer), not a strobe.
 
-1. Add a mask layer (CSS/SVG) over the backdrop `::after` gradient: opacity animation ~1–2 Hz with stepped easing (`steps(1,end)` per game-look §5), candle-coloured glow in the window region. Keep sepia on the photo.
+1. Apply the mask over the backdrop `::after` gradient: opacity animation ~1–2 Hz with stepped easing (`steps(1,end)` per game-look §5), candle-coloured glow in the window region. Keep sepia on the photo.
 2. `prefers-reduced-motion: reduce`: steady glow, no flicker (R3-UI-02).
 3. Flicker runs on all screens that show `.bt-board-backdrop` (splash through play). Do not add JS timers.
 
@@ -98,14 +114,16 @@ Open a PR titled "feat(bloodtower): board backdrop flicker (visuals step 2)".
 
 ```text
 Branch: feat/visuals-03-startup-shell
-Depends on: none. Can run with wave A steps 1–2 after they merge (rebase). Do not run with 4 or 5 until this merges.
+Depends on: none. Run after play track (steps 6–11) and after **dialog frame** is delivered unless Bob approves placeholder-only work. Do not run with 4 or 5 until this merges.
 
-Read CLAUDE.md, apps/bloodtower/spec.md (D28: start-up dialogs not yet centred), research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-01, R3-UI-10 layer 3, R3-UI-11). Visual target: v2-mac.png (dialogs over painting). Code: StoryBoard.tsx, board.css (grid for .bt-board-main), src/web/lib/screens.ts only if you need a helper for "is startup screen".
+Missing asset: Illusionist **dialog frame** (in progress). Introduce `DialogFrame.tsx` here if step 1 has not run. Wrap each startup centre column panel (`SplashPanel`, tower/pick/settings/party/begin, etc.) in `DialogFrame`; placeholder chrome lives only in `DialogFrame.tsx`. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`.
+
+Read CLAUDE.md, apps/bloodtower/spec.md (D28: start-up dialogs not yet centred), research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-01, R3-UI-10 layer 3, R3-UI-11). Visual target: v2-mac.png (dialogs over painting). Code: StoryBoard.tsx, DialogFrame.tsx, board.css (grid for .bt-board-main), src/web/lib/screens.ts only if you need a helper for "is startup screen".
 
 Goal: before `play`, the board is not a three-column dashboard: the landing painting fills the view, with one centred dialog (layer 3). Hunter roll and join QR are hidden or folded into the dialog area per R3-UI-11; the R2-01 status strip stays debug-only (`?debug=1`, already hidden in board-look).
 
-1. Set `data-board-mode="startup"` on `main.bt-board` for screens splash, pick-story, game-settings, not-playable, tower-connect, party-join, begin; `data-board-mode="play"` for play and quit (quit may use startup styling—pick one and document in PR).
-2. CSS: in startup mode, collapse `.bt-board-main` to a single centred column (max width ~min(52rem, 92vw)), drop side hunter list and right join aside from layout (QR may move inside the active panel on party-join).
+1. Set `data-board-mode="startup"` on `main.bt-board` for screens splash, pick-story, game-settings, not-playable, tower-connect, party-join, begin; `data-board-mode="play"` for play and quit (step 6 may already set play mode—rebase cleanly). Quit may use startup styling—pick one and document in PR.
+2. CSS: in startup mode, collapse `.bt-board-main` to a single centred column (max width ~min(52rem, 92vw)), drop side hunter list and right join aside from layout (QR may move inside the active panel on party-join). Outer dialog chrome only via `DialogFrame`.
 3. Keep `NextPrompt` visible under the dialog (R2-115 mirror). Tower header zones may stay minimal or move into the dialog—follow Open question 1 for play; startup can show slim tower/join in header or inside dialog.
 4. Pick Game carousel must still fit without horizontal scroll at 1024×594 (opening-screens / board-look viewports).
 
@@ -122,13 +140,15 @@ Open a PR titled "feat(bloodtower): centered startup shell (visuals step 3)".
 
 ```text
 Branch: feat/visuals-04-carousel-dialog
-Depends on: step 3 (centered shell). Run alone (owns PickStoryPanel + carousel CSS).
+Depends on: step 3 (centered shell). Blocked on **dialog frame** (same as step 3). Run alone (owns PickStoryPanel + carousel CSS).
+
+Missing asset: Illusionist **dialog frame** — carousel lives inside `DialogFrame` from step 3; do not add a second outer frame. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`.
 
 Read CLAUDE.md, spec.md D28, research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-24, R3-UI-51). Visual: v2-mac.png carousel frame; docs/art-direction/game-look.md §3 ornate border on art. Code: StoryBoard.tsx (PickStoryPanel, CarouselPeek), board.css (.bt-carousel*).
 
 Goal: Pick Game reads as a centred parchment dialog with cover art in a plate frame, focused card dominant, neighbours peeking—matching D28 and the Oct 17 mac mock inside the startup shell.
 
-1. Carousel layout inside one parchment card: 16:9 cover with double rule + sepia filter; title, tagline, "N hunters" typography per §4a.
+1. Carousel layout inside `DialogFrame` + inner parchment: 16:9 cover with double rule + sepia filter; title, tagline, "N hunters" typography per §4a.
 2. Peek cards: smaller, partial cover, title only; maintain wrap behaviour with two packs (peek deduping when prev === next).
 3. Devices still have no images; board-only covers unchanged URLs.
 
@@ -145,7 +165,7 @@ Open a PR titled "feat(bloodtower): Pick Game carousel visuals (visuals step 4)"
 
 ```text
 Branch: feat/visuals-05-startup-summary
-Depends on: step 3. Can run with step 6 after 3 merges (rebases StoryBoard.tsx).
+Depends on: step 3. Can run with step 6 only after 3 merges (rebases StoryBoard.tsx). Does not use dialog frame — summary is `.bt-panel` / ink panel per game-look.md §3.
 
 Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-25), shell-prompts.md step 5 (future setup steps). Code: StoryBoard.tsx (new SummaryPanel or aside), board.css, src/web/lib/screens.ts helpers.
 
@@ -168,7 +188,7 @@ Open a PR titled "feat(bloodtower): startup running summary (visuals step 5)".
 
 ```text
 Branch: feat/visuals-06-play-chrome
-Depends on: step 3 (startup vs play modes). Do not run with 4 or 5.
+Depends on: none (first play-track step). Do not run with 4 or 5. Does not use dialog frame or window mask.
 
 Read docs/art-direction/game-look.md §4 (1920 layout), mocks/story-board.html header grid. Code: StoryBoard.tsx header, .bt-board-main grid for play mode, .bt-pub aside.
 
@@ -237,14 +257,16 @@ Open a PR titled "feat(bloodtower): play parchment and prompt band (visuals step
 
 ```text
 Branch: feat/visuals-09-waiting-dialog
-Depends on: step 8. Run alone.
+Depends on: step 8. Run after **dialog frame** is delivered (or Bob approves placeholder). Run after step 10 if 10 is in flight (rebases play layout). Reuse `DialogFrame.tsx` from step 3/1.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30, R3-UI-115). Code: StoryBoard PlayPanel, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
+Missing asset: Illusionist **dialog frame** (in progress). Small centred waiting UI must be wrapped in `DialogFrame` only; no ad-hoc border CSS elsewhere. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`.
+
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30, R3-UI-115). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
 
 Goal: when play has no full-screen visual (no still, not Keeper, not clip), show a small centred waiting dialog over the painting with the prompt label ("Waiting for…"), not a full parchment page filling the column.
 
 1. Detect waiting: `screen === "play"` && moment present && !isVisualMoment(moment) (import same helper as LiveBoard).
-2. Hide or shrink parchment/still area; show compact dialog with prompt from `state.prompt` or nextPrompt().
+2. Hide or shrink parchment/still area; show compact `DialogFrame` with prompt from `state.prompt` or nextPrompt().
 3. Audio: beds keep playing (layers.ts already treats non-visual as waiting).
 
 No protocol changes.
@@ -260,11 +282,11 @@ Open a PR titled "feat(bloodtower): in-game waiting dialog (visuals step 9)".
 
 ```text
 Branch: feat/visuals-10-visual-zoom
-Depends on: step 9. Run alone.
+Depends on: step 8. Run alone. Does not use dialog frame or window mask. Step 9 may follow later.
 
 Read playthrough-ui-notes (R3-UI-10 layer 2, R3-UI-31, R3-UI-32, R3-UI-60 fade ~1s). Code: StoryBoard.tsx, LiveBoard.tsx (wrapper only—pass `visual` or class), board.css, layers.ts (read only).
 
-Goal: when isVisualMoment is true, the still/keeper/clip presentation animates to full-screen layer 2 (~0.6–1.0s zoom), letterbox per Open question 4 default (a); reduced motion = opacity cut. Exiting is driven by iPad continue (state change)—animate back to waiting dialog when moment ends.
+Goal: when isVisualMoment is true, the still/keeper/clip presentation animates to full-screen layer 2 (~0.6–1.0s zoom), letterbox per Open question 4 default (a); reduced motion = opacity cut. Exiting is driven by iPad continue (state change)—animate back to waiting dialog when moment ends (step 9 styling optional until frame asset lands).
 
 1. Add `data-board-layer="visual" | "waiting" | "startup"` on main or a wrapper; CSS transitions; do not add board buttons.
 2. LiveBoard: keep `audio.current?.update(pickLayers({ visual }))` behaviour; optional class when visual true.
