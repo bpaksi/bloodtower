@@ -52,28 +52,6 @@ const holdFrame = (track: CameraTrack): CameraFrame => {
   return { x: 0.5, y: 0.5, w: 1, h: 1 };
 };
 
-/** Visible still fraction under `object-fit: cover` with no extra transform. */
-export const coverVisibleFraction = (
-  containerAspect: number,
-  stillAspect: number = STILL_ASPECT_DEFAULT,
-): CameraFrame => {
-  if (containerAspect >= stillAspect) {
-    return { x: 0.5, y: 0.5, w: 1, h: stillAspect / containerAspect };
-  }
-  return { x: 0.5, y: 0.5, w: containerAspect / stillAspect, h: 1 };
-};
-
-/** Visible still fraction under `object-fit: contain` with no extra transform. */
-export const containVisibleFraction = (
-  containerAspect: number,
-  stillAspect: number = STILL_ASPECT_DEFAULT,
-): CameraFrame => {
-  if (containerAspect >= stillAspect) {
-    return { x: 0.5, y: 0.5, w: 1, h: stillAspect / containerAspect };
-  }
-  return { x: 0.5, y: 0.5, w: containerAspect / stillAspect, h: 1 };
-};
-
 /** Frame at `seconds` on the track clock. Gaps hold the previous cue's `to`. */
 export const frameAtTime = (track: CameraTrack, seconds: number): CameraFrame => {
   if (track.cues.length === 0) return holdFrame(track);
@@ -99,29 +77,62 @@ export const frameAtTime = (track: CameraTrack, seconds: number): CameraFrame =>
   return holdFrame(track);
 };
 
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
+
+/** Width of the still, in well heights, when `object-fit: cover` fills the well. */
+const coverWidth = (containerAspect: number, stillAspect: number): number =>
+  Math.max(containerAspect, stillAspect);
+
 /**
- * CSS transform for a camera still (`object-fit: contain`) filling its well.
- * Frames are fractions of the still bitmap; crop is container-invariant in still space.
+ * The part of the still the well shows for `frame`, as fractions of the still. The still keeps
+ * its aspect (one uniform scale), the whole cue rect is in view with the artwork around it filling
+ * the rest of the well, the zoom never drops below cover (no bars), and the view stays inside the
+ * still (the centre moves in from the edge when it must).
+ */
+export const visibleRegion = (
+  frame: CameraFrame,
+  containerAspect: number = STILL_ASPECT_DEFAULT,
+  stillAspect: number = STILL_ASPECT_DEFAULT,
+): CameraFrame => {
+  const width = Math.max(
+    coverWidth(containerAspect, stillAspect),
+    Math.min(containerAspect / frame.w, stillAspect / frame.h),
+  );
+  const w = containerAspect / width;
+  const h = stillAspect / width;
+  return {
+    x: clamp(frame.x, w / 2, 1 - w / 2),
+    y: clamp(frame.y, h / 2, 1 - h / 2),
+    w,
+    h,
+  };
+};
+
+/**
+ * CSS transform for a camera still drawn with `object-fit: cover` at the well's size. Translate
+ * percentages are of the well, so the result depends only on the two aspects (width / height).
  */
 export const frameToTransform = (
   frame: CameraFrame,
-  _containerAspect: number = STILL_ASPECT_DEFAULT,
-  _stillAspect: number = STILL_ASPECT_DEFAULT,
+  containerAspect: number = STILL_ASPECT_DEFAULT,
+  stillAspect: number = STILL_ASPECT_DEFAULT,
 ): string => {
-  const scaleX = 1 / frame.w;
-  const scaleY = 1 / frame.h;
-  const tx = (0.5 - frame.x) * scaleX * 100;
-  const ty = (0.5 - frame.y) * scaleY * 100;
-  return `translate(${tx}%, ${ty}%) scale(${scaleX}, ${scaleY})`;
+  const region = visibleRegion(frame, containerAspect, stillAspect);
+  const base = coverWidth(containerAspect, stillAspect);
+  const scale = containerAspect / region.w / base;
+  const tx = (-scale * (region.x - 0.5) * base * 100) / containerAspect;
+  const ty = (-scale * (region.y - 0.5) * base * 100) / stillAspect;
+  return `translate(${tx}%, ${ty}%) scale(${scale})`;
 };
 
-const TRANSFORM_RE = /translate\(([-\d.e]+)%, ([-\d.e]+)%\) scale\(([-\d.e]+)(?:, ([-\d.e]+))?\)/;
+const TRANSFORM_RE = /^translate\(([-\d.e]+)%, ([-\d.e]+)%\) scale\(([-\d.e]+)\)$/;
 
-/** Decodes a {@link frameToTransform} string back into the still-space crop (for tests). */
-export const stillFrameFromTransform = (
+/** Decodes a {@link frameToTransform} string back into the still region it shows (for tests). */
+export const regionFromTransform = (
   transform: string,
-  _containerAspect: number = STILL_ASPECT_DEFAULT,
-  _stillAspect: number = STILL_ASPECT_DEFAULT,
+  containerAspect: number = STILL_ASPECT_DEFAULT,
+  stillAspect: number = STILL_ASPECT_DEFAULT,
 ): CameraFrame => {
   const match = TRANSFORM_RE.exec(transform);
   if (!match) {
@@ -129,13 +140,14 @@ export const stillFrameFromTransform = (
   }
   const tx = Number(match[1]);
   const ty = Number(match[2]);
-  const scaleX = Number(match[3]);
-  const scaleY = match[4] === undefined ? scaleX : Number(match[4]);
+  const scale = Number(match[3]);
+  const base = coverWidth(containerAspect, stillAspect);
+  const width = scale * base;
   return {
-    x: 0.5 - tx / (100 * scaleX),
-    y: 0.5 - ty / (100 * scaleY),
-    w: 1 / scaleX,
-    h: 1 / scaleY,
+    x: 0.5 - (tx * containerAspect) / (100 * scale * base),
+    y: 0.5 - (ty * stillAspect) / (100 * scale * base),
+    w: containerAspect / width,
+    h: stillAspect / width,
   };
 };
 

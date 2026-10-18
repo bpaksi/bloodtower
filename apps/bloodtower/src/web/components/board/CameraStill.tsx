@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cameraStillImageStyle } from "../../lib/cameraStillStyle.ts";
-import type { CameraTrack } from "../../lib/cameraTrack.ts";
+import { type CameraTrack, STILL_ASPECT_DEFAULT } from "../../lib/cameraTrack.ts";
 import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { fetchCameraTrack, packTrackStillUrl, preloadStill } from "../../lib/packCamera.ts";
 
@@ -24,7 +24,10 @@ export function CameraStill({
   const [track, setTrack] = useState<CameraTrack | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [reduced, setReduced] = useState(false);
+  const [containerAspect, setContainerAspect] = useState(STILL_ASPECT_DEFAULT);
+  const [stillAspect, setStillAspect] = useState(STILL_ASPECT_DEFAULT);
   const mountAt = useRef(performance.now());
+  const well = useRef<HTMLDivElement>(null);
 
   const fallbackSrc = packStillImageUrl(assetId, packId);
 
@@ -57,6 +60,19 @@ export function CameraStill({
   }, []);
 
   useEffect(() => {
+    const element = well.current;
+    if (!element || typeof ResizeObserver !== "function") return;
+    const sync = () => {
+      const { width, height } = element.getBoundingClientRect();
+      if (width > 0 && height > 0) setContainerAspect(width / height);
+    };
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (reduced) return;
     let frame = 0;
     const tick = (now: number) => {
@@ -67,19 +83,23 @@ export function CameraStill({
     return () => cancelAnimationFrame(frame);
   }, [reduced]);
 
-  const imageStyle = cameraStillImageStyle(track, seconds, reduced);
+  const imageStyle = cameraStillImageStyle(track, seconds, reduced, containerAspect, stillAspect);
 
   const src = track ? packTrackStillUrl(track.still, packId) : fallbackSrc;
 
   return (
-    <div className="bt-still" data-camera-still="">
+    <div className="bt-still" data-camera-still="" ref={well}>
       {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
       <img
         alt=""
         data-still={assetId}
-        data-camera-track={track ? momentId : ""}
+        data-camera-track={track ? momentId : undefined}
         data-camera-reduced={reduced ? "true" : "false"}
         src={src}
+        onLoad={(event) => {
+          const { naturalWidth, naturalHeight } = event.currentTarget;
+          if (naturalWidth > 0 && naturalHeight > 0) setStillAspect(naturalWidth / naturalHeight);
+        }}
         style={imageStyle}
       />
     </div>

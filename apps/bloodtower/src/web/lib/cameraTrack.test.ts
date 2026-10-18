@@ -1,15 +1,47 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   applyEase,
   type CameraFrame,
   type CameraTrack,
-  coverVisibleFraction,
   estimateSpeechDurationSeconds,
   frameAtTime,
   frameToTransform,
+  regionFromTransform,
   STILL_ASPECT_DEFAULT,
-  stillFrameFromTransform,
+  visibleRegion,
 } from "./cameraTrack.ts";
+
+const packCameraDir = new URL("../../../../../packs/test/camera/", import.meta.url);
+
+/** Every cue frame in the test pack's camera sidecars, labelled for failure messages. */
+const packFrames: { label: string; frame: CameraFrame }[] = readdirSync(packCameraDir)
+  .filter((name) => name.endsWith(".json"))
+  .flatMap((name) => {
+    const parsed = JSON.parse(readFileSync(new URL(name, packCameraDir), "utf8")) as CameraTrack;
+    return parsed.cues.flatMap((cue, index) => [
+      { label: `${parsed.id} cue ${index} from`, frame: cue.from },
+      { label: `${parsed.id} cue ${index} to`, frame: cue.to },
+    ]);
+  });
+
+/** Well shapes the board can take: wide, the usual desktop well, 16:9, square, tall. */
+const containerAspects = [21 / 9, 1.37, STILL_ASPECT_DEFAULT, 1, 9 / 16];
+const EPSILON = 1e-9;
+
+/** How the view's span on one axis relates to the cue's span on that axis. */
+const axisFit = (
+  viewCenter: number,
+  viewSize: number,
+  cueCenter: number,
+  cueSize: number,
+): "contains" | "inside" | "outside" => {
+  const [viewMin, viewMax] = [viewCenter - viewSize / 2, viewCenter + viewSize / 2];
+  const [cueMin, cueMax] = [cueCenter - cueSize / 2, cueCenter + cueSize / 2];
+  if (viewMin <= cueMin + EPSILON && viewMax >= cueMax - EPSILON) return "contains";
+  if (viewMin >= cueMin - EPSILON && viewMax <= cueMax + EPSILON) return "inside";
+  return "outside";
+};
 
 const track: CameraTrack = {
   id: "grey-stair.01",
@@ -53,38 +85,67 @@ const expectFrameClose = (actual: CameraFrame, expected: CameraFrame) => {
   expect(actual.h).toBeCloseTo(expected.h, 5);
 };
 
-describe("coverVisibleFraction", () => {
-  const rs = STILL_ASPECT_DEFAULT;
+describe("visibleRegion", () => {
+  it("covers every test pack cue", () => {
+    expect(packFrames.length).toBeGreaterThanOrEqual(8);
+  });
 
-  it("crops height on a wide container (21:9)", () => {
-    expect(coverVisibleFraction(21 / 9, rs)).toEqual({
+  for (const aspect of containerAspects) {
+    for (const { label, frame } of packFrames) {
+      it(`frames ${label} with no stretch or bars in a ${aspect.toFixed(2)} well`, () => {
+        const region = visibleRegion(frame, aspect, STILL_ASPECT_DEFAULT);
+        // Uniform scale: the region in pixels has the well's aspect, so the still is not stretched.
+        expect((region.w * STILL_ASPECT_DEFAULT) / region.h).toBeCloseTo(aspect, 9);
+        // No bars: the region never leaves the still.
+        expect(region.x - region.w / 2).toBeGreaterThanOrEqual(-EPSILON);
+        expect(region.x + region.w / 2).toBeLessThanOrEqual(1 + EPSILON);
+        expect(region.y - region.h / 2).toBeGreaterThanOrEqual(-EPSILON);
+        expect(region.y + region.h / 2).toBeLessThanOrEqual(1 + EPSILON);
+        // On each axis the view holds the cue's whole extent or, when the cue is wider (taller)
+        // than the well allows without bars, sits inside it; on at least one axis it holds it.
+        const x = axisFit(region.x, region.w, frame.x, frame.w);
+        const y = axisFit(region.y, region.h, frame.y, frame.h);
+        expect(x).not.toBe("outside");
+        expect(y).not.toBe("outside");
+        expect([x, y]).toContain("contains");
+      });
+    }
+  }
+
+  it("shows exactly the cue rect when it matches the well's aspect", () => {
+    const frame = { x: 0.4, y: 0.45, w: 0.5, h: 0.5 };
+    expectFrameClose(visibleRegion(frame, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT), frame);
+  });
+
+  it("zooms in on a tight cue and centres it", () => {
+    const frame = { x: 0.5, y: 0.63, w: 0.42, h: 0.28 };
+    const region = visibleRegion(frame, 1.37, STILL_ASPECT_DEFAULT);
+    expect(region.x).toBeCloseTo(0.5, 9);
+    expect(region.y).toBeCloseTo(0.63, 9);
+    expect(region.w).toBeLessThan(0.5);
+  });
+
+  it("falls back to cover for the full still in a non-16:9 well", () => {
+    const full = { x: 0.5, y: 0.5, w: 1, h: 1 };
+    expectFrameClose(visibleRegion(full, 1, STILL_ASPECT_DEFAULT), {
+      x: 0.5,
+      y: 0.5,
+      w: 1 / STILL_ASPECT_DEFAULT,
+      h: 1,
+    });
+    expectFrameClose(visibleRegion(full, 21 / 9, STILL_ASPECT_DEFAULT), {
       x: 0.5,
       y: 0.5,
       w: 1,
-      h: rs / (21 / 9),
+      h: STILL_ASPECT_DEFAULT / (21 / 9),
     });
   });
 
-  it("crops width on a square container", () => {
-    expect(coverVisibleFraction(1, rs)).toEqual({
-      x: 0.5,
-      y: 0.5,
-      w: 1 / rs,
-      h: 1,
-    });
-  });
-
-  it("crops width on a tall container (9:16)", () => {
-    expect(coverVisibleFraction(9 / 16, rs)).toEqual({
-      x: 0.5,
-      y: 0.5,
-      w: 9 / 16 / rs,
-      h: 1,
-    });
-  });
-
-  it("shows the full still on a 16:9 container", () => {
-    expect(coverVisibleFraction(rs, rs)).toEqual({ x: 0.5, y: 0.5, w: 1, h: 1 });
+  it("slides the view in from the edge instead of showing past it", () => {
+    const corner = { x: 0.1, y: 0.9, w: 0.2, h: 0.2 };
+    const region = visibleRegion(corner, 1, STILL_ASPECT_DEFAULT);
+    expect(region.x - region.w / 2).toBeCloseTo(0, 9);
+    expect(region.y + region.h / 2).toBeCloseTo(1, 9);
   });
 });
 
@@ -105,37 +166,25 @@ describe("cameraTrack", () => {
     expect(frameAtTime(gapTrack, 3)).not.toEqual(gapTrack.cues[1]?.from);
   });
 
-  it("round-trips a crop on a 16:9 container", () => {
-    const frame = { x: 0.5, y: 0.5, w: 0.5, h: 0.5 };
-    const transform = frameToTransform(frame, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT);
-    expectFrameClose(
-      stillFrameFromTransform(transform, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT),
-      frame,
-    );
-  });
-
-  it("maps a track rect to the same still-space region across container aspects", () => {
-    const frame = { x: 0.5, y: 0.63, w: 0.42, h: 0.28 };
-    const aspects = [21 / 9, 1, 9 / 16, STILL_ASPECT_DEFAULT];
-    const crops = aspects.map((aspect) =>
-      stillFrameFromTransform(frameToTransform(frame, aspect, STILL_ASPECT_DEFAULT), aspect),
-    );
-    const first = crops[0];
-    expect(first).toBeDefined();
-    if (!first) return;
-    for (let index = 1; index < crops.length; index++) {
-      const next = crops[index];
-      expect(next).toBeDefined();
-      if (!next) return;
-      expectFrameClose(next, first);
+  it("emits one uniform scale that decodes back to the visible region", () => {
+    for (const aspect of containerAspects) {
+      for (const { frame } of packFrames) {
+        const transform = frameToTransform(frame, aspect, STILL_ASPECT_DEFAULT);
+        expect(transform).toMatch(/scale\([-\d.e]+\)$/);
+        expectFrameClose(
+          regionFromTransform(transform, aspect, STILL_ASPECT_DEFAULT),
+          visibleRegion(frame, aspect, STILL_ASPECT_DEFAULT),
+        );
+      }
     }
-    expectFrameClose(first, frame);
   });
 
-  it("uses a neutral transform at the full still frame", () => {
+  it("uses a neutral transform at the full still frame in a 16:9 well", () => {
     const full = { x: 0.5, y: 0.5, w: 1, h: 1 };
-    const identity = frameToTransform(full, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT);
-    expect(identity).toContain("scale(1, 1)");
+    const transform = frameToTransform(full, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT);
+    const region = regionFromTransform(transform, STILL_ASPECT_DEFAULT, STILL_ASPECT_DEFAULT);
+    expect(transform).toMatch(/scale\(1\)$/);
+    expectFrameClose(region, full);
   });
 
   it("estimates speech duration from words and pause tags", () => {
