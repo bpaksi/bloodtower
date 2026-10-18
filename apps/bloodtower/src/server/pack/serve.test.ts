@@ -1,4 +1,4 @@
-import { mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -16,6 +16,15 @@ afterEach(async () => {
   }
   servers.length = 0;
 });
+
+// server.close() waits for every open socket. A response whose body is never read keeps its
+// socket open, and a large file then stays blocked on the socket buffer, so close() hangs.
+// Read the body here so each request finishes before the test ends.
+const fetchDrained = async (url: string) => {
+  const res = await fetch(url);
+  await res.arrayBuffer();
+  return res;
+};
 
 const startPackServer = async () => {
   const loaded = loadPackDir(join(loadConfig().packsDir, "test"));
@@ -45,17 +54,17 @@ describe("pack asset HTTP", () => {
     expect(byId.headers.get("content-type")).toBe("image/png");
     expect(Buffer.from(await byId.arrayBuffer()).length).toBeGreaterThan(0);
 
-    const byFile = await fetch(`${base}/packs/test/assets/fx-hall.png`);
+    const byFile = await fetchDrained(`${base}/packs/test/assets/fx-hall.png`);
     expect(byFile.status).toBe(200);
     expect(byFile.headers.get("content-type")).toBe("image/png");
 
-    const traversal = await fetch(`${base}/packs/test/assets/%2e%2e%2fsecret.png`);
+    const traversal = await fetchDrained(`${base}/packs/test/assets/%2e%2e%2fsecret.png`);
     expect(traversal.status).toBe(404);
 
-    const unknown = await fetch(`${base}/packs/test/assets/not-declared.png`);
+    const unknown = await fetchDrained(`${base}/packs/test/assets/not-declared.png`);
     expect(unknown.status).toBe(404);
 
-    const fakePack = await fetch(`${base}/packs/other/asset/fx.hall`);
+    const fakePack = await fetchDrained(`${base}/packs/other/asset/fx.hall`);
     expect(fakePack.status).toBe(404);
 
     for (const momentId of ["grey-stair.01", "grey-stair.04"]) {
@@ -66,25 +75,27 @@ describe("pack asset HTTP", () => {
       expect(body.id).toBe(momentId);
     }
 
-    const missingCamera = await fetch(`${base}/packs/test/camera/not-a-moment.json`);
+    const missingCamera = await fetchDrained(`${base}/packs/test/camera/not-a-moment.json`);
     expect(missingCamera.status).toBe(404);
 
-    const cameraTraversal = await fetch(`${base}/packs/test/camera/%2e%2e%2fassets%2ffx-hall.png`);
+    const cameraTraversal = await fetchDrained(
+      `${base}/packs/test/camera/%2e%2e%2fassets%2ffx-hall.png`,
+    );
     expect(cameraTraversal.status).toBe(404);
 
-    const cameraTraversalStem = await fetch(
+    const cameraTraversalStem = await fetchDrained(
       `${base}/packs/test/camera/%2e%2e%2fgrey-stair.04.json`,
     );
     expect(cameraTraversalStem.status).toBe(404);
 
-    const cameraSlash = await fetch(`${base}/packs/test/camera/foo%2fbar.json`);
+    const cameraSlash = await fetchDrained(`${base}/packs/test/camera/foo%2fbar.json`);
     expect(cameraSlash.status).toBe(404);
   });
 });
 
 describe("resolveAssetImage", () => {
   it("resolves by manifest path stem in an isolated assets folder", () => {
-    const dir = join(tmpdir(), `bloodtower-resolve-${Date.now()}`);
+    const dir = mkdtempSync(join(tmpdir(), "bloodtower-resolve-"));
     const assetsDir = join(dir, "assets");
     mkdirSync(assetsDir, { recursive: true });
     writeFileSync(join(assetsDir, "fx-hall.png"), "png");
@@ -112,7 +123,7 @@ describe("resolveAssetImage", () => {
 
   it("resolves when the assets folder is reached through a symlinked parent", () => {
     const dir = realpathSync(join(tmpdir()));
-    const base = join(dir, `bloodtower-link-${Date.now()}`);
+    const base = mkdtempSync(join(dir, "bloodtower-link-"));
     const real = join(base, "real");
     const link = join(base, "link");
     mkdirSync(join(real, "assets"), { recursive: true });
@@ -128,7 +139,7 @@ describe("resolveAssetImage", () => {
   });
 
   it("still rejects ../ escapes and symlinks pointing outside the assets folder", () => {
-    const base = join(tmpdir(), `bloodtower-escape-${Date.now()}`);
+    const base = mkdtempSync(join(tmpdir(), "bloodtower-escape-"));
     const assetsDir = join(base, "assets");
     mkdirSync(assetsDir, { recursive: true });
     writeFileSync(join(base, "secret.png"), "png");
