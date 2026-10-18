@@ -307,16 +307,18 @@ test("the test pack's first night, end to end, on one board and two devices", as
         board.getByText("A grey stair climbs into the dark. Someone has left the lamps unlit."),
       ).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");
-      const cameraStill = board.locator(
-        '[data-camera-still] img[data-camera-track="grey-stair.01"]',
-      );
-      await expect(cameraStill).toBeVisible();
-      const transformAtStart = await cameraStill.evaluate((img) => getComputedStyle(img).transform);
-      await expect
-        .poll(async () => cameraStill.evaluate((img) => getComputedStyle(img).transform), {
-          timeout: 4000,
-        })
-        .not.toBe(transformAtStart);
+      // Camera pan-and-zoom runs only on the Mac story board. Phone/iPad projects drive hunters, not board visuals.
+      if (testInfo.project.name === "desktop") {
+        const cameraStill = board.locator(
+          '[data-camera-still] img[data-camera-track="grey-stair.01"]',
+        );
+        await expect(cameraStill).toBeVisible();
+        const readTransform = () => cameraStill.evaluate((img) => getComputedStyle(img).transform);
+        const atOneSecond = await readTransform();
+        await board.waitForTimeout(2000);
+        const atThreeSeconds = await readTransform();
+        expect(atOneSecond).not.toBe(atThreeSeconds);
+      }
       await a.button("continue").click();
       await expect(board.getByText(/At the top, a door/)).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");

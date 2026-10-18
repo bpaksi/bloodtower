@@ -58,14 +58,27 @@ describe("pack asset HTTP", () => {
     const fakePack = await fetch(`${base}/packs/other/asset/fx.hall`);
     expect(fakePack.status).toBe(404);
 
-    const camera = await fetch(`${base}/packs/test/camera/grey-stair.01.json`);
-    expect(camera.status).toBe(200);
-    expect(camera.headers.get("content-type")).toMatch(/json/);
-    const body = (await camera.json()) as { id: string };
-    expect(body.id).toBe("grey-stair.01");
+    for (const momentId of ["grey-stair.01", "grey-stair.04"]) {
+      const camera = await fetch(`${base}/packs/test/camera/${momentId}.json`);
+      expect(camera.status).toBe(200);
+      expect(camera.headers.get("content-type")).toMatch(/json/);
+      const body = (await camera.json()) as { id: string };
+      expect(body.id).toBe(momentId);
+    }
 
     const missingCamera = await fetch(`${base}/packs/test/camera/not-a-moment.json`);
     expect(missingCamera.status).toBe(404);
+
+    const cameraTraversal = await fetch(`${base}/packs/test/camera/%2e%2e%2fassets%2ffx-hall.png`);
+    expect(cameraTraversal.status).toBe(404);
+
+    const cameraTraversalStem = await fetch(
+      `${base}/packs/test/camera/%2e%2e%2fgrey-stair.04.json`,
+    );
+    expect(cameraTraversalStem.status).toBe(404);
+
+    const cameraSlash = await fetch(`${base}/packs/test/camera/foo%2fbar.json`);
+    expect(cameraSlash.status).toBe(404);
   });
 });
 

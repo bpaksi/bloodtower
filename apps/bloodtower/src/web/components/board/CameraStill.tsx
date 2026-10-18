@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { cameraStillImageStyle } from "../../lib/cameraStillStyle.ts";
 import {
   type CameraTrack,
-  estimateSpeechDurationSeconds,
-  frameAtClock,
-  frameAtTime,
-  frameToTransform,
   prefersReducedMotion,
+  STILL_ASPECT_DEFAULT,
 } from "../../lib/cameraTrack.ts";
 import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { fetchCameraTrack, packTrackStillUrl, preloadStill } from "../../lib/packCamera.ts";
@@ -20,7 +18,7 @@ export function CameraStill({
   momentId,
   packId,
   assetId,
-  spokenText,
+  spokenText: _spokenText,
 }: {
   momentId: string;
   packId?: string;
@@ -29,14 +27,18 @@ export function CameraStill({
 }) {
   const [track, setTrack] = useState<CameraTrack | null>(null);
   const [seconds, setSeconds] = useState(0);
-  const reduced = prefersReducedMotion();
+  const [reduced, setReduced] = useState(false);
+  const [containerAspect, setContainerAspect] = useState(STILL_ASPECT_DEFAULT);
+  const mountAt = useRef(performance.now());
+  const shellRef = useRef<HTMLDivElement>(null);
 
   const fallbackSrc = packStillImageUrl(assetId, packId);
 
   useEffect(() => {
-    let cancelled = false;
-    setTrack(null);
+    mountAt.current = performance.now();
     setSeconds(0);
+    setTrack(null);
+    let cancelled = false;
     void fetchCameraTrack(momentId, packId).then((next) => {
       if (cancelled) return;
       setTrack(next);
@@ -51,46 +53,53 @@ export function CameraStill({
     };
   }, [momentId, packId, fallbackSrc]);
 
-  const src = track ? packTrackStillUrl(track.still, packId) : fallbackSrc;
-
-  const speechDuration = useMemo(() => estimateSpeechDurationSeconds(spokenText), [spokenText]);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
-    if (!track || reduced) return;
-    const start = performance.now();
+    const shell = shellRef.current;
+    if (!shell || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setContainerAspect(width / height);
+    });
+    observer.observe(shell);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (reduced) return;
     let frame = 0;
     const tick = (now: number) => {
-      setSeconds((now - start) / 1000);
+      setSeconds((now - mountAt.current) / 1000);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [track, reduced]);
+  }, [reduced]);
 
-  const frame = track
-    ? reduced
-      ? frameAtTime(track, Number.POSITIVE_INFINITY)
-      : frameAtClock(track, seconds, speechDuration)
-    : null;
+  const imageStyle = cameraStillImageStyle(track, seconds, reduced, containerAspect);
 
-  const transform = frame ? frameToTransform(frame) : undefined;
+  const src = track ? packTrackStillUrl(track.still, packId) : fallbackSrc;
 
   return (
-    <div className="bt-still" data-camera-still="">
+    <div className="bt-still" data-camera-still="" ref={shellRef}>
       {/* biome-ignore lint/performance/noImgElement: stills are loaded from the session host URL, not static export. */}
       <img
         alt=""
         data-still={assetId}
         data-camera-track={track ? momentId : ""}
+        data-camera-reduced={reduced ? "true" : "false"}
         src={src}
-        style={
-          transform
-            ? {
-                transform,
-                transition: reduced ? undefined : "transform 0.05s linear",
-              }
-            : undefined
-        }
+        style={imageStyle}
       />
     </div>
   );

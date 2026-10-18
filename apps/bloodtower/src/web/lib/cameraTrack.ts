@@ -23,6 +23,8 @@ export type CameraTrack = {
   cues: CameraCue[];
 };
 
+export const STILL_ASPECT_DEFAULT = 16 / 9;
+
 const DEFAULT_EASE = "ease-in-out";
 
 const easeInOut = (t: number): number => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -50,13 +52,25 @@ const holdFrame = (track: CameraTrack): CameraFrame => {
   return { x: 0.5, y: 0.5, w: 1, h: 1 };
 };
 
-/** Frame at `seconds` on the track clock, before audio-end clamping. */
+/** Visible still fraction under `object-fit: cover` with no extra transform. */
+export const coverVisibleFraction = (
+  containerAspect: number,
+  stillAspect: number = STILL_ASPECT_DEFAULT,
+): CameraFrame => {
+  if (containerAspect >= stillAspect) {
+    return { x: 0.5, y: 0.5, w: stillAspect / containerAspect, h: 1 };
+  }
+  return { x: 0.5, y: 0.5, w: 1, h: containerAspect / stillAspect };
+};
+
+/** Frame at `seconds` on the track clock. Gaps hold the previous cue's `to`. */
 export const frameAtTime = (track: CameraTrack, seconds: number): CameraFrame => {
   if (track.cues.length === 0) return holdFrame(track);
   const t = Math.max(0, seconds);
+  let previousTo: CameraFrame | null = null;
   for (const cue of track.cues) {
     if (t < cue.start) {
-      return cue.from;
+      return previousTo ?? cue.from;
     }
     if (t <= cue.end) {
       const span = cue.end - cue.start;
@@ -69,33 +83,24 @@ export const frameAtTime = (track: CameraTrack, seconds: number): CameraFrame =>
       const eased = applyEase(raw, hold ? undefined : cue.ease);
       return interpolateFrame(cue.from, cue.to, eased);
     }
+    previousTo = cue.to;
   }
   return holdFrame(track);
 };
 
 /**
- * When speech ends before the last cue, hold the final framing (Bob, 2026-10-18).
- * When the clock runs past the last cue, keep the last `to` frame.
+ * CSS transform for an image with width/height 100% and `object-fit: cover`.
+ * Frames are fractions of the still bitmap (1920×1080); container aspect may differ.
  */
-export const frameAtClock = (
-  track: CameraTrack,
-  seconds: number,
-  speechDurationSeconds: number,
-): CameraFrame => {
-  if (speechDurationSeconds > 0 && seconds >= speechDurationSeconds) {
-    return holdFrame(track);
-  }
-  return frameAtTime(track, seconds);
-};
-
-/**
- * CSS transform for an image that fills its container (width and height 100%).
- * Uniform scale keeps aspect ratio; pan centers the crop window on (x, y).
- */
-export const frameToTransform = (frame: CameraFrame): string => {
-  const scale = Math.max(1 / frame.w, 1 / frame.h);
-  const tx = (0.5 - frame.x) * scale * 100;
-  const ty = (0.5 - frame.y) * scale * 100;
+export const frameToTransform = (
+  frame: CameraFrame,
+  containerAspect: number,
+  stillAspect: number = STILL_ASPECT_DEFAULT,
+): string => {
+  const cover = coverVisibleFraction(containerAspect, stillAspect);
+  const scale = Math.max(cover.w / frame.w, cover.h / frame.h);
+  const tx = ((0.5 - frame.x) / cover.w) * scale * 100;
+  const ty = ((0.5 - frame.y) / cover.h) * scale * 100;
   return `translate(${tx}%, ${ty}%) scale(${scale})`;
 };
 

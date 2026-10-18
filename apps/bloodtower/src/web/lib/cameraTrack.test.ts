@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   applyEase,
   type CameraTrack,
+  coverVisibleFraction,
   estimateSpeechDurationSeconds,
-  frameAtClock,
   frameAtTime,
   frameToTransform,
+  STILL_ASPECT_DEFAULT,
 } from "./cameraTrack.ts";
 
 const track: CameraTrack = {
@@ -14,38 +15,63 @@ const track: CameraTrack = {
   cues: [
     {
       start: 0,
-      end: 4,
+      end: 10,
       from: { x: 0.5, y: 0.5, w: 1, h: 1 },
       to: { x: 0.4, y: 0.4, w: 0.5, h: 0.5 },
       ease: "ease-in-out",
     },
+  ],
+};
+
+const gapTrack: CameraTrack = {
+  id: "gap",
+  still: "fx-stair.png",
+  cues: [
     {
-      start: 4,
+      start: 0,
+      end: 2,
+      from: { x: 0.5, y: 0.5, w: 1, h: 1 },
+      to: { x: 0.3, y: 0.3, w: 0.6, h: 0.6 },
+      ease: "ease-in-out",
+    },
+    {
+      start: 5,
       end: 8,
-      from: { x: 0.4, y: 0.4, w: 0.5, h: 0.5 },
-      to: { x: 0.6, y: 0.5, w: 0.45, h: 0.45 },
+      from: { x: 0.8, y: 0.8, w: 0.4, h: 0.4 },
+      to: { x: 0.7, y: 0.7, w: 0.35, h: 0.35 },
       ease: "ease-in-out",
     },
   ],
 };
 
 describe("cameraTrack", () => {
-  it("interpolates between cue boundaries", () => {
-    const early = frameToTransform(frameAtTime(track, 1));
-    const late = frameToTransform(frameAtTime(track, 6));
-    expect(early).not.toBe(late);
+  it("advances within a single cue over time", () => {
+    const atStart = frameToTransform(frameAtTime(track, 0.5), STILL_ASPECT_DEFAULT);
+    const midCue = frameToTransform(frameAtTime(track, 5), STILL_ASPECT_DEFAULT);
+    expect(atStart).not.toBe(midCue);
   });
 
   it("holds the last framing after the final cue", () => {
     const end = frameAtTime(track, 20);
-    expect(end).toEqual(track.cues[1]?.to);
+    expect(end).toEqual(track.cues[0]?.to);
   });
 
-  it("holds end framing when speech ends before the last cue", () => {
-    const mid = frameAtClock(track, 1, 100);
-    const held = frameAtClock(track, 10, 2);
-    expect(held).toEqual(track.cues[1]?.to);
-    expect(mid).not.toEqual(held);
+  it("holds the previous cue to across a gap", () => {
+    expect(frameAtTime(gapTrack, 3)).toEqual(gapTrack.cues[0]?.to);
+    expect(frameAtTime(gapTrack, 3)).not.toEqual(gapTrack.cues[1]?.from);
+  });
+
+  it("maps still-space frames differently for non-16:9 containers", () => {
+    const frame = { x: 0.5, y: 0.63, w: 0.42, h: 0.28 };
+    const square = frameToTransform(frame, 1, STILL_ASPECT_DEFAULT);
+    const wide = frameToTransform(frame, 16 / 9, STILL_ASPECT_DEFAULT);
+    expect(square).not.toBe(wide);
+  });
+
+  it("uses cover baseline at the default full frame", () => {
+    const cover = coverVisibleFraction(1, STILL_ASPECT_DEFAULT);
+    const identity = frameToTransform(cover, 1, STILL_ASPECT_DEFAULT);
+    expect(identity).toContain("scale(1");
   });
 
   it("estimates speech duration from words and pause tags", () => {
@@ -64,9 +90,9 @@ describe("cameraTrack", () => {
 
   it("maps reduced-motion end framing to the last cue to frame", () => {
     const end = frameAtTime(track, Number.POSITIVE_INFINITY);
-    const last = track.cues[1]?.to;
+    const last = track.cues[0]?.to;
     expect(last).toBeDefined();
     if (!last) return;
-    expect(frameToTransform(end)).toBe(frameToTransform(last));
+    expect(frameToTransform(end, 1)).toBe(frameToTransform(last, 1));
   });
 });
