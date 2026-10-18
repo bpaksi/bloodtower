@@ -95,6 +95,48 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await shot(pad, "device-pick-story");
       await shot(board, "board-pick-story");
 
+      await test.step("the carousel lists both packs; Vellmoor stops at Not playable yet", async () => {
+        // Two cards: the focus is Proving ground and the other pack peeks on the right.
+        await expect(board.locator('[data-story-peek="dracula"]')).toBeVisible();
+        await expect(
+          board.getByRole("heading", { name: "Proving ground", exact: true }),
+        ).toBeVisible();
+        await expect(pad.getByText("4 hunters")).toBeVisible();
+        const cover = board.locator(".bt-carousel-focus img.bt-carousel-cover");
+        await expect(cover).toHaveAttribute("src", /\/packs\/test\/assets\/cover\.png$/);
+        await expect
+          .poll(() => cover.evaluate((img: HTMLImageElement) => img.naturalWidth))
+          .toBeGreaterThan(0);
+
+        await d.button("story-next").click();
+        await expect(
+          board.getByRole("heading", { name: "The Count of Vellmoor", exact: true }),
+        ).toBeVisible();
+        await expect(d.button("continue")).toHaveText("Choose The Count of Vellmoor");
+        await d.button("continue").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "not-playable");
+        await expect(pad.getByRole("heading", { name: "Not playable yet" })).toBeVisible();
+        await expect(board.locator("main")).toHaveAttribute("data-screen", "not-playable");
+        await expect(d.button("continue")).toBeHidden();
+        await shot(pad, "device-not-playable");
+        await shot(board, "board-not-playable");
+
+        await d.button("back").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
+
+        // Back opens a new visit: the same story can be chosen again, and Back works again.
+        await expect(d.button("continue")).toBeEnabled();
+        await d.button("continue").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "not-playable");
+        await expect(d.button("back")).toBeEnabled();
+        await d.button("back").click();
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "pick-story");
+        await d.button("story-next").click();
+        await expect(
+          board.getByRole("heading", { name: "Proving ground", exact: true }),
+        ).toBeVisible();
+      });
+
       await d.button("continue").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(pad.getByRole("heading", { name: "Party Join" })).toBeVisible();

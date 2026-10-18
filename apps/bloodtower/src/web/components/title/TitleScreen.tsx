@@ -1,7 +1,32 @@
+"use client";
+
+import { useEffect } from "react";
 import "../../styles/title-screen.css";
+
+/**
+ * A click or keypress on the landing screen opens the Story board on a Mac (R3-UI-03), where the
+ * pointer is fine. Links keep their own job, so a press on "Hunter" still goes to join.
+ */
+const openBoardOnPress = (event: Event) => {
+  if (!window.matchMedia("(pointer: fine)").matches) return;
+  if (event.target instanceof Element && event.target.closest("a")) return;
+  // Tab moves focus between the links; a bare modifier or a shortcut is not a press.
+  if (event instanceof KeyboardEvent && (event.key === "Tab" || event.metaKey || event.ctrlKey)) {
+    return;
+  }
+  window.location.assign("/board");
+};
 
 /** Opening title: Mac opens the Story board; hunters open join on iPad. */
 export function TitleScreen() {
+  useEffect(() => {
+    window.addEventListener("click", openBoardOnPress);
+    window.addEventListener("keydown", openBoardOnPress);
+    return () => {
+      window.removeEventListener("click", openBoardOnPress);
+      window.removeEventListener("keydown", openBoardOnPress);
+    };
+  }, []);
   return (
     <div className="bt-title-page" data-screen="title">
       <div className="bt-title-backdrop" aria-hidden="true" />

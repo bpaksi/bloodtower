@@ -166,6 +166,7 @@ export function DeviceScreen({
             state.screen === "begin" ||
             state.screen === "splash" ||
             state.screen === "quit" ||
+            state.screen === "not-playable" ||
             (state.pick !== null && state.pick !== undefined) ||
             (state.screen === "tower-connect" && !ready) ||
             (state.screen === "play" && controls.resume)
@@ -174,6 +175,16 @@ export function DeviceScreen({
           onClick={() => press(state.prompt?.id ?? null, "continue", controls.continue)}
         >
           {state.prompt?.id.startsWith("continue-") ? state.prompt.label : "Continue"}
+        </button>
+        <button
+          type="button"
+          className="bt-secondary"
+          data-action="back"
+          hidden={state.screen !== "not-playable"}
+          disabled={!controls.back}
+          onClick={() => press(state.prompt?.id ?? null, "back", controls.back)}
+        >
+          Back
         </button>
         {partyReason && !controls.continue ? (
           <p className="text-lg text-[var(--bt-muted)]">Disabled: {partyReason}.</p>
@@ -272,12 +283,13 @@ const PickStoryDevice = ({
   const previous = neighborStory(stories, -1);
   const next = neighborStory(stories, 1);
   const players = focus ? playersText(focus.players) : null;
+  const tagline = focus?.tagline ?? focus?.blurb ?? null;
   return (
     <section className="flex flex-col gap-3">
       <article className="bt-card space-y-2" data-story={focus?.id}>
         <p className="bt-kicker">Story</p>
         <h2 className="text-3xl">{focus ? focus.title : "Stories unavailable."}</h2>
-        {focus?.blurb ? <p className="text-xl">{focus.blurb}</p> : null}
+        {tagline ? <p className="text-xl">{tagline}</p> : null}
         {players ? <p className="text-[var(--bt-muted)]">{players}</p> : null}
         {focus && !focus.loadable ? <p className="text-xl">Can't load</p> : null}
       </article>
@@ -290,7 +302,7 @@ const PickStoryDevice = ({
             disabled={!live}
             onClick={() => onFocusStory?.(previous.id)}
           >
-            Previous story
+            Previous
           </button>
           <button
             type="button"
@@ -299,7 +311,7 @@ const PickStoryDevice = ({
             disabled={!live}
             onClick={() => onFocusStory?.(next.id)}
           >
-            Next story
+            Next
           </button>
         </div>
       ) : null}

@@ -229,7 +229,10 @@ describe("story board", () => {
       id,
       title,
       blurb: loadable ? `${title} blurb` : null,
+      tagline: loadable ? `${title} blurb` : null,
+      cover: null,
       players: loadable ? { min: 1, max: 4 } : null,
+      playable: loadable,
       loadable,
     });
     const pickState = (focus: string) =>
@@ -250,11 +253,11 @@ describe("story board", () => {
     expect(pick).toContain('data-screen="pick-story"');
     expect(pick).toContain('data-story="test"');
     expect(pick).toContain("Proving ground blurb");
-    expect(pick).toContain("1–4 hunters");
+    expect(pick).toContain("4 hunters");
     expect(pick).not.toContain("data-status-strip");
-    // Both doors are listed, the greyed one marked, and the board still has no controls.
-    expect(pick).toContain('data-story-door="zzz"');
-    expect(pick).toContain("(can&#x27;t load)");
+    // The carousel peeks the greyed neighbour, marked, and the board still has no controls.
+    expect(pick).toContain('data-story-peek="zzz"');
+    expect(pick).toContain("Can&#x27;t load");
     expect(pick).not.toMatch(interactive);
     const greyed = renderToStaticMarkup(createElement(StoryBoard, { state: pickState("zzz") }));
     expect(greyed).toContain('data-story="zzz"');

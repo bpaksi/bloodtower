@@ -292,16 +292,26 @@ export const pauseBannerSchema = z.strictObject({
 });
 
 /**
- * One door on Pick Story (R2 §3.3). `loadable` is false for a pack that failed validation;
- * the card is shown greyed and cannot be chosen. No card carries a file path or a lint message.
+ * One card in the Pick Game carousel (R2 §3.3, R3-UI-24). `loadable` means the card can be
+ * chosen; it is false for a pack that failed validation, so the card is greyed. `playable` is
+ * false for a `playable: false` pack: it can be chosen and stops at "Not playable yet".
+ * `cover` is the host path of the pack's image (`/packs/<id>/assets/<file>`), or null.
+ * No card carries a file path on disk or a lint message.
  */
 export const storyCardSchema = z.strictObject({
   id: optionIdSchema,
   title: z.string().min(1).max(120),
   blurb: z.string().min(1).max(200).nullable(),
+  tagline: z.string().min(1).max(200).nullable(),
+  cover: z
+    .string()
+    .max(300)
+    .regex(/^\/packs\/[^/]+\/assets\/[^/]+$/)
+    .nullable(),
   players: z
     .strictObject({ min: z.number().int().min(1), max: z.number().int().min(1) })
     .nullable(),
+  playable: z.boolean(),
   loadable: z.boolean(),
 });
 export type StoryCard = z.infer<typeof storyCardSchema>;

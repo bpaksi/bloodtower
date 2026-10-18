@@ -74,6 +74,49 @@ describe("device controls", () => {
     expect(controls(null).quit).toBe(false);
   });
 
+  it("enables Back only on the Not playable yet prompt, and the screen shows that Back alone", () => {
+    const notPlayable = (promptId: string | null): DeviceState =>
+      deviceStatePayloadSchema.parse({
+        ...playing(),
+        screen: "not-playable",
+        quitPromptId: null,
+        heldHunters: [],
+        views: [],
+        prompt: promptId ? { id: promptId, label: "Back" } : null,
+        lock: null,
+        won: null,
+      });
+    const controls = (promptId: string | null) =>
+      deviceControls({
+        live: true,
+        state: notPlayable(promptId),
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+        deviceId: "device-1",
+      });
+    expect(controls("back-not-playable").back).toBe(true);
+    expect(controls("back-not-playable").continue).toBe(false);
+    expect(controls("continue-pick-story-test").back).toBe(false);
+    expect(controls(null).back).toBe(false);
+
+    const html = renderToStaticMarkup(
+      createElement(DeviceScreen, {
+        live: true,
+        deviceId: "device-1",
+        state: notPlayable("back-not-playable"),
+        pausePromptId: null,
+        connectLock: null,
+        calibrateLock: null,
+        tower: tower("disconnected"),
+      }),
+    );
+    expect(html).toContain('data-screen="not-playable"');
+    expect(html).toContain("Not playable yet");
+    expect(html).toMatch(/data-action="back"[^>]*>Back</);
+  });
+
   it("enables Begin only when that prompt is open, and locks a losing press", () => {
     const begin = deviceStatePayloadSchema.parse({
       screen: "begin",
@@ -364,7 +407,10 @@ describe("device screens", () => {
       id,
       title,
       blurb: null,
+      tagline: null,
+      cover: null,
       players: { min: 1, max: 4 },
+      playable: true,
       loadable,
     });
     const render = (focus: string, cards = [door("alpha", "Alpha"), door("beta", "Beta")]) =>

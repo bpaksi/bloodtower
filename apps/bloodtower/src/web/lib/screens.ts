@@ -16,17 +16,20 @@ export const neighborStory = (stories: Stories | undefined, step: 1 | -1): Story
   return stories.cards[(at + step + count) % count] ?? null;
 };
 
-/** "1–4 hunters", or the single number when min equals max. Null when the pack did not load. */
+/**
+ * "4 hunters": the party size. Every hunter in the pack is always in play (the card reads the
+ * maximum), so the minimum is not shown. Null when the pack did not load.
+ */
 export const playersText = (players: StoryCard["players"]): string | null => {
   if (!players) return null;
-  const range = players.min === players.max ? `${players.min}` : `${players.min}–${players.max}`;
-  return `${range} ${players.max === 1 ? "hunter" : "hunters"}`;
+  return `${players.max} ${players.max === 1 ? "hunter" : "hunters"}`;
 };
 
 export const SCREEN_TITLE: Record<FlowScreen, string> = {
   splash: "Loading",
   "tower-connect": "Tower Connect",
   "pick-story": "Pick Story",
+  "not-playable": "Not playable yet",
   "party-join": "Party Join",
   begin: "Begin Story",
   play: "Play",
@@ -38,6 +41,7 @@ export const SCREEN_NEXT: Record<FlowScreen, string> = {
   splash: "Next: connect the tower",
   "tower-connect": "Next: pick a story",
   "pick-story": "Next: gather the party",
+  "not-playable": "This story is listed, but it cannot be played yet.",
   "party-join": "Next: set up the story",
   begin: "Next: begin the story",
   play: "The night is underway.",

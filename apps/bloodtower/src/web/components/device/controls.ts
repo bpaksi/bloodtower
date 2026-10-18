@@ -3,6 +3,8 @@ import type { ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protoco
 export interface DeviceControls {
   begin: boolean;
   continue: boolean;
+  /** Back on a start-up screen (R3-UI-37). Only the prompt named `back-…` enables it. */
+  back: boolean;
   /** The pick options are live on the iPad: the prompt is a pick and nothing has locked. */
   pick: boolean;
   pause: boolean;
@@ -41,6 +43,7 @@ export const deviceControls = (input: {
   return {
     begin: input.live && promptId === "begin" && !locked,
     continue: input.live && promptId.startsWith("continue-") && !locked,
+    back: input.live && promptId.startsWith("back-") && !locked,
     pick: input.live && promptId.startsWith("pick-") && !locked,
     pause: input.live && input.pausePromptId !== null,
     resume: input.live && promptId.startsWith("resume-") && !locked,

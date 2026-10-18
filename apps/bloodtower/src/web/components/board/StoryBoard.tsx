@@ -1,4 +1,4 @@
-import type { StoryboardState } from "bloodtower-protocols";
+import type { StoryboardState, StoryCard } from "bloodtower-protocols";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
 import { portraitSrc } from "../../lib/portrait.ts";
@@ -9,12 +9,14 @@ import {
   FORTUNE_LINE,
   focusedStory,
   joinedDeviceIds,
+  neighborStory,
   partyJoinNextReason,
   playersText,
   SCREEN_NEXT,
   SCREEN_TITLE,
   towerStripState,
 } from "../../lib/screens";
+import { pageServerOrigin } from "../../lib/serverOrigin.ts";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { PortraitCard } from "../PortraitCard";
 import { CameraStill } from "./CameraStill";
@@ -47,6 +49,7 @@ export function StoryBoard({
       data-moment={state.moment?.id ?? ""}
       data-board-layout={keeperMoment ? "keeper" : "standard"}
     >
+      <div className="bt-board-backdrop" aria-hidden="true" />
       <div className="bt-board-vignette" aria-hidden="true" />
       <header className="bt-board-header">
         <div className="bt-zone bt-panel">
@@ -93,6 +96,7 @@ export function StoryBoard({
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
           {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
           {state.screen === "pick-story" ? <PickStoryPanel state={state} /> : null}
+          {state.screen === "not-playable" ? <NotPlayablePanel state={state} /> : null}
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
           {state.screen === "begin" ? <BeginPanel state={state} /> : null}
           {state.screen === "play" ? (
@@ -155,6 +159,7 @@ const headerCopy = (state: StoryboardState): { scene: string; place: string } =>
   if (state.screen === "splash") return { scene: "Bloodtower", place: "The Table" };
   if (state.screen === "tower-connect") return { scene: "The Tower", place: "On the Table" };
   if (state.screen === "pick-story") return { scene: "The Door", place: "Choose a Story" };
+  if (state.screen === "not-playable") return { scene: "The Door", place: "Not Yet Playable" };
   if (state.screen === "party-join") return { scene: "The Party", place: "Gather" };
   if (state.screen === "begin") return { scene: "The Night", place: "The Table is Set" };
   if (state.screen === "quit") return { scene: "The Table", place: "Paused" };
@@ -297,37 +302,65 @@ const TowerConnectPanel = ({ state }: { state: StoryboardState }) => (
   </article>
 );
 
+/** The pack's cover on the host, or undefined when the card has none. Board only: devices show no images. */
+const coverSrc = (cover: StoryCard["cover"]): string | undefined =>
+  cover ? `${pageServerOrigin()}${cover}` : undefined;
+
+/**
+ * Pick Game carousel (R3-UI-24): the focused story large, a neighbour peeking at each side.
+ * The board has no buttons; the devices move the highlight.
+ */
 const PickStoryPanel = ({ state }: { state: StoryboardState }) => {
   const focus = focusedStory(state.stories);
+  const previous = neighborStory(state.stories, -1);
+  const next = neighborStory(state.stories, 1);
+  // With two cards both neighbours are the same story: show it once, on the right.
+  const peekBefore = previous && previous.id !== next?.id ? previous : null;
   const players = focus ? playersText(focus.players) : null;
+  const tagline = focus?.tagline ?? focus?.blurb ?? null;
   return (
-    <>
-      <article className="bt-page bt-parchment bt-ink-in" data-story={focus?.id}>
+    <div className="bt-carousel">
+      {peekBefore ? <CarouselPeek card={peekBefore} side="previous" /> : null}
+      <article className="bt-page bt-parchment bt-ink-in bt-carousel-focus" data-story={focus?.id}>
+        {focus && coverSrc(focus.cover) ? (
+          <img className="bt-carousel-cover" src={coverSrc(focus.cover)} alt="" />
+        ) : null}
         <div>
           <p className="bt-kicker">The door</p>
           <h2>{focus ? focus.title : "Stories unavailable."}</h2>
-          {focus?.blurb ? <p className="bt-narration">{focus.blurb}</p> : null}
+          {tagline ? <p className="bt-narration">{tagline}</p> : null}
           {players ? <p className="bt-muted">{players}</p> : null}
           {focus && !focus.loadable ? <p className="bt-narration">Can't load</p> : null}
           <p className="bt-lede">{SCREEN_NEXT["pick-story"]}</p>
         </div>
       </article>
-      {state.stories && state.stories.cards.length > 1 ? (
-        <ul className="bt-muted" aria-label="Stories">
-          {state.stories.cards.map((card) => (
-            <li
-              key={card.id}
-              data-story-door={card.id}
-              aria-current={card.id === state.stories?.focus ? "true" : undefined}
-            >
-              {card.id === state.stories?.focus ? "› " : ""}
-              {card.title}
-              {card.loadable ? "" : " (can't load)"}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </>
+      {next ? <CarouselPeek card={next} side="next" /> : null}
+    </div>
+  );
+};
+
+const CarouselPeek = ({ card, side }: { card: StoryCard; side: "previous" | "next" }) => (
+  <article className="bt-carousel-peek" data-carousel-side={side} data-story-peek={card.id}>
+    {coverSrc(card.cover) ? (
+      <img className="bt-carousel-cover" src={coverSrc(card.cover)} alt="" />
+    ) : null}
+    <p>{card.title}</p>
+    {card.loadable ? null : <p>Can't load</p>}
+  </article>
+);
+
+/** "Not playable yet" (R3-UI-24): a dialog over the landing background; Back returns to the doors. */
+const NotPlayablePanel = ({ state }: { state: StoryboardState }) => {
+  const focus = focusedStory(state.stories);
+  return (
+    <article className="bt-page bt-parchment bt-ink-in">
+      <div>
+        <p className="bt-kicker">The door</p>
+        <h2>{SCREEN_TITLE["not-playable"]}</h2>
+        <p className="bt-narration">{focus ? focus.title : "This story"} is not ready to play.</p>
+        <p className="bt-lede">{SCREEN_NEXT["not-playable"]}</p>
+      </div>
+    </article>
   );
 };
 

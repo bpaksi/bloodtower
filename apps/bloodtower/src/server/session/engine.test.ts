@@ -843,7 +843,10 @@ describe("pick story", () => {
       id,
       title: pack.title,
       blurb: null,
+      tagline: null,
+      cover: null,
       players: pack.players,
+      playable: true,
       loadable: true,
     });
     return {
@@ -853,7 +856,16 @@ describe("pick story", () => {
         { card: card(first, "test"), pack: first, issues: [], assets: null },
         { card: card(second, "second"), pack: second, issues: [], assets: null },
         {
-          card: { id: "zzz", title: "zzz", blurb: null, players: null, loadable: false },
+          card: {
+            id: "zzz",
+            title: "zzz",
+            blurb: null,
+            tagline: null,
+            cover: null,
+            players: null,
+            playable: false,
+            loadable: false,
+          },
           pack: null,
           issues: [],
           assets: null,
@@ -881,7 +893,10 @@ describe("pick story", () => {
             id: "test",
             title: "Proving ground",
             blurb: "A long-lived proving ground for new ideas.",
+            tagline: "A long-lived proving ground for new ideas.",
+            cover: null,
             players: { min: 1, max: 4 },
+            playable: true,
             loadable: true,
           },
         ],
@@ -1011,6 +1026,110 @@ describe("pick story", () => {
       expect(engine.screen()).toBe("party-join");
       expect(engine.roster().packId).toBe("test");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(true);
+    } finally {
+      opened.close();
+    }
+  });
+
+  /** The doors plus a `playable: false` pack: listed, choosable, never bound. */
+  const doorsWithVellmoor = (): StoryEntry[] => [
+    ...doors().stories,
+    {
+      card: {
+        id: "vellmoor",
+        title: "The Count of Vellmoor",
+        blurb: "The Count has taken Lenka.",
+        tagline: "The Count has taken Lenka.",
+        cover: "/packs/vellmoor/assets/cover.png",
+        players: null,
+        playable: false,
+        loadable: true,
+      },
+      pack: null,
+      issues: [],
+      assets: null,
+    },
+  ];
+
+  it("stops a chosen playable: false story at Not playable yet, binds nothing, and Back returns", () => {
+    const { opened, engine, deviceId } = atPickStory({
+      stories: doorsWithVellmoor(),
+      storyId: "test",
+    });
+    try {
+      engine.focusStory(deviceId, "vellmoor");
+      expect(engine.projectDevice(deviceId).prompt).toEqual({
+        id: "continue-pick-story-vellmoor",
+        label: "Choose The Count of Vellmoor",
+      });
+      winStep(engine, deviceId, "continue-pick-story-vellmoor", "continue");
+      expect(engine.screen()).toBe("not-playable");
+      const board = engine.projectStoryboard(TOWER, JOIN);
+      expect(board.screen).toBe("not-playable");
+      expect(board.stories?.current).toBe("test");
+      expect(board.prompt).toEqual({ id: "back-not-playable", label: "Back" });
+      expect(engine.roster().packId).toBe("test");
+
+      // Only Back is offered here: no Continue. The Choose press that won is locked, so a
+      // repeat is recorded as a losing press and changes nothing.
+      expect(engine.press(deviceId, "continue-pick-story-vellmoor", "continue")).toMatchObject({
+        ok: true,
+        winner: false,
+      });
+      expect(engine.screen()).toBe("not-playable");
+      expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({ winner: true });
+      expect(engine.screen()).toBe("pick-story");
+      expect(engine.projectDevice(deviceId).prompt).toEqual({
+        id: "continue-pick-story-vellmoor",
+        label: "Choose The Count of Vellmoor",
+      });
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("lets the same story be chosen again, and Back pressed again, after Back", () => {
+    const { opened, engine, deviceId } = atPickStory({
+      stories: doorsWithVellmoor(),
+      storyId: "test",
+    });
+    try {
+      engine.focusStory(deviceId, "vellmoor");
+      for (let visit = 0; visit < 2; visit += 1) {
+        expect(engine.projectDevice(deviceId).lock).toBeNull();
+        expect(engine.press(deviceId, "continue-pick-story-vellmoor", "continue")).toMatchObject({
+          winner: true,
+        });
+        expect(engine.screen()).toBe("not-playable");
+        expect(engine.projectDevice(deviceId).lock).toBeNull();
+        expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({
+          winner: true,
+        });
+        expect(engine.screen()).toBe("pick-story");
+        // A late Back from this visit still loses and moves nothing.
+        expect(engine.press(deviceId, "back-not-playable", "back")).toMatchObject({
+          ok: true,
+          winner: false,
+        });
+        expect(engine.screen()).toBe("pick-story");
+      }
+      expect(engine.roster().packId).toBe("test");
+    } finally {
+      opened.close();
+    }
+  });
+
+  it("refuses Back anywhere but Not playable yet", () => {
+    const { opened, engine, deviceId } = atPickStory({
+      stories: doorsWithVellmoor(),
+      storyId: "test",
+    });
+    try {
+      expect(engine.press(deviceId, "back-not-playable", "back")).toEqual({
+        ok: false,
+        code: "invalid-state",
+      });
+      expect(engine.screen()).toBe("pick-story");
     } finally {
       opened.close();
     }
