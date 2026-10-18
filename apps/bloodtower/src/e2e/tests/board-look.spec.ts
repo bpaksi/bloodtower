@@ -108,6 +108,12 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.getByText("Emeric")).toBeVisible();
     await assertBoardFits(board);
     await shot(board, "board-join-warning-1024x594");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await expect(board.locator("main")).toHaveAttribute("data-board-mode", "play");
+    await expect(board.locator(".bt-acting")).toBeInViewport({ ratio: 1 });
+    await expect(board.locator(".bt-qr")).toHaveCount(0);
+    await assertBoardFits(board);
+    await shot(board, "board-proving-ground-1920x1080");
     await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();
@@ -120,6 +126,10 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
     await shot(board, "board-grey-stair-landscape");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await assertBoardFits(board);
+    await shot(board, "board-grey-stair-1920x1080");
+    await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();
     await expect(board.getByText(/At the top, a door/)).toBeVisible();
@@ -152,6 +162,9 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.03");
     await assertBoardFits(board, { keeper: true });
     await shot(board, "board-keeper-1024x594");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await assertBoardFits(board, { keeper: true });
+    await shot(board, "board-keeper-1920x1080");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await host.close();

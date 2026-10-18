@@ -30,7 +30,7 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 | 3 | `feat/visuals-03-startup-shell` | none | — | blocked on asset (dialog frame) | |
 | 4 | `feat/visuals-04-carousel-dialog` | 3 | — | blocked on asset (dialog frame) | |
 | 5 | `feat/visuals-05-startup-summary` | 3 | — | todo (after 3; ink panel, no dialog frame) | |
-| 6 | `feat/visuals-06-play-chrome` | none | 7 | todo | |
+| 6 | `feat/visuals-06-play-chrome` | none | 7 | in review (Open question 1: option a; QR hidden in play; quit keeps play chrome) | |
 | 7 | `feat/visuals-07-hunter-roll` | 6 | none | todo | |
 | 8 | `feat/visuals-08-play-parchment` | 6 | 7 | todo | |
 | 9 | `feat/visuals-09-waiting-dialog` | 8 | — | blocked on asset (dialog frame) | |

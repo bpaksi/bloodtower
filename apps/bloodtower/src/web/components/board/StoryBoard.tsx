@@ -50,10 +50,13 @@ export function StoryBoard({
   const warning = joinWarning(state.join);
   const header = headerCopy(state);
   const keeperMoment = state.screen === "play" && state.moment?.id === KEEPER_MOMENT_ID;
+  // Quit keeps the play chrome: it is a pause in the story, with the roll still on the table.
+  const playMode = state.screen === "play" || state.screen === "quit";
   return (
     <main
       className="bt-board"
       data-screen={state.screen}
+      data-board-mode={playMode ? "play" : undefined}
       data-moment={state.moment?.id ?? ""}
       data-board-layout={keeperMoment ? "keeper" : "standard"}
     >
@@ -96,7 +99,7 @@ export function StoryBoard({
         </p>
       ) : null}
       <div className="bt-board-main">
-        {state.summary ? (
+        {state.summary && !playMode ? (
           <SummaryPanel summary={state.summary} tower={state.tower} />
         ) : (
           <HunterList hunters={state.hunters} />
@@ -117,10 +120,14 @@ export function StoryBoard({
           {state.screen === "quit" ? <QuitPanel /> : null}
           <NextPrompt label={nextPrompt(state)} />
         </section>
-        <aside className="bt-pub bt-panel">
-          <span className="bt-lbl">Table</span>
-          <JoinBlock join={state.join} large={state.screen === "party-join"} />
-        </aside>
+        {playMode ? (
+          <ActingPanel hunters={state.hunters} />
+        ) : (
+          <aside className="bt-pub bt-panel">
+            <span className="bt-lbl">Table</span>
+            <JoinBlock join={state.join} large={state.screen === "party-join"} />
+          </aside>
+        )}
       </div>
     </main>
   );
@@ -221,6 +228,36 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
     {join ? <p className="bt-join-url">{join.url}</p> : <p className="bt-join-code">unavailable</p>}
   </section>
 );
+
+/**
+ * Right column in play: the acting hunter's public view (game-look.md section 4). The join QR is
+ * not shown here (the header keeps the join code). Corruption and carried items are not on
+ * `storyboardState` yet, so they read "unavailable", never zero.
+ */
+const ActingPanel = ({ hunters }: { hunters: StoryboardState["hunters"] }) => {
+  const id = actingHunterId(hunters);
+  const acting = hunters.find((hunter) => hunter.id === id);
+  return (
+    <aside className="bt-pub bt-panel bt-acting" data-acting={id ?? ""}>
+      <span className="bt-lbl">Now acting</span>
+      <p className="bt-acting-name">{acting ? acting.name : "Nobody yet"}</p>
+      <dl className="bt-acting-stats">
+        <div>
+          <dd className="bt-num" data-unavailable="">
+            unavailable
+          </dd>
+          <dt className="bt-lbl">corruption</dt>
+        </div>
+        <div>
+          <dd className="bt-num" data-unavailable="">
+            unavailable
+          </dd>
+          <dt className="bt-lbl">carried</dt>
+        </div>
+      </dl>
+    </aside>
+  );
+};
 
 const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => (
   <aside className="bt-hunters">
