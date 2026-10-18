@@ -43,16 +43,16 @@ The key is at the bottom. It always is.
   it("strips WebVTT cue settings from the end timestamp", () => {
     const cues = parseVtt(`WEBVTT
 
-00:00:00.000 --> 00:00:02.000 line:80% align:start
+00:00:00.000 --> 00:00:02.500 line:80% align:start
 First phrase.
 
-00:00:03.000 --> 00:00:06.000 position:50%
+00:00:03.000 --> 00:00:06.750 position:50%
 Second phrase.
 `);
     expect(cues).toHaveLength(2);
-    expect(cues[0]?.end).toBe(2);
+    expect(cues[0]?.end).toBe(2.5);
     expect(cues[1]?.start).toBe(3);
-    expect(cues[1]?.end).toBe(6);
+    expect(cues[1]?.end).toBe(6.75);
   });
 
   it("holds the last cue in a gap instead of leaving the caption empty", () => {

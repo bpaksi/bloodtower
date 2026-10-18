@@ -29,9 +29,9 @@ export function KeeperBoardCaption({
   enabled: boolean;
   plateRef: RefObject<HTMLDivElement | null>;
 }) {
-  const [cues, setCues] = useState<BoardCaptionCue[]>([]);
-  const [visible, setVisible] = useState<string>("");
   const fullCaption = formatBoardCaption(speakerName, scriptText);
+  const [cues, setCues] = useState<BoardCaptionCue[]>([]);
+  const [visible, setVisible] = useState(fullCaption);
 
   useEffect(() => {
     setCues([]);
