@@ -1,3 +1,4 @@
+import { pageServerOrigin } from "../serverOrigin.ts";
 import type { Layers } from "./layers.ts";
 import { CHANNELS, type Channel, type Levels } from "./levels.ts";
 import { loopPointsFor } from "./loopPoints.ts";
@@ -24,9 +25,15 @@ export class BoardAudio {
   private mixer: LayerMixer | null = null;
   private pending: Layers | null = null;
   private levels: Levels;
+  private origin: string;
 
-  constructor(levels: Levels) {
+  /**
+   * `origin` is the session host that serves `/audio/` and `/packs/<id>/audio/`. Under
+   * `pnpm dev` that is not the page's own origin (see {@link pageServerOrigin}).
+   */
+  constructor(levels: Levels, origin: string = pageServerOrigin()) {
     this.levels = levels;
+    this.origin = origin;
   }
 
   /** Call from a click or keypress. Safe to call again. */
@@ -71,7 +78,7 @@ export class BoardAudio {
     const gain = this.gains.get(channel);
     if (!context || !gain) return;
     const { file, seconds } = TEST_CLIPS[channel];
-    void this.buffer(context, file).then((buffer) => {
+    this.withBuffer(context, file, (buffer) => {
       const source = context.createBufferSource();
       source.buffer = buffer;
       source.connect(gain);
@@ -85,7 +92,7 @@ export class BoardAudio {
     const context = this.context;
     const gain = this.gains.get(channel);
     if (!context || !gain) return;
-    void this.buffer(context, file).then((buffer) => {
+    this.withBuffer(context, file, (buffer) => {
       const source = context.createBufferSource();
       source.buffer = buffer;
       source.connect(gain);
@@ -104,12 +111,14 @@ export class BoardAudio {
         track.connect(out ?? context.destination);
         let source: AudioBufferSourceNode | null = null;
         let stopping = false;
-        void this.buffer(context, file).then((buffer) => {
+        this.withBuffer(context, file, (buffer) => {
           if (stopping) return;
           source = context.createBufferSource();
           source.buffer = buffer;
           source.connect(track);
-          const points = file.frames ? loopPointsFor(buffer.length, file.frames) : null;
+          const points = file.frames
+            ? loopPointsFor(buffer.length, file.frames, buffer.sampleRate)
+            : null;
           if (points) {
             source.loop = true;
             source.loopStart = points.loopStart;
@@ -134,11 +143,28 @@ export class BoardAudio {
     };
   }
 
+  /** Runs `use` once the file is decoded. A file that fails to load is reported, not played. */
+  private withBuffer(
+    context: AudioContext,
+    file: AudioFile,
+    use: (buffer: AudioBuffer) => void,
+  ): void {
+    this.buffer(context, file)
+      .then(use)
+      .catch((error: unknown) => {
+        this.buffers.delete(file.url);
+        console.warn("[bloodtower] audio unavailable", file.url, error);
+      });
+  }
+
   private buffer(context: AudioContext, file: AudioFile): Promise<AudioBuffer> {
     let loaded = this.buffers.get(file.url);
     if (!loaded) {
-      loaded = fetch(file.url)
-        .then((response) => response.arrayBuffer())
+      loaded = fetch(`${this.origin}${file.url}`)
+        .then((response) => {
+          if (!response.ok) throw new Error(`Audio ${file.url} returned ${response.status}.`);
+          return response.arrayBuffer();
+        })
         .then((bytes) => context.decodeAudioData(bytes));
       this.buffers.set(file.url, loaded);
     }

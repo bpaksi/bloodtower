@@ -1,4 +1,9 @@
-import { FLOW_SCREENS, type FlowScreen } from "bloodtower-protocols";
+import {
+  FLOW_SCREENS,
+  type FlowScreen,
+  KEEPER_MOMENT_ID,
+  type StoryboardState,
+} from "bloodtower-protocols";
 import { type AudioFile, moodFile, SIGNATURE } from "./tracks.ts";
 
 /**
@@ -17,9 +22,21 @@ export interface LayerInput {
   packId: string | null;
   /** Night 1 is the only night in the test pack. Night 2 is picked when a pack has it. */
   night?: 1 | 2;
-  /** A moment (still, clip or card) is on the board. */
+  /** A visual or cut scene fills the board (see {@link isVisualMoment}). */
   visual: boolean;
 }
+
+/**
+ * True when a visual or cut scene zooms in: a still, a clip or the Keeper scene. Text and pick
+ * cards are the waiting dialog, so the night bed and waiting music keep playing under them
+ * (R3-UI-60).
+ */
+export const isVisualMoment = (moment: StoryboardState["moment"]): boolean =>
+  moment !== null &&
+  (moment.kind === "still" ||
+    moment.kind === "clip" ||
+    moment.still !== null ||
+    moment.id === KEEPER_MOMENT_ID);
 
 /** Strictly before the Pick Game screen: the Sound dialog opens here (R3-UI-03). */
 export const isBeforePickGame = (screen: FlowScreen) =>

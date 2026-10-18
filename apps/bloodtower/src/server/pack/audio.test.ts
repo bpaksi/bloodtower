@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
-import { indexPackAudio, validateAudioFolder } from "./audio.ts";
+import { devAudioAllowOrigin, indexPackAudio, isAudioPath, validateAudioFolder } from "./audio.ts";
 import { loadPackDir, loadR1Pack, type PackLoadIssue } from "./load.ts";
 import { tryServePackAssets } from "./serve.ts";
 
@@ -121,5 +121,34 @@ describe("pack audio folder", () => {
       expect(response.status, path).toBe(404);
       await response.arrayBuffer();
     }
+  });
+});
+
+describe("devAudioAllowOrigin (pnpm dev board on another port)", () => {
+  const dev = ["http://localhost:3000"];
+
+  it("matches only the audio routes", () => {
+    expect(isAudioPath("/audio/signature/signature-bed.m4a")).toBe(true);
+    expect(isAudioPath("/packs/test/audio/pg-music.m4a")).toBe(true);
+    expect(isAudioPath("/packs/test/assets/cover.png")).toBe(false);
+    expect(isAudioPath("/landing/window.png")).toBe(false);
+  });
+
+  it("allows a listed dev origin on an audio route", () => {
+    expect(devAudioAllowOrigin("/audio/signature/motif-sting.m4a", dev[0], dev)).toBe(dev[0]);
+    expect(devAudioAllowOrigin("/packs/test/audio/night1-ambient.m4a", dev[0], dev)).toBe(dev[0]);
+  });
+
+  it("allows a LAN dev origin, as the session socket does under pnpm dev", () => {
+    expect(devAudioAllowOrigin("/audio/x.m4a", "http://192.168.1.20:3000", dev)).toBe(
+      "http://192.168.1.20:3000",
+    );
+  });
+
+  it("allows nothing outside dev, off the audio routes, or for other origins", () => {
+    expect(devAudioAllowOrigin("/audio/x.m4a", dev[0], [])).toBeUndefined();
+    expect(devAudioAllowOrigin("/packs/test/assets/cover.png", dev[0], dev)).toBeUndefined();
+    expect(devAudioAllowOrigin("/audio/x.m4a", "https://evil.example", dev)).toBeUndefined();
+    expect(devAudioAllowOrigin("/audio/x.m4a", undefined, dev)).toBeUndefined();
   });
 });

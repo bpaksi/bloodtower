@@ -1,5 +1,7 @@
+import type { StoryboardState } from "bloodtower-protocols";
+import { KEEPER_MOMENT_ID } from "bloodtower-protocols";
 import { describe, expect, it } from "vitest";
-import { isBeforePickGame, isGameChosen, pickLayers } from "./layers.ts";
+import { isBeforePickGame, isGameChosen, isVisualMoment, pickLayers } from "./layers.ts";
 import { moodFile, SIGNATURE } from "./tracks.ts";
 
 const base = { packId: "test", visual: false } as const;
@@ -44,6 +46,26 @@ describe("pickLayers (stage to file)", () => {
       ambient: null,
       music: null,
     });
+  });
+
+  it("counts stills, clips and the Keeper scene as visuals, and cards as the waiting dialog", () => {
+    const moment = (
+      over: Partial<NonNullable<StoryboardState["moment"]>>,
+    ): StoryboardState["moment"] => ({
+      id: "proving-ground.01",
+      kind: "text-card",
+      text: "The gate opens.",
+      still: null,
+      fallbackAudio: null,
+      ...over,
+    });
+    expect(isVisualMoment(null)).toBe(false);
+    expect(isVisualMoment(moment({}))).toBe(false);
+    expect(isVisualMoment(moment({ kind: "pick-card" }))).toBe(false);
+    expect(isVisualMoment(moment({ kind: "still", still: "img.gate" }))).toBe(true);
+    expect(isVisualMoment(moment({ kind: "clip" }))).toBe(true);
+    expect(isVisualMoment(moment({ still: "img.gate" }))).toBe(true);
+    expect(isVisualMoment(moment({ id: KEEPER_MOMENT_ID }))).toBe(true);
   });
 
   it("falls back to the signature bed for a pack with no moods", () => {

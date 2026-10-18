@@ -33,4 +33,29 @@ describe("loopPointsFor", () => {
     expect(loopPointsFor(BED / 2, BED)).toBeNull();
     expect(loopPointsFor(BED + 100_000, BED)).toBeNull();
   });
+
+  it("scales the lengths when the context decodes at 44.1 kHz", () => {
+    // 114 s at 44.1 kHz is 5,027,400 frames, not the 48 kHz N.
+    const at44 = (frames: number) => Math.round((frames * 44_100) / SAMPLE_RATE);
+    expect(loopPointsFor(at44(BED), BED, 44_100)).toEqual({
+      loopStart: 0,
+      loopEnd: 114,
+      startAt: 0,
+    });
+    const points = loopPointsFor(at44(STARTUP + 582_000), STARTUP, 44_100);
+    expect(points?.startAt).toBeCloseTo(PRE_ROLL_FRAMES / SAMPLE_RATE, 9);
+    expect(points?.loopEnd).toBeCloseTo(PRE_ROLL_FRAMES / SAMPLE_RATE + 96, 9);
+  });
+
+  it("scales the lengths when the context decodes at 96 kHz", () => {
+    expect(loopPointsFor(BED * 2 + 400, BED, 96_000)).toEqual({
+      loopStart: 0,
+      loopEnd: 114,
+      startAt: 0,
+    });
+    expect(loopPointsFor((STARTUP + 582_000) * 2, STARTUP, 96_000)?.loopStart).toBeCloseTo(
+      PRE_ROLL_FRAMES / SAMPLE_RATE,
+      9,
+    );
+  });
 });

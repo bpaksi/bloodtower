@@ -3,7 +3,12 @@
 import type { FlowScreen, StoryboardState } from "bloodtower-protocols";
 import { useEffect, useRef, useState } from "react";
 import { BoardAudio } from "../../lib/audio/boardAudio.ts";
-import { isBeforePickGame, isGameChosen, pickLayers } from "../../lib/audio/layers.ts";
+import {
+  isBeforePickGame,
+  isGameChosen,
+  isVisualMoment,
+  pickLayers,
+} from "../../lib/audio/layers.ts";
 import {
   type Channel,
   DEFAULT_LEVELS,
@@ -26,6 +31,12 @@ const localStore = (): Storage | undefined => {
   }
 };
 
+/** After the first input: the landing sting, and the Sound dialog before Pick Game. */
+const afterFirstInput = (current: FlowScreen, player: BoardAudio | null, openSound: () => void) => {
+  if (current === "splash") player?.play(SIGNATURE.sting, "music", 6.5);
+  if (isBeforePickGame(current)) openSound();
+};
+
 /** The story board for a live session. It has no controls, except the Sound dialog (R3-UI-03). */
 export function LiveBoard() {
   const [state, setState] = useState<StoryboardState>(waitingStoryboard());
@@ -37,6 +48,10 @@ export function LiveBoard() {
   const audio = useRef<BoardAudio | null>(null);
   const screen = useRef<FlowScreen>(state.screen);
   const lastScreen = useRef<FlowScreen | null>(null);
+  /** False until the session sends its first state, so a reload mid-game is not taken for the landing. */
+  const received = useRef(false);
+  /** The first input came before the first state; decide on the sting and dialog when it lands. */
+  const inputBeforeState = useRef(false);
 
   useEffect(() => {
     setDebug(new URLSearchParams(window.location.search).get("debug") === "1");
@@ -49,6 +64,12 @@ export function LiveBoard() {
       onLive: () => undefined,
       onWelcome: () => undefined,
       onStoryboard: (next) => {
+        received.current = true;
+        screen.current = next.screen;
+        if (inputBeforeState.current) {
+          inputBeforeState.current = false;
+          afterFirstInput(next.screen, audio.current, () => setSoundOpen(true));
+        }
         setNotice(null);
         setState(next);
         if (next.moment) {
@@ -65,8 +86,9 @@ export function LiveBoard() {
     return () => session.close();
   }, []);
 
-  // The first click or keypress unlocks audio, plays the landing sting, and (before Pick Game)
-  // opens the Sound dialog. Listeners go once the audio is unlocked.
+  // The first click or keypress unlocks audio. On the landing screen it is the moment the window
+  // lights come on, so it plays the sting. Before Pick Game it opens the Sound dialog.
+  // Listeners go once the audio is unlocked.
   useEffect(() => {
     const onFirstInput = () => {
       window.removeEventListener("pointerdown", onFirstInput);
@@ -74,8 +96,8 @@ export function LiveBoard() {
       const player = audio.current;
       if (!player) return;
       player.unlock();
-      player.play(SIGNATURE.sting, "music", 6.5);
-      if (isBeforePickGame(screen.current)) setSoundOpen(true);
+      if (received.current) afterFirstInput(screen.current, player, () => setSoundOpen(true));
+      else inputBeforeState.current = true;
     };
     window.addEventListener("pointerdown", onFirstInput);
     window.addEventListener("keydown", onFirstInput);
@@ -85,7 +107,7 @@ export function LiveBoard() {
     };
   }, []);
 
-  const visual = state.moment !== null;
+  const visual = state.screen === "play" && isVisualMoment(state.moment);
   useEffect(() => {
     screen.current = state.screen;
     audio.current?.update(

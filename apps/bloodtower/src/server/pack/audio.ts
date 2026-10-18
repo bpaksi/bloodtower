@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { extname, join, sep } from "node:path";
+import { isAllowedOrigin } from "../hub/origin.ts";
 import type { PackLoadIssue } from "./load.ts";
 
 export const PACK_AUDIO_DIR = "audio";
@@ -87,4 +88,23 @@ export const indexPackAudio = (packRoot: string): PackAudioIndex => {
     byFile.set(name, real);
   }
   return { byFile };
+};
+
+/** The board's audio routes: the signature under `/audio/` and a pack's `/packs/<id>/audio/`. */
+export const isAudioPath = (pathname: string): boolean =>
+  pathname.startsWith("/audio/") || /^\/packs\/[^/]+\/audio\//.test(pathname);
+
+/**
+ * Under `pnpm dev` the board page is on another port, so it fetches audio cross-origin and Web
+ * Audio cannot decode it without CORS. Returns the origin to allow on an audio route, or undefined
+ * when no dev origins are set (`pnpm start` is same-origin) or the origin is not a dev origin.
+ */
+export const devAudioAllowOrigin = (
+  pathname: string | undefined,
+  origin: string | undefined,
+  devOrigins: readonly string[],
+): string | undefined => {
+  if (devOrigins.length === 0 || origin === undefined || pathname === undefined) return undefined;
+  if (!isAudioPath(pathname)) return undefined;
+  return isAllowedOrigin(origin, undefined, devOrigins, true) ? origin : undefined;
 };
