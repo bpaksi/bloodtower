@@ -6,7 +6,7 @@ import { WebSocketServer } from "ws";
 import { createMockTower } from "./mock.ts";
 import { runTowerPress } from "./port.ts";
 import { createSidecarTower, DEFAULT_SIDECAR_URL, diagLogPathFromEnv } from "./sidecar.ts";
-import { mapBattery, mapCalibration, mapConnection } from "./snapshot.ts";
+import { mapBattery, mapCalibration, mapConnection, mapFirmware } from "./snapshot.ts";
 
 const waitFor = async (ready: () => boolean) => {
   for (let attempt = 0; attempt < 50; attempt += 1) {
@@ -82,6 +82,10 @@ describe("sidecar", () => {
     expect(sources).not.toContain("@stoprocent/noble");
     expect(sources).not.toContain('type: "command"');
     expect(sources).not.toContain("type: 'command'");
+    // The one command the sidecar sends is a sound with a volume. No lights, no other capability.
+    expect(sources.match(/capabilityId/g)?.length).toBe(1);
+    expect(sources).toContain('SOUND_CAPABILITY = "sound.play-stateful"');
+    expect(sources).not.toMatch(/lighting\.|mechanics\.|seals\./);
   });
 
   it("sends hello and connect, reads battery without turning unknown into zero, and does not reconnect", async () => {
@@ -315,6 +319,133 @@ describe("sidecar", () => {
     } finally {
       tower.close();
       await fake.stop();
+    }
+  });
+});
+
+describe("tower sound", () => {
+  it("reads the firmware revision, and keeps a missing or blank one unavailable", () => {
+    expect(mapFirmware({ firmwareRevision: "1.2.3" })).toEqual({
+      state: "known",
+      version: "1.2.3",
+    });
+    expect(mapFirmware({ firmwareRevision: "" })).toEqual({ state: "unavailable" });
+    expect(mapFirmware({ firmwareRevision: "  " })).toEqual({ state: "unavailable" });
+    expect(mapFirmware({ firmwareRevision: null })).toEqual({ state: "unavailable" });
+    expect(mapFirmware(undefined)).toEqual({ state: "unavailable" });
+  });
+
+  it("records a sound and fails while no tower is connected, and fails once on request", async () => {
+    const tower = createMockTower();
+    expect(await tower.playSound(58, 0)).toBe("failed");
+    expect(tower.sent()).toEqual([]);
+    tower.connect();
+    expect(await tower.playSound(58, 1)).toBe("written");
+    tower.failNextSound();
+    expect(await tower.playSound(58, 2)).toBe("failed");
+    expect(await tower.playSound(58, 2)).toBe("written");
+    expect(tower.sent().filter((item) => item.type === "sound")).toEqual([
+      { type: "sound", soundIndex: 58, volume: 1 },
+      { type: "sound", soundIndex: 58, volume: 2 },
+    ]);
+  });
+
+  it("sends sound.play-stateful as a command with an id, resolves on write-completed, and reads the firmware", async () => {
+    const commands: Array<{ id?: string; payload?: unknown }> = [];
+    const server = new WebSocketServer({ port: 0, host: "127.0.0.1" });
+    await new Promise<void>((resolve) => server.once("listening", () => resolve()));
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("port");
+    let outcome: "write-completed" | "failed" | "unwritten" = "write-completed";
+    server.on("connection", (socket) => {
+      socket.on("message", (raw) => {
+        const message = JSON.parse(String(raw)) as {
+          type?: string;
+          id?: string;
+          payload?: unknown;
+        };
+        if (message.type === "hello") {
+          socket.send(JSON.stringify({ v: 1, type: "welcome", payload: {} }));
+          socket.send(
+            JSON.stringify({ v: 1, type: "connection", payload: { state: "disconnected" } }),
+          );
+        }
+        if (message.type === "connect") {
+          socket.send(
+            JSON.stringify({
+              v: 1,
+              type: "connection",
+              payload: {
+                state: "connected",
+                calibration: "calibrated",
+                device: { firmwareRevision: "2.0.1" },
+              },
+            }),
+          );
+        }
+        if (message.type === "command") {
+          commands.push({ id: message.id, payload: message.payload });
+          // A queued frame does not end the wait; the stage after it does.
+          socket.send(
+            JSON.stringify({
+              v: 1,
+              type: "command.lifecycle",
+              payload: {
+                commandId: message.id,
+                capabilityId: "sound.play-stateful",
+                stage: "queued",
+              },
+            }),
+          );
+          socket.send(
+            JSON.stringify({
+              v: 1,
+              type: "command.lifecycle",
+              payload: {
+                commandId: message.id,
+                capabilityId: "sound.play-stateful",
+                stage: outcome === "unwritten" ? "indeterminate" : outcome,
+                ...(outcome === "unwritten" ? { written: false } : {}),
+              },
+            }),
+          );
+        }
+      });
+    });
+    const tower = createSidecarTower({ url: `ws://127.0.0.1:${address.port}` });
+    try {
+      // No tower yet: nothing is sent.
+      expect(await tower.playSound(58, 0)).toBe("failed");
+      expect(commands).toEqual([]);
+      tower.connect();
+      await tower.settled();
+      await waitFor(() => tower.snapshot().connection === "connected");
+      expect(tower.snapshot().firmware).toEqual({ state: "known", version: "2.0.1" });
+
+      expect(await tower.playSound(58, 2)).toBe("written");
+      expect(commands).toEqual([
+        {
+          id: "bt-sound-1",
+          payload: { capabilityId: "sound.play-stateful", params: { soundIndex: 58, volume: 2 } },
+        },
+      ]);
+      outcome = "failed";
+      expect(await tower.playSound(58, 1)).toBe("failed");
+      // A command tower-poc never wrote is not a sound that played.
+      outcome = "unwritten";
+      expect(await tower.playSound(58, 0)).toBe("failed");
+      // A failed sound is not sent again by the sidecar.
+      expect(commands).toHaveLength(3);
+      expect(tower.sent().map((item) => item.type)).toEqual([
+        "hello",
+        "connect",
+        "sound",
+        "sound",
+        "sound",
+      ]);
+    } finally {
+      tower.close();
+      server.close();
     }
   });
 });

@@ -71,7 +71,9 @@ console.log(`Socket shares port ${server.port} with the page.`);
 console.log(`Serving web UI from ${webRoot}`);
 console.log(`Data folder ${config.dataDir}`);
 console.log(`Packs folder ${config.packsDir}`);
-console.log(`${towerLine} This process sends no effects.`);
+console.log(
+  `${towerLine} It plays only the volume test's sound, after a press, and sends no lights.`,
+);
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {

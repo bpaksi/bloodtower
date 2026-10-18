@@ -1053,6 +1053,23 @@
   text-underline-offset: 0.2em;
 }
 
+/* Tower volume test: the level playing now is lit. */
+.bt-levels {
+  display: flex;
+  gap: 1.25rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--bt-size-label);
+  color: var(--bt-vellum-shadow);
+}
+
+.bt-levels [data-current] {
+  color: var(--bt-blood);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 /* Sound dialog (R3-UI-03): the Mac board's only control besides the Menu. */
 .bt-sound-backdrop {
   position: fixed;

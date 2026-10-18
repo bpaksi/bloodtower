@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { BoardAudio } from "../../lib/audio/boardAudio.ts";
 import {
   audioPackId,
+  duckLevel,
   isGameChosen,
   isLanding,
   isVisualMoment,
@@ -126,6 +127,11 @@ export function LiveBoard() {
       audio.current?.play(SIGNATURE.soft, "music", 6.5);
     }
   }, [state.screen, soundPack, visual]);
+
+  const duck = duckLevel(state.volumeTest);
+  useEffect(() => {
+    audio.current?.setDuck(duck);
+  }, [duck]);
 
   const onLevelChange = (channel: Channel, level: number) => {
     const next = { ...levels, [channel]: level };

@@ -135,3 +135,18 @@ export const activeMillis = (totalMillis: number, marks: readonly TimingMark[]):
   if (paused === null || totalMillis < paused) return null;
   return totalMillis - paused;
 };
+
+/**
+ * One recorded pack stat of type `event` (Proving Ground section 14). `data` holds what the
+ * stat names, as text or null. Null is a value the app did not have, such as an unreported
+ * firmware revision, never an empty string or zero.
+ */
+export const statEventSchema = z.strictObject({
+  sessionId: z.string().min(1).max(64),
+  statId: z.string().min(1).max(64),
+  atMonoMs: monoMs,
+  atWall: utcTimestampSchema,
+  deviceId: deviceIdSchema.nullable(),
+  data: z.record(z.string().min(1).max(64), z.string().max(500).nullable()),
+});
+export type StatEvent = z.infer<typeof statEventSchema>;

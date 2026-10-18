@@ -3,13 +3,15 @@ import {
   type ControlPress,
   controlPressSchema,
   type PauseCause,
+  type StatEvent,
+  statEventSchema,
   type TimingKind,
   type TimingMark,
   timingMarkSchema,
 } from "bloodtower-protocols";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Db } from "./client.ts";
-import { controlPresses, devices, holdings, sessions, timingMarks } from "./schema.ts";
+import { controlPresses, devices, holdings, sessions, statEvents, timingMarks } from "./schema.ts";
 
 export interface RosterDevice {
   deviceId: string;
@@ -46,6 +48,7 @@ export interface StoredRun {
   holdings: RosterHolding[];
   presses: ControlPress[];
   marks: TimingMark[];
+  stats: StatEvent[];
 }
 
 const markFromRow = (row: typeof timingMarks.$inferSelect): TimingMark =>
@@ -61,6 +64,16 @@ const markFromRow = (row: typeof timingMarks.$inferSelect): TimingMark =>
     cause: row.cause,
     hunter: row.hunter,
     result: row.result,
+  });
+
+const statFromRow = (row: typeof statEvents.$inferSelect): StatEvent =>
+  statEventSchema.parse({
+    sessionId: row.sessionId,
+    statId: row.statId,
+    atMonoMs: row.atMonoMs,
+    atWall: row.atWall,
+    deviceId: row.deviceId,
+    data: JSON.parse(row.data),
   });
 
 const pressFromRow = (row: typeof controlPresses.$inferSelect): ControlPress =>
@@ -84,6 +97,8 @@ export interface SessionStore {
     end: { endMonoMs: number; endWall: string; result: TimingMark["result"] },
   ) => void;
   listMarks: (sessionId: string) => TimingMark[];
+  insertStat: (event: StatEvent) => void;
+  listStats: (sessionId: string) => StatEvent[];
   loadRun: (sessionId: string) => StoredRun;
 }
 
@@ -188,6 +203,23 @@ export const createSessionStore = (db: Db): SessionStore => ({
       .all()
       .map(markFromRow),
 
+  insertStat: (event) => {
+    const parsed = statEventSchema.parse(event);
+    db.insert(statEvents)
+      .values({
+        sessionId: parsed.sessionId,
+        statId: parsed.statId,
+        atMonoMs: parsed.atMonoMs,
+        atWall: parsed.atWall,
+        deviceId: parsed.deviceId,
+        data: JSON.stringify(parsed.data),
+      })
+      .run();
+  },
+
+  listStats: (sessionId) =>
+    db.select().from(statEvents).where(eq(statEvents.sessionId, sessionId)).all().map(statFromRow),
+
   loadRun: (sessionId) => {
     const session = db.select().from(sessions).where(eq(sessions.id, sessionId)).get();
     if (!session) throw new Error(`No session ${sessionId}.`);
@@ -228,6 +260,12 @@ export const createSessionStore = (db: Db): SessionStore => ({
         .where(eq(timingMarks.sessionId, sessionId))
         .all()
         .map(markFromRow),
+      stats: db
+        .select()
+        .from(statEvents)
+        .where(eq(statEvents.sessionId, sessionId))
+        .all()
+        .map(statFromRow),
     };
   },
 });

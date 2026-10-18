@@ -184,6 +184,21 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
         await d.button("play-without-tower").click();
       });
 
+      await test.step("The tower volume test with no tower is the room-sound check: nothing to play", async () => {
+        await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
+        await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
+        await expect(pad.getByRole("heading", { name: "Tower volume test" })).toBeVisible();
+        await expect(board.getByText("Check the room sound")).toBeVisible();
+        await expect(board.getByText(/No tower is connected/)).toBeVisible();
+        await expect(d.button("volume-play")).toHaveCount(0);
+        await expect(d.button("continue")).toBeEnabled();
+        await expect(d.button("back")).toBeEnabled();
+        await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
+        await shot(pad, "device-tower-volume-test-room");
+        await shot(board, "board-tower-volume-test-room");
+        await d.button("continue").click();
+      });
+
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "party-join");
       await expect(pad.getByRole("heading", { name: "Claim Hunters" })).toBeVisible();
       await expect(

@@ -63,6 +63,18 @@ body {
   opacity: 0.45;
 }
 
+.bt-input {
+  min-height: var(--bt-touch);
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: var(--bt-radius);
+  border: 2px solid var(--bt-line);
+  background: var(--bt-card);
+  color: var(--bt-fg);
+  font: inherit;
+  font-size: 1.25rem;
+}
+
 .bt-card {
   background: var(--bt-card);
   border: 1px solid var(--bt-line);

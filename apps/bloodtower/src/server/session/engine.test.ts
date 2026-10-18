@@ -120,6 +120,7 @@ const startPlay = (engine: SessionEngine, deviceId: string) => {
   winStep(engine, deviceId, "continue-pick-story-test", "continue");
   winStep(engine, deviceId, "continue-game-settings", "continue");
   winStep(engine, deviceId, "continue-tower-connect", "continue");
+  winStep(engine, deviceId, "continue-tower-volume-test", "continue");
   winStep(engine, deviceId, "continue-party-join", "continue");
   doSetup(engine, deviceId);
   winStep(engine, deviceId, "begin", "begin");
@@ -148,6 +149,7 @@ describe("session", () => {
       winStep(engine, joined.deviceId, "continue-pick-story-test", "continue");
       winStep(engine, joined.deviceId, "continue-game-settings", "continue");
       winStep(engine, joined.deviceId, "continue-tower-connect", "continue");
+      winStep(engine, joined.deviceId, "continue-tower-volume-test", "continue");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(false);
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toBeNull();
       expect(engine.press(joined.deviceId, "continue-party-join", "continue")).toEqual({
@@ -600,7 +602,7 @@ describe("session", () => {
       expect(engine.screen()).toBe("tower-connect");
       expect(engine.projectStoryboard(TOWER, JOIN).prompt).toEqual({
         id: "continue-tower-connect",
-        label: "Next: gather the party",
+        label: "Next: tower volume test",
       });
       expect(engine.press(alpha.deviceId, "quit", "quit")).toEqual({
         ok: false,
@@ -613,6 +615,7 @@ describe("session", () => {
         backLock: null,
       });
       winStep(engine, alpha.deviceId, "continue-tower-connect", "continue");
+      winStep(engine, alpha.deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
       winStep(engine, alpha.deviceId, "continue-party-join", "continue");
       doSetup(engine, alpha.deviceId);
@@ -646,13 +649,13 @@ describe("session", () => {
         true,
         false,
       ]);
-      expect(engine.screen()).toBe("party-join");
+      expect(engine.screen()).toBe("tower-volume-test");
       // The flow moved on. A press on the step it left is ignored, not an error.
       expect(engine.press(beta.deviceId, "continue-tower-connect", "continue")).toMatchObject({
         ok: true,
         winner: false,
       });
-      expect(engine.screen()).toBe("party-join");
+      expect(engine.screen()).toBe("tower-volume-test");
 
       const presses = store
         .loadRun("run")
@@ -669,11 +672,11 @@ describe("session", () => {
           device: alpha.deviceId,
           winner: true,
           screen: "tower-connect",
-          nextScreen: "party-join",
+          nextScreen: "tower-volume-test",
         },
         // Arrived after the flow moved in the same batch, so it records the screen then held.
-        { device: beta.deviceId, winner: false, screen: "party-join", nextScreen: null },
-        { device: beta.deviceId, winner: false, screen: "party-join", nextScreen: null },
+        { device: beta.deviceId, winner: false, screen: "tower-volume-test", nextScreen: null },
+        { device: beta.deviceId, winner: false, screen: "tower-volume-test", nextScreen: null },
       ]);
     } finally {
       opened.close();
@@ -1074,6 +1077,7 @@ describe("pick story", () => {
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.hunterRoster().map((hunter) => hunter.name)).toContain("Agnes the Second");
       const board = engine.projectStoryboard(TOWER, JOIN);
@@ -1095,6 +1099,7 @@ describe("pick story", () => {
       winStep(engine, deviceId, "continue-pick-story-test", "continue");
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.roster().packId).toBe("test");
       expect(engine.projectStoryboard(TOWER, JOIN).gate.canBegin).toBe(true);
@@ -1261,6 +1266,7 @@ describe("pick story", () => {
       winStep(engine, deviceId, "continue-pick-story-second", "continue");
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
       doSetup(engine, deviceId);
@@ -1390,6 +1396,7 @@ describe("game settings", () => {
       });
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
     } finally {
       opened.close();
@@ -1515,6 +1522,7 @@ describe("game settings", () => {
       expect(device.lock).toBeNull();
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
       expect(engine.press(deviceId, "back-game-settings", "back")).toEqual({
         ok: false,
@@ -1538,6 +1546,7 @@ describe("game settings", () => {
       winStep(engine, deviceId, "set-0", "set", "long", "length");
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       holdAll(engine, deviceId);
       winStep(engine, deviceId, "continue-party-join", "continue");
       doSetup(engine, deviceId);
@@ -1623,9 +1632,10 @@ describe("Connect Tower after Game settings (R3-UI-23)", () => {
       // "Play without tower" is the Continue prompt while no tower is connected (R2-22).
       expect(engine.projectDevice(deviceId).prompt).toEqual({
         id: "continue-tower-connect",
-        label: "Next: gather the party",
+        label: "Next: tower volume test",
       });
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
     } finally {
       opened.close();
@@ -1683,9 +1693,10 @@ describe("Connect Tower after Game settings (R3-UI-23)", () => {
       setTower(connected(true));
       expect(engine.projectDevice(deviceId).prompt).toEqual({
         id: "continue-tower-connect",
-        label: "Next: gather the party",
+        label: "Next: tower volume test",
       });
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
     } finally {
       opened.close();
@@ -1714,6 +1725,7 @@ describe("Connect Tower after Game settings (R3-UI-23)", () => {
       winStep(engine, deviceId, "back-tower-connect", "back");
       winStep(engine, deviceId, "continue-game-settings", "continue");
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(engine.screen()).toBe("party-join");
       // Off Connect Tower, Back is refused like Back from Game settings once it is left.
       expect(engine.press(deviceId, "back-tower-connect", "back")).toEqual({
@@ -1805,6 +1817,7 @@ describe("claim hunters and setup steps", () => {
     winStep(made.engine, deviceId, "continue-game-settings", "continue");
     if (made.engine.screen() === "tower-connect") {
       winStep(made.engine, deviceId, "continue-tower-connect", "continue");
+      winStep(made.engine, deviceId, "continue-tower-volume-test", "continue");
     }
     holdAll(made.engine, deviceId);
     return { ...made, deviceId };
@@ -1977,11 +1990,14 @@ describe("claim hunters and setup steps", () => {
     }
   });
 
-  it("Back from Claim Hunters returns to Connect Tower, keeps every claim and clears the tower item", () => {
+  it("Back from Claim Hunters returns to the tower volume test, and Back again to Connect Tower, clearing the tower item", () => {
     const { opened, engine, deviceId } = atClaim();
     try {
       expect(board(engine).summary?.tower).toBe("without");
       winStep(engine, deviceId, "back-party-join", "back");
+      expect(engine.screen()).toBe("tower-volume-test");
+      expect(board(engine).summary?.tower).toBe("without");
+      winStep(engine, deviceId, "back-tower-volume-test", "back");
       expect(engine.screen()).toBe("tower-connect");
       expect(board(engine).summary?.tower).toBeNull();
       expect(board(engine).gate).toEqual({ canBegin: true, unheld: [] });
@@ -2042,6 +2058,7 @@ describe("claim hunters and setup steps", () => {
       winStep(engine, deviceId, "continue-game-settings", "continue");
       expect(board(engine).summary?.tower).toBeNull();
       winStep(engine, deviceId, "continue-tower-connect", "continue");
+      winStep(engine, deviceId, "continue-tower-volume-test", "continue");
       expect(board(engine).summary?.tower).toBe("connected");
 
       engine.hold(deviceId, "alpha", "take");

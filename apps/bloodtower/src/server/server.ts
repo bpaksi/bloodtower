@@ -54,8 +54,8 @@ export const parseByteRange = (
 
 const HEALTH = hostHealthSchema.parse({
   protocol: PROTOCOL_VERSION,
-  tower: "connection-only",
-  effects: "none",
+  tower: "connection-and-sound",
+  effects: "sound-only",
 });
 
 const isFile = async (path: string) => {
@@ -123,7 +123,7 @@ const sendJson = (res: ServerResponse, status: number, body: unknown, head: bool
   res.end(head ? undefined : JSON.stringify(body));
 };
 
-/** Serves the exported web UI. `GET /health` reports connection-only mode and no effects. */
+/** Serves the exported web UI. `GET /health` reports connection-and-sound mode and no light effects. */
 export const serveStatic = async (root: string, req: IncomingMessage, res: ServerResponse) => {
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("allow", "GET, HEAD");

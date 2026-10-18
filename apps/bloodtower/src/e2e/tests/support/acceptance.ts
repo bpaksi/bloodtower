@@ -41,6 +41,8 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
     databasePath,
     tower,
     towerWatchMs: 50,
+    // The volume test waits about 4 s between sounds; the e2e run does not.
+    sleep: async () => undefined,
   });
   return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath };
 };

@@ -29,11 +29,19 @@ import {
   type TowerChoice,
   type TowerMode,
   type TowerSnapshot,
+  VOLUME_ANSWER_PROMPT_ID,
+  VOLUME_PLAY_PROMPT_PREFIX,
+  VOLUME_TEST_BACK_ID,
+  VOLUME_TEST_CONTINUE_ID,
+  type VolumeAnswer,
+  type VolumeTest,
+  volumeAnswerSchema,
 } from "bloodtower-protocols";
 import { lockPresses, type PressInput, type PressLog } from "../control/lock.ts";
 import type { RosterSnapshot } from "../db/store.ts";
 import type { StoryEntry } from "../pack/load.ts";
 import type { TimingLog } from "../timing/log.ts";
+import type { StatLog } from "../timing/stats.ts";
 import { type Beat, beatsForNight, privateText } from "./beats.ts";
 
 export interface JoinOk {
@@ -72,8 +80,9 @@ export interface SessionEngine {
   disconnect: (deviceId: string) => void;
   hold: (deviceId: string, hunter: string, action: "take" | "release") => { ok: true } | Fail;
   /**
-   * `option` is required for a `pick` or a `set` and refused for any other action. `setting` is
-   * required for a `set` and refused for any other action.
+   * `option` is required for a `pick`, a `set` or a `volume-answer` and refused for any other
+   * action. `setting` is required for a `set` and refused for any other action. `note` is the
+   * write-in text of a `volume-answer`: required with the write-in option, refused otherwise.
    */
   press: (
     deviceId: string,
@@ -81,6 +90,7 @@ export interface SessionEngine {
     action: ControlAction,
     option?: string,
     setting?: string,
+    note?: string,
   ) => PressOk | Fail;
   pressAll: (presses: readonly (PressInput & { deviceId: string })[]) => Array<PressOk | Fail>;
   /**
@@ -106,6 +116,17 @@ export interface SessionEngine {
   /** The id of the pack the session is bound to. */
   packId: () => string;
   /**
+   * The tower volume test, for the host to run after a winning `volume-play` press. Returns the
+   * run to play once (null when no run is waiting), so a repeated call starts nothing twice.
+   */
+  takeVolumeRun: () => VolumeRun | null;
+  /** Progress from the run. Ignored once the run is stale (Back, a newer run). */
+  volumeProgress: (run: number, phase: VolumeTest["phase"], level: 0 | 1 | 2 | null) => void;
+  /** The run's tower sound did not play. It ends the run; nothing is retried. */
+  volumeFailed: (run: number) => void;
+  /** True while `run` is the current run and the flow is still on the volume test. */
+  volumeRunLive: (run: number) => boolean;
+  /**
    * Moves the highlight on Pick Story. Not a press: no lock, no screen change. Refused off
    * Pick Story, from a device that is not connected, and for a story that is not in the list.
    */
@@ -127,6 +148,15 @@ export interface SessionEngine {
 
 /** How long a dropped device's hunters stay claimed before they become unclaimed (R2-104, §3.4). */
 export const GRACE_MS = 60_000;
+
+/** One start of the tower volume test. The first run also does the balance check. */
+export interface VolumeRun {
+  run: number;
+  withBalance: boolean;
+}
+
+/** The pack stat the test records (Proving Ground section 14). */
+export const VOLUME_TEST_STAT = "tower-volume-test";
 
 export interface SessionOptions {
   /** Claim hold after a device drops. Defaults to GRACE_MS. */
@@ -156,6 +186,8 @@ export interface SessionOptions {
    * only while the reading is `connected`.
    */
   tower?: () => TowerSnapshot;
+  /** Where event stats are recorded. Without it the answer is kept in memory and not stored. */
+  stats?: StatLog;
 }
 
 const newToken = () => randomBytes(16).toString("base64url");
@@ -163,14 +195,15 @@ const newToken = () => randomBytes(16).toString("base64url");
 /**
  * Each step before play moves to the next screen. Play, quit and splash are handled apart. Game
  * settings goes to "Not playable yet" instead when the chosen pack is `playable: false`, and
- * straight to Claim Hunters when its `tower` is `none` (R3-UI-23). Claim Hunters goes to the
- * pack's setup steps, one dialog each, and the last one to Begin; with no steps it goes straight
- * to Begin (R3-UI-22).
+ * straight to Claim Hunters when its `tower` is `none` (R3-UI-23). Connect Tower goes to the tower
+ * volume test, which goes to Claim Hunters. Claim Hunters goes to the pack's setup steps, one
+ * dialog each, and the last one to Begin; with no steps it goes straight to Begin (R3-UI-22).
  */
 const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "pick-story": "game-settings",
   "game-settings": "tower-connect",
-  "tower-connect": "party-join",
+  "tower-connect": "tower-volume-test",
+  "tower-volume-test": "party-join",
   "party-join": "begin",
 };
 
@@ -182,6 +215,7 @@ const BACK_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "game-settings": "pick-story",
   "not-playable": "game-settings",
   "tower-connect": "game-settings",
+  "tower-volume-test": "tower-connect",
 };
 
 /** The tower is connected and its calibration is known to be done. Unknown is not ready. */
@@ -313,6 +347,42 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   /** True while `pressAll` is deciding one batch, so the first press keeps the lock. */
   let inBatch = false;
 
+  /**
+   * The tower volume test (Proving Ground section 6a). Fresh on each visit to the screen. `run`
+   * names the current start, so progress from a run that Back left behind is ignored. `serial`
+   * makes each Play press a fresh lock, so "Play again" can win.
+   */
+  const freshVolume = () => ({
+    phase: "idle" as VolumeTest["phase"],
+    level: null as 0 | 1 | 2 | null,
+    runs: 0,
+    failed: false,
+    answer: null as VolumeAnswer | null,
+    /** The balance check has played once this visit. "Play again" repeats the levels only. */
+    balanceDone: false,
+  });
+  let volume = freshVolume();
+  let volumeRun = 0;
+  let volumeSerial = 0;
+  /** Set by a winning Play press and taken once by the host. */
+  let volumeQueued: VolumeRun | null = null;
+  let volumeLogged: {
+    answer: VolumeAnswer;
+    note: string | null;
+    firmware: string | null;
+    at: string;
+  } | null = null;
+  const volumePlayId = () => `${VOLUME_PLAY_PROMPT_PREFIX}${volumeSerial}`;
+  /** A tower is connected: the level test can run. Otherwise only the room-sound check shows. */
+  const volumeMode = (): VolumeTest["mode"] =>
+    readTower().connection === "connected" ? "tower" : "room";
+  const volumePlaying = () =>
+    volume.phase === "levels" || volume.phase === "balance-bed" || volume.phase === "balance-tower";
+  const volumePlayLegal = () =>
+    screen === "tower-volume-test" &&
+    volumeMode() === "tower" &&
+    (volume.phase === "idle" || volume.phase === "asking");
+
   const reconcileTowerLocks = () => {
     if (inBatch) return;
     const connection = readTower().connection;
@@ -415,7 +485,16 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (screen === "tower-connect") {
       // A required tower holds Continue until it is connected and calibrated (R3-UI-23).
       if (chosenTower() === "required" && !towerReady(readTower())) return null;
-      return { id: TOWER_CONNECT_CONTINUE_ID, action: "continue", label: "Next: gather the party" };
+      return {
+        id: TOWER_CONNECT_CONTINUE_ID,
+        action: "continue",
+        label: "Next: tower volume test",
+      };
+    }
+    if (screen === "tower-volume-test") {
+      // Continue waits while the tower plays, so no sound is cut off by leaving.
+      if (volumePlaying()) return null;
+      return { id: VOLUME_TEST_CONTINUE_ID, action: "continue", label: "Next: gather the party" };
     }
     if (screen === "game-settings") {
       return { id: GAME_SETTINGS_CONTINUE_ID, action: "continue", label: "Continue" };
@@ -567,7 +646,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (action === "quit") return "quit";
     if (action === "back") {
       if (screen === "party-join") {
-        return chosenTower() === "none" ? "game-settings" : "tower-connect";
+        return chosenTower() === "none" ? "game-settings" : "tower-volume-test";
       }
       if (screen === "setup") return setupAt > 0 ? "setup" : "party-join";
       if (screen === "begin") return setupSteps().length > 0 ? "setup" : "party-join";
@@ -656,6 +735,14 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         delete locks[id];
       }
       if (entered === "begin" && id === BEGIN_BACK_ID) delete locks[id];
+      if (
+        entered === "tower-volume-test" &&
+        (id === VOLUME_TEST_CONTINUE_ID ||
+          id === VOLUME_TEST_BACK_ID ||
+          id === VOLUME_ANSWER_PROMPT_ID)
+      ) {
+        delete locks[id];
+      }
     }
   };
 
@@ -674,6 +761,15 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       options.timing.close("setting", subject);
     }
   };
+
+  const volumeState = (): VolumeTest => ({
+    mode: volumeMode(),
+    phase: volume.phase,
+    level: volume.level,
+    runs: volume.runs,
+    failed: volume.failed,
+    answer: volume.answer,
+  });
 
   const gameSettingsState = (): GameSettings | null => {
     if (!chosen) return null;
@@ -710,7 +806,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       towerChoice = null;
       setupAt = 0;
     }
-    if (screen === "party-join") towerChoice = null;
+    if (screen === "tower-volume-test") towerChoice = null;
+    if (screen === "party-join" && chosenTower() === "none") towerChoice = null;
     if (screen === "setup") {
       closeSetupMark();
       setupAt = Math.max(0, setupAt - 1);
@@ -718,10 +815,43 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (screen === "begin") setupAt = Math.max(0, setupSteps().length - 1);
   };
 
-  const applyWin = (action: ControlAction, deviceId: string, option?: string, setting?: string) => {
+  /** The stat is recorded only when the bound pack declares it (stats.yaml). */
+  const recordVolumeAnswer = (deviceId: string, answer: VolumeAnswer, note: string | null) => {
+    const reading = readTower().firmware;
+    const firmware = reading?.state === "known" ? reading.version : null;
+    volume.answer = answer;
+    volume.phase = "answered";
+    if (!pack.stats.custom.some((stat) => stat.id === VOLUME_TEST_STAT)) return;
+    const event = options.stats?.record({
+      statId: VOLUME_TEST_STAT,
+      deviceId,
+      data: { answer, note, firmware },
+    });
+    if (event) volumeLogged = { answer, note, firmware, at: event.atWall };
+  };
+
+  const applyWin = (
+    action: ControlAction,
+    deviceId: string,
+    option?: string,
+    setting?: string,
+    note?: string,
+  ) => {
     if (action === "set") {
       if (chosen && setting && option) chosen.values.set(setting, option);
       setSerial += 1;
+      return;
+    }
+    if (action === "volume-play") {
+      volumeSerial += 1;
+      volumeRun += 1;
+      // The first start that gets there also runs the balance check; "Play again" does not.
+      volumeQueued = { run: volumeRun, withBalance: !volume.balanceDone };
+      volume = { ...volume, phase: "levels", level: 0, runs: volume.runs + 1, failed: false };
+      return;
+    }
+    if (action === "volume-answer") {
+      if (option) recordVolumeAnswer(deviceId, volumeAnswerSchema.parse(option), note ?? null);
       return;
     }
     if (action === "continue" && screen === "pick-story") {
@@ -735,6 +865,15 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     // A setup step moves to another step on the same screen, so it re-opens its locks too.
     if (screen !== left || screen === "setup") releaseRevisitLocks(screen);
     if (screen === "setup") openSetupMark();
+    if (left === "tower-volume-test" && screen !== left) {
+      // Leaving ends the run: a late progress report from it is ignored.
+      volumeRun += 1;
+      volumeQueued = null;
+    }
+    if (screen === "tower-volume-test" && left !== screen) {
+      volume = freshVolume();
+      volumeLogged = null;
+    }
     if (action === "quit") {
       closeBeat();
       if (pause) closePause();
@@ -807,9 +946,18 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     }
     if (action === "back") {
       if (screen === "tower-connect") return promptId === TOWER_CONNECT_BACK_ID;
+      if (screen === "tower-volume-test") return promptId === VOLUME_TEST_BACK_ID;
       if (screen === "party-join") return promptId === PARTY_JOIN_BACK_ID;
       if (screen === "setup") return promptId === setupBackId();
       if (screen === "begin") return promptId === BEGIN_BACK_ID;
+    }
+    if (action === "volume-play") return promptId === volumePlayId() && volumePlayLegal();
+    if (action === "volume-answer") {
+      return (
+        screen === "tower-volume-test" &&
+        promptId === VOLUME_ANSWER_PROMPT_ID &&
+        volume.phase === "asking"
+      );
     }
     const prompt = gameplayPrompt();
     return prompt !== null && prompt.id === promptId && prompt.action === action;
@@ -825,6 +973,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   const ownBackId = (): string | null => {
     if (screen === "game-settings") return GAME_SETTINGS_BACK_ID;
     if (screen === "tower-connect") return TOWER_CONNECT_BACK_ID;
+    if (screen === "tower-volume-test") return VOLUME_TEST_BACK_ID;
     if (screen === "party-join") return PARTY_JOIN_BACK_ID;
     if (screen === "setup") return setupBackId();
     if (screen === "begin") return BEGIN_BACK_ID;
@@ -892,6 +1041,14 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       (item) => item.id === setting && item.options.some((choice) => choice.id === option),
     );
 
+  /** One of the volume answers; the write-in answer carries text and no other answer does. */
+  const volumeAnswerOk = (option: string | undefined, note: string | undefined) => {
+    const parsed = volumeAnswerSchema.safeParse(option);
+    if (!parsed.success) return false;
+    if (parsed.data === "write-in") return note !== undefined && note.trim() !== "";
+    return note === undefined;
+  };
+
   /** True when `option` is one of the current pick's options. */
   const pickOptionOk = (option: string | undefined) => {
     const beat = currentBeat();
@@ -953,7 +1110,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       return { ok: true };
     },
 
-    press: (deviceId, promptId, action, option, setting) => {
+    press: (deviceId, promptId, action, option, setting, note) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };
       reconcileTowerLocks();
       // Logged with the screen it was made on. A win also logs the screen it moved to, before
@@ -976,6 +1133,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       if (action === "set" && !setOptionOk(setting, option)) {
         return { ok: false, code: "invalid-state" };
       }
+      if (action === "volume-answer" && !volumeAnswerOk(option, note)) {
+        return { ok: false, code: "invalid-state" };
+      }
       const decided = lockPresses(locks, [{ promptId, action, deviceId }]);
       const winner = decided.winners[0] === true;
       Object.assign(locks, decided.locks);
@@ -990,7 +1150,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
       });
       const lock = locks[promptId];
       if (!lock) return { ok: false, code: "invalid-state" };
-      if (winner) applyWin(action, deviceId, option, setting);
+      if (winner) applyWin(action, deviceId, option, setting, note);
       persist();
       return { ok: true, winner, lock, action };
     },
@@ -1052,6 +1212,8 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         gameSettings: gameSettingsState(),
         summary: summaryState(),
         setupStep: setupStep ? { step: setupStep, illustration: setupIllustration() } : null,
+        volumeTest:
+          screen === "tower-volume-test" ? { ...volumeState(), logged: volumeLogged } : null,
         pause: pause ? { cause: pause.cause, hunter: pause.hunter } : null,
         tower,
         gate: { canBegin: unheld.length === 0, unheld },
@@ -1095,12 +1257,44 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         setupStep: setupStepState(),
         backPromptId: ownBack,
         backLock: ownBack ? (locks[ownBack] ?? null) : null,
+        // Never the write-in text: only the board's debug overlay sees what was logged.
+        volumeTest: screen === "tower-volume-test" ? volumeState() : null,
+        volumePlayPromptId: volumePlayLegal() ? volumePlayId() : null,
+        volumeAnswerPromptId:
+          screen === "tower-volume-test" && volume.phase === "asking"
+            ? VOLUME_ANSWER_PROMPT_ID
+            : null,
       });
     },
 
     hunterRoster: () => hunters.map((hunter) => ({ ...hunter })),
 
     packId: () => pack.pack_id,
+
+    takeVolumeRun: () => {
+      const queued = volumeQueued;
+      volumeQueued = null;
+      return queued;
+    },
+
+    volumeRunLive: (run) => run === volumeRun && screen === "tower-volume-test",
+
+    volumeProgress: (run, phase, level) => {
+      if (run !== volumeRun || screen !== "tower-volume-test") return;
+      volume = {
+        ...volume,
+        phase,
+        level: phase === "levels" ? level : null,
+        balanceDone: volume.balanceDone || phase === "balance-tower",
+      };
+    },
+
+    volumeFailed: (run) => {
+      if (run !== volumeRun || screen !== "tower-volume-test") return;
+      // A balance sound that did not play leaves the balance check still to do.
+      const balanceDone = volume.phase === "balance-tower" ? false : volume.balanceDone;
+      volume = { ...volume, phase: "idle", level: null, failed: true, balanceDone };
+    },
 
     focusStory: (deviceId, storyId) => {
       if (!connectedDevice(deviceId)) return { ok: false, code: "unknown-device" };

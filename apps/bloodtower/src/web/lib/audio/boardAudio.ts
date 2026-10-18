@@ -6,6 +6,8 @@ import { LayerMixer, type LoopChannel, type LoopHandle, type MixerBackend } from
 import { type AudioFile, SIGNATURE } from "./tracks.ts";
 
 const FADE_IN_TIME_CONSTANT = 0.05;
+/** The bed gives way to the tower in about half a second. */
+const DUCK_TIME_CONSTANT = 0.12;
 
 /** Test clip per slider: the bed for ambient, motif-soft for music, motif-sting for voice (R3-UI-03). */
 export const TEST_CLIPS: Record<Channel, { file: AudioFile; seconds: number }> = {
@@ -21,6 +23,9 @@ export const TEST_CLIPS: Record<Channel, { file: AudioFile; seconds: number }> =
 export class BoardAudio {
   private context: AudioContext | null = null;
   private gains = new Map<Channel, GainNode>();
+  /** Every channel feeds this one gain, so the tower's sound can duck all of them (R3-UI-60). */
+  private duck: GainNode | null = null;
+  private duckTarget = 1;
   private buffers = new Map<string, Promise<AudioBuffer>>();
   private mixer: LayerMixer | null = null;
   private pending: Layers | null = null;
@@ -56,10 +61,14 @@ export class BoardAudio {
     if (!Context) return;
     const context = new Context();
     this.context = context;
+    const duck = context.createGain();
+    duck.gain.value = this.duckTarget;
+    duck.connect(context.destination);
+    this.duck = duck;
     for (const channel of CHANNELS) {
       const gain = context.createGain();
       gain.gain.value = this.levels[channel];
-      gain.connect(context.destination);
+      gain.connect(duck);
       this.gains.set(channel, gain);
     }
     this.resume();
@@ -83,6 +92,16 @@ export class BoardAudio {
         .get(channel)
         ?.gain.setTargetAtTime(levels[channel], this.context.currentTime, FADE_IN_TIME_CONSTANT);
     }
+  }
+
+  /**
+   * Ducks every channel to `level` (1 is none) over a short ramp. Held until the context exists.
+   * The tower volume test uses it while the tower plays.
+   */
+  setDuck(level: number): void {
+    this.duckTarget = level;
+    if (!this.context || !this.duck) return;
+    this.duck.gain.setTargetAtTime(level, this.context.currentTime, DUCK_TIME_CONSTANT);
   }
 
   /** The layers the board should hear now. Held until the context exists. */

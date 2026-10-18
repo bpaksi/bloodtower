@@ -3,6 +3,10 @@ import { KEEPER_MOMENT_ID } from "bloodtower-protocols";
 import { describe, expect, it } from "vitest";
 import {
   audioPackId,
+  DUCK_BALANCE,
+  DUCK_HARD,
+  DUCK_NONE,
+  duckLevel,
   isBeforePickGame,
   isGameChosen,
   isLanding,
@@ -12,6 +16,42 @@ import {
 import { moodFile, SIGNATURE } from "./tracks.ts";
 
 const base = { packId: "test", visual: false } as const;
+
+describe("duckLevel (the bed gives way to the tower, R3-UI-60)", () => {
+  const test = (phase: string, mode = "tower") =>
+    ({
+      mode,
+      phase,
+      level: phase === "levels" ? 1 : null,
+      runs: 1,
+      failed: false,
+      answer: null,
+      logged: null,
+    }) as NonNullable<StoryboardState["volumeTest"]>;
+
+  it("ducks hard while a level plays and partly while the tower plays over the room sound", () => {
+    expect(duckLevel(test("levels"))).toBe(DUCK_HARD);
+    expect(duckLevel(test("balance-tower"))).toBe(DUCK_BALANCE);
+    expect(DUCK_HARD).toBeLessThan(DUCK_BALANCE);
+    expect(DUCK_BALANCE).toBeLessThan(DUCK_NONE);
+  });
+
+  it("leaves the room sound alone when the tower is silent, and with no tower at all", () => {
+    for (const phase of ["idle", "balance-bed", "asking", "answered"]) {
+      expect(duckLevel(test(phase))).toBe(DUCK_NONE);
+    }
+    expect(duckLevel(test("levels", "room"))).toBe(DUCK_NONE);
+    expect(duckLevel(null)).toBe(DUCK_NONE);
+    expect(duckLevel(undefined)).toBe(DUCK_NONE);
+  });
+
+  it("keeps the start-up bed under the volume test", () => {
+    expect(pickLayers({ ...base, screen: "tower-volume-test" })).toEqual({
+      ambient: moodFile("test", "startup"),
+      music: null,
+    });
+  });
+});
 
 describe("pickLayers (stage to file)", () => {
   it("plays the signature bed from the landing screen through Pick Game (layer 1)", () => {

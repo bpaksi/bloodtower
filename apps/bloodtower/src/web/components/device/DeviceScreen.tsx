@@ -1,6 +1,14 @@
 "use client";
 
-import type { ControlAction, ControlLock, DeviceState, TowerSnapshot } from "bloodtower-protocols";
+import {
+  type ControlAction,
+  type ControlLock,
+  type DeviceState,
+  type TowerSnapshot,
+  VOLUME_ANSWERS,
+  VOLUME_NOTE_MAX,
+} from "bloodtower-protocols";
+import { useState } from "react";
 import { displayCaption } from "../../lib/caption.ts";
 import {
   chosenStory,
@@ -15,6 +23,7 @@ import {
   towerRequiredReason,
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
+import { VOLUME_ANSWER_LABEL, VOLUME_QUESTION, volumeIsPlaying } from "../../lib/volumeTest.ts";
 import { deviceControls } from "./controls";
 
 /**
@@ -40,7 +49,13 @@ export function DeviceScreen({
   connectLock: ControlLock | null;
   calibrateLock: ControlLock | null;
   tower: TowerSnapshot;
-  onControl?: (promptId: string, action: ControlAction, option?: string, setting?: string) => void;
+  onControl?: (
+    promptId: string,
+    action: ControlAction,
+    option?: string,
+    setting?: string,
+    note?: string,
+  ) => void;
   onHold?: (hunter: string, action: "take" | "release") => void;
   onFocusStory?: (story: string) => void;
 }) {
@@ -74,6 +89,7 @@ export function DeviceScreen({
     controls.continue &&
     (state.screen === "pick-story" ||
       state.screen === "game-settings" ||
+      state.screen === "tower-volume-test" ||
       state.screen === "party-join" ||
       state.screen === "setup" ||
       (state.screen === "play" && !controls.resume) ||
@@ -120,6 +136,23 @@ export function DeviceScreen({
           press={press}
           promptId={state.prompt?.id ?? null}
           skip={controls.continue && !ready && !towerRequired}
+        />
+      ) : null}
+      {state.screen === "tower-volume-test" ? (
+        <VolumeTestDevice
+          test={state.volumeTest ?? null}
+          playEnabled={controls.volumePlay}
+          answerEnabled={controls.volumeAnswer}
+          onPlay={() => {
+            if (controls.volumePlay && state.volumePlayPromptId) {
+              onControl?.(state.volumePlayPromptId, "volume-play");
+            }
+          }}
+          onAnswer={(option, note) => {
+            if (controls.volumeAnswer && state.volumeAnswerPromptId) {
+              onControl?.(state.volumeAnswerPromptId, "volume-answer", option, undefined, note);
+            }
+          }}
         />
       ) : null}
       {state.screen === "pick-story" ? (
@@ -242,6 +275,7 @@ const BACK_SCREENS: ReadonlySet<DeviceState["screen"]> = new Set([
   "not-playable",
   "game-settings",
   "tower-connect",
+  "tower-volume-test",
   "party-join",
   "setup",
   "begin",
@@ -298,6 +332,109 @@ const TowerConnectDevice = ({
         >
           Play without tower
         </button>
+      ) : null}
+    </section>
+  );
+};
+
+/**
+ * The tower volume test (Proving Ground section 6a). Text and buttons only. With a tower: Play
+ * levels, then the question with its answers and a write-in. With no tower there is nothing to
+ * press but Continue. The write-in text goes only with its own press and is never shown here
+ * again or on another device.
+ */
+const VolumeTestDevice = ({
+  test,
+  playEnabled,
+  answerEnabled,
+  onPlay,
+  onAnswer,
+}: {
+  test: DeviceState["volumeTest"] | null;
+  playEnabled: boolean;
+  answerEnabled: boolean;
+  onPlay: () => void;
+  onAnswer: (option: string, note?: string) => void;
+}) => {
+  const [note, setNote] = useState("");
+  if (!test) return null;
+  if (test.mode === "room") {
+    return (
+      <article className="bt-card space-y-2" data-volume-mode="room">
+        <p className="text-xl">No tower is connected. Check that the board is playing sound.</p>
+      </article>
+    );
+  }
+  const playing = volumeIsPlaying(test);
+  return (
+    <section className="flex flex-col gap-4" data-volume-phase={test.phase}>
+      {playing ? (
+        <p className="text-xl" role="status">
+          {test.phase === "levels"
+            ? `Level ${test.level ?? 0} is playing.`
+            : "The tower is playing."}
+        </p>
+      ) : null}
+      {test.failed ? (
+        <p className="text-xl" role="status">
+          The tower did not play that sound. Nothing was sent again.
+        </p>
+      ) : null}
+      {test.phase === "idle" || test.phase === "asking" ? (
+        <button
+          type="button"
+          className={test.phase === "idle" ? "bt-primary" : "bt-secondary"}
+          data-action="volume-play"
+          disabled={!playEnabled}
+          onClick={onPlay}
+        >
+          {test.runs === 0 ? "Play levels" : "Play again"}
+        </button>
+      ) : null}
+      {test.phase === "asking" ? (
+        <fieldset className="flex flex-col gap-3" data-volume-question="">
+          <legend className="bt-kicker">{VOLUME_QUESTION}</legend>
+          {VOLUME_ANSWERS.filter((answer) => answer !== "write-in").map((answer) => (
+            <button
+              key={answer}
+              type="button"
+              className="bt-primary"
+              data-action="volume-answer"
+              data-answer={answer}
+              disabled={!answerEnabled}
+              onClick={() => onAnswer(answer)}
+            >
+              {VOLUME_ANSWER_LABEL[answer]}
+            </button>
+          ))}
+          <label className="flex flex-col gap-2">
+            <span className="text-lg">Or write what you heard</span>
+            <input
+              type="text"
+              className="bt-input"
+              data-volume-note=""
+              maxLength={VOLUME_NOTE_MAX}
+              value={note}
+              disabled={!answerEnabled}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            className="bt-secondary"
+            data-action="volume-answer"
+            data-answer="write-in"
+            disabled={!answerEnabled || note.trim() === ""}
+            onClick={() => onAnswer("write-in", note.trim())}
+          >
+            Send what I wrote
+          </button>
+        </fieldset>
+      ) : null}
+      {test.phase === "answered" && test.answer ? (
+        <p className="text-xl" role="status">
+          Answered: {VOLUME_ANSWER_LABEL[test.answer]}.
+        </p>
       ) : null}
     </section>
   );

@@ -26,8 +26,10 @@ import { requestPath, serveStatic } from "../server.ts";
 import { createSession, type SessionEngine } from "../session/engine.ts";
 import { type Clock, systemClock } from "../timing/clock.ts";
 import { createTimingLog } from "../timing/log.ts";
+import { createStatLog } from "../timing/stats.ts";
 import { runTowerPress } from "../tower/port.ts";
 import type { TowerPort } from "../tower/types.ts";
+import { runVolumeTest } from "../tower/volumeTest.ts";
 import { isAllowedOrigin } from "./origin.ts";
 
 const WS_PATH = "/ws";
@@ -52,6 +54,8 @@ export interface SessionHostOptions {
   towerWatchMs?: number;
   /** The address iPads open for the join QR. Undefined when only loopback is reachable. Defaults to the LAN address for `host`. */
   lanHost?: () => string | undefined;
+  /** Waits for the volume test's timing. Tests pass one that does not wait. */
+  sleep?: (ms: number) => Promise<void>;
 }
 
 export interface SessionHost {
@@ -122,6 +126,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const joinPagePort = options.joinPagePort;
   const tower = options.tower;
   const lanHost = options.lanHost ?? (() => joinHost(options.host));
+  const sleep =
+    options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
   let engine: SessionEngine;
   try {
     engine = createSession(pack, {
@@ -131,6 +137,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       joinCode,
       startedWall: clock.wall(),
       timing: createTimingLog(store, clock, sessionId),
+      stats: createStatLog(store, clock, sessionId),
       presses: createPressLog(clock, (press) => store.insertPress(sessionId, press)),
       saveRoster: (roster) => store.saveRoster(roster),
       tower: () => tower.snapshot(),
@@ -430,6 +437,35 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     broadcast();
   };
 
+  /**
+   * Plays the volume test after the winning press that asked for it. It runs on its own; each
+   * step publishes the board and the devices. A run Back left behind stops at its next step.
+   */
+  const startVolumeRun = () => {
+    const queued = engine.takeVolumeRun();
+    if (!queued) return;
+    void runVolumeTest({
+      port: tower,
+      withBalance: queued.withBalance,
+      sleep,
+      hooks: {
+        live: () => !closing && engine.volumeRunLive(queued.run),
+        progress: (phase, level) => {
+          engine.volumeProgress(queued.run, phase, level);
+          broadcast();
+        },
+        failed: () => {
+          engine.volumeFailed(queued.run);
+          broadcast();
+        },
+      },
+    }).catch(() => {
+      console.error("The tower volume test stopped.");
+      engine.volumeFailed(queued.run);
+      broadcast();
+    });
+  };
+
   const onControl = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
     if (message.type !== "control") return;
     const correlationId = message.id;
@@ -447,6 +483,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       message.payload.action,
       message.payload.option,
       message.payload.setting,
+      message.payload.note,
     );
     if (!result.ok) {
       sendError(socket, "invalid-state", "That press was not accepted.", correlationId);
@@ -454,6 +491,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     }
     runTowerPress(result, tower);
     broadcast();
+    if (result.winner && result.action === "volume-play") startVolumeRun();
   };
 
   /**

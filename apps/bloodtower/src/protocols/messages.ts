@@ -5,6 +5,8 @@ import {
   flowScreenSchema,
   optionIdSchema,
   promptIdSchema,
+  VOLUME_NOTE_MAX,
+  volumeAnswerSchema,
 } from "./control.ts";
 import {
   deviceIdSchema,
@@ -13,6 +15,7 @@ import {
   joinCodeSchema,
   roleSchema,
   tokenSchema,
+  utcTimestampSchema,
 } from "./devices.ts";
 import { KEEPER_LINE_COUNT, KEEPER_MOMENT_ID } from "./keeper.ts";
 import {
@@ -129,7 +132,8 @@ export const holdPayloadSchema = z.strictObject({
 /**
  * A press. The server accepts this only on a device socket and locks the first arrival.
  * A `pick` names the option it chooses. A `set` names the game setting and the option it
- * chooses for it. No other action names either.
+ * chooses for it. A `volume-answer` names one of the volume answers, and the write-in answer adds
+ * its text as `note`. No other action names an option, a setting or a note.
  */
 export const controlPayloadSchema = z
   .strictObject({
@@ -137,13 +141,26 @@ export const controlPayloadSchema = z
     action: controlActionSchema,
     option: optionIdSchema.optional(),
     setting: optionIdSchema.optional(),
+    /** The write-in text of a `volume-answer`. Length-capped, and never sent to other devices. */
+    note: z.string().trim().min(1).max(VOLUME_NOTE_MAX).optional(),
   })
   .superRefine((value, ctx) => {
-    const choosing = value.action === "pick" || value.action === "set";
+    const choosing =
+      value.action === "pick" || value.action === "set" || value.action === "volume-answer";
     if (choosing && !value.option) issue(ctx, `A ${value.action} names its option.`);
-    if (!choosing && value.option) issue(ctx, "Only a pick or a set names an option.");
+    if (!choosing && value.option) issue(ctx, "Only a pick, a set or an answer names an option.");
     if (value.action === "set" && !value.setting) issue(ctx, "A set names its setting.");
     if (value.action !== "set" && value.setting) issue(ctx, "Only a set names a setting.");
+    if (value.action === "volume-answer") {
+      if (!volumeAnswerSchema.safeParse(value.option).success) {
+        issue(ctx, "That is not one of the volume answers.");
+      }
+      if ((value.option === "write-in") !== (value.note !== undefined)) {
+        issue(ctx, "Only the write-in answer carries text, and it must.");
+      }
+    } else if (value.note !== undefined) {
+      issue(ctx, "Only a volume answer carries a note.");
+    }
   });
 
 /**
@@ -267,10 +284,18 @@ export const towerCalibrationSchema = z.discriminatedUnion("state", [
   z.strictObject({ state: z.literal("known"), calibrated: z.boolean() }),
 ]);
 
+/** The firmware revision the tower reported on connect. Absent or unavailable is never blank. */
+export const towerFirmwareSchema = z.discriminatedUnion("state", [
+  z.strictObject({ state: z.literal("unavailable") }),
+  z.strictObject({ state: z.literal("known"), version: z.string().min(1).max(200) }),
+]);
+
 export const towerSnapshotSchema = z.strictObject({
   connection: z.enum(["unavailable", "disconnected", "connecting", "connected"]),
   battery: towerBatterySchema,
   calibrated: towerCalibrationSchema,
+  /** Absent means the same as unavailable. */
+  firmware: towerFirmwareSchema.optional(),
 });
 export type TowerSnapshot = z.infer<typeof towerSnapshotSchema>;
 
@@ -473,6 +498,53 @@ export const startupSummarySchema = z.strictObject({
 });
 export type StartupSummary = z.infer<typeof startupSummarySchema>;
 
+/**
+ * The tower volume test (Proving Ground section 6a), shared by the board and the devices.
+ * `mode` is `tower` when a tower is connected, and `room` when it is not: then only the
+ * sound-dialog check shows and no tower command is sent. `phase` walks idle, levels (the tower
+ * plays Level 0, 1, 2 with `level` set), balance-bed (the room sound alone), balance-tower (the
+ * tower over it), asking, then answered. `failed` is set when a tower sound did not play.
+ */
+export const VOLUME_PHASES = [
+  "idle",
+  "levels",
+  "balance-bed",
+  "balance-tower",
+  "asking",
+  "answered",
+] as const;
+export const volumeTestSchema = z
+  .strictObject({
+    mode: z.enum(["tower", "room"]),
+    phase: z.enum(VOLUME_PHASES),
+    level: z.number().int().min(0).max(2).nullable(),
+    /** How many times the levels have started. */
+    runs: z.number().int().min(0).max(99),
+    failed: z.boolean(),
+    answer: volumeAnswerSchema.nullable(),
+  })
+  .superRefine((value, ctx) => {
+    if ((value.level !== null) !== (value.phase === "levels")) {
+      issue(ctx, "A level is set only while the levels play.");
+    }
+    if ((value.answer !== null) !== (value.phase === "answered")) {
+      issue(ctx, "An answer is set only once answered.");
+    }
+  });
+export type VolumeTest = z.infer<typeof volumeTestSchema>;
+
+/** What the stat holds, for the board's debug overlay only (R3-UI-40). */
+export const volumeTestLoggedSchema = z.strictObject({
+  answer: volumeAnswerSchema,
+  note: z.string().max(VOLUME_NOTE_MAX).nullable(),
+  /** The firmware revision, or null when the tower did not report one. */
+  firmware: z.string().min(1).max(200).nullable(),
+  at: utcTimestampSchema,
+});
+export const volumeTestBoardSchema = volumeTestSchema.safeExtend({
+  logged: volumeTestLoggedSchema.nullable(),
+});
+
 /** `lobby` is every screen before play. `ended` is the quit screen. */
 export const STORYBOARD_STAGES = ["lobby", "playing", "paused", "ended"] as const;
 
@@ -517,6 +589,8 @@ export const storyboardStatePayloadSchema = z
       })
       .nullable()
       .optional(),
+    /** The tower volume test, while the flow is on it. Null on every other screen. */
+    volumeTest: volumeTestBoardSchema.nullable().optional(),
     /** The line the Keeper scene is on (0..KEEPER_LINE_COUNT-1), or null outside that scene. */
     keeperLine: z
       .number()
@@ -661,6 +735,12 @@ export const deviceStatePayloadSchema = z
      */
     backPromptId: promptIdSchema.nullable().optional(),
     backLock: controlLockSchema.nullable().optional(),
+    /** The tower volume test, while the flow is on it. It never carries the write-in text. */
+    volumeTest: volumeTestSchema.nullable().optional(),
+    /** The prompt Play (and Play again) is pressed under, on the volume test only. */
+    volumePlayPromptId: promptIdSchema.nullable().optional(),
+    /** The prompt the answer is pressed under, while the test is asking. */
+    volumeAnswerPromptId: promptIdSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     if (new Set(value.heldHunters).size !== value.heldHunters.length) {
@@ -706,10 +786,10 @@ export const SERVER_MESSAGE_TYPES: readonly string[] = serverMessageSchema.optio
   (option) => option.shape.type.value,
 );
 
-/** `GET /health`. Connection only: this process sends no tower effects. */
+/** `GET /health`. Connection and sound only: this process sends no light or other tower effect. */
 export const hostHealthSchema = z.strictObject({
   protocol: z.literal(PROTOCOL_VERSION),
-  tower: z.literal("connection-only"),
-  effects: z.literal("none"),
+  tower: z.literal("connection-and-sound"),
+  effects: z.literal("sound-only"),
 });
 export type HostHealth = z.infer<typeof hostHealthSchema>;

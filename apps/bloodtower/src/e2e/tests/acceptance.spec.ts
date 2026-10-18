@@ -195,9 +195,45 @@ test("the test pack's first night, end to end, on one board and two devices", as
 
     await test.step("AC-4: hold several hunters; Begin waits for all", async () => {
       // Connected and calibrated: Continue replaces "Play without tower".
-      await expect(a.button("continue")).toHaveText("Next: gather the party");
+      await expect(a.button("continue")).toHaveText("Next: tower volume test");
       await expect(pageA.locator('[data-primary="true"]')).toHaveCount(1);
       await expect(a.button("play-without-tower")).toHaveCount(0);
+      await a.button("continue").click();
+
+      // The tower volume test (Proving Ground 6a): Play levels, the question, one answer.
+      await expect(pageA.getByRole("heading", { name: "Tower volume test" })).toBeVisible();
+      await expect(board.locator("[data-volume-mode='tower']")).toBeVisible();
+      await expect(board.getByText("Tower volume test", { exact: true }).first()).toBeVisible();
+      // Reaching the screen plays nothing: the sound waits for a press.
+      expect(tower.sent().filter((item) => item.type === "sound")).toEqual([]);
+      await expect(a.button("volume-play")).toHaveText("Play levels");
+      await a.button("volume-play").click();
+      await expect(board.getByText("Did the levels sound different?")).toBeVisible();
+      await expect(pageB.getByText("Did the levels sound different?")).toBeVisible();
+      expect(
+        tower
+          .sent()
+          .filter((item) => item.type === "sound")
+          .map((item) => [item.soundIndex, item.volume]),
+      ).toEqual([
+        [58, 0],
+        [58, 1],
+        [58, 2],
+        [58, 2],
+      ]);
+      await expect(b.button("volume-play")).toHaveText("Play again");
+      await pageB.locator('button[data-answer="all-differ"]').click();
+      await expect(board.getByText("Answered: All three differ.")).toBeVisible();
+      await expect(pageA.getByText("Answered: All three differ.")).toBeVisible();
+      // The debug overlay shows what was logged, with the tower's firmware.
+      await expect(board.locator("[data-volume-logged]")).toContainText("All three differ");
+      await expect(board.locator("[data-volume-logged]")).toContainText("mock");
+      expect(host.loadRun().stats).toMatchObject([
+        {
+          statId: "tower-volume-test",
+          data: { answer: "all-differ", note: null, firmware: "mock" },
+        },
+      ]);
       await a.button("continue").click();
       await expect(pageA.getByRole("heading", { name: "Claim Hunters" })).toBeVisible();
       await a.hold("alpha").click();
@@ -458,6 +494,22 @@ test("the test pack's first night, end to end, on one board and two devices", as
       expect(won("continue-tower-connect")).toMatchObject({
         winner: true,
         screen: "tower-connect",
+        nextScreen: "tower-volume-test",
+      });
+      expect(won("volume-play-0")).toMatchObject({
+        winner: true,
+        action: "volume-play",
+        screen: "tower-volume-test",
+        nextScreen: null,
+      });
+      expect(won("volume-answer")).toMatchObject({
+        winner: true,
+        action: "volume-answer",
+        screen: "tower-volume-test",
+      });
+      expect(won("continue-tower-volume-test")).toMatchObject({
+        winner: true,
+        screen: "tower-volume-test",
         nextScreen: "party-join",
       });
       // The settings locked at Begin, and the chosen length is in the timing log.
@@ -484,6 +536,9 @@ test("the test pack's first night, end to end, on one board and two devices", as
         "tower-calibrate:true",
         "tower-calibrate:false",
         "continue-tower-connect:true",
+        "volume-play-0:true",
+        "volume-answer:true",
+        "continue-tower-volume-test:true",
         "continue-party-join:true",
         "continue-setup-lay-out-board:true",
         "continue-setup-place-hunters:true",
@@ -532,8 +587,16 @@ test("the test pack's first night, end to end, on one board and two devices", as
       );
     });
 
-    await test.step("AC-9 (mock): only connect and calibrate reached the tower", async () => {
-      expect(tower.sent()).toEqual([{ type: "connect" }, { type: "calibrate" }]);
+    await test.step("AC-9 (mock): only connect, calibrate and the volume test's sounds reached the tower", async () => {
+      // Connect, calibrate, then the volume test's four sounds: no light, no other command.
+      expect(tower.sent()).toEqual([
+        { type: "connect" },
+        { type: "calibrate" },
+        { type: "sound", soundIndex: 58, volume: 0 },
+        { type: "sound", soundIndex: 58, volume: 1 },
+        { type: "sound", soundIndex: 58, volume: 2 },
+        { type: "sound", soundIndex: 58, volume: 2 },
+      ]);
     });
 
     await test.step("AC-3: no board frame carried a private line or an ipad: payload", async () => {
