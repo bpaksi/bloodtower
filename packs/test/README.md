@@ -35,6 +35,10 @@ Hunter ids stay `alpha`–`delta`; display names in `hunters.yaml` are Agnes, To
 
 If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
 
+## Camera tracks (`camera/`)
+
+Optional pan-and-zoom sidecars for story-board stills ([talking-avatar camera-track contract v1](https://github.com/bpaksi/talking-avatar/blob/cursor/camera-track-contract-1f07/docs/camera-track-contract.md)). One JSON file per moment id (`grey-stair.01.json` → `id` `grey-stair.01`). The folder is flat JSON only (no subfolders). The host serves tracks at `/packs/test/camera/<moment-id>.json`. Night 2 moment `grey-stair-n2.01` has a sidecar ready for when that moment lands in `moments.yaml`; until then only `grey-stair.01` and `grey-stair.02` exercise the board player.
+
 # Test pack (`packs/test/`) content spec
 
 Status: design draft for Bob, 2026-10-15. The YAML in this folder is still the proving ground above. This spec is not what the loader reads.

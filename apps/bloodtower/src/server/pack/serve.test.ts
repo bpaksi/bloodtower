@@ -57,6 +57,15 @@ describe("pack asset HTTP", () => {
 
     const fakePack = await fetch(`${base}/packs/other/asset/fx.hall`);
     expect(fakePack.status).toBe(404);
+
+    const camera = await fetch(`${base}/packs/test/camera/grey-stair.01.json`);
+    expect(camera.status).toBe(200);
+    expect(camera.headers.get("content-type")).toMatch(/json/);
+    const body = (await camera.json()) as { id: string };
+    expect(body.id).toBe("grey-stair.01");
+
+    const missingCamera = await fetch(`${base}/packs/test/camera/not-a-moment.json`);
+    expect(missingCamera.status).toBe(404);
   });
 });
 

@@ -307,6 +307,16 @@ test("the test pack's first night, end to end, on one board and two devices", as
         board.getByText("A grey stair climbs into the dark. Someone has left the lamps unlit."),
       ).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");
+      const cameraStill = board.locator(
+        '[data-camera-still] img[data-camera-track="grey-stair.01"]',
+      );
+      await expect(cameraStill).toBeVisible();
+      const transformAtStart = await cameraStill.evaluate((img) => getComputedStyle(img).transform);
+      await expect
+        .poll(async () => cameraStill.evaluate((img) => getComputedStyle(img).transform), {
+          timeout: 4000,
+        })
+        .not.toBe(transformAtStart);
       await a.button("continue").click();
       await expect(board.getByText(/At the top, a door/)).toBeVisible();
       await expect(board.locator("main")).not.toContainText("[pause");

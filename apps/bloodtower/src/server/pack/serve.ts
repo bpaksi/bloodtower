@@ -20,7 +20,8 @@ const pipeFile = (file: string, res: ServerResponse) => {
 };
 
 /**
- * `/packs/<packId>/assets/<file>` and `/packs/<packId>/asset/<assetId>`.
+ * `/packs/<packId>/assets/<file>`, `/packs/<packId>/asset/<assetId>`, and
+ * `/packs/<packId>/camera/<momentId>.json` for optional camera-track sidecars.
  * Only declared assets that resolved at load time are served. Traversal is refused.
  */
 export const tryServePackAssets = async (
@@ -41,6 +42,27 @@ export const tryServePackAssets = async (
   if (!catalog) {
     sendText(res, 404, "Not found.\n");
     return true;
+  }
+
+  if (parts[2] === "camera" && parts.length === 4) {
+    let momentId: string;
+    try {
+      const filePart = decodeURIComponent(parts[3] ?? "");
+      if (!filePart.endsWith(".json") || filePart.includes("/") || filePart.includes("\\")) {
+        sendText(res, 404, "Not found.\n");
+        return true;
+      }
+      momentId = filePart.slice(0, -".json".length);
+    } catch {
+      sendText(res, 400, "Bad request.\n");
+      return true;
+    }
+    const absolute = catalog.camera.byMomentId.get(momentId);
+    if (!absolute) {
+      sendText(res, 404, "Not found.\n");
+      return true;
+    }
+    return sendPackFile(absolute, req, res);
   }
 
   if (parts[2] === "asset" && parts.length === 4) {
