@@ -52,6 +52,7 @@ When action is required. Mutliple choice options are presented in large centered
 
 ### 2.1 Landing / background
 - R3-UI-01. The landing painting is the permanent Story board background from Splash to Goodbye; every other board element sits on it as a dialog, a zoomed visual, or a full-screen cut scene. Test: snapshot of every screen shows the background or a full-screen visual, never a bare page.
+- R3-UI-03 (Bob, 8:23 PM ET). Every game starts on the landing screen. On the Mac, a click or keypress on the landing screen opens it as the Story board and shows a Sound dialog (music, ambient and voice sliders with a short test clip, plus Continue) before Pick Game. That click also unlocks browser audio. Levels are remembered on that Mac and stay adjustable in the Control menu. Tower volume is still set in Connect Tower, because the tower is not connected yet. Test: fresh load needs one input; Sound dialog shown before Pick Game; levels persist across reload.
 - R3-UI-02. Window light flicker uses the motion-still (layered animation) technique: a static painting plus a window-glow mask layer driven by CSS/SVG. Slow, irregular, candle-like (about 1-2 Hz with jitter), never a strobe; honours reduced motion with a steady glow. Bats and other overlays stay on wish list #72. Test: reduced-motion setting stops the flicker; no frame-to-frame brightness jump over the flash-safety limit (3 per second).
 - Note: the flicker can later double as tower state (steady = connected, slow pulse = searching, dark = no tower). Proposal only; not a requirement until Bob says so.
 
@@ -62,16 +63,20 @@ When action is required. Mutliple choice options are presented in large centered
 - Flow buttons stay on the devices: "Continue" and "Back" on start-up dialogs are shown on the board as the step's state but pressed on the iPads/phones (R2-03, first press wins). The one exception is the board Menu (R3-UI-39).
 
 ### 2.3 Start-up dialogs
-Order: Connect Tower, then Pick Game, then Claim Hunters, each with Continue and Back on the iPads.
+Order (Bob, 8:06 PM ET): Pick Game, Game settings, Connect Tower, Claim Hunters, setup steps, each with Continue and Back on the devices. Devices join from Splash onward (the QR shows from Splash), since a device is needed to press anything.
 - R3-UI-20. Pick Game shows each story's hunters (names and avatars) as the story defines them; players never name or pick avatars (matches D2). Test: hunter cards come from the pack.
 - R3-UI-21. Claim Hunters keeps R2-30 (Continue disabled with reason until all held) and R2-31 ("Take all"). Test: as R2.
-- R3-UI-22 (Bob, Q1, Oct 17 7:49 PM ET). Game length (Short / Standard / Long, plus difficulty) is chosen inside Pick Game, on the chosen story's card, before Continue. Each physical setup step stays its own dialog with Done, after Claim Hunters; "Begin the story" follows the last one (R2-50..52 kept). Order: Connect Tower, Pick Game (+ length), Claim Hunters, setup step dialogs, Begin. Test: e2e order; length locked at Begin.
+- R3-UI-22 (Bob, Q1 7:49 PM, revised 8:04 PM ET). A "Game settings" dialog comes immediately after Pick Game. Its options are defined by each story pack (Dracula: length Short / Standard / Long plus difficulty; other stories may add their own). Each physical setup step stays its own dialog with Done, after Claim Hunters; "Begin the story" follows the last one (R2-50..52 kept). Order: Pick Game, Game settings, Connect Tower, Claim Hunters, setup step dialogs, Begin. Test: e2e order; settings come from the pack; length locked at Begin.
+- R3-UI-23 (Bob, 8:04 and 8:06 PM ET). Each story pack declares the tower as required, optional or none (none skips Connect Tower). Connect Tower comes after Game settings. Optional: "Play without tower" sits next to Connect (R2-22 kept). Required: no "Play without tower"; Continue stays disabled until connected and calibrated, with the reason shown. Dracula is optional (Loremaster writes no-drum versions of the fortune reading, open grave and finale). Supersedes D4 (tower right after Splash). Test: both pack types; required pack cannot continue unconnected.
+- R3-UI-25 (Bob, 8:06 PM ET). During start-up the Story board shows a running summary panel beside the current dialog that echoes every choice as it is made: game (cover + title), settings, tower state, hunters with the device holding each, and setup steps done. Empty items show "not chosen yet". Back clears the item it undoes. Test: summary matches state after each step and after Back.
+- R3-UI-24 (Bob, 8:04 PM ET). Pick Game is a carousel built for many stories: the board shows the focused story large with neighbours peeking at each side; devices move it with Previous / Next buttons (swipe allowed but never the only way, R2-113) and press "Choose <story title>". Saved games appear as their own cards first (R2-41). Test: 10+ packs browse with buttons only.
 
 ### 2.4 In game
 - R3-UI-30. With nothing to show, the board shows a small centered waiting dialog over the background naming who the table waits for ("Waiting for Mina to choose"), per R2-112/R2-115. Test: snapshot.
 - R3-UI-31. A visual enters with a zoom from the waiting dialog to full screen; the art is shown uncropped (letterboxed if needed). Zoom lasts about 0.6-1.0 s and is skipped under reduced motion. Test: timing + reduced-motion check.
 - R3-UI-32. A visual exits only by an iPad action (Continue, first press wins). On exit it crossfades straight into the next visual if one is queued, or zooms back to the waiting dialog. Test: e2e both paths.
 - R3-UI-33. Talking-avatar scenes count as visuals: they follow R3-UI-31/32; captions stay on (R-AV fallback).
+- R3-UI-33b (Bob, 8:29 PM ET; R2 playthrough bug). Every talking-avatar line shows a caption on the board: the speaker's name and the line's script text, shown for the length of the line and cleared when it ends or is skipped. Captions are on by default (R2 standing ruling: captions are the avatar's only fallback), sit in the lower third clear of the face, and are readable from across the room (at least 1/25 of screen height). A Captions on/off toggle lives in the Control menu. Caption text must match the voiced line (asset review). Test: each avatar line in the funeral POC shows its caption in sync.
 - R3-UI-34. The last visual can be replayed from the iPad menu ("Replay last video", §2.6). The board replays it with the same zoom and returns to the state it left. Replay never changes game state or stats beyond a replay count. Test: e2e.
 
 ### 2.5 Action needed
@@ -102,6 +107,30 @@ The menu lives on every device and on the Story board (Bob, Oct 17 7:46 PM ET: "
 - R3-UI-53. When action is needed, choices show as large centered buttons. If the game needs to know who acts and the device holds more than one hunter, a second row of hunter buttons follows the choice; with exactly one hunter, it is assumed. Test: e2e with 1 and 2+ hunters on a device.
 - Note: R3-UI-53's "who acts" step replaces the R2 hunter switcher tabs for choices; private lines still label the hunter by name.
 
+## 2.8b Waiting audio and tower sound (Bob, 8:21 PM ET)
+- R3-UI-60. While the board shows start-up dialogs or the waiting dialog, the Mac plays a looping ambient bed plus quiet music, mixed well under game play: ambient about -30 LUFS, music about -26 LUFS, against voice and scenes at -18 LUFS. It fades out over about 1 s when a visual or cut scene zooms in and fades back in when play returns to the waiting dialog. The bed ducks hard (or pauses) whenever the tower plays a sound. A pack may give one ambient/music mood per night instead of one per story (Loremaster writes the mood notes). Audio starts after the first board click or keypress on the landing screen (R3-UI-03). Never under an action-needed dialog's alert sound. Test: loudness check on the loops; fade on zoom in/out.
+- R3-UI-64 (Bob, 8:28 PM ET). Three sound layers by stage:
+  1. **Blood Tower signature** (app-level, not in any pack): plays from the landing screen through the Sound dialog and Pick Game, before a game is chosen. It is the house sound of Blood Tower: one recognizable motif (Illusionist proposes; a short phrase that can recur) over an ambient bed. The Sound dialog's test clips come from it.
+  2. **Game start-up mood** (per pack): replaces the signature with a crossfade once a game is chosen, through Game settings, Connect Tower, Claim Hunters and setup.
+  3. **Chapter/night mood** (per pack, per night): the waiting audio during play; Loremaster writes one mood note per night (Dracula: Oct 17 notes, nights 1-5, no voices).
+  Every change between layers is a crossfade of 2-3 s, never a hard cut. A pack with no moods falls back to the signature bed. Test: layer matches stage; crossfade on game choice and on night change.
+- R3-UI-61. Assets (Illusionist): per story, one seamless ambient loop (60-120 s; wind, distant bells or similar) and one waiting music loop (2-3 min, seamless), plus one shared default pair for packs that declare none. Declared in the pack manifest; mono 22050 Hz like the other audio unless Illusionist needs stereo for music.
+- R3-UI-62. Tower on connect: after connect and calibration succeed, the tower plays Tower Connected (#94, FX-U2) once, then the story's idle light bed (FX-04 by default). During waiting the tower is lights only: no repeating tower sounds, and ambient accents (FX-06) are off, because the tower is loud. Tower sounds are kept for meaningful cues. Test: no tower sound commands while waiting, after #94.
+- R3-UI-63. Tower volume: Connect Tower offers the tower volume (quiet / medium / loud = tiers 2 / 1 / 0, plus mute = 3) with a "Test sound" button once connected; default quiet. Also in the Control menu under Tower info. Mac audio has separate music, ambient and voice sliders in the Control menu. Open hardware gap: whether tiers 0-2 differ in loudness is unknown (GAP-HW-003); if they don't, the choice shrinks to On / Mute and Lights only (C7). Test: volume tier sent on every tower sound; GAP-HW-003 measured before this ships.
+
+## 2.9 Mockups
+Rough first-pass frames by Illusionist (Oct 17), nine per device: `mockups/2026-10-17/v2-mac.png`, `v2-ipad.png`, `v2-iphone.png`, plus `frames-mac-0-sound.png` (Sound dialog, R3-UI-03). Flow only; look is not final. Known fixes: hook reads "The Count has taken Lenka. Bring her home before she's his." (Loremaster); the setup frame uses a real step, "Lay out the board and orient the kingdoms" (R-WIZ-5 step 4), not the coffin line; card reads "4 hunters" (all four always in play), one "Quit game" menu item opening the three-way confirm on every device, board menu icon top-left (debug overlay is top-right), settings default Standard.
+
+## 2.10 Where it is built (Bob, 8:32 PM ET)
+All of this is built and proven in the Proving Ground pack (`packs/test/`) in `apps/bloodtower`, not in the funeral POC; Dracula takes it once proven. Proving Ground needs, as pack data and assets:
+- cover image (16:9) and tagline; tower: optional; a settings list (length Short/Standard/Long + difficulty);
+- a second short night (night 2: one shared moment, one choice, end-of-night summary) so night-mood crossfades can be tested; Loremaster writes its words;
+- a start-up mood and two night moods (nights 1 and 2), plus the app-level Blood Tower signature;
+- two or three setup steps with Done (one with an illustration);
+- at least two visuals (one still, one talking-avatar line with a `.vtt` caption) to exercise zoom, chaining, replay and captions;
+- one choice needing "who acts" (for the hunter row) and one private line: `grey-stair.door-choice` / "Oil the hinge" asks "Who spends their oil?" when two or more present hunters hold lamp oil (Ash and Cole start with it; spec in `packs/test/README.md` §5).
+The carousel needs two or more packs to test; until Dracula loads, a second stub card (cover + title only, marked "Coming soon", not choosable) stands in.
+
 ## 3. Changes to R2 (for the doc pass)
 | R2 item | Change |
 |---|---|
@@ -109,6 +138,7 @@ The menu lives on every device and on the Story board (Bob, Oct 17 7:46 PM ET: "
 | R2-66 tower loss never stops the game | Superseded by R3-UI-35 (blocking dialog) |
 | D6 / R2 §4 phones out | Reversed by R3-UI-50 |
 | §3.6 Pause menu | Becomes the Control menu (§2.6) |
+| D4 tower right after Splash | Superseded by R3-UI-23: tower after Game settings, required or optional per pack |
 | §4 hunter switcher tabs | Replaced for choices by R3-UI-53 |
 | Standing ruling "Story board: no buttons, ever" | Amended: the board has a Menu (R3-UI-39); all other controls stay on devices |
 | R2-104 all devices drop | Adds the board-menu exit (R3-UI-39) |
