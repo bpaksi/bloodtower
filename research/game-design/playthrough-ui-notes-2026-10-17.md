@@ -62,10 +62,13 @@ When action is required. Mutliple choice options are presented in large centered
 - Flow buttons stay on the devices: "Continue" and "Back" on start-up dialogs are shown on the board as the step's state but pressed on the iPads/phones (R2-03, first press wins). The one exception is the board Menu (R3-UI-39).
 
 ### 2.3 Start-up dialogs
-Order: Connect Tower, then Pick Game, then Claim Hunters, each with Continue and Back on the iPads.
+Order (Bob, 8:06 PM ET): Pick Game, Game settings, Connect Tower, Claim Hunters, setup steps, each with Continue and Back on the devices. Devices join from Splash onward (the QR shows from Splash), since a device is needed to press anything.
 - R3-UI-20. Pick Game shows each story's hunters (names and avatars) as the story defines them; players never name or pick avatars (matches D2). Test: hunter cards come from the pack.
 - R3-UI-21. Claim Hunters keeps R2-30 (Continue disabled with reason until all held) and R2-31 ("Take all"). Test: as R2.
-- R3-UI-22 (Bob, Q1, Oct 17 7:49 PM ET). Game length (Short / Standard / Long, plus difficulty) is chosen inside Pick Game, on the chosen story's card, before Continue. Each physical setup step stays its own dialog with Done, after Claim Hunters; "Begin the story" follows the last one (R2-50..52 kept). Order: Connect Tower, Pick Game (+ length), Claim Hunters, setup step dialogs, Begin. Test: e2e order; length locked at Begin.
+- R3-UI-22 (Bob, Q1 7:49 PM, revised 8:04 PM ET). A "Game settings" dialog comes immediately after Pick Game. Its options are defined by each story pack (Dracula: length Short / Standard / Long plus difficulty; other stories may add their own). Each physical setup step stays its own dialog with Done, after Claim Hunters; "Begin the story" follows the last one (R2-50..52 kept). Order: Pick Game, Game settings, Connect Tower, Claim Hunters, setup step dialogs, Begin. Test: e2e order; settings come from the pack; length locked at Begin.
+- R3-UI-23 (Bob, 8:04 and 8:06 PM ET). Each story pack declares the tower as required or optional. Connect Tower comes after Game settings. Optional: "Play without tower" sits next to Connect (R2-22 kept). Required: no "Play without tower"; Continue stays disabled until connected and calibrated, with the reason shown. Dracula is optional (Loremaster writes no-drum versions of the fortune reading, open grave and finale). Supersedes D4 (tower right after Splash). Test: both pack types; required pack cannot continue unconnected.
+- R3-UI-25 (Bob, 8:06 PM ET). During start-up the Story board shows a running summary panel beside the current dialog that echoes every choice as it is made: game (cover + title), settings, tower state, hunters with the device holding each, and setup steps done. Empty items show "not chosen yet". Back clears the item it undoes. Test: summary matches state after each step and after Back.
+- R3-UI-24 (Bob, 8:04 PM ET). Pick Game is a carousel built for many stories: the board shows the focused story large with neighbours peeking at each side; devices move it with Previous / Next buttons (swipe allowed but never the only way, R2-113) and press "Choose <story title>". Saved games appear as their own cards first (R2-41). Test: 10+ packs browse with buttons only.
 
 ### 2.4 In game
 - R3-UI-30. With nothing to show, the board shows a small centered waiting dialog over the background naming who the table waits for ("Waiting for Mina to choose"), per R2-112/R2-115. Test: snapshot.
@@ -109,6 +112,7 @@ The menu lives on every device and on the Story board (Bob, Oct 17 7:46 PM ET: "
 | R2-66 tower loss never stops the game | Superseded by R3-UI-35 (blocking dialog) |
 | D6 / R2 §4 phones out | Reversed by R3-UI-50 |
 | §3.6 Pause menu | Becomes the Control menu (§2.6) |
+| D4 tower right after Splash | Superseded by R3-UI-23: tower after Game settings, required or optional per pack |
 | §4 hunter switcher tabs | Replaced for choices by R3-UI-53 |
 | Standing ruling "Story board: no buttons, ever" | Amended: the board has a Menu (R3-UI-39); all other controls stay on devices |
 | R2-104 all devices drop | Adds the board-menu exit (R3-UI-39) |
