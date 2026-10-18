@@ -1812,5 +1812,169 @@
     "speaker": "emeric",
     "moment": "n1-lantern-and-bell.05",
     "duration_s": 2.4
+  },
+  "n1-lantern-and-bell.05.vo-04": {
+    "id": "n1-lantern-and-bell.05.vo-04",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.05.vo-04.wren.wav",
+    "status": "draft",
+    "text": "Before. Grave's open now. From the inside.",
+    "speaker": "wren",
+    "moment": "n1-lantern-and-bell.05",
+    "duration_s": 4.64
+  },
+  "n1-lantern-and-bell.06": {
+    "id": "n1-lantern-and-bell.06",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.06@dashboard.png",
+    "status": "placeholder",
+    "text": "Emeric: He split it between us so no single one of us could \u2014 oh. That's very clever.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.06.vo-01": {
+    "id": "n1-lantern-and-bell.06.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.06.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "He split it between us so no single one of us could \u2014 oh. That's very clever.",
+    "speaker": "emeric",
+    "moment": "n1-lantern-and-bell.06",
+    "duration_s": 5.96
+  },
+  "n1-lantern-and-bell.06.vo-02": {
+    "id": "n1-lantern-and-bell.06.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.06.vo-02.tomas.wav",
+    "status": "draft",
+    "text": "It's a riddle that got a priest killed.",
+    "speaker": "tomas",
+    "moment": "n1-lantern-and-bell.06",
+    "duration_s": 4.04
+  },
+  "n1-lantern-and-bell.07": {
+    "id": "n1-lantern-and-bell.07",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.07@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: A stable boy stumbles in, white to the lips. The road out of the valley is gone. Not blocked. Gone. The mist has come down over it like a lid.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.07.vo-01": {
+    "id": "n1-lantern-and-bell.07.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.07.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "A stable boy stumbles in, white to the lips. The road out of the valley is gone. Not blocked. Gone. The mist has come down over it like a lid.",
+    "speaker": "narrator",
+    "moment": "n1-lantern-and-bell.07",
+    "duration_s": 18.28
+  },
+  "n1-lantern-and-bell.07.vo-02": {
+    "id": "n1-lantern-and-bell.07.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.07.vo-02.hanne.wav",
+    "status": "draft",
+    "text": "It does that when he wants company. Nobody leaves Vellmoor now, loves. Not since spring.",
+    "speaker": "hanne",
+    "moment": "n1-lantern-and-bell.07",
+    "duration_s": 7.16
+  },
+  "n1-lantern-and-bell.08": {
+    "id": "n1-lantern-and-bell.08",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.08@dashboard.png",
+    "status": "placeholder",
+    "text": "Hanne: You want to help this valley? Go up the hill to the burgomaster's house. Anton Morosz died last night, at his daughter's door. And the girl is gone.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.08.vo-01": {
+    "id": "n1-lantern-and-bell.08.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.08.vo-01.hanne.wav",
+    "status": "draft",
+    "text": "You want to help this valley? Go up the hill to the burgomaster's house. Anton Morosz died last night, at his daughter's door. And the girl is gone.",
+    "speaker": "hanne",
+    "moment": "n1-lantern-and-bell.08",
+    "duration_s": 13.12
+  },
+  "n1-lantern-and-bell.08.vo-02": {
+    "id": "n1-lantern-and-bell.08.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.08.vo-02.agnes.wav",
+    "status": "draft",
+    "text": "Gone where, innkeeper?",
+    "speaker": "agnes",
+    "moment": "n1-lantern-and-bell.08",
+    "duration_s": 2.84
+  },
+  "n1-lantern-and-bell.09": {
+    "id": "n1-lantern-and-bell.09",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.09@dashboard.png",
+    "status": "placeholder",
+    "text": "Hanne: Up. Every night for a month her window was open in the morning, and she always shut it. This morning it was open, and her bed was empty.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.09.vo-01": {
+    "id": "n1-lantern-and-bell.09.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.09.vo-01.hanne.wav",
+    "status": "draft",
+    "text": "Up. Every night for a month her window was open in the morning, and she always shut it. This morning it was open, and her bed was empty.",
+    "speaker": "hanne",
+    "moment": "n1-lantern-and-bell.09",
+    "duration_s": 12.64
+  },
+  "n1-lantern-and-bell.10.private.agnes": {
+    "id": "n1-lantern-and-bell.10.private.agnes",
+    "type": "still",
+    "target": "ipad:agnes",
+    "path": "stills/n1-lantern-and-bell.10.private.agnes@ipad.png",
+    "status": "placeholder",
+    "text": "Agnes: The garlic, the open window, the girl taken. Ten winters ago it began like this at Saint Ysolde. You know the shape of this. You have been walking toward it for ten years.",
+    "profile": "@ipad"
+  },
+  "n1-lantern-and-bell.10.private.agnes.vo-01": {
+    "id": "n1-lantern-and-bell.10.private.agnes.vo-01",
+    "type": "line",
+    "target": "ipad:agnes",
+    "path": "audio/lines/n1-lantern-and-bell.10.private.agnes.vo-01.agnes.wav",
+    "status": "draft",
+    "text": "The garlic, the open window, the girl taken. Ten winters ago it began like this at Saint Ysolde. You know the shape of this. You have been walking toward it for ten years.",
+    "speaker": "agnes",
+    "moment": "n1-lantern-and-bell.10.private.agnes",
+    "duration_s": 16.48
+  },
+  "n1-lantern-and-bell.10.private.tomas": {
+    "id": "n1-lantern-and-bell.10.private.tomas",
+    "type": "still",
+    "target": "ipad:tomas",
+    "path": "stills/n1-lantern-and-bell.10.private.tomas@ipad.png",
+    "status": "placeholder",
+    "text": "Tomas: The castle windows are lit in the old pattern, the one the guard used for a feast. Marta is at home, asleep, with the shutters nailed. She will wake at dusk and ask what the lights mean. You won't tell her.",
+    "profile": "@ipad"
+  },
+  "n1-lantern-and-bell.10.private.tomas.vo-01": {
+    "id": "n1-lantern-and-bell.10.private.tomas.vo-01",
+    "type": "line",
+    "target": "ipad:tomas",
+    "path": "audio/lines/n1-lantern-and-bell.10.private.tomas.vo-01.tomas.wav",
+    "status": "draft",
+    "text": "The castle windows are lit in the old pattern, the one the guard used for a feast. Marta is at home, asleep, with the shutters nailed. She will wake at dusk and ask what the lights mean. You won't tell her.",
+    "speaker": "tomas",
+    "moment": "n1-lantern-and-bell.10.private.tomas",
+    "duration_s": 18.24
   }
 }
