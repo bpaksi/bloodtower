@@ -1291,7 +1291,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
 
     volumeFailed: (run) => {
       if (run !== volumeRun || screen !== "tower-volume-test") return;
-      volume = { ...volume, phase: "idle", level: null, failed: true };
+      // A balance sound that did not play leaves the balance check still to do.
+      const balanceDone = volume.phase === "balance-tower" ? false : volume.balanceDone;
+      volume = { ...volume, phase: "idle", level: null, failed: true, balanceDone };
     },
 
     focusStory: (deviceId, storyId) => {

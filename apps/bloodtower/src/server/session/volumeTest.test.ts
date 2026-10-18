@@ -203,6 +203,24 @@ describe("tower volume test screen", () => {
     }
   });
 
+  it("repeats the balance check when its own sound failed", () => {
+    const f = atTowerConnect();
+    try {
+      f.setTower(towerReading());
+      f.toVolumeTest();
+      f.win("volume-play-0", "volume-play");
+      const run = f.engine.takeVolumeRun();
+      if (!run) throw new Error("run");
+      f.engine.volumeProgress(run.run, "balance-bed", null);
+      f.engine.volumeProgress(run.run, "balance-tower", null);
+      f.engine.volumeFailed(run.run);
+      f.win("volume-play-1", "volume-play");
+      expect(f.engine.takeVolumeRun()).toMatchObject({ withBalance: true });
+    } finally {
+      f.opened.close();
+    }
+  });
+
   it("logs the answer as the tower-volume-test stat with firmware and time, first answer wins", () => {
     const f = atTowerConnect();
     try {

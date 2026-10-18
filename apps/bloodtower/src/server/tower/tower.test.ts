@@ -356,7 +356,7 @@ describe("tower sound", () => {
     await new Promise<void>((resolve) => server.once("listening", () => resolve()));
     const address = server.address();
     if (!address || typeof address === "string") throw new Error("port");
-    let outcome: "write-completed" | "failed" = "write-completed";
+    let outcome: "write-completed" | "failed" | "unwritten" = "write-completed";
     server.on("connection", (socket) => {
       socket.on("message", (raw) => {
         const message = JSON.parse(String(raw)) as {
@@ -404,7 +404,8 @@ describe("tower sound", () => {
               payload: {
                 commandId: message.id,
                 capabilityId: "sound.play-stateful",
-                stage: outcome,
+                stage: outcome === "unwritten" ? "indeterminate" : outcome,
+                ...(outcome === "unwritten" ? { written: false } : {}),
               },
             }),
           );
@@ -430,9 +431,18 @@ describe("tower sound", () => {
       ]);
       outcome = "failed";
       expect(await tower.playSound(58, 1)).toBe("failed");
+      // A command tower-poc never wrote is not a sound that played.
+      outcome = "unwritten";
+      expect(await tower.playSound(58, 0)).toBe("failed");
       // A failed sound is not sent again by the sidecar.
-      expect(commands).toHaveLength(2);
-      expect(tower.sent().map((item) => item.type)).toEqual(["hello", "connect", "sound", "sound"]);
+      expect(commands).toHaveLength(3);
+      expect(tower.sent().map((item) => item.type)).toEqual([
+        "hello",
+        "connect",
+        "sound",
+        "sound",
+        "sound",
+      ]);
     } finally {
       tower.close();
       server.close();

@@ -141,7 +141,11 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
       const stage = typeof payload.stage === "string" ? payload.stage : "";
       const finish = pendingSounds.get(id);
       if (!finish) return;
-      if (WRITTEN_STAGES.has(stage)) {
+      // tower-poc ends a command it never wrote as `indeterminate` with `written: false`.
+      if (payload.written === false) {
+        pendingSounds.delete(id);
+        finish("failed");
+      } else if (WRITTEN_STAGES.has(stage)) {
         pendingSounds.delete(id);
         finish("written");
       } else if (FAILED_STAGES.has(stage)) {
