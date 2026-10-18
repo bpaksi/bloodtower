@@ -19,7 +19,10 @@ describe("story doors", () => {
     id,
     title: id,
     blurb: null,
+    tagline: null,
+    cover: null,
     players: { min: 1, max: 4 },
+    playable: true,
     loadable,
   });
   const stories = (focus: string) => ({
@@ -41,6 +44,21 @@ describe("story doors", () => {
     expect(neighborStory(stories("gamma"), 1)?.id).toBe("alpha");
   });
 
+  it("wraps with two cards: both neighbours are the other story", () => {
+    const two = { cards: [card("alpha"), card("beta")], focus: "alpha", current: "alpha" };
+    expect(neighborStory(two, 1)?.id).toBe("beta");
+    expect(neighborStory(two, -1)?.id).toBe("beta");
+    expect(neighborStory({ ...two, focus: "beta" }, 1)?.id).toBe("alpha");
+  });
+
+  it("wraps with ten or more cards, from either end, with buttons only", () => {
+    const ids = Array.from({ length: 12 }, (_, index) => `story-${index}`);
+    const many = { cards: ids.map((id) => card(id)), focus: ids[0] ?? "", current: ids[0] ?? "" };
+    expect(neighborStory(many, -1)?.id).toBe("story-11");
+    expect(neighborStory({ ...many, focus: "story-11" }, 1)?.id).toBe("story-0");
+    expect(neighborStory({ ...many, focus: "story-5" }, 1)?.id).toBe("story-6");
+  });
+
   it("offers no arrows for a single story", () => {
     expect(
       neighborStory({ cards: [card("alpha")], focus: "alpha", current: "alpha" }, 1),
@@ -48,8 +66,8 @@ describe("story doors", () => {
     expect(neighborStory(undefined, 1)).toBeNull();
   });
 
-  it("words the player range", () => {
-    expect(playersText({ min: 1, max: 4 })).toBe("1–4 hunters");
+  it("words the party size: every hunter is always in play, so the card reads the maximum", () => {
+    expect(playersText({ min: 1, max: 4 })).toBe("4 hunters");
     expect(playersText({ min: 2, max: 2 })).toBe("2 hunters");
     expect(playersText({ min: 1, max: 1 })).toBe("1 hunter");
     expect(playersText(null)).toBeNull();

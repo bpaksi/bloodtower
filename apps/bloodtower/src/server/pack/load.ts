@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
-import { join, resolve, sep } from "node:path";
+import { basename, join, resolve, sep } from "node:path";
 import {
   optionIdSchema,
   type Pack,
@@ -313,7 +313,7 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
     .map((id): StoryEntry => {
       if (id.length > STORY_ID_MAX) {
         return {
-          card: { id, title: id, blurb: null, players: null, loadable: false },
+          card: greyedCard(id, id),
           pack: null,
           issues: [
             issue(id, "(folder)", "V-1", `The folder name is over ${STORY_ID_MAX} characters.`),
@@ -323,13 +323,18 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
       }
       const loaded = loadPackDir(join(packsDir, id));
       if (loaded.ok && !loaded.playable) {
+        // Listed and choosable, but never bound: Pick Game stops at "Not playable yet".
+        const { pack } = loaded;
         return {
           card: {
             id,
-            title: loaded.pack.title,
-            blurb: loaded.pack.tagline ?? null,
+            title: pack.title,
+            blurb: pack.tagline ?? null,
+            tagline: pack.tagline ?? null,
+            cover: coverPath(id, pack.cover, loaded.assets),
             players: null,
-            loadable: false,
+            playable: false,
+            loadable: true,
           },
           pack: null,
           issues: [],
@@ -343,7 +348,10 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
             id,
             title: pack.title,
             blurb: pack.tagline ?? pack.tone ?? null,
+            tagline: pack.tagline ?? null,
+            cover: coverPath(id, pack.cover, loaded.assets),
             players: pack.players,
+            playable: true,
             loadable: true,
           },
           pack,
@@ -355,12 +363,39 @@ export const loadStories = (packsDir: string): StoryEntry[] => {
         ? [issue(id, "nights", "V-1", "The pack has no night to play.")]
         : loaded.issues;
       return {
-        card: { id, title: id, blurb: null, players: null, loadable: false },
+        card: greyedCard(id, id),
         pack: null,
         issues,
         assets: loaded.ok ? loaded.assets : null,
       };
     });
+};
+
+/** A card that cannot be chosen: a folder that failed the lint, or one with no night. */
+const greyedCard = (id: string, title: string): StoryCard => ({
+  id,
+  title,
+  blurb: null,
+  tagline: null,
+  cover: null,
+  players: null,
+  playable: false,
+  loadable: false,
+});
+
+/**
+ * The host path of the pack's cover image, or null when the manifest has no cover or the file did
+ * not resolve. The route is `/packs/<id>/assets/<file>`, the one `serve.ts` answers.
+ */
+const coverPath = (
+  id: string,
+  cover: string | undefined,
+  assets: PackAssetIndex | null | undefined,
+): string | null => {
+  if (!cover || !assets) return null;
+  const file = basename(cover);
+  if (!assets.byBasename.has(file)) return null;
+  return `/packs/${encodeURIComponent(id)}/assets/${encodeURIComponent(file)}`;
 };
 
 export const formatLoadIssues = (issues: readonly PackLoadIssue[]): string[] =>

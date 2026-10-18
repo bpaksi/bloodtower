@@ -141,6 +141,11 @@ const NEXT_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
   "party-join": "begin",
 };
 
+/** Back from a start-up screen. Only "Not playable yet" goes back today (R3-UI-37). */
+const BACK_BEFORE_PLAY: Partial<Record<FlowScreen, FlowScreen>> = {
+  "not-playable": "pick-story",
+};
+
 const holdingKey = (deviceId: string, hunter: string) => `${deviceId}\0${hunter}`;
 
 /** The pack-bound parts of a session. They change only when Pick Story binds another story. */
@@ -179,7 +184,10 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
         id: initialId,
         title: initialPack.title,
         blurb: initialPack.tone ?? null,
+        tagline: initialPack.tagline ?? null,
+        cover: null,
         players: initialPack.players,
+        playable: true,
         loadable: true,
       },
       pack: initialPack,
@@ -194,6 +202,7 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   /** The highlighted door on Pick Story. It starts on the bound story. */
   let focusedStory = initialId;
   const storyEntry = (id: string) => entries.find((entry) => entry.card.id === id);
+  const focusedPlayable = () => storyEntry(focusedStory)?.card.playable ?? false;
   const sessionId = options.sessionId ?? `session-${randomBytes(8).toString("hex")}`;
 
   const devices = new Map<string, DeviceRow>();
@@ -311,6 +320,9 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
     if (screen === "splash" || screen === "quit") return null;
     if (screen === "tower-connect") {
       return { id: "continue-tower-connect", action: "continue", label: "Next: pick a story" };
+    }
+    if (screen === "not-playable") {
+      return { id: "back-not-playable", action: "back", label: "Back" };
     }
     if (screen === "pick-story") {
       // The prompt names the story, so a press made on a stale highlight is refused (R2 §3.3).
@@ -444,6 +456,11 @@ export const createSession = (initialPack: Pack, options: SessionOptions): Sessi
   const screenAfter = (action: ControlAction): FlowScreen => {
     if (action === "begin") return "play";
     if (action === "quit") return "quit";
+    if (action === "back") return BACK_BEFORE_PLAY[screen] ?? screen;
+    // A `playable: false` pack is chosen but never bound: its stop is "Not playable yet".
+    if (action === "continue" && screen === "pick-story" && !focusedPlayable()) {
+      return "not-playable";
+    }
     if (action === "continue" && screen !== "play") {
       return NEXT_BEFORE_PLAY[screen] ?? screen;
     }

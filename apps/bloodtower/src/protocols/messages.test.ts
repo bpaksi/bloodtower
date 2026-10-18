@@ -81,6 +81,7 @@ describe("client messages", () => {
     expect(CONTROL_ACTIONS).toEqual([
       "begin",
       "continue",
+      "back",
       "pause",
       "resume",
       "quit",
@@ -112,7 +113,10 @@ describe("client messages", () => {
       id,
       title: id,
       blurb: null,
+      tagline: null,
+      cover: null,
       players: { min: 1, max: 4 },
+      playable: true,
       loadable,
     });
     const parse = (value: unknown) => storiesSchema.safeParse(value).success;

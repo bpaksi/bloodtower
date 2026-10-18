@@ -10,6 +10,7 @@ import { deviceIdSchema, utcTimestampSchema } from "./devices.ts";
 export const CONTROL_ACTIONS = [
   "begin",
   "continue",
+  "back",
   "pause",
   "resume",
   "quit",
@@ -28,6 +29,7 @@ export const FLOW_SCREENS = [
   "splash",
   "tower-connect",
   "pick-story",
+  "not-playable",
   "party-join",
   "begin",
   "play",

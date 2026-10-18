@@ -315,19 +315,26 @@ describe("story list", () => {
   it("lists both packs in order: the metadata-only dracula card, then the playable test pack", () => {
     const [dracula, test, ...rest] = loadStories(loadConfig().packsDir);
     expect(rest).toEqual([]);
+    // Listed and choosable, but metadata only: it can never be bound (playable: false).
     expect(dracula?.card).toEqual({
       id: "dracula",
       title: "The Count of Vellmoor",
       blurb: "The Count has taken Lenka. Bring her home before she's his.",
+      tagline: "The Count has taken Lenka. Bring her home before she's his.",
+      cover: "/packs/dracula/assets/cover.png",
       players: null,
-      loadable: false,
+      playable: false,
+      loadable: true,
     });
     expect(dracula?.pack).toBeNull();
     expect(test?.card).toEqual({
       id: "test",
       title: "Proving ground",
       blurb: "A long-lived proving ground for new ideas.",
+      tagline: "A long-lived proving ground for new ideas.",
+      cover: "/packs/test/assets/cover.png",
       players: { min: 1, max: 4 },
+      playable: true,
       loadable: true,
     });
     expect(test?.pack?.pack_id).toBe("test");
@@ -345,7 +352,10 @@ describe("story list", () => {
         id: "broken",
         title: "broken",
         blurb: null,
+        tagline: null,
+        cover: null,
         players: null,
+        playable: false,
         loadable: false,
       });
       expect(broken?.pack).toBeNull();

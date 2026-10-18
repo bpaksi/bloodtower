@@ -945,3 +945,69 @@
     animation: none;
   }
 }
+
+/* The landing painting is the board's permanent background (R3-UI-01). Start-up dialogs sit on it. */
+.bt-board > .bt-board-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("/landing/hero.webp");
+  background-size: cover;
+  background-position: left top;
+  filter: sepia(0.12) contrast(1.05);
+  pointer-events: none;
+}
+
+.bt-board > .bt-board-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgb(11 8 6 / 0.82) 0%,
+    rgb(11 8 6 / 0.55) 38%,
+    rgb(11 8 6 / 0.2) 70%,
+    rgb(11 8 6 / 0.45) 100%
+  );
+}
+
+/* Pick Game carousel (R3-UI-24): the focused story large, a neighbour peeking at each side. */
+.bt-carousel {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.6rem, 1.6vw, 1.4rem);
+  flex: 1;
+  min-height: 0;
+}
+
+.bt-carousel-focus {
+  flex: 2.4 1 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bt-carousel-peek {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  gap: 0.4rem;
+  align-content: center;
+  opacity: 0.55;
+  transform: scale(0.92);
+  color: var(--bt-bone);
+  font-family: var(--bt-font-label);
+  text-align: center;
+}
+
+.bt-carousel-peek p {
+  margin: 0;
+  font-size: var(--bt-size-label);
+}
+
+.bt-carousel-cover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: var(--bt-rule-gold);
+}
