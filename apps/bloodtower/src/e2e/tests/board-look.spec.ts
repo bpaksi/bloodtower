@@ -47,6 +47,57 @@ const assertBoardFits = async (page: Page, opts?: { keeper?: boolean }) => {
 };
 
 /**
+ * Keeper cinema (visuals step 11; R3-UI-33, R3-UI-33b): the Keeper is in the visual layer's 16:9
+ * well on void with no plate rule; his caption is in the lower third of that well, below the
+ * portrait (clear of the face), at least 1/25 of the screen's height, and on by default.
+ */
+const assertKeeperCinema = async (page: Page, key: string) => {
+  const m = await page.evaluate(() => {
+    const plate = document.querySelector("[data-visual-layer] > [data-keeper-plate]");
+    const portrait = plate?.querySelector("[data-talking-avatar] > div");
+    const caption = plate?.querySelector("[data-board-caption]");
+    if (!plate || !portrait || !caption) return null;
+    const box = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, h: r.height };
+    };
+    const style = getComputedStyle(plate);
+    return {
+      vh: window.innerHeight,
+      well: box(plate),
+      portrait: box(portrait),
+      caption: box(caption),
+      font: Number.parseFloat(getComputedStyle(caption).fontSize),
+      border: style.borderTopWidth,
+      outline: style.outlineStyle,
+      background: style.backgroundColor,
+    };
+  });
+  expect(
+    m,
+    `${key}: the Keeper plate, portrait and caption are in the visual layer`,
+  ).not.toBeNull();
+  if (!m) return;
+  expect(m.border, `${key}: no plate rule`).toBe("0px");
+  expect(m.outline, `${key}: no plate outline`).toBe("none");
+  expect(m.background, `${key}: on void`).toBe("rgb(11, 8, 6)");
+  expect(m.font, `${key}: caption at least 1/25 of the screen height`).toBeGreaterThanOrEqual(
+    m.vh / 25 - 0.5,
+  );
+  const third = m.well.top + (m.well.h * 2) / 3;
+  expect(m.caption.top, `${key}: caption in the lower third`).toBeGreaterThanOrEqual(third - 1);
+  expect(m.caption.bottom, `${key}: caption inside the well`).toBeLessThanOrEqual(
+    m.well.bottom + 1,
+  );
+  expect(m.portrait.bottom, `${key}: caption clear of the face`).toBeLessThanOrEqual(
+    m.caption.top + 1,
+  );
+  expect(m.portrait.h, `${key}: the portrait takes the top of the well`).toBeGreaterThan(
+    m.well.h / 2,
+  );
+};
+
+/**
  * Play chrome must not cost header height or break words in the zone labels. The baseline is the
  * same page with the play attribute removed (the startup header layout), measured in place.
  */
@@ -486,13 +537,16 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       for (const audio of document.querySelectorAll("audio")) audio.pause();
     });
     await assertBoardFits(board, { keeper: true });
+    await assertKeeperCinema(board, "1180x820");
     await shot(board, "board-keeper-moment-landscape");
     await board.setViewportSize({ width: 1024, height: 594 });
     await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.03");
     await assertBoardFits(board, { keeper: true });
+    await assertKeeperCinema(board, "1024x594");
     await shot(board, "board-keeper-1024x594");
     await board.setViewportSize({ width: 1920, height: 1080 });
     await assertBoardFits(board, { keeper: true });
+    await assertKeeperCinema(board, "1920x1080");
     await shot(board, "board-keeper-1920x1080");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);

@@ -40,8 +40,9 @@ export function VisualLayer({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!leaving) return;
-    // Backstop for a zoom out that never reports its end (no Web Animations, or a hidden tab).
-    const timer = window.setTimeout(() => setLeaving(false), VISUAL_ZOOM_MS + 200);
+    // Backstop for a zoom out that never reports its end (no Web Animations, or a hidden tab). The
+    // zoom out may wait for the zoom in to finish first (holdsExit), so allow for both.
+    const timer = window.setTimeout(() => setLeaving(false), 2 * VISUAL_ZOOM_MS + 200);
     return () => window.clearTimeout(timer);
   }, [leaving]);
 
@@ -96,10 +97,27 @@ export const ranOut = (animation: Animation) =>
   animation.playbackRate < 0 && Number(animation.currentTime ?? 0) <= 0;
 
 /**
+ * Whether a zoom out must wait: the zoom in is still running and has started to show (Bob's ruling
+ * on step 10's open item (e)). Turning every flip around at once let a pack that alternates visual
+ * and text faster than about 1.5 presses a second pass 3 brightness turns a second. Held, every
+ * zoom out starts from fully shown, so a press can no longer cut a zoom in short. A zoom in that
+ * has not moved yet is not held: turnAround drops it unseen.
+ */
+export const holdsExit = (animation: Animation) => {
+  const time = animation.currentTime;
+  return (
+    animation.playbackRate > 0 &&
+    animation.playState === "running" &&
+    time !== null &&
+    Number(time) > 0
+  );
+};
+
+/**
  * The layer element and its one animation. The zoom (or, under reduced motion, the fade) runs
- * forward to come in and is reversed to go out. Reversing an animation that is still running
- * continues from where it is, so pressing Continue mid-zoom turns the zoom around smoothly: the
- * brightness never jumps (flash safety), whichever way and however often the phase flips.
+ * forward to come in and is reversed to go out. Pressing Continue during the zoom in lets it
+ * finish, then zooms out (holdsExit); a visual that comes back during the zoom out turns it around
+ * from where it is. Either way the brightness never jumps (flash safety).
  */
 function LayerBox({
   phase,
@@ -114,6 +132,9 @@ function LayerBox({
   const animation = useRef<Animation | null>(null);
   const gone = useRef(onGone);
   gone.current = onGone;
+  // Read when the zoom in finishes, to start a zoom out that was held for it.
+  const wanted = useRef(phase);
+  wanted.current = phase;
 
   // Before paint, so the first frame is already the start of the zoom, never the full visual.
   useLayoutEffect(() => {
@@ -147,11 +168,20 @@ function LayerBox({
       );
       current.id = reduced ? VISUAL_FADE_ID : VISUAL_ZOOM_ID;
       current.onfinish = (event) => {
-        if (ranOut(event.target as Animation)) gone.current();
+        const done = event.target as Animation;
+        if (ranOut(done)) gone.current();
+        else if (wanted.current === "out" && done.playbackRate > 0) {
+          // The held zoom out starts 1 ms inside the end: reversed from exactly its end inside a
+          // finish event, WebKit draws one frame of the first keyframe (hidden), a full flash.
+          const end = Number(done.effect?.getComputedTiming().endTime ?? 0);
+          done.currentTime = Math.max(0, end - 1);
+          turnAround(done, "out", element, () => gone.current());
+        }
       };
       animation.current = current;
       return;
     }
+    if (phase === "out" && holdsExit(current)) return;
     turnAround(current, phase, element, () => gone.current());
   }, [phase]);
 
