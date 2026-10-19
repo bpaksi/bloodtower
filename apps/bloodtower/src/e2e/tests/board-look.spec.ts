@@ -27,6 +27,17 @@ const assertBoardFits = async (page: Page, opts?: { keeper?: boolean }) => {
     await expect(portrait).toBeInViewport({ ratio: 1 });
     await expect(caption).toBeInViewport({ ratio: 1 });
   }
+  // The play roll: a corruption column reading unavailable (never 0) and no invented acting hunter.
+  if (await page.locator(".bt-cart-roll").count()) {
+    const cor = page.locator(".bt-cart-cor");
+    await expect(cor).toHaveCount(4);
+    for (let i = 0; i < 4; i += 1) {
+      await expect(cor.nth(i)).toHaveText("—");
+      await expect(cor.nth(i)).toHaveAttribute("data-unavailable", "");
+      await expect(cor.nth(i)).toBeInViewport({ ratio: 1 });
+    }
+    await expect(page.locator(".bt-cart-act")).toHaveCount(0);
+  }
   const overflow = await page.evaluate(() => ({
     x: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     y: document.documentElement.scrollHeight - document.documentElement.clientHeight,
@@ -128,6 +139,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       const status = await cartStatus.nth(i).innerText();
       expect(status, "cartouche status is the holder id, not the hunter name").not.toContain(name);
       expect(status).not.toMatch(/—/);
+      expect(status, "status maps from existing fields").toMatch(/^(Waiting|Away|\S+)$/);
       expect(status.length).toBeGreaterThan(0);
     }
     await expect(board.locator(".bt-banner")).toContainText("iPads can't reach this address");
@@ -137,7 +149,7 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
 
     await board.setViewportSize({ width: 1024, height: 594 });
     await expect(board.locator(".bt-banner")).toContainText("iPads can't reach this address");
-    await expect(board.getByText("Emeric")).toBeVisible();
+    await expect(board.locator(".bt-cart-nm", { hasText: "Emeric" })).toBeVisible();
     await assertBoardFits(board);
     await assertPlayHeader(board);
     await shot(board, "board-join-warning-1024x594");

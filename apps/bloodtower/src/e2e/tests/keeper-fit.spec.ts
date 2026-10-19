@@ -57,9 +57,10 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     await d.button("continue").click();
     await expect(board.getByText(/At the top, a door/)).toBeVisible();
     await d.button("continue").click();
-    await expect(
-      board.getByText("Light them if you can. The key is at the bottom. It always is."),
-    ).toBeVisible();
+    // The Keeper figure and the board caption can both carry the line, so match the caption only.
+    await expect(board.locator("[data-board-caption]")).toContainText(
+      "Light them if you can. The key is at the bottom. It always is.",
+    );
     await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
     await expect(board.getByRole("img", { name: "The Keeper" })).toBeVisible();
 

@@ -103,7 +103,7 @@ export function StoryBoard({
         {state.summary && !playMode ? (
           <SummaryPanel summary={state.summary} tower={state.tower} />
         ) : (
-          <HunterList hunters={state.hunters} />
+          <HunterList hunters={state.hunters} packId={state.packId} />
         )}
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
@@ -195,11 +195,6 @@ const headerCopy = (state: StoryboardState): { scene: string; place: string } =>
   return { scene: "The Night", place: "The Moment" };
 };
 
-const actingHunterId = (hunters: StoryboardState["hunters"]): string | null =>
-  hunters.find((hunter) => hunter.holders.length > 0 && !hunter.disconnected)?.id ??
-  hunters.find((hunter) => hunter.holders.length > 0)?.id ??
-  null;
-
 const StatusStrip = ({ state }: { state: StoryboardState }) => {
   const devices = joinedDeviceIds(state.hunters);
   return (
@@ -258,45 +253,59 @@ const ActingPanel = () => (
   </aside>
 );
 
-const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => (
+const HunterList = ({
+  hunters,
+  packId,
+}: {
+  hunters: StoryboardState["hunters"];
+  packId?: StoryboardState["packId"];
+}) => (
   <aside className="bt-hunters">
     <h2 className="bt-roll-title">Hunters</h2>
     {hunters.length === 0 ? (
       <p className="bt-roll-empty">Hunters unavailable.</p>
     ) : (
-      <HunterCarts hunters={hunters} />
+      <HunterCarts hunters={hunters} packId={packId} roll />
     )}
   </aside>
 );
 
-/** One cartouche per hunter. With `portraits` (Claim Hunters) each shows the pack portrait. */
+/**
+ * One cartouche per hunter. With `portraits` (Claim Hunters) each shows the pack portrait. In the
+ * play `roll`, a hunter shows the portrait medallion whenever the pack id and the hunter's
+ * portrait exist (an initial medallion otherwise) and a corruption column that reads
+ * unavailable: `storyboardState` has no corruption, and no acting hunter either, so no cartouche
+ * is marked as acting (`.bt-cart-act` in board.css waits for real data).
+ */
 const HunterCarts = ({
   hunters,
   packId,
   portraits = false,
+  roll = false,
 }: {
   hunters: StoryboardState["hunters"];
   packId?: StoryboardState["packId"];
   portraits?: boolean;
+  roll?: boolean;
 }) => {
-  const acting = actingHunterId(hunters);
   return (
     <ul className="bt-roll">
       {hunters.map((hunter) => {
         const away = hunter.holders.length === 0 || hunter.disconnected;
         const classes = ["bt-cart"];
         if (portraits) classes.push("bt-cart-portrait");
-        if (hunter.id === acting) classes.push("bt-cart-act");
+        if (roll) classes.push("bt-cart-roll");
+        const portrait = portraitSrc(packId, hunter.portrait);
         if (away) classes.push("bt-cart-away");
         const accessibleLabel = `${hunter.name} — ${holdingText(hunter)}`;
         return (
           <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
-            {portraits ? (
+            {portraits || portrait ? (
               <PortraitCard
                 compact
                 frameOnly
                 name={hunter.name}
-                src={portraitSrc(packId, hunter.portrait)}
+                src={portrait}
                 accessibleLabel={accessibleLabel}
               />
             ) : (
@@ -308,6 +317,16 @@ const HunterCarts = ({
               <span className="bt-cart-nm">{hunter.name}</span>
               <span className="bt-cart-st">{holdingText(hunter)}</span>
             </span>
+            {roll ? (
+              <span
+                className="bt-cart-cor bt-num"
+                data-unavailable=""
+                role="img"
+                aria-label="corruption unavailable"
+              >
+                —
+              </span>
+            ) : null}
           </li>
         );
       })}

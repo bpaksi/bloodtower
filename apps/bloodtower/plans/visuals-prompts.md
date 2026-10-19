@@ -31,7 +31,7 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 | 4 | `feat/visuals-04-carousel-dialog` | 3 | — | blocked on asset (dialog frame) | |
 | 5 | `feat/visuals-05-startup-summary` | 3 | — | todo (after 3; ink panel, no dialog frame) | |
 | 6 | `feat/visuals-06-play-chrome` | none | 7 | in review (Open question 1: option a; QR hidden in play; quit is not play mode, it keeps the closing summary and join block; Now acting reads unavailable until the engine exposes an acting hunter) | |
-| 7 | `feat/visuals-07-hunter-roll` | 6 | none | todo | |
+| 7 | `feat/visuals-07-hunter-roll` | 6 | none | in review (Q2 (a) status: Waiting / Away / holder id; portrait medallions whenever packId + portrait exist; corruption column reads unavailable; no acting-hunter highlight, the `.bt-cart-act` blood rule stays in board.css unused until the engine exposes an acting hunter; no epithet line, the hunter schema has no epithet field) | |
 | 8 | `feat/visuals-08-play-parchment` | 6 | 7 | todo | |
 | 9 | `feat/visuals-09-waiting-dialog` | 8 | — | blocked on asset (dialog frame) | |
 | 10 | `feat/visuals-10-visual-zoom` | 8 | none | todo | |

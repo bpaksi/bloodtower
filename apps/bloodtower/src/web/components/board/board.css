@@ -341,6 +341,7 @@
   );
 }
 
+/* The acting-hunter blood rule. Nothing sets it yet: the engine exposes no acting hunter. */
 .bt-cart-act {
   outline: 3px solid var(--bt-blood);
   outline-offset: -8px;
@@ -353,6 +354,26 @@
 .bt-cart-portrait-frame {
   display: flex;
   align-items: center;
+}
+
+/* Play roll: the portrait is a round medallion, the same size as the initial medallion. */
+.bt-cart-roll .bt-cart-portrait-frame > [data-portrait-frame] {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  border: 3px double var(--bt-iron-gall);
+}
+
+.bt-cart-roll {
+  grid-template-columns: auto minmax(0, 1fr) 56px;
+}
+
+/* Corruption column: unavailable until the engine exposes corruption, never a fake zero. */
+.bt-cart-cor {
+  color: #5a4128;
+  font-size: 1.75rem;
+  line-height: 1;
+  text-align: center;
 }
 
 .bt-cart-ph {
@@ -815,7 +836,8 @@
     display: none;
   }
 
-  .bt-cart-ph {
+  .bt-cart-ph,
+  .bt-cart-roll .bt-cart-portrait-frame > [data-portrait-frame] {
     width: 2.6rem;
     height: 2.6rem;
   }
@@ -870,7 +892,8 @@
     );
   }
 
-  .bt-board:has(.bt-banner) .bt-cart-ph {
+  .bt-board:has(.bt-banner) .bt-cart-ph,
+  .bt-board:has(.bt-banner) .bt-cart-roll .bt-cart-portrait-frame > [data-portrait-frame] {
     width: 2.2rem;
     height: 2.2rem;
     font-size: 1.75rem;

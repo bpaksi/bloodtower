@@ -61,9 +61,9 @@ describe("story board", () => {
     expect(html).toContain('data-board-layout="standard"');
     expect(html).toContain("Waiting for someone to hold Agnes.");
     expect(html).toContain("device-1");
-    expect(html).toContain("waiting");
+    expect(html).toContain(">Waiting<");
     expect(html).not.toContain("Agnes — device-1");
-    expect(html).not.toContain("Tomas — waiting");
+    expect(html).not.toContain("Tomas — Waiting");
     expect(html).not.toContain("Agnes —");
     expect(html).toContain("iPads can&#x27;t reach this address.");
     expect(html).not.toContain("Battery 0%");
@@ -212,16 +212,47 @@ describe("story board", () => {
     expect(debugSplash).toContain("Battery unavailable");
   });
 
-  it("names a disconnected holder and a hunter nobody holds", () => {
+  it("maps a hunter's status from existing fields: Waiting, Away, else the holder id", () => {
     expect(
       holdingText({ id: "alpha", name: "Agnes", holders: ["device-1"], disconnected: true }),
-    ).toBe("disconnected (device-1)");
+    ).toBe("Away");
     expect(holdingText({ id: "beta", name: "Tomas", holders: [], disconnected: false })).toBe(
-      "waiting",
+      "Waiting",
     );
     expect(
       holdingText({ id: "gamma", name: "Wren", holders: ["device-2"], disconnected: false }),
     ).toBe("device-2");
+  });
+
+  it("draws the play roll with a corruption column that is unavailable and no acting hunter", () => {
+    const html = renderToStaticMarkup(createElement(StoryBoard, { state: state() }));
+    expect(html.match(/bt-cart-cor/g)).toHaveLength(2);
+    expect(html.match(/aria-label="corruption unavailable"/g)).toHaveLength(2);
+    expect(html).not.toMatch(/class="[^"]*bt-cart-act/);
+    expect(html).toContain("bt-cart-roll");
+    // Only the held hunter is not "away"; Tomas has no holder.
+    expect(html.match(/bt-cart-away/g)).toHaveLength(1);
+  });
+
+  it("shows a portrait medallion in the play roll only when the pack id and portrait exist", () => {
+    const withPortrait = storyboardStatePayloadSchema.parse({
+      ...state(),
+      packId: "test",
+      hunters: [
+        {
+          id: "alpha",
+          name: "Agnes",
+          holders: ["device-1"],
+          disconnected: false,
+          portrait: "por.alpha",
+        },
+        { id: "beta", name: "Tomas", holders: [], disconnected: false },
+      ],
+    });
+    const html = renderToStaticMarkup(createElement(StoryBoard, { state: withPortrait }));
+    expect(html).toContain("/packs/test/asset/por.alpha");
+    expect(html.match(/data-portrait-card=/g)).toHaveLength(1);
+    expect(html.match(/bt-cart-ph/g)).toHaveLength(1);
   });
 
   it("lists each game setting with its options and the chosen value, with no controls", () => {
