@@ -1316,10 +1316,9 @@
 /*
  * Start-up summary (R3-UI-25): "Tonight's game" in the right column of the start-up shell, an
  * ink panel (Q3 (a)). Each row runs on as one paragraph, its label then its value, with an item's
- * lines joined by a middle dot. Under 1040px high a row is one line (the column is wide enough
- * for "Settings not chosen yet") and a long value ends in an ellipsis; on the TV a row takes two
- * lines and the game's cover shows. So all five rows and the join QR fit beside the dialog at
- * 28px type, banner or not. The full text stays in the DOM. Empty rows read in italic.
+ * lines joined by a middle dot, and always shows in full (R3-UI-25 echoes every choice). Hunters
+ * read one line per device; the setup steps' labels show only on the TV (1040px high and up),
+ * where the game's cover shows too. Empty rows read "not chosen yet" in italic.
  */
 .bt-summary {
   display: flex;
@@ -1348,12 +1347,13 @@
 }
 
 .bt-summary-item {
-  display: -webkit-box;
   min-width: 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--bt-summary-lines, 1);
   line-height: 1.15;
+}
+
+/* The setup steps' labels: only on the TV, where the column has the height for them. */
+.bt-summary-detail {
+  display: none;
 }
 
 .bt-summary .bt-summary-item dt.bt-lbl {
@@ -1774,7 +1774,8 @@
 .bt-startup-side {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* Centred while it fits; never pushed off the top (which the clip would hide). */
+  justify-content: safe center;
   gap: clamp(0.9rem, 1.8vh, 1.6rem);
   min-width: 0;
   min-height: 0;
@@ -1788,12 +1789,33 @@
   overflow: hidden;
 }
 
+/* The QR and address speak alone: the column keeps its height for the summary. */
+.bt-startup-side .bt-pub > .bt-lbl {
+  display: none;
+}
+
+/* The QR gives up height before the summary does: it is capped by the viewport height too. */
 .bt-startup-side .bt-qr {
-  width: min(100%, 10rem);
+  width: min(100%, 10rem, 14vh);
 }
 
 .bt-startup-side .bt-qr-lg {
-  width: min(100%, 12rem);
+  width: min(100%, 12rem, 14vh);
+}
+
+/* Below the TV the column is short for TV type: it widens so each row wraps less. */
+@media (max-height: 1039px) {
+  .bt-board[data-board-mode="startup"] .bt-board-main {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 40%);
+  }
+
+  .bt-startup-side {
+    gap: 0.75rem;
+  }
+
+  .bt-summary dl {
+    gap: 0.35rem;
+  }
 }
 
 @media (min-width: 1024px) and (max-height: 700px) {
@@ -1816,11 +1838,10 @@
     padding: 0.45rem 0.65rem 0.5rem;
   }
 
-  .bt-startup-side .bt-pub > .bt-lbl,
-  .bt-startup-side .bt-join-url {
+  .bt-startup-side .bt-join-url,
+  .bt-summary .bt-roll-title {
     display: none;
   }
-
   .bt-startup-side {
     gap: 0.75rem;
     padding: 0.7rem 0.7rem;
@@ -1841,11 +1862,11 @@
 
 @media (min-height: 1040px) {
   .bt-board[data-board-mode="startup"] .bt-board-main {
-    grid-template-columns: minmax(0, 1fr) minmax(20rem, 28%);
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 33%);
   }
 
-  .bt-summary {
-    --bt-summary-lines: 2;
+  .bt-summary-detail {
+    display: inline;
   }
 
   .bt-summary-cover {
@@ -1854,14 +1875,6 @@
 
   .bt-summary-item dd {
     font-size: clamp(1.75rem, 1.6vw, 2.1rem);
-  }
-
-  .bt-startup-side .bt-qr {
-    width: min(100%, 12rem);
-  }
-
-  .bt-startup-side .bt-qr-lg {
-    width: min(100%, 14rem);
   }
 }
 

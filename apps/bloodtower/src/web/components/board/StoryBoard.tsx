@@ -379,8 +379,8 @@ const HunterCarts = ({
 /**
  * "Tonight's game" (R3-UI-25): beside every start-up dialog, each choice as it is made. An item
  * with nothing chosen reads "not chosen yet"; Back clears the item it undoes. Display only: the
- * rows come from `summaryItems`. The lines of an item run on in one value, so a short board
- * can clamp it without dropping whole rows.
+ * rows come from `summaryItems`. The lines of an item run on in one value and always show in
+ * full; an item's detail lines (the setup steps' labels) show only on the TV.
  */
 export const SummaryPanel = ({
   summary,
@@ -406,6 +406,11 @@ export const SummaryPanel = ({
             <dd>
               {item.lines.map((line) => (
                 <span key={line}>{line}</span>
+              ))}
+              {item.detail.map((line) => (
+                <span key={line} className="bt-summary-detail">
+                  {line}
+                </span>
               ))}
             </dd>
           </div>

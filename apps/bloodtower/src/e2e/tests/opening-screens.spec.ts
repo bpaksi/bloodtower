@@ -238,7 +238,7 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await shot(pad, "device-party-join-claimed");
       await shot(board, "board-party-join-claimed");
 
-      await expect(summary("hunters")).toContainText("Agnes:");
+      await expect(summary("hunters")).toContainText("Agnes");
 
       await test.step("Setup steps: one dialog each, Done and Back on the device, Back undoes a step", async () => {
         await d.button("continue").click();

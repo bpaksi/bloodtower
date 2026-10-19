@@ -48,7 +48,12 @@ const assertShellFits = async (page: Page, label: string) => {
       band: box(document.querySelector("[data-next-band]")),
       side: box(document.querySelector(".bt-startup-side")),
       qr: box(document.querySelector(".bt-startup-side .bt-qr")),
+      table: box(document.querySelector(".bt-startup-side > .bt-pub")),
       summary: box(document.querySelector(".bt-summary")),
+      // Rows cut short sideways (an ellipsis or a no-wrap line wider than its box).
+      cutLines: [...document.querySelectorAll("[data-summary-item]")].filter(
+        (row) => row.scrollWidth > row.clientWidth + 1,
+      ).length,
       rows: rows.map((row) => box(row)),
       rowFonts: rows.map((row) =>
         Number.parseFloat(getComputedStyle(row.querySelector("dd") as Element).fontSize),
@@ -88,6 +93,10 @@ const assertShellFits = async (page: Page, label: string) => {
     (geo.frame?.right ?? 0) - 1,
   );
   expect(inView(geo.qr), `${label}: join QR on screen`).toBe(true);
+  // The column clips its overflow, so a panel past its edge would hide lines: both sit inside.
+  expect(inside(geo.summary, geo.side), `${label}: summary inside the column`).toBe(true);
+  expect(inside(geo.table, geo.side), `${label}: join panel inside the column`).toBe(true);
+  expect(geo.cutLines, `${label}: no summary line cut short`).toBe(0);
   for (const [index, row] of geo.rows.entries()) {
     expect(inView(row), `${label}: summary row ${index} on screen`).toBe(true);
     expect(inside(row, geo.summary), `${label}: summary row ${index} not cut off`).toBe(true);
@@ -214,11 +223,27 @@ test("start-up shell: one framed dialog, summary column, at laptop, iPad and TV 
       await expect(summary("tower")).toContainText("Playing without tower");
       await d.button("take-all").click();
       await expect(board.getByText("4 of 4 hunters claimed")).toBeVisible();
-      await expect(summary("hunters")).toContainText("Agnes:");
+      await expect(summary("hunters")).toContainText("Agnes");
       await expect(summary("setup")).toContainText("not chosen yet");
       await expect(board.locator(".bt-dialog-frame .bt-cart")).toHaveCount(4);
       await expect(pad.locator("img")).toHaveCount(0);
       await shoot(board, "party-join");
+    });
+
+    await test.step("Begin: every summary row filled, every line on screen", async () => {
+      await d.button("continue").click();
+      for (let done = 0; done < 3; done += 1) {
+        await expect(board.locator("main")).toHaveAttribute("data-screen", "setup");
+        await d.button("continue").click();
+      }
+      await expect(board.locator("main")).toHaveAttribute("data-screen", "begin");
+      const summary = (item: string) => board.locator(`[data-summary-item="${item}"]`);
+      await expect(summary("setup")).toContainText("3 of 3 done");
+      // One device holds the whole party: one line, every name on it.
+      for (const name of ["Agnes", "Tomas", "Wren", "Emeric"]) {
+        await expect(summary("hunters")).toContainText(name);
+      }
+      await shoot(board, "begin");
     });
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);

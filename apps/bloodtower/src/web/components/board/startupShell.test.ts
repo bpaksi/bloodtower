@@ -90,10 +90,13 @@ describe("SummaryPanel (R3-UI-25)", () => {
     expect(items.game).toEqual({ empty: false, text: expect.stringContaining("Proving ground") });
     expect(items.settings?.text).toContain("Length: Long");
     expect(items.tower?.text).toContain("Connected");
-    expect(items.hunters?.text).toContain("Agnes: device-1");
-    expect(items.hunters?.text).toContain(`Tomas: ${NOT_CHOSEN}`);
+    expect(items.hunters?.text).toContain("device-1: Agnes");
+    expect(items.hunters?.text).toContain(`${NOT_CHOSEN}: Tomas`);
     expect(items.setup?.text).toContain("1 of 2 done");
-    expect(items.setup?.text).toContain("Lay out the board.");
+    // The steps' labels are TV-only detail: present, but marked so CSS shows them on the TV only.
+    expect(items.setup?.text).toContain(
+      '<span class="bt-summary-detail">Lay out the board.</span>',
+    );
     // Every row has the same shape: one label, one value holding its lines.
     for (const item of Object.values(items)) {
       expect(item.empty).toBe(false);

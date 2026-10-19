@@ -298,9 +298,27 @@ describe("start-up summary (R3-UI-25)", () => {
       game: ["Proving ground"],
       settings: ["Length: Long", "Difficulty: unavailable"],
       tower: ["Playing without tower"],
-      hunters: ["Agnes: device-1", `Tomas: ${NOT_CHOSEN}`],
-      setup: ["1 of 2 done", "Lay out the board."],
+      hunters: ["device-1: Agnes", `${NOT_CHOSEN}: Tomas`],
+      setup: ["1 of 2 done"],
     });
+    const setup = summaryItems(summary, NO_TOWER).find((item) => item.id === "setup");
+    expect(setup?.detail).toEqual(["Lay out the board."]);
+  });
+
+  it("groups the hunters by the device holding them, one line per device", () => {
+    const summary = {
+      ...empty,
+      hunters: [
+        { id: "alpha", name: "Agnes", holders: ["device-1"] },
+        { id: "beta", name: "Tomas", holders: ["device-2"] },
+        { id: "gamma", name: "Wren", holders: ["device-1"] },
+        { id: "delta", name: "Emeric", holders: ["device-1", "device-2"] },
+      ],
+    };
+    expect(lines(summary).hunters).toEqual([
+      "device-1: Agnes, Wren, Emeric",
+      "device-2: Tomas, Emeric",
+    ]);
   });
 
   it("names the tower outcome with the live reading once connected", () => {
