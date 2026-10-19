@@ -98,7 +98,7 @@ Use the step's "Review focus" line in the runbook for extra checks.
 | 5 | `feat/visuals-05-startup-summary` | 3 | Dialog / startup | todo | |
 | 6 | `feat/visuals-06-play-chrome` | none | Play TV | **in progress** (Bob) | |
 | 7 | `feat/visuals-07-hunter-roll` | 6 | Play TV | in review (Q2 (a) status: Waiting / Away / holder id; portrait medallions whenever packId + portrait exist; corruption column reads unavailable; no acting-hunter highlight, the `.bt-cart-act` blood rule stays in board.css unused until the engine exposes an acting hunter; no epithet line, the hunter schema has no epithet field) | #93 |
-| 8 | `feat/visuals-08-play-parchment` | 6, 7 merged first | Play TV | todo | |
+| 8 | `feat/visuals-08-play-parchment` | 6, 7 merged first | Play TV | in review (ornament line added; narration justified; still wrapped in `.bt-plate`, `CameraStill` untouched; party items zone shows count/item/carrier as `unavailable` and is not rendered on the Keeper moment; blood-band prompt; below 700px height the ornament and the zone title are hidden to keep the still readable at 1024x594) | |
 | 9 | `feat/visuals-09-waiting-dialog` | 3, 8 and 10 merged | Dialog / startup | todo | |
 | 10 | `feat/visuals-10-visual-zoom` | 8 | Play TV | todo | |
 | 11 | `feat/visuals-11-keeper-cinema` | 10 | Play TV | todo | |

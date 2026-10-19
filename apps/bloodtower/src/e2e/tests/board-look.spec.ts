@@ -77,6 +77,102 @@ const assertPlayHeader = async (page: Page) => {
   );
 };
 
+/**
+ * Play parchment (visuals step 8): kicker, title, ornament, justified narration with a floated
+ * drop cap, a plate around any still, the party items zone reading unavailable (never a count),
+ * and the blood-band next prompt. Everything measured, at whatever viewport is current.
+ */
+const assertPlayParchment = async (page: Page) => {
+  const page_ = page.locator(".bt-page .bt-narration[data-moment-caption]");
+  await expect(page.locator(".bt-page .bt-kicker")).toBeVisible();
+  await expect(page.locator(".bt-page h2")).toBeVisible();
+  await expect(page.locator(".bt-page .bt-orn")).toContainText("❦");
+  const look = await page_.evaluate((el) => {
+    const style = getComputedStyle(el);
+    const cap = getComputedStyle(el, "::first-letter");
+    const tallest = Math.max(
+      ...[...document.querySelectorAll(".bt-page")].map((x) => x.getBoundingClientRect().bottom),
+    );
+    return {
+      align: style.textAlign,
+      capFloat: cap.float,
+      capColor: cap.color,
+      pageBottom: tallest,
+    };
+  });
+  expect(look.align, "narration is justified").toBe("justify");
+  expect(look.capFloat, "first paragraph has a drop cap").toBe("left");
+  expect(look.capColor, "drop cap is blood").toBe("rgb(142, 27, 27)");
+  const still = page.locator("[data-camera-still]");
+  if (await still.count()) {
+    await expect(page.locator(".bt-plate [data-camera-still]")).toHaveCount(1);
+    const frame = await page.locator(".bt-plate").evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { border: Number.parseFloat(cs.borderTopWidth), outline: cs.outlineStyle };
+    });
+    expect(frame.border, "plate has a rule").toBeGreaterThanOrEqual(2);
+    expect(frame.outline, "plate has an offset outline").toBe("solid");
+  }
+  const items = page.locator("[data-party-items]");
+  await expect(items).toBeVisible();
+  await expect(items).toBeInViewport({ ratio: 1 });
+  const values = items.locator(".bt-items-val");
+  await expect(values).toHaveCount(3);
+  for (let i = 0; i < 3; i += 1) {
+    await expect(values.nth(i)).toHaveText("unavailable");
+    await expect(values.nth(i)).toHaveAttribute("data-unavailable", "");
+  }
+  await expect(items).not.toContainText(/\b\d+\b/);
+  const fit = await items.evaluate((el) => ({
+    valuesInside: [...el.querySelectorAll(".bt-items-val")].every((v) => {
+      const r = v.getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      return r.left >= box.left - 1 && r.right <= box.right + 1;
+    }),
+  }));
+  expect(fit.valuesInside, "each unavailable value sits inside the zone").toBe(true);
+  if (await still.count()) {
+    const plate = await page
+      .locator(".bt-plate")
+      .evaluate((el) => el.getBoundingClientRect().height);
+    expect(plate, "the still plate keeps room to read").toBeGreaterThanOrEqual(
+      page.viewportSize()!.height * 0.15,
+    );
+  }
+  const band = page.locator("[data-next-band]");
+  await expect(band).toBeInViewport({ ratio: 1 });
+  const geo = await page.evaluate(() => {
+    const b = document.querySelector("[data-next-band]") as HTMLElement;
+    const it = document.querySelector("[data-party-items]") as HTMLElement;
+    const story = document.querySelector(".bt-story") as HTMLElement;
+    const br = b.getBoundingClientRect();
+    const ir = it.getBoundingClientRect();
+    const sr = story.getBoundingClientRect();
+    const text = b.querySelector("b") as HTMLElement;
+    return {
+      bg: getComputedStyle(b).backgroundImage,
+      fontPx: Number.parseFloat(getComputedStyle(text).fontSize),
+      lineHeight: Number.parseFloat(getComputedStyle(text).lineHeight),
+      textH: text.getBoundingClientRect().height,
+      bandH: br.height,
+      bandW: br.width,
+      storyW: sr.width,
+      bandTop: br.top,
+      itemsBottom: ir.bottom,
+      viewW: window.innerWidth,
+    };
+  });
+  expect(geo.bg, "next prompt sits on a blood band").toContain("rgb(142, 27, 27)");
+  expect(geo.bandW, "band spans the story column").toBeGreaterThanOrEqual(geo.storyW - 2);
+  expect(geo.bandTop, "band sits under the items zone").toBeGreaterThanOrEqual(geo.itemsBottom - 1);
+  expect(geo.textH, "prompt is one line").toBeLessThanOrEqual(geo.lineHeight * 1.5);
+  expect(geo.fontPx, "prompt is at least 28px").toBeGreaterThanOrEqual(28);
+  if (geo.viewW >= 1900) {
+    expect(geo.fontPx, "prompt is 56 to 60px on the TV").toBeGreaterThanOrEqual(56);
+    expect(geo.bandH).toBeGreaterThanOrEqual(60);
+  }
+};
+
 test("story board look at proving ground, grey-stair, and the Keeper", async ({
   browser,
   browserName,
@@ -172,9 +268,17 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1")).toContainText("A Grey Stair");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
+    await assertPlayParchment(board);
     await shot(board, "board-grey-stair-landscape");
+    await board.setViewportSize({ width: 1024, height: 594 });
+    await assertBoardFits(board);
+    await assertPlayParchment(board);
+    await assertPlayHeader(board);
+    await shot(board, "board-grey-stair-1024x594");
     await board.setViewportSize({ width: 1920, height: 1080 });
     await assertBoardFits(board);
+    await assertPlayParchment(board);
+    await assertPlayHeader(board);
     await shot(board, "board-grey-stair-1920x1080");
     await board.setViewportSize({ width: 1180, height: 820 });
 

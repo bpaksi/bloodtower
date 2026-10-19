@@ -119,6 +119,7 @@ export function StoryBoard({
             <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
           ) : null}
           {state.screen === "quit" ? <QuitPanel /> : null}
+          {playMode && !keeperMoment ? <PartyItems /> : null}
           <NextPrompt label={nextPrompt(state)} />
         </section>
         {playMode ? (
@@ -369,8 +370,27 @@ const SummaryPanel = ({
   );
 };
 
+/**
+ * Party items zone (game-look.md section 4): labels only. `storyboardState` carries no party
+ * items yet, so each value reads "unavailable", never a count or a zero.
+ */
+const PartyItems = () => (
+  <div className="bt-items bt-panel" data-party-items="">
+    <span className="bt-lbl">Party items</span>
+    {(["count", "item", "carrier"] as const).map((part) => (
+      <p key={part} data-party-item={part}>
+        <span className="bt-lbl">{part}</span>
+        <b className="bt-items-val" data-unavailable="">
+          unavailable
+        </b>
+      </p>
+    ))}
+  </div>
+);
+
+/** Next-step prompt (V2-3): the blood band under the story. */
 const NextPrompt = ({ label }: { label: string }) => (
-  <div className="bt-next">
+  <div className="bt-next" data-next-band="">
     <span className="bt-lbl">Next</span>
     <b>{label}</b>
   </div>
@@ -679,17 +699,22 @@ const PlayPanel = ({
       <div>
         <p className="bt-kicker">{scene.kicker}</p>
         <h2>{scene.title}</h2>
+        <p className="bt-orn" aria-hidden="true">
+          ❦ ❦ ❦
+        </p>
         <p className="bt-narration" data-moment-caption="">
           {text}
         </p>
       </div>
       {still ? (
-        <CameraStill
-          momentId={state.moment.id}
-          packId={state.packId}
-          assetId={still}
-          spokenText={state.moment.text ?? ""}
-        />
+        <div className="bt-plate" data-plate="">
+          <CameraStill
+            momentId={state.moment.id}
+            packId={state.packId}
+            assetId={still}
+            spokenText={state.moment.text ?? ""}
+          />
+        </div>
       ) : null}
     </article>
   );
