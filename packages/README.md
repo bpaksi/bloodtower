@@ -7,4 +7,10 @@ Promoting code here:
 2. Move it with `git mv` to `packages/<name>/` and name the package `@dark-tower/<name>`.
 3. Update the importing apps in the same branch.
 
-Likely first candidates: the tower protocol schemas and a tower client, once `game-test` needs to drive the tower.
+Current packages:
+
+| Package | Used by | Decision |
+|---|---|---|
+| [`workbench`](workbench/) (`@dark-tower/workbench`) | game-workbench, story-workbench | [0002](../research/decisions/0002-workbench-package.md) |
+
+Likely next candidates: the tower protocol schemas and a tower client, once `game-test` needs to drive the tower.

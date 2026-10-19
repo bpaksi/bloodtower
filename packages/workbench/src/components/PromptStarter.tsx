@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { copyText } from "../lib/clipboard.ts";
+import { copyText } from "../clipboard.ts";
 import {
   buildPrompt,
   MODE_LABEL,
+  type PromptConfig,
   type PromptMode,
   type PromptScope,
   scopeLines,
-} from "../lib/prompt.ts";
+} from "../prompt.ts";
 
 const NEW_IDEA: PromptScope = { file: null, section: [], lines: null, ids: [] };
 const MODES: PromptMode[] = ["change", "add", "ask"];
@@ -26,7 +27,7 @@ function findScope(key: string): PromptScope | null {
  * The prompt starter: any element with data-prompt="<key>" opens a dialog with that scope filled
  * in. Bob picks a mode, types the idea, and copies a complete prompt to paste into Claude.
  */
-export function PromptStarter() {
+export function PromptStarter({ config }: { config: PromptConfig }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const text = useRef<HTMLTextAreaElement>(null);
   const [scope, setScope] = useState<PromptScope>(NEW_IDEA);
@@ -57,7 +58,7 @@ export function PromptStarter() {
       text.current?.focus();
       return;
     }
-    const prompt = buildPrompt(scope, mode, idea);
+    const prompt = buildPrompt(scope, mode, idea, config);
     void copyText(prompt).then((ok) => {
       if (ok) {
         setToast("Prompt copied. Paste it into Claude.");
@@ -68,7 +69,7 @@ export function PromptStarter() {
       }
     });
     setTimeout(() => setToast(null), 2500);
-  }, [idea, mode, scope]);
+  }, [config, idea, mode, scope]);
 
   return (
     <>
@@ -86,7 +87,7 @@ export function PromptStarter() {
               Close
             </button>
           </header>
-          <pre className="prompt-scope">{scopeLines(scope).join("\n")}</pre>
+          <pre className="prompt-scope">{scopeLines(scope, config).join("\n")}</pre>
           <fieldset className="segmented">
             <legend className="sr-only">What kind of prompt</legend>
             {MODES.map((m) => (
@@ -120,7 +121,7 @@ export function PromptStarter() {
           />
           <details className="prompt-preview">
             <summary>Preview full prompt</summary>
-            <pre>{buildPrompt(scope, mode, idea || "…")}</pre>
+            <pre>{buildPrompt(scope, mode, idea || "…", config)}</pre>
           </details>
           <footer className="prompt-foot">
             <span className="hint">⌘↵ to copy · Esc to close</span>

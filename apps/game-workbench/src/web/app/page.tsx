@@ -1,11 +1,20 @@
+import { FocusGraph, type GraphPlaces, PromptScopes } from "@dark-tower/workbench/components";
 import { Suspense } from "react";
-import { FocusGraph } from "../components/FocusGraph.tsx";
-import { PromptScopes } from "../components/PromptScopes.tsx";
 import { buildGraph } from "../lib/cards.ts";
+import { LAYER_LABEL } from "../lib/graph-types.ts";
+import { KIND_LABEL } from "../lib/ids.ts";
 import type { PromptScope } from "../lib/prompt.ts";
 
 // Read the cards on every request so edits made through Claude show on reload.
 export const dynamic = "force-dynamic";
+
+const PLACES: GraphPlaces = {
+  graphHref: "/",
+  docBase: "/doc/",
+  sourceDir: "research/game-design",
+  kindLabels: KIND_LABEL,
+  layerLabels: LAYER_LABEL,
+};
 
 export default async function GraphPage({
   searchParams,
@@ -49,7 +58,7 @@ export default async function GraphPage({
     <>
       <PromptScopes scopes={scopes} />
       <Suspense>
-        <FocusGraph graph={graph} initialFocus={initial} />
+        <FocusGraph graph={graph} initialFocus={initial} places={PLACES} />
       </Suspense>
     </>
   );

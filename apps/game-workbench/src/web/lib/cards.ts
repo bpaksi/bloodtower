@@ -1,22 +1,12 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { parse } from "yaml";
-import { designDir, loadDocs } from "./content.ts";
 import {
-  CARD_TYPES,
-  type Card,
-  type CardStatus,
-  type CardType,
-  type Edge,
-  type Graph,
-  type GraphNode,
-  LAYERS,
-  type Layer,
-  type Link,
-  RELS,
-  type Source,
-  STATUSES,
-} from "./graph-types.ts";
+  buildGraph as buildGraphWith,
+  type CardSchema,
+  parseCard as parseCardWith,
+} from "@dark-tower/workbench";
+import { loadCards as loadCardsWith } from "@dark-tower/workbench/server";
+import { designDir, loadDocs } from "./content.ts";
+import { CARD_TYPES, type Card, type CardType, type Graph, LAYERS, RELS } from "./graph-types.ts";
 import { idKind } from "./ids.ts";
 import { renderMarkdown } from "./markdown.ts";
 
@@ -38,100 +28,49 @@ const PREFIX: Record<CardType, string> = {
   example: "EX",
 };
 
+/** Card format: research/game-design/cards/README.md. */
+export const GAME_CARDS: CardSchema = {
+  types: CARD_TYPES,
+  // Pieces keep their asset-catalog IDs (AST-B04 skulls); every other type is PREFIX-NNN.
+  checkId(type, id) {
+    if (type === "piece") return /^AST-B\d{2}$/.test(id) ? null : "a piece keeps its AST-Bnn ID";
+    const prefix = PREFIX[type as CardType];
+    return new RegExp(`^${prefix}-\\d{3,}$`).test(id)
+      ? null
+      : `ID must be ${prefix}-NNN for type ${type}`;
+  },
+  layers: LAYERS,
+  rels: RELS,
+  dir: "research/game-design/cards",
+  render: renderMarkdown,
+};
+
 export function cardsDir(): string {
   return path.join(designDir(), "cards");
 }
 
-function splitFrontMatter(text: string): { data: unknown; body: string } {
-  const m = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(text);
-  if (!m) throw new Error("missing --- front matter");
-  return { data: parse(m[1] ?? ""), body: (m[2] ?? "").trim() };
-}
-
 /** Parses and checks one card file. Throws with the file name on any format error. */
 export function parseCard(file: string, text: string): Card {
-  const id = file.replace(/\.md$/, "");
-  const fail = (msg: string): never => {
-    throw new Error(`cards/${file}: ${msg}`);
-  };
-  const { data, body } = splitFrontMatter(text);
-  const d = (data ?? {}) as Record<string, unknown>;
-  const type = d.type as CardType;
-  if (!CARD_TYPES.includes(type)) fail(`unknown type "${String(d.type)}"`);
-  // Pieces keep their asset-catalog IDs (AST-B04 skulls); every other type is PREFIX-NNN.
-  const idOk =
-    type === "piece" ? /^AST-B\d{2}$/.test(id) : new RegExp(`^${PREFIX[type]}-\\d{3,}$`).test(id);
-  if (!idOk)
-    fail(
-      type === "piece"
-        ? "a piece keeps its AST-Bnn ID"
-        : `ID must be ${PREFIX[type]}-NNN for type ${type}`,
-    );
-  const layer = (d.layer ?? null) as Layer | null;
-  if (layer !== null && !LAYERS.includes(layer)) fail(`unknown layer "${String(layer)}"`);
-  if (typeof d.title !== "string" || !d.title.trim()) fail("title is required");
-  const status = (d.status ?? "open") as CardStatus;
-  if (!STATUSES.includes(status)) fail(`unknown status "${String(status)}"`);
-  const links = ((d.links ?? []) as Link[]).map((l) => {
-    if (!(l?.rel in RELS)) fail(`unknown link rel "${String(l?.rel)}"`);
-    if (typeof l.to !== "string") fail("link without a 'to' ID");
-    return { rel: l.rel, to: l.to, ...(l.note ? { note: String(l.note) } : {}) };
-  });
-  const sources = ((d.sources ?? []) as Source[]).map((s) => ({
-    file: String(s.file),
-    ...(s.lines !== undefined ? { lines: String(s.lines) } : {}),
-    ...(s.note ? { note: String(s.note) } : {}),
-  }));
-  return {
-    id,
-    type,
-    title: (d.title as string).trim(),
-    status,
-    layer,
-    by: typeof d.by === "string" ? d.by : null,
-    links,
-    sources,
-    body,
-    bodyHtml: body ? renderMarkdown(body) : "",
-    file: `research/game-design/cards/${file}`,
-  };
+  // The schema has checked type and layer, so the narrower game types hold.
+  return parseCardWith(file, text, GAME_CARDS) as Card;
 }
 
-export function loadCards(dir = cardsDir()): Card[] {
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".md") && f !== "README.md")
-    .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
-    .map((f) => parseCard(f, readFileSync(path.join(dir, f), "utf8")));
+/** Every card that parses, plus one message per card file that does not. */
+export function loadCards(dir = cardsDir()): { cards: Card[]; errors: string[] } {
+  const { cards, errors } = loadCardsWith(dir, GAME_CARDS);
+  return { cards: cards as Card[], errors };
 }
 
 /**
- * Builds the graph. A link to an ID with no card becomes a "ref" node, titled by the first note
- * that names it and listing the documents that mention it. Returns the problems it finds
- * (links to IDs that appear nowhere), so the lint test can fail on them.
+ * Builds the graph over the given cards, or over the cards folder. Problems are links to IDs that
+ * appear nowhere, plus, when the folder is read, every card file that does not parse.
  */
-export function buildGraph(cards: Card[] = loadCards()): { graph: Graph; problems: string[] } {
-  const docs = loadDocs();
-  const nodes: Record<string, GraphNode> = {};
-  const edges: Edge[] = [];
-  const problems: string[] = [];
-  for (const c of cards) nodes[c.id] = { kind: "card", ...c };
-  for (const c of cards) {
-    for (const l of c.links) {
-      edges.push({ from: c.id, to: l.to, rel: l.rel, ...(l.note ? { note: l.note } : {}) });
-      if (nodes[l.to]) continue;
-      const foundIn = docs.filter((d) => d.ids.includes(l.to)).map((d) => d.file);
-      if (foundIn.length === 0 && !l.note) {
-        problems.push(`${c.id} links to ${l.to}, which is no card and appears in no document`);
-      }
-      nodes[l.to] = {
-        kind: "ref",
-        id: l.to,
-        idKind: idKind(l.to),
-        title: l.note ?? l.to,
-        foundIn,
-      };
-    }
-  }
-  return { graph: { nodes, edges }, problems };
+export function buildGraph(cards?: Card[]): { graph: Graph; problems: string[] } {
+  const loaded = cards ? { cards, errors: [] } : loadCards();
+  const { graph, problems } = buildGraphWith(loaded.cards, {
+    docs: loadDocs(),
+    rels: RELS,
+    kindOf: idKind,
+  });
+  return { graph, problems: [...loaded.errors, ...problems] };
 }

@@ -3,19 +3,36 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { type Graph, type GraphNode, LAYER_LABEL } from "../lib/graph-types.ts";
-import { KIND_LABEL } from "../lib/ids.ts";
-import { labelPoint, layout, type Neighbour } from "../lib/layout.ts";
+import type { Graph, GraphNode } from "../graph-types.ts";
+import { labelPoint, layout, type Neighbour } from "../layout.ts";
 import { Chip } from "./Chip.tsx";
+
+function parentDir(dir: string): string {
+  return dir.split("/").slice(0, -1).join("/");
+}
 
 function nodeKind(n: GraphNode | undefined): string {
   if (!n) return "question";
   return n.kind === "card" ? (n.type as string) : n.idKind;
 }
 
-function docHref(file: string, lines?: string): string {
-  const slug = file.replace(/\.md$/, "");
-  return lines ? `/doc/${slug}#L${lines.split("-")[0]}` : `/doc/${slug}`;
+/** Where things live, as plain data (a server page cannot hand functions to this component). */
+export type GraphPlaces = {
+  /** The graph page; a focus is `<graphHref>?focus=<id>`. */
+  graphHref: string;
+  /** A document is `<docBase><slug>`. */
+  docBase: string;
+  /** Repo-relative folder that card sources are relative to. */
+  sourceDir: string;
+  /** Label per node kind (card type or ref ID kind). */
+  kindLabels: Record<string, string>;
+  /** Label per layer; empty when the workbench has no layers. */
+  layerLabels: Record<string, string>;
+};
+
+function docHref(places: GraphPlaces, file: string, lines?: string): string {
+  const doc = `${places.docBase}${file.replace(/\.md$/, "")}`;
+  return lines ? `${doc}#L${lines.split("-")[0]}` : doc;
 }
 
 /**
@@ -23,7 +40,15 @@ function docHref(file: string, lines?: string): string {
  * fainter cards one step further out. Clicking a card moves it to the centre; the URL keeps
  * ?focus= so the back button and links work.
  */
-export function FocusGraph({ graph, initialFocus }: { graph: Graph; initialFocus: string }) {
+export function FocusGraph({
+  graph,
+  initialFocus,
+  places,
+}: {
+  graph: Graph;
+  initialFocus: string;
+  places: GraphPlaces;
+}) {
   const params = useSearchParams();
   const urlFocus = params.get("focus");
   const focus = urlFocus && graph.nodes[urlFocus] ? urlFocus : initialFocus;
@@ -54,7 +79,7 @@ export function FocusGraph({ graph, initialFocus }: { graph: Graph; initialFocus
 
   const go = (id: string) => {
     if (id === focus) return;
-    window.history.pushState(null, "", `/?focus=${encodeURIComponent(id)}`);
+    window.history.pushState(null, "", `${places.graphHref}?focus=${encodeURIComponent(id)}`);
   };
 
   // Edges re-draw after the cards have moved.
@@ -131,7 +156,7 @@ export function FocusGraph({ graph, initialFocus }: { graph: Graph; initialFocus
           />
         ))}
       </div>
-      <Detail graph={graph} id={focus} ring1={ring1} onPick={go} />
+      <Detail graph={graph} id={focus} ring1={ring1} onPick={go} places={places} />
     </div>
   );
 }
@@ -176,8 +201,9 @@ function Detail(props: {
   id: string;
   ring1: Neighbour[];
   onPick: (id: string) => void;
+  places: GraphPlaces;
 }) {
-  const { graph, id, ring1, onPick } = props;
+  const { graph, id, ring1, onPick, places } = props;
   const node = graph.nodes[id];
   if (!node) return null;
   const kind = nodeKind(node);
@@ -189,14 +215,16 @@ function Detail(props: {
   return (
     <aside className="detail">
       <div className="detail-head">
-        <Chip id={id} />
+        <Chip id={id} kind={kind} label={places.kindLabels[kind] ?? kind} />
         <span className="muted">
-          {KIND_LABEL[kind as keyof typeof KIND_LABEL] ?? kind} ·{" "}
+          {places.kindLabels[kind] ?? kind} ·{" "}
           {node.kind === "card" ? node.status : "document ID, no card"}
         </span>
       </div>
       {node.kind === "card" && node.layer && (
-        <p className={`layer-line layer-${node.layer}`}>{LAYER_LABEL[node.layer]}</p>
+        <p className={`layer-line layer-${node.layer}`}>
+          {places.layerLabels[node.layer] ?? node.layer}
+        </p>
       )}
       <h1>{node.title}</h1>
       {node.kind === "card" && node.by && <p className="muted small">{node.by}</p>}
@@ -255,13 +283,13 @@ function Detail(props: {
             {node.sources.map((s) => (
               <li key={`${s.file}${s.lines}`}>
                 {s.file.includes("/") ? (
-                  // Outside research/game-design: the workbench can't open it, so show the path.
-                  <span className="mono" title={`research/game-design/${s.file}`}>
-                    {s.file.replace(/^\.\.\//, "research/")}
+                  // Outside the workbench folder: it can't open it, so show the path.
+                  <span className="mono" title={`${places.sourceDir}/${s.file}`}>
+                    {s.file.replace(/^\.\.\//, `${parentDir(places.sourceDir)}/`)}
                     {s.lines ? ` · lines ${s.lines}` : ""}
                   </span>
                 ) : (
-                  <Link href={docHref(s.file, s.lines)}>
+                  <Link href={docHref(places, s.file, s.lines)}>
                     {s.file}
                     {s.lines ? ` · lines ${s.lines}` : ""}
                   </Link>
@@ -281,7 +309,7 @@ function Detail(props: {
             <ul className="sources">
               {node.foundIn.map((f) => (
                 <li key={f}>
-                  <Link href={docHref(f)}>{f}</Link>
+                  <Link href={docHref(places, f)}>{f}</Link>
                 </li>
               ))}
             </ul>
