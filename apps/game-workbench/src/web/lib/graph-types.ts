@@ -3,10 +3,13 @@ import type { IdKind } from "./ids.ts";
 
 /** Card format: research/game-design/cards/README.md. */
 export const CARD_TYPES = [
+  "area",
   "idea",
   "question",
+  "option",
   "decision",
   "mechanic",
+  "piece",
   "screen",
   "ui",
   "cue",
@@ -19,6 +22,21 @@ export type CardType = (typeof CARD_TYPES)[number];
 export const STATUSES = ["open", "answered", "proposed", "decided", "parked"] as const;
 export type CardStatus = (typeof STATUSES)[number];
 
+/**
+ * Where a card sits between "every story" and "one story":
+ * core = the same in every story; configurable = an engine mechanism each story fills with data;
+ * optional = an engine module a story may switch on; story = lives in one story pack.
+ */
+export const LAYERS = ["core", "configurable", "optional", "story"] as const;
+export type Layer = (typeof LAYERS)[number];
+
+export const LAYER_LABEL: Record<Layer, string> = {
+  core: "Core · every story",
+  configurable: "Configurable · story fills it",
+  optional: "Optional module",
+  story: "Story-specific",
+};
+
 export const RELS = {
   needs: { label: "needs", reverse: "needed by" },
   raises: { label: "raises", reverse: "raised by" },
@@ -27,6 +45,7 @@ export const RELS = {
   refines: { label: "refines", reverse: "refined by" },
   affects: { label: "affects", reverse: "affected by" },
   conflicts: { label: "conflicts with", reverse: "conflicts with" },
+  "part-of": { label: "part of", reverse: "has part" },
 } as const;
 export type Rel = keyof typeof RELS;
 
@@ -38,6 +57,7 @@ export type Card = {
   type: CardType;
   title: string;
   status: CardStatus;
+  layer: Layer | null;
   by: string | null;
   links: Link[];
   sources: Source[];

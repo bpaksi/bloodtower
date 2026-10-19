@@ -10,6 +10,8 @@ import {
   type Edge,
   type Graph,
   type GraphNode,
+  LAYERS,
+  type Layer,
   type Link,
   RELS,
   type Source,
@@ -21,6 +23,9 @@ import { renderMarkdown } from "./markdown.ts";
 export { RELS };
 
 const PREFIX: Record<CardType, string> = {
+  area: "AREA",
+  option: "OPT",
+  piece: "AST",
   idea: "IDEA",
   question: "Q",
   decision: "DEC",
@@ -53,9 +58,17 @@ export function parseCard(file: string, text: string): Card {
   const d = (data ?? {}) as Record<string, unknown>;
   const type = d.type as CardType;
   if (!CARD_TYPES.includes(type)) fail(`unknown type "${String(d.type)}"`);
-  if (!id.startsWith(`${PREFIX[type]}-`) || !/-\d{3,}$/.test(id)) {
-    fail(`ID must be ${PREFIX[type]}-NNN for type ${type}`);
-  }
+  // Pieces keep their asset-catalog IDs (AST-B04 skulls); every other type is PREFIX-NNN.
+  const idOk =
+    type === "piece" ? /^AST-B\d{2}$/.test(id) : new RegExp(`^${PREFIX[type]}-\\d{3,}$`).test(id);
+  if (!idOk)
+    fail(
+      type === "piece"
+        ? "a piece keeps its AST-Bnn ID"
+        : `ID must be ${PREFIX[type]}-NNN for type ${type}`,
+    );
+  const layer = (d.layer ?? null) as Layer | null;
+  if (layer !== null && !LAYERS.includes(layer)) fail(`unknown layer "${String(layer)}"`);
   if (typeof d.title !== "string" || !d.title.trim()) fail("title is required");
   const status = (d.status ?? "open") as CardStatus;
   if (!STATUSES.includes(status)) fail(`unknown status "${String(status)}"`);
@@ -74,6 +87,7 @@ export function parseCard(file: string, text: string): Card {
     type,
     title: (d.title as string).trim(),
     status,
+    layer,
     by: typeof d.by === "string" ? d.by : null,
     links,
     sources,

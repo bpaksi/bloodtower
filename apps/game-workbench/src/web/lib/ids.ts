@@ -10,6 +10,8 @@ export type IdKind =
   | "engine"
   | "question"
   | "decision"
+  | "area"
+  | "option"
   | "screen"
   | "ui"
   | "cue"
@@ -25,6 +27,8 @@ export const KIND_LABEL: Record<IdKind, string> = {
   engine: "Engine",
   question: "Question",
   decision: "Decision",
+  area: "Area",
+  option: "Option",
   screen: "Screen",
   ui: "UI piece",
   cue: "Tower cue",
@@ -46,11 +50,13 @@ const NEW_PREFIX: Record<string, IdKind> = {
   EX: "example",
   Q: "question",
   DEC: "decision",
+  AREA: "area",
+  OPT: "option",
 };
 
 // Order matters: longer, more specific forms first so R-AST-ORG-1 is not read as AST-….
 const ID_SOURCE = [
-  String.raw`(?:SCR|UI|CUE|SND|MEC|IDEA|DEC|SK|EX|Q)-\d+`,
+  String.raw`(?:SCR|UI|CUE|SND|MEC|IDEA|DEC|AREA|OPT|SK|EX|Q)-\d+`,
   String.raw`R\d?-[A-Z]+(?:-[A-Z]+)*-\d+[a-z]?`,
   String.raw`AST-[A-Z]\d+`,
   String.raw`E\d{1,2}[a-z]?`,

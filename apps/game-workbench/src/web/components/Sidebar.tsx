@@ -3,7 +3,14 @@ import { loadCards } from "../lib/cards.ts";
 import { CARD_TYPES } from "../lib/graph-types.ts";
 import { KIND_LABEL } from "../lib/ids.ts";
 
-const TYPE_LABEL: Record<string, string> = { ...KIND_LABEL, question: "Questions", idea: "Ideas" };
+const TYPE_LABEL: Record<string, string> = {
+  ...KIND_LABEL,
+  area: "Areas",
+  question: "Questions",
+  option: "Options",
+  idea: "Ideas",
+  piece: "RtDT pieces",
+};
 
 export function Sidebar() {
   const cards = loadCards();
@@ -14,6 +21,11 @@ export function Sidebar() {
         <span className="brand-sub">Return to Dark Tower · design</span>
       </Link>
       <ul>
+        <li>
+          <Link href="/map" className="nav-item">
+            Map and progress
+          </Link>
+        </li>
         <li>
           <Link href="/" className="nav-item">
             Graph

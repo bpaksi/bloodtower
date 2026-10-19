@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { Graph, GraphNode } from "../lib/graph-types.ts";
+import { type Graph, type GraphNode, LAYER_LABEL } from "../lib/graph-types.ts";
 import { KIND_LABEL } from "../lib/ids.ts";
 import { labelPoint, layout, type Neighbour } from "../lib/layout.ts";
 import { Chip } from "./Chip.tsx";
@@ -40,12 +40,17 @@ export function FocusGraph({ graph, initialFocus }: { graph: Graph; initialFocus
     return () => ro.disconnect();
   }, []);
 
-  const { placed, ring1 } = useMemo(
+  const { placed, ring1, dense } = useMemo(
     () => layout(graph, focus, size.w, size.h),
     [graph, focus, size],
   );
   const at = new Map(placed.map((p) => [p.id, p]));
   const verbs = new Map(ring1.map((n) => [n.id, n]));
+  // On a busy card, the most common verb goes in a caption instead of on every line.
+  const verbText = (id: string) => verbs.get(id)?.verbs.join(" · ") ?? "";
+  const counts = new Map<string, number>();
+  for (const n of ring1) counts.set(verbText(n.id), (counts.get(verbText(n.id)) ?? 0) + 1);
+  const common = dense ? [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] : undefined;
 
   const go = (id: string) => {
     if (id === focus) return;
@@ -97,22 +102,28 @@ export function FocusGraph({ graph, initialFocus }: { graph: Graph; initialFocus
         {edgesFor === focus &&
           centre &&
           placed
-            .filter((p) => p.ring === 1)
+            .filter((p) => p.ring === 1 && verbText(p.id) !== common)
             .map((p) => (
               <span
                 key={`v-${p.id}`}
                 className="edge-verb"
                 style={{ left: labelPoint(centre, p).x, top: labelPoint(centre, p).y }}
               >
-                {verbs.get(p.id)?.verbs.join(" · ")}
+                {verbText(p.id)}
               </span>
             ))}
+        {dense && common && (
+          <p className="stage-caption">
+            {ring1.length} links · unlabelled lines are <b>{common}</b>
+          </p>
+        )}
         {placed.map((p) => (
           <GraphCard
             key={p.id}
             node={graph.nodes[p.id]}
             id={p.id}
             ring={p.ring}
+            compact={p.compact === true}
             x={p.x}
             y={p.y}
             onPick={go}
@@ -129,28 +140,33 @@ function GraphCard(props: {
   node: GraphNode | undefined;
   id: string;
   ring: 0 | 1 | 2;
+  compact: boolean;
   x: number;
   y: number;
   neighbour?: Neighbour;
   onPick: (id: string) => void;
 }) {
-  const { node, id, ring, x, y, onPick } = props;
+  const { node, id, ring, compact, x, y, onPick } = props;
+  const small = ring === 2 || compact;
   const kind = nodeKind(node);
   const title = node?.title ?? id;
   const status = node?.kind === "card" ? node.status : "in docs";
   return (
     <button
       type="button"
-      className={`gcard ring-${ring} gk-${kind}${node?.kind === "ref" ? " is-ref" : ""} st-${status.replace(" ", "-")}`}
+      className={`gcard ring-${ring}${compact ? " compact" : ""} gk-${kind}${node?.kind === "ref" ? " is-ref" : ""} st-${status.replace(" ", "-")}`}
       style={{ transform: `translate(${x}px, ${y}px) translate(-50%, -50%)` }}
       onClick={() => onPick(id)}
-      title={ring === 2 ? `${id} · ${title}` : undefined}
+      title={small ? `${id} · ${title}` : undefined}
     >
       <span className="gcard-top">
         <span className="gcard-id">{id}</span>
-        {ring !== 2 && <span className="gcard-status">{status}</span>}
+        {!small && <span className="gcard-status">{status}</span>}
       </span>
       <span className="gcard-title">{title}</span>
+      {!small && node?.kind === "card" && node.layer && (
+        <span className={`layer-tag layer-${node.layer}`}>{node.layer}</span>
+      )}
     </button>
   );
 }
@@ -179,6 +195,9 @@ function Detail(props: {
           {node.kind === "card" ? node.status : "document ID, no card"}
         </span>
       </div>
+      {node.kind === "card" && node.layer && (
+        <p className={`layer-line layer-${node.layer}`}>{LAYER_LABEL[node.layer]}</p>
+      )}
       <h1>{node.title}</h1>
       {node.kind === "card" && node.by && <p className="muted small">{node.by}</p>}
       {node.kind === "card" && node.bodyHtml && (
@@ -235,10 +254,18 @@ function Detail(props: {
           <ul className="sources">
             {node.sources.map((s) => (
               <li key={`${s.file}${s.lines}`}>
-                <Link href={docHref(s.file, s.lines)}>
-                  {s.file}
-                  {s.lines ? ` · lines ${s.lines}` : ""}
-                </Link>
+                {s.file.includes("/") ? (
+                  // Outside research/game-design: the workbench can't open it, so show the path.
+                  <span className="mono" title={`research/game-design/${s.file}`}>
+                    {s.file.replace(/^\.\.\//, "research/")}
+                    {s.lines ? ` · lines ${s.lines}` : ""}
+                  </span>
+                ) : (
+                  <Link href={docHref(s.file, s.lines)}>
+                    {s.file}
+                    {s.lines ? ` · lines ${s.lines}` : ""}
+                  </Link>
+                )}
                 {s.note && <span className="muted"> {s.note}</span>}
               </li>
             ))}

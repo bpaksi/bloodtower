@@ -25,7 +25,10 @@ export default async function GraphPage({
       </section>
     );
   }
-  const firstOpen = cards.find((c) => c.type === "idea" && c.status === "open") ?? cards[0];
+  const firstOpen =
+    cards.find((c) => c.id === "AREA-000") ??
+    cards.find((c) => c.type === "idea" && c.status === "open") ??
+    cards[0];
   const initial = focus && graph.nodes[focus] ? focus : (firstOpen?.id as string);
 
   // One prompt scope per node: the card file (or the document ID), plus its neighbours' IDs.
