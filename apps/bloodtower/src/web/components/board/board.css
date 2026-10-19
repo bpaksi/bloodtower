@@ -1483,10 +1483,61 @@
   min-height: 0;
 }
 
+/*
+ * Keeper cinema (visuals step 11; R3-UI-33, R3-UI-33b; game-look.md section 4 cut scenes). The
+ * Keeper fills the layer's 16:9 well on void with no plate rule: his portrait takes the top two
+ * thirds, its paper fading into the dark, and his line is captioned in the lower third, clear of
+ * the face. The portrait's chin sits at about 74% of its height, so a caption laid over a
+ * full-height portrait would cover it. The caption row grows if a long line needs it.
+ */
 .bt-visual > .bt-keeper {
-  justify-content: center;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(calc(100% / 3), auto);
+  gap: 0;
+  padding: 0;
+  background: var(--bt-void);
   border: 0;
   outline: 0;
+}
+
+.bt-visual > .bt-keeper > [data-talking-avatar] {
+  grid-row: 1;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0;
+}
+
+.bt-visual > .bt-keeper [data-talking-avatar] > div {
+  flex: none;
+  height: 100%;
+  max-width: 100%;
+  max-height: none;
+  aspect-ratio: 1;
+  /* A vignette, not a frame: the square portrait's edges fade into the void. */
+  mask-image: radial-gradient(closest-side, #000 58%, transparent);
+}
+
+.bt-visual > .bt-keeper > .bt-keeper-captions,
+.bt-visual > .bt-keeper > .bt-caption {
+  grid-row: 2;
+  align-self: center;
+  min-height: 0;
+  padding: 0.5rem max(2rem, 8vw) clamp(0.75rem, 3vh, 2.5rem);
+}
+
+/* Read from the couch: at least 1/25 of the screen's height (R3-UI-33b), bone on void like the
+   other cut-scene captions, at most three lines (the whole line stays in the DOM). */
+.bt-board .bt-visual .bt-keeper .bt-caption {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--bt-bone);
+  font-size: max(1.75rem, 4.2vh);
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.8);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .bt-visual-caption {

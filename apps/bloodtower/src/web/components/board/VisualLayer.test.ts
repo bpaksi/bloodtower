@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ranOut, turnAround } from "./VisualLayer.tsx";
+import { holdsExit, ranOut, turnAround } from "./VisualLayer.tsx";
 
 const END = 800;
 
@@ -83,6 +83,45 @@ describe("turnAround", () => {
     expect(hidden.playState).toBe("finished");
     turn(hidden, "in");
     expect([hidden.currentTime, hidden.playbackRate, hidden.playState]).toEqual([0, 1, "running"]);
+  });
+});
+
+describe("holdsExit", () => {
+  const holds = (time: number | null, rate: number) =>
+    holdsExit(new FakeAnimation(time, rate) as unknown as Animation);
+
+  it("holds the zoom out while a zoom in that has begun is still running", () => {
+    expect(holds(1, 1)).toBe(true);
+    expect(holds(400, 1)).toBe(true);
+    expect(holds(END - 1, 1)).toBe(true);
+  });
+
+  it("does not hold a zoom in that has not moved yet: it is dropped unseen instead", () => {
+    expect(holds(0, 1)).toBe(false);
+    expect(holds(null, 1)).toBe(false);
+  });
+
+  it("does not hold once the zoom in has finished, or while a zoom out runs", () => {
+    expect(holds(END, 1)).toBe(false);
+    expect(holds(400, -1)).toBe(false);
+    expect(holds(END, -1)).toBe(false);
+  });
+
+  it("lets the held zoom in reach full, then zooms out from there", () => {
+    // Continue at 300 ms of the zoom in: nothing turns, the zoom in plays on.
+    const animation = new FakeAnimation(300, 1);
+    expect(holdsExit(animation as unknown as Animation)).toBe(true);
+    expect([animation.currentTime, animation.playbackRate]).toEqual([300, 1]);
+    // It finishes; the zoom out that was waiting starts from fully shown.
+    animation.currentTime = END;
+    expect(holdsExit(animation as unknown as Animation)).toBe(false);
+    const { onGone } = turn(animation, "out");
+    expect([animation.currentTime, animation.playbackRate, animation.playState]).toEqual([
+      END,
+      -1,
+      "running",
+    ]);
+    expect(onGone).not.toHaveBeenCalled();
   });
 });
 
