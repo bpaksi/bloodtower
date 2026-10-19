@@ -87,6 +87,15 @@ export const turnAround = (
 };
 
 /**
+ * Whether the layer's zoom out has really run out (going backwards and back at time 0), so the
+ * layer may go. A `finish` event is dispatched a frame after it is queued: a zoom out turned back
+ * at its end queues one with the rate at +1, and if the phase flips out again before it arrives
+ * the rate already reads −1 while the layer is still fully shown. The time tells them apart.
+ */
+export const ranOut = (animation: Animation) =>
+  animation.playbackRate < 0 && Number(animation.currentTime ?? 0) <= 0;
+
+/**
  * The layer element and its one animation. The zoom (or, under reduced motion, the fade) runs
  * forward to come in and is reversed to go out. Reversing an animation that is still running
  * continues from where it is, so pressing Continue mid-zoom turns the zoom around smoothly: the
@@ -138,8 +147,7 @@ function LayerBox({
       );
       current.id = reduced ? VISUAL_FADE_ID : VISUAL_ZOOM_ID;
       current.onfinish = (event) => {
-        const target = event.target as Animation;
-        if (target.playbackRate < 0) gone.current();
+        if (ranOut(event.target as Animation)) gone.current();
       };
       animation.current = current;
       return;

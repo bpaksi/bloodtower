@@ -61,11 +61,24 @@ const LAYER = "[data-visual-layer]";
  * Passes the board's session socket through the test, unchanged, and keeps the last
  * `storyboardState` frame the server sent for each moment. `send` hands the board one of those
  * frames again: the same bytes the server sent, at a time the test chooses, so a test can put two
- * moments any number of milliseconds apart on the board.
+ * moments any number of milliseconds apart on the board. `replay` does it from inside the page,
+ * each frame handed to the board's socket as soon as React has drawn the one before, so a whole
+ * run of moments can land inside one animation frame (a test process cannot time that).
  */
 const tapBoardSocket = async (board: Page) => {
   const byMoment = new Map<string, string>();
   let toBoard: ((message: string) => void) | null = null;
+  await board.addInitScript(() => {
+    const w = window as unknown as { __sockets: WebSocket[] };
+    w.__sockets = [];
+    const Native = window.WebSocket;
+    window.WebSocket = class extends Native {
+      constructor(...args: ConstructorParameters<typeof Native>) {
+        super(...args);
+        w.__sockets.push(this);
+      }
+    };
+  });
   await board.routeWebSocket(/\/ws$/, (socket) => {
     const server = socket.connectToServer();
     toBoard = (message) => socket.send(message);
@@ -87,6 +100,40 @@ const tapBoardSocket = async (board: Page) => {
       const frame = byMoment.get(momentId);
       if (!frame || !toBoard) throw new Error(`no storyboardState seen for ${momentId}`);
       toBoard(frame);
+    },
+    /** Hands the board these moments in order, each the moment React has committed the last. */
+    replay: (momentIds: string[]) => {
+      const run = momentIds.map((id) => {
+        const data = byMoment.get(id);
+        if (!data) throw new Error(`no storyboardState seen for ${id}`);
+        return { id, data };
+      });
+      return board.evaluate(
+        (steps) =>
+          new Promise<void>((resolve, reject) => {
+            const socket = (window as unknown as { __sockets: WebSocket[] }).__sockets.at(-1);
+            const main = document.querySelector("main");
+            if (!socket || !main) return reject(new Error("no board socket or main"));
+            let next = 0;
+            const send = () => {
+              const step = steps[next];
+              if (!step) {
+                observer.disconnect();
+                return resolve();
+              }
+              socket.dispatchEvent(new MessageEvent("message", { data: step.data }));
+            };
+            // A MutationObserver runs right after React's commit (layout effects included).
+            const observer = new MutationObserver(() => {
+              if (main.dataset.moment !== steps[next]?.id) return;
+              next += 1;
+              send();
+            });
+            observer.observe(main, { attributes: true, attributeFilter: ["data-moment"] });
+            send();
+          }),
+        run,
+      );
     },
   };
 };
@@ -468,10 +515,17 @@ test("under reduced motion the visual only fades: no zoom, and the camera holds 
   }
 });
 
-/** Records, every animation frame, the layer's opacity and phase and the state of its media. */
+/**
+ * Records, every animation frame, the layer's opacity and phase, the state of its media, and its
+ * animation's own clock (which animation, its current time and rate).
+ */
 const recordFrames = (board: Page) =>
   board.evaluate(() => {
-    const w = window as unknown as { __frames: unknown[]; __recording?: boolean };
+    const w = window as unknown as {
+      __frames: unknown[];
+      __recording?: boolean;
+      __layerAnimations?: Animation[];
+    };
     w.__frames = [];
     if (w.__recording) return;
     w.__recording = true;
@@ -479,8 +533,21 @@ const recordFrames = (board: Page) =>
     const tick = () => {
       const el = document.querySelector("[data-visual-layer]") as HTMLElement | null;
       const media = el ? [...el.querySelectorAll("audio, video")] : [];
+      const all = w.__layerAnimations ?? [];
+      let anim = -1;
+      for (let i = all.length - 1; i >= 0 && el; i -= 1) {
+        if ((all[i]?.effect as KeyframeEffect | null)?.target === el) {
+          anim = i;
+          break;
+        }
+      }
+      const animation = anim >= 0 ? all[anim] : undefined;
+      const time = animation?.currentTime;
       w.__frames.push({
         t: performance.now() - t0,
+        anim,
+        time: time === null || time === undefined ? null : Number(time),
+        rate: animation?.playbackRate ?? 0,
         opacity: el ? Number(getComputedStyle(el).opacity) : null,
         phase: el?.dataset.visualPhase ?? null,
         moment: document.querySelector("main")?.dataset.moment ?? "",
@@ -494,6 +561,11 @@ const recordFrames = (board: Page) =>
 
 type Frame = {
   t: number;
+  /** Index in window.__layerAnimations of the layer's animation, or −1 with none. */
+  anim: number;
+  /** That animation's current time (ms), or null when unresolved or cancelled. */
+  time: number | null;
+  rate: number;
   opacity: number | null;
   phase: "in" | "out" | null;
   moment: string;
@@ -564,28 +636,8 @@ test("Continue mid-zoom turns the zoom around from where it is: no jump in brigh
     }
     expect(inToOut, "Continue landed during the zoom in").toBeGreaterThanOrEqual(1);
     expect(outToIn, "a visual arrived during the zoom out").toBeGreaterThanOrEqual(1);
-    // No frame-to-frame jump, and at most 3 changes of direction in any second (flash safety).
-    let worst = 0;
-    const turns: number[] = [];
-    let direction = 0;
-    for (let i = 1; i < all.length; i += 1) {
-      const a = all[i - 1] as Frame;
-      const b = all[i] as Frame;
-      if (a.opacity === null || b.opacity === null) continue;
-      const delta = b.opacity - a.opacity;
-      worst = Math.max(worst, Math.abs(delta));
-      if (Math.abs(delta) < 0.002) continue;
-      const sign = Math.sign(delta);
-      if (direction !== 0 && sign !== direction) turns.push(b.t);
-      direction = sign;
-    }
-    expect(worst, "largest opacity change between two frames").toBeLessThanOrEqual(0.25);
-    for (const t of turns) {
-      expect(
-        turns.filter((u) => u >= t && u < t + 1000).length,
-        "brightness turns within one second",
-      ).toBeLessThanOrEqual(3);
-    }
+    // No jump, and at most 3 changes of direction in any second (flash safety).
+    expectNoFlash(all, "Continue mid-zoom");
     const end = shown.at(-1);
     expect(end?.phase).toBe("in");
     expect(end?.opacity).toBe(1);
@@ -644,27 +696,71 @@ test("quitting during the Keeper silences it for the zoom out", async ({ browser
   }
 });
 
-/** Largest frame-to-frame opacity change and most direction changes in any one second. With no
- * layer the board shows through, counted as opacity 0 (the layer's void is not on screen). */
-const brightness = (all: Frame[]) => {
+/** Frames further apart than this are a stall: the page did not draw, so they are not compared. */
+const SHORT_GAP_MS = 40;
+/** How far the animation's clock may run ahead of the page's between two frames (timer jitter). */
+const CLOCK_SLACK_MS = 25;
+
+/**
+ * The flash checks on a run of frames. With no layer the board shows through, counted as opacity
+ * 0 (the layer's void is not on screen). A stalled page (no frame for 80 ms or more) shows a big
+ * step in opacity that is not a jump, so the checks follow the animation's own clock instead:
+ * - `worst`: largest opacity change between two frames at most SHORT_GAP_MS apart;
+ * - `rewind`: largest amount the layer's animation clock moved beyond the time between two frames
+ *   (a rewind to the far end, the round-2 bug, moves it by a whole zoom in one frame);
+ * - `brightEdge`: highest opacity at which the layer appeared or vanished when its clock says it
+ *   could not have got there (the stale-finish bug: gone at full brightness mid-zoom);
+ * - `perSecond`: most changes of brightness direction in any one second.
+ */
+const flashCheck = (all: Frame[]) => {
   let worst = 0;
+  let rewind = 0;
+  let brightEdge = 0;
   let direction = 0;
   const turns: number[] = [];
   for (let i = 1; i < all.length; i += 1) {
-    const a = (all[i - 1] as Frame).opacity ?? 0;
-    const b = (all[i] as Frame).opacity ?? 0;
-    const delta = b - a;
-    worst = Math.max(worst, Math.abs(delta));
+    const a = all[i - 1] as Frame;
+    const b = all[i] as Frame;
+    const dt = b.t - a.t;
+    const delta = (b.opacity ?? 0) - (a.opacity ?? 0);
+    if (dt <= SHORT_GAP_MS) worst = Math.max(worst, Math.abs(delta));
+    if (a.anim >= 0 && a.anim === b.anim && a.time !== null && b.time !== null) {
+      rewind = Math.max(rewind, Math.abs(b.time - a.time) - dt);
+    }
+    if (a.opacity !== null && b.opacity === null) {
+      // Gone: only a zoom out with no more time to run than the gap may have run out in it.
+      const left = a.rate < 0 && a.time !== null ? a.time : Number.POSITIVE_INFINITY;
+      if (left > dt + CLOCK_SLACK_MS) brightEdge = Math.max(brightEdge, a.opacity);
+    }
+    if (a.opacity === null && b.opacity !== null) {
+      // Appeared: a zoom in starts at time 0, so it can be no further on than the gap.
+      if ((b.time ?? 0) > dt + CLOCK_SLACK_MS) brightEdge = Math.max(brightEdge, b.opacity);
+    }
     if (Math.abs(delta) < 0.002) continue;
     const sign = Math.sign(delta);
-    if (direction !== 0 && sign !== direction) turns.push((all[i] as Frame).t);
+    if (direction !== 0 && sign !== direction) turns.push(b.t);
     direction = sign;
   }
   const perSecond = Math.max(
     0,
     ...turns.map((t) => turns.filter((u) => u >= t && u < t + 1000).length),
   );
-  return { worst, perSecond };
+  return { worst, rewind, brightEdge, perSecond };
+};
+
+const expectNoFlash = (all: Frame[], label: string) => {
+  const result = flashCheck(all);
+  expect(result.worst, `${label}: largest opacity change between two frames`).toBeLessThanOrEqual(
+    0.25,
+  );
+  expect(result.rewind, `${label}: the zoom's clock jumped (ms)`).toBeLessThanOrEqual(
+    CLOCK_SLACK_MS,
+  );
+  expect(result.brightEdge, `${label}: opacity the layer came or went at`).toBeLessThanOrEqual(
+    0.25,
+  );
+  expect(result.perSecond, `${label}: brightness turns in one second`).toBeLessThanOrEqual(3);
+  return result;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -706,13 +802,7 @@ for (const motion of ["no-preference", "reduce"] as const) {
       };
       const check = async (label: string) => {
         await board.waitForTimeout(1300);
-        const result = brightness(await frames(board));
-        expect(
-          result.worst,
-          `${label}: largest opacity change between two frames`,
-        ).toBeLessThanOrEqual(0.25);
-        expect(result.perSecond, `${label}: brightness turns in one second`).toBeLessThanOrEqual(3);
-        return result;
+        return expectNoFlash(await frames(board), label);
       };
       const results: Record<string, number> = {};
       // A visual, then text 0-40 ms later: Continue on the layer's first frames (zoom not begun).
@@ -749,6 +839,20 @@ for (const motion of ["no-preference", "reduce"] as const) {
           await check(`out turned back at its end -${early} ms`)
         ).worst;
         await expect(layer).toHaveAttribute("data-visual-phase", "in");
+      }
+      // Fully in, then text, a visual and text again inside one frame: the zoom out is turned back
+      // before it moves (left finished, a finish event queued), then sent out again before that
+      // event arrives. The layer must zoom out from full, not vanish on the stale event.
+      for (let run = 0; run < 3; run += 1) {
+        await settleVisual();
+        await recordFrames(board);
+        await tap.replay(["proving-ground.02", "proving-ground.03", "proving-ground.02"]);
+        results[`out, in, out in one frame #${run}`] = (
+          await check(`out, in, out in one frame #${run}`)
+        ).worst;
+        await expect(layer).toHaveCount(0, { timeout: 3000 });
+        const left = (await frames(board)).filter((f) => f.phase === "out").length;
+        expect(left, `out, in, out #${run}: frames of the zoom out`).toBeGreaterThan(5);
       }
       console.log(
         `[${testInfo.project.name} ${motion}] largest frame change`,
