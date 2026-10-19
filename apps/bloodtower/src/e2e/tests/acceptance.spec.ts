@@ -29,8 +29,10 @@ const boardStates = (frames: readonly string[]) =>
 const expectCameraTrackMoves = async (board: Page, momentId: string) => {
   const cameraStill = board.locator(`[data-camera-still] img[data-camera-track="${momentId}"]`);
   await expect(cameraStill).toBeVisible();
-  // The still sits in the plate frame (visuals step 8) without losing its #78 hooks.
+  // The still sits in the plate frame (visuals step 8) without losing its #78 hooks, and the
+  // plate is in the full-screen visual layer (visuals step 10).
   await expect(board.locator(".bt-plate > [data-camera-still]")).toHaveCount(1);
+  await expect(board.locator("[data-visual-layer] .bt-plate > [data-camera-still]")).toHaveCount(1);
   const readTransform = () => cameraStill.evaluate((img) => getComputedStyle(img).transform);
   const atOneSecond = await readTransform();
   await board.waitForTimeout(2000);

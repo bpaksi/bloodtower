@@ -27,9 +27,11 @@ import { pageServerOrigin } from "../../lib/serverOrigin.ts";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { VOLUME_ANSWER_LABEL, volumeBoardCopy } from "../../lib/volumeTest.ts";
 import { PortraitCard } from "../PortraitCard";
+import { boardLayer } from "./boardLayer.ts";
 import { CameraStill } from "./CameraStill";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
+import { VisualLayer } from "./VisualLayer";
 
 /**
  * Display only for game controls. Holdings do not change here.
@@ -53,11 +55,14 @@ export function StoryBoard({
   // Play chrome only while the story runs. Quit is "the table is closed" (spec D20), not a
   // pause, so it keeps the closing summary and join block and gets no play mode.
   const playMode = state.screen === "play";
+  // Layer 2 (R3-UI-10): a still, clip or the Keeper fills the screen; the board stays under it.
+  const layer = boardLayer(state);
   return (
     <main
       className="bt-board"
       data-screen={state.screen}
       data-board-mode={playMode ? "play" : undefined}
+      data-board-layer={layer}
       data-moment={state.moment?.id ?? ""}
       data-board-layout={keeperMoment ? "keeper" : "standard"}
     >
@@ -115,9 +120,7 @@ export function StoryBoard({
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
           {state.screen === "setup" ? <SetupPanel state={state} /> : null}
           {state.screen === "begin" ? <BeginPanel state={state} /> : null}
-          {state.screen === "play" ? (
-            <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
-          ) : null}
+          {state.screen === "play" ? <PlayPanel state={state} /> : null}
           {state.screen === "quit" ? <QuitPanel /> : null}
           {playMode && !keeperMoment ? <PartyItems /> : null}
           <NextPrompt label={nextPrompt(state)} />
@@ -131,6 +134,16 @@ export function StoryBoard({
           </aside>
         )}
       </div>
+      <VisualLayer>
+        {layer === "visual" && state.moment ? (
+          <VisualMoment
+            moment={state.moment}
+            packId={state.packId}
+            keeperLine={state.keeperLine ?? 0}
+            onKeeperLineEnded={onKeeperLineEnded}
+          />
+        ) : null}
+      </VisualLayer>
     </main>
   );
 }
@@ -670,23 +683,7 @@ const BeginPanel = ({ state }: { state: StoryboardState }) => (
   </article>
 );
 
-const PlayPanel = ({
-  state,
-  onKeeperLineEnded,
-}: {
-  state: StoryboardState;
-  onKeeperLineEnded?: (momentId: string, line: number) => void;
-}) => {
-  if (state.moment?.id === KEEPER_MOMENT_ID) {
-    return (
-      <article className="bt-page bt-parchment bt-ink-in bt-page-keeper" data-keeper-stage="">
-        <KeeperScene
-          keeperLine={state.keeperLine ?? 0}
-          onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
-        />
-      </article>
-    );
-  }
+const PlayPanel = ({ state }: { state: StoryboardState }) => {
   if (!state.moment) {
     return (
       <article className="bt-page bt-parchment">
@@ -694,9 +691,34 @@ const PlayPanel = ({
       </article>
     );
   }
+  // A visual moment shows in the visual layer (VisualMoment). The page under it keeps the scene's
+  // heading for the zoom; the Keeper's page stays bare, as the header already names him.
+  if (boardLayer(state) === "visual") {
+    if (state.moment.id === KEEPER_MOMENT_ID) {
+      return (
+        <article
+          className="bt-page bt-parchment bt-ink-in bt-page-keeper"
+          data-keeper-stage=""
+          data-under-visual=""
+        />
+      );
+    }
+    const scene = sceneCopy(state.moment);
+    return (
+      <article className="bt-page bt-parchment bt-ink-in" data-under-visual="">
+        <MomentMeta moment={state.moment} />
+        <div className="bt-page-text">
+          <p className="bt-kicker">{scene.kicker}</p>
+          <h2>{scene.title}</h2>
+          <p className="bt-orn" aria-hidden="true">
+            ❦ ❦ ❦
+          </p>
+        </div>
+      </article>
+    );
+  }
   const scene = sceneCopy(state.moment);
   const text = state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text);
-  const still = state.moment.still;
   return (
     <article className="bt-page bt-parchment bt-ink-in">
       <MomentMeta moment={state.moment} />
@@ -710,17 +732,57 @@ const PlayPanel = ({
           {text}
         </p>
       </div>
-      {still ? (
+    </article>
+  );
+};
+
+/**
+ * The visual layer's content for a visual moment (R3-UI-31): the Keeper scene, or the still in
+ * its plate with the camera track (#78), letterboxed whole in the layer (Q4 (a)), and the moment's
+ * text as a caption at the bottom (game-look.md section 4, cut scenes). A clip with no still has
+ * nothing the board can draw yet, so it reads unavailable.
+ */
+const VisualMoment = ({
+  moment,
+  packId,
+  keeperLine,
+  onKeeperLineEnded,
+}: {
+  moment: NonNullable<StoryboardState["moment"]>;
+  packId: StoryboardState["packId"];
+  keeperLine: number;
+  onKeeperLineEnded?: (momentId: string, line: number) => void;
+}) => {
+  if (moment.id === KEEPER_MOMENT_ID) {
+    return (
+      <KeeperScene
+        keeperLine={keeperLine}
+        onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
+      />
+    );
+  }
+  return (
+    <>
+      {moment.still ? (
         <div className="bt-plate" data-plate="">
           <CameraStill
-            momentId={state.moment.id}
-            packId={state.packId}
-            assetId={still}
-            spokenText={state.moment.text ?? ""}
+            momentId={moment.id}
+            packId={packId}
+            assetId={moment.still}
+            spokenText={moment.text ?? ""}
           />
         </div>
-      ) : null}
-    </article>
+      ) : (
+        <p className="bt-visual-missing" data-unavailable="">
+          Visual unavailable.
+        </p>
+      )}
+      {moment.text == null ? null : (
+        <p className="bt-visual-caption" data-moment-caption="">
+          {displayCaption(moment.text)}
+        </p>
+      )}
+    </>
   );
 };
 

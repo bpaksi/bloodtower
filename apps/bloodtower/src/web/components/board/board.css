@@ -1417,3 +1417,110 @@
     display: flex;
   }
 }
+
+/*
+ * Visual zoom layer (visuals step 10; R3-UI-10 layer 2, R3-UI-31, R3-UI-32). A still, clip or the
+ * Keeper fills the screen on void, over the whole board. It zooms in from the centre, where the
+ * waiting dialog sits, fading through void (one steady change of brightness, never a flash), and
+ * zooms back out when the iPad's Continue ends the moment. Under reduced motion it only fades.
+ * The still is letterboxed whole (Q4 (a)): its well takes the 16:9 of the board's art
+ * (R-DEV-7), as large as the screen allows, so cover shows the whole picture and the camera track
+ * (#78) pans and zooms inside that frame exactly as it does in the plate.
+ */
+.bt-board > .bt-visual {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--bt-void);
+  /* The zoom itself is a Web Animation in VisualLayer.tsx, so a reversal continues smoothly. */
+  transform-origin: 50% 50%;
+}
+
+.bt-board > .bt-visual[data-visual-phase="out"] {
+  pointer-events: none;
+}
+
+/* Action-needed messages (layer 1) stay above the visual: the pause and join warnings, and the
+   connection notice. */
+.bt-board[data-board-layer="visual"] > .bt-banner {
+  z-index: 6;
+}
+
+.bt-board-notice {
+  position: relative;
+  z-index: 6;
+}
+
+.bt-visual > .bt-plate,
+.bt-visual > .bt-keeper {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  width: min(100vw, 177.7778vh);
+  height: min(56.25vw, 100vh);
+  min-height: 0;
+}
+
+@supports (height: 100dvh) {
+  .bt-visual > .bt-plate,
+  .bt-visual > .bt-keeper {
+    width: min(100vw, 177.7778dvh);
+    height: min(56.25vw, 100dvh);
+  }
+}
+
+/* Edge to edge: no plate rule in the layer. */
+.bt-visual > .bt-plate {
+  outline: none;
+  box-shadow: none;
+}
+
+.bt-visual > .bt-plate > .bt-still {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.bt-visual > .bt-keeper {
+  justify-content: center;
+  border: 0;
+  outline: 0;
+}
+
+.bt-visual-caption {
+  grid-area: 1 / 1;
+  align-self: end;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 2.5rem max(2rem, 8vw) clamp(1rem, 4vh, 3rem);
+  background: linear-gradient(to bottom, transparent, rgb(11 8 6 / 0.82) 45%);
+  color: var(--bt-bone);
+  font-family: var(--bt-font-body);
+  font-size: clamp(1.75rem, 4.1vh, 2.75rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.8);
+}
+
+/* At most three lines over the art; the whole text stays in the DOM. */
+.bt-visual-caption {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.bt-visual-missing {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--bt-parchment-dark);
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  letter-spacing: 0.16em;
+}
