@@ -32,7 +32,8 @@ describe("card files", () => {
   // The lint: every card in research/game-design/cards parses, and every link resolves to a card,
   // a document ID, or carries a note saying what it is.
   it("has no broken cards or dangling links in the real folder", () => {
-    expect(loadCards().length).toBeGreaterThan(0);
+    expect(loadCards().cards.length).toBeGreaterThan(0);
+    expect(loadCards().errors).toEqual([]);
     expect(buildGraph().problems).toEqual([]);
   });
 });

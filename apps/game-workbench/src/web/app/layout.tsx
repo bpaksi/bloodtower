@@ -1,10 +1,11 @@
+import { ChipCopy, PromptStarter } from "@dark-tower/workbench/components";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { ChipCopy } from "../components/ChipCopy.tsx";
-import { PromptStarter } from "../components/PromptStarter.tsx";
 import { Sidebar } from "../components/Sidebar.tsx";
-import "./globals.css";
-import "./graph.css";
+import { loadCards } from "../lib/cards.ts";
+import { GAME_PROMPT } from "../lib/prompt.ts";
+import "@dark-tower/workbench/styles/globals.css";
+import "@dark-tower/workbench/styles/graph.css";
 
 export const metadata: Metadata = {
   title: "Game Workbench",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // A card that does not parse is left out of every page and listed here instead.
+  const { errors } = loadCards();
   return (
     <html lang="en">
       <body>
@@ -31,11 +34,25 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </button>
               <span className="readonly">Read-only · changes go through Claude</span>
             </header>
+            {errors.length > 0 && (
+              <div className="card-errors" role="alert">
+                <b>
+                  {errors.length} card file{errors.length === 1 ? "" : "s"} could not be read
+                </b>
+                <ul>
+                  {errors.map((e) => (
+                    <li key={e} className="mono">
+                      {e}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <main className="content">{children}</main>
           </div>
         </div>
         <ChipCopy />
-        <PromptStarter />
+        <PromptStarter config={GAME_PROMPT} />
       </body>
     </html>
   );

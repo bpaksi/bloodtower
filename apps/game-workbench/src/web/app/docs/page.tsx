@@ -1,6 +1,6 @@
+import { PromptScopes } from "@dark-tower/workbench/components";
 import Link from "next/link";
 import { Chip } from "../../components/Chip.tsx";
-import { PromptScopes } from "../../components/PromptScopes.tsx";
 import { groupDocs, loadDocs } from "../../lib/content.ts";
 import { type IdKind, idKind, KIND_LABEL } from "../../lib/ids.ts";
 import type { PromptScope } from "../../lib/prompt.ts";

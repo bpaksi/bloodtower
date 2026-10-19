@@ -240,6 +240,21 @@ a.nav-item:hover {
   max-width: 1440px;
 }
 
+/* Card files that did not parse: shown above every page, left out of the graph. */
+.card-errors {
+  margin: 1rem 1.5rem 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.card-errors ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+}
+
 /* ---------- home ---------- */
 
 .page-head h1 {

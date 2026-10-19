@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { copyText } from "../lib/clipboard.ts";
+import { copyText } from "../clipboard.ts";
 
 /**
  * Any element with data-id copies its ID on click or Enter, so Bob can paste an exact ID into chat.

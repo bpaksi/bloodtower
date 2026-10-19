@@ -13,7 +13,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export function Sidebar() {
-  const cards = loadCards();
+  const { cards } = loadCards();
   return (
     <nav className="sidebar" aria-label="Sections">
       <Link href="/" className="brand">

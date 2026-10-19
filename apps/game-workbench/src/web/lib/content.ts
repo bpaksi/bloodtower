@@ -1,18 +1,17 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { extractIds } from "./ids.ts";
+import {
+  type Doc,
+  loadDocs as loadDocsWith,
+  loadDoc as loadDocWith,
+  parseDoc as parseDocWith,
+  repoRoot,
+} from "@dark-tower/workbench/server";
+import { GAME_IDS } from "./ids.ts";
 
 /** One markdown file in research/game-design, as the workbench shows it. */
-export type DesignDoc = {
-  slug: string;
-  file: string;
-  title: string;
-  /** The doc's own "Status:" line, or null when it has none (shown as unavailable). */
-  status: string | null;
-  lines: number;
-  ids: string[];
-  markdown: string;
-};
+export type DesignDoc = Doc;
+
+export { repoRoot };
 
 export type DocGroup = { title: string; note: string; docs: DesignDoc[] };
 
@@ -63,50 +62,21 @@ const GROUPS: { title: string; note: string; slugs: string[] }[] = [
   },
 ];
 
-/** The repo root: the nearest folder above `from` that holds pnpm-workspace.yaml. */
-export function repoRoot(from = process.cwd()): string {
-  let dir = path.resolve(from);
-  while (!existsSync(path.join(dir, "pnpm-workspace.yaml"))) {
-    const parent = path.dirname(dir);
-    if (parent === dir) throw new Error(`No pnpm-workspace.yaml above ${from}`);
-    dir = parent;
-  }
-  return dir;
-}
-
 export function designDir(root = repoRoot()): string {
   return path.join(root, "research", "game-design");
 }
 
 export function parseDoc(file: string, markdown: string): DesignDoc {
-  const slug = file.replace(/\.md$/, "");
-  const title = /^#\s+(.+)$/m.exec(markdown)?.[1]?.trim() ?? slug;
-  const statusLine = /^Status:\s*(.+)$/m.exec(markdown)?.[1];
-  const status = statusLine ? statusLine.replace(/\*\*/g, "").trim() : null;
-  return {
-    slug,
-    file,
-    title,
-    status,
-    lines: markdown.split("\n").length,
-    ids: extractIds(markdown),
-    markdown,
-  };
+  return parseDocWith(file, markdown, GAME_IDS);
 }
 
 /** Every top-level markdown file except the README, read fresh on each call. */
 export function loadDocs(dir = designDir()): DesignDoc[] {
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".md") && f !== "README.md")
-    .sort()
-    .map((f) => parseDoc(f, readFileSync(path.join(dir, f), "utf8")));
+  return loadDocsWith(dir, GAME_IDS);
 }
 
 export function loadDoc(slug: string, dir = designDir()): DesignDoc | null {
-  if (!/^[\w-]+$/.test(slug)) return null;
-  const file = path.join(dir, `${slug}.md`);
-  if (slug === "README" || !existsSync(file)) return null;
-  return parseDoc(`${slug}.md`, readFileSync(file, "utf8"));
+  return loadDocWith(slug, dir, GAME_IDS);
 }
 
 export function groupDocs(docs: DesignDoc[]): DocGroup[] {

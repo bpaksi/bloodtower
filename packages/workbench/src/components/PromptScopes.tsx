@@ -1,4 +1,4 @@
-import type { PromptScope } from "../lib/prompt.ts";
+import type { PromptScope } from "../prompt.ts";
 
 /**
  * Publishes the prompt scopes of this page for PromptStarter. A button with data-prompt="<key>"

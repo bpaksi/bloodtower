@@ -1,8 +1,7 @@
+import { LineJump, PromptScopes } from "@dark-tower/workbench/components";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Chip } from "../../../components/Chip.tsx";
-import { LineJump } from "../../../components/LineJump.tsx";
-import { PromptScopes } from "../../../components/PromptScopes.tsx";
 import { loadDoc } from "../../../lib/content.ts";
 import { idFamily } from "../../../lib/ids.ts";
 import { renderMarkdown } from "../../../lib/markdown.ts";
