@@ -105,7 +105,7 @@ Use the step's "Review focus" line in the runbook for extra checks.
 
 **Follow-up (no asset-swap PRs):** Illusionist assets land in the step that creates each swap point. Shell step 5 (#87) has merged, so there is no step 5b; step 5 here restyles the existing `SummaryPanel`.
 
-**Step 3 timing:** the table says play track through 8 merged (recommended). This is deliberately later than `visuals-prompts.md` (which says after steps 6–11): steps 9 and 10 must follow 3 and 8, and 11 is independent of startup work.
+**Step 3 timing:** the table says play track through 8 merged (recommended). This is deliberately later than `visuals-prompts.md` (which says after steps 6–11): step 9 must follow 3, 8 and 10 (it shares `DialogFrame.tsx` with 3), step 10 follows 8 only, and 11 is independent of startup work.
 
 ## Parallel lanes (file ownership)
 
@@ -342,7 +342,7 @@ Illusionist dialog-frame and window-mask assets are already on `main` (a5bacf5).
 Branch: feat/visuals-09-waiting-dialog
 Depends on: steps 3, 8 and 10 merged (3 creates `DialogFrame.tsx`; 10 owns the visual layer). Rebase if 11 is in flight. Lane: Dialog / startup.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10, R3-UI-30, R3-UI-115), apps/bloodtower/public/board/dialog-frame/README.md. Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (read `isVisualMoment`).
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10, R3-UI-30) and R2-115 (research/game-design/r2-screen-flow.md), apps/bloodtower/public/board/dialog-frame/README.md. Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (read `isVisualMoment`).
 
 Goal: text-only play moments show small centred waiting dialog over the painting, not full parchment column.
 
