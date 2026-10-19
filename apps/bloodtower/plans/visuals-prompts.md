@@ -241,7 +241,7 @@ Read game-look.md §3 parchment page, §4 main story view and next-step prompt. 
 Goal: shared moments use kicker, title, ornament, justified narration with Fraktur drop cap on first paragraph; stills sit in a plate frame; next-step prompt is the blood-band bar (60px class) per mock.
 
 1. Do not change CameraStill transform math or data attributes (#78). Wrap still in `.bt-plate` styling only.
-2. Moment text: use displayCaption; optional `<mark>` styling for candle highlights already in CSS.
+2. Moment text: use displayCaption; `<mark>` candle highlights are deferred (no mark rule in board.css; displayCaption returns plain text).
 3. Party items zone: layout with labels only, values `unavailable` until items exist on state (no fake counts).
 
 No protocol changes.
