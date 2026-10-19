@@ -27,9 +27,11 @@ import { pageServerOrigin } from "../../lib/serverOrigin.ts";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { VOLUME_ANSWER_LABEL, volumeBoardCopy } from "../../lib/volumeTest.ts";
 import { PortraitCard } from "../PortraitCard";
+import { boardLayer } from "./boardLayer.ts";
 import { CameraStill } from "./CameraStill";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
+import { VisualLayer } from "./VisualLayer";
 
 /**
  * Display only for game controls. Holdings do not change here.
@@ -50,10 +52,17 @@ export function StoryBoard({
   const warning = joinWarning(state.join);
   const header = headerCopy(state);
   const keeperMoment = state.screen === "play" && state.moment?.id === KEEPER_MOMENT_ID;
+  // Play chrome only while the story runs. Quit is "the table is closed" (spec D20), not a
+  // pause, so it keeps the closing summary and join block and gets no play mode.
+  const playMode = state.screen === "play";
+  // Layer 2 (R3-UI-10): a still, clip or the Keeper fills the screen; the board stays under it.
+  const layer = boardLayer(state);
   return (
     <main
       className="bt-board"
       data-screen={state.screen}
+      data-board-mode={playMode ? "play" : undefined}
+      data-board-layer={layer}
       data-moment={state.moment?.id ?? ""}
       data-board-layout={keeperMoment ? "keeper" : "standard"}
     >
@@ -96,10 +105,10 @@ export function StoryBoard({
         </p>
       ) : null}
       <div className="bt-board-main">
-        {state.summary ? (
+        {state.summary && !playMode ? (
           <SummaryPanel summary={state.summary} tower={state.tower} />
         ) : (
-          <HunterList hunters={state.hunters} />
+          <HunterList hunters={state.hunters} packId={state.packId} />
         )}
         <section className="bt-story">
           {state.screen === "splash" ? <SplashPanel state={state} /> : null}
@@ -111,17 +120,30 @@ export function StoryBoard({
           {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
           {state.screen === "setup" ? <SetupPanel state={state} /> : null}
           {state.screen === "begin" ? <BeginPanel state={state} /> : null}
-          {state.screen === "play" ? (
-            <PlayPanel state={state} onKeeperLineEnded={onKeeperLineEnded} />
-          ) : null}
+          {state.screen === "play" ? <PlayPanel state={state} /> : null}
           {state.screen === "quit" ? <QuitPanel /> : null}
+          {playMode && !keeperMoment ? <PartyItems /> : null}
           <NextPrompt label={nextPrompt(state)} />
         </section>
-        <aside className="bt-pub bt-panel">
-          <span className="bt-lbl">Table</span>
-          <JoinBlock join={state.join} large={state.screen === "party-join"} />
-        </aside>
+        {playMode ? (
+          <ActingPanel />
+        ) : (
+          <aside className="bt-pub bt-panel">
+            <span className="bt-lbl">Table</span>
+            <JoinBlock join={state.join} large={state.screen === "party-join"} />
+          </aside>
+        )}
       </div>
+      <VisualLayer>
+        {layer === "visual" && state.moment ? (
+          <VisualMoment
+            moment={state.moment}
+            packId={state.packId}
+            keeperLine={state.keeperLine ?? 0}
+            onKeeperLineEnded={onKeeperLineEnded}
+          />
+        ) : null}
+      </VisualLayer>
     </main>
   );
 }
@@ -187,11 +209,6 @@ const headerCopy = (state: StoryboardState): { scene: string; place: string } =>
   return { scene: "The Night", place: "The Moment" };
 };
 
-const actingHunterId = (hunters: StoryboardState["hunters"]): string | null =>
-  hunters.find((hunter) => hunter.holders.length > 0 && !hunter.disconnected)?.id ??
-  hunters.find((hunter) => hunter.holders.length > 0)?.id ??
-  null;
-
 const StatusStrip = ({ state }: { state: StoryboardState }) => {
   const devices = joinedDeviceIds(state.hunters);
   return (
@@ -222,45 +239,87 @@ const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boo
   </section>
 );
 
-const HunterList = ({ hunters }: { hunters: StoryboardState["hunters"] }) => (
+/**
+ * Right column in play: the acting hunter's public view (game-look.md section 4). The join QR is
+ * not shown here (the header keeps the join code). `storyboardState` carries no acting hunter,
+ * corruption or carried items yet, so all three read "unavailable", never a guess or zero.
+ */
+const ActingPanel = () => (
+  <aside className="bt-pub bt-panel bt-acting">
+    <span className="bt-lbl">Now acting</span>
+    <p className="bt-acting-name bt-num" data-unavailable="">
+      unavailable
+    </p>
+    <dl className="bt-acting-stats">
+      <div>
+        <dd className="bt-num" data-unavailable="">
+          unavailable
+        </dd>
+        <dt className="bt-lbl">corruption</dt>
+      </div>
+      <div>
+        <dd className="bt-num" data-unavailable="">
+          unavailable
+        </dd>
+        <dt className="bt-lbl">carried</dt>
+      </div>
+    </dl>
+  </aside>
+);
+
+const HunterList = ({
+  hunters,
+  packId,
+}: {
+  hunters: StoryboardState["hunters"];
+  packId?: StoryboardState["packId"];
+}) => (
   <aside className="bt-hunters">
     <h2 className="bt-roll-title">Hunters</h2>
     {hunters.length === 0 ? (
       <p className="bt-roll-empty">Hunters unavailable.</p>
     ) : (
-      <HunterCarts hunters={hunters} />
+      <HunterCarts hunters={hunters} packId={packId} roll />
     )}
   </aside>
 );
 
-/** One cartouche per hunter. With `portraits` (Claim Hunters) each shows the pack portrait. */
+/**
+ * One cartouche per hunter. With `portraits` (Claim Hunters) each shows the pack portrait. In the
+ * play `roll`, a hunter shows the portrait medallion whenever the pack id and the hunter's
+ * portrait exist (an initial medallion otherwise) and a corruption column that reads
+ * unavailable: `storyboardState` has no corruption, and no acting hunter either, so no cartouche
+ * is marked as acting (`.bt-cart-act` in board.css waits for real data).
+ */
 const HunterCarts = ({
   hunters,
   packId,
   portraits = false,
+  roll = false,
 }: {
   hunters: StoryboardState["hunters"];
   packId?: StoryboardState["packId"];
   portraits?: boolean;
+  roll?: boolean;
 }) => {
-  const acting = actingHunterId(hunters);
   return (
     <ul className="bt-roll">
       {hunters.map((hunter) => {
         const away = hunter.holders.length === 0 || hunter.disconnected;
         const classes = ["bt-cart"];
         if (portraits) classes.push("bt-cart-portrait");
-        if (hunter.id === acting) classes.push("bt-cart-act");
+        if (roll) classes.push("bt-cart-roll");
+        const portrait = portraitSrc(packId, hunter.portrait);
         if (away) classes.push("bt-cart-away");
         const accessibleLabel = `${hunter.name} — ${holdingText(hunter)}`;
         return (
           <li key={hunter.id} className={classes.join(" ")} data-hunter={hunter.id}>
-            {portraits ? (
+            {portraits || portrait ? (
               <PortraitCard
                 compact
                 frameOnly
                 name={hunter.name}
-                src={portraitSrc(packId, hunter.portrait)}
+                src={portrait}
                 accessibleLabel={accessibleLabel}
               />
             ) : (
@@ -272,6 +331,16 @@ const HunterCarts = ({
               <span className="bt-cart-nm">{hunter.name}</span>
               <span className="bt-cart-st">{holdingText(hunter)}</span>
             </span>
+            {roll ? (
+              <span
+                className="bt-cart-cor bt-num"
+                data-unavailable=""
+                role="img"
+                aria-label="corruption unavailable"
+              >
+                —
+              </span>
+            ) : null}
           </li>
         );
       })}
@@ -314,8 +383,31 @@ const SummaryPanel = ({
   );
 };
 
+/**
+ * Party items zone (game-look.md section 4): labels only. `storyboardState` carries no party
+ * items yet, so each value reads "unavailable", never a count or a zero.
+ */
+const PartyItems = () => (
+  <div className="bt-items bt-panel" data-party-items="">
+    <span className="bt-lbl">Party items</span>
+    {(["count", "item", "carrier"] as const).map((part) => (
+      <p key={part} data-party-item={part}>
+        <span className="bt-lbl">{part}</span>
+        <b className="bt-items-val" data-unavailable="">
+          unavailable
+        </b>
+      </p>
+    ))}
+  </div>
+);
+
+/** Next-step prompt (V2-3): the blood band under the story. */
 const NextPrompt = ({ label }: { label: string }) => (
-  <div className="bt-next">
+  <div
+    className="bt-next"
+    data-next-band=""
+    data-len={label.length <= 24 ? "short" : label.length <= 48 ? "mid" : "long"}
+  >
     <span className="bt-lbl">Next</span>
     <b>{label}</b>
   </div>
@@ -591,23 +683,7 @@ const BeginPanel = ({ state }: { state: StoryboardState }) => (
   </article>
 );
 
-const PlayPanel = ({
-  state,
-  onKeeperLineEnded,
-}: {
-  state: StoryboardState;
-  onKeeperLineEnded?: (momentId: string, line: number) => void;
-}) => {
-  if (state.moment?.id === KEEPER_MOMENT_ID) {
-    return (
-      <article className="bt-page bt-parchment bt-ink-in bt-page-keeper" data-keeper-stage="">
-        <KeeperScene
-          keeperLine={state.keeperLine ?? 0}
-          onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
-        />
-      </article>
-    );
-  }
+const PlayPanel = ({ state }: { state: StoryboardState }) => {
   if (!state.moment) {
     return (
       <article className="bt-page bt-parchment">
@@ -615,28 +691,98 @@ const PlayPanel = ({
       </article>
     );
   }
+  // A visual moment shows in the visual layer (VisualMoment). The page under it keeps the scene's
+  // heading for the zoom; the Keeper's page stays bare, as the header already names him.
+  if (boardLayer(state) === "visual") {
+    if (state.moment.id === KEEPER_MOMENT_ID) {
+      return (
+        <article
+          className="bt-page bt-parchment bt-ink-in bt-page-keeper"
+          data-keeper-stage=""
+          data-under-visual=""
+        />
+      );
+    }
+    const scene = sceneCopy(state.moment);
+    return (
+      <article className="bt-page bt-parchment bt-ink-in" data-under-visual="">
+        <MomentMeta moment={state.moment} />
+        <div className="bt-page-text">
+          <p className="bt-kicker">{scene.kicker}</p>
+          <h2>{scene.title}</h2>
+          <p className="bt-orn" aria-hidden="true">
+            ❦ ❦ ❦
+          </p>
+        </div>
+      </article>
+    );
+  }
   const scene = sceneCopy(state.moment);
   const text = state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text);
-  const still = state.moment.still;
   return (
     <article className="bt-page bt-parchment bt-ink-in">
       <MomentMeta moment={state.moment} />
-      <div>
+      <div className="bt-page-text">
         <p className="bt-kicker">{scene.kicker}</p>
         <h2>{scene.title}</h2>
+        <p className="bt-orn" aria-hidden="true">
+          ❦ ❦ ❦
+        </p>
         <p className="bt-narration" data-moment-caption="">
           {text}
         </p>
       </div>
-      {still ? (
-        <CameraStill
-          momentId={state.moment.id}
-          packId={state.packId}
-          assetId={still}
-          spokenText={state.moment.text ?? ""}
-        />
-      ) : null}
     </article>
+  );
+};
+
+/**
+ * The visual layer's content for a visual moment (R3-UI-31): the Keeper scene, or the still in
+ * its plate with the camera track (#78), letterboxed whole in the layer (Q4 (a)), and the moment's
+ * text as a caption at the bottom (game-look.md section 4, cut scenes). A clip with no still has
+ * nothing the board can draw yet, so it reads unavailable.
+ */
+const VisualMoment = ({
+  moment,
+  packId,
+  keeperLine,
+  onKeeperLineEnded,
+}: {
+  moment: NonNullable<StoryboardState["moment"]>;
+  packId: StoryboardState["packId"];
+  keeperLine: number;
+  onKeeperLineEnded?: (momentId: string, line: number) => void;
+}) => {
+  if (moment.id === KEEPER_MOMENT_ID) {
+    return (
+      <KeeperScene
+        keeperLine={keeperLine}
+        onLineEnded={(line) => onKeeperLineEnded?.(KEEPER_MOMENT_ID, line)}
+      />
+    );
+  }
+  return (
+    <>
+      {moment.still ? (
+        <div className="bt-plate" data-plate="">
+          <CameraStill
+            momentId={moment.id}
+            packId={packId}
+            assetId={moment.still}
+            spokenText={moment.text ?? ""}
+          />
+        </div>
+      ) : (
+        <p className="bt-visual-missing" data-unavailable="">
+          Visual unavailable.
+        </p>
+      )}
+      {moment.text == null ? null : (
+        <p className="bt-visual-caption" data-moment-caption="">
+          {displayCaption(moment.text)}
+        </p>
+      )}
+    </>
   );
 };
 

@@ -19,11 +19,13 @@ export const waitingStoryboard = (): StoryboardState =>
     lock: null,
   });
 
-/** A hunter's holding on the board: waiting, the holders, or the holders marked disconnected (R2-104). */
+/**
+ * A hunter's public status on the board (visuals Q2 (a), existing fields only): nobody holds them
+ * is "Waiting", a holder who dropped is "Away", otherwise the holder ids (R2-104).
+ */
 export const holdingText = (hunter: StoryboardState["hunters"][number]): string => {
-  if (hunter.holders.length === 0) return "waiting";
-  const holders = hunter.holders.join(", ");
-  return hunter.disconnected ? `disconnected (${holders})` : holders;
+  if (hunter.holders.length === 0) return "Waiting";
+  return hunter.disconnected ? "Away" : hunter.holders.join(", ");
 };
 
 /** The warning under the QR when iPads cannot open the join address, or null (R2-12). */

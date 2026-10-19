@@ -121,7 +121,7 @@ for (const size of SIZES) {
       );
       await expect(pad.locator('button[data-hunter="alpha"]')).toHaveText("Agnes: Mine");
       await expect(board.locator('.bt-cart[data-hunter="alpha"] .bt-cart-st')).not.toHaveText(
-        "waiting",
+        "Waiting",
       );
       // Take all and Continue stay reachable above the fold.
       await expect(pad.locator('button[data-action="take-all"]')).toBeInViewport();

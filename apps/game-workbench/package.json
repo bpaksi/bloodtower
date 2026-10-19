@@ -1,0 +1,12 @@
+{
+  "name": "game-workbench",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Game workbench: a local, read-only viewer for the Game Design Document in research/game-design.",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -F game-workbench-web dev",
+    "build": "pnpm -F game-workbench-web build",
+    "start": "pnpm -F game-workbench-web start"
+  }
+}

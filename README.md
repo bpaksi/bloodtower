@@ -11,6 +11,8 @@ The project produces many small websites over its life. Each one lives in its ow
 | Tower controller POC | [apps/tower-poc](apps/tower-poc/) | Explore | Spec v1 approved, M0 in progress | Yes, unless promoted |
 | New game test | [apps/game-test](apps/game-test/) | Explore → Design | Not started | Yes |
 | Final game | [apps/game](apps/game/) | Build | Not started | No |
+| Game workbench (GDD viewer) | [apps/game-workbench](apps/game-workbench/) | Design | Awaiting intent | Yes |
+| Story workbench | [apps/story-workbench](apps/story-workbench/) | Design | Awaiting intent | Yes |
 
 ## Layout
 
