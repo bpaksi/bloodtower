@@ -1427,11 +1427,6 @@
  * (R-DEV-7), as large as the screen allows, so cover shows the whole picture and the camera track
  * (#78) pans and zooms inside that frame exactly as it does in the plate.
  */
-.bt-board {
-  --bt-dur-zoom: 800ms;
-  --bt-ease-zoom: cubic-bezier(0.65, 0, 0.35, 1);
-}
-
 .bt-board > .bt-visual {
   position: fixed;
   inset: 0;
@@ -1440,14 +1435,12 @@
   place-items: center;
   overflow: hidden;
   background: var(--bt-void);
+  /* The zoom itself is a Web Animation in VisualLayer.tsx, so a reversal continues smoothly. */
   transform-origin: 50% 50%;
-  /* backwards: once the zoom is done the layer keeps no transform, so it is a plain full screen. */
-  animation: bt-visual-in var(--bt-dur-zoom) var(--bt-ease-zoom) backwards;
 }
 
 .bt-board > .bt-visual[data-visual-phase="out"] {
   pointer-events: none;
-  animation: bt-visual-out var(--bt-dur-zoom) var(--bt-ease-zoom) both;
 }
 
 /* Action-needed messages (layer 1) stay above the visual: the pause and join warnings, and the
@@ -1530,45 +1523,4 @@
   font-family: var(--bt-font-label);
   font-size: var(--bt-size-label);
   letter-spacing: 0.16em;
-}
-
-@keyframes bt-visual-in {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes bt-visual-out {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-}
-
-@keyframes bt-fade-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bt-board > .bt-visual {
-    animation: bt-fade-in 300ms ease-out backwards;
-  }
-
-  .bt-board > .bt-visual[data-visual-phase="out"] {
-    animation: bt-fade-out 300ms ease-in both;
-  }
 }

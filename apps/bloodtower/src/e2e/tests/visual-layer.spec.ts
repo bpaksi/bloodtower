@@ -1,6 +1,8 @@
 import { type Browser, type BrowserContext, expect, type Page, test } from "@playwright/test";
 import {
   doneEverySetupStep,
+  gateControls,
+  releaseTogether,
   startAcceptanceHost,
   waitForBoardAnimationsSettled,
 } from "./support/acceptance.ts";
@@ -62,6 +64,7 @@ const openBoardAtFirstMoment = async (
   joinCode: string,
   contexts: BrowserContext[],
   reducedMotion: "reduce" | "no-preference" = "no-preference",
+  beforeBegin?: (board: Page) => Promise<void>,
 ) => {
   const boardContext = await browser.newContext({
     baseURL,
@@ -77,6 +80,7 @@ const openBoardAtFirstMoment = async (
   });
   contexts.push(padContext);
   const pad = await padContext.newPage();
+  const gate = await gateControls(pad);
   const d = device(pad);
   await board.goto("/board", { waitUntil: "domcontentloaded" });
   await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
@@ -94,21 +98,35 @@ const openBoardAtFirstMoment = async (
   await d.button("continue").click();
   await doneEverySetupStep(pad);
   await expect(board.locator("main")).toHaveAttribute("data-board-layer", "startup");
+  await captureLayerAnimations(board);
+  if (beforeBegin) await beforeBegin(board);
   await d.button("begin").click();
   await expect(board.locator("main")).toHaveAttribute("data-moment", "proving-ground.01");
-  return { board, pad, d };
+  return { board, pad, d, gate };
 };
 
-/** The layer's own CSS animation: its name, length, keyframes and samples across its run. */
+/**
+ * Keeps every animation the visual layer starts (window.__layerAnimations), so a test can read it
+ * after it has finished: a finished zoom with backwards fill leaves getAnimations().
+ */
+const captureLayerAnimations = (board: Page) =>
+  board.evaluate(() => {
+    const w = window as unknown as { __layerAnimations: Animation[] };
+    w.__layerAnimations = [];
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (this: Element, ...args: Parameters<typeof animate>) {
+      const animation = animate.apply(this, args);
+      if (this.matches("[data-visual-layer]")) w.__layerAnimations.push(animation);
+      return animation;
+    };
+  });
+
+/** The layer's own animation (a Web Animation): its id, length, keyframes and samples. */
 const layerAnimation = (page: Page) =>
   page.locator(LAYER).evaluate((el) => {
-    const own = el
-      .getAnimations()
-      .filter(
-        (a): a is CSSAnimation =>
-          "animationName" in a && (a.effect as KeyframeEffect | null)?.target === el,
-      );
-    const animation = own.at(-1);
+    const animation = (window as unknown as { __layerAnimations: Animation[] }).__layerAnimations
+      .filter((a) => (a.effect as KeyframeEffect | null)?.target === el)
+      .at(-1);
     if (!animation) return null;
     const timing = animation.effect?.getComputedTiming();
     const duration = Number(timing?.duration ?? 0);
@@ -128,12 +146,21 @@ const layerAnimation = (page: Page) =>
     }
     animation.finish();
     return {
-      name: animation.animationName,
+      name: animation.id,
       duration,
       transformKeyframes: keyframes.filter((k) => "transform" in k).length,
       samples,
     };
   });
+
+/** "reversed" while the layer's animation plays backwards (the zoom out). */
+const playback = (el: Element) => {
+  const animation = (window as unknown as { __layerAnimations: Animation[] }).__layerAnimations
+    .filter((a) => (a.effect as KeyframeEffect | null)?.target === el)
+    .at(-1);
+  if (!animation) return "none";
+  return animation.playbackRate < 0 ? "reversed" : "forward";
+};
 
 /** The still well, the camera image's transform, and the board under the layer. */
 const measureVisual = (page: Page) =>
@@ -221,7 +248,7 @@ test("a visual zooms to a full-screen letterboxed layer, the camera runs in it, 
       await expect(main).toHaveAttribute("data-board-layer", "visual");
       await expect(layer).toHaveAttribute("data-visual-phase", "in");
       const zoom = await layerAnimation(board);
-      expect(zoom?.name).toBe("bt-visual-in");
+      expect(zoom?.name).toBe("bt-visual-zoom");
       expect(zoom?.duration).toBeGreaterThanOrEqual(600);
       expect(zoom?.duration).toBeLessThanOrEqual(1000);
       const samples = zoom?.samples ?? [];
@@ -265,11 +292,9 @@ test("a visual zooms to a full-screen letterboxed layer, the camera runs in it, 
       await expect(main).toHaveAttribute("data-board-layer", "waiting");
       // The last visual stays on screen for the zoom out, then the layer is gone.
       await expect(layer).toHaveAttribute("data-visual-phase", "out");
-      const out = await board
-        .locator(LAYER)
-        .evaluate((el) => getComputedStyle(el).animationName)
-        .catch(() => "gone");
-      expect(["bt-visual-out", "gone"]).toContain(out);
+      // The zoom out is the same animation played backwards.
+      const out = await layer.evaluate(playback).catch(() => "gone");
+      expect(["reversed", "gone"]).toContain(out);
       await expect(layer).toHaveCount(0, { timeout: 2000 });
       await expect(board.locator(".bt-page [data-moment-caption]")).toHaveText(
         "Each hunter reads alone.",
@@ -373,7 +398,7 @@ test("under reduced motion the visual only fades: no zoom, and the camera holds 
     const layer = board.locator(LAYER);
     await expect(main).toHaveAttribute("data-board-layer", "visual");
     const fade = await layerAnimation(board);
-    expect(fade?.name).toBe("bt-fade-in");
+    expect(fade?.name).toBe("bt-visual-fade");
     expect(fade?.transformKeyframes, "no zoom keyframes").toBe(0);
     expect(fade?.duration).toBeLessThanOrEqual(300);
     for (const sample of fade?.samples ?? []) expect(sample.transform).toBe("none");
@@ -383,11 +408,13 @@ test("under reduced motion the visual only fades: no zoom, and the camera holds 
     await expect(main).toHaveAttribute("data-board-layer", "waiting");
     const out = await layer
       .evaluate((el) => ({
-        name: getComputedStyle(el).animationName,
+        playback: (window as unknown as { __layerAnimations: Animation[] }).__layerAnimations
+          .filter((a) => (a.effect as KeyframeEffect | null)?.target === el)
+          .at(-1)?.playbackRate,
         transform: getComputedStyle(el).transform,
       }))
       .catch(() => null);
-    if (out) expect(out).toEqual({ name: "bt-fade-out", transform: "none" });
+    if (out) expect(out).toEqual({ playback: -1, transform: "none" });
     await expect(layer).toHaveCount(0, { timeout: 2000 });
 
     await d.button("continue").click();
@@ -400,6 +427,180 @@ test("under reduced motion the visual only fades: no zoom, and the camera holds 
     const later = await measureVisual(board);
     expect(later.transform, "reduced motion holds the camera's last frame").toBe(first.transform);
     assertLetterboxed(later, "1180x820");
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await host.close();
+  }
+});
+
+/** Records, every animation frame, the layer's opacity and phase and the state of its media. */
+const recordFrames = (board: Page) =>
+  board.evaluate(() => {
+    const w = window as unknown as { __frames: unknown[] };
+    w.__frames = [];
+    const t0 = performance.now();
+    const tick = () => {
+      const el = document.querySelector("[data-visual-layer]") as HTMLElement | null;
+      const media = el ? [...el.querySelectorAll("audio, video")] : [];
+      w.__frames.push({
+        t: performance.now() - t0,
+        opacity: el ? Number(getComputedStyle(el).opacity) : null,
+        phase: el?.dataset.visualPhase ?? null,
+        moment: document.querySelector("main")?.dataset.moment ?? "",
+        screen: document.querySelector("main")?.dataset.screen ?? "",
+        media: media.map((m) => ((m as HTMLMediaElement).paused ? "paused" : "playing")),
+      });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+
+type Frame = {
+  t: number;
+  opacity: number | null;
+  phase: "in" | "out" | null;
+  moment: string;
+  screen: string;
+  media: ("paused" | "playing")[];
+};
+const frames = (board: Page) =>
+  board.evaluate(() => (window as unknown as { __frames: Frame[] }).__frames);
+
+test("Continue mid-zoom turns the zoom around from where it is: no jump in brightness", async ({
+  browser,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "the Story board runs on the Mac (Chromium)");
+  test.setTimeout(120_000);
+  const { baseURL, host } = await startAcceptanceHost(testInfo);
+  const contexts: BrowserContext[] = [];
+  try {
+    const { board, d, gate } = await openBoardAtFirstMoment(
+      browser,
+      baseURL,
+      host.joinCode,
+      contexts,
+      "no-preference",
+      recordFrames,
+    );
+    // proving-ground.01 (visual) -> .02 (text) -> .03 (visual) -> grey-stair.01 (visual), each
+    // press well inside the 800 ms zoom: in is cut to out, out is cut back to in, then a cut.
+    // Each press is held at the iPad's socket and released at a measured point of the zoom, so it
+    // lands mid-zoom however busy the machine is.
+    const layerAt = (phase: "in" | "out", min: number) =>
+      board.waitForFunction(
+        ([p, m]) => {
+          const el = document.querySelector("[data-visual-layer]") as HTMLElement | null;
+          return el?.dataset.visualPhase === p && Number(getComputedStyle(el).opacity) >= m;
+        },
+        [phase, min] as const,
+        { polling: "raf" },
+      );
+    const pressHeld = async () => {
+      await expect(d.button("continue")).toBeEnabled();
+      gate.hold();
+      await d.button("continue").click();
+      await gate.held(1);
+    };
+    // Continue about halfway through the zoom in (a text moment comes next: zoom out).
+    await pressHeld();
+    await layerAt("in", 0.5);
+    releaseTogether(gate);
+    await expect(board.locator("main")).toHaveAttribute("data-moment", "proving-ground.02");
+    // The next visual arrives while that zoom out is still running.
+    await pressHeld();
+    releaseTogether(gate);
+    await expect(board.locator("main")).toHaveAttribute("data-moment", "proving-ground.03");
+    // Then a visual after a visual: a straight cut.
+    await d.button("continue").click();
+    await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.01");
+    await board.waitForTimeout(1500);
+    const all = await frames(board);
+    const shown = all.filter((f): f is Frame & { opacity: number } => f.opacity !== null);
+    // The presses really landed mid-zoom, both ways (otherwise this test proves nothing).
+    let inToOut = 0;
+    let outToIn = 0;
+    for (let i = 1; i < shown.length; i += 1) {
+      const a = shown[i - 1] as Frame & { opacity: number };
+      const b = shown[i] as Frame & { opacity: number };
+      if (a.phase === "in" && b.phase === "out" && a.opacity < 0.99) inToOut += 1;
+      if (a.phase === "out" && b.phase === "in" && a.opacity > 0.01) outToIn += 1;
+    }
+    expect(inToOut, "Continue landed during the zoom in").toBeGreaterThanOrEqual(1);
+    expect(outToIn, "a visual arrived during the zoom out").toBeGreaterThanOrEqual(1);
+    // No frame-to-frame jump, and at most 3 changes of direction in any second (flash safety).
+    let worst = 0;
+    const turns: number[] = [];
+    let direction = 0;
+    for (let i = 1; i < all.length; i += 1) {
+      const a = all[i - 1] as Frame;
+      const b = all[i] as Frame;
+      if (a.opacity === null || b.opacity === null) continue;
+      const delta = b.opacity - a.opacity;
+      worst = Math.max(worst, Math.abs(delta));
+      if (Math.abs(delta) < 0.002) continue;
+      const sign = Math.sign(delta);
+      if (direction !== 0 && sign !== direction) turns.push(b.t);
+      direction = sign;
+    }
+    expect(worst, "largest opacity change between two frames").toBeLessThanOrEqual(0.25);
+    for (const t of turns) {
+      expect(
+        turns.filter((u) => u >= t && u < t + 1000).length,
+        "brightness turns within one second",
+      ).toBeLessThanOrEqual(3);
+    }
+    const end = shown.at(-1);
+    expect(end?.phase).toBe("in");
+    expect(end?.opacity).toBe(1);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await host.close();
+  }
+});
+
+test("quitting during the Keeper silences it for the zoom out", async ({ browser }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "the Story board runs on the Mac (Chromium)");
+  test.setTimeout(120_000);
+  const { baseURL, host } = await startAcceptanceHost(testInfo);
+  const contexts: BrowserContext[] = [];
+  try {
+    const { board, pad, d } = await openBoardAtFirstMoment(
+      browser,
+      baseURL,
+      host.joinCode,
+      contexts,
+    );
+    for (let i = 0; i < 5; i += 1) await d.button("continue").click();
+    const main = board.locator("main");
+    await expect(main).toHaveAttribute("data-moment", "grey-stair.03");
+    const speaking = board.locator(`${LAYER} audio`);
+    // The Keeper is speaking (otherwise there is nothing to silence and this proves nothing).
+    await expect
+      .poll(() => speaking.evaluateAll((all) => all.some((a) => !(a as HTMLAudioElement).paused)))
+      .toBe(true);
+    await recordFrames(board);
+    await d.button("pause").click();
+    await pad.locator('button[data-action="quit"]').click();
+    await expect(main).toHaveAttribute("data-screen", "quit");
+    await expect(board.locator(LAYER)).toHaveCount(0, { timeout: 2000 });
+    const all = await frames(board);
+    const before = all.filter((f) => f.phase === "in");
+    expect(
+      before.some((f) => f.media.includes("playing")),
+      "the Keeper spoke until Quit",
+    ).toBe(true);
+    const leaving = all.filter((f) => f.phase === "out");
+    expect(leaving.length, "frames of the zoom out").toBeGreaterThan(5);
+    for (const frame of leaving) {
+      expect(frame.screen).toBe("quit");
+      expect(
+        frame.media.length,
+        "the Keeper's audio is still in the leaving layer",
+      ).toBeGreaterThan(0);
+      expect(frame.media, `media at ${Math.round(frame.t)} ms of the zoom out`).not.toContain(
+        "playing",
+      );
+    }
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await host.close();
