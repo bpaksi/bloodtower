@@ -1976,5 +1976,178 @@
     "speaker": "tomas",
     "moment": "n1-lantern-and-bell.10.private.tomas",
     "duration_s": 18.24
+  },
+  "n1-lantern-and-bell.10.private.wren": {
+    "id": "n1-lantern-and-bell.10.private.wren",
+    "type": "still",
+    "target": "ipad:wren",
+    "path": "stills/n1-lantern-and-bell.10.private.wren@ipad.png",
+    "status": "placeholder",
+    "text": "Wren: Six cloves left. One blank bolt. The mist smells of turned earth, the way the churchyard smelled the spring your mother went up the hill.",
+    "profile": "@ipad"
+  },
+  "n1-lantern-and-bell.10.private.wren.vo-01": {
+    "id": "n1-lantern-and-bell.10.private.wren.vo-01",
+    "type": "line",
+    "target": "ipad:wren",
+    "path": "audio/lines/n1-lantern-and-bell.10.private.wren.vo-01.wren.wav",
+    "status": "draft",
+    "text": "Six cloves left. One blank bolt. The mist smells of turned earth, the way the churchyard smelled the spring your mother went up the hill.",
+    "speaker": "wren",
+    "moment": "n1-lantern-and-bell.10.private.wren",
+    "duration_s": 12.72
+  },
+  "n1-lantern-and-bell.10.private.emeric": {
+    "id": "n1-lantern-and-bell.10.private.emeric",
+    "type": "still",
+    "target": "ipad:emeric",
+    "path": "stills/n1-lantern-and-bell.10.private.emeric@ipad.png",
+    "status": "placeholder",
+    "text": "Emeric: Gerhardt's treatise, page one: \"The affliction does not spread. It is sent.\" The cipher page is still in your satchel. You have not dared to try it in this valley.",
+    "profile": "@ipad"
+  },
+  "n1-lantern-and-bell.10.private.emeric.vo-01": {
+    "id": "n1-lantern-and-bell.10.private.emeric.vo-01",
+    "type": "line",
+    "target": "ipad:emeric",
+    "path": "audio/lines/n1-lantern-and-bell.10.private.emeric.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "Gerhardt's treatise, page one: \"The affliction does not spread. It is sent.\" The cipher page is still in your satchel. You have not dared to try it in this valley.",
+    "speaker": "emeric",
+    "moment": "n1-lantern-and-bell.10.private.emeric",
+    "duration_s": 9.04
+  },
+  "n1-lantern-and-bell.11": {
+    "id": "n1-lantern-and-bell.11",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.11@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: The mist is at the windows now. The hunt begins.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.11.vo-01": {
+    "id": "n1-lantern-and-bell.11.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.11.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "The mist is at the windows now. The hunt begins.",
+    "speaker": "narrator",
+    "moment": "n1-lantern-and-bell.11",
+    "duration_s": 7.04
+  },
+  "n1-lantern-and-bell.05~no-wren": {
+    "id": "n1-lantern-and-bell.05~no-wren",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.05~no-wren@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: Agnes lays down a third letter. A fourth lies on the table already, sealed, addressed to someone who never came.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.05~no-wren.vo-01": {
+    "id": "n1-lantern-and-bell.05~no-wren.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.05~no-wren.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "Agnes lays down a third letter. A fourth lies on the table already, sealed, addressed to someone who never came.",
+    "speaker": "narrator",
+    "moment": "n1-lantern-and-bell.05~no-wren",
+    "duration_s": 13.76
+  },
+  "n1-lantern-and-bell.05~no-wren.vo-02": {
+    "id": "n1-lantern-and-bell.05~no-wren.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.05~no-wren.vo-02.hanne.wav",
+    "status": "draft",
+    "text": "Your priest's not coming, loves. We buried him this morning. And his grave's open.",
+    "speaker": "hanne",
+    "moment": "n1-lantern-and-bell.05~no-wren",
+    "duration_s": 7.88
+  },
+  "n1-lantern-and-bell.02~no-tomas": {
+    "id": "n1-lantern-and-bell.02~no-tomas",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.02~no-tomas@dashboard.png",
+    "status": "placeholder",
+    "text": "Narrator: In the corner, a stool by the wall stands empty, a full tankard in front of it that nobody touches.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.02~no-tomas.vo-01": {
+    "id": "n1-lantern-and-bell.02~no-tomas.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.02~no-tomas.vo-01.narrator.wav",
+    "status": "draft",
+    "text": "In the corner, a stool by the wall stands empty, a full tankard in front of it that nobody touches.",
+    "speaker": "narrator",
+    "moment": "n1-lantern-and-bell.02~no-tomas",
+    "duration_s": 10.2
+  },
+  "n1-lantern-and-bell.04~no-tomas": {
+    "id": "n1-lantern-and-bell.04~no-tomas",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.04~no-tomas@dashboard.png",
+    "status": "placeholder",
+    "text": "Emeric: I'm looking for Father Oskar? I have a letter. That is, I'm expected. I think.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.04~no-tomas.vo-01": {
+    "id": "n1-lantern-and-bell.04~no-tomas.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.04~no-tomas.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "I'm looking for Father Oskar? I have a letter. That is, I'm expected. I think.",
+    "speaker": "emeric",
+    "moment": "n1-lantern-and-bell.04~no-tomas",
+    "duration_s": 6.04
+  },
+  "n1-lantern-and-bell.04~no-tomas.vo-02": {
+    "id": "n1-lantern-and-bell.04~no-tomas.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.04~no-tomas.vo-02.agnes.wav",
+    "status": "draft",
+    "text": "So am I.",
+    "speaker": "agnes",
+    "moment": "n1-lantern-and-bell.04~no-tomas",
+    "duration_s": 1.48
+  },
+  "n1-lantern-and-bell.06~no-tomas": {
+    "id": "n1-lantern-and-bell.06~no-tomas",
+    "type": "still",
+    "target": "dashboard",
+    "path": "stills/n1-lantern-and-bell.06~no-tomas@dashboard.png",
+    "status": "placeholder",
+    "text": "Emeric: He split it between us so no single one of us could \u2014 oh. That's very clever.",
+    "profile": "@dashboard"
+  },
+  "n1-lantern-and-bell.06~no-tomas.vo-01": {
+    "id": "n1-lantern-and-bell.06~no-tomas.vo-01",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.06~no-tomas.vo-01.emeric.wav",
+    "status": "draft",
+    "text": "He split it between us so no single one of us could \u2014 oh. That's very clever.",
+    "speaker": "emeric",
+    "moment": "n1-lantern-and-bell.06~no-tomas",
+    "duration_s": 5.04
+  },
+  "n1-lantern-and-bell.06~no-tomas.vo-02": {
+    "id": "n1-lantern-and-bell.06~no-tomas.vo-02",
+    "type": "line",
+    "target": "dashboard",
+    "path": "audio/lines/n1-lantern-and-bell.06~no-tomas.vo-02.wren.wav",
+    "status": "draft",
+    "text": "Clever got him buried.",
+    "speaker": "wren",
+    "moment": "n1-lantern-and-bell.06~no-tomas",
+    "duration_s": 1.96
   }
 }
