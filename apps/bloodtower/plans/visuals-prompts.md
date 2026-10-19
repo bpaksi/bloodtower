@@ -261,7 +261,7 @@ Depends on: step 8. Run after **dialog frame** is delivered (or Bob approves pla
 
 Missing asset: Illusionist **dialog frame** (in progress). Small centred waiting UI must be wrapped in `DialogFrame` only; no ad-hoc border CSS elsewhere. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30, R3-UI-115). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30) and R2-115 (research/game-design/r2-screen-flow.md). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
 
 Goal: when play has no full-screen visual (no still, not Keeper, not clip), show a small centred waiting dialog over the painting with the prompt label ("Waiting for…"), not a full parchment page filling the column.
 

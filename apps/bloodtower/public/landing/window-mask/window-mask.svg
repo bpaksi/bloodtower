@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <title>Bloodtower window mask for /landing/hero.webp (vector approximation)</title>
+  <desc>Illusionist asset window-mask. White = lit glass/flame, black = everything else. Same 1920x1080 frame as hero.webp. Groups a-d match window-mask-a..d.png. The PNG is the master; this SVG is a hand-fitted approximation (arch and ellipses) for inline use or editing.</desc>
+  <defs><filter id="feather" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+  <rect width="1920" height="1080" fill="#000"/>
+  <g fill="#fff" filter="url(#feather)">
+  <g id="group-a" data-group="A"><!-- tower window -->
+    <path id="tower-window" d="M1328 359 V306 Q1328 288 1341.0 280 Q1355 288 1355 306 V359 Z"/>
+  </g>
+  <g id="group-b" data-group="B"><!-- upper stair lanterns -->
+    <ellipse id="stair-lantern-upper-1" cx="1291.1" cy="652.8" rx="5.0" ry="5.5"/>
+    <ellipse id="stair-lantern-upper-2" cx="1326.2" cy="674.2" rx="3.0" ry="2.5"/>
+    <ellipse id="stair-lantern-upper-3" cx="1361.3" cy="713.2" rx="11.5" ry="9.0"/>
+  </g>
+  <g id="group-c" data-group="C"><!-- lower stair lanterns -->
+    <ellipse id="stair-lantern-lower-1" cx="1260.3" cy="787.3" rx="4.5" ry="4.5"/>
+    <ellipse id="stair-lantern-lower-2" cx="1215.2" cy="804.8" rx="8.0" ry="6.5"/>
+    <ellipse id="stair-lantern-lower-3" cx="1164.4" cy="844.8" rx="8.5" ry="7.5"/>
+  </g>
+  <g id="group-d" data-group="D"><!-- lamp post at the stair foot -->
+    <rect id="lamp-post" x="960" y="955" width="20" height="23"/>
+  </g>
+  </g>
+</svg>
