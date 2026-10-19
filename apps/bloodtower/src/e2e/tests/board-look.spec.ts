@@ -108,14 +108,18 @@ const assertPlayParchment = async (page: Page) => {
     await expect(page.locator(".bt-plate [data-camera-still]")).toHaveCount(1);
     const frame = await page.locator(".bt-plate").evaluate((el) => {
       const cs = getComputedStyle(el);
-      return { border: Number.parseFloat(cs.borderTopWidth), outline: cs.outlineStyle };
+      return { border: Number.parseFloat(cs.outlineWidth), outline: cs.outlineStyle };
     });
     expect(frame.border, "plate has a rule").toBeGreaterThanOrEqual(2);
     expect(frame.outline, "plate has an offset outline").toBe("solid");
   }
   const items = page.locator("[data-party-items]");
-  await expect(items).toBeVisible();
-  await expect(items).toBeInViewport({ ratio: 1 });
+  const tall = (page.viewportSize()?.height ?? 0) > 900;
+  // Below 900px high the zone is hidden so the still keeps main's room; the unavailable values
+  // stay in the DOM and are checked there too.
+  if (tall) await expect(items).toBeVisible();
+  else await expect(items).toBeHidden();
+  if (tall) await expect(items).toBeInViewport({ ratio: 1 });
   const values = items.locator(".bt-items-val");
   await expect(values).toHaveCount(3);
   for (let i = 0; i < 3; i += 1) {
@@ -123,21 +127,18 @@ const assertPlayParchment = async (page: Page) => {
     await expect(values.nth(i)).toHaveAttribute("data-unavailable", "");
   }
   await expect(items).not.toContainText(/\b\d+\b/);
-  const fit = await items.evaluate((el) => ({
-    valuesInside: [...el.querySelectorAll(".bt-items-val")].every((v) => {
-      const r = v.getBoundingClientRect();
-      const box = el.getBoundingClientRect();
-      return r.left >= box.left - 1 && r.right <= box.right + 1;
-    }),
-  }));
+  const fit = tall
+    ? await items.evaluate((el) => ({
+        valuesInside: [...el.querySelectorAll(".bt-items-val")].every((v) => {
+          const r = v.getBoundingClientRect();
+          const box = el.getBoundingClientRect();
+          return r.left >= box.left - 1 && r.right <= box.right + 1;
+        }),
+      }))
+    : { valuesInside: true };
   expect(fit.valuesInside, "each unavailable value sits inside the zone").toBe(true);
   if (await still.count()) {
-    const plate = await page
-      .locator(".bt-plate")
-      .evaluate((el) => el.getBoundingClientRect().height);
-    expect(plate, "the still plate keeps room to read").toBeGreaterThanOrEqual(
-      page.viewportSize()!.height * 0.15,
-    );
+    await assertStillRoom(page);
   }
   const band = page.locator("[data-next-band]");
   await expect(band).toBeInViewport({ ratio: 1 });
@@ -164,7 +165,11 @@ const assertPlayParchment = async (page: Page) => {
   });
   expect(geo.bg, "next prompt sits on a blood band").toContain("rgb(142, 27, 27)");
   expect(geo.bandW, "band spans the story column").toBeGreaterThanOrEqual(geo.storyW - 2);
-  expect(geo.bandTop, "band sits under the items zone").toBeGreaterThanOrEqual(geo.itemsBottom - 1);
+  if (tall) {
+    expect(geo.bandTop, "band sits under the items zone").toBeGreaterThanOrEqual(
+      geo.itemsBottom - 1,
+    );
+  }
   expect(geo.textH, "prompt is one line").toBeLessThanOrEqual(geo.lineHeight * 1.5);
   expect(geo.fontPx, "prompt is at least 28px").toBeGreaterThanOrEqual(28);
   if (geo.viewW >= 1900) {
@@ -172,6 +177,74 @@ const assertPlayParchment = async (page: Page) => {
     expect(geo.bandH).toBeGreaterThanOrEqual(60);
   }
 };
+
+/** Still well height on origin/main at the same viewport with the same moment (measured). */
+const MAIN_WELL_HEIGHT: Record<string, number> = { "1180x820": 282, "1024x594": 171 };
+
+const wellKey = (page: Page) => {
+  const v = page.viewportSize();
+  return `${v?.width}x${v?.height}`;
+};
+
+/**
+ * The still well keeps main's height (so the camera track keeps its zoom), the plate stays fully
+ * in view, and the camera frame is a zoom (scale above 1), not a clamped pan.
+ */
+const assertStillRoom = async (page: Page, opts?: { text?: string }) => {
+  if (opts?.text) {
+    await page.locator("[data-moment-caption]").evaluate((el, text) => {
+      // Edit the text node in place so React can still update it on the next moment.
+      if (el.firstChild) el.firstChild.nodeValue = text;
+    }, opts.text);
+    await page.waitForTimeout(400);
+  }
+  const plate = page.locator(".bt-plate");
+  await expect(plate).toBeInViewport({ ratio: 1 });
+  const m = await page.evaluate(() => {
+    const well = document.querySelector("[data-camera-still]") as HTMLElement;
+    const page_ = document.querySelector(".bt-page") as HTMLElement;
+    const plateEl = document.querySelector(".bt-plate") as HTMLElement;
+    const r = well.getBoundingClientRect();
+    const pr = plateEl.getBoundingClientRect();
+    const img = well.querySelector("img") as HTMLElement;
+    const t = getComputedStyle(img).transform;
+    const scale = t === "none" ? 1 : Number.parseFloat(t.slice(7));
+    return {
+      h: r.height,
+      plateBottom: pr.bottom,
+      pageBottom: page_.getBoundingClientRect().bottom,
+      scale,
+    };
+  });
+  expect(m.plateBottom, "plate is not clipped by the page").toBeLessThanOrEqual(m.pageBottom + 1);
+  expect(m.scale, "camera track keeps a zoom (scale above 1)").toBeGreaterThan(1);
+  const base = MAIN_WELL_HEIGHT[wellKey(page)];
+  if (base && !opts?.text)
+    expect(m.h, "still well is as tall as main's").toBeGreaterThanOrEqual(base - 3);
+};
+
+/** The prompt band stays one line and a bounded height for short and long prompts. */
+const assertBandLine = async (page: Page, label: string) => {
+  await page.locator("[data-next-band] b").evaluate((el, text) => {
+    if (el.firstChild) el.firstChild.nodeValue = text;
+  }, label);
+  const g = await page.evaluate(() => {
+    const b = document.querySelector("[data-next-band]") as HTMLElement;
+    const t = b.querySelector("b") as HTMLElement;
+    return {
+      band: b.getBoundingClientRect().height,
+      text: t.getBoundingClientRect().height,
+      line: Number.parseFloat(getComputedStyle(t).lineHeight),
+    };
+  });
+  expect(g.text, `"${label.slice(0, 20)}" is one line`).toBeLessThanOrEqual(g.line * 1.2);
+  expect(g.band, "band height is bounded").toBeLessThanOrEqual(g.line + 40);
+};
+
+const LONG_CAPTION =
+  "The burgomaster's house stands shuttered at the end of the lane, and the smell of old smoke hangs in its eaves. Someone has set a single lamp in the upper window, and it does not move when the wind comes. The door is not locked. It never was, they say, since the night the bells stopped.";
+const LONG_PROMPT =
+  "Oil the hinge and slip inside, or force the door and wake the whole house to its long dark";
 
 test("story board look at proving ground, grey-stair, and the Keeper", async ({
   browser,
@@ -269,16 +342,24 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
     await assertPlayParchment(board);
+    await assertBandLine(board, "Oil the hinge, or force it.");
+    await assertBandLine(board, LONG_PROMPT);
+    await assertStillRoom(board, { text: LONG_CAPTION });
     await shot(board, "board-grey-stair-landscape");
     await board.setViewportSize({ width: 1024, height: 594 });
     await assertBoardFits(board);
     await assertPlayParchment(board);
     await assertPlayHeader(board);
+    await assertBandLine(board, "Oil the hinge, or force it.");
+    await assertBandLine(board, LONG_PROMPT);
+    await assertStillRoom(board, { text: LONG_CAPTION });
     await shot(board, "board-grey-stair-1024x594");
     await board.setViewportSize({ width: 1920, height: 1080 });
     await assertBoardFits(board);
     await assertPlayParchment(board);
     await assertPlayHeader(board);
+    await assertBandLine(board, "Oil the hinge, or force it.");
+    await assertBandLine(board, LONG_PROMPT);
     await shot(board, "board-grey-stair-1920x1080");
     await board.setViewportSize({ width: 1180, height: 820 });
 

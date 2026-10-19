@@ -98,7 +98,7 @@ Use the step's "Review focus" line in the runbook for extra checks.
 | 5 | `feat/visuals-05-startup-summary` | 3 | Dialog / startup | todo | |
 | 6 | `feat/visuals-06-play-chrome` | none | Play TV | **in progress** (Bob) | |
 | 7 | `feat/visuals-07-hunter-roll` | 6 | Play TV | in review (Q2 (a) status: Waiting / Away / holder id; portrait medallions whenever packId + portrait exist; corruption column reads unavailable; no acting-hunter highlight, the `.bt-cart-act` blood rule stays in board.css unused until the engine exposes an acting hunter; no epithet line, the hunter schema has no epithet field) | #93 |
-| 8 | `feat/visuals-08-play-parchment` | 6, 7 merged first | Play TV | in review (ornament line added; narration justified; still wrapped in `.bt-plate`, `CameraStill` untouched; party items zone shows count/item/carrier as `unavailable` and is not rendered on the Keeper moment; blood-band prompt; below 700px height the ornament and the zone title are hidden to keep the still readable at 1024x594) | |
+| 8 | `feat/visuals-08-play-parchment` | 6, 7 merged first | Play TV | in review (ornament line added; narration justified; still wrapped in `.bt-plate`, `CameraStill` untouched; party items zone shows count/item/carrier as `unavailable` and is not rendered on the Keeper moment; blood-band prompt; at or below 900px viewport height the ornament and the whole items zone are hidden and a moment's narration is clamped to 3 lines so the still well keeps main's size and camera zoom; the plate rule is an outline, not a border; `<mark>` highlights deferred, not in CSS) | |
 | 9 | `feat/visuals-09-waiting-dialog` | 3, 8 and 10 merged | Dialog / startup | todo | |
 | 10 | `feat/visuals-10-visual-zoom` | 8 | Play TV | todo | |
 | 11 | `feat/visuals-11-keeper-cinema` | 10 | Play TV | todo | |
@@ -320,7 +320,7 @@ Read game-look.md §3 parchment page, §4 main story view. Code: PlayPanel in St
 Goal: kicker, title, ornament, justified narration with Fraktur drop cap; stills in `.bt-plate`; blood-band next prompt (60px class).
 
 1. Do not change CameraStill transform math or data attributes (#78). `.bt-plate` styling only.
-2. Moment text: `displayCaption`; `<mark>` candle highlights as in CSS.
+2. Moment text: `displayCaption`; `<mark>` candle highlights are deferred: board.css has no `mark` rule and displayCaption returns plain text, so the earlier claim that they were "already in CSS" was wrong.
 3. Party items zone: labels only, values unavailable until state has items.
 
 No protocol changes.
