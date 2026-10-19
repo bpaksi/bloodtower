@@ -5,6 +5,8 @@ import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { portraitSrc } from "../../lib/portrait.ts";
 import { JoinQr } from "../../lib/qr";
 import {
+  BOARD_MODE,
+  carouselPeeks,
   chosenLabel,
   chosenStory,
   claimedCount,
@@ -13,7 +15,6 @@ import {
   focusedStory,
   gameSettingsNext,
   joinedDeviceIds,
-  neighborStory,
   partyJoinNextReason,
   playersText,
   SCREEN_NEXT,
@@ -29,6 +30,7 @@ import { VOLUME_ANSWER_LABEL, volumeBoardCopy } from "../../lib/volumeTest.ts";
 import { PortraitCard } from "../PortraitCard";
 import { boardLayer } from "./boardLayer.ts";
 import { CameraStill } from "./CameraStill";
+import { DialogFrame } from "./DialogFrame";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
 import { VisualLayer } from "./VisualLayer";
@@ -52,16 +54,19 @@ export function StoryBoard({
   const warning = joinWarning(state.join);
   const header = headerCopy(state);
   const keeperMoment = state.screen === "play" && state.moment?.id === KEEPER_MOMENT_ID;
-  // Play chrome only while the story runs. Quit is "the table is closed" (spec D20), not a
-  // pause, so it keeps the closing summary and join block and gets no play mode.
-  const playMode = state.screen === "play";
+  // Play chrome only while the story runs; every pre-play screen is the centred start-up shell.
+  // Quit is "the table is closed" (spec D20), not a pause, so it keeps the closing summary and
+  // join block and gets neither mode.
+  const mode = BOARD_MODE[state.screen];
+  const playMode = mode === "play";
+  const startup = mode === "startup";
   // Layer 2 (R3-UI-10): a still, clip or the Keeper fills the screen; the board stays under it.
   const layer = boardLayer(state);
   return (
     <main
       className="bt-board"
       data-screen={state.screen}
-      data-board-mode={playMode ? "play" : undefined}
+      data-board-mode={mode ?? undefined}
       data-board-layer={layer}
       data-moment={state.moment?.id ?? ""}
       data-board-layout={keeperMoment ? "keeper" : "standard"}
@@ -105,21 +110,18 @@ export function StoryBoard({
         </p>
       ) : null}
       <div className="bt-board-main">
-        {state.summary && !playMode ? (
+        {startup ? null : state.summary && !playMode ? (
           <SummaryPanel summary={state.summary} tower={state.tower} />
         ) : (
           <HunterList hunters={state.hunters} packId={state.packId} />
         )}
         <section className="bt-story">
-          {state.screen === "splash" ? <SplashPanel state={state} /> : null}
-          {state.screen === "tower-connect" ? <TowerConnectPanel state={state} /> : null}
-          {state.screen === "tower-volume-test" ? <VolumeTestPanel state={state} /> : null}
-          {state.screen === "pick-story" ? <PickStoryPanel state={state} /> : null}
-          {state.screen === "game-settings" ? <GameSettingsPanel state={state} /> : null}
-          {state.screen === "not-playable" ? <NotPlayablePanel state={state} /> : null}
-          {state.screen === "party-join" ? <PartyJoinPanel state={state} /> : null}
-          {state.screen === "setup" ? <SetupPanel state={state} /> : null}
-          {state.screen === "begin" ? <BeginPanel state={state} /> : null}
+          {startup ? (
+            // Layer 3 (R3-UI-10): one centred dialog. Keyed by screen so each new step inks in.
+            <DialogFrame key={state.screen} className="bt-ink-in">
+              <StartupPanel state={state} />
+            </DialogFrame>
+          ) : null}
           {state.screen === "play" ? <PlayPanel state={state} /> : null}
           {state.screen === "quit" ? <QuitPanel /> : null}
           {playMode && !keeperMoment ? <PartyItems /> : null}
@@ -127,11 +129,15 @@ export function StoryBoard({
         </section>
         {playMode ? (
           <ActingPanel />
+        ) : startup ? (
+          // Q3 (a): the running summary and the join QR in one column right of the dialog. The
+          // hunter roll folds into Claim Hunters' dialog (R3-UI-11); the QR shows from Splash on.
+          <div className="bt-startup-side">
+            {state.summary ? <SummaryPanel summary={state.summary} tower={state.tower} /> : null}
+            <TablePanel join={state.join} large={state.screen === "party-join"} />
+          </div>
         ) : (
-          <aside className="bt-pub bt-panel">
-            <span className="bt-lbl">Table</span>
-            <JoinBlock join={state.join} large={state.screen === "party-join"} />
-          </aside>
+          <TablePanel join={state.join} large={false} />
         )}
       </div>
       <VisualLayer>
@@ -147,6 +153,20 @@ export function StoryBoard({
     </main>
   );
 }
+
+/** The start-up dialog's content for the current pre-play screen. */
+const StartupPanel = ({ state }: { state: StoryboardState }) => {
+  if (state.screen === "splash") return <SplashPanel state={state} />;
+  if (state.screen === "tower-connect") return <TowerConnectPanel state={state} />;
+  if (state.screen === "tower-volume-test") return <VolumeTestPanel state={state} />;
+  if (state.screen === "pick-story") return <PickStoryPanel state={state} />;
+  if (state.screen === "game-settings") return <GameSettingsPanel state={state} />;
+  if (state.screen === "not-playable") return <NotPlayablePanel state={state} />;
+  if (state.screen === "party-join") return <PartyJoinPanel state={state} />;
+  if (state.screen === "setup") return <SetupPanel state={state} />;
+  if (state.screen === "begin") return <BeginPanel state={state} />;
+  return null;
+};
 
 const nextPrompt = (state: StoryboardState): string => {
   if (state.screen === "splash") return SCREEN_NEXT.splash;
@@ -225,6 +245,14 @@ const StatusStrip = ({ state }: { state: StoryboardState }) => {
     </p>
   );
 };
+
+/** The join QR and address in an ink panel: the right column before play, and on Quit. */
+const TablePanel = ({ join, large }: { join: StoryboardState["join"]; large: boolean }) => (
+  <aside className="bt-pub bt-panel">
+    <span className="bt-lbl">Table</span>
+    <JoinBlock join={join} large={large} />
+  </aside>
+);
 
 const JoinBlock = ({ join, large }: { join: StoryboardState["join"]; large?: boolean }) => (
   <section>
@@ -350,9 +378,11 @@ const HunterCarts = ({
 
 /**
  * "Tonight's game" (R3-UI-25): beside every start-up dialog, each choice as it is made. An item
- * with nothing chosen reads "not chosen yet"; Back clears the item it undoes.
+ * with nothing chosen reads "not chosen yet"; Back clears the item it undoes. Display only: the
+ * rows come from `summaryItems`. The lines of an item run on in one value, so a short board
+ * can clamp it without dropping whole rows.
  */
-const SummaryPanel = ({
+export const SummaryPanel = ({
   summary,
   tower,
 }: {
@@ -373,9 +403,11 @@ const SummaryPanel = ({
             data-empty={item.empty ? "true" : undefined}
           >
             <dt className="bt-lbl">{item.label}</dt>
-            {item.lines.map((line) => (
-              <dd key={line}>{line}</dd>
-            ))}
+            <dd>
+              {item.lines.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </dd>
           </div>
         ))}
       </dl>
@@ -423,7 +455,7 @@ const MomentMeta = ({ moment }: { moment: NonNullable<StoryboardState["moment"]>
 );
 
 const SplashPanel = ({ state }: { state: StoryboardState }) => (
-  <article className="bt-page bt-parchment bt-ink-in" data-fortune="">
+  <article className="bt-page" data-fortune="">
     <div>
       <p className="bt-kicker">Fortune</p>
       <h2>Bloodtower</h2>
@@ -437,7 +469,7 @@ const TowerConnectPanel = ({ state }: { state: StoryboardState }) => {
   const story = chosenStory(state.stories, state.gameSettings ?? null);
   const reason = towerRequiredReason(story, state.tower);
   return (
-    <article className="bt-page bt-parchment bt-ink-in">
+    <article className="bt-page">
       <div>
         <p className="bt-kicker">{story ? story.title : "The tower"}</p>
         <h2>
@@ -464,7 +496,7 @@ const VolumeTestPanel = ({ state }: { state: StoryboardState }) => {
   const copy = volumeBoardCopy(test);
   return (
     <article
-      className="bt-page bt-parchment bt-ink-in"
+      className="bt-page"
       data-volume-phase={test.phase}
       data-volume-mode={test.mode}
       data-volume-level={test.level ?? undefined}
@@ -514,47 +546,49 @@ const coverSrc = (cover: StoryCard["cover"]): string | undefined =>
   cover ? `${pageServerOrigin()}${cover}` : undefined;
 
 /**
- * Pick Game carousel (R3-UI-24): the focused story large, a neighbour peeking at each side.
- * The board has no buttons; the devices move the highlight.
+ * Pick Game carousel (R3-UI-24), inside the start-up dialog: the focused story large and centred,
+ * a smaller neighbour peeking at each side. Covers are 16:9 plates. The board has no buttons; the
+ * devices move the highlight, and devices never show the covers (R3-UI-51).
  */
 const PickStoryPanel = ({ state }: { state: StoryboardState }) => {
   const focus = focusedStory(state.stories);
-  const previous = neighborStory(state.stories, -1);
-  const next = neighborStory(state.stories, 1);
-  // With two cards both neighbours are the same story: show it once, on the right.
-  const peekBefore = previous && previous.id !== next?.id ? previous : null;
+  const { previous, next } = carouselPeeks(state.stories);
   const players = focus ? playersText(focus.players) : null;
   const tagline = focus?.tagline ?? focus?.blurb ?? null;
+  const cover = focus ? coverSrc(focus.cover) : undefined;
   return (
     <div className="bt-carousel">
-      {peekBefore ? <CarouselPeek card={peekBefore} side="previous" /> : null}
-      <article className="bt-page bt-parchment bt-ink-in bt-carousel-focus" data-story={focus?.id}>
-        {focus && coverSrc(focus.cover) ? (
-          <img className="bt-carousel-cover" src={coverSrc(focus.cover)} alt="" />
+      {previous ? <CarouselPeek card={previous} side="previous" /> : null}
+      <article className="bt-carousel-focus" data-story={focus?.id}>
+        {cover ? (
+          <div className="bt-carousel-plate">
+            <img className="bt-carousel-cover" src={cover} alt="" />
+          </div>
         ) : null}
-        <div>
-          <p className="bt-kicker">The door</p>
-          <h2>{focus ? focus.title : "Stories unavailable."}</h2>
-          {tagline ? <p className="bt-narration">{tagline}</p> : null}
-          {players ? <p className="bt-muted">{players}</p> : null}
-          {focus && !focus.loadable ? <p className="bt-narration">Can't load</p> : null}
-          <p className="bt-lede">{SCREEN_NEXT["pick-story"]}</p>
-        </div>
+        <h2>{focus ? focus.title : "Stories unavailable."}</h2>
+        {tagline ? <p className="bt-carousel-tagline">{tagline}</p> : null}
+        {players ? <p className="bt-carousel-players">{players}</p> : null}
+        {focus && !focus.loadable ? <p className="bt-carousel-players">Can't load</p> : null}
       </article>
       {next ? <CarouselPeek card={next} side="next" /> : null}
     </div>
   );
 };
 
-const CarouselPeek = ({ card, side }: { card: StoryCard; side: "previous" | "next" }) => (
-  <article className="bt-carousel-peek" data-carousel-side={side} data-story-peek={card.id}>
-    {coverSrc(card.cover) ? (
-      <img className="bt-carousel-cover" src={coverSrc(card.cover)} alt="" />
-    ) : null}
-    <p>{card.title}</p>
-    {card.loadable ? null : <p>Can't load</p>}
-  </article>
-);
+const CarouselPeek = ({ card, side }: { card: StoryCard; side: "previous" | "next" }) => {
+  const cover = coverSrc(card.cover);
+  return (
+    <article className="bt-carousel-peek" data-carousel-side={side} data-story-peek={card.id}>
+      {cover ? (
+        <div className="bt-carousel-plate">
+          <img className="bt-carousel-cover" src={cover} alt="" />
+        </div>
+      ) : null}
+      <p>{card.title}</p>
+      {card.loadable ? null : <p>Can't load</p>}
+    </article>
+  );
+};
 
 /**
  * Game settings (R3-UI-22): a dialog listing each of the chosen pack's settings, its options and
@@ -564,7 +598,7 @@ const GameSettingsPanel = ({ state }: { state: StoryboardState }) => {
   const settings = state.gameSettings ?? null;
   const story = chosenStory(state.stories, settings);
   return (
-    <article className="bt-page bt-parchment bt-ink-in" data-game-settings={settings?.story ?? ""}>
+    <article className="bt-page" data-game-settings={settings?.story ?? ""}>
       <div>
         <p className="bt-kicker">{story ? story.title : "The story"}</p>
         <h2>{SCREEN_TITLE["game-settings"]}</h2>
@@ -604,7 +638,7 @@ const NotPlayablePanel = ({ state }: { state: StoryboardState }) => {
   const focus =
     chosenStory(state.stories, state.gameSettings ?? null) ?? focusedStory(state.stories);
   return (
-    <article className="bt-page bt-parchment bt-ink-in">
+    <article className="bt-page">
       <div>
         <p className="bt-kicker">The door</p>
         <h2>{SCREEN_TITLE["not-playable"]}</h2>
@@ -623,7 +657,7 @@ const PartyJoinPanel = ({ state }: { state: StoryboardState }) => {
   const claimed = claimedCount(state.hunters);
   const total = state.hunters.length;
   return (
-    <article className="bt-page bt-parchment bt-ink-in bt-claim">
+    <article className="bt-page bt-claim">
       <div>
         <p className="bt-kicker">The party</p>
         <h2>{SCREEN_TITLE["party-join"]}</h2>
@@ -644,14 +678,14 @@ const SetupPanel = ({ state }: { state: StoryboardState }) => {
   const current = state.setupStep;
   if (!current) {
     return (
-      <article className="bt-page bt-parchment">
+      <article className="bt-page">
         <p className="bt-narration">Setup step unavailable.</p>
       </article>
     );
   }
   const { step, illustration } = current;
   return (
-    <article className="bt-page bt-parchment bt-ink-in bt-setup" data-setup-step={step.id}>
+    <article className="bt-page bt-setup" data-setup-step={step.id}>
       <div>
         <p className="bt-kicker">{currentStory(state.stories)?.title ?? "The story"}</p>
         <h2>{setupStepTitle(step)}</h2>
@@ -671,7 +705,7 @@ const SetupPanel = ({ state }: { state: StoryboardState }) => {
 };
 
 const BeginPanel = ({ state }: { state: StoryboardState }) => (
-  <article className="bt-page bt-parchment bt-ink-in">
+  <article className="bt-page">
     <div>
       <p className="bt-kicker">{currentStory(state.stories)?.title ?? "The story"}</p>
       <h2>The table is set</h2>

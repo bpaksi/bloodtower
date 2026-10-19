@@ -1078,37 +1078,102 @@
   );
 }
 
-/* Pick Game carousel (R3-UI-24): the focused story large, a neighbour peeking at each side. */
+/*
+ * Pick Game carousel (R3-UI-24), inside the start-up dialog: the focused story large in the
+ * centre column, a smaller neighbour peeking at each side. With two packs the one neighbour
+ * peeks on the right, so the focus never moves off centre.
+ */
 .bt-carousel {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr);
+  gap: clamp(0.8rem, 1.8vw, 1.8rem);
   align-items: center;
-  gap: clamp(0.6rem, 1.6vw, 1.4rem);
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
 .bt-carousel-focus {
-  flex: 2.4 1 0;
+  display: flex;
+  grid-column: 2;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
   min-width: 0;
+  min-height: 0;
+  text-align: center;
+}
+
+.bt-carousel-focus h2 {
+  margin: 0.55rem 0 0;
+  font-family: var(--bt-font-title);
+  font-size: clamp(2rem, 3vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+
+.bt-carousel-tagline {
+  display: -webkit-box;
+  margin: 0;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(1.75rem, 2vw, 2.25rem);
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.bt-carousel-players {
+  margin: 0;
+  color: var(--bt-blood);
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  letter-spacing: var(--bt-tracking-label);
+  line-height: 1.1;
 }
 
 .bt-carousel-peek {
-  flex: 1 1 0;
-  min-width: 0;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.45rem;
   align-content: center;
-  opacity: 0.55;
-  transform: scale(0.92);
-  color: var(--bt-bone);
+  min-width: 0;
+  opacity: 0.6;
+  color: var(--bt-iron-gall);
   font-family: var(--bt-font-label);
   text-align: center;
 }
 
+.bt-carousel-peek[data-carousel-side="previous"] {
+  grid-column: 1;
+}
+
+.bt-carousel-peek[data-carousel-side="next"] {
+  grid-column: 3;
+}
+
 .bt-carousel-peek p {
   margin: 0;
+  overflow: hidden;
   font-size: var(--bt-size-label);
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A cover is a 16:9 plate (game-look.md section 3): a double ink rule with an offset hairline. */
+.bt-carousel-plate {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3px;
+  border: 3px double var(--bt-iron-gall);
+  outline: 1px solid var(--bt-vellum-shadow);
+  outline-offset: 4px;
+}
+
+.bt-carousel-focus .bt-carousel-plate {
+  /* As wide as the column allows, but never so tall that the title and tagline lose the height. */
+  width: min(100%, calc(var(--bt-carousel-cover-h, 38vh) * 16 / 9));
 }
 
 .bt-carousel-cover {
@@ -1116,7 +1181,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border: var(--bt-rule-gold);
+  filter: sepia(0.35) contrast(1.08);
 }
 
 /* Game settings (R3-UI-22): each setting, its options, and the chosen one marked. */
@@ -1248,36 +1313,65 @@
   color: var(--bt-bone);
 }
 
-/* Start-up summary (R3-UI-25): "Tonight's game" beside each start-up dialog. */
+/*
+ * Start-up summary (R3-UI-25): "Tonight's game" in the right column of the start-up shell, an
+ * ink panel (Q3 (a)). Each row runs on as one paragraph, its label then its value, with an item's
+ * lines joined by a middle dot. Under 1040px high a row is one line (the column is wide enough
+ * for "Settings not chosen yet") and a long value ends in an ellipsis; on the TV a row takes two
+ * lines and the game's cover shows. So all five rows and the join QR fit beside the dialog at
+ * 28px type, banner or not. The full text stays in the DOM. Empty rows read in italic.
+ */
 .bt-summary {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 0.5rem;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
+  padding: 0.8rem 0.95rem 0.9rem;
 }
 
 .bt-summary .bt-roll-title {
-  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+  color: var(--bt-candle);
+  font-family: var(--bt-font-title);
+  font-size: clamp(1.75rem, 2vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
 }
 
 .bt-summary dl {
   display: grid;
-  gap: clamp(0.3rem, 0.9vh, 0.7rem);
+  gap: clamp(0.35rem, 1vh, 0.85rem);
   margin: 0;
+  min-height: 0;
+}
+
+.bt-summary-item {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--bt-summary-lines, 1);
+  line-height: 1.15;
 }
 
 .bt-summary .bt-summary-item dt.bt-lbl {
-  margin-bottom: 0.05rem;
-  font-size: clamp(0.95rem, 1.15vw, 1.25rem);
+  display: inline;
+  margin: 0 0.4em 0 0;
 }
 
 .bt-summary-item dd {
+  display: inline;
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--bt-bone);
-  font-size: clamp(1.15rem, 1.5vw, 1.55rem);
-  line-height: 1.2;
+  font-size: var(--bt-size-body);
+}
+
+.bt-summary-item dd > span + span::before {
+  content: " · ";
+  color: var(--bt-parchment-dark);
 }
 
 .bt-summary-item[data-empty="true"] dd {
@@ -1286,11 +1380,14 @@
 }
 
 .bt-summary-cover {
-  display: block;
-  width: min(100%, 9rem);
+  display: none;
+  box-sizing: border-box;
+  width: min(100%, 11rem);
+  margin: 0 auto;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border: var(--bt-rule-gold);
+  border: 3px double var(--bt-candle);
+  filter: sepia(0.35) contrast(1.08);
 }
 
 /* Claim Hunters: the portrait cartouches sit in the dialog, side by side. */
@@ -1574,4 +1671,202 @@
   font-family: var(--bt-font-label);
   font-size: var(--bt-size-label);
   letter-spacing: 0.16em;
+}
+
+/*
+ * DialogFrame (visuals step 3): the Illusionist asset dialog-frame, the board's only dialog
+ * chrome (public/board/dialog-frame/README.md). A 9-slice SVG ink border at slice 40; the
+ * parchment tile and a burn gradient run under it from the border box, never an outer shadow.
+ */
+.bt-board .bt-dialog-frame {
+  --bt-dialog-frame-width: 40px;
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--bt-dialog-frame-width);
+  border-image-source: url("/board/dialog-frame/dialog-frame.svg");
+  border-image-slice: 40;
+  border-image-width: 1;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background-color: var(--bt-parchment);
+  background-image:
+    radial-gradient(ellipse at 50% 42%, transparent 58%, rgb(138 111 71 / 0.38) 100%),
+    url("/board/dialog-frame/dialog-parchment.webp");
+  background-origin: border-box;
+  background-size:
+    100% 100%,
+    512px 512px;
+  background-repeat: no-repeat, repeat;
+  color: var(--bt-iron-gall);
+  padding: 12px 28px 20px;
+}
+
+.bt-board .bt-dialog-frame[data-dialog-size="compact"] {
+  --bt-dialog-frame-width: 32px;
+  width: fit-content;
+  max-width: min(34rem, 100%);
+  margin-inline: auto;
+}
+
+/*
+ * Start-up shell (visuals steps 3 to 5): every pre-play screen is one centred dialog (layer 3,
+ * R3-UI-10) over the landing painting, with the next prompt under it (R2-115) and the running
+ * summary plus the join QR in a right column (Q3 (a)). The hunter roll is not shown: Claim
+ * Hunters lists the hunters in its dialog (R3-UI-11).
+ */
+.bt-board[data-board-mode="startup"] .bt-board-main {
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 35%);
+  box-sizing: border-box;
+  width: min(100%, 118rem);
+  margin-inline: auto;
+}
+
+.bt-board[data-board-mode="startup"] .bt-story {
+  --bt-startup-w: 66rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.bt-board[data-board-mode="startup"][data-screen="pick-story"] .bt-story {
+  --bt-startup-w: 88rem;
+}
+
+.bt-board[data-board-mode="startup"] .bt-story > * {
+  width: min(100%, var(--bt-startup-w));
+}
+
+.bt-board[data-board-mode="startup"] .bt-story > .bt-dialog-frame {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bt-board[data-board-mode="startup"] .bt-dialog-frame > .bt-page {
+  flex: 0 1 auto;
+  padding: 0;
+  text-align: center;
+}
+
+.bt-board[data-board-mode="startup"] .bt-dialog-frame .bt-narration {
+  text-align: center;
+}
+
+.bt-board[data-board-mode="startup"] .bt-dialog-frame .bt-narration::first-letter {
+  float: none;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.bt-board[data-board-mode="startup"] .bt-dialog-frame .bt-setting {
+  text-align: left;
+}
+
+.bt-board[data-board-mode="startup"] .bt-dialog-frame .bt-levels {
+  justify-content: center;
+}
+
+.bt-startup-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(0.9rem, 1.8vh, 1.6rem);
+  min-width: 0;
+  min-height: 0;
+  /* Room for the panels' offset outline and corner fleurons inside the column. */
+  padding: 0.9rem 0.75rem;
+  overflow: hidden;
+}
+
+.bt-startup-side > .bt-pub {
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.bt-startup-side .bt-qr {
+  width: min(100%, 10rem);
+}
+
+.bt-startup-side .bt-qr-lg {
+  width: min(100%, 12rem);
+}
+
+@media (min-width: 1024px) and (max-height: 700px) {
+  .bt-board .bt-dialog-frame {
+    --bt-dialog-frame-width: 32px;
+    padding: 4px 18px 8px;
+  }
+
+  .bt-board[data-board-mode="startup"] .bt-story {
+    --bt-carousel-cover-h: 30vh;
+  }
+
+  .bt-startup-side .bt-qr,
+  .bt-startup-side .bt-qr-lg {
+    width: min(100%, 6.75rem);
+  }
+
+  .bt-summary {
+    gap: 0.25rem;
+    padding: 0.45rem 0.65rem 0.5rem;
+  }
+
+  .bt-startup-side .bt-pub > .bt-lbl,
+  .bt-startup-side .bt-join-url {
+    display: none;
+  }
+
+  .bt-startup-side {
+    gap: 0.75rem;
+    padding: 0.7rem 0.7rem;
+  }
+
+  .bt-summary dl {
+    gap: 0.15rem;
+  }
+
+  .bt-carousel-focus h2 {
+    margin-top: 0.3rem;
+  }
+
+  .bt-carousel-tagline {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@media (min-height: 1040px) {
+  .bt-board[data-board-mode="startup"] .bt-board-main {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 28%);
+  }
+
+  .bt-summary {
+    --bt-summary-lines: 2;
+  }
+
+  .bt-summary-cover {
+    display: block;
+  }
+
+  .bt-summary-item dd {
+    font-size: clamp(1.75rem, 1.6vw, 2.1rem);
+  }
+
+  .bt-startup-side .bt-qr {
+    width: min(100%, 12rem);
+  }
+
+  .bt-startup-side .bt-qr-lg {
+    width: min(100%, 14rem);
+  }
+}
+
+@media (max-width: 960px) {
+  .bt-board[data-board-mode="startup"] .bt-board-main {
+    grid-template-columns: 1fr;
+  }
 }

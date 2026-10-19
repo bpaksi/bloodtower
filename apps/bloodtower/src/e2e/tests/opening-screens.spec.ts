@@ -60,6 +60,10 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(board.locator("[data-status-strip]")).toBeVisible();
       await expect(board.locator("[data-status='tower']")).toContainText("no tower");
       await expect(board.locator("[data-status='step']")).toContainText("Pick Story");
+      // Before play the board is the start-up shell: one framed dialog, no hunter roll.
+      await expect(board.locator("main")).toHaveAttribute("data-board-mode", "startup");
+      await expect(board.locator('[data-illusionist-asset="dialog-frame"]')).toHaveCount(1);
+      await expect(board.locator(".bt-hunters")).toHaveCount(0);
       await expect(board.getByRole("img", { name: "Join code" })).toBeVisible();
       await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
     });
@@ -220,8 +224,8 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
       const join = boardStates(boardFrames).at(-1)?.join as { url: string };
       await expect(board.getByText(join.url)).toBeVisible();
-      await expect(board.locator("main")).not.toHaveAttribute("data-board-mode", "play");
-      await expect(board.locator(".bt-qr")).toBeVisible();
+      await expect(board.locator("main")).toHaveAttribute("data-board-mode", "startup");
+      await expect(board.locator(".bt-startup-side .bt-qr")).toBeVisible();
       await expect(board.locator(".bt-acting")).toHaveCount(0);
       await shot(pad, "device-party-join");
       await shot(board, "board-party-join");
@@ -284,8 +288,13 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await d.button("quit").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "quit");
       await expect(board.locator("main")).toHaveAttribute("data-screen", "quit");
-      // Quit is "the table is closed" (spec D20), not a pause: no play chrome, no acting panel.
-      await expect(board.locator("main")).not.toHaveAttribute("data-board-mode", "play");
+      // Quit is "the table is closed" (spec D20), not a pause: no play chrome, no acting panel,
+      // and not the start-up shell either: the base layout, with the hunter roll, the closing
+      // panel and the join block.
+      await expect(board.locator("main")).not.toHaveAttribute("data-board-mode", /.+/);
+      await expect(board.locator('[data-illusionist-asset="dialog-frame"]')).toHaveCount(0);
+      await expect(board.locator(".bt-hunters")).toBeVisible();
+      await expect(board.locator(".bt-qr")).toBeVisible();
       await expect(board.locator(".bt-acting")).toHaveCount(0);
       await shot(board, "board-quit");
     });

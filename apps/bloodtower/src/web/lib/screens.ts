@@ -23,6 +23,39 @@ export const neighborStory = (stories: Stories | undefined, step: 1 | -1): Story
 };
 
 /**
+ * The Pick Game carousel's peeking neighbours. With two cards both neighbours are the same story,
+ * so it shows once, on the right (`previous` is null). Both null with fewer than two cards.
+ */
+export const carouselPeeks = (
+  stories: Stories | undefined,
+): { previous: StoryCard | null; next: StoryCard | null } => {
+  const previous = neighborStory(stories, -1);
+  const next = neighborStory(stories, 1);
+  return { previous: previous && previous.id !== next?.id ? previous : null, next };
+};
+
+/**
+ * The board's layout mode (`data-board-mode`): "startup" is the centred dialog shell over the
+ * landing painting, "play" the three-column TV chrome. Quit has neither: it is "the table is
+ * closed" (spec D20), so it keeps the closing summary and the join block in the base layout.
+ */
+export type BoardMode = "startup" | "play";
+
+export const BOARD_MODE: Record<FlowScreen, BoardMode | null> = {
+  splash: "startup",
+  "tower-connect": "startup",
+  "tower-volume-test": "startup",
+  "pick-story": "startup",
+  "game-settings": "startup",
+  "not-playable": "startup",
+  "party-join": "startup",
+  setup: "startup",
+  begin: "startup",
+  play: "play",
+  quit: null,
+};
+
+/**
  * "4 hunters": the party size. Every hunter in the pack is always in play (the card reads the
  * maximum), so the minimum is not shown. Null when the pack did not load.
  */
