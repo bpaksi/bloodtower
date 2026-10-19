@@ -4,6 +4,7 @@ import { ChipCopy } from "../components/ChipCopy.tsx";
 import { PromptStarter } from "../components/PromptStarter.tsx";
 import { Sidebar } from "../components/Sidebar.tsx";
 import "./globals.css";
+import "./graph.css";
 
 export const metadata: Metadata = {
   title: "Game Workbench",

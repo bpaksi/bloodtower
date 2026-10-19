@@ -43,7 +43,8 @@ export function PromptStarter() {
       const found = findScope(el.getAttribute("data-prompt") ?? "");
       if (!found) return;
       setScope(found);
-      setMode(found.file ? "change" : "add");
+      const asked = el.getAttribute("data-prompt-mode") as PromptMode | null;
+      setMode(asked && MODES.includes(asked) ? asked : found.file ? "change" : "add");
       dialog.current?.showModal();
       requestAnimationFrame(() => text.current?.focus());
     };

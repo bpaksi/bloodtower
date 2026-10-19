@@ -5,7 +5,7 @@ export default function NotFound() {
     <section className="page-head">
       <h1>No such document</h1>
       <p className="muted">
-        <Link href="/">Back to the design document</Link>
+        <Link href="/">Back to the graph</Link>
       </p>
     </section>
   );

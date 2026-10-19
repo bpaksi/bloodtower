@@ -1,21 +1,12 @@
 import Link from "next/link";
+import { loadCards } from "../lib/cards.ts";
+import { CARD_TYPES } from "../lib/graph-types.ts";
+import { KIND_LABEL } from "../lib/ids.ts";
 
-type Section = { label: string; prefix: string; href?: string };
-
-/** The planned sections. Only the GDD is live; the rest come with the reorg and later steps. */
-const SECTIONS: Section[] = [
-  { label: "Design document", prefix: "GDD", href: "/" },
-  { label: "Screens", prefix: "SCR" },
-  { label: "UI pieces", prefix: "UI" },
-  { label: "Tower cues", prefix: "CUE" },
-  { label: "Tower sounds", prefix: "SND" },
-  { label: "Mechanics", prefix: "MEC" },
-  { label: "Sketches", prefix: "SK" },
-  { label: "Ideas", prefix: "IDEA" },
-  { label: "Questions", prefix: "Q" },
-];
+const TYPE_LABEL: Record<string, string> = { ...KIND_LABEL, question: "Questions", idea: "Ideas" };
 
 export function Sidebar() {
+  const cards = loadCards();
   return (
     <nav className="sidebar" aria-label="Sections">
       <Link href="/" className="brand">
@@ -23,23 +14,41 @@ export function Sidebar() {
         <span className="brand-sub">Return to Dark Tower · design</span>
       </Link>
       <ul>
-        {SECTIONS.map((s) => (
-          <li key={s.prefix}>
-            {s.href ? (
-              <Link href={s.href} className="nav-item">
-                <span className="nav-prefix">{s.prefix}</span>
-                {s.label}
-              </Link>
-            ) : (
-              <span className="nav-item nav-coming" title="Coming after the reorg">
-                <span className="nav-prefix">{s.prefix}</span>
-                {s.label}
-                <span className="nav-soon">soon</span>
-              </span>
-            )}
-          </li>
-        ))}
+        <li>
+          <Link href="/" className="nav-item">
+            Graph
+          </Link>
+        </li>
+        <li>
+          <Link href="/docs" className="nav-item">
+            Documents
+          </Link>
+        </li>
       </ul>
+      <div className="card-index">
+        {CARD_TYPES.map((type) => {
+          const ofType = cards.filter((c) => c.type === type);
+          if (ofType.length === 0) return null;
+          return (
+            <section key={type}>
+              <h2>
+                <span className={`swatch chip-${type}`} />
+                {TYPE_LABEL[type] ?? type} <span className="muted">{ofType.length}</span>
+              </h2>
+              <ul>
+                {ofType.map((c) => (
+                  <li key={c.id}>
+                    <Link href={`/?focus=${c.id}`} className={`card-item st-${c.status}`}>
+                      <span className="mono">{c.id}</span>
+                      <span className="card-item-title">{c.title}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
       <p className="sidebar-foot">Source: research/game-design</p>
     </nav>
   );

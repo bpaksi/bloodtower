@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Chip } from "../../../components/Chip.tsx";
+import { LineJump } from "../../../components/LineJump.tsx";
 import { PromptScopes } from "../../../components/PromptScopes.tsx";
 import { loadDoc } from "../../../lib/content.ts";
 import { idFamily } from "../../../lib/ids.ts";
@@ -39,10 +40,13 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
   return (
     <div className="doc-layout">
       <PromptScopes scopes={scopes} />
+      <LineJump
+        sections={sections.map((s) => ({ anchor: s.anchor, start: s.startLine, end: s.endLine }))}
+      />
       <article className="doc">
         <div className="doc-bar">
           <nav className="crumbs">
-            <Link href="/">Design document</Link> / <span className="mono">{doc.file}</span>
+            <Link href="/docs">Documents</Link> / <span className="mono">{doc.file}</span>
           </nav>
           <button type="button" className="prompt-btn" data-prompt={`doc:${doc.slug}`}>
             Prompt (whole doc)

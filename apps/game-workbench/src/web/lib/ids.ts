@@ -1,7 +1,7 @@
 /**
  * Design IDs. Every piece of the game design has a stable kind-prefixed ID, so Bob and Claude
  * can name it exactly. The new prefixes (SCR-, UI-, CUE-…) come with the research/game-design
- * reorg; the older families (R-ENG-20, AST-T04, E17, Q3) already appear in the docs and are kept.
+ * reorg and the cards; the older families (R-ENG-20, AST-T04, E17, Q3) already appear in the docs and are kept.
  */
 
 export type IdKind =
@@ -9,6 +9,7 @@ export type IdKind =
   | "asset"
   | "engine"
   | "question"
+  | "decision"
   | "screen"
   | "ui"
   | "cue"
@@ -23,6 +24,7 @@ export const KIND_LABEL: Record<IdKind, string> = {
   asset: "Asset",
   engine: "Engine",
   question: "Question",
+  decision: "Decision",
   screen: "Screen",
   ui: "UI piece",
   cue: "Tower cue",
@@ -43,11 +45,12 @@ const NEW_PREFIX: Record<string, IdKind> = {
   SK: "sketch",
   EX: "example",
   Q: "question",
+  DEC: "decision",
 };
 
 // Order matters: longer, more specific forms first so R-AST-ORG-1 is not read as AST-….
 const ID_SOURCE = [
-  String.raw`(?:SCR|UI|CUE|SND|MEC|IDEA|SK|EX|Q)-\d+`,
+  String.raw`(?:SCR|UI|CUE|SND|MEC|IDEA|DEC|SK|EX|Q)-\d+`,
   String.raw`R\d?-[A-Z]+(?:-[A-Z]+)*-\d+[a-z]?`,
   String.raw`AST-[A-Z]\d+`,
   String.raw`E\d{1,2}[a-z]?`,

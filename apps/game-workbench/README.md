@@ -23,11 +23,14 @@ pnpm --dir apps/game-workbench dev     # http://localhost:4797
 
 | Path | What |
 |---|---|
-| `src/web/app/` | Next.js pages: `/` (document cards) and `/doc/<file>` (one rendered document) |
+| `src/web/app/` | Next.js pages: `/` (focus graph of the cards), `/docs` (document cards) and `/doc/<file>` (one rendered document) |
 | `src/web/lib/ids.ts` | The ID families and how an ID is recognised and classified |
 | `src/web/lib/content.ts` | Reads and groups the design docs (the groups preview the planned reorg) |
+| `src/web/lib/cards.ts` | Reads `research/game-design/cards/` (format in its README) and builds the graph; `cards.test.ts` is the card lint |
+| `src/web/lib/layout.ts` | Places the focus card, its neighbours and the next ring |
+| `src/web/lib/prompt.ts` | The prompt starter's text |
 | `src/web/lib/markdown.ts` | Renders a doc; IDs become copyable chips, sibling `.md` links stay inside the workbench |
 
 ## Plan
 
-Step 0 (this): shell and first page. Step 1: reorganise `research/game-design/` (chapters, catalogs, visuals, all pieces numbered). Step 2: the full GDD browser (`/id/<ID>` pages, backlinks, search, live refresh, ID lint in `pnpm check`). Later: UI pieces gallery, tower cue library (simulated tower, optional play on the tower through tower-poc), sketchbook, flows.
+Step 0 (this): shell, documents view, prompt starter and the focus graph over cards (seeded with Bob's quest-token thread). Step 1: reorganise `research/game-design/` (chapters, catalogs, visuals, all pieces numbered). Step 2: the full GDD browser (`/id/<ID>` pages, backlinks, search, live refresh, ID lint in `pnpm check`). Later: UI pieces gallery, tower cue library (simulated tower, optional play on the tower through tower-poc), sketchbook, flows.

@@ -24,8 +24,8 @@ const MAX_IDS = 40;
 
 const RULES: Record<PromptMode, string> = {
   change:
-    "Edit only what the scope needs, in research/game-design. Keep every existing ID; give a new piece the next free ID of its kind (SCR-, UI-, CUE-, SND-, MEC-, IDEA-, SK-, EX-, Q-). Follow CLAUDE.md for the branch, and tell me what changed by ID.",
-  add: "Add this as a new piece in research/game-design, near the scope. Give it the next free ID of its kind (SCR-, UI-, CUE-, SND-, MEC-, IDEA-, SK-, EX-, Q-) and link it to the related IDs. Follow CLAUDE.md for the branch, and tell me the new ID.",
+    "Edit only what the scope needs in research/game-design (cards follow cards/README.md). Keep every existing ID; a new piece gets the next free ID of its kind. Follow CLAUDE.md for the branch, and tell me what changed by ID.",
+  add: "Turn this into cards in research/game-design/cards (format: cards/README.md): one card per thought with a one-line title, linked to the scope with a verb (needs, raises, answers, uses, refines, affects, conflicts). If a question is already answered in a card or a document, link that answer instead of making a new card. Use the next free ID per type. Follow CLAUDE.md for the branch, and list the new IDs.",
   ask: "Answer only. Do not edit any file. Cite IDs and file lines.",
 };
 
