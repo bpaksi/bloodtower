@@ -33,68 +33,36 @@ Control delivers the **Story board Menu** (R3-UI-39): Mac mouse/keyboard access 
 
 ---
 
-## Local PR review (Anthropic only)
+## Local PR review
 
-After each PR is pushed, run **both** reviews on the **same head sha**. Any new push reruns both. At most **3** rounds; after round 3 with blockers left, add the `needs-bob` label.
+The loop is `docs/sdlc.md` §4 "Review loop": one Opus attack in round 1, Sonnet fix-checks in rounds 2 and 3, reviewers trust CI, and only the blockers listed there block. After round 3 with blockers left, add the `needs-bob` label.
 
-**Merge rule:** both reviewers **VERDICT PASS** on the same head sha **and** CI green, then:
+**`Done when` for every step below:** the step's numbered items, its `Tests:` line and the hard constraints. Viewports are exactly the ones the step names. Anything else a reviewer finds is a non-blocking follow-up.
+
+**Standing checks for this track:** only whitelisted board actions are accepted and a device cannot spoof the `board` device id; the D7 text in `spec.md` and `messages.ts` stays accurate; camera tracks (#78), audio layers (#83) and the Visuals zoom and Keeper layers still work; the board button allowlist in the acceptance tests changes only on purpose.
+
+**Merge rule:** Bob authorized merging this track when the latest review ends `Blocking: none` on the PR's head sha and CI is green:
 
 ```bash
 gh pr merge <N> --squash --match-head-commit <sha>
 ```
 
-**Fix prompt (paste into Claude Code after a FAIL):**
+**Round 1, attack (paste into Claude Code):**
 
 ```text
-Fix the findings in PR <N> review comments (head <sha>); keep scope; push; reply in the PR listing what changed.
+Run the adversary-bugs agent (Opus) on PR <N>, round 1. Step prompt: apps/bloodtower/plans/control-devices-runbook.md §<step>; use its "Review focus" line and the track's standing checks. Follow docs/sdlc.md §4: trust CI (no pnpm install, pnpm check or full e2e); prove suspicions with single spec files or a throwaway probe in a separate worktree, then remove it; block only on the §4 list; post under about 1,500 characters ending with "Blocking: none" or "Blocking: <n>".
 ```
 
-### Reviewer A — Sonnet (review only)
+**Fix (developer, Sonnet):**
 
 ```text
-You are Reviewer A (Sonnet). Review only — do not fix code in the repo.
-
-gh pr checkout <N>
-gh pr diff <N>
-pnpm install && pnpm check
-
-Check the work against this step's coding prompt in apps/bloodtower/plans/control-devices-runbook.md (spec, scope, out-of-scope list). Confirm the step's listed protocol/engine/hub changes match the PR description; D7 text in spec.md and messages.ts stays accurate. Run and reason about the step's tests. Verify fixes from earlier review rounds are still present.
-
-Post with: gh pr comment <N> --body "<comment>"
-
-Comment format:
-- First line: VERDICT PASS or VERDICT FAIL
-- Second line: head sha: <full sha>
-- Then file:line findings (or "No findings." on PASS)
-
-Use the step's "Review focus" line in the runbook for extra checks.
+Fix the blocking findings in PR <N> (head <sha>) and nothing else; rerun pnpm check and only the affected spec files; push; reply on the PR with one short comment: finding -> commit.
 ```
 
-### Reviewer B — Opus (adversarial)
+**Rounds 2 and 3, fix-check:**
 
 ```text
-You are Reviewer B (Opus). Adversarial review — prove suspicions; do not fix code in the repo.
-
-gh pr checkout <N>
-gh pr diff <N>
-pnpm install && pnpm check
-
-Trace changes through callers. Hunt for state left over after quit, replay, reconnect, or reload; races; first-press locks; session-start ordering; dev vs prod differences (:3000 vs :4787). For board menu: confirm only whitelisted actions accept storyboard `control` (or the documented board message); devices cannot spoof `board` device id.
-
-For Control also check: do not break camera tracks (#78), audio layers (#83), or Visuals zoom/Keeper layers; board button allowlist in acceptance tests updated deliberately; viewport fit at 1024×594, 1180×820, and 1920×1080 on `/board`.
-
-For each suspicion, prove it with a quick throwaway test or repro. Put repro files in /tmp, or delete them when done. Do not report anything you could not confirm.
-
-Before posting: git status — tree must be clean.
-
-Post with: gh pr comment <N> --body "<comment>"
-
-Comment format:
-- First line: VERDICT PASS or VERDICT FAIL
-- Second line: head sha: <full sha>
-- Then file:line findings (or "No findings." on PASS)
-
-Use the step's "Review focus" line in the runbook for extra checks.
+Run the adversary-bugs agent with model sonnet on PR <N>, round <r>, last reviewed sha <sha>. Fix-check only (docs/sdlc.md §4): read the open blocking findings and git diff <sha>..HEAD; confirm each is fixed and nothing next to it broke; no new hunting. Post under about 1,500 characters ending with "Blocking: none" or "Blocking: <n>".
 ```
 
 ---

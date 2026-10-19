@@ -21,7 +21,7 @@ apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──appro
 | 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
 | 3. Build | Plan mode first. One plan per milestone; each step is one branch in its own worktree and one PR. Steps carry `Depends on`, `Touches`, `Deps change` and `Runs`, and the plan groups them into batches (see Parallel work). Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan (gate G-plan) |
 | 4. Test | The developer runs `pnpm check` in its worktree and puts the output in the PR body. GitHub Actions reruns `pnpm check` on the PR. The verifier runs on the PR branch and posts its result on the PR. | Vitest, Playwright, screenshots, `.github/workflows/check.yml` | Only at a named gate (playtest, judgement) |
-| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs checks on commit; CI runs `pnpm check` on the PR; the `adversary-bugs` and `adversary-prd` agents post findings on the PR, and the developer fixes them, for up to 3 rounds. The coordinator squash-merges, one PR at a time, once CI is green and both adversaries report no blocking findings (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
+| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs checks on commit; CI runs `pnpm check` on the PR; one adversarial review (round 1) posts findings, the developer fixes the blockers, and fix-check rounds confirm the fixes, for up to 3 rounds in all. The coordinator squash-merges, one PR at a time, once CI is green and the latest review says `Blocking: none` (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
 | 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
 
 ## Tiers
@@ -35,7 +35,7 @@ Every app README states its tier. Explore-phase experiments shouldn't carry the 
 | Spec | Optional; README is enough | Required, with decision log |
 | Plans | Optional single `plans/plan.md` | One per milestone |
 | Shared hooks + `pnpm check` | Yes | Yes |
-| Adversary agents | Optional (`adversary-bugs` only) | Both, every PR |
+| Adversary agents | Optional (`adversary-bugs` only) | Review loop (§4) on every PR; `adversary-prd` when the step claims PRD ids |
 | Branch per step | Yes | Yes |
 
 Promoting an Experiment to Full: write a spec from what was learned, then continue with milestone plans.
@@ -61,7 +61,7 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 | No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: `adversary-bugs` checks the diff. |
 | No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2. `main` changes only by a squash-merged PR. |
 | A developer agent writes only inside its own worktree | `worktree-guard` PreToolUse hook on edits and shell writes, active in any checkout with a `.wt.json` → exit 2. Temp folders stay writable; the main checkout and other worktrees do not, even when they sit in a temp folder. |
-| A PR merges only on green CI | `check` workflow on every PR. Branch protection on `main` requires the `check` status and an up-to-date branch. The coordinator also merges only when both adversaries' latest reports end in `Blocking: none`. |
+| A PR merges only on green CI | `check` workflow on every PR. Branch protection on `main` requires the `check` status and an up-to-date branch. The coordinator also merges only when the latest review ends in `Blocking: none`. |
 | The ordinary ways to skip `pnpm check` on a commit are blocked | The same hook blocks `--no-verify`, `-n`, `LEFTHOOK=0` and `core.hooksPath` on committing git commands, on every branch → exit 2. Docs-only commits skip the check by design (`lefthook.yml`). |
 | Pinned `ultimatedarktower` cannot be bumped silently | Pins live in `scripts/pinned-versions.json`. `scripts/check-pins.mjs` in `pnpm check` fails on any other version in a `package.json` or the lockfile. A PreToolUse hook warns earlier, on the edit or install command. |
 | No raw-bytes message type in a tower protocol | Protocol unit test plus an `adversary-bugs` check |
@@ -79,10 +79,10 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # runs checks + Playwright + screenshots for the app under change; reports, never fixes (model: haiku)
-.claude/agents/adversary-bugs.md  # adversarial PR review: bugs, edge cases, security, spec holes, all REVIEW.md passes (model: sonnet; Opus override in round 3). Replaced reviewer.md
-.claude/agents/adversary-prd.md   # adversarial PR review against PRD ids and SC-1..SC-5 (model: haiku; Opus override in round 3)
-.claude/agents/developer.md     # builds one plan step in its own worktree with tests, pushes, opens the PR (model: sonnet; Opus override for work that needs more judgement)
-.claude/agents/coordinator.md   # runs one approved batch: worktrees, developers, PR review, serial merges; stops at Bob's gates
+.claude/agents/adversary-bugs.md  # round 1: adversarial PR review, all REVIEW.md passes (model: opus). Rounds 2-3: fix-check only (Sonnet override). Replaced reviewer.md
+.claude/agents/adversary-prd.md   # round 1 only, and only when the step claims PRD/AT/SC ids: checks them against the diff (model: haiku)
+.claude/agents/developer.md     # builds one plan step in its own worktree with tests, pushes, opens the PR (model: sonnet; Opus only when the step says `Model: opus`)
+.claude/agents/coordinator.md   # runs one approved batch: worktrees, developers, PR review, serial merges; stops at Bob's gates (model: sonnet)
 .claude/agents/requirement-review.md  # reviews one step's requirements before build: conflicts, gaps, untestable criteria, open rulings, out-of-scope Touches (model: sonnet)
 .claude/skills/new-app/SKILL.md            # scaffold apps/<name>/ with README, intent, tier
 .claude/skills/tower-capability/SKILL.md   # tower apps: inventory → protocol → executor → UI → test → gap
@@ -142,8 +142,7 @@ When Cursor cloud agents cannot run, a batch is built in Claude Code on Bob's Ma
 
 - Work only in a worktree on a new branch off `origin/main` (`pnpm wt <branch>`). Never edit, stash, or switch branches in Bob's main checkout.
 - Deliver as a PR to `main`. The required `check` still gates it.
-- Two Claude Code subagents replace the two cloud reviewers: a **reviewer** (`adversary-bugs`: bugs, edge cases, adversarial) and a **verifier** (spec/PRD conformance as `adversary-prd`, and it runs the exit tests). Each ends its PR report with `Blocking: none` or `Blocking: <n>`.
-- Same cap of 3 rounds. Rounds 1 and 2 use Sonnet (`adversary-bugs` and the developer fixes) and Haiku (`adversary-prd`). Round 3 runs both adversaries and the developer fix with an Opus override. This differs from the cloud ladder (round 2 Opus high effort, round 3 Opus max effort).
+- The review loop is the one in §4 "Review loop": one Opus adversarial pass in round 1, Sonnet fix-checks after it. The developer and its fixes run on Sonnet unless the step says `Model: opus`. The developer's PR body carries the `Done when` checklist with evidence, so there is no separate spec-conformance reviewer.
 - Blockers still open after round 3 get the `needs-bob` label, and the step stops.
 - Claude Code never merges. Wright reviews and merges as in §4.
 
@@ -161,7 +160,16 @@ Every step in `apps/<app>/plans/Mx-*.md` carries four fields:
 - Touches: apps/game/src/combat/**, packages/dice/**
 - Deps change: no          # yes if it edits any package.json or pnpm-lock.yaml
 - Runs: cloud              # local or cloud, set by the plan author (see Step placement)
+- Model: sonnet            # optional; "opus" only for tower safety, hooks, protocol or schema design, an unexplained bug, or open design choices
+- Done when:               # measurable, and the only things a reviewer may block on besides the standing rules (§4)
+  - <observable result, with numbers where it has any>
+  - Viewports: <at most 3, named>   # UI steps
+  - Not required: <edge cases and polish deliberately left out>
 ```
+
+**`Done when` is the contract.** It names what the step must do and how a test proves it. A reviewer may not add viewports, timings or edge cases to it; those become follow-up issues. If a step has no measurable `Done when`, requirement review writes one before code and Bob's plan approval covers it.
+
+**Step size.** A step expected to exceed about 400 changed lines, or that mixes a visual change with new timing or interaction behaviour, is split into two steps (for example "layer and plain zoom", then "interruptible zoom").
 
 A **batch** is a set of steps whose dependencies are already merged (or signed off, for gates), whose `Touches` globs do not overlap, and where at most one has `Deps change: yes`. The plan lists its batches and merge order:
 
@@ -180,6 +188,8 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 **Requirement review before build.** Requirements are checked before code, so building does not stall on a question that was answerable earlier.
 
 - **Planning.** Before a step is scheduled, Wright and Gamewright review its requirements (PRD refs, acceptance criteria, rulings) and resolve conflicts or gaps between them. Only open items that need Bob's ruling go to Bob, as one multiple-choice question at a time.
+- **Whole track, once.** Before the first batch of a plan or runbook, `requirement-review` reads every remaining step together and reports any later step that changes, hides or removes what an earlier step builds (visuals step 10 made step 8's still plate unreachable, after step 8 had spent its rounds tuning it). Fix the order or the scope before building; do not find it in review.
+- **UI rulings up front.** Questions a UI step is bound to raise (what shows at small heights, what text gets cut, what is on top of what) are asked before code, not listed as "spec holes" in the PR.
 - **`Runs: local` steps.** The session opens with a requirement review by Claude Code (the `requirement-review` agent) with Bob present: conflicts, missing or untestable acceptance criteria, open rulings, and `Touches` outside the step's scope. Bob's answers are recorded before building starts.
 - **`Runs: cloud` steps.** The cloud agent's first action is a short requirement check against the PRD and the step. If it finds a genuine blocking question, it stops before writing code and reports the question; the coordinator relays it to Bob. Otherwise it proceeds without stopping. Escalation to Bob should be rare.
 - **Record.** The findings and answers go in the PR body under `Requirement review`.
@@ -205,12 +215,15 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 
 1. The developer commits in its worktree, pushes the branch and opens a PR with `gh pr create`. The body names the plan step id and carries the evidence (the `pnpm check` exit code and test counts, what was not verified).
 2. CI (`.github/workflows/check.yml`) runs `pnpm check` on the PR.
-3. The verifier runs on the PR branch in its worktree and posts its result as a PR comment (it runs things; the adversaries read and attack).
-4. **Adversarial loop, at most 3 rounds.** Both adversaries review the PR and post with `gh pr review --comment`, each report ending in `Blocking: none` or `Blocking: <count>`:
-   - `adversary-bugs` (sonnet; Opus override in round 3): bugs, edge cases, races, security and privacy, tower safety, weak tests, spec holes, plus every `REVIEW.md` pass. It replaced the `reviewer` agent, whose passes it runs.
-   - `adversary-prd` (haiku; Opus override in round 3): the PRD requirement IDs, acceptance tests and SC-1..SC-5 the step claims, and regressions in the ones it does not.
-   The developer fixes the blocking findings, pushes, and answers each finding on the PR; the next round starts. Different models on purpose, so the two do not share blind spots. Claude Code's agent `model:` field takes an alias (`opus`, `sonnet`, `haiku`) or a full Claude model id; it has no per-agent provider option. The provider (Anthropic API, Bedrock, Vertex, a gateway via `ANTHROPIC_BASE_URL`) is set for the whole session by environment variables, so a non-Claude second opinion would need a separate CLI called from Bash, which this repo does not do. (GitHub does not let an account approve its own PR and every agent posts as Bob, so the `Blocking:` lines are what count.)
-5. **Merge** when CI is green and the latest report from **both** adversaries says `Blocking: none`. The coordinator merges one PR at a time, in the batch's merge order: `gh pr update-branch` if `main` moved, wait for CI again, then `gh pr merge --squash --delete-branch`. A conflict or a red check after an update goes back to the developer and counts as a new round.
+3. The verifier runs once per PR, on the head that round 1 reviews, and posts its result as a PR comment. It is the one full e2e run besides the developer's; fix rounds rely on CI plus the developer's rerun of the affected spec files.
+4. **Review loop, at most 3 rounds.** Each report ends in `Blocking: none` or `Blocking: <count>`. GitHub does not let an account approve its own PR and every agent posts as Bob, so the `Blocking:` lines are what count.
+   - **Round 1, adversarial (Opus).** `adversary-bugs` attacks the diff: bugs, edge cases, races, security and privacy, tower safety, weak tests, plus every `REVIEW.md` pass. If the step claims PRD, AT or SC ids, `adversary-prd` (Haiku) checks those in parallel by reading; otherwise it does not run. Docs-only PRs get one Sonnet `adversary-bugs` pass for consistency and nothing else.
+   - **Rounds 2 and 3, fix-check (Sonnet).** `adversary-bugs` with a Sonnet override reads only the open findings and `git diff <last reviewed sha>..HEAD`. It confirms each finding is fixed and that the fix broke nothing next to it. It does not hunt for new problems; a new blocker is allowed only when the fix itself caused it.
+   - **Trust CI.** Reviewers do not run `pnpm install`, `pnpm check` or the full e2e suite: CI and the developer did, on the same head. A reviewer may run single spec files or a throwaway probe to prove a suspicion.
+   - **What blocks** (nothing else does): a regression against `main`; a `Done when` item that is not met, or not proven by a test that can fail; a broken standing rule (tower safety, privacy, D7-style message rules, unknown shown as zero); a change outside `Touches` or an unflagged dependency change. Everything else is non-blocking: a nit (cap 5), a spec hole for Bob, or a follow-up the coordinator files as an issue.
+   - **Short reports.** At most about 1,500 characters: findings with file, line, what breaks and how to reproduce. No restated test counts or measurement tables unless they prove a blocker. Later rounds and the developer read every report, so length costs every round after it.
+   The developer fixes the blocking findings, pushes, and answers on the PR in one short comment (finding → commit). Claude Code's agent `model:` field takes an alias (`opus`, `sonnet`, `haiku`) or a full Claude model id, and the Agent tool can override it per call; that is how rounds 2 and 3 run `adversary-bugs` on Sonnet.
+5. **Merge** when CI is green and the latest review says `Blocking: none` (and `adversary-prd`'s round 1 report, when it ran). The coordinator merges one PR at a time, in the batch's merge order: `gh pr update-branch` if `main` moved, wait for CI again, then `gh pr merge --squash --delete-branch`. A conflict or a red check after an update goes back to the developer and counts as a new round.
 6. **Escalation.** If round 3 ends with blocking findings still open, the coordinator labels the PR `needs-bob`, disables auto-merge on it (`gh pr merge --disable-auto`, a no-op while auto-merge is unavailable), stops that step, and reports it to Bob with the open findings. Steps that depend on it wait; the rest of the batch continues. Bob decides: fix himself, re-scope the step, override a finding, or drop it.
 7. `pnpm wt:rm <branch>` after the merge.
 
@@ -226,12 +239,21 @@ When a batch has merged, the coordinator posts one summary (as a comment on the 
 
 - reads the approved plan and the next batch whose dependencies are met,
 - runs `pnpm wt` for each step and starts one developer agent per worktree,
-- runs the verifier and both adversaries on each PR for up to 3 rounds, merges PRs serially as in §4, and escalates with `needs-bob`,
+- runs the verifier once and the review loop on each PR for up to 3 rounds, merges PRs serially as in §4, and escalates with `needs-bob`,
 - writes the batch summary,
 - stops at a gate step and asks for Bob's sign-off,
-- never commits to `main`, never edits intent, never merges a PR without green CI and `Blocking: none` from both adversaries, and never starts a step outside the approved plan.
+- never commits to `main`, never edits intent, never merges a PR without green CI and `Blocking: none` from the latest review, and never starts a step outside the approved plan.
 
 Start with two or three agents per batch. Raise the cap once first-pass CI success stays high.
+
+### 7. Token budget
+
+Token use and wall-clock time are the same problem here: on 2026-10-19 the visuals track hit the plan's session limit twice and sat idle for about 4 h 50 m (PRs #94 and #99).
+
+- **One heavy track at a time.** Do not run two Opus-heavy tracks (a coordinator batch and a separate Opus build session) on the same plan limit at once.
+- **Fresh coordinator per batch.** Start a new coordinator session for each batch; do not keep one session running all day.
+- **Link, do not paste.** Brief a developer with the PR number and the finding ids, not the text of every report.
+- **Opus where it pays.** Round 1 review, and steps marked `Model: opus`. Everything else runs on Sonnet or Haiku.
 
 ## Metrics we'll actually glance at
 
@@ -245,3 +267,4 @@ Start with two or three agents per batch. Raise the cap once first-pass CI succe
 - Batch wall-clock time vs. the same steps run serially (lagging).
 - Time a PR waits between green CI and merge (lagging). It shows whether serial merging is the bottleneck.
 - Gate turnaround: time from a gate step becoming ready to Bob's sign-off (lagging).
+- Tokens per merged PR, from the session transcripts (lagging). Baseline for visuals steps 6-10 (PRs #89-#99): about 88M for 5 PRs.

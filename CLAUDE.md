@@ -30,7 +30,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 2. One branch per plan step: `<type>/<app>-<slug>` (repo-wide work: `chore/<slug>`). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
 4. Before handing over, run `pnpm check`, push the branch and open a PR with the evidence and the plan step id in the body.
-5. CI runs `pnpm check` on the PR; the `verifier` posts its run, and the two adversaries (`adversary-bugs`, `adversary-prd`) post findings. The developer fixes and they review again, for up to 3 rounds. The coordinator squash-merges one PR at a time once CI is green and both adversaries say `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
+5. CI runs `pnpm check` on the PR and the `verifier` posts one run. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
 
 ## Conventions
 
