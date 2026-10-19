@@ -1214,13 +1214,8 @@
 
 /* Play chrome (visuals step 6): the three-column TV layout from mocks/story-board.html. */
 .bt-board[data-board-mode="play"] .bt-board-header {
-  grid-template-columns: minmax(16rem, 22%) minmax(0, 1fr) minmax(16rem, 22%);
+  grid-template-columns: minmax(18rem, 32%) minmax(0, 1fr) minmax(11rem, 22%);
   align-items: center;
-}
-
-.bt-board[data-board-mode="play"] .bt-zone {
-  min-height: 5rem;
-  padding: 0.5rem 1.1rem;
 }
 
 .bt-board[data-board-mode="play"] .bt-zone .bt-num {
@@ -1229,11 +1224,6 @@
 
 .bt-board[data-board-mode="play"] .bt-join-zone .bt-num {
   font-size: clamp(2rem, 3.3vw, 4rem);
-}
-
-.bt-board[data-board-mode="play"] .bt-zone-copy {
-  flex: 1 1 0;
-  overflow-wrap: anywhere;
 }
 
 .bt-board[data-board-mode="play"] .bt-board-main {
@@ -1275,17 +1265,13 @@
   margin: 0;
 }
 
+.bt-board[data-board-mode="play"] .bt-acting-name[data-unavailable],
 .bt-board[data-board-mode="play"] .bt-acting-stats .bt-num {
   font-size: var(--bt-size-label);
   color: var(--bt-parchment-dark);
 }
 
 @media (min-width: 1024px) and (max-height: 700px) {
-  .bt-board[data-board-mode="play"] .bt-zone {
-    min-height: 0;
-    padding: 0.28rem 0.7rem;
-  }
-
   .bt-board[data-board-mode="play"] .bt-acting {
     gap: 0.3rem;
   }
