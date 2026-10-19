@@ -30,8 +30,8 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 | 3 | `feat/visuals-03-startup-shell` | none | — | blocked on asset (dialog frame) | |
 | 4 | `feat/visuals-04-carousel-dialog` | 3 | — | blocked on asset (dialog frame) | |
 | 5 | `feat/visuals-05-startup-summary` | 3 | — | todo (after 3; ink panel, no dialog frame) | |
-| 6 | `feat/visuals-06-play-chrome` | none | 7 | todo | |
-| 7 | `feat/visuals-07-hunter-roll` | 6 | none | todo | |
+| 6 | `feat/visuals-06-play-chrome` | none | 7 | in review (Open question 1: option a; QR hidden in play; quit is not play mode, it keeps the closing summary and join block; Now acting reads unavailable until the engine exposes an acting hunter) | |
+| 7 | `feat/visuals-07-hunter-roll` | 6 | none | in review (Q2 (a) status: Waiting / Away / holder id; portrait medallions whenever packId + portrait exist; corruption column reads unavailable; no acting-hunter highlight, the `.bt-cart-act` blood rule stays in board.css unused until the engine exposes an acting hunter; no epithet line, the hunter schema has no epithet field) | #93 |
 | 8 | `feat/visuals-08-play-parchment` | 6 | 7 | todo | |
 | 9 | `feat/visuals-09-waiting-dialog` | 8 | — | blocked on asset (dialog frame) | |
 | 10 | `feat/visuals-10-visual-zoom` | 8 | none | todo | |
@@ -41,7 +41,7 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 
 Bob should run **play TV track first** (no Illusionist frame/mask). **Startup / Sound / flicker last**, after assets land or via an approved placeholder-only PR for that step.
 
-- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (and `quit` if you keep play chrome there); it does not require step 3. Do not run 6 with 4 or 5.
+- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (not `quit`: quit is "table closed", spec D20); it does not require step 3. Do not run 6 with 4 or 5.
 - **Wave P2 (after 8):** 10 then 11 (visual zoom, then Keeper). Step 10 does not require step 9 (waiting dialog is separate).
 - **Wave P3 (after 10, optional before assets):** 9 only after **dialog frame** is delivered (or Bob approves placeholder in step 9).
 - **Wave S (startup, after dialog frame):** 3, then 4 and 5 (4 and 5 rebase `StoryBoard.tsx`; 5 uses `.bt-panel` summary, not `DialogFrame`).
@@ -261,7 +261,7 @@ Depends on: step 8. Run after **dialog frame** is delivered (or Bob approves pla
 
 Missing asset: Illusionist **dialog frame** (in progress). Small centred waiting UI must be wrapped in `DialogFrame` only; no ad-hoc border CSS elsewhere. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30, R3-UI-115). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30) and R2-115 (research/game-design/r2-screen-flow.md). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
 
 Goal: when play has no full-screen visual (no still, not Keeper, not clip), show a small centred waiting dialog over the painting with the prompt label ("Waiting for…"), not a full parchment page filling the column.
 

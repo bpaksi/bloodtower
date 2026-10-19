@@ -220,6 +220,9 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(board.getByText(host.joinCode, { exact: true })).toBeVisible();
       const join = boardStates(boardFrames).at(-1)?.join as { url: string };
       await expect(board.getByText(join.url)).toBeVisible();
+      await expect(board.locator("main")).not.toHaveAttribute("data-board-mode", "play");
+      await expect(board.locator(".bt-qr")).toBeVisible();
+      await expect(board.locator(".bt-acting")).toHaveCount(0);
       await shot(pad, "device-party-join");
       await shot(board, "board-party-join");
 
@@ -274,11 +277,16 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       await expect(board.locator("[data-status='step']")).toContainText("Play");
       await expect(d.button("continue")).toBeEnabled();
       await shot(pad, "device-play");
+      await expect(board.locator("main")).toHaveAttribute("data-board-mode", "play");
+      await expect(board.locator(".bt-acting [data-unavailable]")).toHaveCount(3);
       await shot(board, "board-play");
 
       await d.button("quit").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "quit");
       await expect(board.locator("main")).toHaveAttribute("data-screen", "quit");
+      // Quit is "the table is closed" (spec D20), not a pause: no play chrome, no acting panel.
+      await expect(board.locator("main")).not.toHaveAttribute("data-board-mode", "play");
+      await expect(board.locator(".bt-acting")).toHaveCount(0);
       await shot(board, "board-quit");
     });
   } finally {

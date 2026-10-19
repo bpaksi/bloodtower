@@ -27,12 +27,54 @@ const assertBoardFits = async (page: Page, opts?: { keeper?: boolean }) => {
     await expect(portrait).toBeInViewport({ ratio: 1 });
     await expect(caption).toBeInViewport({ ratio: 1 });
   }
+  // The play roll: a corruption column reading unavailable (never 0) and no invented acting hunter.
+  if (await page.locator(".bt-cart-roll").count()) {
+    const cor = page.locator(".bt-cart-cor");
+    await expect(cor).toHaveCount(4);
+    for (let i = 0; i < 4; i += 1) {
+      await expect(cor.nth(i)).toHaveText("—");
+      await expect(cor.nth(i)).toHaveAttribute("data-unavailable", "");
+      await expect(cor.nth(i)).toBeInViewport({ ratio: 1 });
+    }
+    await expect(page.locator(".bt-cart-act")).toHaveCount(0);
+  }
   const overflow = await page.evaluate(() => ({
     x: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     y: document.documentElement.scrollHeight - document.documentElement.clientHeight,
   }));
   expect(overflow.y, "board must not scroll vertically").toBeLessThanOrEqual(0);
   expect(overflow.x, "board must not scroll sideways").toBeLessThanOrEqual(0);
+};
+
+/**
+ * Play chrome must not cost header height or break words in the zone labels. The baseline is the
+ * same page with the play attribute removed (the startup header layout), measured in place.
+ */
+const assertPlayHeader = async (page: Page) => {
+  const measure = () =>
+    page.evaluate(() => {
+      const header = document.querySelector(".bt-board-header") as HTMLElement;
+      const copies = [...document.querySelectorAll(".bt-zone-copy > *")] as HTMLElement[];
+      return {
+        height: header.getBoundingClientRect().height,
+        // One line each: a word broken mid-word makes the element taller than its line height.
+        broken: copies.filter((el) => {
+          const lineHeight = Number.parseFloat(getComputedStyle(el).lineHeight);
+          return el.getBoundingClientRect().height > lineHeight * 1.5;
+        }).length,
+        overflow: copies.filter((el) => el.scrollWidth > el.clientWidth + 1).length,
+      };
+    });
+  const main = page.locator("main");
+  const play = await measure();
+  await main.evaluate((el) => el.removeAttribute("data-board-mode"));
+  const base = await measure();
+  await main.evaluate((el) => el.setAttribute("data-board-mode", "play"));
+  expect(play.broken, "zone labels stay on one line per element").toBe(0);
+  expect(play.overflow, "zone labels do not overflow their column").toBe(0);
+  expect(play.height, "play header is no taller than the base header").toBeLessThanOrEqual(
+    base.height + 2,
+  );
 };
 
 test("story board look at proving ground, grey-stair, and the Keeper", async ({
@@ -97,17 +139,28 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
       const status = await cartStatus.nth(i).innerText();
       expect(status, "cartouche status is the holder id, not the hunter name").not.toContain(name);
       expect(status).not.toMatch(/—/);
+      expect(status, "status maps from existing fields").toMatch(/^(Waiting|Away|\S+)$/);
       expect(status.length).toBeGreaterThan(0);
     }
     await expect(board.locator(".bt-banner")).toContainText("iPads can't reach this address");
     await assertBoardFits(board);
+    await assertPlayHeader(board);
     await shot(board, "board-proving-ground-landscape");
 
     await board.setViewportSize({ width: 1024, height: 594 });
     await expect(board.locator(".bt-banner")).toContainText("iPads can't reach this address");
-    await expect(board.getByText("Emeric")).toBeVisible();
+    await expect(board.locator(".bt-cart-nm", { hasText: "Emeric" })).toBeVisible();
     await assertBoardFits(board);
+    await assertPlayHeader(board);
     await shot(board, "board-join-warning-1024x594");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await expect(board.locator("main")).toHaveAttribute("data-board-mode", "play");
+    await expect(board.locator(".bt-acting")).toBeInViewport({ ratio: 1 });
+    // No acting hunter, corruption or carried data exists yet: all three read unavailable.
+    await expect(board.locator(".bt-acting [data-unavailable]")).toHaveCount(3);
+    await expect(board.locator(".bt-qr")).toHaveCount(0);
+    await assertBoardFits(board);
+    await shot(board, "board-proving-ground-1920x1080");
     await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();
@@ -120,6 +173,10 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
     await shot(board, "board-grey-stair-landscape");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await assertBoardFits(board);
+    await shot(board, "board-grey-stair-1920x1080");
+    await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();
     await expect(board.getByText(/At the top, a door/)).toBeVisible();
@@ -152,6 +209,9 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator("main")).toHaveAttribute("data-moment", "grey-stair.03");
     await assertBoardFits(board, { keeper: true });
     await shot(board, "board-keeper-1024x594");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await assertBoardFits(board, { keeper: true });
+    await shot(board, "board-keeper-1920x1080");
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await host.close();
