@@ -30,7 +30,7 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 | 3 | `feat/visuals-03-startup-shell` | none | — | blocked on asset (dialog frame) | |
 | 4 | `feat/visuals-04-carousel-dialog` | 3 | — | blocked on asset (dialog frame) | |
 | 5 | `feat/visuals-05-startup-summary` | 3 | — | todo (after 3; ink panel, no dialog frame) | |
-| 6 | `feat/visuals-06-play-chrome` | none | 7 | todo | |
+| 6 | `feat/visuals-06-play-chrome` | none | 7 | in review (Open question 1: option a; QR hidden in play; quit is not play mode, it keeps the closing summary and join block; Now acting reads unavailable until the engine exposes an acting hunter) | |
 | 7 | `feat/visuals-07-hunter-roll` | 6 | none | todo | |
 | 8 | `feat/visuals-08-play-parchment` | 6 | 7 | todo | |
 | 9 | `feat/visuals-09-waiting-dialog` | 8 | — | blocked on asset (dialog frame) | |
@@ -41,7 +41,7 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 
 Bob should run **play TV track first** (no Illusionist frame/mask). **Startup / Sound / flicker last**, after assets land or via an approved placeholder-only PR for that step.
 
-- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (and `quit` if you keep play chrome there); it does not require step 3. Do not run 6 with 4 or 5.
+- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (not `quit`: quit is "table closed", spec D20); it does not require step 3. Do not run 6 with 4 or 5.
 - **Wave P2 (after 8):** 10 then 11 (visual zoom, then Keeper). Step 10 does not require step 9 (waiting dialog is separate).
 - **Wave P3 (after 10, optional before assets):** 9 only after **dialog frame** is delivered (or Bob approves placeholder in step 9).
 - **Wave S (startup, after dialog frame):** 3, then 4 and 5 (4 and 5 rebase `StoryBoard.tsx`; 5 uses `.bt-panel` summary, not `DialogFrame`).
