@@ -196,22 +196,6 @@ const P90 =
 const P200 =
   "Agnes may oil the hinge and slip inside quietly, or Tomas may force the door and wake the whole house; whoever goes first carries the lantern and must draw a card from the dread deck before anyone moves";
 
-/**
- * Still well height on origin/main for the same moment (grey-stair.01) with the real text, a
- * 294-character text (DRAC) and a 480-character text (FIVE), measured per viewport.
- */
-const MAIN_WELL: Record<string, [number, number, number]> = {
-  "1024x594": [171, 112, 112],
-  "1180x820": [282, 112, 112],
-  "1366x768": [247, 112, 112],
-  "1440x900": [361, 197, 112],
-  "1440x901": [362, 198, 112],
-  "1280x901": [383, 235, 112],
-  "1600x1000": [441, 272, 145],
-  "1680x1050": [485, 316, 231],
-  "1920x960": [419, 267, 183],
-  "1920x1080": [531, 379, 295],
-};
 const BUDGET_VIEWPORTS = [
   "1024x594",
   "1180x820",
@@ -226,9 +210,6 @@ const BUDGET_VIEWPORTS = [
   "820x1180",
   "1024x1366",
 ];
-/** Height the ornament and the items zone may cost the well (they only show from 1040px high). */
-const EXTRAS_MAX = 100;
-
 const setNode = (page: Page, selector: string, text: string | null) =>
   page
     .locator(selector)
@@ -251,57 +232,57 @@ const setPrompt = async (page: Page, text: string | null) => {
   }, text);
 };
 
-const measureStill = (page: Page) =>
+/** The waiting page (a text moment) and its narration, measured where they sit. */
+const measurePage = (page: Page) =>
   page.evaluate(() => {
-    const well = document.querySelector("[data-camera-still]") as HTMLElement;
+    const story = document.querySelector(".bt-story") as HTMLElement;
     const pageEl = document.querySelector(".bt-page") as HTMLElement;
-    const plate = document.querySelector(".bt-plate") as HTMLElement;
-    const wr = well.getBoundingClientRect();
-    const pr = plate.getBoundingClientRect();
+    const text = document.querySelector(".bt-page [data-moment-caption]") as HTMLElement;
+    const band = document.querySelector("[data-next-band]") as HTMLElement;
     return {
-      h: wr.height,
-      aspect: wr.width / wr.height,
-      plateVisible:
-        (Math.min(pr.bottom, pageEl.getBoundingClientRect().bottom) - pr.top) / pr.height,
+      storyBottom: story.getBoundingClientRect().bottom,
+      pageBottom: pageEl.getBoundingClientRect().bottom,
+      textBottom: text.getBoundingClientRect().bottom,
+      bandBottom: band.getBoundingClientRect().bottom,
+      viewH: window.innerHeight,
       docY: document.documentElement.scrollHeight - document.documentElement.clientHeight,
     };
   });
 
 /**
- * The still well is at least main's at the same viewport and text (less the ornament and items
- * zone where those show), the plate is fully visible, and the prompt band shows every real
- * prompt untruncated. Run at every viewport in BUDGET_VIEWPORTS on the grey-stair moment.
+ * The waiting board (a text moment, no visual): the narration stays inside its page with the
+ * real text, a 294-character text (DRAC) and a 480-character text (FIVE), the page and the band
+ * fit, and the prompt band shows every real prompt untruncated. Since visuals step 10 a still
+ * shows in the visual layer, so its size is checked in visual-layer.spec.ts, not here.
  */
 const assertViewportBudget = async (page: Page, key: string) => {
   const [w, h] = key.split("x").map(Number);
   await page.setViewportSize({ width: w as number, height: h as number });
   await page.waitForTimeout(300);
   const tall = (h as number) >= 1040;
-  const base = MAIN_WELL[key];
   const texts: [string, string | null][] = [
     ["real", null],
     ["294 chars", DRAC],
     ["480 chars", FIVE],
   ];
-  for (const [i, [name, text]] of texts.entries()) {
-    await setNode(page, "[data-moment-caption]", text);
+  for (const [name, text] of texts) {
+    await setNode(page, ".bt-page [data-moment-caption]", text);
     await page.waitForTimeout(250);
-    const m = await measureStill(page);
+    const m = await measurePage(page);
     const label = `${key} ${name}`;
-    expect(m.plateVisible, `${label}: plate fully visible`).toBeGreaterThanOrEqual(0.99);
+    expect(m.textBottom, `${label}: narration stays in its page`).toBeLessThanOrEqual(
+      m.pageBottom + 1,
+    );
+    expect(m.pageBottom, `${label}: page stays in the story column`).toBeLessThanOrEqual(
+      m.storyBottom + 1,
+    );
     // Under 960px wide the board stacks into one column and scrolls on main too (spec: TV board).
     if ((w as number) >= 960) {
       expect(m.docY, `${label}: board does not scroll`).toBeLessThanOrEqual(0);
-    }
-    if (base) {
-      expect(m.h, `${label}: still well as tall as main's`).toBeGreaterThanOrEqual(
-        (base[i] as number) - (tall ? EXTRAS_MAX : 3),
-      );
-    } else {
-      expect(m.h, `${label}: still well keeps room`).toBeGreaterThanOrEqual(112);
+      expect(m.bandBottom, `${label}: band on screen`).toBeLessThanOrEqual(m.viewH + 1);
     }
   }
-  await setNode(page, "[data-moment-caption]", null);
+  await setNode(page, ".bt-page [data-moment-caption]", null);
   if (tall) {
     await expect(page.locator("[data-party-items]")).toBeVisible();
     await expectItemsInside(page);
@@ -334,6 +315,19 @@ const assertViewportBudget = async (page: Page, key: string) => {
     long.line * 3 + 24,
   );
   await setPrompt(page, null);
+};
+
+/**
+ * A visual moment (visuals step 10): the board is on the visual layer, the still sits in its
+ * plate inside the layer with its #78 hooks, and the moment text is the layer's caption.
+ */
+const assertVisualLayer = async (page: Page) => {
+  await expect(page.locator("main")).toHaveAttribute("data-board-layer", "visual");
+  await expect(page.locator("[data-visual-layer] .bt-plate > [data-camera-still]")).toHaveCount(1);
+  await expect(page.locator("[data-visual-layer] [data-moment-caption]")).toBeInViewport({
+    ratio: 1,
+  });
+  await expect(page.locator(".bt-page [data-camera-still]")).toHaveCount(0);
 };
 
 test("story board look at proving ground, grey-stair, and the Keeper", async ({
@@ -386,6 +380,8 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await d.button("begin").click();
 
     await expect(board.getByText("The proving ground is quiet.")).toBeVisible();
+    // proving-ground.01 is a still: the board is on the visual layer (visuals step 10).
+    await expect(board.locator("main")).toHaveAttribute("data-board-layer", "visual");
     await expect(board.locator(".bt-board-title h1")).toContainText("The Hall");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Proving Ground");
     await expect(board.locator("[data-status-strip]")).toHaveCount(0);
@@ -424,6 +420,25 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
 
     await d.button("continue").click();
     await expect(board.getByText("Each hunter reads alone.")).toBeVisible();
+    // A text moment: the waiting board, with the parchment page (visuals step 8) and no layer.
+    await expect(board.locator("main")).toHaveAttribute("data-board-layer", "waiting");
+    await expect(board.locator("[data-visual-layer]")).toHaveCount(0, { timeout: 2000 });
+    await assertBoardFits(board);
+    await assertPlayParchment(board);
+    await assertPlayHeader(board);
+    await shot(board, "board-waiting-landscape");
+    await board.setViewportSize({ width: 1024, height: 594 });
+    await assertBoardFits(board);
+    await assertPlayParchment(board);
+    await assertPlayHeader(board);
+    await shot(board, "board-waiting-1024x594");
+    await board.setViewportSize({ width: 1920, height: 1080 });
+    await assertBoardFits(board);
+    await assertPlayParchment(board);
+    await assertPlayHeader(board);
+    await shot(board, "board-waiting-1920x1080");
+    for (const key of BUDGET_VIEWPORTS) await assertViewportBudget(board, key);
+    await board.setViewportSize({ width: 1180, height: 820 });
     await d.button("continue").click();
     await expect(board.getByText("A bell marks the step.")).toBeVisible();
     await d.button("continue").click();
@@ -431,19 +446,18 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1")).toContainText("A Grey Stair");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
-    await assertPlayParchment(board);
+    await assertVisualLayer(board);
     await shot(board, "board-grey-stair-landscape");
     await board.setViewportSize({ width: 1024, height: 594 });
     await assertBoardFits(board);
-    await assertPlayParchment(board);
+    await assertVisualLayer(board);
     await assertPlayHeader(board);
     await shot(board, "board-grey-stair-1024x594");
     await board.setViewportSize({ width: 1920, height: 1080 });
     await assertBoardFits(board);
-    await assertPlayParchment(board);
+    await assertVisualLayer(board);
     await assertPlayHeader(board);
     await shot(board, "board-grey-stair-1920x1080");
-    for (const key of BUDGET_VIEWPORTS) await assertViewportBudget(board, key);
     await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();
