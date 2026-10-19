@@ -446,6 +446,11 @@
 }
 
 .bt-page > div:first-child {
+  flex: 0 0 auto;
+}
+
+/* The moment's text block gives way before the still does (PlayPanel adds this class). */
+.bt-page > .bt-page-text {
   flex: 0 1 auto;
   min-height: 0;
   overflow: hidden;
@@ -482,6 +487,7 @@
 }
 
 .bt-orn {
+  display: none;
   margin: 0 0 0.45rem;
   color: var(--bt-vellum-shadow);
   font-size: var(--bt-size-label);
@@ -553,9 +559,9 @@
 
 /* Party items zone (visuals step 8): labels with unavailable values until state carries items. */
 .bt-board .bt-items {
-  display: flex;
+  display: none;
   flex-shrink: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem 1.25rem;
@@ -585,13 +591,18 @@
   font-weight: 500;
 }
 
-/* Next-step prompt: a blood band, candle on blood, full width under the story. */
+/*
+ * Next-step prompt: a blood band, candle on blood, full width under the story. There is no
+ * inline "Next" label (it is read aloud only), so the whole width is the prompt. Longer prompts
+ * step the font down, then wrap to at most three lines; past that the text is cut with an
+ * ellipsis (about 120 characters at 1180px wide).
+ */
 .bt-next {
+  position: relative;
   display: flex;
   flex-shrink: 0;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: 1.25rem;
   box-sizing: border-box;
   min-height: 3.75rem;
   padding: 0.3rem 0.9rem;
@@ -604,15 +615,20 @@
 }
 
 .bt-next .bt-lbl {
-  color: var(--bt-parchment);
-  letter-spacing: 0.3em;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .bt-next b {
+  display: -webkit-box;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   color: var(--bt-candle);
   font-family: var(--bt-font-title);
   font-size: var(--bt-size-prompt);
@@ -620,6 +636,15 @@
   letter-spacing: 0.04em;
   line-height: 1.1;
   text-shadow: 0 0 22px rgb(245 196 81 / 0.4);
+}
+
+.bt-next[data-len="mid"] b {
+  font-size: clamp(1.75rem, 2.4vw, 2.75rem);
+}
+
+.bt-next[data-len="long"] b {
+  font-size: 1.75rem;
+  line-height: 1.1;
 }
 
 .bt-pub {
@@ -1366,18 +1391,29 @@
   }
 }
 
-/* Below 900px of height the still keeps every pixel main gave it: no ornament, no items zone. */
-@media (max-height: 900px) {
-  .bt-orn,
-  .bt-board .bt-items {
-    display: none;
+/*
+ * Height budget (no cliff). The narration may fill at most about 45% of the viewport height less
+ * five rem, rounded down to whole lines, so a long moment gives up lines (never the still); the
+ * still plate keeps a floor of 7rem. The ornament and the party items zone cost height the
+ * still needs, so they only appear on tall boards (1040px and up).
+ */
+.bt-page .bt-narration[data-moment-caption] {
+  max-height: 14rem;
+  overflow: hidden;
+}
+
+@supports (max-height: round(down, 10px, 1px)) {
+  .bt-page .bt-narration[data-moment-caption] {
+    max-height: round(down, calc(45vh - 5rem), 1lh);
+  }
+}
+
+@media (min-height: 1040px) {
+  .bt-orn {
+    display: block;
   }
 
-  /* A long moment gives up lines, never the still. */
-  .bt-page .bt-narration[data-moment-caption] {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+  .bt-board .bt-items {
+    display: flex;
   }
 }

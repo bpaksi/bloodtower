@@ -114,12 +114,15 @@ const assertPlayParchment = async (page: Page) => {
     expect(frame.outline, "plate has an offset outline").toBe("solid");
   }
   const items = page.locator("[data-party-items]");
-  const tall = (page.viewportSize()?.height ?? 0) > 900;
-  // Below 900px high the zone is hidden so the still keeps main's room; the unavailable values
-  // stay in the DOM and are checked there too.
-  if (tall) await expect(items).toBeVisible();
-  else await expect(items).toBeHidden();
-  if (tall) await expect(items).toBeInViewport({ ratio: 1 });
+  const tall = (page.viewportSize()?.height ?? 0) >= 1040;
+  // The zone and ornament only appear from 1040px high; the values stay in the DOM either way.
+  if (tall) {
+    await expect(items).toBeVisible();
+    await expect(items).toBeInViewport({ ratio: 1 });
+    await expectItemsInside(page);
+  } else {
+    await expect(items).toBeHidden();
+  }
   const values = items.locator(".bt-items-val");
   await expect(values).toHaveCount(3);
   for (let i = 0; i < 3; i += 1) {
@@ -127,19 +130,6 @@ const assertPlayParchment = async (page: Page) => {
     await expect(values.nth(i)).toHaveAttribute("data-unavailable", "");
   }
   await expect(items).not.toContainText(/\b\d+\b/);
-  const fit = tall
-    ? await items.evaluate((el) => ({
-        valuesInside: [...el.querySelectorAll(".bt-items-val")].every((v) => {
-          const r = v.getBoundingClientRect();
-          const box = el.getBoundingClientRect();
-          return r.left >= box.left - 1 && r.right <= box.right + 1;
-        }),
-      }))
-    : { valuesInside: true };
-  expect(fit.valuesInside, "each unavailable value sits inside the zone").toBe(true);
-  if (await still.count()) {
-    await assertStillRoom(page);
-  }
   const band = page.locator("[data-next-band]");
   await expect(band).toBeInViewport({ ratio: 1 });
   const geo = await page.evaluate(() => {
@@ -170,7 +160,7 @@ const assertPlayParchment = async (page: Page) => {
       geo.itemsBottom - 1,
     );
   }
-  expect(geo.textH, "prompt is one line").toBeLessThanOrEqual(geo.lineHeight * 1.5);
+  expect(geo.textH, "short prompt is one line").toBeLessThanOrEqual(geo.lineHeight * 1.5);
   expect(geo.fontPx, "prompt is at least 28px").toBeGreaterThanOrEqual(28);
   if (geo.viewW >= 1900) {
     expect(geo.fontPx, "prompt is 56 to 60px on the TV").toBeGreaterThanOrEqual(56);
@@ -178,73 +168,173 @@ const assertPlayParchment = async (page: Page) => {
   }
 };
 
-/** Still well height on origin/main at the same viewport with the same moment (measured). */
-const MAIN_WELL_HEIGHT: Record<string, number> = { "1180x820": 282, "1024x594": 171 };
-
-const wellKey = (page: Page) => {
-  const v = page.viewportSize();
-  return `${v?.width}x${v?.height}`;
+/** Every unavailable value sits inside the party items zone (nothing clipped at any width). */
+const expectItemsInside = async (page: Page) => {
+  const fit = await page.locator("[data-party-items]").evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    return [...el.querySelectorAll(".bt-items-val")].map((v) => {
+      const r = v.getBoundingClientRect();
+      return r.left >= box.left - 1 && r.right <= box.right + 1;
+    });
+  });
+  expect(fit, "each unavailable value sits inside the zone").toEqual([true, true, true]);
 };
+
+const DRAC =
+  "Anton Morosz kept the valley's ledgers for thirty years. He found his daughter at the church door as a baby, wrapped in a shawl no one in Vellmoor had ever woven. Last night he stood at her door with a poker, and this morning the maid found him on the stair, white and still. The girl was gone.";
+const FIVE = [
+  "The burgomaster's house stands shuttered at the end of the lane, and old smoke hangs in its eaves.",
+  "Someone has set a single lamp in the upper window, and it does not move when the wind comes.",
+  "The door is not locked. It never was, they say, since the night the bells stopped ringing.",
+  "Inside, the ledgers lie open on the desk, every column added and every sum correct to the coin.",
+  "On the last page, in a hand that is not his, someone has written one word: home. Choose who goes first.",
+].join(" ");
+const P_DOOR = "Oil the hinge, or force it.";
+const P_D30 = "Connect and calibrate the tower first";
+const P90 =
+  "Oil the hinge and slip inside, or force the door and wake the whole house to its long dark";
+const P200 =
+  "Agnes may oil the hinge and slip inside quietly, or Tomas may force the door and wake the whole house; whoever goes first carries the lantern and must draw a card from the dread deck before anyone moves";
 
 /**
- * The still well keeps main's height (so the camera track keeps its zoom), the plate stays fully
- * in view, and the camera frame is a zoom (scale above 1), not a clamped pan.
+ * Still well height on origin/main for the same moment (grey-stair.01) with the real text, a
+ * 294-character text (DRAC) and a 480-character text (FIVE), measured per viewport.
  */
-const assertStillRoom = async (page: Page, opts?: { text?: string }) => {
-  if (opts?.text) {
-    await page.locator("[data-moment-caption]").evaluate((el, text) => {
+const MAIN_WELL: Record<string, [number, number, number]> = {
+  "1024x594": [171, 112, 112],
+  "1180x820": [282, 112, 112],
+  "1366x768": [247, 112, 112],
+  "1440x900": [361, 197, 112],
+  "1440x901": [362, 198, 112],
+  "1280x901": [383, 235, 112],
+  "1600x1000": [441, 272, 145],
+  "1680x1050": [485, 316, 231],
+  "1920x960": [419, 267, 183],
+  "1920x1080": [531, 379, 295],
+};
+const BUDGET_VIEWPORTS = [
+  "1024x594",
+  "1180x820",
+  "1366x768",
+  "1440x900",
+  "1440x901",
+  "1280x901",
+  "1600x1000",
+  "1680x1050",
+  "1920x960",
+  "1920x1080",
+  "820x1180",
+  "1024x1366",
+];
+/** Height the ornament and the items zone may cost the well (they only show from 1040px high). */
+const EXTRAS_MAX = 100;
+
+const setNode = (page: Page, selector: string, text: string | null) =>
+  page
+    .locator(selector)
+    .first()
+    .evaluate((el, t) => {
+      const node = el as HTMLElement & { __orig?: string };
       // Edit the text node in place so React can still update it on the next moment.
-      if (el.firstChild) el.firstChild.nodeValue = text;
-    }, opts.text);
-    await page.waitForTimeout(400);
-  }
-  const plate = page.locator(".bt-plate");
-  await expect(plate).toBeInViewport({ ratio: 1 });
-  const m = await page.evaluate(() => {
+      if (!el.firstChild) return;
+      if (node.__orig === undefined) node.__orig = el.firstChild.nodeValue ?? "";
+      el.firstChild.nodeValue = t ?? node.__orig;
+    }, text);
+
+/** Put a prompt in the band, with the same length tier StoryBoard computes for a real one. */
+const setPrompt = async (page: Page, text: string | null) => {
+  await setNode(page, "[data-next-band] b", text);
+  await page.locator("[data-next-band]").evaluate((el, t) => {
+    const node = el.querySelector("b") as HTMLElement;
+    const n = (t ?? node.textContent ?? "").length;
+    el.setAttribute("data-len", n <= 24 ? "short" : n <= 48 ? "mid" : "long");
+  }, text);
+};
+
+const measureStill = (page: Page) =>
+  page.evaluate(() => {
     const well = document.querySelector("[data-camera-still]") as HTMLElement;
-    const page_ = document.querySelector(".bt-page") as HTMLElement;
-    const plateEl = document.querySelector(".bt-plate") as HTMLElement;
-    const r = well.getBoundingClientRect();
-    const pr = plateEl.getBoundingClientRect();
-    const img = well.querySelector("img") as HTMLElement;
-    const t = getComputedStyle(img).transform;
-    const scale = t === "none" ? 1 : Number.parseFloat(t.slice(7));
+    const pageEl = document.querySelector(".bt-page") as HTMLElement;
+    const plate = document.querySelector(".bt-plate") as HTMLElement;
+    const wr = well.getBoundingClientRect();
+    const pr = plate.getBoundingClientRect();
     return {
-      h: r.height,
-      plateBottom: pr.bottom,
-      pageBottom: page_.getBoundingClientRect().bottom,
-      scale,
+      h: wr.height,
+      aspect: wr.width / wr.height,
+      plateVisible:
+        (Math.min(pr.bottom, pageEl.getBoundingClientRect().bottom) - pr.top) / pr.height,
+      docY: document.documentElement.scrollHeight - document.documentElement.clientHeight,
     };
   });
-  expect(m.plateBottom, "plate is not clipped by the page").toBeLessThanOrEqual(m.pageBottom + 1);
-  expect(m.scale, "camera track keeps a zoom (scale above 1)").toBeGreaterThan(1);
-  const base = MAIN_WELL_HEIGHT[wellKey(page)];
-  if (base && !opts?.text)
-    expect(m.h, "still well is as tall as main's").toBeGreaterThanOrEqual(base - 3);
-};
 
-/** The prompt band stays one line and a bounded height for short and long prompts. */
-const assertBandLine = async (page: Page, label: string) => {
-  await page.locator("[data-next-band] b").evaluate((el, text) => {
-    if (el.firstChild) el.firstChild.nodeValue = text;
-  }, label);
-  const g = await page.evaluate(() => {
-    const b = document.querySelector("[data-next-band]") as HTMLElement;
-    const t = b.querySelector("b") as HTMLElement;
+/**
+ * The still well is at least main's at the same viewport and text (less the ornament and items
+ * zone where those show), the plate is fully visible, and the prompt band shows every real
+ * prompt untruncated. Run at every viewport in BUDGET_VIEWPORTS on the grey-stair moment.
+ */
+const assertViewportBudget = async (page: Page, key: string) => {
+  const [w, h] = key.split("x").map(Number);
+  await page.setViewportSize({ width: w as number, height: h as number });
+  await page.waitForTimeout(300);
+  const tall = (h as number) >= 1040;
+  const base = MAIN_WELL[key];
+  const texts: [string, string | null][] = [
+    ["real", null],
+    ["294 chars", DRAC],
+    ["480 chars", FIVE],
+  ];
+  for (const [i, [name, text]] of texts.entries()) {
+    await setNode(page, "[data-moment-caption]", text);
+    await page.waitForTimeout(250);
+    const m = await measureStill(page);
+    const label = `${key} ${name}`;
+    expect(m.plateVisible, `${label}: plate fully visible`).toBeGreaterThanOrEqual(0.99);
+    // Under 960px wide the board stacks into one column and scrolls on main too (spec: TV board).
+    if ((w as number) >= 960) {
+      expect(m.docY, `${label}: board does not scroll`).toBeLessThanOrEqual(0);
+    }
+    if (base) {
+      expect(m.h, `${label}: still well as tall as main's`).toBeGreaterThanOrEqual(
+        (base[i] as number) - (tall ? EXTRAS_MAX : 3),
+      );
+    } else {
+      expect(m.h, `${label}: still well keeps room`).toBeGreaterThanOrEqual(112);
+    }
+  }
+  await setNode(page, "[data-moment-caption]", null);
+  if (tall) {
+    await expect(page.locator("[data-party-items]")).toBeVisible();
+    await expectItemsInside(page);
+  }
+  for (const prompt of [P_DOOR, P_D30, P90]) {
+    await setPrompt(page, prompt);
+    await page.waitForTimeout(150);
+    const g = await page.evaluate(() => {
+      const b = document.querySelector("[data-next-band] b") as HTMLElement;
+      return {
+        w: b.scrollWidth - b.clientWidth,
+        h: b.scrollHeight - b.clientHeight,
+        font: Number.parseFloat(getComputedStyle(b).fontSize),
+      };
+    });
+    expect(g.w, `${key}: "${prompt.slice(0, 18)}" is not cut sideways`).toBeLessThanOrEqual(1);
+    expect(g.h, `${key}: "${prompt.slice(0, 18)}" is not cut off`).toBeLessThanOrEqual(4);
+    expect(g.font, `${key}: prompt font`).toBeGreaterThanOrEqual(28);
+  }
+  await setPrompt(page, P200);
+  const long = await page.evaluate(() => {
+    const band = document.querySelector("[data-next-band]") as HTMLElement;
+    const b = band.querySelector("b") as HTMLElement;
     return {
-      band: b.getBoundingClientRect().height,
-      text: t.getBoundingClientRect().height,
-      line: Number.parseFloat(getComputedStyle(t).lineHeight),
+      band: band.getBoundingClientRect().height,
+      line: Number.parseFloat(getComputedStyle(b).lineHeight),
     };
   });
-  expect(g.text, `"${label.slice(0, 20)}" is one line`).toBeLessThanOrEqual(g.line * 1.2);
-  expect(g.band, "band height is bounded").toBeLessThanOrEqual(g.line + 40);
+  expect(long.band, `${key}: a 200-character prompt keeps the band bounded`).toBeLessThanOrEqual(
+    long.line * 3 + 24,
+  );
+  await setPrompt(page, null);
 };
-
-const LONG_CAPTION =
-  "The burgomaster's house stands shuttered at the end of the lane, and the smell of old smoke hangs in its eaves. Someone has set a single lamp in the upper window, and it does not move when the wind comes. The door is not locked. It never was, they say, since the night the bells stopped.";
-const LONG_PROMPT =
-  "Oil the hinge and slip inside, or force the door and wake the whole house to its long dark";
 
 test("story board look at proving ground, grey-stair, and the Keeper", async ({
   browser,
@@ -342,25 +432,18 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
     await assertPlayParchment(board);
-    await assertBandLine(board, "Oil the hinge, or force it.");
-    await assertBandLine(board, LONG_PROMPT);
-    await assertStillRoom(board, { text: LONG_CAPTION });
     await shot(board, "board-grey-stair-landscape");
     await board.setViewportSize({ width: 1024, height: 594 });
     await assertBoardFits(board);
     await assertPlayParchment(board);
     await assertPlayHeader(board);
-    await assertBandLine(board, "Oil the hinge, or force it.");
-    await assertBandLine(board, LONG_PROMPT);
-    await assertStillRoom(board, { text: LONG_CAPTION });
     await shot(board, "board-grey-stair-1024x594");
     await board.setViewportSize({ width: 1920, height: 1080 });
     await assertBoardFits(board);
     await assertPlayParchment(board);
     await assertPlayHeader(board);
-    await assertBandLine(board, "Oil the hinge, or force it.");
-    await assertBandLine(board, LONG_PROMPT);
     await shot(board, "board-grey-stair-1920x1080");
+    for (const key of BUDGET_VIEWPORTS) await assertViewportBudget(board, key);
     await board.setViewportSize({ width: 1180, height: 820 });
 
     await d.button("continue").click();

@@ -390,7 +390,11 @@ const PartyItems = () => (
 
 /** Next-step prompt (V2-3): the blood band under the story. */
 const NextPrompt = ({ label }: { label: string }) => (
-  <div className="bt-next" data-next-band="">
+  <div
+    className="bt-next"
+    data-next-band=""
+    data-len={label.length <= 24 ? "short" : label.length <= 48 ? "mid" : "long"}
+  >
     <span className="bt-lbl">Next</span>
     <b>{label}</b>
   </div>
@@ -696,7 +700,7 @@ const PlayPanel = ({
   return (
     <article className="bt-page bt-parchment bt-ink-in">
       <MomentMeta moment={state.moment} />
-      <div>
+      <div className="bt-page-text">
         <p className="bt-kicker">{scene.kicker}</p>
         <h2>{scene.title}</h2>
         <p className="bt-orn" aria-hidden="true">
