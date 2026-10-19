@@ -19,11 +19,8 @@ export function Sidebar() {
   return (
     <nav className="sidebar" aria-label="Sections">
       <Link href="/" className="brand">
-        <span className="brand-initial">W</span>
-        <span>
-          <span className="brand-title">Game Workbench</span>
-          <span className="brand-sub">Return to Dark Tower</span>
-        </span>
+        <span className="brand-title">Game Workbench</span>
+        <span className="brand-sub">Return to Dark Tower · design</span>
       </Link>
       <ul>
         {SECTIONS.map((s) => (

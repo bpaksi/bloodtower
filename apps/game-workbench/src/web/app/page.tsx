@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Chip } from "../components/Chip.tsx";
+import { PromptScopes } from "../components/PromptScopes.tsx";
 import { groupDocs, loadDocs } from "../lib/content.ts";
 import { type IdKind, idKind, KIND_LABEL } from "../lib/ids.ts";
+import type { PromptScope } from "../lib/prompt.ts";
 
 // Read the folder on every request so edits made through Claude show on reload.
 export const dynamic = "force-dynamic";
@@ -15,47 +17,69 @@ export default function Home() {
   const byKind = new Map<IdKind, number>();
   for (const id of allIds) byKind.set(idKind(id), (byKind.get(idKind(id)) ?? 0) + 1);
 
+  const scopes: Record<string, PromptScope> = Object.fromEntries(
+    docs.map((d) => [
+      `doc:${d.slug}`,
+      {
+        file: `research/game-design/${d.file}`,
+        section: [],
+        lines: { start: 1, end: d.lines },
+        ids: d.ids,
+      },
+    ]),
+  );
+
   return (
     <>
-      <section className="hero">
-        <p className="kicker">Game design document · story-neutral</p>
-        <h1>The Design Codex</h1>
-        <p className="lede">
-          Everything about how the game works, apart from any one story. Every piece carries an ID:
-          click one to copy it, then name it in chat.
+      <PromptScopes scopes={scopes} />
+      <section className="page-head">
+        <h1>Game design document</h1>
+        <p className="muted">
+          Story-neutral design, read from research/game-design. Click an ID to copy it. Use Prompt
+          to start a change scoped to a document or section.
         </p>
-        <dl className="stats">
-          <div>
-            <dt>Documents</dt>
-            <dd>{docs.length}</dd>
-          </div>
-          <div>
-            <dt>Distinct IDs</dt>
-            <dd>{allIds.size}</dd>
-          </div>
-          {[...byKind].map(([kind, n]) => (
-            <div key={kind}>
-              <dt>
-                <span className={`swatch chip-${kind}`} />
-                {KIND_LABEL[kind]}
-              </dt>
-              <dd>{n}</dd>
-            </div>
-          ))}
-        </dl>
       </section>
+
+      <dl className="stats">
+        <div>
+          <dt>Documents</dt>
+          <dd>{docs.length}</dd>
+        </div>
+        <div>
+          <dt>Distinct IDs</dt>
+          <dd>{allIds.size}</dd>
+        </div>
+        {[...byKind].map(([kind, n]) => (
+          <div key={kind}>
+            <dt>
+              <span className={`swatch chip-${kind}`} />
+              {KIND_LABEL[kind]}
+            </dt>
+            <dd>{n}</dd>
+          </div>
+        ))}
+      </dl>
 
       {groups.map((group) => (
         <section key={group.title} className="group">
           <header className="group-head">
             <h2>{group.title}</h2>
-            <p>{group.note}</p>
+            <span className="muted">{group.note}</span>
           </header>
           <div className="cards">
             {group.docs.map((doc) => (
-              <Link key={doc.slug} href={`/doc/${doc.slug}`} className="card">
-                <span className="card-file">{doc.file}</span>
-                <h3>{doc.title}</h3>
+              <article key={doc.slug} className="card">
+                <div className="card-top">
+                  <span className="mono muted">{doc.file}</span>
+                  <button type="button" className="prompt-btn" data-prompt={`doc:${doc.slug}`}>
+                    Prompt
+                  </button>
+                </div>
+                <h3>
+                  <Link href={`/doc/${doc.slug}`} className="card-link">
+                    {doc.title}
+                  </Link>
+                </h3>
                 <p className={doc.status ? "card-status" : "card-status unavailable"}>
                   {doc.status ?? "Status unavailable"}
                 </p>
@@ -72,7 +96,7 @@ export default function Home() {
                     )}
                   </div>
                 )}
-              </Link>
+              </article>
             ))}
           </div>
         </section>

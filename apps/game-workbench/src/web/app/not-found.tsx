@@ -2,10 +2,9 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <section className="hero">
-      <p className="kicker">Not found</p>
+    <section className="page-head">
       <h1>No such document</h1>
-      <p className="lede">
+      <p className="muted">
         <Link href="/">Back to the design document</Link>
       </p>
     </section>

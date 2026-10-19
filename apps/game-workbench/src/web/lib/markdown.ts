@@ -1,16 +1,8 @@
 import { Marked, type Tokens } from "marked";
 import { ID_AT_START, idKind, KIND_LABEL } from "./ids.ts";
+import { anchorMaker } from "./sections.ts";
 
 const ID_ANYWHERE = new RegExp(ID_AT_START.source.slice(1));
-
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/<[^>]+>/g, "")
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
 
 export function chipHtml(id: string): string {
   const kind = idKind(id);
@@ -28,6 +20,9 @@ export function linkTarget(href: string): { kind: "doc" | "external" | "outside"
   if (href.startsWith("#")) return { kind: "doc", href };
   return { kind: "outside", href };
 }
+
+// Headings get the same anchors as parseSections; reset per render so repeats count from one.
+let nextAnchor = anchorMaker();
 
 const marked = new Marked({
   gfm: true,
@@ -52,7 +47,12 @@ const marked = new Marked({
   renderer: {
     heading({ tokens, depth, text }: Tokens.Heading) {
       const inner = this.parser.parseInline(tokens);
-      return `<h${depth} id="${slugify(text)}">${inner}</h${depth}>\n`;
+      const anchor = nextAnchor(text);
+      const button =
+        depth === 1
+          ? ""
+          : ` <button type="button" class="prompt-btn" data-prompt="sec:${anchor}" title="Start a prompt scoped to this section">Prompt</button>`;
+      return `<h${depth} id="${anchor}">${inner}${button}</h${depth}>\n`;
     },
     link({ href, tokens }: Tokens.Link) {
       const inner = this.parser.parseInline(tokens);
@@ -67,5 +67,6 @@ const marked = new Marked({
 });
 
 export function renderMarkdown(markdown: string): string {
+  nextAnchor = anchorMaker();
   return marked.parse(markdown, { async: false });
 }

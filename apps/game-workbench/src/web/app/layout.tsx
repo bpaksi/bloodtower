@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ChipCopy } from "../components/ChipCopy.tsx";
+import { PromptStarter } from "../components/PromptStarter.tsx";
 import { Sidebar } from "../components/Sidebar.tsx";
-import { workbenchFonts } from "./fonts.ts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={workbenchFonts}>
+    <html lang="en">
       <body>
         <div className="shell">
           <Sidebar />
@@ -25,12 +25,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 aria-label="Find an ID or a word"
                 disabled
               />
-              <span className="readonly">Read-only · edit by asking Claude</span>
+              <button type="button" className="btn-primary" data-prompt="new">
+                New idea
+              </button>
+              <span className="readonly">Read-only · changes go through Claude</span>
             </header>
             <main className="content">{children}</main>
           </div>
         </div>
         <ChipCopy />
+        <PromptStarter />
       </body>
     </html>
   );

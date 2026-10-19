@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { copyText } from "../lib/clipboard.ts";
 
 /**
  * Any element with data-id copies its ID on click or Enter, so Bob can paste an exact ID into chat.
@@ -18,10 +19,7 @@ export function ChipCopy() {
       event.preventDefault();
       event.stopPropagation();
       const id = chip.getAttribute("data-id") ?? "";
-      void navigator.clipboard?.writeText(id).then(
-        () => setCopied(id),
-        () => setCopied(null),
-      );
+      void copyText(id).then((ok) => setCopied(ok ? id : null));
       clearTimeout(timer);
       timer = setTimeout(() => setCopied(null), 1600);
     };
