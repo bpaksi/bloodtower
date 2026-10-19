@@ -10,72 +10,36 @@ Bob runs one step per branch in Claude Code on the Mac. Wright tracks progress h
 
 **Notes:** `data-board-mode` is `startup` for every pre-play `FlowScreen`, including `tower-volume-test` and `setup`. Step 6 (PR #89, already built) has no prompt in this runbook; see `visuals-prompts.md` §6. Playwright has no 1920×1080 project, so tests that need that size call `page.setViewportSize({ width: 1920, height: 1080 })`.
 
-## Local PR review (Anthropic only)
+## Local PR review
 
-After each PR is pushed, run **both** reviews on the **same head sha**. Any new push reruns both. At most **3** rounds; after round 3 with blockers left, add the `needs-bob` label.
+The loop is `docs/sdlc.md` §4 "Review loop": one Opus attack in round 1, Sonnet fix-checks in rounds 2 and 3, reviewers trust CI, and only the blockers listed there block. After round 3 with blockers left, add the `needs-bob` label.
 
-**Merge rule:** this differs from `docs/sdlc.md` (which leaves the merge to the coordinator after `Blocking: none`). For this visuals track Bob authorized merging on two **VERDICT PASS** reviews. Each reviewer also ends the comment with a `Blocking: none` or `Blocking: <n>` line; VERDICT PASS maps to `Blocking: none`, VERDICT FAIL to `Blocking: <n>` with n at least 1. Both PASS on the same head sha **and** CI green, then:
+**`Done when` for every step below:** the step's numbered items, its `Tests:` line and the hard constraints. Viewports are exactly the ones the step names. Anything else a reviewer finds is a non-blocking follow-up.
+
+**Standing checks for this track:** prefers-reduced-motion; flash safety (no more than 3 brightness jumps per second on the board); camera tracks (#78) and audio layers (#83) still work; the board sends only `keeper-line-ended` (D7).
+
+**Merge rule:** Bob authorized merging this track when the latest review ends `Blocking: none` on the PR's head sha and CI is green:
 
 ```bash
 gh pr merge <N> --squash --match-head-commit <sha>
 ```
 
-**Fix prompt (paste into Claude Code after a FAIL):**
+**Round 1, attack (paste into Claude Code):**
 
 ```text
-Fix the findings in PR <N> review comments (head <sha>); keep scope; push; reply in the PR listing what changed.
+Run the adversary-bugs agent (Opus) on PR <N>, round 1. Step prompt: apps/bloodtower/plans/visuals-runbook.md §<step>; use its "Review focus" line and the track's standing checks. Follow docs/sdlc.md §4: trust CI (no pnpm install, pnpm check or full e2e); prove suspicions with single spec files or a throwaway probe in a separate worktree, then remove it; block only on the §4 list; post under about 1,500 characters ending with "Blocking: none" or "Blocking: <n>".
 ```
 
-### Reviewer A — Sonnet (review only)
+**Fix (developer, Sonnet):**
 
 ```text
-You are Reviewer A (Sonnet). Review only — do not fix code in the repo.
-
-Do not use the working checkout. Make a separate worktree (pnpm wt, or: git worktree add ../BloodTower-work/review-<N> origin/<branch> after gh pr view <N> --json headRefName), work there, and remove it when done.
-
-gh pr diff <N>
-pnpm install && pnpm check   # in the review worktree
-
-Check the work against this step's coding prompt in apps/bloodtower/plans/visuals-runbook.md (spec, scope, out-of-scope list). Confirm protocols unchanged (D7: board sends only keeper-line-ended). Run and reason about the step's tests. Verify fixes from earlier review rounds are still present.
-
-Post with: gh pr comment <N> --body "<comment>"
-
-Comment format:
-- First line: VERDICT PASS or VERDICT FAIL
-- Second line: head sha: <full sha>
-- Then file:line findings (or "No findings." on PASS)
-- Last line: Blocking: none (PASS) or Blocking: <n> (FAIL)
-
-Use the step's "Review focus" line in the runbook for extra checks.
+Fix the blocking findings in PR <N> (head <sha>) and nothing else; rerun pnpm check and only the affected spec files; push; reply on the PR with one short comment: finding -> commit.
 ```
 
-### Reviewer B — Opus (adversarial)
+**Rounds 2 and 3, fix-check:**
 
 ```text
-You are Reviewer B (Opus). Adversarial review — prove suspicions; do not fix code in the repo.
-
-Do not use the working checkout. Make a separate worktree (pnpm wt, or: git worktree add ../BloodTower-work/review-<N> origin/<branch> after gh pr view <N> --json headRefName), work there, and remove it when done.
-
-gh pr diff <N>
-pnpm install && pnpm check   # in the review worktree
-
-Trace changes through callers. Hunt for state left over after Back, revisit, or reload; races; first-press locks; session-start ordering; dev vs prod differences (:3000 vs :4787, public asset paths). Safari, sample-rate and autoplay quirks; unit mismatches; path traversal.
-
-For visuals also check: prefers-reduced-motion, flash safety (no more than 3 brightness jumps per second on the board), viewport fit at 1024×594, 1180×820, and 1920×1080, and that camera tracks (#78) and audio layers (#83) still work.
-
-For each suspicion, prove it with a quick throwaway test or repro. Put repro files in /tmp, or delete them when done. Do not report anything you could not confirm.
-
-Before posting: git status — tree must be clean.
-
-Post with: gh pr comment <N> --body "<comment>"
-
-Comment format:
-- First line: VERDICT PASS or VERDICT FAIL
-- Second line: head sha: <full sha>
-- Then file:line findings (or "No findings." on PASS)
-- Last line: Blocking: none (PASS) or Blocking: <n> (FAIL)
-
-Use the step's "Review focus" line in the runbook for extra checks.
+Run the adversary-bugs agent with model sonnet on PR <N>, round <r>, last reviewed sha <sha>. Fix-check only (docs/sdlc.md §4): read the open blocking findings and git diff <sha>..HEAD; confirm each is fixed and nothing next to it broke; no new hunting. Post under about 1,500 characters ending with "Blocking: none" or "Blocking: <n>".
 ```
 
 ## Resolved defaults (Bob)
