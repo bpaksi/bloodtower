@@ -57,6 +57,40 @@ const MAIN_WELL: Record<string, [number, number]> = {
 
 const LAYER = "[data-visual-layer]";
 
+/**
+ * Passes the board's session socket through the test, unchanged, and keeps the last
+ * `storyboardState` frame the server sent for each moment. `send` hands the board one of those
+ * frames again: the same bytes the server sent, at a time the test chooses, so a test can put two
+ * moments any number of milliseconds apart on the board.
+ */
+const tapBoardSocket = async (board: Page) => {
+  const byMoment = new Map<string, string>();
+  let toBoard: ((message: string) => void) | null = null;
+  await board.routeWebSocket(/\/ws$/, (socket) => {
+    const server = socket.connectToServer();
+    toBoard = (message) => socket.send(message);
+    server.onMessage((message) => {
+      if (typeof message === "string") {
+        const parsed = JSON.parse(message) as {
+          type?: string;
+          payload?: { moment?: { id?: string } | null };
+        };
+        const id = parsed.payload?.moment?.id;
+        if (parsed.type === "storyboardState" && id) byMoment.set(id, message);
+      }
+      socket.send(message);
+    });
+    socket.onMessage((message) => server.send(message));
+  });
+  return {
+    send: (momentId: string) => {
+      const frame = byMoment.get(momentId);
+      if (!frame || !toBoard) throw new Error(`no storyboardState seen for ${momentId}`);
+      toBoard(frame);
+    },
+  };
+};
+
 /** From the Pick Story screen to Begin, on one iPad; the board shows proving-ground.01 after. */
 const openBoardAtFirstMoment = async (
   browser: Browser,
@@ -73,6 +107,7 @@ const openBoardAtFirstMoment = async (
   });
   contexts.push(boardContext);
   const board = await boardContext.newPage();
+  const tap = await tapBoardSocket(board);
   const padContext = await browser.newContext({
     baseURL,
     viewport: { width: 820, height: 1180 },
@@ -102,7 +137,7 @@ const openBoardAtFirstMoment = async (
   if (beforeBegin) await beforeBegin(board);
   await d.button("begin").click();
   await expect(board.locator("main")).toHaveAttribute("data-moment", "proving-ground.01");
-  return { board, pad, d, gate };
+  return { board, pad, d, gate, tap };
 };
 
 /**
@@ -436,8 +471,10 @@ test("under reduced motion the visual only fades: no zoom, and the camera holds 
 /** Records, every animation frame, the layer's opacity and phase and the state of its media. */
 const recordFrames = (board: Page) =>
   board.evaluate(() => {
-    const w = window as unknown as { __frames: unknown[] };
+    const w = window as unknown as { __frames: unknown[]; __recording?: boolean };
     w.__frames = [];
+    if (w.__recording) return;
+    w.__recording = true;
     const t0 = performance.now();
     const tick = () => {
       const el = document.querySelector("[data-visual-layer]") as HTMLElement | null;
@@ -606,3 +643,120 @@ test("quitting during the Keeper silences it for the zoom out", async ({ browser
     await host.close();
   }
 });
+
+/** Largest frame-to-frame opacity change and most direction changes in any one second. With no
+ * layer the board shows through, counted as opacity 0 (the layer's void is not on screen). */
+const brightness = (all: Frame[]) => {
+  let worst = 0;
+  let direction = 0;
+  const turns: number[] = [];
+  for (let i = 1; i < all.length; i += 1) {
+    const a = (all[i - 1] as Frame).opacity ?? 0;
+    const b = (all[i] as Frame).opacity ?? 0;
+    const delta = b - a;
+    worst = Math.max(worst, Math.abs(delta));
+    if (Math.abs(delta) < 0.002) continue;
+    const sign = Math.sign(delta);
+    if (direction !== 0 && sign !== direction) turns.push((all[i] as Frame).t);
+    direction = sign;
+  }
+  const perSecond = Math.max(
+    0,
+    ...turns.map((t) => turns.filter((u) => u >= t && u < t + 1000).length),
+  );
+  return { worst, perSecond };
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+for (const motion of ["no-preference", "reduce"] as const) {
+  test(`a cut at the very start or end of a zoom never jumps (${motion === "reduce" ? "reduced motion" : "zoom"})`, async ({
+    browser,
+  }, testInfo) => {
+    // Chromium (desktop) and WebKit (ipad project): the board's browser may be either.
+    test.skip(testInfo.project.name === "phone", "one run per engine");
+    test.setTimeout(150_000);
+    const { baseURL, host } = await startAcceptanceHost(testInfo);
+    const contexts: BrowserContext[] = [];
+    try {
+      const { board, d, tap } = await openBoardAtFirstMoment(
+        browser,
+        baseURL,
+        host.joinCode,
+        contexts,
+        motion,
+      );
+      const main = board.locator("main");
+      const layer = board.locator(LAYER);
+      // Let the server send the three frames the test replays: a visual, text, a visual.
+      await d.button("continue").click();
+      await expect(main).toHaveAttribute("data-moment", "proving-ground.02");
+      await d.button("continue").click();
+      await expect(main).toHaveAttribute("data-moment", "proving-ground.03");
+      await expect(layer).toHaveAttribute("data-visual-phase", "in");
+      const settleWaiting = async () => {
+        tap.send("proving-ground.02");
+        await expect(layer).toHaveCount(0, { timeout: 3000 });
+        await board.waitForTimeout(200);
+      };
+      const settleVisual = async () => {
+        tap.send("proving-ground.01");
+        await expect(layer).toHaveAttribute("data-visual-phase", "in");
+        await board.waitForTimeout(1100);
+      };
+      const check = async (label: string) => {
+        await board.waitForTimeout(1300);
+        const result = brightness(await frames(board));
+        expect(
+          result.worst,
+          `${label}: largest opacity change between two frames`,
+        ).toBeLessThanOrEqual(0.25);
+        expect(result.perSecond, `${label}: brightness turns in one second`).toBeLessThanOrEqual(3);
+        return result;
+      };
+      const results: Record<string, number> = {};
+      // A visual, then text 0-40 ms later: Continue on the layer's first frames (zoom not begun).
+      for (const gap of [0, 10, 20, 30, 40]) {
+        await settleWaiting();
+        await recordFrames(board);
+        tap.send("proving-ground.01");
+        await sleep(gap);
+        tap.send("proving-ground.02");
+        results[`visual then text +${gap}ms`] = (await check(`visual then text +${gap} ms`)).worst;
+        await expect(layer).toHaveCount(0, { timeout: 3000 });
+      }
+      // Fully in, then text, then a visual 0-40 ms later: the zoom out turned back at its start.
+      for (const gap of [0, 10, 20, 30, 40]) {
+        await settleVisual();
+        await recordFrames(board);
+        tap.send("proving-ground.02");
+        await sleep(gap);
+        tap.send("proving-ground.03");
+        results[`out turned back at its start +${gap}ms`] = (
+          await check(`out turned back at its start +${gap} ms`)
+        ).worst;
+        await expect(layer).toHaveAttribute("data-visual-phase", "in");
+      }
+      // Fully in, then text, then a visual as the zoom out ends.
+      const exit = motion === "reduce" ? 300 : 800;
+      for (const early of [40, 20, 0]) {
+        await settleVisual();
+        await recordFrames(board);
+        tap.send("proving-ground.02");
+        await sleep(exit - early);
+        tap.send("proving-ground.03");
+        results[`out turned back at its end -${early}ms`] = (
+          await check(`out turned back at its end -${early} ms`)
+        ).worst;
+        await expect(layer).toHaveAttribute("data-visual-phase", "in");
+      }
+      console.log(
+        `[${testInfo.project.name} ${motion}] largest frame change`,
+        JSON.stringify(results),
+      );
+    } finally {
+      for (const context of contexts) await context.close().catch(() => undefined);
+      await host.close();
+    }
+  });
+}

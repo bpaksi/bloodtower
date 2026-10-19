@@ -54,6 +54,39 @@ export function VisualLayer({ children }: { children: ReactNode }) {
 }
 
 /**
+ * Points the layer's animation at `phase` from exactly where it is, never from the far end.
+ * `play()` rewinds to the far end when the animation sits at the end it would play away from
+ * (a zoom out at time 0, a zoom in at its end), so this never lets that happen:
+ * - going out at time 0 (or not started yet: an unresolved time counts as 0): nothing has shown,
+ *   so the layer is hidden and dropped at once;
+ * - coming in at the end (a zoom out turned back before it moved): it is already fully in, so it
+ *   is left finished there;
+ * - otherwise the time is pinned and it plays on in the new direction from that time.
+ */
+export const turnAround = (
+  animation: Animation,
+  phase: Phase,
+  element: HTMLElement,
+  onGone: () => void,
+) => {
+  const rate = phase === "in" ? 1 : -1;
+  const timing = animation.effect?.getComputedTiming();
+  const end = Number(timing?.endTime ?? 0);
+  const raw = animation.currentTime;
+  const time = raw === null ? 0 : Math.min(end, Math.max(0, Number(raw)));
+  if (rate < 0 && time <= 0) {
+    element.style.opacity = "0";
+    animation.cancel();
+    onGone();
+    return;
+  }
+  animation.playbackRate = rate;
+  animation.currentTime = time;
+  if (rate > 0 && time >= end) return;
+  if (animation.playState !== "running") animation.play();
+};
+
+/**
  * The layer element and its one animation. The zoom (or, under reduced motion, the fade) runs
  * forward to come in and is reversed to go out. Reversing an animation that is still running
  * continues from where it is, so pressing Continue mid-zoom turns the zoom around smoothly: the
@@ -96,7 +129,8 @@ function LayerBox({
             ],
         {
           duration: reduced ? VISUAL_FADE_MS : VISUAL_ZOOM_MS,
-          easing: reduced ? "ease-out" : ZOOM_EASE,
+          // Linear: the gentlest fade, the same small change of brightness every frame.
+          easing: reduced ? "linear" : ZOOM_EASE,
           // Backwards only: once the zoom is done the layer keeps no transform, and a reversed
           // zoom that has run out holds its first frame (hidden) until the layer unmounts.
           fill: "backwards",
@@ -110,13 +144,7 @@ function LayerBox({
       animation.current = current;
       return;
     }
-    // Turn the zoom around from its current time: running, it continues from where it is;
-    // finished, it plays back from its end (or its start) to the other end.
-    const rate = phase === "in" ? 1 : -1;
-    if (current.playbackRate !== rate || current.playState === "paused") {
-      current.playbackRate = rate;
-      current.play();
-    }
+    turnAround(current, phase, element, () => gone.current());
   }, [phase]);
 
   return (
