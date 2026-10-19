@@ -30,18 +30,18 @@ Run **steps 6–11 before steps 1–5 and 9** so play-mode work does not depend 
 | 3 | `feat/visuals-03-startup-shell` | none | — | blocked on asset (dialog frame) | |
 | 4 | `feat/visuals-04-carousel-dialog` | 3 | — | blocked on asset (dialog frame) | |
 | 5 | `feat/visuals-05-startup-summary` | 3 | — | todo (after 3; ink panel, no dialog frame) | |
-| 6 | `feat/visuals-06-play-chrome` | none | 7 | todo | |
-| 7 | `feat/visuals-07-hunter-roll` | 6 | none | todo | |
+| 6 | `feat/visuals-06-play-chrome` | none | 7 | in review (Open question 1: option a; QR hidden in play; quit is not play mode, it keeps the closing summary and join block; Now acting reads unavailable until the engine exposes an acting hunter) | |
+| 7 | `feat/visuals-07-hunter-roll` | 6 | none | in review (Q2 (a) status: Waiting / Away / holder id; portrait medallions whenever packId + portrait exist; corruption column reads unavailable; no acting-hunter highlight, the `.bt-cart-act` blood rule stays in board.css unused until the engine exposes an acting hunter; no epithet line, the hunter schema has no epithet field) | #93 |
 | 8 | `feat/visuals-08-play-parchment` | 6 | 7 | todo | |
 | 9 | `feat/visuals-09-waiting-dialog` | 8 | — | blocked on asset (dialog frame) | |
-| 10 | `feat/visuals-10-visual-zoom` | 8 | none | todo | |
+| 10 | `feat/visuals-10-visual-zoom` | 8 | none | in review (layer: `main[data-board-layer="visual"|"waiting"|"startup"]` from `boardLayer()`, the same test as LiveBoard's `pickLayers({ visual })`, which is unchanged; `VisualLayer.tsx` is one fixed full-screen element on void at the end of `main` that hosts the still plate (`CameraStill` unchanged), the Keeper scene, or `Visual unavailable.` for a clip the board cannot draw (the layer adds no controls; the Keeper's pre-existing Captions on/off button sits inside it, step 11's area); zoom in from the screen centre, scale 0.5 to 1 with opacity 0 to 1, 800 ms `cubic-bezier(.65,0,.35,1)`, monotonic (one change of brightness, no flash); the zoom is one Web Animation played forward to come in and backward to go out, so Continue mid-zoom turns it around from where it is (no jump; round 1 fix), and a cut before the zoom has moved drops it hidden or leaves it fully shown instead of letting `play()` rewind it to the far end (round 2 fix); reduced-motion fade is linear; Continue to a text moment keeps the last visual for the same zoom out, then unmounts, and pauses its audio; visual to visual is a straight cut (same layer, no new zoom); reduced motion: 300 ms opacity fade only, no transform (game-look section 5); **Q4 (a):** the well is 16:9 (R-DEV-7), as large as the screen allows and centred, so cover shows the whole still and the camera pan and zoom run inside it unchanged; the moment text is a bottom caption in the layer (game-look section 4 cut scenes), at most 3 lines; the page under the layer keeps only the scene heading; pause and join banners and the connection notice stay above the layer; header heights under the layer are main's. **Deviation:** a still no longer shows in the parchment plate (step 8) at all, since every still moment is a visual; step 8's still-well budget is replaced by letterbox checks in `visual-layer.spec.ts`, and its narration and prompt budget runs on the text moment. The Keeper moves into the layer here with its current plate styling; step 11 restyles it. **For Bob's ruling:** (a) caption over the art, cut at 3 lines; (b) Q4 says keep cover in the parchment well when not zoomed, but no still is shown unzoomed now; (c) a non-16:9 still would be cropped to 16:9 inside the letterbox; (d) zoom grows from the centre (where step 9's waiting dialog sits), not from the old plate; (e) a pack alternating visual and text faster than about 1.5 presses a second can pass 3 brightness turns a second, since each flip reverses the zoom: rate-limit flips, or hold the exit until the zoom in completes) | #99 |
 | 11 | `feat/visuals-11-keeper-cinema` | 10 | none | todo | |
 
 ## Parallel waves
 
 Bob should run **play TV track first** (no Illusionist frame/mask). **Startup / Sound / flicker last**, after assets land or via an approved placeholder-only PR for that step.
 
-- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (and `quit` if you keep play chrome there); it does not require step 3. Do not run 6 with 4 or 5.
+- **Wave P (play, go now):** 6, then 7 and 8 (7 before 8 if both open; 8 owns `PlayPanel`). Step 6 sets `data-board-mode="play"` on `main.bt-board` when `screen === "play"` (not `quit`: quit is "table closed", spec D20); it does not require step 3. Do not run 6 with 4 or 5.
 - **Wave P2 (after 8):** 10 then 11 (visual zoom, then Keeper). Step 10 does not require step 9 (waiting dialog is separate).
 - **Wave P3 (after 10, optional before assets):** 9 only after **dialog frame** is delivered (or Bob approves placeholder in step 9).
 - **Wave S (startup, after dialog frame):** 3, then 4 and 5 (4 and 5 rebase `StoryBoard.tsx`; 5 uses `.bt-panel` summary, not `DialogFrame`).
@@ -241,7 +241,7 @@ Read game-look.md §3 parchment page, §4 main story view and next-step prompt. 
 Goal: shared moments use kicker, title, ornament, justified narration with Fraktur drop cap on first paragraph; stills sit in a plate frame; next-step prompt is the blood-band bar (60px class) per mock.
 
 1. Do not change CameraStill transform math or data attributes (#78). Wrap still in `.bt-plate` styling only.
-2. Moment text: use displayCaption; optional `<mark>` styling for candle highlights already in CSS.
+2. Moment text: use displayCaption; `<mark>` candle highlights are deferred (no mark rule in board.css; displayCaption returns plain text).
 3. Party items zone: layout with labels only, values `unavailable` until items exist on state (no fake counts).
 
 No protocol changes.
@@ -261,7 +261,7 @@ Depends on: step 8. Run after **dialog frame** is delivered (or Bob approves pla
 
 Missing asset: Illusionist **dialog frame** (in progress). Small centred waiting UI must be wrapped in `DialogFrame` only; no ad-hoc border CSS elsewhere. Follow-up: swap in final dialog frame from Illusionist at `DialogFrame.tsx`.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30, R3-UI-115). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10 layer 3, R3-UI-30) and R2-115 (research/game-design/r2-screen-flow.md). Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (isVisualMoment—text-only moments are not visual).
 
 Goal: when play has no full-screen visual (no still, not Keeper, not clip), show a small centred waiting dialog over the painting with the prompt label ("Waiting for…"), not a full parchment page filling the column.
 
