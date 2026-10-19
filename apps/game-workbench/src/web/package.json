@@ -1,0 +1,26 @@
+{
+  "name": "game-workbench-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Next.js UI for the game workbench. Reads research/game-design on each request; never writes.",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 4797",
+    "build": "next build",
+    "start": "next start -p 4797",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "marked": "18.0.14",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "vitest": "5.0.4"
+  }
+}
