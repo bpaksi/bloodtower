@@ -23,6 +23,39 @@ export const neighborStory = (stories: Stories | undefined, step: 1 | -1): Story
 };
 
 /**
+ * The Pick Game carousel's peeking neighbours. With two cards both neighbours are the same story,
+ * so it shows once, on the right (`previous` is null). Both null with fewer than two cards.
+ */
+export const carouselPeeks = (
+  stories: Stories | undefined,
+): { previous: StoryCard | null; next: StoryCard | null } => {
+  const previous = neighborStory(stories, -1);
+  const next = neighborStory(stories, 1);
+  return { previous: previous && previous.id !== next?.id ? previous : null, next };
+};
+
+/**
+ * The board's layout mode (`data-board-mode`): "startup" is the centred dialog shell over the
+ * landing painting, "play" the three-column TV chrome. Quit has neither: it is "the table is
+ * closed" (spec D20), so it keeps the closing summary and the join block in the base layout.
+ */
+export type BoardMode = "startup" | "play";
+
+export const BOARD_MODE: Record<FlowScreen, BoardMode | null> = {
+  splash: "startup",
+  "tower-connect": "startup",
+  "tower-volume-test": "startup",
+  "pick-story": "startup",
+  "game-settings": "startup",
+  "not-playable": "startup",
+  "party-join": "startup",
+  setup: "startup",
+  begin: "startup",
+  play: "play",
+  quit: null,
+};
+
+/**
  * "4 hunters": the party size. Every hunter in the pack is always in play (the card reads the
  * maximum), so the minimum is not shown. Null when the pack did not load.
  */
@@ -150,13 +183,39 @@ export interface SummaryItem {
   label: string;
   /** The lines under the label. An empty item has one line, "not chosen yet". */
   lines: string[];
+  /** More lines the board shows only where it has the room (the TV): the setup steps done. */
+  detail: string[];
   empty: boolean;
 }
 
-const item = (id: SummaryItemId, label: string, lines: readonly string[]): SummaryItem =>
+const item = (
+  id: SummaryItemId,
+  label: string,
+  lines: readonly string[],
+  detail: readonly string[] = [],
+): SummaryItem =>
   lines.length === 0
-    ? { id, label, lines: [NOT_CHOSEN], empty: true }
-    : { id, label, lines: [...lines], empty: false };
+    ? { id, label, lines: [NOT_CHOSEN], detail: [], empty: true }
+    : { id, label, lines: [...lines], detail: [...detail], empty: false };
+
+/**
+ * The hunters line per device, in the order the devices first hold a hunter, as
+ * "device-1: Agnes, Tomas", then the hunters no device holds yet as "not chosen yet: Wren".
+ * One line per device keeps the whole party readable in the summary column.
+ */
+const huntersByDevice = (hunters: NonNullable<StartupSummary["hunters"]>): string[] => {
+  const byDevice = new Map<string, string[]>();
+  for (const hunter of hunters) {
+    for (const holder of hunter.holders) {
+      byDevice.set(holder, [...(byDevice.get(holder) ?? []), hunter.name]);
+    }
+  }
+  const unheld = hunters.filter((hunter) => hunter.holders.length === 0).map((h) => h.name);
+  return [
+    ...[...byDevice].map(([device, names]) => `${device}: ${names.join(", ")}`),
+    ...(unheld.length > 0 ? [`${NOT_CHOSEN}: ${unheld.join(", ")}`] : []),
+  ];
+};
 
 /** The tower line: how Connect Tower was left, with the live reading once it was connected. */
 const towerLine = (
@@ -172,8 +231,9 @@ const towerLine = (
 };
 
 /**
- * The start-up summary panel's rows (R3-UI-25): game, settings, tower, hunters with the devices
- * holding each, and the setup steps done. Each empty row reads "not chosen yet".
+ * The start-up summary panel's rows (R3-UI-25): game, settings, tower, hunters grouped by the
+ * device holding them, and the setup steps done ("2 of 3 done", with the steps' labels as
+ * detail). Each empty row reads "not chosen yet".
  */
 export const summaryItems = (
   summary: StartupSummary,
@@ -196,22 +256,12 @@ export const summaryItems = (
           : settings.map((setting) => `${setting.label}: ${setting.value ?? "unavailable"}`),
     ),
     item("tower", "Tower", towerText ? [towerText] : []),
-    item(
-      "hunters",
-      "Hunters",
-      held.length === 0
-        ? []
-        : hunters.map(
-            (hunter) =>
-              `${hunter.name}: ${hunter.holders.length > 0 ? hunter.holders.join(", ") : NOT_CHOSEN}`,
-          ),
-    ),
+    item("hunters", "Hunters", held.length === 0 ? [] : huntersByDevice(hunters)),
     item(
       "setup",
       "Setup",
-      done.length === 0
-        ? []
-        : [`${done.length} of ${summary.setup.length} done`, ...done.map((step) => step.label)],
+      done.length === 0 ? [] : [`${done.length} of ${summary.setup.length} done`],
+      done.map((step) => step.label),
     ),
   ];
 };

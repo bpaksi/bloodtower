@@ -197,7 +197,9 @@ describe("story board", () => {
     const html = renderToStaticMarkup(createElement(StoryBoard, { state: waitingStoryboard() }));
     expect(html).not.toMatch(interactive);
     expect(html).toContain("Join code unavailable.");
-    expect(html).toContain("Hunters unavailable.");
+    // The start-up shell folds the hunter roll away (R3-UI-11); Claim Hunters lists them.
+    expect(html).toContain('data-board-mode="startup"');
+    expect(html).not.toContain('class="bt-hunters"');
     expect(html).not.toContain("Battery unavailable");
     expect(html).toContain("Bloodtower");
     expect(html).toContain("The Table");

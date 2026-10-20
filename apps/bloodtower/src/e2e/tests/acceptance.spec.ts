@@ -268,7 +268,7 @@ test("the test pack's first night, end to end, on one board and two devices", as
     await test.step("Setup steps: each its own dialog with Done; the summary fills in", async () => {
       const summary = (item: string) => board.locator(`[data-summary-item="${item}"]`);
       await expect(summary("tower")).toContainText("Connected");
-      await expect(summary("hunters")).toContainText("Agnes:");
+      await expect(summary("hunters")).toContainText("Agnes");
       for (const step of ["lay-out-board", "place-hunters", "ready-decks"]) {
         await expect(board.locator(`[data-setup-step="${step}"]`)).toBeVisible();
         await expect(pageA.locator(`[data-setup-step="${step}"]`)).toBeVisible();

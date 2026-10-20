@@ -579,7 +579,7 @@ const frames = (board: Page) =>
 // test.fixme cannot skip just them). Flip to false to re-enable when #100 is fixed.
 const SKIP_FLAKY_MID_ZOOM_PRECONDITIONS = true;
 
-test("Continue mid-zoom turns the zoom around from where it is: no jump in brightness", async ({
+test("Continue mid-zoom lets the zoom in finish before the zoom out, and a visual mid-zoom-out turns it back: no jump in brightness", async ({
   browser,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "the Story board runs on the Mac (Chromium)");
@@ -596,7 +596,8 @@ test("Continue mid-zoom turns the zoom around from where it is: no jump in brigh
       recordFrames,
     );
     // proving-ground.01 (visual) -> .02 (text) -> .03 (visual) -> grey-stair.01 (visual), each
-    // press well inside the 800 ms zoom: in is cut to out, out is cut back to in, then a cut.
+    // press well inside the 800 ms zoom: the zoom in is left to finish and then zooms out (Bob's
+    // ruling on step 10's item (e)), the zoom out is turned back in, then a cut.
     // Each press is held at the iPad's socket and released at a measured point of the zoom, so it
     // lands mid-zoom however busy the machine is.
     const layerAt = (phase: "in" | "out", min: number) =>
@@ -646,6 +647,20 @@ test("Continue mid-zoom turns the zoom around from where it is: no jump in brigh
     if (!SKIP_FLAKY_MID_ZOOM_PRECONDITIONS) {
       expect(outToIn, "a visual arrived during the zoom out").toBeGreaterThanOrEqual(1);
     }
+    // The exit waits for the zoom in: from the press, brightness only rises until the layer is
+    // fully shown, and only then falls.
+    const press = shown.findIndex((f) => f.phase === "out");
+    expect(press, "the layer was told to leave").toBeGreaterThanOrEqual(0);
+    let peak = shown[press]?.opacity ?? 0;
+    for (const f of shown.slice(press + 1)) {
+      if (peak >= 0.999) break;
+      expect(
+        f.opacity,
+        `zoom in kept on after Continue (${Math.round(f.t)} ms)`,
+      ).toBeGreaterThanOrEqual(peak - 1e-3);
+      peak = Math.max(peak, f.opacity);
+    }
+    expect(peak, "the zoom in finished before the zoom out").toBeGreaterThanOrEqual(0.999);
     // No jump, and at most 3 changes of direction in any second (flash safety).
     expectNoFlash(all, "Continue mid-zoom");
     const end = shown.at(-1);
