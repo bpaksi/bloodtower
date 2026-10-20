@@ -28,9 +28,9 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
 | Event | Something that happens to the heroes present on a space. Drawn at random when a hero stops in the wild, or placed by a set piece | A tower event | Bob | IDEA-014, DEC-017 |
-| Event type | The kind of event. Bob named two: **encounter** and **plague**. Proposed others: lost, dragon, windfall, quiet (see Q-026) | | Bob, open | IDEA-014, Q-026 |
+| Event type | The kind of event: **encounter**, **hazard**, **disaster** (dragon), **windfall** (a find) and **quiet** (nothing) | | Bob | IDEA-014, DEC-022 |
 | Encounter | An event type: the party meets someone. Foes lead to a fight; people lead to talk or trade | Any event | Bob, proposed detail | IDEA-014 |
-| Plague | An event type: sickness that costs the party unless they hold its counter (a healer) | | Bob | IDEA-014, MEC-006 |
+| Hazard | An event type: something that costs the party unless they hold its counter. Plague (healer), lost (scout), storm | A disaster, which is bigger | Bob | DEC-022, MEC-006 |
 | Counter | An item, ally or ability that cancels a specific event type (healer vs plague, scout vs lost) | | proposed | MEC-006 |
 | Set piece | A story's own scene, the part needed to win. It has a location at the start of every turn and can move. On a building it adds an option to that building's menu; in the wild a quest marker shows it | An event, which is random | Bob | MEC-011, IDEA-013, IDEA-015, Q-027 |
 | Tower event | Base RtDT's happenings the tower fires after a skull drop (foes spawn, foes strike) | An event | proposed name | DEC-004 |
