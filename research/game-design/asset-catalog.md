@@ -40,7 +40,7 @@ Sources: [api-surface-7.1.2.md](../tower/api-surface-7.1.2.md), [spikes/2026-10-
 
 ## 2. Physical components (RtDT base, unless noted)
 
-IDs: AST-B01 board, B02 buildings, B03 hero minis, B04 skulls, B05 foe tokens/Dark Horde, B06 warrior tokens (50), B07 spirit tokens (40), B08 quest markers, B09 dungeon tokens, B10 haggle die, B11 cards, B12 special tokens, B13 expansion pieces, B14 heroic test cards.
+IDs: AST-B01 board, B02 buildings, B03 hero minis, B04 skulls, B05 foe tokens/Dark Horde, B06 warrior tokens (50), B07 spirit tokens (40), B08 quest markers, B09 dungeon tokens, B10 haggle die, B11 cards, B12 special tokens, B13 expansion pieces, B14 heroic test cards, B15 virtue tiles, B16 hero boards, B17 corruption cards, B18 companion cards, B19 treasure cards, B20 gear cards, B21 potion cards, B22 quest item cards, B23 foe cards, B24 adversaries, B25 caravan tokens, B26 siege tree tokens, B27 spore tokens, B28 river of fire tokens, B29 tower seals (the physical pieces; AST-T13 is the tower's seal output). B05 is now foe tokens only; B11 and B12 are the groups (one card each in `cards/`).
 
 Source: [component-inventory.md](../return-to-dark-tower/component-inventory.md), [game-overview-and-rules.md](../return-to-dark-tower/game-overview-and-rules.md).
 
