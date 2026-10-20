@@ -4,7 +4,7 @@ title: "Buildings (16): citadel, sanctuary, village, bazaar per kingdom"
 status: proposed
 layer: core
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-006 }
   - { rel: uses, to: MEC-004 }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }

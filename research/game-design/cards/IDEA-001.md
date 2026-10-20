@@ -5,7 +5,7 @@ status: open
 layer: configurable
 by: Bob, 2026-10-19
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-010 }
   - { rel: uses, to: AST-B08, note: Quest marker standees ×3 }
   - { rel: needs, to: SCR-001, note: setup has to set them }
   - { rel: raises, to: Q-001 }

@@ -1,0 +1,17 @@
+---
+type: piece
+title: "Corruption cards (12)"
+status: proposed
+layer: configurable
+by: "Claude, for Bob, 2026-10-20"
+links:
+  - { rel: part-of, to: AREA-009 }
+  - { rel: refines, to: AST-B11, note: "one deck of the cards" }
+  - { rel: refines, to: E3, note: "Corruption track" }
+  - { rel: uses, to: MEC-013, note: "never a 3rd from one random effect" }
+sources:
+  - { file: "asset-catalog.md", lines: "41-63" }
+  - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
+  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+---
+**Proposal:** each corruption is one physical card on the hero board, and a 3rd loses (E3). The story names them (Dracula: bites). The app names which card to take from a seeded draw, so it knows the card's effect instead of treating it as unknown. Cures (holy water, the host, sanctuary rest) put a card back.
