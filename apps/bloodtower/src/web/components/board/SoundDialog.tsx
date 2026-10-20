@@ -1,4 +1,6 @@
+import type { CSSProperties } from "react";
 import { CHANNELS, type Channel, type Levels } from "../../lib/audio/levels.ts";
+import { DialogFrame } from "./DialogFrame";
 
 const LABELS: Record<Channel, string> = {
   music: "Music",
@@ -9,6 +11,7 @@ const LABELS: Record<Channel, string> = {
 /**
  * The Sound dialog on the Mac, shown after the first click on the landing screen (R3-UI-03).
  * Board-local: it is not a device control. Each slider has a test clip (see BoardAudio.test).
+ * The frame is DialogFrame's (compact); this component adds no dialog chrome.
  */
 export function SoundDialog({
   levels,
@@ -23,38 +26,43 @@ export function SoundDialog({
 }) {
   return (
     <div className="bt-sound-backdrop">
-      <section
-        className="bt-sound-dialog"
+      <DialogFrame
+        size="compact"
+        className="bt-ink-in bt-sound-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="bt-sound-title"
-        data-sound-dialog
+        data-sound-dialog=""
       >
         <h2 id="bt-sound-title">Sound</h2>
         <p className="bt-sound-note">
           Levels stay on this Mac. Tower volume is set in Connect Tower.
         </p>
-        {CHANNELS.map((channel) => (
-          <div className="bt-sound-row" key={channel}>
-            <label htmlFor={`bt-sound-${channel}`}>{LABELS[channel]}</label>
-            <input
-              id={`bt-sound-${channel}`}
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={Math.round(levels[channel] * 100)}
-              onChange={(event) => onLevelChange(channel, Number(event.target.value) / 100)}
-            />
-            <button type="button" onClick={() => onTest(channel)}>
-              Test
-            </button>
-          </div>
-        ))}
+        {CHANNELS.map((channel) => {
+          const percent = Math.round(levels[channel] * 100);
+          return (
+            <div className="bt-sound-row" key={channel}>
+              <label htmlFor={`bt-sound-${channel}`}>{LABELS[channel]}</label>
+              <input
+                id={`bt-sound-${channel}`}
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={percent}
+                style={{ "--bt-fill": `${percent}%` } as CSSProperties}
+                onChange={(event) => onLevelChange(channel, Number(event.target.value) / 100)}
+              />
+              <button type="button" onClick={() => onTest(channel)}>
+                Test
+              </button>
+            </div>
+          );
+        })}
         <button type="button" className="bt-sound-continue" onClick={onContinue}>
           Continue
         </button>
-      </section>
+      </DialogFrame>
     </div>
   );
 }
