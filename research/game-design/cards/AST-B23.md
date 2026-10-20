@@ -5,7 +5,7 @@ status: proposed
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-009 }
   - { rel: refines, to: AST-B05, note: "split out of foes" }
   - { rel: affects, to: Q-007, note: "battle resolution" }
 sources:

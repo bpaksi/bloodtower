@@ -5,7 +5,7 @@ status: proposed
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-006 }
   - { rel: refines, to: AST-B12, note: "one kind of special token" }
   - { rel: part-of, to: AREA-001 }
   - { rel: conflicts, to: DEC-003, note: "base token costs warriors to cross" }

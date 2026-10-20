@@ -5,7 +5,7 @@ status: proposed
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-009 }
   - { rel: refines, to: AST-B12, note: "one kind of special token" }
   - { rel: refines, to: E3, note: "Corruption track" }
   - { rel: uses, to: AST-B17 }

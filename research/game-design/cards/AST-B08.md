@@ -4,7 +4,7 @@ title: "Quest markers (3)"
 status: proposed
 layer: configurable
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-010 }
   - { rel: refines, to: E19 }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }

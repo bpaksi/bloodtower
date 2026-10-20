@@ -29,7 +29,7 @@ Prefix by type, three digits, never reused or renumbered. A retired card stays, 
 
 | Type | Prefix |
 |---|---|
-| area | `AREA-` (AREA-000 is the core game; areas hang off it) |
+| area | `AREA-` (AREA-000 is the core game; areas hang off it, and an area can hold sub-areas by linking `part-of` its parent) |
 | idea | `IDEA-` |
 | question | `Q-` |
 | option | `OPT-` (one possible answer to a question, with for and against) |
@@ -81,7 +81,7 @@ Every card except areas says where it sits between "every story" and "one story"
 | `optional` | An engine module a story may switch on | Dungeon crawl, hunter token |
 | `story` | Lives in one story pack; kept here only as an example | Dracula's 5 nights |
 
-Every card links `part-of` at least one area, so the Map page can count it.
+Every card links `part-of` at least one area, so the Map page can count it. Link a card to the most specific area that fits, so no area gets more than about 10 direct links (the graph's busy limit).
 
 ## How Claude adds a thread
 

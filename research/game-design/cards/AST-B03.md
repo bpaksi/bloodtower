@@ -4,7 +4,7 @@ title: "Hero figures (4)"
 status: proposed
 layer: core
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-007 }
   - { rel: affects, to: Q-004 }
   - { rel: uses, to: MEC-003 }
 sources:

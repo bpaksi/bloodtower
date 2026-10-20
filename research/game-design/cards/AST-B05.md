@@ -4,7 +4,7 @@ title: "Foe tokens (65)"
 status: proposed
 layer: configurable
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-009 }
   - { rel: uses, to: MEC-005 }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }

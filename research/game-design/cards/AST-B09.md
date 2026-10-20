@@ -4,7 +4,7 @@ title: "Dungeon tokens (6)"
 status: proposed
 layer: optional
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-006 }
   - { rel: refines, to: E20, note: "Dungeon crawl" }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }

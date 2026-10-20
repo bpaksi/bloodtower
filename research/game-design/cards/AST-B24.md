@@ -5,7 +5,7 @@ status: proposed
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-009 }
   - { rel: refines, to: AST-B05, note: "adversary cards are in the foe deck" }
   - { rel: refines, to: AST-B12, note: "adversary tokens are special tokens" }
   - { rel: refines, to: E7, note: "Adversary agenda" }

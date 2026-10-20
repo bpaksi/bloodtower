@@ -5,7 +5,7 @@ status: proposed
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-007 }
   - { rel: refines, to: AST-B11, note: "one deck of the cards" }
   - { rel: refines, to: E18, note: "Advantages and companions" }
 sources:

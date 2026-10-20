@@ -4,7 +4,7 @@ title: "Cards (136): eight decks"
 status: proposed
 layer: configurable
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-008 }
   - { rel: refines, to: E3, note: "Corruption track" }
   - { rel: refines, to: E18, note: "Advantages and companions" }
   - { rel: raises, to: Q-012 }

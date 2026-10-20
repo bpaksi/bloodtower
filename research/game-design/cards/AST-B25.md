@@ -5,7 +5,7 @@ status: proposed
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-010 }
   - { rel: refines, to: AST-B12, note: "one kind of special token" }
   - { rel: affects, to: Q-004, note: "an escort moves with a hunter" }
 sources:

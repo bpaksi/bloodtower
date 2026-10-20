@@ -5,7 +5,7 @@ status: proposed
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-008 }
   - { rel: refines, to: AST-B11, note: "one deck of the cards" }
   - { rel: raises, to: Q-012 }
   - { rel: affects, to: AST-B17, note: "a potion can cure a corruption" }

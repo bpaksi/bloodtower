@@ -5,7 +5,7 @@ status: proposed
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-009 }
   - { rel: refines, to: AST-B11, note: "one deck of the cards" }
   - { rel: refines, to: E3, note: "Corruption track" }
   - { rel: uses, to: MEC-013, note: "never a 3rd from one random effect" }

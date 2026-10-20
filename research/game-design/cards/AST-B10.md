@@ -5,7 +5,7 @@ status: proposed
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-008 }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }

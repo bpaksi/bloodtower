@@ -5,7 +5,7 @@ status: proposed
 layer: core
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-007 }
   - { rel: refines, to: AST-B03, note: "split out of hero figures and boards" }
   - { rel: uses, to: AST-B15, note: "virtue slots" }
   - { rel: uses, to: AST-B17, note: "corruption slots" }

@@ -5,7 +5,7 @@ status: proposed
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-005 }
+  - { rel: part-of, to: AREA-008 }
   - { rel: refines, to: AST-B11, note: "one deck of the cards" }
   - { rel: uses, to: MEC-009, note: "keys" }
   - { rel: uses, to: MEC-011, note: "set pieces grant them" }
