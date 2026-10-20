@@ -5,7 +5,7 @@ status: proposed
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-010 }
+  - { rel: part-of, to: AREA-011 }
   - { rel: part-of, to: AREA-003 }
   - { rel: refines, to: AST-T13, note: "tower seal output (breakSeal)" }
   - { rel: refines, to: E14, note: "Skull and seal ledgers" }

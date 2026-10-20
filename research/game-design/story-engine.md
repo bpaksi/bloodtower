@@ -106,7 +106,7 @@ See [open-questions.md](open-questions.md), especially: pack reach into code, sh
 
 ## E16 Tower is never idle (Bob, 2026-10-14)
 The tower should nearly always be doing something. The engine runs a three-layer cue stack:
-1. **Ambient bed (always on):** a light pattern for each phase or mood (e.g. a slow breathe at dusk, a dim flicker at night), declared per story. Lights only. No drum moves (drums carry game meaning) and no looping sound (the tower can't loop).
+1. **Ambient bed (always on):** a light pattern for each phase or mood (e.g. a slow breathe at dusk, a dim flicker at night), declared per story. Lights only. No drum moves in the bed (a drum move is a deliberate cue; drums may move during play since DEC-006, 2026-10-20) and no looping sound (the tower can't loop).
 2. **Ambient accents:** occasional one-shot sounds or light pulses at randomized intervals (e.g. every 20–60 s, declared per story). They're suppressed during speech, choices and calibration.
 3. **Scene cues:** these override layers 1 and 2 while they run, then hand back to the ambient bed automatically.
 - The pack supplies the ambient sets, keyed by phase. The engine supplies generic defaults so a new story is never silent.

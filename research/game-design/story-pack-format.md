@@ -530,7 +530,7 @@ Rules:
 - Cleared rooms stay cleared after leaving (E20e).
 - End: target cleared (success), retreat (partial, depth logged), or length cap hit (treated as retreat) (E20h).
 - Logging: seed, layout, each room (type, Advantages applied, cost, corruption, loot), the choice, start/end per room and crawl (E20j, PRD-41).
-- No tower control in the POC; ambient E16 continues (E20k). Story cues never move drums.
+- No tower control in the POC; ambient E16 continues (E20k). Story cues may move drums (DEC-006, 2026-10-20).
 
 ```yaml
 dungeons:                           # D-DRA-14
@@ -650,7 +650,7 @@ titles: [{cond: "corruption(hunter) = 0", text: "the one who never flinched"}]  
 - V-5. Every `~no-<x>` names a declared hunter. When hunter H is absent, play `~no-H` if that variant exists. If it does not, and H would speak, cut that line (PRD-8). `presence_safe` marks a base that does not depict H, so no variant is expected. A missing variant is not by itself a load error.
 - V-6. No two variants of a moment are equally specific with overlapping conditions; a header-only base has variants that cover all cases.
 - V-7. At most 2 speakers per exchange.
-- V-8. Every cue has a screen half and a fallback; story cues have `drums: none` unless flagged base-game.
+- V-8. Every cue has a screen half and a fallback; story cues declare `drums` (`none` by default; a move is allowed since DEC-006, 2026-10-20).
 - V-9. Every corruption effect passes through the guard; the guard has at least one always-payable fallback.
 - V-10. Advantage effects use only RtDT traits; the static max per hunter per fight is ≤ `advantage_cap`, otherwise a warning (runtime caps anyway).
 - V-11. Foe modifiers floor at 1.

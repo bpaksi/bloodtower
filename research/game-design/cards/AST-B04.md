@@ -4,7 +4,7 @@ title: "Skulls (24)"
 status: proposed
 layer: configurable
 links:
-  - { rel: part-of, to: AREA-009 }
+  - { rel: part-of, to: AREA-011 }
   - { rel: refines, to: E14, note: "Skull and seal ledgers" }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }

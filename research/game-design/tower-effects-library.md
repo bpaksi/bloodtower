@@ -42,7 +42,7 @@ Status labels follow E13: **Verified** = passed the M3 Verify pass on Bob's towe
 | calibrate | none | **19.5–24 s**, noisy | Verified | Lost on **every reconnect**. Commands during calibration are rejected (D22, PRD-6) |
 | unjam, door reset, overwrite drum states | | | GAP | No public method in 7.1.2 |
 
-**Board-state finding:** drum faces (glyphs, seal windows) carry game meaning (E13, E16 bed rule, E19c "never moves the drum", cue sheet "story cues never move drums"), positions are not sensed, and moves are slow and unstoppable. → rule C5 below.
+**Board-state finding:** drum faces (glyphs, seal windows) carry game meaning (E13, E16 bed rule, E19c "never moves the drum", cue sheet "story cues never move drums"), positions are not sensed, and moves are slow and unstoppable. → rule C5 below (lifted 2026-10-20: drums may move during play).
 
 ### A4. Seals
 
@@ -254,7 +254,7 @@ Accents must **change** something (no-op rule). Each accent is "perturb, then `r
 
 **C4. Never-idle cadence (E16, AT-26).** A watchdog tracks time since last tower activity. Bed lights count as activity only when a command was sent, so: if 8 s pass with no command, send an L1 "bed breath" (switch the bed between two equivalent styles, e.g. `breathe`↔`breathe50percent` on one ring), keeping the gap ≤10 s. Accents fire on seeded intervals per pack (`interval_s: [20, 60]`). Exempt: calibration, pause, disconnected, host mode Off. Lights-only mode: accents use light variants only.
 
-**C5. No drum moves during play.** Drums are board state (glyph faces and seal windows carry game meaning; positions are tracked in software only; moves take ~1.1 s/quarter turn, are noisy, cannot be stopped, and need calibration). Story cues use `drums: none`. A drum move is allowed only when the base game's rules would move one, scripted at a quiet beat (not during speech/choice), with lights only after the move + 300–500 ms (E13), and never `random-rotate`. Players must not turn drums by hand during a tracked session. `rotation*` light sequences are fine as light effects (no movement) but need calibration; skip if uncalibrated.
+**C5. Drum moves during play (lifted by Bob, 2026-10-20, card DEC-006).** The old rule, no drum moves during play, no longer holds: a story cue may turn a drum. The limits still apply: drums are board state (glyph faces and seal windows carry game meaning), positions are tracked in software only, and moves take ~1.1 s/quarter turn, are noisy, cannot be stopped and need calibration. So script a move at a quiet beat (not during speech/choice), with lights only after the move + 300–500 ms (E13). Positions are confirmed by players at setup, resume and chapter ends (card MEC-018), since a hand-turned drum is invisible to the app. `rotation*` light sequences are fine as light effects (no movement) but need calibration; skip if uncalibrated.
 
 **C6. Calibration and connection.** During calibration send nothing; cues → fallback, logged `rejected/fallback` (PRD-6, AT-13). After reconnect, drum-dependent and `rotation*` effects are disabled until recalibration. Low battery (threshold TBD) → warn host; consider Lights-only mode.
 
