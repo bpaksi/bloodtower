@@ -24,9 +24,13 @@ Both files were produced outside this repo and are kept as received, including t
 
 ## Things to resolve
 
-- **Which TV?** The review and log say Samsung 9 Series 65 inch. Our playtest notes say the Story board ran on an LG at 3840×2160 (playtest 1, 2026-10-20). Bob to confirm which TV is the target, or whether there are two. E4 and E7 depend on the model.
+- **Which TV?** Settled 2026-10-20: the Samsung 9 Series 65 inch is the target. The LG at 3840×2160 in the playtest 1 notes is not. Model year and firmware are still needed for E4 and E7.
 - **Resolution.** The review suggests 1080p first. The board must still be checked at 3840×2160 in case the wireless path delivers more than 1080p.
 - **The one-minute target** applies to repeat sessions only, per both documents.
+
+## First result
+
+Run R1 (2026-10-20) used a Fire TV Stick 4K Max with the FireMirror app as an extended display. Good enough: full 1920×1080, sound on the TV, about 100 ms audio lag, about 30 fps. FireMirror costs $9 one-time after a trial. Next is Roku Extended Display, which is free. Details and Bob's rulings for the Story board are in [tv-experiments.md](tv-experiments.md#r1--fire-stick--firemirror-extended-display).
 
 ## Suggested order
 

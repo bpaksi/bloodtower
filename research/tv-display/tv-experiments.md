@@ -1,6 +1,6 @@
 # Browser-to-TV Experiment Log
 
-Started: 2026-10-20 · Last updated: _enter date_
+Started: 2026-10-20 · Last updated: 2026-10-20
 
 **Purpose:** Find the simplest reusable way to present any responsive browser experience fullscreen on a TV, with consistent picture/audio and approximately one-minute repeat-session setup. Update this file with observations and repost it for next-step analysis.
 
@@ -21,15 +21,15 @@ Started: 2026-10-20 · Last updated: _enter date_
 
 | Detail | Value |
 |---|---|
-| Samsung full model/year and firmware; no serial number | _unknown_ |
+| Samsung full model/year and firmware; no serial number | Samsung 9 Series 65-inch; model/year and firmware _unknown_. This is the Story board's target TV |
 | Roku Ultra model and OS version | _unknown_ |
 | Roku Streaming Stick+ model and OS version | _unknown_ |
 | Fire Stick generation and Fire OS version | _unknown_ |
-| Chrome version | _unknown_ |
+| Chrome version | 154 (from the user agent) |
 | iPad model/iPadOS/browser; number connected | _unknown_ |
-| Server command and Story Board URL | _enter_ |
+| Server command and Story Board URL | Test page instead of the Story board: `apps/tv-display-poc`, `pnpm start`, http://127.0.0.1:4760 |
 | Network: router, Mac/receiver Wi-Fi or Ethernet, guest network? | _enter_ |
-| Audio equipment: TV speakers / soundbar / other | _enter_ |
+| Audio equipment: TV speakers / soundbar / other | TV speakers |
 | Normal room lighting and viewing distance | _enter_ |
 | Maximum acceptable one-time / recurring cost | _undecided_ |
 
@@ -112,8 +112,8 @@ DeskPad documents virtual-display preview, resolution selection, and screen-reco
 - [ ] If acceptable, test Mac AirPlay connection, extended-display availability, viewport, audio, and reopening after a Fire Stick restart.
 - [ ] **Silk alternative:** open the game using the Mac's LAN URL; check compatibility, fullscreen/chrome, WebSocket updates, and sound after an iPad-triggered action. Record any required TV-remote “Start” interaction.
 - **Capture:** app/store/version, pricing screenshot/date, complete launch sequence, timers, interruptions, viewport, audio, permissions, background/auto-start behavior.
-- **Result/status:** _not tested_
-- **Decision:** _does either path improve on the Roku enough to justify cost/steps?_
+- **Result/status:** PARTIAL (2026-10-20). Tested **FireMirror** instead of AirScreen, as an extended display: full 16:9 at 1920×1080, sound on the TV speakers, about 100 ms of audio lag, about 30 fps, repeat start under one minute. Bob's verdict: good enough. FireMirror's free trial (Bob didn't know there was one) ended during the run; it costs $9, one-time. Silk not tested. See run R1 under Results index.
+- **Decision:** try Roku Extended Display (E2, free) with the same test page first. Buy FireMirror ($9) only if the Roku does worse.
 
 Do not sideload software or grant extra permissions just to enable auto-start during the initial comparison. AirScreen cost and one-minute usability remain unverified.
 
@@ -184,7 +184,59 @@ Use PASS / FAIL / PARTIAL / NOT TESTED. Record unknown cost/resolution as unknow
 
 | Run / experiment / date | Receiver + method | Full TV / viewport | Audio + sync | Repeat starts, seconds | Cost + main blocker |
 |---|---|---|---|---|---|
-| _enter_ | | | | | |
+| R1 / E5 (FireMirror) / 2026-10-20 — PARTIAL | Fire TV Stick 4K Max + FireMirror, Mac extended display, Chrome fullscreen | Yes, no bars or cropping / 1920×1080, DPR 1 | TV speakers; audio about 100 ms behind the picture | Under 60 (estimate, not timed) | $9 one-time once the trial ends; 30 fps limits motion |
+
+### R1 — Fire Stick + FireMirror, extended display
+
+```text
+Run ID / experiment / date: R1 / E5 variant (FireMirror instead of AirScreen) / 2026-10-20
+Versions / profile / starting state: Samsung 9 Series 65-inch, picture mode Movie (household default; Game mode looked about the same). Fire TV Stick 4K Max, FireMirror (version not recorded). Chrome 154 on the MacBook Air. Test page apps/tv-display-poc.
+Exact steps and click count: Mac screen mirroring to FireMirror as an extended display, Chrome moved to the TV and fullscreened. Clicks not counted.
+One-time setup time / repeat-start times / server-start time: not recorded / under one minute (estimate) / not recorded.
+Viewport JSON / display settings / receiver output: see below. TV reported as a 1920×1080 display. Receiver output not reported.
+Picture / sound / responsiveness observations: see below.
+Failures / recovery / state preserved?: none seen. Not tested.
+Price / ads / limits, if applicable: free trial (not obvious up front) ended during the run; $9 one-time, lifetime.
+Screenshots, photos, or video filenames: none.
+Outcome / next question: good enough to use. Does Roku Extended Display (free) match it?
+```
+
+Viewport, fullscreen (`F`, then `H` to hide the tab bar):
+
+```json
+{
+  "viewportCSS": { "width": 1920, "height": 1080 },
+  "screenCSS": { "width": 1920, "height": 1080 },
+  "devicePixelRatio": 1,
+  "aspect": 1.7778,
+  "documentFullscreen": true,
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+}
+```
+
+Not fullscreen, the browser toolbar and frame took the rest: viewport 1910×960 on a 1920×1080 screen.
+
+| Test page tab | TV result | Compared with the Mac |
+|---|---|---|
+| Sounds: beep and flash | The beep lands as the 100 ms flash goes away, so audio is about 100 ms late | In sync on the Mac |
+| Sounds: sweep, levels, left/right, drone, voice | All fine | — |
+| Motion | Frame counter about 30 fps; sweep stutters | — |
+| Pan | Slow pan fine; medium and fast stutter | — |
+| Speak | First couple of plays the mouth seemed behind the voice; matched after that. Probably first speech start and image decode on the page, not the TV link | — |
+| Black on black: text ladder | 48 easy, 32 readable, 24 barely visible, 18 and darker lost. Picture modes made it crisper but no more lines | Mac reads 24 and sees 14 |
+| Black on black: grey backdrop | Same as the Mac | Same |
+| Reference: text sizes, from the couch | 24 px small but readable; 18 and 14 px readable | — |
+| Reference: edge guides | Full screen, no cropping | — |
+| Reference: pixel checker | Same as the Mac, no visible blur | Same |
+| Reference: colour bars and hero art | Good | Nicer on the Mac |
+
+**Rulings from R1 for the Story board** (Bob, 2026-10-20):
+
+1. Motion: slow movement only (slow pans, fades, glows). About 30 fps is acceptable.
+2. A/V sync: about 100 ms is fine for sound effects but not for voice. The game gets a configurable A/V offset that delays the mouth and other speech-linked visuals, default 100 ms, calibrated with the beep-and-flash test.
+3. Darkness on black: readable text at 48/255 or brighter; detail that matters at 32/255 or brighter.
+4. Text at 1080p: 18 px (1.7vh) minimum for normal text; 14 px (1.3vh) only for low-importance information where space is tight. Scale with the viewport (36 and 28 px at 4K).
+5. Next: Roku Extended Display (E2), same tabs, fullscreen. Buy FireMirror only if the Roku does worse.
 
 Duplicate this block for significant runs:
 
