@@ -21,7 +21,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Location | A building on the board, entered through its menu: base action, sub-locations, NPCs | A story point | Bob | IDEA-006, MEC-019 |
 | Sub-location | A place inside a location (tavern, merchant, chapel) | A feature | Bob | IDEA-006 |
 | NPC | A person at a location the heroes can talk to | A companion, who joins the party | Bob | IDEA-006 |
-| Story point | A kingdom or location a story marks so a special interaction can happen there | A set piece (see Q-025) | Bob | IDEA-007 |
+| Story point | Where a set piece is this turn: a building (it gains an extra option) or a space in the wild. A whole kingdom as a story point is still open | A set piece, which is what plays there | Bob, proposed | IDEA-007, IDEA-015 |
 
 ## What happens
 
@@ -32,7 +32,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Encounter | An event type: the party meets someone. Foes lead to a fight; people lead to talk or trade | Any event | Bob, proposed detail | IDEA-014 |
 | Plague | An event type: sickness that costs the party unless they hold its counter (a healer) | | Bob | IDEA-014, MEC-006 |
 | Counter | An item, ally or ability that cancels a specific event type (healer vs plague, scout vs lost) | | proposed | MEC-006 |
-| Set piece | Bob's question: a story-driven location where events can happen? Today's cards: a story's authored scene (trigger, steps, outcome). Winning needs the story's set pieces finished | A story point (see Q-025) | open | MEC-011, IDEA-013, Q-025 |
+| Set piece | A story's own scene, the part needed to win. It has a location at the start of every turn and can move. On a building it adds an option to that building's menu; in the wild a quest marker shows it | An event, which is random | Bob | MEC-011, IDEA-013, IDEA-015, Q-027 |
 | Tower event | Base RtDT's happenings the tower fires after a skull drop (foes spawn, foes strike) | An event | proposed name | DEC-004 |
 
 ## Fights
