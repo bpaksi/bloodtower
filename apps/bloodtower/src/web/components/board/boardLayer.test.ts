@@ -130,6 +130,7 @@ describe("StoryBoard visual layer", () => {
     expect(layer).toContain('data-board-caption=""');
     expect(layer).not.toContain("data-camera-still");
     expect(html.match(/class="bt-keeper"/g)).toHaveLength(1);
+    expect(html).not.toContain("data-waiting-dialog");
     expect(html).toContain('data-keeper-stage=""');
   });
 
@@ -145,7 +146,12 @@ describe("StoryBoard visual layer", () => {
     const text = render(playState(moment({ text: "A bell marks the step." })));
     expect(text).toContain('data-board-layer="waiting"');
     expect(layerHtml(text)).toBeNull();
-    expect(text).toContain('class="bt-narration" data-moment-caption=""');
+    // The waiting dialog (visuals step 9): the real frame holds the text and the prompt band.
+    expect(text).toContain('data-illusionist-asset="dialog-frame" data-dialog-size="compact"');
+    expect(text).toContain('<p class="bt-wait-text" data-moment-caption="">A bell marks the step.');
+    expect(text.indexOf("data-waiting-dialog")).toBeLessThan(text.indexOf("data-next-band"));
+    expect(text.match(/data-next-band/g)).toHaveLength(1);
+    expect(text).not.toContain('class="bt-page');
     const startup = render({ ...playState(null), screen: "begin" });
     expect(startup).toContain('data-board-layer="startup"');
     expect(layerHtml(startup)).toBeNull();

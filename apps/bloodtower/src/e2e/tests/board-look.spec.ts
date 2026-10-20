@@ -129,44 +129,58 @@ const assertPlayHeader = async (page: Page) => {
 };
 
 /**
- * Play parchment (visuals step 8): kicker, title, ornament, justified narration with a floated
- * drop cap, a plate around any still, the party items zone reading unavailable (never a count),
- * and the blood-band next prompt. Everything measured, at whatever viewport is current.
+ * The waiting board (visuals step 9; R3-UI-30): a small centred DialogFrame (the real SVG frame)
+ * holds the moment text and the blood-band prompt; no parchment column, no plate. The party items
+ * zone still reads unavailable (never a count) under it on tall boards.
  */
-const assertPlayParchment = async (page: Page) => {
-  const page_ = page.locator(".bt-page .bt-narration[data-moment-caption]");
-  await expect(page.locator(".bt-page .bt-kicker")).toBeVisible();
-  await expect(page.locator(".bt-page h2")).toBeVisible();
-  await expect(page.locator(".bt-page .bt-orn")).toContainText("❦");
-  const look = await page_.evaluate((el) => {
-    const style = getComputedStyle(el);
-    const cap = getComputedStyle(el, "::first-letter");
-    const tallest = Math.max(
-      ...[...document.querySelectorAll(".bt-page")].map((x) => x.getBoundingClientRect().bottom),
-    );
+const assertWaitingDialog = async (page: Page) => {
+  await expect(page.locator("main")).toHaveAttribute("data-board-layer", "waiting");
+  const dialog = page.locator('[data-illusionist-asset="dialog-frame"][data-waiting-dialog]');
+  await expect(dialog).toHaveCount(1);
+  await expect(dialog.locator(".bt-wait-text[data-moment-caption]")).toBeVisible();
+  await expect(dialog.locator("[data-next-band]")).toBeVisible();
+  await expect(page.locator(".bt-page")).toHaveCount(0);
+  await expect(page.locator(".bt-plate")).toHaveCount(0);
+  const geo = await page.evaluate(() => {
+    const d = document.querySelector("[data-waiting-dialog]") as HTMLElement;
+    const story = document.querySelector(".bt-story") as HTMLElement;
+    const text = d.querySelector(".bt-wait-text") as HTMLElement;
+    const band = d.querySelector("[data-next-band]") as HTMLElement;
+    const bandText = band.querySelector("b") as HTMLElement;
+    const dr = d.getBoundingClientRect();
+    const sr = story.getBoundingClientRect();
+    const br = band.getBoundingClientRect();
     return {
-      align: style.textAlign,
-      capFloat: cap.float,
-      capColor: cap.color,
-      pageBottom: tallest,
+      frame: getComputedStyle(d).borderImageSource,
+      size: d.getAttribute("data-dialog-size"),
+      bandBg: getComputedStyle(band).backgroundImage,
+      bandFont: Number.parseFloat(getComputedStyle(bandText).fontSize),
+      textFont: Number.parseFloat(getComputedStyle(text).fontSize),
+      dx: dr.left + dr.width / 2 - (sr.left + sr.width / 2),
+      dy: dr.top + dr.height / 2 - (sr.top + sr.height / 2),
+      dialogInStory: dr.top >= sr.top - 1 && dr.bottom <= sr.bottom + 1,
+      bandInDialog: br.left >= dr.left && br.right <= dr.right && br.bottom <= dr.bottom,
+      viewW: window.innerWidth,
+      viewH: window.innerHeight,
+      dialogBottom: dr.bottom,
+      overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     };
   });
-  expect(look.align, "narration is justified").toBe("justify");
-  expect(look.capFloat, "first paragraph has a drop cap").toBe("left");
-  expect(look.capColor, "drop cap is blood").toBe("rgb(142, 27, 27)");
-  const still = page.locator("[data-camera-still]");
-  if (await still.count()) {
-    await expect(page.locator(".bt-plate [data-camera-still]")).toHaveCount(1);
-    const frame = await page.locator(".bt-plate").evaluate((el) => {
-      const cs = getComputedStyle(el);
-      return { border: Number.parseFloat(cs.outlineWidth), outline: cs.outlineStyle };
-    });
-    expect(frame.border, "plate has a rule").toBeGreaterThanOrEqual(2);
-    expect(frame.outline, "plate has an offset outline").toBe("solid");
-  }
+  expect(geo.frame, "the real dialog-frame SVG draws the border").toContain(
+    "/board/dialog-frame/dialog-frame.svg",
+  );
+  expect(["compact", "default"]).toContain(geo.size);
+  expect(geo.bandBg, "prompt sits on a blood band").toContain("rgb(142, 27, 27)");
+  expect(geo.bandInDialog, "the band is inside the frame").toBe(true);
+  expect(geo.bandFont, "prompt is at least 28px").toBeGreaterThanOrEqual(28);
+  expect(geo.textFont, "moment text is at least 28px (TV distance)").toBeGreaterThanOrEqual(28);
+  expect(Math.abs(geo.dx), "dialog is centred in the story column").toBeLessThanOrEqual(2);
+  expect(Math.abs(geo.dy), "dialog is centred in the story column").toBeLessThanOrEqual(2);
+  expect(geo.dialogInStory, "dialog stays inside the story column").toBe(true);
+  expect(geo.dialogBottom).toBeLessThanOrEqual(geo.viewH + 1);
+  expect(geo.overflowX, "no horizontal scroll").toBeLessThanOrEqual(0);
   const items = page.locator("[data-party-items]");
   const tall = (page.viewportSize()?.height ?? 0) >= 1040;
-  // The zone and ornament only appear from 1040px high; the values stay in the DOM either way.
   if (tall) {
     await expect(items).toBeVisible();
     await expect(items).toBeInViewport({ ratio: 1 });
@@ -181,42 +195,6 @@ const assertPlayParchment = async (page: Page) => {
     await expect(values.nth(i)).toHaveAttribute("data-unavailable", "");
   }
   await expect(items).not.toContainText(/\b\d+\b/);
-  const band = page.locator("[data-next-band]");
-  await expect(band).toBeInViewport({ ratio: 1 });
-  const geo = await page.evaluate(() => {
-    const b = document.querySelector("[data-next-band]") as HTMLElement;
-    const it = document.querySelector("[data-party-items]") as HTMLElement;
-    const story = document.querySelector(".bt-story") as HTMLElement;
-    const br = b.getBoundingClientRect();
-    const ir = it.getBoundingClientRect();
-    const sr = story.getBoundingClientRect();
-    const text = b.querySelector("b") as HTMLElement;
-    return {
-      bg: getComputedStyle(b).backgroundImage,
-      fontPx: Number.parseFloat(getComputedStyle(text).fontSize),
-      lineHeight: Number.parseFloat(getComputedStyle(text).lineHeight),
-      textH: text.getBoundingClientRect().height,
-      bandH: br.height,
-      bandW: br.width,
-      storyW: sr.width,
-      bandTop: br.top,
-      itemsBottom: ir.bottom,
-      viewW: window.innerWidth,
-    };
-  });
-  expect(geo.bg, "next prompt sits on a blood band").toContain("rgb(142, 27, 27)");
-  expect(geo.bandW, "band spans the story column").toBeGreaterThanOrEqual(geo.storyW - 2);
-  if (tall) {
-    expect(geo.bandTop, "band sits under the items zone").toBeGreaterThanOrEqual(
-      geo.itemsBottom - 1,
-    );
-  }
-  expect(geo.textH, "short prompt is one line").toBeLessThanOrEqual(geo.lineHeight * 1.5);
-  expect(geo.fontPx, "prompt is at least 28px").toBeGreaterThanOrEqual(28);
-  if (geo.viewW >= 1900) {
-    expect(geo.fontPx, "prompt is 56 to 60px on the TV").toBeGreaterThanOrEqual(56);
-    expect(geo.bandH).toBeGreaterThanOrEqual(60);
-  }
 };
 
 /** Every unavailable value sits inside the party items zone (nothing clipped at any width). */
@@ -281,32 +259,53 @@ const setPrompt = async (page: Page, text: string | null) => {
     const n = (t ?? node.textContent ?? "").length;
     el.setAttribute("data-len", n <= 24 ? "short" : n <= 48 ? "mid" : "long");
   }, text);
+  await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+  await page.waitForTimeout(100);
 };
 
-/** The waiting page (a text moment) and its narration, measured where they sit. */
-const measurePage = (page: Page) =>
+/** The waiting dialog (a text moment) and its text, measured where they sit. */
+const measureDialog = (page: Page) =>
   page.evaluate(() => {
     const story = document.querySelector(".bt-story") as HTMLElement;
-    const pageEl = document.querySelector(".bt-page") as HTMLElement;
-    const text = document.querySelector(".bt-page [data-moment-caption]") as HTMLElement;
+    const dialog = document.querySelector("[data-waiting-dialog]") as HTMLElement;
+    const text = dialog.querySelector("[data-moment-caption]") as HTMLElement;
     const band = document.querySelector("[data-next-band]") as HTMLElement;
+    const line = Number.parseFloat(getComputedStyle(text).lineHeight);
     return {
+      storyTop: story.getBoundingClientRect().top,
       storyBottom: story.getBoundingClientRect().bottom,
-      pageBottom: pageEl.getBoundingClientRect().bottom,
-      textBottom: text.getBoundingClientRect().bottom,
+      dialogTop: dialog.getBoundingClientRect().top,
+      dialogBottom: dialog.getBoundingClientRect().bottom,
+      size: dialog.getAttribute("data-dialog-size"),
+      shownH: text.clientHeight,
+      fullH: text.scrollHeight,
+      line,
+      chars: (text.textContent ?? "").length,
       bandBottom: band.getBoundingClientRect().bottom,
       viewH: window.innerHeight,
       docY: document.documentElement.scrollHeight - document.documentElement.clientHeight,
     };
   });
 
+/** Tell WaitingDialog to measure again after a test edits its text node behind React's back. */
+const remeasure = async (page: Page) => {
+  await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+  await page.waitForTimeout(250);
+};
+
 /**
- * The waiting board (a text moment, no visual): the narration stays inside its page with the
- * real text, a 294-character text (DRAC) and a 480-character text (FIVE), the page and the band
- * fit, and the prompt band shows every real prompt untruncated. Since visuals step 10 a still
- * shows in the visual layer, so its size is checked in visual-layer.spec.ts, not here.
+ * The waiting board (a text moment, no visual): the dialog stays in the story column with the
+ * real text, a 294-character text (DRAC) and a 480-character text (FIVE). A text that does not
+ * fit the compact frame grows it to the default size before any line is cut; what is cut is cut at
+ * a whole line, with the full text still in the DOM. The band fits and shows every real prompt
+ * untruncated. Since visuals step 10 a still shows in the visual layer, so its size is checked in
+ * visual-layer.spec.ts, not here.
  */
-const assertViewportBudget = async (page: Page, key: string) => {
+const assertViewportBudget = async (
+  page: Page,
+  key: string,
+  shot?: (name: string) => Promise<void>,
+) => {
   const [w, h] = key.split("x").map(Number);
   await page.setViewportSize({ width: w as number, height: h as number });
   await page.waitForTimeout(300);
@@ -315,25 +314,42 @@ const assertViewportBudget = async (page: Page, key: string) => {
     ["real", null],
     ["294 chars", DRAC],
     ["480 chars", FIVE],
+    ["1440 chars", `${FIVE} ${FIVE} ${FIVE}`],
   ];
   for (const [name, text] of texts) {
-    await setNode(page, ".bt-page [data-moment-caption]", text);
-    await page.waitForTimeout(250);
-    const m = await measurePage(page);
+    await setNode(page, ".bt-wait-text", text);
+    await remeasure(page);
+    const m = await measureDialog(page);
     const label = `${key} ${name}`;
-    expect(m.textBottom, `${label}: narration stays in its page`).toBeLessThanOrEqual(
-      m.pageBottom + 1,
+    expect(m.dialogTop, `${label}: dialog stays in the story column`).toBeGreaterThanOrEqual(
+      m.storyTop - 1,
     );
-    expect(m.pageBottom, `${label}: page stays in the story column`).toBeLessThanOrEqual(
+    expect(m.dialogBottom, `${label}: dialog stays in the story column`).toBeLessThanOrEqual(
       m.storyBottom + 1,
     );
+    const rest = m.shownH % m.line;
+    expect(Math.min(rest, m.line - rest), `${label}: the text is cut at a whole line`).toBeLessThan(
+      2,
+    );
+    if (m.fullH > m.shownH + 1) {
+      expect(m.size, `${label}: a cut text grew the dialog to the default size first`).toBe(
+        "default",
+      );
+    }
+    if (key === "1180x820" && name === "1440 chars") await shot?.("board-waiting-long-1180x820");
+    if (key === "1180x820" && text === FIVE) {
+      // Measured: up to 506 characters of this text fit whole at 1180x820 (default size).
+      expect(m.fullH, `${label}: 480 characters fit whole`).toBeLessThanOrEqual(m.shownH + 1);
+    }
+    if (text) expect(m.chars, `${label}: the full text stays in the DOM`).toBe(text.length);
     // Under 960px wide the board stacks into one column and scrolls on main too (spec: TV board).
     if ((w as number) >= 960) {
       expect(m.docY, `${label}: board does not scroll`).toBeLessThanOrEqual(0);
       expect(m.bandBottom, `${label}: band on screen`).toBeLessThanOrEqual(m.viewH + 1);
     }
   }
-  await setNode(page, ".bt-page [data-moment-caption]", null);
+  await setNode(page, ".bt-wait-text", null);
+  await remeasure(page);
   if (tall) {
     await expect(page.locator("[data-party-items]")).toBeVisible();
     await expectItemsInside(page);
@@ -475,29 +491,35 @@ test("story board look at proving ground, grey-stair, and the Keeper", async ({
     await expect(board.locator("main")).toHaveAttribute("data-board-layer", "waiting");
     await expect(board.locator("[data-visual-layer]")).toHaveCount(0, { timeout: 2000 });
     await assertBoardFits(board);
-    await assertPlayParchment(board);
+    await assertWaitingDialog(board);
     await assertPlayHeader(board);
     await shot(board, "board-waiting-landscape");
     await board.setViewportSize({ width: 1024, height: 594 });
     await assertBoardFits(board);
-    await assertPlayParchment(board);
+    await assertWaitingDialog(board);
     await assertPlayHeader(board);
     await shot(board, "board-waiting-1024x594");
     await board.setViewportSize({ width: 1920, height: 1080 });
     await assertBoardFits(board);
-    await assertPlayParchment(board);
+    await assertWaitingDialog(board);
     await assertPlayHeader(board);
     await shot(board, "board-waiting-1920x1080");
-    for (const key of BUDGET_VIEWPORTS) await assertViewportBudget(board, key);
+    for (const key of BUDGET_VIEWPORTS)
+      await assertViewportBudget(board, key, (n) => shot(board, n));
     await board.setViewportSize({ width: 1180, height: 820 });
     await d.button("continue").click();
     await expect(board.getByText("A bell marks the step.")).toBeVisible();
+    // Waiting to visual and back to waiting: each layer is exactly one of the two.
+    await expect(board.locator("main")).toHaveAttribute("data-board-layer", "visual");
+    await expect(board.locator("[data-waiting-dialog]")).toHaveCount(0);
     await d.button("continue").click();
     await expect(board.getByText(/A grey stair climbs into the dark/)).toBeVisible();
     await expect(board.locator(".bt-board-title h1")).toContainText("A Grey Stair");
     await expect(board.locator(".bt-board-title h1 small")).toHaveText("The Grey Stair");
     await assertBoardFits(board);
     await assertVisualLayer(board);
+    // Waiting to visual: the layer takes the screen and the dialog is gone from the page.
+    await expect(board.locator("[data-waiting-dialog]")).toHaveCount(0);
     await shot(board, "board-grey-stair-landscape");
     await board.setViewportSize({ width: 1024, height: 594 });
     await assertBoardFits(board);

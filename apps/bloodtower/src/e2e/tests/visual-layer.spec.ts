@@ -378,7 +378,7 @@ test("a visual zooms to a full-screen letterboxed layer, the camera runs in it, 
       const out = await layer.evaluate(playback).catch(() => "gone");
       expect(["reversed", "gone"]).toContain(out);
       await expect(layer).toHaveCount(0, { timeout: 2000 });
-      await expect(board.locator(".bt-page [data-moment-caption]")).toHaveText(
+      await expect(board.locator("[data-waiting-dialog] [data-moment-caption]")).toHaveText(
         "Each hunter reads alone.",
       );
       await expect(main.locator(".bt-board-header")).toBeVisible();
