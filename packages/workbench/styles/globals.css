@@ -96,6 +96,21 @@ a:hover {
   border: 1px solid var(--line);
 }
 
+.btn-ghost:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.history-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
 .prompt-btn {
   padding: 0.1rem 0.5rem;
   background: var(--panel);

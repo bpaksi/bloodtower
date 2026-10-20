@@ -1,4 +1,4 @@
-import { ChipCopy, PromptStarter } from "@dark-tower/workbench/components";
+import { ChipCopy, HistoryButtons, PromptStarter } from "@dark-tower/workbench/components";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar.tsx";
@@ -22,6 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Sidebar />
           <div className="main">
             <header className="topbar">
+              <HistoryButtons />
               <input
                 className="search"
                 type="search"
