@@ -1079,6 +1079,63 @@
 }
 
 /*
+ * Candle flicker in the painting's lit windows and lanterns (R3-UI-02, visuals step 2). Four
+ * layers, one per light group (the tower window, two lantern runs, the lamp post), each a 1920x1080
+ * glow PNG sized and placed exactly like the backdrop so the lights stay on the painting at every
+ * size. They are children of the backdrop, which the ::after dark gradient paints over, and the
+ * backdrop's filter makes it a stacking context, so the glow stays in the painting and never lies
+ * over a dialog, the visual layer or the play page. The image, duration and delay of each group
+ * come from boardWindowMask.ts.
+ *
+ * Flash safety: every stop below changes a layer once, 6 changes per cycle, at most 2.1 a second
+ * for the fastest group (2.9s). Each layer's opacity moves 0.62 to 1 over a small area.
+ */
+.bt-board .bt-window-glow {
+  position: absolute;
+  inset: 0;
+  background-position: left top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation-name: bt-window-flicker;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+
+/* Stepped and uneven, never a sine (game-look section 5). */
+@keyframes bt-window-flicker {
+  0% {
+    opacity: 1;
+  }
+  17% {
+    opacity: 0.78;
+  }
+  29% {
+    opacity: 0.96;
+  }
+  52% {
+    opacity: 0.62;
+  }
+  61% {
+    opacity: 0.9;
+  }
+  83% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-board .bt-window-glow {
+    animation: none;
+    opacity: 0.9;
+  }
+}
+
+/*
  * Pick Game carousel (R3-UI-24), inside the start-up dialog: the focused story large in the
  * centre column, a smaller neighbour peeking at each side. With two packs the one neighbour
  * peeks on the right, so the focus never moves off centre.
