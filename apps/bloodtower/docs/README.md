@@ -7,4 +7,4 @@
 | [../README.md](../README.md) | How to run it |
 | [ipad-door-pick-diagnosis.md](ipad-door-pick-diagnosis.md) | QA: door pick-card (`ipad:all`) never reaches `/device` |
 
-Playtest notes land here when there is a playtest. There is no separate intent file; the approved plan is the source until Bob writes one.
+Playtest results land in [playtests/](playtests/), one `.json` and `.md` per run of `pnpm --dir apps/bloodtower playtest` (see [../README.md](../README.md#playtest)). There is no separate intent file; the approved plan is the source until Bob writes one.

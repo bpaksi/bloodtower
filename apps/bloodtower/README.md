@@ -49,6 +49,17 @@ A worktree reads ports, the SQLite folder and `packsDir` from `.wt.json` (`pnpm 
 
 These ports sit away from tower-poc (4747/4748) and the funeral POC (4767/4768).
 
+## Playtest
+
+```bash
+pnpm --dir apps/bloodtower playtest                # mock tower, every section
+pnpm --dir apps/bloodtower playtest --tower        # real tower; start tower-poc on 4747 first
+pnpm --dir apps/bloodtower playtest --only E,F     # one short chunk
+pnpm --dir apps/bloodtower playtest --resume <file>.json
+```
+
+It lints both packs, builds and starts the host (or uses one already answering on the port, and leaves that one running), prints the board and join URLs, then asks each check in order: the step to do on the Mac, iPad, phone or tower, and what should happen. Answer `p` pass, `f` fail (it asks what happened), `s` skip, `n` pass with a note, `b` back or `q` save and quit; Ctrl-D and Ctrl-C also save. Every answer is saved at once to `docs/playtests/<stamp>.json` and `.md`. The Markdown file ends with the latest session's timing report and, when something failed, a fix prompt to paste into Claude Code. `--check` and `--e2e` run those suites first and record the result; `--no-build` and `--no-server` skip the build or the start. The script never sends a tower command: every tower action is a press on a device.
+
 ## Other commands
 
 ```bash
