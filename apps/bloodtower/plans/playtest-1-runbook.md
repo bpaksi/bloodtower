@@ -2,7 +2,7 @@
 
 Bob runs one step per branch in Claude Code on the Mac. Update **Status** and **PR #** here when a step opens or merges.
 
-**Source:** the first full playtest, 2026-10-20: [`docs/playtests/2026-10-20-1120.md`](../docs/playtests/2026-10-20-1120.md) (commit `bbcb292`, mock tower, Story board on an LG TV at 3840×2160, iPad and phone, `pnpm --dir apps/bloodtower playtest --check`). All 33 checks passed. Bob's notes hold three bugs, polish, and new play features; this runbook turns each note into an item (`PT-nn`), a bug (`B1`–`B3`) or a plan step (`P1`–`P9`).
+**Source:** the first full playtest, 2026-10-20: [`docs/playtests/2026-10-20-1120.md`](../docs/playtests/2026-10-20-1120.md) (commit `bbcb292`, mock tower, Story board on an LG TV at 3840×2160, iPad and phone, `pnpm --dir apps/bloodtower playtest --check`). All 33 checks passed. A tower run followed the same day: [`docs/playtests/2026-10-20-1325-tower.md`](../docs/playtests/2026-10-20-1325-tower.md) (real tower through tower-poc, sections E and F; E2, E3 and F2 passed, F3 and F4 could not be done; the answer was "All three differ", firmware recorded). Bob's notes hold three bugs, polish, and new play features; this runbook turns each note into an item (`PT-nn`), a bug (`B1`–`B3`) or a plan step (`P1`–`P9`).
 
 **How a step runs:** the review loop in `docs/sdlc.md` §4 (one Opus attack, Sonnet fix-checks, trust CI, block only on the §4 list) and the merge rule in `CLAUDE.md` (squash-merge once CI is green and the latest review says `Blocking: none`). `Done when` for every step: its numbered items, its `Tests:` line and the hard constraints below.
 
@@ -41,6 +41,10 @@ Bob runs one step per branch in Claude Code on the Mac. Update **Status** and **
 | PT-20 | J1 | Menu: Last game summary | P6 |
 | PT-21 | J1 | Menu: Statistics for past games | P6 |
 | PT-22 | K1 | The Table section (join QR) shows scroll bars | B2 |
+| PT-23 | F3 (tower run) | Never saw the balance check. It starts on its own after Level 2; the iPad only says "The tower is playing." and only the board names it, for about 7 s | P3 |
+| PT-24 | F4 (tower run) | Never saw Play again. It shows only while the question is open, above the answers and styled like them, and goes away once an answer is sent, leaving only Continue | P3 |
+| PT-25 | F2 (tower run) | The answer ("All three differ") does not say which level is quietest, so the library's "2 is quietest" (GAP-HW-003) is still unconfirmed | P3 |
+| PT-26 | E2 (tower run) | Connect was pressed 7 times over about a minute before the tower connected | PQ6 |
 
 C3's note (Vellmoor shows "Not playable yet" only after Game settings) matches the design (D30); no action.
 
@@ -62,6 +66,7 @@ C3's note (Vellmoor shows "Not playable yet" only after Game settings) matches t
 | PQ2 | With the menu on the iPad, are sound levels set from the iPad (the board applies them), or does the Sound dialog stay a Mac-only control reached from `/`? | none yet |
 | PQ3 | Play screen (I2): what besides zoom speed needs work? | none yet |
 | PQ4 | Does the board keep its own Menu (R3-UI-39: a corner button and Esc on the Mac, and save-and-quit when every device has dropped), or does the iPad menu replace it? | Replace it for now; revisit with save and resume (R2-41). |
+| PQ6 | Tower run (PT-26): when Connect was pressed and the tower did not connect, did the iPad and board show an error each time, or did nothing seem to happen? If nothing showed, it becomes bug B4 (a failed connect must show its error; nothing retries). Also: which level was quietest and which loudest? | none yet |
 | PQ5 | The Dracula script has 159 private moments (`target: ipad:<hunter>`). Play them on the board as shared lines, or rewrite or cut them? | none yet; Dracula is `playable: false`, so nothing breaks while this is open. |
 
 ## Status
@@ -88,7 +93,7 @@ C3's note (Vellmoor shows "Not playable yet" only after Game settings) matches t
 - **After P3 and P8:** P5 (the menu).
 - **After P5:** P6; then P4 once PQ1 is answered; P7 once PQ2 and PQ4 are answered.
 - **After P1:** P9.
-- **Later:** a tower run of the playtest (`--tower --only E,F`), and a second full playtest when P1–P9 are in.
+- **Later:** a second tower run (`--tower --only E,F`) once P3 is in, and a second full playtest when P1–P9 are in.
 
 ---
 
@@ -190,9 +195,9 @@ Review focus (put this line in the PR body): no private path left anywhere; ipad
 When done: set the P2 Status row in the runbook, run pnpm check and the affected spec files, push, and open a PR titled "feat(bloodtower): remove private moments (playtest-1 P2)".
 ```
 
-## P3. Tower volume test only with a tower
+## P3. Tower volume test: only with a tower, and a test you can see and repeat
 
-**Review focus:** skip only after "Play without tower"; Back paths; the stat is absent, not zero, without a tower; spec row.
+**Review focus:** skip only after "Play without tower"; Back paths; the stat is absent, not zero, without a tower; every phase named on the iPad; Play again and the answers available until Continue; the quietest-level answer in the stat; one tower command at a time as before; spec row.
 
 ```text
 Build playtest-1 step P3 (tower volume test only with a tower) for apps/bloodtower.
@@ -210,14 +215,23 @@ This step changes the flow order in engine/session state. Say so in the PR. No n
 5. Nothing physical changes: no command is sent by the skip.
 6. spec.md: a new decision row (next free D id) for R2, superseding the part of the shell step 7 row it changes.
 
+The tower run of 2026-10-20 (apps/bloodtower/docs/playtests/2026-10-20-1325-tower.md, items PT-23 to PT-25) showed the test works but cannot be seen or repeated from the iPad. In the same step:
+
+7. Name every phase on the iPad as well as the board (PT-23): "Level 0 is playing", "Level 1 …", "Level 2 …", then "Now the tower plays over the room sound" for the balance check (today the iPad says only "The tower is playing."), then the question. The board keeps its titles.
+8. Play again (PT-24) stays available after an answer is sent, until Continue. It looks like an action, not an answer (the P8 option/action rule if P8 has merged; otherwise a clearly different style, and say so). Another answer may be sent after a replay; the stat keeps the last answer and counts the runs.
+9. Quietest level (PT-25): after "Did the levels sound different?", ask "Which level was quietest?" with Level 0, Level 1, Level 2 and "Couldn't tell". Record it in the tower-volume-test stat with the existing answer, write-in and firmware. Labels stay neutral (no loud/quiet names on the levels themselves).
+10. Unchanged: one command at a time, 250 ms after each write, about 4 s apart, no lights, nothing plays without a press, a failed sound stops the run and is not retried.
+
 Tests:
 - Engine: with and without a tower, the next screen after Connect Tower and the Back target from Claim Hunters; tower: none unchanged; no stat without a tower; no tower command on the skip path (mock records none).
+- Engine: Play again is legal after an answer and before Continue; a second answer replaces the first; the stat holds the answer, the quietest level, the run count and firmware.
+- Device: each phase's line, including the balance check; Play again present after answering; the quietest-level question.
 - e2e: Play without tower goes from Connect Tower to Claim Hunters.
-- Playtest script: remove check F1 (no-tower volume test) and make F5 a tower-only check, with its test.
+- Playtest script: remove check F1 (no-tower volume test); make F5 a tower-only check; rewrite F2–F4 to match (one Play runs the levels and the balance check; Play again after answering; the quietest-level answer), with its test.
 
-Review focus (put this line in the PR body): skip only on the no-tower path; Back targets; no stat and no command without a tower; spec row.
+Review focus (put this line in the PR body): skip only on the no-tower path; Back targets; no stat and no command without a tower; phases named on the iPad; Play again until Continue; quietest level in the stat; tower command pacing unchanged; spec row.
 
-When done: set the P3 Status row in the runbook, run pnpm check and the affected spec files, push, and open a PR titled "feat(bloodtower): volume test only with a tower (playtest-1 P3)".
+When done: set the P3 Status row in the runbook, run pnpm check and the affected spec files, push, and open a PR titled "feat(bloodtower): volume test only with a tower, visible and repeatable (playtest-1 P3)".
 ```
 
 ## P4. Replay and Back during play
