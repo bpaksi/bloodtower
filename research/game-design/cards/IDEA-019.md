@@ -5,7 +5,7 @@ status: open
 layer: story
 by: "Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-004 }
+  - { rel: part-of, to: AREA-042 }
   - { rel: affects, to: IDEA-009, note: "both games used warriors; retold with hit points (DEC-032)" }
   - { rel: affects, to: DEC-007, note: "DT81 gold is per player" }
   - { rel: affects, to: MEC-024, note: "RtDT battles are card reveals" }
