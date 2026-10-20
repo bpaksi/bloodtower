@@ -52,6 +52,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 |---|---|---|---|---|
 | Hero | One player's character | | | |
 | Party | All the heroes in the game | The present heroes | | |
+| Group | 1–4 heroes on one space travelling together with one move; heroes split off or join at any time | The party | Bob | DEC-031 |
 | Present heroes | The heroes on the space where something happens; only they take part | The party | Bob | DEC-010, DEC-019 |
 | Hit points | A hero's health, counted by the app; 0 gives a corruption | Warriors, which are gone | Bob | IDEA-009 |
 | Purse | The party's one money track, counted by the app and shown on the Story board | | Bob | DEC-007, UI-001 |
