@@ -1,0 +1,10 @@
+{
+  "name": "tv-display-poc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Standalone browser test page for judging picture and sound on the TV versus the Mac display.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
