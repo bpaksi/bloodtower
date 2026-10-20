@@ -8,10 +8,9 @@ links:
   - { rel: part-of, to: AREA-008 }
   - { rel: refines, to: AST-B11, note: "one deck of the cards" }
   - { rel: raises, to: Q-012 }
-  - { rel: refines, to: E20f, note: "dungeon loot" }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
   - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
 ---
-**Proposal:** the rare finds. Treasures come from dungeon target rooms (E20f), lures (E19b) and set pieces, not from a market of 3. The base card is the physical token for the find, and the app names it for the story. Base limit of 4 per hunter kept.
+**Proposal:** booty for winning a battle (IDEA-002), the rarest of the three, so it comes from the toughest foes. The base card is the physical item, and the app names it for the story. Base limit of 4 per hunter kept. How much a battle drops is Q-013.

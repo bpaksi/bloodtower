@@ -7,4 +7,4 @@ by: "Claude, for Bob, 2026-10-20"
 links:
   - { rel: part-of, to: AREA-005 }
 ---
-The board, buildings, dungeon sites and terrain props a story puts on the map.
+The board, buildings, dungeon sites, terrain props and the haggle die (rolled at buildings) a story puts on the map.
