@@ -1,0 +1,318 @@
+{
+  "version": 1,
+  "startedAt": "2026-10-20T11:20:17.555Z",
+  "git": {
+    "sha": "bbcb292",
+    "branch": "main",
+    "dirty": false
+  },
+  "tower": false,
+  "setup": {
+    "server": "started by playtest on port 4787 (mock tower); log apps/bloodtower/data/playtests/2026-10-20-1120-server.log",
+    "health": "{\"protocol\":1,\"tower\":\"connection-and-sound\",\"effects\":\"sound-only\"}",
+    "board": "LG TV",
+    "devices": "ipad"
+  },
+  "preflight": [
+    {
+      "name": "pack:lint packs/test",
+      "ok": true,
+      "detail": [
+        "OK test 0.1.0"
+      ]
+    },
+    {
+      "name": "pack:lint packs/dracula",
+      "ok": true,
+      "detail": [
+        "OK dracula 0.1.0"
+      ]
+    },
+    {
+      "name": "pnpm check",
+      "ok": true,
+      "detail": [
+        "  ",
+        "    55 │   .next { text-align:center; padding: 14px 20px; border-top:1px solid var(--bt-candle); border-bottom:1px solid var(--bt-candle); background: linear-gradient(90deg, transparent, rgb(142 27 27 / .35), transparent); }",
+        "    56 │   .next .lbl { display:block; font-size:28px; color: var(--bt-parchment-dark); letter-spacing:.3em; }",
+        "  > 57 │   .next b { font-family: var(--bt-font-title); font-size:60px; color: var(--bt-candle); letter-spacing:.04em; text-shadow: 0 0 22px rgb(245 196 81 / .4); }",
+        "       │   ^^^^^^^",
+        "    58 │ </style></head><body>",
+        "    59 │ <header>",
+        "  ",
+        "  i This selector specificity is (0, 2, 1)",
+        "  ",
+        "    12 │   .zone { display:flex; align-items:center; gap:20px; padding: 10px 22px; height:96px; box-sizing:border-box; }",
+        "    13 │   .zone .t { display:flex; flex-direction:column; }",
+        "  > 14 │   .zone .t b { font-family: var(--bt-font-title); font-size:34px; color: var(--bt-bone); font-weight:700; line-height:1.1; }",
+        "       │   ^^^^^^^^^^",
+        "    15 │   header h1 { margin:0; text-align:center; font-family: var(--bt-font-title); color: var(--bt-candle); font-size:52px; letter-spacing:.06em; line-height:1.05; text-shadow: 0 0 18px rgb(245 196 81 / .35); }",
+        "    16 │   header h1 small { display:block; font-family: var(--bt-font-label); font-size:28px; letter-spacing:.25em; color: var(--bt-parchment-dark); }",
+        "  ",
+        "  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.",
+        "  ",
+        "",
+        "packages/workbench/styles/graph.css:346:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+        "  ! Descending specificity selector found. This selector specificity is (0, 1, 1)",
+        "  ",
+        "    344 │ }",
+        "    345 │ ",
+        "  > 346 │ .detail-links ul,",
+        "        │ ^^^^^^^^^^^^^^^^",
+        "    347 │ .sources {",
+        "    348 │   list-style: none;",
+        "  ",
+        "  i This selector specificity is (0, 2, 1)",
+        "  ",
+        "    312 │ .detail .prose p,",
+        "  > 313 │ .detail .prose ul {",
+        "        │ ^^^^^^^^^^^^^^^^^",
+        "    314 │   margin: 0.5rem 0;",
+        "    315 │ }",
+        "  ",
+        "  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details."
+      ]
+    }
+  ],
+  "answers": {
+    "A1": {
+      "status": "pass",
+      "at": "2026-10-20T11:26:08.909Z"
+    },
+    "A2": {
+      "status": "pass",
+      "note": "Game should always start at the root (/). There should be a config button with configure sound menu there. Sound Menu Voices uses the game music it should have a sample dialag (somthing like \"Welcome to Blood Tower\").",
+      "at": "2026-10-20T11:27:37.003Z"
+    },
+    "A3": {
+      "status": "pass",
+      "note": "Yes this works really good, however, Voice uses game music.",
+      "at": "2026-10-20T11:29:42.825Z"
+    },
+    "A4": {
+      "status": "pass",
+      "note": "Yes the level save great! However, from the story board there needs to be a menu button at all times. Sound Config should be here.",
+      "at": "2026-10-20T11:30:56.283Z"
+    },
+    "A5": {
+      "status": "pass",
+      "note": "Landing (I call root /) doens't have the flicker. However, story board does. The flicker is not random enough. the lights along the path are good, however the window is too fast and not random. I'm going for the feel of someone walking past the window causing the light to change.",
+      "at": "2026-10-20T11:32:14.677Z"
+    },
+    "B1": {
+      "status": "pass",
+      "note": "picking game is great! however, length and difficulty scroll the iPad when in portrait mode. Is the game designed for letter?",
+      "at": "2026-10-20T11:34:27.277Z"
+    },
+    "B2": {
+      "status": "pass",
+      "note": "lots of scrolling on phone but that is to be expected. On both iPad and iPhone it is hard to distinguish between option buttons and continue buttons.",
+      "at": "2026-10-20T11:37:04.314Z"
+    },
+    "C1": {
+      "status": "pass",
+      "at": "2026-10-20T11:38:49.127Z"
+    },
+    "C2": {
+      "status": "pass",
+      "at": "2026-10-20T11:38:59.859Z"
+    },
+    "C3": {
+      "status": "pass",
+      "note": "you need to get past Game settings first, but then you see \"Not Ready\"",
+      "at": "2026-10-20T11:39:41.519Z"
+    },
+    "C4": {
+      "status": "pass",
+      "at": "2026-10-20T11:40:26.041Z"
+    },
+    "D1": {
+      "status": "pass",
+      "at": "2026-10-20T11:40:47.774Z"
+    },
+    "D2": {
+      "status": "pass",
+      "at": "2026-10-20T11:41:24.891Z"
+    },
+    "D3": {
+      "status": "pass",
+      "note": "looks good",
+      "at": "2026-10-20T11:41:58.924Z"
+    },
+    "E1": {
+      "status": "pass",
+      "at": "2026-10-20T11:43:53.044Z"
+    },
+    "F1": {
+      "status": "pass",
+      "note": "I don't like this step? Is this only from Proving Grounds?",
+      "at": "2026-10-20T11:44:18.579Z"
+    },
+    "F5": {
+      "status": "pass",
+      "at": "2026-10-20T11:45:22.080Z"
+    },
+    "G1": {
+      "status": "pass",
+      "note": "Pass, this is very nice!",
+      "at": "2026-10-20T11:46:09.630Z"
+    },
+    "G2": {
+      "status": "pass",
+      "at": "2026-10-20T11:46:34.948Z"
+    },
+    "H1": {
+      "status": "pass",
+      "at": "2026-10-20T11:47:29.146Z"
+    },
+    "H2": {
+      "status": "pass",
+      "at": "2026-10-20T11:47:53.865Z"
+    },
+    "H3": {
+      "status": "pass",
+      "note": "Pressed \"Begin Play\", Story board shows (full scree) the hallway. iPad should sections for the 4 hunters with \"No private line\" and a continue button. There is no such thing as Private lines.",
+      "at": "2026-10-20T11:48:48.513Z"
+    },
+    "I1": {
+      "status": "pass",
+      "note": "My monitor is 3840x2160 and at this resolution I can see the text, however in the \"debug\" window I do see the text. Need more explicit text like \"Waiting on hunters\"",
+      "at": "2026-10-20T11:54:18.235Z"
+    },
+    "I2": {
+      "status": "pass",
+      "note": "I did see the full screen Hall transition to the game play screen (which is very nice). The transition was too fast it needs to slow down. We need to work on this screen.",
+      "at": "2026-10-20T11:56:51.429Z"
+    },
+    "I3": {
+      "status": "pass",
+      "note": "I missed the text only because the text was hidden. The iPad alwas needs a back button in case the players missed something. This is a generic play mechanic for all stories",
+      "at": "2026-10-20T11:58:50.803Z"
+    },
+    "I4": {
+      "status": "pass",
+      "at": "2026-10-20T11:59:53.880Z"
+    },
+    "I5": {
+      "status": "pass",
+      "note": "the ambiant music stopped. The ambiant music should never stop expect maybe during dialog but then should start again",
+      "at": "2026-10-20T12:00:15.766Z"
+    },
+    "I6": {
+      "status": "pass",
+      "note": "There is never private moments in the game",
+      "at": "2026-10-20T12:01:26.331Z"
+    },
+    "I7": {
+      "status": "pass",
+      "note": "In the Story Board view under a new menu should be a Join options to display the QR code.",
+      "at": "2026-10-20T12:02:08.972Z"
+    },
+    "J1": {
+      "status": "pass",
+      "note": "There must be a confirmation to quit the game. I'm think something like you must hold the confirmation button for 5 seconds. The button fills during this time so the player is absoluetly sure they are quiting. I didn't see a summary board. From the Story Board menu shoudl be a Last game summary options and a Statistic view for previously played games",
+      "at": "2026-10-20T12:03:22.204Z"
+    },
+    "K1": {
+      "status": "pass",
+      "note": "the Table section (where QR is shown) show scroll bars",
+      "at": "2026-10-20T12:06:27.939Z"
+    },
+    "K2": {
+      "status": "pass",
+      "at": "2026-10-20T12:07:02.820Z"
+    },
+    "K3": {
+      "status": "pass",
+      "note": "Overall very nice. The game is really comming together",
+      "at": "2026-10-20T12:07:14.720Z"
+    }
+  },
+  "finishedAt": "2026-10-20T12:07:32.376Z",
+  "timingReport": [
+    "Session session-f9471ae0464548e8",
+    "Pack test 0.1.0. Started 2026-10-20T11:20:42.765Z. Join code 120713.",
+    "Devices device-1 (ipad), device-2 (phone).",
+    "",
+    "+13:22.020  2026-10-20T11:34:04.784Z  press won       continue-pick-story-test continue on pick-story -> game-settings  device device-1",
+    "+17:36.665  2026-10-20T11:38:19.429Z  press won       back-game-settings back on game-settings -> pick-story  device device-1",
+    "+17:56.319  2026-10-20T11:38:39.083Z  press won       continue-pick-story-test continue on pick-story -> game-settings  device device-2",
+    "+18:28.107  2026-10-20T11:39:10.871Z  press won       back-game-settings back on game-settings -> pick-story  device device-2",
+    "+18:38.170  2026-10-20T11:39:20.934Z  press won       continue-pick-story-dracula continue on pick-story -> game-settings  device device-2",
+    "+18:42.725  2026-10-20T11:39:25.489Z  press won       continue-game-settings continue on game-settings -> not-playable  device device-2",
+    "+18:46.891  2026-10-20T11:39:29.655Z  press won       back-not-playable back on not-playable -> game-settings  device device-2",
+    "+18:51.954  2026-10-20T11:39:34.719Z  press won       back-game-settings back on game-settings -> pick-story  device device-2",
+    "+19:38.047  2026-10-20T11:40:20.811Z  press won       continue-pick-story-test continue on pick-story -> game-settings  device device-1",
+    "+19:38.052  2026-10-20T11:40:20.817Z  press lost      continue-pick-story-test continue on game-settings  device device-2",
+    "+20:12.799  2026-10-20T11:40:55.563Z  press won       set-0 set on game-settings  device device-2",
+    "+20:18.279  2026-10-20T11:41:01.043Z  press won       continue-game-settings continue on game-settings -> tower-connect  device device-2",
+    "+20:20.579  2026-10-20T11:41:03.343Z  press won       back-tower-connect back on tower-connect -> game-settings  device device-2",
+    "+20:27.956  2026-10-20T11:41:10.720Z  press won       back-game-settings back on game-settings -> pick-story  device device-2",
+    "+20:29.939  2026-10-20T11:41:12.704Z  press won       continue-pick-story-test continue on pick-story -> game-settings  device device-2",
+    "+20:50.048  2026-10-20T11:41:32.812Z  press won       continue-game-settings continue on game-settings -> tower-connect  device device-2",
+    "+21:55.558  2026-10-20T11:42:38.322Z  press won       continue-tower-connect continue on tower-connect -> tower-volume-test  device device-2",
+    "+24:55.545  2026-10-20T11:45:38.331Z  press won       continue-tower-volume-test continue on tower-volume-test -> party-join  device device-1",
+    "+25:58.676  2026-10-20T11:46:41.462Z  press won       continue-party-join continue on party-join -> setup  device device-1",
+    "+25:58.679  2026-10-20T11:46:41.465Z  setup-step start  lay-out-board",
+    "+26:26.005  2026-10-20T11:47:08.791Z  press won       continue-setup-lay-out-board continue on setup  device device-1",
+    "+26:26.007  2026-10-20T11:47:08.793Z  setup-step end  lay-out-board",
+    "+26:26.009  2026-10-20T11:47:08.796Z  setup-step start  place-hunters",
+    "+26:28.974  2026-10-20T11:47:11.761Z  press won       continue-setup-place-hunters continue on setup  device device-1",
+    "+26:28.975  2026-10-20T11:47:11.762Z  setup-step end  place-hunters",
+    "+26:28.977  2026-10-20T11:47:11.763Z  setup-step start  ready-decks",
+    "+26:32.250  2026-10-20T11:47:15.036Z  press won       continue-setup-ready-decks continue on setup -> begin  device device-1",
+    "+26:32.251  2026-10-20T11:47:15.037Z  setup-step end  ready-decks",
+    "+26:58.169  2026-10-20T11:47:40.956Z  press won       back-begin back on begin -> setup  device device-1",
+    "+26:58.172  2026-10-20T11:47:40.958Z  setup-step start  ready-decks",
+    "+27:00.184  2026-10-20T11:47:42.971Z  press won       back-setup-ready-decks back on setup  device device-1",
+    "+27:00.185  2026-10-20T11:47:42.971Z  setup-step end  ready-decks",
+    "+27:00.185  2026-10-20T11:47:42.972Z  setup-step start  place-hunters",
+    "+27:01.638  2026-10-20T11:47:44.424Z  press won       continue-setup-place-hunters continue on setup  device device-1",
+    "+27:01.638  2026-10-20T11:47:44.425Z  setup-step end  place-hunters",
+    "+27:01.639  2026-10-20T11:47:44.426Z  setup-step start  ready-decks",
+    "+27:02.879  2026-10-20T11:47:45.666Z  press won       continue-setup-ready-decks continue on setup -> begin  device device-1",
+    "+27:02.880  2026-10-20T11:47:45.667Z  setup-step end  ready-decks",
+    "+27:29.695  2026-10-20T11:48:12.481Z  press won       begin begin on begin -> play  device device-1",
+    "+27:29.696  2026-10-20T11:48:12.483Z  setting start   length:standard",
+    "+27:29.697  2026-10-20T11:48:12.484Z  setting end     length:standard",
+    "+27:29.697  2026-10-20T11:48:12.484Z  setting start   difficulty:standard",
+    "+27:29.698  2026-10-20T11:48:12.485Z  setting end     difficulty:standard",
+    "+27:29.698  2026-10-20T11:48:12.485Z  phase start     night",
+    "+27:29.698  2026-10-20T11:48:12.485Z  moment start    proving-ground.01",
+    "+35:05.553  2026-10-20T11:55:48.342Z  press won       continue-0 continue on play  device device-1",
+    "+35:05.559  2026-10-20T11:55:48.348Z  moment end      proving-ground.01",
+    "+35:05.561  2026-10-20T11:55:48.350Z  moment start    proving-ground.02",
+    "+37:14.015  2026-10-20T11:57:56.805Z  press won       continue-1 continue on play  device device-1",
+    "+37:14.018  2026-10-20T11:57:56.807Z  moment end      proving-ground.02",
+    "+37:14.019  2026-10-20T11:57:56.808Z  moment start    proving-ground.03",
+    "+37:14.019  2026-10-20T11:57:56.808Z  cue start       bell",
+    "+37:20.462  2026-10-20T11:58:03.251Z  press won       continue-2 continue on play  device device-1",
+    "+37:20.463  2026-10-20T11:58:03.252Z  cue end         bell",
+    "+37:20.463  2026-10-20T11:58:03.253Z  moment end      proving-ground.03",
+    "+37:20.464  2026-10-20T11:58:03.253Z  moment start    grey-stair.01",
+    "+37:41.027  2026-10-20T11:58:23.816Z  press won       pause-1 pause on play  device device-1",
+    "+37:41.028  2026-10-20T11:58:23.817Z  pause start     host-pause:1  device device-1  cause host-pause",
+    "+37:51.379  2026-10-20T11:58:34.169Z  press won       resume-1 resume on play  device device-1",
+    "+37:51.380  2026-10-20T11:58:34.170Z  pause end       host-pause:1  device device-1  cause host-pause",
+    "+39:18.729  2026-10-20T12:00:01.519Z  press won       continue-3 continue on play  device device-1",
+    "+39:18.730  2026-10-20T12:00:01.520Z  moment end      grey-stair.01",
+    "+39:18.731  2026-10-20T12:00:01.521Z  moment start    grey-stair.02",
+    "+40:10.003  2026-10-20T12:00:52.793Z  press won       continue-4 continue on play  device device-1",
+    "+40:10.004  2026-10-20T12:00:52.794Z  moment end      grey-stair.02",
+    "+40:10.004  2026-10-20T12:00:52.795Z  moment start    grey-stair.03",
+    "+40:30.299  2026-10-20T12:01:13.090Z  moment end      grey-stair.03",
+    "+40:30.301  2026-10-20T12:01:13.091Z  moment start    grey-stair.door-choice",
+    "+42:03.125  2026-10-20T12:02:45.916Z  press won       pick-6 pick on play  device device-1",
+    "+42:03.126  2026-10-20T12:02:45.917Z  moment end      grey-stair.door-choice",
+    "+42:03.126  2026-10-20T12:02:45.917Z  moment start    grey-stair.04",
+    "+42:15.052  2026-10-20T12:02:57.843Z  press won       continue-7 continue on play  device device-1",
+    "+42:15.054  2026-10-20T12:02:57.845Z  moment end      grey-stair.04",
+    "+42:15.055  2026-10-20T12:02:57.845Z  phase end       night",
+    "+42:19.907  2026-10-20T12:03:02.698Z  press won       quit quit on play -> quit  device device-1",
+    "",
+    "Marks 19, presses 37 (36 won).",
+    "Open marks none.",
+    "Lobby 1649698 ms. Night 885356 ms. Paused 10352 ms. Active 875004 ms."
+  ]
+}
