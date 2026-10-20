@@ -24,6 +24,12 @@ const PREFIX: Record<CardType, string> = {
   ui: "UI",
   cue: "CUE",
   sound: "SND",
+  glyph: "GLY",
+  seal: "SEAL",
+  light: "LGT",
+  "light-effect": "LFX",
+  "light-sequence": "LSQ",
+  drum: "DRM",
   sketch: "SK",
   example: "EX",
 };

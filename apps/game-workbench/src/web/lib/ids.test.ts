@@ -5,7 +5,7 @@ import { linkTarget, renderMarkdown } from "./markdown.ts";
 describe("design IDs", () => {
   it("finds the existing families and the new prefixes", () => {
     const text =
-      "See R-ENG-20, R3-UI-4 and R-AST-ORG-1; AST-T04 and E19e; Q3. New: SCR-007, UI-014, SND-058.";
+      "See R-ENG-20, R3-UI-4 and R-AST-ORG-1; AST-T04 and E19e; Q3. New: SCR-007, UI-014, SND-058, GLY-002, DRM-003.";
     expect(extractIds(text)).toEqual([
       "R-ENG-20",
       "R3-UI-4",
@@ -16,6 +16,8 @@ describe("design IDs", () => {
       "SCR-007",
       "UI-014",
       "SND-058",
+      "GLY-002",
+      "DRM-003",
     ]);
   });
 
@@ -32,6 +34,12 @@ describe("design IDs", () => {
     expect(idKind("Q3")).toBe("question");
     expect(idKind("CUE-031")).toBe("cue");
     expect(idKind("SK-0041")).toBe("sketch");
+    expect(idKind("GLY-001")).toBe("glyph");
+    expect(idKind("SEAL-012")).toBe("seal");
+    expect(idKind("LGT-024")).toBe("light");
+    expect(idKind("LFX-006")).toBe("light-effect");
+    expect(idKind("LSQ-021")).toBe("light-sequence");
+    expect(idKind("DRM-003")).toBe("drum");
   });
 
   it("names families", () => {

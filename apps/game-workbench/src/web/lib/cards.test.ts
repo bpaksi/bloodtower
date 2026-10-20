@@ -29,6 +29,20 @@ describe("card files", () => {
     expect(() => parseCard("IDEA-001.md", card("type: idea"))).toThrow(/title/);
   });
 
+  it("accepts the tower card types with their own prefixes", () => {
+    for (const [type, id] of [
+      ["glyph", "GLY-001"],
+      ["seal", "SEAL-012"],
+      ["light", "LGT-024"],
+      ["light-effect", "LFX-006"],
+      ["light-sequence", "LSQ-021"],
+      ["drum", "DRM-003"],
+    ]) {
+      expect(parseCard(`${id}.md`, card(`type: ${type}\ntitle: x`)).id).toBe(id);
+    }
+    expect(() => parseCard("LGT-001.md", card("type: drum\ntitle: x"))).toThrow(/DRM-NNN/);
+  });
+
   // The lint: every card in research/game-design/cards parses, and every link resolves to a card,
   // a document ID, or carries a note saying what it is.
   it("has no broken cards or dangling links in the real folder", () => {

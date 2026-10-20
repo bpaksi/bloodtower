@@ -27,6 +27,12 @@ export const CARD_TYPES = [
   "ui",
   "cue",
   "sound",
+  "glyph",
+  "seal",
+  "light",
+  "light-effect",
+  "light-sequence",
+  "drum",
   "sketch",
   "example",
 ] as const;

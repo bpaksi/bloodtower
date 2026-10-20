@@ -22,6 +22,12 @@ export type IdKind =
   | "ui"
   | "cue"
   | "sound"
+  | "glyph"
+  | "seal"
+  | "light"
+  | "light-effect"
+  | "light-sequence"
+  | "drum"
   | "mechanic"
   | "idea"
   | "sketch"
@@ -39,6 +45,12 @@ export const KIND_LABEL: Record<IdKind, string> = {
   ui: "UI piece",
   cue: "Tower cue",
   sound: "Tower sound",
+  glyph: "Tower glyph",
+  seal: "Tower seal",
+  light: "Tower light",
+  "light-effect": "Light effect",
+  "light-sequence": "Light sequence",
+  drum: "Tower drum",
   mechanic: "Mechanic",
   idea: "Idea",
   sketch: "Sketch",
@@ -50,6 +62,12 @@ const NEW_PREFIX: Record<string, IdKind> = {
   UI: "ui",
   CUE: "cue",
   SND: "sound",
+  GLY: "glyph",
+  SEAL: "seal",
+  LGT: "light",
+  LFX: "light-effect",
+  LSQ: "light-sequence",
+  DRM: "drum",
   MEC: "mechanic",
   IDEA: "idea",
   SK: "sketch",
@@ -62,7 +80,7 @@ const NEW_PREFIX: Record<string, IdKind> = {
 
 // Order matters: longer, more specific forms first so R-AST-ORG-1 is not read as AST-….
 const ID_SOURCES = [
-  String.raw`(?:SCR|UI|CUE|SND|MEC|IDEA|DEC|AREA|OPT|SK|EX|Q)-\d+`,
+  String.raw`(?:SCR|UI|CUE|SND|GLY|SEAL|LGT|LFX|LSQ|DRM|MEC|IDEA|DEC|AREA|OPT|SK|EX|Q)-\d+`,
   String.raw`R\d?-[A-Z]+(?:-[A-Z]+)*-\d+[a-z]?`,
   String.raw`AST-[A-Z]\d+`,
   String.raw`E\d{1,2}[a-z]?`,
