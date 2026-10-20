@@ -9,7 +9,8 @@
     "build": "pnpm -F bloodtower-web build",
     "start": "pnpm -F bloodtower-server start",
     "e2e": "pnpm -F bloodtower-e2e e2e",
-    "pack:lint": "pnpm -F bloodtower-server pack:lint"
+    "pack:lint": "pnpm -F bloodtower-server pack:lint",
+    "playtest": "pnpm -F bloodtower-server playtest"
   },
   "devDependencies": {
     "concurrently": "10.0.6"
