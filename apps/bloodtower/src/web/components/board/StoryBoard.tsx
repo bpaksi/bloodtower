@@ -1,4 +1,5 @@
 import type { StoryboardState, StoryCard } from "bloodtower-protocols";
+import type { CSSProperties } from "react";
 import { holdingText, joinWarning, pauseText } from "../../lib/boardView";
 import { displayCaption } from "../../lib/caption.ts";
 import { packStillImageUrl } from "../../lib/packAsset.ts";
@@ -29,6 +30,7 @@ import { towerStatusLines } from "../../lib/towerStatus";
 import { VOLUME_ANSWER_LABEL, volumeBoardCopy } from "../../lib/volumeTest.ts";
 import { PortraitCard } from "../PortraitCard";
 import { boardLayer } from "./boardLayer.ts";
+import { BOARD_WINDOW_MASK_URL, WINDOW_GLOWS } from "./boardWindowMask.ts";
 import { CameraStill } from "./CameraStill";
 import { DialogFrame } from "./DialogFrame";
 import { KeeperScene } from "./KeeperScene";
@@ -73,7 +75,31 @@ export function StoryBoard({
       data-moment={state.moment?.id ?? ""}
       data-board-layout={keeperMoment ? "keeper" : "standard"}
     >
-      <div className="bt-board-backdrop" aria-hidden="true" />
+      <div
+        className="bt-board-backdrop"
+        aria-hidden="true"
+        style={
+          {
+            "--bt-window-mask": `url("${BOARD_WINDOW_MASK_URL}")`,
+          } as CSSProperties
+        }
+      >
+        {WINDOW_GLOWS.map((glow) => (
+          <div
+            key={glow.group}
+            className="bt-window-glow"
+            data-group={glow.group}
+            aria-hidden="true"
+            style={
+              {
+                backgroundImage: `url("${glow.url}")`,
+                animationDuration: `${glow.durationS}s`,
+                animationDelay: `${glow.delayS}s`,
+              } as CSSProperties
+            }
+          />
+        ))}
+      </div>
       <div className="bt-board-vignette" aria-hidden="true" />
       <header className="bt-board-header">
         <div className="bt-zone bt-panel">

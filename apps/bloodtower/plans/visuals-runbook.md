@@ -56,7 +56,7 @@ Run the adversary-bugs agent with model sonnet on PR <N>, round <r>, last review
 | Step | Branch | Depends on | Lane | Status | PR # |
 |---|---|---|---|---|---|
 | 1 | `feat/visuals-01-sound-dialog` | #106 merged (hard; steps 3–5 create `DialogFrame.tsx`) | Dialog / startup | todo | |
-| 2 | `feat/visuals-02-backdrop-flicker` | 6 merged, or Option A (CSS-only, no `StoryBoard.tsx` edit) | Backdrop | **backlog** (Bob, 2026-10-19; not scheduled, do not start) | |
+| 2 | `feat/visuals-02-backdrop-flicker` | 6 merged, or Option A (CSS-only, no `StoryBoard.tsx` edit) | Backdrop | PR open (Option B: four `.bt-window-glow` layers inside `.bt-board-backdrop`, one per light group, from `boardWindowMask.ts`; `--bt-window-mask` set on the backdrop but no rule uses it yet; steps(1, end), reduced motion holds a steady 0.9; the ::after gradient still paints over the glow; `StoryBoard.tsx` touched only in the backdrop element) | #108 |
 | 3 | `feat/visuals-03-startup-shell` | play track through 8 merged (recommended; Bob may accept rebase churn) | Dialog / startup | combined into one PR with 4 and 5 (`DialogFrame.tsx` with `default` / `compact` sizes; `BOARD_MODE` in screens.ts: the nine pre-play screens `startup`, play `play`, quit neither; startup panels render in one frame keyed by screen; the hunter roll is not shown before play; `/board/` is in the export, so server.ts is unchanged) | #106 |
 | 4 | `feat/visuals-04-carousel-dialog` | 3 | Dialog / startup | combined into one PR with 3 and 5 (focus centred in a 3-column grid, 16:9 double-rule sepia plates; the "The door" kicker and "Next" lede dropped, as the header and band carry them) | #106 |
 | 5 | `feat/visuals-05-startup-summary` | 3 | Dialog / startup | combined into one PR with 3 and 4 (right column with the join QR; every row shows in full, label then value, never cut: hunters read one line per device ("device-1: Agnes, Tomas"), setup reads "2 of 3 done" with the steps' labels on the TV only; **fit:** the column is 40% wide below 1040px high and 33% on the TV, the Table label is dropped and the QR is capped at 14vh; at ≤700px high the panel title and join URL hide and the QR is 6.75rem; the cover shows on the TV only. The e2e checks Pick Story, Game settings, Claim Hunters and Begin at 1024×594, 1180×820 and 1920×1080) | #106 |
@@ -80,7 +80,7 @@ Steps in the same lane run **in order**. Lanes with **no shared paths** may run 
 | Lane | Order | Files touched (ownership) | Parallel with |
 |---|---|---|---|
 | **Play TV** | 6 → 7 → 8 → 10 → 11 (step 9 is in the Dialog lane) | `StoryBoard.tsx` (header, hunter roll, `PlayPanel`, play layout, ), `board.css` (play/header/grid/page/plate/zoom/keeper), `LiveBoard.tsx` (step 10), `KeeperScene.tsx`, `KeeperBoardCaption.tsx` (step 11), `src/e2e/tests/board-look.spec.ts` and related e2e | **Backdrop** only while **no open Play PR edits `StoryBoard.tsx`**; **Dialog / startup** only after play through **8** merged (or Bob accepts rebase churn) |
-| **Backdrop** (backlog) | 2 (after 6 merged, or Option A) | `boardWindowMask.ts`, `board.css` (`.bt-board-backdrop` / glow layers only), `StoryBoard.tsx` (**only** the `.bt-board-backdrop` subtree — four `.bt-window-glow` children for per-group flicker) | **Play TV** only if the active play branch does not touch `StoryBoard.tsx` (step **6 in progress** → finish or land 6 before starting 2, or isolate a one-line backdrop mount on 6's branch) |
+| **Backdrop** | 2 (after 6 merged, or Option A) | `boardWindowMask.ts`, `board.css` (`.bt-board-backdrop` / glow layers only), `StoryBoard.tsx` (**only** the `.bt-board-backdrop` subtree — four `.bt-window-glow` children for per-group flicker) | **Play TV** only if the active play branch does not touch `StoryBoard.tsx` (step **6 in progress** → finish or land 6 before starting 2, or isolate a one-line backdrop mount on 6's branch) |
 | **Dialog / startup** | 3 → 1 → 4 → 5; **9** after 3, 8 and 10 | `DialogFrame.tsx`, `SoundDialog.tsx` (1), `StoryBoard.tsx` (startup panels, carousel, summary), `board.css` (startup / carousel / sound / waiting, step 9), `src/server/server.ts` if `/board/` fallback needed | **Play TV** after step **8** merged; **Backdrop (2)**: different CSS and mask module, but both lanes edit `StoryBoard.tsx`; coordinate on that file (no two open PRs editing it at once) |
 
 **Why these lanes:** Step 2 does not edit `SoundDialog`, `DialogFrame`, or play panels — only backdrop CSS, `boardWindowMask.ts`, and backdrop markup. Play steps 6–8 own the rest of `StoryBoard.tsx`. Steps 3, 1, 4, 5 and 9 share startup/carousel/summary sections with each other, not with 7–8, but all use `StoryBoard.tsx`, so they stay one lane sequenced after play layout stabilizes.
@@ -91,7 +91,7 @@ Steps in the same lane run **in order**. Lanes with **no shared paths** may run 
 - [ ] **Now:** **Step 11**, and **Step 3** (creates `DialogFrame.tsx`).
 - [ ] **After #106 (steps 3–5) merges:** **1**.
 - [ ] **After #106 merges (8 and 10 already merged):** **Step 9** (waiting dialog).
-- **Backlog:** **Step 2** (backdrop flicker). Not scheduled; do not start until Bob moves it back.
+- [ ] **Step 2** (backdrop flicker): PR open (#108). Bob moved it out of the backlog on 2026-10-20.
 
 ---
 
@@ -126,7 +126,7 @@ Open a PR titled "feat(bloodtower): Sound dialog visuals (visuals step 1)".
 
 ## 2. Landing backdrop flicker
 
-**Status: backlog (Bob, 2026-10-19).** Kept for later; do not start.
+**Status: PR open (#108).**
 
 **Review focus:** Per-group flicker (four glow layers) unless PR documents Option A conflict; `steps(1,end)` not sine; reduced motion steady glow; flash safety ≤3 brightness jumps/s; mask/glow URLs under `/landing/window-mask/` aligned with `cover` / `left top`.
 
