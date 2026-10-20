@@ -6,6 +6,7 @@ Mechanics, themes and rules ideas for the new game. Ideas that become a prototyp
 
 | File | What's in it |
 |---|---|
+| [glossary.md](glossary.md) | One meaning per word: engine, location, event, encounter, set piece, fight terms |
 | [requirements.md](requirements.md) | The single requirements index: the two chief goals, and all groups (R-ENG, R-AV, R-ASSET, R-FUN, R-SES, R-SP, R-RE, R-STA) |
 | [core-mechanics.md](core-mechanics.md) | Systems shared across stories: table setup, party, shadow clock, open world, resources |
 | [story-engine.md](story-engine.md) | Engine and story-pack design: what a story module defines (R-ENG-20–34), AV theme and script rules (R-AV) |

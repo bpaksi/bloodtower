@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Is an encounter a kind of event, like 1981's plague and brigands?"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
