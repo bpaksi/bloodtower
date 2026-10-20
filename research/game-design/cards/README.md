@@ -8,7 +8,7 @@ One small idea per file. The game-workbench shows them as a graph: one card in t
 
 ```markdown
 ---
-type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | sketch | example
+type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | glyph | seal | light | light-effect | light-sequence | drum | sketch | example
 title: Use the 3 RtDT quest tokens   # one line, the headline
 status: open          # open | answered | proposed | decided | parked
 layer: core           # core | configurable | optional | story (see Layers)
@@ -40,6 +40,12 @@ Prefix by type, three digits, never reused or renumbered. A retired card stays, 
 | ui | `UI-` |
 | cue | `CUE-` |
 | sound | `SND-` (number = tower index) |
+| glyph | `GLY-` (tower glyph) |
+| seal | `SEAL-` (tower seal) |
+| light | `LGT-` (one tower light) |
+| light-effect | `LFX-` (a light effect: breathe, flicker…) |
+| light-sequence | `LSQ-` (a built-in light sequence) |
+| drum | `DRM-` (tower drum) |
 | sketch | `SK-` |
 | example | `EX-` |
 
