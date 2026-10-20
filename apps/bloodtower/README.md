@@ -27,7 +27,9 @@ The Mac runs this host. The Story board is a display-only page at `/board`. iPad
 pnpm --dir apps/bloodtower pack:lint
 ```
 
-That checks `packs/test`. `pnpm --dir apps/bloodtower pack:lint -- <dir>` checks another folder, and the path is resolved from the server package's working directory.
+That checks `packs/test`. `pnpm --dir apps/bloodtower pack:lint <dir>` checks another folder, and the path is resolved from the server package's working directory.
+
+Two rules guard what the board draws. **W-fit** (a warning, exit stays 0) names a shared moment whose text is longer than the board shows whole: 460 characters in the waiting dialog, 225 under a visual's art, counted after pause tags and `(stage directions)` are dropped, at 1180×820, so writers shorten it in the pack. **V-aspect** (an error, exit 1) fails any still image, and the pack cover, that is not 16:9 (within 0.5%, so 1366×768 passes) or whose PNG, JPEG or WebP header cannot be read; a placeholder with no file is skipped. A `playable: false` pack reads only its manifest and `assets/`, so W-fit does not apply to it.
 
 ## Running on the Mac
 

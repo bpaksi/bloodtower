@@ -16,10 +16,12 @@ import {
   indexPackAssets,
   PACK_ASSETS_DIR,
   type PackAssetIndex,
+  stillAspectIssues,
   validateAssetsFolder,
 } from "./assets.ts";
 import { PACK_AUDIO_DIR, validateAudioFolder } from "./audio.ts";
 import { PACK_CAMERA_DIR, validateCameraFolder } from "./camera.ts";
+import { textFitWarnings } from "./fit.ts";
 
 /**
  * Reads one pack folder (YAML or JSON) into the frozen pack schema.
@@ -253,12 +255,19 @@ export const loadPackDir = (dir: string): PackLoadResult => {
       assets: [],
       cover: meta.data.cover,
     });
+    const shape = stillAspectIssues(assets, { assets: [], cover: meta.data.cover });
+    if (shape.length > 0) return { ok: false, issues: shape };
     return { ok: true, playable: false, pack: meta.data, assets };
   }
 
   const parsed = packSchema.safeParse(assembled);
   if (!parsed.success) return failed(parsed.error);
-  const assets = indexPackAssets(root, parsed.data);
+  const indexed = indexPackAssets(root, parsed.data);
+  const shape = stillAspectIssues(indexed, parsed.data);
+  if (shape.length > 0) return { ok: false, issues: shape };
+  // W-fit rides the same warnings channel as W-asset, so pack:lint still exits 0.
+  const fit = textFitWarnings(parsed.data, sources.get("moments") ?? manifestName);
+  const assets = { ...indexed, warnings: [...indexed.warnings, ...fit] };
   return { ok: true, playable: true, pack: parsed.data, assets };
 };
 
