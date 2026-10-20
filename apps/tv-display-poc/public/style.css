@@ -1,0 +1,290 @@
+:root {
+  --ink: #e8dcc0;
+  --dim: #8a8070;
+  --blood: #8b1a1a;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  font-size: max(14px, 1.04vw);
+}
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: var(--ink);
+  font-family: Georgia, serif;
+  overflow: hidden;
+}
+#bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: #0b0b0b;
+  border-bottom: 1px solid #222;
+}
+body.nobar #bar {
+  display: none;
+}
+#tabs,
+#tools,
+.row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+button {
+  font: inherit;
+  color: var(--ink);
+  background: #1a1612;
+  border: 1px solid #4a4030;
+  border-radius: 0.3rem;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--ink);
+}
+button[aria-pressed="true"],
+button.on {
+  background: var(--blood);
+  border-color: #c33;
+}
+#stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.panel {
+  position: absolute;
+  inset: 0;
+  padding: 1.2rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.panel h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.note {
+  color: var(--dim);
+  font-size: 0.85rem;
+  max-width: 60rem;
+  line-height: 1.4;
+}
+.fill {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+#flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}
+
+/* motion */
+.glowstack {
+  position: absolute;
+  inset: 0;
+  background: url(assets/hero.webp) center / cover;
+  filter: brightness(0.5);
+}
+.glowstack img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12%;
+  height: 4rem;
+  background: repeating-linear-gradient(90deg, #222 0 2px, transparent 2px 5%);
+}
+.bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4%;
+  background: #fff;
+  will-change: transform;
+}
+#fps {
+  position: absolute;
+  top: 0.6rem;
+  right: 1rem;
+  font: 1rem monospace;
+  color: #9f9;
+}
+
+/* pan */
+.pan {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.pan img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* speak */
+.dialog {
+  margin: auto;
+  width: min(80%, 70rem);
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  padding: 2.4rem 2.8rem;
+  color: #2a1d10;
+  background:
+    url(assets/dialog-parchment.webp) 0 0 / 512px,
+    #dfcda5;
+  background-origin: border-box;
+  border: 40px solid transparent;
+  border-image: url(assets/dialog-frame@2x.png) 80 stretch;
+}
+.dialog img {
+  width: 30%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  flex: none;
+}
+.dialog p {
+  font-size: 1.6rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* dark */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(21, 1fr);
+  gap: 0;
+}
+.swatches div {
+  height: 5rem;
+  font: 0.7rem monospace;
+  color: #666;
+  padding: 0.2rem;
+}
+.ladder p {
+  margin: 0.2rem 0;
+  font-size: 1.4rem;
+}
+.grad {
+  height: 4rem;
+  background: linear-gradient(90deg, #000, rgb(32, 32, 32));
+}
+.pair {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+}
+.pair img {
+  flex: 1;
+  min-width: 0;
+  object-fit: cover;
+  height: 100%;
+}
+
+/* edges */
+.edge {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #fff;
+}
+.guide {
+  position: absolute;
+  border: 1px dashed #f80;
+}
+.cross {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30vh;
+  height: 30vh;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+.cross::before,
+.cross::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+}
+.cross::before {
+  left: 50%;
+  top: -10%;
+  bottom: -10%;
+  width: 2px;
+}
+.cross::after {
+  top: 50%;
+  left: -10%;
+  right: -10%;
+  height: 2px;
+}
+.bars {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 8%;
+  height: 14%;
+  display: flex;
+}
+.bars div {
+  flex: 1;
+}
+.checker {
+  position: absolute;
+  left: 6%;
+  bottom: 8%;
+  width: 12%;
+  aspect-ratio: 1;
+  background: repeating-conic-gradient(#fff 0 25%, #000 0 50%) 0 0 / 2px 2px;
+}
+.greys {
+  position: absolute;
+  left: 22%;
+  right: 6%;
+  bottom: 8%;
+  height: 8%;
+  background: linear-gradient(90deg, #000, #fff);
+}
+.sizes {
+  position: absolute;
+  left: 6%;
+  top: 26%;
+  line-height: 1.3;
+}
