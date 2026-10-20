@@ -55,17 +55,19 @@ Run the adversary-bugs agent with model sonnet on PR <N>, round <r>, last review
 
 | Step | Branch | Depends on | Lane | Status | PR # |
 |---|---|---|---|---|---|
-| 1 | `feat/visuals-01-sound-dialog` | 3 merged (hard; 3 creates `DialogFrame.tsx`) | Dialog / startup | todo | |
+| 1 | `feat/visuals-01-sound-dialog` | #106 merged (hard; steps 3–5 create `DialogFrame.tsx`) | Dialog / startup | todo | |
 | 2 | `feat/visuals-02-backdrop-flicker` | 6 merged, or Option A (CSS-only, no `StoryBoard.tsx` edit) | Backdrop | **backlog** (Bob, 2026-10-19; not scheduled, do not start) | |
-| 3 | `feat/visuals-03-startup-shell` | play track through 8 merged (recommended; Bob may accept rebase churn) | Dialog / startup | todo | |
-| 4 | `feat/visuals-04-carousel-dialog` | 3 | Dialog / startup | todo | |
-| 5 | `feat/visuals-05-startup-summary` | 3 | Dialog / startup | todo | |
+| 3 | `feat/visuals-03-startup-shell` | play track through 8 merged (recommended; Bob may accept rebase churn) | Dialog / startup | combined into one PR with 4 and 5 (`DialogFrame.tsx` with `default` / `compact` sizes; `BOARD_MODE` in screens.ts: the nine pre-play screens `startup`, play `play`, quit neither; startup panels render in one frame keyed by screen; the hunter roll is not shown before play; `/board/` is in the export, so server.ts is unchanged) | #106 |
+| 4 | `feat/visuals-04-carousel-dialog` | 3 | Dialog / startup | combined into one PR with 3 and 5 (focus centred in a 3-column grid, 16:9 double-rule sepia plates; the "The door" kicker and "Next" lede dropped, as the header and band carry them) | #106 |
+| 5 | `feat/visuals-05-startup-summary` | 3 | Dialog / startup | combined into one PR with 3 and 4 (right column with the join QR; every row shows in full, label then value, never cut: hunters read one line per device ("device-1: Agnes, Tomas"), setup reads "2 of 3 done" with the steps' labels on the TV only; **fit:** the column is 40% wide below 1040px high and 33% on the TV, the Table label is dropped and the QR is capped at 14vh; at ≤700px high the panel title and join URL hide and the QR is 6.75rem; the cover shows on the TV only. The e2e checks Pick Story, Game settings, Claim Hunters and Begin at 1024×594, 1180×820 and 1920×1080) | #106 |
 | 6 | `feat/visuals-06-play-chrome` | none | Play TV | merged | #89 |
 | 7 | `feat/visuals-07-hunter-roll` | 6 | Play TV | merged (Q2 (a) status: Waiting / Away / holder id; portrait medallions whenever packId + portrait exist; corruption column reads unavailable; no acting-hunter highlight, the `.bt-cart-act` blood rule stays in board.css unused until the engine exposes an acting hunter; no epithet line, the hunter schema has no epithet field) | #93 |
 | 8 | `feat/visuals-08-play-parchment` | 6, 7 merged first | Play TV | merged (ornament line; justified narration; still in `.bt-plate` (outline rule, no layout cost), `CameraStill` untouched; blood-band prompt with no visible "Next" label, font steps down by prompt length, at most 3 lines then ellipsis (about 120 characters at 1180px); party items zone shows count/item/carrier as `unavailable`. **Height budget:** the ornament and items zone appear only at viewport height 1040px and up (1680x1050, 1920x1080, portrait 820x1180 and 1024x1366), so they are hidden at 1024x594, 1180x820, 1366x768, 1280x901, 1440x900/901, 1600x1000 and 1920x960; the still well is at least main's everywhere below 1040px; the narration is capped at 45vh less 5rem in whole lines, so a long moment loses lines, not the still. `<mark>` highlights deferred. **For Bob's ruling:** (a) the narration cap cuts a long moment mid-sentence on the board (the full text stays in the DOM); (b) the party items zone is not shown at 1180x820 or on any board under 1040px high) | #94 |
-| 9 | `feat/visuals-09-waiting-dialog` | 3, 8 and 10 merged | Dialog / startup | todo | |
+| 9 | `feat/visuals-09-waiting-dialog` | #106 (steps 3–5), 8 and 10 merged | Dialog / startup | todo | |
 | 10 | `feat/visuals-10-visual-zoom` | 8 | Play TV | merged (layer: `main[data-board-layer="visual"|"waiting"|"startup"]` from `boardLayer()`, the same test as LiveBoard's `pickLayers({ visual })`, which is unchanged; `VisualLayer.tsx` is one fixed full-screen element on void at the end of `main` that hosts the still plate (`CameraStill` unchanged), the Keeper scene, or `Visual unavailable.` for a clip the board cannot draw (the layer adds no controls; the Keeper's pre-existing Captions on/off button sits inside it, step 11's area); zoom in from the screen centre, scale 0.5 to 1 with opacity 0 to 1, 800 ms `cubic-bezier(.65,0,.35,1)`, monotonic (one change of brightness, no flash); the zoom is one Web Animation played forward to come in and backward to go out, so Continue mid-zoom turns it around from where it is (no jump; round 1 fix), and a cut before the zoom has moved drops it hidden or leaves it fully shown instead of letting `play()` rewind it to the far end (round 2 fix); reduced-motion fade is linear; Continue to a text moment keeps the last visual for the same zoom out, then unmounts, and pauses its audio; visual to visual is a straight cut (same layer, no new zoom); reduced motion: 300 ms opacity fade only, no transform (game-look section 5); **Q4 (a):** the well is 16:9 (R-DEV-7), as large as the screen allows and centred, so cover shows the whole still and the camera pan and zoom run inside it unchanged; the moment text is a bottom caption in the layer (game-look section 4 cut scenes), at most 3 lines; the page under the layer keeps only the scene heading; pause and join banners and the connection notice stay above the layer; header heights under the layer are main's. **Deviation:** a still no longer shows in the parchment plate (step 8) at all, since every still moment is a visual; step 8's still-well budget is replaced by letterbox checks in `visual-layer.spec.ts`, and its narration and prompt budget runs on the text moment. The Keeper moves into the layer here with its current plate styling; step 11 restyles it. **For Bob's ruling:** (a) caption over the art, cut at 3 lines; (b) Q4 says keep cover in the parchment well when not zoomed, but no still is shown unzoomed now; (c) a non-16:9 still would be cropped to 16:9 inside the letterbox; (d) zoom grows from the centre (where step 9's waiting dialog sits), not from the old plate; (e) a pack alternating visual and text faster than about 1.5 presses a second can pass 3 brightness turns a second, since each flip reverses the zoom: rate-limit flips, or hold the exit until the zoom in completes; **ruled (Bob, 2026-10-19): hold the exit until the zoom in completes**, built in step 11) | #99 |
 | 11 | `feat/visuals-11-keeper-cinema` | 10 | Play TV | PR open (cinema: the Keeper fills the layer's 16:9 well on void with no plate rule; the portrait takes the top two thirds with its edges vignetted into the void, and the caption sits in the lower third below the portrait, clear of the face (the portrait's chin is at about 74% of its height, so a caption over a full-height portrait would cover it); caption bone italic, `max(1.75rem, 4.2vh)` so at least 1/25 of screen height, at most 3 lines; captions on by default and the Captions on/off button and `c` key unchanged; `data-board-caption`, `data-keeper-line` and `data-keeper-plate` kept; no change to `KeeperScene.tsx` or `KeeperBoardCaption.tsx`, CSS only. **Also in this PR, Bob's ruling on step 10's (e):** `VisualLayer.tsx` holds a zoom out until a zoom in that has started has finished, then zooms out from fully shown; a zoom in that has not moved is still dropped unseen, and a visual during a zoom out still turns it back. The held exit starts 1 ms inside the end, because WebKit drew one hidden frame (a full flash) when it was reversed from exactly its end inside the finish event. The backstop is now two zooms plus 200 ms. `visual-layer.spec.ts`'s mid-zoom test now asserts the hold) | #105 |
+
+Steps 3, 4 and 5 were combined into one PR (#106) to build the startup shell layout once, with the summary in the right column (Q3 (a)).
 
 **Follow-up (no asset-swap PRs):** Illusionist assets land in the step that creates each swap point. Shell step 5 (#87) has merged, so there is no step 5b; step 5 here restyles the existing `SummaryPanel`.
 
@@ -87,8 +89,8 @@ Steps in the same lane run **in order**. Lanes with **no shared paths** may run 
 
 - [x] Steps 6, 7, 8 and 10 merged (#89, #93, #94, #99).
 - [ ] **Now:** **Step 11**, and **Step 3** (creates `DialogFrame.tsx`).
-- [ ] **After step 3 merges:** **1** → **4** → **5**.
-- [ ] **After 3 merges (8 and 10 already merged):** **Step 9** (waiting dialog).
+- [ ] **After #106 (steps 3–5) merges:** **1**.
+- [ ] **After #106 merges (8 and 10 already merged):** **Step 9** (waiting dialog).
 - **Backlog:** **Step 2** (backdrop flicker). Not scheduled; do not start until Bob moves it back.
 
 ---
@@ -101,9 +103,9 @@ Steps in the same lane run **in order**. Lanes with **no shared paths** may run 
 Illusionist dialog-frame and window-mask assets are already on `main` (a5bacf5).
 
 Branch: feat/visuals-01-sound-dialog
-Depends on: step 3 merged (hard: step 3 creates `DialogFrame.tsx`). Do not edit .bt-board-backdrop (step 2).
+Depends on: #106 merged (hard: steps 3–5, combined in #106, create `DialogFrame.tsx`). Do not edit .bt-board-backdrop (step 2).
 
-Read CLAUDE.md, docs/art-direction/game-look.md (§2–3 frames, §4a type, §7 avoid), research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-03), apps/bloodtower/public/board/dialog-frame/README.md, docs/deliveries/2026-10-18-dialog-frame-and-window-mask.md. Visual target: research/game-design/mockups/2026-10-17/frames-mac-0-sound.png. Code: SoundDialog.tsx, DialogFrame.tsx (created in step 3; reuse it), board.css (.bt-sound-* only — no duplicate frame chrome outside DialogFrame).
+Read CLAUDE.md, docs/art-direction/game-look.md (§2–3 frames, §4a type, §7 avoid), research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-03), apps/bloodtower/public/board/dialog-frame/README.md, docs/deliveries/2026-10-18-dialog-frame-and-window-mask.md. Visual target: research/game-design/mockups/2026-10-17/frames-mac-0-sound.png. Code: SoundDialog.tsx, DialogFrame.tsx (created in #106; reuse it with `size="compact"`), board.css (.bt-sound-* only — no duplicate frame chrome outside DialogFrame).
 
 Goal: the Sound dialog matches the Illusionist frame language over the landing painting, TV-readable type (≥ 28px labels), candle focus rings—not browser default grey card.
 
@@ -302,7 +304,7 @@ Open a PR titled "feat(bloodtower): play parchment and prompt band (visuals step
 Illusionist dialog-frame and window-mask assets are already on `main` (a5bacf5).
 
 Branch: feat/visuals-09-waiting-dialog
-Depends on: steps 3, 8 and 10 merged (3 creates `DialogFrame.tsx`; 10 owns the visual layer). Rebase if 11 is in flight. Lane: Dialog / startup.
+Depends on: #106 (steps 3–5), 8 and 10 merged (#106 creates `DialogFrame.tsx`; 10 owns the visual layer). Rebase if 11 is in flight. Lane: Dialog / startup.
 
 Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-10, R3-UI-30) and R2-115 (research/game-design/r2-screen-flow.md), apps/bloodtower/public/board/dialog-frame/README.md. Code: StoryBoard PlayPanel, DialogFrame.tsx, board.css, src/web/lib/audio/layers.ts (read `isVisualMoment`).
 

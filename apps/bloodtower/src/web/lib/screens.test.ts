@@ -1,5 +1,8 @@
+import { FLOW_SCREENS } from "bloodtower-protocols";
 import { describe, expect, it } from "vitest";
 import {
+  BOARD_MODE,
+  carouselPeeks,
   claimedCount,
   currentStory,
   FORTUNE_LINE,
@@ -71,6 +74,33 @@ describe("story doors", () => {
       neighborStory({ cards: [card("alpha")], focus: "alpha", current: "alpha" }, 1),
     ).toBeNull();
     expect(neighborStory(undefined, 1)).toBeNull();
+  });
+
+  it("peeks at each neighbour, and at the other story once (on the right) with two cards", () => {
+    const three = carouselPeeks(stories("alpha"));
+    expect(three.previous?.id).toBe("gamma");
+    expect(three.next?.id).toBe("beta");
+    const two = { cards: [card("alpha"), card("beta")], focus: "alpha", current: "alpha" };
+    expect(carouselPeeks(two)).toEqual({ previous: null, next: two.cards[1] });
+    expect(carouselPeeks({ ...two, focus: "beta" })).toEqual({
+      previous: null,
+      next: two.cards[0],
+    });
+  });
+
+  it("peeks and wraps with ten or more cards from either end", () => {
+    const ids = Array.from({ length: 12 }, (_, index) => `story-${index}`);
+    const many = { cards: ids.map((id) => card(id)), focus: "story-0", current: "story-0" };
+    expect(carouselPeeks(many).previous?.id).toBe("story-11");
+    expect(carouselPeeks(many).next?.id).toBe("story-1");
+    const last = carouselPeeks({ ...many, focus: "story-11" });
+    expect([last.previous?.id, last.next?.id]).toEqual(["story-10", "story-0"]);
+  });
+
+  it("peeks at nothing with one story or none", () => {
+    const one = { cards: [card("alpha")], focus: "alpha", current: "alpha" };
+    expect(carouselPeeks(one)).toEqual({ previous: null, next: null });
+    expect(carouselPeeks(undefined)).toEqual({ previous: null, next: null });
   });
 
   it("words the party size: every hunter is always in play, so the card reads the maximum", () => {
@@ -202,6 +232,28 @@ describe("Claim Hunters and setup steps", () => {
   });
 });
 
+describe("board mode", () => {
+  it("is startup on every pre-play screen, play in play, and neither on Quit", () => {
+    const startup = [
+      "splash",
+      "tower-connect",
+      "tower-volume-test",
+      "pick-story",
+      "game-settings",
+      "not-playable",
+      "party-join",
+      "setup",
+      "begin",
+    ];
+    for (const screen of FLOW_SCREENS) {
+      const expected = startup.includes(screen) ? "startup" : screen === "play" ? "play" : null;
+      expect(BOARD_MODE[screen], screen).toBe(expected);
+    }
+    expect(BOARD_MODE.quit).toBeNull();
+    expect(FLOW_SCREENS.filter((screen) => BOARD_MODE[screen] === "startup")).toHaveLength(9);
+  });
+});
+
 describe("start-up summary (R3-UI-25)", () => {
   const NO_TOWER = {
     connection: "unavailable" as const,
@@ -246,9 +298,27 @@ describe("start-up summary (R3-UI-25)", () => {
       game: ["Proving ground"],
       settings: ["Length: Long", "Difficulty: unavailable"],
       tower: ["Playing without tower"],
-      hunters: ["Agnes: device-1", `Tomas: ${NOT_CHOSEN}`],
-      setup: ["1 of 2 done", "Lay out the board."],
+      hunters: ["device-1: Agnes", `${NOT_CHOSEN}: Tomas`],
+      setup: ["1 of 2 done"],
     });
+    const setup = summaryItems(summary, NO_TOWER).find((item) => item.id === "setup");
+    expect(setup?.detail).toEqual(["Lay out the board."]);
+  });
+
+  it("groups the hunters by the device holding them, one line per device", () => {
+    const summary = {
+      ...empty,
+      hunters: [
+        { id: "alpha", name: "Agnes", holders: ["device-1"] },
+        { id: "beta", name: "Tomas", holders: ["device-2"] },
+        { id: "gamma", name: "Wren", holders: ["device-1"] },
+        { id: "delta", name: "Emeric", holders: ["device-1", "device-2"] },
+      ],
+    };
+    expect(lines(summary).hunters).toEqual([
+      "device-1: Agnes, Wren, Emeric",
+      "device-2: Tomas, Emeric",
+    ]);
   });
 
   it("names the tower outcome with the live reading once connected", () => {
