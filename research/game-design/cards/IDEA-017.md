@@ -5,7 +5,7 @@ status: open
 layer: core
 by: "Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-001 }
+  - { rel: part-of, to: AREA-019 }
   - { rel: refines, to: Q-004 }
   - { rel: affects, to: OPT-001 }
   - { rel: affects, to: OPT-002 }
