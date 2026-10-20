@@ -15,6 +15,14 @@
     "style": "nervous, fast, breathless. thought",
     "voice": "Fenrir"
   },
+  "0b2bc6496a7911fa97d6e3b3e2fdcdb0764a4f7cf73947310be95f3c43dd9990": {
+    "file": "n1-lantern-and-bell.04~no-tomas.vo-01.emeric.wav",
+    "generated_at": "2026-10-19T07:47:54.062481+00:00",
+    "hash": "0b2bc6496a7911fa97d6e3b3e2fdcdb0764a4f7cf73947310be95f3c43dd9990",
+    "speaker": "emeric",
+    "style": "nervous, fast, breathless",
+    "voice": "Fenrir"
+  },
   "0d258e62555102a0a8a87980588a74909abab8bf013b6dd508be8cf0674fdca1": {
     "file": "n1-lantern-and-bell.02.vo-01.hanne.wav",
     "generated_at": "2026-10-16T07:58:01.239257+00:00",
@@ -30,6 +38,30 @@
     "speaker": "wren",
     "style": "flat, terse, matter-of-fact",
     "voice": "Erinome"
+  },
+  "0f49ea9125d34b2b78825d255a7340e6ef485d03285fd847269e72f99cc8da84": {
+    "file": "n1-lantern-and-bell.09.vo-01.hanne.wav",
+    "generated_at": "2026-10-18T07:48:25.883190+00:00",
+    "hash": "0f49ea9125d34b2b78825d255a7340e6ef485d03285fd847269e72f99cc8da84",
+    "speaker": "hanne",
+    "style": "wry, warm, tired",
+    "voice": "Sulafat"
+  },
+  "16eb6c1917314242ba56dec3bee43bc4ea88a4581f27efdbf63e6c479dfbd018": {
+    "file": "n1-lantern-and-bell.07.vo-02.hanne.wav",
+    "generated_at": "2026-10-18T07:47:03.998038+00:00",
+    "hash": "16eb6c1917314242ba56dec3bee43bc4ea88a4581f27efdbf63e6c479dfbd018",
+    "speaker": "hanne",
+    "style": "wry, warm, tired",
+    "voice": "Sulafat"
+  },
+  "2e52556822d09dafe5af595d238e9567d0756f7130172c67a4bdc4aced84a80b": {
+    "file": "n1-lantern-and-bell.08.vo-02.agnes.wav",
+    "generated_at": "2026-10-18T07:47:57.585577+00:00",
+    "hash": "2e52556822d09dafe5af595d238e9567d0756f7130172c67a4bdc4aced84a80b",
+    "speaker": "agnes",
+    "style": "calm, dry, quietly stern",
+    "voice": "Kore"
   },
   "31c3cbd19235b9ca2aa60e642dc6b98b2a221d2d2c78ab0fad02c6f8b75267b4": {
     "file": "n1-lantern-and-bell.02.vo-02.tomas.wav",
@@ -95,6 +127,14 @@
     "style": "nervous, fast, breathless",
     "voice": "Fenrir"
   },
+  "77ce99184a46f5ea753b61e901b0581338ab32177a87f2bb8c6cc2dd62b6d99f": {
+    "file": "n1-lantern-and-bell.05.vo-04.wren.wav",
+    "generated_at": "2026-10-18T07:45:14.077314+00:00",
+    "hash": "77ce99184a46f5ea753b61e901b0581338ab32177a87f2bb8c6cc2dd62b6d99f",
+    "speaker": "wren",
+    "style": "flat, terse, matter-of-fact",
+    "voice": "Erinome"
+  },
   "7c45e3f867edd5cd796feb37c822f67fa392736a3a5be04ef9bbefce4c13ceaf": {
     "file": "n2-burgomasters-funeral.mourner-returns.agnes.vo-01.agnes.wav",
     "generated_at": "2026-10-17T07:49:53.094968+00:00",
@@ -111,10 +151,42 @@
     "style": "flat, terse, matter-of-fact. thought",
     "voice": "Erinome"
   },
+  "861692c2728035e085a6d96c146c853bbb49e94c8c810539cb23824dfd82cbe1": {
+    "file": "n1-lantern-and-bell.05~no-wren.vo-01.narrator.wav",
+    "generated_at": "2026-10-19T07:46:31.893199+00:00",
+    "hash": "861692c2728035e085a6d96c146c853bbb49e94c8c810539cb23824dfd82cbe1",
+    "speaker": "narrator",
+    "style": "slow, low, ominous storyteller",
+    "voice": "Charon"
+  },
+  "8ada9834c5d8a177d3f76e971e6b119d4bc3e29193546e5f0df7da62612ff082": {
+    "file": "n1-lantern-and-bell.11.vo-01.narrator.wav",
+    "generated_at": "2026-10-19T07:46:03.816458+00:00",
+    "hash": "8ada9834c5d8a177d3f76e971e6b119d4bc3e29193546e5f0df7da62612ff082",
+    "speaker": "narrator",
+    "style": "slow, low, ominous storyteller",
+    "voice": "Charon"
+  },
+  "8af34981c00fb803269bb2a1e8031b42708332c6964c4947833c0e23b83b0e6b": {
+    "file": "n1-lantern-and-bell.02~no-tomas.vo-01.narrator.wav",
+    "generated_at": "2026-10-19T07:47:26.682266+00:00",
+    "hash": "8af34981c00fb803269bb2a1e8031b42708332c6964c4947833c0e23b83b0e6b",
+    "speaker": "narrator",
+    "style": "slow, low, ominous storyteller",
+    "voice": "Charon"
+  },
   "8af8585613d7c239b24e13851c65104fc7725098f048d2ce68a76bc2f267c202": {
     "file": "n2-burgomasters-funeral.end.private.tomas.vo-01.tomas.wav",
     "generated_at": "2026-10-17T00:50:06.779523+00:00",
     "hash": "8af8585613d7c239b24e13851c65104fc7725098f048d2ce68a76bc2f267c202",
+    "speaker": "tomas",
+    "style": "gruff, low, unhurried. thought",
+    "voice": "Algenib"
+  },
+  "8dc763fc14a61324af2e16397a043528d4dfc9a94eeabc38390f2fd8e9af76d8": {
+    "file": "n1-lantern-and-bell.10.private.tomas.vo-01.tomas.wav",
+    "generated_at": "2026-10-18T07:49:25.646930+00:00",
+    "hash": "8dc763fc14a61324af2e16397a043528d4dfc9a94eeabc38390f2fd8e9af76d8",
     "speaker": "tomas",
     "style": "gruff, low, unhurried. thought",
     "voice": "Algenib"
@@ -127,6 +199,14 @@
     "style": "gruff, low, unhurried",
     "voice": "Algenib"
   },
+  "989f8c9a7a95db821b9b033adf1f5f2fe8064d2db1f75a3a9a6cd9764f60446c": {
+    "file": "n1-lantern-and-bell.06~no-tomas.vo-02.wren.wav",
+    "generated_at": "2026-10-19T07:49:10.444183+00:00",
+    "hash": "989f8c9a7a95db821b9b033adf1f5f2fe8064d2db1f75a3a9a6cd9764f60446c",
+    "speaker": "wren",
+    "style": "flat, terse, matter-of-fact",
+    "voice": "Erinome"
+  },
   "9a135532b6624e0ff919e053628713a8b8fd95d1eebed53acd6f598bc322a888": {
     "file": "n1-lantern-and-bell.04.vo-02.tomas.wav",
     "generated_at": "2026-10-17T07:52:36.086146+00:00",
@@ -134,6 +214,14 @@
     "speaker": "tomas",
     "style": "gruff, low, unhurried",
     "voice": "Algenib"
+  },
+  "adbe13049dae5d9b323b171e1b489a6f67671ad0e23bad99d659882cdd0e693a": {
+    "file": "n1-lantern-and-bell.10.private.wren.vo-01.wren.wav",
+    "generated_at": "2026-10-19T07:45:09.663541+00:00",
+    "hash": "adbe13049dae5d9b323b171e1b489a6f67671ad0e23bad99d659882cdd0e693a",
+    "speaker": "wren",
+    "style": "flat, terse, matter-of-fact. thought",
+    "voice": "Erinome"
   },
   "b876172eeb37b57a0c7638e2465e1c2809ed3683c200417e2ae8da8f215aeb86": {
     "file": "n2-burgomasters-funeral.mourner-returns.tomas.vo-01.tomas.wav",
@@ -151,12 +239,52 @@
     "style": "flat, terse, matter-of-fact",
     "voice": "Erinome"
   },
+  "c0cede7a6acd96d5c6624f4f48cef4ca3a2b05e7857ab5476b449793b34416fe": {
+    "file": "n1-lantern-and-bell.10.private.agnes.vo-01.agnes.wav",
+    "generated_at": "2026-10-18T07:48:55.591352+00:00",
+    "hash": "c0cede7a6acd96d5c6624f4f48cef4ca3a2b05e7857ab5476b449793b34416fe",
+    "speaker": "agnes",
+    "style": "calm, dry, quietly stern. thought",
+    "voice": "Kore"
+  },
   "c6daba6c004a6f85a2104b942c6f70e050875935384ed12f3a29f1de9ffe3f92": {
     "file": "n1-lantern-and-bell.04.vo-01.emeric.wav",
     "generated_at": "2026-10-17T08:02:15.433475+00:00",
     "hash": "c6daba6c004a6f85a2104b942c6f70e050875935384ed12f3a29f1de9ffe3f92",
     "speaker": "emeric",
     "style": "nervous and breathless, only a little slower than a rushed delivery. A brief pause before the name, then the name Oskar said clearly, OS-kar, stress on the first syllable.",
+    "voice": "Fenrir"
+  },
+  "d0250af566519eca264e416220b40ee749af7bb91f80c976bdb9286617ec6096": {
+    "file": "n1-lantern-and-bell.10.private.emeric.vo-01.emeric.wav",
+    "generated_at": "2026-10-19T07:45:37.065064+00:00",
+    "hash": "d0250af566519eca264e416220b40ee749af7bb91f80c976bdb9286617ec6096",
+    "speaker": "emeric",
+    "style": "nervous, fast, breathless. thought",
+    "voice": "Fenrir"
+  },
+  "d95caab26aac01a418ed728fc523adbe3e6005fe3916551507eaafba7b04af38": {
+    "file": "n1-lantern-and-bell.04~no-tomas.vo-02.agnes.wav",
+    "generated_at": "2026-10-19T07:48:19.240611+00:00",
+    "hash": "d95caab26aac01a418ed728fc523adbe3e6005fe3916551507eaafba7b04af38",
+    "speaker": "agnes",
+    "style": "calm, dry, quietly stern",
+    "voice": "Kore"
+  },
+  "dcbcac6393fc46e5cb3449b69cbf5128764a14e20a440f6ad2df1b53843e2038": {
+    "file": "n1-lantern-and-bell.08.vo-01.hanne.wav",
+    "generated_at": "2026-10-18T07:47:32.291823+00:00",
+    "hash": "dcbcac6393fc46e5cb3449b69cbf5128764a14e20a440f6ad2df1b53843e2038",
+    "speaker": "hanne",
+    "style": "wry, warm, tired",
+    "voice": "Sulafat"
+  },
+  "deea21675dbab04cca4a1126ce4b74a2deffbd0bc380fd9ed6502be1d58b3b6d": {
+    "file": "n1-lantern-and-bell.06~no-tomas.vo-01.emeric.wav",
+    "generated_at": "2026-10-19T07:48:45.261877+00:00",
+    "hash": "deea21675dbab04cca4a1126ce4b74a2deffbd0bc380fd9ed6502be1d58b3b6d",
+    "speaker": "emeric",
+    "style": "nervous, fast, breathless",
     "voice": "Fenrir"
   },
   "df6329dfdc6f2238db898c99365291baea6ada0b5c6eaa0f12aeb1aef60b458c": {
@@ -167,6 +295,14 @@
     "style": "soft, frightened, loving; still human",
     "voice": "Aoede"
   },
+  "e0ae9983f18b15d7a00ce65bdc9ba868d0c1e11c71d3ff302b184b3ac1497f67": {
+    "file": "n1-lantern-and-bell.06.vo-02.tomas.wav",
+    "generated_at": "2026-10-18T07:46:07.231561+00:00",
+    "hash": "e0ae9983f18b15d7a00ce65bdc9ba868d0c1e11c71d3ff302b184b3ac1497f67",
+    "speaker": "tomas",
+    "style": "gruff, low, unhurried",
+    "voice": "Algenib"
+  },
   "e4c1cae46c5848a00cebbcd8033d6e6ea1789f646f9d9f5f17c36fb5e7571c47": {
     "file": "n1-lantern-and-bell.05.vo-03.emeric.wav",
     "generated_at": "2026-10-17T07:53:56.753775+00:00",
@@ -175,10 +311,26 @@
     "style": "nervous, fast, breathless",
     "voice": "Fenrir"
   },
+  "f2f60e06d9c8dc4acf02464a33ba026e9ba0cee7dfbd4feca797ae852b51125b": {
+    "file": "n1-lantern-and-bell.05~no-wren.vo-02.hanne.wav",
+    "generated_at": "2026-10-19T07:46:58.758867+00:00",
+    "hash": "f2f60e06d9c8dc4acf02464a33ba026e9ba0cee7dfbd4feca797ae852b51125b",
+    "speaker": "hanne",
+    "style": "wry, warm, tired",
+    "voice": "Sulafat"
+  },
   "f8a517667609fe9e41400db77ca836fc90f38c77d7e7bce4e9150f4b2fb4f0d4": {
     "file": "n2-burgomasters-funeral.07~fight-lost~no-wren.vo-01.narrator.wav",
     "generated_at": "2026-10-16T07:55:59.805447+00:00",
     "hash": "f8a517667609fe9e41400db77ca836fc90f38c77d7e7bce4e9150f4b2fb4f0d4",
+    "speaker": "narrator",
+    "style": "slow, low, ominous storyteller",
+    "voice": "Charon"
+  },
+  "f91c9ef7287224588beec82d6c2864f3623fd024ba5f732cc59d1605f86d4f37": {
+    "file": "n1-lantern-and-bell.07.vo-01.narrator.wav",
+    "generated_at": "2026-10-18T07:46:36.612378+00:00",
+    "hash": "f91c9ef7287224588beec82d6c2864f3623fd024ba5f732cc59d1605f86d4f37",
     "speaker": "narrator",
     "style": "slow, low, ominous storyteller",
     "voice": "Charon"
