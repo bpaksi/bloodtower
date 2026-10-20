@@ -34,6 +34,7 @@ import { DialogFrame } from "./DialogFrame";
 import { KeeperScene } from "./KeeperScene";
 import { KEEPER_MOMENT_ID } from "./keeperLines";
 import { VisualLayer } from "./VisualLayer";
+import { WaitingDialog } from "./WaitingDialog";
 
 /**
  * Display only for game controls. Holdings do not change here.
@@ -62,6 +63,7 @@ export function StoryBoard({
   const startup = mode === "startup";
   // Layer 2 (R3-UI-10): a still, clip or the Keeper fills the screen; the board stays under it.
   const layer = boardLayer(state);
+  const waitingDialog = layer === "waiting" && state.moment !== null;
   return (
     <main
       className="bt-board"
@@ -122,10 +124,11 @@ export function StoryBoard({
               <StartupPanel state={state} />
             </DialogFrame>
           ) : null}
-          {state.screen === "play" ? <PlayPanel state={state} /> : null}
+          {state.screen === "play" ? <PlayPanel state={state} prompt={nextPrompt(state)} /> : null}
           {state.screen === "quit" ? <QuitPanel /> : null}
           {playMode && !keeperMoment ? <PartyItems /> : null}
-          <NextPrompt label={nextPrompt(state)} />
+          {/* The waiting dialog (layer 3) holds the prompt band itself. */}
+          {waitingDialog ? null : <NextPrompt label={nextPrompt(state)} />}
         </section>
         {playMode ? (
           <ActingPanel />
@@ -722,7 +725,7 @@ const BeginPanel = ({ state }: { state: StoryboardState }) => (
   </article>
 );
 
-const PlayPanel = ({ state }: { state: StoryboardState }) => {
+const PlayPanel = ({ state, prompt }: { state: StoryboardState; prompt: string }) => {
   if (!state.moment) {
     return (
       <article className="bt-page bt-parchment">
@@ -756,22 +759,14 @@ const PlayPanel = ({ state }: { state: StoryboardState }) => {
       </article>
     );
   }
-  const scene = sceneCopy(state.moment);
+  // Waiting (layer 3): text only, so a small centred dialog over the painting (R3-UI-30). One
+  // mounted dialog for the whole waiting stretch: the next moment swaps its text in place.
   const text = state.moment.text == null ? "Text unavailable." : displayCaption(state.moment.text);
   return (
-    <article className="bt-page bt-parchment bt-ink-in">
+    <WaitingDialog text={text}>
       <MomentMeta moment={state.moment} />
-      <div className="bt-page-text">
-        <p className="bt-kicker">{scene.kicker}</p>
-        <h2>{scene.title}</h2>
-        <p className="bt-orn" aria-hidden="true">
-          ❦ ❦ ❦
-        </p>
-        <p className="bt-narration" data-moment-caption="">
-          {text}
-        </p>
-      </div>
-    </article>
+      <NextPrompt label={prompt} />
+    </WaitingDialog>
   );
 };
 
