@@ -77,8 +77,8 @@ Record Chrome zoom separately. `documentFullscreen` only reports the page Fullsc
 - [ ] Move Chrome to the TV desktop and fullscreen it. Repeat E1's content checks.
 - [ ] If useful, compare the other Roku without changing TV picture settings.
 - **Capture:** selected resolution/scaling, receiver output if reported, viewport JSON, screenshot/photo, Chrome toolbar/menu visibility, sound destination, manual actions and repeat-start times.
-- **Result/status:** PASS (2026-10-20) on the **Roku Streaming Stick+**: 1920×1080 at 16:9, sound on the TV in sync, about 60 fps, repeat start under one minute. The Samsung needed **Fit to Screen: On** for the Roku input to stop cropping. See run R2 under Results index. Roku Ultra not tested.
-- **Decision:** yes. Roku Stick+ Extended Display is the chosen path, with no extra app or cost. Try the Roku Ultra (Ethernet) only if E8 shows dropouts.
+- **Result/status:** PASS (2026-10-20) on the **Roku Streaming Stick+**: 1920×1080 at 16:9, sound on the TV in sync, about 60 fps, repeat start under one minute. The Samsung needed **Fit to Screen: On** to stop cropping. It is a whole-TV setting, not per input. See run R2 under Results index. Roku Ultra not tested.
+- **Decision:** yes. Roku Stick+ Extended Display is the chosen path, with no extra app or cost. Try the Roku Ultra (Ethernet) only if dropouts show up in play. E7 and E8 are on hold.
 
 Apple documents AirPlay extension and window/app sharing as distinct options.[cite:255]
 
@@ -243,7 +243,7 @@ Not fullscreen, the browser toolbar and frame took the rest: viewport 1910×960 
 
 ```text
 Run ID / experiment / date: R2 / E2 / 2026-10-20
-Versions / profile / starting state: Samsung 9 Series 65-inch, Roku input: picture mode Movie, Picture Size 16:9, Fit to Screen On. Roku Streaming Stick+ (OS version not recorded). Chrome 154. Test page apps/tv-display-poc.
+Versions / profile / starting state: Samsung 9 Series 65-inch: picture mode Movie, Picture Size 16:9, Fit to Screen On (whole TV, not per input). Roku Streaming Stick+ (OS version not recorded). Chrome 154. Test page apps/tv-display-poc.
 Exact steps and click count: Mac screen mirroring to the Roku as an extended display, Chrome moved to the TV and fullscreened. Clicks not counted.
 One-time setup time / repeat-start times / server-start time: Fit to Screen changed once / under one minute (estimate) / not recorded.
 Viewport JSON / display settings / receiver output: see below. TV reported as a 1920×1080 display. Receiver output not reported.
@@ -269,7 +269,7 @@ Viewport, fullscreen:
 
 | Test page tab | TV result (Roku) | Compared with R1 (Fire Stick) |
 |---|---|---|
-| Reference: edge guides | With Fit to Screen on Auto: the outer border sat 3–5 px in at the sides, the bottom was right, and the top cut off about a quarter of the tab buttons. Fit to Screen On fixed it | R1 had no cropping |
+| Reference: edge guides | With Fit to Screen on Auto: the outer border sat 3–5 px in at the sides, the bottom was right, and the top cut off about a quarter of the tab buttons. Fit to Screen On fixed it | R1 had no cropping with Fit to Screen on Auto |
 | Sounds: beep and flash | Looks in sync | Better (R1 about 100 ms late) |
 | Sounds: sweep, levels, left/right, drone, voice | All fine | Same |
 | Motion and Pan | Frame counter about 60 fps; all pans smooth | Better (R1 about 30 fps, medium and fast pans stuttered) |
@@ -281,13 +281,13 @@ Viewport, fullscreen:
 
 **Rulings from R2 for the Story board** (Bob, 2026-10-20), replacing R1's:
 
-1. Path: Roku Streaming Stick+ as a Mac extended display. Don't buy FireMirror. Roku Ultra only if E8 shows dropouts.
-2. TV profile, Roku input: Movie, 16:9, Fit to Screen On.
+1. Path: Roku Streaming Stick+ as a Mac extended display. Don't buy FireMirror. Roku Ultra only if dropouts show up in play.
+2. TV profile: Movie, 16:9, Fit to Screen On. Fit to Screen applies to the whole TV, not per input.
 3. Motion: no limit; fast motion is allowed.
 4. A/V offset: shelved. Build it only if a playtest needs it.
 5. Darkness on black: unchanged. Readable text at 48/255 or brighter; detail that matters at 32/255 or brighter, so it also holds on the Mac.
 6. Text at 1080p: 24 px (2.2vh) for normal text, 18 px (1.7vh) for small text, 14 px (1.3vh) only for low-importance information where space is tight. At 4K: 48, 36 and 28 px.
-7. Next: E7 (full picture and audio profile) and E8 (timed repeat starts, 30-minute session) on the Roku.
+7. E7 (full picture and audio profile) and E8 (timed repeat starts, 30-minute session) are on hold. The Roku is good enough for now.
 
 Duplicate this block for significant runs:
 

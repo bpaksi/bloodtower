@@ -32,7 +32,7 @@ Both files were produced outside this repo and are kept as received, including t
 
 Run R1 (2026-10-20) used a Fire TV Stick 4K Max with the FireMirror app as an extended display. Good enough: full 1920×1080, sound on the TV, about 100 ms audio lag, about 30 fps. FireMirror costs $9 one-time after a trial. Details are in [tv-experiments.md](tv-experiments.md#r1--fire-stick--firemirror-extended-display).
 
-**Chosen path:** run R2 (2026-10-20), a Roku Streaming Stick+ as an extended display, did better on everything checked and costs nothing: sound in sync, about 60 fps, sharper text, colour like the Mac. The Samsung needs Fit to Screen On for that input. Bob's current rulings for the Story board are in [tv-experiments.md](tv-experiments.md#r2--roku-streaming-stick-extended-display). Next: E7 and E8 on the Roku.
+**Chosen path:** run R2 (2026-10-20), a Roku Streaming Stick+ as an extended display, did better on everything checked and costs nothing: sound in sync, about 60 fps, sharper text, colour like the Mac. The Samsung needs Fit to Screen set to On, a whole-TV setting rather than a per-input one. Bob's current rulings for the Story board are in [tv-experiments.md](tv-experiments.md#r2--roku-streaming-stick-extended-display). E7 and E8 are on hold (Bob, 2026-10-20): the Roku is good enough for now.
 
 ## Suggested order
 
