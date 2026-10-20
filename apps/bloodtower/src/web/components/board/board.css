@@ -1,7 +1,7 @@
 /* Story board look. Tokens and frames from docs/art-direction/{game-look.md,tokens.css,mocks/story-board.html}.
    Scoped to .bt-board so iPad screens keep the R2 opening-screen CSS. */
 
-.bt-board {
+:is(.bt-board, .bt-sound-backdrop) {
   /* palette */
   --bt-void: #0b0806;
   --bt-soot: #1a1310;
@@ -32,7 +32,9 @@
   --bt-dur-ink: 900ms;
   --bt-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .16 0 0 0 0 .11 0 0 0 0 .07 0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   --bt-foxing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .12 0 0 0 .55 -.18'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+}
 
+.bt-board {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -817,7 +819,7 @@
   line-height: 1.3;
 }
 
-.bt-board .bt-ink-in {
+:is(.bt-board, .bt-sound-backdrop) .bt-ink-in {
   animation: bt-ink-in var(--bt-dur-ink) var(--bt-ease-ink) both;
 }
 
@@ -1044,7 +1046,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bt-board .bt-ink-in {
+  :is(.bt-board, .bt-sound-backdrop) .bt-ink-in {
     animation: bt-fade-in 300ms ease-out both;
   }
 
@@ -1299,7 +1301,12 @@
   text-underline-offset: 0.2em;
 }
 
-/* Sound dialog (R3-UI-03): the Mac board's only control besides the Menu. */
+/*
+ * Sound dialog (R3-UI-03, visuals step 1): the Mac board's only control besides the Menu. It is
+ * mounted beside main.bt-board, so the palette and the DialogFrame rules also match
+ * .bt-sound-backdrop (see the :is() selectors). The frame itself is DialogFrame's; nothing here
+ * draws dialog chrome. The scrim sits above the board, so the window glow stays under the dialog.
+ */
 .bt-sound-backdrop {
   position: fixed;
   inset: 0;
@@ -1307,67 +1314,162 @@
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgb(11 8 6 / 0.72);
+  background: rgb(11 8 6 / 0.62);
+  /* The start-up shell under it blurs away; the painting and its flicker still read, as in the mock. */
+  backdrop-filter: blur(7px);
 }
 
 .bt-sound-dialog {
-  width: min(34rem, 100%);
-  padding: 1.4rem 1.6rem;
-  border: 1px solid var(--bt-candle);
-  background: var(--bt-soot);
-  color: var(--bt-bone);
+  width: 34rem;
+  font-family: var(--bt-font-body);
+  font-size: var(--bt-size-body);
+  line-height: 1.25;
 }
 
 .bt-sound-dialog h2 {
-  margin: 0 0 0.4rem;
+  margin: 0;
+  text-align: center;
   font-family: var(--bt-font-title);
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--bt-candle);
+  font-size: 2.75rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--bt-iron-gall);
 }
 
 .bt-sound-note {
-  margin: 0 0 1rem;
-  color: var(--bt-parchment-dark);
-  font-size: 0.95rem;
+  margin: 0.2rem 0 0.9rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--bt-umber);
 }
 
 .bt-sound-row {
   display: grid;
-  grid-template-columns: 5.5rem 1fr auto;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.75rem;
-  margin: 0.7rem 0;
+  gap: 0.9rem;
+  margin: 0.55rem 0;
 }
 
+.bt-sound-row label {
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  letter-spacing: var(--bt-tracking-label);
+  color: var(--bt-iron-gall);
+}
+
+/* A physical slider: an inked bar that fills as it is turned up, and a blood-red bead. */
 .bt-sound-dialog input[type="range"] {
   width: 100%;
-  accent-color: var(--bt-candle);
+  height: 2.5rem;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bt-sound-dialog input[type="range"]::-webkit-slider-runnable-track {
+  height: 0.7rem;
+  border: 1px solid var(--bt-iron-gall);
+  background: linear-gradient(
+    to right,
+    var(--bt-iron-gall) var(--bt-fill, 50%),
+    var(--bt-parchment-dark) var(--bt-fill, 50%)
+  );
+}
+
+.bt-sound-dialog input[type="range"]::-moz-range-track {
+  height: 0.7rem;
+  border: 1px solid var(--bt-iron-gall);
+  background: linear-gradient(
+    to right,
+    var(--bt-iron-gall) var(--bt-fill, 50%),
+    var(--bt-parchment-dark) var(--bt-fill, 50%)
+  );
+}
+
+.bt-sound-dialog input[type="range"]::-webkit-slider-thumb {
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-top: calc((0.7rem - 1.9rem) / 2 - 1px);
+  border: 3px solid var(--bt-iron-gall);
+  border-radius: 50%;
+  background: var(--bt-blood);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bt-sound-dialog input[type="range"]::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 3px solid var(--bt-iron-gall);
+  border-radius: 50%;
+  background: var(--bt-blood);
+}
+
+/* Candle ring, with a dark inner ring so it reads on parchment. */
+.bt-sound-dialog button:focus-visible,
+.bt-sound-dialog input:focus-visible {
+  outline: 4px solid var(--bt-candle);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--bt-iron-gall);
 }
 
 .bt-sound-dialog button {
-  min-height: 2.6rem;
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--bt-candle);
-  background: transparent;
-  color: var(--bt-candle);
-  font-family: var(--bt-font-title);
-  font-size: 1.1rem;
+  min-height: 3.25rem;
+  padding: 0.3rem 1.1rem;
+  border: 2px solid var(--bt-iron-gall);
+  background: var(--bt-parchment);
+  color: var(--bt-iron-gall);
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  letter-spacing: var(--bt-tracking-label);
   cursor: pointer;
 }
 
-.bt-sound-dialog button:focus-visible,
-.bt-sound-dialog input:focus-visible {
-  outline: 2px solid var(--bt-flame);
-  outline-offset: 2px;
+.bt-sound-dialog button:hover {
+  background: var(--bt-parchment-dark);
 }
 
 .bt-sound-dialog .bt-sound-continue {
   display: block;
   width: 100%;
   margin-top: 1.1rem;
+  border-color: var(--bt-iron-gall);
   background: var(--bt-blood);
   color: var(--bt-bone);
+}
+
+.bt-sound-dialog .bt-sound-continue:hover {
+  background: color-mix(in srgb, var(--bt-blood) 80%, var(--bt-flame));
+}
+
+@media (max-height: 700px) {
+  .bt-sound-dialog h2 {
+    font-size: 2.25rem;
+  }
+
+  .bt-sound-note {
+    margin-bottom: 0.4rem;
+  }
+
+  .bt-sound-row {
+    margin: 0.25rem 0;
+  }
+
+  .bt-sound-dialog input[type="range"] {
+    height: 2.2rem;
+  }
+
+  .bt-sound-dialog button {
+    min-height: 2.75rem;
+  }
+
+  .bt-sound-dialog .bt-sound-continue {
+    margin-top: 0.6rem;
+  }
 }
 
 /*
@@ -1735,7 +1837,7 @@
  * chrome (public/board/dialog-frame/README.md). A 9-slice SVG ink border at slice 40; the
  * parchment tile and a burn gradient run under it from the border box, never an outer shadow.
  */
-.bt-board .bt-dialog-frame {
+:is(.bt-board, .bt-sound-backdrop) .bt-dialog-frame {
   --bt-dialog-frame-width: 40px;
   box-sizing: border-box;
   border-style: solid;
@@ -1759,7 +1861,7 @@
   padding: 12px 28px 20px;
 }
 
-.bt-board .bt-dialog-frame[data-dialog-size="compact"] {
+:is(.bt-board, .bt-sound-backdrop) .bt-dialog-frame[data-dialog-size="compact"] {
   --bt-dialog-frame-width: 32px;
   width: fit-content;
   max-width: min(34rem, 100%);
@@ -1876,7 +1978,7 @@
 }
 
 @media (min-width: 1024px) and (max-height: 700px) {
-  .bt-board .bt-dialog-frame {
+  :is(.bt-board, .bt-sound-backdrop) .bt-dialog-frame {
     --bt-dialog-frame-width: 32px;
     padding: 4px 18px 8px;
   }
