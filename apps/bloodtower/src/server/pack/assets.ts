@@ -5,6 +5,7 @@ import type { PackAudioIndex } from "./audio.ts";
 import { indexPackAudio } from "./audio.ts";
 import type { PackCameraIndex } from "./camera.ts";
 import { indexPackCamera } from "./camera.ts";
+import { type ImageSize, isSixteenByNine, readImageSize } from "./imageSize.ts";
 import type { PackLoadIssue } from "./load.ts";
 
 export const PACK_ASSETS_DIR = "assets";
@@ -226,3 +227,55 @@ export const indexPackAssets = (
     warnings: [...warnings, ...camera.warnings],
   };
 };
+
+const sizeLabel = ({ width, height }: ImageSize) => `${width}x${height}`;
+
+/**
+ * V-aspect: every still with a file, and the pack cover, is 16:9 (within 0.5%). The board draws a
+ * still in a 16:9 well and the carousel draws the cover on a 16:9 plate, and both crop anything
+ * else, so a real pack never ships one. A header that cannot be read is an error too. A still
+ * with no file (a placeholder) is skipped: W-asset already covers it. Portraits are not stills.
+ */
+export const stillAspectIssues = (
+  index: PackAssetIndex,
+  pack: { assets: readonly Asset[]; cover?: string },
+): PackLoadIssue[] => {
+  const issues: PackLoadIssue[] = [];
+  const check = (file: string, path: string, absolute: string, what: string) => {
+    const size = readImageSize(absolute);
+    if (!size) {
+      issues.push(
+        aspectIssue(file, path, `The header of ${what} cannot be read, so its shape is unknown.`),
+      );
+    } else if (!isSixteenByNine(size)) {
+      issues.push(
+        aspectIssue(file, path, `${what} is ${sizeLabel(size)}, not 16:9 (within 0.5%).`),
+      );
+    }
+  };
+  for (const asset of pack.assets) {
+    if (asset.type !== "still") continue;
+    const resolved = index.byId.get(asset.id);
+    if (!resolved) continue;
+    check(
+      `${PACK_ASSETS_DIR}/${resolved.basename}`,
+      asset.id,
+      resolved.absolute,
+      `still ${asset.id}`,
+    );
+  }
+  if (pack.cover) {
+    const cover = resolveCover(index.packRoot, pack.cover);
+    if (cover) {
+      check(`${PACK_ASSETS_DIR}/${basename(cover)}`, "cover", cover, `the cover ${pack.cover}`);
+    }
+  }
+  return issues;
+};
+
+const aspectIssue = (file: string, path: string, message: string): PackLoadIssue => ({
+  rule: "V-aspect",
+  file,
+  path,
+  message: `V-aspect: ${message}`,
+});

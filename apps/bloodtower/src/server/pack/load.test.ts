@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
 import { lintPath } from "../scripts/packLint.ts";
+import { pngBytes } from "./imageFixtures.ts";
 import { loadPackDir, loadR1Pack, loadStories, type PackLoadIssue } from "./load.ts";
 
 const testPack = () => join(loadConfig().packsDir, "test");
@@ -217,7 +218,7 @@ describe("story loader", () => {
   it("allows assets/ with images, rejects other subfolders and non-images in assets/", () => {
     const dir = copyPack();
     try {
-      writeFileSync(join(dir, "assets", "fx-hall.png"), "png");
+      writeFileSync(join(dir, "assets", "fx-hall.png"), pngBytes(1920, 1080));
       expect(loadPackDir(dir).ok).toBe(true);
 
       writeFileSync(join(dir, "assets", "notes.txt"), "nope");
@@ -279,7 +280,7 @@ describe("story loader", () => {
       if (!result.ok) return;
       expect(result.assets.warnings).toEqual([]);
       expect(result.assets.byId.has("ill.setup-board")).toBe(false);
-      writeFileSync(join(dir, "assets", "ill-setup-board.png"), "png");
+      writeFileSync(join(dir, "assets", "ill-setup-board.png"), pngBytes(1920, 1080));
       const landed = loadPackDir(dir);
       expect(landed.ok).toBe(true);
       if (!landed.ok) return;
@@ -300,7 +301,7 @@ describe("story loader", () => {
       expect(result.assets.byId.has("fx.hall")).toBe(false);
       expect(result.assets.warnings.some((item) => item.rule === "W-asset")).toBe(true);
       mkdirSync(assetsDir);
-      writeFileSync(join(dir, "assets", "fx-hall.png"), "png");
+      writeFileSync(join(dir, "assets", "fx-hall.png"), pngBytes(1920, 1080));
       const again = loadPackDir(dir);
       expect(again.ok).toBe(true);
       if (!again.ok) return;

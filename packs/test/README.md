@@ -42,6 +42,11 @@ Hunter ids stay `alpha`–`delta`; display names in `hunters.yaml` are Agnes, To
 
 If `path` is set in `assets.yaml`, the loader looks for that path with an image extension, then the id as `id.png` / `id.jpg` / `id.webp`, then the id with dots turned to hyphens (e.g. `fx.hall` → `fx-hall.png`). Missing files warn (`W-asset`) but do not block lint. A `placeholder` asset with no file does not warn: its art has not landed, and the board shows no image until it does. The session host serves resolved files at `/packs/test/assets/<filename>` and `/packs/test/asset/<asset-id>`.
 
+### Authoring limits (`pnpm --dir apps/bloodtower pack:lint`)
+
+- **Text length (W-fit, warning).** Measured at 1180×820, after `[pause N]` tags and `(stage directions)` are dropped and a moment's two lines are joined: a text moment holds up to 460 characters in the waiting dialog, and a moment that shows a still, a clip or a cue holds up to 225 under the art (3 lines). Longer text is cut on the board, so shorten it here. A smaller board cuts sooner.
+- **Still shape (V-aspect, error).** Every still image and the cover is 16:9 within 0.5% (1920×1080 and 1366×768 pass, 4:3 does not), so the board never crops it. The width and height come from the PNG, JPEG or WebP header; an unreadable header is an error. A placeholder with no file is skipped.
+
 ## Audio (`audio/`)
 
 Seamless loops for the Mac board (R3-UI-60, R3-UI-64). The folder is flat `.m4a` only (AAC, 48 kHz, no subfolders, no WAV masters). The host serves each file at `/packs/test/audio/<file>`. Loops are declared in `assets.yaml` (types `ambient` and `music`); the board maps them to moods in `apps/bloodtower/src/web/lib/audio/tracks.ts`.
