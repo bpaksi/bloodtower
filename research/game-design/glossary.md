@@ -21,7 +21,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Location | A building on the board, entered through its menu: base action, sub-locations, NPCs | A story point | Bob | IDEA-006, MEC-019 |
 | Sub-location | A place inside a location (tavern, merchant, chapel) | A feature | Bob | IDEA-006 |
 | NPC | A person at a location the heroes can talk to | A companion, who joins the party | Bob | IDEA-006 |
-| Story point | Where a set piece is this turn: a building (it gains an extra option) or a space in the wild. A whole kingdom as a story point is still open | A set piece, which is what plays there | Bob, proposed | IDEA-007, IDEA-015 |
+| Story point | Where a set piece is this turn: a building (it gains an extra option) or a space in the wild, never a whole kingdom | A set piece, which is what plays there | Bob | IDEA-007, IDEA-015, DEC-021 |
 
 ## What happens
 
