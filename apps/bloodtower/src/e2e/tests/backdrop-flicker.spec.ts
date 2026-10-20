@@ -95,8 +95,15 @@ const pauseGlow = (page: Page) =>
     }
   }, GLOWS);
 
-/** The element on top at the middle of `target` is inside `target`: nothing glows over it. */
+/**
+ * The element on top at the middle of `selector` is inside it: nothing glows over it. The backdrop
+ * and glow layers are pointer-events: none, which elementFromPoint skips, so the test turns
+ * pointer events on for them first; then paint order decides the hit.
+ */
 const assertOnTopAtCentre = async (page: Page, selector: string) => {
+  const style = await page.addStyleTag({
+    content: ".bt-board-backdrop, .bt-window-glow { pointer-events: auto !important; }",
+  });
   const top = await page.evaluate((sel) => {
     const el = document.querySelector(sel);
     if (!el) return "missing";
@@ -104,6 +111,7 @@ const assertOnTopAtCentre = async (page: Page, selector: string) => {
     const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
     return hit && el.contains(hit) ? "inside" : (hit?.className?.toString() ?? "none");
   }, selector);
+  await style.evaluate((el) => (el as Element).remove());
   expect(top, `${selector} is on top at its centre`).toBe("inside");
 };
 
