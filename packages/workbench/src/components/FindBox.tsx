@@ -96,8 +96,8 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
     const plan = resolveOpen(hit.href, pathname, window.location.hash);
     if (plan.kind === "jump") {
       if (plan.rescroll) {
-        // The hash is already set, so no hashchange fires: scroll to the line again.
-        document.getElementById(plan.hash)?.scrollIntoView({ block: "center" });
+        // The hash is already set, so no hashchange fires: ask LineJump to jump again.
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
       } else window.location.hash = plan.hash;
     } else {
       // A card opens in the graph; below 1200 px that means the detail panel over it.

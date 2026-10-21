@@ -81,10 +81,11 @@ export function Panels() {
     };
     const toggle = (side: Side) => {
       if (side === "right" && !hasRight()) return;
-      const next = togglePanel(current(), side);
+      const before = current();
+      const next = togglePanel(before, side);
       apply(next, ["left", "right"]);
       // Save only the side that was toggled; an overlay opened by a pick stays unsaved.
-      saved = savedAfterToggle(saved, window.innerWidth, current(), side);
+      saved = savedAfterToggle(saved, window.innerWidth, before, side);
       writeStored(saved);
     };
 
