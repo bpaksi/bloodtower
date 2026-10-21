@@ -81,3 +81,14 @@ export function loadCards(dir: string, schema: CardSchema): { cards: Card[]; err
   }
   return { cards, errors };
 }
+
+export {
+  findGaps,
+  GAP_RULE_LABEL,
+  GAP_RULES,
+  type Gap,
+  type GapGroup,
+  type GapRule,
+  gapsPerArea,
+  groupGaps,
+} from "./gaps.ts";

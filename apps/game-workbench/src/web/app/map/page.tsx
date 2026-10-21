@@ -1,5 +1,7 @@
+import { gapsPerArea } from "@dark-tower/workbench/server";
 import Link from "next/link";
 import { buildGraph } from "../../lib/cards.ts";
+import { loadGaps } from "../../lib/gaps.ts";
 import { LAYER_LABEL, LAYERS } from "../../lib/graph-types.ts";
 import { areaProgress } from "../../lib/progress.ts";
 
@@ -7,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default function MapPage() {
   const { graph } = buildGraph();
+  const perArea = gapsPerArea(loadGaps().gaps);
   const rows = areaProgress(graph).filter((r) => r.members.some((m) => m.type !== "area"));
   const sum = (k: "decided" | "proposed" | "open") => rows.reduce((n, r) => n + r[k], 0);
   const total = sum("decided") + sum("proposed") + sum("open");
@@ -53,6 +56,10 @@ export default function MapPage() {
                 </Link>
                 <span className="area-pct">
                   {r.percent === null ? "—" : `${r.percent}% decided`}
+                  {" · "}
+                  <Link href={`/gaps#${r.area.id}`} className="area-gaps">
+                    {perArea.get(r.area.id) ?? 0} gaps
+                  </Link>
                 </span>
               </header>
               <div className="bar" aria-hidden="true">

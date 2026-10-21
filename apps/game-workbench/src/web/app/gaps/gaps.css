@@ -1,0 +1,17 @@
+.gap-group h2 {
+  margin: 1.6rem 0 0.4rem;
+  font-size: 1.1rem;
+}
+.gap-area h3 {
+  margin: 0.9rem 0 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.gap-area ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.gap-area li {
+  padding: 0.2rem 0;
+}

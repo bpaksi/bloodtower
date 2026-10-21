@@ -35,6 +35,11 @@ export function Sidebar() {
             </Link>
           </li>
           <li>
+            <Link href="/gaps" className="nav-item">
+              Gaps
+            </Link>
+          </li>
+          <li>
             <Link href="/docs" className="nav-item">
               Documents
             </Link>
