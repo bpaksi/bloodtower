@@ -235,6 +235,15 @@ describe("a lost link to the service", () => {
     expect(view.welcome?.soundFeel).toEqual([feel(7, "calm"), feel(90, "calm")]);
     // Before welcome there are no rows to update; nothing is made up.
     expect(applyServerMessage(initialView, changed(feel(1, "calm")), 0).welcome).toBeUndefined();
+    expect(view.savedSoundFeel).toEqual([]);
+
+    // A save answering this page's own record is noted by its id, even before welcome.
+    const answer = (id: string): ServerMessage => ({
+      ...changed(feel(1, "calm")),
+      correlationId: id,
+    });
+    expect(applyServerMessage(view, answer("s-1"), 0).savedSoundFeel).toEqual(["s-1"]);
+    expect(applyServerMessage(initialView, answer("s-2"), 0).savedSoundFeel).toEqual(["s-2"]);
   });
 
   it("keeps each refusal by the id it answers, so a later error does not replace it", () => {

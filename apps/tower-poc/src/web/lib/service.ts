@@ -45,6 +45,8 @@ export interface ServiceView {
    * `COMMAND_HISTORY`. A refusal arrives as `lastError` with the same id.
    */
   savedVerifications: readonly string[];
+  /** Ids of this page's `soundFeel.record`s the service has saved, newest last, at most `COMMAND_HISTORY`. */
+  savedSoundFeel: readonly string[];
   /**
    * The message of every recent \`error\` that answered a message of this page, by that message's
    * id, at most \`COMMAND_HISTORY\`. Unlike \`lastError\`, a later error does not replace it.
@@ -63,6 +65,7 @@ export const initialView: ServiceView = {
   commands: {},
   interrupted: {},
   savedVerifications: [],
+  savedSoundFeel: [],
   refusals: {},
   ownClientIds: [],
 };
@@ -100,12 +103,16 @@ export const applyServerMessage = (
     case "soundFeel.changed": {
       // The rows travel in `welcome`; this replaces one of them (D25). The Sounds page's Review
       // feel mode reads them (M6 step 6.2).
-      if (!view.welcome) return view;
+      const { correlationId } = message;
+      const savedSoundFeel = correlationId
+        ? [...view.savedSoundFeel, correlationId].slice(-COMMAND_HISTORY)
+        : view.savedSoundFeel;
+      if (!view.welcome) return { ...view, savedSoundFeel };
       const { row } = message.payload;
       const soundFeel = [...view.welcome.soundFeel.filter((r) => r.index !== row.index), row].sort(
         (a, b) => a.index - b.index,
       );
-      return { ...view, welcome: { ...view.welcome, soundFeel } };
+      return { ...view, welcome: { ...view.welcome, soundFeel }, savedSoundFeel };
     }
     case "verify.changed": {
       // The overlay travels in `welcome`; this is its newer version.
