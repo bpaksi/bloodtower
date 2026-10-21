@@ -28,9 +28,9 @@ Bob asked for the tool to be state of the art at designing knowledge graphs for 
 | AI review | A `graph-review` skill, run on demand or at the end of a design session. It looks for likely duplicates, contradictions between decisions and missing questions, and returns proposed cards. The tool makes no model calls. |
 | Requirements | Stay as `R-` rows in requirements.md (see Answers). The engine reads each row as a node. |
 
-What this means for the process:
-- The tool becomes shared and reused, so it moves from Experiment to **Full tier**. It needs an intent in Bob's words (`apps/game-workbench/intent/`, which only Bob writes) and then a spec, and this backlog becomes milestone plans. Claude drafts the spec once the intent exists.
-- Steps 5 and 6 are still approved. Step 5's `find.ts` becomes the engine's first query. The other steps are put in order again once the spec exists. The likely order: engine and schema, then the link review, then gaps and backlinks, then requirement tracing to tests, then build slices.
+Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, statuses, areas, the graph, the card lint), so the work is to make it more formal. It is split by what gets more expensive if it waits:
+- **Now** (steps 9 to 11, at Experiment tier): link rules for new links, so the backlog of loose links stops growing; a gaps report that steers design sessions; and "what points here" backlinks with a small CLI. These come after steps 5 and 6.
+- **Later**, when `apps/game` is close to starting: build slices, tracing into code and tests, the one-time review of the old links (by then smaller, since many cards will have changed or been parked), Full tier with an intent and a spec, and the MCP server. See Later.
 
 ## Done
 
@@ -43,12 +43,13 @@ What this means for the process:
 
 ## Suggested order
 
-5 (find) and 6 (small screens) first: both are small and make every session easier on the laptop. Then 3, 4, 7, 8. Steps 1 and 2 stay as planned.
+5 (find) and 6 (small screens) first: both are small and make every session easier on the laptop. Then 9, 10 and 11 (formalizing the graph, see New direction). Then 3, 4, 7, 8. Steps 1 and 2 stay as planned.
 
 ## Batches
 
 - B1: 5
 - B2: 6 (after B1 merges)
+- Proposed, once Bob approves steps 9 to 11: B3: 9; B4: 10; B5: 11. Their `Touches` overlap in `packages/workbench/src/**`, so they run one after another.
 
 5 and 6 both change the top bar in `layout.tsx` and the shared CSS, so their `Touches` overlap and they run one after the other. Each is small. Before B1 starts, `requirement-review` reads steps 5 and 6 together once.
 
@@ -167,8 +168,64 @@ Today [requirements.md](../../../research/game-design/requirements.md) holds the
 - Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `becomes` link), `packages/workbench/src/graph-types.ts`
 - Requirements stay as `R-` rows in requirements.md, with no `REQ-` cards (Bob, 2026-10-21).
 
+### Step 9: Link rules for new links (Bob, 2026-10-21)
+Today 1,200 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), and only 13 are `needs`.
+- `research/game-design/cards/README.md` gets a rules table for each link type: which card types it may join, and whether it sets build order. `needs` means "B must exist before A can be built" and is the only link that sets build order.
+- The schema in `packages/workbench/src/cards.ts` (or a new `rules.ts` beside it) checks each link against its rule, and fails when `needs` links form a cycle.
+- Old links are grandfathered. A baseline file (`research/game-design/cards/.link-baseline.json`) lists the rule breaks that exist today. The card lint fails on any break not in it, so a new link must follow the rules, while an old one waits for the link review (Later). Fixing an old link removes its line from the baseline.
+- Depends on: none
+- Touches: `research/game-design/cards/README.md`, `research/game-design/cards/.link-baseline.json`, `packages/workbench/src/**`, `apps/game-workbench/src/web/lib/**`
+- Deps change: no
+- Runs: local (it sets the rules Bob reviews)
+- Model: opus (schema design)
+- Done when:
+  - Unit tests: a link that joins types its rule does not allow fails; a `needs` cycle (A → B → A) fails; a break listed in the baseline passes; a break not in the baseline fails.
+  - The card lint passes on today's cards with the baseline in place.
+  - `pnpm check` passes.
+  - Not required: fixing old links, changing the graph's look
+
+### Step 10: Gaps report (Bob, 2026-10-21)
+- `packages/workbench/src/gaps.ts` finds gaps in the graph as pure functions. Each gap carries the card ID and the rule that found it.
+- First rules: an open question with no `answers` link to it; a mechanic with no link to a screen, UI piece or cue; a `conflicts` link where neither card is parked; a decided card with no link to an `R-` requirement; an area with no decided card.
+- A **Gaps** page (`/gaps`), grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
+- `pnpm graph gaps` prints the same list, so Claude can start a design session from it.
+- A gap is a warning, never an error. `pnpm check` does not fail on gaps.
+- Depends on: 9
+- Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`, root `package.json` (the `graph` script)
+- Deps change: yes (a root `package.json` script, no new packages; Node 24 runs the `.ts` CLI directly)
+- Runs: cloud
+- Model: sonnet
+- Done when:
+  - Unit tests on a small graph: each rule finds its gap, and does not report a card once the gap is fixed.
+  - `/gaps` lists today's gaps, and `pnpm graph gaps` prints the same count.
+  - `pnpm check` passes.
+  - Viewports: 1470 × 956
+  - Not required: an AI review (that is the `graph-review` skill, Later), rules beyond the five above
+
+### Step 11: What points here, and `pnpm graph show` (Bob, 2026-10-21)
+- The detail panel lists every link pointing at the card, grouped by verb read in reverse ("needed by", "answered by"…), next to the links it writes itself. Documents that mention the ID are already listed.
+- `pnpm graph show <ID>` prints the card, its links both ways and its sources. `pnpm graph find <words>` prints step 5's search.
+- Depends on: 5, 10 (the CLI)
+- Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`
+- Deps change: no
+- Runs: cloud
+- Model: sonnet
+- Done when:
+  - A unit test: a card that only other cards link to lists those cards under the reverse verb.
+  - `pnpm graph show MEC-012` prints its links both ways.
+  - `pnpm check` passes.
+  - Viewports: 1470 × 956
+  - Not required: an impact view across several hops (Later)
+
 ## Later
 
+When `apps/game` is close to starting (see New direction):
+- **Link review:** go through the old loose links once, turn the ones that mean build order into `needs`, bring the unclear ones to Bob in batches, and empty the baseline.
+- **Build slices:** `pnpm graph slices` and a view, using the "ready to build" rule in New direction. Ready slices go to `prd-02-write`. Builds on step 8.
+- **Tracing into code and tests:** tests cite `R-` IDs, and `pnpm check` reports each requirement as designed, built or tested.
+- **Impact:** "if this decision changes, what moves?", over several hops.
+- **`graph-review` skill:** likely duplicates, contradictions and missing questions, returned as proposed cards.
+- **Full tier:** an intent in Bob's words, a spec, and milestone plans. The MCP server wraps the CLI.
 - UI pieces gallery
 - Tower cue library: a simulated tower; playing on the real tower stays in tower-poc (as in step 7a)
 - Sketchbook
