@@ -94,7 +94,8 @@ feel:
   mood: dread          # dread | tension | wonder | triumph | loss | calm | comic | mystery | menace
   readsAs: threat      # threat | alert | reward | failure | arrival | magic | voice | transition
   strength: strong     # soft | medium | strong
-  lengthMs: 2300       # measured by Bob's Stopped press; the tower does not report when a sound ends
+  lengthMs: 2300       # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
+  answerLengthMs: 2240 # from the tower's answer to the play (as the sound starts) to the same Stopped press
   note: low growl, then a crack
 ```
 

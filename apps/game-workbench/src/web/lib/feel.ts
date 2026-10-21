@@ -32,12 +32,15 @@ export type Feel = {
   mood?: Mood;
   readsAs?: ReadsAs;
   strength?: Strength;
-  /** Measured by Bob's Stopped press; the tower does not report when a sound ends. */
+  /** From Bob's Play press to his Stopped press; the tower does not report when a sound ends. */
   lengthMs?: number;
+  /** From the tower's answer to the play (as the sound starts) to the same Stopped press. */
+  answerLengthMs?: number;
   note?: string;
 };
 
-const KEYS = ["mood", "readsAs", "strength", "lengthMs", "note"];
+const KEYS = ["mood", "readsAs", "strength", "lengthMs", "answerLengthMs", "note"];
+const LENGTHS = ["lengthMs", "answerLengthMs"];
 
 function oneOf(list: readonly string[], v: unknown): boolean {
   return typeof v === "string" && list.includes(v);
@@ -57,11 +60,11 @@ export function checkFeel(type: string, data: Record<string, unknown>): string |
     return `unknown readsAs "${String(feel.readsAs)}"`;
   if (feel.strength !== undefined && !oneOf(STRENGTHS, feel.strength))
     return `unknown strength "${String(feel.strength)}"`;
-  if (
-    feel.lengthMs !== undefined &&
-    !(Number.isInteger(feel.lengthMs) && (feel.lengthMs as number) > 0)
-  )
-    return "feel lengthMs must be a whole number above 0";
+  for (const k of LENGTHS) {
+    const v = feel[k];
+    if (v !== undefined && !(Number.isInteger(v) && (v as number) > 0))
+      return `feel ${k} must be a whole number above 0`;
+  }
   if (feel.note !== undefined && typeof feel.note !== "string") return "feel note must be text";
   return null;
 }

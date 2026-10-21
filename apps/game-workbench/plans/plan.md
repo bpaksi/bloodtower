@@ -185,14 +185,14 @@ Bob listens to each of the 113 tower sounds and records how it feels, so sounds 
 Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-poc, and the workbench shows the results. The work is split in two.
 
 **7a: Review on tower-poc's Sounds page (tower-poc work, Full tier).** This is not a workbench step. It needs an intent from Bob in `apps/tower-poc/intent/` and a step in a tower-poc milestone plan, and it follows the `tower-capability` skill's safety rules.
-- Each sound on the existing page gets **Stopped** after Play, which records the length. The tower does not report when a sound ends, so Bob's press is the measure. One press plays one sound once. Nothing plays on its own, and there is no "play all".
+- Each sound on the existing page gets **Stopped** after Play, which records two lengths from one play: `lengthMs` from the Play press and `answerLengthMs` from the tower's answer, each to the Stopped press (Bob, 2026-10-21). The tower does not report when a sound ends, so Bob's press is the measure. Built as tower-poc M6 (`apps/tower-poc/plans/M6-sound-feel.md`, spec D25). One press plays one sound once. Nothing plays on its own, and there is no "play all".
 - For each sound Bob picks one of each:
   - **Mood**: dread, tension, wonder, triumph, loss, calm, comic, mystery, menace
   - **Reads as**: threat, alert, reward, failure, arrival, magic, voice, transition
   - **Strength**: soft, medium, strong
   - a few words of his own
 - Picks are saved on the tower-poc server as Bob goes, so a review can span several sittings and survives cleared browser data (Bob, 2026-10-21). **Export** downloads `sound-feel.json`:
-  `{ "version": 1, "sounds": [{ "id": "SND-044", "index": 44, "lengthMs": 2300, "mood": "dread", "readsAs": "threat", "strength": "strong", "note": "…" }] }`.
+  `{ "version": 1, "sounds": [{ "id": "SND-044", "index": 44, "lengthMs": 2300, "answerLengthMs": 2240, "mood": "dread", "readsAs": "threat", "strength": "strong", "note": "…" }] }`.
   A length that was not measured is left out, never written as 0. `SND-NNN` is the tower index, so tower-poc builds the ID without importing workbench code.
 - Claude reads the file and writes each sound to its `SND-` card as a `feel:` block and fills the lengths in the inventory. There is no import script.
 

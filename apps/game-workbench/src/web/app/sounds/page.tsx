@@ -102,13 +102,15 @@ export default async function SoundsPage({
                 <th>Mood</th>
                 <th>Reads as</th>
                 <th>Strength</th>
-                <th>Length</th>
+                <th title="From the Play press to Stopped">Length</th>
+                <th title="From the tower's answer to Stopped">From answer</th>
                 <th>Note</th>
               </tr>
             </thead>
             <tbody>
               {g.rows.map((r) => {
                 const length = formatLength(r.feel?.lengthMs);
+                const fromAnswer = formatLength(r.feel?.answerLengthMs);
                 return (
                   <tr key={r.id} data-sound={r.id}>
                     <td>
@@ -121,6 +123,7 @@ export default async function SoundsPage({
                     <td>{r.feel?.readsAs ?? <Unavailable />}</td>
                     <td>{r.feel?.strength ?? <Unavailable />}</td>
                     <td>{length ?? <Unavailable />}</td>
+                    <td>{fromAnswer ?? <Unavailable />}</td>
                     <td>{r.feel?.note ?? ""}</td>
                   </tr>
                 );

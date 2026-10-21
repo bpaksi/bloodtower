@@ -16,7 +16,7 @@ describe("/sounds on the real cards", () => {
   it("shows unavailable, never 0, for a sound with no feel recorded", async () => {
     const html = await render();
     const row = /<tr data-sound="SND-001">(.*?)<\/tr>/.exec(html)?.[1] ?? "";
-    expect(row.match(/>unavailable</g)).toHaveLength(4);
+    expect(row.match(/>unavailable</g)).toHaveLength(5);
     expect(row).not.toMatch(/>0(\.0)?( s)?</);
   });
 
