@@ -1,7 +1,7 @@
 /**
  * Link rules: which node types each verb may join, which verbs set build order, and which must
  * not form a cycle. A rule break that is listed in the app's baseline is grandfathered; any other
- * break, a stale baseline entry or a cycle is a problem. No Node imports.
+ * break, a stale baseline entry, a duplicate link or a cycle is a problem. No Node imports.
  */
 import type { Graph } from "./graph-types.ts";
 
@@ -48,29 +48,54 @@ export function linkBreaks(graph: Graph, rules: LinkRules): string[] {
   return [...new Set(keys)].sort();
 }
 
-/** Each cycle formed by links of one verb, as the IDs around it (first ID repeated at the end). */
+/**
+ * Each group of cards that loop back on themselves through links of one verb (a strongly
+ * connected group, or a card linking to itself). IDs sorted inside a group, groups sorted by
+ * first ID, so one fix round shows every loop.
+ */
 export function cycles(graph: Graph, rel: string): string[][] {
-  const next = new Map<string, string[]>();
+  const next = new Map<string, Set<string>>();
   for (const e of graph.edges) {
-    if (e.rel === rel) next.set(e.from, [...(next.get(e.from) ?? []), e.to]);
+    if (e.rel !== rel) continue;
+    if (!next.has(e.from)) next.set(e.from, new Set());
+    next.get(e.from)?.add(e.to);
   }
-  const found: string[][] = [];
-  const done = new Set<string>();
-  const onPath: string[] = [];
+  // Tarjan's strongly connected groups.
+  const index = new Map<string, number>();
+  const low = new Map<string, number>();
+  const stack: string[] = [];
+  const onStack = new Set<string>();
+  const groups: string[][] = [];
+  let counter = 0;
   const visit = (id: string) => {
-    const at = onPath.indexOf(id);
-    if (at >= 0) {
-      found.push([...onPath.slice(at), id]);
-      return;
+    index.set(id, counter);
+    low.set(id, counter);
+    counter++;
+    stack.push(id);
+    onStack.add(id);
+    for (const to of next.get(id) ?? []) {
+      if (!index.has(to)) {
+        visit(to);
+        low.set(id, Math.min(low.get(id) ?? 0, low.get(to) ?? 0));
+      } else if (onStack.has(to)) {
+        low.set(id, Math.min(low.get(id) ?? 0, index.get(to) ?? 0));
+      }
     }
-    if (done.has(id)) return;
-    onPath.push(id);
-    for (const to of next.get(id) ?? []) visit(to);
-    onPath.pop();
-    done.add(id);
+    if (low.get(id) === index.get(id)) {
+      const group: string[] = [];
+      let top: string | undefined;
+      do {
+        top = stack.pop();
+        if (top === undefined) break;
+        onStack.delete(top);
+        group.push(top);
+      } while (top !== id);
+      const looped = group.length > 1 || next.get(id)?.has(id);
+      if (looped) groups.push(group.sort());
+    }
   };
-  for (const id of [...next.keys()].sort()) visit(id);
-  return found;
+  for (const id of [...next.keys()].sort()) if (!index.has(id)) visit(id);
+  return groups.sort((x, y) => (x[0] ?? "").localeCompare(y[0] ?? ""));
 }
 
 /**
@@ -94,8 +119,16 @@ export function linkProblems(
       .sort()
       .map((k) => `baseline entry ${k} is no longer a break; remove it from the baseline`),
   ];
+  const seen = new Set<string>();
+  for (const e of graph.edges) {
+    const key = linkKey(e.from, e.rel, e.to);
+    if (seen.has(key)) {
+      if (!problems.includes(`duplicate link ${key}`)) problems.push(`duplicate link ${key}`);
+    }
+    seen.add(key);
+  }
   for (const rel of rules.acyclic) {
-    for (const loop of cycles(graph, rel)) problems.push(`${rel} cycle: ${loop.join(" → ")}`);
+    for (const loop of cycles(graph, rel)) problems.push(`${rel} loop among: ${loop.join(", ")}`);
   }
   return problems;
 }

@@ -32,6 +32,9 @@ export type Gap = {
   detail?: string;
 };
 
+/** ID kinds that live in documents, not as cards: a conflict with one is settled by deciding. */
+const DOCUMENT_ID_KINDS = ["requirement", "asset", "engine"];
+
 const SURFACE_TYPES = ["screen", "ui", "cue"];
 const DECIDED_TYPES = ["decision", "mechanic", "screen", "ui", "cue"];
 
@@ -117,7 +120,8 @@ export function findGaps(graph: Graph): Gap[] {
     if (a?.kind !== "card" || a.status === "parked") continue;
     if (b?.kind === "card" && b.status === "parked") continue;
     // A conflict with a document ID (R-, E...) is settled once the card side is decided.
-    if (b?.kind === "ref" && a.status === "decided") continue;
+    if (b?.kind === "ref" && DOCUMENT_ID_KINDS.includes(b.idKind) && a.status === "decided")
+      continue;
     // A conflict written on both cards is one gap.
     const key = [e.from, e.to].sort().join("|");
     if (pairs.has(key)) continue;

@@ -22,10 +22,12 @@ pnpm --dir apps/game-workbench dev     # http://localhost:4797
 ## Command line
 
 ```bash
-pnpm graph gaps    # gaps in the card graph, by rule, then a line "N gaps" (same list as /gaps)
+pnpm graph gaps            # gaps in the card graph, by rule, then a line "N gaps" (same list as /gaps)
+pnpm graph show <ID>       # a card or document ID: its text, links both ways with verbs and notes, sources
+pnpm graph find <words>    # the hits the top-bar box shows (same list as GET /api/find)
 ```
 
-`pnpm graph show` and `pnpm graph find` say "not yet" until step 11. Gaps are warnings; `pnpm check` does not fail on them.
+Gaps are warnings; `pnpm check` does not fail on them.
 
 ## Where things are
 

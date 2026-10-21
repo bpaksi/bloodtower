@@ -33,7 +33,7 @@ describe("pnpm graph show", () => {
       for (const g of groups) {
         expect(part).toContain(`  ${g.verb}\n`);
         for (const l of g.links) {
-          expect(part).toContain(`    ${l.id}  `);
+          expect(part).toContain(`    ${l.id}`);
           if (l.note) expect(part).toContain(`(${l.note})`);
         }
       }
@@ -51,6 +51,19 @@ describe("pnpm graph show", () => {
     );
     expect(lonely).toBeDefined();
     expect(run("show", lonely?.id ?? "")).toContain("Points here: none");
+  });
+
+  it("a link note that is the other node's title is printed once", () => {
+    const { graph } = buildGraph();
+    const ref = Object.values(graph.nodes).find(
+      (n) => n.kind === "ref" && graph.edges.some((e) => e.to === n.id && e.note === n.title),
+    );
+    expect(ref).toBeDefined();
+    const from = graph.edges.find((e) => e.to === ref?.id && e.note === ref?.title);
+    const out = run("show", from?.from ?? "");
+    for (const line of out.split("\n")) {
+      if (line.startsWith(`    ${ref?.id}`)) expect(line).not.toContain(`(${ref?.title})`);
+    }
   });
 
   it("an unknown ID exits 1", () => {

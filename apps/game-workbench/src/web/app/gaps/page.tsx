@@ -6,6 +6,15 @@ export const dynamic = "force-dynamic";
 
 export default function GapsPage() {
   const { gaps, groups, titles } = loadGaps();
+  // The map links to /gaps#AREA-xxx: the first heading of an area keeps that id; later ones are
+  // prefixed with their rule so no id appears twice.
+  const taken = new Set<string>(groups.map((g) => g.rule));
+  const anchorFor = (rule: string, area: string | null) => {
+    if (!area) return undefined;
+    const id = taken.has(area) ? `${rule}-${area}` : area;
+    taken.add(id);
+    return id;
+  };
   return (
     <>
       <section className="page-head">
@@ -22,7 +31,7 @@ export default function GapsPage() {
           </h2>
           {g.byArea.map((a) => (
             <div key={a.area ?? "none"} className="gap-area">
-              <h3 id={a.area ? `${a.area}` : undefined}>
+              <h3 id={anchorFor(g.rule, a.area)}>
                 {a.area ? (
                   <>
                     <span className="mono muted">{a.area}</span> {titles[a.area] ?? a.area}
