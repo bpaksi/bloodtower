@@ -26,7 +26,7 @@
 ### 7.0 Chunk A on the tower (gate, Bob)
 
 - Depends on: none
-- Touches: research/tower/**
+- Touches: research/tower/**, apps/tower-poc/plans/M7-drum-sync.md
 - Runs: local
 - Done when:
   - Bob runs chunk A from the setup-slice findings on the current tower-poc, about 12 minutes, one press per step. Each run records:
@@ -39,7 +39,7 @@
 ### 7.1 Sync model (`feat/tower-poc-drum-sync-model`)
 
 - Depends on: 7.0
-- Touches: apps/tower-poc/src/protocols/**
+- Touches: apps/tower-poc/src/protocols/**, apps/tower-poc/plans/M7-drum-sync.md
 - Deps change: no
 - Runs: local
 - Model: opus
@@ -60,7 +60,7 @@
 ### 7.2a Sync state and protocol (`feat/tower-poc-drum-sync-state`)
 
 - Depends on: 7.1
-- Touches: apps/tower-poc/src/protocols/**, apps/tower-poc/src/server/**, apps/tower-poc/spec.md
+- Touches: apps/tower-poc/src/protocols/**, apps/tower-poc/src/server/**, apps/tower-poc/spec.md, apps/tower-poc/plans/M7-drum-sync.md
 - Deps change: no
 - Runs: local
 - Model: sonnet
@@ -74,7 +74,7 @@
 ### 7.2b Sync page (`feat/tower-poc-drum-sync-page`)
 
 - Depends on: 7.2a
-- Touches: apps/tower-poc/src/web/**, apps/tower-poc/src/e2e/**, apps/tower-poc/public/**
+- Touches: apps/tower-poc/src/web/**, apps/tower-poc/src/e2e/**, apps/tower-poc/public/**, apps/tower-poc/plans/M7-drum-sync.md
 - Deps change: no
 - Runs: local
 - Model: sonnet
