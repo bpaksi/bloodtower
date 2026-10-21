@@ -11,6 +11,7 @@ import {
   resolve,
   simulate,
   toConfig,
+  totals,
 } from "./game.ts";
 
 const cfg = (over: Record<string, number> = {}) => toConfig({ ...DEFAULTS, ...over });
@@ -88,5 +89,43 @@ describe("tomb rules", () => {
     expect(r.finished + r.left + r.dead).toBeCloseTo(1);
     expect(simulate("s", { ...DEFAULTS, runs: 200 })).toEqual(r);
     expect(simulate("s", { ...DEFAULTS, runs: 0 })).toBeNull();
+  });
+});
+
+describe("run summary totals", () => {
+  const sumOf = (s: ReturnType<typeof fresh>, k: "hp" | "money" | "corruption") =>
+    s.entered.reduce((a, e) => a + e.cost[k], 0);
+
+  it("counts rooms and costs paid after a left run", () => {
+    let s = fresh({ advantages: 0 });
+    s = resolve(enter(s), false);
+    s = resolve(enter(s), false);
+    s = leave(s);
+    const t = totals(s);
+    expect(s.outcome).toBe("left");
+    expect(t.rooms).toBe(2);
+    expect(t.hp).toBe(sumOf(s, "hp"));
+    expect(t.money).toBe(sumOf(s, "money"));
+    expect(t.corruption).toBe(sumOf(s, "corruption"));
+  });
+
+  it("reports a dead run with all hit points lost and the rooms entered", () => {
+    const high = Object.fromEntries(ROOMS.map((r) => [`hp_${r.id}`, 20]));
+    let s = fresh({ hp: 3, ...high, depth: 12 });
+    s = resolve(enter(s), false);
+    const t = totals(s);
+    expect(s.outcome).toBe("dead");
+    expect(t.rooms).toBe(1);
+    expect(t.hp).toBe(3);
+  });
+
+  it("reports a finished run covering every room on the route", () => {
+    let s = fresh({ hp: 1000, money: 1000, depth: 4 });
+    while (!s.outcome) s = resolve(enter(s), false);
+    const t = totals(s);
+    expect(s.outcome).toBe("finished");
+    expect(t.rooms).toBe(4);
+    expect(t.hp).toBe(sumOf(s, "hp"));
+    expect(t.corruption).toBe(sumOf(s, "corruption"));
   });
 });
