@@ -6,6 +6,7 @@ Mechanics, themes and rules ideas for the new game. Ideas that become a prototyp
 
 | File | What's in it |
 |---|---|
+| [glossary.md](glossary.md) | One meaning per word: engine, location, event, encounter, set piece, fight terms |
 | [requirements.md](requirements.md) | The single requirements index: the two chief goals, and all groups (R-ENG, R-AV, R-ASSET, R-FUN, R-SES, R-SP, R-RE, R-STA) |
 | [core-mechanics.md](core-mechanics.md) | Systems shared across stories: table setup, party, shadow clock, open world, resources |
 | [story-engine.md](story-engine.md) | Engine and story-pack design: what a story module defines (R-ENG-20–34), AV theme and script rules (R-AV) |
@@ -19,5 +20,6 @@ Mechanics, themes and rules ideas for the new game. Ideas that become a prototyp
 | [setup-wizard-and-summary.md](setup-wizard-and-summary.md) | Guided setup wizard for board and pieces, and the end-of-game summary screen |
 | [look-and-feel-harness.md](look-and-feel-harness.md) | Story-neutral screen list, layout zones, story slots and invariants |
 | [tower-effects-library.md](tower-effects-library.md) | Named tower effects built from verified capabilities, with fallbacks and funeral cue mapping |
+| [modifier-effects.md](modifier-effects.md) | What RtDT cards and virtues do, and the effect kinds a Bloodtower card could have |
 | [tower-sound-inventory.md](tower-sound-inventory.md) | The 113 sounds already on the tower, by index, so they are reused rather than recreated |
 | [playthrough-ui-notes-2026-10-17.md](playthrough-ui-notes-2026-10-17.md) | Bob's Oct 17 playthrough notes (TV + remote board, start-up dialogs, phones, menu, debug overlay) and proposed R3-UI requirements |
