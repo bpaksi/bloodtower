@@ -7,7 +7,8 @@ by: "Bob, 2026-10-20"
 links:
   - { rel: part-of, to: AREA-053 }
   - { rel: refines, to: MEC-011 }
-  - { rel: uses, to: MEC-010, note: "dungeon crawl" }
+  - { rel: uses, to: E20, note: "dungeon crawl in story-engine.md" }
+  - { rel: uses, to: AST-B09, note: "dungeon tokens" }
   - { rel: refines, to: DEC-040, note: "a plot told through set pieces" }
 sources:
   - { file: "rtdt-subsystems.md", lines: "7-24", note: "RtDT sub-games rated for reuse" }
