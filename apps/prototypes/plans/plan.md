@@ -1,6 +1,6 @@
 # Prototypes — plan
 
-**Status:** draft for Bob, 2026-10-21, revised after the requirement review the same day. Waiting on Bob's intent (`intent/0001-prototypes.md`) and plan approval. Experiment tier: `adversary-bugs` reviews each PR, and `adversary-prd` does not run. Build on a `main` that has the error rule (PR #151) and the 2026-10-21 design session merged.
+**Status:** approved by Bob (G-plan), 2026-10-21, after the requirement review the same day. Experiment tier: `adversary-bugs` reviews each PR, and `adversary-prd` does not run. Build on a `main` that has the error rule (PR #151) and the 2026-10-21 design session merged.
 
 **Goal:** one page per prototype, each answering one design question, so that the answers go back into the cards before Bloodtower builds the real thing.
 
