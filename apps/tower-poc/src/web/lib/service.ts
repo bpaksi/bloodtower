@@ -97,6 +97,16 @@ export const applyServerMessage = (
       const commands = { ...view.commands, [commandId]: stages };
       return { ...view, commands: keepLatest(commands) };
     }
+    case "soundFeel.changed": {
+      // The rows travel in `welcome`; this replaces one of them (D25). The Sounds page's Review
+      // feel mode reads them (M6 step 6.2).
+      if (!view.welcome) return view;
+      const { row } = message.payload;
+      const soundFeel = [...view.welcome.soundFeel.filter((r) => r.index !== row.index), row].sort(
+        (a, b) => a.index - b.index,
+      );
+      return { ...view, welcome: { ...view.welcome, soundFeel } };
+    }
     case "verify.changed": {
       // The overlay travels in `welcome`; this is its newer version.
       const { correlationId } = message;

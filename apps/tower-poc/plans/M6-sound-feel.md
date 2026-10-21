@@ -21,7 +21,7 @@ This reopens the POC, which closed after M3, for this one milestone. M4 and M5 s
 - `GET /api/sound-feel.json` returns the export, the format in spec §3.3. A field never recorded is left out, never written as 0 or "". Only the service's own origin, per D20.
 - The word lists live once, in the protocols package (`soundFeel.ts`).
 - Depends on: G-plan
-- Touches: `apps/tower-poc/src/protocols/**`, `apps/tower-poc/src/server/**`, `apps/tower-poc/spec.md`, `apps/tower-poc/plans/M6-sound-feel.md`
+- Touches: `apps/tower-poc/src/protocols/**`, `apps/tower-poc/src/server/**`, `apps/tower-poc/src/web/lib/service.ts` and its test (as built, see Results), `apps/tower-poc/spec.md`, `apps/tower-poc/plans/M6-sound-feel.md`
 - Deps change: no
 - Runs: local (protocol contract)
 - Model: opus (protocol and schema design)
@@ -94,3 +94,13 @@ Bob's answers (2026-10-21):
 |---|---|
 | Measure length from the tower's answer (`confirmed`) or from the Play press? | **Both**, from one Stopped press: `lengthMs` from the Play press, `answerLengthMs` from the tower's answer (Bob first chose the Play press, then asked for both). The gap between them is the send and answer time (25 to 64 ms in M1, plus the LAN). A play the service refuses or that fails measures nothing. |
 | Save each choice when made, or with a Save button per sound? | **Each choice when made**; the note on leaving the field. |
+
+## Results
+
+### 6.1 Feel record on the service (`feat/tower-poc-sound-feel-record`)
+
+- **Protocol** (`src/protocols/soundFeel.ts`): the word lists, `soundFeel.record` (index from the inventory's `soundIndexSchema`, so 1 to 113 as the data has it; each length a whole number from 1 to 60,000; a note up to 500 characters), the row, `soundFeel.changed`, and the export with `buildSoundFeelExport`. The export leaves out a field never recorded and a row with nothing left in it (every field cleared).
+- **Service**: migration 4 adds `sound_feel`; `createSoundFeel` (`src/server/soundFeel.ts`) applies a record (left out keeps, `null` clears, a note of only spaces is no note) and saves it. `welcome` carries the rows; each save goes to every client. `GET /api/sound-feel.json` answers with the export as a download (`content-disposition: attachment`), refuses another page's origin (D20) and any method but GET and HEAD. The mock tower keeps its own record, in its own database, as it does every other value.
+- **Deviation:** the web client's message handler must handle every server message type, so adding `soundFeel.changed` meant touching `src/web/lib/service.ts`: it now keeps the rows from `welcome` up to date. No UI; that is 6.2.
+- **Raw bytes:** the protocol test that lists every field a client can fill now names the three `soundFeel.record` numbers (index and the two lengths) and the note, and a new test pins the numbers' bounds. None reaches the tower.
+- **Evidence:** `pnpm check` passes. New tests: 7 in `protocols/soundFeel.test.ts`, 5 in `server/db/soundFeel.test.ts` (including a restart on a file database), 13 in `server.test.ts` ("sound feel record (D25)": two clients, a late `welcome`, nine refusals, no tower write while connected, the export with and without rows, the origin check), 1 in `web/lib/service.test.ts`.

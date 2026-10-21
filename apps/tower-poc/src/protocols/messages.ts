@@ -3,6 +3,11 @@ import { commandLifecyclePayloadSchema, commandPayloadSchema } from "./command.t
 import { connectionPayloadSchema } from "./connection.ts";
 import { envelopeSchema, PROTOCOL_VERSION } from "./envelope.ts";
 import { inventoryEntrySchema } from "./inventoryWire.ts";
+import {
+  soundFeelChangedPayloadSchema,
+  soundFeelRecordPayloadSchema,
+  soundFeelRowSchema,
+} from "./soundFeel.ts";
 import { restoreStatePayloadSchema, statePayloadSchema } from "./state.ts";
 import {
   verificationOverlaySchema,
@@ -40,6 +45,14 @@ export const verifyRecordMessageSchema = message("verify.record", verifyRecordPa
   },
 );
 
+/** `id` is required: an `error` refusing the record names it, and so does the `soundFeel.changed` it causes. */
+export const soundFeelRecordMessageSchema = message(
+  "soundFeel.record",
+  soundFeelRecordPayloadSchema,
+).extend({
+  id: z.string().min(1).max(64),
+});
+
 export const clientMessageSchema = z.discriminatedUnion("type", [
   helloMessageSchema,
   connectMessageSchema,
@@ -49,6 +62,7 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
   commandMessageSchema,
   restoreStateMessageSchema,
   verifyRecordMessageSchema,
+  soundFeelRecordMessageSchema,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
@@ -72,6 +86,8 @@ export const welcomePayloadSchema = z.strictObject({
    * (D14). The inventory's own `verification` never says `hardware-verified`; this does.
    */
   verificationOverlay: verificationOverlaySchema,
+  /** Every saved sound feel row, by index (M6, D25). */
+  soundFeel: z.array(soundFeelRowSchema),
   /** Which tower the service drives: its mock (`MOCK=1`, D8) or a real one over Bluetooth. */
   tower: z.enum(["mock", "bluetooth"]),
 });
@@ -113,6 +129,15 @@ export const commandLifecycleMessageSchema = message(
  */
 export const verifyChangedMessageSchema = message("verify.changed", verifyChangedPayloadSchema);
 
+/**
+ * Sent to every client when a sound feel is saved (D25). Its `correlationId` is the recording
+ * `soundFeel.record`'s id, so the device that recorded it knows it was saved.
+ */
+export const soundFeelChangedMessageSchema = message(
+  "soundFeel.changed",
+  soundFeelChangedPayloadSchema,
+);
+
 export const serverMessageSchema = z.discriminatedUnion("type", [
   welcomeMessageSchema,
   errorMessageSchema,
@@ -120,6 +145,7 @@ export const serverMessageSchema = z.discriminatedUnion("type", [
   stateMessageSchema,
   commandLifecycleMessageSchema,
   verifyChangedMessageSchema,
+  soundFeelChangedMessageSchema,
 ]);
 
 export type ServerMessage = z.infer<typeof serverMessageSchema>;
