@@ -1,6 +1,6 @@
 # Game workbench plan
 
-Status: backlog, 2026-10-20. Steps 5 and 6 approved by Bob on 2026-10-21 (batches B1, B2). Steps 3, 4, 7 and 8 stay proposals until Bob approves them. Tier: Experiment (one plan, one branch and PR per step).
+Status: backlog, 2026-10-20. Steps 5, 6, 9, 10 and 11 approved by Bob on 2026-10-21 (batches B1 to B5). Steps 3, 4, 7 and 8 stay proposals until Bob approves them. Tier: Experiment (one plan, one branch and PR per step).
 
 This file is the workbench's backlog. New asks for the workbench go here as a step or under Later. Design content (cards, documents) goes in `research/game-design/`, not here.
 
@@ -49,7 +49,11 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 
 - B1: 5
 - B2: 6 (after B1 merges)
-- Proposed, once Bob approves steps 9 to 11: B3: 9; B4: 10; B5: 11. Their `Touches` overlap in `packages/workbench/src/**`, so they run one after another.
+- B3: 9
+- B4: 10
+- B5: 11
+
+Steps 9, 10 and 11 were approved on 2026-10-21. Their `Touches` overlap in `packages/workbench/src/**`, so they run one after another.
 
 5 and 6 both change the top bar in `layout.tsx` and the shared CSS, so their `Touches` overlap and they run one after the other. Each is small. Before B1 starts, `requirement-review` reads steps 5 and 6 together once.
 
