@@ -19,6 +19,14 @@ pnpm --dir apps/game-workbench dev     # http://localhost:4797
 
 `pnpm --dir apps/game-workbench build && pnpm --dir apps/game-workbench start` serves a production build on the same port. Pages read `research/game-design/` on every request, so a reload shows the latest files.
 
+## Command line
+
+```bash
+pnpm graph gaps    # gaps in the card graph, by rule, then a line "N gaps" (same list as /gaps)
+```
+
+`pnpm graph show` and `pnpm graph find` say "not yet" until step 11. Gaps are warnings; `pnpm check` does not fail on them.
+
 ## Where things are
 
 The generic parts (ID schemes, markdown with chips, card parsing, graph, layout, prompt starter, focus graph, CSS) live in [`packages/workbench`](../../packages/workbench/), shared with story-workbench (decision [0002](../../research/decisions/0002-workbench-package.md)). This app holds the game design's config and pages.
@@ -32,6 +40,7 @@ The generic parts (ID schemes, markdown with chips, card parsing, graph, layout,
 | `src/web/lib/graph-types.ts` | Card types, layers and verbs |
 | `src/web/lib/prompt.ts` | The prompt starter's rules (`GAME_PROMPT`) |
 | `src/web/lib/progress.ts` | Area progress for the map |
+| `src/web/lib/gaps.ts`, `src/web/cli/graph.ts` | The gaps report (engine in `packages/workbench/src/gaps.ts`) and the `pnpm graph` entry point |
 
 A card file that does not parse is left out and listed in a banner on every page; the card lint in `pnpm check` fails on it.
 

@@ -42,7 +42,8 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 0b | Card types and ID prefixes for tower outputs (`SND-`, `GLY-`, `SEAL-`, `LGT-`, `LFX-`, `LSQ-`, `DRM-`) | #119 |
 | 5 | Find an ID or a word | #124 |
 | 6 | Works on a small screen | #128 |
-| 9 | Link rules for new links | this PR |
+| 9 | Link rules for new links | #132 |
+| 10 | Gaps report | #134 |
 
 ## Suggested order
 

@@ -13,6 +13,7 @@
     "prepare": "lefthook install",
     "check": "biome check . && pnpm check:repo && pnpm -r --if-present typecheck && pnpm -r --if-present test",
     "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
+    "graph": "node apps/game-workbench/src/web/cli/graph.ts",
     "land": "node scripts/land.mjs",
     "wt": "node scripts/wt.mjs add",
     "wt:rm": "node scripts/wt.mjs rm",
