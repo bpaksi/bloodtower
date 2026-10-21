@@ -81,6 +81,23 @@ describe("tower client against tower-poc's mock tower", () => {
     client.close();
   }, 20_000);
 
+  it("two clients each get their own outcome, never the other's", async () => {
+    const a = createTowerClient({ url, timeoutMs: 5000 });
+    const b = createTowerClient({ url, timeoutMs: 5000 });
+    await a.open();
+    await b.open();
+    expect(a.welcome?.clientId).not.toBe(b.welcome?.clientId);
+    const [good, bad] = await Promise.all([
+      a.command("sound.play", { soundIndex: 1 }),
+      b.command("sound.play", { soundIndex: "loud" }),
+    ]);
+    expect(good.ok).toBe(true);
+    expect(bad.stage).toBe("rejected");
+    expect(good.commandId).not.toBe(bad.commandId);
+    a.close();
+    b.close();
+  }, 20_000);
+
   it("reports a rejected command as an outcome, with the field named", async () => {
     const client = createTowerClient({ url, timeoutMs: 5000 });
     await client.open();

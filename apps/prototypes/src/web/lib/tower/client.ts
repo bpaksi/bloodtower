@@ -75,6 +75,8 @@ export const createTowerClient = (options: TowerClientOptions) => {
   let welcome: WelcomePayload | undefined;
   let connection: ConnectionPayload | undefined;
   let seq = 0;
+  // Ids must be unique across clients: the service reports a command by its id alone.
+  const session = Math.random().toString(36).slice(2, 10);
   const waiters = new Set<Waiter>();
 
   const failAll = (error: TowerClientError) => {
@@ -137,7 +139,7 @@ export const createTowerClient = (options: TowerClientOptions) => {
     open.send(JSON.stringify(envelope));
   };
 
-  const nextId = (prefix: string) => `${prefix}-${++seq}`;
+  const nextId = (prefix: string) => `${prefix}-${session}-${++seq}`;
   const isErrorFor = (id: string) => (m: Envelope) => m.type === "error" && m.correlationId === id;
 
   return {
@@ -217,6 +219,7 @@ export const createTowerClient = (options: TowerClientOptions) => {
           isErrorFor(id)(m) ||
           (m.type === "command.lifecycle" &&
             (m.payload as LifecyclePayload).commandId === id &&
+            (m.payload as LifecyclePayload).clientId === welcome?.clientId &&
             END_STAGES.includes((m.payload as LifecyclePayload).stage)),
         `command ${capabilityId}`,
       );
