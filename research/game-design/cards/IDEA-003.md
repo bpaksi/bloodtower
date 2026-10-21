@@ -12,3 +12,5 @@ links:
   - { rel: affects, to: MEC-001, note: "the hunter role is a moving foe, not a building" }
 ---
 "I'm thinking these are story dependent but these act as moving buildings. Probably have some game centric meaning. But if we keep them as game optional and behave like moving buildings we are good."
+
+**2026-10-21:** DEC-001 (objective, lure and hunter) is parked. The quest tokens are only lead markers, placed when an NPC reveals a lead (DEC-087). Objective and lure are no longer live uses.
