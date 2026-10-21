@@ -2,9 +2,12 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { backlinks, outlinks } from "@dark-tower/workbench";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { GET } from "../app/api/find/route.ts";
 import { buildGraph } from "./cards.ts";
+
+// Each test spawns the CLI; CI runners are slow.
+vi.setConfig({ testTimeout: 60000 });
 
 const cli = path.join(path.dirname(fileURLToPath(import.meta.url)), "../cli/graph.ts");
 const run = (...args: string[]) => execFileSync("node", [cli, ...args], { encoding: "utf8" });

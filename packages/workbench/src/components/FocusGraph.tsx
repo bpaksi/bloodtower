@@ -217,7 +217,7 @@ function LinkList(props: {
           <span className="verb">{g.verb}</span>
           <ul>
             {g.links.map((l) => (
-              <li key={`${l.id}${l.note ?? ""}`}>
+              <li key={`${l.id}|${l.note ?? ""}`}>
                 <button type="button" className="linklike" onClick={() => onPick(l.id)}>
                   <span className="mono">{l.id}</span> {graph.nodes[l.id]?.title}
                 </button>
