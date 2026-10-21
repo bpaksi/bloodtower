@@ -166,7 +166,7 @@
 
 ## Later batches (not in this plan yet)
 
-- **P-06 Ruins** (MEC-030, the riddle answered on the drums) and **P-07 Shrine** (MEC-031, the glyph puzzle). Both need the real tower, step 0b and drum sync, so they wait for tower-poc M6 (at least its 6.0 chunk A).
+- **P-06 Ruins** (MEC-030, the riddle answered on the drums) and **P-07 Shrine** (MEC-031, the glyph puzzle). Both need the real tower, step 0b and drum sync, so they wait for tower-poc M7, drum sync (at least its step 7.0, chunk A).
 - A fight prototype (MEC-024, Q-023), if the placeholder fights in P-03 to P-05 show it is needed.
 
 ## Batches
