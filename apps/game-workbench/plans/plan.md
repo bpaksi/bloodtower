@@ -8,6 +8,30 @@ This file is the workbench's backlog. New asks for the workbench go here as a st
 
 A local, read-only site over `research/game-design/`: the cards as a graph, the documents, and in time every numbered piece (screens, UI, cues, sounds, sketches). Changes go through a prompt pasted into Claude.
 
+## New direction (Bob, 2026-10-21): a knowledge-graph tool for building software
+
+Bob's goals for the tool:
+1. An easy way for Bob and Claude to work out and track a design.
+2. A format that helps Claude (a) find information, (b) find dependencies, (c) find gaps and missing requirements, and (d) organise the work into segments that can be built.
+
+Bob asked for the tool to be state of the art at designing knowledge graphs for building software. His rulings:
+
+| Question | Answer |
+|---|---|
+| Scope | Every app in this repo. One engine and one schema in `packages/`. Each app keeps its own cards folder and ID families. |
+| Trace depth | Through code and tests: idea → question → option → decision → requirement → plan step → code and tests. Tests cite `R-` IDs, and `pnpm check` reports which requirements are designed, built and tested. |
+| Storage | Markdown cards in git, as today. The engine builds an in-memory index when it loads. |
+| Editing | Claude edits through engine commands that validate before they write. The site stays read-only. Every change goes through a PR. |
+| Claude's access | A CLI first: `pnpm graph find\|show\|impact\|gaps\|slices\|add\|link\|check`. A local MCP server wraps it once the commands settle. |
+| Link rules | Strict. Each link type says which card types it joins, whether it sets build order (`needs`), and that it must not form a cycle. Claude reviews the 593 existing `refines`/`uses`/`affects` links once, turns the ones that mean build order into `needs`, and brings the unclear ones to Bob in batches. |
+| Ready to build | A slice is ready when every card in it is decided or parked, every decision has an `R-` requirement with a test idea, no open question links to it, and everything it `needs` is in a slice that is built or ready. Ready slices go to `prd-02-write`. |
+| AI review | A `graph-review` skill, run on demand or at the end of a design session. It looks for likely duplicates, contradictions between decisions and missing questions, and returns proposed cards. The tool makes no model calls. |
+| Requirements | Stay as `R-` rows in requirements.md (see Answers). The engine reads each row as a node. |
+
+What this means for the process:
+- The tool becomes shared and reused, so it moves from Experiment to **Full tier**. It needs an intent in Bob's words (`apps/game-workbench/intent/`, which only Bob writes) and then a spec, and this backlog becomes milestone plans. Claude drafts the spec once the intent exists.
+- Steps 5 and 6 are still approved. Step 5's `find.ts` becomes the engine's first query. The other steps are put in order again once the spec exists. The likely order: engine and schema, then the link review, then gaps and backlinks, then requirement tracing to tests, then build slices.
+
 ## Done
 
 | Step | What | PR |
