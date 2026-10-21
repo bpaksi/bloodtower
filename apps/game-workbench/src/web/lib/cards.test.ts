@@ -1,6 +1,9 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildGraph, loadCards, parseCard } from "./cards.ts";
+import { buildGraph, cardsDir, linkRuleProblems, loadCards, parseCard, RELS } from "./cards.ts";
 import { layout, neighbours } from "./layout.ts";
+import { GAME_LINK_RULES } from "./link-rules.ts";
 
 const card = (front: string, body = "") => `---\n${front}\n---\n${body}`;
 
@@ -49,6 +52,44 @@ describe("card files", () => {
     expect(loadCards().cards.length).toBeGreaterThan(0);
     expect(loadCards().errors).toEqual([]);
     expect(buildGraph().problems).toEqual([]);
+  });
+});
+
+describe("link rules", () => {
+  // The lint: every link follows the rules table, or is an old break listed in the baseline.
+  it("passes the real folder with the baseline, which stays small", () => {
+    expect(linkRuleProblems()).toEqual([]);
+    const baseline = JSON.parse(
+      readFileSync(path.join(cardsDir(), ".link-baseline.json"), "utf8"),
+    ) as string[];
+    expect(baseline.length).toBeLessThanOrEqual(160);
+    expect(baseline).toEqual([...baseline].sort());
+  });
+
+  it("has a rules row for every verb, in the README and in the code", () => {
+    const readme = readFileSync(path.join(cardsDir(), "README.md"), "utf8");
+    const section = readme.split("## Link rules")[1]?.split("\n## ")[0] ?? "";
+    const inReadme = [...section.matchAll(/^\| `([a-z-]+)` \|/gm)].map((m) => m[1]);
+    const verbs = Object.keys(RELS).sort();
+    expect([...inReadme].sort()).toEqual(verbs);
+    expect(Object.keys(GAME_LINK_RULES.rels).sort()).toEqual(verbs);
+  });
+
+  it("lets a new needs link between buildable things pass, and fails an odd new shape", () => {
+    const { graph } = buildGraph([
+      parseCard(
+        "MEC-901.md",
+        card("type: mechanic\ntitle: a\nlinks:\n  - { rel: needs, to: SCR-901 }"),
+      ),
+      parseCard(
+        "SCR-901.md",
+        card("type: screen\ntitle: b\nlinks:\n  - { rel: raises, to: Q-901 }"),
+      ),
+      parseCard("Q-901.md", card("type: question\ntitle: c")),
+    ]);
+    expect(linkRuleProblems(graph, [])).toEqual([
+      "link SCR-901|raises|Q-901 breaks the link rules (see the rules table in the cards README)",
+    ]);
   });
 });
 

@@ -66,6 +66,25 @@ A link is written on one card and read both ways.
 
 `to` is a card ID or an ID that already lives in a document (`E19`, `R-WIZ-5`, `AST-B08`). A link to a document ID should carry a `note`, since that ID has no card of its own.
 
+## Link rules
+
+Each verb may join only certain types. The card lint (`pnpm check`) fails a link that no rule allows. `needs` is the only verb that sets build order: "A needs B" means B must be settled or built before A. `needs` and `part-of` must not loop back on themselves.
+
+Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or more times on that day, plus the rules by meaning below. The code is `apps/game-workbench/src/web/lib/link-rules.ts`. Below, "built" means decision, option, mechanic, piece, screen, ui, cue or a tower output (sound, glyph, seal, light, light-effect, light-sequence, drum). A document ID is written `ref:<kind>`, for example `ref:requirement` for `R-WIZ-5`.
+
+| Verb | Sets build order | No loops | Allowed by meaning | Also allowed (common shapes) |
+|---|---|---|---|---|
+| `needs` | yes | yes | built or idea → built or question; question → question | — |
+| `raises` | no | no | — | decision → question; idea → question |
+| `answers` | no | no | anything → question | decision → idea; option → question |
+| `uses` | no | no | screen, ui, cue → ui, cue or a tower output | area → piece; decision → decision, idea, mechanic; glyph → drum; idea → piece; mechanic → decision, mechanic, piece; piece → mechanic; question → decision, mechanic; seal → drum |
+| `refines` | no | no | — | area → ref:asset; decision → decision, idea, mechanic, piece, ref:engine, ref:requirement; idea → decision, idea, mechanic, piece, ref:requirement; mechanic → idea, mechanic, ref:engine, ref:requirement; piece → piece, ref:engine; question → decision; screen → ref:requirement; ui → ref:requirement |
+| `affects` | no | no | — | decision → decision, mechanic, piece; idea → decision, mechanic, piece, question; question → decision, idea, mechanic, piece, question |
+| `conflicts` | no | no | anything → anything | — |
+| `part-of` | no | yes | anything → area | — |
+
+**Old links.** The 134 links that broke these rules on 2026-10-21 are listed in [`.link-baseline.json`](.link-baseline.json), one `from|rel|to` key each, and the lint lets them pass. A new link must follow the rules. When an old link is fixed or removed, delete its line: the lint also fails on an entry that is no longer a break. The link review (game-workbench plan, Later) empties the baseline. To allow a new shape, change the table here and in `link-rules.ts` in the same PR.
+
 ## Status
 
 | Status | Meaning |
