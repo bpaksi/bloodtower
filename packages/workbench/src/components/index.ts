@@ -4,5 +4,7 @@ export { FindBox } from "./FindBox.tsx";
 export { FocusGraph, type GraphPlaces } from "./FocusGraph.tsx";
 export { HistoryButtons } from "./HistoryButtons.tsx";
 export { LineJump } from "./LineJump.tsx";
+export { Panels } from "./Panels.tsx";
+export { PanelToggle } from "./PanelToggle.tsx";
 export { PromptScopes } from "./PromptScopes.tsx";
 export { PromptStarter } from "./PromptStarter.tsx";

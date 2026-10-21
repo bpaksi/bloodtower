@@ -1,4 +1,4 @@
-import { LineJump, PromptScopes } from "@dark-tower/workbench/components";
+import { LineJump, PanelToggle, PromptScopes } from "@dark-tower/workbench/components";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Chip } from "../../../components/Chip.tsx";
@@ -55,39 +55,44 @@ export default async function DocPage({ params }: { params: Promise<{ slug: stri
         <div className="prose" dangerouslySetInnerHTML={{ __html: renderMarkdown(doc.markdown) }} />
       </article>
       <aside className="rail">
-        <h2>Document</h2>
-        <dl className="rail-meta">
-          <dt>File</dt>
-          <dd className="mono">{file}</dd>
-          <dt>Status</dt>
-          <dd className={doc.status ? undefined : "unavailable"}>{doc.status ?? "unavailable"}</dd>
-          <dt>Size</dt>
-          <dd>{doc.lines} lines</dd>
-        </dl>
-        <h2>Sections</h2>
-        <ol className="toc">
-          {sections
-            .filter((s) => s.depth > 1 && s.depth <= 3)
-            .map((s) => (
-              <li key={s.anchor} className={`toc-d${s.depth}`}>
-                <a href={`#${s.anchor}`}>{s.title}</a>
-                <span className="mono muted">
-                  {s.startLine}–{s.endLine}
-                </span>
-              </li>
-            ))}
-        </ol>
-        <h2>IDs ({doc.ids.length})</h2>
-        {[...families].map(([family, ids]) => (
-          <div key={family} className="rail-family">
-            <h3>{family}</h3>
-            <div className="chips">
-              {ids.map((id) => (
-                <Chip key={id} id={id} />
+        <PanelToggle side="right" />
+        <div className="panel-body">
+          <h2>Document</h2>
+          <dl className="rail-meta">
+            <dt>File</dt>
+            <dd className="mono">{file}</dd>
+            <dt>Status</dt>
+            <dd className={doc.status ? undefined : "unavailable"}>
+              {doc.status ?? "unavailable"}
+            </dd>
+            <dt>Size</dt>
+            <dd>{doc.lines} lines</dd>
+          </dl>
+          <h2>Sections</h2>
+          <ol className="toc">
+            {sections
+              .filter((s) => s.depth > 1 && s.depth <= 3)
+              .map((s) => (
+                <li key={s.anchor} className={`toc-d${s.depth}`}>
+                  <a href={`#${s.anchor}`}>{s.title}</a>
+                  <span className="mono muted">
+                    {s.startLine}–{s.endLine}
+                  </span>
+                </li>
               ))}
+          </ol>
+          <h2>IDs ({doc.ids.length})</h2>
+          {[...families].map(([family, ids]) => (
+            <div key={family} className="rail-family">
+              <h3>{family}</h3>
+              <div className="chips">
+                {ids.map((id) => (
+                  <Chip key={id} id={id} />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </aside>
     </div>
   );

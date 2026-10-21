@@ -1,4 +1,10 @@
-import { ChipCopy, FindBox, HistoryButtons, PromptStarter } from "@dark-tower/workbench/components";
+import {
+  ChipCopy,
+  FindBox,
+  HistoryButtons,
+  Panels,
+  PromptStarter,
+} from "@dark-tower/workbench/components";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar.tsx";
@@ -46,6 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main className="content">{children}</main>
           </div>
         </div>
+        <Panels />
         <ChipCopy />
         <PromptStarter config={GAME_PROMPT} />
       </body>

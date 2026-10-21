@@ -16,6 +16,15 @@ export { extractIds, type IdScheme, idFamily, makeIdScheme } from "./ids.ts";
 export { labelPoint, layout, type Neighbour, neighbours, type Placed } from "./layout.ts";
 export { chipHtml, type LinkTarget, linkTarget, makeRenderer } from "./markdown.ts";
 export {
+  initialPanels,
+  type PanelState,
+  parseStored,
+  type Side,
+  STORAGE_KEY,
+  togglePanel,
+  WIDE_FROM,
+} from "./panels.ts";
+export {
   buildPrompt,
   MODE_LABEL,
   type PromptConfig,

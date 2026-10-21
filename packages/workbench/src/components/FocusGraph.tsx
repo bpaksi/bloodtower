@@ -6,6 +6,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Graph, GraphNode } from "../graph-types.ts";
 import { labelPoint, layout, type Neighbour } from "../layout.ts";
 import { Chip } from "./Chip.tsx";
+import { PANEL_OPEN_DETAIL } from "./Panels.tsx";
+import { PanelToggle } from "./PanelToggle.tsx";
 
 function parentDir(dir: string): string {
   return dir.split("/").slice(0, -1).join("/");
@@ -78,6 +80,8 @@ export function FocusGraph({
   const common = dense ? [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] : undefined;
 
   const go = (id: string) => {
+    // Below 1200 px a pick opens the detail panel over the graph (even on the focused card).
+    window.dispatchEvent(new Event(PANEL_OPEN_DETAIL));
     if (id === focus) return;
     window.history.pushState(null, "", `${places.graphHref}?focus=${encodeURIComponent(id)}`);
   };
@@ -214,109 +218,112 @@ function Detail(props: {
 
   return (
     <aside className="detail">
-      <div className="detail-head">
-        <Chip id={id} kind={kind} label={places.kindLabels[kind] ?? kind} />
-        <span className="muted">
-          {places.kindLabels[kind] ?? kind} ·{" "}
-          {node.kind === "card" ? node.status : "document ID, no card"}
-        </span>
-      </div>
-      {node.kind === "card" && node.layer && (
-        <p className={`layer-line layer-${node.layer}`}>
-          {places.layerLabels[node.layer] ?? node.layer}
-        </p>
-      )}
-      <h1>{node.title}</h1>
-      {node.kind === "card" && node.by && <p className="muted small">{node.by}</p>}
-      {node.kind === "card" && node.bodyHtml && (
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: rendered from our own card files
-        <div className="prose small" dangerouslySetInnerHTML={{ __html: node.bodyHtml }} />
-      )}
-
-      <div className="detail-actions">
-        <button
-          type="button"
-          className="btn-primary"
-          data-prompt={`card:${id}`}
-          data-prompt-mode="add"
-        >
-          Continue from here
-        </button>
-        <button
-          type="button"
-          className="prompt-btn"
-          data-prompt={`card:${id}`}
-          data-prompt-mode="change"
-        >
-          Change
-        </button>
-        <button
-          type="button"
-          className="prompt-btn"
-          data-prompt={`card:${id}`}
-          data-prompt-mode="ask"
-        >
-          Ask
-        </button>
-      </div>
-
-      {byVerb.size > 0 && <h2>Links</h2>}
-      {[...byVerb].map(([verb, ids]) => (
-        <div key={verb} className="detail-links">
-          <span className="verb">{verb}</span>
-          <ul>
-            {ids.map((other) => (
-              <li key={other}>
-                <button type="button" className="linklike" onClick={() => onPick(other)}>
-                  <span className="mono">{other}</span> {graph.nodes[other]?.title}
-                </button>
-              </li>
-            ))}
-          </ul>
+      <PanelToggle side="right" />
+      <div className="panel-body">
+        <div className="detail-head">
+          <Chip id={id} kind={kind} label={places.kindLabels[kind] ?? kind} />
+          <span className="muted">
+            {places.kindLabels[kind] ?? kind} ·{" "}
+            {node.kind === "card" ? node.status : "document ID, no card"}
+          </span>
         </div>
-      ))}
+        {node.kind === "card" && node.layer && (
+          <p className={`layer-line layer-${node.layer}`}>
+            {places.layerLabels[node.layer] ?? node.layer}
+          </p>
+        )}
+        <h1>{node.title}</h1>
+        {node.kind === "card" && node.by && <p className="muted small">{node.by}</p>}
+        {node.kind === "card" && node.bodyHtml && (
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: rendered from our own card files
+          <div className="prose small" dangerouslySetInnerHTML={{ __html: node.bodyHtml }} />
+        )}
 
-      {node.kind === "card" && node.sources.length > 0 && (
-        <>
-          <h2>Sources</h2>
-          <ul className="sources">
-            {node.sources.map((s) => (
-              <li key={`${s.file}${s.lines}`}>
-                {s.file.includes("/") ? (
-                  // Outside the workbench folder: it can't open it, so show the path.
-                  <span className="mono" title={`${places.sourceDir}/${s.file}`}>
-                    {s.file.replace(/^\.\.\//, `${parentDir(places.sourceDir)}/`)}
-                    {s.lines ? ` · lines ${s.lines}` : ""}
-                  </span>
-                ) : (
-                  <Link href={docHref(places, s.file, s.lines)}>
-                    {s.file}
-                    {s.lines ? ` · lines ${s.lines}` : ""}
-                  </Link>
-                )}
-                {s.note && <span className="muted"> {s.note}</span>}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {node.kind === "ref" && (
-        <>
-          <h2>Found in</h2>
-          {node.foundIn.length === 0 ? (
-            <p className="unavailable">No document names this ID directly.</p>
-          ) : (
-            <ul className="sources">
-              {node.foundIn.map((f) => (
-                <li key={f}>
-                  <Link href={docHref(places, f)}>{f}</Link>
+        <div className="detail-actions">
+          <button
+            type="button"
+            className="btn-primary"
+            data-prompt={`card:${id}`}
+            data-prompt-mode="add"
+          >
+            Continue from here
+          </button>
+          <button
+            type="button"
+            className="prompt-btn"
+            data-prompt={`card:${id}`}
+            data-prompt-mode="change"
+          >
+            Change
+          </button>
+          <button
+            type="button"
+            className="prompt-btn"
+            data-prompt={`card:${id}`}
+            data-prompt-mode="ask"
+          >
+            Ask
+          </button>
+        </div>
+
+        {byVerb.size > 0 && <h2>Links</h2>}
+        {[...byVerb].map(([verb, ids]) => (
+          <div key={verb} className="detail-links">
+            <span className="verb">{verb}</span>
+            <ul>
+              {ids.map((other) => (
+                <li key={other}>
+                  <button type="button" className="linklike" onClick={() => onPick(other)}>
+                    <span className="mono">{other}</span> {graph.nodes[other]?.title}
+                  </button>
                 </li>
               ))}
             </ul>
-          )}
-        </>
-      )}
-      {node.kind === "card" && <p className="mono muted small file">{node.file}</p>}
+          </div>
+        ))}
+
+        {node.kind === "card" && node.sources.length > 0 && (
+          <>
+            <h2>Sources</h2>
+            <ul className="sources">
+              {node.sources.map((s) => (
+                <li key={`${s.file}${s.lines}`}>
+                  {s.file.includes("/") ? (
+                    // Outside the workbench folder: it can't open it, so show the path.
+                    <span className="mono" title={`${places.sourceDir}/${s.file}`}>
+                      {s.file.replace(/^\.\.\//, `${parentDir(places.sourceDir)}/`)}
+                      {s.lines ? ` · lines ${s.lines}` : ""}
+                    </span>
+                  ) : (
+                    <Link href={docHref(places, s.file, s.lines)}>
+                      {s.file}
+                      {s.lines ? ` · lines ${s.lines}` : ""}
+                    </Link>
+                  )}
+                  {s.note && <span className="muted"> {s.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {node.kind === "ref" && (
+          <>
+            <h2>Found in</h2>
+            {node.foundIn.length === 0 ? (
+              <p className="unavailable">No document names this ID directly.</p>
+            ) : (
+              <ul className="sources">
+                {node.foundIn.map((f) => (
+                  <li key={f}>
+                    <Link href={docHref(places, f)}>{f}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+        {node.kind === "card" && <p className="mono muted small file">{node.file}</p>}
+      </div>
     </aside>
   );
 }
