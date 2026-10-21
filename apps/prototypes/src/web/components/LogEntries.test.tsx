@@ -14,6 +14,12 @@ describe("LogEntries", () => {
     expect(html).toContain("inner");
   });
 
+  it("says how many older entries were dropped", () => {
+    const html = renderToStaticMarkup(<LogEntries entries={[]} dropped={7} />);
+    expect(html).toContain("7 older entries dropped");
+    expect(html).not.toContain("No log entries");
+  });
+
   it("says so when empty", () => {
     expect(renderToStaticMarkup(<LogEntries entries={[]} />)).toContain("No log entries");
   });

@@ -59,4 +59,13 @@ describe("rng", () => {
     expect(() => rng.pick([])).toThrow();
     expect(() => rng.int(5, 3)).toThrow();
   });
+
+  it("chance throws for NaN or p outside 0..1, and accepts the ends", () => {
+    const rng = createRng("c");
+    expect(() => rng.chance(Number.NaN)).toThrow(/rng\.chance/);
+    expect(() => rng.chance(-0.1)).toThrow(/rng\.chance/);
+    expect(() => rng.chance(1.5)).toThrow(/rng\.chance/);
+    expect(rng.chance(0)).toBe(false);
+    expect(rng.chance(1)).toBe(true);
+  });
 });
