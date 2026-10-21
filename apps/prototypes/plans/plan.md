@@ -184,8 +184,5 @@
 - The tower client uses a local copy of the message types, with a drift test.
 - Step 0 is split into 0a and 0b.
 - Every batch-1 prototype gets Bob's play-through before its findings are final.
-
-## Open questions for Bob
-
-1. Should the prototypes' log go only to the console and an in-page panel that can be exported, since there is no Mac host? Recommended: yes. Decision 0003's Mac-host log is Bloodtower's.
-2. P-01 is the one TV test. Should the other prototypes be viewed on the Mac only? Recommended: yes, and on the TV only when a finding needs it.
+- Prototypes log to the console and an in-page panel that can be exported. Decision 0003's Mac-host log stays Bloodtower's.
+- P-01 is tested on the TV. The other prototypes are viewed on the Mac, and on the TV only when a finding needs it.
