@@ -7,7 +7,7 @@ import { backlinks, type LinkGroup, outlinks } from "../backlinks.ts";
 import type { Graph, GraphNode } from "../graph-types.ts";
 import { labelPoint, layout, type Neighbour } from "../layout.ts";
 import { Chip } from "./Chip.tsx";
-import { PANEL_OPEN_DETAIL } from "./Panels.tsx";
+import { PANEL_OPEN_CANCEL, PANEL_OPEN_DETAIL } from "./Panels.tsx";
 import { PanelToggle } from "./PanelToggle.tsx";
 
 function parentDir(dir: string): string {
@@ -55,6 +55,11 @@ export function FocusGraph({
   const params = useSearchParams();
   const urlFocus = params.get("focus");
   const focus = urlFocus && graph.nodes[urlFocus] ? urlFocus : initialFocus;
+  // An ID that names nothing shows no detail panel, so a pending "open it" must not wait for the next one.
+  const unknownFocus = (urlFocus !== null && !graph.nodes[urlFocus]) || !graph.nodes[focus];
+  useEffect(() => {
+    if (unknownFocus) window.dispatchEvent(new Event(PANEL_OPEN_CANCEL));
+  }, [unknownFocus]);
 
   const stage = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 900, h: 640 });

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FindHit } from "../find.ts";
-import { resolveEnter } from "../findEnter.ts";
+import { findEscape, resolveEnter, resolveOpen } from "../findEnter.ts";
 import { PANEL_OPEN_DETAIL } from "./Panels.tsx";
 
 /**
@@ -93,19 +93,25 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
   const openHit = (hit: FindHit) => {
     setOpen(false);
     input.current?.blur();
-    const [path, hash] = hit.href.split("#");
-    if (hash && path === pathname) window.location.hash = hash;
-    else {
+    const plan = resolveOpen(hit.href, pathname, window.location.hash);
+    if (plan.kind === "jump") {
+      if (plan.rescroll) {
+        // The hash is already set, so no hashchange fires: ask LineJump to jump again.
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      } else window.location.hash = plan.hash;
+    } else {
       // A card opens in the graph; below 1200 px that means the detail panel over it.
-      if (/[?&]focus=/.test(path ?? "")) window.dispatchEvent(new Event(PANEL_OPEN_DETAIL));
+      if (plan.openDetail) window.dispatchEvent(new Event(PANEL_OPEN_DETAIL));
       router.push(hit.href);
     }
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      setOpen(false);
-      input.current?.blur();
+      const act = findEscape();
+      if (act.closeList) setOpen(false);
+      if (act.preventDefault) e.preventDefault(); // the window Esc handler then leaves the overlay be
+      if (act.blur) input.current?.blur();
     } else if (e.key === "ArrowDown" && hits.length > 0) {
       e.preventDefault();
       setOpen(true);

@@ -18,3 +18,22 @@ export function resolveEnter(
   const hit = hits[active];
   return hit ? { kind: "open", hit } : { kind: "none" };
 }
+
+export type OpenPlan =
+  | { kind: "jump"; hash: string; rescroll: boolean }
+  | { kind: "navigate"; openDetail: boolean };
+
+/** How to open a hit: jump within the page (scroll again if the hash is unchanged) or navigate. */
+export function resolveOpen(href: string, pathname: string, currentHash: string): OpenPlan {
+  const [path, hash] = href.split("#");
+  if (hash && path === pathname) {
+    // An unchanged hash fires no hashchange, so the caller must scroll itself.
+    return { kind: "jump", hash, rescroll: currentHash.replace(/^#/, "") === hash };
+  }
+  return { kind: "navigate", openDetail: /[?&]focus=/.test(path ?? "") };
+}
+
+/** What Esc does in the find box: close the list and leave the box, and keep the key to itself. */
+export function findEscape(): { closeList: boolean; blur: boolean; preventDefault: boolean } {
+  return { closeList: true, blur: true, preventDefault: true };
+}

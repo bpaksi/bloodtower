@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { initialPanels, parseStored, togglePanel } from "./panels.ts";
+import {
+  escapeClosesRight,
+  initialPanels,
+  parseStored,
+  savedAfterToggle,
+  stepPending,
+  togglePanel,
+} from "./panels.ts";
 
 describe("initialPanels", () => {
   it("returns the saved choice, whatever the width", () => {
@@ -42,5 +49,63 @@ describe("parseStored", () => {
     expect(parseStored("{")).toBeNull();
     expect(parseStored('{"left":1,"right":true}')).toBeNull();
     expect(parseStored("null")).toBeNull();
+  });
+});
+
+describe("savedAfterToggle (#129)", () => {
+  it("does not persist an unsaved overlay when the other side is toggled", () => {
+    // At 1100 px a pick opened the right overlay without saving; then [ opens the left panel.
+    const current = { left: false, right: true };
+    expect(savedAfterToggle(null, 1100, current, "left")).toEqual({ left: true, right: false });
+  });
+  it("keeps a saved side the user chose earlier", () => {
+    const saved = { left: false, right: true };
+    expect(savedAfterToggle(saved, 1100, { left: false, right: true }, "left")).toEqual({
+      left: true,
+      right: true,
+    });
+  });
+});
+
+describe("escapeClosesRight (#131)", () => {
+  const base = {
+    width: 1100,
+    defaultPrevented: false,
+    graphDetail: true,
+    rightOpen: true,
+    dialogOpen: false,
+  };
+  it("closes the graph detail overlay below 1200 px", () => {
+    expect(escapeClosesRight(base)).toBe(true);
+  });
+  it("leaves the document-page rail alone", () => {
+    expect(escapeClosesRight({ ...base, graphDetail: false })).toBe(false);
+  });
+  it("does nothing at 1200 px, when closed, in a dialog or when the key was handled", () => {
+    expect(escapeClosesRight({ ...base, width: 1200 })).toBe(false);
+    expect(escapeClosesRight({ ...base, rightOpen: false })).toBe(false);
+    expect(escapeClosesRight({ ...base, dialogOpen: true })).toBe(false);
+    expect(escapeClosesRight({ ...base, defaultPrevented: true })).toBe(false);
+  });
+});
+
+describe("stepPending (#131)", () => {
+  it("waits for the toggle, then opens once", () => {
+    const a = stepPending(false, { type: "request", hasRight: false });
+    expect(a).toEqual({ pending: true, open: false });
+    expect(stepPending(a.pending, { type: "ready", hasRight: true })).toEqual({
+      pending: false,
+      open: true,
+    });
+  });
+  it("opens at once when the panel exists", () => {
+    expect(stepPending(false, { type: "request", hasRight: true })).toEqual({
+      pending: false,
+      open: true,
+    });
+  });
+  it("clears the flag when Detail gets an unknown ID", () => {
+    const a = stepPending(false, { type: "request", hasRight: false });
+    expect(stepPending(a.pending, { type: "unknown-id" })).toEqual({ pending: false, open: false });
   });
 });

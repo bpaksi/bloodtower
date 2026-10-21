@@ -92,3 +92,4 @@ export {
   gapsPerArea,
   groupGaps,
 } from "./gaps.ts";
+export { dirStamp } from "./stamp.ts";
