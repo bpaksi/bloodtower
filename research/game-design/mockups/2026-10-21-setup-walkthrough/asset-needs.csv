@@ -1,0 +1,69 @@
+step,card_ids,kind,description,size_or_length,existing_asset,status
+01 landing,SCR-002 UI-005 R3-UI-01 R3-UI-03,still,"landing painting, window glow flicker (UI-005)",16:9 1920×1080,apps/bloodtower/public/landing/hero.webp + landing/window-mask/,have
+01 landing,SCR-002 UI-005 R3-UI-01 R3-UI-03,music,landing bed under the painting,,apps/bloodtower/public/audio/signature/signature-bed.m4a,have
+02 sound,SCR-003 R3-UI-03 R3-UI-60 SCR-013 AREA-049,music,music test clip,,apps/bloodtower/public/audio/signature/motif-soft.m4a,have
+02 sound,SCR-003 R3-UI-03 R3-UI-60 SCR-013 AREA-049,ambience,ambient test clip,,packs/test/audio/startup-ambient.m4a (test pack),have
+02 sound,SCR-003 R3-UI-03 R3-UI-60 SCR-013 AREA-049,narration,voice test clip,,apps/bloodtower/public/avatars/keeper/lines/ts-keeper-001.m4a,have
+02 sound,SCR-003 R3-UI-03 R3-UI-60 SCR-013 AREA-049,ui-text,dialog frame and parchment,,apps/bloodtower/public/board/dialog-frame/,have
+03 splash,SCR-004 R-UI-1 R-UI-3 R-UI-10 R2-10 R2-11 R2-12 UI-010,still,engine title / logo forming (cold open),"16:9 overlay, transparent",,missing
+03 splash,SCR-004 R-UI-1 R-UI-3 R-UI-10 R2-10 R2-11 R2-12 UI-010,still,fortune card frame,about 3:4 card,,can-make
+03 splash,SCR-004 R-UI-1 R-UI-3 R-UI-10 R2-10 R2-11 R2-12 UI-010,sfx,"'tower awakens' stinger, 1981 homage",2–4 s,,missing
+03 splash,SCR-004 R-UI-1 R-UI-3 R-UI-10 R2-10 R2-11 R2-12 UI-010,ambience,splash ambient loop (R-UI-3),,packs/test/audio/startup-ambient.m4a (test pack only),have
+03 splash,SCR-004 R-UI-1 R-UI-3 R-UI-10 R2-10 R2-11 R2-12 UI-010,ui-text,"fortune card flavour lines, a few dozen",,,can-make
+05 connect,SCR-005 AREA-056 R-SES-2 R2-20 R2-21 R2-22 AST-T17 AREA-049,still,"the tower, silhouette with status lights",about 9:16 panel,apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png (other app; copy it),have
+05 connect,SCR-005 AREA-056 R-SES-2 R2-20 R2-21 R2-22 AST-T17 AREA-049,ui-text,"tower error causes: asleep, out of range, held by another app",,,can-make
+06 calibrate,SCR-005 R-WIZ-9 AST-T10 R-UI-10,still,'the castle stirs' loop image,16:9 1920×1080,,missing
+06 calibrate,SCR-005 R-WIZ-9 AST-T10 R-UI-10,ambience,'castle stirs' app audio under calibration,loop ≥ 25 s,,missing
+06 calibrate,SCR-005 R-WIZ-9 AST-T10 R-UI-10,ui-text,fortune card lines (shared pool),,,can-make
+07 volume,SCR-006 SND-058 R-DEV-5,tower-sound,"SND-058 Dungeon Complete at volume 0, 1, 2",,tower sound #58 (ultimatedarktower 7.1.2),have
+08 pick,SCR-007 UI-016 R-UI-2 R-UI-9 spec D25 spec D28 DEC-047,still,pack cover: The Count of Vellmoor,16:9,packs/dracula/assets/cover.png,have
+08 pick,SCR-007 UI-016 R-UI-2 R-UI-9 spec D25 spec D28 DEC-047,still,pack cover: Proving ground,16:9,packs/test/assets/cover.png,have
+08 pick,SCR-007 UI-016 R-UI-2 R-UI-9 spec D25 spec D28 DEC-047,still,pack cover: next story (none yet),16:9,,missing
+08 pick,SCR-007 UI-016 R-UI-2 R-UI-9 spec D25 spec D28 DEC-047,music,per-story four-note motif when its door is focused (R-UI-9),2–4 s,,missing
+09 settings,SCR-008 DEC-050 DEC-059 R2-50 spec D29,ui-text,one line per length and difficulty saying what it changes,,,can-make
+10 notplayable,SCR-009 spec D27,still,pack cover: The Count of Vellmoor,16:9,packs/dracula/assets/cover.png,have
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,portrait,Hero A,"square, medallion",stand-in: packs/test/assets/por-alpha.png,have
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,portrait,Hero B,"square, medallion",stand-in: packs/test/assets/por-beta.png,have
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,portrait,Hero C,"square, medallion",stand-in: packs/test/assets/por-gamma.png,have
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,portrait,Hero D,"square, medallion",stand-in: packs/test/assets/por-delta.png,have
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,portrait,Hero E,"square, medallion",,missing
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,portrait,Hero F,"square, medallion",,missing
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,ui-text,six hero names and one-line pitches (roles settled by DEC-100),,,missing
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,ui-text,"attribute values per hero: Might, Stealth, Magic, Wits (DEC-101)",,,missing
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,narration,"voiced intro line per hero on claim (R-UI-7), 6 lines",3–6 s each,,can-make
+11 party,SCR-010 DEC-045 DEC-098 DEC-099 DEC-100 DEC-101 Q-030 UI-010 UI-012 R2-30 R2-31 spec D31 R3-UI-51,sfx,join flourish when a hero is claimed,< 1 s,,missing
+12 components,SCR-011 SCR-001 R-WIZ-3 R-WIZ-5 DEC-039 spec D31,still,components illustration: in use vs. back in the box,16:9 panel 1280×720,,missing
+12 components,SCR-011 SCR-001 R-WIZ-3 R-WIZ-5 DEC-039 spec D31,dialog,components step text,,,can-make
+13 board,SCR-011 R-WIZ-4 packs/test/pack.yaml,still,"board diagram: four kingdoms, tower in the centre (ill.setup-board)",16:9 panel 1280×720,,missing
+14 orient,AREA-056 MEC-017 IDEA-025 IDEA-005 MEC-016 AREA-036 LGT-005 LFX-002,still,"top-down tower on the board, one lit side, four kingdom labels",square 1080×1080,,can-make
+14 orient,AREA-056 MEC-017 IDEA-025 IDEA-005 MEC-016 AREA-036 LGT-005 LFX-002,tower-light,"one side's doorway light, effect On",,LGT-005..008 with LFX-002 (library),have
+14 orient,AREA-056 MEC-017 IDEA-025 IDEA-005 MEC-016 AREA-036 LGT-005 LFX-002,ui-text,kingdom names as the story renames them,,,can-make
+15 glyphs,IDEA-025 MEC-017 Q-033 AREA-033 GLY-001 GLY-002 GLY-003 GLY-004 GLY-005 AREA-036,still,"drum diagram: three drums, lit doorway, expected glyph",square 1080×1080,,can-make
+15 glyphs,IDEA-025 MEC-017 Q-033 AREA-033 GLY-001 GLY-002 GLY-003 GLY-004 GLY-005 AREA-036,still,glyph icon: Cleanse (GLY-001),"square, 5 icons",,can-make
+15 glyphs,IDEA-025 MEC-017 Q-033 AREA-033 GLY-001 GLY-002 GLY-003 GLY-004 GLY-005 AREA-036,tower-light,"one doorway per drum ring, in turn",,LGT-001..012 (library),have
+15 glyphs,IDEA-025 MEC-017 Q-033 AREA-033 GLY-001 GLY-002 GLY-003 GLY-004 GLY-005 AREA-036,tower-sound,"small reveal on each match (SND-099 Tower Glyph, not on a card)",,tower sound #99,have
+16 seals,MEC-017 MEC-018 R-WIZ-9 Q-032 AREA-011 AST-T13,still,"tower with seals in place, skulls going in the top",16:9 panel 1280×720,,missing
+17 heroes,SCR-011 DEC-031 DEC-035 MEC-018 packs/test/pack.yaml,still,board diagram with the start building highlighted,16:9 panel 1280×720,,missing
+18 purse,IDEA-010 Q-022 OPT-006 OPT-007 OPT-008 UI-001 DEC-059,still,coin purse / wheel illustration,square 720×720,,missing
+18 purse,IDEA-010 Q-022 OPT-006 OPT-007 OPT-008 UI-001 DEC-059,tower-light,"light chase round the tower, slowing to a stop (OPT-007)",,,can-make
+18 purse,IDEA-010 Q-022 OPT-006 OPT-007 OPT-008 UI-001 DEC-059,sfx,coin sound on the stop,< 1 s,,missing
+19 decks,SCR-011 DEC-067 Q-034 DEC-001 Q-002 DEC-087 packs/test/pack.yaml,still,tokens beside the board,16:9 panel 1280×720,,missing
+20 confirm,MEC-018 AREA-056 R-WIZ-5 DEC-047,still,confirm picture: tower facing,4:3 thumb 480×360,,can-make
+20 confirm,MEC-018 AREA-056 R-WIZ-5 DEC-047,still,confirm picture: glyphs,4:3 thumb,,can-make
+20 confirm,MEC-018 AREA-056 R-WIZ-5 DEC-047,still,confirm picture: seals and skulls,4:3 thumb,,can-make
+21 begin,SCR-012 R2-03 R2-52 R-WIZ-5 R-WIZ-9 UI-014,tower-sound,SND-095 Game Start on Begin (proposed),,tower sound #95,have
+21 begin,SCR-012 R2-03 R2-52 R-WIZ-5 R-WIZ-9 UI-014,tower-light,"story idle effect, e.g. Breathe on the base lights (proposed)",,LFX-003 + LGT-017..024 (library),have
+22 opening,DEC-077 DEC-040 UI-002 UI-003 R3-UI-31 R3-UI-32 R3-UI-33b R3-UI-60,still,"opening scene, uncropped (packs/test fx-hall stands in)",16:9 1920×1080,packs/test/assets/fx-hall.png (test pack),have
+22 opening,DEC-077 DEC-040 UI-002 UI-003 R3-UI-31 R3-UI-32 R3-UI-33b R3-UI-60,portrait,"narrator talking avatar, 8 mouth shapes",square 1024 + mouths,apps/bloodtower/public/avatars/keeper/ (Keeper as stand-in),have
+22 opening,DEC-077 DEC-040 UI-002 UI-003 R3-UI-31 R3-UI-32 R3-UI-33b R3-UI-60,narration,"opening narration, story voice (TTS)",20–30 s,,can-make
+22 opening,DEC-077 DEC-040 UI-002 UI-003 R3-UI-31 R3-UI-32 R3-UI-33b R3-UI-60,music,story theme under the opening,,packs/test/audio/night1-ambient.m4a (test pack),have
+23 roll,DEC-077 DEC-079 DEC-102 DEC-034 Q-043 AREA-019 AREA-058 MEC-002 AREA-062 R2-60,still,roll visual: die / dial / hourglass,square 720×720,,missing
+23 roll,DEC-077 DEC-079 DEC-102 DEC-034 Q-043 AREA-019 AREA-058 MEC-002 AREA-062 R2-60,sfx,roll sound on the board,< 1.5 s,,missing
+24 loop,SCR-014 DEC-057 UI-019 UI-011 UI-012 UI-013 UI-014 UI-001 DEC-031 DEC-035 DEC-078 R3-UI-53,portrait,Hero A,square,stand-in: packs/test/assets/por-alpha.png,have
+24 loop,SCR-014 DEC-057 UI-019 UI-011 UI-012 UI-013 UI-014 UI-001 DEC-031 DEC-035 DEC-078 R3-UI-53,portrait,Hero B,square,stand-in: packs/test/assets/por-beta.png,have
+24 loop,SCR-014 DEC-057 UI-019 UI-011 UI-012 UI-013 UI-014 UI-001 DEC-031 DEC-035 DEC-078 R3-UI-53,portrait,Hero C,square,stand-in: packs/test/assets/por-gamma.png,have
+24 loop,SCR-014 DEC-057 UI-019 UI-011 UI-012 UI-013 UI-014 UI-001 DEC-031 DEC-035 DEC-078 R3-UI-53,still,"iPad board map: spaces within 5 moves lit, tap where the figures now stand","4:3 vector, 1024×560 pt",,missing
+24 loop,SCR-014 DEC-057 UI-019 UI-011 UI-012 UI-013 UI-014 UI-001 DEC-031 DEC-035 DEC-078 R3-UI-53,ambience,day ambient bed during play,,packs/test/audio/night1-ambient.m4a (test pack),have
+25 move,DEC-035 DEC-078 MEC-004 MEC-019 DEC-080 DEC-017 IDEA-028 Q-024,still,village establishing shot (building type art),16:9 1280×720,,missing
+25 move,DEC-035 DEC-078 MEC-004 MEC-019 DEC-080 DEC-017 IDEA-028 Q-024,ui-text,village menu names (story renames them),,,can-make
+25 move,DEC-035 DEC-078 MEC-004 MEC-019 DEC-080 DEC-017 IDEA-028 Q-024,ambience,village ambience,loop 60 s,,missing

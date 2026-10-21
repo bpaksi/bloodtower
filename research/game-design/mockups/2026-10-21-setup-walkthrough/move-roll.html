@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Move Roll Simulator</title>
+<!--
+  Design tool for DEC-102 / Q-043: a group's moves are a seeded roll, +1 per helping virtue,
+  -1 per corruption, never below a floor. Moves pay for walking and building actions (DEC-078).
+  Self-contained: open in a browser. Seeded RNG (mulberry32), 10,000 trials per run. 2026-10-21.
+-->
+<style>
+:root {
+  --void: #0b0806; --soot: #1a1310; --umber: #3b2a1e; --parch: #e9d9b4; --parch-dk: #c9b182;
+  --vellum: #8a6f47; --candle: #f5c451; --blood: #8e1b1b; --bone: #f3ead2; --verd: #4f7a6a;
+  --serif: "Cormorant Garamond", "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --label: "IM Fell English SC", "Cormorant SC", "Iowan Old Style", Georgia, serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--void); color: var(--bone); font-family: var(--serif); font-size: 17px; }
+main { max-width: 1180px; overflow-x: hidden; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { font-weight: 600; font-size: 30px; margin: 0; }
+.kick { font-family: var(--label); letter-spacing: .14em; color: var(--blood); font-size: 13px; }
+p.lead { color: var(--parch-dk); margin: 6px 0 16px; line-height: 1.45; max-width: 860px; }
+.ids code { font-size: 12px; border: 1px solid var(--umber); padding: 1px 5px; color: var(--parch-dk); background: #140e0b; }
+.grid { display: grid; grid-template-columns: 340px 1fr; gap: 18px; align-items: start; }
+.box { background: var(--soot); border: 1px solid var(--umber); padding: 14px 16px; }
+.box h2 { font-family: var(--label); font-weight: normal; letter-spacing: .14em; font-size: 13px; color: var(--parch-dk); margin: 0 0 10px; }
+label { display: grid; grid-template-columns: 1fr 120px; align-items: center; gap: 8px; margin: 8px 0; }
+label small { display: block; color: var(--vellum); font-size: 13px; }
+input, select { font: inherit; font-size: 16px; background: #0f0a08; color: var(--bone); border: 1px solid var(--vellum); padding: 6px 8px; width: 100%; min-height: 40px; }
+input:focus, select:focus { outline: 2px solid var(--candle); outline-offset: 1px; }
+.presets { display: grid; gap: 6px; margin-bottom: 8px; }
+.presets button { text-align: left; font: inherit; font-size: 15px; background: #241a14; color: var(--bone); border: 1px solid var(--umber); padding: 8px 10px; cursor: pointer; min-height: 44px; }
+.presets button:hover { border-color: var(--candle); }
+.presets button.on { border-color: var(--candle); background: #3a2a12; }
+.presets button small { display: block; color: var(--parch-dk); font-size: 13px; }
+.err { color: #ff9b9b; font-size: 14px; min-height: 18px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.stat { background: #120d0a; border: 1px solid var(--umber); padding: 10px 12px; }
+.stat .v { font-size: 32px; font-weight: 700; color: var(--candle); line-height: 1.1; }
+.stat .k { font-family: var(--label); font-size: 12px; letter-spacing: .1em; color: var(--parch-dk); }
+.stat .d { font-size: 13px; color: var(--vellum); }
+svg text { font-family: var(--serif); fill: var(--bone); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--umber); padding: 6px 8px; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { font-family: var(--label); font-weight: normal; letter-spacing: .08em; color: var(--parch-dk); font-size: 12px; }
+tr.on td { color: var(--candle); }
+.note { color: var(--vellum); font-size: 14px; line-height: 1.45; }
+.grid > * { min-width: 0; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } table { font-size: 13px; } th, td { padding: 5px 4px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="kick">DESIGN TOOL · DEC-102 · Q-043 · 2026-10-21</div>
+  <h1>Move roll simulator</h1>
+  <p class="lead">A group rolls its moves (seeded), adds 1 for each virtue that helps movement, takes 1 away for each corruption, and never goes below a floor (DEC-102). Moves pay for walking and for each building action alike, 1 each (DEC-078), so a low total can strand a group in a village. The dice, the floor and which virtues help are the numbers still open.
+  <span class="ids"><code>DEC-102</code> <code>DEC-079</code> <code>DEC-078</code> <code>DEC-034</code> <code>Q-043</code> <code>MEC-002</code> <code>AREA-058</code></span></p>
+
+  <div class="grid">
+    <div class="box">
+      <h2>PRESETS (DICE AND FLOOR ONLY)</h2>
+      <div class="presets" id="presets"></div>
+      <h2 style="margin-top:14px">ROLL</h2>
+      <label>Dice<small>e.g. 1d6, 2d4, 1d4+2, d8-1, 3</small><input id="dice" value="1d6" autocomplete="off" spellcheck="false"></label>
+      <div class="err" id="err"></div>
+      <label>Floor<small>never below this</small><input id="floor" type="number" min="0" max="20" value="2"></label>
+      <label>Cap<small>0 = no cap</small><input id="cap" type="number" min="0" max="40" value="0"></label>
+      <h2 style="margin-top:14px">MODIFIERS</h2>
+      <label>Helping virtues<small>count in the group</small><input id="nv" type="number" min="0" max="12" value="0"></label>
+      <label>Shift per virtue<small>DEC-102: +1</small><input id="sv" type="number" min="0" max="5" step="1" value="1"></label>
+      <label>Corruptions<small>count in the group</small><input id="nc" type="number" min="0" max="12" value="0"></label>
+      <label>Shift per corruption<small>DEC-102: −1 (enter 1)</small><input id="sc" type="number" min="0" max="5" step="1" value="1"></label>
+      <h2 style="margin-top:14px">TARGET</h2>
+      <label>Distance in spaces<input id="dist" type="number" min="1" max="60" value="6"></label>
+      <label>Building actions on the way<small>1 move each (DEC-078)</small><input id="acts" type="number" min="0" max="20" value="0"></label>
+      <label>Seed<input id="seed" type="number" min="1" value="20261021"></label>
+      <p class="note">10,000 trials per run, mulberry32 seeded, so the same inputs always give the same numbers. Virtue and corruption counts are held steady across turns.</p>
+    </div>
+
+    <div>
+      <div class="stats" id="stats"></div>
+      <div class="box"><h2>MOVES PER TURN (10,000 TURNS)</h2><div id="chart"></div>
+        <p class="note">Bars: share of turns with that many moves. Red bar: the floor. Candle line: the 3 moves Bob's village example needs (2 to walk in, 1 for the tavern, DEC-078).</p></div>
+      <div class="box" style="margin-top:14px"><h2>EVERY PRESET WITH THESE MODIFIERS AND THIS TARGET</h2><div id="compare" style="overflow-x:auto"></div></div>
+      <div class="box" style="margin-top:14px"><h2>WHERE THE PRESETS COME FROM</h2>
+        <ul class="note" id="sources"></ul></div>
+    </div>
+  </div>
+</main>
+<script>
+"use strict";
+const PRESETS = [
+  { name: "1d6, floor 2", dice: "1d6", floor: 2, why: "DEC-102 shape with a plain six-sided roll (DEC-034's 'seeded roll each turn'); floor 2 keeps one walk plus one action." },
+  { name: "2d4, floor 2", dice: "2d4", floor: 2, why: "Same range as 1d6+1 but bunched in the middle: fewer stranded turns and fewer huge ones." },
+  { name: "1d4+2, floor 3", dice: "1d4+2", floor: 3, why: "Narrow 3–6, centred near Bob's 5-move example (DEC-078); the floor of 3 always covers 'walk 2 into a village, 1 for the tavern'." },
+  { name: "Reference: flat 3, floor 0", dice: "3", floor: 0, why: "Base RtDT move value (MEC-002, parked). The value 3 is from memory of the hero boards and is not recorded in the repo; check a hero board (AST-B16)." },
+];
+
+// ---------- dice ----------
+function parseDice(src) {
+  const s = src.replace(/\s+/g, "").toLowerCase();
+  if (!s) throw new Error("Enter a dice expression.");
+  if (!/^[+-]?(\d*d\d+|\d+)([+-](\d*d\d+|\d+))*$/.test(s)) throw new Error("Use terms like 1d6, 2d4, d8 or 3 joined by + or -.");
+  const terms = [];
+  for (const m of s.matchAll(/([+-]?)(\d*)d(\d+)|([+-]?)(\d+)/g)) {
+    if (m[3] !== undefined) {
+      const n = m[2] === "" ? 1 : Number(m[2]), sides = Number(m[3]);
+      if (n < 1 || n > 20 || sides < 2 || sides > 100) throw new Error("Dice: 1 to 20 dice of 2 to 100 sides.");
+      terms.push({ sign: m[1] === "-" ? -1 : 1, n, sides });
+    } else if (m[5] !== undefined) {
+      terms.push({ sign: m[4] === "-" ? -1 : 1, k: Number(m[5]) });
+    }
+  }
+  return terms;
+}
+function mulberry32(a) {
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function rollOnce(terms, rnd) {
+  let v = 0;
+  for (const t of terms) {
+    if (t.k !== undefined) v += t.sign * t.k;
+    else for (let i = 0; i < t.n; i++) v += t.sign * (1 + Math.floor(rnd() * t.sides));
+  }
+  return v;
+}
+
+// ---------- simulate ----------
+const TRIALS = 10000;
+function simulate(p) {
+  const terms = parseDice(p.dice);
+  const rnd = mulberry32(p.seed >>> 0 || 1);
+  const shift = p.nv * p.sv - p.nc * p.sc;
+  const need = p.dist + p.acts;
+  const counts = new Map();
+  let sum = 0, atFloor = 0, floorSaved = 0, ge3 = 0;
+  const reach = [0, 0, 0];
+  const turn = () => {
+    const raw = rollOnce(terms, rnd) + shift;
+    let v = Math.max(p.floor, raw);
+    if (p.cap > 0) v = Math.min(v, p.cap);
+    return { raw, v };
+  };
+  for (let i = 0; i < TRIALS; i++) {
+    const a = turn();
+    counts.set(a.v, (counts.get(a.v) || 0) + 1);
+    sum += a.v;
+    if (a.v === p.floor) atFloor++;
+    if (a.raw < p.floor) floorSaved++;
+    if (a.v >= 3) ge3++;
+    // reach within 1, 2, 3 turns: first turn is this one, then two more independent turns
+    let tot = a.v;
+    if (tot >= need) { reach[0]++; reach[1]++; reach[2]++; continue; }
+    tot += turn().v;
+    if (tot >= need) { reach[1]++; reach[2]++; continue; }
+    tot += turn().v;
+    if (tot >= need) reach[2]++;
+  }
+  return { counts, mean: sum / TRIALS, atFloor: atFloor / TRIALS, floorSaved: floorSaved / TRIALS, ge3: ge3 / TRIALS, reach: reach.map((r) => r / TRIALS), need, shift };
+}
+
+// ---------- UI ----------
+const $ = (id) => document.getElementById(id);
+const pct = (x) => (x * 100).toFixed(1) + "%";
+const fields = ["dice", "floor", "cap", "nv", "sv", "nc", "sc", "dist", "acts", "seed"];
+function read() {
+  const n = (id) => Math.max(0, Math.floor(Number($(id).value) || 0));
+  return { dice: $("dice").value, floor: n("floor"), cap: n("cap"), nv: n("nv"), sv: n("sv"), nc: n("nc"), sc: n("sc"), dist: Math.max(1, n("dist")), acts: n("acts"), seed: Math.max(1, n("seed")) };
+}
+function renderPresets(p) {
+  $("presets").innerHTML = "";
+  PRESETS.forEach((x) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = x.dice.replace(/\s/g, "") === p.dice.replace(/\s/g, "") && x.floor === p.floor ? "on" : "";
+    b.innerHTML = `${x.name}<small>${x.why.split(":")[0].split(".")[0]}</small>`;
+    b.addEventListener("click", () => { $("dice").value = x.dice; $("floor").value = x.floor; run(); });
+    $("presets").appendChild(b);
+  });
+  $("sources").innerHTML = PRESETS.map((x) => `<li><b>${x.name}.</b> ${x.why}</li>`).join("");
+}
+function chart(r, p) {
+  const keys = [...r.counts.keys()].sort((a, b) => a - b);
+  const lo = Math.min(keys[0], p.floor), hi = Math.max(keys[keys.length - 1], 3);
+  const xs = []; for (let v = lo; v <= hi; v++) xs.push(v);
+  const max = Math.max(...xs.map((v) => r.counts.get(v) || 0)) / TRIALS;
+  const W = 760, H = 260, L = 44, B = 34, T = 14, bw = (W - L - 10) / xs.length;
+  let g = "";
+  for (let i = 0; i <= 4; i++) {
+    const y = T + (H - T - B) * (1 - i / 4), val = (max * i) / 4;
+    g += `<line x1="${L}" x2="${W - 6}" y1="${y}" y2="${y}" stroke="#3b2a1e"/><text x="${L - 6}" y="${y + 4}" font-size="12" text-anchor="end">${(val * 100).toFixed(0)}%</text>`;
+  }
+  xs.forEach((v, i) => {
+    const f = (r.counts.get(v) || 0) / TRIALS, h = max ? ((H - T - B) * f) / max : 0;
+    const x = L + i * bw + 3, y = H - B - h;
+    const fill = v === p.floor ? "#c0392b" : "#c9b182";
+    g += `<rect x="${x}" y="${y}" width="${Math.max(1, bw - 6)}" height="${h}" fill="${fill}"><title>${v} moves: ${pct(f)}</title></rect>`;
+    g += `<text x="${x + (bw - 6) / 2}" y="${H - B + 16}" font-size="13" text-anchor="middle">${v}</text>`;
+    if (f > 0 && bw > 30) g += `<text x="${x + (bw - 6) / 2}" y="${y - 4}" font-size="11" text-anchor="middle" fill="#c9b182">${(f * 100).toFixed(1)}</text>`;
+  });
+  const i3 = xs.indexOf(3);
+  if (i3 >= 0) { const x3 = L + i3 * bw; g += `<line x1="${x3}" x2="${x3}" y1="${T}" y2="${H - B}" stroke="#f5c451" stroke-dasharray="5 4"/><text x="${x3 + 4}" y="${T + 10}" font-size="12" fill="#f5c451">3: village + tavern</text>`; }
+  g += `<text x="${(W + L) / 2}" y="${H - 4}" font-size="13" text-anchor="middle" fill="#8a6f47">moves this turn</text>`;
+  $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Distribution of moves per turn">${g}</svg>`;
+}
+function stats(r, p) {
+  const s = [
+    ["MEAN MOVES", r.mean.toFixed(2), `shift ${r.shift >= 0 ? "+" : ""}${r.shift} from modifiers`],
+    ["ONLY THE FLOOR", pct(r.atFloor), `ends on exactly ${p.floor}; floor saved ${pct(r.floorSaved)}`],
+    ["AT LEAST 3 MOVES", pct(r.ge3), "walk 2 into a village + 1 tavern"],
+    [`REACH ${r.need} IN 1 TURN`, pct(r.reach[0]), `${p.dist} spaces + ${p.acts} actions`],
+    ["WITHIN 2 TURNS", pct(r.reach[1]), ""],
+    ["WITHIN 3 TURNS", pct(r.reach[2]), ""],
+  ];
+  $("stats").innerHTML = s.map(([k, v, d]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+}
+function compare(p) {
+  const rows = PRESETS.map((x) => {
+    const r = simulate({ ...p, dice: x.dice, floor: x.floor });
+    const on = x.dice === p.dice.replace(/\s/g, "") && x.floor === p.floor;
+    return `<tr class="${on ? "on" : ""}"><td>${x.name}</td><td>${r.mean.toFixed(2)}</td><td>${pct(r.atFloor)}</td><td>${pct(r.ge3)}</td><td>${pct(r.reach[0])}</td><td>${pct(r.reach[1])}</td><td>${pct(r.reach[2])}</td></tr>`;
+  }).join("");
+  $("compare").innerHTML = `<table><thead><tr><th>Preset</th><th>Mean</th><th>Only floor</th><th>≥ 3 moves</th><th>Reach 1 turn</th><th>2 turns</th><th>3 turns</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function run() {
+  const p = read();
+  try {
+    parseDice(p.dice);
+    $("err").textContent = "";
+  } catch (e) {
+    $("err").textContent = e.message;
+    return;
+  }
+  const r = simulate(p);
+  renderPresets(p);
+  stats(r, p);
+  chart(r, p);
+  compare(p);
+  window.LAST = { params: p, result: { ...r, counts: Object.fromEntries(r.counts) } };
+}
+for (const id of fields) $(id).addEventListener("input", run);
+run();
+</script>
+</body>
+</html>
