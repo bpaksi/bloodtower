@@ -5,7 +5,7 @@
 | Purpose | A local, read-only website that shows the story-neutral Game Design Document in `research/game-design/`, and later its sketches, POC images, digital UI pieces and tower cues. Every piece has a stable kind-prefixed ID (`SCR-`, `UI-`, `CUE-`, `SND-`, `MEC-`, `IDEA-`, `SK-`, `EX-`, `Q-`). |
 | Phase | Design |
 | SDLC tier | Experiment (self-merge, no adversaries) |
-| Status | Step 0: shell and first page, built ahead of the intent at Bob's request (2026-10-19). Intent `intent/0001-game-workbench.md` still to be written by Bob. |
+| Status | Steps 0, 0a, 0b done; backlog in `plans/plan.md`. Built ahead of the intent at Bob's request (2026-10-19). Intent `intent/0001-game-workbench.md` still to be written by Bob. |
 | Disposable? | Yes. The content lives in `research/game-design/`; this app only displays it. |
 
 Edits are made by asking Claude to change files in `research/game-design/`. The site never writes.
@@ -37,4 +37,4 @@ A card file that does not parse is left out and listed in a banner on every page
 
 ## Plan
 
-Step 0 (this): shell, documents view, prompt starter and the focus graph over cards (seeded with Bob's quest-token thread). Step 1: reorganise `research/game-design/` (chapters, catalogs, visuals, all pieces numbered). Step 2: the full GDD browser (`/id/<ID>` pages, backlinks, search, live refresh, ID lint in `pnpm check`). Added during Bob's first session (2026-10-20): back and forward buttons in the top bar (done). Asked for next: a "this session" view listing the cards added or changed against `main`, and live refresh brought forward from Step 2. Later: UI pieces gallery, tower cue library (simulated tower, optional play on the tower through tower-poc), sketchbook, flows.
+The backlog and the steps are in [plans/plan.md](plans/plan.md). Asks for the workbench go there.
