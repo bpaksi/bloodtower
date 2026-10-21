@@ -101,6 +101,8 @@ export {
   restoreStateMessageSchema,
   type ServerMessage,
   serverMessageSchema,
+  soundFeelChangedMessageSchema,
+  soundFeelRecordMessageSchema,
   stateMessageSchema,
   verifyChangedMessageSchema,
   verifyRecordMessageSchema,
@@ -116,6 +118,23 @@ export {
   type ParamValues,
 } from "./paramFields.ts";
 export { SOUND_CATALOG, SOUND_CATEGORIES, type Sound, soundName } from "./soundCatalog.ts";
+export {
+  buildSoundFeelExport,
+  SOUND_FEEL_FIELDS,
+  SOUND_LENGTH_MAX_MS,
+  SOUND_MOODS,
+  SOUND_NOTE_MAX,
+  SOUND_READS_AS,
+  SOUND_STRENGTHS,
+  type SoundFeelExport,
+  type SoundFeelRecordPayload,
+  type SoundFeelRow,
+  soundCardId,
+  soundFeelChangedPayloadSchema,
+  soundFeelExportSchema,
+  soundFeelRecordPayloadSchema,
+  soundFeelRowSchema,
+} from "./soundFeel.ts";
 export {
   type Origin,
   originSchema,

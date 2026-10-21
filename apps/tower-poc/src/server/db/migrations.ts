@@ -24,4 +24,16 @@ export const MIGRATIONS: readonly string[] = [
     tested_at INTEGER NOT NULL,
     environment TEXT NOT NULL
   )`,
+  // The sound feel record (spec D25, M6 step 6.1): one row per sound, the newest picks.
+  `CREATE TABLE sound_feel (
+    sound_index INTEGER PRIMARY KEY,
+    mood TEXT,
+    reads_as TEXT,
+    strength TEXT,
+    length_ms INTEGER,
+    answer_length_ms INTEGER,
+    note TEXT,
+    updated_at INTEGER NOT NULL,
+    client TEXT NOT NULL
+  )`,
 ];

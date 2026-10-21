@@ -15,7 +15,10 @@ import {
   lifecycleStageSchema,
   PROTOCOL_VERSION,
   SILENT_LIGHT_SEQUENCES,
+  SOUND_NOTE_MAX,
   serverMessageSchema,
+  soundFeelRecordMessageSchema,
+  soundFeelRecordPayloadSchema,
   toInventoryEntry,
   VERIFICATION_NOTES_MAX,
   validateCommand,
@@ -40,6 +43,7 @@ const welcome = {
     },
     inventory: inventory.map(toInventoryEntry),
     verificationOverlay: {},
+    soundFeel: [],
     tower: "mock",
   },
 };
@@ -77,6 +81,7 @@ describe("clientMessageSchema", () => {
       "command",
       "restoreState",
       "verify.record",
+      "soundFeel.record",
     ]);
   });
 
@@ -163,8 +168,10 @@ const openFields = (schema: z.ZodType, path: string): string[] => {
 };
 
 describe("no client message carries raw bytes", () => {
-  // `verify.record` carries a person's notes, which the service saves and never sends to the tower.
-  it("has no open field except the envelope ids, the client label, command.params and Verify notes", () => {
+  // `verify.record` and `soundFeel.record` carry a person's notes, which the service saves and
+  // never sends to the tower. `soundFeel.record` also carries a sound index and two lengths:
+  // bounded whole numbers, saved and never sent (bounds checked below).
+  it("has no open field except the envelope ids, the client label, command.params and the notes", () => {
     const open = clientMessageSchema.options.flatMap((option) =>
       openFields(option, option.shape.type.value),
     );
@@ -177,6 +184,10 @@ describe("no client message carries raw bytes", () => {
         "command.payload.params",
         "verify.record.payload.capabilityId",
         "verify.record.payload.notes",
+        "soundFeel.record.payload.index",
+        "soundFeel.record.payload.lengthMs",
+        "soundFeel.record.payload.answerLengthMs",
+        "soundFeel.record.payload.note",
       ].sort(),
     );
   });
@@ -188,6 +199,19 @@ describe("no client message carries raw bytes", () => {
     expect(verifyRecordPayloadSchema.shape.capabilityId.maxLength).toBe(64);
     expect(verifyRecordPayloadSchema.shape.notes.maxLength).toBe(VERIFICATION_NOTES_MAX);
     expect(verifyRecordMessageSchema.shape.id.maxLength).toBe(64);
+    expect(soundFeelRecordPayloadSchema.shape.note.unwrap().unwrap().maxLength).toBe(
+      SOUND_NOTE_MAX,
+    );
+    expect(soundFeelRecordMessageSchema.shape.id.maxLength).toBe(64);
+  });
+
+  it("bounds the sound feel numbers to whole numbers in range", () => {
+    const { index, lengthMs, answerLengthMs } = soundFeelRecordPayloadSchema.shape;
+    expect([index.minValue, index.maxValue, index.isInt]).toEqual([1, 113, true]);
+    for (const length of [lengthMs, answerLengthMs]) {
+      const inner = length.unwrap().unwrap();
+      expect([inner.minValue, inner.maxValue, inner.isInt]).toEqual([1, 60_000, true]);
+    }
     expect(envelopeSchema.shape.id.unwrap().maxLength).toBe(64);
     expect(envelopeSchema.shape.correlationId.unwrap().maxLength).toBe(64);
   });
