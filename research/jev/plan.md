@@ -1,6 +1,6 @@
 # Jev finding triage: plan
 
-Status: draft, 2026-10-21. Nothing approved yet. Repo-wide work on `chore/jev-finding-triage`.
+Status: approved by Bob on 2026-10-21 (G-plan). Step 1 in progress. Repo-wide work on `chore/jev-finding-triage`.
 
 ## Goal
 
@@ -83,12 +83,20 @@ If a finding fits more than one blocking label, use the first that applies in th
   "finding": "the text of the finding, as the reviewer wrote it",
   "done_when": "the step's Done when items, or null if the PR has none",
   "reviewer_blocking": true,
-  "outcome": "fixed | disputed | overridden | needs-bob | ignored",
+  "outcome": "fixed | disputed | overridden | needs-bob | ignored | unknown",
   "label": "done-when",
   "reason": "one line",
-  "bob_checked": false
+  "bob_checked": false,
+  "pr_escalated": false
 }
 ```
+
+Deviations in step 1 (2026-10-21):
+- `finding` is the reviewer's words, shortened to the claim and its proof. Long repros are cut; `source_url` has the full text.
+- `done_when` is `null` on every row. Most of these PRs predate measurable `Done when` fields, and the rest cite runbook steps. Step 2 fills it from the plan or runbook step the PR names, before any Jev call.
+- `outcome` adds `unknown` for a finding whose fate the reports do not show. `ignored` means nothing in this PR changed for it; a follow-up issue may exist.
+- `pr_escalated` marks findings from PRs that reached `needs-bob` (#25, #78) or that Bob let run past round 3 (#99).
+- The 20 labels for Bob are not a random sample. They are the 14 findings where today's label and the reviewer's call disagree, plus 6 agreements spread over the labels. So the agreement rate tests the labels most likely to be wrong.
 
 ## Open questions for Bob
 
