@@ -1,4 +1,6 @@
 /** Everything that runs anywhere (no Node imports). Disk access is in ./server.ts. */
+export { backlinks, type LinkGroup, outlinks } from "./backlinks.ts";
+export { makeCached } from "./cache.ts";
 export { buildGraph, type CardSchema, parseCard, splitFrontMatter } from "./cards.ts";
 export {
   buildFindIndex,

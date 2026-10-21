@@ -23,11 +23,4 @@ describe("gaps report on the real cards", () => {
     const { graph } = buildGraph();
     for (const g of loadGaps().gaps) expect(graph.nodes[g.id]?.kind).toBe("card");
   });
-
-  it("show and find say not yet", () => {
-    const out = execFileSync("node", [path.join(here, "../cli/graph.ts"), "show", "MEC-001"], {
-      encoding: "utf8",
-    });
-    expect(out.trim()).toBe("graph show: not yet");
-  });
 });

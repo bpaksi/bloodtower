@@ -44,6 +44,9 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 6 | Works on a small screen | #128 |
 | 9 | Link rules for new links | #132 |
 | 10 | Gaps report | #134 |
+| 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
+| F1 | Graph tooling correctness: duplicate links, loop groups, conflict with a missing card, /gaps anchors, show/find text (#133, #138, #135, #139) | #140 |
+| F2 | Find and panels polish: re-pick scroll, cached index, line-hit ID, unsaved overlay, Esc scope, pending flag (#125, #126, #127, #129, #130, #131) | #142 |
 
 ## Suggested order
 
@@ -80,7 +83,7 @@ The `requirement-review` agent read the five approved steps together against the
 | Step 9: how strict is the first rules table? | Allow each type pair today's cards use **5 or more times**, plus `part-of` → area. About 146 of the 680 non-`part-of` links go into the baseline. |
 | Step 9: may `needs` join two questions? | **Yes.** `needs` means "B must be settled or built first". (8 such links today.) |
 | Steps 5 and 6: a find hit below 1200 px | The detail panel **opens over the graph**, the same as a pick in the graph. |
-| Step 6: the overlay below 1200 px | A 360 px panel with **no scrim**; the graph stays clickable. Esc, its close button or `]` closes it, and picking another card keeps it open. Stacking, bottom to top: graph, then detail overlay, then top bar and find list (top bar raised to z-index 20), then toast and prompt dialog (50). |
+| Step 6: the overlay below 1200 px | A 360 px panel with **no scrim**; the graph stays clickable. Esc, its close button or `]` closes it, and picking another card keeps it open. Esc closes only this graph overlay; on a document page it does nothing to the rail (`]` or its button closes it), and Esc in the find box closes only the find list (F2, #130, #131). Stacking, bottom to top: graph, then detail overlay, then top bar and find list (top bar raised to z-index 20), then toast and prompt dialog (50). |
 | Step 5: the find list at small heights | As wide as the box (up to 32 rem), as tall as the window less the top bar and 16 px, and it **scrolls inside**. Each row is ID and title on one line, then a one-line snippet, both cut with an ellipsis. All 20 hits are kept. |
 
 Other findings, without a ruling:
@@ -119,7 +122,7 @@ How it is built:
 - Exact ID: a query that is a whole ID (case ignored, read with the app's `IdScheme`) puts that ID first. If it is a card, the hit opens `/?focus=<ID>`. Otherwise the hit opens the line that defines the ID: the first line that starts a heading, a table row (first cell) or a list item (`- R-WIZ-5.`), at `/doc/<slug>#L<n>`. A heading wins over a table row, and a table row over a list item; after that, file order, then line. The existing `LineJump` scrolls to the section that holds the line, not to the line itself. An ID with neither a card nor a defining line falls through to the word search.
 - The list follows Bob's ruling in Requirement review: up to 32 rem wide, scrolls inside, one line for the ID and title and one for the snippet. Below 1200 px a card hit opens the detail panel over the graph, the same as a pick in the graph.
 - Words: every word must appear (AND, case ignored). The score ranks a match in the ID, then the title, then the body or line text. Ties go to ID order with numbers compared as numbers (`MEC-2` before `MEC-10`), then file and line.
-- The search runs on the server. A route `apps/game-workbench/src/web/app/api/find/route.ts` (`GET /api/find?q=`) reads cards and docs fresh on each request, like the pages do, so the browser never loads all 500 cards. Each hit returns `{kind, id, title, snippet, href}`.
+- The search runs on the server. A route `apps/game-workbench/src/web/app/api/find/route.ts` (`GET /api/find?q=`) reads the cards and docs on each request, but rebuilds the index only when a file in the design folder or its `cards/` folder was added, removed or changed (keyed on file mtimes and sizes, F2 #126), so an edit shows on the next search. The browser never loads all 500 cards. Each hit returns `{kind, id, title, snippet, href}`. A document-line hit shows the first ID on the line in its ID column, else `file:line` (Bob, 2026-10-21, #127).
 - `packages/workbench/src/components/FindBox.tsx` is the client box that replaces the disabled input. It waits about 120 ms after typing before it fetches and shows a listbox (`role="listbox"`, `aria-activedescendant`). `/` focuses the box only when no other field has focus. `⌘K` / `Ctrl+K` always focuses it. Esc closes the list and leaves the box.
 - Depends on: none
 - Touches: `apps/game-workbench/src/web/**`, `packages/workbench/src/**`, `packages/workbench/styles/**`
@@ -242,15 +245,15 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
 - First rules:
   - an open question with no `answers` link to it;
   - a mechanic with no link either way to a screen, UI piece or cue;
-  - a `conflicts` link where neither card is parked;
-  - a decided card (decision, mechanic, screen, ui or cue) with no link to an `R-` ID other than `conflicts`, so step 8's `becomes` counts with no change here;
+  - a `conflicts` link where neither card is parked. Bob's ruling (#136): a conflict between a card and a document ID (`R-`, `E…`) is settled once the card side is parked or decided; card-to-card conflicts stay settled only when either card is parked;
+  - a decided card (decision, mechanic, screen, ui or cue) with no link to an `R-` ID other than `conflicts`, so step 8's `becomes` counts with no change here. Bob's ruling (#136): decided means status `decided` only, and `R2-`/`R3-` links count as requirement links, as built;
   - an area where no card in its `part-of` subtree is decided.
 - A card in several areas counts once in each.
-- Expected on day one: about 190 gaps.
+- Day one: 157 gaps (160 as first built, 157 after the conflict ruling in #136).
 - A **Gaps** page (`/gaps`), linked from the sidebar, grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
 - `pnpm graph gaps` prints the same list, so Claude can start a design session from it.
   - The engine is in `packages/workbench/src` and is exported from `server.ts`, so the package's `package.json` is not edited.
-  - The entry point is the app's `apps/game-workbench/src/web/cli/graph.ts`. It supplies the app's card schema, ID scheme and folders, and handles the subcommands (`gaps` now; `show` and `find` say "not yet" until step 11).
+  - The entry point is the app's `apps/game-workbench/src/web/cli/graph.ts`. It supplies the app's card schema, ID scheme and folders, and handles the subcommands (`gaps`, `show` and `find`; `show` and `find` came with step 11).
   - The root script is `"graph": "node apps/game-workbench/src/web/cli/graph.ts"`. Node 24 strips the types, so the CLI uses erasable TypeScript only and nothing it reaches imports `next` or a `.tsx` file.
   - For now it covers the game only; later apps add `--app`.
 - A gap is a warning, never an error. `pnpm check` does not fail on gaps.
@@ -282,6 +285,7 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
   - `pnpm graph find <words>` prints the same hits as `GET /api/find?q=` for the same query.
   - `pnpm check` passes.
   - Viewports: 1470 × 956
+  - Conflict rule per #136 (recorded deviation, see step 10): a `conflicts` link to a document ID is settled when the card is parked or decided; unit tests cover both cases.
   - Not required: an impact view across several hops (Later)
 
 ## Later

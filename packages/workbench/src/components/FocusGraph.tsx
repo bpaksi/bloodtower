@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { backlinks, type LinkGroup, outlinks } from "../backlinks.ts";
 import type { Graph, GraphNode } from "../graph-types.ts";
 import { labelPoint, layout, type Neighbour } from "../layout.ts";
 import { Chip } from "./Chip.tsx";
-import { PANEL_OPEN_DETAIL } from "./Panels.tsx";
+import { PANEL_OPEN_CANCEL, PANEL_OPEN_DETAIL } from "./Panels.tsx";
 import { PanelToggle } from "./PanelToggle.tsx";
 
 function parentDir(dir: string): string {
@@ -54,6 +55,11 @@ export function FocusGraph({
   const params = useSearchParams();
   const urlFocus = params.get("focus");
   const focus = urlFocus && graph.nodes[urlFocus] ? urlFocus : initialFocus;
+  // An ID that names nothing shows no detail panel, so a pending "open it" must not wait for the next one.
+  const unknownFocus = (urlFocus !== null && !graph.nodes[urlFocus]) || !graph.nodes[focus];
+  useEffect(() => {
+    if (unknownFocus) window.dispatchEvent(new Event(PANEL_OPEN_CANCEL));
+  }, [unknownFocus]);
 
   const stage = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 900, h: 640 });
@@ -160,7 +166,7 @@ export function FocusGraph({
           />
         ))}
       </div>
-      <Detail graph={graph} id={focus} ring1={ring1} onPick={go} places={places} />
+      <Detail graph={graph} id={focus} onPick={go} places={places} />
     </div>
   );
 }
@@ -200,21 +206,46 @@ function GraphCard(props: {
   );
 }
 
+function LinkList(props: {
+  title: string;
+  groups: LinkGroup[];
+  graph: Graph;
+  onPick: (id: string) => void;
+}) {
+  const { title, groups, graph, onPick } = props;
+  return (
+    <>
+      <h2>{title}</h2>
+      {groups.length === 0 && <p className="muted small">None.</p>}
+      {groups.map((g) => (
+        <div key={g.verb} className="detail-links">
+          <span className="verb">{g.verb}</span>
+          <ul>
+            {g.links.map((l) => (
+              <li key={`${l.id}|${l.note ?? ""}`}>
+                <button type="button" className="linklike" onClick={() => onPick(l.id)}>
+                  <span className="mono">{l.id}</span> {graph.nodes[l.id]?.title}
+                </button>
+                {l.note && <span className="muted small link-note"> {l.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </>
+  );
+}
+
 function Detail(props: {
   graph: Graph;
   id: string;
-  ring1: Neighbour[];
   onPick: (id: string) => void;
   places: GraphPlaces;
 }) {
-  const { graph, id, ring1, onPick, places } = props;
+  const { graph, id, onPick, places } = props;
   const node = graph.nodes[id];
   if (!node) return null;
   const kind = nodeKind(node);
-  const byVerb = new Map<string, string[]>();
-  for (const n of ring1) {
-    for (const v of n.verbs) byVerb.set(v, [...(byVerb.get(v) ?? []), n.id]);
-  }
 
   return (
     <aside className="detail">
@@ -266,21 +297,13 @@ function Detail(props: {
           </button>
         </div>
 
-        {byVerb.size > 0 && <h2>Links</h2>}
-        {[...byVerb].map(([verb, ids]) => (
-          <div key={verb} className="detail-links">
-            <span className="verb">{verb}</span>
-            <ul>
-              {ids.map((other) => (
-                <li key={other}>
-                  <button type="button" className="linklike" onClick={() => onPick(other)}>
-                    <span className="mono">{other}</span> {graph.nodes[other]?.title}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <LinkList title="Points here" groups={backlinks(graph, id)} graph={graph} onPick={onPick} />
+        <LinkList
+          title="Links from here"
+          groups={outlinks(graph, id)}
+          graph={graph}
+          onPick={onPick}
+        />
 
         {node.kind === "card" && node.sources.length > 0 && (
           <>
