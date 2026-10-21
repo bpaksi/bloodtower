@@ -92,6 +92,6 @@ If a finding fits more than one blocking label, use the first that applies in th
 
 ## Open questions for Bob
 
-1. Who labels: Claude labels all of them and Bob checks 20 (recommended), or Bob labels all 50?
-2. Include findings from before #102, judged against today's §4 (recommended, as only 17 reports come after it)?
-3. Does the plan live here in `research/jev/`, or somewhere else for repo-wide plans?
+1. ~~Who labels?~~ Answered (Bob, 2026-10-21): Claude labels all of them and Bob checks 20.
+2. ~~Include findings from before #102?~~ Answered (Bob, 2026-10-21): yes, judged against today's §4.
+3. ~~Where does the plan live?~~ Answered (Bob, 2026-10-21): here in `research/jev/`, with its data. The step 2 script goes in `scripts/`.
