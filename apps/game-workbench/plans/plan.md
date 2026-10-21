@@ -46,7 +46,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 10 | Gaps report | #134 |
 | 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
 | F1 | Graph tooling correctness: duplicate links, loop groups, conflict with a missing card, /gaps anchors, show/find text (#133, #138, #135, #139) | #140 |
-| F2 | Find and panels polish: re-pick scroll, cached index, line-hit ID, unsaved overlay, Esc scope, pending flag (#125, #126, #127, #129, #130, #131) | this PR |
+| F2 | Find and panels polish: re-pick scroll, cached index, line-hit ID, unsaved overlay, Esc scope, pending flag (#125, #126, #127, #129, #130, #131) | #142 |
 
 ## Suggested order
 
