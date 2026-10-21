@@ -45,7 +45,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 9 | Link rules for new links | #132 |
 | 10 | Gaps report | #134 |
 | 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
-| F1 | Graph tooling correctness: duplicate links, loop groups, conflict with a missing card, /gaps anchors, show/find text (#133, #138, #135, #139) | #PR |
+| F1 | Graph tooling correctness: duplicate links, loop groups, conflict with a missing card, /gaps anchors, show/find text (#133, #138, #135, #139) | #140 |
 
 ## Suggested order
 
