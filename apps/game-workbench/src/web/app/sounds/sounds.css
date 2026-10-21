@@ -1,0 +1,54 @@
+.sound-filters {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.6rem 0 1rem;
+}
+.sound-filters div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+.sound-filters span {
+  width: 5rem;
+}
+.sound-filters a {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+}
+.sound-filters a[aria-current="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.sound-group h2 {
+  margin: 1.6rem 0 0.4rem;
+  font-size: 1.1rem;
+}
+/* Fixed columns, so every category's table lines up with the others. */
+.sound-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.sound-table th:nth-child(1) {
+  width: 6rem;
+}
+.sound-table th:nth-child(2) {
+  width: 15rem;
+}
+.sound-table th:nth-child(n + 3):nth-child(-n + 6) {
+  width: 7.5rem;
+}
+.sound-table th,
+.sound-table td {
+  padding: 0.25rem 0.6rem 0.25rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.sound-table th {
+  color: var(--muted);
+  font-weight: 500;
+}

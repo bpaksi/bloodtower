@@ -1,6 +1,6 @@
 # Game workbench plan
 
-Status: backlog, 2026-10-20. Steps 5, 6, 9, 10 and 11 approved by Bob on 2026-10-21 (batches B1 to B5). Steps 3, 4, 7 and 8 stay proposals until Bob approves them. Tier: Experiment (one plan, one branch and PR per step).
+Status: backlog, 2026-10-20. Steps 5, 6, 9, 10 and 11 approved by Bob on 2026-10-21 (batches B1 to B5). Step 7 approved by Bob on 2026-10-21 ("let's build it"; batch B6 is 7b). Steps 3, 4 and 8 stay proposals until Bob approves them. Tier: Experiment (one plan, one branch and PR per step).
 
 This file is the workbench's backlog. New asks for the workbench go here as a step or under Later. Design content (cards, documents) goes in `research/game-design/`, not here.
 
@@ -59,6 +59,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 - B3: 9
 - B4: 10
 - B5: 11
+- B6: 7b (7a is tower-poc work and waits for Bob's intent there)
 
 Steps 9, 10 and 11 were approved on 2026-10-21. Their `Touches` overlap in `packages/workbench/src/**`, so they run one after another.
 
@@ -184,25 +185,30 @@ Bob listens to each of the 113 tower sounds and records how it feels, so sounds 
 Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-poc, and the workbench shows the results. The work is split in two.
 
 **7a: Review on tower-poc's Sounds page (tower-poc work, Full tier).** This is not a workbench step. It needs an intent from Bob in `apps/tower-poc/intent/` and a step in a tower-poc milestone plan, and it follows the `tower-capability` skill's safety rules.
-- Each sound on the existing page gets **Stopped** after Play, which records the length. The tower does not report when a sound ends, so Bob's press is the measure. One press plays one sound once. Nothing plays on its own, and there is no "play all".
+- Each sound on the existing page gets **Stopped** after Play, which records two lengths from one play: `lengthMs` from the Play press and `answerLengthMs` from the tower's answer, each to the Stopped press (Bob, 2026-10-21). The tower does not report when a sound ends, so Bob's press is the measure. Built as tower-poc M6 (`apps/tower-poc/plans/M6-sound-feel.md`, spec D25). One press plays one sound once. Nothing plays on its own, and there is no "play all".
 - For each sound Bob picks one of each:
   - **Mood**: dread, tension, wonder, triumph, loss, calm, comic, mystery, menace
   - **Reads as**: threat, alert, reward, failure, arrival, magic, voice, transition
   - **Strength**: soft, medium, strong
-  - **Fits**: mechanics or cues it suits (`MEC-`, `CUE-` IDs), and **Avoid** for sounds tied too closely to an RtDT character
   - a few words of his own
-- Picks are kept in the browser until exported. **Export** downloads `sound-feel.json`:
-  `{ "version": 1, "sounds": [{ "id": "SND-044", "index": 44, "lengthMs": 2300, "mood": "dread", "readsAs": "threat", "strength": "strong", "fits": ["MEC-012"], "avoid": false, "note": "…" }] }`.
+- Picks are saved on the tower-poc server as Bob goes, so a review can span several sittings and survives cleared browser data (Bob, 2026-10-21). **Export** downloads `sound-feel.json`:
+  `{ "version": 1, "sounds": [{ "id": "SND-044", "index": 44, "lengthMs": 2300, "answerLengthMs": 2240, "mood": "dread", "readsAs": "threat", "strength": "strong", "note": "…" }] }`.
   A length that was not measured is left out, never written as 0. `SND-NNN` is the tower index, so tower-poc builds the ID without importing workbench code.
-- Claude reads the file and writes each sound to its `SND-` card as a `feel:` block, adds `uses` links from the mechanics, and fills the lengths in the inventory. There is no import script.
+- Claude reads the file and writes each sound to its `SND-` card as a `feel:` block and fills the lengths in the inventory. There is no import script.
 
 **7b: `/sounds` in the workbench (this plan).**
 - One row per `SND-` card, grouped by category, with its feel and length once recorded, and "unavailable" when not.
 - Filter by mood or reads-as to choose a sound for a mechanic. No Play button.
 - The `feel:` card field, in `research/game-design/cards/README.md` and the card schema.
 - Done when: the card lint accepts a `feel:` block and rejects an unknown mood (the two new moods included); `/sounds` lists a card with a `feel:` block under its category, and the mood filter hides a card with another mood.
-- Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `feel:` field), `packages/workbench/src/cards.ts`
+- Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `feel:` field), `packages/workbench/src/cards.ts`, `apps/game-workbench/README.md` (the page), `apps/game-workbench/plans/plan.md`
+- Depends on: none
+- Deps change: no
+- Runs: local
+- Model: opus
 - 7b can be built before 7a; until then every row shows "unavailable".
+- As built: `CardSchema` gets an optional `checkFields(type, data)`, and the game's `checkFeel` (`lib/feel.ts`) is the check. Every `feel:` field is optional; the block also fails on a card that is not a sound, an unknown field, or a length that is not a whole number above 0. `/sounds` groups by the card's `part-of` area under AREA-021 ("Tower sounds: <category>"), filters with `?mood=` and `?reads=` links (no client code), and is linked from the sidebar.
+- Bob's ruling (2026-10-21): the review records only the feeling a sound produces. **Fits** and **Avoid** are dropped from 7a and from the `feel:` block. Linking sounds to mechanics waits until mechanics are prototyped; a mechanic's tower interaction (lights, sound and movement as one unit) is then a `CUE-` card, and the rules already allow `cue uses <tower output>`.
 - Later, the same review for the 21 light sequences (`LSQ-`) and the light effects (`LFX-`).
 
 ### Step 8: From design to requirements (Bob, 2026-10-20)

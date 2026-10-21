@@ -85,6 +85,22 @@ Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or
 
 **Old links.** The 134 links that broke these rules on 2026-10-21 are listed in [`.link-baseline.json`](.link-baseline.json), one `from|rel|to` key each, and the lint lets them pass. A new link must follow the rules. When an old link is fixed or removed, delete its line: the lint also fails on an entry that is no longer a break. The link review (game-workbench plan, Later) empties the baseline. To allow a new shape, change the table here and in `link-rules.ts` in the same PR.
 
+## Sound feel
+
+A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it on tower-poc's Sounds page and exports `sound-feel.json`; Claude copies each sound into its card. The `/sounds` page in the workbench lists and filters them.
+
+```yaml
+feel:
+  mood: dread          # dread | tension | wonder | triumph | loss | calm | comic | mystery | menace
+  readsAs: threat      # threat | alert | reward | failure | arrival | magic | voice | transition
+  strength: strong     # soft | medium | strong
+  lengthMs: 2300       # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
+  answerLengthMs: 2240 # from the tower's answer to the play (as the sound starts) to the same Stopped press
+  note: low growl, then a crack
+```
+
+Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a word outside the lists above. The code is `apps/game-workbench/src/web/lib/feel.ts`.
+
 ## Status
 
 | Status | Meaning |

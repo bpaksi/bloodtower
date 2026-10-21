@@ -35,7 +35,7 @@ The generic parts (ID schemes, markdown with chips, card parsing, graph, layout,
 
 | Path | What |
 |---|---|
-| `src/web/app/` | Next.js pages: `/` (focus graph of the cards), `/map` (areas and progress), `/docs` (document cards) and `/doc/<file>` (one rendered document) |
+| `src/web/app/` | Next.js pages: `/` (focus graph of the cards), `/map` (areas and progress), `/sounds` (the 113 tower sounds with their feel, filtered by mood or reads-as), `/docs` (document cards) and `/doc/<file>` (one rendered document) |
 | `src/web/lib/ids.ts` | The game ID families and how an ID is recognised and classified (`GAME_IDS`) |
 | `src/web/lib/content.ts` | Reads and groups the design docs (the groups preview the planned reorg) |
 | `src/web/lib/cards.ts` | The card schema for `research/game-design/cards/` (format in its README) and the graph; `cards.test.ts` is the card lint |
