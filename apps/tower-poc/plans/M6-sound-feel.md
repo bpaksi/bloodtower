@@ -1,6 +1,6 @@
 # M6 — Sound feel review
 
-**Status:** proposed, 2026-10-21. Waiting for Bob's approval (G-plan).
+**Status:** approved by Bob, 2026-10-21 (G-plan). Step 6.1 next.
 **Intent:** [0002-sound-feel-review.md](../intent/0002-sound-feel-review.md). Spec 1.24, D25.
 **Goal:** Bob listens to each of the 113 tower sounds on the Sounds page and records the feeling it produces and its length. The record is saved on the tower service as he goes and exported as `sound-feel.json`, which Claude copies into the game design's `SND-` cards (game-workbench plan, step 7a; the workbench's `/sounds` page from step 7b shows it).
 **Exit condition:** every sound Bob has reviewed is in the export, and the export is in the `SND-` cards.
