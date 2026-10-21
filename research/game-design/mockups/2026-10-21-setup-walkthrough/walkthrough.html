@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup Walkthrough</title>
+<!--
+  Design mockup, not an app. Launch to the first hero's first move in the saga game (bloodtower).
+  Story board (16:9) and iPad (4:3) side by side, with placeholder art, the line, the tower cue,
+  the card IDs and a red banner for every gap. Self-contained: open the file in a browser.
+  Source cards: research/game-design/cards/ (pnpm graph show <ID>). Written 2026-10-21.
+-->
+<style>
+:root {
+  --void: #0b0806; --soot: #1a1310; --umber: #3b2a1e; --ink: #2a1d14;
+  --parch: #e9d9b4; --parch-dk: #c9b182; --vellum: #8a6f47;
+  --candle: #f5c451; --flame: #e8892b; --blood: #8e1b1b; --verd: #4f7a6a; --bone: #f3ead2;
+  --gap-bg: #3a0d0d; --gap-edge: #d23a3a;
+  --serif: "Cormorant Garamond", "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --label: "IM Fell English SC", "Cormorant SC", "Iowan Old Style", Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--void); color: var(--bone); font-family: var(--serif); }
+body { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+button { font-family: inherit; }
+
+/* side list */
+nav { border-right: 1px solid var(--umber); background: var(--soot); padding: 16px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+nav h1 { font-family: var(--label); letter-spacing: .12em; font-size: 15px; color: var(--parch-dk); margin: 0 16px 4px; font-weight: normal; }
+nav .sub { font-size: 13px; color: var(--vellum); margin: 0 16px 12px; }
+nav .phase { font-family: var(--label); font-size: 12px; letter-spacing: .14em; color: var(--blood); margin: 14px 16px 4px; text-transform: uppercase; }
+nav a { display: flex; gap: 8px; align-items: baseline; padding: 5px 16px; color: var(--bone); text-decoration: none; font-size: 15px; line-height: 1.25; border-left: 3px solid transparent; }
+nav a:hover { background: #241a14; }
+nav a.on { background: #2c2018; border-left-color: var(--candle); }
+nav a .n { color: var(--vellum); font-size: 12px; min-width: 26px; font-family: var(--label); }
+nav a .t { flex: 1; }
+nav a .g { font-size: 12px; min-width: 22px; text-align: center; padding: 0 5px; background: var(--gap-edge); color: #fff; font-family: system-ui, sans-serif; font-weight: 600; }
+nav a .g.z { background: #2f4a3f; color: #cfe; }
+nav .total { margin: 16px; font-size: 13px; color: var(--parch-dk); border-top: 1px solid var(--umber); padding-top: 10px; }
+
+/* main */
+main { padding: 18px 24px 40px; min-width: 0; }
+.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.top h2 { margin: 0; font-weight: 600; font-size: 28px; flex: 1; min-width: 240px; }
+.top h2 .k { font-family: var(--label); font-size: 14px; letter-spacing: .14em; color: var(--blood); display: block; font-weight: normal; }
+.navbtn { background: var(--soot); color: var(--bone); border: 1px solid var(--vellum); padding: 10px 18px; font-size: 16px; cursor: pointer; min-height: 44px; }
+.navbtn:hover { border-color: var(--candle); }
+.navbtn:disabled { opacity: .35; cursor: default; }
+.ids { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.id { font-family: ui-monospace, Menlo, monospace; font-size: 12px; padding: 2px 6px; border: 1px solid var(--umber); color: var(--parch-dk); background: #140e0b; }
+.id.br { border-color: var(--verd); color: #9fd0bd; }
+.gaps { margin: 12px 0 0; display: grid; gap: 6px; }
+.gap { background: var(--gap-bg); border: 1px solid var(--gap-edge); border-left: 6px solid var(--gap-edge); padding: 8px 12px; font-size: 16px; line-height: 1.35; }
+.gap b { font-family: system-ui, sans-serif; font-size: 11px; letter-spacing: .08em; background: var(--gap-edge); color: #fff; padding: 1px 6px; margin-right: 6px; vertical-align: 2px; }
+.gap code { font-size: 13px; color: #ffd1d1; }
+
+.frames { display: grid; grid-template-columns: 16fr 9.6fr; gap: 18px; margin-top: 16px; align-items: start; }
+.fwrap h3 { font-family: var(--label); font-weight: normal; letter-spacing: .14em; font-size: 13px; color: var(--parch-dk); margin: 0 0 6px; }
+.fwrap h3 span { color: var(--vellum); letter-spacing: .04em; }
+
+/* Story board frame: 16:9, type scales with its width (cqw), like the TV */
+.board { aspect-ratio: 16/9; container-type: inline-size; position: relative; overflow: hidden; border: 6px solid #000; outline: 1px solid var(--umber); outline-offset: 3px;
+  background: radial-gradient(ellipse at 50% 30%, #2a1f18 0%, #120c09 70%), repeating-linear-gradient(45deg, #ffffff05 0 2px, transparent 2px 9px); }
+.board .bgtag { position: absolute; left: 1cqw; bottom: .6cqw; font-size: .8cqw; color: #8a6f4799; font-family: ui-monospace, Menlo, monospace; z-index: 0; }
+.bd { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3cqw; gap: 1.4cqw; font-size: 1.6cqw; line-height: 1.3; z-index: 1; }
+.board .strip { position: absolute; top: 0; left: 0; right: 0; display: flex; gap: 2.4cqw; padding: .6cqw 1.4cqw; background: #0b0806cc; border-bottom: 1px solid var(--umber); font-family: var(--label); font-size: 1.1cqw; letter-spacing: .1em; color: var(--parch-dk); }
+.board .strip b { color: var(--bone); font-weight: normal; }
+.board .strip .r { margin-left: auto; }
+.dlg { background: radial-gradient(ellipse at 50% 40%, var(--parch) 55%, var(--parch-dk) 100%); color: var(--ink); padding: 2cqw 2.8cqw; box-shadow: inset 0 0 2.5cqw #8a6f47aa, 0 0 0 .25cqw var(--ink), 0 0 0 .5cqw var(--parch-dk); max-width: 70cqw; text-align: center; }
+.dlg .kick { font-family: var(--label); color: var(--blood); letter-spacing: .14em; font-size: 1.2cqw; }
+.dlg h4 { margin: .2cqw 0 .8cqw; font-size: 2.8cqw; font-weight: 700; font-variant: small-caps; letter-spacing: .03em; }
+.dlg p { margin: .4cqw 0; }
+.dlg .row { display: flex; gap: 1.4cqw; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: .8cqw; }
+.chipb { border: .15cqw solid var(--ink); padding: .3cqw 1cqw; font-family: var(--label); font-size: 1.3cqw; }
+.chipb.on { background: var(--ink); color: var(--candle); }
+.band { position: absolute; left: 0; right: 0; bottom: 0; background: #0b0806e6; border-top: 1px solid var(--candle); color: var(--candle); text-align: center; padding: .7cqw; font-size: 1.9cqw; font-style: italic; }
+.qr { width: 15cqw; aspect-ratio: 1; background:
+   conic-gradient(from 90deg at 30% 30%, #000 25%, #fff 0 50%, #000 0 75%, #fff 0) 0 0/3cqw 3cqw;
+   border: 1cqw solid #fff; outline: .2cqw solid var(--ink); }
+.qr.sm { width: 7cqw; border-width: .5cqw; background-size: 1.4cqw 1.4cqw; }
+.code { font-family: ui-monospace, Menlo, monospace; font-size: 2.6cqw; letter-spacing: .3em; }
+.slider { display: grid; grid-template-columns: 9cqw 22cqw 7cqw; gap: 1cqw; align-items: center; text-align: left; margin: .5cqw 0; }
+.slider i { display: block; height: .5cqw; background: linear-gradient(90deg, var(--blood) var(--v), var(--vellum) var(--v)); }
+.prog { width: 40cqw; height: 1cqw; border: .15cqw solid var(--parch-dk); background: linear-gradient(90deg, var(--candle) var(--v), transparent var(--v)); }
+.roster { display: flex; gap: 1.2cqw; flex-wrap: wrap; justify-content: center; }
+.hcard { width: 12.5cqw; background: radial-gradient(ellipse at 50% 30%, var(--parch) 60%, var(--parch-dk)); color: var(--ink); text-align: center; padding: .8cqw; clip-path: polygon(1.2cqw 0, calc(100% - 1.2cqw) 0, 100% 1.2cqw, 100% calc(100% - 1.2cqw), calc(100% - 1.2cqw) 100%, 1.2cqw 100%, 0 calc(100% - 1.2cqw), 0 1.2cqw); font-size: 1.3cqw; line-height: 1.2; }
+.hcard .nm { font-variant: small-caps; font-weight: 700; font-size: 1.6cqw; }
+.hcard .hl { font-family: var(--label); font-size: 1.05cqw; color: var(--blood); letter-spacing: .06em; }
+.hcard.un { filter: sepia(.5) brightness(.75); }
+.hcard.act { box-shadow: inset 0 0 0 .3cqw var(--blood); }
+.hcard .ph { height: 8cqw; margin-bottom: .5cqw; font-size: .8cqw; }
+.hcard .ph em { font-size: .7cqw; }
+.cols { display: flex; gap: 2cqw; align-items: center; justify-content: center; width: 100%; }
+.small { font-size: 1.2cqw; }
+.side { position: absolute; top: 3.4cqw; width: 17cqw; background: #1a1310e6; border: .15cqw solid var(--umber); padding: .8cqw; font-size: 1.25cqw; line-height: 1.25; color: var(--bone); }
+.side h5 { margin: 0 0 .4cqw; font-family: var(--label); font-weight: normal; letter-spacing: .1em; font-size: 1.1cqw; color: var(--parch-dk); }
+.side.l { left: 1cqw; } .side.r { right: 1cqw; }
+.unav { color: #b9a; font-style: italic; }
+
+/* iPad frame: 4:3 landscape, 1024x768 pt, so 1pt = 100/1024 cqw */
+.ipad { aspect-ratio: 4/3; container-type: inline-size; position: relative; overflow: hidden; border: 14px solid #111; border-radius: 22px; outline: 1px solid #333; background: radial-gradient(ellipse at 50% 20%, #241a14, #0f0a08 75%); }
+.ip { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 3cqw 4cqw; gap: 2cqw; font-size: 2.75cqw; line-height: 1.3; }
+.ip .hd { display: flex; align-items: center; gap: 2cqw; font-family: var(--label); letter-spacing: .1em; font-size: 2.2cqw; color: var(--parch-dk); }
+.ip .hd .menu { margin-left: auto; border: 1px solid var(--vellum); padding: .6cqw 1.8cqw; color: var(--bone); }
+.ip .step { font-size: 3.6cqw; font-variant: small-caps; font-weight: 700; color: var(--bone); }
+.ip .next { color: var(--parch-dk); font-style: italic; }
+.ip .body { flex: 1; display: flex; flex-direction: column; gap: 1.6cqw; justify-content: center; }
+.btn { min-height: 6.25cqw; /* 64pt (R2-111) */ display: flex; align-items: center; justify-content: center; border: .3cqw double var(--candle); background: var(--soot); color: var(--bone); font-size: 2.9cqw; padding: 0 3cqw; font-family: var(--serif); font-weight: 600; text-align: center; line-height: 1.1; }
+.btn.primary { background: var(--blood); border-color: var(--candle); color: var(--bone); min-height: 8cqw; font-size: 3.3cqw; box-shadow: 0 0 2cqw #f5c45133; }
+.btn.off { opacity: .45; filter: grayscale(.6); }
+.btn.mine { background: #3a2a12; border-color: var(--candle); color: var(--candle); }
+.btn.sec { border-style: solid; border-width: .2cqw; border-color: var(--vellum); background: transparent; }
+.btns { display: grid; gap: 1.6cqw; }
+.btns.two { grid-template-columns: 1fr 1fr; } .btns.three { grid-template-columns: 1fr 1fr 1fr; } .btns.four { grid-template-columns: repeat(4, 1fr); }
+.why { font-size: 2.2cqw; color: var(--parch-dk); text-align: center; font-style: italic; }
+.ip .ph { min-height: 10cqw; }
+.banner { background: var(--blood); color: var(--bone); padding: 1cqw 2cqw; font-variant: small-caps; font-weight: 700; font-size: 3.2cqw; text-align: center; }
+.hint { font-size: 2.2cqw; color: var(--vellum); }
+
+/* placeholder art */
+.ph { background: repeating-linear-gradient(135deg, #5a5a5a 0 6px, #525252 6px 12px); color: #eee; border: 2px dashed #9a9a9a; display: flex; align-items: center; justify-content: center; text-align: center; padding: 6px; position: relative; font-family: ui-monospace, Menlo, monospace; font-size: max(10px, .95cqw); line-height: 1.25; }
+.ip .ph { font-size: max(10px, 1.7cqw); }
+.ph > span { background: #222c; padding: 2px 6px; }
+.ph em { position: absolute; right: 4px; top: 4px; font-style: normal; font-size: 10px; padding: 0 4px; font-family: system-ui, sans-serif; font-weight: 600; }
+.st-have { background: #2f6b4a; } .st-can-make { background: #7a6a1f; } .st-missing { background: var(--gap-edge); }
+
+/* info panel */
+.info { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
+.box { background: var(--soot); border: 1px solid var(--umber); padding: 10px 14px; }
+.box h4 { margin: 0 0 6px; font-family: var(--label); font-weight: normal; letter-spacing: .14em; font-size: 13px; color: var(--parch-dk); }
+.box p, .box li { font-size: 16px; line-height: 1.4; margin: 4px 0; }
+.box ul { margin: 0; padding-left: 18px; }
+.line { font-style: italic; font-size: 19px; color: var(--parch); }
+.line .who { font-style: normal; font-family: var(--label); font-size: 13px; letter-spacing: .1em; color: var(--blood); display: block; }
+.media { display: flex; flex-wrap: wrap; gap: 6px; }
+.mchip { max-width: 100%; overflow-wrap: anywhere; font-size: 13px; border: 1px dashed #9a9a9a; padding: 3px 7px; background: #2b2b2b; font-family: ui-monospace, Menlo, monospace; }
+.mchip em { font-style: normal; font-family: system-ui, sans-serif; font-size: 10px; padding: 0 4px; margin-left: 4px; color: #fff; }
+.cue { color: #ffd88a; }
+.legend { font-size: 13px; color: var(--vellum); margin-top: 18px; }
+.legend em { font-style: normal; color: #fff; padding: 0 4px; font-family: system-ui, sans-serif; font-size: 11px; }
+
+@media (max-width: 1100px) {
+  body { grid-template-columns: 1fr; }
+  nav { position: static; height: auto; max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--umber); }
+  .frames { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<nav id="nav" aria-label="Steps"></nav>
+<main>
+  <div class="top">
+    <h2 id="title">Setup walkthrough</h2>
+    <button class="navbtn" id="prev" type="button">&larr; Back</button>
+    <button class="navbtn" id="next" type="button">Next &rarr;</button>
+  </div>
+  <div class="ids" id="ids"></div>
+  <div class="gaps" id="gaps"></div>
+  <div class="frames">
+    <div class="fwrap"><h3>STORY BOARD <span>· TV, 1920×1080 via Roku (DEC-060), display only</span></h3><div class="board" id="board"></div></div>
+    <div class="fwrap"><h3>IPAD 1 <span>· 1024×768 pt landscape, touch (64 pt buttons, R2-111)</span></h3><div class="ipad" id="ipad"></div></div>
+  </div>
+  <div class="info">
+    <div class="box"><h4>LINE ON SCREEN OR SPOKEN</h4><div id="line"></div></div>
+    <div class="box"><h4>TOWER</h4><div id="cue"></div></div>
+    <div class="box"><h4>SOUND, VOICE AND TEXT NEEDED</h4><div class="media" id="media"></div></div>
+    <div class="box"><h4>NOTES</h4><ul id="notes"></ul></div>
+  </div>
+  <p class="legend">Grey hatched boxes are placeholder art, labelled with the asset needed. Badge: <em class="st-have">have</em> exists in the repo, <em class="st-can-make">can-make</em> we can produce it (code, text-to-speech, the tower's own sounds and lights), <em class="st-missing">missing</em> needs art or a decision. Green IDs are on the design branch <code>chore/design-session-2026-10-21b</code>, not yet on main. Keys: &larr; &rarr;.</p>
+</main>
+
+<script>
+"use strict";
+// ---------- helpers ----------
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const BRANCH_IDS = new Set(["DEC-098", "DEC-099", "DEC-100", "DEC-101", "DEC-102", "DEC-001", "Q-002", "DEC-087", "SCR-014"]);
+
+function helpers(assets) {
+  const add = (kind, desc, o) => {
+    const status = o.status || (o.have ? "have" : "missing");
+    assets.push({ kind, desc, size: o.size || "", have: o.have || "", status });
+    return status;
+  };
+  return {
+    // visual placeholder
+    ph(kind, desc, o = {}) {
+      const status = add(kind, desc, o);
+      return `<div class="ph ${o.cls || ""}" style="${o.style || ""}"><span>${esc(kind)}: ${esc(desc)}${o.size ? " · " + esc(o.size) : ""}</span><em class="st-${status}">${status}</em></div>`;
+    },
+    // non-visual asset (sound, voice, text) shown as a chip under the frames
+    m(kind, desc, o = {}) {
+      const status = add(kind, desc, o);
+      return `<span class="mchip">${esc(kind)}: ${esc(desc)}${o.size ? " · " + esc(o.size) : ""}${o.have ? " · " + esc(o.have) : ""}<em class="st-${status}">${status}</em></span>`;
+    },
+  };
+}
+
+const strip = (step, tower = "connected · calibrated", devices = "2 iPads") =>
+  `<div class="strip"><span>Tower <b>${tower}</b></span><span>Devices <b>${devices}</b></span><span class="r">Step <b>${step}</b></span></div>`;
+const ipHead = (step) => `<div class="hd"><span>iPad 1 · Hero A, Hero B</span><span class="menu">Menu</span></div><div class="step">${step}</div>`;
+const ipHeadPre = (step, who = "iPad 1") => `<div class="hd"><span>${who}</span><span class="menu">Menu</span></div><div class="step">${step}</div>`;
+
+const HEROES = [
+  { n: "Hero A", r: "Fighter", a: "Might", by: "iPad 1" },
+  { n: "Hero B", r: "Healer", a: "healing", by: "iPad 1" },
+  { n: "Hero C", r: "Magic user", a: "Magic", by: "iPad 2" },
+  { n: "Hero D", r: "Scout", a: "Stealth", by: null },
+  { n: "Hero E", r: "Ranger", a: "Wits", by: null },
+  { n: "Hero F", r: "Scholar", a: "Wits", by: null },
+];
+
+// ---------- the steps ----------
+// Each step: id, phase, title, cards, gaps [{t: open|conflict|missing|disagree, ids, text}],
+// line {who, text} or null, cue (tower) string, notes [], build(h) -> {board, ipad, media}.
+const STEPS = [
+{
+  id: "landing", phase: "Launch", title: "Landing: the painting every game starts on",
+  cards: ["SCR-002", "UI-005", "R3-UI-01", "R3-UI-03"],
+  gaps: [],
+  line: { who: "Board, small", text: "Click or press any key to begin" },
+  cue: "None. The tower is not touched before an iPad presses Connect (R-UI-4, R2-20).",
+  notes: ["The one press on the Mac: the click opens the Story board and unlocks browser audio (R3-UI-03).", "From here to goodbye the landing painting stays behind every board screen (R3-UI-01); later steps show it as the hatched background only."],
+  build: (h) => ({
+    board: `${h.ph("still", "landing painting, window glow flicker (UI-005)", { size: "16:9 1920×1080", have: "apps/bloodtower/public/landing/hero.webp + landing/window-mask/", style: "position:absolute;inset:0;font-size:1.4cqw" })}
+      <div class="bd" style="justify-content:flex-end;padding-bottom:5cqw"><div class="dlg" style="padding:1cqw 2cqw"><p style="font-size:1.8cqw;margin:0"><i>Click or press any key</i></p></div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("No device yet")}<div class="body"><p class="next">iPads join once the board shows the QR at the end of Splash (SCR-004).</p></div></div>`,
+    media: [h.m("music", "landing bed under the painting", { have: "apps/bloodtower/public/audio/signature/signature-bed.m4a" })],
+  }),
+},
+{
+  id: "sound", phase: "Launch", title: "Sound dialog: music, ambient and voice levels",
+  cards: ["SCR-003", "R3-UI-03", "R3-UI-60", "SCR-013", "AREA-049"],
+  gaps: [
+    { t: "disagree", ids: ["SCR-013", "SCR-003"], text: "SCR-013 says the board is display only and every press comes from an iPad; SCR-003 is pressed on the Mac (sliders, test clips, Continue). R3-UI-03 explains why (the click unlocks browser audio) but SCR-013 does not name the exception." },
+    { t: "missing", ids: ["AREA-049", "SCR-003", "SCR-004"], text: "AREA-049's order (splash, tower connect, …) leaves out the sound dialog. SCR-002 puts it right after the landing click, so before Splash; no card says so." },
+  ],
+  line: { who: "Board dialog", text: "Set the sound for the room. Music · Ambient · Voice. Continue." },
+  cue: "None.",
+  notes: ["Levels are remembered on that Mac (SCR-003).", "Mix targets: ambient about −30 LUFS, music −26, voice and scenes −18 (R3-UI-60)."],
+  build: (h) => ({
+    board: `<div class="bd"><div class="dlg"><div class="kick">BEFORE WE BEGIN</div><h4>The sound of the room</h4>
+      <div class="slider"><span>Music</span><i style="--v:60%"></i><span class="chipb">Test</span></div>
+      <div class="slider"><span>Ambient</span><i style="--v:40%"></i><span class="chipb">Test</span></div>
+      <div class="slider"><span>Voice</span><i style="--v:80%"></i><span class="chipb">Test</span></div>
+      <div class="row"><span class="chipb on">Continue</span></div></div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("No device yet")}<div class="body"><p class="next">Nothing on iPads yet. This dialog is clicked on the Mac.</p></div></div>`,
+    media: [
+      h.m("music", "music test clip", { have: "apps/bloodtower/public/audio/signature/motif-soft.m4a" }),
+      h.m("ambience", "ambient test clip", { have: "packs/test/audio/startup-ambient.m4a (test pack)" }),
+      h.m("narration", "voice test clip", { have: "apps/bloodtower/public/avatars/keeper/lines/ts-keeper-001.m4a" }),
+      h.m("ui-text", "dialog frame and parchment", { have: "apps/bloodtower/public/board/dialog-frame/" }),
+    ],
+  }),
+},
+{
+  id: "splash", phase: "Launch", title: "Splash: sells the game while it loads",
+  cards: ["SCR-004", "R-UI-1", "R-UI-3", "R-UI-10", "R2-10", "R2-11", "R2-12", "UI-010"],
+  gaps: [
+    { t: "missing", ids: ["SCR-004", "R-UI-1"], text: "SCR-004 has no content of its own. The cold open (title, logo forming, 'tower awakens' stinger, landing-and-initial-screens flow 1) and the fortune card (R-UI-10) have no SCR-/UI- card." },
+    { t: "open", ids: ["landing-and-initial-screens.md"], text: "Open question with no card: what the engine is called on the title and cold open." },
+  ],
+  line: { who: "Fortune card (if load > 3 s)", text: "\"The candles gutter. Something in the tower turns over in its sleep.\" (placeholder flavour line)" },
+  cue: "None (R2-20). The tower can play lights and sound before calibration (AST-T11) but no card asks for it here.",
+  notes: ["Advances to the next screen within 2 s of load, with no press (R2-10).", "Ends by showing the join QR and six-digit code (UI-010). If only loopback is available the board warns (R2-12)."],
+  build: (h) => ({
+    board: `${strip("Loading", "not connected", "0")}<div class="bd">
+      ${h.ph("still", "engine title / logo forming (cold open)", { size: "16:9 overlay, transparent", style: "width:46cqw;height:12cqw" })}
+      <div class="prog" style="--v:70%"></div><div class="small">Loading the story packs… reaching the tower service</div>
+      <div class="cols" style="margin-top:1cqw">${h.ph("still", "fortune card frame", { size: "about 3:4 card", status: "can-make", style: "width:14cqw;height:18cqw" })}
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.6cqw"><div class="qr"></div><div class="code">482 913</div><div class="small">Scan to join</div></div></div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Game is loading…", "iPad 1 · not joined")}<div class="body"><p class="next">A device that opens the join link now waits here and moves on by itself (r2 §3.1).</p></div></div>`,
+    media: [
+      h.m("sfx", "'tower awakens' stinger, 1981 homage", { size: "2–4 s" }),
+      h.m("ambience", "splash ambient loop (R-UI-3)", { have: "packs/test/audio/startup-ambient.m4a (test pack only)" }),
+      h.m("ui-text", "fortune card flavour lines, a few dozen", { status: "can-make" }),
+    ],
+  }),
+},
+{
+  id: "join", phase: "Launch", title: "Join: scan the QR, pick this device",
+  cards: ["SCR-015", "UI-010", "UI-017", "R2-32"],
+  gaps: [],
+  line: { who: "iPad", text: "Name this device · Join" },
+  cue: "None.",
+  notes: ["A device must be joined before it can press Connect, so the first iPad joins here (r2 §3.2 note).", "The join page never shows the device token (R2-32). A phone is detected and starts compact (UI-017)."],
+  build: (h) => ({
+    board: `${strip("Join", "not connected", "1 iPad")}<div class="bd"><div class="dlg"><div class="kick">JOIN THE TABLE</div><h4>Scan with each iPad</h4>
+      <div class="row"><div class="qr"></div><div><div class="code">482 913</div><p class="small">or open the address and type the code</p><p>iPad 1 joined</p></div></div></div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Join the table", "Join page")}<div class="body">
+      <div class="hint">Code</div><div class="btn sec" style="font-family:ui-monospace,Menlo,monospace;letter-spacing:.3em">482 913</div>
+      <div class="hint">This device</div><div class="btn sec">iPad 1</div>
+      <div class="btn primary">Join</div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "connect", phase: "Tower", title: "Tower connect: only on a press",
+  cards: ["SCR-005", "AREA-056", "R-SES-2", "R2-20", "R2-21", "R2-22", "AST-T17", "AREA-049"],
+  gaps: [
+    { t: "disagree", ids: ["AREA-049", "SCR-005", "spec D30"], text: "AREA-049 and SCR-005 put Tower connect right after Splash, before Pick story. The built POC (apps/bloodtower/spec.md D30, README) runs Pick story → Game settings → Tower connect, because the pack's tower field (required / optional / none) decides whether connect is shown. This walkthrough follows AREA-049; pick one before Friday." },
+  ],
+  line: { who: "iPad", text: "Connect tower · Play without tower" },
+  cue: "Nothing until a press (R2-20). After a winning Connect: the link only. A 'connected' sound (SND-094 Tower Connected, inventory says 'setup only') is not on any card.",
+  notes: ["Not found within 15 s: plain cause, Retry, Play without tower (R2-21).", "Play without tower: every cue falls back to the screen and audio; marked in stats (R2-22).", "Low battery: a warning, still allowed (AST-T17)."],
+  build: (h) => ({
+    board: `${strip("Tower connect", "not connected", "1 iPad")}<div class="bd"><div class="cols">
+      ${h.ph("still", "the tower, silhouette with status lights", { size: "about 9:16 panel", have: "apps/burgomaster-funeral-poc/assets/shared/dt1981/slides/tower.png (other app; copy it)", style: "width:18cqw;height:30cqw" })}
+      <div class="dlg" style="text-align:left"><div class="kick">THE TOWER</div><h4>Wake the tower</h4>
+      <p>Searching… <b>not yet</b></p><p>Battery: <span class="unav">unavailable</span></p><p>Calibrated: <span class="unav">unavailable</span></p>
+      <p class="small">Join QR stays in the corner.</p></div><div class="qr sm"></div></div>
+      <div class="band">Waiting for an iPad to press Connect tower</div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Tower connect")}<div class="body"><p class="next">Next: calibrate the tower (about 22 seconds).</p>
+      <div class="btn primary">Connect tower</div><div class="btn sec">Play without tower</div></div></div>`,
+    media: [h.m("ui-text", "tower error causes: asleep, out of range, held by another app", { status: "can-make" })],
+  }),
+},
+{
+  id: "calibrate", phase: "Tower", title: "Calibrate: the tower wakes (about 22 s)",
+  cards: ["SCR-005", "R-WIZ-9", "AST-T10", "R-UI-10"],
+  gaps: [
+    { t: "missing", ids: ["R-WIZ-9", "AREA-056"], text: "R-WIZ-9e (a light-and-sound self-test with 'I saw and heard it') has no card, and AREA-056 does not list it. The volume test may stand in for it; no card says so." },
+  ],
+  line: { who: "Fortune card", text: "\"Stone grinds on stone. The castle stirs.\" (placeholder)" },
+  cue: "After a winning Calibrate press: all three drums spin about 21–22 s (AST-T10). No other command is sent during it, since the tower drops them.",
+  notes: ["The wait is covered by a looping 'castle stirs' image under a fortune card, with app audio (R-UI-10, R-WIZ-9d)."],
+  build: (h) => ({
+    board: `${strip("Calibrating", "connected · calibrating", "1 iPad")}<div class="bd">
+      ${h.ph("still", "'the castle stirs' loop image", { size: "16:9 1920×1080", style: "position:absolute;inset:0" })}
+      <div class="dlg" style="position:relative"><div class="kick">CALIBRATING</div><h4>The tower wakes</h4><div class="prog" style="--v:45%;margin:auto"></div><p class="small">about 12 seconds left</p></div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Calibrate")}<div class="body"><div class="btn primary off">Calibrating… about 22 s</div><p class="why">Nothing else can be sent to the tower until it finishes.</p><p class="next">Next: test the tower's volume.</p></div></div>`,
+    media: [h.m("ambience", "'castle stirs' app audio under calibration", { size: "loop ≥ 25 s" }), h.m("ui-text", "fortune card lines (shared pool)", { status: "can-make" })],
+  }),
+},
+{
+  id: "volume", phase: "Tower", title: "Volume test: pick the tower volume by ear",
+  cards: ["SCR-006", "SND-058", "R-DEV-5"],
+  gaps: [],
+  line: { who: "Board dialog", text: "Which level could everyone hear? 0 · 1 · 2" },
+  cue: "Only after a Play levels press: SND-058 Dungeon Complete at volume 0, then 1, then 2. With no tower it is a room-sound check and sends nothing (README).",
+  notes: ["The answer is the tower-volume-test stat (README)."],
+  build: (h) => ({
+    board: `${strip("Volume test")}<div class="bd"><div class="dlg"><div class="kick">THE TOWER'S VOICE</div><h4>How loud?</h4><p>The tower plays one sound three times, quiet to loud.</p>
+      <div class="row"><span class="chipb">0 · quiet</span><span class="chipb on">1</span><span class="chipb">2 · loud</span></div></div>
+      <div class="band">Waiting for an iPad to press Play levels</div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Volume test")}<div class="body"><div class="btn primary">Play levels</div><div class="hint">Then choose the one everyone could hear:</div>
+      <div class="btns three"><div class="btn">0</div><div class="btn mine">1</div><div class="btn">2</div></div><p class="next">Next: pick a story.</p></div></div>`,
+    media: [h.m("tower-sound", "SND-058 Dungeon Complete at volume 0, 1, 2", { have: "tower sound #58 (ultimatedarktower 7.1.2)" })],
+  }),
+},
+{
+  id: "pick", phase: "Story", title: "Pick story: each story is a door",
+  cards: ["SCR-007", "UI-016", "R-UI-2", "R-UI-9", "spec D25", "spec D28", "DEC-047"],
+  gaps: [],
+  line: { who: "Board", text: "Proving ground: A long-lived proving ground for new ideas. · 4 hunters" },
+  cue: "None.",
+  notes: ["Devices move the highlight with Previous and Next; swipe is not needed (D28, R2-113).", "R2-41 put saved games on this screen; DEC-047 (one sitting, no save and resume) removes that card.", "Once chosen the UI takes the story's theme (R-UI-2, R2-40)."],
+  build: (h) => ({
+    board: `${strip("Pick story")}<div class="bd" style="flex-direction:row;gap:2cqw">
+      <div style="opacity:.5;transform:scale(.8)">${h.ph("still", "pack cover: The Count of Vellmoor", { size: "16:9", have: "packs/dracula/assets/cover.png", style: "width:22cqw;height:12.4cqw" })}</div>
+      <div style="text-align:center">${h.ph("still", "pack cover: Proving ground", { size: "16:9", have: "packs/test/assets/cover.png", style: "width:40cqw;height:22.5cqw" })}
+        <div style="font-size:2.6cqw;font-variant:small-caps;font-weight:700;margin-top:.6cqw">Proving ground</div><div class="small"><i>A long-lived proving ground for new ideas.</i> · 4 hunters</div></div>
+      <div style="opacity:.5;transform:scale(.8)">${h.ph("still", "pack cover: next story (none yet)", { size: "16:9", style: "width:22cqw;height:12.4cqw" })}</div>
+      <div class="band">Waiting for an iPad to choose a story</div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Pick a story")}<div class="body"><div class="btns two"><div class="btn">&larr; Previous</div><div class="btn">Next &rarr;</div></div>
+      <div class="btn primary">Choose Proving ground</div><div class="btn sec">Back</div><p class="next">Next: game settings.</p></div></div>`,
+    media: [h.m("music", "per-story four-note motif when its door is focused (R-UI-9)", { size: "2–4 s", status: "missing" })],
+  }),
+},
+{
+  id: "settings", phase: "Story", title: "Game settings: length and difficulty",
+  cards: ["SCR-008", "DEC-050", "DEC-059", "R2-50", "spec D29"],
+  gaps: [
+    { t: "disagree", ids: ["DEC-059", "DEC-050", "spec D29", "packs/test/pack.yaml"], text: "DEC-059 says players pick easy, normal or hard and the engine applies it the same in every story, and DEC-050 makes length engine-wide. The POC builds this screen from the pack's own settings list (spec D29), and packs/test offers difficulty 'Standard' only. Who owns these options, engine or pack?" },
+    { t: "missing", ids: ["DEC-059", "R-WIZ-5"], text: "What each difficulty changes (event odds, horde sizes, starting purse, villain pace) has no numbers yet, and the seed / fortune card from R-WIZ-5 step 1 has no card." },
+  ],
+  line: { who: "Board", text: "Length: Short (about 1 hour) · Standard (about 2) · Long (about 3). Difficulty: Easy · Normal · Hard." },
+  cue: "None.",
+  notes: ["Length is fixed once Begin is pressed (R2-50).", "The finale and the set pieces the win depends on are in every length (DEC-050)."],
+  build: (h) => ({
+    board: `${strip("Game settings")}<div class="bd"><div class="dlg"><div class="kick">PROVING GROUND</div><h4>How long, how hard</h4>
+      <p><b>Length</b></p><div class="row"><span class="chipb">Short · ~1 h</span><span class="chipb on">Standard · ~2 h</span><span class="chipb">Long · ~3 h</span></div>
+      <p style="margin-top:1cqw"><b>Difficulty</b></p><div class="row"><span class="chipb">Easy</span><span class="chipb on">Normal</span><span class="chipb">Hard</span></div></div>
+      <div class="band">Waiting for an iPad to press Continue</div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Game settings")}<div class="body"><div class="hint">Length</div><div class="btns three"><div class="btn">Short</div><div class="btn mine">Standard</div><div class="btn">Long</div></div>
+      <div class="hint">Difficulty</div><div class="btns three"><div class="btn">Easy</div><div class="btn mine">Normal</div><div class="btn">Hard</div></div>
+      <div class="btns two"><div class="btn sec">Back</div><div class="btn primary">Continue</div></div></div></div>`,
+    media: [h.m("ui-text", "one line per length and difficulty saying what it changes", { status: "can-make" })],
+  }),
+},
+{
+  id: "notplayable", phase: "Story", title: "Not playable (branch): a story listed but not ready",
+  cards: ["SCR-009", "spec D27"],
+  gaps: [],
+  line: { who: "Board", text: "The Count of Vellmoor is not ready to play yet." },
+  cue: "None.",
+  notes: ["Only when a playable: false pack (Dracula today) is chosen. It shows Game settings, then stops here and binds nothing. Back returns to Pick story."],
+  build: (h) => ({
+    board: `${strip("Not playable")}<div class="bd"><div class="cols">${h.ph("still", "pack cover: The Count of Vellmoor", { size: "16:9", have: "packs/dracula/assets/cover.png", style: "width:32cqw;height:18cqw;filter:grayscale(1)" })}
+      <div class="dlg"><div class="kick">NOT YET</div><h4>The Count of Vellmoor</h4><p>This story is not ready to play yet.</p></div></div></div>`,
+    ipad: `<div class="ip">${ipHeadPre("Not playable yet")}<div class="body"><p class="next">The Count of Vellmoor cannot be played yet.</p><div class="btn primary">Back to the stories</div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "party", phase: "Party", title: "Party join: every iPad in, heroes claimed from the pool",
+  cards: ["SCR-010", "DEC-045", "DEC-098", "DEC-099", "DEC-100", "DEC-101", "Q-030", "UI-010", "UI-012", "R2-30", "R2-31", "spec D31", "R3-UI-51"],
+  gaps: [
+    { t: "open", ids: ["Q-030", "DEC-100", "DEC-101"], text: "Still open under Q-030: the six heroes' names, their Might / Stealth / Magic / Wits values and their innate abilities. The roles (DEC-100) and attributes (DEC-101) are settled; placeholders Hero A–F carry them." },
+    { t: "missing", ids: ["DEC-098", "R2-30", "R2-31", "packs/test/pack.yaml"], text: "With a pool, nothing says when Next is allowed. R2-30 ('until every hunter is held') and R2-31 ('Take all') assume the story's fixed roster. How many heroes must or may be claimed (pack players.min/max is 1–4; the pool has 6)? And how does a story's 'suggested' hero (DEC-098) show?" },
+  ],
+  line: { who: "Board", text: "3 heroes claimed · iPad 1: Hero A, Hero B · iPad 2: Hero C" },
+  cue: "None.",
+  notes: ["SCR-010 vs DEC-045 is settled by DEC-098 (each iPad claims from the engine pool; a claimed hero greys out for the others). DEC-098 to DEC-101 are on the design branch, not yet on main.", "A party of up to 4 always leaves at least 2 of the 6 roles out, so the picks matter (DEC-100).", "The claim screen lays out any number of heroes, not a fixed 6 (DEC-099): a wrapping grid on both screens.", "Devices show text buttons only, no portraits (spec D31, R3-UI-51); the role line does the work a portrait would.", "Two devices claim at once: first press wins, the other sees 'Taken by iPad 1' (r2 §3.4)."],
+  build: (h) => ({
+    board: `${strip("Party join", "connected · calibrated", "2 iPads")}<div class="bd" style="justify-content:flex-start;padding-top:5cqw">
+      <div class="cols"><div class="qr"></div><div class="dlg" style="padding:1cqw 2cqw"><div class="kick">CLAIM YOUR HEROES</div><div class="code">482 913</div><p class="small">3 claimed · choose 1 to 4</p></div></div>
+      <div class="roster">${HEROES.map((x) => `<div class="hcard ${x.by ? "" : "un"}">${h.ph("portrait", x.n, { size: "square, medallion", have: x.n <= "Hero D" ? "stand-in: packs/test/assets/por-" + ["alpha", "beta", "gamma", "delta"]["ABCD".indexOf(x.n.slice(-1))] + ".png" : "" })}<div class="nm">${x.n}</div><div><i>${x.r}</i> · ${x.a}</div><div class="hl">${x.by || "unclaimed"}</div></div>`).join("")}</div></div>`,
+    ipad: `<div class="ip">${ipHead("Claim your heroes")}<div class="body">
+      <div class="btns three">${HEROES.map((x) => `<div class="btn ${x.by === "iPad 1" ? "mine" : x.by ? "off" : ""}" style="flex-direction:column;font-size:2.6cqw">${x.n}<span style="font-size:2cqw;font-weight:400"><i>${x.r}</i> · ${x.a} · ${x.by === "iPad 1" ? "Mine" : x.by ? "Taken by " + x.by : "Free"}</span></div>`).join("")}</div>
+      <div class="btn primary">Next: set up the story</div><p class="why">Rule for when Next is allowed: not decided (see gap).</p></div></div>`,
+    media: [
+      h.m("ui-text", "six hero names and one-line pitches (roles settled by DEC-100)", { status: "missing" }),
+      h.m("ui-text", "attribute values per hero: Might, Stealth, Magic, Wits (DEC-101)", { status: "missing" }),
+      h.m("narration", "voiced intro line per hero on claim (R-UI-7), 6 lines", { size: "3–6 s each", status: "can-make" }),
+      h.m("sfx", "join flourish when a hero is claimed", { size: "< 1 s" }),
+    ],
+  }),
+},
+{
+  id: "components", phase: "Setup", title: "Setup 1: what you need, what stays in the box",
+  cards: ["SCR-011", "SCR-001", "R-WIZ-3", "R-WIZ-5", "DEC-039", "spec D31"],
+  gaps: [
+    { t: "missing", ids: ["SCR-011", "R-WIZ-5", "packs/test/pack.yaml"], text: "No card says which setup steps the engine adds and which come from the story. The POC makes one step per pack setup entry (spec D31: three in packs/test); R-WIZ-5 lists eleven, including components, tower, skulls and starting resources. This walkthrough shows the engine steps it thinks Friday needs." },
+  ],
+  line: { who: "Board dialog", text: "Leave the warrior and spirit tokens in the box. You need: the board, the tower, the hero figures, the skulls, the seals." },
+  cue: "None.",
+  notes: ["Warrior and spirit tokens stay in the box (DEC-039).", "Every physical step has its own Done; the wizard never assumes (R-WIZ-6, R2-52)."],
+  build: (h) => ({
+    board: `${strip("Setup 1 of 8")}<div class="bd"><div class="cols">${h.ph("still", "components illustration: in use vs. back in the box", { size: "16:9 panel 1280×720", style: "width:40cqw;height:22.5cqw" })}
+      <div class="dlg" style="text-align:left;max-width:30cqw"><div class="kick">SETUP · 1 OF 8</div><h4>What you need</h4><p>Board, tower, hero figures, skulls, seals.</p><p><b>Leave in the box:</b> warriors, spirit.</p></div></div>
+      <div class="band">Waiting for an iPad to press Done</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 1 of 8 · Components")}<div class="body"><p>Take out the board, the tower, the hero figures, the skulls and the seals. Leave warriors and spirit in the box.</p>
+      <div class="btns two"><div class="btn sec">Back</div><div class="btn primary">Done</div></div></div></div>`,
+    media: [h.m("dialog", "components step text", { status: "can-make" })],
+  }),
+},
+{
+  id: "board", phase: "Setup", title: "Setup 2: lay out the board",
+  cards: ["SCR-011", "R-WIZ-4", "packs/test/pack.yaml"],
+  gaps: [],
+  line: { who: "Board dialog", text: "Lay out the board and orient the kingdoms." },
+  cue: "None.",
+  notes: ["The text is the test pack's lay-out-board step; its illustration ill.setup-board is a placeholder in packs/test/assets.yaml."],
+  build: (h) => ({
+    board: `${strip("Setup 2 of 8")}<div class="bd"><div class="cols">${h.ph("still", "board diagram: four kingdoms, tower in the centre (ill.setup-board)", { size: "16:9 panel 1280×720", style: "width:44cqw;height:24.75cqw" })}
+      <div class="dlg" style="max-width:26cqw"><div class="kick">SETUP · 2 OF 8</div><h4>The board</h4><p>Lay out the board and orient the kingdoms.</p></div></div><div class="band">Waiting for an iPad to press Done</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 2 of 8 · The board")}<div class="body"><p>Lay out the board and orient the kingdoms. Put the tower in the centre.</p><div class="btns two"><div class="btn sec">Back</div><div class="btn primary">Done</div></div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "orient", phase: "Setup", title: "Setup 3: orient the tower (light a side, tap its kingdom)",
+  cards: ["AREA-056", "MEC-017", "IDEA-025", "IDEA-005", "MEC-016", "AREA-036", "LGT-005", "LFX-002"],
+  gaps: [
+    { t: "disagree", ids: ["IDEA-025", "MEC-017", "SCR-005", "SCR-011", "R-WIZ-5"], text: "IDEA-025 and MEC-017 put orientation right after calibrate (in Tower connect), but the player needs the board laid out to tap a kingdom, and that is a setup step after Party join (SCR-011; R-WIZ-5 puts the board, step 4, before the tower, step 5). This walkthrough moves it here, after the board." },
+    { t: "open", ids: ["MEC-017", "IDEA-025"], text: "MEC-017 is proposed and IDEA-025 open. Which doorway lights mark a side (one light, a ring, a colour?) is not named." },
+  ],
+  line: { who: "Board dialog", text: "One side of the tower is lit. Which kingdom does it face?" },
+  cue: "After a press of Light a side: one side's doorway lights on (e.g. LGT-005 middle ring north, effect On LFX-002). Off after the tap.",
+  notes: ["Nothing else maps a tower side to a board kingdom, so glyph facing, light cues and 'skulls land in the North' all need this (MEC-017).", "Light only after a press: nothing physical happens on its own."],
+  build: (h) => ({
+    board: `${strip("Setup 3 of 8")}<div class="bd"><div class="cols">${h.ph("still", "top-down tower on the board, one lit side, four kingdom labels", { size: "square 1080×1080", status: "can-make", style: "width:28cqw;height:28cqw" })}
+      <div class="dlg" style="max-width:30cqw"><div class="kick">SETUP · 3 OF 8 · THE TOWER</div><h4>Which way?</h4><p>One side of the tower is lit. Tap the kingdom it faces.</p></div></div><div class="band">Waiting for an iPad to tap a kingdom</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 3 of 8 · Orient the tower")}<div class="body"><div class="btn sec">Light a side</div><div class="hint">The lit side faces:</div>
+      <div class="btns two"><div class="btn">North kingdom</div><div class="btn">East kingdom</div><div class="btn">South kingdom</div><div class="btn">West kingdom</div></div></div></div>`,
+    media: [h.m("tower-light", "one side's doorway light, effect On", { have: "LGT-005..008 with LFX-002 (library)" }), h.m("ui-text", "kingdom names as the story renames them", { status: "can-make" })],
+  }),
+},
+{
+  id: "glyphs", phase: "Setup", title: "Setup 4: turn the drums to the start and check each glyph",
+  cards: ["IDEA-025", "MEC-017", "Q-033", "AREA-033", "GLY-001", "GLY-002", "GLY-003", "GLY-004", "GLY-005", "AREA-036"],
+  gaps: [
+    { t: "open", ids: ["Q-033"], text: "Q-033 open: does calibration put each glyph where the library says? If yes this is a yes/no check per drum; if no, the player names the glyph at each lit spot. Needs a hardware test." },
+    { t: "disagree", ids: ["MEC-017", "Q-033"], text: "MEC-017 lists the seals to remove after the glyph check, but Q-033 notes seals still in place may hide the glyphs. Which comes first?" },
+  ],
+  line: { who: "Board dialog", text: "Behind the lit doorway on the top drum you should see the Cleanse glyph. Is it there?" },
+  cue: "After a press: the drums turn to the story's start (MEC-017, about 1.1 s per drum, AST-T08), then one doorway per drum lights (top, middle, bottom ring) in turn.",
+  notes: ["Start positions from the GLY cards: Cleanse top N, Quest top S, Battle middle N, Banner bottom N, Reinforce bottom S (library, unverified).", "Glyph positions are the software's belief, not sensed (MEC-018); a 'No' leaves them unconfirmed, never trusted."],
+  build: (h) => ({
+    board: `${strip("Setup 4 of 8")}<div class="bd"><div class="cols">${h.ph("still", "drum diagram: three drums, lit doorway, expected glyph", { size: "square 1080×1080", status: "can-make", style: "width:26cqw;height:26cqw" })}
+      <div class="dlg" style="max-width:32cqw"><div class="kick">SETUP · 4 OF 8 · GLYPHS</div><h4>Top drum</h4>
+      <div class="row">${h.ph("still", "glyph icon: Cleanse (GLY-001)", { size: "square, 5 icons", status: "can-make", style: "width:8cqw;height:8cqw" })}</div><p>Behind the lit doorway you should see this glyph.</p></div></div><div class="band">Waiting for an iPad: Yes or No</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 4 of 8 · Glyphs · top drum")}<div class="body"><div class="btn sec">Turn drums to the start</div><p>Behind the lit doorway, do you see <b>Cleanse</b>?</p>
+      <div class="btns two"><div class="btn primary">Yes</div><div class="btn">No, it is another</div></div><p class="next">1 of 3 drums</p></div></div>`,
+    media: [h.m("tower-light", "one doorway per drum ring, in turn", { have: "LGT-001..012 (library)" }), h.m("tower-sound", "small reveal on each match (SND-099 Tower Glyph, not on a card)", { have: "tower sound #99" })],
+  }),
+},
+{
+  id: "seals", phase: "Setup", title: "Setup 5: seals in, skulls loaded",
+  cards: ["MEC-017", "MEC-018", "R-WIZ-9", "Q-032", "AREA-011", "AST-T13"],
+  gaps: [
+    { t: "open", ids: ["Q-032"], text: "Q-032 open: Bob decides on the seals after the 'how often does a skull stay trapped with all seals out' test. Until then, which seals go in at the start is unknown." },
+    { t: "missing", ids: ["R-WIZ-9", "DEC-064"], text: "How many skulls start in the tower or on buildings has no card (R-WIZ-9g only says 'load the starting skulls')." },
+  ],
+  line: { who: "Board dialog", text: "Put in all twelve seals. Load the starting skulls into the top of the tower." },
+  cue: "None. Seal state is app-tracked; the firmware does not know (AST-T13).",
+  notes: ["Seals and skulls are tracked, not sensed (MEC-018)."],
+  build: (h) => ({
+    board: `${strip("Setup 5 of 8")}<div class="bd"><div class="cols">${h.ph("still", "tower with seals in place, skulls going in the top", { size: "16:9 panel 1280×720", style: "width:40cqw;height:22.5cqw" })}
+      <div class="dlg" style="max-width:28cqw"><div class="kick">SETUP · 5 OF 8</div><h4>Seals and skulls</h4><p>Seals: <span class="unav">decision pending (Q-032)</span></p><p>Skulls: <span class="unav">count not decided</span></p></div></div><div class="band">Waiting for an iPad to press Done</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 5 of 8 · Seals and skulls")}<div class="body"><p>Put in the seals as shown on the board. Load the starting skulls.</p><div class="btns two"><div class="btn sec">Back</div><div class="btn primary">Done</div></div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "heroes", phase: "Setup", title: "Setup 6: hero figures to the start",
+  cards: ["SCR-011", "DEC-031", "DEC-035", "MEC-018", "packs/test/pack.yaml"],
+  gaps: [
+    { t: "missing", ids: ["DEC-031", "DEC-035"], text: "No card says where the heroes start (a story's start building? the engine's?) or that heroes who start together form one group (DEC-031 only says heroes on a space can travel as a group). The iPad map (DEC-035) needs a known start space." },
+  ],
+  line: { who: "Board dialog", text: "Stand Hero A, Hero B and Hero C on the Citadel of the North kingdom. They travel together as one group." },
+  cue: "None.",
+  notes: ["Text adapted from packs/test 'place-hunters'. Mini positions are tracked, not sensed (MEC-018)."],
+  build: (h) => ({
+    board: `${strip("Setup 6 of 8")}<div class="bd"><div class="cols">${h.ph("still", "board diagram with the start building highlighted", { size: "16:9 panel 1280×720", style: "width:40cqw;height:22.5cqw" })}
+      <div class="dlg" style="max-width:28cqw"><div class="kick">SETUP · 6 OF 8</div><h4>The heroes</h4><p>Stand Hero A, B and C on the start building.</p><p class="small">They start as one group.</p></div></div><div class="band">Waiting for an iPad to press Done</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 6 of 8 · Heroes")}<div class="body"><p>Stand your figures on the start building shown on the board.</p><div class="btns two"><div class="btn sec">Back</div><div class="btn primary">Done</div></div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "purse", phase: "Setup", title: "Setup 7: the starting purse",
+  cards: ["IDEA-010", "Q-022", "OPT-006", "OPT-007", "OPT-008", "UI-001", "DEC-059"],
+  gaps: [
+    { t: "open", ids: ["Q-022", "IDEA-010"], text: "Q-022 open: which game of chance sets the purse (haggle die OPT-006, tower fortune wheel OPT-007, chests OPT-008), its range and floor, and whether length or player count scales it. Shown here with OPT-007 as an example only." },
+  ],
+  line: { who: "Board", text: "The lights slow… and stop. The party's purse: 12 gold. (placeholder amount)" },
+  cue: "If OPT-007: after a Spin press, lights chase round the tower, slow and stop on a side, with a coin sound. Lights and sound only.",
+  notes: ["The purse then stays on the Story board under the story's name (UI-001).", "Difficulty may change it (DEC-059 affects IDEA-010)."],
+  build: (h) => ({
+    board: `${strip("Setup 7 of 8")}<div class="bd"><div class="dlg"><div class="kick">SETUP · 7 OF 8 · FORTUNE</div><h4>The party's purse</h4><div class="row">${h.ph("still", "coin purse / wheel illustration", { size: "square 720×720", style: "width:14cqw;height:14cqw" })}<div style="font-size:5cqw;font-weight:700">12</div></div><p class="small">example only: the game of chance is undecided (Q-022)</p></div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 7 of 8 · Purse")}<div class="body"><div class="btn primary">Spin</div><p class="next">The tower picks the purse (one of three options, Q-022).</p></div></div>`,
+    media: [h.m("tower-light", "light chase round the tower, slowing to a stop (OPT-007)", { status: "can-make" }), h.m("sfx", "coin sound on the stop", { size: "< 1 s" })],
+  }),
+},
+{
+  id: "decks", phase: "Setup", title: "Setup 8: decks and tokens",
+  cards: ["SCR-011", "DEC-067", "Q-034", "DEC-001", "Q-002", "DEC-087", "packs/test/pack.yaml"],
+  gaps: [
+    { t: "disagree", ids: ["DEC-067", "Q-034", "packs/test/pack.yaml"], text: "packs/test has a 'Shuffle the decks and set the tokens beside the board' step, but DEC-067 has the app deal every card and Q-034 (parked) says design as if the hand is digital. Is there a physical deck step at all?" },
+  ],
+  line: { who: "Board dialog", text: "Set the tokens beside the board. (The decks stay in the box: the app deals every card.)" },
+  cue: "None.",
+  notes: ["No quest tokens go down at setup: they are only lead markers, placed when an NPC reveals a lead (DEC-087; DEC-001 parked, Q-002 settled)."],
+  build: (h) => ({
+    board: `${strip("Setup 8 of 8")}<div class="bd"><div class="cols">${h.ph("still", "tokens beside the board", { size: "16:9 panel 1280×720", style: "width:36cqw;height:20.25cqw" })}
+      <div class="dlg" style="max-width:28cqw"><div class="kick">SETUP · 8 OF 8</div><h4>Tokens</h4><p>Set the tokens beside the board. No quest markers yet.</p><p class="small">Decks: <span class="unav">app-dealt? (gap)</span></p></div></div><div class="band">Waiting for an iPad to press Done</div></div>`,
+    ipad: `<div class="ip">${ipHead("Setup 8 of 8 · Tokens")}<div class="body"><p>Set the tokens beside the board.</p><div class="btns two"><div class="btn sec">Back</div><div class="btn primary">Done</div></div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "confirm", phase: "Setup", title: "Final check: confirm what the tower cannot sense",
+  cards: ["MEC-018", "AREA-056", "R-WIZ-5", "DEC-047"],
+  gaps: [
+    { t: "open", ids: ["MEC-018"], text: "MEC-018 is proposed. It says each tracked state shows as unconfirmed until confirmed 'with a picture', but not whether that is one checklist here or a confirm inside each step, and the pictures do not exist." },
+  ],
+  line: { who: "Board", text: "Tower faces: confirmed · Glyphs: 2 of 3 confirmed · Seals: confirmed · Skulls: confirmed · Heroes: on the start building" },
+  cue: "None.",
+  notes: ["A skipped check stays unconfirmed, never quietly trusted (MEC-018).", "No resume check: a game is one sitting (DEC-047)."],
+  build: (h) => ({
+    board: `${strip("Final check")}<div class="bd"><div class="dlg" style="text-align:left"><div class="kick">THE TABLE</div><h4>Is this what you see?</h4>
+      <div class="row" style="justify-content:flex-start">${h.ph("still", "confirm picture: tower facing", { size: "4:3 thumb 480×360", status: "can-make", style: "width:11cqw;height:8.25cqw" })}${h.ph("still", "confirm picture: glyphs", { size: "4:3 thumb", status: "can-make", style: "width:11cqw;height:8.25cqw" })}${h.ph("still", "confirm picture: seals and skulls", { size: "4:3 thumb", status: "can-make", style: "width:11cqw;height:8.25cqw" })}</div>
+      <p>Tower faces North ✓ · Glyphs 2 of 3 · <span class="unav">middle drum unconfirmed</span> · Seals ✓ · Heroes on the start ✓</p></div></div>`,
+    ipad: `<div class="ip">${ipHead("Final check")}<div class="body"><div class="btns two"><div class="btn mine">Tower facing ✓</div><div class="btn">Middle drum glyph: confirm</div><div class="btn mine">Seals ✓</div><div class="btn mine">Heroes ✓</div></div><div class="btn primary">All as shown</div></div></div>`,
+    media: [],
+  }),
+},
+{
+  id: "begin", phase: "Begin", title: "Begin: the table is set",
+  cards: ["SCR-012", "R2-03", "R2-52", "R-WIZ-5", "R-WIZ-9", "UI-014"],
+  gaps: [
+    { t: "missing", ids: ["SCR-012", "R-WIZ-5", "R-WIZ-9"], text: "R-WIZ-5 step 11 says Begin plays the first tower cue, and R-WIZ-9h starts the story's idle light effect. No card names either (SND-095 'Game Start' is the inventory's candidate)." },
+  ],
+  line: { who: "Board", text: "Proving ground · Standard · Normal · Heroes A, B, C · Purse 12. Any iPad: Begin the story." },
+  cue: "Proposed, not on a card: on the winning Begin press, SND-095 Game Start, then a story idle effect (e.g. LFX-003 Breathe on the base lights).",
+  notes: ["Any joined iPad can begin; first press wins, the others move on with no error (R2-03).", "Begin is unavailable until every setup step is Done (R2-52)."],
+  build: (h) => ({
+    board: `${strip("Begin")}<div class="bd"><div class="dlg"><div class="kick">TONIGHT'S GAME</div><h4>The table is set</h4><p>Proving ground · Standard · Normal</p>
+      <div class="roster" style="margin:.6cqw 0">${HEROES.slice(0, 3).map((x) => `<span class="chipb">${x.n} · ${x.r}</span>`).join("")}</div><p>Purse 12</p></div><div class="band">Any iPad: Begin the story</div></div>`,
+    ipad: `<div class="ip">${ipHead("Ready")}<div class="body"><div class="btn primary">Begin the story</div><div class="btn sec">Back</div></div></div>`,
+    media: [h.m("tower-sound", "SND-095 Game Start on Begin (proposed)", { have: "tower sound #95" }), h.m("tower-light", "story idle effect, e.g. Breathe on the base lights (proposed)", { have: "LFX-003 + LGT-017..024 (library)" })],
+  }),
+},
+{
+  id: "opening", phase: "Play", title: "Opening: the story speaks",
+  cards: ["DEC-077", "DEC-040", "UI-002", "UI-003", "R3-UI-31", "R3-UI-32", "R3-UI-33b", "R3-UI-60"],
+  gaps: [
+    { t: "open", ids: ["DEC-077"], text: "DEC-077 is proposed, and its beat 2 (the story beat) is 'still to be worked out'. Is the opening scene turn 1's story beat, or its own scene before turn 1? No card." },
+  ],
+  line: { who: "Narrator (talking avatar, captioned)", text: "\"The bell has not rung in the hall for a hundred years. Tonight it rings.\" (placeholder)" },
+  cue: "None decided. Music ducks about 1 s as the visual zooms in (R3-UI-60).",
+  notes: ["A visual zooms in from the waiting dialog and leaves only on an iPad Continue (R3-UI-31, R3-UI-32).", "Captions always on (R3-UI-33b). Devices play no audio or visuals (R3-UI-51)."],
+  build: (h) => ({
+    board: `${h.ph("still", "opening scene, uncropped (packs/test fx-hall stands in)", { size: "16:9 1920×1080", have: "packs/test/assets/fx-hall.png (test pack)", style: "position:absolute;inset:0" })}
+      <div class="bd" style="justify-content:flex-end;padding-bottom:5.5cqw">${h.ph("portrait", "narrator talking avatar, 8 mouth shapes", { size: "square 1024 + mouths", have: "apps/bloodtower/public/avatars/keeper/ (Keeper as stand-in)", style: "position:absolute;left:2cqw;bottom:6cqw;width:14cqw;height:14cqw" })}
+      <div class="dlg" style="max-width:60cqw;margin-left:14cqw;padding:1cqw 2cqw;text-align:left"><b>Narrator:</b> <i>The bell has not rung in the hall for a hundred years. Tonight it rings.</i></div></div><div class="band">iPad: Continue</div>`,
+    ipad: `<div class="ip">${ipHead("The story")}<div class="body"><p class="next">Watch the board.</p><div class="btn primary">Continue</div></div></div>`,
+    media: [h.m("narration", "opening narration, story voice (TTS)", { size: "20–30 s", status: "can-make" }), h.m("music", "story theme under the opening", { have: "packs/test/audio/night1-ambient.m4a (test pack)" })],
+  }),
+},
+{
+  id: "roll", phase: "Play", title: "Turn 1, beat 1: roll each group's moves",
+  cards: ["DEC-077", "DEC-079", "DEC-102", "DEC-034", "Q-043", "AREA-019", "AREA-058", "MEC-002", "AREA-062", "R2-60"],
+  gaps: [
+    { t: "disagree", ids: ["R2-60", "AREA-062", "DEC-064"], text: "R2-60 has the board show 'Night N of 5' at all times; AREA-062 and DEC-064 make one turn one day. What does the board count?" },
+    { t: "missing", ids: ["DEC-102", "DEC-077"], text: "Nothing says whether the tower takes part in the roll (a light chase, a sound), or whether the table presses 'Roll' (the app rolls, so no press is needed)." },
+  ],
+  line: { who: "Board", text: "Day 1. Group 1 (Hero A, B, C) rolled 4, +1 for a virtue: 5 moves." },
+  cue: "None decided.",
+  notes: ["DEC-102 (design branch) answers Q-043's shape: a seeded roll, +1 per helping virtue, −1 per corruption, never below a floor. The board shows the roll, each modifier and the total. The dice, floor and which virtues help are tuned in move-roll.html (same folder).", "MEC-002 (base RtDT move value, doubled for 1 spirit) is parked: spirit is gone (DEC-039) and reach is a seeded roll (DEC-034, DEC-079).", "Moves pay for walking and building actions alike (DEC-078)."],
+  build: (h) => ({
+    board: `${strip("Day 1 · roll")}<div class="bd"><div class="dlg"><div class="kick">DAY 1</div><h4>The road ahead</h4>
+      <div class="row">${h.ph("still", "roll visual: die / dial / hourglass", { size: "square 720×720", style: "width:12cqw;height:12cqw" })}<div style="text-align:left"><p><b>Group 1</b> · Hero A, B, C</p><p style="font-size:4.5cqw;font-weight:700;margin:0">5 moves</p><p class="small">roll 4 · helping virtue +1 · corruptions 0 · floor 2 · <b>total 5</b> (example)</p></div></div></div></div>`,
+    ipad: `<div class="ip">${ipHead("Day 1")}<div class="body"><div class="banner">Group 1 · 5 moves</div><p class="next">The board shows the roll. Next: Group 1 plays.</p></div></div>`,
+    media: [h.m("sfx", "roll sound on the board", { size: "< 1.5 s" })],
+  }),
+},
+{
+  id: "loop", phase: "Play", title: "Turn 1, beat 3: Group 1 spends its moves (Play screen)",
+  cards: ["SCR-014", "DEC-057", "UI-019", "UI-011", "UI-012", "UI-013", "UI-014", "UI-001", "DEC-031", "DEC-035", "DEC-078", "R3-UI-53"],
+  gaps: [
+    { t: "disagree", ids: ["UI-019", "UI-011", "DEC-031"], text: "UI-019 (whose-turn banner, designed not built) and UI-011 (now acting) name the hero who acts; DEC-031 has groups act. Banner per group or per hero? And there is no screen to split off or join a group." },
+    { t: "missing", ids: ["DEC-035", "Q-024"], text: "DEC-035 needs an iPad map of the board's spaces with this turn's reach shown. No card for the map screen, and no card for the board's spaces and adjacency data." },
+  ],
+  line: { who: "Prompt band", text: "Group 1 is moving: 5 moves left." },
+  cue: "None.",
+  notes: ["SCR-014 now follows DEC-057 (design branch): every line shows on the Story board; iPads carry choices and taps only.", "One primary button per iPad screen (R2-02). With several heroes on one device, who acts follows the choice (R3-UI-53).", "Hero panels show 'unavailable' for HP and items until the state carries them, never zero (UI-011)."],
+  build: (h) => ({
+    board: `${strip("Day 1 · Group 1")}<div class="side l" style="top:3.4cqw"><h5>NOW ACTING</h5><p>Group 1: Hero A, B, C</p><p>Corruption: 0</p><p>HP: <span class="unav">unavailable</span></p></div>
+      <div class="side r"><h5>PROVING GROUND</h5><p>Purse <b>12</b></p><h5 style="margin-top:.6cqw">PARTY ITEMS</h5><p class="unav">none yet</p></div>
+      <div class="bd"><div class="dlg" style="max-width:40cqw"><p>Group 1 is on the road.</p><p style="font-size:3cqw;font-weight:700;margin:0">5 moves left</p></div>
+      <div class="roster" style="position:absolute;bottom:5cqw">${HEROES.slice(0, 3).map((x, i) => `<div class="hcard ${i === 0 ? "act" : ""}" style="width:10cqw">${h.ph("portrait", x.n, { size: "square", have: "stand-in: packs/test/assets/por-" + ["alpha", "beta", "gamma"][i] + ".png" })}<div class="nm">${x.n}</div><div class="hl">Group 1</div></div>`).join("")}</div></div>
+      <div class="band">Group 1 is moving: 5 moves left</div>`,
+    ipad: `<div class="ip">${ipHead("Day 1")}<div class="body" style="justify-content:flex-start"><div class="banner">Group 1 · 5 moves left</div>
+      ${h.ph("still", "iPad board map: spaces within 5 moves lit, tap where the figures now stand", { size: "4:3 vector, 1024×560 pt", style: "min-height:24cqw" })}
+      <div class="btns two"><div class="btn sec">End turn</div><div class="btn primary">I moved: tap the space</div></div></div></div>`,
+    media: [h.m("ambience", "day ambient bed during play", { have: "packs/test/audio/night1-ambient.m4a (test pack)" })],
+  }),
+},
+{
+  id: "move", phase: "Play", title: "First move: tap the new space, arrive at a site",
+  cards: ["DEC-035", "DEC-078", "MEC-004", "MEC-019", "DEC-080", "DEC-017", "IDEA-028", "Q-024"],
+  gaps: [
+    { t: "disagree", ids: ["MEC-004", "IDEA-028", "DEC-080"], text: "MEC-004 ('moving onto a site starts its set piece, encounter, shop') and IDEA-028 ('if the move is onto an encounter, resolve it') resolve on arrival; DEC-080 says nothing interrupts a group's loop and events come at the end of the turn. For a building the menu opens (MEC-019); for a set piece or a wild space mid-loop, what happens now?" },
+    { t: "open", ids: ["MEC-019"], text: "MEC-019 (the location menu: base action, sub-locations, NPCs, story point) is proposed; each pick costs 1 move (DEC-078)." },
+    { t: "missing", ids: ["SCR-013", "DEC-035"], text: "No card says whether the Story board shows the map or the group's new position at all." },
+  ],
+  line: { who: "Board", text: "Group 1 walked 2 spaces to the village of Ashford. 3 moves left." },
+  cue: "None.",
+  notes: ["Bob's example (DEC-078): 2 moves into a village, 1 for the tavern, 2 more into the wild is 5 moves.", "Staying in town all turn is allowed (DEC-078). Ending in the wild invites an event at the end of the turn (DEC-080).", "End of the walkthrough: the loop repeats until moves run out or the group ends its turn."],
+  build: (h) => ({
+    board: `${strip("Day 1 · Group 1")}<div class="bd"><div class="cols">${h.ph("still", "village establishing shot (building type art)", { size: "16:9 1280×720", style: "width:38cqw;height:21.4cqw" })}
+      <div class="dlg" style="max-width:28cqw;text-align:left"><div class="kick">THE VILLAGE OF ASHFORD</div><p>Group 1 walked 2 spaces.</p><p style="font-size:2.6cqw;font-weight:700">3 moves left</p></div></div><div class="band">Group 1 is choosing in the village</div></div>`,
+    ipad: `<div class="ip">${ipHead("Ashford · village")}<div class="body"><div class="banner">Group 1 · 3 moves left</div>
+      <div class="btns two"><div class="btn">Tavern · 1 move</div><div class="btn">Market · 1 move</div><div class="btn">Talk to the elder · 1 move</div><div class="btn">Keep walking</div></div>
+      <div class="btn sec">End turn here</div></div></div>`,
+    media: [h.m("ui-text", "village menu names (story renames them)", { status: "can-make" }), h.m("ambience", "village ambience", { size: "loop 60 s" })],
+  }),
+},
+];
+
+// ---------- build all steps once (so counts, CSV and README can read them) ----------
+for (const s of STEPS) {
+  s.assets = [];
+  const out = s.build(helpers(s.assets));
+  s.boardHtml = out.board;
+  s.ipadHtml = out.ipad;
+  s.mediaHtml = out.media.join("");
+}
+window.STEPS = STEPS;
+
+// ---------- render ----------
+const nav = document.getElementById("nav");
+function renderNav(cur) {
+  let html = `<h1>SETUP WALKTHROUGH</h1><div class="sub">Launch to the first hero's first move · 2026-10-21</div>`;
+  let phase = "";
+  STEPS.forEach((s, i) => {
+    if (s.phase !== phase) { phase = s.phase; html += `<div class="phase">${phase}</div>`; }
+    const g = s.gaps.length;
+    html += `<a href="#${s.id}" class="${i === cur ? "on" : ""}" data-i="${i}"><span class="n">${String(i + 1).padStart(2, "0")}</span><span class="t">${esc(s.title.split(":")[0])}</span><span class="g ${g ? "" : "z"}" title="${g} gap(s)">${g}</span></a>`;
+  });
+  const total = STEPS.reduce((n, s) => n + s.gaps.length, 0);
+  html += `<div class="total">${STEPS.length} steps · ${total} gaps</div>`;
+  nav.innerHTML = html;
+}
+const idChip = (x) => `<span class="id ${BRANCH_IDS.has(x) ? "br" : ""}">${esc(x)}</span>`;
+let cur = 0;
+function show(i) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[cur];
+  document.getElementById("title").innerHTML = `<span class="k">${String(cur + 1).padStart(2, "0")} / ${STEPS.length} · ${esc(s.phase.toUpperCase())}</span>${esc(s.title)}`;
+  document.getElementById("ids").innerHTML = s.cards.map(idChip).join("");
+  document.getElementById("gaps").innerHTML = s.gaps.map((g) => `<div class="gap" role="note"><b>GAP · ${esc(g.t.toUpperCase())}</b>${g.ids.map((x) => `<code>${esc(x)}</code>`).join(" ")} — ${esc(g.text)}</div>`).join("");
+  const showBg = !s.boardHtml.includes("landing painting");
+  document.getElementById("board").innerHTML = (showBg ? `<span class="bgtag">bg: landing painting (SCR-002, R3-UI-01)</span>` : "") + s.boardHtml;
+  document.getElementById("ipad").innerHTML = s.ipadHtml;
+  document.getElementById("line").innerHTML = s.line ? `<p class="line"><span class="who">${esc(s.line.who)}</span>${esc(s.line.text)}</p>` : `<p>None.</p>`;
+  document.getElementById("cue").innerHTML = `<p class="cue">${esc(s.cue)}</p>`;
+  document.getElementById("media").innerHTML = s.mediaHtml || `<span class="hint">Nothing beyond the art in the frames.</span>`;
+  document.getElementById("notes").innerHTML = s.notes.length ? s.notes.map((n) => `<li>${esc(n)}</li>`).join("") : "<li>None.</li>";
+  document.getElementById("prev").disabled = cur === 0;
+  document.getElementById("next").disabled = cur === STEPS.length - 1;
+  renderNav(cur);
+  if (location.hash.slice(1) !== s.id) history.replaceState(null, "", "#" + s.id);
+}
+document.getElementById("prev").addEventListener("click", () => show(cur - 1));
+document.getElementById("next").addEventListener("click", () => show(cur + 1));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") show(cur + 1);
+  if (e.key === "ArrowLeft") show(cur - 1);
+});
+window.addEventListener("hashchange", () => {
+  const i = STEPS.findIndex((s) => s.id === location.hash.slice(1));
+  if (i >= 0 && i !== cur) show(i);
+});
+const start = STEPS.findIndex((s) => s.id === location.hash.slice(1));
+show(start >= 0 ? start : 0);
+</script>
+</body>
+</html>

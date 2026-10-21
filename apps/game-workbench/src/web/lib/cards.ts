@@ -8,6 +8,7 @@ import {
 } from "@dark-tower/workbench";
 import { loadCards as loadCardsWith } from "@dark-tower/workbench/server";
 import { designDir, loadDocs } from "./content.ts";
+import { checkFeel } from "./feel.ts";
 import { CARD_TYPES, type Card, type CardType, type Graph, LAYERS, RELS } from "./graph-types.ts";
 import { idKind } from "./ids.ts";
 import { GAME_LINK_RULES } from "./link-rules.ts";
@@ -51,6 +52,7 @@ export const GAME_CARDS: CardSchema = {
   layers: LAYERS,
   rels: RELS,
   dir: "research/game-design/cards",
+  checkFields: checkFeel,
   render: renderMarkdown,
 };
 
