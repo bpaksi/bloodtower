@@ -22,7 +22,7 @@
 - **The tower** (CLAUDE.md, Tower safety): only through tower-poc, one press per physical action, no automatic retry. Without tower-poc running, a prototype shows the tower as unavailable (never zero) and plays a screen-and-sound stand-in.
 - **What it found:**
   - Each prototype ends with `apps/prototypes/src/web/app/p/<name>/FINDINGS.md`. It records what worked, what didn't, the numbers chosen, the simulation results and the card IDs to update.
-  - It counts as final only after Bob's play-through (Bob, 2026-10-21: every prototype in batch 1).
+  - A prototype's PR merges once its review and CI pass, so Bob can play it from `main`. Its FINDINGS.md counts as final only after Bob's play-through (Bob, 2026-10-21: every prototype in batch 1). The play-through is a gate on the findings, not on the merge.
   - Claude turns it into card updates on a game-design branch.
 
 ## Steps
@@ -57,13 +57,14 @@
   - A small local copy of the tower-poc message types the client needs, each `command{capabilityId, params}`, so no message carries raw bytes. Bob ruled a copy rather than a move to `packages/` (2026-10-21).
   - **Drift test:** a unit test reads `apps/tower-poc/src/protocols` as text from disk, without importing it (apps never import from another app), and fails if any copied message type, field or capability id differs.
   - **Client:** connects to tower-poc's `/ws` on a press, sends a command, and reports each command's outcome. A command with no answer is an error, shown with its code. Nothing reconnects or retries on its own.
-  - Tested against tower-poc's mock tower.
+  - Tested against tower-poc running with its mock tower, over `/ws`. Nothing is imported from tower-poc.
   - No batch-1 prototype needs this. It is for P-06 and P-07.
 
 ### P-01 Story board layouts (`feat/prototypes-board`)
 
 - Depends on: 0a
 - Touches: apps/prototypes/src/web/app/p/board/**
+- Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Question: are the board's panels readable from the couch on the Samsung at 1080p, and do they scale to 4K?
@@ -78,6 +79,7 @@
 
 - Depends on: 0a
 - Touches: apps/prototypes/src/web/app/p/turn/**
+- Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Question: does a turn feel right, and is there enough to do with the moves a group rolls?
@@ -97,6 +99,7 @@
 
 - Depends on: 0a
 - Touches: apps/prototypes/src/web/app/p/tomb/**
+- Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Question: does "deeper or leave" make a tense scene in about 5–10 minutes?
@@ -113,6 +116,7 @@
 
 - Depends on: 0a
 - Touches: apps/prototypes/src/web/app/p/cave/**
+- Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Question: is reading signs to pick a passage fun, and is the light meter fair?
@@ -133,6 +137,7 @@
 
 - Depends on: 0a
 - Touches: apps/prototypes/src/web/app/p/camp/**
+- Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Question: does the camp's temper make haggling a real choice?
@@ -150,6 +155,7 @@
 
 - Depends on: 0a
 - Touches: apps/prototypes/src/web/app/p/fortress/**
+- Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Question: how many rungs, and how steep, before the ladder feels like a grind?
