@@ -1,4 +1,4 @@
-import { ChipCopy, HistoryButtons, PromptStarter } from "@dark-tower/workbench/components";
+import { ChipCopy, FindBox, HistoryButtons, PromptStarter } from "@dark-tower/workbench/components";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar.tsx";
@@ -23,13 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="main">
             <header className="topbar">
               <HistoryButtons />
-              <input
-                className="search"
-                type="search"
-                placeholder="Find an ID or a word (coming)"
-                aria-label="Find an ID or a word"
-                disabled
-              />
+              <FindBox />
               <button type="button" className="btn-primary" data-prompt="new">
                 New idea
               </button>
