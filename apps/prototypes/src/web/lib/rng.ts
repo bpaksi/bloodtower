@@ -33,6 +33,7 @@ export function hashSeed(seed: string): number {
   return (h1 ^ (h1 >>> 16)) >>> 0;
 }
 
+const MAX_DICE = 1000;
 const DICE = /^\s*(?:(\d*)d(\d+))?\s*(?:([+-])\s*(\d+))?\s*$/i;
 
 /** Splits "2d6+1" into its parts. Throws on text it cannot read, so a typo is never a silent zero. */
@@ -45,6 +46,9 @@ export function parseDice(notation: string): { count: number; sides: number; mod
   const sides = m[2] === undefined ? 0 : Number(m[2]);
   if (m[2] !== undefined && (count < 1 || sides < 1)) {
     throw new Error(`Invalid dice notation "${notation}": dice need at least 1 die and 1 side.`);
+  }
+  if (count > MAX_DICE) {
+    throw new Error(`Invalid dice notation "${notation}": at most ${MAX_DICE} dice per roll.`);
   }
   const modifier = m[4] === undefined ? 0 : (m[3] === "-" ? -1 : 1) * Number(m[4]);
   return { count, sides, modifier };

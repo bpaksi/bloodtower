@@ -47,6 +47,11 @@ describe("rng", () => {
     }
   });
 
+  it("rejects more than 1000 dice with a clear error, and allows 1000", () => {
+    expect(() => createRng("x").roll("1001d6")).toThrow(/at most 1000 dice/);
+    expect(createRng("x").roll("1000d1").total).toBe(1000);
+  });
+
   it("int, pick and shuffle stay in range and keep every item", () => {
     const rng = createRng("s");
     for (let i = 0; i < 100; i++) expect([3, 4, 5]).toContain(rng.int(3, 5));

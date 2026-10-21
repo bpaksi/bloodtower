@@ -111,4 +111,15 @@ describe("logger", () => {
     logger.error(undefined, "plain");
     expect(logger.getState().entries.map((e) => e.message)).toEqual(['{"code":5}', "plain"]);
   });
+
+  it("an error event with an empty message uses the error's message, then 'Unknown error'", () => {
+    const { logger } = setup();
+    const target = new EventTarget();
+    logger.installGlobalHandlers(target);
+    target.dispatchEvent(
+      Object.assign(new Event("error"), { error: new Error("inner"), message: "" }),
+    );
+    target.dispatchEvent(Object.assign(new Event("error"), { message: "" }));
+    expect(logger.getState().entries.map((e) => e.message)).toEqual(["inner", "Unknown error"]);
+  });
 });

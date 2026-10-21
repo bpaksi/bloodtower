@@ -98,7 +98,11 @@ export function createLogger(options: { sink?: ConsoleSink; now?: () => Date } =
   /** Catches errors thrown in a page and unhandled promise rejections on `target` (the window). */
   function installGlobalHandlers(target: EventTargetLike): () => void {
     const onError = (e: { error?: unknown; message?: string }) =>
-      error(e.message ?? messageOf(e.error), e.error ?? e.message, "UNCAUGHT_ERROR");
+      error(
+        e.message || (e.error === undefined ? "Unknown error" : messageOf(e.error)),
+        e.error ?? e.message,
+        "UNCAUGHT_ERROR",
+      );
     const onRejection = (e: { reason?: unknown }) =>
       error(`Unhandled rejection: ${messageOf(e.reason)}`, e.reason, "UNHANDLED_REJECTION");
     target.addEventListener("error", onError as unknown as EventListener);
