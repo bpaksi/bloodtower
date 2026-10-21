@@ -116,10 +116,7 @@ export default async function SoundsPage({
                         {r.id}
                       </Link>
                     </td>
-                    <td>
-                      {r.name}
-                      {r.feel?.avoid && <span className="sound-avoid">avoid</span>}
-                    </td>
+                    <td>{r.name}</td>
                     <td>{r.feel?.mood ?? <Unavailable />}</td>
                     <td>{r.feel?.readsAs ?? <Unavailable />}</td>
                     <td>{r.feel?.strength ?? <Unavailable />}</td>

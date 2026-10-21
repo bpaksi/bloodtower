@@ -95,11 +95,10 @@ feel:
   readsAs: threat      # threat | alert | reward | failure | arrival | magic | voice | transition
   strength: strong     # soft | medium | strong
   lengthMs: 2300       # measured by Bob's Stopped press; the tower does not report when a sound ends
-  avoid: false         # true when the sound is tied too closely to an RtDT character
   note: low growl, then a crack
 ```
 
-Every field is optional. One that was not recorded is left out, never written as 0 or "". The mechanics or cues a sound fits are not part of the block; they are `uses` links on those cards. The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a word outside the lists above. The code is `apps/game-workbench/src/web/lib/feel.ts`.
+Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a word outside the lists above. The code is `apps/game-workbench/src/web/lib/feel.ts`.
 
 ## Status
 

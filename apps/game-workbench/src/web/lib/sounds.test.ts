@@ -19,7 +19,7 @@ describe("feel: in the card lint", () => {
       const c = sound(
         90,
         "AREA-030",
-        `\nfeel:\n  mood: ${mood}\n  readsAs: threat\n  strength: strong\n  lengthMs: 2300\n  avoid: false\n  note: low growl`,
+        `\nfeel:\n  mood: ${mood}\n  readsAs: threat\n  strength: strong\n  lengthMs: 2300\n  note: low growl`,
       );
       expect(c.data.feel).toMatchObject({ mood, lengthMs: 2300 });
     }
@@ -31,6 +31,7 @@ describe("feel: in the card lint", () => {
     expect(() => sound(1, "AREA-022", "\nfeel:\n  readsAs: boom")).toThrow(/unknown readsAs/);
     expect(() => sound(1, "AREA-022", "\nfeel:\n  strength: loud")).toThrow(/unknown strength/);
     expect(() => sound(1, "AREA-022", "\nfeel:\n  fits: [MEC-012]")).toThrow(/unknown feel field/);
+    expect(() => sound(1, "AREA-022", "\nfeel:\n  avoid: true")).toThrow(/unknown feel field/);
   });
 
   it("rejects a length of 0, a feel on a card that is not a sound, and a feel that is not a block", () => {

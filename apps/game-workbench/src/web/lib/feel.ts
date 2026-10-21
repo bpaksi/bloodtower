@@ -34,12 +34,10 @@ export type Feel = {
   strength?: Strength;
   /** Measured by Bob's Stopped press; the tower does not report when a sound ends. */
   lengthMs?: number;
-  /** Tied too closely to an RtDT character to reuse. */
-  avoid?: boolean;
   note?: string;
 };
 
-const KEYS = ["mood", "readsAs", "strength", "lengthMs", "avoid", "note"];
+const KEYS = ["mood", "readsAs", "strength", "lengthMs", "note"];
 
 function oneOf(list: readonly string[], v: unknown): boolean {
   return typeof v === "string" && list.includes(v);
@@ -64,8 +62,6 @@ export function checkFeel(type: string, data: Record<string, unknown>): string |
     !(Number.isInteger(feel.lengthMs) && (feel.lengthMs as number) > 0)
   )
     return "feel lengthMs must be a whole number above 0";
-  if (feel.avoid !== undefined && typeof feel.avoid !== "boolean")
-    return "feel avoid must be true or false";
   if (feel.note !== undefined && typeof feel.note !== "string") return "feel note must be text";
   return null;
 }

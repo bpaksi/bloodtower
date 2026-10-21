@@ -190,12 +190,11 @@ Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-p
   - **Mood**: dread, tension, wonder, triumph, loss, calm, comic, mystery, menace
   - **Reads as**: threat, alert, reward, failure, arrival, magic, voice, transition
   - **Strength**: soft, medium, strong
-  - **Fits**: mechanics or cues it suits (`MEC-`, `CUE-` IDs), and **Avoid** for sounds tied too closely to an RtDT character
   - a few words of his own
-- Picks are kept in the browser until exported. **Export** downloads `sound-feel.json`:
-  `{ "version": 1, "sounds": [{ "id": "SND-044", "index": 44, "lengthMs": 2300, "mood": "dread", "readsAs": "threat", "strength": "strong", "fits": ["MEC-012"], "avoid": false, "note": "…" }] }`.
+- Picks are saved on the tower-poc server as Bob goes, so a review can span several sittings and survives cleared browser data (Bob, 2026-10-21). **Export** downloads `sound-feel.json`:
+  `{ "version": 1, "sounds": [{ "id": "SND-044", "index": 44, "lengthMs": 2300, "mood": "dread", "readsAs": "threat", "strength": "strong", "note": "…" }] }`.
   A length that was not measured is left out, never written as 0. `SND-NNN` is the tower index, so tower-poc builds the ID without importing workbench code.
-- Claude reads the file and writes each sound to its `SND-` card as a `feel:` block, adds `uses` links from the mechanics, and fills the lengths in the inventory. There is no import script.
+- Claude reads the file and writes each sound to its `SND-` card as a `feel:` block and fills the lengths in the inventory. There is no import script.
 
 **7b: `/sounds` in the workbench (this plan).**
 - One row per `SND-` card, grouped by category, with its feel and length once recorded, and "unavailable" when not.
@@ -208,8 +207,8 @@ Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-p
 - Runs: local
 - Model: opus
 - 7b can be built before 7a; until then every row shows "unavailable".
-- As built: `CardSchema` gets an optional `checkFields(type, data)`, and the game's `checkFeel` (`lib/feel.ts`) is the check. Every `feel:` field is optional; the block also fails on a card that is not a sound, an unknown field (so `fits` cannot sneak in), a length that is not a whole number above 0, or a non-boolean `avoid`. `/sounds` groups by the card's `part-of` area under AREA-021 ("Tower sounds: <category>"), filters with `?mood=` and `?reads=` links (no client code), and is linked from the sidebar.
-- Open for 7a: the link rules allow `uses` from a screen, ui or cue to a sound, but not from a mechanic. "Adds `uses` links from the mechanics" needs Bob to add `mechanic uses <tower output>` to the rules table, or the fits go on cues instead.
+- As built: `CardSchema` gets an optional `checkFields(type, data)`, and the game's `checkFeel` (`lib/feel.ts`) is the check. Every `feel:` field is optional; the block also fails on a card that is not a sound, an unknown field, or a length that is not a whole number above 0. `/sounds` groups by the card's `part-of` area under AREA-021 ("Tower sounds: <category>"), filters with `?mood=` and `?reads=` links (no client code), and is linked from the sidebar.
+- Bob's ruling (2026-10-21): the review records only the feeling a sound produces. **Fits** and **Avoid** are dropped from 7a and from the `feel:` block. Linking sounds to mechanics waits until mechanics are prototyped; a mechanic's tower interaction (lights, sound and movement as one unit) is then a `CUE-` card, and the rules already allow `cue uses <tower output>`.
 - Later, the same review for the 21 light sequences (`LSQ-`) and the light effects (`LFX-`).
 
 ### Step 8: From design to requirements (Bob, 2026-10-20)
