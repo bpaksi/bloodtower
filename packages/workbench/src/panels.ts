@@ -30,3 +30,51 @@ export function parseStored(raw: string | null): PanelState | null {
   }
   return null;
 }
+
+/** What a toggle persists: the saved choice with only the toggled side changed. */
+export function savedAfterToggle(
+  saved: PanelState | null,
+  width: number,
+  current: PanelState,
+  side: Side,
+): PanelState {
+  // Stub: saves the whole current state, an unsaved overlay included (the bug).
+  void saved;
+  void width;
+  return togglePanel(current, side);
+}
+
+export type EscapeContext = {
+  width: number;
+  defaultPrevented: boolean;
+  /** The graph's detail panel is on the page (a document page has a rail instead). */
+  graphDetail: boolean;
+  rightOpen: boolean;
+  dialogOpen: boolean;
+};
+
+/** Esc closes only the graph's detail overlay below 1200 px. */
+export function escapeClosesRight(c: EscapeContext): boolean {
+  // Stub: also closes the doc rail (the bug).
+  return !c.defaultPrevented && c.width < WIDE_FROM && c.rightOpen && !c.dialogOpen;
+}
+
+export type PendingEvent =
+  | { type: "request"; hasRight: boolean }
+  | { type: "ready"; hasRight: boolean }
+  | { type: "unknown-id" };
+
+/** The "open the detail panel once it exists" flag. `open` says to open the panel now. */
+export function stepPending(
+  pending: boolean,
+  event: PendingEvent,
+): { pending: boolean; open: boolean } {
+  switch (event.type) {
+    case "request":
+      return event.hasRight ? { pending, open: true } : { pending: true, open: false };
+    case "ready":
+      return pending && event.hasRight ? { pending: false, open: true } : { pending, open: false };
+    case "unknown-id":
+      return { pending, open: false }; // stub: the flag stays (the bug)
+  }
+}

@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { GET } from "../app/api/find/route.ts";
 import { designDir } from "./content.ts";
-import { searchGame } from "./find.ts";
+import { getFindIndex, searchGame } from "./find.ts";
 
 describe("find on the real folder", () => {
   it("resolves R-ENG-6 to the requirements line that starts | R-ENG-6 |", () => {
@@ -18,5 +18,11 @@ describe("find on the real folder", () => {
     const res = GET(new Request("http://x/api/find?q=MEC-012"));
     const body = (await res.json()) as { hits: { href: string }[] };
     expect(body.hits[0]?.href).toBe("/?focus=MEC-012");
+  });
+});
+
+describe("find index cache (#126)", () => {
+  it.fails("hands out the same index while the folders are unchanged", () => {
+    expect(getFindIndex()).toBe(getFindIndex());
   });
 });

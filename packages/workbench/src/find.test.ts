@@ -70,3 +70,12 @@ describe("find", () => {
     expect(find(index, "r", 2)).toHaveLength(2);
   });
 });
+
+describe("find: ID column of a document-line hit (#127)", () => {
+  it.fails("shows the first ID on the line, else file:line", () => {
+    const withId = find(index, "elsewhere")[0];
+    expect(withId).toMatchObject({ kind: "line", id: "R-ENG-6" });
+    const none = find(index, "lanterns")[0];
+    expect(none).toMatchObject({ kind: "line", id: "reqs.md:7" });
+  });
+});
