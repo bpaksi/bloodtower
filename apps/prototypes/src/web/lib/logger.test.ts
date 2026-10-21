@@ -99,10 +99,22 @@ describe("logger", () => {
     off();
     logger.info("b");
     expect(seen).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(logger.exportText()).map((e: { message: string }) => e.message)).toEqual([
-      "a",
-      "b",
-    ]);
+    expect(
+      JSON.parse(logger.exportText()).entries.map((e: { message: string }) => e.message),
+    ).toEqual(["a", "b"]);
+  });
+
+  it("counts entries the 500 cap drops, shows it in state and in the export, and clear resets it", () => {
+    const { logger } = setup();
+    for (let i = 0; i < 503; i++) logger.info(`m${i}`);
+    expect(logger.getState().entries).toHaveLength(500);
+    expect(logger.getState().dropped).toBe(3);
+    const exported = JSON.parse(logger.exportText());
+    expect(exported.droppedEntries).toBe(3);
+    expect(exported.entries).toHaveLength(500);
+    expect(exported.entries[0].message).toBe("m3");
+    logger.clear();
+    expect(logger.getState().dropped).toBe(0);
   });
 
   it("describes non-Error throws", () => {
