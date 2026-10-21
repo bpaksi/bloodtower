@@ -4,7 +4,7 @@ Status: **rewritten 2026-10-21** from Bob's decisions DEC-105 to DEC-107 and DEC
 
 ## Requirements
 
-R-STA-1 to R-STA-11 in [requirements.md](requirements.md) §8: detailed per-game stats in SQLite; an append-only event log as the source of truth; local and exportable; null, not zero; the seed and pack version on every game; per-player attribution.
+R-STA-1 to R-STA-11 in [requirements.md](requirements.md) §8: detailed per-game stats in SQLite; an append-only event log as the source of truth; resources over time (R-STA-3); each encounter and fight with its choice, outcome and changes (R-STA-4); tower activity (R-STA-5); roll-ups per game, story, hero and all time (R-STA-6); pack counters without new tables (R-STA-7); local and exportable; null, not zero; the seed and pack version on every game; per-player attribution. R-STA-3 to R-STA-5 are recorded as events in the log, even where no screen shows them yet.
 
 ## What players see
 
