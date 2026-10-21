@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FindHit } from "../find.ts";
 import { resolveEnter } from "../findEnter.ts";
+import { PANEL_OPEN_DETAIL } from "./Panels.tsx";
 
 /**
  * The top-bar find box. It asks the server (`endpoint?q=`), so the browser never loads every card.
@@ -94,7 +95,11 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
     input.current?.blur();
     const [path, hash] = hit.href.split("#");
     if (hash && path === pathname) window.location.hash = hash;
-    else router.push(hit.href);
+    else {
+      // A card opens in the graph; below 1200 px that means the detail panel over it.
+      if (/[?&]focus=/.test(path ?? "")) window.dispatchEvent(new Event(PANEL_OPEN_DETAIL));
+      router.push(hit.href);
+    }
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {

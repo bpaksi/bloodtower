@@ -129,9 +129,67 @@ a:hover {
 /* ---------- shell ---------- */
 
 .shell {
+  --left-w: 220px;
+  --left-body: flex;
+  --left-glyph: "‹";
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: var(--left-w) minmax(0, 1fr);
   min-height: 100dvh;
+}
+
+/* Closed sidebar: a 36px rail. Below 1200px this is the default until a choice is made (no
+   data-left yet), so the first paint does not flash. Panels.tsx sets data-left after a toggle. */
+.shell[data-left="closed"] {
+  --left-w: 36px;
+  --left-body: none;
+  --left-glyph: "›";
+}
+
+@media (max-width: 1199.98px) {
+  .shell:not([data-left]) {
+    --left-w: 36px;
+    --left-body: none;
+    --left-glyph: "›";
+  }
+}
+
+.panel-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 4px;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.panel-toggle:hover,
+.panel-toggle:focus-visible {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.panel-glyph::before {
+  font-size: 18px;
+  content: var(--left-glyph);
+}
+
+.panel-toggle-right .panel-glyph::before {
+  content: var(--right-glyph);
+}
+
+.sidebar > .panel-body {
+  display: var(--left-body);
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .sidebar {
@@ -141,6 +199,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  overflow-x: hidden;
   padding: 1rem 0.6rem;
   background: var(--panel);
   border-right: 1px solid var(--line);
@@ -148,7 +207,7 @@ a:hover {
 
 .brand {
   display: block;
-  padding: 0 0.5rem 0.75rem;
+  padding: 0 2rem 0.75rem 0.5rem;
   border-bottom: 1px solid var(--line);
   color: var(--text);
 }
@@ -572,8 +631,9 @@ a.nav-item:hover {
 /* ---------- document page ---------- */
 
 .doc-layout {
+  --right-open: 300px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) var(--right-w);
   gap: 1rem;
   align-items: start;
 }
@@ -709,12 +769,20 @@ a.nav-item:hover {
 .rail {
   position: sticky;
   top: 3.75rem;
-  max-height: calc(100dvh - 5rem);
-  overflow-y: auto;
-  padding: 0.9rem;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+.rail {
+  min-height: 44px;
+}
+
+.rail > .panel-body {
+  display: var(--right-body);
+  max-height: calc(100dvh - 5rem);
+  overflow-y: auto;
+  padding: 0.9rem;
 }
 
 .rail h2 {
@@ -883,14 +951,4 @@ a.nav-item:hover {
 .hint {
   font-size: 12px;
   color: var(--muted);
-}
-
-@media (max-width: 1000px) {
-  .doc-layout {
-    grid-template-columns: 1fr;
-  }
-  .rail {
-    position: static;
-    max-height: none;
-  }
 }

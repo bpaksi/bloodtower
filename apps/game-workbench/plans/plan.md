@@ -40,6 +40,8 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | — | Shared code moved to `packages/workbench` (story-workbench step 2) | #98 |
 | 0a | Back and forward buttons in the top bar (Bob, 2026-10-20) | #117 |
 | 0b | Card types and ID prefixes for tower outputs (`SND-`, `GLY-`, `SEAL-`, `LGT-`, `LFX-`, `LSQ-`, `DRM-`) | #119 |
+| 5 | Find an ID or a word | #124 |
+| 6 | Works on a small screen | #TBD |
 
 ## Suggested order
 
