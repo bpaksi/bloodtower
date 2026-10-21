@@ -257,7 +257,7 @@ a.nav-item:hover {
   width: 100%;
   box-sizing: border-box;
   /* As tall as the window less the top bar and 16px; scrolls inside. */
-  max-height: calc(100vh - var(--topbar-h, 52px) - 16px);
+  max-height: calc(100vh - 52px - 16px);
   overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--line);

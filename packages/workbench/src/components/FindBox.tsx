@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FindHit } from "../find.ts";
+import { resolveEnter } from "../findEnter.ts";
 
 /**
  * The top-bar find box. It asks the server (`endpoint?q=`), so the browser never loads every card.
@@ -16,8 +17,11 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
   const input = useRef<HTMLInputElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const [q, setQ] = useState("");
+  const inputText = useRef("");
+  inputText.current = q.trim();
   const [hits, setHits] = useState<FindHit[]>([]);
   const [open, setOpen] = useState(false);
+  const [hitsFor, setHitsFor] = useState<string | null>(null);
   const [active, setActive] = useState(0);
   const [failed, setFailed] = useState(false);
 
@@ -54,6 +58,7 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
     const text = q.trim();
     if (text === "") {
       setHits([]);
+      setHitsFor(null);
       setFailed(false);
       return;
     }
@@ -66,12 +71,14 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
         if (!res.ok) throw new Error(String(res.status));
         const body = (await res.json()) as { hits: FindHit[] };
         setHits(body.hits);
+        setHitsFor(text);
         setActive(0);
         setFailed(false);
         setOpen(true);
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
         setHits([]);
+        setHitsFor(text);
         setFailed(true);
         setOpen(true);
       }
@@ -103,10 +110,22 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
       setOpen(true);
       setActive((a) => (a - 1 + hits.length) % hits.length);
     } else if (e.key === "Enter") {
-      const hit = hits[active];
-      if (open && hit) {
+      const text = q.trim();
+      const act = resolveEnter(text, hitsFor, hits, active);
+      if (act.kind === "open") {
+        if (open) {
+          e.preventDefault();
+          openHit(act.hit);
+        }
+      } else if (act.kind === "fetch") {
         e.preventDefault();
-        openHit(hit);
+        void fetch(`${endpoint}?q=${encodeURIComponent(text)}`)
+          .then((r) => (r.ok ? (r.json() as Promise<{ hits: FindHit[] }>) : null))
+          .then((body) => {
+            if (inputText.current !== text || !body || !body.hits[0]) return;
+            openHit(body.hits[0]);
+          })
+          .catch(() => {});
       }
     }
   };
