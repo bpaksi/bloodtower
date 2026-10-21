@@ -5,7 +5,7 @@ status: open
 layer: core
 by: "Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-010 }
+  - { rel: part-of, to: AREA-053 }
   - { rel: answers, to: Q-025 }
   - { rel: refines, to: MEC-011 }
   - { rel: refines, to: IDEA-007, note: "a story point is where a set piece is" }
