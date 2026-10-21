@@ -52,7 +52,7 @@ describe("backlinks", () => {
     ]);
   });
 
-  it.fails("drops a note that is the other node's title (a document ID titled by its note)", () => {
+  it("drops a note that is the other node's title (a document ID titled by its note)", () => {
     const g: Graph = {
       nodes: {
         ...graph.nodes,

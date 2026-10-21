@@ -45,6 +45,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 9 | Link rules for new links | #132 |
 | 10 | Gaps report | #134 |
 | 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
+| F1 | Graph tooling correctness: duplicate links, loop groups, conflict with a missing card, /gaps anchors, show/find text (#133, #138, #135, #139) | #PR |
 
 ## Suggested order
 
@@ -251,7 +252,7 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
 - A **Gaps** page (`/gaps`), linked from the sidebar, grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
 - `pnpm graph gaps` prints the same list, so Claude can start a design session from it.
   - The engine is in `packages/workbench/src` and is exported from `server.ts`, so the package's `package.json` is not edited.
-  - The entry point is the app's `apps/game-workbench/src/web/cli/graph.ts`. It supplies the app's card schema, ID scheme and folders, and handles the subcommands (`gaps` now; `show` and `find` say "not yet" until step 11).
+  - The entry point is the app's `apps/game-workbench/src/web/cli/graph.ts`. It supplies the app's card schema, ID scheme and folders, and handles the subcommands (`gaps`, `show` and `find`; `show` and `find` came with step 11).
   - The root script is `"graph": "node apps/game-workbench/src/web/cli/graph.ts"`. Node 24 strips the types, so the CLI uses erasable TypeScript only and nothing it reaches imports `next` or a `.tsx` file.
   - For now it covers the game only; later apps add `--app`.
 - A gap is a warning, never an error. `pnpm check` does not fail on gaps.

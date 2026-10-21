@@ -53,7 +53,7 @@ describe("pnpm graph show", () => {
     expect(run("show", lonely?.id ?? "")).toContain("Points here: none");
   });
 
-  it.fails("a link note that is the other node's title is printed once", () => {
+  it("a link note that is the other node's title is printed once", () => {
     const { graph } = buildGraph();
     const ref = Object.values(graph.nodes).find(
       (n) => n.kind === "ref" && graph.edges.some((e) => e.to === n.id && e.note === n.title),

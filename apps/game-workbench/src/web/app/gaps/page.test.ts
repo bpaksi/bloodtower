@@ -7,7 +7,7 @@ describe("/gaps anchors", () => {
   const html = renderToStaticMarkup(GapsPage());
   const ids = [...html.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]);
 
-  it.fails("has no id twice", () => {
+  it("has no id twice", () => {
     expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
   });
 

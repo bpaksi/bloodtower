@@ -12,8 +12,10 @@ function group(graph: Graph, id: string, incoming: boolean): LinkGroup[] {
     if (other === id) continue;
     const rel = graph.rels[e.rel] ?? { label: e.rel, reverse: e.rel };
     const g = byRel.get(e.rel) ?? { verb: incoming ? rel.reverse : rel.label, links: [] };
-    if (!g.links.some((l) => l.id === other && l.note === e.note)) {
-      g.links.push({ id: other, ...(e.note ? { note: e.note } : {}) });
+    // A document ID with no card is titled by its note; showing both would say it twice.
+    const note = e.note && e.note !== graph.nodes[e.to]?.title ? e.note : undefined;
+    if (!g.links.some((l) => l.id === other && l.note === note)) {
+      g.links.push({ id: other, ...(note ? { note } : {}) });
     }
     byRel.set(e.rel, g);
   }

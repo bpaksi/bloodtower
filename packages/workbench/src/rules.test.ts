@@ -70,7 +70,7 @@ describe("link rules", () => {
     expect(linkBreaks(g, RULES)).toEqual(["MEC-001|uses|MEC-002"]);
   });
 
-  it.fails("fails a needs cycle and a part-of cycle", () => {
+  it("fails a needs cycle and a part-of cycle", () => {
     const g = graphOf([
       card("MEC-001", "mechanic", [["needs", "MEC-002"]]),
       card("MEC-002", "mechanic", [["needs", "MEC-001"]]),
@@ -84,7 +84,7 @@ describe("link rules", () => {
     ]);
   });
 
-  it.fails("reports every looped group once, even when loops share cards", () => {
+  it("reports every looped group once, even when loops share cards", () => {
     const g = graphOf([
       card("MEC-001", "mechanic", [
         ["needs", "MEC-002"],
@@ -102,7 +102,7 @@ describe("link rules", () => {
     ]);
   });
 
-  it.fails("reports a self-loop once, even when written twice", () => {
+  it("reports a self-loop once, even when written twice", () => {
     const g = graphOf([
       card("MEC-001", "mechanic", [
         ["needs", "MEC-001"],
@@ -112,7 +112,7 @@ describe("link rules", () => {
     expect(cycles(g, "needs")).toEqual([["MEC-001"]]);
   });
 
-  it.fails("fails a duplicate link (same verb and target on one card), even if grandfathered", () => {
+  it("fails a duplicate link (same verb and target on one card), even if grandfathered", () => {
     const g = graphOf([
       card("MEC-001", "mechanic", [
         ["needs", "MEC-002"],

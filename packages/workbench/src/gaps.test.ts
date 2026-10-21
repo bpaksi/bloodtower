@@ -88,7 +88,7 @@ describe("gaps", () => {
     expect(conflicts(g("decided"))).toHaveLength(0);
   });
 
-  it.fails("conflict with a card-shaped ID that has no card is not settled by a decided card", () => {
+  it("conflict with a card-shaped ID that has no card is not settled by a decided card", () => {
     const g = graphOf({
       "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "DEC-999"]] },
     });
