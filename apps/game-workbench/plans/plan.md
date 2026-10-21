@@ -44,6 +44,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 6 | Works on a small screen | #128 |
 | 9 | Link rules for new links | #132 |
 | 10 | Gaps report | #134 |
+| 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
 
 ## Suggested order
 
