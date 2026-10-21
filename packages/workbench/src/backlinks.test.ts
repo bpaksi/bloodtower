@@ -51,4 +51,31 @@ describe("backlinks", () => {
       { verb: "uses", links: [{ id: "D", note: "outgoing" }] },
     ]);
   });
+
+  it.fails("drops a note that is the other node's title (a document ID titled by its note)", () => {
+    const g: Graph = {
+      nodes: {
+        ...graph.nodes,
+        "R-X-1": {
+          kind: "ref",
+          id: "R-X-1",
+          idKind: "requirement",
+          title: "same words",
+          foundIn: [],
+        },
+      },
+      edges: [
+        { from: "A", to: "R-X-1", rel: "uses", note: "same words" },
+        { from: "B", to: "R-X-1", rel: "uses", note: "other words" },
+      ],
+      rels: RELS,
+    };
+    expect(outlinks(g, "A")).toEqual([{ verb: "uses", links: [{ id: "R-X-1" }] }]);
+    expect(backlinks(g, "R-X-1")).toEqual([
+      {
+        verb: "used by",
+        links: [{ id: "A" }, { id: "B", note: "other words" }],
+      },
+    ]);
+  });
 });

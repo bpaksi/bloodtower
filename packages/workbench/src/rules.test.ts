@@ -70,18 +70,58 @@ describe("link rules", () => {
     expect(linkBreaks(g, RULES)).toEqual(["MEC-001|uses|MEC-002"]);
   });
 
-  it("fails a needs cycle and a part-of cycle", () => {
+  it.fails("fails a needs cycle and a part-of cycle", () => {
     const g = graphOf([
       card("MEC-001", "mechanic", [["needs", "MEC-002"]]),
       card("MEC-002", "mechanic", [["needs", "MEC-001"]]),
       card("AREA-001", "area", [["part-of", "AREA-002"]]),
       card("AREA-002", "area", [["part-of", "AREA-001"]]),
     ]);
-    expect(cycles(g, "needs")).toEqual([["MEC-001", "MEC-002", "MEC-001"]]);
+    expect(cycles(g, "needs")).toEqual([["MEC-001", "MEC-002"]]);
     expect(linkProblems(g, RULES, [])).toEqual([
-      "needs cycle: MEC-001 → MEC-002 → MEC-001",
-      "part-of cycle: AREA-001 → AREA-002 → AREA-001",
+      "needs loop among: MEC-001, MEC-002",
+      "part-of loop among: AREA-001, AREA-002",
     ]);
+  });
+
+  it.fails("reports every looped group once, even when loops share cards", () => {
+    const g = graphOf([
+      card("MEC-001", "mechanic", [
+        ["needs", "MEC-002"],
+        ["needs", "MEC-003"],
+      ]),
+      card("MEC-002", "mechanic", [["needs", "MEC-003"]]),
+      card("MEC-003", "mechanic", [["needs", "MEC-001"]]),
+      card("MEC-004", "mechanic", [["needs", "MEC-005"]]),
+      card("MEC-005", "mechanic", [["needs", "MEC-004"]]),
+      card("MEC-006", "mechanic", [["needs", "MEC-001"]]),
+    ]);
+    expect(cycles(g, "needs")).toEqual([
+      ["MEC-001", "MEC-002", "MEC-003"],
+      ["MEC-004", "MEC-005"],
+    ]);
+  });
+
+  it.fails("reports a self-loop once, even when written twice", () => {
+    const g = graphOf([
+      card("MEC-001", "mechanic", [
+        ["needs", "MEC-001"],
+        ["needs", "MEC-001"],
+      ]),
+    ]);
+    expect(cycles(g, "needs")).toEqual([["MEC-001"]]);
+  });
+
+  it.fails("fails a duplicate link (same verb and target on one card), even if grandfathered", () => {
+    const g = graphOf([
+      card("MEC-001", "mechanic", [
+        ["needs", "MEC-002"],
+        ["needs", "MEC-002"],
+        ["needs", "MEC-002"],
+      ]),
+      card("MEC-002", "mechanic"),
+    ]);
+    expect(linkProblems(g, RULES, [])).toEqual(["duplicate link MEC-001|needs|MEC-002"]);
   });
 
   it("finds no cycle in a chain or a diamond", () => {

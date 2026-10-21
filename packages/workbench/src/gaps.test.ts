@@ -88,6 +88,15 @@ describe("gaps", () => {
     expect(conflicts(g("decided"))).toHaveLength(0);
   });
 
+  it.fails("conflict with a card-shaped ID that has no card is not settled by a decided card", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "DEC-999"]] },
+    });
+    const ref = g.nodes["DEC-999"];
+    if (ref?.kind === "ref") ref.idKind = "decision";
+    expect(findGaps(g).filter((f) => f.rule === "conflict-unparked")).toHaveLength(1);
+  });
+
   it("conflict between cards: a decided card does not settle it, only a parked one", () => {
     const decided = graphOf({
       "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "OPT-002"]] },
