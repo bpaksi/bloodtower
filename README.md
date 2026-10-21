@@ -14,6 +14,7 @@ The project produces many small websites over its life. Each one lives in its ow
 | Game workbench (GDD viewer) | [apps/game-workbench](apps/game-workbench/) | Design | Awaiting intent | Yes |
 | Story workbench | [apps/story-workbench](apps/story-workbench/) | Design | Awaiting intent | Yes |
 | TV display POC | [apps/tv-display-poc](apps/tv-display-poc/) | Explore | Awaiting intent | Yes |
+| Prototypes | [apps/prototypes](apps/prototypes/) | Explore | Awaiting intent | Yes |
 
 ## Layout
 
