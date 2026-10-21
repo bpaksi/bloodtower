@@ -1,5 +1,16 @@
 /** Everything that runs anywhere (no Node imports). Disk access is in ./server.ts. */
 export { buildGraph, type CardSchema, parseCard, splitFrontMatter } from "./cards.ts";
+export {
+  buildFindIndex,
+  cardHref,
+  type FindCard,
+  type FindDoc,
+  type FindEntry,
+  type FindHit,
+  type FindIndex,
+  find,
+  lineHref,
+} from "./find.ts";
 export * from "./graph-types.ts";
 export { extractIds, type IdScheme, idFamily, makeIdScheme } from "./ids.ts";
 export { labelPoint, layout, type Neighbour, neighbours, type Placed } from "./layout.ts";

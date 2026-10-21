@@ -224,7 +224,7 @@ a.nav-item:hover {
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 20;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -233,15 +233,83 @@ a.nav-item:hover {
   border-bottom: 1px solid var(--line);
 }
 
-.search {
+.find {
+  position: relative;
   flex: 1;
   max-width: 32rem;
+}
+
+.search {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.4rem 0.7rem;
   background: var(--panel-2);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   color: var(--text);
   font: inherit;
+}
+
+.find-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  /* As tall as the window less the top bar and 16px; scrolls inside. */
+  max-height: calc(100vh - var(--topbar-h, 52px) - 16px);
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.find-hit {
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+.find-hit.active {
+  background: var(--panel-2);
+}
+
+.find-head,
+.find-snippet {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.find-head {
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.find-id {
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.find-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.find-snippet {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.find-empty {
+  padding: 0.6rem 0.7rem;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .readonly {
