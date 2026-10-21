@@ -44,6 +44,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 6 | Works on a small screen | #128 |
 | 9 | Link rules for new links | #132 |
 | 10 | Gaps report | #134 |
+| 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
 
 ## Suggested order
 
@@ -242,11 +243,11 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
 - First rules:
   - an open question with no `answers` link to it;
   - a mechanic with no link either way to a screen, UI piece or cue;
-  - a `conflicts` link where neither card is parked;
-  - a decided card (decision, mechanic, screen, ui or cue) with no link to an `R-` ID other than `conflicts`, so step 8's `becomes` counts with no change here;
+  - a `conflicts` link where neither card is parked. Bob's ruling (#136): a conflict between a card and a document ID (`R-`, `E…`) is settled once the card side is parked or decided; card-to-card conflicts stay settled only when either card is parked;
+  - a decided card (decision, mechanic, screen, ui or cue) with no link to an `R-` ID other than `conflicts`, so step 8's `becomes` counts with no change here. Bob's ruling (#136): decided means status `decided` only, and `R2-`/`R3-` links count as requirement links, as built;
   - an area where no card in its `part-of` subtree is decided.
 - A card in several areas counts once in each.
-- Expected on day one: about 190 gaps.
+- Day one: 157 gaps (160 as first built, 157 after the conflict ruling in #136).
 - A **Gaps** page (`/gaps`), linked from the sidebar, grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
 - `pnpm graph gaps` prints the same list, so Claude can start a design session from it.
   - The engine is in `packages/workbench/src` and is exported from `server.ts`, so the package's `package.json` is not edited.
@@ -282,6 +283,7 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
   - `pnpm graph find <words>` prints the same hits as `GET /api/find?q=` for the same query.
   - `pnpm check` passes.
   - Viewports: 1470 × 956
+  - Conflict rule per #136 (recorded deviation, see step 10): a `conflicts` link to a document ID is settled when the card is parked or decided; unit tests cover both cases.
   - Not required: an impact view across several hops (Later)
 
 ## Later
