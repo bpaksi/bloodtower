@@ -40,6 +40,11 @@ export function Sidebar() {
             </Link>
           </li>
           <li>
+            <Link href="/sounds" className="nav-item">
+              Sounds
+            </Link>
+          </li>
+          <li>
             <Link href="/docs" className="nav-item">
               Documents
             </Link>
