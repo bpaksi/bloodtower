@@ -20,6 +20,8 @@ export type CardSchema = {
   rels: RelTable;
   /** Repo-relative folder of the card files, for `Card.file`. */
   dir: string;
+  /** Checks the front-matter fields this workbench adds (the game's `feel:`); returns the problem, or null. */
+  checkFields?(type: string, data: Record<string, unknown>): string | null;
   render(markdown: string): string;
 };
 
@@ -47,6 +49,8 @@ export function parseCard(file: string, text: string, schema: CardSchema): Card 
   if (!schema.types.includes(type)) fail(`unknown type "${String(d.type)}"`);
   const idProblem = schema.checkId(type, id);
   if (idProblem) fail(idProblem);
+  const fieldProblem = schema.checkFields?.(type, d) ?? null;
+  if (fieldProblem) fail(fieldProblem);
   const layer = (d.layer ?? null) as string | null;
   if (layer !== null && !schema.layers?.includes(layer)) fail(`unknown layer "${String(layer)}"`);
   if (typeof d.title !== "string" || !d.title.trim()) fail("title is required");
