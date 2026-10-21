@@ -184,7 +184,7 @@ Bob listens to each of the 113 tower sounds and records how it feels, so sounds 
 
 Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-poc, and the workbench shows the results. The work is split in two.
 
-**7a: Review on tower-poc's Sounds page (tower-poc work, Full tier).** This is not a workbench step. It needs an intent from Bob in `apps/tower-poc/intent/` and a step in a tower-poc milestone plan, and it follows the `tower-capability` skill's safety rules.
+**7a: Review on tower-poc's Sounds page (tower-poc work, Experiment tier).** This is not a workbench step. tower-poc moved to the Experiment tier on 2026-10-21: it keeps its spec and milestone plans and needs no new intent per milestone, so this is a step in a tower-poc milestone plan, and it follows the `tower-capability` skill's safety rules.
 - Each sound on the existing page gets **Stopped** after Play, which records two lengths from one play: `lengthMs` from the Play press and `answerLengthMs` from the tower's answer, each to the Stopped press (Bob, 2026-10-21). The tower does not report when a sound ends, so Bob's press is the measure. Built as tower-poc M6 (`apps/tower-poc/plans/M6-sound-feel.md`, spec D25). One press plays one sound once. Nothing plays on its own, and there is no "play all".
 - For each sound Bob picks one of each:
   - **Mood**: dread, tension, wonder, triumph, loss, calm, comic, mystery, menace
