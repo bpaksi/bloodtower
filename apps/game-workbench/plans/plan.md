@@ -1,6 +1,6 @@
 # Game workbench plan
 
-Status: backlog, 2026-10-20. Steps 5, 6, 9, 10 and 11 approved by Bob on 2026-10-21 (batches B1 to B5). Steps 3, 4, 7 and 8 stay proposals until Bob approves them. Tier: Experiment (one plan, one branch and PR per step).
+Status: backlog, 2026-10-20. Steps 5, 6, 9, 10 and 11 approved by Bob on 2026-10-21 (batches B1 to B5). Step 7 approved by Bob on 2026-10-21 ("let's build it"; batch B6 is 7b). Steps 3, 4 and 8 stay proposals until Bob approves them. Tier: Experiment (one plan, one branch and PR per step).
 
 This file is the workbench's backlog. New asks for the workbench go here as a step or under Later. Design content (cards, documents) goes in `research/game-design/`, not here.
 
@@ -59,6 +59,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 - B3: 9
 - B4: 10
 - B5: 11
+- B6: 7b (7a is tower-poc work and waits for Bob's intent there)
 
 Steps 9, 10 and 11 were approved on 2026-10-21. Their `Touches` overlap in `packages/workbench/src/**`, so they run one after another.
 
@@ -201,8 +202,14 @@ Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-p
 - Filter by mood or reads-as to choose a sound for a mechanic. No Play button.
 - The `feel:` card field, in `research/game-design/cards/README.md` and the card schema.
 - Done when: the card lint accepts a `feel:` block and rejects an unknown mood (the two new moods included); `/sounds` lists a card with a `feel:` block under its category, and the mood filter hides a card with another mood.
-- Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `feel:` field), `packages/workbench/src/cards.ts`
+- Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `feel:` field), `packages/workbench/src/cards.ts`, `apps/game-workbench/README.md` (the page), `apps/game-workbench/plans/plan.md`
+- Depends on: none
+- Deps change: no
+- Runs: local
+- Model: opus
 - 7b can be built before 7a; until then every row shows "unavailable".
+- As built: `CardSchema` gets an optional `checkFields(type, data)`, and the game's `checkFeel` (`lib/feel.ts`) is the check. Every `feel:` field is optional; the block also fails on a card that is not a sound, an unknown field (so `fits` cannot sneak in), a length that is not a whole number above 0, or a non-boolean `avoid`. `/sounds` groups by the card's `part-of` area under AREA-021 ("Tower sounds: <category>"), filters with `?mood=` and `?reads=` links (no client code), and is linked from the sidebar.
+- Open for 7a: the link rules allow `uses` from a screen, ui or cue to a sound, but not from a mechanic. "Adds `uses` links from the mechanics" needs Bob to add `mechanic uses <tower output>` to the rules table, or the fits go on cues instead.
 - Later, the same review for the 21 light sequences (`LSQ-`) and the light effects (`LFX-`).
 
 ### Step 8: From design to requirements (Bob, 2026-10-20)
