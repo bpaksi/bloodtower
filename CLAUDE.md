@@ -47,6 +47,14 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 - Nothing physical happens automatically: no auto-calibrate, no auto-reconnect, no automatic retry of a physical action.
 - Unknown values are shown as unavailable, never as zero.
 
+## Errors
+
+Never eat, hide or ignore an error, however small ([decision 0003](research/decisions/0003-error-logging.md)).
+
+- Log every error, including the ones the code expects and handles. No empty `catch`, no `.catch(() => {})`, no promise left unhandled.
+- An error tied to a person's action is shown to that person, with its error code.
+- In Bloodtower, every logged error also shows as a toast on the Story board.
+
 ## Hooks that will stop you
 
 | Hook | Blocks |
