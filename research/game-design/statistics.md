@@ -1,38 +1,40 @@
 # Statistics
 
-Status: **draft for Bob's review**, 2026-10-14. Design only: the data model below is design-level (tables, fields, meaning), not migration code.
+Status: **rewritten 2026-10-21** from Bob's decisions DEC-105 to DEC-107 and DEC-115 to DEC-117 (cards in `cards/`). This replaces the draft of 2026-10-14, which predated one turn being one day and the removal of warriors and spirit. Design only: the data model below is design-level, not migration code.
 
 ## Requirements
 
-R-STA-1 to R-STA-11 in [requirements.md](requirements.md) §8: detailed per-game stats in SQLite; append-only event log as source of truth; resources over time; encounters and combats; tower activity; roll-ups; pack counters without new tables; local, exportable; null not zero; seed and pack version; per-player attribution.
+R-STA-1 to R-STA-11 in [requirements.md](requirements.md) §8: detailed per-game stats in SQLite; an append-only event log as the source of truth; local and exportable; null, not zero; the seed and pack version on every game; per-player attribution.
 
-## Example stats shown to players
+## What players see
 
-Win rate per story/difficulty, average session length, ticks used, warriors lost, gold earned/spent, most common encounter, deadliest encounter, keys found, riddle attempts, corruptions taken and cured (and by what), skulls dropped per kingdom, hero MVP, fun ratings over time.
+The numbers are for the players first (DEC-105). There are three places:
+
+| Where | What | Card |
+|---|---|---|
+| **End of each day** | Only the effects of that day's events. No recap, no numbers | DEC-115 |
+| **End of the game** | How it ended (the win, or the reason for the loss). Start and end clock times. Active length (pauses left out) against the best and the average for the same story, length and difficulty, where the best is the fastest win. Total win/loss, and win/loss for this story | DEC-116 |
+| **Party join** | On each hero's card: "Played 6, won 4" across every story | DEC-117 |
+
+## How it is recorded
+
+- **The event log is the source of truth** (DEC-107). Every roll, move, choice, fight, purchase, hero claim and tower cue is one row, never changed or deleted. Each row carries the game's seed and pack version.
+- **Every stat is computed from the log.** There are no summary tables for now. One can be added later if a screen is slow. A stat thought of later can still be counted for past games.
+- **Bloodtower's existing records become kinds of event:** its timing marks and control presses (spec D6, D29, D31). Active time is computed as it is today: pauses are left out, overlapping pauses count once, and an open pause makes active time unknown, not zero.
+- **Errors are not stats.** They go to the error log (research/decisions/0003-error-logging.md).
 
 ## Data model (design level)
 
 | Table | Meaning | Key fields |
 |---|---|---|
-| **stories** | Installed story modules | id, name, version, installed_at |
-| **campaigns** | One playthrough of a story (one or more parts) | id, story_id, story_version, name, seed, difficulty, player_count, started_at, ended_at, status (active/won/lost/abandoned) |
-| **games** | One part of a campaign, or a one-shot (the unit of "a game") | id, campaign_id, part_number, pack_version, seed, difficulty, starting_kingdom, outcome (won/lost/part_complete/abandoned), outcome_reason, final_clock_tick, fun_rating, notes |
-| **sessions** | One sitting at the table; a game can span several (save/resume) | id, game_id, started_at, ended_at, end_reason (finished/saved/abandoned/crashed/conceded), host_device, tower_used (bool) |
-| **devices** | Player iPads joined to a session | id, session_id, device_label, game_hero_id, joined_at, left_at |
-| **heroes** | Hero templates in a story | id, story_id, name, class, base stats |
-| **game_heroes** | A hero as played in a game | id, game_id, hero_id, joined_at_tick, left_at_tick, final stats, warriors_lost, encounters_won, status (active/fallen/absent) |
-| **clock_ticks** | Each advance of the story clock | id, game_id, session_id, tick_number, chapter_or_night, kingdom, cause (action/skull drop/beat), at, beat_id |
-| **events** | Append-only log of everything | id, game_id, session_id, tick_number, at, seq, type, actor (hero/NPC/tower/system), device_id (null = shared), location, payload (JSON details) |
-| **encounters** | Each encounter or set piece played | id, game_id, tick_number, encounter_id, kind (random/set piece), location, kingdom, choice, outcome, clock_cost, resource deltas (JSON) |
-| **combats** | Each fight | id, game_id, encounter_row_id, foe, foe_level, heroes involved, rounds, warriors_lost, result, rewards |
-| **resource_snapshots** | Resource values over time | id, game_id, tick_number, at, resource, value, delta, cause_event_id |
-| **inventory_changes** | Items, keys, allies gained/lost | id, game_id, tick_number, item (incl. keys), change (+/-), source (e.g. kingdom set pieces complete) |
-| **tower_activity** | Tower cues and inputs | id, session_id, at, kind (cue/skull drop/seal/calibrate/disconnect/battery), capability_id, params, result (sent/rejected/failed/fallback), kingdom |
-| **flags** | Story flags and custom counters | id, campaign_id, game_id, key, value, set_at_tick |
-| **outcomes** | Final summary per game for fast stats | game_id, won, duration_minutes, ticks_used, warriors_lost, gold_net, keys_found, encounters_count, combats_won, combats_lost, skulls_dropped, mvp_hero |
+| **games** | One game, from Begin to its end | id, story_id, pack_version, seed, length, difficulty, started_at, ended_at, outcome (won/lost/abandoned), outcome_reason |
+| **sessions** | One sitting; a game may span several (save and resume) | id, game_id, started_at, ended_at, end_reason |
+| **game_heroes** | A pool hero as played in a game | game_id, hero_id, device_id |
+| **events** | The append-only log | id, game_id, session_id, day, seq, at (UTC), monotonic_ms, type, actor (hero, group, NPC, tower, system), device_id, location, payload (JSON) |
 
-Notes: `events` is the source of truth; the other tables are summaries kept for fast queries. Times stored in UTC and shown in local time.
+The end-of-game numbers come from `games` (outcome, length, difficulty, times) and from the events that mark pauses. The hero records come from `game_heroes` joined to `games`. A pack's own counters (R-STA-7) are events of a pack-named type with a number in `payload`, so they need no new tables.
 
-## Open questions
+## Still open
 
-See [open-questions.md](open-questions.md) (sync vs. local, log retention, live dashboard).
+- Graphs over time (R-STA-3) and anything shown beyond the three places above.
+- Sync between machines, log retention, and a live dashboard ([open-questions.md](open-questions.md)).
