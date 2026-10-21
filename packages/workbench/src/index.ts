@@ -32,4 +32,15 @@ export {
   type PromptScope,
   scopeLines,
 } from "./prompt.ts";
+export {
+  allows,
+  cycles,
+  type LinkRule,
+  type LinkRules,
+  linkBreaks,
+  linkKey,
+  linkProblems,
+  type TypeOf,
+  typeOfIn,
+} from "./rules.ts";
 export { anchorMaker, parseSections, type Section, slugify } from "./sections.ts";

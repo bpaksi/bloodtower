@@ -42,6 +42,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 0b | Card types and ID prefixes for tower outputs (`SND-`, `GLY-`, `SEAL-`, `LGT-`, `LFX-`, `LSQ-`, `DRM-`) | #119 |
 | 5 | Find an ID or a word | #124 |
 | 6 | Works on a small screen | #128 |
+| 9 | Link rules for new links | this PR |
 
 ## Suggested order
 
@@ -214,13 +215,13 @@ Today [requirements.md](../../../research/game-design/requirements.md) holds the
 ### Step 9: Link rules for new links (Bob, 2026-10-21)
 Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), and only 12 are `needs`.
 - `research/game-design/cards/README.md` gets a rules table for each link type: which card types it may join, and whether it sets build order. `needs` means "B must be settled or built before A" and is the only link that sets build order. It may join two questions (Bob, 2026-10-21).
-- The first table allows each type pair today's cards use 5 or more times, plus `part-of` → area (Bob, 2026-10-21). That puts about 146 of the 680 non-`part-of` links in the baseline.
+- The first table allows each type pair today's cards use 5 or more times, plus `part-of` → area (Bob, 2026-10-21). While building, Bob also ruled to add rules by meaning on top: `conflicts` between any two things; `answers` from anything to a question; `needs` from a buildable thing or idea to a buildable thing or question, and question → question; and screen, ui and cue may use ui, cue and tower outputs. Frequency alone would have blocked every new `needs` and `conflicts` link. Result: 52 common shapes plus the meaning rules, with 134 links in the baseline and no cycles.
 - The generic checker is `packages/workbench/src/rules.ts`. It takes the rules table and the app's `kindOf`, because 109 links point at IDs that are not cards (`R-`, `E`, `AST-T`…). The table lives in the app, in `apps/game-workbench/src/web/lib/link-rules.ts`. The checker fails when `needs` or `part-of` links form a cycle.
 - Old links are grandfathered. A baseline file (`research/game-design/cards/.link-baseline.json`) lists today's rule breaks, one `from|rel|to` key each, sorted.
   - The card lint fails on any break not in the baseline, so a new link must follow the rules. An old one waits for the link review (Later).
   - The lint also fails on a baseline entry that is no longer a break, so fixing an old link means removing its line.
 - Depends on: none
-- Touches: `research/game-design/cards/README.md`, `research/game-design/cards/.link-baseline.json`, `packages/workbench/src/**`, `apps/game-workbench/src/web/lib/**`
+- Touches: `research/game-design/cards/README.md`, `research/game-design/cards/.link-baseline.json`, `packages/workbench/src/**`, `apps/game-workbench/src/web/lib/**`, `apps/game-workbench/plans/plan.md` (this deviation and the Done row)
 - Deps change: no
 - Runs: local (it sets the rules Bob reviews)
 - Model: opus (schema design)

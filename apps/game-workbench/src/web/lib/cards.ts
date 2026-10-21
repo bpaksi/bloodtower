@@ -1,13 +1,16 @@
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
   buildGraph as buildGraphWith,
   type CardSchema,
+  linkProblems,
   parseCard as parseCardWith,
 } from "@dark-tower/workbench";
 import { loadCards as loadCardsWith } from "@dark-tower/workbench/server";
 import { designDir, loadDocs } from "./content.ts";
 import { CARD_TYPES, type Card, type CardType, type Graph, LAYERS, RELS } from "./graph-types.ts";
 import { idKind } from "./ids.ts";
+import { GAME_LINK_RULES } from "./link-rules.ts";
 import { renderMarkdown } from "./markdown.ts";
 
 export { RELS };
@@ -79,4 +82,15 @@ export function buildGraph(cards?: Card[]): { graph: Graph; problems: string[] }
     kindOf: idKind,
   });
   return { graph, problems: [...loaded.errors, ...problems] };
+}
+
+/** The link-rule breaks that existed when the rules came in (step 9), as `from|rel|to` keys. */
+export function loadLinkBaseline(dir = cardsDir()): string[] {
+  const file = path.join(dir, ".link-baseline.json");
+  return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as string[]) : [];
+}
+
+/** Link-rule problems in the cards folder: new breaks, stale baseline entries and cycles. */
+export function linkRuleProblems(graph = buildGraph().graph, baseline = loadLinkBaseline()) {
+  return linkProblems(graph, GAME_LINK_RULES, baseline);
 }
