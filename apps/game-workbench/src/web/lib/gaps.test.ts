@@ -8,7 +8,8 @@ import { loadGaps } from "./gaps.ts";
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 describe("gaps report on the real cards", () => {
-  it("prints a count that equals the sum of the /gaps group counts", () => {
+  // Spawns a node process that loads every card, which can pass the 5000 ms default under load.
+  it("prints a count that equals the sum of the /gaps group counts", { timeout: 60_000 }, () => {
     const out = execFileSync("node", [path.join(here, "../cli/graph.ts"), "gaps"], {
       encoding: "utf8",
     });

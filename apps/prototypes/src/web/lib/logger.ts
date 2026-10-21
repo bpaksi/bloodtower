@@ -22,7 +22,12 @@ export type Toast = {
   count: number;
 };
 
-export type LogState = { entries: readonly LogEntry[]; toasts: readonly Toast[] };
+export type LogState = {
+  entries: readonly LogEntry[];
+  toasts: readonly Toast[];
+  /** How many older entries the 500-entry cap has dropped since the last clear. */
+  dropped: number;
+};
 
 export type ConsoleSink = Pick<Console, "debug" | "info" | "warn" | "error">;
 
@@ -49,7 +54,7 @@ function messageOf(cause: unknown): string {
 export function createLogger(options: { sink?: ConsoleSink; now?: () => Date } = {}) {
   const sink = options.sink ?? console;
   const now = options.now ?? (() => new Date());
-  let state: LogState = { entries: [], toasts: [] };
+  let state: LogState = { entries: [], toasts: [], dropped: 0 };
   let nextId = 1;
   const listeners = new Set<() => void>();
 
@@ -83,7 +88,9 @@ export function createLogger(options: { sink?: ConsoleSink; now?: () => Date } =
         ? toasts.map((t) => (t === same ? { ...t, count: t.count + 1 } : t))
         : [...toasts, { id: entry.id, level, code, message, count: 1 }];
     }
-    set({ entries: [...state.entries, entry].slice(-MAX_ENTRIES), toasts });
+    const all = [...state.entries, entry];
+    const over = Math.max(0, all.length - MAX_ENTRIES);
+    set({ entries: all.slice(over), toasts, dropped: state.dropped + over });
     return entry;
   }
 
@@ -130,11 +137,11 @@ export function createLogger(options: { sink?: ConsoleSink; now?: () => Date } =
       set({ ...state, toasts: state.toasts.filter((t) => t.id !== id) });
     },
     clear() {
-      set({ entries: [], toasts: [] });
+      set({ entries: [], toasts: [], dropped: 0 });
     },
-    /** The whole log as JSON text, for the panel's export. */
+    /** The whole log as JSON text, for the panel's export. `droppedEntries` counts entries the cap removed. */
     exportText(): string {
-      return JSON.stringify(state.entries, null, 2);
+      return JSON.stringify({ droppedEntries: state.dropped, entries: state.entries }, null, 2);
     },
   };
 }
