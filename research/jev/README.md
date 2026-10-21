@@ -42,7 +42,7 @@ So the old rules did not simply block too much. They blocked edge cases and let 
 
 ## Limits
 
-- One labeler. Bob's check of 20 labels is the only second opinion.
+- One labeler. Bob checked 5 labels (all agreed) and left the other 15 of the check to Claude, so most labels have no second human opinion.
 - `done_when` is empty on every row. Step 2 fills it from the plans before any Jev call.
 - bloodtower supplies 81% of the findings, because most review rounds ran there.
 - No `touches` finding came up in these PRs. Step 2 cannot measure that label.

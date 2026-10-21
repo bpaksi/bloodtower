@@ -1,6 +1,6 @@
 # Jev finding triage: plan
 
-Status: approved by Bob on 2026-10-21 (G-plan). Step 1 in progress. Repo-wide work on `chore/jev-finding-triage`.
+Status: approved by Bob on 2026-10-21 (G-plan). Step 1 done on 2026-10-21. Step 2 waits for a Jev key. Repo-wide work on `chore/jev-finding-triage`.
 
 ## Goal
 
@@ -96,6 +96,7 @@ Deviations in step 1 (2026-10-21):
 - `done_when` is `null` on every row. Most of these PRs predate measurable `Done when` fields, and the rest cite runbook steps. Step 2 fills it from the plan or runbook step the PR names, before any Jev call.
 - `outcome` adds `unknown` for a finding whose fate the reports do not show. `ignored` means nothing in this PR changed for it; a follow-up issue may exist.
 - `pr_escalated` marks findings from PRs that reached `needs-bob` (#25, #78) or that Bob let run past round 3 (#99).
+- Bob checked 5 of the 20 labels (5 of 5 agreed) and delegated the other 15 to Claude's judgement ("Please use good judgement on this and the rest", 2026-10-21). Claude's second pass changed none of them and flags 3 as low confidence; see labels-check.md. That stands in for the 18-of-20 gate.
 - The 20 labels for Bob are not a random sample. They are the 14 findings where today's label and the reviewer's call disagree, plus 6 agreements spread over the labels. So the agreement rate tests the labels most likely to be wrong.
 
 ## Open questions for Bob
