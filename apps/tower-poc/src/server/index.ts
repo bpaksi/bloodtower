@@ -6,12 +6,14 @@ import { createMockTower } from "./adapters/mockTower.ts";
 import { openDatabase } from "./db/client.ts";
 import { createRecordStorage } from "./db/records.ts";
 import { createSnapshotStorage } from "./db/snapshots.ts";
+import { createSoundFeelStorage } from "./db/soundFeel.ts";
 import { createVerificationStorage } from "./db/verifications.ts";
 import { openDiagLog, teeEventList } from "./diagLog.ts";
 import { lanUrls } from "./lanUrls.ts";
 import packageJson from "./package.json" with { type: "json" };
 import { parseDevOrigins, startTowerServer, WS_PATH } from "./server.ts";
 import { createTowerSession } from "./session.ts";
+import { createSoundFeel } from "./soundFeel.ts";
 import { createStateStore, feedStateStore } from "./stateStore.ts";
 import { createTowerRecords } from "./towerRecords.ts";
 import { createVerifications } from "./verifications.ts";
@@ -77,6 +79,8 @@ const verifications = createVerifications({
   libraryVersion: installedVersion("ultimatedarktower"),
   appVersion: packageJson.version,
 });
+// Bob's sound feel record (spec D25). The mock keeps its own, like the rest of its database.
+const soundFeel = createSoundFeel({ storage: createSoundFeelStorage(database.db) });
 
 const server = await startTowerServer({
   port: parsePort(process.env.PORT),
@@ -87,6 +91,7 @@ const server = await startTowerServer({
   store,
   records,
   verifications,
+  soundFeel,
   tower,
   devOrigins,
   timingResultsDir: resolve(import.meta.dirname, "../../docs/timing-results"),
