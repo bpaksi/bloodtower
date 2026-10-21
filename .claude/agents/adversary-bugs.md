@@ -31,7 +31,7 @@ Only these:
 
 - a regression against `main`;
 - a `Done when` item not met, or not proven by a test that can fail;
-- a broken standing rule: tower safety, privacy, a message-type rule such as D7, an unknown value shown as zero, an edit to intent;
+- a broken standing rule: tower safety, privacy, a message-type rule such as D7, an unknown value shown as zero, an edit to intent, an error eaten, hidden or not shown to the person whose action caused it (decision 0003; in code the PR adds or changes);
 - a change outside the step's `Touches`, or a `package.json` / lockfile change the step did not declare.
 
 Everything else is non-blocking: nits (cap 5), spec holes for Bob or Gamewright (say what the code picked), and follow-ups (extra viewports, rare timings, polish). Mark follow-ups `Follow-up:` so the coordinator can file them as issues. Do not block on a viewport, timing or edge case the step's `Done when` does not name.
