@@ -34,8 +34,8 @@ This reopens the POC, which closed after M3, for this one milestone. M4 and M5 s
 
 ### Step 6.2: Review mode on the Sounds page
 - A **Review feel** toggle on the Sounds page, kept per device like Verify mode. On, each sound in the catalog shows its saved feel and a review row: Play (the existing button), **Stopped**, then mood, reads as and strength (each a choice with "not set"), and a note.
-- **Stopped** is enabled from the moment the page sees that sound's play `confirmed` (the tower answers as the sound starts) until another sound is played. It records the time from then to the press. If the play ends without `confirmed`, Stopped stays off and the length is not measured. Pressing Stopped after a replay replaces the length.
-- Each choice is saved as soon as it is made (`soundFeel.record`); the note on leaving the field. A save the service refuses or cannot receive is shown on the row, never shown as saved.
+- **Stopped** is enabled from Bob's Play press for that sound until another sound is played. It records the time from the Play press to the Stopped press (Bob, 2026-10-21), so the send and the tower's answer (about 0.1 s) are in every length. If the play ends `rejected` or `failed`, no sound played: Stopped turns off and nothing is measured. An `indeterminate` play may have sounded, so Stopped stays on. Pressing Stopped after a replay replaces the length.
+- Each choice is saved as soon as it is made (`soundFeel.record`); the note on leaving the field (Bob, 2026-10-21). A save the service refuses or cannot receive is shown on the row, never shown as saved.
 - A count, "N of 113 with a feel", and a filter "not yet reviewed", so a sitting can pick up where the last ended. The category filter already exists.
 - **Export** downloads `/api/sound-feel.json` as `sound-feel.json`.
 - Anything not recorded shows "unavailable", never 0.
@@ -45,7 +45,7 @@ This reopens the POC, which closed after M3, for this one milestone. M4 and M5 s
 - Runs: local (tower UI)
 - Model: sonnet
 - Done when:
-  - Unit tests: Stopped is off before `confirmed`, on after it, off again after another play; the measured length is the time from `confirmed` to the press; a play that ends `indeterminate` measures nothing.
+  - Unit tests: Stopped is off before Play, on from the Play press, off again after another play; the measured length is the time from the Play press to the Stopped press; a play that ends `rejected` or `failed` turns Stopped off and measures nothing; one that ends `indeterminate` keeps it on.
   - e2e on the mock: play sound 1, press Stopped, pick dread / threat / strong and type a note; reload, and the row shows the same picks; a second browser sees them without reloading; Export downloads JSON with that sound and no other.
   - The "not yet reviewed" filter hides sound 1 after its first pick.
   - `pnpm check` and `pnpm e2e` pass.
@@ -82,10 +82,12 @@ G-plan (this plan) and G-review (step 6.3, a judgement gate: only Bob can say ho
 
 Done inline by Claude over all four steps against the intent, the spec and the code. Findings already written into the steps:
 - The Sounds page has no way to know when a sound ends (GAP-LIB-007), so Stopped is Bob's press by design; human reaction time (about 0.2 s) is in every length.
-- `confirmed` on `sound.play` is the tower's answer, 25 to 64 ms after the write in M1, so it is the closest the page gets to "the sound started".
 - The only other origin rule that applies is D20; the export endpoint follows the timing endpoint's pattern.
 - GAP-HW-011 (link dropped while a sound played) may recur over 113 plays. Nothing reconnects on its own; Bob reconnects by hand and carries on, and his picks are already saved.
 
-Open for Bob, one at a time before 6.1 starts:
-1. Measure length from the tower's answer (`confirmed`, as written), or from the Play press?
-2. Save each choice the moment it is made (as written), or with a Save button per sound?
+Bob's answers (2026-10-21):
+
+| Question | Answer |
+|---|---|
+| Measure length from the tower's answer (`confirmed`) or from the Play press? | **From the Play press.** Every length then includes the send and the tower's answer (25 to 64 ms in M1) as well as reaction time. A play the service refuses or that fails measures nothing. |
+| Save each choice when made, or with a Save button per sound? | **Each choice when made**; the note on leaving the field. |
