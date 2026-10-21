@@ -72,7 +72,7 @@ describe("find", () => {
 });
 
 describe("find: ID column of a document-line hit (#127)", () => {
-  it.fails("shows the first ID on the line, else file:line", () => {
+  it("shows the first ID on the line, else file:line", () => {
     const withId = find(index, "elsewhere")[0];
     expect(withId).toMatchObject({ kind: "line", id: "R-ENG-6" });
     const none = find(index, "lanterns")[0];

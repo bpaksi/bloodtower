@@ -46,6 +46,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 | 10 | Gaps report | #134 |
 | 11 | What points here, `pnpm graph show` and `find` (and the #136 conflict rule) | #137 |
 | F1 | Graph tooling correctness: duplicate links, loop groups, conflict with a missing card, /gaps anchors, show/find text (#133, #138, #135, #139) | #140 |
+| F2 | Find and panels polish: re-pick scroll, cached index, line-hit ID, unsaved overlay, Esc scope, pending flag (#125, #126, #127, #129, #130, #131) | this PR |
 
 ## Suggested order
 
@@ -82,7 +83,7 @@ The `requirement-review` agent read the five approved steps together against the
 | Step 9: how strict is the first rules table? | Allow each type pair today's cards use **5 or more times**, plus `part-of` → area. About 146 of the 680 non-`part-of` links go into the baseline. |
 | Step 9: may `needs` join two questions? | **Yes.** `needs` means "B must be settled or built first". (8 such links today.) |
 | Steps 5 and 6: a find hit below 1200 px | The detail panel **opens over the graph**, the same as a pick in the graph. |
-| Step 6: the overlay below 1200 px | A 360 px panel with **no scrim**; the graph stays clickable. Esc, its close button or `]` closes it, and picking another card keeps it open. Stacking, bottom to top: graph, then detail overlay, then top bar and find list (top bar raised to z-index 20), then toast and prompt dialog (50). |
+| Step 6: the overlay below 1200 px | A 360 px panel with **no scrim**; the graph stays clickable. Esc, its close button or `]` closes it, and picking another card keeps it open. Esc closes only this graph overlay; on a document page it does nothing to the rail (`]` or its button closes it), and Esc in the find box closes only the find list (F2, #130, #131). Stacking, bottom to top: graph, then detail overlay, then top bar and find list (top bar raised to z-index 20), then toast and prompt dialog (50). |
 | Step 5: the find list at small heights | As wide as the box (up to 32 rem), as tall as the window less the top bar and 16 px, and it **scrolls inside**. Each row is ID and title on one line, then a one-line snippet, both cut with an ellipsis. All 20 hits are kept. |
 
 Other findings, without a ruling:
@@ -121,7 +122,7 @@ How it is built:
 - Exact ID: a query that is a whole ID (case ignored, read with the app's `IdScheme`) puts that ID first. If it is a card, the hit opens `/?focus=<ID>`. Otherwise the hit opens the line that defines the ID: the first line that starts a heading, a table row (first cell) or a list item (`- R-WIZ-5.`), at `/doc/<slug>#L<n>`. A heading wins over a table row, and a table row over a list item; after that, file order, then line. The existing `LineJump` scrolls to the section that holds the line, not to the line itself. An ID with neither a card nor a defining line falls through to the word search.
 - The list follows Bob's ruling in Requirement review: up to 32 rem wide, scrolls inside, one line for the ID and title and one for the snippet. Below 1200 px a card hit opens the detail panel over the graph, the same as a pick in the graph.
 - Words: every word must appear (AND, case ignored). The score ranks a match in the ID, then the title, then the body or line text. Ties go to ID order with numbers compared as numbers (`MEC-2` before `MEC-10`), then file and line.
-- The search runs on the server. A route `apps/game-workbench/src/web/app/api/find/route.ts` (`GET /api/find?q=`) reads cards and docs fresh on each request, like the pages do, so the browser never loads all 500 cards. Each hit returns `{kind, id, title, snippet, href}`.
+- The search runs on the server. A route `apps/game-workbench/src/web/app/api/find/route.ts` (`GET /api/find?q=`) reads the cards and docs on each request, but rebuilds the index only when a file in the design folder or its `cards/` folder was added, removed or changed (keyed on file mtimes and sizes, F2 #126), so an edit shows on the next search. The browser never loads all 500 cards. Each hit returns `{kind, id, title, snippet, href}`. A document-line hit shows the first ID on the line in its ID column, else `file:line` (Bob, 2026-10-21, #127).
 - `packages/workbench/src/components/FindBox.tsx` is the client box that replaces the disabled input. It waits about 120 ms after typing before it fetches and shows a listbox (`role="listbox"`, `aria-activedescendant`). `/` focuses the box only when no other field has focus. `⌘K` / `Ctrl+K` always focuses it. Esc closes the list and leaves the box.
 - Depends on: none
 - Touches: `apps/game-workbench/src/web/**`, `packages/workbench/src/**`, `packages/workbench/styles/**`

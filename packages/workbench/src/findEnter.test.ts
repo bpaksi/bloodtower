@@ -23,7 +23,7 @@ describe("resolveEnter", () => {
 });
 
 describe("resolveOpen (#125)", () => {
-  it.fails("scrolls again when the picked hit has the hash already in the address", () => {
+  it("scrolls again when the picked hit has the hash already in the address", () => {
     expect(resolveOpen("/doc/reqs#L7", "/doc/reqs", "#L7")).toEqual({
       kind: "jump",
       hash: "L7",
@@ -42,7 +42,7 @@ describe("resolveOpen (#125)", () => {
 });
 
 describe("findEscape (#130)", () => {
-  it.fails("closes the list, leaves the box, and keeps the key from the overlay", () => {
+  it("closes the list, leaves the box, and keeps the key from the overlay", () => {
     expect(findEscape()).toEqual({ closeList: true, blur: true, preventDefault: true });
   });
 });

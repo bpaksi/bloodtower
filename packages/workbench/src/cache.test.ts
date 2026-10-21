@@ -6,7 +6,7 @@ import { makeCached } from "./cache.ts";
 import { dirStamp } from "./stamp.ts";
 
 describe("makeCached (#126)", () => {
-  it.fails("builds once while the stamp is unchanged, and again when it changes", () => {
+  it("builds once while the stamp is unchanged, and again when it changes", () => {
     let stamp = "a";
     let builds = 0;
     const get = makeCached(
@@ -23,7 +23,7 @@ describe("makeCached (#126)", () => {
 });
 
 describe("dirStamp (#126)", () => {
-  it.fails("is stable when nothing changed and differs after an edit or a new file", () => {
+  it("is stable when nothing changed and differs after an edit or a new file", () => {
     const root = mkdtempSync(path.join(tmpdir(), "stamp-"));
     const cards = path.join(root, "cards");
     mkdirSync(cards);

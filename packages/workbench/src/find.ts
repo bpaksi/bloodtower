@@ -207,7 +207,7 @@ export function find(index: FindIndex, query: string, limit = 20): FindHit[] {
         score: words.length,
         hit: {
           kind: "line",
-          id: `${e.file}:${e.line}`,
+          id: e.text.match(index.ids.pattern)?.[0] ?? `${e.file}:${e.line}`,
           title: e.title,
           snippet: snippetAround(e.text, words),
           href: e.href,

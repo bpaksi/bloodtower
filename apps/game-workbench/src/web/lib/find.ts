@@ -1,10 +1,10 @@
-import { buildFindIndex, type FindIndex, find } from "@dark-tower/workbench";
-import { loadCards } from "./cards.ts";
-import { loadDocs } from "./content.ts";
+import { buildFindIndex, type FindIndex, find, makeCached } from "@dark-tower/workbench";
+import { dirStamp } from "@dark-tower/workbench/server";
+import { cardsDir, loadCards } from "./cards.ts";
+import { designDir, loadDocs } from "./content.ts";
 import { GAME_IDS } from "./ids.ts";
 
-/** The find index over the cards and documents. */
-export function getFindIndex(): FindIndex {
+function build(): FindIndex {
   const { cards } = loadCards();
   const docs = loadDocs();
   return buildFindIndex(
@@ -14,7 +14,13 @@ export function getFindIndex(): FindIndex {
   );
 }
 
-/** Searches the cards and docs, like the pages do. */
+/**
+ * The find index, rebuilt only when a file in the cards or documents folder was added, removed or
+ * changed, so an edit still shows on the next search.
+ */
+export const getFindIndex = makeCached(() => dirStamp([designDir(), cardsDir()]), build);
+
+/** Searches the cards and docs. */
 export function searchGame(query: string, limit = 20) {
   return find(getFindIndex(), query, limit);
 }

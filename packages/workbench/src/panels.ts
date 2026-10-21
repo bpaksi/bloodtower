@@ -38,10 +38,10 @@ export function savedAfterToggle(
   current: PanelState,
   side: Side,
 ): PanelState {
-  // Stub: saves the whole current state, an unsaved overlay included (the bug).
-  void saved;
-  void width;
-  return togglePanel(current, side);
+  // Only the toggled side is a choice; the other keeps its saved value or the width default, so an
+  // overlay opened by a pick (never saved) is not saved by a toggle of the other side.
+  const base = saved ?? initialPanels(width, null);
+  return { ...base, [side]: togglePanel(current, side)[side] };
 }
 
 export type EscapeContext = {
@@ -55,8 +55,9 @@ export type EscapeContext = {
 
 /** Esc closes only the graph's detail overlay below 1200 px. */
 export function escapeClosesRight(c: EscapeContext): boolean {
-  // Stub: also closes the doc rail (the bug).
-  return !c.defaultPrevented && c.width < WIDE_FROM && c.rightOpen && !c.dialogOpen;
+  return (
+    !c.defaultPrevented && c.graphDetail && c.width < WIDE_FROM && c.rightOpen && !c.dialogOpen
+  );
 }
 
 export type PendingEvent =
@@ -75,6 +76,6 @@ export function stepPending(
     case "ready":
       return pending && event.hasRight ? { pending: false, open: true } : { pending, open: false };
     case "unknown-id":
-      return { pending, open: false }; // stub: the flag stays (the bug)
+      return { pending: false, open: false };
   }
 }

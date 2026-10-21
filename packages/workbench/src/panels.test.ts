@@ -53,7 +53,7 @@ describe("parseStored", () => {
 });
 
 describe("savedAfterToggle (#129)", () => {
-  it.fails("does not persist an unsaved overlay when the other side is toggled", () => {
+  it("does not persist an unsaved overlay when the other side is toggled", () => {
     // At 1100 px a pick opened the right overlay without saving; then [ opens the left panel.
     const current = { left: false, right: true };
     expect(savedAfterToggle(null, 1100, current, "left")).toEqual({ left: true, right: false });
@@ -78,7 +78,7 @@ describe("escapeClosesRight (#131)", () => {
   it("closes the graph detail overlay below 1200 px", () => {
     expect(escapeClosesRight(base)).toBe(true);
   });
-  it.fails("leaves the document-page rail alone", () => {
+  it("leaves the document-page rail alone", () => {
     expect(escapeClosesRight({ ...base, graphDetail: false })).toBe(false);
   });
   it("does nothing at 1200 px, when closed, in a dialog or when the key was handled", () => {
@@ -104,7 +104,7 @@ describe("stepPending (#131)", () => {
       open: true,
     });
   });
-  it.fails("clears the flag when Detail gets an unknown ID", () => {
+  it("clears the flag when Detail gets an unknown ID", () => {
     const a = stepPending(false, { type: "request", hasRight: false });
     expect(stepPending(a.pending, { type: "unknown-id" })).toEqual({ pending: false, open: false });
   });

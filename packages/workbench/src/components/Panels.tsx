@@ -2,11 +2,14 @@
 
 import { useEffect } from "react";
 import {
+  escapeClosesRight,
   initialPanels,
   type PanelState,
   parseStored,
   type Side,
   STORAGE_KEY,
+  savedAfterToggle,
+  stepPending,
   togglePanel,
   WIDE_FROM,
 } from "../panels.ts";
@@ -16,6 +19,8 @@ export const PANEL_TOGGLE = "workbench:panel-toggle";
 export const PANEL_SYNC = "workbench:panel-sync";
 /** Open the detail panel over the graph; does nothing at 1200 px or more. */
 export const PANEL_OPEN_DETAIL = "workbench:open-detail";
+/** The graph was asked for an ID that is no card or document ID: drop any pending open. */
+export const PANEL_OPEN_CANCEL = "workbench:open-cancel";
 
 function readStored(): PanelState | null {
   try {
@@ -78,10 +83,12 @@ export function Panels() {
       if (side === "right" && !hasRight()) return;
       const next = togglePanel(current(), side);
       apply(next, ["left", "right"]);
-      writeStored(next);
+      // Save only the side that was toggled; an overlay opened by a pick stays unsaved.
+      saved = savedAfterToggle(saved, window.innerWidth, current(), side);
+      writeStored(saved);
     };
 
-    const saved = readStored();
+    let saved = readStored();
     if (saved) apply(initialPanels(window.innerWidth, saved), ["left", "right"]);
     else sync();
 
@@ -92,10 +99,13 @@ export function Panels() {
       else if (e.key === "]") toggle("right");
       else if (
         e.key === "Escape" &&
-        window.innerWidth < WIDE_FROM &&
-        hasRight() &&
-        current().right &&
-        !document.querySelector("dialog[open]")
+        escapeClosesRight({
+          width: window.innerWidth,
+          defaultPrevented: e.defaultPrevented,
+          graphDetail: document.querySelector("aside.detail") !== null,
+          rightOpen: hasRight() && current().right,
+          dialogOpen: document.querySelector("dialog[open]") !== null,
+        })
       ) {
         toggle("right");
       }
@@ -107,26 +117,33 @@ export function Panels() {
       if (window.innerWidth >= WIDE_FROM) return;
       apply({ ...current(), right: true }, ["right"]); // a pick is not a saved choice
     };
+    const step = (event: Parameters<typeof stepPending>[1]) => {
+      const r = stepPending(pending, event);
+      pending = r.pending;
+      return r.open;
+    };
     const onOpenDetail = () => {
-      if (hasRight()) openDetail();
-      else pending = true;
+      if (step({ type: "request", hasRight: hasRight() })) openDetail();
     };
     const onSync = () => {
-      if (pending && hasRight()) {
-        pending = false;
-        openDetail();
-      } else sync();
+      if (step({ type: "ready", hasRight: hasRight() })) openDetail();
+      else sync();
+    };
+    const onCancel = () => {
+      step({ type: "unknown-id" });
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener(PANEL_TOGGLE, onToggle);
     window.addEventListener(PANEL_OPEN_DETAIL, onOpenDetail);
     window.addEventListener(PANEL_SYNC, onSync);
+    window.addEventListener(PANEL_OPEN_CANCEL, onCancel);
     window.addEventListener("resize", sync);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener(PANEL_TOGGLE, onToggle);
       window.removeEventListener(PANEL_OPEN_DETAIL, onOpenDetail);
       window.removeEventListener(PANEL_SYNC, onSync);
+      window.removeEventListener(PANEL_OPEN_CANCEL, onCancel);
       window.removeEventListener("resize", sync);
     };
   }, []);

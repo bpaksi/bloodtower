@@ -22,7 +22,7 @@ describe("find on the real folder", () => {
 });
 
 describe("find index cache (#126)", () => {
-  it.fails("hands out the same index while the folders are unchanged", () => {
+  it("hands out the same index while the folders are unchanged", () => {
     expect(getFindIndex()).toBe(getFindIndex());
   });
 });
