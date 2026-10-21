@@ -5,7 +5,7 @@ status: open
 layer: core
 by: "Bob, 2026-10-20"
 links:
-  - { rel: part-of, to: AREA-011 }
+  - { rel: part-of, to: AREA-055 }
   - { rel: affects, to: AST-B29, note: "tower seals" }
   - { rel: affects, to: MEC-030, note: "ruins riddle needs visible drums" }
   - { rel: affects, to: MEC-031, note: "shrine puzzle needs visible glyphs" }
