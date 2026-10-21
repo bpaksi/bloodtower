@@ -55,7 +55,7 @@ Timing (Bob, 2026-10-21): most of this is already in place (cards, IDs, links, s
 
 Steps 9, 10 and 11 were approved on 2026-10-21. Their `Touches` overlap in `packages/workbench/src/**`, so they run one after another.
 
-5 and 6 both change the top bar in `layout.tsx` and the shared CSS, so their `Touches` overlap and they run one after the other. Each is small. Before B1 starts, `requirement-review` reads steps 5 and 6 together once.
+5 and 6 both change the top bar in `layout.tsx` and the shared CSS, so their `Touches` overlap and they run one after the other. Each is small. The whole-track requirement review of steps 5, 6, 9, 10 and 11 is done (see Requirement review).
 
 ## Answers (Bob, 2026-10-21)
 
@@ -66,6 +66,26 @@ Steps 9, 10 and 11 were approved on 2026-10-21. Their `Touches` overlap in `pack
 | Step 7: how picks reach the cards | tower-poc's page exports a **JSON file**. Claude reads it and edits the cards (no import script). |
 | Step 8: requirements as `REQ-` cards? | No. They **stay as rows** in requirements.md, linked from cards with `becomes`. |
 | First batch | Steps 5 and 6 |
+
+## Requirement review (2026-10-21, steps 5, 6, 9, 10, 11)
+
+The `requirement-review` agent read the five approved steps together against the code, and its fixes are written into the steps below. Bob's rulings:
+
+| Question | Answer |
+|---|---|
+| Step 9: how strict is the first rules table? | Allow each type pair today's cards use **5 or more times**, plus `part-of` → area. About 146 of the 680 non-`part-of` links go into the baseline. |
+| Step 9: may `needs` join two questions? | **Yes.** `needs` means "B must be settled or built first". (8 such links today.) |
+| Steps 5 and 6: a find hit below 1200 px | The detail panel **opens over the graph**, the same as a pick in the graph. |
+| Step 6: the overlay below 1200 px | A 360 px panel with **no scrim**; the graph stays clickable. Esc, its close button or `]` closes it, and picking another card keeps it open. Stacking, bottom to top: graph, then detail overlay, then top bar and find list (top bar raised to z-index 20), then toast and prompt dialog (50). |
+| Step 5: the find list at small heights | As wide as the box (up to 32 rem), as tall as the window less the top bar and 16 px, and it **scrolls inside**. Each row is ID and title on one line, then a one-line snippet, both cut with an ellipsis. All 20 hits are kept. |
+
+Other findings, without a ruling:
+- The panel already lists incoming links under their reverse verbs (`neighbours()` in `layout.ts`), so step 11 is rescoped.
+- All 62 areas are `open`, so step 10's area rule reads the `part-of` subtree instead.
+- Expect about 190 gaps on day one.
+- `pnpm graph` lives in the app, because a package may not import an app. The engine stays in `packages/workbench`.
+- Today's numbers: 1,184 links and 12 `needs`.
+- Step 8, once approved, depends on 10 (`/ready` reuses the decided-card rule) and adds `becomes` to step 9's rules table.
 
 ## Steps
 
@@ -92,7 +112,8 @@ The top-bar box is there but disabled ("coming").
 
 How it is built:
 - `packages/workbench/src/find.ts` holds the pure parts, with no Node imports. `buildFindIndex(cards, docs, ids)` makes one entry per card (ID, title, body) and one per non-blank document line (file, line number, text). `find(index, query, limit = 20)` returns hits, best first.
-- Exact ID: a query that is a whole ID (case ignored, read with the app's `IdScheme`) puts that ID first. If it is a card, the hit opens `/?focus=<ID>`. Otherwise the hit opens the line that defines the ID: the first line where it starts a heading or the first cell of a table row, at `/doc/<slug>#L<n>` (the existing `LineJump` scrolls there). An ID with neither a card nor a defining line falls through to the word search.
+- Exact ID: a query that is a whole ID (case ignored, read with the app's `IdScheme`) puts that ID first. If it is a card, the hit opens `/?focus=<ID>`. Otherwise the hit opens the line that defines the ID: the first line that starts a heading, a table row (first cell) or a list item (`- R-WIZ-5.`), at `/doc/<slug>#L<n>`. A heading wins over a table row, and a table row over a list item; after that, file order, then line. The existing `LineJump` scrolls to the section that holds the line, not to the line itself. An ID with neither a card nor a defining line falls through to the word search.
+- The list follows Bob's ruling in Requirement review: up to 32 rem wide, scrolls inside, one line for the ID and title and one for the snippet. Below 1200 px a card hit opens the detail panel over the graph, the same as a pick in the graph.
 - Words: every word must appear (AND, case ignored). The score ranks a match in the ID, then the title, then the body or line text. Ties go to ID order with numbers compared as numbers (`MEC-2` before `MEC-10`), then file and line.
 - The search runs on the server. A route `apps/game-workbench/src/web/app/api/find/route.ts` (`GET /api/find?q=`) reads cards and docs fresh on each request, like the pages do, so the browser never loads all 500 cards. Each hit returns `{kind, id, title, snippet, href}`.
 - `packages/workbench/src/components/FindBox.tsx` is the client box that replaces the disabled input. It waits about 120 ms after typing before it fetches and shows a listbox (`role="listbox"`, `aria-activedescendant`). `/` focuses the box only when no other field has focus. `⌘K` / `Ctrl+K` always focuses it. Esc closes the list and leaves the box.
@@ -102,11 +123,18 @@ How it is built:
 - Runs: cloud
 - Model: sonnet
 - Done when:
-  - Unit tests in `packages/workbench` (`find.test.ts`) find a card by exact ID, by a word in its title and by a word only in its body. They also find a document line by a word, and resolve a document-only ID to its defining line.
-  - The top-bar box is enabled. Typing `MEC-012` and pressing Enter focuses that card in the graph.
+  - Unit tests in `packages/workbench` (`find.test.ts`) cover:
+    - a card by exact ID (case ignored);
+    - a card by a word in its title, and by a word only in its body;
+    - a document line by a word;
+    - ties order `MEC-2` before `MEC-10`;
+    - a document-only ID defined in a table row and one defined in a list item each resolve to their defining line;
+    - an ID with no card and no defining line falls through to word search.
+  - A test in the app on the real folder: `R-ENG-6` resolves to `/doc/requirements#L<n>`, where line n starts with `| R-ENG-6 |`; and `GET /api/find?q=MEC-012` returns `/?focus=MEC-012` first.
+  - The top-bar box is enabled. The PR has a screenshot of the open list and a note that Enter on `MEC-012` focuses that card.
   - `pnpm check` passes.
-  - Viewports: 1470 × 956 (one screenshot of the open list in the PR)
-  - Not required: typo tolerance, stemming, highlighting inside snippets, wiring into story-workbench (it has no code yet)
+  - Viewports: 1470 × 956 and 1280 × 800 (the open list scrolls inside and is not clipped)
+  - Not required: typo tolerance, stemming, highlighting inside snippets, zero-padding (`MEC-12` does not find `MEC-012`), scrolling to the exact line, wiring into story-workbench (it has no code yet)
 
 ### Step 6: Works on a small screen (Bob, 2026-10-20)
 Target: a 13-inch MacBook Air with no external monitor (about 1440 × 900 or 1470 × 956 in the browser, less the menu and tab bars).
@@ -118,9 +146,16 @@ Target: a 13-inch MacBook Air with no external monitor (about 1440 × 900 or 147
 How it is built:
 - The right panel is `.detail` on the graph page and `.rail` on a document page. Both collapse the same way.
 - `packages/workbench/src/panels.ts` holds the pure state. `initialPanels(width, stored)` returns the stored choice when there is one; otherwise both panels start closed below 1200 px and open at 1200 px or more. `togglePanel(state, side)` flips one side.
-- `packages/workbench/src/components/Panels.tsx` is a client component. It sets `data-left` and `data-right` (`open` or `closed`) on `.shell`, and the grid columns in `globals.css` and `graph.css` follow those attributes. A closed panel is a 36 px rail with an open button, and an open panel has a close button.
+- `packages/workbench/src/components/Panels.tsx` is a client component. It sets `data-left` and `data-right` (`open` or `closed`) on `.shell`, but only after a toggle or when a stored choice exists.
+  - `.shell[data-left]` drives the sidebar column.
+  - `.shell[data-right]` drives the right column inside `.graph-layout` (`.detail`) and `.doc-layout` (`.rail`).
+  - The closed state is the CSS default below 1200 px, so the first paint does not flash.
+  - The old `max-width: 1000px` rule for `.doc-layout` and `.rail` in `globals.css` is replaced.
+  - A closed panel is a 36 px rail with an open button, and an open panel has a close button.
+  - `/map` and `/docs` have no right panel, so `]` does nothing there.
 - The choice is saved in `localStorage` (`workbench.panels`), with every read and write in try/catch. With no saved choice, or when storage is blocked, the width rule applies.
-- Below 1200 px an open right panel lies over the graph instead of taking a column. Picking a card in `FocusGraph` opens it there. At 1200 px or more, picking a card leaves Bob's choice alone.
+- Below 1200 px an open right panel lies over the graph instead of taking a column. Picking a card in `FocusGraph`, or opening one from find, opens it there. At 1200 px or more, picking a card leaves Bob's choice alone.
+- Overlay and z-order follow Bob's ruling in Requirement review: no scrim, the graph stays clickable, Esc, close or `]` closes it, and the top bar is raised to z-index 20 so the find list stays above the overlay and the graph's verb labels.
 - `[` and `]` are ignored while a field has focus, and when ⌘ or Ctrl is held, so `⌘[` and `⌘]` still go back and forward.
 - Depends on: 5 (both edit the top bar and the shared CSS)
 - Touches: `apps/game-workbench/src/web/**`, `packages/workbench/src/**`, `packages/workbench/styles/**` (story-workbench gets the same panels)
@@ -128,12 +163,13 @@ How it is built:
 - Runs: cloud
 - Model: sonnet
 - Done when:
-  - At 1280 × 800 the page has no horizontal scroll, both panels collapse and open from their buttons and from `[` and `]`, and with both collapsed the graph uses the full width.
   - Unit tests for `initialPanels` (saved choice wins; with none, closed below 1200 px and open at 1200 px or more) and for `togglePanel`.
-  - A reload keeps the choice.
+  - At 1280 × 800: with both panels open, the stage is 700 px wide and there is no horizontal scroll. After both are collapsed (with the buttons, and again with `[` and `]`), the stage is 1208 px wide and each rail is 36 px.
+  - At 1100 × 800: both panels start closed, and picking a card opens the detail over the graph without changing the graph's width.
+  - A reload keeps the choice. With storage blocked, the width rule applies.
   - `pnpm check` passes.
-  - Viewports: 1280 × 800 and 1470 × 956 (screenshots in the PR with panels open and collapsed)
-  - Not required: animation, drag to resize, phone widths
+  - Viewports: 1100 × 800, 1280 × 800 and 1470 × 956 (screenshots in the PR with panels open and collapsed)
+  - Not required: animation, drag to resize, phone widths (below 1000 px), panels on `/map` and `/docs`
 
 ### Step 7: Sound review tool (Bob, 2026-10-20)
 Bob listens to each of the 113 tower sounds and records how it feels, so sounds can be assigned to game mechanics. Today each `SND-` card says only the name and category; lengths are "?" in [tower-sound-inventory.md](../../../research/game-design/tower-sound-inventory.md).
@@ -169,54 +205,77 @@ Today [requirements.md](../../../research/game-design/requirements.md) holds the
 - **Coverage**: on the map page, per area, how many decisions have a requirement. A lint warning (not an error) for an `R-` row with no source.
 - When a whole area is ready, the existing `prd-02-write` skill turns its requirements into a PRD for `apps/game`. No new tool is needed for that.
 - Done when: a decided card with no `becomes` link shows in the ready view, and stops showing once it has one; the draft prompt names the card, its area and its linked decisions.
-- Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `becomes` link), `packages/workbench/src/graph-types.ts`
+- Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `becomes` link), `packages/workbench/src/graph-types.ts`, `apps/game-workbench/src/web/lib/link-rules.ts` (a `becomes` row), `research/game-design/cards/.link-baseline.json`
+- Depends on: 10 (`/ready` reuses step 10's decided-card rule)
 - Requirements stay as `R-` rows in requirements.md, with no `REQ-` cards (Bob, 2026-10-21).
 
 ### Step 9: Link rules for new links (Bob, 2026-10-21)
-Today 1,200 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), and only 13 are `needs`.
-- `research/game-design/cards/README.md` gets a rules table for each link type: which card types it may join, and whether it sets build order. `needs` means "B must exist before A can be built" and is the only link that sets build order.
-- The schema in `packages/workbench/src/cards.ts` (or a new `rules.ts` beside it) checks each link against its rule, and fails when `needs` links form a cycle.
-- Old links are grandfathered. A baseline file (`research/game-design/cards/.link-baseline.json`) lists the rule breaks that exist today. The card lint fails on any break not in it, so a new link must follow the rules, while an old one waits for the link review (Later). Fixing an old link removes its line from the baseline.
+Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), and only 12 are `needs`.
+- `research/game-design/cards/README.md` gets a rules table for each link type: which card types it may join, and whether it sets build order. `needs` means "B must be settled or built before A" and is the only link that sets build order. It may join two questions (Bob, 2026-10-21).
+- The first table allows each type pair today's cards use 5 or more times, plus `part-of` → area (Bob, 2026-10-21). That puts about 146 of the 680 non-`part-of` links in the baseline.
+- The generic checker is `packages/workbench/src/rules.ts`. It takes the rules table and the app's `kindOf`, because 109 links point at IDs that are not cards (`R-`, `E`, `AST-T`…). The table lives in the app, in `apps/game-workbench/src/web/lib/link-rules.ts`. The checker fails when `needs` or `part-of` links form a cycle.
+- Old links are grandfathered. A baseline file (`research/game-design/cards/.link-baseline.json`) lists today's rule breaks, one `from|rel|to` key each, sorted.
+  - The card lint fails on any break not in the baseline, so a new link must follow the rules. An old one waits for the link review (Later).
+  - The lint also fails on a baseline entry that is no longer a break, so fixing an old link means removing its line.
 - Depends on: none
 - Touches: `research/game-design/cards/README.md`, `research/game-design/cards/.link-baseline.json`, `packages/workbench/src/**`, `apps/game-workbench/src/web/lib/**`
 - Deps change: no
 - Runs: local (it sets the rules Bob reviews)
 - Model: opus (schema design)
 - Done when:
-  - Unit tests: a link that joins types its rule does not allow fails; a `needs` cycle (A → B → A) fails; a break listed in the baseline passes; a break not in the baseline fails.
-  - The card lint passes on today's cards with the baseline in place.
+  - Unit tests:
+    - a link joining types its rule does not allow fails;
+    - a `needs` cycle (A → B → A) fails, and so does a `part-of` cycle;
+    - a break in the baseline passes, and one not in it fails;
+    - a baseline entry that is no longer a break fails;
+    - every rel in `RELS` has a row in both the README table and `link-rules.ts`.
+  - The card lint passes on today's cards, with a baseline of at most 160 entries.
   - `pnpm check` passes.
   - Not required: fixing old links, changing the graph's look
 
 ### Step 10: Gaps report (Bob, 2026-10-21)
 - `packages/workbench/src/gaps.ts` finds gaps in the graph as pure functions. Each gap carries the card ID and the rule that found it.
-- First rules: an open question with no `answers` link to it; a mechanic with no link to a screen, UI piece or cue; a `conflicts` link where neither card is parked; a decided card with no link to an `R-` requirement; an area with no decided card.
-- A **Gaps** page (`/gaps`), grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
+- First rules:
+  - an open question with no `answers` link to it;
+  - a mechanic with no link either way to a screen, UI piece or cue;
+  - a `conflicts` link where neither card is parked;
+  - a decided card (decision, mechanic, screen, ui or cue) with no link to an `R-` ID other than `conflicts`, so step 8's `becomes` counts with no change here;
+  - an area where no card in its `part-of` subtree is decided.
+- A card in several areas counts once in each.
+- Expected on day one: about 190 gaps.
+- A **Gaps** page (`/gaps`), linked from the sidebar, grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
 - `pnpm graph gaps` prints the same list, so Claude can start a design session from it.
+  - The engine is in `packages/workbench/src` and is exported from `server.ts`, so the package's `package.json` is not edited.
+  - The entry point is the app's `apps/game-workbench/src/web/cli/graph.ts`. It supplies the app's card schema, ID scheme and folders, and handles the subcommands (`gaps` now; `show` and `find` say "not yet" until step 11).
+  - The root script is `"graph": "node apps/game-workbench/src/web/cli/graph.ts"`. Node 24 strips the types, so the CLI uses erasable TypeScript only and nothing it reaches imports `next` or a `.tsx` file.
+  - For now it covers the game only; later apps add `--app`.
 - A gap is a warning, never an error. `pnpm check` does not fail on gaps.
 - Depends on: 9
-- Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`, root `package.json` (the `graph` script)
-- Deps change: yes (a root `package.json` script, no new packages; Node 24 runs the `.ts` CLI directly)
+- Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`, `apps/game-workbench/README.md` (the command), root `package.json` (the `graph` script)
+- Deps change: yes (one root `package.json` script, no new packages)
 - Runs: cloud
 - Model: sonnet
 - Done when:
-  - Unit tests on a small graph: each rule finds its gap, and does not report a card once the gap is fixed.
-  - `/gaps` lists today's gaps, and `pnpm graph gaps` prints the same count.
-  - `pnpm check` passes.
-  - Viewports: 1470 × 956
-  - Not required: an AI review (that is the `graph-review` skill, Later), rules beyond the five above
+  - Unit tests on a small graph: each of the five rules finds its gap, and does not report it once the gap is fixed.
+  - A test on the real cards folder: the count `pnpm graph gaps` prints (a line `N gaps`) equals the sum of the `/gaps` group counts. Both come from the same function.
+  - `/gaps` is linked from the sidebar, and each row opens its card. The map page shows a count per area.
+  - `pnpm check` passes and does not fail on gaps.
+  - Viewports: 1470 × 956 (`/gaps`)
+  - Not required: an AI review (that is the `graph-review` skill, Later), rules beyond the five above, fixing the gaps
 
 ### Step 11: What points here, and `pnpm graph show` (Bob, 2026-10-21)
-- The detail panel lists every link pointing at the card, grouped by verb read in reverse ("needed by", "answered by"…), next to the links it writes itself. Documents that mention the ID are already listed.
-- `pnpm graph show <ID>` prints the card, its links both ways and its sources. `pnpm graph find <words>` prints step 5's search.
+- The detail panel already lists incoming links under their reverse verbs (`neighbours()` in `layout.ts`). Missing today: the links' notes, and any split between links in and links out.
+- Add `backlinks(graph, id)` as a pure function in `packages/workbench/src`: the incoming links, grouped by reverse verb ("needed by", "answered by"…), with notes. The panel uses it under two headings, "Points here" and "Links from here", and shows the notes. Documents that mention the ID are already listed.
+- `pnpm graph show <ID>` prints the card, its links both ways with verbs and notes, and its sources. `pnpm graph find <words>` prints step 5's search.
 - Depends on: 5, 10 (the CLI)
 - Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`
-- Deps change: no
+- Deps change: no (the `graph` script exists from step 10)
 - Runs: cloud
 - Model: sonnet
 - Done when:
-  - A unit test: a card that only other cards link to lists those cards under the reverse verb.
-  - `pnpm graph show MEC-012` prints its links both ways.
+  - Unit tests on `backlinks`: a card that only other cards link to returns them grouped under the reverse verb, with each link's note; a card with no incoming links returns an empty list.
+  - `pnpm graph show MEC-012` prints the card, its links in both directions with verbs and notes, and its sources. A test compares the output with `backlinks`.
+  - `pnpm graph find <words>` prints the same hits as `GET /api/find?q=` for the same query.
   - `pnpm check` passes.
   - Viewports: 1470 × 956
   - Not required: an impact view across several hops (Later)
