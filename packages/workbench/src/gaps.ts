@@ -16,7 +16,7 @@ export type GapRule = (typeof GAP_RULES)[number];
 export const GAP_RULE_LABEL: Record<GapRule, string> = {
   "open-question": "Open question with no answer",
   "mechanic-surface": "Mechanic with no screen, UI piece or cue",
-  "conflict-unparked": "Conflict where neither card is parked",
+  "conflict-unparked": "Conflict not yet settled",
   "decided-no-requirement": "Decided card with no requirement",
   "area-undecided": "Area with nothing decided",
 };
@@ -116,6 +116,8 @@ export function findGaps(graph: Graph): Gap[] {
     const b = graph.nodes[e.to];
     if (a?.kind !== "card" || a.status === "parked") continue;
     if (b?.kind === "card" && b.status === "parked") continue;
+    // A conflict with a document ID (R-, E...) is settled once the card side is decided.
+    if (b?.kind === "ref" && a.status === "decided") continue;
     // A conflict written on both cards is one gap.
     const key = [e.from, e.to].sort().join("|");
     if (pairs.has(key)) continue;

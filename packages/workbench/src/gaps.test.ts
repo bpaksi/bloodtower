@@ -78,6 +78,24 @@ describe("gaps", () => {
     expect(findGaps(parked)).toEqual([]);
   });
 
+  it("conflict with a document ID: settled once the card is parked or decided", () => {
+    const g = (status: "open" | "parked" | "decided" | "proposed") =>
+      graphOf({ "DEC-001": { type: "decision", status, links: [["conflicts", "R-X-1"]] } });
+    const conflicts = (x: Graph) => findGaps(x).filter((f) => f.rule === "conflict-unparked");
+    expect(conflicts(g("open"))).toHaveLength(1);
+    expect(conflicts(g("proposed"))).toHaveLength(1);
+    expect(conflicts(g("parked"))).toHaveLength(0);
+    expect(conflicts(g("decided"))).toHaveLength(0);
+  });
+
+  it("conflict between cards: a decided card does not settle it, only a parked one", () => {
+    const decided = graphOf({
+      "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "OPT-002"]] },
+      "OPT-002": { type: "option" },
+    });
+    expect(findGaps(decided).filter((f) => f.rule === "conflict-unparked")).toHaveLength(1);
+  });
+
   it("decided card: found until it links to an R- ID, and conflicts does not count", () => {
     const none = graphOf({ "DEC-001": { type: "decision", status: "decided" } });
     expect(rulesFor(none, "DEC-001")).toEqual(["decided-no-requirement"]);
