@@ -5,6 +5,15 @@ Date: 2026-10-21 · Status: accepted
 Bloodtower runs on a Mac host with pages on iPads and the TV (the Story board). Today the server and the pages use bare `console.*` calls, and no page catches its own errors. An error on an iPad or the TV is lost unless Safari's dev tools happen to be attached. tower-poc already has a diagnostics timeline (its spec, D16), but that covers the tower, not the game. Bob wanted this settled before coding continues on 2026-10-23.
 
 ## Decision
+**The rule (Bob, 2026-10-21): never eat, hide or ignore an error.**
+- Every error, however small, is logged. That includes failures the code expects and handles: a tower command with no answer, a rejected press, a pack lint warning.
+- No empty `catch`, no `.catch(() => {})`, no promise left unhandled. Errors from the browser and third-party code are logged too, not filtered out.
+- An error tied to a person's action is shown to that person, on the iPad that pressed, with the error code.
+- Every error logged also shows as a toast on the Story board.
+  - The board is display-only, so the toast sits in a corner away from the story text and fades after a few seconds.
+  - Repeats of the same code collapse into one toast with a count ("×12"). The log keeps every one.
+- Why: errors made visible early save hours of hunting later.
+
 Bob's answers, 2026-10-21:
 - **One log on the Mac host. Nothing leaves the LAN.**
   - Every page catches its errors: a React error boundary, `window.onerror` and `unhandledrejection`.
