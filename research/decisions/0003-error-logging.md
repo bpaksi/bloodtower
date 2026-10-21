@@ -6,8 +6,10 @@ Bloodtower runs on a Mac host with pages on iPads and the TV (the Story board). 
 
 ## Decision
 **The rule (Bob, 2026-10-21): never eat, hide or ignore an error.**
-- Every error, however small, is logged. That includes failures the code expects and handles: a tower command with no answer, a rejected press, a pack lint warning.
-- No empty `catch`, no `.catch(() => {})`, no promise left unhandled. Errors from the browser and third-party code are logged too, not filtered out.
+- Every error, however small, is logged. Errors from the browser and third-party code are logged too, not filtered out.
+- No empty `catch`, no `.catch(() => {})`, no promise left unhandled. Every `catch` either recovers fully or logs an error.
+- **An outcome the code expects and fully recovers from is not an error** (Bob, 2026-10-21). Two examples: a slow call that times out and succeeds on a retry, and a press that loses a first-press-wins race. It may write a `debug` line (each retry does, so a rising rate shows in the log), but it is not logged as an error and gets no toast. It becomes an error when the recovery fails: the last retry fails, there is no fallback, or the result is wrong or unknown.
+- A tower command with no answer is always an error, because physical actions are never retried automatically (CLAUDE.md, Tower safety).
 - An error tied to a person's action is shown to that person, on the iPad that pressed, with the error code.
 - Every error logged also shows as a toast on the Story board.
   - The board is display-only, so the toast sits in a corner away from the story text and fades after a few seconds.

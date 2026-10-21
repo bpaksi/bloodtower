@@ -51,7 +51,8 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 
 Never eat, hide or ignore an error, however small ([decision 0003](research/decisions/0003-error-logging.md)).
 
-- Log every error, including the ones the code expects and handles. No empty `catch`, no `.catch(() => {})`, no promise left unhandled.
+- Log every error. No empty `catch`, no `.catch(() => {})`, no promise left unhandled: a `catch` either recovers fully or logs an error.
+- An outcome the code expects and fully recovers from (a retry that succeeds, a lost first-press race) is not an error. It may write a `debug` line. When the recovery fails, it is an error.
 - An error tied to a person's action is shown to that person, with its error code.
 - In Bloodtower, every logged error also shows as a toast on the Story board.
 
