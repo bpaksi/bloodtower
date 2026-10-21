@@ -30,7 +30,7 @@ Every app README states its tier. Explore-phase experiments shouldn't carry the 
 
 | | Experiment | Full |
 |---|---|---|
-| Use for | Throwaway prototypes, quick mechanic tests | Anything touching hardware, reused later, or shipping (`tower-poc`, `game`) |
+| Use for | Throwaway prototypes, quick mechanic tests | Anything touching hardware, reused later, or shipping (`game`). Bob can place a hardware app on Experiment, as he did `tower-poc` on 2026-10-21; the tower safety rules hold on either tier |
 | Intent | One short `intent/0001-*.md` | Yes, one per change |
 | Spec | Optional; README is enough | Required, with decision log |
 | Plans | Optional single `plans/plan.md` | One per milestone |

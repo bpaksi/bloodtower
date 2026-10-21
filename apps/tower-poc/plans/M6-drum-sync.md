@@ -1,6 +1,6 @@
 # M6 — Drum sync and orientation prototype
 
-**Status:** draft for Bob, 2026-10-21. Waiting on Bob's intent file (`intent/0002-drum-sync.md`) and plan approval (G-plan).
+**Status:** draft for Bob, 2026-10-21. Waiting on plan approval. tower-poc is on the Experiment tier from 2026-10-21, so no new intent file is needed and the review loop is `adversary-bugs` only, as the tier allows.
 
 **Why:** Bloodtower's calibrate step will sync the drums by asking players which glyphs they can see, then orient the tower to the board, in one tower block right after calibrate (DEC-103, DEC-104 in `research/game-design/cards/`). The library copies a fixed glyph table in when calibration ends and never checks it against the tower ([setup-slice findings](../../../research/tower/setup-slice-findings-2026-10-21.md)). This milestone proves the prompts on the real tower before Bloodtower builds them.
 
