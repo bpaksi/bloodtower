@@ -17,13 +17,15 @@ export const useCommand = (capabilityId: string) => {
   );
   const pending = commandId !== undefined && isPending(stages, interrupted);
 
+  /** Returns the command's id, or undefined when nothing was sent. */
   const send = (params: unknown) => {
-    if (pending) return;
+    if (pending) return undefined;
     const id = sendToService("command", { capabilityId, params });
     if (id) useService.setState((view) => markSent(view, id), true);
     setUnsent(id === undefined);
     setCommandId(id);
     setRequested(id === undefined ? undefined : params);
+    return id;
   };
 
   return { send, pending, unsent, commandId, stages, interrupted, requested };
