@@ -6,7 +6,7 @@ import { LogEntries } from "./LogEntries.tsx";
 
 /** In-page log panel, fixed at the bottom-left. Export downloads the log as JSON. */
 export function LogPanel() {
-  const { entries } = useLogState();
+  const { entries, dropped } = useLogState();
   const [open, setOpen] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
 
@@ -54,7 +54,7 @@ export function LogPanel() {
               {problem}
             </p>
           ) : null}
-          <LogEntries entries={entries} />
+          <LogEntries entries={entries} dropped={dropped} />
         </div>
       ) : null}
     </div>

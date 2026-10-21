@@ -75,7 +75,12 @@ export function createRng(seed: string | number): Rng {
     seed: seedText,
     next,
     int,
-    chance: (p) => next() < p,
+    chance(p) {
+      if (typeof p !== "number" || Number.isNaN(p) || p < 0 || p > 1) {
+        throw new Error(`rng.chance needs a number from 0 to 1, got ${String(p)}.`);
+      }
+      return next() < p;
+    },
     pick(items) {
       if (items.length === 0) throw new Error("rng.pick needs a non-empty list.");
       return items[int(0, items.length - 1)] as (typeof items)[number];
