@@ -15,3 +15,5 @@ sources:
   - { file: "../return-to-dark-tower/assets/IMG_5690.HEIC", note: "spore and caravan tokens (photo, blurry)" }
 ---
 **Proposal:** an escort or cargo on the board: someone or something that only moves when a hunter spends movement on it. Dracula: the woman under protection. Fellowship: the supply wagon. A snatch or ambush targets the token's space.
+
+**Decided (Bob, 2026-10-21):** in the core game caravans are moving encounters (DEC-090); escort is an option a story may switch on.
