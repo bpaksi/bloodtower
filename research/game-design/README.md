@@ -14,6 +14,7 @@ Mechanics, themes and rules ideas for the new game. Ideas that become a prototyp
 | [encounters-and-set-pieces.md](encounters-and-set-pieces.md) | Set pieces and random encounters (R-SP, R-RE): template, fellowship starter table |
 | [sessions.md](sessions.md) | Startup, play, save/resume, carry-over and ending flows (R-SES) |
 | [statistics.md](statistics.md) | Per-game statistics and design-level SQLite data model (R-STA) |
+| [dungeon-review.md](dungeon-review.md) | How to review one set-piece type by chatting (one picture, one meter, two or three choices), and how the review is recorded |
 | [open-questions.md](open-questions.md) | One deduplicated list of decisions for Bob, most important first |
 | [asset-organization.md](asset-organization.md) | How story and shared assets are laid out so multiple stories coexist |
 | [landing-and-initial-screens.md](landing-and-initial-screens.md) | Landing, title, setup and join screens, plus the asset wish list |
