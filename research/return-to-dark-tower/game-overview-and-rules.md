@@ -65,7 +65,7 @@ Haggle die results: normal, +3 warriors, +1 potion, +1 gear, or the Reinforce is
 - **Foe status** escalates the longer foes stay on the board: panicked → unsteady → ready → savage → lethal. Each foe type has a monthly-ish strike event.
 - **Corruptions.** Gained when you can't pay a loss, when skulls land on destroyed buildings, when a home building is destroyed, or by effect. Normally one per effect.
 - **Items.** Potions (unlimited), gear (one of each), treasures (max 4), quest items (unlimited).
-- **Virtues.** 3 active at start, 3 more unlockable at a citadel.
+- **Virtues.** 16 tiles: 3 hero virtues per hero plus 1 kingdom virtue per kingdom. The rulebook says "You start the game with three active virtues and three inactive virtues, which you can gain during the game", but its setup places the 3 hero tiles "inactive side up" next to the home-kingdom tile, and it doesn't square the two. Gaining one: "Spend 5 spirit to gain 1 virtue" at a citadel Reinforce; you "flip one of your inactive virtues face up to its active side" and it works at once. Virtues can't be traded. Only the citadel is tied to virtues; single virtues trigger on actions or spending (*Generous* after a Cleanse, *Relic Hunter's Inventive* on spending 4 potions). Source: RulesPal rulebook transcription, checked 2026-10-22.
 - **Game seeds.** A 12-character code captures mode, players, difficulty, goal, adversary, foes and events, so a setup can be replayed or shared.
 
 ## Winning and losing
