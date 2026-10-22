@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combat Simulator</title>
+<!--
+  Design tool for Q-023 / OPT-010: the fight loop of MEC-024 with the round actions of DEC-129,
+  class fight numbers (DEC-130), Advantages (DEC-128), spells with uses (DEC-122, DEC-123),
+  falls at 0 hit points (DEC-119). No mana (DEC-124), no attributes (DEC-125).
+  Self-contained: open in a browser. Seeded RNG (mulberry32), 10,000 trials per run. 2026-10-22.
+-->
+<style>
+:root {
+  --void: #0b0806; --soot: #1a1310; --umber: #3b2a1e; --parch: #e9d9b4; --parch-dk: #c9b182;
+  --vellum: #8a6f47; --candle: #f5c451; --blood: #8e1b1b; --bone: #f3ead2; --verd: #4f7a6a;
+  --serif: "Cormorant Garamond", "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --label: "IM Fell English SC", "Cormorant SC", "Iowan Old Style", Georgia, serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--void); color: var(--bone); font-family: var(--serif); font-size: 17px; }
+main { max-width: 1180px; overflow-x: hidden; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { font-weight: 600; font-size: 30px; margin: 0; }
+.kick { font-family: var(--label); letter-spacing: .14em; color: var(--blood); font-size: 13px; }
+p.lead { color: var(--parch-dk); margin: 6px 0 16px; line-height: 1.45; max-width: 860px; }
+.ids code { font-size: 12px; border: 1px solid var(--umber); padding: 1px 5px; color: var(--parch-dk); background: #140e0b; }
+.grid { display: grid; grid-template-columns: 340px 1fr; gap: 18px; align-items: start; }
+.grid > * { min-width: 0; }
+.box { background: var(--soot); border: 1px solid var(--umber); padding: 14px 16px; margin-bottom: 14px; }
+.box h2 { font-family: var(--label); font-weight: normal; letter-spacing: .14em; font-size: 13px; color: var(--parch-dk); margin: 0 0 10px; }
+label { display: grid; grid-template-columns: 1fr 90px; align-items: center; gap: 8px; margin: 6px 0; }
+label.chk { grid-template-columns: 28px 1fr; }
+label small { display: block; color: var(--vellum); font-size: 13px; }
+input, select { font: inherit; font-size: 16px; background: #0f0a08; color: var(--bone); border: 1px solid var(--vellum); padding: 6px 8px; width: 100%; min-height: 40px; }
+input[type=checkbox] { width: 22px; min-height: 22px; accent-color: var(--candle); }
+input:focus, select:focus { outline: 2px solid var(--candle); outline-offset: 1px; }
+.err { color: #ff9b9b; font-size: 14px; min-height: 18px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.stat { background: #120d0a; border: 1px solid var(--umber); padding: 10px 12px; }
+.stat .v { font-size: 32px; font-weight: 700; color: var(--candle); line-height: 1.1; }
+.stat .k { font-family: var(--label); font-size: 12px; letter-spacing: .1em; color: var(--parch-dk); }
+.stat .d { font-size: 13px; color: var(--vellum); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--umber); padding: 6px 8px; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { font-family: var(--label); font-weight: normal; letter-spacing: .08em; color: var(--parch-dk); font-size: 12px; }
+tr.on td { color: var(--candle); }
+.note { color: var(--vellum); font-size: 14px; line-height: 1.45; }
+pre { white-space: pre-wrap; font-family: var(--serif); font-size: 15px; color: var(--parch); margin: 0; line-height: 1.4; }
+details summary { cursor: pointer; font-family: var(--label); letter-spacing: .1em; font-size: 13px; color: var(--parch-dk); min-height: 32px; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } table { font-size: 13px; } th, td { padding: 5px 4px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="kick">DESIGN TOOL · Q-023 · OPT-010 · 2026-10-22</div>
+  <h1>Combat simulator</h1>
+  <p class="lead">A fight as MEC-024 runs it. Each round every standing hero picks one action (DEC-129). The magic user casts, the others make a normal attack worth their class's fight number (DEC-130), and matching automatic Advantages add to every round (DEC-128). A seeded draw weighs strength against the foe's level. A win cuts the horde; a loss hits a random standing hero for the foe's level, and a hero at 0 sits out (DEC-119). Every number below is OPT-010's first guess and can be changed.
+  <span class="ids"><code>MEC-024</code> <code>DEC-118</code> <code>DEC-119</code> <code>DEC-122</code> <code>DEC-123</code> <code>DEC-128</code> <code>DEC-129</code> <code>DEC-130</code> <code>Q-023</code></span></p>
+
+  <div class="grid">
+    <div>
+      <div class="box">
+        <h2>THE FIGHT</h2>
+        <div id="party"></div>
+        <label>Foe level<small>RtDT foes 2–4, lieutenant 5, disaster 8</small><input id="level" type="number" min="1" max="10" value="3"></label>
+        <label>Matching automatic Advantages<small>count every round (DEC-128)</small><input id="auto" type="number" min="0" max="10" value="0"></label>
+        <label>Conditional Advantages held<small>one spent per round as an action</small><input id="cond" type="number" min="0" max="10" value="0"></label>
+        <label>Potions held<small>given to a hero at or below the foe's level</small><input id="potions" type="number" min="0" max="10" value="0"></label>
+        <label class="chk"><input id="guard" type="checkbox"><span>Fighter holds a guard virtue (once per fight)<small>used when a hit would make a hero fall</small></span></label>
+        <label>Magic user's once spell<select id="once"><option value="lightning">Lightning</option><option value="fireball">Fireball</option><option value="none">none</option></select></label>
+        <label>Seed<input id="seed" type="number" value="2026"></label>
+        <div class="err" id="err"></div>
+      </div>
+      <div class="box">
+        <h2>THE NUMBERS (OPT-010)</h2>
+        <div id="nums"></div>
+      </div>
+    </div>
+    <div>
+      <div class="stats" id="stats"></div>
+      <div class="box">
+        <h2>THIS PARTY AGAINST EVERY LEVEL</h2>
+        <table id="byLevel"></table>
+        <p class="note">Win: the horde is gone. Everything else is a loss: every hero fell, or the fight hit the round cap, which stands in for the group running. The highlighted row is the level picked on the left.</p>
+      </div>
+      <div class="box">
+        <details open><summary>ONE FIGHT, ROUND BY ROUND</summary><pre id="log"></pre></details>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+const CLASSES = [
+  { id: "fighter", name: "Fighter", f: 3, hp: 12, on: true },
+  { id: "healer", name: "Healer", f: 1, hp: 9, on: false },
+  { id: "mage", name: "Magic user", f: 1, hp: 8, on: true },
+  { id: "scout", name: "Scout", f: 2, hp: 9, on: false },
+  { id: "ranger", name: "Ranger", f: 2, hp: 10, on: false },
+  { id: "scholar", name: "Scholar", f: 1, hp: 8, on: false },
+];
+const NUMS = [
+  ["hordePerLevel", "Horde per foe level", 4],
+  ["hordePerHero", "Horde per hero after the first", 1],
+  ["defPerLevel", "Foe defence per level", 2],
+  ["cutMin", "Least a won round cuts", 2],
+  ["advCond", "A conditional Advantage adds", 3],
+  ["missile", "Magic Missile cuts (unlimited)", 2],
+  ["lightning", "Lightning cuts (once)", 6],
+  ["potion", "A potion heals", 4],
+  ["maxRounds", "Round cap (the group runs)", 12],
+];
+const N = 10000;
+
+function mulberry32(a) {
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const $ = (id) => document.getElementById(id);
+$("party").innerHTML = CLASSES.map((c) =>
+  `<label class="chk"><input type="checkbox" id="c-${c.id}" ${c.on ? "checked" : ""}><span>${c.name}<small>fight ${c.f} · ${c.hp} hit points</small></span></label>`).join("");
+$("nums").innerHTML = NUMS.map(([k, label, v]) =>
+  `<label>${label}<input id="n-${k}" type="number" min="0" max="50" value="${v}"></label>`).join("") +
+  `<p class="note">Fireball halves the horde, rounded up. A won round cuts half the round's strength, rounded up, and never less than the least cut. The odds of a won round are strength ÷ (strength + defence), kept between 10% and 90%.</p>`;
+
+function read() {
+  const P = {};
+  for (const [k] of NUMS) P[k] = Number($(`n-${k}`).value);
+  const party = CLASSES.filter((c) => $(`c-${c.id}`).checked);
+  const s = {
+    party, P,
+    level: Number($("level").value), auto: Number($("auto").value), cond: Number($("cond").value),
+    potions: Number($("potions").value), guard: $("guard").checked, once: $("once").value, seed: Number($("seed").value),
+  };
+  const bad = [s.level, s.auto, s.cond, s.potions, s.seed, ...Object.values(P)].some((v) => !Number.isFinite(v) || v < 0);
+  if (!party.length) return { error: "Pick at least one hero." };
+  if (bad || s.level < 1) return { error: "Every number must be 0 or more, and the foe level at least 1." };
+  return { s };
+}
+
+function fight(s, level, r, log) {
+  const { P } = s;
+  let horde = P.hordePerLevel * level + P.hordePerHero * (s.party.length - 1);
+  const heroes = s.party.map((c) => ({ ...c, cur: c.hp, up: true }));
+  let cond = s.cond, potions = s.potions, guard = s.guard, once = s.once !== "none", rounds = 0, falls = 0, lost = 0;
+  const say = (t) => log && log.push(t);
+  say(`The horn sounds. A horde of ${horde}, level ${level}.`);
+  while (horde > 0 && rounds < P.maxRounds) {
+    rounds++;
+    const up = heroes.filter((h) => h.up);
+    if (!up.length) break;
+    let strength = s.auto, guarding = false, condUsed = false;
+    const acts = [];
+    const hurt = up.find((h) => h.cur <= level);
+    for (const h of up) {
+      if (h.id === "mage") {
+        if (once && horde >= 6) {
+          once = false;
+          const cut = s.once === "fireball" ? Math.ceil(horde / 2) : P.lightning;
+          horde -= cut; acts.push(`${h.name} casts ${s.once === "fireball" ? "Fireball" : "Lightning"} (−${cut})`);
+        } else { horde -= P.missile; acts.push(`${h.name} casts Magic Missile (−${P.missile})`); }
+      } else if (hurt && potions > 0 && h.id === "healer") {
+        potions--; hurt.cur = Math.min(hurt.hp, hurt.cur + P.potion); acts.push(`${h.name} gives ${hurt.name} a potion (+${P.potion})`);
+      } else if (hurt && guard && h.id === "fighter") {
+        guard = false; guarding = true; acts.push(`${h.name} guards`);
+      } else if (cond > 0 && !condUsed && h.id !== "fighter") {
+        cond--; condUsed = true; strength += P.advCond; acts.push(`${h.name} spends an Advantage (+${P.advCond})`);
+      } else { strength += h.f; acts.push(`${h.name} attacks (+${h.f})`); }
+    }
+    say(`Round ${rounds}: ${acts.join(", ")}.`);
+    if (horde <= 0) { say("The spell finishes the horde."); break; }
+    const def = P.defPerLevel * level;
+    const p = Math.min(0.9, Math.max(0.1, strength / (strength + def || 1)));
+    if (r() < p) {
+      const cut = Math.max(P.cutMin, Math.ceil(strength / 2));
+      horde = Math.max(0, horde - cut);
+      say(`  Strength ${strength} against ${def} (${Math.round(p * 100)}%): won, the horde drops by ${cut} to ${horde}.`);
+    } else if (guarding) {
+      say(`  Strength ${strength} against ${def} (${Math.round(p * 100)}%): lost, but the guard holds.`);
+    } else {
+      const h = up[Math.floor(r() * up.length)];
+      h.cur -= level; lost += level;
+      say(`  Strength ${strength} against ${def} (${Math.round(p * 100)}%): lost, ${h.name} takes ${level} (${Math.max(0, h.cur)} left).`);
+      if (h.cur <= 0) { h.up = false; falls++; say(`  ${h.name} falls: a corruption, out of the fight.`); }
+    }
+  }
+  const win = horde <= 0;
+  say(win ? "Victory: money and one card by foe level (DEC-120)." : heroes.every((h) => !h.up) ? "Every hero has fallen. The horde stays and grows." : "The group runs. The horde stays and grows.");
+  return { win, rounds, falls, lost };
+}
+
+function many(s, level) {
+  const r = mulberry32(s.seed * 31 + level);
+  let w = 0, R = 0, F = 0, L = 0;
+  for (let i = 0; i < N; i++) { const o = fight(s, level, r); w += o.win; R += o.rounds; F += o.falls; L += o.lost; }
+  return { win: w / N, rounds: R / N, falls: F / N, lost: L / N };
+}
+
+function render() {
+  const { s, error } = read();
+  $("err").textContent = error || "";
+  if (error) return;
+  const m = many(s, s.level);
+  const pct = (x) => `${Math.round(x * 100)}%`;
+  $("stats").innerHTML = [
+    ["WIN", pct(m.win), `${N.toLocaleString()} seeded fights`],
+    ["ROUNDS", m.rounds.toFixed(1), "average per fight"],
+    ["HIT POINTS LOST", m.lost.toFixed(1), "across the party"],
+    ["FALLS", m.falls.toFixed(2), "heroes at 0, each a corruption"],
+  ].map(([k, v, d]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+  let rows = "<tr><th>Foe level</th><th>Horde</th><th>Win</th><th>Rounds</th><th>HP lost</th><th>Falls</th></tr>";
+  for (let L = 1; L <= 8; L++) {
+    const x = many(s, L);
+    const horde = s.P.hordePerLevel * L + s.P.hordePerHero * (s.party.length - 1);
+    rows += `<tr class="${L === s.level ? "on" : ""}"><td>${L}</td><td>${horde}</td><td>${pct(x.win)}</td><td>${x.rounds.toFixed(1)}</td><td>${x.lost.toFixed(1)}</td><td>${x.falls.toFixed(2)}</td></tr>`;
+  }
+  $("byLevel").innerHTML = rows;
+  const log = [];
+  fight(s, s.level, mulberry32(s.seed), log);
+  $("log").textContent = log.join("\n");
+}
+
+for (const el of document.querySelectorAll("input, select")) el.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
