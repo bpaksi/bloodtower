@@ -10,6 +10,7 @@ Research on the published Return to Dark Tower (RtDT) game and companion app, co
 | [game-overview-and-rules.md](game-overview-and-rules.md) | How the game plays: setup, turn, systems, win/loss, competitive mode, expansion mechanics, design notes |
 | [companion-app.md](companion-app.md) | The official app: platforms, features, full version history, gaps, third-party tools |
 | [sources.md](sources.md) | Where each fact came from |
+| [assets/board-top-down.webp](assets/board-top-down.webp) | Bob's top-down photo of the physical board, for the DEC-221 graph draft |
 
 ## Product line timeline
 
