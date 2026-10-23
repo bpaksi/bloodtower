@@ -1,7 +1,23 @@
-import { resolve } from "node:path";
+import { basename, dirname, isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadConfig } from "../config.ts";
+
+/** Repo root from `src/server/scripts` (same layout as `config.ts`). */
+const REPO_ROOT = resolve(import.meta.dirname, "../../../../..");
+
+const resolveLintDir = (dir: string, cwd: string): string => {
+  if (isAbsolute(dir)) return dir;
+  if (dir === "packs-v2" || dir.startsWith("packs-v2/")) return resolve(REPO_ROOT, dir);
+  return resolve(cwd, dir);
+};
+
 import { formatLoadIssues, loadPackDir, loadR1Pack, type PackLoadResult } from "../pack/load.ts";
+import {
+  formatPackV2Issues,
+  isPackV2Manifest,
+  loadPackV2Dir,
+  type PackV2LoadResult,
+} from "../pack/v2/load.ts";
 
 export interface LintReport {
   exitCode: number;
@@ -10,8 +26,29 @@ export interface LintReport {
 
 /** Lints one folder, or the configured test pack when `dir` is omitted. */
 export const lintPath = (dir: string | undefined, cwd: string): LintReport => {
+  if (dir) {
+    const resolved = resolveLintDir(dir, cwd);
+    if (isPackV2Manifest(resolved)) {
+      let packsV2Root = resolved;
+      while (basename(packsV2Root) !== "packs-v2") {
+        const parent = dirname(packsV2Root);
+        if (parent === packsV2Root) break;
+        packsV2Root = parent;
+      }
+      const v2: PackV2LoadResult = loadPackV2Dir(
+        resolved,
+        basename(packsV2Root) === "packs-v2" ? packsV2Root : undefined,
+      );
+      if (v2.ok) {
+        const pack = v2.kind === "story" ? v2.pack : v2.pack;
+        const lines = [`OK ${pack.pack_id} ${pack.version} (format v2)`];
+        return { exitCode: 0, lines };
+      }
+      return { exitCode: 1, lines: formatPackV2Issues(v2.issues) };
+    }
+  }
   const result: PackLoadResult = dir
-    ? loadPackDir(resolve(cwd, dir))
+    ? loadPackDir(resolveLintDir(dir, cwd))
     : loadR1Pack(loadConfig().packsDir);
   if (result.ok) {
     const lines = [`OK ${result.pack.pack_id} ${result.pack.version}`];

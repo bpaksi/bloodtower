@@ -126,6 +126,22 @@ Rules the schema enforces, with the id in the issue message (`packIssues` maps a
 
 The loader adds folder rules on top of the schema (same `V-1` id in issues). A pack folder holds `pack.yaml` or split YAML/JSON stems, optional `README.md`, and optionally exactly one subfolder `assets/`. That folder holds only image files (`.png`, `.jpg`, `.jpeg`, `.webp`) with no nested folders. Any other top-level entry is refused. Missing image files for declared still and portrait assets are `W-asset` warnings; the pack still loads.
 
+### 4.1 Pack format v2 (D34, D38)
+
+Until the host switch-over, v2 packs live under `packs-v2/`. Each manifest carries `format: 2` and `kind: story` or `kind: base-content`. Schemas and lint live in `src/protocols/pack-v2/`; the v2 loader is `src/server/pack/v2/`. `pnpm --dir apps/bloodtower pack:lint packs-v2/test` lints v2; omitting the path still lints the R1 `packs/test` pack.
+
+**Story packs** carry identity, settings, `day.move_roll`, a `start` block (AREA-077 uses `one-per-kingdom-citadel`), optional game entry points, and `chapters` with kingdoms, timed beats, quests (`quest_type` names a base quest type), and entry points as lists of effects from the fixed set: `narrate` (optional tower `cue`), `place-token`, `remove-token`, `open-lead`, `set-flag`, `clear-flag`, `add-counter`. Conditions check flags, counters, chapter, day, or kingdom, combined with `and` / `or` / `not`.
+
+**Base content packs** hold the shared hero pool (DEC-099, DEC-100), building types, quest type names, and the RtDT board graph (DEC-221): kingdoms with direction-letter ids (DEC-226), printed space names (DEC-225), terrains, optional buildings, adjacency, and river crossings. A story names its `base_pack` id; lint loads that folder beside the story under `packs-v2/`.
+
+| Rule | What fails |
+|---|---|
+| P2-1 | An unknown manifest key or value, a duplicate id, or a structural mismatch (semver, kingdom letter on a space id, four kingdoms). |
+| P2-2 | A ref to an undeclared space, hero, or base pack. |
+| P2-3 | A flag read in a condition that is never set or cleared in the same story. |
+
+The v2 lint refuses code in a pack: strict objects only, and effects must be one of the kinds above. R1 rules V-1–V-20 still apply only to `packs/` until step 9.
+
 ## 5. Timing rows
 
 TypeScript `TimingMark` and the SQLite columns step 4 will create:
