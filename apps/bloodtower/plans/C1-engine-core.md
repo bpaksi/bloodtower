@@ -1,8 +1,8 @@
 # C1 — Engine core: the loop stack on an event log (build plan)
 
 **Status:** draft for Bob, 2026-10-23. Nothing is built. Waiting on G0.
-**Source:** spec §1a (D32 to D38), decisions [0004](../../../research/decisions/0004-tower-package.md) and [0005](../../../research/decisions/0005-seeded-rng-package.md), and the game-design cards: the loop stack (DEC-132 to DEC-147, MEC-032 to MEC-039), the session loop (DEC-152 to DEC-155), the event log (DEC-107), the day (DEC-077, DEC-078, DEC-085, DEC-108, DEC-109) and the names (DEC-186 to DEC-206).
-**Goal:** replace R1's session engine with the reducer core, move the shell flow onto it, and play one day of a test story end to end, with Save and quit and resume.
+**Source:** spec §1a (D32 to D38), decisions [0004](../../../research/decisions/0004-tower-package.md) and [0005](../../../research/decisions/0005-seeded-rng-package.md), and the game-design cards: the loop stack (DEC-132 to DEC-147, MEC-032 to MEC-039), the session loop (DEC-152 to DEC-155), the event log (DEC-107), the day (DEC-077, DEC-078, DEC-085, DEC-108, DEC-109) and the names (DEC-186 to DEC-206). Continue-only autosave and the session screen are PR #186 (DEC-208 to DEC-217). The Proving Grounds day slice is PR #188 (AREA-077, DEC-218 to DEC-226).
+**Goal:** replace R1's session engine with the reducer core, move the shell flow onto it, and play the Proving Grounds day slice (AREA-077) end to end. The exit is Continue-only: Quit story lands on the session screen (SCR-021), Done for tonight ends the sitting, and Continue resumes the autosave until a new game replaces it.
 **Exit condition:** every `Done when` below passes in CI with the mock tower, and Bob signs off at G-C1 on the Mac, TV, an iPad and the real tower.
 
 The milestone is called C1, not R2, because R2 already names the requirement set `R2-xx` (`research/game-design/r2-screen-flow.md`).
@@ -32,7 +32,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 
 ## Out of scope
 
-- Loops past the day slice: encounters beyond one building action, quests, battles, events, skulls, chapters past the first, the outcome screens. Plan C2 builds them, one loop card at a time.
+- Loops past the Proving Grounds day slice (AREA-077): events, the Grey Stair, quests, battles, skull effects, chapters past the first, and the outcome screens. This slice's encounter is Enter and Leave only. The skull drop is prompted and recorded, and changes nothing (DEC-222). Plan C2 builds the rest, one loop card at a time. The past-games list and Play again (DEC-213 to DEC-216) are later than this slice (DEC-219).
 - Story content past `packs-v2/test`. The Dracula pack stays metadata only.
 - Stats screens. C1 writes the events they will read.
 - Tower cues past the move roll's one short cue (DEC-108), and the drum sync (DEC-103, DEC-104), which is prototyped in tower-poc first.
@@ -94,7 +94,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 - Model: opus
 - Done when:
   - Pack format v2 has the story and base-content shapes of D34: identity and settings, chapters with their kingdoms and timed beats, entry points as lists of effects from the fixed set, conditions on flags and counters, quests by quest type, and asset ids. It uses the D38 names.
-  - `packs-v2/base` holds the hero pool (DEC-099, DEC-100) and the building types the day slice needs. `packs-v2/test` is a one-chapter test story.
+  - `packs-v2/base` holds the hero pool (DEC-099, DEC-100), the building types the day slice needs, and the RtDT board graph (DEC-221): printed space names (DEC-225) and kingdoms Arisilon (N), Brynthia (E), Durnin (S), Zenon (W), with data IDs keeping the direction letter (DEC-226). Claude drafts the graph from Bob's photo; Bob checks it before the day slice uses it. `packs-v2/test` is the one-chapter Proving Grounds story (AREA-077): one hero per kingdom at its citadel (DEC-223), and a 2d4 move roll with a floor of 2 and no modifiers (DEC-224).
   - The v2 lint refuses code in a pack (any key or value the schema does not know), an effect outside the fixed set, and a flag read that is never set. One bad pack per rule proves it.
   - `pnpm --dir apps/bloodtower pack:lint packs-v2/test` passes.
   - Not required: quest-type details beyond their names, which C2 fills.
@@ -118,11 +118,13 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 - Runs: local
 - Model: opus
 - Done when:
-  - The session loop (MEC-039) runs Connect Tower and calibrate once, then one game per pass, and returns to Pick Story after a game ends, not to Connect Tower (DEC-152).
-  - The game loop's setup runs Pick Story, Game settings, Claim Heroes (DEC-098: a claimed hero greys out for others) and the pack's setup steps, with the Back rules of D31.
-  - A dropped iPad pauses until every hero is claimed again (DEC-154). A lost tower pauses until a Reconnect press, or Save and quit (DEC-155). Nothing reconnects by itself.
-  - There is no "Play without tower" path.
-  - Engine tests cover each screen's forward and Back moves and both pauses.
+  - The session loop (MEC-039) runs Connect Tower and calibrate once, then one game per pass. After a game ends, including Quit story, the table lands on the session screen (SCR-021), not on Connect Tower (DEC-152, DEC-214).
+  - For this slice SCR-021 offers New game and Done for tonight (DEC-219). New game goes to Pick Story. Done for tonight goes to Goodbye (SCR-020) and ends the session. The past-games list and Play again (DEC-213, DEC-215, DEC-216) come later. Seeds stay internal (DEC-217): there is no seed field and no fortune card.
+  - The game loop's setup runs Pick Story, Game settings, Claim Heroes (DEC-098: a claimed hero greys out for others) and the pack's setup steps, with the Back rules of D31. Setup keeps the seals and skulls step (DEC-110, DEC-222) so the tower has skulls to drop. There is no Save button. The only stored game is the running autosave (DEC-208).
+  - A dropped iPad pauses until every hero is claimed again (DEC-154). A lost tower pauses until a Reconnect press, or Quit story (DEC-155, DEC-208, DEC-218). Nothing reconnects by itself.
+  - Quit story, from the pause, ends the game as quit (neither won nor lost), writes its record, keeps the autosave, and lands on SCR-021 (DEC-218). Pick Game shows Continue while that autosave exists; a new game replaces it. Continue runs the tower check (MEC-018).
+  - There is no "Play without tower" path and no Save-and-quit exit.
+  - Engine tests cover each screen's forward and Back moves, both pauses, Quit story onto the session screen, and Done for tonight.
 
 ### Step 7: Event store and checkpoints
 - Depends on: 3
@@ -132,7 +134,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 - Model: opus
 - Done when:
   - An `events` table and a `checkpoints` table as D37 describes. Rows are only ever inserted, and a test fails on any update or delete statement in `src/server/events`.
-  - Resume loads the last checkpoint and replays later events. With the same versions the state equals the live state. With a different engine version it loads the checkpoint, logs a `version-changed` event and goes on.
+  - Continue (DEC-208) loads the last checkpoint and replays later events. With the same versions the state equals the live state. With a different engine version it loads the checkpoint, logs a `version-changed` event and goes on. There is one autosave and no save slots.
   - The timing report rebuilds a run from events, with the same totals rules as today (D6).
 
 ### Step 8: Day slice
@@ -142,9 +144,12 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 - Runs: local
 - Model: opus
 - Done when:
-  - One chapter loops on days (DEC-135). A day rolls every group's moves (DEC-102, DEC-108), plays each group's turn (moves spent on spaces and one building action, DEC-078), loses unspent moves (DEC-149), and ends with a checkpoint effect.
+  - One chapter loops on days (DEC-135). The playable target is the Proving Grounds slice (AREA-077).
+  - A day rolls every group's moves as 2d4 with a floor of 2 and no modifiers (DEC-102, DEC-108, DEC-224). The test story starts one hero per kingdom, alone at that kingdom's citadel; groups do not split or join (DEC-223).
+  - A group's turn spends moves on spaces (1 move each). Enter and Leave are free. The only building action in this slice is Leave, and a group may walk through a building space without entering (DEC-078, DEC-220). Unspent moves are lost (DEC-149). After the last group's turn the app prompts the skull drop and the players record where it landed and on which building (DEC-064, DEC-222). The skulls have no effect. The day ends with a checkpoint effect.
+  - The move map reads the RtDT board graph from base content (`packs-v2/base`, DEC-221). Spaces show their printed names (DEC-225). A kingdom shown to players is Arisilon (N), Brynthia (E), Durnin (S) or Zenon (W); data IDs keep the direction letter (DEC-226).
   - `pnpm --dir apps/bloodtower simulate --games 1000 --days 10 --seed s` plays headless and prints moves per day and actions per group. The same seed prints the same report.
-  - Not required: events, quests, battles, skulls, chapter exits.
+  - Not required: events, the Grey Stair, quests, battles, skull effects, chapter exits. No villain, lieutenants or caravans run, so the chapter does not end on its own; Quit story is the way out (DEC-218, DEC-222).
 
 ### Step 9: Host switch-over
 - Depends on: 2, 5, 7, 8
@@ -156,14 +161,14 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
   - The host runs the core through the effects runner and the event store, and the tower through `@dark-tower/tower`. `src/server/session/`, `src/server/tower/sidecar.ts`, `TOWER_URL` and the v1 messages are gone. `packs-v2/` has moved to `packs/`.
   - The board and iPad render v2 views for every setup screen and the day slice, at the e2e suite's three viewports.
   - The e2e suite passes on the core, rewritten from AC-1 to AC-9 where they still apply: board display only, one winner per press, private lines only to their holders, the pauses, and a run rebuilt from events.
-  - New e2e: Save and quit at the end of day 2, restart the host, resume, and day 3 starts with the same purse, positions and seed.
+  - New e2e: at the end of day 2, Quit story from the pause ends the game as quit and lands on the session screen (SCR-021), which offers New game and Done for tonight. Done for tonight reaches Goodbye. Restart the host: Pick Game offers Continue (DEC-208), and day 3 starts with the same purse, positions and seed. The seed is not shown (DEC-217).
   - The old-names check of D38 runs in `pnpm check` over `src/engine`, `src/protocols/v2` and `packs/`.
   - This step may exceed 400 lines. If its review finds it too large, it splits into "server on the core" and "web on v2 views" before round 2.
 
 ### Step G-C1: Bob plays it
 - Owner: Bob (gates G-playtest and G-signoff)
 - Depends on: 9
-- On the Mac with the TV, one iPad and the real tower: connect, calibrate, pick the test story, claim heroes, play two days, Save and quit, restart, resume, play a third day. Notes go in `docs/playtests/`.
+- On the Mac with the TV, one iPad and the real tower: connect, calibrate, pick the test story, claim heroes, play two days. Quit story from the pause lands on the session screen (SCR-021); Done for tonight goes to Goodbye. Restart the host, Continue from Pick Game, and day 3 starts with the same purse, positions and seed. Notes go in `docs/playtests/`.
 
 ## Batches
 
