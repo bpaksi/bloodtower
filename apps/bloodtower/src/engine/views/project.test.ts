@@ -122,4 +122,13 @@ describe("project setup screens", () => {
       expect(closed && !closed.open ? closed.reason : "").toBe("Nothing to undo yet.");
     }
   });
+
+  it("refuses a private id in a public level before it can reach any iPad", () => {
+    const state = fixture("setup");
+    const level = state.levels[0];
+    if (!level) throw new Error("expected a level");
+    state.levels = [{ ...level, shows: "See setup.private.beta" }];
+    expect(() => project(state, { kind: "device", deviceId: "device-a" })).toThrow(/private line/);
+    expect(() => project(state, { kind: "board" })).toThrow(/private line/);
+  });
 });

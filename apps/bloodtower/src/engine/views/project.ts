@@ -1,5 +1,9 @@
 import type { BoardView, DeviceView, OfferedAction } from "../../protocols/v2/index.ts";
-import { boardViewPayloadSchema, deviceViewPayloadSchema } from "../../protocols/v2/index.ts";
+import {
+  boardContentRefused,
+  boardViewPayloadSchema,
+  deviceViewPayloadSchema,
+} from "../../protocols/v2/index.ts";
 import type { Audience, ViewAction, ViewState } from "./state.ts";
 
 export type ProjectedView = BoardView | DeviceView;
@@ -39,6 +43,19 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
   const current = state.levels.at(-1);
   if (!current) throw new Error("A view needs a public level.");
 
+  const offered = state.actions.map(toOffered);
+  if (
+    boardContentRefused({
+      screen: state.screen,
+      levels: state.levels,
+      narration: state.narration,
+      actions: offered,
+      heroes: state.heroes.map((hero) => ({ id: hero.id, name: hero.name })),
+    })
+  ) {
+    throw new Error("A public view field carries a private line or a tower command.");
+  }
+
   if (audience.kind === "board") {
     return boardViewPayloadSchema.parse({
       screen: state.screen,
@@ -53,7 +70,7 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
         held: hero.deviceId !== null,
       })),
       narration: state.narration,
-      actions: state.actions.map(toOffered),
+      actions: offered,
     });
   }
 
