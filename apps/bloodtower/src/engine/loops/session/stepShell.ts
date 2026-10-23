@@ -17,6 +17,7 @@ import {
   ensurePauseOffers,
   matchOffer,
   takePendingCheckpoint,
+  takePendingTowerCommands,
 } from "./shellRef.ts";
 import { initialShellState, type ShellState } from "./state.ts";
 import { TOWER_READY, towerReady } from "./tower.ts";
@@ -87,6 +88,14 @@ const resumeLoopsOrPauseOffers = (
       v: 1,
       gameId: checkpoint.gameId,
       day: checkpoint.day,
+    });
+  }
+  for (const command of takePendingTowerCommands()) {
+    effects.push({
+      kind: "tower-command",
+      v: 1,
+      capabilityId: command.capabilityId,
+      params: command.params,
     });
   }
   if (next.pause) ensurePauseOffers(next);

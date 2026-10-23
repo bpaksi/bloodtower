@@ -1,7 +1,8 @@
 import type { LoopDefinition } from "../../loop/types.ts";
-import { kingdomDisplayName } from "../chapter/board.ts";
 import { groupById, playState, rollGroupMoves } from "../chapter/playState.ts";
 import { recordOffer, requestCheckpoint, shellState } from "../session/shellRef.ts";
+import { requestMoveRollCue } from "./cues.ts";
+import { offerSkullPlacement } from "./skull.ts";
 
 export type DayLocal = {
   phase: "roll" | "groups" | "skull-prompt" | "skull-place" | "done";
@@ -22,6 +23,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
     for (const groupId of play.turnOrder) {
       play.dayRolls[groupId] = rollGroupMoves(seed, play, play.content.moveRoll);
     }
+    requestMoveRollCue();
     return { phase: "roll", groupIndex: 0, awaitingPress: false, awaitingChild: false };
   },
   body: (local, ctx) => {
@@ -82,24 +84,14 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
 
     if (local.phase === "skull-place") {
       if (!local.awaitingPress) {
-        const groupId = play.turnOrder[0] ?? play.groups[0]?.id;
-        if (!groupId) {
+        if (play.turnOrder.length === 0) {
           return { local: { ...local, phase: "done", awaitingPress: false }, passComplete: false };
         }
-        const group = groupById(play, groupId);
-        const spaceId = group?.spaceId ?? play.content.board.spaces[0]?.id ?? "unknown";
-        const space = play.content.board.spaceById.get(spaceId);
-        play.lastSkull = {
-          kingdom: space?.kingdom ?? "N",
-          spaceId,
-          building: space?.building ?? null,
-        };
-        const kingdom = play.lastSkull.kingdom;
-        kingdomDisplayName(play.content.board, kingdom);
-        const placePrompt = `skull-place-${play.dayNumber}-${kingdom}-${spaceId}`;
-        ctx.offerPrompt(placePrompt, "confirm");
-        recordOffer(placePrompt, "confirm");
+        offerSkullPlacement(play.dayNumber, ctx);
         return { local: { ...local, awaitingPress: true }, passComplete: false };
+      }
+      if (play.lastSkull == null) {
+        return { local, passComplete: false };
       }
       local = { ...local, phase: "done", awaitingPress: false };
     }

@@ -1,5 +1,6 @@
 import type { LoopFrame } from "../../loop/types.ts";
 import type { DayLocal } from "../day/loop.ts";
+import { applySkullRecord, parseSkullRecordPrompt } from "../day/skull.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { handleEncounterLeave } from "../encounter/loop.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
@@ -37,8 +38,11 @@ export const updatePlayFrameOnPress = (
       top.local = { ...local, awaitingPress: true };
       return;
     }
-    if (local.phase === "skull-place" && actionId === "confirm") {
-      top.local = { ...local, awaitingPress: true };
+    if (local.phase === "skull-place" && actionId === "record") {
+      const parsed = parseSkullRecordPrompt(promptId);
+      if (parsed && applySkullRecord(parsed.day, parsed.target)) {
+        top.local = { ...local, awaitingPress: true };
+      }
     }
   }
 };

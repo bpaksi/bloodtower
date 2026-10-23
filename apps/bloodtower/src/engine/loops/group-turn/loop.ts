@@ -10,6 +10,8 @@ export type GroupTurnLocal = {
   movesLeft: number;
   awaitingPress: boolean;
   encounterPending: boolean;
+  /** Last walk spent all moves on a building space; Enter must be offered before the turn ends (DEC-220). */
+  landedOnBuildingWithNoMoves: boolean;
 };
 
 export type GroupTurnResult = { groupId: string };
@@ -52,6 +54,20 @@ const offerMoveMap = (
   recordOffer(endId, "end-turn");
 };
 
+const offerEnterOrEndTurn = (
+  local: GroupTurnLocal,
+  ctx: { offerPrompt: (a: string, b: string) => void },
+) => {
+  const group = groupById(playState(), local.groupId);
+  if (!group) return;
+  const promptId = `enter--${local.groupId}--${group.spaceId}`;
+  ctx.offerPrompt(promptId, "enter");
+  recordOffer(promptId, "enter");
+  const endId = `end-turn--${local.groupId}`;
+  ctx.offerPrompt(endId, "end-turn");
+  recordOffer(endId, "end-turn");
+};
+
 export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
   id: "group-turn",
   enter: () => {
@@ -66,6 +82,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
       movesLeft: input.moves,
       awaitingPress: false,
       encounterPending: false,
+      landedOnBuildingWithNoMoves: false,
     };
   },
   body: (local, ctx) => {
@@ -87,6 +104,18 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     }
 
     if (local.movesLeft <= 0) {
+      if (
+        local.landedOnBuildingWithNoMoves &&
+        group &&
+        !group.insideBuilding &&
+        play.content.board.spaceById.get(group.spaceId)?.building
+      ) {
+        if (!local.awaitingPress) {
+          offerEnterOrEndTurn(local, ctx);
+          return { local: { ...local, awaitingPress: true }, passComplete: false };
+        }
+        return { local, passComplete: false };
+      }
       return { local, passComplete: true };
     }
 
@@ -100,6 +129,10 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
   exit: (local) => {
     const group = groupById(playState(), local.groupId);
     if (group?.insideBuilding) return false;
+    if (local.landedOnBuildingWithNoMoves && group && !group.insideBuilding) {
+      const here = playState().content.board.spaceById.get(group.spaceId);
+      if (here?.building) return false;
+    }
     return local.movesLeft <= 0 && !local.encounterPending;
   },
   resultUp: (local) => ({ groupId: local.groupId }),
@@ -132,14 +165,27 @@ export const handleGroupTurnPress = (
   actionId: string,
 ): GroupTurnLocal => {
   if (actionId === "end-turn" && promptId === `end-turn--${local.groupId}`) {
-    return { ...local, movesLeft: 0, awaitingPress: false };
+    return {
+      ...local,
+      movesLeft: 0,
+      awaitingPress: false,
+      landedOnBuildingWithNoMoves: false,
+    };
   }
 
   if (actionId === "walk") {
     const spaceId = parseWalkPrompt(promptId);
     if (!spaceId || local.movesLeft < 1) return { ...local, awaitingPress: false };
     if (!applyWalk(local.groupId, spaceId)) return { ...local, awaitingPress: false };
-    return { ...local, movesLeft: local.movesLeft - 1, awaitingPress: false };
+    const movesLeft = local.movesLeft - 1;
+    const space = playState().content.board.spaceById.get(spaceId);
+    const landedOnBuildingWithNoMoves = movesLeft <= 0 && Boolean(space?.building);
+    return {
+      ...local,
+      movesLeft,
+      awaitingPress: false,
+      landedOnBuildingWithNoMoves,
+    };
   }
 
   if (
@@ -149,7 +195,7 @@ export const handleGroupTurnPress = (
     const group = groupById(playState(), local.groupId);
     if (!group) return { ...local, awaitingPress: false };
     if (!applyEnter(local.groupId, group.spaceId)) return { ...local, awaitingPress: false };
-    return { ...local, awaitingPress: false };
+    return { ...local, awaitingPress: false, landedOnBuildingWithNoMoves: false };
   }
 
   if (actionId === "leave" && promptId === `leave--${local.groupId}`) {

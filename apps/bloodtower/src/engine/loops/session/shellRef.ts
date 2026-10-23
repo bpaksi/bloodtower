@@ -48,6 +48,26 @@ export const takePendingCheckpoint = (): { gameId: string; day: number } | null 
   return row;
 };
 
+type PendingTowerCommand = {
+  capabilityId: string;
+  params: Record<string, unknown>;
+};
+
+let pendingTowerCommands: PendingTowerCommand[] = [];
+
+export const requestTowerCommand = (
+  capabilityId: string,
+  params: Record<string, unknown>,
+): void => {
+  pendingTowerCommands.push({ capabilityId, params });
+};
+
+export const takePendingTowerCommands = (): PendingTowerCommand[] => {
+  const row = pendingTowerCommands;
+  pendingTowerCommands = [];
+  return row;
+};
+
 /** Pause prompts must show even when a play loop is the stack top (chapter / day / group turn). */
 export const ensurePauseOffers = (state: ShellState): void => {
   if (state.stage !== "paused" || !state.pause) return;
