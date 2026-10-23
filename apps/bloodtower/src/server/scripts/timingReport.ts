@@ -8,6 +8,8 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { loadConfig } from "../config.ts";
 import * as schema from "../db/schema.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
+import { storedRunFromEventLog } from "../events/rebuildRun.ts";
+import { createEventStore } from "../events/store.ts";
 
 export interface TimelineEvent {
   monoMs: number;
@@ -171,7 +173,14 @@ export const readRun = (path: string, sessionId?: string): StoredRun => {
       if (!latest) throw new Error(`No session in ${path}.`);
       id = latest.id;
     }
-    return createSessionStore(db).loadRun(id);
+    const sessionStore = createSessionStore(db);
+    const base = sessionStore.loadRun(id);
+    const eventStore = createEventStore(db);
+    const autosave = eventStore.autosaveForSession(id);
+    if (autosave && eventStore.hasEvents(autosave.gameId)) {
+      return storedRunFromEventLog(eventStore, autosave.gameId, base);
+    }
+    return base;
   } finally {
     sqlite.close();
   }

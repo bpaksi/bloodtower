@@ -70,3 +70,40 @@ export const statEvents = sqliteTable("stat_events", {
   deviceId: text("device_id"),
   data: text("data").notNull(),
 });
+
+/** Append-only host log (D37). Rows are never updated or deleted. */
+export const events = sqliteTable("events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  gameId: text("game_id").notNull(),
+  seq: integer("seq").notNull(),
+  kind: text("kind").notNull(),
+  payload: text("payload").notNull(),
+  atMonoMs: real("at_mono_ms").notNull(),
+  atWall: text("at_wall").notNull(),
+  deviceId: text("device_id"),
+  seed: text("seed").notNull(),
+  packVersion: text("pack_version").notNull(),
+  engineVersion: text("engine_version").notNull(),
+});
+
+/** Whole engine state at end of day (D37). Insert only. */
+export const checkpoints = sqliteTable("checkpoints", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  gameId: text("game_id").notNull(),
+  day: integer("day").notNull(),
+  afterEventSeq: integer("after_event_seq").notNull(),
+  stateJson: text("state_json").notNull(),
+  atMonoMs: real("at_mono_ms").notNull(),
+  atWall: text("at_wall").notNull(),
+  seed: text("seed").notNull(),
+  packVersion: text("pack_version").notNull(),
+  engineVersion: text("engine_version").notNull(),
+});
+
+/** The one running autosave (DEC-208). Replaced when a new game starts. */
+export const autosave = sqliteTable("autosave", {
+  id: integer("id").primaryKey(),
+  gameId: text("game_id").notNull(),
+  sessionId: text("session_id").notNull(),
+  packId: text("pack_id").notNull(),
+});

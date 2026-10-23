@@ -16,8 +16,11 @@ describe("session store", () => {
         sql`select name from sqlite_master where type = 'table' order by name`,
       );
       expect(names.map((row) => row.name).filter((name) => name !== "sqlite_sequence")).toEqual([
+        "autosave",
+        "checkpoints",
         "control_presses",
         "devices",
+        "events",
         "holdings",
         "sessions",
         "stat_events",

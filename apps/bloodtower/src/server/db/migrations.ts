@@ -60,4 +60,36 @@ export const MIGRATIONS: readonly string[] = [
     device_id TEXT,
     data TEXT NOT NULL
   )`,
+  `CREATE TABLE events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    at_mono_ms REAL NOT NULL,
+    at_wall TEXT NOT NULL,
+    device_id TEXT,
+    seed TEXT NOT NULL,
+    pack_version TEXT NOT NULL,
+    engine_version TEXT NOT NULL,
+    UNIQUE(game_id, seq)
+  )`,
+  `CREATE TABLE checkpoints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id TEXT NOT NULL,
+    day INTEGER NOT NULL,
+    after_event_seq INTEGER NOT NULL,
+    state_json TEXT NOT NULL,
+    at_mono_ms REAL NOT NULL,
+    at_wall TEXT NOT NULL,
+    seed TEXT NOT NULL,
+    pack_version TEXT NOT NULL,
+    engine_version TEXT NOT NULL
+  )`,
+  `CREATE TABLE autosave (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    game_id TEXT NOT NULL,
+    session_id TEXT NOT NULL REFERENCES sessions(id),
+    pack_id TEXT NOT NULL
+  )`,
 ];
