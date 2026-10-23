@@ -1,14 +1,11 @@
 ---
 type: piece
 title: "Game board: 4 kingdoms × 15 spaces, 6 terrains"
-status: draft
+status: proposed
 layer: core
 links:
   - { rel: part-of, to: AREA-006 }
   - { rel: uses, to: MEC-005 }
-  - { rel: refined-by, to: DEC-221, note: "fixed graph drafted from Bob's board photo" }
-  - { rel: refined-by, to: DEC-225, note: "printed name + kingdom+slug ID" }
-  - { rel: refined-by, to: DEC-226, note: "N Arisilon, E Brynthia, S Durnin, W Zenon" }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
