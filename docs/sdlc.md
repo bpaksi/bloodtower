@@ -138,7 +138,7 @@ An app plan names which of these it uses. Batch evidence (below) is posted for B
 
 ## Local mode (cloud agents unavailable)
 
-When Cursor cloud agents cannot run, a batch is built in Claude Code on Bob's Mac from a hand-off prompt in the app's `plans/` folder (for example `apps/bloodtower/plans/B4-handoff.md`).
+When Cursor cloud agents cannot run, a batch is built in Claude Code on Bob's Mac from a hand-off prompt in the app's `plans/` folder (for example `apps/bloodtower/plans/archive/B4-handoff.md`).
 
 - Work only in a worktree on a new branch off `origin/main` (`pnpm wt <branch>`). Never edit, stash, or switch branches in Bob's main checkout.
 - Deliver as a PR to `main`. The required `check` still gates it.

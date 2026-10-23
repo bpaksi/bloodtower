@@ -5,7 +5,7 @@
 | Purpose | The real app: a story pack on the Story board, iPads joining by QR, first press wins, and a timing log. R1 connects to the tower and sends no lights. The one tower sound is the volume test (Dungeon Complete #58 at volume 0, 1, 2), played only after a press. |
 | Phase | Build |
 | SDLC tier | Full |
-| Status | R1 batch B3. The socket hub joins the Story board and the devices to one session. [plans/R1-step1-foundation.md](plans/R1-step1-foundation.md). [spec.md](spec.md). |
+| Status | R1 batch B3. The socket hub joins the Story board and the devices to one session. [plans/archive/R1-step1-foundation.md](plans/archive/R1-step1-foundation.md). [spec.md](spec.md). |
 | Disposable? | No. |
 
 The Mac runs this host. The Story board is a display-only page at `/board`. iPad join is `/join` and the device controls are `/device`. Those pages open `/ws` on this host. tower-poc stays a sidecar on port 4747 (reuse-guide option A). This host uses a mock tower unless `TOWER_URL` points at that sidecar. It does not connect until a joined device presses connect, and it does not send a light, a sound or a drum.

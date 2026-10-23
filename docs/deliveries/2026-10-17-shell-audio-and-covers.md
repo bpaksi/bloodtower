@@ -1,6 +1,6 @@
 # Delivery: shell audio and pack covers (2026-10-17)
 
-From Illusionist. Bob approved audio v2 at 9:22 PM ET on Oct 17 2026. These are the files the shell build uses (`apps/bloodtower/plans/shell-prompts.md`, steps 1, 2 and 6). Each file's sha256 was checked against the delivery note before commit.
+From Illusionist. Bob approved audio v2 at 9:22 PM ET on Oct 17 2026. These are the files the shell build uses (`apps/bloodtower/plans/archive/shell-prompts.md`, steps 1, 2 and 6). Each file's sha256 was checked against the delivery note before commit.
 
 ## Covers (1920x1080 PNG, 16:9)
 

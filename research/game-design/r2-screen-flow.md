@@ -4,7 +4,7 @@ Author: Gamewright (draft, 2026-10-16; revised 2026-10-16 with Bob's answers). R
 
 ## 1. Purpose and scope
 
-R1 closes as plumbing only: join, first-press-wins, timing log, tower link through the tower-poc sidecar (plan `apps/bloodtower/plans/R1-step1-foundation.md`, B1-B4; B4 = acceptance e2e). Bob's R1 test (Mac + 1 iPad holding all hunters) showed the UI is bare and the buttons are hard to find.
+R1 closes as plumbing only: join, first-press-wins, timing log, tower link through the tower-poc sidecar (plan `apps/bloodtower/plans/archive/R1-step1-foundation.md`, B1-B4; B4 = acceptance e2e). Bob's R1 test (Mac + 1 iPad holding all hunters) showed the UI is bare and the buttons are hard to find.
 
 **R2 = the full game-flow UI**, from first launch to goodbye, laid out like a real game's start:
 Splash/Loading -> Tower Connect -> Pick Story -> Party Join -> Begin Story (setup + length) -> Play -> End/Quit -> Game Stats -> Goodbye.
@@ -22,7 +22,7 @@ Out of scope: visual design. That comes later from Illusionist, building on the 
 | research/game-design/story-engine.md | R-ENG-1..34, R-AV-1..7 |
 | apps/burgomaster-funeral-poc/docs/poc-v2-flow.md | V2-1 (screen roles), V2-2 (flow controls on iPads, first press wins), V2-9 (splash then wizard) |
 | apps/bloodtower/spec.md | §3 protocols, §6 tower safety, §8 R1 out of scope |
-| apps/bloodtower/plans/R1-step1-foundation.md, B4-handoff.md | R1 steps, AC-1..AC-9, B3 follow-ups (token shown on join page; QR fails on loopback) |
+| apps/bloodtower/plans/archive/R1-step1-foundation.md, apps/bloodtower/plans/archive/B4-handoff.md | R1 steps, AC-1..AC-9, B3 follow-ups (token shown on join page; QR fails on loopback) |
 | apps/tower-poc/docs/reuse-guide.md | "nothing physical happens automatically", every tower effect has a fallback, calibrate once at setup |
 
 ### Standing rulings applied (Bob)
