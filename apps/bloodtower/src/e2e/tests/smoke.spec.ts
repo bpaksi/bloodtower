@@ -65,7 +65,7 @@ test("the title page offers Story board and Hunter paths and health reports conn
   const health = await page.request.get("/health");
   expect(health.status()).toBe(200);
   expect(await health.json()).toEqual({
-    protocol: 1,
+    protocol: 2,
     tower: "connection-and-sound",
     effects: "sound-only",
   });
@@ -104,7 +104,7 @@ test("typing a join code on /join lands on /device", async ({ browser }, testInf
     await page.getByLabel("Join code").fill(session.host.joinCode);
     await page.getByRole("button", { name: "Enter the table" }).click();
     await expect(page).toHaveURL(/\/device/);
-    await expect(page.locator("main")).toHaveAttribute("data-screen", "pick-story");
+    await expect(page.locator("main")).toHaveAttribute("data-screen", /pick-game|tower-connect/);
   } finally {
     await context.close().catch(() => undefined);
     await session.host.close();

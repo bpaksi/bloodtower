@@ -838,7 +838,7 @@ export const SERVER_MESSAGE_TYPES: readonly string[] = serverMessageSchema.optio
 
 /** `GET /health`. Connection and sound only: this process sends no light or other tower effect. */
 export const hostHealthSchema = z.strictObject({
-  protocol: z.literal(PROTOCOL_VERSION),
+  protocol: z.literal(2),
   tower: z.literal("connection-and-sound"),
   effects: z.literal("sound-only"),
 });

@@ -1,0 +1,255 @@
+import { randomBytes } from "node:crypto";
+import type { ControlPress } from "bloodtower-protocols";
+import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
+import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
+import type { ShellEvent } from "../../engine/loops/session/events.ts";
+import type { ShellStory } from "../../engine/loops/session/pack.ts";
+import {
+  initialShellState,
+  SHELL_ENGINE_VERSION,
+  type ShellState,
+} from "../../engine/loops/session/state.ts";
+import { stepShell } from "../../engine/loops/session/stepShell.ts";
+import { projectShellView } from "../../engine/loops/session/view.ts";
+import { project } from "../../engine/views/project.ts";
+import type { BoardView, DeviceView } from "../../protocols/v2/index.ts";
+import type { EventStore } from "../events/store.ts";
+import type { HostLogger } from "../log/hostLog.ts";
+import type { Clock } from "../timing/clock.ts";
+import type { BloodtowerTower } from "../tower/host.ts";
+import { runShellEffects } from "./effects.ts";
+import { continueShellFromCheckpoint } from "./shellContinue.ts";
+
+export const GRACE_MS = 60_000;
+
+type DeviceRecord = {
+  id: string;
+  token: string;
+  formFactor: "ipad" | "phone";
+  grace?: ReturnType<typeof setTimeout>;
+};
+
+export type CoreSessionOptions = {
+  sessionId: string;
+  seed: string;
+  stories: ShellStory[];
+  playContent: PlayContent | null;
+  packVersion: string;
+  store: EventStore;
+  tower: BloodtowerTower;
+  clock: Clock;
+  log: HostLogger;
+  onChange: () => void;
+};
+
+export type CoreSession = {
+  state: () => ShellState;
+  join: (input: {
+    joinCode: string;
+    formFactor: "ipad" | "phone";
+  }) => { ok: true; deviceId: string; token: string } | { ok: false };
+  rejoin: (token: string) => { ok: true; deviceId: string } | { ok: false };
+  disconnect: (deviceId: string) => void;
+  act: (
+    deviceId: string,
+    promptId: string,
+    actionId: string,
+    args: Record<string, unknown>,
+  ) => void;
+  projectBoard: (join: { code: string; url: string; reachable: boolean }) => BoardView;
+  projectDevice: (deviceId: string) => DeviceView;
+  channelsFor: (deviceId: string) => string[];
+  roster: () => { devices: { id: string; token: string }[] };
+  resumeAutosave: () => boolean;
+  syncTowerSnapshot: () => void;
+};
+
+const gameIdOf = (state: ShellState) => state.autosave?.gameId ?? state.activeGameId;
+
+export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
+  let state = initialShellState({
+    sessionId: options.sessionId,
+    seed: options.seed,
+    stories: options.stories,
+  });
+  if (options.playContent) state = { ...state, playContent: options.playContent };
+
+  const devices = new Map<string, DeviceRecord>();
+  const meta = {
+    seed: options.seed,
+    packVersion: options.packVersion,
+    engineVersion: SHELL_ENGINE_VERSION,
+  };
+
+  const effectsCtx = () => ({
+    store: options.store,
+    tower: options.tower,
+    log: options.log,
+    sessionId: options.sessionId,
+    clock: options.clock,
+    meta,
+    onViewRefresh: options.onChange,
+  });
+
+  const appendShell = (event: ShellEvent, deviceId: string | null) => {
+    const gameId = gameIdOf(state);
+    if (!gameId) return;
+    options.store.append({
+      gameId,
+      kind: "shell",
+      payload: { v: 1, event },
+      atMonoMs: options.clock.monoMs(),
+      atWall: options.clock.wall(),
+      deviceId,
+      ...meta,
+    });
+  };
+
+  const logPress = (press: ControlPress) => {
+    const gameId = gameIdOf(state);
+    if (!gameId) return;
+    options.store.append({
+      gameId,
+      kind: "control-press",
+      payload: { v: 1, press },
+      atMonoMs: options.clock.monoMs(),
+      atWall: options.clock.wall(),
+      deviceId: press.deviceId,
+      ...meta,
+    });
+  };
+
+  const apply = async (event: ShellEvent, deviceId: string | null) => {
+    const before = state;
+    const result = stepShell(state, event);
+    state = result.state;
+    appendShell(event, deviceId);
+    if (event.kind === "press") {
+      const open =
+        before.offered.find(
+          (offer) =>
+            offer.promptId === event.promptId && offer.actionId === event.actionId && offer.open,
+        ) != null;
+      logPress({
+        deviceId: event.deviceId,
+        promptId: event.promptId,
+        action: event.actionId as ControlPress["action"],
+        atMonoMs: options.clock.monoMs(),
+        atWall: options.clock.wall(),
+        winner: open,
+        screen: before.screen,
+        nextScreen: open && before.screen !== state.screen ? state.screen : null,
+      });
+    }
+    const shellEffects: ShellEffect[] = [];
+    for (const effect of result.effects) {
+      const parsed = shellEffectSchema.safeParse(effect);
+      if (parsed.success) shellEffects.push(parsed.data);
+    }
+    await runShellEffects(state, shellEffects, effectsCtx());
+    options.onChange();
+  };
+
+  void (async () => {
+    await apply(
+      { kind: "start-session", v: 1, sessionId: options.sessionId, seed: options.seed },
+      null,
+    );
+    await apply({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
+  })();
+
+  const heldHeroes = (deviceId: string) =>
+    Object.entries(state.holdings)
+      .filter(([, holder]) => holder === deviceId)
+      .map(([heroId]) => heroId);
+
+  return {
+    state: () => state,
+    join: ({ formFactor }) => {
+      const deviceId = `device-${randomBytes(4).toString("hex")}`;
+      const token = randomBytes(16).toString("base64url");
+      devices.set(deviceId, { id: deviceId, token, formFactor });
+      void apply({ kind: "device-join", v: 1, deviceId }, deviceId);
+      return { ok: true, deviceId, token };
+    },
+    rejoin: (token) => {
+      const device = [...devices.values()].find((entry) => entry.token === token);
+      if (!device) return { ok: false };
+      void apply({ kind: "device-join", v: 1, deviceId: device.id }, device.id);
+      return { ok: true, deviceId: device.id };
+    },
+    disconnect: (deviceId) => {
+      const record = devices.get(deviceId);
+      if (!record) return;
+      if (record.grace) clearTimeout(record.grace);
+      record.grace = setTimeout(() => {
+        void apply({ kind: "device-drop", v: 1, deviceId }, deviceId);
+      }, GRACE_MS);
+      record.grace.unref?.();
+    },
+    act: (deviceId, promptId, actionId, args) => {
+      if (promptId === "hero-hold" && (actionId === "take" || actionId === "release")) {
+        const heroId = args.heroId;
+        if (typeof heroId !== "string") return;
+        void apply({ kind: "hero-hold", v: 1, deviceId, heroId, action: actionId }, deviceId);
+        return;
+      }
+      if (promptId === "focus-story" && actionId === "focus") {
+        const storyId = args.storyId;
+        if (typeof storyId !== "string") return;
+        void apply({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
+        return;
+      }
+      if (promptId === "set-setting" && actionId === "set") {
+        const settingId = args.settingId;
+        const optionId = args.optionId;
+        if (typeof settingId !== "string" || typeof optionId !== "string") return;
+        void apply({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId);
+        return;
+      }
+      void apply({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId);
+    },
+    projectBoard: (join) => {
+      const view = projectShellView(state);
+      const board = project(view, { kind: "board" });
+      return {
+        ...board,
+        levels: [
+          {
+            id: "join",
+            label: "Join",
+            shows: `Code ${join.code} — ${join.url}${join.reachable ? "" : " (unreachable)"}`,
+          },
+          ...board.levels,
+        ],
+      };
+    },
+    projectDevice: (deviceId) => project(projectShellView(state), { kind: "device", deviceId }),
+    channelsFor: (deviceId) => heldHeroes(deviceId).map((hero) => `ipad:${hero}`),
+    roster: () => ({
+      devices: [...devices.values()].map((device) => ({ id: device.id, token: device.token })),
+    }),
+    syncTowerSnapshot: () => {
+      void apply({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
+    },
+    resumeAutosave: () => {
+      const row = options.store.getAutosave();
+      if (!row || row.sessionId !== options.sessionId) return false;
+      try {
+        const resumed = continueShellFromCheckpoint(options.store, {
+          gameId: row.gameId,
+          packVersion: meta.packVersion,
+          engineVersion: meta.engineVersion,
+          meta,
+          atMonoMs: options.clock.monoMs(),
+          atWall: options.clock.wall(),
+        });
+        state = resumed.state;
+        options.onChange();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  };
+};

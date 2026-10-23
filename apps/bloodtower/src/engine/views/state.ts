@@ -1,4 +1,4 @@
-import type { SetupScreen } from "../../protocols/v2/common.ts";
+import type { ViewScreen } from "../../protocols/v2/common.ts";
 
 export type PrivateLine = {
   id: string;
@@ -36,7 +36,7 @@ export type ViewAction = {
  * It is not the reducer state: step 5 does not change `step`.
  */
 export type ViewState = {
-  screen: SetupScreen;
+  screen: ViewScreen;
   levels: LoopLevel[];
   heroes: SeatedHero[];
   actions: ViewAction[];

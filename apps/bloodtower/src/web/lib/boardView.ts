@@ -1,47 +1,31 @@
-import { type StoryboardState, storyboardStatePayloadSchema } from "bloodtower-protocols";
+import { type BoardView, boardViewPayloadSchema } from "bloodtower-protocols";
 
-/** What the board shows before a session exists. Every reading is unavailable. */
-export const waitingStoryboard = (): StoryboardState =>
-  storyboardStatePayloadSchema.parse({
-    screen: "splash",
-    stage: "lobby",
-    hunters: [],
-    join: null,
-    prompt: null,
-    moment: null,
-    pause: null,
-    tower: {
-      connection: "unavailable",
-      battery: { state: "unavailable" },
-      calibrated: { state: "unavailable" },
-    },
-    gate: { canBegin: true, unheld: [] },
-    lock: null,
+/** What the board shows before the first view arrives. */
+export const waitingStoryboard = (): BoardView =>
+  boardViewPayloadSchema.parse({
+    screen: "pick-game",
+    levels: [{ id: "wait", label: "Session", shows: "Connecting…" }],
+    heroes: [],
+    narration: null,
+    actions: [],
   });
 
-/**
- * A hunter's public status on the board (visuals Q2 (a), existing fields only): nobody holds them
- * is "Waiting", a holder who dropped is "Away", otherwise the holder ids (R2-104).
- */
-export const holdingText = (hunter: StoryboardState["hunters"][number]): string => {
-  if (hunter.holders.length === 0) return "Waiting";
-  return hunter.disconnected ? "Away" : hunter.holders.join(", ");
+/** Join code text is in the first level's `shows` string on the live board. */
+export const joinCodeFromBoard = (view: BoardView): string | null => {
+  const join = view.levels.find((level) => level.id === "join");
+  if (!join) return null;
+  const match = /Code (\d{6})/.exec(join.shows);
+  return match?.[1] ?? null;
 };
 
-/** The warning under the QR when iPads cannot open the join address, or null (R2-12). */
-export const joinWarning = (join: StoryboardState["join"]): string | null =>
-  join && !join.reachable
-    ? "iPads can't reach this address. Connect this Mac to Wi-Fi, then restart Bloodtower."
-    : null;
-
-export const pauseText = (
-  pause: StoryboardState["pause"],
-  hunters: StoryboardState["hunters"] = [],
-): string | null => {
-  if (!pause) return null;
-  if ((pause.cause === "disconnect" || pause.cause === "unheld-hunter") && pause.hunter) {
-    const name = hunters.find((hunter) => hunter.id === pause.hunter)?.name ?? pause.hunter;
-    return `Waiting for someone to hold ${name}.`;
-  }
-  return "Paused.";
+export const joinWarning = (view: BoardView): string | null => {
+  const join = view.levels.find((level) => level.id === "join");
+  if (!join || !join.shows.includes("(unreachable)")) return null;
+  return "iPads can't reach this address. Connect this Mac to Wi-Fi, then restart Bloodtower.";
 };
+
+export const holdingText = (hero: BoardView["heroes"][number]): string =>
+  hero.held ? "Held" : "Waiting";
+
+export const pauseText = (screen: BoardView["screen"]): string | null =>
+  screen === "pause" ? "Paused." : null;

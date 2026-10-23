@@ -14,7 +14,9 @@
     "simulate": "tsx scripts/simulate.ts"
   },
   "dependencies": {
+    "@dark-tower/tower": "workspace:*",
     "@stoprocent/noble": "2.8.0",
+    "bloodtower-engine": "workspace:*",
     "better-sqlite3": "13.0.3",
     "bloodtower-protocols": "workspace:*",
     "drizzle-orm": "0.45.3",

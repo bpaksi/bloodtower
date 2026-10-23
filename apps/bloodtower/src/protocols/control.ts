@@ -23,6 +23,10 @@ export const CONTROL_ACTIONS = [
   "set",
   "volume-play",
   "volume-answer",
+  "new-game",
+  "done-for-tonight",
+  "quit-story",
+  "reconnect",
 ] as const;
 export const controlActionSchema = z.enum(CONTROL_ACTIONS);
 export type ControlAction = z.infer<typeof controlActionSchema>;
@@ -46,6 +50,11 @@ export const FLOW_SCREENS = [
   "begin",
   "play",
   "quit",
+  "pick-game",
+  "claim-heroes",
+  "pause",
+  "session",
+  "goodbye",
 ] as const;
 export const flowScreenSchema = z.enum(FLOW_SCREENS);
 export type FlowScreen = z.infer<typeof flowScreenSchema>;

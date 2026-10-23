@@ -3,9 +3,9 @@ import { join, resolve } from "node:path";
 import { loadConfig } from "./config.ts";
 import { startSessionHost } from "./hub/host.ts";
 import { parseDevOrigins } from "./hub/origin.ts";
-import { towerFromEnv } from "./hub/tower.ts";
 import { joinHost, lanUrls } from "./lanUrls.ts";
 import { createHostLogger, debugEnabledFromEnv } from "./log/hostLog.ts";
+import { createBloodtowerTower } from "./tower/host.ts";
 
 const config = loadConfig();
 const hostName = process.env.HOST || "0.0.0.0";
@@ -36,7 +36,7 @@ const openLog = () => {
 const devOrigins = readDevOrigins();
 const log = openLog();
 
-const chosen = towerFromEnv(process.env, log);
+const tower = createBloodtowerTower({ mock: process.env.MOCK === "1" });
 
 const joinPagePort =
   process.env.DEV_PAGE_PORT === undefined || process.env.DEV_PAGE_PORT === ""
@@ -47,7 +47,7 @@ let server: Awaited<ReturnType<typeof startSessionHost>>;
 try {
   if (joinPagePort !== undefined && (!Number.isInteger(joinPagePort) || joinPagePort < 0)) {
     log.error("host-config", "DEV_PAGE_PORT must be a non-negative integer.");
-    chosen.tower.close();
+    void tower.close();
     process.exit(1);
   }
 
@@ -57,7 +57,7 @@ try {
     webRoot,
     packsDir: config.packsDir,
     databasePath: join(config.dataDir, "session.sqlite"),
-    tower: chosen.tower,
+    tower,
     devOrigins,
     joinPagePort,
     log,
@@ -65,14 +65,14 @@ try {
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   log.error("host-start", message.trim() === "" ? "The host failed to start." : message);
-  chosen.tower.close();
+  tower.close();
   process.exit(1);
 }
 
 const towerLine =
-  chosen.mode === "sidecar"
-    ? `Tower: sidecar ${chosen.url ?? ""}. Nothing connects until a joined device presses connect.`
-    : "Tower: mock. Nothing connects until a joined device presses connect.";
+  process.env.MOCK === "1"
+    ? "Tower: mock (@dark-tower/tower). Nothing connects until a joined device presses connect."
+    : "Tower: @dark-tower/tower. Nothing connects until a joined device presses connect.";
 
 // iPads open the join QR's address, so the log shows the LAN address (R2-12).
 const lan = joinHost(hostName);

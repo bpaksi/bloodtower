@@ -7,7 +7,7 @@ import {
   message,
   offeredActionSchema,
   publicHeroSchema,
-  setupScreenSchema,
+  viewScreenSchema,
 } from "./common.ts";
 import { refuseBoardContent } from "./refuse.ts";
 
@@ -31,7 +31,7 @@ const uniqueIds = (ids: string[], ctx: z.RefinementCtx, label: string) => {
  */
 export const boardViewPayloadSchema = z
   .strictObject({
-    screen: setupScreenSchema,
+    screen: viewScreenSchema,
     levels: z.array(levelSchema).min(1).max(8),
     heroes: z.array(publicHeroSchema).max(16),
     narration: narrationSchema.nullable(),
@@ -78,7 +78,7 @@ const deviceHeroSchema = z
 export const deviceViewPayloadSchema = z
   .strictObject({
     deviceId: deviceIdSchema,
-    screen: setupScreenSchema,
+    screen: viewScreenSchema,
     shows: z.string().min(1).max(500),
     heroes: z.array(deviceHeroSchema).max(16),
     actions: z.array(offeredActionSchema).max(32),

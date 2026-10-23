@@ -4,6 +4,7 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { loadConfig } from "../../../server/config.ts";
 import { type SessionHost, startSessionHost } from "../../../server/hub/host.ts";
 import { createMockTower, type MockTower } from "../../../server/tower/mock.ts";
+import { bloodtowerTowerFromMock } from "../../../server/tower/testAdapter.ts";
 
 const WEB_ROOT = resolve(import.meta.dirname, "../../../web/out");
 
@@ -19,7 +20,10 @@ export interface AcceptanceHost {
  * It serves the export the webServer step built. The SQLite file sits under `.wt.json` `dataDir`
  * (`e2e-acceptance/<project>.sqlite`, plus the repeat or retry index), outside the folder the config clears in every worker.
  */
-export const startAcceptanceHost = async (testInfo: TestInfo): Promise<AcceptanceHost> => {
+export const startAcceptanceHost = async (
+  testInfo: TestInfo,
+  options?: { databasePath?: string },
+): Promise<AcceptanceHost> => {
   const config = loadConfig({ env: {} });
   const dir = join(config.dataDir, "e2e-acceptance");
   mkdirSync(dir, { recursive: true });
@@ -30,8 +34,10 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
     testInfo.repeatEachIndex > 0 ? `repeat${testInfo.repeatEachIndex}` : null,
     testInfo.retry > 0 ? `retry${testInfo.retry}` : null,
   ].filter(Boolean);
-  const databasePath = join(dir, `${run.join("-")}.sqlite`);
-  for (const suffix of ["", "-wal", "-shm"]) rmSync(`${databasePath}${suffix}`, { force: true });
+  const databasePath = options?.databasePath ?? join(dir, `${run.join("-")}.sqlite`);
+  if (!options?.databasePath) {
+    for (const suffix of ["", "-wal", "-shm"]) rmSync(`${databasePath}${suffix}`, { force: true });
+  }
   const tower = createMockTower();
   const host = await startSessionHost({
     port: 0,
@@ -39,7 +45,7 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
     webRoot: WEB_ROOT,
     packsDir: config.packsDir,
     databasePath,
-    tower,
+    tower: bloodtowerTowerFromMock(tower),
     towerWatchMs: 50,
     // The volume test waits about 4 s between sounds; the e2e run does not.
     sleep: async () => undefined,
@@ -100,7 +106,7 @@ export const gateControls = async (page: Page): Promise<ControlGate> => {
       socket.send(message);
     });
     socket.onMessage((message) => {
-      if (holding && typeof message === "string" && JSON.parse(message).type === "control") {
+      if (holding && typeof message === "string" && JSON.parse(message).type === "act") {
         queue.push(() => server.send(message));
         return;
       }

@@ -62,7 +62,7 @@ describe("protocol v2 envelope", () => {
     expect(PROTOCOL_VERSION).toBe(2);
     expect(V1).toBe(1);
     expect(CLIENT_MESSAGE_TYPES).toEqual(["hello", "act", "narration-ended", "log"]);
-    expect(SERVER_MESSAGE_TYPES).toEqual(["welcome", "error", "boardView", "deviceView"]);
+    expect(SERVER_MESSAGE_TYPES).toEqual(["welcome", "error", "logged", "boardView", "deviceView"]);
   });
 
   it("rejects a v1 envelope, an unknown type, and an extra key", () => {

@@ -1,51 +1,54 @@
+format: 2
+kind: story
 pack_id: test
-title: Proving ground
+title: Proving Grounds
 version: 0.1.0
 engine_min: 0.1.0
-tagline: A long-lived proving ground for new ideas.
-tone: A long-lived proving ground for new ideas.
-cover: assets/cover.png
-tower: optional
-settings:
-  - id: length
-    label: Length
-    options:
-      - {id: short, label: Short}
-      - {id: standard, label: Standard}
-      - {id: long, label: Long}
-    default: standard
-  - id: difficulty
-    label: Difficulty
-    options:
-      - {id: standard, label: Standard}
-    default: standard
-structure: one-shot
+tagline: AREA-077 day slice — Enter and Leave only.
+base_pack: base
+playable: true
 players: {min: 1, max: 4}
-lengths: [short, standard, long]
-difficulties:
-  - {id: standard, label: Standard, mods: {}}
-systems: {clock: nights, corruption: false}
-components:
-  - {asset-group: stills, use: used}
-# Physical setup steps, one board dialog each with Done and Back on the devices (R-WIZ-5, R-WIZ-6).
-# Claim Hunters and Connect Tower are engine screens, not listed here.
-setup:
-  - id: lay-out-board
-    label: Lay out the board and orient the kingdoms.
-    illustration: ill.setup-board
-  - id: place-hunters
-    label: Stand each hunter's figure on the hall's start building.
-  - id: ready-decks
-    label: Shuffle the decks and set the tokens beside the board.
-av_theme:
-  art_style: plain
-  clip_style: none
-  palette: ink
-  narrator_voice: narrator
-  music_mood: quiet
-  sfx_set: basic
-ambient:
-  night: {bed: amb.night, accents: [acc.tick], interval_s: [20, 60]}
-cast:
-  - {id: narrator, name: Narrator, voice: vo.narrator, role: narrator}
-  - {id: keeper, name: The Keeper, voice: vo.keeper, role: npc}
+
+day:
+  move_roll:
+    dice: 2d4
+    floor: 2
+    modifiers: false
+
+start:
+  mode: one-per-kingdom-citadel
+  assignments:
+    - {hero: hero-a, kingdom: N}
+    - {hero: hero-b, kingdom: E}
+    - {hero: hero-c, kingdom: S}
+    - {hero: hero-d, kingdom: W}
+
+game:
+  start:
+    effects:
+      - kind: set-flag
+        flag: proving-grounds-open
+
+chapters:
+  - id: proving-grounds
+    index: 1
+    kingdoms: [N, E, S, W]
+    timed_beats: []
+    start:
+      effects:
+        - kind: narrate
+          target: storyboard
+          lines:
+            - {speaker: narrator, text: "Walk the kingdoms. Enter a building or leave it. That is the whole of today."}
+    end:
+      when:
+        type: flag
+        flag: proving-grounds-open
+      effects:
+        - kind: narrate
+          target: storyboard
+          lines:
+            - {speaker: narrator, text: "The sun sets on the Proving Grounds."}
+    quests: []
+
+assets: []
