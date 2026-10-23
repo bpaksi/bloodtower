@@ -1,7 +1,9 @@
 import type { LoopRuntimeState, PromptSlot } from "../../loop/runtime.ts";
 import { emptyLoopRuntime } from "../../loop/runtime.ts";
 import type { LoopRegistry } from "../../loop/types.ts";
+import type { PlayContent, PlayState } from "../chapter/playState.ts";
 import type { ShellStory } from "./pack.ts";
+import { PROVING_GROUNDS_PLAY } from "./playContent.ts";
 import { createShellRegistry } from "./registry.ts";
 import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
@@ -50,6 +52,8 @@ export type ShellState = {
   sessionEnded: boolean;
   /** Every action offered in the latest advance; the runtime keeps only one prompt slot. */
   offered: PromptSlot[];
+  playContent: PlayContent | null;
+  play: PlayState | null;
 };
 
 export const initialHoldings = (story: ShellStory): Record<string, string | null> =>
@@ -90,5 +94,7 @@ export const initialShellState = (input: {
     resumedFromAutosave: false,
     sessionEnded: false,
     offered: [],
+    playContent: PROVING_GROUNDS_PLAY,
+    play: null,
   };
 };
