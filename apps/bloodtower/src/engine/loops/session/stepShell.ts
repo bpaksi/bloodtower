@@ -1,15 +1,23 @@
 import type { EngineEffect } from "../../effects.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
+import { bindPlayState, initPlayState } from "../chapter/playState.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress, handleSessionHubPress } from "../game/loop.ts";
 import { allHeroesHeld } from "../game/setupFlow.ts";
+import { updatePlayFrameOnPress } from "../play/presses.ts";
 import type { ShellEffect } from "./effects.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
 import { SESSION_ROOT_LOOP_ID } from "./registry.ts";
-import { bindShellState, clearShellState, matchOffer } from "./shellRef.ts";
+import {
+  bindShellState,
+  clearShellState,
+  ensurePauseOffers,
+  matchOffer,
+  takePendingCheckpoint,
+} from "./shellRef.ts";
 import { initialShellState, type ShellState } from "./state.ts";
 import { TOWER_READY, towerReady } from "./tower.ts";
 
@@ -51,6 +59,37 @@ const ensureSessionHubOffers = (state: ShellState): void => {
       { promptId: "session-done-tonight", actionId: "done-for-tonight", open: true },
     );
   }
+};
+
+const collapsePlayLoopsOnQuit = (state: ShellState): void => {
+  const gameIndex = state.loops.stack.findIndex((frame) => frame.loopId === "game");
+  if (gameIndex < 0) return;
+  state.loops.stack = state.loops.stack.slice(0, gameIndex + 1);
+  state.loops.prompt = null;
+  state.loops.childStartRequested = null;
+};
+
+const resumeLoopsOrPauseOffers = (
+  next: ShellState,
+  eventSeq: number,
+  effects: ShellStepResult["effects"],
+): void => {
+  if (next.pause && next.screen === "pause") {
+    ensurePauseOffers(next);
+    return;
+  }
+  bindPlayState(next.play);
+  resumeAfterPrompt(next.registry, next.seed, eventSeq, next.loops, effects as EngineEffect[]);
+  const checkpoint = takePendingCheckpoint();
+  if (checkpoint) {
+    effects.push({
+      kind: "checkpoint-write",
+      v: 1,
+      gameId: checkpoint.gameId,
+      day: checkpoint.day,
+    });
+  }
+  if (next.pause) ensurePauseOffers(next);
 };
 
 const pauseIfNeeded = (state: ShellState): void => {
@@ -111,7 +150,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     const next = { ...state, tower: e.tower, eventSeq: eventSeq + 1 };
     pauseIfNeeded(next);
     bindShellState(next);
-    resumeAfterPrompt(next.registry, next.seed, eventSeq, next.loops, effects as EngineEffect[]);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
@@ -140,7 +179,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     pauseIfNeeded(next);
     resetGameAwaitingPress(next);
     bindShellState(next);
-    resumeAfterPrompt(next.registry, next.seed, eventSeq, next.loops, effects as EngineEffect[]);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
@@ -174,7 +213,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     }
     resetGameAwaitingPress(next);
     bindShellState(next);
-    resumeAfterPrompt(next.registry, next.seed, eventSeq, next.loops, effects as EngineEffect[]);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
@@ -257,10 +296,25 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         capabilityId: "tower.calibrate",
         params: {},
       });
+    } else if (
+      next.pause &&
+      (e.actionId === "quit-story" || e.actionId === "reconnect") &&
+      e.promptId.startsWith("pause-")
+    ) {
+      const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
+      if (gameFrame) {
+        gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
+        if ((gameFrame.local as GameLocal).phase === "done") {
+          collapsePlayLoopsOnQuit(next);
+        }
+      }
     } else if (top?.loopId === "game") {
       const before = top.local as GameLocal;
       const local = handleGamePress(before, e.promptId, e.actionId);
       updateTopLocal(next, local);
+      if (local.phase === "play" && before.phase === "begin" && next.playContent && !next.play) {
+        next.play = initPlayState(next.seed, next.playContent);
+      }
       if (local.phase === "play" && before.phase === "begin" && !next.resumedFromAutosave) {
         const gameId = next.activeGameId ?? `game-${next.eventSeq}`;
         next.activeGameId = gameId;
@@ -273,6 +327,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         effects.push({ kind: "autosave-write", v: 1, gameId });
       }
       if (local.phase === "done" && next.stage === "ended") {
+        collapsePlayLoopsOnQuit(next);
         if (next.activeGameId) {
           effects.push({
             kind: "game-record",
@@ -294,9 +349,11 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     } else if (top?.loopId === "session") {
       const local = handleSessionHubPress(top.local as SessionLocal, e.promptId, e.actionId);
       updateSessionLocal(next, local);
+    } else {
+      updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
     }
 
-    resumeAfterPrompt(next.registry, next.seed, eventSeq, next.loops, effects as EngineEffect[]);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     ensureSessionHubOffers(next);
     if (e.promptId === "session-done-tonight" && e.actionId === "done-for-tonight") {

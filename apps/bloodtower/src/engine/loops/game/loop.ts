@@ -19,6 +19,7 @@ export type GameLocal = {
     | "play"
     | "done";
   awaitingPress: boolean;
+  playStarted: boolean;
 };
 
 export type GameResult = { outcome: "quit" | "completed" };
@@ -74,9 +75,9 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
     const shell = shellState();
     shell.stage = "lobby";
     if (shell.screen === "pick-story") {
-      return { phase: "pick-story", awaitingPress: false };
+      return { phase: "pick-story", awaitingPress: false, playStarted: false };
     }
-    return { phase: "pick-game", awaitingPress: false };
+    return { phase: "pick-game", awaitingPress: false, playStarted: false };
   },
   body: (local, ctx) => {
     const shell = shellState();
@@ -118,6 +119,13 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
         recordOffer(`pause-${shell.pauseSerial}-quit`, "quit-story");
         return { local, passComplete: false };
       }
+      if (!local.playStarted && shell.play) {
+        const stackHasChapter = shell.loops.stack.some((frame) => frame.loopId === "chapter");
+        if (!stackHasChapter) {
+          ctx.startChild("chapter");
+          return { local: { ...local, playStarted: true }, passComplete: false };
+        }
+      }
       return { local, passComplete: false };
     }
 
@@ -143,13 +151,13 @@ export const handleGamePress = (
       shell.resumedFromAutosave = false;
       shell.autosave = null;
       shell.activeGameId = `game-${shell.eventSeq}`;
-      return { phase: "pick-story", awaitingPress: false };
+      return { phase: "pick-story", awaitingPress: false, playStarted: false };
     }
     if (promptId === "continue-pick-game" && actionId === "continue" && shell.autosave) {
       shell.resumedFromAutosave = true;
       shell.screen = "play";
       shell.stage = "playing";
-      return { phase: "play", awaitingPress: false };
+      return { phase: "play", awaitingPress: false, playStarted: false };
     }
   }
 
@@ -157,13 +165,13 @@ export const handleGamePress = (
     if (local.phase === "pick-story" && promptId === `continue-pick-story-${shell.focusStoryId}`) {
       if (!bindStoryChoice(shell, shell.focusStoryId)) return { ...local, awaitingPress: false };
       shell.screen = "game-settings";
-      return { phase: "game-settings", awaitingPress: false };
+      return { phase: "game-settings", awaitingPress: false, playStarted: false };
     }
     if (local.phase === "game-settings" && promptId === "continue-game-settings") {
       const next = screenAfterContinue(shell, "game-settings");
       if (!next) return local;
       shell.screen = next;
-      return { phase: next as GameLocal["phase"], awaitingPress: false };
+      return { phase: next as GameLocal["phase"], awaitingPress: false, playStarted: false };
     }
     if (local.phase === "claim-heroes" && promptId === "continue-claim-heroes") {
       if (!allHeroesHeld(shell)) return local;
@@ -171,7 +179,7 @@ export const handleGamePress = (
       if (!next) return local;
       shell.screen = next;
       if (next === "setup") shell.setupAt = 0;
-      return { phase: next as GameLocal["phase"], awaitingPress: false };
+      return { phase: next as GameLocal["phase"], awaitingPress: false, playStarted: false };
     }
     if (local.phase === "setup") {
       const step = shell.setupSteps[shell.setupAt];
@@ -180,13 +188,13 @@ export const handleGamePress = (
       const next = screenAfterContinue(shell, "setup");
       if (!next) return local;
       shell.screen = next;
-      return { phase: next as GameLocal["phase"], awaitingPress: false };
+      return { phase: next as GameLocal["phase"], awaitingPress: false, playStarted: false };
     }
     if (local.phase === "begin" && promptId === "continue-begin" && allHeroesHeld(shell)) {
       shell.screen = "play";
       shell.stage = "playing";
       if (!shell.activeGameId) shell.activeGameId = `game-${shell.eventSeq}`;
-      return { phase: "play", awaitingPress: false };
+      return { phase: "play", awaitingPress: false, playStarted: false };
     }
   }
 
@@ -195,14 +203,19 @@ export const handleGamePress = (
     const next = screenAfterBack(shell, backScreen);
     if (!next) return { ...local, awaitingPress: false };
     shell.screen = next;
-    return { phase: next as GameLocal["phase"], awaitingPress: false };
+    return {
+      phase: next as GameLocal["phase"],
+      awaitingPress: false,
+      playStarted: local.playStarted,
+    };
   }
 
   if (local.phase === "play" && shell.pause && promptId === `pause-${shell.pauseSerial}-quit`) {
     if (actionId === "quit-story") {
       shell.stage = "ended";
       shell.pause = null;
-      return { phase: "done", awaitingPress: false };
+      shell.screen = "play";
+      return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
     }
   }
   if (

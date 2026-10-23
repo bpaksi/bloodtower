@@ -10,7 +10,8 @@
     "start": "pnpm -F bloodtower-server start",
     "e2e": "pnpm -F bloodtower-e2e e2e",
     "pack:lint": "pnpm -F bloodtower-server pack:lint",
-    "playtest": "pnpm -F bloodtower-server playtest"
+    "playtest": "pnpm -F bloodtower-server playtest",
+    "simulate": "pnpm -F bloodtower-server simulate"
   },
   "devDependencies": {
     "concurrently": "10.0.6"

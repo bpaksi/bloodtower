@@ -25,11 +25,19 @@ export const towerCommandEffectV1 = z.object({
   params: z.record(z.string(), z.unknown()),
 });
 
+export const checkpointWriteEffectV1 = z.object({
+  kind: z.literal("checkpoint-write"),
+  v: z.literal(1),
+  gameId: z.string(),
+  day: z.number().int().min(1),
+});
+
 export const shellEffectSchema = z.discriminatedUnion("kind", [
   viewRefreshEffectV1,
   autosaveWriteEffectV1,
   gameRecordEffectV1,
   towerCommandEffectV1,
+  checkpointWriteEffectV1,
 ]);
 
 export type ShellEffect = z.infer<typeof shellEffectSchema>;

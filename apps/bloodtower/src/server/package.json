@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "pack:lint": "tsx scripts/packLint.ts",
-    "playtest": "tsx scripts/playtest.ts"
+    "playtest": "tsx scripts/playtest.ts",
+    "simulate": "tsx scripts/simulate.ts"
   },
   "dependencies": {
     "@stoprocent/noble": "2.8.0",
