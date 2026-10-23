@@ -5,21 +5,38 @@ import { startSessionHost } from "./hub/host.ts";
 import { parseDevOrigins } from "./hub/origin.ts";
 import { towerFromEnv } from "./hub/tower.ts";
 import { joinHost, lanUrls } from "./lanUrls.ts";
+import { createHostLogger, debugEnabledFromEnv } from "./log/hostLog.ts";
 
 const config = loadConfig();
 const hostName = process.env.HOST || "0.0.0.0";
 const webRoot = resolve(process.env.WEB_ROOT || resolve(import.meta.dirname, "../web/out"));
 
-let devOrigins: string[];
-try {
-  devOrigins = parseDevOrigins(process.env.DEV_ORIGINS);
-} catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-}
+const readDevOrigins = (): string[] => {
+  try {
+    return parseDevOrigins(process.env.DEV_ORIGINS);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+};
 
-mkdirSync(config.dataDir, { recursive: true });
-const chosen = towerFromEnv(process.env);
+const openLog = () => {
+  try {
+    mkdirSync(config.dataDir, { recursive: true });
+    return createHostLogger({
+      dataDir: config.dataDir,
+      debug: debugEnabledFromEnv(process.env),
+    });
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+};
+
+const devOrigins = readDevOrigins();
+const log = openLog();
+
+const chosen = towerFromEnv(process.env, log);
 
 const joinPagePort =
   process.env.DEV_PAGE_PORT === undefined || process.env.DEV_PAGE_PORT === ""
@@ -29,7 +46,8 @@ const joinPagePort =
 let server: Awaited<ReturnType<typeof startSessionHost>>;
 try {
   if (joinPagePort !== undefined && (!Number.isInteger(joinPagePort) || joinPagePort < 0)) {
-    console.error("DEV_PAGE_PORT must be a non-negative integer.");
+    log.error("host-config", "DEV_PAGE_PORT must be a non-negative integer.");
+    chosen.tower.close();
     process.exit(1);
   }
 
@@ -42,9 +60,11 @@ try {
     tower: chosen.tower,
     devOrigins,
     joinPagePort,
+    log,
   });
 } catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
+  const message = error instanceof Error ? error.message : String(error);
+  log.error("host-start", message.trim() === "" ? "The host failed to start." : message);
   chosen.tower.close();
   process.exit(1);
 }
@@ -77,6 +97,14 @@ console.log(
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {
-    server.close().finally(() => process.exit(0));
+    server
+      .close()
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        log.error("host-close", message.trim() === "" ? "The host failed to close." : message);
+      })
+      .finally(() => {
+        process.exit(0);
+      });
   });
 }

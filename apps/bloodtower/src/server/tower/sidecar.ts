@@ -2,6 +2,7 @@ import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { TowerSnapshot } from "bloodtower-protocols";
 import { WebSocket } from "ws";
+import type { HostLogger } from "../log/hostLog.ts";
 import {
   mapBattery,
   mapCalibration,
@@ -25,15 +26,17 @@ const FAILED_STAGES = new Set(["failed", "timed-out", "rejected"]);
 
 export interface SidecarOptions {
   url: string;
-  /** Set for a hardware session. Lines are `{ at, dir, type }` with no payload. */
+  /**
+   * Hardware trace. Lines are `{ at, dir, type }` with no payload.
+   * This file stays separate from the decision 0003 error log. Command fail, timeout and
+   * no-answer are the only tower outcomes written to `log`.
+   */
   diagLogPath?: string;
+  /** Decision 0003 log. Command fail, timeout and no-answer are errors here. */
+  log?: HostLogger;
+  /** Tests shorten the wait. A command that outlives it is an error. */
+  commandTimeoutMs?: number;
 }
-
-const diag = (path: string | undefined, dir: "in" | "out", type: string) => {
-  if (!path) return;
-  mkdirSync(dirname(path), { recursive: true });
-  appendFileSync(path, `${JSON.stringify({ at: new Date().toISOString(), dir, type })}\n`);
-};
 
 /**
  * A client of tower-poc. The socket stays closed until `connect()`.
@@ -41,8 +44,13 @@ const diag = (path: string | undefined, dir: "in" | "out", type: string) => {
  * Outbound types are hello, connect, calibrate and `command`. The only command is
  * `sound.play-stateful` (a library sound index and a volume tier), sent by `playSound`. No light
  * cue and no raw bytes. A sound is never sent again after a failure.
+ * A command that fails, times out, or gets no answer is an error in `log`. DIAG_LOG is not copied.
  */
 export const createSidecarTower = (options: SidecarOptions): TowerPort => {
+  const timeoutMs = options.commandTimeoutMs ?? SOUND_TIMEOUT_MS;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new Error("commandTimeoutMs must be a positive number.");
+  }
   let snapshot = unavailableTower();
   const sent: TowerSent[] = [];
   let socket: WebSocket | undefined;
@@ -59,8 +67,31 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
   const pendingSounds = new Map<string, (result: SoundResult) => void>();
   let commandSerial = 0;
 
+  const report = (code: string, message: string) => {
+    const text = message.trim() === "" ? "The tower reported an error with no message." : message;
+    if (options.log) options.log.error(code, text);
+    else console.error(`${code}: ${text}`);
+  };
+
+  const writeDiag = (dir: "in" | "out", type: string) => {
+    const path = options.diagLogPath;
+    if (!path) return;
+    try {
+      mkdirSync(dirname(path), { recursive: true });
+      appendFileSync(path, `${JSON.stringify({ at: new Date().toISOString(), dir, type })}\n`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      report("diag-log", `DIAG_LOG write failed: ${message}`);
+    }
+  };
+
   const track = (step: Promise<void>) => {
-    chain = chain.then(() => step).catch(() => undefined);
+    chain = chain
+      .then(() => step)
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        report("tower-socket", message);
+      });
   };
 
   const send = (
@@ -71,13 +102,16 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
     if (!OUTBOUND.has(type) || !socket || socket.readyState !== WebSocket.OPEN) return false;
     socket.send(JSON.stringify({ v: 1, type, ...(extra ? { id: extra.id } : {}), payload }));
     sent.push(extra?.entry ?? { type });
-    diag(options.diagLogPath, "out", type);
+    writeDiag("out", type);
     return true;
   };
 
   const endSounds = (result: SoundResult) => {
     for (const [id, finish] of [...pendingSounds]) {
       pendingSounds.delete(id);
+      if (result === "failed") {
+        report("tower-command-no-answer", `Sound command ${id} got no answer.`);
+      }
       finish(result);
     }
   };
@@ -86,14 +120,22 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
     let parsed: unknown;
     try {
       parsed = JSON.parse(String(raw));
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      report("tower-frame", `Tower message is not valid JSON: ${message}`);
       return;
     }
-    if (!parsed || typeof parsed !== "object") return;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      report("tower-frame", "Tower message is not a JSON object.");
+      return;
+    }
     const message = parsed as Record<string, unknown>;
     const type = typeof message.type === "string" ? message.type : "";
-    if (!type) return;
-    diag(options.diagLogPath, "in", type);
+    if (!type) {
+      report("tower-frame", "Tower message has no type.");
+      return;
+    }
+    writeDiag("in", type);
     const payload =
       message.payload && typeof message.payload === "object"
         ? (message.payload as Record<string, unknown>)
@@ -144,12 +186,18 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
       // tower-poc ends a command it never wrote as `indeterminate` with `written: false`.
       if (payload.written === false) {
         pendingSounds.delete(id);
+        report("tower-command-failed", `Sound command ${id} was not written.`);
         finish("failed");
       } else if (WRITTEN_STAGES.has(stage)) {
         pendingSounds.delete(id);
         finish("written");
+      } else if (stage === "timed-out") {
+        pendingSounds.delete(id);
+        report("tower-command-timeout", `Sound command ${id} ended timed-out.`);
+        finish("failed");
       } else if (FAILED_STAGES.has(stage)) {
         pendingSounds.delete(id);
+        report("tower-command-failed", `Sound command ${id} ended ${stage}.`);
         finish("failed");
       }
       return;
@@ -204,17 +252,31 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
         new Promise((resolve) => {
           const finish = () => resolve();
           opened.once("open", () => {
-            send("hello", { clientLabel: "bloodtower" });
+            try {
+              send("hello", { clientLabel: "bloodtower" });
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              report("tower-socket", message);
+            }
             finish();
           });
-          opened.once("error", finish);
+          opened.once("error", (error: unknown) => {
+            const message = error instanceof Error ? error.message : String(error);
+            report("tower-socket", message);
+            finish();
+          });
           opened.once("close", () => {
             if (socket === opened) drop();
             finish();
           });
           opened.on("message", (raw) => {
             if (socket !== opened) return;
-            onMessage(raw);
+            try {
+              onMessage(raw);
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              report("tower-frame", message);
+            }
           });
         }),
       );
@@ -224,14 +286,26 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
       send("calibrate", {});
     },
     playSound: (soundIndex, volume) => {
-      if (snapshot.connection !== "connected") return Promise.resolve("failed");
+      if (snapshot.connection !== "connected") {
+        report(
+          "tower-command-failed",
+          `Sound ${soundIndex} at volume ${volume} was not sent because the tower is not connected.`,
+        );
+        return Promise.resolve("failed");
+      }
       commandSerial += 1;
       const id = `bt-sound-${commandSerial}`;
       return new Promise<SoundResult>((resolve) => {
         const timer = setTimeout(() => {
+          const finish = pendingSounds.get(id);
+          if (!finish) return;
           pendingSounds.delete(id);
-          resolve("failed");
-        }, SOUND_TIMEOUT_MS);
+          report(
+            "tower-command-timeout",
+            `Sound ${soundIndex} at volume ${volume} timed out with no answer (${id}).`,
+          );
+          finish("failed");
+        }, timeoutMs);
         timer.unref?.();
         pendingSounds.set(id, (result) => {
           clearTimeout(timer);
@@ -243,9 +317,14 @@ export const createSidecarTower = (options: SidecarOptions): TowerPort => {
           { id, entry: { type: "sound", soundIndex, volume } },
         );
         if (!wrote) {
+          const finish = pendingSounds.get(id);
+          if (!finish) return;
           pendingSounds.delete(id);
-          clearTimeout(timer);
-          resolve("failed");
+          report(
+            "tower-command-failed",
+            `Sound ${soundIndex} at volume ${volume} was not sent (${id}).`,
+          );
+          finish("failed");
         }
       });
     },

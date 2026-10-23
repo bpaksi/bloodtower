@@ -13,6 +13,7 @@ import { privateHunterOf, type ServerMessage, serverMessageSchema } from "bloodt
 import { afterEach, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { loadConfig } from "../config.ts";
+import { createHostLogger, type HostLogger } from "../log/hostLog.ts";
 import { loadR1Pack } from "../pack/load.ts";
 import { createMockTower, type MockTower } from "../tower/mock.ts";
 import { type SessionHost, startSessionHost } from "./host.ts";
@@ -58,6 +59,7 @@ const start = async (
     joinPagePort?: number;
     packsDir?: string;
     sleep?: (ms: number) => Promise<void>;
+    log?: HostLogger;
   },
 ) => {
   const root = tempDir();
@@ -74,6 +76,7 @@ const start = async (
     lanHost: extra?.lanHost,
     joinPagePort: extra?.joinPagePort,
     sleep: extra?.sleep,
+    log: extra?.log,
   });
   hosts.push(host);
   return { host, tower };
@@ -224,6 +227,63 @@ describe("session hub", () => {
     await expect(connect(host.port, "https://evil.example")).rejects.toThrow(/403/);
     const allowed = await connect(host.port, `http://127.0.0.1:${host.port}`);
     expect(allowed.socket.readyState).toBe(WebSocket.OPEN);
+  });
+
+  it("writes a page entry from POST /log and does not serve the log", async () => {
+    const dataDir = tempDir();
+    const log = createHostLogger({
+      dataDir,
+      mirror: false,
+      now: () => new Date("2026-10-23T12:00:00.000Z"),
+    });
+    const { host } = await start(createMockTower(), {
+      log,
+      devOrigins: ["http://127.0.0.1:3000"],
+    });
+    const url = `http://127.0.0.1:${host.port}/log`;
+    const preflight = await fetch(url, {
+      method: "OPTIONS",
+      headers: { origin: "http://127.0.0.1:3000", "access-control-request-method": "POST" },
+    });
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get("access-control-allow-origin")).toBe("http://127.0.0.1:3000");
+
+    const blocked = await fetch(url, {
+      method: "OPTIONS",
+      headers: { origin: "https://evil.example" },
+    });
+    expect(blocked.status).toBe(204);
+    expect(blocked.headers.get("access-control-allow-origin")).toBeNull();
+
+    const posted = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "http://127.0.0.1:3000" },
+      body: JSON.stringify({
+        level: "error",
+        source: "board",
+        device: null,
+        session: null,
+        screen: "story",
+        code: "page-error",
+        message: "The board hit an error.",
+      }),
+    });
+    expect(posted.status).toBe(204);
+    const lines = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8")
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { code: string; session: string | null; source: string });
+    expect(lines).toEqual([
+      expect.objectContaining({
+        code: "page-error",
+        source: "board",
+        session: null,
+        message: "The board hit an error.",
+      }),
+    ]);
+
+    const get = await fetch(url);
+    expect(get.status).toBe(405);
   });
 
   it("accepts a listed dev origin and ignores a spoofed Host on the join URL", async () => {

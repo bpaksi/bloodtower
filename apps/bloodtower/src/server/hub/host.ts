@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { createServer, type IncomingMessage } from "node:http";
+import { dirname } from "node:path";
 import {
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
@@ -18,6 +19,12 @@ import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
 import { joinHost } from "../lanUrls.ts";
+import {
+  createHostLogger,
+  type HostLogger,
+  handleLogIngest,
+  isLogIngestPath,
+} from "../log/hostLog.ts";
 import type { PackAssetIndex } from "../pack/assets.ts";
 import { devAudioAllowOrigin } from "../pack/audio.ts";
 import { formatLoadIssues, loadStories } from "../pack/load.ts";
@@ -54,6 +61,11 @@ export interface SessionHostOptions {
   towerWatchMs?: number;
   /** The address iPads open for the join QR. Undefined when only loopback is reachable. Defaults to the LAN address for `host`. */
   lanHost?: () => string | undefined;
+  /**
+   * Decision 0003 log. Omitted, one is created under the database folder and pruned on start.
+   * Pass the same instance the tower was built with so a command failure shares this file.
+   */
+  log?: HostLogger;
   /** Waits for the volume test's timing. Tests pass one that does not wait. */
   sleep?: (ms: number) => Promise<void>;
 }
@@ -91,6 +103,7 @@ interface ClientState {
  * Arrival order on this process is the lock order. Client clocks are not read.
  */
 export const startSessionHost = async (options: SessionHostOptions): Promise<SessionHost> => {
+  const log = options.log ?? createHostLogger({ dataDir: dirname(options.databasePath) });
   const stories = loadStories(options.packsDir);
   // The session starts on the first story that loads. The rest wait on Pick Story.
   const first = stories.find((entry) => entry.pack);
@@ -101,7 +114,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   for (const entry of stories) {
     // A metadata-only pack (`playable: false`) has no issues and is not an error.
     if (!entry.pack && entry.issues.length > 0) {
-      console.error(
+      log.error(
+        "pack-load",
         `Story ${entry.card.id} can't load.\n${formatLoadIssues(entry.issues).join("\n")}`,
       );
     }
@@ -112,7 +126,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     .filter((catalog): catalog is PackAssetIndex => catalog !== null);
   for (const catalog of packAssetCatalogs) {
     if (catalog.warnings.length > 0) {
-      console.warn(formatLoadIssues(catalog.warnings).join("\n"));
+      log.warn("pack-asset", formatLoadIssues(catalog.warnings).join("\n"));
     }
   }
   const joinCode =
@@ -121,6 +135,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const opened = openDatabase(options.databasePath);
   const store = createSessionStore(opened.db);
   const sessionId = `session-${randomBytes(8).toString("hex")}`;
+  log.setSession(sessionId);
   const devOrigins = options.devOrigins ?? [];
   const allowDevPrivateOrigins = devOrigins.length > 0;
   const joinPagePort = options.joinPagePort;
@@ -459,8 +474,12 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
           broadcast();
         },
       },
-    }).catch(() => {
-      console.error("The tower volume test stopped.");
+    }).catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      log.error(
+        "tower-volume-test",
+        `The tower volume test stopped. ${message.trim() === "" ? "It failed with no message." : message}`,
+      );
       engine.volumeFailed(queued.run);
       broadcast();
     });
@@ -566,15 +585,39 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   const http = createServer((req, res) => {
-    const allowOrigin = devAudioAllowOrigin(requestPath(req.url), req.headers.origin, devOrigins);
+    const pathname = requestPath(req.url);
+    const origin = header(req.headers.origin);
+    const allowOrigin = devAudioAllowOrigin(pathname, origin, devOrigins);
     if (allowOrigin) {
       res.setHeader("access-control-allow-origin", allowOrigin);
       res.setHeader("vary", "origin");
     }
+    if (
+      isLogIngestPath(pathname) &&
+      origin &&
+      devOrigins.length > 0 &&
+      isAllowedOrigin(origin, undefined, devOrigins, allowDevPrivateOrigins)
+    ) {
+      res.setHeader("access-control-allow-origin", origin);
+      res.setHeader("vary", "origin");
+      res.setHeader("access-control-allow-methods", "POST, OPTIONS");
+      res.setHeader("access-control-allow-headers", "content-type");
+    }
+    if (isLogIngestPath(pathname) && req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
     void (async () => {
+      if (isLogIngestPath(pathname)) {
+        await handleLogIngest(req, res, log);
+        return;
+      }
       if (await tryServePackAssets(packAssetCatalogs, req, res)) return;
       return serveStatic(options.webRoot, req, res);
-    })().catch(() => {
+    })().catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      log.error("http-request", message.trim() === "" ? "The request failed." : message);
       if (!res.headersSent) {
         res.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
         res.end("Internal error.\n");
