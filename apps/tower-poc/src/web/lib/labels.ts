@@ -7,7 +7,7 @@ import type {
   LifecycleStage,
   Origin,
   StateValue,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 export const CONNECTION_LABELS: Record<ConnectionState, string> = {
   "bluetooth-unavailable": "Bluetooth unavailable",

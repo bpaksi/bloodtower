@@ -13,8 +13,8 @@ import {
   SERVER_TYPES,
 } from "./types.ts";
 
-// Reads tower-poc's protocols as text. Importing from another app is not allowed.
-const dir = resolve(import.meta.dirname, "../../../../../tower-poc/src/protocols");
+// Reads @dark-tower/tower's protocols as text. Importing from another app is not allowed.
+const dir = resolve(import.meta.dirname, "../../../../../../packages/tower/src/protocols");
 const read = (file: string) =>
   readFileSync(resolve(dir, file), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -64,7 +64,7 @@ const lineDepthZero = (line: string) => {
 
 const sorted = (xs: readonly string[]) => [...xs].sort();
 
-describe("drift against tower-poc/src/protocols", () => {
+describe("drift against @dark-tower/tower protocols", () => {
   it("has the same protocol version", () => {
     expect(read("envelope.ts")).toContain(`PROTOCOL_VERSION = ${PROTOCOL_VERSION};`);
   });

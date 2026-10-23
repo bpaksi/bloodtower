@@ -7,7 +7,7 @@ import {
   type VerificationOverlay,
   type VerificationRecord,
   type VerifyRecordPayload,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 export interface VerificationStorage {
   /** Saves a result and returns it with the id the database gave it. */

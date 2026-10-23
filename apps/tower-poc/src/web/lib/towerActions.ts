@@ -1,6 +1,6 @@
 // The tower's four lifecycle actions and when the service allows each. Pure, so it is tested
 // without React. The service refuses the others anyway; this spares the person the press.
-import type { ConnectionPayload } from "tower-poc-protocols";
+import type { ConnectionPayload } from "@dark-tower/tower";
 
 export type TowerAction = "connect" | "reconnect" | "disconnect" | "calibrate";
 

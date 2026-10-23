@@ -1,5 +1,5 @@
+import { PROTOCOL_VERSION } from "@dark-tower/tower";
 import type { Metadata } from "next";
-import { PROTOCOL_VERSION } from "tower-poc-protocols";
 import { PageShell } from "@/components/PageShell";
 import { PAGES } from "@/lib/pages";
 import packageJson from "@/package.json";

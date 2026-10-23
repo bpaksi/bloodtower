@@ -9,14 +9,18 @@ import {
   PROTOCOL_VERSION,
   type ServerMessage,
   serverMessageSchema,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
+import {
+  createMockTower,
+  createStateStore,
+  createTowerRecords,
+  createTowerSession,
+} from "@dark-tower/tower/runtime";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
-import { createMockTower } from "./adapters/mockTower.ts";
 import { openDatabase } from "./db/client.ts";
 import { createSoundFeelStorage } from "./db/soundFeel.ts";
 import { createVerificationStorage } from "./db/verifications.ts";
-import packageJson from "./package.json" with { type: "json" };
 import {
   isAllowedOrigin,
   parseDevOrigins,
@@ -24,10 +28,7 @@ import {
   type TowerServer,
   WS_PATH,
 } from "./server.ts";
-import { createTowerSession } from "./session.ts";
 import { createSoundFeel } from "./soundFeel.ts";
-import { createStateStore } from "./stateStore.ts";
-import { createTowerRecords } from "./towerRecords.ts";
 import { createVerifications, type VerificationStorage } from "./verifications.ts";
 
 /** A session on its own mock tower, which connects in 20 ms. */
@@ -363,7 +364,7 @@ describe("WebSocket endpoint", () => {
           server: "9.9.9",
           node: process.version,
           library: LIBRARY_BASELINE.version,
-          data: packageJson.dependencies.ultimatedarktowerdata,
+          data: "3.0.0",
         },
       },
     });

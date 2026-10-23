@@ -7,6 +7,9 @@
 //
 // Nothing here is sent twice. A command that fails, times out or gets no answer ends its lifecycle
 // and is not tried again.
+
+import type { UltimateDarkTower } from "ultimatedarktower";
+import { TOWER_LIGHT_SEQUENCES } from "ultimatedarktowerdata";
 import {
   type CapabilityParams,
   type CommandableId,
@@ -19,9 +22,7 @@ import {
   SILENT_LIGHT_SEQUENCES,
   type ValidatedCommand,
   validateCommand,
-} from "tower-poc-protocols";
-import type { UltimateDarkTower } from "ultimatedarktower";
-import { TOWER_LIGHT_SEQUENCES } from "ultimatedarktowerdata";
+} from "./protocols/index.ts";
 import { flashOneLight } from "./timing/flashLight.ts";
 import type { TowerRecords } from "./towerRecords.ts";
 

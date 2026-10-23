@@ -8,7 +8,7 @@ import {
   type ServerMessage,
   type StatePayload,
   type WelcomePayload,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 /** An `error` the service sent, with when it arrived. */
 export interface ServiceError {

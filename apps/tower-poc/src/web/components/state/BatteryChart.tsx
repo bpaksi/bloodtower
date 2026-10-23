@@ -1,7 +1,7 @@
 "use client";
 
+import type { TowerValue } from "@dark-tower/tower";
 import { useId, useState } from "react";
-import type { TowerValue } from "tower-poc-protocols";
 import { timeLabel } from "@/lib/labels";
 import { batteryPoints, nearestPoint } from "@/lib/towerState";
 

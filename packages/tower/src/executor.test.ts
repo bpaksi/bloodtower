@@ -1,12 +1,3 @@
-import {
-  type CommandLifecyclePayload,
-  findCapability,
-  inventory,
-  isCommandable,
-  RANDOM_ROTATE_DRUMS,
-  SOUND_COUNT,
-  type ValidatedCommand,
-} from "tower-poc-protocols";
 import { LIGHT_EFFECTS } from "ultimatedarktower";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockTower } from "./adapters/mockTower.ts";
@@ -20,6 +11,15 @@ import {
   MIN_COMMAND_GAP_MS,
   PLANNED_IDS,
 } from "./executor.ts";
+import {
+  type CommandLifecyclePayload,
+  findCapability,
+  inventory,
+  isCommandable,
+  RANDOM_ROTATE_DRUMS,
+  SOUND_COUNT,
+  type ValidatedCommand,
+} from "./protocols/index.ts";
 import { createTowerSession } from "./session.ts";
 import { createStateStore } from "./stateStore.ts";
 import { createTowerRecords } from "./towerRecords.ts";

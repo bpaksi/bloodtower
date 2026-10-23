@@ -1,7 +1,7 @@
 "use client";
 
+import { SOUND_CATALOG, SOUND_CATEGORIES, soundName, validateCommand } from "@dark-tower/tower";
 import { useEffect, useId, useState } from "react";
-import { SOUND_CATALOG, SOUND_CATEGORIES, soundName, validateCommand } from "tower-poc-protocols";
 import { CommandStatus } from "@/components/controls/CommandStatus";
 import { SoundReviewRow } from "@/components/controls/SoundReviewRow";
 import { Button } from "@/components/ui/button";

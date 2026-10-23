@@ -1,7 +1,8 @@
 // Keeps the state store's latest snapshot in the database, for the restore prompt (D11).
+
+import { stateSnapshotSchema } from "@dark-tower/tower";
+import type { SnapshotStorage } from "@dark-tower/tower/runtime";
 import { eq } from "drizzle-orm";
-import { stateSnapshotSchema } from "tower-poc-protocols";
-import type { SnapshotStorage } from "../stateStore.ts";
 import type { Db } from "./client.ts";
 import { stateSnapshots } from "./schema.ts";
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
 import {
   SOUND_MOODS,
   SOUND_NOTE_MAX,
@@ -8,7 +7,8 @@ import {
   SOUND_STRENGTHS,
   type SoundFeelRecordPayload,
   type SoundFeelRow,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { lengthLabel, measure, type PlayTiming } from "@/lib/soundReview";
 import { sendToService, useService } from "@/lib/store";

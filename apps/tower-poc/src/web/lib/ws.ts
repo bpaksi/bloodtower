@@ -7,7 +7,7 @@ import {
   PROTOCOL_VERSION,
   type ServerMessage,
   serverMessageSchema,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 /** Waits between attempts: quick at first, then every 5 s for as long as the page is open. */
 export const RECONNECT_DELAYS_MS = [500, 1_000, 2_000, 5_000] as const;

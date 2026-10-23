@@ -1,6 +1,6 @@
-import { inventory, type PendingRestore, RECORD_KEYS } from "tower-poc-protocols";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMockTower } from "./adapters/mockTower.ts";
+import { inventory, type PendingRestore, RECORD_KEYS } from "./protocols/index.ts";
 import { createTowerSession } from "./session.ts";
 import {
   createStateStore,

@@ -1,4 +1,4 @@
-import { type CommandLifecyclePayload, END_STAGES } from "tower-poc-protocols";
+import { type CommandLifecyclePayload, END_STAGES } from "@dark-tower/tower";
 import { markSent } from "./service.ts";
 import { sendToService, useService } from "./store.ts";
 

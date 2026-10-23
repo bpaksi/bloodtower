@@ -1,4 +1,4 @@
-import { SOUND_CATALOG, type Sound } from "tower-poc-protocols";
+import { SOUND_CATALOG, type Sound } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import { describeSound, filterSounds } from "./soundFilter.ts";
 

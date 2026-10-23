@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
-import { savedTimingResultSchema, timingResultSchema } from "tower-poc-protocols";
+import { savedTimingResultSchema, timingResultSchema } from "@dark-tower/tower";
 
 /** `timing-2026-10-15T12-00-00-000Z.json`, with `:` and `.` turned into `-`. */
 export const timingResultFilename = (at: Date, suffix = "") => {

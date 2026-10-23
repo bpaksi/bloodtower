@@ -23,7 +23,7 @@ import {
   TOWER_VALUE_SCHEMAS,
   type TowerValue,
   type TowerValueKey,
-} from "tower-poc-protocols";
+} from "./protocols/index.ts";
 import type { TowerSession } from "./session.ts";
 
 /** The values the store keeps, by inventory id. */

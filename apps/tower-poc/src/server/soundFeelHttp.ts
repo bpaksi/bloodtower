@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { buildSoundFeelExport } from "tower-poc-protocols";
+import { buildSoundFeelExport } from "@dark-tower/tower";
 import type { SoundFeel } from "./soundFeel.ts";
 import { requestPath } from "./static.ts";
 

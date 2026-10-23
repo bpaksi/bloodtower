@@ -1,10 +1,10 @@
-import type { ConnectionPayload } from "tower-poc-protocols";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createMockTower,
   DEFAULT_MOCK_TIMINGS,
   type MockTowerOptions,
 } from "./adapters/mockTower.ts";
+import type { ConnectionPayload } from "./protocols/index.ts";
 import { CALIBRATION_LIMIT_MS, createTowerSession, SessionStateError } from "./session.ts";
 
 beforeEach(() => {
@@ -383,5 +383,25 @@ describe("tower session: closing", () => {
     expect(mock.adapter.isConnected()).toBe(false);
     expect(seen.length).toBe(count);
     await expect(session.connect()).rejects.toThrow(/closed/);
+  });
+
+  it("refuses a second session in one process", async () => {
+    const prev = process.env.VITEST;
+    process.env.VITEST = "";
+    try {
+      const mock = createMockTower();
+      const first = createTowerSession({ createAdapter: () => mock.adapter });
+      expect(() => createTowerSession({ createAdapter: () => mock.adapter })).toThrow(
+        expect.objectContaining({
+          code: "tower-session-already-open",
+          name: "TowerSessionAlreadyOpenError",
+        }),
+      );
+      await first.close();
+      const second = createTowerSession({ createAdapter: () => mock.adapter });
+      await second.close();
+    } finally {
+      process.env.VITEST = prev;
+    }
   });
 });

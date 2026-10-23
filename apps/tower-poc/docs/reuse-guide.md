@@ -10,14 +10,14 @@ Lines exclude tests; every part has its own unit tests that move with it.
 
 | Part | Where now | Lines | What it gives a new app | Reuse |
 |---|---|---|---|---|
-| **Protocol** | `src/protocols/` | 2,618 | The capability inventory (54 entries, each a Zod schema for its params, with availability and evidence), WebSocket messages and envelope, command validation and lifecycle stages, the tower value types, the sound catalog, and the timing-result schema | **As is.** No Node, React or library runtime in it, only `zod` and `ultimatedarktowerdata` |
-| **Tower session** | `src/server/session.ts` | 401 | Connect, disconnect and reconnect, plus calibration, as one state machine. A new library object per connection, cleanup ordering, no auto-reconnect (D10), library re-sends off (D21) | **As is** |
-| **Executor** | `src/server/executor.ts` | 478 | The only path from `command{capabilityId, params}` to the library: validation, the queue and direct lanes, timeouts, `confirmed` / `indeterminate` / `failed`, refusals while calibrating (D22), silent sequences (D23). `lighting.flash` is a direct plan inside this file | **As is.** It is the safety boundary; don't rewrite it |
-| **State store and records** | `stateStore.ts`, `towerRecords.ts` | 440 | Every tower value with its origin and freshness, snapshots for the restore prompt (D11), the app's own seal and skull record (D24) | **As is.** Storage is passed in, so any app can supply its own |
-| **Adapters** | `src/server/adapters/` | 390 | `InstrumentedAdapter` taps every packet and lifecycle call; `mockTower` is an in-memory tower for tests and for demos without the hardware | **As is.** The mock is how a game is tested without a tower |
+| **Protocol** | `@dark-tower/tower` (`packages/tower/src/protocols/`) | 2,618 | The capability inventory (54 entries, each a Zod schema for its params, with availability and evidence), WebSocket messages and envelope, command validation and lifecycle stages, the tower value types, the sound catalog, and the timing-result schema | **As is.** Import `@dark-tower/tower`. No Node, React or library runtime in the protocol layer, only `zod` and `ultimatedarktowerdata` |
+| **Tower session** | `@dark-tower/tower` | 401 | Connect, disconnect and reconnect, plus calibration, as one state machine. A new library object per connection, cleanup ordering, no auto-reconnect (D10), library re-sends off (D21). Only one session per process | **As is** |
+| **Executor** | `@dark-tower/tower` | 478 | The only path from `command{capabilityId, params}` to the library: validation, the queue and direct lanes, timeouts, `confirmed` / `indeterminate` / `failed`, refusals while calibrating (D22), silent sequences (D23). `lighting.flash` is a direct plan inside this file | **As is.** It is the safety boundary; don't rewrite it |
+| **State store and records** | `@dark-tower/tower` | 440 | Every tower value with its origin and freshness, snapshots for the restore prompt (D11), the app's own seal and skull record (D24) | **As is.** Storage is passed in, so any app can supply its own |
+| **Adapters** | `@dark-tower/tower` | 390 | `InstrumentedAdapter` taps every packet and lifecycle call; `mockTower` is an in-memory tower for tests and for demos without the hardware | **As is.** The mock is how a game is tested without a tower |
 | **WebSocket host** | `server.ts`, `clientHub.ts`, `static.ts` | 537 | One process serving the UI and `/ws`, broadcast to every client, the origin check (D20). `src/server/timing/` saves the timing page's results and is not part of this host for a game | Keep if the new app runs the service; replace if it embeds it |
 | **SQLite storage** | `src/server/db/` | 230 | `better-sqlite3` plus Drizzle migrations for snapshots, records and verifications | Pattern only: a new app has its own database |
-| **Diagnostics log** | `diagLog.ts` | 48 | `DIAG_LOG=<file>` JSONL of tx/rx bytes, connection changes and command lifecycles. It found the cause of the drum problem in the Verify pass | **As is.** Turn it on in every hardware session |
+| **Diagnostics log** | `@dark-tower/tower` | 48 | `DIAG_LOG=<file>` JSONL of tx/rx bytes, connection changes and command lifecycles. It found the cause of the drum problem in the Verify pass | **As is.** Turn it on in every hardware session |
 | **Browser client** | `src/web/lib/` | ~1,200 | `ws.ts` (reconnecting link to the service), `service.ts` (pure reducer of server messages), `store.ts` (Zustand), `useCommand`, `controls.ts` (when a control may be used and why not) | **As is** for a React app that talks to the service |
 | **Control components** | `src/web/components/controls/` | — | `CapabilityControl` (a form generated from a capability's schema), `CommandStatus` (requested versus outcome) | Useful for an admin or debug page; a game draws its own UI |
 | **Verify mode** | `verifications.ts`, `components/verify/` | — | Record pass, partial or fail per capability on the real tower | Reuse when a new app adds tower features to verify |
@@ -32,12 +32,12 @@ Not code, but just as reusable:
 ### How the server parts depend on each other
 
 ```text
-protocols  ←  adapters  ←  session  ←  stateStore  ←  towerRecords  ←  executor  ←  server (WebSocket host)
+@dark-tower/tower (protocols ← adapters ← session ← stateStore ← towerRecords ← executor)
                                                                                      ↑
-                                                         index.ts wires them together, with storage and env
+                              tower-poc server (WebSocket host) and index.ts wire storage and env
 ```
 
-Each arrow points to what a part imports. Nothing imports `index.ts` or `server.ts`, so an app can take everything left of the host and supply its own wiring.
+Each arrow points to what a part imports inside the package. Nothing imports tower-poc's `index.ts` or `server.ts`, so an app can import `@dark-tower/tower` and supply its own host.
 
 ## Three ways to use it
 

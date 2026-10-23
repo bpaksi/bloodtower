@@ -1,7 +1,7 @@
 import { mkdtemp, readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FLASH_DURATION_MS, timingResultSchema } from "tower-poc-protocols";
+import { FLASH_DURATION_MS, timingResultSchema } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import { saveTimingResult, timingResultFilename } from "./resultLog.ts";
 

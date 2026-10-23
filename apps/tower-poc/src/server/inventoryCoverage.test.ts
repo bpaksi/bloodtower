@@ -14,7 +14,7 @@ import {
   towerLevelSchema,
   towerSideSchema,
   VOLUME_LEVEL_COUNT,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 /**

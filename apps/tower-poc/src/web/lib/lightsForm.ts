@@ -8,7 +8,7 @@ import {
   towerCornerSchema,
   towerLevelSchema,
   towerSideSchema,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 export type LightEffect = (typeof lightEffectSchema.options)[number];
 export type LightGroup = "doorway" | "ledge" | "base";

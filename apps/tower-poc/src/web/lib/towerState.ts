@@ -8,7 +8,7 @@ import {
   type TowerValue,
   type TowerValueKey,
   towerSideSchema,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 export type ValueView<Value> =
   | { known: false }

@@ -1,4 +1,4 @@
-import { type StateSnapshot, skullTallySchema } from "tower-poc-protocols";
+import { type StateSnapshot, skullTallySchema } from "@dark-tower/tower";
 
 /** Where the timing page posts a result. `next dev` serves the page from another port than the service. */
 export const serviceHttpOrigin = (pageProtocol: string, pageHost: string, wsUrl?: string) => {

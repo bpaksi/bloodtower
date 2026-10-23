@@ -1,4 +1,4 @@
-import { PROTOCOL_VERSION } from "tower-poc-protocols";
+import { PROTOCOL_VERSION } from "@dark-tower/tower";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { clientLabel, openServiceSocket, reconnectDelay, serviceUrl } from "./ws.ts";
 

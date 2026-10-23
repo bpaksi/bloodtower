@@ -4,7 +4,7 @@ import {
   SOUND_FEEL_FIELDS,
   type SoundFeelRecordPayload,
   type SoundFeelRow,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 export interface SoundFeelStorage {
   /** Saves a row, replacing the one for the same sound. */

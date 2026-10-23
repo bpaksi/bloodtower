@@ -1,6 +1,6 @@
 "use client";
 
-import { type Availability, EFFECTIVE_VERIFICATIONS } from "tower-poc-protocols";
+import { type Availability, EFFECTIVE_VERIFICATIONS } from "@dark-tower/tower";
 import { useService } from "@/lib/store";
 import { AVAILABILITY_LABELS, capabilitySummary, VERIFICATION_LABELS } from "@/lib/verify";
 
