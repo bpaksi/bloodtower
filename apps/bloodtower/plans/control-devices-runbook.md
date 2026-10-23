@@ -4,7 +4,7 @@ Bob runs **Control** on the Mac in Claude Code, **one step per branch**, after *
 
 Wright tracks progress here: update **Status** and **PR #** when a step opens or merges.
 
-**Related plans:** `apps/bloodtower/plans/visuals-runbook.md` (must finish first), `apps/bloodtower/plans/shell-prompts.md` (Sound dialog and tower volume test — board-local or device-only today).
+**Related plans:** `apps/bloodtower/plans/visuals-runbook.md` (must finish first), `apps/bloodtower/plans/archive/shell-prompts.md` (Sound dialog and tower volume test — board-local or device-only today).
 
 ---
 
@@ -19,7 +19,7 @@ Control delivers the **Story board Menu** (R3-UI-39): Mac mouse/keyboard access 
 | Resume | Ends host pause from the board when legal (same lock as device Resume) | R3-UI-39; R2 pause menu (`pause` / `resume` in `control.ts`) |
 | Replay last video | Replays the last full-screen visual with zoom; no game-state change beyond a replay counter | R3-UI-34; Visuals steps 10–11 (`isVisualMoment`, zoom layer) |
 | Reconnect tower | Explicit reconnect from menu (no auto-reconnect) | R3-UI-39 tower info; R2-23; `spec.md` D5, D15 deviation |
-| Debug overlay toggle | R3-UI-40 overlay off by default; toggled from menu (not only `?debug=1`) | R3-UI-40; shell step 7 note in `shell-prompts.md` |
+| Debug overlay toggle | R3-UI-40 overlay off by default; toggled from menu (not only `?debug=1`) | R3-UI-40; shell step 7 note in `archive/shell-prompts.md` |
 | Read-only menu rows | Tower state / battery / calibration; app build + pack version | R3-UI-39; R3-UI-63 tower info (volume **change** stays Connect Tower + Devices Control menu) |
 
 **Explicitly not Control (other tracks):**
@@ -262,7 +262,7 @@ Open a PR titled "feat(bloodtower): board menu reconnect tower (control step 6)"
 Branch: feat/control-07-debug-overlay
 Depends on: step 2 merged.
 
-Read playthrough-ui-notes (R3-UI-40), shell-prompts.md step 7 debug note, StoryBoard.tsx StatusStrip / VolumeLogged. Code: LiveBoard.tsx, StoryBoard.tsx, BoardMenu.tsx, board.css.
+Read playthrough-ui-notes (R3-UI-40), archive/shell-prompts.md step 7 debug note, StoryBoard.tsx StatusStrip / VolumeLogged. Code: LiveBoard.tsx, StoryBoard.tsx, BoardMenu.tsx, board.css.
 
 Goal: Statistics/Debug menu item toggles the R3-UI-40 overlay on the board without requiring ?debug=1.
 

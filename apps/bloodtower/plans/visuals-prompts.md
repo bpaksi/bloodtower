@@ -48,7 +48,7 @@ Bob should run **play TV track first** (no Illusionist frame/mask). **Startup / 
 - **Wave S2 (after window mask):** 2 alone (`.bt-board-backdrop` mask only).
 - **Wave S3 (after dialog frame, with or after 3):** 1 (`SoundDialog` wrapped in `DialogFrame`; can run with 3 if files conflict—prefer after 3 merges).
 
-When shell steps 5–7 from `shell-prompts.md` land (`setup` flow screens, Claim Hunters rename, running-summary data), step 5 should gain follow-up rows in a small patch PR or a step-5b prompt—do not block the visuals track on shell, but leave summary hooks ready (see step 5).
+When shell steps 5–7 from `archive/shell-prompts.md` land (`setup` flow screens, Claim Hunters rename, running-summary data), step 5 should gain follow-up rows in a small patch PR or a step-5b prompt—do not block the visuals track on shell, but leave summary hooks ready (see step 5).
 
 ## Open questions (Bob)
 
@@ -167,7 +167,7 @@ Open a PR titled "feat(bloodtower): Pick Game carousel visuals (visuals step 4)"
 Branch: feat/visuals-05-startup-summary
 Depends on: step 3. Can run with step 6 only after 3 merges (rebases StoryBoard.tsx). Does not use dialog frame — summary is `.bt-panel` / ink panel per game-look.md §3.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-25), shell-prompts.md step 5 (future setup steps). Code: StoryBoard.tsx (new SummaryPanel or aside), board.css, src/web/lib/screens.ts helpers.
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-25), archive/shell-prompts.md step 5 (future setup steps). Code: StoryBoard.tsx (new SummaryPanel or aside), board.css, src/web/lib/screens.ts helpers.
 
 Goal: during startup, a summary panel echoes choices: game (cover + title), settings, tower state, hunters with holder, setup steps done. Empty items read "not chosen yet". Back clearing is engine behaviour—only display what state already holds.
 

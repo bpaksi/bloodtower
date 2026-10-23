@@ -4,7 +4,7 @@ Paste everything below the line into Claude Code on Bob's Mac, started at the ro
 
 ---
 
-You are building batch **B4** of `apps/bloodtower/plans/R1-step1-foundation.md` in the repo `bpaksi/bloodtower`. B1, B2 and B3 are merged (B3 = PR #28, commit `8e2a58d`). B4 is **step 10 only**: acceptance e2e and timing reconstruction. Step G-R1 (Bob on hardware) comes after B4 and is not yours.
+You are building batch **B4** of `apps/bloodtower/plans/archive/R1-step1-foundation.md` in the repo `bpaksi/bloodtower`. B1, B2 and B3 are merged (B3 = PR #28, commit `8e2a58d`). B4 is **step 10 only**: acceptance e2e and timing reconstruction. Step G-R1 (Bob on hardware) comes after B4 and is not yours.
 
 ## Rules
 
@@ -15,7 +15,7 @@ You are building batch **B4** of `apps/bloodtower/plans/R1-step1-foundation.md` 
 
 ## Read first
 
-- `apps/bloodtower/plans/R1-step1-foundation.md`: Step 10, Batches (B4 row), Acceptance criteria AC-1..AC-9, Out of scope, Deviations B1..B3 (especially D16, D17 and the B3 notes on `/ws`, the join URL, the mock tower and `TOWER_URL`).
+- `apps/bloodtower/plans/archive/R1-step1-foundation.md`: Step 10, Batches (B4 row), Acceptance criteria AC-1..AC-9, Out of scope, Deviations B1..B3 (especially D16, D17 and the B3 notes on `/ws`, the join URL, the mock tower and `TOWER_URL`).
 - `apps/bloodtower/spec.md`: §3 protocols contract (frozen), §5 timing rows (PRD-41, must match the funeral POC exactly), §6 tower safety, §7 traceability (the `AC-1..AC-9 | 10` row), §8 out of scope, §9 test pack.
 - `docs/sdlc.md`: §4 merging and the Local mode section.
 - Existing code: `apps/bloodtower/src/e2e/{playwright.config.ts,tests/smoke.spec.ts}`, `src/server/hub/**`, `src/server/timing/**`, `src/server/db/**`, `src/server/scripts/packLint.ts` (pattern for a script), `packs/test/`.

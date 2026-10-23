@@ -67,7 +67,7 @@ Optional pan-and-zoom sidecars for story-board stills ([talking-avatar camera-tr
 # Test pack (`packs/test/`) content spec
 
 Status: design draft for Bob, 2026-10-15. The YAML in this folder is still the proving ground above. This spec is not what the loader reads.
-Sources: `research/game-design/story-pack-format.md` (sections 0-15, V-1..V-21, rulings 1-10), `story-engine.md`, `tower-effects-library.md`, `tower-sound-inventory.md`, `apps/bloodtower/plans/R1-step1-foundation.md`, `apps/bloodtower/spec.md` (D3, D4), `src/protocols/pack.ts`, `src/server/config.ts`.
+Sources: `research/game-design/story-pack-format.md` (sections 0-15, V-1..V-21, rulings 1-10), `story-engine.md`, `tower-effects-library.md`, `tower-sound-inventory.md`, `apps/bloodtower/plans/archive/R1-step1-foundation.md`, `apps/bloodtower/spec.md` (D3, D4), `src/protocols/pack.ts`, `src/server/config.ts`.
 ## Purpose
 - Long-lived proving ground for new engine ideas. Ideas are proven here first; the Dracula pack holds only proven work.
 - Story-neutral: no Dracula names, places, items or art. Theme: "The Grey Stair", a nameless tower lit by lamps.

@@ -228,7 +228,7 @@ Illusionist dialog-frame and window-mask assets are already on `main` (a5bacf5).
 Branch: feat/visuals-05-startup-summary
 Depends on: step 3. Does not use `DialogFrame` — summary is `.bt-panel` / ink panel.
 
-Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-25), shell-prompts.md step 5. Shell step 5 (#87) is already on `main`: `SummaryPanel` (in StoryBoard.tsx), `data-summary` / `data-summary-item`, `SummaryItemId` (includes "setup", in screens.ts) and `storyboardState.summary` (in messages.ts) all exist. Code: StoryBoard.tsx (SummaryPanel), board.css, src/web/lib/screens.ts.
+Read research/game-design/playthrough-ui-notes-2026-10-17.md (R3-UI-25), archive/shell-prompts.md step 5. Shell step 5 (#87) is already on `main`: `SummaryPanel` (in StoryBoard.tsx), `data-summary` / `data-summary-item`, `SummaryItemId` (includes "setup", in screens.ts) and `storyboardState.summary` (in messages.ts) all exist. Code: StoryBoard.tsx (SummaryPanel), board.css, src/web/lib/screens.ts.
 
 Goal: restyle and relocate the existing `SummaryPanel` (game, settings, tower, hunters, setup steps done; empty -> "not chosen yet"). Do not rebuild it.
 
