@@ -11,7 +11,7 @@ import { dirname, join, resolve } from "node:path";
 import { stdin, stdout } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
-import { instrumentAdapter } from "../adapters/instrumented.ts";
+import { type AdapterEvent, instrumentAdapter } from "@dark-tower/tower/runtime";
 import { type Answer, runSpike, type SpikeIo, type SpikeTower } from "./spikeSteps.ts";
 
 const HELD_ROTATION_SEQUENCES = [
@@ -70,7 +70,7 @@ const main = async () => {
 
   const adapter = instrumentAdapter(
     BluetoothAdapterFactory.create(BluetoothPlatform.NODE),
-    (event) => log({ type: "adapter", ...event }),
+    (event: AdapterEvent) => log({ type: "adapter", ...event }),
   );
   const tower = new UltimateDarkTower({ adapter, diagnostics: { enabled: true } });
   // The library's console logger prints the serial number and writes over the prompts.

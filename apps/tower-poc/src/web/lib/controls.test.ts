@@ -8,7 +8,7 @@ import {
   type LifecycleStage,
   toInventoryEntry,
   validateCommand,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import {
   applyChoices,

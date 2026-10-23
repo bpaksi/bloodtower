@@ -5,7 +5,7 @@ import {
   SOUND_FEEL_FIELDS,
   SOUND_LENGTH_MAX_MS,
   type SoundFeelRow,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 /**
  * One play being timed. `pressedAt` is Bob's Play press; `answeredAt` is when this page received

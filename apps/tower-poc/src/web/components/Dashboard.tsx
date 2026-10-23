@@ -1,7 +1,7 @@
 "use client";
 
+import type { Device } from "@dark-tower/tower";
 import { useState } from "react";
-import type { Device } from "tower-poc-protocols";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { PageHeader } from "@/components/PageHeader";
 import { RestorePrompt } from "@/components/RestorePrompt";

@@ -1,14 +1,12 @@
-import { LIBRARY_BASELINE } from "tower-poc-protocols";
+import { LIBRARY_BASELINE } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
-import packageJson from "./package.json" with { type: "json" };
 import { installedVersion } from "./versions.ts";
 
 describe("installedVersion", () => {
   it("reads the installed library and data versions from their manifests", () => {
     expect(installedVersion("ultimatedarktower")).toBe(LIBRARY_BASELINE.version);
-    expect(installedVersion("ultimatedarktowerdata")).toBe(
-      packageJson.dependencies.ultimatedarktowerdata,
-    );
+    // Resolved via `@dark-tower/tower`, which pins ultimatedarktowerdata.
+    expect(installedVersion("ultimatedarktowerdata")).toBe("3.0.0");
   });
 
   it("throws for a package that is not installed", () => {

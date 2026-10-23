@@ -1,4 +1,4 @@
-import { lightsParamsSchema, validateCommand } from "tower-poc-protocols";
+import { lightsParamsSchema, validateCommand } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import { buildLightsParams, describeLights, LIGHT_EFFECTS, LIGHT_SLOTS } from "./lightsForm.ts";
 

@@ -3,8 +3,8 @@
 // step 11) until the diagnostics bus exists (M4 step 4.1); `DIAG_LOG=<path>` turns it on.
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import type { CommandLifecyclePayload, ConnectionPayload } from "tower-poc-protocols";
 import type { AdapterEvent, AdapterEventList } from "./adapters/instrumented.ts";
+import type { CommandLifecyclePayload, ConnectionPayload } from "./protocols/index.ts";
 
 export type DiagRecord =
   | { source: "transport"; event: AdapterEvent }

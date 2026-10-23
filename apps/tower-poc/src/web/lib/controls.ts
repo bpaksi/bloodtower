@@ -6,7 +6,7 @@ import type {
   ConnectionPayload,
   InventoryEntry,
   ParamField,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 import { STAGE_LABELS } from "./labels.ts";
 
 export interface ControlContext {

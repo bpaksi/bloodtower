@@ -1,10 +1,11 @@
 // Keeps Verify mode's results in the database (spec D14). Rows are only added, never changed.
-import { asc } from "drizzle-orm";
+
 import {
   type VerificationRecord,
   verificationEnvironmentSchema,
   verificationRecordSchema,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
+import { asc } from "drizzle-orm";
 import type { VerificationStorage } from "../verifications.ts";
 import type { Db } from "./client.ts";
 import { verifications } from "./schema.ts";

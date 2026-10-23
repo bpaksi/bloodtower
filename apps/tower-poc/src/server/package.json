@@ -13,10 +13,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@stoprocent/noble": "2.8.0",
+    "@dark-tower/tower": "workspace:*",
     "better-sqlite3": "13.0.3",
     "drizzle-orm": "0.45.3",
-    "tower-poc-protocols": "workspace:*",
     "tsx": "4.23.15",
     "ultimatedarktower": "7.1.2",
     "ultimatedarktowerdata": "3.0.0",

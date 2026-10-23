@@ -1,8 +1,8 @@
 "use client";
+import { ALL_SEALS, towerLevelSchema, towerSideSchema } from "@dark-tower/tower";
 // The values on the Tower State page (M3 step 3.5), each with its origin, freshness and time.
 // Nothing here sends anything: the controls beside them are capability controls.
 import { useId } from "react";
-import { ALL_SEALS, towerLevelSchema, towerSideSchema } from "tower-poc-protocols";
 import { BatteryChart } from "@/components/state/BatteryChart";
 import { ValueMeta } from "@/components/state/ValueMeta";
 import { timeLabel } from "@/lib/labels";

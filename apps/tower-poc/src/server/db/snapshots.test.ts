@@ -1,10 +1,10 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { PendingRestore } from "@dark-tower/tower";
+import { createStateStore } from "@dark-tower/tower/runtime";
 import Database from "better-sqlite3";
-import type { PendingRestore } from "tower-poc-protocols";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createStateStore } from "../stateStore.ts";
 import { openDatabase } from "./client.ts";
 import { MIGRATIONS } from "./migrations.ts";
 import { stateSnapshots } from "./schema.ts";

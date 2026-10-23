@@ -3,7 +3,7 @@ import {
   toInventoryEntry,
   type VerificationOverlay,
   type VerificationRecord,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import { capabilitySummary, verifyChunks, verifyStatusLabel } from "./verify.ts";
 

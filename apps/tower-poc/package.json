@@ -10,7 +10,7 @@
     "build": "pnpm -F tower-poc-web build",
     "start": "pnpm -F tower-poc-server start",
     "e2e": "pnpm -F tower-poc-e2e e2e",
-    "inventory:doc": "pnpm -F tower-poc-protocols inventory:doc"
+    "inventory:doc": "pnpm -F @dark-tower/tower inventory:doc"
   },
   "devDependencies": {
     "concurrently": "10.0.6"

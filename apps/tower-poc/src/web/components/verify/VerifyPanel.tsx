@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
 import {
   type InventoryEntry,
   type UiLocation,
@@ -8,7 +7,8 @@ import {
   type VerificationRecord,
   type VerificationResult,
   type WelcomePayload,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { timeLabel } from "@/lib/labels";
 import { sendToService, useService } from "@/lib/store";

@@ -1,4 +1,4 @@
-import type { CommandLifecyclePayload, SoundFeelRow } from "tower-poc-protocols";
+import type { CommandLifecyclePayload, SoundFeelRow } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import {
   feelByIndex,

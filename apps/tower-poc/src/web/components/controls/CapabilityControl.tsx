@@ -1,6 +1,5 @@
 "use client";
 
-import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import {
   buildParams,
   type CommandableId,
@@ -9,7 +8,8 @@ import {
   findCapability,
   type ParamValues,
   validateCommand,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { CommandStatus } from "@/components/controls/CommandStatus";
 import { Button } from "@/components/ui/button";
 import {

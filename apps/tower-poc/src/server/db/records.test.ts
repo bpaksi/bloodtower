@@ -1,9 +1,8 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createStateStore, createTowerRecords } from "@dark-tower/tower/runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createStateStore } from "../stateStore.ts";
-import { createTowerRecords } from "../towerRecords.ts";
 import { openDatabase } from "./client.ts";
 import { createRecordStorage } from "./records.ts";
 import { appRecords } from "./schema.ts";

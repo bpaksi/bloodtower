@@ -1,6 +1,7 @@
 // Keeps the sound feel record in the database (spec D25): one row per sound, replaced on each save.
+
+import { type SoundFeelRow, soundFeelRowSchema } from "@dark-tower/tower";
 import { asc } from "drizzle-orm";
-import { type SoundFeelRow, soundFeelRowSchema } from "tower-poc-protocols";
 import type { SoundFeelStorage } from "../soundFeel.ts";
 import type { Db } from "./client.ts";
 import { soundFeel } from "./schema.ts";

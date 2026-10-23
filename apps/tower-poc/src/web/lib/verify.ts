@@ -12,7 +12,7 @@ import {
   type VerificationOverlay,
   type VerificationRecord,
   type VerificationResult,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
 
 export const RESULT_LABELS: Record<VerificationResult, string> = {
   pass: "Pass",

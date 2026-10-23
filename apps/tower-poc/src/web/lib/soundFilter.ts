@@ -1,5 +1,5 @@
 // Filtering the Sounds page's catalog (M3 step 3.3). Pure, so it is tested without React.
-import type { Sound } from "tower-poc-protocols";
+import type { Sound } from "@dark-tower/tower";
 
 const fold = (text: string) => text.toLowerCase().replace(/\s+/g, " ").trim();
 

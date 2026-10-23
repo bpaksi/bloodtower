@@ -1,7 +1,7 @@
 "use client";
 
+import { type CommandIssue, validateCommand } from "@dark-tower/tower";
 import { useId, useState } from "react";
-import { type CommandIssue, validateCommand } from "tower-poc-protocols";
 import { CommandStatus } from "@/components/controls/CommandStatus";
 import { Button } from "@/components/ui/button";
 import {

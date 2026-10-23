@@ -1,4 +1,4 @@
-import type { ConnectionPayload } from "tower-poc-protocols";
+import type { ConnectionPayload } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import { towerActions } from "./towerActions.ts";
 

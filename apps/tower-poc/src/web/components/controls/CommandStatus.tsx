@@ -1,4 +1,4 @@
-import type { CommandLifecyclePayload } from "tower-poc-protocols";
+import type { CommandLifecyclePayload } from "@dark-tower/tower";
 import { outcomeOf, stageName } from "@/lib/controls";
 import { cn } from "@/lib/utils";
 

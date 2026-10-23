@@ -1,4 +1,4 @@
-import { PROTOCOL_VERSION, type ServerMessage } from "tower-poc-protocols";
+import { PROTOCOL_VERSION, type ServerMessage } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import {
   applyServerMessage,

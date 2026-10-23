@@ -12,7 +12,7 @@ import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { stdin, stdout } from "node:process";
 import { createInterface } from "node:readline/promises";
-import { PROTOCOL_VERSION, SILENT_LIGHT_SEQUENCES } from "tower-poc-protocols";
+import { PROTOCOL_VERSION, SILENT_LIGHT_SEQUENCES } from "@dark-tower/tower";
 import WebSocket from "ws";
 
 const URL = process.env.SERVICE_URL || "ws://localhost:4747/ws";

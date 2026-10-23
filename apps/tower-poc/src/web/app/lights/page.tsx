@@ -1,5 +1,5 @@
+import { HELD_LIGHT_SEQUENCES } from "@dark-tower/tower";
 import type { Metadata } from "next";
-import { HELD_LIGHT_SEQUENCES } from "tower-poc-protocols";
 import { CapabilityControl } from "@/components/controls/CapabilityControl";
 import { LightsControl } from "@/components/controls/LightsControl";
 import { PageHeader } from "@/components/PageHeader";

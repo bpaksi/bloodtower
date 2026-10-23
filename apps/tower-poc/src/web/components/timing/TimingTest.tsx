@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import {
   type CommandTimes,
   commandTimes,
@@ -13,7 +12,8 @@ import {
   type PlannedOverlap,
   type SequenceObservation,
   timingResultSchema,
-} from "tower-poc-protocols";
+} from "@dark-tower/tower";
+import { useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { CALIBRATION_LABELS, CONNECTION_LABELS } from "@/lib/labels";

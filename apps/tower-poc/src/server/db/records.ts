@@ -1,7 +1,8 @@
 // Keeps the service's own record in the database (spec D24): the broken seals and the skull count.
 // Unlike the snapshot, it is loaded when the service starts, with no prompt.
+
+import type { RecordStorage } from "@dark-tower/tower/runtime";
 import { eq } from "drizzle-orm";
-import type { RecordStorage } from "../stateStore.ts";
 import type { Db } from "./client.ts";
 import { appRecords } from "./schema.ts";
 

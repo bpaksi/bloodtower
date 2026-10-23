@@ -1,7 +1,7 @@
 // The service's own record of seals and skulls (spec D24), kept in the state store. The library's
 // record is not read and not seeded: each connection gets a new library object, whose record
 // starts empty, so the service's is the only one that lasts.
-import { sealOrder, type TowerValue } from "tower-poc-protocols";
+import { sealOrder, type TowerValue } from "./protocols/index.ts";
 import type { SkullCounter, StateStore } from "./stateStore.ts";
 
 export type Seal = TowerValue<"seals.broken">[number];

@@ -1,7 +1,7 @@
 // Every browser connected over /ws, under the id the service gave it, and the one place that sends
 // to all of them (D7: every client sees every change, whoever caused it).
 import { randomUUID } from "node:crypto";
-import type { ServerMessage } from "tower-poc-protocols";
+import type { ServerMessage } from "@dark-tower/tower";
 import type { WebSocket } from "ws";
 
 export interface HubClient {

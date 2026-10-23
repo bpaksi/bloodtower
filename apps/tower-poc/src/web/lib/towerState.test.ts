@@ -1,4 +1,4 @@
-import type { StateSnapshot } from "tower-poc-protocols";
+import type { StateSnapshot } from "@dark-tower/tower";
 import { describe, expect, it } from "vitest";
 import {
   batteryPoints,

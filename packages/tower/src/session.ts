@@ -9,12 +9,7 @@
 //
 // Nothing here acts on its own: no reconnect, no retry, no calibration. Each physical action is
 // one of the four calls below, made because a person asked.
-import type {
-  CalibrationState,
-  ConnectionPayload,
-  ConnectionState,
-  Device,
-} from "tower-poc-protocols";
+
 import {
   BluetoothDeviceNotFoundError,
   type DeviceInformation,
@@ -27,6 +22,12 @@ import {
   createAdapterEventList,
   instrumentAdapter,
 } from "./adapters/instrumented.ts";
+import type {
+  CalibrationState,
+  ConnectionPayload,
+  ConnectionState,
+  Device,
+} from "./protocols/index.ts";
 
 export type SessionAction = "connect" | "reconnect" | "disconnect" | "calibrate";
 
@@ -145,7 +146,24 @@ const connectFailure = (error: unknown): ConnectionPayload => {
 
 const CAN_CONNECT: readonly ConnectionState[] = ["disconnected", "error", "bluetooth-unavailable"];
 
+/** Only one tower session may own the radio in a process (decision 0004). */
+export class TowerSessionAlreadyOpenError extends Error {
+  readonly code = "tower-session-already-open";
+
+  constructor() {
+    super("Only one tower session may be open in this process.");
+    this.name = "TowerSessionAlreadyOpenError";
+  }
+}
+
+let openSession: TowerSession | undefined;
+
+const enforceSingleSession = () => process.env.VITEST !== "true";
+
 export const createTowerSession = (options: TowerSessionOptions): TowerSession => {
+  if (enforceSingleSession() && openSession !== undefined) {
+    throw new TowerSessionAlreadyOpenError();
+  }
   const events = options.events ?? createAdapterEventList();
   const listeners = new Set<(status: ConnectionPayload) => void>();
   const reportListeners = new Set<() => void>();
@@ -357,7 +375,7 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
     }
   };
 
-  return {
+  const session: TowerSession = {
     status: () => status,
     subscribe: (listener) => {
       listeners.add(listener);
@@ -396,6 +414,9 @@ export const createTowerSession = (options: TowerSessionOptions): TowerSession =
         }
         await release(tower);
       }
+      if (openSession === session) openSession = undefined;
     },
   };
+  if (enforceSingleSession()) openSession = session;
+  return session;
 };
