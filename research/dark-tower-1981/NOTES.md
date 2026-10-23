@@ -30,3 +30,6 @@ I measured wos_battle.wav (22.05 kHz, 8-bit, 1.05 s) with autocorrelation:
 - ~0.05 s of silence, then the pair repeats once (C–G… C–G)
 
 The recipe: two-tone rising-fifth bugle call, 50% duty square wave, played twice. `sounds/synth/brigands_horn_synth.wav` is a generated example (44.1 kHz, ~1.1 s). For the app, synthesize it live (WebAudio `OscillatorNode` with type "square", or a JS/Swift sample generator). Then you can make an original variation: change the timbre, add an envelope, or transpose. That keeps the feel without copying the recording. The same autocorrelation pitch analysis (50 ms windows) works on the other WAVs to transcribe them.
+
+## The four kingdoms
+The board has four kingdom quadrants: **Arisilon, Brynthia, Durnin and Zenon**. The tower's flags carry those four plus the Dark Tower. Each kingdom has the same spaces, with the buildings in the same places, and a hero needs a kingdom's key to cross its frontier. DT81 gives the kingdoms no compass directions, so which one is RtDT's North, South, East or West is a Bloodtower ruling, not a fact from the game. Sources: Wikipedia, boardgame.de review (2026-10-23 web check). Kingdom colours were not found.
