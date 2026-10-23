@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Each engine loop paints its own Story board content: an outer loop gives a border, the innermost fills the middle"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-23"
 links:
