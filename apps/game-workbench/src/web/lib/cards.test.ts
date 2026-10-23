@@ -48,7 +48,8 @@ describe("card files", () => {
 
   // The lint: every card in research/game-design/cards parses, and every link resolves to a card,
   // a document ID, or carries a note saying what it is.
-  it("has no broken cards or dangling links in the real folder", () => {
+  // Loads the full cards folder; CI can exceed vitest's 5s default under load (see find.test.ts).
+  it("has no broken cards or dangling links in the real folder", { timeout: 30_000 }, () => {
     expect(loadCards().cards.length).toBeGreaterThan(0);
     expect(loadCards().errors).toEqual([]);
     expect(buildGraph().problems).toEqual([]);
