@@ -49,7 +49,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 
 ### Step 1: `packages/rng` (decision 0005)
 - Depends on: G0
-- Touches: `packages/rng/**`, `packages/README.md`, `apps/prototypes/src/web/lib/{rng.ts,rng.test.ts}`, `apps/prototypes/src/web/package.json`, the prototype pages' imports of `lib/rng.ts`, `pnpm-lock.yaml`
+- Touches: `packages/rng/**`, `packages/README.md`, `apps/prototypes/src/web/lib/{rng.ts,rng.test.ts,batch.ts,batch.test.ts,README.md}`, `apps/prototypes/src/web/{package.json,next.config.ts}`, every prototypes import of `lib/rng.ts` (pages and the game, logic and data modules, with their tests), `pnpm-lock.yaml`, this file (Results). `batch.ts` and `batch.test.ts` change only the import of the moved generator. `next.config.ts` sets `transpilePackages` so Next can compile the TypeScript package.
 - Deps change: yes
 - Runs: cloud
 - Model: sonnet
@@ -191,3 +191,4 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ## Results
 
 - G0 (2026-10-23 ET): Approved by Wright under Bob's process handoff (Wright+Warden own day-to-day gates). Plan + architecture review stand in for intent. Weekend slice = AREA-077 move+Enter/Leave+exit only; no Tower play / Keeper / combat. B1 may start (Step 1, then Step 4).
+- Step 1 (2026-10-23): `@dark-tower/rng` holds the generator and dice notation, moved with `git mv`, plus `eventRng(seed, seq)`. Prototypes import the package and `lib/rng.ts` is gone. Seed `bloodtower` stays pinned to its first ten `1d6` totals from main: 3, 3, 5, 2, 5, 4, 2, 1, 1, 5. `pnpm check` exit 0 (Biome 636 files, repo tests 270, `@dark-tower/rng` 13, prototypes-web 118). Deviation: the deletion also rewrites imports in the game, logic and data modules and in `batch.ts` / `batch.test.ts`, updates `lib/README.md`, and sets `transpilePackages` in `next.config.ts` so Next can compile the TypeScript package. The batch runner stays in prototypes.

@@ -1,3 +1,4 @@
+import type { Rng } from "@dark-tower/rng";
 import { describe, expect, it } from "vitest";
 import { mean, runBatch, runSeed, share, tally } from "./batch.ts";
 
@@ -9,7 +10,7 @@ describe("batch runner", () => {
   });
 
   it("replays the batch from the same seed, and a single run alone", () => {
-    const play = (rng: ReturnType<typeof import("./rng.ts").createRng>) => rng.roll("2d6").total;
+    const play = (rng: Rng) => rng.roll("2d6").total;
     const a = runBatch(30, "x", play).map((r) => r.result);
     expect(runBatch(30, "x", play).map((r) => r.result)).toEqual(a);
     expect(runSeed("x", 7)).toBe("x:7");

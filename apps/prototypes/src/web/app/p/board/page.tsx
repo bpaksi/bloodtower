@@ -1,8 +1,8 @@
 "use client";
+import { createRng } from "@dark-tower/rng";
 import { useEffect, useMemo, useState } from "react";
 import { TuningPanel } from "../../../components/TuningPanel.tsx";
 import { TvFrame } from "../../../components/TvFrame.tsx";
-import { createRng } from "../../../lib/rng.ts";
 import { defaultValues } from "../../../lib/tuning.ts";
 import { tvPx } from "../../../lib/tv.ts";
 import { assignHolders, LAYOUTS, type LayoutId } from "./data.ts";

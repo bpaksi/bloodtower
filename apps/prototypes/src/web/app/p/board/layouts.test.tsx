@@ -1,7 +1,7 @@
+import { createRng } from "@dark-tower/rng";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TvFrame } from "../../../components/TvFrame.tsx";
-import { createRng } from "../../../lib/rng.ts";
 import { defaultValues } from "../../../lib/tuning.ts";
 import { scaledPx, tvPx } from "../../../lib/tv.ts";
 import { assignHolders, LAYOUTS, POOL_HEROES } from "./data.ts";

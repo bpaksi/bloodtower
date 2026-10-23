@@ -1,6 +1,6 @@
 // Cave: the hunt (MEC-027, DEC-084). Pure game logic: the page and the simulation share it.
+import type { Rng } from "@dark-tower/rng";
 import { type BatchRun, mean, runBatch, share, tally } from "../../../lib/batch.ts";
-import type { Rng } from "../../../lib/rng.ts";
 import { defaultValues, type TuningField, type TuningValues } from "../../../lib/tuning.ts";
 
 export const FIELDS: TuningField[] = [

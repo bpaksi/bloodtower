@@ -1,5 +1,9 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { createRng, parseDice } from "./rng.ts";
+import { createRng, eventRng, parseDice } from "./rng.ts";
+
+/** First ten `roll("1d6")` totals from `createRng("bloodtower")` on main, captured before the move. */
+const BLOODTOWER_D6 = [3, 3, 5, 2, 5, 4, 2, 1, 1, 5];
 
 describe("rng", () => {
   it("replays exactly from the same seed", () => {
@@ -67,5 +71,58 @@ describe("rng", () => {
     expect(() => rng.chance(1.5)).toThrow(/rng\.chance/);
     expect(rng.chance(0)).toBe(false);
     expect(rng.chance(1)).toBe(true);
+  });
+
+  it("pins seed bloodtower to the first ten 1d6 rolls from main", () => {
+    const rng = createRng("bloodtower");
+    expect(Array.from({ length: 10 }, () => rng.roll("1d6").total)).toEqual(BLOODTOWER_D6);
+  });
+});
+
+describe("eventRng", () => {
+  const take = (seed: string, seq: number): number[] => {
+    const rng = eventRng(seed, seq);
+    return Array.from({ length: 8 }, () => rng.roll("1d6").total);
+  };
+
+  it("returns the same draws for the same seed and seq after other draws", () => {
+    const expected = take("bloodtower", 4);
+    const moved = eventRng("bloodtower", 4);
+    moved.roll("2d6+1");
+    moved.next();
+    moved.shuffle([1, 2, 3, 4]);
+    createRng("bloodtower").roll("1d6");
+    take("bloodtower", 3);
+    take("other", 4);
+    expect(take("bloodtower", 4)).toEqual(expected);
+    expect(take("bloodtower", 5)).not.toEqual(expected);
+    expect(take("other-seed", 4)).not.toEqual(expected);
+  });
+
+  it("rejects a sequence or seed it cannot use", () => {
+    expect(() => eventRng("bloodtower", -1)).toThrow(/sequence/);
+    expect(() => eventRng("bloodtower", 1.5)).toThrow(/sequence/);
+    expect(() => eventRng("bloodtower", Number.NaN)).toThrow(/sequence/);
+    expect(() => eventRng("bloodtower", Number.POSITIVE_INFINITY)).toThrow(/sequence/);
+    expect(() => eventRng(42 as unknown as string, 0)).toThrow(/string seed/);
+  });
+});
+
+describe("rng source", () => {
+  it("does no I/O, reads no clock and has no unseeded fallback", () => {
+    const raw = readFileSync(new URL("./rng.ts", import.meta.url), "utf8");
+    const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    for (const forbidden of [
+      "Math.random",
+      "Date.now",
+      "new Date",
+      "performance.now",
+      "setTimeout",
+      "node:",
+      "crypto",
+      "process",
+    ]) {
+      expect(src.includes(forbidden), forbidden).toBe(false);
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { createRng, type Rng } from "./rng.ts";
+import { createRng, type Rng } from "@dark-tower/rng";
 
 export type BatchRun<T> = { index: number; seed: string; result: T };
 

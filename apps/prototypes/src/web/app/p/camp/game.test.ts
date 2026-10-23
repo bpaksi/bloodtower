@@ -1,5 +1,5 @@
+import { createRng } from "@dark-tower/rng";
 import { describe, expect, it } from "vitest";
-import { createRng } from "../../../lib/rng.ts";
 import { configFrom, isOver, playVisit, simulate, startVisit, step } from "./game.ts";
 
 const cfg = configFrom();

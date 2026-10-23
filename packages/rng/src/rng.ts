@@ -1,4 +1,5 @@
 // Seeded random numbers. The same seed always gives the same draws, so a run can be replayed.
+// This module does no I/O and reads no clock. Every draw comes from the seed it was given.
 
 export type RollResult = {
   notation: string;
@@ -100,4 +101,23 @@ export function createRng(seed: string | number): Rng {
       return { notation, dice, modifier, total: dice.reduce((s, d) => s + d, 0) + modifier };
     },
   };
+}
+
+/**
+ * One event's generator (decision 0005). Draws depend only on `seed` and `seq`:
+ * a fresh generator is built from those two values, so earlier draws cannot change it.
+ * `seq` is the event's sequence number, a whole number from 0 to `Number.MAX_SAFE_INTEGER`.
+ */
+export function eventRng(seed: string, seq: number): Rng {
+  if (typeof seed !== "string") {
+    throw new Error(`eventRng needs a string seed, got ${typeof seed}.`);
+  }
+  if (!Number.isInteger(seq) || seq < 0 || seq > Number.MAX_SAFE_INTEGER) {
+    throw new Error(
+      `eventRng needs a whole sequence number from 0 to ${Number.MAX_SAFE_INTEGER}, got ${String(seq)}.`,
+    );
+  }
+  // The sequence is always a decimal, so the split on the separator is unique even if
+  // the seed text itself contains that separator.
+  return createRng(`${seed}\u001f${seq}`);
 }

@@ -1,6 +1,6 @@
 // Pure rules of the fortress duel ladder (MEC-029, DEC-084, DEC-101). Shared by the page and the simulation.
+import type { Rng } from "@dark-tower/rng";
 import { mean, runBatch, share, tally } from "../../../lib/batch.ts";
-import type { Rng } from "../../../lib/rng.ts";
 import { defaultValues, type TuningField, type TuningValues } from "../../../lib/tuning.ts";
 
 export const FIELDS: TuningField[] = [
