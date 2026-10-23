@@ -8,8 +8,8 @@ import { join } from "node:path";
  * Files older than 30 days are deleted when the logger is created, which the host does
  * on start.
  *
- * Pages will POST `/log` when their socket is down. That stub is here. The socket `log`
- * message, the mist card, Story-board toasts and a log viewer are not. This module stays
+ * Pages POST `/log` when their socket is down. The socket `log` message is accepted by the
+ * session host, which writes through this logger. A log viewer is not here. This module stays
  * in Bloodtower until a second app needs it.
  *
  * DIAG_LOG is a different file. Nothing in here copies sidecar traffic into this log.
@@ -70,6 +70,12 @@ export interface HostLogger {
   setSession(session: string | null): void;
   /** Writes one line. A debug line is dropped when debug is off. */
   append(entry: Omit<LogEntry, "time">): void;
+  /**
+   * Called after a line is stored. A debug line that was dropped does not call it.
+   * The listener sees the stored entry. A throw in a listener is reported and does not
+   * stop the others.
+   */
+  subscribe(listener: (entry: LogEntry) => void): () => void;
   error(code: string, message: string, fields?: LogFields): void;
   warn(code: string, message: string, fields?: LogFields): void;
   info(code: string, message: string, fields?: LogFields): void;
@@ -190,6 +196,17 @@ export const createHostLogger = (options: HostLoggerOptions): HostLogger => {
   const mirror = options.mirror !== false;
   const pruned = pruneErrorLogs(dir, now(), options.retentionDays ?? LOG_RETENTION_DAYS);
   let currentSession: string | null = null;
+  const listeners = new Set<(entry: LogEntry) => void>();
+
+  const notify = (entry: LogEntry): void => {
+    for (const listener of listeners) {
+      try {
+        listener(entry);
+      } catch (error) {
+        console.error(`log-listen: ${errorText(error)}`);
+      }
+    }
+  };
 
   const writeLine = (entry: LogEntry): void => {
     try {
@@ -231,6 +248,7 @@ export const createHostLogger = (options: HostLoggerOptions): HostLogger => {
     };
     writeLine(stored);
     mirrorLine(stored);
+    notify(stored);
   };
 
   const emit = (level: LogLevel, code: string, message: string, fields?: LogFields): void => {
@@ -252,6 +270,12 @@ export const createHostLogger = (options: HostLoggerOptions): HostLogger => {
       currentSession = session;
     },
     append,
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
     error: (code, message, fields) => emit("error", code, message, fields),
     warn: (code, message, fields) => emit("warn", code, message, fields),
     info: (code, message, fields) => emit("info", code, message, fields),

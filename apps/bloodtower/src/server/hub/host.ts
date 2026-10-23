@@ -5,10 +5,13 @@ import {
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
   clientMessageSchema,
+  containsPrivateChannel,
   deviceStatePayloadSchema,
   type ErrorCode,
   envelopeSchema,
   errorPayloadSchema,
+  loggedMessageSchema,
+  PAGE_LOG_MESSAGE_MAX,
   PROTOCOL_VERSION,
   type ServerMessage,
   storyboardStatePayloadSchema,
@@ -24,6 +27,7 @@ import {
   type HostLogger,
   handleLogIngest,
   isLogIngestPath,
+  type LogEntry,
 } from "../log/hostLog.ts";
 import type { PackAssetIndex } from "../pack/assets.ts";
 import { devAudioAllowOrigin } from "../pack/audio.ts";
@@ -194,6 +198,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     correlationId?: string,
   ) => {
     const payload = errorPayloadSchema.parse({ code, message });
+    const client = clients.get(socket);
+    log.error(code, message, { device: client?.deviceId ?? null });
     send(socket, {
       v: PROTOCOL_VERSION,
       type: "error",
@@ -202,14 +208,53 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     });
   };
 
+  const toastMessage = (text: string): string => {
+    const clipped =
+      text.length > PAGE_LOG_MESSAGE_MAX ? `${text.slice(0, PAGE_LOG_MESSAGE_MAX - 3)}...` : text;
+    if (clipped.trim() === "" || containsPrivateChannel(clipped)) return "An error was logged.";
+    return clipped;
+  };
+
+  let inToast = false;
+  const notifyBoards = (entry: LogEntry) => {
+    if (inToast || entry.level !== "error" || closing) return;
+    inToast = true;
+    try {
+      const parsed = loggedMessageSchema.safeParse({
+        v: PROTOCOL_VERSION,
+        type: "logged",
+        payload: {
+          code: entry.code,
+          source: entry.source,
+          message: toastMessage(entry.message),
+        },
+      });
+      if (!parsed.success) {
+        log.error("log-toast", "The story board toast was refused.");
+        return;
+      }
+      for (const [board, client] of clients) {
+        if (client.role === "storyboard") send(board, parsed.data);
+      }
+    } finally {
+      inToast = false;
+    }
+  };
+
+  const stopLog = log.subscribe(notifyBoards);
+
   const storyboardMessage = (): ServerMessage | undefined => {
     try {
       const payload = storyboardStatePayloadSchema.parse(
         engine.projectStoryboard(tower.snapshot(), joinAt()),
       );
       return { v: PROTOCOL_VERSION, type: "storyboardState", payload };
-    } catch {
-      console.error("Story board state was refused.");
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
+      log.error(
+        "storyboard-state",
+        detail.trim() === "" ? "Story board state was refused." : detail,
+      );
       return undefined;
     }
   };
@@ -227,8 +272,9 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         packId: engine.packId(),
       });
       return { v: PROTOCOL_VERSION, type: "deviceState", payload };
-    } catch {
-      console.error("Device state was refused.");
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
+      log.error("device-state", detail.trim() === "" ? "Device state was refused." : detail);
       return undefined;
     }
   };
@@ -250,8 +296,9 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
           else sendError(socket, "invalid-state", "That device state was refused.");
         }
       }
-    } catch {
-      console.error("Broadcast failed.");
+    } catch (error: unknown) {
+      const detail = error instanceof Error ? error.message : String(error);
+      log.error("broadcast", detail.trim() === "" ? "Broadcast failed." : detail);
     }
   };
 
@@ -514,7 +561,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   /**
-   * The story board's one message (D7 exception). Only the storyboard socket may send it.
+   * The story board's Keeper report (D7). Only the storyboard socket may send it.
+   * `log` is separate (D39) and changes no game state.
    * The engine acts only when the line matches the current Keeper line, so a late one is a no-op.
    */
   const onKeeperLineEnded = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
@@ -534,6 +582,29 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       return;
     }
     if (engine.keeperLineEnded(message.payload.momentId, message.payload.line)) broadcast();
+  };
+
+  /**
+   * A page log (D39). It changes no game state. The device id and the session come from
+   * this socket, not from the payload (D12). A storyboard line has no device id.
+   */
+  const onLog = (_socket: WebSocket, client: ClientState, message: ClientMessage) => {
+    if (message.type !== "log") return;
+    const source =
+      client.role === "storyboard"
+        ? "board"
+        : client.role === "device"
+          ? "device"
+          : message.payload.source;
+    log.append({
+      level: message.payload.level,
+      source,
+      device: client.role === "device" ? (client.deviceId ?? null) : null,
+      session: sessionId,
+      screen: message.payload.screen,
+      code: message.payload.code,
+      message: message.payload.message,
+    });
   };
 
   const handle = (socket: WebSocket, raw: RawData) => {
@@ -581,6 +652,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     else if (message.data.type === "focus-story") onFocusStory(socket, client, message.data);
     else if (message.data.type === "keeper-line-ended")
       onKeeperLineEnded(socket, client, message.data);
+    else if (message.data.type === "log") onLog(socket, client, message.data);
     else onControl(socket, client, message.data);
   };
 
@@ -638,9 +710,14 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     socket.on("message", (data) => {
       try {
         handle(socket, data);
-      } catch {
-        console.error("Session message failed.");
-        sendError(socket, "invalid-state", "That message was not applied.");
+      } catch (error: unknown) {
+        const detail = error instanceof Error ? error.message : String(error);
+        const shown = detail.trim() === "" ? "That message was not applied." : detail;
+        sendError(
+          socket,
+          "invalid-state",
+          shown.length > 300 ? `${shown.slice(0, 297)}...` : shown,
+        );
       }
     });
   });
@@ -705,6 +782,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     close: () => {
       if (closingPromise) return closingPromise;
       closing = true;
+      stopLog();
       if (timer) clearInterval(timer);
       closingPromise = (async () => {
         try {

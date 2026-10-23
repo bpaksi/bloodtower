@@ -303,4 +303,21 @@ describe("host error log", () => {
     const get = await fetch(`${base}/log`);
     expect(get.status).toBe(405);
   });
+
+  it("tells a subscriber about a stored line and skips a debug line when debug is off", () => {
+    const dataDir = makeDir();
+    const log = createHostLogger({
+      dataDir,
+      mirror: false,
+      now: () => new Date("2026-10-23T12:00:00.000Z"),
+    });
+    const seen: string[] = [];
+    const stop = log.subscribe((entry) => seen.push(entry.code));
+    log.debug("socket-reconnect", "hidden");
+    log.error("page-error", "shown");
+    expect(seen).toEqual(["page-error"]);
+    stop();
+    log.error("window-error", "after");
+    expect(seen).toEqual(["page-error"]);
+  });
 });

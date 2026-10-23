@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from "react";
 import {
+  reconnectLog,
+  reportPageLog,
+  setPageLogContext,
+  setPageLogSocket,
+} from "../../lib/pageLog.ts";
+import {
   DEVICE_TOKEN_KEY,
   deviceHello,
   forgetStoredToken,
   openSession,
+  type SessionClient,
   sessionUrl,
 } from "../../lib/session";
 import { detectFormFactor } from "./formFactor";
@@ -34,18 +41,50 @@ export function LiveJoin() {
     if (stored) {
       try {
         hello = deviceHello({ formFactor, token: stored });
-      } catch {
+      } catch (error) {
         sessionStorage.removeItem(DEVICE_TOKEN_KEY);
+        const detail = error instanceof Error ? error.message : String(error);
+        void reportPageLog({
+          level: "debug",
+          code: "device-hello",
+          message:
+            detail.trim() === ""
+              ? "A stored device token was refused. Joining again."
+              : `A stored device token was refused. Joining again. ${detail}`,
+          source: "device",
+          screen: "join",
+        });
       }
     }
     if (!hello && urlCode) {
       try {
         hello = deviceHello({ formFactor, joinCode: urlCode });
-      } catch {
+      } catch (error) {
         hello = null;
+        const detail = error instanceof Error ? error.message : String(error);
+        void reportPageLog({
+          level: "error",
+          code: "device-hello",
+          message: detail.trim() === "" ? "The join code was refused." : detail,
+          source: "device",
+          screen: "join",
+        });
       }
     }
-    if (!hello) return;
+    const client: { current: SessionClient | null } = { current: null };
+    const clearContext = setPageLogContext(() => ({
+      source: "device",
+      device: null,
+      session: null,
+      screen: "join",
+    }));
+    const clearSocket = setPageLogSocket((entry) => client.current?.sendLog(entry) ?? false);
+    if (!hello) {
+      return () => {
+        clearSocket();
+        clearContext();
+      };
+    }
     let welcomed = false;
     const session = openSession({
       url: sessionUrl(window.location, process.env.NEXT_PUBLIC_WS_URL),
@@ -61,16 +100,33 @@ export function LiveJoin() {
       onDevice: () => {
         setNotice(null);
       },
+      onReconnect: () => {
+        void reportPageLog({ ...reconnectLog(), source: "device", screen: "join" });
+      },
       onError: (error) => {
-        setNotice(error.message);
+        setNotice(`${error.code}: ${error.message}`);
         if (!forgetStoredToken({ hadStoredToken: stored !== null, welcomed, code: error.code })) {
           return;
         }
         sessionStorage.removeItem(DEVICE_TOKEN_KEY);
         if (urlCode) window.location.reload();
       },
+      onLocalError: (error) => {
+        void reportPageLog({
+          level: "error",
+          code: error.code,
+          message: error.message,
+          source: "device",
+          screen: "join",
+        });
+      },
     });
-    return () => session.close();
+    client.current = session;
+    return () => {
+      session.close();
+      clearSocket();
+      clearContext();
+    };
   }, []);
 
   return (
