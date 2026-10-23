@@ -1,9 +1,9 @@
 "use client";
+import { createRng } from "@dark-tower/rng";
 import { useMemo, useState } from "react";
 import { Placeholder } from "../../../components/Placeholder.tsx";
 import { TuningPanel } from "../../../components/TuningPanel.tsx";
 import { logger } from "../../../lib/logger.ts";
-import { createRng } from "../../../lib/rng.ts";
 import { defaultValues } from "../../../lib/tuning.ts";
 import {
   type Cost,

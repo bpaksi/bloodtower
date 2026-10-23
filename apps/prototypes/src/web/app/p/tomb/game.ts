@@ -1,7 +1,7 @@
 // Pure tomb rules (DEC-084 scene, DEC-039 costs, MEC-026 crawl). No React, no clock, no Math.random:
 // the page and the simulation both play through these functions.
+import type { Rng } from "@dark-tower/rng";
 import { mean, runBatch, tally } from "../../../lib/batch.ts";
-import type { Rng } from "../../../lib/rng.ts";
 import { defaultValues, type TuningField, type TuningValues } from "../../../lib/tuning.ts";
 
 export type Cost = { hp: number; money: number; corruption: number };

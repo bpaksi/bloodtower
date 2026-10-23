@@ -4,15 +4,17 @@ A prototype is one folder, `app/p/<name>/`, with a `page.tsx` (a client componen
 Import with relative paths and the `.ts`/`.tsx` extension. Run with `pnpm --dir apps/prototypes/src/web dev` (port 4777).
 The root layout already mounts the log panel, the toasts, an error boundary and the global error handlers, so a page does nothing to turn them on.
 
-## Seeded random: `lib/rng.ts`
+## Seeded random: `@dark-tower/rng`
 
 ```ts
+import { createRng } from "@dark-tower/rng";
+
 const rng = createRng(seed);        // seed: string | number; same seed = same draws
 rng.roll("2d6+1")                   // { total, dice, modifier, notation }; also "1d6", "d20", "3d4-2", "+2"
 rng.int(1, 6); rng.chance(0.3); rng.pick(items); rng.shuffle(items); rng.next()
 ```
 
-Every random draw on a page comes from a `createRng`. Show the seed in the page (an input, default e.g. `"1"`) and build the rng from it, so "same seed" replays a run. Bad dice text throws; do not catch it just to continue.
+The generator lives in `packages/rng` (decision 0005). Every random draw on a page comes from a `createRng`. Show the seed in the page (an input, default e.g. `"1"`) and build the rng from it, so "same seed" replays a run. Bad dice text throws; do not catch it just to continue.
 
 ## Tuning panel: `lib/tuning.ts` + `components/TuningPanel.tsx`
 

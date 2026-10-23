@@ -1,8 +1,8 @@
 "use client";
+import { createRng, type Rng } from "@dark-tower/rng";
 import { useMemo, useRef, useState } from "react";
 import { TuningPanel } from "../../../components/TuningPanel.tsx";
 import { logger } from "../../../lib/logger.ts";
-import { createRng, type Rng } from "../../../lib/rng.ts";
 import {
   championStrength,
   defaults,

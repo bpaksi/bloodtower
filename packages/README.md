@@ -11,6 +11,7 @@ Current packages:
 
 | Package | Used by | Decision |
 |---|---|---|
+| [`rng`](rng/) (`@dark-tower/rng`) | prototypes, and the bloodtower engine once C1 step 3 lands | [0005](../research/decisions/0005-seeded-rng-package.md) |
 | [`workbench`](workbench/) (`@dark-tower/workbench`) | game-workbench, story-workbench | [0002](../research/decisions/0002-workbench-package.md) |
 
 Likely next candidates: the tower protocol schemas and a tower client, once `game-test` needs to drive the tower.

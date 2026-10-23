@@ -1,7 +1,7 @@
 // Pure turn-loop rules for P-08 (DEC-077, DEC-078, DEC-102). No React and no clock: the page and
 // the 1,000-turn simulation both call these, so they cannot drift apart.
+import type { Rng } from "@dark-tower/rng";
 import { mean, runBatch, share } from "../../../lib/batch.ts";
-import type { Rng } from "../../../lib/rng.ts";
 import { defaultValues, type TuningField, type TuningValues } from "../../../lib/tuning.ts";
 
 export type SpaceKind = "wild" | "village" | "sanctuary";
