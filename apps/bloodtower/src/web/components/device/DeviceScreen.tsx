@@ -24,6 +24,7 @@ import {
 } from "../../lib/screens";
 import { towerStatusLines } from "../../lib/towerStatus";
 import { VOLUME_ANSWER_LABEL, VOLUME_QUESTION, volumeIsPlaying } from "../../lib/volumeTest.ts";
+import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { deviceControls } from "./controls";
 
 /**
@@ -38,6 +39,7 @@ export function DeviceScreen({
   connectLock,
   calibrateLock,
   tower,
+  errorBanner,
   onControl,
   onHold,
   onFocusStory,
@@ -49,6 +51,8 @@ export function DeviceScreen({
   connectLock: ControlLock | null;
   calibrateLock: ControlLock | null;
   tower: TowerSnapshot;
+  /** A control error on this iPad. Beside the controls, not a mist card. */
+  errorBanner?: DeviceErrorBannerModel | null;
   onControl?: (
     promptId: string,
     action: ControlAction,
@@ -128,6 +132,9 @@ export function DeviceScreen({
       <p>
         Tower {status.connection}. Battery {status.battery}. Calibration {status.calibration}.
       </p>
+      {errorBanner ? (
+        <DeviceErrorBanner code={errorBanner.code} message={errorBanner.message} />
+      ) : null}
 
       {state.screen === "splash" ? <SplashDevice /> : null}
       {state.screen === "tower-connect" ? (

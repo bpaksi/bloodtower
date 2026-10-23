@@ -5,6 +5,8 @@ import {
   helloPayloadSchema,
   holdMessageSchema,
   keeperLineEndedMessageSchema,
+  type LogPayload,
+  logMessageSchema,
   PROTOCOL_VERSION,
   type ServerMessage,
   serverMessageSchema,
@@ -102,6 +104,12 @@ export interface SessionClient {
   sendFocusStory: (story: string) => boolean;
   /** The story board only: the Keeper line that finished on the board (D7 exception). */
   sendKeeperLineEnded: (momentId: string, line: number) => boolean;
+  /**
+   * Page log (decision 0003). Text and a short code only. False when the socket is not open,
+   * hello has not finished, or the payload is refused, so the caller can POST `/log` instead.
+   * A socket that has not joined cannot stamp a role, so the line does not go out on it.
+   */
+  sendLog: (payload: LogPayload) => boolean;
   close: () => void;
 }
 
@@ -112,7 +120,16 @@ export interface SessionOptions {
   onStoryboard: (payload: Extract<ServerMessage, { type: "storyboardState" }>["payload"]) => void;
   onDevice: (payload: Extract<ServerMessage, { type: "deviceState" }>["payload"]) => void;
   onError: (payload: Extract<ServerMessage, { type: "error" }>["payload"]) => void;
+  /**
+   * A frame this page could not read. The host did not write it. `onError` is also called.
+   * A host `error` message is not a local error: the host already logged it.
+   */
+  onLocalError?: (payload: Extract<ServerMessage, { type: "error" }>["payload"]) => void;
+  /** An error line the host just wrote. The story board shows it as a toast. */
+  onLogged?: (payload: Extract<ServerMessage, { type: "logged" }>["payload"]) => void;
   onLive: (live: boolean) => void;
+  /** The socket dropped and a reconnect is scheduled. This is not an error. */
+  onReconnect?: () => void;
   /** For tests. */
   createSocket?: (url: string) => WebSocket;
 }
@@ -127,6 +144,7 @@ export const openSession = (options: SessionOptions): SessionClient => {
   let socket: WebSocket | undefined;
   let hello = options.hello;
   let closed = false;
+  let joined = false;
   let attempt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -145,32 +163,35 @@ export const openSession = (options: SessionOptions): SessionClient => {
       sendRaw({ v: PROTOCOL_VERSION, type: "hello", payload: hello });
     };
     current.onmessage = (event) => {
+      const failLocal = (code: "invalid-json" | "invalid-payload", message: string) => {
+        const payload = { code, message };
+        options.onLocalError?.(payload);
+        options.onError(payload);
+      };
       if (typeof event.data !== "string") {
-        options.onError({
-          code: "invalid-json",
-          message: "The session host sent a frame this page cannot show.",
-        });
+        failLocal("invalid-json", "The session host sent a frame this page cannot show.");
         return;
       }
       let json: unknown;
       try {
         json = JSON.parse(event.data);
-      } catch {
-        options.onError({
-          code: "invalid-json",
-          message: "The session host sent a frame this page cannot show.",
-        });
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        failLocal(
+          "invalid-json",
+          detail.trim() === ""
+            ? "The session host sent a frame this page cannot show."
+            : `The session host sent a frame this page cannot show. ${detail}`,
+        );
         return;
       }
       const message = serverMessageSchema.safeParse(json);
       if (!message.success) {
-        options.onError({
-          code: "invalid-payload",
-          message: "The session host sent a frame this page cannot show.",
-        });
+        failLocal("invalid-payload", "The session host sent a frame this page cannot show.");
         return;
       }
       if (message.data.type === "welcome") {
+        joined = true;
         if (message.data.payload.role === "device" && hello.role === "device") {
           hello = deviceHello({
             formFactor: hello.formFactor === "phone" ? "phone" : "ipad",
@@ -188,12 +209,18 @@ export const openSession = (options: SessionOptions): SessionClient => {
         options.onDevice(message.data.payload);
         return;
       }
+      if (message.data.type === "logged") {
+        options.onLogged?.(message.data.payload);
+        return;
+      }
       options.onError(message.data.payload);
     };
     current.onclose = () => {
       if (socket !== current) return;
+      joined = false;
       options.onLive(false);
       if (closed) return;
+      options.onReconnect?.();
       const delay = reconnectDelay(attempt);
       attempt += 1;
       timer = setTimeout(connect, delay);
@@ -232,6 +259,16 @@ export const openSession = (options: SessionOptions): SessionClient => {
         v: PROTOCOL_VERSION,
         type: "focus-story",
         payload: { story },
+      });
+      if (!message.success) return false;
+      return sendRaw(message.data);
+    },
+    sendLog: (payload) => {
+      if (!joined) return false;
+      const message = logMessageSchema.safeParse({
+        v: PROTOCOL_VERSION,
+        type: "log",
+        payload,
       });
       if (!message.success) return false;
       return sendRaw(message.data);

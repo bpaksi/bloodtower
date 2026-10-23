@@ -261,29 +261,228 @@ describe("session hub", () => {
       body: JSON.stringify({
         level: "error",
         source: "board",
-        device: null,
-        session: null,
+        device: "spoofed-device",
+        session: "spoofed-session",
         screen: "story",
         code: "page-error",
         message: "The board hit an error.",
       }),
     });
     expect(posted.status).toBe(204);
-    const lines = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8")
+    const rawLog = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
+    expect(rawLog).not.toContain("spoofed-device");
+    expect(rawLog).not.toContain("spoofed-session");
+    const lines = rawLog
       .trim()
       .split("\n")
       .map((line) => JSON.parse(line) as { code: string; session: string | null; source: string });
     expect(lines).toEqual([
       expect.objectContaining({
         code: "page-error",
-        source: "board",
-        session: null,
+        source: "server",
+        device: null,
+        session: host.loadRun().session.id,
+        screen: "story",
         message: "The board hit an error.",
       }),
     ]);
 
     const get = await fetch(url);
     expect(get.status).toBe(405);
+  });
+
+  it("writes a socket log line, toasts the story board, and refuses raw bytes", async () => {
+    const dataDir = tempDir();
+    const log = createHostLogger({
+      dataDir,
+      mirror: false,
+      now: () => new Date("2026-10-23T12:00:00.000Z"),
+    });
+    const { host } = await start(createMockTower(), { log });
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    const welcome = device.log.find((message) => message.type === "welcome");
+    if (welcome?.type !== "welcome") throw new Error("welcome");
+
+    send(device.socket, "log", {
+      level: "error",
+      source: "board",
+      device: "spoofed-device",
+      session: "spoofed-session",
+      screen: "play",
+      code: "page-error",
+      message: "The iPad hit an error.",
+    });
+    await until(board.inbox, board.log, (messages) =>
+      messages.some((message) => message.type === "logged"),
+    );
+    const toasted = board.log.filter((message) => message.type === "logged");
+    expect(toasted.map((message) => message.type === "logged" && message.payload)).toEqual([
+      expect.objectContaining({
+        code: "page-error",
+        source: "device",
+        message: "The iPad hit an error.",
+      }),
+    ]);
+    expect(JSON.stringify(toasted)).not.toContain("bytes");
+
+    const file = join(dataDir, "logs", "2026-10-23.jsonl");
+    const read = () =>
+      readFileSync(file, "utf8")
+        .trim()
+        .split("\n")
+        .filter((line) => line.length > 0)
+        .map(
+          (line) =>
+            JSON.parse(line) as {
+              level: string;
+              source: string;
+              device: string | null;
+              session: string | null;
+              screen: string | null;
+              code: string;
+              message: string;
+            },
+        );
+    expect(read()).toEqual([
+      expect.objectContaining({
+        level: "error",
+        source: "device",
+        device: welcome.payload.clientId,
+        screen: "play",
+        code: "page-error",
+        message: "The iPad hit an error.",
+      }),
+    ]);
+    const stored = read()[0];
+    if (!stored) throw new Error("line");
+    expect(stored.session?.startsWith("session-")).toBe(true);
+    expect(stored.session).not.toBe("spoofed-session");
+    expect(stored.device).not.toBe("spoofed-device");
+
+    send(board.socket, "log", {
+      level: "error",
+      source: "device",
+      device: "spoofed-device",
+      session: null,
+      screen: "story",
+      code: "window-error",
+      message: "The board hit an error.",
+    });
+    await until(
+      board.inbox,
+      board.log,
+      (messages) => messages.filter((message) => message.type === "logged").length >= 2,
+    );
+    expect(read().filter((line) => line.code === "window-error")).toEqual([
+      expect.objectContaining({
+        source: "board",
+        device: null,
+        screen: "story",
+        message: "The board hit an error.",
+      }),
+    ]);
+    expect(
+      board.log.some(
+        (message) => message.type === "error" && message.payload.code === "storyboard-control",
+      ),
+    ).toBe(false);
+
+    const secret = "raw-byte-payload";
+    send(device.socket, "log", {
+      level: "error",
+      source: "device",
+      device: null,
+      session: null,
+      screen: "play",
+      code: "page-error",
+      message: "no",
+      bytes: secret,
+    });
+    await until(device.inbox, device.log, (messages) =>
+      messages.some((message) => message.type === "error"),
+    );
+    const raw = readFileSync(file, "utf8");
+    expect(raw).not.toContain(secret);
+    expect(raw).toContain("invalid-payload");
+
+    send(device.socket, "log", {
+      level: "debug",
+      source: "device",
+      device: null,
+      session: null,
+      screen: "play",
+      code: "socket-reconnect",
+      message: "The socket dropped. Reconnecting.",
+    });
+    send(device.socket, "log", {
+      level: "error",
+      source: "device",
+      device: null,
+      session: null,
+      screen: "play",
+      code: "unhandled-rejection",
+      message: "A promise was rejected.",
+    });
+    await until(
+      board.inbox,
+      board.log,
+      (messages) =>
+        messages.filter(
+          (message) => message.type === "logged" && message.payload.code === "unhandled-rejection",
+        ).length >= 1,
+    );
+    const levels = read().map((line) => line.level);
+    expect(levels).not.toContain("debug");
+    expect(read().some((line) => line.code === "socket-reconnect")).toBe(false);
+    expect(device.log.some((message) => message.type === "logged")).toBe(false);
+  });
+
+  it("refuses a log before hello and does not keep a forged board source", async () => {
+    const dataDir = tempDir();
+    const log = createHostLogger({
+      dataDir,
+      mirror: false,
+      now: () => new Date("2026-10-23T12:00:00.000Z"),
+    });
+    const { host } = await start(createMockTower(), { log });
+    const board = await helloBoard(host.port);
+    const pending = await connect(host.port);
+    const forged = "Forged before hello.";
+    send(pending.socket, "log", {
+      level: "error",
+      source: "board",
+      device: "spoofed-device",
+      session: "spoofed-session",
+      screen: "story",
+      code: "page-error",
+      message: forged,
+    });
+    await until(pending.inbox, pending.log, (messages) =>
+      messages.some((message) => message.type === "error"),
+    );
+    expect(latest(pending.log, "error")).toMatchObject({
+      type: "error",
+      payload: { code: "invalid-state" },
+    });
+    await until(board.inbox, board.log, (messages) =>
+      messages.some((message) => message.type === "logged"),
+    );
+    const raw = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
+    expect(raw).not.toContain(forged);
+    expect(raw).not.toContain("spoofed-device");
+    expect(raw).not.toContain("spoofed-session");
+    expect(raw).not.toContain('"source":"board"');
+    expect(
+      board.log.some(
+        (message) => message.type === "logged" && message.payload.code === "page-error",
+      ),
+    ).toBe(false);
+    expect(
+      board.log.some(
+        (message) => message.type === "logged" && message.payload.code === "invalid-state",
+      ),
+    ).toBe(true);
   });
 
   it("accepts a listed dev origin and ignores a spoofed Host on the join URL", async () => {
