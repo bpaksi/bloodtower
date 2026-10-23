@@ -1,0 +1,109 @@
+format: 2
+kind: base-content
+pack_id: base
+title: Return to Dark Tower base content
+version: 0.1.0
+engine_min: 0.1.0
+
+heroes:
+  - id: hero-a
+    name: Hero A
+    role: fighter
+    might: 5
+    stealth: 2
+    magic: 1
+    wits: 2
+    ability: Duel
+    portrait: por.hero-a
+    voice: vo.hero-a
+  - id: hero-b
+    name: Hero B
+    role: healer
+    might: 2
+    stealth: 2
+    magic: 3
+    wits: 3
+    ability: Heal
+    portrait: por.hero-b
+    voice: vo.hero-b
+  - id: hero-c
+    name: Hero C
+    role: magic-user
+    might: 1
+    stealth: 2
+    magic: 5
+    wits: 3
+    ability: Glyph
+    portrait: por.hero-c
+    voice: vo.hero-c
+  - id: hero-d
+    name: Hero D
+    role: scout
+    might: 2
+    stealth: 5
+    magic: 1
+    wits: 3
+    ability: Disarm
+    portrait: por.hero-d
+    voice: vo.hero-d
+  - id: hero-e
+    name: Hero E
+    role: ranger
+    might: 3
+    stealth: 3
+    magic: 1
+    wits: 5
+    ability: Track
+    portrait: por.hero-e
+    voice: vo.hero-e
+  - id: hero-f
+    name: Hero F
+    role: scholar
+    might: 1
+    stealth: 2
+    magic: 3
+    wits: 5
+    ability: Lore
+    portrait: por.hero-f
+    voice: vo.hero-f
+
+building_types:
+  - {id: citadel, name: Citadel}
+  - {id: sanctuary, name: Sanctuary}
+  - {id: village, name: Village}
+  - {id: bazaar, name: Bazaar}
+
+quest_types:
+  - {id: tomb, name: Tomb}
+  - {id: cave, name: Cave}
+  - {id: encampment, name: Encampment}
+  - {id: fortress, name: Fortress}
+  - {id: ruins, name: Ruins}
+  - {id: shrine, name: Shrine}
+
+board:
+  kingdoms:
+    - {id: N, name: Arisilon, label: Arisilon (N)}
+    - {id: E, name: Brynthia, label: Brynthia (E)}
+    - {id: S, name: Durnin, label: Durnin (S)}
+    - {id: W, name: Zenon, label: Zenon (W)}
+  region_labels:
+    - name: Regal Run
+      notes: Spanning label near The Throne; not a space (DEC-225).
+    - name: The Great Woods
+      notes: Spanning label in Zenon; not a space (DEC-225).
+  spaces: []
+
+assets:
+  - {id: por.hero-a, type: portrait, target: ipad, status: placeholder}
+  - {id: por.hero-b, type: portrait, target: ipad, status: placeholder}
+  - {id: por.hero-c, type: portrait, target: ipad, status: placeholder}
+  - {id: por.hero-d, type: portrait, target: ipad, status: placeholder}
+  - {id: por.hero-e, type: portrait, target: ipad, status: placeholder}
+  - {id: por.hero-f, type: portrait, target: ipad, status: placeholder}
+  - {id: vo.hero-a, type: line, target: ipad, status: placeholder}
+  - {id: vo.hero-b, type: line, target: ipad, status: placeholder}
+  - {id: vo.hero-c, type: line, target: ipad, status: placeholder}
+  - {id: vo.hero-d, type: line, target: ipad, status: placeholder}
+  - {id: vo.hero-e, type: line, target: ipad, status: placeholder}
+  - {id: vo.hero-f, type: line, target: ipad, status: placeholder}

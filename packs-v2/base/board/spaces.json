@@ -1,0 +1,497 @@
+{
+  "spaces": [
+    {
+      "id": "N-egans-end",
+      "name": "Egan's End",
+      "kingdom": "N",
+      "terrain": "grasslands",
+      "building": "village",
+      "adjacent": ["N-rimeweald", "N-the-tundra"]
+    },
+    {
+      "id": "N-the-tundra",
+      "name": "The Tundra",
+      "kingdom": "N",
+      "terrain": "desert",
+      "adjacent": ["N-dayside", "N-egans-end", "N-lower-ice-fangs", "N-rimeweald"]
+    },
+    {
+      "id": "N-dayside",
+      "name": "Dayside",
+      "kingdom": "N",
+      "terrain": "lake",
+      "building": "bazaar",
+      "notes": "Confirm spelling (DEC-225 draft)",
+      "adjacent": ["N-lower-ice-fangs", "N-the-tundra"]
+    },
+    {
+      "id": "N-fivepoint",
+      "name": "Fivepoint",
+      "kingdom": "N",
+      "terrain": "grasslands",
+      "notes": "Partial name on photo; needs Bob",
+      "adjacent": []
+    },
+    {
+      "id": "N-rimeweald",
+      "name": "Rimeweald",
+      "kingdom": "N",
+      "terrain": "forest",
+      "adjacent": ["N-egans-end", "N-lower-ice-fangs", "N-peaks-of-the-djinn", "N-the-tundra"]
+    },
+    {
+      "id": "N-lower-ice-fangs",
+      "name": "Lower Ice Fangs",
+      "kingdom": "N",
+      "terrain": "mountains",
+      "adjacent": [
+        "N-dayside",
+        "N-peaks-of-the-djinn",
+        "N-rimeweald",
+        "N-the-tundra",
+        "N-upper-ice-fangs"
+      ]
+    },
+    {
+      "id": "N-upper-ice-fangs",
+      "name": "Upper Ice Fangs",
+      "kingdom": "N",
+      "terrain": "mountains",
+      "building": "sanctuary",
+      "tower_adjacent": true,
+      "adjacent": ["N-lower-ice-fangs", "N-peaks-of-the-djinn", "N-tower-scar-desert"]
+    },
+    {
+      "id": "N-peaks-of-the-djinn",
+      "name": "Peaks of the Djinn",
+      "kingdom": "N",
+      "terrain": "mountains",
+      "adjacent": ["N-lower-ice-fangs", "N-rimeweald", "N-upper-ice-fangs"]
+    },
+    {
+      "id": "N-greenbridge",
+      "name": "Greenbridge",
+      "kingdom": "N",
+      "terrain": "grasslands",
+      "adjacent": ["N-muted-forest"]
+    },
+    {
+      "id": "N-muted-forest",
+      "name": "Muted Forest",
+      "kingdom": "N",
+      "terrain": "forest",
+      "adjacent": ["N-broken-lands", "N-greenbridge", "N-radiant-mountains", "N-tower-scar-desert"]
+    },
+    {
+      "id": "N-tower-scar-desert",
+      "name": "Tower Scar Desert",
+      "kingdom": "N",
+      "terrain": "desert",
+      "tower_adjacent": true,
+      "adjacent": ["N-muted-forest", "N-upper-ice-fangs"]
+    },
+    {
+      "id": "N-radiant-mountains",
+      "name": "Radiant Mountains",
+      "kingdom": "N",
+      "terrain": "mountains",
+      "building": "citadel",
+      "adjacent": ["N-lodestone-mountains", "N-muted-forest", "N-pearl-of-the-north"]
+    },
+    {
+      "id": "N-lodestone-mountains",
+      "name": "Lodestone Mountains",
+      "kingdom": "N",
+      "terrain": "mountains",
+      "adjacent": ["N-pearl-of-the-north", "N-radiant-mountains"]
+    },
+    {
+      "id": "N-pearl-of-the-north",
+      "name": "Pearl-of-the-North",
+      "kingdom": "N",
+      "terrain": "grasslands",
+      "notes": "Confirm hyphenation",
+      "adjacent": ["N-lodestone-mountains", "N-radiant-mountains"]
+    },
+    {
+      "id": "N-broken-lands",
+      "name": "Broken Lands",
+      "kingdom": "N",
+      "terrain": "hills",
+      "adjacent": ["N-muted-forest"]
+    },
+    {
+      "id": "E-three-rivers",
+      "name": "Three Rivers",
+      "kingdom": "E",
+      "terrain": "grasslands",
+      "building": "bazaar",
+      "adjacent": ["E-lake-of-songs", "E-lesser-tombstones"]
+    },
+    {
+      "id": "E-lake-of-songs",
+      "name": "Lake of Songs",
+      "kingdom": "E",
+      "terrain": "lake",
+      "adjacent": ["E-duwani", "E-lesser-tombstones", "E-three-rivers"]
+    },
+    {
+      "id": "E-duwani",
+      "name": "Duwani",
+      "kingdom": "E",
+      "terrain": "grasslands",
+      "building": "village",
+      "adjacent": ["E-jewel-hills", "E-lake-of-songs"]
+    },
+    {
+      "id": "E-jewel-hills",
+      "name": "Jewel Hills",
+      "kingdom": "E",
+      "terrain": "hills",
+      "adjacent": ["E-copper-grove", "E-duwani", "E-the-decaying-wilds"]
+    },
+    {
+      "id": "E-copper-grove",
+      "name": "Copper Grove",
+      "kingdom": "E",
+      "terrain": "forest",
+      "adjacent": ["E-jewel-hills", "E-outer-kinghills", "E-the-decaying-wilds"]
+    },
+    {
+      "id": "E-outer-kinghills",
+      "name": "Outer Kinghills",
+      "kingdom": "E",
+      "terrain": "hills",
+      "adjacent": ["E-copper-grove", "E-inner-kinghills"]
+    },
+    {
+      "id": "E-lesser-tombstones",
+      "name": "Lesser Tombstones",
+      "kingdom": "E",
+      "terrain": "hills",
+      "adjacent": ["E-greater-tombstones", "E-lake-of-songs", "E-three-rivers"]
+    },
+    {
+      "id": "E-utars-barrows",
+      "name": "Utar's Barrows",
+      "kingdom": "E",
+      "terrain": "desert",
+      "adjacent": ["E-the-decaying-wilds"]
+    },
+    {
+      "id": "E-the-decaying-wilds",
+      "name": "The Decaying Wilds",
+      "kingdom": "E",
+      "terrain": "grasslands",
+      "adjacent": [
+        "E-copper-grove",
+        "E-dragontooth-lake",
+        "E-inner-kinghills",
+        "E-jewel-hills",
+        "E-utars-barrows"
+      ]
+    },
+    {
+      "id": "E-inner-kinghills",
+      "name": "Inner Kinghills",
+      "kingdom": "E",
+      "terrain": "hills",
+      "building": "citadel",
+      "adjacent": ["E-outer-kinghills", "E-the-decaying-wilds"]
+    },
+    {
+      "id": "E-big-sister",
+      "name": "Big Sister",
+      "kingdom": "E",
+      "terrain": "mountains",
+      "tower_adjacent": true,
+      "adjacent": ["E-forest-of-shades", "E-greater-tombstones", "S-middle-sister"]
+    },
+    {
+      "id": "E-greater-tombstones",
+      "name": "Greater Tombstones",
+      "kingdom": "E",
+      "terrain": "hills",
+      "building": "sanctuary",
+      "adjacent": [
+        "E-big-sister",
+        "E-dragontooth-lake",
+        "E-forest-of-shades",
+        "E-lesser-tombstones"
+      ]
+    },
+    {
+      "id": "E-forest-of-shades",
+      "name": "Forest of Shades",
+      "kingdom": "E",
+      "terrain": "forest",
+      "tower_adjacent": true,
+      "adjacent": ["E-big-sister", "E-bleak-wastes", "E-dragontooth-lake", "E-greater-tombstones"]
+    },
+    {
+      "id": "E-dragontooth-lake",
+      "name": "Dragontooth Lake",
+      "kingdom": "E",
+      "terrain": "lake",
+      "adjacent": [
+        "E-bleak-wastes",
+        "E-forest-of-shades",
+        "E-greater-tombstones",
+        "E-the-decaying-wilds"
+      ]
+    },
+    {
+      "id": "E-bleak-wastes",
+      "name": "Bleak Wastes",
+      "kingdom": "E",
+      "terrain": "desert",
+      "tower_adjacent": true,
+      "adjacent": ["E-dragontooth-lake", "E-forest-of-shades"]
+    },
+    {
+      "id": "S-southern-wastes",
+      "name": "Southern Wastes",
+      "kingdom": "S",
+      "terrain": "desert",
+      "building": "village",
+      "adjacent": []
+    },
+    {
+      "id": "S-pine-barrens",
+      "name": "Pine Barrens",
+      "kingdom": "S",
+      "terrain": "forest",
+      "adjacent": []
+    },
+    {
+      "id": "S-ulamels-hollow",
+      "name": "Ulamel's Hollow",
+      "kingdom": "S",
+      "terrain": "lake",
+      "notes": "Terrain draft; needs Bob",
+      "adjacent": []
+    },
+    {
+      "id": "S-little-sister",
+      "name": "Little Sister",
+      "kingdom": "S",
+      "terrain": "mountains",
+      "adjacent": ["S-middle-sister"]
+    },
+    {
+      "id": "S-middle-sister",
+      "name": "Middle Sister",
+      "kingdom": "S",
+      "terrain": "mountains",
+      "adjacent": ["E-big-sister", "S-little-sister"]
+    },
+    {
+      "id": "S-bone-hills",
+      "name": "Bone Hills",
+      "kingdom": "S",
+      "terrain": "hills",
+      "adjacent": ["S-the-emerald-expanse"]
+    },
+    {
+      "id": "S-howling-desert",
+      "name": "Howling Desert",
+      "kingdom": "S",
+      "terrain": "desert",
+      "building": "citadel",
+      "adjacent": ["S-mountains-of-the-watchers", "S-the-emerald-expanse"]
+    },
+    {
+      "id": "S-mountains-of-the-watchers",
+      "name": "Mountains of the Watchers",
+      "kingdom": "S",
+      "terrain": "mountains",
+      "adjacent": ["S-howling-desert", "S-the-emerald-expanse", "W-lost-lands"]
+    },
+    {
+      "id": "S-the-emerald-expanse",
+      "name": "The Emerald Expanse",
+      "kingdom": "S",
+      "terrain": "grasslands",
+      "building": "bazaar",
+      "adjacent": [
+        "S-azkols-bane",
+        "S-bone-hills",
+        "S-howling-desert",
+        "S-mountains-of-the-watchers"
+      ]
+    },
+    {
+      "id": "S-azkols-bane",
+      "name": "Azkol's Bane",
+      "kingdom": "S",
+      "terrain": "desert",
+      "notes": "Terrain draft; needs Bob",
+      "adjacent": ["S-archmont", "S-the-emerald-expanse"]
+    },
+    {
+      "id": "S-archmont",
+      "name": "Archmont",
+      "kingdom": "S",
+      "terrain": "grasslands",
+      "adjacent": ["S-azkols-bane", "S-sands-of-madness", "S-the-cloister"]
+    },
+    {
+      "id": "S-sands-of-madness",
+      "name": "Sands of Madness",
+      "kingdom": "S",
+      "terrain": "desert",
+      "building": "sanctuary",
+      "adjacent": ["S-archmont", "S-the-throne"]
+    },
+    {
+      "id": "S-the-cloister",
+      "name": "The Cloister",
+      "kingdom": "S",
+      "terrain": "grasslands",
+      "adjacent": ["S-archmont", "S-irontops", "S-the-throne"]
+    },
+    {
+      "id": "S-irontops",
+      "name": "Irontops",
+      "kingdom": "S",
+      "terrain": "mountains",
+      "tower_adjacent": true,
+      "adjacent": ["S-the-cloister", "S-the-throne"]
+    },
+    {
+      "id": "S-the-throne",
+      "name": "The Throne",
+      "kingdom": "S",
+      "terrain": "grasslands",
+      "tower_adjacent": true,
+      "notes": "Under Regal Run label",
+      "adjacent": ["S-irontops", "S-sands-of-madness", "S-the-cloister"]
+    },
+    {
+      "id": "W-lost-lands",
+      "name": "Lost Lands",
+      "kingdom": "W",
+      "terrain": "desert",
+      "adjacent": ["S-mountains-of-the-watchers", "W-plains-of-woldra"]
+    },
+    {
+      "id": "W-plains-of-woldra",
+      "name": "Plains of Woldra",
+      "kingdom": "W",
+      "terrain": "grasslands",
+      "adjacent": ["W-anza", "W-idran-forest", "W-lost-lands"]
+    },
+    {
+      "id": "W-anza",
+      "name": "Anza",
+      "kingdom": "W",
+      "terrain": "grasslands",
+      "building": "village",
+      "adjacent": ["W-plains-of-woldra", "W-yellowpike"]
+    },
+    {
+      "id": "W-yellowpike",
+      "name": "Yellowpike",
+      "kingdom": "W",
+      "terrain": "forest",
+      "notes": "Under The Great Woods label",
+      "adjacent": ["W-akartus", "W-anza"]
+    },
+    {
+      "id": "W-akartus",
+      "name": "Akartus",
+      "kingdom": "W",
+      "terrain": "forest",
+      "building": "sanctuary",
+      "adjacent": ["W-delmsmire", "W-yellowpike"]
+    },
+    {
+      "id": "W-delmsmire",
+      "name": "Delmsmire",
+      "kingdom": "W",
+      "terrain": "forest",
+      "notes": "Confirm spelling",
+      "adjacent": ["W-akartus", "W-plains-of-plovo"]
+    },
+    {
+      "id": "W-plains-of-plovo",
+      "name": "Plains of Plovo",
+      "kingdom": "W",
+      "terrain": "grasslands",
+      "building": "bazaar",
+      "adjacent": ["W-delmsmire"]
+    },
+    {
+      "id": "W-idran-forest",
+      "name": "Idran Forest",
+      "kingdom": "W",
+      "terrain": "forest",
+      "adjacent": ["W-plains-of-woldra", "W-weeping-waters"]
+    },
+    {
+      "id": "W-weeping-waters",
+      "name": "Weeping Waters",
+      "kingdom": "W",
+      "terrain": "lake",
+      "adjacent": ["W-idran-forest", "W-lonelight-hills", "W-the-empty-glade"]
+    },
+    {
+      "id": "W-lonelight-hills",
+      "name": "Lonelight Hills",
+      "kingdom": "W",
+      "terrain": "hills",
+      "adjacent": ["W-hissing-groves", "W-the-grass-sea", "W-weeping-waters"]
+    },
+    {
+      "id": "W-the-empty-glade",
+      "name": "The Empty Glade",
+      "kingdom": "W",
+      "terrain": "grasslands",
+      "adjacent": ["W-ash-hills", "W-cloudhold", "W-hissing-groves", "W-weeping-waters"]
+    },
+    {
+      "id": "W-cloudhold",
+      "name": "Cloudhold",
+      "kingdom": "W",
+      "terrain": "mountains",
+      "adjacent": ["W-ash-hills", "W-the-empty-glade"]
+    },
+    {
+      "id": "W-hissing-groves",
+      "name": "Hissing Groves",
+      "kingdom": "W",
+      "terrain": "forest",
+      "building": "citadel",
+      "tower_adjacent": true,
+      "adjacent": ["W-ash-hills", "W-lonelight-hills", "W-the-empty-glade", "W-the-grass-sea"]
+    },
+    {
+      "id": "W-the-grass-sea",
+      "name": "The Grass Sea",
+      "kingdom": "W",
+      "terrain": "grasslands",
+      "tower_adjacent": true,
+      "adjacent": ["W-hissing-groves", "W-lonelight-hills"]
+    },
+    {
+      "id": "W-ash-hills",
+      "name": "Ash Hills",
+      "kingdom": "W",
+      "terrain": "hills",
+      "adjacent": ["W-cloudhold", "W-hissing-groves", "W-the-empty-glade"]
+    }
+  ],
+  "river_crossings": [
+    {
+      "from": "E-big-sister",
+      "to": "S-middle-sister",
+      "notes": "E-S river (draft)"
+    },
+    {
+      "from": "S-mountains-of-the-watchers",
+      "to": "W-lost-lands",
+      "notes": "S-W river (draft)"
+    }
+  ],
+  "draft_note": "Adjacency incomplete — Bob workbench check (DEC-221). Uncertain edges omitted."
+}
