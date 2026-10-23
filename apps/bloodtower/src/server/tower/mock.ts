@@ -1,6 +1,12 @@
 import type { TowerSnapshot } from "bloodtower-protocols";
+import type { HostLogger } from "../log/hostLog.ts";
 import { unavailableTower } from "./snapshot.ts";
 import type { TowerPort, TowerSent } from "./types.ts";
+
+export interface MockTowerOptions {
+  /** Decision 0003 log. A failed sound is an error line. */
+  log?: HostLogger;
+}
 
 export interface MockTower extends TowerPort {
   setBattery: (percent: number | "unavailable") => void;
@@ -14,11 +20,16 @@ export interface MockTower extends TowerPort {
  * In-memory tower for CI. It records connect, calibrate and sounds, and never a light cue.
  * Battery stays unavailable until a test sets a reading. Zero is a reading only when set.
  */
-export const createMockTower = (): MockTower => {
+export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   let snapshot: TowerSnapshot = unavailableTower();
   const sent: TowerSent[] = [];
   let opened = false;
   let failSound = false;
+
+  const report = (code: string, message: string) => {
+    if (options.log) options.log.error(code, message);
+    else console.error(`${code}: ${message}`);
+  };
 
   return {
     snapshot: () => snapshot,
@@ -39,9 +50,16 @@ export const createMockTower = (): MockTower => {
       snapshot = { ...snapshot, calibrated: { state: "known", calibrated: true } };
     },
     playSound: async (soundIndex, volume) => {
-      if (snapshot.connection !== "connected") return "failed";
+      if (snapshot.connection !== "connected") {
+        report(
+          "tower-command-failed",
+          `Sound ${soundIndex} at volume ${volume} was not sent because the tower is not connected.`,
+        );
+        return "failed";
+      }
       if (failSound) {
         failSound = false;
+        report("tower-command-failed", `Sound ${soundIndex} at volume ${volume} was not taken.`);
         return "failed";
       }
       sent.push({ type: "sound", soundIndex, volume });
