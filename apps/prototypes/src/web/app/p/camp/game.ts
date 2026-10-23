@@ -1,6 +1,6 @@
 // Pure rules for the encampment (MEC-028, DEC-091). No React: the page and the simulation share it.
+import type { Rng } from "@dark-tower/rng";
 import { runBatch } from "../../../lib/batch.ts";
-import type { Rng } from "../../../lib/rng.ts";
 import { defaultValues, type TuningField, type TuningValues } from "../../../lib/tuning.ts";
 
 export const FIELDS: TuningField[] = [

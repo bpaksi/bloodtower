@@ -14,6 +14,8 @@ import {
   holdPayloadSchema,
   hostHealthSchema,
   keeperLineEndedMessageSchema,
+  loggedMessageSchema,
+  logMessageSchema,
   PROTOCOL_VERSION,
   SERVER_MESSAGE_TYPES,
   type StoryboardState,
@@ -82,6 +84,7 @@ describe("client messages", () => {
       "control",
       "focus-story",
       "keeper-line-ended",
+      "log",
     ]);
     expect(CLIENT_MESSAGE_TYPES).not.toContain("command");
     expect(CONTROL_ACTIONS).toEqual([
@@ -98,6 +101,48 @@ describe("client messages", () => {
       "volume-play",
       "volume-answer",
     ]);
+  });
+
+  it("accepts a page log of text and a short code, and refuses raw bytes", () => {
+    const payload = {
+      level: "error" as const,
+      source: "device" as const,
+      device: null,
+      session: null,
+      screen: "play",
+      code: "page-error",
+      message: "The page hit an error.",
+    };
+    expect(logMessageSchema.parse(envelope("log", payload))).toMatchObject({ payload });
+    expect(logMessageSchema.safeParse(envelope("log", { ...payload, bytes: "0a0b" })).success).toBe(
+      false,
+    );
+    expect(logMessageSchema.safeParse(envelope("log", { ...payload, raw: "0a0b" })).success).toBe(
+      false,
+    );
+    expect(
+      logMessageSchema.safeParse(envelope("log", { ...payload, code: "Has Space" })).success,
+    ).toBe(false);
+    expect(
+      loggedMessageSchema.parse(
+        envelope("logged", { code: "page-error", source: "server", message: "Sound failed." }),
+      ),
+    ).toMatchObject({ type: "logged" });
+    expect(
+      loggedMessageSchema.safeParse(
+        envelope("logged", { code: "page-error", source: "server", message: "ipad:alpha" }),
+      ).success,
+    ).toBe(false);
+    expect(
+      loggedMessageSchema.safeParse(
+        envelope("logged", {
+          code: "page-error",
+          source: "server",
+          message: "no",
+          bytes: "0a0b",
+        }),
+      ).success,
+    ).toBe(false);
   });
 
   it("requires a pick to name its option, and refuses an option on any other action", () => {
@@ -508,7 +553,13 @@ describe("story board state", () => {
 
 describe("server messages", () => {
   it("lists the server types and gives a device its private view only", () => {
-    expect(SERVER_MESSAGE_TYPES).toEqual(["welcome", "error", "storyboardState", "deviceState"]);
+    expect(SERVER_MESSAGE_TYPES).toEqual([
+      "welcome",
+      "error",
+      "storyboardState",
+      "deviceState",
+      "logged",
+    ]);
     const token = "device-token-1234";
     const state = serverMessageSchema.parse(
       envelope("deviceState", {

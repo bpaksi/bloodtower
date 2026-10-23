@@ -199,4 +199,165 @@ describe("openSession", () => {
     expect(errors).toEqual(["invalid-payload"]);
     expect(JSON.stringify(errors)).not.toContain("Only Alpha");
   });
+
+  it("sends a log message on an open socket and not while the socket is down", () => {
+    const sockets: FakeSocket[] = [];
+    const session = openSession({
+      url: "ws://127.0.0.1:4787/ws",
+      hello: deviceHello({ formFactor: "ipad", joinCode: "048213" }),
+      onWelcome: () => undefined,
+      onStoryboard: () => undefined,
+      onDevice: () => undefined,
+      onError: () => undefined,
+      onLive: () => undefined,
+      createSocket: () => {
+        const socket = new FakeSocket();
+        sockets.push(socket);
+        return socket as unknown as WebSocket;
+      },
+    });
+    const entry = {
+      level: "error" as const,
+      source: "device" as const,
+      device: null,
+      session: null,
+      screen: "play",
+      code: "page-error",
+      message: "The page hit an error.",
+    };
+    expect(session.sendLog(entry)).toBe(false);
+    const socket = sockets[0];
+    if (!socket) throw new Error("socket");
+    socket.open();
+    expect(session.sendLog(entry)).toBe(false);
+    socket.receive({
+      v: 1,
+      type: "welcome",
+      payload: {
+        clientId: "device-1",
+        role: "device",
+        token: "device-token-1234",
+        channels: [],
+        versions,
+      },
+    });
+    expect(session.sendLog(entry)).toBe(true);
+    const sent = JSON.parse(socket.sent.at(-1) ?? "{}") as { type?: string; payload?: unknown };
+    expect(sent.type).toBe("log");
+    expect(sent.payload).toEqual(entry);
+    expect(JSON.stringify(sent)).not.toContain("bytes");
+    expect(session.sendLog({ ...entry, bytes: "0a0b" } as unknown as typeof entry)).toBe(false);
+    session.close();
+  });
+
+  it("treats a socket reconnect as a reconnect notice and not an error", () => {
+    vi.useFakeTimers();
+    const sockets: FakeSocket[] = [];
+    const errors: string[] = [];
+    let reconnects = 0;
+    const session = openSession({
+      url: "ws://127.0.0.1:4787/ws",
+      hello: storyboardHello(),
+      onWelcome: () => undefined,
+      onStoryboard: () => undefined,
+      onDevice: () => undefined,
+      onError: (error) => errors.push(error.code),
+      onLive: () => undefined,
+      onReconnect: () => {
+        reconnects += 1;
+      },
+      createSocket: () => {
+        const socket = new FakeSocket();
+        sockets.push(socket);
+        return socket as unknown as WebSocket;
+      },
+    });
+    const socket = sockets[0];
+    if (!socket) throw new Error("socket");
+    socket.open();
+    socket.receive({
+      v: 1,
+      type: "welcome",
+      payload: {
+        clientId: "storyboard-1",
+        role: "storyboard",
+        token: "board-token-1234",
+        channels: ["storyboard"],
+        versions,
+      },
+    });
+    expect(
+      session.sendLog({
+        level: "debug",
+        source: "board",
+        device: null,
+        session: null,
+        screen: "story",
+        code: "socket-reconnect",
+        message: "The socket dropped. Reconnecting.",
+      }),
+    ).toBe(true);
+    socket.close();
+    expect(reconnects).toBe(1);
+    expect(errors).toEqual([]);
+    vi.advanceTimersByTime(500);
+    const again = sockets[1];
+    if (!again) throw new Error("reconnect");
+    again.open();
+    const afterDrop = {
+      level: "error" as const,
+      source: "board" as const,
+      device: null,
+      session: null,
+      screen: "story",
+      code: "page-error",
+      message: "After the drop.",
+    };
+    expect(session.sendLog(afterDrop)).toBe(false);
+    again.receive({
+      v: 1,
+      type: "welcome",
+      payload: {
+        clientId: "storyboard-2",
+        role: "storyboard",
+        token: "board-token-1234",
+        channels: ["storyboard"],
+        versions,
+      },
+    });
+    expect(session.sendLog(afterDrop)).toBe(true);
+    session.close();
+  });
+
+  it("hands a logged error to the story board and does not treat it as a local failure", () => {
+    const sockets: FakeSocket[] = [];
+    const logged: string[] = [];
+    const local: string[] = [];
+    openSession({
+      url: "ws://127.0.0.1:4787/ws",
+      hello: storyboardHello(),
+      onWelcome: () => undefined,
+      onStoryboard: () => undefined,
+      onDevice: () => undefined,
+      onError: () => undefined,
+      onLocalError: (error) => local.push(error.code),
+      onLogged: (entry) => logged.push(entry.code),
+      onLive: () => undefined,
+      createSocket: () => {
+        const socket = new FakeSocket();
+        sockets.push(socket);
+        return socket as unknown as WebSocket;
+      },
+    });
+    const socket = sockets[0];
+    if (!socket) throw new Error("socket");
+    socket.open();
+    socket.receive({
+      v: 1,
+      type: "logged",
+      payload: { code: "page-error", source: "device", message: "The iPad hit an error." },
+    });
+    expect(logged).toEqual(["page-error"]);
+    expect(local).toEqual([]);
+  });
 });

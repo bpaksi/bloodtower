@@ -1,6 +1,6 @@
 // Placeholder content for the Story board layouts. Roles are DEC-100; the four attributes are
 // DEC-101. The attribute values are invented (1-5) because the cards say "numbers for later".
-import type { Rng } from "../../../lib/rng.ts";
+import type { Rng } from "@dark-tower/rng";
 
 export type Role = "Fighter" | "Healer" | "Magic user" | "Scout" | "Ranger" | "Scholar";
 export type Hero = {

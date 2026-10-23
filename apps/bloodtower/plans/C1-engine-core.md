@@ -1,6 +1,6 @@
 # C1 — Engine core: the loop stack on an event log (build plan)
 
-**Status:** draft for Bob, 2026-10-23. Nothing is built. Waiting on G0.
+**Status:** approved for build (G0 passed), 2026-10-23 ET. Nothing is built. B1 may start.
 **Source:** spec §1a (D32 to D38), decisions [0004](../../../research/decisions/0004-tower-package.md) and [0005](../../../research/decisions/0005-seeded-rng-package.md), and the game-design cards: the loop stack (DEC-132 to DEC-147, MEC-032 to MEC-039), the session loop (DEC-152 to DEC-155), the event log (DEC-107), the day (DEC-077, DEC-078, DEC-085, DEC-108, DEC-109) and the names (DEC-186 to DEC-206). Continue-only autosave and the session screen are PR #186 (DEC-208 to DEC-217). The Proving Grounds day slice is PR #188 (AREA-077, DEC-218 to DEC-226).
 **Goal:** replace R1's session engine with the reducer core, move the shell flow onto it, and play the Proving Grounds day slice (AREA-077) end to end. The exit is Continue-only: Quit story lands on the session screen (SCR-021), Done for tonight ends the sitting, and Continue resumes the autosave until a new game replaces it.
 **Exit condition:** every `Done when` below passes in CI with the mock tower, and Bob signs off at G-C1 on the Mac, TV, an iPad and the real tower.
@@ -49,7 +49,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 
 ### Step 1: `packages/rng` (decision 0005)
 - Depends on: G0
-- Touches: `packages/rng/**`, `packages/README.md`, `apps/prototypes/src/web/lib/{rng.ts,rng.test.ts}`, `apps/prototypes/src/web/package.json`, the prototype pages' imports of `lib/rng.ts`, `pnpm-lock.yaml`
+- Touches: `packages/rng/**`, `packages/README.md`, `apps/prototypes/src/web/lib/{rng.ts,rng.test.ts,batch.ts,batch.test.ts,README.md}`, `apps/prototypes/src/web/{package.json,next.config.ts}`, every prototypes import of `lib/rng.ts` (pages and the game, logic and data modules, with their tests), `pnpm-lock.yaml`, this file (Results). `batch.ts` and `batch.test.ts` change only the import of the moved generator. `next.config.ts` sets `transpilePackages` so Next can compile the TypeScript package.
 - Deps change: yes
 - Runs: cloud
 - Model: sonnet
@@ -190,4 +190,6 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 
 ## Results
 
-(none yet)
+- G0 (2026-10-23 ET): Approved by Wright under Bob's process handoff (Wright+Warden own day-to-day gates). Plan + architecture review stand in for intent. Weekend slice = AREA-077 move+Enter/Leave+exit only; no Tower play / Keeper / combat. B1 may start (Step 1, then Step 4).
+- Step 1 (2026-10-23): `@dark-tower/rng` holds the generator and dice notation, moved with `git mv`, plus `eventRng(seed, seq)`. Prototypes import the package and `lib/rng.ts` is gone. Seed `bloodtower` stays pinned to its first ten `1d6` totals from main: 3, 3, 5, 2, 5, 4, 2, 1, 1, 5. `pnpm check` exit 0 (Biome 636 files, repo tests 270, `@dark-tower/rng` 13, prototypes-web 118). Deviation: the deletion also rewrites imports in the game, logic and data modules and in `batch.ts` / `batch.test.ts`, updates `lib/README.md`, and sets `transpilePackages` in `next.config.ts` so Next can compile the TypeScript package. The batch runner stays in prototypes.
+- Step 4 (2026-10-23): Pack format v2 (`src/protocols/pack-v2`, `src/server/pack/v2`), `packs-v2/base` and `packs-v2/test`. `pnpm --dir apps/bloodtower pack:lint packs-v2/test` OK. Board graph drafted from `research/game-design/board-map.md`; uncertain adjacencies omitted — Bob workbench check still pending.

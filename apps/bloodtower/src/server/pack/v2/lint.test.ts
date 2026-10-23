@@ -1,0 +1,100 @@
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { lintPath } from "../../scripts/packLint.ts";
+import { loadPackV2Dir } from "./load.ts";
+
+const repoRoot = join(import.meta.dirname, "../../../../../../");
+const packsV2 = join(repoRoot, "packs-v2");
+const basePack = join(packsV2, "base");
+const testPack = join(packsV2, "test");
+
+describe("pack format v2 lint", () => {
+  it("loads the base content pack with 60 board spaces", () => {
+    const result = loadPackV2Dir(basePack, packsV2);
+    expect(result.ok).toBe(true);
+    if (!result.ok || result.kind !== "base-content") return;
+    expect(result.pack.heroes).toHaveLength(6);
+    expect(result.pack.board.spaces).toHaveLength(60);
+    expect(result.pack.quest_types.map((q) => q.id)).toEqual([
+      "tomb",
+      "cave",
+      "encampment",
+      "fortress",
+      "ruins",
+      "shrine",
+    ]);
+  });
+
+  it("loads the Proving Grounds story against base content", () => {
+    const result = loadPackV2Dir(testPack, packsV2);
+    expect(result.ok).toBe(true);
+    if (!result.ok || result.kind !== "story") return;
+    expect(result.pack.day.move_roll).toEqual({ dice: "2d4", floor: 2, modifiers: false });
+    expect(result.pack.start.assignments).toHaveLength(4);
+    expect(result.base.pack_id).toBe("base");
+  });
+
+  it("passes pack:lint for packs-v2/test", () => {
+    const report = lintPath("packs-v2/test", repoRoot);
+    expect(report.exitCode).toBe(0);
+    expect(report.lines[0]).toContain("OK test");
+  });
+
+  const tempPacksV2 = () => {
+    const root = mkdtempSync(join(tmpdir(), "pack-v2-root-"));
+    const storyDir = join(root, "test");
+    cpSync(testPack, storyDir, { recursive: true });
+    cpSync(basePack, join(root, "base"), { recursive: true });
+    return { root, storyDir };
+  };
+
+  it("refuses an unknown manifest key (no code in packs)", () => {
+    const { root, storyDir } = tempPacksV2();
+    try {
+      const manifest = join(storyDir, "pack.yaml");
+      const text = readFileSync(manifest, "utf8");
+      writeFileSync(manifest, `${text}\nrun: eval("hack")\n`);
+      const result = loadPackV2Dir(storyDir, root);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.issues.some((item) => item.rule === "P2-1")).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses an effect outside the fixed set", () => {
+    const { root, storyDir } = tempPacksV2();
+    try {
+      const manifest = join(storyDir, "pack.yaml");
+      const text = readFileSync(manifest, "utf8").replace("kind: set-flag", "kind: run-script");
+      writeFileSync(manifest, text);
+      const result = loadPackV2Dir(storyDir, root);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.issues.some((item) => item.rule === "P2-1")).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses a flag read that is never set", () => {
+    const { root, storyDir } = tempPacksV2();
+    try {
+      const manifest = join(storyDir, "pack.yaml");
+      const text = readFileSync(manifest, "utf8").replace(
+        "flag: proving-grounds-open",
+        "flag: never-written",
+      );
+      writeFileSync(manifest, text);
+      const result = loadPackV2Dir(storyDir, root);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.issues.some((item) => item.rule === "P2-3")).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});

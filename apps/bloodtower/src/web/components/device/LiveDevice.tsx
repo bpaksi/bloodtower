@@ -7,12 +7,20 @@ import {
 } from "bloodtower-protocols";
 import { useEffect, useRef, useState } from "react";
 import {
+  pageLogContext,
+  reconnectLog,
+  reportPageLog,
+  setPageLogContext,
+  setPageLogSocket,
+} from "../../lib/pageLog.ts";
+import {
   DEVICE_TOKEN_KEY,
   deviceHello,
   openSession,
   type SessionClient,
   sessionUrl,
 } from "../../lib/session";
+import { type DeviceErrorBannerModel, liveDeviceBanner } from "../errors/DeviceErrorBanner.tsx";
 import { DeviceScreen } from "./DeviceScreen";
 import { detectFormFactor } from "./formFactor";
 
@@ -36,16 +44,45 @@ export function LiveDevice() {
   const [live, setLive] = useState(false);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [state, setState] = useState<DeviceState>(waiting);
+  const [banner, setBanner] = useState<DeviceErrorBannerModel | null>(null);
   const client = useRef<SessionClient | null>(null);
+  const deviceIdRef = useRef<string | null>(null);
+  const screenRef = useRef(state.screen);
+  screenRef.current = state.screen;
+  deviceIdRef.current = deviceId;
 
   useEffect(() => {
+    const clearContext = setPageLogContext(() => ({
+      source: "device",
+      device: deviceIdRef.current,
+      session: null,
+      screen: screenRef.current,
+    }));
+    const clearSocket = setPageLogSocket((entry) => client.current?.sendLog(entry) ?? false);
     const token = sessionStorage.getItem(DEVICE_TOKEN_KEY);
-    if (!token) return;
+    if (!token)
+      return () => {
+        clearSocket();
+        clearContext();
+      };
     let hello: ReturnType<typeof deviceHello>;
     try {
       hello = deviceHello({ formFactor: detectFormFactor(navigator.userAgent), token });
-    } catch {
-      return;
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      const message = detail.trim() === "" ? "The device hello was refused." : detail;
+      void reportPageLog({
+        level: "error",
+        code: "device-hello",
+        message,
+        source: "device",
+        screen: "device",
+      });
+      setBanner(liveDeviceBanner({ code: "device-hello", message }));
+      return () => {
+        clearSocket();
+        clearContext();
+      };
     }
     const session = openSession({
       url: sessionUrl(window.location, process.env.NEXT_PUBLIC_WS_URL),
@@ -55,11 +92,33 @@ export function LiveDevice() {
         if (welcome.role === "device") setDeviceId(welcome.clientId);
       },
       onStoryboard: () => undefined,
-      onDevice: setState,
-      onError: () => undefined,
+      onDevice: (next) => {
+        if (screenRef.current !== next.screen) setBanner(null);
+        setState(next);
+      },
+      onError: (error) => setBanner(liveDeviceBanner(error)),
+      onLocalError: (error) => {
+        const context = pageLogContext();
+        void reportPageLog({
+          level: "error",
+          code: error.code,
+          message: error.message,
+          source: "device",
+          device: context.device,
+          screen: context.screen,
+        });
+        setBanner(liveDeviceBanner(error));
+      },
+      onReconnect: () => {
+        void reportPageLog(reconnectLog());
+      },
     });
     client.current = session;
-    return () => session.close();
+    return () => {
+      session.close();
+      clearSocket();
+      clearContext();
+    };
   }, []);
 
   return (
@@ -81,6 +140,7 @@ export function LiveDevice() {
         onFocusStory={(story) => {
           client.current?.sendFocusStory(story);
         }}
+        errorBanner={banner}
       />
       <p className="px-6 pb-8 text-[var(--bt-muted)]">
         <a href="/join">Back to join</a>

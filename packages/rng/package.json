@@ -1,0 +1,18 @@
+{
+  "name": "@dark-tower/rng",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Seeded generator and dice notation. A draw for one event depends only on the game seed and that event's sequence number.",
+  "type": "module",
+  "exports": {
+    ".": "./src/rng.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "vitest": "5.0.4"
+  }
+}

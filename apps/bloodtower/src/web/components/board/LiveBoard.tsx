@@ -20,15 +20,32 @@ import {
 } from "../../lib/audio/levels.ts";
 import { SIGNATURE } from "../../lib/audio/tracks.ts";
 import { waitingStoryboard } from "../../lib/boardView";
+import { type ErrorToast, pushErrorToast, visibleErrorToasts } from "../../lib/errorToasts.ts";
+import {
+  pageLogContext,
+  reconnectLog,
+  reportPageLog,
+  setPageLogContext,
+  setPageLogSocket,
+} from "../../lib/pageLog.ts";
 import { openSession, type SessionClient, sessionUrl, storyboardHello } from "../../lib/session";
 import { SoundDialog } from "./SoundDialog";
 import { StoryBoard } from "./StoryBoard";
+import { StoryToasts } from "./StoryToasts.tsx";
 
 /** localStorage can throw in a private window or with blocked site data. */
 const localStore = (): Storage | undefined => {
   try {
     return window.localStorage;
-  } catch {
+  } catch (error) {
+    // A private window refuses site storage. Levels fall back to the defaults, so this is recovered.
+    const detail = error instanceof Error ? error.message : String(error);
+    void reportPageLog({
+      level: "debug",
+      code: "board-storage",
+      message: detail.trim() === "" ? "Site storage is unavailable." : detail,
+      source: "board",
+    });
     return undefined;
   }
 };
@@ -43,6 +60,7 @@ const afterFirstInput = (current: FlowScreen, player: BoardAudio | null, openSou
 export function LiveBoard() {
   const [state, setState] = useState<StoryboardState>(waitingStoryboard());
   const [notice, setNotice] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ErrorToast[]>([]);
   const [debug, setDebug] = useState(false);
   const [levels, setLevels] = useState<Levels>(DEFAULT_LEVELS);
   const [soundOpen, setSoundOpen] = useState(false);
@@ -60,11 +78,25 @@ export function LiveBoard() {
     const saved = readLevels(localStore());
     setLevels(saved);
     audio.current = new BoardAudio(saved);
+    const clearContext = setPageLogContext(() => ({
+      source: "board",
+      device: null,
+      session: null,
+      screen: screen.current,
+    }));
+    const clearSocket = setPageLogSocket((entry) => client.current?.sendLog(entry) ?? false);
     const session = openSession({
       url: sessionUrl(window.location, process.env.NEXT_PUBLIC_WS_URL),
       hello: storyboardHello(),
       onLive: () => undefined,
       onWelcome: () => undefined,
+      onReconnect: () => {
+        void reportPageLog({ ...reconnectLog(), source: "board" });
+      },
+      onLogged: (entry) => {
+        const now = Date.now();
+        setToasts((current) => pushErrorToast(visibleErrorToasts(current, now), entry, now));
+      },
       onStoryboard: (next) => {
         received.current = true;
         screen.current = next.screen;
@@ -82,11 +114,35 @@ export function LiveBoard() {
         }
       },
       onDevice: () => undefined,
-      onError: (error) => setNotice(error.message),
+      onError: (error) => setNotice(`${error.code}: ${error.message}`),
+      onLocalError: (error) => {
+        const context = pageLogContext();
+        void reportPageLog({
+          level: "error",
+          code: error.code,
+          message: error.message,
+          source: "board",
+          screen: context.screen,
+        });
+        setNotice(`${error.code}: ${error.message}`);
+      },
     });
     client.current = session;
-    return () => session.close();
+    return () => {
+      session.close();
+      clearSocket();
+      clearContext();
+    };
   }, []);
+
+  useEffect(() => {
+    if (toasts.length === 0) return;
+    const delay = Math.max(0, Math.min(...toasts.map((toast) => toast.until - Date.now())));
+    const timer = setTimeout(() => {
+      setToasts((current) => visibleErrorToasts(current, Date.now()));
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [toasts]);
 
   // The first click or keypress unlocks audio. On the landing it is the moment the window
   // lights come on, so it plays the sting and opens the Sound dialog.
@@ -142,6 +198,7 @@ export function LiveBoard() {
 
   return (
     <>
+      <StoryToasts toasts={toasts} />
       {notice ? (
         <p className="bt-board-notice" role="status">
           {notice}

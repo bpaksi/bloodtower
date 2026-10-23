@@ -248,14 +248,16 @@ describe("host error log", () => {
       {
         time: "2026-10-23T12:00:00.000Z",
         level: "warn",
-        source: "device",
-        device: "ipad-2",
-        session: null,
+        source: "server",
+        device: null,
+        session: "session-host",
         screen: "play",
         code: "page-error",
         message: "The page reported a warning.",
       },
     ]);
+    const stored = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
+    expect(stored).not.toContain("ipad-2");
 
     const secret = "raw-byte-payload";
     const refused = await fetch(`${base}/log`, {
@@ -302,5 +304,22 @@ describe("host error log", () => {
 
     const get = await fetch(`${base}/log`);
     expect(get.status).toBe(405);
+  });
+
+  it("tells a subscriber about a stored line and skips a debug line when debug is off", () => {
+    const dataDir = makeDir();
+    const log = createHostLogger({
+      dataDir,
+      mirror: false,
+      now: () => new Date("2026-10-23T12:00:00.000Z"),
+    });
+    const seen: string[] = [];
+    const stop = log.subscribe((entry) => seen.push(entry.code));
+    log.debug("socket-reconnect", "hidden");
+    log.error("page-error", "shown");
+    expect(seen).toEqual(["page-error"]);
+    stop();
+    log.error("window-error", "after");
+    expect(seen).toEqual(["page-error"]);
   });
 });

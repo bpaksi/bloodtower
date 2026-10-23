@@ -1,8 +1,8 @@
 "use client";
+import { createRng } from "@dark-tower/rng";
 import { useState } from "react";
 import { Placeholder } from "../../../components/Placeholder.tsx";
 import { TuningPanel } from "../../../components/TuningPanel.tsx";
-import { createRng } from "../../../lib/rng.ts";
 import { defaultValues, toJson } from "../../../lib/tuning.ts";
 import {
   type CaveState,
