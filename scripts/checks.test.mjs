@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, before, describe, it } from "node:test";
-import { checkImports } from "./check-imports.mjs";
+import { checkEngineConstraints, checkImports } from "./check-imports.mjs";
 import { checkPins } from "./check-pins.mjs";
 
 let root;
@@ -176,5 +176,41 @@ describe("checkImports", () => {
     assert.deepEqual(errors, [
       'packages/shared/bad.ts: a shared package imports "one-protocols" from an app (one).',
     ]);
+  });
+});
+
+describe("checkEngineConstraints", () => {
+  before(() => {
+    root = mkdtempSync(join(tmpdir(), "dark-tower-engine-"));
+  });
+
+  const engineErrors = (path, text) => {
+    write(path, text);
+    const errors = checkEngineConstraints(root);
+    rmSync(join(root, path), { force: true });
+    rmSync(join(root, dirname(path)), { recursive: true, force: true });
+    return errors;
+  };
+
+  it("passes for a normal engine file", () => {
+    const errors = engineErrors(
+      "apps/bloodtower/src/engine/ok.ts",
+      'import { z } from "zod";\nimport { eventRng } from "@dark-tower/rng";\n',
+    );
+    assert.deepEqual(errors, []);
+  });
+
+  it("fails on banned imports and globals", () => {
+    const errors = engineErrors(
+      "apps/bloodtower/src/engine/bad.ts",
+      [
+        'import ws from "ws";',
+        'import { readFileSync } from "node:fs";',
+        "const x = Math.random();",
+      ].join("\n"),
+    );
+    assert.ok(errors.length >= 3);
+    assert.match(errors.join("\n"), /node:fs/);
+    assert.match(errors.join("\n"), /Math\.random/);
   });
 });

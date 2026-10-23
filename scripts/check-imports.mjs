@@ -36,6 +36,41 @@ const appOf = (root, path) => {
 const packageName = (specifier) =>
   specifier.startsWith("@") ? specifier.split("/").slice(0, 2).join("/") : specifier.split("/")[0];
 
+const SQLITE_PACKAGE = /^(?:better-sqlite3|drizzle-orm|@libsql\/client|sql\.js|sqlite3)(?:\/|$)/;
+
+/** Engine must stay pure: no I/O stack, clock, or ambient randomness (C1 step 3). */
+export const checkEngineConstraints = (root) => {
+  const engineDir = join(root, "apps/bloodtower/src/engine");
+  if (!existsSync(engineDir)) return [];
+
+  const errors = [];
+  const bannedGlobal = /\b(Math\.random|new\s+Date\s*\(|\bcrypto\.)/;
+
+  for (const file of walk(engineDir, (name) => SOURCE.test(name))) {
+    const rel = relative(root, file);
+    const text = readFileSync(file, "utf8");
+    for (const [, , specifier] of text.matchAll(IMPORT)) {
+      if (specifier.startsWith(".")) continue;
+      const pkg = packageName(specifier);
+      if (specifier.startsWith("node:")) {
+        errors.push(`${rel}: engine must not import "${specifier}".`);
+        continue;
+      }
+      if (pkg === "ws" || pkg === "react" || pkg === "react-dom") {
+        errors.push(`${rel}: engine must not import "${specifier}".`);
+        continue;
+      }
+      if (SQLITE_PACKAGE.test(pkg) || SQLITE_PACKAGE.test(specifier)) {
+        errors.push(`${rel}: engine must not import "${specifier}".`);
+      }
+    }
+    if (bannedGlobal.test(text)) {
+      errors.push(`${rel}: engine must not use Math.random, Date, or crypto.`);
+    }
+  }
+  return errors;
+};
+
 /** Returns one message per violation. An empty list means there are none. */
 export const checkImports = (root) => {
   const appsDir = join(root, "apps");
@@ -72,7 +107,7 @@ export const checkImports = (root) => {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-  const errors = checkImports(root);
+  const errors = [...checkImports(root), ...checkEngineConstraints(root)];
   for (const error of errors) console.error(error);
   if (errors.length > 0) {
     console.error(

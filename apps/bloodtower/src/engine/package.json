@@ -1,0 +1,22 @@
+{
+  "name": "bloodtower-engine",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bloodtower event-sourced reducer and loop runtime (DEC-143). No I/O.",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dark-tower/rng": "workspace:*",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "vitest": "5.0.4"
+  }
+}
