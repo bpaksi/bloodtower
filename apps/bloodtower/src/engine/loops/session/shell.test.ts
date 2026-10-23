@@ -98,7 +98,7 @@ describe("game setup forward and back", () => {
     expect(state.autosave).not.toBeNull();
   });
 
-  it("backs out of each setup screen per D31", () => {
+  it("backs out of claim-heroes and game-settings per D31", () => {
     let state = chooseStory(throughTower());
     state = runPresses(state, [
       press("ipad-0", "continue-game-settings", "continue"),
@@ -108,6 +108,57 @@ describe("game setup forward and back", () => {
     state = runPresses(state, [press("ipad-0", "back-game-settings", "back")]);
     expect(state.screen).toBe("pick-story");
     expect(state.chosenStoryId).toBeNull();
+  });
+
+  const atClaimHeroes = () => {
+    let state = chooseStory(throughTower());
+    state = runPresses(state, [press("ipad-0", "continue-game-settings", "continue")]);
+    for (const [index, hero] of TEST_STORY.heroes.entries()) {
+      const deviceId = `ipad-${index}`;
+      state = stepShell(state, { kind: "device-join", v: 1, deviceId }).state;
+      state = stepShell(state, {
+        kind: "hero-hold",
+        v: 1,
+        deviceId,
+        heroId: hero.id,
+        action: "take",
+      }).state;
+    }
+    return state;
+  };
+
+  it("backs through each setup step to the previous step or claim-heroes", () => {
+    let state = atClaimHeroes();
+    state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
+    expect(state.screen).toBe("setup");
+    const steps = state.setupSteps;
+    expect(steps.length).toBeGreaterThanOrEqual(2);
+    const first = steps[0];
+    const second = steps[1];
+    if (!first || !second) throw new Error("Expected at least two setup steps.");
+
+    state = runPresses(state, [press("ipad-0", `continue-setup-${first.id}`, "continue")]);
+    expect(state.screen).toBe("setup");
+    expect(state.setupAt).toBe(1);
+
+    state = runPresses(state, [press("ipad-0", `back-setup-${second.id}`, "back")]);
+    expect(state.screen).toBe("setup");
+    expect(state.setupAt).toBe(0);
+
+    state = runPresses(state, [press("ipad-0", `back-setup-${first.id}`, "back")]);
+    expect(state.screen).toBe("claim-heroes");
+  });
+
+  it("backs from Begin to the last setup step", () => {
+    let state = atClaimHeroes();
+    state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
+    for (const step of state.setupSteps) {
+      state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
+    }
+    expect(state.screen).toBe("begin");
+    state = runPresses(state, [press("ipad-0", "back-begin", "back")]);
+    expect(state.screen).toBe("setup");
+    expect(state.setupAt).toBe(state.setupSteps.length - 1);
   });
 });
 
@@ -156,6 +207,41 @@ describe("pauses", () => {
     }).state;
     expect(state.stage).toBe("playing");
     expect(state.pause).toBeNull();
+  });
+
+  it("keeps a tower-lost pause after iPad heroes are reclaimed (DEC-155)", () => {
+    let state = inPlay();
+    state = stepShell(state, {
+      kind: "tower-snapshot",
+      v: 1,
+      tower: TOWER_DISCONNECTED,
+    }).state;
+    expect(state.pause?.cause).toBe("tower-lost");
+
+    state = stepShell(state, { kind: "device-drop", v: 1, deviceId: "ipad-0" }).state;
+    expect(state.pause?.cause).toBe("disconnect");
+
+    state = stepShell(state, { kind: "device-join", v: 1, deviceId: "ipad-0" }).state;
+    state = stepShell(state, {
+      kind: "hero-hold",
+      v: 1,
+      deviceId: "ipad-0",
+      heroId: "hero-a",
+      action: "take",
+    }).state;
+
+    expect(state.stage).toBe("paused");
+    expect(state.pause?.cause).toBe("tower-lost");
+    expect(state.tower.connection).not.toBe("connected");
+    expect(state.offered.some((o) => o.actionId === "reconnect" && o.open)).toBe(true);
+  });
+
+  it("does not offer Reconnect on an iPad-drop pause", () => {
+    let state = inPlay();
+    state = stepShell(state, { kind: "device-drop", v: 1, deviceId: "ipad-0" }).state;
+    expect(state.pause?.cause).toBe("disconnect");
+    expect(state.offered.some((o) => o.actionId === "reconnect")).toBe(false);
+    expect(state.offered.some((o) => o.actionId === "quit-story" && o.open)).toBe(true);
   });
 
   it("pauses on a lost tower until Reconnect is pressed", () => {
@@ -208,6 +294,27 @@ describe("quit story and session screen", () => {
     expect(state.autosave).toEqual(autosave);
     expect(state.towerSetupDone).toBe(true);
     expect(state.screen).not.toBe("tower-connect");
+  });
+
+  it("pauses on Continue when the autosave resumes but the tower is not ready (MEC-018)", () => {
+    let state = runPresses(start(), [
+      press("ipad-0", "tower-connect", "tower-connect"),
+      press("ipad-0", "tower-calibrate", "tower-calibrate"),
+    ]);
+    state = {
+      ...state,
+      autosave: { gameId: "game-1", packId: "test", seed: "seed", day: 2 },
+    };
+    state = stepShell(state, {
+      kind: "tower-snapshot",
+      v: 1,
+      tower: TOWER_DISCONNECTED,
+    }).state;
+    expect(state.offered.some((o) => o.promptId === "continue-pick-game" && o.open)).toBe(true);
+    state = runPresses(state, [press("ipad-0", "continue-pick-game", "continue")]);
+    expect(state.resumedFromAutosave).toBe(true);
+    expect(state.stage).toBe("paused");
+    expect(state.pause?.cause).toBe("tower-lost");
   });
 
   it("offers Continue on pick-game while an autosave exists", () => {

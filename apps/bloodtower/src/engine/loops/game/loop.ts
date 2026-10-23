@@ -110,8 +110,10 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
       syncScreen(local);
       shell.stage = shell.pause ? "paused" : "playing";
       if (shell.pause) {
-        ctx.offerPrompt(`pause-${shell.pauseSerial}-reconnect`, "reconnect");
-        recordOffer(`pause-${shell.pauseSerial}-reconnect`, "reconnect");
+        if (shell.pause.cause === "tower-lost") {
+          ctx.offerPrompt(`pause-${shell.pauseSerial}-reconnect`, "reconnect");
+          recordOffer(`pause-${shell.pauseSerial}-reconnect`, "reconnect");
+        }
         ctx.offerPrompt(`pause-${shell.pauseSerial}-quit`, "quit-story");
         recordOffer(`pause-${shell.pauseSerial}-quit`, "quit-story");
         return { local, passComplete: false };

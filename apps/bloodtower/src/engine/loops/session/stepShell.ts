@@ -59,16 +59,20 @@ const pauseIfNeeded = (state: ShellState): void => {
   if (!story) return;
   const unheld = story.heroes.some((hero) => state.holdings[hero.id] == null);
   if (unheld) {
+    if (state.pause?.cause !== "disconnect") {
+      state.pauseSerial += 1;
+    }
     state.stage = "paused";
     state.pause = { cause: "disconnect" };
-    state.pauseSerial += 1;
     state.screen = "pause";
     return;
   }
   if (state.tower.connection !== "connected") {
+    if (state.pause?.cause !== "tower-lost") {
+      state.pauseSerial += 1;
+    }
     state.stage = "paused";
     state.pause = { cause: "tower-lost" };
-    state.pauseSerial += 1;
     state.screen = "pause";
   }
 };
@@ -166,8 +170,8 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       next.pause = null;
       next.stage = "playing";
       next.screen = "play";
+      pauseIfNeeded(next);
     }
-    resetGameAwaitingPress(next);
     resetGameAwaitingPress(next);
     bindShellState(next);
     resumeAfterPrompt(next.registry, next.seed, eventSeq, next.loops, effects as EngineEffect[]);
