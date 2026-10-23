@@ -15,6 +15,7 @@ import {
   type SessionClient,
   sessionUrl,
 } from "../../lib/session";
+import { DeviceErrorBanner } from "../errors/DeviceErrorBanner.tsx";
 import { detectFormFactor } from "./formFactor";
 import { JoinScreen } from "./JoinScreen";
 
@@ -27,11 +28,17 @@ const enterDevice = () => {
   window.location.assign("/device");
 };
 
+/** The join page's error bar. Same banner as LiveDevice: the code, and no Reload. */
+export function JoinErrorBar({ error }: { error: { code: string; message: string } | null }) {
+  if (!error) return null;
+  return <DeviceErrorBanner code={error.code} message={error.message} />;
+}
+
 /** Join and rejoin. Once welcomed, the iPad enters Tower Connect. */
 export function LiveJoin() {
   const [live, setLive] = useState(false);
   const [code, setCode] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ code: string; message: string } | null>(null);
   useEffect(() => {
     const urlCode = codeFromLocation();
     setCode(urlCode);
@@ -104,7 +111,7 @@ export function LiveJoin() {
         void reportPageLog({ ...reconnectLog(), source: "device", screen: "join" });
       },
       onError: (error) => {
-        setNotice(`${error.code}: ${error.message}`);
+        setNotice({ code: error.code, message: error.message });
         if (!forgetStoredToken({ hadStoredToken: stored !== null, welcomed, code: error.code })) {
           return;
         }
@@ -112,6 +119,7 @@ export function LiveJoin() {
         if (urlCode) window.location.reload();
       },
       onLocalError: (error) => {
+        setNotice({ code: error.code, message: error.message });
         void reportPageLog({
           level: "error",
           code: error.code,
@@ -139,7 +147,7 @@ export function LiveJoin() {
           enterDevice();
         }}
       />
-      {notice ? <p role="status">{notice}</p> : null}
+      <JoinErrorBar error={notice} />
     </>
   );
 }

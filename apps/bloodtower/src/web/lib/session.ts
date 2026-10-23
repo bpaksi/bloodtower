@@ -105,8 +105,9 @@ export interface SessionClient {
   /** The story board only: the Keeper line that finished on the board (D7 exception). */
   sendKeeperLineEnded: (momentId: string, line: number) => boolean;
   /**
-   * Page log (decision 0003). Text and a short code only. False when the socket is not open
-   * or the payload is refused, so the caller can POST `/log` instead.
+   * Page log (decision 0003). Text and a short code only. False when the socket is not open,
+   * hello has not finished, or the payload is refused, so the caller can POST `/log` instead.
+   * A socket that has not joined cannot stamp a role, so the line does not go out on it.
    */
   sendLog: (payload: LogPayload) => boolean;
   close: () => void;
@@ -143,6 +144,7 @@ export const openSession = (options: SessionOptions): SessionClient => {
   let socket: WebSocket | undefined;
   let hello = options.hello;
   let closed = false;
+  let joined = false;
   let attempt = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -189,6 +191,7 @@ export const openSession = (options: SessionOptions): SessionClient => {
         return;
       }
       if (message.data.type === "welcome") {
+        joined = true;
         if (message.data.payload.role === "device" && hello.role === "device") {
           hello = deviceHello({
             formFactor: hello.formFactor === "phone" ? "phone" : "ipad",
@@ -214,6 +217,7 @@ export const openSession = (options: SessionOptions): SessionClient => {
     };
     current.onclose = () => {
       if (socket !== current) return;
+      joined = false;
       options.onLive(false);
       if (closed) return;
       options.onReconnect?.();
@@ -260,6 +264,7 @@ export const openSession = (options: SessionOptions): SessionClient => {
       return sendRaw(message.data);
     },
     sendLog: (payload) => {
+      if (!joined) return false;
       const message = logMessageSchema.safeParse({
         v: PROTOCOL_VERSION,
         type: "log",

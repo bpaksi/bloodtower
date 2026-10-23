@@ -248,14 +248,16 @@ describe("host error log", () => {
       {
         time: "2026-10-23T12:00:00.000Z",
         level: "warn",
-        source: "device",
-        device: "ipad-2",
-        session: null,
+        source: "server",
+        device: null,
+        session: "session-host",
         screen: "play",
         code: "page-error",
         message: "The page reported a warning.",
       },
     ]);
+    const stored = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
+    expect(stored).not.toContain("ipad-2");
 
     const secret = "raw-byte-payload";
     const refused = await fetch(`${base}/log`, {

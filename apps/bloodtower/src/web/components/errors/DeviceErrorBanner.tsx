@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * A LiveDevice control error, beside the controls. Not the mist card: the page is still up.
- * Nothing retries the press.
+ * A device-page error beside the controls, on LiveDevice and on Join.
+ * Not the mist card: the page is still up. Nothing retries the action.
  */
 export interface DeviceErrorBannerModel {
   code: string;

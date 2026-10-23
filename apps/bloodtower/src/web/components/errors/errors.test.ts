@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DeviceScreen } from "../device/DeviceScreen.tsx";
+import { JoinErrorBar } from "../device/LiveJoin.tsx";
 import { DeviceErrorBanner, liveDeviceBanner } from "./DeviceErrorBanner.tsx";
 import { MIST_COPY, MistCard } from "./MistCard.tsx";
 
@@ -74,5 +75,22 @@ describe("LiveDevice banner", () => {
     expect(page).toContain("invalid-state");
     expect(page).toContain('data-layout="ipad"');
     expect(page).not.toContain(MIST_COPY);
+  });
+
+  it("shows a join-page error on that same banner, with the code", () => {
+    const html = renderToStaticMarkup(
+      createElement(JoinErrorBar, {
+        error: {
+          code: "invalid-json",
+          message: "The session host sent a frame this page cannot show.",
+        },
+      }),
+    );
+    expect(html).toContain("invalid-json");
+    expect(html).toContain("The session host sent a frame this page cannot show.");
+    expect(html).toContain('data-presentation="banner"');
+    expect(html).not.toContain(MIST_COPY);
+    expect(html).not.toContain("<button");
+    expect(renderToStaticMarkup(createElement(JoinErrorBar, { error: null }))).toBe("");
   });
 });

@@ -229,6 +229,18 @@ describe("openSession", () => {
     const socket = sockets[0];
     if (!socket) throw new Error("socket");
     socket.open();
+    expect(session.sendLog(entry)).toBe(false);
+    socket.receive({
+      v: 1,
+      type: "welcome",
+      payload: {
+        clientId: "device-1",
+        role: "device",
+        token: "device-token-1234",
+        channels: [],
+        versions,
+      },
+    });
     expect(session.sendLog(entry)).toBe(true);
     const sent = JSON.parse(socket.sent.at(-1) ?? "{}") as { type?: string; payload?: unknown };
     expect(sent.type).toBe("log");
@@ -263,9 +275,57 @@ describe("openSession", () => {
     const socket = sockets[0];
     if (!socket) throw new Error("socket");
     socket.open();
+    socket.receive({
+      v: 1,
+      type: "welcome",
+      payload: {
+        clientId: "storyboard-1",
+        role: "storyboard",
+        token: "board-token-1234",
+        channels: ["storyboard"],
+        versions,
+      },
+    });
+    expect(
+      session.sendLog({
+        level: "debug",
+        source: "board",
+        device: null,
+        session: null,
+        screen: "story",
+        code: "socket-reconnect",
+        message: "The socket dropped. Reconnecting.",
+      }),
+    ).toBe(true);
     socket.close();
     expect(reconnects).toBe(1);
     expect(errors).toEqual([]);
+    vi.advanceTimersByTime(500);
+    const again = sockets[1];
+    if (!again) throw new Error("reconnect");
+    again.open();
+    const afterDrop = {
+      level: "error" as const,
+      source: "board" as const,
+      device: null,
+      session: null,
+      screen: "story",
+      code: "page-error",
+      message: "After the drop.",
+    };
+    expect(session.sendLog(afterDrop)).toBe(false);
+    again.receive({
+      v: 1,
+      type: "welcome",
+      payload: {
+        clientId: "storyboard-2",
+        role: "storyboard",
+        token: "board-token-1234",
+        channels: ["storyboard"],
+        versions,
+      },
+    });
+    expect(session.sendLog(afterDrop)).toBe(true);
     session.close();
   });
 

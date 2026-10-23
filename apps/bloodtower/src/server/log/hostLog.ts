@@ -68,6 +68,8 @@ export interface HostLogger {
   readonly dir: string;
   /** Fills `session` on later server lines that do not set one. */
   setSession(session: string | null): void;
+  /** The session `setSession` stored. `POST /log` stamps this and ignores the body. */
+  session(): string | null;
   /** Writes one line. A debug line is dropped when debug is off. */
   append(entry: Omit<LogEntry, "time">): void;
   /**
@@ -269,6 +271,7 @@ export const createHostLogger = (options: HostLoggerOptions): HostLogger => {
       assertContext(session, "session");
       currentSession = session;
     },
+    session: () => currentSession,
     append,
     subscribe: (listener) => {
       listeners.add(listener);
@@ -385,9 +388,12 @@ const acceptIngest = (
 };
 
 /**
- * `POST /log` appends one line. The host stamps the time. Unknown fields are refused,
- * including anything that would carry raw bytes. A debug line is accepted and stored
- * only when the logger's debug switch is on. The caller answers `OPTIONS` for dev CORS.
+ * `POST /log` appends one line. The host stamps the time. It also stamps identity (D12):
+ * the body's `device`, `session` and `source` are ignored, because this request has no
+ * joined socket. The stored line uses the logger's session, no device id, and source
+ * `server`. Screen, level, code and message are the page's report. Unknown fields are
+ * refused, including anything that would carry raw bytes. A debug line is accepted and
+ * stored only when the logger's debug switch is on. The caller answers `OPTIONS` for dev CORS.
  */
 export const handleLogIngest = async (
   req: IncomingMessage,
@@ -431,7 +437,15 @@ export const handleLogIngest = async (
     sendText(res, 400, "Log entry was refused.\n");
     return;
   }
-  logger.append(accepted.entry);
+  logger.append({
+    level: accepted.entry.level,
+    source: "server",
+    device: null,
+    session: logger.session(),
+    screen: accepted.entry.screen,
+    code: accepted.entry.code,
+    message: accepted.entry.message,
+  });
   res.writeHead(204);
   res.end();
 };

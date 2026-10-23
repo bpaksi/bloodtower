@@ -261,23 +261,28 @@ describe("session hub", () => {
       body: JSON.stringify({
         level: "error",
         source: "board",
-        device: null,
-        session: null,
+        device: "spoofed-device",
+        session: "spoofed-session",
         screen: "story",
         code: "page-error",
         message: "The board hit an error.",
       }),
     });
     expect(posted.status).toBe(204);
-    const lines = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8")
+    const rawLog = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
+    expect(rawLog).not.toContain("spoofed-device");
+    expect(rawLog).not.toContain("spoofed-session");
+    const lines = rawLog
       .trim()
       .split("\n")
       .map((line) => JSON.parse(line) as { code: string; session: string | null; source: string });
     expect(lines).toEqual([
       expect.objectContaining({
         code: "page-error",
-        source: "board",
-        session: null,
+        source: "server",
+        device: null,
+        session: host.loadRun().session.id,
+        screen: "story",
         message: "The board hit an error.",
       }),
     ]);
@@ -431,6 +436,53 @@ describe("session hub", () => {
     expect(levels).not.toContain("debug");
     expect(read().some((line) => line.code === "socket-reconnect")).toBe(false);
     expect(device.log.some((message) => message.type === "logged")).toBe(false);
+  });
+
+  it("refuses a log before hello and does not keep a forged board source", async () => {
+    const dataDir = tempDir();
+    const log = createHostLogger({
+      dataDir,
+      mirror: false,
+      now: () => new Date("2026-10-23T12:00:00.000Z"),
+    });
+    const { host } = await start(createMockTower(), { log });
+    const board = await helloBoard(host.port);
+    const pending = await connect(host.port);
+    const forged = "Forged before hello.";
+    send(pending.socket, "log", {
+      level: "error",
+      source: "board",
+      device: "spoofed-device",
+      session: "spoofed-session",
+      screen: "story",
+      code: "page-error",
+      message: forged,
+    });
+    await until(pending.inbox, pending.log, (messages) =>
+      messages.some((message) => message.type === "error"),
+    );
+    expect(latest(pending.log, "error")).toMatchObject({
+      type: "error",
+      payload: { code: "invalid-state" },
+    });
+    await until(board.inbox, board.log, (messages) =>
+      messages.some((message) => message.type === "logged"),
+    );
+    const raw = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
+    expect(raw).not.toContain(forged);
+    expect(raw).not.toContain("spoofed-device");
+    expect(raw).not.toContain("spoofed-session");
+    expect(raw).not.toContain('"source":"board"');
+    expect(
+      board.log.some(
+        (message) => message.type === "logged" && message.payload.code === "page-error",
+      ),
+    ).toBe(false);
+    expect(
+      board.log.some(
+        (message) => message.type === "logged" && message.payload.code === "invalid-state",
+      ),
+    ).toBe(true);
   });
 
   it("accepts a listed dev origin and ignores a spoofed Host on the join URL", async () => {

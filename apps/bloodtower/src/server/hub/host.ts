@@ -585,20 +585,21 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   /**
-   * A page log (D39). It changes no game state. The device id and the session come from
-   * this socket, not from the payload (D12). A storyboard line has no device id.
+   * A page log (D39). It changes no game state. Source, device id and session come from
+   * this socket after hello (D12), never from the payload. A pending socket is refused:
+   * it has no role, so it cannot claim the story board or a device. A storyboard line
+   * has no device id.
    */
-  const onLog = (_socket: WebSocket, client: ClientState, message: ClientMessage) => {
+  const onLog = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
     if (message.type !== "log") return;
-    const source =
-      client.role === "storyboard"
-        ? "board"
-        : client.role === "device"
-          ? "device"
-          : message.payload.source;
+    const correlationId = message.id;
+    if (client.role === "pending") {
+      sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
+      return;
+    }
     log.append({
       level: message.payload.level,
-      source,
+      source: client.role === "storyboard" ? "board" : "device",
       device: client.role === "device" ? (client.deviceId ?? null) : null,
       session: sessionId,
       screen: message.payload.screen,

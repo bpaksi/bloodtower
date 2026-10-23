@@ -8,8 +8,10 @@ import { sessionUrl } from "./session.ts";
 
 /**
  * Ships a page log to the Mac host (decision 0003).
- * The socket is preferred. When it is down, or it refuses the line, the same fields go to
- * `POST /log`. The body is text and a short code only: the same object the socket sends.
+ * The socket is preferred, and only after hello: until then the socket cannot stamp a role.
+ * When it is down, not yet joined, or it refuses the line, the same fields go to `POST /log`.
+ * The body is text and a short code only. The host does not keep `device`, `session` or
+ * `source` from that body; it stamps its own session, no device, and source `server`.
  */
 
 export const SOCKET_RECONNECT_CODE = "socket-reconnect";
@@ -164,8 +166,9 @@ const errorText = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 /**
- * Sends one page line. A failure to send is logged on the console: the page has no other
- * channel left, and the failure is not hidden.
+ * Sends one page line. If the socket and `POST /log` both fail, the failure is
+ * `console.error` with code `log-ship` and the result is `"unsent"`. There is no third
+ * host path and no retry: the console line is the remaining record, and it is not hidden.
  */
 export const reportPageLog = async (
   input: Pick<LogPayload, "level" | "code" | "message"> & Partial<PageLogContext>,

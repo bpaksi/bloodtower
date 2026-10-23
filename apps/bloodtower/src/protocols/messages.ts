@@ -206,7 +206,9 @@ export const pageLogSourceSchema = z.enum(["board", "device"]);
 /**
  * Client-to-host `log` (decision 0003, D39). Text and a short code only.
  * A strict object, so `bytes`, `raw`, `packet`, `capabilityId` and `params` are refused.
- * The host stamps the time, and it takes the device id and the session from the socket (D12).
+ * The host stamps the time. After hello it also stamps source, device and session from the
+ * socket (D12). A socket that has not joined is refused. `POST /log` carries the same
+ * fields, and the host ignores device, session and source on that path.
  */
 export const logPayloadSchema = z.strictObject({
   level: pageLogLevelSchema,
