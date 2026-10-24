@@ -4,7 +4,7 @@ import { type BoardSpaceInput, buildBoardGraph } from "../../engine/loops/chapte
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { mergeSetupSteps, type ShellStory } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
-import { loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
+import { classifyPackDoor, loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
 
 export type StoryCatalog = {
   stories: ShellStory[];
@@ -50,6 +50,14 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   for (const name of readdirSync(root, { withFileTypes: true })) {
     if (!name.isDirectory()) continue;
     const dir = join(root, name.name);
+    // A parsed manifest that is not format 2 (the metadata-only Count) is not a v2 door.
+    // A manifest that cannot be read or parsed is still reported.
+    const door = classifyPackDoor(dir);
+    if (door.kind === "skip") continue;
+    if (door.kind === "broken") {
+      issues.push(...door.issues);
+      continue;
+    }
     const loaded = loadPackV2Dir(dir, root);
     if (!loaded.ok) {
       issues.push(...loaded.issues);

@@ -14,6 +14,7 @@ import {
 import { parse as parseYaml } from "yaml";
 import {
   indexPackAssets,
+  mediaOnDiskIssues,
   PACK_ASSETS_DIR,
   type PackAssetIndex,
   stillAspectIssues,
@@ -32,6 +33,8 @@ import { textFitWarnings } from "./fit.ts";
 const MAX_FILE_BYTES = 1_000_000;
 
 const MANIFEST_FILES: ReadonlySet<string> = new Set(["pack.yaml", "pack.yml", "pack.json"]);
+
+const isMarkdownNote = (name: string) => name.toLowerCase().endsWith(".md");
 
 /** File stem → pack field. A stem not listed here is not a pack file. */
 const SPLIT_KEYS: Readonly<Record<string, string>> = {
@@ -183,7 +186,7 @@ export const loadPackDir = (dir: string): PackLoadResult => {
   const metadataOnly = assembled.playable === false;
 
   for (const name of sortedNames) {
-    if (name === "README.md" || name === packFile) continue;
+    if (isMarkdownNote(name) || name === packFile) continue;
     if (MANIFEST_FILES.has(name)) {
       issues.push(issue(name, "(file)", "V-1", "The pack has two manifest files."));
       continue;
@@ -250,6 +253,8 @@ export const loadPackDir = (dir: string): PackLoadResult => {
   if (metadataOnly) {
     const meta = packMetadataSchema.safeParse(assembled);
     if (!meta.success) return failed(meta.error);
+    const media = mediaOnDiskIssues(root, [], meta.data.cover, "V-2");
+    if (media.errors.length > 0) return { ok: false, issues: media.errors };
     const assets = indexPackAssets(root, {
       pack_id: meta.data.pack_id,
       assets: [],
@@ -257,17 +262,27 @@ export const loadPackDir = (dir: string): PackLoadResult => {
     });
     const shape = stillAspectIssues(assets, { assets: [], cover: meta.data.cover });
     if (shape.length > 0) return { ok: false, issues: shape };
-    return { ok: true, playable: false, pack: meta.data, assets };
+    return {
+      ok: true,
+      playable: false,
+      pack: meta.data,
+      assets: { ...assets, warnings: [...assets.warnings, ...media.warnings] },
+    };
   }
 
   const parsed = packSchema.safeParse(assembled);
   if (!parsed.success) return failed(parsed.error);
+  const media = mediaOnDiskIssues(root, parsed.data.assets, parsed.data.cover, "V-2");
+  if (media.errors.length > 0) return { ok: false, issues: media.errors };
   const indexed = indexPackAssets(root, parsed.data);
   const shape = stillAspectIssues(indexed, parsed.data);
   if (shape.length > 0) return { ok: false, issues: shape };
   // W-fit rides the same warnings channel as W-asset, so pack:lint still exits 0.
   const fit = textFitWarnings(parsed.data, sources.get("moments") ?? manifestName);
-  const assets = { ...indexed, warnings: [...indexed.warnings, ...fit] };
+  const assets = {
+    ...indexed,
+    warnings: [...indexed.warnings, ...media.warnings, ...fit],
+  };
   return { ok: true, playable: true, pack: parsed.data, assets };
 };
 

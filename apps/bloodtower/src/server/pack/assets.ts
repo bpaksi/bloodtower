@@ -175,6 +175,91 @@ export const validateAssetsFolder = (
 
 const expectsImageFile = (type: Asset["type"]) => type === "still" || type === "portrait";
 
+const FILE_BACKED_TYPES = new Set(["still", "clip", "line", "sfx", "music", "ambient"]);
+
+/** A pack-relative file that stays inside the pack folder, or undefined when it does not. */
+const resolveInsidePack = (packRoot: string, rel: string): string | undefined => {
+  if (rel.length === 0 || rel.startsWith("/") || rel.startsWith("\\") || rel.includes("\\")) {
+    return undefined;
+  }
+  if (rel.split("/").some((part) => part === ".." || part === ".")) return undefined;
+  let root = packRoot;
+  try {
+    root = realpathSync(packRoot);
+  } catch {
+    return undefined;
+  }
+  const path = join(root, rel);
+  if (!existsSync(path)) return undefined;
+  let real = path;
+  try {
+    real = realpathSync(path);
+  } catch {
+    return undefined;
+  }
+  if (!isInside(root, real) || !statSync(real).isFile()) return undefined;
+  return real;
+};
+
+const mediaAsset = (asset: {
+  id: string;
+  type: string;
+  status?: string;
+  path?: string;
+}): Asset => ({
+  id: asset.id,
+  type: asset.type === "clip" ? "clip" : "still",
+  target: "storyboard",
+  status: asset.status === "placeholder" || asset.status === "draft" ? asset.status : "final",
+  ...(asset.path ? { path: asset.path } : {}),
+});
+
+/**
+ * Still, clip, and audio files the board and the lines play.
+ * A placeholder with no file yet is `W-asset` (the art has not landed).
+ * Any other missing still, audio, or cover file fails the load: the Story board
+ * would otherwise show an empty frame.
+ */
+export const mediaOnDiskIssues = (
+  packRoot: string,
+  assets: readonly { id: string; type: string; status?: string; path?: string }[],
+  cover: string | undefined,
+  rule: string,
+): { errors: PackLoadIssue[]; warnings: PackLoadIssue[] } => {
+  const errors: PackLoadIssue[] = [];
+  const warnings: PackLoadIssue[] = [];
+  const fail = (file: string, path: string, message: string) => {
+    errors.push({
+      rule,
+      file,
+      path,
+      message: message.startsWith(`${rule}:`) ? message : `${rule}: ${message}`,
+    });
+  };
+  const note = (file: string, path: string, message: string) => {
+    warnings.push(warn(file, path, message));
+  };
+  for (const asset of assets) {
+    if (!FILE_BACKED_TYPES.has(asset.type)) continue;
+    let found: string | undefined;
+    if (asset.path) found = resolveInsidePack(packRoot, asset.path);
+    const bareName = asset.path !== undefined && !asset.path.includes("/");
+    if (!found && (asset.type === "still" || asset.type === "clip") && (!asset.path || bareName)) {
+      found = resolveAssetImage(join(packRoot, PACK_ASSETS_DIR), mediaAsset(asset));
+    }
+    if (found) continue;
+    const where = asset.path ?? "a file";
+    const message = `${asset.type} ${asset.id} is missing ${where} on disk.`;
+    if (asset.status === "placeholder") note("pack.yaml", `assets.${asset.id}.path`, message);
+    else fail(asset.path ?? "pack.yaml", `assets.${asset.id}.path`, message);
+  }
+  if (cover) {
+    const file = resolveCover(packRoot, cover) ?? resolveInsidePack(packRoot, cover);
+    if (!file) fail(cover, "cover", `Cover ${cover} is not a file in the pack.`);
+  }
+  return { errors, warnings };
+};
+
 /** The manifest `cover` file under `<pack>/assets/`, or undefined when it is missing or outside the folder. */
 export const resolveCover = (packRoot: string, cover: string): string | undefined => {
   let assetsDir: string;

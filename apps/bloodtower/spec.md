@@ -158,23 +158,23 @@ Rules the schema enforces, with the id in the issue message (`packIssues` maps a
 
 `stats.timing.marks` is the literal `auto`. A pack does not author timing rows.
 
-The loader adds folder rules on top of the schema (same `V-1` id in issues). A pack folder holds `pack.yaml` or split YAML/JSON stems, optional `README.md`, and optionally exactly one subfolder `assets/`. That folder holds only image files (`.png`, `.jpg`, `.jpeg`, `.webp`) with no nested folders. Any other top-level entry is refused. Missing image files for declared still and portrait assets are `W-asset` warnings; the pack still loads.
+The loader adds folder rules on top of the schema (same `V-1` id in issues). A pack folder holds `pack.yaml` or split YAML/JSON stems, optional markdown notes (`README.md`, `CONVERSION-NOTES.md`, any other `*.md`), and optionally exactly one subfolder `assets/`. That folder holds only image files (`.png`, `.jpg`, `.jpeg`, `.webp`) with no nested folders. Any other top-level entry is refused. Markdown is never parsed as pack data. A `playable: false` pack is validated from its manifest only; sibling files are not read. A missing portrait is a `W-asset` warning. A `placeholder` still, clip, or audio asset with no file yet is a `W-asset` warning, and the pack still loads. A non-placeholder still, clip, line, music, ambient, sfx, or cover whose file is not in the pack fails the load (`V-2`).
 
 ### 4.1 Pack format v2 (D34, D38)
 
-Until the host switch-over, v2 packs live under `packs-v2/`. Each manifest carries `format: 2` and `kind: story` or `kind: base-content`. Schemas and lint live in `src/protocols/pack-v2/`; the v2 loader is `src/server/pack/v2/`. `pnpm --dir apps/bloodtower pack:lint packs-v2/test` lints v2; omitting the path still lints the R1 `packs/test` pack.
+The host reads `packsDir` (default `packs/`). Each v2 manifest carries `format: 2` and `kind: story` or `kind: base-content`. Schemas and lint live in `src/protocols/pack-v2/`; the v2 loader is `src/server/pack/v2/`. It skips `*.md` notes and, when `playable` is false, reads the manifest alone. A non-placeholder still, clip, or audio asset whose file is missing fails (`P2-2`); a placeholder with no file yet warns (`W-asset`). `pnpm --dir apps/bloodtower pack:lint` with no argument checks `packs/test` only. `pnpm --dir apps/bloodtower pack:lint:all` lints every immediate child of `packsDir` (`.wt.json`, then `PACKS_DIR`) and, when `packs-v2/` is a separate tree, that folder the same way. `pnpm check` and `pnpm build` run `pack:lint:all` and fail when any door fails. The rules are the loader's (schema, `V-*` / `P2-*`, and `W-*` warnings). Authoring limits are `research/game-design/story-pack-format.md`.
 
 **Story packs** carry identity, settings, `day.move_roll`, a `start` block (AREA-077 uses `one-per-kingdom-citadel`), optional game entry points, and `chapters` with kingdoms, timed beats, quests (`quest_type` names a base quest type), and entry points as lists of effects from the fixed set: `narrate` (optional tower `cue`), `place-token`, `remove-token`, `open-lead`, `set-flag`, `clear-flag`, `add-counter`. Conditions check flags, counters, chapter, day, or kingdom, combined with `and` / `or` / `not`.
 
-**Base content packs** hold the shared hero pool (DEC-099, DEC-100), building types, quest type names, and the RtDT board graph (DEC-221): kingdoms with direction-letter ids (DEC-226), printed space names (DEC-225), terrains, optional buildings, adjacency, and river crossings. A story names its `base_pack` id; lint loads that folder beside the story under `packs-v2/`.
+**Base content packs** hold the shared hero pool (DEC-099, DEC-100), building types, quest type names, and the RtDT board graph (DEC-221): kingdoms with direction-letter ids (DEC-226), printed space names (DEC-225), terrains, optional buildings, adjacency, and river crossings. A story names its `base_pack` id; lint loads that folder beside the story under `packsDir`.
 
 | Rule | What fails |
 |---|---|
 | P2-1 | An unknown manifest key or value, a duplicate id, or a structural mismatch (semver, kingdom letter on a space id, four kingdoms). |
-| P2-2 | A ref to an undeclared space, hero, or base pack. |
+| P2-2 | A ref to an undeclared space, hero, or base pack, or a non-placeholder still, clip, or audio file that is not on disk. |
 | P2-3 | A flag read in a condition that is never set or cleared in the same story. |
 
-The v2 lint refuses code in a pack: strict objects only, and effects must be one of the kinds above. R1 rules V-1–V-20 still apply only to `packs/` until step 9.
+The v2 lint refuses code in a pack: strict objects only, and effects must be one of the kinds above. A manifest without `format: 2` (the metadata-only Count) still uses the R1 rules V-1–V-20.
 
 ## 5. Timing rows
 
