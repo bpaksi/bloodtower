@@ -22,7 +22,7 @@ export interface AcceptanceHost {
  */
 export const startAcceptanceHost = async (
   testInfo: TestInfo,
-  options?: { databasePath?: string; seed?: string },
+  options?: { databasePath?: string; seed?: string; graceMs?: number },
 ): Promise<AcceptanceHost> => {
   const config = loadConfig({ env: {} });
   const dir = join(config.dataDir, "e2e-acceptance");
@@ -50,6 +50,7 @@ export const startAcceptanceHost = async (
     // The volume test waits about 4 s between sounds; the e2e run does not.
     sleep: async () => undefined,
     seed: options?.seed,
+    graceMs: options?.graceMs ?? 100,
   });
   return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath };
 };

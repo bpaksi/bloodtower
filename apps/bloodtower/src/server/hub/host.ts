@@ -22,6 +22,7 @@ import { loadStoryCatalog } from "../core/loadStories.ts";
 import { type CoreSession, createCoreSession } from "../core/session.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
+import { storedRunFromEventLog } from "../events/rebuildRun.ts";
 import { createEventStore } from "../events/store.ts";
 import { joinHost } from "../lanUrls.ts";
 import {
@@ -70,6 +71,8 @@ export interface SessionHostOptions {
   sleep?: (ms: number) => Promise<void>;
   /** Game seed. Omitted, one is chosen for this process. */
   seed?: string;
+  /** Device holding grace after a drop. E2e passes a short value. */
+  graceMs?: number;
 }
 
 export interface SessionHost {
@@ -152,6 +155,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       playContent: catalog.defaultPlay,
       packVersion,
       store: eventStore,
+      graceMs: options.graceMs,
       tower,
       clock,
       log,
@@ -687,7 +691,15 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   return {
     port,
     joinCode,
-    loadRun: () => store.loadRun(sessionId),
+    loadRun: () => {
+      const base = store.loadRun(sessionId);
+      const gameId =
+        engine.currentGameId() ?? eventStore.autosaveForSession(sessionId)?.gameId ?? null;
+      if (gameId && eventStore.hasEvents(gameId)) {
+        return storedRunFromEventLog(eventStore, gameId, base);
+      }
+      return base;
+    },
     syncTower,
     close: () => {
       if (closingPromise) return closingPromise;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { loggedPayloadSchema } from "../messages.ts";
+import { loggedPayloadSchema } from "../hostLog.ts";
 import { message, roleSchema, tokenSchema } from "./common.ts";
 import { refuseBoardContent } from "./refuse.ts";
 import { boardViewMessageSchema, deviceViewMessageSchema } from "./views.ts";

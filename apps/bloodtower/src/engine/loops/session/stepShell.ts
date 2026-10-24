@@ -142,6 +142,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     });
     if (state.playContent) next.playContent = state.playContent;
     next.eventSeq = eventSeq + 1;
+    next.activeGameId = `game-${next.eventSeq}`;
     bindShellState(next);
     startRootLoop(
       next.registry,
@@ -382,6 +383,16 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   }
 
   return withEffects(state, effects);
+};
+
+/** After loading a checkpoint, rebuild offered actions from the restored loop stack. */
+export const refreshOffersAfterRestore = (state: ShellState): ShellEffect[] => {
+  const effects: ShellEffect[] = [];
+  bindShellState(state);
+  resumeLoopsOrPauseOffers(state, state.eventSeq, effects);
+  clearShellState();
+  effects.push({ kind: "view-refresh", v: 1 });
+  return effects;
 };
 
 export const runShellEvents = (events: ShellEvent[]) => {

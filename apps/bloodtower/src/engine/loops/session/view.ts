@@ -1,6 +1,18 @@
 import type { ViewState } from "../../views/state.ts";
 import type { ShellState } from "./state.ts";
 
+/** Matches protocol v2 setup screens (private lines on these only). */
+const SETUP_SCREENS = new Set([
+  "pick-story",
+  "game-settings",
+  "tower-connect",
+  "claim-heroes",
+  "setup",
+  "begin",
+]);
+
+const isSetupScreen = (screen: ViewState["screen"]): boolean => SETUP_SCREENS.has(screen);
+
 const labelFor = (promptId: string, actionId: string): string => {
   if (actionId === "continue") return "Continue";
   if (actionId === "back") return "Back";
@@ -30,11 +42,14 @@ export const projectShellView = (state: ShellState): ViewState => {
   const story = state.stories.find(
     (entry) => entry.card.id === (state.chosenStoryId ?? state.boundStoryId),
   );
+  const screen = mapScreen(state.screen);
   const heroes = (story?.heroes ?? []).map((hero) => ({
     id: hero.id,
     name: hero.name,
     deviceId: state.holdings[hero.id] ?? null,
-    lines: [],
+    lines: isSetupScreen(screen)
+      ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
+      : [],
   }));
 
   const actions: ViewState["actions"] = state.offered.map((offer) =>
@@ -63,7 +78,7 @@ export const projectShellView = (state: ShellState): ViewState => {
       : `Screen ${state.screen}`;
 
   return {
-    screen: mapScreen(state.screen),
+    screen,
     levels: [{ id: state.screen, label: state.screen, shows }],
     heroes,
     actions,

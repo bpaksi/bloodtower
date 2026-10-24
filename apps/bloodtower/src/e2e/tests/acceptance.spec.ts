@@ -1,7 +1,12 @@
-import { expect, type Page, test } from "@playwright/test";
+import { type BrowserContext, expect, type Page, test } from "@playwright/test";
+import { readRun } from "../../server/scripts/timingReport.ts";
+import { DEVICE_TOKEN_KEY } from "../../web/lib/session.ts";
 import {
+  captureFrames,
+  gateControls,
   holdHeroesFromTest,
   installSessionSocketHook,
+  releaseTogether,
   sendPlayPressFromTest,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
@@ -183,8 +188,171 @@ test("quit from pause lands on session; continue resumes after host restart", as
     await expect(deviceMain(page2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(page2).getByText(/Day 3/i)).toBeVisible({ timeout: 20_000 });
     await expect(page2.getByText(/seed/i)).toHaveCount(0);
+    await holdHeroesFromTest(page2, [...HERO_IDS]);
+    let walked = false;
+    const walkDeadline = Date.now() + 120_000;
+    while (Date.now() < walkDeadline && !walked) {
+      const walkBtn = deviceMain(page2)
+        .locator('button[data-action-id="walk"]:not([disabled])')
+        .first();
+      if ((await walkBtn.count()) > 0) {
+        await walkBtn.click();
+        walked = true;
+        break;
+      }
+      if (!(await sendPlayPressFromTest(page2))) await page2.waitForTimeout(50);
+    }
+    expect(walked).toBe(true);
+    await expect(deviceMain(page2)).toHaveAttribute("data-screen", "play");
+    await expect(deviceMain(page2).getByText(/Day 3/i)).toBeVisible();
   } finally {
     await context2.close();
     await restarted.host.close();
+  }
+});
+
+const boardViewFrames = (frames: readonly string[]) =>
+  frames
+    .map((frame) => JSON.parse(frame) as { type: string })
+    .filter((message) => message.type === "boardView");
+
+test("core: one winner per press, private wire, disconnect pause, run from events", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(180_000);
+  const session = await startAcceptanceHost(testInfo);
+  const { baseURL, host, tower, databasePath } = session;
+  const contextBoard = await browser.newContext({ baseURL });
+  const contextA = await browser.newContext({ baseURL });
+  const contextB = await browser.newContext({ baseURL });
+  const contexts: BrowserContext[] = [contextBoard, contextA, contextB];
+  const board = await contextBoard.newPage();
+  const boardFrames = captureFrames(board);
+  const pageA = await contextA.newPage();
+  const pageB = await contextB.newPage();
+  const gateA = await gateControls(pageA);
+  const gateB = await gateControls(pageB);
+  const joinPage = `${baseURL}/join?code=${host.joinCode}`;
+
+  try {
+    await board.goto("/board");
+    await installSessionSocketHook(pageA);
+    await installSessionSocketHook(pageB);
+    await pageA.goto(joinPage);
+    await pageB.goto(joinPage);
+
+    await test.step("one tower-connect press wins when both devices press together", async () => {
+      gateA.hold();
+      gateB.hold();
+      await clickAct(pageA, "tower-connect", "tower-connect");
+      await clickAct(pageB, "tower-connect", "tower-connect");
+      await gateA.held(1);
+      await gateB.held(1);
+      expect(releaseTogether(gateA, gateB)).toBe(2);
+      await expect
+        .poll(() => host.loadRun().presses.filter((press) => press.promptId === "tower-connect"))
+        .toHaveLength(2);
+      const connects = host.loadRun().presses.filter((press) => press.promptId === "tower-connect");
+      expect(connects.filter((press) => press.winner)).toHaveLength(1);
+      expect(tower.sent().filter((item) => item.type === "connect")).toHaveLength(1);
+    });
+
+    await clickAct(pageA, "tower-calibrate", "tower-calibrate");
+    await clickAct(pageA, "new-game", "new-pick-game");
+    await clickAct(pageA, "continue", `continue-pick-story-${STORY_ID}`);
+    await clickAct(pageA, "continue", "continue-game-settings");
+    await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "claim-heroes", {
+      timeout: 15_000,
+    });
+    await pageB.goto(joinPage);
+    await expect(deviceMain(pageB)).toHaveAttribute("data-screen", "claim-heroes", {
+      timeout: 30_000,
+    });
+
+    await test.step("private setup lines reach only the holder on screen and on the wire", async () => {
+      await holdHeroesFromTest(pageA, ["hero-a", "hero-b"]);
+      await holdHeroesFromTest(pageB, ["hero-c", "hero-d"]);
+      await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
+      await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
+      await expect(pageB.getByText("Only Hero D hears this.")).toBeVisible();
+      await expect(pageB.getByText("Only Hero A hears this.")).toHaveCount(0);
+      await expect(board.getByText(/Only Hero [A-D] hears this/)).toHaveCount(0);
+      expect(gateA.received.some((frame) => frame.includes("Only Hero A hears this."))).toBe(true);
+      expect(gateB.received.some((frame) => frame.includes("Only Hero D hears this."))).toBe(true);
+      for (const frame of gateA.received) {
+        expect(frame).not.toContain("Only Hero D hears this.");
+        expect(frame).not.toContain(".private.hero-d");
+      }
+      for (const frame of gateB.received) {
+        expect(frame).not.toContain("Only Hero A hears this.");
+        expect(frame).not.toContain(".private.hero-a");
+      }
+      expect(boardViewFrames(boardFrames).length).toBeGreaterThan(0);
+      for (const frame of boardFrames) {
+        expect(frame).not.toContain(".private.");
+        expect(frame).not.toMatch(/Only Hero [A-D] hears this/);
+      }
+    });
+
+    await holdHeroesFromTest(pageA, [...HERO_IDS]);
+    await holdHeroesFromTest(pageB, [...HERO_IDS]);
+    await clickAct(pageA, "continue", "continue-claim-heroes");
+    const setupDeadline = Date.now() + 90_000;
+    while (Date.now() < setupDeadline) {
+      const screen = await deviceMain(pageA).getAttribute("data-screen");
+      if (screen === "play") break;
+      if (screen === "begin") {
+        await holdHeroesFromTest(pageA, [...HERO_IDS]);
+        await clickAct(pageA, "continue", "continue-begin");
+        break;
+      }
+      if (screen === "setup") {
+        await clickAct(pageA, "continue");
+        continue;
+      }
+      await pageA.waitForTimeout(50);
+    }
+    await waitForPlayScreen(pageA);
+
+    await test.step("dropping the only holder for heroes pauses until rejoin", async () => {
+      const tokenB = await pageB.evaluate((key) => sessionStorage.getItem(key), DEVICE_TOKEN_KEY);
+      expect(tokenB).toBeTruthy();
+      await contextB.close();
+      contexts.pop();
+      await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "pause", { timeout: 15_000 });
+      await expect(
+        deviceMain(pageA).locator('button[data-action-id="continue"]:not([disabled])'),
+      ).toHaveCount(0);
+      await expect(
+        deviceMain(pageA).locator('button[data-action-id="walk"]:not([disabled])'),
+      ).toHaveCount(0);
+
+      const contextRejoin = await browser.newContext({ baseURL });
+      contexts.push(contextRejoin);
+      const pageC = await contextRejoin.newPage();
+      await installSessionSocketHook(pageC);
+      await pageC.goto("/join");
+      await pageC.getByLabel("Rejoin token").fill(tokenB ?? "");
+      await pageC.getByRole("button", { name: "Rejoin" }).click();
+      await expect(pageC).toHaveURL(/\/device/);
+      await holdHeroesFromTest(pageC, ["hero-c", "hero-d"]);
+      await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    });
+
+    await test.step("timingReport rebuilds the same presses as the host", async () => {
+      const live = host.loadRun();
+      const rebuilt = readRun(databasePath);
+      expect(rebuilt.presses.length).toBeGreaterThan(0);
+      expect(rebuilt.presses).toEqual(live.presses);
+      let previous = -1;
+      for (const press of rebuilt.presses) {
+        expect(press.atMonoMs).toBeGreaterThanOrEqual(previous);
+        expect(press.atWall).toMatch(/^\d{4}-\d\d-\d\dT.*Z$/);
+        previous = press.atMonoMs;
+      }
+    });
+  } finally {
+    for (const ctx of contexts) await ctx.close().catch(() => undefined);
+    await host.close();
   }
 });

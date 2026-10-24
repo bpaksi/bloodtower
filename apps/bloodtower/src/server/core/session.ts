@@ -9,7 +9,7 @@ import {
   SHELL_ENGINE_VERSION,
   type ShellState,
 } from "../../engine/loops/session/state.ts";
-import { stepShell } from "../../engine/loops/session/stepShell.ts";
+import { refreshOffersAfterRestore, stepShell } from "../../engine/loops/session/stepShell.ts";
 import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
@@ -41,6 +41,8 @@ export type CoreSessionOptions = {
   clock: Clock;
   log: HostLogger;
   onChange: () => void;
+  /** Holding grace after a socket drop. Tests pass a short value. */
+  graceMs?: number;
 };
 
 export type CoreSession = {
@@ -67,11 +69,14 @@ export type CoreSession = {
   syncTowerSnapshot: () => void;
   /** Wait until queued shell applies and effects have finished. */
   whenIdle: () => Promise<void>;
+  /** Active game id for the event log, when the session has started. */
+  currentGameId: () => string | null;
 };
 
 const gameIdOf = (state: ShellState) => state.autosave?.gameId ?? state.activeGameId;
 
 export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
+  const graceMs = options.graceMs ?? GRACE_MS;
   let state = initialShellState({
     sessionId: options.sessionId,
     seed: options.seed,
@@ -150,6 +155,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
         state = { ...state, pause: null, stage: "playing", screen: "play" };
       }
+      state = { ...state, resumedFromAutosave: true };
     }
     appendShell(event, deviceId);
     if (event.kind === "press") {
@@ -173,6 +179,17 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     for (const effect of result.effects) {
       const parsed = shellEffectSchema.safeParse(effect);
       if (parsed.success) shellEffects.push(parsed.data);
+    }
+    if (
+      event.kind === "press" &&
+      event.promptId === "continue-pick-game" &&
+      event.actionId === "continue" &&
+      state.screen === "play"
+    ) {
+      for (const effect of refreshOffersAfterRestore(state)) {
+        const parsed = shellEffectSchema.safeParse(effect);
+        if (parsed.success) shellEffects.push(parsed.data);
+      }
     }
     await runShellEffects(state, shellEffects, effectsCtx());
     options.onChange();
@@ -220,7 +237,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (record.grace) clearTimeout(record.grace);
       record.grace = setTimeout(() => {
         enqueue({ kind: "device-drop", v: 1, deviceId }, deviceId);
-      }, GRACE_MS);
+      }, graceMs);
       record.grace.unref?.();
     },
     act: (deviceId, promptId, actionId, args) => {
@@ -300,5 +317,6 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
     },
     whenIdle: () => applyQueue,
+    currentGameId: () => gameIdOf(state),
   };
 };

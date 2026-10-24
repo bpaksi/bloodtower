@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { PROTOCOL_VERSION as V1 } from "../messages.ts";
 import {
   actMessageSchema,
   boardContentRefused,
@@ -58,9 +57,8 @@ const envelope = <T extends string>(type: T, payload: unknown, v: 1 | 2 = 2) => 
 });
 
 describe("protocol v2 envelope", () => {
-  it("uses v: 2 and leaves v1 at 1", () => {
+  it("uses v: 2 on the wire", () => {
     expect(PROTOCOL_VERSION).toBe(2);
-    expect(V1).toBe(1);
     expect(CLIENT_MESSAGE_TYPES).toEqual(["hello", "act", "narration-ended", "log"]);
     expect(SERVER_MESSAGE_TYPES).toEqual(["welcome", "error", "logged", "boardView", "deviceView"]);
   });
