@@ -4,7 +4,7 @@ Date: 2026-10-24
 Owner: Illusionist
 Serves: C1-step-10 / AREA-077 move-only gameplay slice; pack `packs/test` (title Proving Grounds)
 Continuity: DEC-201 (Story board only); DEC-220 Enter/Leave
-Bob: show, do not wait for approval (2026-10-24). Correction the same day, via Gamewright: ship the four Enter place stills only.
+Bob: look approved 2026-10-24 ~10:48 AM ET. Village locked. Bazaar remade (first stall-ring layout, village scale, daytime under storm clouds, brooding). Citadel is the secular keep, the seat of power. Sanctuary is the chapel: sacred rest, cures, and lore. Earlier the same day, via Gamewright: ship the four Enter place stills only. Board wash and hero marks stay withdrawn.
 
 The files are in `packs/test/assets/`, flat, as delivered. No crop and no resize. Pack format v2 keeps the registry on `packs/test/pack.yaml` (`status: final`). There is no `assets.yaml`: a sibling file of that name is pack data whose stem duplicates the manifest field `assets`, and `pack:lint` fails it (P2-1). The loader does not merge split files.
 
@@ -12,18 +12,25 @@ The files are in `packs/test/assets/`, flat, as delivered. No crop and no resize
 
 Every row targets `storyboard` (DEC-201). iPads get no place still and no story art.
 
-## Place stills (Story board, 16:9 JPEG)
+## Place stills (Story board JPEG)
 
 Enter opens the still for that building type. The ids use the base building types (`village`, `bazaar`, `citadel`, `sanctuary`). The v2 asset object has no place-type key, only `id`, `type`, `target`, `status`, and `path`.
 
 | Asset id | Enter | File | Dims | sha256 |
 |---|---|---|---|---|
-| place.village | Village | `packs/test/assets/place-village.jpg` | 1280x720 | `0091c45875fea2ab19724bd24e533e12d0f92e378e6008c275071a96a6dfa354` |
-| place.bazaar | Bazaar | `packs/test/assets/place-bazaar.jpg` | 1280x720 | `2a5ec82f61d86c465ce6cdf1de582b6f8a073d887a9cc5f4d4dee02810428037` |
-| place.citadel | Citadel | `packs/test/assets/place-citadel.jpg` | 1280x720 | `14596f2846203e51eadf3110328809ba67aa6577cef839a695dacdb80a8a8ef2` |
-| place.sanctuary | Sanctuary | `packs/test/assets/place-sanctuary.jpg` | 1920x1080 | `3f9e837a38b7737f53478e6c8ded598aeac8546bac83098d8aef89699be0b4f0` |
+| place.village | Village | `packs/test/assets/place-village.jpg` | 1280x720 | `35b14328a0163accd5995a2c47b87dc68e068e75b2009a34a6efe8a3a235b93d` |
+| place.bazaar | Bazaar | `packs/test/assets/place-bazaar.jpg` | 864x1152 | `eed0548eab50baf12f052e4b9fa7ca3f3fe5a8d4ade63f99f7cb7da4acb542f2` |
+| place.citadel | Citadel | `packs/test/assets/place-citadel.jpg` | 1280x720 | `cf2c04cdd17ab67f4ed3f28803986b79421501d5466a8221c2dd5c9642bc299b` |
+| place.sanctuary | Sanctuary | `packs/test/assets/place-sanctuary.jpg` | 1280x720 | `171682a853a6abdb73dd67947ae3206073d2f2ac780ba691af57b1c12fe84b94` |
 
-Village, Bazaar, and Citadel are 1280x720. Sanctuary is 1920x1080. All four are exact 16:9. The board cover-fits a still, so the two sizes can share one frame.
+These four files replace the first drop. Same ids, same `pack.yaml` rows. Village, Citadel, and Sanctuary are 1280x720, exact 16:9. Bazaar is 864x1152 (3:4), the file as delivered. The board cover-fits a still into a 16:9 well, so the bazaar frame crops that portrait.
+
+### Look (Bob, 2026-10-24 ~10:48 AM ET)
+
+- Village: locked.
+- Bazaar: remade. First stall-ring layout, village scale, daytime under storm clouds (brooding).
+- Citadel: secular keep, the seat of power.
+- Sanctuary: chapel. Sacred rest, cures, and lore.
 
 ## Withdrawn
 
