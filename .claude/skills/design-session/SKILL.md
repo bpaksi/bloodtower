@@ -1,11 +1,17 @@
 ---
 name: design-session
-description: Start a game-design session on the saga game. Asks Bob for the topic, orients from the card graph and the last session, sets up the session branch, then works one question at a time. Use when Bob says he wants a design session, a brainstorm on the game, or runs /design-session.
+description: Start a game-design session on the saga game. Asks Bob for the topic, orients from the card graph and the last session, sets up the session branch, then works one question at a time. A morning card review uses the same branch and PR. Use when Bob says he wants a design session, a brainstorm on the game, a morning card review, or runs /design-session.
 ---
 
 # Design session
 
 The game design lives in `research/game-design/`: long documents as sources, and one small idea per file in `cards/` (format in [cards/README.md](../../../research/game-design/cards/README.md)). Bob views the cards in the game-workbench. A session turns his answers into cards.
+
+## Morning card review
+
+Not a full design session. Skip the question loop. Use the same branch and PR as §3 and §5.
+
+Bob edits cards on that branch, in the main checkout. Commit those edits on the branch. The git diff and the PR are the change record. Do not add version or `as-of` fields. Follow [cards/README.md](../../../research/game-design/cards/README.md).
 
 ## 1. Topic
 
