@@ -64,8 +64,19 @@
 - `images/wikipedia_Dark_tower_box_cover.jpg`: https://en.wikipedia.org/wiki/File:Dark_tower_box_cover.jpg (https://upload.wikimedia.org/wikipedia/en/8/8b/Dark_tower_box_cover.jpg). Non-free box art that Wikipedia hosts under fair use. Reference only.
 - `contact-sheet.png`: a montage of the images above. Reference only, same status as its contents.
 
-## Other references (not downloaded)
+### Added 2026-10-24 (from well-of-souls.com/tower pages)
+- `images/wos_dtflag.gif`: https://well-of-souls.com/tower/dtflag.gif (194×142). One red kingdom flag with a dragon. Copyrighted (scan of game material), reference only.
+- `images/wos_bob_pepper.jpg`: https://well-of-souls.com/tower/bob_pepper.jpg (144×178). Portrait of illustrator Bob Pepper, from the Q&A page. Copyrighted photo, reference only.
+- `images/wos_pepper_sk.jpg`: https://well-of-souls.com/tower/pepper_sk.jpg (367×475). Cover of *Starry Skies* (Peel and Sparkle book, illustrated by Bob Pepper). Not a Dark Tower image. Copyrighted, reference only.
+- `images/wos_atlantis1.jpg`, `images/wos_atlantis2.jpg`: https://well-of-souls.com/tower/atlantis1.jpg and atlantis2.jpg (400×300 each, iPIX panorama captures). Photos of the German *Atlantis* release box (checked visually; the page that links them was not in the saved copy). Copyrighted, reference only.
+- `images/wos_vdt-title.gif`, `wos_vdt-forest.gif`, `wos_vdt-chest.gif`, `wos_vdt-brigand.gif`: https://well-of-souls.com/tower/vdt-title.gif (and the other three). Screenshots of the unreleased Vectrex Dark Tower prototype (c.1983). Copyrighted, reference only.
+
+Not downloaded from the site: sound files (all WAV/MP3 links already in `sounds/`), the Java and Flash files (code, see NOTES), the DragonMaster card images (other game), and the nav icons.
+
+## Other references
 - MAME driver: https://github.com/mamedev/mame/blob/master/src/mame/handheld/hh_tms1k.cpp (class `mbdtower_state`). The ROM set mbdtower.zip (mp7332) is copyrighted, so I didn't download it.
 - Manual scan: https://archive.org/details/dark-tower-manual-1981
-- Well of Souls site: https://well-of-souls.com/tower/ (events: dt_events.htm). It also links a Java remake (darktower-src.zip) by Michael Bommer.
+- Well of Souls site: https://well-of-souls.com/tower/ (pages: index.html, dt_play, dt_board, dt_inv, dt_events, dt_loc, dt_about, dt_pepper, triumph, vectrex, dmaster). Last changed 01/14/20. It also links a Java remake (darktower-src.zip) by Michael Bommer.
+- Triumph lawsuit (web check, 2026-10-24): https://m.openjurist.org/763/f2d/461 (Burten v. Milton Bradley Co., 763 F.2d 461, 1st Cir. 1985). District court: 592 F. Supp. 1021 (D.R.I. 1984).
+- Return to Dark Tower (web check, 2026-10-24): https://en.wikipedia.org/wiki/Return_to_Dark_Tower
 - Wikipedia: https://en.wikipedia.org/wiki/Dark_Tower_(game)
