@@ -10,7 +10,7 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "prepare": "lefthook install",
+    "prepare": "node scripts/install-git-hooks.mjs",
     "check": "biome check . && pnpm check:repo && pnpm -r --if-present typecheck && pnpm -r --if-present test && pnpm pack:lint:all",
     "pack:lint": "pnpm --dir apps/bloodtower pack:lint",
     "pack:lint:all": "pnpm --dir apps/bloodtower pack:lint:all",

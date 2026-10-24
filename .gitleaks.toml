@@ -1,0 +1,12 @@
+# Default gitleaks rules, plus one proven false positive.
+# dGhlIHNhbXBsZSBub25jZQ== is the RFC 6455 sample WebSocket nonce
+# ("the sample nonce") in apps/tower-poc/src/server/server.test.ts.
+# The generic-api-key rule matches it. It is not a credential.
+title = "bloodtower"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "RFC 6455 sample WebSocket nonce in the tower-poc handshake test."
+regexes = ['''dGhlIHNhbXBsZSBub25jZQ==''']

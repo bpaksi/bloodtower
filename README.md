@@ -45,6 +45,13 @@ dark-tower/
 
 | From | Command | Does |
 |---|---|---|
+| root | `pnpm install` | installs dependencies and git hooks (`lefthook install`). Every commit then runs Gitleaks on the staged changes |
 | root | `pnpm check` | lint, repo checks, typecheck and unit tests for every app and package |
 | root | `pnpm build` | builds every app |
 | root | `pnpm -F <app> dev` | runs one app in dev (same as `pnpm dev` inside its folder) |
+
+## Secrets
+
+Pre-commit uses Gitleaks **8.30.1** with its default rules. `.gitleaks.toml` extends those rules and allowlists one proven false positive: the RFC 6455 sample WebSocket nonce in `apps/tower-poc/src/server/server.test.ts`. The hook (`scripts/gitleaks-protect.mjs`) uses `gitleaks` on `PATH` when that exact version is already installed, and otherwise downloads the official release into `~/.cache/bloodtower/gitleaks/`. On a Mac, `brew install gitleaks` is enough when Homebrew's version is 8.30.1.
+
+`pnpm install` turns the hook on, including in a step worktree. It installs lefthook into `.git/hooks`. A checkout that already sets `core.hooksPath` keeps that path; the hooks still land in `.git/hooks` so an outer dispatcher runs them. CI fails the `check` job when a pull request's commits contain a secret. That job scans the pull request range, not the repository history.

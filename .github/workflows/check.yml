@@ -1,5 +1,8 @@
 # Runs `pnpm check` on every pull request to main and on main itself. Branch protection on main
 # requires the `check` job, so a PR merges (auto-merge, squash) only when it passes.
+# The gitleaks step fails that job when the pull request's commits, or the commits in a push
+# to main, contain a secret. It does not audit the repository's full history (no schedule and
+# no workflow_dispatch). fetch-depth 0 only makes that commit range available locally.
 name: check
 
 on:
@@ -14,6 +17,8 @@ concurrency:
 
 permissions:
   contents: read
+  # gitleaks-action lists the pull request's commits. Comments stay off (see the step).
+  pull-requests: read
 
 jobs:
   check:
@@ -21,6 +26,16 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        # v3.0.0. GITLEAKS_VERSION matches scripts/gitleaks-protect.mjs (default rules).
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

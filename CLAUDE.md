@@ -16,6 +16,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 
 | From | Command | Does |
 |---|---|---|
+| root | `pnpm install` | Dependencies and git hooks. Commits then run Gitleaks 8.30.1 on staged changes (`scripts/gitleaks-protect.mjs`; default rules, one RFC 6455 nonce allow) |
 | root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
 | root | `pnpm build` | Builds every app |
 | root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | Make / remove a step worktree at `../BloodTower-work/<branch>` with its own ports and SQLite folder in `.wt.json` |
@@ -30,7 +31,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approv
 2. One branch per plan step: `<type>/<app>-<slug>` (repo-wide work: `chore/<slug>`). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
 4. Before handing over, run `pnpm check`, push the branch and open a PR with the evidence and the plan step id in the body.
-5. CI runs `pnpm check` on the PR and the `verifier` posts one run. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
+5. CI runs Gitleaks and `pnpm check` on the PR and the `verifier` posts one run. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
 
 ## Conventions
 
