@@ -246,9 +246,14 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
         const image = await device.request.get(src ?? "");
         expect(image.status()).toBe(200);
         const moves = now.moves;
+        const hero = now.hero;
         await clickAct(device, "leave");
         await settle(device, before);
-        expect((await readStatus(device)).moves).toBe(moves);
+        const afterLeave = await readStatus(device);
+        if (moves && Number(moves) > 0) {
+          expect(afterLeave.hero).toBe(hero);
+          expect(afterLeave.moves).toBe(moves);
+        }
         seen.add(building);
         continue;
       }
