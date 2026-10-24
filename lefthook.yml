@@ -1,6 +1,10 @@
-# Git hooks, installed by `pnpm install` (the root `prepare` script).
+# Git hooks, installed into `.git/hooks` by `pnpm install` (the root `prepare` script).
 pre-commit:
   commands:
+    gitleaks:
+      # Every commit, including docs-only. Staged changes, default rules.
+      # scripts/gitleaks-protect.mjs uses gitleaks 8.30.1 on PATH or downloads that release.
+      run: node scripts/gitleaks-protect.mjs
     check:
       # Runs the full check when code or config is staged. Docs-only commits skip it.
       glob: "*.{ts,tsx,js,mjs,cjs,json,css,yaml,yml}"
