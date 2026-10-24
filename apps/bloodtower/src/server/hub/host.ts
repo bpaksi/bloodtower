@@ -715,6 +715,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         try {
           for (const id of deviceSockets.keys()) engine.disconnect(id);
           deviceSockets.clear();
+          await engine.cancelDisconnects();
           for (const socket of clients.keys()) socket.close();
           clients.clear();
           await new Promise<void>((resolveClose) => {
@@ -723,7 +724,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
             http.closeAllConnections();
           });
         } finally {
-          await engine.flushDisconnects();
+          await engine.whenIdle();
           void tower.close();
           opened.close();
         }
