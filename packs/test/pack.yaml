@@ -56,3 +56,8 @@ assets:
   - {id: place.bazaar, type: still, target: storyboard, status: final, path: assets/place-bazaar.jpg}
   - {id: place.citadel, type: still, target: storyboard, status: final, path: assets/place-citadel.jpg}
   - {id: place.sanctuary, type: still, target: storyboard, status: final, path: assets/place-sanctuary.jpg}
+  - {id: board.wash, type: still, target: storyboard, status: final, path: assets/board-wash.jpg}
+  - {id: hero.a.mark, type: portrait, target: storyboard, status: final, path: assets/hero-a-mark.png}
+  - {id: hero.b.mark, type: portrait, target: storyboard, status: final, path: assets/hero-b-mark.png}
+  - {id: hero.c.mark, type: portrait, target: storyboard, status: final, path: assets/hero-c-mark.png}
+  - {id: hero.d.mark, type: portrait, target: storyboard, status: final, path: assets/hero-d-mark.png}
