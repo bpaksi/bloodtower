@@ -61,6 +61,18 @@ const fixture = (screen: SetupScreen): ViewState => ({
 const showsUnclaimedHeroes = (screen: SetupScreen) =>
   screen === "claim-heroes" || screen === "begin";
 
+const deviceHeroIds = (screen: SetupScreen, device: "a" | "b" | "z"): string[] => {
+  if (screen === "claim-heroes") return ["alpha", "gamma", "beta", "delta"];
+  if (screen === "begin") {
+    if (device === "a") return ["alpha", "gamma", "delta"];
+    if (device === "b") return ["beta", "delta"];
+    return ["delta"];
+  }
+  if (device === "a") return ["alpha", "gamma"];
+  if (device === "b") return ["beta"];
+  return [];
+};
+
 describe("project setup screens", () => {
   it("gives each iPad only its own heroes' private lines, on every setup screen", () => {
     expect(SETUP_SCREENS.length).toBeGreaterThan(0);
@@ -86,10 +98,12 @@ describe("project setup screens", () => {
 
       expect(padA.screen, screen).toBe(screen);
       expect(padA.deviceId).toBe("device-a");
-      const padAHeroIds = showsUnclaimedHeroes(screen)
-        ? ["alpha", "gamma", "delta"]
-        : ["alpha", "gamma"];
-      expect(padA.heroes.map((hero) => hero.id)).toEqual(padAHeroIds);
+      expect(padA.heroes.map((hero) => hero.id)).toEqual(deviceHeroIds(screen, "a"));
+      if (screen === "claim-heroes") {
+        expect(padA.heroes.find((hero) => hero.id === "alpha")?.claim).toBe("yours");
+        expect(padA.heroes.find((hero) => hero.id === "beta")?.claim).toBe("taken");
+        expect(padA.heroes.find((hero) => hero.id === "delta")?.claim).toBe("open");
+      }
       const padAJson = JSON.stringify(padA);
       expect(padAJson, screen).toContain(`Alpha secret on ${screen}`);
       expect(padAJson, screen).toContain(`Gamma secret on ${screen}`);
@@ -105,19 +119,14 @@ describe("project setup screens", () => {
         expect(padAJson, screen).not.toContain(".private.delta");
       }
 
-      const padBHeroIds = showsUnclaimedHeroes(screen) ? ["beta", "delta"] : ["beta"];
-      expect(padB.heroes.map((hero) => hero.id)).toEqual(padBHeroIds);
+      expect(padB.heroes.map((hero) => hero.id)).toEqual(deviceHeroIds(screen, "b"));
       const padBJson = JSON.stringify(padB);
       expect(padBJson, screen).toContain(`Beta secret on ${screen}`);
       expect(padBJson, screen).not.toContain(`Alpha secret on ${screen}`);
       expect(padBJson, screen).not.toContain(`Gamma secret on ${screen}`);
       expect(padBJson, screen).not.toContain(".private.alpha");
 
-      if (showsUnclaimedHeroes(screen)) {
-        expect(stranger.heroes.map((hero) => hero.id)).toEqual(["delta"]);
-      } else {
-        expect(stranger.heroes).toEqual([]);
-      }
+      expect(stranger.heroes.map((hero) => hero.id)).toEqual(deviceHeroIds(screen, "z"));
       expect(JSON.stringify(stranger), screen).not.toContain(".private.");
 
       for (const view of [board, padA, padB]) {

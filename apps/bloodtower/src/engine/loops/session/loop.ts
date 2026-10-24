@@ -3,7 +3,7 @@ import { recordOffer, shellState } from "./shellRef.ts";
 import { towerReady } from "./tower.ts";
 
 export type SessionLocal = {
-  phase: "tower" | "hub" | "goodbye" | "running-game";
+  phase: "splash" | "tower" | "hub" | "goodbye" | "running-game";
   towerStep: "connect" | "calibrate" | "done";
   awaitingPress: boolean;
   fromSessionScreen: boolean;
@@ -12,10 +12,17 @@ export type SessionLocal = {
 
 export type SessionResult = { ended: boolean };
 
+const offerSplash = (ctx: { offerPrompt: (promptId: string, actionId: string) => void }) => {
+  ctx.offerPrompt("splash-play", "continue");
+  recordOffer("splash-play", "continue");
+  ctx.offerPrompt("tower-connect", "tower-connect");
+  recordOffer("tower-connect", "tower-connect");
+};
+
 export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
   id: "session",
   enter: () => ({
-    phase: "tower",
+    phase: "splash",
     towerStep: "connect",
     awaitingPress: false,
     fromSessionScreen: false,
@@ -24,19 +31,19 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
   body: (local, ctx) => {
     const shell = shellState();
 
+    if (local.phase === "splash") {
+      shell.screen = "splash";
+      shell.stage = "lobby";
+      if (!local.awaitingPress) {
+        offerSplash(ctx);
+        return { local: { ...local, awaitingPress: true }, passComplete: false };
+      }
+      return { local, passComplete: false };
+    }
+
     if (!shell.towerSetupDone && local.phase === "tower") {
       shell.screen = "tower-connect";
       shell.stage = "lobby";
-      const connected =
-        shell.tower.connection === "connected" && shell.tower.calibrated.state === "known";
-      if (!connected) {
-        ctx.offerPrompt("tower-connect", "tower-connect");
-        recordOffer("tower-connect", "tower-connect");
-        return {
-          local: { ...local, awaitingPress: true, towerStep: "connect" },
-          passComplete: false,
-        };
-      }
       if (!towerReady(shell.tower)) {
         ctx.offerPrompt("tower-calibrate", "tower-calibrate");
         recordOffer("tower-calibrate", "tower-calibrate");
@@ -67,17 +74,16 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
         return { local, passComplete: false };
       }
 
-      if (shell.screen === "pick-story" && local.fromSessionScreen) {
+      if (
+        shell.screen === "pick-story" ||
+        shell.screen === "pick-game" ||
+        shell.screen === "play"
+      ) {
         ctx.startChild("game");
         return {
           local: { ...local, phase: "running-game", childOpen: true, fromSessionScreen: false },
           passComplete: false,
         };
-      }
-
-      if (!local.childOpen && (shell.screen === "pick-game" || shell.screen === "play")) {
-        ctx.startChild("game");
-        return { local: { ...local, phase: "running-game", childOpen: true }, passComplete: false };
       }
 
       shell.screen = "pick-game";
@@ -92,7 +98,7 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
         shell.stage = "lobby";
         local = {
           phase: "hub",
-          towerStep: "done",
+          towerStep: local.towerStep,
           awaitingPress: false,
           fromSessionScreen: false,
           childOpen: false,

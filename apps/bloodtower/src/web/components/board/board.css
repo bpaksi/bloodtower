@@ -2107,3 +2107,50 @@
 .bt-wait > .bt-next b {
   letter-spacing: 0.02em;
 }
+
+.bt-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  align-items: baseline;
+}
+
+.bt-waiting-pulse {
+  margin: 0;
+  color: var(--bt-candle);
+  animation: bt-waiting-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes bt-waiting-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-waiting-pulse {
+    animation: none;
+  }
+}
+
+.bt-place-still {
+  margin: 0;
+  width: min(100%, 64rem);
+}
+
+.bt-place-still img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--bt-soot);
+}
+
+.bt-place-still figcaption {
+  margin-top: 0.35rem;
+  font-size: var(--bt-size-caption);
+}

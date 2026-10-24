@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { PressEvent } from "../../events.ts";
-import { ENGINE_SETUP_STEPS, mergeSetupSteps, TEST_STORY } from "./pack.ts";
+import { project } from "../../views/project.ts";
+import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { mergeSetupSteps, TEST_STORY } from "./pack.ts";
+import { PLACE_CAPTION } from "./placeCaption.ts";
 import { initialShellState } from "./state.ts";
 import { stepShell } from "./stepShell.ts";
+import { projectShellView } from "./view.ts";
 
 const press = (deviceId: string, promptId: string, actionId: string): PressEvent => ({
   kind: "press",
@@ -33,12 +37,33 @@ const runPresses = (state: ReturnType<typeof start>, presses: ReturnType<typeof 
 describe("session loop tower setup", () => {
   it("runs connect and calibrate once, then lands on pick-game", () => {
     let state = start();
-    expect(state.screen).toBe("tower-connect");
+    expect(state.screen).toBe("splash");
     state = stepShell(state, press("ipad-0", "tower-connect", "tower-connect")).state;
     expect(state.tower.connection).toBe("connected");
     state = stepShell(state, press("ipad-0", "tower-calibrate", "tower-calibrate")).state;
     expect(state.towerSetupDone).toBe(true);
     expect(state.screen).toBe("pick-game");
+    expect(state.towerLinked).toBe(true);
+  });
+
+  it("Play on splash reaches pick-story and does not pause a tower that was never connected", () => {
+    let state = start();
+    expect(state.offered.some((offer) => offer.promptId === "splash-play" && offer.open)).toBe(
+      true,
+    );
+    state = stepShell(state, press("ipad-0", "splash-play", "continue")).state;
+    expect(state.screen).toBe("pick-story");
+    expect(state.towerLinked).toBe(false);
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    expect(state.pause).toBeNull();
+    expect(state.screen).toBe("pick-story");
+  });
+
+  it("stays on splash when a tower snapshot is already ready", () => {
+    let state = start();
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_READY }).state;
+    expect(state.screen).toBe("splash");
+    expect(state.towerLinked).toBe(false);
   });
 });
 
@@ -379,6 +404,79 @@ describe("done for tonight", () => {
     ]);
     expect(state.screen).toBe("goodbye");
     expect(state.sessionEnded).toBe(true);
+  });
+});
+
+const playWithoutTower = () => {
+  let state = runPresses(start(), [
+    press("ipad-0", "splash-play", "continue"),
+    press("ipad-0", `continue-pick-story-${"test"}`, "continue"),
+    press("ipad-0", "continue-game-settings", "continue"),
+  ]);
+  for (const [index, hero] of TEST_STORY.heroes.entries()) {
+    const deviceId = `ipad-${index}`;
+    state = stepShell(state, { kind: "device-join", v: 1, deviceId }).state;
+    state = stepShell(state, {
+      kind: "hero-hold",
+      v: 1,
+      deviceId,
+      heroId: hero.id,
+      action: "take",
+    }).state;
+  }
+  state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
+  for (const step of state.setupSteps) {
+    state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
+  }
+  return runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
+};
+
+const movesLeft = (state: ReturnType<typeof start>): number | null => {
+  const frame = state.loops.stack.find((row) => row.loopId === "group-turn");
+  if (!frame) return null;
+  return (frame.local as GroupTurnLocal).movesLeft;
+};
+
+describe("place stills", () => {
+  it("opens a citadel on Enter and returns on Leave without spending a move", () => {
+    let state = playWithoutTower();
+    expect(state.towerLinked).toBe(false);
+    expect(state.pause).toBeNull();
+    const roll = state.offered.find((offer) => offer.promptId.includes("roll-done"));
+    expect(roll?.open).toBe(true);
+    state = stepShell(state, press("ipad-0", roll?.promptId ?? "", "continue")).state;
+    const enter = state.offered.find((offer) => offer.actionId === "enter" && offer.open);
+    expect(enter).toBeTruthy();
+    expect(state.offered.some((offer) => offer.actionId === "walk" && offer.open)).toBe(true);
+    const before = movesLeft(state);
+    expect(before).toBeGreaterThanOrEqual(2);
+    state = stepShell(state, press("ipad-0", enter?.promptId ?? "", "enter")).state;
+    expect(movesLeft(state)).toBe(before);
+    const view = projectShellView(state);
+    expect(view.place).toEqual({
+      building: "citadel",
+      stillId: "place.citadel",
+      caption: PLACE_CAPTION.citadel,
+    });
+    const device = project(view, { kind: "device", deviceId: "ipad-0" });
+    expect(JSON.stringify(device)).not.toContain(PLACE_CAPTION.citadel);
+    expect(device).not.toHaveProperty("place");
+    expect(view.table?.health).toBe("unavailable");
+    expect(view.table?.purse).toBe("unavailable");
+    expect(view.table?.modifier).toBe("none");
+    expect(view.table?.chapter).toBe(TEST_STORY.card.title);
+    const leave = state.offered.find((offer) => offer.actionId === "leave" && offer.open);
+    expect(leave).toBeTruthy();
+    expect(state.offered.some((offer) => offer.actionId === "walk")).toBe(false);
+    state = stepShell(state, press("ipad-0", leave?.promptId ?? "", "leave")).state;
+    expect(movesLeft(state)).toBe(before);
+    expect(projectShellView(state).place).toBeNull();
+    expect(state.offered.some((offer) => offer.actionId === "walk" && offer.open)).toBe(true);
+    expect(state.offered.some((offer) => offer.promptId === "menu-quit")).toBe(true);
+    expect(state.offered.some((offer) => offer.promptId === "menu-connect")).toBe(true);
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    expect(state.pause).toBeNull();
+    expect(state.screen).toBe("play");
   });
 });
 

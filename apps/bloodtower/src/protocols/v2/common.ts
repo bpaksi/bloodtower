@@ -21,8 +21,18 @@ export const SETUP_SCREENS = [
 export const setupScreenSchema = z.enum(SETUP_SCREENS);
 export type SetupScreen = z.infer<typeof setupScreenSchema>;
 
-/** Runtime screens the host projects during play and between games (C1 step 9). */
-export const RUNTIME_SCREENS = ["pick-game", "play", "pause", "session", "goodbye"] as const;
+/**
+ * Runtime screens the host projects during play and between games (C1 steps 9 and 10).
+ * `splash` is the designed start. Play skips tower connect and calibrate.
+ */
+export const RUNTIME_SCREENS = [
+  "splash",
+  "pick-game",
+  "play",
+  "pause",
+  "session",
+  "goodbye",
+] as const;
 export const viewScreenSchema = z.enum([...SETUP_SCREENS, ...RUNTIME_SCREENS]);
 export type ViewScreen = z.infer<typeof viewScreenSchema>;
 

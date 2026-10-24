@@ -39,6 +39,11 @@ export type ShellState = {
   holdings: Record<string, string | null>;
   tower: TowerSnapshot;
   towerSetupDone: boolean;
+  /**
+   * True after this session pressed connect. A drop pauses only then (DEC-155 slice).
+   * A session that never connected stays in play, including after Continue.
+   */
+  towerLinked: boolean;
   screen: ShellScreen;
   setupAt: number;
   setupSteps: { id: string; label: string }[];
@@ -83,7 +88,8 @@ export const initialShellState = (input: {
     holdings: stories[0] ? initialHoldings(stories[0]) : {},
     tower: TOWER_DISCONNECTED,
     towerSetupDone: false,
-    screen: "tower-connect",
+    towerLinked: false,
+    screen: "splash",
     setupAt: 0,
     setupSteps: [],
     stage: "lobby",

@@ -128,7 +128,7 @@ describe("pack format v2 lint", () => {
   const withAsset = (yaml: string) => {
     const { root, storyDir } = tempPacksV2();
     const manifest = join(storyDir, "pack.yaml");
-    const text = readFileSync(manifest, "utf8").replace("assets: []", yaml.trim());
+    const text = readFileSync(manifest, "utf8").replace(/\nassets:[\s\S]*$/, `\n${yaml.trim()}\n`);
     writeFileSync(manifest, text);
     return { root, storyDir };
   };
