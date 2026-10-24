@@ -52,6 +52,6 @@ Sessions run in the main folder, not a worktree, so Bob's workbench shows the ca
 
 When Bob says the session is done:
 
-1. Push and open one PR titled `docs(game-design): design session <date>, <topics>`, listing the new IDs by kind. Merge only when Bob says so.
+1. Push and open one PR titled `docs(game-design): design session <date>, <topics>`, listing the new IDs by kind. Leave it open. Gamewright reviews and squash-merges it. Bob does not merge. Wright stays off design merges.
 2. Update the `game-design-roadmap` memory with what progressed and where the next session starts.
 3. Switch the folder back to `main` only after the merge, so the workbench keeps showing the session's cards until then.
