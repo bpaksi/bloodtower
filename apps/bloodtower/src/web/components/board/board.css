@@ -2154,3 +2154,138 @@
   margin-top: 0.35rem;
   font-size: var(--bt-size-caption);
 }
+
+/*
+ * Startup lobby (C1 step 10): one centred dialog over the landing painting.
+ * Not the two-column shell. The R2-01 strip is debug-only.
+ */
+.bt-board[data-board-mode="startup"] .bt-startup-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 1.4vh, 1.1rem);
+  width: min(64rem, 94vw);
+  min-height: 0;
+  margin-inline: auto;
+}
+
+.bt-board[data-screen="splash"] .bt-startup-stage,
+.bt-board[data-screen="setup"] .bt-startup-stage,
+.bt-board[data-screen="begin"] .bt-startup-stage,
+.bt-board[data-screen="tower-connect"] .bt-startup-stage {
+  width: min(46rem, 92vw);
+}
+
+.bt-board[data-board-mode="startup"] .bt-startup-stage > .bt-dialog-frame {
+  width: 100%;
+  max-height: min(72dvh, 42rem);
+  overflow: auto;
+}
+
+.bt-board[data-board-mode="startup"] .bt-startup-stage > .bt-next {
+  width: 100%;
+}
+
+.bt-startup-title {
+  margin: 0.15rem 0 0.35rem;
+  color: var(--bt-iron-gall);
+  font-family: var(--bt-font-title);
+  font-size: clamp(2.4rem, 5vw, 4.1rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.bt-dialog-frame .bt-kicker,
+.bt-startup-progress,
+.bt-startup-cue,
+.bt-claim-state {
+  text-align: center;
+}
+
+.bt-startup-cue {
+  margin: 0.35rem 0 0;
+  color: var(--bt-vellum-shadow);
+  font-style: italic;
+}
+
+.bt-startup-progress,
+.bt-claim-state {
+  margin: 0.2rem 0 0;
+  color: var(--bt-blood);
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.12em;
+}
+
+.bt-dialog-frame .bt-join-code {
+  color: var(--bt-iron-gall);
+}
+
+.bt-dialog-frame .bt-join-url {
+  color: var(--bt-vellum-shadow);
+  font-size: 1.15rem;
+}
+
+.bt-startup-join {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.bt-hunter-roster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem 1.25rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bt-door {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
+.bt-door .bt-carousel-focus {
+  width: min(100%, 28rem);
+}
+
+.bt-door-motif {
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  background: var(--bt-iron-gall);
+  color: var(--bt-parchment);
+  font-family: var(--bt-font-title);
+  font-size: clamp(3rem, 6vw, 5rem);
+}
+
+.bt-tower-still {
+  display: block;
+  width: min(100%, 28rem);
+  margin: 0.4rem auto 0;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: left center;
+  border: 3px double var(--bt-iron-gall);
+  filter: sepia(0.25) contrast(1.05);
+}
+
+.bt-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  justify-content: center;
+  margin: 0;
+  color: var(--bt-parchment-dark);
+  font-family: var(--bt-font-label);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
