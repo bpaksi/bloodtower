@@ -12,7 +12,8 @@
   "scripts": {
     "prepare": "lefthook install",
     "check": "biome check . && pnpm check:repo && pnpm -r --if-present typecheck && pnpm -r --if-present test",
-    "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
+    "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && pnpm brief:lint && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
+    "brief:lint": "node scripts/check-briefs.mjs",
     "graph": "node apps/game-workbench/src/web/cli/graph.ts",
     "land": "node scripts/land.mjs",
     "wt": "node scripts/wt.mjs add",
