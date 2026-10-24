@@ -9,6 +9,7 @@ import {
   type StoryPack,
   storyPackSchema,
 } from "../../../protocols/pack-v2/index.ts";
+import { mediaOnDiskIssues } from "../assets.ts";
 
 const MAX_FILE_BYTES = 2_000_000;
 
@@ -22,9 +23,12 @@ export interface PackV2LoadIssue {
 }
 
 export type PackV2LoadResult =
-  | { ok: true; kind: "base-content"; pack: BaseContentPack }
-  | { ok: true; kind: "story"; pack: StoryPack; base: BaseContentPack }
+  | { ok: true; kind: "base-content"; pack: BaseContentPack; warnings: PackV2LoadIssue[] }
+  | { ok: true; kind: "story"; pack: StoryPack; base: BaseContentPack; warnings: PackV2LoadIssue[] }
   | { ok: false; issues: PackV2LoadIssue[] };
+
+const isMarkdownNote = (name: string) => name.toLowerCase().endsWith(".md");
+const isPackData = (name: string) => /\.(ya?ml|json)$/i.test(name);
 
 const issue = (file: string, path: string, rule: string, message: string): PackV2LoadIssue => ({
   rule,
@@ -127,15 +131,23 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   issues.push(...mergeBoardSpaces(root, assembled));
 
   for (const name of names) {
-    if (name === packFile || name === "README.md" || name === "board") continue;
+    if (name === packFile || name === "board" || isMarkdownNote(name)) continue;
     const entryPath = join(root, name);
     try {
       if (statSync(entryPath).isDirectory()) continue;
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      issues.push(issue(name, "(file)", "P2-1", message));
       continue;
     }
     if (MANIFEST_FILES.has(name)) {
       issues.push(issue(name, "(file)", "P2-1", "The pack has two manifest files."));
+      continue;
+    }
+    // A metadata-only pack is its manifest. Notes and sibling files are not parsed.
+    if (assembled.playable === false) continue;
+    if (!isPackData(name)) {
+      issues.push(issue(name, "(file)", "P2-1", "This file is not part of the pack."));
       continue;
     }
     const extra = readPackFile(root, name);
@@ -174,7 +186,9 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
         ),
       };
     }
-    return { ok: true, kind: "base-content", pack: parsed.data };
+    const media = mediaOnDiskIssues(root, parsed.data.assets, undefined, "P2-2");
+    if (media.errors.length > 0) return { ok: false, issues: media.errors };
+    return { ok: true, kind: "base-content", pack: parsed.data, warnings: media.warnings };
   }
 
   if (kind === "story") {
@@ -233,7 +247,15 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
     }
     if (issues.length > 0) return { ok: false, issues };
 
-    return { ok: true, kind: "story", pack: story, base: baseLoaded.pack };
+    const media = mediaOnDiskIssues(root, story.assets, undefined, "P2-2");
+    if (media.errors.length > 0) return { ok: false, issues: media.errors };
+    return {
+      ok: true,
+      kind: "story",
+      pack: story,
+      base: baseLoaded.pack,
+      warnings: media.warnings,
+    };
   }
 
   return {

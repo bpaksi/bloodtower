@@ -4,7 +4,7 @@ import { type BoardSpaceInput, buildBoardGraph } from "../../engine/loops/chapte
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { mergeSetupSteps, type ShellStory } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
-import { loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
+import { isPackV2Manifest, loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
 
 export type StoryCatalog = {
   stories: ShellStory[];
@@ -50,6 +50,8 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   for (const name of readdirSync(root, { withFileTypes: true })) {
     if (!name.isDirectory()) continue;
     const dir = join(root, name.name);
+    // v1 doors (the metadata-only Count) are not format v2. Do not parse their notes.
+    if (!isPackV2Manifest(dir)) continue;
     const loaded = loadPackV2Dir(dir, root);
     if (!loaded.ok) {
       issues.push(...loaded.issues);

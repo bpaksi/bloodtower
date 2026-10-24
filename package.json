@@ -11,14 +11,16 @@
   },
   "scripts": {
     "prepare": "lefthook install",
-    "check": "biome check . && pnpm check:repo && pnpm -r --if-present typecheck && pnpm -r --if-present test",
+    "check": "biome check . && pnpm check:repo && pnpm -r --if-present typecheck && pnpm -r --if-present test && pnpm pack:lint:all",
+    "pack:lint": "pnpm --dir apps/bloodtower pack:lint",
+    "pack:lint:all": "pnpm --dir apps/bloodtower pack:lint:all",
     "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && pnpm brief:lint && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
     "brief:lint": "node scripts/check-briefs.mjs",
     "graph": "node apps/game-workbench/src/web/cli/graph.ts",
     "land": "node scripts/land.mjs",
     "wt": "node scripts/wt.mjs add",
     "wt:rm": "node scripts/wt.mjs rm",
-    "build": "pnpm --filter \"./apps/*\" --if-present build",
+    "build": "pnpm pack:lint:all && pnpm --filter \"./apps/*\" --if-present build",
     "lint": "biome check .",
     "format": "biome check --write ."
   },
