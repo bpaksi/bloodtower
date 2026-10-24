@@ -68,9 +68,26 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
   });
   await holdHeroesFromTest(page, [...HERO_IDS]);
   if (board) {
-    for (const label of ["Hero A", "Hero B", "Hero C", "Hero D"]) {
-      await expect(board.getByText(`${label} — held`)).toBeVisible({ timeout: 10_000 });
+    const main = board.locator("main.bt-board");
+    await expect(main).toHaveAttribute("data-screen", "claim-heroes", { timeout: 10_000 });
+    await expect(main).toHaveAttribute("data-board-mode", "startup");
+    await expect(main.locator('[data-illusionist-asset="dialog-frame"]')).toHaveCount(1);
+    await expect(main.locator("[data-claim-count]")).toHaveText("4 of 4 claimed");
+    for (const [id, label] of [
+      ["hero-a", "Hero A"],
+      ["hero-b", "Hero B"],
+      ["hero-c", "Hero C"],
+      ["hero-d", "Hero D"],
+    ] as const) {
+      const row = main.locator(`[data-hero="${id}"]`);
+      await expect(row).toHaveAttribute("data-held", "true");
+      await expect(row.getByText(label, { exact: true })).toBeVisible();
+      await expect(row.getByText("Claimed", { exact: true })).toBeVisible();
     }
+    await expect(main.getByText("Unclaimed", { exact: true })).toHaveCount(0);
+    await expect(main.getByText(/— held|— waiting/)).toHaveCount(0);
+    await expect(main.locator("[data-status-strip]")).toHaveCount(0);
+    await expect(main.locator("[data-next-prompt]")).toBeVisible();
   }
   await expect(
     page.locator(
