@@ -31,7 +31,7 @@ const html = (view: BoardView, debug?: boolean) =>
   renderToStaticMarkup(createElement(CoreStoryBoard, { view, debug }));
 
 describe("story board startup chrome", () => {
-  it.fails("draws splash as a title lobby, not the protocol dump", () => {
+  it("draws splash as a title lobby, not the protocol dump", () => {
     const markup = html(splashView);
     expect(markup).toContain('data-board-mode="startup"');
     expect(markup).toContain('data-screen="splash"');
@@ -52,7 +52,7 @@ describe("story board startup chrome", () => {
     expect(markup.match(/data-illusionist-asset="dialog-frame"/g)).toHaveLength(1);
   });
 
-  it.fails("keeps the status strip on the debug face only", () => {
+  it("keeps the status strip on the debug face only", () => {
     const markup = html(splashView, true);
     expect(markup).toContain("data-status-strip");
     expect(markup).toContain('data-status="tower"');
@@ -61,7 +61,7 @@ describe("story board startup chrome", () => {
     expect(markup).not.toMatch(/<button/i);
   });
 
-  it.fails("draws pick-story as a door, not a level heading", () => {
+  it("draws pick-story as a door, not a level heading", () => {
     const markup = html({
       ...splashView,
       screen: "pick-story",
@@ -85,7 +85,7 @@ describe("story board startup chrome", () => {
     expect(markup.match(/data-illusionist-asset="dialog-frame"/g)).toHaveLength(1);
   });
 
-  it.fails("draws claim-heroes as a party roster with the join code", () => {
+  it("draws claim-heroes as a party roster with the join code", () => {
     const markup = html({
       ...splashView,
       screen: "claim-heroes",
@@ -102,7 +102,7 @@ describe("story board startup chrome", () => {
     expect(markup).not.toContain("data-hero-place");
   });
 
-  it.fails("draws setup and begin as table instructions, not a map", () => {
+  it("draws setup and begin as table instructions, not a map", () => {
     const setup = html({
       ...splashView,
       screen: "setup",
@@ -144,7 +144,7 @@ describe("story board startup chrome", () => {
     expect(begin).not.toContain("data-hero-place");
   });
 
-  it.fails("keeps the play band, waiting pulse, still, and roster", () => {
+  it("keeps the play band, waiting pulse, still, and roster", () => {
     const markup = html({
       screen: "play",
       levels: [join, { id: "play", label: "play", shows: "Day 1" }],

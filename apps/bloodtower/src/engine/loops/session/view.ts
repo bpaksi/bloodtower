@@ -1,9 +1,11 @@
-import type { PlaceStill, TableBand, ViewState } from "../../views/state.ts";
+import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
 import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import type { ShellStory } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import type { ShellState } from "./state.ts";
+import { towerReady } from "./tower.ts";
 
 /** Matches protocol v2 setup screens (private lines on these only). */
 const SETUP_SCREENS = new Set([
@@ -140,21 +142,143 @@ const buildPlace = (state: ShellState): PlaceStill | null => {
   };
 };
 
-const showsFor = (state: ShellState, title: string): string => {
+const LEVEL_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+
+const STEP_NAME: Record<ShellState["screen"], string> = {
+  splash: "Splash",
+  "tower-connect": "Tower Connect",
+  "pick-story": "Pick Story",
+  "game-settings": "Game settings",
+  "claim-heroes": "Party Join",
+  setup: "Setup",
+  begin: "Begin",
+  "pick-game": "Pick a game",
+  play: "Play",
+  pause: "Paused",
+  session: "Session",
+  goodbye: "Goodbye",
+};
+
+/** R2-01 words. A session that never connected is "no tower", not a lost link. */
+const towerStrip = (state: ShellState): string => {
+  if (towerReady(state.tower)) return "connected";
+  if (state.tower.connection === "connected" || state.tower.connection === "connecting") {
+    return "calibrating";
+  }
+  return state.towerLinked ? "lost" : "no tower";
+};
+
+const towerLine = (state: ShellState): string => {
+  const strip = towerStrip(state);
+  if (strip === "connected") return "The tower is connected and calibrated.";
+  if (strip === "calibrating") return "The tower is connected. Calibrate it from an iPad.";
+  if (strip === "lost") return "The tower is lost. An iPad can reconnect.";
+  return "No tower yet. An iPad can connect it, or play on without it.";
+};
+
+const chosenOrBound = (state: ShellState): ShellStory | undefined =>
+  state.stories.find((entry) => entry.card.id === (state.chosenStoryId ?? state.boundStoryId));
+
+const doorLevel = (story: ShellStory, focused: boolean): LoopLevel | null => {
+  const id = `door-${story.card.id}`;
+  if (!LEVEL_ID.test(id)) return null;
+  const { min, max } = story.card.players;
+  const players = min === max ? `${max} players` : `${min}\u2013${max} players`;
+  const tagline = (story.card.tagline ?? "A story door.").replaceAll("\n", " ");
+  return {
+    id,
+    label: story.card.title,
+    shows: `${focused ? "In focus" : "A door"}\n${tagline}\n${players}\n${story.card.playable ? "Playable" : "Not playable yet"}`,
+  };
+};
+
+const settingLevels = (state: ShellState, story: ShellStory | undefined): LoopLevel[] => {
+  if (!story) return [];
+  const levels: LoopLevel[] = [];
+  for (const setting of story.settings) {
+    const id = `setting-${setting.id}`;
+    if (!LEVEL_ID.test(id)) continue;
+    const chosen = state.settingValues[setting.id] ?? setting.default;
+    const option = setting.options.find((row) => row.id === chosen);
+    levels.push({ id, label: setting.label, shows: option?.label ?? chosen });
+    if (levels.length === 4) break;
+  }
+  return levels;
+};
+
+const statusLevel = (state: ShellState): LoopLevel => ({
+  id: "table-status",
+  label: "Status",
+  shows: `tower: ${towerStrip(state)}\ndevices: ${state.devices.size}\nstep: ${STEP_NAME[state.screen]}`,
+});
+
+const showsFor = (state: ShellState, title: string, story: ShellStory | undefined): string => {
   if ((state.screen === "play" || state.screen === "pause") && state.play) {
     return `Day ${state.play.dayNumber}`;
   }
   if (state.screen === "splash") return "Blood Tower";
   if (state.screen === "pick-story") return title;
+  if (state.screen === "game-settings") {
+    if (!story || story.settings.length === 0) return "Nothing to set.";
+    return story.settings
+      .map((setting) => {
+        const chosen = state.settingValues[setting.id] ?? setting.default;
+        const option = setting.options.find((row) => row.id === chosen);
+        return `${setting.label}: ${option?.label ?? chosen}`;
+      })
+      .join("\n");
+  }
+  if (state.screen === "tower-connect") return towerLine(state);
+  if (state.screen === "claim-heroes") {
+    const roster = story?.heroes ?? [];
+    const held = roster.filter((hero) => state.holdings[hero.id]).length;
+    return `${held} of ${roster.length} claimed`;
+  }
+  if (state.screen === "setup") {
+    return (
+      state.setupSteps[state.setupAt]?.label ??
+      "Lay the board out on the table and face each kingdom."
+    );
+  }
+  if (state.screen === "begin") return "The table is set.";
+  if (state.screen === "pick-game") {
+    return state.autosave ? "A saved game can continue." : "A new game is ready.";
+  }
   if (state.screen === "goodbye") return "Goodbye";
   if (state.screen === "session") return "The session";
-  return `Screen ${state.screen}`;
+  return title;
+};
+
+/**
+ * Public lines the Story board paints. The screen line stays last so an iPad's
+ * `shows` text stays that line. Join is added later and must keep the total at 8.
+ */
+const startupLevels = (state: ShellState, story: ShellStory | undefined): LoopLevel[] => {
+  if (state.screen === "play" || state.screen === "pause") return [];
+  const leading: LoopLevel[] = [];
+  if (state.screen === "pick-story") {
+    for (const entry of state.stories.slice(0, 5)) {
+      const door = doorLevel(entry, entry.card.id === state.focusStoryId);
+      if (door) leading.push(door);
+    }
+  }
+  if (state.screen === "game-settings") leading.push(...settingLevels(state, story));
+  leading.push(statusLevel(state));
+  return leading.slice(0, 6);
+};
+
+const screenLabel = (state: ShellState): string => {
+  if (state.screen === "setup") {
+    const total = state.setupSteps.length;
+    if (total === 0) return "Board setup";
+    const index = Math.min(state.setupAt + 1, total);
+    return `Step ${index} of ${total}`;
+  }
+  return STEP_NAME[state.screen];
 };
 
 export const projectShellView = (state: ShellState): ViewState => {
-  const story = state.stories.find(
-    (entry) => entry.card.id === (state.chosenStoryId ?? state.boundStoryId),
-  );
+  const story = chosenOrBound(state);
   const screen = state.screen;
   const title = story?.card.title ?? "Story";
   const heroes = (story?.heroes ?? []).map((hero) => ({
@@ -185,9 +309,15 @@ export const projectShellView = (state: ShellState): ViewState => {
         },
   );
 
+  const screenLevel: LoopLevel = {
+    id: screen,
+    label: screenLabel(state),
+    shows: showsFor(state, title, story),
+  };
+
   return {
     screen,
-    levels: [{ id: state.screen, label: state.screen, shows: showsFor(state, title) }],
+    levels: [...startupLevels(state, story), screenLevel],
     heroes,
     actions,
     narration: null,
