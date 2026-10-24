@@ -203,12 +203,33 @@ describe("session hub (core)", () => {
       }),
     });
     expect(posted.status).toBe(204);
-    const day = new Date().toISOString().slice(0, 10);
+    const day = "2026-10-23";
     const lines = readFileSync(join(dataDir, "logs", `${day}.jsonl`), "utf8")
       .trim()
       .split("\n");
     expect(lines.length).toBeGreaterThan(0);
     expect(JSON.parse(lines.at(-1) ?? "{}")).toMatchObject({ code: "test-log" });
+  });
+
+  it("applies hero-hold through act on claim-heroes", async () => {
+    const host = await start();
+    const board = await helloBoard(host.port);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await act(device, "tower-connect", "tower-connect");
+    await act(device, "tower-calibrate", "tower-calibrate");
+    await act(device, "new-pick-game", "new-game");
+    await act(device, "continue-pick-story-test", "continue");
+    await act(device, "continue-game-settings", "continue");
+    await act(device, "hero-hold", "take", { heroId: "hero-a" });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await until(board.inbox, board.log, (messages) => {
+      const view = [...messages].reverse().find((m) => m.type === "boardView");
+      return (
+        view?.type === "boardView" &&
+        view.payload.screen === "claim-heroes" &&
+        view.payload.heroes.some((hero) => hero.id === "hero-a" && hero.held)
+      );
+    });
   });
 
   it("steps a device from pick-game toward pick-story with act", async () => {

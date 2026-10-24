@@ -68,6 +68,8 @@ export interface SessionHostOptions {
   log?: HostLogger;
   /** Waits for the volume test's timing. Tests pass one that does not wait. */
   sleep?: (ms: number) => Promise<void>;
+  /** Game seed. Omitted, one is chosen for this process. */
+  seed?: string;
 }
 
 export interface SessionHost {
@@ -127,7 +129,19 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const lanHost = options.lanHost ?? (() => joinHost(options.host));
   const sleep =
     options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
-  const seed = randomBytes(8).toString("hex");
+  const seed = options.seed ?? randomBytes(8).toString("hex");
+  const playableStory = catalog.stories.find((story) => story.card.playable) ?? catalog.stories[0];
+  const packId = playableStory?.card.id ?? "test";
+  const packVersion = packId === "test" ? "0.1.0" : "0.0.0";
+  store.saveRoster({
+    sessionId,
+    packId,
+    packVersion,
+    startedWall: clock.wall(),
+    joinCode,
+    devices: [],
+    holdings: [],
+  });
   let broadcastImpl: () => void = () => undefined;
   let engine: CoreSession;
   try {
@@ -136,7 +150,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       seed,
       stories: catalog.stories,
       playContent: catalog.defaultPlay,
-      packVersion: catalog.stories[0]?.card.id === "test" ? "0.1.0" : "0.0.0",
+      packVersion,
       store: eventStore,
       tower,
       clock,
@@ -147,7 +161,18 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     opened.close();
     throw error;
   }
-  engine.resumeAutosave();
+  const autosaveRow = eventStore.getAutosave();
+  if (autosaveRow) {
+    if (autosaveRow.sessionId !== sessionId) {
+      eventStore.replaceAutosave({ ...autosaveRow, sessionId });
+    }
+    const checkpoint = eventStore.lastCheckpoint(autosaveRow.gameId);
+    engine.rememberAutosave({
+      gameId: autosaveRow.gameId,
+      packId: autosaveRow.packId,
+      day: checkpoint?.day ?? 1,
+    });
+  }
 
   const clients = new Map<WebSocket, ClientState>();
   const deviceSockets = new Map<string, Set<WebSocket>>();
@@ -468,7 +493,6 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       message.payload.actionId,
       message.payload.args,
     );
-    broadcast();
   };
 
   /**

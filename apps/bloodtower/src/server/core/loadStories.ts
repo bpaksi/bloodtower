@@ -57,7 +57,10 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     }
     if (loaded.kind === "base-content") continue;
     const story = loaded.pack;
-    const heroes = loaded.base.heroes.map((hero) => ({ id: hero.id, name: hero.name }));
+    const partyHeroIds = new Set(story.start.assignments.map((row) => row.hero));
+    const heroes = loaded.base.heroes
+      .filter((hero) => partyHeroIds.has(hero.id))
+      .map((hero) => ({ id: hero.id, name: hero.name }));
     const packSteps = ((story as { setup?: { id: string; label: string }[] }).setup ?? []).map(
       (step) => ({ id: step.id, label: step.label }),
     );

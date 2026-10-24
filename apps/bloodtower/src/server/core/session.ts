@@ -61,6 +61,8 @@ export type CoreSession = {
   channelsFor: (deviceId: string) => string[];
   roster: () => { devices: { id: string; token: string }[] };
   resumeAutosave: () => boolean;
+  /** DEC-208: keep the autosave row visible on pick-game without resuming play yet. */
+  rememberAutosave: (row: { gameId: string; packId: string; day: number }) => void;
   syncTowerSnapshot: () => void;
 };
 
@@ -123,6 +125,23 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const before = state;
     const result = stepShell(state, event);
     state = result.state;
+    if (
+      event.kind === "press" &&
+      event.promptId === "continue-pick-game" &&
+      event.actionId === "continue" &&
+      before.autosave &&
+      state.screen === "play"
+    ) {
+      const resumed = continueShellFromCheckpoint(options.store, {
+        gameId: before.autosave.gameId,
+        packVersion: meta.packVersion,
+        engineVersion: meta.engineVersion,
+        meta,
+        atMonoMs: options.clock.monoMs(),
+        atWall: options.clock.wall(),
+      });
+      state = resumed.state;
+    }
     appendShell(event, deviceId);
     if (event.kind === "press") {
       const open =
@@ -150,13 +169,21 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     options.onChange();
   };
 
-  void (async () => {
-    await apply(
-      { kind: "start-session", v: 1, sessionId: options.sessionId, seed: options.seed },
-      null,
-    );
-    await apply({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
-  })();
+  let applyQueue: Promise<void> = Promise.resolve();
+  const enqueue = (event: ShellEvent, deviceId: string | null): void => {
+    applyQueue = applyQueue
+      .then(() => apply(event, deviceId))
+      .catch((error: unknown) => {
+        const detail = error instanceof Error ? error.message : String(error);
+        options.log.error(
+          "core-apply",
+          detail.trim() === "" ? "Core session apply failed." : detail,
+        );
+      });
+  };
+
+  enqueue({ kind: "start-session", v: 1, sessionId: options.sessionId, seed: options.seed }, null);
+  enqueue({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
 
   const heldHeroes = (deviceId: string) =>
     Object.entries(state.holdings)
@@ -169,13 +196,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       const deviceId = `device-${randomBytes(4).toString("hex")}`;
       const token = randomBytes(16).toString("base64url");
       devices.set(deviceId, { id: deviceId, token, formFactor });
-      void apply({ kind: "device-join", v: 1, deviceId }, deviceId);
+      enqueue({ kind: "device-join", v: 1, deviceId }, deviceId);
       return { ok: true, deviceId, token };
     },
     rejoin: (token) => {
       const device = [...devices.values()].find((entry) => entry.token === token);
       if (!device) return { ok: false };
-      void apply({ kind: "device-join", v: 1, deviceId: device.id }, device.id);
+      enqueue({ kind: "device-join", v: 1, deviceId: device.id }, device.id);
       return { ok: true, deviceId: device.id };
     },
     disconnect: (deviceId) => {
@@ -183,7 +210,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (!record) return;
       if (record.grace) clearTimeout(record.grace);
       record.grace = setTimeout(() => {
-        void apply({ kind: "device-drop", v: 1, deviceId }, deviceId);
+        enqueue({ kind: "device-drop", v: 1, deviceId }, deviceId);
       }, GRACE_MS);
       record.grace.unref?.();
     },
@@ -191,23 +218,23 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (promptId === "hero-hold" && (actionId === "take" || actionId === "release")) {
         const heroId = args.heroId;
         if (typeof heroId !== "string") return;
-        void apply({ kind: "hero-hold", v: 1, deviceId, heroId, action: actionId }, deviceId);
+        enqueue({ kind: "hero-hold", v: 1, deviceId, heroId, action: actionId }, deviceId);
         return;
       }
       if (promptId === "focus-story" && actionId === "focus") {
         const storyId = args.storyId;
         if (typeof storyId !== "string") return;
-        void apply({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
+        enqueue({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
         return;
       }
       if (promptId === "set-setting" && actionId === "set") {
         const settingId = args.settingId;
         const optionId = args.optionId;
         if (typeof settingId !== "string" || typeof optionId !== "string") return;
-        void apply({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId);
+        enqueue({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId);
         return;
       }
-      void apply({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId);
+      enqueue({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId);
     },
     projectBoard: (join) => {
       const view = projectShellView(state);
@@ -230,7 +257,19 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       devices: [...devices.values()].map((device) => ({ id: device.id, token: device.token })),
     }),
     syncTowerSnapshot: () => {
-      void apply({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
+      enqueue({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
+    },
+    rememberAutosave: (row) => {
+      state = {
+        ...state,
+        autosave: {
+          gameId: row.gameId,
+          packId: row.packId,
+          seed: options.seed,
+          day: row.day,
+        },
+      };
+      options.onChange();
     },
     resumeAutosave: () => {
       const row = options.store.getAutosave();

@@ -17,10 +17,10 @@ const toShell = (snapshot: ReturnType<MockTower["snapshot"]>): ShellTowerSnapsho
       : { state: "unavailable" },
 });
 
-/** Wraps the R1 mock tower port for host tests until they use @dark-tower/tower directly. */
+/** Wraps the mock tower port for acceptance tests and hub unit tests. */
 export const bloodtowerTowerFromMock = (mock: MockTower): BloodtowerTower => ({
   snapshot: () => toShell(mock.snapshot()),
-  subscribe: () => () => {},
+  subscribe: (listener) => mock.onSnapshotChange(listener),
   runCapability: async (capabilityId) => {
     if (capabilityId === "tower.connect") mock.connect();
     else if (capabilityId === "tower.calibrate") mock.calibrate();

@@ -138,8 +138,9 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     const next = initialShellState({
       sessionId: e.sessionId,
       seed: e.seed,
-      stories: [TEST_STORY],
+      stories: state.stories.length > 0 ? state.stories : [TEST_STORY],
     });
+    if (state.playContent) next.playContent = state.playContent;
     next.eventSeq = eventSeq + 1;
     bindShellState(next);
     startRootLoop(

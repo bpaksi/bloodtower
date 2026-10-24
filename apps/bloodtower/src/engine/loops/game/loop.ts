@@ -174,7 +174,7 @@ export const handleGamePress = (
       return { phase: next as GameLocal["phase"], awaitingPress: false, playStarted: false };
     }
     if (local.phase === "claim-heroes" && promptId === "continue-claim-heroes") {
-      if (!allHeroesHeld(shell)) return local;
+      if (!allHeroesHeld(shell)) return { ...local, awaitingPress: false };
       const next = screenAfterContinue(shell, "claim-heroes");
       if (!next) return local;
       shell.screen = next;

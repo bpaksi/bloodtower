@@ -14,6 +14,9 @@ export interface MockTower extends TowerPort {
   setFirmware: (version: string | null) => void;
   /** The next playSound fails once, as a tower that did not take the command. */
   failNextSound: () => void;
+  /** Drops the link while keeping prior calibration readings (tower-lost pause). */
+  loseConnection: () => void;
+  onSnapshotChange: (listener: () => void) => () => void;
 }
 
 /**
@@ -25,6 +28,10 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   const sent: TowerSent[] = [];
   let opened = false;
   let failSound = false;
+  const snapshotListeners = new Set<() => void>();
+  const notifySnapshot = () => {
+    for (const listener of snapshotListeners) listener();
+  };
 
   const report = (code: string, message: string) => {
     if (options.log) options.log.error(code, message);
@@ -43,11 +50,13 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
         calibrated: { state: "known", calibrated: false },
         firmware: { state: "known", version: "mock" },
       };
+      notifySnapshot();
     },
     calibrate: () => {
       if (snapshot.connection !== "connected") return;
       sent.push({ type: "calibrate" });
       snapshot = { ...snapshot, calibrated: { state: "known", calibrated: true } };
+      notifySnapshot();
     },
     playSound: async (soundIndex, volume) => {
       if (snapshot.connection !== "connected") {
@@ -70,6 +79,19 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
         ...snapshot,
         firmware: version === null ? { state: "unavailable" } : { state: "known", version },
       };
+      notifySnapshot();
+    },
+    loseConnection: () => {
+      snapshot = {
+        ...snapshot,
+        connection: "disconnected",
+        calibrated: { state: "unavailable" },
+      };
+      notifySnapshot();
+    },
+    onSnapshotChange: (listener) => {
+      snapshotListeners.add(listener);
+      return () => snapshotListeners.delete(listener);
     },
     failNextSound: () => {
       failSound = true;

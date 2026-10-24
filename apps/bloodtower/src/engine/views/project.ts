@@ -74,17 +74,23 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     });
   }
 
+  const heroesOnDevice =
+    state.screen === "claim-heroes" || state.screen === "begin"
+      ? state.heroes.filter((hero) => hero.deviceId === audience.deviceId || hero.deviceId === null)
+      : state.heroes.filter((hero) => hero.deviceId === audience.deviceId);
+
   return deviceViewPayloadSchema.parse({
     deviceId: audience.deviceId,
     screen: state.screen,
     shows: current.shows,
-    heroes: state.heroes
-      .filter((hero) => hero.deviceId === audience.deviceId)
-      .map((hero) => ({
-        id: hero.id,
-        name: hero.name,
-        lines: hero.lines.map((line) => ({ id: line.id, text: line.text })),
-      })),
+    heroes: heroesOnDevice.map((hero) => ({
+      id: hero.id,
+      name: hero.name,
+      lines:
+        hero.deviceId === audience.deviceId
+          ? hero.lines.map((line) => ({ id: line.id, text: line.text }))
+          : [],
+    })),
     actions: state.actions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
   });
 }
