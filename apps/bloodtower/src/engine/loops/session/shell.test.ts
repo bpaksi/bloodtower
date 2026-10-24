@@ -64,6 +64,23 @@ describe("session loop tower setup", () => {
     state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_READY }).state;
     expect(state.screen).toBe("splash");
     expect(state.towerLinked).toBe(false);
+    expect(state.offered.filter((offer) => offer.open).map((offer) => offer.promptId)).toEqual([
+      "splash-play",
+      "tower-connect",
+    ]);
+  });
+
+  it("keeps Play and Connect tower after the startup tower snapshot", () => {
+    let state = start();
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    expect(state.screen).toBe("splash");
+    expect(state.offered.filter((offer) => offer.open).map((offer) => offer.promptId)).toEqual([
+      "splash-play",
+      "tower-connect",
+    ]);
+    state = stepShell(state, press("ipad-0", "splash-play", "continue")).state;
+    expect(state.screen).toBe("pick-story");
+    expect(state.pause).toBeNull();
   });
 });
 

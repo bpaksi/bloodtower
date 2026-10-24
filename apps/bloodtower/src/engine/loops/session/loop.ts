@@ -34,11 +34,10 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
     if (local.phase === "splash") {
       shell.screen = "splash";
       shell.stage = "lobby";
-      if (!local.awaitingPress) {
-        offerSplash(ctx);
-        return { local: { ...local, awaitingPress: true }, passComplete: false };
-      }
-      return { local, passComplete: false };
+      // A tower snapshot and a device drop both resume this loop and clear offers.
+      // Splash has to record Play and Connect tower again, the same way pick-game does.
+      offerSplash(ctx);
+      return { local: { ...local, awaitingPress: true }, passComplete: false };
     }
 
     if (!shell.towerSetupDone && local.phase === "tower") {
