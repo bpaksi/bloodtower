@@ -6,7 +6,7 @@ import { lintPath } from "../../scripts/packLint.ts";
 import { loadPackV2Dir } from "./load.ts";
 
 const repoRoot = join(import.meta.dirname, "../../../../../../");
-const packsV2 = join(repoRoot, "packs-v2");
+const packsV2 = join(repoRoot, "packs");
 const basePack = join(packsV2, "base");
 const testPack = join(packsV2, "test");
 
@@ -36,8 +36,8 @@ describe("pack format v2 lint", () => {
     expect(result.base.pack_id).toBe("base");
   });
 
-  it("passes pack:lint for packs-v2/test", () => {
-    const report = lintPath("packs-v2/test", repoRoot);
+  it("passes pack:lint for packs/test", () => {
+    const report = lintPath("packs/test", repoRoot);
     expect(report.exitCode).toBe(0);
     expect(report.lines[0]).toContain("OK test");
   });

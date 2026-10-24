@@ -71,6 +71,36 @@ export const checkEngineConstraints = (root) => {
   return errors;
 };
 
+const D38_BANNED = [/\bhunter\b/i, /\bset[- ]piece\b/i, /\bsetpiece\b/i, /\bhunters\b/i];
+
+/** D38: old glossary names must not appear in engine, protocol v2, or packs/. */
+export const checkD38Names = (root) => {
+  const targets = [
+    join(root, "apps/bloodtower/src/engine"),
+    join(root, "apps/bloodtower/src/protocols/v2"),
+    join(root, "apps/bloodtower/src/protocols/pack-v2"),
+    join(root, "packs"),
+  ];
+  const errors = [];
+  const textExtensions = /\.(ts|tsx|yaml|yml|json|md)$/i;
+  for (const base of targets) {
+    if (!existsSync(base)) continue;
+    for (const file of walk(base, (name) => textExtensions.test(name))) {
+      const rel = relative(root, file);
+      if (rel.includes("node_modules")) continue;
+      if (rel.startsWith("packs/dracula/")) continue;
+      const text = readFileSync(file, "utf8");
+      for (const pattern of D38_BANNED) {
+        if (pattern.test(text)) {
+          errors.push(`${rel}: banned old name (${pattern}) (D38).`);
+          break;
+        }
+      }
+    }
+  }
+  return errors;
+};
+
 /** Returns one message per violation. An empty list means there are none. */
 export const checkImports = (root) => {
   const appsDir = join(root, "apps");
@@ -107,7 +137,7 @@ export const checkImports = (root) => {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-  const errors = [...checkImports(root), ...checkEngineConstraints(root)];
+  const errors = [...checkImports(root), ...checkEngineConstraints(root), ...checkD38Names(root)];
   for (const error of errors) console.error(error);
   if (errors.length > 0) {
     console.error(

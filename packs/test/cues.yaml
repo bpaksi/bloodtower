@@ -1,6 +1,0 @@
-- name: bell
-  capability: screen
-  status: Library
-  screen: fx.bell
-  fallback_sfx: sfx.bell
-  drums: none

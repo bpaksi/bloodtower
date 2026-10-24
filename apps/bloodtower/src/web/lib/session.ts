@@ -1,12 +1,11 @@
 import {
-  type ControlAction,
-  controlMessageSchema,
-  focusStoryMessageSchema,
+  actMessageSchema,
+  type BoardView,
+  type DeviceView,
   helloPayloadSchema,
-  holdMessageSchema,
-  keeperLineEndedMessageSchema,
   type LogPayload,
   logMessageSchema,
+  narrationEndedMessageSchema,
   PROTOCOL_VERSION,
   type ServerMessage,
   serverMessageSchema,
@@ -21,31 +20,18 @@ export const RECONNECT_DELAYS_MS = [500, 1_000, 2_000, 5_000] as const;
 export const reconnectDelay = (attempt: number) =>
   RECONNECT_DELAYS_MS[Math.min(attempt, RECONNECT_DELAYS_MS.length - 1)] ?? 5_000;
 
-/**
- * A stored token is stale only when hello itself is refused, before welcome.
- * A later invalid-state, such as a hold the session rejected, keeps the token.
- */
 export const forgetStoredToken = (input: {
   hadStoredToken: boolean;
   welcomed: boolean;
   code: string;
 }) => input.hadStoredToken && !input.welcomed && input.code === "invalid-state";
 
-/** Session socket port in `pnpm dev` while `next dev` serves the page on port 3000. */
 export const DEV_SESSION_WS_PORT = 4787;
-
-/** `next dev` serves the UI on this port; the socket stays on {@link DEV_SESSION_WS_PORT}. */
 export const DEV_PAGE_PORT = 3000;
 
 const isLoopbackHostname = (hostname: string) =>
   hostname === "localhost" || hostname === "::1" || hostname.startsWith("127.");
 
-/**
- * Where `/ws` is. A page this host served uses its own host and port.
- * `next dev` serves the page on another port; the socket stays on {@link SESSION_WS_PORT}.
- * When the page is opened on the LAN but `NEXT_PUBLIC_WS_URL` still points at loopback,
- * the socket URL follows the page hostname so an iPad does not connect to itself.
- */
 export const sessionUrl = (location: { protocol: string; host: string }, configured?: string) => {
   const page = new URL(`${location.protocol}//${location.host}`);
   const scheme = location.protocol === "https:" ? "wss:" : "ws:";
@@ -87,28 +73,11 @@ export const deviceHello = (input: {
 type HelloPayload = ReturnType<typeof storyboardHello> | ReturnType<typeof deviceHello>;
 
 export interface SessionClient {
-  /** False when the link is down. Nothing is kept to send later. */
-  sendHold: (hunter: string, action: "take" | "release") => boolean;
-  /**
-   * `option` is set only for a `pick`, a `set` or a `volume-answer`; `setting` only for a `set`;
-   * `note` only for the write-in `volume-answer`.
-   */
-  sendControl: (
-    promptId: string,
-    action: ControlAction,
-    option?: string,
-    setting?: string,
-    note?: string,
-  ) => boolean;
-  /** Moves the highlight on Pick Story. Not a press: it takes no lock. */
-  sendFocusStory: (story: string) => boolean;
-  /** The story board only: the Keeper line that finished on the board (D7 exception). */
-  sendKeeperLineEnded: (momentId: string, line: number) => boolean;
-  /**
-   * Page log (decision 0003). Text and a short code only. False when the socket is not open,
-   * hello has not finished, or the payload is refused, so the caller can POST `/log` instead.
-   * A socket that has not joined cannot stamp a role, so the line does not go out on it.
-   */
+  sendAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => boolean;
+  sendHold: (heroId: string, action: "take" | "release") => boolean;
+  sendFocusStory: (storyId: string) => boolean;
+  sendSetting: (settingId: string, optionId: string) => boolean;
+  sendNarrationEnded: (lineId: string) => boolean;
   sendLog: (payload: LogPayload) => boolean;
   close: () => void;
 }
@@ -117,28 +86,16 @@ export interface SessionOptions {
   url: string;
   hello: HelloPayload;
   onWelcome: (payload: Extract<ServerMessage, { type: "welcome" }>["payload"]) => void;
-  onStoryboard: (payload: Extract<ServerMessage, { type: "storyboardState" }>["payload"]) => void;
-  onDevice: (payload: Extract<ServerMessage, { type: "deviceState" }>["payload"]) => void;
+  onBoardView: (payload: BoardView) => void;
+  onDeviceView: (payload: DeviceView) => void;
   onError: (payload: Extract<ServerMessage, { type: "error" }>["payload"]) => void;
-  /**
-   * A frame this page could not read. The host did not write it. `onError` is also called.
-   * A host `error` message is not a local error: the host already logged it.
-   */
   onLocalError?: (payload: Extract<ServerMessage, { type: "error" }>["payload"]) => void;
-  /** An error line the host just wrote. The story board shows it as a toast. */
   onLogged?: (payload: Extract<ServerMessage, { type: "logged" }>["payload"]) => void;
   onLive: (live: boolean) => void;
-  /** The socket dropped and a reconnect is scheduled. This is not an error. */
   onReconnect?: () => void;
-  /** For tests. */
   createSocket?: (url: string) => WebSocket;
 }
 
-/**
- * One socket to the session host. It reconnects by itself.
- * A device reconnects with its token, not the join code, so it does not become a second device.
- * A dropped link does not retry a press or a tower action.
- */
 export const openSession = (options: SessionOptions): SessionClient => {
   const create = options.createSocket ?? ((url: string) => new WebSocket(url));
   let socket: WebSocket | undefined;
@@ -201,19 +158,22 @@ export const openSession = (options: SessionOptions): SessionClient => {
         options.onWelcome(message.data.payload);
         return;
       }
-      if (message.data.type === "storyboardState") {
-        options.onStoryboard(message.data.payload);
+      if (message.data.type === "boardView") {
+        options.onBoardView(message.data.payload);
         return;
       }
-      if (message.data.type === "deviceState") {
-        options.onDevice(message.data.payload);
+      if (message.data.type === "deviceView") {
+        options.onDeviceView(message.data.payload);
         return;
       }
       if (message.data.type === "logged") {
         options.onLogged?.(message.data.payload);
         return;
       }
-      options.onError(message.data.payload);
+      if (message.data.type === "error") {
+        options.onError(message.data.payload);
+        return;
+      }
     };
     current.onclose = () => {
       if (socket !== current) return;
@@ -230,35 +190,51 @@ export const openSession = (options: SessionOptions): SessionClient => {
   connect();
 
   return {
-    sendHold: (hunter, action) => {
-      const message = holdMessageSchema.safeParse({
+    sendAct: (promptId, actionId, args = {}) => {
+      const message = actMessageSchema.safeParse({
         v: PROTOCOL_VERSION,
-        type: "hold",
-        payload: { hunter, action },
+        type: "act",
+        payload: { promptId, actionId, args },
       });
       if (!message.success) return false;
       return sendRaw(message.data);
     },
-    sendControl: (promptId, action, option, setting, note) => {
-      const message = controlMessageSchema.safeParse({
+    sendHold: (heroId, action) => {
+      const message = actMessageSchema.safeParse({
         v: PROTOCOL_VERSION,
-        type: "control",
+        type: "act",
+        payload: { promptId: "hero-hold", actionId: action, args: { heroId } },
+      });
+      if (!message.success) return false;
+      return sendRaw(message.data);
+    },
+    sendFocusStory: (storyId) => {
+      const message = actMessageSchema.safeParse({
+        v: PROTOCOL_VERSION,
+        type: "act",
+        payload: { promptId: "focus-story", actionId: "focus", args: { storyId } },
+      });
+      if (!message.success) return false;
+      return sendRaw(message.data);
+    },
+    sendSetting: (settingId, optionId) => {
+      const message = actMessageSchema.safeParse({
+        v: PROTOCOL_VERSION,
+        type: "act",
         payload: {
-          promptId,
-          action,
-          ...(option === undefined ? {} : { option }),
-          ...(setting === undefined ? {} : { setting }),
-          ...(note === undefined ? {} : { note }),
+          promptId: "set-setting",
+          actionId: "set",
+          args: { settingId, optionId },
         },
       });
       if (!message.success) return false;
       return sendRaw(message.data);
     },
-    sendFocusStory: (story) => {
-      const message = focusStoryMessageSchema.safeParse({
+    sendNarrationEnded: (lineId) => {
+      const message = narrationEndedMessageSchema.safeParse({
         v: PROTOCOL_VERSION,
-        type: "focus-story",
-        payload: { story },
+        type: "narration-ended",
+        payload: { lineId },
       });
       if (!message.success) return false;
       return sendRaw(message.data);
@@ -269,15 +245,6 @@ export const openSession = (options: SessionOptions): SessionClient => {
         v: PROTOCOL_VERSION,
         type: "log",
         payload,
-      });
-      if (!message.success) return false;
-      return sendRaw(message.data);
-    },
-    sendKeeperLineEnded: (momentId, line) => {
-      const message = keeperLineEndedMessageSchema.safeParse({
-        v: PROTOCOL_VERSION,
-        type: "keeper-line-ended",
-        payload: { momentId, line },
       });
       if (!message.success) return false;
       return sendRaw(message.data);

@@ -1,4 +1,4 @@
-import boardJson from "../../../../../../packs-v2/base/board/spaces.json" with { type: "json" };
+import boardJson from "../../../../../../packs/base/board/spaces.json" with { type: "json" };
 import type { KingdomId } from "../chapter/board.ts";
 import { type BoardGraph, type BoardSpaceInput, buildBoardGraph } from "../chapter/board.ts";
 import type { PlayContent } from "../chapter/playState.ts";

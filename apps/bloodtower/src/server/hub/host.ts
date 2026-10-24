@@ -2,11 +2,12 @@ import { randomBytes } from "node:crypto";
 import { createServer, type IncomingMessage } from "node:http";
 import { dirname } from "node:path";
 import {
+  boardViewMessageSchema,
   CLIENT_MESSAGE_TYPES,
   type ClientMessage,
   clientMessageSchema,
   containsPrivateChannel,
-  deviceStatePayloadSchema,
+  deviceViewMessageSchema,
   type ErrorCode,
   envelopeSchema,
   errorPayloadSchema,
@@ -14,13 +15,15 @@ import {
   PAGE_LOG_MESSAGE_MAX,
   PROTOCOL_VERSION,
   type ServerMessage,
-  storyboardStatePayloadSchema,
   welcomePayloadSchema,
 } from "bloodtower-protocols";
 import { type RawData, WebSocket, WebSocketServer } from "ws";
-import { createPressLog } from "../control/lock.ts";
+import { loadStoryCatalog } from "../core/loadStories.ts";
+import { type CoreSession, createCoreSession } from "../core/session.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
+import { storedRunFromEventLog } from "../events/rebuildRun.ts";
+import { createEventStore } from "../events/store.ts";
 import { joinHost } from "../lanUrls.ts";
 import {
   createHostLogger,
@@ -29,18 +32,12 @@ import {
   isLogIngestPath,
   type LogEntry,
 } from "../log/hostLog.ts";
-import type { PackAssetIndex } from "../pack/assets.ts";
 import { devAudioAllowOrigin } from "../pack/audio.ts";
-import { formatLoadIssues, loadStories } from "../pack/load.ts";
 import { tryServePackAssets } from "../pack/serve.ts";
+import { formatPackV2Issues } from "../pack/v2/load.ts";
 import { requestPath, serveStatic } from "../server.ts";
-import { createSession, type SessionEngine } from "../session/engine.ts";
 import { type Clock, systemClock } from "../timing/clock.ts";
-import { createTimingLog } from "../timing/log.ts";
-import { createStatLog } from "../timing/stats.ts";
-import { runTowerPress } from "../tower/port.ts";
-import type { TowerPort } from "../tower/types.ts";
-import { runVolumeTest } from "../tower/volumeTest.ts";
+import { type BloodtowerTower, createBloodtowerTower } from "../tower/host.ts";
 import { isAllowedOrigin } from "./origin.ts";
 
 const WS_PATH = "/ws";
@@ -54,7 +51,7 @@ export interface SessionHostOptions {
   packsDir: string;
   /** SQLite file. The folder is created. */
   databasePath: string;
-  tower: TowerPort;
+  tower?: BloodtowerTower;
   devOrigins?: readonly string[];
   /** When set, join URLs use this HTTP port (for example `next dev` on 3000) while `/ws` stays on `port`. */
   joinPagePort?: number;
@@ -72,6 +69,10 @@ export interface SessionHostOptions {
   log?: HostLogger;
   /** Waits for the volume test's timing. Tests pass one that does not wait. */
   sleep?: (ms: number) => Promise<void>;
+  /** Game seed. Omitted, one is chosen for this process. */
+  seed?: string;
+  /** Device holding grace after a drop. E2e passes a short value. */
+  graceMs?: number;
 }
 
 export interface SessionHost {
@@ -108,31 +109,14 @@ interface ClientState {
  */
 export const startSessionHost = async (options: SessionHostOptions): Promise<SessionHost> => {
   const log = options.log ?? createHostLogger({ dataDir: dirname(options.databasePath) });
-  const stories = loadStories(options.packsDir);
-  // The session starts on the first story that loads. The rest wait on Pick Story.
-  const first = stories.find((entry) => entry.pack);
-  if (!first?.pack) {
-    const issues = stories.flatMap((entry) => formatLoadIssues(entry.issues));
-    throw new Error(`No story pack loaded.\n${issues.join("\n")}`);
+  const catalog = loadStoryCatalog(options.packsDir);
+  if (catalog.stories.length === 0) {
+    throw new Error(`No story pack loaded.\n${formatPackV2Issues(catalog.issues).join("\n")}`);
   }
-  for (const entry of stories) {
-    // A metadata-only pack (`playable: false`) has no issues and is not an error.
-    if (!entry.pack && entry.issues.length > 0) {
-      log.error(
-        "pack-load",
-        `Story ${entry.card.id} can't load.\n${formatLoadIssues(entry.issues).join("\n")}`,
-      );
-    }
+  for (const issue of catalog.issues) {
+    log.error("pack-load", formatPackV2Issues([issue]).join("\n"));
   }
-  const pack = first.pack;
-  const packAssetCatalogs: PackAssetIndex[] = stories
-    .map((entry) => entry.assets)
-    .filter((catalog): catalog is PackAssetIndex => catalog !== null);
-  for (const catalog of packAssetCatalogs) {
-    if (catalog.warnings.length > 0) {
-      log.warn("pack-asset", formatLoadIssues(catalog.warnings).join("\n"));
-    }
-  }
+  const packAssetCatalogs: import("../pack/assets.ts").PackAssetIndex[] = [];
   const joinCode =
     options.joinCode ?? String(randomBytes(3).readUIntBE(0, 3) % 1_000_000).padStart(6, "0");
   const clock = options.clock ?? systemClock();
@@ -143,30 +127,57 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const devOrigins = options.devOrigins ?? [];
   const allowDevPrivateOrigins = devOrigins.length > 0;
   const joinPagePort = options.joinPagePort;
-  const tower = options.tower;
+  const tower = options.tower ?? createBloodtowerTower({ mock: process.env.MOCK === "1" });
+  const eventStore = createEventStore(opened.db);
   const lanHost = options.lanHost ?? (() => joinHost(options.host));
   const sleep =
     options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
-  let engine: SessionEngine;
+  const seed = options.seed ?? randomBytes(8).toString("hex");
+  const playableStory = catalog.stories.find((story) => story.card.playable) ?? catalog.stories[0];
+  const packId = playableStory?.card.id ?? "test";
+  const packVersion = packId === "test" ? "0.1.0" : "0.0.0";
+  store.saveRoster({
+    sessionId,
+    packId,
+    packVersion,
+    startedWall: clock.wall(),
+    joinCode,
+    devices: [],
+    holdings: [],
+  });
+  let broadcastImpl: () => void = () => undefined;
+  let engine: CoreSession;
   try {
-    engine = createSession(pack, {
-      stories,
-      storyId: first.card.id,
+    engine = createCoreSession({
       sessionId,
-      joinCode,
-      startedWall: clock.wall(),
-      timing: createTimingLog(store, clock, sessionId),
-      stats: createStatLog(store, clock, sessionId),
-      presses: createPressLog(clock, (press) => store.insertPress(sessionId, press)),
-      saveRoster: (roster) => store.saveRoster(roster),
-      tower: () => tower.snapshot(),
-      onChange: () => broadcast(),
+      seed,
+      stories: catalog.stories,
+      playContent: catalog.defaultPlay,
+      packVersion,
+      store: eventStore,
+      graceMs: options.graceMs,
+      tower,
+      clock,
+      log,
+      onChange: () => broadcastImpl(),
     });
-    // The pack loaded and the session exists, so the splash is done. It is not a press.
-    engine.finishSplash();
   } catch (error) {
     opened.close();
     throw error;
+  }
+  const autosaveRow = eventStore.getAutosave();
+  if (autosaveRow) {
+    if (autosaveRow.sessionId !== sessionId) {
+      eventStore.replaceAutosave({ ...autosaveRow, sessionId });
+    }
+    const checkpoint = eventStore.lastCheckpoint(autosaveRow.gameId);
+    await engine.whenIdle();
+    engine.rememberAutosave({
+      gameId: autosaveRow.gameId,
+      packId: autosaveRow.packId,
+      day: checkpoint?.day ?? 1,
+    });
+    engine.syncTowerSnapshot();
   }
 
   const clients = new Map<WebSocket, ClientState>();
@@ -245,41 +256,40 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
 
   const storyboardMessage = (): ServerMessage | undefined => {
     try {
-      const payload = storyboardStatePayloadSchema.parse(
-        engine.projectStoryboard(tower.snapshot(), joinAt()),
-      );
-      return { v: PROTOCOL_VERSION, type: "storyboardState", payload };
+      const join = joinAt();
+      const payload = engine.projectBoard({
+        code: joinCode,
+        url: join.url,
+        reachable: join.reachable,
+      });
+      return boardViewMessageSchema.parse({
+        v: PROTOCOL_VERSION,
+        type: "boardView",
+        payload,
+      });
     } catch (error: unknown) {
       const detail = error instanceof Error ? error.message : String(error);
-      log.error(
-        "storyboard-state",
-        detail.trim() === "" ? "Story board state was refused." : detail,
-      );
+      log.error("board-view", detail.trim() === "" ? "Story board view was refused." : detail);
       return undefined;
     }
   };
 
   const deviceMessage = (deviceId: string): ServerMessage | undefined => {
     try {
-      const view = engine.projectDevice(deviceId);
-      const payload = deviceStatePayloadSchema.parse({
-        ...view,
-        tower: tower.snapshot(),
-        pausePromptId: engine.pausePromptId(),
-        connectLock: engine.lockFor("tower-connect"),
-        calibrateLock: engine.lockFor("tower-calibrate"),
-        roster: engine.hunterRoster(),
-        packId: engine.packId(),
+      const payload = engine.projectDevice(deviceId);
+      return deviceViewMessageSchema.parse({
+        v: PROTOCOL_VERSION,
+        type: "deviceView",
+        payload,
       });
-      return { v: PROTOCOL_VERSION, type: "deviceState", payload };
     } catch (error: unknown) {
       const detail = error instanceof Error ? error.message : String(error);
-      log.error("device-state", detail.trim() === "" ? "Device state was refused." : detail);
+      log.error("device-view", detail.trim() === "" ? "Device view was refused." : detail);
       return undefined;
     }
   };
 
-  const broadcast = () => {
+  broadcastImpl = () => {
     try {
       lastSnapshot = JSON.stringify(tower.snapshot());
       const board = storyboardMessage();
@@ -301,12 +311,15 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       log.error("broadcast", detail.trim() === "" ? "Broadcast failed." : detail);
     }
   };
+  const broadcast = () => broadcastImpl();
 
   const syncTower = () => {
     const next = JSON.stringify(tower.snapshot());
     if (next === lastSnapshot) return;
+    engine.syncTowerSnapshot();
     broadcast();
   };
+  tower.subscribe(() => syncTower());
 
   const watchMs = options.towerWatchMs ?? 200;
   const timer = watchMs > 0 ? setInterval(syncTower, watchMs) : undefined;
@@ -353,8 +366,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     });
   };
 
-  const channelsFor = (deviceId: string) =>
-    engine.projectDevice(deviceId).heldHunters.map((hunter) => `ipad:${hunter}`);
+  const channelsFor = (deviceId: string) => engine.channelsFor(deviceId);
 
   const onHello = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
     if (message.type !== "hello") return;
@@ -438,6 +450,15 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       sendError(socket, "invalid-payload", "A device joins with a code or a token.", correlationId);
       return;
     }
+    if (payload.joinCode !== joinCode) {
+      sendError(
+        socket,
+        "invalid-state",
+        "The join code does not match this session.",
+        correlationId,
+      );
+      return;
+    }
     const joined = engine.join({ joinCode: payload.joinCode, formFactor: payload.formFactor });
     if (!joined.ok) {
       sendError(
@@ -461,8 +482,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     broadcast();
   };
 
-  const onHold = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
-    if (message.type !== "hold") return;
+  const onAct = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
+    if (message.type !== "act") return;
     const correlationId = message.id;
     if (client.role === "pending") {
       sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
@@ -472,116 +493,12 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       sendError(socket, "storyboard-control", "The story board is display only.", correlationId);
       return;
     }
-    const result = engine.hold(client.deviceId, message.payload.hunter, message.payload.action);
-    if (!result.ok) {
-      sendError(socket, "invalid-state", "That hold was not accepted.", correlationId);
-      return;
-    }
-    broadcast();
-  };
-
-  const onFocusStory = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
-    if (message.type !== "focus-story") return;
-    const correlationId = message.id;
-    if (client.role === "pending") {
-      sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
-      return;
-    }
-    if (client.role !== "device" || !client.deviceId) {
-      sendError(socket, "storyboard-control", "The story board is display only.", correlationId);
-      return;
-    }
-    const result = engine.focusStory(client.deviceId, message.payload.story);
-    if (!result.ok) {
-      sendError(socket, "invalid-state", "That story was not accepted.", correlationId);
-      return;
-    }
-    broadcast();
-  };
-
-  /**
-   * Plays the volume test after the winning press that asked for it. It runs on its own; each
-   * step publishes the board and the devices. A run Back left behind stops at its next step.
-   */
-  const startVolumeRun = () => {
-    const queued = engine.takeVolumeRun();
-    if (!queued) return;
-    void runVolumeTest({
-      port: tower,
-      withBalance: queued.withBalance,
-      sleep,
-      hooks: {
-        live: () => !closing && engine.volumeRunLive(queued.run),
-        progress: (phase, level) => {
-          engine.volumeProgress(queued.run, phase, level);
-          broadcast();
-        },
-        failed: () => {
-          engine.volumeFailed(queued.run);
-          broadcast();
-        },
-      },
-    }).catch((error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
-      log.error(
-        "tower-volume-test",
-        `The tower volume test stopped. ${message.trim() === "" ? "It failed with no message." : message}`,
-      );
-      engine.volumeFailed(queued.run);
-      broadcast();
-    });
-  };
-
-  const onControl = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
-    if (message.type !== "control") return;
-    const correlationId = message.id;
-    if (client.role === "pending") {
-      sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
-      return;
-    }
-    if (client.role !== "device" || !client.deviceId) {
-      sendError(socket, "storyboard-control", "The story board is display only.", correlationId);
-      return;
-    }
-    const result = engine.press(
+    engine.act(
       client.deviceId,
       message.payload.promptId,
-      message.payload.action,
-      message.payload.option,
-      message.payload.setting,
-      message.payload.note,
+      message.payload.actionId,
+      message.payload.args,
     );
-    if (!result.ok) {
-      sendError(socket, "invalid-state", "That press was not accepted.", correlationId);
-      return;
-    }
-    runTowerPress(result, tower);
-    broadcast();
-    if (result.winner && result.action === "volume-play") startVolumeRun();
-  };
-
-  /**
-   * The story board's Keeper report (D7). Only the storyboard socket may send it.
-   * `log` is separate (D39) and changes no game state.
-   * The engine acts only when the line matches the current Keeper line, so a late one is a no-op.
-   */
-  const onKeeperLineEnded = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
-    if (message.type !== "keeper-line-ended") return;
-    const correlationId = message.id;
-    if (client.role === "pending") {
-      sendError(socket, "invalid-state", "Say hello before anything else.", correlationId);
-      return;
-    }
-    if (client.role !== "storyboard") {
-      sendError(
-        socket,
-        "invalid-state",
-        "Only the story board reports a Keeper line.",
-        correlationId,
-      );
-      return;
-    }
-    if (engine.keeperLineEnded(message.payload.momentId, message.payload.line)) broadcast();
   };
 
   /**
@@ -649,12 +566,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       return;
     }
     if (message.data.type === "hello") onHello(socket, client, message.data);
-    else if (message.data.type === "hold") onHold(socket, client, message.data);
-    else if (message.data.type === "focus-story") onFocusStory(socket, client, message.data);
-    else if (message.data.type === "keeper-line-ended")
-      onKeeperLineEnded(socket, client, message.data);
     else if (message.data.type === "log") onLog(socket, client, message.data);
-    else onControl(socket, client, message.data);
+    else if (message.data.type === "act") onAct(socket, client, message.data);
   };
 
   const http = createServer((req, res) => {
@@ -778,7 +691,15 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   return {
     port,
     joinCode,
-    loadRun: () => store.loadRun(sessionId),
+    loadRun: () => {
+      const base = store.loadRun(sessionId);
+      const gameId =
+        engine.currentGameId() ?? eventStore.autosaveForSession(sessionId)?.gameId ?? null;
+      if (gameId && eventStore.hasEvents(gameId)) {
+        return storedRunFromEventLog(eventStore, gameId, base);
+      }
+      return base;
+    },
     syncTower,
     close: () => {
       if (closingPromise) return closingPromise;
@@ -788,7 +709,6 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       closingPromise = (async () => {
         try {
           for (const id of deviceSockets.keys()) engine.disconnect(id);
-          engine.close();
           deviceSockets.clear();
           for (const socket of clients.keys()) socket.close();
           clients.clear();
@@ -798,7 +718,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
             http.closeAllConnections();
           });
         } finally {
-          tower.close();
+          await engine.whenIdle();
+          void tower.close();
           opened.close();
         }
       })();

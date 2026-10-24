@@ -1,3 +1,0 @@
-custom:
-  - {id: tower-volume-test, type: event, scope: session}
-timing: {marks: auto}

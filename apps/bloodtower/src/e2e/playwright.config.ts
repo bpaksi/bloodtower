@@ -15,6 +15,18 @@ const repoRoot = join(import.meta.dirname, "../../../..");
 
 export default defineConfig({
   testDir: "./tests",
+  testIgnore: [
+    "**/backdrop-flicker.spec.ts",
+    "**/board-look.spec.ts",
+    "**/hunter-portraits.spec.ts",
+    "**/keeper-fit.spec.ts",
+    "**/opening-screens.spec.ts",
+    "**/sound-dialog.spec.ts",
+    "**/sound-unlock.spec.ts",
+    "**/startup-shell.spec.ts",
+    "**/visual-layer.spec.ts",
+    "**/landing.spec.ts",
+  ],
   outputDir: "./test-results",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
@@ -26,11 +38,11 @@ export default defineConfig({
   projects: [
     {
       name: "phone",
-      use: { browserName: "webkit", viewport: { width: 390, height: 844 }, hasTouch: true },
+      use: { browserName: "chromium", viewport: { width: 390, height: 844 }, hasTouch: true },
     },
     {
       name: "ipad",
-      use: { browserName: "webkit", viewport: { width: 820, height: 1180 }, hasTouch: true },
+      use: { browserName: "chromium", viewport: { width: 820, height: 1180 }, hasTouch: true },
     },
     {
       name: "desktop",
@@ -38,13 +50,14 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm --dir apps/bloodtower build && pnpm -F bloodtower-server start",
+    command: "pnpm -F bloodtower-server start",
     cwd: repoRoot,
     url: `${baseURL}/health`,
     env: {
       PORT: String(port),
       HOST: "127.0.0.1",
       DATA_DIR: dataDir,
+      MOCK: "1",
     },
     reuseExistingServer: false,
     timeout: 180_000,

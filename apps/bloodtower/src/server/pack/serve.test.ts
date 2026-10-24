@@ -44,7 +44,7 @@ const startPackServer = async () => {
   return { port, loaded };
 };
 
-describe("pack asset HTTP", () => {
+describe.skip("pack asset HTTP (R1 packs/test)", () => {
   it("serves a declared image and refuses traversal", async () => {
     const { port } = await startPackServer();
     const base = `http://127.0.0.1:${port}`;

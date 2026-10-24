@@ -9,10 +9,12 @@ import {
   timingMarkSchema,
 } from "bloodtower-protocols";
 import { type EngineEvent, engineEventSchema } from "../../engine/events.ts";
+import { type ShellEvent, shellEventSchema } from "../../engine/loops/session/events.ts";
 
 /** Host log event kinds (DEC-107). Payload shape is checked before insert. */
 export const HOST_EVENT_KINDS = [
   "engine",
+  "shell",
   "control-press",
   "timing-mark-open",
   "timing-mark-close",
@@ -51,19 +53,26 @@ export const parseHostPayload = <K extends HostEventKind>(
   payloadJson: string,
 ): K extends "engine"
   ? { v: 1; event: EngineEvent }
-  : K extends "control-press"
-    ? { v: 1; press: ControlPress }
-    : K extends "timing-mark-open"
-      ? { v: 1; mark: TimingMark }
-      : K extends "timing-mark-close"
-        ? TimingMarkClosePayloadV1
-        : K extends "stat"
-          ? { v: 1; stat: StatEvent }
-          : VersionChangedPayloadV1 => {
+  : K extends "shell"
+    ? { v: 1; event: ShellEvent }
+    : K extends "control-press"
+      ? { v: 1; press: ControlPress }
+      : K extends "timing-mark-open"
+        ? { v: 1; mark: TimingMark }
+        : K extends "timing-mark-close"
+          ? TimingMarkClosePayloadV1
+          : K extends "stat"
+            ? { v: 1; stat: StatEvent }
+            : VersionChangedPayloadV1 => {
   const parsed = assertV1(JSON.parse(payloadJson));
   switch (kind) {
     case "engine": {
       const event = engineEventSchema.safeParse(parsed.event);
+      if (!event.success) throw new Error(event.error.message);
+      return { v: 1, event: event.data } as never;
+    }
+    case "shell": {
+      const event = shellEventSchema.safeParse(parsed.event);
       if (!event.success) throw new Error(event.error.message);
       return { v: 1, event: event.data } as never;
     }

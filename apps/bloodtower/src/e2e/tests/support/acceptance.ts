@@ -4,6 +4,7 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { loadConfig } from "../../../server/config.ts";
 import { type SessionHost, startSessionHost } from "../../../server/hub/host.ts";
 import { createMockTower, type MockTower } from "../../../server/tower/mock.ts";
+import { bloodtowerTowerFromMock } from "../../../server/tower/testAdapter.ts";
 
 const WEB_ROOT = resolve(import.meta.dirname, "../../../web/out");
 
@@ -19,7 +20,10 @@ export interface AcceptanceHost {
  * It serves the export the webServer step built. The SQLite file sits under `.wt.json` `dataDir`
  * (`e2e-acceptance/<project>.sqlite`, plus the repeat or retry index), outside the folder the config clears in every worker.
  */
-export const startAcceptanceHost = async (testInfo: TestInfo): Promise<AcceptanceHost> => {
+export const startAcceptanceHost = async (
+  testInfo: TestInfo,
+  options?: { databasePath?: string; seed?: string; graceMs?: number },
+): Promise<AcceptanceHost> => {
   const config = loadConfig({ env: {} });
   const dir = join(config.dataDir, "e2e-acceptance");
   mkdirSync(dir, { recursive: true });
@@ -30,8 +34,10 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
     testInfo.repeatEachIndex > 0 ? `repeat${testInfo.repeatEachIndex}` : null,
     testInfo.retry > 0 ? `retry${testInfo.retry}` : null,
   ].filter(Boolean);
-  const databasePath = join(dir, `${run.join("-")}.sqlite`);
-  for (const suffix of ["", "-wal", "-shm"]) rmSync(`${databasePath}${suffix}`, { force: true });
+  const databasePath = options?.databasePath ?? join(dir, `${run.join("-")}.sqlite`);
+  if (!options?.databasePath) {
+    for (const suffix of ["", "-wal", "-shm"]) rmSync(`${databasePath}${suffix}`, { force: true });
+  }
   const tower = createMockTower();
   const host = await startSessionHost({
     port: 0,
@@ -39,10 +45,12 @@ export const startAcceptanceHost = async (testInfo: TestInfo): Promise<Acceptanc
     webRoot: WEB_ROOT,
     packsDir: config.packsDir,
     databasePath,
-    tower,
+    tower: bloodtowerTowerFromMock(tower),
     towerWatchMs: 50,
     // The volume test waits about 4 s between sounds; the e2e run does not.
     sleep: async () => undefined,
+    seed: options?.seed,
+    graceMs: options?.graceMs ?? 100,
   });
   return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath };
 };
@@ -100,7 +108,7 @@ export const gateControls = async (page: Page): Promise<ControlGate> => {
       socket.send(message);
     });
     socket.onMessage((message) => {
-      if (holding && typeof message === "string" && JSON.parse(message).type === "control") {
+      if (holding && typeof message === "string" && JSON.parse(message).type === "act") {
         queue.push(() => server.send(message));
         return;
       }
@@ -131,6 +139,133 @@ export const releaseTogether = (...gates: ControlGate[]) => {
 
 /** The test pack's setup steps, in order (packs/test/pack.yaml `setup`). */
 export const SETUP_STEPS = ["lay-out-board", "place-hunters", "ready-decks"] as const;
+
+/** Injects a handle to the session WebSocket before navigation (see `walkFullSetup`). */
+export const installSessionSocketHook = async (page: Page) => {
+  await page.addInitScript(() => {
+    const Native = window.WebSocket;
+    class SessionTrackingWebSocket extends Native {
+      constructor(url: string | URL, protocols?: string | string[]) {
+        super(url, protocols);
+        if (String(url).includes("/ws")) {
+          const win = window as unknown as {
+            __btSessionSocket?: WebSocket;
+            __btLastDeviceView?: {
+              screen: string;
+              actions: { promptId: string; actionId: string; open: boolean }[];
+            };
+          };
+          win.__btSessionSocket = this;
+          this.addEventListener("message", (event) => {
+            try {
+              const message = JSON.parse(String(event.data)) as {
+                type?: string;
+                payload?: {
+                  screen: string;
+                  actions: { promptId: string; actionId: string; open: boolean }[];
+                };
+              };
+              if (message.type === "deviceView" && message.payload) {
+                win.__btLastDeviceView = message.payload;
+              }
+            } catch {
+              // Ignore non-JSON frames.
+            }
+          });
+        }
+      }
+    }
+    window.WebSocket = SessionTrackingWebSocket;
+  });
+};
+
+const PLAY_PRESS_PREFERENCE = ["continue", "record", "end-turn", "leave", "enter", "walk"] as const;
+
+const PLAY_PRESS_SKIP = new Set([
+  "quit-story",
+  "reconnect",
+  "new-game",
+  "done-for-tonight",
+  "back",
+  "tower-connect",
+  "tower-calibrate",
+]);
+
+/** Sends one open play/setup press on the live session socket (same connection as the UI). */
+export const sendPlayPressFromTest = async (page: Page): Promise<boolean> => {
+  await page.waitForFunction(
+    () => {
+      const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;
+      return socket != null && socket.readyState === WebSocket.OPEN;
+    },
+    { timeout: 15_000 },
+  );
+  return page.evaluate(
+    ({ prefer, skip }) => {
+      const win = window as unknown as {
+        __btSessionSocket?: WebSocket;
+        __btLastDeviceView?: {
+          screen: string;
+          actions: { promptId: string; actionId: string; open: boolean }[];
+        };
+      };
+      const socket = win.__btSessionSocket;
+      const view = win.__btLastDeviceView;
+      if (!socket || socket.readyState !== WebSocket.OPEN || !view) return false;
+      const open = view.actions.filter((action) => action.open);
+      if (open.length === 0) return false;
+      let pick = null as { promptId: string; actionId: string } | null;
+      for (const actionId of prefer) {
+        const hit = open.find((action) => action.actionId === actionId);
+        if (hit) {
+          pick = { promptId: hit.promptId, actionId: hit.actionId };
+          break;
+        }
+      }
+      if (!pick) {
+        const hit = open.find((action) => !skip.includes(action.actionId));
+        if (hit) pick = { promptId: hit.promptId, actionId: hit.actionId };
+      }
+      if (!pick) return false;
+      socket.send(
+        JSON.stringify({
+          v: 2,
+          type: "act",
+          payload: { promptId: pick.promptId, actionId: pick.actionId, args: {} },
+        }),
+      );
+      return true;
+    },
+    { prefer: [...PLAY_PRESS_PREFERENCE], skip: [...PLAY_PRESS_SKIP] },
+  );
+};
+
+/** Sends hero-hold on the page's live session socket (same connection as the UI). */
+export const holdHeroesFromTest = async (page: Page, heroIds: string[]) => {
+  await page.waitForFunction(
+    () => {
+      const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;
+      return socket != null && socket.readyState === WebSocket.OPEN;
+    },
+    { timeout: 15_000 },
+  );
+  await page.evaluate((heroes) => {
+    const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      throw new Error("Session socket is not open.");
+    }
+    for (const heroId of heroes) {
+      socket.send(
+        JSON.stringify({
+          v: 2,
+          type: "act",
+          payload: { promptId: "hero-hold", actionId: "take", args: { heroId } },
+        }),
+      );
+    }
+  }, heroIds);
+  await page.waitForTimeout(250);
+};
 
 /**
  * From the first setup step to Begin: presses Done on each step once its dialog shows, so no

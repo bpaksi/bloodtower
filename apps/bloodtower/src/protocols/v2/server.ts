@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { loggedPayloadSchema } from "../hostLog.ts";
 import { message, roleSchema, tokenSchema } from "./common.ts";
 import { refuseBoardContent } from "./refuse.ts";
 import { boardViewMessageSchema, deviceViewMessageSchema } from "./views.ts";
@@ -63,9 +64,12 @@ export const errorPayloadSchema = z
 export const welcomeMessageSchema = message("welcome", welcomePayloadSchema);
 export const errorMessageSchema = message("error", errorPayloadSchema);
 
+export const loggedMessageSchema = message("logged", loggedPayloadSchema);
+
 export const serverMessageSchema = z.discriminatedUnion("type", [
   welcomeMessageSchema,
   errorMessageSchema,
+  loggedMessageSchema,
   boardViewMessageSchema,
   deviceViewMessageSchema,
 ]);

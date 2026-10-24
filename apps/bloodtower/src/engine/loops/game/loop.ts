@@ -36,36 +36,46 @@ const offerContinueOrBack = (
   ctx: { offerPrompt: (promptId: string, actionId: string) => void },
 ) => {
   const shell = shellState();
-  local.awaitingPress = true;
   const offer = (promptId: string, actionId: string) => {
     ctx.offerPrompt(promptId, actionId);
     recordOffer(promptId, actionId);
   };
   if (shell.screen === "pick-story") {
     offer(`continue-pick-story-${shell.focusStoryId}`, "continue");
+    local.awaitingPress = true;
     return;
   }
   if (shell.screen === "game-settings") {
     offer("continue-game-settings", "continue");
     offer("back-game-settings", "back");
+    local.awaitingPress = true;
     return;
   }
   if (shell.screen === "claim-heroes") {
     offer("continue-claim-heroes", "continue");
     offer("back-claim-heroes", "back");
+    local.awaitingPress = true;
     return;
   }
   if (shell.screen === "setup") {
     const step = shell.setupSteps[shell.setupAt];
-    if (!step) return;
+    if (!step) {
+      local.awaitingPress = false;
+      return;
+    }
     offer(`continue-setup-${step.id}`, "continue");
     offer(`back-setup-${step.id}`, "back");
+    local.awaitingPress = true;
     return;
   }
   if (shell.screen === "begin") {
-    if (!allHeroesHeld(shell)) return;
+    if (!allHeroesHeld(shell)) {
+      local.awaitingPress = false;
+      return;
+    }
     offer("continue-begin", "continue");
     offer("back-begin", "back");
+    local.awaitingPress = true;
   }
 };
 
@@ -174,7 +184,7 @@ export const handleGamePress = (
       return { phase: next as GameLocal["phase"], awaitingPress: false, playStarted: false };
     }
     if (local.phase === "claim-heroes" && promptId === "continue-claim-heroes") {
-      if (!allHeroesHeld(shell)) return local;
+      if (!allHeroesHeld(shell)) return { ...local, awaitingPress: false };
       const next = screenAfterContinue(shell, "claim-heroes");
       if (!next) return local;
       shell.screen = next;

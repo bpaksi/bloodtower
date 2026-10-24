@@ -15,7 +15,9 @@ export {
 } from "./client.ts";
 export {
   actionIdSchema,
+  containsPrivateChannel,
   deviceIdSchema,
+  envelopeSchema,
   FORM_FACTORS,
   formFactorSchema,
   heroIdSchema,
@@ -30,11 +32,14 @@ export {
   promptIdSchema,
   publicHeroSchema,
   ROLES,
+  RUNTIME_SCREENS,
   roleSchema,
   SETUP_SCREENS,
   type SetupScreen,
   setupScreenSchema,
   tokenSchema,
+  type ViewScreen,
+  viewScreenSchema,
 } from "./common.ts";
 export {
   BOARD_SECRET_KEYS,
@@ -44,9 +49,11 @@ export {
 } from "./refuse.ts";
 export {
   channelSchema,
+  type ErrorCode,
   errorCodeSchema,
   errorMessageSchema,
   errorPayloadSchema,
+  loggedMessageSchema,
   SERVER_MESSAGE_TYPES,
   type ServerMessage,
   serverMessageSchema,

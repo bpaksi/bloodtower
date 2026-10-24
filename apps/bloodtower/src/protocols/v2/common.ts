@@ -21,6 +21,11 @@ export const SETUP_SCREENS = [
 export const setupScreenSchema = z.enum(SETUP_SCREENS);
 export type SetupScreen = z.infer<typeof setupScreenSchema>;
 
+/** Runtime screens the host projects during play and between games (C1 step 9). */
+export const RUNTIME_SCREENS = ["pick-game", "play", "pause", "session", "goodbye"] as const;
+export const viewScreenSchema = z.enum([...SETUP_SCREENS, ...RUNTIME_SCREENS]);
+export type ViewScreen = z.infer<typeof viewScreenSchema>;
+
 export const heroIdSchema = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/);
 export const deviceIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
 export const promptIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
@@ -100,3 +105,36 @@ export const publicHeroSchema = z.strictObject({
   name: z.string().min(1).max(80),
   held: z.boolean(),
 });
+
+export const envelopeSchema = z.strictObject({
+  v: z.literal(PROTOCOL_VERSION),
+  type: z.string().min(1).max(80),
+  id: z.string().min(1).max(64).optional(),
+  correlationId: z.string().min(1).max(64).optional(),
+  payload: z.unknown(),
+});
+
+const FORBIDDEN_STORYBOARD_KEYS = new Set([
+  "privateMoment",
+  "bytes",
+  "raw",
+  "packet",
+  "capabilityId",
+  "params",
+]);
+
+export const containsPrivateChannel = (value: unknown): boolean => {
+  const walk = (node: unknown): boolean => {
+    if (typeof node === "string") {
+      return node.includes(".private.") || node.includes("ipad:");
+    }
+    if (Array.isArray(node)) return node.some((entry) => walk(entry));
+    if (node && typeof node === "object") {
+      for (const [key, entry] of Object.entries(node)) {
+        if (FORBIDDEN_STORYBOARD_KEYS.has(key) || walk(entry)) return true;
+      }
+    }
+    return false;
+  };
+  return walk(value);
+};

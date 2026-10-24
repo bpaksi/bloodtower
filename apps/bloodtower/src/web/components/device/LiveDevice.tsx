@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  type DeviceState,
-  deviceStatePayloadSchema,
-  type TowerSnapshot,
-} from "bloodtower-protocols";
+import { type DeviceView, deviceViewPayloadSchema } from "bloodtower-protocols";
 import { useEffect, useRef, useState } from "react";
 import {
   pageLogContext,
@@ -21,29 +17,22 @@ import {
   sessionUrl,
 } from "../../lib/session";
 import { type DeviceErrorBannerModel, liveDeviceBanner } from "../errors/DeviceErrorBanner.tsx";
-import { DeviceScreen } from "./DeviceScreen";
+import { CoreDeviceScreen } from "./CoreDeviceScreen";
 import { detectFormFactor } from "./formFactor";
 
-const waiting = deviceStatePayloadSchema.parse({
-  screen: "splash",
-  heldHunters: [],
-  views: [],
-  prompt: null,
-  lock: null,
-  won: null,
+const waiting = deviceViewPayloadSchema.parse({
+  deviceId: "pending",
+  screen: "pick-game",
+  shows: "Joining…",
+  heroes: [],
+  actions: [],
 });
 
-const unavailable: TowerSnapshot = {
-  connection: "unavailable",
-  battery: { state: "unavailable" },
-  calibrated: { state: "unavailable" },
-};
-
-/** The controls for a device that already joined. A missing token stays on the waiting screen. */
+/** The controls for a device that already joined. */
 export function LiveDevice() {
   const [live, setLive] = useState(false);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  const [state, setState] = useState<DeviceState>(waiting);
+  const [state, setState] = useState<DeviceView>(waiting);
   const [banner, setBanner] = useState<DeviceErrorBannerModel | null>(null);
   const client = useRef<SessionClient | null>(null);
   const deviceIdRef = useRef<string | null>(null);
@@ -91,8 +80,8 @@ export function LiveDevice() {
       onWelcome: (welcome) => {
         if (welcome.role === "device") setDeviceId(welcome.clientId);
       },
-      onStoryboard: () => undefined,
-      onDevice: (next) => {
+      onBoardView: () => undefined,
+      onDeviceView: (next) => {
         if (screenRef.current !== next.screen) setBanner(null);
         setState(next);
       },
@@ -123,24 +112,16 @@ export function LiveDevice() {
 
   return (
     <>
-      <DeviceScreen
+      <CoreDeviceScreen
         live={live}
-        deviceId={deviceId}
-        state={state}
-        pausePromptId={state.pausePromptId ?? null}
-        connectLock={state.connectLock ?? null}
-        calibrateLock={state.calibrateLock ?? null}
-        tower={state.tower ?? unavailable}
-        onControl={(promptId, action, option, setting, note) => {
-          client.current?.sendControl(promptId, action, option, setting, note);
-        }}
-        onHold={(hunter, action) => {
-          client.current?.sendHold(hunter, action);
-        }}
-        onFocusStory={(story) => {
-          client.current?.sendFocusStory(story);
-        }}
+        view={state}
         errorBanner={banner}
+        onAct={(promptId, actionId, args) => {
+          client.current?.sendAct(promptId, actionId, args);
+        }}
+        onHold={(heroId, action) => {
+          client.current?.sendHold(heroId, action);
+        }}
       />
       <p className="px-6 pb-8 text-[var(--bt-muted)]">
         <a href="/join">Back to join</a>

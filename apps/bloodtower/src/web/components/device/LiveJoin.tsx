@@ -103,8 +103,8 @@ export function LiveJoin() {
         sessionStorage.setItem(DEVICE_TOKEN_KEY, welcome.token);
         enterDevice();
       },
-      onStoryboard: () => undefined,
-      onDevice: () => {
+      onBoardView: () => undefined,
+      onDeviceView: () => {
         setNotice(null);
       },
       onReconnect: () => {

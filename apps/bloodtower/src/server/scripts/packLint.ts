@@ -7,6 +7,7 @@ const REPO_ROOT = resolve(import.meta.dirname, "../../../../..");
 
 const resolveLintDir = (dir: string, cwd: string): string => {
   if (isAbsolute(dir)) return dir;
+  if (dir === "packs" || dir.startsWith("packs/")) return resolve(REPO_ROOT, dir);
   if (dir === "packs-v2" || dir.startsWith("packs-v2/")) return resolve(REPO_ROOT, dir);
   return resolve(cwd, dir);
 };
@@ -29,15 +30,16 @@ export const lintPath = (dir: string | undefined, cwd: string): LintReport => {
   if (dir) {
     const resolved = resolveLintDir(dir, cwd);
     if (isPackV2Manifest(resolved)) {
-      let packsV2Root = resolved;
-      while (basename(packsV2Root) !== "packs-v2") {
-        const parent = dirname(packsV2Root);
-        if (parent === packsV2Root) break;
-        packsV2Root = parent;
+      let packsRoot = resolved;
+      while (basename(packsRoot) !== "packs" && basename(packsRoot) !== "packs-v2") {
+        const parent = dirname(packsRoot);
+        if (parent === packsRoot) break;
+        packsRoot = parent;
       }
+      const rootName = basename(packsRoot);
       const v2: PackV2LoadResult = loadPackV2Dir(
         resolved,
-        basename(packsV2Root) === "packs-v2" ? packsV2Root : undefined,
+        rootName === "packs" || rootName === "packs-v2" ? packsRoot : undefined,
       );
       if (v2.ok) {
         const pack = v2.kind === "story" ? v2.pack : v2.pack;

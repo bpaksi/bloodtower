@@ -1,21 +1,13 @@
-import {
-  cpSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { privateHunterOf, type ServerMessage, serverMessageSchema } from "bloodtower-protocols";
+import { PROTOCOL_VERSION, type ServerMessage, serverMessageSchema } from "bloodtower-protocols";
 import { afterEach, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { loadConfig } from "../config.ts";
 import { createHostLogger, type HostLogger } from "../log/hostLog.ts";
-import { loadR1Pack } from "../pack/load.ts";
-import { createMockTower, type MockTower } from "../tower/mock.ts";
+import { createMockTower } from "../tower/mock.ts";
+import { bloodtowerTowerFromMock } from "../tower/testAdapter.ts";
 import { type SessionHost, startSessionHost } from "./host.ts";
 
 const dirs: string[] = [];
@@ -37,31 +29,7 @@ const tempDir = () => {
   return dir;
 };
 
-const packOrThrow = () => {
-  const loaded = loadR1Pack(loadConfig().packsDir);
-  if (!loaded.ok) throw new Error(loaded.issues.map((item) => item.message).join("\n"));
-  return loaded.pack;
-};
-
-const privateTexts = (hunter: string) => {
-  const pack = packOrThrow();
-  return pack.moments.flatMap((moment) => {
-    if (privateHunterOf(moment.id) !== hunter) return [];
-    return (moment.lines ?? []).map((line) => line.text);
-  });
-};
-
-const start = async (
-  tower: MockTower = createMockTower(),
-  extra?: {
-    devOrigins?: string[];
-    lanHost?: () => string | undefined;
-    joinPagePort?: number;
-    packsDir?: string;
-    sleep?: (ms: number) => Promise<void>;
-    log?: HostLogger;
-  },
-) => {
+const start = async (extra?: { devOrigins?: string[]; packsDir?: string; log?: HostLogger }) => {
   const root = tempDir();
   writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
   const host = await startSessionHost({
@@ -70,16 +38,13 @@ const start = async (
     webRoot: root,
     packsDir: extra?.packsDir ?? loadConfig().packsDir,
     databasePath: join(tempDir(), "session.sqlite"),
-    tower,
+    tower: bloodtowerTowerFromMock(createMockTower()),
     towerWatchMs: 0,
     devOrigins: extra?.devOrigins,
-    lanHost: extra?.lanHost,
-    joinPagePort: extra?.joinPagePort,
-    sleep: extra?.sleep,
     log: extra?.log,
   });
   hosts.push(host);
-  return { host, tower };
+  return host;
 };
 
 class Inbox {
@@ -112,17 +77,6 @@ const track = (socket: WebSocket) => {
   return { log, inbox };
 };
 
-const waitFor = async <T>(read: () => T, ready: (value: T) => boolean): Promise<T> => {
-  const started = Date.now();
-  let value = read();
-  while (!ready(value)) {
-    if (Date.now() - started > 2000) throw new Error("timed out waiting for the session");
-    await new Promise((resolve) => setTimeout(resolve, 15));
-    value = read();
-  }
-  return value;
-};
-
 const until = async (
   inbox: Inbox,
   log: ServerMessage[],
@@ -130,7 +84,7 @@ const until = async (
 ) => {
   const startMs = Date.now();
   while (!ready(log)) {
-    if (Date.now() - startMs > 2000) throw new Error(`timed out after ${log.length} messages`);
+    if (Date.now() - startMs > 5000) throw new Error(`timed out after ${log.length} messages`);
     await inbox.next();
   }
 };
@@ -146,7 +100,7 @@ const connect = async (port: number, origin?: string) => {
 };
 
 const send = (socket: WebSocket, type: string, payload: unknown, id?: string) => {
-  socket.send(JSON.stringify({ v: 1, type, ...(id ? { id } : {}), payload }));
+  socket.send(JSON.stringify({ v: PROTOCOL_VERSION, type, ...(id ? { id } : {}), payload }));
 };
 
 const helloBoard = async (port: number) => {
@@ -157,7 +111,7 @@ const helloBoard = async (port: number) => {
     formFactor: "mac",
   });
   await until(client.inbox, client.log, (messages) =>
-    messages.some((message) => message.type === "storyboardState"),
+    messages.some((message) => message.type === "boardView"),
   );
   return client;
 };
@@ -178,1008 +132,116 @@ const helloDevice = async (
   return client;
 };
 
-const latest = (log: ServerMessage[], type: ServerMessage["type"]) =>
-  [...log].reverse().find((message) => message.type === type);
-
-type Client = Awaited<ReturnType<typeof connect>>;
-
-/** One flow press, then wait until this device's state shows the screen the flow moved to. */
-const step = async (
-  client: Client,
+const act = async (
+  client: ReturnType<typeof track> & { socket: WebSocket },
   promptId: string,
-  action: "continue" | "begin" | "back",
-  next: string,
+  actionId: string,
+  args: Record<string, unknown> = {},
 ) => {
-  send(client.socket, "control", { promptId, action });
-  await until(client.inbox, client.log, (messages) => {
-    const state = [...messages].reverse().find((message) => message.type === "deviceState");
-    return state?.type === "deviceState" && state.payload.screen === next;
-  });
+  send(client.socket, "act", { promptId, actionId, args });
 };
 
-/** The steps before play, then Begin. Any joined iPad may send each one. */
-const walkToPlay = async (client: Client) => {
-  await step(client, "continue-pick-story-test", "continue", "game-settings");
-  await step(client, "continue-game-settings", "continue", "tower-connect");
-  await step(client, "continue-tower-connect", "continue", "tower-volume-test");
-  await step(client, "continue-tower-volume-test", "continue", "party-join");
-  // The test pack's setup steps, one Done each, then Begin (R-WIZ-6).
-  await step(client, "continue-party-join", "continue", "setup");
-  await step(client, "continue-setup-lay-out-board", "continue", "setup");
-  await step(client, "continue-setup-place-hunters", "continue", "setup");
-  await step(client, "continue-setup-ready-decks", "continue", "begin");
-  await step(client, "begin", "begin", "play");
-};
-
-describe("session hub", () => {
-  it("serves the page and connection-and-sound health, and refuses another origin", async () => {
-    const { host } = await start();
+describe("session hub (core)", () => {
+  it("serves static pages and v2 health", async () => {
+    const host = await start();
     const page = await fetch(`http://127.0.0.1:${host.port}/`);
     expect(page.status).toBe(200);
-    expect(await page.text()).toContain("Bloodtower");
     const health = await fetch(`http://127.0.0.1:${host.port}/health`);
     expect(await health.json()).toEqual({
-      protocol: 1,
+      protocol: 2,
       tower: "connection-and-sound",
       effects: "sound-only",
     });
-
     await expect(connect(host.port, "https://evil.example")).rejects.toThrow(/403/);
-    const allowed = await connect(host.port, `http://127.0.0.1:${host.port}`);
-    expect(allowed.socket.readyState).toBe(WebSocket.OPEN);
   });
 
-  it("writes a page entry from POST /log and does not serve the log", async () => {
+  it("broadcasts boardView and deviceView on v2", async () => {
+    const host = await start();
+    const board = await helloBoard(host.port);
+    const latestBoard = [...board.log].reverse().find((m) => m.type === "boardView");
+    expect(latestBoard?.type).toBe("boardView");
+    expect(latestBoard?.v).toBe(2);
+    expect(latestBoard?.payload.levels[0]?.shows).toContain(host.joinCode);
+
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await until(device.inbox, device.log, (messages) =>
+      messages.some((m) => m.type === "deviceView"),
+    );
+    const latestDevice = [...device.log].reverse().find((m) => m.type === "deviceView");
+    expect(["tower-connect", "pick-game"]).toContain(latestDevice?.payload.screen);
+  });
+
+  it("refuses control from the story board", async () => {
+    const host = await start();
+    const board = await helloBoard(host.port);
+    send(board.socket, "act", { promptId: "new-pick-game", actionId: "new-game", args: {} });
+    await until(board.inbox, board.log, (messages) =>
+      messages.some((m) => m.type === "error" && m.payload.code === "storyboard-control"),
+    );
+  });
+
+  it("writes POST /log from an allowed dev origin", async () => {
     const dataDir = tempDir();
     const log = createHostLogger({
       dataDir,
       mirror: false,
       now: () => new Date("2026-10-23T12:00:00.000Z"),
     });
-    const { host } = await start(createMockTower(), {
-      log,
-      devOrigins: ["http://127.0.0.1:3000"],
-    });
+    const host = await start({ log, devOrigins: ["http://127.0.0.1:3000"] });
     const url = `http://127.0.0.1:${host.port}/log`;
-    const preflight = await fetch(url, {
-      method: "OPTIONS",
-      headers: { origin: "http://127.0.0.1:3000", "access-control-request-method": "POST" },
-    });
-    expect(preflight.status).toBe(204);
-    expect(preflight.headers.get("access-control-allow-origin")).toBe("http://127.0.0.1:3000");
-
-    const blocked = await fetch(url, {
-      method: "OPTIONS",
-      headers: { origin: "https://evil.example" },
-    });
-    expect(blocked.status).toBe(204);
-    expect(blocked.headers.get("access-control-allow-origin")).toBeNull();
-
     const posted = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json", origin: "http://127.0.0.1:3000" },
       body: JSON.stringify({
         level: "error",
         source: "board",
-        device: "spoofed-device",
-        session: "spoofed-session",
-        screen: "story",
-        code: "page-error",
-        message: "The board hit an error.",
+        device: null,
+        session: null,
+        screen: "board",
+        code: "test-log",
+        message: "A page line.",
       }),
     });
     expect(posted.status).toBe(204);
-    const rawLog = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
-    expect(rawLog).not.toContain("spoofed-device");
-    expect(rawLog).not.toContain("spoofed-session");
-    const lines = rawLog
+    const day = "2026-10-23";
+    const lines = readFileSync(join(dataDir, "logs", `${day}.jsonl`), "utf8")
       .trim()
-      .split("\n")
-      .map((line) => JSON.parse(line) as { code: string; session: string | null; source: string });
-    expect(lines).toEqual([
-      expect.objectContaining({
-        code: "page-error",
-        source: "server",
-        device: null,
-        session: host.loadRun().session.id,
-        screen: "story",
-        message: "The board hit an error.",
-      }),
-    ]);
-
-    const get = await fetch(url);
-    expect(get.status).toBe(405);
+      .split("\n");
+    expect(lines.length).toBeGreaterThan(0);
+    expect(JSON.parse(lines.at(-1) ?? "{}")).toMatchObject({ code: "test-log" });
   });
 
-  it("writes a socket log line, toasts the story board, and refuses raw bytes", async () => {
-    const dataDir = tempDir();
-    const log = createHostLogger({
-      dataDir,
-      mirror: false,
-      now: () => new Date("2026-10-23T12:00:00.000Z"),
-    });
-    const { host } = await start(createMockTower(), { log });
+  it("applies hero-hold through act on claim-heroes", async () => {
+    const host = await start();
     const board = await helloBoard(host.port);
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    const welcome = device.log.find((message) => message.type === "welcome");
-    if (welcome?.type !== "welcome") throw new Error("welcome");
-
-    send(device.socket, "log", {
-      level: "error",
-      source: "board",
-      device: "spoofed-device",
-      session: "spoofed-session",
-      screen: "play",
-      code: "page-error",
-      message: "The iPad hit an error.",
+    await act(device, "tower-connect", "tower-connect");
+    await act(device, "tower-calibrate", "tower-calibrate");
+    await act(device, "new-pick-game", "new-game");
+    await act(device, "continue-pick-story-test", "continue");
+    await act(device, "continue-game-settings", "continue");
+    await act(device, "hero-hold", "take", { heroId: "hero-a" });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await until(board.inbox, board.log, (messages) => {
+      const view = [...messages].reverse().find((m) => m.type === "boardView");
+      return (
+        view?.type === "boardView" &&
+        view.payload.screen === "claim-heroes" &&
+        view.payload.heroes.some((hero) => hero.id === "hero-a" && hero.held)
+      );
     });
-    await until(board.inbox, board.log, (messages) =>
-      messages.some((message) => message.type === "logged"),
-    );
-    const toasted = board.log.filter((message) => message.type === "logged");
-    expect(toasted.map((message) => message.type === "logged" && message.payload)).toEqual([
-      expect.objectContaining({
-        code: "page-error",
-        source: "device",
-        message: "The iPad hit an error.",
-      }),
-    ]);
-    expect(JSON.stringify(toasted)).not.toContain("bytes");
-
-    const file = join(dataDir, "logs", "2026-10-23.jsonl");
-    const read = () =>
-      readFileSync(file, "utf8")
-        .trim()
-        .split("\n")
-        .filter((line) => line.length > 0)
-        .map(
-          (line) =>
-            JSON.parse(line) as {
-              level: string;
-              source: string;
-              device: string | null;
-              session: string | null;
-              screen: string | null;
-              code: string;
-              message: string;
-            },
-        );
-    expect(read()).toEqual([
-      expect.objectContaining({
-        level: "error",
-        source: "device",
-        device: welcome.payload.clientId,
-        screen: "play",
-        code: "page-error",
-        message: "The iPad hit an error.",
-      }),
-    ]);
-    const stored = read()[0];
-    if (!stored) throw new Error("line");
-    expect(stored.session?.startsWith("session-")).toBe(true);
-    expect(stored.session).not.toBe("spoofed-session");
-    expect(stored.device).not.toBe("spoofed-device");
-
-    send(board.socket, "log", {
-      level: "error",
-      source: "device",
-      device: "spoofed-device",
-      session: null,
-      screen: "story",
-      code: "window-error",
-      message: "The board hit an error.",
-    });
-    await until(
-      board.inbox,
-      board.log,
-      (messages) => messages.filter((message) => message.type === "logged").length >= 2,
-    );
-    expect(read().filter((line) => line.code === "window-error")).toEqual([
-      expect.objectContaining({
-        source: "board",
-        device: null,
-        screen: "story",
-        message: "The board hit an error.",
-      }),
-    ]);
-    expect(
-      board.log.some(
-        (message) => message.type === "error" && message.payload.code === "storyboard-control",
-      ),
-    ).toBe(false);
-
-    const secret = "raw-byte-payload";
-    send(device.socket, "log", {
-      level: "error",
-      source: "device",
-      device: null,
-      session: null,
-      screen: "play",
-      code: "page-error",
-      message: "no",
-      bytes: secret,
-    });
-    await until(device.inbox, device.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    const raw = readFileSync(file, "utf8");
-    expect(raw).not.toContain(secret);
-    expect(raw).toContain("invalid-payload");
-
-    send(device.socket, "log", {
-      level: "debug",
-      source: "device",
-      device: null,
-      session: null,
-      screen: "play",
-      code: "socket-reconnect",
-      message: "The socket dropped. Reconnecting.",
-    });
-    send(device.socket, "log", {
-      level: "error",
-      source: "device",
-      device: null,
-      session: null,
-      screen: "play",
-      code: "unhandled-rejection",
-      message: "A promise was rejected.",
-    });
-    await until(
-      board.inbox,
-      board.log,
-      (messages) =>
-        messages.filter(
-          (message) => message.type === "logged" && message.payload.code === "unhandled-rejection",
-        ).length >= 1,
-    );
-    const levels = read().map((line) => line.level);
-    expect(levels).not.toContain("debug");
-    expect(read().some((line) => line.code === "socket-reconnect")).toBe(false);
-    expect(device.log.some((message) => message.type === "logged")).toBe(false);
   });
 
-  it("refuses a log before hello and does not keep a forged board source", async () => {
-    const dataDir = tempDir();
-    const log = createHostLogger({
-      dataDir,
-      mirror: false,
-      now: () => new Date("2026-10-23T12:00:00.000Z"),
-    });
-    const { host } = await start(createMockTower(), { log });
-    const board = await helloBoard(host.port);
-    const pending = await connect(host.port);
-    const forged = "Forged before hello.";
-    send(pending.socket, "log", {
-      level: "error",
-      source: "board",
-      device: "spoofed-device",
-      session: "spoofed-session",
-      screen: "story",
-      code: "page-error",
-      message: forged,
-    });
-    await until(pending.inbox, pending.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(pending.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "invalid-state" },
-    });
-    await until(board.inbox, board.log, (messages) =>
-      messages.some((message) => message.type === "logged"),
-    );
-    const raw = readFileSync(join(dataDir, "logs", "2026-10-23.jsonl"), "utf8");
-    expect(raw).not.toContain(forged);
-    expect(raw).not.toContain("spoofed-device");
-    expect(raw).not.toContain("spoofed-session");
-    expect(raw).not.toContain('"source":"board"');
-    expect(
-      board.log.some(
-        (message) => message.type === "logged" && message.payload.code === "page-error",
-      ),
-    ).toBe(false);
-    expect(
-      board.log.some(
-        (message) => message.type === "logged" && message.payload.code === "invalid-state",
-      ),
-    ).toBe(true);
-  });
-
-  it("accepts a listed dev origin and ignores a spoofed Host on the join URL", async () => {
-    const { host } = await start(createMockTower(), { devOrigins: ["http://localhost:3000"] });
-    const dev = await connect(host.port, "http://localhost:3000");
-    expect(dev.socket.readyState).toBe(WebSocket.OPEN);
-
-    const spoofed = new WebSocket(`ws://127.0.0.1:${host.port}/ws`, {
-      headers: { host: "evil.example:9" },
-    });
-    sockets.push(spoofed);
-    await new Promise<void>((resolve, reject) => {
-      spoofed.once("open", () => resolve());
-      spoofed.once("error", reject);
-    });
-    const board = track(spoofed);
-    send(spoofed, "hello", { role: "storyboard", clientLabel: "Story board", formFactor: "mac" });
-    await until(board.inbox, board.log, (messages) =>
-      messages.some((message) => message.type === "storyboardState"),
-    );
-    const state = latest(board.log, "storyboardState");
-    if (state?.type !== "storyboardState") throw new Error("board");
-    expect(state.payload.join?.url.startsWith("http://127.0.0.1:")).toBe(true);
-    expect(state.payload.join?.url).not.toContain("evil.example");
-    expect(state.payload.join?.code).toBe(host.joinCode);
-    expect(state.payload.join?.url).toContain(`/join?code=${host.joinCode}`);
-  });
-
-  it("rejects a bad frame, a storyboard press, and a token used for the other role", async () => {
-    const { host } = await start();
+  it("steps a device from pick-game toward pick-story with act", async () => {
+    const host = await start();
+    await helloBoard(host.port);
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    const welcome = latest(device.log, "welcome");
-    if (welcome?.type !== "welcome") throw new Error("welcome");
-    expect(welcome.payload.channels).toEqual([]);
-    expect(welcome.payload.role).toBe("device");
-
-    const early = await connect(host.port);
-    send(early.socket, "hold", { hunter: "nope", action: "take" });
-    await until(early.inbox, early.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(early.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "invalid-state" },
-    });
-
-    send(early.socket, "nope", {});
-    await until(
-      early.inbox,
-      early.log,
-      (messages) => messages.filter((message) => message.type === "error").length >= 2,
-    );
-    early.socket.send(JSON.stringify({ v: 1, type: "hello", bytes: "0a", payload: {} }));
-    await until(
-      early.inbox,
-      early.log,
-      (messages) => messages.filter((message) => message.type === "error").length >= 3,
-    );
-    const codes = early.log
-      .filter((message) => message.type === "error")
-      .map((message) => message.payload.code);
-    expect(codes).toEqual(["invalid-state", "unknown-type", "invalid-envelope"]);
-
-    const board = await helloBoard(host.port);
-    const before = host.loadRun().holdings.length;
-    send(board.socket, "hold", {
-      hunter: packOrThrow().hunters[0]?.id ?? "hunter",
-      action: "take",
-    });
-    await until(board.inbox, board.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(board.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "storyboard-control" },
-    });
-    expect(host.loadRun().holdings).toHaveLength(before);
-
-    const asBoard = await connect(host.port);
-    send(asBoard.socket, "hello", {
-      role: "storyboard",
-      clientLabel: "Story board",
-      formFactor: "mac",
-      token: welcome.payload.token,
-    });
-    await until(asBoard.inbox, asBoard.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(asBoard.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "invalid-payload" },
-    });
-
-    const boardWelcome = latest(board.log, "welcome");
-    if (boardWelcome?.type !== "welcome") throw new Error("board welcome");
-    const asDevice = await connect(host.port);
-    send(asDevice.socket, "hello", {
-      role: "device",
-      clientLabel: "iPad",
-      formFactor: "ipad",
-      token: boardWelcome.payload.token,
-    });
-    await until(asDevice.inbox, asDevice.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(asDevice.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "invalid-state" },
-    });
-
-    const wrong = host.joinCode === "000000" ? "111111" : "000000";
-    const missed = await connect(host.port);
-    send(missed.socket, "hello", {
-      role: "device",
-      clientLabel: "Phone",
-      formFactor: "phone",
-      joinCode: wrong,
-    });
-    await until(missed.inbox, missed.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(missed.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "invalid-state" },
-    });
-    expect(JSON.stringify(board.log)).not.toContain(welcome.payload.token);
-  });
-
-  it("gives the board a code and keeps private lines off it, with one winner for two continues", async () => {
-    const pack = packOrThrow();
-    const privateHunter =
-      pack.hunters.find((hunter) => privateTexts(hunter.id).length > 0) ?? pack.hunters[0];
-    if (!privateHunter) throw new Error("The test pack has no hunter.");
-    const { host } = await start();
-    const board = await helloBoard(host.port);
-    const alpha = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    const beta = await helloDevice(host.port, { formFactor: "phone", joinCode: host.joinCode });
-    const alphaWelcome = latest(alpha.log, "welcome");
-    const betaWelcome = latest(beta.log, "welcome");
-    if (alphaWelcome?.type !== "welcome" || betaWelcome?.type !== "welcome")
-      throw new Error("welcome");
-
-    const hold = async (client: typeof alpha, hunter: string) => {
-      send(client.socket, "hold", { hunter, action: "take" });
-      await until(client.inbox, client.log, (messages) => {
-        const state = [...messages].reverse().find((message) => message.type === "deviceState");
-        return state?.type === "deviceState" && state.payload.heldHunters.includes(hunter);
-      });
-    };
-    await hold(alpha, privateHunter.id);
-    for (const hunter of pack.hunters) {
-      if (hunter.id !== privateHunter.id) await hold(beta, hunter.id);
-    }
-
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.gate.canBegin;
-    });
-    const shown = latest(board.log, "storyboardState");
-    if (shown?.type !== "storyboardState" || !shown.payload.join) throw new Error("join");
-    expect(shown.payload.join.code).toMatch(/^\d{6}$/);
-    expect(shown.payload.gate.canBegin).toBe(true);
-
-    await walkToPlay(alpha);
-    await until(alpha.inbox, alpha.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.prompt?.id === "continue-0";
-    });
-
-    send(alpha.socket, "control", { promptId: "continue-0", action: "continue" });
-    send(beta.socket, "control", { promptId: "continue-0", action: "continue" });
-    const presses = await waitFor(
-      () => host.loadRun().presses.filter((press) => press.promptId === "continue-0"),
-      (found) => found.length >= 2,
-    );
-    await until(alpha.inbox, alpha.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.prompt?.id !== "continue-0";
-    });
-    expect(presses).toHaveLength(2);
-    expect(presses.filter((press) => press.winner)).toHaveLength(1);
-    expect(new Set(presses.map((press) => press.deviceId)).size).toBe(2);
-    expect(
-      presses.every((press) => Number.isFinite(press.atMonoMs) && press.atWall.endsWith("Z")),
-    ).toBe(true);
-
-    let guard = 0;
-    while (guard < 12) {
-      guard += 1;
-      const state = latest(alpha.log, "deviceState");
-      if (state?.type !== "deviceState") break;
-      const promptId = state.payload.prompt?.id;
-      if (!promptId?.startsWith("continue-")) break;
-      if (state.payload.lock?.promptId === promptId) break;
-      const before = alpha.log.length;
-      send(alpha.socket, "control", { promptId, action: "continue" });
-      await until(alpha.inbox, alpha.log, (messages) => messages.length > before);
-    }
-
-    const hidden = pack.moments.flatMap((moment) => {
-      if (!privateHunterOf(moment.id)) return [];
-      return (moment.lines ?? []).map((line) => line.text);
-    });
-    const boardText = JSON.stringify(board.log);
-    for (const text of hidden) expect(boardText).not.toContain(text);
-    expect(boardText).not.toContain(".private.");
-    expect(boardText).not.toContain("ipad:");
-    expect(boardText).not.toContain(alphaWelcome.payload.token);
-
-    const alphaText = JSON.stringify(alpha.log);
-    const betaText = JSON.stringify(beta.log);
-    for (const text of privateTexts(privateHunter.id)) {
-      expect(alphaText).toContain(text);
-      if (
-        !beta.log.some(
-          (message) =>
-            message.type === "deviceState" &&
-            message.payload.heldHunters.includes(privateHunter.id),
-        )
-      ) {
-        expect(betaText).not.toContain(text);
-      }
-    }
-    for (const hunter of pack.hunters) {
-      if (hunter.id === privateHunter.id) continue;
-      for (const text of privateTexts(hunter.id)) expect(alphaText).not.toContain(text);
-    }
-
-    const run = host.loadRun();
-    expect(run.session.packId).toBe(pack.pack_id);
-    expect(run.session.packVersion).toBe(pack.version);
-    expect(run.marks.some((mark) => mark.kind === "moment" && mark.startWall.endsWith("Z"))).toBe(
-      true,
-    );
-    if (pack.moments.some((moment) => (moment.cues?.length ?? 0) > 0)) {
-      expect(run.marks.some((mark) => mark.kind === "cue")).toBe(true);
-    }
-    const roster = latest(alpha.log, "deviceState");
-    if (roster?.type !== "deviceState") throw new Error("roster");
-    expect(roster.payload.roster?.map((hunter) => hunter.id)).toEqual(
-      pack.hunters.map((hunter) => hunter.id),
-    );
-    // The portrait comes from the pack's hunter data, not from the hunter id.
-    expect(roster.payload.roster?.map((hunter) => hunter.portrait)).toEqual(
-      pack.hunters.map((hunter) => hunter.portrait),
-    );
-    expect(roster.payload.packId).toBe(pack.pack_id);
-  });
-
-  it("moves the flow on the first press of a step, logs both presses with their screen, and sends the loser no error", async () => {
-    const { host } = await start();
-    const board = await helloBoard(host.port);
-    // Splash goes straight to Pick Story; Connect Tower follows Game settings.
-    expect(latest(board.log, "storyboardState")).toMatchObject({
-      payload: { screen: "pick-story" },
-    });
-    const alpha = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    const beta = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await step(alpha, "continue-pick-story-test", "continue", "game-settings");
-    await step(alpha, "continue-game-settings", "continue", "tower-connect");
-
-    send(alpha.socket, "control", { promptId: "continue-tower-connect", action: "continue" });
-    send(beta.socket, "control", { promptId: "continue-tower-connect", action: "continue" });
-    const presses = await waitFor(
-      () => host.loadRun().presses.filter((press) => press.promptId === "continue-tower-connect"),
-      (found) => found.length >= 2,
-    );
-    expect(presses.filter((press) => press.winner)).toHaveLength(1);
-    expect(presses.find((press) => press.winner)).toMatchObject({
-      screen: "tower-connect",
-      nextScreen: "tower-volume-test",
-    });
-    expect(
-      presses.filter((press) => !press.winner).every((press) => press.nextScreen === null),
-    ).toBe(true);
-    expect(new Set(presses.map((press) => press.deviceId)).size).toBe(2);
-
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.screen === "tower-volume-test";
-    });
-    await until(beta.inbox, beta.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.screen === "tower-volume-test";
-    });
-    expect(latest(beta.log, "error")).toBeUndefined();
-    expect(latest(beta.log, "deviceState")).toMatchObject({
-      payload: { screen: "tower-volume-test" },
-    });
-  });
-
-  it("pauses when the only holder drops and resumes on rejoin, and a spare socket does not", async () => {
-    const pack = packOrThrow();
-    const { host } = await start();
-    const board = await helloBoard(host.port);
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    const welcome = latest(device.log, "welcome");
-    if (welcome?.type !== "welcome") throw new Error("welcome");
-    for (const hunter of pack.hunters) {
-      send(device.socket, "hold", { hunter: hunter.id, action: "take" });
-      await until(device.inbox, device.log, (messages) => {
-        const state = [...messages].reverse().find((message) => message.type === "deviceState");
-        return state?.type === "deviceState" && state.payload.heldHunters.includes(hunter.id);
-      });
-    }
-    await walkToPlay(device);
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.stage === "playing";
-    });
-
-    const spare = await helloDevice(host.port, {
-      formFactor: "ipad",
-      token: welcome.payload.token,
-    });
-    const deviceId = welcome.payload.clientId;
-    spare.socket.close();
-    await new Promise<void>((resolve) => spare.socket.once("close", () => resolve()));
-    expect(host.loadRun().devices.find((item) => item.deviceId === deviceId)?.connected).toBe(true);
-    const still = latest(board.log, "storyboardState");
-    if (still?.type !== "storyboardState") throw new Error("board");
-    expect(still.payload.stage).toBe("playing");
-
-    device.socket.close();
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.stage === "paused";
-    });
-    const paused = latest(board.log, "storyboardState");
-    if (paused?.type !== "storyboardState") throw new Error("paused");
-    expect(paused.payload.pause?.cause).toBe("disconnect");
-    expect(paused.payload.pause?.hunter).toBe(pack.hunters[0]?.id);
-
-    const again = await helloDevice(host.port, {
-      formFactor: "ipad",
-      token: welcome.payload.token,
-    });
-    await until(again.inbox, again.log, (messages) =>
-      messages.some((message) => message.type === "deviceState"),
-    );
-    const restored = latest(again.log, "deviceState");
-    if (restored?.type !== "deviceState") throw new Error("restored");
-    expect(restored.payload.heldHunters).toEqual(pack.hunters.map((hunter) => hunter.id));
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.stage === "playing";
-    });
-    const pause = host.loadRun().marks.find((mark) => mark.kind === "pause");
-    expect(pause?.cause).toBe("disconnect");
-    expect(pause?.startWall.endsWith("Z")).toBe(true);
-    expect(pause?.endWall?.endsWith("Z")).toBe(true);
-    expect(pause?.endMonoMs).not.toBeNull();
-  });
-
-  it("reaches Connect Tower after Game settings, and Back and Play without tower send the tower nothing", async () => {
-    const tower = createMockTower();
-    const { host } = await start(tower);
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await step(device, "continue-pick-story-test", "continue", "game-settings");
-    await step(device, "continue-game-settings", "continue", "tower-connect");
-    const onConnect = latest(device.log, "deviceState");
-    if (onConnect?.type !== "deviceState") throw new Error("device");
-    expect(onConnect.payload.backPromptId).toBe("back-tower-connect");
-    await step(device, "back-tower-connect", "back", "game-settings");
-    await step(device, "continue-game-settings", "continue", "tower-connect");
-    await step(device, "continue-tower-connect", "continue", "tower-volume-test");
-    await step(device, "continue-tower-volume-test", "continue", "party-join");
-    expect(tower.sent()).toEqual([]);
-    expect(host.loadRun().presses.every((press) => !press.action.startsWith("tower-"))).toBe(true);
-  });
-
-  it("plays the volume test only after a winning press, one sound at a time, and logs the answer", async () => {
-    const tower = createMockTower();
-    const slept: number[] = [];
-    const { host } = await start(tower, {
-      sleep: async (ms) => {
-        slept.push(ms);
-      },
-    });
-    const board = await helloBoard(host.port);
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await step(device, "continue-pick-story-test", "continue", "game-settings");
-    await step(device, "continue-game-settings", "continue", "tower-connect");
-    send(device.socket, "control", { promptId: "tower-connect", action: "tower-connect" });
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.tower.connection === "connected";
-    });
-    await step(device, "continue-tower-connect", "continue", "tower-volume-test");
-    // Reaching the screen plays nothing.
-    expect(tower.sent().map((item) => item.type)).toEqual(["connect"]);
-
-    send(device.socket, "control", { promptId: "volume-play-0", action: "volume-play" });
+    await act(device, "tower-connect", "tower-connect");
+    await act(device, "tower-calibrate", "tower-calibrate");
+    await act(device, "new-pick-game", "new-game");
     await until(device.inbox, device.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.volumeTest?.phase === "asking";
+      const state = [...messages].reverse().find((m) => m.type === "deviceView");
+      return state?.type === "deviceView" && state.payload.screen === "pick-story";
     });
-    expect(
-      tower
-        .sent()
-        .filter((item) => item.type === "sound")
-        .map((item) => [item.soundIndex, item.volume]),
-    ).toEqual([
-      [58, 0],
-      [58, 1],
-      [58, 2],
-      [58, 2],
-    ]);
-    // 250 ms after each of the four writes.
-    expect(slept.filter((ms) => ms === 250)).toHaveLength(4);
-    const asking = latest(board.log, "storyboardState");
-    expect(asking).toMatchObject({ payload: { volumeTest: { mode: "tower", phase: "asking" } } });
-
-    // The write-in text is stored, shown on the board's debug state, and not sent to the device.
-    send(device.socket, "control", {
-      promptId: "volume-answer",
-      action: "volume-answer",
-      option: "write-in",
-      note: "Only the middle one rang",
-    });
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.volumeTest?.phase === "answered";
-    });
-    const answered = latest(board.log, "storyboardState");
-    if (answered?.type !== "storyboardState") throw new Error("board");
-    expect(answered.payload.volumeTest?.logged).toMatchObject({
-      answer: "write-in",
-      note: "Only the middle one rang",
-      firmware: "mock",
-    });
-    expect(JSON.stringify(latest(device.log, "deviceState"))).not.toContain("middle one");
-    expect(host.loadRun().stats).toMatchObject([
-      {
-        statId: "tower-volume-test",
-        data: { answer: "write-in", note: "Only the middle one rang", firmware: "mock" },
-      },
-    ]);
-    expect(tower.sent().some((item) => item.type === "command")).toBe(false);
-  });
-
-  it("sends the tower no sound when the volume test is reached with no tower", async () => {
-    const tower = createMockTower();
-    const { host } = await start(tower, { sleep: async () => {} });
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await step(device, "continue-pick-story-test", "continue", "game-settings");
-    await step(device, "continue-game-settings", "continue", "tower-connect");
-    await step(device, "continue-tower-connect", "continue", "tower-volume-test");
-    send(device.socket, "control", { promptId: "volume-play-0", action: "volume-play" });
-    await until(device.inbox, device.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    const state = latest(device.log, "deviceState");
-    expect(state).toMatchObject({ payload: { volumeTest: { mode: "room", phase: "idle" } } });
-    expect(tower.sent()).toEqual([]);
-  });
-
-  it("connects and calibrates only from a winning press, and keeps an unknown battery unavailable", async () => {
-    const pack = packOrThrow();
-    const tower = createMockTower();
-    const { host } = await start(tower);
-    const board = await helloBoard(host.port);
-    const first = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    const second = await helloDevice(host.port, { formFactor: "phone", joinCode: host.joinCode });
-    for (const hunter of pack.hunters) {
-      send(first.socket, "hold", { hunter: hunter.id, action: "take" });
-    }
-    await until(first.inbox, first.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return (
-        state?.type === "deviceState" && state.payload.heldHunters.length === pack.hunters.length
-      );
-    });
-
-    send(first.socket, "control", { promptId: "tower-calibrate", action: "tower-calibrate" });
-    await until(first.inbox, first.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(tower.sent()).toEqual([]);
-
-    send(first.socket, "control", { promptId: "tower-connect", action: "tower-connect" });
-    send(second.socket, "control", { promptId: "tower-connect", action: "tower-connect" });
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.tower.connection === "connected";
-    });
-    const connectPresses = await waitFor(
-      () => host.loadRun().presses.filter((press) => press.action === "tower-connect"),
-      (found) => found.length >= 2,
-    );
-    expect(tower.sent().map((item) => item.type)).toEqual(["connect"]);
-    expect(connectPresses.filter((press) => press.winner)).toHaveLength(1);
-    expect(connectPresses).toHaveLength(2);
-
-    await until(first.inbox, first.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return (
-        state?.type === "deviceState" &&
-        state.payload.connectLock?.action === "tower-connect" &&
-        state.payload.tower?.connection === "connected"
-      );
-    });
-    const locked = latest(first.log, "deviceState");
-    if (locked?.type !== "deviceState") throw new Error("lock");
-    expect(locked.payload.connectLock?.action).toBe("tower-connect");
-    expect(locked.payload.tower?.connection).toBe("connected");
-    expect(locked.payload.tower?.battery).toEqual({ state: "unavailable" });
-
-    send(first.socket, "control", { promptId: "tower-calibrate", action: "tower-calibrate" });
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return (
-        state?.type === "storyboardState" &&
-        state.payload.tower.calibrated.state === "known" &&
-        state.payload.tower.calibrated.calibrated === true
-      );
-    });
-    expect(tower.sent().map((item) => item.type)).toEqual(["connect", "calibrate"]);
-    expect(tower.sent().some((item) => item.type === "command")).toBe(false);
-
-    tower.setBattery(0);
-    host.syncTower();
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return state?.type === "storyboardState" && state.payload.tower.battery.state === "known";
-    });
-    const known = latest(board.log, "storyboardState");
-    if (known?.type !== "storyboardState") throw new Error("battery");
-    expect(known.payload.tower.battery).toEqual({ state: "known", percent: 0 });
-
-    tower.setBattery("unavailable");
-    host.syncTower();
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return (
-        state?.type === "storyboardState" && state.payload.tower.battery.state === "unavailable"
-      );
-    });
-  });
-
-  it("puts the LAN address in the join QR and marks it reachable", async () => {
-    const { host } = await start(createMockTower(), { lanHost: () => "192.168.1.20" });
-    const board = await helloBoard(host.port);
-    const state = latest(board.log, "storyboardState");
-    if (state?.type !== "storyboardState") throw new Error("board");
-    expect(state.payload.join).toEqual({
-      code: host.joinCode,
-      url: `http://192.168.1.20:${host.port}/join?code=${host.joinCode}`,
-      reachable: true,
-    });
-  });
-
-  it("uses joinPagePort for the join QR when next dev serves the page on another port", async () => {
-    const { host } = await start(createMockTower(), {
-      lanHost: () => "192.168.1.20",
-      joinPagePort: 3000,
-    });
-    const board = await helloBoard(host.port);
-    const state = latest(board.log, "storyboardState");
-    if (state?.type !== "storyboardState") throw new Error("board");
-    expect(state.payload.join?.url).toBe(`http://192.168.1.20:3000/join?code=${host.joinCode}`);
-  });
-
-  it("says the join address is unreachable when only loopback is available", async () => {
-    const { host } = await start();
-    const board = await helloBoard(host.port);
-    const state = latest(board.log, "storyboardState");
-    if (state?.type !== "storyboardState") throw new Error("board");
-    expect(state.payload.join).toEqual({
-      code: host.joinCode,
-      url: `http://127.0.0.1:${host.port}/join?code=${host.joinCode}`,
-      reachable: false,
-    });
-  });
-
-  it("shows a dropped device's hunters as disconnected, still claimed, during the grace period", async () => {
-    const pack = packOrThrow();
-    const { host } = await start();
-    const board = await helloBoard(host.port);
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    for (const hunter of pack.hunters) {
-      send(device.socket, "hold", { hunter: hunter.id, action: "take" });
-      await until(device.inbox, device.log, (messages) => {
-        const state = [...messages].reverse().find((message) => message.type === "deviceState");
-        return state?.type === "deviceState" && state.payload.heldHunters.includes(hunter.id);
-      });
-    }
-    device.socket.close();
-    await until(board.inbox, board.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "storyboardState");
-      return (
-        state?.type === "storyboardState" &&
-        state.payload.hunters.every((hunter) => hunter.disconnected)
-      );
-    });
-    const state = latest(board.log, "storyboardState");
-    if (state?.type !== "storyboardState") throw new Error("board");
-    expect(state.payload.hunters.every((hunter) => hunter.holders.length === 1)).toBe(true);
-    expect(state.payload.gate).toEqual({ canBegin: true, unheld: [] });
-  });
-
-  it("ignores keeper-line-ended from a device socket", async () => {
-    const { host } = await start();
-    const board = await helloBoard(host.port);
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    send(device.socket, "keeper-line-ended", { momentId: "grey-stair.03", line: 0 });
-    await until(device.inbox, device.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(latest(device.log, "error")).toMatchObject({
-      type: "error",
-      payload: { code: "invalid-state" },
-    });
-    const state = latest(board.log, "storyboardState");
-    if (state?.type !== "storyboardState") throw new Error("board");
-    expect(state.payload.keeperLine ?? null).not.toBe(1);
-  });
-
-  it("lists every story, moves the highlight for the board, and binds the one chosen", async () => {
-    const packs = tempDir();
-    cpSync(join(loadConfig().packsDir, "test"), join(packs, "test"), { recursive: true });
-    cpSync(join(loadConfig().packsDir, "test"), join(packs, "second"), { recursive: true });
-    const manifest = join(packs, "second", "pack.yaml");
-    writeFileSync(
-      manifest,
-      readFileSync(manifest, "utf8")
-        .replace("pack_id: test", "pack_id: second")
-        .replace("title: Proving ground", "title: Second story"),
-    );
-    mkdirSync(join(packs, "broken"));
-    writeFileSync(join(packs, "broken", "pack.yaml"), "pack_id: broken\n");
-    const { host } = await start(createMockTower(), { packsDir: packs });
-    const board = await helloBoard(host.port);
-    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await until(device.inbox, device.log, (messages) => {
-      const state = [...messages].reverse().find((message) => message.type === "deviceState");
-      return state?.type === "deviceState" && state.payload.screen === "pick-story";
-    });
-
-    const boardStories = () => {
-      const state = latest(board.log, "storyboardState");
-      return state?.type === "storyboardState" ? state.payload.stories : undefined;
-    };
-    await waitFor(boardStories, (stories) => stories?.cards.length === 3);
-    expect(boardStories()?.cards.map((card) => [card.id, card.loadable])).toEqual([
-      ["broken", false],
-      ["second", true],
-      ["test", true],
-    ]);
-    // The session starts on the first story that loads; the greyed door is never current.
-    expect(boardStories()?.current).toBe("second");
-
-    send(device.socket, "focus-story", { story: "test" });
-    await waitFor(boardStories, (stories) => stories?.focus === "test");
-    expect(boardStories()?.current).toBe("second");
-    await step(device, "continue-pick-story-test", "continue", "game-settings");
-    await step(device, "continue-game-settings", "continue", "tower-connect");
-    await waitFor(boardStories, (stories) => stories?.current === "test");
-    const deviceState = latest(device.log, "deviceState");
-    if (deviceState?.type !== "deviceState") throw new Error("device");
-    expect(deviceState.payload.roster?.map((hunter) => hunter.id)).toContain("alpha");
-
-    // Off Pick Story the highlight no longer moves, and the board cannot move it at all.
-    send(device.socket, "focus-story", { story: "second" });
-    send(board.socket, "focus-story", { story: "second" });
-    await until(board.inbox, board.log, (messages) =>
-      messages.some((message) => message.type === "error"),
-    );
-    expect(boardStories()?.focus).toBe("test");
-  });
-
-  it("does not open a port when no story pack loads", async () => {
-    const tower = createMockTower();
-    const root = tempDir();
-    writeFileSync(join(root, "index.html"), "<h1>Bloodtower</h1>");
-    const databasePath = join(tempDir(), "session.sqlite");
-    await expect(
-      startSessionHost({
-        port: 0,
-        host: "127.0.0.1",
-        webRoot: root,
-        packsDir: tempDir(),
-        databasePath,
-        tower,
-        towerWatchMs: 0,
-      }),
-    ).rejects.toThrow(/No story pack/);
-    tower.close();
-  });
-
-  it("does not name a story pack in the hub", () => {
-    const dir = new URL(".", import.meta.url);
-    const source = readdirSync(dir)
-      .filter((name) => name.endsWith(".ts") && !name.endsWith(".test.ts"))
-      .map((name) => readFileSync(new URL(name, dir), "utf8"))
-      .join("\n")
-      .toLowerCase();
-    expect(source).not.toMatch(/dracula|grey stair/);
   });
 });

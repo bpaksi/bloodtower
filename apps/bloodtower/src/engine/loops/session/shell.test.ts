@@ -44,7 +44,10 @@ describe("session loop tower setup", () => {
 
 describe("setup steps include seals and skulls", () => {
   it("prepends the engine core step before pack steps", () => {
-    const steps = mergeSetupSteps(TEST_STORY.setup);
+    const steps = mergeSetupSteps([
+      { id: "lay-out-board", label: "Lay out the board and orient the kingdoms." },
+      { id: "place-heroes", label: "Stand each hero on their start building." },
+    ]);
     expect(steps[0]?.id).toBe("seals-and-skulls");
     expect(steps.map((step) => step.id)).toEqual([
       "seals-and-skulls",

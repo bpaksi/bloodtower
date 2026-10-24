@@ -65,13 +65,15 @@ Four packages under `apps/bloodtower/src/`, orchestrated by `apps/bloodtower/pac
 
 The host serves the static export, `GET /health`, and `/ws`. It scans `packsDir` for story folders (D25), binds the session to the first pack that loads, and listens once the socket host and that binding are ready. It opens SQLite at `session.sqlite` in the data folder. It does not import `ultimatedarktower` or `@stoprocent/noble`. The hub imports `ws`. The tower library packages stay pinned from step 1; this step does not change a version.
 
-The tower port is the mock unless `TOWER_URL` is set, in which case it is a client of that tower-poc socket. Nothing connects, calibrates or reconnects until a joined device wins that press. `DIAG_LOG` is passed through to the sidecar when it is set. `pnpm dev` sets `DEV_ORIGINS` to the `next dev` page origins on port 3000 and `DEV_PAGE_PORT=3000` so the board QR and startup log use that port while the socket stays on 4787. Listed `DEV_ORIGINS` are an exact match for `/ws`; when any are set, private-range LAN page origins are also accepted. `next.config.ts` lists private hostnames in `allowedDevOrigins` so HMR from an iPad on the LAN is not blocked.
+The host runs the core engine (`src/engine`) through `src/server/core/` with an append-only event store (D37). The tower is `@dark-tower/tower` (mock by default). Nothing connects, calibrates or reconnects until a joined device wins that press. `pnpm dev` sets `DEV_ORIGINS` and `DEV_PAGE_PORT=3000` so the board QR uses the Next port while `/ws` stays on 4787. Listed `DEV_ORIGINS` are an exact match for `/ws`; when any are set, private-range LAN page origins are also accepted.
 
 SQLite is pinned (`better-sqlite3` 13.0.3, `drizzle-orm` 0.45.3). The game tables are `sessions`, `devices`, `holdings`, `control_presses` and `timing_marks`. `control_presses` has `screen` and `next_screen` from the R2 flow state (migration steps 6 and 7). They are null on presses recorded before it. The running host creates `apps/bloodtower/data/` (gitignored), or `.wt.json` `dataDir`. Hub tests use a temporary file. Other tests still use `:memory:`.
 
 ## 3. Protocols contract (frozen)
 
-`bloodtower-protocols` is the contract. A later change to these types or messages is a plan deviation. D16 and D17 are the step 7 changes. D18 and D19 are the R2 changes: `hunters[].disconnected` and `join.reachable` are added fields. D23 adds `pick` / `option` and `deviceState.pick`. D24 adds `keeper-line-ended` and `storyboardState.keeperLine`. D25 adds `stories` on both states and the `focus-story` client message. D26 adds the optional `portrait` on roster and hunters entries and the optional `packId` on both states. D39 adds the client `log` message and the server `logged` message (decision 0003). The frozen contract otherwise stands. Protocol v2 is §3.1 and does not change these v1 tables. The host keeps speaking v1 until C1 step 9.
+`bloodtower-protocols` is the contract. After C1 step 9 the host speaks **only** protocol v2 (§3.1). The v1 WebSocket tables below are kept as the R1 record; they are not on the wire anymore. Shared types (`TowerSnapshot`, `StoryCard`, page log payloads, timing rows) live in `src/protocols/` outside `v2/`. D39 adds the client `log` message and the server `logged` message (decision 0003). Control presses and timing marks are rebuilt from the event log when a game id has events (D6, D37).
+
+### 3.0 R1 wire (retired at C1 step 9)
 
 Envelope: `{ v: 1, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
 
@@ -104,11 +106,11 @@ Begin is open only when `unheld` is empty. A paused stage has a pause banner; an
 
 Tower snapshot: `connection` is `unavailable`, `disconnected`, `connecting` or `connected`. Battery and calibration are `{ state: "unavailable" }` or `{ state: "known", ... }`.
 
-Health: `{ protocol: 1, tower: "connection-and-sound", effects: "sound-only" }`.
+Health: `{ protocol: 2, tower: "connection-and-sound", effects: "sound-only" }`.
 
-### 3.1 Protocol v2 (D36)
+### 3.1 Protocol v2 (D36, host contract)
 
-v2 lives in `src/protocols/v2`. `PROTOCOL_VERSION` in `messages.ts` stays 1 until the host switch-over. The v2 envelope is `{ v: 2, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
+v2 lives in `src/protocols/v2`. `PROTOCOL_VERSION` is 2. The v2 envelope is `{ v: 2, type, id?, correlationId?, payload }`. Strict objects. An extra key, including `bytes`, is rejected.
 
 `project(state, audience)` in `src/engine/views` builds one view from the table state. `audience` is the story board or one device. The reducer `step` is unchanged. Session and game loops fill this state in later steps. Clients render the views and do not compute rules.
 

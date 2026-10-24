@@ -3,7 +3,7 @@ import { baseContentPackSchema } from "./base.ts";
 import { storyPackSchema } from "./story.ts";
 
 describe("pack format v2 schema", () => {
-  it("uses hero and quest names, not R1 hunter or set-piece fields", () => {
+  it("uses hero and quest names, not R1 legacy glossary fields", () => {
     const parsed = baseContentPackSchema.safeParse({
       format: 2,
       kind: "base-content",
