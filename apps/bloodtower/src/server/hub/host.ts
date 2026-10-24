@@ -723,7 +723,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
             http.closeAllConnections();
           });
         } finally {
-          await engine.whenIdle();
+          await engine.flushDisconnects();
           void tower.close();
           opened.close();
         }

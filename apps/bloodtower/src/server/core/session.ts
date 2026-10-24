@@ -69,6 +69,8 @@ export type CoreSession = {
   syncTowerSnapshot: () => void;
   /** Wait until queued shell applies and effects have finished. */
   whenIdle: () => Promise<void>;
+  /** Drop devices whose grace timer has not fired yet, then wait for those applies. */
+  flushDisconnects: () => Promise<void>;
   /** Active game id for the event log, when the session has started. */
   currentGameId: () => string | null;
 };
@@ -326,6 +328,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
     },
     whenIdle: () => applyQueue,
+    flushDisconnects: () => {
+      for (const record of devices.values()) {
+        if (!record.grace) continue;
+        clearTimeout(record.grace);
+        record.grace = undefined;
+        enqueue({ kind: "device-drop", v: 1, deviceId: record.id }, record.id);
+      }
+      return applyQueue;
+    },
     currentGameId: () => gameIdOf(state),
   };
 };
