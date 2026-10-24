@@ -10,6 +10,7 @@ import {
   type ShellState,
 } from "../../engine/loops/session/state.ts";
 import { stepShell } from "../../engine/loops/session/stepShell.ts";
+import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
 import type { BoardView, DeviceView } from "../../protocols/v2/index.ts";
@@ -64,6 +65,8 @@ export type CoreSession = {
   /** DEC-208: keep the autosave row visible on pick-game without resuming play yet. */
   rememberAutosave: (row: { gameId: string; packId: string; day: number }) => void;
   syncTowerSnapshot: () => void;
+  /** Wait until queued shell applies and effects have finished. */
+  whenIdle: () => Promise<void>;
 };
 
 const gameIdOf = (state: ShellState) => state.autosave?.gameId ?? state.activeGameId;
@@ -140,7 +143,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         atMonoMs: options.clock.monoMs(),
         atWall: options.clock.wall(),
       });
-      state = resumed.state;
+      state = {
+        ...resumed.state,
+        tower: options.tower.snapshot(),
+      };
+      if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
+        state = { ...state, pause: null, stage: "playing", screen: "play" };
+      }
     }
     appendShell(event, deviceId);
     if (event.kind === "press") {
@@ -290,5 +299,6 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         return false;
       }
     },
+    whenIdle: () => applyQueue,
   };
 };

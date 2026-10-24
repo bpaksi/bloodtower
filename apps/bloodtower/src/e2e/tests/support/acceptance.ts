@@ -147,12 +147,96 @@ export const installSessionSocketHook = async (page: Page) => {
       constructor(url: string | URL, protocols?: string | string[]) {
         super(url, protocols);
         if (String(url).includes("/ws")) {
-          (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket = this;
+          const win = window as unknown as {
+            __btSessionSocket?: WebSocket;
+            __btLastDeviceView?: {
+              screen: string;
+              actions: { promptId: string; actionId: string; open: boolean }[];
+            };
+          };
+          win.__btSessionSocket = this;
+          this.addEventListener("message", (event) => {
+            try {
+              const message = JSON.parse(String(event.data)) as {
+                type?: string;
+                payload?: {
+                  screen: string;
+                  actions: { promptId: string; actionId: string; open: boolean }[];
+                };
+              };
+              if (message.type === "deviceView" && message.payload) {
+                win.__btLastDeviceView = message.payload;
+              }
+            } catch {
+              // Ignore non-JSON frames.
+            }
+          });
         }
       }
     }
     window.WebSocket = SessionTrackingWebSocket;
   });
+};
+
+const PLAY_PRESS_PREFERENCE = ["continue", "record", "end-turn", "leave", "enter", "walk"] as const;
+
+const PLAY_PRESS_SKIP = new Set([
+  "quit-story",
+  "reconnect",
+  "new-game",
+  "done-for-tonight",
+  "back",
+  "tower-connect",
+  "tower-calibrate",
+]);
+
+/** Sends one open play/setup press on the live session socket (same connection as the UI). */
+export const sendPlayPressFromTest = async (page: Page): Promise<boolean> => {
+  await page.waitForFunction(
+    () => {
+      const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;
+      return socket != null && socket.readyState === WebSocket.OPEN;
+    },
+    { timeout: 15_000 },
+  );
+  return page.evaluate(
+    ({ prefer, skip }) => {
+      const win = window as unknown as {
+        __btSessionSocket?: WebSocket;
+        __btLastDeviceView?: {
+          screen: string;
+          actions: { promptId: string; actionId: string; open: boolean }[];
+        };
+      };
+      const socket = win.__btSessionSocket;
+      const view = win.__btLastDeviceView;
+      if (!socket || socket.readyState !== WebSocket.OPEN || !view) return false;
+      const open = view.actions.filter((action) => action.open);
+      if (open.length === 0) return false;
+      let pick = null as { promptId: string; actionId: string } | null;
+      for (const actionId of prefer) {
+        const hit = open.find((action) => action.actionId === actionId);
+        if (hit) {
+          pick = { promptId: hit.promptId, actionId: hit.actionId };
+          break;
+        }
+      }
+      if (!pick) {
+        const hit = open.find((action) => !skip.includes(action.actionId));
+        if (hit) pick = { promptId: hit.promptId, actionId: hit.actionId };
+      }
+      if (!pick) return false;
+      socket.send(
+        JSON.stringify({
+          v: 2,
+          type: "act",
+          payload: { promptId: pick.promptId, actionId: pick.actionId, args: {} },
+        }),
+      );
+      return true;
+    },
+    { prefer: [...PLAY_PRESS_PREFERENCE], skip: [...PLAY_PRESS_SKIP] },
+  );
 };
 
 /** Sends hero-hold on the page's live session socket (same connection as the UI). */

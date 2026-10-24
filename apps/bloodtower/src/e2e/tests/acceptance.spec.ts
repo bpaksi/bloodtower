@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   holdHeroesFromTest,
   installSessionSocketHook,
+  sendPlayPressFromTest,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -19,38 +20,33 @@ const clickAct = async (page: Page, actionId: string, promptId?: string) => {
 };
 
 const readDayNumber = async (page: Page): Promise<number | null> => {
-  const text = await page.locator("main.bt-device p").first().textContent();
+  const text = await deviceMain(page).locator("p").first().textContent();
   const match = text?.match(/Day (\d+)/);
   return match ? Number(match[1]) : null;
 };
 
-const PRESS_PREFERENCE = ["continue", "record", "end-turn", "leave", "enter", "walk"] as const;
-
-const clickAnyOpenAction = async (page: Page): Promise<boolean> => {
-  for (const actionId of PRESS_PREFERENCE) {
-    const button = page.locator(`button[data-action-id="${actionId}"]:not([disabled])`).first();
-    if ((await button.count()) === 0) continue;
-    await button.click();
-    return true;
-  }
-  const fallback = page.locator("main.bt-device button[data-action-id]:not([disabled])").first();
-  if ((await fallback.count()) === 0) return false;
-  await fallback.click();
-  return true;
-};
-
 /** Autoplay presses until the device shows the given day number (inclusive). */
 const playUntilDay = async (page: Page, targetDay: number) => {
+  await holdHeroesFromTest(page, [...HERO_IDS]);
   const deadline = Date.now() + 240_000;
-  let presses = 0;
-  while (Date.now() < deadline && presses < 800) {
-    presses += 1;
+  while (Date.now() < deadline) {
     const day = await readDayNumber(page);
     if (day !== null && day >= targetDay) return;
-    const clicked = await clickAnyOpenAction(page);
-    if (!clicked) await page.waitForTimeout(50);
+    const screen = await deviceMain(page).getAttribute("data-screen");
+    if (screen === "pause") {
+      await holdHeroesFromTest(page, [...HERO_IDS]);
+    }
+    const pressed = await sendPlayPressFromTest(page);
+    if (!pressed) await page.waitForTimeout(50);
+    else await page.waitForTimeout(10);
   }
   throw new Error(`Timed out before reaching day ${targetDay}`);
+};
+
+const deviceMain = (page: Page) => page.locator("main.bt-device");
+
+const waitForPlayScreen = async (page: Page) => {
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 60_000 });
 };
 
 const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
@@ -62,7 +58,7 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
   await clickAct(page, "new-game", "new-pick-game");
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
-  await expect(page.locator("main")).toHaveAttribute("data-screen", "claim-heroes", {
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes", {
     timeout: 15_000,
   });
   await holdHeroesFromTest(page, [...HERO_IDS]);
@@ -71,30 +67,46 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
       await expect(board.getByText(`${label} — held`)).toBeVisible({ timeout: 10_000 });
     }
   }
+  await expect(
+    page.locator(
+      'button[data-prompt-id="continue-claim-heroes"][data-action-id="continue"]:not([disabled])',
+    ),
+  ).toBeEnabled({ timeout: 15_000 });
   await clickAct(page, "continue", "continue-claim-heroes");
-  await expect(page.locator("main")).not.toHaveAttribute("data-screen", "claim-heroes", {
-    timeout: 15_000,
-  });
-  for (let guard = 0; guard < 8; guard += 1) {
-    const screen = await page.locator("main").getAttribute("data-screen");
+
+  const deadline = Date.now() + 90_000;
+  while (Date.now() < deadline) {
+    const screen = await deviceMain(page).getAttribute("data-screen");
     if (screen === "play") return;
     if (screen === "setup") {
-      await clickAct(page, "continue");
+      const stepContinue = page
+        .locator('main.bt-device button[data-action-id="continue"]:not([disabled])')
+        .first();
+      await expect(stepContinue).toBeEnabled({ timeout: 15_000 });
+      await stepContinue.click();
       continue;
     }
     if (screen === "begin") {
+      await holdHeroesFromTest(page, [...HERO_IDS]);
       const beginContinue = page.locator(
-        'button[data-prompt-id="continue-begin"][data-action-id="continue"]',
+        'button[data-prompt-id="continue-begin"][data-action-id="continue"]:not([disabled])',
       );
-      if ((await beginContinue.count()) === 0) {
-        await holdHeroesFromTest(page, [...HERO_IDS]);
+      if ((await beginContinue.count()) > 0) {
+        await beginContinue.click();
+        await waitForPlayScreen(page);
+        return;
       }
-      await clickAct(page, "continue", "continue-begin");
+      if ((await deviceMain(page).getAttribute("data-screen")) === "play") return;
+      await page.waitForTimeout(100);
+      continue;
+    }
+    if (screen === "claim-heroes") {
+      await page.waitForTimeout(100);
       continue;
     }
     throw new Error(`Unexpected setup screen: ${screen}`);
   }
-  await expect(page.locator("main")).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+  await waitForPlayScreen(page);
 };
 
 test("core: board is display-only and a device walks setup to play", async ({
@@ -132,21 +144,23 @@ test("quit from pause lands on session; continue resumes after host restart", as
     await playUntilDay(page, 3);
 
     tower.loseConnection();
-    await expect(page.locator("main")).toHaveAttribute("data-screen", "pause", { timeout: 30_000 });
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 30_000 });
 
-    const quit = page.locator('button[data-action-id="quit-story"]');
+    const quit = deviceMain(page).locator('button[data-action-id="quit-story"]');
     const quitPrompt = await quit.getAttribute("data-prompt-id");
     expect(quitPrompt).toMatch(/^pause-\d+-quit$/);
     await clickAct(page, "quit-story", quitPrompt ?? undefined);
-    await expect(page.locator("main")).toHaveAttribute("data-screen", "session", {
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "session", {
       timeout: 30_000,
     });
-    await expect(page.locator('button[data-action-id="new-game"]')).toBeVisible();
-    await expect(page.locator('button[data-action-id="done-for-tonight"]')).toBeVisible();
+    await expect(deviceMain(page).locator('button[data-action-id="new-game"]')).toBeVisible();
+    await expect(
+      deviceMain(page).locator('button[data-action-id="done-for-tonight"]'),
+    ).toBeVisible();
     await expect(page.getByText(/seed/i)).toHaveCount(0);
 
     await clickAct(page, "done-for-tonight", "session-done-tonight");
-    await expect(page.locator("main")).toHaveAttribute("data-screen", "goodbye");
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "goodbye");
   } finally {
     await context.close();
     await session.host.close();
@@ -160,12 +174,14 @@ test("quit from pause lands on session; continue resumes after host restart", as
     await page2.goto(`/join?code=${restarted.host.joinCode}`);
     await clickAct(page2, "tower-connect", "tower-connect");
     await clickAct(page2, "tower-calibrate", "tower-calibrate");
-    await expect(page2.locator('button[data-action-id="continue"]')).toBeVisible({
+    await expect(
+      page2.locator('button[data-prompt-id="continue-pick-game"][data-action-id="continue"]'),
+    ).toBeVisible({
       timeout: 20_000,
     });
     await clickAct(page2, "continue", "continue-pick-game");
-    await expect(page2.locator("main")).toHaveAttribute("data-screen", "play");
-    await expect(page2.getByText(/Day 3/i)).toBeVisible({ timeout: 20_000 });
+    await expect(deviceMain(page2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    await expect(deviceMain(page2).getByText(/Day 3/i)).toBeVisible({ timeout: 20_000 });
     await expect(page2.getByText(/seed/i)).toHaveCount(0);
   } finally {
     await context2.close();

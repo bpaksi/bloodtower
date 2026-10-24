@@ -31,9 +31,15 @@ const shellEventsAfter = (store: EventStore, gameId: string, afterSeq: number): 
   return out;
 };
 
+const endsSittingReplay = (event: ShellEvent): boolean =>
+  event.kind === "press" &&
+  (event.actionId === "quit-story" ||
+    (event.promptId === "session-done-tonight" && event.actionId === "done-for-tonight"));
+
 const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): ShellState => {
   let state = start;
   for (const event of events) {
+    if (endsSittingReplay(event)) break;
     state = stepShell(state, event).state;
   }
   return state;

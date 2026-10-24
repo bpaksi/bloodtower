@@ -167,11 +167,13 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       eventStore.replaceAutosave({ ...autosaveRow, sessionId });
     }
     const checkpoint = eventStore.lastCheckpoint(autosaveRow.gameId);
+    await engine.whenIdle();
     engine.rememberAutosave({
       gameId: autosaveRow.gameId,
       packId: autosaveRow.packId,
       day: checkpoint?.day ?? 1,
     });
+    engine.syncTowerSnapshot();
   }
 
   const clients = new Map<WebSocket, ClientState>();
@@ -704,6 +706,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
             http.closeAllConnections();
           });
         } finally {
+          await engine.whenIdle();
           void tower.close();
           opened.close();
         }
