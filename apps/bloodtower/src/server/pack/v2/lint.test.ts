@@ -197,6 +197,28 @@ assets:
     }
   });
 
+  it("reports a pack.yaml that starts with a backtick instead of dropping the door", () => {
+    const root = mkdtempSync(join(tmpdir(), "pack-catalog-"));
+    try {
+      const broken = join(root, "test");
+      cpSync(testPack, broken, { recursive: true });
+      writeFileSync(join(broken, "pack.yaml"), "`not yaml\n");
+      mkdirSync(join(root, "notes"));
+      writeFileSync(
+        join(root, "notes", "pack.yaml"),
+        "pack_id: notes\ntitle: Notes\nversion: 0.1.0\nengine_min: 0.1.0\nplayable: false\n",
+      );
+      const catalog = loadStoryCatalog(root);
+      expect(catalog.stories).toEqual([]);
+      expect(catalog.issues.some((item) => item.file === "pack.yaml" && item.rule === "P2-1")).toBe(
+        true,
+      );
+      expect(catalog.issues.some((item) => item.message.includes("format: 2"))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("does not report CONVERSION-NOTES when the host loads the repo packs", () => {
     const catalog = loadStoryCatalog(join(repoRoot, "packs"));
     expect(catalog.issues.filter((item) => item.file.includes("CONVERSION-NOTES"))).toEqual([]);

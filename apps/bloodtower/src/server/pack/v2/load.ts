@@ -264,19 +264,38 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   };
 };
 
-export const isPackV2Manifest = (dir: string): boolean => {
+export type PackDoorClass =
+  | { kind: "v2" }
+  | { kind: "skip" }
+  | { kind: "broken"; issues: PackV2LoadIssue[] };
+
+/**
+ * A door with no manifest, or a manifest that parses and is not format 2, is skipped.
+ * A manifest that cannot be read or parsed is broken: the caller must keep those issues.
+ */
+export const classifyPackDoor = (dir: string): PackDoorClass => {
   try {
     const root = realpathSync(resolve(dir));
     const names = readdirSync(root);
     const packFile = names.find((name) => MANIFEST_FILES.has(name));
-    if (!packFile) return false;
+    if (!packFile) return { kind: "skip" };
     const read = readPackFile(root, packFile);
-    if (!("ok" in read) || !read.value || typeof read.value !== "object") return false;
-    return (read.value as { format?: unknown }).format === 2;
-  } catch {
-    return false;
+    if (!("ok" in read)) return { kind: "broken", issues: [read] };
+    if (!read.value || typeof read.value !== "object" || Array.isArray(read.value)) {
+      return {
+        kind: "broken",
+        issues: [issue(packFile, "(file)", "P2-1", "The pack manifest is a JSON object.")],
+      };
+    }
+    if ((read.value as { format?: unknown }).format !== 2) return { kind: "skip" };
+    return { kind: "v2" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { kind: "broken", issues: [issue(dir, "(file)", "P2-1", message)] };
   }
 };
+
+export const isPackV2Manifest = (dir: string): boolean => classifyPackDoor(dir).kind === "v2";
 
 export const formatPackV2Issues = (issues: readonly PackV2LoadIssue[]): string[] =>
   issues.map(
