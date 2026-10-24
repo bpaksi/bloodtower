@@ -73,13 +73,13 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
       const local = frame.local as EncounterLocal;
       actingId = local.groupId;
       waiting = true;
-      break;
+      continue;
     }
     if (frame.loopId === "group-turn") {
       const local = frame.local as GroupTurnLocal;
-      actingId = local.groupId;
+      actingId = actingId ?? local.groupId;
       movesLeft = local.movesLeft;
-      waiting = local.awaitingPress;
+      if (!waiting) waiting = local.awaitingPress;
       break;
     }
     if (frame.loopId === "day") {

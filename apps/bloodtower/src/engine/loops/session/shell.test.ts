@@ -51,7 +51,9 @@ describe("session loop tower setup", () => {
     expect(state.offered.some((offer) => offer.promptId === "splash-play" && offer.open)).toBe(
       true,
     );
+    expect(state.activeGameId).toBe("game-1");
     state = stepShell(state, press("ipad-0", "splash-play", "continue")).state;
+    expect(state.activeGameId).toBe(`game-${state.eventSeq}`);
     expect(state.screen).toBe("pick-story");
     expect(state.towerLinked).toBe(false);
     state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
@@ -470,6 +472,7 @@ describe("place stills", () => {
     state = stepShell(state, press("ipad-0", enter?.promptId ?? "", "enter")).state;
     expect(movesLeft(state)).toBe(before);
     const view = projectShellView(state);
+    expect(view.table?.movesLeft).toBe(before);
     expect(view.place).toEqual({
       building: "citadel",
       stillId: "place.citadel",

@@ -73,7 +73,16 @@ export type CoreSession = {
   currentGameId: () => string | null;
 };
 
-const gameIdOf = (state: ShellState) => state.autosave?.gameId ?? state.activeGameId;
+/**
+ * Play and pause log on the autosave game. A restarted lobby still has that row
+ * so Continue can find it, and its own splash must not be appended onto the saved log.
+ */
+const gameIdOf = (state: ShellState) => {
+  const inSavedGame =
+    state.screen === "play" || state.screen === "pause" || state.resumedFromAutosave;
+  if (inSavedGame && state.autosave) return state.autosave.gameId;
+  return state.activeGameId;
+};
 
 export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   const graceMs = options.graceMs ?? GRACE_MS;

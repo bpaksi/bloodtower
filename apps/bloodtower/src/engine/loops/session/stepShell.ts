@@ -305,6 +305,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       const session = sessionFrame(next);
       if (session) {
         const local = session.local as SessionLocal;
+        if (!next.autosave) next.activeGameId = `game-${next.eventSeq}`;
         next.screen = next.autosave ? "pick-game" : "pick-story";
         session.local = {
           ...local,
