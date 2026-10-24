@@ -50,6 +50,7 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
 
 export const deserializeShellState = (row: SerializedShellState): ShellState => ({
   ...row,
+  towerLinked: row.towerLinked ?? false,
   devices: new Set(row.devices),
   registry: createShellRegistry(),
   playContent: row.playContent ? rehydratePlayContent(row.playContent) : null,

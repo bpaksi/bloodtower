@@ -220,13 +220,15 @@ export const handleGamePress = (
     };
   }
 
-  if (local.phase === "play" && shell.pause && promptId === `pause-${shell.pauseSerial}-quit`) {
-    if (actionId === "quit-story") {
-      shell.stage = "ended";
-      shell.pause = null;
-      shell.screen = "play";
-      return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
-    }
+  if (
+    local.phase === "play" &&
+    actionId === "quit-story" &&
+    (promptId === "menu-quit" || (shell.pause && promptId === `pause-${shell.pauseSerial}-quit`))
+  ) {
+    shell.stage = "ended";
+    shell.pause = null;
+    shell.screen = "play";
+    return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
   }
   if (
     local.phase === "play" &&
@@ -237,6 +239,7 @@ export const handleGamePress = (
   ) {
     shell.pause = null;
     shell.stage = "playing";
+    shell.screen = "play";
     return { ...local, awaitingPress: false };
   }
 

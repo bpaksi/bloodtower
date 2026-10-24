@@ -134,6 +134,8 @@ v2 lives in `src/protocols/v2`. `PROTOCOL_VERSION` is 2. The v2 envelope is `{ v
 
 Setup screens: `pick-story`, `game-settings`, `tower-connect` (connect and calibrate), `claim-heroes` (the v1 `party-join` id), `setup` (one pack step at a time, including seals and skulls), `begin`.
 
+Runtime adds `splash` as the designed start. Play on Splash skips tower connect and calibrate, so Proving Grounds can be played with the tower never connected. A lost tower pauses only after this session has connected one. During play, Enter shows a place still and its caption on the Story board only (`place.village`, `place.bazaar`, `place.citadel`, `place.sanctuary`). iPads stay text and icons.
+
 An offered action has `promptId`, `actionId`, `label`, and `open: true`, or `open: false` with `reason`. An open action has no reason.
 
 `boardView` rejects a `.private.` id, any string containing `ipad:`, and the keys `privateMoment`, `bytes`, `raw`, `packet`, `capabilityId` and `params`. A public line may contain the word "private". A private line id ends with `.private.<hero id>`. A device view carries lines only for heroes that device holds.

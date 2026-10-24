@@ -2,9 +2,11 @@ import type { EngineEffect } from "../../effects.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
 import { bindPlayState, initPlayState } from "../chapter/playState.ts";
+import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress, handleSessionHubPress } from "../game/loop.ts";
 import { allHeroesHeld } from "../game/setupFlow.ts";
+import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
 import type { ShellEffect } from "./effects.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
@@ -15,7 +17,9 @@ import {
   bindShellState,
   clearShellState,
   ensurePauseOffers,
+  ensurePlayMenuOffers,
   matchOffer,
+  requestCheckpoint,
   takePendingCheckpoint,
   takePendingTowerCommands,
 } from "./shellRef.ts";
@@ -99,7 +103,16 @@ const resumeLoopsOrPauseOffers = (
     });
   }
   if (next.pause) ensurePauseOffers(next);
+  else ensurePlayMenuOffers(next);
 };
+
+const playFingerprint = (state: ShellState): string =>
+  state.play?.groups
+    .map((group) => `${group.id}:${group.spaceId}:${group.insideBuilding ? 1 : 0}`)
+    .join("|") ?? "";
+
+const sessionFrame = (state: ShellState) =>
+  state.loops.stack.find((frame) => frame.loopId === "session");
 
 const pauseIfNeeded = (state: ShellState): void => {
   if (state.stage !== "playing" && state.stage !== "paused") return;
@@ -115,7 +128,7 @@ const pauseIfNeeded = (state: ShellState): void => {
     state.screen = "pause";
     return;
   }
-  if (state.tower.connection !== "connected") {
+  if (state.towerLinked && state.tower.connection !== "connected") {
     if (state.pause?.cause !== "tower-lost") {
       state.pauseSerial += 1;
     }
@@ -288,7 +301,25 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     bindShellState(next);
     const top = next.loops.stack.at(-1) as LoopFrame | undefined;
 
-    if (e.promptId === "tower-connect" && e.actionId === "tower-connect") {
+    if (e.promptId === "splash-play" && e.actionId === "continue") {
+      const session = sessionFrame(next);
+      if (session) {
+        const local = session.local as SessionLocal;
+        if (!next.autosave) next.activeGameId = `game-${next.eventSeq}`;
+        next.screen = next.autosave ? "pick-game" : "pick-story";
+        session.local = {
+          ...local,
+          phase: "hub",
+          towerStep: "done",
+          awaitingPress: false,
+          fromSessionScreen: false,
+        };
+      }
+    } else if (
+      (e.promptId === "tower-connect" || e.promptId === "menu-connect") &&
+      e.actionId === "tower-connect"
+    ) {
+      next.towerLinked = true;
       next.tower = {
         connection: "connected",
         calibrated: { state: "known", calibrated: false },
@@ -299,7 +330,20 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         capabilityId: "tower.connect",
         params: {},
       });
+      if (e.promptId === "tower-connect") {
+        const session = sessionFrame(next);
+        if (session && (session.local as SessionLocal).phase === "splash") {
+          const local = session.local as SessionLocal;
+          session.local = {
+            ...local,
+            phase: "tower",
+            towerStep: "calibrate",
+            awaitingPress: false,
+          };
+        }
+      }
     } else if (e.promptId === "tower-calibrate" && e.actionId === "tower-calibrate") {
+      next.towerLinked = true;
       next.tower = TOWER_READY;
       effects.push({
         kind: "tower-command",
@@ -308,9 +352,8 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         params: {},
       });
     } else if (
-      next.pause &&
-      (e.actionId === "quit-story" || e.actionId === "reconnect") &&
-      e.promptId.startsWith("pause-")
+      e.actionId === "quit-story" &&
+      (e.promptId === "menu-quit" || (next.pause && e.promptId.startsWith("pause-")))
     ) {
       const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
       if (gameFrame) {
@@ -318,6 +361,11 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         if ((gameFrame.local as GameLocal).phase === "done") {
           collapsePlayLoopsOnQuit(next);
         }
+      }
+    } else if (next.pause && e.actionId === "reconnect" && e.promptId.startsWith("pause-")) {
+      const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
+      if (gameFrame) {
+        gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
       }
     } else if (top?.loopId === "game") {
       const before = top.local as GameLocal;
@@ -351,7 +399,12 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
           effects.push({ kind: "autosave-write", v: 1, gameId: next.autosave.gameId });
         }
       }
-      if (local.phase === "play" && next.resumedFromAutosave && !towerReady(next.tower)) {
+      if (
+        local.phase === "play" &&
+        next.resumedFromAutosave &&
+        next.towerLinked &&
+        !towerReady(next.tower)
+      ) {
         next.stage = "paused";
         next.pause = { cause: "tower-lost" };
         next.pauseSerial += 1;
@@ -361,7 +414,16 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       const local = handleSessionHubPress(top.local as SessionLocal, e.promptId, e.actionId);
       updateSessionLocal(next, local);
     } else {
+      const before = playFingerprint(next);
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
+      if (
+        (e.actionId === "walk" || e.actionId === "enter" || e.actionId === "leave") &&
+        next.play &&
+        next.activeGameId &&
+        playFingerprint(next) !== before
+      ) {
+        requestCheckpoint(next.activeGameId, next.play.dayNumber);
+      }
     }
 
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
@@ -388,6 +450,15 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
 /** After loading a checkpoint, rebuild offered actions from the restored loop stack. */
 export const refreshOffersAfterRestore = (state: ShellState): ShellEffect[] => {
   const effects: ShellEffect[] = [];
+  for (const frame of state.loops.stack) {
+    if (frame.loopId === "group-turn") {
+      const local = frame.local as GroupTurnLocal;
+      frame.local = { ...local, awaitingPress: false };
+    } else if (frame.loopId === "encounter") {
+      const local = frame.local as EncounterLocal;
+      frame.local = { ...local, awaitingLeave: false };
+    }
+  }
   bindShellState(state);
   resumeLoopsOrPauseOffers(state, state.eventSeq, effects);
   clearShellState();

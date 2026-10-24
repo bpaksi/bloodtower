@@ -1,16 +1,42 @@
 import { readdirSync, readFileSync, realpathSync } from "node:fs";
 import { join, resolve } from "node:path";
+import type { Asset } from "bloodtower-protocols";
 import { type BoardSpaceInput, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { mergeSetupSteps, type ShellStory } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
+import { indexPackAssets, type PackAssetIndex } from "../pack/assets.ts";
 import { classifyPackDoor, loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
 
 export type StoryCatalog = {
   stories: ShellStory[];
   defaultPlay: PlayContent | null;
   issues: PackV2LoadIssue[];
+  /** Image catalogs for v2 story packs, so `/packs/<id>/asset/<assetId>` can serve stills. */
+  assetIndexes: PackAssetIndex[];
 };
+
+const indexAssets = (
+  packRoot: string,
+  packId: string,
+  assets: readonly {
+    id: string;
+    type: Asset["type"];
+    target: Asset["target"];
+    status: Asset["status"];
+    path?: string;
+  }[],
+): PackAssetIndex =>
+  indexPackAssets(packRoot, {
+    pack_id: packId,
+    assets: assets.map((asset) => ({
+      id: asset.id,
+      type: asset.type,
+      target: asset.target,
+      status: asset.status,
+      ...(asset.path ? { path: asset.path } : {}),
+    })),
+  });
 
 const kingdomLabels = [
   { id: "N" as const, name: "Arisilon", label: "Arisilon (N)" },
@@ -45,6 +71,7 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   const root = realpathSync(resolve(packsDir));
   const stories: ShellStory[] = [];
   const issues: PackV2LoadIssue[] = [];
+  const assetIndexes: PackAssetIndex[] = [];
   let defaultPlay: PlayContent | null = null;
 
   for (const name of readdirSync(root, { withFileTypes: true })) {
@@ -65,6 +92,7 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     }
     if (loaded.kind === "base-content") continue;
     const story = loaded.pack;
+    assetIndexes.push(indexAssets(dir, story.pack_id, story.assets));
     const partyHeroIds = new Set(story.start.assignments.map((row) => row.hero));
     const heroes = loaded.base.heroes
       .filter((hero) => partyHeroIds.has(hero.id))
@@ -106,5 +134,5 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   }
 
   stories.sort((a, b) => a.card.id.localeCompare(b.card.id));
-  return { stories, defaultPlay, issues };
+  return { stories, defaultPlay, issues, assetIndexes };
 };

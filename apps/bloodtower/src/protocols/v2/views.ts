@@ -20,6 +20,38 @@ const narrationSchema = z.strictObject({
   text: z.string().min(1).max(2000),
 });
 
+const placeStillSchema = z.strictObject({
+  building: z.enum(["village", "bazaar", "citadel", "sanctuary"]),
+  stillId: z.string().min(1).max(80),
+  caption: z.string().min(1).max(500),
+});
+
+const tableGroupSchema = z.strictObject({
+  heroId: heroIdSchema,
+  heroName: z.string().min(1).max(80),
+  kingdom: z.enum(["N", "E", "S", "W"]),
+  kingdomLabel: z.string().min(1).max(40),
+  spaceId: z.string().min(1).max(80),
+  spaceName: z.string().min(1).max(80),
+  building: z.string().min(1).max(40).nullable(),
+  inside: z.boolean(),
+  alone: z.boolean(),
+});
+
+const tableBandSchema = z.strictObject({
+  chapter: z.string().min(1).max(120),
+  day: z.number().int().min(0).max(99),
+  health: z.literal("unavailable"),
+  purse: z.literal("unavailable"),
+  actingGroup: z.string().min(1).max(80).nullable(),
+  actingHeroId: heroIdSchema.nullable(),
+  movesLeft: z.number().int().min(0).max(12).nullable(),
+  moveRoll: z.number().int().min(0).max(12).nullable(),
+  modifier: z.literal("none"),
+  waitingFor: z.string().min(1).max(120).nullable(),
+  groups: z.array(tableGroupSchema).max(8),
+});
+
 const uniqueIds = (ids: string[], ctx: z.RefinementCtx, label: string) => {
   if (new Set(ids).size !== ids.length) issue(ctx, `A ${label} is listed twice.`);
 };
@@ -36,6 +68,10 @@ export const boardViewPayloadSchema = z
     heroes: z.array(publicHeroSchema).max(16),
     narration: narrationSchema.nullable(),
     actions: z.array(offeredActionSchema).max(32),
+    /** Status band for the move. Absent on setup screens. */
+    table: tableBandSchema.nullable().optional(),
+    /** Place still and caption. Story board only, and only while a group is inside. */
+    place: placeStillSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     refuseBoardContent(value, ctx);
@@ -62,6 +98,8 @@ const deviceHeroSchema = z
     id: heroIdSchema,
     name: z.string().min(1).max(80),
     lines: z.array(privateLineSchema).max(8),
+    /** Claim-heroes only. `taken` is greyed for this iPad (DEC-098). */
+    claim: z.enum(["open", "yours", "taken"]).optional(),
   })
   .superRefine((value, ctx) => {
     for (const line of value.lines) {
@@ -82,6 +120,8 @@ export const deviceViewPayloadSchema = z
     shows: z.string().min(1).max(500),
     heroes: z.array(deviceHeroSchema).max(16),
     actions: z.array(offeredActionSchema).max(32),
+    /** Same status band as the board. No place still and no caption. */
+    table: tableBandSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     uniqueIds(

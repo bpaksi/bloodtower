@@ -27,6 +27,11 @@ export const CONTROL_ACTIONS = [
   "done-for-tonight",
   "quit-story",
   "reconnect",
+  "walk",
+  "enter",
+  "leave",
+  "end-turn",
+  "record",
 ] as const;
 export const controlActionSchema = z.enum(CONTROL_ACTIONS);
 export type ControlAction = z.infer<typeof controlActionSchema>;

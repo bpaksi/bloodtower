@@ -83,3 +83,14 @@ export const ensurePauseOffers = (state: ShellState): void => {
     }
   }
 };
+
+/** Quit story, and connect when this session has never linked a tower, live in the iPad menu. */
+export const ensurePlayMenuOffers = (state: ShellState): void => {
+  if (state.screen !== "play" || state.pause || state.stage !== "playing") return;
+  if (!state.offered.some((offer) => offer.promptId === "menu-quit")) {
+    state.offered.push({ promptId: "menu-quit", actionId: "quit-story", open: true });
+  }
+  if (!state.towerLinked && !state.offered.some((offer) => offer.promptId === "menu-connect")) {
+    state.offered.push({ promptId: "menu-connect", actionId: "tower-connect", open: true });
+  }
+};
