@@ -1,6 +1,8 @@
 // Board map entry: drag a neighbour onto an open slot or the tray, or add one by typing a name.
 // Every change goes to the server, which keeps the draft and refuses anything that breaks the rules.
 const KINGDOM = { N: "Arisilon", E: "Brynthia", S: "Durnin", W: "Zenon" };
+// RtDT names kingdoms with their direction: "N Arisilon".
+const kingdomLabel = (k) => `${k} ${KINGDOM[k]}`;
 const state = { data: null, selected: null, editing: null, picked: null, query: "", highlight: 0 };
 const $ = (id) => document.getElementById(id);
 
@@ -20,6 +22,9 @@ function el(tag, props = {}, ...children) {
 
 function spaceById(id) {
   return state.data.spaces.find((s) => s.id === id);
+}
+function regionName(id) {
+  return state.data.regions.find((r) => r.id === id)?.name ?? "no region";
 }
 function nameOf(id) {
   return spaceById(id)?.name ?? id;
@@ -72,7 +77,7 @@ function renderSpaces() {
   for (const k of ["N", "E", "S", "W"]) {
     const group = shown.filter((s) => s.kingdom === k);
     if (group.length === 0) continue;
-    list.append(el("h2", {}, `${KINGDOM[k]} (${group.length})`));
+    list.append(el("h2", {}, `${kingdomLabel(k)} (${group.length})`));
     for (const s of group) {
       list.append(
         el(
@@ -82,7 +87,7 @@ function renderSpaces() {
             onclick: () => selectSpace(s.id),
           },
           el("span", {}, s.name),
-          el("span", { class: "tag" }, s.region ? s.region.replace("REG-", "R") : "no region"),
+          el("span", { class: "tag" }, s.region ? regionName(s.region) : "no region"),
         ),
       );
     }
@@ -102,7 +107,7 @@ function renderRegions() {
   ul.replaceChildren();
   for (const r of state.data.regions) {
     const count = state.data.spaces.filter((s) => s.region === r.id).length;
-    ul.append(el("li", {}, `${r.id}  ${r.name} (${count} spaces)`));
+    ul.append(el("li", {}, `${r.name} (${count} spaces)`));
   }
 }
 
@@ -350,7 +355,7 @@ function updateResults(s) {
           },
         },
         `${x.name}  `,
-        el("span", { class: "tag" }, `${x.kingdom} · ${KINGDOM[x.kingdom]}`),
+        el("span", { class: "tag" }, `${kingdomLabel(x.kingdom)}`),
       ),
     );
   });
@@ -409,7 +414,7 @@ function renderDetail() {
     { onchange: (e) => post("/api/assign", { space: s.id, region: e.target.value || null }) },
     el("option", { value: "" }, "no region"),
     ...state.data.regions.map((r) =>
-      el("option", { value: r.id, selected: r.id === s.region }, `${r.id}  ${r.name}`),
+      el("option", { value: r.id, selected: r.id === s.region }, `${r.name}`),
     ),
   );
 
@@ -418,7 +423,7 @@ function renderDetail() {
     el(
       "p",
       { class: "muted", style: "margin: 0 0 18px" },
-      `${s.id} · ${KINGDOM[s.kingdom]}${s.building ? ` · ${s.building}` : ""}`,
+      `${s.id} · ${kingdomLabel(s.kingdom)}${s.building ? ` · ${s.building}` : ""}`,
     ),
     el(
       "div",
@@ -450,12 +455,14 @@ function render() {
 }
 
 $("spaceFilter").addEventListener("input", renderSpaces);
-$("addRegion").onclick = () => {
-  const name = $("newRegion").value;
+// A region is added by typing its name and pressing Enter.
+$("newRegion").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const name = e.target.value;
   if (!name.trim()) return message("A region needs a name", true);
-  $("newRegion").value = "";
+  e.target.value = "";
   post("/api/region", { name });
-};
+});
 $("export").onclick = () => post("/api/export");
 
 fetch("/api/state")
