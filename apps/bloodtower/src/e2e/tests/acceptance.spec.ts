@@ -117,11 +117,12 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
     const screen = await deviceMain(page).getAttribute("data-screen");
     if (screen === "play") return;
     if (screen === "setup") {
-      const stepContinue = page
-        .locator('main.bt-device button[data-action-id="continue"]:not([disabled])')
-        .first();
-      await expect(stepContinue).toBeEnabled({ timeout: 15_000 });
-      await stepContinue.click();
+      const step = await deviceMain(page).getAttribute("data-setup-step");
+      if (!step) {
+        await page.waitForTimeout(50);
+        continue;
+      }
+      await clickAct(page, "continue", `continue-setup-${step}`);
       continue;
     }
     if (screen === "begin") {
@@ -337,28 +338,24 @@ test("core: one winner per press, private wire, disconnect pause, run from event
     await holdHeroesFromTest(pageA, [...HERO_IDS]);
     await holdHeroesFromTest(pageB, [...HERO_IDS]);
     await clickAct(pageA, "continue", "continue-claim-heroes");
-    const setupDeadline = Date.now() + 90_000;
+    // Name each setup step. A generic Continue retargets after that button
+    // detaches and can press Begin before this loop looks for it.
+    const setupIds = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
     let sawPrivateLine = false;
-    while (Date.now() < setupDeadline) {
-      const screen = await deviceMain(pageA).getAttribute("data-screen");
-      if (screen === "play") break;
-      if (screen === "begin") {
-        await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
-        await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
-        sawPrivateLine = true;
-        await holdHeroesFromTest(pageA, [...HERO_IDS]);
-        await clickAct(pageA, "continue", "continue-begin");
-        break;
-      }
-      if (screen === "setup") {
-        await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
-        await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
-        sawPrivateLine = true;
-        await clickAct(pageA, "continue");
-        continue;
-      }
-      await pageA.waitForTimeout(50);
+    for (const id of setupIds) {
+      await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
+      await expect(deviceMain(pageA)).toHaveAttribute("data-setup-step", id);
+      await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
+      await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
+      sawPrivateLine = true;
+      await clickAct(pageA, "continue", `continue-setup-${id}`);
     }
+    await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
+    await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
+    await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
+    sawPrivateLine = true;
+    await holdHeroesFromTest(pageA, [...HERO_IDS]);
+    await clickAct(pageA, "continue", "continue-begin");
     expect(sawPrivateLine).toBe(true);
     await waitForPlayScreen(pageA);
 

@@ -229,6 +229,7 @@ const expectGoodbye = async (
 const walkOnce = async (page: Page) => {
   const roll = page.locator('button[data-action-id="continue"][data-prompt-id*="roll-done"]');
   // The last opening Continue lands on play before the roll offer is on the device.
+  // Moves stay 0 until that control is there, so a one-shot count misses it.
   await expect
     .poll(
       async () => {
