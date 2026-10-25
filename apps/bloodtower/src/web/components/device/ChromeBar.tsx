@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
+import { IpadCorners } from "./IpadCorners.tsx";
 
 type Offer = {
   promptId: string;
@@ -51,6 +52,7 @@ export function ChromeBar({
 
   return (
     <>
+      <IpadCorners />
       {menuOpen ? (
         <div className="bt-menu-dialog" role="dialog" aria-label="Menu" data-menu>
           <section>
