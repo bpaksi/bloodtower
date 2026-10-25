@@ -45,7 +45,7 @@ test("W2 landing shows an open Blood Tower banner and a Sound control", async ({
     src:
       el instanceof HTMLImageElement ? el.getAttribute("src") : el.getAttribute("data-banner-src"),
   }));
-  expect(["IMG", "SVG"]).toContain(bannerFacts.tag);
+  expect(["IMG", "SVG"]).toContain(bannerFacts.tag.toUpperCase());
   expect(bannerFacts.text).toBe("");
   expect(bannerFacts.src).not.toBe("/landing/hero.webp");
   await expect(banner).toHaveAccessibleName("Blood Tower");
