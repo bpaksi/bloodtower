@@ -184,9 +184,11 @@ test("focused Proving Grounds fits, and only Dracula's cover is painted", async 
   try {
     const home = await context.newPage();
     await home.goto("/");
+    // W2 already owns the landing banner and the Sound control. This step adds no iPad bar.
     await expect(home.locator("[data-bottom-bar]")).toHaveCount(0);
     await expect(home.locator("[data-sound-dialog]")).toHaveCount(0);
-    await expect(home.getByRole("button", { name: "Sound" })).toHaveCount(0);
+    await expect(home.locator("[data-banner]")).toHaveCount(1);
+    await expect(home.locator('button[data-action="sound"]')).toHaveCount(1);
     await home.close();
 
     await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-story-focus", "test");
