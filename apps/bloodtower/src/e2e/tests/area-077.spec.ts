@@ -228,10 +228,21 @@ const expectGoodbye = async (
 
 const walkOnce = async (page: Page) => {
   const roll = page.locator('button[data-action-id="continue"][data-prompt-id*="roll-done"]');
+  // The last opening Continue lands on play before the roll offer is on the device.
+  await expect
+    .poll(
+      async () => {
+        if ((await roll.count()) > 0) return "roll";
+        const moves = Number((await readStatus(page)).moves);
+        return moves > 0 ? "moves" : "";
+      },
+      { timeout: 20_000 },
+    )
+    .not.toBe("");
   if ((await roll.count()) > 0) {
     await expect(roll).toBeEnabled({ timeout: 20_000 });
     await roll.click();
-    await expect.poll(async () => (await readStatus(page)).moves).not.toBeNull();
+    await expect.poll(async () => Number((await readStatus(page)).moves)).toBeGreaterThan(0);
   }
   const before = await readStatus(page);
   expect(Number(before.moves)).toBeGreaterThan(0);
