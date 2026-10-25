@@ -4,11 +4,11 @@ import { expect, test } from "@playwright/test";
 // board. On an iPad (touch) the landing stays put, and the Hunter link goes to join.
 test("a click on the landing screen opens the Story board on a Mac", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Blood Tower" })).toBeVisible();
+  await expect(page.locator("[data-banner]")).toBeVisible();
   const fine = await page.evaluate(() => window.matchMedia("(pointer: fine)").matches);
   test.skip(!fine, "The landing opens the board only where the pointer is fine.");
 
-  await page.mouse.click(40, 40);
+  await page.locator("[data-banner]").click({ position: { x: 8, y: 8 } });
   await expect(page).toHaveURL(/\/board$/);
   await expect(page.locator("main.bt-board")).toBeVisible();
 });
