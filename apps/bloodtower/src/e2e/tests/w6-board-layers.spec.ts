@@ -171,8 +171,14 @@ const assertFits = async (board: Page) => {
       for (const node of nodes) {
         const el = node as HTMLElement;
         if (el.scrollHeight > el.clientHeight + 1) {
+          const data = [...el.attributes]
+            .filter((attr) => attr.name.startsWith("data-"))
+            .slice(0, 2)
+            .map((attr) => `${attr.name}=${attr.value}`)
+            .join(" ");
+          const parent = el.parentElement?.className ? String(el.parentElement.className) : "";
           clipped.push(
-            `${el.tagName}.${String(el.className)} ${el.scrollHeight}>${el.clientHeight}`,
+            `${el.tagName}.${String(el.className)} ${data} parent=${parent} ${el.scrollHeight}>${el.clientHeight}`,
           );
         }
         const ownText = [...el.childNodes].some(
@@ -404,7 +410,15 @@ test("W6 weekend frames fit the Story board and the place still stays off the iP
     const setupDeadline = Date.now() + 30_000;
     while ((await deviceMain(device).getAttribute("data-screen")) === "setup") {
       if (Date.now() > setupDeadline) throw new Error("Setup did not reach begin.");
-      await clickAct(device, "continue");
+      const step = device.locator(
+        'button[data-prompt-id^="continue-setup-"][data-action-id="continue"]',
+      );
+      await expect(step).toBeEnabled({ timeout: 20_000 });
+      const promptId = await step.getAttribute("data-prompt-id");
+      await step.click();
+      if (promptId) {
+        await expect(device.locator(`button[data-prompt-id="${promptId}"]`)).toHaveCount(0);
+      }
     }
     await expect(board.locator("main")).toHaveAttribute("data-screen", "begin");
     await expect(board.locator("main")).toHaveAttribute("data-board-layer", "startup");
