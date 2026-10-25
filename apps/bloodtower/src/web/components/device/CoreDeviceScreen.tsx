@@ -3,6 +3,7 @@
 import type { DeviceView, OfferedAction } from "bloodtower-protocols";
 import { useState } from "react";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
+import { GoodbyeTeardown } from "../GoodbyeTeardown.tsx";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
@@ -53,6 +54,7 @@ export function CoreDeviceScreen({
   const quit = actions.find((action) => action.promptId === "menu-quit");
   const connect = actions.find((action) => action.promptId === "menu-connect");
   const showHold = view.screen === "claim-heroes" || view.screen === "begin";
+  const farewell = view.screen === "goodbye";
   const acting = view.table?.groups.find((group) => group.heroId === view.table?.actingHeroId);
 
   return (
@@ -133,80 +135,86 @@ export function CoreDeviceScreen({
       <h1 className="text-2xl font-semibold text-[var(--bt-accent)]">
         {SCREEN_TITLE[view.screen] ?? view.screen}
       </h1>
-      <p
-        className="mt-2 text-lg"
-        data-day={view.table?.day}
-        data-moves={view.table?.movesLeft ?? undefined}
-        data-roll={view.table?.moveRoll ?? undefined}
-        data-modifier={view.table?.modifier}
-        data-acting-hero={view.table?.actingHeroId ?? undefined}
-        data-space={acting?.spaceId}
-        data-space-name={acting?.spaceName}
-        data-building={acting?.building ?? ""}
-        data-inside={acting?.inside ? "true" : "false"}
-      >
-        {view.shows}
-      </p>
       {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
-      {view.table ? (
-        <ul className="mt-4" data-roster>
-          {view.table.groups.map((group) => (
-            <li key={group.heroId} data-hero-place={group.heroId}>
-              {group.heroName} · {group.kingdomLabel} · {group.spaceName}
-              {group.alone ? " · alone" : ""}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {view.heroes.map((hero) => (
-        <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
-          <h2 className="text-lg font-medium">{hero.name}</h2>
-          {hero.lines.map((line) => (
-            <p key={line.id} className="text-[var(--bt-muted)]" data-private-line={line.id}>
-              {line.text}
-            </p>
-          ))}
-          {onHold && showHold ? (
-            <button
-              type="button"
-              className={
-                hero.claim === "taken" ? "bt-ghost bt-claim-taken mt-2" : "bt-secondary mt-2"
-              }
-              data-hunter={hero.id}
-              data-action="take"
-              data-claim={hero.claim ?? "open"}
-              disabled={!live || hero.claim === "taken"}
-              onClick={() => onHold(hero.id, "take")}
-            >
-              {hero.claim === "taken" ? `${hero.name} claimed` : `Hold ${hero.name}`}
-            </button>
+      {farewell ? (
+        <GoodbyeTeardown shows={view.shows} />
+      ) : (
+        <>
+          <p
+            className="mt-2 text-lg"
+            data-day={view.table?.day}
+            data-moves={view.table?.movesLeft ?? undefined}
+            data-roll={view.table?.moveRoll ?? undefined}
+            data-modifier={view.table?.modifier}
+            data-acting-hero={view.table?.actingHeroId ?? undefined}
+            data-space={acting?.spaceId}
+            data-space-name={acting?.spaceName}
+            data-building={acting?.building ?? ""}
+            data-inside={acting?.inside ? "true" : "false"}
+          >
+            {view.shows}
+          </p>
+          {view.table ? (
+            <ul className="mt-4" data-roster>
+              {view.table.groups.map((group) => (
+                <li key={group.heroId} data-hero-place={group.heroId}>
+                  {group.heroName} · {group.kingdomLabel} · {group.spaceName}
+                  {group.alone ? " · alone" : ""}
+                </li>
+              ))}
+            </ul>
           ) : null}
-        </section>
-      ))}
-      <div className="mt-6 flex flex-col gap-3">
-        {body.map((action) => {
-          const icon = iconFor(action.actionId);
-          return (
-            <button
-              key={`${action.promptId}:${action.actionId}`}
-              type="button"
-              className="bt-primary"
-              data-prompt-id={action.promptId}
-              data-action-id={action.actionId}
-              data-action={action.actionId}
-              disabled={!live}
-              onClick={() => onAct(action.promptId, action.actionId)}
-            >
-              {icon ? (
-                <span className="bt-icon" aria-hidden="true">
-                  {icon}
-                </span>
+          {view.heroes.map((hero) => (
+            <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
+              <h2 className="text-lg font-medium">{hero.name}</h2>
+              {hero.lines.map((line) => (
+                <p key={line.id} className="text-[var(--bt-muted)]" data-private-line={line.id}>
+                  {line.text}
+                </p>
+              ))}
+              {onHold && showHold ? (
+                <button
+                  type="button"
+                  className={
+                    hero.claim === "taken" ? "bt-ghost bt-claim-taken mt-2" : "bt-secondary mt-2"
+                  }
+                  data-hunter={hero.id}
+                  data-action="take"
+                  data-claim={hero.claim ?? "open"}
+                  disabled={!live || hero.claim === "taken"}
+                  onClick={() => onHold(hero.id, "take")}
+                >
+                  {hero.claim === "taken" ? `${hero.name} claimed` : `Hold ${hero.name}`}
+                </button>
               ) : null}
-              {action.label}
-            </button>
-          );
-        })}
-      </div>
+            </section>
+          ))}
+          <div className="mt-6 flex flex-col gap-3">
+            {body.map((action) => {
+              const icon = iconFor(action.actionId);
+              return (
+                <button
+                  key={`${action.promptId}:${action.actionId}`}
+                  type="button"
+                  className="bt-primary"
+                  data-prompt-id={action.promptId}
+                  data-action-id={action.actionId}
+                  data-action={action.actionId}
+                  disabled={!live}
+                  onClick={() => onAct(action.promptId, action.actionId)}
+                >
+                  {icon ? (
+                    <span className="bt-icon" aria-hidden="true">
+                      {icon}
+                    </span>
+                  ) : null}
+                  {action.label}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
     </main>
   );
 }

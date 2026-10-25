@@ -74,6 +74,22 @@ const collapsePlayLoopsOnQuit = (state: ShellState): void => {
   state.loops.childStartRequested = null;
 };
 
+/** One quit record and one autosave write. The autosave stays (DEC-208, DEC-218). */
+const pushQuitRecord = (state: ShellState, effects: ShellStepResult["effects"]): void => {
+  if (state.stage !== "ended") return;
+  if (state.activeGameId) {
+    effects.push({
+      kind: "game-record",
+      v: 1,
+      gameId: state.activeGameId,
+      outcome: "quit",
+    });
+  }
+  if (state.autosave) {
+    effects.push({ kind: "autosave-write", v: 1, gameId: state.autosave.gameId });
+  }
+};
+
 const resumeLoopsOrPauseOffers = (
   next: ShellState,
   eventSeq: number,
@@ -360,6 +376,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
         if ((gameFrame.local as GameLocal).phase === "done") {
           collapsePlayLoopsOnQuit(next);
+          pushQuitRecord(next, effects);
         }
       }
     } else if (next.pause && e.actionId === "reconnect" && e.promptId.startsWith("pause-")) {
@@ -387,17 +404,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       }
       if (local.phase === "done" && next.stage === "ended") {
         collapsePlayLoopsOnQuit(next);
-        if (next.activeGameId) {
-          effects.push({
-            kind: "game-record",
-            v: 1,
-            gameId: next.activeGameId,
-            outcome: "quit",
-          });
-        }
-        if (next.autosave) {
-          effects.push({ kind: "autosave-write", v: 1, gameId: next.autosave.gameId });
-        }
+        pushQuitRecord(next, effects);
       }
       if (
         local.phase === "play" &&
@@ -413,6 +420,9 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     } else if (top?.loopId === "session") {
       const local = handleSessionHubPress(top.local as SessionLocal, e.promptId, e.actionId);
       updateSessionLocal(next, local);
+      if (e.promptId === "session-new-game" && e.actionId === "new-game") {
+        effects.push({ kind: "autosave-clear", v: 1 });
+      }
     } else {
       const before = playFingerprint(next);
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
@@ -439,6 +449,17 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         fromSessionScreen: false,
         childOpen: false,
       });
+      // Idle only while this session's link is still up (DEC-155, DEC-219). One command.
+      if (next.towerLinked && next.tower.connection === "connected") {
+        effects.push({
+          kind: "tower-command",
+          v: 1,
+          capabilityId: "lighting.all-off",
+          params: {},
+        });
+      } else {
+        next.goodbyeTower = next.towerLinked ? "unavailable" : "no-tower";
+      }
     }
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);

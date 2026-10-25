@@ -426,6 +426,35 @@ describe("done for tonight", () => {
   });
 });
 
+const reachPlay = (linked: boolean) => {
+  if (!linked) return playWithoutTower();
+  let state = start();
+  const storyId = state.focusStoryId;
+  state = runPresses(state, [
+    press("ipad-0", "tower-connect", "tower-connect"),
+    press("ipad-0", "tower-calibrate", "tower-calibrate"),
+    press("ipad-0", "new-pick-game", "new-game"),
+    press("ipad-0", `continue-pick-story-${storyId}`, "continue"),
+    press("ipad-0", "continue-game-settings", "continue"),
+  ]);
+  for (const [index, hero] of TEST_STORY.heroes.entries()) {
+    const deviceId = `ipad-${index}`;
+    state = stepShell(state, { kind: "device-join", v: 1, deviceId }).state;
+    state = stepShell(state, {
+      kind: "hero-hold",
+      v: 1,
+      deviceId,
+      heroId: hero.id,
+      action: "take",
+    }).state;
+  }
+  state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
+  for (const step of state.setupSteps) {
+    state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
+  }
+  return runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
+};
+
 const playWithoutTower = () => {
   let state = runPresses(start(), [
     press("ipad-0", "splash-play", "continue"),
@@ -449,6 +478,88 @@ const playWithoutTower = () => {
   }
   return runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
 };
+
+describe("W8 quit, goodbye, and new game", () => {
+  it("menu quit keeps the autosave, records quit once, and offers only New game and Done for tonight", () => {
+    const playing = reachPlay(false);
+    const autosave = playing.autosave;
+    const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
+    expect(quit.state.screen).toBe("session");
+    expect(quit.state.autosave).toEqual(autosave);
+    expect(quit.effects.filter((effect) => effect.kind === "game-record")).toEqual([
+      { kind: "game-record", v: 1, gameId: playing.activeGameId, outcome: "quit" },
+    ]);
+    expect(quit.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    const open = quit.state.offered.filter((offer) => offer.open);
+    expect(open.map((offer) => offer.actionId)).toEqual(["new-game", "done-for-tonight"]);
+    const view = projectShellView(quit.state);
+    expect(view.actions.filter((action) => action.open).map((action) => action.label)).toEqual([
+      "New game",
+      "Done for tonight",
+    ]);
+    expect(view.actions.some((action) => action.label === "Play again")).toBe(false);
+    expect(view.actions.some((action) => action.label === "Quit game")).toBe(false);
+  });
+
+  it("idles a connected tower once on Done for tonight and not on a second press", () => {
+    const playing = reachPlay(true);
+    expect(playing.towerLinked).toBe(true);
+    expect(playing.tower.connection).toBe("connected");
+    const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
+    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    expect(done.state.screen).toBe("goodbye");
+    expect(done.state.sessionEnded).toBe(true);
+    expect(done.effects.filter((effect) => effect.kind === "tower-command")).toEqual([
+      { kind: "tower-command", v: 1, capabilityId: "lighting.all-off", params: {} },
+    ]);
+    const again = stepShell(
+      done.state,
+      press("ipad-0", "session-done-tonight", "done-for-tonight"),
+    );
+    expect(again.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    expect(again.state.screen).toBe("goodbye");
+  });
+
+  it("sends no idle when the tower was never connected and shows no tower", () => {
+    const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story"));
+    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    expect(done.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    expect(done.state.goodbyeTower).toBe("no-tower");
+    expect(done.state.pause).toBeNull();
+    const shows = projectShellView(done.state).levels.find((level) => level.id === "goodbye");
+    expect(shows?.shows).toBe("no tower");
+    expect(projectShellView(done.state).actions.filter((action) => action.open)).toEqual([]);
+  });
+
+  it("sends no idle when the link has dropped and shows unavailable", () => {
+    let playing = reachPlay(true);
+    playing = stepShell(playing, {
+      kind: "tower-snapshot",
+      v: 1,
+      tower: TOWER_DISCONNECTED,
+    }).state;
+    expect(playing.screen).toBe("pause");
+    const quit = stepShell(
+      playing,
+      press("ipad-0", `pause-${playing.pauseSerial}-quit`, "quit-story"),
+    );
+    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    expect(done.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    expect(done.state.goodbyeTower).toBe("unavailable");
+    expect(done.state.screen).toBe("goodbye");
+    expect(done.state.pause).toBeNull();
+  });
+
+  it("new game clears the autosave, opens pick-story, and sends no idle", () => {
+    const quit = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story"));
+    expect(quit.state.autosave).not.toBeNull();
+    const started = stepShell(quit.state, press("ipad-0", "session-new-game", "new-game"));
+    expect(started.state.screen).toBe("pick-story");
+    expect(started.state.autosave).toBeNull();
+    expect(started.effects.some((effect) => effect.kind === "autosave-clear")).toBe(true);
+    expect(started.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+  });
+});
 
 const movesLeft = (state: ReturnType<typeof start>): number | null => {
   const frame = state.loops.stack.find((row) => row.loopId === "group-turn");

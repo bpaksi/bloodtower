@@ -2267,6 +2267,47 @@
   font-size: clamp(3rem, 6vw, 5rem);
 }
 
+.bt-teardown {
+  margin: 0.8rem auto 0;
+  max-width: 36rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.bt-teardown li {
+  margin: 0.45rem 0;
+}
+
+.bt-board .bt-teardown li {
+  color: var(--bt-iron-gall);
+}
+
+.bt-device .bt-teardown {
+  margin-top: 1.25rem;
+}
+
+.bt-device .bt-teardown li {
+  color: var(--bt-fg);
+  font-size: 1.25rem;
+}
+
+.bt-tower-state {
+  margin: 0.9rem 0 0;
+  text-align: center;
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.14em;
+}
+
+.bt-board .bt-tower-state {
+  color: var(--bt-blood);
+}
+
+.bt-device .bt-tower-state {
+  color: var(--bt-muted);
+  font-size: 1.15rem;
+}
+
 .bt-tower-still {
   display: block;
   width: min(100%, 28rem);

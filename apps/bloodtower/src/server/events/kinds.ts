@@ -20,6 +20,7 @@ export const HOST_EVENT_KINDS = [
   "timing-mark-close",
   "stat",
   "version-changed",
+  "game-record",
 ] as const;
 
 export type HostEventKind = (typeof HOST_EVENT_KINDS)[number];
@@ -29,6 +30,12 @@ const assertV1 = (parsed: unknown): Record<string, unknown> => {
     throw new Error("Expected payload v: 1.");
   }
   return parsed as Record<string, unknown>;
+};
+
+export type GameRecordPayloadV1 = {
+  v: 1;
+  gameId: string;
+  outcome: "quit" | "won" | "lost";
 };
 
 export type VersionChangedPayloadV1 = {
@@ -63,7 +70,9 @@ export const parseHostPayload = <K extends HostEventKind>(
           ? TimingMarkClosePayloadV1
           : K extends "stat"
             ? { v: 1; stat: StatEvent }
-            : VersionChangedPayloadV1 => {
+            : K extends "game-record"
+              ? GameRecordPayloadV1
+              : VersionChangedPayloadV1 => {
   const parsed = assertV1(JSON.parse(payloadJson));
   switch (kind) {
     case "engine": {
@@ -119,6 +128,15 @@ export const parseHostPayload = <K extends HostEventKind>(
       const stat = statEventSchema.safeParse(parsed.stat);
       if (!stat.success) throw new Error(stat.error.message);
       return { v: 1, stat: stat.data } as never;
+    }
+    case "game-record": {
+      if (typeof parsed.gameId !== "string" || parsed.gameId.length === 0) {
+        throw new Error("game-record needs a gameId.");
+      }
+      if (parsed.outcome !== "quit" && parsed.outcome !== "won" && parsed.outcome !== "lost") {
+        throw new Error("game-record outcome must be quit, won, or lost.");
+      }
+      return { v: 1, gameId: parsed.gameId, outcome: parsed.outcome } as never;
     }
     case "version-changed": {
       for (const key of [

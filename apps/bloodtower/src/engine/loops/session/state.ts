@@ -55,6 +55,13 @@ export type ShellState = {
   /** True after the player chose Continue on pick-game and passed the tower check. */
   resumedFromAutosave: boolean;
   sessionEnded: boolean;
+  /**
+   * Goodbye card tower line (DEC-219). `no-tower` when this session never connected.
+   * `unavailable` when the link is down or the idle command failed. `idle` after
+   * `lighting.all-off` is taken. `null` until Done for tonight, or while that command
+   * is still in flight.
+   */
+  goodbyeTower: "idle" | "no-tower" | "unavailable" | null;
   /** Every action offered in the latest advance; the runtime keeps only one prompt slot. */
   offered: PromptSlot[];
   playContent: PlayContent | null;
@@ -99,6 +106,7 @@ export const initialShellState = (input: {
     activeGameId: null,
     resumedFromAutosave: false,
     sessionEnded: false,
+    goodbyeTower: null,
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,
