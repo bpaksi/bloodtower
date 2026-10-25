@@ -57,6 +57,7 @@ export const screenAfterContinue = (state: ShellState, screen: ShellScreen): She
 };
 
 export const screenAfterBack = (state: ShellState, screen: ShellScreen): ShellScreen | null => {
+  if (screen === "not-playable") return "pick-story";
   if (screen === "game-settings") {
     state.chosenStoryId = null;
     state.settingValues = {};

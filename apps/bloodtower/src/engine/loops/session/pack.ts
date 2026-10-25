@@ -17,7 +17,10 @@ export type StoryCard = {
   title: string;
   tagline: string | null;
   playable: boolean;
-  players: { min: number; max: number };
+  /** Null on a metadata-only door: the board must not invent a player count. */
+  players: { min: number; max: number } | null;
+  /** Served cover URL, or null when the file is not on disk. */
+  cover?: string | null;
 };
 
 export type ShellStory = {

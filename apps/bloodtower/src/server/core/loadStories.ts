@@ -1,11 +1,12 @@
 import { readdirSync, readFileSync, realpathSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import type { Asset } from "bloodtower-protocols";
 import { type BoardSpaceInput, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { mergeSetupSteps, type ShellStory } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
-import { indexPackAssets, type PackAssetIndex } from "../pack/assets.ts";
+import { indexPackAssets, type PackAssetIndex, resolveCover } from "../pack/assets.ts";
+import { loadPackDir } from "../pack/load.ts";
 import { classifyPackDoor, loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
 
 export type StoryCatalog = {
@@ -15,6 +16,9 @@ export type StoryCatalog = {
   /** Image catalogs for v2 story packs, so `/packs/<id>/asset/<assetId>` can serve stills. */
   assetIndexes: PackAssetIndex[];
 };
+
+const coverUrl = (packId: string, file: string) =>
+  `/packs/${encodeURIComponent(packId)}/assets/${encodeURIComponent(file)}`;
 
 const indexAssets = (
   packRoot: string,
@@ -26,6 +30,7 @@ const indexAssets = (
     status: Asset["status"];
     path?: string;
   }[],
+  cover?: string,
 ): PackAssetIndex =>
   indexPackAssets(packRoot, {
     pack_id: packId,
@@ -36,6 +41,7 @@ const indexAssets = (
       status: asset.status,
       ...(asset.path ? { path: asset.path } : {}),
     })),
+    ...(cover ? { cover } : {}),
   });
 
 const kingdomLabels = [
@@ -77,10 +83,38 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   for (const name of readdirSync(root, { withFileTypes: true })) {
     if (!name.isDirectory()) continue;
     const dir = join(root, name.name);
-    // A parsed manifest that is not format 2 (the metadata-only Count) is not a v2 door.
-    // A manifest that cannot be read or parsed is still reported.
+    // A manifest that cannot be read or parsed is reported. A parsed manifest that is
+    // not format 2 is a metadata-only door when `playable` is false (the Count).
     const door = classifyPackDoor(dir);
-    if (door.kind === "skip") continue;
+    if (door.kind === "skip") {
+      const loaded = loadPackDir(dir);
+      if (loaded.ok && !loaded.playable) {
+        const pack = loaded.pack;
+        const file = pack.cover ? basename(pack.cover) : "";
+        const cover =
+          file && loaded.assets.byBasename.has(file) ? coverUrl(pack.pack_id, file) : null;
+        assetIndexes.push(loaded.assets);
+        stories.push({
+          card: {
+            id: pack.pack_id,
+            title: pack.title,
+            tagline: pack.tagline ?? null,
+            playable: false,
+            players: null,
+            cover,
+          },
+          settings: pack.settings.map((setting) => ({
+            id: setting.id,
+            label: setting.label,
+            options: setting.options.map((option) => ({ id: option.id, label: option.label })),
+            default: setting.default,
+          })),
+          setup: [],
+          heroes: [],
+        });
+      }
+      continue;
+    }
     if (door.kind === "broken") {
       issues.push(...door.issues);
       continue;
@@ -92,7 +126,9 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     }
     if (loaded.kind === "base-content") continue;
     const story = loaded.pack;
-    assetIndexes.push(indexAssets(dir, story.pack_id, story.assets));
+    const coverFile = resolveCover(dir, "assets/cover.png");
+    const cover = coverFile ? "assets/cover.png" : undefined;
+    assetIndexes.push(indexAssets(dir, story.pack_id, story.assets, cover));
     const partyHeroIds = new Set(story.start.assignments.map((row) => row.hero));
     const heroes = loaded.base.heroes
       .filter((hero) => partyHeroIds.has(hero.id))
@@ -107,6 +143,7 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
         tagline: story.tagline ?? null,
         playable: story.playable ?? true,
         players: story.players,
+        cover: cover ? coverUrl(story.pack_id, "cover.png") : null,
       },
       settings: (story.settings ?? []).map((setting) => ({
         id: setting.id,

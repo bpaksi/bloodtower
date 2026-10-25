@@ -20,6 +20,7 @@ const SCREEN_TITLE: Record<string, string> = {
   pause: "Paused",
   session: "Session",
   goodbye: "Goodbye",
+  "not-playable": "Not playable yet",
 };
 
 /** Existing step names (view.ts STEP_NAME). Shown as context; the instruction stays `shows`. */
@@ -36,7 +37,48 @@ const STEP_CONTEXT: Record<string, string> = {
   pause: "Paused",
   session: "Session",
   goodbye: "Goodbye",
+  "not-playable": "Not playable yet",
 };
+
+function StoryNav({
+  doors,
+  live,
+  onAct,
+}: {
+  doors: NonNullable<DeviceView["doors"]>;
+  live: boolean;
+  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
+}) {
+  if (doors.length < 2) return null;
+  const focusIndex = doors.findIndex((door) => door.focus);
+  const ring = focusIndex >= 0 ? focusIndex : 0;
+  const step = (delta: number) => doors[(ring + delta + doors.length) % doors.length];
+  const previous = step(-1);
+  const next = step(1);
+  if (!previous || !next) return null;
+  return (
+    <div className="bt-story-nav">
+      <button
+        type="button"
+        className="bt-secondary"
+        data-action="story-prev"
+        disabled={!live}
+        onClick={() => onAct("focus-story", "focus", { storyId: previous.id })}
+      >
+        Previous
+      </button>
+      <button
+        type="button"
+        className="bt-secondary"
+        data-action="story-next"
+        disabled={!live}
+        onClick={() => onAct("focus-story", "focus", { storyId: next.id })}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
 
 const iconFor = (actionId: string): string => {
   if (actionId === "walk") return "→";
@@ -177,6 +219,9 @@ export function CoreDeviceScreen({
               <section className="bt-move-map" data-move-map aria-label="Move">
                 {mapActions.map(renderAction)}
               </section>
+            ) : null}
+            {view.screen === "pick-story" && view.doors && view.doors.length > 1 ? (
+              <StoryNav doors={view.doors} live={live} onAct={onAct} />
             ) : null}
             {scrolling.length > 0 ? (
               <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>

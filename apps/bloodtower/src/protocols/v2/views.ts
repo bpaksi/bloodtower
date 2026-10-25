@@ -93,6 +93,12 @@ const privateLineSchema = z.strictObject({
   text: z.string().min(1).max(2000),
 });
 
+const deviceDoorSchema = z.strictObject({
+  id: z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/),
+  title: z.string().min(1).max(120),
+  focus: z.boolean(),
+});
+
 const deviceHeroSchema = z
   .strictObject({
     id: heroIdSchema,
@@ -122,6 +128,11 @@ export const deviceViewPayloadSchema = z
     actions: z.array(offeredActionSchema).max(32),
     /** Same status band as the board. No place still and no caption. */
     table: tableBandSchema.nullable().optional(),
+    /**
+     * Pick Story doors, in catalog order. Present only while the board is listing doors.
+     * Previous and Next send `focus-story`; the iPad does not draw the carousel.
+     */
+    doors: z.array(deviceDoorSchema).max(8).optional(),
   })
   .superRefine((value, ctx) => {
     uniqueIds(
@@ -129,6 +140,13 @@ export const deviceViewPayloadSchema = z
       ctx,
       "hero",
     );
+    if (value.doors) {
+      uniqueIds(
+        value.doors.map((door) => door.id),
+        ctx,
+        "door",
+      );
+    }
     const lineIds = value.heroes.flatMap((hero) => hero.lines.map((line) => line.id));
     uniqueIds(lineIds, ctx, "line");
   });

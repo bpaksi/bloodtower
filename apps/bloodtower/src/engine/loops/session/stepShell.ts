@@ -260,10 +260,15 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   }
 
   if (e.kind === "focus-story") {
-    if (!state.stories.some((story) => story.card.id === e.storyId)) {
+    const known = state.stories.some((story) => story.card.id === e.storyId);
+    if (state.screen !== "pick-story" || !known) {
       return withEffects({ ...state, eventSeq: eventSeq + 1 }, effects);
     }
     const next = { ...state, focusStoryId: e.storyId, eventSeq: eventSeq + 1 };
+    resetGameAwaitingPress(next);
+    bindShellState(next);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }

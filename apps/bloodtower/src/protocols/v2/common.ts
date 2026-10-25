@@ -33,7 +33,14 @@ export const RUNTIME_SCREENS = [
   "session",
   "goodbye",
 ] as const;
-export const viewScreenSchema = z.enum([...SETUP_SCREENS, ...RUNTIME_SCREENS]);
+
+/**
+ * A metadata-only door can be chosen, then stops here (D40). It is not a setup
+ * screen: no private lines, and Continue does not bind the pack.
+ */
+export const NOT_PLAYABLE_SCREEN = "not-playable" as const;
+
+export const viewScreenSchema = z.enum([...SETUP_SCREENS, ...RUNTIME_SCREENS, NOT_PLAYABLE_SCREEN]);
 export type ViewScreen = z.infer<typeof viewScreenSchema>;
 
 export const heroIdSchema = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/);

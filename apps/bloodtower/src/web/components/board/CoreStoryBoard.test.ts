@@ -80,9 +80,62 @@ describe("story board startup chrome", () => {
     expect(markup).toContain("Proving Grounds");
     expect(markup).toContain("AREA-077 day slice");
     expect(markup).toContain("1–4 hunters");
+    expect(markup).not.toContain("bt-door-motif");
+    expect(markup).not.toContain("bt-carousel-cover");
     expect(markup).not.toContain(">pick-story</h2>");
     expect(markup).not.toContain("Hero A — waiting");
     expect(markup.match(/data-illusionist-asset="dialog-frame"/g)).toHaveLength(1);
+  });
+
+  it("paints a cover in place of the letter when the door names one", () => {
+    const markup = html({
+      ...splashView,
+      screen: "pick-story",
+      levels: [
+        {
+          id: "door-dracula",
+          label: "The Count of Vellmoor",
+          shows:
+            "A door\nThe Count has taken Lenka. Bring her home before she's his.\n\nNot playable yet\n/packs/dracula/assets/cover.png",
+        },
+        {
+          id: "door-test",
+          label: "Proving Grounds",
+          shows: "In focus\nAREA-077 day slice — Enter and Leave only.\n1–4 players\nPlayable",
+        },
+        { id: "pick-story", label: "Pick Story", shows: "Proving Grounds" },
+      ],
+    });
+    expect(markup).toContain('data-story-focus="test"');
+    expect(markup).toContain('data-playable="true"');
+    expect(markup).toContain('data-story-peek="dracula"');
+    expect(markup).toContain('data-carousel-side="next"');
+    expect(markup).toContain('data-playable="false"');
+    expect(markup).toContain('class="bt-carousel-cover"');
+    expect(markup).toContain('src="/packs/dracula/assets/cover.png"');
+    expect(markup.match(/bt-carousel-cover/g)).toHaveLength(1);
+    expect(markup).not.toContain("bt-door-motif");
+    expect(markup).not.toContain(">0<");
+  });
+
+  it("draws the not-ready stop with the focused title", () => {
+    const markup = html({
+      ...splashView,
+      screen: "not-playable",
+      levels: [
+        {
+          id: "table-status",
+          label: "Status",
+          shows: "tower: no tower\ndevices: 1\nstep: Not playable yet",
+        },
+        { id: "not-playable", label: "Not playable yet", shows: "The Count of Vellmoor" },
+      ],
+    });
+    expect(markup).toContain('data-screen="not-playable"');
+    expect(markup).toContain('data-startup-panel="not-playable"');
+    expect(markup).toContain("Not playable yet");
+    expect(markup).toContain("The Count of Vellmoor");
+    expect(markup).not.toMatch(/<button/i);
   });
 
   it("draws claim-heroes as a party roster with the join code", () => {

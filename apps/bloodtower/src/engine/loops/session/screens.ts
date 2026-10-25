@@ -8,7 +8,8 @@ export type ShellScreen =
   | "session"
   | "goodbye"
   | "play"
-  | "pause";
+  | "pause"
+  | "not-playable";
 
 export const isSetupScreen = (screen: ShellScreen): screen is SetupScreen =>
   screen !== "splash" &&
@@ -16,4 +17,5 @@ export const isSetupScreen = (screen: ShellScreen): screen is SetupScreen =>
   screen !== "session" &&
   screen !== "goodbye" &&
   screen !== "play" &&
-  screen !== "pause";
+  screen !== "pause" &&
+  screen !== "not-playable";

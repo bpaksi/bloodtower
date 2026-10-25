@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
-import { mergeSetupSteps, TEST_STORY } from "./pack.ts";
+import { mergeSetupSteps, type ShellStory, TEST_STORY } from "./pack.ts";
 import { PLACE_CAPTION } from "./placeCaption.ts";
 import { initialShellState } from "./state.ts";
 import { stepShell } from "./stepShell.ts";
@@ -694,6 +694,120 @@ describe("hero claims", () => {
       action: "take",
     }).state;
     expect(state.holdings["hero-a"]).toBe("ipad-a");
+  });
+});
+
+describe("metadata-only Pick Story door", () => {
+  const count: ShellStory = {
+    card: {
+      id: "dracula",
+      title: "The Count of Vellmoor",
+      tagline: "The Count has taken Lenka. Bring her home before she's his.",
+      playable: false,
+      players: null,
+      cover: "/packs/dracula/assets/cover.png",
+    },
+    settings: [],
+    setup: [],
+    heroes: [],
+  };
+
+  const open = () => {
+    const state = stepShell(
+      initialShellState({ sessionId: "s", seed: "seed", stories: [count, TEST_STORY] }),
+      { kind: "start-session", v: 1, seed: "seed", sessionId: "sess-1" },
+    ).state;
+    return stepShell(state, press("ipad-0", "splash-play", "continue")).state;
+  };
+
+  it("keeps Proving Grounds bound and stops Choose on not-playable", () => {
+    let state = open();
+    expect(state.screen).toBe("pick-story");
+    expect(state.focusStoryId).toBe("test");
+    expect(state.boundStoryId).toBe("test");
+    expect(state.chosenStoryId).toBeNull();
+    expect(state.holdings).toEqual({
+      "hero-a": null,
+      "hero-b": null,
+      "hero-c": null,
+      "hero-d": null,
+    });
+    expect(
+      state.offered.some((offer) => offer.promptId === "continue-pick-story-test" && offer.open),
+    ).toBe(true);
+
+    const focused = stepShell(state, {
+      kind: "focus-story",
+      v: 1,
+      deviceId: "ipad-0",
+      storyId: "dracula",
+    });
+    expect(focused.effects.some((effect) => effect.kind === "tower-command")).toBe(false);
+    state = focused.state;
+    expect(state.screen).toBe("pick-story");
+    expect(state.focusStoryId).toBe("dracula");
+    expect(state.boundStoryId).toBe("test");
+    expect(
+      state.offered.some((offer) => offer.promptId === "continue-pick-story-dracula" && offer.open),
+    ).toBe(true);
+
+    const view = projectShellView(state);
+    const device = project(view, { kind: "device", deviceId: "ipad-0" });
+    expect(device.doors).toEqual([
+      { id: "dracula", title: "The Count of Vellmoor", focus: true },
+      { id: "test", title: "Proving Grounds", focus: false },
+    ]);
+    const choose = device.actions.find((action) => action.actionId === "continue");
+    expect(choose?.label).toBe("Choose The Count of Vellmoor");
+    const door = view.levels.find((level) => level.id === "door-dracula");
+    expect(door?.shows.split("\n")[2]).toBe("");
+    expect(door?.shows).toContain("/packs/dracula/assets/cover.png");
+
+    const chosen = stepShell(state, press("ipad-0", "continue-pick-story-dracula", "continue"));
+    expect(
+      chosen.effects.some(
+        (effect) => effect.kind === "tower-command" || effect.kind === "autosave-write",
+      ),
+    ).toBe(false);
+    state = chosen.state;
+    expect(state.screen).toBe("not-playable");
+    expect(state.boundStoryId).toBe("test");
+    expect(state.chosenStoryId).toBeNull();
+    expect(state.focusStoryId).toBe("dracula");
+    expect(state.offered.filter((offer) => offer.open).map((offer) => offer.promptId)).toEqual([
+      "back-not-playable",
+    ]);
+    expect(projectShellView(state).levels.at(-1)?.shows).toBe("The Count of Vellmoor");
+
+    state = stepShell(state, press("ipad-0", "back-not-playable", "back")).state;
+    expect(state.screen).toBe("pick-story");
+    expect(state.focusStoryId).toBe("dracula");
+    expect(state.boundStoryId).toBe("test");
+
+    state = stepShell(state, {
+      kind: "focus-story",
+      v: 1,
+      deviceId: "ipad-0",
+      storyId: "test",
+    }).state;
+    state = stepShell(state, press("ipad-0", "continue-pick-story-test", "continue")).state;
+    expect(state.screen).toBe("game-settings");
+    expect(state.chosenStoryId).toBe("test");
+    expect(state.boundStoryId).toBe("test");
+  });
+
+  it("does not move focus for an unknown story", () => {
+    const state = open();
+    const next = stepShell(state, {
+      kind: "focus-story",
+      v: 1,
+      deviceId: "ipad-0",
+      storyId: "missing",
+    }).state;
+    expect(next.focusStoryId).toBe("test");
+    expect(
+      next.offered.some((offer) => offer.promptId === "continue-pick-story-test" && offer.open),
+    ).toBe(true);
   });
 });
 
