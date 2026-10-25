@@ -140,7 +140,8 @@ export const serveStatic = async (root: string, req: IncomingMessage, res: Serve
     !file &&
     (pathname.startsWith("/avatars/") ||
       pathname.startsWith("/landing/") ||
-      pathname.startsWith("/audio/"))
+      pathname.startsWith("/audio/") ||
+      pathname.startsWith("/ipad/"))
   ) {
     file = await resolveStaticFile(AVATARS_ROOT, pathname);
   }
