@@ -112,39 +112,17 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
   ).toBeEnabled({ timeout: 15_000 });
   await clickAct(page, "continue", "continue-claim-heroes");
 
-  const deadline = Date.now() + 90_000;
-  while (Date.now() < deadline) {
-    const screen = await deviceMain(page).getAttribute("data-screen");
-    if (screen === "play") return;
-    if (screen === "setup") {
-      const step = await deviceMain(page).getAttribute("data-setup-step");
-      if (!step) {
-        await page.waitForTimeout(50);
-        continue;
-      }
-      await clickAct(page, "continue", `continue-setup-${step}`);
-      continue;
-    }
-    if (screen === "begin") {
-      await holdHeroesFromTest(page, [...HERO_IDS]);
-      const beginContinue = page.locator(
-        'button[data-prompt-id="continue-begin"][data-action-id="continue"]:not([disabled])',
-      );
-      if ((await beginContinue.count()) > 0) {
-        await beginContinue.click();
-        await waitForPlayScreen(page);
-        return;
-      }
-      if ((await deviceMain(page).getAttribute("data-screen")) === "play") return;
-      await page.waitForTimeout(100);
-      continue;
-    }
-    if (screen === "claim-heroes") {
-      await page.waitForTimeout(100);
-      continue;
-    }
-    throw new Error(`Unexpected setup screen: ${screen}`);
+  // Wait until each step is the one on screen. Reading the attribute and clicking
+  // immediately can still see the previous step after Done, then miss that button.
+  const setupIds = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+  for (const id of setupIds) {
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+    await clickAct(page, "continue", `continue-setup-${id}`);
   }
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
+  await holdHeroesFromTest(page, [...HERO_IDS]);
+  await clickAct(page, "continue", "continue-begin");
   await waitForPlayScreen(page);
 };
 
