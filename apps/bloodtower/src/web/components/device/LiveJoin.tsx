@@ -146,8 +146,9 @@ export function LiveJoin() {
           sessionStorage.setItem(DEVICE_TOKEN_KEY, next);
           enterDevice();
         }}
-      />
-      <JoinErrorBar error={notice} />
+      >
+        <JoinErrorBar error={notice} />
+      </JoinScreen>
     </>
   );
 }
