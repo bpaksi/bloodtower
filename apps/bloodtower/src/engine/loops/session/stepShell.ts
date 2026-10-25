@@ -135,10 +135,13 @@ const pauseIfNeeded = (state: ShellState): void => {
   if (state.stage !== "playing" && state.stage !== "paused") return;
   const story = state.stories.find((s) => s.card.id === state.boundStoryId);
   if (!story) return;
-  const watched = state.play
-    ? state.play.groups.flatMap((group) => group.heroIds)
-    : story.heroes.map((hero) => hero.id);
-  const unheld = watched.some((heroId) => state.holdings[heroId] == null);
+  // Before the opening ends, the table is not built yet. Watch the seated count.
+  // An unpicked pool hero is not a missing seat.
+  const unheld = state.play
+    ? state.play.groups
+        .flatMap((group) => group.heroIds)
+        .some((heroId) => state.holdings[heroId] == null)
+    : heldCount(state) < partySize(state);
   if (unheld) {
     if (state.pause?.cause !== "disconnect") {
       state.pauseSerial += 1;
