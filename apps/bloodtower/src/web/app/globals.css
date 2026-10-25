@@ -194,6 +194,14 @@ body {
   padding: 2rem 1.5rem 1rem;
 }
 
+/* Acting iPad move controls (UI-023). Text and icons only: no board, no mini. */
+.bt-move-map {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
 .bt-pinned {
   flex: none;
   padding: 0.75rem 1.5rem;
