@@ -98,3 +98,18 @@ test("terrain can be changed, and the export carries the region and neighbours",
   assert.equal(out.spaces[0].region, "REG-01");
   assert.equal(out.spaces[0].neighbours[0].to, "N-b");
 });
+
+test("the starting edges from the board map all fit the model", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const board = JSON.parse(
+    await readFile(new URL("./spaces.json", import.meta.url), "utf8"),
+  ).spaces;
+  const { edges } = JSON.parse(
+    await readFile(new URL("./starting-edges.json", import.meta.url), "utf8"),
+  );
+  const d = emptyDraft();
+  for (const e of edges) setEdge(d, board, { from: e.a, to: e.b, slot: null, river: e.river });
+  assert.equal(Object.keys(d.edges).length, edges.length);
+  const hasEdge = board.every((s) => neighboursOf(d, s.id).length > 0);
+  assert.equal(hasEdge, true, "every space has at least one starting neighbour");
+});

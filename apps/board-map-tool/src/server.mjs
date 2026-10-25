@@ -25,6 +25,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const appDir = join(here, "..");
 const repoRoot = join(appDir, "..", "..");
 const spaces = JSON.parse(await readFile(join(here, "spaces.json"), "utf8")).spaces;
+const startingEdges = JSON.parse(await readFile(join(here, "starting-edges.json"), "utf8"));
 const draftPath = join(appDir, "data", "draft.json");
 const exportPath = join(repoRoot, "packs-v2", "base", "board-map.json");
 const port = Number(process.env.PORT ?? 4790);
@@ -38,6 +39,11 @@ try {
 } catch (err) {
   if (err.code !== "ENOENT") throw err;
   for (const name of startingRegions) addRegion(draft, name);
+  // The adjacency from board-map.md (src/import-board-map.mjs), with no compass slots yet.
+  for (const e of startingEdges.edges) {
+    const note = e.unconfirmed ? "unconfirmed on the board map draft" : "";
+    setEdge(draft, spaces, { from: e.a, to: e.b, slot: null, river: e.river, note });
+  }
 }
 
 async function save() {
