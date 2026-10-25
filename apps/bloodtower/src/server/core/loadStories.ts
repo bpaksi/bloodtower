@@ -151,7 +151,7 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
         options: setting.options.map((option) => ({ id: option.id, label: option.label })),
         default: setting.default,
       })),
-      setup: mergeSetupSteps(packSteps).filter((step) => step.id !== "seals-and-skulls"),
+      setup: mergeSetupSteps(packSteps),
       heroes,
     });
 

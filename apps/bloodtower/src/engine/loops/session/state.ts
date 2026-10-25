@@ -47,6 +47,11 @@ export type ShellState = {
   screen: ShellScreen;
   setupAt: number;
   setupSteps: { id: string; label: string }[];
+  /**
+   * Opening moment index after Begin. `-1` before Begin, `OPENING_MOMENTS.length` once
+   * Continue has left the last moment. A checkpoint keeps this so Continue can resume it.
+   */
+  openingIndex: number;
   stage: "lobby" | "playing" | "paused" | "ended";
   pause: { cause: PauseCause } | null;
   pauseSerial: number;
@@ -100,6 +105,7 @@ export const initialShellState = (input: {
     screen: "splash",
     setupAt: 0,
     setupSteps: [],
+    openingIndex: -1,
     stage: "lobby",
     pause: null,
     pauseSerial: 0,

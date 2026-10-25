@@ -1,3 +1,8 @@
+import {
+  OPENING_MOMENTS,
+  openingActiveIndex,
+  openingPromptId,
+} from "../../../protocols/opening.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
 import type { ShellScreen } from "../session/screens.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
@@ -90,6 +95,16 @@ const offerContinueOrBack = (
     offer("continue-begin", "continue");
     offer("back-begin", "back");
     local.awaitingPress = true;
+    return;
+  }
+  if (shell.screen === "play" && openingActiveIndex(shell.openingIndex)) {
+    const momentId = OPENING_MOMENTS[shell.openingIndex];
+    if (!momentId) {
+      local.awaitingPress = false;
+      return;
+    }
+    offer(openingPromptId(momentId), "continue");
+    local.awaitingPress = true;
   }
 };
 
@@ -143,6 +158,10 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
         }
         ctx.offerPrompt(`pause-${shell.pauseSerial}-quit`, "quit-story");
         recordOffer(`pause-${shell.pauseSerial}-quit`, "quit-story");
+        return { local, passComplete: false };
+      }
+      if (openingActiveIndex(shell.openingIndex)) {
+        if (!local.awaitingPress) offerContinueOrBack(local, ctx);
         return { local, passComplete: false };
       }
       if (!local.playStarted && shell.play) {
@@ -233,8 +252,17 @@ export const handleGamePress = (
     if (local.phase === "begin" && promptId === "continue-begin" && allHeroesHeld(shell)) {
       shell.screen = "play";
       shell.stage = "playing";
+      shell.openingIndex = 0;
       if (!shell.activeGameId) shell.activeGameId = `game-${shell.eventSeq}`;
       return { phase: "play", awaitingPress: false, playStarted: false };
+    }
+    if (
+      local.phase === "play" &&
+      openingActiveIndex(shell.openingIndex) &&
+      promptId === openingPromptId(OPENING_MOMENTS[shell.openingIndex] ?? "")
+    ) {
+      shell.openingIndex += 1;
+      return { ...local, awaitingPress: false, playStarted: false };
     }
   }
 

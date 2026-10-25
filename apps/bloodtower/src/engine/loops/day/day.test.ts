@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import { initPlayState } from "../chapter/playState.ts";
 import type { ShellEvent } from "../session/events.ts";
 import { TEST_STORY } from "../session/pack.ts";
@@ -117,6 +118,13 @@ const setupThroughBegin = () => {
       promptId: "continue-begin",
       actionId: "continue",
     },
+    ...OPENING_MOMENTS.map((momentId) => ({
+      kind: "press" as const,
+      v: 1 as const,
+      deviceId: "pad",
+      promptId: openingPromptId(momentId),
+      actionId: "continue" as const,
+    })),
   ];
   let state = initialShellState({ sessionId: "t", seed: "cue-test", stories: [TEST_STORY] });
   const towerCues: unknown[] = [];
