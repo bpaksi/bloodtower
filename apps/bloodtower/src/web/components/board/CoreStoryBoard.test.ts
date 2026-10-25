@@ -187,5 +187,49 @@ describe("story board startup chrome", () => {
     expect(markup).not.toContain('data-board-mode="startup"');
     expect(markup).not.toContain("Hero A — waiting");
     expect(markup).not.toContain(">play</h2>");
+    expect(markup).not.toContain("data-waiting-dialog");
+  });
+
+  it("keeps the edge band and drops the waiting line when nobody is choosing", () => {
+    const markup = html({
+      screen: "play",
+      levels: [join, { id: "play", label: "play", shows: "Day 1" }],
+      heroes,
+      narration: null,
+      actions: [],
+      table: {
+        chapter: "Proving Grounds",
+        day: 1,
+        health: "unavailable",
+        purse: "unavailable",
+        actingGroup: "Hero A",
+        actingHeroId: "hero-a",
+        movesLeft: 4,
+        moveRoll: 4,
+        modifier: "none",
+        waitingFor: null,
+        groups: [
+          {
+            heroId: "hero-a",
+            heroName: "Hero A",
+            kingdom: "N",
+            kingdomLabel: "Arisilon (N)",
+            spaceId: "n-citadel",
+            spaceName: "Radiant Mountains",
+            building: "citadel",
+            inside: false,
+            alone: true,
+          },
+        ],
+      },
+      place: null,
+    });
+    expect(markup).toContain("data-band");
+    expect(markup).toContain("data-chapter");
+    expect(markup).not.toContain("data-waiting");
+    expect(markup).not.toContain("data-waiting-dialog");
+    expect(markup).not.toContain("<img");
+    expect(markup).not.toContain("data-still");
+    expect(markup).not.toContain("data-place");
   });
 });
