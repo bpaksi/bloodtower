@@ -6,6 +6,7 @@ import {
   checkDraft,
   emptyDraft,
   exportBoard,
+  firstOpenSlot,
   neighboursOf,
   removeEdge,
   setEdge,
@@ -112,4 +113,13 @@ test("the starting edges from the board map all fit the model", async () => {
   assert.equal(Object.keys(d.edges).length, edges.length);
   const hasEdge = board.every((s) => neighboursOf(d, s.id).length > 0);
   assert.equal(hasEdge, true, "every space has at least one starting neighbour");
+});
+
+test("the first open slot is taken in clockwise order, on both spaces", () => {
+  const d = emptyDraft();
+  assert.equal(firstOpenSlot(d, "N-a", "N-b"), "N");
+  setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "N" });
+  assert.equal(firstOpenSlot(d, "N-a", "N-b"), "NE");
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "NE" });
+  assert.equal(neighboursOf(d, "N-b").find((n) => n.to === "N-a").slot, "SW");
 });

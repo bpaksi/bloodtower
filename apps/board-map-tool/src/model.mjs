@@ -6,6 +6,9 @@
 export const SLOTS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 export const TERRAINS = ["Desert", "Hills", "Mountains", "Lake", "Forest", "Grasslands"];
 
+// The order "first open slot" means: clockwise from north.
+export const SLOT_ORDER = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+
 const OPPOSITE = { N: "S", NE: "SW", E: "W", SE: "NW", S: "N", SW: "NE", W: "E", NW: "SE" };
 
 export function emptyDraft() {
@@ -48,6 +51,22 @@ export function setEdge(draft, spaces, { from, to, slot, river = false, note = "
     note: note.trim(),
   };
   return draft;
+}
+
+// The first slot in SLOT_ORDER that is open on both spaces, so the edge can be placed.
+// An edge already between the two keeps its own slots while it is checked.
+export function firstOpenSlot(draft, from, to) {
+  const key = edgeKey(from, to);
+  const current = draft.edges[key];
+  const free = (space, slot) => {
+    const other = space === from ? to : from;
+    return !neighboursOf(draft, space).some((n) => n.slot === slot && n.to !== other);
+  };
+  for (const slot of SLOT_ORDER) {
+    if (current && current.slots[from] === slot) return slot;
+    if (free(from, slot) && free(to, OPPOSITE[slot])) return slot;
+  }
+  return null;
 }
 
 export function removeEdge(draft, a, b) {
