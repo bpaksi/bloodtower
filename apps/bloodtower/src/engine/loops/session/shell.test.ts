@@ -498,6 +498,31 @@ describe("place stills", () => {
     expect(state.pause).toBeNull();
     expect(state.screen).toBe("play");
   });
+
+  it("drops the waiting line when the move choice closes and nobody is choosing", () => {
+    let state = playWithoutTower();
+    const roll = state.offered.find((offer) => offer.promptId.includes("roll-done"));
+    expect(roll?.open).toBe(true);
+    state = stepShell(state, press("ipad-0", roll?.promptId ?? "", "continue")).state;
+    expect(projectShellView(state).table?.waitingFor).toMatch(/is choosing/);
+    const quiet = {
+      ...state,
+      loops: {
+        ...state.loops,
+        stack: state.loops.stack.map((frame) => {
+          if (frame.loopId !== "group-turn") return frame;
+          const local = frame.local as GroupTurnLocal;
+          return { ...frame, local: { ...local, awaitingPress: false } };
+        }),
+      },
+    };
+    const view = projectShellView(quiet);
+    expect(view.screen).toBe("play");
+    expect(view.table?.waitingFor).toBeNull();
+    expect(view.table?.chapter).toBe(TEST_STORY.card.title);
+    expect(view.table?.actingGroup).toBeTruthy();
+    expect(view.place).toBeNull();
+  });
 });
 
 describe("hero claims", () => {
