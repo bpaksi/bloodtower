@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { replaySittingLog } from "../../server/core/replaySitting.ts";
@@ -228,6 +229,12 @@ const expectGoodbye = async (
 };
 
 const walkOnce = async (page: Page) => {
+  const roll = page.locator('button[data-action-id="continue"][data-prompt-id*="roll-done"]');
+  if ((await roll.count()) > 0) {
+    await expect(roll).toBeEnabled({ timeout: 20_000 });
+    await roll.click();
+    await expect.poll(async () => (await readStatus(page)).moves).not.toBeNull();
+  }
   const before = await readStatus(page);
   expect(Number(before.moves)).toBeGreaterThan(0);
   const here = before.space ? spaceById.get(before.space) : undefined;
@@ -682,7 +689,14 @@ test("AREA-077 Done for tonight idles a connected tower once and replay does not
 
 test("AREA-077 a refused idle stays on goodbye and toasts once", async ({ browser }, testInfo) => {
   test.setTimeout(180_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "area-077-idle-fail" });
+  const databasePath = join(
+    mkdtempSync(join(tmpdir(), `w8-idle-fail-${testInfo.project.name}-`)),
+    "session.sqlite",
+  );
+  const session = await startAcceptanceHost(testInfo, {
+    databasePath,
+    seed: "area-077-idle-fail",
+  });
   const context = await browser.newContext({ baseURL: session.baseURL });
   const board = await context.newPage();
   const device = await context.newPage();
