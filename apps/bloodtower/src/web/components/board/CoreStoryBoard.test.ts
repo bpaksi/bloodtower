@@ -197,7 +197,7 @@ describe("story board startup chrome", () => {
     expect(begin).not.toContain("data-hero-place");
   });
 
-  it("keeps the play band, waiting pulse, still, and roster", () => {
+  it("keeps the play band and waiting pulse, and drops the roster", () => {
     const markup = html({
       screen: "play",
       levels: [join, { id: "play", label: "play", shows: "Day 1" }],
@@ -211,8 +211,8 @@ describe("story board startup chrome", () => {
         purse: "unavailable",
         actingGroup: "Hero A",
         actingHeroId: "hero-a",
-        movesLeft: 4,
-        moveRoll: 4,
+        movesLeft: null,
+        moveRoll: null,
         modifier: "none",
         waitingFor: "Hero A is choosing",
         groups: [
@@ -227,20 +227,44 @@ describe("story board startup chrome", () => {
             inside: false,
             alone: true,
           },
+          {
+            heroId: "hero-b",
+            heroName: "Hero B",
+            kingdom: "E",
+            kingdomLabel: "Brynthia (E)",
+            spaceId: "e-citadel",
+            spaceName: "Inner Kinghills",
+            building: "citadel",
+            inside: false,
+            alone: true,
+          },
         ],
       },
       place: null,
     });
+    expect(markup).toContain('data-board-mode="play"');
+    expect(markup).toContain('data-board-layer="move"');
+    expect(markup).toContain("bt-board-backdrop");
     expect(markup).toContain("data-band");
     expect(markup).toContain("data-waiting");
     expect(markup).toContain("Hero A is choosing");
-    expect(markup).toContain("data-roster");
-    expect(markup).toContain('data-hero-place="hero-a"');
-    expect(markup).toContain("Arisilon (N)");
+    expect(markup.match(/data-health=/g)).toHaveLength(2);
+    expect(markup).toContain("unavailable");
+    expect(markup).toContain(">Day 1<");
+    expect(markup).not.toContain("data-roster");
+    expect(markup).not.toContain("data-hero-place");
+    expect(markup).not.toContain("data-kingdom");
+    expect(markup).not.toContain("data-space-name");
+    expect(markup).not.toContain("Arisilon (N)");
+    expect(markup).not.toContain("modifier");
+    expect(markup).not.toContain(">0<");
+    expect(markup).not.toContain("data-waiting-dialog");
+    expect(markup).not.toContain("data-visual-layer");
+    expect(markup).not.toContain("data-place");
     expect(markup).not.toContain('data-board-mode="startup"');
     expect(markup).not.toContain("Hero A — waiting");
     expect(markup).not.toContain(">play</h2>");
-    expect(markup).not.toContain("data-waiting-dialog");
+    expect(markup).not.toMatch(/<(?:button|input|textarea|select|a)\b/i);
   });
 
   it("keeps the edge band and drops the waiting line when nobody is choosing", () => {
@@ -284,5 +308,42 @@ describe("story board startup chrome", () => {
     expect(markup).not.toContain("<img");
     expect(markup).not.toContain("data-still");
     expect(markup).not.toContain("data-place");
+    expect(markup).not.toContain("data-roster");
+  });
+
+  it("shows the place still on its own layer and hides the band", () => {
+    const markup = html({
+      screen: "play",
+      levels: [join, { id: "play", label: "play", shows: "Day 1" }],
+      heroes,
+      narration: null,
+      actions: [],
+      table: {
+        chapter: "Proving Grounds",
+        day: 1,
+        health: "unavailable",
+        purse: "unavailable",
+        actingGroup: "Hero A",
+        actingHeroId: "hero-a",
+        movesLeft: 3,
+        moveRoll: 4,
+        modifier: "none",
+        waitingFor: "Hero A is choosing",
+        groups: [],
+      },
+      place: {
+        building: "village",
+        stillId: "place.village",
+        caption: "Quiet roofs. A well, a few doors. Nothing stirs.",
+      },
+    });
+    expect(markup).toContain('data-board-layer="place"');
+    expect(markup).toContain('data-still="place.village"');
+    expect(markup).toContain("Quiet roofs. A well, a few doors. Nothing stirs.");
+    expect(markup).not.toContain("data-band");
+    expect(markup).not.toContain("data-waiting");
+    expect(markup).not.toContain("data-roster");
+    expect(markup).not.toContain("data-waiting-dialog");
+    expect(markup).not.toContain("data-visual-layer");
   });
 });

@@ -188,7 +188,9 @@ function SetupPanel({ view }: { view: BoardView }) {
       <p className="bt-startup-progress" data-setup-progress="">
         {progress.label}
       </p>
-      <p className="bt-startup-cue">{progress.instruction}</p>
+      <p className="bt-startup-cue" data-setup-instruction="">
+        {progress.instruction}
+      </p>
       <p className="bt-startup-cue">
         Set the pieces on the table. This screen does not draw the board or mark the heroes.
       </p>
@@ -297,8 +299,8 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
           data-next-prompt=""
           data-len={waiting.length > 80 ? "long" : waiting.length > 42 ? "mid" : undefined}
           role="status"
+          aria-label="Waiting"
         >
-          <span className="bt-lbl">Waiting</span>
           <b>{waiting}</b>
         </p>
       </div>
