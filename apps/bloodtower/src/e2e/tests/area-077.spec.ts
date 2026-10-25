@@ -636,7 +636,7 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
     expect(nextId).toBeTruthy();
     await page.locator(`button[data-prompt-id="walk--${restored.hero}--${nextId}"]`).click();
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
-    expect((await readStatus(page)).space).toBe(nextId);
+    await expect.poll(async () => (await readStatus(page)).space).toBe(nextId);
   } finally {
     await context2.close();
     await restarted.host.close();
