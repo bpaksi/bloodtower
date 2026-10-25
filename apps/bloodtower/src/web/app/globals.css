@@ -210,6 +210,13 @@ body {
   padding: 0.75rem max(1.5rem, var(--bt-ipad-corner));
 }
 
+.bt-story-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
 .bt-bottom-bar {
   flex: none;
   display: flex;

@@ -12,6 +12,7 @@ export type GameLocal = {
   phase:
     | "pick-game"
     | "pick-story"
+    | "not-playable"
     | "game-settings"
     | "tower-connect"
     | "claim-heroes"
@@ -43,6 +44,11 @@ const offerContinueOrBack = (
   };
   if (shell.screen === "pick-story") {
     offer(`continue-pick-story-${shell.focusStoryId}`, "continue");
+    local.awaitingPress = true;
+    return;
+  }
+  if (shell.screen === "not-playable") {
+    offer("back-not-playable", "back");
     local.awaitingPress = true;
     return;
   }
@@ -113,6 +119,7 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
 
     if (
       local.phase === "pick-story" ||
+      local.phase === "not-playable" ||
       local.phase === "game-settings" ||
       local.phase === "tower-connect" ||
       local.phase === "claim-heroes" ||
@@ -191,6 +198,11 @@ export const handleGamePress = (
 
   if (actionId === "continue") {
     if (local.phase === "pick-story" && promptId === `continue-pick-story-${shell.focusStoryId}`) {
+      const focused = shell.stories.find((story) => story.card.id === shell.focusStoryId);
+      if (focused && !focused.card.playable) {
+        shell.screen = "not-playable";
+        return { phase: "not-playable", awaitingPress: false, playStarted: false };
+      }
       if (!bindStoryChoice(shell, shell.focusStoryId)) return { ...local, awaitingPress: false };
       shell.screen = "game-settings";
       return { phase: "game-settings", awaitingPress: false, playStarted: false };

@@ -90,11 +90,20 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     return deviceId === audience.deviceId ? "yours" : "taken";
   };
 
+  const doors = state.levels
+    .filter((level) => level.id.startsWith("door-"))
+    .map((level) => ({
+      id: level.id.slice("door-".length),
+      title: level.label,
+      focus: level.shows.startsWith("In focus"),
+    }));
+
   return deviceViewPayloadSchema.parse({
     deviceId: audience.deviceId,
     screen: state.screen,
     shows: current.shows,
     table: state.table ?? null,
+    ...(doors.length > 0 ? { doors } : {}),
     heroes: heroesOnDevice.map((hero) => ({
       id: hero.id,
       name: hero.name,

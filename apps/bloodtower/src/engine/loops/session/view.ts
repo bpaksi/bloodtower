@@ -41,6 +41,11 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "leave") return "Leave";
   if (actionId === "end-turn") return "End turn";
   if (actionId === "record") return "Record";
+  if (promptId.startsWith("continue-pick-story-")) {
+    const id = promptId.slice("continue-pick-story-".length);
+    const story = state.stories.find((entry) => entry.card.id === id);
+    return story ? `Choose ${story.card.title}` : "Choose";
+  }
   if (actionId === "continue") return "Continue";
   if (actionId === "back") return "Back";
   if (actionId === "new-game") return "New game";
@@ -158,6 +163,7 @@ const STEP_NAME: Record<ShellState["screen"], string> = {
   pause: "Paused",
   session: "Session",
   goodbye: "Goodbye",
+  "not-playable": "Not playable yet",
 };
 
 /** R2-01 words. A session that never connected is "no tower", not a lost link. */
@@ -180,16 +186,28 @@ const towerLine = (state: ShellState): string => {
 const chosenOrBound = (state: ShellState): ShellStory | undefined =>
   state.stories.find((entry) => entry.card.id === (state.chosenStoryId ?? state.boundStoryId));
 
+const playerLine = (story: ShellStory): string => {
+  const players = story.card.players;
+  if (!players) return "";
+  const { min, max } = players;
+  return min === max ? `${max} players` : `${min}\u2013${max} players`;
+};
+
 const doorLevel = (story: ShellStory, focused: boolean): LoopLevel | null => {
   const id = `door-${story.card.id}`;
   if (!LEVEL_ID.test(id)) return null;
-  const { min, max } = story.card.players;
-  const players = min === max ? `${max} players` : `${min}\u2013${max} players`;
   const tagline = (story.card.tagline ?? "A story door.").replaceAll("\n", " ");
+  const lines = [
+    focused ? "In focus" : "A door",
+    tagline,
+    playerLine(story),
+    story.card.playable ? "Playable" : "Not playable yet",
+  ];
+  if (story.card.cover) lines.push(story.card.cover);
   return {
     id,
     label: story.card.title,
-    shows: `${focused ? "In focus" : "A door"}\n${tagline}\n${players}\n${story.card.playable ? "Playable" : "Not playable yet"}`,
+    shows: lines.join("\n"),
   };
 };
 
@@ -219,6 +237,10 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
   }
   if (state.screen === "splash") return "Blood Tower";
   if (state.screen === "pick-story") return title;
+  if (state.screen === "not-playable") {
+    const focused = state.stories.find((entry) => entry.card.id === state.focusStoryId);
+    return focused?.card.title ?? title;
+  }
   if (state.screen === "game-settings") {
     if (!story || story.settings.length === 0) return "Nothing to set.";
     return story.settings

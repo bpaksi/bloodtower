@@ -209,7 +209,9 @@ assets:
         "pack_id: notes\ntitle: Notes\nversion: 0.1.0\nengine_min: 0.1.0\nplayable: false\n",
       );
       const catalog = loadStoryCatalog(root);
-      expect(catalog.stories).toEqual([]);
+      expect(catalog.stories.map((story) => story.card.id)).toEqual(["notes"]);
+      expect(catalog.stories[0]?.card.playable).toBe(false);
+      expect(catalog.stories[0]?.card.cover).toBeNull();
       expect(catalog.issues.some((item) => item.file === "pack.yaml" && item.rule === "P2-1")).toBe(
         true,
       );
@@ -222,7 +224,14 @@ assets:
   it("does not report CONVERSION-NOTES when the host loads the repo packs", () => {
     const catalog = loadStoryCatalog(join(repoRoot, "packs"));
     expect(catalog.issues.filter((item) => item.file.includes("CONVERSION-NOTES"))).toEqual([]);
-    expect(catalog.stories.some((story) => story.card.id === "test")).toBe(true);
+    const testStory = catalog.stories.find((story) => story.card.id === "test");
+    const dracula = catalog.stories.find((story) => story.card.id === "dracula");
+    expect(testStory?.card.playable).toBe(true);
+    expect(testStory?.card.cover).toBeNull();
+    expect(dracula?.card.playable).toBe(false);
+    expect(dracula?.card.title).toBe("The Count of Vellmoor");
+    expect(dracula?.card.players).toBeNull();
+    expect(dracula?.card.cover).toBe("/packs/dracula/assets/cover.png");
   });
 
   it("lints every door under the configured packs folder", () => {

@@ -77,7 +77,8 @@ export const initialShellState = (input: {
   stories?: ShellStory[];
 }): ShellState => {
   const stories = input.stories ?? [];
-  const bound = stories[0]?.card.id ?? "test";
+  const boundStory = stories.find((story) => story.card.playable) ?? stories[0];
+  const bound = boundStory?.card.id ?? "test";
   return {
     version: SHELL_ENGINE_VERSION,
     sessionId: input.sessionId,
@@ -92,7 +93,7 @@ export const initialShellState = (input: {
     settingValues: {},
     setSerial: 0,
     devices: new Set(),
-    holdings: stories[0] ? initialHoldings(stories[0]) : {},
+    holdings: boundStory ? initialHoldings(boundStory) : {},
     tower: TOWER_DISCONNECTED,
     towerSetupDone: false,
     towerLinked: false,

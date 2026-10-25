@@ -59,6 +59,17 @@ function SplashPanel({ view }: { view: BoardView }) {
   );
 }
 
+function CoverPlate({ door }: { door: StoryDoor }) {
+  return (
+    <div className="bt-carousel-plate" aria-hidden="true">
+      {door.cover ? (
+        // biome-ignore lint/performance/noImgElement: pack cover is a static file the host serves
+        <img className="bt-carousel-cover" alt="" src={door.cover} />
+      ) : null}
+    </div>
+  );
+}
+
 function DoorFocus({ door }: { door: StoryDoor }) {
   return (
     <article
@@ -66,9 +77,7 @@ function DoorFocus({ door }: { door: StoryDoor }) {
       data-story-focus={door.id}
       data-playable={door.playable ? "true" : "false"}
     >
-      <div className="bt-carousel-plate" aria-hidden="true">
-        <div className="bt-door-motif">{door.title.slice(0, 1)}</div>
-      </div>
+      <CoverPlate door={door} />
       <h2>{door.title}</h2>
       <p className="bt-carousel-tagline">{door.tagline}</p>
       {door.players ? <p className="bt-carousel-players">{door.players}</p> : null}
@@ -79,7 +88,13 @@ function DoorFocus({ door }: { door: StoryDoor }) {
 
 function DoorPeek({ door, side }: { door: StoryDoor; side: "previous" | "next" }) {
   return (
-    <aside className="bt-carousel-peek" data-carousel-side={side} data-story-peek={door.id}>
+    <aside
+      className="bt-carousel-peek"
+      data-carousel-side={side}
+      data-story-peek={door.id}
+      data-playable={door.playable ? "true" : "false"}
+    >
+      <CoverPlate door={door} />
       <p>{door.title}</p>
     </aside>
   );
@@ -194,6 +209,16 @@ function BeginPanel() {
   );
 }
 
+function NotPlayablePanel({ view }: { view: BoardView }) {
+  const title = publicLine(view);
+  return (
+    <div data-startup-panel="not-playable">
+      <h1 className="bt-startup-title">Not playable yet</h1>
+      {title ? <p className="bt-startup-cue">{title}</p> : null}
+    </div>
+  );
+}
+
 function LinePanel({ kicker, title, line }: { kicker: string; title: string; line: string }) {
   return (
     <div data-startup-panel="line">
@@ -207,6 +232,7 @@ function LinePanel({ kicker, title, line }: { kicker: string; title: string; lin
 function StartupPanel({ view }: { view: BoardView }) {
   if (view.screen === "splash" || hallOpening(view)) return <SplashPanel view={view} />;
   if (view.screen === "pick-story") return <PickStoryPanel view={view} />;
+  if (view.screen === "not-playable") return <NotPlayablePanel view={view} />;
   if (view.screen === "tower-connect") return <TowerPanel view={view} />;
   if (view.screen === "game-settings") return <SettingsPanel view={view} />;
   if (view.screen === "claim-heroes") return <ClaimPanel view={view} />;

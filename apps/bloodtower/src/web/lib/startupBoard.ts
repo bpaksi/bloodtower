@@ -12,6 +12,7 @@ export const STARTUP_SCREENS = new Set<ViewScreen>([
   "pick-game",
   "session",
   "goodbye",
+  "not-playable",
 ]);
 
 export const isStartupScreen = (screen: ViewScreen): boolean => STARTUP_SCREENS.has(screen);
@@ -29,6 +30,7 @@ const STEP_NAME: Record<ViewScreen, string> = {
   pause: "Paused",
   session: "Session",
   goodbye: "Goodbye",
+  "not-playable": "Not playable yet",
 };
 
 export type StoryDoor = {
@@ -38,6 +40,8 @@ export type StoryDoor = {
   players: string;
   playable: boolean;
   focused: boolean;
+  /** Served cover URL, or null when the pack has no cover file. */
+  cover: string | null;
 };
 
 export type StartupStatus = {
@@ -64,8 +68,13 @@ export const storyDoors = (view: BoardView): StoryDoor[] => {
   const parsed = view.levels.flatMap((level): StoryDoor[] => {
     if (!level.id.startsWith("door-")) return [];
     const id = level.id.slice("door-".length);
-    const [mark, tagline, players, ready] = level.shows.split("\n");
-    if (!tagline || !players || !ready) {
+    const lines = level.shows.split("\n");
+    const mark = lines[0];
+    const tagline = lines[1];
+    const players = lines[2];
+    const ready = lines[3];
+    const coverLine = lines[4];
+    if (tagline === undefined || players === undefined || ready === undefined) {
       return [
         {
           id,
@@ -74,6 +83,7 @@ export const storyDoors = (view: BoardView): StoryDoor[] => {
           players: "",
           playable: true,
           focused: false,
+          cover: null,
         },
       ];
     }
@@ -85,6 +95,7 @@ export const storyDoors = (view: BoardView): StoryDoor[] => {
         players,
         playable: ready !== "Not playable yet",
         focused: mark === "In focus",
+        cover: coverLine?.startsWith("/") ? coverLine : null,
       },
     ];
   });
@@ -103,6 +114,7 @@ export const storyDoors = (view: BoardView): StoryDoor[] => {
       players: "",
       playable: true,
       focused: true,
+      cover: null,
     },
   ];
 };
