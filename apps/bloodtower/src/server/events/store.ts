@@ -70,6 +70,8 @@ export interface EventStore {
   getAutosave: () => AutosaveRow | null;
   setAutosave: (row: AutosaveRow) => void;
   replaceAutosave: (row: AutosaveRow) => void;
+  /** Removes the one autosave row. New game on the session screen (DEC-208). */
+  clearAutosave: () => void;
   autosaveForSession: (sessionId: string) => AutosaveRow | null;
   hasEvents: (gameId: string) => boolean;
 }
@@ -213,6 +215,10 @@ export const createEventStore = (db: Db): EventStore => {
           },
         })
         .run();
+    },
+
+    clearAutosave: () => {
+      db.delete(autosave).where(eq(autosave.id, AUTOSAVE_ROW_ID)).run();
     },
 
     autosaveForSession: (sessionId) => {

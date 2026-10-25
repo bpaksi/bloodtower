@@ -16,6 +16,7 @@ import {
   storyDoors,
   waitingFor,
 } from "../../lib/startupBoard";
+import { GoodbyeTeardown } from "../GoodbyeTeardown";
 import { PortraitCard } from "../PortraitCard";
 import { DialogFrame } from "./DialogFrame";
 
@@ -215,7 +216,13 @@ function StartupPanel({ view }: { view: BoardView }) {
     return <LinePanel kicker="Between games" title="Session" line={publicLine(view)} />;
   }
   if (view.screen === "goodbye") {
-    return <LinePanel kicker="Tonight" title="Goodbye" line={publicLine(view) || "Goodbye"} />;
+    return (
+      <div data-startup-panel="goodbye">
+        <p className="bt-kicker">Tonight</p>
+        <h1 className="bt-startup-title">Goodbye</h1>
+        <GoodbyeTeardown shows={publicLine(view)} />
+      </div>
+    );
   }
   return <LinePanel kicker="The table" title="Pick a game" line={publicLine(view)} />;
 }

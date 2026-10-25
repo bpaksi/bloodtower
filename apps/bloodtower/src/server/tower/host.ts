@@ -39,7 +39,7 @@ export type BloodtowerTower = {
     capabilityId: string,
     params: Record<string, unknown>,
     log: HostLogger,
-  ) => Promise<void>;
+  ) => Promise<"ok" | "failed">;
   close: () => Promise<void>;
 };
 
@@ -60,11 +60,35 @@ export const createBloodtowerTower = (options: TowerHostOptions = {}): Bloodtowe
   const store = createStateStore();
   const records = createTowerRecords(store);
   const feed = feedStateStore(session, store, { skulls: records });
+  let idleOutcome: "ok" | "failed" | null = null;
+  let idleReason = "";
   const executor = createCommandExecutor({
     session,
     records,
-    onLifecycle: () => {
+    onLifecycle: (payload) => {
       feed.refresh();
+      if (payload.capabilityId !== "lighting.all-off") return;
+      if (payload.stage === "confirmed") {
+        idleOutcome = "ok";
+        return;
+      }
+      if (payload.stage === "indeterminate" && payload.written === false) {
+        idleOutcome = "ok";
+        return;
+      }
+      if (
+        payload.stage === "failed" ||
+        payload.stage === "timed-out" ||
+        payload.stage === "rejected" ||
+        payload.stage === "indeterminate"
+      ) {
+        idleOutcome = "failed";
+        idleReason =
+          payload.reason ??
+          (payload.stage === "indeterminate"
+            ? "Tower command lighting.all-off was not answered."
+            : `Tower command lighting.all-off ${payload.stage}.`);
+      }
     },
   });
   const listeners = new Set<() => void>();
@@ -85,12 +109,33 @@ export const createBloodtowerTower = (options: TowerHostOptions = {}): Bloodtowe
       if (capabilityId === "tower.connect") {
         await session.connect();
         notify();
-        return;
+        return "ok";
       }
       if (capabilityId === "tower.calibrate") {
         await session.calibrate();
         notify();
-        return;
+        return "ok";
+      }
+      if (capabilityId === "lighting.all-off") {
+        idleOutcome = null;
+        idleReason = "";
+        await executor.submit({
+          commandId: `cmd-${Date.now()}`,
+          clientId: "bloodtower-host",
+          capabilityId,
+          params,
+        });
+        notify();
+        if (idleOutcome !== "ok") {
+          log.error(
+            "tower-command-failed",
+            idleReason.trim() === ""
+              ? "Tower command lighting.all-off was not answered."
+              : idleReason,
+          );
+          return "failed";
+        }
+        return "ok";
       }
       const commandId = `cmd-${Date.now()}`;
       await executor.submit({
@@ -100,6 +145,7 @@ export const createBloodtowerTower = (options: TowerHostOptions = {}): Bloodtowe
         params,
       });
       notify();
+      return "ok";
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       log.error(
@@ -107,6 +153,7 @@ export const createBloodtowerTower = (options: TowerHostOptions = {}): Bloodtowe
         message.trim() === "" ? `Tower command ${capabilityId} failed.` : message,
       );
       notify();
+      return "failed";
     }
   };
 

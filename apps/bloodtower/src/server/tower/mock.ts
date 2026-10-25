@@ -14,13 +14,23 @@ export interface MockTower extends TowerPort {
   setFirmware: (version: string | null) => void;
   /** The next playSound fails once, as a tower that did not take the command. */
   failNextSound: () => void;
+  /**
+   * The next idle fails once, after the command is recorded. The tower did not take it.
+   * A later idle is sent normally.
+   */
+  failNextIdle: () => void;
+  /** How many idle commands were dispatched while the link was up. */
+  idleAttempts: () => number;
+  /** `lighting.all-off`. Recorded as `{ type: "idle" }` once per dispatch. */
+  idle: () => Promise<"written" | "failed">;
   /** Drops the link while keeping prior calibration readings (tower-lost pause). */
   loseConnection: () => void;
   onSnapshotChange: (listener: () => void) => () => void;
 }
 
 /**
- * In-memory tower for CI. It records connect, calibrate and sounds, and never a light cue.
+ * In-memory tower for CI. It records connect, calibrate, sounds, and idle
+ * (`lighting.all-off` as `{ type: "idle" }`). It never records a light cue or raw bytes.
  * Battery stays unavailable until a test sets a reading. Zero is a reading only when set.
  */
 export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
@@ -28,6 +38,8 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   const sent: TowerSent[] = [];
   let opened = false;
   let failSound = false;
+  let failIdle = false;
+  let idleAttempts = 0;
   const snapshotListeners = new Set<() => void>();
   const notifySnapshot = () => {
     for (const listener of snapshotListeners) listener();
@@ -74,6 +86,20 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
       sent.push({ type: "sound", soundIndex, volume });
       return "written";
     },
+    idle: async () => {
+      if (snapshot.connection !== "connected") return "failed";
+      idleAttempts += 1;
+      sent.push({ type: "idle" });
+      if (failIdle) {
+        failIdle = false;
+        return "failed";
+      }
+      return "written";
+    },
+    failNextIdle: () => {
+      failIdle = true;
+    },
+    idleAttempts: () => idleAttempts,
     setFirmware: (version) => {
       snapshot = {
         ...snapshot,

@@ -2,6 +2,7 @@
 
 import type { DeviceView, OfferedAction } from "bloodtower-protocols";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
+import { GoodbyeTeardown } from "../GoodbyeTeardown.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
@@ -106,6 +107,7 @@ export function CoreDeviceScreen({
     );
   };
   const showHold = view.screen === "claim-heroes" || view.screen === "begin";
+  const farewell = view.screen === "goodbye";
 
   return (
     <main className="bt-device" data-screen={view.screen}>
@@ -116,69 +118,75 @@ export function CoreDeviceScreen({
         <h1 className="text-2xl font-semibold text-[var(--bt-accent)]">
           {SCREEN_TITLE[view.screen] ?? view.screen}
         </h1>
-        <p
-          className="mt-2 text-lg"
-          data-step-instruction=""
-          data-day={view.table?.day}
-          data-moves={view.table?.movesLeft ?? undefined}
-          data-roll={view.table?.moveRoll ?? undefined}
-          data-modifier={view.table?.modifier}
-          data-acting-hero={view.table?.actingHeroId ?? undefined}
-          data-space={acting?.spaceId}
-          data-space-name={acting?.spaceName}
-          data-building={acting?.building ?? ""}
-          data-inside={acting?.inside ? "true" : "false"}
-        >
-          {view.shows}
-        </p>
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
-        {view.table ? (
-          <ul className="mt-4" data-roster>
-            {view.table.groups.map((group) => (
-              <li key={group.heroId} data-hero-place={group.heroId}>
-                {group.heroName} · {group.kingdomLabel} · {group.spaceName}
-                {group.alone ? " · alone" : ""}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {view.heroes.map((hero) => (
-          <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
-            <h2 className="text-lg font-medium">{hero.name}</h2>
-            {hero.lines.map((line) => (
-              <p key={line.id} className="text-[var(--bt-muted)]" data-private-line={line.id}>
-                {line.text}
-              </p>
-            ))}
-            {onHold && showHold ? (
-              <button
-                type="button"
-                className={
-                  hero.claim === "taken" ? "bt-ghost bt-claim-taken mt-2" : "bt-secondary mt-2"
-                }
-                data-hunter={hero.id}
-                data-action="take"
-                data-claim={hero.claim ?? "open"}
-                disabled={!live || hero.claim === "taken"}
-                onClick={() => onHold(hero.id, "take")}
-              >
-                {hero.claim === "taken" ? `${hero.name} claimed` : `Hold ${hero.name}`}
-              </button>
+        {farewell ? (
+          <GoodbyeTeardown shows={view.shows} />
+        ) : (
+          <>
+            <p
+              className="mt-2 text-lg"
+              data-step-instruction=""
+              data-day={view.table?.day}
+              data-moves={view.table?.movesLeft ?? undefined}
+              data-roll={view.table?.moveRoll ?? undefined}
+              data-modifier={view.table?.modifier}
+              data-acting-hero={view.table?.actingHeroId ?? undefined}
+              data-space={acting?.spaceId}
+              data-space-name={acting?.spaceName}
+              data-building={acting?.building ?? ""}
+              data-inside={acting?.inside ? "true" : "false"}
+            >
+              {view.shows}
+            </p>
+            {view.table ? (
+              <ul className="mt-4" data-roster>
+                {view.table.groups.map((group) => (
+                  <li key={group.heroId} data-hero-place={group.heroId}>
+                    {group.heroName} · {group.kingdomLabel} · {group.spaceName}
+                    {group.alone ? " · alone" : ""}
+                  </li>
+                ))}
+              </ul>
             ) : null}
-          </section>
-        ))}
-        {showMoveMap ? (
-          <section className="bt-move-map" data-move-map aria-label="Move">
-            {mapActions.map(renderAction)}
-          </section>
-        ) : null}
-        {scrolling.length > 0 ? (
-          <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>
-        ) : null}
+            {view.heroes.map((hero) => (
+              <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
+                <h2 className="text-lg font-medium">{hero.name}</h2>
+                {hero.lines.map((line) => (
+                  <p key={line.id} className="text-[var(--bt-muted)]" data-private-line={line.id}>
+                    {line.text}
+                  </p>
+                ))}
+                {onHold && showHold ? (
+                  <button
+                    type="button"
+                    className={
+                      hero.claim === "taken" ? "bt-ghost bt-claim-taken mt-2" : "bt-secondary mt-2"
+                    }
+                    data-hunter={hero.id}
+                    data-action="take"
+                    data-claim={hero.claim ?? "open"}
+                    disabled={!live || hero.claim === "taken"}
+                    onClick={() => onHold(hero.id, "take")}
+                  >
+                    {hero.claim === "taken" ? `${hero.name} claimed` : `Hold ${hero.name}`}
+                  </button>
+                ) : null}
+              </section>
+            ))}
+            {showMoveMap ? (
+              <section className="bt-move-map" data-move-map aria-label="Move">
+                {mapActions.map(renderAction)}
+              </section>
+            ) : null}
+            {scrolling.length > 0 ? (
+              <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>
+            ) : null}
+          </>
+        )}
       </div>
-      {pinned.length > 0 ? (
+      {farewell || pinned.length === 0 ? null : (
         <div className="bt-pinned flex flex-col gap-3">{pinned.map(renderAction)}</div>
-      ) : null}
+      )}
       <ChromeBar live={live} back={back} connect={connect} quit={quit} onAct={onAct} />
     </main>
   );

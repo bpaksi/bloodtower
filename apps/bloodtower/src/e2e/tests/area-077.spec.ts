@@ -1,8 +1,13 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { expect, type Page, test } from "@playwright/test";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { expect, type Locator, type Page, test } from "@playwright/test";
+import { replaySittingLog } from "../../server/core/replaySitting.ts";
 import { openDatabase } from "../../server/db/client.ts";
 import { createEventStore } from "../../server/events/store.ts";
+import { createHostLogger } from "../../server/log/hostLog.ts";
+import type { MockTower } from "../../server/tower/mock.ts";
+import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import {
   gateControls,
   holdHeroesFromTest,
@@ -131,6 +136,142 @@ const skipTowerToClaim = async (page: Page, joinCode: string) => {
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
 };
 
+const TEARDOWN = [
+  ["place-heroes", "Take each hero off the board."],
+  ["lay-out-board", "Pack up the board."],
+  ["seals-and-skulls", "Take the seals off the tower and collect the skulls."],
+] as const;
+
+const readSitting = (databasePath: string, gameId?: string) => {
+  const opened = openDatabase(databasePath);
+  try {
+    const store = createEventStore(opened.db);
+    const autosave = store.getAutosave();
+    const id = gameId ?? autosave?.gameId ?? null;
+    const outcomes = id
+      ? store
+          .listEvents(id)
+          .filter((row) => row.kind === "game-record")
+          .map((row) => (JSON.parse(row.payload) as { outcome?: string }).outcome ?? "")
+      : [];
+    return { autosaveGameId: autosave?.gameId ?? null, outcomes };
+  } finally {
+    opened.close();
+  }
+};
+
+const commandFailures = (databasePath: string) => {
+  const dir = join(dirname(databasePath), "logs");
+  return readdirSync(dir).flatMap((name) =>
+    readFileSync(join(dir, name), "utf8")
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => JSON.parse(line) as { level?: string; code?: string })
+      .filter((entry) => entry.level === "error" && entry.code === "tower-command-failed"),
+  );
+};
+
+const replayLog = async (databasePath: string, tower: MockTower) => {
+  const opened = openDatabase(databasePath);
+  try {
+    const store = createEventStore(opened.db);
+    const log = createHostLogger({
+      dataDir: join(dirname(databasePath), "replay"),
+      mirror: false,
+    });
+    return await replaySittingLog(store, bloodtowerTowerFromMock(tower), log);
+  } finally {
+    opened.close();
+  }
+};
+
+const expectNoExitExtras = async (page: Page) => {
+  await expect(page.getByText("Play again")).toHaveCount(0);
+  await expect(page.getByText(/past game/i)).toHaveCount(0);
+  await expect(page.getByText("Quit game")).toHaveCount(0);
+  await expect(page.getByText(/seed/i)).toHaveCount(0);
+};
+
+const expectTeardown = async (root: Locator) => {
+  const items = root.locator("[data-teardown] [data-setup-id]");
+  await expect(items).toHaveCount(3);
+  for (const [index, [id, text]] of TEARDOWN.entries()) {
+    const item = items.nth(index);
+    await expect(item).toHaveAttribute("data-setup-id", id);
+    await expect(item).toHaveText(text);
+  }
+  await expect(root.locator("[data-teardown] :is(button, input, textarea, select)")).toHaveCount(0);
+};
+
+const expectGoodbye = async (
+  device: Page,
+  board: Page,
+  towerState: "idle" | "no tower" | "unavailable",
+) => {
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "goodbye");
+  const boardMain = board.locator("main.bt-board");
+  await expect(boardMain).toHaveAttribute("data-screen", "goodbye");
+  await expect(boardMain).toHaveAttribute("data-board-mode", "startup");
+  await expect(device.getByRole("heading", { name: "Goodbye" })).toBeVisible();
+  await expect(boardMain.getByRole("heading", { name: "Goodbye" })).toBeVisible();
+  await expect(boardMain.locator("[data-next-prompt] b")).toHaveText("The evening is closing.");
+  await expectTeardown(deviceMain(device));
+  await expectTeardown(boardMain);
+  await expect(deviceMain(device).locator("[data-tower-state]")).toHaveText(towerState);
+  await expect(boardMain.locator("[data-tower-state]")).toHaveText(towerState);
+  expect(await deviceMain(device).locator("[data-tower-state]").innerText()).not.toMatch(/\d/);
+  expect(await boardMain.locator("[data-tower-state]").innerText()).not.toMatch(/\d/);
+  await expect(boardMain.locator(":is(button, input, textarea, select)")).toHaveCount(0);
+  for (const actionId of ["new-game", "done-for-tonight", "quit-story"]) {
+    await expect(device.locator(`button[data-action-id="${actionId}"]`)).toHaveCount(0);
+  }
+  await expect(device.getByRole("button", { name: "Play again" })).toHaveCount(0);
+  await expect(device.getByRole("button", { name: "Done for tonight" })).toHaveCount(0);
+  await expect(board.getByText("Play again")).toHaveCount(0);
+};
+
+const walkOnce = async (page: Page) => {
+  const roll = page.locator('button[data-action-id="continue"][data-prompt-id*="roll-done"]');
+  if ((await roll.count()) > 0) {
+    await expect(roll).toBeEnabled({ timeout: 20_000 });
+    await roll.click();
+    await expect.poll(async () => (await readStatus(page)).moves).not.toBeNull();
+  }
+  const before = await readStatus(page);
+  expect(Number(before.moves)).toBeGreaterThan(0);
+  const here = before.space ? spaceById.get(before.space) : undefined;
+  const nextId = here?.adjacent[0];
+  expect(nextId).toBeTruthy();
+  const walk = page.locator(`button[data-prompt-id="walk--${before.hero}--${nextId}"]`);
+  await expect(walk).toBeEnabled({ timeout: 20_000 });
+  await walk.click();
+  await expect.poll(async () => (await readStatus(page)).space).toBe(nextId);
+};
+
+const reachPlay = async (device: Page, joinCode: string, linked: boolean) => {
+  await installSessionSocketHook(device);
+  await device.goto(`/join?code=${joinCode}`);
+  await expect(device).toHaveURL(/\/device/);
+  if (linked) {
+    await clickAct(device, "tower-connect", "tower-connect");
+    await clickAct(device, "tower-calibrate", "tower-calibrate");
+    await clickAct(device, "new-game", "new-pick-game");
+  } else {
+    await clickAct(device, "continue", "splash-play");
+  }
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
+  await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
+  await clickAct(device, "continue", "continue-game-settings");
+  if (!linked) {
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "tower-connect");
+    await device.locator('button[data-action="play-without-tower"]').click();
+  }
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "claim-heroes");
+  await holdHeroesFromTest(device, [...HERO_IDS]);
+  await clickAct(device, "continue", "continue-claim-heroes");
+  await finishSetup(device);
+};
+
 const checkpointSeed = (databasePath: string): string => {
   const opened = openDatabase(databasePath);
   try {
@@ -148,8 +289,10 @@ const checkpointSeed = (databasePath: string): string => {
 test("AREA-077 cold start plays, enters every place, and leaves the session", async ({
   browser,
 }, testInfo) => {
-  test.setTimeout(240_000);
+  test.setTimeout(300_000);
   const session = await startAcceptanceHost(testInfo, { seed: "area-077-cold" });
+  const { databasePath } = session;
+  let gameId = "";
   const context = await browser.newContext({ baseURL: session.baseURL });
   const board = await context.newPage();
   const device = await context.newPage();
@@ -296,16 +439,59 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
     await device.locator('[data-action="menu"]').click();
     await clickAct(device, "quit-story", "menu-quit");
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "session");
+    const boardMain = board.locator("main.bt-board");
+    await expect(boardMain).toHaveAttribute("data-screen", "session");
+    await expect(boardMain).toHaveAttribute("data-board-mode", "startup");
     const offered = device.locator("main button[data-action-id]");
     await expect(offered).toHaveCount(2);
-    await expect(device.locator('button[data-action-id="new-game"]')).toBeVisible();
-    await expect(device.locator('button[data-action-id="done-for-tonight"]')).toBeVisible();
+    await expect(offered.nth(0)).toHaveText("New game");
+    await expect(offered.nth(1)).toHaveText("Done for tonight");
+    await expect(
+      device.locator('button[data-prompt-id="session-new-game"][data-action-id="new-game"]'),
+    ).toBeVisible();
+    await expect(
+      device.locator(
+        'button[data-prompt-id="session-done-tonight"][data-action-id="done-for-tonight"]',
+      ),
+    ).toBeVisible();
+    await expect(boardMain.locator("[data-next-prompt] b")).toHaveText(
+      "Waiting for an iPad to start a new game, or to be done for tonight.",
+    );
+    await expectNoExitExtras(device);
+    await expectNoExitExtras(board);
+    const sitting = readSitting(session.databasePath);
+    expect(sitting.autosaveGameId).toBeTruthy();
+    expect(sitting.outcomes).toEqual(["quit"]);
+    gameId = sitting.autosaveGameId ?? "";
+    const sent = session.tower.sent().map((item) => item.type);
+    expect(sent).not.toContain("connect");
+    expect(sent).not.toContain("calibrate");
+    expect(sent).not.toContain("idle");
+
     await clickAct(device, "done-for-tonight", "session-done-tonight");
-    await expect(deviceMain(device)).toHaveAttribute("data-screen", "goodbye");
+    await expectGoodbye(device, board, "no tower");
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {
     await context.close();
     await session.host.close();
+  }
+
+  const restarted = await startAcceptanceHost(testInfo, {
+    databasePath,
+    seed: "area-077-cold",
+  });
+  const context2 = await browser.newContext({ baseURL: restarted.baseURL });
+  const board2 = await context2.newPage();
+  try {
+    await board2.goto("/board");
+    await expect(board2.locator("main.bt-board")).toHaveAttribute("data-screen", "splash");
+    const sitting = readSitting(databasePath);
+    expect(sitting.autosaveGameId).toBe(gameId);
+    expect(sitting.outcomes).toEqual(["quit"]);
+  } finally {
+    await context2.close();
+    await restarted.host.close();
   }
 });
 
@@ -472,5 +658,101 @@ test("AREA-077 a connected tower pauses on drop and a never-connected one does n
   } finally {
     await context.close();
     await linked.host.close();
+  }
+});
+
+test("AREA-077 Done for tonight idles a connected tower once and replay does not send it again", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(180_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "area-077-idle" });
+  const context = await browser.newContext({ baseURL: session.baseURL });
+  const board = await context.newPage();
+  const device = await context.newPage();
+  try {
+    await board.goto("/board");
+    await reachPlay(device, session.host.joinCode, true);
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "play");
+    await walkOnce(device);
+    expect(session.tower.sent().some((item) => item.type === "connect")).toBe(true);
+    expect(session.tower.sent().some((item) => item.type === "calibrate")).toBe(true);
+    await device.locator('[data-action="menu"]').click();
+    await clickAct(device, "quit-story", "menu-quit");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "session");
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
+
+    await clickAct(device, "done-for-tonight", "session-done-tonight");
+    await expectGoodbye(device, board, "idle");
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toEqual([{ type: "idle" }]);
+    expect(session.tower.idleAttempts()).toBe(1);
+
+    const replayed = await replayLog(session.databasePath, session.tower);
+    expect(replayed.skippedTowerCommands).toBe(1);
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(1);
+    expect(readSitting(session.databasePath).outcomes).toEqual(["quit"]);
+  } finally {
+    await context.close();
+    await session.host.close();
+  }
+});
+
+test("AREA-077 a refused idle stays on goodbye and toasts once", async ({ browser }, testInfo) => {
+  test.setTimeout(180_000);
+  const databasePath = join(
+    mkdtempSync(join(tmpdir(), `w8-idle-fail-${testInfo.project.name}-`)),
+    "session.sqlite",
+  );
+  const session = await startAcceptanceHost(testInfo, {
+    databasePath,
+    seed: "area-077-idle-fail",
+  });
+  const context = await browser.newContext({ baseURL: session.baseURL });
+  const board = await context.newPage();
+  const device = await context.newPage();
+  try {
+    await board.goto("/board");
+    await reachPlay(device, session.host.joinCode, true);
+    await device.locator('[data-action="menu"]').click();
+    await clickAct(device, "quit-story", "menu-quit");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "session");
+    session.tower.failNextIdle();
+    await clickAct(device, "done-for-tonight", "session-done-tonight");
+    await expect(board.locator('[data-error-code="tower-command-failed"]')).toHaveCount(1);
+    await expectGoodbye(device, board, "unavailable");
+    expect(commandFailures(session.databasePath)).toHaveLength(1);
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(1);
+    expect(session.tower.idleAttempts()).toBe(1);
+    expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(1);
+  } finally {
+    await context.close();
+    await session.host.close();
+  }
+});
+
+test("AREA-077 New game clears the quit autosave and sends no idle", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(180_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "area-077-new" });
+  const context = await browser.newContext({ baseURL: session.baseURL });
+  const device = await context.newPage();
+  try {
+    await reachPlay(device, session.host.joinCode, false);
+    await device.locator('[data-action="menu"]').click();
+    await clickAct(device, "quit-story", "menu-quit");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "session");
+    const sitting = readSitting(session.databasePath);
+    expect(sitting.autosaveGameId).toBeTruthy();
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
+
+    await clickAct(device, "new-game", "session-new-game");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
+    const after = readSitting(session.databasePath, sitting.autosaveGameId ?? undefined);
+    expect(after.autosaveGameId).toBeNull();
+    expect(after.outcomes).toEqual(["quit"]);
+    expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
+  } finally {
+    await context.close();
+    await session.host.close();
   }
 });

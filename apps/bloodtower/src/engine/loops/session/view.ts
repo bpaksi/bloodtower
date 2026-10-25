@@ -245,7 +245,11 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
   if (state.screen === "pick-game") {
     return state.autosave ? "A saved game can continue." : "A new game is ready.";
   }
-  if (state.screen === "goodbye") return "Goodbye";
+  if (state.screen === "goodbye") {
+    if (state.goodbyeTower === "idle") return "idle";
+    if (state.goodbyeTower === "no-tower") return "no tower";
+    return "unavailable";
+  }
   if (state.screen === "session") return "The session";
   return title;
 };

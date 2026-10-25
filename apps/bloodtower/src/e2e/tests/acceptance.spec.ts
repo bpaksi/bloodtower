@@ -1,4 +1,4 @@
-import { type BrowserContext, expect, type Page, test } from "@playwright/test";
+import { type BrowserContext, expect, type Locator, type Page, test } from "@playwright/test";
 import { readRun } from "../../server/scripts/timingReport.ts";
 import { DEVICE_TOKEN_KEY } from "../../web/lib/session.ts";
 import {
@@ -46,6 +46,22 @@ const playUntilDay = async (page: Page, targetDay: number) => {
     else await page.waitForTimeout(10);
   }
   throw new Error(`Timed out before reaching day ${targetDay}`);
+};
+
+const TEARDOWN = [
+  ["place-heroes", "Take each hero off the board."],
+  ["lay-out-board", "Pack up the board."],
+  ["seals-and-skulls", "Take the seals off the tower and collect the skulls."],
+] as const;
+
+const expectTeardown = async (root: Locator) => {
+  const items = root.locator("[data-teardown] [data-setup-id]");
+  await expect(items).toHaveCount(3);
+  for (const [index, [id, text]] of TEARDOWN.entries()) {
+    const item = items.nth(index);
+    await expect(item).toHaveAttribute("data-setup-id", id);
+    await expect(item).toHaveText(text);
+  }
 };
 
 const deviceMain = (page: Page) => page.locator("main.bt-device");
@@ -169,8 +185,11 @@ test("quit from pause lands on session; continue resumes after host restart", as
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 30_000 });
 
     const quit = deviceMain(page).locator('button[data-action-id="quit-story"]');
+    await expect(quit).toHaveText("Quit story");
+    await expect(page.getByRole("button", { name: "Quit game" })).toHaveCount(0);
     const quitPrompt = await quit.getAttribute("data-prompt-id");
     expect(quitPrompt).toMatch(/^pause-\d+-quit$/);
+    const connectsBefore = tower.sent().filter((item) => item.type === "connect").length;
     await clickAct(page, "quit-story", quitPrompt ?? undefined);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "session", {
       timeout: 30_000,
@@ -180,9 +199,23 @@ test("quit from pause lands on session; continue resumes after host restart", as
       deviceMain(page).locator('button[data-action-id="done-for-tonight"]'),
     ).toBeVisible();
     await expect(page.getByText(/seed/i)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Quit game" })).toHaveCount(0);
 
+    const board = await context.newPage();
+    await board.goto("/board");
     await clickAct(page, "done-for-tonight", "session-done-tonight");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "goodbye");
+    const boardMain = board.locator("main.bt-board");
+    await expect(boardMain).toHaveAttribute("data-screen", "goodbye");
+    await expect(boardMain).toHaveAttribute("data-board-mode", "startup");
+    await expect(boardMain.getByRole("heading", { name: "Goodbye" })).toBeVisible();
+    await expect(boardMain.locator("[data-next-prompt] b")).toHaveText("The evening is closing.");
+    await expectTeardown(deviceMain(page));
+    await expectTeardown(boardMain);
+    await expect(deviceMain(page).locator("[data-tower-state]")).toHaveText("unavailable");
+    await expect(boardMain.locator("[data-tower-state]")).toHaveText("unavailable");
+    expect(tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
+    expect(tower.sent().filter((item) => item.type === "connect")).toHaveLength(connectsBefore);
   } finally {
     await context.close();
     await session.host.close();
@@ -222,6 +255,7 @@ test("quit from pause lands on session; continue resumes after host restart", as
     expect(walked).toBe(true);
     await expect(deviceMain(page2)).toHaveAttribute("data-screen", "play");
     await expect(deviceMain(page2).getByText(/Day 3/i)).toBeVisible();
+    expect(restarted.tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
   } finally {
     await context2.close();
     await restarted.host.close();
