@@ -133,9 +133,7 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     const heroes = loaded.base.heroes
       .filter((hero) => partyHeroIds.has(hero.id))
       .map((hero) => ({ id: hero.id, name: hero.name }));
-    const packSteps = ((story as { setup?: { id: string; label: string }[] }).setup ?? []).map(
-      (step) => ({ id: step.id, label: step.label }),
-    );
+    const packSteps = story.setup.map((step) => ({ id: step.id, label: step.label }));
     stories.push({
       card: {
         id: story.pack_id,

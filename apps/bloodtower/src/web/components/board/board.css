@@ -2260,6 +2260,73 @@
   font-size: var(--bt-size-caption);
 }
 
+/* Move frame (UI-028, DEC-198): one slim line along the top of the painting. */
+.bt-board[data-board-layer="move"] > .bt-band {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  height: 4rem;
+  max-height: 72px;
+  margin: 0;
+  padding: 0 1.25rem;
+  background: rgb(11 8 6 / 0.78);
+  color: var(--bt-bone);
+  font-size: 1.2rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bt-board[data-board-layer="move"] > .bt-waiting-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  max-width: min(36rem, 60vw);
+  margin: 0;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: clamp(1.75rem, 2.4vw, 2.75rem);
+  line-height: 1.2;
+}
+
+/* Enter place (DEC-201): the still fills most of the TV. The painting stays behind it. */
+.bt-board[data-board-layer="place"] {
+  padding: 0;
+}
+
+.bt-board[data-board-layer="place"] > .bt-place-still {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  width: 78vw;
+  max-height: 100dvh;
+  margin: 0;
+  transform: translate(-50%, -50%);
+}
+
+.bt-board[data-board-layer="place"] > .bt-place-still img {
+  width: 100%;
+  max-height: calc(100dvh - 5.5rem);
+  object-fit: cover;
+}
+
+.bt-board[data-board-layer="place"] > .bt-place-still figcaption {
+  flex: 0 0 auto;
+  margin-top: 0.35rem;
+  text-align: center;
+}
+
 /*
  * Startup lobby (C1 step 10): one centred dialog over the landing painting.
  * Not the two-column shell. The R2-01 strip is debug-only.
@@ -2287,8 +2354,19 @@
 
 .bt-board[data-board-mode="startup"] .bt-startup-stage > .bt-dialog-frame {
   width: 100%;
-  max-height: min(72dvh, 42rem);
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* The weekend frames do not clip their text. A line that fits is shown whole. */
+.bt-board[data-board-mode="startup"] .bt-next b,
+.bt-board[data-board-mode="startup"] .bt-carousel-tagline,
+.bt-board[data-board-mode="startup"] .bt-carousel-peek p {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  text-overflow: unset;
+  white-space: normal;
 }
 
 .bt-board[data-screen="pick-story"] .bt-startup-stage > .bt-dialog-frame,
