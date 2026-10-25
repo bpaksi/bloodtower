@@ -692,10 +692,21 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     }
     await passOpening(first.device, first.board);
     const roll = first.device.locator('button[data-prompt-id*="roll-done"]');
-    if ((await roll.count()) > 0) await roll.click();
-    await expect(first.device.locator('button[data-action-id="enter"]')).toBeVisible({
-      timeout: 20_000,
-    });
+    const enter = first.device.locator('button[data-action-id="enter"]');
+    await expect
+      .poll(
+        async () => {
+          if ((await roll.count()) > 0) return "roll";
+          if ((await enter.count()) > 0) return "enter";
+          return "";
+        },
+        { timeout: 20_000 },
+      )
+      .not.toBe("");
+    if ((await roll.count()) > 0) {
+      await roll.click();
+      await expect(enter).toBeVisible({ timeout: 20_000 });
+    }
     const beforeEnter = await readStatus(first.device);
     await clickAct(first.device, "enter");
     await expect.poll(async () => (await readStatus(first.device)).inside).toBe("true");
