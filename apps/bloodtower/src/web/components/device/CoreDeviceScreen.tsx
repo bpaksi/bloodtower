@@ -22,6 +22,22 @@ const SCREEN_TITLE: Record<string, string> = {
   goodbye: "Goodbye",
 };
 
+/** Existing step names (view.ts STEP_NAME). Shown as context; the instruction stays `shows`. */
+const STEP_CONTEXT: Record<string, string> = {
+  splash: "Splash",
+  "tower-connect": "Tower Connect",
+  "pick-story": "Pick Story",
+  "game-settings": "Game settings",
+  "claim-heroes": "Party Join",
+  setup: "Setup",
+  begin: "Begin",
+  "pick-game": "Pick a game",
+  play: "Play",
+  pause: "Paused",
+  session: "Session",
+  goodbye: "Goodbye",
+};
+
 const iconFor = (actionId: string): string => {
   if (actionId === "walk") return "→";
   if (actionId === "enter") return "⌂";
@@ -67,14 +83,17 @@ export function CoreDeviceScreen({
   const scrolling = body.filter((action) => !isPinned(action) && !inMoveMap(action));
   const renderAction = (action: OfferedAction) => {
     const icon = iconFor(action.actionId);
+    const connectChoice = body.some((row) => row.actionId === "play-without-tower");
+    const primary = !connectChoice || action.actionId === "tower-connect";
     return (
       <button
         key={`${action.promptId}:${action.actionId}`}
         type="button"
-        className="bt-primary"
+        className={primary ? "bt-primary" : "bt-secondary"}
         data-prompt-id={action.promptId}
         data-action-id={action.actionId}
         data-action={action.actionId}
+        data-primary={connectChoice ? (primary ? "true" : "false") : undefined}
         disabled={!live}
         onClick={() => onAct(action.promptId, action.actionId)}
       >
@@ -93,6 +112,9 @@ export function CoreDeviceScreen({
   return (
     <main className="bt-device" data-screen={view.screen}>
       <div className="bt-scroll">
+        <div className="bt-kicker" data-step-context>
+          {STEP_CONTEXT[view.screen] ?? view.screen}
+        </div>
         <h1 className="text-2xl font-semibold text-[var(--bt-accent)]">
           {SCREEN_TITLE[view.screen] ?? view.screen}
         </h1>
@@ -103,6 +125,7 @@ export function CoreDeviceScreen({
           <>
             <p
               className="mt-2 text-lg"
+              data-step-instruction=""
               data-day={view.table?.day}
               data-moves={view.table?.movesLeft ?? undefined}
               data-roll={view.table?.moveRoll ?? undefined}

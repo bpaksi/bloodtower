@@ -131,6 +131,8 @@ const skipTowerToClaim = async (page: Page, joinCode: string) => {
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
+  await page.locator('button[data-action="play-without-tower"]').click();
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
 };
 
@@ -260,6 +262,10 @@ const reachPlay = async (device: Page, joinCode: string, linked: boolean) => {
   await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(device, "continue", "continue-game-settings");
+  if (!linked) {
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "tower-connect");
+    await device.locator('button[data-action="play-without-tower"]').click();
+  }
   await expect(deviceMain(device)).toHaveAttribute("data-screen", "claim-heroes");
   await holdHeroesFromTest(device, [...HERO_IDS]);
   await clickAct(device, "continue", "continue-claim-heroes");
@@ -553,7 +559,10 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
     await finishSetup(device);
     await clickAct(device, "continue");
     await device.locator('[data-action="menu"]').click();
-    await expect(device.locator('button[data-prompt-id="menu-connect"]')).toBeVisible();
+    const menuConnect = device.locator('button[data-prompt-id="menu-connect"]');
+    await expect(menuConnect).toBeVisible();
+    await expect(menuConnect).toHaveAccessibleName("Connect Tower");
+    await expect(menuConnect).toHaveAttribute("data-action", "tower-connect");
     await device.locator('[data-action="menu"]').click();
     const before = await readStatus(device);
     expect(Number(before.moves)).toBeGreaterThanOrEqual(2);
