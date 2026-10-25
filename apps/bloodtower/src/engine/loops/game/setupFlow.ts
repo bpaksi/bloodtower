@@ -18,7 +18,7 @@ export const chosenStory = (state: ShellState) =>
 
 export const refreshSetupSteps = (state: ShellState): void => {
   const story = chosenStory(state);
-  // `story.setup` is already merged (and pack-filtered) when the host loads the catalog.
+  // `story.setup` is already merged with the engine seals step when the host loads the catalog.
   state.setupSteps = story ? [...story.setup] : [];
   state.setupAt = 0;
 };

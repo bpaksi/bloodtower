@@ -254,16 +254,26 @@ function StartupPanel({ view }: { view: BoardView }) {
 }
 
 /** Centred startup dialog over the landing painting. No controls. */
+const setupStepId = (view: BoardView): string | undefined => {
+  if (view.screen !== "setup") return undefined;
+  const promptId = view.actions.find((action) =>
+    action.promptId.startsWith("continue-setup-"),
+  )?.promptId;
+  return promptId ? promptId.slice("continue-setup-".length) : undefined;
+};
+
 export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean }) {
   const warning = joinWarning(view);
   const status = startupStatus(view);
   const waiting = waitingFor(view);
+  const setupStep = setupStepId(view);
   return (
     <main
       className="bt-board"
       data-board-mode="startup"
       data-board-layer="startup"
       data-screen={view.screen}
+      data-setup-step={setupStep}
     >
       <div className="bt-board-backdrop" aria-hidden="true" />
       {warning ? (

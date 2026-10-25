@@ -232,6 +232,16 @@ assets:
     expect(dracula?.card.title).toBe("The Count of Vellmoor");
     expect(dracula?.card.players).toBeNull();
     expect(dracula?.card.cover).toBe("/packs/dracula/assets/cover.png");
+    expect(testStory?.setup.map((step) => step.id)).toEqual([
+      "seals-and-skulls",
+      "lay-out-board",
+      "place-heroes",
+    ]);
+    expect(testStory?.setup.map((step) => step.label)).toEqual([
+      "Place the seals on the tower and load the skulls into the chute.",
+      "Lay out the board and orient the kingdoms.",
+      "Stand each hero on their start building.",
+    ]);
   });
 
   it("lints every door under the configured packs folder", () => {

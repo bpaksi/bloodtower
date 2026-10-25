@@ -1,9 +1,10 @@
 "use client";
 
-import type { BoardView } from "bloodtower-protocols";
+import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
+import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
 
 /** v2 story board. Startup is a centred dialog. Play keeps the table band. Display only. */
@@ -14,8 +15,15 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const paused = pauseText(view.screen);
   const table = view.table ?? null;
   const place = view.place ?? null;
+  const momentId =
+    view.narration && isOpeningMomentId(view.narration.lineId) ? view.narration.lineId : null;
   return (
-    <main className="bt-board" data-screen={view.screen} data-board-mode="play">
+    <main
+      className="bt-board"
+      data-screen={view.screen}
+      data-board-mode="play"
+      data-moment={momentId ?? undefined}
+    >
       {warning ? (
         <p className="bt-board-warning" role="status">
           {warning}
@@ -38,6 +46,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           </span>
         </header>
       ) : null}
+      {momentId ? <OpeningMoment momentId={momentId} /> : null}
       {table?.waitingFor ? (
         <p className="bt-waiting-pulse" data-waiting role="status">
           {table.waitingFor}
