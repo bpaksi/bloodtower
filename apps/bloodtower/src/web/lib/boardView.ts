@@ -3,8 +3,8 @@ import { type BoardView, boardViewPayloadSchema } from "bloodtower-protocols";
 /** What the board shows before the first view arrives. */
 export const waitingStoryboard = (): BoardView =>
   boardViewPayloadSchema.parse({
-    screen: "pick-game",
-    levels: [{ id: "wait", label: "Session", shows: "Connecting…" }],
+    screen: "splash",
+    levels: [{ id: "splash", label: "Splash", shows: "Blood Tower" }],
     heroes: [],
     narration: null,
     actions: [],

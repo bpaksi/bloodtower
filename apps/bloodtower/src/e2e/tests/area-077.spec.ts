@@ -228,10 +228,21 @@ const expectGoodbye = async (
 
 const walkOnce = async (page: Page) => {
   const roll = page.locator('button[data-action-id="continue"][data-prompt-id*="roll-done"]');
+  // The last opening Continue lands on play before the roll offer is on the device.
+  await expect
+    .poll(
+      async () => {
+        if ((await roll.count()) > 0) return "roll";
+        const moves = Number((await readStatus(page)).moves);
+        return moves > 0 ? "moves" : "";
+      },
+      { timeout: 20_000 },
+    )
+    .not.toBe("");
   if ((await roll.count()) > 0) {
     await expect(roll).toBeEnabled({ timeout: 20_000 });
     await roll.click();
-    await expect.poll(async () => (await readStatus(page)).moves).not.toBeNull();
+    await expect.poll(async () => Number((await readStatus(page)).moves)).toBeGreaterThan(0);
   }
   const before = await readStatus(page);
   expect(Number(before.moves)).toBeGreaterThan(0);
@@ -313,15 +324,17 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
     await clickAct(device, "continue", "continue-claim-heroes");
     await finishSetup(device);
 
-    await expect(board.locator("[data-kingdom='Arisilon (N)']")).toContainText("Radiant Mountains");
-    await expect(board.locator("[data-kingdom='Brynthia (E)']")).toContainText("Inner Kinghills");
-    await expect(board.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
-    await expect(board.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
-    await expect(board.locator("[data-alone='true']")).toHaveCount(4);
+    await expect(device.locator("[data-kingdom='Arisilon (N)']")).toContainText(
+      "Radiant Mountains",
+    );
+    await expect(device.locator("[data-kingdom='Brynthia (E)']")).toContainText("Inner Kinghills");
+    await expect(device.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
+    await expect(device.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
+    await expect(device.locator("[data-alone='true']")).toHaveCount(4);
     await expect(device.locator('button[data-action-id="split"]')).toHaveCount(0);
     await expect(device.locator('button[data-action-id="join"]')).toHaveCount(0);
 
-    await expect(board.locator("[data-band] [data-health]")).toHaveText(/unavailable/);
+    await expect(board.locator("[data-band] [data-health]").first()).toHaveText(/unavailable/);
     await expect(board.locator("[data-band] [data-purse]")).toHaveText(/unavailable/);
     await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
     await expect(board.locator("[data-day]")).toHaveText(/Day \d+/);

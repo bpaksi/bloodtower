@@ -357,11 +357,14 @@ test("W5 Begin plays four opening moments before any walk", async ({ browser }, 
 
     await expect(boardMain(board)).not.toHaveAttribute("data-moment", /.+/);
     await expect(device.locator('button[data-action-id="walk"]')).toHaveCount(0);
-    await expect(board.locator("[data-alone='true']")).toHaveCount(4);
-    await expect(board.locator("[data-kingdom='Arisilon (N)']")).toContainText("Radiant Mountains");
-    await expect(board.locator("[data-kingdom='Brynthia (E)']")).toContainText("Inner Kinghills");
-    await expect(board.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
-    await expect(board.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
+    await expect(board.locator("[data-roster], [data-kingdom], [data-hero-place]")).toHaveCount(0);
+    await expect(device.locator("[data-alone='true']")).toHaveCount(4);
+    await expect(device.locator("[data-kingdom='Arisilon (N)']")).toContainText(
+      "Radiant Mountains",
+    );
+    await expect(device.locator("[data-kingdom='Brynthia (E)']")).toContainText("Inner Kinghills");
+    await expect(device.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
+    await expect(device.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
     await expect(board.locator("[data-band] [data-moves]")).toHaveText(/unavailable/);
     await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
     expect(session.tower.sent()).toEqual([]);

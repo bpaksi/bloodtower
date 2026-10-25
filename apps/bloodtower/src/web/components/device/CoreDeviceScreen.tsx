@@ -188,7 +188,13 @@ export function CoreDeviceScreen({
             {view.table ? (
               <ul className="mt-4" data-roster>
                 {view.table.groups.map((group) => (
-                  <li key={group.heroId} data-hero-place={group.heroId}>
+                  <li
+                    key={group.heroId}
+                    data-hero-place={group.heroId}
+                    data-kingdom={group.kingdomLabel}
+                    data-space-name={group.spaceName}
+                    data-alone={group.alone ? "true" : "false"}
+                  >
                     {group.heroName} · {group.kingdomLabel} · {group.spaceName}
                     {group.alone ? " · alone" : ""}
                   </li>
