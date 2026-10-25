@@ -114,6 +114,43 @@ describe("game setup forward and back", () => {
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
     ]);
 
+  it("offers Connect Tower after game settings when the tower was never set up", () => {
+    let state = start();
+    state = runPresses(state, [
+      press("ipad-0", "splash-play", "continue"),
+      press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
+    ]);
+    const entered = stepShell(state, press("ipad-0", "continue-game-settings", "continue"));
+    expect(entered.state.screen).toBe("tower-connect");
+    expect(entered.state.towerLinked).toBe(false);
+    expect(entered.effects.some((effect) => effect.kind === "tower-command")).toBe(false);
+    const view = projectShellView(entered.state);
+    expect(view.levels.at(-1)?.label).toBe("Tower Connect");
+    expect(view.levels.at(-1)?.shows).toBe(
+      "No tower yet. An iPad can connect it, or play on without it.",
+    );
+    const connect = view.actions.find((action) => action.actionId === "tower-connect");
+    const skip = view.actions.find((action) => action.actionId === "play-without-tower");
+    expect(connect).toMatchObject({
+      promptId: "tower-connect",
+      label: "Connect Tower",
+      open: true,
+    });
+    expect(skip).toMatchObject({
+      promptId: "play-without-tower",
+      label: "Play without Tower",
+      open: true,
+    });
+
+    const skipped = stepShell(
+      entered.state,
+      press("ipad-0", "play-without-tower", "play-without-tower"),
+    );
+    expect(skipped.state.screen).toBe("claim-heroes");
+    expect(skipped.state.towerLinked).toBe(false);
+    expect(skipped.effects.some((effect) => effect.kind === "tower-command")).toBe(false);
+  });
+
   it("walks pick-story, game-settings, claim-heroes, each setup step, and begin forward", () => {
     let state = chooseStory(throughTower());
     expect(state.screen).toBe("game-settings");
@@ -431,6 +468,7 @@ const playWithoutTower = () => {
     press("ipad-0", "splash-play", "continue"),
     press("ipad-0", `continue-pick-story-${"test"}`, "continue"),
     press("ipad-0", "continue-game-settings", "continue"),
+    press("ipad-0", "play-without-tower", "play-without-tower"),
   ]);
   for (const [index, hero] of TEST_STORY.heroes.entries()) {
     const deviceId = `ipad-${index}`;

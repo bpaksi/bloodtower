@@ -341,6 +341,11 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
             awaitingPress: false,
           };
         }
+        const game = next.loops.stack.find((frame) => frame.loopId === "game");
+        if (game && (game.local as GameLocal).phase === "tower-connect") {
+          game.local = { phase: "claim-heroes", awaitingPress: false, playStarted: false };
+          next.screen = "claim-heroes";
+        }
       }
     } else if (e.promptId === "tower-calibrate" && e.actionId === "tower-calibrate") {
       next.towerLinked = true;

@@ -56,7 +56,13 @@ describe("startup board copy", () => {
       press(`continue-pick-story-${state.focusStoryId}`, "continue"),
       press("continue-game-settings", "continue"),
     ]);
+    expect(state.screen).toBe("tower-connect");
+    expect(projectShellView(state).levels.at(-1)?.shows).toBe(
+      "No tower yet. An iPad can connect it, or play on without it.",
+    );
+    state = run(state, [press("play-without-tower", "play-without-tower")]);
     expect(state.screen).toBe("claim-heroes");
+    expect(state.towerLinked).toBe(false);
     for (const hero of TEST_STORY.heroes) {
       state = stepShell(state, {
         kind: "hero-hold",

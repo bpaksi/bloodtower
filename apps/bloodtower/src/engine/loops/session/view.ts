@@ -27,7 +27,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (promptId === "continue-begin") return "Begin";
   if (promptId.startsWith("continue-setup-")) return "Done";
   if (promptId.startsWith("day-") && promptId.endsWith("-roll-done")) return "Take the move roll";
-  if (promptId === "menu-connect") return "Connect tower";
+  if (promptId === "menu-connect") return "Connect Tower";
   if (actionId === "walk") {
     const spaceId = promptId.split("--").slice(2).join("--");
     const name = state.play?.content.board.spaceById.get(spaceId)?.name ?? spaceId;
@@ -47,7 +47,8 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "done-for-tonight") return "Done for tonight";
   if (actionId === "quit-story") return "Quit story";
   if (actionId === "reconnect") return "Reconnect";
-  if (promptId === "tower-connect" && actionId === "tower-connect") return "Connect tower";
+  if (promptId === "tower-connect" && actionId === "tower-connect") return "Connect Tower";
+  if (actionId === "play-without-tower") return "Play without Tower";
   if (promptId === "tower-calibrate" && actionId === "tower-calibrate") return "Calibrate";
   return actionId;
 };

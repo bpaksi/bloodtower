@@ -74,14 +74,31 @@
   color: var(--bt-parchment-dark);
 }
 
-.bt-title-heading {
-  margin: 0;
-  font-family: var(--bt-font-title);
-  font-size: clamp(2.25rem, 6.5vw, 3.75rem);
-  letter-spacing: 0.08em;
-  color: var(--bt-candle);
-  line-height: 1.05;
-  text-shadow: 0 2px 18px rgb(0 0 0 / 0.55);
+.bt-title-banner {
+  display: block;
+  width: 100%;
+  height: clamp(4.5rem, 12vw, 7.5rem);
+  object-fit: contain;
+  object-position: left center;
+}
+
+.bt-title-sound {
+  justify-self: start;
+  min-height: var(--bt-touch, 64pt);
+  padding: 0.4rem 1.25rem;
+  border: 2px solid var(--bt-candle, #f5c451);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--bt-bone, #f4efe6);
+  font-family: var(--bt-font-label, inherit);
+  font-size: 1.15rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.bt-title-sound:focus-visible {
+  outline: 3px solid var(--bt-candle, #f5c451);
+  outline-offset: 3px;
 }
 
 .bt-title-actions {
@@ -185,8 +202,8 @@
     width: min(4.5rem, 10vw);
   }
 
-  .bt-title-heading {
-    font-size: clamp(2rem, 5.5vw, 3rem);
+  .bt-title-banner {
+    height: clamp(3.5rem, 10vw, 5.5rem);
   }
 
   .bt-title-action {
