@@ -331,6 +331,26 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
     await expect(device.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
     await expect(device.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
     await expect(device.locator("[data-alone='true']")).toHaveCount(4);
+    await expect(device.locator('[data-hero-place="hero-a"]')).toHaveAttribute(
+      "data-kingdom",
+      "Arisilon (N)",
+    );
+    await expect(device.locator('[data-hero-place="hero-b"]')).toHaveAttribute(
+      "data-kingdom",
+      "Brynthia (E)",
+    );
+    await expect(device.locator('[data-hero-place="hero-c"]')).toHaveAttribute(
+      "data-kingdom",
+      "Durnin (S)",
+    );
+    await expect(device.locator('[data-hero-place="hero-d"]')).toHaveAttribute(
+      "data-kingdom",
+      "Zenon (W)",
+    );
+    await expect(device.locator('[data-hero-place="hero-e"]')).toHaveCount(0);
+    await expect(device.locator('[data-hero-place="hero-f"]')).toHaveCount(0);
+    await expect(board.locator("main :is(button, input, textarea, select, a)")).toHaveCount(0);
+    await expect(board.locator("[data-hero-place], [data-kingdom], [data-roster]")).toHaveCount(0);
     await expect(device.locator('button[data-action-id="split"]')).toHaveCount(0);
     await expect(device.locator('button[data-action-id="join"]')).toHaveCount(0);
 
@@ -522,10 +542,10 @@ test("AREA-077 one shared press wins and a private line stays on its iPad", asyn
     await expect(deviceMain(pageB)).toHaveAttribute("data-screen", "claim-heroes");
     await holdHeroesFromTest(pageA, ["hero-a", "hero-b"]);
     await holdHeroesFromTest(pageB, ["hero-c", "hero-d"]);
-    await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
-    await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
-    await expect(pageB.getByText("Only Hero D hears this.")).toBeVisible();
-    await expect(pageB.getByText("Only Hero A hears this.")).toHaveCount(0);
+    await expect(pageA.getByText("Only Hero A hears this.")).toHaveCount(0);
+    await expect(pageB.getByText("Only Hero D hears this.")).toHaveCount(0);
+    await expect(pageA.locator("[data-private-line]")).toHaveCount(0);
+    await expect(pageB.locator("[data-private-line]")).toHaveCount(0);
 
     gateA.hold();
     gateB.hold();

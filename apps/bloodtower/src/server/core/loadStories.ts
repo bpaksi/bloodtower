@@ -129,10 +129,9 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     const coverFile = resolveCover(dir, "assets/cover.png");
     const cover = coverFile ? "assets/cover.png" : undefined;
     assetIndexes.push(indexAssets(dir, story.pack_id, story.assets, cover));
-    const partyHeroIds = new Set(story.start.assignments.map((row) => row.hero));
-    const heroes = loaded.base.heroes
-      .filter((hero) => partyHeroIds.has(hero.id))
-      .map((hero) => ({ id: hero.id, name: hero.name }));
+    // The pick pool is every base hero. Party size decides how many sit; start assignments
+    // only place the ones who do.
+    const heroes = loaded.base.heroes.map((hero) => ({ id: hero.id, name: hero.name }));
     const packSteps = story.setup.map((step) => ({ id: step.id, label: step.label }));
     stories.push({
       card: {

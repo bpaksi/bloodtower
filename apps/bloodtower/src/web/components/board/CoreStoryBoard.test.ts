@@ -142,14 +142,14 @@ describe("story board startup chrome", () => {
     const markup = html({
       ...splashView,
       screen: "claim-heroes",
-      levels: [join, { id: "claim-heroes", label: "claim-heroes", shows: "0 of 4 claimed" }],
+      levels: [join, { id: "claim-heroes", label: "claim-heroes", shows: "1 of 4 picked" }],
       heroes: heroes.map((hero, index) => ({ ...hero, held: index === 0 })),
     });
     expect(markup).toContain('data-board-mode="startup"');
     expect(markup).toContain('data-join-code="124285"');
-    expect(markup).toContain("1 of 4 claimed");
-    expect(markup).toContain("Unclaimed");
-    expect(markup).toContain("Claimed");
+    expect(markup).toContain("1 of 4 picked");
+    expect(markup).toContain("Open");
+    expect(markup).toContain("Picked");
     expect(markup).toContain('data-portrait-card="Hero B"');
     expect(markup).not.toContain("Hero A — waiting");
     expect(markup).not.toContain("data-hero-place");

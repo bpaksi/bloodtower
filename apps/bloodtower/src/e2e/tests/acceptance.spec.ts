@@ -88,7 +88,7 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
     await expect(main).toHaveAttribute("data-screen", "claim-heroes", { timeout: 10_000 });
     await expect(main).toHaveAttribute("data-board-mode", "startup");
     await expect(main.locator('[data-illusionist-asset="dialog-frame"]')).toHaveCount(1);
-    await expect(main.locator("[data-claim-count]")).toHaveText("4 of 4 claimed");
+    await expect(main.locator("[data-claim-count]")).toHaveText("4 of 4 picked");
     for (const [id, label] of [
       ["hero-a", "Hero A"],
       ["hero-b", "Hero B"],
@@ -98,7 +98,7 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
       const row = main.locator(`[data-hero="${id}"]`);
       await expect(row).toHaveAttribute("data-held", "true");
       await expect(row.getByText(label, { exact: true })).toBeVisible();
-      await expect(row.getByText("Claimed", { exact: true })).toBeVisible();
+      await expect(row.getByText("Picked", { exact: true })).toBeVisible();
     }
     await expect(main.getByText("Unclaimed", { exact: true })).toHaveCount(0);
     await expect(main.getByText(/— held|— waiting/)).toHaveCount(0);
@@ -320,49 +320,46 @@ test("core: one winner per press, private wire, disconnect pause, run from event
       timeout: 30_000,
     });
 
-    await test.step("private setup lines reach only the holder on screen and on the wire", async () => {
+    await test.step("claim-heroes has no private line on the screen or the wire", async () => {
       await holdHeroesFromTest(pageA, ["hero-a", "hero-b"]);
       await holdHeroesFromTest(pageB, ["hero-c", "hero-d"]);
-      await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
-      await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
-      await expect(pageB.getByText("Only Hero D hears this.")).toBeVisible();
-      await expect(pageB.getByText("Only Hero A hears this.")).toHaveCount(0);
-      await expect(board.getByText(/Only Hero [A-D] hears this/)).toHaveCount(0);
-      expect(gateA.received.some((frame) => frame.includes("Only Hero A hears this."))).toBe(true);
-      expect(gateB.received.some((frame) => frame.includes("Only Hero D hears this."))).toBe(true);
-      for (const frame of gateA.received) {
-        expect(frame).not.toContain("Only Hero D hears this.");
-        expect(frame).not.toContain(".private.hero-d");
-      }
-      for (const frame of gateB.received) {
-        expect(frame).not.toContain("Only Hero A hears this.");
-        expect(frame).not.toContain(".private.hero-a");
+      await expect(pageA.getByText(/hears this/)).toHaveCount(0);
+      await expect(pageB.getByText(/hears this/)).toHaveCount(0);
+      await expect(pageA.locator("[data-private-line]")).toHaveCount(0);
+      await expect(board.getByText(/hears this/)).toHaveCount(0);
+      for (const frame of [...gateA.received, ...gateB.received, ...boardFrames]) {
+        expect(frame).not.toContain("hears this");
+        expect(frame).not.toContain(".private.");
       }
       expect(boardViewFrames(boardFrames).length).toBeGreaterThan(0);
-      for (const frame of boardFrames) {
-        expect(frame).not.toContain(".private.");
-        expect(frame).not.toMatch(/Only Hero [A-D] hears this/);
-      }
     });
 
     await holdHeroesFromTest(pageA, [...HERO_IDS]);
     await holdHeroesFromTest(pageB, [...HERO_IDS]);
     await clickAct(pageA, "continue", "continue-claim-heroes");
     const setupDeadline = Date.now() + 90_000;
+    let sawPrivateLine = false;
     while (Date.now() < setupDeadline) {
       const screen = await deviceMain(pageA).getAttribute("data-screen");
       if (screen === "play") break;
       if (screen === "begin") {
+        await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
+        await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
+        sawPrivateLine = true;
         await holdHeroesFromTest(pageA, [...HERO_IDS]);
         await clickAct(pageA, "continue", "continue-begin");
         break;
       }
       if (screen === "setup") {
+        await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
+        await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
+        sawPrivateLine = true;
         await clickAct(pageA, "continue");
         continue;
       }
       await pageA.waitForTimeout(50);
     }
+    expect(sawPrivateLine).toBe(true);
     await waitForPlayScreen(pageA);
 
     await test.step("dropping the only holder for heroes pauses until rejoin", async () => {

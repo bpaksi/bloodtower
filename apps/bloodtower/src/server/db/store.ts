@@ -90,6 +90,7 @@ const pressFromRow = (row: typeof controlPresses.$inferSelect): ControlPress =>
 
 export interface SessionStore {
   saveRoster: (snapshot: RosterSnapshot) => void;
+  listDevices: () => RosterDevice[];
   insertPress: (sessionId: string, press: ControlPress) => void;
   insertMark: (mark: TimingMark) => number;
   closeMark: (
@@ -104,6 +105,23 @@ export interface SessionStore {
 
 /** SQLite backing for the session, its presses and its timing rows. */
 export const createSessionStore = (db: Db): SessionStore => ({
+  listDevices: () =>
+    db
+      .select()
+      .from(devices)
+      .all()
+      .flatMap((row) => {
+        if (row.formFactor !== "ipad" && row.formFactor !== "phone") return [];
+        return [
+          {
+            deviceId: row.deviceId,
+            formFactor: row.formFactor,
+            token: row.token,
+            connected: row.connected,
+          },
+        ];
+      }),
+
   saveRoster: (snapshot) => {
     db.transaction((tx) => {
       tx.insert(sessions)

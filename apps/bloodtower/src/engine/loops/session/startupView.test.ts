@@ -73,7 +73,7 @@ describe("startup board copy", () => {
       }).state;
     }
     view = projectShellView(state);
-    expect(view.levels.at(-1)?.shows).toBe("4 of 4 claimed");
+    expect(view.levels.at(-1)?.shows).toBe("4 of 4 picked");
 
     state = run(state, [press("continue-claim-heroes", "continue")]);
     expect(state.screen).toBe("setup");

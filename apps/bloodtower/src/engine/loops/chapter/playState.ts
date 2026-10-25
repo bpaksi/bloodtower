@@ -77,6 +77,41 @@ export const rollGroupMoves = (seed: string, play: PlayState, config: MoveRollCo
   return Math.max(config.floor, rolled.total);
 };
 
+const KINGDOM_ORDER = ["N", "E", "S", "W"] as const satisfies readonly KingdomId[];
+
+/**
+ * Seat the chosen heroes, one per citadel.
+ * A pack assignment keeps its kingdom. Anyone else takes the next free kingdom in N, E, S, W.
+ */
+export const seatAtCitadels = (
+  assignments: readonly StartAssignment[],
+  seatedHeroIds: readonly string[],
+): StartAssignment[] => {
+  const preferred = new Map(assignments.map((row) => [row.hero, row.kingdom]));
+  const used = new Set<KingdomId>();
+  const placed = new Map<string, KingdomId>();
+  const unassigned: string[] = [];
+  for (const hero of seatedHeroIds) {
+    const kingdom = preferred.get(hero);
+    if (kingdom && !used.has(kingdom)) {
+      used.add(kingdom);
+      placed.set(hero, kingdom);
+    } else {
+      unassigned.push(hero);
+    }
+  }
+  for (const hero of unassigned) {
+    const kingdom = KINGDOM_ORDER.find((id) => !used.has(id));
+    if (!kingdom) break;
+    used.add(kingdom);
+    placed.set(hero, kingdom);
+  }
+  return seatedHeroIds.flatMap((hero) => {
+    const kingdom = placed.get(hero);
+    return kingdom ? [{ hero, kingdom }] : [];
+  });
+};
+
 export const initPlayState = (seed: string, content: PlayContent): PlayState => {
   const rng = eventRng(seed, 0);
   const assignments = content.start.assignments;

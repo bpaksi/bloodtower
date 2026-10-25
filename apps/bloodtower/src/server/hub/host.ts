@@ -152,6 +152,26 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   });
   let broadcastImpl: () => void = () => undefined;
   let engine: CoreSession;
+  const persistRoster = () => {
+    const current = engine.state();
+    const roster = engine.roster();
+    store.saveRoster({
+      sessionId,
+      packId,
+      packVersion,
+      startedWall: clock.wall(),
+      joinCode,
+      devices: roster.devices.map((device) => ({
+        deviceId: device.id,
+        formFactor: device.formFactor,
+        token: device.token,
+        connected: current.devices.has(device.id),
+      })),
+      holdings: Object.entries(current.holdings).flatMap(([hunter, deviceId]) =>
+        deviceId == null ? [] : [{ deviceId, hunter }],
+      ),
+    });
+  };
   try {
     engine = createCoreSession({
       sessionId,
@@ -164,8 +184,12 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       tower,
       clock,
       log,
-      onChange: () => broadcastImpl(),
+      onChange: () => {
+        broadcastImpl();
+        persistRoster();
+      },
     });
+    engine.restoreDevices(store.listDevices());
   } catch (error) {
     opened.close();
     throw error;
