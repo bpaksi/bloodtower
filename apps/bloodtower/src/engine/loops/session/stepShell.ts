@@ -2,11 +2,11 @@ import { openingActiveIndex, openingFinishedIndex } from "../../../protocols/ope
 import type { EngineEffect } from "../../effects.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
-import { bindPlayState, initPlayState } from "../chapter/playState.ts";
+import { bindPlayState, initPlayState, seatAtCitadels } from "../chapter/playState.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress, handleSessionHubPress } from "../game/loop.ts";
-import { allHeroesHeld } from "../game/setupFlow.ts";
+import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
 import type { ShellEffect } from "./effects.ts";
@@ -135,7 +135,13 @@ const pauseIfNeeded = (state: ShellState): void => {
   if (state.stage !== "playing" && state.stage !== "paused") return;
   const story = state.stories.find((s) => s.card.id === state.boundStoryId);
   if (!story) return;
-  const unheld = story.heroes.some((hero) => state.holdings[hero.id] == null);
+  // Before the opening ends, the table is not built yet. Watch the seated count.
+  // An unpicked pool hero is not a missing seat.
+  const unheld = state.play
+    ? state.play.groups
+        .flatMap((group) => group.heroIds)
+        .some((heroId) => state.holdings[heroId] == null)
+    : heldCount(state) < partySize(state);
   if (unheld) {
     if (state.pause?.cause !== "disconnect") {
       state.pauseSerial += 1;
@@ -237,7 +243,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       return withEffects(state, effects);
     }
     if (e.action === "take") {
-      if (next.holdings[e.heroId] != null) {
+      if (next.holdings[e.heroId] != null || heldCount(next) >= partySize(next)) {
         return withEffects(state, effects);
       }
       next.holdings[e.heroId] = e.deviceId;
@@ -283,6 +289,8 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     if (!setting?.options.some((o) => o.id === e.optionId)) {
       return withEffects(state, effects);
     }
+    const current = state.settingValues[e.settingId] ?? setting.default;
+    if (current === e.optionId) return withEffects(state, effects);
     const next = {
       ...state,
       settingValues: { ...state.settingValues, [e.settingId]: e.optionId },
@@ -417,7 +425,18 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         next.playContent &&
         !next.resumedFromAutosave
       ) {
-        next.play = initPlayState(next.seed, next.playContent);
+        const story = next.stories.find((entry) => entry.card.id === next.boundStoryId);
+        const seated = (story?.heroes ?? [])
+          .map((hero) => hero.id)
+          .filter((heroId) => next.holdings[heroId] != null)
+          .slice(0, partySize(next));
+        next.play = initPlayState(next.seed, {
+          ...next.playContent,
+          start: {
+            ...next.playContent.start,
+            assignments: seatAtCitadels(next.playContent.start.assignments, seated),
+          },
+        });
       }
       if (
         next.openingIndex !== beforeOpening &&

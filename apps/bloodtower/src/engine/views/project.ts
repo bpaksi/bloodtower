@@ -114,5 +114,6 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
           : [],
     })),
     actions: state.actions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
+    ...(state.settings && state.settings.length > 0 ? { settings: state.settings } : {}),
   });
 }

@@ -89,4 +89,15 @@ export const continueShellFromCheckpoint = (
   return { state, versionChangedLogged };
 };
 
+const LOBBY_RESUME = new Set(["game-settings", "claim-heroes", "setup", "begin"]);
+
+/** A party setup saved before play. Splash is never a resume screen. */
+export const readLobbyCheckpoint = (store: EventStore): ShellState | null => {
+  const row = store.latestCheckpoint();
+  if (!row) return null;
+  const saved = parseShellCheckpoint(JSON.parse(row.stateJson) as unknown);
+  if (!LOBBY_RESUME.has(saved.screen) || saved.autosave) return null;
+  return saved;
+};
+
 export const shellEngineVersion = () => SHELL_ENGINE_VERSION;

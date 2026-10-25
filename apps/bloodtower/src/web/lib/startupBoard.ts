@@ -174,8 +174,10 @@ export const publicLine = (view: BoardView): string => {
 };
 
 export const claimCount = (view: BoardView): string => {
+  const shows = publicLine(view);
+  if (/^\d+ of \d+ picked$/.test(shows)) return shows;
   const held = view.heroes.filter((hero) => hero.held).length;
-  return `${held} of ${view.heroes.length} claimed`;
+  return `${held} of ${view.heroes.length} picked`;
 };
 
 export const hallOpening = (view: BoardView): boolean =>
@@ -195,9 +197,11 @@ export const waitingFor = (view: BoardView): string => {
     case "game-settings":
       return "Waiting for an iPad to confirm these settings.";
     case "claim-heroes": {
-      const open = view.heroes.filter((hero) => !hero.held).map((hero) => hero.name);
-      if (open.length === 0) return "Waiting for an iPad to set up the board.";
-      return `Waiting for ${open.join(", ")} to be claimed.`;
+      const match = /^(\d+) of (\d+) picked$/.exec(publicLine(view));
+      if (match && Number(match[2]) > 0 && Number(match[1]) >= Number(match[2])) {
+        return "Waiting for an iPad to set up the board.";
+      }
+      return "Waiting for an iPad to pick the party.";
     }
     case "setup":
       return "Waiting for an iPad to mark this step done.";

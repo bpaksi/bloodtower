@@ -77,6 +77,10 @@ const toClaim = async (page: Page, joinCode: string, ipad: boolean) => {
     await expectMuted(page);
     await clickAct(page, "continue", promptId);
   }
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
+  await expectBar(page, ipad);
+  await expectMuted(page);
+  await clickAct(page, "play-without-tower", "play-without-tower");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
   await expectBar(page, ipad);
   await expectMuted(page);
@@ -225,14 +229,16 @@ test("W1 a held hero, the Menu and a restart survive Continue", async ({ browser
     await installSessionSocketHook(again);
     await again.goto(`/join?code=${restarted.host.joinCode}`);
     await clickAct(again, "continue", "splash-play");
-    // No game is saved before play, so Continue lands where main lands it: back at the story pick.
-    await expect(deviceMain(again)).toHaveAttribute("data-screen", "pick-story");
+    // The party pick is restored. This is a new iPad, so Hero A is taken by the one that sat down.
+    await expect(deviceMain(again)).toHaveAttribute("data-screen", "claim-heroes");
+    await expect(again.locator("[data-pick-status]")).toHaveText("1 of 4 picked");
+    await expect(again.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
+      "data-claim",
+      "taken",
+    );
     await expectBar(again, ipad);
     await again.locator('[data-action="menu"]').click();
     await again.locator('[data-action="menu"]').click();
-    await expect(deviceMain(again)).toHaveAttribute("data-screen", "pick-story");
-    await clickAct(again, "continue", `continue-pick-story-${STORY_ID}`);
-    await clickAct(again, "continue", "continue-game-settings");
     await expect(deviceMain(again)).toHaveAttribute("data-screen", "claim-heroes");
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {

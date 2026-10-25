@@ -797,6 +797,8 @@ describe("metadata-only Pick Story door", () => {
       "hero-b": null,
       "hero-c": null,
       "hero-d": null,
+      "hero-e": null,
+      "hero-f": null,
     });
     expect(
       state.offered.some((offer) => offer.promptId === "continue-pick-story-test" && offer.open),

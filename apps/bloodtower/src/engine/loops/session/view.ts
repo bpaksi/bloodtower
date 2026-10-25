@@ -6,6 +6,7 @@ import {
 import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
 import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
+import { partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import type { ShellStory } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
@@ -271,7 +272,7 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
   if (state.screen === "claim-heroes") {
     const roster = story?.heroes ?? [];
     const held = roster.filter((hero) => state.holdings[hero.id]).length;
-    return `${held} of ${roster.length} claimed`;
+    return `${held} of ${partySize(state)} picked`;
   }
   if (state.screen === "setup") {
     return (
@@ -328,9 +329,10 @@ export const projectShellView = (state: ShellState): ViewState => {
     id: hero.id,
     name: hero.name,
     deviceId: state.holdings[hero.id] ?? null,
-    lines: isSetupScreen(screen)
-      ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
-      : [],
+    lines:
+      isSetupScreen(screen) && screen !== "claim-heroes"
+        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
+        : [],
   }));
 
   const actions: ViewState["actions"] = state.offered.map((offer) =>
@@ -359,11 +361,25 @@ export const projectShellView = (state: ShellState): ViewState => {
   };
   const momentId = openingMomentId(state);
 
+  const settings =
+    screen === "game-settings"
+      ? (story?.settings ?? []).map((setting) => {
+          const optionId = state.settingValues[setting.id] ?? setting.default;
+          return {
+            id: setting.id,
+            label: setting.label,
+            optionId,
+            options: setting.options.map((option) => ({ id: option.id, label: option.label })),
+          };
+        })
+      : undefined;
+
   return {
     screen,
     levels: [...startupLevels(state, story), screenLevel],
     heroes,
     actions,
+    ...(settings && settings.length > 0 ? { settings } : {}),
     narration: momentId ? { lineId: momentId, text: OPENING_PLACEHOLDER } : null,
     table: momentId ? null : buildTable(state, title),
     place: momentId ? null : buildPlace(state),

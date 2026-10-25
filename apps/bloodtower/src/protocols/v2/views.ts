@@ -133,6 +133,26 @@ export const deviceViewPayloadSchema = z
      * Previous and Next send `focus-story`; the iPad does not draw the carousel.
      */
     doors: z.array(deviceDoorSchema).max(8).optional(),
+    /** Game settings only. Existing `set-setting` act; not a new message type. */
+    settings: z
+      .array(
+        z.strictObject({
+          id: z.string().min(1).max(64),
+          label: z.string().min(1).max(80),
+          optionId: z.string().min(1).max(64),
+          options: z
+            .array(
+              z.strictObject({
+                id: z.string().min(1).max(64),
+                label: z.string().min(1).max(80),
+              }),
+            )
+            .min(1)
+            .max(16),
+        }),
+      )
+      .max(8)
+      .optional(),
   })
   .superRefine((value, ctx) => {
     uniqueIds(

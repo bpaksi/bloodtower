@@ -68,12 +68,21 @@ export type TableBand = {
  * What `project` reads. Session and game loops fill this in later steps.
  * It is not the reducer state: step 5 does not change `step`.
  */
+export type ViewSetting = {
+  id: string;
+  label: string;
+  optionId: string;
+  options: { id: string; label: string }[];
+};
+
 export type ViewState = {
   screen: ViewScreen;
   levels: LoopLevel[];
   heroes: SeatedHero[];
   actions: ViewAction[];
   narration: { lineId: string; text: string } | null;
+  /** Game settings only. The iPad paints one button per option. */
+  settings?: ViewSetting[];
   /** Present during play. Omitted on setup fixtures. */
   table?: TableBand | null;
   /** Story board only. Null when nobody is inside a place. */

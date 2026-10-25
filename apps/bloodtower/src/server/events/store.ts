@@ -67,6 +67,7 @@ export interface EventStore {
   listEvents: (gameId: string, afterSeq?: number) => StoredHostEvent[];
   writeCheckpoint: (input: CheckpointInput) => StoredCheckpoint;
   lastCheckpoint: (gameId: string) => StoredCheckpoint | null;
+  latestCheckpoint: () => StoredCheckpoint | null;
   getAutosave: () => AutosaveRow | null;
   setAutosave: (row: AutosaveRow) => void;
   replaceAutosave: (row: AutosaveRow) => void;
@@ -177,6 +178,11 @@ export const createEventStore = (db: Db): EventStore => {
         .orderBy(desc(checkpoints.day), desc(checkpoints.id))
         .limit(1)
         .get();
+      return row ? checkpointFromSelect(row) : null;
+    },
+
+    latestCheckpoint: () => {
+      const row = db.select().from(checkpoints).orderBy(desc(checkpoints.id)).limit(1).get();
       return row ? checkpointFromSelect(row) : null;
     },
 

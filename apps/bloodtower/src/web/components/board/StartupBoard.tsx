@@ -162,7 +162,7 @@ function ClaimPanel({ view }: { view: BoardView }) {
   return (
     <div data-startup-panel="claim-heroes">
       <p className="bt-kicker">The party</p>
-      <h1 className="bt-startup-title">Claim hunters</h1>
+      <h1 className="bt-startup-title">Party Join</h1>
       <p className="bt-startup-progress" data-claim-count="">
         {claimCount(view)}
       </p>
@@ -171,7 +171,7 @@ function ClaimPanel({ view }: { view: BoardView }) {
         {view.heroes.map((hero) => (
           <li key={hero.id} data-hero={hero.id} data-held={hero.held ? "true" : "false"}>
             <PortraitCard name={hero.name} label={hero.name} compact />
-            <p className="bt-claim-state">{hero.held ? "Claimed" : "Unclaimed"}</p>
+            <p className="bt-claim-state">{hero.held ? "Picked" : "Open"}</p>
           </li>
         ))}
       </ul>
