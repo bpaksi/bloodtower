@@ -15,6 +15,7 @@ The project produces many small websites over its life. Each one lives in its ow
 | Story workbench | [apps/story-workbench](apps/story-workbench/) | Design | Awaiting intent | Yes |
 | TV display POC | [apps/tv-display-poc](apps/tv-display-poc/) | Explore | Awaiting intent | Yes |
 | Prototypes | [apps/prototypes](apps/prototypes/) | Explore | Plan approved, batch 0 next | Yes |
+| Board map entry tool | [apps/board-map-tool](apps/board-map-tool/) | Build | Intent written, build not started | Yes |
 
 ## Layout
 
