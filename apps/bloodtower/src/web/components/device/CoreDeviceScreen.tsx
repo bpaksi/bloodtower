@@ -149,10 +149,15 @@ export function CoreDeviceScreen({
     );
   };
   const showHold = view.screen === "claim-heroes" || view.screen === "begin";
+  const setupPrompt = view.actions.find((action) => action.promptId.startsWith("continue-setup-"));
+  const setupStep =
+    view.screen === "setup" && setupPrompt
+      ? setupPrompt.promptId.slice("continue-setup-".length)
+      : undefined;
   const farewell = view.screen === "goodbye";
 
   return (
-    <main className="bt-device" data-screen={view.screen}>
+    <main className="bt-device" data-screen={view.screen} data-setup-step={setupStep}>
       <div className="bt-scroll">
         <div className="bt-kicker" data-step-context>
           {STEP_CONTEXT[view.screen] ?? view.screen}
@@ -225,6 +230,19 @@ export function CoreDeviceScreen({
             ) : null}
             {scrolling.length > 0 ? (
               <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>
+            ) : null}
+            {view.screen === "setup" ? (
+              <div className="mt-6 flex flex-col gap-3">
+                <p data-begin-lock="">The setup steps are not done.</p>
+                <button
+                  type="button"
+                  className="bt-primary"
+                  data-prompt-id="continue-begin"
+                  disabled
+                >
+                  Begin
+                </button>
+              </div>
             ) : null}
           </>
         )}

@@ -1,3 +1,8 @@
+import {
+  OPENING_MOMENTS,
+  OPENING_PLACEHOLDER,
+  openingActiveIndex,
+} from "../../../protocols/opening.ts";
 import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
 import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
@@ -231,7 +236,18 @@ const statusLevel = (state: ShellState): LoopLevel => ({
   shows: `tower: ${towerStrip(state)}\ndevices: ${state.devices.size}\nstep: ${STEP_NAME[state.screen]}`,
 });
 
+/**
+ * The grey-stair line is play-screen narration only. Quit leaves `openingIndex` active,
+ * and session / goodbye must keep their own shows (including the W8 tower phrase).
+ */
+const openingMomentId = (state: ShellState): string | null => {
+  if (state.screen !== "play") return null;
+  if (!openingActiveIndex(state.openingIndex)) return null;
+  return OPENING_MOMENTS[state.openingIndex] ?? null;
+};
+
 const showsFor = (state: ShellState, title: string, story: ShellStory | undefined): string => {
+  if (openingMomentId(state)) return OPENING_PLACEHOLDER;
   if ((state.screen === "play" || state.screen === "pause") && state.play) {
     return `Day ${state.play.dayNumber}`;
   }
@@ -341,14 +357,15 @@ export const projectShellView = (state: ShellState): ViewState => {
     label: screenLabel(state),
     shows: showsFor(state, title, story),
   };
+  const momentId = openingMomentId(state);
 
   return {
     screen,
     levels: [...startupLevels(state, story), screenLevel],
     heroes,
     actions,
-    narration: null,
-    table: buildTable(state, title),
-    place: buildPlace(state),
+    narration: momentId ? { lineId: momentId, text: OPENING_PLACEHOLDER } : null,
+    table: momentId ? null : buildTable(state, title),
+    place: momentId ? null : buildPlace(state),
   };
 };

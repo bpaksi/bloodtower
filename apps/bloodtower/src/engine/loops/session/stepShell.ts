@@ -1,3 +1,4 @@
+import { openingActiveIndex, openingFinishedIndex } from "../../../protocols/opening.ts";
 import type { EngineEffect } from "../../effects.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
@@ -396,11 +397,9 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       }
     } else if (top?.loopId === "game") {
       const before = top.local as GameLocal;
+      const beforeOpening = next.openingIndex;
       const local = handleGamePress(before, e.promptId, e.actionId);
       updateTopLocal(next, local);
-      if (local.phase === "play" && before.phase === "begin" && next.playContent && !next.play) {
-        next.play = initPlayState(next.seed, next.playContent);
-      }
       if (local.phase === "play" && before.phase === "begin" && !next.resumedFromAutosave) {
         const gameId = next.activeGameId ?? `game-${next.eventSeq}`;
         next.activeGameId = gameId;
@@ -411,6 +410,21 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
           day: 1,
         };
         effects.push({ kind: "autosave-write", v: 1, gameId });
+      }
+      if (
+        openingFinishedIndex(next.openingIndex) &&
+        !next.play &&
+        next.playContent &&
+        !next.resumedFromAutosave
+      ) {
+        next.play = initPlayState(next.seed, next.playContent);
+      }
+      if (
+        next.openingIndex !== beforeOpening &&
+        openingActiveIndex(next.openingIndex) &&
+        next.activeGameId
+      ) {
+        requestCheckpoint(next.activeGameId, 1);
       }
       if (local.phase === "done" && next.stage === "ended") {
         collapsePlayLoopsOnQuit(next);
@@ -488,6 +502,9 @@ export const refreshOffersAfterRestore = (state: ShellState): ShellEffect[] => {
     } else if (frame.loopId === "encounter") {
       const local = frame.local as EncounterLocal;
       frame.local = { ...local, awaitingLeave: false };
+    } else if (frame.loopId === "game" && openingActiveIndex(state.openingIndex)) {
+      const local = frame.local as GameLocal;
+      frame.local = { ...local, awaitingPress: false, playStarted: false };
     }
   }
   bindShellState(state);

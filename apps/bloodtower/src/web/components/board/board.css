@@ -1138,6 +1138,50 @@
 }
 
 /*
+ * grey-stair.04 motion still. One glow, about 1.4 Hz (one step per 0.7 s), not a strobe.
+ * Reduced motion holds a steady glow. The landing window mask is not this layer.
+ */
+.bt-motion-still {
+  position: relative;
+}
+
+.bt-motion-still img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bt-motion-still .bt-motion-glow {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation-name: bt-motion-flicker;
+  animation-duration: 0.7s;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+
+@keyframes bt-motion-flicker {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0.62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-motion-still .bt-motion-glow {
+    animation: none;
+    opacity: 0.9;
+  }
+}
+
+/*
  * Pick Game carousel (R3-UI-24), inside the start-up dialog: the focused story large in the
  * centre column, a smaller neighbour peeking at each side. With two packs the one neighbour
  * peeks on the right, so the focus never moves off centre.

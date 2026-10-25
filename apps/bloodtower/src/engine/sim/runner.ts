@@ -1,4 +1,5 @@
 import { createRng, type Rng } from "@dark-tower/rng";
+import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
 import { formatGroupAction } from "../loops/group-turn/loop.ts";
 import type { ShellEvent } from "../loops/session/events.ts";
 import { TEST_STORY } from "../loops/session/pack.ts";
@@ -84,6 +85,15 @@ const SETUP_EVENTS = (seed: string): ShellEvent[] => [
     actionId: "continue",
   },
   { kind: "press", v: 1, deviceId: "sim-pad", promptId: "continue-begin", actionId: "continue" },
+  ...OPENING_MOMENTS.map(
+    (momentId): ShellEvent => ({
+      kind: "press",
+      v: 1,
+      deviceId: "sim-pad",
+      promptId: openingPromptId(momentId),
+      actionId: "continue",
+    }),
+  ),
 ];
 
 const setupThroughPlay = (seed: string): ShellState => {
