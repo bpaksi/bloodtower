@@ -33,6 +33,9 @@ const iconFor = (actionId: string): string => {
 const inMenu = (action: OfferedAction) =>
   action.promptId === "menu-quit" || action.promptId === "menu-connect";
 
+/** Walk, Enter, and End turn. Leave stays outside this region (DEC-220). */
+const MOVE_CONTROLS = new Set(["walk", "enter", "end-turn"]);
+
 /** v2 device UI: text and icon controls. Place stills stay on the Story board. */
 export function CoreDeviceScreen({
   live,
@@ -54,8 +57,14 @@ export function CoreDeviceScreen({
   const connect = actions.find((action) => action.promptId === "menu-connect");
   const isPinned = (action: OfferedAction) =>
     action.actionId === "continue" || action.label.trim().toLowerCase() === "cancel";
-  const scrolling = body.filter((action) => !isPinned(action));
   const pinned = body.filter(isPinned);
+  const acting = view.table?.groups.find((group) => group.heroId === view.table?.actingHeroId);
+  const inside = acting?.inside === true;
+  const showMoveMap =
+    view.screen === "play" && !inside && body.some((action) => MOVE_CONTROLS.has(action.actionId));
+  const inMoveMap = (action: OfferedAction) => showMoveMap && MOVE_CONTROLS.has(action.actionId);
+  const mapActions = body.filter(inMoveMap);
+  const scrolling = body.filter((action) => !isPinned(action) && !inMoveMap(action));
   const renderAction = (action: OfferedAction) => {
     const icon = iconFor(action.actionId);
     return (
@@ -80,7 +89,6 @@ export function CoreDeviceScreen({
   };
   const showHold = view.screen === "claim-heroes" || view.screen === "begin";
   const farewell = view.screen === "goodbye";
-  const acting = view.table?.groups.find((group) => group.heroId === view.table?.actingHeroId);
 
   return (
     <main className="bt-device" data-screen={view.screen}>
@@ -142,7 +150,14 @@ export function CoreDeviceScreen({
                 ) : null}
               </section>
             ))}
-            <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>
+            {showMoveMap ? (
+              <section className="bt-move-map" data-move-map aria-label="Move">
+                {mapActions.map(renderAction)}
+              </section>
+            ) : null}
+            {scrolling.length > 0 ? (
+              <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>
+            ) : null}
           </>
         )}
       </div>
