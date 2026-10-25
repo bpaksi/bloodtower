@@ -1,0 +1,9 @@
+{
+  "name": "board-map-tool",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.mjs",
+    "test": "node --test src/model.test.mjs"
+  }
+}

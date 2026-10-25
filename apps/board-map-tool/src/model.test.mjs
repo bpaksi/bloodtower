@@ -1,0 +1,100 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import {
+  addRegion,
+  assignRegion,
+  checkDraft,
+  emptyDraft,
+  exportBoard,
+  neighboursOf,
+  removeEdge,
+  setEdge,
+  setTerrain,
+} from "./model.mjs";
+
+const spaces = [
+  { id: "N-a", kingdom: "N", name: "A", terrain: "Desert", building: null },
+  { id: "N-b", kingdom: "N", name: "B", terrain: "Lake", building: null },
+  { id: "N-c", kingdom: "N", name: "C", terrain: "Forest", building: null },
+];
+
+test("an edge is seen from both spaces, with the opposite slot on the other side", () => {
+  const d = emptyDraft();
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E", river: true, note: "Great Woods" });
+  assert.deepEqual(neighboursOf(d, "N-a"), [
+    { to: "N-b", slot: "E", river: true, note: "Great Woods" },
+  ]);
+  assert.deepEqual(neighboursOf(d, "N-b"), [
+    { to: "N-a", slot: "W", river: true, note: "Great Woods" },
+  ]);
+});
+
+test("a slot already used on a space is refused, so Bob picks which neighbour keeps it", () => {
+  const d = emptyDraft();
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "NE" });
+  assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" }), /taken by N-b/);
+});
+
+test("a neighbour can be moved to the list to free its slot", () => {
+  const d = emptyDraft();
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: null });
+  setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" });
+  assert.equal(neighboursOf(d, "N-a").find((n) => n.to === "N-c").slot, "E");
+});
+
+test("a space cannot neighbour itself, and unknown spaces are refused", () => {
+  const d = emptyDraft();
+  assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-a", slot: "N" }));
+  assert.throws(
+    () => setEdge(d, spaces, { from: "N-a", to: "X-nowhere", slot: "N" }),
+    /Unknown space/,
+  );
+});
+
+test("removing an edge removes it from both spaces", () => {
+  const d = emptyDraft();
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  removeEdge(d, "N-b", "N-a");
+  assert.deepEqual(neighboursOf(d, "N-a"), []);
+});
+
+test("regions get REG numbers in order, and every space needs one", () => {
+  const d = emptyDraft();
+  addRegion(d, "The Great Woods");
+  addRegion(d, "Regal Run");
+  assert.deepEqual(
+    d.regions.map((r) => r.id),
+    ["REG-01", "REG-02"],
+  );
+  assert.throws(() => addRegion(d, "Regal Run"), /already exists/);
+  assignRegion(d, "N-a", "REG-01");
+  const result = checkDraft(d, spaces);
+  assert.equal(result.complete, false);
+  assert.ok(result.errors.includes("N-b has no region"));
+});
+
+test("a check passes only when every space has a region and neighbours", () => {
+  const d = emptyDraft();
+  addRegion(d, "Longwater");
+  for (const s of spaces) assignRegion(d, s.id, "REG-01");
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  setEdge(d, spaces, { from: "N-c", to: "N-b", slot: "S" });
+  setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "SE" });
+  const result = checkDraft(d, spaces);
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.complete, true);
+});
+
+test("terrain can be changed, and the export carries the region and neighbours", () => {
+  const d = emptyDraft();
+  addRegion(d, "Longwater");
+  for (const s of spaces) assignRegion(d, s.id, "REG-01");
+  setTerrain(d, "N-a", "Hills");
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  const out = exportBoard(d, spaces);
+  assert.equal(out.spaces[0].terrain, "Hills");
+  assert.equal(out.spaces[0].region, "REG-01");
+  assert.equal(out.spaces[0].neighbours[0].to, "N-b");
+});

@@ -1,0 +1,424 @@
+{
+  "spaces": [
+    {
+      "id": "N-egans-end",
+      "kingdom": "N",
+      "name": "Egan’s End",
+      "terrain": "Grasslands",
+      "building": "Village"
+    },
+    {
+      "id": "N-the-tundra",
+      "kingdom": "N",
+      "name": "The Tundra",
+      "terrain": "Desert",
+      "building": null
+    },
+    {
+      "id": "N-dayside",
+      "kingdom": "N",
+      "name": "Dayside",
+      "terrain": "Lake",
+      "building": "Bazaar"
+    },
+    {
+      "id": "N-fivepint",
+      "kingdom": "N",
+      "name": "Fivepint",
+      "terrain": "Lake",
+      "building": null
+    },
+    {
+      "id": "N-rimeweald",
+      "kingdom": "N",
+      "name": "Rimeweald",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "N-lower-ice-fangs",
+      "kingdom": "N",
+      "name": "Lower Ice Fangs",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "N-upper-ice-fangs",
+      "kingdom": "N",
+      "name": "Upper Ice Fangs",
+      "terrain": "Mountains",
+      "building": "Sanctuary"
+    },
+    {
+      "id": "N-peaks-of-the-djinn",
+      "kingdom": "N",
+      "name": "Peaks of the Djinn",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "N-greenbridge",
+      "kingdom": "N",
+      "name": "Greenbridge",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "N-muted-forest",
+      "kingdom": "N",
+      "name": "Muted Forest",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "N-tower-scar-desert",
+      "kingdom": "N",
+      "name": "Tower Scar Desert",
+      "terrain": "Desert",
+      "building": null
+    },
+    {
+      "id": "N-radiant-mountains",
+      "kingdom": "N",
+      "name": "Radiant Mountains",
+      "terrain": "Mountains",
+      "building": "Citadel"
+    },
+    {
+      "id": "N-lodestone-mountains",
+      "kingdom": "N",
+      "name": "Lodestone Mountains",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "N-pearl-of-the-north",
+      "kingdom": "N",
+      "name": "Pearl of the North",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "N-broken-lands",
+      "kingdom": "N",
+      "name": "Broken Lands",
+      "terrain": "Hills",
+      "building": null
+    },
+    {
+      "id": "E-three-rivers",
+      "kingdom": "E",
+      "name": "Three Rivers",
+      "terrain": "Grasslands",
+      "building": "Bazaar"
+    },
+    {
+      "id": "E-lake-of-songs",
+      "kingdom": "E",
+      "name": "Lake of Songs",
+      "terrain": "Lake",
+      "building": null
+    },
+    {
+      "id": "E-duwani",
+      "kingdom": "E",
+      "name": "Duwani",
+      "terrain": "Grasslands",
+      "building": "Village"
+    },
+    {
+      "id": "E-jewel-hills",
+      "kingdom": "E",
+      "name": "Jewel Hills",
+      "terrain": "Hills",
+      "building": null
+    },
+    {
+      "id": "E-copper-grove",
+      "kingdom": "E",
+      "name": "Copper Grove",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "E-outer-kinghills",
+      "kingdom": "E",
+      "name": "Outer Kinghills",
+      "terrain": "Hills",
+      "building": null
+    },
+    {
+      "id": "E-lesser-tombstones",
+      "kingdom": "E",
+      "name": "Lesser Tombstones",
+      "terrain": "Hills",
+      "building": null
+    },
+    {
+      "id": "E-utars-barrows",
+      "kingdom": "E",
+      "name": "Utar’s Barrows",
+      "terrain": "Desert",
+      "building": null
+    },
+    {
+      "id": "E-the-decaying-wilds",
+      "kingdom": "E",
+      "name": "The Decaying Wilds",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "E-inner-kinghills",
+      "kingdom": "E",
+      "name": "Inner Kinghills",
+      "terrain": "Hills",
+      "building": "Citadel"
+    },
+    {
+      "id": "E-big-sister",
+      "kingdom": "E",
+      "name": "Big Sister",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "E-greater-tombstones",
+      "kingdom": "E",
+      "name": "Greater Tombstones",
+      "terrain": "Hills",
+      "building": "Sanctuary"
+    },
+    {
+      "id": "E-forest-of-shades",
+      "kingdom": "E",
+      "name": "Forest of Shades",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "E-dragontooth-lake",
+      "kingdom": "E",
+      "name": "Dragontooth Lake",
+      "terrain": "Lake",
+      "building": null
+    },
+    {
+      "id": "E-bleak-wastes",
+      "kingdom": "E",
+      "name": "Bleak Wastes",
+      "terrain": "Desert",
+      "building": null
+    },
+    {
+      "id": "S-southern-wastes",
+      "kingdom": "S",
+      "name": "Southern Wastes",
+      "terrain": "Desert",
+      "building": "Village"
+    },
+    {
+      "id": "S-pine-barrens",
+      "kingdom": "S",
+      "name": "Pine Barrens",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "S-ulamels-hollow",
+      "kingdom": "S",
+      "name": "Ulamel’s Hollow",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "S-little-sister",
+      "kingdom": "S",
+      "name": "Little Sister",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "S-middle-sister",
+      "kingdom": "S",
+      "name": "Middle Sister",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "S-bone-hills",
+      "kingdom": "S",
+      "name": "Bone Hills",
+      "terrain": "Hills",
+      "building": null
+    },
+    {
+      "id": "S-howling-desert",
+      "kingdom": "S",
+      "name": "Howling Desert",
+      "terrain": "Desert",
+      "building": "Citadel"
+    },
+    {
+      "id": "S-mountains-of-the-watchers",
+      "kingdom": "S",
+      "name": "Mountains of the Watchers",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "S-the-emerald-expanse",
+      "kingdom": "S",
+      "name": "The Emerald Expanse",
+      "terrain": "Grasslands",
+      "building": "Bazaar"
+    },
+    {
+      "id": "S-azkols-bane",
+      "kingdom": "S",
+      "name": "Azkol’s Bane",
+      "terrain": "Desert",
+      "building": null
+    },
+    {
+      "id": "S-archmont",
+      "kingdom": "S",
+      "name": "Archmont",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "S-sands-of-madness",
+      "kingdom": "S",
+      "name": "Sands of Madness",
+      "terrain": "Desert",
+      "building": "Sanctuary"
+    },
+    {
+      "id": "S-the-cloister",
+      "kingdom": "S",
+      "name": "The Cloister",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "S-irontops",
+      "kingdom": "S",
+      "name": "Irontops",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "S-the-throne",
+      "kingdom": "S",
+      "name": "The Throne",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "W-lost-lands",
+      "kingdom": "W",
+      "name": "Lost Lands",
+      "terrain": "Desert",
+      "building": null
+    },
+    {
+      "id": "W-plains-of-woldra",
+      "kingdom": "W",
+      "name": "Plains of Woldra",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "W-anza",
+      "kingdom": "W",
+      "name": "Anza",
+      "terrain": "Grasslands",
+      "building": "Village"
+    },
+    {
+      "id": "W-yellowpike",
+      "kingdom": "W",
+      "name": "Yellowpike",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "W-akartus",
+      "kingdom": "W",
+      "name": "Akartus",
+      "terrain": "Forest",
+      "building": "Sanctuary"
+    },
+    {
+      "id": "W-delmsmire",
+      "kingdom": "W",
+      "name": "Delmsmire",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "W-plains-of-plovo",
+      "kingdom": "W",
+      "name": "Plains of Plovo",
+      "terrain": "Grasslands",
+      "building": "Bazaar"
+    },
+    {
+      "id": "W-idran-forest",
+      "kingdom": "W",
+      "name": "Idran Forest",
+      "terrain": "Forest",
+      "building": null
+    },
+    {
+      "id": "W-weeping-waters",
+      "kingdom": "W",
+      "name": "Weeping Waters",
+      "terrain": "Lake",
+      "building": null
+    },
+    {
+      "id": "W-lonelight-hills",
+      "kingdom": "W",
+      "name": "Lonelight Hills",
+      "terrain": "Hills",
+      "building": null
+    },
+    {
+      "id": "W-the-empty-glade",
+      "kingdom": "W",
+      "name": "The Empty Glade",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "W-cloudhold",
+      "kingdom": "W",
+      "name": "Cloudhold",
+      "terrain": "Mountains",
+      "building": null
+    },
+    {
+      "id": "W-hissing-groves",
+      "kingdom": "W",
+      "name": "Hissing Groves",
+      "terrain": "Forest",
+      "building": "Citadel"
+    },
+    {
+      "id": "W-the-grass-sea",
+      "kingdom": "W",
+      "name": "The Grass Sea",
+      "terrain": "Grasslands",
+      "building": null
+    },
+    {
+      "id": "W-ash-hills",
+      "kingdom": "W",
+      "name": "Ash Hills",
+      "terrain": "Hills",
+      "building": null
+    }
+  ]
+}
