@@ -58,6 +58,27 @@ const clickAct = async (page: Page, actionId: string, promptId?: string) => {
 
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
+/** One setup step or Begin. A bare Continue also matches the next opening prompt. */
+const clickCurrentSetupOrBegin = async (page: Page) => {
+  const screen = await deviceMain(page).getAttribute("data-screen");
+  if (screen === "setup") {
+    const step = page.locator(
+      'button[data-prompt-id^="continue-setup-"][data-action-id="continue"]',
+    );
+    await expect(step).toBeEnabled({ timeout: 20_000 });
+    const promptId = await step.getAttribute("data-prompt-id");
+    await step.click();
+    if (promptId) {
+      await expect(page.locator(`button[data-prompt-id="${promptId}"]`)).toHaveCount(0);
+    }
+    return;
+  }
+  if (screen === "begin") {
+    await clickAct(page, "continue", "continue-begin");
+    await expect(page.locator('button[data-prompt-id="continue-begin"]')).toHaveCount(0);
+  }
+};
+
 /** W5 grey-stair moments sit on the play screen before the move band. */
 const passOpening = async (device: Page, board: Page) => {
   for (const id of OPENING_IDS) {
@@ -645,7 +666,7 @@ test("W6 waiting line honours reduced motion", async ({ browser }, testInfo) => 
       const screen = await deviceMain(device).getAttribute("data-screen");
       if (screen === "tower-connect") {
         await device.locator('button[data-action="play-without-tower"]').click();
-      } else if (screen === "setup" || screen === "begin") await clickAct(device, "continue");
+      } else if (screen === "setup" || screen === "begin") await clickCurrentSetupOrBegin(device);
       else await device.waitForTimeout(50);
     }
     await passOpening(device, board);
@@ -687,7 +708,8 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
       const screen = await deviceMain(first.device).getAttribute("data-screen");
       if (screen === "tower-connect") {
         await first.device.locator('button[data-action="play-without-tower"]').click();
-      } else if (screen === "setup" || screen === "begin") await clickAct(first.device, "continue");
+      } else if (screen === "setup" || screen === "begin")
+        await clickCurrentSetupOrBegin(first.device);
       else await first.device.waitForTimeout(50);
     }
     await passOpening(first.device, first.board);
