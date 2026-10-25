@@ -62,31 +62,22 @@ const backToGameSettings = async (page: Page) => {
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
 };
 
+const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
+/** Same walk as area-077: three setup steps, Begin, then the four opening moments. */
 const finishSetup = async (page: Page) => {
-  const deadline = Date.now() + 90_000;
-  while (Date.now() < deadline) {
-    const screen = await deviceMain(page).getAttribute("data-screen");
-    if (screen === "setup") {
-      await clickAct(page, "continue");
-      continue;
-    }
-    if (screen === "begin") {
-      await clickAct(page, "continue", "continue-begin");
-      for (const id of OPENING_IDS) {
-        await clickAct(page, "continue", `continue-opening-${id.replace(".", "-")}`);
-      }
-      await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
-      return;
-    }
-    if (screen === "claim-heroes") {
-      await page.waitForTimeout(50);
-      continue;
-    }
-    throw new Error(`Unexpected setup screen: ${screen}`);
+  for (const id of SETUP_IDS) {
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id);
+    await clickAct(page, "continue", `continue-setup-${id}`);
   }
-  throw new Error("Setup did not reach play.");
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
+  await clickAct(page, "continue", "continue-begin");
+  for (const id of OPENING_IDS) {
+    await clickAct(page, "continue", `continue-opening-${id.replace(".", "-")}`);
+  }
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
 };
 
 const noClaimWords = async (page: Page) => {
