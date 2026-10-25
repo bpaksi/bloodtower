@@ -1169,7 +1169,7 @@
   font-size: clamp(2rem, 3vw, 3.5rem);
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1.05;
+  line-height: 1.25;
 }
 
 .bt-carousel-tagline {
@@ -1179,7 +1179,7 @@
   overflow: visible;
   font-size: clamp(1.75rem, 2vw, 2.25rem);
   font-style: italic;
-  line-height: 1.2;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
@@ -1189,7 +1189,7 @@
   font-family: var(--bt-font-label);
   font-size: var(--bt-size-label);
   letter-spacing: var(--bt-tracking-label);
-  line-height: 1.1;
+  line-height: 1.3;
 }
 
 .bt-carousel-peek {
@@ -1218,7 +1218,7 @@
   overflow: visible;
   font-size: var(--bt-size-label);
   letter-spacing: 0.06em;
-  line-height: 1.1;
+  line-height: 1.3;
   overflow-wrap: anywhere;
   text-overflow: clip;
   white-space: normal;
@@ -2251,6 +2251,16 @@
 .bt-board[data-screen="not-playable"] .bt-startup-stage > .bt-dialog-frame {
   max-height: none;
   overflow: visible;
+}
+
+.bt-board[data-screen="pick-story"] .bt-startup-title,
+.bt-board[data-screen="not-playable"] .bt-startup-title {
+  line-height: 1.25;
+}
+
+.bt-board[data-screen="pick-story"] .bt-next b,
+.bt-board[data-screen="not-playable"] .bt-next b {
+  line-height: 1.3;
 }
 
 .bt-board[data-board-mode="startup"] .bt-startup-stage > .bt-next {
