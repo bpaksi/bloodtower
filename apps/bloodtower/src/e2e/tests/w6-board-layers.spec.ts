@@ -56,6 +56,20 @@ const clickAct = async (page: Page, actionId: string, promptId?: string) => {
   await button.click();
 };
 
+const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
+
+/** W5 grey-stair moments sit on the play screen before the move band. */
+const passOpening = async (device: Page, board: Page) => {
+  for (const id of OPENING_IDS) {
+    const promptId = `continue-opening-${id.replace(".", "-")}`;
+    await expect(board.locator("main")).toHaveAttribute("data-moment", id);
+    await expect(board.locator("main")).toHaveAttribute("data-board-layer", "move");
+    await expect(board.locator("[data-band]")).toHaveCount(0);
+    await clickAct(device, "continue", promptId);
+  }
+  await expect(board.locator("main")).not.toHaveAttribute("data-moment", /.+/);
+};
+
 const readStatus = async (page: Page) => {
   const line = deviceMain(page).locator("p").first();
   return {
@@ -427,6 +441,7 @@ test("W6 weekend frames fit the Story board and the place still stays off the iP
     await expect(board.locator("[data-still]")).toHaveCount(0);
     await assertStartupChrome(board);
     await clickAct(device, "continue", "continue-begin");
+    await passOpening(device, board);
 
     await expect(board.locator("main")).toHaveAttribute("data-screen", "play");
     await expect(board.locator("main")).toHaveAttribute("data-board-mode", "play");
@@ -633,6 +648,7 @@ test("W6 waiting line honours reduced motion", async ({ browser }, testInfo) => 
       } else if (screen === "setup" || screen === "begin") await clickAct(device, "continue");
       else await device.waitForTimeout(50);
     }
+    await passOpening(device, board);
     await expect(board.locator("[data-waiting]")).toBeVisible();
     await expect(board.locator("[data-waiting]")).toHaveText(/is choosing/);
     const pulse = await board.locator("[data-waiting]").evaluate((node) => {
@@ -674,6 +690,7 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
       } else if (screen === "setup" || screen === "begin") await clickAct(first.device, "continue");
       else await first.device.waitForTimeout(50);
     }
+    await passOpening(first.device, first.board);
     const roll = first.device.locator('button[data-prompt-id*="roll-done"]');
     if ((await roll.count()) > 0) await roll.click();
     await expect(first.device.locator('button[data-action-id="enter"]')).toBeVisible({
