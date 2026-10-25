@@ -13,6 +13,7 @@ export type GameLocal = {
     | "pick-game"
     | "pick-story"
     | "game-settings"
+    | "tower-connect"
     | "claim-heroes"
     | "setup"
     | "begin"
@@ -48,6 +49,13 @@ const offerContinueOrBack = (
   if (shell.screen === "game-settings") {
     offer("continue-game-settings", "continue");
     offer("back-game-settings", "back");
+    local.awaitingPress = true;
+    return;
+  }
+  if (shell.screen === "tower-connect") {
+    offer("tower-connect", "tower-connect");
+    offer("play-without-tower", "play-without-tower");
+    offer("back-tower-connect", "back");
     local.awaitingPress = true;
     return;
   }
@@ -106,6 +114,7 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
     if (
       local.phase === "pick-story" ||
       local.phase === "game-settings" ||
+      local.phase === "tower-connect" ||
       local.phase === "claim-heroes" ||
       local.phase === "setup" ||
       local.phase === "begin"
@@ -169,6 +178,15 @@ export const handleGamePress = (
       shell.stage = "playing";
       return { phase: "play", awaitingPress: false, playStarted: false };
     }
+  }
+
+  if (
+    local.phase === "tower-connect" &&
+    promptId === "play-without-tower" &&
+    actionId === "play-without-tower"
+  ) {
+    shell.screen = "claim-heroes";
+    return { phase: "claim-heroes", awaitingPress: false, playStarted: false };
   }
 
   if (actionId === "continue") {

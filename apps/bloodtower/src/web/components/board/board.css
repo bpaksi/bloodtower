@@ -2108,11 +2108,17 @@
   letter-spacing: 0.02em;
 }
 
+/* Move frame: the band keeps the top edge (DEC-198). The waiting line sits under it. */
+.bt-board[data-board-mode="play"] {
+  justify-content: flex-start;
+}
+
 .bt-band {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem 1.1rem;
   align-items: baseline;
+  margin: 0;
 }
 
 .bt-waiting-pulse {

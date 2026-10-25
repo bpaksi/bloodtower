@@ -19,6 +19,7 @@ export const CONTROL_ACTIONS = [
   "quit",
   "tower-connect",
   "tower-calibrate",
+  "play-without-tower",
   "pick",
   "set",
   "volume-play",
