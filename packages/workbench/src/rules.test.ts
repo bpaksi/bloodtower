@@ -113,15 +113,41 @@ describe("link rules", () => {
   });
 
   it("fails a duplicate link (same verb and target on one card), even if grandfathered", () => {
+    // part-of between mechanics is a real break, so the baseline entry is meaningful; needs
+    // between them would only yield a stale-baseline error.
     const g = graphOf([
       card("MEC-001", "mechanic", [
-        ["needs", "MEC-002"],
-        ["needs", "MEC-002"],
-        ["needs", "MEC-002"],
+        ["part-of", "MEC-002"],
+        ["part-of", "MEC-002"],
+        ["part-of", "MEC-002"],
       ]),
       card("MEC-002", "mechanic"),
     ]);
-    expect(linkProblems(g, RULES, [])).toEqual(["duplicate link MEC-001|needs|MEC-002"]);
+    expect(linkProblems(g, RULES, ["MEC-001|part-of|MEC-002"])).toEqual([
+      "duplicate link MEC-001|part-of|MEC-002",
+    ]);
+  });
+
+  it("a link to a dangling card-shaped ID says no such card", () => {
+    const g = graphOf([card("MEC-001", "mechanic", [["needs", "MEC-999"]])]);
+    const ref = g.nodes["MEC-999"];
+    if (ref?.kind === "ref") ref.idKind = "mechanic";
+    expect(linkProblems(g, RULES, [])).toEqual([
+      "link MEC-001|needs|MEC-999: no such card MEC-999",
+    ]);
+  });
+
+  it("a break to a document ref keeps the generic rules message", () => {
+    const g = graphOf([card("MEC-001", "mechanic", [["needs", "R-X-1"]])]);
+    expect(linkProblems(g, RULES, [])).toEqual([
+      "link MEC-001|needs|R-X-1 breaks the link rules (see the rules table in the cards README)",
+    ]);
+    const q = graphOf([card("MEC-001", "mechanic", [["needs", "Q3"]])]);
+    const ref = q.nodes.Q3;
+    if (ref?.kind === "ref") ref.idKind = "question";
+    expect(linkProblems(q, RULES, [])).toEqual([
+      "link MEC-001|needs|Q3 breaks the link rules (see the rules table in the cards README)",
+    ]);
   });
 
   it("finds no cycle in a chain or a diamond", () => {

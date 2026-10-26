@@ -88,6 +88,15 @@ describe("gaps", () => {
     expect(conflicts(g("decided"))).toHaveLength(0);
   });
 
+  it("conflict with an old document question ID (Q3) is settled once decided", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "Q3"]] },
+    });
+    const ref = g.nodes.Q3;
+    if (ref?.kind === "ref") ref.idKind = "question";
+    expect(findGaps(g).filter((f) => f.rule === "conflict-unparked")).toHaveLength(0);
+  });
+
   it("conflict with a card-shaped ID that has no card is not settled by a decided card", () => {
     const g = graphOf({
       "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "DEC-999"]] },
