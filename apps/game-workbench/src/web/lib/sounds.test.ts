@@ -73,6 +73,15 @@ describe("/sounds rows", () => {
     expect(parseSoundFilter({})).toEqual({});
   });
 
+  it("throws on a repeated mood or reads param instead of ignoring it", () => {
+    expect(() => parseSoundFilter({ mood: ["dread", "calm"] })).toThrow(
+      "mood query param must be a single value",
+    );
+    expect(() => parseSoundFilter({ reads: ["alarm", "boom"] })).toThrow(
+      "reads query param must be a single value",
+    );
+  });
+
   it("formats a measured length and leaves an unmeasured one empty", () => {
     expect(formatLength(1850)).toBe("1.9 s");
     expect(formatLength(undefined)).toBeNull();

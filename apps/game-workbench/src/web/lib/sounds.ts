@@ -39,7 +39,12 @@ export function soundGroups(cards: Card[]): SoundGroup[] {
 }
 
 /** Reads the filter from the page's query; a word that is not a mood or reads-as is ignored. */
-export function parseSoundFilter(q: { mood?: string; reads?: string }): SoundFilter {
+export function parseSoundFilter(q: {
+  mood?: string | string[];
+  reads?: string | string[];
+}): SoundFilter {
+  if (Array.isArray(q.mood)) throw new Error("mood query param must be a single value");
+  if (Array.isArray(q.reads)) throw new Error("reads query param must be a single value");
   return {
     ...((MOODS as readonly string[]).includes(q.mood ?? "") ? { mood: q.mood as Mood } : {}),
     ...((READS_AS as readonly string[]).includes(q.reads ?? "")

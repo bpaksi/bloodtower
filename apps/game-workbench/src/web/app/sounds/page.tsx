@@ -28,7 +28,7 @@ function filterHref(f: SoundFilter): string {
 export default async function SoundsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mood?: string; reads?: string }>;
+  searchParams: Promise<{ mood?: string | string[]; reads?: string | string[] }>;
 }) {
   const filter = parseSoundFilter(await searchParams);
   const all = soundGroups(loadCards().cards);
