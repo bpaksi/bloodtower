@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildGraph, cardsDir, linkRuleProblems, loadCards, parseCard, RELS } from "./cards.ts";
 import { layout, neighbours } from "./layout.ts";
-import { GAME_LINK_RULES } from "./link-rules.ts";
+import { COMMON, GAME_LINK_RULES } from "./link-rules.ts";
 
 const card = (front: string, body = "") => `---\n${front}\n---\n${body}`;
 
@@ -74,6 +74,28 @@ describe("link rules", () => {
     const verbs = Object.keys(RELS).sort();
     expect([...inReadme].sort()).toEqual(verbs);
     expect(Object.keys(GAME_LINK_RULES.rels).sort()).toEqual(verbs);
+  });
+
+  it("README common-shapes column matches link-rules.ts COMMON", () => {
+    const readme = readFileSync(path.join(cardsDir(), "README.md"), "utf8");
+    const section = readme.split("## Link rules")[1]?.split("\n## ")[0] ?? "";
+    const shapes: string[] = [];
+    for (const m of section.matchAll(/^\| `([a-z-]+)` \|[^|]+\|[^|]+\|[^|]+\|([^|]+)\|/gm)) {
+      const rel = m[1] ?? "";
+      const cell = (m[2] ?? "").trim();
+      if (!cell || cell === "—") continue;
+      for (const part of cell.split(";")) {
+        const [left, right] = part.split("→").map((s) => s.trim());
+        if (!left || !right) continue;
+        for (const to of right
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)) {
+          shapes.push(`${left} ${rel} ${to}`);
+        }
+      }
+    }
+    expect([...shapes].sort()).toEqual([...COMMON].sort());
   });
 
   it("lets a new needs link between buildable things pass, and fails an odd new shape", () => {

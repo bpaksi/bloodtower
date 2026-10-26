@@ -35,7 +35,7 @@ const TOWER_OUTPUTS: readonly CardType[] = [
 ];
 
 /** "from rel to" shapes used 5 or more times on 2026-10-21. A ref is written `ref:<kind>`. */
-const COMMON = [
+export const COMMON = [
   "decision affects decision",
   "decision affects mechanic",
   "decision affects piece",

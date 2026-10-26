@@ -74,9 +74,9 @@ Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or
 
 | Verb | Sets build order | No loops | Allowed by meaning | Also allowed (common shapes) |
 |---|---|---|---|---|
-| `needs` | yes | yes | built or idea → built or question; question → question | — |
+| `needs` | yes | yes | built or idea → built or question; question → question | question → question |
 | `raises` | no | no | — | decision → question; idea → question |
-| `answers` | no | no | anything → question | decision → idea; option → question |
+| `answers` | no | no | anything → question | decision → idea, question; option → question |
 | `uses` | no | no | screen, ui, cue → ui, cue or a tower output | area → piece; decision → decision, idea, mechanic; glyph → drum; idea → piece; mechanic → decision, mechanic, piece; piece → mechanic; question → decision, mechanic; seal → drum |
 | `refines` | no | no | — | area → ref:asset; decision → decision, idea, mechanic, piece, ref:engine, ref:requirement; idea → decision, idea, mechanic, piece, ref:requirement; mechanic → idea, mechanic, ref:engine, ref:requirement; piece → piece, ref:engine; question → decision; screen → ref:requirement; ui → ref:requirement |
 | `affects` | no | no | — | decision → decision, mechanic, piece; idea → decision, mechanic, piece, question; question → decision, idea, mechanic, piece, question |
