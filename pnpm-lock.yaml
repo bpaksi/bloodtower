@@ -346,6 +346,15 @@ importers:
 
   apps/game-workbench: {}
 
+  apps/game-workbench/src/e2e:
+    devDependencies:
+      '@playwright/test':
+        specifier: 1.64.0
+        version: 1.64.0
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+
   apps/game-workbench/src/web:
     dependencies:
       '@dark-tower/workbench':
