@@ -501,6 +501,17 @@ function renderDetail() {
     },
     ...state.data.terrains.map((t) => el("option", { value: t, selected: t === s.terrain }, t)),
   );
+  const building = el(
+    "select",
+    {
+      disabled: s.completed,
+      onchange: (e) => post("/api/building", { space: s.id, type: e.target.value || null }),
+    },
+    el("option", { value: "" }, "no building"),
+    ...state.data.buildingTypes.map((t) =>
+      el("option", { value: t, selected: t === s.building }, t),
+    ),
+  );
   const region = el(
     "select",
     {
@@ -541,6 +552,7 @@ function renderDetail() {
       { class: "row" },
       el("label", { class: "stack" }, "Terrain", terrain),
       el("label", { class: "stack" }, "Region", region),
+      el("label", { class: "stack" }, "Building", building),
     ),
     el("h2", {}, "Compass cross"),
     el(

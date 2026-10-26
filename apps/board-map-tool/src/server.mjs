@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 import {
   addRegion,
   assignRegion,
+  BUILDING_TYPES,
+  buildingOf,
   checkDraft,
   emptyDraft,
   exportBoard,
@@ -20,6 +22,7 @@ import {
   progressOf,
   removeEdge,
   SLOTS,
+  setBuilding,
   setCompleted,
   setEdge,
   setObject,
@@ -58,12 +61,14 @@ function state() {
       ...s,
       terrain: terrainOf(draft, s),
       region: draft.regionOf[s.id] ?? null,
+      building: buildingOf(draft, s),
       objects: objectsOf(draft, s.id),
       completed: isCompleted(draft, s.id),
       neighbours: neighboursOf(draft, s.id),
     })),
     regions: draft.regions,
     objectKinds: OBJECT_KINDS,
+    buildingTypes: BUILDING_TYPES,
     slots: SLOTS,
     terrains: TERRAINS,
     check: checkDraft(draft, spaces),
@@ -100,6 +105,7 @@ const actions = {
   "/api/terrain": async (b) => setTerrain(draft, b.space, b.terrain),
   "/api/object": async (b) => setObject(draft, b.space, b.kind, b.slot ?? null),
   "/api/complete": async (b) => setCompleted(draft, b.space, Boolean(b.on)),
+  "/api/building": async (b) => setBuilding(draft, b.space, b.type ?? null),
 };
 
 async function route(req, res) {

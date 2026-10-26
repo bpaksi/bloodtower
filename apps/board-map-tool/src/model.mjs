@@ -12,7 +12,15 @@ export const SLOT_ORDER = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const OPPOSITE = { N: "S", NE: "SW", E: "W", SE: "NW", S: "N", SW: "NE", W: "E", NW: "SE" };
 
 export function emptyDraft() {
-  return { regions: [], regionOf: {}, terrain: {}, objects: {}, completed: {}, edges: {} };
+  return {
+    regions: [],
+    regionOf: {},
+    terrain: {},
+    objects: {},
+    completed: {},
+    buildings: {},
+    edges: {},
+  };
 }
 
 export function edgeKey(a, b) {
@@ -184,6 +192,28 @@ export function terrainOf(draft, space) {
 }
 
 // Problems that block the export (errors) and things to look at (warnings).
+const KINGDOM_LETTERS = { N: "Arisilon", E: "Brynthia", S: "Durnin", W: "Zenon" };
+
+// Each kingdom has exactly one building of each type (Bob, 2026-10-26).
+export const BUILDING_TYPES = ["Village", "Bazaar", "Sanctuary", "Citadel"];
+
+// The building on a space: the one the tool set, else the one the board map gives it.
+// null means no building.
+export function buildingOf(draft, space) {
+  return Object.hasOwn(draft.buildings ?? {}, space.id)
+    ? draft.buildings[space.id]
+    : (space.building ?? null);
+}
+
+// Sets or clears (null) the building on a space. Only one type per space.
+export function setBuilding(draft, spaceId, type) {
+  assertEditable(draft, spaceId);
+  if (type !== null && !BUILDING_TYPES.includes(type)) throw new Error(`Unknown building ${type}`);
+  draft.buildings ??= {};
+  draft.buildings[spaceId] = type;
+  return draft;
+}
+
 export function checkDraft(draft, spaces) {
   const errors = [];
   const warnings = [];
@@ -210,6 +240,14 @@ export function checkDraft(draft, spaces) {
     for (const s of new Set(dupes)) errors.push(`${space.id} uses slot ${s} twice`);
   }
 
+  for (const k of Object.keys(KINGDOM_LETTERS)) {
+    const inKingdom = spaces.filter((s) => s.kingdom === k);
+    for (const type of BUILDING_TYPES) {
+      const count = inKingdom.filter((s) => buildingOf(draft, s) === type).length;
+      if (count !== 1) errors.push(`${k} has ${count} ${type}s; each kingdom needs exactly one`);
+    }
+  }
+
   return { errors, warnings, complete: errors.length === 0 };
 }
 
@@ -222,7 +260,7 @@ export function exportBoard(draft, spaces) {
       kingdom: s.kingdom,
       name: s.name,
       terrain: terrainOf(draft, s),
-      building: s.building,
+      building: buildingOf(draft, s),
       region: draft.regionOf[s.id],
       objects: objectsOf(draft, s.id),
       neighbours: neighboursOf(draft, s.id),
