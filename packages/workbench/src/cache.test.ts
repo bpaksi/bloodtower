@@ -40,3 +40,18 @@ describe("dirStamp (#126)", () => {
     expect(dirStamp([root, cards])).not.toBe(edited);
   });
 });
+
+describe("dirStamp nested cards (#143)", () => {
+  it("sees a cards/ edit when only the design root is stamped (no second walk)", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "stamp-nested-"));
+    const cards = path.join(root, "cards");
+    mkdirSync(cards);
+    const file = path.join(cards, "A-1.md");
+    writeFileSync(file, "one");
+    utimesSync(file, 1000, 1000);
+    const before = dirStamp([root]);
+    expect(dirStamp([root])).toBe(before);
+    utimesSync(file, 2000, 2000);
+    expect(dirStamp([root])).not.toBe(before);
+  });
+});

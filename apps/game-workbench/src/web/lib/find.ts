@@ -1,6 +1,6 @@
 import { buildFindIndex, type FindIndex, find, makeCached } from "@dark-tower/workbench";
 import { dirStamp } from "@dark-tower/workbench/server";
-import { cardsDir, loadCards } from "./cards.ts";
+import { loadCards } from "./cards.ts";
 import { designDir, loadDocs } from "./content.ts";
 import { GAME_IDS } from "./ids.ts";
 
@@ -15,10 +15,11 @@ function build(): FindIndex {
 }
 
 /**
- * The find index, rebuilt only when a file in the cards or documents folder was added, removed or
- * changed, so an edit still shows on the next search.
+ * The find index, rebuilt only when a file under the design folder (docs and cards/) was added,
+ * removed or changed, so an edit still shows on the next search. Stamp designDir alone: cards/
+ * sits inside it, and dirStamp walks recursively.
  */
-export const getFindIndex = makeCached(() => dirStamp([designDir(), cardsDir()]), build);
+export const getFindIndex = makeCached(() => dirStamp([designDir()]), build);
 
 /** Searches the cards and docs. */
 export function searchGame(query: string, limit = 20) {

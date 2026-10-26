@@ -3,7 +3,13 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FindHit } from "../find.ts";
-import { findEscape, resolveEnter, resolveOpen } from "../findEnter.ts";
+import {
+  applyFindEscape,
+  applyOpenPlan,
+  findEscape,
+  resolveEnter,
+  resolveOpen,
+} from "../findEnter.ts";
 import { PANEL_OPEN_DETAIL } from "./Panels.tsx";
 
 /**
@@ -94,24 +100,26 @@ export function FindBox({ endpoint = "/api/find" }: { endpoint?: string }) {
     setOpen(false);
     input.current?.blur();
     const plan = resolveOpen(hit.href, pathname, window.location.hash);
-    if (plan.kind === "jump") {
-      if (plan.rescroll) {
-        // The hash is already set, so no hashchange fires: ask LineJump to jump again.
-        window.dispatchEvent(new HashChangeEvent("hashchange"));
-      } else window.location.hash = plan.hash;
-    } else {
+    applyOpenPlan(plan, hit.href, {
+      // Same-hash re-pick: no hashchange fires, so ask LineJump to jump again.
+      dispatchHashChange: () => window.dispatchEvent(new HashChangeEvent("hashchange")),
+      setHash: (hash) => {
+        window.location.hash = hash;
+      },
       // A card opens in the graph; below 1200 px that means the detail panel over it.
-      if (plan.openDetail) window.dispatchEvent(new Event(PANEL_OPEN_DETAIL));
-      router.push(hit.href);
-    }
+      openDetail: () => window.dispatchEvent(new Event(PANEL_OPEN_DETAIL)),
+      navigate: (href) => router.push(href),
+    });
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      const act = findEscape();
-      if (act.closeList) setOpen(false);
-      if (act.preventDefault) e.preventDefault(); // the window Esc handler then leaves the overlay be
-      if (act.blur) input.current?.blur();
+      applyFindEscape(findEscape(), {
+        closeList: () => setOpen(false),
+        // Keep Esc from the overlay handler so only the find list closes.
+        preventDefault: () => e.preventDefault(),
+        blur: () => input.current?.blur(),
+      });
     } else if (e.key === "ArrowDown" && hits.length > 0) {
       e.preventDefault();
       setOpen(true);

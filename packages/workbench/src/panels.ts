@@ -79,3 +79,14 @@ export function stepPending(
       return { pending: false, open: false };
   }
 }
+
+/** UI next state and what to persist after a toggle (only the toggled side is a saved choice). */
+export function toggleAndSave(
+  saved: PanelState | null,
+  width: number,
+  before: PanelState,
+  side: Side,
+): { next: PanelState; saved: PanelState } {
+  const next = togglePanel(before, side);
+  return { next, saved: savedAfterToggle(saved, width, before, side) };
+}
