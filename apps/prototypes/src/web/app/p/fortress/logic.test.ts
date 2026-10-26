@@ -1,10 +1,12 @@
 import { createRng } from "@dark-tower/rng";
 import { describe, expect, it } from "vitest";
+import { commitNumber, setValue } from "../../../lib/tuning.ts";
 import {
   autoPlay,
   championStrength,
   defaults,
   duel,
+  FIELDS,
   nextVisit,
   simulate,
   start,
@@ -72,5 +74,16 @@ describe("fortress logic", () => {
     const s = autoPlay(createRng(1), v, 0, 3);
     expect(s.status).not.toBe("done");
     expect(s.visit).toBeLessThanOrEqual(3);
+  });
+  it("visitCap field declares a max that the tuning clamp enforces", () => {
+    const field = FIELDS.find((f) => f.key === "visitCap");
+    expect(field?.type).toBe("number");
+    if (field?.type !== "number") throw new Error("visitCap must be a number field");
+    expect(field.max).toBe(2000);
+    expect(field.max).toBeGreaterThan(field.default);
+    const clamped = setValue(FIELDS, defaults(), "visitCap", 99999);
+    expect(clamped.visitCap).toBe(2000);
+    const committed = commitNumber(field, "50000");
+    expect(committed).toEqual({ ok: true, value: 2000 });
   });
 });
