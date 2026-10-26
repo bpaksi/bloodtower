@@ -8,9 +8,11 @@ import {
   exportBoard,
   firstOpenSlot,
   neighboursOf,
+  objectsOf,
   progressOf,
   removeEdge,
   setEdge,
+  setObject,
   setTerrain,
 } from "./model.mjs";
 
@@ -139,4 +141,24 @@ test("progress counts spaces, regions, pairs and the sides placed or in the tray
   assert.equal(p.sidesPlaced, 2);
   assert.equal(p.sidesInTray, 2);
   assert.equal(p.kingdoms.N.withRegion, 1);
+});
+
+test("the river and the tower sit on their own slots, one of each per space", () => {
+  const d = emptyDraft();
+  setObject(d, "N-a", "river", "W");
+  setObject(d, "N-a", "river", "NE");
+  setObject(d, "N-a", "tower", "N");
+  assert.deepEqual(objectsOf(d, "N-a"), { river: "NE", tower: "N" });
+  assert.throws(() => setObject(d, "N-a", "river", "N"), /cannot go on N/);
+  assert.throws(() => setObject(d, "N-a", "tower", "E"), /cannot go on E/);
+  setObject(d, "N-a", "river", null);
+  assert.deepEqual(objectsOf(d, "N-a"), { tower: "N" });
+});
+
+test("a neighbour and an object cannot share a slot", () => {
+  const d = emptyDraft();
+  setObject(d, "N-a", "tower", "N");
+  assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "N" }), /holds the tower/);
+  setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" });
+  assert.throws(() => setObject(d, "N-a", "river", "E"), /taken by N-c/);
 });

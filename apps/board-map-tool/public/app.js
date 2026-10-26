@@ -3,7 +3,15 @@
 const KINGDOM = { N: "Arisilon", E: "Brynthia", S: "Durnin", W: "Zenon" };
 // RtDT names kingdoms with their direction: "N Arisilon".
 const kingdomLabel = (k) => `${k} ${KINGDOM[k]}`;
-const state = { data: null, selected: null, editing: null, picked: null, query: "", highlight: 0 };
+const state = {
+  data: null,
+  selected: null,
+  editing: null,
+  picked: null,
+  query: "",
+  highlight: 0,
+  dragging: null,
+};
 const $ = (id) => document.getElementById(id);
 
 function el(tag, props = {}, ...children) {
@@ -127,14 +135,53 @@ function renderChecks() {
   box.append(ul);
 }
 
-// One neighbour as a draggable chip. Dragging carries the neighbour's ID.
+// What is being dragged: a neighbour space, or a non-space object (river or tower).
+function startDrag(e, drag) {
+  state.dragging = drag;
+  e.dataTransfer.setData("text/plain", drag.id);
+}
+
+// A slot takes the dragged thing only if it is open and the thing is allowed there.
+function canDrop(slot) {
+  const d = state.dragging;
+  if (!d) return false;
+  if (slot === null) return true;
+  const s = spaceById(state.selected);
+  const taken =
+    s.neighbours.some((n) => n.slot === slot && n.to !== d.id) ||
+    Object.entries(s.objects ?? {}).some(([kind, at]) => at === slot && kind !== d.id);
+  if (taken) return false;
+  if (d.type === "object")
+    return state.data.objectKinds.find((k) => k.id === d.id).slots.includes(slot);
+  return true;
+}
+
+function onDrop(e, node, slot) {
+  e.preventDefault();
+  node.classList.remove("drop");
+  const d = state.dragging;
+  state.dragging = null;
+  if (!d) return;
+  if (d.type === "object") return post("/api/object", { space: state.selected, kind: d.id, slot });
+  const current = currentNeighbour(d.id);
+  if (!current) return;
+  post("/api/edge", {
+    from: state.selected,
+    to: d.id,
+    slot,
+    river: current.river,
+    note: current.note,
+  });
+}
+
+// One neighbour as a draggable chip.
 function chip(n) {
   return el(
     "div",
     {
       class: `chip${n.unconfirmed ? " unsure" : ""}`,
       draggable: "true",
-      ondragstart: (e) => e.dataTransfer.setData("text/plain", n.to),
+      ondragstart: (e) => startDrag(e, { type: "neighbour", id: n.to }),
       onclick: () => {
         state.editing = n.to;
         render();
@@ -147,20 +194,32 @@ function chip(n) {
   );
 }
 
-// Drop targets: an open slot takes a neighbour; the tray takes it off the cross.
+// A river or the tower, dragged from the tray onto a slot it is allowed on.
+function objectToken(kind) {
+  return el(
+    "div",
+    {
+      class: "chip object",
+      draggable: "true",
+      ondragstart: (e) => startDrag(e, { type: "object", id: kind.id }),
+      title: `Drag onto ${kind.slots.join(", ")}`,
+    },
+    el("span", {}, kind.label),
+    el("span", { class: "badge" }, kind.slots.length === 1 ? "always N" : "W, E or a diagonal"),
+  );
+}
+
+// Drop targets: an open slot takes a neighbour or an object; the tray takes it off the cross.
 function dropTarget(node, slot) {
   node.addEventListener("dragover", (e) => {
+    if (!canDrop(slot)) return;
     e.preventDefault();
     node.classList.add("drop");
   });
   node.addEventListener("dragleave", () => node.classList.remove("drop"));
   node.addEventListener("drop", (e) => {
-    e.preventDefault();
-    node.classList.remove("drop");
-    const to = e.dataTransfer.getData("text/plain");
-    const current = currentNeighbour(to);
-    if (!current) return;
-    post("/api/edge", { from: state.selected, to, slot, river: current.river, note: current.note });
+    if (!canDrop(slot)) return;
+    onDrop(e, node, slot);
   });
   return node;
 }
@@ -171,7 +230,23 @@ function currentNeighbour(to) {
 
 function renderCross(s) {
   const bySlot = {};
-  for (const n of s.neighbours) if (n.slot) bySlot[n.slot] = n;
+  for (const n of s.neighbours)
+    if (n.slot)
+      bySlot[n.slot] = {
+        type: "neighbour",
+        id: n.to,
+        name: nameOf(n.to),
+        note: [n.river ? "river" : "", n.note].filter(Boolean).join(" · "),
+        n,
+      };
+  for (const [kind, slot] of Object.entries(s.objects ?? {})) {
+    bySlot[slot] = {
+      type: "object",
+      id: kind,
+      name: state.data.objectKinds.find((k) => k.id === kind).label,
+      note: "",
+    };
+  }
   const grid = el("div", { class: "cross" });
   const order = ["NW", "N", "NE", "W", null, "E", "SW", "S", "SE"];
   for (const slot of order) {
@@ -179,30 +254,26 @@ function renderCross(s) {
       grid.append(el("div", { class: "cell center" }, el("span", { class: "name" }, s.name)));
       continue;
     }
-    const n = bySlot[slot];
-    if (n) {
+    const item = bySlot[slot];
+    if (item) {
       grid.append(
         el(
           "div",
           {
-            class: "cell filled",
+            class: `cell filled${item.type === "object" ? " object" : ""}`,
             draggable: "true",
-            title: "Drag to another open slot, or click to edit",
-            ondragstart: (e) => e.dataTransfer.setData("text/plain", n.to),
+            title: "Drag to another open slot or the tray, or click to edit",
+            ondragstart: (e) => startDrag(e, { type: item.type, id: item.id }),
             onclick: () => {
-              state.editing = n.to;
-              render();
+              if (item.type === "neighbour") {
+                state.editing = item.id;
+                render();
+              }
             },
           },
           el("span", { class: "slot" }, slot),
-          el("span", { class: "name" }, nameOf(n.to)),
-          n.river || n.note
-            ? el(
-                "span",
-                { class: "badge" },
-                [n.river ? "river" : "", n.note].filter(Boolean).join(" · "),
-              )
-            : null,
+          el("span", { class: "name" }, item.name),
+          item.note ? el("span", { class: "badge" }, item.note) : null,
         ),
       );
     } else {
@@ -228,8 +299,18 @@ function renderTray(s) {
   if (loose.length === 0)
     tray.append(el("span", { class: "muted" }, "Drop a neighbour here to take it off the cross."));
   for (const n of loose) tray.append(chip(n));
+  tray.append(el("div", { class: "divider" }, "Not spaces: drag onto a slot"));
+  for (const kind of state.data.objectKinds) tray.append(objectToken(kind));
   return tray;
 }
+
+// Clear any drop highlight left behind when a drag ends outside a target.
+document.addEventListener("dragend", () => {
+  state.dragging = null;
+  document.querySelectorAll(".drop").forEach((n) => {
+    n.classList.remove("drop");
+  });
+});
 
 function renderEditor(s) {
   const n = state.editing && s.neighbours.find((x) => x.to === state.editing);
