@@ -45,9 +45,9 @@ export const FIELDS: TuningField[] = [
     label: "Light a wrong turn costs",
     type: "number",
     default: 2,
-    min: 0,
+    min: 1,
     max: 10,
-    note: "MEC-027: a wrong turn costs light",
+    note: "MEC-027: a wrong turn costs light; min 1 so light always drains",
   },
   {
     key: "signCount",
@@ -251,10 +251,17 @@ export function pickPassage(
 
 export type RunResult = { outcome: Outcome; rounds: number; wrongTurns: number; won: boolean };
 
+/** Hard cap so a bot hunt cannot hang if knobs make progress impossible (e.g. trueChance=0, wrongCost=0). */
+export const MAX_RUN_ROUNDS = 10_000;
+
 /** One whole hunt for a bot party. The follower reads sign 0 with its Advantage on the first round. */
 export function playRun(policy: PartyPolicy, rng: Rng, v: TuningValues): RunResult {
   let state = newCave(rng, v);
   while (!state.outcome) {
+    if (state.rounds >= MAX_RUN_ROUNDS) {
+      state = { ...state, outcome: "ambush", light: 0 };
+      continue;
+    }
     if (policy === "follows" && state.advantageLeft && state.read === null)
       state = readSign(state, 0);
     state = choose(state, pickPassage(policy, state, rng, v), rng, v);
