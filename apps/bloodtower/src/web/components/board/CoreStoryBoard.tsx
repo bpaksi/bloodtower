@@ -1,12 +1,13 @@
 "use client";
 
-import type { BoardView } from "bloodtower-protocols";
+import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
+import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
 
-/** v2 story board. Startup is a centred dialog. Play keeps the table band. Display only. */
+/** v2 story board. Startup is a centred dialog. Play is the move band or the place still. Display only. */
 export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boolean }) {
   if (isStartupScreen(view.screen)) return <StartupBoard view={view} debug={debug} />;
 
@@ -14,8 +15,19 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const paused = pauseText(view.screen);
   const table = view.table ?? null;
   const place = view.place ?? null;
+  const layer = place ? "place" : "move";
+  const momentId =
+    view.narration && isOpeningMomentId(view.narration.lineId) ? view.narration.lineId : null;
+  const showMove = layer === "move" && !momentId;
   return (
-    <main className="bt-board" data-screen={view.screen} data-board-mode="play">
+    <main
+      className="bt-board"
+      data-screen={view.screen}
+      data-board-mode="play"
+      data-board-layer={layer}
+      data-moment={momentId ?? undefined}
+    >
+      <div className="bt-board-backdrop" aria-hidden="true" />
       {warning ? (
         <p className="bt-board-warning" role="status">
           {warning}
@@ -26,50 +38,34 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           {paused}
         </p>
       ) : null}
-      {table ? (
+      {showMove && table ? (
         <header className="bt-band" data-band>
-          <span data-health={table.health}>Health {table.health}</span>
-          <span data-purse={table.purse}>Purse {table.purse}</span>
+          {table.groups.map((group) => (
+            <span key={group.heroId} data-health="unavailable">
+              {group.heroName} unavailable
+            </span>
+          ))}
+          <span data-purse="unavailable">unavailable</span>
           <span data-chapter>{table.chapter}</span>
           <span data-day>Day {table.day}</span>
           {table.actingGroup ? <span data-acting>{table.actingGroup}</span> : null}
           <span data-moves={table.movesLeft ?? "unavailable"}>
-            Moves {table.movesLeft ?? "unavailable"}
+            {table.movesLeft == null ? "unavailable" : table.movesLeft}
           </span>
         </header>
       ) : null}
-      {table?.waitingFor ? (
+      {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
+      {showMove && table?.waitingFor ? (
         <p className="bt-waiting-pulse" data-waiting role="status">
           {table.waitingFor}
         </p>
       ) : null}
-      {place ? (
+      {layer === "place" && place ? (
         <figure className="bt-place-still" data-place={place.building} data-still={place.stillId}>
+          {/* biome-ignore lint/performance/noImgElement: pack stills are static files on the session host */}
           <img src={packStillImageUrl(place.stillId)} alt="" />
           <figcaption>{place.caption}</figcaption>
         </figure>
-      ) : null}
-      {table ? (
-        <ul data-roster>
-          {table.groups.map((group) => (
-            <li
-              key={group.heroId}
-              data-hero-place={group.heroId}
-              data-alone={group.alone ? "true" : "false"}
-              data-kingdom={group.kingdomLabel}
-              data-space-name={group.spaceName}
-            >
-              {group.heroName} · {group.kingdomLabel} · {group.spaceName}
-              {group.alone ? " · alone" : ""}
-              {group.inside && group.building ? ` · inside the ${group.building}` : ""}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {view.narration ? (
-        <p className="bt-narration" data-narration={view.narration.lineId}>
-          {view.narration.text}
-        </p>
       ) : null}
       {debug ? (
         <pre className="mt-4 max-h-64 overflow-auto text-xs opacity-70">

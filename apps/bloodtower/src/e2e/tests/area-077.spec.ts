@@ -98,28 +98,24 @@ const settle = async (page: Page, before: string) => {
   await expect.poll(async () => marker(page), { timeout: 15_000 }).not.toBe(before);
 };
 
+const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
+
+/** Done on the three setup steps, Begin, then Continue through the four opening moments. No walk. */
 const finishSetup = async (page: Page) => {
-  const deadline = Date.now() + 90_000;
-  while (Date.now() < deadline) {
-    const screen = await deviceMain(page).getAttribute("data-screen");
-    if (screen === "play") return;
-    if (screen === "setup") {
-      await clickAct(page, "continue");
-      continue;
-    }
-    if (screen === "begin") {
-      await holdHeroesFromTest(page, [...HERO_IDS]);
-      await clickAct(page, "continue", "continue-begin");
-      await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
-      return;
-    }
-    if (screen === "claim-heroes") {
-      await page.waitForTimeout(50);
-      continue;
-    }
-    throw new Error(`Unexpected setup screen: ${screen}`);
+  for (const id of SETUP_IDS) {
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id);
+    await clickAct(page, "continue", `continue-setup-${id}`);
   }
-  throw new Error("Setup did not reach play.");
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
+  await clickAct(page, "continue", "continue-begin");
+  for (const id of OPENING_IDS) {
+    await expect(page.locator('button[data-action-id="walk"]')).toHaveCount(0);
+    await clickAct(page, "continue", `continue-opening-${id.replace(".", "-")}`);
+  }
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
+  await expect(page.locator('button[data-action-id="walk"]')).toHaveCount(0);
 };
 
 const skipTowerToClaim = async (page: Page, joinCode: string) => {
@@ -232,10 +228,22 @@ const expectGoodbye = async (
 
 const walkOnce = async (page: Page) => {
   const roll = page.locator('button[data-action-id="continue"][data-prompt-id*="roll-done"]');
+  // The last opening Continue lands on play before the roll offer is on the device.
+  // Moves stay 0 until that control is there, so a one-shot count misses it.
+  await expect
+    .poll(
+      async () => {
+        if ((await roll.count()) > 0) return "roll";
+        const moves = Number((await readStatus(page)).moves);
+        return moves > 0 ? "moves" : "";
+      },
+      { timeout: 20_000 },
+    )
+    .not.toBe("");
   if ((await roll.count()) > 0) {
     await expect(roll).toBeEnabled({ timeout: 20_000 });
     await roll.click();
-    await expect.poll(async () => (await readStatus(page)).moves).not.toBeNull();
+    await expect.poll(async () => Number((await readStatus(page)).moves)).toBeGreaterThan(0);
   }
   const before = await readStatus(page);
   expect(Number(before.moves)).toBeGreaterThan(0);
@@ -317,15 +325,37 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
     await clickAct(device, "continue", "continue-claim-heroes");
     await finishSetup(device);
 
-    await expect(board.locator("[data-kingdom='Arisilon (N)']")).toContainText("Radiant Mountains");
-    await expect(board.locator("[data-kingdom='Brynthia (E)']")).toContainText("Inner Kinghills");
-    await expect(board.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
-    await expect(board.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
-    await expect(board.locator("[data-alone='true']")).toHaveCount(4);
+    await expect(device.locator("[data-kingdom='Arisilon (N)']")).toContainText(
+      "Radiant Mountains",
+    );
+    await expect(device.locator("[data-kingdom='Brynthia (E)']")).toContainText("Inner Kinghills");
+    await expect(device.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
+    await expect(device.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
+    await expect(device.locator("[data-alone='true']")).toHaveCount(4);
+    await expect(device.locator('[data-hero-place="hero-a"]')).toHaveAttribute(
+      "data-kingdom",
+      "Arisilon (N)",
+    );
+    await expect(device.locator('[data-hero-place="hero-b"]')).toHaveAttribute(
+      "data-kingdom",
+      "Brynthia (E)",
+    );
+    await expect(device.locator('[data-hero-place="hero-c"]')).toHaveAttribute(
+      "data-kingdom",
+      "Durnin (S)",
+    );
+    await expect(device.locator('[data-hero-place="hero-d"]')).toHaveAttribute(
+      "data-kingdom",
+      "Zenon (W)",
+    );
+    await expect(device.locator('[data-hero-place="hero-e"]')).toHaveCount(0);
+    await expect(device.locator('[data-hero-place="hero-f"]')).toHaveCount(0);
+    await expect(board.locator("main :is(button, input, textarea, select, a)")).toHaveCount(0);
+    await expect(board.locator("[data-hero-place], [data-kingdom], [data-roster]")).toHaveCount(0);
     await expect(device.locator('button[data-action-id="split"]')).toHaveCount(0);
     await expect(device.locator('button[data-action-id="join"]')).toHaveCount(0);
 
-    await expect(board.locator("[data-band] [data-health]")).toHaveText(/unavailable/);
+    await expect(board.locator("[data-band] [data-health]").first()).toHaveText(/unavailable/);
     await expect(board.locator("[data-band] [data-purse]")).toHaveText(/unavailable/);
     await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
     await expect(board.locator("[data-day]")).toHaveText(/Day \d+/);
@@ -513,10 +543,10 @@ test("AREA-077 one shared press wins and a private line stays on its iPad", asyn
     await expect(deviceMain(pageB)).toHaveAttribute("data-screen", "claim-heroes");
     await holdHeroesFromTest(pageA, ["hero-a", "hero-b"]);
     await holdHeroesFromTest(pageB, ["hero-c", "hero-d"]);
-    await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
-    await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
-    await expect(pageB.getByText("Only Hero D hears this.")).toBeVisible();
-    await expect(pageB.getByText("Only Hero A hears this.")).toHaveCount(0);
+    await expect(pageA.getByText("Only Hero A hears this.")).toHaveCount(0);
+    await expect(pageB.getByText("Only Hero D hears this.")).toHaveCount(0);
+    await expect(pageA.locator("[data-private-line]")).toHaveCount(0);
+    await expect(pageB.locator("[data-private-line]")).toHaveCount(0);
 
     gateA.hold();
     gateB.hold();
@@ -607,7 +637,7 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
     expect(nextId).toBeTruthy();
     await page.locator(`button[data-prompt-id="walk--${restored.hero}--${nextId}"]`).click();
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
-    expect((await readStatus(page)).space).toBe(nextId);
+    await expect.poll(async () => (await readStatus(page)).space).toBe(nextId);
   } finally {
     await context2.close();
     await restarted.host.close();

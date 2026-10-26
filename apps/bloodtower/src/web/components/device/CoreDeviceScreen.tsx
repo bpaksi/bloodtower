@@ -13,7 +13,7 @@ const SCREEN_TITLE: Record<string, string> = {
   "pick-game": "Pick a game",
   "game-settings": "Game settings",
   "tower-connect": "Connect the tower",
-  "claim-heroes": "Claim heroes",
+  "claim-heroes": "Party Join",
   setup: "Board setup",
   begin: "Begin",
   play: "The move",
@@ -123,6 +123,11 @@ export function CoreDeviceScreen({
   const inMoveMap = (action: OfferedAction) => showMoveMap && MOVE_CONTROLS.has(action.actionId);
   const mapActions = body.filter(inMoveMap);
   const scrolling = body.filter((action) => !isPinned(action) && !inMoveMap(action));
+  const picking = view.screen === "claim-heroes";
+  const pickMatch = picking ? /^(\d+) of (\d+) picked$/.exec(view.shows) : null;
+  const seated = pickMatch ? Number(pickMatch[1]) : 0;
+  const party = pickMatch ? Number(pickMatch[2]) : 0;
+  const partyFull = pickMatch != null && party > 0 && seated >= party;
   const renderAction = (action: OfferedAction) => {
     const icon = iconFor(action.actionId);
     const connectChoice = body.some((row) => row.actionId === "play-without-tower");
@@ -136,7 +141,7 @@ export function CoreDeviceScreen({
         data-action-id={action.actionId}
         data-action={action.actionId}
         data-primary={connectChoice ? (primary ? "true" : "false") : undefined}
-        disabled={!live}
+        disabled={!live || (picking && action.actionId === "continue" && !partyFull)}
         onClick={() => onAct(action.promptId, action.actionId)}
       >
         {icon ? (
@@ -148,11 +153,16 @@ export function CoreDeviceScreen({
       </button>
     );
   };
-  const showHold = view.screen === "claim-heroes" || view.screen === "begin";
+  const showHold = picking || view.screen === "begin";
+  const setupPrompt = view.actions.find((action) => action.promptId.startsWith("continue-setup-"));
+  const setupStep =
+    view.screen === "setup" && setupPrompt
+      ? setupPrompt.promptId.slice("continue-setup-".length)
+      : undefined;
   const farewell = view.screen === "goodbye";
 
   return (
-    <main className="bt-device" data-screen={view.screen}>
+    <main className="bt-device" data-screen={view.screen} data-setup-step={setupStep}>
       <div className="bt-scroll">
         <div className="bt-kicker" data-step-context>
           {STEP_CONTEXT[view.screen] ?? view.screen}
@@ -177,13 +187,46 @@ export function CoreDeviceScreen({
               data-space-name={acting?.spaceName}
               data-building={acting?.building ?? ""}
               data-inside={acting?.inside ? "true" : "false"}
+              data-pick-status={picking ? view.shows : undefined}
             >
               {view.shows}
             </p>
+            {picking ? (
+              <p className="mt-2 text-[var(--bt-muted)]" data-pick-help="">
+                Who this iPad speaks for at the table
+              </p>
+            ) : null}
+            {view.settings?.map((setting) => (
+              <div key={setting.id} className="mt-4 flex flex-col gap-3" data-setting={setting.id}>
+                {setting.options.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className="bt-secondary"
+                    data-setting={setting.id}
+                    data-option={option.id}
+                    data-action="set"
+                    aria-pressed={option.id === setting.optionId}
+                    disabled={!live}
+                    onClick={() =>
+                      onAct("set-setting", "set", { settingId: setting.id, optionId: option.id })
+                    }
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            ))}
             {view.table ? (
               <ul className="mt-4" data-roster>
                 {view.table.groups.map((group) => (
-                  <li key={group.heroId} data-hero-place={group.heroId}>
+                  <li
+                    key={group.heroId}
+                    data-hero-place={group.heroId}
+                    data-kingdom={group.kingdomLabel}
+                    data-space-name={group.spaceName}
+                    data-alone={group.alone ? "true" : "false"}
+                  >
                     {group.heroName} · {group.kingdomLabel} · {group.spaceName}
                     {group.alone ? " · alone" : ""}
                   </li>
@@ -207,10 +250,18 @@ export function CoreDeviceScreen({
                     data-hunter={hero.id}
                     data-action="take"
                     data-claim={hero.claim ?? "open"}
-                    disabled={!live || hero.claim === "taken"}
-                    onClick={() => onHold(hero.id, "take")}
+                    disabled={
+                      !live ||
+                      hero.claim === "taken" ||
+                      (picking && partyFull && hero.claim !== "yours")
+                    }
+                    onClick={() => onHold(hero.id, hero.claim === "yours" ? "release" : "take")}
                   >
-                    {hero.claim === "taken" ? `${hero.name} claimed` : `Hold ${hero.name}`}
+                    {picking
+                      ? `Pick ${hero.name}`
+                      : hero.claim === "taken"
+                        ? `${hero.name} claimed`
+                        : `Hold ${hero.name}`}
                   </button>
                 ) : null}
               </section>
@@ -225,6 +276,19 @@ export function CoreDeviceScreen({
             ) : null}
             {scrolling.length > 0 ? (
               <div className="mt-6 flex flex-col gap-3">{scrolling.map(renderAction)}</div>
+            ) : null}
+            {view.screen === "setup" ? (
+              <div className="mt-6 flex flex-col gap-3">
+                <p data-begin-lock="">The setup steps are not done.</p>
+                <button
+                  type="button"
+                  className="bt-primary"
+                  data-prompt-id="continue-begin"
+                  disabled
+                >
+                  Begin
+                </button>
+              </div>
             ) : null}
           </>
         )}

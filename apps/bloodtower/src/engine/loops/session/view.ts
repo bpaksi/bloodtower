@@ -1,6 +1,12 @@
+import {
+  OPENING_MOMENTS,
+  OPENING_PLACEHOLDER,
+  openingActiveIndex,
+} from "../../../protocols/opening.ts";
 import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
 import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
+import { partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import type { ShellStory } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
@@ -231,7 +237,18 @@ const statusLevel = (state: ShellState): LoopLevel => ({
   shows: `tower: ${towerStrip(state)}\ndevices: ${state.devices.size}\nstep: ${STEP_NAME[state.screen]}`,
 });
 
+/**
+ * The grey-stair line is play-screen narration only. Quit leaves `openingIndex` active,
+ * and session / goodbye must keep their own shows (including the W8 tower phrase).
+ */
+const openingMomentId = (state: ShellState): string | null => {
+  if (state.screen !== "play") return null;
+  if (!openingActiveIndex(state.openingIndex)) return null;
+  return OPENING_MOMENTS[state.openingIndex] ?? null;
+};
+
 const showsFor = (state: ShellState, title: string, story: ShellStory | undefined): string => {
+  if (openingMomentId(state)) return OPENING_PLACEHOLDER;
   if ((state.screen === "play" || state.screen === "pause") && state.play) {
     return `Day ${state.play.dayNumber}`;
   }
@@ -255,7 +272,7 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
   if (state.screen === "claim-heroes") {
     const roster = story?.heroes ?? [];
     const held = roster.filter((hero) => state.holdings[hero.id]).length;
-    return `${held} of ${roster.length} claimed`;
+    return `${held} of ${partySize(state)} picked`;
   }
   if (state.screen === "setup") {
     return (
@@ -312,9 +329,10 @@ export const projectShellView = (state: ShellState): ViewState => {
     id: hero.id,
     name: hero.name,
     deviceId: state.holdings[hero.id] ?? null,
-    lines: isSetupScreen(screen)
-      ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
-      : [],
+    lines:
+      isSetupScreen(screen) && screen !== "claim-heroes"
+        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
+        : [],
   }));
 
   const actions: ViewState["actions"] = state.offered.map((offer) =>
@@ -341,14 +359,29 @@ export const projectShellView = (state: ShellState): ViewState => {
     label: screenLabel(state),
     shows: showsFor(state, title, story),
   };
+  const momentId = openingMomentId(state);
+
+  const settings =
+    screen === "game-settings"
+      ? (story?.settings ?? []).map((setting) => {
+          const optionId = state.settingValues[setting.id] ?? setting.default;
+          return {
+            id: setting.id,
+            label: setting.label,
+            optionId,
+            options: setting.options.map((option) => ({ id: option.id, label: option.label })),
+          };
+        })
+      : undefined;
 
   return {
     screen,
     levels: [...startupLevels(state, story), screenLevel],
     heroes,
     actions,
-    narration: null,
-    table: buildTable(state, title),
-    place: buildPlace(state),
+    ...(settings && settings.length > 0 ? { settings } : {}),
+    narration: momentId ? { lineId: momentId, text: OPENING_PLACEHOLDER } : null,
+    table: momentId ? null : buildTable(state, title),
+    place: momentId ? null : buildPlace(state),
   };
 };

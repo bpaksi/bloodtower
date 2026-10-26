@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { mergeSetupSteps, type ShellStory, TEST_STORY } from "./pack.ts";
 import { PLACE_CAPTION } from "./placeCaption.ts";
 import { initialShellState } from "./state.ts";
-import { stepShell } from "./stepShell.ts";
+import { refreshOffersAfterRestore, stepShell } from "./stepShell.ts";
+import { TOWER_DISCONNECTED, TOWER_READY } from "./tower.ts";
 import { projectShellView } from "./view.ts";
 
 const press = (deviceId: string, promptId: string, actionId: string): PressEvent => ({
@@ -15,8 +17,6 @@ const press = (deviceId: string, promptId: string, actionId: string): PressEvent
   promptId,
   actionId,
 });
-
-import { TOWER_DISCONNECTED, TOWER_READY } from "./tower.ts";
 
 const start = () =>
   stepShell(initialShellState({ sessionId: "s", seed: "seed", stories: [TEST_STORY] }), {
@@ -180,6 +180,20 @@ describe("game setup forward and back", () => {
     state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
     expect(state.screen).toBe("play");
     expect(state.autosave).not.toBeNull();
+    expect(state.openingIndex).toBe(0);
+    expect(state.offered.some((offer) => offer.actionId === "walk")).toBe(false);
+    expect(projectShellView(state).narration?.lineId).toBe("grey-stair.01");
+    for (const momentId of OPENING_MOMENTS) {
+      expect(state.offered.some((offer) => offer.promptId === openingPromptId(momentId))).toBe(
+        true,
+      );
+      expect(state.offered.some((offer) => offer.actionId === "walk")).toBe(false);
+      state = runPresses(state, [press("ipad-0", openingPromptId(momentId), "continue")]);
+    }
+    expect(state.openingIndex).toBe(OPENING_MOMENTS.length);
+    expect(state.offered.some((offer) => offer.promptId.includes("roll-done"))).toBe(true);
+    expect(state.offered.some((offer) => offer.actionId === "walk")).toBe(false);
+    expect(state.play?.groups.every((group) => group.heroIds.length === 1)).toBe(true);
   });
 
   it("backs out of claim-heroes and game-settings per D31", () => {
@@ -463,6 +477,40 @@ describe("done for tonight", () => {
   });
 });
 
+/** `momentCount` is how many opening Continues to press. `0` sits on grey-stair.01. */
+const throughOpening = (momentCount: number) => {
+  let state = runPresses(start(), [
+    press("ipad-0", "splash-play", "continue"),
+    press("ipad-0", `continue-pick-story-${"test"}`, "continue"),
+    press("ipad-0", "continue-game-settings", "continue"),
+    press("ipad-0", "play-without-tower", "play-without-tower"),
+  ]);
+  for (const [index, hero] of TEST_STORY.heroes.entries()) {
+    const deviceId = `ipad-${index}`;
+    state = stepShell(state, { kind: "device-join", v: 1, deviceId }).state;
+    state = stepShell(state, {
+      kind: "hero-hold",
+      v: 1,
+      deviceId,
+      heroId: hero.id,
+      action: "take",
+    }).state;
+  }
+  state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
+  for (const step of state.setupSteps) {
+    state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
+  }
+  state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
+  for (let index = 0; index < momentCount; index += 1) {
+    const momentId = OPENING_MOMENTS[index];
+    if (!momentId) break;
+    state = runPresses(state, [press("ipad-0", openingPromptId(momentId), "continue")]);
+  }
+  return state;
+};
+
+const playWithoutTower = () => throughOpening(OPENING_MOMENTS.length);
+
 const reachPlay = (linked: boolean) => {
   if (!linked) return playWithoutTower();
   let state = start();
@@ -489,32 +537,11 @@ const reachPlay = (linked: boolean) => {
   for (const step of state.setupSteps) {
     state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
   }
-  return runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
-};
-
-const playWithoutTower = () => {
-  let state = runPresses(start(), [
-    press("ipad-0", "splash-play", "continue"),
-    press("ipad-0", `continue-pick-story-${"test"}`, "continue"),
-    press("ipad-0", "continue-game-settings", "continue"),
-    press("ipad-0", "play-without-tower", "play-without-tower"),
-  ]);
-  for (const [index, hero] of TEST_STORY.heroes.entries()) {
-    const deviceId = `ipad-${index}`;
-    state = stepShell(state, { kind: "device-join", v: 1, deviceId }).state;
-    state = stepShell(state, {
-      kind: "hero-hold",
-      v: 1,
-      deviceId,
-      heroId: hero.id,
-      action: "take",
-    }).state;
+  state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
+  for (const momentId of OPENING_MOMENTS) {
+    state = runPresses(state, [press("ipad-0", openingPromptId(momentId), "continue")]);
   }
-  state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
-  for (const step of state.setupSteps) {
-    state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
-  }
-  return runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
+  return state;
 };
 
 describe("W8 quit, goodbye, and new game", () => {
@@ -569,6 +596,28 @@ describe("W8 quit, goodbye, and new game", () => {
     expect(projectShellView(done.state).actions.filter((action) => action.open)).toEqual([]);
   });
 
+  it("quit on grey-stair.01 still shows no tower, not the opening line", () => {
+    const playing = throughOpening(0);
+    expect(playing.screen).toBe("play");
+    expect(playing.openingIndex).toBe(0);
+    expect(projectShellView(playing).narration?.lineId).toBe("grey-stair.01");
+    const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
+    expect(quit.state.screen).toBe("session");
+    expect(quit.state.openingIndex).toBe(0);
+    expect(projectShellView(quit.state).narration).toBeNull();
+    expect(projectShellView(quit.state).levels.find((level) => level.id === "session")?.shows).toBe(
+      "The session",
+    );
+    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    expect(done.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    expect(done.state.screen).toBe("goodbye");
+    expect(done.state.goodbyeTower).toBe("no-tower");
+    expect(done.state.openingIndex).toBe(0);
+    const view = projectShellView(done.state);
+    expect(view.narration).toBeNull();
+    expect(view.levels.find((level) => level.id === "goodbye")?.shows).toBe("no tower");
+  });
+
   it("sends no idle when the link has dropped and shows unavailable", () => {
     let playing = reachPlay(true);
     playing = stepShell(playing, {
@@ -604,6 +653,23 @@ const movesLeft = (state: ReturnType<typeof start>): number | null => {
   if (!frame) return null;
   return (frame.local as GroupTurnLocal).movesLeft;
 };
+
+describe("opening restore", () => {
+  it("re-offers the current opening continue and does not offer a walk", () => {
+    const state = throughOpening(1);
+    expect(state.openingIndex).toBe(1);
+    expect(projectShellView(state).narration?.lineId).toBe("grey-stair.02");
+    refreshOffersAfterRestore(state);
+    expect(
+      state.offered.some(
+        (offer) => offer.promptId === openingPromptId("grey-stair.02") && offer.open,
+      ),
+    ).toBe(true);
+    expect(state.offered.some((offer) => offer.actionId === "walk")).toBe(false);
+    expect(projectShellView(state).narration?.lineId).toBe("grey-stair.02");
+    expect(state.play).toBeNull();
+  });
+});
 
 describe("place stills", () => {
   it("opens a citadel on Enter and returns on Leave without spending a move", () => {
@@ -731,6 +797,8 @@ describe("metadata-only Pick Story door", () => {
       "hero-b": null,
       "hero-c": null,
       "hero-d": null,
+      "hero-e": null,
+      "hero-f": null,
     });
     expect(
       state.offered.some((offer) => offer.promptId === "continue-pick-story-test" && offer.open),

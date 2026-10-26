@@ -162,7 +162,7 @@ function ClaimPanel({ view }: { view: BoardView }) {
   return (
     <div data-startup-panel="claim-heroes">
       <p className="bt-kicker">The party</p>
-      <h1 className="bt-startup-title">Claim hunters</h1>
+      <h1 className="bt-startup-title">Party Join</h1>
       <p className="bt-startup-progress" data-claim-count="">
         {claimCount(view)}
       </p>
@@ -171,7 +171,7 @@ function ClaimPanel({ view }: { view: BoardView }) {
         {view.heroes.map((hero) => (
           <li key={hero.id} data-hero={hero.id} data-held={hero.held ? "true" : "false"}>
             <PortraitCard name={hero.name} label={hero.name} compact />
-            <p className="bt-claim-state">{hero.held ? "Claimed" : "Unclaimed"}</p>
+            <p className="bt-claim-state">{hero.held ? "Picked" : "Open"}</p>
           </li>
         ))}
       </ul>
@@ -188,7 +188,9 @@ function SetupPanel({ view }: { view: BoardView }) {
       <p className="bt-startup-progress" data-setup-progress="">
         {progress.label}
       </p>
-      <p className="bt-startup-cue">{progress.instruction}</p>
+      <p className="bt-startup-cue" data-setup-instruction="">
+        {progress.instruction}
+      </p>
       <p className="bt-startup-cue">
         Set the pieces on the table. This screen does not draw the board or mark the heroes.
       </p>
@@ -254,16 +256,26 @@ function StartupPanel({ view }: { view: BoardView }) {
 }
 
 /** Centred startup dialog over the landing painting. No controls. */
+const setupStepId = (view: BoardView): string | undefined => {
+  if (view.screen !== "setup") return undefined;
+  const promptId = view.actions.find((action) =>
+    action.promptId.startsWith("continue-setup-"),
+  )?.promptId;
+  return promptId ? promptId.slice("continue-setup-".length) : undefined;
+};
+
 export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean }) {
   const warning = joinWarning(view);
   const status = startupStatus(view);
   const waiting = waitingFor(view);
+  const setupStep = setupStepId(view);
   return (
     <main
       className="bt-board"
       data-board-mode="startup"
       data-board-layer="startup"
       data-screen={view.screen}
+      data-setup-step={setupStep}
     >
       <div className="bt-board-backdrop" aria-hidden="true" />
       {warning ? (
@@ -287,8 +299,8 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
           data-next-prompt=""
           data-len={waiting.length > 80 ? "long" : waiting.length > 42 ? "mid" : undefined}
           role="status"
+          aria-label="Waiting"
         >
-          <span className="bt-lbl">Waiting</span>
           <b>{waiting}</b>
         </p>
       </div>
