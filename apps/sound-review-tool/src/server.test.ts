@@ -1,5 +1,5 @@
 import { mkdtemp, readFile, rm } from "node:fs/promises";
-import type { Server } from "node:http";
+import { request, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createMockTower } from "@dark-tower/tower/runtime";
@@ -42,12 +42,33 @@ afterEach(async () => {
 const post = async (path: string, body?: unknown) => {
   const res = await fetch(`${base}${path}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    // The tool's own page: a browser sends its origin on every POST.
+    headers: { "content-type": "application/json", origin: base },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   // biome-ignore lint/suspicious/noExplicitAny: test reads the JSON as it comes.
   return { status: res.status, body: (await res.json()) as any };
 };
+
+/** A raw request, so the test can set any Host, Origin or body type. */
+const raw = (
+  path: string,
+  headers: Record<string, string>,
+  body?: string,
+  method = "POST",
+): Promise<{ status: number; body: { error?: { code: string } } }> =>
+  new Promise((resolve, reject) => {
+    const { port } = new URL(base);
+    const req = request({ host: "127.0.0.1", port, path, method, headers }, (res) => {
+      let text = "";
+      res.on("data", (chunk) => {
+        text += chunk;
+      });
+      res.on("end", () => resolve({ status: res.statusCode ?? 0, body: JSON.parse(text) }));
+    });
+    req.on("error", reject);
+    req.end(body);
+  });
 
 const waitFor = async (check: () => boolean, ms = 2_000) => {
   const end = Date.now() + ms;
@@ -139,5 +160,63 @@ describe("sound review server", () => {
     expect((await fetch(`${base}/app.js`)).status).toBe(200);
     expect((await fetch(`${base}/..%2Fpackage.json`)).status).toBe(404);
     expect((await fetch(`${base}/src/model.ts`)).status).toBe(404);
+  });
+
+  it("refuses another site, a rebound host and a non-JSON body before the tower moves", async () => {
+    const { port } = new URL(base);
+    const own = `127.0.0.1:${port}`;
+    const play = JSON.stringify({ capabilityId: "sound.play", params: { soundIndex: 3 } });
+    const cases: [string, Record<string, string>, string | undefined, string][] = [
+      [
+        "/api/tower/connect",
+        { host: own, origin: "http://evil.example" },
+        undefined,
+        "foreign-origin",
+      ],
+      ["/api/tower/connect", { host: own }, undefined, "foreign-origin"],
+      [
+        "/api/tower/connect",
+        { host: `evil.example:${port}`, origin: base },
+        undefined,
+        "foreign-host",
+      ],
+      ["/api/command", { host: own, origin: base, "content-type": "text/plain" }, play, "not-json"],
+      [
+        "/api/command",
+        { host: own, origin: "null", "content-type": "application/json" },
+        play,
+        "foreign-origin",
+      ],
+    ];
+    for (const [path, headers, body, code] of cases) {
+      const refused = await raw(path, headers, body);
+      expect(
+        [refused.status, refused.body.error?.code],
+        `${path} ${JSON.stringify(headers)}`,
+      ).toEqual([403, code]);
+    }
+    expect(
+      (await raw("/api/state", { host: `evil.example:${port}` }, undefined, "GET")).status,
+    ).toBe(403);
+    expect(tower.status().state).toBe("disconnected");
+    expect(tower.session.writes()).toBe(0);
+    // The page's own requests still get through, by either local name.
+    expect(
+      (
+        await raw("/api/tower/connect", {
+          host: `localhost:${port}`,
+          origin: `http://localhost:${port}`,
+        })
+      ).status,
+    ).toBe(200);
+  });
+
+  it("keeps every change when saves arrive at once", async () => {
+    const saves = await Promise.all(
+      Array.from({ length: 20 }, (_, i) => post("/api/sound", { index: i + 1, tone: "good" })),
+    );
+    expect(saves.map((save) => save.status)).toEqual(Array(20).fill(200));
+    const draft = JSON.parse(await readFile(join(dir, "data", "sounds.json"), "utf8"));
+    expect(Object.keys(draft.sounds)).toHaveLength(20);
   });
 });

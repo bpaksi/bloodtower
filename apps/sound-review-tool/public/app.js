@@ -29,6 +29,8 @@ let toastTimer;
 function showError(problem) {
   console.error(`[${problem.code}] ${problem.message}`);
   const toast = $("toast");
+  toast.style.color = "";
+  toast.style.borderColor = "";
   toast.textContent = problemText(problem);
   toast.style.display = "block";
   clearTimeout(toastTimer);
@@ -202,7 +204,8 @@ function renderSounds() {
     el.classList.toggle("timing", timing?.index === sound.index);
     el.querySelector(".play").disabled = !canPlay;
     el.querySelector(".play").textContent = playing === sound.index ? "Playing…" : "Play";
-    el.querySelector(".stop").disabled = timing?.index !== sound.index;
+    // Stopped waits for the play to end: a play that fails must not leave a length behind.
+    el.querySelector(".stop").disabled = timing?.index !== sound.index || playing === sound.index;
     el.querySelector(".length").textContent = lengthLabel(record?.lengthMs);
     el.querySelector(".done").textContent = reviewed(record) ? "reviewed" : "";
     for (const button of el.querySelectorAll(".tones button")) {
@@ -243,7 +246,7 @@ async function play(index) {
 }
 
 function stopped(index) {
-  if (timing?.index !== index) return;
+  if (timing?.index !== index || playing === index) return;
   const lengthMs = Math.max(1, Math.round(Date.now() - timing.pressedAt));
   timing = undefined;
   render();

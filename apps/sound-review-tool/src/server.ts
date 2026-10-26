@@ -3,6 +3,7 @@
 // Export writes research/game-design/sound-feel.json.
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
 import { dirname, extname, join } from "node:path";
 import { SOUND_CATALOG, SOUND_COUNT } from "@dark-tower/tower";
 import { SessionStateError } from "@dark-tower/tower/runtime";
@@ -82,11 +83,19 @@ export const startServer = async (options: ServerOptions): Promise<Server> => {
   const { tower, draft, draftPath, exportPath, publicDir } = options;
   const now = options.now ?? Date.now;
 
-  const save = async () => {
+  const write = async () => {
     await mkdir(dirname(draftPath), { recursive: true });
     const tmp = `${draftPath}.tmp`;
     await writeFile(tmp, `${JSON.stringify(draft, null, 2)}\n`);
     await rename(tmp, draftPath);
+  };
+  // One write at a time, so two saves never share the temp file. Each writes the whole draft as it
+  // is then; a failed write is reported to its own caller, and the next save writes again.
+  let queue: Promise<void> = Promise.resolve();
+  const save = () => {
+    const run = queue.then(write, write);
+    queue = run;
+    return run;
   };
 
   const state = () => ({
@@ -101,6 +110,17 @@ export const startServer = async (options: ServerOptions): Promise<Server> => {
   const route = async (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     const path = url.pathname;
+
+    // Only this tool's own page may use the API: another page open in the browser must not reach
+    // the tower (tower-poc D20). The Host check stops a rebound DNS name; Origin, which a browser
+    // sends on every POST, stops another site; JSON-only bodies stop a form or a no-preflight post.
+    if (path.startsWith("/api/")) {
+      const refusal = refuseForeign(req, (server.address() as AddressInfo | null)?.port);
+      if (refusal) {
+        console.error(`Refused ${req.method} ${req.url}: [${refusal.code}] ${refusal.message}`);
+        return send(res, 403, { error: refusal });
+      }
+    }
 
     if (req.method === "GET" && path === "/api/state") return send(res, 200, state());
 
@@ -169,3 +189,33 @@ export const startServer = async (options: ServerOptions): Promise<Server> => {
 };
 
 const notFound: Problem = { code: "not-found", message: "Not found." };
+
+const LOCAL_HOSTS = ["127.0.0.1", "localhost"];
+
+/**
+ * Why an API request does not come from this tool's own page, or undefined when it does. Exported
+ * for the tests.
+ */
+export const refuseForeign = (
+  req: IncomingMessage,
+  port: number | undefined,
+): Problem | undefined => {
+  const own = LOCAL_HOSTS.map((name) => `${name}:${port}`);
+  const host = req.headers.host;
+  if (!host || !own.includes(host)) {
+    return { code: "foreign-host", message: `This tool only answers on 127.0.0.1:${port}.` };
+  }
+  if (req.method === "GET") return undefined;
+  const origin = req.headers.origin;
+  if (!origin || !own.map((name) => `http://${name}`).includes(origin)) {
+    return { code: "foreign-origin", message: "Only the tool's own page may change anything." };
+  }
+  const type = req.headers["content-type"]?.split(";")[0]?.trim();
+  const length = req.headers["content-length"];
+  const hasBody =
+    req.headers["transfer-encoding"] !== undefined || (length !== undefined && length !== "0");
+  if (hasBody && type !== "application/json") {
+    return { code: "not-json", message: "The request body must be application/json." };
+  }
+  return undefined;
+};
