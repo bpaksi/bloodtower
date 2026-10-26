@@ -4,7 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "node src/server.mjs",
-    "seed": "node src/seed-draft.mjs",
-    "test": "node --test src/model.test.mjs"
-  }
+    "start": "node src/server.mjs",
+    "build": "pnpm test",
+    "test": "node --test src/model.test.mjs",
+    "seed": "node src/seed-draft.mjs"
+  },
+  "packageManager": "pnpm@10.30.1"
 }

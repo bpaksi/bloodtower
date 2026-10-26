@@ -5,6 +5,8 @@ packages:
   - "apps/*"
   - "apps/*/src/*"
   - "packages/*"
+  # Runs on its own: see apps/board-map-tool/pnpm-workspace.yaml.
+  - "!apps/board-map-tool"
 # Dependencies allowed to run install scripts (pnpm 10 blocks them by default).
 onlyBuiltDependencies:
   - better-sqlite3
