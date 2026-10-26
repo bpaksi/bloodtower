@@ -209,6 +209,7 @@ Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-p
 - 7b can be built before 7a; until then every row shows "unavailable".
 - As built: `CardSchema` gets an optional `checkFields(type, data)`, and the game's `checkFeel` (`lib/feel.ts`) is the check. Every `feel:` field is optional; the block also fails on a card that is not a sound, an unknown field, or a length that is not a whole number above 0. `/sounds` groups by the card's `part-of` area under AREA-021 ("Tower sounds: <category>"), filters with `?mood=` and `?reads=` links (no client code), and is linked from the sidebar.
 - Bob's ruling (2026-10-21): the review records only the feeling a sound produces. **Fits** and **Avoid** are dropped from 7a and from the `feel:` block. Linking sounds to mechanics waits until mechanics are prototyped; a mechanic's tower interaction (lights, sound and movement as one unit) is then a `CUE-` card, and the rules already allow `cue uses <tower output>`.
+- Changed 2026-10-26 (Bob): the review moved out of tower-poc into `apps/sound-review-tool`, with fewer fields. The `feel:` block is now `soundsLike` (Bob's words), `tone` (good, bad, neutral) and `lengthMs`; mood, reads-as, strength, `answerLengthMs` and note are gone, and `/sounds` filters by `?tone=`. The export is `research/game-design/sound-feel.json`, version 2. The 7a and 7b text above is kept as history.
 - Later, the same review for the 21 light sequences (`LSQ-`) and the light effects (`LFX-`).
 
 ### Step 8: From design to requirements (Bob, 2026-10-20)
