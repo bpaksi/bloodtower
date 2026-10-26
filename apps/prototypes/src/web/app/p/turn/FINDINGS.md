@@ -8,7 +8,7 @@ DEC-077's four beats on a made-up 12-space road (village at space 4, sanctuary a
 
 ## Simulation (seed "1", 1,000 turns per row, group starts on a random non-village space, village menu of 3)
 
-The policy: head for the village; if a move is spare on arrival, take each menu action it can afford. "Reach" is the share of turns that get to the village and take at least one action. "Unused" is the average moves left over (after the 3-action menu is exhausted, or 0 if the group ran out walking). The board distance is invented (average start distance to the village about 3.4 spaces), so read the numbers as relative.
+The policy: head for the village; if a move is spare on arrival, take each village menu action it can afford. It never spends leftovers at the sanctuary. "Reach" is the share of turns that get to the village and take at least one action. "Unused" is therefore an **upper bound** for this policy: average moves left after the village menu is exhausted (or 0 if the group ran out walking), without sanctuary spend. The board distance is invented (average start distance to the village about 3.4 spaces), so read the numbers as relative.
 
 Defaults (1d6, floor 1, no virtues, no corruption): **reach 45.0%, average moves left unused 0.12** (average roll 3.48).
 
@@ -30,7 +30,7 @@ Reproduce: the page's "Run 1,000 seeded turns" button, with the tuning panel set
 
 - Dice: **2d6** (a hero with no help reaches the village about 83% of turns on this board, with about 1.6 moves to spare, so a turn rarely feels wasted and rarely overflows).
 - Floor: **2**, so a heavily corrupted group can still step into a village or take one action. At 2d6 the floor changes little until corruption is 4 or more; it matters mostly with 1d6.
-- Helping virtue: **+1** each (shifts reach by roughly 12 points at 2d6), corruption **-1** each (about 19 points per 2 at 2d6): corruption bites harder than virtue helps near the middle of the curve, which suits its role.
+- Helping virtue: **+1** each (about 6 reach points per virtue at 2d6; ~12 for two), corruption **-1** each (about 19 points per 2 at 2d6): corruption bites harder than virtue helps near the middle of the curve, which suits its role.
 - Building menu: 3 actions in a village is the cap that decides "unused": at 2d6 with 2 virtues a group wastes about 3 moves, so larger menus or sub-locations are worth testing.
 
 Open for the play-through: does a turn feel right, and is there enough to do with the moves rolled?

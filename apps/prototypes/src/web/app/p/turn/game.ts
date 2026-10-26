@@ -182,7 +182,8 @@ export function newGroups(rng: Rng, t: Tuning, positions: readonly number[]): Gr
     const roll = rollMoves(rng, t, i);
     out.push({
       name: GROUP_NAMES[i] ?? `Group ${i + 1}`,
-      at: positions[i] ?? 0,
+      // Missing slot (e.g. Groups 1→2 mid-game) uses the board start, not space 0 on top of A.
+      at: positions[i] ?? START[i] ?? 0,
       roll,
       movesLeft: roll.total,
       spent: 0,
