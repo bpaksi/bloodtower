@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import SoundsPage from "./page.tsx";
 
-const render = async (q: { mood?: string; reads?: string } = {}) =>
+const render = async (q: { tone?: string } = {}) =>
   renderToStaticMarkup(await SoundsPage({ searchParams: Promise.resolve(q) }));
 
 describe("/sounds on the real cards", () => {
@@ -16,13 +16,13 @@ describe("/sounds on the real cards", () => {
   it("shows unavailable, never 0, for a sound with no feel recorded", async () => {
     const html = await render();
     const row = /<tr data-sound="SND-001">(.*?)<\/tr>/.exec(html)?.[1] ?? "";
-    expect(row.match(/>unavailable</g)).toHaveLength(5);
+    expect(row.match(/>unavailable</g)).toHaveLength(3);
     expect(row).not.toMatch(/>0(\.0)?( s)?</);
   });
 
   it("marks the chosen filter", async () => {
-    const html = await render({ mood: "dread" });
-    expect(html).toMatch(/aria-current="true" href="\/sounds\?mood=dread"/);
+    const html = await render({ tone: "bad" });
+    expect(html).toMatch(/aria-current="true" href="\/sounds\?tone=bad"/);
     expect(html).not.toContain('aria-current="false"');
   });
 });

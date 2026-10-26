@@ -1,0 +1,24 @@
+{
+  "name": "sound-review-tool",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Connect and calibrate the tower, then describe each sound: sounds like, tone and length.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "start": "tsx src/main.ts",
+    "import-tower-poc": "tsx src/import-tower-poc.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dark-tower/tower": "workspace:*",
+    "tsx": "4.23.15",
+    "ultimatedarktower": "7.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3",
+    "vitest": "5.0.4"
+  }
+}

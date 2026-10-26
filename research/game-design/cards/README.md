@@ -87,19 +87,16 @@ Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or
 
 ## Sound feel
 
-A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it on tower-poc's Sounds page and exports `sound-feel.json`; Claude copies each sound into its card. The `/sounds` page in the workbench lists and filters them.
+A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it in the sound review tool (`apps/sound-review-tool`), whose Export writes `research/game-design/sound-feel.json`; Claude copies each sound into its card. The `/sounds` page in the workbench lists them and filters by tone.
 
 ```yaml
 feel:
-  mood: dread          # dread | tension | wonder | triumph | loss | calm | comic | mystery | menace
-  readsAs: threat      # threat | alert | reward | failure | arrival | magic | voice | transition
-  strength: strong     # soft | medium | strong
-  lengthMs: 2300       # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
-  answerLengthMs: 2240 # from the tower's answer to the play (as the sound starts) to the same Stopped press
-  note: low growl, then a crack
+  soundsLike: low growl, then a crack # a few of Bob's own words
+  tone: bad                           # good | bad | neutral
+  lengthMs: 2300                      # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
 ```
 
-Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a word outside the lists above. The code is `apps/game-workbench/src/web/lib/feel.ts`.
+Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a tone outside the list above. The older fields (mood, readsAs, strength, answerLengthMs, note) were dropped on 2026-10-26, when the review moved out of tower-poc. The code is `apps/game-workbench/src/web/lib/feel.ts`.
 
 ## Status
 

@@ -16,6 +16,7 @@ The project produces many small websites over its life. Each one lives in its ow
 | TV display POC | [apps/tv-display-poc](apps/tv-display-poc/) | Explore | Awaiting intent | Yes |
 | Prototypes | [apps/prototypes](apps/prototypes/) | Explore | Plan approved, batch 0 next | Yes |
 | Board map entry tool | [apps/board-map-tool](apps/board-map-tool/) | Build | Intent written, build not started | Yes |
+| Sound review tool | [apps/sound-review-tool](apps/sound-review-tool/) | Build | Built; awaiting Bob's use on the tower | Yes. The exported JSON is kept |
 
 ## Layout
 
