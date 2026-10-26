@@ -5,9 +5,11 @@ import {
   BOARD,
   DEFAULTS,
   endTurn,
+  eventFor,
   newGroups,
   readTuning,
   rollMoves,
+  START,
   simulate,
   VILLAGE,
   walk,
@@ -85,5 +87,46 @@ describe("simulation", () => {
   });
   it("board has one village", () => {
     expect(BOARD.filter((k) => k === "village")).toHaveLength(1);
+  });
+});
+
+describe("newGroups start spaces", () => {
+  it("uses START when a second group has no saved position (Groups 1→2)", () => {
+    const gs = newGroups(createRng("x"), { ...t, groups: 2, dice: "+1" }, [0]);
+    expect(gs).toHaveLength(2);
+    expect(gs[0]?.at).toBe(0);
+    expect(gs[1]?.at).toBe(START[1]);
+    expect(gs[1]?.at).not.toBe(0);
+  });
+});
+
+describe("eventFor (beat 4)", () => {
+  const base = () => {
+    const g = newGroups(createRng("x"), { ...t, dice: "+1" }, [0, 11])[0];
+    if (!g) throw new Error("expected Group A");
+    return g;
+  };
+  const villageEvents = ["Rumour", "Brawl", "Traveller", "Market day"];
+  const sanctuaryEvents = ["Quiet blessing", "Pilgrims"];
+  const wildEvents = ["Wolves", "Lost trail", "Abandoned camp", "Storm"];
+  const sanctuary = BOARD.indexOf("sanctuary");
+
+  it("village always gets a village event", () => {
+    for (let i = 0; i < 30; i++) {
+      const e = eventFor(createRng(`v${i}`), { ...base(), at: VILLAGE }, t);
+      expect(villageEvents).toContain(e);
+    }
+  });
+  it("sanctuary always gets a sanctuary event", () => {
+    for (let i = 0; i < 30; i++) {
+      const e = eventFor(createRng(`s${i}`), { ...base(), at: sanctuary }, t);
+      expect(sanctuaryEvents).toContain(e);
+    }
+  });
+  it("wild goes by chance", () => {
+    const none = eventFor(createRng("w0"), { ...base(), at: 0 }, { ...t, wildEvent: 0 });
+    expect(none).toBe("Nothing happens");
+    const always = eventFor(createRng("w1"), { ...base(), at: 0 }, { ...t, wildEvent: 1 });
+    expect(wildEvents).toContain(always);
   });
 });
