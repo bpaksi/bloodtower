@@ -22,6 +22,7 @@ import {
   TERRAINS,
   terrainOf,
 } from "./model.mjs";
+import { startingDraft } from "./seed.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const appDir = join(here, "..");
