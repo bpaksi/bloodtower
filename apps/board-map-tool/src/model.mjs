@@ -12,7 +12,7 @@ export const SLOT_ORDER = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const OPPOSITE = { N: "S", NE: "SW", E: "W", SE: "NW", S: "N", SW: "NE", W: "E", NW: "SE" };
 
 export function emptyDraft() {
-  return { regions: [], regionOf: {}, terrain: {}, edges: {} };
+  return { regions: [], regionOf: {}, terrain: {}, objects: {}, edges: {} };
 }
 
 export function edgeKey(a, b) {
@@ -36,6 +36,8 @@ export function setEdge(draft, spaces, { from, to, slot, river = false, note = "
     const clash = neighboursOf(draft, space).find(
       (n) => n.slot === s && n.to !== (space === from ? to : from),
     );
+    const object = objectAt(draft, space, s);
+    if (object) throw new Error(`Slot ${s} at ${space} holds the ${object}`);
     if (clash) {
       throw new Error(
         `Slot ${s} at ${space} is taken by ${clash.to}. Move ${clash.to} to the list, or pick another slot.`,
@@ -60,6 +62,7 @@ export function firstOpenSlot(draft, from, to) {
   const current = draft.edges[key];
   const free = (space, slot) => {
     const other = space === from ? to : from;
+    if (objectAt(draft, space, slot)) return false;
     return !neighboursOf(draft, space).some((n) => n.slot === slot && n.to !== other);
   };
   for (const slot of SLOT_ORDER) {
@@ -112,6 +115,47 @@ export function setTerrain(draft, spaceId, terrain) {
   return draft;
 }
 
+// Things that sit in a compass slot but are not spaces: the River (W, E or a diagonal) and
+// The Tower (always N). Each space has at most one of each. Stored as objects[spaceId][kind] = slot;
+// a kind with no slot is not on the cross.
+export const OBJECT_KINDS = [
+  { id: "river", label: "River", slots: ["W", "E", "NW", "NE", "SW", "SE"] },
+  { id: "tower", label: "The Tower", slots: ["N"] },
+];
+
+export function objectsOf(draft, spaceId) {
+  return draft.objects?.[spaceId] ?? {};
+}
+
+// Places a river or the tower on a slot, or takes it off the cross (slot null).
+export function setObject(draft, spaceId, kind, slot) {
+  const def = OBJECT_KINDS.find((k) => k.id === kind);
+  if (!def) throw new Error(`Unknown object ${kind}`);
+  draft.objects ??= {};
+  const current = { ...objectsOf(draft, spaceId) };
+  if (slot === null) {
+    delete current[kind];
+  } else {
+    if (!def.slots.includes(slot)) throw new Error(`${def.label} cannot go on ${slot}`);
+    const neighbour = neighboursOf(draft, spaceId).find((n) => n.slot === slot);
+    const other = objectAt(draft, spaceId, slot, kind);
+    if (neighbour) throw new Error(`Slot ${slot} at ${spaceId} is taken by ${neighbour.to}`);
+    if (other) throw new Error(`Slot ${slot} at ${spaceId} is taken by the ${other}`);
+    current[kind] = slot;
+  }
+  if (Object.keys(current).length) draft.objects[spaceId] = current;
+  else delete draft.objects[spaceId];
+  return draft;
+}
+
+// The object kind on a slot of a space (other than `except`), or undefined.
+export function objectAt(draft, spaceId, slot, except) {
+  const hit = Object.entries(objectsOf(draft, spaceId)).find(
+    ([kind, s]) => s === slot && kind !== except,
+  );
+  return hit ? hit[0] : undefined;
+}
+
 export function terrainOf(draft, space) {
   return draft.terrain[space.id] ?? space.terrain;
 }
@@ -157,6 +201,7 @@ export function exportBoard(draft, spaces) {
       terrain: terrainOf(draft, s),
       building: s.building,
       region: draft.regionOf[s.id],
+      objects: objectsOf(draft, s.id),
       neighbours: neighboursOf(draft, s.id),
     })),
   };

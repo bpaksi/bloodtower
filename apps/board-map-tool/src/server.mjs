@@ -14,10 +14,13 @@ import {
   exportBoard,
   firstOpenSlot,
   neighboursOf,
+  OBJECT_KINDS,
+  objectsOf,
   progressOf,
   removeEdge,
   SLOTS,
   setEdge,
+  setObject,
   setTerrain,
   TERRAINS,
   terrainOf,
@@ -53,9 +56,11 @@ function state() {
       ...s,
       terrain: terrainOf(draft, s),
       region: draft.regionOf[s.id] ?? null,
+      objects: objectsOf(draft, s.id),
       neighbours: neighboursOf(draft, s.id),
     })),
     regions: draft.regions,
+    objectKinds: OBJECT_KINDS,
     slots: SLOTS,
     terrains: TERRAINS,
     check: checkDraft(draft, spaces),
@@ -90,6 +95,7 @@ const actions = {
   "/api/region": async (b) => addRegion(draft, b.name),
   "/api/assign": async (b) => assignRegion(draft, b.space, b.region ?? null),
   "/api/terrain": async (b) => setTerrain(draft, b.space, b.terrain),
+  "/api/object": async (b) => setObject(draft, b.space, b.kind, b.slot ?? null),
 };
 
 async function route(req, res) {
