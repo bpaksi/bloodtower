@@ -97,7 +97,8 @@ export const FIELDS: TuningField[] = [
     type: "number",
     default: 200,
     min: 1,
-    note: "A run that has not topped the ladder by then counts as capped",
+    max: 2000,
+    note: "A run that has not topped the ladder by then counts as capped; max 2000 keeps Run simulation from freezing the page",
   },
 ];
 
