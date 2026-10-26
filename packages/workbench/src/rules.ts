@@ -98,9 +98,22 @@ export function cycles(graph: Graph, rel: string): string[][] {
   return groups.sort((x, y) => (x[0] ?? "").localeCompare(y[0] ?? ""));
 }
 
+/** Document ID kinds that live as refs by design (not missing cards). */
+const DOCUMENT_REF_KINDS = new Set(["requirement", "asset", "engine"]);
+
+/** True when `id` is a card-shaped ref with no card (e.g. MEC-999), not a document ID. */
+function noSuchCard(graph: Graph, id: string): boolean {
+  const n = graph.nodes[id];
+  if (n?.kind !== "ref") return false;
+  // Old document questions are Q3 (no hyphen), not Q-001.
+  if (n.idKind === "question" && !id.includes("-")) return false;
+  if (DOCUMENT_REF_KINDS.has(n.idKind)) return false;
+  return true;
+}
+
 /**
  * Everything the card lint fails on: a break not in the baseline, a baseline entry that is no
- * longer a break (remove it), and a cycle in an acyclic verb.
+ * longer a break (remove it), a duplicate link, and a cycle in an acyclic verb.
  */
 export function linkProblems(
   graph: Graph,
@@ -113,7 +126,11 @@ export function linkProblems(
   const problems = [
     ...breaks
       .filter((k) => !known.has(k))
-      .map((k) => `link ${k} breaks the link rules (see the rules table in the cards README)`),
+      .map((k) => {
+        const to = k.split("|")[2] ?? "";
+        if (noSuchCard(graph, to)) return `link ${k}: no such card ${to}`;
+        return `link ${k} breaks the link rules (see the rules table in the cards README)`;
+      }),
     ...[...known]
       .filter((k) => !now.has(k))
       .sort()

@@ -33,7 +33,7 @@ export type Gap = {
 };
 
 /** ID kinds that live in documents, not as cards: a conflict with one is settled by deciding. */
-const DOCUMENT_ID_KINDS = ["requirement", "asset", "engine"];
+const DOCUMENT_ID_KINDS = ["requirement", "asset", "engine", "question"];
 
 const SURFACE_TYPES = ["screen", "ui", "cue"];
 const DECIDED_TYPES = ["decision", "mechanic", "screen", "ui", "cue"];
