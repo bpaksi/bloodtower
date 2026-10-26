@@ -5,6 +5,7 @@ import {
   parseStored,
   savedAfterToggle,
   stepPending,
+  toggleAndSave,
   togglePanel,
 } from "./panels.ts";
 
@@ -107,5 +108,24 @@ describe("stepPending (#131)", () => {
   it("clears the flag when Detail gets an unknown ID", () => {
     const a = stepPending(false, { type: "request", hasRight: false });
     expect(stepPending(a.pending, { type: "unknown-id" })).toEqual({ pending: false, open: false });
+  });
+});
+
+describe("toggleAndSave (#143 / #129)", () => {
+  it("flips UI and does not persist an unsaved overlay when the other side is toggled", () => {
+    // At 1100 px a pick opened the right overlay without saving; then [ opens the left panel.
+    const before = { left: false, right: true };
+    expect(toggleAndSave(null, 1100, before, "left")).toEqual({
+      next: { left: true, right: true },
+      saved: { left: true, right: false },
+    });
+  });
+
+  it("keeps a saved side the user chose earlier when the other side toggles", () => {
+    const saved = { left: false, right: true };
+    expect(toggleAndSave(saved, 1100, { left: false, right: true }, "left")).toEqual({
+      next: { left: true, right: true },
+      saved: { left: true, right: true },
+    });
   });
 });
