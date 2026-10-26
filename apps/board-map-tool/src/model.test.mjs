@@ -7,10 +7,12 @@ import {
   emptyDraft,
   exportBoard,
   firstOpenSlot,
+  isCompleted,
   neighboursOf,
   objectsOf,
   progressOf,
   removeEdge,
+  setCompleted,
   setEdge,
   setObject,
   setTerrain,
@@ -161,4 +163,21 @@ test("a neighbour and an object cannot share a slot", () => {
   assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "N" }), /holds the tower/);
   setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" });
   assert.throws(() => setObject(d, "N-a", "river", "E"), /taken by N-c/);
+});
+
+test("a completed space is read-only until it is reopened", () => {
+  const d = emptyDraft();
+  addRegion(d, "Longwater");
+  assignRegion(d, "N-a", "REG-01");
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  setCompleted(d, "N-a", true);
+  assert.equal(isCompleted(d, "N-a"), true);
+  assert.throws(() => setTerrain(d, "N-a", "Hills"), /is completed/);
+  assert.throws(() => assignRegion(d, "N-a", null), /is completed/);
+  assert.throws(() => setObject(d, "N-a", "tower", "N"), /is completed/);
+  assert.throws(() => setEdge(d, spaces, { from: "N-c", to: "N-a", slot: "W" }), /is completed/);
+  assert.throws(() => removeEdge(d, "N-a", "N-b"), /is completed/);
+  setCompleted(d, "N-a", false);
+  setTerrain(d, "N-a", "Hills");
+  assert.equal(isCompleted(d, "N-a"), false);
 });

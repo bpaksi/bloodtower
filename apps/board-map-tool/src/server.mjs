@@ -13,12 +13,14 @@ import {
   emptyDraft,
   exportBoard,
   firstOpenSlot,
+  isCompleted,
   neighboursOf,
   OBJECT_KINDS,
   objectsOf,
   progressOf,
   removeEdge,
   SLOTS,
+  setCompleted,
   setEdge,
   setObject,
   setTerrain,
@@ -57,6 +59,7 @@ function state() {
       terrain: terrainOf(draft, s),
       region: draft.regionOf[s.id] ?? null,
       objects: objectsOf(draft, s.id),
+      completed: isCompleted(draft, s.id),
       neighbours: neighboursOf(draft, s.id),
     })),
     regions: draft.regions,
@@ -96,6 +99,7 @@ const actions = {
   "/api/assign": async (b) => assignRegion(draft, b.space, b.region ?? null),
   "/api/terrain": async (b) => setTerrain(draft, b.space, b.terrain),
   "/api/object": async (b) => setObject(draft, b.space, b.kind, b.slot ?? null),
+  "/api/complete": async (b) => setCompleted(draft, b.space, Boolean(b.on)),
 };
 
 async function route(req, res) {

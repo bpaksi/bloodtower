@@ -12,7 +12,7 @@ export const SLOT_ORDER = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const OPPOSITE = { N: "S", NE: "SW", E: "W", SE: "NW", S: "N", SW: "NE", W: "E", NW: "SE" };
 
 export function emptyDraft() {
-  return { regions: [], regionOf: {}, terrain: {}, objects: {}, edges: {} };
+  return { regions: [], regionOf: {}, terrain: {}, objects: {}, completed: {}, edges: {} };
 }
 
 export function edgeKey(a, b) {
@@ -22,9 +22,28 @@ export function edgeKey(a, b) {
 // Set one space's slot on an edge, and the other space's slot to the opposite point.
 // Throws when either slot is already used by another neighbour, so Bob picks which one
 // keeps it (DEC-236).
+// A completed space is read-only until it is reopened (Bob, 2026-10-26).
+export function isCompleted(draft, spaceId) {
+  return Boolean(draft.completed?.[spaceId]);
+}
+
+function assertEditable(draft, ...spaceIds) {
+  for (const id of spaceIds) {
+    if (isCompleted(draft, id)) throw new Error(`${id} is completed. Reopen it to change it.`);
+  }
+}
+
+export function setCompleted(draft, spaceId, on) {
+  draft.completed ??= {};
+  if (on) draft.completed[spaceId] = true;
+  else delete draft.completed[spaceId];
+  return draft;
+}
+
 export function setEdge(draft, spaces, { from, to, slot, river = false, note = "" }) {
   const ids = new Set(spaces.map((s) => s.id));
   if (!ids.has(from) || !ids.has(to)) throw new Error("Unknown space");
+  assertEditable(draft, from, to);
   if (from === to) throw new Error("A space cannot neighbour itself");
   if (slot !== null && !SLOTS.includes(slot)) throw new Error(`Unknown slot ${slot}`);
 
@@ -73,6 +92,7 @@ export function firstOpenSlot(draft, from, to) {
 }
 
 export function removeEdge(draft, a, b) {
+  assertEditable(draft, a, b);
   delete draft.edges[edgeKey(a, b)];
   return draft;
 }
@@ -100,6 +120,7 @@ export function addRegion(draft, name) {
 }
 
 export function assignRegion(draft, spaceId, regionId) {
+  assertEditable(draft, spaceId);
   if (regionId === null) {
     delete draft.regionOf[spaceId];
     return draft;
@@ -110,6 +131,7 @@ export function assignRegion(draft, spaceId, regionId) {
 }
 
 export function setTerrain(draft, spaceId, terrain) {
+  assertEditable(draft, spaceId);
   if (!TERRAINS.includes(terrain)) throw new Error(`Unknown terrain ${terrain}`);
   draft.terrain[spaceId] = terrain;
   return draft;
@@ -129,6 +151,7 @@ export function objectsOf(draft, spaceId) {
 
 // Places a river or the tower on a slot, or takes it off the cross (slot null).
 export function setObject(draft, spaceId, kind, slot) {
+  assertEditable(draft, spaceId);
   const def = OBJECT_KINDS.find((k) => k.id === kind);
   if (!def) throw new Error(`Unknown object ${kind}`);
   draft.objects ??= {};
@@ -228,6 +251,7 @@ export function progressOf(draft, spaces) {
     spaces: spaces.length,
     withRegion: spaces.filter((s) => draft.regionOf[s.id]).length,
     withNeighbours: spaces.filter((s) => neighboursOf(draft, s.id).length > 0).length,
+    completed: spaces.filter((s) => isCompleted(draft, s.id)).length,
     pairs: edges.length,
     sidesPlaced: placed,
     sidesInTray: sides - placed,
