@@ -5,6 +5,7 @@ import {
   DEFAULTS,
   drawSigns,
   fight,
+  MAX_RUN_ROUNDS,
   newCave,
   playRun,
   readSign,
@@ -88,5 +89,13 @@ describe("cave game", () => {
 
   it("an empty simulation is unavailable, not zero", () => {
     expect(simulate(0, "x", v).follows.lairShare).toBeNull();
+  });
+
+  it("playRun terminates when trueChance=0 and wrongCost=0 (follows cannot hang)", () => {
+    const vv = { ...v, trueChance: 0, wrongCost: 0, stepCost: 0 };
+    const result = playRun("follows", createRng("hang-probe"), vv);
+    expect(["lair", "ambush"]).toContain(result.outcome);
+    expect(result.rounds).toBeLessThanOrEqual(MAX_RUN_ROUNDS);
+    expect(Number.isFinite(result.rounds)).toBe(true);
   });
 });
