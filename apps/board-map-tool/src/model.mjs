@@ -161,3 +161,31 @@ export function exportBoard(draft, spaces) {
     })),
   };
 }
+
+// How far the entry has got, for the toolbar. A side is "placed" once it has a compass slot,
+// and "in the tray" while it does not.
+export function progressOf(draft, spaces) {
+  const edges = Object.values(draft.edges);
+  const sides = edges.length * 2;
+  const placed = edges.reduce(
+    (n, e) => n + Object.values(e.slots).filter((slot) => slot !== null).length,
+    0,
+  );
+  const kingdoms = {};
+  for (const k of ["N", "E", "S", "W"]) {
+    const members = spaces.filter((s) => s.kingdom === k);
+    kingdoms[k] = {
+      total: members.length,
+      withRegion: members.filter((s) => draft.regionOf[s.id]).length,
+    };
+  }
+  return {
+    spaces: spaces.length,
+    withRegion: spaces.filter((s) => draft.regionOf[s.id]).length,
+    withNeighbours: spaces.filter((s) => neighboursOf(draft, s.id).length > 0).length,
+    pairs: edges.length,
+    sidesPlaced: placed,
+    sidesInTray: sides - placed,
+    kingdoms,
+  };
+}

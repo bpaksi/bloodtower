@@ -6,59 +6,70 @@
 <title>Board map entry</title>
 <style>
   :root {
-    --ink: #1d1b18; --muted: #6d675e; --line: #d8d2c6; --paper: #faf8f3; --panel: #ffffff;
-    --accent: #7a4a1e; --bad: #9b2c2c; --good: #2d6a3e; --open: #f1ecdf; --drop: #f4d9a8;
+    --ink: #1d1b18; --muted: #6d675e; --line: #e2dccf; --paper: #f5f2ea; --panel: #ffffff;
+    --accent: #7a4a1e; --accent-soft: #f3e7d6; --bad: #9b2c2c; --good: #2d6a3e; --open: #f4f0e6; --drop: #f2d6a2;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --ink: #ece7dc; --muted: #a39c8f; --line: #3d3a32; --paper: #1c1a16; --panel: #242119;
-      --accent: #d9a46a; --bad: #e88a8a; --good: #8fd1a2; --open: #2a271f; --drop: #5a4424; }
+    :root { --ink: #ece7dc; --muted: #a39c8f; --line: #3d3a32; --paper: #17150f; --panel: #211e17; --accent: #d9a46a;
+      --accent-soft: #3a2f20; --bad: #e88a8a; --good: #8fd1a2; --open: #2a271f; --drop: #5a4424;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3); }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 17px/1.45 system-ui, sans-serif; color: var(--ink); background: var(--paper); }
-  header { display: flex; align-items: center; gap: 20px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+  body { margin: 0; font: 17px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--paper); }
+  header { display: flex; align-items: center; gap: 20px; padding: 16px 28px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; box-shadow: var(--shadow); }
   header h1 { font-size: 20px; margin: 0; margin-right: auto; }
-  .columns { display: grid; grid-template-columns: 380px 1fr; gap: 0; height: calc(100vh - 70px); }
-  .column { overflow: auto; padding: 22px 24px; }
-  .column + .column { border-left: 1px solid var(--line); }
-  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 26px 0 12px; }
-  h2:first-child { margin-top: 0; }
-  button { font: inherit; padding: 9px 16px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; cursor: pointer; }
+  .columns { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 70px); }
+  .toolbar { overflow: auto; padding: 22px; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 22px; }
+  .area { overflow: auto; padding: 32px 40px; }
+  .wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); }
+  .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 14px; }
+  h1.space-name { font-size: 28px; margin: 0; }
+  button { font: inherit; padding: 10px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 10px; cursor: pointer; }
   button:hover { border-color: var(--accent); }
   button.primary { background: var(--accent); color: var(--paper); border-color: var(--accent); }
-  input, select { font: inherit; padding: 9px 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; }
-  label { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 14px; }
-  .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+  input, select { font: inherit; padding: 10px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 10px; width: 100%; }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  label { display: flex; flex-direction: column; gap: 8px; color: var(--muted); font-size: 14px; }
+  .row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
-  .space-row { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; }
+  .space-list { max-height: 360px; overflow: auto; margin-top: 12px; }
+  .space-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
   .space-row:hover { background: var(--open); }
-  .space-row.sel { background: var(--open); outline: 2px solid var(--accent); }
+  .space-row.sel { background: var(--accent-soft); }
+  .space-group { margin-top: 14px; }
+  .space-group h3 { font-size: 13px; color: var(--muted); letter-spacing: .04em; margin: 0 0 6px; text-transform: uppercase; }
   .tag { color: var(--muted); font-size: 14px; }
-  .cross { display: grid; grid-template-columns: repeat(3, minmax(130px, 1fr)); gap: 14px; margin: 14px 0 24px; max-width: 620px; }
-  .cell { min-height: 112px; border: 2px dashed var(--line); border-radius: 12px; padding: 12px; background: var(--open); display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+  .meter { height: 8px; background: var(--open); border-radius: 999px; overflow: hidden; margin: 6px 0 12px; }
+  .meter span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+  .stat { display: flex; justify-content: space-between; font-size: 15px; margin: 4px 0; }
+  .cross { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .cell { min-height: 118px; border: 2px dashed var(--line); border-radius: 14px; padding: 14px; background: var(--open); display: flex; flex-direction: column; gap: 6px; justify-content: center; }
   .cell.open { color: var(--muted); }
   .cell.drop { background: var(--drop); border-color: var(--accent); }
-  .cell.filled { background: var(--panel); border-style: solid; border-color: var(--accent); cursor: grab; }
-  .cell.center { background: transparent; border-style: solid; border-color: var(--line); text-align: center; font-weight: 600; cursor: default; align-items: center; }
-  .cell .slot { font-size: 13px; color: var(--muted); letter-spacing: .05em; }
+  .cell.filled { background: var(--panel); border-style: solid; border-color: var(--accent); cursor: grab; box-shadow: var(--shadow); }
+  .cell.center { background: transparent; border-style: solid; border-color: var(--line); text-align: center; align-items: center; }
+  .cell .slot { font-size: 13px; color: var(--muted); letter-spacing: .06em; }
   .cell .name { font-size: 17px; font-weight: 600; }
-  .chip { display: inline-flex; gap: 8px; align-items: center; padding: 8px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--accent); cursor: grab; }
+  .chip { display: inline-flex; gap: 8px; align-items: center; padding: 9px 16px; border-radius: 999px; background: var(--panel); border: 1px solid var(--accent); cursor: grab; }
   .chip.unsure { border-style: dashed; }
-  .tray { min-height: 76px; border: 2px dashed var(--line); border-radius: 12px; padding: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+  .tray { min-height: 84px; border: 2px dashed var(--line); border-radius: 14px; padding: 14px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; background: var(--open); }
   .tray.drop { background: var(--drop); border-color: var(--accent); }
   .badge { font-size: 13px; color: var(--muted); }
-  .picker { position: relative; max-width: 520px; }
-  .picker input { width: 100%; }
-  .results { position: absolute; left: 0; right: 0; top: 100%; margin-top: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; max-height: 330px; overflow: auto; z-index: 3; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
-  .results div { padding: 10px 14px; cursor: pointer; }
+  .picker { position: relative; }
+  .results { position: absolute; left: 0; right: 0; top: 100%; margin-top: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; max-height: 340px; overflow: auto; z-index: 3; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .results div { padding: 12px 16px; cursor: pointer; }
   .results div.hi, .results div:hover { background: var(--open); }
   .results .none { color: var(--muted); cursor: default; }
-  .editor { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--panel); max-width: 620px; }
+  .editor { border: 1px solid var(--accent); }
   .error { color: var(--bad); }
   .ok { color: var(--good); font-weight: 600; }
   .muted { color: var(--muted); }
-  .list li { margin: 8px 0; }
+  ul.list { margin: 0; padding-left: 20px; }
+  ul.list li { margin: 8px 0; }
   #message { min-height: 1.4em; }
-  .toolbar input { width: 100%; margin-bottom: 8px; }
+  @media (max-width: 1000px) { .columns { grid-template-columns: 1fr; height: auto; } .toolbar, .area { overflow: visible; } }
 </style>
 </head>
 <body>
@@ -68,17 +79,24 @@
   <button type="button" id="export" class="primary">Export to base pack</button>
 </header>
 <div class="columns">
-  <div class="column toolbar">
-    <h2>Spaces</h2>
-    <input id="spaceFilter" placeholder="Find a space (type part of a name)" autocomplete="off">
-    <div id="spaces"></div>
-    <h2>Regions</h2>
-    <input id="newRegion" placeholder="Type a region name and press Enter">
-    <ul id="regions" class="list"></ul>
-    <h2>Checks</h2>
-    <div id="checks"></div>
-  </div>
-  <div class="column" id="detail"><p class="muted">Pick a space on the left.</p></div>
+  <aside class="toolbar">
+    <section class="card" id="progress"></section>
+    <section class="card">
+      <p class="section-title">Spaces</p>
+      <input id="spaceFilter" placeholder="Find a space by name" autocomplete="off">
+      <div id="spaces" class="space-list"></div>
+    </section>
+    <section class="card">
+      <p class="section-title">Regions</p>
+      <input id="newRegion" placeholder="Type a region name and press Enter">
+      <ul id="regions" class="list"></ul>
+    </section>
+    <section class="card">
+      <p class="section-title">Checks</p>
+      <div id="checks"></div>
+    </section>
+  </aside>
+  <main class="area" id="detail"><p class="muted">Pick a space on the left.</p></main>
 </div>
 <script src="app.js" type="module"></script>
 </body>

@@ -8,6 +8,7 @@ import {
   exportBoard,
   firstOpenSlot,
   neighboursOf,
+  progressOf,
   removeEdge,
   setEdge,
   setTerrain,
@@ -122,4 +123,20 @@ test("the first open slot is taken in clockwise order, on both spaces", () => {
   assert.equal(firstOpenSlot(d, "N-a", "N-b"), "NE");
   setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "NE" });
   assert.equal(neighboursOf(d, "N-b").find((n) => n.to === "N-a").slot, "SW");
+});
+
+test("progress counts spaces, regions, pairs and the sides placed or in the tray", () => {
+  const d = emptyDraft();
+  addRegion(d, "Longwater");
+  assignRegion(d, "N-a", "REG-01");
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  setEdge(d, spaces, { from: "N-c", to: "N-b", slot: null });
+  const p = progressOf(d, spaces);
+  assert.equal(p.spaces, 3);
+  assert.equal(p.withRegion, 1);
+  assert.equal(p.withNeighbours, 3);
+  assert.equal(p.pairs, 2);
+  assert.equal(p.sidesPlaced, 2);
+  assert.equal(p.sidesInTray, 2);
+  assert.equal(p.kingdoms.N.withRegion, 1);
 });

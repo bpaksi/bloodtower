@@ -403,6 +403,8 @@ function renderDetail() {
   detail.replaceChildren();
   const s = state.selected && state.data.spaces.find((x) => x.id === state.selected);
   if (!s) return detail.append(el("p", { class: "muted" }, "Pick a space on the left."));
+  const wrap = el("div", { class: "wrap" });
+  detail.append(wrap);
 
   const terrain = el(
     "select",
@@ -418,7 +420,7 @@ function renderDetail() {
     ),
   );
 
-  detail.append(
+  wrap.append(
     el("h1", { style: "font-size: 24px; margin: 0 0 6px" }, s.name),
     el(
       "p",
@@ -443,11 +445,33 @@ function renderDetail() {
   );
   const editor = renderEditor(s);
   if (editor) detail.append(el("div", { style: "margin-top: 24px" }, editor));
-  detail.append(el("div", { style: "margin-top: 28px" }, renderPicker(s)));
+  wrap.append(el("div", { style: "margin-top: 28px" }, renderPicker(s)));
+}
+
+function renderProgress() {
+  const p = state.data.progress;
+  const pct = (n, d) => (d ? Math.round((100 * n) / d) : 0);
+  const bar = (label, n, d) =>
+    el(
+      "div",
+      {},
+      el("div", { class: "stat" }, el("span", {}, label), el("span", {}, `${n} of ${d}`)),
+      el("div", { class: "meter" }, el("span", { style: `width: ${pct(n, d)}%` })),
+    );
+  const box = $("progress");
+  box.replaceChildren(
+    el("p", { class: "section-title" }, "Progress"),
+    bar("Spaces with a region", p.withRegion, p.spaces),
+    bar("Spaces with neighbours", p.withNeighbours, p.spaces),
+    bar("Sides on a slot", p.sidesPlaced, p.sidesPlaced + p.sidesInTray),
+    el("p", { class: "section-title", style: "margin-top: 18px" }, "By kingdom"),
+    ...Object.entries(p.kingdoms).map(([k, v]) => bar(kingdomLabel(k), v.withRegion, v.total)),
+  );
 }
 
 function render() {
   if (!state.data) return;
+  renderProgress();
   renderSpaces();
   renderRegions();
   renderChecks();
