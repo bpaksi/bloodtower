@@ -19,6 +19,8 @@ pnpm --dir apps/game-workbench dev     # http://localhost:4797
 
 `pnpm --dir apps/game-workbench build && pnpm --dir apps/game-workbench start` serves a production build on the same port. Pages read `research/game-design/` on every request, so a reload shows the latest files.
 
+`pnpm --dir apps/game-workbench/src/e2e e2e` builds the web UI and runs a Playwright smoke test of the focus graph on port 4798 (first run: `pnpm --dir apps/game-workbench/src/e2e e2e:install`). No CI job runs it yet.
+
 ## Command line
 
 ```bash
