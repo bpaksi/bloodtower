@@ -11,6 +11,7 @@ import {
   isCompleted,
   neighboursOf,
   objectsOf,
+  parseDraft,
   progressOf,
   removeEdge,
   setBuilding,
@@ -214,4 +215,46 @@ test("each kingdom needs exactly one building of each type", () => {
   setBuilding(d, "N-4", null);
   assert.equal(buildingOf(d, board[4]), null);
   assert.throws(() => setBuilding(d, "N-4", "Castle"), /Unknown building/);
+});
+
+test("an object the tool no longer knows can still be taken off the cross", () => {
+  const d = emptyDraft();
+  d.objects = { "N-a": { river: "W" } };
+  setObject(d, "N-a", "river", null);
+  assert.deepEqual(objectsOf(d, "N-a"), {});
+  d.objects = { "N-a": { river: "W" } };
+  assert.throws(() => setObject(d, "N-a", "river", "W"), /Unknown object river/);
+});
+
+test("a draft with bad entries loads, keeping what is good and listing what was dropped", () => {
+  const text = JSON.stringify({
+    regions: [{ id: "REG-01", name: "Longwater" }, { id: 7 }],
+    regionOf: { "N-a": "REG-01", "N-b": "REG-99", "X-gone": "REG-01" },
+    terrain: { "N-a": "Lava" },
+    objects: { "N-a": { river: "W", tower: "N" } },
+    buildings: { "N-a": "Castle" },
+    completed: { "N-a": true },
+    edges: {
+      "N-a|N-b": { a: "N-a", b: "N-b", slots: { "N-a": "E", "N-b": "W" }, note: "ok" },
+      "N-a|N-c": { a: "N-a", b: "N-missing", slots: {} },
+    },
+  });
+  const { draft, problems } = parseDraft(text, spaces);
+  assert.deepEqual(draft.regions, [{ id: "REG-01", name: "Longwater" }]);
+  assert.deepEqual(draft.regionOf, { "N-a": "REG-01" });
+  assert.deepEqual(draft.terrain, {});
+  assert.deepEqual(draft.objects, { "N-a": { tower: "N" } });
+  assert.deepEqual(draft.buildings, {});
+  assert.deepEqual(draft.completed, { "N-a": true });
+  assert.deepEqual(Object.keys(draft.edges), ["N-a|N-b"]);
+  assert.ok(problems.some((p) => p.includes("region REG-99")));
+  assert.ok(problems.some((p) => p.includes("river on N-a")));
+  assert.ok(problems.some((p) => p.includes("building Castle")));
+  assert.ok(problems.some((p) => p.includes("edge N-a|N-c is broken")));
+});
+
+test("text that is not a draft returns no draft, so the caller can set it aside", () => {
+  assert.equal(parseDraft("{not json", spaces).draft, null);
+  assert.equal(parseDraft("[1,2]", spaces).draft, null);
+  assert.equal(parseDraft("null", spaces).draft, null);
 });

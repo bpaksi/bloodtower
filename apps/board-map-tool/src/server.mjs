@@ -19,6 +19,7 @@ import {
   neighboursOf,
   OBJECT_KINDS,
   objectsOf,
+  parseDraft,
   progressOf,
   removeEdge,
   SLOTS,
@@ -40,13 +41,32 @@ const draftPath = join(appDir, "data", "draft.json");
 const exportPath = join(repoRoot, "packs-v2", "base", "board-map.json");
 const port = Number(process.env.PORT ?? 4790);
 
-let draft = emptyDraft();
+// Loading never stops the tool. Bad entries are dropped and listed (and logged); a file that is
+// not JSON is moved aside, never overwritten, and the tool starts from the board map.
+let draft;
+const loadProblems = [];
 try {
-  draft = JSON.parse(await readFile(draftPath, "utf8"));
+  const text = await readFile(draftPath, "utf8");
+  const parsed = parseDraft(text, spaces);
+  if (parsed.draft) {
+    draft = parsed.draft;
+    loadProblems.push(...parsed.problems);
+  } else {
+    const aside = join(appDir, "data", `draft.broken-${Date.now()}.json`);
+    await rename(draftPath, aside);
+    loadProblems.push(
+      `${parsed.problems.join("; ")}. The file was moved to ${aside}; starting from the board map.`,
+    );
+    draft = await startingDraft();
+  }
 } catch (err) {
-  if (err.code !== "ENOENT") throw err;
+  if (err.code !== "ENOENT") {
+    console.error(`Could not read ${draftPath}: ${err.message}. Starting from the board map.`);
+    loadProblems.push(`could not read the draft (${err.message}); starting from the board map`);
+  }
   draft = await startingDraft();
 }
+for (const problem of loadProblems) console.error(`draft: ${problem}`);
 
 async function save() {
   await mkdir(dirname(draftPath), { recursive: true });
@@ -57,6 +77,7 @@ async function save() {
 
 function state() {
   return {
+    problems: loadProblems,
     spaces: spaces.map((s) => ({
       ...s,
       terrain: terrainOf(draft, s),
