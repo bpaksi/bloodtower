@@ -79,6 +79,8 @@ const openActionSchema = z.strictObject({
   promptId: promptIdSchema,
   actionId: actionIdSchema,
   label: z.string().min(1).max(200),
+  /** Walk only: the compass slot this neighbour sits in (UI-023). */
+  slot: z.enum(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]).optional(),
   open: z.literal(true),
 });
 

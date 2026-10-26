@@ -4,6 +4,7 @@ import {
   openingActiveIndex,
 } from "../../../protocols/opening.ts";
 import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
+import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
 import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
@@ -37,7 +38,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "walk") {
     const spaceId = promptId.split("--").slice(2).join("--");
     const name = state.play?.content.board.spaceById.get(spaceId)?.name ?? spaceId;
-    return `Walk to ${name}`;
+    return name;
   }
   if (actionId === "enter") {
     const spaceId = promptId.split("--").slice(2).join("--");
@@ -62,6 +63,18 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "play-without-tower") return "Play without Tower";
   if (promptId === "tower-calibrate" && actionId === "tower-calibrate") return "Calibrate";
   return actionId;
+};
+
+/** Walk offers carry the compass slot of their neighbour (UI-023). */
+const slotFor = (state: ShellState, promptId: string, actionId: string): { slot?: CompassSlot } => {
+  if (actionId !== "walk" || !state.play) return {};
+  const [, groupId, ...rest] = promptId.split("--");
+  const group = state.play.groups.find((row) => row.id === groupId);
+  if (!group) return {};
+  const found = slottedNeighborsOf(state.play.content.board, group.spaceId).find(
+    (n) => n.space.id === rest.join("--"),
+  );
+  return found ? { slot: found.slot } : {};
 };
 
 const heroName = (state: ShellState, heroId: string): string => {
@@ -341,6 +354,7 @@ export const projectShellView = (state: ShellState): ViewState => {
           promptId: offer.promptId,
           actionId: offer.actionId,
           label: labelFor(state, offer.promptId, offer.actionId),
+          ...slotFor(state, offer.promptId, offer.actionId),
           open: true,
           deviceId: null,
         }
