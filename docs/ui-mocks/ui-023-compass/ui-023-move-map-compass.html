@@ -642,7 +642,7 @@
               <span class="frontier-label f2">frontier</span>
 
               <!-- YOU center (DEC-234) -->
-              <div class="node you slot-C" aria-label="You are at Upper Ice Fangs">
+              <div class="node you slot-C" role="status" aria-label="You are at Upper Ice Fangs">
                 <div class="badge">YOU</div>
                 <div class="label">
                   <span class="name">Upper Ice Fangs</span>
@@ -712,7 +712,7 @@
 
   function clearSelection() {
     document.querySelectorAll(".node.selected")
-      .forEach((el) => el.classList.remove("selected"));
+      .forEach((el) => { el.classList.remove("selected"); });
     selectedId = null;
   }
 
