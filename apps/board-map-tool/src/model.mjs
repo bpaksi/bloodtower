@@ -12,7 +12,15 @@ export const SLOT_ORDER = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const OPPOSITE = { N: "S", NE: "SW", E: "W", SE: "NW", S: "N", SW: "NE", W: "E", NW: "SE" };
 
 export function emptyDraft() {
-  return { regions: [], regionOf: {}, terrain: {}, objects: {}, edges: {} };
+  return {
+    regions: [],
+    regionOf: {},
+    terrain: {},
+    objects: {},
+    completed: {},
+    buildings: {},
+    edges: {},
+  };
 }
 
 export function edgeKey(a, b) {
@@ -22,9 +30,28 @@ export function edgeKey(a, b) {
 // Set one space's slot on an edge, and the other space's slot to the opposite point.
 // Throws when either slot is already used by another neighbour, so Bob picks which one
 // keeps it (DEC-236).
+// A completed space is read-only until it is reopened (Bob, 2026-10-26).
+export function isCompleted(draft, spaceId) {
+  return Boolean(draft.completed?.[spaceId]);
+}
+
+function assertEditable(draft, ...spaceIds) {
+  for (const id of spaceIds) {
+    if (isCompleted(draft, id)) throw new Error(`${id} is completed. Reopen it to change it.`);
+  }
+}
+
+export function setCompleted(draft, spaceId, on) {
+  draft.completed ??= {};
+  if (on) draft.completed[spaceId] = true;
+  else delete draft.completed[spaceId];
+  return draft;
+}
+
 export function setEdge(draft, spaces, { from, to, slot, river = false, note = "" }) {
   const ids = new Set(spaces.map((s) => s.id));
   if (!ids.has(from) || !ids.has(to)) throw new Error("Unknown space");
+  assertEditable(draft, from, to);
   if (from === to) throw new Error("A space cannot neighbour itself");
   if (slot !== null && !SLOTS.includes(slot)) throw new Error(`Unknown slot ${slot}`);
 
@@ -73,6 +100,7 @@ export function firstOpenSlot(draft, from, to) {
 }
 
 export function removeEdge(draft, a, b) {
+  assertEditable(draft, a, b);
   delete draft.edges[edgeKey(a, b)];
   return draft;
 }
@@ -100,6 +128,7 @@ export function addRegion(draft, name) {
 }
 
 export function assignRegion(draft, spaceId, regionId) {
+  assertEditable(draft, spaceId);
   if (regionId === null) {
     delete draft.regionOf[spaceId];
     return draft;
@@ -110,6 +139,7 @@ export function assignRegion(draft, spaceId, regionId) {
 }
 
 export function setTerrain(draft, spaceId, terrain) {
+  assertEditable(draft, spaceId);
   if (!TERRAINS.includes(terrain)) throw new Error(`Unknown terrain ${terrain}`);
   draft.terrain[spaceId] = terrain;
   return draft;
@@ -129,6 +159,7 @@ export function objectsOf(draft, spaceId) {
 
 // Places a river or the tower on a slot, or takes it off the cross (slot null).
 export function setObject(draft, spaceId, kind, slot) {
+  assertEditable(draft, spaceId);
   const def = OBJECT_KINDS.find((k) => k.id === kind);
   if (!def) throw new Error(`Unknown object ${kind}`);
   draft.objects ??= {};
@@ -161,6 +192,28 @@ export function terrainOf(draft, space) {
 }
 
 // Problems that block the export (errors) and things to look at (warnings).
+const KINGDOM_LETTERS = { N: "Arisilon", E: "Brynthia", S: "Durnin", W: "Zenon" };
+
+// Each kingdom has exactly one building of each type (Bob, 2026-10-26).
+export const BUILDING_TYPES = ["Village", "Bazaar", "Sanctuary", "Citadel"];
+
+// The building on a space: the one the tool set, else the one the board map gives it.
+// null means no building.
+export function buildingOf(draft, space) {
+  return Object.hasOwn(draft.buildings ?? {}, space.id)
+    ? draft.buildings[space.id]
+    : (space.building ?? null);
+}
+
+// Sets or clears (null) the building on a space. Only one type per space.
+export function setBuilding(draft, spaceId, type) {
+  assertEditable(draft, spaceId);
+  if (type !== null && !BUILDING_TYPES.includes(type)) throw new Error(`Unknown building ${type}`);
+  draft.buildings ??= {};
+  draft.buildings[spaceId] = type;
+  return draft;
+}
+
 export function checkDraft(draft, spaces) {
   const errors = [];
   const warnings = [];
@@ -187,6 +240,14 @@ export function checkDraft(draft, spaces) {
     for (const s of new Set(dupes)) errors.push(`${space.id} uses slot ${s} twice`);
   }
 
+  for (const k of Object.keys(KINGDOM_LETTERS)) {
+    const inKingdom = spaces.filter((s) => s.kingdom === k);
+    for (const type of BUILDING_TYPES) {
+      const count = inKingdom.filter((s) => buildingOf(draft, s) === type).length;
+      if (count !== 1) errors.push(`${k} has ${count} ${type}s; each kingdom needs exactly one`);
+    }
+  }
+
   return { errors, warnings, complete: errors.length === 0 };
 }
 
@@ -199,7 +260,7 @@ export function exportBoard(draft, spaces) {
       kingdom: s.kingdom,
       name: s.name,
       terrain: terrainOf(draft, s),
-      building: s.building,
+      building: buildingOf(draft, s),
       region: draft.regionOf[s.id],
       objects: objectsOf(draft, s.id),
       neighbours: neighboursOf(draft, s.id),
@@ -228,6 +289,7 @@ export function progressOf(draft, spaces) {
     spaces: spaces.length,
     withRegion: spaces.filter((s) => draft.regionOf[s.id]).length,
     withNeighbours: spaces.filter((s) => neighboursOf(draft, s.id).length > 0).length,
+    completed: spaces.filter((s) => isCompleted(draft, s.id)).length,
     pairs: edges.length,
     sidesPlaced: placed,
     sidesInTray: sides - placed,

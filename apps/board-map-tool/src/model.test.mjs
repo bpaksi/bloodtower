@@ -3,14 +3,18 @@ import { test } from "node:test";
 import {
   addRegion,
   assignRegion,
+  buildingOf,
   checkDraft,
   emptyDraft,
   exportBoard,
   firstOpenSlot,
+  isCompleted,
   neighboursOf,
   objectsOf,
   progressOf,
   removeEdge,
+  setBuilding,
+  setCompleted,
   setEdge,
   setObject,
   setTerrain,
@@ -87,8 +91,10 @@ test("a check passes only when every space has a region and neighbours", () => {
   setEdge(d, spaces, { from: "N-c", to: "N-b", slot: "S" });
   setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "SE" });
   const result = checkDraft(d, spaces);
-  assert.deepEqual(result.errors, []);
-  assert.equal(result.complete, true);
+  assert.deepEqual(
+    result.errors.filter((e) => !e.includes("each kingdom")),
+    [],
+  );
 });
 
 test("terrain can be changed, and the export carries the region and neighbours", () => {
@@ -161,4 +167,57 @@ test("a neighbour and an object cannot share a slot", () => {
   assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "N" }), /holds the tower/);
   setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" });
   assert.throws(() => setObject(d, "N-a", "river", "E"), /taken by N-c/);
+});
+
+test("a completed space is read-only until it is reopened", () => {
+  const d = emptyDraft();
+  addRegion(d, "Longwater");
+  assignRegion(d, "N-a", "REG-01");
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  setCompleted(d, "N-a", true);
+  assert.equal(isCompleted(d, "N-a"), true);
+  assert.throws(() => setTerrain(d, "N-a", "Hills"), /is completed/);
+  assert.throws(() => assignRegion(d, "N-a", null), /is completed/);
+  assert.throws(() => setObject(d, "N-a", "tower", "N"), /is completed/);
+  assert.throws(() => setEdge(d, spaces, { from: "N-c", to: "N-a", slot: "W" }), /is completed/);
+  assert.throws(() => removeEdge(d, "N-a", "N-b"), /is completed/);
+  setCompleted(d, "N-a", false);
+  setTerrain(d, "N-a", "Hills");
+  assert.equal(isCompleted(d, "N-a"), false);
+});
+
+test("each kingdom needs exactly one building of each type", () => {
+  const kingdoms = ["N", "E", "S", "W"];
+  const types = ["Village", "Bazaar", "Sanctuary", "Citadel"];
+  const board = [];
+  for (const k of kingdoms)
+    for (let i = 0; i < 15; i++)
+      board.push({
+        id: `${k}-${i}`,
+        kingdom: k,
+        name: `${k}${i}`,
+        terrain: "Desert",
+        building: null,
+      });
+  const d = emptyDraft();
+  addRegion(d, "Longwater");
+  for (const s of board) assignRegion(d, s.id, "REG-01");
+  for (const k of kingdoms)
+    types.forEach((type, i) => {
+      setBuilding(d, `${k}-${i}`, type);
+    });
+  const buildingErrors = (draft) =>
+    checkDraft(draft, board).errors.filter((e) => e.includes("each kingdom"));
+  assert.deepEqual(buildingErrors(d), []);
+
+  setBuilding(d, "N-4", "Village");
+  const errors = buildingErrors(d);
+  assert.ok(errors.includes("N has 2 Villages; each kingdom needs exactly one"));
+  assert.equal(buildingOf(d, board[4]), "Village");
+  setBuilding(d, "N-1", null);
+  assert.ok(buildingErrors(d).includes("N has 0 Bazaars; each kingdom needs exactly one"));
+  setBuilding(d, "N-1", "Bazaar");
+  setBuilding(d, "N-4", null);
+  assert.equal(buildingOf(d, board[4]), null);
+  assert.throws(() => setBuilding(d, "N-4", "Castle"), /Unknown building/);
 });
