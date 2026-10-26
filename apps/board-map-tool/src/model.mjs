@@ -48,7 +48,7 @@ export function setCompleted(draft, spaceId, on) {
   return draft;
 }
 
-export function setEdge(draft, spaces, { from, to, slot, river = false, note = "" }) {
+export function setEdge(draft, spaces, { from, to, slot, note = "" }) {
   const ids = new Set(spaces.map((s) => s.id));
   if (!ids.has(from) || !ids.has(to)) throw new Error("Unknown space");
   assertEditable(draft, from, to);
@@ -76,7 +76,6 @@ export function setEdge(draft, spaces, { from, to, slot, river = false, note = "
     a: [from, to].sort()[0],
     b: [from, to].sort()[1],
     slots: sides,
-    river: Boolean(river),
     note: note.trim(),
   };
   return draft;
@@ -111,7 +110,7 @@ export function neighboursOf(draft, id) {
     .filter((e) => e.a === id || e.b === id)
     .map((e) => {
       const to = e.a === id ? e.b : e.a;
-      return { to, slot: e.slots[id] ?? null, river: e.river, note: e.note };
+      return { to, slot: e.slots[id] ?? null, note: e.note };
     })
     .sort((x, y) => x.to.localeCompare(y.to));
 }
@@ -145,19 +144,15 @@ export function setTerrain(draft, spaceId, terrain) {
   return draft;
 }
 
-// Things that sit in a compass slot but are not spaces: the River (W, E or a diagonal) and
-// The Tower (always N). Each space has at most one of each. Stored as objects[spaceId][kind] = slot;
-// a kind with no slot is not on the cross.
-export const OBJECT_KINDS = [
-  { id: "river", label: "River", slots: ["W", "E", "NW", "NE", "SW", "SE"] },
-  { id: "tower", label: "The Tower", slots: ["N"] },
-];
+// Things that sit in a compass slot but are not spaces: The Tower (always N). Each space has at
+// most one. Stored as objects[spaceId][kind] = slot; a kind with no slot is not on the cross.
+export const OBJECT_KINDS = [{ id: "tower", label: "The Tower", slots: ["N"] }];
 
 export function objectsOf(draft, spaceId) {
   return draft.objects?.[spaceId] ?? {};
 }
 
-// Places a river or the tower on a slot, or takes it off the cross (slot null).
+// Places the tower on a slot, or takes it off the cross (slot null).
 export function setObject(draft, spaceId, kind, slot) {
   assertEditable(draft, spaceId);
   const def = OBJECT_KINDS.find((k) => k.id === kind);

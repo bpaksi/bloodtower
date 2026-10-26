@@ -1,5 +1,5 @@
 // Reads the adjacency tables in research/game-design/board-map.md and writes src/starting-edges.json:
-// one entry per pair of spaces, with river crossings and unconfirmed (?) pairs marked. The draft
+// one entry per pair of spaces, with unconfirmed (?) pairs marked. The draft
 // gives no compass directions, so every starting edge begins under the cross (slot null).
 // Run: node src/import-board-map.mjs
 import { readFile, writeFile } from "node:fs/promises";
@@ -52,9 +52,9 @@ for (const line of lines) {
   }
 
   for (const part of cells[1].split(";").map((p) => p.trim())) {
-    const across = part.match(/^(?:\?\s*)?across (?:.*? )?river\s*→\s*(.*)$/i);
-    const river = Boolean(across);
-    const list = (across ? across[1] : part)
+    // "across … river → X" names neighbours across a river; rivers are not in the tool.
+    const list = part
+      .replace(/^(?:\?\s*)?across (?:.*? )?river\s*→\s*/i, "")
       .split(/[,/]/)
       .map((n) => n.trim())
       .filter(Boolean);
@@ -63,8 +63,8 @@ for (const line of lines) {
       if (!to || to === from) continue;
       const unsure = /\?/.test(raw);
       const key = [from, to].sort().join("|");
-      const seen = pairs.get(key) ?? { river: false, unsure: false };
-      pairs.set(key, { river: seen.river || river, unsure: seen.unsure || unsure });
+      const seen = pairs.get(key) ?? { unsure: false };
+      pairs.set(key, { unsure: seen.unsure || unsure });
     }
   }
 }
@@ -72,7 +72,7 @@ for (const line of lines) {
 const edges = [...pairs.entries()]
   .map(([key, v]) => {
     const [a, b] = key.split("|");
-    return { a, b, river: v.river, unconfirmed: v.unsure };
+    return { a, b, unconfirmed: v.unsure };
   })
   .sort((x, y) => `${x.a}${x.b}`.localeCompare(`${y.a}${y.b}`));
 
@@ -80,7 +80,5 @@ await writeFile(
   join(here, "starting-edges.json"),
   JSON.stringify({ source: "research/game-design/board-map.md", edges }, null, 2) + "\n",
 );
-console.log(
-  `${edges.length} edges, ${edges.filter((e) => e.river).length} across a river, ${edges.filter((e) => e.unconfirmed).length} unconfirmed`,
-);
+console.log(`${edges.length} edges, ${edges.filter((e) => e.unconfirmed).length} unconfirmed`);
 if (unmatched.size) console.log("Names not matched to a space:", [...unmatched].join(" | "));

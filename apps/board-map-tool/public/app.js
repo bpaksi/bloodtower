@@ -135,7 +135,7 @@ function renderChecks() {
   box.append(ul);
 }
 
-// What is being dragged: a neighbour space, or a non-space object (river or tower).
+// What is being dragged: a neighbour space, or a non-space object (the tower).
 function startDrag(e, drag) {
   state.dragging = drag;
   e.dataTransfer.setData("text/plain", drag.id);
@@ -175,7 +175,6 @@ function onDrop(e, node, slot) {
     from: state.selected,
     to: d.id,
     slot,
-    river: current.river,
     note: current.note,
   });
 }
@@ -195,12 +194,11 @@ function chip(n) {
       title: "Drag to an open slot, or click to edit",
     },
     el("span", {}, nameOf(n.to)),
-    n.river ? el("span", { class: "badge" }, "river") : null,
     n.note ? el("span", { class: "badge" }, n.note) : null,
   );
 }
 
-// A river or the tower, dragged from the tray onto a slot it is allowed on.
+// The tower, dragged from the tray onto its slot.
 function objectToken(kind) {
   return el(
     "div",
@@ -242,7 +240,7 @@ function renderCross(s) {
         type: "neighbour",
         id: n.to,
         name: nameOf(n.to),
-        note: [n.river ? "river" : "", n.note].filter(Boolean).join(" · "),
+        note: n.note,
         n,
       };
   for (const [kind, slot] of Object.entries(s.objects ?? {})) {
@@ -321,13 +319,11 @@ document.addEventListener("dragend", () => {
 function renderEditor(s) {
   const n = state.editing && s.neighbours.find((x) => x.to === state.editing);
   if (!n) return null;
-  const river = el("input", { type: "checkbox", checked: n.river });
   const note = el("input", { value: n.note ?? "", placeholder: "optional note" });
   const box = el(
     "div",
     { class: "editor" },
     el("h2", {}, `${s.name} and ${nameOf(n.to)}`),
-    el("div", { class: "row" }, el("label", { class: "row" }, river, " River between")),
     el("div", { class: "row" }, el("label", { class: "stack" }, "Note", note)),
     el(
       "div",
@@ -342,7 +338,6 @@ function renderEditor(s) {
               from: s.id,
               to: n.to,
               slot: n.slot,
-              river: river.checked,
               note: note.value.trim(),
             }),
         },
@@ -482,7 +477,7 @@ function addPicked(s) {
   const to = state.picked.id;
   state.picked = null;
   state.query = "";
-  post("/api/edge", { from: s.id, to, slot, river: false, note: "" });
+  post("/api/edge", { from: s.id, to, slot, note: "" });
 }
 
 function renderDetail() {
