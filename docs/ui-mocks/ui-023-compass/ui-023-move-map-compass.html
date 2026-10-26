@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Blood Tower · UI-023 Move Map (Compass) · Theme B</title>
+<style>
+  :root {
+    --parchment: #e8d9b8;
+    --parchment-deep: #d4c29a;
+    --ink: #1a1410;
+    --ink-muted: #4a3f32;
+    --chrome: #2a2622;
+    --chrome-mid: #3d3832;
+    --chrome-edge: #5a534a;
+    --gold: #c9a227;
+    --gold-bright: #e8c547;
+    --gold-dim: #8a7020;
+    --cream: #f3ead4;
+    --green-glow: #3d9a4a;
+    --green-core: #2e7a38;
+    --blocked: #6a6560;
+    --blocked-x: #8a8480;
+    --danger: #b33a2a;
+    --frontier: #8b6914;
+    --hero-gold: #b8963a;
+    --frame-w: 390px;
+    --frame-h: 844px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100%;
+    background: #0e0c0a;
+    color: var(--ink);
+    font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 12px;
+    min-height: 100vh;
+  }
+
+  /* Outer device chrome */
+  .device {
+    width: var(--frame-w);
+    height: var(--frame-h);
+    background: #111;
+    border-radius: 36px;
+    padding: 10px;
+    box-shadow:
+      0 0 0 2px #2a2520,
+      0 0 0 4px #1a1612,
+      0 24px 60px rgba(0,0,0,.65);
+    position: relative;
+  }
+
+  .device::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 8px;
+    background: #1a1612;
+    border-radius: 6px;
+    z-index: 5;
+  }
+
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--chrome);
+    position: relative;
+  }
+
+  /* Top nav bar */
+  .topbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    background: linear-gradient(180deg, #2c2824 0%, #1e1b18 100%);
+    border-bottom: 1px solid #4a443c;
+    color: var(--cream);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    user-select: none;
+  }
+
+  .topbar button {
+    background: none;
+    border: none;
+    color: var(--cream);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 6px;
+    opacity: 0.92;
+  }
+  .topbar button:active { opacity: 0.6; }
+  .topbar .mid { opacity: 0.85; }
+
+  /* Engraved frame + parchment field */
+  .frame {
+    flex: 1 1 auto;
+    position: relative;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(255,245,220,.35) 0%, transparent 55%),
+      linear-gradient(165deg, #efe0c0 0%, var(--parchment) 40%, var(--parchment-deep) 100%);
+    border: 10px solid var(--chrome);
+    border-top-width: 6px;
+    box-shadow: inset 0 0 40px rgba(60,40,10,.18);
+  }
+
+  /* Theme B engraved corner ornaments (CSS recreation) */
+  .ornament {
+    position: absolute;
+    width: 62px;
+    height: 62px;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .ornament::before,
+  .ornament::after {
+    content: "";
+    position: absolute;
+    background: var(--chrome);
+  }
+  /* L-bars */
+  .ornament::before {
+    width: 100%;
+    height: 13px;
+    background: linear-gradient(180deg, #3d3832 0%, #1e1b18 55%, #2a2622 100%);
+    box-shadow:
+      inset 0 1px 0 #6a6358,
+      inset 0 -1px 0 #0e0c0a,
+      0 0 0 1px #3a3530;
+  }
+  .ornament::after {
+    width: 13px;
+    height: 100%;
+    background: linear-gradient(90deg, #3d3832 0%, #1e1b18 55%, #2a2622 100%);
+    box-shadow:
+      inset 1px 0 0 #6a6358,
+      inset -1px 0 0 #0e0c0a,
+      0 0 0 1px #3a3530;
+  }
+  /* Corner medallion */
+  .ornament .med {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background:
+      radial-gradient(circle at 40% 35%, #5a534a 0%, #2a2622 55%, #1a1612 100%);
+    border: 1px solid #6a6358;
+    box-shadow:
+      inset 0 0 0 2px #3a3530,
+      0 1px 2px rgba(0,0,0,.4);
+    z-index: 1;
+  }
+  .ornament .med::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 1px solid #7a7368;
+    opacity: 0.7;
+  }
+  .ornament .spike {
+    position: absolute;
+    width: 0; height: 0;
+    border-style: solid;
+    z-index: 0;
+  }
+
+  .ornament.tl { top: -2px; left: -2px; }
+  .ornament.tl::before { top: 0; left: 0; }
+  .ornament.tl::after  { top: 0; left: 0; }
+  .ornament.tl .med { top: 2px; left: 2px; }
+  .ornament.tl .spike {
+    top: 18px; left: 18px;
+    border-width: 0 10px 14px 0;
+    border-color: transparent var(--chrome) transparent transparent;
+  }
+
+  .ornament.tr { top: -2px; right: -2px; transform: scaleX(-1); }
+  .ornament.tr::before { top: 0; left: 0; }
+  .ornament.tr::after  { top: 0; left: 0; }
+  .ornament.tr .med { top: 2px; left: 2px; }
+  .ornament.tr .spike {
+    top: 18px; left: 18px;
+    border-width: 0 10px 14px 0;
+    border-color: transparent var(--chrome) transparent transparent;
+  }
+
+  .ornament.bl { bottom: -2px; left: -2px; transform: scaleY(-1); }
+  .ornament.bl::before { top: 0; left: 0; }
+  .ornament.bl::after  { top: 0; left: 0; }
+  .ornament.bl .med { top: 2px; left: 2px; }
+  .ornament.bl .spike {
+    top: 18px; left: 18px;
+    border-width: 0 10px 14px 0;
+    border-color: transparent var(--chrome) transparent transparent;
+  }
+
+  .ornament.br { bottom: -2px; right: -2px; transform: scale(-1); }
+  .ornament.br::before { top: 0; left: 0; }
+  .ornament.br::after  { top: 0; left: 0; }
+  .ornament.br .med { top: 2px; left: 2px; }
+  .ornament.br .spike {
+    top: 18px; left: 18px;
+    border-width: 0 10px 14px 0;
+    border-color: transparent var(--chrome) transparent transparent;
+  }
+
+  /* Inner chrome rim lines */
+  .frame::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(90,83,74,.55);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 14px 10px;
+    position: relative;
+    z-index: 1;
+    min-height: 0;
+  }
+
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 4px 4px;
+  }
+  .moves-left {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .moves-left span { font-variant-numeric: tabular-nums; }
+  .hero-line {
+    font-size: 13px;
+    color: var(--hero-gold);
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--ink-muted);
+    opacity: 0.75;
+    margin: 2px 0 6px;
+    line-height: 1.35;
+  }
+
+  /* Compass stage */
+  .compass-wrap {
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 428px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .compass {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    flex: 0 0 auto;
+  }
+
+  /* SVG spokes / frontiers / tower links behind nodes */
+  .compass-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .spoke {
+    stroke: #1a1410;
+    stroke-width: 2.5;
+    fill: none;
+  }
+  .spoke.empty {
+    stroke: rgba(26,20,16,.18);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 4;
+  }
+  .spoke.blocked {
+    stroke: rgba(80,75,70,.45);
+    stroke-width: 2;
+  }
+  .frontier-line {
+    stroke: var(--frontier);
+    stroke-width: 1.75;
+    stroke-dasharray: 5 4;
+    fill: none;
+  }
+  .tower-link {
+    stroke: #8a8580;
+    stroke-width: 1.25;
+    fill: none;
+  }
+
+  .frontier-label {
+    position: absolute;
+    font-size: 8px;
+    color: var(--frontier);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .frontier-label.f1 { top: 18%; left: 22%; transform: rotate(-38deg); }
+  .frontier-label.f2 { top: 12%; right: 18%; transform: rotate(32deg); }
+
+  /* Nodes */
+  .node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    z-index: 2;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+  }
+  .node:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  .node .badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 700;
+    background: #f7f2e6;
+    color: var(--ink);
+    border: 2px solid var(--green-core);
+    box-shadow:
+      0 0 0 3px rgba(61,154,74,.35),
+      0 0 12px rgba(61,154,74,.55),
+      0 2px 4px rgba(0,0,0,.2);
+    transition: box-shadow .15s, transform .12s, border-color .15s;
+  }
+  .node .label {
+    background: #1e1a16;
+    color: #f0e6d0;
+    font-size: 9.5px;
+    line-height: 1.25;
+    padding: 3px 7px 4px;
+    border-radius: 3px;
+    text-align: center;
+    max-width: 92px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.35);
+    border: 1px solid #3a3530;
+  }
+  .node .label .name {
+    display: block;
+    color: var(--gold-bright);
+    font-weight: 600;
+    font-size: 10px;
+  }
+
+  .node.selectable:hover .badge,
+  .node.selectable:focus-visible .badge {
+    transform: scale(1.06);
+  }
+  .node.selected .badge {
+    border-color: var(--gold);
+    background: #fff8e6;
+    box-shadow:
+      0 0 0 3px rgba(201,162,39,.55),
+      0 0 16px rgba(232,197,71,.7),
+      0 2px 6px rgba(0,0,0,.25);
+  }
+  .node.selected .label {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold), 0 2px 6px rgba(0,0,0,.4);
+  }
+
+  /* Empty slot */
+  .node.empty {
+    cursor: default;
+    pointer-events: none;
+  }
+  .node.empty .badge {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1.5px dashed rgba(26,20,16,.28);
+    box-shadow: none;
+    color: transparent;
+  }
+  .node.empty .label { display: none; }
+
+  /* Blocked */
+  .node.blocked {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.72;
+  }
+  .node.blocked .badge {
+    background: #c8c4bc;
+    border-color: var(--blocked);
+    color: #4a4540;
+    box-shadow: none;
+    font-size: 16px;
+    font-weight: 800;
+  }
+  .node.blocked .label {
+    background: #3a3834;
+    border-color: #555049;
+  }
+  .node.blocked .label .name { color: #a8a090; }
+  .node .blocked-tag {
+    font-size: 9px;
+    color: var(--danger);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-top: -1px;
+  }
+
+  /* YOU center */
+  .node.you {
+    cursor: default;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .node.you .badge {
+    width: 48px;
+    height: 48px;
+    background: #faf6ec;
+    border: 3px solid var(--gold);
+    box-shadow:
+      0 0 0 2px #8a7020,
+      0 0 0 4px rgba(201,162,39,.35),
+      inset 0 0 0 2px rgba(179,58,42,.35),
+      0 3px 8px rgba(0,0,0,.25);
+    color: var(--danger);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+  .node.you .label {
+    background: #1a1612;
+    min-width: 110px;
+  }
+  .node.you .label .name {
+    color: var(--gold-bright);
+    font-size: 10.5px;
+  }
+
+  /* Slot positions — fixed 8-point layout (DEC-235); Tower at top = board-relative */
+  .slot-N  { left: 50%; top: 16.5%; }
+  .slot-NE { left: 82%; top: 22%; }
+  .slot-E  { left: 88%; top: 50%; }
+  .slot-SE { left: 82%; top: 78%; }
+  .slot-S  { left: 50%; top: 88%; }
+  .slot-SW { left: 18%; top: 78%; }
+  .slot-W  { left: 12%; top: 50%; }
+  .slot-NW { left: 18%; top: 22%; }
+  .slot-C  { left: 50%; top: 50%; }
+
+  /* The Tower marker — own reserved band ABOVE the compass ring (Bob lock 2026-10-26: no overlap) */
+  .tower-band {
+    flex: 0 0 auto;
+    height: 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    pointer-events: none;
+    margin-bottom: 2px;
+  }
+  .tower-band svg { width: 30px; height: 40px; display: block;
+    filter: drop-shadow(0 0 4px rgba(179,58,42,.45)); }
+  .tower-band .tstem { width: 1px; height: 4px; background: #8a7a5a; }
+
+  /* Footer */
+  .footer {
+    flex: 0 0 auto;
+    padding: 8px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(0deg, #1e1b18 0%, #2a2622 100%);
+    border-top: 1px solid #4a443c;
+  }
+  .end-turn {
+    width: 100%;
+    max-width: 280px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #f5edd8 0%, #e8d9b8 100%);
+    border: 1.5px solid #2a2622;
+    border-radius: 4px;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 0 #1a1612, 0 3px 8px rgba(0,0,0,.35);
+  }
+  .end-turn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #1a1612;
+  }
+  .foot-note {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5px;
+    color: #8a8480;
+    letter-spacing: 0.01em;
+    padding: 0 2px;
+  }
+
+  /* Selection flash toast (subtle) */
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 88px;
+    transform: translateX(-50%) translateY(8px);
+    background: rgba(26,20,16,.92);
+    color: var(--cream);
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--gold-dim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+  <div class="device" role="application" aria-label="Blood Tower move map compass mock">
+    <div class="screen">
+      <header class="topbar">
+        <button type="button" data-visual-only="back" aria-label="Back">◀ Back</button>
+        <button type="button" class="mid" data-visual-only="replay" aria-label="Replay">↻ Replay</button>
+        <button type="button" data-visual-only="menu" aria-label="Menu">≡ Menu</button>
+      </header>
+
+      <div class="frame">
+        <div class="ornament tl" aria-hidden="true"><span class="med"></span><span class="spike"></span></div>
+        <div class="ornament tr" aria-hidden="true"><span class="med"></span><span class="spike"></span></div>
+        <div class="ornament bl" aria-hidden="true"><span class="med"></span><span class="spike"></span></div>
+        <div class="ornament br" aria-hidden="true"><span class="med"></span><span class="spike"></span></div>
+
+        <div class="content">
+          <div class="status-row">
+            <div class="moves-left">Moves left: <span id="movesLeft">5</span></div>
+            <div class="hero-line">Agnes · you are here.</div>
+          </div>
+          <p class="hint">8 fixed slots · frontiers shown · story-blocked stays visible but disabled</p>
+
+          <div class="compass-wrap">
+            <div class="tower-band" role="img" aria-label="The Tower">
+              <svg viewBox="0 0 30 40" aria-hidden="true">
+                <!-- spire -->
+                <path d="M15 1 L18 10 L12 10 Z" fill="#2a2420" stroke="#c9a85a" stroke-width=".8"/>
+                <circle cx="15" cy="6.5" r="1.3" fill="#d4543a"/>
+                <!-- crown battlements -->
+                <path d="M9 10 h12 v3 h-1.5 v-1.5 h-1.5 v1.5 h-1.5 v-1.5 h-1.5 v1.5 h-1.5 v-1.5 h-1.5 v1.5 h-1.5 v-1.5 h-1.5 v1.5 H9 Z" fill="#2a2420" stroke="#c9a85a" stroke-width=".7"/>
+                <!-- keep body, tapering -->
+                <path d="M10 13 L20 13 L22 37 L8 37 Z" fill="#1f1b18" stroke="#c9a85a" stroke-width=".9"/>
+                <!-- window slits, blood glow -->
+                <rect x="14.2" y="17" width="1.6" height="4" rx=".8" fill="#d4543a"/>
+                <rect x="12.4" y="25" width="1.4" height="3.2" rx=".7" fill="#8a1e14"/>
+                <rect x="16.2" y="25" width="1.4" height="3.2" rx=".7" fill="#8a1e14"/>
+                <!-- door -->
+                <path d="M13 37 v-4 a2 2 0 0 1 4 0 v4 Z" fill="#0e0c0a" stroke="#c9a85a" stroke-width=".6"/>
+                <!-- ground line -->
+                <line x1="4" y1="37.5" x2="26" y2="37.5" stroke="#c9a85a" stroke-width=".8"/>
+              </svg>
+              <div class="tstem"></div>
+            </div>
+            <div class="compass" id="compass">
+              <!-- Spokes, frontiers, tower links -->
+              <svg class="compass-svg" viewBox="0 0 340 340" aria-hidden="true">
+                <!-- Center at 170,170. Slot centers match CSS % of 340 -->
+                <!-- N 170,47.6  NE 278.8,74.8  E 299.2,170  SE 278.8,265.2
+                     S 170,299.2  SW 61.2,265.2  W 40.8,170  NW 61.2,74.8 -->
+                <line class="spoke" x1="170" y1="170" x2="170" y2="66" />
+                <line class="spoke blocked" x1="170" y1="170" x2="268" y2="86" />
+                <line class="spoke" x1="170" y1="170" x2="282" y2="170" />
+                <line class="spoke" x1="170" y1="170" x2="268" y2="254" />
+                <line class="spoke empty" x1="170" y1="170" x2="170" y2="282" />
+                <line class="spoke" x1="170" y1="170" x2="72" y2="254" />
+                <line class="spoke" x1="170" y1="170" x2="58" y2="170" />
+                <line class="spoke empty" x1="170" y1="170" x2="72" y2="86" />
+
+                <!-- Frontiers: W↔N and N↔NE -->
+                <line class="frontier-line" x1="58" y1="160" x2="160" y2="64" />
+                <line class="frontier-line" x1="180" y1="58" x2="258" y2="82" />
+              </svg>
+
+              <span class="frontier-label f1">frontier</span>
+              <span class="frontier-label f2">frontier</span>
+
+              <!-- YOU center (DEC-234) -->
+              <div class="node you slot-C" aria-label="You are at Upper Ice Fangs">
+                <div class="badge">YOU</div>
+                <div class="label">
+                  <span class="name">Upper Ice Fangs</span>
+                </div>
+              </div>
+
+              <!-- Eight fixed slots (DEC-235/236 authored) — filled by JS -->
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <button type="button" class="end-turn" id="endTurn" data-visual-only="end-turn">End turn</button>
+        <div class="foot-note">
+          <span>Mock · UI-023 portrait · HTML first cut · DEC-234/235/236</span>
+          <span>Theme B</span>
+        </div>
+      </footer>
+
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </div>
+
+<script>
+/**
+ * UI-023 move-map compass — demo data (DEC-236: pre-authored slots, no angle math)
+ * Bob lock 2026-10-26: no Also-adjacent / overflow list — adjacents are the 8 slots only.
+ * Bob lock 2026-10-26: no N/S/E/W letters on labels — positions only; Tower always at top
+ * (board-relative). Rivers conceptually left/right.
+ * Moves left stays at 5 until a selectable neighbour is selected; then decrements once
+ * to 4 to show the tap cost visually. Re-selecting another neighbour does not stack.
+ */
+(function () {
+  // Authored layout — Bob/Gamewright locked brief (not computed).
+  // Slot keys (N…NW) are layout positions only; never shown as letters/words on UI.
+  const SLOTS = [
+    { dir: "N",  name: "Tower Scar Desert", cost: 1, state: "open" },
+    { dir: "NE", name: "Ash Hills",         cost: 1, state: "blocked" },
+    { dir: "E",  name: "Greenbridge",       cost: 1, state: "open" },
+    { dir: "SE", name: "Lower Ice Fangs",   cost: 1, state: "open" },
+    { dir: "S",  name: null,               cost: null, state: "empty" },
+    { dir: "SW", name: "Peaks of the Djinn", cost: 1, state: "open" },
+    { dir: "W",  name: "Bleak Wastes",      cost: 1, state: "open" },
+    { dir: "NW", name: null,               cost: null, state: "empty" }
+  ];
+
+  const compass = document.getElementById("compass");
+  const movesLeftEl = document.getElementById("movesLeft");
+  const toast = document.getElementById("toast");
+
+  let selectedId = null;
+  let movesSpent = false;
+  const BASE_MOVES = 5;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove("show"), 1400);
+  }
+
+  function updateMoves() {
+    movesLeftEl.textContent = movesSpent ? String(BASE_MOVES - 1) : String(BASE_MOVES);
+  }
+
+  function clearSelection() {
+    document.querySelectorAll(".node.selected")
+      .forEach((el) => el.classList.remove("selected"));
+    selectedId = null;
+  }
+
+  function selectTarget(id, name, el) {
+    clearSelection();
+    selectedId = id;
+    el.classList.add("selected");
+    if (!movesSpent) {
+      movesSpent = true;
+      updateMoves();
+    }
+    showToast("Selected · " + name);
+  }
+
+  // Build eight slots always (DEC-235) — position keys only; no dir letters on UI
+  SLOTS.forEach((slot) => {
+    const btn = document.createElement(slot.state === "open" ? "button" : "div");
+    btn.className = "node slot-" + slot.dir;
+    btn.dataset.slot = slot.dir;
+
+    if (slot.state === "empty") {
+      btn.classList.add("empty");
+      btn.setAttribute("aria-hidden", "true");
+      btn.innerHTML = '<div class="badge" title="empty slot"></div>';
+    } else if (slot.state === "blocked") {
+      btn.classList.add("blocked");
+      btn.setAttribute("aria-label", slot.name + " blocked");
+      btn.innerHTML =
+        '<div class="badge" aria-hidden="true">✕</div>' +
+        '<div class="label"><span class="name">' + slot.name + "</span></div>" +
+        '<span class="blocked-tag">blocked</span>';
+    } else {
+      btn.classList.add("selectable");
+      btn.type = "button";
+      const id = "slot-" + slot.dir;
+      btn.dataset.id = id;
+      btn.setAttribute("aria-label", "Move to " + slot.name + ", cost " + slot.cost);
+      btn.innerHTML =
+        '<div class="badge">' + slot.cost + "</div>" +
+        '<div class="label"><span class="name">' + slot.name + "</span></div>";
+      btn.addEventListener("click", () => selectTarget(id, slot.name, btn));
+    }
+
+    compass.appendChild(btn);
+  });
+
+  // Visual-only chrome
+  document.querySelectorAll("[data-visual-only]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const kind = el.getAttribute("data-visual-only");
+      if (kind === "end-turn") {
+        showToast(selectedId ? "End turn (visual) · destination held" : "End turn (visual)");
+      } else {
+        showToast(kind.charAt(0).toUpperCase() + kind.slice(1) + " (visual only)");
+      }
+    });
+  });
+
+  updateMoves();
+})();
+</script>
+</body>
+</html>
