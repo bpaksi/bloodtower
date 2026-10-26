@@ -1,6 +1,14 @@
 import { createRng } from "@dark-tower/rng";
 import { describe, expect, it } from "vitest";
-import { configFrom, isOver, playVisit, simulate, startVisit, step } from "./game.ts";
+import {
+  configFrom,
+  isOver,
+  MAX_SIM_VISITS,
+  playVisit,
+  simulate,
+  startVisit,
+  step,
+} from "./game.ts";
 
 const cfg = configFrom();
 const rng = () => createRng("t");
@@ -103,5 +111,24 @@ describe("simulation", () => {
 
   it("a whole visit ends", () => {
     expect(isOver(playVisit(createRng("x"), cfg, "haggle-always"))).toBe(true);
+  });
+
+  it("haggle-once haggles exactly once and saves between never and always", () => {
+    const visit = playVisit(createRng("x"), cfg, "haggle-once");
+    expect(visit.haggles).toBe(1);
+    const r = simulate(cfg, "1", 1000);
+    const never = r.find((x) => x.policy === "haggle-never");
+    const once = r.find((x) => x.policy === "haggle-once");
+    const always = r.find((x) => x.policy === "haggle-always");
+    expect(once?.moneySaved).toBeGreaterThan(never?.moneySaved ?? 0);
+    expect(once?.moneySaved).toBeLessThan(always?.moneySaved ?? Number.POSITIVE_INFINITY);
+  });
+
+  it("simulate clamps visits to MAX_SIM_VISITS", () => {
+    expect(MAX_SIM_VISITS).toBe(2000);
+    const capped = simulate(cfg, "1", MAX_SIM_VISITS + 50_000);
+    for (const row of capped) {
+      expect(row.visits).toBe(MAX_SIM_VISITS);
+    }
   });
 });
