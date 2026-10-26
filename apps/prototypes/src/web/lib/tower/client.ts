@@ -47,7 +47,10 @@ export interface TowerClientOptions {
   /** `ws://host:port/ws` of tower-poc. */
   url: string;
   label?: string;
-  /** Wait this long for an answer before NO_ANSWER. */
+  /**
+   * Wait this long for an answer before NO_ANSWER. Default covers tower-poc's
+   * calibration limit (30 s) and queued-command timeout (35 s).
+   */
   timeoutMs?: number;
   /** Test seam; defaults to the platform WebSocket. */
   WebSocketImpl?: typeof WebSocket;
@@ -69,7 +72,7 @@ interface Waiter {
  * `open()`, sends only what a method is told to, and never reopens or resends on its own.
  */
 export const createTowerClient = (options: TowerClientOptions) => {
-  const timeoutMs = options.timeoutMs ?? 10_000;
+  const timeoutMs = options.timeoutMs ?? 35_000;
   const Impl = options.WebSocketImpl ?? globalThis.WebSocket;
   let socket: WebSocket | undefined;
   let welcome: WelcomePayload | undefined;
