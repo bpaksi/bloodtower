@@ -258,3 +258,12 @@ test("text that is not a draft returns no draft, so the caller can set it aside"
   assert.equal(parseDraft("[1,2]", spaces).draft, null);
   assert.equal(parseDraft("null", spaces).draft, null);
 });
+
+test("a chosen slot can replace the neighbour on it, which goes to the tray", () => {
+  const d = emptyDraft();
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
+  assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" }), /is taken by N-b/);
+  setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E", replace: true });
+  assert.equal(neighboursOf(d, "N-a").find((n) => n.to === "N-c").slot, "E");
+  assert.equal(neighboursOf(d, "N-a").find((n) => n.to === "N-b").slot, null);
+});

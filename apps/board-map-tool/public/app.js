@@ -162,15 +162,18 @@ function dragAttr() {
 function canDrop(slot) {
   const d = state.dragging;
   if (!d) return false;
-  if (spaceById(state.selected)?.completed) return false;
-  if (slot === null) return true;
   const s = spaceById(state.selected);
-  const taken =
-    s.neighbours.some((n) => n.slot === slot && n.to !== d.id) ||
-    Object.entries(s.objects ?? {}).some(([kind, at]) => at === slot && kind !== d.id);
-  if (taken) return false;
-  if (d.type === "object")
-    return state.data.objectKinds.find((k) => k.id === d.id).slots.includes(slot);
+  if (s.completed) return false;
+  if (slot === null) return true;
+  // The tower or another object on the slot blocks the drop; a neighbour there is replaced.
+  const objectHere = Object.entries(s.objects ?? {}).some(
+    ([kind, at]) => at === slot && kind !== d.id,
+  );
+  if (objectHere) return false;
+  if (d.type === "object") {
+    const neighbourHere = s.neighbours.some((n) => n.slot === slot);
+    return !neighbourHere && state.data.objectKinds.find((k) => k.id === d.id).slots.includes(slot);
+  }
   return true;
 }
 
@@ -187,6 +190,7 @@ function onDrop(e, node, slot) {
     from: state.selected,
     to: d.id,
     slot,
+    replace: true,
     note: current.note,
   });
 }
@@ -273,26 +277,25 @@ function renderCross(s) {
     }
     const item = bySlot[slot];
     if (item) {
-      grid.append(
-        el(
-          "div",
-          {
-            class: `cell filled${item.type === "object" ? " object" : ""}`,
-            draggable: dragAttr(),
-            title: "Drag to another open slot or the tray, or click to edit",
-            ondragstart: (e) => startDrag(e, { type: item.type, id: item.id }),
-            onclick: () => {
-              if (item.type === "neighbour") {
-                state.editing = item.id;
-                render();
-              }
-            },
+      const filled = el(
+        "div",
+        {
+          class: `cell filled${item.type === "object" ? " object" : ""}`,
+          draggable: dragAttr(),
+          title: "Drag to another open slot or the tray, or click to edit",
+          ondragstart: (e) => startDrag(e, { type: item.type, id: item.id }),
+          onclick: () => {
+            if (item.type === "neighbour") {
+              state.editing = item.id;
+              render();
+            }
           },
-          el("span", { class: "slot" }, slot),
-          el("span", { class: "name" }, item.name),
-          item.note ? el("span", { class: "badge" }, item.note) : null,
-        ),
+        },
+        el("span", { class: "slot" }, slot),
+        el("span", { class: "name" }, item.name),
+        item.note ? el("span", { class: "badge" }, item.note) : null,
       );
+      grid.append(item.type === "neighbour" ? dropTarget(filled, slot) : filled);
     } else {
       grid.append(
         dropTarget(
@@ -490,7 +493,7 @@ function addPicked(s) {
   const to = state.picked.id;
   state.picked = null;
   state.query = "";
-  post("/api/edge", { from: s.id, to, slot, note: "" });
+  post("/api/edge", { from: s.id, to, slot, note: "", replace: slot !== null });
 }
 
 function renderDetail() {
@@ -562,6 +565,7 @@ function renderDetail() {
       el("label", { class: "stack" }, "Region", region),
       el("label", { class: "stack" }, "Building", building),
     ),
+    ...(s.completed ? [] : [renderPicker(s)]),
     el("h2", {}, "Compass cross"),
     el(
       "p",
@@ -574,7 +578,6 @@ function renderDetail() {
   );
   const editor = s.completed ? null : renderEditor(s);
   if (editor) detail.append(el("div", { style: "margin-top: 24px" }, editor));
-  if (!s.completed) wrap.append(el("div", { style: "margin-top: 28px" }, renderPicker(s)));
 }
 
 function renderProgress() {

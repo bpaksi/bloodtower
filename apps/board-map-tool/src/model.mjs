@@ -48,7 +48,9 @@ export function setCompleted(draft, spaceId, on) {
   return draft;
 }
 
-export function setEdge(draft, spaces, { from, to, slot, note = "" }) {
+// With replace, a neighbour already on the slot goes to the tray (the slot the caller picked wins).
+// Objects on a slot are never replaced.
+export function setEdge(draft, spaces, { from, to, slot, note = "", replace = false }) {
   const ids = new Set(spaces.map((s) => s.id));
   if (!ids.has(from) || !ids.has(to)) throw new Error("Unknown space");
   assertEditable(draft, from, to);
@@ -60,16 +62,16 @@ export function setEdge(draft, spaces, { from, to, slot, note = "" }) {
   const sides = { [from]: slot, [to]: otherSlot };
   for (const [space, s] of Object.entries(sides)) {
     if (s === null) continue;
-    const clash = neighboursOf(draft, space).find(
-      (n) => n.slot === s && n.to !== (space === from ? to : from),
-    );
+    const other = space === from ? to : from;
+    const clash = neighboursOf(draft, space).find((n) => n.slot === s && n.to !== other);
     const object = objectAt(draft, space, s);
     if (object) throw new Error(`Slot ${s} at ${space} holds the ${object}`);
-    if (clash) {
+    if (clash && !replace) {
       throw new Error(
         `Slot ${s} at ${space} is taken by ${clash.to}. Move ${clash.to} to the list, or pick another slot.`,
       );
     }
+    if (clash) draft.edges[edgeKey(space, clash.to)].slots[space] = null;
   }
 
   draft.edges[key] = {
