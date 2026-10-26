@@ -292,3 +292,92 @@ export function progressOf(draft, spaces) {
     kingdoms,
   };
 }
+
+// Reads a saved draft and keeps everything that makes sense. Anything that does not (an unknown
+// space, region, terrain, building, object or slot, or a broken edge) is dropped and listed in
+// `problems`, so one bad entry never stops the tool. Text that is not JSON returns no draft.
+export function parseDraft(text, spaces) {
+  let raw;
+  try {
+    raw = JSON.parse(text);
+  } catch (err) {
+    return { draft: null, problems: [`draft is not valid JSON (${err.message})`] };
+  }
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return { draft: null, problems: ["draft is not an object"] };
+  }
+
+  const problems = [];
+  const known = new Set(spaces.map((s) => s.id));
+  const pick = (name) => {
+    const value = raw[name];
+    if (value === undefined || value === null) return {};
+    if (typeof value !== "object" || Array.isArray(value)) {
+      problems.push(`${name} is not an object; it was ignored`);
+      return {};
+    }
+    return value;
+  };
+  const draft = emptyDraft();
+
+  for (const r of Array.isArray(raw.regions) ? raw.regions : []) {
+    if (r && typeof r.id === "string" && typeof r.name === "string" && r.name.trim()) {
+      draft.regions.push({ id: r.id, name: r.name });
+    } else {
+      problems.push(`a region entry is malformed and was dropped: ${JSON.stringify(r)}`);
+    }
+  }
+  const regionIds = new Set(draft.regions.map((r) => r.id));
+
+  for (const [space, region] of Object.entries(pick("regionOf"))) {
+    if (!known.has(space) || !regionIds.has(region))
+      problems.push(`region ${region} for ${space} is unknown; dropped`);
+    else draft.regionOf[space] = region;
+  }
+  for (const [space, terrain] of Object.entries(pick("terrain"))) {
+    if (!known.has(space) || !TERRAINS.includes(terrain))
+      problems.push(`terrain ${terrain} for ${space} is unknown; dropped`);
+    else draft.terrain[space] = terrain;
+  }
+  for (const [space, type] of Object.entries(pick("buildings"))) {
+    if (!known.has(space) || (type !== null && !BUILDING_TYPES.includes(type)))
+      problems.push(`building ${type} for ${space} is unknown; dropped`);
+    else draft.buildings[space] = type;
+  }
+  for (const [space, done] of Object.entries(pick("completed"))) {
+    if (!known.has(space))
+      problems.push(`completed flag for ${space} is for an unknown space; dropped`);
+    else if (done) draft.completed[space] = true;
+  }
+  for (const [space, objects] of Object.entries(pick("objects"))) {
+    if (!known.has(space) || !objects || typeof objects !== "object") {
+      problems.push(`objects for ${space} are unknown; dropped`);
+      continue;
+    }
+    for (const [kind, slot] of Object.entries(objects)) {
+      const def = OBJECT_KINDS.find((k) => k.id === kind);
+      if (!def || !def.slots.includes(slot))
+        problems.push(`${kind} on ${space} at ${slot} is not allowed; dropped`);
+      else draft.objects[space] = { ...(draft.objects[space] ?? {}), [kind]: slot };
+    }
+  }
+  for (const [key, e] of Object.entries(pick("edges"))) {
+    const ok =
+      e &&
+      known.has(e.a) &&
+      known.has(e.b) &&
+      e.a !== e.b &&
+      [e.slots?.[e.a], e.slots?.[e.b]].every((s) => s === null || SLOTS.includes(s));
+    if (!ok) {
+      problems.push(`edge ${key} is broken; dropped`);
+      continue;
+    }
+    draft.edges[key] = {
+      a: e.a,
+      b: e.b,
+      slots: { [e.a]: e.slots[e.a], [e.b]: e.slots[e.b] },
+      note: typeof e.note === "string" ? e.note : "",
+    };
+  }
+  return { draft, problems };
+}

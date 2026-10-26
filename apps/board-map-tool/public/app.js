@@ -44,12 +44,20 @@ function message(text, bad = false) {
 }
 
 async function post(path, body = {}) {
-  const res = await fetch(path, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
+  let res;
+  let data;
+  try {
+    res = await fetch(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    data = await res.json();
+  } catch (err) {
+    console.error(`POST ${path} failed`, err);
+    message(`Could not reach the tool: ${err.message}`, true);
+    return false;
+  }
   if (res.ok) message(path === "/api/export" ? `Exported to ${data.exported}` : "Saved");
   else message(data.error ?? "Failed", true);
   state.data = data;
@@ -122,7 +130,11 @@ function renderRegions() {
 function renderChecks() {
   const c = state.data.check;
   const box = $("checks");
-  box.replaceChildren(
+  box.replaceChildren();
+  for (const p of state.data.problems ?? []) {
+    box.append(el("p", { class: "error" }, `Loaded with a problem: ${p}`));
+  }
+  box.append(
     el(
       "p",
       { class: c.complete ? "ok" : "error" },
@@ -584,13 +596,23 @@ function renderProgress() {
   );
 }
 
+// Each part of the page renders on its own: a failure is logged and shown, and the rest still works.
+function safely(name, draw) {
+  try {
+    draw();
+  } catch (err) {
+    console.error(`${name} failed`, err);
+    message(`${name} could not be shown: ${err.message}`, true);
+  }
+}
+
 function render() {
   if (!state.data) return;
-  renderProgress();
-  renderSpaces();
-  renderRegions();
-  renderChecks();
-  renderDetail();
+  safely("Progress", renderProgress);
+  safely("Spaces", renderSpaces);
+  safely("Regions", renderRegions);
+  safely("Checks", renderChecks);
+  safely("Space", renderDetail);
 }
 
 $("spaceFilter").addEventListener("input", renderSpaces);
@@ -609,4 +631,8 @@ fetch("/api/state")
   .then((d) => {
     state.data = d;
     render();
+  })
+  .catch((err) => {
+    console.error("Could not load the tool's data", err);
+    message(`Could not load the tool's data: ${err.message}`, true);
   });
