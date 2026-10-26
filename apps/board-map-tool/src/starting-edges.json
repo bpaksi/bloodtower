@@ -4,799 +4,666 @@
     {
       "a": "E-big-sister",
       "b": "E-forest-of-shades",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-big-sister",
       "b": "E-greater-tombstones",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-big-sister",
       "b": "E-lesser-tombstones",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-big-sister",
       "b": "S-middle-sister",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "E-big-sister",
       "b": "S-sands-of-madness",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "E-big-sister",
       "b": "S-the-throne",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "E-bleak-wastes",
       "b": "E-dragontooth-lake",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-bleak-wastes",
       "b": "E-forest-of-shades",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-bleak-wastes",
       "b": "N-peaks-of-the-djinn",
-      "river": true,
       "unconfirmed": true
     },
     {
       "a": "E-copper-grove",
       "b": "E-inner-kinghills",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "E-copper-grove",
       "b": "E-jewel-hills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-copper-grove",
       "b": "E-outer-kinghills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-copper-grove",
       "b": "E-the-decaying-wilds",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-dragontooth-lake",
       "b": "E-forest-of-shades",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-dragontooth-lake",
       "b": "E-greater-tombstones",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-dragontooth-lake",
       "b": "E-inner-kinghills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-dragontooth-lake",
       "b": "E-the-decaying-wilds",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-duwani",
       "b": "E-jewel-hills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-duwani",
       "b": "E-lake-of-songs",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-duwani",
       "b": "E-utars-barrows",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-forest-of-shades",
       "b": "E-greater-tombstones",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-forest-of-shades",
       "b": "S-the-throne",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "E-greater-tombstones",
       "b": "E-lesser-tombstones",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-greater-tombstones",
       "b": "E-the-decaying-wilds",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-greater-tombstones",
       "b": "E-utars-barrows",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-inner-kinghills",
       "b": "E-outer-kinghills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-inner-kinghills",
       "b": "E-the-decaying-wilds",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-inner-kinghills",
       "b": "N-peaks-of-the-djinn",
-      "river": true,
       "unconfirmed": true
     },
     {
       "a": "E-jewel-hills",
       "b": "E-the-decaying-wilds",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-jewel-hills",
       "b": "E-utars-barrows",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-lake-of-songs",
       "b": "E-lesser-tombstones",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-lake-of-songs",
       "b": "E-three-rivers",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-lake-of-songs",
       "b": "E-utars-barrows",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-lesser-tombstones",
       "b": "E-three-rivers",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-lesser-tombstones",
       "b": "E-utars-barrows",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "E-outer-kinghills",
       "b": "N-egans-end",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "E-outer-kinghills",
       "b": "S-mountains-of-the-watchers",
-      "river": true,
       "unconfirmed": true
     },
     {
       "a": "E-the-decaying-wilds",
       "b": "E-utars-barrows",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-broken-lands",
       "b": "N-muted-forest",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-broken-lands",
       "b": "N-radiant-mountains",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-broken-lands",
       "b": "W-ash-hills",
-      "river": true,
       "unconfirmed": true
     },
     {
       "a": "N-broken-lands",
       "b": "W-lonelight-hills",
-      "river": true,
       "unconfirmed": true
     },
     {
       "a": "N-dayside",
       "b": "N-fivepint",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-dayside",
       "b": "N-greenbridge",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-dayside",
       "b": "N-lower-ice-fangs",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-dayside",
       "b": "N-the-tundra",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-egans-end",
       "b": "N-rimeweald",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-egans-end",
       "b": "N-the-tundra",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-fivepint",
       "b": "N-lodestone-mountains",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-fivepint",
       "b": "N-pearl-of-the-north",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-greenbridge",
       "b": "N-lower-ice-fangs",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-greenbridge",
       "b": "N-muted-forest",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-greenbridge",
       "b": "N-radiant-mountains",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-greenbridge",
       "b": "N-upper-ice-fangs",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-lodestone-mountains",
       "b": "N-pearl-of-the-north",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-lodestone-mountains",
       "b": "N-radiant-mountains",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-lower-ice-fangs",
       "b": "N-peaks-of-the-djinn",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-lower-ice-fangs",
       "b": "N-rimeweald",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-lower-ice-fangs",
       "b": "N-the-tundra",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-lower-ice-fangs",
       "b": "N-upper-ice-fangs",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-muted-forest",
       "b": "N-radiant-mountains",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-muted-forest",
       "b": "N-tower-scar-desert",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-muted-forest",
       "b": "N-upper-ice-fangs",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "N-peaks-of-the-djinn",
       "b": "N-rimeweald",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-peaks-of-the-djinn",
       "b": "N-upper-ice-fangs",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-pearl-of-the-north",
       "b": "N-radiant-mountains",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-rimeweald",
       "b": "N-the-tundra",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "N-tower-scar-desert",
       "b": "N-upper-ice-fangs",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-archmont",
       "b": "S-azkols-bane",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-archmont",
       "b": "S-bone-hills",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-archmont",
       "b": "S-sands-of-madness",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-archmont",
       "b": "S-the-cloister",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-azkols-bane",
       "b": "S-bone-hills",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-azkols-bane",
       "b": "S-howling-desert",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-azkols-bane",
       "b": "S-the-cloister",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-azkols-bane",
       "b": "S-the-emerald-expanse",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-bone-hills",
       "b": "S-southern-wastes",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-bone-hills",
       "b": "S-the-emerald-expanse",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-howling-desert",
       "b": "S-irontops",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-howling-desert",
       "b": "S-mountains-of-the-watchers",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-howling-desert",
       "b": "S-the-cloister",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-howling-desert",
       "b": "S-the-emerald-expanse",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-howling-desert",
       "b": "W-idran-forest",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "S-howling-desert",
       "b": "W-lonelight-hills",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "S-irontops",
       "b": "S-the-cloister",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-irontops",
       "b": "S-the-throne",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-irontops",
       "b": "W-lonelight-hills",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "S-irontops",
       "b": "W-the-grass-sea",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "S-little-sister",
       "b": "S-middle-sister",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-little-sister",
       "b": "S-pine-barrens",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-little-sister",
       "b": "S-sands-of-madness",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-little-sister",
       "b": "S-southern-wastes",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-little-sister",
       "b": "S-ulamels-hollow",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-middle-sister",
       "b": "S-pine-barrens",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-middle-sister",
       "b": "S-sands-of-madness",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-mountains-of-the-watchers",
       "b": "S-the-emerald-expanse",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-mountains-of-the-watchers",
       "b": "W-idran-forest",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "S-mountains-of-the-watchers",
       "b": "W-lost-lands",
-      "river": true,
       "unconfirmed": false
     },
     {
       "a": "S-pine-barrens",
       "b": "S-southern-wastes",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-pine-barrens",
       "b": "S-ulamels-hollow",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-sands-of-madness",
       "b": "S-the-cloister",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-sands-of-madness",
       "b": "S-the-throne",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "S-southern-wastes",
       "b": "S-ulamels-hollow",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "S-the-cloister",
       "b": "S-the-throne",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-akartus",
       "b": "W-anza",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-akartus",
       "b": "W-delmsmire",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-akartus",
       "b": "W-the-empty-glade",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-akartus",
       "b": "W-yellowpike",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-anza",
       "b": "W-plains-of-woldra",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-anza",
       "b": "W-yellowpike",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-ash-hills",
       "b": "W-cloudhold",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-ash-hills",
       "b": "W-hissing-groves",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-ash-hills",
       "b": "W-plains-of-plovo",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-ash-hills",
       "b": "W-the-empty-glade",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-cloudhold",
       "b": "W-delmsmire",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-cloudhold",
       "b": "W-plains-of-plovo",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-cloudhold",
       "b": "W-the-empty-glade",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-delmsmire",
       "b": "W-plains-of-plovo",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-delmsmire",
       "b": "W-the-empty-glade",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-hissing-groves",
       "b": "W-lonelight-hills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-hissing-groves",
       "b": "W-the-empty-glade",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-hissing-groves",
       "b": "W-the-grass-sea",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-idran-forest",
       "b": "W-lonelight-hills",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-idran-forest",
       "b": "W-lost-lands",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-idran-forest",
       "b": "W-plains-of-woldra",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-idran-forest",
       "b": "W-weeping-waters",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-lonelight-hills",
       "b": "W-the-grass-sea",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-lonelight-hills",
       "b": "W-weeping-waters",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-lost-lands",
       "b": "W-plains-of-woldra",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-plains-of-woldra",
       "b": "W-weeping-waters",
-      "river": false,
       "unconfirmed": true
     },
     {
       "a": "W-the-empty-glade",
       "b": "W-weeping-waters",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-the-empty-glade",
       "b": "W-yellowpike",
-      "river": false,
       "unconfirmed": false
     },
     {
       "a": "W-weeping-waters",
       "b": "W-yellowpike",
-      "river": false,
       "unconfirmed": true
     }
   ]

@@ -15,7 +15,7 @@ export async function startingDraft() {
   for (const name of startingRegions) addRegion(draft, name);
   for (const e of edges) {
     const note = e.unconfirmed ? "unconfirmed on the board map draft" : "";
-    setEdge(draft, spaces, { from: e.a, to: e.b, slot: null, river: e.river, note });
+    setEdge(draft, spaces, { from: e.a, to: e.b, slot: null, note });
   }
   return draft;
 }

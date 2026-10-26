@@ -28,13 +28,9 @@ const spaces = [
 
 test("an edge is seen from both spaces, with the opposite slot on the other side", () => {
   const d = emptyDraft();
-  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E", river: true, note: "Great Woods" });
-  assert.deepEqual(neighboursOf(d, "N-a"), [
-    { to: "N-b", slot: "E", river: true, note: "Great Woods" },
-  ]);
-  assert.deepEqual(neighboursOf(d, "N-b"), [
-    { to: "N-a", slot: "W", river: true, note: "Great Woods" },
-  ]);
+  setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E", note: "Great Woods" });
+  assert.deepEqual(neighboursOf(d, "N-a"), [{ to: "N-b", slot: "E", note: "Great Woods" }]);
+  assert.deepEqual(neighboursOf(d, "N-b"), [{ to: "N-a", slot: "W", note: "Great Woods" }]);
 });
 
 test("a slot already used on a space is refused, so Bob picks which neighbour keeps it", () => {
@@ -118,7 +114,7 @@ test("the starting edges from the board map all fit the model", async () => {
     await readFile(new URL("./starting-edges.json", import.meta.url), "utf8"),
   );
   const d = emptyDraft();
-  for (const e of edges) setEdge(d, board, { from: e.a, to: e.b, slot: null, river: e.river });
+  for (const e of edges) setEdge(d, board, { from: e.a, to: e.b, slot: null });
   assert.equal(Object.keys(d.edges).length, edges.length);
   const hasEdge = board.every((s) => neighboursOf(d, s.id).length > 0);
   assert.equal(hasEdge, true, "every space has at least one starting neighbour");
@@ -149,24 +145,22 @@ test("progress counts spaces, regions, pairs and the sides placed or in the tray
   assert.equal(p.kingdoms.N.withRegion, 1);
 });
 
-test("the river and the tower sit on their own slots, one of each per space", () => {
+test("the tower sits on N, and only on N", () => {
   const d = emptyDraft();
-  setObject(d, "N-a", "river", "W");
-  setObject(d, "N-a", "river", "NE");
   setObject(d, "N-a", "tower", "N");
-  assert.deepEqual(objectsOf(d, "N-a"), { river: "NE", tower: "N" });
-  assert.throws(() => setObject(d, "N-a", "river", "N"), /cannot go on N/);
-  assert.throws(() => setObject(d, "N-a", "tower", "E"), /cannot go on E/);
-  setObject(d, "N-a", "river", null);
   assert.deepEqual(objectsOf(d, "N-a"), { tower: "N" });
+  assert.throws(() => setObject(d, "N-a", "tower", "E"), /cannot go on E/);
+  assert.throws(() => setObject(d, "N-a", "river", "W"), /Unknown object river/);
+  setObject(d, "N-a", "tower", null);
+  assert.deepEqual(objectsOf(d, "N-a"), {});
 });
 
-test("a neighbour and an object cannot share a slot", () => {
+test("a neighbour and the tower cannot share a slot", () => {
   const d = emptyDraft();
   setObject(d, "N-a", "tower", "N");
   assert.throws(() => setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "N" }), /holds the tower/);
   setEdge(d, spaces, { from: "N-a", to: "N-c", slot: "E" });
-  assert.throws(() => setObject(d, "N-a", "river", "E"), /taken by N-c/);
+  assert.throws(() => setObject(d, "N-a", "tower", "E"), /cannot go on E/);
 });
 
 test("a completed space is read-only until it is reopened", () => {
