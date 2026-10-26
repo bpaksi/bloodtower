@@ -215,3 +215,12 @@ test("each kingdom needs exactly one building of each type", () => {
   assert.equal(buildingOf(d, board[4]), null);
   assert.throws(() => setBuilding(d, "N-4", "Castle"), /Unknown building/);
 });
+
+test("an object the tool no longer knows can still be taken off the cross", () => {
+  const d = emptyDraft();
+  d.objects = { "N-a": { river: "W" } };
+  setObject(d, "N-a", "river", null);
+  assert.deepEqual(objectsOf(d, "N-a"), {});
+  d.objects = { "N-a": { river: "W" } };
+  assert.throws(() => setObject(d, "N-a", "river", "W"), /Unknown object river/);
+});

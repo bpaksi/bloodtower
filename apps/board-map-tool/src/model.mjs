@@ -155,13 +155,14 @@ export function objectsOf(draft, spaceId) {
 // Places the tower on a slot, or takes it off the cross (slot null).
 export function setObject(draft, spaceId, kind, slot) {
   assertEditable(draft, spaceId);
-  const def = OBJECT_KINDS.find((k) => k.id === kind);
-  if (!def) throw new Error(`Unknown object ${kind}`);
   draft.objects ??= {};
   const current = { ...objectsOf(draft, spaceId) };
   if (slot === null) {
+    // Taking an object off the cross always works, even for a kind the tool no longer has.
     delete current[kind];
   } else {
+    const def = OBJECT_KINDS.find((k) => k.id === kind);
+    if (!def) throw new Error(`Unknown object ${kind}`);
     if (!def.slots.includes(slot)) throw new Error(`${def.label} cannot go on ${slot}`);
     const neighbour = neighboursOf(draft, spaceId).find((n) => n.slot === slot);
     const other = objectAt(draft, spaceId, slot, kind);

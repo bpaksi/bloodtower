@@ -247,7 +247,8 @@ function renderCross(s) {
     bySlot[slot] = {
       type: "object",
       id: kind,
-      name: state.data.objectKinds.find((k) => k.id === kind).label,
+      // A kind the tool no longer has (e.g. an old River) still shows, so it can be taken off.
+      name: state.data.objectKinds.find((k) => k.id === kind)?.label ?? kind,
       note: "",
     };
   }
