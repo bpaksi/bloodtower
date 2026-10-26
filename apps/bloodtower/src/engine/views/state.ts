@@ -1,4 +1,5 @@
 import type { ViewScreen } from "../../protocols/v2/common.ts";
+import type { CompassSlot } from "../loops/chapter/board.ts";
 
 export type PrivateLine = {
   id: string;
@@ -29,7 +30,7 @@ export type ViewAction = {
   actionId: string;
   label: string;
   deviceId: string | null;
-} & ({ open: true } | { open: false; reason: string });
+} & ({ open: true; slot?: CompassSlot } | { open: false; reason: string });
 
 export type PlaceStill = {
   building: "village" | "bazaar" | "citadel" | "sanctuary";

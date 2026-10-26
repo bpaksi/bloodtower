@@ -94,6 +94,21 @@ const inMenu = (action: OfferedAction) =>
 /** Walk, Enter, and End turn. Leave stays outside this region (DEC-220). */
 const MOVE_CONTROLS = new Set(["walk", "enter", "end-turn"]);
 
+/** The eight fixed slots, clockwise from the tower-up point (UI-023). Slot ids are data only. */
+const COMPASS_SLOTS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
+
+/** Slot centre as a share of the square compass (0-100). */
+const SLOT_POINT: Record<(typeof COMPASS_SLOTS)[number], { x: number; y: number }> = {
+  N: { x: 50, y: 11 },
+  NE: { x: 83, y: 22 },
+  E: { x: 89, y: 50 },
+  SE: { x: 83, y: 78 },
+  S: { x: 50, y: 89 },
+  SW: { x: 17, y: 78 },
+  W: { x: 11, y: 50 },
+  NW: { x: 17, y: 22 },
+};
+
 /** v2 device UI: text and icon controls. Place stills stay on the Story board. */
 export function CoreDeviceScreen({
   live,
@@ -122,6 +137,8 @@ export function CoreDeviceScreen({
     view.screen === "play" && !inside && body.some((action) => MOVE_CONTROLS.has(action.actionId));
   const inMoveMap = (action: OfferedAction) => showMoveMap && MOVE_CONTROLS.has(action.actionId);
   const mapActions = body.filter(inMoveMap);
+  const walks = mapActions.filter((action) => action.actionId === "walk");
+  const mapExtras = mapActions.filter((action) => action.actionId !== "walk");
   const scrolling = body.filter((action) => !isPinned(action) && !inMoveMap(action));
   const picking = view.screen === "claim-heroes";
   const pickMatch = picking ? /^(\d+) of (\d+) picked$/.exec(view.shows) : null;
@@ -129,7 +146,7 @@ export function CoreDeviceScreen({
   const party = pickMatch ? Number(pickMatch[2]) : 0;
   const partyFull = pickMatch != null && party > 0 && seated >= party;
   const renderAction = (action: OfferedAction) => {
-    const icon = iconFor(action.actionId);
+    const icon = action.actionId === "walk" ? "" : iconFor(action.actionId);
     const connectChoice = body.some((row) => row.actionId === "play-without-tower");
     const primary = !connectChoice || action.actionId === "tower-connect";
     return (
@@ -268,7 +285,52 @@ export function CoreDeviceScreen({
             ))}
             {showMoveMap ? (
               <section className="bt-move-map" data-move-map aria-label="Move">
-                {mapActions.map(renderAction)}
+                <p className="bt-tower-up" data-tower-up>
+                  <span aria-hidden="true">▲</span> The Tower
+                </p>
+                <div className="bt-compass">
+                  <svg
+                    className="bt-compass-svg"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <circle cx="50" cy="50" r="38" />
+                    <circle cx="50" cy="50" r="17" />
+                    {COMPASS_SLOTS.map((slot) => (
+                      <line
+                        key={slot}
+                        x1="50"
+                        y1="50"
+                        x2={SLOT_POINT[slot].x}
+                        y2={SLOT_POINT[slot].y}
+                      />
+                    ))}
+                  </svg>
+                  <div className="bt-compass-you" data-you>
+                    <span className="bt-compass-name">{acting?.spaceName}</span>
+                    <span className="bt-compass-badge">YOU</span>
+                  </div>
+                  {COMPASS_SLOTS.map((slot) => {
+                    const walk = walks.find((action) => action.slot === slot);
+                    return (
+                      <div
+                        key={slot}
+                        className="bt-compass-slot"
+                        data-slot={slot}
+                        style={{ left: `${SLOT_POINT[slot].x}%`, top: `${SLOT_POINT[slot].y}%` }}
+                      >
+                        {walk ? renderAction(walk) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+                {view.table?.movesLeft != null ? (
+                  <p className="bt-moves-left" data-moves-left>
+                    Moves left: {view.table.movesLeft}
+                  </p>
+                ) : null}
+                {mapExtras.map(renderAction)}
               </section>
             ) : null}
             {view.screen === "pick-story" && view.doors && view.doors.length > 1 ? (
