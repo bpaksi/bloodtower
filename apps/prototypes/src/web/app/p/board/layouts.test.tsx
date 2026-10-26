@@ -1,12 +1,11 @@
 import { createRng } from "@dark-tower/rng";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { TvFrame } from "../../../components/TvFrame.tsx";
 import { defaultValues } from "../../../lib/tuning.ts";
-import { scaledPx, tvPx } from "../../../lib/tv.ts";
+import { scaledPx } from "../../../lib/tv.ts";
 import { assignHolders, LAYOUTS, POOL_HEROES } from "./data.ts";
 import { FIELDS } from "./fields.ts";
-import { Layout } from "./layouts.tsx";
+import { BoardFrame } from "./page.tsx";
 
 const v = defaultValues(FIELDS);
 const sizes = {
@@ -18,23 +17,34 @@ const sizes = {
 const holders = assignHolders(createRng("1"));
 
 function render(id: (typeof LAYOUTS)[number]["id"], s = sizes) {
-  return renderToStaticMarkup(
-    <TvFrame style={{ fontSize: tvPx(s.min) }}>
-      <Layout id={id} sizes={s} holders={holders} />
-    </TvFrame>,
-  );
+  return renderToStaticMarkup(<BoardFrame layout={id} sizes={s} holders={holders} />);
 }
 
-/** Every font size in the markup, in design px. */
+const READABLE = /^calc\((\d+(?:\.\d+)?) \* var\(--tv-px\)\)$/;
+
+/** Every font size in the markup, in design px. Fails on any unreadable font-size. */
 function fontSizes(html: string): number[] {
-  return [...html.matchAll(/font-size:calc\((\d+(?:\.\d+)?) \* var\(--tv-px\)\)/g)].map((m) =>
-    Number(m[1]),
-  );
+  const out: number[] = [];
+  for (const match of html.matchAll(/font-size:([^;}"']+)/g)) {
+    const raw = match[1]?.trim();
+    if (raw === undefined) continue;
+    const m = raw.match(READABLE);
+    if (!m) {
+      throw new Error(`unreadable font-size: ${raw}`);
+    }
+    out.push(Number(m[1]));
+  }
+  return out;
 }
 
 describe("board layouts", () => {
   it("the tuning panel holds the minimum text size, default 28", () => {
     expect(FIELDS.find((f) => f.key === "minTextPx")?.default).toBe(28);
+  });
+
+  it("fails when markup has a font-size the size check cannot read", () => {
+    expect(() => fontSizes('<div style="font-size:14px">x</div>')).toThrow(/unreadable font-size/);
+    expect(() => fontSizes('<div style="font-size:0.8em">x</div>')).toThrow(/unreadable font-size/);
   });
 
   for (const l of LAYOUTS) {
