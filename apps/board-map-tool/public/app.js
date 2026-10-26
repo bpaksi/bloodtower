@@ -582,10 +582,7 @@ function renderProgress() {
   const box = $("progress");
   box.replaceChildren(
     el("p", { class: "section-title" }, "Progress"),
-    bar("Spaces with a region", p.withRegion, p.spaces),
-    bar("Spaces with neighbours", p.withNeighbours, p.spaces),
     bar("Spaces completed", p.completed, p.spaces),
-    bar("Sides on a slot", p.sidesPlaced, p.sidesPlaced + p.sidesInTray),
     el("p", { class: "section-title", style: "margin-top: 18px" }, "By kingdom"),
     ...Object.entries(p.kingdoms).map(([k, v]) => bar(kingdomLabel(k), v.withRegion, v.total)),
   );
