@@ -94,7 +94,7 @@ function renderSpaces() {
             class: `space-row${state.selected === s.id ? " sel" : ""}`,
             onclick: () => selectSpace(s.id),
           },
-          el("span", {}, s.name),
+          el("span", {}, s.completed ? `✓ ${s.name}` : s.name),
           el("span", { class: "tag" }, s.region ? regionName(s.region) : "no region"),
         ),
       );
@@ -142,9 +142,15 @@ function startDrag(e, drag) {
 }
 
 // A slot takes the dragged thing only if it is open and the thing is allowed there.
+// Completed spaces cannot be dragged or dropped on.
+function dragAttr() {
+  return spaceById(state.selected)?.completed ? "false" : "true";
+}
+
 function canDrop(slot) {
   const d = state.dragging;
   if (!d) return false;
+  if (spaceById(state.selected)?.completed) return false;
   if (slot === null) return true;
   const s = spaceById(state.selected);
   const taken =
@@ -180,7 +186,7 @@ function chip(n) {
     "div",
     {
       class: `chip${n.unconfirmed ? " unsure" : ""}`,
-      draggable: "true",
+      draggable: dragAttr(),
       ondragstart: (e) => startDrag(e, { type: "neighbour", id: n.to }),
       onclick: () => {
         state.editing = n.to;
@@ -200,7 +206,7 @@ function objectToken(kind) {
     "div",
     {
       class: "chip object",
-      draggable: "true",
+      draggable: dragAttr(),
       ondragstart: (e) => startDrag(e, { type: "object", id: kind.id }),
       title: `Drag onto ${kind.slots.join(", ")}`,
     },
@@ -261,7 +267,7 @@ function renderCross(s) {
           "div",
           {
             class: `cell filled${item.type === "object" ? " object" : ""}`,
-            draggable: "true",
+            draggable: dragAttr(),
             title: "Drag to another open slot or the tray, or click to edit",
             ondragstart: (e) => startDrag(e, { type: item.type, id: item.id }),
             onclick: () => {
@@ -489,12 +495,18 @@ function renderDetail() {
 
   const terrain = el(
     "select",
-    { onchange: (e) => post("/api/terrain", { space: s.id, terrain: e.target.value }) },
+    {
+      disabled: s.completed,
+      onchange: (e) => post("/api/terrain", { space: s.id, terrain: e.target.value }),
+    },
     ...state.data.terrains.map((t) => el("option", { value: t, selected: t === s.terrain }, t)),
   );
   const region = el(
     "select",
-    { onchange: (e) => post("/api/assign", { space: s.id, region: e.target.value || null }) },
+    {
+      disabled: s.completed,
+      onchange: (e) => post("/api/assign", { space: s.id, region: e.target.value || null }),
+    },
     el("option", { value: "" }, "no region"),
     ...state.data.regions.map((r) =>
       el("option", { value: r.id, selected: r.id === s.region }, `${r.name}`),
@@ -507,6 +519,22 @@ function renderDetail() {
       "p",
       { class: "muted", style: "margin: 0 0 18px" },
       `${s.id} · ${kingdomLabel(s.kingdom)}${s.building ? ` · ${s.building}` : ""}`,
+    ),
+    el(
+      "div",
+      { class: "row" },
+      el(
+        "button",
+        {
+          type: "button",
+          class: s.completed ? "" : "primary",
+          onclick: () => post("/api/complete", { space: s.id, on: !s.completed }),
+        },
+        s.completed ? "Completed: reopen" : "Mark completed",
+      ),
+      s.completed
+        ? el("span", { class: "muted" }, "Read-only. Reopen to change it.")
+        : el("span", { class: "muted" }, "Changes are saved as you make them."),
     ),
     el(
       "div",
@@ -524,9 +552,9 @@ function renderDetail() {
     el("h2", {}, "Not on a slot"),
     renderTray(s),
   );
-  const editor = renderEditor(s);
+  const editor = s.completed ? null : renderEditor(s);
   if (editor) detail.append(el("div", { style: "margin-top: 24px" }, editor));
-  wrap.append(el("div", { style: "margin-top: 28px" }, renderPicker(s)));
+  if (!s.completed) wrap.append(el("div", { style: "margin-top: 28px" }, renderPicker(s)));
 }
 
 function renderProgress() {
@@ -544,6 +572,7 @@ function renderProgress() {
     el("p", { class: "section-title" }, "Progress"),
     bar("Spaces with a region", p.withRegion, p.spaces),
     bar("Spaces with neighbours", p.withNeighbours, p.spaces),
+    bar("Spaces completed", p.completed, p.spaces),
     bar("Sides on a slot", p.sidesPlaced, p.sidesPlaced + p.sidesInTray),
     el("p", { class: "section-title", style: "margin-top: 18px" }, "By kingdom"),
     ...Object.entries(p.kingdoms).map(([k, v]) => bar(kingdomLabel(k), v.withRegion, v.total)),
