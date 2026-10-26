@@ -68,7 +68,8 @@ describe("acting iPad move map", () => {
         {
           promptId: "walk--hero-a--N-muted-forest",
           actionId: "walk",
-          label: "Walk to Muted Forest",
+          label: "Muted Forest",
+          slot: "NE",
           open: true,
         },
         {
@@ -84,7 +85,14 @@ describe("acting iPad move map", () => {
     const map = mapMarkup(markup);
     expect(map).toContain('data-action-id="walk"');
     expect(map).toContain("walk--hero-a--N-muted-forest");
-    expect(map).toContain("Walk to Muted Forest");
+    expect(map).toContain("Muted Forest");
+    expect(map).not.toContain("Walk to");
+    expect(map).toContain("data-tower-up");
+    expect(map).toContain("data-you");
+    expect(map).toMatch(/data-slot="NE"[^>]*><button[^>]*walk--hero-a--N-muted-forest/);
+    expect(map.match(/data-slot="/g)).toHaveLength(8);
+    expect(map).toContain("<svg");
+    expect(map).not.toContain("Also adjacent");
     expect(map).toContain('data-action-id="enter"');
     expect(map).toContain("Enter Citadel");
     expect(map).toContain('data-action-id="end-turn"');

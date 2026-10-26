@@ -231,8 +231,29 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
       const promptId = `walk--${now.hero}--${nextId}`;
       const button = map.locator(`button[data-prompt-id="${promptId}"]`);
       await expect(button).toHaveCount(1);
-      await expect(button).toContainText(`Walk to ${spaceById.get(nextId)?.name ?? nextId}`);
+      await expect(button).toHaveText(spaceById.get(nextId)?.name ?? nextId);
+      await expect(button.locator("xpath=ancestor::*[@data-slot][1]")).toHaveCount(1);
     }
+    await expect(map.locator("[data-slot]")).toHaveCount(8);
+    expect(
+      await map
+        .locator("[data-slot]")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("data-slot"))),
+    ).toEqual(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]);
+    await expect(map.locator("[data-tower-up]")).toHaveCount(1);
+    const you = map.locator("[data-you]");
+    await expect(you).toContainText(here?.name ?? "");
+    await expect(you).toContainText("YOU");
+    await expect(map.getByText("Also adjacent")).toHaveCount(0);
+    await expect(device.locator('[data-ipad-corners="theme-b"]')).toHaveCount(1);
+    for (const corner of ["tl", "tr", "bl", "br"]) {
+      await expect(device.locator(`[data-ipad-corner="${corner}"]`)).toHaveCount(1);
+    }
+    expect(
+      await map
+        .locator("[data-slot]")
+        .evaluateAll((els) => els.map((el) => el.textContent?.trim())),
+    ).not.toContain("N");
     const stranger = spaces.spaces.find(
       (space) => space.id !== here?.id && !here?.adjacent.includes(space.id),
     );
@@ -247,7 +268,8 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
       const enter = map.locator(`button[data-prompt-id="enter--${now.hero}--${here.id}"]`);
       await expect(enter).toContainText(`Enter ${buildingTitle(here.building)}`);
     }
-    await expect(map.locator("img, canvas, svg")).toHaveCount(0);
+    await expect(map.locator("img, canvas")).toHaveCount(0);
+    await expect(map.locator("svg")).not.toHaveCount(0);
     await expect(device.locator("main img, main canvas")).toHaveCount(0);
     await expect(device.locator("[data-mini], [data-token], [data-board-map]")).toHaveCount(0);
 
