@@ -1,6 +1,6 @@
 "use client";
 import { createRng, type Rng } from "@dark-tower/rng";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TuningPanel } from "../../../components/TuningPanel.tsx";
 import { logger } from "../../../lib/logger.ts";
 import { defaultValues, toJson } from "../../../lib/tuning.ts";
@@ -9,6 +9,7 @@ import {
   configFrom,
   FIELDS,
   isOver,
+  MAX_SIM_VISITS,
   type PolicyResult,
   simulate,
   startVisit,
@@ -34,11 +35,28 @@ export default function CampPage() {
   const [state, setState] = useState(() => (cfg ? startVisit(cfg, true) : null));
 
   const restart = () => {
-    if (!cfg) return;
+    if (!cfg) {
+      setState(null);
+      setProblem(null);
+      return;
+    }
     rngRef.current = createRng(seed);
     setState(startVisit(cfg, advantage));
     setProblem(null);
   };
+
+  // Tuning or seed (or advantage) change restarts the visit so temper/header
+  // cannot show N/M with N > M after lowering maxTemper, and wares/purse match cfg.
+  useEffect(() => {
+    if (!cfg) {
+      setState(null);
+      setProblem(null);
+      return;
+    }
+    rngRef.current = createRng(seed);
+    setState(startVisit(cfg, advantage));
+    setProblem(null);
+  }, [cfg, seed, advantage]);
 
   const act = (where: string, action: Action) => {
     if (!cfg || !state) return;
@@ -212,7 +230,10 @@ export default function CampPage() {
           type="number"
           value={visits}
           min={1}
-          onChange={(e) => setVisits(Math.max(1, Number(e.target.value)))}
+          max={MAX_SIM_VISITS}
+          onChange={(e) =>
+            setVisits(Math.min(MAX_SIM_VISITS, Math.max(1, Number(e.target.value) || 1)))
+          }
         />
       </label>{" "}
       <button type="button" onClick={runSim} disabled={!cfg}>
