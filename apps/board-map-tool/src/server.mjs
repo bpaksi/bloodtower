@@ -12,7 +12,9 @@ import {
   checkDraft,
   emptyDraft,
   exportBoard,
+  firstOpenSlot,
   neighboursOf,
+  progressOf,
   removeEdge,
   SLOTS,
   setEdge,
@@ -29,15 +31,12 @@ const draftPath = join(appDir, "data", "draft.json");
 const exportPath = join(repoRoot, "packs-v2", "base", "board-map.json");
 const port = Number(process.env.PORT ?? 4790);
 
-// The region names Bob gave on 2026-10-25 (Q-147). They start a new draft; more are added in the page.
-const startingRegions = ["The Great Woods", "Regal Run", "Long Water"];
-
 let draft = emptyDraft();
 try {
   draft = JSON.parse(await readFile(draftPath, "utf8"));
 } catch (err) {
   if (err.code !== "ENOENT") throw err;
-  for (const name of startingRegions) addRegion(draft, name);
+  draft = await startingDraft();
 }
 
 async function save() {
@@ -59,6 +58,7 @@ function state() {
     slots: SLOTS,
     terrains: TERRAINS,
     check: checkDraft(draft, spaces),
+    progress: progressOf(draft, spaces),
   };
 }
 
@@ -78,7 +78,13 @@ function readBody(req) {
 }
 
 const actions = {
-  "/api/edge": async (b) => setEdge(draft, spaces, b),
+  // slot "auto" takes the first open slot on both spaces (SLOT_ORDER), or fails if none is open.
+  "/api/edge": async (b) => {
+    const slot = b.slot === "auto" ? firstOpenSlot(draft, b.from, b.to) : b.slot;
+    if (b.slot === "auto" && slot === null)
+      throw new Error(`No open slot on ${b.from} and ${b.to}`);
+    return setEdge(draft, spaces, { ...b, slot });
+  },
   "/api/edge/remove": async (b) => removeEdge(draft, b.a, b.b),
   "/api/region": async (b) => addRegion(draft, b.name),
   "/api/assign": async (b) => assignRegion(draft, b.space, b.region ?? null),

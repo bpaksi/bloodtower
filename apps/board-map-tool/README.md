@@ -24,6 +24,7 @@ Open http://127.0.0.1:4790. The server listens on 127.0.0.1 only.
 ## Data
 
 - **Spaces:** `src/spaces.json`, the 60 spaces from research/game-design/board-map.md, with printed name, kingdom, terrain and building. Terrain can be changed in the tool.
+- **Starting edges:** `src/starting-edges.json`, made from the adjacency tables in board-map.md by `node src/import-board-map.mjs`. It has 133 pairs with no compass slots yet, 16 across a river, and 40 marked unconfirmed, as the draft marks them with `?`. A new draft starts with them.
 - **Edges:** one edge per pair of spaces. Each side has its own compass slot; entering one side sets the opposite point on the other (DEC-234, DEC-235).
 - **Contested slot:** a slot used by another neighbour is refused. Move that neighbour under the cross first, then save (DEC-236).
 - **Regions:** named in the tool, numbered REG-01, REG-02 in order (DEC-242, DEC-243). Each space holds exactly one region.
