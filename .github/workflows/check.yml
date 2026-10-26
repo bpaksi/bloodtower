@@ -1,8 +1,22 @@
-# Runs `pnpm check` on every pull request to main and on main itself. Branch protection on main
-# requires the `check` job, so a PR merges (auto-merge, squash) only when it passes.
-# The gitleaks step fails that job when the pull request's commits, or the commits in a push
-# to main, contain a secret. It does not audit the repository's full history (no schedule and
-# no workflow_dispatch). fetch-depth 0 only makes that commit range available locally.
+# Branch protection on main requires the job named `check`. The job always runs and
+# reports, including when the app suite is skipped. A path filter on `on:` would skip
+# the workflow entirely, and the required check would never report.
+#
+# Gitleaks always runs. It fails this job when the pull request's commits, or the
+# commits in a push to main, contain a secret. It does not audit the repository's
+# full history (no schedule and no workflow_dispatch). fetch-depth 0 only makes that
+# commit range available locally.
+#
+# Lite CI (Bob / Warden, 2026-10-25/26): when every changed path is docs, game design,
+# packs, or a root asset-only tree, skip apt, pnpm install, and `pnpm check`. The job
+# still exits green. Any other path, including a mix on a push to main, runs the full
+# suite. Allowlist:
+#   research/game-design/**
+#   docs/**                  (ui-mocks, art-direction, deliveries, this tree)
+#   packs/**                 (repo-root packs; there is no apps/bloodtower/packs)
+#   assets/stories/**        (story scripts)
+#   assets/app-icon/**       (icon images)
+# Anything under apps/, including app docs and app asset folders, is full CI.
 name: check
 
 on:
@@ -28,6 +42,99 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: classify changes
+        id: scope
+        env:
+          CI_SCOPE_EVENT: ${{ github.event_name }}
+          CI_SCOPE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          CI_SCOPE_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          base="${CI_SCOPE_BASE}"
+          head="${CI_SCOPE_HEAD}"
+          zero="0000000000000000000000000000000000000000"
+          summary="${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+          finish() {
+            local mode="$1"
+            local detail="$2"
+            echo "needs_full_ci=${mode}" >> "$GITHUB_OUTPUT"
+            echo "CI scope: needs_full_ci=${mode} — ${detail}"
+            {
+              echo "## CI scope"
+              echo
+              echo "\`needs_full_ci=${mode}\`. ${detail}"
+            } >> "$summary"
+            exit 0
+          }
+
+          # Unknown range: run the suite. A missing base (first push, force-push
+          # whose previous tip was not fetched) must not look like a docs-only change.
+          if [ -z "$base" ] || [ "$base" = "$zero" ]; then
+            echo "::warning::No base commit to diff (base=${base:-empty})."
+            finish true "No base commit to diff against, so the app suite runs."
+          fi
+          if ! git cat-file -e "${base}^{commit}" >/dev/null 2>&1; then
+            echo "::warning::Base commit ${base} is not in this checkout."
+            finish true "The base commit is not in this checkout, so the app suite runs."
+          fi
+          if ! git cat-file -e "${head}^{commit}" >/dev/null 2>&1; then
+            echo "::warning::Head commit ${head} is not in this checkout."
+            finish true "The head commit is not in this checkout, so the app suite runs."
+          fi
+
+          if [ "$CI_SCOPE_EVENT" = "pull_request" ]; then
+            # Three-dot: files this PR introduces since the merge base, not files
+            # that landed on main after the branch point.
+            if ! files="$(git diff --name-only --no-renames "${base}...${head}")"; then
+              echo "::warning::git diff failed for ${base}...${head}."
+              finish true "The pull request diff could not be listed, so the app suite runs."
+            fi
+          else
+            # Push to main. Net tree diff plus every commit in the range, so a
+            # code file that a later commit reverts still counts as a non-lite path.
+            if ! files="$(
+              set -euo pipefail
+              git diff --name-only --no-renames "${base}" "${head}"
+              commits="$(git rev-list "${base}..${head}")"
+              while IFS= read -r commit; do
+                [ -z "$commit" ] && continue
+                if git rev-parse --verify --quiet "${commit}^1" >/dev/null; then
+                  git diff --name-only --no-renames "${commit}^1" "$commit"
+                else
+                  git diff-tree --no-commit-id --name-only -r --no-renames "$commit"
+                fi
+              done <<< "$commits"
+            )"; then
+              echo "::warning::git diff failed for push ${base}..${head}."
+              finish true "The push diff could not be listed, so the app suite runs."
+            fi
+          fi
+
+          outside=""
+          lite_count=0
+          sorted="$(printf '%s\n' "$files" | sort -u)"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              research/game-design | research/game-design/*) lite_count=$((lite_count + 1)) ;;
+              docs | docs/*) lite_count=$((lite_count + 1)) ;;
+              packs | packs/*) lite_count=$((lite_count + 1)) ;;
+              assets/stories | assets/stories/*) lite_count=$((lite_count + 1)) ;;
+              assets/app-icon | assets/app-icon/*) lite_count=$((lite_count + 1)) ;;
+              *) outside+="${path}"$'\n' ;;
+            esac
+          done <<< "$sorted"
+
+          if [ -n "$outside" ]; then
+            echo "Paths outside the lite allowlist:"
+            printf '%s' "$outside" | sed '/^$/d' | head -n 40 || true
+            finish true "A changed path is outside the docs/design/packs allowlist, so the app suite runs."
+          fi
+
+          finish false "Every changed path is docs, game-design, packs, story scripts, or app icons (${lite_count} paths). Apt, pnpm install, and pnpm check are skipped."
       - name: gitleaks
         # v3.0.0. GITLEAKS_VERSION matches scripts/gitleaks-protect.mjs (default rules).
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
@@ -36,12 +143,22 @@ jobs:
           GITLEAKS_VERSION: "8.30.1"
           GITLEAKS_ENABLE_COMMENTS: "false"
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: pnpm setup
+        if: steps.scope.outputs.needs_full_ci == 'true'
+        uses: pnpm/action-setup@v4
+      - name: node setup
+        if: steps.scope.outputs.needs_full_ci == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
       # Bluetooth headers for the native tower library; nothing in CI connects to a tower.
-      - run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm check
+      - name: bluetooth and udev headers
+        if: steps.scope.outputs.needs_full_ci == 'true'
+        run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
+      - name: pnpm install
+        if: steps.scope.outputs.needs_full_ci == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: pnpm check
+        if: steps.scope.outputs.needs_full_ci == 'true'
+        run: pnpm check
