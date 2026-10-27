@@ -108,6 +108,8 @@ Every field is optional. One that was not recorded is left out, never written as
 | `answered` | A question with a decided or proposed answer linked |
 | `parked` | Dropped or postponed; left out of progress |
 
+**Replaced rulings (DEC-352).** When a newer ruling replaces a whole card, park the old card and start its body with "Replaced by DEC-x (Bob, date)." When it replaces only part, the old card stays `decided`, its title is cut to what still holds, and its body says what DEC-x replaced. Either way the newer card links `refines` to the old one, with a note saying what it replaces.
+
 ## Layers
 
 Every card except areas says where it sits between "every story" and "one story":
