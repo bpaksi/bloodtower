@@ -37,13 +37,14 @@ The generic parts (ID schemes, markdown with chips, card parsing, graph, layout,
 
 | Path | What |
 |---|---|
-| `src/web/app/` | Next.js pages: `/` (focus graph of the cards), `/map` (areas and progress), `/sounds` (the 113 tower sounds with their feel, filtered by tone), `/docs` (document cards) and `/doc/<file>` (one rendered document) |
+| `src/web/app/` | Next.js pages: `/` (focus graph of the cards), `/map` (areas and progress), `/engine` (the engine map: the loop cards' railroads, the same loops read as the event-sourced reducer, a walkthrough with an event log, and every idea placed on the loops), `/sounds` (the 113 tower sounds with their feel, filtered by tone), `/docs` (document cards) and `/doc/<file>` (one rendered document) |
 | `src/web/lib/ids.ts` | The game ID families and how an ID is recognised and classified (`GAME_IDS`) |
 | `src/web/lib/content.ts` | Reads and groups the design docs (the groups preview the planned reorg) |
 | `src/web/lib/cards.ts` | The card schema for `research/game-design/cards/` (format in its README) and the graph; `cards.test.ts` is the card lint |
 | `src/web/lib/graph-types.ts` | Card types, layers and verbs |
 | `src/web/lib/prompt.ts` | The prompt starter's rules (`GAME_PROMPT`) |
 | `src/web/lib/progress.ts` | Area progress for the map |
+| `src/web/lib/engine.ts` | Reads the `railroad` blocks (DEC-276) into loops, the loop stack, the trigger nodes and a compiled program for the walkthrough |
 | `src/web/lib/gaps.ts`, `src/web/cli/graph.ts` | The gaps report (engine in `packages/workbench/src/gaps.ts`) and the `pnpm graph` entry point |
 
 A card file that does not parse is left out and listed in a banner on every page; the card lint in `pnpm check` fails on it.

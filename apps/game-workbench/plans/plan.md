@@ -295,6 +295,13 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
   - Conflict rule per #136 (recorded deviation, see step 10): a `conflicts` link to a document ID is settled when the card is parked or decided; unit tests cover both cases.
   - Not required: an impact view across several hops (Later)
 
+### Step 12: Engine map (Bob, 2026-10-27)
+Bob: a way to visualize the game engine's loops, as designed (loops within loops) and as it will be implemented (an event model), as a design aid that names every card.
+- `/engine` reads every loop card's `railroad` block (DEC-276) on each request. Four tabs: the loop stack and each railroad as designed, with a "read as events" lens; the event model from the bloodtower spec D32 to D38 (events in, `step(state, event)`, effects out; what each node kind becomes; waits per loop; the five triggers as domain events; interrupts; where the spec and the cards disagree); a walkthrough that runs the railroads as one reducer with a stack and an event log; and every idea and every card a loop names, placed on the loop nodes.
+- Every ID opens its card in a side panel. The view is kept in the URL hash, so a link names a loop, a node and a card.
+- Done when: all 13 loop cards read with no errors; the session walkthrough reaches the encounter's pick through six frames; an interrupt resumes at the held node; `lib/engine.test.ts` passes.
+- Touches: `apps/game-workbench/src/web/{app/engine/**,lib/engine.ts,lib/engine.test.ts,components/Sidebar.tsx}`, `apps/game-workbench/{README.md,plans/plan.md}`, `.claude/launch.json`
+
 ## Later
 
 When `apps/game` is close to starting (see New direction):
