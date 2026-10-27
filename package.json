@@ -17,6 +17,7 @@
     "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && pnpm brief:lint && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
     "brief:lint": "node scripts/check-briefs.mjs",
     "graph": "node apps/game-workbench/src/web/cli/graph.ts",
+    "card-id": "node scripts/card-id.mjs",
     "land": "node scripts/land.mjs",
     "wt": "node scripts/wt.mjs add",
     "wt:rm": "node scripts/wt.mjs rm",
