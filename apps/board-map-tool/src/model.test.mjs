@@ -143,6 +143,16 @@ test("progress counts spaces, regions, pairs and the sides placed or in the tray
   assert.equal(p.sidesPlaced, 2);
   assert.equal(p.sidesInTray, 2);
   assert.equal(p.kingdoms.N.withRegion, 1);
+  assert.equal(p.kingdoms.N.completed, 0);
+});
+
+test("progress by kingdom counts completed spaces, not spaces with a region", () => {
+  const d = emptyDraft();
+  setCompleted(d, "N-a", true);
+  setCompleted(d, "N-b", true);
+  const p = progressOf(d, spaces);
+  assert.equal(p.kingdoms.N.completed, 2);
+  assert.equal(p.kingdoms.N.withRegion, 0);
 });
 
 test("the tower sits on N, and only on N", () => {

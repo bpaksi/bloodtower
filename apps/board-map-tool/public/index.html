@@ -21,7 +21,12 @@
   header h1 { font-size: 20px; margin: 0; margin-right: auto; }
   .columns { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 70px); }
   .toolbar { overflow: auto; padding: 22px; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 22px; }
-  .area { overflow: auto; padding: 32px 40px; }
+  .area { overflow: auto; padding: 0 40px 32px; }
+  /* The space's name and its complete button stay at the top while the rest scrolls. */
+  .detail-head { position: sticky; top: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--line); padding: 22px 0 16px; margin-bottom: 22px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .detail-head .title { margin-right: auto; }
+  .detail-head h1 { font-size: 24px; margin: 0; }
+  .detail-head p { margin: 2px 0 0; }
   .wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); }
   .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 14px; }
@@ -34,7 +39,8 @@
   label { display: flex; flex-direction: column; gap: 8px; color: var(--muted); font-size: 14px; }
   .row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
   .stack { display: flex; flex-direction: column; gap: 14px; }
-  .space-list { max-height: 360px; overflow: auto; margin-top: 12px; }
+  /* Toolbar sections take the height they need; only the toolbar itself scrolls. */
+  .space-list { margin-top: 12px; }
   .space-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
   .space-row:hover { background: var(--open); }
   .space-row.sel { background: var(--accent-soft); }
@@ -58,7 +64,7 @@
   .tray.drop { background: var(--drop); border-color: var(--accent); }
   .badge { font-size: 13px; color: var(--muted); }
   .picker { position: relative; }
-  .results { position: static; margin-top: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; max-height: 300px; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .results { position: static; margin-top: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
   .results div { padding: 12px 16px; cursor: pointer; }
   .results div.hi, .results div:hover { background: var(--open); }
   .results .none { color: var(--muted); cursor: default; }
@@ -72,7 +78,7 @@
   .divider { flex-basis: 100%; font-size: 13px; color: var(--muted); letter-spacing: .04em; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
   .chip.object { border-style: dashed; }
   .cell.object { border-color: var(--good); }
-  @media (max-width: 1000px) { .columns { grid-template-columns: 1fr; height: auto; } .toolbar, .area { overflow: visible; } }
+  @media (max-width: 1000px) { .columns { grid-template-columns: 1fr; height: auto; } .toolbar, .area { overflow: visible; } .detail-head { top: 72px; } }
 </style>
 </head>
 <body>
@@ -82,6 +88,7 @@
 </header>
 <div class="columns">
   <aside class="toolbar">
+    <section class="card" id="addNeighbour"></section>
     <section class="card" id="progress"></section>
     <section class="card">
       <p class="section-title">Spaces</p>
