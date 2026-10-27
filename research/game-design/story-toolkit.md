@@ -17,7 +17,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 | set pieces (MEC-042) | configurable | For every scene the plot needs the heroes to play through, not just hear. The win must depend on them (IDEA-013). | 4 · 6 · 8 | 8 · 12 · 14 |
 | steps inside a set piece (MEC-043) | configurable | Every set piece. Use more steps for a set piece that should feel like a journey (a crypt), fewer for a sharp scene. | 2 | 3-5 |
 | chapter and set piece narration (MEC-044) | configurable | Start of every chapter and set piece at least. Add an end for each outcome (set piece: won, left, failed) so each result lands its own way. | start of each | start + one end per outcome |
-| timed beats (MEC-045) | configurable | When the world should move without the heroes: the villain acts, a new story point opens, a rumour comes true. | 0 | 1 per chapter |
+| trigger beats (MEC-045) | configurable | When the board should answer what the heroes do: a hint on a set piece's spot, a rumour when they enter the inn, a token placed after a battle. | 0 | 1 per chapter |
 | win and loss scenes (MEC-046) | core | Every story. Each loss scene names the reason, so the table knows why it lost. | 1 win + 1 per way to lose | 1 win + 1 per way to lose |
 
 ## People (AREA-083, DEC-262)
