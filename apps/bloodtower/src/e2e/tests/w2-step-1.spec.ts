@@ -189,9 +189,9 @@ test("W2 tower-off walk shows Connect Tower before claim and keeps the step line
     await expect(mainOf(page)).not.toHaveAttribute("data-screen", "tower-connect");
     await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
-    await expectStep(page, "Party Join", /^\d+ of \d+ claimed$/);
-    await expect(page.locator('button[data-hunter="hero-a"]')).toContainText("Hold");
-    await expect(page.getByRole("button", { name: /Pick Hero/ })).toHaveCount(0);
+    await expectStep(page, "Party Join", /^\d+ of \d+ picked$/);
+    await expect(page.locator('button[data-hunter="hero-a"]')).toHaveAccessibleName("Pick Hero A");
+    await expect(page.getByRole("button", { name: /^(Take|Claim|Hold)\b/ })).toHaveCount(0);
 
     await page.locator('[data-action="menu"]').click();
     const menuConnect = page.locator('button[data-prompt-id="menu-connect"]');
@@ -243,7 +243,7 @@ test("W2 Sound and Play without Tower leave the session, and levels survive a ho
       "yours",
     );
     await expect(mainOf(device)).toHaveAttribute("data-screen", "claim-heroes");
-    await expect(device.locator("[data-step-instruction]")).toHaveText(/claimed/);
+    await expect(device.locator("[data-step-instruction]")).toHaveText(/picked/);
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
 
     await session.host.close();
@@ -272,8 +272,14 @@ test("W2 Sound and Play without Tower leave the session, and levels survive a ho
       await resumed.goto(`/join?code=${restarted.joinCode}`);
       await expect(mainOf(resumed)).toHaveAttribute("data-screen", "splash");
       await clickAct(resumed, "continue", "splash-play");
-      await expect(mainOf(resumed)).toHaveAttribute("data-screen", "pick-story");
-      await expect(resumed.locator("[data-step-instruction]")).toHaveText("Proving Grounds");
+      // The restart keeps the party (W4): Proving Grounds, hero-a still held on claim-heroes.
+      // This page joins as a new iPad, so the first iPad's hold shows as taken.
+      await expect(mainOf(resumed)).toHaveAttribute("data-screen", "claim-heroes");
+      await expect(resumed.locator("[data-step-instruction]")).toHaveText("1 of 4 picked");
+      await expect(resumed.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
+        "data-claim",
+        "taken",
+      );
       expect(tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
     } finally {
       await restarted.close();
