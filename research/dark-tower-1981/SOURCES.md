@@ -2,6 +2,8 @@
 
 **Licensing summary:** Dark Tower (1981) is © Milton Bradley Co. (now Hasbro). Every original image and every tower sound recording below is **copyrighted, reference only**. Do not ship any of it in the app. The Well of Souls fan site says its images are scanned from the game booklet and used without permission, and its WAVs are fan recordings of a real tower (credited to "Death Lock"). The YouTube audio is third-party uploads of copyrighted material, also reference only. The only file free to use is `sounds/synth/brigands_horn_synth.wav`. I generated it from scratch in code from the measured pitches. It is an original synthesis and contains no samples.
 
+**Where the files live:** the copyrighted images, sounds and `contact-sheet.png` are in Bob's backup folder, `~/Library/CloudStorage/OneDrive-Personal/Backups/BloodTower/reference/`dark-tower-1981/, not in the repo (it is public). The paths below are relative to that folder. Only `sounds/synth/brigands_horn_synth.wav` stays here, in `research/dark-tower-1981/sounds/synth/` (git-ignored).
+
 ## Sounds
 - `sounds/wos_battle.wav`: https://well-of-souls.com/tower/battle.wav (fan recording of the tower). Copyrighted, reference only. (Linked as the Brigands battle horn on dt_events.htm.)
 - `sounds/wos_bazaar-closed.wav`: https://well-of-souls.com/tower/bazaar-closed.wav (fan recording of the tower). Copyrighted, reference only.

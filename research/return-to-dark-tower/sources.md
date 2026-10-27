@@ -5,6 +5,7 @@ Accessed 13 October 2026.
 ## Official
 - [Restoration Games — Return to Dark Tower collection](https://restorationgames.com/return-to-dark-tower/) — price, expansions, accessories, app links
 - [Return to Dark Tower rules (two-page PDF)](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf) — official rulebook
+- [Return to Dark Tower Rulebook v2.0 (2023, 28 pages)](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) — the full official rulebook, second printing. Bob has a local copy; it is not in the repo because the repo is public and the rulebook is Restoration Games' copyright. Read 2026-10-27; notes in [game-overview-and-rules.md](game-overview-and-rules.md) §Rulebook v2.0 details, a section-by-section summary in [rulebook-summary.md](rulebook-summary.md) and a strategy commentary in [strategy-commentary.md](strategy-commentary.md), both supplied by Bob
 - [BackerKit: 2nd Printing and Covenant](https://www.backerkit.com/c/projects/restoration-games/return-to-dark-tower) — Covenant mechanics, 2nd-printing changes, add-ons, funding
 - [BackerKit update: Relentless Warden](https://backerkit.com/c/restoration-games/return-to-dark-tower/updates/143) — Warden details, Brutal Warlord reference
 - [Expeditions on Kickstarter (blog)](https://restorationgames.com/return-to-dark-tower-expeditions-kickstarter/)
@@ -32,3 +33,8 @@ Accessed 13 October 2026.
 
 ## Third party
 - [Return to Dark Tower Assistant (Ben Dodson)](https://bendodson.com/apps/return-to-dark-tower-assistant/)
+
+## Items and virtues (2026-10-27)
+- Bob's Perplexity report: [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf), summarised in [items-and-virtues.md](items-and-virtues.md)
+- [GeekDad: Reaping the Rewards](https://geekdad.com/2022/10/reaping-the-rewards-return-to-dark-tower/) — photos of gear and the 12 hero virtues
+- [BoardGameGeek: Expansion Info thread](https://boardgamegeek.com/thread/2838905/return-to-dark-tower-expansion-info) — lead for a full contents spreadsheet

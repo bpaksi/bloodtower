@@ -11,8 +11,8 @@ links:
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
-  - { file: "../return-to-dark-tower/assets/IMG_5690.HEIC", note: "spore and caravan tokens (photo, blurry)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5690 (backup folder): spore and caravan tokens (photo, blurry)" }
 ---
 **Proposal:** an escort or cargo on the board: someone or something that only moves when a hunter spends movement on it. Dracula: the woman under protection. Fellowship: the supply wagon. A snatch or ambush targets the token's space.
 

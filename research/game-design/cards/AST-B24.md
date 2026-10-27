@@ -13,6 +13,6 @@ links:
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** the story's antagonist. A pack picks one adversary (Empress of Shades or Gravemaw as the Count, The Gaze Eternal as the Eye). The token is on the board from chapter 1 and moves by the E7 agenda. The finale is the base multi-card adversary battle, with retreats and lasting progress. The other 7 stay in the box.

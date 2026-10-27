@@ -1,6 +1,6 @@
 # dt1981 asset NOTES (measured + synthesis)
 
-Reference recordings under `/workspace/research/dark-tower-1981/sounds/` were analyzed with
+Reference recordings (then under `research/dark-tower-1981/sounds/`, now in Bob's backup folder, see that folder's SOURCES.md) were analyzed with
 20 ms autocorrelation windows (numpy), then pitches quantized to nearest MIDI note.
 All shipped audio is **synthesized from scratch** as 50% duty square waves (1-bit style),
 44.1 kHz mono PCM + Vorbis OGG. Optional `.warm` variants add lowpass + short aecho.

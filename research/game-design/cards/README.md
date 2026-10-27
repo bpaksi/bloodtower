@@ -108,6 +108,10 @@ Every field is optional. One that was not recorded is left out, never written as
 | `answered` | A question with a decided or proposed answer linked |
 | `parked` | Dropped or postponed; left out of progress |
 
+**Replaced rulings (DEC-352).** When a newer ruling replaces a whole card, park the old card and start its body with "Replaced by DEC-x (Bob, date)." When it replaces only part, the old card stays `decided`, its title is cut to what still holds, and its body says what DEC-x replaced. Either way the newer card links `refines` to the old one, with a note saying what it replaces.
+
+**Deliverables (DEC-355).** `SCR-`, `UI-`, `CUE-` and `MEC-` cards are the deliverables: one card per thing that gets built. Every decided ruling is reached from at least one of them by `needs` or `uses`, and each plan step lists the deliverable cards it builds as `Builds: <IDs>`.
+
 ## Layers
 
 Every card except areas says where it sits between "every story" and "one story":

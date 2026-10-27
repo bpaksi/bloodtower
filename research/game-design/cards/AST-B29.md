@@ -12,6 +12,6 @@ links:
   - { rel: refines, to: R-SP-6, note: "seals as doors" }
 sources:
   - { file: "asset-catalog.md", lines: "35", note: "AST-T13" }
-  - { file: "../return-to-dark-tower/assets/IMG_5692.HEIC", note: "one seal (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5692 (backup folder): one seal (photo)" }
 ---
 **Proposal:** milestone markers. One seal breaks at each chapter accomplishment, more as buildings fall, and the rest in the finale. Each break is a player step the app waits for (R-SP-8) and is tracked in the app's seal ledger (E14). The glyph a seal reveals becomes a world condition. A pack writes the seal plan.

@@ -9,8 +9,28 @@ Research on the published Return to Dark Tower (RtDT) game and companion app, co
 | [component-inventory.md](component-inventory.md) | Every physical piece: base game, Alliances, Covenant, Expeditions, Dark Horde, accessories, plus named rosters (heroes, adversaries, foes, companions) |
 | [game-overview-and-rules.md](game-overview-and-rules.md) | How the game plays: setup, turn, systems, win/loss, competitive mode, expansion mechanics, design notes |
 | [companion-app.md](companion-app.md) | The official app: platforms, features, full version history, gaps, third-party tools |
-| [sources.md](sources.md) | Where each fact came from |
-| [assets/board-top-down.webp](assets/board-top-down.webp) | Bob's top-down photo of the physical board, for the DEC-221 graph draft |
+| [items-and-virtues.md](items-and-virtues.md) | Potions, gear, treasures and hero virtues, with what each does where known (Bob's Perplexity report, 2026-10-27) |
+| [foes-adversaries-companions.md](foes-adversaries-companions.md) | The 12 foes, 8 adversaries and 10 companions: levels, traits, battle effects, events, companion abilities and main goals, from Bob's cards (2026-10-27) |
+| [rulebook-summary.md](rulebook-summary.md) | The Rulebook v2.0 summarised section by section, with page references (Bob, 2026-10-27) |
+| [strategy-commentary.md](strategy-commentary.md) | Independent commentary on RtDT's central decisions: time, board condition, hero resilience, spirit as a budget (Bob, 2026-10-27) |
+| [sources.md](sources.md) | Where each fact came from, including the official [Rulebook v2.0](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) |
+| [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf) | Bob's Perplexity report on potions, gear, virtues and treasures, the source of items-and-virtues.md |
+
+## Copyrighted material (not in the repo)
+
+The repo is public, so RtDT art, photos of the physical game and the rulebook PDF live in Bob's backup folder, `~/Library/CloudStorage/OneDrive-Personal/Backups/BloodTower/reference/`return-to-dark-tower/, on his Mac only. Cite a file there by its path in that folder.
+
+| Path in the backup folder | What |
+|---|---|
+| `RtDT_Rulebook-v2-web.pdf` | The official Rulebook v2.0 (also at the [official link](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf)) |
+| `cards/` | One image per card: 22 treasures, 20 quest items, 6 gear, 18 potions, 12 corruptions, plus `gear-potions-corruptions.csv`; listed in [items-and-virtues.md](items-and-virtues.md#card-images) |
+| `cards/foes/`, `cards/adversaries/`, `cards/companions/` | Front and back of every foe (12), adversary (8) and companion (10), plus their CSVs; listed in [foes-adversaries-companions.md](foes-adversaries-companions.md#card-images) |
+| `cards/archives/` | Bob's original zips and CSVs, as sent |
+| `photos/board-top-down.webp` | Bob's top-down photo of the physical board, for the DEC-221 board map |
+| `photos/IMG_5683.HEIC` | Rulebook components page (cited by the AST-B cards) |
+| `photos/IMG_5687.HEIC` to `IMG_5689.HEIC` | Virtue tiles (Infused and others) |
+| `photos/IMG_5690.HEIC` to `IMG_5692.HEIC` | Spore and caravan tokens, haggle die, one seal |
+| `photos/IMG_5697.jpeg` to `IMG_5702.jpeg` | Treasure and quest item cards, the source of the card images |
 
 ## Product line timeline
 
