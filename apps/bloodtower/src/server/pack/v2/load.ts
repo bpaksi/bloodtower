@@ -81,10 +81,16 @@ const mergeBoardSpaces = (root: string, assembled: Record<string, unknown>): Pac
   try {
     const parsed = JSON.parse(readFileSync(spacesFile, "utf8")) as {
       spaces?: unknown;
+      region_labels?: unknown;
       river_crossings?: unknown;
       draft_note?: unknown;
     };
     if (parsed.spaces) boardObj.spaces = parsed.spaces;
+    // The board map tool writes the regions with the spaces; pack.yaml labels win if it has any.
+    const yamlLabels = boardObj.region_labels;
+    if (parsed.region_labels && !(Array.isArray(yamlLabels) && yamlLabels.length > 0)) {
+      boardObj.region_labels = parsed.region_labels;
+    }
     if (parsed.river_crossings && !boardObj.river_crossings) {
       boardObj.river_crossings = parsed.river_crossings;
     }

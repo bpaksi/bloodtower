@@ -221,6 +221,45 @@ assets:
     }
   });
 
+  it("reports a base pack board the play content cannot read instead of dropping it", () => {
+    const root = mkdtempSync(join(tmpdir(), "pack-catalog-"));
+    try {
+      // A base pack with its spaces inline in pack.yaml and no board/spaces.json: the pack loads,
+      // but the play content reads the board from the file.
+      const base = join(root, "inline-base");
+      cpSync(join(packsV2, "base"), base, { recursive: true });
+      const board = readFileSync(join(base, "board", "spaces.json"), "utf8");
+      rmSync(join(base, "board"), { recursive: true });
+      const spaces = JSON.stringify((JSON.parse(board) as { spaces: unknown }).spaces);
+      const regions = JSON.stringify(
+        (JSON.parse(board) as { region_labels: unknown }).region_labels,
+      );
+      writeFileSync(
+        join(base, "pack.yaml"),
+        readFileSync(join(packsV2, "base", "pack.yaml"), "utf8")
+          .replace("pack_id: base", "pack_id: inline-base")
+          .replace("  spaces: []", `  region_labels: ${regions}\n  spaces: ${spaces}`),
+      );
+      const story = join(root, "test");
+      cpSync(testPack, story, { recursive: true });
+      writeFileSync(
+        join(story, "pack.yaml"),
+        readFileSync(join(testPack, "pack.yaml"), "utf8").replace(
+          "base_pack: base",
+          "base_pack: inline-base",
+        ),
+      );
+      const catalog = loadStoryCatalog(root);
+      expect(catalog.stories.map((s) => s.card.id)).toEqual(["test"]);
+      expect(catalog.defaultPlay).toBeNull();
+      expect(catalog.issues).toContainEqual(
+        expect.objectContaining({ rule: "P2-1", file: "inline-base/board/spaces.json" }),
+      );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("does not report CONVERSION-NOTES when the host loads the repo packs", () => {
     const catalog = loadStoryCatalog(join(repoRoot, "packs"));
     expect(catalog.issues.filter((item) => item.file.includes("CONVERSION-NOTES"))).toEqual([]);

@@ -502,13 +502,27 @@ test("W7 Enter shows the place still on the story board and Leave is the only pl
         await settle(device, before);
         const after = await readStatus(device);
         expect(after.inside).toBe("false");
-        expect(after.moves).toBe(moves);
-        expect(after.space).toBe(now.space);
         if (moves && Number(moves) > 0) {
+          // Leave spends no move and brings the move map back (W7-step-1 l.40).
+          expect(after.moves).toBe(moves);
+          expect(after.space).toBe(now.space);
           await expect(device.locator("[data-move-map]")).toBeVisible();
           await expect(board.locator("[data-still]")).toHaveCount(0);
           await expect(board.locator("[data-place]")).toHaveCount(0);
           await expect(board.locator("main.bt-board img")).toHaveCount(0);
+        } else {
+          // Entered with no moves left: Leave ends the group's turn, and the next
+          // offer is the next move roll or the skull prompt (W7-step-1 l.36).
+          const nextOffer = await device
+            .locator('button[data-prompt-id*="roll-done"], button[data-prompt-id*="skull-drop"]')
+            .count();
+          const turnPassed =
+            after.hero !== now.hero ||
+            after.day !== now.day ||
+            Number(after.moves) > 0 ||
+            nextOffer > 0;
+          expect(turnPassed).toBe(true);
+          await expect(board.locator("[data-place]")).toHaveCount(0);
         }
         seen.add(building);
         continue;
