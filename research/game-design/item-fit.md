@@ -2,7 +2,7 @@
 
 Can Bloodtower use RtDT's virtues, potions, gear, corruptions, treasures (magic items) and quest items as physical pieces, all behaving the same way? This chart takes each known piece, its RtDT effect, and the Bloodtower effect it would become. Bob asked for it on 2026-10-27, after ruling the direction: **the game chooses, the player takes the physical piece and holds it until it is lost or spent, and the game tracks the Advantages.**
 
-Status: Claude's analysis for Bob's review. Nothing here is decided. RtDT texts come from [items-and-virtues.md](../return-to-dark-tower/items-and-virtues.md) and the Rulebook v2.0; they are paraphrased.
+Status: Bob adopted the physical cards (DEC-370), skull removal (DEC-371) and the foe trait effects (DEC-372) on 2026-10-27. The Bloodtower effects below are still Claude's proposals, to be settled card by card in Q-269. RtDT texts come from [items-and-virtues.md](../return-to-dark-tower/items-and-virtues.md) and the Rulebook v2.0; they are paraphrased.
 
 ## One behaviour for every kind
 
@@ -183,5 +183,5 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 - **Six heroes, four boards.** RtDT's starting virtues are printed on 4 hero boards, but Bloodtower has 6 heroes (DEC-099). Two classes would have no board, or starting virtues become app-only.
 - **Six per class does not fit the tiles.** 16 tiles cannot give 6 classes 6 virtues each (DEC-156). Tiles shared between classes, or fewer virtues per class, would fix it.
 - **Spells have no piece.** RtDT has no spell card or tile, which supports keeping spells apart from virtues (Bob, 2026-10-27, still open). The three Scroll treasures (spend for +4 of one trait) are the nearest thing.
-- **Rulings this would change:** DEC-368 (tiles stay in the box), DEC-121 (spells are virtues) and DEC-156 (six per class).
+- **Rulings this changes:** DEC-370 partly replaces DEC-368 (tiles stay in the box). DEC-121 (spells are virtues) and DEC-156 (six per class) wait on Q-268.
 - **Still missing:** the 4 kingdom virtues and the Spymaster's Stealth virtue name.
