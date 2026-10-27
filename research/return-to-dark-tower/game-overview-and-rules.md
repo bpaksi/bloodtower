@@ -78,6 +78,22 @@ Haggle die results: normal, +3 warriors, +1 potion, +1 gear, or the Reinforce is
 
 Based on Nimet's earlier quest. Each player gets 4 heroic test cards and an Amulet of Hope. Complete 3 tests (each lets you remove or replace a seal anywhere), then enter the Tower dungeon from a space next to the Tower and find the relic. Elimination on a 3rd corruption or empty skull supply. Monthly quest grants a companion to whoever finishes it first.
 
+## Rulebook v2.0 details
+
+Read from the official Rulebook v2.0 (2023) on 2026-10-27, page numbers in brackets. Facts not already above:
+
+- **Box contents (p3):** 20 quest item cards, 16 heroic test cards, 10 companion cards, 20 foe cards, 65 foe tokens, 20 special tokens, 3 quest markers, 6 dungeon tokens, 40 spirit and 50 warrior tokens, 24 skulls plus spares.
+- **Setup (p4-7):** gear in 6 face-up stacks of 3; treasure deck with a market of 3 face up; potion and corruption decks shuffled. Each hero puts their 3 hero virtue tiles inactive side up, plus the kingdom virtue of their home kingdom. Difficulty is Heroic (default) or Gritty. The app picks one level 2, one level 3 and one level 4 foe; the adversary is level 5.
+- **Corruptions (p9):** at most one per effect, except building destruction and "gain a corruption" effects. A drawn corruption takes effect at once; removed ones go to the bottom of the deck.
+- **Months (p12):** average turns per month are 6, 7, 8 or 9 for 1 to 4 players; Gritty gives fewer. Each month after the first brings a companion quest and an adversary quest, which fail at month end.
+- **Turn (p13-14):** one trade a turn with heroes on your space (no virtues or corruptions). Spending is optional, losing is mandatory; an item spent to trigger something else gives no effect of its own. Spend 1 spirit to double your move before moving. Rivers are borders, not spaces; nothing on the board blocks movement.
+- **Heroic actions (p15-19):** one of Cleanse, Battle or Quest a turn, then gain 2 spirit. Up to 10 Advantages per heroic action; unused ones vanish. In a dungeon each room can be improved once; cleared rooms stay cleared for the next hero.
+- **Adversary battle (p17):** only after the main goal; 5 battle cards; retreat allowed after at least one; Advantages applied to a card stay on it for the next attempt.
+- **End of turn (p21-22):** a skull is placed in the kingdom where it first emerged; the home player chooses the building, the dropper chooses in dormant kingdoms. Event kinds: foes strike, foes spawn, foes grow in power, the Tower stirs (rotate or remove a seal, shown by the lights), the Tower acts (adversary strikes), companion events, new wares.
+- **Competitive Tower dungeon (p25):** entered by the Quest action from any space adjacent to the Tower; a hero who leaves may re-enter and keep exploring. Bloodtower's Tower encounter follows the same shape (DEC-363, DEC-364).
+- **Treasure examples (p3-4):** Scroll of the Great Serpent (spend for +4 Melee Advantages), Hallowed Reliquary (after you Battle, remove 1 skull from a building in your current kingdom), Golden Mace of Azkol (on a space with a foe, spend spirit equal to its level to remove it; +1 Undead Advantage).
+- **Tokens (p26):** caravans are moving dungeons (only with Miras the Horselord; no southern caravan); siege trees, rivers of fire and spores belong to particular companions or adversaries.
+
 ## Expansion mechanics in one line each
 
 - **Alliances:** shared *influence* resource to sway 4 two-sided guilds; power skulls drain resources; guild companions; 2 heroes.

@@ -15,7 +15,7 @@ RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero
 | Potion of the Siren Song | Move any foe up to 2 spaces | Read in unboxing |
 | Potion of the Golden Sun | Gain spirit (amount not confirmed) | Seen in a playthrough |
 | Potion of Fortune's Favor | Not found | Name only |
-| Potion of the Thousand Strides | Not found | Name only |
+| Potion of the Thousand Strides | Moves heroes, including other heroes (rulebook p25 calls it the Potion of One Thousand Strides) | Name only; effect partly from the rulebook |
 
 ## Gear
 
@@ -40,7 +40,9 @@ RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero
 | Gaining | Choose a face-up treasure when an effect grants one |
 | Bazaar | Spend 2 spirit at a Reinforce for a treasure instead of the free gear |
 
-**No list found.** Names in videos and captions disagree. Lead: BoardGameGeek thread 2838905 ("Return to Dark Tower – Expansion Info") mentions a full contents spreadsheet.
+Three are printed in the rulebook (v2.0, p3-4): **Scroll of the Great Serpent** (spend for +4 Melee Advantages), **Hallowed Reliquary** (after you Battle, remove 1 skull from a building in your current kingdom) and **Golden Mace of Azkol** (on a space with a foe, spend spirit equal to its level to remove it; +1 Undead Advantage).
+
+**No full list found.** Names in videos and captions disagree. Lead: BoardGameGeek thread 2838905 ("Return to Dark Tower – Expansion Info") mentions a full contents spreadsheet.
 
 ## Virtues
 
