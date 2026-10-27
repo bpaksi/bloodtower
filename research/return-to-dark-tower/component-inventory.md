@@ -52,13 +52,13 @@ Physical components are unchanged between the 1st printing (2021/22 Kickstarter)
 
 **Heroes (4):** Brutal Warlord, Orphaned Scion, Relic Hunter, Spymaster.
 
-**Adversaries (level 5, 8 total incl. Kickstarter stretch goals):** Ashstrider, Utuk-Ku the Ice Herald, Empress of Shades, Gravemaw, Bane of Omens, Lingering Rot, Isa the Exile, The Gaze Eternal. (Taken from the Dark Horde miniature list, which mirrors the base-game adversaries.)
+**Adversaries (level 5, 8 total incl. Kickstarter stretch goals):** Ashstrider, Utuk-Ku the Ice Herald, Empress of Shades, Gravemaw, Bane of Omens, Lingering Rot, Isa the Exile, The Gaze Eternal. Confirmed from Bob's cards; traits and effects in [foes-adversaries-companions.md](foes-adversaries-companions.md).
 
-**Foes (12 types, 4 at each of levels 2, 3 and 4):** Brigands, Oreks, Shadow Wolves, Spine Fiends, Frost Trolls, Lemures, Clan of Neuri, Widowmade Spiders, Dragons, Mormos, Striga, Titan. **[which foe is which level is unverified — check the foe cards]**
+**Foes (12 types, 4 at each of levels 2, 3 and 4):** Brigands, Oreks, Shadow Wolves, Spine Fiends, Frost Trolls, Lemures, Clan of Neuri, Widowmade Spiders, Dragons, Mormos, Striga, Titan. Levels confirmed from Bob's foe cards: level 2 Brigands, Oreks, Shadow Wolves, Spine Fiend; level 3 Clan of Neuri, Frost Troll, Lemure, Widowmade Spider; level 4 Dragon, Mormo, Striga, Titan. Traits and events in [foes-adversaries-companions.md](foes-adversaries-companions.md).
 
-**Main goals:** 9 in the base game. The recommended first game is *Recover Azkol's Treasures* vs. *Ashstrider*. Full list **[unverified]**.
+**Main goals:** the 10 companion cards name 10, one each (an earlier count of 9 was unverified). The recommended first game is *Recover Azkol's Treasures* vs. *Ashstrider*. List in [foes-adversaries-companions.md](foes-adversaries-companions.md#companions).
 
-**Companions named in sources:** Miras the Horselord (uses caravan tokens), Letha the Dryad (uses siege tree tokens), Hakan the Artificer, Yana, Tomas, Xyr, Grigor, Haraswa, Kamaria (Kamaria's Carpet treasure). Which are main vs. recruitable, and base vs. expansion, **[unverified]**.
+**Companions (10, from Bob's cards):** Gleb the Outlaw King, Grigor the Unbreakable, Hakan the Artificer, Letha the Dryad (uses siege tree tokens), Miras the Horselord (uses caravan tokens), Nimet the Fathomless, Tomas the Scout, Vasa the Divine, Yana the Assassin, Zaida the Efreet. Xyr, Haraswa and Kamaria, named in other sources, are not among the base cards. Details in [foes-adversaries-companions.md](foes-adversaries-companions.md#companions).
 
 **Kingdoms:** North, South, East, West. Terrain types: Desert, Hills, Mountains, Lake, Forest, Grasslands.
 
