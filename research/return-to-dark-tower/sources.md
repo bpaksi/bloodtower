@@ -32,3 +32,8 @@ Accessed 13 October 2026.
 
 ## Third party
 - [Return to Dark Tower Assistant (Ben Dodson)](https://bendodson.com/apps/return-to-dark-tower-assistant/)
+
+## Items and virtues (2026-10-27)
+- Bob's Perplexity report: [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf), summarised in [items-and-virtues.md](items-and-virtues.md)
+- [GeekDad: Reaping the Rewards](https://geekdad.com/2022/10/reaping-the-rewards-return-to-dark-tower/) — photos of gear and the 12 hero virtues
+- [BoardGameGeek: Expansion Info thread](https://boardgamegeek.com/thread/2838905/return-to-dark-tower-expansion-info) — lead for a full contents spreadsheet

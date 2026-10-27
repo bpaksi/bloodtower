@@ -9,8 +9,10 @@ Research on the published Return to Dark Tower (RtDT) game and companion app, co
 | [component-inventory.md](component-inventory.md) | Every physical piece: base game, Alliances, Covenant, Expeditions, Dark Horde, accessories, plus named rosters (heroes, adversaries, foes, companions) |
 | [game-overview-and-rules.md](game-overview-and-rules.md) | How the game plays: setup, turn, systems, win/loss, competitive mode, expansion mechanics, design notes |
 | [companion-app.md](companion-app.md) | The official app: platforms, features, full version history, gaps, third-party tools |
+| [items-and-virtues.md](items-and-virtues.md) | Potions, gear, treasures and hero virtues, with what each does where known (Bob's Perplexity report, 2026-10-27) |
 | [sources.md](sources.md) | Where each fact came from |
 | [assets/board-top-down.webp](assets/board-top-down.webp) | Bob's top-down photo of the physical board, for the DEC-221 graph draft |
+| [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf) | Bob's Perplexity report on potions, gear, virtues and treasures, the source of items-and-virtues.md |
 
 ## Product line timeline
 
