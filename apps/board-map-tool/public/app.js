@@ -58,7 +58,7 @@ async function post(path, body = {}) {
     message(`Could not reach the tool: ${err.message}`, true);
     return false;
   }
-  if (res.ok) message(path === "/api/export" ? `Exported to ${data.exported}` : "Saved");
+  if (res.ok) message(`Saved to ${data.file}`);
   else message(data.error ?? "Failed", true);
   state.data = data;
   render();
@@ -138,7 +138,7 @@ function renderChecks() {
     el(
       "p",
       { class: c.complete ? "ok" : "error" },
-      c.complete ? "Complete: ready to export" : `${c.errors.length} to fix before export`,
+      c.complete ? "Complete: no errors" : `${c.errors.length} to fix`,
     ),
   );
   const ul = el("ul", { class: "list" });
@@ -627,12 +627,12 @@ $("newRegion").addEventListener("keydown", (e) => {
   e.target.value = "";
   post("/api/region", { name });
 });
-$("export").onclick = () => post("/api/export");
 
 fetch("/api/state")
   .then((r) => r.json())
   .then((d) => {
     state.data = d;
+    message(`Saving to ${d.file}`);
     render();
   })
   .catch((err) => {

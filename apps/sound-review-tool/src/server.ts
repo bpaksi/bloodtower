@@ -1,6 +1,6 @@
 // Local-only server for the sound review tool. Serves the page, keeps Bob's descriptions in
-// data/sounds.json, saved on every change, and reaches the tower only through `ReviewTower`.
-// Export writes research/game-design/sound-feel.json.
+// ~/Desktop/sound-feel.json, saved on every change, and reaches the tower only through
+// `ReviewTower`. That file is the tool's output; there is no export.
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -10,7 +10,6 @@ import { SessionStateError } from "@dark-tower/tower/runtime";
 import {
   applyChange,
   type Draft,
-  exportSounds,
   isReviewed,
   ModelError,
   type SoundChange,
@@ -21,9 +20,10 @@ import { type ReviewTower, type TowerAction, TowerRequestError } from "./tower.t
 export interface ServerOptions {
   tower: ReviewTower;
   draft: Draft;
+  /** What was wrong with the saved draft when it was loaded, shown on the page. */
+  loadProblems?: readonly string[];
   /** Where the draft is saved after each change. */
   draftPath: string;
-  exportPath: string;
   publicDir: string;
   port: number;
   now?: () => number;
@@ -80,7 +80,8 @@ const problemOf = (error: unknown): Problem | undefined => {
 };
 
 export const startServer = async (options: ServerOptions): Promise<Server> => {
-  const { tower, draft, draftPath, exportPath, publicDir } = options;
+  const { tower, draft, draftPath, publicDir } = options;
+  const loadProblems = options.loadProblems ?? [];
   const now = options.now ?? Date.now;
 
   const write = async () => {
@@ -99,6 +100,8 @@ export const startServer = async (options: ServerOptions): Promise<Server> => {
   };
 
   const state = () => ({
+    file: draftPath,
+    problems: loadProblems,
     connection: tower.status(),
     busy: tower.busy(),
     tones: TONES,
@@ -142,13 +145,6 @@ export const startServer = async (options: ServerOptions): Promise<Server> => {
       applyChange(draft, change, SOUND_COUNT, now());
       await save();
       return send(res, 200, state());
-    }
-
-    if (req.method === "POST" && path === "/api/export") {
-      const file = exportSounds(draft);
-      await mkdir(dirname(exportPath), { recursive: true });
-      await writeFile(exportPath, `${JSON.stringify(file, null, 2)}\n`);
-      return send(res, 200, { exported: exportPath, count: file.sounds.length, ...state() });
     }
 
     if (req.method === "GET") {

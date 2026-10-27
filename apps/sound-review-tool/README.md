@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Purpose | Connect and calibrate the tower, then play each sound and describe it: sounds like, tone and length. Export the descriptions the game design reads |
+| Purpose | Connect and calibrate the tower, then play each sound and describe it: sounds like, tone and length, saved in the file the game design reads |
 | Phase | Build |
 | SDLC tier | Experiment |
 | Status | Built and tried on the mock tower; awaiting Bob's use on the real one |
-| Disposable? | Yes. The exported JSON is kept; the tool is not |
+| Disposable? | Yes. The data file is kept; the tool is not |
 
 Intent: [intent/0001-sound-review-tool.md](intent/0001-sound-review-tool.md). It replaces the Review feel mode that was on tower-poc's Sounds page (tower-poc spec 1.25).
 
@@ -27,9 +27,11 @@ Open http://127.0.0.1:4791. The server listens on 127.0.0.1 only. `MOCK=1` uses 
 
 ## Data
 
-- **Draft:** every change is saved at once to `data/sounds.json` (git-ignored). A mock run keeps its own, `data/sounds.mock.json`.
+- **Data file:** every change is saved at once to `~/Desktop/sound-feel.json`. That file is the output; there is no export. `DATA_FILE=<path>` saves somewhere else. A mock run keeps its own, `data/sounds.mock.json`.
+- **Moving from the old place:** with no Desktop file yet, the tool copies the old `data/sounds.json` there on start. The old file is left as it was.
+- **Bad data:** loading works as in the board map tool. Entries and fields the tool cannot use are dropped and listed on the page; a file that is not JSON is moved aside next to it (`sound-feel.broken-<time>.json`) and the tool starts from the seed.
 - **Start:** with no draft, the tool starts from `src/seed.json`: the 14 sounds reviewed on tower-poc. The note became sounds like and the length from Play was kept. The tone was set only where the old mood and reads-as both pointed one way (triumph or reward is good; dread, menace, tension or threat is bad). `pnpm import-tower-poc [db]` rebuilds the seed from tower-poc's database.
-- **Export:** writes `research/game-design/sound-feel.json` (`data/sound-feel.mock.json` on the mock): `{ "version": 2, "sounds": [{ "id": "SND-001", "index": 1, "soundsLike": "growl", "tone": "bad", "lengthMs": 3635 }] }`, one entry per sound with anything recorded. A value not entered is left out, never 0 or "". The card `feel:` block uses the same fields (research/game-design/cards/README.md).
+- **Shape:** `{ "version": 1, "sounds": { "1": { "index": 1, "soundsLike": "growl", "tone": "bad", "lengthMs": 3635, "updatedAt": 1793105237656 } } }`, keyed by sound index, one entry per sound with anything recorded. A value not entered is left out, never 0 or "". Sound 1 is card `SND-001`. The card `feel:` block uses the same fields (research/game-design/cards/README.md).
 
 ## Tower safety
 

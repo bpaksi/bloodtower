@@ -249,23 +249,6 @@ export function checkDraft(draft, spaces) {
   return { errors, warnings, complete: errors.length === 0 };
 }
 
-// The file the game reads (DEC-240): spaces with their region, terrain and neighbours.
-export function exportBoard(draft, spaces) {
-  return {
-    regions: draft.regions,
-    spaces: spaces.map((s) => ({
-      id: s.id,
-      kingdom: s.kingdom,
-      name: s.name,
-      terrain: terrainOf(draft, s),
-      building: buildingOf(draft, s),
-      region: draft.regionOf[s.id],
-      objects: objectsOf(draft, s.id),
-      neighbours: neighboursOf(draft, s.id),
-    })),
-  };
-}
-
 // How far the entry has got, for the toolbar. A side is "placed" once it has a compass slot,
 // and "in the tray" while it does not.
 export function progressOf(draft, spaces) {

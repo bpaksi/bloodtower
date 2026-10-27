@@ -6,7 +6,6 @@ import {
   buildingOf,
   checkDraft,
   emptyDraft,
-  exportBoard,
   firstOpenSlot,
   isCompleted,
   neighboursOf,
@@ -19,6 +18,7 @@ import {
   setEdge,
   setObject,
   setTerrain,
+  terrainOf,
 } from "./model.mjs";
 
 const spaces = [
@@ -94,16 +94,15 @@ test("a check passes only when every space has a region and neighbours", () => {
   );
 });
 
-test("terrain can be changed, and the export carries the region and neighbours", () => {
+test("terrain can be changed, and the draft keeps the region and neighbours", () => {
   const d = emptyDraft();
   addRegion(d, "Longwater");
   for (const s of spaces) assignRegion(d, s.id, "REG-01");
   setTerrain(d, "N-a", "Hills");
   setEdge(d, spaces, { from: "N-a", to: "N-b", slot: "E" });
-  const out = exportBoard(d, spaces);
-  assert.equal(out.spaces[0].terrain, "Hills");
-  assert.equal(out.spaces[0].region, "REG-01");
-  assert.equal(out.spaces[0].neighbours[0].to, "N-b");
+  assert.equal(terrainOf(d, spaces[0]), "Hills");
+  assert.equal(d.regionOf[spaces[0].id], "REG-01");
+  assert.equal(neighboursOf(d, spaces[0].id)[0].to, "N-b");
 });
 
 test("the starting edges from the board map all fit the model", async () => {

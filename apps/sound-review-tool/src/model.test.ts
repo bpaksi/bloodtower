@@ -3,11 +3,11 @@ import {
   applyChange,
   carryOver,
   emptyDraft,
-  exportSounds,
   isReviewed,
   LENGTH_MAX_MS,
   ModelError,
   oldTone,
+  parseDraft,
   SOUNDS_LIKE_MAX,
 } from "./model.ts";
 
@@ -75,19 +75,33 @@ describe("applyChange", () => {
   });
 });
 
-describe("exportSounds", () => {
-  it("lists reviewed sounds by index with card IDs, leaving out what was not entered", () => {
+describe("parseDraft", () => {
+  it("reads back a saved draft as it was", () => {
     const draft = emptyDraft();
-    applyChange(draft, { index: 10, tone: "bad" }, COUNT, 1);
-    applyChange(draft, { index: 2, soundsLike: "coins", lengthMs: 2475 }, COUNT, 1);
-    applyChange(draft, { index: 5, soundsLike: "" }, COUNT, 1);
-    expect(exportSounds(draft)).toEqual({
-      version: 2,
-      sounds: [
-        { id: "SND-002", index: 2, soundsLike: "coins", lengthMs: 2475 },
-        { id: "SND-010", index: 10, tone: "bad" },
-      ],
+    applyChange(draft, { index: 2, soundsLike: "coins", tone: "good", lengthMs: 2475 }, COUNT, 7);
+    expect(parseDraft(JSON.stringify(draft), COUNT)).toEqual({ draft, problems: [] });
+  });
+
+  it("drops bad entries and fields, and lists each one", () => {
+    const text = JSON.stringify({
+      version: 1,
+      sounds: {
+        "2": { index: 2, soundsLike: "coins", tone: "dread", lengthMs: 2475, updatedAt: 7 },
+        "999": { index: 999, tone: "bad", updatedAt: 7 },
+        "4": "loud",
+        "5": { index: 5, lengthMs: 0, updatedAt: 7 },
+      },
     });
+    const { draft, problems } = parseDraft(text, COUNT);
+    expect(draft?.sounds).toEqual({
+      "2": { index: 2, soundsLike: "coins", lengthMs: 2475, updatedAt: 7 },
+    });
+    expect(problems).toHaveLength(4);
+  });
+
+  it("gives no draft for a file that is not a JSON object", () => {
+    expect(parseDraft("{ not json", COUNT).draft).toBeNull();
+    expect(parseDraft("[]", COUNT).draft).toBeNull();
   });
 });
 

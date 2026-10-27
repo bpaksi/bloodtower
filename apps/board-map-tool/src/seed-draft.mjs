@@ -1,11 +1,11 @@
-// Writes data/draft.json from the board map, if there is no draft yet. Run: pnpm -F board-map-tool seed
+// Writes ~/Desktop/board-map.json (or DATA_FILE) from the board map, if there is none yet.
+// Run: pnpm seed
 import { access, mkdir, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { startingDraft } from "./seed.mjs";
 
-const appDir = join(dirname(fileURLToPath(import.meta.url)), "..");
-const path = join(appDir, "data", "draft.json");
+const path = process.env.DATA_FILE || join(homedir(), "Desktop", "board-map.json");
 
 try {
   await access(path);
