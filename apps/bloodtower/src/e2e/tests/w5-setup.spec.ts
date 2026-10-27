@@ -406,19 +406,16 @@ test("W5 a restart before Begin does not skip an undone setup step", async ({
     await page.goto(`/join?code=${restarted.host.joinCode}`);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
     await clickAct(page, "continue", "splash-play");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
-    await expect(page.locator('button[data-action-id="walk"]')).toHaveCount(0);
-    await expect(page.locator('button[data-prompt-id="continue-begin"]')).toHaveCount(0);
-    await expect(boardMain(board)).toContainText("Proving Grounds");
-    await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
-    await clickAct(page, "continue", "continue-game-settings");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-    await page.locator('button[data-action="play-without-tower"]').click();
-    await holdHeroesFromTest(page, [...HERO_IDS]);
-    await clickAct(page, "continue", "continue-claim-heroes");
+    // The restart keeps the pre-play session (W4), so the kept Done on seals-and-skulls
+    // resumes on the next undone step, lay-out-board. Not on Begin, not on a walk.
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
-    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "seals-and-skulls");
-    await expect(deviceMain(page)).not.toHaveAttribute("data-setup-step", "lay-out-board");
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "lay-out-board");
+    await expect(page.locator('button[data-action-id="walk"]')).toHaveCount(0);
+    await expect(page.locator('button[data-prompt-id="continue-begin"]')).toBeDisabled();
+    await expect(boardMain(board)).toHaveAttribute("data-screen", "setup");
+    await expect(boardMain(board)).not.toHaveAttribute("data-moment", /.+/);
+    await clickAct(page, "continue", "continue-setup-lay-out-board");
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "place-heroes");
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {
     await boardContext.close();
