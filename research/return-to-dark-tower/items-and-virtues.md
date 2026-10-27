@@ -2,7 +2,7 @@
 
 Potions, gear, treasures and hero virtues in the RtDT base game, from a Perplexity report Bob ran on 2026-10-27 ([the PDF](assets/items-and-virtues-perplexity-2026-10-27.pdf)), plus a Claude web check the same day. Effects are paraphrased from community sources unless marked; check the physical cards before relying on exact wording. No code here.
 
-RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero abilities, not items. Items can be used only on your own turn.
+Treasures and quest items are read from Bob's photos of his own cards. RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero abilities, not items. Items can be used only on your own turn.
 
 ## Potions
 
@@ -40,9 +40,56 @@ RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero
 | Gaining | Choose a face-up treasure when an effect grants one |
 | Bazaar | Spend 2 spirit at a Reinforce for a treasure instead of the free gear |
 
-Three are printed in the rulebook (v2.0, p3-4): **Scroll of the Great Serpent** (spend for +4 Melee Advantages), **Hallowed Reliquary** (after you Battle, remove 1 skull from a building in your current kingdom) and **Golden Mace of Azkol** (on a space with a foe, spend spirit equal to its level to remove it; +1 Undead Advantage).
+All 22, read from Bob's photos of his base box (IMG_5697 to IMG_5700, 2026-10-27). One copy of each. Every treasure carries an Advantage; most also have an ability. Three are also printed in the rulebook (v2.0, p3-4).
 
-**No full list found.** Names in videos and captions disagree. Lead: BoardGameGeek thread 2838905 ("Return to Dark Tower – Expansion Info") mentions a full contents spreadsheet.
+| Treasure | Advantage | Ability |
+|---|---|---|
+| Kamaria's Carpet | +1 Magic | Once per turn, spend 1 spirit to place your hero on any space |
+| Azkol's Idol | +1 Beast | Prevent up to 2 warrior losses per dungeon room |
+| Cloak of Stars | +1 Stealth | Once per turn, when you enter a space with a foe, place that foe on any space |
+| Azkol's Banner | +1 Melee | Take any hero's Banner action instead of your own |
+| Spear of Atish | +1 Beast | When you defeat a Melee foe, gain 10 warriors |
+| Lamp of Darkness | +1 Beast | Spend to remove 1 foe from your space |
+| Circlet of Conviction | +1 Humanoid | Spend instead of dropping a skull into the Tower this turn; take another turn |
+| Tears of the Shedu | +1 Undead | When you defeat a Stealth foe, gain 1 potion |
+| Oakstone Bow | +1 Melee | Battle a foe on an adjacent space (terrain Advantages use your own space) |
+| Scroll of Twilight Shadow | Spend: +4 Stealth | None |
+| Crown of Azkol | +1 Humanoid | After you Reinforce at a sanctuary, also gain spirit equal to the current month |
+| Golden Mace of Azkol | +1 Undead | On a space with a foe, spend spirit equal to its level to remove it |
+| Scroll of Burning Sands | Spend: +4 Magic | None |
+| Scroll of the Great Serpent | Spend: +4 Melee | None |
+| Hallowed Reliquary | +1 Undead | After you Battle, remove 1 skull from a building in your current kingdom |
+| Azkol's Horn | +1 Beast | Glyphs facing you cost no spirit |
+| Amulet of the Marid | +2 Wild in lakes | When you cross a river, move to any space next to that river |
+| White Cauldron | +1 Undead | After you Reinforce at a citadel, also gain 1 potion |
+| Necklace of Haggling | +1 Stealth | Ignore the cancel face on the haggle die; Reinforce as normal |
+| Lamp of Hope | +1 Magic | When you Cleanse, you may remove skulls from any space |
+| Axe of Soul Rending | +1 Humanoid | When you defeat a Magic foe, gain 1 more spirit |
+| Acorns of the White Oak | +1 Wild in grasslands | Spend to remove up to 5 skulls from anywhere on the board |
+
+## Quest items
+
+20 cards, 17 kinds (Amulet of Hope has 4 copies), from Bob's list and photos IMG_5701 and IMG_5702 (2026-10-27). Taken when a quest grants one; carry any number. Several name pieces from specific quests or adversaries (Empress of Shades, spore tokens, siege trees, caravans).
+
+| Quest item | Copies | Advantage | Ability |
+|---|---|---|---|
+| Amulet of Annihilation | 1 | None | Spend to remove all foes from your space and all adjacent spaces |
+| Amulet of Hope | 4 | +1 Wild | After you Battle, gain a market treasure instead of 2 spirit |
+| Bezoar | 1 | None | Lose at most 5 warriors from any Empress of Shades event |
+| Dragon Scales | 1 | +2 Wild against level 4 foes | None |
+| Fulminating Silver | 1 | None | Once per battle, spend 1 spirit for +1 Wild |
+| Golden Wolf Pelt | 1 | None | Prevent up to 6 warrior losses per battle card |
+| Herbal Remedy | 1 | None | After you Reinforce, remove all your spore tokens |
+| Horn of the Elements | 1 | None | Once per turn, move a foe or siege tree 1 space (the card reads "a foe or siege tree") |
+| Mark of the Outlaw | 1 | None | After you Reinforce at a village, gain 5 more warriors |
+| Orb of Pure Snow | 1 | None | Prevent up to 1 spirit loss per battle card |
+| Relic of Light | 1 | None | After you Cleanse, gain 1 more spirit |
+| Smuggler's Coin | 1 | None | After you Reinforce at a bazaar, cycle any market treasures to the deck bottom and refill |
+| The Black Mark | 1 | None | Cannot be spent or lost; spend 1 spirit to give it to another hero |
+| Tomas's Map | 1 | Spend: +5 Wild in a dungeon | None |
+| Tools of the Saboteur | 1 | +3 Wild against caravans | None |
+| Turquoise Urn | 1 | None | Carry up to 2 extra treasures |
+| Wraps of Invisibility | 1 | None | Prevent up to 3 warrior losses per dungeon room |
 
 ## Virtues
 
@@ -97,10 +144,11 @@ Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starti
 ## Notes for Bloodtower
 
 - **Fit with the virtue kinds (DEC-367).** Of the 20 known base virtues, 7 are Advantages as they stand: five starting virtues (Baleful, Veteran, Arcane, Precise and the Spymaster's Stealth one) and two tiles (Relentless, Anointed). Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
-- **Still missing:** the Spymaster's Stealth virtue's name, the 4 kingdom virtues, 2 potion effects, 4 gear effects and all 22 treasures. Photos of the cards would close these.
+- **Still missing:** the Spymaster's Stealth virtue's name, the 4 kingdom virtues, 2 potion effects, 4 gear effects and the 12 corruption cards. Photos of the cards would close these.
 
 ## Sources
 
 - Bob's Perplexity report, 2026-10-27: [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf). Its citations include the RtDT two-page rules (restorationgames.com), GeekDad "Reaping the Rewards: Return to Dark Tower" (photos of all 6 gear types and the 12 hero virtues), the "Unboxing Return to Dark Tower" video (YouTube ARrYseRvT_w, potions and gear from about 18 minutes), a ReturnToDarkTower Facebook group virtue compilation (post 1965737157673374), and BoardGameGeek thread 2838905.
 - Claude web check, 2026-10-27: GeekDad (Baleful, Veteran), BoardGameGeek thread 3185484 "All hero's ranked", BackerKit RtDT update 122.
 - Bob's photo IMG_5687 (*Infused*).
+- Bob's photos IMG_5697 to IMG_5702, 2026-10-27: all 22 treasures and all 20 quest item cards, plus his quest item list. The photos are not in the repo (card art).
