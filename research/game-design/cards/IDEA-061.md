@@ -1,0 +1,14 @@
+---
+type: idea
+title: Each NPC has a set of portraits for tone and body language, such as friendly or scared
+status: open
+layer: core
+by: Bob, 2026-10-27
+links:
+  - { rel: affects, to: MEC-067, note: "one avatar per speaker becomes one per mood" }
+  - { rel: affects, to: DEC-334, note: "pool faces need the moods too" }
+  - { rel: affects, to: DEC-336, note: "the face node picks a person; the line picks the mood" }
+  - { rel: raises, to: Q-239 }
+  - { rel: part-of, to: AREA-083 }
+---
+"I think each NPC should have an array of images to match tone & body language. i.e. friendly, scared, ..."
