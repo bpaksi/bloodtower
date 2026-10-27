@@ -1,6 +1,6 @@
 # Return to Dark Tower — Items and virtues
 
-Potions, gear, treasures, quest items, corruptions and hero virtues in the RtDT base game. Every item and corruption table is read from images of Bob's own cards ([Card images](#card-images)), checked against his consolidated lists. The virtues come from a Perplexity report Bob ran on 2026-10-27 ([the PDF](assets/items-and-virtues-perplexity-2026-10-27.pdf)) and a Claude web check the same day; check the physical tiles before relying on their exact wording. No code here.
+Potions, gear, treasures, quest items, corruptions and hero virtues in the RtDT base game. Every item and corruption table is read from images of Bob's own cards ([Card images](#card-images)), checked against his consolidated lists. The 16 virtue tiles are read from Bob's tile images and his consolidated virtue list (2026-10-27). The 8 starting virtues printed on the hero boards come from a Perplexity report Bob ran the same day ([the PDF](assets/items-and-virtues-perplexity-2026-10-27.pdf)) and a Claude web check; check the hero boards before relying on their exact wording. No code here.
 
 RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero abilities, not items. Items can be used only on your own turn.
 
@@ -146,8 +146,23 @@ Each base hero has 2 starting virtues printed on the hero board, 3 virtue tiles 
 | Spymaster | Unseen | When you finish a monthly quest, you may remove a foe instead of gaining spirit |
 | Spymaster | Resourceful | At the end of each month, gain 15 warriors |
 | Orphaned Scion | Blessed | Spend 1 spirit to prevent up to 6 warrior losses from a battle card or dungeon room |
-| Orphaned Scion | Infused | At the start of your turn, remove 1 skull from a building in your home kingdom (confirmed on Bob's photo IMG_5687) |
+| Orphaned Scion | Infused | At the start of your turn, remove 1 skull from a building in your home kingdom |
 | Orphaned Scion | Anointed | +1 Wild Advantage for each building with no skulls on or next to your space |
+
+All 12 agree with Bob's tile images and his list, 2026-10-27.
+
+### The 4 kingdom virtues
+
+Each hero takes the tile of their home kingdom at setup. Each gives +2 Wild Advantages in one terrain.
+
+| Kingdom tile | Effect |
+|---|---|
+| Champion of the North | +2 Wild Advantages in mountains |
+| Champion of the East | +2 Wild Advantages in hills |
+| Champion of the South | +2 Wild Advantages in deserts |
+| Champion of the West | +2 Wild Advantages in forests |
+
+Read from Bob's tile images and his list, 2026-10-27.
 
 ### Starting virtues (printed on the hero board)
 
@@ -162,7 +177,7 @@ Each base hero has 2 starting virtues printed on the hero board, 3 virtue tiles 
 | Spymaster | Name not found | +1 Stealth Advantage | YouTube |
 | Spymaster | Swift | Your base move is 4 rather than 3 | YouTube |
 
-Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starting virtue is a +1 Advantage of one trait. The 4 kingdom virtues were not found.
+Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starting virtue is a +1 Advantage of one trait.
 
 ### Expansion virtues (partial, not in the base box)
 
@@ -189,14 +204,16 @@ One PNG per card, cropped from Bob's photos, in `cards/` under Bob's backup fold
 | `cards/gear/` | 6, one per type (each type has 3 identical cards in the box) |
 | `cards/potions/` | 18: 3 copies of each kind, for example `Dragon_Teeth_01.png` to `_03.png` |
 | `cards/corruptions/` | 12, one per corruption |
+| `cards/virtues/` | 16 tiles, one folder per owner: `Kingdom/` (4, for example `Champion_of_the_East.png`), `Brutal_Warlord/`, `Orphaned_Scion/`, `Relic_Hunter/` and `Spymaster/` (3 each) |
+| `cards/virtues.csv` | Bob's consolidated list of the 16 virtue tiles |
 | `cards/gear-potions-corruptions.csv` | Bob's consolidated list of the gear, potions and corruptions |
 
 The gear, potion and corruption tables were spot-checked against the images (Blessed Sceptres, Leather Armor, Trusted Maps, One Thousand Strides, Golden Sun, Feral) and agree with Bob's CSV.
 
 ## Notes for Bloodtower
 
-- **Fit with the virtue kinds (DEC-367).** Of the 20 known base virtues, 7 are Advantages as they stand: five starting virtues (Baleful, Veteran, Arcane, Precise and the Spymaster's Stealth one) and two tiles (Relentless, Anointed). Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
-- **Still missing:** the Spymaster's Stealth virtue's name and the 4 kingdom virtues. Photos of the hero boards and kingdom tiles would close these.
+- **Fit with the virtue kinds (DEC-367).** Of the 24 base virtues, 11 are Advantages as they stand: five starting virtues (Baleful, Veteran, Arcane, Precise and the Spymaster's Stealth one), two hero tiles (Relentless, Anointed) and the four kingdom tiles, which are terrain Advantages like Amulet of the Marid's. Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
+- **Still missing:** the Spymaster's Stealth virtue's name, and a check of the 8 starting virtues against the hero boards. Photos of the hero boards would close these.
 
 ## Sources
 
