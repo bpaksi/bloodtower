@@ -2474,7 +2474,9 @@
   gap: 0.2rem;
 }
 
+/* The pool is six heroes (W4). Three columns keep it to two rows, as four heroes were. */
 .bt-board[data-screen="claim-heroes"] .bt-hunter-roster {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 0.35rem;
   gap: 0.3rem 1rem;
 }

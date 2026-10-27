@@ -1,0 +1,1597 @@
+{
+  "regions": [
+    {
+      "id": "REG-01",
+      "name": "The Great Woods"
+    },
+    {
+      "id": "REG-02",
+      "name": "Regal Run"
+    },
+    {
+      "id": "REG-03",
+      "name": "Long Water"
+    }
+  ],
+  "regionOf": {
+    "N-dayside": "REG-03",
+    "N-fivepint": "REG-03",
+    "W-delmsmire": "REG-01",
+    "W-akartus": "REG-01",
+    "W-yellowpike": "REG-01",
+    "S-the-throne": "REG-02",
+    "S-the-cloister": "REG-02",
+    "S-archmont": "REG-02"
+  },
+  "terrain": {},
+  "objects": {
+    "N-tower-scar-desert": {
+      "tower": "N"
+    },
+    "E-forest-of-shades": {
+      "tower": "N"
+    },
+    "E-bleak-wastes": {
+      "tower": "N"
+    },
+    "S-irontops": {
+      "tower": "N"
+    },
+    "S-the-throne": {
+      "tower": "N"
+    },
+    "W-the-grass-sea": {
+      "tower": "N"
+    }
+  },
+  "completed": {
+    "N-egans-end": true,
+    "N-the-tundra": true,
+    "N-fivepint": true,
+    "N-rimeweald": true,
+    "N-lower-ice-fangs": true,
+    "N-greenbridge": true,
+    "N-dayside": true,
+    "N-muted-forest": true,
+    "N-radiant-mountains": true,
+    "N-lodestone-mountains": true,
+    "N-pearl-of-the-north": true,
+    "N-broken-lands": true,
+    "E-bleak-wastes": true,
+    "N-upper-ice-fangs": true,
+    "N-peaks-of-the-djinn": true,
+    "E-lake-of-songs": true,
+    "E-duwani": true,
+    "E-jewel-hills": true,
+    "E-copper-grove": true,
+    "E-outer-kinghills": true,
+    "E-utars-barrows": true,
+    "E-the-decaying-wilds": true,
+    "E-inner-kinghills": true,
+    "E-greater-tombstones": true,
+    "E-dragontooth-lake": true,
+    "E-lesser-tombstones": true,
+    "E-three-rivers": true,
+    "S-the-throne": true,
+    "E-big-sister": true,
+    "E-forest-of-shades": true,
+    "S-southern-wastes": true,
+    "S-pine-barrens": true,
+    "S-irontops": true,
+    "S-the-cloister": true,
+    "S-bone-hills": true,
+    "S-sands-of-madness": true,
+    "S-archmont": true,
+    "S-ulamels-hollow": true,
+    "S-little-sister": true,
+    "S-middle-sister": true,
+    "S-howling-desert": true,
+    "S-azkols-bane": true,
+    "S-mountains-of-the-watchers": true,
+    "S-the-emerald-expanse": true,
+    "W-lost-lands": true,
+    "W-plains-of-woldra": true,
+    "N-tower-scar-desert": true,
+    "W-anza": true,
+    "W-ash-hills": true,
+    "W-the-grass-sea": true,
+    "W-hissing-groves": true,
+    "W-the-empty-glade": true,
+    "W-cloudhold": true,
+    "W-yellowpike": true,
+    "W-akartus": true,
+    "W-plains-of-plovo": true,
+    "W-lonelight-hills": true,
+    "W-idran-forest": true,
+    "W-delmsmire": true,
+    "W-weeping-waters": true
+  },
+  "buildings": {},
+  "edges": {
+    "E-big-sister|E-forest-of-shades": {
+      "a": "E-big-sister",
+      "b": "E-forest-of-shades",
+      "slots": {
+        "E-forest-of-shades": "SW",
+        "E-big-sister": "NE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-big-sister|E-greater-tombstones": {
+      "a": "E-big-sister",
+      "b": "E-greater-tombstones",
+      "slots": {
+        "E-greater-tombstones": "W",
+        "E-big-sister": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-big-sister|E-lesser-tombstones": {
+      "a": "E-big-sister",
+      "b": "E-lesser-tombstones",
+      "slots": {
+        "E-lesser-tombstones": "N",
+        "E-big-sister": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-big-sister|S-middle-sister": {
+      "a": "E-big-sister",
+      "b": "S-middle-sister",
+      "slots": {
+        "E-big-sister": "SW",
+        "S-middle-sister": "NE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-big-sister|S-sands-of-madness": {
+      "a": "E-big-sister",
+      "b": "S-sands-of-madness",
+      "slots": {
+        "E-big-sister": "W",
+        "S-sands-of-madness": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-big-sister|S-the-throne": {
+      "a": "E-big-sister",
+      "b": "S-the-throne",
+      "slots": {
+        "S-the-throne": "SE",
+        "E-big-sister": "NW"
+      },
+      "note": "AI reading 2026-10-27 agrees, unsure (corner?)"
+    },
+    "E-bleak-wastes|E-dragontooth-lake": {
+      "a": "E-bleak-wastes",
+      "b": "E-dragontooth-lake",
+      "slots": {
+        "E-dragontooth-lake": "N",
+        "E-bleak-wastes": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-bleak-wastes|E-forest-of-shades": {
+      "a": "E-bleak-wastes",
+      "b": "E-forest-of-shades",
+      "slots": {
+        "E-bleak-wastes": "W",
+        "E-forest-of-shades": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-bleak-wastes|N-peaks-of-the-djinn": {
+      "a": "E-bleak-wastes",
+      "b": "N-peaks-of-the-djinn",
+      "slots": {
+        "E-bleak-wastes": "SE",
+        "N-peaks-of-the-djinn": "NW"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "E-copper-grove|E-inner-kinghills": {
+      "a": "E-copper-grove",
+      "b": "E-inner-kinghills",
+      "slots": {
+        "E-inner-kinghills": "SW",
+        "E-copper-grove": "NE"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "E-copper-grove|E-jewel-hills": {
+      "a": "E-copper-grove",
+      "b": "E-jewel-hills",
+      "slots": {
+        "E-copper-grove": "W",
+        "E-jewel-hills": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-copper-grove|E-outer-kinghills": {
+      "a": "E-copper-grove",
+      "b": "E-outer-kinghills",
+      "slots": {
+        "E-copper-grove": "E",
+        "E-outer-kinghills": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-copper-grove|E-the-decaying-wilds": {
+      "a": "E-copper-grove",
+      "b": "E-the-decaying-wilds",
+      "slots": {
+        "E-copper-grove": "NW",
+        "E-the-decaying-wilds": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-dragontooth-lake|E-forest-of-shades": {
+      "a": "E-dragontooth-lake",
+      "b": "E-forest-of-shades",
+      "slots": {
+        "E-dragontooth-lake": "NW",
+        "E-forest-of-shades": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-dragontooth-lake|E-greater-tombstones": {
+      "a": "E-dragontooth-lake",
+      "b": "E-greater-tombstones",
+      "slots": {
+        "E-dragontooth-lake": "W",
+        "E-greater-tombstones": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-dragontooth-lake|E-inner-kinghills": {
+      "a": "E-dragontooth-lake",
+      "b": "E-inner-kinghills",
+      "slots": {
+        "E-dragontooth-lake": "S",
+        "E-inner-kinghills": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-dragontooth-lake|E-the-decaying-wilds": {
+      "a": "E-dragontooth-lake",
+      "b": "E-the-decaying-wilds",
+      "slots": {
+        "E-dragontooth-lake": "SW",
+        "E-the-decaying-wilds": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-duwani|E-jewel-hills": {
+      "a": "E-duwani",
+      "b": "E-jewel-hills",
+      "slots": {
+        "E-duwani": "E",
+        "E-jewel-hills": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-duwani|E-lake-of-songs": {
+      "a": "E-duwani",
+      "b": "E-lake-of-songs",
+      "slots": {
+        "E-duwani": "W",
+        "E-lake-of-songs": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-duwani|E-utars-barrows": {
+      "a": "E-duwani",
+      "b": "E-utars-barrows",
+      "slots": {
+        "E-duwani": "N",
+        "E-utars-barrows": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-forest-of-shades|E-greater-tombstones": {
+      "a": "E-forest-of-shades",
+      "b": "E-greater-tombstones",
+      "slots": {
+        "E-forest-of-shades": "S",
+        "E-greater-tombstones": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-forest-of-shades|S-the-throne": {
+      "a": "E-forest-of-shades",
+      "b": "S-the-throne",
+      "slots": {
+        "E-forest-of-shades": "W",
+        "S-the-throne": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-greater-tombstones|E-lesser-tombstones": {
+      "a": "E-greater-tombstones",
+      "b": "E-lesser-tombstones",
+      "slots": {
+        "E-lesser-tombstones": "NE",
+        "E-greater-tombstones": "SW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-greater-tombstones|E-the-decaying-wilds": {
+      "a": "E-greater-tombstones",
+      "b": "E-the-decaying-wilds",
+      "slots": {
+        "E-greater-tombstones": "SE",
+        "E-the-decaying-wilds": "NW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-greater-tombstones|E-utars-barrows": {
+      "a": "E-greater-tombstones",
+      "b": "E-utars-barrows",
+      "slots": {
+        "E-greater-tombstones": "S",
+        "E-utars-barrows": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-inner-kinghills|E-outer-kinghills": {
+      "a": "E-inner-kinghills",
+      "b": "E-outer-kinghills",
+      "slots": {
+        "E-inner-kinghills": "S",
+        "E-outer-kinghills": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-inner-kinghills|E-the-decaying-wilds": {
+      "a": "E-inner-kinghills",
+      "b": "E-the-decaying-wilds",
+      "slots": {
+        "E-inner-kinghills": "W",
+        "E-the-decaying-wilds": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-inner-kinghills|N-peaks-of-the-djinn": {
+      "a": "E-inner-kinghills",
+      "b": "N-peaks-of-the-djinn",
+      "slots": {
+        "E-inner-kinghills": "NE",
+        "N-peaks-of-the-djinn": "SW"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "E-jewel-hills|E-the-decaying-wilds": {
+      "a": "E-jewel-hills",
+      "b": "E-the-decaying-wilds",
+      "slots": {
+        "E-jewel-hills": "N",
+        "E-the-decaying-wilds": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-jewel-hills|E-utars-barrows": {
+      "a": "E-jewel-hills",
+      "b": "E-utars-barrows",
+      "slots": {
+        "E-jewel-hills": "NW",
+        "E-utars-barrows": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-lake-of-songs|E-lesser-tombstones": {
+      "a": "E-lake-of-songs",
+      "b": "E-lesser-tombstones",
+      "slots": {
+        "E-lesser-tombstones": "S",
+        "E-lake-of-songs": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-lake-of-songs|E-three-rivers": {
+      "a": "E-lake-of-songs",
+      "b": "E-three-rivers",
+      "slots": {
+        "E-lake-of-songs": "W",
+        "E-three-rivers": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-lake-of-songs|E-utars-barrows": {
+      "a": "E-lake-of-songs",
+      "b": "E-utars-barrows",
+      "slots": {
+        "E-lake-of-songs": "NE",
+        "E-utars-barrows": "SW"
+      },
+      "note": "AI reading 2026-10-27 finds no border"
+    },
+    "E-lesser-tombstones|E-three-rivers": {
+      "a": "E-lesser-tombstones",
+      "b": "E-three-rivers",
+      "slots": {
+        "E-lesser-tombstones": "SW",
+        "E-three-rivers": "NE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-lesser-tombstones|E-utars-barrows": {
+      "a": "E-lesser-tombstones",
+      "b": "E-utars-barrows",
+      "slots": {
+        "E-lesser-tombstones": "E",
+        "E-utars-barrows": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "E-outer-kinghills|N-egans-end": {
+      "a": "E-outer-kinghills",
+      "b": "N-egans-end",
+      "slots": {
+        "E-outer-kinghills": "E",
+        "N-egans-end": "W"
+      },
+      "note": ""
+    },
+    "E-outer-kinghills|S-mountains-of-the-watchers": {
+      "a": "E-outer-kinghills",
+      "b": "S-mountains-of-the-watchers",
+      "slots": {
+        "E-outer-kinghills": null,
+        "S-mountains-of-the-watchers": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "E-the-decaying-wilds|E-utars-barrows": {
+      "a": "E-the-decaying-wilds",
+      "b": "E-utars-barrows",
+      "slots": {
+        "E-the-decaying-wilds": "W",
+        "E-utars-barrows": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "N-broken-lands|N-muted-forest": {
+      "a": "N-broken-lands",
+      "b": "N-muted-forest",
+      "slots": {
+        "N-broken-lands": "NW",
+        "N-muted-forest": "SE"
+      },
+      "note": ""
+    },
+    "N-broken-lands|N-radiant-mountains": {
+      "a": "N-broken-lands",
+      "b": "N-radiant-mountains",
+      "slots": {
+        "N-broken-lands": "W",
+        "N-radiant-mountains": "E"
+      },
+      "note": ""
+    },
+    "N-broken-lands|W-ash-hills": {
+      "a": "N-broken-lands",
+      "b": "W-ash-hills",
+      "slots": {
+        "N-broken-lands": "NE",
+        "W-ash-hills": "SW"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-broken-lands|W-lonelight-hills": {
+      "a": "N-broken-lands",
+      "b": "W-lonelight-hills",
+      "slots": {
+        "N-broken-lands": null,
+        "W-lonelight-hills": null
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-dayside|N-fivepint": {
+      "a": "N-dayside",
+      "b": "N-fivepint",
+      "slots": {
+        "N-dayside": "E",
+        "N-fivepint": "W"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-dayside|N-greenbridge": {
+      "a": "N-dayside",
+      "b": "N-greenbridge",
+      "slots": {
+        "N-dayside": "S",
+        "N-greenbridge": "N"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-dayside|N-lower-ice-fangs": {
+      "a": "N-dayside",
+      "b": "N-lower-ice-fangs",
+      "slots": {
+        "N-dayside": "NW",
+        "N-lower-ice-fangs": "SE"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-dayside|N-the-tundra": {
+      "a": "N-dayside",
+      "b": "N-the-tundra",
+      "slots": {
+        "N-dayside": "W",
+        "N-the-tundra": "E"
+      },
+      "note": ""
+    },
+    "N-egans-end|N-rimeweald": {
+      "a": "N-egans-end",
+      "b": "N-rimeweald",
+      "slots": {
+        "N-egans-end": "N",
+        "N-rimeweald": "S"
+      },
+      "note": ""
+    },
+    "N-egans-end|N-the-tundra": {
+      "a": "N-egans-end",
+      "b": "N-the-tundra",
+      "slots": {
+        "N-egans-end": "E",
+        "N-the-tundra": "W"
+      },
+      "note": ""
+    },
+    "N-fivepint|N-lodestone-mountains": {
+      "a": "N-fivepint",
+      "b": "N-lodestone-mountains",
+      "slots": {
+        "N-fivepint": null,
+        "N-lodestone-mountains": null
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-fivepint|N-pearl-of-the-north": {
+      "a": "N-fivepint",
+      "b": "N-pearl-of-the-north",
+      "slots": {
+        "N-fivepint": "E",
+        "N-pearl-of-the-north": "W"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-greenbridge|N-lower-ice-fangs": {
+      "a": "N-greenbridge",
+      "b": "N-lower-ice-fangs",
+      "slots": {
+        "N-greenbridge": "W",
+        "N-lower-ice-fangs": "E"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-greenbridge|N-muted-forest": {
+      "a": "N-greenbridge",
+      "b": "N-muted-forest",
+      "slots": {
+        "N-greenbridge": "NE",
+        "N-muted-forest": "SW"
+      },
+      "note": ""
+    },
+    "N-greenbridge|N-radiant-mountains": {
+      "a": "N-greenbridge",
+      "b": "N-radiant-mountains",
+      "slots": {
+        "N-greenbridge": "E",
+        "N-radiant-mountains": "W"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-greenbridge|N-upper-ice-fangs": {
+      "a": "N-greenbridge",
+      "b": "N-upper-ice-fangs",
+      "slots": {
+        "N-greenbridge": "NW",
+        "N-upper-ice-fangs": "SE"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-lodestone-mountains|N-pearl-of-the-north": {
+      "a": "N-lodestone-mountains",
+      "b": "N-pearl-of-the-north",
+      "slots": {
+        "N-lodestone-mountains": "W",
+        "N-pearl-of-the-north": "E"
+      },
+      "note": ""
+    },
+    "N-lodestone-mountains|N-radiant-mountains": {
+      "a": "N-lodestone-mountains",
+      "b": "N-radiant-mountains",
+      "slots": {
+        "N-lodestone-mountains": "NW",
+        "N-radiant-mountains": "SE"
+      },
+      "note": ""
+    },
+    "N-lower-ice-fangs|N-peaks-of-the-djinn": {
+      "a": "N-lower-ice-fangs",
+      "b": "N-peaks-of-the-djinn",
+      "slots": {
+        "N-lower-ice-fangs": "W",
+        "N-peaks-of-the-djinn": "E"
+      },
+      "note": ""
+    },
+    "N-lower-ice-fangs|N-rimeweald": {
+      "a": "N-lower-ice-fangs",
+      "b": "N-rimeweald",
+      "slots": {
+        "N-lower-ice-fangs": "SW",
+        "N-rimeweald": "NE"
+      },
+      "note": ""
+    },
+    "N-lower-ice-fangs|N-the-tundra": {
+      "a": "N-lower-ice-fangs",
+      "b": "N-the-tundra",
+      "slots": {
+        "N-lower-ice-fangs": "S",
+        "N-the-tundra": "N"
+      },
+      "note": ""
+    },
+    "N-lower-ice-fangs|N-upper-ice-fangs": {
+      "a": "N-lower-ice-fangs",
+      "b": "N-upper-ice-fangs",
+      "slots": {
+        "N-lower-ice-fangs": "N",
+        "N-upper-ice-fangs": "S"
+      },
+      "note": ""
+    },
+    "N-muted-forest|N-radiant-mountains": {
+      "a": "N-muted-forest",
+      "b": "N-radiant-mountains",
+      "slots": {
+        "N-muted-forest": "S",
+        "N-radiant-mountains": "N"
+      },
+      "note": ""
+    },
+    "N-muted-forest|N-tower-scar-desert": {
+      "a": "N-muted-forest",
+      "b": "N-tower-scar-desert",
+      "slots": {
+        "N-muted-forest": "N",
+        "N-tower-scar-desert": "S"
+      },
+      "note": ""
+    },
+    "N-muted-forest|N-upper-ice-fangs": {
+      "a": "N-muted-forest",
+      "b": "N-upper-ice-fangs",
+      "slots": {
+        "N-muted-forest": "W",
+        "N-upper-ice-fangs": "E"
+      },
+      "note": "unconfirmed on the board map draft"
+    },
+    "N-peaks-of-the-djinn|N-rimeweald": {
+      "a": "N-peaks-of-the-djinn",
+      "b": "N-rimeweald",
+      "slots": {
+        "N-peaks-of-the-djinn": "S",
+        "N-rimeweald": "N"
+      },
+      "note": ""
+    },
+    "N-peaks-of-the-djinn|N-upper-ice-fangs": {
+      "a": "N-peaks-of-the-djinn",
+      "b": "N-upper-ice-fangs",
+      "slots": {
+        "N-peaks-of-the-djinn": "NE",
+        "N-upper-ice-fangs": "SW"
+      },
+      "note": ""
+    },
+    "N-pearl-of-the-north|N-radiant-mountains": {
+      "a": "N-pearl-of-the-north",
+      "b": "N-radiant-mountains",
+      "slots": {
+        "N-pearl-of-the-north": "N",
+        "N-radiant-mountains": "S"
+      },
+      "note": ""
+    },
+    "N-rimeweald|N-the-tundra": {
+      "a": "N-rimeweald",
+      "b": "N-the-tundra",
+      "slots": {
+        "N-rimeweald": "SE",
+        "N-the-tundra": "NW"
+      },
+      "note": ""
+    },
+    "N-tower-scar-desert|N-upper-ice-fangs": {
+      "a": "N-tower-scar-desert",
+      "b": "N-upper-ice-fangs",
+      "slots": {
+        "N-tower-scar-desert": null,
+        "N-upper-ice-fangs": "NE"
+      },
+      "note": ""
+    },
+    "S-archmont|S-azkols-bane": {
+      "a": "S-archmont",
+      "b": "S-azkols-bane",
+      "slots": {
+        "S-archmont": "W",
+        "S-azkols-bane": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-archmont|S-bone-hills": {
+      "a": "S-archmont",
+      "b": "S-bone-hills",
+      "slots": {
+        "S-bone-hills": "NE",
+        "S-archmont": "SW"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "S-archmont|S-sands-of-madness": {
+      "a": "S-archmont",
+      "b": "S-sands-of-madness",
+      "slots": {
+        "S-archmont": "NE",
+        "S-sands-of-madness": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-archmont|S-the-cloister": {
+      "a": "S-archmont",
+      "b": "S-the-cloister",
+      "slots": {
+        "S-archmont": "NW",
+        "S-the-cloister": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-azkols-bane|S-bone-hills": {
+      "a": "S-azkols-bane",
+      "b": "S-bone-hills",
+      "slots": {
+        "S-azkols-bane": "S",
+        "S-bone-hills": "N"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-azkols-bane|S-howling-desert": {
+      "a": "S-azkols-bane",
+      "b": "S-howling-desert",
+      "slots": {
+        "S-azkols-bane": "NW",
+        "S-howling-desert": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-azkols-bane|S-the-cloister": {
+      "a": "S-azkols-bane",
+      "b": "S-the-cloister",
+      "slots": {
+        "S-azkols-bane": "N",
+        "S-the-cloister": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-azkols-bane|S-the-emerald-expanse": {
+      "a": "S-azkols-bane",
+      "b": "S-the-emerald-expanse",
+      "slots": {
+        "S-the-emerald-expanse": "NE",
+        "S-azkols-bane": "SW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-bone-hills|S-southern-wastes": {
+      "a": "S-bone-hills",
+      "b": "S-southern-wastes",
+      "slots": {
+        "S-bone-hills": "E",
+        "S-southern-wastes": "W"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-bone-hills|S-the-emerald-expanse": {
+      "a": "S-bone-hills",
+      "b": "S-the-emerald-expanse",
+      "slots": {
+        "S-the-emerald-expanse": "E",
+        "S-bone-hills": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-howling-desert|S-irontops": {
+      "a": "S-howling-desert",
+      "b": "S-irontops",
+      "slots": {
+        "S-howling-desert": "N",
+        "S-irontops": "SW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-howling-desert|S-mountains-of-the-watchers": {
+      "a": "S-howling-desert",
+      "b": "S-mountains-of-the-watchers",
+      "slots": {
+        "S-mountains-of-the-watchers": "N",
+        "S-howling-desert": null
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-howling-desert|S-the-cloister": {
+      "a": "S-howling-desert",
+      "b": "S-the-cloister",
+      "slots": {
+        "S-howling-desert": "NE",
+        "S-the-cloister": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-howling-desert|S-the-emerald-expanse": {
+      "a": "S-howling-desert",
+      "b": "S-the-emerald-expanse",
+      "slots": {
+        "S-the-emerald-expanse": "N",
+        "S-howling-desert": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-howling-desert|W-idran-forest": {
+      "a": "S-howling-desert",
+      "b": "W-idran-forest",
+      "slots": {
+        "S-howling-desert": "W",
+        "W-idran-forest": "E"
+      },
+      "note": "AI reading 2026-10-27 finds no border"
+    },
+    "S-howling-desert|W-lonelight-hills": {
+      "a": "S-howling-desert",
+      "b": "W-lonelight-hills",
+      "slots": {
+        "S-howling-desert": "NW",
+        "W-lonelight-hills": "SE"
+      },
+      "note": "AI reading 2026-10-27 finds no border"
+    },
+    "S-irontops|S-the-cloister": {
+      "a": "S-irontops",
+      "b": "S-the-cloister",
+      "slots": {
+        "S-irontops": "S",
+        "S-the-cloister": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-irontops|S-the-throne": {
+      "a": "S-irontops",
+      "b": "S-the-throne",
+      "slots": {
+        "S-irontops": "E",
+        "S-the-throne": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-irontops|W-lonelight-hills": {
+      "a": "S-irontops",
+      "b": "W-lonelight-hills",
+      "slots": {
+        "S-irontops": "W",
+        "W-lonelight-hills": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-irontops|W-the-grass-sea": {
+      "a": "S-irontops",
+      "b": "W-the-grass-sea",
+      "slots": {
+        "S-irontops": "NW",
+        "W-the-grass-sea": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees, unsure (corner?)"
+    },
+    "S-little-sister|S-middle-sister": {
+      "a": "S-little-sister",
+      "b": "S-middle-sister",
+      "slots": {
+        "S-little-sister": "E",
+        "S-middle-sister": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-little-sister|S-pine-barrens": {
+      "a": "S-little-sister",
+      "b": "S-pine-barrens",
+      "slots": {
+        "S-little-sister": null,
+        "S-pine-barrens": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "S-little-sister|S-sands-of-madness": {
+      "a": "S-little-sister",
+      "b": "S-sands-of-madness",
+      "slots": {
+        "S-little-sister": "N",
+        "S-sands-of-madness": null
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-little-sister|S-southern-wastes": {
+      "a": "S-little-sister",
+      "b": "S-southern-wastes",
+      "slots": {
+        "S-little-sister": "SW",
+        "S-southern-wastes": "NE"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-little-sister|S-ulamels-hollow": {
+      "a": "S-little-sister",
+      "b": "S-ulamels-hollow",
+      "slots": {
+        "S-little-sister": "S",
+        "S-ulamels-hollow": "N"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-middle-sister|S-pine-barrens": {
+      "a": "S-middle-sister",
+      "b": "S-pine-barrens",
+      "slots": {
+        "S-middle-sister": "S",
+        "S-pine-barrens": "N"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-middle-sister|S-sands-of-madness": {
+      "a": "S-middle-sister",
+      "b": "S-sands-of-madness",
+      "slots": {
+        "S-middle-sister": "N",
+        "S-sands-of-madness": "S"
+      },
+      "note": "AI reading 2026-10-27 finds no border"
+    },
+    "S-mountains-of-the-watchers|S-the-emerald-expanse": {
+      "a": "S-mountains-of-the-watchers",
+      "b": "S-the-emerald-expanse",
+      "slots": {
+        "S-the-emerald-expanse": "NW",
+        "S-mountains-of-the-watchers": "SE"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-mountains-of-the-watchers|W-idran-forest": {
+      "a": "S-mountains-of-the-watchers",
+      "b": "W-idran-forest",
+      "slots": {
+        "S-mountains-of-the-watchers": "NW",
+        "W-idran-forest": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-mountains-of-the-watchers|W-lost-lands": {
+      "a": "S-mountains-of-the-watchers",
+      "b": "W-lost-lands",
+      "slots": {
+        "W-lost-lands": "NE",
+        "S-mountains-of-the-watchers": "SW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-pine-barrens|S-southern-wastes": {
+      "a": "S-pine-barrens",
+      "b": "S-southern-wastes",
+      "slots": {
+        "S-pine-barrens": null,
+        "S-southern-wastes": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "S-pine-barrens|S-ulamels-hollow": {
+      "a": "S-pine-barrens",
+      "b": "S-ulamels-hollow",
+      "slots": {
+        "S-pine-barrens": "W",
+        "S-ulamels-hollow": "E"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-sands-of-madness|S-the-cloister": {
+      "a": "S-sands-of-madness",
+      "b": "S-the-cloister",
+      "slots": {
+        "S-sands-of-madness": "NW",
+        "S-the-cloister": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-sands-of-madness|S-the-throne": {
+      "a": "S-sands-of-madness",
+      "b": "S-the-throne",
+      "slots": {
+        "S-the-throne": "S",
+        "S-sands-of-madness": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "S-southern-wastes|S-ulamels-hollow": {
+      "a": "S-southern-wastes",
+      "b": "S-ulamels-hollow",
+      "slots": {
+        "S-southern-wastes": "E",
+        "S-ulamels-hollow": "W"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "S-the-cloister|S-the-throne": {
+      "a": "S-the-cloister",
+      "b": "S-the-throne",
+      "slots": {
+        "S-the-cloister": "NE",
+        "S-the-throne": "SW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-akartus|W-anza": {
+      "a": "W-akartus",
+      "b": "W-anza",
+      "slots": {
+        "W-akartus": null,
+        "W-anza": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "W-akartus|W-delmsmire": {
+      "a": "W-akartus",
+      "b": "W-delmsmire",
+      "slots": {
+        "W-akartus": "W",
+        "W-delmsmire": "E"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "W-akartus|W-the-empty-glade": {
+      "a": "W-akartus",
+      "b": "W-the-empty-glade",
+      "slots": {
+        "W-the-empty-glade": "S",
+        "W-akartus": "N"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "W-akartus|W-yellowpike": {
+      "a": "W-akartus",
+      "b": "W-yellowpike",
+      "slots": {
+        "W-akartus": "E",
+        "W-yellowpike": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-anza|W-plains-of-woldra": {
+      "a": "W-anza",
+      "b": "W-plains-of-woldra",
+      "slots": {
+        "W-anza": "E",
+        "W-plains-of-woldra": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-anza|W-yellowpike": {
+      "a": "W-anza",
+      "b": "W-yellowpike",
+      "slots": {
+        "W-anza": "W",
+        "W-yellowpike": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-ash-hills|W-cloudhold": {
+      "a": "W-ash-hills",
+      "b": "W-cloudhold",
+      "slots": {
+        "W-ash-hills": "S",
+        "W-cloudhold": "N"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "W-ash-hills|W-hissing-groves": {
+      "a": "W-ash-hills",
+      "b": "W-hissing-groves",
+      "slots": {
+        "W-ash-hills": "SE",
+        "W-hissing-groves": "NW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-ash-hills|W-plains-of-plovo": {
+      "a": "W-ash-hills",
+      "b": "W-plains-of-plovo",
+      "slots": {
+        "W-ash-hills": null,
+        "W-plains-of-plovo": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "W-ash-hills|W-the-empty-glade": {
+      "a": "W-ash-hills",
+      "b": "W-the-empty-glade",
+      "slots": {
+        "W-ash-hills": null,
+        "W-the-empty-glade": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "W-cloudhold|W-delmsmire": {
+      "a": "W-cloudhold",
+      "b": "W-delmsmire",
+      "slots": {
+        "W-delmsmire": "NW",
+        "W-cloudhold": "SE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-cloudhold|W-plains-of-plovo": {
+      "a": "W-cloudhold",
+      "b": "W-plains-of-plovo",
+      "slots": {
+        "W-cloudhold": "S",
+        "W-plains-of-plovo": "N"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "W-cloudhold|W-the-empty-glade": {
+      "a": "W-cloudhold",
+      "b": "W-the-empty-glade",
+      "slots": {
+        "W-the-empty-glade": "W",
+        "W-cloudhold": "E"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-delmsmire|W-plains-of-plovo": {
+      "a": "W-delmsmire",
+      "b": "W-plains-of-plovo",
+      "slots": {
+        "W-plains-of-plovo": "E",
+        "W-delmsmire": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-delmsmire|W-the-empty-glade": {
+      "a": "W-delmsmire",
+      "b": "W-the-empty-glade",
+      "slots": {
+        "W-the-empty-glade": "SW",
+        "W-delmsmire": "NE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-hissing-groves|W-lonelight-hills": {
+      "a": "W-hissing-groves",
+      "b": "W-lonelight-hills",
+      "slots": {
+        "W-hissing-groves": "E",
+        "W-lonelight-hills": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-hissing-groves|W-the-empty-glade": {
+      "a": "W-hissing-groves",
+      "b": "W-the-empty-glade",
+      "slots": {
+        "W-hissing-groves": "S",
+        "W-the-empty-glade": "N"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-hissing-groves|W-the-grass-sea": {
+      "a": "W-hissing-groves",
+      "b": "W-the-grass-sea",
+      "slots": {
+        "W-the-grass-sea": "SW",
+        "W-hissing-groves": "NE"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-idran-forest|W-lonelight-hills": {
+      "a": "W-idran-forest",
+      "b": "W-lonelight-hills",
+      "slots": {
+        "W-lonelight-hills": "S",
+        "W-idran-forest": "N"
+      },
+      "note": ""
+    },
+    "W-idran-forest|W-lost-lands": {
+      "a": "W-idran-forest",
+      "b": "W-lost-lands",
+      "slots": {
+        "W-idran-forest": null,
+        "W-lost-lands": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "W-idran-forest|W-plains-of-woldra": {
+      "a": "W-idran-forest",
+      "b": "W-plains-of-woldra",
+      "slots": {
+        "W-plains-of-woldra": "N",
+        "W-idran-forest": "S"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "W-idran-forest|W-weeping-waters": {
+      "a": "W-idran-forest",
+      "b": "W-weeping-waters",
+      "slots": {
+        "W-weeping-waters": "E",
+        "W-idran-forest": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-lonelight-hills|W-the-grass-sea": {
+      "a": "W-lonelight-hills",
+      "b": "W-the-grass-sea",
+      "slots": {
+        "W-lonelight-hills": "N",
+        "W-the-grass-sea": null
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-lonelight-hills|W-weeping-waters": {
+      "a": "W-lonelight-hills",
+      "b": "W-weeping-waters",
+      "slots": {
+        "W-lonelight-hills": "SW",
+        "W-weeping-waters": "NE"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 finds no border"
+    },
+    "W-lost-lands|W-plains-of-woldra": {
+      "a": "W-lost-lands",
+      "b": "W-plains-of-woldra",
+      "slots": {
+        "W-lost-lands": "N",
+        "W-plains-of-woldra": "S"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-plains-of-woldra|W-weeping-waters": {
+      "a": "W-plains-of-woldra",
+      "b": "W-weeping-waters",
+      "slots": {
+        "W-plains-of-woldra": null,
+        "W-weeping-waters": null
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees, unsure (corner?)"
+    },
+    "W-the-empty-glade|W-weeping-waters": {
+      "a": "W-the-empty-glade",
+      "b": "W-weeping-waters",
+      "slots": {
+        "W-the-empty-glade": "E",
+        "W-weeping-waters": "W"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-the-empty-glade|W-yellowpike": {
+      "a": "W-the-empty-glade",
+      "b": "W-yellowpike",
+      "slots": {
+        "W-the-empty-glade": "SE",
+        "W-yellowpike": "NW"
+      },
+      "note": "AI reading 2026-10-27 agrees"
+    },
+    "W-weeping-waters|W-yellowpike": {
+      "a": "W-weeping-waters",
+      "b": "W-yellowpike",
+      "slots": {
+        "W-weeping-waters": "SW",
+        "W-yellowpike": "NE"
+      },
+      "note": "unconfirmed on the board map draft; AI reading 2026-10-27 agrees"
+    },
+    "N-fivepint|N-greenbridge": {
+      "a": "N-fivepint",
+      "b": "N-greenbridge",
+      "slots": {
+        "N-fivepint": "N",
+        "N-greenbridge": "S"
+      },
+      "note": ""
+    },
+    "N-fivepint|N-radiant-mountains": {
+      "a": "N-fivepint",
+      "b": "N-radiant-mountains",
+      "slots": {
+        "N-fivepint": "NE",
+        "N-radiant-mountains": "SW"
+      },
+      "note": ""
+    },
+    "E-outer-kinghills|N-rimeweald": {
+      "a": "E-outer-kinghills",
+      "b": "N-rimeweald",
+      "slots": {
+        "E-outer-kinghills": "NE",
+        "N-rimeweald": "SW"
+      },
+      "note": ""
+    },
+    "E-inner-kinghills|N-rimeweald": {
+      "a": "E-inner-kinghills",
+      "b": "N-rimeweald",
+      "slots": {
+        "E-inner-kinghills": "E",
+        "N-rimeweald": "W"
+      },
+      "note": ""
+    },
+    "N-lower-ice-fangs|N-pearl-of-the-north": {
+      "a": "N-lower-ice-fangs",
+      "b": "N-pearl-of-the-north",
+      "slots": {
+        "N-lower-ice-fangs": null,
+        "N-pearl-of-the-north": null
+      },
+      "note": ""
+    },
+    "E-bleak-wastes|N-upper-ice-fangs": {
+      "a": "E-bleak-wastes",
+      "b": "N-upper-ice-fangs",
+      "slots": {
+        "E-bleak-wastes": "E",
+        "N-upper-ice-fangs": "W"
+      },
+      "note": ""
+    },
+    "E-dragontooth-lake|N-peaks-of-the-djinn": {
+      "a": "E-dragontooth-lake",
+      "b": "N-peaks-of-the-djinn",
+      "slots": {
+        "E-dragontooth-lake": "E",
+        "N-peaks-of-the-djinn": "W"
+      },
+      "note": ""
+    },
+    "N-muted-forest|W-ash-hills": {
+      "a": "N-muted-forest",
+      "b": "W-ash-hills",
+      "slots": {
+        "N-muted-forest": "E",
+        "W-ash-hills": "W"
+      },
+      "note": ""
+    },
+    "N-tower-scar-desert|W-the-grass-sea": {
+      "a": "N-tower-scar-desert",
+      "b": "W-the-grass-sea",
+      "slots": {
+        "W-the-grass-sea": "NW",
+        "N-tower-scar-desert": "SE"
+      },
+      "note": ""
+    },
+    "E-bleak-wastes|N-tower-scar-desert": {
+      "a": "E-bleak-wastes",
+      "b": "N-tower-scar-desert",
+      "slots": {
+        "E-bleak-wastes": "NE",
+        "N-tower-scar-desert": "SW"
+      },
+      "note": ""
+    },
+    "N-tower-scar-desert|W-ash-hills": {
+      "a": "N-tower-scar-desert",
+      "b": "W-ash-hills",
+      "slots": {
+        "N-tower-scar-desert": null,
+        "W-ash-hills": "NW"
+      },
+      "note": ""
+    },
+    "N-broken-lands|N-lodestone-mountains": {
+      "a": "N-broken-lands",
+      "b": "N-lodestone-mountains",
+      "slots": {
+        "N-broken-lands": "S",
+        "N-lodestone-mountains": "N"
+      },
+      "note": ""
+    },
+    "N-lodestone-mountains|W-plains-of-plovo": {
+      "a": "N-lodestone-mountains",
+      "b": "W-plains-of-plovo",
+      "slots": {
+        "N-lodestone-mountains": "E",
+        "W-plains-of-plovo": "W"
+      },
+      "note": ""
+    },
+    "N-broken-lands|W-plains-of-plovo": {
+      "a": "N-broken-lands",
+      "b": "W-plains-of-plovo",
+      "slots": {
+        "N-broken-lands": "SE",
+        "W-plains-of-plovo": "NW"
+      },
+      "note": ""
+    },
+    "N-broken-lands|W-cloudhold": {
+      "a": "N-broken-lands",
+      "b": "W-cloudhold",
+      "slots": {
+        "N-broken-lands": "E",
+        "W-cloudhold": "W"
+      },
+      "note": ""
+    },
+    "E-three-rivers|S-middle-sister": {
+      "a": "E-three-rivers",
+      "b": "S-middle-sister",
+      "slots": {
+        "E-three-rivers": "NW",
+        "S-middle-sister": "SE"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed, across river"
+    },
+    "E-three-rivers|S-pine-barrens": {
+      "a": "E-three-rivers",
+      "b": "S-pine-barrens",
+      "slots": {
+        "E-three-rivers": "W",
+        "S-pine-barrens": "E"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed, across river"
+    },
+    "E-duwani|E-lesser-tombstones": {
+      "a": "E-duwani",
+      "b": "E-lesser-tombstones",
+      "slots": {
+        "E-duwani": null,
+        "E-lesser-tombstones": null
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "E-lesser-tombstones|S-middle-sister": {
+      "a": "E-lesser-tombstones",
+      "b": "S-middle-sister",
+      "slots": {
+        "E-lesser-tombstones": "W",
+        "S-middle-sister": "E"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed, corner or short border?, across river"
+    },
+    "E-forest-of-shades|S-sands-of-madness": {
+      "a": "E-forest-of-shades",
+      "b": "S-sands-of-madness",
+      "slots": {
+        "E-forest-of-shades": null,
+        "S-sands-of-madness": null
+      },
+      "note": "AI reading 2026-10-27, unconfirmed, corner or short border?, across river"
+    },
+    "S-archmont|S-southern-wastes": {
+      "a": "S-archmont",
+      "b": "S-southern-wastes",
+      "slots": {
+        "S-archmont": "SE",
+        "S-southern-wastes": "NW"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "S-azkols-bane|S-southern-wastes": {
+      "a": "S-azkols-bane",
+      "b": "S-southern-wastes",
+      "slots": {
+        "S-azkols-bane": null,
+        "S-southern-wastes": null
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "S-middle-sister|S-ulamels-hollow": {
+      "a": "S-middle-sister",
+      "b": "S-ulamels-hollow",
+      "slots": {
+        "S-middle-sister": "SW",
+        "S-ulamels-hollow": "NE"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "S-archmont|S-little-sister": {
+      "a": "S-archmont",
+      "b": "S-little-sister",
+      "slots": {
+        "S-archmont": "E",
+        "S-little-sister": "W"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "S-mountains-of-the-watchers|W-lonelight-hills": {
+      "a": "S-mountains-of-the-watchers",
+      "b": "W-lonelight-hills",
+      "slots": {
+        "S-mountains-of-the-watchers": null,
+        "W-lonelight-hills": null
+      },
+      "note": "AI reading 2026-10-27, unconfirmed, corner or short border?"
+    },
+    "W-anza|W-weeping-waters": {
+      "a": "W-anza",
+      "b": "W-weeping-waters",
+      "slots": {
+        "W-anza": "N",
+        "W-weeping-waters": "S"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "W-hissing-groves|W-weeping-waters": {
+      "a": "W-hissing-groves",
+      "b": "W-weeping-waters",
+      "slots": {
+        "W-hissing-groves": "SE",
+        "W-weeping-waters": "NW"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "W-cloudhold|W-hissing-groves": {
+      "a": "W-cloudhold",
+      "b": "W-hissing-groves",
+      "slots": {
+        "W-hissing-groves": "SW",
+        "W-cloudhold": "NE"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "W-ash-hills|W-the-grass-sea": {
+      "a": "W-ash-hills",
+      "b": "W-the-grass-sea",
+      "slots": {
+        "W-ash-hills": "E",
+        "W-the-grass-sea": "W"
+      },
+      "note": "AI reading 2026-10-27, unconfirmed"
+    },
+    "S-mountains-of-the-watchers|W-plains-of-woldra": {
+      "a": "S-mountains-of-the-watchers",
+      "b": "W-plains-of-woldra",
+      "slots": {
+        "S-mountains-of-the-watchers": "W",
+        "W-plains-of-woldra": "E"
+      },
+      "note": ""
+    },
+    "S-the-emerald-expanse|W-lost-lands": {
+      "a": "S-the-emerald-expanse",
+      "b": "W-lost-lands",
+      "slots": {
+        "S-the-emerald-expanse": "W",
+        "W-lost-lands": "E"
+      },
+      "note": ""
+    },
+    "W-anza|W-idran-forest": {
+      "a": "W-anza",
+      "b": "W-idran-forest",
+      "slots": {
+        "W-anza": "NE",
+        "W-idran-forest": "SW"
+      },
+      "note": ""
+    }
+  }
+}
