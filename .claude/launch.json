@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "game-workbench",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "apps/game-workbench", "dev"],
+      "port": 4797
+    }
+  ]
+}
