@@ -1,9 +1,10 @@
-// Local-only server for the board map entry tool. Serves the page and keeps a working draft
-// in data/draft.json. Export writes the game's board file into the base pack (DEC-240) and
-// only when every check passes.
+// Local-only server for the board map entry tool. Serves the page and saves the board map on
+// every change to ~/Desktop/board-map.json (DATA_FILE moves it). That file is the tool's output.
 
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { copyFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
+import { homedir } from "node:os";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -12,8 +13,6 @@ import {
   BUILDING_TYPES,
   buildingOf,
   checkDraft,
-  emptyDraft,
-  exportBoard,
   firstOpenSlot,
   isCompleted,
   neighboursOf,
@@ -35,11 +34,22 @@ import { startingDraft } from "./seed.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const appDir = join(here, "..");
-const repoRoot = join(appDir, "..", "..");
 const spaces = JSON.parse(await readFile(join(here, "spaces.json"), "utf8")).spaces;
-const draftPath = join(appDir, "data", "draft.json");
-const exportPath = join(repoRoot, "packs-v2", "base", "board-map.json");
+const draftPath = process.env.DATA_FILE || join(homedir(), "Desktop", "board-map.json");
+// Where the draft lived before it moved to the Desktop. Copied, never moved, so nothing is lost.
+const oldDraftPath = join(appDir, "data", "draft.json");
 const port = Number(process.env.PORT ?? 4790);
+
+if (!process.env.DATA_FILE) {
+  try {
+    await mkdir(dirname(draftPath), { recursive: true });
+    await copyFile(oldDraftPath, draftPath, constants.COPYFILE_EXCL);
+    console.log(`Copied the draft from ${oldDraftPath} to ${draftPath}.`);
+  } catch (err) {
+    // No old draft, or the Desktop file is already there: nothing to copy.
+    if (err.code !== "ENOENT" && err.code !== "EEXIST") throw err;
+  }
+}
 
 // Loading never stops the tool. Bad entries are dropped and listed (and logged); a file that is
 // not JSON is moved aside, never overwritten, and the tool starts from the board map.
@@ -52,7 +62,7 @@ try {
     draft = parsed.draft;
     loadProblems.push(...parsed.problems);
   } else {
-    const aside = join(appDir, "data", `draft.broken-${Date.now()}.json`);
+    const aside = draftPath.replace(/(\.json)?$/, `.broken-${Date.now()}.json`);
     await rename(draftPath, aside);
     loadProblems.push(
       `${parsed.problems.join("; ")}. The file was moved to ${aside}; starting from the board map.`,
@@ -77,6 +87,7 @@ async function save() {
 
 function state() {
   return {
+    file: draftPath,
     problems: loadProblems,
     spaces: spaces.map((s) => ({
       ...s,
@@ -141,17 +152,6 @@ async function route(req, res) {
       return send(res, 409, { error: err.message, ...state() });
     }
   }
-  if (req.method === "POST" && url.pathname === "/api/export") {
-    const result = checkDraft(draft, spaces);
-    if (!result.complete)
-      return send(res, 409, {
-        error: "The check still has errors, so nothing was exported.",
-        ...state(),
-      });
-    await mkdir(dirname(exportPath), { recursive: true });
-    await writeFile(exportPath, `${JSON.stringify(exportBoard(draft, spaces), null, 2)}\n`);
-    return send(res, 200, { exported: exportPath, ...state() });
-  }
   if (req.method === "GET") {
     const file = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
     const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
@@ -178,4 +178,5 @@ createServer((req, res) => {
   });
 }).listen(port, "127.0.0.1", () => {
   console.log(`Board map entry tool at http://127.0.0.1:${port}`);
+  console.log(`Saving to ${draftPath}`);
 });

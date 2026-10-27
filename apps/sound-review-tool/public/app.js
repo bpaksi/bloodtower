@@ -269,25 +269,6 @@ async function save(change) {
   }
 }
 
-$("export").addEventListener("click", async () => {
-  try {
-    const result = await call("POST", "/api/export");
-    const toast = $("toast");
-    toast.style.color = "var(--good)";
-    toast.style.borderColor = "var(--good)";
-    toast.textContent = `Exported ${result.count} sounds to ${result.exported}`;
-    toast.style.display = "block";
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      toast.style.display = "none";
-      toast.style.color = "";
-      toast.style.borderColor = "";
-    }, 5000);
-  } catch (error) {
-    showError(problemOf(error));
-  }
-});
-
 $("search").addEventListener("input", () => render());
 $("unreviewed").addEventListener("change", () => {
   current = undefined;
@@ -299,10 +280,28 @@ function apply(next) {
   render();
 }
 
+/** What was wrong with the saved file when the tool started; the server has logged each one. */
+function renderLoadProblems() {
+  const box = $("load-problems");
+  const problems = state.problems ?? [];
+  box.hidden = problems.length === 0;
+  if (box.childElementCount === problems.length) return;
+  box.replaceChildren(
+    ...problems.map((problem) => {
+      const p = document.createElement("p");
+      p.className = "problem";
+      p.textContent = `Loaded with a problem: ${problem}`;
+      return p;
+    }),
+  );
+}
+
 function render() {
   if (!state) return;
+  renderLoadProblems();
   renderTower();
   renderSounds();
+  $("file").textContent = state.file;
   $("progress").textContent = `${state.reviewed} of ${state.total} reviewed`;
   $("meter").style.width = `${(100 * state.reviewed) / state.total}%`;
 }

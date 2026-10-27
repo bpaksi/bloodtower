@@ -20,8 +20,8 @@ beforeEach(async () => {
   server = await startServer({
     tower,
     draft: emptyDraft(),
+    loadProblems: ["sound 999 was dropped"],
     draftPath: join(dir, "data", "sounds.json"),
-    exportPath: join(dir, "out", "sound-feel.json"),
     publicDir: join(import.meta.dirname, "..", "public"),
     port: 0,
     now: () => 1_000,
@@ -124,7 +124,14 @@ describe("sound review server", () => {
     expect(refused.body.error.code).toBe("cannot-calibrate");
   });
 
-  it("saves each change to the draft and exports the reviewed sounds", async () => {
+  it("says where it saves and what was wrong when it loaded", async () => {
+    const res = await fetch(`${base}/api/state`);
+    const state = (await res.json()) as { file: string; problems: string[] };
+    expect(state.file).toBe(join(dir, "data", "sounds.json"));
+    expect(state.problems).toEqual(["sound 999 was dropped"]);
+  });
+
+  it("saves each change to the data file, which is the output", async () => {
     await post("/api/sound", { index: 3, soundsLike: "creature, magical", tone: "bad" });
     const saved = await post("/api/sound", { index: 3, lengthMs: 4905 });
     expect(saved.body.reviewed).toBe(1);
@@ -137,15 +144,7 @@ describe("sound review server", () => {
       updatedAt: 1_000,
     });
 
-    const exported = await post("/api/export");
-    expect(exported.body.count).toBe(1);
-    const file = JSON.parse(await readFile(join(dir, "out", "sound-feel.json"), "utf8"));
-    expect(file).toEqual({
-      version: 2,
-      sounds: [
-        { id: "SND-003", index: 3, soundsLike: "creature, magical", tone: "bad", lengthMs: 4905 },
-      ],
-    });
+    expect((await post("/api/export")).status).toBe(405);
   });
 
   it("refuses a bad change with its code and saves nothing", async () => {

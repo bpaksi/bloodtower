@@ -58,9 +58,9 @@
 <header>
   <h1>Sound review</h1>
   <div class="row"><div class="meter"><span id="meter" style="width:0"></span></div><span id="progress" class="muted">…</span></div>
-  <button id="export" type="button">Export</button>
 </header>
 <main>
+  <div id="load-problems" role="alert" hidden></div>
   <section class="card" aria-labelledby="tower-title">
     <p class="step">Step 1</p>
     <h2 id="tower-title">Tower</h2>
@@ -77,7 +77,7 @@
   <section class="card" aria-labelledby="sounds-title">
     <p class="step">Step 2</p>
     <h2 id="sounds-title">Sounds</h2>
-    <p class="muted">Press Play, then Stopped when the sound ends. Say what it sounds like and pick a tone. Each change is saved at once.</p>
+    <p class="muted">Press Play, then Stopped when the sound ends. Say what it sounds like and pick a tone. Each change is saved at once to <code id="file">…</code>.</p>
     <div class="filters">
       <input id="search" type="search" placeholder="Find a sound by number, name or category" aria-label="Find a sound">
       <label><input id="unreviewed" type="checkbox"> Only not reviewed</label>

@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Purpose | Enter each space's neighbours, compass slots, terrain and region, and export the board map JSON the game reads |
+| Purpose | Enter each space's neighbours, compass slots, terrain and region, saved as the board map JSON the game reads |
 | Phase | Build |
 | SDLC tier | Experiment |
 | Status | Built; awaiting Bob's use and review |
-| Disposable? | Yes. The exported JSON is kept; the tool is not |
+| Disposable? | Yes. The data file is kept; the tool is not |
 
 Intent: [intent/0001-board-map-tool.md](intent/0001-board-map-tool.md). Design: research/game-design cards DEC-234 to DEC-244, Q-147 (region names), IDEA-032.
 
@@ -21,8 +21,9 @@ pnpm dev
 
 Open http://127.0.0.1:4790. The server listens on 127.0.0.1 only.
 
-- **Draft:** every change is saved at once to `data/draft.json` (not in the export).
-- **Export:** writes `packs-v2/base/board-map.json` at the repo root, and only when the checks show no errors (DEC-240).
+- **Data file:** every change is saved at once to `~/Desktop/board-map.json`. That file is the output; there is no export. `DATA_FILE=<path>` saves somewhere else.
+- **Moving from the old place:** with no Desktop file yet, the tool copies the old `data/draft.json` there on start. The old file is left as it was.
+- **Bad data:** entries the tool cannot use are dropped and listed on the page. A file that is not JSON is moved aside next to it (`board-map.broken-<time>.json`) and the tool starts from the board map.
 
 ## Data
 
@@ -35,11 +36,11 @@ Open http://127.0.0.1:4790. The server listens on 127.0.0.1 only.
 
 ## Checks
 
-Errors block the export: a space with no region, a space with no neighbours, a slot used twice on one space. A region with no spaces is a warning.
+Errors: a space with no region, a space with no neighbours, a slot used twice on one space. A region with no spaces is a warning. Neither stops a save.
 
 ## Commands
 
 - `pnpm install`: install (the app has no dependencies; it has its own lockfile).
 - `pnpm dev` or `pnpm start`: run the tool at http://127.0.0.1:4790.
 - `pnpm test`: the model tests (`src/model.test.mjs`). `pnpm build` runs the same tests.
-- `pnpm seed`: write `data/draft.json` from the board map, if there is no draft yet.
+- `pnpm seed`: write `~/Desktop/board-map.json` (or `DATA_FILE`) from the board map, if there is none yet.

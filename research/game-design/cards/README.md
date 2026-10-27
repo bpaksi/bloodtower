@@ -87,7 +87,7 @@ Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or
 
 ## Sound feel
 
-A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it in the sound review tool (`apps/sound-review-tool`), whose Export writes `research/game-design/sound-feel.json`; Claude copies each sound into its card. The `/sounds` page in the workbench lists them and filters by tone.
+A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it in the sound review tool (`apps/sound-review-tool`), which saves to `~/Desktop/sound-feel.json` as he goes; Claude copies each sound into its card from that file. The `/sounds` page in the workbench lists them and filters by tone.
 
 ```yaml
 feel:

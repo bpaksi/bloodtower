@@ -20,7 +20,7 @@ export interface SoundRecord {
   updatedAt: number;
 }
 
-/** The saved draft, `data/sounds.json`. Keys are sound indexes as strings. */
+/** The saved draft, `~/Desktop/sound-feel.json`. Keys are sound indexes as strings. */
 export interface Draft {
   version: 1;
   sounds: Record<string, SoundRecord>;
@@ -103,36 +103,68 @@ export const applyChange = (
   return record;
 };
 
+/**
+ * Reads a saved draft without ever stopping the tool. Bad entries and fields are dropped and listed
+ * in `problems`; a file that is not a JSON object gives no draft at all.
+ */
+export const parseDraft = (
+  text: string,
+  soundCount: number,
+): { draft: Draft | null; problems: string[] } => {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch (error) {
+    return { draft: null, problems: [`the draft is not valid JSON (${(error as Error).message})`] };
+  }
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return { draft: null, problems: ["the draft is not an object"] };
+  }
+  const problems: string[] = [];
+  const draft = emptyDraft();
+  const sounds = (raw as { sounds?: unknown }).sounds;
+  if (sounds === undefined || sounds === null) return { draft, problems };
+  if (typeof sounds !== "object" || Array.isArray(sounds)) {
+    return { draft, problems: ["sounds is not an object; it was ignored"] };
+  }
+  for (const [key, value] of Object.entries(sounds)) {
+    const index = Number(key);
+    const entry = value as Partial<Record<keyof SoundRecord, unknown>> | null;
+    if (!Number.isInteger(index) || index < 1 || index > soundCount || String(index) !== key) {
+      problems.push(`there is no sound ${key}; its entry was dropped`);
+      continue;
+    }
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
+      problems.push(`sound ${key} is not an object; it was dropped`);
+      continue;
+    }
+    const updatedAt = Number.isFinite(entry.updatedAt) ? (entry.updatedAt as number) : 0;
+    if (updatedAt === 0) problems.push(`sound ${key} has no time it was changed; set to 0`);
+    const record: SoundRecord = { index, updatedAt };
+    if (entry.soundsLike !== undefined) {
+      const words = typeof entry.soundsLike === "string" ? entry.soundsLike.trim() : "";
+      if (words !== "" && words.length <= SOUNDS_LIKE_MAX) record.soundsLike = words;
+      else problems.push(`sounds like for sound ${key} is not usable text; dropped`);
+    }
+    if (entry.tone !== undefined) {
+      if (isTone(entry.tone)) record.tone = entry.tone;
+      else problems.push(`tone ${JSON.stringify(entry.tone)} for sound ${key} is unknown; dropped`);
+    }
+    if (entry.lengthMs !== undefined) {
+      const ms = entry.lengthMs;
+      if (Number.isInteger(ms) && (ms as number) >= 1 && (ms as number) <= LENGTH_MAX_MS) {
+        record.lengthMs = ms as number;
+      } else problems.push(`length ${JSON.stringify(ms)} for sound ${key} is not usable; dropped`);
+    }
+    if (isReviewed(record)) draft.sounds[key] = record;
+  }
+  return { draft, problems };
+};
+
 /** Whether anything is recorded for the sound. */
 export const isReviewed = (record: SoundRecord | undefined) =>
   record !== undefined &&
   (record.soundsLike !== undefined || record.tone !== undefined || record.lengthMs !== undefined);
-
-/** The game design's card ID for a tower sound: `SND-` and the index in three digits. */
-export const soundCardId = (index: number) => `SND-${String(index).padStart(3, "0")}`;
-
-export interface ExportEntry {
-  id: string;
-  index: number;
-  soundsLike?: string;
-  tone?: Tone;
-  lengthMs?: number;
-}
-
-/** `research/game-design/sound-feel.json`: every sound with something recorded, by index. */
-export const exportSounds = (draft: Draft): { version: 2; sounds: ExportEntry[] } => ({
-  version: 2,
-  sounds: Object.values(draft.sounds)
-    .filter(isReviewed)
-    .sort((a, b) => a.index - b.index)
-    .map((record) => {
-      const entry: ExportEntry = { id: soundCardId(record.index), index: record.index };
-      if (record.soundsLike !== undefined) entry.soundsLike = record.soundsLike;
-      if (record.tone !== undefined) entry.tone = record.tone;
-      if (record.lengthMs !== undefined) entry.lengthMs = record.lengthMs;
-      return entry;
-    }),
-});
 
 /** One row of tower-poc's old `sound_feel` table. */
 export interface OldFeelRow {
