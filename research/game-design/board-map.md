@@ -1,6 +1,6 @@
 # Board map (DEC-221 draft)
 
-**Status:** draft, checked with Bob in session 2026-10-23 (not yet signed off)  
+**Status:** draft, checked with Bob in session 2026-10-23. On 2026-10-27 Bob marked all 60 spaces complete in the board map entry tool. The neighbour data in that file ([board-map-2026-10-27.json](board-map-2026-10-27.json)) now replaces the adjacency tables below; see [Board map file, complete](#board-map-file-complete-2026-10-27). The game does not read it yet  
 **Source photo:** `photos/board-top-down.webp` in Bob's backup folder (Bob’s top-down photo of the physical RtDT board; copyrighted, not in the repo, see [the RtDT README](../return-to-dark-tower/README.md#copyrighted-material-not-in-the-repo))  
 **Cards:** DEC-221 (this graph), DEC-225 (printed name + `kingdom+slug` ID), DEC-226 (N Arisilon, E Brynthia, S Durnin, W Zenon), AST-B01 (4×15, 6 terrains), AREA-077  
 **Accuracy:** drafted from the photo and checked by Bob in session against the physical board (2026-10-23). Still open: river contacts, the adjacency edges still marked `?`, and the items under **Still open** below. Do not treat this as final until Bob signs it off.
@@ -392,3 +392,52 @@ Bob passed on an AI reading of the board: a composite image of the whole board p
 | N–W | Muted Forest – Ash Hills; Broken Lands – Cloudhold; Lodestone Mountains – Plains of Plovo; Broken Lands – Plains of Plovo ~ |
 | E–S | Three Rivers – Pine Barrens; Three Rivers – Middle Sister; Lesser Tombstones – Middle Sister ~; Big Sister – Middle Sister; Big Sister – Sands of Madness; Big Sister – The Throne ~; Forest of Shades – Sands of Madness ~; Forest of Shades – The Throne |
 | S–W | The Emerald Expanse – Mountains of the Watchers; Howling Desert – Mountains of the Watchers; Lonelight Hills – Idran Forest; Lonelight Hills – Hissing Groves; Lonelight Hills – The Grass Sea; Irontops – The Grass Sea ~ |
+
+---
+
+## Board map file, complete (2026-10-27)
+
+On 2026-10-27 Bob finished the board map entry tool pass and marked all 60 spaces complete. A snapshot of the tool's file (`~/Desktop/board-map.json`) is saved here as [board-map-2026-10-27.json](board-map-2026-10-27.json). For neighbours, compass slots, the tower ring and regions, it replaces the adjacency tables above. Spaces, names, terrain and buildings still come from the tables above, through the tool's `apps/board-map-tool/src/spaces.json`. The file sets no terrain or building of its own.
+
+**Format.** The file holds one edge per pair of spaces, keyed `a|b`. Each side has its own compass slot or `null` (the list under the cross), plus a free-text note. The cross is **tower-relative**: N on every space points at the tower, so a slot is not a board direction. `objects` puts the tower on N for the tower-ring spaces. `regionOf` maps a space to a `REG-` region.
+
+### Review
+
+| Check | Result |
+|---|---|
+| Spaces complete | 60 of 60 |
+| Tool checks | No slot used twice, no unknown entries. The only errors are the 52 spaces with no region |
+| Pairs | 165, of which 34 cross a kingdom border. Each space has 3 to 8 neighbours, and every space can reach every other |
+| Slots placed | 295 of 330 sides. Fifteen pairs have no slot on either side and 5 have one side only, so 35 sides sit in the list under the cross |
+| Tower ring | Tower Scar Desert, Forest of Shades, Bleak Wastes, Irontops, The Throne, The Grass Sea (as checked 2026-10-23) |
+| Regions | Longwater (Dayside, Fivepint), The Great Woods (Delmsmire, Akartus, Yellowpike), Regal Run (The Throne, The Cloister, Archmont). The file spells the first one `Long Water` |
+| After the AI merge | Bob added 3 pairs that neither the draft nor the AI had: S Mountains of the Watchers – W Plains of Woldra, S The Emerald Expanse – W Lost Lands, W Anza – W Idran Forest. He removed none. He moved the slots on 83 of the 162 pairs already there, so the AI's slot guesses were reworked before the spaces were completed. He also kept all 13 draft pairs the AI did not find, which overrules the AI reading on those |
+
+**Still open in the data.**
+
+- **Regions for 52 spaces.** DEC-242 says every space is in exactly one region, but only 8 spaces have one. Either more regions are needed, or the rule changes so a space may have no region.
+- **Stale notes.** 52 notes still say "unconfirmed" or quote the AI reading, although every space is now complete. Clear them, or treat them as history, before the game shows notes.
+- **No river field.** Which pairs cross a river is only in the free-text notes and the AI list above. If the game needs rivers, they need a field.
+- **Unplaced sides.** The 35 sides in the list under the cross are valid (DEC-235). The game fills each one into the first open slot clockwise from N (`slottedNeighborsOf`).
+- **Non-opposite sides.** On 6 pairs the two sides are not opposite points (for example Dragontooth Lake SW / The Decaying Wilds N). In a tower-relative cross that can be right, but Bob should confirm it.
+
+### How the game gets the board
+
+The game does **not** read this file yet. It reads the **old draft**, `packs/base/board/spaces.json`, in two ways:
+
+| Path | Code | When it reads |
+|---|---|---|
+| Base pack (`base_pack: base`) | `apps/bloodtower/src/engine/loops/session/playContent.ts` imports `packs/base/board/spaces.json` as a JSON module | At build: the board is compiled into the bundle, so in effect it is hard-coded until the next build |
+| Any other base pack | `apps/bloodtower/src/server/core/loadStories.ts` (`playContentFor`) reads `<packs>/<base_pack>/board/spaces.json` | At server start. If the read fails, the `catch` returns `null` without logging, which breaks the never-hide-errors rule |
+| Pack checks | `apps/bloodtower/src/server/pack/v2/load.ts` loads the same file into the pack's `board`, and `protocols/pack-v2/base.ts` validates it | At pack load |
+
+The old file differs from the finished map:
+
+- It has 73 adjacency pairs (`adjacent` lists) against the map's 165.
+- It has no compass slots. The schema accepts a `neighbours: [{to, slot}]` list, and the game's `buildBoardGraph` / `slottedNeighborsOf` already prefer it, but no space in the file has one.
+- It lists 9 tower-adjacent spaces, against 6 in the map.
+- It has 2 river crossings and no regions.
+- It uses the ID `N-fivepoint`, while the map uses `N-fivepint` (the spelling Bob confirmed).
+- Terrain and building values are lowercase (`grasslands`, `village`).
+
+**To deliver it.** DEC-240 says the tool writes its JSON into the base pack, which the game reads at build. That needs one step that does not exist yet: turn the tool's edges into `packs/base/board/spaces.json`. That means, for each space, a `neighbours` list with slots, `tower_adjacent` from the tower objects, regions as `region_labels`, and terrain and building from the tool's spaces. Then rebuild. The base pack path imports the file, so a change takes a rebuild to show. Fixing the silent `catch` in `playContentFor` belongs in the same change.
