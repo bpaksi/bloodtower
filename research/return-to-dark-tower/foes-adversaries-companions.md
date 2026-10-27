@@ -79,7 +79,7 @@ Bob's three lists match the card images except in two places, and the card wins:
 
 ## Notes for Bloodtower
 
-- **DEC-325 counts Brigands and the Dragon twice.** It adds the 1981 Brigands and Dragon to RtDT's 12 types, but RtDT's 12 already include both (Brigands at level 2, Dragon at level 4). Either the "plus" is only the 1981 names and sounds on RtDT's cards, or the engine has 12 types, not 14. Bob to rule.
+- **12 foe types, not 14 (DEC-369).** DEC-325 had added the 1981 Brigands and Dragon to RtDT's 12, but RtDT's 12 already include both (Brigands at level 2, Dragon at level 4). Bob ruled that the engine has the 12, and 1981 lends Brigands and the Dragon only their names and sounds.
 - **One ability per foe type (DEC-311)** fits RtDT's event line: each foe card already has exactly one event.
 - **Trait effects run on dropped systems.** Losing gear, potions, spirit or warriors, and the Tower manipulation, need the same translation as the items in [item-fit.md](../game-design/item-fit.md): warriors become hit points and spirit becomes money.
 - **Companions hold like items.** A companion is a card a hero keeps, with Advantages and an ability, so it could follow the same physical-card behaviour as the items.
