@@ -8,6 +8,7 @@ links:
   - { rel: affects, to: MEC-067, note: "one avatar per speaker becomes one per mood" }
   - { rel: affects, to: DEC-334, note: "pool faces need the moods too" }
   - { rel: affects, to: DEC-336, note: "the face node picks a person; the line picks the mood" }
+  - { rel: affects, to: DEC-341, note: "came up while sizing the pool; every pool face needs each mood" }
   - { rel: raises, to: Q-239 }
   - { rel: part-of, to: AREA-083 }
 ---
