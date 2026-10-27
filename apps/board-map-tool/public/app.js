@@ -380,7 +380,15 @@ function renderEditor(s) {
   return box;
 }
 
-function renderPicker(s) {
+// Add a neighbour lives in the toolbar. A new neighbour always goes under the cross ("Not on a
+// slot"), and Bob drags it to its slot from there.
+function renderPicker() {
+  const box = $("addNeighbour");
+  const s = state.selected && spaceById(state.selected);
+  box.replaceChildren(el("p", { class: "section-title" }, "Add a neighbour"));
+  if (!s) return box.append(el("p", { class: "muted" }, "Pick a space first."));
+  if (s.completed)
+    return box.append(el("p", { class: "muted" }, `${s.name} is completed. Reopen it to add one.`));
   const input = el("input", {
     id: "neighbourFind",
     placeholder: "Type a space name, e.g. howl",
@@ -395,19 +403,18 @@ function renderPicker(s) {
   });
   const results = el("div", { id: "results", class: "results" });
   const picker = el("div", { class: "picker" }, input, results);
+  // Keep typing in the picker after a render, but never take focus from another field.
+  const refocus = document.activeElement === document.body;
   queueMicrotask(() => {
-    input.focus();
+    if (refocus) input.focus();
     updateResults(s);
   });
-  return el(
-    "div",
-    { class: "stack" },
-    el("h2", {}, "Add a neighbour"),
-    picker,
+  box.append(
     el(
       "div",
-      { class: "row" },
-      el("label", { class: "stack" }, "Slot", slotSelect()),
+      { class: "stack" },
+      el("p", { class: "muted", style: "margin: 0" }, `To ${s.name}`),
+      picker,
       el(
         "button",
         { type: "button", class: "primary", onclick: () => addPicked(s) },
@@ -415,17 +422,6 @@ function renderPicker(s) {
       ),
     ),
   );
-}
-
-function slotSelect() {
-  const sel = el(
-    "select",
-    { id: "slotPick" },
-    el("option", { value: "auto" }, "first open slot"),
-    el("option", { value: "" }, "under the cross"),
-  );
-  for (const k of state.data.slots) sel.append(el("option", { value: k }, k));
-  return sel;
 }
 
 function filteredSpaces(s) {
@@ -488,12 +484,10 @@ function pick(x) {
 
 function addPicked(s) {
   if (!state.picked) return message("Type and pick a space first", true);
-  const choice = $("slotPick").value;
-  const slot = choice === "" ? null : choice;
   const to = state.picked.id;
   state.picked = null;
   state.query = "";
-  post("/api/edge", { from: s.id, to, slot, note: "", replace: slot !== null });
+  post("/api/edge", { from: s.id, to, slot: null, note: "" });
 }
 
 function renderDetail() {
@@ -535,16 +529,23 @@ function renderDetail() {
     ),
   );
 
-  wrap.append(
-    el("h1", { style: "font-size: 24px; margin: 0 0 6px" }, s.name),
-    el(
-      "p",
-      { class: "muted", style: "margin: 0 0 18px" },
-      `${s.id} · ${kingdomLabel(s.kingdom)}${s.building ? ` · ${s.building}` : ""}`,
-    ),
+  detail.prepend(
     el(
       "div",
-      { class: "row" },
+      { class: "detail-head" },
+      el(
+        "div",
+        { class: "title" },
+        el("h1", {}, s.name),
+        el(
+          "p",
+          { class: "muted" },
+          `${s.id} · ${kingdomLabel(s.kingdom)}${s.building ? ` · ${s.building}` : ""}`,
+        ),
+      ),
+      s.completed
+        ? el("span", { class: "muted" }, "Read-only. Reopen to change it.")
+        : el("span", { class: "muted" }, "Changes are saved as you make them."),
       el(
         "button",
         {
@@ -554,10 +555,10 @@ function renderDetail() {
         },
         s.completed ? "Completed: reopen" : "Mark completed",
       ),
-      s.completed
-        ? el("span", { class: "muted" }, "Read-only. Reopen to change it.")
-        : el("span", { class: "muted" }, "Changes are saved as you make them."),
     ),
+  );
+
+  wrap.append(
     el(
       "div",
       { class: "row" },
@@ -565,7 +566,6 @@ function renderDetail() {
       el("label", { class: "stack" }, "Region", region),
       el("label", { class: "stack" }, "Building", building),
     ),
-    ...(s.completed ? [] : [renderPicker(s)]),
     el("h2", {}, "Compass cross"),
     el(
       "p",
@@ -594,8 +594,8 @@ function renderProgress() {
   box.replaceChildren(
     el("p", { class: "section-title" }, "Progress"),
     bar("Spaces completed", p.completed, p.spaces),
-    el("p", { class: "section-title", style: "margin-top: 18px" }, "By kingdom"),
-    ...Object.entries(p.kingdoms).map(([k, v]) => bar(kingdomLabel(k), v.withRegion, v.total)),
+    el("p", { class: "section-title", style: "margin-top: 18px" }, "Completed by kingdom"),
+    ...Object.entries(p.kingdoms).map(([k, v]) => bar(kingdomLabel(k), v.completed, v.total)),
   );
 }
 
@@ -616,6 +616,7 @@ function render() {
   safely("Regions", renderRegions);
   safely("Checks", renderChecks);
   safely("Space", renderDetail);
+  safely("Add a neighbour", renderPicker);
 }
 
 $("spaceFilter").addEventListener("input", renderSpaces);

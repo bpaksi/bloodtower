@@ -264,6 +264,7 @@ export function progressOf(draft, spaces) {
     kingdoms[k] = {
       total: members.length,
       withRegion: members.filter((s) => draft.regionOf[s.id]).length,
+      completed: members.filter((s) => isCompleted(draft, s.id)).length,
     };
   }
   return {
