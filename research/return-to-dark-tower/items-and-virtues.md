@@ -94,7 +94,7 @@ Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starti
 
 ## Notes for Bloodtower
 
-- **Fit with the virtue kinds (DEC-367).** Of the 20 known base virtues, 6 are Advantages as they stand: the four +1 trait starting virtues (Baleful, Veteran, Arcane, Precise, and the Spymaster's Stealth one) and Relentless and Anointed. Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
+- **Fit with the virtue kinds (DEC-367).** Of the 20 known base virtues, 7 are Advantages as they stand: five starting virtues (Baleful, Veteran, Arcane, Precise and the Spymaster's Stealth one) and two tiles (Relentless, Anointed). Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
 - **Still missing:** the Spymaster's Stealth virtue's name, the 4 kingdom virtues, 2 potion effects, 4 gear effects and all 22 treasures. Photos of the cards would close these.
 
 ## Sources
