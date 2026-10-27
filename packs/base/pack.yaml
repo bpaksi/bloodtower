@@ -87,11 +87,8 @@ board:
     - {id: E, name: Brynthia, label: Brynthia (E)}
     - {id: S, name: Durnin, label: Durnin (S)}
     - {id: W, name: Zenon, label: Zenon (W)}
-  region_labels:
-    - name: Regal Run
-      notes: Spanning label near The Throne; not a space (DEC-225).
-    - name: The Great Woods
-      notes: Spanning label in Zenon; not a space (DEC-225).
+  # Spaces, neighbours and regions come from board/spaces.json, which the board map entry
+  # tool generates (apps/board-map-tool, `pnpm export-pack`). Do not edit that file by hand.
   spaces: []
 
 assets:
