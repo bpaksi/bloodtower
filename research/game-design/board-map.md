@@ -305,3 +305,90 @@ Resolved 2026-10-23 (Bob): N Fivepint spelling and terrain, N Dayside spelling, 
 - Tokens and foe cards on Bob’s photo were ignored for names/terrains.
 - Cross-checked some names against the RtDT rulebook examples (Hissing Groves citadel, Ash Hills quest, Upper Ice Fangs / Inner Kinghills / Peaks of the Djinn move example, Forest of Shades / Bleak Wastes) and a public playthrough (Dayside Bazaar, Emerald Expanse, Three Rivers, Duwani, Egan’s End, etc.). Photo labels win when they conflict.
 - DT81 notes (`research/dark-tower-1981/NOTES.md`) say every DT81 kingdom has the same spaces, with the buildings in the same places. The RtDT board does not: each kingdom has its own 15 spaces. The RtDT map follows the RtDT board.
+
+---
+
+## AI board reading (2026-10-27)
+
+Bob passed on an AI reading of the board: a composite image of the whole board plus a transcription made from four photos. The AI's own notes say every direction, region extent and tower contact in it is provisional. This draft and the board map file take precedence. Where the AI disagrees with them, the difference is listed below for Bob's physical-board pass. The reading was not taken as fact.
+
+**Files (copyrighted image, not in the repo).** These are in Bob's backup folder, under `return-to-dark-tower/`:
+
+| Path in the backup folder | What |
+|---|---|
+| `photos/board-ai-composite-2026-10-27.webp` | The AI composite of the full board, N at the top. Most printed names on it are garbled, so it is good for layout only, not for spelling |
+| `board-reading-2026-10-27/provisional_board_transcription.md` | Space by space: terrain, building, region, tower side, neighbours with directions |
+| `board-reading-2026-10-27/provisional_board_spaces.csv` | The 60 spaces as a table |
+| `board-reading-2026-10-27/provisional_board_neighbours.csv` | 283 neighbour rows, with a direction, an unsure flag and river notes |
+
+**Board map file.** The reading was merged into `~/Desktop/board-map.json` (the copy from before the merge is `~/Desktop/board-map.before-ai-2026-10-27.json`). The 15 completed N spaces were not touched. Elsewhere, existing entries were kept, and the merge:
+
+- added the 14 new pairs below and filled 188 open compass slots. Each slot was turned from the AI's board-north direction into the tool's frame, where each space's N points at the tower. Tested against Bob's own slots on the completed spaces, the conversion matched 47 of 71 exactly, put 22 one point off and put 2 further off. Treat every filled slot as a guess.
+- noted on each pair whether the AI found it ("AI reading 2026-10-27 agrees" or "finds no border").
+- put the tower on N for Forest of Shades, Bleak Wastes, Irontops, The Throne and The Grass Sea (the tower ring below).
+- assigned regions: Delmsmire, Akartus and Yellowpike to The Great Woods; The Throne, The Cloister and Archmont to Regal Run.
+
+### Matches this draft
+
+- Terrain and buildings on all 60 spaces, including one Village, Bazaar, Sanctuary and Citadel per kingdom.
+- Region extents: Longwater over Dayside and Fivepint, The Great Woods over Delmsmire, Akartus and Yellowpike, and Regal Run over The Throne, The Cloister and Archmont. The AI reads no other region label.
+- 87 of the draft's pairs between spaces that are not completed.
+
+### Differs: for Bob to check on the board
+
+| Item | This draft | AI reading |
+|---|---|---|
+| Kingdom of Mountains of the Watchers | S Durnin | W Zenon (its river notes put the S–W river between it and Howling Desert / The Emerald Expanse) |
+| Kingdom of Lonelight Hills | W Zenon | S Durnin (its river notes put the river between it and Idran Forest / Hissing Groves / The Grass Sea) |
+| Tower ring | Tower Scar Desert, Forest of Shades, Bleak Wastes, Irontops, The Throne, The Grass Sea (checked 2026-10-23) | Also Upper Ice Fangs, Muted Forest, Big Sister, Lonelight Hills and Ash Hills. Bob removed Upper Ice Fangs and Big Sister on 2026-10-23 |
+| Region name | Longwater here; `Long Water` in the board map file | LONGWATER |
+
+**Name readings.** The draft's names win, and several were confirmed by Bob on 2026-10-23. The AI read these differently. None are confirmed:
+
+| Draft | AI reading |
+|---|---|
+| Rimeweald | Rimewald |
+| Peaks of the Djinn | Peak of Thz'din (AI unsure) |
+| Duwani | Downm (AI unsure) |
+| Forest of Shades | Forest of Shadows |
+| Ulamel's Hollow | Ulmae's Hollow (AI unsure) |
+| Plains of Plovo | Plains of Rovo (AI unsure) |
+| Delmsmire (confirmed by Bob) | Dremsmire (AI unsure) |
+| Akartus | Akarthus |
+| Yellowpike | Yellowrike |
+| Plains of Woldra | Plains of Wydra (AI unsure) |
+| Idran Forest | Jidran Forest |
+
+**Pairs the AI found that the draft lacked.** These are now in the board map file, marked unconfirmed. `~` means the AI was unsure: it may be a corner or a short border.
+
+| Pair | Note |
+|---|---|
+| E Three Rivers – S Middle Sister | across river |
+| E Three Rivers – S Pine Barrens | across river |
+| E Lesser Tombstones – S Middle Sister | across river, ~ |
+| E Forest of Shades – S Sands of Madness | across river, ~ |
+| E Duwani – E Lesser Tombstones | |
+| S Archmont – S Southern Wastes | |
+| S Archmont – S Little Sister | |
+| S Azkol's Bane – S Southern Wastes | |
+| S Middle Sister – S Ulamel's Hollow | |
+| S Mountains of the Watchers – W Lonelight Hills | ~ |
+| W Anza – W Weeping Waters | |
+| W Hissing Groves – W Weeping Waters | |
+| W Cloudhold – W Hissing Groves | |
+| W Ash Hills – W The Grass Sea | |
+| N Greenbridge – N Pearl of the North | Not added: both spaces are completed |
+
+**Draft pairs the AI did not find.** These are kept, and the ones on open spaces are noted "finds no border" in the file:
+
+- Open spaces: E Lake of Songs – E Utar's Barrows; E Outer Kinghills – S Mountains of the Watchers (the composite puts these on opposite sides of the board); S Archmont – S Bone Hills; S Howling Desert – W Idran Forest; S Howling Desert – W Lonelight Hills; S Little Sister – S Pine Barrens; S Middle Sister – S Sands of Madness; S Pine Barrens – S Southern Wastes; W Akartus – W Anza; W Ash Hills – W Plains of Plovo; W Ash Hills – W The Empty Glade; W Idran Forest – W Lost Lands; W Lonelight Hills – W Weeping Waters.
+- Completed spaces (not changed): N Peaks of the Djinn – E Bleak Wastes; N Broken Lands – W Ash Hills; N Broken Lands – W Lonelight Hills; N Fivepint – N Lodestone Mountains; N Fivepint – N Radiant Mountains; N Lodestone Mountains – N Pearl of the North; N Lower Ice Fangs – N Pearl of the North; N Tower Scar Desert – W The Grass Sea; N Tower Scar Desert – W Ash Hills.
+
+**River contacts.** The AI lists 25 pairs that cross a river. These are its candidates, and none has been checked on the board. The AI asserts no bridges.
+
+| Border | Pairs (`~` = unsure) |
+|---|---|
+| N–E | Egan's End – Outer Kinghills; Rimeweald – Outer Kinghills ~; Rimeweald – Inner Kinghills; Peaks of the Djinn – Inner Kinghills ~; Peaks of the Djinn – Dragontooth Lake; Upper Ice Fangs – Bleak Wastes; Tower Scar Desert – Bleak Wastes |
+| N–W | Muted Forest – Ash Hills; Broken Lands – Cloudhold; Lodestone Mountains – Plains of Plovo; Broken Lands – Plains of Plovo ~ |
+| E–S | Three Rivers – Pine Barrens; Three Rivers – Middle Sister; Lesser Tombstones – Middle Sister ~; Big Sister – Middle Sister; Big Sister – Sands of Madness; Big Sister – The Throne ~; Forest of Shades – Sands of Madness ~; Forest of Shades – The Throne |
+| S–W | The Emerald Expanse – Mountains of the Watchers; Howling Desert – Mountains of the Watchers; Lonelight Hills – Idran Forest; Lonelight Hills – Hissing Groves; Lonelight Hills – The Grass Sea; Irontops – The Grass Sea ~ |
