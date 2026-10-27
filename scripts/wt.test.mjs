@@ -55,7 +55,7 @@ describe("pnpm wt", () => {
     assert.equal(git(path, "rev-parse", "HEAD"), git(root, "rev-parse", "main"));
     assert.deepEqual(installs, [path]);
     assert.deepEqual(readWtConfig(path), config);
-    assert.deepEqual(config.ports, { dev: 4757, e2e: 4758 });
+    assert.deepEqual(config.ports, { dev: 4757, e2e: 4758, workbench: 4907 });
     assert.equal(config.dataDir, join(path, ".wt-data"));
     assert.ok(existsSync(config.dataDir));
     assert.match(lines[1], /dev 4757, e2e 4758/);

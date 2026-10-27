@@ -206,7 +206,7 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 
 | Resource | Rule |
 |---|---|
-| Dev server / Playwright ports | `.wt.json` `ports`: dev 4747 + 10·n, e2e 4748 + 10·n. App configs read them from `.wt.json` when it is there, and fall back to 4747/4748 in the main checkout. |
+| Dev server / Playwright ports | `.wt.json` `ports`: dev 4747 + 10·n, e2e 4748 + 10·n, game workbench 4897 + 10·n. App configs read them from `.wt.json` when it is there, and fall back to 4747/4748 in the main checkout. |
 | SQLite files | Every database file of a step lives under `.wt.json` `dataDir` (`<worktree>/.wt-data/`); never a shared absolute path. |
 | `pnpm-lock.yaml` / any `package.json` | Only the one step per batch marked `Deps change: yes`. |
 | Generated files / snapshots | Stay inside the worktree; never written to the main checkout. |
