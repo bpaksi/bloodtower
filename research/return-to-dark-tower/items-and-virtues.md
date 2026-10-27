@@ -62,7 +62,7 @@ All 22, read from Bob's photos of his base box (IMG_5697 to IMG_5700, 2026-10-27
 | Azkol's Horn | +1 Beast | Glyphs facing you cost no spirit |
 | Amulet of the Marid | +2 Wild in lakes | When you cross a river, move to any space next to that river |
 | White Cauldron | +1 Undead | After you Reinforce at a citadel, also gain 1 potion |
-| Necklace of Haggling | +1 Stealth | Ignore the cancel face on the haggle die; Reinforce as normal |
+| Necklace of Haggling | +1 Stealth | Ignore the pictured face (a skull symbol) on the haggle die; Reinforce as normal |
 | Lamp of Hope | +1 Magic | When you Cleanse, you may remove skulls from any space |
 | Axe of Soul Rending | +1 Humanoid | When you defeat a Magic foe, gain 1 more spirit |
 | Acorns of the White Oak | +1 Wild in grasslands | Spend to remove up to 5 skulls from anywhere on the board |
@@ -90,6 +90,21 @@ All 22, read from Bob's photos of his base box (IMG_5697 to IMG_5700, 2026-10-27
 | Tools of the Saboteur | 1 | +3 Wild against caravans | None |
 | Turquoise Urn | 1 | None | Carry up to 2 extra treasures |
 | Wraps of Invisibility | 1 | None | Prevent up to 3 warrior losses per dungeon room |
+
+### Reading the cards
+
+Bob's consolidated list (Perplexity, from the same photos, 2026-10-27) agrees with these tables except in two places, where Claude's closer look at the photo wins:
+
+- **Spear of Atish** reads "gain 10" with the warrior icon, not "gain 1 spirit".
+- **Horn of the Elements** reads "move a foe or siege tree 1 space", not "a siege tree foe".
+
+Wording that matters when the cards are reworded:
+
+- **Remove is not defeat.** Lamp of Darkness, Golden Mace of Azkol and Amulet of Annihilation *remove* a foe. Spear of Atish, Tears of the Shedu and Axe of Soul Rending trigger when you *defeat* one.
+- **Spend is not lose.** Spending is a choice; losing is forced. Lucky triggers only on a spend, and The Black Mark can be neither spent nor lost.
+- **Per battle card or per dungeon room.** Golden Wolf Pelt and Orb of Pure Snow protect per battle card; Azkol's Idol and Wraps of Invisibility per dungeon room.
+- **Terrain Advantages.** Amulet of the Marid's +2 Wild works only in lakes, Acorns of the White Oak's +1 Wild only in grasslands. Oakstone Bow's adjacent battle uses the terrain of your own space.
+- **Spent Advantages.** The three Scrolls and Tomas's Map give their Advantages only when spent; Fulminating Silver's +1 Wild costs 1 spirit, once per battle.
 
 ## Virtues
 
@@ -151,4 +166,4 @@ Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starti
 - Bob's Perplexity report, 2026-10-27: [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf). Its citations include the RtDT two-page rules (restorationgames.com), GeekDad "Reaping the Rewards: Return to Dark Tower" (photos of all 6 gear types and the 12 hero virtues), the "Unboxing Return to Dark Tower" video (YouTube ARrYseRvT_w, potions and gear from about 18 minutes), a ReturnToDarkTower Facebook group virtue compilation (post 1965737157673374), and BoardGameGeek thread 2838905.
 - Claude web check, 2026-10-27: GeekDad (Baleful, Veteran), BoardGameGeek thread 3185484 "All hero's ranked", BackerKit RtDT update 122.
 - Bob's photo IMG_5687 (*Infused*).
-- Bob's photos IMG_5697 to IMG_5702, 2026-10-27: all 22 treasures and all 20 quest item cards, plus his quest item list. The photos are not in the repo (card art).
+- Bob's photos IMG_5697 to IMG_5702, 2026-10-27: all 22 treasures and all 20 quest item cards (42 cards), plus his quest item list and his consolidated list of both. The photos are not in the repo (card art).
