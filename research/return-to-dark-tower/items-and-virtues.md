@@ -63,14 +63,20 @@ Each base hero has 2 starting virtues printed on the hero board, 3 virtue tiles 
 | Orphaned Scion | Infused | At the start of your turn, remove 1 skull from a building in your home kingdom (confirmed on Bob's photo IMG_5687) |
 | Orphaned Scion | Anointed | +1 Wild Advantage for each building with no skulls on or next to your space |
 
-### Starting virtues (partial)
+### Starting virtues (printed on the hero board)
 
-| Hero | Virtue | Effect |
-|---|---|---|
-| Brutal Warlord | Baleful | +1 Melee Advantage |
-| Brutal Warlord | Veteran | +1 Wild Advantage when you Battle |
+| Hero | Virtue | Effect | Source |
+|---|---|---|---|
+| Brutal Warlord | Baleful | +1 Melee Advantage | Name from GeekDad; effect from YouTube |
+| Brutal Warlord | Veteran | +1 Wild Advantage in battle | Name from GeekDad; effect from YouTube |
+| Orphaned Scion | Arcane | +1 Magic Advantage | YouTube |
+| Orphaned Scion | Generous | After you Cleanse, remove 1 skull from any other building | YouTube, BoardGameGeek |
+| Relic Hunter | Precise | +1 Humanoid Advantage | YouTube |
+| Relic Hunter | Prepared | When you Reinforce at a bazaar, treasures cost 1 less spirit | YouTube |
+| Spymaster | Name not found | +1 Stealth Advantage | YouTube |
+| Spymaster | Swift | Your base move is 4 rather than 3 | YouTube |
 
-The other heroes' starting virtues and the 4 kingdom virtues were not found.
+Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starting virtue is a +1 Advantage of one trait. The 4 kingdom virtues were not found.
 
 ### Expansion virtues (partial, not in the base box)
 
@@ -88,8 +94,8 @@ The other heroes' starting virtues and the 4 kingdom virtues were not found.
 
 ## Notes for Bloodtower
 
-- **Fit with the virtue kinds (DEC-367).** Of the 12 base tiles, 2 are Advantages as they stand (Relentless, Anointed), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), home kingdoms and monthly quests. They would need rewording. None is a spell.
-- **Still missing:** the base heroes' other starting virtues, the 4 kingdom virtues, 2 potion effects, 4 gear effects and all 22 treasures. Photos of the cards would close these.
+- **Fit with the virtue kinds (DEC-367).** Of the 20 known base virtues, 6 are Advantages as they stand: the four +1 trait starting virtues (Baleful, Veteran, Arcane, Precise, and the Spymaster's Stealth one) and Relentless and Anointed. Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
+- **Still missing:** the Spymaster's Stealth virtue's name, the 4 kingdom virtues, 2 potion effects, 4 gear effects and all 22 treasures. Photos of the cards would close these.
 
 ## Sources
 
