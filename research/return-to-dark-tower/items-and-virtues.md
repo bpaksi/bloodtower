@@ -1,34 +1,55 @@
 # Return to Dark Tower — Items and virtues
 
-Potions, gear, treasures and hero virtues in the RtDT base game, from a Perplexity report Bob ran on 2026-10-27 ([the PDF](assets/items-and-virtues-perplexity-2026-10-27.pdf)), plus a Claude web check the same day. Effects are paraphrased from community sources unless marked; check the physical cards before relying on exact wording. No code here.
+Potions, gear, treasures, quest items, corruptions and hero virtues in the RtDT base game. Every item and corruption table is read from images of Bob's own cards ([Card images](#card-images)), checked against his consolidated lists. The virtues come from a Perplexity report Bob ran on 2026-10-27 ([the PDF](assets/items-and-virtues-perplexity-2026-10-27.pdf)) and a Claude web check the same day; check the physical tiles before relying on their exact wording. No code here.
 
-Treasures and quest items are read from Bob's photos of his own cards. RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero abilities, not items. Items can be used only on your own turn.
+RtDT's item kinds are potions, gear, treasures and quest items. Virtues are hero abilities, not items. Items can be used only on your own turn.
 
 ## Potions
 
-18 cards in the base box. One use each: spend the card for its effect. Carry any number. Gained by drawing the top card of the potion deck, for example from a citadel's free Reinforce. The Relic Hunter's *Crafty* virtue doubles the number on a spent potion.
+18 cards: 6 kinds, 3 copies each. One use each: spend the card for its effect. Carry any number. Gained by drawing the top card of the potion deck, for example from a citadel's free Reinforce. The Relic Hunter's *Crafty* virtue doubles the number on a spent potion.
 
-| Potion | Effect | Confidence |
-|---|---|---|
-| Potion of Dragon's Teeth | Gain 6 warriors | Read in unboxing and playthrough |
-| Potion of Purifying Breath | Remove up to 2 skulls from any building | Read in unboxing |
-| Potion of the Siren Song | Move any foe up to 2 spaces | Read in unboxing |
-| Potion of the Golden Sun | Gain spirit (amount not confirmed) | Seen in a playthrough |
-| Potion of Fortune's Favor | Not found | Name only |
-| Potion of the Thousand Strides | Moves heroes, including other heroes (rulebook p25 calls it the Potion of One Thousand Strides) | Name only; effect partly from the rulebook |
+| Potion | Spend to |
+|---|---|
+| Potion of Dragon Teeth | Gain 6 warriors |
+| Potion of Fortune's Favor | Gain +1 Wild Advantage |
+| Potion of One Thousand Strides | Move any hero up to 3 spaces |
+| Potion of Purifying Breath | Remove up to 2 skulls from any building |
+| Potion of the Golden Sun | Gain 1 spirit |
+| Potion of the Siren's Song | Move any foe up to 2 spaces |
 
 ## Gear
 
-18 cards in six types. Gear lasts until an effect makes you lose or spend it. Carry at most one of each type. Chosen, not drawn, from the gear stacks, for example at a bazaar's free Reinforce.
+18 cards: 6 types, 3 identical copies each (Bob photographed one of each). Gear lasts until an effect makes you lose or spend it. Carry at most one of each type. Chosen, not drawn, from the gear stacks, for example at a bazaar's free Reinforce.
 
-| Gear | Effect | Confidence |
+| Gear | Advantage | Ability |
 |---|---|---|
-| Longswords | 1 Melee Advantage | Video |
-| Blessed Sceptres | After you Reinforce, remove a skull from a building of your choice | Video |
-| Dusky Cloaks | Not found | Name from photo |
-| Trusted Maps | Not found | Name from photo |
-| Brass Talismans | Not found | Name from photo |
-| Leather Armor | Not found | Name from photo |
+| Blessed Sceptres | None | After you Reinforce, remove 1 skull from the building on your space |
+| Brass Talismans | +1 Magic | None |
+| Dusky Cloaks | +1 Stealth | None |
+| Leather Armor | None | Prevent up to 2 warrior losses per battle card |
+| Longswords | +1 Melee | None |
+| Trusted Maps | None | Your base move is +1 |
+
+Blessed Sceptres works only on the building on your own space; an earlier video-based note said "a building of your choice", and the card wins.
+
+## Corruptions
+
+12 cards, one of each. Gained when a hero must lose what they lack, a building in their home kingdom is destroyed, or an effect says so; a third corruption loses the cooperative game. A sanctuary Reinforce with spirit removes them all.
+
+| Corruption | Drawback |
+|---|---|
+| Cruel | After you Reinforce at a village, lose 1 spirit |
+| Cursed | Spend at most 4 Advantages per turn |
+| Feeble | You cannot double your move |
+| Feral | End your turn on a space with a building: lose 2 spirit |
+| Feverish | You cannot Cleanse a building with 3 skulls |
+| Greedy | After you Reinforce at a bazaar, lose 1 spirit |
+| Lost | End your turn in your home kingdom: lose 1 spirit |
+| Selfish | You cannot give other heroes anything when you trade |
+| Suspicious | Carry at most 2 potions |
+| Tempted | Glyphs cost you 1 more spirit |
+| Uncertain | After you Reinforce, your turn ends at once |
+| Weak | Carry at most 2 treasures |
 
 ## Treasures ("magic items")
 
@@ -93,7 +114,7 @@ All 22, read from Bob's photos of his base box (IMG_5697 to IMG_5700, 2026-10-27
 
 ### Reading the cards
 
-Each card has its own image, cut from Bob's photos (local only, see [Card images](#card-images)). The tables were reconciled against all three sources on 2026-10-27: the images, Bob's quest item list and his consolidated list (Perplexity, from the same photos). All 42 names and copy counts agree. The lists disagree with the card in three places, and the card wins:
+Each card has its own image, cut from Bob's photos ([Card images](#card-images)). The tables were reconciled against all three sources on 2026-10-27: the images, Bob's quest item list and his consolidated list (Perplexity, from the same photos). All 42 names and copy counts agree. The lists disagree with the card in three places, and the card wins:
 
 - **Spear of Atish** reads "gain 10" with the warrior icon, not "gain 1 spirit".
 - **Horn of the Elements** reads "move a foe or siege tree 1 space", not "a siege tree foe".
@@ -159,21 +180,28 @@ Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starti
 
 ## Card images
 
-One PNG per card (630 × 900), cropped from Bob's photos, in `assets/cards/`. The folder is git-ignored: the art is Restoration Games' and the repo is public, so the images live only in the main folder on Bob's Mac. File names follow the card titles without apostrophes.
+One PNG per card, cropped from Bob's photos, in `cards/` under Bob's backup folder (`~/Library/CloudStorage/OneDrive-Personal/Backups/BloodTower/reference/return-to-dark-tower/`, see [the README](README.md#copyrighted-material-not-in-the-repo)). The art is Restoration Games' and the repo is public, so the images are not in the repo. File names follow the card titles without apostrophes; a numbered suffix marks copies.
 
 | Folder | Files |
 |---|---|
-| `assets/cards/treasures/` | 22, one per treasure, for example `Spear_of_Atish.png` |
-| `assets/cards/quest-items/` | 20: one per quest item, plus `Amulet_of_Hope_01.png` to `_04.png` for its 4 copies |
+| `cards/treasures/` | 22, one per treasure, for example `Spear_of_Atish.png` |
+| `cards/quest-items/` | 20: one per quest item, plus `Amulet_of_Hope_01.png` to `_04.png` for its 4 copies |
+| `cards/gear/` | 6, one per type (each type has 3 identical cards in the box) |
+| `cards/potions/` | 18: 3 copies of each kind, for example `Dragon_Teeth_01.png` to `_03.png` |
+| `cards/corruptions/` | 12, one per corruption |
+| `cards/gear-potions-corruptions.csv` | Bob's consolidated list of the gear, potions and corruptions |
+
+The gear, potion and corruption tables were spot-checked against the images (Blessed Sceptres, Leather Armor, Trusted Maps, One Thousand Strides, Golden Sun, Feral) and agree with Bob's CSV.
 
 ## Notes for Bloodtower
 
 - **Fit with the virtue kinds (DEC-367).** Of the 20 known base virtues, 7 are Advantages as they stand: five starting virtues (Baleful, Veteran, Arcane, Precise and the Spymaster's Stealth one) and two tiles (Relentless, Anointed). Swift is a perk that fits directly (a better move roll, DEC-102), and Blessed is close to a guard. Most of the rest are perks that run on systems Bloodtower dropped: warriors and spirit (DEC-039, DEC-124), generic Reinforce (DEC-157), Cleanse, home kingdoms and monthly quests. They would need rewording. None is a spell.
-- **Still missing:** the Spymaster's Stealth virtue's name, the 4 kingdom virtues, 2 potion effects, 4 gear effects and the 12 corruption cards. Photos of the cards would close these.
+- **Still missing:** the Spymaster's Stealth virtue's name and the 4 kingdom virtues. Photos of the hero boards and kingdom tiles would close these.
 
 ## Sources
 
 - Bob's Perplexity report, 2026-10-27: [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf). Its citations include the RtDT two-page rules (restorationgames.com), GeekDad "Reaping the Rewards: Return to Dark Tower" (photos of all 6 gear types and the 12 hero virtues), the "Unboxing Return to Dark Tower" video (YouTube ARrYseRvT_w, potions and gear from about 18 minutes), a ReturnToDarkTower Facebook group virtue compilation (post 1965737157673374), and BoardGameGeek thread 2838905.
 - Claude web check, 2026-10-27: GeekDad (Baleful, Veteran), BoardGameGeek thread 3185484 "All hero's ranked", BackerKit RtDT update 122.
-- Bob's photo IMG_5687 (*Infused*).
-- Bob's photos IMG_5697 to IMG_5702, 2026-10-27: all 22 treasures and all 20 quest item cards (42 cards), plus his quest item list and his consolidated list of both. The photos are not in the repo (card art).
+- Bob's photo IMG_5687 (*Infused*), in the backup folder's `photos/`.
+- Bob's photos IMG_5697 to IMG_5702, 2026-10-27, in the backup folder's `photos/`: all 22 treasures and all 20 quest item cards, plus his quest item list and his consolidated list of both.
+- Bob's card images and CSV of gear, potions and corruptions, 2026-10-27, in the backup folder's `cards/`.

@@ -1,7 +1,7 @@
 # Board map (DEC-221 draft)
 
 **Status:** draft, checked with Bob in session 2026-10-23 (not yet signed off)  
-**Source photo:** `research/return-to-dark-tower/assets/board-top-down.webp` (Bob’s top-down photo of the physical RtDT board)  
+**Source photo:** `photos/board-top-down.webp` in Bob's backup folder (Bob’s top-down photo of the physical RtDT board; copyrighted, not in the repo, see [the RtDT README](../return-to-dark-tower/README.md#copyrighted-material-not-in-the-repo))  
 **Cards:** DEC-221 (this graph), DEC-225 (printed name + `kingdom+slug` ID), DEC-226 (N Arisilon, E Brynthia, S Durnin, W Zenon), AST-B01 (4×15, 6 terrains), AREA-077  
 **Accuracy:** drafted from the photo and checked by Bob in session against the physical board (2026-10-23). Still open: river contacts, the adjacency edges still marked `?`, and the items under **Still open** below. Do not treat this as final until Bob signs it off.
 

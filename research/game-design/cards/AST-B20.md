@@ -11,6 +11,6 @@ links:
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** booty for winning a battle (IDEA-002). Kept in 6 face-up stacks as in base. A pack maps each of the 6 types to a kit item (Dracula: stake, crucifix, silver bolts, lantern…) and keeps the base Advantage on the card. How much a battle drops is Q-013.

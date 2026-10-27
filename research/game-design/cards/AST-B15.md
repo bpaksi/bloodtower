@@ -8,7 +8,7 @@ links:
   - { rel: part-of, to: AREA-007 }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 Replaced by DEC-368 (Bob, 2026-10-27; parked under DEC-352): virtues live in the app and the 16 tiles stay in the box; RtDT virtue names and ideas are borrowed where they fit.
 

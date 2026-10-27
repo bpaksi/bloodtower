@@ -8,7 +8,7 @@ links:
   - { rel: uses, to: MEC-005 }
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
   - { file: "../return-to-dark-tower/assets/board-top-down.webp", note: "Bob's top-down photo of the physical board (DEC-221)" }
   - { file: "../game-design/board-map.md", note: "authoritative draft graph for DEC-221 — draft for Bob workbench check" }
 ---

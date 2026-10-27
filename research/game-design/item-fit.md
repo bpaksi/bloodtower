@@ -34,7 +34,7 @@ Most RtDT texts name resources Bloodtower dropped. Each gets one stand-in:
 | Remove a foe | Remove a standing horde (DEC-320) or cut a horde |
 | Monthly quest | A set piece or lead |
 
-Fit: **Direct** works as written once terms are swapped; **Reword** keeps the idea with a new trigger or cost; **Advantage only** keeps the card's Advantage but drops an ability with no Bloodtower home; **Story only** needs a story to give it meaning; **?** means the card text is still missing.
+Fit: **Direct** works as written once terms are swapped; **None** has no Bloodtower home; **Reword** keeps the idea with a new trigger or cost; **Advantage only** keeps the card's Advantage but drops an ability with no Bloodtower home; **Story only** needs a story to give it meaning; **?** means the card text is still missing.
 
 ## Virtues
 
@@ -68,33 +68,33 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 ## Potions
 
-18 cards; 6 names known (likely 6 kinds × 3). One use: spend the card.
+18 cards, 6 kinds × 3, all known. One use: spend the card.
 
 | Potion | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Dragon's Teeth | Gain 6 warriors | Heal hit points (OPT-010: +4) | Direct |
-| Purifying Breath | Remove up to 2 skulls from any building | Same | Direct (needs skull removal) |
-| Siren Song | Move any foe up to 2 spaces | Move a standing horde's token up to 2 spaces | Reword |
-| Golden Sun | Gain spirit | Gain money | Reword |
-| Thousand Strides | Moves heroes, even others | +moves for a group | Reword (text ?) |
-| Fortune's Favor | ? | ? | ? |
+| Dragon Teeth | Gain 6 warriors | Heal hit points (OPT-010: +4) | Direct |
+| Fortune's Favor | Gain +1 Wild Advantage | Same | Direct |
+| One Thousand Strides | Move any hero up to 3 spaces | Move any group up to 3 spaces | Direct |
+| Purifying Breath | Remove up to 2 skulls from any building | Same | Direct |
+| Golden Sun | Gain 1 spirit | Gain money | Reword |
+| Siren's Song | Move any foe up to 2 spaces | Move a standing horde's token up to 2 spaces | Reword |
 
-**Potions: 2 direct, 3 reword, 1 unknown.**
+**Potions: 4 direct, 2 reword.**
 
 ## Gear
 
-18 cards, 6 types × 3. Lasting; one of each type.
+18 cards, 6 types × 3, all known. Lasting; one of each type.
 
 | Gear | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Longswords | +1 Melee Advantage | +1 Melee Advantage | Direct |
-| Blessed Sceptres | After Reinforce, remove a skull anywhere | After a building pick, remove a skull | Reword (needs skull removal) |
-| Dusky Cloaks | ? | ? | ? |
-| Trusted Maps | ? | ? | ? |
-| Brass Talismans | ? | ? | ? |
-| Leather Armor | ? | ? | ? |
+| Longswords | +1 Melee | Same | Direct |
+| Brass Talismans | +1 Magic | Same | Direct |
+| Dusky Cloaks | +1 Stealth | Same | Direct |
+| Trusted Maps | Base move +1 | +1 on the move roll (DEC-102), like Swift | Direct |
+| Blessed Sceptres | After you Reinforce, remove 1 skull from the building on your space | After a building pick, that building loses a skull | Direct |
+| Leather Armor | Prevent 2 warrior losses per battle card | Each lost round's hit is smaller (a guard) | Reword |
 
-**Gear: 1 direct, 1 reword, 4 unknown.** Bob or a photo can close these.
+**Gear: 5 direct, 1 reword.**
 
 ## Treasures (magic items)
 
@@ -129,11 +129,24 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 ## Corruptions
 
-12 cards; texts not in our research yet. DEC-365 gives each its own lasting drawback on top of -1 move. Expected stand-ins: lost hit points, lost money, fewer moves, a weaker Advantage, a costlier building pick.
+12 cards, all known. DEC-365 gives each its own lasting drawback on top of -1 move.
 
 | Corruption | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| 12 cards | ? | ? | ? (needs the card texts) |
+| Cursed | Spend at most 4 Advantages per turn | At most 4 Advantages per battle | Direct |
+| Suspicious | Carry at most 2 potions | Same | Direct |
+| Uncertain | After you Reinforce, your turn ends | After a building pick, the group's day ends | Direct |
+| Weak | Carry at most 2 treasures | Same | Direct |
+| Cruel | Village Reinforce: lose 1 spirit | After a village pick, lose money | Reword |
+| Greedy | Bazaar Reinforce: lose 1 spirit | After a bazaar pick, lose money | Reword |
+| Feral | End your turn on a building's space: lose 2 spirit | End the day on a building's space: lose money | Reword |
+| Lost | End your turn in your home kingdom: lose 1 spirit | End the day in the group's chapter-start kingdom: lose money | Reword |
+| Feeble | You cannot double your move | You cannot pay for extra moves | Reword |
+| Feverish | You cannot Cleanse a building with 3 skulls | Cannot remove skulls from a 3-skull building | Reword (needs Cleanse) |
+| Selfish | Give nothing when you trade | The group cannot give items to another group | Reword |
+| Tempted | Glyphs cost 1 more spirit | None (no glyph costs) | None |
+
+**Corruptions: 4 direct, 7 reword, 1 none.** Feeble stacks with DEC-365's -1 move; together they may be too harsh.
 
 ## Quest items
 
@@ -163,11 +176,12 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 ## What the chart shows
 
-- **It can work.** Of the 66 kinds with known text, 22 fit directly and 38 with a reworded trigger or cost. 3 treasures keep only their Advantage and 3 quest items need a story to mean anything. None has to stay in the box.
-- **Skull removal touches eight pieces.** Bloodtower has no Cleanse and no other way to take a skull off a building. Five pieces remove skulls themselves (Infused, Purifying Breath, Blessed Sceptres, Hallowed Reliquary, Acorns of the White Oak), Generous and Lamp of Hope widen a Cleanse, and Relic of Light rewards one. Bloodtower needs a skull-removal rule, or these become something else.
-- **Guards are common.** Azkol's Idol, Golden Wolf Pelt, Wraps of Invisibility and Blessed all shrink a hit, which backs the guard kind (DEC-367).
+- **It can work.** Of the 83 kinds with known text, 32 fit directly and 44 with a reworded trigger or cost. 3 treasures keep only their Advantage, 3 quest items need a story to mean anything, and only 1 corruption (Tempted) has no home.
+- **Skull removal touches nine pieces.** Bloodtower has no Cleanse and no other way to take a skull off a building. Five pieces remove skulls themselves (Infused, Purifying Breath, Blessed Sceptres, Hallowed Reliquary, Acorns of the White Oak), Generous and Lamp of Hope widen a Cleanse, Relic of Light rewards one and the Feverish corruption forbids one. Bloodtower needs a skull-removal rule, or these become something else.
+- **Guards are common.** Azkol's Idol, Golden Wolf Pelt, Wraps of Invisibility, Leather Armor and Blessed all shrink a hit, which backs the guard kind (DEC-367).
+- **Corruptions mostly cost money.** Seven of the twelve take spirit, which becomes money. With DEC-365's -1 move on top, Bloodtower's corruption is a mix of a slower group and a leaking purse.
 - **Six heroes, four boards.** RtDT's starting virtues are printed on 4 hero boards, but Bloodtower has 6 heroes (DEC-099). Two classes would have no board, or starting virtues become app-only.
 - **Six per class does not fit the tiles.** 16 tiles cannot give 6 classes 6 virtues each (DEC-156). Tiles shared between classes, or fewer virtues per class, would fix it.
 - **Spells have no piece.** RtDT has no spell card or tile, which supports keeping spells apart from virtues (Bob, 2026-10-27, still open). The three Scroll treasures (spend for +4 of one trait) are the nearest thing.
 - **Rulings this would change:** DEC-368 (tiles stay in the box), DEC-121 (spells are virtues) and DEC-156 (six per class).
-- **Still missing:** 4 kingdom virtues, the Spymaster's Stealth virtue name, 1 potion, 4 gear and 12 corruptions.
+- **Still missing:** the 4 kingdom virtues and the Spymaster's Stealth virtue name.
