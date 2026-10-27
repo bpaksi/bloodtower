@@ -62,9 +62,12 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Scion tile | Blessed | Spend spirit: prevent 6 warrior losses | Pay money to cancel one lost round's hit (a guard) | Reword |
 | Scion tile | Infused | Turn start: remove 1 skull in your home kingdom | Day start: remove 1 skull in the group's kingdom | Reword (needs skull removal) |
 | Scion tile | Anointed | +1 Wild per skull-free building on or next to your space | Same | Direct |
-| Kingdom tiles (4) | ? | ? | ? | ? |
+| Kingdom tile | Champion of the North | +2 Wild in mountains | +2 Wild in mountains | Direct |
+| Kingdom tile | Champion of the East | +2 Wild in hills | +2 Wild in hills | Direct |
+| Kingdom tile | Champion of the South | +2 Wild in deserts | +2 Wild in deserts | Direct |
+| Kingdom tile | Champion of the West | +2 Wild in forests | +2 Wild in forests | Direct |
 
-**Virtues: 10 direct, 10 reword, 0 none, 4 unknown.**
+**Virtues: 14 direct, 10 reword, 0 none.**
 
 ## Potions
 
@@ -176,7 +179,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 ## What the chart shows
 
-- **It can work.** Of the 83 kinds with known text, 32 fit directly and 44 with a reworded trigger or cost. 3 treasures keep only their Advantage, 3 quest items need a story to mean anything, and only 1 corruption (Tempted) has no home.
+- **It can work.** Of the 87 kinds, 36 fit directly and 44 with a reworded trigger or cost. 3 treasures keep only their Advantage, 3 quest items need a story to mean anything, and only 1 corruption (Tempted) has no home.
 - **Skull removal touches nine pieces.** Bloodtower has no Cleanse and no other way to take a skull off a building. Five pieces remove skulls themselves (Infused, Purifying Breath, Blessed Sceptres, Hallowed Reliquary, Acorns of the White Oak), Generous and Lamp of Hope widen a Cleanse, Relic of Light rewards one and the Feverish corruption forbids one. Bloodtower needs a skull-removal rule, or these become something else.
 - **Guards are common.** Azkol's Idol, Golden Wolf Pelt, Wraps of Invisibility, Leather Armor and Blessed all shrink a hit, which backs the guard kind (DEC-367).
 - **Corruptions mostly cost money.** Seven of the twelve take spirit, which becomes money. With DEC-365's -1 move on top, Bloodtower's corruption is a mix of a slower group and a leaking purse.
@@ -184,4 +187,4 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 - **Six per class does not fit the tiles.** 16 tiles cannot give 6 classes 6 virtues each (DEC-156). Tiles shared between classes, or fewer virtues per class, would fix it.
 - **Spells have no piece.** RtDT has no spell card or tile, which supports keeping spells apart from virtues (Bob, 2026-10-27, still open). The three Scroll treasures (spend for +4 of one trait) are the nearest thing.
 - **Rulings this changes:** DEC-370 partly replaces DEC-368 (tiles stay in the box). DEC-121 (spells are virtues) and DEC-156 (six per class) wait on Q-268.
-- **Still missing:** the 4 kingdom virtues and the Spymaster's Stealth virtue name.
+- **Still missing:** the Spymaster's Stealth virtue name. The 4 kingdom virtues came from Bob's tile images on 2026-10-27.
