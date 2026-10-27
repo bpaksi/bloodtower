@@ -15,6 +15,7 @@ Research on the published Return to Dark Tower (RtDT) game and companion app, co
 | [sources.md](sources.md) | Where each fact came from, including the official [Rulebook v2.0](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) |
 | [assets/board-top-down.webp](assets/board-top-down.webp) | Bob's top-down photo of the physical board, for the DEC-221 graph draft |
 | [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf) | Bob's Perplexity report on potions, gear, virtues and treasures, the source of items-and-virtues.md |
+| `assets/cards/` (local only, git-ignored) | One image per treasure and quest item card (42), cropped from Bob's photos; listed in [items-and-virtues.md](items-and-virtues.md#card-images) |
 
 ## Product line timeline
 

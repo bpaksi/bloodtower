@@ -62,7 +62,7 @@ All 22, read from Bob's photos of his base box (IMG_5697 to IMG_5700, 2026-10-27
 | Azkol's Horn | +1 Beast | Glyphs facing you cost no spirit |
 | Amulet of the Marid | +2 Wild in lakes | When you cross a river, move to any space next to that river |
 | White Cauldron | +1 Undead | After you Reinforce at a citadel, also gain 1 potion |
-| Necklace of Haggling | +1 Stealth | Ignore the pictured face (a skull symbol) on the haggle die; Reinforce as normal |
+| Necklace of Haggling | +1 Stealth | Ignore the pictured face (a hooded figure) on the haggle die; Reinforce as normal |
 | Lamp of Hope | +1 Magic | When you Cleanse, you may remove skulls from any space |
 | Axe of Soul Rending | +1 Humanoid | When you defeat a Magic foe, gain 1 more spirit |
 | Acorns of the White Oak | +1 Wild in grasslands | Spend to remove up to 5 skulls from anywhere on the board |
@@ -93,10 +93,11 @@ All 22, read from Bob's photos of his base box (IMG_5697 to IMG_5700, 2026-10-27
 
 ### Reading the cards
 
-Bob's consolidated list (Perplexity, from the same photos, 2026-10-27) agrees with these tables except in two places, where Claude's closer look at the photo wins:
+Each card has its own image, cut from Bob's photos (local only, see [Card images](#card-images)). The tables were reconciled against all three sources on 2026-10-27: the images, Bob's quest item list and his consolidated list (Perplexity, from the same photos). All 42 names and copy counts agree. The lists disagree with the card in three places, and the card wins:
 
 - **Spear of Atish** reads "gain 10" with the warrior icon, not "gain 1 spirit".
 - **Horn of the Elements** reads "move a foe or siege tree 1 space", not "a siege tree foe".
+- **Necklace of Haggling** pictures a hooded figure on the haggle die, not a skull.
 
 Wording that matters when the cards are reworded:
 
@@ -155,6 +156,15 @@ Bob's list, 2026-10-27, from YouTube and BoardGameGeek. Each hero's first starti
 | Undaunted Aegis | Steeled | Once per battle, take another hero's corruption instead and gain 2 spirit |
 | Undaunted Aegis | Emboldened | +1 Wild Advantage for each corruption you have |
 | Undaunted Aegis | Resolute | When you Reinforce, spend 1 less spirit per corruption |
+
+## Card images
+
+One PNG per card (630 × 900), cropped from Bob's photos, in `assets/cards/`. The folder is git-ignored: the art is Restoration Games' and the repo is public, so the images live only in the main folder on Bob's Mac. File names follow the card titles without apostrophes.
+
+| Folder | Files |
+|---|---|
+| `assets/cards/treasures/` | 22, one per treasure, for example `Spear_of_Atish.png` |
+| `assets/cards/quest-items/` | 20: one per quest item, plus `Amulet_of_Hope_01.png` to `_04.png` for its 4 copies |
 
 ## Notes for Bloodtower
 
