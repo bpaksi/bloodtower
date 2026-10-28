@@ -110,23 +110,23 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Cloak of Stars | +1 Stealth; entering a foe's space, place that foe anywhere | +1 Stealth; entering a standing horde's space, move its token anywhere | Reword |
 | Azkol's Banner | +1 Melee; take any hero's Banner action | +1 Melee | Advantage only (no Banner action) |
 | Spear of Atish | +1 Beast; defeat a Melee foe: gain 10 warriors | +1 Beast; beat a Melee horde: heal | Reword |
-| Lamp of Darkness | +1 Beast; spend: remove 1 foe from your space | +1 Beast; spend: remove the standing horde on your space | Direct |
+| Lamp of Darkness | +1 Beast; spend: remove 1 foe from your space | +1 Beast; spend: remove the standing horde on your space (DEC-425) | Direct, decided |
 | Circlet of Conviction | +1 Humanoid; spend instead of dropping a skull: take another turn | +1 Humanoid; spend: skip the day's skull and take another day | Reword |
-| Tears of the Shedu | +1 Undead; defeat a Stealth foe: gain a potion | Same | Direct |
+| Tears of the Shedu | +1 Undead; defeat a Stealth foe: gain a potion | Same (DEC-426) | Direct, decided |
 | Oakstone Bow | +1 Melee; battle a foe on an adjacent space | +1 Melee; fight a standing horde one space away | Reword |
 | Scroll of Twilight Shadow | Spend: +4 Stealth | Spend: soften a Stealth foe's card up to 4 steps (DEC-324) | Reword |
 | Crown of Azkol | +1 Humanoid; sanctuary Reinforce: spirit equal to the month | +1 Humanoid; after a sanctuary pick, money equal to the chapter | Reword |
 | Golden Mace of Azkol | +1 Undead; spirit equal to a foe's level removes it | +1 Undead; pay money by level to remove a standing horde | Reword |
 | Scroll of Burning Sands | Spend: +4 Magic | Spend: soften a Magic foe's card up to 4 steps | Reword |
 | Scroll of the Great Serpent | Spend: +4 Melee | Spend: soften a Melee foe's card up to 4 steps | Reword |
-| Hallowed Reliquary | +1 Undead; after a Battle, remove 1 skull in your kingdom | Same | Direct |
+| Hallowed Reliquary | +1 Undead; after a Battle, remove 1 skull in your kingdom | Same (DEC-427) | Direct, decided |
 | Azkol's Horn | +1 Beast; glyphs facing you cost no spirit | +1 Beast | Advantage only (no glyph costs) |
 | Amulet of the Marid | +2 Wild in lakes; crossing a river, move anywhere along it | Same, if the board's rivers and lakes count | Reword |
-| White Cauldron | +1 Undead; citadel Reinforce: also a potion | +1 Undead; after a citadel pick, also a potion | Direct |
+| White Cauldron | +1 Undead; citadel Reinforce: also a potion | +1 Undead; after a citadel pick, also a potion (DEC-428) | Direct, decided |
 | Necklace of Haggling | +1 Stealth; ignore the haggle die's cancel | +1 Stealth | Advantage only (no haggle die) |
 | Lamp of Hope | +1 Magic; Cleanse removes skulls from any space | +1 Magic; skull removal reaches any building | Reword (needs Cleanse) |
-| Axe of Soul Rending | +1 Humanoid; defeat a Magic foe: +1 spirit | +1 Humanoid; beat a Magic horde: +money | Direct |
-| Acorns of the White Oak | +1 Wild in grasslands; spend: remove up to 5 skulls anywhere | Same | Direct |
+| Axe of Soul Rending | +1 Humanoid; defeat a Magic foe: +1 spirit | +1 Humanoid; beat a Magic horde: +money (DEC-429) | Direct, decided |
+| Acorns of the White Oak | +1 Wild in grasslands; spend: remove up to 5 skulls anywhere | Same (DEC-430) | Direct, decided |
 
 **Treasures: 6 direct, 13 reword, 3 Advantage only.** The three Scrolls are one-shot bursts of Advantage, the closest thing RtDT has to a spell.
 
