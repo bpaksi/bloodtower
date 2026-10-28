@@ -1,5 +1,7 @@
 # Dracula (Vellmoor): fellowship review
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/fellowship-review.md).
+
 Story review (Loremaster), 2026-10-16. Branch `docs/dracula-fellowship-review`, built on `docs/dracula-encounter-trims` (bbe07c2). Covers the 19 scene scripts in `assets/stories/dracula/scripts/` plus README, cast.md and props.md. `tokens-and-encounters.md` is out of scope.
 
 ## Bob's three tests

@@ -1,5 +1,7 @@
 # Characters: the four hunters
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/characters.md).
+
 Status: draft for reaction. Nothing here is decided.
 
 Four heroes, one per player. Each has a public reason for being in Vellmoor and a private tie to the Count. The private tie is something the app can reveal later as a story beat, a personal quest, or a weakness the Count exploits.

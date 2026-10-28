@@ -1,5 +1,7 @@
 # Opening scene: The Lantern & Bell
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/opening-scene.md).
+
 Status: draft for reaction. Nothing here is decided.
 
 **When:** All Hallows' Eve, dusk, a storm rolling in.

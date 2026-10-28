@@ -1,5 +1,7 @@
 # Dracula (Vellmoor): Continuity Guide
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/continuity-guide.md).
+
 Owner: **Loremaster** · Created 2026-10-16 · Status: draft. Settled calls are Loremaster's; Bob's rulings in §4.2.
 Built from Gamewright's draft art bible (`dracula-art-continuity.md`, "bible") and art audit (`dracula-art-audit.md`, "audit"), both 2026-10-16. Their `file:line` citations are kept.
 Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets/stories/dracula/scripts/cast.md · `props` = assets/stories/dracula/scripts/props.md · `tok` = assets/stories/dracula/scripts/tokens-and-encounters.md · `open` = research/stories/dracula/opening-scene.md · `mech` = research/stories/dracula/mechanics-map.md · scene scripts by file name (all in assets/stories/dracula/scripts/).

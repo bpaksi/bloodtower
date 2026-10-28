@@ -1,4 +1,6 @@
 # Burgomaster's Funeral POC (n2-burgomasters-funeral, Gamewright, 2026-10-14)
+
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/poc-funeral.md).
 Goal: prove the engine end to end on one set piece in about 10 minutes, using the Mac, the tower, the Dashboard, and 2 or more iPads/phones. Uses the reviewed script as written (not a rewrite).
 
 ## Moment IDs (cue sheet source)
