@@ -90,11 +90,11 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Gear | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Longswords | +1 Melee | Same | Direct |
-| Brass Talismans | +1 Magic | Same | Direct |
-| Dusky Cloaks | +1 Stealth | Same | Direct |
-| Trusted Maps | Base move +1 | +1 on the move roll (DEC-102), like Swift | Direct |
-| Blessed Sceptres | After you Reinforce, remove 1 skull from the building on your space | After a building pick, that building loses a skull | Direct |
+| Longswords | +1 Melee | Same (DEC-418) | Direct, decided |
+| Brass Talismans | +1 Magic | Same (DEC-419) | Direct, decided |
+| Dusky Cloaks | +1 Stealth | Same (DEC-420) | Direct, decided |
+| Trusted Maps | Base move +1 | +1 on the move roll (DEC-102), like Swift (DEC-421) | Direct, decided |
+| Blessed Sceptres | After you Reinforce, remove 1 skull from the building on your space | After a building pick, that building loses a skull (DEC-422) | Direct, decided |
 | Leather Armor | Prevent 2 warrior losses per battle card | Each lost round's hit is smaller (a guard) | Reword |
 
 **Gear: 5 direct, 1 reword.**
