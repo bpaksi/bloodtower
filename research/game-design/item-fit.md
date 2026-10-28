@@ -75,10 +75,10 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Potion | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Dragon Teeth | Gain 6 warriors | Heal hit points (OPT-010: +4) | Direct |
-| Fortune's Favor | Gain +1 Wild Advantage | Same | Direct |
-| One Thousand Strides | Move any hero up to 3 spaces | Move any group up to 3 spaces | Direct |
-| Purifying Breath | Remove up to 2 skulls from any building | Same | Direct |
+| Dragon Teeth | Gain 6 warriors | Heal one hero's hit points (OPT-010: +4) (DEC-412) | Direct, decided |
+| Fortune's Favor | Gain +1 Wild Advantage | Same; how long is Q-299 (DEC-413) | Direct, decided |
+| One Thousand Strides | Move any hero up to 3 spaces | Move any group up to 3 spaces (DEC-414) | Direct, decided |
+| Purifying Breath | Remove up to 2 skulls from any building | Same (DEC-415) | Direct, decided |
 | Golden Sun | Gain 1 spirit | Gain money | Reword |
 | Siren's Song | Move any foe up to 2 spaces | Move a standing horde's token up to 2 spaces | Reword |
 
