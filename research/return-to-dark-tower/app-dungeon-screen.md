@@ -22,10 +22,25 @@ The image is RtDT art, so it lives in the backup folder (see [README.md](README.
 - **The Advantage is visible:** the screen says how many Advantages are on the current room and of which type. In RtDT each room can be improved once ([game-overview-and-rules.md](game-overview-and-rules.md), p15–19).
 - **Progress is kept:** cleared rooms stay cleared for the next visit and for other heroes ([companion-app.md](companion-app.md)).
 
+## How a visit plays
+
+Bob's research, 2026-10-28, from the [two-page rules](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf) and the [rulebook on manuals.plus](https://manuals.plus/m/2a1d6166a6d21dbbf19d1ee06a98b3b7c7232187ffb504d8e7c0a96429583d2b). A dungeon is a **push-your-luck** branching map. The aim is to find and clear one target room, not to explore every room.
+
+1. **Enter:** a quest puts the dungeon on the board. The hero takes the Quest action there and picks the dungeon in the app.
+2. **Pick a room:** the app shows the rooms found so far and the unexplored ones beside them. Tapping one enters it and reveals what happens. The paths branch, as on the map above.
+3. **Improve it (optional):** spend one matching Advantage to turn the room's result into a better one. The rules' example turns losing warriors into gaining a potion. Each room can be improved once, and a spent Advantage cannot be taken back.
+4. **Resolve it:** apply the gains or losses to the physical pieces. A hero who cannot pay a loss in full pays what they can and gains a corruption. The room is then cleared.
+5. **Go on or leave:** after a room the hero may try another or stop. Clearing the target room finishes the dungeon and its quest.
+
+**Coming back:** cleared rooms stay cleared, even for another hero. One hero can open part of a dungeon and another can finish it later. The core choice is to keep spending now to find the target, or to keep your strength and come back better prepared.
+
+**Feel:** a branching exploration puzzle with resource management, not a tactical crawl. The play is picking paths, revealing room outcomes and choosing where to spend Advantages. Nothing moves square by square, and no hero is positioned for a fight.
+
+**No single meter:** each room's outcome is a gain or a loss of the hero's own resources (warriors, spirit, items). The pressure comes from those running low and from corruption when a loss can't be paid.
+
 ## Not known from one screenshot
 
-- What happens on entering a room: its card, its cost in warriors and spirit, and how an Advantage improves it.
+- The full list of room outcomes, and which of them each Advantage type improves.
 - Whether the map is fixed per dungeon or generated, and how many rooms it has. [game-overview-and-rules.md](game-overview-and-rules.md) says the room graphs are app-generated.
 - What the gold sigils are exactly.
 
-A web search on 2026-10-28 found only the general rule ("several rooms to explore, with one final room granting success upon discovery"; [Wikipedia](https://en.wikipedia.org/wiki/Return_to_Dark_Tower)), and nothing on doors or room effects.
