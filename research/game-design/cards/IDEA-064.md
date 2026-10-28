@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Fold battle behaviour into Tomb traps: entering a room on guard lessens a trap but gives up initiative in a battle"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-28"
 links:
