@@ -79,7 +79,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Fortune's Favor | Gain +1 Wild Advantage | Same; how long is Q-299 (DEC-413) | Direct, decided |
 | One Thousand Strides | Move any hero up to 3 spaces | Move any group up to 3 spaces (DEC-414) | Direct, decided |
 | Purifying Breath | Remove up to 2 skulls from any building | Same (DEC-415) | Direct, decided |
-| Golden Sun | Gain 1 spirit | Gain money | Reword |
+| Golden Sun | Gain 1 spirit | Gain money (DEC-416) | Reword, decided |
 | Siren's Song | Move any foe up to 2 spaces | Move a standing horde's token up to 2 spaces | Reword |
 
 **Potions: 4 direct, 2 reword.**
