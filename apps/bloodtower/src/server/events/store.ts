@@ -67,9 +67,12 @@ export interface EventStore {
   listEvents: (gameId: string, afterSeq?: number) => StoredHostEvent[];
   writeCheckpoint: (input: CheckpointInput) => StoredCheckpoint;
   lastCheckpoint: (gameId: string) => StoredCheckpoint | null;
+  latestCheckpoint: () => StoredCheckpoint | null;
   getAutosave: () => AutosaveRow | null;
   setAutosave: (row: AutosaveRow) => void;
   replaceAutosave: (row: AutosaveRow) => void;
+  /** Removes the one autosave row. New game on the session screen (DEC-208). */
+  clearAutosave: () => void;
   autosaveForSession: (sessionId: string) => AutosaveRow | null;
   hasEvents: (gameId: string) => boolean;
 }
@@ -178,6 +181,11 @@ export const createEventStore = (db: Db): EventStore => {
       return row ? checkpointFromSelect(row) : null;
     },
 
+    latestCheckpoint: () => {
+      const row = db.select().from(checkpoints).orderBy(desc(checkpoints.id)).limit(1).get();
+      return row ? checkpointFromSelect(row) : null;
+    },
+
     getAutosave: () => {
       const row = db.select().from(autosave).where(eq(autosave.id, AUTOSAVE_ROW_ID)).get();
       if (!row) return null;
@@ -213,6 +221,10 @@ export const createEventStore = (db: Db): EventStore => {
           },
         })
         .run();
+    },
+
+    clearAutosave: () => {
+      db.delete(autosave).where(eq(autosave.id, AUTOSAVE_ROW_ID)).run();
     },
 
     autosaveForSession: (sessionId) => {

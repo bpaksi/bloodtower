@@ -2,6 +2,7 @@ import { type BoardGraph, buildBoardGraph } from "../../engine/loops/chapter/boa
 import type { PlayContent, PlayState } from "../../engine/loops/chapter/playState.ts";
 import { createShellRegistry } from "../../engine/loops/session/registry.ts";
 import type { ShellState } from "../../engine/loops/session/state.ts";
+import { OPENING_MOMENTS } from "../../protocols/opening.ts";
 
 /** JSON-safe shell state for checkpoint rows (no registry, devices as a list). */
 export type SerializedShellState = Omit<ShellState, "devices" | "registry"> & {
@@ -50,6 +51,9 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
 
 export const deserializeShellState = (row: SerializedShellState): ShellState => ({
   ...row,
+  towerLinked: row.towerLinked ?? false,
+  openingIndex: typeof row.openingIndex === "number" ? row.openingIndex : OPENING_MOMENTS.length,
+  goodbyeTower: row.goodbyeTower ?? null,
   devices: new Set(row.devices),
   registry: createShellRegistry(),
   playContent: row.playContent ? rehydratePlayContent(row.playContent) : null,

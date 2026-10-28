@@ -116,7 +116,12 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   for (const issue of catalog.issues) {
     log.error("pack-load", formatPackV2Issues([issue]).join("\n"));
   }
-  const packAssetCatalogs: import("../pack/assets.ts").PackAssetIndex[] = [];
+  const packAssetCatalogs = catalog.assetIndexes;
+  for (const index of packAssetCatalogs) {
+    for (const warning of index.warnings) {
+      log.error("pack-asset", `${index.packId}: ${warning.message}`);
+    }
+  }
   const joinCode =
     options.joinCode ?? String(randomBytes(3).readUIntBE(0, 3) % 1_000_000).padStart(6, "0");
   const clock = options.clock ?? systemClock();
@@ -147,6 +152,26 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   });
   let broadcastImpl: () => void = () => undefined;
   let engine: CoreSession;
+  const persistRoster = () => {
+    const current = engine.state();
+    const roster = engine.roster();
+    store.saveRoster({
+      sessionId,
+      packId,
+      packVersion,
+      startedWall: clock.wall(),
+      joinCode,
+      devices: roster.devices.map((device) => ({
+        deviceId: device.id,
+        formFactor: device.formFactor,
+        token: device.token,
+        connected: current.devices.has(device.id),
+      })),
+      holdings: Object.entries(current.holdings).flatMap(([hunter, deviceId]) =>
+        deviceId == null ? [] : [{ deviceId, hunter }],
+      ),
+    });
+  };
   try {
     engine = createCoreSession({
       sessionId,
@@ -159,8 +184,12 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       tower,
       clock,
       log,
-      onChange: () => broadcastImpl(),
+      onChange: () => {
+        broadcastImpl();
+        persistRoster();
+      },
     });
+    engine.restoreDevices(store.listDevices());
   } catch (error) {
     opened.close();
     throw error;
@@ -710,6 +739,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
         try {
           for (const id of deviceSockets.keys()) engine.disconnect(id);
           deviceSockets.clear();
+          await engine.cancelDisconnects();
           for (const socket of clients.keys()) socket.close();
           clients.clear();
           await new Promise<void>((resolveClose) => {

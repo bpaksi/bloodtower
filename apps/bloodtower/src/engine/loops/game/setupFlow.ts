@@ -18,15 +18,35 @@ export const chosenStory = (state: ShellState) =>
 
 export const refreshSetupSteps = (state: ShellState): void => {
   const story = chosenStory(state);
-  // `story.setup` is already merged (and pack-filtered) when the host loads the catalog.
+  // `story.setup` is already merged with the engine seals step when the host loads the catalog.
   state.setupSteps = story ? [...story.setup] : [];
   state.setupAt = 0;
 };
 
+/** How many heroes this story seats. Party size wins; otherwise every hero. */
+export const partySize = (state: ShellState): number => {
+  const story =
+    chosenStory(state) ?? state.stories.find((entry) => entry.card.id === state.boundStoryId);
+  if (!story) return 0;
+  const setting = story.settings.find((entry) => entry.id === "party-size");
+  if (!setting) return story.heroes.length;
+  const optionId = state.settingValues[setting.id] ?? setting.default;
+  const option = setting.options.find((entry) => entry.id === optionId);
+  const parsed = Number(option?.label);
+  if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  return story.heroes.length;
+};
+
+export const heldCount = (state: ShellState): number => {
+  const story =
+    chosenStory(state) ?? state.stories.find((entry) => entry.card.id === state.boundStoryId);
+  if (!story) return 0;
+  return story.heroes.filter((hero) => state.holdings[hero.id] != null).length;
+};
+
 export const allHeroesHeld = (state: ShellState): boolean => {
-  const story = chosenStory(state);
-  if (!story) return false;
-  return story.heroes.every((hero) => state.holdings[hero.id] != null);
+  const size = partySize(state);
+  return size > 0 && heldCount(state) >= size;
 };
 
 export const unheldHeroIds = (state: ShellState): string[] => {
@@ -39,9 +59,18 @@ export const screenAfterContinue = (state: ShellState, screen: ShellScreen): She
   if (screen === "pick-story") return "game-settings";
   if (screen === "game-settings") {
     const story = chosenStory(state);
-    if (!story?.card.playable) return "pick-story";
+    if (!story?.card.playable) {
+      state.chosenStoryId = null;
+      state.settingValues = {};
+      state.setSerial = 0;
+      return "pick-story";
+    }
+    // Connect Tower follows Game settings unless this session already calibrated (SCR-005).
+    // A story that already finished tower setup, including splash connect, skips the screen.
+    if (!state.towerSetupDone) return "tower-connect";
     return "claim-heroes";
   }
+  if (screen === "tower-connect") return "claim-heroes";
   if (screen === "claim-heroes") {
     return state.setupSteps.length > 0 ? "setup" : "begin";
   }
@@ -53,13 +82,15 @@ export const screenAfterContinue = (state: ShellState, screen: ShellScreen): She
 };
 
 export const screenAfterBack = (state: ShellState, screen: ShellScreen): ShellScreen | null => {
+  if (screen === "not-playable") return "pick-story";
   if (screen === "game-settings") {
     state.chosenStoryId = null;
     state.settingValues = {};
     state.setSerial = 0;
     return "pick-story";
   }
-  if (screen === "claim-heroes") return "game-settings";
+  if (screen === "tower-connect") return "game-settings";
+  if (screen === "claim-heroes") return state.towerSetupDone ? "game-settings" : "tower-connect";
   if (screen === "setup") {
     if (state.setupAt > 0) {
       state.setupAt -= 1;

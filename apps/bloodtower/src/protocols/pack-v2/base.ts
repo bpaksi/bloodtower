@@ -18,9 +18,20 @@ const kingdomSchema = z.strictObject({
   label: z.string().min(1).max(80),
 });
 
+const regionIdSchema = z.string().regex(/^REG-\d{2,}$/, {
+  message: "P2-1: a region id is REG- and a number (DEC-243).",
+});
+
 const regionLabelSchema = z.strictObject({
+  /** A region a space can point at (DEC-242). A label with no id is a name on the board only. */
+  id: regionIdSchema.optional(),
   name: z.string().min(1).max(120),
   notes: z.string().max(500).optional(),
+});
+
+const neighbourSchema = z.strictObject({
+  to: spaceIdSchema,
+  slot: z.enum(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]).nullable().optional(),
 });
 
 const spaceSchema = z.strictObject({
@@ -30,7 +41,9 @@ const spaceSchema = z.strictObject({
   terrain: terrainSchema,
   building: buildingTypeIdSchema.optional(),
   tower_adjacent: z.boolean().optional(),
+  region: regionIdSchema.optional(),
   adjacent: z.array(spaceIdSchema).default([]),
+  neighbours: z.array(neighbourSchema).optional(),
   notes: z.string().max(500).optional(),
 });
 
@@ -57,12 +70,37 @@ const boardSchema = z
     if (ids.size !== board.spaces.length) {
       ctx.addIssue({ code: "custom", message: "P2-1: each space id is unique." });
     }
+    const regionIds = new Set(board.region_labels.flatMap((r) => (r.id ? [r.id] : [])));
     for (const space of board.spaces) {
+      if (space.region && !regionIds.has(space.region)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `P2-2: space ${space.id} points at unknown region ${space.region}.`,
+        });
+      }
       if (!space.id.startsWith(`${space.kingdom}-`)) {
         ctx.addIssue({
           code: "custom",
           message: `P2-1: space ${space.id} kingdom letter must match its id (DEC-225).`,
         });
+      }
+      const slots = new Set<string>();
+      for (const neighbour of space.neighbours ?? []) {
+        if (!ids.has(neighbour.to)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `P2-2: space ${space.id} lists unknown neighbour ${neighbour.to}.`,
+          });
+        }
+        if (neighbour.slot) {
+          if (slots.has(neighbour.slot)) {
+            ctx.addIssue({
+              code: "custom",
+              message: `P2-3: space ${space.id} gives slot ${neighbour.slot} to two neighbours (DEC-236).`,
+            });
+          }
+          slots.add(neighbour.slot);
+        }
       }
       for (const neighbor of space.adjacent) {
         if (!ids.has(neighbor)) {

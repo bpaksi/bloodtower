@@ -1,5 +1,7 @@
 # Dracula (Vellmoor) asset map
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/dracula-asset-map.md).
+
 Status: draft for Bob's review, 2026-10-14; updated 09:55 for Loremaster's final scripts; §1b re-done 10:30 for the D-DRA-10 rework (`assets/stories/dracula/scripts/`, 19 scenes incl. `n5-ending-endures`). Design only. Nothing here is decided.
 
 **Names (final scripts):** Lenka Morosz = the woman · Anton Morosz = the dead burgomaster · Vlad = the Count · Ludmila = his lost love · Sergiu = his murdered brother. Older rows that say "the woman" mean Lenka. Readiness findings for the scripts are in [readiness-review.md](readiness-review.md).

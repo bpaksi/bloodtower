@@ -12,6 +12,6 @@ links:
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** a hazard on a river crossing that a story renames (flooded ford, wall of mist). Crossing costs a story item or a corruption, not warriors, to keep DEC-003. A set piece places or removes it to gate a kingdom.

@@ -65,6 +65,14 @@ const storyStartSchema = z.strictObject({
   assignments: z.array(startAssignmentSchema).min(1),
 });
 
+/** Physical setup steps the pack adds after the engine seals-and-skulls step. */
+const setupStepSchema = z.strictObject({
+  id: idSchema,
+  label: z.string().min(1).max(200),
+});
+
+const ENGINE_SETUP_STEP_ID = "seals-and-skulls";
+
 export const storyPackSchema = z
   .strictObject({
     format: z.literal(2),
@@ -85,6 +93,7 @@ export const storyPackSchema = z
       move_roll: moveRollSchema,
     }),
     start: storyStartSchema,
+    setup: z.array(setupStepSchema).max(16).default([]),
     game: z
       .strictObject({
         start: entryPointSchema.optional(),
@@ -120,6 +129,16 @@ export const storyPackSchema = z
     const chapterIds = pack.chapters.map((c) => c.id);
     if (new Set(chapterIds).size !== chapterIds.length) {
       ctx.addIssue({ code: "custom", message: "P2-1: each chapter id is unique." });
+    }
+    const setupIds = pack.setup.map((step) => step.id);
+    if (new Set(setupIds).size !== setupIds.length) {
+      ctx.addIssue({ code: "custom", message: "P2-1: each setup step id is unique." });
+    }
+    if (setupIds.includes(ENGINE_SETUP_STEP_ID)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "P2-1: seals-and-skulls is an engine setup step, not a pack step.",
+      });
     }
   });
 

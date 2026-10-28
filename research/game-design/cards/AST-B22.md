@@ -12,6 +12,6 @@ links:
 sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
-  - { file: "../return-to-dark-tower/assets/IMG_5683.HEIC", note: "rulebook components page (photo)" }
+  - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** the story's key items: chapter artifacts, kingdom keys and clue items. A set piece grants one, and a player takes the card from the box. The carrier holds the physical card so the table can see who has it, and the app shows its story name. Losing the carrier's card is a story event, not a silent removal.

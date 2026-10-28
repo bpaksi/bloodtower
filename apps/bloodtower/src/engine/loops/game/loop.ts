@@ -1,3 +1,8 @@
+import {
+  OPENING_MOMENTS,
+  openingActiveIndex,
+  openingPromptId,
+} from "../../../protocols/opening.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
 import type { ShellScreen } from "../session/screens.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
@@ -12,7 +17,9 @@ export type GameLocal = {
   phase:
     | "pick-game"
     | "pick-story"
+    | "not-playable"
     | "game-settings"
+    | "tower-connect"
     | "claim-heroes"
     | "setup"
     | "begin"
@@ -45,9 +52,21 @@ const offerContinueOrBack = (
     local.awaitingPress = true;
     return;
   }
+  if (shell.screen === "not-playable") {
+    offer("back-not-playable", "back");
+    local.awaitingPress = true;
+    return;
+  }
   if (shell.screen === "game-settings") {
     offer("continue-game-settings", "continue");
     offer("back-game-settings", "back");
+    local.awaitingPress = true;
+    return;
+  }
+  if (shell.screen === "tower-connect") {
+    offer("tower-connect", "tower-connect");
+    offer("play-without-tower", "play-without-tower");
+    offer("back-tower-connect", "back");
     local.awaitingPress = true;
     return;
   }
@@ -75,6 +94,16 @@ const offerContinueOrBack = (
     }
     offer("continue-begin", "continue");
     offer("back-begin", "back");
+    local.awaitingPress = true;
+    return;
+  }
+  if (shell.screen === "play" && openingActiveIndex(shell.openingIndex)) {
+    const momentId = OPENING_MOMENTS[shell.openingIndex];
+    if (!momentId) {
+      local.awaitingPress = false;
+      return;
+    }
+    offer(openingPromptId(momentId), "continue");
     local.awaitingPress = true;
   }
 };
@@ -105,7 +134,9 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
 
     if (
       local.phase === "pick-story" ||
+      local.phase === "not-playable" ||
       local.phase === "game-settings" ||
+      local.phase === "tower-connect" ||
       local.phase === "claim-heroes" ||
       local.phase === "setup" ||
       local.phase === "begin"
@@ -127,6 +158,10 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
         }
         ctx.offerPrompt(`pause-${shell.pauseSerial}-quit`, "quit-story");
         recordOffer(`pause-${shell.pauseSerial}-quit`, "quit-story");
+        return { local, passComplete: false };
+      }
+      if (openingActiveIndex(shell.openingIndex)) {
+        if (!local.awaitingPress) offerContinueOrBack(local, ctx);
         return { local, passComplete: false };
       }
       if (!local.playStarted && shell.play) {
@@ -171,8 +206,22 @@ export const handleGamePress = (
     }
   }
 
+  if (
+    local.phase === "tower-connect" &&
+    promptId === "play-without-tower" &&
+    actionId === "play-without-tower"
+  ) {
+    shell.screen = "claim-heroes";
+    return { phase: "claim-heroes", awaitingPress: false, playStarted: false };
+  }
+
   if (actionId === "continue") {
     if (local.phase === "pick-story" && promptId === `continue-pick-story-${shell.focusStoryId}`) {
+      const focused = shell.stories.find((story) => story.card.id === shell.focusStoryId);
+      if (focused && !focused.card.playable) {
+        shell.screen = "not-playable";
+        return { phase: "not-playable", awaitingPress: false, playStarted: false };
+      }
       if (!bindStoryChoice(shell, shell.focusStoryId)) return { ...local, awaitingPress: false };
       shell.screen = "game-settings";
       return { phase: "game-settings", awaitingPress: false, playStarted: false };
@@ -203,8 +252,17 @@ export const handleGamePress = (
     if (local.phase === "begin" && promptId === "continue-begin" && allHeroesHeld(shell)) {
       shell.screen = "play";
       shell.stage = "playing";
+      shell.openingIndex = 0;
       if (!shell.activeGameId) shell.activeGameId = `game-${shell.eventSeq}`;
       return { phase: "play", awaitingPress: false, playStarted: false };
+    }
+    if (
+      local.phase === "play" &&
+      openingActiveIndex(shell.openingIndex) &&
+      promptId === openingPromptId(OPENING_MOMENTS[shell.openingIndex] ?? "")
+    ) {
+      shell.openingIndex += 1;
+      return { ...local, awaitingPress: false, playStarted: false };
     }
   }
 
@@ -220,13 +278,15 @@ export const handleGamePress = (
     };
   }
 
-  if (local.phase === "play" && shell.pause && promptId === `pause-${shell.pauseSerial}-quit`) {
-    if (actionId === "quit-story") {
-      shell.stage = "ended";
-      shell.pause = null;
-      shell.screen = "play";
-      return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
-    }
+  if (
+    local.phase === "play" &&
+    actionId === "quit-story" &&
+    (promptId === "menu-quit" || (shell.pause && promptId === `pause-${shell.pauseSerial}-quit`))
+  ) {
+    shell.stage = "ended";
+    shell.pause = null;
+    shell.screen = "play";
+    return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
   }
   if (
     local.phase === "play" &&
@@ -237,6 +297,7 @@ export const handleGamePress = (
   ) {
     shell.pause = null;
     shell.stage = "playing";
+    shell.screen = "play";
     return { ...local, awaitingPress: false };
   }
 

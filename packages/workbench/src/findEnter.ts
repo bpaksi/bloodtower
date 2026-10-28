@@ -37,3 +37,33 @@ export function resolveOpen(href: string, pathname: string, currentHash: string)
 export function findEscape(): { closeList: boolean; blur: boolean; preventDefault: boolean } {
   return { closeList: true, blur: true, preventDefault: true };
 }
+
+export type OpenPlanActions = {
+  dispatchHashChange: () => void;
+  setHash: (hash: string) => void;
+  openDetail: () => void;
+  navigate: (href: string) => void;
+};
+
+/** Runs an open plan: re-dispatch hashchange on a same-hash re-pick, else set hash or navigate. */
+export function applyOpenPlan(plan: OpenPlan, href: string, actions: OpenPlanActions): void {
+  if (plan.kind === "jump") {
+    if (plan.rescroll) actions.dispatchHashChange();
+    else actions.setHash(plan.hash);
+    return;
+  }
+  if (plan.openDetail) actions.openDetail();
+  actions.navigate(href);
+}
+
+export type FindEscapeAct = { closeList: boolean; blur: boolean; preventDefault: boolean };
+
+/** Runs find Esc: close list, keep the key from the overlay handler, leave the box. */
+export function applyFindEscape(
+  act: FindEscapeAct,
+  actions: { closeList: () => void; preventDefault: () => void; blur: () => void },
+): void {
+  if (act.closeList) actions.closeList();
+  if (act.preventDefault) actions.preventDefault();
+  if (act.blur) actions.blur();
+}

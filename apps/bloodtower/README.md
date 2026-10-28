@@ -24,10 +24,12 @@ The Mac runs this host. The Story board is display-only at `/board`. Hero device
 | `../../packs/base/` | Shared board graph and hero roster for v2 packs. |
 
 ```bash
+pnpm --dir apps/bloodtower pack:lint            # packs/test only
 pnpm --dir apps/bloodtower pack:lint packs/test
+pnpm --dir apps/bloodtower pack:lint:all        # every door under packsDir
 ```
 
-`pnpm --dir apps/bloodtower pack:lint <dir>` checks another folder; the path is resolved from the server package working directory.
+`pnpm --dir apps/bloodtower pack:lint <dir>` checks another folder; the path is resolved from the server package working directory. `pack:lint:all` walks every immediate child of `packsDir` (`.wt.json`, then `PACKS_DIR`, default `packs/`) and `packs-v2/` when that tree is separate. `pnpm check` and `pnpm build` run it and fail if a pack fails. `W-asset` on a placeholder stays a warning. A missing non-placeholder still, audio file, or cover fails the lint.
 
 ## Running on the Mac
 
@@ -50,7 +52,7 @@ A worktree reads ports, SQLite folder, and `packsDir` from `.wt.json` (`pnpm wt`
 ```bash
 cd apps/bloodtower
 pnpm dev      # server (tsx watch, port 4787) + next dev on port 3000
-pnpm build    # web static export
+pnpm build    # pack:lint:all, then the web static export
 pnpm start    # one process serving the export; run pnpm build first
 pnpm e2e      # Playwright on port 4788 (first time: pnpm -F bloodtower-e2e e2e:install)
 pnpm simulate --games 1000 --days 10 --seed s   # headless Proving Grounds slice

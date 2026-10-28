@@ -21,9 +21,29 @@ const toShell = (snapshot: ReturnType<MockTower["snapshot"]>): ShellTowerSnapsho
 export const bloodtowerTowerFromMock = (mock: MockTower): BloodtowerTower => ({
   snapshot: () => toShell(mock.snapshot()),
   subscribe: (listener) => mock.onSnapshotChange(listener),
-  runCapability: async (capabilityId) => {
-    if (capabilityId === "tower.connect") mock.connect();
-    else if (capabilityId === "tower.calibrate") mock.calibrate();
+  runCapability: async (capabilityId, _params, log) => {
+    if (capabilityId === "tower.connect") {
+      mock.connect();
+      return "ok";
+    }
+    if (capabilityId === "tower.calibrate") {
+      mock.calibrate();
+      return "ok";
+    }
+    if (capabilityId === "lighting.all-off") {
+      const taken = await mock.idle();
+      if (taken === "failed") {
+        log.error(
+          "tower-command-failed",
+          mock.snapshot().connection === "connected"
+            ? "Tower command lighting.all-off failed."
+            : "Tower command lighting.all-off was not sent because the tower is not connected.",
+        );
+        return "failed";
+      }
+      return "ok";
+    }
+    return "ok";
   },
   close: async () => {},
 });

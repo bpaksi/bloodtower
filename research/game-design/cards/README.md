@@ -8,7 +8,7 @@ One small idea per file. The game-workbench shows them as a graph: one card in t
 
 ```markdown
 ---
-type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | glyph | seal | light | light-effect | light-sequence | drum | sketch | example
+type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | glyph | seal | light | light-effect | light-sequence | drum | art | sketch | example
 title: Use the 3 RtDT quest tokens   # one line, the headline
 status: open          # open | answered | proposed | decided | parked
 layer: core           # core | configurable | optional | story (see Layers)
@@ -46,6 +46,7 @@ Prefix by type, three digits, never reused or renumbered. A retired card stays, 
 | light-effect | `LFX-` (a light effect: breathe, flicker…) |
 | light-sequence | `LSQ-` (a built-in light sequence) |
 | drum | `DRM-` (tower drum) |
+| art | `ART-` (one picture to make: a card, tile or token image, made in the game's look) |
 | sketch | `SK-` |
 | example | `EX-` |
 
@@ -70,13 +71,13 @@ A link is written on one card and read both ways.
 
 Each verb may join only certain types. The card lint (`pnpm check`) fails a link that no rule allows. `needs` is the only verb that sets build order: "A needs B" means B must be settled or built before A. `needs` and `part-of` must not loop back on themselves.
 
-Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or more times on that day, plus the rules by meaning below. The code is `apps/game-workbench/src/web/lib/link-rules.ts`. Below, "built" means decision, option, mechanic, piece, screen, ui, cue or a tower output (sound, glyph, seal, light, light-effect, light-sequence, drum). A document ID is written `ref:<kind>`, for example `ref:requirement` for `R-WIZ-5`.
+Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or more times on that day, plus the rules by meaning below. The code is `apps/game-workbench/src/web/lib/link-rules.ts`. Below, "built" means decision, option, mechanic, piece, screen, ui, cue, art or a tower output (sound, glyph, seal, light, light-effect, light-sequence, drum). A document ID is written `ref:<kind>`, for example `ref:requirement` for `R-WIZ-5`.
 
 | Verb | Sets build order | No loops | Allowed by meaning | Also allowed (common shapes) |
 |---|---|---|---|---|
-| `needs` | yes | yes | built or idea → built or question; question → question | — |
+| `needs` | yes | yes | built or idea → built or question; question → question | question → question |
 | `raises` | no | no | — | decision → question; idea → question |
-| `answers` | no | no | anything → question | decision → idea; option → question |
+| `answers` | no | no | anything → question | decision → idea, question; option → question |
 | `uses` | no | no | screen, ui, cue → ui, cue or a tower output | area → piece; decision → decision, idea, mechanic; glyph → drum; idea → piece; mechanic → decision, mechanic, piece; piece → mechanic; question → decision, mechanic; seal → drum |
 | `refines` | no | no | — | area → ref:asset; decision → decision, idea, mechanic, piece, ref:engine, ref:requirement; idea → decision, idea, mechanic, piece, ref:requirement; mechanic → idea, mechanic, ref:engine, ref:requirement; piece → piece, ref:engine; question → decision; screen → ref:requirement; ui → ref:requirement |
 | `affects` | no | no | — | decision → decision, mechanic, piece; idea → decision, mechanic, piece, question; question → decision, idea, mechanic, piece, question |
@@ -87,19 +88,16 @@ Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or
 
 ## Sound feel
 
-A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it on tower-poc's Sounds page and exports `sound-feel.json`; Claude copies each sound into its card. The `/sounds` page in the workbench lists and filters them.
+A `sound` card may carry a `feel:` block: how the sound came across when Bob heard it on the tower (game-workbench plan, step 7). Bob records it in the sound review tool (`apps/sound-review-tool`), which saves to `~/Desktop/sound-feel.json` as he goes; Claude copies each sound into its card from that file. The `/sounds` page in the workbench lists them and filters by tone.
 
 ```yaml
 feel:
-  mood: dread          # dread | tension | wonder | triumph | loss | calm | comic | mystery | menace
-  readsAs: threat      # threat | alert | reward | failure | arrival | magic | voice | transition
-  strength: strong     # soft | medium | strong
-  lengthMs: 2300       # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
-  answerLengthMs: 2240 # from the tower's answer to the play (as the sound starts) to the same Stopped press
-  note: low growl, then a crack
+  soundsLike: low growl, then a crack # a few of Bob's own words
+  tone: bad                           # good | bad | neutral
+  lengthMs: 2300                      # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
 ```
 
-Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a word outside the lists above. The code is `apps/game-workbench/src/web/lib/feel.ts`.
+Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a tone outside the list above. The older fields (mood, readsAs, strength, answerLengthMs, note) were dropped on 2026-10-26, when the review moved out of tower-poc. The code is `apps/game-workbench/src/web/lib/feel.ts`.
 
 ## Status
 
@@ -110,6 +108,10 @@ Every field is optional. One that was not recorded is left out, never written as
 | `decided` | Bob ruled. Only Bob moves a card to `decided`; Claude may propose |
 | `answered` | A question with a decided or proposed answer linked |
 | `parked` | Dropped or postponed; left out of progress |
+
+**Replaced rulings (DEC-352).** When a newer ruling replaces a whole card, park the old card and start its body with "Replaced by DEC-x (Bob, date)." When it replaces only part, the old card stays `decided`, its title is cut to what still holds, and its body says what DEC-x replaced. Either way the newer card links `refines` to the old one, with a note saying what it replaces.
+
+**Deliverables (DEC-355).** `SCR-`, `UI-`, `CUE-`, `MEC-` and `ART-` cards are the deliverables: one card per thing that gets built. Every decided ruling is reached from at least one of them by `needs` or `uses`, and each plan step lists the deliverable cards it builds as `Builds: <IDs>`.
 
 ## Layers
 

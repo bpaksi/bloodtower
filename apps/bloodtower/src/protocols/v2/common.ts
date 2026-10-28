@@ -21,9 +21,26 @@ export const SETUP_SCREENS = [
 export const setupScreenSchema = z.enum(SETUP_SCREENS);
 export type SetupScreen = z.infer<typeof setupScreenSchema>;
 
-/** Runtime screens the host projects during play and between games (C1 step 9). */
-export const RUNTIME_SCREENS = ["pick-game", "play", "pause", "session", "goodbye"] as const;
-export const viewScreenSchema = z.enum([...SETUP_SCREENS, ...RUNTIME_SCREENS]);
+/**
+ * Runtime screens the host projects during play and between games (C1 steps 9 and 10).
+ * `splash` is the designed start. Play skips tower connect and calibrate.
+ */
+export const RUNTIME_SCREENS = [
+  "splash",
+  "pick-game",
+  "play",
+  "pause",
+  "session",
+  "goodbye",
+] as const;
+
+/**
+ * A metadata-only door can be chosen, then stops here (D40). It is not a setup
+ * screen: no private lines, and Continue does not bind the pack.
+ */
+export const NOT_PLAYABLE_SCREEN = "not-playable" as const;
+
+export const viewScreenSchema = z.enum([...SETUP_SCREENS, ...RUNTIME_SCREENS, NOT_PLAYABLE_SCREEN]);
 export type ViewScreen = z.infer<typeof viewScreenSchema>;
 
 export const heroIdSchema = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/);
@@ -62,6 +79,8 @@ const openActionSchema = z.strictObject({
   promptId: promptIdSchema,
   actionId: actionIdSchema,
   label: z.string().min(1).max(200),
+  /** Walk only: the compass slot this neighbour sits in (UI-023). */
+  slot: z.enum(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]).optional(),
   open: z.literal(true),
 });
 

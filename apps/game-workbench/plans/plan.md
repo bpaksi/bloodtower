@@ -209,6 +209,8 @@ Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-p
 - 7b can be built before 7a; until then every row shows "unavailable".
 - As built: `CardSchema` gets an optional `checkFields(type, data)`, and the game's `checkFeel` (`lib/feel.ts`) is the check. Every `feel:` field is optional; the block also fails on a card that is not a sound, an unknown field, or a length that is not a whole number above 0. `/sounds` groups by the card's `part-of` area under AREA-021 ("Tower sounds: <category>"), filters with `?mood=` and `?reads=` links (no client code), and is linked from the sidebar.
 - Bob's ruling (2026-10-21): the review records only the feeling a sound produces. **Fits** and **Avoid** are dropped from 7a and from the `feel:` block. Linking sounds to mechanics waits until mechanics are prototyped; a mechanic's tower interaction (lights, sound and movement as one unit) is then a `CUE-` card, and the rules already allow `cue uses <tower output>`.
+- Changed 2026-10-26 (Bob): the review moved out of tower-poc into `apps/sound-review-tool`, with fewer fields. The `feel:` block is now `soundsLike` (Bob's words), `tone` (good, bad, neutral) and `lengthMs`; mood, reads-as, strength, `answerLengthMs` and note are gone, and `/sounds` filters by `?tone=`. The export is `research/game-design/sound-feel.json`, version 2. The 7a and 7b text above is kept as history.
+- Changed 2026-10-27 (Bob): the tool has no export. It saves to `~/Desktop/sound-feel.json` as Bob goes, and that file is the output (`apps/sound-review-tool/README.md` has its shape).
 - Later, the same review for the 21 light sequences (`LSQ-`) and the light effects (`LFX-`).
 
 ### Step 8: From design to requirements (Bob, 2026-10-20)
@@ -293,6 +295,13 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
   - Viewports: 1470 × 956
   - Conflict rule per #136 (recorded deviation, see step 10): a `conflicts` link to a document ID is settled when the card is parked or decided; unit tests cover both cases.
   - Not required: an impact view across several hops (Later)
+
+### Step 12: Engine map (Bob, 2026-10-27)
+Bob: a way to visualize the game engine's loops, as designed (loops within loops) and as it will be implemented (an event model), as a design aid that names every card.
+- `/engine` reads every loop card's `railroad` block (DEC-276) on each request. Four tabs: the loop stack and each railroad as designed, with a "read as events" lens; the event model from the bloodtower spec D32 to D38 (events in, `step(state, event)`, effects out; what each node kind becomes; waits per loop; the five triggers as domain events; interrupts; where the spec and the cards disagree); a walkthrough that runs the railroads as one reducer with a stack and an event log; and every idea and every card a loop names, placed on the loop nodes.
+- Every ID opens its card in a side panel. The view is kept in the URL hash, so a link names a loop, a node and a card.
+- Done when: all 13 loop cards read with no errors; the session walkthrough reaches the encounter's pick through six frames; an interrupt resumes at the held node; `lib/engine.test.ts` passes.
+- Touches: `apps/game-workbench/src/web/{app/engine/**,lib/engine.ts,lib/engine.test.ts,components/Sidebar.tsx}`, `apps/game-workbench/{README.md,plans/plan.md}`, `.claude/launch.json`
 
 ## Later
 

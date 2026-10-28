@@ -24,7 +24,8 @@ export const MIGRATIONS: readonly string[] = [
     tested_at INTEGER NOT NULL,
     environment TEXT NOT NULL
   )`,
-  // The sound feel record (spec D25, M6 step 6.1): one row per sound, the newest picks.
+  // The old sound feel record (M6 step 6.1). Nothing reads or writes it now: the review moved to
+  // apps/sound-review-tool, which carried its rows over. Kept so the migration list stays as run.
   `CREATE TABLE sound_feel (
     sound_index INTEGER PRIMARY KEY,
     mood TEXT,

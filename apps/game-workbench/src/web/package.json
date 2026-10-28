@@ -14,7 +14,7 @@
   "dependencies": {
     "@dark-tower/workbench": "workspace:*",
     "marked": "18.0.14",
-    "next": "16.4.0",
+    "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "yaml": "2.9.1"

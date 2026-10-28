@@ -353,14 +353,18 @@ export type PolicyResult = {
   attackShare: number;
 };
 
+/** Hard upper bound on simulated visits (main-thread batch; matches fortress visitCap max). */
+export const MAX_SIM_VISITS = 2000;
+
 export function simulate(
   cfg: Config,
   seed: string,
   visits: number,
   advantage = false,
 ): PolicyResult[] {
+  const nVisits = Math.min(MAX_SIM_VISITS, Math.max(0, Math.floor(visits)));
   return POLICIES.map((policy) => {
-    const runs = runBatch(visits, `${seed}:${policy}`, (rng) =>
+    const runs = runBatch(nVisits, `${seed}:${policy}`, (rng) =>
       playVisit(rng, cfg, policy, advantage),
     );
     const n = runs.length;

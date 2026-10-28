@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { ControlPress } from "bloodtower-protocols";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
+import type { GameLocal } from "../../engine/loops/game/loop.ts";
 import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
 import type { ShellStory } from "../../engine/loops/session/pack.ts";
@@ -19,7 +20,8 @@ import type { HostLogger } from "../log/hostLog.ts";
 import type { Clock } from "../timing/clock.ts";
 import type { BloodtowerTower } from "../tower/host.ts";
 import { runShellEffects } from "./effects.ts";
-import { continueShellFromCheckpoint } from "./shellContinue.ts";
+import { shellCheckpointFromState } from "./shellCheckpoint.ts";
+import { continueShellFromCheckpoint, readLobbyCheckpoint } from "./shellContinue.ts";
 
 export const GRACE_MS = 60_000;
 
@@ -62,18 +64,32 @@ export type CoreSession = {
   projectBoard: (join: { code: string; url: string; reachable: boolean }) => BoardView;
   projectDevice: (deviceId: string) => DeviceView;
   channelsFor: (deviceId: string) => string[];
-  roster: () => { devices: { id: string; token: string }[] };
+  roster: () => { devices: { id: string; token: string; formFactor: "ipad" | "phone" }[] };
+  restoreDevices: (
+    rows: readonly { deviceId: string; token: string; formFactor: "ipad" | "phone" }[],
+  ) => void;
   resumeAutosave: () => boolean;
   /** DEC-208: keep the autosave row visible on pick-game without resuming play yet. */
   rememberAutosave: (row: { gameId: string; packId: string; day: number }) => void;
   syncTowerSnapshot: () => void;
   /** Wait until queued shell applies and effects have finished. */
   whenIdle: () => Promise<void>;
+  /** Cancel holding-grace timers so shutdown does not record a drop on the saved game. */
+  cancelDisconnects: () => Promise<void>;
   /** Active game id for the event log, when the session has started. */
   currentGameId: () => string | null;
 };
 
-const gameIdOf = (state: ShellState) => state.autosave?.gameId ?? state.activeGameId;
+/**
+ * Play and pause log on the autosave game. A restarted lobby still has that row
+ * so Continue can find it, and its own splash must not be appended onto the saved log.
+ */
+const gameIdOf = (state: ShellState) => {
+  const inSavedGame =
+    state.screen === "play" || state.screen === "pause" || state.resumedFromAutosave;
+  if (inSavedGame && state.autosave) return state.autosave.gameId;
+  return state.activeGameId;
+};
 
 export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   const graceMs = options.graceMs ?? GRACE_MS;
@@ -89,6 +105,58 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     seed: options.seed,
     packVersion: options.packVersion,
     engineVersion: SHELL_ENGINE_VERSION,
+  };
+
+  const adoptLobby = (lobby: ShellState, live: ShellState): ShellState => ({
+    ...lobby,
+    stories: live.stories,
+    playContent: live.playContent ?? lobby.playContent,
+    sessionId: live.sessionId,
+    tower: live.tower,
+    towerLinked: lobby.towerLinked,
+  });
+
+  const lobbySignature = (current: ShellState) =>
+    JSON.stringify({
+      screen: current.screen,
+      holdings: current.holdings,
+      settingValues: current.settingValues,
+      chosenStoryId: current.chosenStoryId,
+      setupAt: current.setupAt,
+      boundStoryId: current.boundStoryId,
+    });
+
+  let savedLobbySignature = "";
+
+  const persistLobbyCheckpoint = () => {
+    if (state.autosave) return;
+    const screen = state.screen;
+    if (
+      screen !== "pick-story" &&
+      screen !== "game-settings" &&
+      screen !== "claim-heroes" &&
+      screen !== "setup" &&
+      screen !== "begin"
+    ) {
+      return;
+    }
+    const gameId = state.activeGameId;
+    if (!gameId) return;
+    const signature = lobbySignature(state);
+    if (signature === savedLobbySignature) return;
+    const afterSeq = options.store.nextSeq(gameId) - 1;
+    options.store.writeCheckpoint({
+      gameId,
+      day: 0,
+      afterEventSeq: Math.max(0, afterSeq),
+      stateJson: JSON.stringify(shellCheckpointFromState(state)),
+      atMonoMs: options.clock.monoMs(),
+      atWall: options.clock.wall(),
+      seed: state.seed,
+      packVersion: meta.packVersion,
+      engineVersion: meta.engineVersion,
+    });
+    savedLobbySignature = signature;
   };
 
   const effectsCtx = () => ({
@@ -130,6 +198,32 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   };
 
   const apply = async (event: ShellEvent, deviceId: string | null) => {
+    if (
+      event.kind === "press" &&
+      event.promptId === "splash-play" &&
+      event.actionId === "continue" &&
+      !state.autosave
+    ) {
+      const lobby = readLobbyCheckpoint(options.store);
+      if (lobby) {
+        state = adoptLobby(lobby, state);
+        for (const frame of state.loops.stack) {
+          if (frame.loopId !== "game") continue;
+          const local = frame.local as GameLocal;
+          frame.local = { ...local, awaitingPress: false };
+        }
+        state = { ...state, offered: [] };
+        savedLobbySignature = lobbySignature(state);
+        const shellEffects: ShellEffect[] = [];
+        for (const effect of refreshOffersAfterRestore(state)) {
+          const parsed = shellEffectSchema.safeParse(effect);
+          if (parsed.success) shellEffects.push(parsed.data);
+        }
+        await runShellEffects(state, shellEffects, effectsCtx());
+        options.onChange();
+        return;
+      }
+    }
     const before = state;
     const result = stepShell(state, event);
     state = result.state;
@@ -193,6 +287,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     }
     await runShellEffects(state, shellEffects, effectsCtx());
     options.onChange();
+    persistLobbyCheckpoint();
   };
 
   let applyQueue: Promise<void> = Promise.resolve();
@@ -280,8 +375,21 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     projectDevice: (deviceId) => project(projectShellView(state), { kind: "device", deviceId }),
     channelsFor: (deviceId) => heldHeroes(deviceId).map((hero) => `ipad:${hero}`),
     roster: () => ({
-      devices: [...devices.values()].map((device) => ({ id: device.id, token: device.token })),
+      devices: [...devices.values()].map((device) => ({
+        id: device.id,
+        token: device.token,
+        formFactor: device.formFactor,
+      })),
     }),
+    restoreDevices: (rows) => {
+      for (const row of rows) {
+        devices.set(row.deviceId, {
+          id: row.deviceId,
+          token: row.token,
+          formFactor: row.formFactor,
+        });
+      }
+    },
     syncTowerSnapshot: () => {
       enqueue({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
     },
@@ -317,6 +425,14 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
     },
     whenIdle: () => applyQueue,
+    cancelDisconnects: () => {
+      for (const record of devices.values()) {
+        if (!record.grace) continue;
+        clearTimeout(record.grace);
+        record.grace = undefined;
+      }
+      return applyQueue;
+    },
     currentGameId: () => gameIdOf(state),
   };
 };

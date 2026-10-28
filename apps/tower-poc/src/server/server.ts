@@ -23,8 +23,6 @@ import {
 } from "@dark-tower/tower/runtime";
 import { type RawData, type WebSocket, WebSocketServer } from "ws";
 import { type ClientHub, createClientHub } from "./clientHub.ts";
-import type { SoundFeel } from "./soundFeel.ts";
-import { handleSoundFeelExport } from "./soundFeelHttp.ts";
 import { requestPath, serveStatic } from "./static.ts";
 import { handleTimingResults } from "./timing/http.ts";
 import type { Verifications } from "./verifications.ts";
@@ -51,8 +49,6 @@ export interface TowerServerOptions {
   records: TowerRecords;
   /** Verify mode's results, overlaid on the inventory in `welcome` (D14). */
   verifications: Verifications;
-  /** The sound feel record (D25), in `welcome` and exported as `sound-feel.json`. */
-  soundFeel: SoundFeel;
   /** Which tower the session drives, for `welcome`. */
   tower: "mock" | "bluetooth";
   /**
@@ -218,7 +214,6 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
           },
           inventory: INVENTORY,
           verificationOverlay: options.verifications.overlay(),
-          soundFeel: options.soundFeel.rows(),
           tower: options.tower,
         },
       });
@@ -289,28 +284,6 @@ const handleMessage = (socket: WebSocket, data: RawData, context: Context) => {
         payload: { verificationOverlay: outcome.overlay },
       });
     }
-    case "soundFeel.record": {
-      // How a sound came across to the person (D25). Nothing is sent to the tower.
-      let row: ReturnType<SoundFeel["record"]>;
-      try {
-        row = options.soundFeel.record(message.data.payload, client.label ?? "Unnamed device");
-      } catch (error) {
-        console.error("Saving a sound feel failed:", error);
-        return sendError(
-          socket,
-          "invalid-state",
-          "The sound feel was not saved: the service could not write it.",
-          id,
-        );
-      }
-      // Every client sees it; the id tells the device that recorded it that it was saved.
-      return hub.broadcast({
-        v: PROTOCOL_VERSION,
-        type: "soundFeel.changed",
-        correlationId: id,
-        payload: { row },
-      });
-    }
     default: {
       // A client message type with no case here is a compile error, not a message left unanswered.
       const unhandled: never = message.data;
@@ -325,7 +298,6 @@ export const startTowerServer = async (options: TowerServerOptions): Promise<Tow
     const origin = Array.isArray(req.headers.origin) ? req.headers.origin[0] : req.headers.origin;
     const host = Array.isArray(req.headers.host) ? req.headers.host[0] : req.headers.host;
     const allowed = isAllowedOrigin(origin, host, options.devOrigins);
-    if (handleSoundFeelExport(req, res, options.soundFeel, allowed)) return;
     handleTimingResults(req, res, options.timingResultsDir, allowed)
       .then((handled) => {
         if (!handled) return serveStatic(options.webRoot, req, res);

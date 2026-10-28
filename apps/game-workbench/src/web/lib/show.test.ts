@@ -33,7 +33,8 @@ describe("pnpm graph show", () => {
       for (const g of groups) {
         expect(part).toContain(`  ${g.verb}\n`);
         for (const l of g.links) {
-          expect(part).toContain(`    ${l.id}`);
+          // Trailing separator so MEC-01 does not match inside MEC-012.
+          expect(part).toMatch(new RegExp(`\\n    ${l.id}(?:  |\\n|$)`));
           if (l.note) expect(part).toContain(`(${l.note})`);
         }
       }

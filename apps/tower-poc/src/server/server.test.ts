@@ -19,7 +19,6 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { openDatabase } from "./db/client.ts";
-import { createSoundFeelStorage } from "./db/soundFeel.ts";
 import { createVerificationStorage } from "./db/verifications.ts";
 import {
   isAllowedOrigin,
@@ -28,7 +27,6 @@ import {
   type TowerServer,
   WS_PATH,
 } from "./server.ts";
-import { createSoundFeel } from "./soundFeel.ts";
 import { createVerifications, type VerificationStorage } from "./verifications.ts";
 
 /** A session on its own mock tower, which connects in 20 ms. */
@@ -41,19 +39,11 @@ const mockSession = () => {
 const verificationsOn = (storage = createVerificationStorage(openDatabase(":memory:").db)) =>
   createVerifications({ storage, tower: "mock", libraryVersion: "7.1.2", appVersion: "9.9.9" });
 
-/** A sound feel record in a database of its own (D25). */
-const soundFeelOn = (storage = createSoundFeelStorage(openDatabase(":memory:").db)) =>
-  createSoundFeel({ storage });
-
-/**
- * A store with the service's record of seals and skulls on it, the Verify results and the sound
- * feel record, as the server takes them.
- */
+/** A store with the service's record of seals and skulls on it and the Verify results, as the server takes them. */
 const withRecords = (store = createStateStore()) => ({
   store,
   records: createTowerRecords(store),
   verifications: verificationsOn(),
-  soundFeel: soundFeelOn(),
 });
 
 let dir: string;
@@ -985,201 +975,5 @@ describe("restore prompt (D11)", () => {
       await own.close();
       await session.close();
     }
-  });
-});
-
-describe("sound feel record (D25)", () => {
-  const listen = (socket: WebSocket) => {
-    const received: ServerMessage[] = [];
-    socket.on("message", (raw) =>
-      received.push(serverMessageSchema.parse(JSON.parse(raw.toString()))),
-    );
-    const until = async (match: (all: ServerMessage[]) => boolean) => {
-      for (let waited = 0; !match(received); waited += 10) {
-        if (waited > 3000) throw new Error(`timed out; received ${JSON.stringify(received)}`);
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-    };
-    return { received, until };
-  };
-  const hello = (label: string) =>
-    JSON.stringify({ v: PROTOCOL_VERSION, type: "hello", payload: { clientLabel: label } });
-  const record = (id: string, payload: unknown) =>
-    JSON.stringify({ v: PROTOCOL_VERSION, type: "soundFeel.record", id, payload });
-  const changedOf = (all: ServerMessage[]) =>
-    all.flatMap((message) => (message.type === "soundFeel.changed" ? [message] : []));
-
-  const start = async () => {
-    const session = mockSession();
-    const own = await startTowerServer({
-      port: 0,
-      host: "127.0.0.1",
-      webRoot: join(dir, "out"),
-      serverVersion: "9.9.9",
-      session,
-      ...withRecords(),
-      tower: "mock",
-    });
-    const a = await openSocket(WS_PATH, undefined, own.port);
-    const b = await openSocket(WS_PATH, undefined, own.port);
-    const close = async () => {
-      a.close();
-      b.close();
-      await own.close();
-      await session.close();
-    };
-    return { own, session, a, b, close };
-  };
-
-  it("saves a feel, shows it to every client, and gives it to a new one in welcome", async () => {
-    const { own, session, a, b, close } = await start();
-    try {
-      const fromA = listen(a);
-      const fromB = listen(b);
-      a.send(hello("iPad Safari"));
-      b.send(hello("Mac Chrome"));
-      await fromA.until((all) => all.some((m) => m.type === "welcome"));
-      await fromB.until((all) => all.some((m) => m.type === "welcome"));
-      expect(fromA.received[0]).toMatchObject({ type: "welcome", payload: { soundFeel: [] } });
-
-      // With a tower connected, saving a feel still writes nothing to it.
-      await session.connect();
-      const writesBefore = session.writes();
-      a.send(
-        record("f-1", {
-          index: 90,
-          mood: "dread",
-          readsAs: "threat",
-          lengthMs: 1850,
-          answerLengthMs: 1790,
-          note: "  low growl  ",
-        }),
-      );
-      await fromB.until((all) => changedOf(all).length === 1);
-      a.send(record("f-2", { index: 90, strength: "strong", note: null }));
-      await fromA.until((all) => changedOf(all).length === 2);
-      await fromB.until((all) => changedOf(all).length === 2);
-      const expected = {
-        index: 90,
-        mood: "dread",
-        readsAs: "threat",
-        strength: "strong",
-        lengthMs: 1850,
-        answerLengthMs: 1790,
-        note: null,
-        client: "iPad Safari",
-      };
-      expect(changedOf(fromA.received)[0]).toMatchObject({
-        correlationId: "f-1",
-        payload: { row: { strength: null, note: "low growl" } },
-      });
-      expect(changedOf(fromA.received)[1]).toMatchObject({
-        correlationId: "f-2",
-        payload: { row: expected },
-      });
-      expect(changedOf(fromB.received)).toEqual(changedOf(fromA.received));
-      expect(session.writes()).toBe(writesBefore);
-
-      const late = await openSocket(WS_PATH, undefined, own.port);
-      try {
-        const fromLate = listen(late);
-        late.send(hello("Phone"));
-        await fromLate.until((all) => all.some((m) => m.type === "welcome"));
-        expect(fromLate.received[0]).toMatchObject({ payload: { soundFeel: [expected] } });
-      } finally {
-        late.close();
-      }
-    } finally {
-      await close();
-    }
-  });
-
-  it.each([
-    ["an unknown mood", { index: 1, mood: "spooky" }],
-    ["an unknown reads-as", { index: 1, readsAs: "boom" }],
-    ["an unknown strength", { index: 1, strength: "loud" }],
-    ["a length of 0", { index: 1, lengthMs: 0 }],
-    ["a length over a minute", { index: 1, answerLengthMs: 60_001 }],
-    ["a length that is not whole", { index: 1, lengthMs: 12.5 }],
-    ["sound 0", { index: 0, mood: "calm" }],
-    ["sound 114", { index: 114, mood: "calm" }],
-    ["a field it does not know", { index: 1, fits: ["MEC-012"] }],
-  ])("refuses %s, and saves nothing", async (_, payload) => {
-    const { a, b, close } = await start();
-    try {
-      const fromA = listen(a);
-      const fromB = listen(b);
-      a.send(hello("iPad"));
-      b.send(hello("Mac"));
-      await fromB.until((all) => all.some((m) => m.type === "welcome"));
-      a.send(record("f-bad", payload));
-      await fromA.until((all) => all.some((m) => m.type === "error"));
-      expect(fromA.received.find((m) => m.type === "error")).toMatchObject({
-        correlationId: "f-bad",
-        payload: { code: "invalid-payload" },
-      });
-      expect(changedOf(fromB.received)).toEqual([]);
-    } finally {
-      await close();
-    }
-  });
-
-  it("refuses a record without an id", async () => {
-    const reply = await exchange(
-      JSON.stringify({ v: PROTOCOL_VERSION, type: "soundFeel.record", payload: { index: 1 } }),
-    );
-    expect(reply).toMatchObject({ type: "error", payload: { code: "invalid-payload" } });
-  });
-
-  it("exports the saved rows as sound-feel.json, leaving out what was never recorded", async () => {
-    const { own, a, close } = await start();
-    try {
-      const empty = await get("/api/sound-feel.json", "GET", own.port);
-      expect(empty.status).toBe(200);
-      expect(JSON.parse(empty.body)).toEqual({ version: 1, sounds: [] });
-
-      const fromA = listen(a);
-      a.send(hello("iPad"));
-      await fromA.until((all) => all.some((m) => m.type === "welcome"));
-      a.send(record("f-1", { index: 92, mood: "menace" }));
-      a.send(record("f-2", { index: 7, lengthMs: 2300, answerLengthMs: 2240, note: "rot" }));
-      a.send(record("f-3", { index: 50, mood: "calm" }));
-      a.send(record("f-4", { index: 50, mood: null }));
-      await fromA.until((all) => changedOf(all).length === 4);
-
-      const res = await get("/api/sound-feel.json", "GET", own.port);
-      expect(res.type).toBe("application/json; charset=utf-8");
-      // Sound 50 had its only field cleared, so it is not in the export.
-      expect(JSON.parse(res.body)).toEqual({
-        version: 1,
-        sounds: [
-          { id: "SND-007", index: 7, lengthMs: 2300, answerLengthMs: 2240, note: "rot" },
-          { id: "SND-092", index: 92, mood: "menace" },
-        ],
-      });
-      expect((await get("/api/sound-feel.json", "POST", own.port)).status).toBe(405);
-    } finally {
-      await close();
-    }
-  });
-
-  it("refuses the export to a page from another origin (D20)", async () => {
-    const res = await new Promise<number>((resolve, reject) => {
-      const req = request(
-        {
-          host: "127.0.0.1",
-          port: server.port,
-          path: "/api/sound-feel.json",
-          headers: { origin: "http://evil.example" },
-        },
-        (reply) => {
-          reply.resume();
-          resolve(reply.statusCode ?? 0);
-        },
-      );
-      req.on("error", reject);
-      req.end();
-    });
-    expect(res).toBe(403);
   });
 });

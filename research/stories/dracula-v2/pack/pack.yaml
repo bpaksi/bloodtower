@@ -1,0 +1,16 @@
+pack_id: dracula-v2
+title: The Count of Vellmoor
+version: 0.1.0
+engine_min: 0.1.0
+tagline: The Count has taken Lenka. Bring her home before she's his.
+cover: assets/cover.png
+tower: optional
+settings:
+  - id: length
+    label: Length
+    options:
+      - {id: short, label: Short}
+      - {id: standard, label: Standard}
+      - {id: long, label: Long}
+    default: standard
+playable: false

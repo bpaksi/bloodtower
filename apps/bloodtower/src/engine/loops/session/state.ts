@@ -39,9 +39,19 @@ export type ShellState = {
   holdings: Record<string, string | null>;
   tower: TowerSnapshot;
   towerSetupDone: boolean;
+  /**
+   * True after this session pressed connect. A drop pauses only then (DEC-155 slice).
+   * A session that never connected stays in play, including after Continue.
+   */
+  towerLinked: boolean;
   screen: ShellScreen;
   setupAt: number;
   setupSteps: { id: string; label: string }[];
+  /**
+   * Opening moment index after Begin. `-1` before Begin, `OPENING_MOMENTS.length` once
+   * Continue has left the last moment. A checkpoint keeps this so Continue can resume it.
+   */
+  openingIndex: number;
   stage: "lobby" | "playing" | "paused" | "ended";
   pause: { cause: PauseCause } | null;
   pauseSerial: number;
@@ -50,6 +60,13 @@ export type ShellState = {
   /** True after the player chose Continue on pick-game and passed the tower check. */
   resumedFromAutosave: boolean;
   sessionEnded: boolean;
+  /**
+   * Goodbye card tower line (DEC-219). `no-tower` when this session never connected.
+   * `unavailable` when the link is down or the idle command failed. `idle` after
+   * `lighting.all-off` is taken. `null` until Done for tonight, or while that command
+   * is still in flight.
+   */
+  goodbyeTower: "idle" | "no-tower" | "unavailable" | null;
   /** Every action offered in the latest advance; the runtime keeps only one prompt slot. */
   offered: PromptSlot[];
   playContent: PlayContent | null;
@@ -65,7 +82,8 @@ export const initialShellState = (input: {
   stories?: ShellStory[];
 }): ShellState => {
   const stories = input.stories ?? [];
-  const bound = stories[0]?.card.id ?? "test";
+  const boundStory = stories.find((story) => story.card.playable) ?? stories[0];
+  const bound = boundStory?.card.id ?? "test";
   return {
     version: SHELL_ENGINE_VERSION,
     sessionId: input.sessionId,
@@ -80,12 +98,14 @@ export const initialShellState = (input: {
     settingValues: {},
     setSerial: 0,
     devices: new Set(),
-    holdings: stories[0] ? initialHoldings(stories[0]) : {},
+    holdings: boundStory ? initialHoldings(boundStory) : {},
     tower: TOWER_DISCONNECTED,
     towerSetupDone: false,
-    screen: "tower-connect",
+    towerLinked: false,
+    screen: "splash",
     setupAt: 0,
     setupSteps: [],
+    openingIndex: -1,
     stage: "lobby",
     pause: null,
     pauseSerial: 0,
@@ -93,6 +113,7 @@ export const initialShellState = (input: {
     activeGameId: null,
     resumedFromAutosave: false,
     sessionEnded: false,
+    goodbyeTower: null,
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,

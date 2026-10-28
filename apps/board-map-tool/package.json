@@ -1,0 +1,14 @@
+{
+  "name": "board-map-tool",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.mjs",
+    "start": "node src/server.mjs",
+    "build": "pnpm test",
+    "test": "node --test src/model.test.mjs src/server.test.mjs src/pack-board.test.mjs",
+    "seed": "node src/seed-draft.mjs",
+    "export-pack": "node src/export-pack.mjs"
+  },
+  "packageManager": "pnpm@10.30.1"
+}

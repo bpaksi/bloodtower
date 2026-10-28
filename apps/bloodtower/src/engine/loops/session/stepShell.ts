@@ -1,10 +1,13 @@
+import { openingActiveIndex, openingFinishedIndex } from "../../../protocols/opening.ts";
 import type { EngineEffect } from "../../effects.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
-import { bindPlayState, initPlayState } from "../chapter/playState.ts";
+import { bindPlayState, initPlayState, seatAtCitadels } from "../chapter/playState.ts";
+import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress, handleSessionHubPress } from "../game/loop.ts";
-import { allHeroesHeld } from "../game/setupFlow.ts";
+import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
+import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
 import type { ShellEffect } from "./effects.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
@@ -15,7 +18,9 @@ import {
   bindShellState,
   clearShellState,
   ensurePauseOffers,
+  ensurePlayMenuOffers,
   matchOffer,
+  requestCheckpoint,
   takePendingCheckpoint,
   takePendingTowerCommands,
 } from "./shellRef.ts";
@@ -70,6 +75,22 @@ const collapsePlayLoopsOnQuit = (state: ShellState): void => {
   state.loops.childStartRequested = null;
 };
 
+/** One quit record and one autosave write. The autosave stays (DEC-208, DEC-218). */
+const pushQuitRecord = (state: ShellState, effects: ShellStepResult["effects"]): void => {
+  if (state.stage !== "ended") return;
+  if (state.activeGameId) {
+    effects.push({
+      kind: "game-record",
+      v: 1,
+      gameId: state.activeGameId,
+      outcome: "quit",
+    });
+  }
+  if (state.autosave) {
+    effects.push({ kind: "autosave-write", v: 1, gameId: state.autosave.gameId });
+  }
+};
+
 const resumeLoopsOrPauseOffers = (
   next: ShellState,
   eventSeq: number,
@@ -99,13 +120,28 @@ const resumeLoopsOrPauseOffers = (
     });
   }
   if (next.pause) ensurePauseOffers(next);
+  else ensurePlayMenuOffers(next);
 };
+
+const playFingerprint = (state: ShellState): string =>
+  state.play?.groups
+    .map((group) => `${group.id}:${group.spaceId}:${group.insideBuilding ? 1 : 0}`)
+    .join("|") ?? "";
+
+const sessionFrame = (state: ShellState) =>
+  state.loops.stack.find((frame) => frame.loopId === "session");
 
 const pauseIfNeeded = (state: ShellState): void => {
   if (state.stage !== "playing" && state.stage !== "paused") return;
   const story = state.stories.find((s) => s.card.id === state.boundStoryId);
   if (!story) return;
-  const unheld = story.heroes.some((hero) => state.holdings[hero.id] == null);
+  // Before the opening ends, the table is not built yet. Watch the seated count.
+  // An unpicked pool hero is not a missing seat.
+  const unheld = state.play
+    ? state.play.groups
+        .flatMap((group) => group.heroIds)
+        .some((heroId) => state.holdings[heroId] == null)
+    : heldCount(state) < partySize(state);
   if (unheld) {
     if (state.pause?.cause !== "disconnect") {
       state.pauseSerial += 1;
@@ -115,7 +151,7 @@ const pauseIfNeeded = (state: ShellState): void => {
     state.screen = "pause";
     return;
   }
-  if (state.tower.connection !== "connected") {
+  if (state.towerLinked && state.tower.connection !== "connected") {
     if (state.pause?.cause !== "tower-lost") {
       state.pauseSerial += 1;
     }
@@ -207,7 +243,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       return withEffects(state, effects);
     }
     if (e.action === "take") {
-      if (next.holdings[e.heroId] != null) {
+      if (next.holdings[e.heroId] != null || heldCount(next) >= partySize(next)) {
         return withEffects(state, effects);
       }
       next.holdings[e.heroId] = e.deviceId;
@@ -231,10 +267,15 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   }
 
   if (e.kind === "focus-story") {
-    if (!state.stories.some((story) => story.card.id === e.storyId)) {
+    const known = state.stories.some((story) => story.card.id === e.storyId);
+    if (state.screen !== "pick-story" || !known) {
       return withEffects({ ...state, eventSeq: eventSeq + 1 }, effects);
     }
     const next = { ...state, focusStoryId: e.storyId, eventSeq: eventSeq + 1 };
+    resetGameAwaitingPress(next);
+    bindShellState(next);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }
@@ -248,6 +289,8 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     if (!setting?.options.some((o) => o.id === e.optionId)) {
       return withEffects(state, effects);
     }
+    const current = state.settingValues[e.settingId] ?? setting.default;
+    if (current === e.optionId) return withEffects(state, effects);
     const next = {
       ...state,
       settingValues: { ...state.settingValues, [e.settingId]: e.optionId },
@@ -288,7 +331,25 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     bindShellState(next);
     const top = next.loops.stack.at(-1) as LoopFrame | undefined;
 
-    if (e.promptId === "tower-connect" && e.actionId === "tower-connect") {
+    if (e.promptId === "splash-play" && e.actionId === "continue") {
+      const session = sessionFrame(next);
+      if (session) {
+        const local = session.local as SessionLocal;
+        if (!next.autosave) next.activeGameId = `game-${next.eventSeq}`;
+        next.screen = next.autosave ? "pick-game" : "pick-story";
+        session.local = {
+          ...local,
+          phase: "hub",
+          towerStep: "done",
+          awaitingPress: false,
+          fromSessionScreen: false,
+        };
+      }
+    } else if (
+      (e.promptId === "tower-connect" || e.promptId === "menu-connect") &&
+      e.actionId === "tower-connect"
+    ) {
+      next.towerLinked = true;
       next.tower = {
         connection: "connected",
         calibrated: { state: "known", calibrated: false },
@@ -299,7 +360,25 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         capabilityId: "tower.connect",
         params: {},
       });
+      if (e.promptId === "tower-connect") {
+        const session = sessionFrame(next);
+        if (session && (session.local as SessionLocal).phase === "splash") {
+          const local = session.local as SessionLocal;
+          session.local = {
+            ...local,
+            phase: "tower",
+            towerStep: "calibrate",
+            awaitingPress: false,
+          };
+        }
+        const game = next.loops.stack.find((frame) => frame.loopId === "game");
+        if (game && (game.local as GameLocal).phase === "tower-connect") {
+          game.local = { phase: "claim-heroes", awaitingPress: false, playStarted: false };
+          next.screen = "claim-heroes";
+        }
+      }
     } else if (e.promptId === "tower-calibrate" && e.actionId === "tower-calibrate") {
+      next.towerLinked = true;
       next.tower = TOWER_READY;
       effects.push({
         kind: "tower-command",
@@ -308,24 +387,27 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         params: {},
       });
     } else if (
-      next.pause &&
-      (e.actionId === "quit-story" || e.actionId === "reconnect") &&
-      e.promptId.startsWith("pause-")
+      e.actionId === "quit-story" &&
+      (e.promptId === "menu-quit" || (next.pause && e.promptId.startsWith("pause-")))
     ) {
       const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
       if (gameFrame) {
         gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
         if ((gameFrame.local as GameLocal).phase === "done") {
           collapsePlayLoopsOnQuit(next);
+          pushQuitRecord(next, effects);
         }
+      }
+    } else if (next.pause && e.actionId === "reconnect" && e.promptId.startsWith("pause-")) {
+      const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
+      if (gameFrame) {
+        gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
       }
     } else if (top?.loopId === "game") {
       const before = top.local as GameLocal;
+      const beforeOpening = next.openingIndex;
       const local = handleGamePress(before, e.promptId, e.actionId);
       updateTopLocal(next, local);
-      if (local.phase === "play" && before.phase === "begin" && next.playContent && !next.play) {
-        next.play = initPlayState(next.seed, next.playContent);
-      }
       if (local.phase === "play" && before.phase === "begin" && !next.resumedFromAutosave) {
         const gameId = next.activeGameId ?? `game-${next.eventSeq}`;
         next.activeGameId = gameId;
@@ -337,21 +419,42 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         };
         effects.push({ kind: "autosave-write", v: 1, gameId });
       }
+      if (
+        openingFinishedIndex(next.openingIndex) &&
+        !next.play &&
+        next.playContent &&
+        !next.resumedFromAutosave
+      ) {
+        const story = next.stories.find((entry) => entry.card.id === next.boundStoryId);
+        const seated = (story?.heroes ?? [])
+          .map((hero) => hero.id)
+          .filter((heroId) => next.holdings[heroId] != null)
+          .slice(0, partySize(next));
+        next.play = initPlayState(next.seed, {
+          ...next.playContent,
+          start: {
+            ...next.playContent.start,
+            assignments: seatAtCitadels(next.playContent.start.assignments, seated),
+          },
+        });
+      }
+      if (
+        next.openingIndex !== beforeOpening &&
+        openingActiveIndex(next.openingIndex) &&
+        next.activeGameId
+      ) {
+        requestCheckpoint(next.activeGameId, 1);
+      }
       if (local.phase === "done" && next.stage === "ended") {
         collapsePlayLoopsOnQuit(next);
-        if (next.activeGameId) {
-          effects.push({
-            kind: "game-record",
-            v: 1,
-            gameId: next.activeGameId,
-            outcome: "quit",
-          });
-        }
-        if (next.autosave) {
-          effects.push({ kind: "autosave-write", v: 1, gameId: next.autosave.gameId });
-        }
+        pushQuitRecord(next, effects);
       }
-      if (local.phase === "play" && next.resumedFromAutosave && !towerReady(next.tower)) {
+      if (
+        local.phase === "play" &&
+        next.resumedFromAutosave &&
+        next.towerLinked &&
+        !towerReady(next.tower)
+      ) {
         next.stage = "paused";
         next.pause = { cause: "tower-lost" };
         next.pauseSerial += 1;
@@ -360,8 +463,20 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     } else if (top?.loopId === "session") {
       const local = handleSessionHubPress(top.local as SessionLocal, e.promptId, e.actionId);
       updateSessionLocal(next, local);
+      if (e.promptId === "session-new-game" && e.actionId === "new-game") {
+        effects.push({ kind: "autosave-clear", v: 1 });
+      }
     } else {
+      const before = playFingerprint(next);
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
+      if (
+        (e.actionId === "walk" || e.actionId === "enter" || e.actionId === "leave") &&
+        next.play &&
+        next.activeGameId &&
+        playFingerprint(next) !== before
+      ) {
+        requestCheckpoint(next.activeGameId, next.play.dayNumber);
+      }
     }
 
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
@@ -377,6 +492,17 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         fromSessionScreen: false,
         childOpen: false,
       });
+      // Idle only while this session's link is still up (DEC-155, DEC-219). One command.
+      if (next.towerLinked && next.tower.connection === "connected") {
+        effects.push({
+          kind: "tower-command",
+          v: 1,
+          capabilityId: "lighting.all-off",
+          params: {},
+        });
+      } else {
+        next.goodbyeTower = next.towerLinked ? "unavailable" : "no-tower";
+      }
     }
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
@@ -388,6 +514,18 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
 /** After loading a checkpoint, rebuild offered actions from the restored loop stack. */
 export const refreshOffersAfterRestore = (state: ShellState): ShellEffect[] => {
   const effects: ShellEffect[] = [];
+  for (const frame of state.loops.stack) {
+    if (frame.loopId === "group-turn") {
+      const local = frame.local as GroupTurnLocal;
+      frame.local = { ...local, awaitingPress: false };
+    } else if (frame.loopId === "encounter") {
+      const local = frame.local as EncounterLocal;
+      frame.local = { ...local, awaitingLeave: false };
+    } else if (frame.loopId === "game" && openingActiveIndex(state.openingIndex)) {
+      const local = frame.local as GameLocal;
+      frame.local = { ...local, awaitingPress: false, playStarted: false };
+    }
+  }
   bindShellState(state);
   resumeLoopsOrPauseOffers(state, state.eventSeq, effects);
   clearShellState();

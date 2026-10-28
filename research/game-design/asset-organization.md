@@ -13,6 +13,7 @@ assets/
     tower/cues.json             # named cue library -> tower sound/light indices (api-surface-7.1.2)
     ui/                         # engine chrome, icons, fonts
     sfx/                        # generic sounds: dice, door, coin, footsteps
+    cast/                       # neutral NPC avatars: default cast and extra faces, always under the story's filter (DEC-334)
   stories/<story-id>/           # SOURCE ONLY: what people write and version
     story.json                  # manifest + AV theme (see below)
     scripts/<scene-id>.md       # dialog, [sfx:] [music:] cues, still/clip marks, private lines
@@ -32,7 +33,7 @@ assets/
 - R-AST-ORG-3. A still or clip belongs to one script moment, ID `scene.moment`. Reusable media lives in `library/` and is referenced by ID.
 - R-AST-ORG-4. Private lines carry the hunter in the ID, e.g. `scene.moment.private.wren`. The index answers which iPad plays what.
 - R-AST-ORG-5. Character reference sheets are versioned inputs. Changing a sheet flags every still of that character for re-render.
-- R-AST-ORG-6. The theme belongs to the story. Style prompts, the filter preset (palette, grain, duotone), music mood, and narrator voice live in `story.json`. Fallback to `shared/` applies only to sound and UI files, never to style.
+- R-AST-ORG-6. The theme belongs to the story. Style prompts, the filter preset (palette, grain, duotone), music mood, and narrator voice live in `story.json`. Fallback to `shared/` applies only to sound and UI files, never to style. One exception: the shared NPC avatars in `shared/cast/` (DEC-334), which always play under the story's filter preset.
 - R-AST-ORG-7. Every rendered file is marked draft (cheap and fast) or final. Playtests may use drafts; a release build requires finals.
 - R-AST-ORG-8. Readiness check: a story is playable only when every ID its scripts reference exists in the index and every private moment has a line for each hunter. For release, all of them must be final.
 - R-AST-ORG-9. All media is pre-rendered and cached. Nothing is generated live during play.

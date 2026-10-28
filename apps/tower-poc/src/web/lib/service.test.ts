@@ -142,7 +142,6 @@ describe("a lost link to the service", () => {
         },
         inventory: [],
         verificationOverlay: {},
-        soundFeel: [],
         tower: "mock",
       },
     });
@@ -181,7 +180,6 @@ describe("a lost link to the service", () => {
           versions: { protocol: PROTOCOL_VERSION, server: "0", node: "v", library: "7", data: "3" },
           inventory: [],
           verificationOverlay: {},
-          soundFeel: [],
           tower: "bluetooth",
         },
       },
@@ -195,55 +193,6 @@ describe("a lost link to the service", () => {
     expect(view.savedVerifications).toEqual(["v-1"]);
     // Before welcome there is no overlay to update; nothing is made up.
     expect(applyServerMessage(initialView, changed("v-2"), 0).welcome).toBeUndefined();
-  });
-
-  it("replaces a sound's feel row when a newer one is saved, keeping the rows by index", () => {
-    const feel = (index: number, mood: "dread" | "calm") => ({
-      index,
-      mood,
-      readsAs: null,
-      strength: null,
-      lengthMs: null,
-      answerLengthMs: null,
-      note: null,
-      updatedAt: 1,
-      client: "iPad",
-    });
-    const changed = (row: ReturnType<typeof feel>): ServerMessage => ({
-      v: PROTOCOL_VERSION,
-      type: "soundFeel.changed",
-      payload: { row },
-    });
-    const welcomed = applyServerMessage(
-      initialView,
-      {
-        v: PROTOCOL_VERSION,
-        type: "welcome",
-        payload: {
-          clientId: "c-1",
-          versions: { protocol: PROTOCOL_VERSION, server: "0", node: "v", library: "7", data: "3" },
-          inventory: [],
-          verificationOverlay: {},
-          soundFeel: [feel(90, "dread")],
-          tower: "bluetooth",
-        },
-      },
-      0,
-    );
-    let view = applyServerMessage(welcomed, changed(feel(7, "calm")), 0);
-    view = applyServerMessage(view, changed(feel(90, "calm")), 0);
-    expect(view.welcome?.soundFeel).toEqual([feel(7, "calm"), feel(90, "calm")]);
-    // Before welcome there are no rows to update; nothing is made up.
-    expect(applyServerMessage(initialView, changed(feel(1, "calm")), 0).welcome).toBeUndefined();
-    expect(view.savedSoundFeel).toEqual([]);
-
-    // A save answering this page's own record is noted by its id, even before welcome.
-    const answer = (id: string): ServerMessage => ({
-      ...changed(feel(1, "calm")),
-      correlationId: id,
-    });
-    expect(applyServerMessage(view, answer("s-1"), 0).savedSoundFeel).toEqual(["s-1"]);
-    expect(applyServerMessage(initialView, answer("s-2"), 0).savedSoundFeel).toEqual(["s-2"]);
   });
 
   it("keeps each refusal by the id it answers, so a later error does not replace it", () => {

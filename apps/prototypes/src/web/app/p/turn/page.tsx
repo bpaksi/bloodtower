@@ -47,9 +47,14 @@ export default function TurnPage() {
   const rngFor = (beat: string) => createRng(`${seed}:turn${turn}:${beat}`);
 
   const roll = () => {
-    setGroups(newGroups(rngFor("roll"), t, positions));
-    setPhase("story");
-    setProblem(null);
+    try {
+      setGroups(newGroups(rngFor("roll"), t, positions));
+      setPhase("story");
+      setProblem(null);
+    } catch (cause) {
+      const entry = logger.error(undefined, cause, "ROLL_FAILED");
+      setProblem(`${entry.code}: ${entry.message}`);
+    }
   };
   const update = (i: number, r: { group: Group; error?: string }) => {
     setGroups((gs) => gs.map((g, j) => (j === i ? r.group : g)));
@@ -140,9 +145,16 @@ export default function TurnPage() {
         })}
       </div>
       {phase === "roll" && (
-        <button type="button" onClick={roll}>
-          Roll moves for {t.groups} group(s)
-        </button>
+        <div>
+          <button type="button" onClick={roll}>
+            Roll moves for {t.groups} group(s)
+          </button>
+          {problem && (
+            <span role="alert" style={{ color: "#b00", marginLeft: 8 }}>
+              {problem}
+            </span>
+          )}
+        </div>
       )}
       {phase === "story" && (
         <div>
@@ -201,7 +213,7 @@ export default function TurnPage() {
           </section>
         );
       })}
-      {problem && (
+      {problem && phase !== "roll" && (
         <p role="alert" style={{ color: "#b00" }}>
           {problem}
         </p>

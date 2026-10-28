@@ -1,5 +1,7 @@
 # Dracula (Vellmoor): readiness review of the final scripts
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/readiness-review.md).
+
 ## Re-review of the reworked scripts (D-DRA-10), 2026-10-14 10:30 ET
 
 By-hand design review; no script was changed. Reviewed: `assets/stories/dracula/scripts/` (README, cast, props, 19 scenes incl. `n5-ending-endures` and Loremaster's late `n5-final-confrontation.06~carrier-falls` and the README "Settled points") against this file's 09:55 findings, [rulings.md](rulings.md) (D-DRA-1..10 and the Gamewright calls), [dracula-asset-map.md](dracula-asset-map.md), [story-engine.md](../../game-design/story-engine.md) and [api-surface-7.1.2.md](../../tower/api-surface-7.1.2.md). Paths are relative to `assets/stories/dracula/scripts/`; line numbers as of this review. The asset map §1b was rewritten for this pass (19 scenes, ending stills, ending selection).

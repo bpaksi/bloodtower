@@ -168,7 +168,7 @@ describe("session hub (core)", () => {
       messages.some((m) => m.type === "deviceView"),
     );
     const latestDevice = [...device.log].reverse().find((m) => m.type === "deviceView");
-    expect(["tower-connect", "pick-game"]).toContain(latestDevice?.payload.screen);
+    expect(latestDevice?.payload.screen).toBe("splash");
   });
 
   it("refuses control from the story board", async () => {

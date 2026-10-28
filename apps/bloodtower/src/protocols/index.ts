@@ -65,6 +65,15 @@ export {
 } from "./hostLog.ts";
 export { KEEPER_MOMENT_ID } from "./keeper.ts";
 export {
+  isOpeningMomentId,
+  OPENING_MOMENTS,
+  OPENING_PLACEHOLDER,
+  type OpeningMomentId,
+  openingActiveIndex,
+  openingFinishedIndex,
+  openingPromptId,
+} from "./opening.ts";
+export {
   type Asset,
   absentHuntersOf,
   assetIdSchema,

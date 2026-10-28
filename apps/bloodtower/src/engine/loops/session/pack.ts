@@ -17,7 +17,10 @@ export type StoryCard = {
   title: string;
   tagline: string | null;
   playable: boolean;
-  players: { min: number; max: number };
+  /** Null on a metadata-only door: the board must not invent a player count. */
+  players: { min: number; max: number } | null;
+  /** Served cover URL, or null when the file is not on disk. */
+  cover?: string | null;
 };
 
 export type ShellStory = {
@@ -50,13 +53,15 @@ export const TEST_STORY: ShellStory = {
   },
   settings: [
     {
-      id: "length",
-      label: "Length",
+      id: "party-size",
+      label: "Party size",
       options: [
-        { id: "short", label: "Short" },
-        { id: "standard", label: "Standard" },
+        { id: "n-1", label: "1" },
+        { id: "n-2", label: "2" },
+        { id: "n-3", label: "3" },
+        { id: "n-4", label: "4" },
       ],
-      default: "standard",
+      default: "n-4",
     },
   ],
   setup: [
@@ -69,5 +74,7 @@ export const TEST_STORY: ShellStory = {
     { id: "hero-b", name: "Hero B" },
     { id: "hero-c", name: "Hero C" },
     { id: "hero-d", name: "Hero D" },
+    { id: "hero-e", name: "Hero E" },
+    { id: "hero-f", name: "Hero F" },
   ],
 };

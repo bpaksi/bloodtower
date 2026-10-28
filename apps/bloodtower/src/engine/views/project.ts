@@ -14,6 +14,7 @@ const toOffered = (action: ViewAction): OfferedAction =>
         promptId: action.promptId,
         actionId: action.actionId,
         label: action.label,
+        ...(action.slot ? { slot: action.slot } : {}),
         open: true,
       }
     : {
@@ -71,26 +72,49 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
       })),
       narration: state.narration,
       actions: offered,
+      table: state.table ?? null,
+      place: state.place ?? null,
     });
   }
 
   const heroesOnDevice =
-    state.screen === "claim-heroes" || state.screen === "begin"
-      ? state.heroes.filter((hero) => hero.deviceId === audience.deviceId || hero.deviceId === null)
-      : state.heroes.filter((hero) => hero.deviceId === audience.deviceId);
+    state.screen === "claim-heroes"
+      ? state.heroes
+      : state.screen === "begin"
+        ? state.heroes.filter(
+            (hero) => hero.deviceId === audience.deviceId || hero.deviceId === null,
+          )
+        : state.heroes.filter((hero) => hero.deviceId === audience.deviceId);
+
+  const claimFor = (deviceId: string | null): "open" | "yours" | "taken" => {
+    if (deviceId === null) return "open";
+    return deviceId === audience.deviceId ? "yours" : "taken";
+  };
+
+  const doors = state.levels
+    .filter((level) => level.id.startsWith("door-"))
+    .map((level) => ({
+      id: level.id.slice("door-".length),
+      title: level.label,
+      focus: level.shows.startsWith("In focus"),
+    }));
 
   return deviceViewPayloadSchema.parse({
     deviceId: audience.deviceId,
     screen: state.screen,
     shows: current.shows,
+    table: state.table ?? null,
+    ...(doors.length > 0 ? { doors } : {}),
     heroes: heroesOnDevice.map((hero) => ({
       id: hero.id,
       name: hero.name,
+      ...(state.screen === "claim-heroes" ? { claim: claimFor(hero.deviceId) } : {}),
       lines:
         hero.deviceId === audience.deviceId
           ? hero.lines.map((line) => ({ id: line.id, text: line.text }))
           : [],
     })),
     actions: state.actions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
+    ...(state.settings && state.settings.length > 0 ? { settings: state.settings } : {}),
   });
 }

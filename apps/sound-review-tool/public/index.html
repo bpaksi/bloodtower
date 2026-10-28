@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound review</title>
+<style>
+  :root {
+    --ink: #1d1b18; --muted: #6d675e; --line: #e2dccf; --paper: #f5f2ea; --panel: #ffffff;
+    --accent: #7a4a1e; --accent-soft: #f3e7d6; --bad: #9b2c2c; --good: #2d6a3e; --open: #f4f0e6;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #ece7dc; --muted: #a39c8f; --line: #3d3a32; --paper: #17150f; --panel: #211e17; --accent: #d9a46a;
+      --accent-soft: #3a2f20; --bad: #e88a8a; --good: #8fd1a2; --open: #2a271f;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3); }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 17px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--paper); }
+  header { display: flex; align-items: center; gap: 20px; padding: 16px 28px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; box-shadow: var(--shadow); flex-wrap: wrap; }
+  header h1 { font-size: 20px; margin: 0; margin-right: auto; }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; display: flex; flex-direction: column; gap: 22px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); }
+  .step { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 0 0 14px; }
+  button { font: inherit; padding: 10px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 10px; cursor: pointer; min-height: 44px; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  input[type=text], input[type=search] { font: inherit; padding: 10px 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 10px; width: 100%; min-height: 44px; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .muted { color: var(--muted); }
+  .status { font-weight: 600; }
+  .problem { color: var(--bad); margin: 12px 0 0; }
+  .problem code { font-size: 14px; }
+  .meter { height: 8px; background: var(--open); border-radius: 999px; overflow: hidden; width: 160px; }
+  .meter span { display: block; height: 100%; background: var(--accent); }
+  .filters { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; margin-bottom: 16px; }
+  .filters label { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  .sound { border-top: 1px solid var(--line); padding: 16px 0; display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .sound.timing { background: var(--accent-soft); margin: 0 -24px; padding: 16px 24px; }
+  .sound .title { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .sound .id { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+  .sound .name { font-weight: 600; }
+  .sound .length { font-variant-numeric: tabular-nums; min-width: 80px; }
+  .tones { display: inline-flex; gap: 6px; }
+  .tones button { padding: 8px 14px; }
+  .tones button[aria-pressed=true].good { background: var(--good); border-color: var(--good); color: var(--paper); }
+  .tones button[aria-pressed=true].bad { background: var(--bad); border-color: var(--bad); color: var(--paper); }
+  .tones button[aria-pressed=true].neutral { background: var(--muted); border-color: var(--muted); color: var(--paper); }
+  .done { font-size: 14px; color: var(--good); }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--bad); color: var(--bad); padding: 12px 18px; border-radius: 12px; box-shadow: var(--shadow); max-width: calc(100% - 32px); display: none; }
+  @media (max-width: 600px) { header { padding: 12px 16px; } main { padding: 16px; } .card { padding: 18px 16px; } .sound.timing { margin: 0 -16px; padding: 16px; } .filters { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sound review</h1>
+  <div class="row"><div class="meter"><span id="meter" style="width:0"></span></div><span id="progress" class="muted">…</span></div>
+</header>
+<main>
+  <div id="load-problems" role="alert" hidden></div>
+  <section class="card" aria-labelledby="tower-title">
+    <p class="step">Step 1</p>
+    <h2 id="tower-title">Tower</h2>
+    <p>Connection: <span id="conn" class="status">unavailable</span> · Calibration: <span id="calib" class="status">unavailable</span></p>
+    <div class="row" id="tower-buttons">
+      <button type="button" data-action="connect" class="primary">Connect</button>
+      <button type="button" data-action="reconnect" class="primary">Reconnect</button>
+      <button type="button" data-action="calibrate">Calibrate</button>
+      <button type="button" data-action="disconnect">Disconnect</button>
+    </div>
+    <p id="tower-problem" class="problem" role="alert" hidden></p>
+  </section>
+
+  <section class="card" aria-labelledby="sounds-title">
+    <p class="step">Step 2</p>
+    <h2 id="sounds-title">Sounds</h2>
+    <p class="muted">Press Play, then Stopped when the sound ends. Say what it sounds like and pick a tone. Each change is saved at once to <code id="file">…</code>.</p>
+    <div class="filters">
+      <input id="search" type="search" placeholder="Find a sound by number, name or category" aria-label="Find a sound">
+      <label><input id="unreviewed" type="checkbox"> Only not reviewed</label>
+    </div>
+    <div id="sounds"></div>
+  </section>
+</main>
+<div id="toast" role="alert"></div>
+<script src="app.js"></script>
+</body>
+</html>

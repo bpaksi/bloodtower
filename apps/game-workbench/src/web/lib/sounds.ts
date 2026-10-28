@@ -1,5 +1,5 @@
 /** The /sounds list: one row per `SND-` card, grouped by category, with its feel. No Node imports. */
-import { type Feel, feelOf, MOODS, type Mood, READS_AS, type ReadsAs } from "./feel.ts";
+import { type Feel, feelOf, TONES, type Tone } from "./feel.ts";
 import type { Card } from "./graph-types.ts";
 
 /** The area every "Tower sounds: <category>" area is part of. */
@@ -7,7 +7,7 @@ export const SOUNDS_AREA = "AREA-021";
 
 export type SoundRow = { id: string; index: number; name: string; feel: Feel | null };
 export type SoundGroup = { area: string | null; category: string; rows: SoundRow[] };
-export type SoundFilter = { mood?: Mood; readsAs?: ReadsAs };
+export type SoundFilter = { tone?: Tone };
 
 const partOf = (c: Card) => c.links.filter((l) => l.rel === "part-of").map((l) => l.to);
 
@@ -38,21 +38,16 @@ export function soundGroups(cards: Card[]): SoundGroup[] {
   return [...groups.values()].filter((g) => g.rows.length > 0);
 }
 
-/** Reads the filter from the page's query; a word that is not a mood or reads-as is ignored. */
-export function parseSoundFilter(q: { mood?: string; reads?: string }): SoundFilter {
-  return {
-    ...((MOODS as readonly string[]).includes(q.mood ?? "") ? { mood: q.mood as Mood } : {}),
-    ...((READS_AS as readonly string[]).includes(q.reads ?? "")
-      ? { readsAs: q.reads as ReadsAs }
-      : {}),
-  };
+/** Reads the filter from the page's query; a word that is not a tone is ignored. */
+export function parseSoundFilter(q: { tone?: string | string[] }): SoundFilter {
+  if (Array.isArray(q.tone)) throw new Error("tone query param must be a single value");
+  return (TONES as readonly string[]).includes(q.tone ?? "") ? { tone: q.tone as Tone } : {};
 }
 
-/** Keeps the rows whose feel matches every part of the filter; a row with no feel matches none. */
+/** Keeps the rows whose tone matches the filter; a row with no feel matches none. */
 export function filterSounds(groups: SoundGroup[], f: SoundFilter): SoundGroup[] {
-  if (!f.mood && !f.readsAs) return groups;
-  const keep = (r: SoundRow) =>
-    (!f.mood || r.feel?.mood === f.mood) && (!f.readsAs || r.feel?.readsAs === f.readsAs);
+  if (!f.tone) return groups;
+  const keep = (r: SoundRow) => r.feel?.tone === f.tone;
   return groups.map((g) => ({ ...g, rows: g.rows.filter(keep) })).filter((g) => g.rows.length > 0);
 }
 

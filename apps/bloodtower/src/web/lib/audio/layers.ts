@@ -16,7 +16,7 @@ export interface LayerInput {
 export const isVisualMoment = (_moment: unknown): boolean => false;
 
 export const isBeforePickGame = (screen: ViewScreen) =>
-  screen === "pick-game" || screen === "tower-connect";
+  screen === "splash" || screen === "pick-game" || screen === "tower-connect";
 
 export const isLanding = (screen: ViewScreen) => isBeforePickGame(screen);
 

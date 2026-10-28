@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "sounds": {
+    "1": {
+      "index": 1,
+      "updatedAt": 1792603450340,
+      "soundsLike": "Creature sounds, growl. Sounds like a dog/hound",
+      "tone": "bad",
+      "lengthMs": 3635
+    },
+    "2": {
+      "index": 2,
+      "updatedAt": 1792603506380,
+      "soundsLike": "Bird, claws, sword, metal on metal",
+      "tone": "bad",
+      "lengthMs": 3420
+    },
+    "3": {
+      "index": 3,
+      "updatedAt": 1792603552162,
+      "soundsLike": "creature, magical",
+      "tone": "bad",
+      "lengthMs": 4905
+    },
+    "4": {
+      "index": 4,
+      "updatedAt": 1792603579418,
+      "soundsLike": "magic",
+      "tone": "bad",
+      "lengthMs": 4350
+    },
+    "5": {
+      "index": 5,
+      "updatedAt": 1792603587135,
+      "lengthMs": 5145
+    },
+    "6": {
+      "index": 6,
+      "updatedAt": 1792603646712,
+      "soundsLike": "trickster, money, coins, treasure, laughter",
+      "lengthMs": 3999
+    },
+    "7": {
+      "index": 7,
+      "updatedAt": 1792603649200,
+      "lengthMs": 2417
+    },
+    "8": {
+      "index": 8,
+      "updatedAt": 1792603658685,
+      "lengthMs": 2625
+    },
+    "9": {
+      "index": 9,
+      "updatedAt": 1792603692602,
+      "soundsLike": "coins, treasure, approval",
+      "tone": "good",
+      "lengthMs": 2475
+    },
+    "10": {
+      "index": 10,
+      "updatedAt": 1792603731461,
+      "soundsLike": "metal, sword, attack",
+      "tone": "bad",
+      "lengthMs": 2385
+    },
+    "104": {
+      "index": 104,
+      "updatedAt": 1792603788640,
+      "lengthMs": 6545
+    },
+    "111": {
+      "index": 111,
+      "updatedAt": 1792603775017,
+      "lengthMs": 4282
+    },
+    "112": {
+      "index": 112,
+      "updatedAt": 1792603766894,
+      "lengthMs": 9733
+    },
+    "113": {
+      "index": 113,
+      "updatedAt": 1792603750197,
+      "lengthMs": 3854
+    }
+  }
+}

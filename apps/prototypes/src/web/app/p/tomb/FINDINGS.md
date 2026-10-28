@@ -37,3 +37,11 @@ Read: at these defaults the tomb is easy (90% finish with no leaving), so the le
 - Felt tense (yes/no, why): 
 - Values ended with (paste JSON): 
 - Card IDs to update: MEC-026, DEC-039 (re-costed rooms), and a card for the "money shortfall paid in HP" rule if kept.
+
+## Review
+
+2026-10-28, design session `chore/design-session-2026-10-28-set-piece-type`. Bob redesigned the Tomb from the RtDT app's dungeon screen (MEC-026, DEC-486 to DEC-497):
+
+- **Changed:** a branching room map, not a straight line. Each room is nothing, a battle or a random trap type. Rooms entered bold or on guard. A hidden guardian room ends it with a battle. Undead Advantages work as in battle, traps too.
+- **Cut:** flat HP, money and corruption costs on every room; `depth` as a straight line; money shortfall paid in HP. A trap loss the party can't pay is now paid in part plus a corruption.
+- **This prototype is now out of date.** It needs a branching map, the room odds (Q-307), trap types (Q-310), the on-guard cut and first strike (Q-312), and the map size and guardian (Q-311) before its numbers mean anything. Bob wants the Tomb built and played before the other five types are designed.

@@ -18,8 +18,12 @@ import { fileURLToPath } from "node:url";
 
 const MAIN = "main";
 export const WT_FILE = ".wt.json";
-/** The ports a step uses: the base (the main checkout's port) plus 10 × its offset. */
-export const BASE_PORTS = { dev: 4747, e2e: 4748 };
+/**
+ * The ports a step uses: the base plus 10 × its offset. dev and e2e start at the main checkout's
+ * port. The game workbench runs on 4797 in the main checkout; its worktree ports start 100 higher
+ * (4907 and up) so they never meet the dev and e2e ranges.
+ */
+export const BASE_PORTS = { dev: 4747, e2e: 4748, workbench: 4897 };
 export const PORT_STEP = 10;
 /** The most steps that can run at once; a hard cap so ports stay in a known range. */
 export const MAX_OFFSET = 9;
@@ -122,7 +126,7 @@ export const addWorktree = ({ root, branch, install }) => {
     config,
     lines: [
       `Worktree for ${branch} at ${path}.`,
-      `Ports: dev ${config.ports.dev}, e2e ${config.ports.e2e}. SQLite folder: ${relative(path, config.dataDir)}/.`,
+      `Ports: dev ${config.ports.dev}, e2e ${config.ports.e2e}, workbench ${config.ports.workbench}. SQLite folder: ${relative(path, config.dataDir)}/.`,
     ],
   };
 };

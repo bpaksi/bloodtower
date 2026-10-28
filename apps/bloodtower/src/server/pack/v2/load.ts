@@ -9,6 +9,7 @@ import {
   type StoryPack,
   storyPackSchema,
 } from "../../../protocols/pack-v2/index.ts";
+import { mediaOnDiskIssues } from "../assets.ts";
 
 const MAX_FILE_BYTES = 2_000_000;
 
@@ -22,9 +23,12 @@ export interface PackV2LoadIssue {
 }
 
 export type PackV2LoadResult =
-  | { ok: true; kind: "base-content"; pack: BaseContentPack }
-  | { ok: true; kind: "story"; pack: StoryPack; base: BaseContentPack }
+  | { ok: true; kind: "base-content"; pack: BaseContentPack; warnings: PackV2LoadIssue[] }
+  | { ok: true; kind: "story"; pack: StoryPack; base: BaseContentPack; warnings: PackV2LoadIssue[] }
   | { ok: false; issues: PackV2LoadIssue[] };
+
+const isMarkdownNote = (name: string) => name.toLowerCase().endsWith(".md");
+const isPackData = (name: string) => /\.(ya?ml|json)$/i.test(name);
 
 const issue = (file: string, path: string, rule: string, message: string): PackV2LoadIssue => ({
   rule,
@@ -77,10 +81,16 @@ const mergeBoardSpaces = (root: string, assembled: Record<string, unknown>): Pac
   try {
     const parsed = JSON.parse(readFileSync(spacesFile, "utf8")) as {
       spaces?: unknown;
+      region_labels?: unknown;
       river_crossings?: unknown;
       draft_note?: unknown;
     };
     if (parsed.spaces) boardObj.spaces = parsed.spaces;
+    // The board map tool writes the regions with the spaces; pack.yaml labels win if it has any.
+    const yamlLabels = boardObj.region_labels;
+    if (parsed.region_labels && !(Array.isArray(yamlLabels) && yamlLabels.length > 0)) {
+      boardObj.region_labels = parsed.region_labels;
+    }
     if (parsed.river_crossings && !boardObj.river_crossings) {
       boardObj.river_crossings = parsed.river_crossings;
     }
@@ -127,15 +137,23 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   issues.push(...mergeBoardSpaces(root, assembled));
 
   for (const name of names) {
-    if (name === packFile || name === "README.md" || name === "board") continue;
+    if (name === packFile || name === "board" || isMarkdownNote(name)) continue;
     const entryPath = join(root, name);
     try {
       if (statSync(entryPath).isDirectory()) continue;
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      issues.push(issue(name, "(file)", "P2-1", message));
       continue;
     }
     if (MANIFEST_FILES.has(name)) {
       issues.push(issue(name, "(file)", "P2-1", "The pack has two manifest files."));
+      continue;
+    }
+    // A metadata-only pack is its manifest. Notes and sibling files are not parsed.
+    if (assembled.playable === false) continue;
+    if (!isPackData(name)) {
+      issues.push(issue(name, "(file)", "P2-1", "This file is not part of the pack."));
       continue;
     }
     const extra = readPackFile(root, name);
@@ -174,7 +192,9 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
         ),
       };
     }
-    return { ok: true, kind: "base-content", pack: parsed.data };
+    const media = mediaOnDiskIssues(root, parsed.data.assets, undefined, "P2-2");
+    if (media.errors.length > 0) return { ok: false, issues: media.errors };
+    return { ok: true, kind: "base-content", pack: parsed.data, warnings: media.warnings };
   }
 
   if (kind === "story") {
@@ -233,7 +253,15 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
     }
     if (issues.length > 0) return { ok: false, issues };
 
-    return { ok: true, kind: "story", pack: story, base: baseLoaded.pack };
+    const media = mediaOnDiskIssues(root, story.assets, undefined, "P2-2");
+    if (media.errors.length > 0) return { ok: false, issues: media.errors };
+    return {
+      ok: true,
+      kind: "story",
+      pack: story,
+      base: baseLoaded.pack,
+      warnings: media.warnings,
+    };
   }
 
   return {
@@ -242,19 +270,38 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   };
 };
 
-export const isPackV2Manifest = (dir: string): boolean => {
+export type PackDoorClass =
+  | { kind: "v2" }
+  | { kind: "skip" }
+  | { kind: "broken"; issues: PackV2LoadIssue[] };
+
+/**
+ * A door with no manifest, or a manifest that parses and is not format 2, is skipped.
+ * A manifest that cannot be read or parsed is broken: the caller must keep those issues.
+ */
+export const classifyPackDoor = (dir: string): PackDoorClass => {
   try {
     const root = realpathSync(resolve(dir));
     const names = readdirSync(root);
     const packFile = names.find((name) => MANIFEST_FILES.has(name));
-    if (!packFile) return false;
+    if (!packFile) return { kind: "skip" };
     const read = readPackFile(root, packFile);
-    if (!("ok" in read) || !read.value || typeof read.value !== "object") return false;
-    return (read.value as { format?: unknown }).format === 2;
-  } catch {
-    return false;
+    if (!("ok" in read)) return { kind: "broken", issues: [read] };
+    if (!read.value || typeof read.value !== "object" || Array.isArray(read.value)) {
+      return {
+        kind: "broken",
+        issues: [issue(packFile, "(file)", "P2-1", "The pack manifest is a JSON object.")],
+      };
+    }
+    if ((read.value as { format?: unknown }).format !== 2) return { kind: "skip" };
+    return { kind: "v2" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { kind: "broken", issues: [issue(dir, "(file)", "P2-1", message)] };
   }
 };
+
+export const isPackV2Manifest = (dir: string): boolean => classifyPackDoor(dir).kind === "v2";
 
 export const formatPackV2Issues = (issues: readonly PackV2LoadIssue[]): string[] =>
   issues.map(

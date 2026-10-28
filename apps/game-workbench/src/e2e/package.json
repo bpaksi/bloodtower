@@ -1,0 +1,16 @@
+{
+  "name": "game-workbench-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Playwright smoke test for the game workbench. Builds the web UI and serves it with next start.",
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/node": "22.20.5"
+  }
+}

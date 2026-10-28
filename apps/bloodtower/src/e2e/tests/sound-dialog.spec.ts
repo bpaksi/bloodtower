@@ -2,11 +2,10 @@ import { type BrowserContext, expect, test } from "@playwright/test";
 import { startAcceptanceHost } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
-// R3-UI-03. The Mac board shows the Sound dialog after its first click or keypress on the
-// landing, before a game is picked, and the levels survive a reload. Audio exists only on the
-// Mac, so this runs on desktop.
+// R3-UI-03, retargeted onto `/` (W2). Sound is a control on the landing. Levels survive a reload.
+// Desktop only. This file stays in testIgnore.
 
-test("the first board click opens the Sound dialog, and its levels survive a reload", async ({
+test("Sound on the landing opens the dialog, and its levels survive a reload", async ({
   browser,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "The Sound dialog is the Mac board's.");
@@ -18,12 +17,13 @@ test("the first board click opens the Sound dialog, and its levels survive a rel
     const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 } });
     contexts.push(context);
     const board = await context.newPage();
-    await board.goto("/board?debug=1", { waitUntil: "domcontentloaded" });
-    await expect(board.locator("main.bt-board")).toBeVisible();
+    await board.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(board.locator('[data-screen="title"]')).toBeVisible();
     await expect(board.locator("[data-sound-dialog]")).toHaveCount(0);
 
-    await test.step("one click opens the Sound dialog before Pick Game", async () => {
-      await board.locator("main.bt-board").click({ position: { x: 40, y: 300 } });
+    await test.step("Sound on the landing opens the dialog and stays on /", async () => {
+      await board.locator('[data-action="sound"]').click();
+      await expect(board).toHaveURL(/\/$/);
       const dialog = board.locator("[data-sound-dialog]");
       await expect(dialog).toBeVisible();
       await expect(dialog.getByRole("slider")).toHaveCount(3);
@@ -39,12 +39,13 @@ test("the first board click opens the Sound dialog, and its levels survive a rel
     await test.step("Continue closes the dialog", async () => {
       await board.getByRole("button", { name: "Continue" }).click();
       await expect(board.locator("[data-sound-dialog]")).toHaveCount(0);
+      await expect(board).toHaveURL(/\/$/);
     });
 
     await test.step("after a reload the same levels are back", async () => {
       await board.reload({ waitUntil: "domcontentloaded" });
-      await expect(board.locator("main.bt-board")).toBeVisible();
-      await board.locator("main.bt-board").click({ position: { x: 40, y: 300 } });
+      await expect(board.locator('[data-screen="title"]')).toBeVisible();
+      await board.locator('[data-action="sound"]').click();
       await expect(board.locator("[data-sound-dialog]")).toBeVisible();
       await expect(board.locator("#bt-sound-music")).toHaveValue("35");
     });
@@ -67,9 +68,9 @@ const openSound = async (
     reducedMotion,
   });
   const board = await context.newPage();
-  await board.goto("/board?debug=1", { waitUntil: "domcontentloaded" });
-  await expect(board.locator("main.bt-board")).toBeVisible();
-  await board.locator("main.bt-board").click({ position: { x: 40, y: 300 } });
+  await board.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(board.locator('[data-screen="title"]')).toBeVisible();
+  await board.locator('[data-action="sound"]').click();
   await expect(board.locator("[data-sound-dialog]")).toBeVisible();
   return { context, board };
 };
@@ -148,7 +149,7 @@ test("a Sound slider is reachable by Tab, shows a candle ring and moves with the
     await board.keyboard.press("ArrowLeft");
     const ambient = Number(await board.locator("#bt-sound-ambient").inputValue());
     await board.reload({ waitUntil: "domcontentloaded" });
-    await board.locator("main.bt-board").click({ position: { x: 40, y: 300 } });
+    await board.locator('[data-action="sound"]').click();
     await expect(board.locator("#bt-sound-ambient")).toHaveValue(String(ambient));
   } finally {
     await context.close().catch(() => undefined);

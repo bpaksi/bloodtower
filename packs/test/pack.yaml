@@ -8,6 +8,15 @@ tagline: AREA-077 day slice — Enter and Leave only.
 base_pack: base
 playable: true
 players: {min: 1, max: 4}
+settings:
+  - id: party-size
+    label: Party size
+    options:
+      - {id: n-1, label: "1"}
+      - {id: n-2, label: "2"}
+      - {id: n-3, label: "3"}
+      - {id: n-4, label: "4"}
+    default: n-4
 
 day:
   move_roll:
@@ -22,6 +31,12 @@ start:
     - {hero: hero-b, kingdom: E}
     - {hero: hero-c, kingdom: S}
     - {hero: hero-d, kingdom: W}
+
+setup:
+  - id: lay-out-board
+    label: Lay out the board and orient the kingdoms.
+  - id: place-heroes
+    label: Stand each hero on their start building.
 
 game:
   start:
@@ -51,4 +66,8 @@ chapters:
             - {speaker: narrator, text: "The sun sets on the Proving Grounds."}
     quests: []
 
-assets: []
+assets:
+  - {id: place.village, type: still, target: storyboard, status: final, path: assets/place-village.jpg}
+  - {id: place.bazaar, type: still, target: storyboard, status: final, path: assets/place-bazaar.jpg}
+  - {id: place.citadel, type: still, target: storyboard, status: final, path: assets/place-citadel.jpg}
+  - {id: place.sanctuary, type: still, target: storyboard, status: final, path: assets/place-sanctuary.jpg}

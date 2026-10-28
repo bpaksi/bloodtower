@@ -43,23 +43,3 @@ export const verifications = sqliteTable("verifications", {
   /** `{tower, client}` as JSON. */
   environment: text("environment").notNull(),
 });
-
-/**
- * The sound feel record (spec D25): one row per tower sound, keyed by its index, holding the
- * newest picks. A field never recorded is null.
- */
-export const soundFeel = sqliteTable("sound_feel", {
-  index: integer("sound_index").primaryKey(),
-  mood: text("mood"),
-  readsAs: text("reads_as"),
-  strength: text("strength"),
-  /** From the Play press to the Stopped press. */
-  lengthMs: integer("length_ms"),
-  /** From the tower's answer to the Stopped press. */
-  answerLengthMs: integer("answer_length_ms"),
-  note: text("note"),
-  /** Milliseconds since the epoch. */
-  updatedAt: integer("updated_at").notNull(),
-  /** The recording client's `hello` label. */
-  client: text("client").notNull(),
-});

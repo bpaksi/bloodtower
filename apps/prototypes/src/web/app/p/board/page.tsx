@@ -7,7 +7,24 @@ import { defaultValues } from "../../../lib/tuning.ts";
 import { tvPx } from "../../../lib/tv.ts";
 import { assignHolders, LAYOUTS, type LayoutId } from "./data.ts";
 import { FIELDS } from "./fields.ts";
-import { Layout } from "./layouts.tsx";
+import { Layout, type Sizes } from "./layouts.tsx";
+
+/** TV frame + layout — the real page wiring tests must render. */
+export function BoardFrame({
+  layout,
+  sizes,
+  holders,
+}: {
+  layout: LayoutId;
+  sizes: Sizes;
+  holders: (string | null)[];
+}) {
+  return (
+    <TvFrame style={{ fontSize: tvPx(sizes.min) }}>
+      <Layout id={layout} sizes={sizes} holders={holders} />
+    </TvFrame>
+  );
+}
 
 export default function BoardPage() {
   const [layout, setLayout] = useState<LayoutId>("waiting");
@@ -49,9 +66,7 @@ export default function BoardPage() {
 
   return (
     <>
-      <TvFrame style={{ fontSize: tvPx(min) }}>
-        <Layout id={layout} sizes={sizes} holders={holders} />
-      </TvFrame>
+      <BoardFrame layout={layout} sizes={sizes} holders={holders} />
       {!clean && (
         <div
           style={{

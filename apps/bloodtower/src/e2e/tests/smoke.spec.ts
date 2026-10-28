@@ -22,10 +22,10 @@ const titleViewports = [
 const assertTitleLayout = async (page: Page, viewport: { width: number; height: number }) => {
   await settlePageAnimations(page);
   const shell = page.locator(".bt-title-shell");
-  const h1 = page.getByRole("heading", { level: 1, name: "Blood Tower" });
+  const banner = page.locator("[data-banner]");
   const story = page.getByRole("link", { name: /Story board/i });
   const hunter = page.getByRole("link", { name: /Hunter/i });
-  for (const locator of [h1, story, hunter]) {
+  for (const locator of [banner, story, hunter]) {
     const box = await locator.boundingBox();
     expect(box, "title control must have a box").not.toBeNull();
     expect(box?.width ?? 0).toBeGreaterThan(280);
@@ -49,7 +49,7 @@ test("the title page offers Story board and Hunter paths and health reports conn
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
 
-  await expect(page.getByRole("heading", { level: 1, name: "Blood Tower" })).toBeVisible();
+  await expect(page.locator("[data-banner]")).toBeVisible();
   await expect(page.getByRole("link", { name: /Story board/i })).toHaveAttribute("href", "/board");
   await expect(page.getByRole("link", { name: /Hunter/i })).toHaveAttribute("href", "/join");
   await expect(page.getByRole("img", { name: "The Keeper" })).toBeVisible();
@@ -73,7 +73,7 @@ test("the title page offers Story board and Hunter paths and health reports conn
   for (const viewport of titleViewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Blood Tower" })).toBeVisible();
+    await expect(page.locator("[data-banner]")).toBeVisible();
     await expect(page.getByRole("link", { name: /Story board/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Hunter/i })).toBeVisible();
     await assertTitleLayout(page, viewport);
@@ -104,7 +104,7 @@ test("typing a join code on /join lands on /device", async ({ browser }, testInf
     await page.getByLabel("Join code").fill(session.host.joinCode);
     await page.getByRole("button", { name: "Enter the table" }).click();
     await expect(page).toHaveURL(/\/device/);
-    await expect(page.locator("main")).toHaveAttribute("data-screen", /pick-game|tower-connect/);
+    await expect(page.locator("main")).toHaveAttribute("data-screen", "splash");
   } finally {
     await context.close().catch(() => undefined);
     await session.host.close();
