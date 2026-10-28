@@ -59,7 +59,7 @@ Where we stand: a hero's 3rd corruption loses the game (DEC-043). No single rand
 
 ### RV-C5: Important enemy information is easy to miss
 
-The app lets you look at upcoming foe events, but tucks it away (the eye icon in [Bob's screenshots](../return-to-dark-tower/companion-app.md#screenshots-bob-2026-10-28)), so players decide badly without knowing the information was there.
+The app lets you look at upcoming foe events, but tucks it away, so players decide badly without knowing the information was there. The place is the foe status button, the third hex on the turn screen (circled in [Bob's screenshots](../return-to-dark-tower/companion-app.md#screenshots-bob-2026-10-28)). Behind it: each foe's count, its status (panicked to lethal) and its current strike event (Rulebook v2.0, p. 11). The turn screen itself shows only the quests.
 
 Where we stand: the horde panel shows a foe's level, traits and ability before the group picks Fight, Go around or Pay off (DEC-311); players see which of their cards match (Q-210). Nothing yet says where players see what the threats will do at the end of the day: which places are about to fall, what the villain will do, which hordes are growing.
 

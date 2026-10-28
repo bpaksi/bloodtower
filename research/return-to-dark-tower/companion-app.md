@@ -72,7 +72,7 @@ Seven screens from the app, in `app-screenshots/` in the backup folder (see [REA
 
 | File | Screen | What it shows |
 |---|---|---|
-| `01-turn-screen-annotated.jpg` | Turn screen | Header "Month 3 · Turn 4". Three stacked panels on the left: Companion quest (gold, *Smuggler's Coin*, "Dayside · spend 1 treasure"), Adversary quest (red, *War of Words*, "Plains of Plovo · spend 3 spirit"), Main goal (*Recover Azkol's Treasures*, "Mountains of the Watchers · 4 Azkol's treasures and 5 virtues"). The Tower stands in the art on the right. Three hex buttons bottom right (sword, flame, rings) and an eye icon top right. **Bob's red marks:** arrows from the Tower and from the sword to the flame, and an arrow down to the rings button, which is circled. |
+| `01-turn-screen-annotated.jpg` | Turn screen | Header "Month 3 · Turn 4". Three stacked panels on the left: Companion quest (gold, *Smuggler's Coin*, "Dayside · spend 1 treasure"), Adversary quest (red, *War of Words*, "Plains of Plovo · spend 3 spirit"), Main goal (*Recover Azkol's Treasures*, "Mountains of the Watchers · 4 Azkol's treasures and 5 virtues"). The Tower stands in the art on the right. Three hex buttons bottom right and an eye icon top right. The Rulebook v2.0 names the buttons: sword = **battle** (p. 16), torch = **dungeon** (p. 19), rings = **foe status** (p. 16). **Bob's red marks:** arrows from the Tower and from the sword to the torch, and an arrow down to the foe status button, which is circled. |
 | `02-event-new-wares.jpg` | Event | Gold "Event" banner. *New Wares*: put any number of market treasures on the bottom of the treasure deck, then refill the market. One Continue button. |
 | `03-dungeon-lady-loss.jpg` | Dungeon | Dungeon *Lady Loss*: a dark map with two lit rooms, the current one glowing. Room *Secret Altar* with its card "Lose 7 warriors." and an up-arrow (Advantage) button. Below the map: "0 Advantages Applied" and the trait "Magic". |
 | `04-battle-dragon-critical-item.jpg` | Battle | Dragon battle, traits "Beast \| Melee", "Advantages Spent: 2 / 10". A red *Critical Hit!* card: "Lose 1 item.", with a sun-ray Advantage track (one of five pips filled). Three face-down battle cards at the bottom, a Confirm button, the eye icon. Rule line: resolve this card before showing the next; if you can't, take a corruption. |
@@ -84,7 +84,7 @@ What the screens tell Bloodtower:
 
 - Every screen is one picture, one panel of text and one button, the same shape as our set pieces ([dungeon review](../game-design/dungeon-review.md#the-aim-one-picture)).
 - A battle card names a loss in plain words, and the Advantage track shows how many steps are left to soften it. The 2/10 counter is per battle, not per card.
-- The quests on the turn screen carry place and cost in one line. Nothing on that screen says what the foes or the adversary will do next; the eye icon is the only way in (see the [review design check](../game-design/design-check-rtdt-review.md#c5-important-enemy-information-is-easy-to-miss)).
+- The quests on the turn screen carry place and cost in one line. Nothing on that screen says what the foes will do next. That sits one tap away behind the foe status button: each foe's count, its status (panicked to lethal) and its current strike event (Rulebook p. 11). It is also where foes are removed without a battle (p. 16) (see the [review design check](../game-design/design-check-rtdt-review.md#c5-important-enemy-information-is-easy-to-miss)).
 
 ## Third-party tools
 
