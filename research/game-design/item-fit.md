@@ -50,18 +50,18 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Hunter board | Prepared | Bazaar treasures cost 1 less spirit | Bazaar prices lower | Reword |
 | Spymaster board | (name ?) | +1 Stealth Advantage | +1 Stealth Advantage | Direct |
 | Spymaster board | Swift | Base move 4, not 3 | +1 on the move roll (DEC-102) | Direct |
-| Warlord tile | Callous | After a battle losing 10+ warriors, gain a treasure | After a battle where the group lost a lot of hit points, gain a treasure | Reword |
-| Warlord tile | Inspiring | After Reinforce, gain 6 warriors | After a building pick, heal | Reword |
-| Warlord tile | Relentless | If you double your move, +1 Wild | On a high move roll, +1 Wild in the next battle | Reword |
-| Hunter tile | Lucky | Spend a treasure: gain the top treasure | Same | Direct |
-| Hunter tile | Crafty | A spent potion's number doubles | Same | Direct |
-| Hunter tile | Inventive | Spend 4 potions: remove a foe on your space | Spend 4 potions: remove the standing horde on your space | Direct |
-| Spymaster tile | Fortunate | Reinforce twice at one building | Two picks at a building for one move | Reword |
-| Spymaster tile | Unseen | Finish a monthly quest: remove a foe instead of gaining spirit | Finish a set piece: remove a standing horde | Reword |
-| Spymaster tile | Resourceful | Month end: gain 15 warriors | Chapter start: full heal | Reword |
-| Scion tile | Blessed | Spend spirit: prevent 6 warrior losses | Pay money to cancel one lost round's hit (a guard) | Reword |
-| Scion tile | Infused | Turn start: remove 1 skull in your home kingdom | Day start: remove 1 skull in the group's kingdom | Reword (needs skull removal) |
-| Scion tile | Anointed | +1 Wild per skull-free building on or next to your space | Same | Direct |
+| Warlord tile | Callous | After a battle losing 10+ warriors, gain a treasure | After a battle where this hero lost a lot of hit points, gain a treasure (DEC-387) | Reword, decided |
+| Warlord tile | Inspiring | After Reinforce, gain 6 warriors | After a building pick, every hero in the group heals (DEC-389) | Reword, decided |
+| Warlord tile | Relentless | If you double your move, +1 Wild | Move roll shows doubles: +1 Wild until the next move roll (DEC-391) | Reword, decided |
+| Hunter tile | Lucky | Spend a treasure: gain the top treasure | Once per chapter, give back a treasure; the engine names a new one (DEC-393) | Direct, decided |
+| Hunter tile | Crafty | A spent potion's number doubles | Same (DEC-395) | Direct, decided |
+| Hunter tile | Inventive | Spend 4 potions: remove a foe on your space | During a battle, spend 4 potions to win it outright (DEC-397) | Reword, decided |
+| Spymaster tile | Fortunate | Reinforce twice at one building | Once a day, a second pick at a building for no extra move (DEC-399) | Reword, decided |
+| Spymaster tile | Unseen | Finish a monthly quest: remove a foe instead of gaining spirit | Finish a set piece: give up its money to remove a standing horde in the kingdom (DEC-402) | Reword, decided |
+| Spymaster tile | Resourceful | Month end: gain 15 warriors | Day end: the holder heals a little (DEC-404) | Reword, decided |
+| Scion tile | Blessed | Spend spirit: prevent 6 warrior losses | Once a battle, cancel one lost round's hit on one hero, free (DEC-405) | Reword, decided |
+| Scion tile | Infused | Turn start: remove 1 skull in your home kingdom | Group's turn start each day: remove 1 skull from a building in its kingdom (DEC-406, DEC-408) | Reword, decided |
+| Scion tile | Anointed | +1 Wild per skull-free building on or next to your space | Same, standing buildings only (DEC-407) | Direct, decided |
 | Kingdom tile | Champion of the North | +2 Wild in mountains | +2 Wild in mountains | Direct |
 | Kingdom tile | Champion of the East | +2 Wild in hills | +2 Wild in hills | Direct |
 | Kingdom tile | Champion of the South | +2 Wild in deserts | +2 Wild in deserts | Direct |
