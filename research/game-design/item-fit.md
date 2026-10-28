@@ -153,7 +153,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 ## Quest items
 
-20 cards, 17 kinds, all known (Bob's list and photos). Taken when a quest grants one; any number held. Bloodtower's story items (DEC-054, Q-012) are the natural home: a story grants the card and names why. Three only make sense with an RtDT quest's own pieces ("Story only"); a story could still give them a meaning.
+20 cards, 17 kinds, all known (Bob's list and photos). Taken when a story grants one (DEC-447); any number held. Bloodtower's story items (DEC-054, Q-012) are the natural home: a story grants the card and names why. Three only make sense with an RtDT quest's own pieces ("Story only"); a story could still give them a meaning.
 
 | Quest item | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
