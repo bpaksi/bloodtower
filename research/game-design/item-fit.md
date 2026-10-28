@@ -57,7 +57,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Hunter tile | Crafty | A spent potion's number doubles | Same (DEC-395) | Direct, decided |
 | Hunter tile | Inventive | Spend 4 potions: remove a foe on your space | During a battle, spend 4 potions to win it outright (DEC-397) | Reword, decided |
 | Spymaster tile | Fortunate | Reinforce twice at one building | Once a day, a second pick at a building for no extra move (DEC-399) | Reword, decided |
-| Spymaster tile | Unseen | Finish a monthly quest: remove a foe instead of gaining spirit | Finish a set piece: remove a standing horde | Reword |
+| Spymaster tile | Unseen | Finish a monthly quest: remove a foe instead of gaining spirit | Finish a set piece: give up its money to remove a standing horde in the kingdom (DEC-402) | Reword, decided |
 | Spymaster tile | Resourceful | Month end: gain 15 warriors | Chapter start: full heal | Reword |
 | Scion tile | Blessed | Spend spirit: prevent 6 warrior losses | Pay money to cancel one lost round's hit (a guard) | Reword |
 | Scion tile | Infused | Turn start: remove 1 skull in your home kingdom | Day start: remove 1 skull in the group's kingdom | Reword (needs skull removal) |
