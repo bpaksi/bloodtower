@@ -34,6 +34,7 @@ const PREFIX: Record<CardType, string> = {
   "light-effect": "LFX",
   "light-sequence": "LSQ",
   drum: "DRM",
+  art: "ART",
   sketch: "SK",
   example: "EX",
 };
