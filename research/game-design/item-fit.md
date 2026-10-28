@@ -75,14 +75,14 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Potion | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Dragon Teeth | Gain 6 warriors | Heal hit points (OPT-010: +4) | Direct |
-| Fortune's Favor | Gain +1 Wild Advantage | Same | Direct |
-| One Thousand Strides | Move any hero up to 3 spaces | Move any group up to 3 spaces | Direct |
-| Purifying Breath | Remove up to 2 skulls from any building | Same | Direct |
-| Golden Sun | Gain 1 spirit | Gain money | Reword |
-| Siren's Song | Move any foe up to 2 spaces | Move a standing horde's token up to 2 spaces | Reword |
+| Dragon Teeth | Gain 6 warriors | Heal one hero's hit points (OPT-010: +4) (DEC-412) | Direct, decided |
+| Fortune's Favor | Gain +1 Wild Advantage | Same; how long is Q-299 (DEC-413) | Direct, decided |
+| One Thousand Strides | Move any hero up to 3 spaces | Move any group up to 3 spaces (DEC-414) | Direct, decided |
+| Purifying Breath | Remove up to 2 skulls from any building | Same (DEC-415) | Direct, decided |
+| Golden Sun | Gain 1 spirit | Gain money (DEC-416) | Reword, decided |
+| Siren's Song | Move any foe up to 2 spaces | In battle: the group runs with no last attack and no move spent (DEC-417) | Reword, decided |
 
-**Potions: 4 direct, 2 reword.**
+**Potions: 4 direct, 2 reword. All six decided (DEC-412 to DEC-417); when they are used is DEC-411.**
 
 ## Gear
 
@@ -90,14 +90,14 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Gear | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Longswords | +1 Melee | Same | Direct |
-| Brass Talismans | +1 Magic | Same | Direct |
-| Dusky Cloaks | +1 Stealth | Same | Direct |
-| Trusted Maps | Base move +1 | +1 on the move roll (DEC-102), like Swift | Direct |
-| Blessed Sceptres | After you Reinforce, remove 1 skull from the building on your space | After a building pick, that building loses a skull | Direct |
-| Leather Armor | Prevent 2 warrior losses per battle card | Each lost round's hit is smaller (a guard) | Reword |
+| Longswords | +1 Melee | Same (DEC-418) | Direct, decided |
+| Brass Talismans | +1 Magic | Same (DEC-419) | Direct, decided |
+| Dusky Cloaks | +1 Stealth | Same (DEC-420) | Direct, decided |
+| Trusted Maps | Base move +1 | +1 on the move roll (DEC-102), like Swift (DEC-421) | Direct, decided |
+| Blessed Sceptres | After you Reinforce, remove 1 skull from the building on your space | After a building pick, that building loses a skull (DEC-422) | Direct, decided |
+| Leather Armor | Prevent 2 warrior losses per battle card | Each hit on the holder is a little smaller (DEC-423) | Reword, decided |
 
-**Gear: 5 direct, 1 reword.**
+**Gear: 5 direct, 1 reword. All six decided (DEC-418 to DEC-423).**
 
 ## Treasures (magic items)
 
@@ -105,30 +105,30 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Treasure | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Kamaria's Carpet | +1 Magic; once per turn, 1 spirit: place your hero on any space | +1 Magic; once a day, pay money: the group moves to any space | Reword |
-| Azkol's Idol | +1 Beast; prevent 2 warrior losses per dungeon room | +1 Beast; a dungeon room's hit is smaller (a guard) | Reword |
-| Cloak of Stars | +1 Stealth; entering a foe's space, place that foe anywhere | +1 Stealth; entering a standing horde's space, move its token anywhere | Reword |
-| Azkol's Banner | +1 Melee; take any hero's Banner action | +1 Melee | Advantage only (no Banner action) |
-| Spear of Atish | +1 Beast; defeat a Melee foe: gain 10 warriors | +1 Beast; beat a Melee horde: heal | Reword |
-| Lamp of Darkness | +1 Beast; spend: remove 1 foe from your space | +1 Beast; spend: remove the standing horde on your space | Direct |
-| Circlet of Conviction | +1 Humanoid; spend instead of dropping a skull: take another turn | +1 Humanoid; spend: skip the day's skull and take another day | Reword |
-| Tears of the Shedu | +1 Undead; defeat a Stealth foe: gain a potion | Same | Direct |
-| Oakstone Bow | +1 Melee; battle a foe on an adjacent space | +1 Melee; fight a standing horde one space away | Reword |
-| Scroll of Twilight Shadow | Spend: +4 Stealth | Spend: soften a Stealth foe's card up to 4 steps (DEC-324) | Reword |
-| Crown of Azkol | +1 Humanoid; sanctuary Reinforce: spirit equal to the month | +1 Humanoid; after a sanctuary pick, money equal to the chapter | Reword |
-| Golden Mace of Azkol | +1 Undead; spirit equal to a foe's level removes it | +1 Undead; pay money by level to remove a standing horde | Reword |
-| Scroll of Burning Sands | Spend: +4 Magic | Spend: soften a Magic foe's card up to 4 steps | Reword |
-| Scroll of the Great Serpent | Spend: +4 Melee | Spend: soften a Melee foe's card up to 4 steps | Reword |
-| Hallowed Reliquary | +1 Undead; after a Battle, remove 1 skull in your kingdom | Same | Direct |
-| Azkol's Horn | +1 Beast; glyphs facing you cost no spirit | +1 Beast | Advantage only (no glyph costs) |
-| Amulet of the Marid | +2 Wild in lakes; crossing a river, move anywhere along it | Same, if the board's rivers and lakes count | Reword |
-| White Cauldron | +1 Undead; citadel Reinforce: also a potion | +1 Undead; after a citadel pick, also a potion | Direct |
-| Necklace of Haggling | +1 Stealth; ignore the haggle die's cancel | +1 Stealth | Advantage only (no haggle die) |
-| Lamp of Hope | +1 Magic; Cleanse removes skulls from any space | +1 Magic; skull removal reaches any building | Reword (needs Cleanse) |
-| Axe of Soul Rending | +1 Humanoid; defeat a Magic foe: +1 spirit | +1 Humanoid; beat a Magic horde: +money | Direct |
-| Acorns of the White Oak | +1 Wild in grasslands; spend: remove up to 5 skulls anywhere | Same | Direct |
+| Kamaria's Carpet | +1 Magic; once per turn, 1 spirit: place your hero on any space | +1 Magic; once a day, pay money and the group moves to any space (DEC-437) | Reword, decided |
+| Azkol's Idol | +1 Beast; prevent 2 warrior losses per dungeon room | +1 Beast; every hit on the holder in a set piece or Tower room is a little smaller (DEC-438) | Reword, decided |
+| Cloak of Stars | +1 Stealth; entering a foe's space, place that foe anywhere | +1 Stealth; on entering a standing horde's space, the holder may move its token anywhere (DEC-439) | Reword, decided |
+| Azkol's Banner | +1 Melee; take any hero's Banner action | +1 Melee Advantage only (DEC-434) | Advantage only, decided |
+| Spear of Atish | +1 Beast; defeat a Melee foe: gain 10 warriors | +1 Beast; beat a Melee foe and the holder heals (DEC-440) | Reword, decided |
+| Lamp of Darkness | +1 Beast; spend: remove 1 foe from your space | +1 Beast; spend: remove the standing horde on your space (DEC-425) | Direct, decided |
+| Circlet of Conviction | +1 Humanoid; spend instead of dropping a skull: take another turn | +1 Humanoid; spend it to skip one day's skull drop (DEC-441) | Reword, decided |
+| Tears of the Shedu | +1 Undead; defeat a Stealth foe: gain a potion | Same (DEC-426) | Direct, decided |
+| Oakstone Bow | +1 Melee; battle a foe on an adjacent space | +1 Melee; the group may fight a standing horde one space away (DEC-442) | Reword, decided |
+| Scroll of Twilight Shadow | Spend: +4 Stealth | Spend in a battle round: +4 that round, the holder still fights (DEC-431) | Reword, decided |
+| Crown of Azkol | +1 Humanoid; sanctuary Reinforce: spirit equal to the month | +1 Humanoid; after a sanctuary pick, money that grows with the chapter (DEC-443) | Reword, decided |
+| Golden Mace of Azkol | +1 Undead; spirit equal to a foe's level removes it | +1 Undead; pay money by the horde's level to remove a standing horde on the group's space (DEC-444) | Reword, decided |
+| Scroll of Burning Sands | Spend: +4 Magic | Spend in a battle round: +4 that round, the holder still fights (DEC-432) | Reword, decided |
+| Scroll of the Great Serpent | Spend: +4 Melee | Spend in a battle round: +4 that round, the holder still fights (DEC-433) | Reword, decided |
+| Hallowed Reliquary | +1 Undead; after a Battle, remove 1 skull in your kingdom | Same (DEC-427) | Direct, decided |
+| Azkol's Horn | +1 Beast; glyphs facing you cost no spirit | +1 Beast Advantage only (DEC-435) | Advantage only, decided |
+| Amulet of the Marid | +2 Wild in lakes; crossing a river, move anywhere along it | +2 Wild in lakes; on crossing a river, the group may move anywhere along it (DEC-445) | Reword, decided |
+| White Cauldron | +1 Undead; citadel Reinforce: also a potion | +1 Undead; after a citadel pick, also a potion (DEC-428) | Direct, decided |
+| Necklace of Haggling | +1 Stealth; ignore the haggle die's cancel | +1 Stealth; the group may roll the haggle die again and keep the better face (DEC-436) | Direct, decided |
+| Lamp of Hope | +1 Magic; Cleanse removes skulls from any space | +1 Magic; the group's Cleanse pick may take the skull off any building (DEC-446) | Reword, decided |
+| Axe of Soul Rending | +1 Humanoid; defeat a Magic foe: +1 spirit | +1 Humanoid; beat a Magic horde: +money (DEC-429) | Direct, decided |
+| Acorns of the White Oak | +1 Wild in grasslands; spend: remove up to 5 skulls anywhere | Same (DEC-430) | Direct, decided |
 
-**Treasures: 6 direct, 13 reword, 3 Advantage only.** The three Scrolls are one-shot bursts of Advantage, the closest thing RtDT has to a spell.
+**Treasures: 7 direct, 13 reword, 2 Advantage only (the Necklace fits the haggle die, DEC-091). All 22 decided (DEC-425 to DEC-446); a hero holds up to 4 (DEC-424).** The three Scrolls are one-shot bursts of Advantage, the closest thing RtDT has to a spell.
 
 ## Corruptions
 
@@ -136,46 +136,46 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Corruption | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Cursed | Spend at most 4 Advantages per turn | At most 4 Advantages per battle | Direct |
-| Suspicious | Carry at most 2 potions | Same | Direct |
-| Uncertain | After you Reinforce, your turn ends | After a building pick, the group's day ends | Direct |
-| Weak | Carry at most 2 treasures | Same | Direct |
-| Cruel | Village Reinforce: lose 1 spirit | After a village pick, lose money | Reword |
-| Greedy | Bazaar Reinforce: lose 1 spirit | After a bazaar pick, lose money | Reword |
-| Feral | End your turn on a building's space: lose 2 spirit | End the day on a building's space: lose money | Reword |
-| Lost | End your turn in your home kingdom: lose 1 spirit | End the day in the group's chapter-start kingdom: lose money | Reword |
-| Feeble | You cannot double your move | You cannot pay for extra moves | Reword |
-| Feverish | You cannot Cleanse a building with 3 skulls | Cannot remove skulls from a 3-skull building | Reword (needs Cleanse) |
-| Selfish | Give nothing when you trade | The group cannot give items to another group | Reword |
-| Tempted | Glyphs cost 1 more spirit | None (no glyph costs) | None |
+| Cursed | Spend at most 4 Advantages per turn | At most 4 of the holder's Advantages count in a battle round (DEC-466) | Direct, decided |
+| Suspicious | Carry at most 2 potions | The holder holds at most 2 potions (DEC-467) | Direct, decided |
+| Uncertain | After you Reinforce, your turn ends | After a building pick, the holder's group's turn ends (DEC-468) | Direct, decided |
+| Weak | Carry at most 2 treasures | The holder holds at most 2 treasures (DEC-469) | Direct, decided |
+| Cruel | Village Reinforce: lose 1 spirit | After a village pick, the holder loses money (DEC-470) | Reword, decided |
+| Greedy | Bazaar Reinforce: lose 1 spirit | After a bazaar pick, the holder loses money (DEC-471) | Reword, decided |
+| Feral | End your turn on a building's space: lose 2 spirit | The holder loses money when the group's turn ends on a building's space (DEC-472) | Reword, decided |
+| Lost | End your turn in your home kingdom: lose 1 spirit | The holder loses money when the group's turn ends in the holder's home kingdom (DEC-473) | Reword, decided |
+| Feeble | You cannot double your move | The holder's cards add nothing to the group's move roll (DEC-474) | Reword, decided |
+| Feverish | You cannot Cleanse a building with 3 skulls | The holder's group cannot Cleanse a building with 3 skulls (DEC-475) | Direct, decided |
+| Selfish | Give nothing when you trade | The holder cannot give a card to another hero (DEC-476) | Reword, decided |
+| Tempted | Glyphs cost 1 more spirit | Every buy the holder's group makes costs a little more (DEC-477) | Reword, decided |
 
-**Corruptions: 4 direct, 7 reword, 1 none.** Feeble stacks with DEC-365's -1 move; together they may be too harsh.
+**Corruptions: 5 direct, 7 reword. All 12 decided (DEC-466 to DEC-477); Feeble now takes the move bonus away instead of stacking a second -1, and Tempted raises prices. The player picks which one the sanctuary removes (DEC-465).**
 
 ## Quest items
 
-20 cards, 17 kinds, all known (Bob's list and photos). Taken when a quest grants one; any number held. Bloodtower's story items (DEC-054, Q-012) are the natural home: a story grants the card and names why. Three only make sense with an RtDT quest's own pieces ("Story only"); a story could still give them a meaning.
+20 cards, 17 kinds, all known (Bob's list and photos). Taken when a story grants one (DEC-447); any number held. Bloodtower's story items (DEC-054, Q-012) are the natural home: a story grants the card and names why. Three only make sense with an RtDT quest's own pieces ("Story only"); a story could still give them a meaning.
 
 | Quest item | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Amulet of Annihilation | Spend: remove all foes on and next to your space | Spend: remove standing hordes on and next to your space | Direct |
-| Amulet of Hope (×4) | +1 Wild; after a Battle, a treasure instead of 2 spirit | +1 Wild; after a battle, a treasure instead of the money | Reword |
-| Bezoar | Lose at most 5 warriors from Empress of Shades events | Caps the hit from one villain's events | Story only |
-| Dragon Scales | +2 Wild against level 4 foes | +2 Wild against the strongest foes or a boss | Reword |
-| Fulminating Silver | Once per battle, 1 spirit: +1 Wild | Once per battle, pay money: +1 Wild | Reword |
-| Golden Wolf Pelt | Prevent 6 warrior losses per battle card | Each lost round's hit is smaller (a guard) | Reword |
-| Herbal Remedy | After Reinforce, remove your spore tokens | A story's lingering curse lifts at a building | Story only |
-| Horn of the Elements | Once per turn, move a foe or siege tree 1 space | Once a day, move a standing horde's token 1 space | Reword |
-| Mark of the Outlaw | Village Reinforce: +5 warriors | After a village pick, heal | Reword |
-| Orb of Pure Snow | Prevent 1 spirit loss per battle card | A lost round costs no money | Reword |
-| Relic of Light | After Cleanse, +1 spirit | After removing skulls, +money | Reword (needs Cleanse) |
-| Smuggler's Coin | Bazaar Reinforce: cycle the treasure market | After a bazaar pick, redraw the offered treasures | Reword |
-| The Black Mark | Cannot be spent or lost; 1 spirit gives it to another hero | A story curse that can only be passed on | Reword |
-| Tomas's Map | Spend: +5 Wild in a dungeon | Spend: +5 Wild in a dungeon set piece | Direct |
-| Tools of the Saboteur | +3 Wild against caravans | +3 Wild against a story's named target | Story only |
-| Turquoise Urn | Carry 2 extra treasures | Same | Direct |
-| Wraps of Invisibility | Prevent 3 warrior losses per dungeon room | A dungeon room's hit is smaller (a guard) | Reword |
+| Amulet of Annihilation | Spend: remove all foes on and next to your space | Spend it to remove every standing horde on and next to the group's space (DEC-448) | Direct, decided |
+| Amulet of Hope (×4) | +1 Wild; after a Battle, a treasure instead of 2 spirit | +1 Wild; after a won battle, the holder may take a treasure instead of the money (DEC-449) | Reword, decided |
+| Bezoar | Lose at most 5 warriors from Empress of Shades events | The story names a villain, and that villain's events hit the holder for less (DEC-450) | Story only, decided |
+| Dragon Scales | +2 Wild against level 4 foes | +2 Wild against the strongest foes and the boss (DEC-451) | Reword, decided |
+| Fulminating Silver | Once per battle, 1 spirit: +1 Wild | Once per battle, pay money for +1 Wild for the rest of that battle (DEC-452) | Reword, decided |
+| Golden Wolf Pelt | Prevent 6 warrior losses per battle card | Every hit on the holder is smaller, more than Leather Armor (DEC-453) | Reword, decided |
+| Herbal Remedy | After Reinforce, remove your spore tokens | After a building pick, the story's named curse lifts from the holder (DEC-454) | Story only, decided |
+| Horn of the Elements | Once per turn, move a foe or siege tree 1 space | Once a day, move a standing horde's token 1 space (DEC-455) | Reword, decided |
+| Mark of the Outlaw | Village Reinforce: +5 warriors | After a village pick, the holder heals (DEC-456) | Reword, decided |
+| Orb of Pure Snow | Prevent 1 spirit loss per battle card | The holder never loses money to a corruption or an event (DEC-457) | Reword, decided |
+| Relic of Light | After Cleanse, +1 spirit | After the group's Cleanse pick, the holder gains money (DEC-458) | Reword, decided |
+| Smuggler's Coin | Bazaar Reinforce: cycle the treasure market | After a bazaar pick, redraw the offered treasures (DEC-459) | Reword, decided |
+| The Black Mark | Cannot be spent or lost; 1 spirit gives it to another hero | A story curse that cannot be spent or lost, only passed on for money (DEC-460) | Reword, decided |
+| Tomas's Map | Spend: +5 Wild in a dungeon | Spend it in a set piece or Tower room battle round for +5 Wild that round (DEC-461) | Direct, decided |
+| Tools of the Saboteur | +3 Wild against caravans | +3 Wild against the story's named target (DEC-462) | Story only, decided |
+| Turquoise Urn | Carry 2 extra treasures | The holder may hold up to 6 treasures (DEC-463) | Direct, decided |
+| Wraps of Invisibility | Prevent 3 warrior losses per dungeon room | Every hit on the holder in a set piece or Tower room is smaller (DEC-464) | Reword, decided |
 
-**Quest items: 3 direct, 11 reword, 3 story only.**
+**Quest items: 3 direct, 11 reword, 3 story only. All 17 decided (DEC-448 to DEC-464); only a story grants one (DEC-447).**
 
 ## What the chart shows
 
