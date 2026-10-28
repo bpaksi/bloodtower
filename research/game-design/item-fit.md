@@ -95,9 +95,9 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Dusky Cloaks | +1 Stealth | Same (DEC-420) | Direct, decided |
 | Trusted Maps | Base move +1 | +1 on the move roll (DEC-102), like Swift (DEC-421) | Direct, decided |
 | Blessed Sceptres | After you Reinforce, remove 1 skull from the building on your space | After a building pick, that building loses a skull (DEC-422) | Direct, decided |
-| Leather Armor | Prevent 2 warrior losses per battle card | Each lost round's hit is smaller (a guard) | Reword |
+| Leather Armor | Prevent 2 warrior losses per battle card | Each hit on the holder is a little smaller (DEC-423) | Reword, decided |
 
-**Gear: 5 direct, 1 reword.**
+**Gear: 5 direct, 1 reword. All six decided (DEC-418 to DEC-423).**
 
 ## Treasures (magic items)
 
