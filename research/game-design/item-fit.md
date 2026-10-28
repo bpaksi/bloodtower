@@ -54,7 +54,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Warlord tile | Inspiring | After Reinforce, gain 6 warriors | After a building pick, every hero in the group heals (DEC-389) | Reword, decided |
 | Warlord tile | Relentless | If you double your move, +1 Wild | Move roll shows doubles: +1 Wild until the next move roll (DEC-391) | Reword, decided |
 | Hunter tile | Lucky | Spend a treasure: gain the top treasure | Once per chapter, give back a treasure; the engine names a new one (DEC-393) | Direct, decided |
-| Hunter tile | Crafty | A spent potion's number doubles | Same | Direct |
+| Hunter tile | Crafty | A spent potion's number doubles | Same (DEC-395) | Direct, decided |
 | Hunter tile | Inventive | Spend 4 potions: remove a foe on your space | Spend 4 potions: remove the standing horde on your space | Direct |
 | Spymaster tile | Fortunate | Reinforce twice at one building | Two picks at a building for one move | Reword |
 | Spymaster tile | Unseen | Finish a monthly quest: remove a foe instead of gaining spirit | Finish a set piece: remove a standing horde | Reword |
