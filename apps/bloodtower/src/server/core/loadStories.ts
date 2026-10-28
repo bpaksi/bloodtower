@@ -51,6 +51,7 @@ const kingdomLabels = [
   { id: "W" as const, name: "Zenon", label: "Zenon (W)" },
 ];
 
+// A board that cannot be read is reported as a pack issue (the host logs it), never dropped.
 const playContentFor = (
   packsRoot: string,
   story: {
@@ -58,17 +59,25 @@ const playContentFor = (
     day: { move_roll: { dice: string; floor: number } };
     start: PlayContent["start"];
   },
+  issues: PackV2LoadIssue[],
 ): PlayContent | null => {
   if (story.base_pack === "base") return PROVING_GROUNDS_PLAY;
+  const spacesPath = join(packsRoot, story.base_pack, "board", "spaces.json");
   try {
-    const spacesPath = join(packsRoot, story.base_pack, "board", "spaces.json");
     const boardJson = JSON.parse(readFileSync(spacesPath, "utf8")) as { spaces: BoardSpaceInput[] };
     return {
       board: buildBoardGraph({ kingdoms: kingdomLabels, spaces: boardJson.spaces }),
       moveRoll: { dice: story.day.move_roll.dice, floor: story.day.move_roll.floor },
       start: story.start,
     };
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    issues.push({
+      rule: "P2-1",
+      file: `${story.base_pack}/board/spaces.json`,
+      path: "(file)",
+      message: `P2-1: the board for base pack ${story.base_pack} could not be read: ${message}`,
+    });
     return null;
   }
 };
@@ -153,17 +162,21 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     });
 
     if (story.playable && !defaultPlay) {
-      defaultPlay = playContentFor(root, {
-        base_pack: story.base_pack,
-        day: story.day,
-        start: {
-          mode: story.start.mode,
-          assignments: story.start.assignments.map((row) => ({
-            hero: row.hero,
-            kingdom: row.kingdom,
-          })),
+      defaultPlay = playContentFor(
+        root,
+        {
+          base_pack: story.base_pack,
+          day: story.day,
+          start: {
+            mode: story.start.mode,
+            assignments: story.start.assignments.map((row) => ({
+              hero: row.hero,
+              kingdom: row.kingdom,
+            })),
+          },
         },
-      });
+        issues,
+      );
     }
   }
 

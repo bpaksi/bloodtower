@@ -276,7 +276,8 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
     await expect(board.locator("main.bt-board")).toHaveAttribute("data-board-mode", "play");
     await expect(board.locator(".bt-board-warning")).toHaveCount(0);
     await expect(board.getByText("Paused.")).toHaveCount(0);
-    const first = board.locator("main.bt-board > *").first();
+    // The landing painting (W6 backdrop) sits under every layer. The band leads the rest.
+    const first = board.locator("main.bt-board > :not(.bt-board-backdrop)").first();
     expect(await first.evaluate((el) => el.hasAttribute("data-band"))).toBe(true);
     const band = board.locator("[data-band]");
     const waiting = board.locator("[data-waiting]");
@@ -292,9 +293,14 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
       const bottomGap = mainBox.y + mainBox.height - (bandBox.y + bandBox.height);
       expect(topGap).toBeLessThan(bottomGap);
     }
-    await expect(band.locator("[data-health]")).toHaveText(/unavailable/);
+    // One health mark per seated hero (W6).
+    const health = band.locator("[data-health]");
+    await expect(health).toHaveCount(HERO_IDS.length);
+    for (const mark of await health.all()) {
+      await expect(mark).toHaveText(/unavailable/);
+      expect(await mark.innerText()).not.toMatch(/\b0\b/);
+    }
     await expect(band.locator("[data-purse]")).toHaveText(/unavailable/);
-    expect(await band.locator("[data-health]").innerText()).not.toMatch(/\b0\b/);
     expect(await band.locator("[data-purse]").innerText()).not.toMatch(/\b0\b/);
     await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
     await expect(board.locator("[data-day]")).toHaveText(/^Day \d+$/);
@@ -321,7 +327,8 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
       .toLowerCase();
     expect(packText).not.toContain("board.wash");
     expect(packText).not.toMatch(/hero\.[a-z0-9-]+\.mark/);
-    await expect(board.locator("[data-roster]")).toBeVisible();
+    // W6 took the text roster off the Story board. It stays on the iPad.
+    await expect(board.locator("[data-roster]")).toHaveCount(0);
 
     const motionName = await waiting.evaluate((el) => getComputedStyle(el).animationName);
     expect(motionName).toBe("bt-waiting-pulse");
@@ -485,24 +492,37 @@ test("W7 Enter shows the place still on the story board and Leave is the only pl
         for (const label of labels) {
           expect(label).not.toMatch(/search|fight|talk|event|foe|battle/i);
         }
-        await expect(board.locator("[data-waiting]")).toBeVisible();
-        await expect(board.locator("[data-waiting]")).toHaveText(
-          new RegExp(`${heroName(now.hero)} is choosing`),
-        );
+        // The place still fills the board, so the band and the waiting line hide (DEC-190, W6).
+        await expect(board.locator("main.bt-board")).toHaveAttribute("data-board-layer", "place");
+        await expect(board.locator("[data-waiting]")).toHaveCount(0);
         await expect(board.locator("[data-waiting-dialog]")).toHaveCount(0);
-        await expect(board.locator("[data-band]")).toBeVisible();
+        await expect(board.locator("[data-band]")).toHaveCount(0);
         const moves = now.moves;
         await clickAct(device, "leave", `leave--${now.hero}`);
         await settle(device, before);
         const after = await readStatus(device);
         expect(after.inside).toBe("false");
-        expect(after.moves).toBe(moves);
-        expect(after.space).toBe(now.space);
         if (moves && Number(moves) > 0) {
+          // Leave spends no move and brings the move map back (W7-step-1 l.40).
+          expect(after.moves).toBe(moves);
+          expect(after.space).toBe(now.space);
           await expect(device.locator("[data-move-map]")).toBeVisible();
           await expect(board.locator("[data-still]")).toHaveCount(0);
           await expect(board.locator("[data-place]")).toHaveCount(0);
           await expect(board.locator("main.bt-board img")).toHaveCount(0);
+        } else {
+          // Entered with no moves left: Leave ends the group's turn, and the next
+          // offer is the next move roll or the skull prompt (W7-step-1 l.36).
+          const nextOffer = await device
+            .locator('button[data-prompt-id*="roll-done"], button[data-prompt-id*="skull-drop"]')
+            .count();
+          const turnPassed =
+            after.hero !== now.hero ||
+            after.day !== now.day ||
+            Number(after.moves) > 0 ||
+            nextOffer > 0;
+          expect(turnPassed).toBe(true);
+          await expect(board.locator("[data-place]")).toHaveCount(0);
         }
         seen.add(building);
         continue;
@@ -628,7 +648,9 @@ test("W7 continue keeps an entered place and Leave returns to the move map", asy
     expect(restored.moves).toBe(snapshot?.moves);
     expect(restored.day).toBe(snapshot?.day);
     expect(restored.hero).toBe(snapshot?.hero);
-    await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
+    // Inside a place the band, and its chapter, hide behind the still (DEC-190, W6).
+    await expect(board.locator("main.bt-board")).toHaveAttribute("data-board-layer", "place");
+    await expect(board.locator("[data-chapter]")).toHaveCount(0);
     await expect.poll(() => frames.some((frame) => frame.includes('"screen":"play"'))).toBe(true);
     const held = frames
       .map(
@@ -655,7 +677,7 @@ test("W7 continue keeps an entered place and Leave returns to the move map", asy
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
     expect(checkpointSeed(databasePath)).toBe("w7-continue");
     expect(await page.getByText(/seed/i).count()).toBe(0);
-    await expect(board.locator("[data-waiting]")).toBeVisible();
+    await expect(board.locator("[data-waiting]")).toHaveCount(0);
     await expect(board.locator("[data-waiting-dialog]")).toHaveCount(0);
     const beforeLeave = await marker(page);
     await clickAct(page, "leave", `leave--${restored.hero}`);

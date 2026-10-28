@@ -24,7 +24,7 @@ The repo is public, so RtDT art, photos of the physical game and the rulebook PD
 | Path in the backup folder | What |
 |---|---|
 | `RtDT_Rulebook-v2-web.pdf` | The official Rulebook v2.0 (also at the [official link](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf)) |
-| `cards/` | One image per card: 22 treasures, 20 quest items, 6 gear, 18 potions, 12 corruptions, plus `gear-potions-corruptions.csv`; listed in [items-and-virtues.md](items-and-virtues.md#card-images) |
+| `cards/` | One image per card: 22 treasures, 20 quest items, 6 gear, 18 potions, 12 corruptions, 16 virtue tiles (`cards/virtues/`), plus `gear-potions-corruptions.csv` and `virtues.csv`; listed in [items-and-virtues.md](items-and-virtues.md#card-images) |
 | `cards/foes/`, `cards/adversaries/`, `cards/companions/` | Front and back of every foe (12), adversary (8) and companion (10), plus their CSVs; listed in [foes-adversaries-companions.md](foes-adversaries-companions.md#card-images) |
 | `cards/archives/` | Bob's original zips and CSVs, as sent |
 | `app-screenshots/` | Seven companion-app screens (turn, event, dungeon, two battle cards, main goal, setup), Bob 2026-10-28; described in [companion-app.md](companion-app.md#screenshots-bob-2026-10-28) |

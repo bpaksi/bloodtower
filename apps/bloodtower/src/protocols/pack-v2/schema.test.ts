@@ -72,4 +72,47 @@ describe("pack format v2 schema", () => {
     });
     expect(story.success).toBe(true);
   });
+
+  it("lets a space point at a declared region and refuses an unknown one (DEC-242)", () => {
+    const pack = (region: string) => ({
+      format: 2,
+      kind: "base-content",
+      pack_id: "base",
+      title: "Base",
+      version: "0.1.0",
+      engine_min: "0.1.0",
+      heroes: [
+        {
+          id: "hero-a",
+          name: "Hero A",
+          role: "fighter",
+          might: 5,
+          stealth: 2,
+          magic: 1,
+          wits: 2,
+          ability: "Duel",
+          portrait: "por.hero-a",
+          voice: "vo.hero-a",
+        },
+      ],
+      building_types: [{ id: "citadel", name: "Citadel" }],
+      quest_types: [{ id: "tomb", name: "Tomb" }],
+      board: {
+        kingdoms: [
+          { id: "N", name: "Arisilon", label: "Arisilon (N)" },
+          { id: "E", name: "Brynthia", label: "Brynthia (E)" },
+          { id: "S", name: "Durnin", label: "Durnin (S)" },
+          { id: "W", name: "Zenon", label: "Zenon (W)" },
+        ],
+        region_labels: [{ id: "REG-03", name: "Long Water" }],
+        spaces: [{ id: "N-dayside", name: "Dayside", kingdom: "N", terrain: "lake", region }],
+      },
+    });
+    expect(baseContentPackSchema.safeParse(pack("REG-03")).success).toBe(true);
+    const unknown = baseContentPackSchema.safeParse(pack("REG-09"));
+    expect(unknown.success).toBe(false);
+    expect(unknown.error?.issues.map((i) => i.message)).toContain(
+      "P2-2: space N-dayside points at unknown region REG-09.",
+    );
+  });
 });
