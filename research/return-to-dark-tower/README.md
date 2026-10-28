@@ -14,6 +14,7 @@ Research on the published Return to Dark Tower (RtDT) game and companion app, co
 | [rulebook-summary.md](rulebook-summary.md) | The Rulebook v2.0 summarised section by section, with page references (Bob, 2026-10-27) |
 | [strategy-commentary.md](strategy-commentary.md) | Independent commentary on RtDT's central decisions: time, board condition, hero resilience, spirit as a budget (Bob, 2026-10-27) |
 | [sources.md](sources.md) | Where each fact came from, including the official [Rulebook v2.0](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) |
+| [assets/gamingtrend-review-perplexity-2026-10-28.pdf](assets/gamingtrend-review-perplexity-2026-10-28.pdf) | Bob's Perplexity summary of the GamingTrend review: gameplay pros and cons. Checked against our design in [design-check-rtdt-review.md](../game-design/design-check-rtdt-review.md) |
 | [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf) | Bob's Perplexity report on potions, gear, virtues and treasures, the source of items-and-virtues.md |
 
 ## Copyrighted material (not in the repo)
@@ -26,11 +27,13 @@ The repo is public, so RtDT art, photos of the physical game and the rulebook PD
 | `cards/` | One image per card: 22 treasures, 20 quest items, 6 gear, 18 potions, 12 corruptions, 16 virtue tiles (`cards/virtues/`), plus `gear-potions-corruptions.csv` and `virtues.csv`; listed in [items-and-virtues.md](items-and-virtues.md#card-images) |
 | `cards/foes/`, `cards/adversaries/`, `cards/companions/` | Front and back of every foe (12), adversary (8) and companion (10), plus their CSVs; listed in [foes-adversaries-companions.md](foes-adversaries-companions.md#card-images) |
 | `cards/archives/` | Bob's original zips and CSVs, as sent |
+| `app-screenshots/` | Seven companion-app screens (turn, event, dungeon, two battle cards, main goal, setup), Bob 2026-10-28; described in [companion-app.md](companion-app.md#screenshots-bob-2026-10-28) |
 | `photos/board-top-down.webp` | Bob's top-down photo of the physical board, for the DEC-221 board map |
 | `photos/IMG_5683.HEIC` | Rulebook components page (cited by the AST-B cards) |
 | `photos/IMG_5687.HEIC` to `IMG_5689.HEIC` | Virtue tiles (Infused and others) |
 | `photos/IMG_5690.HEIC` to `IMG_5692.HEIC` | Spore and caravan tokens, haggle die, one seal |
 | `photos/IMG_5697.jpeg` to `IMG_5702.jpeg` | Treasure and quest item cards, the source of the card images |
+| `screens/app-dungeon-tower-of-the-guardians.png` | The RtDT app's dungeon screen (Bob's iPad, 2026-10-28), described in [app-dungeon-screen.md](app-dungeon-screen.md) |
 
 ## Product line timeline
 
