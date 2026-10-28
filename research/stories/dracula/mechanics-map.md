@@ -1,5 +1,7 @@
 # Mechanics map: Vellmoor (Ravenloft I6 + Dracula)
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/mechanics-map.md).
+
 Written 2026-10-14, before the story. No story or dialog here. It covers what exists, and how each approved set piece and encounter layer maps onto it.
 
 **Status key:** **HW** = tower hardware/firmware, confirmed on Bob's tower · **HW?** = the library or docs claim it, not verified on the tower · **POC** = tower-poc capability (per the research write-ups) · **RtDT** = original game / physical components · **R** = proposed in research · **NEW** = needed for this game.

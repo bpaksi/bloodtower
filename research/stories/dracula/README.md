@@ -1,5 +1,7 @@
 # Story: Dracula / vampire (Halloween)
 
+> **1.0 cut (2026-10-28):** 1.0 ships this story cut down ([DEC-506](../../game-design/cards/DEC-506.md), [DEC-508](../../game-design/cards/DEC-508.md)): three chapters and ten plain set pieces ([set-piece-counts.md](set-piece-counts.md)). The full version is kept in [dracula-v2](../dracula-v2/README.md).
+
 Status: idea. Nothing here is decided.
 
 | File | What's in it |

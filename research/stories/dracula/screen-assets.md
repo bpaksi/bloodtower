@@ -1,5 +1,7 @@
 # Dracula: landing and screen assets
 
+> **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/screen-assets.md).
+
 Status: draft, 2026-10-14. The generic screen flow is in [landing-and-initial-screens](../../game-design/landing-and-initial-screens.md).
 
 Dracula needs:

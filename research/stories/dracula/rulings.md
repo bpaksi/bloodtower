@@ -1,5 +1,13 @@
 # Dracula: decided rulings
 
+## 1.0 cut (Bob, 2026-10-28)
+
+[DEC-508](../../game-design/cards/DEC-508.md) cuts Dracula down for 1.0. The full rulings below are kept unchanged in [dracula-v2](../dracula-v2/rulings.md). For 1.0:
+
+- **Hold:** D-DRA-5, D-DRA-6, D-DRA-7, D-DRA-8, D-DRA-10 and the four endings, D-DRA-12 (the earth-box sites).
+- **Replaced:** D-DRA-1 to D-DRA-4 (5 nights, one kingdom a night): three chapters, the keys are the blade, the holy symbol and the Tome, and the castle is chapter 3 ([set-piece-counts.md](set-piece-counts.md)). D-DRA-9 was already replaced by hit points (DEC-039).
+- **Wait for v2:** D-DRA-11 (the hunter token left the engine, DEC-310), D-DRA-13 (lengths), D-DRA-14 (the crypt crawl), the pressed flower, the midnight procession, the lookalike, the finale guard and the fly-eater's price.
+
 Status: decided by Bob, 2026-10-14 (via Loremaster). These configure the generic engine; see [requirements](../../game-design/requirements.md).
 
 Bob has made these rulings. They are **Decided** for the Dracula pack.
