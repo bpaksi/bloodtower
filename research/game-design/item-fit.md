@@ -114,11 +114,11 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Circlet of Conviction | +1 Humanoid; spend instead of dropping a skull: take another turn | +1 Humanoid; spend: skip the day's skull and take another day | Reword |
 | Tears of the Shedu | +1 Undead; defeat a Stealth foe: gain a potion | Same (DEC-426) | Direct, decided |
 | Oakstone Bow | +1 Melee; battle a foe on an adjacent space | +1 Melee; fight a standing horde one space away | Reword |
-| Scroll of Twilight Shadow | Spend: +4 Stealth | Spend: soften a Stealth foe's card up to 4 steps (DEC-324) | Reword |
+| Scroll of Twilight Shadow | Spend: +4 Stealth | Spend in a battle round: +4 that round, the holder still fights (DEC-431) | Reword, decided |
 | Crown of Azkol | +1 Humanoid; sanctuary Reinforce: spirit equal to the month | +1 Humanoid; after a sanctuary pick, money equal to the chapter | Reword |
 | Golden Mace of Azkol | +1 Undead; spirit equal to a foe's level removes it | +1 Undead; pay money by level to remove a standing horde | Reword |
-| Scroll of Burning Sands | Spend: +4 Magic | Spend: soften a Magic foe's card up to 4 steps | Reword |
-| Scroll of the Great Serpent | Spend: +4 Melee | Spend: soften a Melee foe's card up to 4 steps | Reword |
+| Scroll of Burning Sands | Spend: +4 Magic | Spend in a battle round: +4 that round, the holder still fights (DEC-432) | Reword, decided |
+| Scroll of the Great Serpent | Spend: +4 Melee | Spend in a battle round: +4 that round, the holder still fights (DEC-433) | Reword, decided |
 | Hallowed Reliquary | +1 Undead; after a Battle, remove 1 skull in your kingdom | Same (DEC-427) | Direct, decided |
 | Azkol's Horn | +1 Beast; glyphs facing you cost no spirit | +1 Beast | Advantage only (no glyph costs) |
 | Amulet of the Marid | +2 Wild in lakes; crossing a river, move anywhere along it | Same, if the board's rivers and lakes count | Reword |
