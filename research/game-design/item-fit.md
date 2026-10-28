@@ -136,20 +136,20 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Corruption | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Cursed | Spend at most 4 Advantages per turn | At most 4 Advantages per battle | Direct |
-| Suspicious | Carry at most 2 potions | Same | Direct |
-| Uncertain | After you Reinforce, your turn ends | After a building pick, the group's day ends | Direct |
-| Weak | Carry at most 2 treasures | Same | Direct |
-| Cruel | Village Reinforce: lose 1 spirit | After a village pick, lose money | Reword |
-| Greedy | Bazaar Reinforce: lose 1 spirit | After a bazaar pick, lose money | Reword |
-| Feral | End your turn on a building's space: lose 2 spirit | End the day on a building's space: lose money | Reword |
-| Lost | End your turn in your home kingdom: lose 1 spirit | End the day in the group's chapter-start kingdom: lose money | Reword |
-| Feeble | You cannot double your move | You cannot pay for extra moves | Reword |
-| Feverish | You cannot Cleanse a building with 3 skulls | Cannot remove skulls from a 3-skull building | Reword (needs Cleanse) |
-| Selfish | Give nothing when you trade | The group cannot give items to another group | Reword |
-| Tempted | Glyphs cost 1 more spirit | None (no glyph costs) | None |
+| Cursed | Spend at most 4 Advantages per turn | At most 4 of the holder's Advantages count in a battle round (DEC-466) | Direct, decided |
+| Suspicious | Carry at most 2 potions | The holder holds at most 2 potions (DEC-467) | Direct, decided |
+| Uncertain | After you Reinforce, your turn ends | After a building pick, the holder's group's turn ends (DEC-468) | Direct, decided |
+| Weak | Carry at most 2 treasures | The holder holds at most 2 treasures (DEC-469) | Direct, decided |
+| Cruel | Village Reinforce: lose 1 spirit | After a village pick, the holder loses money (DEC-470) | Reword, decided |
+| Greedy | Bazaar Reinforce: lose 1 spirit | After a bazaar pick, the holder loses money (DEC-471) | Reword, decided |
+| Feral | End your turn on a building's space: lose 2 spirit | The holder loses money when the group's turn ends on a building's space (DEC-472) | Reword, decided |
+| Lost | End your turn in your home kingdom: lose 1 spirit | The holder loses money when the group's turn ends in the holder's home kingdom (DEC-473) | Reword, decided |
+| Feeble | You cannot double your move | The holder's cards add nothing to the group's move roll (DEC-474) | Reword, decided |
+| Feverish | You cannot Cleanse a building with 3 skulls | The holder's group cannot Cleanse a building with 3 skulls (DEC-475) | Direct, decided |
+| Selfish | Give nothing when you trade | The holder cannot give a card to another hero (DEC-476) | Reword, decided |
+| Tempted | Glyphs cost 1 more spirit | Every buy the holder's group makes costs a little more (DEC-477) | Reword, decided |
 
-**Corruptions: 4 direct, 7 reword, 1 none.** Feeble stacks with DEC-365's -1 move; together they may be too harsh.
+**Corruptions: 5 direct, 7 reword. All 12 decided (DEC-466 to DEC-477); Feeble now takes the move bonus away instead of stacking a second -1, and Tempted raises prices. The player picks which one the sanctuary removes (DEC-465).**
 
 ## Quest items
 
