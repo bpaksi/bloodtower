@@ -50,7 +50,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 | Hunter board | Prepared | Bazaar treasures cost 1 less spirit | Bazaar prices lower | Reword |
 | Spymaster board | (name ?) | +1 Stealth Advantage | +1 Stealth Advantage | Direct |
 | Spymaster board | Swift | Base move 4, not 3 | +1 on the move roll (DEC-102) | Direct |
-| Warlord tile | Callous | After a battle losing 10+ warriors, gain a treasure | After a battle where the group lost a lot of hit points, gain a treasure | Reword |
+| Warlord tile | Callous | After a battle losing 10+ warriors, gain a treasure | After a battle where this hero lost a lot of hit points, gain a treasure (DEC-387) | Reword, decided |
 | Warlord tile | Inspiring | After Reinforce, gain 6 warriors | After a building pick, heal | Reword |
 | Warlord tile | Relentless | If you double your move, +1 Wild | On a high move roll, +1 Wild in the next battle | Reword |
 | Hunter tile | Lucky | Spend a treasure: gain the top treasure | Same | Direct |
