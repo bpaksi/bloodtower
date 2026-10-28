@@ -33,6 +33,7 @@ export const CARD_TYPES = [
   "light-effect",
   "light-sequence",
   "drum",
+  "art",
   "sketch",
   "example",
 ] as const;

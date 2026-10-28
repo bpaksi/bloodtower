@@ -22,6 +22,7 @@ const BUILDABLE: readonly CardType[] = [
   "light-effect",
   "light-sequence",
   "drum",
+  "art",
 ];
 
 const TOWER_OUTPUTS: readonly CardType[] = [

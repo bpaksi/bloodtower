@@ -8,7 +8,7 @@ One small idea per file. The game-workbench shows them as a graph: one card in t
 
 ```markdown
 ---
-type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | glyph | seal | light | light-effect | light-sequence | drum | sketch | example
+type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | glyph | seal | light | light-effect | light-sequence | drum | art | sketch | example
 title: Use the 3 RtDT quest tokens   # one line, the headline
 status: open          # open | answered | proposed | decided | parked
 layer: core           # core | configurable | optional | story (see Layers)
@@ -46,6 +46,7 @@ Prefix by type, three digits, never reused or renumbered. A retired card stays, 
 | light-effect | `LFX-` (a light effect: breathe, flicker…) |
 | light-sequence | `LSQ-` (a built-in light sequence) |
 | drum | `DRM-` (tower drum) |
+| art | `ART-` (one picture to make: a card, tile or token image, made in the game's look) |
 | sketch | `SK-` |
 | example | `EX-` |
 
@@ -70,7 +71,7 @@ A link is written on one card and read both ways.
 
 Each verb may join only certain types. The card lint (`pnpm check`) fails a link that no rule allows. `needs` is the only verb that sets build order: "A needs B" means B must be settled or built before A. `needs` and `part-of` must not loop back on themselves.
 
-Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or more times on that day, plus the rules by meaning below. The code is `apps/game-workbench/src/web/lib/link-rules.ts`. Below, "built" means decision, option, mechanic, piece, screen, ui, cue or a tower output (sound, glyph, seal, light, light-effect, light-sequence, drum). A document ID is written `ref:<kind>`, for example `ref:requirement` for `R-WIZ-5`.
+Bob set the first table on 2026-10-21. It allows every shape the cards used 5 or more times on that day, plus the rules by meaning below. The code is `apps/game-workbench/src/web/lib/link-rules.ts`. Below, "built" means decision, option, mechanic, piece, screen, ui, cue, art or a tower output (sound, glyph, seal, light, light-effect, light-sequence, drum). A document ID is written `ref:<kind>`, for example `ref:requirement` for `R-WIZ-5`.
 
 | Verb | Sets build order | No loops | Allowed by meaning | Also allowed (common shapes) |
 |---|---|---|---|---|
@@ -110,7 +111,7 @@ Every field is optional. One that was not recorded is left out, never written as
 
 **Replaced rulings (DEC-352).** When a newer ruling replaces a whole card, park the old card and start its body with "Replaced by DEC-x (Bob, date)." When it replaces only part, the old card stays `decided`, its title is cut to what still holds, and its body says what DEC-x replaced. Either way the newer card links `refines` to the old one, with a note saying what it replaces.
 
-**Deliverables (DEC-355).** `SCR-`, `UI-`, `CUE-` and `MEC-` cards are the deliverables: one card per thing that gets built. Every decided ruling is reached from at least one of them by `needs` or `uses`, and each plan step lists the deliverable cards it builds as `Builds: <IDs>`.
+**Deliverables (DEC-355).** `SCR-`, `UI-`, `CUE-`, `MEC-` and `ART-` cards are the deliverables: one card per thing that gets built. Every decided ruling is reached from at least one of them by `needs` or `uses`, and each plan step lists the deliverable cards it builds as `Builds: <IDs>`.
 
 ## Layers
 

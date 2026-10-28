@@ -46,6 +46,11 @@ describe("card files", () => {
     expect(() => parseCard("LGT-001.md", card("type: drum\ntitle: x"))).toThrow(/DRM-NNN/);
   });
 
+  it("accepts an art card with its ART- prefix", () => {
+    expect(parseCard("ART-001.md", card("type: art\ntitle: x")).id).toBe("ART-001");
+    expect(() => parseCard("UI-001.md", card("type: art\ntitle: x"))).toThrow(/ART-NNN/);
+  });
+
   // The lint: every card in research/game-design/cards parses, and every link resolves to a card,
   // a document ID, or carries a note saying what it is.
   // Loads the full cards folder; CI can exceed vitest's 5s default under load (see find.test.ts).
