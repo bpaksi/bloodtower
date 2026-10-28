@@ -99,7 +99,6 @@
   "MEC-022|uses|IDEA-008",
   "MEC-023|refines|ENC-FEL-005",
   "MEC-024|raises|Q-023",
-  "MEC-026|affects|DEC-039",
   "MEC-026|uses|E20",
   "MEC-030|refines|AST-O02",
   "MEC-030|uses|AREA-033",

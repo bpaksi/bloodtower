@@ -25,7 +25,7 @@ No official desktop or web version was found. That gap is what our web controlle
 - Setup: mode (cooperative / competitive), difficulty (Heroic / Gritty), expansions, player count, main goal, adversary, foes, optional 12-character game seed.
 - Runs the hidden game state: month length, events, monthly quests, foe status and strikes, adversary actions.
 - Battle screen: face-down cards per foe level, Advantage arrows to improve results, critical hits, adversary 5-card fights with persistent improvements.
-- Dungeon screen: room-by-room exploration with one improvement per room; remembers cleared rooms.
+- Dungeon screen: room-by-room exploration with one improvement per room; remembers cleared rooms; see [app-dungeon-screen.md](app-dungeon-screen.md).
 - Foe status screen: counts, status level, current strike event; removing foes without battle.
 - Save / restore games; "game lost" button on most screens; end-game stats with seed.
 - Settings: localization, performance mode, 180° rotation.

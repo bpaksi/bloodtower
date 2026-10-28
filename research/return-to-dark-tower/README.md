@@ -33,6 +33,7 @@ The repo is public, so RtDT art, photos of the physical game and the rulebook PD
 | `photos/IMG_5687.HEIC` to `IMG_5689.HEIC` | Virtue tiles (Infused and others) |
 | `photos/IMG_5690.HEIC` to `IMG_5692.HEIC` | Spore and caravan tokens, haggle die, one seal |
 | `photos/IMG_5697.jpeg` to `IMG_5702.jpeg` | Treasure and quest item cards, the source of the card images |
+| `screens/app-dungeon-tower-of-the-guardians.png` | The RtDT app's dungeon screen (Bob's iPad, 2026-10-28), described in [app-dungeon-screen.md](app-dungeon-screen.md) |
 
 ## Product line timeline
 
