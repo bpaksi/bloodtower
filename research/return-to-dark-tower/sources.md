@@ -38,3 +38,7 @@ Accessed 13 October 2026.
 - Bob's Perplexity report: [assets/items-and-virtues-perplexity-2026-10-27.pdf](assets/items-and-virtues-perplexity-2026-10-27.pdf), summarised in [items-and-virtues.md](items-and-virtues.md)
 - [GeekDad: Reaping the Rewards](https://geekdad.com/2022/10/reaping-the-rewards-return-to-dark-tower/) — photos of gear and the 12 hero virtues
 - [BoardGameGeek: Expansion Info thread](https://boardgamegeek.com/thread/2838905/return-to-dark-tower-expansion-info) — lead for a full contents spreadsheet
+
+## GamingTrend review (2026-10-28)
+- [GamingTrend: Return to Dark Tower review](https://gamingtrend.com/reviews/return-to-dark-tower-review-the-nerd-maker/) — the review itself
+- Bob's Perplexity summary: [assets/gamingtrend-review-perplexity-2026-10-28.pdf](assets/gamingtrend-review-perplexity-2026-10-28.pdf), checked against our design in [design-check-rtdt-review.md](../game-design/design-check-rtdt-review.md). Its reference list also names unrelated video-game reviews; only reference 1 is used.
