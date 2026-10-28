@@ -1,6 +1,6 @@
 # A1: asset-studio adapter, asset packaging and the `bt-assets` skill (build plan)
 
-**Status:** draft, waiting for Bob's approval (G0). Nothing is built.
+**Status:** approved by Bob (G0 passed), 2026-10-28. Nothing is built. Bob said "no code changes yet": no step starts until he says so.
 **Source:** game-design cards DEC-382 to DEC-403 (session 2026-10-28, PR bpaksi/bloodtower#298, AREA-089); DEC-199, DEC-202 (assets by stable ID through an index), DEC-207 and DEC-348 (avatar limits), DEC-349 (which lines are voiced) and DEC-401 (glow masks). The tool side is asset-studio's plan P2 (`bpaksi/talking-avatar`, to be renamed `bpaksi/asset-studio`: `plans/P2-asset-studio.md`).
 **Goal:** a story's pack goes to an asset-studio job and back into the pack as finished files with an index, through `pnpm assets:needs|render|pack <story>`, driven by the `bt-assets` skill in studio or AI mode.
 **Exit condition:** every `Done when` passes in CI, and Bob signs off at G-A1 on the Mac and the TV.
@@ -158,4 +158,4 @@ Steps 2, 4 and 5 wait on P2 releases. When a P2 step slips, the A1 step that nee
 
 ## Results
 
-(Filled in as steps merge.)
+- G0: Bob approved the plan on 2026-10-28, with no code changes yet. Whether an `intent/` file is needed is still his call before step 1.
