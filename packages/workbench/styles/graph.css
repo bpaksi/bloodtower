@@ -254,6 +254,9 @@
 .gk-sound {
   --chip: #0891b2;
 }
+.gk-art {
+  --chip: #c2410c;
+}
 .gk-sketch {
   --chip: #db2777;
 }

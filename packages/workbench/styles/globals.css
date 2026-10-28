@@ -586,6 +586,9 @@ a.nav-item:hover {
 .chip-idea {
   --chip: #a16207;
 }
+.chip-art {
+  --chip: #9a3412;
+}
 .chip-sketch {
   --chip: #be185d;
 }

@@ -34,6 +34,7 @@ describe("design IDs", () => {
     expect(idKind("Q3")).toBe("question");
     expect(idKind("CUE-031")).toBe("cue");
     expect(idKind("SK-0041")).toBe("sketch");
+    expect(idKind("ART-012")).toBe("art");
     expect(idKind("GLY-001")).toBe("glyph");
     expect(idKind("SEAL-012")).toBe("seal");
     expect(idKind("LGT-024")).toBe("light");
