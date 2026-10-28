@@ -157,25 +157,25 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 
 | Quest item | RtDT effect | Bloodtower effect | Fit |
 |---|---|---|---|
-| Amulet of Annihilation | Spend: remove all foes on and next to your space | Spend: remove standing hordes on and next to your space | Direct |
-| Amulet of Hope (×4) | +1 Wild; after a Battle, a treasure instead of 2 spirit | +1 Wild; after a battle, a treasure instead of the money | Reword |
-| Bezoar | Lose at most 5 warriors from Empress of Shades events | Caps the hit from one villain's events | Story only |
-| Dragon Scales | +2 Wild against level 4 foes | +2 Wild against the strongest foes or a boss | Reword |
-| Fulminating Silver | Once per battle, 1 spirit: +1 Wild | Once per battle, pay money: +1 Wild | Reword |
-| Golden Wolf Pelt | Prevent 6 warrior losses per battle card | Each lost round's hit is smaller (a guard) | Reword |
-| Herbal Remedy | After Reinforce, remove your spore tokens | A story's lingering curse lifts at a building | Story only |
-| Horn of the Elements | Once per turn, move a foe or siege tree 1 space | Once a day, move a standing horde's token 1 space | Reword |
-| Mark of the Outlaw | Village Reinforce: +5 warriors | After a village pick, heal | Reword |
-| Orb of Pure Snow | Prevent 1 spirit loss per battle card | A lost round costs no money | Reword |
-| Relic of Light | After Cleanse, +1 spirit | After removing skulls, +money | Reword (needs Cleanse) |
-| Smuggler's Coin | Bazaar Reinforce: cycle the treasure market | After a bazaar pick, redraw the offered treasures | Reword |
-| The Black Mark | Cannot be spent or lost; 1 spirit gives it to another hero | A story curse that can only be passed on | Reword |
-| Tomas's Map | Spend: +5 Wild in a dungeon | Spend: +5 Wild in a dungeon set piece | Direct |
-| Tools of the Saboteur | +3 Wild against caravans | +3 Wild against a story's named target | Story only |
-| Turquoise Urn | Carry 2 extra treasures | Same | Direct |
-| Wraps of Invisibility | Prevent 3 warrior losses per dungeon room | A dungeon room's hit is smaller (a guard) | Reword |
+| Amulet of Annihilation | Spend: remove all foes on and next to your space | Spend it to remove every standing horde on and next to the group's space (DEC-448) | Direct, decided |
+| Amulet of Hope (×4) | +1 Wild; after a Battle, a treasure instead of 2 spirit | +1 Wild; after a won battle, the holder may take a treasure instead of the money (DEC-449) | Reword, decided |
+| Bezoar | Lose at most 5 warriors from Empress of Shades events | The story names a villain, and that villain's events hit the holder for less (DEC-450) | Story only, decided |
+| Dragon Scales | +2 Wild against level 4 foes | +2 Wild against the strongest foes and the boss (DEC-451) | Reword, decided |
+| Fulminating Silver | Once per battle, 1 spirit: +1 Wild | Once per battle, pay money for +1 Wild for the rest of that battle (DEC-452) | Reword, decided |
+| Golden Wolf Pelt | Prevent 6 warrior losses per battle card | Every hit on the holder is smaller, more than Leather Armor (DEC-453) | Reword, decided |
+| Herbal Remedy | After Reinforce, remove your spore tokens | After a building pick, the story's named curse lifts from the holder (DEC-454) | Story only, decided |
+| Horn of the Elements | Once per turn, move a foe or siege tree 1 space | Once a day, move a standing horde's token 1 space (DEC-455) | Reword, decided |
+| Mark of the Outlaw | Village Reinforce: +5 warriors | After a village pick, the holder heals (DEC-456) | Reword, decided |
+| Orb of Pure Snow | Prevent 1 spirit loss per battle card | The holder never loses money to a corruption or an event (DEC-457) | Reword, decided |
+| Relic of Light | After Cleanse, +1 spirit | After the group's Cleanse pick, the holder gains money (DEC-458) | Reword, decided |
+| Smuggler's Coin | Bazaar Reinforce: cycle the treasure market | After a bazaar pick, redraw the offered treasures (DEC-459) | Reword, decided |
+| The Black Mark | Cannot be spent or lost; 1 spirit gives it to another hero | A story curse that cannot be spent or lost, only passed on for money (DEC-460) | Reword, decided |
+| Tomas's Map | Spend: +5 Wild in a dungeon | Spend it in a set piece or Tower room battle round for +5 Wild that round (DEC-461) | Direct, decided |
+| Tools of the Saboteur | +3 Wild against caravans | +3 Wild against the story's named target (DEC-462) | Story only, decided |
+| Turquoise Urn | Carry 2 extra treasures | The holder may hold up to 6 treasures (DEC-463) | Direct, decided |
+| Wraps of Invisibility | Prevent 3 warrior losses per dungeon room | Every hit on the holder in a set piece or Tower room is smaller (DEC-464) | Reword, decided |
 
-**Quest items: 3 direct, 11 reword, 3 story only.**
+**Quest items: 3 direct, 11 reword, 3 story only. All 17 decided (DEC-448 to DEC-464); only a story grants one (DEC-447).**
 
 ## What the chart shows
 
