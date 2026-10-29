@@ -1,6 +1,6 @@
 ---
 type: idea
-title: "A foe ending: the villain seems to die but escapes"
+title: "A foe ending: the adversary seems to die but escapes"
 status: open
 layer: core
 by: "Bob, 2026-10-27"

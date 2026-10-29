@@ -12,7 +12,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 
 | Tool | Layer | When to use it | Floor | Target |
 |---|---|---|---|---|
-| opening narration (MEC-040) | core | Every story, once. It names the goal, the villain and where the heroes start. | 1 | 1 |
+| opening narration (MEC-040) | core | Every story, once. It names the goal, the adversary and where the heroes start. | 1 | 1 |
 | chapters (MEC-041) | configurable | Always. Use more chapters for a longer game, so each act stays short and the table feels the plot move. | 2 · 3 · 3 | 3 · 4 · 5 |
 | quests (MEC-042) | configurable | For every scene the plot needs the heroes to play through, not just hear. The win must depend on them (IDEA-013). | 4 · 6 · 8 | 8 · 12 · 14 |
 | steps inside a quest (MEC-043) | configurable | Every quest. Use more steps for a quest that should feel like a journey (a crypt), fewer for a sharp scene. | 2 | 3-5 |
@@ -27,7 +27,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 | building NPCs (MEC-047) | configurable | Every story. Write enough lines per role that a second and third visit sound different. The count is lines per role. | 3 | 6 · 8 · 10 |
 | named NPCs (MEC-048) | story | For anyone the plot wants the heroes to come back to: a witness, a suspect, a guide. Lines each: floor 3 (meeting, talking again, the clue action), target 6. | 2 · 3 · 4 | 4 · 6 · 8 |
 | companions (MEC-049) | optional | When the story wants allies with a voice: someone the heroes win over, protect or lose. Lines each: target 5 (join, loyalty up, loyalty down, leaving, the finale). | 0 | 4 · 4 · 6 |
-| the villain (MEC-050) | core | Every story, exactly one. Give it a voice the table hears through the game, not only at the end. Lines: floor 3 (introduction, a taunt, the finale), target 8. | 1 | 1 |
+| the adversary (MEC-050) | core | Every story, exactly one. Give it a voice the table hears through the game, not only at the end. Lines: floor 3 (introduction, a taunt, the finale), target 8. | 1 | 1 |
 | lieutenants (MEC-051) | optional | In a longer game, to give the middle chapters a face and a fight that changes the finale. | 0 | 1 · 2 · 3 |
 | traitor tricks (MEC-052) | optional | When the story is about trust: who to believe, who is lying. | 0 | 1 · 1 · 2 |
 
@@ -44,7 +44,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 
 | Tool | Layer | When to use it | Floor | Target |
 |---|---|---|---|---|
-| villain quests (MEC-057) | optional | When the story wants a race against the villain's plan, a choice between the plot and stopping a threat. | 0 | 1 · 2 · 3 |
+| adversary quests (MEC-057) | optional | When the story wants a race against the adversary's plan, a choice between the plot and stopping a threat. | 0 | 1 · 2 · 3 |
 | foe reskins (MEC-058) | optional | For each foe type the story's world meets often: wolves for Shadow Wolves, brides for Striga. The count is foe types reskinned. | 0 | 4 · 6 · 8 |
 | corruption names (MEC-059) | optional | Whenever the story's threat has its own way of marking a hero. | 0 | 12 |
 | wild event names (MEC-060) | optional | For each event type, so a storm or a plague reads as part of this story's world. The count is event types renamed. | 0 | 1 per event type |
@@ -64,8 +64,8 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 | nuggets (MEC-064) | configurable | Every story. Write more for longer games, so no talk repeats and rumours stay worth chasing. The count is nuggets. | 100 | 150 · 250 · 400 |
 | mood lines (MEC-065) | configurable | Every story, for each of the board's six terrains; add variants so the same road doesn't say the same thing twice. The count is lines per terrain. | 1 per terrain | 3 per terrain |
 | scene pictures (MEC-066) | configurable | At least one per quest; ideally one per moment, so each beat has its own picture. | 1 per quest | 1 per moment |
-| avatars (MEC-067) | configurable | For every character with lines: building NPCs, named NPCs, companions, the villain. The count is avatars per speaker. | 1 per speaker | 1 per speaker |
-| tower cues (MEC-068) | optional | For each quest, and a signature cue for the villain the table learns to dread. | 0 | 1 per quest + the villain's |
+| avatars (MEC-067) | configurable | For every character with lines: building NPCs, named NPCs, companions, the adversary. The count is avatars per speaker. | 1 per speaker | 1 per speaker |
+| tower cues (MEC-068) | optional | For each quest, and a signature cue for the adversary the table learns to dread. | 0 | 1 per quest + the adversary's |
 | place paintings (MEC-069) | optional | When the story's world looks different from the engine's default: gothic villages, a ruined citadel. The count is kinds of place painted. | 0 | 5 |
 | music (MEC-070) | optional | One track per chapter, so each act has its own mood. | 0 | 1 per chapter |
 
