@@ -7,6 +7,7 @@ by: "Bob, 2026-10-27"
 links:
   - { rel: part-of, to: AREA-044 }
   - { rel: affects, to: DEC-356, note: "an ending of the boss battle" }
+  - { rel: refines, to: DEC-567, note: "replaces its optional false death: waits for 1.1" }
 ---
 Bob: "Possibly, a foe ending where the advisory appears to die but actually escapes..." A Tower encounter hook (DEC-358) could play it, as a twist or a sequel hook.
 
