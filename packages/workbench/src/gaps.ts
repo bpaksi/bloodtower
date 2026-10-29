@@ -8,7 +8,7 @@ export const GAP_RULES = [
   "open-question",
   "mechanic-surface",
   "conflict-unparked",
-  "decided-no-requirement",
+  "no-deliverable",
   "area-undecided",
 ] as const;
 export type GapRule = (typeof GAP_RULES)[number];
@@ -17,7 +17,7 @@ export const GAP_RULE_LABEL: Record<GapRule, string> = {
   "open-question": "Open question with no answer",
   "mechanic-surface": "Mechanic with no screen, UI piece or cue",
   "conflict-unparked": "Conflict not yet settled",
-  "decided-no-requirement": "Decided card with no requirement",
+  "no-deliverable": "Decided ruling no deliverable reaches",
   "area-undecided": "Area with nothing decided",
 };
 
@@ -36,7 +36,9 @@ export type Gap = {
 const DOCUMENT_ID_KINDS = ["requirement", "asset", "engine", "question"];
 
 const SURFACE_TYPES = ["screen", "ui", "cue"];
-const DECIDED_TYPES = ["decision", "mechanic", "screen", "ui", "cue"];
+/** The cards that get built (DEC-355): each decided ruling is reached from one by needs or uses. */
+const DELIVERABLE_TYPES = ["screen", "ui", "cue", "mechanic", "art"];
+const REACH_RELS = ["needs", "uses"];
 
 function cardsOf(graph: Graph): Card[] {
   return Object.values(graph.nodes).flatMap((n) => (n.kind === "card" ? [n] : []));
@@ -74,10 +76,28 @@ function subtree(graph: Graph, area: string): Set<string> {
   return seen;
 }
 
-const isRequirement = (graph: Graph, id: string) => {
-  const n = graph.nodes[id];
-  return n?.kind === "ref" && n.idKind === "requirement";
-};
+/** Every node reached from a live deliverable card by `needs` or `uses`, over any number of hops. */
+function reachedFromDeliverables(graph: Graph): Set<string> {
+  const out = new Map<string, string[]>();
+  for (const e of graph.edges) {
+    if (REACH_RELS.includes(e.rel)) out.set(e.from, [...(out.get(e.from) ?? []), e.to]);
+  }
+  const seen = new Set<string>();
+  const stack = cardsOf(graph)
+    .filter((c) => DELIVERABLE_TYPES.includes(c.type) && c.status !== "parked")
+    .map((c) => c.id);
+  while (stack.length > 0) {
+    for (const to of out.get(stack.pop() as string) ?? []) {
+      if (seen.has(to)) continue;
+      seen.add(to);
+      stack.push(to);
+    }
+  }
+  return seen;
+}
+
+const isAnsweredQuestion = (n: Graph["nodes"][string] | undefined, answered: Set<string>) =>
+  n?.kind === "card" && n.type === "question" && (n.status === "answered" || answered.has(n.id));
 
 /** All gaps, ordered by rule, then card ID. */
 export function findGaps(graph: Graph): Gap[] {
@@ -119,6 +139,8 @@ export function findGaps(graph: Graph): Gap[] {
     const b = graph.nodes[e.to];
     if (a?.kind !== "card" || a.status === "parked") continue;
     if (b?.kind === "card" && b.status === "parked") continue;
+    // On an answered question, a conflict records what the question was about (DEC-611).
+    if (isAnsweredQuestion(a, answered) || isAnsweredQuestion(b, answered)) continue;
     // A conflict with a document ID (R-, E...) is settled once the card side is decided.
     if (b?.kind === "ref" && DOCUMENT_ID_KINDS.includes(b.idKind) && a.status === "decided")
       continue;
@@ -129,14 +151,10 @@ export function findGaps(graph: Graph): Gap[] {
     gaps.push(gap(a, "conflict-unparked", `conflicts with ${e.to}`));
   }
 
-  const hasRequirement = new Set(
-    graph.edges
-      .filter((e) => e.rel !== "conflicts" && isRequirement(graph, e.to))
-      .map((e) => e.from),
-  );
+  const reached = reachedFromDeliverables(graph);
   for (const c of cards) {
-    if (c.status === "decided" && DECIDED_TYPES.includes(c.type) && !hasRequirement.has(c.id)) {
-      gaps.push(gap(c, "decided-no-requirement"));
+    if (c.status === "decided" && c.type === "decision" && !reached.has(c.id)) {
+      gaps.push(gap(c, "no-deliverable"));
     }
   }
 
