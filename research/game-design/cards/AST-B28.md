@@ -14,4 +14,4 @@ sources:
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
-**Proposal:** a hazard on a river crossing that a story renames (flooded ford, wall of mist). Crossing costs a story item or a corruption, not warriors, to keep DEC-003. A set piece places or removes it to gate a kingdom.
+**Proposal:** a hazard on a river crossing that a story renames (flooded ford, wall of mist). Crossing costs a story item or a corruption, not warriors, to keep DEC-003. A quest places or removes it to gate a kingdom.

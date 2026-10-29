@@ -14,4 +14,4 @@ links:
 2) if no inner loop, entire content area is filled by current loop.
 3) white space is good but no content is bad. So if a loop is waiting for ipad, there should be some indicator of that."
 
-The board becomes nested frames that follow the loop stack (session, game, chapter, day, group turn, encounter, set piece, battle). Raised while asking Q-097 about the POC's permanent panels.
+The board becomes nested frames that follow the loop stack (session, game, chapter, day, group turn, encounter, quest, battle). Raised while asking Q-097 about the POC's permanent panels.

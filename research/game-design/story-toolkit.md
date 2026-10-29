@@ -14,10 +14,10 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 |---|---|---|---|---|
 | opening narration (MEC-040) | core | Every story, once. It names the goal, the villain and where the heroes start. | 1 | 1 |
 | chapters (MEC-041) | configurable | Always. Use more chapters for a longer game, so each act stays short and the table feels the plot move. | 2 · 3 · 3 | 3 · 4 · 5 |
-| set pieces (MEC-042) | configurable | For every scene the plot needs the heroes to play through, not just hear. The win must depend on them (IDEA-013). | 4 · 6 · 8 | 8 · 12 · 14 |
-| steps inside a set piece (MEC-043) | configurable | Every set piece. Use more steps for a set piece that should feel like a journey (a crypt), fewer for a sharp scene. | 2 | 3-5 |
-| chapter and set piece narration (MEC-044) | configurable | Start of every chapter and set piece at least. Add an end for each outcome (set piece: won, left, failed) so each result lands its own way. | start of each | start + one end per outcome |
-| trigger beats (MEC-045) | configurable | When the board should answer what the heroes do: a hint on a set piece's spot, a rumour when they enter the inn, a token placed after a battle. | 0 | 1 per chapter |
+| quests (MEC-042) | configurable | For every scene the plot needs the heroes to play through, not just hear. The win must depend on them (IDEA-013). | 4 · 6 · 8 | 8 · 12 · 14 |
+| steps inside a quest (MEC-043) | configurable | Every quest. Use more steps for a quest that should feel like a journey (a crypt), fewer for a sharp scene. | 2 | 3-5 |
+| chapter and quest narration (MEC-044) | configurable | Start of every chapter and quest at least. Add an end for each outcome (quest: won, left, failed) so each result lands its own way. | start of each | start + one end per outcome |
+| trigger beats (MEC-045) | configurable | When the board should answer what the heroes do: a hint on a quest's spot, a rumour when they enter the inn, a token placed after a battle. | 0 | 1 per chapter |
 | win and loss scenes (MEC-046) | core | Every story. Each loss scene names the reason, so the table knows why it lost. | 1 win + 1 per way to lose | 1 win + 1 per way to lose |
 
 ## People (AREA-083, DEC-262)
@@ -37,7 +37,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 |---|---|---|---|---|
 | hero start (MEC-053) | configurable | Every story. Start together for a tight party story; one per kingdom for a world under threat everywhere. | 1 | 1 |
 | chapter bounds (MEC-054) | configurable | Every chapter. Narrow bounds walk the party through the world in order; open bounds let them roam. | 1 per chapter | 1 per chapter |
-| story points (MEC-055) | configurable | One for every set piece. Spread them over kingdoms so the party travels. | 1 per set piece | 1 per set piece, over 2 · 3 · 4 kingdoms |
+| story points (MEC-055) | configurable | One for every quest. Spread them over kingdoms so the party travels. | 1 per quest | 1 per quest, over 2 · 3 · 4 kingdoms |
 | leads (MEC-056) | optional | When the story wants the world to feel bigger than its plot, and to reward talking to people. | 0 | 2 · 4 · 6 |
 
 ## Threats (AREA-085, DEC-264)
@@ -55,7 +55,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 |---|---|---|---|---|
 | story items (MEC-061) | configurable | For anything the plot needs the heroes to find, carry or spend, and for the win's keys. | what the win needs | 4 · 6 · 8 |
 | clues (MEC-062) | optional | When the story has a mystery or a traitor: who did it, who lies, where the true coffin is. | 0 | 3 · 4 · 6 |
-| set piece rewards (MEC-063) | configurable | Every set piece. Make the reward fit the scene and help the next chapter. | 1 per set piece | 1 per set piece |
+| quest rewards (MEC-063) | configurable | Every quest. Make the reward fit the scene and help the next chapter. | 1 per quest | 1 per quest |
 
 ## Voice and look (AREA-087, DEC-266)
 
@@ -63,9 +63,9 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 |---|---|---|---|---|
 | nuggets (MEC-064) | configurable | Every story. Write more for longer games, so no talk repeats and rumours stay worth chasing. The count is nuggets. | 100 | 150 · 250 · 400 |
 | mood lines (MEC-065) | configurable | Every story, for each of the board's six terrains; add variants so the same road doesn't say the same thing twice. The count is lines per terrain. | 1 per terrain | 3 per terrain |
-| scene pictures (MEC-066) | configurable | At least one per set piece; ideally one per moment, so each beat has its own picture. | 1 per set piece | 1 per moment |
+| scene pictures (MEC-066) | configurable | At least one per quest; ideally one per moment, so each beat has its own picture. | 1 per quest | 1 per moment |
 | avatars (MEC-067) | configurable | For every character with lines: building NPCs, named NPCs, companions, the villain. The count is avatars per speaker. | 1 per speaker | 1 per speaker |
-| tower cues (MEC-068) | optional | For each set piece, and a signature cue for the villain the table learns to dread. | 0 | 1 per set piece + the villain's |
+| tower cues (MEC-068) | optional | For each quest, and a signature cue for the villain the table learns to dread. | 0 | 1 per quest + the villain's |
 | place paintings (MEC-069) | optional | When the story's world looks different from the engine's default: gothic villages, a ruined citadel. The count is kinds of place painted. | 0 | 5 |
 | music (MEC-070) | optional | One track per chapter, so each act has its own mood. | 0 | 1 per chapter |
 

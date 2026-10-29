@@ -10,4 +10,4 @@ sources:
   - { file: "asset-catalog.md", lines: "41-63" }
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
-Hubs: set pieces and sub-locations hang off buildings. Reinforce stays base RtDT.
+Hubs: quests and sub-locations hang off buildings. Reinforce stays base RtDT.
