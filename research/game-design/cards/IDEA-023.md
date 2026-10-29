@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quests have types, like the RtDT app's sub-games (dungeons)"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: "rtdt-subsystems.md", lines: "7-24", note: "RtDT sub-games rated for reuse" }
 ---
 "I think the set pieces have types. I want these to be similar to RTDT app sub-games. i.e. dungeons." RtDT's app runs dungeons, foe and adversary battles, quests, heroic tests, and in the expansions guild quests, monuments and caravan expeditions.
+
+**Answered** by DEC-063; the Tomb is 1.0's one dungeon type (DEC-593). Found in the 2026-10-29 ideas triage (DEC-612).

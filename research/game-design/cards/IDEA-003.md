@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest markers are optional and behave like moving buildings"
-status: open
+status: answered
 layer: optional
 by: "Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ links:
 "I'm thinking these are story dependent but these act as moving buildings. Probably have some game centric meaning. But if we keep them as game optional and behave like moving buildings we are good."
 
 **2026-10-21:** DEC-001 (objective, lure and hunter) is parked. The quest tokens are only lead markers, placed when an NPC reveals a lead (DEC-087). Objective and lure are no longer live uses.
+
+**Answered** by DEC-613: in 1.0 a quest stays put; moving quests wait for 1.1.

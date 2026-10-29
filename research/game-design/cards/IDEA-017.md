@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Heroes move in groups of 1 to 4"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -12,3 +12,5 @@ links:
   - { rel: uses, to: DEC-010, note: "a group on a space is who takes part" }
 ---
 "So I think we need to allow for groups of players from 1-4."
+
+**Answered** by DEC-031. Found in the 2026-10-29 ideas triage (DEC-612).

@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "A story marks a kingdom or building as a quest marker for a special interaction"
-status: open
+status: answered
 layer: configurable
 by: "Bob, 2026-10-20"
 links:
@@ -12,3 +12,5 @@ links:
   - { rel: raises, to: Q-017 }
 ---
 "I also want a Kingdom/Building location to be identified by the story as offering a story point so special interaction can occur."
+
+**Answered** by DEC-021. Found in the 2026-10-29 ideas triage (DEC-612).

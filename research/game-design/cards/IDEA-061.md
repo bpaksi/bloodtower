@@ -1,7 +1,7 @@
 ---
 type: idea
 title: Each NPC has a set of portraits for tone and body language, such as friendly or scared
-status: open
+status: answered
 layer: core
 by: Bob, 2026-10-27
 links:
@@ -13,3 +13,5 @@ links:
   - { rel: part-of, to: AREA-083 }
 ---
 "I think each NPC should have an array of images to match tone & body language. i.e. friendly, scared, ..."
+
+**Answered** by DEC-344. Found in the 2026-10-29 ideas triage (DEC-612).

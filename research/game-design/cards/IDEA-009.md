@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "No warrior or spirit tokens: the app tracks hit points, and mana if the story has magic"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -17,3 +17,5 @@ links:
   - { rel: raises, to: Q-020 }
 ---
 "This might be contoversial but I don't want ot use Warriors or Sprit tokens. The are annoying, hard to pickup and get lost. I want the game to track Hit points and Mana/Sprit is the game supports Magic which we haven't talked about"
+
+**Answered** by DEC-039 and DEC-124 (no mana). Found in the 2026-10-29 ideas triage (DEC-612).

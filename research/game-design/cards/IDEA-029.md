@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "At the tavern, the haggle die could be a game of chance"
-status: open
+status: parked
 layer: core
 by: "Bob, 2026-10-21"
 links:
@@ -10,3 +10,5 @@ links:
   - { rel: uses, to: AST-B10 }
 ---
 Bob: "For the tavern maybe a game of chance." A player rolls the haggle die, and the iPad records it, as at the merchant (DEC-091).
+
+**Parked 2026-10-29:** the haggle die and the merchant wait for 1.1 (DEC-502). Ideas triage (DEC-612).

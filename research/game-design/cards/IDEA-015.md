@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "A quest has a location every turn and can move; at a building it adds an option"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -15,3 +15,5 @@ links:
   - { rel: raises, to: Q-027 }
 ---
 "Set pieces have a defined location at the start of every turn (i.e. set pieces can move). Set pieces can be buildings, in which case the build takes on an additional option for the player to play."
+
+**Answered** by DEC-613: in 1.0 a quest stays on one site for its chapter; movement waits for 1.1.

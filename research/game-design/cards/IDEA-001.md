@@ -1,7 +1,7 @@
 ---
 type: idea
 title: Use the 3 RtDT quest tokens
-status: open
+status: answered
 layer: configurable
 by: Bob, 2026-10-19
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: story-engine.md, lines: 131-146, note: E19 quest tokens }
 ---
 "I want to use the 3 RtDT quest tokens. Start game / setup game will need to set these. What do each of the 3 represent?"
+
+**Answered:** DEC-001's three tokens are parked, and the hunter token left the engine (DEC-310). A 1.0 quest is on the one site its chapter gives it (DEC-021, DEC-613).

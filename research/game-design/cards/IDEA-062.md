@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Card tooling for tracking: a drift check from cards to built code, and gaps checks for DEC-352 and DEC-355"
-status: proposed
+status: decided
 layer: core
 by: "Claude, for Bob, 2026-10-27 (card audit)"
 links:
@@ -15,3 +15,5 @@ A game-workbench chore, its own branch and PR, not a design session. Cards keep 
 - **Gaps: no deliverable.** Report decided rulings that no SCR-, UI-, CUE- or MEC- card reaches by `needs` or `uses` (DEC-355). It replaces "decided card with no requirement".
 - **Gaps: answered conflicts.** Stop counting a `conflicts` link on an answered question; it records what the question was about (Q-116, Q-117, Q-125, Q-175, Q-179, Q-186).
 - **Later:** a `replaces` link verb, if parking and trimming (DEC-352) proves too loose.
+
+**Bob, 2026-10-29:** "Before playthrough". It's built as its own game-workbench chore, before the playthrough probes start, so the design changes they cause show the code they touch. Rejected: after the playthroughs, and dropping it.

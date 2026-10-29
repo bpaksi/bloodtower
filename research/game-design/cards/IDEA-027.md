@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Potions, magic items, corruptions, companions and virtues all have modifiers; how do they apply in BT?"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -16,3 +16,5 @@ sources:
   - { file: "requirements.md", lines: "84", note: "R-FUN-4 resists Advantage stacking" }
 ---
 "This is the hard question and it applies to several things that we need to decide. Potions, Magic Items, Coruptions, Compainions, Virtues... all have modifiers. How do the modifier's apply in BT"
+
+**Answered** by DEC-067 and DEC-069. Found in the 2026-10-29 ideas triage (DEC-612).
