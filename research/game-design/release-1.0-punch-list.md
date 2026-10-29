@@ -9,7 +9,7 @@ Drafted by Claude for Bob, 2026-10-28. Design only. Part of AREA-091. It lists w
 1. **Merge the open design PRs** in stack order: #300, #301, #302, #303, #304, #305, #306. Until then `main` shows Q-249, Q-266 and Q-269 as open and has no 1.0 cut.
 2. **Settle the Tomb conflict.** Settled by DEC-593: the Tomb ships in 1.0 as its one dungeon, and the other five types stay in 1.1. Q-307 and Q-310 to Q-313 are 1.0 work, answered in the build and playtest. Q-314 is answered in PR #312 (AREA-094).
 3. **Q-316 and Q-322: the type attributes.** Settled: DEC-499 and DEC-594 (named attributes per kind) and DEC-579 (each kind's list; companions parked for 1.1).
-4. **DEC-501: accept or change the fallback order.** It follows item 3.
+4. **DEC-501: accept or change the fallback order.** Settled: DEC-501 accepted, and DEC-596 makes the most specific piece win, with chapter, story and base resolved at each step. The attribute order per kind is Q-338, for the manifest schema step.
 5. **Virtues that use cut content.** 1.0 keeps the hero virtues, but four of them use decks DEC-502 cuts:
    - Crafty (DEC-395) and Inventive (DEC-397) use potions.
    - Callous (DEC-387) and Lucky (DEC-393) use treasures.
