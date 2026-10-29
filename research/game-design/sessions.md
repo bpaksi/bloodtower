@@ -1,6 +1,6 @@
 # Sessions: startup, play, ending
 
-Status: **draft for Bob's review**, 2026-10-14. Design only. Implements R-SES-* in [requirements.md](requirements.md) (former `session-lifecycle.md` folded in). Tower facts: [api-surface-7.1.2.md](../tower/api-surface-7.1.2.md), [2026-10-13 spike](../tower/spikes/2026-10-13-noble-macos.md).
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. Design only. Implements R-SES-* in [requirements.md](requirements.md) (former `session-lifecycle.md` folded in). Tower facts: [api-surface-7.1.2.md](../tower/api-surface-7.1.2.md), [2026-10-13 spike](../tower/spikes/2026-10-13-noble-macos.md).
 
 ## Startup
 

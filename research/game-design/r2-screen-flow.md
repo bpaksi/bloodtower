@@ -1,6 +1,6 @@
 # bloodtower R2: game-flow screens (requirements)
 
-Author: Gamewright (draft, 2026-10-16; revised 2026-10-16 with Bob's answers). Requirements only, no code. Status: decisions folded in; for Bob's review.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Author: Gamewright (draft, 2026-10-16; revised 2026-10-16 with Bob's answers). Requirements only, no code. Status: decisions folded in; for Bob's review.
 
 ## 1. Purpose and scope
 
@@ -145,7 +145,7 @@ Common to every screen (all screens below inherit these):
 - Pause menu (any joined iPad, first press wins, V2-2): Resume (primary), Reconnect tower, Join another iPad (shows QR on board, R-UI-11), Change who holds whom, Quit game.
 - Entry: Begin. Exit: win/loss -> End; Quit confirmed (Save and quit or Abandon) -> End.
 - Errors: hunter unheld (device drop) -> auto-pause "Waiting for Mina's device", resume on rejoin or re-claim (R-DEV-9, AC-7); tower lost -> banner, fallbacks, no auto-reconnect, "Reconnect" on every iPad (R-SES-2); Story board browser closed/reloaded -> on reopen it resumes the current scene.
-- R2-60. The board shows "Night N of 5" and whose turn at all times during Play. Test: snapshot each state.
+- R2-60. The board shows "Night N of 5" and whose turn at all times during Play. Test: snapshot each state. *Superseded by DEC-113: the board shows "Day N" with no day limit.*
 - R2-61. A shared moment starts on the board within 1 s of the last involved hunter's Done, and never before. Test: e2e with staggered Done.
 - R2-62. The iPad shows "Waiting for <hunters>" while others still need to tap Done. Test: e2e.
 - R2-63. No `ipad:*` payload ever reaches the board (R1 AC-3 kept). Test: WS frame capture.

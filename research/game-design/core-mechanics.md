@@ -1,6 +1,6 @@
 # Core mechanics (shared across stories)
 
-Status: brainstorm-level, not final. Nothing here is decided.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: brainstorm-level, not final. Nothing here is decided.
 Started: 2026-10-13
 
 These systems were first worked out while brainstorming the [fellowship story](../stories/fellowship/README.md), but they are meant to carry over to any story the game supports. Story-specific material (characters, plot, scenes, quest) lives in `../stories/<story>/`.

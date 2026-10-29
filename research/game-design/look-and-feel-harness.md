@@ -1,6 +1,6 @@
 # Look-and-feel harness: screens and slots
 
-Status: draft for Bob's review, 2026-10-14. Design only, story-neutral. Gamewright owns the structure (screens, zones, slots, invariants). Illusionist owns the look in [../look-and-feel/](../look-and-feel/README.md): theme tokens, presets, motion, and render specs.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: draft for Bob's review, 2026-10-14. Design only, story-neutral. Gamewright owns the structure (screens, zones, slots, invariants). Illusionist owns the look in [../look-and-feel/](../look-and-feel/README.md): theme tokens, presets, motion, and render specs.
 
 ## Contract
 - R-LF-1. A story picks one theme preset (`story.json` `themePreset`) and may override tokens. It fills slots with asset IDs (see asset-organization.md). A story can never change screen layout, zones, controls, or invariants.

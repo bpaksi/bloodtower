@@ -1,6 +1,6 @@
 # Story engine and story packs
 
-Status: **draft for Bob's review**, 2026-10-14. Design only, no code.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. Design only, no code.
 
 Detail for R-ENG and R-AV in [requirements.md](requirements.md). The index is the source of truth for IDs; this file adds the module contents (R-ENG-20 to R-ENG-34) and the AV design.
 
@@ -14,7 +14,7 @@ The engine runs any number of **stories**. A story pack is content plus configur
 - Packs are versioned; saves pin the version (R-ENG-11). Packs are validated on load (R-ENG-10).
 - Packs reference shared assets by catalog id (R-ENG-15); tower cue maps use only catalog capabilities (R-ENG-6).
 - Every tower cue has a screen/audio fallback (R-ENG-12).
-- Multi-device: one private iPad per player, plus shared content to all (R-ENG-16).
+- Multi-device: one private iPad per player, plus shared content to all (R-ENG-16). *Superseded by DEC-057: nothing private on an iPad.*
 - During play, tower cues fire automatically; connect and calibrate are explicit (R-ENG-19, R-SES-2).
 
 ## What a story module defines (R-ENG-13)
@@ -136,7 +136,7 @@ Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art.
 **Base-game contrast.** In base RtDT foes do not chase heroes. The app says when and on which spaces foes appear, they stay there, their status escalates the longer they stay (panicked → lethal), and they hit through strike events. The hunter token is a new story mechanic, not a reskin of a base rule.
 
 - **E19a Objective.** At dusk the app places the objective on the site of the night's next set piece. The set piece starts when a hunter enters that site, and presence (E15) applies. If the night has two set pieces, the token moves to the second site when the first scene ends.
-- **E19b Lure (optional).** At dusk the engine draws one lure from the pack's lure list, using the game seed, from the entries valid that night. It never sits on the objective's site; if it would, redraw. The first hunter to reach it gains one story item or one finding. The reward is revealed privately to the iPad(s) holding that hunter, with a neutral line on the Dashboard. Then the lure is removed. A pack may skip lures.
+- **E19b Lure (optional).** At dusk the engine draws one lure from the pack's lure list, using the game seed, from the entries valid that night. It never sits on the objective's site; if it would, redraw. The first hunter to reach it gains one story item or one finding. The reward is revealed privately to the iPad(s) holding that hunter, with a neutral line on the Dashboard. Then the lure is removed. A pack may skip lures. *Superseded by DEC-057 and DEC-201: the reward is shown on the Story board, never privately.*
 - **E19c Hunter.** Placed at dusk on its start site (E19d). At the end of each round, before hunters move, it moves one space toward the nearest hunter, using RtDT adjacency and river rules. Ties go by seeded pick. When it lands on a hunter's space, the engine makes a seeded draw from the pack's hunter encounter table. Presence (E15) applies, so only the hunters on that space are present. After the encounter it returns to its start site. It is removed at dawn. Each move pulses tower lights (a pack cue, e.g. a heartbeat). It never moves the drum, because drum positions carry board meaning (E13).
 - **E19d Hunter start site.** Default: the **citadel of the active kingdom**. Every kingdom has exactly one, so placement is always unambiguous. If that space holds the objective or a hunter at dusk, use a **space next to the Tower in the active kingdom** instead (RtDT's own term from the main-goal relic quest). A pack may override with any building type or tower-adjacent space.
 - **E19e Encounter vs. normal RtDT event.** **Ruled by Bob (Oct 14 2026): add.** A hunter-token encounter plays in addition to that turn's normal RtDT event, never instead of it. The normal event resolves first, then the encounter. To keep turns moving: an encounter is 2–3 moments; at most one hunter-token encounter per round; the E19 corruption guard still applies (no third corruption from an encounter). Both are logged separately for stats.

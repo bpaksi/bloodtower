@@ -1,6 +1,6 @@
 # Story pack format
 
-Status: draft for Bob's review, 2026-10-15. Design only, no code.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: draft for Bob's review, 2026-10-15. Design only, no code.
 Scope: the data a new app's **story loader** reads. A story (the Dracula funeral night, the crypt crawl under the church, future stories) must be pure data: adding or changing one needs no code change.
 
 Sources: `research/game-design/story-engine.md` (R-ENG, E1-E18; E15 presence, E16 never idle, E17 investigation, E18 advantages), `requirements.md`, `setup-wizard-and-summary.md` (R-WIZ, R-SUM), `research/stories/dracula/rulings.md`, `apps/burgomaster-funeral-poc/docs/PRD.md` (rev 5, R3-x/R4-x/R5-1), `apps/burgomaster-funeral-poc/assets/manifest.json` and `assets/cues/cue-sheet.json`, scripts `n2-burgomasters-funeral.md`, `n23-catacombs-of-saint-ysolde.md`, `n4-earth-boxes.md`.

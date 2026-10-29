@@ -1,6 +1,6 @@
 # Tower Effects Library (design doc, draft 1)
 
-Status: proposal for Phase 2 (funeral PRD §13) and the story engine (E13, E16, R-ENG-33). Nothing here is implemented.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: proposal for Phase 2 (funeral PRD §13) and the story engine (E13, E16, R-ENG-33). Nothing here is implemented.
 Sources: `apps/tower-poc/docs/{final-report,capabilities,reuse-guide}.md`, `apps/tower-poc/spec.md` §2/§7 gap entries (referenced by the docs), `ultimatedarktowerdata` 3.0.0 sound table, `research/game-design/story-engine.md` (E13, E16, E19c), `story-pack-format.md` §6, funeral `cue-sheet.json`, funeral PRD §13.
 Hardware basis: one tower, rev 1.11, library `ultimatedarktower` 7.1.2, Verify pass 2026-10-15 (42 capabilities passed).
 

@@ -1,6 +1,6 @@
 # Playthrough UI notes (Bob, 2026-10-17) and design responses
 
-Author: Gamewright. Design only, no code. Status: captured; Bob answered Q1-Q3 (Oct 17 2026).
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Author: Gamewright. Design only, no code. Status: captured; Bob answered Q1-Q3 (Oct 17 2026).
 Source: Bob's notes in the Blood Tower room, Oct 17 2026, 7:41 PM ET, after the R2 milestone playthrough.
 Builds on: [r2-screen-flow.md](r2-screen-flow.md) (R2 ids), [landing-and-initial-screens.md](landing-and-initial-screens.md), splash research in `docs/research/splash-animation/` (#73, wish list #72).
 

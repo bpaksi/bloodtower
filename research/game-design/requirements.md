@@ -1,6 +1,6 @@
 # Game requirements (index)
 
-Status: **draft for Bob's review**, 2026-10-14. Nothing here is decided until Bob accepts it, except the Dracula rulings marked **Decided** in §0. Accepted requirements feed `apps/game-test/` and `apps/game/` intents and specs.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. Nothing here is decided until Bob accepts it, except the Dracula rulings marked **Decided** in §0. Accepted requirements feed `apps/game-test/` and `apps/game/` intents and specs.
 
 ## Chief goals (in priority order)
 
@@ -36,7 +36,7 @@ Story module contents and AV theme are detailed in [story-engine.md](story-engin
 | R-ENG-13 | MUST: a story module defines identity, mechanics toggles, clock, chapter/night structure, resources, world, party, encounter tables, set pieces, keys, win/lose, AV theme, tower cue map, stats extras and required components. Full table in [story-engine.md](story-engine.md) (R-ENG-20 to R-ENG-34). | Draft A |
 | R-ENG-14 | SHOULD: clock beats are authored per part/chapter; random encounters fill the gaps between beats. | Fellowship decision |
 | R-ENG-15 | MUST: packs reference shared assets by catalog id, so one tower cue or 1981 event serves several stories with different flavour text. | Draft A |
-| R-ENG-16 | MUST: **multiple devices**. Each player can have a private iPad joined to one game; one device (or the shared screen) is the table host. The engine sends private content (lines, choices, secrets) to one player's device and shared content to all. Game state has one authority, so devices never disagree. | D-DRA-7 |
+| R-ENG-16 | MUST: **multiple devices**. Each player can have a private iPad joined to one game; one device (or the shared screen) is the table host. The engine sends private content (lines, choices, secrets) to one player's device and shared content to all. Game state has one authority, so devices never disagree. *Superseded by DEC-057 and DEC-201: nothing private on an iPad; all story content plays on the Story board.* | D-DRA-7 |
 | R-ENG-17 | MUST: packs declare a **chapter and night structure**: ordered chapters/nights, which kingdom(s) each uses, ordering constraints (e.g. Tome kingdom last), and what ends each one. | D-DRA-1, D-DRA-3, D-DRA-4 |
 | R-ENG-18 | MUST: packs declare **key-earning rules**: which keys exist, what earns each (e.g. all set pieces of a kingdom done), and what keys unlock (e.g. the tower assault needs all three). | D-DRA-2, D-DRA-4; 1981 keys |
 | R-ENG-19 | MUST: during play, **tower cues fire automatically** from the script with no per-cue confirm. Connecting, calibrating and reconnecting stay explicit player actions (R-SES-2). Physical player steps (remove a seal, drop a skull) still wait for confirmation (R-SP-8). | D-DRA-8; tower safety |
@@ -50,7 +50,7 @@ Owned by Illusionist (voices, visuals, sound). Detail in [story-engine.md](story
 | R-AV-1 | MUST: each story declares an **AV theme**: still art style, animated clip style, color palette, narrator voice, one voice per recurring character (a Gemini TTS voice plus a short style line), music mood, and a sound-effect set. | Illusionist |
 | R-AV-2 | MUST: each scene moment is marked as a **still** or an **animated clip**. | Illusionist |
 | R-AV-3 | MUST: dialog has at most **two speakers per exchange**. Lint flags exchanges with more. | Illusionist |
-| R-AV-4 | MUST: **private lines carry a target device** (which hunter's iPad plays them). | Illusionist; R-ENG-16 |
+| R-AV-4 | MUST: **private lines carry a target device** (which hunter's iPad plays them). *Superseded by DEC-057 and DEC-201: there are no private lines.* | Illusionist; R-ENG-16 |
 | R-AV-5 | MUST: all media (art, clips, voice, music, sfx) is **pre-rendered and cached**. The engine only plays files; it never generates media live. Test: a session plays with the network off once a pack is cached. | Illusionist |
 | R-AV-6 | MUST: scripts use bracketed cues, e.g. `[sfx: door creak]`, `[music: ...]`, alongside tower cue names. Lint checks every cue resolves to a cached file or a catalog tower cue. | Illusionist; matches the [APP]/[TOWER] style in [opening-scene](../stories/dracula/opening-scene.md) |
 | R-AV-7 | MUST: the app, not the tower, owns music and ambience. Tower sounds are stingers only (tower sound looping failed on Bob's tower). | Spike run 3 |
@@ -85,7 +85,7 @@ Testable by playtest checklist; Bob judges fun in sessions, logged in playtest n
 | R-FUN-5 | MUST: no rulebook needed. The app does the math and teaches each system the first time it appears (skippable soft tutorial in the opening). | RtDT has no tutorial |
 | R-FUN-6 | MUST: tower **big moments** (wake, seal break, castle storm, finale) at authored beats, at least every ~15 min, with a configurable minimum spacing so they don't become noise. | Battery; pacing |
 | R-FUN-7 | SHOULD: replay variety from seeded variation (start realm, hero placement, clues, tables). | Fellowship; Ravenloft |
-| R-FUN-8 | SHOULD: cooperative; 1–4 players on the same script (unused heroes become NPCs). Private devices (R-ENG-16) add per-player secrets without breaking co-op. | core-mechanics; D-DRA-7 |
+| R-FUN-8 | SHOULD: cooperative; 1–4 players on the same script (unused heroes become NPCs). Private devices (R-ENG-16) add per-player secrets without breaking co-op. *Superseded by DEC-057 for the private devices: nothing is private. Co-op stands; IDEA-018 keeps competitive play open for later.* | core-mechanics; D-DRA-7 |
 | R-FUN-9 | SHOULD: the antagonist acts with intent, not only random draws. | Ravenloft Strahd |
 | R-FUN-10 | SHOULD: each hero has a private tie the story can pay off, delivered on their own iPad. | [dracula characters](../stories/dracula/characters.md) |
 | R-FUN-11 | MUST: touch-first iPad UI (≥56 px targets, ≥18 px text, one-view layout), adaptable to desktop and phone. | look-and-feel |
@@ -99,14 +99,14 @@ Flows and detail in [sessions.md](sessions.md).
 | R-SES-1 | MUST: startup = home → new/resume → pack (+ part/chapter) → players, devices and difficulty → seed → tower connect → calibrate → setup checklist → opening scene. |
 | R-SES-2 | MUST: tower connect, calibrate and reconnect are **user-initiated** buttons, never automatic. Show calibration progress (~22 s) and offer "play without tower" (mock). |
 | R-SES-3 | MUST: the physical setup checklist comes from pack + seed, one confirmed step at a time. |
-| R-SES-4 | MUST: autosave to SQLite after every resolved action and clock tick. Resume restores state exactly (seals, expected drum positions, chapter/night, keys) and shows a reconciliation checklist; the tower is recalibrated. |
+| R-SES-4 | MUST: autosave to SQLite after every resolved action and clock tick. Resume restores state exactly (seals, expected drum positions, chapter/night, keys) and shows a reconciliation checklist; the tower is recalibrated. *Superseded by DEC-047, DEC-354 and DEC-208: one sitting, no Save button; the running autosave is the only stored game, and Continue runs the tower check (MEC-018).* |
 | R-SES-5 | MUST: a session ends on win, loss, part complete, concede, or "end for now". Win/loss (including immediate losses like a 3rd corruption, empty skull supply, clock out) are pack-declared and checked after every state change. |
 | R-SES-6 | MUST: ending plays an outcome scene (app + tower finale cue) and a recap (key events, stats, seed). Multi-part packs carry declared state to the next part. |
 | R-SES-7 | SHOULD: a tower disconnect pauses tower steps, offers manual reconnect or mock mode, and never loses state. |
 | R-SES-8 | SHOULD: home screen: New campaign, Continue, One-shot, Statistics. |
 | R-SES-9 | SHOULD: check battery before starting and warn if low. |
 | R-SES-10 | SHOULD: several saves per campaign; one active session per campaign. |
-| R-SES-11 | SHOULD: undo of the last non-physical choice; physical steps can't be undone by the app. |
+| R-SES-11 | SHOULD: undo of the last non-physical choice; physical steps can't be undone by the app. *Superseded by DEC-209: Back undoes a choice only until its outcome is revealed, then re-shows it read-only.* |
 | R-SES-12 | MUST: each pack declares what carries between parts; a between-part screen shows what carried over and what reset. |
 | R-SES-13 | SHOULD: wrap-up gives a tear-down hint and resets the tower to neutral only when players confirm. |
 | R-SES-14 | MAY: a 1–5 fun rating and note at the end, stored with stats. |
@@ -134,7 +134,7 @@ Detail and template in [encounters-and-set-pieces.md](encounters-and-set-pieces.
 
 | ID | Requirement |
 |---|---|
-| R-RE-1 | MUST: tables are pack data keyed by kingdom, terrain, building type, time phase (day/night), story part and threat level. |
+| R-RE-1 | MUST: tables are pack data keyed by kingdom, terrain, building type, time phase (day/night), story part and threat level. *Superseded by DEC-081 in name only: a random draw is now an event; an encounter is a fixed place. The tables stay story data (MEC-005).* |
 | R-RE-2 | MUST: draws are seeded and weighted; same seed and state = same draw. |
 | R-RE-3 | MUST: encounters are built from catalog assets: an RtDT foe (level + traits) or hazard, a resolution (battle/check/trade/haggle), rewards from existing decks, and a tower cue. |
 | R-RE-4 | MUST: no identical encounter twice in a row; per-session caps and cooldowns. |
@@ -184,7 +184,7 @@ Bob wants a handle on total game length. Story-neutral: each pack supplies its o
 - R-DEV-4. Nothing private ever appears on the Dashboard. Nothing shared depends on a single iPad being present; a player who drops out can rejoin and their iPad restores their view.
 - R-DEV-5. The tower is driven only by the Mac. The iPads never talk to the tower.
 - R-DEV-6. Audio routing: narration, music, and shared sound effects play from the Mac with the Story board. Private lines play only on their owner's iPad (earbuds or low volume recommended). Every script cue carries a target: `storyboard` or `ipad:<hunter>`. If no target is given, the cue goes to the Story board. The readiness check rejects a private line targeted at the Story board. A scene line that still says `dashboard` means `storyboard`. The frozen funeral POC still sends the wire value `dashboard` for this target (spec D25).
-- R-DEV-7. Two render targets from one source: the Dashboard gets 1080p 16:9, and the iPads get portrait or 4:3 crops. The asset index stores a variant per target (`<id>@dashboard`, `<id>@ipad`), and the readiness check requires the variant that each cue's target needs.
+- R-DEV-7. Two render targets from one source: the Dashboard gets 1080p 16:9, and the iPads get portrait or 4:3 crops. The asset index stores a variant per target (`<id>@dashboard`, `<id>@ipad`), and the readiness check requires the variant that each cue's target needs. *Superseded by DEC-201: iPads show only icons and text controls, so no @ipad crops.*
 
 - R-DEV-8. A phone can stand in for a player iPad. Join is the same QR (R-WIZ-10). The device is detected at join, and the player can switch to the full layout.
 
