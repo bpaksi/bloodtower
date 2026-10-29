@@ -1,6 +1,6 @@
 ---
 type: idea
-title: "Set pieces have types, like the RtDT app's sub-games (dungeons)"
+title: "Quests have types, like the RtDT app's sub-games (dungeons)"
 status: open
 layer: core
 by: "Bob, 2026-10-20"
@@ -9,7 +9,7 @@ links:
   - { rel: refines, to: MEC-011 }
   - { rel: uses, to: E20, note: "dungeon crawl in story-engine.md" }
   - { rel: uses, to: AST-B09, note: "dungeon tokens" }
-  - { rel: refines, to: DEC-040, note: "a plot told through set pieces" }
+  - { rel: refines, to: DEC-040, note: "a plot told through quests" }
 sources:
   - { file: "rtdt-subsystems.md", lines: "7-24", note: "RtDT sub-games rated for reuse" }
 ---

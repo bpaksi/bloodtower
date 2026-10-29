@@ -1,6 +1,6 @@
 ---
 type: area
-title: "Hero resources: hit points, mana and money"
+title: "Hero resources: hit points, mana and gold"
 status: open
 layer: core
 by: "Bob, 2026-10-20"

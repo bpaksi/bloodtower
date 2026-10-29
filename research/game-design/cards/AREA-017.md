@@ -7,4 +7,4 @@ by: "Bob, 2026-10-20"
 links:
   - { rel: part-of, to: AREA-002 }
 ---
-What triggers an event, its types (encounter, plague, ...), who decides, and how events differ from a story's set pieces. Words: glossary.md.
+What triggers an event, its types (encounter, plague, ...), who decides, and how events differ from a story's quests. Words: glossary.md.

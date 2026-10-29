@@ -14,4 +14,4 @@ sources:
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
-**Proposal:** booty for winning a battle (IDEA-002), the most common of the three. Drawn face down. A player discards the card when they use it, and the app logs the effect. A pack names them (Dracula: holy water and the host cure one corruption). No limit per hunter, as in base. How much a battle drops is Q-013.
+**Proposal:** booty for winning a battle (IDEA-002), the most common of the three. Drawn face down. A player discards the card when they use it, and the app logs the effect. A pack names them (Dracula: holy water and the host cure one corruption). No limit per hero, as in base. How much a battle drops is Q-013.
