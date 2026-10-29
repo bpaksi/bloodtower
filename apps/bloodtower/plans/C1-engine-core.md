@@ -90,7 +90,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 4: Pack format v2 and the base content pack
 - Depends on: G0
 - Touches: `apps/bloodtower/src/protocols/pack-v2/**`, `apps/bloodtower/src/server/pack/v2/**`, `packs-v2/**`, `apps/bloodtower/spec.md` (§4 v2)
-- Builds: MEC-041, MEC-045, MEC-053, MEC-054
+- Builds: MEC-041, MEC-053, MEC-054
 - Deps change: no
 - Runs: local
 - Model: opus
