@@ -1,6 +1,6 @@
 # Open questions for Bob
 
-Status: **draft for Bob's review**, 2026-10-14. One deduplicated list from all game-design files, most blocking first. IDs refer to [requirements.md](requirements.md).
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. One deduplicated list from all game-design files, most blocking first. IDs refer to [requirements.md](requirements.md).
 
 Resolved by Bob's Dracula rulings (§0 of requirements): Dracula's structure (5 nights, keys, Tome last), corruption loss and cures, devices for Dracula (private iPad per hunter), tower cues in play (automatic), warriors/spirit (base game). Also resolved by the spike: lights and sounds work before calibration.
 

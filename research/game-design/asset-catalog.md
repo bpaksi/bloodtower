@@ -1,6 +1,6 @@
 # Asset catalog (reusable Dark Tower assets)
 
-Status: **draft for Bob's review**, 2026-10-14. Design only. Merges the two earlier catalogs (former `dt-asset-catalog.md` folded in).
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. Design only. Merges the two earlier catalogs (former `dt-asset-catalog.md` folded in).
 
 Every encounter and set piece is built from these (R-SP-2, R-RE-3). Requirements are R-ASSET-* in [requirements.md](requirements.md). Every asset has a stable id (R-ASSET-10).
 

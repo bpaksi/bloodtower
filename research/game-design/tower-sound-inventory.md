@@ -1,6 +1,6 @@
 # Return to Dark Tower: tower sound inventory
 
-For the art and sound designer: these 113 sounds are **already on the tower**. Don't recreate them; reuse where listed.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". For the art and sound designer: these 113 sounds are **already on the tower**. Don't recreate them; reuse where listed.
 Source: `ultimatedarktowerdata` 3.0.0 `TOWER_AUDIO_LIBRARY` (pinned for tower-poc), played by index with `sound.play` / `sound.play-stateful`. The M3 verify pass on 2026-10-15 recorded `sound.play` as a capability pass. It did not record that each of the 113 indexes was heard.
 
 **Facts that apply to every sound**

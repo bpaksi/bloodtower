@@ -1,43 +1,43 @@
 # Story engine and story packs
 
-Status: **draft for Bob's review**, 2026-10-14. Design only, no code.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. Design only, no code.
 
 Detail for R-ENG and R-AV in [requirements.md](requirements.md). The index is the source of truth for IDs; this file adds the module contents (R-ENG-20 to R-ENG-34) and the AV design.
 
-The engine runs any number of **stories**. A story pack is content plus configuration that sets its own mechanics, pacing, structure and look (R-ENG-1). Fellowship (3-part saga) and Dracula (one-shot, 5 nights) are the first two ([../stories/](../stories/README.md)).
+The engine runs any number of **stories**. A story pack is content plus configuration that sets its own mechanics, pacing, structure and look (R-ENG-1). Fellowship (3-part saga) and Dracula (one-shot, 5 nights) are the first two ([../stories/](../stories/README.md)). *Superseded by DEC-508: Dracula 1.0 is three chapters.*
 
 ## Engine summary
 
 - Packs install side by side; players pick one at start (R-ENG-1). A pack can be a one-shot or span parts with carried campaign state (R-ENG-2, R-SES-12).
-- Shared systems a pack switches on/off: party, clock, open-world locations, resources, encounters, set pieces, combat, shop/haggle, riddle, corruption, dialog/narration (R-ENG-3).
+- Shared systems a pack switches on/off: party, clock, open-world locations, resources, encounters, set pieces, combat, shop/haggle, riddle, corruption, dialog/narration (R-ENG-3). *Superseded by DEC-260 (MEC-014 parked): the story toolkit replaces the on/off list.*
 - Story-only mechanics go in registered rule modules (R-ENG-4).
 - Packs are versioned; saves pin the version (R-ENG-11). Packs are validated on load (R-ENG-10).
 - Packs reference shared assets by catalog id (R-ENG-15); tower cue maps use only catalog capabilities (R-ENG-6).
 - Every tower cue has a screen/audio fallback (R-ENG-12).
-- Multi-device: one private iPad per player, plus shared content to all (R-ENG-16).
+- Multi-device: one private iPad per player, plus shared content to all (R-ENG-16). *Superseded by DEC-057: nothing private on an iPad.*
 - During play, tower cues fire automatically; connect and calibrate are explicit (R-ENG-19, R-SES-2).
 
 ## What a story module defines (R-ENG-13)
 
 | ID | Element | What it defines | Fellowship | Dracula |
 |---|---|---|---|---|
-| R-ENG-20 | Identity | Name, tone, parts, player count, length, difficulty levels | 3 parts, epic | One-shot, 5 nights, gothic |
-| R-ENG-21 | Mechanics toggles | Which engine systems are on, and their settings | Party + wizard NPC, keys + riddle | Nights, corruption track |
-| R-ENG-22 | Clock | Name, length, action costs, authored beats per tick, what happens at the end | Shadow clock per part | Night clock per kingdom |
-| R-ENG-23 | Chapter / night structure (R-ENG-17) | Ordered chapters/nights, kingdom per unit, ordering rules, end condition of each | Parts 1–3 | Ch.1 in one kingdom; then one kingdom per night; Tome kingdom last; night 5 = tower assault |
-| R-ENG-24 | Keys (R-ENG-18) | Keys, how each is earned, what they unlock | 1981 brass/silver/gold + riddle | Finish a kingdom's set pieces → its key; assault needs all 3 |
-| R-ENG-25 | Resources | Tracked resources, start values, limits, loss rules | Warriors, spirit, gold/provisions, hope, Eye's attention | Warriors and spirit as base game; faith, kit items |
+| R-ENG-20 | Identity *Superseded by DEC-508: Dracula 1.0 is three chapters, not five nights.* | Name, tone, parts, player count, length, difficulty levels | 3 parts, epic | One-shot, 5 nights, gothic |
+| R-ENG-21 | Mechanics toggles *Superseded by DEC-260: toolkit tools, not toggles.* | Which engine systems are on, and their settings | Party + wizard NPC, keys + riddle | Nights, corruption track |
+| R-ENG-22 | Clock *Superseded by DEC-287, DEC-292 and MEC-034: no clock; beats fire on what happens.* | Name, length, action costs, authored beats per tick, what happens at the end | Shadow clock per part | Night clock per kingdom |
+| R-ENG-23 | Chapter / night structure (R-ENG-17) *Superseded by MEC-033, DEC-134 and DEC-146: chapters, not nights; the story sets where heroes may go.* | Ordered chapters/nights, kingdom per unit, ordering rules, end condition of each | Parts 1–3 | Ch.1 in one kingdom; then one kingdom per night; Tome kingdom last; night 5 = tower assault |
+| R-ENG-24 | Keys (R-ENG-18) *Superseded by DEC-134 and DEC-146 (MEC-009 parked): no kingdom keys.* | Keys, how each is earned, what they unlock | 1981 brass/silver/gold + riddle | Finish a kingdom's set pieces → its key; assault needs all 3 |
+| R-ENG-25 | Resources *Superseded by DEC-039 and DEC-124: hit points; no warriors, spirit or mana.* | Tracked resources, start values, limits, loss rules | Warriors, spirit, gold/provisions, hope, Eye's attention | Warriors and spirit as base game; faith, kit items |
 | R-ENG-26 | Corruption and cures | Corruption sources, loss threshold, cure sources | Bearer burden (TBD) | 3rd corruption loses, every one counts; cures: holy water, host, Sanctuary rest only |
 | R-ENG-27 | World | Kingdoms, buildings as hubs, sub-locations and what each offers | Inn, tomb, ruin, pass | Crypts, churches, Sanctuaries |
-| R-ENG-28 | Party and devices | Heroes, NPCs, stats, abilities, join/leave rules, device per player | Wizard + 3 of 4 heroes | 4 hunters, private iPad each |
-| R-ENG-29 | Encounter tables | Weighted encounters per location, kingdom, phase ([encounters](encounters-and-set-pieces.md)) | Brigands on the road | Wolves at night |
+| R-ENG-28 | Party and devices *Superseded by DEC-057 and DEC-125: nothing private on an iPad, no hero stats.* | Heroes, NPCs, stats, abilities, join/leave rules, device per player | Wizard + 3 of 4 heroes | 4 hunters, private iPad each |
+| R-ENG-29 | Encounter tables *Superseded by DEC-081: random draws are events; encounters are fixed places.* | Weighted encounters per location, kingdom, phase ([encounters](encounters-and-set-pieces.md)) | Brigands on the road | Wolves at night |
 | R-ENG-30 | Set pieces | Triggers, steps, tower cues, outcomes | Tower wakes in the tavern | The Count's arrival |
 | R-ENG-31 | Win / lose | Ranked outcome tiers (full win, lesser win, loss variants); each pack declares its outcomes and the order they are checked | Reach the Tower with keys + riddle (win) | Dracula: Rescued (full win), Endures (lesser win), Taken (loss), Turned (loss) |
 | R-ENG-32 | AV theme (R-AV-1) | See §AV below | Look 1–3 candidates | Red/purple, bells, wolves |
 | R-ENG-33 | Tower cue map | Story events → tower capabilities, each with a fallback (R-ENG-12) | Eye sweep = lights on one side | Night falls = dimming and breathing |
 | R-ENG-34 | Stats extras and components | Story counters (R-STA-7); required physical components | Keys, riddle attempts | Keys, corruptions, villagers turned |
 
-Rules: clock beats are authored per part/chapter and random encounters fill the gaps (R-ENG-14). A pack lists its required physical components so setup can list them (R-ENG-2).
+Rules: clock beats are authored per part/chapter and random encounters fill the gaps (R-ENG-14). A pack lists its required physical components so setup can list them (R-ENG-2). *Superseded by DEC-287 and DEC-081: no authored clock beats; random events come at the end of the turn (DEC-080).*
 
 ## AV: voices, visuals and sound (R-AV)
 
@@ -58,7 +58,7 @@ Owner: Illusionist.
 **Script rules**
 - Each scene moment is marked `still` or `clip` (R-AV-2).
 - At most two speakers per dialog exchange (R-AV-3).
-- Private lines carry a target device, i.e. which hunter's iPad plays them (R-AV-4).
+- Private lines carry a target device, i.e. which hunter's iPad plays them (R-AV-4). *Superseded by DEC-057 and DEC-201: there are no private lines.*
 - Bracketed cues in scripts: `[sfx: door creak]`, `[music: ...]`, with tower cues by name (R-AV-6).
 - All media is pre-rendered and cached; the engine plays files and never generates live (R-AV-5).
 - Music and ambience play from the app; tower sounds are stingers only (R-AV-7).
@@ -69,8 +69,8 @@ Story-neutral mechanics any pack configures with data. Moved here from the Dracu
 
 | ID | Engine mechanic | What the engine does | Pack configures | Example: Dracula | Example: fellowship |
 |---|---|---|---|---|---|
-| E1 | Chapter / phase clock | Chapters made of ordered phases. A phase advances on a **trigger: after N actions OR on an event, whichever comes first**. Each phase selects the live encounter table and which interventions may fire. No time cost unless the pack sets one | chapters, phases, N per phase, trigger events, table per phase | 5 nights, beats B1–B7; dusk after N visits or on finding the site | 3 parts; "Road / Camp / Hunted" phases |
-| E2 | Region gating and keys | Regions unlock in order; finishing a region's required set pieces grants its key; the finale needs K keys. Order per region: fixed, seeded, or player choice | order rules, required set pieces, keys, finale key count | K1 first, K4 (Tome) last, 3 keys for the tower | 1981 brass/silver/gold keys; frontier crossing |
+| E1 | Chapter / phase clock *Superseded by DEC-287, DEC-292 and MEC-033: a chapter ends on its quests, not on N actions.* | Chapters made of ordered phases. A phase advances on a **trigger: after N actions OR on an event, whichever comes first**. Each phase selects the live encounter table and which interventions may fire. No time cost unless the pack sets one | chapters, phases, N per phase, trigger events, table per phase | 5 nights, beats B1–B7; dusk after N visits or on finding the site | 3 parts; "Road / Camp / Hunted" phases |
+| E2 | Region gating and keys *Superseded by DEC-134 and DEC-146 (MEC-009 parked): no keys; the story sets where heroes may go.* | Regions unlock in order; finishing a region's required set pieces grants its key; the finale needs K keys. Order per region: fixed, seeded, or player choice | order rules, required set pieces, keys, finale key count | K1 first, K4 (Tome) last, 3 keys for the tower | 1981 brass/silver/gold keys; frontier crossing |
 | E3 | Corruption track | Mirrors base-game corruption cards (all sources count); thresholds trigger effects; loss at the base limit; cures from a configured list | thresholds, effects, cure sources | Bites; cures only holy water, the host, Sanctuary rest | The bearer's burden |
 | E4 | Protected NPC | App-only ward track, a guard rule at phase end, a threat when unguarded, optional loss if taken | ward max/start, guard rule, threats, loss flag | Not used in Dracula (Lenka is captive from the start) | A captured guide or relic carrier |
 | E5 | Items | Kinds (kit, consumable, key, clue, marker), RtDT Advantage traits, uses, owner, slot limits | defs, limits, sources | Hunter's kit, satchel, 3 artifacts | Provisions, 1981 helpers |
@@ -78,31 +78,31 @@ Story-neutral mechanics any pack configures with data. Moved here from the Dracu
 | E7 | Adversary agenda | Board-present adversary with a move rule, a hidden objective, and scripted **interventions** with triggers, separate from tables | objectives, move rule, interventions | The Count | The Eye |
 | E8 | Hidden-target intervention | The adversary's target is chosen secretly and **revealed at a phase change** by a marker scene | reveal phase, marker scene | Pressed flower at dusk | The Eye marks a ford |
 | E9 | Targeting guard | No single random or adversary effect may cause an instant loss: an effect aimed at a hero one step from a loss threshold is redirected to a configured fallback target | threshold, fallback target | Hunter at 2 corruptions → the strike is blocked (`~blocked`) and the party loses a story item | Bearer near the limit → the Eye targets a kingdom |
-| E10 | Private scenes and secret objectives | Any moment can target one player's device; the Dashboard shows a neutral line. Optional per-player secret objective on that device; stats record success | targeting rules, placeholder text, objectives | Private ties, procession, lookalike goal | Each hero's secret past |
-| E11 | Encounter tables | Per phase/region/terrain; entries resolve by choice, check, or RtDT battle/dungeon shapes; outcomes only from the pack's resource list | tables, outcome types, foe reskins | Day / night / castle | Terrain-keyed, 1981 events |
+| E10 | Private scenes and secret objectives *Superseded by DEC-057: nothing private, no secret objectives.* | Any moment can target one player's device; the Dashboard shows a neutral line. Optional per-player secret objective on that device; stats record success | targeting rules, placeholder text, objectives | Private ties, procession, lookalike goal | Each hero's secret past |
+| E11 | Encounter tables *Superseded by DEC-081 and MEC-005: these are events, drawn from the story's tables.* | Per phase/region/terrain; entries resolve by choice, check, or RtDT battle/dungeon shapes; outcomes only from the pack's resource list | tables, outcome types, foe reskins | Day / night / castle | Terrain-keyed, 1981 events |
 | E12 | Finale-escalation ledger | Unfinished objectives and losses during play (fallen buildings, surviving enemy assets) are counted and **feed the finale** as extra foes, skulls or battle cards, instead of causing a loss | what counts, conversion to finale effects | Fallen buildings, earth boxes left standing | The Last Ascent's muster |
 | E13 | Cue library and cue rules | Named cues map to tower capabilities with status (Verified / Library / GAP) and a mandatory screen fallback. Scene cues fire automatically; calibration, connect, reconnect and retry stay manual (setup wizard only); drum cues skip if uncalibrated; 300–500 ms after a drum move completes; never wait for sound end; held capabilities never used; no colour assumed | cue names, fallbacks, palette (effects only) | Heartbeat breathe | Eye sweep |
-| E14 | Skull and seal ledgers | Skulls per building (3 shadowed, 4 fallen); seals broken per milestone, app-tracked; physical seal from `getRandomUnbrokenSeal` until the layout is known; story skull drops named by the app | thresholds, milestone → seal, story-drop budget per phase | Thralls; seals at keys and finale | Mustering armies; ancient doors |
+| E14 | Skull and seal ledgers *Superseded by DEC-303: one seal breaks at each chapter win.* | Skulls per building (3 shadowed, 4 fallen); seals broken per milestone, app-tracked; physical seal from `getRandomUnbrokenSeal` until the layout is known; story skull drops named by the app | thresholds, milestone → seal, story-drop budget per phase | Thralls; seals at keys and finale | Mustering armies; ancient doors |
 
 ## Open questions
 
 See [open-questions.md](open-questions.md), especially: pack reach into code, shared resource vocabulary, authored vs. procedural, and who authors packs.
 
-- Rule (Bob): story mechanics never use warriors or spirit. They stay base-game RtDT. Story costs and rewards use story items or story tracks.
+- Rule (Bob): story mechanics never use warriors or spirit. They stay base-game RtDT. Story costs and rewards use story items or story tracks. *Superseded by DEC-039 (DEC-003 parked): hit points replace warriors and spirit.*
 
 - R-ENG (outcome tiers): a story may declare several win and loss outcomes with a rank (e.g. full win, lesser win, loss). The summary screen and stats record the exact outcome, not just win or lose.
 
 - E (carried key items): a story item can be bound to a carrying hunter. If the carrier is defeated, the item is lost for the rest of the scene. Outcome rules may test for whether the item is held.
 
 ## E15 Scene presence (hunters move independently)
-- Hunters move individually on the board as in base RtDT. Each hunter has a location.
+- Hunters move individually on the board as in base RtDT. Each hunter has a location. *Superseded by DEC-031: heroes travel in groups; presence (MEC-003) still holds.*
 - A set piece or encounter triggers when a hunter enters its site. **Present** means the hunters at that site when the scene starts. Presence is locked for the scene; there are no late arrivals in v1.
 - The engine passes presence flags to the pack, and `~no-<hunter>` variants fire for absent hunters.
 - Scene costs, choices and rewards apply only to present hunters (e.g. "one hunter takes a corruption" picks from those present). Story items held by the party count only if a present hunter carries them.
-- Private moments for a scene go only to present hunters. The Dashboard still plays the scene for the whole table.
+- Private moments for a scene go only to present hunters. The Dashboard still plays the scene for the whole table. *Superseded by DEC-057: there are no private moments.*
 - Stats log presence for each scene.
 
-- E15a. Phase-level moments (dusk, night start, dawn, and anything tagged `scope: global`) are exempt from presence. Their private lines go to every holder of the named hunter, wherever that hunter is on the board.
+- E15a. Phase-level moments (dusk, night start, dawn, and anything tagged `scope: global`) are exempt from presence. Their private lines go to every holder of the named hunter, wherever that hunter is on the board. *Superseded by DEC-057: there are no private lines.*
 
 ## E16 Tower is never idle (Bob, 2026-10-14)
 The tower should nearly always be doing something. The engine runs a three-layer cue stack:
@@ -115,7 +115,7 @@ The tower should nearly always be doing something. The engine runs a three-layer
 - Every entry is still capability-gated (Verified, Library or GAP) against the tower API doc. Once the tower test session confirms capabilities, revisit the intervals and patterns.
 
 ## E17 Private investigation round
-- The pack declares a list of actions (usually 4–6). Each present hunter picks one, privately, on a device holding them. There's a timer, default 60 s, and an auto-pick if it runs out.
+- The pack declares a list of actions (usually 4–6). Each present hunter picks one, privately, on a device holding them. There's a timer, default 60 s, and an auto-pick if it runs out. *Superseded by DEC-057: nothing is private, so there is no private investigation round.*
 - Each action yields a hidden finding for that hunter only, which may set flags or grant a story item to that hunter. Findings never go to the Dashboard. The Dashboard shows only "Agnes has chosen" ticks.
 - There are fewer hunters than actions, so the party can never cover everything. Two hunters may pick the same action, and each sees the finding.
 - Tower: ambient accents continue. One action may be marked risky. If picked, it fires a tower cue and a declared cost (story items or corruption, under the instant-loss guard).
@@ -123,20 +123,20 @@ The tower should nearly always be doing something. The engine runs a three-layer
 - Stats log each pick, finding, flag and timeout.
 
 ## E18 Advantages and companions
-- Story effects that help in a fight are always granted as RtDT Advantages (Beast, Magic, Humanoid, Melee, Undead, Stealth, Wild) or as the reveal of a battle card. Warriors stay base-game hit points.
+- Story effects that help in a fight are always granted as RtDT Advantages (Beast, Magic, Humanoid, Melee, Undead, Stealth, Wild) or as the reveal of a battle card. Warriors stay base-game hit points. *Superseded by DEC-039: hit points replace warriors.*
 - Sources: base gear, potions, treasure and corruptions (base RtDT), plus story items, investigation findings (E17) and companions.
 - **Companions/NPCs:** RtDT companion and character cards (e.g. Gleb) are reskinned per story as people the hunters meet. A pack maps each physical card to a story role, recruit condition, advantage and loss condition. Base-card effects are kept where possible. This needs Bob's card list.
 - Stack cap: story advantages are limited to +2 per hunter per fight by default, overridable per pack within R-FUN-4.
 
 ## E19 Quest tokens (objective, lure, hunter)
-Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art.
+Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art. *Superseded by DEC-310 and DEC-285 (DEC-001 parked): the hunter token left the engine; quest markers are engine hooks.*
 
 **RtDT grounding.** The base game ships 3 quest markers (companion quest, adversary quest, main goal). The app tells players to place them "in the spaces on the board where they can be completed", and a marker is removed when its quest is done ([official rulebook](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf)). E19 reuses those three physical markers (or Dark Horde minis) for three story roles. Board terms used here are RtDT's own: four **kingdoms** (north, east, south, west) separated by **rivers**; 15 **spaces** per kingdom, each with a terrain (desert, hills, mountains, lake, forest, grasslands); one **building** of each type per kingdom: **citadel, sanctuary, village, bazaar**. Movement is one move per adjacent space, and crossing a river does not let you slide along it. A **site** in this rule means a space, usually one with a building.
 
 **Base-game contrast.** In base RtDT foes do not chase heroes. The app says when and on which spaces foes appear, they stay there, their status escalates the longer they stay (panicked → lethal), and they hit through strike events. The hunter token is a new story mechanic, not a reskin of a base rule.
 
 - **E19a Objective.** At dusk the app places the objective on the site of the night's next set piece. The set piece starts when a hunter enters that site, and presence (E15) applies. If the night has two set pieces, the token moves to the second site when the first scene ends.
-- **E19b Lure (optional).** At dusk the engine draws one lure from the pack's lure list, using the game seed, from the entries valid that night. It never sits on the objective's site; if it would, redraw. The first hunter to reach it gains one story item or one finding. The reward is revealed privately to the iPad(s) holding that hunter, with a neutral line on the Dashboard. Then the lure is removed. A pack may skip lures.
+- **E19b Lure (optional).** At dusk the engine draws one lure from the pack's lure list, using the game seed, from the entries valid that night. It never sits on the objective's site; if it would, redraw. The first hunter to reach it gains one story item or one finding. The reward is revealed privately to the iPad(s) holding that hunter, with a neutral line on the Dashboard. Then the lure is removed. A pack may skip lures. *Superseded by DEC-057 and DEC-201: the reward is shown on the Story board, never privately.*
 - **E19c Hunter.** Placed at dusk on its start site (E19d). At the end of each round, before hunters move, it moves one space toward the nearest hunter, using RtDT adjacency and river rules. Ties go by seeded pick. When it lands on a hunter's space, the engine makes a seeded draw from the pack's hunter encounter table. Presence (E15) applies, so only the hunters on that space are present. After the encounter it returns to its start site. It is removed at dawn. Each move pulses tower lights (a pack cue, e.g. a heartbeat). It never moves the drum, because drum positions carry board meaning (E13).
 - **E19d Hunter start site.** Default: the **citadel of the active kingdom**. Every kingdom has exactly one, so placement is always unambiguous. If that space holds the objective or a hunter at dusk, use a **space next to the Tower in the active kingdom** instead (RtDT's own term from the main-goal relic quest). A pack may override with any building type or tower-adjacent space.
 - **E19e Encounter vs. normal RtDT event.** **Ruled by Bob (Oct 14 2026): add.** A hunter-token encounter plays in addition to that turn's normal RtDT event, never instead of it. The normal event resolves first, then the encounter. To keep turns moving: an encounter is 2–3 moments; at most one hunter-token encounter per round; the E19 corruption guard still applies (no third corruption from an encounter). Both are logged separately for stats.
@@ -145,7 +145,7 @@ Gamewright, 2026-10-14. Story-neutral; a pack supplies the sites, icons and art.
 - **E19h Pace and game length.** Hunter-token pace scales with the game length (R-LEN-2) as declared by the story pack: per length, the pack sets how often the token moves (e.g. every round vs. every other round) and how many hunter-token encounters a night allows. Defaults are the rules above (Standard).
 
 ## E20 Dungeon crawl
-Gamewright, 2026-10-14; E20c and E20i rewritten 2026-10-15 (Bob's rulings). Story-neutral; a pack supplies the dungeon, its room deck, text and art. First use: Dracula crypt (D-DRA-14).
+Gamewright, 2026-10-14; E20c and E20i rewritten 2026-10-15 (Bob's rulings). Story-neutral; a pack supplies the dungeon, its room deck, text and art. First use: Dracula crypt (D-DRA-14). *Superseded by MEC-026 and DEC-487: the Tomb, a branching room map, replaces this crawl.*
 
 **RtDT grounding** (official rulebook, [two-page](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf) and [v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf)):
 - Dungeons spawn as part of certain quests and are marked by a dungeon token showing the dungeon's trait. You explore one with the Quest action on its space. The token is removed when the dungeon is completed or an event says so.

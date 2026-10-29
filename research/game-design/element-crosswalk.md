@@ -18,9 +18,9 @@ Sources: [component-inventory.md](../return-to-dark-tower/component-inventory.md
 | Board | Frontier | Rivers between kingdoms, no rule | Frontier: crossing needs that kingdom's key | A chapter opens the next kingdom (DEC-146). Keys in MEC-009 *(proposed)* | |
 | Board | Wild space | Any space, nothing happens | Territory: a random event on entry | Wild: an event where a group ends its day (DEC-017, DEC-080) | |
 | Board | Trade route | Caravan tokens (scenario only) | | Caravans move along their kingdom's route (DEC-090) | |
-| Building | Citadel | Hero start. Reinforce: 1 potion, or 5 spirit for a virtue | Home citadel, where you start. Re-entering with 5–24 warriors doubles them | Lord's audience, a rally that heals, potions. The only seller of potions and healing (AREA-071, DEC-158, DEC-161) | DEC-161 conflicts with DEC-097, MEC-021 and MEC-022 |
+| Building | Citadel | Hero start. Reinforce: 1 potion, or 5 spirit for a virtue | Home citadel, where you start. Re-entering with 5–24 warriors doubles them | Lord's audience, a rally that heals, potions. The only seller of potions and healing (AREA-071, DEC-158, DEC-161) | DEC-161 conflicts with DEC-097, MEC-021 and MEC-022; resolved in the DEC-352 card audit, 2026-10-27 |
 | Building | Sanctuary | Reinforce: 1 spirit, or 5 spirit to remove all corruptions | Tops you up when low: warriors under 5, gold under 8, food under 6 | Lore and prophecy. Removes corruptions for gold, one at a time (AREA-072, DEC-163, DEC-170, DEC-171) | |
-| Building | Village | Reinforce: 6 warriors, or 1 spirit for 12 | | Street NPC gives rumours. Tavern rest heals for moves (AREA-073, DEC-172–174) | DEC-173 conflicts with DEC-008 and DEC-164 |
+| Building | Village | Reinforce: 6 warriors, or 1 spirit for 12 | | Street NPC gives rumours. Tavern rest heals for moves (AREA-073, DEC-172–174) | DEC-173 conflicts with DEC-008 and DEC-164; resolved in the DEC-352 card audit, 2026-10-27 |
 | Building | Bazaar | Reinforce: 1 gear, or 2 spirit for a treasure | Buy warriors, food, beast, scout, healer. Haggle. It can close on you | Trade, fortune teller, fence with cursed items (AREA-074, DEC-165–168) | |
 | Building | Tomb | | Treasure, a brigand battle or nothing | Tomb quest (Undead): dungeon crawl (MEC-026) | BT moved it from building to quest |
 | Building | Ruin | | Treasure, a brigand battle or nothing | Ruins quest (Stealth): riddle of the keys (MEC-030) | |
@@ -35,7 +35,7 @@ Sources: [component-inventory.md](../return-to-dark-tower/component-inventory.md
 
 | Kind | Element | RtDT | DT81 | Bloodtower | Notes |
 |---|---|---|---|---|---|
-| Hero | Roster | Brutal Warlord, Orphaned Scion, Relic Hunter, Spymaster | One generic player per kingdom | A pool of 6 classes: fighter, healer, magic user, scout, ranger, scholar (DEC-099, DEC-100) | DEC-100 conflicts with DEC-125 |
+| Hero | Roster | Brutal Warlord, Orphaned Scion, Relic Hunter, Spymaster | One generic player per kingdom | A pool of 6 classes: fighter, healer, magic user, scout, ranger, scholar (DEC-099, DEC-100) | DEC-100 conflicts with DEC-125; resolved in the DEC-352 card audit, 2026-10-27 |
 | Hero | Party | 1–4 heroes, each on their own | 1–4 rivals | 1–4 heroes in groups that split and join (DEC-031) | |
 | Hero | Hero board | Move value, banner action, slots | Pegs on the tower's inventory | None. The app tracks everything (AST-B16 *(proposed)*) | |
 | Hero | Attribute | | | None (DEC-125). DEC-096 and DEC-101 parked | |
@@ -44,7 +44,7 @@ Sources: [component-inventory.md](../return-to-dark-tower/component-inventory.md
 | Virtue | Kingdom virtue | 1 per kingdom | | | Not carried over |
 | Virtue | Gaining one | Citadel Reinforce only | | Bought at the citadel or earned in the story (DEC-127) | |
 | Magic | Spell | Covenant: Astromancer spell cards | Wizard: curses another player | Spell virtues: Lightning, Fireball, Magic Missile (DEC-121, DEC-123) | |
-| Magic | Mana | | | None. Uses per battle are the only limit (DEC-122, DEC-124) | DEC-124 conflicts with DEC-039, DEC-054, DEC-097 |
+| Magic | Mana | | | None. Uses per battle are the only limit (DEC-122, DEC-124) | DEC-124 conflicts with DEC-039, DEC-054, DEC-097; resolved in the DEC-352 card audit, 2026-10-27 |
 | Ally | Companion | 10 cards, from quests | | One per hero at most, written by the story, with loyalty (DEC-065, DEC-066, DEC-070–072) | Loyalty is Q-036 *(open)* |
 | Ally | Hired help | | Scout and healer, bought at the bazaar | Bazaar hired help in MEC-023 *(open)* | |
 | Ally | Guild | Alliances: 4 guilds, raised with influence | | | |

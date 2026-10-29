@@ -1,6 +1,6 @@
 # Asset organization (multi-story)
 
-Status: agreed draft, 2026-10-14, Gamewright + Illusionist. Draft for Bob's review. Design only.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: agreed draft, 2026-10-14, Gamewright + Illusionist. Draft for Bob's review. Design only.
 
 ## Goal
 Any number of stories can live side by side. Each story is a self-contained pack on a small shared base, and adding a story never touches another story or the engine.
@@ -28,10 +28,10 @@ assets/
 ```
 
 ## Rules
-- R-AST-ORG-1. The engine refers to assets only by stable ID, never by path, and reads only `rendered/<story-id>/index.json` plus `shared/`.
+- R-AST-ORG-1. The engine refers to assets only by stable ID, never by path, and reads only `rendered/<story-id>/index.json` plus `shared/`. *Superseded by DEC-386: shipped files live in packs/<story>/assets with an index.*
 - R-AST-ORG-2. Source and rendered output stay separate. Rendered files are content-addressed: a re-render overwrites nothing, and identical inputs reuse the same file.
 - R-AST-ORG-3. A still or clip belongs to one script moment, ID `scene.moment`. Reusable media lives in `library/` and is referenced by ID.
-- R-AST-ORG-4. Private lines carry the hunter in the ID, e.g. `scene.moment.private.wren`. The index answers which iPad plays what.
+- R-AST-ORG-4. Private lines carry the hunter in the ID, e.g. `scene.moment.private.wren`. The index answers which iPad plays what. *Superseded by DEC-057 and DEC-201: there are no private lines.*
 - R-AST-ORG-5. Character reference sheets are versioned inputs. Changing a sheet flags every still of that character for re-render.
 - R-AST-ORG-6. The theme belongs to the story. Style prompts, the filter preset (palette, grain, duotone), music mood, and narrator voice live in `story.json`. Fallback to `shared/` applies only to sound and UI files, never to style. One exception: the shared NPC avatars in `shared/cast/` (DEC-334), which always play under the story's filter preset.
 - R-AST-ORG-7. Every rendered file is marked draft (cheap and fast) or final. Playtests may use drafts; a release build requires finals.

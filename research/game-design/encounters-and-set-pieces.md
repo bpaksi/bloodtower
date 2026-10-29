@@ -1,6 +1,6 @@
 # Encounters and set pieces
 
-Status: **draft for Bob's review**, 2026-10-14. Design only.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: **draft for Bob's review**, 2026-10-14. Design only.
 
 - **Random encounter:** short, drawn from a weighted table when the party moves, explores or a clock tick fires. Replayable.
 - **Set piece:** authored scene tied to the story timeline or a place (tower wakes, recruiting, finale). Plays once per campaign unless marked repeatable.

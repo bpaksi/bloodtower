@@ -1,6 +1,6 @@
 # Landing and initial screens
 
-Status: draft for Bob's review, 2026-10-14. Design only. Builds on sessions.md (R-SES) and asset-organization.md.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: draft for Bob's review, 2026-10-14. Design only. Builds on sessions.md (R-SES) and asset-organization.md.
 
 ## Principles
 - R-UI-1. The first 10 seconds sell the game: motion, sound, and the tower, before any menu.

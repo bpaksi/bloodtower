@@ -1,6 +1,6 @@
 # RtDT app-driven subsystems: survey and reuse
 
-Gamewright, 2026-10-14. Sources: official rulebook [v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) and [two-page](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf), [Alliances rulebook](https://restorationgames.com/wp-content/uploads/2021/11/RTDT_Alliances-Rulebook.pdf), [Covenant rulebook](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Covenant_Rulebook-web.pdf), plus local notes (research/return-to-dark-tower/). Anything marked **unverified** has no source we checked. BGG was not consulted in depth.
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Gamewright, 2026-10-14. Sources: official rulebook [v2](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Rulebook-v2-web.pdf) and [two-page](https://restorationgames.com/wp-content/uploads/2022/05/Return_to_Dark_Tower-rules-two-page.pdf), [Alliances rulebook](https://restorationgames.com/wp-content/uploads/2021/11/RTDT_Alliances-Rulebook.pdf), [Covenant rulebook](https://restorationgames.com/wp-content/uploads/2023/10/RtDT_Covenant_Rulebook-web.pdf), plus local notes (research/return-to-dark-tower/). Anything marked **unverified** has no source we checked. BGG was not consulted in depth.
 
 Ratings: **strong** = reuse as a generic set piece; **maybe** = reuse only in part or later; **skip**.
 

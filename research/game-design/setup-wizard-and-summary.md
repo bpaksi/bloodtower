@@ -1,6 +1,6 @@
 # Setup wizard and end-of-game summary
 
-Status: draft for Bob's review, 2026-10-14. Design only. Builds on sessions.md (R-SES), landing-and-initial-screens.md (R-UI), requirements.md (R-DEV), and statistics.md (R-STA).
+**History (DEC-610):** written before the design cards. Where it disagrees with a card, the card wins; known stale lines say "Superseded by". Status: draft for Bob's review, 2026-10-14. Design only. Builds on sessions.md (R-SES), landing-and-initial-screens.md (R-UI), requirements.md (R-DEV), and statistics.md (R-STA).
 
 ## Setup wizard (R-WIZ)
 - R-WIZ-1. Starting a game opens a step-by-step wizard on the Dashboard: one step per screen, with Next/Back, a progress bar, and the story's theme and ambient loop. Players never need the rulebook to set up.
