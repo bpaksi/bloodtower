@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Group skulls, seals and glyphs"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -12,3 +12,5 @@ links:
   - { rel: raises, to: Q-014 }
 ---
 "I think Skulls, Seals & Glyphs need to be grouped. Thoughts how they might be used?"
+
+**Answered** by DEC-302; glyphs wait for 1.1 (DEC-601). Found in the 2026-10-29 ideas triage (DEC-612).

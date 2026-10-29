@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "A pool of heroes with D&D-style attributes and abilities: healers, magic users, fighters"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: "core-mechanics.md", lines: "29", note: "very light D&D: a few stats, a class, a couple of abilities" }
 ---
 "I'm thinking there might be a pool of heros with differnt D&D type attributes and abilties. We could have healers, magic users, fighters, ..."
+
+**Answered** by DEC-045 and DEC-100. Found in the 2026-10-29 ideas triage (DEC-612).

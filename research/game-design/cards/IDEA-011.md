@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The tower runs combat in rounds, as in the 1981 Dark Tower"
-status: open
+status: answered
 layer: core
 by: "Bob, 2026-10-20"
 links:
@@ -15,3 +15,5 @@ sources:
   - { file: "../dark-tower-1981/NOTES.md", lines: "9-10", note: "battle horn, rounds halve brigands or kill a warrior" }
 ---
 "In some places I really like the original DT. In DT the Tower does the combat by turns. The player can run at each turn. If the player loeses all Hit points, they get a coruption. If the defeat all foes they get bounty."
+
+**Answered** by MEC-024. Found in the 2026-10-29 ideas triage (DEC-612).

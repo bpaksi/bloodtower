@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "A story supplies information nuggets (100–500) that NPCs hand out at random, each once"
-status: open
+status: answered
 layer: configurable
 by: "Bob, 2026-10-20"
 links:
@@ -12,3 +12,5 @@ links:
   - { rel: raises, to: Q-028 }
 ---
 "The story can provide information nuggets. These they can be randomly presented via NPCs. They don't all need to be true or even about the story. IF the story give 5, then the game can use those and then once done that option is no longer available. I would expect a story to provide many (100-500) to keep the story fresh"
+
+**Answered** by DEC-024 and DEC-025; in 1.0 nuggets come from tavern rumours, since NPCs wait for 1.1 (DEC-502). Found in the 2026-10-29 ideas triage (DEC-612).
