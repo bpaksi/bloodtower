@@ -67,6 +67,8 @@ const MERGED_LINE = /^\s*(?:[-*]\s+)?\**Merged:?\**:?\s*(?:[\w.-]+\/[\w.-]+)?#(\
 const HEADING_PR = /\(PR (?:[\w.-]+\/[\w.-]+)?#(\d+)\)/;
 const BUILD_TYPES = /^(feat|fix|refactor|perf|chore|test|build)\b/;
 const REACH_RELS = ["needs", "uses"];
+/** The cards that get built (DEC-355). The walk stops at one the step did not build. */
+const DELIVERABLE_TYPES = ["screen", "ui", "cue", "mechanic", "art"];
 /** A changed card linking a watched card by one of these may change what the step built. */
 const CHANGE_RELS = ["refines", "affects", "conflicts"];
 
@@ -149,8 +151,16 @@ export function mergeCommit(step: PlanStep, commits: Commit[]): Commit | null {
   return found;
 }
 
-/** The given IDs plus every node they reach by `needs` or `uses`, over any number of hops. */
+/**
+ * The given IDs plus every node they reach by `needs` or `uses`, over any number of hops. A
+ * deliverable card that is not one of the IDs belongs to another step, so the walk neither
+ * watches it nor goes through it.
+ */
 export function watchedCards(graph: Graph, ids: string[]): Set<string> {
+  const otherDeliverable = (id: string) => {
+    const node = graph.nodes[id];
+    return node?.kind === "card" && DELIVERABLE_TYPES.includes(node.type);
+  };
   const out = new Map<string, string[]>();
   for (const e of graph.edges) {
     if (REACH_RELS.includes(e.rel)) out.set(e.from, [...(out.get(e.from) ?? []), e.to]);
@@ -159,7 +169,7 @@ export function watchedCards(graph: Graph, ids: string[]): Set<string> {
   const stack = [...ids];
   while (stack.length > 0) {
     for (const to of out.get(stack.pop() as string) ?? []) {
-      if (seen.has(to)) continue;
+      if (seen.has(to) || otherDeliverable(to)) continue;
       seen.add(to);
       stack.push(to);
     }

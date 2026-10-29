@@ -222,6 +222,29 @@ describe("watchedCards and stepDrift", () => {
     expect([...watchedCards(graph, ["MEC-039"])].sort()).toEqual(["DEC-154", "DEC-155", "MEC-039"]);
   });
 
+  it("stops at a deliverable the step did not build, and goes through one it did", () => {
+    const g = graphOf({
+      "MEC-001": {
+        type: "mechanic",
+        links: [
+          ["uses", "MEC-002"],
+          ["needs", "DEC-001"],
+        ],
+      },
+      "MEC-002": { type: "mechanic", links: [["needs", "DEC-002"]] },
+      "SCR-001": { type: "screen", links: [["uses", "MEC-002"]] },
+      "DEC-001": { type: "decision", links: [["uses", "SCR-001"]] },
+      "DEC-002": { type: "decision" },
+    });
+    expect([...watchedCards(g, ["MEC-001"])].sort()).toEqual(["DEC-001", "MEC-001"]);
+    expect([...watchedCards(g, ["MEC-001", "MEC-002"])].sort()).toEqual([
+      "DEC-001",
+      "DEC-002",
+      "MEC-001",
+      "MEC-002",
+    ]);
+  });
+
   it("lists cards changed after the merge: reached, and refining a watched card", () => {
     const d = stepDrift(graph, step, history);
     expect(d.merge?.sha).toBe("m");
