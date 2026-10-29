@@ -120,7 +120,7 @@ Every card except areas says where it sits between "every story" and "one story"
 | `layer` | Meaning | Example |
 |---|---|---|
 | `core` | The same in every story | Instant-loss guard, scene presence |
-| `configurable` | An engine mechanism each story fills with data | Encounter tables, chapter list |
+| `configurable` | An engine mechanism each story fills with data | Event tables, chapter list |
 | `optional` | An engine module a story may switch on | Dungeon crawl, hunter token |
 | `story` | Lives in one story pack; kept here only as an example | Dracula's 5 nights |
 
