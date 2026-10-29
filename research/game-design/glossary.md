@@ -29,7 +29,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 |---|---|---|---|---|
 | Event | Something that happens to the heroes present on a space. Drawn at random when a hero stops in the wild, or placed by a quest | A tower event | Bob | IDEA-014, DEC-017 |
 | Event type | The kind of event: **encounter**, **hazard**, **disaster** (dragon), **windfall** (a find) and **quiet** (nothing) | | Bob | IDEA-014, DEC-022 |
-| Encounter | An event type: the party meets someone. Foes lead to a fight; people lead to talk or trade | Any event | Bob, proposed detail | IDEA-014 |
+| Encounter | An event type: the party meets someone. Foes lead to a battle; people lead to talk or trade | Any event | Bob, proposed detail | IDEA-014 |
 | Hazard | An event type: something that costs the party unless they hold its counter. Plague (healer), lost (scout), storm | A disaster, which is bigger | Bob | DEC-022, MEC-006 |
 | Counter | An item, ally or ability that cancels a specific event type (healer vs plague, scout vs lost) | | proposed | MEC-006 |
 | Nugget | One piece of information a story writes (100–500 per story). NPCs hand them out at random, each once; some are false or off-story | A rumour is one way to deliver one | Bob | IDEA-016 |
@@ -41,9 +41,9 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
 | Fight | The round loop the tower runs, as in 1981 | | Bob | IDEA-011, MEC-024 |
-| Horde | The foes in one fight, shown as a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013 |
+| Horde | The foes in one battle, shown as a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013 |
 | Round | One exchange: the horde shrinks, or a random present hero loses hit points | | Bob | DEC-014, DEC-015 |
-| Run | The whole group leaves a fight after any round, free; the horde stays and grows | Going around an event | Bob | DEC-016 |
+| Run | The whole group leaves a battle after any round, free; the horde stays and grows | Going around an event | Bob | DEC-016 |
 | Reward | What beating the whole horde pays: loot cards and gold | | Bob | IDEA-002, IDEA-011 |
 
 ## The party

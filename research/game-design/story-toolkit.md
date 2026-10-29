@@ -28,7 +28,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 | named NPCs (MEC-048) | story | For anyone the plot wants the heroes to come back to: a witness, a suspect, a guide. Lines each: floor 3 (meeting, talking again, the clue action), target 6. | 2 · 3 · 4 | 4 · 6 · 8 |
 | companions (MEC-049) | optional | When the story wants allies with a voice: someone the heroes win over, protect or lose. Lines each: target 5 (join, loyalty up, loyalty down, leaving, the finale). | 0 | 4 · 4 · 6 |
 | the adversary (MEC-050) | core | Every story, exactly one. Give it a voice the table hears through the game, not only at the end. Lines: floor 3 (introduction, a taunt, the finale), target 8. | 1 | 1 |
-| lieutenants (MEC-051) | optional | In a longer game, to give the middle chapters a face and a fight that changes the finale. | 0 | 1 · 2 · 3 |
+| lieutenants (MEC-051) | optional | In a longer game, to give the middle chapters a face and a battle that changes the finale. | 0 | 1 · 2 · 3 |
 | traitor tricks (MEC-052) | optional | When the story is about trust: who to believe, who is lying. | 0 | 1 · 1 · 2 |
 
 ## Places (AREA-084, DEC-263)
