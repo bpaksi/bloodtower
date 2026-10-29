@@ -1,6 +1,6 @@
 ---
 type: idea
-title: "A story marks a kingdom or building as a story point for a special interaction"
+title: "A story marks a kingdom or building as a quest marker for a special interaction"
 status: open
 layer: configurable
 by: "Bob, 2026-10-20"

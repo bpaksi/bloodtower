@@ -37,7 +37,7 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 |---|---|---|---|---|
 | hero start (MEC-053) | configurable | Every story. Start together for a tight party story; one per kingdom for a world under threat everywhere. | 1 | 1 |
 | chapter bounds (MEC-054) | configurable | Every chapter. Narrow bounds walk the party through the world in order; open bounds let them roam. | 1 per chapter | 1 per chapter |
-| story points (MEC-055) | configurable | One for every quest. Spread them over kingdoms so the party travels. | 1 per quest | 1 per quest, over 2 · 3 · 4 kingdoms |
+| quest markers (MEC-055) | configurable | One for every quest. Spread them over kingdoms so the party travels. | 1 per quest | 1 per quest, over 2 · 3 · 4 kingdoms |
 | leads (MEC-056) | optional | When the story wants the world to feel bigger than its plot, and to reward talking to people. | 0 | 2 · 4 · 6 |
 
 ## Threats (AREA-085, DEC-264)
@@ -74,4 +74,4 @@ Field names point at sections of [story-pack-format.md](story-pack-format.md). E
 - **Base treasure, gear and potion decks:** whether story items reuse or replace them is Q-012.
 - **Nugget mix:** how a story's nuggets split between rumours, lore and fortunes is Q-166.
 - **Heroes:** the hero pool belongs to the engine, the same in every story (DEC-045). A story supplies none.
-- **Encounters:** random and the engine's (IDEA-013). A story only renames wild events (MEC-060) and marks story points (MEC-055).
+- **Encounters:** random and the engine's (IDEA-013). A story only renames wild events (MEC-060) and marks quest markers (MEC-055).
