@@ -44,7 +44,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Horde | The foes in one fight, shown as a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013 |
 | Round | One exchange: the horde shrinks, or a random present hero loses hit points | | Bob | DEC-014, DEC-015 |
 | Run | The whole group leaves a fight after any round, free; the horde stays and grows | Going around an event | Bob | DEC-016 |
-| Bounty | What beating the whole horde pays: loot cards and money | | Bob | IDEA-002, IDEA-011 |
+| Bounty | What beating the whole horde pays: loot cards and gold | | Bob | IDEA-002, IDEA-011 |
 
 ## The party
 
@@ -56,5 +56,5 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Day | One round: every group moves and acts once, then a skull is dropped into the tower | | Bob | DEC-033, DEC-064 |
 | Present heroes | The heroes on the space where something happens; only they take part | The party | Bob | DEC-010, DEC-019 |
 | Hit points | A hero's health, counted by the app; 0 gives a corruption | Warriors, which are gone | Bob | IDEA-009 |
-| Purse | The party's one money track, counted by the app and shown on the Story board | | Bob | DEC-007, UI-001 |
+| Purse | The party's one gold track, counted by the app and shown on the Story board | | Bob | DEC-007, UI-001 |
 | Corruption | A card a hero takes at 0 hit points or from some events; a 3rd loses | | Bob | DEC-012, AST-B17 |
