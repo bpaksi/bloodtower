@@ -18,7 +18,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
 | Wild | Any board space with no building | A location | proposed | DEC-017 |
-| Location | A building on the board, entered through its menu: base action, sub-locations, NPCs | A quest marker | Bob | IDEA-006, MEC-019 |
+| Location | A building on the board, entered through its menu: Reinforce, sub-locations, NPCs | A quest marker | Bob | IDEA-006, MEC-019 |
 | Sub-location | A place inside a location (tavern, merchant, chapel) | A feature | Bob | IDEA-006 |
 | NPC | A person at a location the heroes can talk to | A companion, who joins the party | Bob | IDEA-006 |
 | Quest marker | Where a quest is this turn: a building (it gains an extra option) or a space in the wild, never a whole kingdom | A quest, which is what plays there | Bob | IDEA-007, IDEA-015, DEC-021 |
