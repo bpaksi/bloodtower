@@ -22,6 +22,11 @@ export type PlanStep = {
   ids: string[];
   /** True when the IDs come from `Builds:` lines (DEC-355). */
   builds: boolean;
+  /**
+   * The PR that merged the step, when the plan records it: a `Merged: #NNN` line, `(PR #NNN)` in
+   * the heading, or the step's row in a `| Step | … | PR |` table.
+   */
+  pr: number | null;
 };
 
 export type Commit = { sha: string; date: string; subject: string };
@@ -58,6 +63,8 @@ export type StepDrift = {
 const ID = /\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b/g;
 const STEP_HEADING = /^###\s+Step\s+([\w.-]+)\s*:\s*(.*)$/;
 const BUILDS_LINE = /^\s*(?:[-*]\s+)?\**Builds:?\**:?\s*(.*)$/;
+const MERGED_LINE = /^\s*(?:[-*]\s+)?\**Merged:?\**:?\s*(?:[\w.-]+\/[\w.-]+)?#(\d+)/;
+const HEADING_PR = /\(PR (?:[\w.-]+\/[\w.-]+)?#(\d+)\)/;
 const BUILD_TYPES = /^(feat|fix|refactor|perf|chore|test|build)\b/;
 const REACH_RELS = ["needs", "uses"];
 /** A changed card linking a watched card by one of these may change what the step built. */
@@ -66,10 +73,13 @@ const CHANGE_RELS = ["refines", "affects", "conflicts"];
 /** The `### Step <id>: <title>` sections of one plan, each up to the next `##`/`###` heading. */
 export function planSteps(file: string, text: string, app: string): PlanStep[] {
   const plan = /^([A-Z]+\d+[a-z]?)-/.exec(path.basename(file))?.[1] ?? null;
+  const tablePrs = stepTablePrs(text);
   const steps: PlanStep[] = [];
   let current: { step: string; title: string; lines: string[] } | null = null;
   const close = () => {
     if (!current) return;
+    const merged = current.lines.flatMap((l) => MERGED_LINE.exec(l)?.[1] ?? [])[0];
+    const pr = merged ?? HEADING_PR.exec(current.title)?.[1] ?? tablePrs.get(current.step);
     const buildLines = current.lines.flatMap((l) => BUILDS_LINE.exec(l)?.[1] ?? []);
     const source = buildLines.length > 0 ? buildLines : current.lines;
     const ids = [...new Set(source.join("\n").match(ID) ?? [])];
@@ -81,6 +91,7 @@ export function planSteps(file: string, text: string, app: string): PlanStep[] {
       title: current.title,
       ids,
       builds: buildLines.length > 0,
+      pr: pr ? Number(pr) : null,
     });
     current = null;
   };
@@ -95,13 +106,40 @@ export function planSteps(file: string, text: string, app: string): PlanStep[] {
   return steps;
 }
 
+/** Step ID to PR number, from every table whose header row starts `| Step |` and ends `| PR |`. */
+function stepTablePrs(text: string): Map<string, string> {
+  const out = new Map<string, string>();
+  let inTable = false;
+  for (const line of text.split("\n")) {
+    if (!line.trim().startsWith("|")) {
+      inTable = false;
+      continue;
+    }
+    const cells = line
+      .split("|")
+      .slice(1, -1)
+      .map((c) => c.trim());
+    if (/^step$/i.test(cells[0] ?? "") && /^PR$/i.test(cells.at(-1) ?? "")) inTable = true;
+    else if (inTable) {
+      const pr = /^#(\d+)$/.exec(cells.at(-1) ?? "")?.[1];
+      if (pr && cells[0]) out.set(cells[0], pr);
+    }
+  }
+  return out;
+}
+
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
- * The commit that merged the step: the oldest build commit (not `docs`) whose subject names the
- * plan and step (`C1 step 6`, `W7-step-2`) or, for an app's `plan.md`, the app scope and step.
+ * The commit that merged the step. When the plan records the PR, it is the commit whose subject
+ * ends `(#NNN)`. Otherwise it is the oldest build commit (not `docs`) whose subject names the plan
+ * and step (`C1 step 6`, `W7-step-2`) or, for an app's `plan.md`, the app scope and step.
  */
 export function mergeCommit(step: PlanStep, commits: Commit[]): Commit | null {
+  if (step.pr !== null) {
+    const tail = `(#${step.pr})`;
+    return commits.find((c) => c.subject.endsWith(tail)) ?? null;
+  }
   const id = `${escapeRe(step.step)}(?![\\w.])`;
   const named = step.plan
     ? new RegExp(`\\b${escapeRe(step.plan)}[- ]step[- ]${id}`, "i")
@@ -294,7 +332,10 @@ export function driftText(drift: StepDrift[], graph: Graph): string {
   }
   if (unmerged.length > 0) {
     lines.push(`Steps with cards and no merge commit (${unmerged.length}):`);
-    for (const d of unmerged) lines.push(`  ${d.step.file}  step ${d.step.step}: ${d.step.title}`);
+    for (const d of unmerged) {
+      const pr = d.step.pr === null ? "" : `  (PR #${d.step.pr} is not on this branch)`;
+      lines.push(`  ${d.step.file}  step ${d.step.step}: ${d.step.title}${pr}`);
+    }
     lines.push("");
   }
   const cards = changed.reduce((n, d) => n + d.changes.length, 0);

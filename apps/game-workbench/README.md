@@ -30,7 +30,7 @@ pnpm graph find <words>    # the hits the top-bar box shows (same list as GET /a
 pnpm graph drift           # per merged plan step, the cards changed in git since it merged
 ```
 
-`drift` reads every `### Step` in `apps/*/plans/*.md`. A step's cards are the IDs on its `Builds:` line (DEC-355), or, with no such line, every card ID its text cites. It watches those cards and everything they reach by `needs` or `uses`, finds the step's merge commit (the oldest non-`docs` commit on the first-parent history whose subject names the plan and step, such as `C1 step 6`; for a `plan.md`, the app scope and `step N`), and lists each watched card changed since, plus changed cards that `refines`, `affects` or `conflicts` with one. Steps with cards and no matching commit are listed at the end.
+`drift` reads every `### Step` in `apps/*/plans/*.md`. A step's cards are the IDs on its `Builds:` line (DEC-355), or, with no such line, every card ID its text cites. It watches those cards and everything they reach by `needs` or `uses`, finds the step's merge commit, and lists each watched card changed since, plus changed cards that `refines`, `affects` or `conflicts` with one. The merge commit is the PR the plan records, found by the `(#NNN)` that ends a squash-merge subject: a `Merged: #NNN` line in the step, `(PR #NNN)` in its heading, or the step's row in a `| Step | … | PR |` table. With none recorded, it is the oldest non-`docs` first-parent commit whose subject names the plan and step, such as `C1 step 6` (for a `plan.md`, the app scope and `step N`). Steps with cards and no matching commit are listed at the end.
 
 Gaps are warnings; `pnpm check` does not fail on them.
 

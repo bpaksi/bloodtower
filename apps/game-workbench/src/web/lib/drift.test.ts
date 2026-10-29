@@ -91,6 +91,66 @@ const commit = (sha: string, subject: string, date = "2026-10-23"): Commit => ({
   subject,
 });
 
+const RECORDED = `# plan
+
+| Step | What | PR |
+|---|---|---|
+| 5 | Find | #124 |
+| — | Shared code | #98 |
+| 6 | Small screen (see #120) | #128 |
+
+| Step | Note |
+|---|---|
+| 9 | #500 |
+
+### Step 5: Find
+- Uses DEC-001.
+
+### Step 6: Small screen
+- Merged: #129
+
+### Step 7: Land it (PR #96)
+
+### Step 8: Other repo
+- Merged: bpaksi/bloodtower#140
+
+### Step 9: Not in a PR table
+`;
+
+describe("planSteps: the recorded PR", () => {
+  const prs = planSteps("apps/x/plans/plan.md", RECORDED, "x").map((s) => [s.step, s.pr]);
+
+  it("reads a PR table, a Merged: line over the table, and (PR #NNN) in a heading", () => {
+    expect(prs).toEqual([
+      ["5", 124],
+      ["6", 129],
+      ["7", 96],
+      ["8", 140],
+      ["9", null],
+    ]);
+  });
+
+  it("finds the commit ending (#NNN), not one that only mentions it", () => {
+    const step = { ...(planSteps("apps/x/plans/plan.md", RECORDED, "x")[0] as PlanStep) };
+    const commits = [
+      commit("b", "fix(x): leftovers from #124 (#130)"),
+      commit("a", "feat(x): find an ID (#124)"),
+    ];
+    expect(mergeCommit(step, commits)?.sha).toBe("a");
+    expect(mergeCommit({ ...step, pr: 999 }, commits)).toBeNull();
+  });
+
+  it("does not fall back to the subject match when the recorded PR is missing", () => {
+    const step = { ...(planSteps("apps/x/plans/plan.md", RECORDED, "x")[0] as PlanStep), pr: 999 };
+    expect(mergeCommit(step, [commit("a", "feat(x): find (step 5) (#124)")])).toBeNull();
+    const d = stepDrift(graphOf({ "DEC-001": { type: "decision" } }), step, {
+      commits: [],
+      cardCommits: [],
+    });
+    expect(driftText([d], graphOf({}))).toContain("step 5: Find  (PR #999 is not on this branch)");
+  });
+});
+
 describe("mergeCommit", () => {
   const [, six, sixTwo] = planSteps("apps/bloodtower/plans/C1-engine-core.md", PLAN, "bloodtower");
   const commits = [
@@ -140,6 +200,7 @@ const step: PlanStep = {
   title: "Session setup",
   ids: ["MEC-039", "R-SES-11"],
   builds: false,
+  pr: null,
 };
 const history: History = {
   commits: [
