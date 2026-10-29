@@ -76,6 +76,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 3: Core runtime
 - Depends on: 1
 - Touches: `apps/bloodtower/src/engine/**`, `apps/bloodtower/package.json`, `pnpm-lock.yaml`, `scripts/check-imports.mjs` (the engine's import rule), `apps/bloodtower/spec.md` (§1a D32 traceability)
+- Builds: none
 - Deps change: yes (new workspace package)
 - Runs: local
 - Model: opus
@@ -89,6 +90,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 4: Pack format v2 and the base content pack
 - Depends on: G0
 - Touches: `apps/bloodtower/src/protocols/pack-v2/**`, `apps/bloodtower/src/server/pack/v2/**`, `packs-v2/**`, `apps/bloodtower/spec.md` (§4 v2)
+- Builds: MEC-041, MEC-045, MEC-053, MEC-054
 - Deps change: no
 - Runs: local
 - Model: opus
@@ -114,6 +116,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 6: Session and game setup on the core
 - Depends on: 3, 4
 - Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`
+- Builds: MEC-039, MEC-032, MEC-071, SCR-005, SCR-007, SCR-008, SCR-010, SCR-011, SCR-012, SCR-017, SCR-020, SCR-021
 - Deps change: no
 - Runs: local
 - Model: opus
@@ -129,6 +132,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 7: Event store and checkpoints
 - Depends on: 3
 - Touches: `apps/bloodtower/src/server/events/**`, `apps/bloodtower/src/server/db/{schema.ts,migrations.ts}`, `apps/bloodtower/src/server/scripts/timingReport.ts`
+- Builds: none
 - Deps change: no
 - Runs: local
 - Model: opus
@@ -140,6 +144,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 8: Day slice
 - Depends on: 6
 - Touches: `apps/bloodtower/src/engine/loops/{chapter,day,group-turn,encounter}/**`, `apps/bloodtower/src/engine/sim/**`, `apps/bloodtower/src/server/scripts/simulate.ts`, `apps/bloodtower/src/server/package.json` (script entry only)
+- Builds: MEC-033, MEC-034, MEC-035, MEC-036, CUE-006
 - Deps change: no
 - Runs: local
 - Model: opus
@@ -154,6 +159,7 @@ The app keeps working between steps. Until step 9, the host runs the R1 engine u
 ### Step 9: Host switch-over
 - Depends on: 2, 5, 7, 8
 - Touches: `apps/bloodtower/src/server/**`, `apps/bloodtower/src/web/**`, `apps/bloodtower/src/e2e/**`, `apps/bloodtower/src/protocols/{index.ts,messages.ts,messages.test.ts,control.ts}`, `packs/**`, `packs-v2/**`, `apps/bloodtower/{README.md,spec.md}`
+- Builds: SCR-013, SCR-015, SCR-016
 - Deps change: no
 - Runs: local
 - Model: opus
