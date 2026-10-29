@@ -13,4 +13,4 @@ sources:
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
-**Proposal:** people the hunters meet. A pack maps each physical card to a story role, a recruit condition, an Advantage and a loss condition (E18). The recruiting hunter keeps the card face up by their hero board. The iPad shows the story name and art. Still needs the list of which 10 cards are in Bob's box.
+**Proposal:** people the heroes meet. A pack maps each physical card to a story role, a recruit condition, an Advantage and a loss condition (E18). The recruiting hero keeps the card face up by their hero board. The iPad shows the story name and art. Still needs the list of which 10 cards are in Bob's box.

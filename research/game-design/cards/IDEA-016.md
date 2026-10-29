@@ -6,7 +6,7 @@ layer: configurable
 by: "Bob, 2026-10-20"
 links:
   - { rel: part-of, to: AREA-018 }
-  - { rel: refines, to: IDEA-013, note: "a story provides nuggets as well as set pieces" }
+  - { rel: refines, to: IDEA-013, note: "a story provides nuggets as well as quests" }
   - { rel: affects, to: MEC-022, note: "tavern rumours" }
   - { rel: uses, to: DEC-011, note: "seeded pick" }
   - { rel: raises, to: Q-028 }

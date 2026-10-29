@@ -10,6 +10,6 @@ links:
 Bob's words:
 
 > [Game] Determine number of moves
-> [Story — optional, based on location and story progress] Narration, set piece
+> [Story — optional, based on location and story progress] Narration, quest
 > Players: for each group, until moves are exhausted or the player ends the turn: move; if the move is onto an encounter (buildings are encounters), resolve the encounter.
 > [Game] Determine events, resolve events

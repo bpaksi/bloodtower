@@ -10,7 +10,7 @@ links:
   - { rel: affects, to: AST-B05, note: "planned base RtDT battles" }
   - { rel: affects, to: Q-007, note: "how an encounter is resolved" }
   - { rel: refines, to: Q-021, note: "0 HP gives a corruption" }
-  - { rel: uses, to: IDEA-002, note: "the bounty" }
+  - { rel: uses, to: IDEA-002, note: "the reward" }
 sources:
   - { file: "../dark-tower-1981/NOTES.md", lines: "9-10", note: "battle horn, rounds halve brigands or kill a warrior" }
 ---
