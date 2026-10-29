@@ -14,4 +14,4 @@ sources:
   - { file: "../return-to-dark-tower/component-inventory.md", lines: "9-49" }
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
-**Proposal:** keep as the base RtDT player mat: move value, banner action, virtue and corruption slots. The story renames the hero on that player's iPad. The board itself does not change, so the table can always read a hunter's state from it.
+**Proposal:** keep as the base RtDT player mat: move value, banner action, virtue and corruption slots. The story renames the hero on that player's iPad. The board itself does not change, so the table can always read a hero's state from it.
