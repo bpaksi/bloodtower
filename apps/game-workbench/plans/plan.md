@@ -129,6 +129,7 @@ How it is built:
 - `packages/workbench/src/components/FindBox.tsx` is the client box that replaces the disabled input. It waits about 120 ms after typing before it fetches and shows a listbox (`role="listbox"`, `aria-activedescendant`). `/` focuses the box only when no other field has focus. `⌘K` / `Ctrl+K` always focuses it. Esc closes the list and leaves the box.
 - Depends on: none
 - Touches: `apps/game-workbench/src/web/**`, `packages/workbench/src/**`, `packages/workbench/styles/**`
+- Builds: none
 - Deps change: no
 - Runs: cloud
 - Model: sonnet
@@ -204,6 +205,7 @@ Bob ruled on 2026-10-21 (see Answers): listening and recording happen in tower-p
 - The `feel:` card field, in `research/game-design/cards/README.md` and the card schema.
 - Done when: the card lint accepts a `feel:` block and rejects an unknown mood (the two new moods included); `/sounds` lists a card with a `feel:` block under its category, and the mood filter hides a card with another mood.
 - Touches: `apps/game-workbench/src/web/**`, `research/game-design/cards/README.md` (the `feel:` field), `packages/workbench/src/cards.ts`, `apps/game-workbench/README.md` (the page), `apps/game-workbench/plans/plan.md`
+- Builds: none
 - Depends on: none
 - Deps change: no
 - Runs: local
@@ -270,6 +272,7 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
 - A gap is a warning, never an error. `pnpm check` does not fail on gaps.
 - Depends on: 9
 - Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`, `apps/game-workbench/README.md` (the command), root `package.json` (the `graph` script)
+- Builds: none
 - Deps change: yes (one root `package.json` script, no new packages)
 - Runs: cloud
 - Model: sonnet
@@ -287,6 +290,7 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
 - `pnpm graph show <ID>` prints the card, its links both ways with verbs and notes, and its sources. `pnpm graph find <words>` prints step 5's search.
 - Depends on: 5, 10 (the CLI)
 - Touches: `packages/workbench/src/**`, `apps/game-workbench/src/web/**`
+- Builds: none
 - Deps change: no (the `graph` script exists from step 10)
 - Runs: cloud
 - Model: sonnet
@@ -305,6 +309,7 @@ Bob: a way to visualize the game engine's loops, as designed (loops within loops
 - Every ID opens its card in a side panel. The view is kept in the URL hash, so a link names a loop, a node and a card.
 - Done when: all 13 loop cards read with no errors; the session walkthrough reaches the encounter's pick through six frames; an interrupt resumes at the held node; `lib/engine.test.ts` passes.
 - Touches: `apps/game-workbench/src/web/{app/engine/**,lib/engine.ts,lib/engine.test.ts,components/Sidebar.tsx}`, `apps/game-workbench/{README.md,plans/plan.md}`, `.claude/launch.json`
+- Builds: none
 
 ### Step 13: Card drift and the DEC-355 gaps (IDEA-062, 2026-10-29)
 Bob ruled this tooling comes before the scripted playthroughs, so the design changes they cause can be traced to code already built. Cards carry no version fields; git is the change record (DEC-505).
