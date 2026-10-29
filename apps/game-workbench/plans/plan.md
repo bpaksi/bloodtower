@@ -258,6 +258,7 @@ Today 1,184 links are mostly loose (`refines` 239, `uses` 216, `affects` 138), a
   - an area where no card in its `part-of` subtree is decided.
 - A card in several areas counts once in each.
 - Day one: 157 gaps (160 as first built, 157 after the conflict ruling in #136).
+- Changed by step 13: the decided-card rule became "decided ruling no deliverable reaches" (DEC-355), and a conflict on an answered question no longer counts.
 - A **Gaps** page (`/gaps`), linked from the sidebar, grouped by rule and then by area, with a count on the map page for each area. Each row opens the card.
 - `pnpm graph gaps` prints the same list, so Claude can start a design session from it.
   - The engine is in `packages/workbench/src` and is exported from `server.ts`, so the package's `package.json` is not edited.
@@ -302,6 +303,16 @@ Bob: a way to visualize the game engine's loops, as designed (loops within loops
 - Every ID opens its card in a side panel. The view is kept in the URL hash, so a link names a loop, a node and a card.
 - Done when: all 13 loop cards read with no errors; the session walkthrough reaches the encounter's pick through six frames; an interrupt resumes at the held node; `lib/engine.test.ts` passes.
 - Touches: `apps/game-workbench/src/web/{app/engine/**,lib/engine.ts,lib/engine.test.ts,components/Sidebar.tsx}`, `apps/game-workbench/{README.md,plans/plan.md}`, `.claude/launch.json`
+
+### Step 13: Card drift and the DEC-355 gaps (IDEA-062, 2026-10-29)
+Bob ruled this tooling comes before the scripted playthroughs, so the design changes they cause can be traced to code already built. Cards carry no version fields; git is the change record (DEC-505).
+- `pnpm graph drift`: for each plan step's `Builds:` cards (or, until steps carry that line, the card IDs the step cites), and everything they reach by `needs`/`uses`, the cards changed in git since the step merged, plus changed cards that refine, affect or conflict with one. The case behind it: C1 step 6 built on DEC-155 on 2026-10-23, and DEC-275 reversed it on 2026-10-26.
+- Gaps, no deliverable: a decided decision that no live `SCR-`, `UI-`, `CUE-`, `MEC-` or `ART-` card reaches by `needs` or `uses`, over any number of hops (DEC-355). It replaces "decided card with no requirement".
+- Gaps, answered conflicts: a `conflicts` link on an answered question (status `answered`, or with an `answers` link to it) is not a gap; it records what the question was about.
+- Touches: `apps/game-workbench/src/web/{cli/graph.ts,lib/drift.ts,lib/drift.test.ts}`, `packages/workbench/src/{gaps.ts,gaps.test.ts}`, `apps/game-workbench/{README.md,plans/plan.md}`
+- Deps change: no
+- Done when: the commands work against the current cards; vitest covers each with a small fixture (`lib/drift.test.ts`, `packages/workbench/src/gaps.test.ts`); `pnpm check` passes. Gaps went from 720 to 372: "Decided card with no requirement" (627) became "Decided ruling no deliverable reaches" (286), and "Conflict not yet settled" went from 8 to 1.
+- Not required: a `replaces` verb (DEC-352, later), adding `Builds:` lines to existing plans.
 
 ## Later
 

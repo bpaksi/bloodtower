@@ -114,15 +114,12 @@ describe("gaps", () => {
     expect(findGaps(decided).filter((f) => f.rule === "conflict-unparked")).toHaveLength(1);
   });
 
-  it("decided card: found until it links to an R- ID, and conflicts does not count", () => {
+  it("decided ruling: found until a deliverable reaches it by needs or uses", () => {
     const none = graphOf({ "DEC-001": { type: "decision", status: "decided" } });
-    expect(rulesFor(none, "DEC-001")).toEqual(["decided-no-requirement"]);
-    const onlyConflict = graphOf({
-      "DEC-001": { type: "decision", status: "decided", links: [["conflicts", "R-X-1"]] },
-    });
-    expect(rulesFor(onlyConflict, "DEC-001")).toEqual(["decided-no-requirement"]);
+    expect(rulesFor(none, "DEC-001")).toEqual(["no-deliverable"]);
     const ok = graphOf({
-      "DEC-001": { type: "decision", status: "decided", links: [["becomes", "R-X-1"]] },
+      "DEC-001": { type: "decision", status: "decided" },
+      "SCR-001": { type: "screen", links: [["needs", "DEC-001"]] },
     });
     expect(rulesFor(ok, "DEC-001")).toEqual([]);
     const open = graphOf({ "DEC-001": { type: "decision", status: "open" } });
@@ -137,11 +134,9 @@ describe("gaps", () => {
         "DEC-001": {
           type: "decision",
           status: leaf,
-          links: [
-            ["part-of", "AREA-002"],
-            ["uses", "R-X-1"],
-          ],
+          links: [["part-of", "AREA-002"]],
         },
+        "SCR-001": { type: "screen", links: [["needs", "DEC-001"]] },
       });
     expect(findGaps(base("open")).map((g) => g.id)).toEqual(["AREA-001", "AREA-002"]);
     expect(findGaps(base("decided"))).toEqual([]);
@@ -166,7 +161,7 @@ describe("gaps", () => {
     expect(gaps.filter((x) => x.id === "DEC-001")).toHaveLength(1);
     const per = gapsPerArea(gaps);
     expect(per.get("AREA-001")).toBe(per.get("AREA-002"));
-    const group = groupGaps(gaps).find((x) => x.rule === "decided-no-requirement");
+    const group = groupGaps(gaps).find((x) => x.rule === "no-deliverable");
     expect(group?.count).toBe(1);
     expect(group?.byArea.map((a) => a.area)).toEqual(["AREA-001", "AREA-002"]);
   });
@@ -371,59 +366,92 @@ describe("gaps: conflict edge cases", () => {
   });
 });
 
-describe("gaps: decided without requirement edge cases", () => {
-  const rule = "decided-no-requirement";
+describe("gaps: no deliverable edge cases", () => {
+  const rule = "no-deliverable";
+  const reachedBy = (type: string, rel: string, status: CardStatus = "decided") =>
+    graphOf({
+      "DEC-001": { type: "decision", status: "decided" },
+      "X-001": { type, status, links: [[rel, "DEC-001"]] },
+    });
 
-  it("applies to decision, mechanic, screen, ui and cue, and to no other type", () => {
-    for (const type of ["decision", "mechanic", "screen", "ui", "cue"]) {
-      const g = graphOf({ "X-001": { type, status: "decided" } });
-      expect(ofRule(g, rule)).toHaveLength(1);
+  it("applies to decided decisions only, not to decided cards of other types", () => {
+    for (const type of ["mechanic", "screen", "ui", "cue", "question", "option", "area"]) {
+      expect(ofRule(graphOf({ "X-001": { type, status: "decided" } }), rule)).toEqual([]);
     }
-    for (const type of ["question", "option", "area", "note"]) {
-      const g = graphOf({ "X-001": { type, status: "decided" } });
-      expect(ofRule(g, rule)).toEqual([]);
+    for (const status of ["open", "proposed", "parked", "answered"] as const) {
+      expect(ofRule(graphOf({ "DEC-001": { type: "decision", status } }), rule)).toEqual([]);
     }
   });
 
-  it("is satisfied by any non-conflict verb to a requirement ref", () => {
+  it("is reached by each of screen, ui, cue, mechanic and art, with needs or uses", () => {
+    for (const type of ["screen", "ui", "cue", "mechanic", "art"]) {
+      for (const rel of ["needs", "uses"]) expect(ofRule(reachedBy(type, rel), rule)).toEqual([]);
+    }
+  });
+
+  it("is not reached by another verb, by a non-deliverable, or by a parked deliverable", () => {
+    expect(ofRule(reachedBy("screen", "affects"), rule)).toHaveLength(1);
+    expect(ofRule(reachedBy("screen", "conflicts"), rule)).toHaveLength(1);
+    expect(ofRule(reachedBy("decision", "needs", "open"), rule)).toHaveLength(1);
+    expect(ofRule(reachedBy("option", "uses"), rule)).toHaveLength(1);
+    expect(ofRule(reachedBy("screen", "needs", "parked"), rule)).toHaveLength(1);
+  });
+
+  it("is not reached by the ruling's own outgoing link to a deliverable", () => {
     const g = graphOf({
-      "DEC-001": { type: "decision", status: "decided", links: [["uses", "R-X-1"]] },
+      "DEC-001": { type: "decision", status: "decided", links: [["needs", "SCR-001"]] },
+      "SCR-001": { type: "screen" },
     });
-    expect(ofRule(g, rule)).toEqual([]);
+    expect(ofRule(g, rule).map((x) => x.id)).toEqual(["DEC-001"]);
   });
 
-  it("is not satisfied by a link to an asset or engine ref, or to a requirement card", () => {
-    const asset = graphOf({
-      "DEC-001": { type: "decision", status: "decided", links: [["uses", "A-1"]] },
-    });
-    setKind(asset, "A-1", "asset");
-    expect(ofRule(asset, rule)).toHaveLength(1);
-    const card = graphOf({
-      "DEC-001": { type: "decision", status: "decided", links: [["uses", "REQ-001"]] },
-      "REQ-001": { type: "requirement" },
-    });
-    expect(ofRule(card, rule).map((x) => x.id)).toEqual(["DEC-001"]);
-  });
-
-  it("is not satisfied by a requirement linking to the card (only outgoing counts)", () => {
-    const g = graphOf({ "DEC-001": { type: "decision", status: "decided" } });
-    g.nodes["R-X-1"] = { kind: "ref", id: "R-X-1", idKind: "requirement", title: "r", foundIn: [] };
-    g.edges.push({ from: "R-X-1", to: "DEC-001", rel: "uses" });
-    expect(ofRule(g, rule)).toHaveLength(1);
-  });
-
-  it("is satisfied when one of several links is a requirement", () => {
+  it("is reached over several hops, and ends on a needs loop", () => {
     const g = graphOf({
-      "DEC-001": {
-        type: "decision",
-        status: "decided",
-        links: [
-          ["conflicts", "R-X-1"],
-          ["becomes", "R-X-2"],
-        ],
-      },
+      "UI-001": { type: "ui", links: [["uses", "MEC-001"]] },
+      "MEC-001": { type: "mechanic", links: [["needs", "DEC-001"]] },
+      "DEC-001": { type: "decision", status: "decided", links: [["needs", "DEC-002"]] },
+      "DEC-002": { type: "decision", status: "decided", links: [["needs", "DEC-001"]] },
+      "DEC-003": { type: "decision", status: "decided", links: [["needs", "DEC-003"]] },
     });
-    expect(ofRule(g, rule)).toEqual([]);
+    expect(ofRule(g, rule).map((x) => x.id)).toEqual(["DEC-003"]);
+  });
+});
+
+describe("gaps: answered questions", () => {
+  const conflicts = (g: Graph) => ofRule(g, "conflict-unparked");
+
+  it("skips a conflict written on an answered question, by status or by an answers link", () => {
+    const byStatus = graphOf({
+      "Q-001": { type: "question", status: "answered", links: [["conflicts", "DEC-001"]] },
+      "DEC-001": { type: "decision", status: "decided" },
+    });
+    expect(conflicts(byStatus)).toEqual([]);
+    const byLink = graphOf({
+      "Q-001": { type: "question", links: [["conflicts", "DEC-001"]] },
+      "DEC-001": { type: "decision", status: "decided" },
+      "DEC-002": { type: "decision", links: [["answers", "Q-001"]] },
+    });
+    expect(conflicts(byLink)).toEqual([]);
+  });
+
+  it("skips a conflict pointing at an answered question, and with a document ID", () => {
+    const into = graphOf({
+      "OPT-001": { type: "option", links: [["conflicts", "Q-001"]] },
+      "Q-001": { type: "question", status: "answered" },
+    });
+    expect(conflicts(into)).toEqual([]);
+    const doc = graphOf({
+      "Q-001": { type: "question", status: "answered", links: [["conflicts", "R-X-1"]] },
+    });
+    expect(conflicts(doc)).toEqual([]);
+  });
+
+  it("keeps a conflict on an open question", () => {
+    const g = graphOf({
+      "Q-001": { type: "question", links: [["conflicts", "DEC-001"]] },
+      "DEC-001": { type: "decision", status: "decided" },
+    });
+    expect(conflicts(g)).toHaveLength(1);
   });
 });
 

@@ -3,12 +3,18 @@
  * so this file and everything it reaches use erasable TypeScript only and never import `next`
  * or a .tsx file.
  */
+import { driftText, loadDrift } from "../lib/drift.ts";
 import { gapsText } from "../lib/gaps.ts";
 import { findText, showText } from "../lib/show.ts";
 
 const [command, ...rest] = process.argv.slice(2);
 
 switch (command) {
+  case "drift": {
+    const { drift, graph } = loadDrift();
+    console.log(driftText(drift, graph));
+    break;
+  }
   case "gaps":
     console.log(gapsText());
     break;
@@ -29,6 +35,6 @@ switch (command) {
     } else console.log(findText(rest.join(" ")));
     break;
   default:
-    console.error("usage: pnpm graph gaps | show <ID> | find <words>");
+    console.error("usage: pnpm graph drift | gaps | show <ID> | find <words>");
     process.exitCode = command ? 1 : 0;
 }

@@ -27,7 +27,10 @@ pnpm --dir apps/game-workbench dev     # http://localhost:4797
 pnpm graph gaps            # gaps in the card graph, by rule, then a line "N gaps" (same list as /gaps)
 pnpm graph show <ID>       # a card or document ID: its text, links both ways with verbs and notes, sources
 pnpm graph find <words>    # the hits the top-bar box shows (same list as GET /api/find)
+pnpm graph drift           # per merged plan step, the cards changed in git since it merged
 ```
+
+`drift` reads every `### Step` in `apps/*/plans/*.md`. A step's cards are the IDs on its `Builds:` line (DEC-355), or, with no such line, every card ID its text cites. It watches those cards and everything they reach by `needs` or `uses`, finds the step's merge commit (the oldest non-`docs` commit on the first-parent history whose subject names the plan and step, such as `C1 step 6`; for a `plan.md`, the app scope and `step N`), and lists each watched card changed since, plus changed cards that `refines`, `affects` or `conflicts` with one. Steps with cards and no matching commit are listed at the end.
 
 Gaps are warnings; `pnpm check` does not fail on them.
 
@@ -46,6 +49,7 @@ The generic parts (ID schemes, markdown with chips, card parsing, graph, layout,
 | `src/web/lib/progress.ts` | Area progress for the map |
 | `src/web/lib/engine.ts` | Reads the `railroad` blocks (DEC-276) into loops, the loop stack, the trigger nodes and a compiled program for the walkthrough |
 | `src/web/lib/gaps.ts`, `src/web/cli/graph.ts` | The gaps report (engine in `packages/workbench/src/gaps.ts`) and the `pnpm graph` entry point |
+| `src/web/lib/drift.ts` | `pnpm graph drift`: plan steps, their merge commits and the cards changed since (IDEA-062) |
 
 A card file that does not parse is left out and listed in a banner on every page; the card lint in `pnpm check` fails on it.
 
