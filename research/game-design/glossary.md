@@ -1,6 +1,6 @@
 # Glossary
 
-Status: **draft for Bob's review**, 2026-10-20.
+Status: **draft for Bob's review**, 2026-10-20. Names follow DEC-509 to DEC-529 (swept 2026-10-29, DEC-530).
 
 One meaning per word, used the same way in every card and document. **Bob** means Bob said it; **proposed** is Claude's draft waiting for his call; **open** names the question card that settles it.
 
@@ -19,6 +19,7 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 |---|---|---|---|---|
 | Wild | Any board space with no building | A location | proposed | DEC-017 |
 | Location | A building on the board, entered through its menu: Reinforce, sub-locations, NPCs | A quest marker | Bob | IDEA-006, MEC-019 |
+| Reinforce | A building's own action; what it gives is different at each building type | Cleanse, a separate action | Bob | DEC-526, DEC-157 |
 | Sub-location | A place inside a location (tavern, merchant, chapel) | A feature | Bob | IDEA-006 |
 | NPC | A person at a location the heroes can talk to | A companion, who joins the party | Bob | IDEA-006 |
 | Quest marker | Where a quest is this turn: a building (it gains an extra option) or a space in the wild, never a whole kingdom | A quest, which is what plays there | Bob | IDEA-007, IDEA-015, DEC-021 |
@@ -28,33 +29,35 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
 | Event | Something that happens to the heroes present on a space. Drawn at random when a hero stops in the wild, or placed by a quest | A tower event | Bob | IDEA-014, DEC-017 |
-| Event type | The kind of event: **encounter**, **hazard**, **disaster** (dragon), **windfall** (a find) and **quiet** (nothing) | | Bob | IDEA-014, DEC-022 |
-| Encounter | An event type: the party meets someone. Foes lead to a battle; people lead to talk or trade | Any event | Bob, proposed detail | IDEA-014 |
+| Event type | The kind of event: **foes**, **strangers** (people), **hazard**, **disaster** (dragon), **windfall** (a find) and **quiet** (nothing) | | Bob | IDEA-014, DEC-022, DEC-520 |
+| Encounter | A group's visit to a place, opening its menu | An event, which is drawn in the wild | Bob | DEC-520, MEC-036 |
 | Hazard | An event type: something that costs the party unless they hold its counter. Plague (healer), lost (scout), storm | A disaster, which is bigger | Bob | DEC-022, MEC-006 |
 | Counter | An item, ally or ability that cancels a specific event type (healer vs plague, scout vs lost) | | proposed | MEC-006 |
 | Nugget | One piece of information a story writes (100–500 per story). NPCs hand them out at random, each once; some are false or off-story | A rumour is one way to deliver one | Bob | IDEA-016 |
 | Quest | A story's own scene, the part needed to win. It has a location at the start of every turn and can move. On a building it adds an option to that building's menu; in the wild a quest marker shows it | An event, which is random | Bob | MEC-011, IDEA-013, IDEA-015, Q-027 |
-| Tower event | Base RtDT's happenings the tower fires after a skull drop (foes spawn, foes strike) | An event | proposed name | DEC-004 |
+| Tower event | Base RtDT's happenings the tower fires after a skull drop (foes spawn, foes strike) | An event | Bob | DEC-521 |
 
-## Fights
+## Battles
 
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
-| Fight | The round loop the tower runs, as in 1981 | | Bob | IDEA-011, MEC-024 |
-| Foe | The foes in one battle, shown as a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013 |
+| Battle | The round loop the tower runs, as in both originals | Fight, which is only the round choice | Bob | DEC-512, MEC-038 |
+| Foe | An enemy type with a name, a group noun and a level; a battle is one foe with a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013, DEC-514 |
 | Round | One exchange: the foe shrinks, or a random present hero loses hit points | | Bob | DEC-014, DEC-015 |
-| Run | The whole group leaves a battle after any round, free; the foe stays and grows | Going around an event | Bob | DEC-016 |
-| Reward | What beating the whole foe pays: loot cards and gold | | Bob | IDEA-002, IDEA-011 |
+| Retreat | The whole group leaves a battle after a round, with a move left; the foe gets a last attack and stays | Going around an event | Bob | DEC-513, DEC-313 |
+| Reward | What a won battle pays: loot cards and gold | | Bob | DEC-516, DEC-120 |
+| Adversary | The story's big bad; its quests are adversary quests | A foe | Bob | DEC-515 |
 
 ## The party
 
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
-| Hero | One player's character | | | |
+| Hero | One player's named character; its class sets its virtues and fight number | A class | Bob | DEC-528 |
 | Party | All the heroes in the game | The present heroes | | |
 | Group | 1–4 heroes on one space travelling together with one move; heroes split off or join at any time | The party | Bob | DEC-031 |
 | Day | One round: every group moves and acts once, then a skull is dropped into the tower | | Bob | DEC-033, DEC-064 |
 | Present heroes | The heroes on the space where something happens; only they take part | The party | Bob | DEC-010, DEC-019 |
 | Hit points | A hero's health, counted by the app; 0 gives a corruption | Warriors, which are gone | Bob | IDEA-009 |
+| Gold | The money a story counts; a story may rename it on screen | | Bob | DEC-511 |
 | Purse | The party's one gold track, counted by the app and shown on the Story board | | Bob | DEC-007, UI-001 |
 | Corruption | A card a hero takes at 0 hit points or from some events; a 3rd loses | | Bob | DEC-012, AST-B17 |
