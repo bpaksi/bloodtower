@@ -41,10 +41,10 @@ One meaning per word, used the same way in every card and document. **Bob** mean
 | Term | Means | Not the same as | Status | Cards |
 |---|---|---|---|---|
 | Fight | The round loop the tower runs, as in 1981 | | Bob | IDEA-011, MEC-024 |
-| Horde | The foes in one battle, shown as a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013 |
-| Round | One exchange: the horde shrinks, or a random present hero loses hit points | | Bob | DEC-014, DEC-015 |
-| Run | The whole group leaves a battle after any round, free; the horde stays and grows | Going around an event | Bob | DEC-016 |
-| Reward | What beating the whole horde pays: loot cards and gold | | Bob | IDEA-002, IDEA-011 |
+| Foe | The foes in one battle, shown as a count ("12 brigands") | A foe card, which gives the type and level | Bob | DEC-013 |
+| Round | One exchange: the foe shrinks, or a random present hero loses hit points | | Bob | DEC-014, DEC-015 |
+| Run | The whole group leaves a battle after any round, free; the foe stays and grows | Going around an event | Bob | DEC-016 |
+| Reward | What beating the whole foe pays: loot cards and gold | | Bob | IDEA-002, IDEA-011 |
 
 ## The party
 
