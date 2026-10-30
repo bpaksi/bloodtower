@@ -186,6 +186,37 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | 8 | Roll 1 + 3 = 4. The Grass Sea, 1 move. Enter the marker and pick *The Last Stand*, 1 move. *Hold the line*: a level 3 battle. No foe is named, so it is a random level 3 foe: Frost Trolls (DEC-647). Count 4 × 3 + 3 = 15. Round 1: Lightning and Fireball, in no order any card set (**gap 15**). With DEC-655 the flat cut goes first: 15 − 6 = 9, halved to 4 (rounded down, P10). Fighter 4 + Scout 2 = 6 against 6: 50%, rolled 82, lost; a Claw with Crushing blow hits the Scout for 4. Round 2: Magic Missile −2, count 2; strength 7, 54%, rolled 26, won. The foe falls. 6 gold. | DEC-647, DEC-655, DEC-553 |
 | 8 | Chapter 3's quests are done, so the Tower unlocks (DEC-645). As written, MEC-033 .11 would now end the finale chapter, and the game, as won before the Tower (**gap 16**). With DEC-656 the finale is won only in the Tower. | DEC-656 |
 
+### Day 8: the Tower, first visit (MEC-076)
+
+Battles from here on are run by a small seeded simulator using OPT-010's numbers (P4). The boss deck's phases are only approximated.
+
+| Node | What happens | Cards |
+|---|---|---|
+| MEC-035 .3 | The move map had no way into the Tower, because MEC-076 was called from nowhere. Drawing fix, no ruling: Enter the Tower (.14) shows on a Tower-adjacent space once it is unlocked. 1 move to enter, 1 left. | DEC-363, DEC-645 |
+| .4 | Rooms dealt (DEC-566). Basement: guard, shrine. Main: shrine, shrine. Tower level: trap, shrine. A stair guard closes each of the first two levels, and the adversary waits at the top. Guards are foe level +1 per Tower level, from a base of 2 (P11). | DEC-566 |
+| spells | Is the Tower a dungeon for once-per-dungeon spells? **Gap 17.** With DEC-657 it is, once per visit, so the party saves Lightning and Fireball for the adversary. | DEC-657 |
+| basement | A level 3 guard (Lemures), count 15, won in 4 rounds without a hit. The shrine heals 2: Scout 7. The level 3 stair guard is won in 7 rounds: Fighter 8, Magic user 4. | MEC-038, DEC-566 |
+| main | Two shrines, +2 each. The level 4 stair guard is won in 12 rounds. The Magic user falls once (first corruption) and is back at 1. Fighter 8, Healer 5, Scout 9. | DEC-119 |
+| tower level | The next room's trap would hit the Magic user at 1, risking a second corruption. The group picks **Leave**. MEC-076 keeps the level reached and the cleared rooms, and the party stands on The Grass Sea. | DEC-360, DEC-566 |
+| close | Wild: rolled 12, **an event**: a hazard, plague. The Healer is the counter, so it is cancelled. One skull falls into Zenon. No loss. | DEC-027, MEC-072 |
+
+### Days 9 to 11: rest, then back up
+
+| Day | What happens | Cards |
+|---|---|---|
+| 9 | Roll 2 + 1 = 3: The Grass Sea to the Anza village (Zenon), 3 moves, so none left to rest. Mend +3 each. | DEC-174 |
+| 10 | Roll 2 + 3 = 5: rest 5 moves at the tavern. All full. | MEC-075 |
+| 11 | Roll 2 + 2 = 4: back to The Grass Sea (3), Enter the Tower (1). The spells come back on a new visit (DEC-657). The tower level resumes: Falling Rocks, −2 each; the shrine, +2 each. | DEC-657, DEC-606 |
+
+### Day 11: the adversary (MEC-076 .13 to .15, MEC-038)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .14 | Arrival show. The Warden, level 5 (P12), count 23. | DEC-567 |
+| round 1 | Lightning −6, then Fireball halves (DEC-655): 23, then 17, then **8**. That crosses both phase lines (two thirds is 15, one third is 8) in one round, before any roll. **Gap 18.** Strength 5, 33%: won, −3 → 5. | DEC-655, DEC-567 |
+| round 2 | Magic Missile −2 → 3. Lost: Claw −5 hits the Fighter, 7. | |
+| round 3 | Magic Missile −2 → 1. Won: **the Warden falls**. | |
+
 ## Gaps
 
 | # | Where | Gap | Q | Ruling |
@@ -207,6 +238,8 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | 14 | MEC-077 .1 | An option could not need an item (*The Lock* needs the Barrow Key). | Q-352 (part) | DEC-654 |
 | 15 | MEC-038 .8 | No order for spells cast in the same round (flat cuts and halving). | Q-364 | DEC-655 |
 | 16 | MEC-033 .11 | The finale chapter ended when its quests were done, so the game was won before the Tower. | Q-365 | DEC-656 |
+| 17 | MEC-076 | Is the Tower a dungeon for once-per-dungeon spells? | Q-366 | DEC-657 |
+| — | MEC-035 .14 | Drawing fix, no ruling: no node called the Tower loop. Enter the Tower is now on the move map, per DEC-363. | — | DEC-363 |
 | — | MEC-077 .8 to .10 | Drawing fix, no ruling: no step for which hero takes an item a scene gives. It mirrors MEC-038 .21. | — | DEC-120 |
 
 ## Findings (no ruling needed)
@@ -216,6 +249,8 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 - **Once per dungeon matters.** A spell spent in an early tomb room is gone for the guardian (DEC-379). Whether it comes back on a new visit is Q-362, parked.
 - **Howl as a last attack heals the foe.** Under DEC-650 a retreat that draws Howl regrows the foe and hurts no one. It's consistent, but it may read oddly on the board.
 - **Skulls land in kingdoms the heroes can't reach.** On day 4 a skull fell into Durnin, which stays closed until chapter 3 (DEC-134). Its buildings fill up and can't be Cleansed, which pushes toward the fallen-buildings loss (DEC-043, Q-029).
+- **Spells crush the boss.** Lightning and Fireball, saved for the adversary, took it from 23 to 8 before the first roll, and it fell in 3 rounds. OPT-010 already flagged that the Magic user's spells may be too strong. The numbers pass should cap Fireball (for example, at most 6 off) or let the boss resist halving.
+- **The Tower climb is the real finale.** The stair guards (7 and 12 rounds) cost more than the boss. Leaving to rest took 3 days, during which skulls kept falling.
 - **1.0's event list is thin.** With loot, merchants and companions cut (DEC-502), a windfall is only gold, hit points or a nugget, and a stranger only a rumour or a trick. The engine falls back without error (DEC-500), but the numbers pass should check that events still feel varied.
 - **Fortunate plus a skulled building is a strong pair.** A free Cleanse on top of a rest let the party heal fully and come out with no event risk.
 - **Spare moves have little use in chapter 1.** On day 2, group B had 2 moves left and nothing to spend them on.
@@ -234,3 +269,5 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | P8 | Tavern rest per move | +3 hit points | DEC-174 |
 | P9 | A windfall's gold | 5 | DEC-029 |
 | P10 | Fireball's halving | Rounded down | DEC-123, OPT-010 |
+| P11 | Tower guard base level | 2, so levels 3, 4 and 5 | DEC-566 |
+| P12 | The adversary's level and count | Level 5, count 23 | DEC-361 |
