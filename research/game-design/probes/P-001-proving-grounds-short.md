@@ -49,8 +49,43 @@ Quest sites (Claude's pick for DEC-636): *The Herald* at the Egan's End village,
 |---|---|---|
 | .1, .10 | Banner: group A, 2 moves. Neither the Fighter's nor the Healer's class virtues fire at turn start. | UI-019, DEC-408 |
 | .2 to .6 | Walk 1 move to Muted Forest, where the Ambush's quest marker stands. The arrive hook is empty. | DEC-035, DEC-290 |
-| .3 | The move map offers no Enter on a wild quest marker. **Gap 3** stops the walk. | MEC-035, DEC-089 |
-| next | The Ambush is a plain scene, and no step diagram exists for it (**gap 4**). | MEC-037, DEC-063 |
+| .3 | The move map offered no Enter on a wild quest marker (**gap 3**). With DEC-641 the group Enters, which is free. | MEC-035, DEC-641 |
+| MEC-036 .1 to .11 | The menu holds only *The Ambush*. The pick costs 1 move, so 0 are left. The quest loop starts. | DEC-078, MEC-037 |
+| MEC-037 .2 to .5 | Quest cue, one Scroll line, the quest track. Step .5 had no diagram for a plain scene (**gap 4**). With MEC-077 it plays its one choice. | CUE-008, MEC-077 |
+| MEC-077 .1, .2 | Options: *Fight them* (battle, a level 1 Orek band) or *Pay the toll* (cost 10 gold). The group picks Fight. | DEC-642 |
+
+### Day 1, The Ambush's battle (MEC-038)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .1, .2, .27 | Horn; foe panel: Oreks, level 1, count 4 + 1 = **5** (P4). Fighter 12 HP, Healer 9 HP (P4). | UI-026, OPT-010 |
+| .3 to .5 | Fight. Retreat isn't offered, because the group has 0 moves left (DEC-313). | DEC-313 |
+| .28 | The foe reveals card 3 of 8: **Sweep**, 1 to everyone. | DEC-323, DEC-557 |
+| .6 to .8 | The Healer casts Lightning (−6, once per battle) and the Fighter makes a normal attack. The count falls to 0. | DEC-123, DEC-379 |
+| .36 | The diagram had no check here, so the round would go on to Strike and the roll (**gap 5**). With DEC-643 the foe falls, and the Sweep never lands. | DEC-643 |
+| .17 to .19 | Won: 2 gold (2 × level 1), split 1 each. 1.0 has no card draw (DEC-547); the treasure and potion decks wait for 1.1. | DEC-547, DEC-178 |
+| .25, .26 | No one fell. The battle-ends hook is empty. | DEC-119 |
+| MEC-077 .6, .7 | The quest is done. | DEC-642 |
+| MEC-037 .8 to .12 | The Ambush counts toward chapter 1 (1 of 2). | DEC-041 |
+| MEC-036 .15 | No moves left, so group A's turn ends on Muted Forest. | DEC-078 |
+
+### Day 1, group B's turn (MEC-035)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .1 to .6 | 2 moves: Radiant Mountains, Greenbridge, then Dayside (a bazaar). The arrive hook is empty. | DEC-035 |
+| .9 | Out of moves, so the turn ends at the Dayside bazaar. | DEC-149 |
+
+Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). The table loses nothing by placing skulls on it, so the bazaar becomes a free skull dump.
+
+### Day 1, close (MEC-034 .7 to .34)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .7, .8 | Group A is in the wild: event chance 30% (P3), roll 42, **no event**. Group B is at a building with no skulls, so it gets no roll. | DEC-017, DEC-080 |
+| .11 to .15 | Drop a skull. The tower lets **1 skull** fall, into Arisilon. | DEC-064 |
+| .17 to .22 | The table puts it on the Dayside bazaar (see the finding above). | DEC-092, DEC-093 |
+| .23 | The adversary moves. **Gap 6:** no card says where it starts or how far it moves. | DEC-052, DEC-053 |
 
 ## Gaps
 
@@ -60,6 +95,8 @@ Quest sites (Claude's pick for DEC-636): *The Herald* at the Egan's End village,
 | 2 | MEC-035 | No split or join node in the group turn, and no ruling on a split-off group's moves. | Q-349 | DEC-640 |
 | 3 | MEC-035 .3 | A wild quest needs a dungeon token (DEC-089), which 1.0 cuts; Enter shows only on a building, caravan or story token. | Q-350 | DEC-641 |
 | 4 | MEC-037 .5 | No step diagram for the plain scene, the 1.0 quest type. | Q-351 | DEC-642, MEC-077 |
+| 5 | MEC-038 .8 | Spells can cut the foe to 0 before the roll, and no check skips the roll and the card. | Q-353 | DEC-643 |
+| 6 | MEC-034 .23 | Nothing places the adversary at setup or says how far it moves. | Q-354 | |
 
 ## Placeholders
 
@@ -67,3 +104,5 @@ Quest sites (Claude's pick for DEC-636): *The Herald* at the Egan's End village,
 |---|---|---|---|
 | P1 | The purse wheel's sides and floor | 4 sides of 10, 20, 30 and 40 gold, with a floor of 10 | DEC-114 (numbers pass) |
 | P2 | What a chapter's challenge step changes | Step 1 changes nothing, so chapter 1 is the base | Q-063, Q-258 |
+| P3 | Event chance in the wild | 30% | DEC-017, R-RE-8 |
+| P4 | Combat numbers: foe count, hit points, fight numbers, odds, spells | OPT-010's first guesses | Q-023, OPT-010 |
