@@ -37,19 +37,29 @@ A scripted 1.0 game played from the cards alone (DEC-634). Each step cites the c
 
 | Node | What happens | Cards |
 |---|---|---|
-| .2 | Group A (all four) rolls 2d3: 1 + 1 = 2, at the floor of 2. **2 moves.** | DEC-615 |
+| .38 to .42 | First walk: the group turn had no split or join (**gap 2**). Rerun with DEC-640's Regroup: Magic user and Scout split off as group B, the newest. Fighter and Healer stay group A. | DEC-640, DEC-148 |
+| .2 | Group A rolls 2d3: 1 + 1 = 2. Group B rolls 1 + 1 = 2. The floor is 2. **2 moves each.** | DEC-615 |
 | .4 | Day roll panel. | UI-021 |
+
+Quest sites (Claude's pick for DEC-636): *The Herald* at the Egan's End village, 4 spaces from the citadel. *The Ambush* on Muted Forest, a wild space 1 step away.
 
 ### Day 1, group A's turn (MEC-035)
 
-The plan is to split here: Fighter and Healer go for *The Ambush*, and Magic user and Scout go for *The Herald* (DEC-637). **Gap 2:** the group turn has no node for splitting or joining.
+| Node | What happens | Cards |
+|---|---|---|
+| .1, .10 | Banner: group A, 2 moves. Neither the Fighter's nor the Healer's class virtues fire at turn start. | UI-019, DEC-408 |
+| .2 to .6 | Walk 1 move to Muted Forest, where the Ambush's quest marker stands. The arrive hook is empty. | DEC-035, DEC-290 |
+| .3 | The move map offers no Enter on a wild quest marker. **Gap 3** stops the walk. | MEC-035, DEC-089 |
+| next | The Ambush is a plain scene, and no step diagram exists for it (**gap 4**). | MEC-037, DEC-063 |
 
 ## Gaps
 
 | # | Where | Gap | Q | Ruling |
 |---|---|---|---|---|
 | 1 | MEC-032 .14 | SCR-008 has stories declare their own settings, but DEC-050 and DEC-059 make length and difficulty the engine's. | Q-348 | DEC-639 |
-| 2 | MEC-035 | No split or join node in the group turn, and no ruling on a split-off group's moves. | Q-349 | |
+| 2 | MEC-035 | No split or join node in the group turn, and no ruling on a split-off group's moves. | Q-349 | DEC-640 |
+| 3 | MEC-035 .3 | A wild quest needs a dungeon token (DEC-089), which 1.0 cuts; Enter shows only on a building, caravan or story token. | Q-350 | |
+| 4 | MEC-037 .5 | No step diagram for the plain scene, the 1.0 quest type. | Q-351 | |
 
 ## Placeholders
 
