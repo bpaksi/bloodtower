@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Game board: 4 kingdoms × 15 spaces, 6 terrains"
-status: proposed
+status: decided
 layer: core
 links:
   - { rel: part-of, to: AREA-006 }
@@ -15,3 +15,7 @@ sources:
 Used as is. Kingdoms are the regions chapters unlock; terrain keys the event tables.
 
 **Draft graph:** [board-map.md](../board-map.md) — 60 spaces (15 per kingdom), each with printed name, terrain (Desert / Hills / Mountains / Lake / Forest / Grasslands), building or none, and best-effort adjacencies. Status is **draft, checked with Bob in session 2026-10-23, not yet signed off** (DEC-221). The card stays `proposed` until Bob signs off the graph. Photo source: `research/return-to-dark-tower/assets/board-top-down.webp`.
+
+**Trimmed 2026-10-30 (DEC-633):** Accepted for 1.0. The board graph in board-map.md stays a draft until Bob signs it off (DEC-221).
+
+Accepted by Bob in the 2026-10-30 rulings review.

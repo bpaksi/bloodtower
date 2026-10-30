@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Hero boards (4)"
-status: proposed
+status: parked
 layer: core
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -15,3 +15,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** keep as the base RtDT player mat: move value, banner action, virtue and corruption slots. The story renames the hero on that player's iPad. The board itself does not change, so the table can always read a hero's state from it.
+
+**Parked 2026-10-30 (DEC-633):** The hero boards stay in the box (DEC-376).

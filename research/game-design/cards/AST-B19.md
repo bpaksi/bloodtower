@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Treasure cards (22)"
-status: proposed
+status: parked
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** booty for winning a battle (IDEA-002), the rarest of the three, so it comes from the toughest foes. The base card is the physical item, and the app names it for the story. Base limit of 4 per hero kept. How much a battle drops is Q-013.
+
+**Parked 2026-10-30 (DEC-633):** The treasure deck waits for 1.1 (DEC-502).

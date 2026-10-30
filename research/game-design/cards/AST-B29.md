@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Tower seals (12)"
-status: proposed
+status: decided
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -15,3 +15,7 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5692 (backup folder): one seal (photo)" }
 ---
 **Proposal:** milestone markers. One seal breaks at each chapter accomplishment, more as buildings fall, and the rest in the finale. Each break is a player step the app waits for (R-SP-8) and is tracked in the app's seal ledger (E14). The glyph a seal reveals becomes a world condition. A pack writes the seal plan.
+
+**Trimmed 2026-10-30 (DEC-633):** One seal breaks at each chapter win (DEC-303). In 1.0 the break only opens the tower, with no glyph boon (DEC-601).
+
+Accepted by Bob in the 2026-10-30 rulings review.

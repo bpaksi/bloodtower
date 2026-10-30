@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Gear cards (18: 6 types × 3)"
-status: proposed
+status: parked
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** booty for winning a battle (IDEA-002). Kept in 6 face-up stacks as in base. A pack maps each of the 6 types to a kit item (Dracula: stake, crucifix, silver bolts, lantern…) and keeps the base Advantage on the card. How much a battle drops is Q-013.
+
+**Parked 2026-10-30 (DEC-633):** The gear deck waits for 1.1 (DEC-502).

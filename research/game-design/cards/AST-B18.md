@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Companion cards (10)"
-status: proposed
+status: parked
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** people the heroes meet. A pack maps each physical card to a story role, a recruit condition, an Advantage and a loss condition (E18). The recruiting hero keeps the card face up by their hero board. The iPad shows the story name and art. Still needs the list of which 10 cards are in Bob's box.
+
+**Parked 2026-10-30 (DEC-633):** Companions wait for 1.1 (DEC-502).

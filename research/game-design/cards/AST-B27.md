@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Spore tokens"
-status: proposed
+status: parked
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -16,3 +16,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5690 (backup folder): spore token (photo)" }
 ---
 **Proposal:** a creeping affliction before a full corruption. Base text: "If you would gain 3 spores, discard them and gain a corruption." Dracula: the marks before a bite. Fellowship: the Ring's pull. This gives small, frequent costs that never jump straight to a loss.
+
+**Parked 2026-10-30 (DEC-633):** Spore tokens wait for 1.1; DEC-502's 1.0 list does not name them.
