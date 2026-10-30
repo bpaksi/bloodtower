@@ -142,6 +142,28 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | B: walk | Egan's End, then Outer Kinghills (over the N–E river), then the Inner Kinghills citadel: 2 moves, so none left to pick with. | DEC-146 |
 | close | Group A is in the wild: rolled 70, no event. One skull falls into Brynthia, and the table puts it on the Three Rivers bazaar (the skull dump again). No loss. | DEC-080, DEC-092 |
 
+### Day 4 (MEC-034, MEC-035)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .2 | Group A rolls 2 + 2 = 4, group B 3 + 3 = 6. | DEC-615 |
+| A: .10 to .13 | Turn-start virtues: the Healer's Mend heals the group, +3 each (P7). Fighter 10, Healer 6. | DEC-408, DEC-380, UI-037 |
+| A: walk | Forest of Shades to the Greater Tombstones sanctuary, 1 move. Enter, then pick *The Shrine*, 1 move. | DEC-641 |
+| A: MEC-077 | *Pray at the altar* (a quest item) or *Leave an offering* (5 gold). The group prays: the Horn of the Elements. The diagram had no step for who takes an item; .8 to .10 now mirror the battle card's pick (MEC-038 .21). The Healer takes it. | DEC-642, DEC-447, DEC-455 |
+| A: close | The Shrine is done: chapter 2 has 1 of 2. No one is corrupted, so the sanctuary's cure isn't needed, and Fortunate's free second pick has nothing to buy. 2 moves left; the group waits for B. | DEC-399 |
+| B: walk | At the Inner Kinghills citadel: a virtue draw for the Scout, 10 gold (Magic user 8 → 3, Scout 7 → 2). Drawn: **Relentless**. Then Dragontooth Lake to Greater Tombstones, 2 moves; 3 left. | DEC-544, DEC-391 |
+| close | Both groups are at a skull-free sanctuary, so no events. One skull falls into Durnin, a kingdom still closed, and goes on its Southern Wastes village. No loss. | DEC-080, DEC-092 |
+
+### Day 5: the party rejoins and goes back to the Barrow
+
+| Node | What happens | Cards |
+|---|---|---|
+| .38 to .42 | Regroup: both groups are on Greater Tombstones. B joins A, and A keeps its older place. | DEC-640, DEC-148 |
+| .2 | One roll: 2 + 2 = 4. Doubles, so Relentless gives the Scout +1 Wild until the next roll. | DEC-615, DEC-391 |
+| walk | Forest of Shades, 1 move. Enter the marker and pick *The Barrow*, 1 move: 2 left. | DEC-641 |
+| MEC-026 | The tomb goes on from room 2, where group A stopped. Room 3's door is the guardian, at count 13. | DEC-151, DEC-602 |
+| spells | Can the Healer cast Lightning again? It is once per battle or dungeon, and she cast it on the last visit. **Gap 12** (Q-362) stops the walk. | DEC-379 |
+
 ## Gaps
 
 | # | Where | Gap | Q | Ruling |
@@ -158,7 +180,8 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | 10 | MEC-038 .32, .39 | The last attack (DEC-318) predates the round cards; and DEC-607's before-round-1 step was never drawn. | Q-360 | DEC-650 |
 | 11 | MEC-038 .35 | A foe standing inside a tomb room would get a board token. | Q-361 | DEC-651 |
 | — | MEC-026 .2, .8 | Drift, fixed without a ruling: the diagram still rolled each room on entry, but DEC-602 builds the whole tomb on first entry. | — | DEC-602 |
-| — | MEC-026 | Parked, did not stop the walk: is a once-per-dungeon spell once per visit or once per tomb? | Q-362 | open |
+| 12 | MEC-026 | Is a once-per-dungeon spell once per visit or once per tomb? Parked at first, then it stopped the walk on day 5. | Q-362 | |
+| — | MEC-077 .8 to .10 | Drawing fix, no ruling: no step for which hero takes an item a scene gives. It mirrors MEC-038 .21. | — | DEC-120 |
 
 ## Findings (no ruling needed)
 
@@ -166,6 +189,7 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 - **The guardian is a wall for two heroes.** At level 3 with a count of 13 it beat a full Fighter and Healer and ended back at full, and OPT-010 rates 2 heroes against level 3 at 97%. The difference is Shield wall's −1 cut and the trait card. The numbers pass should rerun OPT-010 with foe abilities and the round cards.
 - **Once per dungeon matters.** A spell spent in an early tomb room is gone for the guardian (DEC-379). Whether it comes back on a new visit is Q-362, parked.
 - **Howl as a last attack heals the foe.** Under DEC-650 a retreat that draws Howl regrows the foe and hurts no one. It's consistent, but it may read oddly on the board.
+- **Skulls land in kingdoms the heroes can't reach.** On day 4 a skull fell into Durnin, which stays closed until chapter 3 (DEC-134). Its buildings fill up and can't be Cleansed, which pushes toward the fallen-buildings loss (DEC-043, Q-029).
 - **Spare moves have little use in chapter 1.** On day 2, group B had 2 moves left and nothing to spend them on.
 
 ## Placeholders
@@ -178,3 +202,4 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | P4 | Combat numbers: foe count, hit points, fight numbers, odds, spells | OPT-010's first guesses | Q-023, OPT-010 |
 | P5 | A trait card's extra effect | +1 to its Claw | DEC-559 |
 | P6 | The chance a standing foe steps up | 50% | DEC-314 |
+| P7 | Mend's heal | +3 hit points each | Q-248, Q-276 |
