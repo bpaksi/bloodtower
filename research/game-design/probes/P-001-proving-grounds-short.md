@@ -213,9 +213,24 @@ Battles from here on are run by a small seeded simulator using OPT-010's numbers
 | Node | What happens | Cards |
 |---|---|---|
 | .14 | Arrival show. The Warden, level 5 (P12), count 23. | DEC-567 |
-| round 1 | Lightning −6, then Fireball halves (DEC-655): 23, then 17, then **8**. That crosses both phase lines (two thirds is 15, one third is 8) in one round, before any roll. **Gap 18.** Strength 5, 33%: won, −3 → 5. | DEC-655, DEC-567 |
+| round 1 | Lightning −6, then Fireball halves (DEC-655): 23, then 17, then **8**. That crosses both phase lines (two thirds is 15, one third is 8) in one round, before any roll (**gap 18**). With DEC-658 both phases fire in order: two more Rends in the deck and two shows. Strength 5, 33%: won, −3 → 5. | DEC-655, DEC-567 |
 | round 2 | Magic Missile −2 → 3. Lost: Claw −5 hits the Fighter, 7. | |
 | round 3 | Magic Missile −2 → 1. Won: **the Warden falls**. | |
+
+### Game end (MEC-032 .43 to .49)
+
+| Node | What happens | Cards |
+|---|---|---|
+| MEC-076 | The Warden falls, so the Tower is won. That wins the finale chapter and the game at once, without the rest of the day (DEC-656). | DEC-656 |
+| .43 | The game's record is written. | DEC-116 |
+| .45, .47 | Victory cue; the win scene is one Scroll line. | CUE-002, DEC-144 |
+| .48, .49 | Game stats, then the fun rating, then back to the session. | SCR-019, MEC-039 |
+
+**Result:** won on day 11 of a Short game. 4 heroes, 1 corruption (the Magic user), 6 quests and 15 battles. The skull supply never came under pressure: about 1 skull a day, with 2 Cleansed.
+
+## Summary
+
+The walk reached every 1.0 loop: setup, three chapters, the day and group turn, buildings, the plain scene, the Tomb, battles, an event, the Tower and the win. It stopped 18 times for Bob's ruling (DEC-639 to DEC-658) and made 4 drawing fixes with no ruling (MEC-034 Regroup, MEC-038's before-round-1 step, MEC-035's Enter the Tower, MEC-077's item step). Not reached: a fall, a lost game, the no-tower path, Standard length, solo play, and Continue. Those are for later probes.
 
 ## Gaps
 
@@ -239,6 +254,7 @@ Battles from here on are run by a small seeded simulator using OPT-010's numbers
 | 15 | MEC-038 .8 | No order for spells cast in the same round (flat cuts and halving). | Q-364 | DEC-655 |
 | 16 | MEC-033 .11 | The finale chapter ended when its quests were done, so the game was won before the Tower. | Q-365 | DEC-656 |
 | 17 | MEC-076 | Is the Tower a dungeon for once-per-dungeon spells? | Q-366 | DEC-657 |
+| 18 | MEC-076 .15 | One round crossed both of the boss's phase lines. | Q-367 | DEC-658 |
 | — | MEC-035 .14 | Drawing fix, no ruling: no node called the Tower loop. Enter the Tower is now on the move map, per DEC-363. | — | DEC-363 |
 | — | MEC-077 .8 to .10 | Drawing fix, no ruling: no step for which hero takes an item a scene gives. It mirrors MEC-038 .21. | — | DEC-120 |
 
