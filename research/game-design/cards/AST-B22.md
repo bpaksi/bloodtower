@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Quest item cards (20)"
-status: proposed
+status: decided
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -15,3 +15,7 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** the story's key items: chapter artifacts, kingdom keys and clue items. A quest grants one, and a player takes the card from the box. The carrier holds the physical card so the table can see who has it, and the app shows its story name. Losing the carrier's card is a story event, not a silent removal.
+
+**Trimmed 2026-10-30 (DEC-633):** Accepted for 1.0: story items are in (DEC-502).
+
+Accepted by Bob in the 2026-10-30 rulings review.

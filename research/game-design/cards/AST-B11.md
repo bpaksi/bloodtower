@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Cards (136): eight decks"
-status: proposed
+status: decided
 layer: configurable
 links:
   - { rel: part-of, to: AREA-008 }
@@ -13,3 +13,7 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 Split into one card per deck: corruption AST-B17, companion AST-B18, treasure AST-B19, gear AST-B20, potion AST-B21, quest item AST-B22. Foe cards are AST-B23 and heroic tests AST-B14. Whether the item decks stay beside story items or are replaced by them is Q-012.
+
+**Trimmed 2026-10-30 (DEC-633):** Accepted as the index of the decks. Which decks 1.0 uses is set per deck card (DEC-633).
+
+Accepted by Bob in the 2026-10-30 rulings review.

@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Potion cards (18)"
-status: proposed
+status: parked
 layer: configurable
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -15,3 +15,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** booty for winning a battle (IDEA-002), the most common of the three. Drawn face down. A player discards the card when they use it, and the app logs the effect. A pack names them (Dracula: holy water and the host cure one corruption). No limit per hero, as in base. How much a battle drops is Q-013.
+
+**Parked 2026-10-30 (DEC-633):** The potion deck waits for 1.1 (DEC-502).

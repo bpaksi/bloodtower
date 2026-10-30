@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Siege tree tokens"
-status: proposed
+status: parked
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -14,3 +14,5 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** a ward or barricade a quest places on a building or space. While it stands, skulls landing there are turned away, or the hunter token cannot pass. A story names it (garlic wreaths, a palisade).
+
+**Parked 2026-10-30 (DEC-633):** Siege tree tokens wait for 1.1; DEC-502's 1.0 list does not name them.

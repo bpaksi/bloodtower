@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Caravan tokens (3)"
-status: proposed
+status: parked
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -17,3 +17,5 @@ sources:
 **Proposal:** an escort or cargo on the board: someone or something that only moves when a hero spends movement on it. Dracula: the woman under protection. Fellowship: the supply wagon. A snatch or ambush targets the token's space.
 
 **Decided (Bob, 2026-10-21):** in the core game caravans are moving encounters (DEC-090); escort is an option a story may switch on.
+
+**Parked 2026-10-30 (DEC-633):** Caravan tokens wait for 1.1; DEC-502's 1.0 list does not name them.

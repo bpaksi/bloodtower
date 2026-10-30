@@ -1,7 +1,7 @@
 ---
 type: piece
 title: "Adversaries (8 cards and tokens, level 5)"
-status: proposed
+status: decided
 layer: optional
 by: "Claude, for Bob, 2026-10-20"
 links:
@@ -16,3 +16,7 @@ sources:
   - { file: "../return-to-dark-tower/README.md", note: "Bob's photo IMG_5683 (backup folder): rulebook components page (photo)" }
 ---
 **Proposal:** the story's antagonist. A pack picks one adversary (Empress of Shades or Gravemaw as the Count, The Gaze Eternal as the Eye). The token is on the board from chapter 1 and moves by the E7 agenda. The finale is the base multi-card adversary battle, with retreats and lasting progress. The other 7 stay in the box.
+
+**Trimmed 2026-10-30 (DEC-633):** The finale is the Tower (DEC-566), then a boss battle in the normal battle loop (DEC-356). The agenda movement here predates those rulings.
+
+Accepted by Bob in the 2026-10-30 rulings review.
