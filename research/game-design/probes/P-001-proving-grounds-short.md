@@ -180,7 +180,7 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | 10 | MEC-038 .32, .39 | The last attack (DEC-318) predates the round cards; and DEC-607's before-round-1 step was never drawn. | Q-360 | DEC-650 |
 | 11 | MEC-038 .35 | A foe standing inside a tomb room would get a board token. | Q-361 | DEC-651 |
 | — | MEC-026 .2, .8 | Drift, fixed without a ruling: the diagram still rolled each room on entry, but DEC-602 builds the whole tomb on first entry. | — | DEC-602 |
-| 12 | MEC-026 | Is a once-per-dungeon spell once per visit or once per tomb? Parked at first, then it stopped the walk on day 5. | Q-362 | |
+| 12 | MEC-026 | Is a once-per-dungeon spell once per visit or once per tomb? Parked at first, then it stopped the walk on day 5. | Q-362 | DEC-652 |
 | — | MEC-077 .8 to .10 | Drawing fix, no ruling: no step for which hero takes an item a scene gives. It mirrors MEC-038 .21. | — | DEC-120 |
 
 ## Findings (no ruling needed)
