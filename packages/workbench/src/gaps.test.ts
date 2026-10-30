@@ -397,6 +397,22 @@ describe("gaps: no deliverable edge cases", () => {
     expect(ofRule(reachedBy("screen", "needs", "parked"), rule)).toHaveLength(1);
   });
 
+  it("is not reached through a parked card in the middle of the path", () => {
+    for (const middle of [
+      { type: "mechanic", id: "MEC-001" },
+      { type: "decision", id: "DEC-002" },
+    ]) {
+      const path = (status: CardStatus) =>
+        graphOf({
+          "SCR-001": { type: "screen", links: [["needs", middle.id]] },
+          [middle.id]: { type: middle.type, status, links: [["uses", "DEC-001"]] },
+          "DEC-001": { type: "decision", status: "decided" },
+        });
+      expect(ofRule(path("open"), rule).map((x) => x.id)).not.toContain("DEC-001");
+      expect(ofRule(path("parked"), rule).map((x) => x.id)).toContain("DEC-001");
+    }
+  });
+
   it("is not reached by the ruling's own outgoing link to a deliverable", () => {
     const g = graphOf({
       "DEC-001": { type: "decision", status: "decided", links: [["needs", "SCR-001"]] },
