@@ -116,6 +116,32 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | .2 | Brynthia opens, and Arisilon stays walkable. Challenge step 2 (P2). | DEC-146, DEC-133 |
 | .3, .4 | Quest markers: *The Barrow* (a Tomb) on Forest of Shades, which is wild and Tower-adjacent. *The Shrine* at the Greater Tombstones sanctuary. | DEC-641, DEC-636 |
 
+### Day 3: group A in the Barrow (MEC-026)
+
+| Node | What happens | Cards |
+|---|---|---|
+| day start | No regroup (the groups are on different spaces). Group A rolls 3 + 2 = 5, group B 1 + 1 = 2. | DEC-640, DEC-615 |
+| A: walk | Dayside, Greenbridge, Upper Ice Fangs, Bleak Wastes, Forest of Shades: 4 moves. Enter the marker, then pick *The Barrow* for the last move. | DEC-641 |
+| .1, .2 | First visit: the layout is dealt, Short, 5 rooms (DEC-603). The non-guardian rooms are nothing, nothing, battle and trap (DEC-604), and the guardian is 3 doors deep. The story names Oreks as the Barrow's foe, at level 2 (DEC-608). | DEC-602, DEC-604 |
+| room 1 | Ahead, bold: nothing. | DEC-488 |
+| room 2 | Left, bold: a battle, Oreks level 2, count 9. Bold's free cut takes it to 8 (DEC-607). Round 1: the Healer's Lightning (−6, count 2); the Fighter's 3 plus Weapon Master's +1 Melee = 4 against 2 × 2, so 50%. Rolled 28: won. The cut is 2, and Shield wall makes it 1 (DEC-553), so 1 left. Round 2: strength 5, 56%, rolled 47: won. The foe falls. 4 gold, 2 each. | MEC-038, DEC-553, DEC-547 |
+| room 3 | Ahead, on guard: the **guardian**, Oreks level 3, count 13. On guard gives the foe its last attack before round 1 (DEC-607). No card said what that attack is (**gap 8**: DEC-649, DEC-650). The shuffle opens with Sweep, 2 to each: Fighter 10, Healer 7. The battle loop had no before-round-1 step, though DEC-607 asks for one; it is drawn now as .37 to .41. | DEC-607, DEC-650 |
+| round 1 | Claw. Lightning takes the count to 7. Strength 4 against 6: 40%, rolled 64, lost. Claw 3 hits the Fighter: 7. | DEC-649 |
+| round 2 | Falter. Strength 5: 45%, rolled 56, lost. Falter does nothing. | |
+| round 3 | Claw. Rolled 2: won. The cut is 3 − 1 = 2, so count 5. | |
+| round 4 | Trait card: a Claw plus the trait's effect (+1, P5). Rolled 56: lost. The Healer takes 4: 3. | DEC-557 |
+| round 5 | The group retreats (always allowed in a tomb). The last attack is the next card, Howl: the foe regrows 2 and stands at 7. The group leaves the tomb, still on its space, with no move spent. | DEC-497, DEC-650 |
+| .22, .35 | The foe stays in its room, cut, and the step-up draw misses. The battle loop would have put a foe token on the board (**gap 10**); with DEC-651 it gets none. | DEC-651, DEC-314 |
+
+Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bob also ruled how the foe is picked (DEC-647, Q-357).
+
+### Day 3: group B and the close
+
+| Node | What happens | Cards |
+|---|---|---|
+| B: walk | Egan's End, then Outer Kinghills (over the N–E river), then the Inner Kinghills citadel: 2 moves, so none left to pick with. | DEC-146 |
+| close | Group A is in the wild: rolled 70, no event. One skull falls into Brynthia, and the table puts it on the Three Rivers bazaar (the skull dump again). No loss. | DEC-080, DEC-092 |
+
 ## Gaps
 
 | # | Where | Gap | Q | Ruling |
@@ -127,10 +153,16 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | 5 | MEC-038 .8 | Spells can cut the foe to 0 before the roll, and no check skips the roll and the card. | Q-353 | DEC-643 |
 | 6 | MEC-034 .23 | Nothing places the adversary at setup or says how far it moves. | Q-354, Q-355 | DEC-644, DEC-645 |
 | 7 | MEC-077 (gold) | No rule for the odd coin when gold doesn't split evenly. | Q-356 | DEC-646 |
+| 8 | MEC-038 .28 | No rule for how the 8 round cards are drawn: repeats, reshuffle. | Q-358 | DEC-649 |
+| 9 | MEC-038 | Bob compared the battle with RtDT's resolve-the-cards model, and kept Bloodtower's rounds. Also: no rule for which foe a battle faces when the story names none. | Q-359, Q-357 | DEC-648, DEC-647 |
+| 10 | MEC-038 .32, .39 | The last attack (DEC-318) predates the round cards; and DEC-607's before-round-1 step was never drawn. | Q-360 | DEC-650 |
+| 11 | MEC-038 .35 | A foe standing inside a tomb room would get a board token. | Q-361 | DEC-651 |
 
 ## Findings (no ruling needed)
 
 - **The 1.0 bazaar is a free skull dump.** Its menu is only Cleanse and Leave (DEC-377, DEC-502), so the table loses nothing by putting skulls there. The numbers pass might weigh a fallen bazaar the same as any other building for the loss check (Q-029).
+- **The guardian is a wall for two heroes.** At level 3 with a count of 13 it beat a full Fighter and Healer, and OPT-010 rates 2 heroes against level 3 at 97%. The difference is Shield wall's −1 cut and the trait card. The numbers pass should rerun OPT-010 with foe abilities and the round cards.
+- **Howl as a last attack heals the foe.** Under DEC-650 a retreat that draws Howl regrows the foe and hurts no one. It's consistent, but it may read oddly on the board.
 - **Spare moves have little use in chapter 1.** On day 2, group B had 2 moves left and nothing to spend them on.
 
 ## Placeholders
@@ -141,3 +173,5 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | P2 | What a chapter's challenge step changes | Step 1 changes nothing, so chapter 1 is the base | Q-063, Q-258 |
 | P3 | Event chance in the wild | 30% | DEC-017, R-RE-8 |
 | P4 | Combat numbers: foe count, hit points, fight numbers, odds, spells | OPT-010's first guesses | Q-023, OPT-010 |
+| P5 | A trait card's extra effect | +1 to its Claw | DEC-559 |
+| P6 | The chance a standing foe steps up | 50% | DEC-314 |
