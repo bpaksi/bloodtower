@@ -162,7 +162,20 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | .2 | One roll: 2 + 2 = 4. Doubles, so Relentless gives the Scout +1 Wild until the next roll. | DEC-615, DEC-391 |
 | walk | Forest of Shades, 1 move. Enter the marker and pick *The Barrow*, 1 move: 2 left. | DEC-641 |
 | MEC-026 | The tomb goes on from room 2, where group A stopped. Room 3's door is the guardian, at count 13. | DEC-151, DEC-602 |
-| spells | Can the Healer cast Lightning again? It is once per battle or dungeon, and she cast it on the last visit. **Gap 12** (Q-362) stops the walk. | DEC-379 |
+| spells | Can the Healer cast Lightning again? It is once per battle or dungeon, and she cast it on the last visit. **Gap 12** (Q-362) stopped the walk. With DEC-652 it comes back on each visit. | DEC-379, DEC-652 |
+| guardian | Oreks level 3, count 13, cut and kept from the last visit (DEC-651). Bold, so the free cut takes it to 12. A new shuffle; it opens with Sweep. | DEC-607, DEC-649 |
+| round 1 | Lightning −6 and Magic Missile −2 take it to 4. The Fighter's 3 + 1 Melee and the Scout's 2 + 1 Wild (Relentless) make 7 against 6: 54%. Rolled 64: lost. Sweep 2 hits everyone: Fighter 8, Healer 4, Magic user 6, Scout 7. | DEC-123, DEC-391 |
+| round 2 | Claw. Magic Missile −2 takes it to 2. Strength 8: 57%, rolled 38, won. The cut is 4 − 1 = 3: **the guardian falls**. | DEC-553 |
+| rewards | 6 gold across 4 heroes: 1 each, then the 2 left over go to the heroes holding least (DEC-646): Fighter 5, Healer 4, Magic user 4, Scout 4. | DEC-547, DEC-646 |
+| MEC-037 .8 to .15 | The Barrow is done, and its reward is the *Barrow Key*. No card said who holds a story item (**gap 13**). With DEC-653 the group picks a hero (the Fighter), and the quest loop gains .13 to .15. Chapter 2 has 2 of 2. | DEC-653 |
+| close | 2 moves are left after the tomb, and the party stays on Forest of Shades. Wild: rolled 55, no event. Every quest is done: **chapter 2 won**. A seal breaks, and the freed skull goes on the Plains of Plovo bazaar (Zenon). | DEC-303, DEC-409 |
+
+### Chapter 3, The Tower: enter (MEC-033)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .2 | The whole board opens. Challenge step 3 (P2). | DEC-134, DEC-133 |
+| .3 | Quest markers: *The Lock* at the Howling Desert citadel (Durnin), *The Last Stand* on The Grass Sea (Zenon, wild, Tower-adjacent). The Tower unlocks when both are done (DEC-645). | DEC-636, DEC-645 |
 
 ## Gaps
 
@@ -181,6 +194,7 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | 11 | MEC-038 .35 | A foe standing inside a tomb room would get a board token. | Q-361 | DEC-651 |
 | — | MEC-026 .2, .8 | Drift, fixed without a ruling: the diagram still rolled each room on entry, but DEC-602 builds the whole tomb on first entry. | — | DEC-602 |
 | 12 | MEC-026 | Is a once-per-dungeon spell once per visit or once per tomb? Parked at first, then it stopped the walk on day 5. | Q-362 | DEC-652 |
+| 13 | MEC-037 .8 | No rule for who holds a story item; the quest loop had no hero pick for a reward item. | Q-363 | DEC-653 |
 | — | MEC-077 .8 to .10 | Drawing fix, no ruling: no step for which hero takes an item a scene gives. It mirrors MEC-038 .21. | — | DEC-120 |
 
 ## Findings (no ruling needed)
