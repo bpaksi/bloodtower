@@ -177,6 +177,15 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | .2 | The whole board opens. Challenge step 3 (P2). | DEC-134, DEC-133 |
 | .3 | Quest markers: *The Lock* at the Howling Desert citadel (Durnin), *The Last Stand* on The Grass Sea (Zenon, wild, Tower-adjacent). The Tower unlocks when both are done (DEC-645). | DEC-636, DEC-645 |
 
+### Days 6 to 8: chapter 3's quests
+
+| Day | What happens | Cards |
+|---|---|---|
+| 6 | One group of four rolls 3 + 3 = 6 (doubles: Relentless +1 Wild). Mend +3 each: Fighter 11, Healer 7, Magic user 9, Scout 10. Forest of Shades, Sands of Madness, Archmont, then the Southern Wastes village, which has 1 skull: 3 moves. Enter. Its rumours are bad with a skull on it (DEC-093). Rest (1 move) for 2 more rest moves: +6 each (P8), all full. Fortunate's free second pick Cleanses the skull, so the party ends at a skull-free building: no event. | DEC-174, MEC-075, DEC-377, DEC-399 |
+| 7 | Roll 2 + 2 = 4 (doubles). Azkol's Bane, then the Howling Desert citadel: 2 moves. *The Lock*: *Turn the Barrow Key* (needs the key, DEC-654; the Fighter holds it) or *Force it* (a level 2 battle). No card let an option need an item (**gap 14**). With DEC-654 the key option is open, and the key is kept. The Lock is done. 1 move to Irontops, which is wild and Tower-adjacent. Event roll 25 against 30%: **an event**. Drawn: a **windfall**. With 1.0's loot cards cut, it is 5 gold (P9), split by DEC-646. | DEC-654, MEC-072, DEC-029, DEC-500 |
+| 8 | Roll 1 + 3 = 4. The Grass Sea, 1 move. Enter the marker and pick *The Last Stand*, 1 move. *Hold the line*: a level 3 battle. No foe is named, so it is a random level 3 foe: Frost Trolls (DEC-647). Count 4 × 3 + 3 = 15. Round 1: Lightning and Fireball, in no order any card set (**gap 15**). With DEC-655 the flat cut goes first: 15 − 6 = 9, halved to 4 (rounded down, P10). Fighter 4 + Scout 2 = 6 against 6: 50%, rolled 82, lost; a Claw with Crushing blow hits the Scout for 4. Round 2: Magic Missile −2, count 2; strength 7, 54%, rolled 26, won. The foe falls. 6 gold. | DEC-647, DEC-655, DEC-553 |
+| 8 | Chapter 3's quests are done, so the Tower unlocks (DEC-645). As written, MEC-033 .11 would now end the finale chapter, and the game, as won before the Tower (**gap 16**). With DEC-656 the finale is won only in the Tower. | DEC-656 |
+
 ## Gaps
 
 | # | Where | Gap | Q | Ruling |
@@ -195,6 +204,9 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | — | MEC-026 .2, .8 | Drift, fixed without a ruling: the diagram still rolled each room on entry, but DEC-602 builds the whole tomb on first entry. | — | DEC-602 |
 | 12 | MEC-026 | Is a once-per-dungeon spell once per visit or once per tomb? Parked at first, then it stopped the walk on day 5. | Q-362 | DEC-652 |
 | 13 | MEC-037 .8 | No rule for who holds a story item; the quest loop had no hero pick for a reward item. | Q-363 | DEC-653 |
+| 14 | MEC-077 .1 | An option could not need an item (*The Lock* needs the Barrow Key). | Q-352 (part) | DEC-654 |
+| 15 | MEC-038 .8 | No order for spells cast in the same round (flat cuts and halving). | Q-364 | DEC-655 |
+| 16 | MEC-033 .11 | The finale chapter ended when its quests were done, so the game was won before the Tower. | Q-365 | DEC-656 |
 | — | MEC-077 .8 to .10 | Drawing fix, no ruling: no step for which hero takes an item a scene gives. It mirrors MEC-038 .21. | — | DEC-120 |
 
 ## Findings (no ruling needed)
@@ -204,6 +216,8 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 - **Once per dungeon matters.** A spell spent in an early tomb room is gone for the guardian (DEC-379). Whether it comes back on a new visit is Q-362, parked.
 - **Howl as a last attack heals the foe.** Under DEC-650 a retreat that draws Howl regrows the foe and hurts no one. It's consistent, but it may read oddly on the board.
 - **Skulls land in kingdoms the heroes can't reach.** On day 4 a skull fell into Durnin, which stays closed until chapter 3 (DEC-134). Its buildings fill up and can't be Cleansed, which pushes toward the fallen-buildings loss (DEC-043, Q-029).
+- **1.0's event list is thin.** With loot, merchants and companions cut (DEC-502), a windfall is only gold, hit points or a nugget, and a stranger only a rumour or a trick. The engine falls back without error (DEC-500), but the numbers pass should check that events still feel varied.
+- **Fortunate plus a skulled building is a strong pair.** A free Cleanse on top of a rest let the party heal fully and come out with no event risk.
 - **Spare moves have little use in chapter 1.** On day 2, group B had 2 moves left and nothing to spend them on.
 
 ## Placeholders
@@ -217,3 +231,6 @@ Gap 9 came from Bob comparing the battle with RtDT's: Q-359, kept by DEC-648. Bo
 | P5 | A trait card's extra effect | +1 to its Claw | DEC-559 |
 | P6 | The chance a standing foe steps up | 50% | DEC-314 |
 | P7 | Mend's heal | +3 hit points each | Q-248, Q-276 |
+| P8 | Tavern rest per move | +3 hit points | DEC-174 |
+| P9 | A windfall's gold | 5 | DEC-029 |
+| P10 | Fireball's halving | Rounded down | DEC-123, OPT-010 |
