@@ -85,7 +85,10 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | .7, .8 | Group A is in the wild: event chance 30% (P3), roll 42, **no event**. Group B is at a building with no skulls, so it gets no roll. | DEC-017, DEC-080 |
 | .11 to .15 | Drop a skull. The tower lets **1 skull** fall, into Arisilon. | DEC-064 |
 | .17 to .22 | The table puts it on the Dayside bazaar (see the finding above). | DEC-092, DEC-093 |
-| .23 | The adversary moves. **Gap 6:** no card says where it starts or how far it moves. | DEC-052, DEC-053 |
+| .23 | The adversary moves. No card said where it starts or how far it moves (**gap 6**). With DEC-644 it waits in the locked Tower in 1.0, so this node is skipped. The unlock is the story's trigger (DEC-645). | DEC-644, DEC-645 |
+| .24 to .32 | 1.0 has no lieutenants, caravans or leads (DEC-502), so nothing moves and nothing counts down. | DEC-500 |
+| .33, .34 | Day's effects panel: 1 skull on Dayside, The Ambush done. | UI-022 |
+| MEC-033 .11 | No loss (23 skulls left, no fallen building, no corruption). 1 of 2 quests done, so on to day 2. | DEC-086, DEC-043 |
 
 ## Gaps
 
@@ -96,7 +99,7 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | 3 | MEC-035 .3 | A wild quest needs a dungeon token (DEC-089), which 1.0 cuts; Enter shows only on a building, caravan or story token. | Q-350 | DEC-641 |
 | 4 | MEC-037 .5 | No step diagram for the plain scene, the 1.0 quest type. | Q-351 | DEC-642, MEC-077 |
 | 5 | MEC-038 .8 | Spells can cut the foe to 0 before the roll, and no check skips the roll and the card. | Q-353 | DEC-643 |
-| 6 | MEC-034 .23 | Nothing places the adversary at setup or says how far it moves. | Q-354 | |
+| 6 | MEC-034 .23 | Nothing places the adversary at setup or says how far it moves. | Q-354, Q-355 | DEC-644, DEC-645 |
 
 ## Placeholders
 
