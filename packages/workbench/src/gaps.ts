@@ -36,7 +36,10 @@ export type Gap = {
 const DOCUMENT_ID_KINDS = ["requirement", "asset", "engine", "question"];
 
 const SURFACE_TYPES = ["screen", "ui", "cue"];
-/** The cards that get built (DEC-355): each decided ruling is reached from one by needs or uses. */
+/**
+ * The cards that get built (DEC-355, ART- by DEC-624): each decided ruling is reached from one by
+ * needs or uses.
+ */
 const DELIVERABLE_TYPES = ["screen", "ui", "cue", "mechanic", "art"];
 const REACH_RELS = ["needs", "uses"];
 
@@ -76,19 +79,26 @@ function subtree(graph: Graph, area: string): Set<string> {
   return seen;
 }
 
-/** Every node reached from a live deliverable card by `needs` or `uses`, over any number of hops. */
+/**
+ * Every node reached from a live deliverable card by `needs` or `uses`, over any number of hops.
+ * The walk neither starts at nor goes through a parked card (DEC-625).
+ */
 function reachedFromDeliverables(graph: Graph): Set<string> {
   const out = new Map<string, string[]>();
   for (const e of graph.edges) {
     if (REACH_RELS.includes(e.rel)) out.set(e.from, [...(out.get(e.from) ?? []), e.to]);
   }
+  const parked = (id: string) => {
+    const n = graph.nodes[id];
+    return n?.kind === "card" && n.status === "parked";
+  };
   const seen = new Set<string>();
   const stack = cardsOf(graph)
     .filter((c) => DELIVERABLE_TYPES.includes(c.type) && c.status !== "parked")
     .map((c) => c.id);
   while (stack.length > 0) {
     for (const to of out.get(stack.pop() as string) ?? []) {
-      if (seen.has(to)) continue;
+      if (seen.has(to) || parked(to)) continue;
       seen.add(to);
       stack.push(to);
     }
@@ -139,7 +149,7 @@ export function findGaps(graph: Graph): Gap[] {
     const b = graph.nodes[e.to];
     if (a?.kind !== "card" || a.status === "parked") continue;
     if (b?.kind === "card" && b.status === "parked") continue;
-    // On an answered question, a conflict records what the question was about (DEC-611).
+    // On an answered question, a conflict records what the question was about (IDEA-062).
     if (isAnsweredQuestion(a, answered) || isAnsweredQuestion(b, answered)) continue;
     // A conflict with a document ID (R-, E...) is settled once the card side is decided.
     if (b?.kind === "ref" && DOCUMENT_ID_KINDS.includes(b.idKind) && a.status === "decided")

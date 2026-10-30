@@ -62,12 +62,13 @@ export type StepDrift = {
 
 const ID = /\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b/g;
 const STEP_HEADING = /^###\s+Step\s+([\w.-]+)\s*:\s*(.*)$/;
-const BUILDS_LINE = /^\s*(?:[-*]\s+)?\**Builds:?\**:?\s*(.*)$/;
+/** `Builds:`, `**Builds:**` or `**Builds**:`; the colon is required, so prose like "Builds on" is not one. */
+const BUILDS_LINE = /^\s*(?:[-*]\s+)?\**Builds(?::\**|\**:)\s*(.*)$/;
 const MERGED_LINE = /^\s*(?:[-*]\s+)?\**Merged:?\**:?\s*(?:[\w.-]+\/[\w.-]+)?#(\d+)/;
 const HEADING_PR = /\(PR (?:[\w.-]+\/[\w.-]+)?#(\d+)\)/;
 const BUILD_TYPES = /^(feat|fix|refactor|perf|chore|test|build)\b/;
 const REACH_RELS = ["needs", "uses"];
-/** The cards that get built (DEC-355). The walk stops at one the step did not build. */
+/** The cards that get built (DEC-355, ART- by DEC-624). The walk stops at one the step did not build. */
 const DELIVERABLE_TYPES = ["screen", "ui", "cue", "mechanic", "art"];
 /** A changed card linking a watched card by one of these may change what the step built. */
 const CHANGE_RELS = ["refines", "affects", "conflicts"];

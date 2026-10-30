@@ -76,6 +76,23 @@ describe("planSteps", () => {
     expect(steps[1]?.ids).toEqual(["MEC-039", "DEC-155", "R-SES-11"]);
   });
 
+  it("needs the colon on a Builds line, so prose like 'Builds on' is not one", () => {
+    const text = [
+      "### Step 7: Prose",
+      "- Builds on the step 3 runtime (MEC-039).",
+      "### Step 8: Bold",
+      "- **Builds:** SCR-021",
+      "### Step 9: Bold, colon outside",
+      "- **Builds**: UI-001",
+    ].join("\n");
+    const s = planSteps("apps/bloodtower/plans/C1-engine-core.md", text, "bloodtower");
+    expect(s.map((x) => [x.step, x.builds, x.ids])).toEqual([
+      ["7", false, ["MEC-039"]],
+      ["8", true, ["SCR-021"]],
+      ["9", true, ["UI-001"]],
+    ]);
+  });
+
   it("takes only the Builds: line's IDs when a step has one", () => {
     expect(steps[2]?.ids).toEqual(["SCR-021", "UI-001"]);
   });
