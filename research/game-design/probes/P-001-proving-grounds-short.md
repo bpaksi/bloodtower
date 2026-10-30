@@ -90,6 +90,32 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | .33, .34 | Day's effects panel: 1 skull on Dayside, The Ambush done. | UI-022 |
 | MEC-033 .11 | No loss (23 skulls left, no fallen building, no corruption). 1 of 2 quests done, so on to day 2. | DEC-086, DEC-043 |
 
+### Day 2 (MEC-034, MEC-035)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .38 to .42 | Regroup is offered, since both groups have 2 heroes. No change. | DEC-640 |
+| .2 | Group A rolls 2 + 3 = 5. Group B rolls 2 + 3 = 5. | DEC-615 |
+| A: .2 to .6 | Muted Forest to Radiant Mountains, 1 move. Enter the citadel, free. | DEC-220 |
+| A: MEC-074 | The buy pick (1 move): a virtue draw for the Fighter, 10 gold. Group A held 6 + 6, and pays 5 each. The draw is 3 of the 8 tiles 1.0 keeps: **Fortunate**. | DEC-544, DEC-581, DEC-399 |
+| A: .2 to .6 | Greenbridge, then Dayside, 2 moves; 1 left. Enter the bazaar. Cleanse (1 move) takes its skull back to the supply. Fortunate offers a second free pick, but the bazaar has nothing else in 1.0. | DEC-377, DEC-399 |
+| B: .2 to .6 | Dayside to The Tundra to Egan's End, 2 moves. Enter the village. *The Herald* is the first, highlighted pick (1 move). | UI-043, DEC-630 |
+| B: MEC-077 | *Hear him out* (5 gold and a flag) or *Send him away* (nothing). The group hears him out. With 5 gold for 2 heroes, the split has no rule for the odd coin (**gap 7**). With DEC-646 the odd coin goes to the hero holding least, by seat order on a tie: Magic user 8, Scout 7. | DEC-642, DEC-646 |
+| B: MEC-037 | The Herald is done. Chapter 1 now has 2 of 2. | DEC-041 |
+| B: .9 | 2 moves left, but the group has nothing to buy or heal, so it ends its turn. The moves are lost. | DEC-149 |
+| close | Both groups stand at skull-free buildings, so neither gets an event roll. The drop lets no skull fall; it stays inside. Nothing else moves in 1.0. | DEC-080, DEC-064, DEC-644 |
+| MEC-033 .11 | No loss, and every quest is done: **chapter 1 won**. | DEC-041 |
+
+### Chapter 1 close and chapter 2 enter (MEC-033)
+
+| Node | What happens | Cards |
+|---|---|---|
+| .17 to .21 | The tower is in play, so the app lights one seal and the table breaks it. 1.0 shows no glyph boon. | DEC-303, DEC-601 |
+| .22 to .30 | One held skull falls, into Arisilon. The table puts it on the Dayside bazaar again. | DEC-409, DEC-092 |
+| .12 to .16 | Chapter won cue, one Scroll line, the card stamped won. | CUE-005, UI-020 |
+| .2 | Brynthia opens, and Arisilon stays walkable. Challenge step 2 (P2). | DEC-146, DEC-133 |
+| .3, .4 | Quest markers: *The Barrow* (a Tomb) on Forest of Shades, which is wild and Tower-adjacent. *The Shrine* at the Greater Tombstones sanctuary. | DEC-641, DEC-636 |
+
 ## Gaps
 
 | # | Where | Gap | Q | Ruling |
@@ -100,6 +126,12 @@ Finding: in 1.0 a bazaar's menu is only Cleanse and Leave (DEC-377, DEC-502). Th
 | 4 | MEC-037 .5 | No step diagram for the plain scene, the 1.0 quest type. | Q-351 | DEC-642, MEC-077 |
 | 5 | MEC-038 .8 | Spells can cut the foe to 0 before the roll, and no check skips the roll and the card. | Q-353 | DEC-643 |
 | 6 | MEC-034 .23 | Nothing places the adversary at setup or says how far it moves. | Q-354, Q-355 | DEC-644, DEC-645 |
+| 7 | MEC-077 (gold) | No rule for the odd coin when gold doesn't split evenly. | Q-356 | DEC-646 |
+
+## Findings (no ruling needed)
+
+- **The 1.0 bazaar is a free skull dump.** Its menu is only Cleanse and Leave (DEC-377, DEC-502), so the table loses nothing by putting skulls there. The numbers pass might weigh a fallen bazaar the same as any other building for the loss check (Q-029).
+- **Spare moves have little use in chapter 1.** On day 2, group B had 2 moves left and nothing to spend them on.
 
 ## Placeholders
 
