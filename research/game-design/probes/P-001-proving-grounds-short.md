@@ -59,7 +59,7 @@ Quest sites (Claude's pick for DEC-636): *The Herald* at the Egan's End village,
 | 1 | MEC-032 .14 | SCR-008 has stories declare their own settings, but DEC-050 and DEC-059 make length and difficulty the engine's. | Q-348 | DEC-639 |
 | 2 | MEC-035 | No split or join node in the group turn, and no ruling on a split-off group's moves. | Q-349 | DEC-640 |
 | 3 | MEC-035 .3 | A wild quest needs a dungeon token (DEC-089), which 1.0 cuts; Enter shows only on a building, caravan or story token. | Q-350 | DEC-641 |
-| 4 | MEC-037 .5 | No step diagram for the plain scene, the 1.0 quest type. | Q-351 | |
+| 4 | MEC-037 .5 | No step diagram for the plain scene, the 1.0 quest type. | Q-351 | DEC-642, MEC-077 |
 
 ## Placeholders
 
