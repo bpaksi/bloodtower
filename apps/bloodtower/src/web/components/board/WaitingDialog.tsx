@@ -5,9 +5,8 @@ import { DialogFrame } from "./DialogFrame";
  * The in-game waiting dialog (visuals step 9; R3-UI-10 layer 3, R3-UI-30): a text-only play moment
  * shows as a small centred dialog over the landing painting, with the prompt band inside it.
  *
- * A long moment (or prompt) does not fit the compact frame, so the dialog grows to the default size first
- * (re-measured whenever the text or the screen size changes). The text then keeps whole lines and
- * gives up the rest: the full text stays in the DOM and the CSS cuts it at a line boundary.
+ * The frame keeps the DEC-705 border (DialogFrame measures it). A long moment starts compact and
+ * grows to the default size only when the text is actually cut. It never scrolls.
  * `children` is the prompt band.
  */
 export function WaitingDialog({ text, children }: { text: string; children: ReactNode }) {
