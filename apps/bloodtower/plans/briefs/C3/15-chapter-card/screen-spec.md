@@ -16,7 +16,7 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 - **Stamped won** (.15).
 - **Close Scroll** (.14): "The roads are quiet again.".
 - **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and `[COPY: seal break, {boon}]` (boon wording waits on Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off)
-- **Freed skulls** (.22 to .30): kingdom for each, then the building, as after a drop.
+- **Freed skulls** (.22 to .30; C4+ only, not in C3: shown when c3_end_after_chapter_1 is off): kingdom for each, then the building, as after a drop.
 - **C3 chapter 1 win** (Q-C3-01): the stamped card, then the close Scroll, then the outcome scene (feature 16); no seal, no freed skulls (Bob approved 2026-10-31).
 - Story text on this screen is `[COPY: ...]` per the rule, except the close line (Bob approved 2026-10-31).
 

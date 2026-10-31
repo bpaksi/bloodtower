@@ -68,8 +68,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-064, DEC-092, DEC-093.
 - Method: playwright
 - How: seeded drop into a kingdom with a 3-skull building; place the skull there.
-- Pass evidence: board names the kingdom; iPad lists exactly that kingdom's standing buildings; after the press the board shows the building falling and it leaves the iPad list.
-- Fails if: other kingdoms' or fallen buildings are listed, or the fall is not shown.
+- Pass evidence: board names the kingdom; iPad lists exactly that kingdom's standing buildings; the step does not auto-advance (fake clock: still on skull placement 5 s after it shows, with or without audio end); after the press the board shows the building falling and it leaves the iPad list.
+- Fails if: other kingdoms' or fallen buildings are listed, the step advances without a press, or the fall is not shown.
 
 ### EV-10 — Without the tower, the board shows the drop's kingdom
 - Requirement: DEC-305.
@@ -110,26 +110,40 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: split/rejoin and use a potion or item start from the gear and show on the Story board; the game pauses while open (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright, board 1920×1080 + iPad 768×1024, mid-turn, a hero holding a potion
 - How: gear → Split party; Done. Gear → Use a potion or item; pick the hero, then the potion; Done.
-- Pass evidence: while open, the iPad body shows "See the Story board", the pick buttons (split: one button per group choice; use-item: one button per hero, then one per item that hero holds) and Done/Back; the board shows `[data-panel="split"]` then `[data-panel="use-item"]` (hero step, then item step) with 0 `button` elements, mirroring each iPad press (DEC-278; (Gamewright pick, pending Bob Q-GEAR-1)); host `paused: true` while open and `false` after Done; the potion is used once.
-- Fails if: a panel shows on the iPad, the game runs while open, or the item is used twice.
+- Pass evidence: while open, the iPad body shows "See the Story board", the pick buttons (split: one button per group choice; use-item: one button per hero, then one per item that hero holds) and Done/Back; the board shows `[data-panel="split"]` then `[data-panel="use-item"]` (hero step, then item step) with 0 `button` elements, mirroring each iPad press (DEC-278; (Gamewright pick, pending Bob Q-GEAR-1)); host `paused: true` while open and `false` after Done; after the split, the board shows two groups (two `[data-group]` elements, each with its heroes); after the potion, that hero's HP is higher by exactly the potion's amount and the potion is gone from the hero's inventory on the host and in the Current party panel.
+- Fails if: a panel shows on the iPad, the game runs while open, the board does not show two groups after the split, HP does not rise by the potion amount, or the potion stays in the inventory or is used twice.
 
 ### EV-16 — A disabled item shows its reason
 - Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: open the gear mid-turn with no hero holding a potion or item, and with the whole party in one group.
-- Pass evidence: "Use a potion or item" is disabled with one reason line ("No hero holds a potion or item."); "Rejoin party" is disabled ("The party is together."); "Split party" is enabled; enabled items have no reason line.
+- Pass evidence: "Use a potion or item" is disabled with one reason line ("No potions or items to use.", Loremaster, locked); item 4 is one button reading exactly "Split party" (no number prefix), enabled, and there is no separate "Rejoin party" item; after a split, the same item reads "Rejoin party" (one item whose label toggles, C2 feature 04); enabled items have no reason line.
 - Fails if: a disabled item has no reason, or a working item is greyed.
+
+### EV-17 — Narrated steps do not advance before their audio ends
+- Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock, mock audio
+- How: reach the effects panel with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
+- Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
+
+### EV-18 — Restart and Continue during an auto-advancing step apply its effect once
+- Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: two runs: (1) on the effects panel, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Pass evidence: in each run the same step shows again and auto-advances once; each effect on the panel (gold, HP, days left) is applied exactly once (host state and event log show one application).
+- Fails if: the step is skipped without its effect, repeats its effect, or stalls.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-17 — Continue shows the same clock
+### EV-19 — Continue shows the same clock
 - Requirement: DEC-686.
 - Method: playwright
 - How: quit on day 3, Continue.
 - Pass evidence: the band reads the same days left; buildings show the same skulls.
 - Fails if: the count resets.
 
-### EV-18 — The gear Menu survives a restart closed
+### EV-20 — The gear Menu survives a restart closed
 - Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.

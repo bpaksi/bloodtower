@@ -12,15 +12,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: SCR-019, DEC-627.
 - Method: playwright
 - How: `c3-stats.spec.ts` after fixture `c3-stats-loss` (lost on skulls, active 42 min, 12 days, 1 quest done, 2 corruptions taken, 7 gold left).
-- Pass evidence: in this order: outcome "Lost", time played "42 min", days 12, quests done 1, corruptions taken 2, gold left 7, key moments (contents wait on Q-C3-18), then the rating.
-- Fails if: a stat is missing, out of order, or differs from the fixture.
+- Pass evidence: in this order: outcome "Lost", time played "42 min", days 12, quests done 1, corruptions taken 2, gold left 7, key moments (contents wait on Q-C3-18), active length "42 min" with best and average (values per EV-03), then the rating; the key-moments list sits outside the row order (it is not counted as a row and its place is not checked against the rows); there is no "Skulls on the board" row; the iPad buttons are, in DOM order, "Play again" then "Back".
+- Fails if: a stat is missing, out of order, or differs from the fixture; the Outcome row or the average is missing; a "Skulls on the board" row shows; or Back comes before Play again.
 
-### EV-02 — The rating never blocks Next
+### EV-02 — The rating never blocks Play again or Back
 - Requirement: SCR-019.
 - Method: playwright
-- How: press Next with no rating.
-- Pass evidence: the session screen.
-- Fails if: Next disabled.
+- How: with no rating, press Back; reach the screen again and press Play again.
+- Pass evidence: Back lands on the session screen; Play again starts Pick setup for the same story; neither needs a rating.
+- Fails if: Back or Play again is disabled, or a Next button shows.
 
 ### EV-03 — Best and average
 - Requirement: DEC-116.
@@ -39,7 +39,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Screenshots match
 - Requirement: SCR-019.
 - Method: screenshot
-- How: board and iPad; compare with ./mockup.html `#stats`.
+- How: board and iPad; compare with ./mockup.html `#s=0`.
 - Pass evidence: two images matching.
 - Fails if: a part out of order.
 
@@ -75,7 +75,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
 - How: on each state (stats, rating, drill-in) press "?", then Close.
-- Pass evidence: the sheet's `data-help-screen` is `game-stats` and its text is exactly "Here's how tonight went. Rate it if you like, then tap Next." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Pass evidence: the sheet's `data-help-screen` is `game-stats` and its text is exactly "Here's how tonight went. Rate it if you like, then tap Play again." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows another screen's text, pauses the game or changes state.
 
 ## Survival evals (one per survival invariant in plan.md)

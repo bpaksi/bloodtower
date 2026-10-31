@@ -32,14 +32,14 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - The gear Menu and any gear panel come back closed, the game not paused, the toolbar on every iPad, and item states recomputed (EV-18).
+  - The gear Menu and any gear panel come back closed, the game not paused, the toolbar on every iPad, and item states recomputed (EV-20).
   - The board after Continue shows the same days left and skulls as before the quit.
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-18 all pass (verifier table on PR).
+- [ ] EV-01 … EV-20 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist

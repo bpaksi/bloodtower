@@ -12,15 +12,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-027, UI-041.
 - Method: playwright
 - How: `c3-event.spec.ts` with a seed that draws a hazard.
-- Pass evidence: board: the painting and a Scroll; iPad: two cost buttons; after pressing the hit-point cost the board shows the cost line `−2 hit points each` and each present hero's hit points drop by 2 on the hero panel.
-- Fails if: the cost is applied with no choice.
+- Pass evidence: board: the painting and a Scroll; iPad: two cost buttons; no auto-advance (fake clock: still on the choice 5 s after it shows, with or without audio end); after pressing the hit-point cost the board shows the cost line `−2 hit points each` and each present hero's hit points drop by 2 on the hero panel.
+- Fails if: the costs are not buttons, the step advances without a press, or the cost is applied with no choice.
 
 ### EV-02 — Foes: Go around and Pay them off, no Fight
 - Requirement: DEC-023.
 - Method: playwright
 - How: seed that draws foes.
-- Pass evidence: two choices, Go around and Pay them off; no Fight button, enabled or disabled (Q-C3-02); Pay them off shows its cost from `events.pay_off` = 5 gold (Bob approved 2026-10-31) and is disabled at purse 4, enabled at purse 5.
-- Fails if: Go around missing, a Fight button shows, or Pay them off is enabled below 5 gold.
+- Pass evidence: two choice buttons, Go around and Pay them off; no auto-advance before a press; no Fight button, enabled or disabled (Q-C3-02); Pay them off shows its cost from `events.pay_off` = 5 gold (Bob approved 2026-10-31) and is disabled at purse 4, enabled at purse 5.
+- Fails if: the step advances without a press, Go around missing, a Fight button shows, or Pay them off is enabled below 5 gold.
 
 ### EV-03 — Only present heroes' iPads choose
 - Requirement: DEC-019, MEC-003.
@@ -33,7 +33,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-072 .2.
 - Method: playwright
 - How: seed for quiet.
-- Pass evidence: a Scroll, no cost and no Next; it auto-advances (see the auto-advance eval).
+- Pass evidence: a Scroll, no cost and no Next; it auto-advances (EV-13).
 - Fails if: a cost dialog shows.
 
 ### EV-05 — Screenshots match
@@ -61,8 +61,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-028, Q-C3-02.
 - Method: playwright
 - How: seed that draws a disaster.
-- Pass evidence: exactly two choices, Go around and Pay them off; no Fight, enabled or disabled.
-- Fails if: Fight shows, or either choice is missing.
+- Pass evidence: exactly two choice buttons, Go around and Pay them off; no auto-advance before a press; no Fight, enabled or disabled.
+- Fails if: Fight shows, either choice is missing, or the step advances without a press.
 
 ### EV-09 — Two iPads press different choices: first wins
 - Requirement: DEC-019.
@@ -99,16 +99,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
+### EV-14 — Narrated steps do not advance before their audio ends
+- Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock, mock audio
+- How: reach Quiet or the result step after a pick with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
+- Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
+
+### EV-15 — Restart and Continue during an auto-advancing step apply its effect once
+- Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: two runs: (1) on Quiet or the result step after a pick, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Pass evidence: in each run the same step shows again and auto-advances once; the event result (its gold, HP or item change) is applied exactly once (host state and event log show one application).
+- Fails if: the step is skipped without its effect, repeats its effect, or stalls.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-14 — Continue keeps the open event
+### EV-16 — Continue keeps the open event
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit at a hazard's choice; Continue.
 - Pass evidence: the same painting and two costs.
 - Fails if: a new event.
 
-### EV-15 — The gear Menu survives a restart closed
+### EV-17 — The gear Menu survives a restart closed
 - Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.

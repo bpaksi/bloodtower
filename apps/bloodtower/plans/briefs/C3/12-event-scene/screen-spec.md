@@ -15,13 +15,13 @@ Tell a group what met it in the wild and let the present heroes choose (MEC-072)
 - **Event shown** (.2): its painting, the words `[COPY: event words]` (per pack) on a Scroll (UI-035).
 - **Quiet**: a mood line; auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET).
 - **Windfall**: the gain on a Reveal (UI-036).
-- **Hazard**: the counter saved them, or two costs (DEC-027).
-- **Foes / disaster**: Go around, Pay them off (DEC-023, DEC-028). No Fight button in C3, not even disabled (Q-C3-02); C4 adds it.
-- **People**: Q-C3-03, answered.
+- **Hazard**: the counter saved them, or two costs (DEC-027), each a button on the iPad; a choice, no auto-advance.
+- **Foes / disaster**: Go around, Pay them off (DEC-023, DEC-028). No Fight button in C3, not even disabled (Q-C3-02); C4 adds it. Each choice is a button on the iPad; no auto-advance.
+- **People**: Q-C3-03, answered; the offers are buttons on the iPad; a choice, no auto-advance.
 
 ## Player actions
 
-- iPad (present heroes only, DEC-019): pick a cost or a choice. The result step (Reveal, saved) has no Next; it auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET).
+- iPad (present heroes only, DEC-019): pick a cost or a choice (buttons; these steps wait for a press and never auto-advance). The result step (Reveal, saved) has no Next; it auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET).
 
 ## Mechanics behind it
 

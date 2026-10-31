@@ -21,7 +21,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average.
+SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Play again or Back; DEC-116's active length against the best and the average.
 
 ## Cutover
 
