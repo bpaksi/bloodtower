@@ -35,6 +35,12 @@ UI-026 on the board: the foe painting (one placeholder per level (Gamewright pic
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Foe traits: two trait chips per foe from DEC-068's set (Beast, Magic, Humanoid, Melee, Undead, Stealth), read from the pack's foe entry (DEC-579, UI-026).
+- The Warden's traits: Melee, Humanoid; ability Crushing blow (DEC-688).
+- Strength left: the foe's wounds, 4 per level +1 per present hero after the first (DEC-563, DEC-703).
+
 ## OPEN questions
 
 - OPEN Q-C4-14: The battle horn and hits (CUE-010) with no tower connected: Options: (a) play them through the Story board's speakers; (b) silent; the board shows the hit only. Gamewright pick: (a) (Gamewright pick, pending Bob).

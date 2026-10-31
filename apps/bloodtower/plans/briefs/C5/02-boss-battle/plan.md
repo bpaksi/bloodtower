@@ -48,6 +48,13 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 - [ ] DEC-549: closed before coding (`decided`).
 - [ ] DEC-327: closed before coding (`decided`).
 
+## Values (filled from cards)
+
+- The Warden: level 5; wounds 4 × 5 + 1 per hero after the first (20 for one hero) (DEC-703, DEC-563).
+- Phases at two thirds and one third wounds left; each adds a Rend (DEC-567).
+- Crushing blow: a lost round hits +1 in phase 1, +2 in phase 2, +3 in phase 3 (DEC-688).
+- Strength per phase (the round-odds level): 5 in every phase; only the deck and Crushing blow change (DEC-567, DEC-688).
+
 ## OPEN questions
 
 - OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, pending Bob).

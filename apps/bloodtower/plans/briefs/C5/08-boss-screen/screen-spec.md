@@ -35,6 +35,10 @@ The foe panel for The Warden with a phase change: new painting (Gamewright pick,
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- The Warden: level 5, Melee + Humanoid, Crushing blow +1/+2/+3 by phase; phases at 2/3 and 1/3 wounds left (DEC-688, DEC-567, DEC-703).
+
 ## OPEN questions
 
 - OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, pending Bob).

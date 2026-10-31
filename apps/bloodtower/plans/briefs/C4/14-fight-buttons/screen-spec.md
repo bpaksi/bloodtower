@@ -37,6 +37,11 @@ C3 hid Fight (Q-C3-02). C4 shows it on foes and disaster events and on battle op
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Plain scene: the story's narration plus 2–3 options, each from battle, cost, gold, item or flag (DEC-642, MEC-077).
+- Narration and option labels are story text: `[COPY: fight-buttons, plain-scene = "..."]`, `[COPY: fight-buttons, plain-option-2 = "..."]`, `[COPY: fight-buttons, plain-option-3 = "..."]`.
+
 ## OPEN questions
 
 - OPEN Q-C4-02: Where does Fight show once `fight_enabled` is on? Options: (a) on every foes and disaster event and on every plain-scene option that holds a battle, always enabled; (b) on foes events only; disasters stay Go around / Pay them off until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).

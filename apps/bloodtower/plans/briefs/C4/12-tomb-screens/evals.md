@@ -29,11 +29,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: battle in view half; map stays.
 - Fails if: map gone.
 
-### EV-04 — 7 rooms on the map (Gamewright pick, pending Bob)
-- Requirement: Q-C4-08.
+### EV-04 — The map is the dealt 4×4 grid
+- Requirement: DEC-603, DEC-583.
 - Method: playwright
-- How: reveal all.
-- Pass evidence: 7 rooms.
+- How: Standard seed fixture with 7 rooms; reveal all.
+- Pass evidence: 7 rooms plus the Exit on a 4×4 grid, the entrance on an edge cell; map half beside view half.
 - Fails if: other.
 
 ### EV-05 — Screenshots match
@@ -128,5 +128,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- OPEN Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C4-15 **[Bob taste call]**: Foe paintings in C4, before the A1 art run (C5): Options: (a) one placeholder painting per foe level, swapped by A1 in C5; (b) A1 draft art now, as the art lands. Gamewright pick: (a) (Gamewright pick, pending Bob).

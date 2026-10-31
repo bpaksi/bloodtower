@@ -36,6 +36,12 @@ C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll,
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Kingdoms: Arisilon (N), Brynthia (E), Durnin (S), Zenon (W), shown as "Arisilon (N)" (DEC-226, DEC-579).
+- Buildings per kingdom: Citadel, Sanctuary, Village, Bazaar, Tavern (DEC-579).
+- Seal names 1–3: story text, `[COPY: seal-break-live, seal1 = "..."]`, `seal2`, `seal3` (no card names them; DEC-303).
+
 ## OPEN questions
 
 - OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "The roads are clear and a seal breaks. Ahead stands the Ruined Keep."]`, `[COPY: seal break ch2, Loremaster = "The Keep gives up its dead, and a second seal cracks. The Tower waits."]`, `[COPY: seal break ch3, Loremaster = "The last stand holds, and the third seal breaks. Only the Warden remains."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob).

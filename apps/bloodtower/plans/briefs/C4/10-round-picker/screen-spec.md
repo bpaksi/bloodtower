@@ -37,7 +37,13 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Changing a pick: a hero may change their pick until the last present hero has picked; then the round runs (Gamewright pick, pending Bob) (Q-C4-18). DEC-129 is silent.
+
 ## OPEN questions
+
+- OPEN Q-C4-18 **[Bob taste call]**: Can a hero change a pick before the round runs (DEC-129)? Options: (a) yes, until the last present hero has picked; (b) no, a pick locks on tap. Gamewright pick: (a).
 
 - OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob).

@@ -36,6 +36,13 @@ UI-040: the gold and drawn card on a Reveal; the iPads pick who takes the card. 
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Reward: 2 gold × foe level (DEC-547).
+- Retreat cost: a move in a group's turn, none at day close; the foe's last attack; back a space (DEC-313, DEC-670).
+- Fall cost: 2 × foe level split and capped; corruption, back at 1 HP (DEC-177, DEC-179, DEC-119).
+- Step-up shown only when the 1-in-3 roll hits: `[data-foe-level]` `N → N+1` (DEC-555).
+
 ## OPEN questions
 
 - None.

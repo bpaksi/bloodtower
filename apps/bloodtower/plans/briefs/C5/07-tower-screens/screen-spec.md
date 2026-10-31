@@ -36,6 +36,11 @@ The Tower reuses the Tomb's two halves: the level's room map and the room view (
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Level map: one row of 3 rooms per level, the stair guard last, levels basement / main / tower (DEC-566).
+- Shrine +2 HP each, once; trap −2 HP each (DEC-703).
+
 ## OPEN questions
 
 - OPEN Q-C5-01 **[Bob taste call]**: The Tower has no screen cards. What does the board show in the Tower (MEC-076)? Options: (a) reuse the Tomb's two halves (DEC-583): the level's room map left, the room view right; Gamewright files UI cards for it in a design session; (b) the room map only, full width. Gamewright pick: (a) (Gamewright pick, pending Bob).

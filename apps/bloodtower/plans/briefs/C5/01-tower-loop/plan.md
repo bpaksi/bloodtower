@@ -55,6 +55,12 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 - [ ] DEC-658: closed before coding (`decided`).
 - [ ] DEC-702: closed before coding (`decided`).
 
+## Values (filled from cards)
+
+- Tower: 3 levels (basement, main, tower) of 3 rooms; rooms 1–2 guard, trap or shrine, 1 in 3 each; room 3 the stair guard; The Warden in the tower level's last room (DEC-566).
+- Guard level: the adversary's level − 2 (level 3 under The Warden) (DEC-702).
+- Trap −2 HP each hero; shrine +2 HP each hero, once (DEC-566, DEC-703).
+
 ## OPEN questions
 
 - OPEN Q-C5-11: The Tower's guards and traps (DEC-566, DEC-702): fixed or dealt? Options: (a) dealt fresh on the first visit from the seed, then kept; (b) fixed by the story pack. Gamewright pick: (a) (Gamewright pick, pending Bob).

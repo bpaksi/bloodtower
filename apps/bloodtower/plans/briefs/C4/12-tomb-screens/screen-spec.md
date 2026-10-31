@@ -37,7 +37,13 @@ DEC-583's two halves side by side: the map (found rooms, current glowing, doorwa
 
 Back to the loop that called it (see ./plan.md).
 
+## Values (filled from cards)
+
+- Map: a 4×4 grid, entrance on an edge cell, 6–7 rooms at Standard plus the Exit; unrevealed rooms hidden (DEC-603, DEC-583).
+- Listen: the room-kind sound plays on the board; the iPad shows no hint text beyond `[COPY: tomb-screens, listen = "You listen down the corridor."]` (DEC-618).
+- Trap result: Pit (one hero of the group's pick, −4 HP) or Falling Rocks (each −2 HP) (DEC-606); `[COPY: tomb-screens, pit = "..."]`, `[COPY: tomb-screens, rocks = "..."]`.
+
 ## OPEN questions
 
-- OPEN Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C4-15 **[Bob taste call]**: Foe paintings in C4, before the A1 art run (C5): Options: (a) one placeholder painting per foe level, swapped by A1 in C5; (b) A1 draft art now, as the art lands. Gamewright pick: (a) (Gamewright pick, pending Bob).

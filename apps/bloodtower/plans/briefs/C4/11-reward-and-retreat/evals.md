@@ -25,7 +25,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — Retreat shows the step-up
 - Requirement: UI-039.
 - Method: playwright
-- How: retreat.
+- How: retreat with a seed that steps the foe up (DEC-555).
 - Pass evidence: the foe painting and the line `The foe grows stronger.`; `[data-foe-level]` reads `2 → 3`.
 - Fails if: missing.
 
@@ -39,8 +39,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — The fall screen shows its cost
 - Requirement: UI-039, DEC-177.
 - Method: playwright
-- How: all present heroes fall with purse 15.
-- Pass evidence: the board shows each fallen hero's name and `It cost 7 gold.`; purse shows 8.
+- How: two present heroes holding 25 and 2 gold fall to a level-3 foe.
+- Pass evidence: the board shows each fallen hero's name and `It cost 5 gold.` (6 owed, 1 short, DEC-177); the heroes show 22 and 0.
 - Fails if: no cost line, or a wrong amount.
 
 ### EV-06 — The first Give to press wins

@@ -12,22 +12,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-120.
 - Method: unit
 - How: win vs level 3.
-- Pass evidence: gold = `battle.reward_gold[3]` = 10; exactly one card, drawn from the level-3 reward deck (`battle.reward_deck[3]`).
+- Pass evidence: gold = 2 × 3 = 6 (`battle.reward_gold_per_level` = 2, DEC-547, DEC-703); exactly one card, drawn from the level-3 reward deck (`battle.reward_deck[3]`).
 - Fails if: any other gold, no card, or a card from another level's deck.
 
-### EV-02 — Foe grows, capped at +2 (Gamewright pick, pending Bob)
-- Requirement: DEC-016, Q-C4-13.
-- Method: unit
-- How: retreat 3 times from a level-2 foe.
-- Pass evidence: levels 3, 4, 4.
-- Fails if: 5 or no growth.
+### EV-02 — A foe steps up 1 in 3, +1 level, stopping at lethal
+- Requirement: DEC-555, DEC-703.
+- Method: sim
+- How: 10,000 seeded retreats and falls from a level-2 foe at status 1; then a fixture foe at lethal.
+- Pass evidence: step rate 0.333 ± 0.01; each step is exactly +1 level; the lethal foe never steps.
+- Fails if: rate outside, a step of 0 or 2+, or a lethal foe steps.
 
-### EV-03 — A fall costs half the purse (Gamewright pick, pending Bob)
-- Requirement: DEC-177, Q-C4-12.
+### EV-03 — A fall costs 2 × the foe's level, split and capped
+- Requirement: DEC-177, DEC-179, DEC-703.
 - Method: unit
-- How: purse 15, all present heroes fall; the loss is floor(purse × `battle.fall_gold_loss`), with `battle.fall_gold_loss` = 0.5.
-- Pass evidence: purse 8 (15 − floor(7.5) = 8).
-- Fails if: purse 7 or any other value.
+- How: a level-3 foe; two present heroes fall holding 25 and 2 gold (`battle.fall_gold_per_level` = 2, so the loss is 6, split 3 and 3).
+- Pass evidence: heroes hold 22 and 0; the 1-gold shortfall is not passed on; each fallen hero takes a corruption and returns at 1 HP (DEC-119).
+- Fails if: 21 and 0, any other split, or no corruption.
 
 ### EV-04 — A retreat that fells everyone is a fall
 - Requirement: DEC-671.
@@ -58,5 +58,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- OPEN Q-C4-12: A fallen group's gold loss (DEC-177): how much? Options: (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; (b) a flat 10 gold, never below 0. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C4-13: A foe that stays and grows (DEC-016): is the growth capped? Options: (a) capped at +2 levels over its start; (b) no cap. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- ANSWERED by DEC-177/179 (0005) Q-C4-12: A fallen group's gold loss (DEC-177): how much? Options: (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; (b) a flat 10 gold, never below 0. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- ANSWERED by DEC-555 (0005) Q-C4-13: A foe that stays and grows (DEC-016): is the growth capped? Options: (a) capped at +2 levels over its start; (b) no cap. Gamewright pick: (a) (Gamewright pick, pending Bob).
