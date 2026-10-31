@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildGraph, type CardSchema, parseCard, splitFrontMatter } from "./cards.ts";
-import { RELS } from "./graph-types.ts";
+import { RELS, releaseOf } from "./graph-types.ts";
 
 const schema: CardSchema = {
   types: ["thing", "place"],
@@ -137,8 +137,22 @@ describe("parseCard", () => {
       /unknown link rel/,
     ],
     ["malformed yaml", front("type: [thing\ntitle: x"), /./],
+    [
+      "release 1.0 written out",
+      front('type: thing\ntitle: x\nrelease: "1.0"'),
+      /unknown release "1.0"/,
+    ],
+    ["release 2", front('type: thing\ntitle: x\nrelease: "2"'), /unknown release "2"/],
+    ["unquoted release", front("type: thing\ntitle: x\nrelease: 1.1"), /quote it: release: "1.1"/],
+    ["empty release", front("type: thing\ntitle: x\nrelease:"), /unknown release null/],
   ])("rejects %s", (_name, text, message) => {
     expect(() => parseCard("T-1.md", text, schema)).toThrow(message);
+  });
+
+  it('accepts release: "1.1", and reads no field as 1.0 (DEC-696)', () => {
+    const later = parseCard("T-1.md", front('type: thing\ntitle: x\nrelease: "1.1"'), schema);
+    expect(releaseOf(later)).toBe("1.1");
+    expect(releaseOf(parseCard("T-1.md", front("type: thing\ntitle: x"), schema))).toBe("1.0");
   });
 
   it("prefixes every failure with the file name", () => {

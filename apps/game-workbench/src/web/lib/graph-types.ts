@@ -42,9 +42,10 @@ export type CardType = (typeof CARD_TYPES)[number];
 /**
  * Where a card sits between "every story" and "one story":
  * core = the same in every story; configurable = an engine mechanism each story fills with data;
- * optional = an engine module a story may switch on; story = lives in one story pack.
+ * optional = an engine module a story may switch on; story = lives in one story pack;
+ * process = how we design, not what gets built (DEC-695).
  */
-export const LAYERS = ["core", "configurable", "optional", "story"] as const;
+export const LAYERS = ["core", "configurable", "optional", "story", "process"] as const;
 export type Layer = (typeof LAYERS)[number];
 
 export const LAYER_LABEL: Record<Layer, string> = {
@@ -52,6 +53,7 @@ export const LAYER_LABEL: Record<Layer, string> = {
   configurable: "Configurable · story fills it",
   optional: "Optional module",
   story: "Story-specific",
+  process: "Process · how we design",
 };
 
 export type Card = BaseCard<CardType, Layer>;

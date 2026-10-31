@@ -322,6 +322,17 @@ Bob ruled this tooling comes before the scripted playthroughs, so the design cha
 - Done when: the commands work against the current cards; vitest covers each with a small fixture (`lib/drift.test.ts`, `packages/workbench/src/gaps.test.ts`); `pnpm check` passes. Gaps went from 720 to 372: "Decided card with no requirement" (627) became "Decided ruling no deliverable reaches" (286), and "Conflict not yet settled" went from 8 to 1.
 - Not required: a `replaces` verb (DEC-352, later), adding `Builds:` lines to existing plans.
 
+### Step 14: Process layer and the 1.1 release (DEC-695, DEC-696, DEC-697, 2026-10-31)
+Bob ruled in the v1 readiness review that the gaps report's "Decided ruling no deliverable reaches" list should be the C2 to-do list. DEC-696 replaces DEC-505: cards may now carry a release field.
+- Card lint: `layer: process` joins core, configurable, optional and story (DEC-695). An optional `release: "1.1"` is allowed on any card; no field means 1.0, and any other value fails (DEC-696).
+- Gaps, no deliverable: skips decided rulings on the `process` (DEC-695) and `story` (DEC-697) layers. A 1.0 ruling must be reached from a 1.0 deliverable; one that only 1.1 deliverables reach stays a 1.0 gap, with the detail "reached only from 1.1 deliverables".
+- Gaps by release: every gap on a `release: "1.1"` card (rulings and mechanics among them) is grouped after all the 1.0 groups. `pnpm graph gaps` prints them under "Waits for 1.1" and ends `N gaps (X for 1.0, Y for 1.1)`; `/gaps` gives them their own heading.
+- Touches: `packages/workbench/src/{graph-types.ts,cards.ts,cards.test.ts,gaps.ts,gaps.test.ts}`, `packages/workbench/styles/graph.css`, `apps/game-workbench/src/web/{lib/graph-types.ts,lib/gaps.ts,lib/gaps.test.ts,lib/cards.test.ts,lib/progress.test.ts,app/gaps/page.tsx}`, `apps/game-workbench/plans/plan.md`, `research/game-design/cards/README.md`
+- Deps change: no
+- Done when: the new rules have tests; the lint on the real cards folder stays green; `pnpm graph gaps` runs; `pnpm check` passes.
+- Not required: retagging the cards. The design session does that on its own branch once this merges.
+- Builds: none
+
 ## Later
 
 When `apps/game` is close to starting (see New direction):

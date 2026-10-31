@@ -32,7 +32,7 @@ describe("area progress", () => {
   it("counts decided, proposed and open, leaves parked out, and splits by layer", () => {
     const [row] = areaProgress(graph);
     expect(row).toMatchObject({ decided: 1, proposed: 2, open: 1, percent: 25 });
-    expect(row?.byLayer).toEqual({ core: 2, configurable: 0, optional: 0, story: 1 });
+    expect(row?.byLayer).toEqual({ core: 2, configurable: 0, optional: 0, story: 1, process: 0 });
     expect(row?.openQuestions.map((q) => q.id)).toEqual(["Q-001"]);
     expect(row?.conflicts.map((c) => `${c.from.id}>${c.to}`)).toEqual(["OPT-001>OPT-002"]);
   });

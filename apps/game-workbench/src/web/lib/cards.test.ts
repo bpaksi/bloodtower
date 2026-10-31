@@ -51,6 +51,22 @@ describe("card files", () => {
     expect(() => parseCard("UI-001.md", card("type: art\ntitle: x"))).toThrow(/ART-NNN/);
   });
 
+  it("accepts the five layers, process among them (DEC-695), and the 1.1 release (DEC-696)", () => {
+    for (const layer of ["core", "configurable", "optional", "story", "process"]) {
+      expect(parseCard("DEC-001.md", card(`type: decision\ntitle: x\nlayer: ${layer}`)).layer).toBe(
+        layer,
+      );
+    }
+    expect(() => parseCard("DEC-001.md", card("type: decision\ntitle: x\nlayer: meta"))).toThrow(
+      /unknown layer "meta"/,
+    );
+    const later = parseCard("MEC-001.md", card('type: mechanic\ntitle: x\nrelease: "1.1"'));
+    expect(later.data.release).toBe("1.1");
+    expect(() => parseCard("MEC-001.md", card('type: mechanic\ntitle: x\nrelease: "1.0"'))).toThrow(
+      /unknown release/,
+    );
+  });
+
   // The lint: every card in research/game-design/cards parses, and every link resolves to a card,
   // a document ID, or carries a note saying what it is.
   // Loads the full cards folder; CI can exceed vitest's 5s default under load (see find.test.ts).

@@ -11,7 +11,8 @@ One small idea per file. The game-workbench shows them as a graph: one card in t
 type: idea            # area | idea | question | option | decision | mechanic | piece | screen | ui | cue | sound | glyph | seal | light | light-effect | light-sequence | drum | art | sketch | example
 title: Use the 3 RtDT quest tokens   # one line, the headline
 status: open          # open | answered | proposed | decided | parked
-layer: core           # core | configurable | optional | story (see Layers)
+layer: core           # core | configurable | optional | story | process (see Layers)
+release: "1.1"        # only on a card that waits for 1.1; no field means 1.0 (see Releases)
 by: Bob, 2026-10-19   # who said it and when (optional)
 links:
   - { rel: part-of, to: AREA-005 }
@@ -111,7 +112,7 @@ Every field is optional. One that was not recorded is left out, never written as
 
 **Replaced rulings (DEC-352).** When a newer ruling replaces a whole card, park the old card and start its body with "Replaced by DEC-x (Bob, date)." When it replaces only part, the old card stays `decided`, its title is cut to what still holds, and its body says what DEC-x replaced. Either way the newer card links `refines` to the old one, with a note saying what it replaces.
 
-**Deliverables (DEC-355).** `SCR-`, `UI-`, `CUE-`, `MEC-` and `ART-` cards are the deliverables: one card per thing that gets built. Every decided ruling is reached from at least one of them by `needs` or `uses`, and each plan step lists the deliverable cards it builds as `Builds: <IDs>`.
+**Deliverables (DEC-355).** `SCR-`, `UI-`, `CUE-`, `MEC-` and `ART-` cards are the deliverables: one card per thing that gets built. Every decided ruling is reached from at least one of them by `needs` or `uses`, and each plan step lists the deliverable cards it builds as `Builds: <IDs>`. Two layers are left out of that rule: a `process` ruling, which no deliverable builds (DEC-695), and a `story` ruling, which its pack builds and the pack lint and the playthrough probes check (DEC-697). A C2 step that writes a pack lists its story's area in `Builds:` instead of each story card.
 
 ## Layers
 
@@ -123,8 +124,15 @@ Every card except areas says where it sits between "every story" and "one story"
 | `configurable` | An engine mechanism each story fills with data | Event tables, chapter list |
 | `optional` | An engine module a story may switch on | Dungeon crawl, hunter token |
 | `story` | Lives in one story pack; kept here only as an example | Dracula's 5 nights |
+| `process` | How we design, not what gets built (DEC-695) | Keeping the cards, probe method, release scope |
 
 Every card links `part-of` at least one area, so the Map page can count it. Link a card to the most specific area that fits, so no area gets more than about 10 direct links (the graph's busy limit).
+
+## Releases
+
+A card that waits for 1.1 (DEC-502) carries `release: "1.1"`, quoted so YAML reads it as text (DEC-696). A card with no field is 1.0; a parked card needs none. The card lint fails any other value, `"1.0"` included.
+
+The gaps report (`pnpm graph gaps`, `/gaps`) lists the 1.0 gaps first and the 1.1 gaps after them under "Waits for 1.1", so the 1.0 list is what the C2 plan must close. A 1.0 ruling must be reached from a 1.0 deliverable; one that only 1.1 deliverables reach stays on the 1.0 list, marked "reached only from 1.1 deliverables". A C2 step's `Builds:` lists only 1.0 deliverables.
 
 ## How Claude adds a thread
 
