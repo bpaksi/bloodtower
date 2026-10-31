@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (C2-04, C3 rule).
 - Method: playwright
 - How: on each state (reward Reveal, Give to {hero}, retreat result, fall result) press "?", then Close.
-- Pass evidence: the sheet's `data-help-screen` is `reward-and-retreat` and its text is exactly "After a win, tap Give to {hero} on an iPad to choose who takes the card. After a retreat or a fall, this shows what it cost." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
+- Pass evidence: the sheet's `data-help-screen` is `reward-and-retreat` and its text is exactly "Tap Give to {hero} on an iPad to choose who takes the card." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-10 — Beats auto-advance

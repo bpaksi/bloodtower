@@ -21,7 +21,7 @@ UI-026 on the board: the foe painting (one placeholder per level (Gamewright pic
 
 - Board: shows the state and every line `[COPY: battle-board, board = "Foe: {foe}. Strength left: {N}. / Round {N}: {hero} struck for {N}. / Round {N}: the foe hit {hero}. / {hero} is Cursed: 4 of {N} count. / The foe falls. Victory."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, battle-board = "This board shows the fight as it happens. Make your picks on your iPad."]`, `data-help-screen` = `battle-board`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, battle-board = "Pick Fight or Retreat on your iPad, then Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard."]`, `data-help-screen` = `battle-board`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

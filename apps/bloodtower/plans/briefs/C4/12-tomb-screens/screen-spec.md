@@ -21,7 +21,7 @@ DEC-583's two halves side by side: the map (found rooms, current glowing, doorwa
 
 - Board: shows the state and every line `[COPY: tomb-screens, board = "The Tomb. Rooms found: {N}. / Undead Advantage: {N}. / A cold corridor. Three doors wait. / You hear something behind the door. / A trap. / Something wakes in the dark. / The Exit is open."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, tomb-screens = "Tap Left, Ahead or Right on your iPad to move to the next room, Bold or On guard to say how you go in. Use Listen to hear what waits ahead, or Leave to get out."]`, `data-help-screen` = `tomb-screens`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, tomb-screens = "Pick Left, Ahead or Right on your iPad, then Listen, Bold or On guard on that card. Tap Leave to get out."]`, `data-help-screen` = `tomb-screens`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

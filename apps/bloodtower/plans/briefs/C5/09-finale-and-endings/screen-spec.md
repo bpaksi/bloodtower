@@ -15,13 +15,13 @@ Auto-advance: the win line has no Next; each advances when its narration or cue 
 
 ## Purpose
 
-The board shows `[COPY: last choice, Warden falls = "The Warden falls. The last seal lies at your feet, cracked and warm. Break it, or swear to guard it."]` and the two options; each iPad votes (Gamewright pick, pending Bob) (Q-C5-03); the board ticks who has voted. Then the win line for the flag, voiced (Gamewright pick, pending Bob) (Q-C5-07), then straight to the outcome (Gamewright pick, pending Bob) (Q-C5-09).
+The board shows `[COPY: last choice, Warden falls = "The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place."]` and the two options; each iPad votes (Gamewright pick, pending Bob) (Q-C5-03); the board ticks who has voted. Then the win line for the flag, voiced (Gamewright pick, pending Bob) (Q-C5-07), then straight to the outcome (Gamewright pick, pending Bob) (Q-C5-09).
 
 ## States and player actions
 
 - Board: shows the state and every line `[COPY: finale-and-endings, board = "Choose together. / Waiting on: {hero}. / {hero} has voted. / The choice is made."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, finale-and-endings = "Each hero votes on their iPad. A tie means one more vote, then the app draws."]`, `data-help-screen` = `finale-and-endings`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, finale-and-endings = "Each hero taps Break the seal or Swear the oath. A tie means one more vote, then the app draws."]`, `data-help-screen` = `finale-and-endings`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
@@ -42,4 +42,6 @@ Back to the loop that called it (see ./plan.md).
 - OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
 
-> Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: a Vellmoor story for Return to Dark Tower. Thank you for playing." (Credits line not folded.)
+> Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." (Credits line not folded.)
+
+> Note (DEC-663, DEC-667): the last-choice and finale-win lines were changed from Loremaster's copy to fit the decided story: the choice is to shatter the shard under the keep or swear The Warden's oath and guard it, and the oath ending echoes his fall. Loremaster to review. Button labels Break the seal / Swear the oath and the flags `seal_broken` / `oath_sworn` are unchanged.

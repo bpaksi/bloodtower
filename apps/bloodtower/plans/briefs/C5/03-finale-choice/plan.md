@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-DEC-664: the Tower loop's end hook plays a plain scene with DEC-663's two options; each sets a flag. Each present hero votes; a tie re-votes once, then the seeded draw breaks it (Gamewright pick, pending Bob) (Q-C5-03). Copy: `[COPY: last choice, Warden falls = "The Warden falls. The last seal lies at your feet, cracked and warm. Break it, or swear to guard it."]`, `[COPY: option, break the seal = "Break the seal"]`, `[COPY: option, swear the oath = "Swear the oath"]`.
+DEC-664: the Tower loop's end hook plays a plain scene with DEC-663's two options; each sets a flag. Each present hero votes; a tie re-votes once, then the seeded draw breaks it (Gamewright pick, pending Bob) (Q-C5-03). Copy: `[COPY: last choice, Warden falls = "The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place."]`, `[COPY: option, break the seal = "Break the seal"]`, `[COPY: option, swear the oath = "Swear the oath"]`.
 
 ## Cutover
 
@@ -56,3 +56,5 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).
+
+> Note (DEC-663, DEC-667): the last-choice and finale-win lines were changed from Loremaster's copy to fit the decided story: the choice is to shatter the shard under the keep or swear The Warden's oath and guard it, and the oath ending echoes his fall. Loremaster to review. Button labels Break the seal / Swear the oath and the flags `seal_broken` / `oath_sworn` are unchanged.

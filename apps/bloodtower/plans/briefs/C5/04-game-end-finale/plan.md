@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-`c4_end_after_chapter_3: false`. Chapter 3 won opens the finale; a won Tower ends the game in the win scene with the line for the flag: `[COPY: finale win, seal shattered = "The seal shatters. The Count's hold breaks, and dawn comes to Vellmoor."]` or `[COPY: finale win, seal holds = "You swear the oath. The seal holds, and so do you. Vellmoor will need watchers."]`. The switch and its C3 sibling are removed from the schema once green.
+`c4_end_after_chapter_3: false`. Chapter 3 won opens the finale; a won Tower ends the game in the win scene with the line for the flag: `[COPY: finale win, seal shattered = "The shard shatters. The Tower's call goes quiet, and the roads are yours."]` or `[COPY: finale win, seal holds = "You swear his oath and take up his watch. Guard the shard well. The Tower called to him once, and it will call to you."]`. The switch and its C3 sibling are removed from the schema once green.
 
 ## Cutover
 
@@ -55,3 +55,5 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).
+
+> Note (DEC-663, DEC-667): the last-choice and finale-win lines were changed from Loremaster's copy to fit the decided story: the choice is to shatter the shard under the keep or swear The Warden's oath and guard it, and the oath ending echoes his fall. Loremaster to review. Button labels Break the seal / Swear the oath and the flags `seal_broken` / `oath_sworn` are unchanged.

@@ -21,7 +21,7 @@ The foe panel for The Warden with a phase change: new painting (Gamewright pick,
 
 - Board: shows the state and every line `[COPY: boss-screen, board = "The Warden. Strength left: {N}. / The Warden changes. / The Warden falls."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, boss-screen = "This is the last battle. Make your picks on your iPad."]`, `data-help-screen` = `boss-screen`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, boss-screen = "The Warden's last battle. Pick Fight or Retreat on your iPad, then your action."]`, `data-help-screen` = `boss-screen`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

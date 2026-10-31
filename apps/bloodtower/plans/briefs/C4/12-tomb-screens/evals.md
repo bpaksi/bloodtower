@@ -82,7 +82,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (C2-04, C3 rule).
 - Method: playwright
 - How: on each state (room with three cards, after Listen, trap, battle room, Exit) press "?", then Close.
-- Pass evidence: the sheet's `data-help-screen` is `tomb-screens` and its text is exactly "Tap Left, Ahead or Right on your iPad to move to the next room, Bold or On guard to say how you go in. Use Listen to hear what waits ahead, or Leave to get out." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
+- Pass evidence: the sheet's `data-help-screen` is `tomb-screens` and its text is exactly "Pick Left, Ahead or Right on your iPad, then Listen, Bold or On guard on that card. Tap Leave to get out." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-12 — Beats auto-advance

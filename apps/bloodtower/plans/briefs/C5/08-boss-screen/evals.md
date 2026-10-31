@@ -54,7 +54,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (C2-04, C3 rule).
 - Method: playwright
 - How: on each state (Warden arrives, round picking, phase 2 show, phase 3 show, Warden falls) press "?", then Close.
-- Pass evidence: the sheet's `data-help-screen` is `boss-screen` and its text is exactly "This is the last battle. Make your picks on your iPad." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
+- Pass evidence: the sheet's `data-help-screen` is `boss-screen` and its text is exactly "The Warden's last battle. Pick Fight or Retreat on your iPad, then your action." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-08 — Beats auto-advance

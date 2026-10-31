@@ -21,7 +21,7 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 
 - Board: shows the state and every line `[COPY: round-picker, board = "Fight or Retreat? / Waiting on: {hero}. / {hero} has picked. / Everyone has picked. The round begins."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, round-picker = "Choose Fight or Retreat together, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard on their iPad. The round starts when everyone has picked."]`, `data-help-screen` = `round-picker`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, round-picker = "Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked."]`, `data-help-screen` = `round-picker`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

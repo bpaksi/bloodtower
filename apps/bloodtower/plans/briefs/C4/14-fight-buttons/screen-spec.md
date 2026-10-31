@@ -21,7 +21,7 @@ C3 hid Fight (Q-C3-02). C4 shows it on foes and disaster events and on battle op
 
 - Board: shows the state and every line `[COPY: fight-buttons, board = "Foes block the road. / Fight, or find another way."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, fight-buttons = "Tap Fight on your iPad to start a battle, or pick another option to avoid it."]`, `data-help-screen` = `fight-buttons`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, fight-buttons = "Tap Fight to start a battle, or Go around or Pay them off to avoid it. At The Ambush, Pay the toll instead. In a scene, Fight sits beside the scene's other choice."]`, `data-help-screen` = `fight-buttons`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
@@ -40,3 +40,5 @@ Back to the loop that called it (see ./plan.md).
 ## OPEN questions
 
 - OPEN Q-C4-02: Where does Fight show once `fight_enabled` is on? Options: (a) on every foes and disaster event and on every plain-scene option that holds a battle, always enabled; (b) on foes events only; disasters stay Go around / Pay them off until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).
+
+> Note (help, fight-buttons): Gamewright wrote this line in Loremaster's style to cover Pay the toll (The Ambush) and plain-scene options. Loremaster to review.

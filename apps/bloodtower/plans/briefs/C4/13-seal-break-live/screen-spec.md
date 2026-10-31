@@ -21,7 +21,7 @@ C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll,
 
 - Board: shows the state and every line `[COPY: seal-break-live, board = "The chapter is won. A seal breaks. / {hero} gained {item}. / Skulls are freed. Choose a kingdom."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, seal-break-live = "Confirm on the iPad which seal broke on the tower, then place the freed skulls: kingdom first, then building. Tap Seal broken when the tower matches."]`, `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, seal-break-live = "Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull."]`, `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
@@ -38,6 +38,6 @@ Back to the loop that called it (see ./plan.md).
 
 ## OPEN questions
 
-- OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "One seal breaks. The old wards on the tower loosen, and the road to the Count grows shorter."]`, `[COPY: seal break ch2, Loremaster = "A second seal cracks. Somewhere above, something old opens its eyes."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "The roads are clear and a seal breaks. Ahead stands the Ruined Keep."]`, `[COPY: seal break ch2, Loremaster = "The Keep gives up its dead, and a second seal cracks. The Tower waits."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
 
-> Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders, and Vellmoor hears it."
+> Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders."
