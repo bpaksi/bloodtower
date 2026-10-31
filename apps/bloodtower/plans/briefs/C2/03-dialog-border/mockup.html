@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C2 03 dialog border: tower connect at 1920×1080</title>
+<style>
+  /* Static mockup. No app imports. Open at 1920×1080 (or 3840×2160: everything scales with the viewport). */
+  :root {
+    --void: #0b0806; --umber: #3b2a1e; --parchment: #e9d9b4; --parchment-dark: #c9b182;
+    --iron: #2a1d14; --candle: #f5c451; --blood: #8e1b1b;
+  }
+  html, body { margin: 0; height: 100%; background: var(--void); overflow: hidden; }
+  .board {
+    position: relative; width: 100vw; height: 100vh;
+    /* stands in for the landing painting */
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(245,196,81,.18), transparent 55%),
+      radial-gradient(ellipse at 50% 110%, rgba(142,27,27,.35), transparent 60%),
+      linear-gradient(160deg, #241812, #0b0806 70%);
+    font-family: "Cormorant Garamond", Georgia, serif;
+  }
+  .painting-label {
+    position: absolute; left: 1.2vw; bottom: 1vh; color: rgba(233,217,180,.35);
+    font: 1.1vh/1 Georgia, serif; letter-spacing: .1em; text-transform: uppercase;
+  }
+  /* The border rule: the dialog lives inside a box inset 5% on every side. */
+  .safe {
+    position: absolute; inset: 5vh 5vw; display: grid; place-items: center;
+    outline: 1px dashed rgba(245,196,81,.35);
+  }
+  .safe-label {
+    position: absolute; top: -2.2vh; left: 0; color: rgba(245,196,81,.6);
+    font: 1.2vh/1 Georgia, serif;
+  }
+  .dialog {
+    max-height: 100%; max-width: 100%; box-sizing: border-box;
+    width: min(52vw, 100%); padding: 4.5vh 4vw;
+    background: var(--parchment); color: var(--iron);
+    border: 1.1vh solid var(--umber); box-shadow: 0 0 0 .3vh var(--parchment-dark) inset, 0 2vh 6vh rgba(0,0,0,.6);
+    text-align: center;
+  }
+  h1 { margin: 0 0 2vh; font: 600 5.4vh/1.05 "Cormorant SC", Georgia, serif; letter-spacing: .06em; }
+  p { margin: 0 0 3.5vh; font-size: 3vh; line-height: 1.35; }
+  .kicker { font: 2.2vh/1 "IM Fell English SC", Georgia, serif; letter-spacing: .14em; color: #6b5238; margin-bottom: 1.2vh; }
+  /* The still shrinks so the whole dialog stays inside the safe box (DEC-705: cut down or set smaller). */
+  .still {
+    margin: 0 auto 2.5vh; width: 60%; aspect-ratio: 16 / 9; max-height: 34vh;
+    display: grid; place-items: center; background: linear-gradient(160deg, #3b2a1e, #1a1310);
+    color: rgba(233,217,180,.6); font-size: 1.8vh; font-style: italic;
+  }
+  .join { display: flex; gap: 1.6vw; align-items: center; justify-content: center; font-size: 2.6vh; }
+  .join b { font: 700 4.2vh/1 Georgia, serif; letter-spacing: .3em; }
+  .qr { width: 9vh; height: 9vh; display: grid; place-items: center; background: #fff; color: #000; font-size: 1.6vh; }
+</style>
+</head>
+<body>
+  <main class="board" data-mockup="c2-03-dialog-border">
+    <div class="safe">
+      <span class="safe-label">5% border on every side (DEC-705)</span>
+      <section class="dialog" aria-label="Tower connect">
+        <div class="kicker">Optional</div>
+        <h1>Connect the tower</h1>
+        <div class="still">tower still (today: /landing/hero.webp), set smaller to fit</div>
+        <p>No tower yet. An iPad can connect it, or play on without it.</p>
+        <div class="join"><span>Join</span><b>K7Q2</b><span class="qr">QR</span></div>
+      </section>
+    </div>
+    <span class="painting-label">landing painting (SCR-002)</span>
+  </main>
+</body>
+</html>

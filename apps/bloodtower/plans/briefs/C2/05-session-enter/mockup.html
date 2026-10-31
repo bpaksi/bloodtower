@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C2 05 session Enter: base board setup, tower choice, volume test</title>
+<style>
+  /* Static mockup. No app imports. Each <section> is one state, one viewport tall.
+     Board panels are drawn at 1920×1080; iPad panels at 1024×768. Use the section id named in eval.md. */
+  :root {
+    --void: #0b0806; --umber: #3b2a1e; --parchment: #e9d9b4; --parchment-dark: #c9b182; --iron: #2a1d14;
+    --candle: #f5c451; --blood: #8e1b1b;
+    --bg: #14120f; --fg: #f4efe6; --muted: #c4b8a8; --card: #1f1c18; --line: #3a342c; --accent: #e8d5a3; --ink: #1a1612;
+  }
+  html, body { margin: 0; background: #000; }
+  .state { display: grid; grid-template-columns: 1920px 1024px; gap: 40px; padding: 40px; align-items: start; }
+  .state > h2 { grid-column: 1 / -1; margin: 0; color: #ccc; font: 20px Georgia, serif; }
+  .board {
+    position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: "Cormorant Garamond", Georgia, serif;
+    background: radial-gradient(ellipse at 50% 30%, rgba(245,196,81,.18), transparent 55%),
+      radial-gradient(ellipse at 50% 110%, rgba(142,27,27,.35), transparent 60%), linear-gradient(160deg, #241812, #0b0806 70%);
+  }
+  .safe { position: absolute; inset: 54px 96px; display: grid; place-items: center; }
+  .dialog { box-sizing: border-box; width: 1040px; max-height: 100%; padding: 56px 72px; background: var(--parchment); color: var(--iron);
+    border: 12px solid var(--umber); box-shadow: 0 0 0 3px var(--parchment-dark) inset, 0 20px 60px rgba(0,0,0,.6); text-align: center; }
+  .dialog.wide { width: 1400px; }
+  .kicker { font: 24px/1 Georgia, serif; letter-spacing: .14em; text-transform: uppercase; color: #6b5238; margin-bottom: 14px; }
+  .dialog h1 { margin: 0 0 22px; font: 600 58px/1.05 "Cormorant SC", Georgia, serif; letter-spacing: .05em; }
+  .dialog p, .dialog li { font-size: 32px; line-height: 1.35; }
+  .dialog ol { text-align: left; margin: 0 auto 26px; max-width: 860px; padding-left: 1.2em; }
+  .choices { display: flex; gap: 40px; justify-content: center; margin: 10px 0 18px; font: 600 34px/1 "Cormorant SC", Georgia, serif; }
+  .choices span { border-bottom: 3px solid var(--umber); padding-bottom: 6px; }
+  .wait { font-size: 24px; font-style: italic; color: #5a4632; }
+  .join { position: absolute; right: 120px; bottom: 76px; display: flex; gap: 18px; align-items: center; color: var(--parchment); font-size: 26px; }
+  .join b { font: 700 40px/1 Georgia, serif; letter-spacing: .3em; }
+  .qr { width: 96px; height: 96px; background: #fff; color: #000; display: grid; place-items: center; font-size: 16px; }
+  .ipad { width: 1024px; height: 768px; background: var(--bg); color: var(--fg); font-family: Georgia, serif; display: flex; flex-direction: column; overflow: hidden; }
+  .ipad .body { flex: 1; padding: 48px 72px; display: flex; flex-direction: column; gap: 18px; justify-content: center; }
+  .ipad h1 { margin: 0; font-size: 34px; }
+  .ipad p { margin: 0; color: var(--muted); font-size: 22px; }
+  .btn { min-height: 85px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--fg); font: 24px Georgia, serif; display: grid; place-items: center; }
+  .btn.primary { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+  .row { display: flex; gap: 18px; } .row .btn { flex: 1; }
+  .bar { height: 100px; display: flex; gap: 48px; justify-content: center; align-items: center; border-top: 1px solid var(--line); color: var(--accent); font-size: 20px; }
+  .muted { opacity: .45; }
+  .list { text-align: left; margin: 0 auto 24px; max-width: 1100px; border-top: 2px solid var(--parchment-dark); }
+  .list div { display: flex; justify-content: space-between; font-size: 30px; padding: 12px 6px; border-bottom: 2px solid var(--parchment-dark); }
+  .tag { font: 600 24px "Cormorant SC", Georgia, serif; letter-spacing: .08em; color: var(--blood); }
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+</style>
+</head>
+<body>
+<section class="state" id="board-setup">
+  <h2>#board-setup: base board setup (SCR-022, MEC-039 .3 and .4)</h2>
+  <div class="board"><div class="safe"><div class="dialog">
+    <div class="kicker">Before the first game</div>
+    <h1>Set up the board</h1>
+    <ol>
+      <li>Set the tower on the centre of the board.</li>
+      <li>Lay out the board with the kingdom edges: Arisilon north, Brynthia east, Durnin south, Zenon west.</li>
+      <li>Sort the pieces: hero minis, foes, skulls and buildings.</li>
+    </ol>
+    <div class="wait">When the board is set, press on any iPad.</div>
+  </div></div><div class="join"><span>Join on an iPad</span><b>K7Q2</b><div class="qr">QR</div></div></div>
+  <div class="ipad"><div class="body"><h1>Set up the board</h1><p>Follow the steps on the TV.</p><div class="btn primary">Board is set up</div></div><nav class="bar"><span class="muted">Back</span><span class="muted">Replay</span><span>⚙ Menu</span></nav></div>
+</section>
+<section class="state" id="tower-choice">
+  <h2>#tower-choice: one tower question (SCR-005, DEC-275, MEC-039 .5 and .6)</h2>
+  <div class="board"><div class="safe"><div class="dialog">
+    <div class="kicker">The tower</div>
+    <h1>Connect the tower, or play without it?</h1>
+    <div class="choices"><span>Connect Tower</span><span>Play without Tower</span></div>
+    <div class="wait">Choose on an iPad.</div>
+  </div></div><div class="join"><span>Join on an iPad</span><b>K7Q2</b><div class="qr">QR</div></div></div>
+  <div class="ipad"><div class="body"><h1>The tower</h1><p>Without the tower its sounds and lights are skipped, and the skull drop is simulated.</p>
+    <div class="btn primary">Connect Tower</div><div class="btn">Play without Tower</div></div><nav class="bar"><span class="muted">Back</span><span class="muted">Replay</span><span>⚙ Menu</span></nav></div>
+</section>
+<section class="state" id="volume">
+  <h2>#volume: volume test (SCR-006, MEC-039 .23 and .24), after volume 1 played. The pick before it (.20, .21) offers 0, 1 and 2.</h2>
+  <div class="board"><div class="safe"><div class="dialog">
+    <div class="kicker">The tower</div>
+    <h1>Keep this volume?</h1>
+    <p>The tower played Dungeon Complete at volume 1.</p>
+    <div class="wait">Keep it, or try another, on an iPad.</div>
+  </div></div><div class="join"><span>Join on an iPad</span><b>K7Q2</b><div class="qr">QR</div></div></div>
+  <div class="ipad"><div class="body"><h1>Tower volume</h1><p>Played at volume 1.</p>
+    <div class="row"><div class="btn primary">Keep</div><div class="btn">Try another</div></div></div><nav class="bar"><span class="muted">Back</span><span class="muted">Replay</span><span>⚙ Menu</span></nav></div>
+</section>
+</body>
+</html>

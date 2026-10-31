@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C2 04 iPad Menu with Close</title>
+<style>
+  /* Static mockup. No app imports. Open at 1024×768 or 768×1024. */
+  :root { --bg: #14120f; --fg: #f4efe6; --muted: #c4b8a8; --card: #1f1c18; --line: #3a342c; --accent: #e8d5a3; --ink: #1a1612; --touch: 64pt; --r: .75rem; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: Georgia, "Iowan Old Style", serif; overflow: hidden; }
+  .screen { position: relative; height: 100vh; display: flex; flex-direction: column; }
+  .content { flex: 1; padding: 6vh 8vw; color: var(--muted); font-size: 1.3rem; }
+  .content h1 { color: var(--fg); margin: 0 0 1rem; font-size: 2rem; }
+  .scrim { position: absolute; inset: 0 0 calc(var(--touch) + 1.5rem) 0; background: rgba(0,0,0,.55); display: grid; place-items: center; }
+  .menu { width: min(30rem, 86vw); background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 1.25rem; display: grid; gap: 1rem; }
+  .menu h2 { margin: 0 0 .5rem; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .menu section div { color: var(--muted); }
+  button { font: inherit; font-size: 1.15rem; min-height: var(--touch); width: 100%; border-radius: var(--r); border: 2px solid var(--line); background: var(--card); color: var(--fg); }
+  button[disabled] { opacity: .45; }
+  .close { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+  .bar { height: calc(var(--touch) + 1.5rem); display: flex; gap: 2rem; justify-content: center; align-items: center; border-top: 1px solid var(--line); }
+  .bar span { min-width: 6rem; text-align: center; color: var(--accent); }
+  .gear { border: 2px solid var(--accent); border-radius: 50%; width: 3rem; height: 3rem; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+  <div class="screen" data-mockup="c2-04-ipad-menu-close">
+    <div class="content"><h1>Your move</h1>Arisilon (N), Radiant Mountains. 5 moves left.</div>
+    <div class="scrim" title="Tap outside to close">
+      <div class="menu" role="dialog" aria-label="Menu">
+        <section><h2>Look up</h2><div>Nothing to look up.</div></section>
+        <section><h2>Table</h2><button type="button" disabled>Reconnect tower</button></section>
+        <section><h2>Leave</h2><button type="button">Quit story</button></section>
+        <button type="button" class="close">Close</button>
+      </div>
+    </div>
+    <nav class="bar"><span>Back</span><span>Replay</span><span class="gear">⚙</span></nav>
+  </div>
+</body>
+</html>
