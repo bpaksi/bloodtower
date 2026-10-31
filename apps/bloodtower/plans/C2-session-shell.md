@@ -187,3 +187,4 @@ Each gets its folder as soon as what it waits on is on `main`.
 
 - G0 (2026-10-31): Approved by Bob in chat: "Approve G0". This covers the C2 plan, its batches, and the milestone split in `1.0-milestones.md`. This plan and AREA-100 stand in for an intent file.
 - Revision (2026-10-31): Bob: "I don't want you do the coding only the planning … The goal is to get a chuck of work planned so that it can be built." Claude did the audit as planning work and cut the build into feature folders. This revision needs Bob's OK along with the evals.
+- Features 01 to 10 (2026-10-31 09:09 ET): Bob approved all ten folders' evals and mockups in chat, assumptions included: "Approve all ten". Each `approval.md` holds the row. Batch B1 (01, 02, 03, 04, 09, 10) may start once this PR is on `main`. Features 05 to 08 also wait for G-A, the audit, which is not yet accepted.
