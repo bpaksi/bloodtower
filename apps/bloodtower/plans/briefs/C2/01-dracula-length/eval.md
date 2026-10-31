@@ -36,12 +36,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: exit 0.
 - Fails if: the YAML is broken or a test elsewhere still expects Long.
 
-### EV-05 — w3-pick-story still green
-- Requirement: no spec expects Long (P:14).
-- Method: playwright
-- How: `w3-pick-story.spec.ts` on PR head.
-- Pass evidence: passes; `rg -n 'data-option="long"|"Long"' apps/bloodtower/src/e2e/tests` returns 0 hits.
-- Fails if: any spec still expects Long.
+### EV-05 — Long is gone from the Dracula pack only
+- Requirement: Dracula's pack data lists no Long length; the lengths are exactly Short and Standard, default Standard (DEC-502, DEC-508; Bob ruling 2026-10-31 19:28). Other packs and tests keep Long (Proving Grounds under EV-03; the `w3-pick-story.spec.ts` absence check under EV-02).
+- Method: unit
+- How: `rg -n -i 'long' packs/dracula/pack.yaml` on PR head, plus the EV-01 test "dracula offers short and standard only" in `apps/bloodtower/src/server/pack/load.test.ts`. Specs under `apps/bloodtower/src/e2e/tests` are out of scope and stay unchanged.
+- Pass evidence: the `rg` returns no length entry with id `long` or label `Long`; the Dracula length options are exactly `short` and `standard` with default `standard`, and the EV-01 test passes.
+- Fails if: `packs/dracula/pack.yaml` still has a `long` length option, Long is hidden instead of removed, the cut touches another pack, or any e2e spec is edited for this change.
 
 ### EV-06 — Choose on Dracula lands on Not playable yet (screenshot)
 - Requirement: Dracula keeps the live skip; the YAML cut (Short and Standard, default Standard, Long removed, proven by EV-01 in `load.test.ts`) adds no screen (Bob ruling 2026-10-31 19:28). The Game settings mockup (mockup.html) is superseded by this ruling.
