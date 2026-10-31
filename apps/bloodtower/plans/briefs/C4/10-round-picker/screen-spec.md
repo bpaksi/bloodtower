@@ -26,7 +26,7 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 ## Buttons (exact labels)
 
 - Step 1, the group (every present iPad): **Fight**, **Retreat**.
-- Step 2, each present hero: **Attack**, **Cast a spell** (then the spell: **Lightning**, **Fireball**, **Magic Missile**), **Spend an Advantage**, **Drink a potion** (then **On {hero}**), **Guard** (guard virtue). An action the hero cannot take is greyed with its label. After picking: **Change pick** until the last present hero has picked (pending Bob, Q-C4-18).
+- Step 2, each present hero: **Attack**, **Cast a spell** (then the spell: **Lightning**, **Fireball**, **Magic Missile**), **Spend an Advantage**, **Drink a potion** (then **On {hero}**), **Guard** (guard virtue). An action the hero cannot take is greyed with its label. After picking: **Change pick** until the last present hero has picked (approved by Bob 2026-10-31 6:16 PM ET, Q-C4-18).
 - A sat-out hero: no buttons; `[COPY: sitting out = "You are sitting out this battle. Watch the board."]`.
 
 ## Tokens
@@ -43,7 +43,7 @@ Back to the loop that called it (see ./plan.md).
 
 ## OPEN questions
 
-- OPEN Q-C4-18 **[Bob taste call]**: Can a hero change a pick before the round runs (DEC-129)? Options: (a) yes, until the last present hero has picked; (b) no, a pick locks on tap. Gamewright pick: (a).
+- Resolved Q-C4-18 **[Bob taste call]**: Can a hero change a pick before the round runs (DEC-129)? Options: (a) yes, until the last present hero has picked; (b) no, a pick locks on tap. Gamewright pick: (a). Resolved: (a), approved by Bob 2026-10-31 6:16 PM ET ("Approve all").
 
-- OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
-- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- Resolved Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- Resolved Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
