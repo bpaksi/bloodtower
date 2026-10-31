@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the Menu layout (UI-033, DEC-707; mockup).
 - Method: screenshot
 - How: iPad portrait 768×1024 only (the approved mockup is portrait only; no landscape check); DOM checks per EV-08 to EV-10 replace the side-by-side compare.
-- Pass evidence: both pairs attached; the three groups centred, Close last and full width, the bottom bar still visible under the scrim.
+- Pass evidence: one portrait screenshot attached for review; EV-08–EV-10 are the gate. The three groups centred, Close last and full width, the bottom bar still visible under the scrim.
 - Fails if: Close is missing or the dialog covers the bottom bar.
 
 ### EV-06 — Quit story still works from the Menu
@@ -67,7 +67,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-09 — Look up empty (M "Look up empty")
 - Requirement: with nothing to look up the group still shows.
 - Method: playwright
-- How: open the Menu on a screen with nothing to look up.
+- How: open the Menu on the join/claim screen (before Begin), where Hero panel, Roll and Items have no content.
 - Pass evidence: the Look up heading renders with the text "Nothing to look up."; Close is last.
 - Fails if: the group is hidden.
 
@@ -78,20 +78,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: a confirm titled "Quit story" with line "Are you sure?" and exactly two buttons "Quit story" (primary) and "Back"; Back returns to the open Menu and sends no act.
 - Fails if: a third button, or Back sends an act or closes the Menu.
 
-### EV-11 — Closed after Continue (M "Closed")
-- Requirement: the Menu is closed after reload or Continue.
-- Method: playwright
-- How: Continue a saved game.
-- Pass evidence: the gear is the only Menu control visible; `[data-menu]` absent.
-- Fails if: the Menu opens on its own.
-
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-11 — The Menu starts closed after Continue
 - Requirement: a reload or Continue starts with the Menu closed.
 - Method: playwright
 - How: `w1-chrome.spec.ts` "a held hero, the Menu and a restart survive Continue", extended: open the Menu, restart the host, Continue.
-- Pass evidence: `[data-menu]` is absent after Continue; the held hero is unchanged.
+- Pass evidence: `[data-menu]` is absent after Continue and the gear is the only Menu control visible (M "Closed"); the held hero is unchanged.
 - Fails if: Menu state is stored and reopens.
 
 ## Assumptions surfaced

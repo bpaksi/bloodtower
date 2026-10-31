@@ -27,7 +27,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR).
+- [ ] EV-01 … EV-11 all pass (verifier table on PR).
 - In scope (mockup wins; Bob 2026-10-31): the Menu shows Look up (Hero panel, Roll, Items; "Nothing to look up." when empty), Table (Pause/Resume, Reconnect tower, Join another iPad, Change who holds whom) and Leave (Quit story). Unusable items are greyed, never hidden (DEC-227).
 
 ## AREA / DEC checklist

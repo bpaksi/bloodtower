@@ -34,7 +34,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the rule holds on the Samsung at 3840×2160 (DEC-705).
 - Method: screenshot
 - How: screenshot tower-connect and claim heroes at 3840×2160, compare side by side with ./mockup.html scaled to 3840×2160.
-- Pass evidence: both images attached; borders on all four sides; type scaled up, not left at 1080p size in a sea of painting.
+- Pass evidence: both images attached; frame font-size at 3840×2160 = 2 × the 1920×1080 value ± 5%; frame box inside the 5% guides.
 - Fails if: the dialog grows to the full height at 4K, or stays a small 1080p box.
 
 ### EV-05 — The board look specs still pass
@@ -47,8 +47,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-06 — Long content fitted (M "Long content, fitted")
 - Requirement: board dialogs never scroll: the art shrinks first, then content is cut to fit (Bob 2026-10-31).
 - Method: playwright, 1920×1080
-- How: the base board setup dialog (three steps), plus a forced-long variant whose content cannot fit even with the art at its minimum.
-- Pass evidence: frame inside the 5% guides; no scroll (EV-02 checks). If the natural size exceeds the guides, the step art renders smaller than its intrinsic height before any content is cut; content is cut only once the art is at its minimum, and what is cut is whole items (lines/rows), never a word clipped mid-line.
+- How: the base board setup dialog (three steps), plus a test fixture setup step with 12 lines and a 600 px intrinsic art.
+- Pass evidence: frame inside the 5% guides; no scroll (EV-02 checks). On the fixture: art height < intrinsic (600 px) before any line is removed, then lines are removed whole, never a word clipped mid-line.
 - Fails if: any scroll appears, content is cut while the art is still full size, or a line is clipped mid-text.
 
 ## Survival evals (one per survival invariant in plan.md)

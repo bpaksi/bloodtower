@@ -49,7 +49,7 @@ A skipped step stays unconfirmed (MEC-018): the board marks it in the top band u
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-12 all pass (verifier table on PR).
+- [ ] EV-01 … EV-16 all pass (verifier table on PR).
 - Not required: the chapter-end check (MEC-018's short optional one; C3). Glyph boons (DEC-601: 1.1). Telling a trapped skull from one that came out (Q-032).
 
 ## AREA / DEC checklist

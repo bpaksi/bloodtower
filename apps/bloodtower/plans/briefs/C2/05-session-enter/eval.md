@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the board shows the steps to put the tower on the board, lay out the board with its kingdom edges, and sort the pieces; any joined iPad presses "Board is set up" (SCR-022, DEC-278).
 - Method: playwright
 - How: new `c2-session-enter.spec.ts`, "base board setup shows its steps and waits for one press": cold start, one iPad joins.
-- Pass evidence: the board shows, in order: "Set the tower on the board.", "Lay out the board, kingdom edges matched.", "Sort the pieces: heroes, foes, skulls." (approved mockup wording).
+- Pass evidence: the board shows, in order: "Set the tower on the board.", "Lay out the board, kingdom edges matched.", "Sort the pieces: heroes, foes, skulls." (approved mockup wording). The iPad shows one primary body button 'Board is set up'; the board has 0 `button`; a second iPad's press after the first changes nothing (one setup-done event).
 - Fails if: the steps show on the iPad only, the board shows a button, or the setup needs every iPad.
 
 ### EV-04 — The session waits only for the first iPad
@@ -69,12 +69,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: playwright
 - How: same spec: pick volume 1, then "Try another", pick 2, then "Keep". Also pick Volume 0 once; one `sound.play-stateful` with volume 0.
 - Pass evidence: two `sound.play-stateful` commands for Dungeon Complete (#58), with volume 1 and then 2. After Keep, the session's kept volume is 2, and the next tower sound that takes a volume (the move-roll cue) is sent with volume 2.
+- Also: press Keep before any volume press; Keep is disabled (or keeps the default volume 1, as the plan says); assert which the build does and that it matches the plan.
 - Fails if: Keep keeps the first volume, or later sounds ignore the kept volume.
 
 ### EV-10 — Screenshots match the mockup
 - Requirement: the base board setup, the tower choice and the volume test on the board and the iPad (SCR-022, SCR-005, SCR-006; mockup).
 - Method: screenshot
-- How: screenshot the board at 1920×1080 and the iPad at 1024×768 on each of the three screens; compare side by side with ./mockup.html, sections `#board-setup`, `#tower-choice`, `#volume`.
+- How: screenshot the board at 1920×1080 and the iPad at 1024×768 on each of the three screens; compare side by side with ./mockup.html, mockup.html#s=N (tab names per EV-17).
 - Pass evidence: the EV-17 DOM checks pass; six screenshot pairs attached for review only.
 - Fails if: the board shows controls, or a screen is missing.
 
@@ -96,7 +97,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: after the Enter, a host restart keeps tonight's tower choice and does not re-run the Enter (Bob 2026-10-31).
 - Method: playwright
 - How: Play without Tower, reach Pick story, restart host; repeat with Connect Tower.
-- Pass evidence: after restart the session resumes at Pick story with the same choice; the tower question is not asked again; the mock tower got no command on restart.
+- Pass evidence: after restart the session resumes with tonight's tower choice and no Enter; it is back at Pick story; the tower question is not asked again; the mock tower got no command on restart.
 - Fails if: the Enter re-runs, the tower question shows, or a tower command is sent.
 
 ### EV-17 — Enter screens match the mockup
@@ -112,7 +113,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an autosave written before this feature still loads.
 - Method: unit
 - How: a server test with a checkpoint fixture taken from `main` before this feature: restart the host on it.
-- Pass evidence: the fixture's engine version differs from HEAD's; after the new Enter, Continue (on Pick story) resumes day and positions from the fixture; exactly one `version-changed` event is logged.
+- Pass evidence: the fixture's engine version differs from HEAD's; after the new Enter, Continue (on Pick Game) resumes day and positions from the fixture; exactly one `version-changed` event is logged.
 - Fails if: the old checkpoint throws, or is dropped.
 
 ### EV-12 — A restart mid-Enter sends nothing
@@ -131,6 +132,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- SCR-022's three step texts in EV-03 are Claude's wording → Bob: OK?
+- SCR-022's three step texts in EV-03 are the approved mockup wording.
 - The board's line on the tower choice reads "Wake the tower, or play tonight without it?" (MEC-039 .5; approved mockup) → MEC-039.
-- Volume picks are labelled "0", "1" and "2", as SCR-006 names them → SCR-006.
+- Volume picks are labelled "Volume 0/1/2" (approved mockup).

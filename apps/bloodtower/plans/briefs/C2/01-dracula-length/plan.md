@@ -27,7 +27,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-04 all pass (verifier table on PR).
+- [ ] EV-01 … EV-06 all pass (verifier table on PR).
 - Not required: any change to `packs/test` or to how settings are drawn.
 
 ## AREA / DEC checklist

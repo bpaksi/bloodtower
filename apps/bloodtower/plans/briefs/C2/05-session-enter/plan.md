@@ -28,13 +28,13 @@ Cutover: Y
 - Continue, restore, and restart must keep:
   - An autosave from before this feature still loads (its checkpoint has no session Enter state).
   - A restarted host mid-Enter starts the Enter again from the join; it never sends a tower command on restart.
-  - Whether this session is playing with or without the tower. After the Enter has finished, a host restart keeps tonight's tower choice and does not ask the tower question again (Bob 2026-10-31; EV-16).
+  - Whether this session is playing with or without the tower. After the Enter has finished, on a host restart the session resumes with tonight's tower choice and no Enter (no tower question) (Bob 2026-10-31; EV-16).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-10 all pass (verifier table on PR).
+- [ ] EV-01 … EV-17 all pass (verifier table on PR).
 - Not required: MEC-039 .13 to .19 (glyphs and facing). They wait for feature 10 and Bob's ruling; feature 12 adds them between calibrate and volume. Pick Game stays until feature 06.
 
 ## AREA / DEC checklist

@@ -25,8 +25,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — Go on without asks, then uses the stand-ins
 - Requirement: Go on without asks to confirm, then the rest of the game uses the no-tower stand-ins (DEC-301, DEC-305).
 - Method: playwright
-- How: same spec: press Go on without; No; press again; Yes. Finish the day.
-- Pass evidence: No returns to the pause. Yes resumes play at the same node. The mock tower's sent list is empty from Yes until the day's end. At the day's end there is no "where did it land" prompt; the board names the building the skull landed on, and the board is otherwise drawn as with the tower.
+- How: same spec: press Go on without; Back; press again; Go on without (confirm). Finish the day.
+- Pass evidence: Back returns to the pause; 'Go on without' (confirm) resumes play at the same node. The mock tower's sent list is empty from the confirm until the day's end. At the day's end there is no "where did it land" prompt; the board names the building the skull landed on, and the board is otherwise drawn as with the tower.
 - Fails if: Go on without has no confirm, a tower command is still queued, or the skull prompt still asks the table.
 
 ### EV-04 — The simulated skull drop is seeded
@@ -62,12 +62,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: playwright
 - How: same spec: drop the tower, Quit story, confirm.
 - Pass evidence: the session screen with Continue first and "Tower lost" as the tower line (feature 06).
+- Also: after Go on without, quit → session tower line exactly 'without the tower'.
 - Fails if: the quit drops the autosave, or the tower line says in play.
 
 ### EV-09 — Screenshots match the mockup
 - Requirement: the pause and the Go-on-without confirm (DEC-301; mockup).
 - Method: screenshot
-- How: screenshot the board at 1920×1080 and an iPad at 1024×768 on the pause and on the confirm; compare side by side with ./mockup.html sections `#pause` and `#confirm-without`.
+- How: screenshot the board at 1920×1080 and an iPad at 1024×768 on the pause and on the confirm; compare side by side with ./mockup.html mockup.html#s=N (tab names per EV-13).
 - Pass evidence: four images attached, matching wording and button order.
 - Fails if: a button is missing or out of order.
 
@@ -90,7 +91,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-11 — Continue keeps "without the tower"
 - Requirement: a game that went on without the tower continues without it.
 - Method: playwright
-- How: Go on without, walk, quit, restart the host, run the Enter with Connect Tower, Continue.
+- How: Go on without, walk, quit, restart the host with the tower connected; the session resumes with tonight's tower choice and no Enter; Continue.
 - Pass evidence: the resumed game sends no tower command and simulates the skull drop.
 - Fails if: Continue brings the tower back into that game.
 

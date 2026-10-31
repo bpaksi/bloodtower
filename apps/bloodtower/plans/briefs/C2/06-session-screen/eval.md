@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the session screen shows Continue (only while an autosave exists), New game, tonight's games, Done for tonight, and the tower's state, top to bottom (SCR-021, DEC-709).
 - Method: playwright
 - How: new `c2-session-screen.spec.ts`, "session screen after a quit": play to day 2, Menu → Quit story, confirm.
-- Pass evidence: the board lists, in order: Continue, New game, Tonight's games (one row, "Game 1", marked quit), Done for tonight, and the tower line ("tower: in play" or "without the tower"). The iPad offers Continue, New game, each of tonight's games as a pressable row (feature 07 drill-in) and Done for tonight, Continue first. The board has no buttons.
+- Pass evidence: the board lists, in order: Continue, New game, Tonight's games (one row, "Game 1", marked quit), Done for tonight, and the tower line: connect track exactly 'tower: in play'; also run the without track: exactly 'without the tower'. The iPad offers Continue, New game, each of tonight's games as a pressable row (feature 07 drill-in) and Done for tonight, Continue first. The board has no buttons.
 - Fails if: Continue is missing after a quit, sits below New game, or the list is empty.
 
 ### EV-02 — No autosave, no Continue
@@ -20,13 +20,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: unit
 - How: engine test "no autosave hides Continue": (a) fresh session, no autosave row; (b) session after New game → Yes, before Begin.
 - Pass evidence: (a) no Continue offer or line; (b) Continue is hidden from New game → Yes until Begin, even though the old save still exists (Bob 2026-10-31).
-- Fails if: Continue shows greyed (it is left out, not greyed: it is not a Menu item).
+- Fails if: Continue shows greyed (it is left out, not greyed: it is not a Menu item), or Continue shows between New game → Yes and Begin.
 
 ### EV-03 — Pick Game is gone; Pick story keeps Continue
 - Requirement: Pick Game goes; Continue sits on the session screen and on Pick story (DEC-709, DEC-283).
 - Method: playwright
-- How: same spec: restart the host with an autosave, run the Enter, reach the body.
-- Pass evidence: the first screen after the Enter is Pick story (never `pick-game`), and it offers Continue above the stories. No view anywhere carries the screen id `pick-game`.
+- How: same spec: restart the host with an autosave; the session resumes with tonight's tower choice and no Enter; reach the body.
+- Pass evidence: the first screen after the restart is Pick story (never `pick-game`), and it offers Continue above the stories. No view anywhere carries the screen id `pick-game`.
 - Fails if: Pick Game still shows, or Pick story has no Continue.
 
 ### EV-04 — New game asks before replacing the save
@@ -74,7 +74,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-10 — Screenshots match the mockup
 - Requirement: the session screen, the New game confirm, Done for tonight's end state and "Tower lost" (SCR-021, DEC-709, DEC-711, DEC-713; mockup).
 - Method: screenshot
-- How: screenshot the board at 1920×1080 and an iPad at 1024×768 for each; compare side by side with ./mockup.html sections `#session`, `#confirm-new`, `#session-over`, `#tower-lost`.
+- How: screenshot the board at 1920×1080 and an iPad at 1024×768 for each; compare side by side with ./mockup.html mockup.html#s=N (tab names per EV-15 to EV-17).
 - Pass evidence: eight images attached, each matching its section's parts and order.
 - Fails if: a part is missing or out of order.
 
@@ -131,6 +131,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- The tower line wording: "tower: in play", "without the tower", "Tower lost" → SCR-021 names the three states; the exact words are Claude's. Bob: OK?
+- The tower line wording: "tower: in play", "without the tower", "Tower lost" → SCR-021 names the three states; the exact words are the approved mockup wording (Bob 2026-10-31).
 - Continue is left out (not greyed) when there is no autosave. DEC-227's "greyed, never left out" is for Menu items → DEC-709 says "only while an autosave exists".
 - The idle command stays `lighting.all-off`, as C1 built it for Goodbye → CUE-012.

@@ -18,8 +18,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — Glyph answers are recorded against the library's table
 - Requirement: after calibrate the player says which glyph shows on each drum side, and the page compares it with the library's table (DEC-103, Q-033).
 - Method: unit
-- How: feed answers for all 12 sides (3 drums × 4), some matching, some not, one blank.
-- Pass evidence: 12 entries with expected, seen, match; the blank reads `unknown`, never `match`.
+- How: `setupCheck.test.ts`, "records seen glyphs beside the expected ones": feed answers for all 12 sides (3 drums × 4): 6 matching, 5 not, 1 blank.
+- Pass evidence: 12 entries with expected, seen, match → 6 true, 5 false, 1 unknown; the blank reads `unknown`, never `match`.
 - Fails if: a blank answer counts as a match.
 
 ### EV-03 — The facing question uses one lit side

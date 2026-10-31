@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a game in tonight's list drills in to its stats (SCR-021, DEC-629).
 - Method: playwright
 - How: new `c2-play-again.spec.ts`, "drill in to a quit game": play 2 days (walk, enter one building, record the skull drop at the end of each day), then quit on day 3; on the session screen pick that game on the iPad.
-- Pass evidence: the board shows the game's stats: title "Game 1", story "Proving Grounds", ended "Quit", time played, quit on day 3, moves taken (the sum of the walks made), buildings entered 1, skull drops recorded 2 (one per day ended). The iPad offers Play again and Back. For a quit game, time played reads "—" (Bob 2026-10-31, as in the mockup).
+- Pass evidence: the board shows the game's stats: title "Game 1", story "Proving Grounds", Outcome 'quit', time played, quit on day 3, moves taken (the sum of the walks made), buildings entered 1, skull drops recorded 2 (one per day ended). The iPad offers Play again and Back. For a quit game, time played reads "—" (Bob 2026-10-31, as in the mockup).
 - Fails if: the counts do not match the game played, or the drill-in happens on the board.
 
 ### EV-02 — Unrecorded values show as unavailable
@@ -60,7 +60,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-08 — Screenshots match the mockup
 - Requirement: the stats drill-in and the prefilled claims (SCR-019 slice, DEC-216; mockup).
 - Method: screenshot
-- How: screenshot the board at 1920×1080 and an iPad at 1024×768 on the stats and on the prefilled claim step; compare side by side with ./mockup.html sections `#stats` and `#claims-prefilled`.
+- How: screenshot the board at 1920×1080 and an iPad at 1024×768 on the stats and on the prefilled claim step; compare side by side with ./mockup.html mockup.html#s=N (tab names per EV-13 and EV-15).
 - Pass evidence: four images attached, matching rows and buttons.
 - Fails if: a row or button is missing.
 

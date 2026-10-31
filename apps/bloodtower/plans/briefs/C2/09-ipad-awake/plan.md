@@ -27,7 +27,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-11 all pass (verifier table on PR).
 - Not required: keeping the Mac or the TV awake. A drop between games (DEC-712: it blocks nothing; feature 06 covers the session screen side).
 
 ## AREA / DEC checklist

@@ -11,8 +11,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-01 — The check runs between the tower block and the resumed chapter
 - Requirement: Continue runs the piece check after the tower block and before the saved chapter (DEC-283, DEC-710).
 - Method: playwright
-- How: new `c2-continue-check.spec.ts`, "continue after a restart": play to day 2 with the mock tower, quit, restart the host, run the Enter, press Continue on the session screen. Seed the mock so no skull record has target `inside`.
-- Pass evidence: the screens come in this order: the tower choice, then the hero-minis step, then the skulls step, then day 2 in play. No step of Game settings, Claim heroes or the pack setup shows.
+- How: new `c2-continue-check.spec.ts`, "continue after a restart": play to day 2 with the mock tower, quit, restart the host; the session resumes with tonight's tower choice and no Enter (no tower question); press Continue on the session screen. Seed the mock so no skull record has target `inside`.
+- Pass evidence: the screens come in this order: the tower block only if the tower is not connected, then the hero-minis step, then the skulls step, then day 2 in play. No step of Game settings, Claim heroes or the pack setup shows.
 - Fails if: the game resumes with no check, the check runs before the tower block, or a setup screen shows.
 
 ### EV-02 — Each step shows where the save has the pieces
@@ -47,7 +47,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a rotate the tower rejects is logged, shown on the iPad that pressed with its error code, toasted on the Story board, and never retried on its own (decision 0003, tower safety).
 - Method: unit
 - How: server test with the mock tower set to fail the second rotate.
-- Pass evidence: one error log line with a code; the pressing iPad's view carries the code; the board view carries a toast; no third command is sent. The step offers Turn the drums again and Skip.
+- Pass evidence: one error log line with a code; the pressing iPad's view carries the code; the board view carries a toast; no third command is sent. The step offers Turn the drums again and Skip. After top ok and middle fails, the autosave has the top's new position and the middle's and bottom's old ones.
 - Fails if: the error is swallowed, the rotate is retried with no press, or the step moves on as if done.
 
 ### EV-07 — Trapped skulls: the count comes from the "inside" records
@@ -67,7 +67,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-09 — Screenshots match the mockup
 - Requirement: the minis step, the drums step before and after the press, and the trapped-skull step (mockup).
 - Method: screenshot
-- How: screenshot the board at 1920×1080 and an iPad at 1024×768 for each; compare with ./mockup.html sections `#minis`, `#drums`, `#drums-confirm`, `#trapped`.
+- How: screenshot the board at 1920×1080 and an iPad at 1024×768 for each; compare with ./mockup.html mockup.html#s=N (tab names per EV-16).
 - Pass evidence: eight images attached, each matching its section's parts and order.
 - Fails if: a part is missing or out of order.
 
@@ -106,7 +106,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: unit
 - How: server test: read the autosave, run the check to the drums step, restart; read it again; then skip every step and read it again.
 - Pass evidence: the "inside" records are byte-equal across the three reads until the first new day is played. The drum positions change only by a successful Turn the drums during the check, which writes the sent positions to the autosave (Bob 2026-10-31).
-- Fails if: the check writes either field.
+- Fails if: the check writes the 'inside' records, or writes drum positions other than by a successful Turn the drums.
 
 ### EV-11 — The resumed game matches the save
 - Requirement: after the check, the game is the saved one (DEC-675).

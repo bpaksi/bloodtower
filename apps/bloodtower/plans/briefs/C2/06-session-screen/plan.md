@@ -33,7 +33,7 @@ Cutover: Y
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-10 all pass (verifier table on PR).
+- [ ] EV-01 … EV-17 all pass (verifier table on PR).
 - Not required: drilling in to a game's stats and Play again (feature 07). Continue's piece check (feature 11; until then Continue behaves as today: checkpoint reload and the tower check). Past sessions (DEC-629).
 
 ## AREA / DEC checklist

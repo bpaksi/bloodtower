@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: while an iPad is joined, the device page asks the browser to keep the screen on (DEC-712).
 - Method: playwright
 - How: new `c2-ipad-awake.spec.ts`, "a joined iPad holds a screen wake lock": stub `navigator.wakeLock.request` with `addInitScript` to record calls. Open `/join?code=…` and join.
-- Pass evidence: after the join, exactly one unreleased sentinel held after the join; zero requests before the join with `"screen"`, and the stub's sentinel is not released.
+- Pass evidence: zero `request('screen')` calls before the join; exactly one after; that sentinel is unreleased at the end.
 - Fails if: the request is made before the join (on the code screen), or never.
 
 ### EV-02 — It is asked again when the page comes back
@@ -58,10 +58,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: no banner or the iPad is blocked.
 
 ### EV-08 — Page releases on leave
-- Requirement: P:24.
+- Requirement: the lock is let go on leave (DEC-712; plan's leave line).
 - Method: playwright
 - How: Done for tonight (or leave).
-- Pass evidence: the stub sentinel's `release()` count is 1.
+- Pass evidence: the stub sentinel's `release()` count is 1, and no new request after leave.
 - Fails if: not released.
 
 ### EV-09 — Notice matches mockup (M "Refused notice", "Normal")
