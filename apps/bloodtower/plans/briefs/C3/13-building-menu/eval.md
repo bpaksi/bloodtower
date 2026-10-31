@@ -87,8 +87,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-12 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: building menu, rally, rest, cure, draw, give-back, Cleanse, Fallen building (`#s=10`).
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: building menu, rally, rest, cure, draw, give-back, Cleanse, Fallen building (`#s=10`).
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -108,22 +108,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-15 — Rally, Virtue draw and Cleanse auto-advance
 - Requirement: the Rally, Virtue draw and Cleanse result steps have no Next; each advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock
-- How: reach each of Rally, Virtue draw (4 tiles held, no give-back) and Cleanse; for each, once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach each of Rally, Virtue draw (4 tiles held, no give-back) and Cleanse; for each, once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button on any of them; each advances on its audio end event, and 4 s (±200 ms) after it shows when there is no audio; each lands back on the building menu (or the move map when no moves are left); each step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-16 — Narrated steps do not advance before their audio ends
 - Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock, mock audio
-- How: reach Rally, Virtue draw or Cleanse with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Method: playwright
+- How: (fake clock, mock audio) reach Rally, Virtue draw or Cleanse with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
 - Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
 - Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
 
 ### EV-17 — Restart and Continue during an auto-advancing step apply its effect once
 - Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock
-- How: two runs for each of Rally, Virtue draw and Cleanse: (1) before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Method: playwright
+- How: (fake clock) two runs for each of Rally, Virtue draw and Cleanse: (1) before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
 - Pass evidence: in each run the same step shows again and auto-advances once; its effect (Rally: heal to full, 5 gold and 1 move spent; Virtue draw: one tile added, 10 gold and 1 move spent; Cleanse: −1 skull, +1 day, 1 move spent) is applied exactly once (host state and event log show one application).
 - Fails if: the step is skipped without its effect, repeats its effect, or stalls.
 
@@ -145,8 +145,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-20 — The give-back survives a restart and a Continue (M `#s=8`)
 - Requirement: a restart or a Continue on the give-back step brings back the same 5 tiles with no redraw; the draw's 10 gold and 1 move are spent exactly once; after the pick the group holds 4 tiles (DEC-544).
-- Method: playwright, fixed seed
-- How: two runs, with the group holding 4 tiles, draw to the give-back (`#s=8`) and note the 5 tiles, gold and moves: (1) restart the host and Continue; (2) quit and Continue from the session screen. In each run, pick a tile.
+- Method: playwright
+- How: (fixed seed) two runs, with the group holding 4 tiles, draw to the give-back (`#s=8`) and note the 5 tiles, gold and moves: (1) restart the host and Continue; (2) quit and Continue from the session screen. In each run, pick a tile.
 - Pass evidence: in each run the give-back shows again with the same 5 tiles in the same order; the host event log has one draw and no redraw; gold and moves are each 10 gold and 1 move below their values before the draw, no more; after the pick the group holds 4 and the iPad returns to the menu.
 - Fails if: the tiles differ or are redrawn, the cost is spent twice or not at all, the step is skipped, or the group ends with 5 or 3 tiles.
 

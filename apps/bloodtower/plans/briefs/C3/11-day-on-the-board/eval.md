@@ -80,8 +80,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-11 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: Day start (Regroup), day roll, mid-turn, skull placement, effects panel.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: Day start (Regroup), day roll, mid-turn, skull placement, effects panel.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -101,15 +101,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-14 — Next-only steps auto-advance
 - Requirement: the effects panel has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock
-- How: reach the effects panel; once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach the effects panel; once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-15 — Gear actions open on the Story board
 - Requirement: split/rejoin and use a potion or item start from the gear and show on the Story board; the game pauses while open (Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, board 1920×1080 + iPad 768×1024, mid-turn, a hero holding a potion
-- How: gear → Split party; Done. Gear → Use a potion or item; pick the hero, then the potion; Done.
+- Method: playwright
+- How: (board 1920×1080 + iPad 768×1024, mid-turn, a hero holding a potion) gear → Split party; Done. Gear → Use a potion or item; pick the hero, then the potion; Done.
 - Pass evidence: while open, the iPad body shows "See the Story board", the pick buttons (split: one button per group choice; use-item: one button per hero, then one per item that hero holds) and Done/Back; the board shows `[data-panel="split"]` then `[data-panel="use-item"]` (hero step, then item step) with 0 `button` elements, mirroring each iPad press (DEC-278; (Gamewright pick, pending Bob Q-GEAR-1)); host `paused: true` while open and `false` after Done; after the split, the board shows two groups (two `[data-group]` elements, each with its heroes); after the potion, that hero's HP is higher by exactly the potion's amount and the potion is gone from the hero's inventory on the host and in the Current party panel.
 - Fails if: a panel shows on the iPad, the game runs while open, the board does not show two groups after the split, HP does not rise by the potion amount, or the potion stays in the inventory or is used twice.
 
@@ -122,15 +122,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-17 — Narrated steps do not advance before their audio ends
 - Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock, mock audio
-- How: reach the effects panel with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Method: playwright
+- How: (fake clock, mock audio) reach the effects panel with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
 - Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
 - Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
 
 ### EV-18 — Restart and Continue during an auto-advancing step apply its effect once
 - Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock
-- How: two runs: (1) on the effects panel, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Method: playwright
+- How: (fake clock) two runs: (1) on the effects panel, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
 - Pass evidence: in each run the same step shows again and auto-advances once; each effect on the panel (gold, HP, days left) is applied exactly once (host state and event log show one application).
 - Fails if: the step is skipped without its effect, repeats its effect, or stalls.
 

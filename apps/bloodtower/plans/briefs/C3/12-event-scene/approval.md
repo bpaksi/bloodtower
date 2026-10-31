@@ -2,7 +2,7 @@
 
 | Item | Approved by | When (America/Detroit) | Chat link | Version (commit sha of file) |
 |------|-------------|------------------------|-----------|------------------------------|
-| eval.md | pending | | | |
-| mockup.html | pending (not drawn yet) | | |  |
+| eval.md | Bob | 2026-10-31 10:27 AM (proposal lines); merge approved in chat 2026-10-31 6:30 PM | | |
+| mockup.html | Bob | 2026-10-31 10:27 AM (proposal lines); merge approved in chat 2026-10-31 6:30 PM | |  |
 
-Not approved yet. Bob approves the evals and the mockup in chat; Gamewright records the row here. Coding waits for this file to be filled on `main`.
+Approved by Bob 2026-10-31: the proposal lines at 10:27 AM ET and the merge in chat at 6:30 PM ET.
