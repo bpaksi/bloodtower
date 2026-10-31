@@ -1,0 +1,146 @@
+{
+ "rule": "Reuse existing art first. No paid generation in this step. Spend log: $0.",
+ "assets": [
+  {
+   "file": "assets/place-village.webp",
+   "fallback": "assets/place-village.jpg",
+   "source": "bpaksi/bloodtower@main:packs/test/assets/place-village.jpg",
+   "size": [
+    1280,
+    720
+   ],
+   "kb_webp": 236,
+   "use": "reusable art",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/place-bazaar.webp",
+   "fallback": "assets/place-bazaar.jpg",
+   "source": "bpaksi/bloodtower@main:packs/test/assets/place-bazaar.jpg",
+   "size": [
+    864,
+    1152
+   ],
+   "kb_webp": 142,
+   "use": "reusable art",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/place-citadel.webp",
+   "fallback": "assets/place-citadel.jpg",
+   "source": "bpaksi/bloodtower@main:packs/test/assets/place-citadel.jpg",
+   "size": [
+    1280,
+    720
+   ],
+   "kb_webp": 180,
+   "use": "reusable art",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/place-sanctuary.webp",
+   "fallback": "assets/place-sanctuary.jpg",
+   "source": "bpaksi/bloodtower@main:packs/test/assets/place-sanctuary.jpg",
+   "size": [
+    1280,
+    720
+   ],
+   "kb_webp": 164,
+   "use": "reusable art",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/cover-dracula.webp",
+   "fallback": "assets/cover-dracula.jpg",
+   "source": "bpaksi/bloodtower@main:packs/dracula/assets/cover.png",
+   "size": [
+    1280,
+    720
+   ],
+   "kb_webp": 111,
+   "use": "reusable art",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/ref-theme-b-ipad-move-map.webp",
+   "fallback": "assets/ref-theme-b-ipad-move-map.jpg",
+   "source": "bpaksi/bloodtower@main:docs/ui-mocks/weekend-w1/b-engraved-ipad-move-map.jpg (= /workspace/ui-shell-art/weekend-mocks/corner-theme/b-engraved.jpg)",
+   "size": [
+    820,
+    1093
+   ],
+   "kb_webp": 34,
+   "use": "reference only (contains outdated labels)",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/storyboard-bg-splash.webp",
+   "fallback": "assets/storyboard-bg-splash.jpg",
+   "source": "/workspace/ui-shell-art/weekend-mocks/storyboard-weekend/01-splash.jpg",
+   "size": [
+    1280,
+    720
+   ],
+   "kb_webp": 25,
+   "use": "reusable art",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/ref-storyboard-pick-story.webp",
+   "fallback": "assets/ref-storyboard-pick-story.jpg",
+   "source": "/workspace/ui-shell-art/weekend-mocks/storyboard-weekend/02-pick-story.jpg",
+   "size": [
+    1024,
+    576
+   ],
+   "kb_webp": 21,
+   "use": "reference only (contains outdated labels)",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/ref-storyboard-party-pick.webp",
+   "fallback": "assets/ref-storyboard-party-pick.jpg",
+   "source": "/workspace/ui-shell-art/weekend-mocks/storyboard-weekend/03-party-pick.jpg",
+   "size": [
+    1024,
+    576
+   ],
+   "kb_webp": 18,
+   "use": "reference only (contains outdated labels)",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/ref-storyboard-enter-place.webp",
+   "fallback": "assets/ref-storyboard-enter-place.jpg",
+   "source": "/workspace/ui-shell-art/weekend-mocks/storyboard-weekend/06-enter-place.jpg",
+   "size": [
+    1024,
+    576
+   ],
+   "kb_webp": 89,
+   "use": "reference only (contains outdated labels)",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  },
+  {
+   "file": "assets/corner-b-{tl,tr,bl,br}.webp",
+   "source": "bpaksi/bloodtower@main:docs/ui-mocks/weekend-w1/b-engraved-ipad-move-map.jpg (cropped top-left corner)",
+   "size": [
+    112,
+    112
+   ],
+   "use": "RETIRED 2026-10-31: files removed; corners now drawn in the SVG frame",
+   "spend_usd": 0,
+   "tool": "copy/resize (Pillow)"
+  }
+ ]
+}
