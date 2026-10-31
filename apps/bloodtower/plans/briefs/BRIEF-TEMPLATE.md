@@ -1,13 +1,16 @@
 Keep this a checklist; do not write a second design doc.
 
-# Brief: <plan-id> Step <N> — <title>
+# Brief: <plan-name> / <##-feature> — <title>
 
 ## Meta
 
 - Plan:
-- Step:
+- Feature: <##-feature>
 - Owner:
 - Related AREA/docs:
+- Evals: ./eval.md
+- Mockup: ./mockup.html | none (no screen change)
+- Risk: Low | Med | High | Human
 
 ## Cutover
 
@@ -21,8 +24,15 @@ Cutover: N
 
 ## Done-when (e2e)
 
-- [ ] Run: <action>. Expect: <observable result>.
+Contract is ./eval.md. List EV IDs; do not restate them.
+
+- [ ] EV-01 … EV-NN all pass (verifier table on PR).
+- Not required: <edge cases deliberately left out>
 
 ## AREA / DEC checklist
 
 - [ ] <AREA- or DEC- id>: closed before coding.
+
+## Eval approval
+
+- See ./approval.md (must be filled before coding).
