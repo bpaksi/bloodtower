@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-The board shows `[COPY: last choice, Warden falls]` and the two options; each iPad votes (Gamewright pick, pending Bob) (Q-C5-03); the board ticks who has voted. Then the win line for the flag, voiced (Gamewright pick, pending Bob) (Q-C5-07), then straight to the outcome (Gamewright pick, pending Bob) (Q-C5-09).
+The board shows `[COPY: last choice, Warden falls = "The Warden falls. The last seal lies at your feet, cracked and warm. Break it, or swear to guard it."]` and the two options; each iPad votes (Gamewright pick, pending Bob) (Q-C5-03); the board ticks who has voted. Then the win line for the flag, voiced (Gamewright pick, pending Bob) (Q-C5-07), then straight to the outcome (Gamewright pick, pending Bob) (Q-C5-09).
 
 ## Cutover
 
@@ -56,3 +56,5 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).
+
+> Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: a Vellmoor story for Return to Dark Tower. Thank you for playing." (Credits line not folded.)

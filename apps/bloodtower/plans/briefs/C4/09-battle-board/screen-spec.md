@@ -19,10 +19,17 @@ UI-026 on the board: the foe painting (one placeholder per level (Gamewright pic
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: battle-board, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, battle-board]` on the board.
+- Board: shows the state and every line `[COPY: battle-board, board = "Foe: {foe}. Strength left: {N}. / Round {N}: {hero} struck for {N}. / Round {N}: the foe hit {hero}. / {hero} is Cursed: 4 of {N} count. / The foe falls. Victory."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, battle-board = "This board shows the fight as it happens. Make your picks on your iPad."]` on the board.
+
+## Buttons (exact labels)
+
+- The board has no buttons. The iPad shows the round picker (C4 10): **Fight**, **Retreat**, then **Attack**, **Cast a spell**, **Spend an Advantage**, **Drink a potion**, **Guard**.
+
+## Tokens
+
+- {foe}, {N}, {hero}
 
 ## What happens next
 

@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-DEC-664: the Tower loop's end hook plays a plain scene with DEC-663's two options; each sets a flag. Each present hero votes; a tie re-votes once, then the seeded draw breaks it (Gamewright pick, pending Bob) (Q-C5-03). Copy: `[COPY: last choice, Warden falls]`, `[COPY: option, break the seal]`, `[COPY: option, swear the oath]`.
+DEC-664: the Tower loop's end hook plays a plain scene with DEC-663's two options; each sets a flag. Each present hero votes; a tie re-votes once, then the seeded draw breaks it (Gamewright pick, pending Bob) (Q-C5-03). Copy: `[COPY: last choice, Warden falls = "The Warden falls. The last seal lies at your feet, cracked and warm. Break it, or swear to guard it."]`, `[COPY: option, break the seal = "Break the seal"]`, `[COPY: option, swear the oath = "Swear the oath"]`.
 
 ## Cutover
 

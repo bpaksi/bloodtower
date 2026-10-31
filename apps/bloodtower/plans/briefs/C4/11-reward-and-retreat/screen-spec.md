@@ -19,10 +19,18 @@ UI-040: the gold and drawn card on a Reveal; the iPads pick who takes the card. 
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: reward-and-retreat, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, reward-and-retreat]` on the board.
+- Board: shows the state and every line `[COPY: reward-and-retreat, board = "Victory. You found {N} gold and a card. / Who takes {item}? / {hero} takes {item}. / You fell back. It cost {item}. / {hero} fell. It cost {item}. / The foe grows stronger."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, reward-and-retreat = "After a win, tap Give to {hero} on an iPad to choose who takes the card. After a retreat or a fall, this shows what it cost."]` on the board.
+
+## Buttons (exact labels)
+
+- Reward: **Give to {hero}**, one button per present hero.
+- Retreat or fall result: no iPad button; the board advances after its beat (no Next-only screen).
+
+## Tokens
+
+- {N}, {item}, {hero}
 
 ## What happens next
 

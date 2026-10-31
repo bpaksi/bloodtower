@@ -19,10 +19,18 @@ The Tower reuses the Tomb's two halves: the level's room map and the room view (
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: tower-screens, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, tower-screens]` on the board.
+- Board: shows the state and every line `[COPY: tower-screens, board = "The Tower. Level {N}. / Rooms found: {N}. / A door, shut and cold. / A shrine. You can rest here. / The stairs climb on."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, tower-screens = "Tap Open the next door to go deeper. Tap Rest at a shrine, or Retreat to fall back."]` on the board.
+
+## Buttons (exact labels)
+
+- **Open the next door**, **Rest** (only at a found shrine; greyed otherwise), **Retreat**.
+- A guard or stair battle hands to the round picker (C4 10).
+
+## Tokens
+
+- {N}
 
 ## What happens next
 

@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-119.
 - Method: playwright
 - How: hero at 0.
-- Pass evidence: that iPad shows `[COPY: sitting out]` and no buttons.
+- Pass evidence: that iPad shows `[COPY: sitting out = "You are sitting out this battle. Watch the board."]` and no buttons.
 - Fails if: picker shown.
 
 ### EV-04 — Screenshots match

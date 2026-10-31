@@ -19,10 +19,19 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: round-picker, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, round-picker]` on the board.
+- Board: shows the state and every line `[COPY: round-picker, board = "Fight or Retreat? / Waiting on: {hero}. / {hero} has picked. / Everyone has picked. The round begins."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, round-picker = "Choose Fight or Retreat together, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard on their iPad. The round starts when everyone has picked."]` on the board.
+
+## Buttons (exact labels)
+
+- Step 1, the group (every present iPad): **Fight**, **Retreat**.
+- Step 2, each present hero: **Attack**, **Cast a spell** (then the spell: **Lightning**, **Fireball**, **Magic Missile**), **Spend an Advantage**, **Drink a potion** (then **On {hero}**), **Guard** (guard virtue). An action the hero cannot take is greyed with its label.
+- A sat-out hero: no buttons; `[COPY: sitting out = "You are sitting out this battle. Watch the board."]`.
+
+## Tokens
+
+- {hero}, {N}
 
 ## What happens next
 

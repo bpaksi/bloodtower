@@ -19,10 +19,19 @@ C3 hid Fight (Q-C3-02). C4 shows it on foes and disaster events and on battle op
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: fight-buttons, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, fight-buttons]` on the board.
+- Board: shows the state and every line `[COPY: fight-buttons, board = "Foes block the road. / Fight, or find another way."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, fight-buttons = "Tap Fight on your iPad to start a battle, or pick another option to avoid it."]` on the board.
+
+## Buttons (exact labels)
+
+- Foes or disaster event: **Fight**, **Go around**, **Pay them off (5 gold)** (greyed when short).
+- The Ambush: **Fight**, **Pay the toll (10 gold)**.
+- A plain scene's battle option: **Fight** plus the scene's other option labels.
+
+## Tokens
+
+- none
 
 ## What happens next
 

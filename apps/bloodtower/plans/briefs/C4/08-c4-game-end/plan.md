@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-With `c4_end_after_chapter_3` on, chapter 3 won ends the game won: the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster]` (Gamewright pick, pending Bob) (Q-C4-01). Losses unchanged. Stats add battles won, retreats, falls and Tomb rooms; key moments add battle won and Tomb cleared.
+With `c4_end_after_chapter_3` on, chapter 3 won ends the game won: the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The last seal of the lowlands is broken. Vellmoor sleeps easier tonight. The Count does not."]` (Gamewright pick, pending Bob) (Q-C4-01). Losses unchanged. Stats add battles won, retreats, falls and Tomb rooms; key moments add battle won and Tomb cleared.
 
 ## Cutover
 
@@ -50,7 +50,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C4-01: What ends a C4 game won, before the C5 finale exists? Options: (a) chapter 3 won (The Lock and The Last Stand done) ends the game won, behind tuning switch `c4_end_after_chapter_3` (on in C4, off in C5), with the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster]`; (b) chapter 3 has no end: the game plays until it is lost, and the win is tested only by fixture until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-01: What ends a C4 game won, before the C5 finale exists? Options: (a) chapter 3 won (The Lock and The Last Stand done) ends the game won, behind tuning switch `c4_end_after_chapter_3` (on in C4, off in C5), with the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The last seal of the lowlands is broken. Vellmoor sleeps easier tonight. The Count does not."]`; (b) chapter 3 has no end: the game plays until it is lost, and the win is tested only by fixture until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).
 
 ## Eval approval
 

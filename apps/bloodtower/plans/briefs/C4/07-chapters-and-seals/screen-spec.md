@@ -19,4 +19,6 @@ No new screen: engine work, proved by unit evals and the headless simulator. Any
 
 ## OPEN questions
 
-- OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster]`, `[COPY: seal break ch2, Loremaster]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "One seal breaks. The old wards on the tower loosen, and the road to the Count grows shorter."]`, `[COPY: seal break ch2, Loremaster = "A second seal cracks. Somewhere above, something old opens its eyes."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
+
+> Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders, and Vellmoor hears it."

@@ -19,10 +19,17 @@ The foe panel for The Warden with a phase change: new painting (Gamewright pick,
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: boss-screen, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, boss-screen]` on the board.
+- Board: shows the state and every line `[COPY: boss-screen, board = "The Warden. Strength left: {N}. / The Warden changes. / The Warden falls."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, boss-screen = "This is the last battle. Make your picks on your iPad."]` on the board.
+
+## Buttons (exact labels)
+
+- The board has no buttons. The iPad shows the round picker (C4 10) with the same labels: **Fight**, **Retreat**, **Attack**, **Cast a spell**, **Spend an Advantage**, **Drink a potion**, **Guard**. A phase change has no button; the board advances after the show.
+
+## Tokens
+
+- {N}
 
 ## What happens next
 

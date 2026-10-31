@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C5-03.
 - Method: playwright
 - How: split vote.
-- Pass evidence: `[COPY: tie, vote again]` then a second vote.
+- Pass evidence: `[COPY: tie, vote again = "A tie. Vote once more."]` then a second vote.
 - Fails if: no re-vote.
 
 ### EV-03 — Line for the flag
@@ -61,3 +61,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
+
+> Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: a Vellmoor story for Return to Dark Tower. Thank you for playing." (Credits line not folded.)

@@ -19,10 +19,19 @@ DEC-583's two halves side by side: the map (found rooms, current glowing, doorwa
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: tomb-screens, board]`; never scrolls.
-- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
-- Gear: opens its panel on the Story board; picks on the iPad.
-- Help (?): `[COPY: help, tomb-screens]` on the board.
+- Board: shows the state and every line `[COPY: tomb-screens, board = "The Tomb. Rooms found: {N}. / Undead Advantage: {N}. / A cold corridor. Three doors wait. / You hear something behind the door. / A trap. / Something wakes in the dark. / The Exit is open."]`; never scrolls.
+- Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
+- Help (?): `[COPY: help, tomb-screens = "Tap Left, Ahead or Right on your iPad to move to the next room, Bold or On guard to say how you go in. Use Listen to hear what waits ahead, or Leave to get out."]` on the board.
+
+## Buttons (exact labels)
+
+- Three direction cards **Left**, **Ahead**, **Right** (a wall greys its card); on each open card **Listen**, **Bold**, **On guard** (Bold struck out after Listen, DEC-587).
+- **Leave** below the cards.
+- A trap or battle in the view hands to its own buttons (C4 10 for a battle; a trap advances on the board).
+
+## Tokens
+
+- {N}
 
 ## What happens next
 

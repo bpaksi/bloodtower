@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-`c4_end_after_chapter_3: false`. Chapter 3 won opens the finale; a won Tower ends the game in the win scene with the line for the flag: `[COPY: finale win, seal shattered]` or `[COPY: finale win, seal holds]`. The switch and its C3 sibling are removed from the schema once green.
+`c4_end_after_chapter_3: false`. Chapter 3 won opens the finale; a won Tower ends the game in the win scene with the line for the flag: `[COPY: finale win, seal shattered = "The seal shatters. The Count's hold breaks, and dawn comes to Vellmoor."]` or `[COPY: finale win, seal holds = "You swear the oath. The seal holds, and so do you. Vellmoor will need watchers."]`. The switch and its C3 sibling are removed from the schema once green.
 
 ## Cutover
 
