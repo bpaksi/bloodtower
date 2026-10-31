@@ -33,7 +33,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the Menu shows Look up, Table and Leave; an item that cannot be used yet is greyed, never left out (DEC-707, DEC-229, DEC-227).
 - Method: unit
 - How: `chromeBar.test.ts`, "greys what it cannot offer": render with no `quit` and no `connect` offer.
-- Pass evidence: headings "Look up", "Table", "Leave" in that order; "Quit story" is a `disabled` button; "Reconnect tower" shows and is `disabled`; Close is enabled.
+- Pass evidence: headings "Look up", "Table", "Leave" in that order; "Save and quit" is a `disabled` button; "Tower" shows and is `disabled`; each disabled item has one reason line; Close is enabled.
 - Fails if: Quit story is replaced by the text "Quit story is not offered." (today's build), or a group is left out.
 
 ### EV-05 — Screenshot matches the mockup
@@ -61,31 +61,80 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the open Menu matches the approved mockup.
 - Method: playwright, iPad portrait 768×1024, in play with the tower connected
 - How: open the Menu.
-- Pass evidence: inside `[data-menu]`, in DOM order: label "Look up" with items "Hero panel", "Roll", "Items"; label "Table" with "Pause/Resume", "Reconnect tower", "Join another iPad", "Change who holds whom"; label "Leave" with "Quit story"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Reconnect tower" is disabled (tower in play). The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
+- Pass evidence: inside `[data-menu]`, in DOM order: label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
 - Fails if: any group/item is missing, an unusable item is absent instead of disabled, or Close is not last.
 
-### EV-09 — Look up empty (M "Look up empty")
-- Requirement: with nothing to look up the group still shows.
+### EV-09 — Before Begin, game items are greyed with a reason (M "Look up empty")
+- Requirement: with no game yet, the groups still show and game-only items are greyed with a reason (DEC-227).
 - Method: playwright
-- How: open the Menu on the join/claim screen (before Begin), where Hero panel, Roll and Items have no content.
-- Pass evidence: the Look up heading renders with the text "Nothing to look up."; Close is last.
-- Fails if: the group is hidden.
+- How: open the Menu on the join/claim screen (before Begin).
+- Pass evidence: the Look up heading renders; "Current party" is disabled with the reason "Only during a game."; "Look up" is enabled; Close is last.
+- Fails if: a group or item is hidden, or a disabled item has no reason.
 
 ### EV-10 — Quit story confirm (M "Confirm: Quit story")
 - Requirement: Quit story asks first (DEC-230).
 - Method: playwright
-- How: Menu → Quit story, then Back.
+- How: Menu → Save and quit, then Back.
 - Pass evidence: a confirm titled "Quit story" with line "Are you sure?" and exactly two buttons "Quit story" (primary) and "Back"; Back returns to the open Menu and sends no act.
 - Fails if: a third button, or Back sends an act or closes the Menu.
 
+### EV-11 — The toolbar is on every iPad screen
+- Requirement: every iPad screen has the bottom toolbar with "?" at the left end and the gear at the right end (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7a/7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, session screen, game stats, session over.
+- Pass evidence: on each stop, `footer.bt-bar--bottom` is visible inside the viewport; its first control is "?" and its last is the gear; nothing in the iPad body covers them.
+- Fails if: any screen or state lacks the toolbar, "?" or the gear.
+
+### EV-12 — Gear actions open on the Story board and pause the game
+- Requirement: an enabled gear item starts on the iPad and its UI shows on the Story board; the game pauses while the panel is open and resumes on Done (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright, board 1920×1080 + iPad 768×1024, in play
+- How: for each enabled item in turn (Current party, Game board setup, Volume, Look up, Change who holds whom, Join another iPad), open it from the gear, then press Done.
+- Pass evidence: while open, the iPad body shows "See the Story board", the panel's pick buttons when it needs a choice (Volume: "Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"), and Done (Back only where the panel has a step back); the board shows `[data-panel="<item>"]` with 0 `button` elements (DEC-278) and mirrors each iPad pick within 500 ms (`[data-picked]` matches the pressed button); (Gamewright pick, pending Bob Q-GEAR-1); the host reports `paused: true`. After Done the panel is gone, the iPad is back on its screen and `paused: false`.
+- Fails if: the panel shows on the iPad, the game runs while a panel is open, or Done does not resume.
+
+### EV-13 — The happy path never needs the Menu
+- Requirement: the happy path uses only the iPad body's flow buttons; exceptions go through the gear (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: run the C2 happy path (join → claim → Enter → Pick story → Enable sound → Volume Keep → settings → Begin → base board setup → day one) with Menu opens counted.
+- Pass evidence: the run ends in play with Menu open count 0 and help open count 0.
+- Fails if: any step can only be reached through the gear or help.
+
+### EV-14 — A disabled item shows its reason
+- Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
+- Method: unit (`chromeBar.test.ts`) + playwright
+- How: render the Menu in play with the tower connected in a C2 build.
+- Pass evidence: every `disabled` item has exactly one `[data-reason]` line: "Split party" and "Use a potion or item" read "C3+"; "Tower" reads "The tower is connected."; enabled items have no reason line.
+- Fails if: a disabled item has no reason, or an enabled item is greyed.
+
+### EV-15 — First press wins across iPads
+- Requirement: two iPads pressing a gear item open one panel (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright, two iPads
+- How: both iPads press Volume within 50 ms.
+- Pass evidence: one `[data-panel="volume"]` on the board; the host logs one open; the other iPad's Menu shows Volume disabled with the reason "Open on another iPad."
+- Fails if: two panels, two opens, or no reason on the second iPad.
+
+### EV-16 — "?" help matches the current screen
+- Requirement: "?" opens a help sheet on the iPad for the current screen; Close returns to the same screen; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright
+- How: on each stop of EV-11, press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` equals the screen's id and its text is exactly that screen's Loremaster help line (screen-spec Help lines table, 2026-10-31; e.g. on the tower choice: "Tap Connect Tower to play with the tower, or Play without Tower for tonight."); the host sends nothing and `paused` is unchanged; after Close the same screen and state show.
+- Fails if: help is missing on any screen, shows another screen's text, pauses the game or changes screen.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-11 — The Menu starts closed after Continue
+### EV-17 — The Menu starts closed after Continue
 - Requirement: a reload or Continue starts with the Menu closed.
 - Method: playwright
 - How: `w1-chrome.spec.ts` "a held hero, the Menu and a restart survive Continue", extended: open the Menu, restart the host, Continue.
 - Pass evidence: `[data-menu]` is absent after Continue and the gear is the only Menu control visible (M "Closed"); the held hero is unchanged.
 - Fails if: Menu state is stored and reopens.
+
+### EV-18 — A gear panel survives a restart closed, with items recomputed
+- Requirement: a panel open at a restart comes back closed, the game not paused, the toolbar on every iPad and every item's enabled state recomputed.
+- Method: playwright
+- How: open Volume from the gear (panel on the board), restart the host, Continue.
+- Pass evidence: no `[data-panel]` on the board; `paused: false`; every iPad shows the toolbar with "?" and the gear; opening the Menu shows the same enabled and disabled items, with the same reasons, as before the restart.
+- Fails if: the panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
 
 ## Assumptions surfaced
 

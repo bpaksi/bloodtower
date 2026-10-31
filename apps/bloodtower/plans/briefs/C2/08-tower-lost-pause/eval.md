@@ -54,7 +54,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Reconnect from the Menu stays possible later (DEC-301, DEC-229).
 - Method: playwright
 - How: same spec: after Go on without, open the Menu.
-- Pass evidence: the Table group offers "Reconnect tower". It asks to confirm (DEC-230); Yes connects and runs the tower check; the rest of the game uses the tower again. After Yes, the next move-roll cue is sent to the mock.
+- Pass evidence: the Table group offers "Tower" (gear item 9, (Bob approved 2026-10-31 10:38)), enabled; its panel (reconnect or play without) shows on the Story board (display only, DEC-278) while the iPad shows "See the Story board", the pick buttons "Reconnect" and "Play without" (mirrored on the board), and Done/Back (Gamewright pick, pending Bob Q-GEAR-1). Reconnect asks to confirm (DEC-230); Yes connects and runs the tower check; the rest of the game uses the tower again. After Yes, the next move-roll cue is sent to the mock.
 - Fails if: the item is missing or greyed after Go on without.
 
 ### EV-08 — Quit from the pause
@@ -83,8 +83,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-033.
 - Method: playwright
 - How: after Go on without, open the Menu.
-- Pass evidence: Table rows "Pause/Resume", "Reconnect tower", "Join another iPad", "Change who holds whom", "Reconnect tower" enabled; Close last.
-- Fails if: Reconnect tower is disabled or missing.
+- Pass evidence: Table rows "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume" (feature 04 order); "Tower" enabled; Close last.
+- Fails if: Tower is disabled or missing.
 
 ## Survival evals (one per survival invariant in plan.md)
 

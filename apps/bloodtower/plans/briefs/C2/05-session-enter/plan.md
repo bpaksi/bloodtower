@@ -28,7 +28,7 @@ Cutover: Y
 - Continue, restore, and restart must keep:
   - An autosave from before this feature still loads (its checkpoint has no session Enter state).
   - A restarted host mid-Enter starts the Enter again from the join; it never sends a tower command on restart.
-  - Whether this session is playing with or without the tower. After the Enter has finished, on a host restart the session resumes with tonight's tower choice and no Enter (no tower question) (Bob 2026-10-31; EV-16).
+  - Whether this session is playing with or without the tower. After the Enter has finished, on a host restart the session resumes with tonight's tower choice and no Enter (no tower question) (Bob 2026-10-31; EV-13).
 
 ## Done-when (e2e)
 
@@ -43,7 +43,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-274: closed before coding (`decided`). The join QR stays open until every hero is claimed; the session waits only for the first iPad.
 - [ ] DEC-152: closed before coding (`decided`). Tower and base board once per session.
 - [ ] DEC-275: closed before coding (`decided`). One prompt: Connect Tower, or Play without Tower.
-- [ ] SCR-022: closed before coding (`decided`; the card says "Not designed yet" for the step list). The three steps in eval EV-03 are Claude's proposal from SCR-022's text and `packs/test` → Bob: OK?
+- [ ] SCR-022: closed before coding (`decided`; the card says "Not designed yet" for the step list). The three steps in eval EV-03 are the approved mockup wording (resolved; Assumptions in eval.md).
 - [ ] SCR-006: closed before coding (`decided`). Dungeon Complete (#58) at volume 0, 1 and 2, each only after a press; Keep or try another.
 - [ ] DEC-104: closed before coding (`decided`). The board goes down before the tower block.
 
@@ -60,7 +60,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 Bob: "Some browsers will block volume? if so then we need to prompt user on the story page to enable set volume levels. This will be the first thing to happen; enable sound, set levels."
 - The first step on Pick story is an "Enable sound" prompt on each iPad: one tap unlocks that iPad's browser audio (resume the Web Audio context and play inside the tap's handler). No sound plays on that iPad before its tap.
-- Locked copy (Bob 2026-10-31 10:33 ET): state 7a shows only the prompt "Tap once to turn on this iPad's sound." and one button "Enable sound", plus the chrome (bottom bar and Menu gear); nothing else.
+- Locked copy (Bob 2026-10-31 10:33 ET): state 7a shows only the prompt "Tap once to turn on this iPad's sound." and one button "Enable sound", plus the chrome (bottom toolbar: "?" at the left, Menu gear at the right; feature 04); nothing else.
+- During 7a the Story board shows the Pick story backdrop with no volume line; "How loud should the tower be? Press one to hear it." shows only from 7b on (Gamewright design, parent-approved 2026-10-31; EV-14, EV-10).
 - Each iPad needs its own unlock; one iPad's tap never unlocks another.
 - Then the player sets levels: the volume step (Volume 0/1/2, Keep, Try another; SCR-006) shows on that iPad right after its unlock, and the story list follows Keep. The volume step leaves the Enter and runs here; on the connect track a volume press also plays Dungeon Complete on the tower (still only on a press).
 - Keep stays disabled until a volume has been played (no default volume is kept; this settles EV-09's "Also" line).

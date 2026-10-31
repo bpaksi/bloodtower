@@ -49,7 +49,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 - Tower line: "tower: in play" / "without the tower" / "Tower lost" (tower wording ruling).
 - Game rows read "Game 1", "Game 2"…; rows are pressable on the iPad (feature 07 drill-in).
-- Session over: no buttons and no Menu gear.
+- Session over: no body buttons. The bottom toolbar stays ("?" and gear, Bob 2026-10-31 10:37 AM ET); every gear item is disabled with the reason "The session is over.".
 - There is no delete-game action and no delete confirm.
 - Continue is hidden from New game → Yes until Begin (Bob ruling, C-2).
 - Confirms use "<action>" / "Back".

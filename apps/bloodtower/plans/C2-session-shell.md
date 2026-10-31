@@ -79,11 +79,16 @@ Each feature is a vertical slice: engine, views, host, screens and e2e for one p
 - Runs: cloud
 - Model: sonnet
 
-### Feature 04: The iPad Menu has Close
+### Feature 04: The iPad toolbar, the gear Menu and help
+- Bob (Bob 2026-10-31 10:37 AM ET):
+
+> Bob, 2026-10-31 10:37 AM ET: "I iPad screen lost the toolbar at the bottom. On the toolbar is a "setting" (gear). This from here we need options to see current party, game board setup, volume, split party. use potions, .... All UI for these are done on the Story board, but it is started from the iPad settings. I want the happy path to be easy for the players. Exceptions will go through menu"
+
+- Source of truth for the bottom toolbar ("?" left, gear right) on every iPad screen, the gear list (Bob approved 2026-10-31 10:38), Story board panels and help, in C2 and C3. C3-only items (Split party / Rejoin party, Use a potion or item) show greyed with the reason "C3+" in C2 (DEC-227).
 - Folder: [briefs/C2/04-ipad-menu-close](briefs/C2/04-ipad-menu-close/plan.md)
 - Depends on: its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/ChromeBar.tsx`, `apps/bloodtower/src/web/components/device/chromeBar.test.ts` (new), `apps/bloodtower/src/web/app/globals.css` (Menu rules only), `apps/bloodtower/src/e2e/tests/w1-chrome.spec.ts`
-- Builds: UI-033
+- Builds: UI-033, UI-032 (toolbar)
 - Deps change: no
 - Runs: cloud
 - Model: sonnet
@@ -209,6 +214,9 @@ Each gets its folder as soon as what it waits on is on `main`.
 - **Feature 05 is large.** It moves the tower block, adds base board setup and the volume test, and removes the splash pair. Its brief allows the review split.
 
 ## Open items for Bob
+
+- Q-GEAR-1: gear panels display on the Story board only (DEC-278 kept); any choice is a simple list of buttons on the iPad, mirrored on the board; the iPad shows "See the Story board" + pick buttons + Done/Back (Gamewright pick, pending Bob Q-GEAR-1). Bob: OK?
+- Q-GEAR-2: the 10:38 gear list replaces the old Look up items: Hero panel → Current party, Items → Use a potion or item, Roll → Look up (Gamewright pick, pending Bob Q-GEAR-2). Bob: OK?
 
 - Q-401 and Q-402 are answered (design session 2026-10-31, PR #336): DEC-715 makes feature 14 a bugfix, and DEC-716 and DEC-717 settle feature 11. MEC-018 now `uses` DEC-710, DEC-716 and DEC-717.
 

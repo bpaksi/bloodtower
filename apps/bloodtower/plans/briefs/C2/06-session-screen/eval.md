@@ -103,8 +103,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-712, DEC-713.
 - Method: playwright
 - How: Done for tonight → confirm; separately drop every iPad between games.
-- Pass evidence: session over: board has no `.bt-dialog-frame`, background = landing painting; iPad text "The session is over", 0 buttons and no Menu gear. All dropped: board QR, join URL and "Scan with each iPad. Then pick who this iPad speaks for at the table: …".
-- Fails if: a button or gear shows after the session ends.
+- Pass evidence: session over: board has no `.bt-dialog-frame`, background = landing painting; iPad text "The session is over", 0 body buttons; the toolbar shows "?" and the gear, and every gear item is disabled with the reason "The session is over.". All dropped: board QR, join URL and "Scan with each iPad. Then pick who this iPad speaks for at the table: …".
+- Fails if: a body button shows, or a gear item is enabled, after the session ends.
 
 ## Survival evals (one per survival invariant in plan.md)
 
