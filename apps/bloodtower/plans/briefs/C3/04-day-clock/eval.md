@@ -47,7 +47,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Skulls shrink a menu; the 4th destroys it (DEC-093).
 - Method: unit
 - How: place skulls 1 to 4 on one building.
-- Pass evidence: menus shrink per DEC-093: each skull removes the last offer above Cleanse; Cleanse and Leave always stay, and the quest marker stays first while present. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only (Gamewright proposal, pending Bob); after the 4th the building is fallen and leaves every menu and move target as a place.
+- Pass evidence: menus shrink per DEC-093: each skull removes the last offer above Cleanse; Cleanse and Leave always stay, and the quest marker stays first while present. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only (Bob approved 2026-10-31); after the 4th the building is fallen and leaves every menu and move target as a place.
 - Fails if: the 4th skull leaves the building standing.
 
 ### EV-07 — Without the tower the drop is simulated

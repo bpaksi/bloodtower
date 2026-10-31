@@ -28,6 +28,7 @@ C3 menus (Bob approved 2026-10-31), all prices from tuning:
 - Sanctuary: cure (10 gold + 1 move, first one free each chapter per hero), or Cleanse.
 - Village: tavern rest (+3 hit points per move), or Cleanse.
 - Bazaar: Cleanse only.
+- Cleanse costs 1 move and 0 gold (Bob approved 2026-10-31).
 - A fallen building is not enterable and offers nothing, Cleanse included.
 
 ## Cutover
@@ -39,13 +40,13 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - The free-cure-used flag per hero per chapter survives Continue (EV-11) and a host restart (EV-12) (DEC-700).
+  - The free-cure-used flag per hero per chapter survives Continue (EV-12) and a host restart (EV-13) (DEC-700).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-12 all pass (verifier table on PR).
+- [ ] EV-01 … EV-13 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist

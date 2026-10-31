@@ -58,7 +58,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: Fight is offered, shown disabled, or auto-resolved in C3, or the battle loop is called.
 
 ### EV-08 — Pay them off costs `events.pay_off`
-- Requirement: DEC-023; tuning key `events.pay_off` = 5 gold (Gamewright proposal, pending Bob).
+- Requirement: DEC-023; tuning key `events.pay_off` = 5 gold (Bob approved 2026-10-31).
 - Method: unit
 - How: a foes event with purse 12, then with purse 4.
 - Pass evidence: purse 12: Pay them off takes 5 gold (purse 7) and ends the event; Go around takes no gold. Purse 4: Pay them off is disabled; Go around still works.

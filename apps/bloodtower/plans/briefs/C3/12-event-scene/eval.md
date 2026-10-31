@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-023.
 - Method: playwright
 - How: seed that draws foes.
-- Pass evidence: two choices, Go around and Pay them off; no Fight button, enabled or disabled (Q-C3-02); Pay them off shows its cost from `events.pay_off` = 5 gold (Gamewright proposal, pending Bob) and is disabled at purse 4, enabled at purse 5.
+- Pass evidence: two choices, Go around and Pay them off; no Fight button, enabled or disabled (Q-C3-02); Pay them off shows its cost from `events.pay_off` = 5 gold (Bob approved 2026-10-31) and is disabled at purse 4, enabled at purse 5.
 - Fails if: Go around missing, a Fight button shows, or Pay them off is enabled below 5 gold.
 
 ### EV-03 — Only present heroes' iPads choose

@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-043.
 - Method: playwright
 - How: `c3-building.spec.ts`: enter a citadel with 3 moves and 20 gold.
-- Pass evidence: rally "1 move · 5 gold", virtue draw "1 move · 10 gold", Cleanse "1 move", Leave; the quest marker first when one is there.
+- Pass evidence: rally "1 move · 5 gold", virtue draw "1 move · 10 gold", Cleanse "1 move" with no gold shown (1 move, 0 gold (Bob approved 2026-10-31)), Leave; the quest marker first when one is there.
 - Fails if: costs missing or the marker not first.
 
 ### EV-02 — Free cure reads free
@@ -33,7 +33,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-093.
 - Method: playwright
 - How: citadel with 2 skulls.
-- Pass evidence: the menu shows Cleanse and Leave only (2 skulls on a citadel; Gamewright proposal, pending Bob); 2 skulls shown on the board.
+- Pass evidence: the menu shows Cleanse and Leave only (2 skulls on a citadel; Bob approved 2026-10-31); 2 skulls shown on the board.
 - Fails if: Rally or Virtue draw is offered.
 
 ### EV-05 — Screenshots match

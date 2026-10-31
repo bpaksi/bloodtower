@@ -17,7 +17,7 @@ Let a group spend moves and gold at a building (MEC-036).
 - **Cure** (DEC-170, DEC-700): pick the hero, the corruption goes; free or priced.
 - **Rest** (MEC-075): the village's tavern rest (Bob approved 2026-10-31); pick moves; +3 hit points per move.
 - **Virtue draw** (DEC-544): the tile on a Reveal; a fifth means giving one back.
-- **Cleanse** (DEC-377): −1 skull, "+1 day".
+- **Cleanse** (DEC-377): 1 move, 0 gold (Bob approved 2026-10-31); −1 skull, "+1 day". Its row reads "1 move" with no gold.
 - **No Trade**: no Trade, shop or NPC pick at any building (DEC-502).
 - **Fallen building**: not enterable.
 

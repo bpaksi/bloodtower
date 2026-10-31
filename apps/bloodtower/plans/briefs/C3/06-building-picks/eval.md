@@ -47,7 +47,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-093.
 - Method: unit
 - How: a citadel at 0, 1, 2, 3 skulls.
-- Pass evidence: per DEC-093, each skull removes the last offer above Cleanse; Cleanse and Leave always stay, and the quest marker stays first while present. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only (Gamewright proposal, pending Bob).
+- Pass evidence: per DEC-093, each skull removes the last offer above Cleanse; Cleanse and Leave always stay, and the quest marker stays first while present. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only (Bob approved 2026-10-31).
 - Fails if: the menu is unchanged by skulls.
 
 ### EV-07 — Rest heals per move
@@ -78,16 +78,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: it is not a move target as a place; opening its menu is refused; no Cleanse is offered.
 - Fails if: the fallen building can be entered or Cleansed.
 
+### EV-11 — Cleanse costs 1 move and 0 gold
+- Requirement: DEC-377; Cleanse cost (Bob approved 2026-10-31).
+- Method: unit
+- How: a hero with 3 moves and 8 gold Cleanses a citadel with 2 skulls; repeat with 0 gold.
+- Pass evidence: the building drops to 1 skull; the hero has 2 moves and still 8 gold; with 0 gold Cleanse still works.
+- Fails if: Cleanse takes gold, takes no move or more than one, or is refused for want of gold.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-11 — The free cure is remembered
+### EV-12 — The free cure is remembered
 - Requirement: DEC-700.
 - Method: unit
 - How: cure free, autosave, Continue, cure again in the same chapter.
 - Pass evidence: the second costs the normal price.
 - Fails if: Continue gives a second free cure.
 
-### EV-12 — The free cure survives a restart
+### EV-13 — The free cure survives a restart
 - Requirement: DEC-700.
 - Method: unit
 - How: cure free in chapter 1; restart the host; rebuild from the event log; cure again in chapter 1.

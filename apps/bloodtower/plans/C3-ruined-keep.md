@@ -273,7 +273,7 @@ The deliverables listed under each feature's `Builds:`. The gameplay mechanics i
 
 ## OPEN questions (consolidated)
 
-Each is also listed in the feature files that need it. All are answered: Q-C3-01, 02 and 07 by Bob's rulings, and the rest when Bob approved Gamewright's proposal list in full ("approve all", 2026-10-31 10:27 AM ET). Two later Gamewright proposals (skull menu shrink, Pay them off amount) are still pending Bob. (Q-C3-06 is unused.)
+Each is also listed in the feature files that need it. All are answered: Q-C3-01, 02 and 07 by Bob's rulings, and the rest when Bob approved Gamewright's proposal list in full ("approve all", 2026-10-31 10:27 AM ET). Three later calls (skull menu shrink, Pay them off at 5 gold, Cleanse at 1 move and 0 gold) were approved by Bob at 10:31 AM ET; none are pending. (Q-C3-06 is unused.)
 
 Gamewright defaults, Bob approved 2026-10-31 (from Sentinel's C3 eval review; each tagged "(Bob approved 2026-10-31)" in the feature files):
 - 03 has three items: Tomas's Map, the Signet and the oath-blade (B3).
@@ -290,10 +290,9 @@ Gamewright proposals for the numbers, Bob approved 2026-10-31 (each tagged "(Bob
 - 4 fallen buildings lose the game (Q-C3-05).
 - Corruption: Cruel, Greedy and Feral cost 2 gold, Lost costs 1, Tempted adds +2 to each buy; the named corruption is a seeded draw from the C3 set, never one the hero holds (Q-C3-15, Q-C3-16).
 - The Ambush toll is 10 gold; a short group pays what it has plus 2 hit points per present hero, never below 1 (Q-C3-22).
-
-Gamewright proposals still pending Bob (from Sentinel's recheck at 712207c; each tagged "(Gamewright proposal, pending Bob)"):
-- Skull menu shrink (DEC-093): each skull removes the last offer above Cleanse; Cleanse and Leave always stay. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only; the 4th fells it (features 04, 06, 13).
-- Pay them off costs `events.pay_off` = 5 gold and is disabled when the purse is short; Go around takes no gold (features 05, 12).
+- Skull menu shrink (DEC-093): each skull removes the last offer above Cleanse; Cleanse and Leave always stay. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only; the 4th fells it (features 04, 06, 13) (Bob approved 2026-10-31).
+- Pay them off costs `events.pay_off` = 5 gold and is disabled when the purse is short; Go around takes no gold (features 05, 12) (Bob approved 2026-10-31).
+- Cleanse costs 1 move and 0 gold on every standing building (features 06, 13) (Bob approved 2026-10-31).
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win. The game ends won when chapter 1 is won; no seal break, no chapter 2 (features 09, 10, 16).
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4. Foes and disaster events offer Go around and Pay them off only; plain-scene battle options are hidden (features 05, 07, 12, 14).
