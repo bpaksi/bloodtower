@@ -99,6 +99,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
+### EV-17 — Trap and listen copy
+- Requirement: Loremaster copy (2026-10-31).
+- Method: playwright
+- How: Listen down a corridor, then enter a Pit room and a Falling Rocks room.
+- Pass evidence: the iPad reads exactly "You listen down the corridor."; the Pit result reads exactly "The floor gives way. Choose one hero to take the fall: 4 hit points."; the Falling Rocks result reads exactly "Stones crash from the ceiling. Every hero loses 2 hit points.".
+- Fails if: any other text.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-14 — Map survives Continue

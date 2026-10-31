@@ -64,6 +64,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the sheet's `data-help-screen` is `fight-buttons` and its text is exactly "Tap Fight to start a battle, or Go around or Pay them off to avoid it. At The Ambush, Pay the toll instead. In a scene, Fight sits beside the scene's other choice." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
+### EV-11 — Plain scene copy
+- Requirement: Loremaster copy (2026-10-31).
+- Method: playwright
+- How: the test plain scene.
+- Pass evidence: the board reads exactly "Shapes move on the road ahead. They have seen you."; the iPad shows **Fight**, **Slip past**, **Talk them down**.
+- Fails if: any other text.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-09 — Fight survives Continue

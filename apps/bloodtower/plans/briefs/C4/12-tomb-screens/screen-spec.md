@@ -41,7 +41,7 @@ Back to the loop that called it (see ./plan.md).
 
 - Map: a 4×4 grid, entrance on an edge cell, 6–7 rooms at Standard plus the Exit; unrevealed rooms hidden (DEC-603, DEC-583).
 - Listen: the room-kind sound plays on the board; the iPad shows no hint text beyond `[COPY: tomb-screens, listen = "You listen down the corridor."]` (DEC-618).
-- Trap result: Pit (one hero of the group's pick, −4 HP) or Falling Rocks (each −2 HP) (DEC-606); `[COPY: tomb-screens, pit = "..."]`, `[COPY: tomb-screens, rocks = "..."]`.
+- Trap result: Pit (one hero of the group's pick, −4 HP) or Falling Rocks (each −2 HP) (DEC-606); `[COPY: tomb-screens, pit = "The floor gives way. Choose one hero to take the fall: 4 hit points."]`, `[COPY: tomb-screens, rocks = "Stones crash from the ceiling. Every hero loses 2 hit points."]`.
 
 ## OPEN questions
 

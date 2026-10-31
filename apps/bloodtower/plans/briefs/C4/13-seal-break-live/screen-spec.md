@@ -40,7 +40,7 @@ Back to the loop that called it (see ./plan.md).
 
 - Kingdoms: Arisilon (N), Brynthia (E), Durnin (S), Zenon (W), shown as "Arisilon (N)" (DEC-226, DEC-579).
 - Buildings per kingdom: Citadel, Sanctuary, Village, Bazaar, Tavern (DEC-579).
-- Seal names 1–3: story text, `[COPY: seal-break-live, seal1 = "..."]`, `seal2`, `seal3` (no card names them; DEC-303).
+- Seal names 1–3: story text, `[COPY: seal-break-live, seal1 = "The Road Seal"]`, `[COPY: seal-break-live, seal2 = "The Keep Seal"]`, `[COPY: seal-break-live, seal3 = "The Warden's Seal"]` (no card names them; DEC-303).
 
 ## OPEN questions
 

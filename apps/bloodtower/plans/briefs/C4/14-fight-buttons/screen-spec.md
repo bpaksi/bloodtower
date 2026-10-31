@@ -27,7 +27,7 @@ C3 hid Fight (Q-C3-02). C4 shows it on foes and disaster events and on battle op
 
 - Foes or disaster event: **Fight**, **Go around**, **Pay them off (5 gold)** (greyed when short).
 - The Ambush: **Fight**, **Pay the toll (10 gold)**.
-- A plain scene's battle option: **Fight** plus the scene's other option labels.
+- A plain scene's battle option: **Fight** plus the scene's other option labels (the C4 test scene: **Slip past**, **Talk them down**).
 
 ## Tokens
 
@@ -40,7 +40,7 @@ Back to the loop that called it (see ./plan.md).
 ## Values (filled from cards)
 
 - Plain scene: the story's narration plus 2–3 options, each from battle, cost, gold, item or flag (DEC-642, MEC-077).
-- Narration and option labels are story text: `[COPY: fight-buttons, plain-scene = "..."]`, `[COPY: fight-buttons, plain-option-2 = "..."]`, `[COPY: fight-buttons, plain-option-3 = "..."]`.
+- Narration and option labels are story text: `[COPY: fight-buttons, plain-scene = "Shapes move on the road ahead. They have seen you."]`, `[COPY: fight-buttons, plain-option-2 = "Slip past"]`, `[COPY: fight-buttons, plain-option-3 = "Talk them down"]`.
 
 ## OPEN questions
 

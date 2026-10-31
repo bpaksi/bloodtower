@@ -78,6 +78,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
+### EV-14 — Seal names
+- Requirement: Loremaster copy (2026-10-31).
+- Method: playwright
+- How: break seals 1, 2 and 3 in a fixture.
+- Pass evidence: the lit seal is named exactly "The Road Seal", "The Keep Seal", "The Warden's Seal" in turn.
+- Fails if: any other text.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-11 — Skull placement survives Continue
