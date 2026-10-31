@@ -1,0 +1,195 @@
+/* Blood Tower — shared mockup style base (Theme B engraved parchment).
+   Canonical tokens copied from bpaksi/bloodtower docs/art-direction/tokens.css
+   (mirrored in apps/bloodtower/src/web/styles/game-tokens.css). Theme B chrome/gold
+   values from docs/ui-mocks/ui-023-compass/ui-023-move-map-compass.html.
+   Rules baked in: --bt-radius 0 (no rounded corners), no outer drop shadows on parchment. */
+
+@font-face { font-family: "Cormorant Garamond"; src: url("fonts/CormorantGaramond-VF.ttf") format("truetype"); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("fonts/CormorantGaramond-Italic-VF.ttf") format("truetype"); font-weight: 300 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "Cormorant SC"; src: url("fonts/CormorantSC-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "IM Fell English SC"; src: url("fonts/IMFeENsc28P.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "IM Fell English"; src: url("fonts/IMFeENrm28P.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "UnifrakturMaguntia"; src: url("fonts/UnifrakturMaguntia-Book.ttf") format("truetype"); font-display: swap; }
+
+:root {
+  /* ---- palette: app canonical (docs/art-direction/tokens.css) ---- */
+  --bt-void: #0b0806;          /* page behind everything */
+  --bt-soot: #1a1310;          /* inked panel fill */
+  --bt-umber: #3b2a1e;         /* panel edge / dried ink */
+  --bt-iron-gall: #2a1d14;     /* ink on parchment */
+  --bt-parchment: #e9d9b4;     /* page */
+  --bt-parchment-dark: #c9b182;/* foxed edge */
+  --bt-vellum-shadow: #8a6f47; /* hatching / rules */
+  --bt-candle: #f5c451;        /* highlight, choice waiting */
+  --bt-flame: #e8892b;         /* hover / flame core */
+  --bt-blood: #8e1b1b;         /* rubrication, danger, badge */
+  --bt-verdigris: #4f7a6a;     /* rare: holy / ward */
+  --bt-bone: #f3ead2;          /* text on dark */
+
+  /* ---- Theme B engraved chrome (ui-023 compass mock) ---- */
+  --bt-chrome: #2a2622;        /* top/bottom bars */
+  --bt-chrome-mid: #3d3832;
+  --bt-chrome-edge: #5a534a;
+  --bt-engrave-gold: #c9a85a;  /* engraved line gold (frame, tower stroke) */
+  --bt-gold: #c9a227;          /* selected chrome */
+  --bt-gold-bright: #e8c547;
+  --bt-ember: #d4543a;         /* tower window glow */
+  --bt-ink-muted: #4a3f32;
+  --bt-reachable: #3d9a4a;     /* move-map reachable halo (compass --green-glow) */
+  --bt-blocked: #6a6560;
+
+  /* ---- type ---- */
+  --bt-font-body: "Cormorant Garamond", "IM Fell English", Georgia, serif;
+  --bt-font-label: "IM Fell English SC", "Cormorant SC", serif;
+  --bt-font-title: "Cormorant SC", "IM Fell English SC", serif;
+  --bt-font-initial: "UnifrakturMaguntia", "Cormorant SC", serif;
+  --bt-tracking-label: 0.12em;
+  /* Story Board (TV) scale — app canonical, 28px floor (PRD-2) */
+  --bt-size-caption: clamp(1.75rem, 2.3vw, 2.75rem);
+  --bt-size-body: 1.75rem;
+  --bt-size-number: 3rem;
+  --bt-size-prompt: 3.75rem;
+  --bt-size-label: 1.75rem;
+  /* Device (iPad/phone hand-held) scale — mockup addition, 1.25 ratio */
+  --bt-fs-xs: 0.8125rem;  /* 13 */
+  --bt-fs-sm: 1rem;       /* 16 */
+  --bt-fs-md: 1.25rem;    /* 20 body */
+  --bt-fs-lg: 1.5625rem;  /* 25 */
+  --bt-fs-xl: 1.9375rem;  /* 31 */
+  --bt-fs-2xl: 2.4375rem; /* 39 title */
+
+  /* ---- spacing (4px base) ---- */
+  --bt-sp-1: 4px; --bt-sp-2: 8px; --bt-sp-3: 12px; --bt-sp-4: 16px;
+  --bt-sp-5: 24px; --bt-sp-6: 32px; --bt-sp-7: 48px; --bt-sp-8: 64px;
+  --bt-tap: 48px; /* minimum touch target */
+
+  /* ---- frames ---- */
+  --bt-rule: 2px solid var(--bt-iron-gall);
+  --bt-rule-gold: 1px solid color-mix(in srgb, var(--bt-candle) 55%, transparent);
+  --bt-radius: 0;
+  --bt-frame-engraved: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'><defs><g id='c'><g fill='none' stroke='%23c9a85a' stroke-linecap='round'> <path d='M3 3h44M3 3v44' stroke-width='2.2'/><path d='M8 8h34M8 8v34' stroke-width='.9'/> <rect x='3' y='3' width='15' height='15' fill='%232a2420' stroke-width='1.2'/><rect x='6.5' y='6.5' width='8' height='8' stroke-width='.8' transform='rotate(45 10.5 10.5)'/> <path d='M18 13c9 0 14 3 17 10M13 18c0 9 3 14 10 17' stroke-width='1.1'/><path d='M22 14c4 1 7 3 9 7M14 22c1 4 3 7 7 9' stroke-width='.6' opacity='.8'/> <path d='M24 24c3-1 5 1 4 4-3 1-5-1-4-4Z' fill='%238e1b1b' stroke-width='.7'/> <path d='M30 8.5l2 2M34 8.5l2 2M38 8.5l2 2M8.5 30l2 2M8.5 34l2 2M8.5 38l2 2' stroke-width='.6'/></g></g></defs> <use href='%23c'/><use href='%23c' transform='matrix(-1 0 0 1 150 0)'/><use href='%23c' transform='matrix(1 0 0 -1 0 150)'/><use href='%23c' transform='rotate(180 75 75)'/> <path d='M50 3h50M50 147h50' stroke='%23c9a85a' stroke-width='2.2'/><path d='M50 8h50M50 142h50' stroke='%23c9a85a' stroke-width='.9'/> <path d='M3 50v50M147 50v50' stroke='%23c9a85a' stroke-width='2.2'/><path d='M8 50v50M142 50v50' stroke='%23c9a85a' stroke-width='.9'/></svg>");
+
+  /* ---- motion ---- */
+  --bt-ease-ink: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --bt-ease-page: cubic-bezier(0.65, 0, 0.35, 1);
+  --bt-dur-ink: 900ms; --bt-dur-page: 700ms; --bt-dur-badge-pulse: 2400ms;
+
+  /* ---- textures (no image files) ---- */
+  --bt-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .16 0 0 0 0 .11 0 0 0 0 .07 0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --bt-foxing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='7'/><feColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .12 0 0 0 .55 -.18'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+}
+
+*, *::before, *::after { box-sizing: border-box; border-radius: var(--bt-radius); }
+body.bt { margin: 0; background: var(--bt-grain), var(--bt-void); color: var(--bt-bone); font-family: var(--bt-font-body); font-size: var(--bt-fs-md); line-height: 1.35; }
+
+/* ---- type helpers ---- */
+.bt-title { font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-2xl); line-height: 1.1; margin: 0; }
+.bt-h2 { font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-xl); margin: 0; }
+.bt-label { font-family: var(--bt-font-label); letter-spacing: var(--bt-tracking-label); font-size: var(--bt-fs-sm); }
+.bt-caption { font-style: italic; font-size: var(--bt-fs-lg); line-height: 1.3; }
+.bt-caption mark { background: none; color: var(--bt-blood); font-style: normal; font-weight: 600; }
+.bt-on-dark .bt-caption mark, .bt-panel .bt-caption mark { color: var(--bt-candle); }
+.bt-muted { color: var(--bt-ink-muted); }
+.bt-initial::first-letter { font-family: var(--bt-font-initial); color: var(--bt-blood); font-size: 2.6em; float: left; line-height: .9; margin: .05em .08em 0 0; }
+.bt-number { font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-xl); font-variant-numeric: lining-nums; }
+
+/* ---- surfaces ---- */
+.bt-parchment {
+  background: var(--bt-grain), var(--bt-foxing),
+    radial-gradient(ellipse at 50% 40%, var(--bt-parchment) 55%, var(--bt-parchment-dark) 100%);
+  color: var(--bt-iron-gall);
+  box-shadow: inset 0 0 60px rgb(90 60 25 / .55); /* inset burn only */
+}
+.bt-panel { /* inked panel: double rule + fleurons (app canonical) */
+  position: relative; background: var(--bt-grain), var(--bt-soot);
+  border: 3px double var(--bt-candle); outline: 1px solid var(--bt-umber); outline-offset: 5px;
+  color: var(--bt-bone); padding: var(--bt-sp-5);
+}
+.bt-panel::before, .bt-panel::after { content: "\2766"; position: absolute; color: var(--bt-candle); font-size: 22px; line-height: 1; }
+.bt-panel::before { top: -14px; left: -12px; }
+.bt-panel::after { bottom: -14px; right: -12px; transform: rotate(180deg); }
+
+/* Theme B engraved corner frame: dark engraved mount with gold corners around a parchment page.
+   Markup: <div class="bt-frame"><div class="bt-parchment bt-frame__page">…</div></div> */
+.bt-frame {
+  position: relative; display: flex; flex-direction: column;
+  border: 30px solid transparent;
+  border-image: var(--bt-frame-engraved) 50 / 30px / 0 stretch;
+  background: var(--bt-grain), linear-gradient(var(--bt-chrome), var(--bt-soot));
+  background-clip: border-box;
+}
+.bt-frame--sm { border-width: 20px; border-image-width: 20px; }
+.bt-frame__page { flex: 1; padding: var(--bt-sp-5); outline: 1px solid var(--bt-umber); }
+
+/* ---- buttons (device screens only; never on Story Board) ---- */
+.bt-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--bt-sp-2);
+  min-height: var(--bt-tap); padding: 0 var(--bt-sp-5);
+  font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-md); letter-spacing: .02em;
+  cursor: pointer; text-decoration: none; transition: background .2s var(--bt-ease-ink), color .2s;
+}
+.bt-btn--primary { background: var(--bt-iron-gall); color: var(--bt-bone); border: 1px solid var(--bt-engrave-gold); outline: 1px solid var(--bt-iron-gall); outline-offset: 2px; }
+.bt-btn--primary:hover { background: var(--bt-umber); color: var(--bt-candle); }
+.bt-btn--secondary { background: transparent; color: var(--bt-iron-gall); border: 2px solid var(--bt-iron-gall); box-shadow: inset 0 0 0 3px var(--bt-parchment), inset 0 0 0 4px var(--bt-vellum-shadow); }
+.bt-btn--secondary:hover { color: var(--bt-blood); border-color: var(--bt-blood); }
+.bt-on-dark .bt-btn--secondary, .bt-panel .bt-btn--secondary, .bt-bar .bt-btn--secondary { color: var(--bt-bone); border-color: var(--bt-engrave-gold); box-shadow: none; }
+.bt-btn:disabled, .bt-btn[aria-disabled="true"] { background: color-mix(in srgb, var(--bt-parchment-dark) 60%, transparent); color: var(--bt-vellum-shadow); border: 1px dashed var(--bt-vellum-shadow); outline: none; box-shadow: none; cursor: not-allowed; }
+.bt-btn--block { width: 100%; }
+.bt-iconbtn { display: inline-flex; align-items: center; gap: var(--bt-sp-2); min-height: var(--bt-tap); padding: 0 var(--bt-sp-3); background: none; border: 0; color: inherit; font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-md); cursor: pointer; }
+
+/* ---- icons ---- */
+.bt-icon { width: 24px; height: 24px; flex: none; color: currentColor; vertical-align: middle; }
+.bt-icon--lg { width: 40px; height: 40px; }
+
+/* ---- list rows ---- */
+.bt-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--bt-vellum-shadow); }
+.bt-row { display: flex; align-items: center; gap: var(--bt-sp-3); min-height: 56px; padding: var(--bt-sp-2) var(--bt-sp-3); border-bottom: 1px solid var(--bt-vellum-shadow); }
+.bt-row__main { flex: 1; min-width: 0; }
+.bt-row__title { font-family: var(--bt-font-title); font-weight: 700; font-size: var(--bt-fs-md); }
+.bt-row__sub { font-size: var(--bt-fs-sm); color: var(--bt-ink-muted); font-style: italic; }
+.bt-row--selected { background: color-mix(in srgb, var(--bt-candle) 22%, transparent); box-shadow: inset 3px 0 0 var(--bt-gold); }
+.bt-row--disabled { opacity: .5; }
+.bt-row__thumb { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--bt-iron-gall); filter: sepia(.25); }
+
+/* ---- badges ---- */
+.bt-badge { display: inline-flex; align-items: center; gap: 4px; min-width: 26px; height: 26px; padding: 0 8px; font-family: var(--bt-font-label); font-size: var(--bt-fs-xs); letter-spacing: .06em; background: var(--bt-blood); color: var(--bt-bone); border: 1px solid var(--bt-iron-gall); justify-content: center; }
+.bt-badge--gold { background: var(--bt-candle); color: var(--bt-iron-gall); }
+.bt-badge--ward { background: var(--bt-verdigris); }
+.bt-badge--outline { background: transparent; color: var(--bt-iron-gall); border-color: var(--bt-vellum-shadow); }
+.bt-badge--pulse { animation: bt-badge var(--bt-dur-badge-pulse) ease-in-out infinite; }
+
+/* ---- device frame: iPad portrait 820x1180, collapses to 390 wide ---- */
+.bt-device {
+  width: min(820px, 100vw); height: min(1180px, 100vh); margin: 0 auto;
+  display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+  background: var(--bt-void); outline: 10px solid #111; outline-offset: 0;
+}
+.bt-device--phone { width: 390px; height: 844px; }
+.bt-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--bt-sp-3); padding: var(--bt-sp-2) var(--bt-sp-4); background: var(--bt-chrome); color: var(--bt-bone); border-bottom: 1px solid var(--bt-chrome-edge); }
+.bt-bar--bottom { border-bottom: 0; border-top: 1px solid var(--bt-chrome-edge); justify-content: center; padding: var(--bt-sp-3) var(--bt-sp-4); }
+.bt-stage { overflow: auto; padding: var(--bt-sp-3); }
+.bt-stage > .bt-frame { min-height: 100%; }
+@media (max-width: 480px) {
+  .bt-device { outline: 0; }
+  .bt-frame { border-width: 20px; border-image-width: 20px; }
+  .bt-frame__page { padding: var(--bt-sp-4); }
+  :root { --bt-fs-2xl: 1.9375rem; --bt-fs-xl: 1.5625rem; }
+}
+
+/* ---- Story Board (TV, 16:9) — narration surface, NO buttons ---- */
+.bt-board { aspect-ratio: 16/9; width: 100%; position: relative; overflow: hidden; background: var(--bt-void) center/cover no-repeat; display: grid; place-items: center; font-size: var(--bt-size-body); }
+.bt-board .bt-btn, .bt-board button { display: none !important; } /* lock: no buttons on Story Board */
+
+/* ---- Tower marker (board-relative: always top, never N/S/E/W letters) ---- */
+.bt-tower-band { display: flex; flex-direction: column; align-items: center; color: var(--bt-engrave-gold); }
+
+/* ---- motion ---- */
+@keyframes bt-ink-in { from { opacity: 0; filter: blur(6px) contrast(2.2) brightness(1.6); clip-path: inset(0 100% 0 0); } 60% { opacity: 1; filter: blur(1px) contrast(1.4); } to { opacity: 1; filter: none; clip-path: inset(0 0 0 0); } }
+@keyframes bt-candle { 0%,100% { opacity: 1; } 12% { opacity: .86; } 23% { opacity: .97; } 41% { opacity: .9; } 67% { opacity: 1; } 80% { opacity: .93; } }
+@keyframes bt-badge { 0%,100% { box-shadow: 0 0 0 0 rgb(245 196 81 / 0); } 50% { box-shadow: 0 0 14px 4px rgb(245 196 81 / .55); } }
+@keyframes bt-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.bt-ink-in { animation: bt-ink-in var(--bt-dur-ink) var(--bt-ease-ink) both; }
+.bt-flicker { animation: bt-candle 3.7s steps(1, end) infinite; }
+@media (prefers-reduced-motion: reduce) { .bt-ink-in { animation: bt-fade-in 300ms ease-out both; } .bt-flicker, .bt-badge--pulse { animation: none; } }
+
+/* Engraved corners are drawn inside --bt-frame-engraved (same gold line + weights as the border), one continuous frame. No raster corners. */

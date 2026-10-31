@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blood Tower — Style Guide (Theme B)</title>
+<link rel="stylesheet" href="bt-style.css">
+<style>
+ .sg{max-width:1500px;margin:0 auto;padding:32px;display:grid;grid-template-columns:1fr 840px;gap:40px;align-items:start}
+ .sg section{margin-bottom:32px} .sg h2{color:var(--bt-candle);border-bottom:var(--bt-rule-gold);padding-bottom:6px;margin:0 0 16px}
+ .sw{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.sw div{height:64px;border:1px solid var(--bt-umber)} .sw small{display:block;font-size:12px;color:var(--bt-bone);font-family:monospace;margin-top:4px}
+ .ic{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}.ic figure{margin:0;text-align:center;font:12px monospace;color:var(--bt-bone)}.ic svg{width:40px;height:40px;color:var(--bt-engrave-gold);display:block;margin:0 auto 4px}
+ .row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+ .demo{padding:20px} code{font-size:12px}
+ @media(max-width:900px){.sg{grid-template-columns:1fr;padding:12px}.sw{grid-template-columns:repeat(3,1fr)}.ic{grid-template-columns:repeat(5,1fr)}.sg>div:last-child{position:static!important}}
+</style></head>
+<body class="bt">
+<div class="sg">
+<div>
+ <h1 class="bt-title" style="color:var(--bt-candle)">Blood Tower · Style base</h1>
+ <p class="bt-caption">Theme B — engraved parchment. Every <code>briefs/&lt;plan&gt;/##-&lt;feature&gt;/mockup.html</code> links this.</p>
+
+ <section><h2 class="bt-h2">Palette</h2>
+  <div class="sw" id="sw"></div></section>
+
+ <section><h2 class="bt-h2">Type</h2>
+  <div class="bt-parchment demo">
+   <p class="bt-title">Title · Cormorant SC</p>
+   <p class="bt-h2">Heading · Cormorant SC xl</p>
+   <p class="bt-label">LABEL · IM FELL ENGLISH SC</p>
+   <p>Body · Cormorant Garamond md (20px). The bell tolls over Greenbridge.</p>
+   <p class="bt-caption">Caption italic — the <mark>Tower</mark> stirs.</p>
+   <p class="bt-initial">Once the Adversary rose, the four kingdoms lit their beacons and the heroes gathered.</p>
+   <p class="bt-number">5 <span class="bt-label">moves left</span></p>
+  </div></section>
+
+ <section><h2 class="bt-h2">Spacing</h2>
+  <div class="row" id="sp"></div></section>
+
+ <section><h2 class="bt-h2">Icons — icons.svg</h2>
+  <div class="ic" id="ic"></div></section>
+
+ <section><h2 class="bt-h2">Buttons</h2>
+  <div class="bt-parchment demo row">
+   <button class="bt-btn bt-btn--primary">End turn</button>
+   <button class="bt-btn bt-btn--secondary"><svg class="bt-icon"><use href="icons.svg#i-hero"/></svg>Pick hero</button>
+   <button class="bt-btn bt-btn--primary" disabled>Continue</button>
+  </div>
+  <div class="bt-panel row" style="margin-top:24px">
+   <button class="bt-btn bt-btn--primary">Enter</button><button class="bt-btn bt-btn--secondary">Leave</button>
+   <span class="bt-badge">3</span><span class="bt-badge bt-badge--gold">Picked</span><span class="bt-badge bt-badge--ward">Ward</span><span class="bt-badge bt-badge--pulse bt-badge--gold">Your turn</span>
+  </div></section>
+
+ <section><h2 class="bt-h2">Badges &amp; list rows</h2>
+  <div class="bt-parchment demo">
+   <div class="row" style="margin-bottom:12px"><span class="bt-badge">2</span><span class="bt-badge bt-badge--gold">Picked</span><span class="bt-badge bt-badge--ward">Holy</span><span class="bt-badge bt-badge--outline">Blocked</span></div>
+   <ul class="bt-list">
+    <li class="bt-row"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-map"/></svg><div class="bt-row__main"><div class="bt-row__title">Village</div><div class="bt-row__sub">Rest · recruit</div></div><svg class="bt-icon"><use href="icons.svg#i-back" transform="rotate(180 12 12)"/></svg></li>
+    <li class="bt-row bt-row--selected"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-map"/></svg><div class="bt-row__main"><div class="bt-row__title">Bazaar</div><div class="bt-row__sub">Trade spirit for potions</div></div><span class="bt-badge bt-badge--gold"><svg class="bt-icon" style="width:14px;height:14px"><use href="icons.svg#i-check"/></svg></span></li>
+    <li class="bt-row bt-row--disabled"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-map"/></svg><div class="bt-row__main"><div class="bt-row__title">Citadel</div><div class="bt-row__sub">Story-blocked</div></div><span class="bt-badge bt-badge--outline">Blocked</span></li>
+   </ul></div></section>
+
+ <section><h2 class="bt-h2">Story Board (TV) — no buttons</h2>
+  <div class="bt-board" style="background-image:linear-gradient(rgb(11 8 6/.35),rgb(11 8 6/.55)),url(assets/storyboard-bg-splash.webp)">
+   <div class="bt-frame bt-frame--sm" style="width:55%"><div class="bt-parchment bt-frame__page" style="text-align:center">
+    <p class="bt-title" style="color:var(--bt-blood)">Party</p><p class="bt-caption" style="font-size:var(--bt-fs-lg)">2 of 4 picked — <mark>Pick</mark> your heroes on your device.</p></div></div>
+  </div></section>
+
+ <section><h2 class="bt-h2">Reusable art (assets/) — Story Board only, never on iPad</h2>
+  <div class="row"><img src="assets/place-village.webp" width="160" alt=""><img src="assets/place-bazaar.webp" width="160" alt=""><img src="assets/place-citadel.webp" width="160" alt=""><img src="assets/place-sanctuary.webp" width="160" alt=""><img src="assets/cover-dracula.webp" width="200" alt=""></div></section>
+</div>
+
+<!-- Sample screen: iPad portrait 820x1180 -->
+<div style="position:sticky;top:16px">
+ <div class="bt-device">
+  <header class="bt-bar">
+   <button class="bt-iconbtn"><svg class="bt-icon"><use href="icons.svg#i-back"/></svg>Back</button>
+   <span class="bt-label" style="color:var(--bt-candle)">Day 3 · Agnes</span>
+   <button class="bt-iconbtn"><svg class="bt-icon"><use href="icons.svg#i-menu"/></svg>Menu</button>
+  </header>
+  <main class="bt-stage">
+   <div class="bt-frame"><div class="bt-parchment bt-frame__page">
+    <div class="bt-tower-band" role="img" aria-label="The Tower">
+     <svg viewBox="0 0 30 40" width="45" height="60" aria-hidden="true"><path d="M15 1 L18 10 L12 10 Z" fill="#2a2420" stroke="#c9a85a" stroke-width=".8"/><circle cx="15" cy="6.5" r="1.3" fill="#d4543a"/><path d="M9 10 h12 v3 h-1.5 v-1.5 h-1.5 v1.5 h-1.5 v-1.5 h-1.5 v1.5 h-1.5 v-1.5 h-1.5 v1.5 h-1.5 v-1.5 h-1.5 v1.5 H9 Z" fill="#2a2420" stroke="#c9a85a" stroke-width=".7"/><path d="M10 13 L20 13 L22 37 L8 37 Z" fill="#1f1b18" stroke="#c9a85a" stroke-width=".9"/><rect x="14.2" y="17" width="1.6" height="4" rx=".8" fill="#d4543a"/><rect x="12.4" y="25" width="1.4" height="3.2" rx=".7" fill="#8a1e14"/><rect x="16.2" y="25" width="1.4" height="3.2" rx=".7" fill="#8a1e14"/><path d="M13 37 v-4 a2 2 0 0 1 4 0 v4 Z" fill="#0e0c0a" stroke="#c9a85a" stroke-width=".6"/><line x1="4" y1="37.5" x2="26" y2="37.5" stroke="#c9a85a" stroke-width=".8"/></svg>
+    </div>
+    <h1 class="bt-title" style="text-align:center;margin-top:8px">Greenbridge</h1>
+    <p class="bt-caption bt-muted" style="text-align:center;margin-top:4px">You arrive at the <mark>Bazaar</mark>. Choose what to do.</p>
+    <div class="row" style="justify-content:space-between;margin-bottom:12px">
+     <span class="bt-number">4 <span class="bt-label">moves left</span></span>
+     <span class="row" style="gap:8px"><span class="bt-badge bt-badge--gold"><svg class="bt-icon" style="width:14px;height:14px"><use href="icons.svg#i-coin"/></svg>12</span><span class="bt-badge"><svg class="bt-icon" style="width:14px;height:14px"><use href="icons.svg#i-skull"/></svg>2</span><span class="bt-badge bt-badge--ward"><svg class="bt-icon" style="width:14px;height:14px"><use href="icons.svg#i-shield"/></svg>1</span></span>
+    </div>
+    <ul class="bt-list">
+     <li class="bt-row"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-potion"/></svg><div class="bt-row__main"><div class="bt-row__title">Buy potion</div><div class="bt-row__sub">2 coin · restore 3 spirit</div></div><span class="bt-badge bt-badge--outline">2</span></li>
+     <li class="bt-row bt-row--selected"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-sword"/></svg><div class="bt-row__main"><div class="bt-row__title">Hire warriors</div><div class="bt-row__sub">3 coin · +2 warriors</div></div><svg class="bt-icon"><use href="icons.svg#i-check"/></svg></li>
+     <li class="bt-row"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-map"/></svg><div class="bt-row__main"><div class="bt-row__title">Move on</div><div class="bt-row__sub">Open the move map</div></div></li>
+     <li class="bt-row bt-row--disabled"><svg class="bt-icon bt-icon--lg"><use href="icons.svg#i-info"/></svg><div class="bt-row__main"><div class="bt-row__title">Quest</div><div class="bt-row__sub">Story-blocked</div></div><span class="bt-badge bt-badge--outline">Blocked</span></li>
+    </ul>
+   </div></div>
+  </main>
+  <footer class="bt-bar bt-bar--bottom" style="gap:16px">
+   <button class="bt-btn bt-btn--secondary">Leave</button>
+   <button class="bt-btn bt-btn--primary" style="min-width:240px">End turn</button>
+  </footer>
+ </div>
+ <p class="bt-label" style="text-align:center;color:var(--bt-vellum-shadow)">Sample · iPad portrait 820×1180 · Tower at top, no compass letters</p>
+</div>
+</div>
+<script>
+const c=getComputedStyle(document.documentElement);
+document.getElementById('sw').innerHTML=['void','soot','umber','iron-gall','parchment','parchment-dark','vellum-shadow','candle','flame','blood','verdigris','bone','chrome','chrome-mid','engrave-gold','gold','ember','reachable'].map(n=>`<div><div style="height:64px;background:var(--bt-${n})"></div><small>--bt-${n}<br>${c.getPropertyValue('--bt-'+n).trim()}</small></div>`).join('').replace(/<div><div/g,'<span><div').replace(/<\/small><\/div>/g,'</small></span>');
+document.getElementById('sp').innerHTML=[1,2,3,4,5,6,7,8].map(i=>`<div style="text-align:center;font:12px monospace"><div style="width:var(--bt-sp-${i});height:var(--bt-sp-${i});background:var(--bt-candle);margin:0 auto 4px"></div>sp-${i}<br>${c.getPropertyValue('--bt-sp-'+i).trim()}</div>`).join('');
+document.getElementById('ic').innerHTML='tower hero move menu back close check potion sword shield coin skull map info settings'.split(' ').map(n=>`<figure><svg><use href="icons.svg#i-${n}"/></svg>${n}</figure>`).join('');
+</script>
+</body></html>
