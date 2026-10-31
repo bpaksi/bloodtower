@@ -14,7 +14,7 @@ Drafted by Claude for Bob, 2026-10-28. Design only. Part of AREA-091. It lists w
    - Crafty (DEC-395) and Inventive (DEC-397) use potions.
    - Callous (DEC-387) and Lucky (DEC-393) use treasures.
 6. **Write the C2 plan against 1.0.** This is the go signal for coding. With it:
-   - Record the G-C1 sign-off. The C1 plan's Results do not show it.
+   - Record the G-C1 sign-off. Done 2026-10-31: the C1 plan's Results and `apps/bloodtower/docs/playtests/2026-10-31-G-C1.md`, with six follow-ups (GC1-01 to GC1-06).
    - Remove Long from `packs/dracula/pack.yaml` (DEC-502, DEC-508).
    - Each step lists the cards it builds as `Builds:` (DEC-355, DEC-505).
 
