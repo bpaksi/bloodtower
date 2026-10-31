@@ -2,7 +2,7 @@
 
 - Plan step: C2 step 1 ([plan](../../plans/C2-session-shell.md))
 - Read on: `main` at `fcdb2490`, 2026-10-31
-- By: Claude, for Bob at gate G-A
+- By: Claude. Accepted by Bob at gate G-A, 2026-10-31: "Accept the audit"
 - Method: the line counts and the importers of every module in `apps/bloodtower/src`, then the session shell read against MEC-039, SCR-021 and AREA-100. It reads the code; it changes nothing.
 
 ## Answer to Bob's question 1
