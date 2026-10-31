@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the Menu layout (UI-033, DEC-707; mockup).
 - Method: screenshot
 - How: iPad portrait 768×1024 only (the approved mockup is portrait only; no landscape check); DOM checks per EV-08 to EV-10 replace the side-by-side compare.
-- Pass evidence: one portrait screenshot attached for review against ./mockup.html (M "Toolbar (closed)", "Gear list: in play", "Look up empty", "Confirm: Save and quit"); EV-08–EV-10 are the gate. The three groups centred, Close last and full width, the bottom bar still visible under the scrim.
+- Pass evidence: one portrait screenshot attached for review against ./mockup.html (M "Toolbar (closed)", "Gear list: in play", "Gear list: before Begin (join/claim)" (#s=5), "Look up empty", "Confirm: Save and quit"); EV-08–EV-10 are the gate. The three groups centred, Close last and full width, the bottom bar still visible under the scrim.
 - Fails if: Close is missing or the dialog covers the bottom bar.
 
 ### EV-06 — Quit story still works from the Menu
@@ -64,7 +64,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: inside `[data-menu]`, in DOM order (exact names, no number prefix; any "N · " prefix in the mockup is mockup-only): label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). Item 4 is one button whose label toggles: it reads "Split party" while the party is together (always so in C2) and "Rejoin party" while it is split; there is never a separate "Rejoin party" item. The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
 - Fails if: any group/item is missing, an unusable item is absent instead of disabled, or Close is not last.
 
-### EV-09 — Before Begin, game items are greyed with a reason (M "Look up empty")
+### EV-09 — Before Begin, game items are greyed with a reason (M "Gear list: before Begin (join/claim)", #s=5)
 - Requirement: with no game yet, the groups still show and game-only items are greyed with a reason (DEC-227).
 - Method: playwright
 - How: open the Menu on the join/claim screen (before Begin).
