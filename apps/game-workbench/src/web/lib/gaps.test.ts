@@ -13,7 +13,7 @@ describe("gaps report on the real cards", () => {
     const out = execFileSync("node", [path.join(here, "../cli/graph.ts"), "gaps"], {
       encoding: "utf8",
     });
-    const printed = Number(/^(\d+) gaps$/m.exec(out)?.[1]);
+    const printed = Number(/^(\d+) gaps\b/m.exec(out)?.[1]);
     const { gaps, groups } = loadGaps();
     expect(printed).toBe(gaps.length);
     expect(groups.reduce((n, g) => n + g.count, 0)).toBe(printed);

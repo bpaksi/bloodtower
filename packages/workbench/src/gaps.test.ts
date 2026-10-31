@@ -3,7 +3,13 @@ import { findGaps, GAP_RULE_LABEL, type Gap, gapsPerArea, groupGaps } from "./ga
 import type { Card, CardStatus, Graph } from "./graph-types.ts";
 import { RELS } from "./graph-types.ts";
 
-type Spec = { type: string; status?: CardStatus; links?: [string, string][] };
+type Spec = {
+  type: string;
+  status?: CardStatus;
+  layer?: string;
+  release?: unknown;
+  links?: [string, string][];
+};
 
 function graphOf(specs: Record<string, Spec>): Graph {
   const nodes: Graph["nodes"] = {};
@@ -14,14 +20,14 @@ function graphOf(specs: Record<string, Spec>): Graph {
       type: s.type,
       title: id,
       status: s.status ?? "open",
-      layer: null,
+      layer: s.layer ?? null,
       by: null,
       links: (s.links ?? []).map(([rel, to]) => ({ rel, to })),
       sources: [],
       body: "",
       bodyHtml: "",
       file: `${id}.md`,
-      data: {},
+      data: s.release === undefined ? {} : { release: s.release },
     };
     nodes[id] = { kind: "card", ...c };
     for (const l of c.links) {
@@ -282,6 +288,7 @@ describe("gaps: conflict edge cases", () => {
         id: "OPT-001",
         rule: "conflict-unparked",
         title: "OPT-001",
+        release: "1.0",
         areas: [],
         detail: "conflicts with OPT-002",
       },
@@ -588,10 +595,16 @@ describe("findGaps: ordering", () => {
 });
 
 describe("groupGaps and gapsPerArea: edge cases", () => {
-  const gap = (id: string, rule: Gap["rule"], areas: string[]): Gap => ({
+  const gap = (
+    id: string,
+    rule: Gap["rule"],
+    areas: string[],
+    release: Gap["release"] = "1.0",
+  ): Gap => ({
     id,
     rule,
     title: id,
+    release,
     areas,
   });
 
@@ -646,6 +659,22 @@ describe("groupGaps and gapsPerArea: edge cases", () => {
     expect(groupGaps(gaps).reduce((n, x) => n + x.count, 0)).toBe(gaps.length);
   });
 
+  it("puts the 1.1 groups after every 1.0 group, each release in rule order (DEC-696)", () => {
+    const groups = groupGaps([
+      gap("Q-2", "open-question", [], "1.1"),
+      gap("DEC-1", "no-deliverable", []),
+      gap("MEC-2", "mechanic-surface", [], "1.1"),
+      gap("Q-1", "open-question", []),
+    ]);
+    expect(groups.map((x) => `${x.release}:${x.rule}`)).toEqual([
+      "1.0:open-question",
+      "1.0:no-deliverable",
+      "1.1:open-question",
+      "1.1:mechanic-surface",
+    ]);
+    expect(groups.map((x) => x.count)).toEqual([1, 1, 1, 1]);
+  });
+
   it("counts gaps per area, once for each area a card is in, and skips cards with none", () => {
     const per = gapsPerArea([
       gap("Q-1", "open-question", ["A-1", "A-2"]),
@@ -655,6 +684,80 @@ describe("groupGaps and gapsPerArea: edge cases", () => {
     expect([...per]).toEqual([
       ["A-1", 2],
       ["A-2", 1],
+    ]);
+  });
+});
+
+describe("gaps: process and story layers, and the 1.1 release", () => {
+  const deliverable = (rule: string) => (g: Graph) =>
+    findGaps(g)
+      .filter((x) => x.rule === rule)
+      .map((x) => `${x.release}:${x.id}${x.detail ? ` (${x.detail})` : ""}`);
+  const noDeliverable = deliverable("no-deliverable");
+
+  it("skips a decided ruling on the process or story layer (DEC-695, DEC-697)", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", layer: "process" },
+      "DEC-002": { type: "decision", status: "decided", layer: "story" },
+      "DEC-003": { type: "decision", status: "decided", layer: "core" },
+      "DEC-004": { type: "decision", status: "decided", layer: "configurable" },
+      "DEC-005": { type: "decision", status: "decided", layer: "optional" },
+    });
+    expect(noDeliverable(g)).toEqual(["1.0:DEC-003", "1.0:DEC-004", "1.0:DEC-005"]);
+  });
+
+  it("still reports other rules on a process or story card", () => {
+    const g = graphOf({ "Q-001": { type: "question", layer: "process" } });
+    expect(rulesFor(g, "Q-001")).toEqual(["open-question"]);
+  });
+
+  it("files an unreached 1.1 ruling as a 1.1 gap, after the 1.0 gaps", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", release: "1.1" },
+      "DEC-002": { type: "decision", status: "decided" },
+    });
+    expect(noDeliverable(g)).toEqual(["1.0:DEC-002", "1.1:DEC-001"]);
+    expect(findGaps(g).map((x) => x.release)).toEqual(["1.0", "1.1"]);
+  });
+
+  it("lets a 1.1 deliverable reach a 1.1 ruling", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", release: "1.1" },
+      "SCR-001": { type: "screen", release: "1.1", links: [["needs", "DEC-001"]] },
+    });
+    expect(noDeliverable(g)).toEqual([]);
+  });
+
+  it("keeps a 1.0 ruling that only 1.1 deliverables reach on the 1.0 list", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided" },
+      "SCR-001": { type: "screen", release: "1.1", links: [["needs", "DEC-001"]] },
+    });
+    expect(noDeliverable(g)).toEqual(["1.0:DEC-001 (reached only from 1.1 deliverables)"]);
+    const both = graphOf({
+      "DEC-001": { type: "decision", status: "decided" },
+      "SCR-001": { type: "screen", release: "1.1", links: [["needs", "DEC-001"]] },
+      "UI-001": { type: "ui", links: [["uses", "DEC-001"]] },
+    });
+    expect(noDeliverable(both)).toEqual([]);
+  });
+
+  it("files a 1.1 mechanic with no surface as a 1.1 gap", () => {
+    const g = graphOf({
+      "MEC-001": { type: "mechanic", release: "1.1" },
+      "MEC-002": { type: "mechanic" },
+    });
+    expect(deliverable("mechanic-surface")(g)).toEqual(["1.0:MEC-002", "1.1:MEC-001"]);
+  });
+
+  it("groups 1.1 gaps on their own, after the 1.0 groups", () => {
+    const g = graphOf({
+      "MEC-001": { type: "mechanic", release: "1.1" },
+      "DEC-001": { type: "decision", status: "decided" },
+    });
+    expect(groupGaps(findGaps(g)).map((x) => `${x.release}:${x.rule}`)).toEqual([
+      "1.0:no-deliverable",
+      "1.1:mechanic-surface",
     ]);
   });
 });

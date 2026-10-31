@@ -10,11 +10,18 @@ export function loadGaps(): { gaps: Gap[]; groups: GapGroup[]; titles: Record<st
   return { gaps, groups: groupGaps(gaps), titles };
 }
 
-/** The text `pnpm graph gaps` prints: the list by rule, then a line `N gaps`. */
+/**
+ * The text `pnpm graph gaps` prints: the 1.0 list by rule, then the 1.1 list under its own
+ * heading (DEC-696), then a line `N gaps`.
+ */
 export function gapsText(): string {
   const { gaps, groups, titles } = loadGaps();
   const lines: string[] = [];
+  const later = gaps.filter((g) => g.release === "1.1").length;
   for (const g of groups) {
+    if (g.release === "1.1" && g === groups.find((x) => x.release === "1.1")) {
+      lines.push(`== Waits for 1.1 (${later}) ==`, "");
+    }
     lines.push(`${g.label} (${g.count})`);
     for (const gap of g.byArea.length ? uniqueGaps(g) : []) {
       const where =
@@ -25,7 +32,9 @@ export function gapsText(): string {
     }
     lines.push("");
   }
-  lines.push(`${gaps.length} gaps`);
+  lines.push(
+    `${gaps.length} gaps${later ? ` (${gaps.length - later} for 1.0, ${later} for 1.1)` : ""}`,
+  );
   return lines.join("\n");
 }
 

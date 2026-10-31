@@ -18,6 +18,17 @@ export const RELS = {
   "part-of": { label: "part of", reverse: "has part" },
 } as const satisfies RelTable;
 
+/**
+ * The release a card belongs to (DEC-696). A card says `release: "1.1"` when it waits for 1.1;
+ * a card with no field is 1.0, and the lint fails any other value.
+ */
+export type Release = "1.0" | "1.1";
+export const LATER_RELEASES = ["1.1"] as const;
+
+export function releaseOf(card: { data: Record<string, unknown> }): Release {
+  return card.data.release === "1.1" ? "1.1" : "1.0";
+}
+
 export type Link = { rel: string; to: string; note?: string };
 export type Source = { file: string; lines?: string; note?: string };
 

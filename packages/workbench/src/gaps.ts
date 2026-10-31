@@ -2,7 +2,7 @@
  * Gaps in the card graph, as pure functions. A gap is a warning that steers a design session; it
  * never fails a check. Each gap carries the card ID and the rule that found it. No Node imports.
  */
-import type { Card, Graph } from "./graph-types.ts";
+import { type Card, type Graph, type Release, releaseOf } from "./graph-types.ts";
 
 export const GAP_RULES = [
   "open-question",
@@ -26,6 +26,8 @@ export type Gap = {
   id: string;
   rule: GapRule;
   title: string;
+  /** The card's release (DEC-696): 1.1 gaps are reported after the 1.0 ones. */
+  release: Release;
   /** The areas the card is part of (the area itself for an area gap); empty when it has none. */
   areas: string[];
   /** Short detail, e.g. the other side of a conflict. */
@@ -42,6 +44,12 @@ const SURFACE_TYPES = ["screen", "ui", "cue"];
  */
 const DELIVERABLE_TYPES = ["screen", "ui", "cue", "mechanic", "art"];
 const REACH_RELS = ["needs", "uses"];
+/**
+ * Layers whose decided rulings no deliverable builds, so the reach rule skips them: process
+ * rulings are about how we design (DEC-695), story rulings are built by their pack (DEC-697).
+ */
+const UNREACHED_LAYERS = ["process", "story"];
+const RELEASES: Release[] = ["1.0", "1.1"];
 
 function cardsOf(graph: Graph): Card[] {
   return Object.values(graph.nodes).flatMap((n) => (n.kind === "card" ? [n] : []));
@@ -81,9 +89,10 @@ function subtree(graph: Graph, area: string): Set<string> {
 
 /**
  * Every node reached from a live deliverable card by `needs` or `uses`, over any number of hops.
- * The walk neither starts at nor goes through a parked card (DEC-625).
+ * The walk neither starts at nor goes through a parked card (DEC-625). With `only`, it starts
+ * only at deliverables of that release.
  */
-function reachedFromDeliverables(graph: Graph): Set<string> {
+function reachedFromDeliverables(graph: Graph, only?: Release): Set<string> {
   const out = new Map<string, string[]>();
   for (const e of graph.edges) {
     if (REACH_RELS.includes(e.rel)) out.set(e.from, [...(out.get(e.from) ?? []), e.to]);
@@ -95,6 +104,7 @@ function reachedFromDeliverables(graph: Graph): Set<string> {
   const seen = new Set<string>();
   const stack = cardsOf(graph)
     .filter((c) => DELIVERABLE_TYPES.includes(c.type) && c.status !== "parked")
+    .filter((c) => !only || releaseOf(c) === only)
     .map((c) => c.id);
   while (stack.length > 0) {
     for (const to of out.get(stack.pop() as string) ?? []) {
@@ -109,7 +119,7 @@ function reachedFromDeliverables(graph: Graph): Set<string> {
 const isAnsweredQuestion = (n: Graph["nodes"][string] | undefined, answered: Set<string>) =>
   n?.kind === "card" && n.type === "question" && (n.status === "answered" || answered.has(n.id));
 
-/** All gaps, ordered by rule, then card ID. */
+/** All gaps, ordered by release, then rule, then card ID. */
 export function findGaps(graph: Graph): Gap[] {
   const cards = cardsOf(graph);
   const areas = areasOf(graph);
@@ -117,6 +127,7 @@ export function findGaps(graph: Graph): Gap[] {
     id: c.id,
     rule,
     title: c.title,
+    release: releaseOf(c),
     areas: c.type === "area" ? [c.id] : (areas.get(c.id) ?? []),
     ...(detail ? { detail } : {}),
   });
@@ -161,11 +172,15 @@ export function findGaps(graph: Graph): Gap[] {
     gaps.push(gap(a, "conflict-unparked", `conflicts with ${e.to}`));
   }
 
+  // A 1.0 ruling must be reached from a 1.0 deliverable, since C2 builds only those (DEC-696).
   const reached = reachedFromDeliverables(graph);
+  const reached10 = reachedFromDeliverables(graph, "1.0");
   for (const c of cards) {
-    if (c.status === "decided" && c.type === "decision" && !reached.has(c.id)) {
-      gaps.push(gap(c, "no-deliverable"));
-    }
+    if (c.status !== "decided" || c.type !== "decision") continue;
+    if (c.layer !== null && UNREACHED_LAYERS.includes(c.layer)) continue;
+    if (releaseOf(c) === "1.1" ? reached.has(c.id) : reached10.has(c.id)) continue;
+    const only11 = releaseOf(c) === "1.0" && reached.has(c.id);
+    gaps.push(gap(c, "no-deliverable", only11 ? "reached only from 1.1 deliverables" : undefined));
   }
 
   for (const c of cards) {
@@ -180,6 +195,7 @@ export function findGaps(graph: Graph): Gap[] {
   const order = (r: GapRule) => GAP_RULES.indexOf(r);
   return gaps.sort(
     (a, b) =>
+      RELEASES.indexOf(a.release) - RELEASES.indexOf(b.release) ||
       order(a.rule) - order(b.rule) ||
       a.id.localeCompare(b.id, "en", { numeric: true }) ||
       (a.detail ?? "").localeCompare(b.detail ?? ""),
@@ -187,6 +203,8 @@ export function findGaps(graph: Graph): Gap[] {
 }
 
 export type GapGroup = {
+  /** 1.0 groups come first; the 1.0 list is what the C2 plan must close (DEC-696). */
+  release: Release;
   rule: GapRule;
   label: string;
   /** Gaps in this rule; the group counts add up to the number of gaps. */
@@ -195,8 +213,20 @@ export type GapGroup = {
   byArea: { area: string | null; gaps: Gap[] }[];
 };
 
-/** Gaps grouped by rule, then by area (areas in ID order, cards with no area last). */
+/**
+ * Gaps grouped by release (1.0 first), then rule, then area (areas in ID order, cards with no
+ * area last).
+ */
 export function groupGaps(gaps: Gap[]): GapGroup[] {
+  return RELEASES.flatMap((release) =>
+    groupRelease(
+      gaps.filter((g) => g.release === release),
+      release,
+    ),
+  );
+}
+
+function groupRelease(gaps: Gap[], release: Release): GapGroup[] {
   return GAP_RULES.flatMap((rule) => {
     const mine = gaps.filter((g) => g.rule === rule);
     if (mine.length === 0) return [];
@@ -209,7 +239,7 @@ export function groupGaps(gaps: Gap[]): GapGroup[] {
     }));
     const loose = mine.filter((g) => g.areas.length === 0);
     if (loose.length > 0) byArea.push({ area: null, gaps: loose });
-    return [{ rule, label: GAP_RULE_LABEL[rule], count: mine.length, byArea }];
+    return [{ release, rule, label: GAP_RULE_LABEL[rule], count: mine.length, byArea }];
   });
 }
 
