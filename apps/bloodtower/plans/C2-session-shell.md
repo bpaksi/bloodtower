@@ -1,6 +1,6 @@
 # C2 — Session shell: the whole evening, from first start to Done for tonight (build plan)
 
-**Status:** proposed, for Bob at G0.
+**Status:** approved by Bob at G0 on 2026-10-31. Batch B1 may start.
 **Source:** the evening walkthrough (AREA-100, scenes 1 to 7, PR #334), the session loop (MEC-039), the session screen (SCR-021), the rulings DEC-708 to DEC-713, the G-C1 follow-ups GC1-01 to GC1-06 ([playtest notes](../docs/playtests/2026-10-31-G-C1.md), DEC-704 to DEC-707), and the milestone split in [1.0-milestones.md](1.0-milestones.md). C2 is the first of the four 1.0 milestones.
 **Goal:** first audit the C1 code against the cards, then build the evening around today's day slice: the join, the base board setup, the tower block with Connect Tower or Play without Tower, the session screen with Continue, New game, tonight's games and Play again, Done for tonight, and every failure path in AREA-100.
 **Exit condition:** every `Done when` below passes in CI with the mock tower, and Bob signs off at G-C2 on the Mac, the Samsung TV, two iPads and the real tower.
@@ -277,3 +277,5 @@ The app keeps working between steps, as in C1. Steps 4 to 8 build the new shell 
 - **Q-401 (Pick story)** decides whether GC1-06 is in C2 or C3.
 
 ## Results
+
+- G0 (2026-10-31): Approved by Bob in chat: "Approve G0". This covers the C2 plan, its batches, and the milestone split in `1.0-milestones.md`. This plan and AREA-100 stand in for an intent file. B1 (steps 1, 2 and 3) may start.
