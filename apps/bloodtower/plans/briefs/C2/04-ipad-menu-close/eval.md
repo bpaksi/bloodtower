@@ -59,8 +59,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-08 — Gear list matches mockup (M "Gear list: in play")
 - Requirement: the open Menu matches the approved mockup.
-- Method: playwright, iPad portrait 768×1024, in play with the tower connected
-- How: open the Menu.
+- Method: playwright
+- How: (iPad portrait 768×1024, in play with the tower connected) open the Menu.
 - Pass evidence: inside `[data-menu]`, in DOM order (exact names, no number prefix; any "N · " prefix in the mockup is mockup-only): label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). Item 4 is one button whose label toggles: it reads "Split party" while the party is together (always so in C2) and "Rejoin party" while it is split; there is never a separate "Rejoin party" item. The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
 - Fails if: any group/item is missing, an unusable item is absent instead of disabled, or Close is not last.
 
@@ -80,15 +80,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-11 — The toolbar is on every iPad screen
 - Requirement: every iPad screen has the bottom toolbar with "?" at the left end and the gear at the right end (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7a/7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, glyphs-facing, session screen, game stats, session over.
+- Method: playwright
+- How: (iPad portrait 768×1024) walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7a/7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, glyphs-facing, session screen, game stats, session over.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible inside the viewport; its first control is "?" and its last is the gear; nothing in the iPad body covers them.
 - Fails if: any screen or state lacks the toolbar, "?" or the gear.
 
 ### EV-12 — Gear actions open on the Story board and pause the game
 - Requirement: an enabled gear item starts on the iPad and its UI shows on the Story board; the game pauses while the panel is open and resumes on Done (Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, board 1920×1080 + iPad 768×1024, in play
-- How: for each enabled item in turn (Current party, Game board setup, Volume, Look up, Change who holds whom, Join another iPad), open it from the gear, then press Done.
+- Method: playwright
+- How: (board 1920×1080 + iPad 768×1024, in play) for each enabled item in turn (Current party, Game board setup, Volume, Look up, Change who holds whom, Join another iPad), open it from the gear, then press Done.
 - Pass evidence: while open, the iPad body shows "See the Story board", the panel's pick buttons when it needs a choice (Volume: "Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"), and Done (Back only where the panel has a step back); the board shows `[data-panel="<item>"]` with 0 `button` elements (DEC-278) and mirrors each iPad pick within 500 ms (`[data-picked]` matches the pressed button); (resolved Q-GEAR-1 (a); Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET); the host reports `paused: true`. After Done the panel is gone, the iPad is back on its screen and `paused: false`. Each item also does its job:
   - Current party: the board panel lists every hero with HP, gold, items, corruptions and holder, matching the host state.
   - Game board setup: the board shows the setup steps and the piece check re-runs (the C2 feature 11 flow; the host logs a new piece-check run).
@@ -107,15 +107,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-14 — A disabled item shows its reason
 - Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
-- Method: unit (`chromeBar.test.ts`) + playwright
-- How: render the Menu in play with the tower connected in a C2 build; then open the Menu on the session screen with no tower connected.
+- Method: playwright
+- How: (unit (`chromeBar.test.ts`) + playwright) render the Menu in play with the tower connected in a C2 build; then open the Menu on the session screen with no tower connected.
 - Pass evidence: every `disabled` item has exactly one `[data-reason]` line: "Split party" and "Use a potion or item" read "C3+"; "Tower" reads "The tower is connected."; on the session screen "Look up" and "Pause/Resume" each read "Only in a game." and "Tower" is enabled with no reason line; each disabled row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; enabled items have no reason line and no `.bt-row--disabled`.
 - Fails if: a disabled item has no reason, or an enabled item is greyed; or a disabled item is hidden, not greyed, or has a reason other than its listed text.
 
 ### EV-15 — First press wins across iPads
 - Requirement: two iPads pressing a gear item open one panel (Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, two iPads
-- How: both iPads press Volume within 50 ms.
+- Method: playwright
+- How: (two iPads) both iPads press Volume within 50 ms.
 - Pass evidence: one `[data-panel="volume"]` on the board; the host logs one open; the other iPad's Menu shows Volume disabled with the reason "Open on another iPad."
 - Fails if: two panels, two opens, or no reason on the second iPad.
 

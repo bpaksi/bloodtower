@@ -66,8 +66,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-09 — Notice matches mockup (M "Refused notice", "Normal")
 - Requirement: DEC-712 per mockup.
-- Method: playwright, iPad 768×1024
-- How: refuse the request on one iPad of two; then grant.
+- Method: screenshot
+- How: (iPad 768×1024) refuse the request on one iPad of two; then grant.
 - Pass evidence: one notice with the mockup text sits above the bottom bar (bottom ≤ bar top), covers no body button (`elementFromPoint` at each button centre returns the button), carries the EV-03 code, shows only on the refused iPad; dismissing removes it; granted: no notice in the DOM.
 - Fails if: it covers a button, shows on the other iPad, or cannot be dismissed.
 

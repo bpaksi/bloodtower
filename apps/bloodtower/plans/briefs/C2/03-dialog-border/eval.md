@@ -46,8 +46,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-06 — Long content fitted (M "Long content, fitted")
 - Requirement: board dialogs never scroll: the art shrinks first, then content is cut to fit (Bob 2026-10-31).
-- Method: playwright, 1920×1080
-- How: the base board setup dialog (three steps), plus a test fixture setup step with 12 lines and a 600 px intrinsic art.
+- Method: playwright
+- How: (1920×1080) the base board setup dialog (three steps), plus a test fixture setup step with 12 lines and a 600 px intrinsic art.
 - Pass evidence: frame inside the 5% guides; no scroll (EV-02 checks). On the fixture: art height < intrinsic (600 px) before any line is removed, then lines are removed whole, never a word clipped mid-line.
 - Fails if: any scroll appears, content is cut while the art is still full size, or a line is clipped mid-text.
 

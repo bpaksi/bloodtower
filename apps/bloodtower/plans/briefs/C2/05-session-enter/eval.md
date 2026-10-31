@@ -87,8 +87,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-12 — old screen id gone
 - Requirement: P:24.
-- Method: unit/grep
-- How: `rg -n "'tower-connect'|\"tower-connect\"" apps/bloodtower/src`; full e2e suite.
+- Method: unit
+- How: (unit/grep) `rg -n "'tower-connect'|\"tower-connect\"" apps/bloodtower/src`; full e2e suite.
 - Pass evidence: 0 screen-id hits; full e2e passes.
 - Fails if: any hit.
 

@@ -74,8 +74,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-13 — Pause and confirms match mockup (M "Paused, tower lost", "Go on without confirm", "Quit confirm", "Reconnecting")
 - Requirement: DEC-301 per the mockup.
-- Method: playwright; board 1920×1080, iPad 768×1024
-- How: drop the mock tower mid-game; open each confirm.
+- Method: playwright
+- How: (board 1920×1080, iPad 768×1024) drop the mock tower mid-game; open each confirm.
 - Pass evidence: board "Tower lost" with line "The tower has gone quiet. The game waits." inside the DEC-705 frame, 0 board buttons; iPad same line + "Reconnect" (primary), "Go on without", "Quit". Go on without: title "Go on without", "Are you sure?", "Go on without" (primary), "Back". Quit (M "Quit confirm", s=3): the line "Leave the game? It will be saved." and exactly two buttons "Leave" (primary) and "Back". Reconnecting: iPad 0 body buttons. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
 - Fails if: a label differs or a board button shows.
 

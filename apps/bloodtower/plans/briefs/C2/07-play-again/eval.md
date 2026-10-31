@@ -66,8 +66,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-13 — Stats screen matches mockup (M "Game stats")
 - Requirement: SCR-019 slice per the mockup.
-- Method: playwright; board 1920×1080, iPad 768×1024
-- How: open a quit game from the list.
+- Method: playwright
+- How: (board 1920×1080, iPad 768×1024) open a quit game from the list.
 - Pass evidence: board title = the list label ("Game N"); rows "Outcome" = "quit", "Time played" = "—" for a quit game (Bob 2026-10-31), every slice stat row from EV-01; an unrecorded value renders "unavailable" (never "0" or blank; "—" only for Time played on a quit game); board 0 buttons. iPad body buttons "Play again" (primary), "Back", plus an optional 1–5 fun rating that never blocks.
 - Fails if: a row is missing, an unrecorded value is not "unavailable", or the rating blocks Play again.
 

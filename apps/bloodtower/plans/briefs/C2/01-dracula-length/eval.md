@@ -45,8 +45,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-06 — Screen matches mockup (M "Dracula settings")
 - Requirement: Game settings matches the approved mockup.
-- Method: playwright, iPad portrait 768×1024
-- How: open Game settings for Dracula.
+- Method: screenshot
+- How: (iPad portrait 768×1024) open Game settings for Dracula.
 - Pass evidence: heading "Game settings"; label "Length"; exactly two buttons under it, "Short", "Standard" in that order; "Standard" selected; no element with text "Long" in the DOM. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
 - Fails if: a "Long" button exists in any state (incl. `disabled` or `display:none`).
 

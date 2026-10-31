@@ -73,22 +73,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-13 — Drums confirm after the press
 - Requirement: P:36.
-- Method: server test
-- How: Turn the drums succeeds, then Done.
+- Method: unit
+- How: (server test) Turn the drums succeeds, then Done.
 - Pass evidence: the board view's step shows the expected side per drum; Done logs one confirm event for drums.
 - Fails if: no picture or no confirm event.
 
 ### EV-14 — Foes and seals when present
 - Requirement: P:33–34.
-- Method: engine test
-- How: a save with one foe and one broken seal.
+- Method: unit
+- How: (engine test) a save with one foe and one broken seal.
 - Pass evidence: steps in order minis, skulls, foes, seals.
 - Fails if: a step is missing or out of order.
 
 ### EV-15 — Drum field updated by the check's rotate
 - Requirement: the piece check updates the saved drum positions (Bob 2026-10-31).
-- Method: server test
-- How: Turn the drums succeeds.
+- Method: unit
+- How: (server test) Turn the drums succeeds.
 - Pass evidence: the autosave's drum positions equal the sent positions.
 - Fails if: the autosave keeps the old positions.
 

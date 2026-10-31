@@ -80,15 +80,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-14 — Goodbye removed
 - Requirement: P:22.
-- Method: unit/grep
-- How: check files and `rg "'goodbye'" apps/bloodtower/src`.
+- Method: unit
+- How: (unit/grep) check files and `rg "'goodbye'" apps/bloodtower/src`.
 - Pass evidence: `GoodbyeTeardown.tsx` and `lib/goodbye.ts` do not exist; 0 screen-id hits; an idle-on-close test on the Done-for-tonight path passes.
 - Fails if: any remains.
 
 ### EV-15 — Session screen matches mockup (M "Session screen", "Tower lost", "No games yet")
 - Requirement: SCR-021 per the approved mockup.
-- Method: playwright; board 1920×1080, iPad 768×1024
-- How: open the session screen with games, after a between-games drop, and fresh.
+- Method: playwright
+- How: (board 1920×1080, iPad 768×1024) open the session screen with games, after a between-games drop, and fresh.
 - Pass evidence: board rows in DOM order: "Continue", "New game", label "Tonight's games", rows "Game N" newest first each with a "quit" mark, "Done for tonight", tower line; board 0 buttons. iPad body buttons in order: "Continue" (primary), "New game", each game row, "Done for tonight". (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.) After a drop between games the tower line reads "Tower lost". Fresh: "No games yet tonight." and no Continue. No delete-game action exists anywhere.
 - Fails if: order differs, a row is missing, the empty state is a blank list, or any delete action/confirm appears.
 
