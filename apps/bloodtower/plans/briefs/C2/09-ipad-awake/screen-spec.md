@@ -6,7 +6,7 @@ Mostly invisible. The only screen change: an iPad whose keep-awake request is re
 
 ## States
 - Normal: no change on the device page (SCR-016).
-- Refused: a notice on that iPad only [COPY: screen may sleep], logged. Non-blocking.
+- Refused: a notice on that iPad only "This iPad may dim and sleep. Keep it awake in Settings to stay in the game.", logged. Non-blocking.
 - Slept anyway: it is a drop. Mid-game: pause until every hero has a device (DEC-154). Between games: nothing blocks (DEC-712).
 
 ## Player actions

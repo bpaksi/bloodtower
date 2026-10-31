@@ -24,5 +24,5 @@ SCR-021, DEC-214, DEC-709, DEC-711, DEC-712, DEC-713, DEC-208, DEC-218, DEC-628,
 - Done confirmed → tower to idle if in play (CUE-012) → landing painting; next session starts at the join (MEC-039 .1). Autosave stays.
 
 ## Open questions
-- Empty list (first game of the night not yet played) state: not on a card. Assumed hidden or [COPY: no games yet].
+- Empty list (first game of the night not yet played) state: not on a card. Assumed hidden or "No games yet tonight.".
 - How many games fit before the list must cut down (DEC-705, no scroll)? No ruling.

@@ -5,7 +5,7 @@ Gamewright, 2026-10-31. Design only. Story copy and voiced words: Loremaster fil
 When the tower drops once a game has started (piece setup included), the game pauses and the table picks how to go on (DEC-301, DEC-711).
 
 ## States
-- Paused, tower lost: board waiting dialog (DEC-705 frame) [COPY: tower lost]. iPad: Reconnect, Go on without, Quit.
+- Paused, tower lost: board waiting dialog (DEC-705 frame) "The tower has gone quiet. The game waits.". iPad: Reconnect, Go on without, Quit.
 - Go on without confirm: asks first (DEC-301). Then the rest of the game uses no-tower stand-ins (DEC-305): tower nodes skipped, skull drop is a seeded draw, board unchanged.
 - Reconnecting: progress state; on success the tower check (MEC-018) runs before play goes on (C2: as C1 built it; pictures come in feature 11). On fail: back to the three buttons.
 - Quit: Quit story confirm (DEC-230) → session screen.

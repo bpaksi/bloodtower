@@ -4,7 +4,7 @@ Gamewright, 2026-10-31. Design only. Story copy and voiced words: Loremaster fil
 ## Purpose
 Before a saved game resumes, the table puts back (or checks) every tracked piece, the drums and trapped skulls (AREA-100 scene 5, DEC-710).
 
-## States (each one dialog in the SCR-011 frame; board: picture + [COPY: line]; iPad: Done, Skip)
+## States (each one dialog in the SCR-011 frame; board: picture + line: 1 "Set each hero on their saved space." 2 "Put the skulls back on each building." 3 "Set the foes back where they stood." 4 "Mark the broken seals." 5 (title locked) 6 "Drop N skulls back in the top of the tower."; iPad: Done, Skip)
 1. Hero minis: board picture with each hero's saved space.
 2. Skulls on buildings: count per building.
 3. Foes, only if the save has any.

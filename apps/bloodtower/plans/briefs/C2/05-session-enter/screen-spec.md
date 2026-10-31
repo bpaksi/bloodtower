@@ -5,13 +5,13 @@ Gamewright, 2026-10-31. Design only. Story copy and voiced words: Loremaster fil
 Start the evening once: join, base board out, tower decided and ready, before the first game (AREA-100 scene 1, MEC-039 .1 to .12, .20 to .25).
 
 ## States (board shows, iPad only presses: DEC-278; all dialogs in the DEC-705 frame)
-1. Join (.1): large QR + join URL (UI-010) + [COPY: how to join]. Stays open until every hero is claimed, then small in a corner (DEC-274, SCR-022 uses UI-010).
+1. Join (.1): large QR + join URL (UI-010) + "Scan with each iPad. Then pick who this iPad speaks for at the table: Pick Hero A … N of N picked.". Stays open until every hero is claimed, then small in a corner (DEC-274, SCR-022 uses UI-010).
 2. First iPad joined (.2, SCR-015): session moves on; later iPads may still join.
-3. Base board setup (.3, SCR-022): three steps on the board: tower on the board, board laid out with kingdom edges, RtDT pieces sorted. [COPY: step 1/2/3]. iPad: "Board is set up".
-4. Tower choice (.5, SCR-005): [COPY: connect or play without?]. iPad: Connect Tower (primary), Play without Tower.
+3. Base board setup (.3, SCR-022): three steps on the board: tower on the board, board laid out with kingdom edges, RtDT pieces sorted. Step 1 "Set the tower on the board." Step 2 "Lay out the board, kingdom edges matched." Step 3 "Sort the pieces: heroes, foes, skulls.". iPad: "Board is set up".
+4. Tower choice (.5, SCR-005): "Wake the tower, or play tonight without it?". iPad: Connect Tower (primary), Play without Tower.
 5. Connecting / Calibrating (.8 to .10, CUE-011): board progress state. No iPad buttons.
-6. Connect or calibrate failed (.11): back to state 4 (DEC-711 notes the loop). [COPY: failure line].
-7. Volume (.20 to .25, SCR-006, SND-058): board [COPY: pick volume]; iPad Volume 0 / 1 / 2, each plays Dungeon Complete once only on press; then Keep or Try another.
+6. Connect or calibrate failed (.11): back to state 4 (DEC-711 notes the loop). "The tower did not answer. Try again, or play without it.".
+7. Volume (.20 to .25, SCR-006, SND-058): board "How loud should the tower be? Press one to hear it."; iPad Volume 0 / 1 / 2, each plays Dungeon Complete once only on press; then Keep or Try another.
 8. Without tower: states 5 to 7 skipped (DEC-275, DEC-305).
 - Glyphs and facing (.13 to .19) left out until feature 12.
 
