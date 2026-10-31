@@ -60,7 +60,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-08 — Quit from the pause
 - Requirement: Quit from the pause ends the game as quit and lands on the session screen (DEC-218, DEC-301).
 - Method: playwright
-- How: same spec: drop the tower, Quit story, confirm.
+- How: same spec: drop the tower, Quit, then Leave on the confirm.
 - Pass evidence: the session screen with Continue first and "Tower lost" as the tower line (feature 06).
 - Also: after Go on without, quit → session tower line exactly 'without the tower'.
 - Fails if: the quit drops the autosave, or the tower line says in play.
@@ -72,11 +72,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: four images attached, matching wording and button order.
 - Fails if: a button is missing or out of order.
 
-### EV-13 — Pause and confirms match mockup (M "Paused", "Go on without confirm", "Quit confirm", "Reconnecting")
+### EV-13 — Pause and confirms match mockup (M "Paused, tower lost", "Go on without confirm", "Quit confirm", "Reconnecting")
 - Requirement: DEC-301 per the mockup.
 - Method: playwright; board 1920×1080, iPad 768×1024
 - How: drop the mock tower mid-game; open each confirm.
-- Pass evidence: board "Tower lost" with line "The tower has gone quiet. The game waits." inside the DEC-705 frame, 0 board buttons; iPad same line + "Reconnect" (primary), "Go on without", "Quit". Go on without: title "Go on without", "Are you sure?", "Go on without" (primary), "Back". Quit: title "Quit story", "Are you sure?", "Quit story" (primary), "Back". Reconnecting: iPad 0 body buttons. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
+- Pass evidence: board "Tower lost" with line "The tower has gone quiet. The game waits." inside the DEC-705 frame, 0 board buttons; iPad same line + "Reconnect" (primary), "Go on without", "Quit". Go on without: title "Go on without", "Are you sure?", "Go on without" (primary), "Back". Quit (M "Quit confirm", s=3): the line "Leave the game? It will be saved." and exactly two buttons "Leave" (primary) and "Back". Reconnecting: iPad 0 body buttons. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
 - Fails if: a label differs or a board button shows.
 
 ### EV-14 — gear → Tower while without (M "Later: gear item 9 Tower", s=4; panel M "Later: Tower panel", s=5)
