@@ -103,7 +103,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Loremaster copy (2026-10-31).
 - Method: playwright
 - How: Listen down a corridor, then enter a Pit room and a Falling Rocks room.
-- Pass evidence: the iPad reads exactly "You listen down the corridor."; the Pit result reads exactly "The floor gives way. Choose one hero to take the fall: 4 hit points."; the Falling Rocks result reads exactly "Stones crash from the ceiling. Every hero loses 2 hit points.".
+- Pass evidence: the iPad reads exactly "You listen down the corridor."; the Pit result reads exactly "The floor gives way. Choose one hero to take the fall and lose 4 hit points." (locked by Loremaster); the Falling Rocks result reads exactly "Stones crash from the ceiling. Every hero loses 2 hit points." (locked by Loremaster).
 - Fails if: any other text.
 
 ## Survival evals (one per survival invariant in plan.md)
