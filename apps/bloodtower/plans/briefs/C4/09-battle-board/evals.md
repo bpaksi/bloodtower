@@ -39,8 +39,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Strength left and the round result show
 - Requirement: UI-026.
 - Method: playwright
-- How: level-2 foe with 4 wounds; win round 1.
-- Pass evidence: `[data-foe-strength]` reads 4 then 3; the board line reads `Round 1: {hero} struck for 1.` with the hero's name.
+- How: level-2 foe, 1 hero present (8 wounds, DEC-563); win round 1 with a 2-strength cut.
+- Pass evidence: `[data-foe-strength]` reads 8 then 6; the board line reads `Round 1: {hero} struck for 1.` with the hero's name.
 - Fails if: the bar does not move, or no result line.
 
 ### EV-06 — Hit and victory cues fire
@@ -85,23 +85,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
+### EV-12 — Each foe shows its 2 trait chips
+- Requirement: UI-026, DEC-068, DEC-579.
+- Method: playwright
+- How: a fixture pack foe with traits Undead, Melee.
+- Pass evidence: exactly 2 chips `[data-foe-trait]` reading Undead and Melee, from the pack entry.
+- Fails if: a missing, extra or different chip.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-12 — Board redraws after Continue
+### EV-13 — Board redraws after Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit mid-battle; Continue.
 - Pass evidence: same foe, wounds, heroes.
 - Fails if: blank or reset.
 
-### EV-13 — A beat interrupted by restart applies once
+### EV-14 — A beat interrupted by restart applies once
 - Requirement: restart or Continue during an auto-advancing beat (round result (won or lost), victory) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-14 — The gear comes back closed after a restart
+### EV-15 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

@@ -71,9 +71,37 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no layout before; a 7-room layout after; identical after the second.
 - Fails if: a layout before entry, or a new one on re-entry.
 
+### EV-10 — Short length deals 4–5 rooms
+- Requirement: DEC-603.
+- Method: unit
+- How: 100 seeds at Short.
+- Pass evidence: 4 or 5 rooms each, guardian's included.
+- Fails if: any other count.
+
+### EV-11 — The deal is 40/30/30
+- Requirement: DEC-604.
+- Method: sim
+- How: 10,000 seeded tombs; count non-guardian rooms.
+- Pass evidence: nothing 0.40 ± 0.02, battle 0.30 ± 0.02, trap 0.30 ± 0.02; every tomb has at least 1 battle and 1 trap.
+- Fails if: any rate outside, or a tomb with no battle or no trap.
+
+### EV-12 — Battle rooms hold the quest's foe at the quest's level
+- Requirement: DEC-608.
+- Method: unit
+- How: enter every battle room of a level-2 quest's tomb.
+- Pass evidence: each battle is the quest's foe at level 2.
+- Fails if: another foe or level.
+
+### EV-13 — Listening is free, unlimited and plays a room-kind sound
+- Requirement: DEC-587, DEC-618.
+- Method: unit
+- How: listen 5 times down one corridor of each kind, with a seed giving true hints.
+- Pass evidence: no move or gold spent; board sound `snd.listen_nothing` / `snd.listen_trap` / `snd.listen_battle` by kind, each time.
+- Fails if: a cost, a refusal, or a wrong sound id.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-10 — Rooms kept across Continue
+### EV-14 — Rooms kept across Continue
 - Requirement: DEC-602.
 - Method: playwright
 - How: clear 3 rooms, quit, Continue, re-enter.
@@ -86,6 +114,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- ANSWERED by DEC-608 (0005) Q-C4-07: The Barrow's guardian (the dead garrison, DEC-662): what level? Options: (a) level 3, as `tomb.guardian_level` in base tuning; (b) level 4. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- ANSWERED by DEC-618 (0005) Q-C4-09: Listening at a corridor (DEC-586): how often does the hint lie? Options: (a) 1 in 4 (`tomb.listen_lie` = 0.25); (b) 1 in 3. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- Q-C4-07 ANSWERED by card DEC-608 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Guardian:** the same foe, one level up." Source: research/game-design/cards/DEC-608.md. ~~Old option (a) level 3, as `tomb.guardian_level`; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-08 ANSWERED by card DEC-603 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Rooms, guardian's included:** short 4–5, standard 6–7, long 8–10, seeded within the range. / **Grid:** 4×4, 16 cells. The entrance is on an edge cell." Source: research/game-design/cards/DEC-603.md. ~~Old option (a) 7 rooms, guardian hidden in one of the last 3; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-09 ANSWERED by card DEC-618 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Wrong hints:** 1 in 5, seeded like the room (DEC-011)." Source: research/game-design/cards/DEC-618.md. ~~Old option (a) 1 in 4 (`tomb.listen_lie` = 0.25); Gamewright pick (a), pending Bob~~ (struck: contradicts the card).

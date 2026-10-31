@@ -50,9 +50,37 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: rooms 1–2 each a guard, trap or shrine; room 3 a stair guard; level 3 room 3 is The Warden.
 - Fails if: any other kind, or The Warden elsewhere.
 
+### EV-07 — Tower guards are the adversary's level − 2
+- Requirement: DEC-702.
+- Method: unit
+- How: 100 seeds under The Warden (level 5).
+- Pass evidence: every guard and stair guard is level 3.
+- Fails if: any other level.
+
+### EV-08 — Rooms 1–2 are guard, trap or shrine at 1 in 3
+- Requirement: DEC-566, DEC-703.
+- Method: sim
+- How: 10,000 seeded levels.
+- Pass evidence: each kind 0.333 ± 0.02.
+- Fails if: any rate outside.
+
+### EV-09 — A Tower trap costs each hero 2 HP
+- Requirement: DEC-566.
+- Method: unit
+- How: 2 heroes at 10 HP enter a trap room.
+- Pass evidence: both at 8 HP.
+- Fails if: any other value.
+
+### EV-10 — A shrine heals each hero 2 HP, once
+- Requirement: DEC-566.
+- Method: unit
+- How: 2 heroes at 5 HP use a shrine, then try again.
+- Pass evidence: both at 7 HP; the second use is refused.
+- Fails if: no heal, a different amount, or a second heal.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Progress survives Continue
+### EV-11 — Progress survives Continue
 - Requirement: DEC-360.
 - Method: playwright
 - How: reach main level, quit, Continue.

@@ -64,16 +64,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the sheet's `data-help-screen` is `tower-screens` and its text is exactly "Tap Open the next door to go deeper. Tap Rest at a shrine, or Retreat to fall back." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
+### EV-09 — A Tower trap shows −2 in the view
+- Requirement: DEC-566.
+- Method: playwright
+- How: 2 heroes at 10 HP open a trap room.
+- Pass evidence: the room view shows each hero 8/… HP and the line notes 2 hit points lost.
+- Fails if: no change shown.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-09 — Map survives Continue
+### EV-10 — Map survives Continue
 - Requirement: DEC-360.
 - Method: playwright
 - How: quit on main; Continue.
 - Pass evidence: the same `[data-level]`, the same `[data-room][data-cleared]` set and the same group HP.
 - Fails if: reset.
 
-### EV-10 — The gear comes back closed after a restart
+### EV-11 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

@@ -64,7 +64,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the sheet's `data-help-screen` is `fight-buttons` and its text is exactly "Tap Fight to start a battle, or Go around or Pay them off to avoid it. At The Ambush, Pay the toll instead. In a scene, Fight sits beside the scene's other choice." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
-### EV-11 — Plain scene copy
+### EV-09 — Plain scene copy
 - Requirement: Loremaster copy (2026-10-31).
 - Method: playwright
 - How: the test plain scene.
@@ -73,14 +73,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-09 — Fight survives Continue
+### EV-10 — Fight survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit at a foes event; Continue.
 - Pass evidence: Fight still shown.
 - Fails if: gone.
 
-### EV-10 — The gear comes back closed after a restart
+### EV-11 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

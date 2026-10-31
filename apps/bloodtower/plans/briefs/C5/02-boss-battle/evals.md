@@ -39,13 +39,27 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — His ability grows at each phase
 - Requirement: DEC-567.
 - Method: unit
-- How: fixture ability: hits 1 extra HP per lost round in phase 1.
-- Pass evidence: phase 2 hits 2 extra, phase 3 hits 3 extra.
+- How: The Warden's real Crushing blow (DEC-688); lose a Claw round in each phase against 1 hero.
+- Pass evidence: the hit is 5 + 1 = 6 in phase 1, 7 in phase 2, 8 in phase 3; a phase-3 Rend hits 2 × 5 + 3 = 13.
 - Fails if: the same in every phase.
+
+### EV-06 — The Warden is level 5 with 20 wounds for 1 hero, 21 for 2
+- Requirement: DEC-703, DEC-563.
+- Method: unit
+- How: start the boss battle with 1 hero, then with 2.
+- Pass evidence: level 5; wounds 20, then 21.
+- Fails if: any other level or count.
+
+### EV-07 — Strength stays 5 in every phase
+- Requirement: DEC-567, DEC-688.
+- Method: unit
+- How: drive the battle through phases 1, 2 and 3.
+- Pass evidence: the round-odds level reads 5 in each phase.
+- Fails if: any change.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — Phase survives Continue
+### EV-08 — Phase survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: phase 2, quit, Continue.

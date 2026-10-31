@@ -39,7 +39,7 @@ Cutover: N
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-16 all pass (verifier table on PR).
+- [ ] EV-01 … EV-17 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
@@ -52,7 +52,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 - OPEN Q-C4-17: Does the C2-04 auto-advance rule (advance when narration or cue ends, or after 4 s with no audio) also apply to battle round results and Reveals? Options: (a) yes, every beat in C4 and C5 (round results, victory, reward/retreat/fall, trap, close Scroll, glyph/boon Reveal, boss phase show, win line) follows it; (b) battle beats wait for a press on any iPad; (c) round results hold 2 s, other beats follow the rule. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 09, 11, 12, 13; C5 08, 09)
 
-- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- Q-C4-08 ANSWERED by card DEC-603 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Rooms, guardian's included:** short 4–5, standard 6–7, long 8–10, seeded within the range. / **Grid:** 4×4, 16 cells. The entrance is on an edge cell." Source: research/game-design/cards/DEC-603.md. ~~Old option (a) 7 rooms, guardian hidden in one of the last 3; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
 - OPEN Q-C4-15 **[Bob taste call]**: Foe paintings in C4, before the A1 art run (C5): Options: (a) one placeholder painting per foe level, swapped by A1 in C5; (b) A1 draft art now, as the art lands. Gamewright pick: (a) (Gamewright pick, pending Bob).
 
 ## Eval approval

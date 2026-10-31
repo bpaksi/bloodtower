@@ -60,8 +60,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-08 — The Listen hint shows
 - Requirement: DEC-586.
 - Method: playwright
-- How: press Listen on Ahead.
-- Pass evidence: the board shows `You hear something behind the door.`; Bold is struck out on the Ahead card.
+- How: press Listen on Ahead toward a trap room, seed giving a true hint.
+- Pass evidence: the board shows `You hear something behind the door.` (it names no room kind, so the iPad-only no-hint-text rule holds) and plays `snd.listen_trap` on the board speakers; the iPad shows only "You listen down the corridor."; Bold is struck out on the Ahead card.
 - Fails if: no hint, or Bold still live.
 
 ### EV-09 — The toolbar is on every state
@@ -99,7 +99,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
-### EV-17 — Trap and listen copy
+### EV-14 — Trap and listen copy
 - Requirement: Loremaster copy (2026-10-31).
 - Method: playwright
 - How: Listen down a corridor, then enter a Pit room and a Falling Rocks room.
@@ -108,21 +108,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-14 — Map survives Continue
+### EV-15 — Map survives Continue
 - Requirement: DEC-602.
 - Method: playwright
 - How: clear 2 rooms, quit, Continue.
 - Pass evidence: same map.
 - Fails if: reset.
 
-### EV-15 — A beat interrupted by restart applies once
+### EV-16 — A beat interrupted by restart applies once
 - Requirement: restart or Continue during an auto-advancing beat (trap result) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-16 — The gear comes back closed after a restart
+### EV-17 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.
@@ -135,5 +135,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- Q-C4-08 ANSWERED by card DEC-603 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Rooms, guardian's included:** short 4–5, standard 6–7, long 8–10, seeded within the range. / **Grid:** 4×4, 16 cells. The entrance is on an edge cell." Source: research/game-design/cards/DEC-603.md. ~~Old option (a) 7 rooms, guardian hidden in one of the last 3; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
 - OPEN Q-C4-15 **[Bob taste call]**: Foe paintings in C4, before the A1 art run (C5): Options: (a) one placeholder painting per foe level, swapped by A1 in C5; (b) A1 draft art now, as the art lands. Gamewright pick: (a) (Gamewright pick, pending Bob).

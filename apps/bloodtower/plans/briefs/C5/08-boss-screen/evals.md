@@ -71,23 +71,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
+### EV-10 — The Warden's Melee and Humanoid chips show
+- Requirement: DEC-688, UI-026.
+- Method: playwright
+- How: open the boss battle.
+- Pass evidence: exactly 2 `[data-foe-trait]` chips: Melee, Humanoid.
+- Fails if: missing or other chips.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-10 — Phase redrawn after Continue
+### EV-11 — Phase redrawn after Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: phase 3, quit, Continue.
 - Pass evidence: phase 3 painting.
 - Fails if: phase 1.
 
-### EV-11 — A beat interrupted by restart applies once
+### EV-12 — A beat interrupted by restart applies once
 - Requirement: restart or Continue during an auto-advancing beat (phase show, round result) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-12 — The gear comes back closed after a restart
+### EV-13 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

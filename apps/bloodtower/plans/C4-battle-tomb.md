@@ -72,7 +72,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/battle/close.ts`, `apps/bloodtower/src/engine/rules/battle/reward.ts`
 - Builds: DEC-120, DEC-016, DEC-177, DEC-670, DEC-671
-- Done-when: EV-01 … EV-06
+- Done-when: EV-01 … EV-11
 - Open: none (Q-C4-12/13 answered by cards)
 
 ### Feature 04: Fight in events and scenes: foes, disasters, The Ambush, The Last Stand
@@ -99,7 +99,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, 03, C3 07, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/tomb/**` (new level), `packs/test/**` (The Barrow)
 - Builds: MEC-026, DEC-593, DEC-488, DEC-489, DEC-490, DEC-491, DEC-586, DEC-587, DEC-590, DEC-602, DEC-652
-- Done-when: EV-01 … EV-10
+- Done-when: EV-01 … EV-14
 - Open: none (Q-C4-07/08/09 answered by cards)
 
 ### Feature 07: Chapters 2 and 3 in play, the seal break and the seal lines
@@ -126,7 +126,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, 05, C3 11, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Battle*.tsx` (new), `apps/bloodtower/src/web/components/board/FoePanel.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-battle.spec.ts`
 - Builds: UI-026, CUE-010
-- Done-when: EV-01 … EV-14
+- Done-when: EV-01 … EV-15
 - Open: Q-C4-14, Q-C4-15, Q-C4-05, Q-C4-17
 
 ### Feature 10: The round picker on the iPad: Fight or Retreat, then one action
@@ -135,7 +135,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, C2 06, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/RoundPicker*.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-round.spec.ts`
 - Builds: UI-027
-- Done-when: EV-01 … EV-10
+- Done-when: EV-01 … EV-11
 - Open: Q-C4-16, Q-C4-11
 
 ### Feature 11: The battle's end on screen: reward, retreat and fall
@@ -153,7 +153,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 06, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Tomb*.tsx` (new), `apps/bloodtower/src/web/components/device/TombPicker.tsx` (new)
 - Builds: DEC-583, DEC-584, DEC-585, DEC-591, DEC-592
-- Done-when: EV-01 … EV-16
+- Done-when: EV-01 … EV-17
 - Open: Q-C4-15, Q-C4-17
 
 ### Feature 13: The seal break live on the board, chapters 1 and 2
@@ -162,7 +162,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 07, C3 15, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/SealBreak.tsx`, `apps/bloodtower/src/web/components/device/SkullPlacer.tsx`
 - Builds: UI-044
-- Done-when: EV-01 … EV-13
+- Done-when: EV-01 … EV-15
 - Open: Q-C4-10, Q-C4-17
 
 ### Feature 14: Fight on the event and quest scenes
@@ -171,7 +171,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 04, C3 12, C3 14, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/{EventChoice,SceneChoice}.tsx`
 - Builds: UI-041, UI-042
-- Done-when: EV-01 … EV-10
+- Done-when: EV-01 … EV-11
 - Open: Q-C4-02
 
 ## Ownership and shared rules (Sentinel review 2026-10-31)
@@ -211,13 +211,13 @@ Every pick below is used in the feature files as "(Gamewright pick, pending Bob)
 - OPEN Q-C4-04: The Ambush with Fight on (DEC-662): keep the C3 short-purse toll rule (Q-C3-22)? Options: (a) keep it: Fight or pay the toll; a short group still pays all gold + 2 HP per present hero; (b) drop it: a short group must Fight. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 04)
 - OPEN Q-C4-05: Cursed (DEC-466): does the board show which 4 Advantages counted? Options: (a) yes: the hero panel shows "4 of N count" and dims the rest during the round; (b) no: the app picks silently; only the round result shows. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 05, C4 09)
 - OPEN Q-C4-06: Cursed in the corruption draw (Q-C3-15's seeded set): Options: (a) from C4 the set includes Cursed for every draw (battle, event, scene); (b) Cursed is drawn only when a hero falls in battle. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 05)
-- ANSWERED by DEC-608 (0005) Q-C4-07: The Barrow's guardian (the dead garrison, DEC-662): what level? Options: (a) level 3, as `tomb.guardian_level` in base tuning; (b) level 4. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 06)
-- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 06, C4 12)
-- ANSWERED by DEC-618 (0005) Q-C4-09: Listening at a corridor (DEC-586): how often does the hint lie? Options: (a) 1 in 4 (`tomb.listen_lie` = 0.25); (b) 1 in 3. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 06)
+- Q-C4-07 ANSWERED by card DEC-608 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Guardian:** the same foe, one level up." Source: research/game-design/cards/DEC-608.md. ~~Old option (a) level 3, as `tomb.guardian_level`; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-08 ANSWERED by card DEC-603 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Rooms, guardian's included:** short 4–5, standard 6–7, long 8–10, seeded within the range. / **Grid:** 4×4, 16 cells. The entrance is on an edge cell." Source: research/game-design/cards/DEC-603.md. ~~Old option (a) 7 rooms, guardian hidden in one of the last 3; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-09 ANSWERED by card DEC-618 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Wrong hints:** 1 in 5, seeded like the room (DEC-011)." Source: research/game-design/cards/DEC-618.md. ~~Old option (a) 1 in 4 (`tomb.listen_lie` = 0.25); Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
 - OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "The roads are clear and a seal breaks. Ahead stands the Ruined Keep."]`, `[COPY: seal break ch2, Loremaster = "The Keep gives up its dead, and a second seal cracks. The Tower waits."]`, `[COPY: seal break ch3, Loremaster = "The last stand holds, and the third seal breaks. Only the Warden remains."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 07, C4 13)
 - OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 02, C4 10)
-- ANSWERED by DEC-177/179 (0005) Q-C4-12: A fallen group's gold loss (DEC-177): how much? Options: (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; (b) a flat 10 gold, never below 0. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 03)
-- ANSWERED by DEC-555 (0005) Q-C4-13: A foe that stays and grows (DEC-016): is the growth capped? Options: (a) capped at +2 levels over its start; (b) no cap. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 03)
+- Q-C4-12 ANSWERED by card DEC-177, DEC-179 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "DEC-177: "the app sets a loss and splits it equally across the group's heroes, each losing at most what they hold"; DEC-703 row "Lost on a fall | 2 × the foe's level, split and capped | DEC-179, DEC-177"" Source: research/game-design/cards/DEC-177.md, research/game-design/cards/DEC-179.md. ~~Old option (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-13 ANSWERED by card DEC-555 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Chance:** 1 in 3 per retreat or fall, seeded (DEC-011). / **A step:** the foe's level rises by 1. / **Lethal:** the fourth and last step. A lethal foe does not step again." Source: research/game-design/cards/DEC-555.md. ~~Old option (a) capped at +2 levels over its start; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
 - OPEN Q-C4-14: The battle horn and hits (CUE-010) with no tower connected: Options: (a) play them through the Story board's speakers; (b) silent; the board shows the hit only. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 09)
 - OPEN Q-C4-15 **[Bob taste call]**: Foe paintings in C4, before the A1 art run (C5): Options: (a) one placeholder painting per foe level, swapped by A1 in C5; (b) A1 draft art now, as the art lands. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 09, C4 12)
 - OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 10)

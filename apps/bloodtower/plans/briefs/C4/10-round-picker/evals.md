@@ -64,16 +64,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the sheet's `data-help-screen` is `round-picker` and its text is exactly "Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
+### EV-09 — A hero can change a pick until the last hero picks (Gamewright pick, pending Bob)
+- Requirement: Q-C4-18.
+- Method: playwright
+- How: 2 heroes; hero 1 picks Attack, changes to Cast a spell; hero 2 picks Attack.
+- Pass evidence: the round uses hero 1's Cast a spell; once hero 2 has picked, hero 1's buttons are disabled.
+- Fails if: the old pick is used, or a change is possible after the last pick.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-09 — Pick survives Continue
+### EV-10 — Pick survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: pick, quit, Continue.
 - Pass evidence: pick still ticked.
 - Fails if: lost.
 
-### EV-10 — The gear comes back closed after a restart
+### EV-11 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

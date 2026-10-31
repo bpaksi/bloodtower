@@ -78,30 +78,37 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
-### EV-14 — Seal names
+### EV-11 — Seal names
 - Requirement: Loremaster copy (2026-10-31).
 - Method: playwright
 - How: break seals 1, 2 and 3 in a fixture.
 - Pass evidence: the lit seal is named exactly "The Road Seal", "The Keep Seal", "The Warden's Seal" in turn.
 - Fails if: any other text.
 
+### EV-12 — Skull picks list 4 kingdoms and 5 buildings
+- Requirement: DEC-226, DEC-579.
+- Method: playwright
+- How: break a seal that frees 1 skull.
+- Pass evidence: kingdom buttons `Arisilon (N)`, `Brynthia (E)`, `Durnin (S)`, `Zenon (W)`; then building buttons Citadel, Sanctuary, Village, Bazaar, Tavern.
+- Fails if: any missing, extra or misnamed button.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-11 — Skull placement survives Continue
+### EV-13 — Skull placement survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: place 1 of 2, quit, Continue.
 - Pass evidence: prompt for skull 2.
 - Fails if: restart at 1.
 
-### EV-12 — A beat interrupted by restart applies once
+### EV-14 — A beat interrupted by restart applies once
 - Requirement: restart or Continue during an auto-advancing beat (close Scroll, glyph and boon Reveal) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-13 — The gear comes back closed after a restart
+### EV-15 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

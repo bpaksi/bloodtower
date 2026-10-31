@@ -43,9 +43,44 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the retreat succeeds with moves still 0 and no `move.spent` event.
 - Fails if: the retreat is refused or a move is spent.
 
+### EV-06 — Retreat in a group's turn needs and spends a move
+- Requirement: DEC-313.
+- Method: unit
+- How: a battle in a group's turn with 1 move left; pick Retreat; then the same battle with 0 moves.
+- Pass evidence: with 1 move: retreat succeeds and moves read 0, log `move.spent`; with 0 moves: Retreat is not offered.
+- Fails if: retreat with 0 moves in a group's turn, or no move spent.
+
+### EV-07 — Retreat gives the foe its last attack
+- Requirement: DEC-313, DEC-015.
+- Method: unit
+- How: a level-3 foe, 1 hero at 10 HP, seeded so the last attack lands on that hero; retreat.
+- Pass evidence: the hero is at 7 HP (a lost round's hit, the foe's level).
+- Fails if: no hit, or any other amount.
+
+### EV-08 — Retreat falls back a space, or stays at a building
+- Requirement: DEC-313.
+- Method: unit
+- How: retreat from a battle entered from space A into space B; then retreat from a battle at a Tavern.
+- Pass evidence: first: the group is on A; second: the group is still at the Tavern.
+- Fails if: any other space.
+
+### EV-09 — A disaster win pays double
+- Requirement: DEC-547.
+- Method: unit
+- How: win against a level-3 disaster foe.
+- Pass evidence: gold = 2 × 3 × 2 = 12.
+- Fails if: 6 or any other value.
+
+### EV-10 — A foe nobody fights does not grow
+- Requirement: DEC-555.
+- Method: unit
+- How: leave a level-2 foe unfought for 5 days.
+- Pass evidence: still level 2.
+- Fails if: any step.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — A grown foe survives Continue
+### EV-11 — A grown foe survives Continue
 - Requirement: DEC-016.
 - Method: playwright
 - How: grow a foe, quit, Continue.
@@ -58,5 +93,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- ANSWERED by DEC-177/179 (0005) Q-C4-12: A fallen group's gold loss (DEC-177): how much? Options: (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; (b) a flat 10 gold, never below 0. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- ANSWERED by DEC-555 (0005) Q-C4-13: A foe that stays and grows (DEC-016): is the growth capped? Options: (a) capped at +2 levels over its start; (b) no cap. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- Q-C4-12 ANSWERED by card DEC-177, DEC-179 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "DEC-177: "the app sets a loss and splits it equally across the group's heroes, each losing at most what they hold"; DEC-703 row "Lost on a fall | 2 × the foe's level, split and capped | DEC-179, DEC-177"" Source: research/game-design/cards/DEC-177.md, research/game-design/cards/DEC-179.md. ~~Old option (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-13 ANSWERED by card DEC-555 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Chance:** 1 in 3 per retreat or fall, seeded (DEC-011). / **A step:** the foe's level rises by 1. / **Lethal:** the fourth and last step. A lethal foe does not step again." Source: research/game-design/cards/DEC-555.md. ~~Old option (a) capped at +2 levels over its start; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).

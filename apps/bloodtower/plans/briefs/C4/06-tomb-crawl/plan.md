@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-MEC-026 for The Barrow: 6–7 rooms at Standard, 4–5 at Short, on a 4×4 grid (DEC-603), built on first entry and kept; each room nothing, a battle or a trap; up to 3 corridors; listening gives a hint that lies 1 in 4 (Gamewright pick, pending Bob) (Q-C4-09) and the corridor is entered on guard; the guardian is a level-3 battle (Gamewright pick, pending Bob) (Q-C4-07); its fall gives the Warden's Signet. Retreating leaves; spells come back on each visit.
+MEC-026 for The Barrow: 6–7 rooms at Standard, 4–5 at Short, on a 4×4 grid (DEC-603), built on first entry and kept; each room nothing, a battle or a trap; up to 3 corridors; listening is free and unlimited, plays a room-kind sound on the board and is wrong 1 in 5 (DEC-587, DEC-618), and a listened corridor is entered on guard; battle rooms hold the quest's foe at the quest's level and the guardian is that foe one level up (DEC-608); its fall gives the Warden's Signet. Retreating leaves; spells come back on each visit.
 
 ## Cutover
 
@@ -37,7 +37,7 @@ Cutover: N
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-10 all pass (verifier table on PR).
+- [ ] EV-01 … EV-14 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
@@ -61,9 +61,9 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- ANSWERED by DEC-608 (0005) Q-C4-07: The Barrow's guardian (the dead garrison, DEC-662): what level? Options: (a) level 3, as `tomb.guardian_level` in base tuning; (b) level 4. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- ANSWERED by DEC-603 (0005) Q-C4-08: How many rooms does a 1.0 Tomb deal (DEC-491)? Options: (a) 7 rooms, guardian hidden in one of the last 3; (b) 5 rooms; (c) 9 rooms. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- ANSWERED by DEC-618 (0005) Q-C4-09: Listening at a corridor (DEC-586): how often does the hint lie? Options: (a) 1 in 4 (`tomb.listen_lie` = 0.25); (b) 1 in 3. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- Q-C4-07 ANSWERED by card DEC-608 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Guardian:** the same foe, one level up." Source: research/game-design/cards/DEC-608.md. ~~Old option (a) level 3, as `tomb.guardian_level`; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-08 ANSWERED by card DEC-603 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Rooms, guardian's included:** short 4–5, standard 6–7, long 8–10, seeded within the range. / **Grid:** 4×4, 16 cells. The entrance is on an edge cell." Source: research/game-design/cards/DEC-603.md. ~~Old option (a) 7 rooms, guardian hidden in one of the last 3; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-09 ANSWERED by card DEC-618 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Wrong hints:** 1 in 5, seeded like the room (DEC-011)." Source: research/game-design/cards/DEC-618.md. ~~Old option (a) 1 in 4 (`tomb.listen_lie` = 0.25); Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
 
 ## Eval approval
 
