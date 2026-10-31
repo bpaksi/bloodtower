@@ -12,7 +12,7 @@ Show the day as the game's clock: what the moves are, how many days are left, an
 
 ## States
 
-- **Day start, Regroup** (DEC-640): board shows the groups and "[COPY: regroup prompt]"; iPads offer split / join.
+- **Day start, Regroup** (DEC-640): board shows the groups and "A new day. Stay together, or split up?"; iPads offer split / join.
 - **Day roll** (UI-021): "Day N", each group's moves with modifiers (DEC-615, DEC-102, DEC-684). No press (DEC-108).
 - **Mid-turn**: the edge band (UI-028): health and purse, chapter, Day N, days left, acting group and moves. The threat bar (UI-047) on the edge.
 - **Skull placement** (DEC-064, DEC-092): the board names the kingdom; the iPad lists its buildings; a 4th skull shows the building falling (DEC-093).

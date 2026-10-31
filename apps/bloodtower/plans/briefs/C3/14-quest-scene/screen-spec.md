@@ -12,7 +12,7 @@ Play a quest's one choice and its outcome (MEC-037, MEC-077).
 
 ## States
 
-- **Opening** (.3): narration `[COPY: quest opening]` on a Scroll.
+- **Opening** (.3): narration "A herald waits by the well. His horse is gone, and his message is torn." (The Herald) on a Scroll.
 - **Track** (UI-025): steps done and to come (one step for a plain scene).
 - **Choice** (UI-042, MEC-077 .1): 2–3 options, costs shown, missing-item options disabled.
 - **Corruption cost**: pick the hero who takes it (DEC-693).
@@ -30,7 +30,7 @@ UI-042: the quest's painting and narration on a Scroll, the 2 or 3 options on th
 
 ## What happens next
 
-The quest's end hook (`[COPY: quest end]`), back to the building menu; a done quest may end the chapter at the day's close.
+The quest's end hook ("The herald rides on. The road ahead is a little clearer."), back to the building menu; a done quest may end the chapter at the day's close.
 
 ## OPEN questions
 

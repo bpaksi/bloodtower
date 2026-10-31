@@ -12,9 +12,9 @@ Deliver the ending (SCR-018).
 
 ## States
 
-- **Win** (DEC-663, DEC-664): the ending Painting, `[COPY: win line, shatter]` or `[COPY: win line, guard]`.
-- **Loss** (DEC-144): one scene per way to lose: skulls, corruption, fallen buildings, `[COPY: ...]` each.
-- **Summary line** (DEC-627): `[COPY: summary]` and Next.
+- **Win** (DEC-663, DEC-664): the ending Painting, "Chapter cleared. The seal is shattered, and the dark loosens its hold." or "Chapter cleared. The seal holds, and you stand guard over it.".
+- **Loss** (DEC-144): one scene per way to lose: skulls, corruption, fallen buildings. Skulls: "Too many skulls. The kingdom falls to the dark." Corruption: `[COPY: ...]` (open, corruption name). Fallen buildings: `[COPY: ...]` (open, Q-C3-05).
+- **Summary line** (DEC-627): "{N} days. {Q} quests done. {S} skulls on the board." and Next.
 
 ## Player actions
 

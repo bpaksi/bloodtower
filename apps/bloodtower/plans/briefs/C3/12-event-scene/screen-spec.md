@@ -12,7 +12,7 @@ Tell a group what met it in the wild and let the present heroes choose (MEC-072)
 
 ## States
 
-- **Event shown** (.2): its painting, the words `[COPY: event text]` on a Scroll (UI-035).
+- **Event shown** (.2): its painting, the words "Smoke on the road ahead. Something burned here last night." (The Roads sample; other events per pack) on a Scroll (UI-035).
 - **Quiet**: a mood line, Next.
 - **Windfall**: the gain on a Reveal (UI-036).
 - **Hazard**: the counter saved them, or two costs (DEC-027).
