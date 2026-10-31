@@ -60,6 +60,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 Bob: "Some browsers will block volume? if so then we need to prompt user on the story page to enable set volume levels. This will be the first thing to happen; enable sound, set levels."
 - The first step on Pick story is an "Enable sound" prompt on each iPad: one tap unlocks that iPad's browser audio (resume the Web Audio context and play inside the tap's handler). No sound plays on that iPad before its tap.
+- Locked copy (Bob 2026-10-31 10:33 ET): state 7a shows only the prompt "Tap once to turn on this iPad's sound." and one button "Enable sound", plus the chrome (bottom bar and Menu gear); nothing else.
 - Each iPad needs its own unlock; one iPad's tap never unlocks another.
 - Then the player sets levels: the volume step (Volume 0/1/2, Keep, Try another; SCR-006) shows on that iPad right after its unlock, and the story list follows Keep. The volume step leaves the Enter and runs here; on the connect track a volume press also plays Dungeon Complete on the tower (still only on a press).
 - Keep stays disabled until a volume has been played (no default volume is kept; this settles EV-09's "Also" line).

@@ -110,8 +110,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Bob 2026-10-31 10:30 AM ET: Enable sound is the first step on Pick story; each iPad needs its own unlock.
 - Method: playwright
 - How: two iPad contexts reach Pick story (launch Chromium without `--autoplay-policy=no-user-gesture-required`). Before any tap, read each iPad's `AudioContext.state` and the page's played-sound log. iPad A taps "Enable sound"; read both again.
-- Pass evidence: before the tap both iPads show only the "Enable sound" button (primary, 0 other body buttons, no story list), `AudioContext.state` is `suspended`, and no sound has played. After A's tap: A's state is `running`; B is still `suspended` and still shows only "Enable sound".
-- Fails if: audio starts or a sound plays before the tap, the story list or levels show first, or one iPad's tap unlocks another.
+- Pass evidence: before the tap each iPad's body shows exactly the line "Tap once to turn on this iPad's sound." and one primary button "Enable sound" (0 other body buttons, no other text, no story list; chrome only otherwise, locked copy Bob 2026-10-31 10:33 ET), `AudioContext.state` is `suspended`, and no sound has played. After A's tap: A's state is `running`; B is still `suspended` and still shows only "Enable sound".
+- Fails if: the prompt or button wording differs, anything else shows in the body, audio starts or a sound plays before the tap, the story list or levels show first, or one iPad's tap unlocks another.
 
 ### EV-19 — Levels show after the unlock
 - Requirement: Bob 2026-10-31 10:30 AM ET: then the player sets levels.
@@ -155,4 +155,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - SCR-022's three step texts in EV-03 are the approved mockup wording.
 - The board's line on the tower choice reads "Wake the tower, or play tonight without it?" (MEC-039 .5; approved mockup) → MEC-039.
 - Volume picks are labelled "Volume 0/1/2" (approved mockup).
-- The levels are the existing volume step (SCR-006) moved to Pick story after Enable sound; on the without-tower track they set the iPad's level only. Bob's "set levels" names no other sliders → Bob: OK?
+- The levels are the existing volume step (SCR-006) moved to Pick story after Enable sound; on the without-tower track they set the iPad's level only. Bob approved 2026-10-31 10:33 ET: levels = existing Volume 0/1/2 step with Keep/Try another, moved to Pick story.
