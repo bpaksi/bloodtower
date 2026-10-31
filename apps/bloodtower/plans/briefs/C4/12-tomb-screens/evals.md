@@ -110,7 +110,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-606; Sentinel recheck 4.
 - Method: playwright, fake clock
 - How: 3 heroes at 10 HP enter a Pit room; advance the clock 30 s; press the second hero's button.
-- Pass evidence: after 30 s the Pit is still shown with exactly 3 hero buttons and the locked line; after the press that hero reads 6/10 and the other two 10/10.
+- Pass evidence: after 30 s the Pit is still shown, its iPad title reads exactly "Who takes the fall?", with exactly 3 buttons each labeled exactly with a hero's name and the locked line; after the press that hero reads 6/10 and the other two 10/10.
 - Fails if: it advances without a pick, shows a Next, or takes HP from anyone else.
 
 ## Survival evals (one per survival invariant in plan.md)

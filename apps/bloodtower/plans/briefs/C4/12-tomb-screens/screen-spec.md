@@ -20,7 +20,7 @@ DEC-583's two halves side by side: the map (found rooms, current glowing, doorwa
 ## States and player actions
 
 - Board: shows the state and every line `[COPY: tomb-screens, board = "The Tomb. Rooms found: {N}. / Undead Advantage: {N}. / A cold corridor. Three doors wait. / You hear something behind the door. / A trap. / Something wakes in the dark. / The Exit is open."]`; never scrolls.
-- Pit (its own state): the board and iPad read `[COPY: tomb-screens, pit]` (locked); the iPads show one button per present hero; the first press takes 4 HP from that hero only, then the trap ends (DEC-606; Sentinel recheck 4).
+- Pit (its own state): the iPad title is "Who takes the fall?" (Gamewright pick; Loremaster can override); the board and iPad read `[COPY: tomb-screens, pit]` (locked); the iPads show one button per present hero; the first press takes 4 HP from that hero only, then the trap ends (DEC-606; Sentinel recheck 4).
 - Falling Rocks: every hero −2 HP; the board advances after its beat.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
 - Help (?): a help sheet on the iPad, `[COPY: help, tomb-screens = "Pick Left, Ahead or Right on your iPad, then Listen, Bold or On guard on that card. Tap Leave to get out."]`, `data-help-screen` = `tomb-screens`; it sends nothing to the host and does not pause.
@@ -30,7 +30,7 @@ DEC-583's two halves side by side: the map (found rooms, current glowing, doorwa
 - Three direction cards **Left**, **Ahead**, **Right** (a wall greys its card); on each open card **Listen**, **Bold**, **On guard** (Bold struck out after Listen, DEC-587).
 - **Leave** below the cards.
 - A trap or battle in the view hands to its own buttons (C4 10 for a battle; Falling Rocks advances on the board).
-- Pit: **{hero}**, one button per present hero (the hero's name; Gamewright pick); first press wins.
+- Pit: title "Who takes the fall?"; buttons labeled **{hero}** (the hero's name, nothing else), one per present hero (Gamewright pick); first press wins.
 
 ## Tokens
 
