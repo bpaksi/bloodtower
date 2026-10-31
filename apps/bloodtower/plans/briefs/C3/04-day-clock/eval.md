@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: 1 a night for 1–2 heroes; 1, and 2 every other night, for 3–4 (DEC-564).
 - Method: unit
 - How: sim four nights with 2 heroes and with 4.
-- Pass evidence: 2 heroes: 1,1,1,1. 4 heroes, nights 1–4 of the game: exactly 1,2,1,2 (night 1 drops 1; even-numbered nights drop 2; Bob approved 2026-10-31, for DEC-564's "every other day" phase, Bob to confirm). Same for 3 heroes.
+- Pass evidence: 2 heroes: 1,1,1,1. 4 heroes, nights 1–4 of the game: exactly 1,2,1,2 (night 1 drops 1; even-numbered nights drop 2; Bob approved 2026-10-31, for DEC-564's "every other day" phase). Same for 3 heroes.
 - Fails if: 4 heroes drop 2 every night, or 2 heroes ever drop 2.
 
 ### EV-03 — A won quest skips the whole night's drop
@@ -110,7 +110,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Days left for 3–4 heroes is supply ÷ the average night (1.5). Bob: ? (Q-C3-04, answered)
+- Days left for 3–4 heroes counts the actual nights ahead in the 1,2,1,2 pattern from tonight's night number, not supply ÷ 1.5 (Q-C3-04, Bob approved 2026-10-31).
 
 ## OPEN questions
 

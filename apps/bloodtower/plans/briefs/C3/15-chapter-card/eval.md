@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-020.
 - Method: playwright
 - How: `c3-chapter.spec.ts`: Begin a game.
-- Pass evidence: the card for The Roads: painting, name, goal `[COPY: ...]`, Next on the iPad.
+- Pass evidence: the card for The Roads: painting, name, goal `[COPY: ...]`; no Next on the iPad; it auto-advances.
 - Fails if: no card.
 
 ### EV-02 — Stamped won, then the seal
@@ -57,14 +57,49 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: after the close, Brynthia is lit on the board and chapter 2's quest tokens (The Barrow, The Shrine) are placed, then chapter 2's card shows.
 - Fails if: Brynthia stays dark or tokens are missing.
 
+### EV-08 — The toolbar is on every state
+- Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: chapter card, stamped won, close Scroll, freed skulls.
+- Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-09 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play this screen's happy path through chapter card, stamped won, close Scroll, freed skulls, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: any step can only be reached through the gear or help.
+
+### EV-10 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright
+- How: on each state (chapter card, stamped won, close Scroll, freed skulls) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `chapter-card` and its text is exactly "This is your chapter goal. Finish it before the days run out." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows another screen's text, pauses the game or changes state.
+
+### EV-11 — Next-only steps auto-advance
+- Requirement: the chapter card, the stamped card and the close Scroll has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: reach the chapter card, the stamped card and the close Scroll; once with narration (mock audio end event), once with audio off.
+- Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
+- Fails if: a Next button shows, it advances early, or it waits for a press.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-08 — No replay on Continue
+### EV-12 — No replay on Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit on day 2 of chapter 1; Continue.
 - Pass evidence: no chapter card.
 - Fails if: the card replays.
+
+### EV-13 — The gear Menu survives a restart closed
+- Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen, open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear; the Menu's enabled and disabled items and reasons match those before the restart.
+- Fails if: the Menu or panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
 
 ## Assumptions surfaced
 

@@ -67,18 +67,53 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-09 — End hook, then back to the building menu
 - Requirement: MEC-037 end.
 - Method: playwright
-- How: finish The Herald from its village; press Next after rewards.
-- Pass evidence: the board shows the end hook `[COPY: …]`; the next press returns the iPad to the village's building menu with the quest marker gone.
+- How: finish The Herald from its village; let the rewards step auto-advance.
+- Pass evidence: the board shows the end hook `[COPY: …]`; the end hook auto-advances and returns the iPad to the village's building menu with the quest marker gone.
 - Fails if: the end hook is skipped, or the iPad lands elsewhere.
+
+### EV-10 — The toolbar is on every state
+- Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: quest Scroll, option pick, hero pick, rewards, end hook.
+- Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-11 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play this screen's happy path through quest Scroll, option pick, hero pick, rewards, end hook, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: any step can only be reached through the gear or help.
+
+### EV-12 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright
+- How: on each state (quest Scroll, option pick, hero pick, rewards, end hook) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `quest-scene` and its text is exactly "A quest is in front of you. Pick one of its options." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows another screen's text, pauses the game or changes state.
+
+### EV-13 — Next-only steps auto-advance
+- Requirement: the result step after rewards has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: reach the result step after rewards; once with narration (mock audio end event), once with audio off.
+- Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
+- Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-10 — Continue reopens the choice
+### EV-14 — Continue reopens the choice
 - Requirement: DEC-151, DEC-675.
 - Method: playwright
 - How: quit at The Herald's choice; Continue.
 - Pass evidence: the same choice, no narration replay.
 - Fails if: the narration replays or the quest is lost.
+
+### EV-15 — The gear Menu survives a restart closed
+- Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen, open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear; the Menu's enabled and disabled items and reasons match those before the restart.
+- Fails if: the Menu or panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
 
 ## Assumptions surfaced
 

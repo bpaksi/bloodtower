@@ -32,13 +32,14 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
+  - The gear Menu and any gear panel come back closed, the game not paused, the toolbar on every iPad, and item states recomputed (EV-13).
   - Continue does not replay a chapter card already shown (DEC-675).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-08 all pass (verifier table on PR).
+- [ ] EV-01 … EV-13 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist

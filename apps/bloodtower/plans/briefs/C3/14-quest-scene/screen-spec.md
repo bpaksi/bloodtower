@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: UI-042, UI-025, UI-036, MEC-037, MEC-077, DEC-642, DEC-653, DEC-654, DEC-692, DEC-693, DEC-714, DEC-700
 - Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
-- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
+- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "A quest is in front of you. Pick one of its options.". Story copy stays `[COPY: ...]`.
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Play a quest's one choice and its outcome (MEC-037, MEC-077).
 
 ## Player actions
 
-- iPad (present heroes, DEC-019): pick an option; pick a hero for a cost or an item; Next.
+- iPad (present heroes, DEC-019): pick an option; pick a hero for a cost or an item. The rewards and end-hook steps have no Next; each auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET).
 
 ## Mechanics behind it
 

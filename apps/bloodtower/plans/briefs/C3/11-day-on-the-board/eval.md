@@ -33,8 +33,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-115, DEC-699, UI-022.
 - Method: playwright
 - How: day 2's end with a fixed seed where one Cleanse happened and one skull dropped.
-- Pass evidence: line count = effect count (2); the Cleanse line reads "+1 day" (allowed, DEC-699); no totals row; no recap text; one primary button, Next, on the iPad; pressing it runs the chapter exit check and day 3 starts.
-- Fails if: a totals row or recap shows, line count ≠ effect count, "+1 day" is missing, or Next does not advance.
+- Pass evidence: line count = effect count (2); the Cleanse line reads "+1 day" (allowed, DEC-699); no totals row; no recap text; no Next on the iPad (body shows no buttons); it auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET), then runs the chapter exit check and day 3 starts.
+- Fails if: a totals row or recap shows, line count ≠ effect count, "+1 day" is missing, or the panel does not auto-advance.
 
 ### EV-05 — Regroup on the iPad only
 - Requirement: DEC-640, SCR-016.
@@ -78,14 +78,63 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the board names the seeded kingdom the skull landed in.
 - Fails if: no kingdom is shown, or it differs from the engine's.
 
+### EV-11 — The toolbar is on every state
+- Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: Day start (Regroup), day roll, mid-turn, skull placement, effects panel.
+- Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-12 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play this screen's happy path through Day start (Regroup), day roll, mid-turn, skull placement, effects panel, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: any step can only be reached through the gear or help.
+
+### EV-13 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright
+- How: on each state (Day start (Regroup), day roll, mid-turn, skull placement, effects panel) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `day-on-the-board` and its text is exactly "A new day begins. Move your heroes, then choose where to go." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows another screen's text, pauses the game or changes state.
+
+### EV-14 — Next-only steps auto-advance
+- Requirement: the effects panel has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: reach the effects panel; once with narration (mock audio end event), once with audio off.
+- Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
+- Fails if: a Next button shows, it advances early, or it waits for a press.
+
+### EV-15 — Gear actions open on the Story board
+- Requirement: split/rejoin and use a potion or item start from the gear and show on the Story board; the game pauses while open (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright, board 1920×1080 + iPad 768×1024, mid-turn, a hero holding a potion
+- How: gear → Split party; Done. Gear → Use a potion or item; pick the hero, then the potion; Done.
+- Pass evidence: while open, the iPad body shows "See the Story board", the pick buttons (split: one button per group choice; use-item: one button per hero, then one per item that hero holds) and Done/Back; the board shows `[data-panel="split"]` then `[data-panel="use-item"]` (hero step, then item step) with 0 `button` elements, mirroring each iPad press (DEC-278; (Gamewright pick, pending Bob Q-GEAR-1)); host `paused: true` while open and `false` after Done; the potion is used once.
+- Fails if: a panel shows on the iPad, the game runs while open, or the item is used twice.
+
+### EV-16 — A disabled item shows its reason
+- Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: open the gear mid-turn with no hero holding a potion or item, and with the whole party in one group.
+- Pass evidence: "Use a potion or item" is disabled with one reason line ("No hero holds a potion or item."); "Rejoin party" is disabled ("The party is together."); "Split party" is enabled; enabled items have no reason line.
+- Fails if: a disabled item has no reason, or a working item is greyed.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-11 — Continue shows the same clock
+### EV-17 — Continue shows the same clock
 - Requirement: DEC-686.
 - Method: playwright
 - How: quit on day 3, Continue.
 - Pass evidence: the band reads the same days left; buildings show the same skulls.
 - Fails if: the count resets.
+
+### EV-18 — The gear Menu survives a restart closed
+- Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen, open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear; the Menu's enabled and disabled items and reasons match those before the restart.
+- Fails if: the Menu or panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
 
 ## Assumptions surfaced
 

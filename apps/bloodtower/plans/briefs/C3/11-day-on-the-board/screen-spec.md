@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: SCR-014, UI-021, UI-022, UI-028, UI-030, UI-047, DEC-686, DEC-699, DEC-115, DEC-640, DEC-092, DEC-093
 - Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
-- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
+- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "A new day begins. Move your heroes, then choose where to go.". Story copy stays `[COPY: ...]`.
 
 ## Purpose
 
@@ -23,7 +23,8 @@ Show the day as the game's clock: what the moves are, how many days are left, an
 
 - iPad: split or join at Regroup (DEC-640).
 - iPad: pick the building for each skull, the table agreeing (DEC-092).
-- iPad: Next on the effects panel.
+- Gear (exceptions, C2 feature 04): Split party / Rejoin party and Use a potion or item. The Story board shows the panel, display only (DEC-278); the iPad shows "See the Story board", the picks as a simple list of buttons (a group choice; a hero, then an item) and Done/Back; the board mirrors each press (Gamewright pick, pending Bob Q-GEAR-1).
+- Effects panel: no button; it auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET).
 
 ## Mechanics behind it
 
@@ -31,7 +32,7 @@ The Story board shows each day's roll (UI-021), the edge band with Day N and day
 
 ## What happens next
 
-The effects panel's Next runs the chapter's exit check (MEC-033 .11): next day, the chapter close (feature 15) or the outcome (feature 16).
+The effects panel's auto-advance runs the chapter's exit check (MEC-033 .11): next day, the chapter close (feature 15) or the outcome (feature 16).
 
 ## OPEN questions
 

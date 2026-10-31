@@ -75,7 +75,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- A people event in 1.0 resolves without the talk and buy picks' NPC content (DEC-502). Bob: ? (Q-C3-03, answered)
+- People events in 1.0 offer rumour and trick only (no talk or buy NPC content, DEC-502); the people weight stays 10 (Q-C3-03, Bob approved 2026-10-31).
 
 ## OPEN questions
 

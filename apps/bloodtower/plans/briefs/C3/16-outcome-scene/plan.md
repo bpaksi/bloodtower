@@ -21,7 +21,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-SCR-018: the story's win or loss Painting and narration (UI-046, DEC-144), the win line picked by the last choice's flag (DEC-664), a one-line summary that hands off to Game stats; iPads show Next (DEC-627).
+SCR-018: the story's win or loss Painting and narration (UI-046, DEC-144), the win line picked by the last choice's flag (DEC-664), a one-line summary that hands off to Game stats; it auto-advances to Game stats, no Next (DEC-627; Bob 2026-10-31 10:38 AM ET).
 
 ## Cutover
 
@@ -32,13 +32,14 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
+  - The gear Menu and any gear panel come back closed, the game not paused, the toolbar on every iPad, and item states recomputed (EV-13).
   - A host restart on the outcome scene lands on the session screen with the game listed with its outcome, not on a half-shown scene.
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-08 all pass (verifier table on PR).
+- [ ] EV-01 … EV-13 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist

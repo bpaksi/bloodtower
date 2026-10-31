@@ -31,9 +31,25 @@ Engine first, screens after. Each feature is one PR-sized slice with its tests. 
 
 Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob. Every screen spec, mockup and screenshot eval uses these.
 
+## iPad toolbar, gear Menu and help (Bob 2026-10-31 10:37 and 10:38 AM ET)
+
+> Bob, 2026-10-31 10:37 AM ET: "I iPad screen lost the toolbar at the bottom. On the toolbar is a "setting" (gear). This from here we need options to see current party, game board setup, volume, split party. use potions, .... All UI for these are done on the Story board, but it is started from the iPad settings. I want the happy path to be easy for the players. Exceptions will go through menu"
+
+- Every C3 iPad screen (11 to 17) has the bottom toolbar: "?" at the left, the gear (Menu) at the right. C2 feature 04 is the source of truth for the gear list (Bob approved 2026-10-31 10:38), its rules and help; C3 turns on the C3+ items (Split party / Rejoin party, Use a potion or item).
+- The bottom toolbar is back on every iPad screen, with the gear (Menu) at its right. The toolbar is iPad chrome: it is not a body button and does not count against "one step, one primary button" (SCR-016).
+- The HUD-only iPad lock stays: on the happy path the iPad body shows only the HUD (the current step's line) and its flow buttons. Nothing exceptional sits on the happy path; every exception goes through the gear.
+- Each gear action starts on the iPad. The Story board shows the panel's full UI and only displays it (DEC-278 kept). Any choice in the panel is made on the iPad as a simple list of buttons, and the board mirrors each press. The iPad shows "See the Story board", plus the pick buttons when the panel needs a choice, plus Done/Back (Gamewright pick, pending Bob Q-GEAR-1).
+- An item is enabled only when it works right now. A disabled item shows its reason in one line under it.
+- The game pauses while a Story board panel is open and resumes on Done.
+- First press wins across iPads: a second iPad's press on the same item or panel while one is open changes nothing.
+- Help: a "?" button at the left end of the bottom toolbar, on every iPad screen. It opens a short help sheet on the iPad itself for the current screen: what the screen is and what to do next, from that screen's Loremaster help line (2026-10-31; the Help lines table in C2 feature 04's spec). Close returns to the same screen, unchanged. It is not a gear item, sends nothing to the host, and the game does not pause (Gamewright design, parent-approved 2026-10-31).
+- Next-only iPad screens are kept to a minimum (Bob 2026-10-31 10:38 AM ET): a screen whose only action is Next is merged into the next screen or auto-advances when its narration or cue ends (4 s when it has no audio). Next stays only where a player must confirm the physical board.
+- Per screen: 11 effects panel auto-advances; 12 Quiet and result steps auto-advance; 14 result step auto-advances; 15 chapter card, stamped card and close Scroll auto-advance; 16 outcome scene and summary auto-advance to Game stats; 13 and 17 keep their buttons (real choices). No C3 step needs a physical-board Next today; the C4+ seal Done stays.
+- Cursed is deferred to C4 and never drawn in C3 (Bob approved 2026-10-31 10:38).
+
 ## Out of scope
 
-- The battle loop (MEC-024, MEC-038), the Tomb (MEC-026, The Barrow) and battle-only corruption (Cursed, DEC-466): C4.
+- The battle loop (MEC-024, MEC-038), the Tomb (MEC-026, The Barrow) and battle-only corruption (Cursed, DEC-466): C4. Cursed is never drawn in C3 (Bob approved 2026-10-31 10:38).
 - The Tower finale (MEC-076), its last choice's play (DEC-664) and the art through A1: C5.
 - NPCs, shops and gear (DEC-502). Dracula (DEC-691). Goodbye (DEC-628).
 - Fight, in events and in plain scenes: hidden until C4 (Bob, 2026-10-31, Q-C3-02). Go around, Pay them off and The Ambush's "pay the toll" stay.

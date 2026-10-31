@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: SCR-019, DEC-116, DEC-117, DEC-627, SCR-021
 - Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
-- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
+- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "Here's how tonight went. Rate it if you like, then tap Next.". Story copy stays `[COPY: ...]`.
 
 ## Purpose
 

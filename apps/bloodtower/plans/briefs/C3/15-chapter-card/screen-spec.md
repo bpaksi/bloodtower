@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: UI-020, UI-044, MEC-033, DEC-303, DEC-302, DEC-306, DEC-409, CUE-004, CUE-005
 - Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
-- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
+- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "This is your chapter goal. Finish it before the days run out.". Story copy stays `[COPY: ...]`.
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 
 ## Player actions
 
-- iPad: Next; confirm the seal is broken (Done) (C4+ only; shown when c3_end_after_chapter_1 is off); name the kingdom and building for each freed skull.
+- iPad: no Next; the chapter card, the stamped card and the close Scroll each auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET). Confirm the seal is broken (Done) (C4+ only; shown when c3_end_after_chapter_1 is off); name the kingdom and building for each freed skull.
 
 ## Mechanics behind it
 

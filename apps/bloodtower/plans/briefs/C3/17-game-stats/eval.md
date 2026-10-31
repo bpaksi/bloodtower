@@ -57,14 +57,42 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: Back returns to the session screen; Play again starts Pick setup for the same story with the same heroes.
 - Fails if: either button is missing or goes elsewhere.
 
+### EV-08 — The toolbar is on every state
+- Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: stats, rating, drill-in.
+- Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-09 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play this screen's happy path through stats, rating, drill-in, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: any step can only be reached through the gear or help.
+
+### EV-10 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright
+- How: on each state (stats, rating, drill-in) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `game-stats` and its text is exactly "Here's how tonight went. Rate it if you like, then tap Next." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows another screen's text, pauses the game or changes state.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-08 — The rating is kept
+### EV-11 — The rating is kept
 - Requirement: SCR-019.
 - Method: unit
 - How: two iPads rate 4 and 2 (Q-C3-21 per iPad); restart the host; drill in.
 - Pass evidence: both ratings are stored per iPad and shown as "4 · 2" (one value per iPad, in seat order).
 - Fails if: a rating is lost, averaged into one, or only the last kept.
+
+### EV-12 — The gear Menu survives a restart closed
+- Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen, open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear; the Menu's enabled and disabled items and reasons match those before the restart.
+- Fails if: the Menu or panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
 
 ## Assumptions surfaced
 

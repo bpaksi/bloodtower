@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: SCR-018, UI-046, DEC-144, DEC-627, DEC-663, DEC-664, CUE-003
 - Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
-- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
+- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "The chapter is over. See how it ended; the game stats come next.". Story copy stays `[COPY: ...]`.
 
 ## Purpose
 
@@ -15,15 +15,15 @@ Deliver the ending (SCR-018).
 - **Win, C3** (Q-C3-01): chapter 1 cleared; the DEC-144 win scene, then the Loremaster line `[COPY: chapter 1 win, Loremaster]` (Q-C3-23, Bob approved 2026-10-31).
 - **Win, finale (from C5)** (DEC-663, DEC-664): the ending Painting, `[COPY: finale win, seal shattered]` or `[COPY: finale win, seal holds]`.
 - **Loss** (DEC-144): one scene per way to lose: skulls, corruption, fallen buildings. Skulls: `[COPY: skulls loss]`. Corruption: `[COPY: ...]` (open, corruption name). Fallen buildings: `[COPY: ...]` (4 fallen buildings, Bob approved 2026-10-31, Q-C3-05). Story text on this screen is `[COPY: ...]` per the rule (Bob approved 2026-10-31).
-- **Summary line** (DEC-627): the format `{N} days. {Q} quests done. {S} skulls on the board.` (a data template, not story copy) and Next.
+- **Summary line** (DEC-627): the format `{N} days. {Q} quests done. {S} skulls on the board.` (a data template, not story copy); no Next.
 
 ## Player actions
 
-- iPad: Next.
+- iPad: no body buttons. The scene auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET); the summary line then holds 4 s and auto-advances to Game stats (feature 17).
 
 ## Mechanics behind it
 
-SCR-018: the story's win or loss Painting and narration (UI-046, DEC-144), the win line picked by the last choice's flag (DEC-664), a one-line summary that hands off to Game stats; iPads show Next (DEC-627).
+SCR-018: the story's win or loss Painting and narration (UI-046, DEC-144), the win line picked by the last choice's flag (DEC-664), a one-line summary that hands off to Game stats; it auto-advances to Game stats, no Next (DEC-627; Bob 2026-10-31 10:38 AM ET).
 
 ## What happens next
 

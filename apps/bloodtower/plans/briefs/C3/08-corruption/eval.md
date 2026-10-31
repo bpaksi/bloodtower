@@ -88,7 +88,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Cursed's effect needs a battle round and is built in C4. Bob: OK?
+- Cursed is deferred to C4 and is never drawn in C3 (no C3 scene cost or deck can give it) (Bob approved 2026-10-31 10:38).
 
 ## OPEN questions
 

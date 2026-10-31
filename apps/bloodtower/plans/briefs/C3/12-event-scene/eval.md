@@ -33,7 +33,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-072 .2.
 - Method: playwright
 - How: seed for quiet.
-- Pass evidence: a Scroll and Next; no cost.
+- Pass evidence: a Scroll, no cost and no Next; it auto-advances (see the auto-advance eval).
 - Fails if: a cost dialog shows.
 
 ### EV-05 — Screenshots match
@@ -47,14 +47,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-036, DEC-029.
 - Method: playwright
 - How: seed for windfall, 2-hero group.
-- Pass evidence: the board shows a Reveal with "+5 gold"; purse +5 on the edge band; iPad shows Next only.
+- Pass evidence: the board shows a Reveal with "+5 gold"; purse +5 on the edge band; iPad body shows no buttons; it auto-advances.
 - Fails if: no Reveal, or the amount differs.
 
 ### EV-07 — The counter saved them
 - Requirement: DEC-027.
 - Method: playwright
 - How: seed for plague with a present Healer.
-- Pass evidence: the board shows the saved state `[COPY: counter saved]`; no cost buttons on the iPad, only Next; no hit points change.
+- Pass evidence: the board shows the saved state `[COPY: counter saved]`; no buttons in the iPad body (it auto-advances); no hit points change.
 - Fails if: cost buttons show or a cost applies.
 
 ### EV-08 — Disaster: Go around and Pay them off, no Fight
@@ -71,14 +71,49 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: cost 1 is applied once; iPad B's press changes nothing; both iPads move on to the same next step.
 - Fails if: both costs apply, or cost 2 wins.
 
+### EV-10 — The toolbar is on every state
+- Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: event Scroll, Quiet, cost pick, Reveal, result.
+- Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-11 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play this screen's happy path through event Scroll, Quiet, cost pick, Reveal, result, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: any step can only be reached through the gear or help.
+
+### EV-12 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright
+- How: on each state (event Scroll, Quiet, cost pick, Reveal, result) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `event-scene` and its text is exactly "Something happened on the road. Make a choice if one is shown; the scene moves on by itself." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows another screen's text, pauses the game or changes state.
+
+### EV-13 — Next-only steps auto-advance
+- Requirement: Quiet and the result step after a pick has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: reach Quiet and the result step after a pick; once with narration (mock audio end event), once with audio off.
+- Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
+- Fails if: a Next button shows, it advances early, or it waits for a press.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-10 — Continue keeps the open event
+### EV-14 — Continue keeps the open event
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit at a hazard's choice; Continue.
 - Pass evidence: the same painting and two costs.
 - Fails if: a new event.
+
+### EV-15 — The gear Menu survives a restart closed
+- Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen, open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear; the Menu's enabled and disabled items and reasons match those before the restart.
+- Fails if: the Menu or panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
 
 ## Assumptions surfaced
 
