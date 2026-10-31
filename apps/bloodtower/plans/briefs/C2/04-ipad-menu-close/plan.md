@@ -33,7 +33,7 @@ Cutover: N
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-18 all pass (verifier table on PR).
-- In scope: the gear list (Bob approved 2026-10-31 10:38) in the DEC-229 groups (spec "States"); Pause/Resume stays as a direct Table action. Unusable items are greyed with a one-line reason, never hidden (DEC-227); in C2, Split party / Rejoin party and Use a potion or item show greyed with the reason "C3+".
+- In scope: the gear list (Bob approved 2026-10-31 10:38) in the DEC-229 groups (spec "States"); Pause/Resume stays as a direct Table action. Unusable items are greyed with a one-line reason, never hidden (DEC-227); in C2, Split party (shows "Rejoin party" when split) and Use a potion or item show greyed with the reason "C3+".
 - Rules (Bob 2026-10-31 10:37 AM ET):
 - The bottom toolbar is back on every iPad screen, with the gear (Menu) at its right. The toolbar is iPad chrome: it is not a body button and does not count against "one step, one primary button" (SCR-016).
 - The HUD-only iPad lock stays: on the happy path the iPad body shows only the HUD (the current step's line) and its flow buttons. Nothing exceptional sits on the happy path; every exception goes through the gear.
@@ -48,13 +48,13 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 1. Current party: heroes, HP, gold, items, corruptions and who holds whom.
 2. Game board setup: shows the physical setup again and re-runs the piece check.
 3. Volume: the Volume 0/1/2 step with Keep/Try another.
-4. Split party / Rejoin party: one item whose label toggles ("Split party" when together, "Rejoin party" when split).
+4. Split party: one item whose label toggles ("Split party" when together, "Rejoin party" when split).
 5. Use a potion or item: pick the hero, then the item.
 6. Look up: rules or a card.
 7. Change who holds whom.
 8. Join another iPad: shows the QR code.
 9. Tower: reconnect or play without it.
-10. Save and quit: the existing Quit flow (the Quit story confirm, DEC-230).
+10. Save and quit: the existing Quit flow (the "Save and quit" confirm, DEC-230).
 - Help lines: Loremaster 2026-10-31, in the screen spec's Help lines table (C2 and C3 screens).
 
 ## AREA / DEC checklist

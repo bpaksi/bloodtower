@@ -79,11 +79,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: board "Tower lost" with line "The tower has gone quiet. The game waits." inside the DEC-705 frame, 0 board buttons; iPad same line + "Reconnect" (primary), "Go on without", "Quit". Go on without: title "Go on without", "Are you sure?", "Go on without" (primary), "Back". Quit: title "Quit story", "Are you sure?", "Quit story" (primary), "Back". Reconnecting: iPad 0 body buttons. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
 - Fails if: a label differs or a board button shows.
 
-### EV-14 — Menu Reconnect while without (M "Later: Menu Reconnect tower")
+### EV-14 — gear → Tower while without (M "Later: gear item 9 Tower", s=4; panel M "Later: Tower panel", s=5)
 - Requirement: UI-033.
 - Method: playwright
 - How: after Go on without, open the Menu.
-- Pass evidence: Table rows "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume" (feature 04 order); "Tower" enabled; Close last.
+- Pass evidence: Table rows (exact names, no number prefix) "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume" (feature 04 order); "Tower" enabled; Close last.
 - Fails if: Tower is disabled or missing.
 
 ## Survival evals (one per survival invariant in plan.md)

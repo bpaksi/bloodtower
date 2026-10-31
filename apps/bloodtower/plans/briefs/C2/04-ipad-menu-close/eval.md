@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the Menu layout (UI-033, DEC-707; mockup).
 - Method: screenshot
 - How: iPad portrait 768×1024 only (the approved mockup is portrait only; no landscape check); DOM checks per EV-08 to EV-10 replace the side-by-side compare.
-- Pass evidence: one portrait screenshot attached for review; EV-08–EV-10 are the gate. The three groups centred, Close last and full width, the bottom bar still visible under the scrim.
+- Pass evidence: one portrait screenshot attached for review against ./mockup.html (M "Toolbar (closed)", "Gear list: in play", "Look up empty", "Confirm: Save and quit"); EV-08–EV-10 are the gate. The three groups centred, Close last and full width, the bottom bar still visible under the scrim.
 - Fails if: Close is missing or the dialog covers the bottom bar.
 
 ### EV-06 — Quit story still works from the Menu
@@ -57,11 +57,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: `[data-menu]` gone, gear `aria-expanded="false"`; no act sent.
 - Fails if: the Menu stays open or an act is sent.
 
-### EV-08 — Menu open matches mockup (M "Menu open")
+### EV-08 — Gear list matches mockup (M "Gear list: in play")
 - Requirement: the open Menu matches the approved mockup.
 - Method: playwright, iPad portrait 768×1024, in play with the tower connected
 - How: open the Menu.
-- Pass evidence: inside `[data-menu]`, in DOM order: label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). Item 4 is one button whose label toggles: it reads "Split party" while the party is together (always so in C2) and "Rejoin party" while it is split; there is never a separate "Rejoin party" item. The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
+- Pass evidence: inside `[data-menu]`, in DOM order (exact names, no number prefix; any "N · " prefix in the mockup is mockup-only): label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). Item 4 is one button whose label toggles: it reads "Split party" while the party is together (always so in C2) and "Rejoin party" while it is split; there is never a separate "Rejoin party" item. The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
 - Fails if: any group/item is missing, an unusable item is absent instead of disabled, or Close is not last.
 
 ### EV-09 — Before Begin, game items are greyed with a reason (M "Look up empty")
@@ -71,11 +71,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the Look up heading renders; "Current party" is disabled with the reason "Only during a game."; "Look up" is enabled; Close is last.
 - Fails if: a group or item is hidden, or a disabled item has no reason.
 
-### EV-10 — Quit story confirm (M "Confirm: Quit story")
-- Requirement: Quit story asks first (DEC-230).
+### EV-10 — Save and quit confirm (M "Confirm: Save and quit")
+- Requirement: Save and quit asks first (DEC-230).
 - Method: playwright
 - How: Menu → Save and quit, then Back.
-- Pass evidence: a confirm titled "Quit story" with line "Are you sure?" and exactly two buttons "Quit story" (primary) and "Back"; Back returns to the open Menu and sends no act.
+- Pass evidence: a confirm titled "Save and quit" with line "Are you sure?" and exactly two buttons "Save and quit" (primary) and "Back"; Back returns to the open Menu and sends no act.
 - Fails if: a third button, or Back sends an act or closes the Menu.
 
 ### EV-11 — The toolbar is on every iPad screen
@@ -132,7 +132,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a reload or Continue starts with the Menu closed.
 - Method: playwright
 - How: `w1-chrome.spec.ts` "a held hero, the Menu and a restart survive Continue", extended: open the Menu, restart the host, Continue.
-- Pass evidence: `[data-menu]` is absent after Continue and the gear is the only Menu control visible (M "Closed"); the held hero is unchanged.
+- Pass evidence: `[data-menu]` is absent after Continue and the gear is the only Menu control visible (M "Toolbar (closed)"); the held hero is unchanged.
 - Fails if: Menu state is stored and reopens.
 
 ### EV-18 — A gear panel survives a restart closed, with items recomputed
