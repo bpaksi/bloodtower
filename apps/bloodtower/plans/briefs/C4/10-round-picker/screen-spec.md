@@ -1,0 +1,34 @@
+# Screen spec: C4 / 10-round-picker — The round picker on the iPad: Fight or Retreat, then one action
+
+- Brief: ./plan.md
+- Evals: ./evals.md
+- Cards: UI-027, DEC-118, DEC-129
+
+## Rules for every screen
+
+- Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
+- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
+- Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
+- No Next-only screens: every iPad screen carries a real choice, or the board advances on its own after its beat. A lone "Next" button is a failed build.
+- The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
+- All story and help text is `[COPY: ...]` until the story pass.
+
+## Purpose
+
+UI-027: the group picks Fight or Retreat; then each present hero picks one action, all at once (Gamewright pick, pending Bob) (Q-C4-16); the board ticks each hero who has picked. No timer (Gamewright pick, pending Bob) (Q-C4-11).
+
+## States and player actions
+
+- Board: shows the state and every line `[COPY: round-picker, board]`; never scrolls.
+- iPad: the picks named in "Purpose"; each screen has a real choice (no Next-only screen); toolbar ? left, gear right.
+- Gear: opens its panel on the Story board; picks on the iPad.
+- Help (?): `[COPY: help, round-picker]` on the board.
+
+## What happens next
+
+Back to the loop that called it (see ./plan.md).
+
+## OPEN questions
+
+- OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob).
