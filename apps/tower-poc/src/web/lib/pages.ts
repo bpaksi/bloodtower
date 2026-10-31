@@ -85,6 +85,13 @@ export const PAGES = {
     summary: "Four tests of light, sound and flash timing on the tower in front of you.",
     planned: [],
   },
+  setupCheck: {
+    href: "/setup-check",
+    title: "Setup check",
+    summary:
+      "After calibrate: the glyphs on each drum side, which kingdom north faces, whether a drum turn lands, and how many skulls stay inside.",
+    planned: [],
+  },
 } as const satisfies Record<string, PageInfo>;
 
 export const NAV_PAGES: readonly PageInfo[] = Object.values(PAGES);

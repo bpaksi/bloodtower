@@ -3,7 +3,8 @@ import { defineConfig } from "@playwright/test";
 // Not 4747, so a test run never collides with a running tower service.
 const PORT = 4748;
 const baseURL = `http://127.0.0.1:${PORT}`;
-const TOWER_TESTS = /[\\/]tower[\\/][^\\/]+\.spec\.ts$/;
+// setup-check drives the one shared mock, so it runs with the other tower specs, one at a time.
+const TOWER_TESTS = /[\\/](?:tower[\\/][^\\/]+|setup-check)\.spec\.ts$/;
 
 export default defineConfig({
   testDir: "./tests",

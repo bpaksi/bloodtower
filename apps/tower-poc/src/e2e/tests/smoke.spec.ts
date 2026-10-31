@@ -11,6 +11,7 @@ const PAGES = [
   { path: "/gaps", title: "Feature Gaps" },
   { path: "/settings", title: "Settings" },
   { path: "/timing", title: "Timing" },
+  { path: "/setup-check", title: "Setup check" },
 ] as const;
 
 const collectErrors = (page: Page) => {
