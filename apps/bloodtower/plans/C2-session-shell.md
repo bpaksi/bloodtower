@@ -201,7 +201,6 @@ Each gets its folder as soon as what it waits on is on `main`.
 ## Open items for Bob
 
 - Q-401 and Q-402 are answered (design session 2026-10-31, PR #336): DEC-715 makes feature 14 a bugfix, and DEC-716 and DEC-717 settle feature 11. MEC-018 now `uses` DEC-710, DEC-716 and DEC-717.
-- **Features 11 and 14 need Bob's approval** of their evals (and 11's mockup).
 
 ## Results
 
@@ -209,4 +208,4 @@ Each gets its folder as soon as what it waits on is on `main`.
 - Revision (2026-10-31): Bob: "I don't want you do the coding only the planning … The goal is to get a chuck of work planned so that it can be built." Claude did the audit as planning work and cut the build into feature folders. This revision needs Bob's OK along with the evals.
 - Features 01 to 10 (2026-10-31 09:09 ET): Bob approved all ten folders' evals and mockups in chat, assumptions included: "Approve all ten". Each `approval.md` holds the row. Batch B1 (01, 02, 03, 04, 09, 10) may start once this PR is on `main`. Features 05 to 08 also wait for G-A, the audit, which is not yet accepted.
 - G-A (2026-10-31): Bob accepted the audit in chat: "Accept the audit". No rewrite: the session shell is reworked in C2, and the v1 pack and story-card code in C3. Features 05 to 08 may start in order once this PR is on `main`.
-- Features 11 and 14 (2026-10-31): folders written after the open-questions session answered Q-401 and Q-402. Waiting for Bob's approval.
+- Features 11 and 14 (2026-10-31 09:31 ET): folders written after the open-questions session answered Q-401 and Q-402. Bob approved both in chat, assumptions included: "Approve both". Feature 14 may start after feature 08; feature 11 after 08 and Bob's feature 10 tower run.
