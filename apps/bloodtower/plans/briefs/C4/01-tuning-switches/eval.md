@@ -17,15 +17,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-02 — Chapter 1 no longer ends the game
 - Requirement: DEC-133.
-- Method: sim
-- How: fixed seed, win chapter 1.
+- Method: unit
+- How: (sim) fixed seed, win chapter 1.
 - Pass evidence: chapter 2's card opens; no outcome.
 - Fails if: the game ends won.
 
 ### EV-03 — Chapter 3 won ends the C4 game (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-01.
-- Method: sim
-- How: fixture at chapter 3 with both quests done.
+- Method: unit
+- How: (sim) fixture at chapter 3 with both quests done.
 - Pass evidence: game ends won; record says `end: chapter_3`.
 - Fails if: chapter 4 or no end.
 

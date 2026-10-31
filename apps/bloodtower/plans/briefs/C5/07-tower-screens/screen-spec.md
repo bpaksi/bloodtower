@@ -1,7 +1,7 @@
 # Screen spec: C5 / 07-tower-screens — The Tower on screen: level map, room view, the iPad's doors
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: MEC-076, DEC-566, DEC-583
 
 ## Rules for every screen

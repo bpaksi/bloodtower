@@ -17,8 +17,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-02 — A foe steps up 1 in 3, +1 level, stopping at lethal
 - Requirement: DEC-555, DEC-703.
-- Method: sim
-- How: 10,000 seeded retreats and falls from a level-2 foe at status 1; then a fixture foe at lethal.
+- Method: unit
+- How: (sim) 10,000 seeded retreats and falls from a level-2 foe at status 1; then a fixture foe at lethal.
 - Pass evidence: step rate 0.333 ± 0.01; each step is exactly +1 level; the lethal foe never steps.
 - Fails if: rate outside, a step of 0 or 2+, or a lethal foe steps.
 

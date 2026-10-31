@@ -24,8 +24,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-03 — Listening is wrong 1 in 5
 - Requirement: DEC-586, DEC-618.
-- Method: sim
-- How: 10,000 seeded listens.
+- Method: unit
+- How: (sim) 10,000 seeded listens.
 - Pass evidence: wrong rate 0.20 ± 0.01 (`tomb.listen_wrong` = 0.2); the hint is the room kind only (nothing, trap or battle), never which foe or trap.
 - Fails if: outside.
 
@@ -38,8 +38,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-05 — Guardian at the quest's level +1 gives the Signet
 - Requirement: DEC-662, DEC-608.
-- Method: sim
-- How: beat the guardian.
+- Method: unit
+- How: (sim) beat the guardian.
 - Pass evidence: a battle against the quest's foe at the quest's level + 1; Signet to the group; quest done.
 - Fails if: no Signet.
 
@@ -80,8 +80,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-11 — The deal is 40/30/30
 - Requirement: DEC-604.
-- Method: sim
-- How: 10,000 seeded tombs; count non-guardian rooms.
+- Method: unit
+- How: (sim) 10,000 seeded tombs; count non-guardian rooms.
 - Pass evidence: nothing 0.40 ± 0.02, battle 0.30 ± 0.02, trap 0.30 ± 0.02; every tomb has at least 1 battle and 1 trap.
 - Fails if: any rate outside, or a tomb with no battle or no trap.
 

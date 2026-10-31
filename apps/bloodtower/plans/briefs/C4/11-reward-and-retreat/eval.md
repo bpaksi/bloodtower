@@ -52,8 +52,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-07 — The toolbar is on every state
 - Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: reward Reveal, Give to {hero}, retreat result, fall result.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: reward Reveal, Give to {hero}, retreat result, fall result.
 - Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -73,22 +73,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-10 — Beats auto-advance
 - Requirement: no Next on: Card taken, retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (Card taken, retreat result, fall result); once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach each beat (Card taken, retreat result, fall result); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-11 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (Card taken, retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
+- Method: playwright
+- How: (fake clock) reach each beat (Card taken, retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
 ### EV-12 — The reward Reveal waits for the Give to pick
 - Requirement: Gamewright ruling: a screen with a choice waits for that choice.
-- Method: playwright, fake clock
-- How: reach the reward Reveal with narration ending at once; advance the clock 30 s; then press Give to {hero}.
+- Method: playwright
+- How: (fake clock) reach the reward Reveal with narration ending at once; advance the clock 30 s; then press Give to {hero}.
 - Pass evidence: the Reveal is still shown after 30 s; it moves on only after the Give to {hero} press.
 - Fails if: it advances without the pick.
 

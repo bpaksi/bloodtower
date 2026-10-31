@@ -31,8 +31,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-04 — Cursed in every draw (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-06.
-- Method: sim
-- How: 10,000 seeded draws for heroes holding no corruption, from the C4 set of 6 (Cruel, Greedy, Feral, Lost, Tempted, Cursed).
+- Method: unit
+- How: (sim) 10,000 seeded draws for heroes holding no corruption, from the C4 set of 6 (Cruel, Greedy, Feral, Lost, Tempted, Cursed).
 - Pass evidence: Cursed rate 1/6 = 0.167 ± 0.01; 0 draws give a hero one they hold.
 - Fails if: rate outside 0.157–0.177, or a duplicate.
 

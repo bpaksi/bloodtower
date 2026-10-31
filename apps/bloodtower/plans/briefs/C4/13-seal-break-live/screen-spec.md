@@ -1,7 +1,7 @@
 # Screen spec: C4 / 13-seal-break-live — The seal break live on the board, chapters 1 and 2
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: UI-044, DEC-303
 
 ## Rules for every screen

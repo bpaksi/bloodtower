@@ -1,7 +1,7 @@
 # Screen spec: C4 / 12-tomb-screens — The Tomb on screen: the map and the view, the iPad's three corridors
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: AREA-094, DEC-583 to DEC-592, DEC-617 to DEC-620
 
 ## Rules for every screen

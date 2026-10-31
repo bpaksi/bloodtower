@@ -10,8 +10,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-01 — Sim report at 2, 3, 4 heroes (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-05.
-- Method: sim
-- How: run the report.
+- Method: unit
+- How: (sim) run the report.
 - Pass evidence: win rate, length, falls per group size.
 - Fails if: missing size.
 
@@ -24,8 +24,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-03 — No hang in 900 games
 - Requirement: MEC-032.
-- Method: sim
-- How: 300 seeds at each of 2, 3 and 4 heroes (900 games).
+- Method: unit
+- How: (sim) 300 seeds at each of 2, 3 and 4 heroes (900 games).
 - Pass evidence: all end.
 - Fails if: hang.
 

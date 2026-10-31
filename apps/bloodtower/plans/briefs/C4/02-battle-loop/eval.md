@@ -45,8 +45,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-06 — Headless battles finish
 - Requirement: MEC-038.
-- Method: sim
-- How: 1,000 seeded battles.
+- Method: unit
+- How: (sim) 1,000 seeded battles.
 - Pass evidence: every battle exits won, retreated or fallen; no hang.
 - Fails if: a hang or crash.
 

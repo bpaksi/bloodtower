@@ -7,7 +7,7 @@
 
 ## Who does what
 
-As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/NN-<feature>/` with `plan.md`, `screen-spec.md` (screen features only), `evals.md` (evals first, per `docs/sdlc.md`) and `approval.md`. Illusionist draws each screen feature's `mockup.html`. Bob approves evals and mockups. Wright's developers build; the verifier runs each `evals.md`.
+As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/NN-<feature>/` with `plan.md`, `screen-spec.md` (screen features only), `eval.md` (evals first, per `docs/sdlc.md`) and `approval.md`. Illusionist draws each screen feature's `mockup.html`. Bob approves evals and mockups. Wright's developers build; the verifier runs each `eval.md`.
 
 ## Scope and why
 

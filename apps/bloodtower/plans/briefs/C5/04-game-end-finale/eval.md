@@ -10,15 +10,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-01 — Chapter 3 no longer ends it
 - Requirement: MEC-032.
-- Method: sim
-- How: win chapter 3.
+- Method: unit
+- How: (sim) win chapter 3.
 - Pass evidence: finale opens.
 - Fails if: ends.
 
 ### EV-02 — Two win lines by flag
 - Requirement: DEC-664.
-- Method: sim
-- How: each flag.
+- Method: unit
+- How: (sim) each flag.
 - Pass evidence: its own `[COPY]` key.
 - Fails if: wrong line.
 

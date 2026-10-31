@@ -1,7 +1,7 @@
 # Screen spec: C4 / 10-round-picker — The round picker on the iPad: Fight or Retreat, then one action
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: UI-027, DEC-118, DEC-129
 
 ## Rules for every screen

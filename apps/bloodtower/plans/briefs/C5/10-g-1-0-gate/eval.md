@@ -17,15 +17,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-02 — Two table games (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-10.
-- Method: manual
-- How: Bob plays.
+- Method: screenshot
+- How: (manual) Bob plays.
 - Pass evidence: one win, one loss logged.
 - Fails if: fewer.
 
 ### EV-03 — Every C4 and C5 eval table green
 - Requirement: sdlc.
-- Method: manual
-- How: read PRs.
+- Method: screenshot
+- How: (manual) read PRs.
 - Pass evidence: all pass.
 - Fails if: a fail.
 

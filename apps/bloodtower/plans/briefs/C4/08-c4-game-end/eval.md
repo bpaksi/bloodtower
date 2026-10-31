@@ -10,15 +10,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-01 — Chapter 3 won ends it (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-01.
-- Method: sim
-- How: win chapter 3.
+- Method: unit
+- How: (sim) win chapter 3.
 - Pass evidence: won; `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]` key.
 - Fails if: no end.
 
 ### EV-02 — A loss in chapter 2 ends it
 - Requirement: DEC-117.
-- Method: sim
-- How: third corruption in chapter 2.
+- Method: unit
+- How: (sim) third corruption in chapter 2.
 - Pass evidence: lost.
 - Fails if: continues.
 

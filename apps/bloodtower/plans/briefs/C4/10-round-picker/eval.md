@@ -45,8 +45,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-06 — The toolbar is on every state
 - Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: Fight or Retreat, actions, waiting, sitting out.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: Fight or Retreat, actions, waiting, sitting out.
 - Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -73,8 +73,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-10 — "All picked" goes straight to the round result
 - Requirement: Gamewright ruling: All picked does not hold.
-- Method: playwright, fake clock
-- How: 2 heroes; the last hero picks; do not advance the clock.
+- Method: playwright
+- How: (fake clock) 2 heroes; the last hero picks; do not advance the clock.
 - Pass evidence: the board shows the round result line in the same tick; no "All picked" hold and no Next.
 - Fails if: the board holds on "All picked", waits for a timer, or shows a Next.
 

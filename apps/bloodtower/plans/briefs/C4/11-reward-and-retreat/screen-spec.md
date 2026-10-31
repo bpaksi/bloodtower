@@ -1,7 +1,7 @@
 # Screen spec: C4 / 11-reward-and-retreat — The battle's end on screen: reward, retreat and fall
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: UI-039, UI-040, UI-036, DEC-120, DEC-016, DEC-177
 
 ## Rules for every screen

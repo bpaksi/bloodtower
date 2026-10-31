@@ -1,7 +1,7 @@
 # Screen spec: C4 / 09-battle-board — The battle on the board: horn, foe panel, round results
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: UI-026, CUE-010, UI-030, UI-036, DEC-466
 
 ## Rules for every screen

@@ -66,8 +66,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-09 — The toolbar is on every state
 - Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: room with three cards, after Listen, trap, battle room, Exit.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: room with three cards, after Listen, trap, battle room, Exit.
 - Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -87,15 +87,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-12 — Beats auto-advance
 - Requirement: no Next on: Falling Rocks result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (Falling Rocks result); once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach each beat (Falling Rocks result); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-13 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (Falling Rocks result) with narration playing; advance the clock 4.5 s with no audio end event.
+- Method: playwright
+- How: (fake clock) reach each beat (Falling Rocks result) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
@@ -108,8 +108,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-15 — The Pit waits for the pick and hurts only that hero
 - Requirement: DEC-606; Sentinel recheck 4.
-- Method: playwright, fake clock
-- How: 3 heroes at 10 HP enter a Pit room; advance the clock 30 s; press the second hero's button.
+- Method: playwright
+- How: (fake clock) 3 heroes at 10 HP enter a Pit room; advance the clock 30 s; press the second hero's button.
 - Pass evidence: after 30 s the Pit is still shown, its iPad title reads exactly "Who takes the fall?", with exactly 3 buttons each labeled exactly with a hero's name and the locked line; after the press that hero reads 6/10 and the other two 10/10.
 - Fails if: it advances without a pick, shows a Next, or takes HP from anyone else.
 

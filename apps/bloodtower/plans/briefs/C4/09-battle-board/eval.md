@@ -45,15 +45,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-06 — Hit and victory cues fire
 - Requirement: CUE-010.
-- Method: playwright, tower mock
-- How: lose a round, then win the battle.
+- Method: playwright
+- How: (tower mock) lose a round, then win the battle.
 - Pass evidence: tower mock receives `cue.hit` once for the lost round and `cue.victory` once at the end.
 - Fails if: a cue missing or doubled.
 
 ### EV-07 — The toolbar is on every state
 - Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: foe arrives (horn), round picking, round won, round lost, victory.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: foe arrives (horn), round picking, round won, round lost, victory.
 - Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -73,15 +73,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-10 — Beats auto-advance
 - Requirement: no Next on: round result (won or lost), victory; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (round result (won or lost), victory); once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach each beat (round result (won or lost), victory); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-11 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (round result (won or lost), victory) with narration playing; advance the clock 4.5 s with no audio end event.
+- Method: playwright
+- How: (fake clock) reach each beat (round result (won or lost), victory) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 

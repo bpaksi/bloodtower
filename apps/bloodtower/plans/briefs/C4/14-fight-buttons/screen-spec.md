@@ -1,7 +1,7 @@
 # Screen spec: C4 / 14-fight-buttons — Fight on the event and quest scenes
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: UI-041, UI-042, DEC-023, DEC-028
 
 ## Rules for every screen

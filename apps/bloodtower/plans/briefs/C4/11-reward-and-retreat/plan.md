@@ -9,7 +9,7 @@ Keep this a checklist; do not write a second design doc.
 - Kind: screen
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, UI-039, UI-040, UI-036, DEC-120, DEC-016, DEC-177
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Screen spec: ./screen-spec.md
 - Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals
 - Depends on: 03, 09, and its `approval.md` on `main`
@@ -37,7 +37,7 @@ Cutover: N
 
 ## Done-when (e2e)
 
-Contract is ./evals.md. List EV IDs; do not restate them.
+Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-16 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).

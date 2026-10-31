@@ -9,7 +9,7 @@ Keep this a checklist; do not write a second design doc.
 - Kind: engine
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, DEC-663, DEC-664, DEC-540, DEC-642, DEC-290, MEC-077
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 02, C3 07, and its `approval.md` on `main`
@@ -35,7 +35,7 @@ Cutover: N
 
 ## Done-when (e2e)
 
-Contract is ./evals.md. List EV IDs; do not restate them.
+Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-04 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; 1.1 work (DEC-502).

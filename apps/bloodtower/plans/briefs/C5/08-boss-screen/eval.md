@@ -38,8 +38,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-05 — The toolbar is on every state
 - Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: Warden arrives, round picking, phase 2 show, phase 3 show, Warden falls.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: Warden arrives, round picking, phase 2 show, phase 3 show, Warden falls.
 - Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -59,15 +59,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-08 — Beats auto-advance
 - Requirement: no Next on: phase show, round result, The Warden falls; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (phase show, round result, The Warden falls); once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach each beat (phase show, round result, The Warden falls); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-09 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
-- Method: playwright, fake clock
-- How: reach each beat (phase show, round result, The Warden falls) with narration playing; advance the clock 4.5 s with no audio end event.
+- Method: playwright
+- How: (fake clock) reach each beat (phase show, round result, The Warden falls) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
@@ -80,8 +80,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-11 — "The Warden falls" waits for its narration
 - Requirement: Gamewright ruling: The Warden falls auto-advances when its narration ends.
-- Method: playwright, fake clock
-- How: win the last round with narration playing; advance the clock 4.5 s with no audio end event, then fire it.
+- Method: playwright
+- How: (fake clock) win the last round with narration playing; advance the clock 4.5 s with no audio end event, then fire it.
 - Pass evidence: still on "The Warden falls" at 4.5 s; advances only after the end event.
 - Fails if: it advances before narration ends, or shows a Next.
 

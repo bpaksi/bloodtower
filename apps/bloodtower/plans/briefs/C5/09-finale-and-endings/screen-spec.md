@@ -1,7 +1,7 @@
 # Screen spec: C5 / 09-finale-and-endings — The last choice and the two endings on screen
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: DEC-663, DEC-664, SCR-018, DEC-144
 
 ## Rules for every screen

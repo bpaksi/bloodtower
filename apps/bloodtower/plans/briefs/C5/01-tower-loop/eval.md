@@ -10,8 +10,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-01 — Locked until the unlock fires
 - Requirement: DEC-645.
-- Method: sim
-- How: before and after The Last Stand.
+- Method: unit
+- How: (sim) before and after The Last Stand.
 - Pass evidence: Enter hidden, then offered.
 - Fails if: offered early.
 
@@ -59,8 +59,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-08 — Rooms 1–2 are guard, trap or shrine at 1 in 3
 - Requirement: DEC-566, DEC-703.
-- Method: sim
-- How: 10,000 seeded levels.
+- Method: unit
+- How: (sim) 10,000 seeded levels.
 - Pass evidence: each kind 0.333 ± 0.02.
 - Fails if: any rate outside.
 

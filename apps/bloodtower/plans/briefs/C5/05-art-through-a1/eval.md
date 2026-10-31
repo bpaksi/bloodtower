@@ -31,8 +31,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-04 — Bob approved every final
 - Requirement: Q-C5-06 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
-- Method: manual
-- How: read ./approval.md's art checklist.
+- Method: unit
+- How: (manual) read ./approval.md's art checklist.
 - Pass evidence: every asset id in `index.json` has a ticked line `- [x] <id> — approved by Bob <date>`.
 - Fails if: any id unticked or missing.
 

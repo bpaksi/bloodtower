@@ -1,4 +1,6 @@
 # Approval: C5 / 01-tower-loop — The Tower: three levels, dealt rooms, stair guards, retreat keeps progress
 
-- Evals approved by Bob: 2026-10-31 6:16 PM ET ("Approve all")
-- Mockup approved by Bob: n/a
+| Item | Approved by | When (America/Detroit) | Chat link | Version (commit sha of file) |
+|------|-------------|------------------------|-----------|------------------------------|
+| eval.md | Bob | 2026-10-31 6:16 PM ("Approve all") | | |
+| mockup.html | n/a | | | no mockup: no screen change |

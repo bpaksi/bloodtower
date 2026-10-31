@@ -24,22 +24,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-03 — The Ambush: Fight or toll (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: DEC-662, Q-C4-04.
-- Method: sim
-- How: short purse; pick toll.
+- Method: unit
+- How: (sim) short purse; pick toll.
 - Pass evidence: purse 4, 3 present heroes at 10 HP: purse 0, each hero 8 HP, The Ambush done.
 - Fails if: the toll is refused, a hero drops below 1 HP, or the quest stays open.
 
 ### EV-04 — The Ambush won by Fight
 - Requirement: DEC-662.
-- Method: sim
-- How: pick Fight, win.
+- Method: unit
+- How: (sim) pick Fight, win.
 - Pass evidence: quest done, reward given.
 - Fails if: not done.
 
 ### EV-05 — The Last Stand is a level-3 battle
 - Requirement: Q-C3-11.
-- Method: sim
-- How: reach The Last Stand.
+- Method: unit
+- How: (sim) reach The Last Stand.
 - Pass evidence: level-3 battle starts.
 - Fails if: plain scene only.
 

@@ -1,7 +1,7 @@
 # Screen spec: C5 / 08-boss-screen — The Warden on screen: phases and the tower show
 
 - Brief: ./plan.md
-- Evals: ./evals.md
+- Evals: ./eval.md
 - Cards: DEC-567, DEC-327, UI-026
 
 ## Rules for every screen

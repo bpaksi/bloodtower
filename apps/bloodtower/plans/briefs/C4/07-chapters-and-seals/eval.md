@@ -10,8 +10,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-01 — Chapter 2 opens after chapter 1
 - Requirement: MEC-033.
-- Method: sim
-- How: win chapter 1.
+- Method: unit
+- How: (sim) win chapter 1.
 - Pass evidence: chapter 2 card; Brynthia opens.
 - Fails if: game ends.
 
@@ -38,15 +38,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-05 — The Lock needs the Signet
 - Requirement: DEC-662.
-- Method: sim
-- How: reach The Lock without, then with, the Signet.
+- Method: unit
+- How: (sim) reach The Lock without, then with, the Signet.
 - Pass evidence: without the Signet The Lock's option is `enabled: false` with the reason `[COPY: needs the Warden's Signet]`; with it, The Lock is done.
 - Fails if: The Lock opens without the Signet, or no reason is given.
 
 ### EV-06 — Chapter 3 plays
 - Requirement: DEC-662.
-- Method: sim
-- How: fixed seed; win chapter 2.
+- Method: unit
+- How: (sim) fixed seed; win chapter 2.
 - Pass evidence: chapter 3 opens with the whole board; quests The Lock and The Last Stand are live; both done wins the chapter.
 - Fails if: chapter 3 missing a quest, or won early.
 
