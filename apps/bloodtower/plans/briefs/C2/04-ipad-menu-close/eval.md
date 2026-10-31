@@ -34,7 +34,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: unit
 - How: `chromeBar.test.ts`, "greys what it cannot offer": render with no `quit` and no `connect` offer.
 - Pass evidence: headings "Look up", "Table", "Leave" in that order; "Save and quit" is a `disabled` button; "Tower" shows and is `disabled`; each disabled item has one reason line; Close is enabled.
-- Fails if: Quit story is replaced by the text "Quit story is not offered." (today's build), or a group is left out.
+- Fails if: Save and quit is replaced by the text "Quit story is not offered." (today's build), or a group is left out.
 
 ### EV-05 — Screenshot matches the mockup
 - Requirement: the Menu layout (UI-033, DEC-707; mockup).
@@ -61,7 +61,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the open Menu matches the approved mockup.
 - Method: playwright, iPad portrait 768×1024, in play with the tower connected
 - How: open the Menu.
-- Pass evidence: inside `[data-menu]`, in DOM order: label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
+- Pass evidence: inside `[data-menu]`, in DOM order: label "Look up" with items "Current party", "Look up"; label "Table" with "Game board setup", "Volume", "Split party", "Use a potion or item", "Change who holds whom", "Join another iPad", "Tower", "Pause/Resume"; label "Leave" with "Save and quit"; a version line matching `/^v\d+\.\d+\.\d+/`; then the last button "Close". "Tower" is disabled with the reason "The tower is connected."; "Split party" and "Use a potion or item" are disabled with the reason "C3+" (C2 build). Item 4 is one button whose label toggles: it reads "Split party" while the party is together (always so in C2) and "Rejoin party" while it is split; there is never a separate "Rejoin party" item. The gear stays visible (`elementFromPoint` at the gear centre returns the gear or the scrim, not the dialog).
 - Fails if: any group/item is missing, an unusable item is absent instead of disabled, or Close is not last.
 
 ### EV-09 — Before Begin, game items are greyed with a reason (M "Look up empty")
@@ -81,7 +81,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-11 — The toolbar is on every iPad screen
 - Requirement: every iPad screen has the bottom toolbar with "?" at the left end and the gear at the right end (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
 - Method: playwright, iPad portrait 768×1024
-- How: walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7a/7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, session screen, game stats, session over.
+- How: walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7a/7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, glyphs-facing, session screen, game stats, session over.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible inside the viewport; its first control is "?" and its last is the gear; nothing in the iPad body covers them.
 - Fails if: any screen or state lacks the toolbar, "?" or the gear.
 
@@ -89,8 +89,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an enabled gear item starts on the iPad and its UI shows on the Story board; the game pauses while the panel is open and resumes on Done (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright, board 1920×1080 + iPad 768×1024, in play
 - How: for each enabled item in turn (Current party, Game board setup, Volume, Look up, Change who holds whom, Join another iPad), open it from the gear, then press Done.
-- Pass evidence: while open, the iPad body shows "See the Story board", the panel's pick buttons when it needs a choice (Volume: "Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"), and Done (Back only where the panel has a step back); the board shows `[data-panel="<item>"]` with 0 `button` elements (DEC-278) and mirrors each iPad pick within 500 ms (`[data-picked]` matches the pressed button); (Gamewright pick, pending Bob Q-GEAR-1); the host reports `paused: true`. After Done the panel is gone, the iPad is back on its screen and `paused: false`.
-- Fails if: the panel shows on the iPad, the game runs while a panel is open, or Done does not resume.
+- Pass evidence: while open, the iPad body shows "See the Story board", the panel's pick buttons when it needs a choice (Volume: "Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"), and Done (Back only where the panel has a step back); the board shows `[data-panel="<item>"]` with 0 `button` elements (DEC-278) and mirrors each iPad pick within 500 ms (`[data-picked]` matches the pressed button); (Gamewright pick, pending Bob Q-GEAR-1); the host reports `paused: true`. After Done the panel is gone, the iPad is back on its screen and `paused: false`. Each item also does its job:
+  - Current party: the board panel lists every hero with HP, gold, items, corruptions and holder, matching the host state.
+  - Game board setup: the board shows the setup steps and the piece check re-runs (the C2 feature 11 flow; the host logs a new piece-check run).
+  - Join another iPad: the board shows a QR code and the join URL, and the URL matches the host's join URL.
+  - Look up: the board shows the rules/card list; picking one card on the iPad opens that card on the board.
+  - Change who holds whom: after a swap on the iPad and Done, the host's holdings show the new holder, and it is still the new holder after a host restart and Continue.
+  - Volume: after picking a level and Keep, the host reports the new volume level, and it is still that level after the panel closes and reopens.
+- Fails if: the panel shows on the iPad, the game runs while a panel is open, Done does not resume, or any item opens but its outcome above is missing.
 
 ### EV-13 — The happy path never needs the Menu
 - Requirement: the happy path uses only the iPad body's flow buttons; exceptions go through the gear (Bob 2026-10-31 10:37 AM ET).

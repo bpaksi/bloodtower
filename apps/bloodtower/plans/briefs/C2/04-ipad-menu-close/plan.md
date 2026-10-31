@@ -43,11 +43,12 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - First press wins across iPads: a second iPad's press on the same item or panel while one is open changes nothing.
 - Help: a "?" button at the left end of the bottom toolbar, on every iPad screen. It opens a short help sheet on the iPad itself for the current screen: what the screen is and what to do next, from that screen's Loremaster help line (2026-10-31; the Help lines table in C2 feature 04's spec). Close returns to the same screen, unchanged. It is not a gear item, sends nothing to the host, and the game does not pause (Gamewright design, parent-approved 2026-10-31).
 - Next-only iPad screens are kept to a minimum (Bob 2026-10-31 10:38 AM ET): a screen whose only action is Next is merged into the next screen or auto-advances when its narration or cue ends (4 s when it has no audio). Next stays only where a player must confirm the physical board.
+- Auto-advance (4 s): none in C2.
 - The gear list (Bob approved 2026-10-31 10:38):
 1. Current party: heroes, HP, gold, items, corruptions and who holds whom.
 2. Game board setup: shows the physical setup again and re-runs the piece check.
 3. Volume: the Volume 0/1/2 step with Keep/Try another.
-4. Split party / Rejoin party.
+4. Split party / Rejoin party: one item whose label toggles ("Split party" when together, "Rejoin party" when split).
 5. Use a potion or item: pick the hero, then the item.
 6. Look up: rules or a card.
 7. Change who holds whom.
