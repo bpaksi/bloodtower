@@ -60,21 +60,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-08 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
 - Method: playwright, iPad portrait 768×1024
-- How: stop on each state: chapter card, stamped won, close Scroll, freed skulls.
+- How: stop on each state: chapter card, stamped won, close Scroll. (The freed-skulls state is C4+, not in C3.)
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
 ### EV-09 — The happy path never needs the gear
 - Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
-- How: play this screen's happy path through chapter card, stamped won, close Scroll, freed skulls, counting Menu and help opens.
+- How: play this screen's happy path through chapter card, stamped won, close Scroll, counting Menu and help opens.
 - Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
 - Fails if: any step can only be reached through the gear or help.
 
 ### EV-10 — Help matches this screen
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
-- How: on each state (chapter card, stamped won, close Scroll, freed skulls) press "?", then Close.
+- How: on each state (chapter card, stamped won, close Scroll) press "?", then Close.
 - Pass evidence: the sheet's `data-help-screen` is `chapter-card` and its text is exactly "This is your chapter goal. Finish it before the days run out." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows another screen's text, pauses the game or changes state.
 
@@ -85,16 +85,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
+### EV-12 — Narrated steps do not advance before their audio ends
+- Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock, mock audio
+- How: reach the chapter card, the stamped card or the close Scroll with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
+- Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
+
+### EV-13 — Restart and Continue during an auto-advancing step apply its effect once
+- Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: two runs: (1) on the chapter card, the stamped card or the close Scroll, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Pass evidence: in each run the same step shows again and auto-advances once; the chapter step (the chapter number and its cue, CUE-004 or CUE-005) is applied exactly once (host state and event log show one application).
+- Fails if: the step is skipped without its effect, repeats its effect, or stalls.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-12 — No replay on Continue
+### EV-14 — No replay on Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit on day 2 of chapter 1; Continue.
 - Pass evidence: no chapter card.
 - Fails if: the card replays.
 
-### EV-13 — The gear Menu survives a restart closed
+### EV-15 — The gear Menu survives a restart closed
 - Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.

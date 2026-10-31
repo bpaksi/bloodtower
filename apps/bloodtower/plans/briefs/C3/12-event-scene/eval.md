@@ -33,7 +33,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-072 .2.
 - Method: playwright
 - How: seed for quiet.
-- Pass evidence: a Scroll, no cost and no Next; it auto-advances (see the auto-advance eval).
+- Pass evidence: a Scroll, no cost and no Next; it auto-advances (EV-13).
 - Fails if: a cost dialog shows.
 
 ### EV-05 — Screenshots match
@@ -99,16 +99,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
+### EV-14 — Narrated steps do not advance before their audio ends
+- Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock, mock audio
+- How: reach Quiet or the result step after a pick with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
+- Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
+
+### EV-15 — Restart and Continue during an auto-advancing step apply its effect once
+- Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: two runs: (1) on Quiet or the result step after a pick, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Pass evidence: in each run the same step shows again and auto-advances once; the event result (its gold, HP or item change) is applied exactly once (host state and event log show one application).
+- Fails if: the step is skipped without its effect, repeats its effect, or stalls.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-14 — Continue keeps the open event
+### EV-16 — Continue keeps the open event
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit at a hazard's choice; Continue.
 - Pass evidence: the same painting and two costs.
 - Fails if: a new event.
 
-### EV-15 — The gear Menu survives a restart closed
+### EV-17 — The gear Menu survives a restart closed
 - Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.

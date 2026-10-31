@@ -45,10 +45,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-06 — The outcome auto-advances to Game stats
 - Requirement: SCR-018, DEC-627.
-- Method: playwright
-- How: on any outcome scene, let the narration end and the summary line hold 4 s.
-- Pass evidence: every device moves to Game stats (feature 17) for this game.
-- Fails if: it goes to the session screen or stays.
+- Method: playwright, fake clock
+- How: on any outcome scene, fire the narration's audio-end event, then advance the clock while the summary line holds.
+- Pass evidence: the summary line holds 4 s (±250 ms on the fake clock) after the audio-end event; then every device moves to Game stats (feature 17) for this game.
+- Fails if: it goes to the session screen, stays, or the hold is outside 3.75–4.25 s.
 
 ### EV-07 — The defeat light plays on a loss
 - Requirement: CUE-003.
@@ -85,16 +85,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
+### EV-12 — Narrated steps do not advance before their audio ends
+- Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock, mock audio
+- How: reach the outcome scene or its summary line with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
+- Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
+
+### EV-13 — Restart and Continue during an auto-advancing step apply its effect once
+- Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: two runs: (1) on the outcome scene or its summary line, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Pass evidence: in each run the same step shows again and auto-advances once; the game result (one finished game recorded; one move to Game stats) is applied exactly once (host state and event log show one application).
+- Fails if: the step is skipped without its effect, repeats its effect, or stalls.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-12 — Restart on the outcome
+### EV-14 — Restart on the outcome
 - Requirement: DEC-116.
 - Method: playwright
 - How: restart the host on the outcome scene.
 - Pass evidence: the session screen, the game listed won or lost.
 - Fails if: the game shows as in progress.
 
-### EV-13 — The gear Menu survives a restart closed
+### EV-15 — The gear Menu survives a restart closed
 - Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.

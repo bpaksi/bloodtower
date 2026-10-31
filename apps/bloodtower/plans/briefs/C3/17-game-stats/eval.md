@@ -15,12 +15,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: in this order: outcome "Lost", time played "42 min", days 12, quests done 1, corruptions taken 2, gold left 7, key moments (contents wait on Q-C3-18), then the rating.
 - Fails if: a stat is missing, out of order, or differs from the fixture.
 
-### EV-02 — The rating never blocks Next
+### EV-02 — The rating never blocks Play again or Back
 - Requirement: SCR-019.
 - Method: playwright
-- How: press Next with no rating.
-- Pass evidence: the session screen.
-- Fails if: Next disabled.
+- How: with no rating, press Back; reach the screen again and press Play again.
+- Pass evidence: Back lands on the session screen; Play again starts Pick setup for the same story; neither needs a rating.
+- Fails if: Back or Play again is disabled, or a Next button shows.
 
 ### EV-03 — Best and average
 - Requirement: DEC-116.
@@ -75,7 +75,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
 - How: on each state (stats, rating, drill-in) press "?", then Close.
-- Pass evidence: the sheet's `data-help-screen` is `game-stats` and its text is exactly "Here's how tonight went. Rate it if you like, then tap Next." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
+- Pass evidence: the sheet's `data-help-screen` is `game-stats` and its text is exactly "Here's how tonight went. Rate it if you like, then tap Play again." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows another screen's text, pauses the game or changes state.
 
 ## Survival evals (one per survival invariant in plan.md)

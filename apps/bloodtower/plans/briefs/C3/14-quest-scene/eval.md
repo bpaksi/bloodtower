@@ -93,22 +93,36 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows another screen's text, pauses the game or changes state.
 
 ### EV-13 — Next-only steps auto-advance
-- Requirement: the result step after rewards has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
+- Requirement: the result step after rewards and the end hook have no Next; each it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
 - Method: playwright, fake clock
-- How: reach the result step after rewards; once with narration (mock audio end event), once with audio off.
-- Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
+- How: reach the result step after rewards, then the end hook; for each, once with narration (mock audio end event), once with audio off.
+- Pass evidence: the iPad shows no Next button on either step; each advances on its audio end event, and 4 s (±200 ms) after it shows when there is no audio; the end hook then lands on the village's building menu; each step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
+
+### EV-14 — Narrated steps do not advance before their audio ends
+- Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock, mock audio
+- How: reach the result step after rewards or the end hook with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
+- Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
+
+### EV-15 — Restart and Continue during an auto-advancing step apply its effect once
+- Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
+- Method: playwright, fake clock
+- How: two runs: (1) on the result step after rewards or the end hook, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Pass evidence: in each run the same step shows again and auto-advances once; the quest reward (quest gold and the quest marker removal) is applied exactly once (host state and event log show one application).
+- Fails if: the step is skipped without its effect, repeats its effect, or stalls.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-14 — Continue reopens the choice
+### EV-16 — Continue reopens the choice
 - Requirement: DEC-151, DEC-675.
 - Method: playwright
 - How: quit at The Herald's choice; Continue.
 - Pass evidence: the same choice, no narration replay.
 - Fails if: the narration replays or the quest is lost.
 
-### EV-15 — The gear Menu survives a restart closed
+### EV-17 — The gear Menu survives a restart closed
 - Requirement: after a restart and Continue on this screen, the Menu and any gear panel come back closed, the game is not paused, the toolbar is back on every iPad, and every item's enabled state is recomputed (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.

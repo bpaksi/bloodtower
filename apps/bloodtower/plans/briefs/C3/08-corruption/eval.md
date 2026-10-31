@@ -88,7 +88,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Cursed is deferred to C4 and is never drawn in C3 (no C3 scene cost or deck can give it) (Bob approved 2026-10-31 10:38).
+- Cursed is deferred to C4 and is never drawn in C3 (no C3 scene cost or deck can give it) (Bob 10:38 via Warden: Cursed corruption deferred to C4).
 
 ## OPEN questions
 
