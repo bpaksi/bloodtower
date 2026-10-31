@@ -9,9 +9,9 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Claude (brief). A Wright developer builds it.
 - Related AREA/docs: DEC-502, DEC-508
 - Evals: ./eval.md
-- Mockup: none (no screen change; Game settings loses one button)
+- Mockup: none (no screen change; Dracula keeps the live skip to Not playable yet, no Game settings screen)
 - Risk: Low
-- Touches: `packs/dracula/pack.yaml`, `apps/bloodtower/src/server/pack/load.test.ts` (one new case), `apps/bloodtower/src/e2e/tests/{opening-screens,w3-pick-story}.spec.ts`
+- Touches: `packs/dracula/pack.yaml`, `apps/bloodtower/src/server/pack/load.test.ts` (one new case), `apps/bloodtower/src/e2e/tests/w3-pick-story.spec.ts` and `w4-party.spec.ts` (run unchanged, no edits)
 
 ## Cutover
 
@@ -37,8 +37,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
 
-- No summary line under Length (mockup); EV-02 no longer asserts "Length: Standard".
-- Long is removed from pack data, not greyed (mockup shows two buttons only).
+- Bob ruling 2026-10-31 19:28 ET: Dracula keeps the live skip; Choose goes straight to "Not playable yet" with no Game settings screen (EV-02).
+- Long is removed from pack data, not greyed: lengths Short and Standard, default Standard (EV-01, EV-06).
 
 ## Eval approval
 

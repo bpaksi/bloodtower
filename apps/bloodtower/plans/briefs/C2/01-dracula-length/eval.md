@@ -15,12 +15,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the length option ids are exactly `["short", "standard"]` in that order, and the default is `standard`.
 - Fails if: Long is still listed, an option was renamed, or the default changed.
 
-### EV-02 — Game settings for Vellmoor shows two buttons
-- Requirement: the iPad's Game settings for Dracula offers two length buttons (DEC-508).
+### EV-02 — Choose on Dracula skips straight to Not playable yet
+- Requirement: Dracula keeps the live skip: Choose on Dracula goes straight to the "Not playable yet" screen, with no Game settings screen (Bob ruling 2026-10-31 19:28; DEC-508 cut is data-only).
 - Method: playwright
-- How: `opening-screens.spec.ts`, the Vellmoor game-settings test, updated to expect `["Short", "Standard"]` and to pick Standard where it picked Long.
-- Pass evidence: `[data-setting="length"] button[data-action="set"]` has exactly the texts Short, Standard. No summary line is asserted (the approved mockup has none).
-- Fails if: a third button shows, or the test still clicks `data-option="long"`.
+- How: the existing `w3-pick-story.spec.ts` test "Choose on Dracula stops, and Back still chooses Proving Grounds", plus all of `w4-party.spec.ts`, on PR head, unchanged.
+- Pass evidence: after `continue-pick-story-dracula` the heading "Not playable yet" is visible, no "Game settings" heading appears, and both specs pass.
+- Fails if: a Game settings screen (or any length buttons) shows between Choose and "Not playable yet", or either spec is edited to pass.
 
 ### EV-03 — The test pack is untouched
 - Requirement: only Dracula changes (DEC-502 scopes the cut to Dracula's settings).
@@ -43,12 +43,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: passes; `rg -n 'data-option="long"|"Long"' apps/bloodtower/src/e2e/tests` returns 0 hits.
 - Fails if: any spec still expects Long.
 
-### EV-06 — Screen matches mockup (M "Dracula settings")
-- Requirement: Game settings matches the approved mockup.
+### EV-06 — Choose on Dracula lands on Not playable yet (screenshot)
+- Requirement: Dracula keeps the live skip; the YAML cut (Short and Standard, default Standard, Long removed, proven by EV-01 in `load.test.ts`) adds no screen (Bob ruling 2026-10-31 19:28). The Game settings mockup (mockup.html) is superseded by this ruling.
 - Method: screenshot
-- How: (iPad portrait 768×1024) open Game settings for Dracula.
-- Pass evidence: heading "Game settings"; label "Length"; exactly two buttons under it, "Short", "Standard" in that order; "Standard" selected; no element with text "Long" in the DOM. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
-- Fails if: a "Long" button exists in any state (incl. `disabled` or `display:none`).
+- How: (iPad portrait 768×1024) the screen captured by `w3-pick-story.spec.ts` "Choose on Dracula stops, and Back still chooses Proving Grounds" right after Choose on Dracula.
+- Pass evidence: heading "Not playable yet"; no heading "Game settings"; no element with text "Length", "Short", "Standard" or "Long" in `[data-screen]`; EV-01 passes on the same head.
+- Fails if: any Game settings screen or length button appears after Choose on Dracula, or EV-01 fails.
 
 ## Survival evals (one per survival invariant in plan.md)
 
