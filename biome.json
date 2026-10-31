@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!apps/bloodtower/docs/playtests"]
+    "includes": ["**", "!apps/bloodtower/docs/playtests", "!apps/bloodtower/plans/briefs/**"]
   },
   "formatter": {
     "indentStyle": "space",
