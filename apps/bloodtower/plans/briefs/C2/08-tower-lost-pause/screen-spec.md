@@ -8,7 +8,7 @@ When the tower drops once a game has started (piece setup included), the game pa
 - Paused, tower lost: board waiting dialog (DEC-705 frame) titled "Tower lost", "The tower has gone quiet. The game waits.". iPad: Reconnect, Go on without, Quit.
 - Go on without confirm: asks first (DEC-301). Then the rest of the game uses no-tower stand-ins (DEC-305): tower nodes skipped, skull drop is a seeded draw, board unchanged.
 - Reconnecting: progress state; on success the tower check (MEC-018) runs before play goes on (C2: as C1 built it; pictures come in feature 11). On fail: back to the three buttons.
-- Quit: Quit story confirm (DEC-230) → session screen.
+- Quit: confirm (DEC-230; mockup s=3) "Leave the game? It will be saved." with "Leave" (primary) and "Back"; Leave → session screen, autosave kept; Back returns to the pause.
 - Later: the gear's Tower item (reconnect or play without it; feature 04, Bob approved 2026-10-31 10:38) while playing without; its panel shows on the Story board.
 
 ## Player actions

@@ -25,7 +25,7 @@ The happy path stays easy: the iPad body shows only the current step and its flo
   - Leave: 10 Save and quit (the existing quit flow; confirm "Save and quit").
   - Version + debug toggle line, then "Close" last (DEC-707).
 - Item names are exact, with no number prefix (the numbers in this list and any "N · " in the mockup are reference only).
-- Disabled items: greyed, never hidden (DEC-227), with a one-line reason under each, e.g. "Only during a game.", "The tower is connected.", "C3+" (items that need C3 features in a C2 build: Split party, Use a potion or item).
+- Disabled items: greyed, never hidden (DEC-227), with a one-line reason under each, e.g. "Only in a game.", "The tower is connected.", "C3+" (items that need C3 features in a C2 build: Split party, Use a potion or item).
 - Panel open: the iPad shows "See the Story board", the panel's pick buttons as a simple list when it needs a choice (e.g. Volume 0/1/2, Keep, Try another; a hero, then an item), and Done (Back where there is a step back); the Story board shows the panel's full UI, display only, and mirrors each iPad pick (Gamewright pick, pending Bob Q-GEAR-1); the game is paused until Done. Another iPad that opens the Menu sees the panel's item disabled with the reason "Open on another iPad."
 - Confirm sub-state for table-wide items (DEC-230), e.g. Save and quit; the confirm stays on the iPad.
 - Help open: a sheet on the iPad with the current screen's help line (Help lines below) and Close.
