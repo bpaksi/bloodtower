@@ -143,16 +143,34 @@ Each feature is a vertical slice: engine, views, host, screens and e2e for one p
 - Runs: cloud
 - Model: opus (tower safety)
 
+### Feature 11: Continue's piece check: the pieces, the drums and the trapped skulls
+- Folder: [briefs/C2/11-continue-piece-check](briefs/C2/11-continue-piece-check/plan.md)
+- Depends on: 08; feature 10's findings note on `main` with Bob's tower run (the rotate); and its `approval.md` on `main`
+- Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`, `apps/bloodtower/src/engine/loops/day/skull.ts` (read only), `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/protocols/v2/**`, `apps/bloodtower/src/server/{core,tower}/**`, `apps/bloodtower/src/web/components/board/{StartupBoard,CoreStoryBoard}.tsx`, `apps/bloodtower/src/web/components/board/board.css`, `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/e2e/tests/c2-continue-check.spec.ts` (new)
+- Builds: MEC-018, SCR-011
+- Deps change: no
+- Runs: cloud
+- Model: opus (autosave, tower safety)
+- If feature 10's run shows the rotate does not land, the drum step uses DEC-716's hand-turn fallback; the brief says how, and Bob approves the changed evals first.
+
+### Feature 14: Bugfix: Pick story always shows and waits for a press
+- Folder: [briefs/C2/14-pick-story-skip](briefs/C2/14-pick-story-skip/plan.md)
+- Depends on: 08, and its `approval.md` on `main`
+- Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/server/core/loadStories.ts`, `apps/bloodtower/src/web/components/board/StartupBoard.tsx`, `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/e2e/tests/w3-pick-story.spec.ts`
+- Builds: SCR-007
+- Deps change: no
+- Runs: cloud, with the `bugfix` skill on `fix/bloodtower-pick-story-skip`
+- Model: sonnet
+- DEC-715: no redesign. If features 05 to 08 already fixed it, the developer reports that and the feature closes with no code.
+
 ### Planned once unblocked
 
 Each gets its folder as soon as what it waits on is on `main`.
 
 | Feature | Waits on | Builds |
 |---|---|---|
-| 11: Continue's piece check (DEC-283, DEC-710) | 06, and Bob's Q-402 ruling after feature 10 | MEC-018, SCR-011 |
 | 12: Glyphs and facing in the session's Enter (MEC-039 .13 to .19) | 05, and Bob's ruling on the glyph prompts after feature 10 | MEC-017 |
 | 13: iPad corners from ART-080 (DEC-706, GC1-03) | 04, and ART-080 on `main` (Bob) | ART-080 |
-| 14: Pick story redesign (GC1-06) | Bob's answer to Q-401. If it is not in by the time feature 08 merges, this moves to C3 | SCR-007, UI-016 |
 
 ### Step G-C2: Bob plays the evening
 - Owner: Bob (gates G-playtest and G-signoff)
@@ -167,7 +185,9 @@ Each gets its folder as soon as what it waits on is on `main`.
 - B3: 06
 - B4: 07
 - B5: 08
-- then 11, 12, 13 and 14 as they unblock (13 can run with any batch after 04; 11 and 12 each touch the session shell, so they run after B5, one at a time)
+- B6: 14 (its folder is ready; it touches the session shell, so it runs after B5)
+- B7: 11, once feature 10's tower run is in the findings note
+- then 12 and 13 as they unblock (13 can run with any batch after 04; 12 touches the session shell, so it runs after B7)
 - G-C2
 
 05 to 08 run one at a time: each reworks the same session shell.
@@ -175,13 +195,13 @@ Each gets its folder as soon as what it waits on is on `main`.
 ## Risks
 
 - **The shell features are serial.** 05 to 08 all touch `engine/loops/session`. They cannot run in parallel without merge conflicts, so they are the long pole. B1 runs everything else around them.
-- **Q-402 holds up Continue's piece check.** Only feature 11 waits on it. Feature 06 keeps today's Continue (checkpoint reload, no piece check) until 11 lands.
+- **Feature 11 waits on Bob's tower run.** Q-402 is answered (DEC-716, DEC-717), but the drum step needs feature 10's run to show the rotate lands. Feature 06 keeps today's Continue (checkpoint reload, no piece check) until 11 lands.
 - **Feature 05 is large.** It moves the tower block, adds base board setup and the volume test, and removes the splash pair. Its brief allows the review split.
 
 ## Open items for Bob
 
-- **DEC-710 has no deliverable that reaches it** (`pnpm graph gaps`). Feature 11 builds it through MEC-018. Adding the `uses` link from MEC-018 to DEC-710 is a card edit for the next design session.
-- **Q-401** decides whether feature 14 is in C2.
+- Q-401 and Q-402 are answered (design session 2026-10-31, PR #336): DEC-715 makes feature 14 a bugfix, and DEC-716 and DEC-717 settle feature 11. MEC-018 now `uses` DEC-710, DEC-716 and DEC-717.
+- **Features 11 and 14 need Bob's approval** of their evals (and 11's mockup).
 
 ## Results
 
@@ -189,3 +209,4 @@ Each gets its folder as soon as what it waits on is on `main`.
 - Revision (2026-10-31): Bob: "I don't want you do the coding only the planning … The goal is to get a chuck of work planned so that it can be built." Claude did the audit as planning work and cut the build into feature folders. This revision needs Bob's OK along with the evals.
 - Features 01 to 10 (2026-10-31 09:09 ET): Bob approved all ten folders' evals and mockups in chat, assumptions included: "Approve all ten". Each `approval.md` holds the row. Batch B1 (01, 02, 03, 04, 09, 10) may start once this PR is on `main`. Features 05 to 08 also wait for G-A, the audit, which is not yet accepted.
 - G-A (2026-10-31): Bob accepted the audit in chat: "Accept the audit". No rewrite: the session shell is reworked in C2, and the v1 pack and story-card code in C3. Features 05 to 08 may start in order once this PR is on `main`.
+- Features 11 and 14 (2026-10-31): folders written after the open-questions session answered Q-401 and Q-402. Waiting for Bob's approval.
