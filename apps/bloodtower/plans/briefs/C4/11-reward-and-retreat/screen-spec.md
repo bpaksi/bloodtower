@@ -9,7 +9,7 @@
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
 - iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
-Auto-advance: the retreat result and the fall result have no Next; the reward Reveal does not auto-advance: a screen with a choice waits for that choice, so it waits for the **Give to {hero}** pick (Gamewright ruling); each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+Auto-advance: "Card taken" (after a Give to {hero} press), the retreat result and the fall result have no Next; the reward Reveal does not auto-advance: a screen with a choice waits for that choice, so it waits for the **Give to {hero}** pick (Gamewright ruling); each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
 - All story and help text is `[COPY: ...]` until the story pass.
 
@@ -26,6 +26,7 @@ UI-040: the gold and drawn card on a Reveal; the iPads pick who takes the card. 
 ## Buttons (exact labels)
 
 - Reward: **Give to {hero}**, one button per present hero.
+- Card taken: no iPad button; the board advances after its beat (Sentinel recheck 4).
 - Retreat or fall result: no iPad button; the board advances after its beat (no Next-only screen).
 
 ## Tokens

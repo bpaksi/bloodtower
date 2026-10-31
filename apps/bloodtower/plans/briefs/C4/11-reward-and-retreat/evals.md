@@ -72,16 +72,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-10 — Beats auto-advance
-- Requirement: no Next on: retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: Card taken, retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (retreat result, fall result); once with narration (mock audio end event), once with audio off.
+- How: reach each beat (Card taken, retreat result, fall result); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-11 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
+- How: reach each beat (Card taken, retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
@@ -114,6 +114,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: on this screen open a gear panel (Volume), restart the host, Continue.
 - Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear.
 - Fails if: the Menu or panel reopens, the game stays paused, or the toolbar is missing.
+
+### EV-16 — A restart during "Card taken" gives the card once
+- Requirement: restart or Continue during the auto-advancing "Card taken" beat (Sentinel recheck 4).
+- Method: playwright
+- How: press Give to {hero}; during "Card taken", restart the host and Continue.
+- Pass evidence: "Card taken" or the next beat shows; the card is in that hero's hand exactly once and `card.taken` appears once in the state log.
+- Fails if: the card is lost, given twice, or goes back to untaken.
 
 ## Assumptions surfaced
 

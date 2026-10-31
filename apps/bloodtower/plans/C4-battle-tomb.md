@@ -144,7 +144,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 03, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/{BattleReward,RetreatResult}.tsx` (new), `apps/bloodtower/src/web/components/device/RewardTaker.tsx` (new)
 - Builds: UI-039, UI-040
-- Done-when: EV-01 … EV-15
+- Done-when: EV-01 … EV-16
 - Open: none, Q-C4-17
 
 ### Feature 12: The Tomb on screen: the map and the view, the iPad's three corridors
@@ -153,7 +153,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 06, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Tomb*.tsx` (new), `apps/bloodtower/src/web/components/device/TombPicker.tsx` (new)
 - Builds: DEC-583, DEC-584, DEC-585, DEC-591, DEC-592
-- Done-when: EV-01 … EV-17
+- Done-when: EV-01 … EV-18
 - Open: Q-C4-15, Q-C4-17
 
 ### Feature 13: The seal break live on the board, chapters 1 and 2

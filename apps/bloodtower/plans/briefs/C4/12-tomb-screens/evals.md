@@ -86,16 +86,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-12 — Beats auto-advance
-- Requirement: no Next on: trap result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: Falling Rocks result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (trap result); once with narration (mock audio end event), once with audio off.
+- How: reach each beat (Falling Rocks result); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-13 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (trap result) with narration playing; advance the clock 4.5 s with no audio end event.
+- How: reach each beat (Falling Rocks result) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
@@ -106,23 +106,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the iPad reads exactly "You listen down the corridor."; the Pit result reads exactly "The floor gives way. Choose one hero to take the fall and lose 4 hit points." (locked by Loremaster); the Falling Rocks result reads exactly "Stones crash from the ceiling. Every hero loses 2 hit points." (locked by Loremaster).
 - Fails if: any other text.
 
+### EV-15 — The Pit waits for the pick and hurts only that hero
+- Requirement: DEC-606; Sentinel recheck 4.
+- Method: playwright, fake clock
+- How: 3 heroes at 10 HP enter a Pit room; advance the clock 30 s; press the second hero's button.
+- Pass evidence: after 30 s the Pit is still shown with exactly 3 hero buttons and the locked line; after the press that hero reads 6/10 and the other two 10/10.
+- Fails if: it advances without a pick, shows a Next, or takes HP from anyone else.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-15 — Map survives Continue
+### EV-16 — Map survives Continue
 - Requirement: DEC-602.
 - Method: playwright
 - How: clear 2 rooms, quit, Continue.
 - Pass evidence: same map.
 - Fails if: reset.
 
-### EV-16 — A beat interrupted by restart applies once
-- Requirement: restart or Continue during an auto-advancing beat (trap result) (Q-C4-17 (Gamewright pick, pending Bob)).
+### EV-17 — A beat interrupted by restart applies once
+- Requirement: restart or Continue during an auto-advancing beat (Falling Rocks result) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-17 — The gear comes back closed after a restart
+### EV-18 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.
