@@ -32,25 +32,25 @@ One line per asset id in `packs/test/assets/index.json`; EV-05 checks every id i
 - [ ] painting.keep-sealed-door — approved by Bob 
 - [ ] trap.pit — approved by Bob 
 - [ ] trap.falling-rocks — approved by Bob 
-- [ ] tower room map: basement (ID TBD) — approved by Bob 
-- [ ] tower room map: main (ID TBD) — approved by Bob 
-- [ ] tower room map: tower (ID TBD) — approved by Bob 
+- [ ] map.tower-basement — approved by Bob 
+- [ ] map.tower-main — approved by Bob 
+- [ ] map.tower-top — approved by Bob 
 - [ ] painting.finale-win — approved by Bob 
 - [ ] painting.finale-loss — approved by Bob 
 - [ ] snd.listen_nothing — approved by Bob 
 - [ ] snd.listen_trap — approved by Bob 
 - [ ] snd.listen_battle — approved by Bob 
-- [ ] tomb door cue (ID TBD) — approved by Bob 
-- [ ] guardian reveal cue (ID TBD) — approved by Bob 
-- [ ] vo.loremaster chapter-card line 1 (ID TBD) — approved by Bob 
-- [ ] vo.loremaster chapter-card line 2 (ID TBD) — approved by Bob 
-- [ ] vo.loremaster chapter-card line 3 (ID TBD) — approved by Bob 
-- [ ] vo.loremaster seal-break line 1 (ID TBD) — approved by Bob 
-- [ ] vo.loremaster seal-break line 2 (ID TBD) — approved by Bob 
-- [ ] vo.loremaster seal-break line 3 (ID TBD) — approved by Bob 
+- [ ] snd.tomb-door — approved by Bob 
+- [ ] snd.tomb-guardian-reveal — approved by Bob 
+- [ ] vo.loremaster.chapter-1 — approved by Bob 
+- [ ] vo.loremaster.chapter-2 — approved by Bob 
+- [ ] vo.loremaster.chapter-3 — approved by Bob 
+- [ ] vo.loremaster.seal-break-1 — approved by Bob 
+- [ ] vo.loremaster.seal-break-2 — approved by Bob 
+- [ ] vo.loremaster.seal-break-3 — approved by Bob 
 - [ ] vo.loremaster.finale_win_shattered — approved by Bob 
 - [ ] vo.loremaster.finale_win_oath — approved by Bob 
-- [ ] vo.loremaster loss line (ID TBD) — approved by Bob 
+- [ ] vo.loremaster.finale-loss — approved by Bob 
 - [ ] avatar.loremaster portrait — pending Bob ruling (8 AM Nov 1)
 - [ ] avatar.loremaster anchor — pending Bob ruling (8 AM Nov 1)
 - [ ] avatar.loremaster mouth-A — pending Bob ruling (8 AM Nov 1)
