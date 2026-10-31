@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: with no game yet, the groups still show and game-only items are greyed with a reason (DEC-227).
 - Method: playwright
 - How: open the Menu on the join/claim screen (before Begin).
-- Pass evidence: the Look up heading renders; "Current party" is disabled with the reason "Only in a game." and its row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; "Look up" is enabled; Close is last.
+- Pass evidence: the Look up heading renders; "Current party" is disabled with the reason "Only in a game." and its row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; "Look up" is enabled; "Pause/Resume" is disabled with the reason "Only in a game."; "Save and quit" is disabled with "Only in a game."; "Tower" is enabled with no reason line; Close is last.
 - Fails if: a group or item is hidden, or a disabled item has no reason; or a disabled item is hidden, not greyed, or has a reason other than its listed text.
 
 ### EV-10 — Save and quit confirm (M "Confirm: Save and quit")
