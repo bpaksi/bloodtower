@@ -33,8 +33,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C3-18.
 - Method: unit
 - How: win a battle, clear the Tomb.
-- Pass evidence: both listed.
-- Fails if: missing.
+- Pass evidence: the stats' key moments include `km.battle_won` and `km.tomb_cleared`, once each.
+- Fails if: either id missing or listed twice.
 
 ## Survival evals (one per survival invariant in plan.md)
 

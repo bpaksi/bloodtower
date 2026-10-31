@@ -21,11 +21,11 @@ The board shows `[COPY: last choice, Warden falls = "The Warden falls. Beneath t
 
 - Board: shows the state and every line `[COPY: finale-and-endings, board = "Choose together. / Waiting on: {hero}. / {hero} has voted. / The choice is made."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, finale-and-endings = "Each hero taps Break the seal or Swear the oath. A tie means one more vote, then the app draws."]`, `data-help-screen` = `finale-and-endings`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, `[COPY: help, finale-and-endings = "Each hero taps Shatter the shard or Swear the oath. A tie means one more vote, then the app draws."]`, `data-help-screen` = `finale-and-endings`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
-- Vote: **Break the seal**, **Swear the oath** on each present iPad. A tie shows the same two again under `[COPY: tie, vote again = "A tie. Vote once more."]`.
+- Vote: **Shatter the shard**, **Swear the oath** on each present iPad. A tie shows the same two again under `[COPY: tie, vote again = "A tie. Vote once more."]`.
 - The win line and the outcome: no button; the board advances (no credits, Q-C5-09 pick a).
 
 ## Tokens
@@ -44,4 +44,3 @@ Back to the loop that called it (see ./plan.md).
 
 > Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." (Credits line not folded.)
 
-> Note (DEC-663, DEC-667): the last-choice and finale-win lines were changed from Loremaster's copy to fit the decided story: the choice is to shatter the shard under the keep or swear The Warden's oath and guard it, and the oath ending echoes his fall. Loremaster to review. Button labels Break the seal / Swear the oath and the flags `seal_broken` / `oath_sworn` are unchanged.

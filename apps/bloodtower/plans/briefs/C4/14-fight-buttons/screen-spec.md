@@ -41,4 +41,3 @@ Back to the loop that called it (see ./plan.md).
 
 - OPEN Q-C4-02: Where does Fight show once `fight_enabled` is on? Options: (a) on every foes and disaster event and on every plain-scene option that holds a battle, always enabled; (b) on foes events only; disasters stay Go around / Pay them off until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).
 
-> Note (help, fight-buttons): Gamewright wrote this line in Loremaster's style to cover Pay the toll (The Ambush) and plain-scene options. Loremaster to review.

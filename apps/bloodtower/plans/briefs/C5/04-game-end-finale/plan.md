@@ -56,4 +56,3 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 - See ./approval.md (must be filled before coding).
 
-> Note (DEC-663, DEC-667): the last-choice and finale-win lines were changed from Loremaster's copy to fit the decided story: the choice is to shatter the shard under the keep or swear The Warden's oath and guard it, and the oath ending echoes his fall. Loremaster to review. Button labels Break the seal / Swear the oath and the flags `seal_broken` / `oath_sworn` are unchanged.

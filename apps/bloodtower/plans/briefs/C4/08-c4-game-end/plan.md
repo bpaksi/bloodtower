@@ -22,6 +22,8 @@ Keep this a checklist; do not write a second design doc.
 
 With `c4_end_after_chapter_3` on, chapter 3 won ends the game won: the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]` (Gamewright pick, pending Bob) (Q-C4-01). Losses unchanged. Stats add battles won, retreats, falls and Tomb rooms; key moments add battle won and Tomb cleared.
 
+Key-moment ids (new in C4, added to Q-C3-18's list): `km.battle_won` (a battle won), `km.tomb_cleared` (the Tomb's guardian beaten).
+
 ## Cutover
 
 Cutover: N

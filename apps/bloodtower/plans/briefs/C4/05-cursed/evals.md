@@ -13,7 +13,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: unit
 - How: Cursed hero, fight number 2, 6 matching Advantages worth +1, +1, +1, +2, +2, +3.
 - Pass evidence: round strength 2 + (3 + 2 + 2 + 1) = 10.
-- Fails if: strength 13 (all 6), or any value but 10.
+- Fails if: strength 12 (all 6), or any value but 10.
 
 ### EV-02 — Below 4 is untouched
 - Requirement: DEC-466.

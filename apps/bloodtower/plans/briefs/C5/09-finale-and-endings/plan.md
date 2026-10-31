@@ -63,4 +63,3 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 > Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." (Credits line not folded.)
 
-> Note (DEC-663, DEC-667): the last-choice and finale-win lines were changed from Loremaster's copy to fit the decided story: the choice is to shatter the shard under the keep or swear The Warden's oath and guard it, and the oath ending echoes his fall. Loremaster to review. Button labels Break the seal / Swear the oath and the flags `seal_broken` / `oath_sworn` are unchanged.

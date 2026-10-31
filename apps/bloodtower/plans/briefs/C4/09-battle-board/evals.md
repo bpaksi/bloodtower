@@ -19,8 +19,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: CUE-010, Q-C4-14.
 - Method: playwright
 - How: no tower; start battle.
-- Pass evidence: horn on board audio.
-- Fails if: silent.
+- Pass evidence: the board plays audio asset `snd.battle_start` (SND-037) once at the battle's start.
+- Fails if: silent, another asset, or played twice.
 
 ### EV-03 — Cursed count shown (Gamewright pick, pending Bob)
 - Requirement: Q-C4-05.
