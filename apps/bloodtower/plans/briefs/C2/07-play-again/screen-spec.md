@@ -5,7 +5,7 @@ Gamewright, 2026-10-31. Design only. Story copy and voiced words: Loremaster fil
 From tonight's list, see a game's stats so far and replay it with a new seed and the same heroes (DEC-708).
 
 ## States
-- Game stats (SCR-019, C2 slice): board shows outcome (quit), time played, and what the day slice records. Unrecorded values show as unavailable. Optional 1-5 fun rating never blocks (SCR-019).
+- Game stats (SCR-019, C2 slice): board shows outcome (quit), time played ("—" for a quit game, Bob 2026-10-31), and what the day slice records. Unrecorded values show as unavailable. Optional 1-5 fun rating never blocks (SCR-019).
 - iPad: Play again, Back.
 - Replace-save confirm if an autosave exists (DEC-709).
 - Claim heroes (SCR-010) prefilled: same heroes on the same iPads; one "Confirm" press confirms (DEC-216). iPads not joined now: their heroes unclaimed.
@@ -21,4 +21,4 @@ Play again → (tower block if lost, DEC-711) → skips Pick story and Game sett
 
 ## Open questions
 - Which stats the day slice records is not listed on a card; the brief says "unavailable" for the rest. Need the C2 stats list.
-- Resolved: the optional fun rating shows for a quit game and never blocks (mockup). "Time played —" in the mockup is a placeholder; the build shows a real duration.
+- Resolved: the optional fun rating shows for a quit game and never blocks (mockup). A quit game shows "—" for Time played, as in the mockup (Bob 2026-10-31).
