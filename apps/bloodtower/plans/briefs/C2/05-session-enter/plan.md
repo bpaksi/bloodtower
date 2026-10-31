@@ -34,7 +34,7 @@ Cutover: Y
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-17 all pass (verifier table on PR).
+- [ ] EV-01 … EV-20 all pass (verifier table on PR).
 - Not required: MEC-039 .13 to .19 (glyphs and facing). They wait for feature 10 and Bob's ruling; feature 12 adds them between calibrate and volume. Pick Game stays until feature 06.
 
 ## AREA / DEC checklist
@@ -55,6 +55,14 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - Volume buttons "Volume 0/1/2"; Keep and Try another show with them.
 - Connect failure status reads "Tower not found" (tower wording ruling).
 - Restart after the Enter keeps tonight's tower choice (Bob ruling, C-3).
+
+## Sound first on Pick story (Bob 2026-10-31 10:30 AM ET)
+
+Bob: "Some browsers will block volume? if so then we need to prompt user on the story page to enable set volume levels. This will be the first thing to happen; enable sound, set levels."
+- The first step on Pick story is an "Enable sound" prompt on each iPad: one tap unlocks that iPad's browser audio (resume the Web Audio context and play inside the tap's handler). No sound plays on that iPad before its tap.
+- Each iPad needs its own unlock; one iPad's tap never unlocks another.
+- Then the player sets levels: the volume step (Volume 0/1/2, Keep, Try another; SCR-006) shows on that iPad right after its unlock, and the story list follows Keep. The volume step leaves the Enter and runs here; on the connect track a volume press also plays Dungeon Complete on the tower (still only on a press).
+- Keep stays disabled until a volume has been played (no default volume is kept; this settles EV-09's "Also" line).
 
 ## Eval approval
 
