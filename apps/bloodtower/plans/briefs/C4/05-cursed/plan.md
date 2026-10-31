@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, DEC-466, DEC-324, DEC-365, MEC-080
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 02, C3 08, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/rules/corruption/cursed.ts`, `apps/bloodtower/src/engine/rules/battle/strength.ts`

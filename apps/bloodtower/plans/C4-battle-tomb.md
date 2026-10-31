@@ -7,7 +7,7 @@
 
 ## Who does what
 
-As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/NN-<feature>/` with `plan.md`, `screen-spec.md`, `evals.md` (evals first, per `docs/sdlc.md`) and `approval.md`. Illusionist draws each screen feature's `mockup.html`. Bob approves evals and mockups. Wright's developers build; the verifier runs each `evals.md`.
+As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/NN-<feature>/` with `plan.md`, `screen-spec.md` (screen features only), `evals.md` (evals first, per `docs/sdlc.md`) and `approval.md`. Illusionist draws each screen feature's `mockup.html`. Bob approves evals and mockups. Wright's developers build; the verifier runs each `evals.md`.
 
 ## Scope and why
 
@@ -54,7 +54,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: C3 02, C3 09, C3 10, and its `approval.md` on `main`
 - Touches: `packs/base/tuning.yaml`, `apps/bloodtower/src/protocols/pack-v2/base.ts` (tuning schema), `apps/bloodtower/src/engine/loops/{chapter,game}/**` (switch reads only)
 - Builds: DEC-500, DEC-133
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-06
 - Open: Q-C4-01
 
 ### Feature 02: The battle loop: horn, rounds, Fight or Retreat, one action each
@@ -63,7 +63,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 01, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/battle/**` (new level), `apps/bloodtower/src/engine/rules/battle/**`
 - Builds: MEC-038, MEC-024, DEC-118, DEC-129, DEC-130, DEC-643, DEC-649, DEC-650, DEC-655, DEC-607, DEC-553
-- Done-when: EV-01 … EV-07
+- Done-when: EV-01 … EV-11
 - Open: Q-C4-11
 
 ### Feature 03: Battle ends: the reward, the retreat, the group's fall
@@ -72,7 +72,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/battle/close.ts`, `apps/bloodtower/src/engine/rules/battle/reward.ts`
 - Builds: DEC-120, DEC-016, DEC-177, DEC-670, DEC-671
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-06
 - Open: Q-C4-12, Q-C4-13
 
 ### Feature 04: Fight in events and scenes: foes, disasters, The Ambush, The Last Stand
@@ -81,7 +81,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, 03, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/event/**`, `apps/bloodtower/src/engine/loops/scene/**` (battle option), `packs/test/**` (The Last Stand)
 - Builds: DEC-023, DEC-028, DEC-647, AREA-097
-- Done-when: EV-01 … EV-06
+- Done-when: EV-01 … EV-08
 - Open: Q-C4-02, Q-C4-03, Q-C4-04
 
 ### Feature 05: Cursed: at most 4 Advantages count in a round
@@ -99,7 +99,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, 03, C3 07, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/tomb/**` (new level), `packs/test/**` (The Barrow)
 - Builds: MEC-026, DEC-593, DEC-488, DEC-489, DEC-490, DEC-491, DEC-586, DEC-587, DEC-590, DEC-602, DEC-652
-- Done-when: EV-01 … EV-06
+- Done-when: EV-01 … EV-10
 - Open: Q-C4-07, Q-C4-08, Q-C4-09
 
 ### Feature 07: Chapters 2 and 3 in play, the seal break and the seal lines
@@ -108,7 +108,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 01, 06, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/chapter/close.ts`, `packs/test/**` (chapter 2 and 3 cards, seal lines)
 - Builds: DEC-303, DEC-306, DEC-409, AREA-097
-- Done-when: EV-01 … EV-06
+- Done-when: EV-01 … EV-08
 - Open: Q-C4-10
 
 ### Feature 08: The C4 game end: chapter 3 won, or lost on any chapter
@@ -126,8 +126,8 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, 05, C3 11, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Battle*.tsx` (new), `apps/bloodtower/src/web/components/board/FoePanel.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-battle.spec.ts`
 - Builds: UI-026, CUE-010
-- Done-when: EV-01 … EV-05
-- Open: Q-C4-14, Q-C4-15, Q-C4-05
+- Done-when: EV-01 … EV-14
+- Open: Q-C4-14, Q-C4-15, Q-C4-05, Q-C4-17
 
 ### Feature 10: The round picker on the iPad: Fight or Retreat, then one action
 - Folder: [briefs/C4/10-round-picker](briefs/C4/10-round-picker/plan.md)
@@ -135,7 +135,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, C2 06, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/RoundPicker*.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-round.spec.ts`
 - Builds: UI-027
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-10
 - Open: Q-C4-16, Q-C4-11
 
 ### Feature 11: The battle's end on screen: reward, retreat and fall
@@ -144,8 +144,8 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 03, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/{BattleReward,RetreatResult}.tsx` (new), `apps/bloodtower/src/web/components/device/RewardTaker.tsx` (new)
 - Builds: UI-039, UI-040
-- Done-when: EV-01 … EV-05
-- Open: none
+- Done-when: EV-01 … EV-14
+- Open: none, Q-C4-17
 
 ### Feature 12: The Tomb on screen: the map and the view, the iPad's three corridors
 - Folder: [briefs/C4/12-tomb-screens](briefs/C4/12-tomb-screens/plan.md)
@@ -153,8 +153,8 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 06, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Tomb*.tsx` (new), `apps/bloodtower/src/web/components/device/TombPicker.tsx` (new)
 - Builds: DEC-583, DEC-584, DEC-585, DEC-591, DEC-592
-- Done-when: EV-01 … EV-06
-- Open: Q-C4-08, Q-C4-15
+- Done-when: EV-01 … EV-16
+- Open: Q-C4-08, Q-C4-15, Q-C4-17
 
 ### Feature 13: The seal break live on the board, chapters 1 and 2
 - Folder: [briefs/C4/13-seal-break-live](briefs/C4/13-seal-break-live/plan.md)
@@ -162,8 +162,8 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 07, C3 15, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/SealBreak.tsx`, `apps/bloodtower/src/web/components/device/SkullPlacer.tsx`
 - Builds: UI-044
-- Done-when: EV-01 … EV-05
-- Open: Q-C4-10
+- Done-when: EV-01 … EV-13
+- Open: Q-C4-10, Q-C4-17
 
 ### Feature 14: Fight on the event and quest scenes
 - Folder: [briefs/C4/14-fight-buttons](briefs/C4/14-fight-buttons/plan.md)
@@ -171,8 +171,16 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 04, C3 12, C3 14, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/{EventChoice,SceneChoice}.tsx`
 - Builds: UI-041, UI-042
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-10
 - Open: Q-C4-02
+
+## Ownership and shared rules (Sentinel review 2026-10-31)
+
+- C4 14 owns the Fight button on every event and scene; C4 04 owns only what Fight does in the engine.
+- Help: every screen feature's "?" opens a help sheet on the iPad that sends nothing to the host. Add these ids to the C2-04 help table: `battle-board`, `round-picker`, `reward-and-retreat`, `tomb-screens`, `seal-break-live`, `fight-buttons`.
+- Auto-advance: every no-Next beat advances when its narration or cue ends, or after 4 s with no audio (Q-C4-17 (Gamewright pick, pending Bob)). Each screen spec lists its beats.
+- The group's Fight or Retreat pick (C4 10): the first press on any present iPad decides.
+- Engine-only features have no screen-spec.md.
 
 ## Batches
 
@@ -213,6 +221,7 @@ Every pick below is used in the feature files as "(Gamewright pick, pending Bob)
 - OPEN Q-C4-14: The battle horn and hits (CUE-010) with no tower connected: Options: (a) play them through the Story board's speakers; (b) silent; the board shows the hit only. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 09)
 - OPEN Q-C4-15 **[Bob taste call]**: Foe paintings in C4, before the A1 art run (C5): Options: (a) one placeholder painting per foe level, swapped by A1 in C5; (b) A1 draft art now, as the art lands. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 09, C4 12)
 - OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 10)
+- OPEN Q-C4-17: Does the C2-04 auto-advance rule (advance when narration or cue ends, or after 4 s with no audio) also apply to battle round results and Reveals? Options: (a) yes, every beat in C4 and C5 (round results, victory, reward/retreat/fall, trap, close Scroll, glyph/boon Reveal, boss phase show, win line) follows it; (b) battle beats wait for a press on any iPad; (c) round results hold 2 s, other beats follow the rule. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C4 09, 11, 12, 13; C5 08, 09)
 
 ## Results
 

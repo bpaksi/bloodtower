@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-06; survival evals last (EV-06).
 
 ## Checks
 
@@ -12,8 +12,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-120.
 - Method: unit
 - How: win vs level 3.
-- Pass evidence: tuned gold and one card.
-- Fails if: wrong amount or no card.
+- Pass evidence: gold = `battle.reward_gold[3]` = 10; exactly one card, drawn from the level-3 reward deck (`battle.reward_deck[3]`).
+- Fails if: any other gold, no card, or a card from another level's deck.
 
 ### EV-02 — Foe grows, capped at +2 (Gamewright pick, pending Bob)
 - Requirement: DEC-016, Q-C4-13.
@@ -25,9 +25,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — A fall costs half the purse (Gamewright pick, pending Bob)
 - Requirement: DEC-177, Q-C4-12.
 - Method: unit
-- How: purse 15, all fall.
-- Pass evidence: purse 8.
-- Fails if: any other value.
+- How: purse 15, all present heroes fall; the loss is floor(purse × `battle.fall_gold_loss`), with `battle.fall_gold_loss` = 0.5.
+- Pass evidence: purse 8 (15 − floor(7.5) = 8).
+- Fails if: purse 7 or any other value.
 
 ### EV-04 — A retreat that fells everyone is a fall
 - Requirement: DEC-671.
@@ -36,9 +36,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: fall result.
 - Fails if: retreat result.
 
+### EV-05 — Retreat at day close needs no move
+- Requirement: DEC-670.
+- Method: unit
+- How: a battle open at the day's close with 0 moves left; pick Retreat.
+- Pass evidence: the retreat succeeds with moves still 0 and no `move.spent` event.
+- Fails if: the retreat is refused or a move is spent.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-05 — A grown foe survives Continue
+### EV-06 — A grown foe survives Continue
 - Requirement: DEC-016.
 - Method: playwright
 - How: grow a foe, quit, Continue.

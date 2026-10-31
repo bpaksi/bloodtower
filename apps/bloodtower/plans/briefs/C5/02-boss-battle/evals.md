@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-06; survival evals last (EV-06).
 
 ## Checks
 
@@ -25,9 +25,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — Inventive cannot end it
 - Requirement: DEC-549.
 - Method: unit
-- How: Inventive at phase 3.
-- Pass evidence: not ended.
-- Fails if: ended.
+- How: The Warden in phase 3 at 2 wounds; a hero plays Inventive.
+- Pass evidence: The Warden still has 2 wounds and the battle continues; log `inventive.blocked`.
+- Fails if: the battle ends or wounds change.
 
 ### EV-04 — Falls at 0
 - Requirement: DEC-567.
@@ -36,9 +36,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: won; no false death.
 - Fails if: revives.
 
+### EV-05 — His ability grows at each phase
+- Requirement: DEC-567.
+- Method: unit
+- How: fixture ability: hits 1 extra HP per lost round in phase 1.
+- Pass evidence: phase 2 hits 2 extra, phase 3 hits 3 extra.
+- Fails if: the same in every phase.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-05 — Phase survives Continue
+### EV-06 — Phase survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: phase 2, quit, Continue.

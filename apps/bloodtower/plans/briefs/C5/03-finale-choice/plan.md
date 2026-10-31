@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, DEC-663, DEC-664, DEC-540, DEC-642, DEC-290, MEC-077
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 02, C3 07, and its `approval.md` on `main`
 - Touches: `packs/test/**` (the end-hook scene), `apps/bloodtower/src/engine/loops/scene/vote.ts` (new)
@@ -31,7 +31,7 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - A vote half cast survives Continue.
+  - The resolved finale flag survives Continue (vote collection is owned by C5 09).
 
 ## Done-when (e2e)
 

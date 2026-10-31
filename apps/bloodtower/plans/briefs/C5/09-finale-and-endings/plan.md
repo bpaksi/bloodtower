@@ -32,12 +32,14 @@ Cutover: N
 
 - Continue, restore, and restart must keep:
   - Votes cast survive Continue; the outcome is not shown twice.
+  - After a restart and Continue, the Menu and any gear panel come back closed.
+  - A beat interrupted by restart shows again or the next one shows, its effect applied once.
 
 ## Done-when (e2e)
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR).
+- [ ] EV-01 … EV-14 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; 1.1 work (DEC-502).
 
 ## AREA / DEC checklist
@@ -48,6 +50,8 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 - [ ] DEC-144: closed before coding (`decided`).
 
 ## OPEN questions
+
+- Q-C4-17 (auto-advance timing, Gamewright pick (a), pending Bob) applies to this screen; see C4 plan.
 
 - OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob).

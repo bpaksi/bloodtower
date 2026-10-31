@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: ./mockup.html (to be drawn from ./screen-spec.md)
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-10; survival evals last (EV-09 … EV-10).
 
 ## Checks
 
@@ -33,17 +33,52 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-076.
 - Method: screenshot
 - How: mockup `#basement`, `#stair`, `#top`.
-- Pass evidence: matching.
-- Fails if: differs.
+- Pass evidence: pixel diff under 1% against `#basement`, `#stair`, `#top`.
+- Fails if: any image over 1% diff.
+
+### EV-05 — Open, Rest and Retreat do what they say
+- Requirement: DEC-566, DEC-360.
+- Method: playwright
+- How: Open the next door; at a found shrine Rest with heroes at 5/12; then Retreat.
+- Pass evidence: Open: the next room shows on the view half; Rest: each hero 7/12 and Rest disables; Retreat: the group stands on the Tower-adjacent space and the level is kept.
+- Fails if: any button without its effect.
+
+### EV-06 — The toolbar is on every state
+- Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: closed door, cleared room with shrine, stair room, top level.
+- Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-07 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play the happy path through closed door, cleared room with shrine, stair room, top level, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: a Menu or help open is needed.
+
+### EV-08 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (C2-04, C3 rule).
+- Method: playwright
+- How: on each state (closed door, cleared room with shrine, stair room, top level) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `tower-screens` and its text is exactly "Tap Open the next door to go deeper. Tap Rest at a shrine, or Retreat to fall back." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-05 — Map survives Continue
+### EV-09 — Map survives Continue
 - Requirement: DEC-360.
 - Method: playwright
 - How: quit on main; Continue.
-- Pass evidence: same.
+- Pass evidence: the same `[data-level]`, the same `[data-room][data-cleared]` set and the same group HP.
 - Fails if: reset.
+
+### EV-10 — The gear comes back closed after a restart
+- Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear.
+- Fails if: the Menu or panel reopens, the game stays paused, or the toolbar is missing.
 
 ## Assumptions surfaced
 

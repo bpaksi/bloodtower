@@ -9,7 +9,7 @@
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
 - iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
-- No Next-only screens: every iPad screen carries a real choice, or the board advances on its own after its beat. A lone "Next" button is a failed build.
+Auto-advance: no beat on this screen auto-advances; every step waits for a named button.
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
 - All story and help text is `[COPY: ...]` until the story pass.
 
@@ -21,7 +21,7 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 
 - Board: shows the state and every line `[COPY: round-picker, board = "Fight or Retreat? / Waiting on: {hero}. / {hero} has picked. / Everyone has picked. The round begins."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): `[COPY: help, round-picker = "Choose Fight or Retreat together, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard on their iPad. The round starts when everyone has picked."]` on the board.
+- Help (?): a help sheet on the iPad, `[COPY: help, round-picker = "Choose Fight or Retreat together, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard on their iPad. The round starts when everyone has picked."]`, `data-help-screen` = `round-picker`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-04; the survival eval is last (EV-04).
+- Done-when: EV-01 … EV-05; survival evals last (EV-05).
 
 ## Checks
 
@@ -29,9 +29,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: load fails naming the field.
 - Fails if: accepted.
 
+### EV-04 — The C3 switch is gone too
+- Requirement: DEC-500.
+- Method: unit
+- How: load tuning with `c3_end_after_chapter_1`.
+- Pass evidence: load fails naming the field.
+- Fails if: accepted.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-04 — Chapter-3 save resumes into the finale
+### EV-05 — Chapter-3 save resumes into the finale
 - Requirement: DEC-675.
 - Method: playwright
 - How: fixture save; Continue.

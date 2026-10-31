@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, DEC-120, DEC-016, DEC-177, DEC-670, DEC-671
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 02, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/battle/close.ts`, `apps/bloodtower/src/engine/rules/battle/reward.ts`
@@ -37,7 +37,7 @@ Cutover: N
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-06 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist

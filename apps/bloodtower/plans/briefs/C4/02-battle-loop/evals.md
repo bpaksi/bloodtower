@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-07; the survival eval is last (EV-07).
+- Done-when: EV-01 … EV-11; survival evals last (EV-11).
 
 ## Checks
 
@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-038.
 - Method: unit
 - How: fixed seed, 2 heroes vs level-2 foe.
-- Pass evidence: ordered log: abilities, choice, actions, spells, card, result.
+- Pass evidence: ordered log events: `battle.abilities`, `battle.stance`, `round.choice`, `round.actions`, `round.spells`, `round.card`, `round.result`.
 - Fails if: any step out of order.
 
 ### EV-02 — Round cards never repeat before 8
@@ -50,9 +50,37 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: every battle exits won, retreated or fallen; no hang.
 - Fails if: a hang or crash.
 
+### EV-07 — Foe abilities fire before round 1
+- Requirement: DEC-553.
+- Method: unit
+- How: fixture foe with a start ability (−1 HP to each present hero).
+- Pass evidence: each present hero −1 HP and log `battle.abilities` before the first `round.choice`.
+- Fails if: the ability fires in round 1 or not at all.
+
+### EV-08 — Bold and on guard apply before round 1
+- Requirement: DEC-607.
+- Method: unit
+- How: enter bold; then a second run entered on guard.
+- Pass evidence: bold: +1 strength in round 1 only; on guard: a lost round 1 hits no one.
+- Fails if: either applies after round 1 or in every round.
+
+### EV-09 — Retreat by the group ends the battle
+- Requirement: DEC-118.
+- Method: unit
+- How: the group picks Retreat in round 2.
+- Pass evidence: battle ends `retreated` with no `round.actions` in round 2; foe wounds kept.
+- Fails if: actions are asked or the foe resets.
+
+### EV-10 — A won round cuts, a lost round hits
+- Requirement: MEC-024 step 5.
+- Method: unit
+- How: seed with round 1 won and round 2 lost; foe 3 wounds, heroes at full.
+- Pass evidence: after round 1 the foe has 2 wounds; after round 2 exactly one present hero has −1 HP (or −0 if a guard virtue was used).
+- Fails if: a won round hits a hero, or a lost round cuts the foe.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Continue resumes mid-round
+### EV-11 — Continue resumes mid-round
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit after 1 of 2 picks; Continue.

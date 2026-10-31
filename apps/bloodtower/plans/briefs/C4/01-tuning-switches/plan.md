@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, DEC-500, DEC-133, DEC-662, DEC-144
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: C3 02, C3 09, C3 10, and its `approval.md` on `main`
 - Touches: `packs/base/tuning.yaml`, `apps/bloodtower/src/protocols/pack-v2/base.ts` (tuning schema), `apps/bloodtower/src/engine/loops/{chapter,game}/**` (switch reads only)
@@ -33,11 +33,13 @@ Cutover: N
 - Continue, restore, and restart must keep:
   - A game saved under C3 switches is not resumed under C4 switches; tuning stays fixed at Begin (C3 B2).
 
+  - A save written under the C3 switches is not offered for Continue.
+
 ## Done-when (e2e)
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-06 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist

@@ -48,7 +48,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: C4 02, C4 03, C4 06, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/tower/**` (new level), `packs/test/**` (the Tower unlock)
 - Builds: MEC-076, DEC-566, DEC-363, DEC-360, DEC-356, DEC-645, DEC-702
-- Done-when: EV-01 … EV-06
+- Done-when: EV-01 … EV-07
 - Open: Q-C5-11, Q-C5-04
 
 ### Feature 02: The Warden: his own deck and three phases
@@ -57,7 +57,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 01, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/rules/battle/boss.ts` (new), `packs/test/**` (The Warden)
 - Builds: DEC-567, DEC-361, DEC-549
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-06
 - Open: Q-C5-02
 
 ### Feature 03: The last choice: break the seal or swear the oath
@@ -75,7 +75,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 01, 03, C4 08, and its `approval.md` on `main`
 - Touches: `packs/base/tuning.yaml`, `apps/bloodtower/src/engine/loops/game/**`
 - Builds: MEC-032, DEC-144, DEC-356
-- Done-when: EV-01 … EV-04
+- Done-when: EV-01 … EV-05
 - Open: none
 
 ### Feature 05: The Ruined Keep's art and voice through the A1 adapter
@@ -84,7 +84,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: A1 plan merged, C4 09, C4 12, and its `approval.md` on `main`
 - Touches: `packs/test/assets/**`, `packs/test/pack.yaml` (`assets[]`)
 - Builds: AREA-097, DEC-593
-- Done-when: EV-01 … EV-04
+- Done-when: EV-01 … EV-05
 - Open: Q-C5-06, Q-C5-07
 
 ### Feature 06: The tuning pass: placeholder numbers become 1.0 numbers
@@ -102,7 +102,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 01, C4 12, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Tower*.tsx` (new), `apps/bloodtower/src/web/components/device/TowerPicker.tsx` (new)
 - Builds: MEC-076 (screens; UI cards to be filed)
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-10
 - Open: Q-C5-01
 
 ### Feature 08: The Warden on screen: phases and the tower show
@@ -111,7 +111,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 02, C4 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/BossPhase.tsx` (new)
 - Builds: DEC-567, DEC-327
-- Done-when: EV-01 … EV-05
+- Done-when: EV-01 … EV-12
 - Open: Q-C5-02, Q-C5-08
 
 ### Feature 09: The last choice and the two endings on screen
@@ -120,7 +120,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 03, 04, C3 16, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/Vote.tsx` (new), `apps/bloodtower/src/web/components/board/Outcome*.tsx`
 - Builds: DEC-663, DEC-664, SCR-018
-- Done-when: EV-01 … EV-06
+- Done-when: EV-01 … EV-14
 - Open: Q-C5-03, Q-C5-07, Q-C5-09
 
 ### Feature 10: The 1.0 gate: gaps zero and the 1.0 playtest
@@ -131,6 +131,14 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Builds: DEC-696
 - Done-when: EV-01 … EV-04
 - Open: Q-C5-10
+
+## Ownership and shared rules (Sentinel review 2026-10-31)
+
+- C5 09 owns voting (collecting votes, the vote screen, votes surviving Continue); C5 03 owns resolving them (tie re-vote, seeded draw, the flag).
+- Help: add these ids to the C2-04 help table: `tower-screens`, `boss-screen`, `finale-and-endings`. The help sheet is on the iPad and sends nothing to the host.
+- Auto-advance follows Q-C4-17 (Gamewright pick, pending Bob).
+- C5 05: Bob's approval of each final is a ticked line in its approval.md checklist.
+- Engine, pack and process features have no screen-spec.md.
 
 ## Batches
 

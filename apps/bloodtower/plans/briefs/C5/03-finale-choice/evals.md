@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-04; the survival eval is last (EV-04).
+- Done-when: EV-01 … EV-04; survival evals last (EV-04).
 
 ## Checks
 
@@ -22,21 +22,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: `seal_broken` or `oath_sworn`.
 - Fails if: none.
 
-### EV-03 — Tie re-votes then seeded (Gamewright pick, pending Bob)
+### EV-03 — Tie resolution: re-vote once, then the seeded draw (Gamewright pick, pending Bob)
 - Requirement: Q-C5-03.
 - Method: unit
-- How: 2 heroes, split twice.
-- Pass evidence: one re-vote, then seeded pick.
-- Fails if: other.
+- How: seed 4401; 2 heroes split twice (C5 09 collects the votes; this feature resolves them).
+- Pass evidence: one re-vote is requested; the second tie resolves to `oath_sworn` for seed 4401.
+- Fails if: no re-vote, more than one re-vote, or `seal_broken` for seed 4401.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-04 — Votes survive Continue
-- Requirement: DEC-675.
+### EV-04 — The resolved outcome survives Continue
+- Requirement: DEC-675; vote collection and its survival are owned by C5 09 (EV-06).
 - Method: playwright
-- How: 1 of 2 votes, quit, Continue.
-- Pass evidence: vote kept.
-- Fails if: lost.
+- How: resolve to `seal_broken`, quit before the ending scene, Continue.
+- Pass evidence: `seal_broken` is still set, `oath_sworn` is not, and no new vote is asked.
+- Fails if: the flag is lost or flipped, or a re-vote is asked.
 
 ## Assumptions surfaced
 

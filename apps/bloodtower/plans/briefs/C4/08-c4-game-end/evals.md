@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-05; survival evals last (EV-05).
 
 ## Checks
 
@@ -25,9 +25,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — Battle stats counted
 - Requirement: DEC-116.
 - Method: unit
-- How: 2 wins, 1 retreat.
-- Pass evidence: stats 2 / 1 / 0.
-- Fails if: off.
+- How: fixture game: 2 battles won, 1 retreat, 1 fall, 5 Tomb rooms entered.
+- Pass evidence: stats fields `battles_won` 2, `retreats` 1, `falls` 1, `tomb_rooms` 5.
+- Fails if: any field missing or a different value.
 
 ### EV-04 — New key moments
 - Requirement: Q-C3-18.
@@ -42,8 +42,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-116.
 - Method: playwright
 - How: finish, reload.
-- Pass evidence: same record, written once.
-- Fails if: duplicated.
+- Pass evidence: the record store holds exactly 1 record for this game id, unchanged byte for byte.
+- Fails if: a count of 0 or 2, or a changed record.
 
 ## Assumptions surfaced
 

@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, MEC-032, DEC-144, DEC-356, DEC-663, DEC-664
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 01, 03, C4 08, and its `approval.md` on `main`
 - Touches: `packs/base/tuning.yaml`, `apps/bloodtower/src/engine/loops/game/**`
@@ -37,7 +37,7 @@ Cutover: N
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-04 all pass (verifier table on PR).
+- [ ] EV-01 … EV-05 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; 1.1 work (DEC-502).
 
 ## AREA / DEC checklist

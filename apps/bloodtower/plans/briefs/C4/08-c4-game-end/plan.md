@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, MEC-032, DEC-144, DEC-116, DEC-117, Q-C3-18
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 01, 07, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/loops/game/**`, `apps/bloodtower/src/server/timing/stats.ts`

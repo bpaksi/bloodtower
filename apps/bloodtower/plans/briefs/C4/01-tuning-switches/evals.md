@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-06; survival evals last (EV-05 … EV-06).
 
 ## Checks
 
@@ -44,6 +44,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: Begin, quit, edit tuning file, Continue.
 - Pass evidence: the game keeps the Begin values.
 - Fails if: new values read.
+
+### EV-06 — A C3 save is not resumed under C4
+- Requirement: the plan's survival rule; C3 B2 (tuning fixed at Begin), Q-C3-07 (drop, not migrate).
+- Method: playwright
+- How: load a fixture save written under the C3 switches (`c3_end_after_chapter_1: true`, `fight_enabled: false`); start the host; open Continue.
+- Pass evidence: the save is not offered for Continue; the host logs `save skipped: pre-C4 format` once; a new game can Begin.
+- Fails if: the C3 save resumes, or the host errors.
 
 ## Assumptions surfaced
 

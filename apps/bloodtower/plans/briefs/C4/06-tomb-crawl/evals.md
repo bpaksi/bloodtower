@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-06; the survival eval is last (EV-06).
+- Done-when: EV-01 … EV-10; survival evals last (EV-10).
 
 ## Checks
 
@@ -13,7 +13,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: unit
 - How: 100 seeds.
 - Pass evidence: 7 rooms; guardian in rooms 5–7; up to 3 corridors each.
-- Fails if: other count.
+- Fails if: any count but 7, the guardian outside rooms 5–7, or a room with more than 3 corridors.
 
 ### EV-02 — Each room is nothing, battle or trap
 - Requirement: DEC-488.
@@ -43,9 +43,37 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: level-3 battle; Signet to the group; quest done.
 - Fails if: no Signet.
 
+### EV-06 — A trap costs its flat loss
+- Requirement: DEC-489.
+- Method: unit
+- How: enter a fixture trap room (`tomb.trap_hp` = 2) with 2 present heroes at 10 HP.
+- Pass evidence: each present hero 8 HP; the room is marked cleared.
+- Fails if: no loss, a battle, or the room stays live.
+
+### EV-07 — Retreat leaves the Tomb
+- Requirement: DEC-497.
+- Method: unit
+- How: retreat from a battle room.
+- Pass evidence: the group stands on The Barrow's board space; the Tomb state is kept.
+- Fails if: the group stays inside or the layout resets.
+
+### EV-08 — Spells come back on each visit
+- Requirement: DEC-652.
+- Method: unit
+- How: cast Fireball, leave, re-enter.
+- Pass evidence: Fireball usable again.
+- Fails if: still spent.
+
+### EV-09 — The layout is built on first entry only
+- Requirement: DEC-602.
+- Method: unit
+- How: seed S; inspect state before entry, after entry, after a second entry.
+- Pass evidence: no layout before; a 7-room layout after; identical after the second.
+- Fails if: a layout before entry, or a new one on re-entry.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — Rooms kept across Continue
+### EV-10 — Rooms kept across Continue
 - Requirement: DEC-602.
 - Method: playwright
 - How: clear 3 rooms, quit, Continue, re-enter.

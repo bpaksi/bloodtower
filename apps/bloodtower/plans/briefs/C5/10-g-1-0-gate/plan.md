@@ -10,7 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (plan, evals); a Wright developer (build)
 - Related AREA/docs: AREA-097, DEC-696, DEC-355, DEC-691
 - Evals: ./evals.md
-- Screen spec: ./screen-spec.md
+- Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 01 to 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/plans/C5-finale-polish.md` (Results), `research/game-design/release-1.0-punch-list.md`

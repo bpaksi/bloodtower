@@ -32,12 +32,14 @@ Cutover: N
 
 - Continue, restore, and restart must keep:
   - The phase painting is redrawn after Continue.
+  - After a restart and Continue, the Menu and any gear panel come back closed.
+  - A beat interrupted by restart shows again or the next one shows, its effect applied once.
 
 ## Done-when (e2e)
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-12 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; 1.1 work (DEC-502).
 
 ## AREA / DEC checklist
@@ -47,6 +49,8 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 - [ ] UI-026: closed before coding (`decided`).
 
 ## OPEN questions
+
+- Q-C4-17 (auto-advance timing, Gamewright pick (a), pending Bob) applies to this screen; see C4 plan.
 
 - OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, pending Bob).
 - OPEN Q-C5-08: The boss's full tower show (DEC-567, DEC-327) with no tower connected: Options: (a) a board-only show: the painting change, a shake and the sound on the board speakers; (b) skip the show. Gamewright pick: (a) (Gamewright pick, pending Bob).

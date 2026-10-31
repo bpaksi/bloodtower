@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-04; the survival eval is last (EV-04).
+- Done-when: EV-01 … EV-04; survival evals last (EV-04).
 
 ## Checks
 
@@ -22,10 +22,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: each changed key names its sim row and playtest.
 - Fails if: uncited.
 
-### EV-03 — No hang in 300 games
+### EV-03 — No hang in 900 games
 - Requirement: MEC-032.
 - Method: sim
-- How: 300 seeds.
+- How: 300 seeds at each of 2, 3 and 4 heroes (900 games).
 - Pass evidence: all end.
 - Fails if: hang.
 

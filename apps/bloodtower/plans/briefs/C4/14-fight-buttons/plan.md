@@ -32,12 +32,13 @@ Cutover: N
 
 - Continue, restore, and restart must keep:
   - After Continue at an event, Fight is still offered.
+  - After a restart and Continue, the Menu and any gear panel come back closed.
 
 ## Done-when (e2e)
 
 Contract is ./evals.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-10 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist

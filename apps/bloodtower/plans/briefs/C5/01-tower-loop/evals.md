@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-06; the survival eval is last (EV-06).
+- Done-when: EV-01 … EV-07; survival evals last (EV-07).
 
 ## Checks
 
@@ -19,8 +19,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-363.
 - Method: unit
 - How: enter.
-- Pass evidence: moves −1.
-- Fails if: other.
+- Pass evidence: moves exactly −1.
+- Fails if: any change but −1.
 
 ### EV-03 — Rooms dealt once from the seed (Gamewright pick, pending Bob)
 - Requirement: Q-C5-11.
@@ -43,9 +43,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: C4 03's retreat cost; rooms kept.
 - Fails if: free or reset.
 
+### EV-06 — Each level deals guard, trap or shrine, then a stair guard
+- Requirement: DEC-566.
+- Method: unit
+- How: 100 seeds; inspect each level.
+- Pass evidence: rooms 1–2 each a guard, trap or shrine; room 3 a stair guard; level 3 room 3 is The Warden.
+- Fails if: any other kind, or The Warden elsewhere.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — Progress survives Continue
+### EV-07 — Progress survives Continue
 - Requirement: DEC-360.
 - Method: playwright
 - How: reach main level, quit, Continue.

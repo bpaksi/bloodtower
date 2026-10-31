@@ -9,7 +9,7 @@
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
 - iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
-- No Next-only screens: every iPad screen carries a real choice, or the board advances on its own after its beat. A lone "Next" button is a failed build.
+Auto-advance: the close Scroll and the glyph/boon Reveal have no Next; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
 - All story and help text is `[COPY: ...]` until the story pass.
 
@@ -21,7 +21,7 @@ C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll,
 
 - Board: shows the state and every line `[COPY: seal-break-live, board = "The chapter is won. A seal breaks. / {hero} gained {item}. / Skulls are freed. Choose a kingdom."]`; never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): `[COPY: help, seal-break-live = "Confirm on the iPad which seal broke on the tower, then place the freed skulls: kingdom first, then building. Tap Seal broken when the tower matches."]` on the board.
+- Help (?): a help sheet on the iPad, `[COPY: help, seal-break-live = "Confirm on the iPad which seal broke on the tower, then place the freed skulls: kingdom first, then building. Tap Seal broken when the tower matches."]`, `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

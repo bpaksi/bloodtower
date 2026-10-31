@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-04; the survival eval is last (EV-04).
+- Done-when: EV-01 … EV-05; survival evals last (EV-05).
 
 ## Checks
 
@@ -29,14 +29,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: Loremaster keys only.
 - Fails if: others.
 
+### EV-04 — Bob approved every final
+- Requirement: Q-C5-06 (Gamewright pick, pending Bob).
+- Method: manual
+- How: read ./approval.md's art checklist.
+- Pass evidence: every asset id in `index.json` has a ticked line `- [x] <id> — approved by Bob <date>`.
+- Fails if: any id unticked or missing.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-04 — Old save loads with new art
+### EV-05 — Old save loads with new art
 - Requirement: DEC-202.
 - Method: playwright
 - How: C4 save; Continue.
-- Pass evidence: art shows, no error.
-- Fails if: error.
+- Pass evidence: every painting slot (chapter cards, foes, Tomb, Tower levels, Warden phases, endings) renders the asset id listed in `index.json`; 0 assets tagged `placeholder`.
+- Fails if: any slot shows a placeholder id or none.
 
 ## Assumptions surfaced
 

@@ -4,16 +4,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-05; survival evals last (EV-05).
 
 ## Checks
 
 ### EV-01 — Only 4 count
 - Requirement: DEC-466.
 - Method: unit
-- How: Cursed hero with 6 matching Advantages.
-- Pass evidence: strength uses the best 4.
-- Fails if: 6 or the wrong 4.
+- How: Cursed hero, fight number 2, 6 matching Advantages worth +1, +1, +1, +2, +2, +3.
+- Pass evidence: round strength 2 + (3 + 2 + 2 + 1) = 10.
+- Fails if: strength 13 (all 6), or any value but 10.
 
 ### EV-02 — Below 4 is untouched
 - Requirement: DEC-466.
@@ -32,9 +32,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-04 — Cursed in every draw (Gamewright pick, pending Bob)
 - Requirement: Q-C4-06.
 - Method: sim
-- How: 10,000 seeded draws.
-- Pass evidence: Cursed appears; never to a hero holding it.
-- Fails if: absent or doubled.
+- How: 10,000 seeded draws for heroes holding no corruption, from the C4 set of 6 (Cruel, Greedy, Feral, Lost, Tempted, Cursed).
+- Pass evidence: Cursed rate 1/6 = 0.167 ± 0.01; 0 draws give a hero one they hold.
+- Fails if: rate outside 0.157–0.177, or a duplicate.
 
 ## Survival evals (one per survival invariant in plan.md)
 

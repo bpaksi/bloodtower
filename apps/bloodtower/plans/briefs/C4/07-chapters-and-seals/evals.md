@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-06; the survival eval is last (EV-06).
+- Done-when: EV-01 … EV-08; survival evals last (EV-08).
 
 ## Checks
 
@@ -40,12 +40,26 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-662.
 - Method: sim
 - How: reach The Lock without, then with, the Signet.
-- Pass evidence: disabled, then done.
-- Fails if: opens without.
+- Pass evidence: without the Signet The Lock's option is `enabled: false` with the reason `[COPY: needs the Warden's Signet]`; with it, The Lock is done.
+- Fails if: The Lock opens without the Signet, or no reason is given.
+
+### EV-06 — Chapter 3 plays
+- Requirement: DEC-662.
+- Method: sim
+- How: fixed seed; win chapter 2.
+- Pass evidence: chapter 3 opens with the whole board; quests The Lock and The Last Stand are live; both done wins the chapter.
+- Fails if: chapter 3 missing a quest, or won early.
+
+### EV-07 — The boon applies, then the freed skulls
+- Requirement: DEC-303, Q-C3-17.
+- Method: unit
+- How: tower; win chapter 1 with a fixture glyph whose boon is +1 move.
+- Pass evidence: state shows the boon active (next roll +1) before the first freed-skull prompt; freed skulls = `seals.freed[1]` = 2.
+- Fails if: no boon, or skulls before the boon.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — Seal break survives Continue
+### EV-08 — Seal break survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit after stamp, before seal; Continue.

@@ -4,7 +4,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: ./mockup.html (to be drawn from ./screen-spec.md)
-- Done-when: EV-01 … EV-05; the survival eval is last (EV-05).
+- Done-when: EV-01 … EV-10; survival evals last (EV-09 … EV-10).
 
 ## Checks
 
@@ -12,8 +12,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C4-02.
 - Method: playwright
 - How: each event type.
-- Pass evidence: Fight on both.
-- Fails if: missing.
+- Pass evidence: foes and disaster events each show Fight, Go around, Pay them off (5 gold), all enabled with purse 10.
+- Fails if: Fight missing or disabled on either.
 
 ### EV-02 — Fight hands to the battle
 - Requirement: MEC-038.
@@ -33,17 +33,52 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-041.
 - Method: screenshot
 - How: iPad 768×1024; mockup `#foes`, `#ambush`.
-- Pass evidence: matching.
-- Fails if: differs.
+- Pass evidence: pixel diff under 1% against `#foes`, `#ambush`.
+- Fails if: any image over 1% diff.
+
+### EV-05 — A plain-scene battle option shows Fight
+- Requirement: Q-C4-02 (Gamewright pick, pending Bob); this feature owns the Fight button.
+- Method: playwright
+- How: a scene whose option B holds a battle.
+- Pass evidence: the iPad shows Fight in B's place plus the scene's other option label.
+- Fails if: no Fight, or the battle option shows under its scene label only.
+
+### EV-06 — The toolbar is on every state
+- Requirement: every iPad state has the bottom toolbar, "?" at the left and the gear at the right (C3 rule, Bob 2026-10-31 10:37 AM ET).
+- Method: playwright, iPad portrait 768×1024
+- How: stop on each state: foes event, disaster event, The Ambush, plain-scene battle option.
+- Pass evidence: on each stop `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
+- Fails if: any state lacks the toolbar, "?" or the gear.
+
+### EV-07 — The happy path never needs the gear
+- Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: play the happy path through foes event, disaster event, The Ambush, plain-scene battle option, counting Menu and help opens.
+- Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
+- Fails if: a Menu or help open is needed.
+
+### EV-08 — Help matches this screen
+- Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (C2-04, C3 rule).
+- Method: playwright
+- How: on each state (foes event, disaster event, The Ambush, plain-scene battle option) press "?", then Close.
+- Pass evidence: the sheet's `data-help-screen` is `fight-buttons` and its text is exactly "Tap Fight on your iPad to start a battle, or pick another option to avoid it." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
+- Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-05 — Fight survives Continue
+### EV-09 — Fight survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit at a foes event; Continue.
 - Pass evidence: Fight still shown.
 - Fails if: gone.
+
+### EV-10 — The gear comes back closed after a restart
+- Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
+- Method: playwright
+- How: on this screen open a gear panel (Volume), restart the host, Continue.
+- Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear.
+- Fails if: the Menu or panel reopens, the game stays paused, or the toolbar is missing.
 
 ## Assumptions surfaced
 
