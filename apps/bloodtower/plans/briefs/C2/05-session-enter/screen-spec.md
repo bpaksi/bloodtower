@@ -21,7 +21,7 @@ Scan QR; Board is set up (any iPad); Connect Tower / Play without Tower; Volume 
 ## Mechanics
 MEC-039, DEC-273, DEC-274, DEC-152, DEC-275, DEC-104 (board before tower), DEC-278, SCR-015, SCR-022, SCR-005, SCR-006, UI-010, CUE-011, AREA-100.
 
-- Restart: mid-Enter starts again from the join; after the Enter, a restart keeps tonight's tower choice and does not ask again (Bob 2026-10-31).
+- Restart: mid-Enter starts again from the join; after the Enter, on a restart the session resumes with tonight's tower choice and no Enter (no tower question) (Bob 2026-10-31).
 
 ## What happens next
 Today: Pick story (SCR-007) for the first game. After feature 06: the session screen (SCR-021).

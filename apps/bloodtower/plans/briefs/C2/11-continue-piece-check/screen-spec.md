@@ -22,7 +22,7 @@ Done · Skip · Turn the drums (the only tower action; nothing turns without it)
 DEC-710, DEC-716, DEC-717, MEC-018, DEC-283, DEC-675, DEC-305/306, DEC-064, DEC-006, SCR-011, Q-032.
 
 ## What happens next
-Continue → tower block if none → steps 1 to 6 → saved chapter at its saved node (DEC-675). Host restart mid-check resumes at that step.
+Continue → tower block only if the tower is not connected → steps 1 to 6 → saved chapter at its saved node (DEC-675). Host restart mid-check resumes at that step; the session resumes with tonight's tower choice and no Enter.
 
 ## Open questions
 - Blocked on feature 10's tower run (rotate lands?).
