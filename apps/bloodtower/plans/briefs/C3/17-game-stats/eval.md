@@ -59,8 +59,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-08 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: stats, rating, drill-in.
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: stats, rating, drill-in.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 

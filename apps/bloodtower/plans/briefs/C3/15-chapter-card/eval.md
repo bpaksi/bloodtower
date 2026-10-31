@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-044, DEC-303.
 - Method: playwright
 - How: fixture with `c3_end_after_chapter_1: false` (in C3 the game ends at chapter 1, Q-C3-01); win chapter 1 with the mock tower; the seed frees 2 skulls.
-- Pass evidence (1.0 / C3 checks): card stamped won, the close Scroll, the lit seal prompt, a Reveal of the glyph and its boon. C4+ only (not run in C3, not a 1.0 check): then exactly 2 freed-skull prompts, each a kingdom then a building.
+- Pass evidence: 1.0 / C3 checks: card stamped won, the close Scroll, the lit seal prompt, a Reveal of the glyph and its boon. C4+ only (not run in C3, not a 1.0 check): then exactly 2 freed-skull prompts, each a kingdom then a building.
 - Fails if: seal before the stamp.
 
 ### EV-03 — No seal without the tower
@@ -59,8 +59,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-08 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, iPad portrait 768×1024
-- How: stop on each state: chapter card, stamped won, close Scroll. (The freed-skulls state is C4+, not in C3.)
+- Method: playwright
+- How: (iPad portrait 768×1024) stop on each state: chapter card, stamped won, close Scroll. (The freed-skulls state is C4+, not in C3.)
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -80,22 +80,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ### EV-11 — Next-only steps auto-advance
 - Requirement: the chapter card, the stamped card and the close Scroll has no Next; it advances when its narration or cue ends, or after 4 s when it has no audio (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock
-- How: reach the chapter card, the stamped card and the close Scroll; once with narration (mock audio end event), once with audio off.
+- Method: playwright
+- How: (fake clock) reach the chapter card, the stamped card and the close Scroll; once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button there; the screen advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio; the step's outcome is the same as the old Next.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-12 — Narrated steps do not advance before their audio ends
 - Requirement: a Next-only step with narration advances only on its audio-end event, never on a timer (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock, mock audio
-- How: reach the chapter card, the stamped card or the close Scroll with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
+- Method: playwright
+- How: (fake clock, mock audio) reach the chapter card, the stamped card or the close Scroll with narration longer than 4.5 s; advance the clock 4.5 s without firing the audio-end event; then fire it.
 - Pass evidence: after 4.5 s the iPad and the board are still on the step; it advances only after the audio-end event fires.
 - Fails if: the step advances before its audio ends, or does not advance after the audio-end event.
 
 ### EV-13 — Restart and Continue during an auto-advancing step apply its effect once
 - Requirement: a restart or a Continue during an auto-advancing step resumes that step and applies its effect exactly once (Bob 2026-10-31 10:38 AM ET).
-- Method: playwright, fake clock
-- How: two runs: (1) on the chapter card, the stamped card or the close Scroll, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
+- Method: playwright
+- How: (fake clock) two runs: (1) on the chapter card, the stamped card or the close Scroll, before it advances, restart the host and Continue; (2) on the same step, quit and Continue from the session screen. In each run let the step advance.
 - Pass evidence: in each run the same step shows again and auto-advances once; the chapter step (the chapter number and its cue, CUE-004 or CUE-005) is applied exactly once (host state and event log show one application).
 - Fails if: the step is skipped without its effect, repeats its effect, or stalls.
 
