@@ -37,6 +37,7 @@ Back to the loop that called it (see ./plan.md).
 
 ## Values (filled from cards)
 
+- Trait chips: each chip carries `[data-foe-trait]` (placeholder attribute until the build names it).
 - Foe traits: two trait chips per foe from DEC-068's set (Beast, Magic, Humanoid, Melee, Undead, Stealth), read from the pack's foe entry (DEC-579, UI-026).
 - The Warden's traits: Melee, Humanoid; ability Crushing blow (DEC-688).
 - Strength left: the foe's wounds, 4 per level +1 per present hero after the first (DEC-563, DEC-703).

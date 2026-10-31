@@ -40,6 +40,7 @@ Back to the loop that called it (see ./plan.md).
 
 - Level map: one row of 3 rooms per level, the stair guard last, levels basement / main / tower (DEC-566).
 - Shrine +2 HP each, once; trap −2 HP each (DEC-703).
+- Trap line: reuses the second sentence of the Tomb's Falling Rocks line, "Every hero loses 2 hit points." (C4-12 `[COPY: tomb-screens, rocks]`). Loremaster's text in /workspace/c4c5-copy.md reads "Every hero takes 2 damage."; "loses 2 hit points" is Gamewright's hit-points wording from 0006, so Loremaster still needs to lock it.
 
 ## OPEN questions
 
