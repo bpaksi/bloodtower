@@ -36,21 +36,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: six images matching.
 - Fails if: a part missing.
 
-### EV-06 — C3: stamped card and close Scroll before the outcome
-- Requirement: Q-C3-01; (Gamewright default, Bob to confirm).
+### EV-05 — C3: stamped card and close Scroll before the outcome
+- Requirement: Q-C3-01; (Bob approved 2026-10-31).
 - Method: playwright
 - How: C3 tuning (`c3_end_after_chapter_1: true`); win chapter 1.
-- Pass evidence: in order: the card stamped won, the close Scroll `[COPY: …]`, then the outcome scene (feature 16); no seal prompt, no freed-skull prompt.
+- Pass evidence: in order: the card stamped won, the close Scroll reading exactly "The roads are quiet again.", then the outcome scene (feature 16); no seal prompt, no freed-skull prompt.
 - Fails if: the outcome shows first, either step is skipped, or a seal or skull prompt shows.
 
-### EV-07 — Chapter cues play
+### EV-06 — Chapter cues play
 - Requirement: CUE-004 (chapter start), CUE-005 (chapter won).
 - Method: playwright
 - How: Begin a game; then win chapter 1 (C3 tuning); read the cue log.
 - Pass evidence: CUE-004 fires once with the chapter card; CUE-005 fires once with the stamped card.
 - Fails if: either cue is missing, repeated or at the wrong step.
 
-### EV-08 — The next chapter's enter lights its kingdom
+### EV-07 — The next chapter's enter lights its kingdom
 - Requirement: MEC-033 .3, DEC-662.
 - Method: playwright
 - How: fixture with `c3_end_after_chapter_1: false`; win chapter 1 without the tower.
@@ -59,7 +59,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-05 — No replay on Continue
+### EV-08 — No replay on Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit on day 2 of chapter 1; Continue.
@@ -72,4 +72,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Q-C3-17 (which boons)
+- ANSWERED Q-C3-17 (Bob approved 2026-10-31): the base pack supplies the boons and the app picks; The Ruined Keep names none in 1.0. (which boons)

@@ -39,7 +39,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Each gold-loss corruption fires on its trigger only
 - Requirement: DEC-470, DEC-471, DEC-472, DEC-473, DEC-477.
 - Method: unit
-- How: one case per card at its trigger and one off it, amounts (Gamewright proposal, pending Bob):
+- How: one case per card at its trigger and one off it, amounts (Bob approved 2026-10-31):
   - Cruel (DEC-470) ↔ after a village pick: −2; off: a citadel pick, 0.
   - Greedy (DEC-471) ↔ after a bazaar pick (Cleanse): −2; off: a village pick, 0.
   - Feral (DEC-472) ↔ the group's turn ends on a building's space: −2; off: ends in the wild, 0.
@@ -53,17 +53,17 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-080 and the corruption cards.
 - Method: unit
 - How: give a hero two corruptions under a fixed seed; repeat with the same seed.
-- Pass evidence: each is a seeded draw from the C3 set (Gamewright proposal, pending Bob); the same seed gives the same two IDs; the second is never the first; both are stored by ID.
+- Pass evidence: each is a seeded draw from the C3 set (Bob approved 2026-10-31); the same seed gives the same two IDs; the second is never the first; both are stored by ID.
 - Fails if: a named corruption is shown but has no effect, the draw is unseeded, or a hero draws one they hold.
 
-### EV-08 — Selfish blocks giving a card
+### EV-07 — Selfish blocks giving a card
 - Requirement: DEC-476.
 - Method: unit
 - How: 2 present heroes; the Selfish holder tries to give a virtue tile (and an item) to the other; then the other hero gives one to the Selfish holder.
 - Pass evidence: the holder's give is refused and nothing moves; the other hero's give to the holder succeeds.
 - Fails if: the holder can give a card, or Selfish also blocks receiving.
 
-### EV-09 — Corruptions outside C3 are never drawn
+### EV-08 — Corruptions outside C3 are never drawn
 - Requirement: DEC-466 (C4), DEC-467 and DEC-469 (1.1, DEC-718).
 - Method: unit
 - How: fixed seed; 1,000 corruption draws in C3.
@@ -72,7 +72,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Corruptions survive Continue
+### EV-09 — Corruptions survive Continue
 - Requirement: MEC-080.
 - Method: unit
 - How: autosave with a hero holding Feral; Continue; end the turn on a building.
@@ -92,5 +92,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Q-C3-15: how is the named corruption picked when a hero takes one: a seeded draw from the 1.0 set, the story's choice (MEC-059), or the group's? And can a hero draw the same one twice? Gamewright proposal, pending Bob: seeded draw from the C3 set, no repeats per hero.
-- Q-C3-16: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers? Gamewright proposal, pending Bob: Cruel/Greedy/Feral 2, Lost 1, Tempted +2 per buy.
+- ANSWERED Q-C3-15 (Bob approved 2026-10-31): a seeded draw from the C3 set, never one the hero already holds. Was: how is the named corruption picked when a hero takes one: a seeded draw from the 1.0 set, the story's choice (MEC-059), or the group's? And can a hero draw the same one twice?
+- ANSWERED Q-C3-16 (Bob approved 2026-10-31): Cruel, Greedy and Feral −2 gold on their trigger; Lost −1; Tempted +2 on each buy. Was: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers?

@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-116.
 - Method: unit
 - How: three stored won games of this story with active lengths 40, 50 and 60 min, plus one lost game of 30 min; view the 50-min game.
-- Pass evidence: best 40 min (shortest winning game, (Gamewright default, Bob to confirm)); average 45 min (mean of all four finished games: 40, 50, 60, 30); this game 50 min.
+- Pass evidence: best 40 min (shortest winning game, (Bob approved 2026-10-31)); average 45 min (mean of all four finished games: 40, 50, 60, 30); this game 50 min.
 - Fails if: best is 30 (a loss) or 60, the average is wrong, or only this game shows.
 
 ### EV-04 — Drill-in shows the same stats
@@ -50,7 +50,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no Seals broken row, label or zero value in either.
 - Fails if: Seals broken shows, even as 0.
 
-### EV-08 — Drill-in Play again and Back
+### EV-07 — Drill-in Play again and Back
 - Requirement: C2 07, SCR-021.
 - Method: playwright
 - How: from tonight's games open a finished game; press Back; open it again; press Play again.
@@ -59,18 +59,18 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — The rating is kept
+### EV-08 — The rating is kept
 - Requirement: SCR-019.
 - Method: unit
-- How: two iPads rate 4 and 2 (DEFAULT Q-C3-21 per iPad); restart the host; drill in.
+- How: two iPads rate 4 and 2 (Q-C3-21 per iPad); restart the host; drill in.
 - Pass evidence: both ratings are stored per iPad and shown as "4 · 2" (one value per iPad, in seat order).
 - Fails if: a rating is lost, averaged into one, or only the last kept.
 
 ## Assumptions surfaced
 
-- Each iPad gives its own rating (default Q-C3-21, pending Bob).
+- Each iPad gives its own rating (Q-C3-21, Bob approved 2026-10-31).
 
 ## OPEN questions
 
-- Q-C3-18 (key moments)
-- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad.
+- ANSWERED Q-C3-18 (Bob approved 2026-10-31): key moments are quest done, item gained, building fallen, corruption taken, chapter won. (key moments)
+- ANSWERED Q-C3-21 (Bob approved 2026-10-31): the fun rating is per iPad, shown per seat.

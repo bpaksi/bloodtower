@@ -43,25 +43,25 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: `server/timing/log.ts`, `stats.ts`, `control/lock.ts` and their tests are absent; `pnpm check` passes.
 - Fails if: a file stays with no importer.
 
-## Survival evals (one per survival invariant in plan.md)
-
-### EV-06 — A pre-C3 autosave is dropped, without a crash
-- Requirement: Q-C3-07 (Bob, 2026-10-31): pre-C3 saves are dropped; the error rule; DEC-208.
-- Method: unit
-- How: seed the DB with an autosave written by `main` before this change; start the host.
-- Pass evidence: no Continue on the session screen (C2 06) or on Pick story; the host log has exactly one line `save skipped: pre-C3 format` with `{version}`; the row is still in the DB, unchanged (kept and ignored, Gamewright default, Bob to confirm); a New game starts clean. No exception, no migration.
-- Fails if: the host throws at startup, Continue is offered for the old save, the log line is missing or repeated, the row is deleted or rewritten, or the save is migrated and resumed.
-
-### EV-07 — Asset serving works on v2 paths only
+### EV-06 — Asset serving works on v2 paths only
 - Requirement: plan "keeps today's asset serving working on v2 paths only".
 - Method: unit
 - How: server test: GET one cover and one audio asset of `packs/test` by its v2 path, then by its old v1 path.
 - Pass evidence: both v2 GETs return 200 with the file's bytes; both v1 GETs return 404.
 - Fails if: a v2 path fails, or a v1 path still serves.
 
+## Survival evals (one per survival invariant in plan.md)
+
+### EV-07 — A pre-C3 autosave is dropped, without a crash
+- Requirement: Q-C3-07 (Bob, 2026-10-31): pre-C3 saves are dropped; the error rule; DEC-208.
+- Method: unit
+- How: seed the DB with an autosave written by `main` before this change; start the host.
+- Pass evidence: no Continue on the session screen (C2 06) or on Pick story; the host log has exactly one line `save skipped: pre-C3 format` with `{version}`; the row is still in the DB, unchanged (kept and ignored, Bob approved 2026-10-31); a New game starts clean. No exception, no migration.
+- Fails if: the host throws at startup, Continue is offered for the old save, the log line is missing or repeated, the row is deleted or rewritten, or the save is migrated and resumed.
+
 ## Assumptions surfaced
 
-- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled). The row is kept and ignored, logging `save skipped: pre-C3 format` (Gamewright default, Bob to confirm).
+- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled). The row is kept and ignored, logging `save skipped: pre-C3 format` (Bob approved 2026-10-31).
 
 ## OPEN questions
 

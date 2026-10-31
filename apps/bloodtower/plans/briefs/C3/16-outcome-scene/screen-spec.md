@@ -12,9 +12,9 @@ Deliver the ending (SCR-018).
 
 ## States
 
-- **Win, C3** (Q-C3-01): chapter 1 cleared; scene and line OPEN Q-C3-23.
+- **Win, C3** (Q-C3-01): chapter 1 cleared; the DEC-144 win scene, then the Loremaster line `[COPY: chapter 1 win, Loremaster]` (Q-C3-23, Bob approved 2026-10-31).
 - **Win, finale (from C5)** (DEC-663, DEC-664): the ending Painting, `[COPY: finale win, seal shattered]` or `[COPY: finale win, seal holds]`.
-- **Loss** (DEC-144): one scene per way to lose: skulls, corruption, fallen buildings. Skulls: `[COPY: skulls loss]`. Corruption: `[COPY: ...]` (open, corruption name). Fallen buildings: `[COPY: ...]` (4 fallen buildings, Gamewright proposal, pending Bob, Q-C3-05). Story text on this screen is `[COPY: ...]` per the rule (Gamewright default, Bob to confirm).
+- **Loss** (DEC-144): one scene per way to lose: skulls, corruption, fallen buildings. Skulls: `[COPY: skulls loss]`. Corruption: `[COPY: ...]` (open, corruption name). Fallen buildings: `[COPY: ...]` (4 fallen buildings, Bob approved 2026-10-31, Q-C3-05). Story text on this screen is `[COPY: ...]` per the rule (Bob approved 2026-10-31).
 - **Summary line** (DEC-627): the format `{N} days. {Q} quests done. {S} skulls on the board.` (a data template, not story copy) and Next.
 
 ## Player actions
@@ -32,4 +32,4 @@ Game stats (feature 17), then the session screen (C2 06).
 ## OPEN questions
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
-- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?
+- ANSWERED Q-C3-23 (Bob approved 2026-10-31): the DEC-144 win scene plays, then the Loremaster line `[COPY: chapter 1 win, Loremaster]`. Was: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?

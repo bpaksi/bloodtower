@@ -263,9 +263,9 @@ Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob. Ev
 ## Risks
 
 - **The C3 win ends after chapter 1.** Ruled (Q-C3-01). C4 and C5 must remove the C3 end rule, so it sits behind one tuning switch (feature 02) with its own eval (features 09, 10).
-- **The Ambush with no Fight.** With Fight hidden (Q-C3-02), the toll is the only way to finish chapter 1. A group that cannot pay was stuck; the Gamewright proposal (pending Bob, Q-C3-22) lets a short group pay all its gold plus 2 hit points per present hero, never below 1, so chapter 1 can always finish.
+- **The Ambush with no Fight.** With Fight hidden (Q-C3-02), the toll is the only way to finish chapter 1. A group that cannot pay was stuck; Bob's ruling (2026-10-31, Q-C3-22) lets a short group pay all its gold plus 2 hit points per present hero, never below 1, so chapter 1 can always finish.
 - **Feature 10 and the C2 shell.** It is the one engine feature that waits for C2's serial line.
-- **The pack and old saves.** Feature 01 changes how stories load; pre-C3 autosaves are dropped (Q-C3-07, ruled), so a game in progress at upgrade is lost. The old row is kept and ignored, logging `save skipped: pre-C3 format` (Gamewright default, Bob to confirm).
+- **The pack and old saves.** Feature 01 changes how stories load; pre-C3 autosaves are dropped (Q-C3-07, ruled), so a game in progress at upgrade is lost. The old row is kept and ignored, logging `save skipped: pre-C3 format` (Bob approved 2026-10-31).
 
 ## Gaps this plan closes (`pnpm graph gaps`, 1.0)
 
@@ -273,9 +273,9 @@ The deliverables listed under each feature's `Builds:`. The gameplay mechanics i
 
 ## OPEN questions (consolidated)
 
-Each is also listed in the feature files that need it. Three are answered (Bob, 2026-10-31); three carry a Gamewright default pending Bob's review (Q-C3-19, 20, 21); the rest are not ruled here. (Q-C3-06 is unused.)
+Each is also listed in the feature files that need it. All are answered: Q-C3-01, 02 and 07 by Bob's rulings, and the rest when Bob approved Gamewright's proposal list in full ("approve all", 2026-10-31 10:27 AM ET). Two later Gamewright proposals (skull menu shrink, Pay them off amount) are still pending Bob. (Q-C3-06 is unused.)
 
-Gamewright defaults (2026-10-31, from Sentinel's C3 eval review; each tagged "(Gamewright default, Bob to confirm)" in the feature files):
+Gamewright defaults, Bob approved 2026-10-31 (from Sentinel's C3 eval review; each tagged "(Bob approved 2026-10-31)" in the feature files):
 - 03 has three items: Tomas's Map, the Signet and the oath-blade (B3).
 - Rest is the village's tavern rest, +3 hit points per move, in 06 and 13 (B4).
 - Story text in screen specs 15 and 16 (and 12, 14) is `[COPY: ...]` per the rule (B7).
@@ -285,34 +285,38 @@ Gamewright defaults (2026-10-31, from Sentinel's C3 eval review; each tagged "(G
 - With Fight hidden, The Ambush may have one option: a documented C3 exception to the 2–3 option rule (B5).
 - On the C3 chapter 1 win, the stamped card and close Scroll show before the outcome scene (B6).
 
-Gamewright proposals for the pending numbers (pending Bob; each tagged "(Gamewright proposal, pending Bob)"):
+Gamewright proposals for the numbers, Bob approved 2026-10-31 (each tagged "(Bob approved 2026-10-31)"):
 - Citadel: Rally (5 gold + 1 move), Virtue draw (10 gold + 1 move) or Cleanse. Sanctuary: cure (10 gold + 1 move, first one free each chapter) or Cleanse. Village: tavern rest or Cleanse. Bazaar: Cleanse only (Q-C3-13, Q-C3-14).
 - 4 fallen buildings lose the game (Q-C3-05).
 - Corruption: Cruel, Greedy and Feral cost 2 gold, Lost costs 1, Tempted adds +2 to each buy; the named corruption is a seeded draw from the C3 set, never one the hero holds (Q-C3-15, Q-C3-16).
 - The Ambush toll is 10 gold; a short group pays what it has plus 2 hit points per present hero, never below 1 (Q-C3-22).
 
+Gamewright proposals still pending Bob (from Sentinel's recheck at 712207c; each tagged "(Gamewright proposal, pending Bob)"):
+- Skull menu shrink (DEC-093): each skull removes the last offer above Cleanse; Cleanse and Leave always stay. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only; the 4th fells it (features 04, 06, 13).
+- Pay them off costs `events.pay_off` = 5 gold and is disabled when the purse is short; Go around takes no gold (features 05, 12).
+
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win. The game ends won when chapter 1 is won; no seal break, no chapter 2 (features 09, 10, 16).
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4. Foes and disaster events offer Go around and Pay them off only; plain-scene battle options are hidden (features 05, 07, 12, 14).
-- Q-C3-03: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type? (features 05, 12)
-- Q-C3-04: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives? (features 04, 11)
-- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. (features 04) Gamewright proposal, pending Bob: 4 fallen buildings.
+- ANSWERED Q-C3-03 (Bob approved 2026-10-31): in 1.0 people events offer rumour and trick only; the people weight stays 10. Was: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type? (features 05, 12)
+- ANSWERED Q-C3-04 (Bob approved 2026-10-31): count the actual nights the 1,2,1,2 pattern gives. Was: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives? (features 04, 11)
+- ANSWERED Q-C3-05 (Bob approved 2026-10-31): 4 fallen buildings lose the game. Was: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. (features 04)
 - ANSWERED Q-C3-07 (Bob, 2026-10-31): yes, pre-C3 saves are dropped, not migrated. (features 01)
-- Q-C3-08: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them? (features 02)
-- Q-C3-09: DEC-666 says the pack ID is Proving Grounds, but the folder's `pack_id` is `test`. Rename to `proving-grounds`, or keep `test`? (features 03)
-- Q-C3-10: which spaces hold The Ambush ("a wild space"), The Lock and The Last Stand? DEC-662 names the kingdom only; P-003 used Muted Forest, Howling Desert and The Grass Sea. Are the probe's spaces the ruling? (features 03)
-- Q-C3-11: The Last Stand's foe: DEC-647 draws a random level-3 foe. Is that the intent, or does the story name the oathsworn guard? (features 03)
-- Q-C3-12: does the disaster event's boss-level foe (DEC-028) need a C3 placeholder, as P-003 day 11 met one? (features 05)
-- Q-C3-13: which picks does each 1.0 building kind offer? DEC-158 lists a citadel potion and an audience; DEC-502 cuts NPCs and shops. Are the potion and audience out of 1.0? (features 06, 13) Gamewright proposal, pending Bob: citadel Rally/Virtue draw/Cleanse; sanctuary cure/Cleanse; village tavern rest/Cleanse; bazaar Cleanse only.
-- Q-C3-14: is there a 1.0 bazaar or village pick beyond rest and Cleanse, or are they Cleanse-only (P-003 gap 2 says "in 1.0 those sell nothing")? (features 06) Gamewright proposal, pending Bob: village = tavern rest or Cleanse; bazaar = Cleanse only.
-- Q-C3-15: how is the named corruption picked when a hero takes one: a seeded draw from the 1.0 set, the story's choice (MEC-059), or the group's? And can a hero draw the same one twice? (features 08) Gamewright proposal, pending Bob: seeded draw from the C3 set, no repeats per hero.
-- Q-C3-16: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers? (features 08) Gamewright proposal, pending Bob: Cruel/Greedy/Feral 2, Lost 1, Tempted +2 per buy.
-- Q-C3-17: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons? (features 09, 15)
-- Q-C3-18: "key moments" on the stats screen (SCR-019): which events count as one? No card lists them. (features 10, 17)
-- DEFAULT Q-C3-19 (Gamewright default, pending Bob's review): the threat bar shows only the coming drop. (features 11)
-- DEFAULT Q-C3-20 (Gamewright default, pending Bob's review): the hero picks which corruption a cure removes. (features 13)
-- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? (features 03, 07, 14) Gamewright proposal, pending Bob: 10 gold; short group pays all + 2 HP per present hero, never below 1.
-- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line? (features 10, 16)
-- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad. (features 17)
+- ANSWERED Q-C3-08 (Bob approved 2026-10-31): no story override in 1.0; only the base file holds tuning (the Warden's level 5 goes in base tuning). Was: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them? (features 02)
+- ANSWERED Q-C3-09 (Bob approved 2026-10-31): keep `pack_id` `test`; Proving Grounds is only the old name. Was: DEC-666 says the pack ID is Proving Grounds, but the folder's `pack_id` is `test`. Rename to `proving-grounds`, or keep `test`? (features 03)
+- ANSWERED Q-C3-10 (Bob approved 2026-10-31): P-003's spaces: The Ambush in Muted Forest, The Lock in Howling Desert, The Last Stand in The Grass Sea. Was: which spaces hold The Ambush ("a wild space"), The Lock and The Last Stand? DEC-662 names the kingdom only; P-003 used Muted Forest, Howling Desert and The Grass Sea. Are the probe's spaces the ruling? (features 03)
+- ANSWERED Q-C3-11 (Bob approved 2026-10-31): the random level-3 foe DEC-647 draws. Was: The Last Stand's foe: DEC-647 draws a random level-3 foe. Is that the intent, or does the story name the oathsworn guard? (features 03)
+- ANSWERED Q-C3-12 (Bob approved 2026-10-31): no placeholder; Fight is hidden, so the disaster offers Go around and Pay them off only. Was: does the disaster event's boss-level foe (DEC-028) need a C3 placeholder, as P-003 day 11 met one? (features 05)
+- ANSWERED Q-C3-13 (Bob approved 2026-10-31): potion and audience are out of 1.0; citadel Rally (5 gold + 1 move, heals to full), Virtue draw (10 gold + 1 move) or Cleanse; sanctuary cure (10 gold + 1 move, first free per hero each chapter) or Cleanse. Was: which picks does each 1.0 building kind offer? DEC-158 lists a citadel potion and an audience; DEC-502 cuts NPCs and shops. Are the potion and audience out of 1.0? (features 06, 13)
+- ANSWERED Q-C3-14 (Bob approved 2026-10-31): village = tavern rest (+3 HP per move) or Cleanse; bazaar = Cleanse only. Was: is there a 1.0 bazaar or village pick beyond rest and Cleanse, or are they Cleanse-only (P-003 gap 2 says "in 1.0 those sell nothing")? (features 06)
+- ANSWERED Q-C3-15 (Bob approved 2026-10-31): a seeded draw from the C3 set, never one the hero already holds. Was: how is the named corruption picked when a hero takes one: a seeded draw from the 1.0 set, the story's choice (MEC-059), or the group's? And can a hero draw the same one twice? (features 08)
+- ANSWERED Q-C3-16 (Bob approved 2026-10-31): Cruel, Greedy and Feral −2 gold on their trigger; Lost −1; Tempted +2 on each buy. Was: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers? (features 08)
+- ANSWERED Q-C3-17 (Bob approved 2026-10-31): the base pack supplies the boons and the app picks; The Ruined Keep names none in 1.0. Was: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons? (features 09, 15)
+- ANSWERED Q-C3-18 (Bob approved 2026-10-31): key moments are quest done, item gained, building fallen, corruption taken, chapter won. Was: "key moments" on the stats screen (SCR-019): which events count as one? No card lists them. (features 10, 17)
+- ANSWERED Q-C3-19 (Bob approved 2026-10-31): the threat bar shows only the coming drop.
+- ANSWERED Q-C3-20 (Bob approved 2026-10-31): the hero picks which corruption a cure removes.
+- ANSWERED Q-C3-22 (Bob approved 2026-10-31): 10 gold; a short group pays all its gold plus 2 HP per present hero, never below 1 HP, and the quest finishes. Was: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? (features 03, 07, 14)
+- ANSWERED Q-C3-23 (Bob approved 2026-10-31): the DEC-144 win scene plays, then the Loremaster line `[COPY: chapter 1 win, Loremaster]`. Was: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line? (features 10, 16)
+- ANSWERED Q-C3-21 (Bob approved 2026-10-31): the fun rating is per iPad, shown per seat.
 
 ## Results
 

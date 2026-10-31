@@ -65,8 +65,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-04: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives?
-- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. Gamewright proposal, pending Bob: 4 fallen buildings.
+- ANSWERED Q-C3-04 (Bob approved 2026-10-31): count the actual nights the 1,2,1,2 pattern gives. Was: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives?
+- ANSWERED Q-C3-05 (Bob approved 2026-10-31): 4 fallen buildings lose the game. Was: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it.
 
 ## Eval approval
 

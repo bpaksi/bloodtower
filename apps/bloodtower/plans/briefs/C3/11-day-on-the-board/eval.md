@@ -50,28 +50,28 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: six images, parts and order matching.
 - Fails if: a part is missing.
 
-### EV-08 — The threat bar shows the coming drop only
-- Requirement: UI-047; DEFAULT Q-C3-19 (Gamewright default, pending Bob's review).
+### EV-07 — The threat bar shows the coming drop only
+- Requirement: UI-047; Q-C3-19 (Bob approved 2026-10-31).
 - Method: playwright
 - How: 4 heroes, mid-turn on night 1 (drop 1) and night 2 (drop 2).
 - Pass evidence: the bar shows 1 then 2 coming skulls; no later nights shown.
 - Fails if: the bar is absent, wrong, or shows more than the coming drop.
 
-### EV-09 — Hero panel shows corruptions
+### EV-08 — Hero panel shows corruptions
 - Requirement: UI-030.
 - Method: playwright
 - How: a hero holding Feral and Lost.
 - Pass evidence: that hero's panel on the board shows 2 corruptions with both names; other heroes show none.
 - Fails if: a count or name is missing or on the wrong hero.
 
-### EV-10 — Skull placement on the iPad, including a fall
+### EV-09 — Skull placement on the iPad, including a fall
 - Requirement: DEC-064, DEC-092, DEC-093.
 - Method: playwright
 - How: seeded drop into a kingdom with a 3-skull building; place the skull there.
 - Pass evidence: board names the kingdom; iPad lists exactly that kingdom's standing buildings; after the press the board shows the building falling and it leaves the iPad list.
 - Fails if: other kingdoms' or fallen buildings are listed, or the fall is not shown.
 
-### EV-11 — Without the tower, the board shows the drop's kingdom
+### EV-10 — Without the tower, the board shows the drop's kingdom
 - Requirement: DEC-305.
 - Method: playwright
 - How: tower off; end a day with a fixed seed.
@@ -80,7 +80,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Continue shows the same clock
+### EV-11 — Continue shows the same clock
 - Requirement: DEC-686.
 - Method: playwright
 - How: quit on day 3, Continue.
@@ -93,5 +93,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Q-C3-04 (days left for 3–4 heroes)
-- DEFAULT Q-C3-19 (Gamewright default, pending Bob's review): the threat bar shows only the coming drop.
+- ANSWERED Q-C3-04 (Bob approved 2026-10-31): count the actual nights the 1,2,1,2 pattern gives. (days left for 3–4 heroes)
+- ANSWERED Q-C3-19 (Bob approved 2026-10-31): the threat bar shows only the coming drop.

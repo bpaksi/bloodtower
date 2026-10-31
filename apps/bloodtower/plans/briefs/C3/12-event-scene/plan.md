@@ -55,7 +55,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
-- Q-C3-03 (people offers in 1.0)
+- ANSWERED Q-C3-03 (Bob approved 2026-10-31): in 1.0 people events offer rumour and trick only; the people weight stays 10. (people offers in 1.0)
 
 ## Eval approval
 

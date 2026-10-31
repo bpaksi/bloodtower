@@ -51,8 +51,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-18 (key moments)
-- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad.
+- ANSWERED Q-C3-18 (Bob approved 2026-10-31): key moments are quest done, item gained, building fallen, corruption taken, chapter won. (key moments)
+- ANSWERED Q-C3-21 (Bob approved 2026-10-31): the fun rating is per iPad, shown per seat.
 
 ## Eval approval
 

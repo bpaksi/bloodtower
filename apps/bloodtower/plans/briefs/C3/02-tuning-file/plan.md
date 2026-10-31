@@ -34,7 +34,7 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - A saved game keeps the tuning values it started with: Continue does not pick up a changed tuning file mid-game. Tuning is fixed at Begin (Gamewright default, Bob to confirm).
+  - A saved game keeps the tuning values it started with: Continue does not pick up a changed tuning file mid-game. Tuning is fixed at Begin (Bob approved 2026-10-31).
 
 ## Done-when (e2e)
 
@@ -56,7 +56,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-08: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them?
+- ANSWERED Q-C3-08 (Bob approved 2026-10-31): no story override in 1.0; only the base file holds tuning (the Warden's level 5 goes in base tuning). Was: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them?
 
 ## Eval approval
 

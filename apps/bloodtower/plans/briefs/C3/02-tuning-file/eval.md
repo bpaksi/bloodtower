@@ -29,27 +29,27 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: in each case lint names `tuning.yaml` and `skulls.supply`; the base pack does not load.
 - Fails if: the engine falls back to a default silently.
 
-## Survival evals (one per survival invariant in plan.md)
-
-### EV-04 — Continue keeps the game's tuning
-- Requirement: A game resumes with the numbers it began with.
-- Method: unit
-- How: start a game, autosave, change skull supply 24→30 in the tuning file, Continue.
-- Pass evidence: the resumed state's supply total is still 24 and its whole tuning equals the one at Begin.
-- Fails if: Continue reads the new file.
-
-### EV-05 — The two C3 switches are present and typed
+### EV-04 — The two C3 switches are present and typed
 - Requirement: plan "Holds the two C3 switches" (Q-C3-01, Q-C3-02).
 - Method: unit
 - How: read the shipped `tuning.yaml`; then lint test copies with each switch deleted, and each set to `"yes"`.
 - Pass evidence: shipped file has `c3_end_after_chapter_1: true` and `fight_enabled: false`; each broken copy gives a lint issue naming the key.
 - Fails if: a switch is missing, has the wrong value, or a missing/non-boolean switch passes lint.
 
+## Survival evals (one per survival invariant in plan.md)
+
+### EV-05 — Continue keeps the game's tuning
+- Requirement: A game resumes with the numbers it began with.
+- Method: unit
+- How: start a game, autosave, change skull supply 24→30 in the tuning file, Continue.
+- Pass evidence: the resumed state's supply total is still 24 and its whole tuning equals the one at Begin.
+- Fails if: Continue reads the new file.
+
 ## Assumptions surfaced
 
-- Tuning is stored on the game state at Begin, so a mid-game file change has no effect. Tuning is fixed at Begin (Gamewright default, Bob to confirm).
-- The file lives in the base pack, not the story pack; a story cannot override it in 1.0. OPEN Q-C3-08.
+- Tuning is stored on the game state at Begin, so a mid-game file change has no effect. Tuning is fixed at Begin (Bob approved 2026-10-31).
+- The file lives in the base pack, not the story pack; a story cannot override it in 1.0. Q-C3-08, answered.
 
 ## OPEN questions
 
-- Q-C3-08: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them?
+- ANSWERED Q-C3-08 (Bob approved 2026-10-31): no story override in 1.0; only the base file holds tuning (the Warden's level 5 goes in base tuning). Was: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them?

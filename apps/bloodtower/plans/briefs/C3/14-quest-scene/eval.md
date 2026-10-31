@@ -47,24 +47,24 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C3-02 (Bob, 2026-10-31).
 - Method: playwright
 - How: open The Ambush on the iPad and the board.
-- Pass evidence: no "Fight them" choice on either device; the toll choice is the one primary button and reads "10 gold" (Gamewright proposal, pending Bob); with purse 6 and 2 present heroes it reads "6 gold · 2 hit points each" and stays enabled.
+- Pass evidence: no "Fight them" choice on either device; the toll choice is the one primary button and reads "10 gold" (Bob approved 2026-10-31); with purse 6 and 2 present heroes it reads "6 gold · 2 hit points each" and stays enabled.
 - Fails if: a Fight choice shows, enabled or disabled.
 
-### EV-08 — Corruption cost: pick the hero who takes it
+### EV-07 — Corruption cost: pick the hero who takes it
 - Requirement: DEC-693.
 - Method: playwright
 - How: a quest option costing a corruption, 2 present heroes (test fixture pack).
 - Pass evidence: after the option, the iPads list the 2 present heroes; the picked hero's panel shows +1 corruption; the other's is unchanged.
 - Fails if: no pick, or the wrong hero takes it.
 
-### EV-09 — The quest track
+### EV-08 — The quest track
 - Requirement: UI-025.
 - Method: playwright
 - How: open The Herald; finish it.
 - Pass evidence: the board shows the track with 1 step to come; after the choice it shows 1 step done.
 - Fails if: no track, or the count is wrong.
 
-### EV-10 — End hook, then back to the building menu
+### EV-09 — End hook, then back to the building menu
 - Requirement: MEC-037 end.
 - Method: playwright
 - How: finish The Herald from its village; press Next after rewards.
@@ -73,7 +73,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Continue reopens the choice
+### EV-10 — Continue reopens the choice
 - Requirement: DEC-151, DEC-675.
 - Method: playwright
 - How: quit at The Herald's choice; Continue.
@@ -87,4 +87,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
-- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? Gamewright proposal, pending Bob: 10 gold; short group pays all + 2 HP per present hero, never below 1.
+- ANSWERED Q-C3-22 (Bob approved 2026-10-31): 10 gold; a short group pays all its gold plus 2 HP per present hero, never below 1 HP, and the quest finishes. Was: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?

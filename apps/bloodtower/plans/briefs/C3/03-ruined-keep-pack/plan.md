@@ -21,7 +21,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-The pack carries DEC-636's skeleton as DEC-662 words it: three chapters (The Roads, The Keep, The Tower), the six quests with their places and types, the three items (Tomas's Map DEC-672 from The Herald, the Signet DEC-674 from The Barrow, the oath-blade DEC-673 from The Shrine) (Gamewright default, Bob to confirm), the opening, the two win endings and the loss scenes (DEC-663, DEC-664, DEC-144). Every player-facing line is a `[COPY: ...]` placeholder for the story pass. The Barrow (a Tomb, MEC-026) and the Tower finale (MEC-076) are declared but their games are C4 and C5.
+The pack carries DEC-636's skeleton as DEC-662 words it: three chapters (The Roads, The Keep, The Tower), the six quests with their places and types, the three items (Tomas's Map DEC-672 from The Herald, the Signet DEC-674 from The Barrow, the oath-blade DEC-673 from The Shrine) (Bob approved 2026-10-31), the opening, the two win endings and the loss scenes (DEC-663, DEC-664, DEC-144). Every player-facing line is a `[COPY: ...]` placeholder for the story pass. The Barrow (a Tomb, MEC-026) and the Tower finale (MEC-076) are declared but their games are C4 and C5.
 
 ## Cutover
 
@@ -32,7 +32,7 @@ Cutover: Y
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - The pack ID and folder stay `test`/Proving Grounds, so autosaves keyed by pack ID still match (DEC-666). A pre-C3 autosave is still dropped by feature 01's rule (kept and ignored, logged `save skipped: pre-C3 format`; Gamewright default, Bob to confirm).
+  - The pack ID and folder stay `test`/Proving Grounds, so autosaves keyed by pack ID still match (DEC-666). A pre-C3 autosave is still dropped by feature 01's rule (kept and ignored, logged `save skipped: pre-C3 format`; Bob approved 2026-10-31).
 
 ## Done-when (e2e)
 
@@ -63,10 +63,10 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-09: DEC-666 says the pack ID is Proving Grounds, but the folder's `pack_id` is `test`. Rename to `proving-grounds`, or keep `test`?
-- Q-C3-10: which spaces hold The Ambush ("a wild space"), The Lock and The Last Stand? DEC-662 names the kingdom only; P-003 used Muted Forest, Howling Desert and The Grass Sea. Are the probe's spaces the ruling?
-- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? Gamewright proposal, pending Bob: 10 gold; short group pays all + 2 HP per present hero, never below 1.
-- Q-C3-11: The Last Stand's foe: DEC-647 draws a random level-3 foe. Is that the intent, or does the story name the oathsworn guard?
+- ANSWERED Q-C3-09 (Bob approved 2026-10-31): keep `pack_id` `test`; Proving Grounds is only the old name. Was: DEC-666 says the pack ID is Proving Grounds, but the folder's `pack_id` is `test`. Rename to `proving-grounds`, or keep `test`?
+- ANSWERED Q-C3-10 (Bob approved 2026-10-31): P-003's spaces: The Ambush in Muted Forest, The Lock in Howling Desert, The Last Stand in The Grass Sea. Was: which spaces hold The Ambush ("a wild space"), The Lock and The Last Stand? DEC-662 names the kingdom only; P-003 used Muted Forest, Howling Desert and The Grass Sea. Are the probe's spaces the ruling?
+- ANSWERED Q-C3-22 (Bob approved 2026-10-31): 10 gold; a short group pays all its gold plus 2 HP per present hero, never below 1 HP, and the quest finishes. Was: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?
+- ANSWERED Q-C3-11 (Bob approved 2026-10-31): the random level-3 foe DEC-647 draws. Was: The Last Stand's foe: DEC-647 draws a random level-3 foe. Is that the intent, or does the story name the oathsworn guard?
 
 ## Eval approval
 

@@ -18,7 +18,7 @@ Play a quest's one choice and its outcome (MEC-037, MEC-077).
 - **Corruption cost**: pick the hero who takes it (DEC-693).
 - **Item** (UI-036): Reveal, then pick who takes it (DEC-653).
 - **Rewards** (.9): gold, quest gold, items.
-- **Battle option**: hidden in C3 (Q-C3-02); The Ambush shows its toll option only, a documented C3 exception to the 2–3 option rule (Gamewright default, Bob to confirm). C4 shows it. Toll 10 gold; a short group pays all its gold plus 2 hit points per present hero, never below 1 (Gamewright proposal, pending Bob).
+- **Battle option**: hidden in C3 (Q-C3-02); The Ambush shows its toll option only, a documented C3 exception to the 2–3 option rule (Bob approved 2026-10-31). C4 shows it. Toll 10 gold; a short group pays all its gold plus 2 hit points per present hero, never below 1 (Bob approved 2026-10-31).
 
 ## Player actions
 
@@ -35,4 +35,4 @@ The quest's end hook (`[COPY: the herald end hook]`), back to the building menu;
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
-- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? Gamewright proposal, pending Bob: 10 gold; short group pays all + 2 HP per present hero, never below 1.
+- ANSWERED Q-C3-22 (Bob approved 2026-10-31): 10 gold; a short group pays all its gold plus 2 HP per present hero, never below 1 HP, and the quest finishes. Was: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?

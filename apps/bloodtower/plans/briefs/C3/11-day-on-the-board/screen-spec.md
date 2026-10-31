@@ -35,5 +35,5 @@ The effects panel's Next runs the chapter's exit check (MEC-033 .11): next day, 
 
 ## OPEN questions
 
-- Q-C3-04 (days left for 3–4 heroes)
-- DEFAULT Q-C3-19 (Gamewright default, pending Bob's review): the threat bar shows only the coming drop.
+- ANSWERED Q-C3-04 (Bob approved 2026-10-31): count the actual nights the 1,2,1,2 pattern gives. (days left for 3–4 heroes)
+- ANSWERED Q-C3-19 (Bob approved 2026-10-31): the threat bar shows only the coming drop.

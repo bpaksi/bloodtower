@@ -33,7 +33,7 @@ Cutover: Y
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - An autosave written before this feature by the v1 path is dropped (Q-C3-07): it is not offered as Continue, the row is kept in the DB and ignored (Gamewright default, Bob to confirm), the host logs one line `save skipped: pre-C3 format` with the old version, and nothing crashes (the error rule). No migration code.
+  - An autosave written before this feature by the v1 path is dropped (Q-C3-07): it is not offered as Continue, the row is kept in the DB and ignored (Bob approved 2026-10-31), the host logs one line `save skipped: pre-C3 format` with the old version, and nothing crashes (the error rule). No migration code.
   - Pick story lists the same stories, in the same order, before and after.
 
 ## Done-when (e2e)

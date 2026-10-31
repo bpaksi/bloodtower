@@ -17,7 +17,7 @@ Tell a group what met it in the wild and let the present heroes choose (MEC-072)
 - **Windfall**: the gain on a Reveal (UI-036).
 - **Hazard**: the counter saved them, or two costs (DEC-027).
 - **Foes / disaster**: Go around, Pay them off (DEC-023, DEC-028). No Fight button in C3, not even disabled (Q-C3-02); C4 adds it.
-- **People**: OPEN Q-C3-03.
+- **People**: Q-C3-03, answered.
 
 ## Player actions
 
@@ -34,4 +34,4 @@ The next group's event, or the skull drop (MEC-034 close). No Fight in C3 (Q-C3-
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
-- Q-C3-03 (people offers in 1.0)
+- ANSWERED Q-C3-03 (Bob approved 2026-10-31): in 1.0 people events offer rumour and trick only; the people weight stays 10. (people offers in 1.0)

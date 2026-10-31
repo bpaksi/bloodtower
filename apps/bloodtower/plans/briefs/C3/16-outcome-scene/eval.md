@@ -36,21 +36,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: four images matching.
 - Fails if: a part missing.
 
-### EV-06 — The C3 win scene (PLACEHOLDER, depends on Q-C3-23)
-- Requirement: Q-C3-01; Q-C3-23 (open).
+### EV-05 — The C3 win scene
+- Requirement: Q-C3-01; Q-C3-23 (Bob approved 2026-10-31).
 - Method: playwright
 - How: C3 tuning; win chapter 1.
-- Pass evidence: win scene `<scene id per Q-C3-23>`, `<line per Q-C3-23>`, the summary line, Next. Filled in once Bob rules Q-C3-23.
-- Fails if: a loss scene, no scene, or no summary.
+- Pass evidence: in order: the DEC-144 win scene (scene id `win`) plays, then the Loremaster line `[COPY: chapter 1 win, Loremaster]` (DEC-232), then the summary line and Next.
+- Fails if: a loss scene, no scene, the Loremaster line is missing or comes before the scene, a finale line (DEC-663/664) shows, or no summary.
 
-### EV-07 — Next goes to Game stats
+### EV-06 — Next goes to Game stats
 - Requirement: SCR-018, DEC-627.
 - Method: playwright
 - How: on any outcome scene, press Next on one iPad.
 - Pass evidence: every device moves to Game stats (feature 17) for this game.
 - Fails if: it goes to the session screen or stays.
 
-### EV-08 — The defeat light plays on a loss
+### EV-07 — The defeat light plays on a loss
 - Requirement: CUE-003.
 - Method: playwright
 - How: run to the skulls loss; then run to a C3 win; read the cue log.
@@ -59,7 +59,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-05 — Restart on the outcome
+### EV-08 — Restart on the outcome
 - Requirement: DEC-116.
 - Method: playwright
 - How: restart the host on the outcome scene.
@@ -73,4 +73,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
-- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?
+- ANSWERED Q-C3-23 (Bob approved 2026-10-31): the DEC-144 win scene plays, then the Loremaster line `[COPY: chapter 1 win, Loremaster]`. Was: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?

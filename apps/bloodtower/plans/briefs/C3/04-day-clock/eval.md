@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: 1 a night for 1–2 heroes; 1, and 2 every other night, for 3–4 (DEC-564).
 - Method: unit
 - How: sim four nights with 2 heroes and with 4.
-- Pass evidence: 2 heroes: 1,1,1,1. 4 heroes, nights 1–4 of the game: exactly 1,2,1,2 (night 1 drops 1; even-numbered nights drop 2; Gamewright default for DEC-564's "every other day" phase, Bob to confirm). Same for 3 heroes.
+- Pass evidence: 2 heroes: 1,1,1,1. 4 heroes, nights 1–4 of the game: exactly 1,2,1,2 (night 1 drops 1; even-numbered nights drop 2; Bob approved 2026-10-31, for DEC-564's "every other day" phase, Bob to confirm). Same for 3 heroes.
 - Fails if: 4 heroes drop 2 every night, or 2 heroes ever drop 2.
 
 ### EV-03 — A won quest skips the whole night's drop
@@ -33,7 +33,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: The board shows skulls left as days at the party's drop rate (DEC-686).
 - Method: unit
 - How: view projection with supply 12 and 2 heroes; and with 4 heroes.
-- Pass evidence: days left 12 for 2 heroes; for 4 heroes the count at DEC-564's average rate (see OPEN Q-C3-04).
+- Pass evidence: days left 12 for 2 heroes; for 4 heroes the count at DEC-564's average rate (see Q-C3-04, answered).
 - Fails if: the board shows the raw skull count only.
 
 ### EV-05 — An empty supply after a drop loses
@@ -47,7 +47,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Skulls shrink a menu; the 4th destroys it (DEC-093).
 - Method: unit
 - How: place skulls 1 to 4 on one building.
-- Pass evidence: menu sizes shrink per DEC-093; after the 4th the building is fallen and leaves every menu and move target as a place.
+- Pass evidence: menus shrink per DEC-093: each skull removes the last offer above Cleanse; Cleanse and Leave always stay, and the quest marker stays first while present. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only (Gamewright proposal, pending Bob); after the 4th the building is fallen and leaves every menu and move target as a place.
 - Fails if: the 4th skull leaves the building standing.
 
 ### EV-07 — Without the tower the drop is simulated
@@ -64,29 +64,29 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: refused; the Regroup step is the only node that changes groups.
 - Fails if: groups change during a turn.
 
-### EV-11 — Regroup changes groups at day start
+### EV-09 — Regroup changes groups at day start
 - Requirement: DEC-640, MEC-034 .38–.42.
 - Method: unit
 - How: 2 heroes in one group; at day start the Regroup node runs; press split; next day press join.
 - Pass evidence: the Regroup node offers split and join; after split there are 2 groups, each with its own turn that day; after join, 1 group.
 - Fails if: Regroup is not offered at day start, or the split/join does not change groups.
 
-### EV-12 — Oldest group goes first
+### EV-10 — Oldest group goes first
 - Requirement: DEC-148.
 - Method: unit
 - How: create groups A, B, C in that order (C by a later split); run a day.
 - Pass evidence: turns run A, B, C in creation order, regardless of hero order or seat.
 - Fails if: any other order.
 
-### EV-13 — The adversary's move is skipped
+### EV-11 — The adversary's move is skipped
 - Requirement: DEC-644.
 - Method: unit
 - How: run 3 full days with a fixed seed; read the node trace and event log.
 - Pass evidence: no `.23` node runs; no adversary event is logged.
 - Fails if: a `.23` node runs or an adversary event appears.
 
-### EV-14 — Four fallen buildings lose the game
-- Requirement: DEC-043 fallen-buildings loss; count 4 (Gamewright proposal, pending Bob, Q-C3-05), read from tuning key `loss.fallen_buildings`.
+### EV-12 — Four fallen buildings lose the game
+- Requirement: DEC-043 fallen-buildings loss; count 4 (Bob approved 2026-10-31, Q-C3-05), read from tuning key `loss.fallen_buildings`.
 - Method: unit
 - How: fixed board; fell buildings one by one with skulls at the close; supply kept above 0.
 - Pass evidence: after the 3rd falls the game goes on; when the 4th falls, the chapter check reports lost with reason `buildings` at MEC-033 .11; with the tuning key set to 5 in a test copy, the 4th does not lose.
@@ -94,14 +94,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-09 — Continue mid-day replays nothing
+### EV-13 — Continue mid-day replays nothing
 - Requirement: DEC-675, DEC-283.
 - Method: unit
 - How: autosave at a group's turn on day 3; Continue.
 - Pass evidence: the day's rolls are not re-rolled; the next drop matches an uninterrupted run with the same seed.
 - Fails if: a roll changes after Continue.
 
-### EV-10 — Restart keeps the clock
+### EV-14 — Restart keeps the clock
 - Requirement: Days left and skulls on buildings survive a host restart.
 - Method: unit
 - How: restart after day 2's drop; rebuild from the event log.
@@ -110,9 +110,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Days left for 3–4 heroes is supply ÷ the average night (1.5). Bob: ? (OPEN Q-C3-04)
+- Days left for 3–4 heroes is supply ÷ the average night (1.5). Bob: ? (Q-C3-04, answered)
 
 ## OPEN questions
 
-- Q-C3-04: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives?
-- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. Gamewright proposal, pending Bob: 4 fallen buildings.
+- ANSWERED Q-C3-04 (Bob approved 2026-10-31): count the actual nights the 1,2,1,2 pattern gives. Was: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives?
+- ANSWERED Q-C3-05 (Bob approved 2026-10-31): 4 fallen buildings lose the game. Was: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it.

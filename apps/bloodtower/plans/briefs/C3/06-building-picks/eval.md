@@ -47,7 +47,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-093.
 - Method: unit
 - How: a citadel at 0, 1, 2, 3 skulls.
-- Pass evidence: the menu shrinks per DEC-093; the quest marker stays first while present.
+- Pass evidence: per DEC-093, each skull removes the last offer above Cleanse; Cleanse and Leave always stay, and the quest marker stays first while present. Citadel: 0 skulls Rally, Virtue draw, Cleanse; 1 skull Rally, Cleanse; 2 and 3 skulls Cleanse only (Gamewright proposal, pending Bob).
 - Fails if: the menu is unchanged by skulls.
 
 ### EV-07 — Rest heals per move
@@ -57,21 +57,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: 10/12; Back after opening still spends the pick's move.
 - Fails if: Back refunds the move.
 
-### EV-09 — Rally heals to full and takes the price from the purse
-- Requirement: DEC-158, DEC-176, DEC-078; rally 5 gold + 1 move (Gamewright proposal, pending Bob).
+### EV-08 — Rally heals to full and takes the price from the purse
+- Requirement: DEC-158, DEC-176, DEC-078; rally 5 gold + 1 move (Bob approved 2026-10-31).
 - Method: unit
 - How: hero at 4/12, purse 12, 3 moves left; rally at a citadel.
 - Pass evidence: hero 12/12; purse 7 (−5); moves 2 (−1).
 - Fails if: partial heal, the purse or a hero's share is not reduced by the tuning price, or no move is spent.
 
-### EV-10 — Virtue draw adds one tile; a fifth forces a give-back
-- Requirement: DEC-544; virtue draw 10 gold + 1 move (Gamewright proposal, pending Bob).
+### EV-09 — Virtue draw adds one tile; a fifth forces a give-back
+- Requirement: DEC-544; virtue draw 10 gold + 1 move (Bob approved 2026-10-31).
 - Method: unit
 - How: fixed seed; group holding 3 virtue tiles, purse 25; draw twice.
 - Pass evidence: first draw: 4 tiles, purse 15, the drawn tile matches the seed. Second draw: purse 5; a give-back prompt opens and the group ends with exactly 4 tiles.
 - Fails if: a draw adds 0 or 2 tiles, the fifth is kept, or the draw is unseeded.
 
-### EV-11 — A fallen building offers nothing, not even Cleanse
+### EV-10 — A fallen building offers nothing, not even Cleanse
 - Requirement: DEC-093, plan "Cleanse on every standing building".
 - Method: unit
 - How: fell a citadel with its 4th skull; try to move there and to open its menu.
@@ -80,7 +80,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-08 — The free cure is remembered
+### EV-11 — The free cure is remembered
 - Requirement: DEC-700.
 - Method: unit
 - How: cure free, autosave, Continue, cure again in the same chapter.
@@ -91,16 +91,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-700.
 - Method: unit
 - How: cure free in chapter 1; restart the host; rebuild from the event log; cure again in chapter 1.
-- Pass evidence: the second cure costs the normal price (10 gold (Gamewright proposal, pending Bob)).
+- Pass evidence: the second cure costs the normal price (10 gold (Bob approved 2026-10-31)).
 - Fails if: the restart gives a second free cure.
 
 ## Assumptions surfaced
 
-- Rest is the village's tavern rest (Gamewright default, Bob to confirm).
-- The C3 menus and prices in plan.md are a Gamewright proposal, pending Bob (Q-C3-13, Q-C3-14).
+- Rest is the village's tavern rest (Bob approved 2026-10-31).
+- The C3 menus and prices in plan.md are approved by Bob, 2026-10-31 (Q-C3-13, Q-C3-14).
 - Silver Tongue's rounding of a quarter off follows P-003 (5 → 4).
 
 ## OPEN questions
 
-- Q-C3-13: which picks does each 1.0 building kind offer? DEC-158 lists a citadel potion and an audience; DEC-502 cuts NPCs and shops. Are the potion and audience out of 1.0? Gamewright proposal, pending Bob: citadel Rally/Virtue draw/Cleanse; sanctuary cure/Cleanse; village tavern rest/Cleanse; bazaar Cleanse only.
-- Q-C3-14: is there a 1.0 bazaar or village pick beyond rest and Cleanse, or are they Cleanse-only (P-003 gap 2 says "in 1.0 those sell nothing")? Gamewright proposal, pending Bob: village = tavern rest or Cleanse; bazaar = Cleanse only.
+- ANSWERED Q-C3-13 (Bob approved 2026-10-31): potion and audience are out of 1.0; citadel Rally (5 gold + 1 move, heals to full), Virtue draw (10 gold + 1 move) or Cleanse; sanctuary cure (10 gold + 1 move, first free per hero each chapter) or Cleanse. Was: which picks does each 1.0 building kind offer? DEC-158 lists a citadel potion and an audience; DEC-502 cuts NPCs and shops. Are the potion and audience out of 1.0?
+- ANSWERED Q-C3-14 (Bob approved 2026-10-31): village = tavern rest (+3 HP per move) or Cleanse; bazaar = Cleanse only. Was: is there a 1.0 bazaar or village pick beyond rest and Cleanse, or are they Cleanse-only (P-003 gap 2 says "in 1.0 those sell nothing")?

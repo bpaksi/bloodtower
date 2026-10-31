@@ -22,7 +22,7 @@ Show the game in numbers (SCR-019).
 
 ## Mechanics behind it
 
-SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average. "Best" is the shortest active length of a won game of this story (Gamewright default, Bob to confirm); the average is over all finished games of this story.
+SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average. "Best" is the shortest active length of a won game of this story (Bob approved 2026-10-31); the average is over all finished games of this story.
 
 ## What happens next
 
@@ -30,5 +30,5 @@ The session screen (SCR-021), with the game listed won or lost.
 
 ## OPEN questions
 
-- Q-C3-18 (key moments)
-- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad.
+- ANSWERED Q-C3-18 (Bob approved 2026-10-31): key moments are quest done, item gained, building fallen, corruption taken, chapter won. (key moments)
+- ANSWERED Q-C3-21 (Bob approved 2026-10-31): the fun rating is per iPad, shown per seat.

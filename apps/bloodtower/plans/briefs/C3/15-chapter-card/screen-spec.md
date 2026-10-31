@@ -17,8 +17,8 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 - **Close Scroll** (.14): "The roads are quiet again.".
 - **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and `[COPY: seal break, {boon}]` (boon wording waits on Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off)
 - **Freed skulls** (.22 to .30): kingdom for each, then the building, as after a drop.
-- **C3 chapter 1 win** (Q-C3-01): the stamped card, then the close Scroll, then the outcome scene (feature 16); no seal, no freed skulls (Gamewright default, Bob to confirm).
-- Story text on this screen is `[COPY: ...]` per the rule (Gamewright default, Bob to confirm).
+- **C3 chapter 1 win** (Q-C3-01): the stamped card, then the close Scroll, then the outcome scene (feature 16); no seal, no freed skulls (Bob approved 2026-10-31).
+- Story text on this screen is `[COPY: ...]` per the rule, except the close line (Bob approved 2026-10-31).
 
 ## Player actions
 
@@ -34,4 +34,4 @@ The next chapter's enter: place its quest tokens, the newly open kingdom lit (ME
 
 ## OPEN questions
 
-- Q-C3-17 (which boons)
+- ANSWERED Q-C3-17 (Bob approved 2026-10-31): the base pack supplies the boons and the app picks; The Ruined Keep names none in 1.0. (which boons)

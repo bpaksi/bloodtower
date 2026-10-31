@@ -23,7 +23,7 @@ Keep this a checklist; do not write a second design doc.
 
 A hero's corruptions (MEC-080): gained from a scene cost (DEC-693) and, from C4, from battle; removed one at a time by the sanctuary (feature 06). Each takes the shift on its group's move roll through the most corrupted hero (DEC-684). The third corruption loses the game at once wherever it lands, stopping the open loops (DEC-676). The named corruptions Bob accepted for 1.0 apply their effects: Uncertain, Cruel, Greedy, Feral, Lost, Feeble, Feverish, Selfish, Tempted (DEC-468, DEC-470 to DEC-477); Cursed (DEC-466) is battle-only and lands in C4. DEC-467 and DEC-469 are 1.1 (DEC-718).
 
-C3 numbers (Gamewright proposal, pending Bob), from tuning: Cruel, Greedy and Feral cost 2 gold each on their trigger; Lost costs 1 gold; Tempted adds +2 gold to each buy the holder's group makes. The named corruption comes from a seeded draw over the C3 set (Uncertain, Cruel, Greedy, Feral, Lost, Feeble, Feverish, Selfish, Tempted), never one the hero already holds (Q-C3-15, Q-C3-16).
+C3 numbers (Bob approved 2026-10-31), from tuning: Cruel, Greedy and Feral cost 2 gold each on their trigger; Lost costs 1 gold; Tempted adds +2 gold to each buy the holder's group makes. The named corruption comes from a seeded draw over the C3 set (Uncertain, Cruel, Greedy, Feral, Lost, Feeble, Feverish, Selfish, Tempted), never one the hero already holds (Q-C3-15, Q-C3-16).
 
 ## Cutover
 
@@ -34,7 +34,7 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - Each hero's corruptions, and which named ones they are, survive Continue (EV-07) and a host restart (EV-10).
+  - Each hero's corruptions, and which named ones they are, survive Continue (EV-09) and a host restart (EV-10).
 
 ## Done-when (e2e)
 
@@ -65,8 +65,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-15: how is the named corruption picked when a hero takes one: a seeded draw from the 1.0 set, the story's choice (MEC-059), or the group's? And can a hero draw the same one twice? Gamewright proposal, pending Bob: seeded draw from the C3 set, no repeats per hero.
-- Q-C3-16: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers? Gamewright proposal, pending Bob: Cruel/Greedy/Feral 2, Lost 1, Tempted +2 per buy.
+- ANSWERED Q-C3-15 (Bob approved 2026-10-31): a seeded draw from the C3 set, never one the hero already holds. Was: how is the named corruption picked when a hero takes one: a seeded draw from the 1.0 set, the story's choice (MEC-059), or the group's? And can a hero draw the same one twice?
+- ANSWERED Q-C3-16 (Bob approved 2026-10-31): Cruel, Greedy and Feral −2 gold on their trigger; Lost −1; Tempted +2 on each buy. Was: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers?
 
 ## Eval approval
 

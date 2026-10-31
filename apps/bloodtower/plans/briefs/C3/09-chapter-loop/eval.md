@@ -57,14 +57,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: in both runs the chapter returns won and last; no seal node runs; no seal breaks; no skull prompt; chapter 2's enter never runs.
 - Fails if: chapter 2 opens, a seal breaks, or the game keeps running days.
 
-### EV-10 — The enter runs the challenge step and places quest tokens
+### EV-08 — The enter runs the challenge step and places quest tokens
 - Requirement: MEC-033 enter; DEC-133, DEC-134, DEC-146.
 - Method: unit
 - How: start chapter 1 of The Ruined Keep with a fixed seed; read the node trace and board state.
 - Pass evidence: the challenge step node runs once; exactly one token per chapter-1 quest (The Herald, The Ambush) sits on its space; no chapter-2 token is placed; board bounds are Arisilon only.
 - Fails if: the challenge step is skipped, a token is missing, doubled or misplaced.
 
-### EV-11 — The start emits cue, narration and card in order
+### EV-09 — The start emits cue, narration and card in order
 - Requirement: MEC-033 start.
 - Method: unit
 - How: start chapter 1; read the emitted outputs.
@@ -73,14 +73,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-08 — Continue skips enter and start
+### EV-10 — Continue skips enter and start
 - Requirement: DEC-675.
 - Method: unit
 - How: fixture with `c3_end_after_chapter_1: false`; autosave mid chapter 2; Continue.
 - Pass evidence: no chapter cue, narration or card; the saved day resumes.
 - Fails if: the chapter card replays.
 
-### EV-09 — Seals survive Continue
+### EV-11 — Seals survive Continue
 - Requirement: DEC-303.
 - Method: unit
 - How: break a seal, autosave, Continue.
@@ -94,4 +94,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
-- Q-C3-17: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons?
+- ANSWERED Q-C3-17 (Bob approved 2026-10-31): the base pack supplies the boons and the app picks; The Ruined Keep names none in 1.0. Was: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons?

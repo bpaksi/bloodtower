@@ -57,9 +57,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: C3 tuning: only Go around and Pay them off are offered, and the battle loop is never entered. Switch on: Fight is offered too.
 - Fails if: Fight is offered, shown disabled, or auto-resolved in C3, or the battle loop is called.
 
+### EV-08 — Pay them off costs `events.pay_off`
+- Requirement: DEC-023; tuning key `events.pay_off` = 5 gold (Gamewright proposal, pending Bob).
+- Method: unit
+- How: a foes event with purse 12, then with purse 4.
+- Pass evidence: purse 12: Pay them off takes 5 gold (purse 7) and ends the event; Go around takes no gold. Purse 4: Pay them off is disabled; Go around still works.
+- Fails if: a different amount, the amount is hardcoded rather than read from tuning, or Pay them off works below 5 gold.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-08 — Continue resumes an open event
+### EV-09 — Continue resumes an open event
 - Requirement: DEC-675.
 - Method: unit
 - How: autosave at .15 (the foes choice); Continue.
@@ -68,10 +75,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- A people event in 1.0 resolves without the talk and buy picks' NPC content (DEC-502). Bob: ? (OPEN Q-C3-03)
+- A people event in 1.0 resolves without the talk and buy picks' NPC content (DEC-502). Bob: ? (Q-C3-03, answered)
 
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
-- Q-C3-03: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type?
-- Q-C3-12: does the disaster event's boss-level foe (DEC-028) need a C3 placeholder, as P-003 day 11 met one?
+- ANSWERED Q-C3-03 (Bob approved 2026-10-31): in 1.0 people events offer rumour and trick only; the people weight stays 10. Was: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type?
+- ANSWERED Q-C3-12 (Bob approved 2026-10-31): no placeholder; Fight is hidden, so the disaster offers Go around and Pay them off only. Was: does the disaster event's boss-level foe (DEC-028) need a C3 placeholder, as P-003 day 11 met one?
