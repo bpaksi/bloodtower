@@ -15,7 +15,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: both buttons; no actions yet.
 - Fails if: actions first.
 
-### EV-02 — All pick at once (Gamewright pick, pending Bob)
+### EV-02 — All pick at once (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-16.
 - Method: playwright
 - How: 3 iPads.
@@ -64,11 +64,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the sheet's `data-help-screen` is `round-picker` and its text is exactly "Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
-### EV-09 — A hero can change a pick until the last hero picks (Gamewright pick, pending Bob)
+### EV-09 — A hero can change a pick until the last hero picks (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-18.
 - Method: playwright
 - How: 2 heroes; hero 1 picks Attack, changes to Cast a spell; hero 2 picks Attack.
-- Pass evidence: after picking, hero 1's iPad shows **Change pick** (label pending Bob, Q-C4-18); tapping it brings the actions back, and the round uses hero 1's Cast a spell; once hero 2 has picked, **Change pick** is gone and hero 1's buttons are disabled.
+- Pass evidence: after picking, hero 1's iPad shows **Change pick** (label approved by Bob 2026-10-31 6:16 PM ET, Q-C4-18); tapping it brings the actions back, and the round uses hero 1's Cast a spell; once hero 2 has picked, **Change pick** is gone and hero 1's buttons are disabled.
 - Fails if: the old pick is used, or a change is possible after the last pick.
 
 ### EV-10 — "All picked" goes straight to the round result
@@ -96,9 +96,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

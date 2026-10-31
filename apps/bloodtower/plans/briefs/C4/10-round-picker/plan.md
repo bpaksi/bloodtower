@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-UI-027: the group picks Fight or Retreat; then each present hero picks one action, all at once (Gamewright pick, pending Bob) (Q-C4-16); the board ticks each hero who has picked. No timer (Gamewright pick, pending Bob) (Q-C4-11).
+UI-027: the group picks Fight or Retreat; then each present hero picks one action, all at once (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-16); the board ticks each hero who has picked. No timer (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-11).
 
 ## Cutover
 
@@ -49,8 +49,8 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

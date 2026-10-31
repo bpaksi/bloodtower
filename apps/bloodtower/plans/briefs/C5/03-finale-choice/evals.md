@@ -22,7 +22,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: `seal_broken` or `oath_sworn`.
 - Fails if: none.
 
-### EV-03 — Tie resolution: re-vote once, then the seeded draw (Gamewright pick, pending Bob)
+### EV-03 — Tie resolution: re-vote once, then the seeded draw (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-03.
 - Method: unit
 - How: seed 4401; 2 heroes split twice (C5 09 collects the votes; this feature resolves them).
@@ -40,8 +40,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

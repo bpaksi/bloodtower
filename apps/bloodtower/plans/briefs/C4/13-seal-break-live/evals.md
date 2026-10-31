@@ -15,7 +15,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the event log holds, in order: `chapter.stamp`, `scroll.shown`, `seal.broken`, `glyph.revealed`, `skulls.placed`.
 - Fails if: any event missing, doubled or out of order.
 
-### EV-02 — Chapter's own seal line (Gamewright pick, pending Bob)
+### EV-02 — Chapter's own seal line (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-10.
 - Method: playwright
 - How: win chapters 1 and 2.
@@ -65,14 +65,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-09 — Beats auto-advance
-- Requirement: no Next on: close Scroll, glyph and boon Reveal; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: close Scroll, glyph and boon Reveal; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright, fake clock
 - How: reach each beat (close Scroll, glyph and boon Reveal); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-10 — Narration holds the beat past 4 s
-- Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright, fake clock
 - How: reach each beat (close Scroll, glyph and boon Reveal) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
@@ -109,7 +109,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: restart at 1.
 
 ### EV-15 — A beat interrupted by restart applies once
-- Requirement: restart or Continue during an auto-advancing beat (close Scroll, glyph and boon Reveal) (Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: restart or Continue during an auto-advancing beat (close Scroll, glyph and boon Reveal) (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
@@ -124,10 +124,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "The roads are clear and a seal breaks. Ahead stands the Ruined Keep."]`, `[COPY: seal break ch2, Loremaster = "The Keep gives up its dead, and a second seal cracks. The Tower waits."]`, `[COPY: seal break ch3, Loremaster = "The last stand holds, and the third seal breaks. Only the Warden remains."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "The roads are clear and a seal breaks. Ahead stands the Ruined Keep."]`, `[COPY: seal break ch2, Loremaster = "The Keep gives up its dead, and a second seal cracks. The Tower waits."]`, `[COPY: seal break ch3, Loremaster = "The last stand holds, and the third seal breaks. Only the Warden remains."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 > Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders."

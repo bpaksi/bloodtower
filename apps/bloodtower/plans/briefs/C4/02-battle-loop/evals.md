@@ -36,7 +36,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: hero out of later rounds, one corruption gained.
 - Fails if: still acts.
 
-### EV-05 — No timer (Gamewright pick, pending Bob)
+### EV-05 — No timer (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-11.
 - Method: unit
 - How: one hero never picks.
@@ -89,8 +89,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

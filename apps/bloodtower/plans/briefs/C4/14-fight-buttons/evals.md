@@ -8,7 +8,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Checks
 
-### EV-01 — Fight on foes and disasters (Gamewright pick, pending Bob)
+### EV-01 — Fight on foes and disasters (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C4-02.
 - Method: playwright
 - How: each event type.
@@ -37,7 +37,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: any image over 1% diff.
 
 ### EV-05 — A plain-scene battle option shows Fight
-- Requirement: Q-C4-02 (Gamewright pick, pending Bob); this feature owns the Fight button.
+- Requirement: Q-C4-02 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET); this feature owns the Fight button.
 - Method: playwright
 - How: a scene whose option B holds a battle.
 - Pass evidence: the iPad shows Fight in B's place plus the scene's other option label.
@@ -89,8 +89,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C4-02: Where does Fight show once `fight_enabled` is on? Options: (a) on every foes and disaster event and on every plain-scene option that holds a battle, always enabled; (b) on foes events only; disasters stay Go around / Pay them off until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-02: Where does Fight show once `fight_enabled` is on? Options: (a) on every foes and disaster event and on every plain-scene option that holds a battle, always enabled; (b) on foes events only; disasters stay Go around / Pay them off until C5. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

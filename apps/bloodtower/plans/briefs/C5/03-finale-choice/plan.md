@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-DEC-664: the Tower loop's end hook plays a plain scene with DEC-663's two options; each sets a flag. Each present hero votes; a tie re-votes once, then the seeded draw breaks it (Gamewright pick, pending Bob) (Q-C5-03). Copy: `[COPY: last choice, Warden falls = "The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place."]`, `[COPY: option, break the seal = "Shatter the shard"]`, `[COPY: option, swear the oath = "Swear the oath"]`.
+DEC-664: the Tower loop's end hook plays a plain scene with DEC-663's two options; each sets a flag. Each present hero votes; a tie re-votes once, then the seeded draw breaks it (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-03). Copy: `[COPY: last choice, Warden falls = "The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place."]`, `[COPY: option, break the seal = "Shatter the shard"]`, `[COPY: option, swear the oath = "Swear the oath"]`.
 
 ## Cutover
 
@@ -51,7 +51,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

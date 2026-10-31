@@ -8,14 +8,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Checks
 
-### EV-01 — Phase painting changes (Gamewright pick, pending Bob)
+### EV-01 — Phase painting changes (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-02.
 - Method: playwright
 - How: cross 2/3.
 - Pass evidence: painting 2.
 - Fails if: same.
 
-### EV-02 — Board-only show without tower (Gamewright pick, pending Bob)
+### EV-02 — Board-only show without tower (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-08.
 - Method: playwright
 - How: no tower; cross a phase.
@@ -58,14 +58,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-08 — Beats auto-advance
-- Requirement: no Next on: phase show, round result, The Warden falls; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: phase show, round result, The Warden falls; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright, fake clock
 - How: reach each beat (phase show, round result, The Warden falls); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-09 — Narration holds the beat past 4 s
-- Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright, fake clock
 - How: reach each beat (phase show, round result, The Warden falls) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
@@ -95,7 +95,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: phase 1.
 
 ### EV-13 — A beat interrupted by restart applies once
-- Requirement: restart or Continue during an auto-advancing beat (phase show, round result, The Warden falls) (Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: restart or Continue during an auto-advancing beat (phase show, round result, The Warden falls) (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
@@ -117,9 +117,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C5-08: The boss's full tower show (DEC-567, DEC-327) with no tower connected: Options: (a) a board-only show: the painting change, a shake and the sound on the board speakers; (b) skip the show. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C5-08: The boss's full tower show (DEC-567, DEC-327) with no tower connected: Options: (a) a board-only show: the painting change, a shake and the sound on the board speakers; (b) skip the show. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

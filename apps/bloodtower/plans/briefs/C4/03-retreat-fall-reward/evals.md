@@ -89,9 +89,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- Q-C4-12 ANSWERED by card DEC-177, DEC-179 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "DEC-177: "the app sets a loss and splits it equally across the group's heroes, each losing at most what they hold"; DEC-703 row "Lost on a fall | 2 × the foe's level, split and capped | DEC-179, DEC-177"" Source: research/game-design/cards/DEC-177.md, research/game-design/cards/DEC-179.md. ~~Old option (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
-- Q-C4-13 ANSWERED by card DEC-555 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Chance:** 1 in 3 per retreat or fall, seeded (DEC-011). / **A step:** the foe's level rises by 1. / **Lethal:** the fourth and last step. A lethal foe does not step again." Source: research/game-design/cards/DEC-555.md. ~~Old option (a) capped at +2 levels over its start; Gamewright pick (a), pending Bob~~ (struck: contradicts the card).
+- Q-C4-12 ANSWERED by card DEC-177, DEC-179 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "DEC-177: "the app sets a loss and splits it equally across the group's heroes, each losing at most what they hold"; DEC-703 row "Lost on a fall | 2 × the foe's level, split and capped | DEC-179, DEC-177"" Source: research/game-design/cards/DEC-177.md, research/game-design/cards/DEC-179.md. ~~Old option (a) half the purse, rounded down, as `battle.fall_gold_loss` = 0.5; Gamewright pick (a), approved by Bob 2026-10-31 6:16 PM ET~~ (struck: contradicts the card).
+- Q-C4-13 ANSWERED by card DEC-555 (in commit 0005 "C4/C5 plans: fill the 14 [TBD] values"; not a Bob question). Card: "**Chance:** 1 in 3 per retreat or fall, seeded (DEC-011). / **A step:** the foe's level rises by 1. / **Lethal:** the fourth and last step. A lethal foe does not step again." Source: research/game-design/cards/DEC-555.md. ~~Old option (a) capped at +2 levels over its start; Gamewright pick (a), approved by Bob 2026-10-31 6:16 PM ET~~ (struck: contradicts the card).

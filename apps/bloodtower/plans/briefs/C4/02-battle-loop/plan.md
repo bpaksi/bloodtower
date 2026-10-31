@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-MEC-038's loop as a new level: foe abilities and bold/on guard before round 1; each round Fight or Retreat together, then one action per present hero (no timer (Gamewright pick, pending Bob), Q-C4-11), spells first, the seeded round card (8, no repeats), cut or hit, a hero at 0 takes a corruption and sits out. Exits on foe gone, retreat or all fallen.
+MEC-038's loop as a new level: foe abilities and bold/on guard before round 1; each round Fight or Retreat together, then one action per present hero (no timer (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET), Q-C4-11), spells first, the seeded round card (8, no repeats), cut or hit, a hero at 0 takes a corruption and sits out. Exits on foe gone, retreat or all fallen.
 
 ## Cutover
 
@@ -59,7 +59,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

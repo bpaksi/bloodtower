@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-300 headless games at 2, 3 and 4 heroes, then two table playtests; a number moves only when both agree (Gamewright pick, pending Bob) (Q-C5-05). Target bands are proposed in the sim report for Bob.
+300 headless games at 2, 3 and 4 heroes, then two table playtests; a number moves only when both agree (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-05). Target bands are proposed in the sim report for Bob.
 
 ## Cutover
 
@@ -48,7 +48,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

@@ -136,7 +136,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 
 - C5 09 owns voting (collecting votes, the vote screen, votes surviving Continue); C5 03 owns resolving them (tie re-vote, seeded draw, the flag).
 - Help: add these ids to the C2-04 help table: `tower-screens`, `boss-screen`, `finale-and-endings`. The help sheet is on the iPad and sends nothing to the host.
-- Auto-advance follows Q-C4-17 (Gamewright pick, pending Bob).
+- Auto-advance follows Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 - C5 05: Bob's approval of each final is a ticked line in its approval.md checklist.
 - Engine, pack and process features have no screen-spec.md.
 
@@ -161,19 +161,19 @@ MEC-076, DEC-566, DEC-567, DEC-663, DEC-664, the Tower's screens (to be filed), 
 
 ## OPEN questions (consolidated)
 
-Every pick below is used in the feature files as "(Gamewright pick, pending Bob)". **[Bob taste call]** marks the ones that are Bob's taste, not a rules call.
+Every pick below is used in the feature files as "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)". **[Bob taste call]** marks the ones that are Bob's taste, not a rules call.
 
-- OPEN Q-C5-01 **[Bob taste call]**: The Tower has no screen cards. What does the board show in the Tower (MEC-076)? Options: (a) reuse the Tomb's two halves (DEC-583): the level's room map left, the room view right; Gamewright files UI cards for it in a design session; (b) the room map only, full width. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 07)
-- OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 02, C5 08)
-- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 03, C5 09)
-- OPEN Q-C5-04: The Tower's retreat (DEC-360): what does it cost? Options: (a) the same as a battle retreat (C4 feature 03); the rooms stay cleared; (b) nothing beyond the moves spent. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 01)
-- OPEN Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 06)
-- OPEN Q-C5-06 **[Bob taste call]**: How is the 1.0 art made through A1? Options: (a) A1 AI mode for drafts, then Bob approves each final in the studio; (b) studio mode only, Bob directing each piece. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 05)
-- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 05, C5 09)
-- OPEN Q-C5-08: The boss's full tower show (DEC-567, DEC-327) with no tower connected: Options: (a) a board-only show: the painting change, a shake and the sound on the board speakers; (b) skip the show. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 08)
-- OPEN Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 09)
-- OPEN Q-C5-10: What does G-1.0 need? Options: (a) two full table games of The Ruined Keep, one won (either ending) and one lost, with `pnpm graph gaps` empty for 1.0; (b) three games, one per ending and one loss. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 10)
-- OPEN Q-C5-11: The Tower's guards and traps (DEC-566, DEC-702): fixed or dealt? Options: (a) dealt fresh on the first visit from the seed, then kept; (b) fixed by the story pack. Gamewright pick: (a) (Gamewright pick, pending Bob). (features C5 01)
+- OPEN Q-C5-01 **[Bob taste call]**: The Tower has no screen cards. What does the board show in the Tower (MEC-076)? Options: (a) reuse the Tomb's two halves (DEC-583): the level's room map left, the room view right; Gamewright files UI cards for it in a design session; (b) the room map only, full width. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 07)
+- OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 02, C5 08)
+- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 03, C5 09)
+- OPEN Q-C5-04: The Tower's retreat (DEC-360): what does it cost? Options: (a) the same as a battle retreat (C4 feature 03); the rooms stay cleared; (b) nothing beyond the moves spent. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 01)
+- OPEN Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 06)
+- OPEN Q-C5-06 **[Bob taste call]**: How is the 1.0 art made through A1? Options: (a) A1 AI mode for drafts, then Bob approves each final in the studio; (b) studio mode only, Bob directing each piece. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 05)
+- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 05, C5 09)
+- OPEN Q-C5-08: The boss's full tower show (DEC-567, DEC-327) with no tower connected: Options: (a) a board-only show: the painting change, a shake and the sound on the board speakers; (b) skip the show. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 08)
+- OPEN Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 09)
+- OPEN Q-C5-10: What does G-1.0 need? Options: (a) two full table games of The Ruined Keep, one won (either ending) and one lost, with `pnpm graph gaps` empty for 1.0; (b) three games, one per ending and one loss. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 10)
+- OPEN Q-C5-11: The Tower's guards and traps (DEC-566, DEC-702): fixed or dealt? Options: (a) dealt fresh on the first visit from the seed, then kept; (b) fixed by the story pack. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C5 01)
 
 ## Results
 

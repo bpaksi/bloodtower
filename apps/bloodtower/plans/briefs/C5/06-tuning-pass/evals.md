@@ -8,7 +8,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Checks
 
-### EV-01 — Sim report at 2, 3, 4 heroes (Gamewright pick, pending Bob)
+### EV-01 — Sim report at 2, 3, 4 heroes (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-05.
 - Method: sim
 - How: run the report.
@@ -40,8 +40,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-05: How is the tuning pass (DEC-500) run? Options: (a) 300 headless simulator games at 2, 3 and 4 heroes, then two table playtests; numbers move only on both; (b) table playtests only. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

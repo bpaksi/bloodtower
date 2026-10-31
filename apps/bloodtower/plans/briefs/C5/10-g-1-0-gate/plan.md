@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-`pnpm graph gaps` lists no 1.0 gap; two full table games, one won and one lost (Gamewright pick, pending Bob) (Q-C5-10); results written to the plan.
+`pnpm graph gaps` lists no 1.0 gap; two full table games, one won and one lost (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-10); results written to the plan.
 
 ## Cutover
 
@@ -48,7 +48,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C5-10: What does G-1.0 need? Options: (a) two full table games of The Ruined Keep, one won (either ending) and one lost, with `pnpm graph gaps` empty for 1.0; (b) three games, one per ending and one loss. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-10: What does G-1.0 need? Options: (a) two full table games of The Ruined Keep, one won (either ending) and one lost, with `pnpm graph gaps` empty for 1.0; (b) three games, one per ending and one loss. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

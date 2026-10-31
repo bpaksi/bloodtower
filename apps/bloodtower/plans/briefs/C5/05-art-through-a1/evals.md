@@ -22,7 +22,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no `placeholder` tag.
 - Fails if: one left.
 
-### EV-03 — Only Loremaster lines voiced (Gamewright pick, pending Bob)
+### EV-03 — Only Loremaster lines voiced (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-07.
 - Method: unit
 - How: list audio.
@@ -30,7 +30,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: others.
 
 ### EV-04 — Bob approved every final
-- Requirement: Q-C5-06 (Gamewright pick, pending Bob).
+- Requirement: Q-C5-06 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 - Method: manual
 - How: read ./approval.md's art checklist.
 - Pass evidence: every asset id in `index.json` has a ticked line `- [x] <id> — approved by Bob <date>`.
@@ -47,9 +47,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C5-06 **[Bob taste call]**: How is the 1.0 art made through A1? Options: (a) A1 AI mode for drafts, then Bob approves each final in the studio; (b) studio mode only, Bob directing each piece. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-06 **[Bob taste call]**: How is the 1.0 art made through A1? Options: (a) A1 AI mode for drafts, then Bob approves each final in the studio; (b) studio mode only, Bob directing each piece. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

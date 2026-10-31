@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-DEC-567: The Warden (level 5, base tuning, Q-C3-08) has an 8-card deck with two Rends and no Falter; at two thirds and one third wounds left he changes phase: a new painting (three in all (Gamewright pick, pending Bob), Q-C5-02), one more Rend, a stronger ability. No false death; Inventive cannot end it.
+DEC-567: The Warden (level 5, base tuning, Q-C3-08) has an 8-card deck with two Rends and no Falter; at two thirds and one third wounds left he changes phase: a new painting (three in all (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET), Q-C5-02), one more Rend, a stronger ability. No false death; Inventive cannot end it.
 
 ## Cutover
 
@@ -57,7 +57,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-02 **[Bob taste call]**: The Warden's three phases (DEC-567): three paintings or one? Options: (a) three paintings, one per phase; (b) one painting, darkening at each phase. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

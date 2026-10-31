@@ -15,7 +15,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: 1.0 section empty.
 - Fails if: any gap.
 
-### EV-02 — Two table games (Gamewright pick, pending Bob)
+### EV-02 — Two table games (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-10.
 - Method: manual
 - How: Bob plays.
@@ -40,8 +40,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C5-10: What does G-1.0 need? Options: (a) two full table games of The Ruined Keep, one won (either ending) and one lost, with `pnpm graph gaps` empty for 1.0; (b) three games, one per ending and one loss. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-10: What does G-1.0 need? Options: (a) two full table games of The Ruined Keep, one won (either ending) and one lost, with `pnpm graph gaps` empty for 1.0; (b) three games, one per ending and one loss. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

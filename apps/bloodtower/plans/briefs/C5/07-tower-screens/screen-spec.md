@@ -15,7 +15,7 @@ Auto-advance: no beat on this screen auto-advances; every step waits for a named
 
 ## Purpose
 
-The Tower reuses the Tomb's two halves: the level's room map and the room view (Gamewright pick, pending Bob) (Q-C5-01). The iPad: Open the next door, Rest (at a found shrine), Retreat.
+The Tower reuses the Tomb's two halves: the level's room map and the room view (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-01). The iPad: Open the next door, Rest (at a found shrine), Retreat.
 
 ## States and player actions
 
@@ -45,4 +45,4 @@ Back to the loop that called it (see ./plan.md).
 
 ## OPEN questions
 
-- OPEN Q-C5-01 **[Bob taste call]**: The Tower has no screen cards. What does the board show in the Tower (MEC-076)? Options: (a) reuse the Tomb's two halves (DEC-583): the level's room map left, the room view right; Gamewright files UI cards for it in a design session; (b) the room map only, full width. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-01 **[Bob taste call]**: The Tower has no screen cards. What does the board show in the Tower (MEC-076)? Options: (a) reuse the Tomb's two halves (DEC-583): the level's room map left, the room view right; Gamewright files UI cards for it in a design session; (b) the room map only, full width. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

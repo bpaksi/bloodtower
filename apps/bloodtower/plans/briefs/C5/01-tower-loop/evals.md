@@ -22,7 +22,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: moves exactly −1.
 - Fails if: any change but −1.
 
-### EV-03 — Rooms dealt once from the seed (Gamewright pick, pending Bob)
+### EV-03 — Rooms dealt once from the seed (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-11.
 - Method: unit
 - How: same seed twice; revisit.
@@ -36,7 +36,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: still on the level.
 - Fails if: goes up.
 
-### EV-05 — Retreat costs as a battle retreat (Gamewright pick, pending Bob)
+### EV-05 — Retreat costs as a battle retreat (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
 - Requirement: Q-C5-04.
 - Method: unit
 - How: retreat.
@@ -89,9 +89,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 
-- OPEN Q-C5-11: The Tower's guards and traps (DEC-566, DEC-702): fixed or dealt? Options: (a) dealt fresh on the first visit from the seed, then kept; (b) fixed by the story pack. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C5-04: The Tower's retreat (DEC-360): what does it cost? Options: (a) the same as a battle retreat (C4 feature 03); the rooms stay cleared; (b) nothing beyond the moves spent. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-11: The Tower's guards and traps (DEC-566, DEC-702): fixed or dealt? Options: (a) dealt fresh on the first visit from the seed, then kept; (b) fixed by the story pack. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C5-04: The Tower's retreat (DEC-360): what does it cost? Options: (a) the same as a battle retreat (C4 feature 03); the rooms stay cleared; (b) nothing beyond the moves spent. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

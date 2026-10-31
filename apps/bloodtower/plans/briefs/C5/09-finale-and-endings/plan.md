@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-The board shows `[COPY: last choice, Warden falls = "The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place."]` and the two options; each iPad votes (Gamewright pick, pending Bob) (Q-C5-03); the board ticks who has voted. Then the win line for the flag, voiced (Gamewright pick, pending Bob) (Q-C5-07), then straight to the outcome (Gamewright pick, pending Bob) (Q-C5-09).
+The board shows `[COPY: last choice, Warden falls = "The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place."]` and the two options; each iPad votes (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-03); the board ticks who has voted. Then the win line for the flag, voiced (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-07), then straight to the outcome (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-09).
 
 ## Cutover
 
@@ -51,11 +51,11 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C4-17 (auto-advance timing, Gamewright pick (a), pending Bob) applies to this screen; see C4 plan.
+- Q-C4-17 (auto-advance timing, Gamewright pick (a), approved by Bob 2026-10-31 6:16 PM ET) applies to this screen; see C4 plan.
 
-- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

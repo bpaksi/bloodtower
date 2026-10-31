@@ -72,14 +72,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-10 — Beats auto-advance
-- Requirement: no Next on: Card taken, retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: Card taken, retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright, fake clock
 - How: reach each beat (Card taken, retreat result, fall result); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-11 — Narration holds the beat past 4 s
-- Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright, fake clock
 - How: reach each beat (Card taken, retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
@@ -102,7 +102,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: card lost.
 
 ### EV-14 — A beat interrupted by restart applies once
-- Requirement: restart or Continue during an auto-advancing beat (retreat result, fall result) (Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: restart or Continue during an auto-advancing beat (retreat result, fall result) (Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
@@ -124,7 +124,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Picks marked "(Gamewright pick, pending Bob)" are drafts; an eval tied to one changes if Bob picks otherwise.
+- Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 
 ## OPEN questions
 

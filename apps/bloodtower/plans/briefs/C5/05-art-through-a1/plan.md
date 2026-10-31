@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-Run `pnpm assets:needs|render|pack test` for every painting, foe (C4 placeholders swapped), the Tomb style, the Tower levels, The Warden's phases and the endings; AI drafts then Bob approves each final (Gamewright pick, pending Bob) (Q-C5-06). Voiced: the Loremaster's lines only (Gamewright pick, pending Bob) (Q-C5-07).
+Run `pnpm assets:needs|render|pack test` for every painting, foe (C4 placeholders swapped), the Tomb style, the Tower levels, The Warden's phases and the endings; AI drafts then Bob approves each final (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-06). Voiced: the Loremaster's lines only (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C5-07).
 
 ## Cutover
 
@@ -51,8 +51,8 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C5-06 **[Bob taste call]**: How is the 1.0 art made through A1? Options: (a) A1 AI mode for drafts, then Bob approves each final in the studio; (b) studio mode only, Bob directing each piece. Gamewright pick: (a) (Gamewright pick, pending Bob).
-- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C5-06 **[Bob taste call]**: How is the 1.0 art made through A1? Options: (a) A1 AI mode for drafts, then Bob approves each final in the studio; (b) studio mode only, Bob directing each piece. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- OPEN Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 

@@ -20,7 +20,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-With `c4_end_after_chapter_3` on, chapter 3 won ends the game won: the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]` (Gamewright pick, pending Bob) (Q-C4-01). Losses unchanged. Stats add battles won, retreats, falls and Tomb rooms; key moments add battle won and Tomb cleared.
+With `c4_end_after_chapter_3` on, chapter 3 won ends the game won: the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]` (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-01). Losses unchanged. Stats add battles won, retreats, falls and Tomb rooms; key moments add battle won and Tomb cleared.
 
 Key-moment ids (new in C4, added to Q-C3-18's list): `km.battle_won` (a battle won), `km.tomb_cleared` (the Tomb's guardian beaten).
 
@@ -52,7 +52,7 @@ Contract is ./evals.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- OPEN Q-C4-01: What ends a C4 game won, before the C5 finale exists? Options: (a) chapter 3 won (The Lock and The Last Stand done) ends the game won, behind tuning switch `c4_end_after_chapter_3` (on in C4, off in C5), with the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]`; (b) chapter 3 has no end: the game plays until it is lost, and the win is tested only by fixture until C5. Gamewright pick: (a) (Gamewright pick, pending Bob).
+- OPEN Q-C4-01: What ends a C4 game won, before the C5 finale exists? Options: (a) chapter 3 won (The Lock and The Last Stand done) ends the game won, behind tuning switch `c4_end_after_chapter_3` (on in C4, off in C5), with the DEC-144 win scene and `[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden's door is open, for now."]`; (b) chapter 3 has no end: the game plays until it is lost, and the win is tested only by fixture until C5. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 ## Eval approval
 
