@@ -88,7 +88,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-12 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
 - Method: playwright, iPad portrait 768×1024
-- How: stop on each state: building menu, rally, rest, cure, draw, give-back, Cleanse.
+- How: stop on each state: building menu, rally, rest, cure, draw, give-back, Cleanse, Fallen building (`#s=10`).
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
@@ -142,6 +142,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: on this screen, open a gear panel (Volume), restart the host, Continue.
 - Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear; the Menu's enabled and disabled items and reasons match those before the restart.
 - Fails if: the Menu or panel reopens, the game stays paused, the toolbar is missing, or item states are stale.
+
+### EV-20 — The give-back survives a restart and a Continue (M `#s=8`)
+- Requirement: a restart or a Continue on the give-back step brings back the same 5 tiles with no redraw; the draw's 10 gold and 1 move are spent exactly once; after the pick the group holds 4 tiles (DEC-544).
+- Method: playwright, fixed seed
+- How: two runs, with the group holding 4 tiles, draw to the give-back (`#s=8`) and note the 5 tiles, gold and moves: (1) restart the host and Continue; (2) quit and Continue from the session screen. In each run, pick a tile.
+- Pass evidence: in each run the give-back shows again with the same 5 tiles in the same order; the host event log has one draw and no redraw; gold and moves are each 10 gold and 1 move below their values before the draw, no more; after the pick the group holds 4 and the iPad returns to the menu.
+- Fails if: the tiles differ or are redrawn, the cost is spent twice or not at all, the step is skipped, or the group ends with 5 or 3 tiles.
 
 ## Assumptions surfaced
 
