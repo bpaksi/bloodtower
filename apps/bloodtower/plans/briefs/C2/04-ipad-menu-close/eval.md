@@ -33,8 +33,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the Menu shows Look up, Table and Leave; an item that cannot be used yet is greyed, never left out (DEC-707, DEC-229, DEC-227).
 - Method: unit
 - How: `chromeBar.test.ts`, "greys what it cannot offer": render with no `quit` and no `connect` offer.
-- Pass evidence: headings "Look up", "Table", "Leave" in that order; "Save and quit" is a `disabled` button; "Tower" shows and is `disabled`; each disabled item has one reason line; Close is enabled.
-- Fails if: Save and quit is replaced by the text "Quit story is not offered." (today's build), or a group is left out.
+- Pass evidence: headings "Look up", "Table", "Leave" in that order; "Save and quit" is a `disabled` button with the reason "Only in a game."; "Tower" shows and is `disabled` with the reason "The tower is connected."; each disabled row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; Close is enabled.
+- Fails if: Save and quit is replaced by the text "Quit story is not offered." (today's build), or a group is left out; or a disabled item is hidden, not greyed, or has a reason other than its listed text.
 
 ### EV-05 — Screenshot matches the mockup
 - Requirement: the Menu layout (UI-033, DEC-707; mockup).
@@ -68,8 +68,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: with no game yet, the groups still show and game-only items are greyed with a reason (DEC-227).
 - Method: playwright
 - How: open the Menu on the join/claim screen (before Begin).
-- Pass evidence: the Look up heading renders; "Current party" is disabled with the reason "Only in a game."; "Look up" is enabled; Close is last.
-- Fails if: a group or item is hidden, or a disabled item has no reason.
+- Pass evidence: the Look up heading renders; "Current party" is disabled with the reason "Only in a game." and its row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; "Look up" is enabled; Close is last.
+- Fails if: a group or item is hidden, or a disabled item has no reason; or a disabled item is hidden, not greyed, or has a reason other than its listed text.
 
 ### EV-10 — Save and quit confirm (M "Confirm: Save and quit")
 - Requirement: Save and quit asks first (DEC-230).
@@ -89,7 +89,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an enabled gear item starts on the iPad and its UI shows on the Story board; the game pauses while the panel is open and resumes on Done (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright, board 1920×1080 + iPad 768×1024, in play
 - How: for each enabled item in turn (Current party, Game board setup, Volume, Look up, Change who holds whom, Join another iPad), open it from the gear, then press Done.
-- Pass evidence: while open, the iPad body shows "See the Story board", the panel's pick buttons when it needs a choice (Volume: "Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"), and Done (Back only where the panel has a step back); the board shows `[data-panel="<item>"]` with 0 `button` elements (DEC-278) and mirrors each iPad pick within 500 ms (`[data-picked]` matches the pressed button); (Gamewright pick, pending Bob Q-GEAR-1); the host reports `paused: true`. After Done the panel is gone, the iPad is back on its screen and `paused: false`. Each item also does its job:
+- Pass evidence: while open, the iPad body shows "See the Story board", the panel's pick buttons when it needs a choice (Volume: "Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"), and Done (Back only where the panel has a step back); the board shows `[data-panel="<item>"]` with 0 `button` elements (DEC-278) and mirrors each iPad pick within 500 ms (`[data-picked]` matches the pressed button); (resolved Q-GEAR-1 (a); Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET); the host reports `paused: true`. After Done the panel is gone, the iPad is back on its screen and `paused: false`. Each item also does its job:
   - Current party: the board panel lists every hero with HP, gold, items, corruptions and holder, matching the host state.
   - Game board setup: the board shows the setup steps and the piece check re-runs (the C2 feature 11 flow; the host logs a new piece-check run).
   - Join another iPad: the board shows a QR code and the join URL, and the URL matches the host's join URL.
@@ -109,8 +109,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
 - Method: unit (`chromeBar.test.ts`) + playwright
 - How: render the Menu in play with the tower connected in a C2 build.
-- Pass evidence: every `disabled` item has exactly one `[data-reason]` line: "Split party" and "Use a potion or item" read "C3+"; "Tower" reads "The tower is connected."; enabled items have no reason line.
-- Fails if: a disabled item has no reason, or an enabled item is greyed.
+- Pass evidence: every `disabled` item has exactly one `[data-reason]` line: "Split party" and "Use a potion or item" read "C3+"; "Tower" reads "The tower is connected."; each disabled row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; enabled items have no reason line and no `.bt-row--disabled`.
+- Fails if: a disabled item has no reason, or an enabled item is greyed; or a disabled item is hidden, not greyed, or has a reason other than its listed text.
 
 ### EV-15 — First press wins across iPads
 - Requirement: two iPads pressing a gear item open one panel (Bob 2026-10-31 10:37 AM ET).

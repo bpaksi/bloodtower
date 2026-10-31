@@ -215,8 +215,8 @@ Each gets its folder as soon as what it waits on is on `main`.
 
 ## Open items for Bob
 
-- Q-GEAR-1: gear panels display on the Story board only (DEC-278 kept); any choice is a simple list of buttons on the iPad, mirrored on the board; the iPad shows "See the Story board" + pick buttons + Done/Back (Gamewright pick, pending Bob Q-GEAR-1). Bob: OK?
-- Q-GEAR-2: the 10:38 gear list replaces the old Look up items: Hero panel → Current party, Items → Use a potion or item, Roll → Look up (Gamewright pick, pending Bob Q-GEAR-2). Bob: OK?
+- Q-GEAR-1: gear panels display on the Story board only (DEC-278 kept); any choice is a simple list of buttons on the iPad, mirrored on the board; the iPad shows "See the Story board" + pick buttons + Done/Back. Resolved (a) (Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET).
+- Q-GEAR-2: the 10:38 gear list replaces the old Look up items: Hero panel → Current party, Items → Use a potion or item, Roll → Look up. Resolved (a) (Bob approved Q-GEAR-2 (a), 2026-10-31 6:13–6:14 PM ET).
 
 - Q-401 and Q-402 are answered (design session 2026-10-31, PR #336): DEC-715 makes feature 14 a bugfix, and DEC-716 and DEC-717 settle feature 11. MEC-018 now `uses` DEC-710, DEC-716 and DEC-717.
 

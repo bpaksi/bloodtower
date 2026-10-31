@@ -37,7 +37,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - Rules (Bob 2026-10-31 10:37 AM ET):
 - The bottom toolbar is back on every iPad screen, with the gear (Menu) at its right. The toolbar is iPad chrome: it is not a body button and does not count against "one step, one primary button" (SCR-016).
 - The HUD-only iPad lock stays: on the happy path the iPad body shows only the HUD (the current step's line) and its flow buttons. Nothing exceptional sits on the happy path; every exception goes through the gear.
-- Each gear action starts on the iPad. The Story board shows the panel's full UI and only displays it (DEC-278 kept). Any choice in the panel is made on the iPad as a simple list of buttons, and the board mirrors each press. The iPad shows "See the Story board", plus the pick buttons when the panel needs a choice, plus Done/Back (Gamewright pick, pending Bob Q-GEAR-1).
+- Each gear action starts on the iPad. The Story board shows the panel's full UI and only displays it (DEC-278 kept). Any choice in the panel is made on the iPad as a simple list of buttons, and the board mirrors each press. The iPad shows "See the Story board", plus the pick buttons when the panel needs a choice, plus Done/Back (resolved Q-GEAR-1 (a); Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET)
 - An item is enabled only when it works right now. A disabled item shows its reason in one line under it.
 - The game pauses while a Story board panel is open and resumes on Done.
 - First press wins across iPads: a second iPad's press on the same item or panel while one is open changes nothing.
@@ -65,9 +65,9 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
 
-- The Menu keeps Look up, Join another iPad and Change who holds whom (Bob ruling on Illusionist conflict). The 10:38 gear list replaces the old Look up items: Hero panel → Current party, Items → Use a potion or item; Roll moves into Look up (rules or a card) (Gamewright pick, pending Bob Q-GEAR-2).
+- The Menu keeps Look up, Join another iPad and Change who holds whom (Bob ruling on Illusionist conflict). The 10:38 gear list replaces the old Look up items: Hero panel → Current party, Items → Use a potion or item; Roll moves into Look up (rules or a card) (resolved Q-GEAR-2 (a); Bob approved Q-GEAR-2 (a), 2026-10-31 6:13–6:14 PM ET).
 - The mockup must be redrawn for the toolbar, the gear list and the Story board panel (Illusionist; see /workspace/gear-menu-changes.md).
-- DEC-278 (board shows, iPad presses) is kept: gear panels display on the Story board; their picks are iPad buttons the board mirrors (Gamewright pick, pending Bob Q-GEAR-1).
+- DEC-278 (board shows, iPad presses) is kept: gear panels display on the Story board; their picks are iPad buttons the board mirrors (resolved Q-GEAR-1 (a); Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET).
 - Portrait only; Back on the Quit confirm returns to the open Menu (mockup).
 - Escape also closes (EV-07).
 

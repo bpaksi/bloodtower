@@ -54,7 +54,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Reconnect from the Menu stays possible later (DEC-301, DEC-229).
 - Method: playwright
 - How: same spec: after Go on without, open the Menu.
-- Pass evidence: the Table group offers "Tower" (gear item 9, (Bob approved 2026-10-31 10:38)), enabled; its panel (reconnect or play without) shows on the Story board (display only, DEC-278) while the iPad shows "See the Story board", the pick buttons "Reconnect" and "Play without" (mirrored on the board), and Done/Back (Gamewright pick, pending Bob Q-GEAR-1). Reconnect asks to confirm (DEC-230); Yes connects and runs the tower check; the rest of the game uses the tower again. After Yes, the next move-roll cue is sent to the mock.
+- Pass evidence: the Table group offers "Tower" (gear item 9, (Bob approved 2026-10-31 10:38)), enabled; its panel (reconnect or play without) shows on the Story board (display only, DEC-278) while the iPad shows "See the Story board", the pick buttons "Reconnect" and "Play without" (mirrored on the board), and Done/Back (resolved Q-GEAR-1 (a); Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET). Reconnect asks to confirm (DEC-230); Yes connects and runs the tower check; the rest of the game uses the tower again. After Yes, the next move-roll cue is sent to the mock.
 - Fails if: the item is missing or greyed after Go on without.
 
 ### EV-08 — Quit from the pause
