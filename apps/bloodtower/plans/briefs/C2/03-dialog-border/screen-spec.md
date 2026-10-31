@@ -6,7 +6,7 @@ No Story board dialog fills the TV. The landing painting always shows around it 
 
 ## States
 - Any board dialog (connect, waiting, setup, session screen, pauses): inside a frame with at least 5% of board height above and below and 5% of width at each side (DEC-705).
-- Long content: cut down or set smaller to fit. Never scrolls, never clips (SCR-013).
+- Long content: the art shrinks first, then content is cut (whole items) to fit. Never scrolls, never clips mid-line (SCR-013; Bob 2026-10-31).
 - Checked at 1920×1080 and 3840×2160 on the Samsung.
 
 ## Player actions
@@ -20,4 +20,4 @@ Every later screen spec here (05, 06, 07, 08, 11, 12) inherits this frame.
 
 ## Open questions
 - The 5% is a placeholder (DEC-705); Bob tunes it at G-C2.
-- When content is "cut down", who picks what goes? Design rule needed: a priority order per dialog (assumed: art shrinks first, then text size, never text dropped without a copy edit).
+- Resolved: art shrinks first, then content is cut to fit (Bob 2026-10-31).

@@ -19,4 +19,4 @@ DEC-502 (Long waits for 1.1), DEC-508 (Dracula's 1.0 cut has no Long), SCR-008, 
 Unchanged: Game settings → Claim heroes (SCR-010).
 
 ## Open questions
-- DEC-227 says unusable items are greyed, never left out. That is an iPad Menu rule; confirm it does not apply to pack options cut from 1.0 (assumed: removed).
+- Resolved (mockup wins): Long is removed, not greyed; no summary line under Length.

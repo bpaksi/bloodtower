@@ -17,7 +17,8 @@ The iPad Menu can always be dismissed without acting (GC1-04).
 DEC-707, DEC-229, DEC-227, DEC-230, UI-033, UI-032, UI-018 (replaced).
 
 ## What happens next
-Close → the iPad screen under it, unchanged. Quit story confirmed → session screen (DEC-218, feature 06).
+Close or Escape → the iPad screen under it, unchanged. Back on the Quit story confirm → the open Menu. Quit story confirmed → session screen (DEC-218, feature 06).
 
 ## Open questions
+- Resolved: the Menu keeps Look up (Hero panel, Roll, Items), Join another iPad and Change who holds whom (Bob 2026-10-31). Portrait only.
 - Which items are enabled in each C2 state (session screen, setup, play) is not listed on a card. Assumed: Reconnect tower only when tower is lost (feature 08); Pause/Resume only in a game.

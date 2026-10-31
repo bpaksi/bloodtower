@@ -9,9 +9,9 @@ Before a saved game resumes, the table puts back (or checks) every tracked piece
 2. Skulls on buildings: count per building.
 3. Foes, only if the save has any.
 4. Broken seals, only if any.
-5. Tower only, only if a drum is off home: "Turn the drums to the saved game" (DEC-716 title). iPad: Turn the drums. Then a picture of the expected glyphs per side; Done / Skip.
+5. Tower only, only if a drum is off home: "Turn the drums to the saved game" (DEC-716 title). iPad: Turn the drums, with Done / Skip shown (Done disabled until the press succeeds). Then a picture of the expected glyphs per side. A successful turn updates the saved drum positions (Bob 2026-10-31).
 6. Tower only, only if N > 0: drop N skulls back in the top (DEC-717). Done / Skip.
-- Skipped step: stays unconfirmed, marked in the board's top band until the next chapter-end check (MEC-018).
+- Skipped step: stays unconfirmed, an outline badge with a count beside Tower in the board's top band, until the next chapter-end check (MEC-018).
 - Old save with no drum field: reads "at home", step 5 hidden.
 - Fallback if feature 10 shows rotate does not land: step 5 becomes one picture per drum, turned by hand, no rotate (DEC-716).
 
@@ -26,5 +26,5 @@ Continue → tower block if none → steps 1 to 6 → saved chapter at its saved
 
 ## Open questions
 - Blocked on feature 10's tower run (rotate lands?).
-- What the "unconfirmed" mark in the top band looks like: no UI card.
+- Resolved (mockup): outline badge with a count beside Tower.
 - Picture art (board diagrams per step): no ART card yet.

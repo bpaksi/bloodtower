@@ -19,4 +19,4 @@ DEC-712, DEC-154, DEC-153, SCR-016.
 No flow change.
 
 ## Open questions
-- Where the notice sits and whether it can be dismissed: no card. Assumed a small line above the bottom bar, clear of the corners (DEC-706).
+- Resolved (mockup): one DeviceErrorBanner with this copy and the error code, above the bottom bar, clear of the corners (DEC-706), dismissible.
