@@ -14,7 +14,7 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 
 - **Chapter card** (UI-020): painting, "Chapter 1: The Roads", "Finish The Herald and The Ambush before the days run out.".
 - **Stamped won** (.15).
-- **Close Scroll** (.14): "The roads are quiet again. The keep waits ahead.".
+- **Close Scroll** (.14): "The roads are quiet again.".
 - **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and "A seal breaks. Its glyph lends you strength: {boon}." (boon wording waits on Q-C3-17).
 - **Freed skulls** (.22 to .30): kingdom for each, then the building, as after a drop.
 
