@@ -39,7 +39,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Screenshots match
 - Requirement: UI-043.
 - Method: screenshot
-- How: iPad 768×1024 portrait (locked by Bob) and board 1920×1080 at citadel, sanctuary, village, bazaar; compare with ./mockup.html `#citadel`, `#sanctuary`, `#village`, `#bazaar`.
+- How: iPad 768×1024 portrait (locked by Bob) and board 1920×1080 at citadel, sanctuary, village, bazaar; compare with ./mockup.html `#s=0` (citadel), `#s=1` (sanctuary), `#s=2` (village), `#s=3` (bazaar); and the result states `#s=7` (Virtue draw), `#s=8` (Virtue give-back), `#s=9` (Cleanse), `#s=10` (Fallen building).
 - Pass evidence: eight images matching.
 - Fails if: a part missing.
 
@@ -64,12 +64,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the picker offers 1–3 moves; picking 2 shows 10/12 on the hero panel and 1 move left.
 - Fails if: no picker, the range exceeds moves left, or the heal differs.
 
-### EV-09 — Virtue draw: Reveal and the fifth-tile give-back
+### EV-09 — Virtue draw: Reveal, then the fifth-tile give-back as its own choice (M `#s=7`, `#s=8`)
 - Requirement: DEC-544, UI-036.
 - Method: playwright
 - How: fixed seed; group holding 4 tiles; draw.
-- Pass evidence: the board shows the drawn tile on a Reveal; the iPad then lists the 5 tiles to give one back; after the pick the group holds 4.
-- Fails if: no Reveal, no give-back prompt, or 5 tiles kept.
+- Pass evidence: the board shows the drawn tile on a Reveal (`#s=7`); then a separate give-back step (`#s=8`) whose iPad body shows exactly 5 tile buttons ("Tile 1" … "Tile 5 (new)") and no Next; on a fake clock it is still on the give-back step 5 s after it shows, with or without the audio-end event; after the press the group holds 4 and the iPad returns to the menu.
+- Fails if: no Reveal, the give-back is not its own step, the tiles are not buttons, the step advances without a press, or 5 tiles kept.
 
 ### EV-10 — A fallen building is not enterable
 - Requirement: DEC-093.
@@ -88,21 +88,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-12 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
 - Method: playwright, iPad portrait 768×1024
-- How: stop on each state: building menu, rest, cure, draw.
+- How: stop on each state: building menu, rally, rest, cure, draw, give-back, Cleanse.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
 ### EV-13 — The happy path never needs the gear
 - Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
-- How: play this screen's happy path through building menu, rest, cure, draw, counting Menu and help opens.
+- How: play this screen's happy path through building menu, rest, cure, draw, give-back, counting Menu and help opens.
 - Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
 - Fails if: any step can only be reached through the gear or help.
 
 ### EV-14 — Help matches this screen
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
-- How: on each state (building menu, rest, cure, draw) press "?", then Close.
+- How: on each state (building menu, rest, cure, draw, give-back) press "?", then Close.
 - Pass evidence: the sheet's `data-help-screen` is `building-menu` and its text is exactly "Choose what to do in this building, or Leave." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows another screen's text, pauses the game or changes state.
 
