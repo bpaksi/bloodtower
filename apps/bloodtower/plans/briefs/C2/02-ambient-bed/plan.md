@@ -27,7 +27,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR).
+- [ ] EV-01 … EV-06 and EV-11 all pass (verifier table on PR).
 - Not required: a story or screen choosing its own bed (DEC-500: the landing page's bed plays throughout until one does). Stopping at Goodbye (parked, DEC-628).
 
 ## AREA / DEC checklist

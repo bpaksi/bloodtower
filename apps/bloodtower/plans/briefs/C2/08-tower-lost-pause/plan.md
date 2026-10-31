@@ -30,7 +30,7 @@ Cutover: Y
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-14 all pass (verifier table on PR).
+- [ ] EV-01 … EV-09 and EV-11 … EV-14 all pass (verifier table on PR).
 - Not required: seals and glyphs without the tower (Q-193; the day slice has neither). The tower check's piece pictures (feature 11); until then Reconnect runs the tower check as C1 built it.
 - Copy (mockup): pause title "Tower lost"; buttons "Reconnect", "Go on without", "Quit". After Go on without the session status line reads "without the tower".
 

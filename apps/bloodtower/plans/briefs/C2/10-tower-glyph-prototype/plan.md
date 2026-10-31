@@ -27,7 +27,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR) with the mock tower.
+- [ ] EV-01 … EV-06 and EV-11 all pass (verifier table on PR) with the mock tower.
 - [ ] After the merge, Bob runs the page on the real tower and the findings note answers the questions in "What the run must answer". This is Bob's hardware run, not a verifier check.
 - Not required: Bloodtower screens. Any automatic step: every tower action is a press.
 

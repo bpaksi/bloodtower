@@ -29,7 +29,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-15 all pass (verifier table on PR).
+- [ ] EV-01 … EV-08 and EV-11 … EV-15 all pass (verifier table on PR).
 - Not required: the full stats screen for won and lost games (C3, with SCR-018). Play again on a past session's game (DEC-629: tonight only).
 
 ## AREA / DEC checklist

@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Continue runs the piece check after the tower block and before the saved chapter (DEC-283, DEC-710).
 - Method: playwright
 - How: new `c2-continue-check.spec.ts`, "continue after a restart": play to day 2 with the mock tower, quit, restart the host; the session resumes with tonight's tower choice and no Enter (no tower question); press Continue on the session screen. Seed the mock so no skull record has target `inside`.
-- Pass evidence: the screens come in this order: the tower block only if the tower is not connected, then the hero-minis step, then the skulls step, then day 2 in play. No step of Game settings, Claim heroes or the pack setup shows.
+- Pass evidence: the mock tower stays connected across the restart; order is hero-minis, skulls, day 2, with no tower block. No step of Game settings, Claim heroes or the pack setup shows.
 - Fails if: the game resumes with no check, the check runs before the tower block, or a setup screen shows.
 
 ### EV-02 — Each step shows where the save has the pieces
