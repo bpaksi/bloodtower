@@ -20,6 +20,7 @@ The foe panel for The Warden with a phase change: new painting (Gamewright pick,
 ## States and player actions
 
 - Board: shows the state and every line `[COPY: boss-screen, board = "The Warden. Strength left: {N}. / The Warden changes. / The Warden falls."]`; never scrolls.
+- Round result: after each round the board shows the result line, then advances per the Auto-advance line above (no Next).
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
 - Help (?): a help sheet on the iPad, `[COPY: help, boss-screen = "The Warden's last battle. Pick Fight or Retreat on your iPad, then your action."]`, `data-help-screen` = `boss-screen`; it sends nothing to the host and does not pause.
 
@@ -37,6 +38,7 @@ Back to the loop that called it (see ./plan.md).
 
 ## Values (filled from cards)
 
+- Trait chips: each chip carries `[data-foe-trait]` (placeholder attribute until the C4-09 build names it); The Warden shows Melee and Humanoid.
 - The Warden: level 5, Melee + Humanoid, Crushing blow +1/+2/+3 by phase; phases at 2/3 and 1/3 wounds left (DEC-688, DEC-567, DEC-703).
 
 ## OPEN questions

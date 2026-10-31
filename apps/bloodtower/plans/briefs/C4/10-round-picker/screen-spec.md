@@ -26,7 +26,7 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 ## Buttons (exact labels)
 
 - Step 1, the group (every present iPad): **Fight**, **Retreat**.
-- Step 2, each present hero: **Attack**, **Cast a spell** (then the spell: **Lightning**, **Fireball**, **Magic Missile**), **Spend an Advantage**, **Drink a potion** (then **On {hero}**), **Guard** (guard virtue). An action the hero cannot take is greyed with its label.
+- Step 2, each present hero: **Attack**, **Cast a spell** (then the spell: **Lightning**, **Fireball**, **Magic Missile**), **Spend an Advantage**, **Drink a potion** (then **On {hero}**), **Guard** (guard virtue). An action the hero cannot take is greyed with its label. After picking: **Change pick** until the last present hero has picked (pending Bob, Q-C4-18).
 - A sat-out hero: no buttons; `[COPY: sitting out = "You are sitting out this battle. Watch the board."]`.
 
 ## Tokens
@@ -39,7 +39,7 @@ Back to the loop that called it (see ./plan.md).
 
 ## Values (filled from cards)
 
-- Changing a pick: a hero may change their pick until the last present hero has picked; then the round runs (Gamewright pick, pending Bob) (Q-C4-18). DEC-129 is silent.
+- Changing a pick: after picking, a hero sees **Change pick** (label and rule pending Bob, Q-C4-18; not ruled); a hero may change their pick until the last present hero has picked; then the round runs (Gamewright pick, pending Bob) (Q-C4-18). DEC-129 is silent.
 
 ## OPEN questions
 

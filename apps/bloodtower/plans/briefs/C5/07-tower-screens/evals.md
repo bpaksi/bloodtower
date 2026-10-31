@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-566.
 - Method: playwright
 - How: 2 heroes at 10 HP open a trap room.
-- Pass evidence: the room view shows each hero 8/… HP and the line notes 2 hit points lost.
+- Pass evidence: the room view shows each hero's HP as exactly `8/10 HP`, and the result line reads exactly "Every hero loses 2 hit points." (a placeholder line until Loremaster supplies the Tower trap copy).
 - Fails if: no change shown.
 
 ## Survival evals (one per survival invariant in plan.md)

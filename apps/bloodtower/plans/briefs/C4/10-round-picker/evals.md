@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C4-18.
 - Method: playwright
 - How: 2 heroes; hero 1 picks Attack, changes to Cast a spell; hero 2 picks Attack.
-- Pass evidence: the round uses hero 1's Cast a spell; once hero 2 has picked, hero 1's buttons are disabled.
+- Pass evidence: after picking, hero 1's iPad shows **Change pick** (label pending Bob, Q-C4-18); tapping it brings the actions back, and the round uses hero 1's Cast a spell; once hero 2 has picked, **Change pick** is gone and hero 1's buttons are disabled.
 - Fails if: the old pick is used, or a change is possible after the last pick.
 
 ## Survival evals (one per survival invariant in plan.md)

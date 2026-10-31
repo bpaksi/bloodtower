@@ -39,8 +39,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Strength left and the round result show
 - Requirement: UI-026.
 - Method: playwright
-- How: level-2 foe, 1 hero present (8 wounds, DEC-563); win round 1 with a 2-strength cut.
-- Pass evidence: `[data-foe-strength]` reads 8 then 6; the board line reads `Round 1: {hero} struck for 1.` with the hero's name.
+- How: level-2 foe, 1 hero present (8 wounds, DEC-563); win round 1 at round strength 3 (4 or less, so the cut is the 2-wound minimum, DEC-703).
+- Pass evidence: `[data-foe-strength]` reads 8 then 6; the board line reads exactly `Round 1: {hero} struck for 2.` with the hero's name.
 - Fails if: the bar does not move, or no result line.
 
 ### EV-06 — Hit and victory cues fire

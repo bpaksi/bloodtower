@@ -72,10 +72,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: actions are asked or the foe resets.
 
 ### EV-10 — A won round cuts, a lost round hits
-- Requirement: MEC-024 step 5.
+- Requirement: MEC-024 step 5, DEC-703, DEC-563.
 - Method: unit
-- How: seed with round 1 won and round 2 lost; foe 3 wounds, heroes at full.
-- Pass evidence: after round 1 the foe has 2 wounds; after round 2 exactly one present hero has −1 HP (or −0 if a guard virtue was used).
+- How: a level-2 foe, 1 hero present (8 wounds); seed with round 1 won at round strength 3 and round 2 lost; heroes at full.
+- Pass evidence: after round 1 the foe has 6 wounds (cut = half of 3 rounded up = 2, at least 2); after round 2 exactly one present hero has lost 2 HP, the foe's level (0 if a guard virtue was used).
 - Fails if: a won round hits a hero, or a lost round cuts the foe.
 
 ## Survival evals (one per survival invariant in plan.md)
