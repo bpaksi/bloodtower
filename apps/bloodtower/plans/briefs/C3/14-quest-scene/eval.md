@@ -12,8 +12,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-672, UI-042.
 - Method: playwright
 - How: `c3-quest.spec.ts`: reach The Herald.
-- Pass evidence: board: painting and `[COPY: ...]` narration; iPad: exactly two options: 'Ask for pay' → '+10 gold'; 'Take the job' → 'Tomas's Map'.
-- Fails if: options on the board, or either gain label differs.
+- Pass evidence: board: painting and `[COPY: ...]` narration; iPad: exactly two options: 'Ask for pay' → '+10 gold'; 'Take the job' → 'Tomas's Map', each a button; no auto-advance (fake clock: still on the choice 5 s after it shows).
+- Fails if: options on the board, either gain label differs, or the step advances without a press.
 
 ### EV-02 — Item option disabled
 - Requirement: DEC-654.
@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-653, UI-036.
 - Method: playwright
 - How: take the job.
-- Pass evidence: a Reveal of Tomas's Map; the iPads pick the hero; the hero panel shows the item.
+- Pass evidence: a Reveal of Tomas's Map; the iPads pick the hero from one button per hero (no auto-advance before the press); the hero panel shows the item.
 - Fails if: the item is assigned without a pick.
 
 ### EV-04 — Quest gold shown
@@ -54,7 +54,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-693.
 - Method: playwright
 - How: a quest option costing a corruption, 2 present heroes (test fixture pack).
-- Pass evidence: after the option, the iPads list the 2 present heroes; the picked hero's panel shows +1 corruption; the other's is unchanged.
+- Pass evidence: after the option, the iPads list the 2 present heroes as buttons and wait for a press (no auto-advance); the picked hero's panel shows +1 corruption; the other's is unchanged.
 - Fails if: no pick, or the wrong hero takes it.
 
 ### EV-08 — The quest track

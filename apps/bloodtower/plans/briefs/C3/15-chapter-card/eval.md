@@ -15,11 +15,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the card for The Roads: painting, name, goal `[COPY: ...]`; no Next on the iPad; it auto-advances.
 - Fails if: no card.
 
-### EV-02 — Stamped won, then the seal
+### EV-02 — Stamped won, then the seal (C4+ only; not run in C3)
 - Requirement: UI-044, DEC-303.
 - Method: playwright
 - How: fixture with `c3_end_after_chapter_1: false` (in C3 the game ends at chapter 1, Q-C3-01); win chapter 1 with the mock tower; the seed frees 2 skulls.
-- Pass evidence: card stamped won, the close Scroll, the lit seal prompt, a Reveal of the glyph and its boon, then exactly 2 freed-skull prompts, each a kingdom then a building.
+- Pass evidence (1.0 / C3 checks): card stamped won, the close Scroll, the lit seal prompt, a Reveal of the glyph and its boon. C4+ only (not run in C3, not a 1.0 check): then exactly 2 freed-skull prompts, each a kingdom then a building.
 - Fails if: seal before the stamp.
 
 ### EV-03 — No seal without the tower

@@ -12,13 +12,13 @@ Show the game in numbers (SCR-019).
 
 ## States
 
-- **Stats**: the list per DEC-627, all from stored stats.
+- **Stats**: the list per DEC-627, all from stored stats, in this order: Outcome (Won or Lost), time played, days, quests done, corruptions taken, gold left, key moments, then this game's active length with the best and the average. There is no "Skulls on the board" row.
 - **Rating**: optional 1–5 on the iPads.
 - **Drill-in** (from tonight's games, C2 07): the same screen, with Play again.
 
 ## Player actions
 
-- iPad: rate (optional), then Back or Play again (the same buttons on drill-in).
+- iPad: rate (optional), then Play again or Back. Button order is pinned: Play again first, then Back (the same buttons and order on drill-in).
 
 ## Mechanics behind it
 

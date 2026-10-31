@@ -13,11 +13,11 @@ Let a group spend moves and gold at a building (MEC-036).
 ## States
 
 - **Menu** (UI-043): Each building shows its own offers plus Leave, and no Trade (Bob approved 2026-10-31): citadel: Rally (5 gold + 1 move), Virtue draw (10 gold + 1 move) or Cleanse; sanctuary: Cure (10 gold + 1 move, first one free each chapter) or Cleanse; village: tavern Rest (+3 hit points per move; Bob approved 2026-10-31) or Cleanse; bazaar: Cleanse only (Bob approved 2026-10-31). Picks with move and gold cost, quest marker first, disabled when unaffordable, shrunk by skulls.
-- **Rally** (DEC-158): heals to full; the result on the board.
+- **Rally** (DEC-158): heals to full; the result on the board. No Next; it auto-advances when its narration or cue ends (4 s ±200 ms with no audio; Bob 2026-10-31 10:38 AM ET).
 - **Cure** (DEC-170, DEC-700): pick the hero, the corruption goes; free or priced.
 - **Rest** (MEC-075): the village's tavern rest (Bob approved 2026-10-31); pick moves; +3 hit points per move.
-- **Virtue draw** (DEC-544): the tile on a Reveal; a fifth means giving one back.
-- **Cleanse** (DEC-377): 1 move, 0 gold (Bob approved 2026-10-31); −1 skull, "+1 day". Its row reads "1 move" with no gold.
+- **Virtue draw** (DEC-544): the tile on a Reveal; a fifth means giving one back. The Reveal has no Next; it auto-advances when its narration or cue ends (4 s ±200 ms with no audio; Bob 2026-10-31 10:38 AM ET); the fifth-tile give-back is a pick and waits for it.
+- **Cleanse** (DEC-377): 1 move, 0 gold (Bob approved 2026-10-31); −1 skull, "+1 day". Its row reads "1 move" with no gold. The result has no Next; it auto-advances when its narration or cue ends (4 s ±200 ms with no audio; Bob 2026-10-31 10:38 AM ET).
 - **No Trade**: no Trade, shop or NPC pick at any building (DEC-502).
 - **Fallen building**: not enterable.
 

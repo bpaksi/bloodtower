@@ -47,8 +47,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: SCR-018, DEC-627.
 - Method: playwright, fake clock
 - How: on any outcome scene, fire the narration's audio-end event, then advance the clock while the summary line holds.
-- Pass evidence: the summary line holds 4 s (±250 ms on the fake clock) after the audio-end event; then every device moves to Game stats (feature 17) for this game.
-- Fails if: it goes to the session screen, stays, or the hold is outside 3.75–4.25 s.
+- Pass evidence: the summary line holds 4 s (±200 ms on the fake clock) after the audio-end event; then every device moves to Game stats (feature 17) for this game.
+- Fails if: it goes to the session screen, stays, or the hold is outside 3.8–4.2 s.
 
 ### EV-07 — The defeat light plays on a loss
 - Requirement: CUE-003.

@@ -12,8 +12,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: SCR-019, DEC-627.
 - Method: playwright
 - How: `c3-stats.spec.ts` after fixture `c3-stats-loss` (lost on skulls, active 42 min, 12 days, 1 quest done, 2 corruptions taken, 7 gold left).
-- Pass evidence: in this order: outcome "Lost", time played "42 min", days 12, quests done 1, corruptions taken 2, gold left 7, key moments (contents wait on Q-C3-18), then the rating.
-- Fails if: a stat is missing, out of order, or differs from the fixture.
+- Pass evidence: in this order: outcome "Lost", time played "42 min", days 12, quests done 1, corruptions taken 2, gold left 7, key moments (contents wait on Q-C3-18), active length "42 min" with best and average (values per EV-03), then the rating; there is no "Skulls on the board" row; the iPad buttons are, in DOM order, "Play again" then "Back".
+- Fails if: a stat is missing, out of order, or differs from the fixture; the Outcome row or the average is missing; a "Skulls on the board" row shows; or Back comes before Play again.
 
 ### EV-02 — The rating never blocks Play again or Back
 - Requirement: SCR-019.
@@ -39,7 +39,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Screenshots match
 - Requirement: SCR-019.
 - Method: screenshot
-- How: board and iPad; compare with ./mockup.html `#stats`.
+- How: board and iPad; compare with ./mockup.html `#s=0`.
 - Pass evidence: two images matching.
 - Fails if: a part out of order.
 

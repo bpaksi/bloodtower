@@ -15,7 +15,7 @@ Show the day as the game's clock: what the moves are, how many days are left, an
 - **Day start, Regroup** (DEC-640): board shows the groups and "A new day. Stay together, or split up?"; iPads offer split / join.
 - **Day roll** (UI-021): "Day N", each group's moves with modifiers (DEC-615, DEC-102, DEC-684). No press (DEC-108).
 - **Mid-turn**: the edge band (UI-028): health and purse, chapter, Day N, days left, acting group and moves. The threat bar (UI-047) on the edge.
-- **Skull placement** (DEC-064, DEC-092): the board names the kingdom; the iPad lists its buildings; a 4th skull shows the building falling (DEC-093).
+- **Skull placement** (DEC-064, DEC-092): the board names the kingdom; the iPad lists its buildings; a 4th skull shows the building falling (DEC-093). This is a choice: one button per building, no auto-advance; it waits for the press.
 - **Effects panel** (UI-022, DEC-115): one line per effect, "+1 day" for a Cleanse or a won-quest night (DEC-699).
 - **Without the tower**: the drop is simulated; the board shows the kingdom it landed in (DEC-305).
 
@@ -23,7 +23,8 @@ Show the day as the game's clock: what the moves are, how many days are left, an
 
 - iPad: split or join at Regroup (DEC-640).
 - iPad: pick the building for each skull, the table agreeing (DEC-092).
-- Gear (exceptions, C2 feature 04): Split party / Rejoin party and Use a potion or item. The Story board shows the panel, display only (DEC-278); the iPad shows "See the Story board", the picks as a simple list of buttons (a group choice; a hero, then an item) and Done/Back; the board mirrors each press (Gamewright pick, pending Bob Q-GEAR-1).
+- Gear (exceptions, C2 feature 04): Split party (shows "Rejoin party" when split) and Use a potion or item. With no hero holding a potion or item, "Use a potion or item" is greyed with the reason "No potions or items to use." (Loremaster, locked). The Story board shows the panel, display only (DEC-278); the iPad shows "See the Story board", the picks as a simple list of buttons (a group choice; a hero, then an item) and Done/Back; the board mirrors each press (Gamewright pick, pending Bob Q-GEAR-1).
+- Skull placement: a choice (pick a building); it never auto-advances.
 - Effects panel: no button; it auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET).
 
 ## Mechanics behind it

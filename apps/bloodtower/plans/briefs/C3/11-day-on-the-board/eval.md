@@ -68,8 +68,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-064, DEC-092, DEC-093.
 - Method: playwright
 - How: seeded drop into a kingdom with a 3-skull building; place the skull there.
-- Pass evidence: board names the kingdom; iPad lists exactly that kingdom's standing buildings; after the press the board shows the building falling and it leaves the iPad list.
-- Fails if: other kingdoms' or fallen buildings are listed, or the fall is not shown.
+- Pass evidence: board names the kingdom; iPad lists exactly that kingdom's standing buildings; the step does not auto-advance (fake clock: still on skull placement 5 s after it shows, with or without audio end); after the press the board shows the building falling and it leaves the iPad list.
+- Fails if: other kingdoms' or fallen buildings are listed, the step advances without a press, or the fall is not shown.
 
 ### EV-10 — Without the tower, the board shows the drop's kingdom
 - Requirement: DEC-305.
@@ -117,7 +117,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: open the gear mid-turn with no hero holding a potion or item, and with the whole party in one group.
-- Pass evidence: "Use a potion or item" is disabled with one reason line ("No hero holds a potion or item."); item 4 is one button reading "Split party", enabled, and there is no separate "Rejoin party" item; after a split, the same item reads "Rejoin party" (one item whose label toggles, C2 feature 04); enabled items have no reason line.
+- Pass evidence: "Use a potion or item" is disabled with one reason line ("No potions or items to use.", Loremaster, locked); item 4 is one button reading exactly "Split party" (no number prefix), enabled, and there is no separate "Rejoin party" item; after a split, the same item reads "Rejoin party" (one item whose label toggles, C2 feature 04); enabled items have no reason line.
 - Fails if: a disabled item has no reason, or a working item is greyed.
 
 ### EV-17 — Narrated steps do not advance before their audio ends
