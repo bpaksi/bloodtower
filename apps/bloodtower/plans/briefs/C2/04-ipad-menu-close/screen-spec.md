@@ -15,12 +15,13 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 - First press wins across iPads: a second iPad's press on the same item or panel while one is open changes nothing.
 - Help: a "?" button at the left end of the bottom toolbar, on every iPad screen. It opens a short help sheet on the iPad itself for the current screen: what the screen is and what to do next, from that screen's Loremaster help line (2026-10-31; the Help lines table in C2 feature 04's spec). Close returns to the same screen, unchanged. It is not a gear item, sends nothing to the host, and the game does not pause (Gamewright design, parent-approved 2026-10-31).
 - Next-only iPad screens are kept to a minimum (Bob 2026-10-31 10:38 AM ET): a screen whose only action is Next is merged into the next screen or auto-advances when its narration or cue ends (4 s when it has no audio). Next stays only where a player must confirm the physical board.
+- Auto-advance (4 s): none in C2.
 
 ## States
 - Toolbar (every iPad screen, UI-032): "?" at the left end, the gear (Menu) at the right end. Default after reload or Continue: Menu closed, help closed.
 - Open: centered dialog (UI-033), three groups (DEC-229) holding the gear list (Bob approved 2026-10-31 10:38):
   - Look up: 1 Current party; 6 Look up (rules or a card).
-  - Table: 2 Game board setup; 3 Volume; 4 Split party / Rejoin party; 5 Use a potion or item; 7 Change who holds whom; 8 Join another iPad; 9 Tower (reconnect or play without it); Pause/Resume (kept from DEC-707; acts at once, no panel).
+  - Table: 2 Game board setup; 3 Volume; 4 Split party / Rejoin party (one item; the label toggles); 5 Use a potion or item; 7 Change who holds whom; 8 Join another iPad; 9 Tower (reconnect or play without it); Pause/Resume (kept from DEC-707; acts at once, no panel).
   - Leave: 10 Save and quit (the existing Quit story flow).
   - Version + debug toggle line, then "Close" last (DEC-707).
 - Disabled items: greyed, never hidden (DEC-227), with a one-line reason under each, e.g. "Only during a game.", "The tower is connected.", "C3+" (items that need C3 features in a C2 build: Split party / Rejoin party, Use a potion or item).
@@ -32,7 +33,7 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 1. Current party: heroes, HP, gold, items, corruptions and who holds whom.
 2. Game board setup: shows the physical setup again and re-runs the piece check.
 3. Volume: the Volume 0/1/2 step with Keep/Try another.
-4. Split party / Rejoin party.
+4. Split party / Rejoin party: one item whose label toggles. It reads "Split party" while the party is together and "Rejoin party" while it is split (Gamewright pick).
 5. Use a potion or item: pick the hero, then the item.
 6. Look up: rules or a card.
 7. Change who holds whom.
@@ -60,7 +61,7 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 | piece-check | Set the pieces back where the saved game had them. Tap Done after each step. |
 | glyphs-facing | Tell the app which glyphs you can see on the tower. |
 | session-screen | Your saved games are here. Tap Continue for the last one, or New game. |
-| game-stats | Here's how tonight went. Rate it if you like, then tap Play again or Back. |
+| game-stats | Here's how tonight went. Rate it if you like, then tap Play again. |
 | session-over | The game is over and saved. You can close the app for tonight. |
 | day-on-the-board (C3) | A new day begins. Move your heroes, then choose where to go. |
 | event-scene (C3) | Something happened on the road. Make a choice if one is shown; the scene moves on by itself. |
@@ -68,7 +69,6 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 | quest-scene (C3) | A quest is in front of you. Pick one of its options. |
 | chapter-card (C3) | This is your chapter goal. Finish it before the days run out. |
 | outcome-scene (C3) | The chapter is over. See how it ended; the game stats come next. |
-| game-stats (C3) | Here's how tonight went. Rate it if you like, then tap Next. |
 
 ## Player actions
 - Tap gear: open. Tap gear again, tap outside, Close or Escape: close. Closing sends nothing (DEC-707).

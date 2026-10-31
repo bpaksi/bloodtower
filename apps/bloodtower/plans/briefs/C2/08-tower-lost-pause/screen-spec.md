@@ -12,7 +12,7 @@ When the tower drops once a game has started (piece setup included), the game pa
 - Later: the gear's Tower item (reconnect or play without it; feature 04, Bob approved 2026-10-31 10:38) while playing without; its panel shows on the Story board.
 
 ## Player actions
-Reconnect (only on press) · Go on without (confirm) · Quit (confirm) · Menu → Reconnect tower later.
+Reconnect (only on press) · Go on without (confirm) · Quit (confirm) · gear → Tower.
 
 ## Mechanics
 DEC-301, DEC-305, DEC-711, MEC-018, MEC-032 (interrupts via MEC-071), UI-033, DEC-229, Q-176.
