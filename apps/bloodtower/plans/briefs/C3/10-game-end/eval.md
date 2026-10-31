@@ -23,7 +23,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: one loss scene for all.
 
 ### EV-03 — The win scene's line follows the last choice
-- Requirement: DEC-664.
+- Requirement: DEC-664 (finale, from C5).
 - Method: unit
 - How: drive a finished finale through a test fixture that sets each flag.
 - Pass evidence: each flag plays its own closing line ID.
@@ -50,16 +50,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the row is marked won or lost, not quit.
 - Fails if: marked quit.
 
+### EV-07 — The C3 game is won by clearing chapter 1
+- Requirement: Q-C3-01 (Bob, 2026-10-31).
+- Method: unit
+- How: `game/loop.test.ts`, C3 tuning: win chapter 1.
+- Pass evidence: the game exits won; the record's outcome is won; each seated hero's won +1; no chapter 2.
+- Fails if: chapter 2 opens, or the game is recorded lost or quit.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — No Continue after a finished game
+### EV-08 — No Continue after a finished game
 - Requirement: DEC-208, DEC-709.
 - Method: unit
 - How: finish a game; read the session view.
 - Pass evidence: no autosave; Continue absent.
 - Fails if: Continue resumes a finished game.
 
-### EV-08 — The record survives a restart
+### EV-09 — The record survives a restart
 - Requirement: DEC-116.
 - Method: unit
 - How: finish, restart, rebuild.
@@ -68,9 +75,10 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- The win path is tested through a fixture that ends the finale, until C5 builds the Tower. OPEN Q-C3-01.
+- The C3 win is chapter 1 won (Q-C3-01). The finale's win lines (EV-03) are tested by fixture until C5.
 
 ## OPEN questions
 
-- Q-C3-01 (as feature 09)
+- ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
+- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?
 - Q-C3-18: "key moments" on the stats screen (SCR-019): which events count as one? No card lists them.

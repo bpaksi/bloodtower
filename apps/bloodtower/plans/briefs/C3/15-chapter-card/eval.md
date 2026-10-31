@@ -18,7 +18,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — Stamped won, then the seal
 - Requirement: UI-044, DEC-303.
 - Method: playwright
-- How: win chapter 1 (fixture) with the mock tower.
+- How: C4 switch on (fixture; in C3 the game ends at chapter 1, Q-C3-01); win chapter 1 with the mock tower.
 - Pass evidence: card stamped won, the close Scroll, the lit seal prompt, a Reveal of the glyph and its boon, then freed-skull prompts if any.
 - Fails if: seal before the stamp.
 

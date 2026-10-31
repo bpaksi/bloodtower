@@ -33,7 +33,7 @@ Cutover: Y
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - An autosave written before this feature by the v1 path either loads or is reported as from an older version, with no crash (the error rule).
+  - An autosave written before this feature by the v1 path is dropped (Q-C3-07): it is not offered as Continue, the host logs one line naming the old version, and nothing crashes (the error rule). No migration code.
   - Pick story lists the same stories, in the same order, before and after.
 
 ## Done-when (e2e)
@@ -54,7 +54,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-07: may a pre-C3 autosave be dropped, or must it migrate?
+- ANSWERED Q-C3-07 (Bob, 2026-10-31): yes, pre-C3 saves are dropped, not migrated.
 
 ## Eval approval
 

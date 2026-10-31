@@ -15,11 +15,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: board: the painting and a Scroll; iPad: two cost buttons; after a press the effect line shows.
 - Fails if: the cost is applied with no choice.
 
-### EV-02 — Foes: Fight, Go around, Pay them off
+### EV-02 — Foes: Go around and Pay them off, no Fight
 - Requirement: DEC-023.
 - Method: playwright
 - How: seed that draws foes.
-- Pass evidence: three choices; Pay them off disabled when the purse is short (see OPEN Q-C3-02 for Fight).
+- Pass evidence: two choices, Go around and Pay them off; no Fight button, enabled or disabled (Q-C3-02); Pay them off disabled when the purse is short.
 - Fails if: Go around missing.
 
 ### EV-03 — Only present heroes' iPads choose
@@ -58,5 +58,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Q-C3-02 (Fight before C4)
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
 - Q-C3-03 (people offers in 1.0)

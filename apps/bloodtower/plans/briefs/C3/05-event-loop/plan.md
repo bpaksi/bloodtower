@@ -23,6 +23,8 @@ Keep this a checklist; do not write a second design doc.
 
 MEC-072 for each group that ended its turn in the wild or at a skulled building (DEC-017, DEC-080, DEC-093): a seeded draw at the length's chance (Short 30%, Standard 40%, DEC-669) and DEC-022's weights, then the type's track: quiet, windfall (5 gold), hazard (two costs, −2 hit points each hero), foes or disaster (Fight, Go around, Pay them off), people (trade, rumour, companion, trick). In 1.0 NPCs and shops wait (DEC-502), and the battle is C4.
 
+In C3, Fight is hidden (Q-C3-02): a foes or disaster event offers Go around and Pay them off only, and the battle loop is never called. Fight returns in C4 by one tuning switch (feature 02).
+
 ## Cutover
 
 Cutover: N
@@ -38,7 +40,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-07 all pass (verifier table on PR).
+- [ ] EV-01 … EV-08 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -61,7 +63,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-02: a foes or disaster event's Fight calls the battle loop (MEC-038), which is C4. In C3, is Fight hidden, auto-resolved, or is C4's battle pulled into C3?
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
 - Q-C3-03: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type?
 - Q-C3-12: does the disaster event's boss-level foe (DEC-028) need a C3 placeholder, as P-003 day 11 met one?
 

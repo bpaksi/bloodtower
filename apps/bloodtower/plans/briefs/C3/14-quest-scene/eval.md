@@ -43,9 +43,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: six images matching.
 - Fails if: a part out of order.
 
+### EV-06 — Battle options are not drawn
+- Requirement: Q-C3-02 (Bob, 2026-10-31).
+- Method: playwright
+- How: open The Ambush on the iPad and the board.
+- Pass evidence: no "Fight them" choice on either device; the toll choice is the one primary button.
+- Fails if: a Fight choice shows, enabled or disabled.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — Continue reopens the choice
+### EV-07 — Continue reopens the choice
 - Requirement: DEC-151, DEC-675.
 - Method: playwright
 - How: quit at The Herald's choice; Continue.
@@ -58,4 +65,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Q-C3-02 (battle options before C4)
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
+- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?

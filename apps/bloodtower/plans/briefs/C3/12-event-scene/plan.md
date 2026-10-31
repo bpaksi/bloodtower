@@ -54,7 +54,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-02 (Fight before C4)
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
 - Q-C3-03 (people offers in 1.0)
 
 ## Eval approval

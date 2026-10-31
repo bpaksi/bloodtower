@@ -18,7 +18,7 @@ Play a quest's one choice and its outcome (MEC-037, MEC-077).
 - **Corruption cost**: pick the hero who takes it (DEC-693).
 - **Item** (UI-036): Reveal, then pick who takes it (DEC-653).
 - **Rewards** (.9): gold, quest gold, items.
-- **Battle option**: OPEN Q-C3-02.
+- **Battle option**: hidden in C3 (Q-C3-02); The Ambush shows its toll option only. C4 shows it.
 
 ## Player actions
 
@@ -34,4 +34,5 @@ The quest's end hook ("The herald rides on. The road ahead is a little clearer."
 
 ## OPEN questions
 
-- Q-C3-02 (battle options before C4)
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
+- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?

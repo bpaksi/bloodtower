@@ -50,9 +50,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no draw sets lost.
 - Fails if: any draw loses.
 
+### EV-07 — Fight is hidden until C4
+- Requirement: Q-C3-02 (Bob, 2026-10-31): hide Fight until C4.
+- Method: unit
+- How: seeds that draw foes and disaster; read the offered choices; then flip the C4 switch in a test tuning file.
+- Pass evidence: C3 tuning: only Go around and Pay them off are offered, and the battle loop is never entered. Switch on: Fight is offered too.
+- Fails if: Fight is offered, shown disabled, or auto-resolved in C3, or the battle loop is called.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Continue resumes an open event
+### EV-08 — Continue resumes an open event
 - Requirement: DEC-675.
 - Method: unit
 - How: autosave at .15 (the foes choice); Continue.
@@ -65,6 +72,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Q-C3-02: a foes or disaster event's Fight calls the battle loop (MEC-038), which is C4. In C3, is Fight hidden, auto-resolved, or is C4's battle pulled into C3?
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
 - Q-C3-03: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type?
 - Q-C3-12: does the disaster event's boss-level foe (DEC-028) need a C3 placeholder, as P-003 day 11 met one?

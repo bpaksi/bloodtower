@@ -3,7 +3,7 @@
 **Status:** draft for Bob, 2026-10-31. Gamewright plans only and writes no code. Not yet at G0.
 **Source:** [1.0-milestones.md](1.0-milestones.md) (C3 row and "Unblocking", on PR #335's branch `docs/bloodtower-c2-plan`), the [C2 audit](../docs/audit/C2-audit.md)'s "Lines for the C3 plan" (same branch), the 1.0 scope (DEC-691 to DEC-697), The Ruined Keep (AREA-097, DEC-659 to DEC-667, DEC-672 to DEC-674), the probes P-001 to P-003 (AREA-096, AREA-098), the numbers pass (AREA-099, DEC-699 to DEC-703), the skull clock (DEC-686), the loops MEC-032 to MEC-037, MEC-072, MEC-077 and the screens SCR-014, SCR-018, SCR-019.
 **Goal:** a whole simple game of The Ruined Keep (AREA-097, the one 1.0 story, DEC-691) on pack v2: moving, events, the skull clock, corruption, chapters, buildings, plain scenes, win and loss, with the outcome and stats screens, on DEC-703's placeholder numbers (DEC-500).
-**Exit condition:** every feature's eval table is all-pass on its PR, and Bob signs off at G-C3: The Ruined Keep played to a win and to a loss (but see OPEN Q-C3-01: as carded, a win needs C4 and C5).
+**Exit condition:** every feature's eval table is all-pass on its PR, and Bob signs off at G-C3: The Ruined Keep played to a win and to a loss. In C3, clearing chapter 1 counts as the win (Bob, 2026-10-31, Q-C3-01).
 
 ## Who does what
 
@@ -32,6 +32,8 @@ Engine first, screens after. Each feature is one PR-sized slice with its tests. 
 - The battle loop (MEC-024, MEC-038), the Tomb (MEC-026, The Barrow) and battle-only corruption (Cursed, DEC-466): C4.
 - The Tower finale (MEC-076), its last choice's play (DEC-664) and the art through A1: C5.
 - NPCs, shops and gear (DEC-502). Dracula (DEC-691). Goodbye (DEC-628).
+- Fight, in events and in plain scenes: hidden until C4 (Bob, 2026-10-31, Q-C3-02). Go around, Pay them off and The Ambush's "pay the toll" stay.
+- Chapters 2 and 3 in play: the C3 game ends won when chapter 1 is won (Q-C3-01). The chapter loop still builds them, proved by fixtures.
 - Final story copy: every line is `[COPY: ...]` until the story pass.
 
 ## Features
@@ -256,10 +258,10 @@ Engine first, screens after. Each feature is one PR-sized slice with its tests. 
 
 ## Risks
 
-- **G-C3's win is not reachable as carded.** Chapter 2 needs The Barrow (a Tomb, C4), chapter 3 the Tower (DEC-656, C5), and The Ambush and The Last Stand are battle options (C4). See Q-C3-01 and Q-C3-02. Until ruled, the win path is proved by test fixtures only.
-- **Battle in events and scenes.** Features 05, 07, 12 and 14 cannot finish their foes and battle tracks before C4.
+- **The C3 win ends after chapter 1.** Ruled (Q-C3-01). C4 and C5 must remove the C3 end rule, so it sits behind one tuning switch (feature 02) with its own eval (features 09, 10).
+- **The Ambush with no Fight.** With Fight hidden (Q-C3-02), the toll is the only way to finish chapter 1. A group that cannot pay is stuck (Q-C3-22).
 - **Feature 10 and the C2 shell.** It is the one engine feature that waits for C2's serial line.
-- **The pack and old saves.** Feature 01 changes how stories load; a pre-C3 autosave may not survive (Q-C3-07).
+- **The pack and old saves.** Feature 01 changes how stories load; pre-C3 autosaves are dropped (Q-C3-07, ruled), so a game in progress at upgrade is lost.
 
 ## Gaps this plan closes (`pnpm graph gaps`, 1.0)
 
@@ -267,14 +269,14 @@ The deliverables listed under each feature's `Builds:`. The gameplay mechanics i
 
 ## OPEN questions (consolidated)
 
-Each is also listed in the feature files that need it. None is ruled here. (Q-C3-06 is unused.)
+Each is also listed in the feature files that need it. Three are answered (Bob, 2026-10-31); the rest are not ruled here. (Q-C3-06 is unused.)
 
-- Q-C3-01: G-C3 is "The Ruined Keep played to a win", but chapter 3 is won only by the Tower (DEC-656, C5) and chapter 2 needs the Barrow, a Tomb (C4). What does a C3 win look like? (features 09, 10, 16)
-- Q-C3-02: a foes or disaster event's Fight calls the battle loop (MEC-038), which is C4. In C3, is Fight hidden, auto-resolved, or is C4's battle pulled into C3? (features 05, 07, 12, 14)
+- ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win. The game ends won when chapter 1 is won; no seal break, no chapter 2 (features 09, 10, 16).
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4. Foes and disaster events offer Go around and Pay them off only; plain-scene battle options are hidden (features 05, 07, 12, 14).
 - Q-C3-03: DEC-502 cuts NPCs and shops from 1.0, but the people track draws trade, rumour, companion or trick (DEC-024). Which offers are in 1.0? Does the people weight (10) move to another type? (features 05, 12)
 - Q-C3-04: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives? (features 04, 11)
 - Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. (features 04)
-- Q-C3-07: may a pre-C3 autosave be dropped, or must it migrate? (features 01)
+- ANSWERED Q-C3-07 (Bob, 2026-10-31): yes, pre-C3 saves are dropped, not migrated. (features 01)
 - Q-C3-08: can a story pack override tuning values (e.g. The Ruined Keep's Warden level 5, DEC-361), or does only the base file hold them? (features 02)
 - Q-C3-09: DEC-666 says the pack ID is Proving Grounds, but the folder's `pack_id` is `test`. Rename to `proving-grounds`, or keep `test`? (features 03)
 - Q-C3-10: which spaces hold The Ambush ("a wild space"), The Lock and The Last Stand? DEC-662 names the kingdom only; P-003 used Muted Forest, Howling Desert and The Grass Sea. Are the probe's spaces the ruling? (features 03)
@@ -288,6 +290,8 @@ Each is also listed in the feature files that need it. None is ruled here. (Q-C3
 - Q-C3-18: "key moments" on the stats screen (SCR-019): which events count as one? No card lists them. (features 10, 17)
 - Q-C3-19: what does the threat bar (UI-047) show in 1.0: the coming drop only, or also skulled buildings near falling? (features 11)
 - Q-C3-20: when a hero holds several corruptions, who picks which the cure removes: the hero, the group, or the oldest first? (features 13)
+- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? (features 03, 07, 14)
+- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line? (features 10, 16)
 - Q-C3-21: the fun rating: one for the table, or one per iPad? (features 17)
 
 ## Results

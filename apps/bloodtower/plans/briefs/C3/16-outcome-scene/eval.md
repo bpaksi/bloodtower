@@ -47,8 +47,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- The win is reached by a fixture until C5 (OPEN Q-C3-01).
+- In C3 the win is reached by clearing chapter 1 (Q-C3-01); the two finale lines (EV-03) are reached by fixture until C5.
 
 ## OPEN questions
 
-- Q-C3-01
+- ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
+- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?

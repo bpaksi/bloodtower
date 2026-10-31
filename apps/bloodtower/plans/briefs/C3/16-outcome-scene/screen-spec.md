@@ -12,7 +12,8 @@ Deliver the ending (SCR-018).
 
 ## States
 
-- **Win** (DEC-663, DEC-664): the ending Painting, "Chapter cleared. The seal is shattered, and the dark loosens its hold." or "Chapter cleared. The seal holds, and you stand guard over it.".
+- **Win, C3** (Q-C3-01): chapter 1 cleared; scene and line OPEN Q-C3-23.
+- **Win, finale (from C5)** (DEC-663, DEC-664): the ending Painting, "Chapter cleared. The seal is shattered, and the dark loosens its hold." or "Chapter cleared. The seal holds, and you stand guard over it.".
 - **Loss** (DEC-144): one scene per way to lose: skulls, corruption, fallen buildings. Skulls: "Too many skulls. The kingdom falls to the dark." Corruption: `[COPY: ...]` (open, corruption name). Fallen buildings: `[COPY: ...]` (open, Q-C3-05).
 - **Summary line** (DEC-627): "{N} days. {Q} quests done. {S} skulls on the board." and Next.
 
@@ -30,4 +31,5 @@ Game stats (feature 17), then the session screen (C2 06).
 
 ## OPEN questions
 
-- Q-C3-01
+- ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
+- Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?

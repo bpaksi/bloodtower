@@ -23,6 +23,8 @@ Keep this a checklist; do not write a second design doc.
 
 MEC-037 for the plain-scene type and MEC-077 as its one step: the scene's 2 or 3 options, one needing an item no present hero holds shown disabled (DEC-654); a cost of gold, hit points from each present hero (stopping at 1, DEC-714), or a corruption to one hero the group picks (DEC-693); 1 to 3 effects in order (DEC-692); an item goes to the hero the group picks (DEC-653). A done quest pays 5 gold to each present hero (DEC-700), counts toward the chapter (DEC-041) and marks the day for DEC-699. The Tomb type (MEC-026) and an option's battle are C4.
 
+In C3 a plain-scene option that holds a battle (The Ambush's "Fight them", DEC-662) is hidden (Q-C3-02); The Ambush is finished by paying the toll.
+
 ## Cutover
 
 Cutover: N
@@ -39,7 +41,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-08 all pass (verifier table on PR).
+- [ ] EV-01 … EV-09 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -63,7 +65,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-02 (as feature 05): The Ambush's "Fight them" and The Last Stand are battle options (DEC-692, MEC-077 .4). In C3 is the option disabled, auto-resolved, or is C3 blocked on C4's battle?
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4. A plain-scene option that holds a battle is hidden, not disabled.
+- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?
 
 ## Eval approval
 

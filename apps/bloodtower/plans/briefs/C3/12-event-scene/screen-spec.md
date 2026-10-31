@@ -16,7 +16,7 @@ Tell a group what met it in the wild and let the present heroes choose (MEC-072)
 - **Quiet**: a mood line, Next.
 - **Windfall**: the gain on a Reveal (UI-036).
 - **Hazard**: the counter saved them, or two costs (DEC-027).
-- **Foes / disaster**: Fight, Go around, Pay them off (DEC-023, DEC-028).
+- **Foes / disaster**: Go around, Pay them off (DEC-023, DEC-028). No Fight button in C3, not even disabled (Q-C3-02); C4 adds it.
 - **People**: OPEN Q-C3-03.
 
 ## Player actions
@@ -29,9 +29,9 @@ UI-041: a painting with the event's words on a Scroll (UI-035), the choices on t
 
 ## What happens next
 
-The next group's event, or the skull drop (MEC-034 close). Fight calls the battle (C4; OPEN Q-C3-02).
+The next group's event, or the skull drop (MEC-034 close). No Fight in C3 (Q-C3-02); in C4 Fight calls the battle.
 
 ## OPEN questions
 
-- Q-C3-02 (Fight before C4)
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
 - Q-C3-03 (people offers in 1.0)

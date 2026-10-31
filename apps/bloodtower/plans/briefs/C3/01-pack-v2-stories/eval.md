@@ -45,17 +45,17 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — An old autosave does not crash the host
-- Requirement: The error rule; DEC-208.
+### EV-06 — A pre-C3 autosave is dropped, without a crash
+- Requirement: Q-C3-07 (Bob, 2026-10-31): pre-C3 saves are dropped; the error rule; DEC-208.
 - Method: unit
 - How: seed the DB with an autosave written by `main` before this change; start the host.
-- Pass evidence: either Continue resumes it, or Pick story shows no Continue and the host log has one line naming the old version. No exception.
-- Fails if: the host throws at startup.
+- Pass evidence: Pick story shows no Continue for it; the host log has one line naming the old version; a New game starts clean. No exception, no migration.
+- Fails if: the host throws at startup, Continue is offered for the old save, or the save is migrated and resumed.
 
 ## Assumptions surfaced
 
-- An autosave from the v1 path may be dropped rather than migrated. Bob: OK? (OPEN Q-C3-07)
+- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled).
 
 ## OPEN questions
 
-- Q-C3-07: may a pre-C3 autosave be dropped, or must it migrate?
+- ANSWERED Q-C3-07 (Bob, 2026-10-31): yes, pre-C3 saves are dropped, not migrated.

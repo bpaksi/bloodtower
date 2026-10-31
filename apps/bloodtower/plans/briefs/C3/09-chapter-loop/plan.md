@@ -23,6 +23,8 @@ Keep this a checklist; do not write a second design doc.
 
 MEC-033 in full: the enter (challenge step and board bounds, DEC-133, DEC-134, DEC-146; quest tokens placed), the start (cue, narration hook, chapter card), days until every quest is done or a loss check is true (DEC-041, DEC-086; a loss on the same day as a finish is a loss), and the close: with the tower, a won chapter breaks one seal, its glyph's story boon takes effect, and any freed skulls are placed (DEC-303, DEC-409); without, seals drop out (DEC-306). The finale chapter is won only by winning the Tower (DEC-656), which is C5.
 
+In C3, clearing chapter 1 is the win (Q-C3-01): when chapter 1 is won, the chapter returns won-and-last and the game ends (feature 10). No seal breaks and chapter 2 does not open. One tuning switch (feature 02) turns the C3 end off for C4. Chapters 2 and 3, the seal break and the finale rule are still built and proved by fixtures.
+
 ## Cutover
 
 Cutover: N
@@ -39,7 +41,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-08 all pass (verifier table on PR).
+- [ ] EV-01 … EV-09 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -64,7 +66,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-01: G-C3 is "The Ruined Keep played to a win", but chapter 3 is won only by the Tower (DEC-656, C5) and chapter 2 needs the Barrow, a Tomb (C4). What does a C3 win look like?
+- ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
 - Q-C3-17: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons?
 
 ## Eval approval

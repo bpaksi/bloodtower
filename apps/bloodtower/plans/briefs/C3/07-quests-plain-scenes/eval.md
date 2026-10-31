@@ -57,9 +57,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no drop, event or day change between enter and end.
 - Fails if: the clock moves inside a quest.
 
+### EV-08 — The Ambush in C3: no Fight, the toll finishes it
+- Requirement: Q-C3-02 (Bob, 2026-10-31), DEC-662.
+- Method: unit
+- How: `scene.test.ts` on the pack's Ambush with a purse that covers the toll.
+- Pass evidence: one option offered (pay the toll); "Fight them" absent from the options; picking it pays, finishes the quest and counts it for chapter 1.
+- Fails if: "Fight them" is offered or shown disabled, or paying the toll leaves the quest open.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-08 — Continue keeps quest progress and items
+### EV-09 — Continue keeps quest progress and items
 - Requirement: DEC-151, DEC-653.
 - Method: unit
 - How: finish The Herald, autosave, Continue.
@@ -68,8 +75,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- A plain scene whose option holds a battle cannot be played in C3. OPEN Q-C3-02.
+- A battle option is hidden in C3 (Q-C3-02); its scene stays playable through its other options.
 
 ## OPEN questions
 
-- Q-C3-02 (as feature 05): The Ambush's "Fight them" and The Last Stand are battle options (DEC-692, MEC-077 .4). In C3 is the option disabled, auto-resolved, or is C3 blocked on C4's battle?
+- ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
+- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?

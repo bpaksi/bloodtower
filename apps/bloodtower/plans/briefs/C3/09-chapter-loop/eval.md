@@ -25,21 +25,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — Board bounds open per chapter
 - Requirement: DEC-134, DEC-146, DEC-662.
 - Method: unit
-- How: enter chapter 2 then 3.
+- How: fixture that starts at chapter 2, then 3.
 - Pass evidence: Brynthia opens in chapter 2; the whole board in chapter 3; foe level steps +1 a chapter (DEC-185).
 - Fails if: a kingdom opens early.
 
 ### EV-04 — The seal break with the tower in play
 - Requirement: DEC-303, DEC-409.
 - Method: unit
-- How: win chapter 1 with the tower; seeded break frees 2 skulls.
+- How: C4 switch on (fixture); win chapter 1 with the tower; seeded break frees 2 skulls.
 - Pass evidence: one seal broken, its glyph's boon active, two skull placement prompts (.25 to .29) before chapter 2's enter.
 - Fails if: no seal breaks, or freed skulls skip placement.
 
 ### EV-05 — Without the tower, seals drop out
 - Requirement: DEC-306.
 - Method: unit
-- How: win chapter 1 without the tower.
+- How: C4 switch on (fixture); win chapter 1 without the tower.
 - Pass evidence: no seal node, no boon, no skull prompt.
 - Fails if: a boon applies without the tower.
 
@@ -50,16 +50,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: not won; the Tower is unlocked; the chapter keeps running days.
 - Fails if: chapter 3 is won without the Tower.
 
+### EV-07 — In C3, clearing chapter 1 is the win
+- Requirement: Q-C3-01 (Bob, 2026-10-31).
+- Method: unit
+- How: C3 tuning; win chapter 1 (The Herald done, The Ambush paid off).
+- Pass evidence: the chapter returns won and last; no seal breaks; no skull prompt; chapter 2's enter never runs.
+- Fails if: chapter 2 opens, a seal breaks, or the game keeps running days.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-07 — Continue skips enter and start
+### EV-08 — Continue skips enter and start
 - Requirement: DEC-675.
 - Method: unit
 - How: autosave mid chapter 2; Continue.
 - Pass evidence: no chapter cue, narration or card; the saved day resumes.
 - Fails if: the chapter card replays.
 
-### EV-08 — Seals survive Continue
+### EV-09 — Seals survive Continue
 - Requirement: DEC-303.
 - Method: unit
 - How: break a seal, autosave, Continue.
@@ -68,9 +75,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- None beyond the cards cited.
+- The C3 end is a tuning switch, so C4 lifts it without code changes; the chapter 2 and 3 evals run with it off.
 
 ## OPEN questions
 
-- Q-C3-01: G-C3 is "The Ruined Keep played to a win", but chapter 3 is won only by the Tower (DEC-656, C5) and chapter 2 needs the Barrow, a Tomb (C4). What does a C3 win look like?
+- ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
 - Q-C3-17: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons?

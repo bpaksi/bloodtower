@@ -23,6 +23,8 @@ Keep this a checklist; do not write a second design doc.
 
 One tuning file in the base pack carries every number in DEC-703's tables, each as a placeholder (DEC-500, DEC-131). The engine reads numbers only from it; no rules feature hard-codes a number. Battle, Tomb and Tower rows are loaded now but used from C4 and C5.
 
+Holds the two C3 switches Bob ruled (2026-10-31): `c3_end_after_chapter_1: true` (Q-C3-01) and `fight_enabled: false` (Q-C3-02). C4 and C5 flip them.
+
 ## Cutover
 
 Cutover: N
