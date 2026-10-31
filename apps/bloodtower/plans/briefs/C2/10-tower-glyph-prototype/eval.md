@@ -18,8 +18,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — Glyph answers are recorded against the library's table
 - Requirement: after calibrate the player says which glyph shows on each drum side, and the page compares it with the library's table (DEC-103, Q-033).
 - Method: unit
-- How: `setupCheck.test.ts`, "records seen glyphs beside the expected ones": feed answers for the top drum's four sides, two matching and two not.
-- Pass evidence: the record lists all four sides with expected, seen and match flags, two `true` and two `false`. An unanswered side reads `unknown`, never `match`.
+- How: feed answers for all 12 sides (3 drums × 4), some matching, some not, one blank.
+- Pass evidence: 12 entries with expected, seen, match; the blank reads `unknown`, never `match`.
 - Fails if: a blank answer counts as a match.
 
 ### EV-03 — The facing question uses one lit side
@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the run counts skulls that stay inside after a box-up (Q-032, Q-402).
 - Method: unit
 - How: `setupCheck.test.ts`, "skull tries": record 10 tries with counts in and out.
-- Pass evidence: the summary gives tries, total dropped, total stayed inside and the share; a try with no count is left out of the share and listed.
+- Pass evidence: the summary gives tries, total dropped, total stayed inside and the share; a try with no count is left out of the share and listed. With 9 counted tries, the summary marks the run incomplete (`tries < 10`).
 - Fails if: a missing count is read as zero (the "unknown is never zero" rule).
 
 ### EV-06 — Errors from the tower are shown
@@ -55,8 +55,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-11 — Answers survive a reload
 - Requirement: a run can stop and pick up later.
 - Method: playwright
-- How: answer two glyph sides and the facing, reload the page.
-- Pass evidence: both answers and the facing are still shown; the tower state shows as unknown until the next calibrate press (no command is resent).
+- How: answer two glyph sides, the facing, one rotate result and two skull tries; reload the page.
+- Pass evidence: all are still shown; the tower state shows as unknown until the next calibrate press; no command is resent.
 - Fails if: answers are lost, or reload recalibrates.
 
 ## Assumptions surfaced

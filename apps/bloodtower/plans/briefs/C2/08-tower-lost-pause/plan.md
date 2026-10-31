@@ -32,12 +32,18 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-09 all pass (verifier table on PR).
 - Not required: seals and glyphs without the tower (Q-193; the day slice has neither). The tower check's piece pictures (feature 11); until then Reconnect runs the tower check as C1 built it.
+- Copy (mockup): pause title "Tower lost"; buttons "Reconnect", "Go on without", "Quit". After Go on without the session status line reads "without the tower".
 
 ## AREA / DEC checklist
 
 - [ ] DEC-301: closed before coding (`decided`). Three buttons; Go on without asks to confirm; Reconnect stays in the Menu; Reconnect runs the tower check (MEC-018) before play goes on; Reconnect only on a press.
 - [ ] DEC-305: closed before coding (`decided`). Without the tower every sound or light node is skipped; the board does not change; the skull drop is simulated by a seeded draw.
 - [ ] DEC-711: closed before coding (`decided`). A tower lost once a game has started, piece setup included, pauses that game.
+
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- Pause buttons: "Reconnect" / "Go on without" / "Quit" (mockup).
+- Tower wording: "Tower lost" for the mid-game drop; "without the tower" as the status line after Go on without.
 
 ## Eval approval
 

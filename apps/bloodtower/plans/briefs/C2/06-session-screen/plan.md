@@ -39,11 +39,20 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## AREA / DEC checklist
 
 - [ ] SCR-021: closed before coding (`decided`). Continue (only with an autosave), New game, tonight's games, Done for tonight, the tower's state. Board shows; iPads press.
-- [ ] DEC-709: closed before coding (`decided`). Continue first; New game asks "This replaces the saved game. Are you sure?" while an autosave exists.
+- [ ] DEC-709: closed before coding (`decided`). Continue first, hidden from New game → Yes until Begin even though the old save survives until Begin (Bob 2026-10-31); New game asks "This replaces the saved game. Are you sure?" while an autosave exists.
 - [ ] DEC-713: closed before coding (`decided`). Confirm; landing painting; tower to idle if in play; iPads "The session is over" with no buttons, then leave; the autosave stays.
 - [ ] DEC-711: closed before coding (`decided`). "Tower lost" on the session screen; the next New game or Continue runs MEC-039 .5 to .25 again first; no Reconnect button there.
 - [ ] DEC-712: closed before coding (`decided`). Between games a drop blocks nothing; if every iPad has dropped, the board shows the join QR until one joins.
 - [ ] DEC-628: closed before coding (`decided`). No Goodbye in 1.0.
+
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- Tower line: "tower: in play" / "without the tower" / "Tower lost" (tower wording ruling).
+- Game rows read "Game 1", "Game 2"…; rows are pressable on the iPad (feature 07 drill-in).
+- Session over: no buttons and no Menu gear.
+- There is no delete-game action and no delete confirm.
+- Continue is hidden from New game → Yes until Begin (Bob ruling, C-2).
+- Confirms use "<action>" / "Back".
 
 ## Eval approval
 

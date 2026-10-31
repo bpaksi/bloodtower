@@ -28,13 +28,19 @@ Cutover: N
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-06 all pass (verifier table on PR).
-- Not required: new Menu items. The Look up group stays "Nothing to look up." until a later feature fills it.
+- In scope (mockup wins; Bob 2026-10-31): the Menu shows Look up (Hero panel, Roll, Items; "Nothing to look up." when empty), Table (Pause/Resume, Reconnect tower, Join another iPad, Change who holds whom) and Leave (Quit story). Unusable items are greyed, never hidden (DEC-227).
 
 ## AREA / DEC checklist
 
 - [ ] DEC-707: closed before coding (`decided`, Bob 2026-10-31). Close always ends the dialog; a tap outside and a tap on the gear also close it; closing sends nothing; all three groups show, unusable items greyed.
 - [ ] DEC-229: closed before coding (`decided`). Groups: Look up, Table, Leave.
 - [ ] DEC-227: closed before coding (`decided`). An item that cannot be used is greyed, never left out.
+
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- The Menu keeps Look up, Join another iPad and Change who holds whom (Bob ruling on Illusionist conflict).
+- Portrait only; Back on the Quit confirm returns to the open Menu (mockup).
+- Escape also closes (EV-07).
 
 ## Eval approval
 

@@ -12,14 +12,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the session screen shows Continue (only while an autosave exists), New game, tonight's games, Done for tonight, and the tower's state, top to bottom (SCR-021, DEC-709).
 - Method: playwright
 - How: new `c2-session-screen.spec.ts`, "session screen after a quit": play to day 2, Menu → Quit story, confirm.
-- Pass evidence: the board lists, in order: Continue, New game, Tonight's games (one row, "Proving Grounds", marked quit), Done for tonight, and the tower line ("Tower in play" or "Without the tower"). The iPad offers Continue, New game and Done for tonight as buttons, Continue first. The board has no buttons.
+- Pass evidence: the board lists, in order: Continue, New game, Tonight's games (one row, "Game 1", marked quit), Done for tonight, and the tower line ("tower: in play" or "without the tower"). The iPad offers Continue, New game, each of tonight's games as a pressable row (feature 07 drill-in) and Done for tonight, Continue first. The board has no buttons.
 - Fails if: Continue is missing after a quit, sits below New game, or the list is empty.
 
 ### EV-02 — No autosave, no Continue
 - Requirement: Continue shows only while an autosave exists (DEC-709).
 - Method: unit
-- How: engine test "no autosave hides Continue": a fresh session, then a session whose autosave was replaced and then cleared.
-- Pass evidence: no Continue offer and no Continue line on the board view in either case.
+- How: engine test "no autosave hides Continue": (a) fresh session, no autosave row; (b) session after New game → Yes, before Begin.
+- Pass evidence: (a) no Continue offer or line; (b) Continue is hidden from New game → Yes until Begin, even though the old save still exists (Bob 2026-10-31).
 - Fails if: Continue shows greyed (it is left out, not greyed: it is not a Menu item).
 
 ### EV-03 — Pick Game is gone; Pick story keeps Continue
@@ -32,14 +32,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-04 — New game asks before replacing the save
 - Requirement: while an autosave exists, New game asks "This replaces the saved game. Are you sure?" first (DEC-709).
 - Method: playwright
-- How: same spec: on the session screen with an autosave, press New game; first answer No, then press again and answer Yes.
+- How: same spec: on the session screen with an autosave, press New game; first answer Back, then press again and answer New game.
 - Pass evidence: No returns to the session screen with Continue still there and the autosave unchanged. Yes goes to Pick story; Continue is gone; the next game writes a new autosave only at its Begin.
 - Fails if: New game clears the autosave without asking, or clears it on No.
 
 ### EV-05 — Done for tonight asks, then ends the session
 - Requirement: Done for tonight asks "Are you sure?"; then the board returns to the landing painting, and the iPads show "The session is over" with no buttons and leave (DEC-713, DEC-628).
 - Method: playwright
-- How: same spec: press Done for tonight; answer No once, then Yes.
+- How: same spec: press Done for tonight; answer Back once, then Done for tonight.
 - Pass evidence: No returns to the session screen. Yes: the board shows the landing painting (SCR-002) with no dialog; every iPad shows "The session is over" and no button; the host lists no joined device. The autosave row is still in the database.
 - Fails if: a Goodbye screen shows, an iPad keeps a button, or the autosave is dropped.
 
@@ -61,7 +61,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a tower lost between games shows "Tower lost"; nothing reconnects on its own; the next New game or Continue runs the tower block again first (DEC-711).
 - Method: playwright
 - How: same spec: connect track, play, quit to the session screen, drop the mock tower. Wait 5 s. Press New game.
-- Pass evidence: the tower line reads "Tower lost"; no command is sent during the wait; there is no Reconnect button on the session screen. After New game, the tower choice (Connect Tower or Play without Tower) shows before Pick story.
+- Pass evidence: the tower line reads "Tower lost"; no command is sent during the wait; there is no Reconnect button on the session screen. After New game, the tower choice (Connect Tower or Play without Tower) shows before Pick story. Repeat with Continue instead of New game: the tower choice shows before the resumed game.
 - Fails if: a Reconnect button is offered, the tower reconnects itself, or New game goes straight to Pick story.
 
 ### EV-09 — Every iPad dropped between games: the join QR
@@ -78,13 +78,41 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: eight images attached, each matching its section's parts and order.
 - Fails if: a part is missing or out of order.
 
+### EV-14 — Goodbye removed
+- Requirement: P:22.
+- Method: unit/grep
+- How: check files and `rg "'goodbye'" apps/bloodtower/src`.
+- Pass evidence: `GoodbyeTeardown.tsx` and `lib/goodbye.ts` do not exist; 0 screen-id hits; an idle-on-close test on the Done-for-tonight path passes.
+- Fails if: any remains.
+
+### EV-15 — Session screen matches mockup (M "Session screen", "Tower lost", "No games yet")
+- Requirement: SCR-021 per the approved mockup.
+- Method: playwright; board 1920×1080, iPad 768×1024
+- How: open the session screen with games, after a between-games drop, and fresh.
+- Pass evidence: board rows in DOM order: "Continue", "New game", label "Tonight's games", rows "Game N" newest first each with a "quit" mark, "Done for tonight", tower line; board 0 buttons. iPad body buttons in order: "Continue" (primary), "New game", each game row, "Done for tonight". (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.) After a drop between games the tower line reads "Tower lost". Fresh: "No games yet tonight." and no Continue. No delete-game action exists anywhere.
+- Fails if: order differs, a row is missing, the empty state is a blank list, or any delete action/confirm appears.
+
+### EV-16 — Confirms match mockup (M "Replace-save confirm", "Done confirm")
+- Requirement: DEC-709, DEC-713.
+- Method: playwright
+- How: New game with autosave; Done for tonight.
+- Pass evidence: New game: line "This replaces the saved game. Are you sure?", iPad exactly "New game" (primary), "Back". Done: title "Done for tonight", "Are you sure?", "Done for tonight" (primary), "Back". Back is the EV-04/EV-05 decline path.
+- Fails if: labels differ or a third button shows.
+
+### EV-17 — Session over and all-dropped (M "Session over", "All iPads dropped")
+- Requirement: DEC-712, DEC-713.
+- Method: playwright
+- How: Done for tonight → confirm; separately drop every iPad between games.
+- Pass evidence: session over: board has no `.bt-dialog-frame`, background = landing painting; iPad text "The session is over", 0 buttons and no Menu gear. All dropped: board QR, join URL and "Scan with each iPad. Then pick who this iPad speaks for at the table: …".
+- Fails if: a button or gear shows after the session ends.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-11 — The autosave survives Done for tonight and a restart
 - Requirement: an autosave left by a quit stays after Done for tonight; Continue resumes it (DEC-208, DEC-713).
 - Method: playwright
 - How: walk once, quit, Done for tonight, restart the host, new session through the Enter, Continue on Pick story.
-- Pass evidence: day, group positions, purse and claims match the quit game; the seed is the same and not shown.
+- Pass evidence: day, group positions, purse and claims match the quit game; the autosave row's seed equals the quit game's seed (DB read) and no view carries it; the next move roll matches the replayed log.
 - Fails if: Continue is missing, or the game restarts at day 1.
 
 ### EV-12 — Tonight's games survive a host restart
@@ -103,6 +131,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- The tower line wording: "Tower in play", "Without the tower", "Tower lost" → SCR-021 names the three states; the exact words are Claude's. Bob: OK?
+- The tower line wording: "tower: in play", "without the tower", "Tower lost" → SCR-021 names the three states; the exact words are Claude's. Bob: OK?
 - Continue is left out (not greyed) when there is no autosave. DEC-227's "greyed, never left out" is for Menu items → DEC-709 says "only while an autosave exists".
 - The idle command stays `lighting.all-off`, as C1 built it for Goodbye → CUE-012.

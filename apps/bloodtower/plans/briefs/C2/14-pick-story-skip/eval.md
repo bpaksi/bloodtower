@@ -17,14 +17,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — Pick story waits for a press
 - Requirement: Pick story always shows and waits before Game settings (DEC-715).
 - Method: playwright
-- How: cold start with the mock tower, the Enter, New game. Wait 5 s on Pick story.
+- How: cold start with the mock tower, the Enter, New game. Wait 5 s on Pick story. Repeat after a quit: session screen → New game → confirm; Pick story still waits 5 s.
 - Pass evidence: the board still shows Pick story after the wait, and Game settings shows only after an iPad press.
 - Fails if: Game settings or any later screen shows with no press.
 
 ### EV-03 — Every loaded story is a door
 - Requirement: Pick story shows every loaded story, Dracula included (DEC-715, SCR-007).
 - Method: unit
-- How: server test: load `packs/` as the host does, project the Pick story view.
+- How: server test; load `packs/` as the host does, plus a fixture dir with one malformed `pack.yaml`; project the Pick story view.
 - Pass evidence: the view has one door per story pack (Proving Grounds and Dracula today), Dracula marked not playable. A pack that fails to load is logged as an error with its id.
 - Fails if: a story pack is missing from the doors with no error logged.
 
@@ -32,7 +32,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: with two or more doors the iPad shows previous and next and the Choose button (UI-016).
 - Method: playwright
 - How: same as EV-02, at the ipad viewport.
-- Pass evidence: previous and next move the focused door and wrap; the board's focused cover follows; choosing Dracula stops on not-ready (SCR-009) and binds nothing.
+- Pass evidence: previous and next move the focused door and wrap; the board's focused cover follows; choosing Dracula stops on not-ready (SCR-009) and binds nothing. Focused door has `aria-current`; previous and next doors are rendered (UI-016 layout otherwise deferred).
 - Fails if: the iPad shows only one button, or the board does not follow.
 
 ## Survival evals (one per survival invariant in plan.md)

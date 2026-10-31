@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a game in tonight's list drills in to its stats (SCR-021, DEC-629).
 - Method: playwright
 - How: new `c2-play-again.spec.ts`, "drill in to a quit game": play 2 days (walk, enter one building, record the skull drop at the end of each day), then quit on day 3; on the session screen pick that game on the iPad.
-- Pass evidence: the board shows the game's stats: story "Proving Grounds", ended "Quit", time played, quit on day 3, moves taken (the sum of the walks made), buildings entered 1, skull drops recorded 2 (one per day ended). The iPad offers Play again and Back.
+- Pass evidence: the board shows the game's stats: title "Game 1", story "Proving Grounds", ended "Quit", time played, quit on day 3, moves taken (the sum of the walks made), buildings entered 1, skull drops recorded 2 (one per day ended). The iPad offers Play again and Back. Time played is a duration > 0, not `unavailable` (the mockup's "—" is a placeholder).
 - Fails if: the counts do not match the game played, or the drill-in happens on the board.
 
 ### EV-02 — Unrecorded values show as unavailable
@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Play again keeps the story, length and difficulty and the heroes; it skips Pick story and Game settings (DEC-708).
 - Method: playwright
 - How: same spec: from the stats, Play again (no autosave, so no confirm).
-- Pass evidence: the next screen is claim-heroes with the same heroes held by the same iPads, prefilled; one Continue press confirms. Then setup runs its pack steps again, then Begin. Pick story and Game settings never show.
+- Pass evidence: the next screen is claim-heroes with the same heroes held by the same iPads, prefilled; one Confirm press confirms. Then setup runs its pack steps again, then Begin. Pick story and Game settings never show.
 - Fails if: claims start empty, or Game settings shows.
 
 ### EV-04 — Play again takes a new seed
@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the claims come prefilled where the same iPads are joined (DEC-216).
 - Method: playwright
 - How: same spec: two iPads holding two heroes each; close one iPad; Play again.
-- Pass evidence: the remaining iPad's two heroes are prefilled; the other two are unclaimed and claimable; the Continue press is closed until all four are held.
+- Pass evidence: the remaining iPad's two heroes are prefilled; the other two are unclaimed and claimable; the Confirm press is closed until all four are held.
 - Fails if: the left iPad's heroes stay claimed with no device.
 
 ### EV-06 — Play again asks before replacing the autosave
@@ -64,20 +64,41 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: four images attached, matching rows and buttons.
 - Fails if: a row or button is missing.
 
+### EV-13 — Stats screen matches mockup (M "Game stats")
+- Requirement: SCR-019 slice per the mockup.
+- Method: playwright; board 1920×1080, iPad 768×1024
+- How: open a quit game from the list.
+- Pass evidence: board title = the list label ("Game N"); rows "Outcome" = "quit", "Time played" = a duration, every slice stat row from EV-01; an unrecorded value renders "unavailable" (never "0", "—" or blank); board 0 buttons. iPad body buttons "Play again" (primary), "Back", plus an optional 1–5 fun rating that never blocks.
+- Fails if: a row is missing, an unrecorded value is not "unavailable", or the rating blocks Play again.
+
+### EV-14 — Play again confirm (M "Replace-save confirm")
+- Requirement: DEC-709.
+- Method: playwright
+- How: Play again with an autosave.
+- Pass evidence: line "This replaces the saved game. Are you sure?"; buttons "Play again" (primary), "Back"; Back = EV-06 decline.
+- Fails if: labels differ.
+
+### EV-15 — Prefilled claims (M "Claim heroes, prefilled")
+- Requirement: DEC-216.
+- Method: playwright
+- How: Play again with one iPad gone.
+- Pass evidence: each hero held by this iPad is selected and marked "this iPad"; a hero whose iPad left reads "unclaimed"; counter `/^\d+ of \d+ picked$/`; one primary "Confirm" button, disabled until all heroes are held; board shows the same counter.
+- Fails if: label differs or Confirm is enabled early.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-11 — Continue after Play again resumes the new game's seed
 - Requirement: the new seed is the one Continue resumes.
 - Method: playwright
 - How: Play again, walk on day 1, quit, restart the host, Continue.
-- Pass evidence: the positions and the next move roll match the replayed log for the new game, not the original.
+- Pass evidence: the autosave's seed ≠ the original game's seed (DB read), and positions plus next move roll match the replay of the new game's log.
 - Fails if: Continue resumes with the original seed.
 
 ### EV-12 — Stats survive a restart
 - Requirement: a game's stats survive a host restart.
 - Method: unit
 - How: server test: rebuild the stats from the event log after a restart.
-- Pass evidence: the same counts as before the restart.
+- Pass evidence: story, ended, time played, day ended, moves taken, buildings entered and skull drops are equal before and after the restart.
 - Fails if: stats are kept only in memory.
 
 ## Assumptions surfaced

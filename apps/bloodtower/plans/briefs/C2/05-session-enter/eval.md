@@ -26,18 +26,18 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the board shows the steps to put the tower on the board, lay out the board with its kingdom edges, and sort the pieces; any joined iPad presses "Board is set up" (SCR-022, DEC-278).
 - Method: playwright
 - How: new `c2-session-enter.spec.ts`, "base board setup shows its steps and waits for one press": cold start, one iPad joins.
-- Pass evidence: the board shows, in order: "Set the tower on the centre of the board.", "Lay out the board with the kingdom edges: Arisilon north, Brynthia east, Durnin south, Zenon west.", "Sort the pieces: hero minis, foes, skulls and buildings." The iPad shows one primary button "Board is set up". The board has no buttons. A second iPad's press after the first is a loser and changes nothing.
+- Pass evidence: the board shows, in order: "Set the tower on the board.", "Lay out the board, kingdom edges matched.", "Sort the pieces: heroes, foes, skulls." (approved mockup wording).
 - Fails if: the steps show on the iPad only, the board shows a button, or the setup needs every iPad.
 
 ### EV-04 — The session waits only for the first iPad
 - Requirement: no "everyone's in" step; the join QR stays open until every hero is claimed (DEC-274, UI-010).
 - Method: playwright
 - How: same spec: cold start; one iPad joins; on base board setup and on the tower choice, read the board.
-- Pass evidence: base board setup shows as soon as the first iPad joins. The join QR and code stay on the board through Enter and on Pick story. A second iPad can join during the tower choice.
+- Pass evidence: base board setup shows as soon as the first iPad joins. The join QR and code stay on the board through Enter and on Pick story. A second iPad can join during the tower choice. After the first iPad joins the large join QR shrinks to a small QR in a board corner and stays there (M "2 First iPad joined").
 - Fails if: the board waits for a "Start" or "Ready" press, or the QR goes away after the first join.
 
 ### EV-05 — One tower question, both buttons named
-- Requirement: the board asks "Connect the tower, or play without it?" and the iPad offers "Connect Tower" and "Play without Tower" (SCR-005, DEC-275, GC1-05).
+- Requirement: the board asks "Wake the tower, or play tonight without it?" and the iPad offers "Connect Tower" and "Play without Tower" (SCR-005, DEC-275, GC1-05).
 - Method: playwright
 - How: same spec: after "Board is set up", read the board and the iPad.
 - Pass evidence: the iPad shows exactly two buttons with those labels. The board names both choices in text and shows no button. The splash shows neither "Continue" nor "Connect Tower".
@@ -67,7 +67,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-09 — The volume test: one volume per press, keep or try another
 - Requirement: Dungeon Complete at the picked volume, then Keep or try another (SCR-006, MEC-039 .20 to .25).
 - Method: playwright
-- How: same spec: pick volume 1, then "Try another", pick 2, then "Keep".
+- How: same spec: pick volume 1, then "Try another", pick 2, then "Keep". Also pick Volume 0 once; one `sound.play-stateful` with volume 0.
 - Pass evidence: two `sound.play-stateful` commands for Dungeon Complete (#58), with volume 1 and then 2. After Keep, the session's kept volume is 2, and the next tower sound that takes a volume (the move-roll cue) is sent with volume 2.
 - Fails if: Keep keeps the first volume, or later sounds ignore the kept volume.
 
@@ -75,8 +75,36 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the base board setup, the tower choice and the volume test on the board and the iPad (SCR-022, SCR-005, SCR-006; mockup).
 - Method: screenshot
 - How: screenshot the board at 1920×1080 and the iPad at 1024×768 on each of the three screens; compare side by side with ./mockup.html, sections `#board-setup`, `#tower-choice`, `#volume`.
-- Pass evidence: six pairs attached. Each board dialog is inside the DEC-705 border; the iPad shows only the presses named in EV-03, EV-05 and EV-09.
+- Pass evidence: the EV-17 DOM checks pass; six screenshot pairs attached for review only.
 - Fails if: the board shows controls, or a screen is missing.
+
+### EV-14 — test pack drops lay-out-board
+- Requirement: P:23.
+- Method: unit
+- How: load `packs/test/pack.yaml`.
+- Pass evidence: setup step ids contain `place-heroes` and not `lay-out-board`.
+- Fails if: `lay-out-board` remains.
+
+### EV-15 — old screen id gone
+- Requirement: P:24.
+- Method: unit/grep
+- How: `rg -n "'tower-connect'|\"tower-connect\"" apps/bloodtower/src`; full e2e suite.
+- Pass evidence: 0 screen-id hits; full e2e passes.
+- Fails if: any hit.
+
+### EV-16 — Tonight's tower choice survives a restart after the Enter
+- Requirement: after the Enter, a host restart keeps tonight's tower choice and does not re-run the Enter (Bob 2026-10-31).
+- Method: playwright
+- How: Play without Tower, reach Pick story, restart host; repeat with Connect Tower.
+- Pass evidence: after restart the session resumes at Pick story with the same choice; the tower question is not asked again; the mock tower got no command on restart.
+- Fails if: the Enter re-runs, the tower question shows, or a tower command is sent.
+
+### EV-17 — Enter screens match the mockup
+- Requirement: DOM checks; board 1920×1080, iPad 768×1024 portrait. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
+- Method: playwright
+- How: walk M tabs 1–7.
+- Pass evidence: Join (M "1"): board QR `img|canvas|svg` and join URL `/^https?:\/\/.+\/join/`; iPad `Pick <hero>` rows and counter `/^\d+ of \d+ picked$/`. First iPad joined (M "2"): board step 1 line and a corner QR; that iPad shows a waiting line and 0 body buttons. Base board setup (M "3"): board `li` ×3 per EV-03; board 0 buttons; iPad one body button "Board is set up", primary. Tower choice (M "4"): board line "Wake the tower, or play tonight without it?"; iPad "Connect Tower" (primary) then "Play without Tower"; splash shows neither "Continue" nor "Connect Tower". Connecting (M "5"): iPad 0 body buttons; board non-empty progress line. Failed (M "6"): status "Tower not found" and line "The tower did not answer. Try again, or play without it."; iPad "Connect Tower", "Play without Tower"; error code on the pressing iPad (EV-08). Volume (M "7"): line "How loud should the tower be? Press one to hear it."; iPad "Volume 0", "Volume 1", "Volume 2", "Keep" (primary), "Try another", all shown together as in the mockup.
+- Fails if: any board screen has a `button`, an iPad shows extra/missing body buttons, or a line differs.
 
 ## Survival evals (one per survival invariant in plan.md)
 
@@ -84,7 +112,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an autosave written before this feature still loads.
 - Method: unit
 - How: a server test with a checkpoint fixture taken from `main` before this feature: restart the host on it.
-- Pass evidence: after the new Enter, Continue (on Pick Game) resumes day and positions from the fixture. A `version-changed` event is logged if the engine version changed.
+- Pass evidence: the fixture's engine version differs from HEAD's; after the new Enter, Continue (on Pick story) resumes day and positions from the fixture; exactly one `version-changed` event is logged.
 - Fails if: the old checkpoint throws, or is dropped.
 
 ### EV-12 — A restart mid-Enter sends nothing
@@ -104,5 +132,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## Assumptions surfaced
 
 - SCR-022's three step texts in EV-03 are Claude's wording → Bob: OK?
-- The board's line on the tower choice reads "Connect the tower, or play without it?" (MEC-039 .5) → MEC-039.
+- The board's line on the tower choice reads "Wake the tower, or play tonight without it?" (MEC-039 .5; approved mockup) → MEC-039.
 - Volume picks are labelled "0", "1" and "2", as SCR-006 names them → SCR-006.

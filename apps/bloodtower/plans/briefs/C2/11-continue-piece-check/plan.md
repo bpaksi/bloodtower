@@ -23,7 +23,7 @@ Read feature 10's findings note first. If it says `mechanics.rotate-drum` does n
 Cutover: Y
 
 - Continue today reloads the checkpoint and runs the tower check (feature 06 kept that). After this feature, Continue runs the piece check between the tower block and the resumed chapter (DEC-283's board node).
-- The autosave gains one field, each drum's position, kept up to date by every rotate the engine sends. The trapped-skull count is derived from the skull records already saved. An autosave written before this feature has no drum field; it reads as "at home" (the calibrated position), and the check says so.
+- The autosave gains one field, each drum's position, kept up to date by every rotate the engine sends, including Turn the drums during this check (Bob 2026-10-31). The trapped-skull count is derived from the skull records already saved. An autosave written before this feature has no drum field; it reads as "at home" (the calibrated position), and step 5 is hidden with no line (screen spec).
 
 ## The check, in order
 
@@ -33,8 +33,8 @@ Continue (session screen or Pick story) → the tower block if this session has 
 2. Skulls on buildings: one picture with each building's saved skull count.
 3. Foes on the board, if the save has any.
 4. Broken seals, if any chapter win broke one.
-5. Tower only: "Turn the drums to the saved game", shown only when a drum's saved position differs from where calibration left it. One press of Turn the drums sends one `mechanics.rotate-drum` per drum that is off, in top, middle, bottom order. Then a picture shows what each side should show, and the table confirms.
-6. Tower only: "Drop N skulls back into the tower", shown only when N > 0. N is the count of skull records whose target is "inside" (DEC-717).
+5. Tower only: "Turn the drums to the saved game", shown only when a drum's saved position differs from where calibration left it. One press of Turn the drums sends one `mechanics.rotate-drum` per drum that is off, in top, middle, bottom order. Then a picture shows what each side should show, and the table confirms. Done and Skip show with Turn the drums (mockup); Done stays disabled until the press succeeds.
+6. Tower only: "Drop N skulls back in the top of the tower.", shown only when N > 0. N is the count of skull records whose target is "inside" (DEC-717).
 
 A skipped step stays unconfirmed (MEC-018): the board marks it in the top band until the next chapter-end check.
 
@@ -61,6 +61,14 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-305, DEC-306: closed before coding (`decided`). Without the tower, steps 5 and 6 drop out.
 - [ ] Tower safety (root CLAUDE.md): no rotate without the press; a failed rotate is not retried on its own.
 - [ ] Errors (decision 0003): a failed rotate is logged, shown on the iPad that pressed with its error code, and toasted on the Story board.
+
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- Trapped-skull line: "Drop N skulls back in the top of the tower."
+- Skipped mark: an outline badge with a count beside Tower in the top band.
+- Drums step shows Turn the drums, Done, Skip together; Done disabled until the press.
+- Old save: step 5 hidden, no line.
+- The check's Turn the drums updates the saved drum positions (Bob ruling, C-1; supersedes EV-10's no-write).
 
 ## Eval approval
 

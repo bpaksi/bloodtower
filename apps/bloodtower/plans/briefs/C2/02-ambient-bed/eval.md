@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: going from the landing page to the Story board does not stop the bed and needs no second gesture (DEC-704).
 - Method: playwright
 - How: new test in `sound-unlock.spec.ts`, "the bed carries from / onto /board with one gesture": on `/`, one real click that unlocks audio, then open the Story board the way the landing page does. Make no other click or key press. Read the board's audio state through a test hook (`window.__btAudio`: context state and the ambient layer's playing flag).
-- Pass evidence: on the board, the context state is `running` and the ambient layer is playing, 3 s after arrival.
+- Pass evidence: on the board, the context state is `running` and the ambient layer is playing, 3 s after arrival. `AudioContext` constructor spy (via `addInitScript`) counts exactly 1 across `/` → `/board`; `__btAudio.contextState === ctx.state` of that instance; `performance.getEntriesByType('navigation').length === 1`; `location.pathname === '/board'`.
 - Fails if: the board is reached by a full page load (the context is new and `suspended`), or the bed is started only on a board click.
 
 ### EV-02 — The bed plays on each board screen of the day slice
@@ -25,8 +25,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-03 — The landing page's levels apply on the board
 - Requirement: the music, ambient and voice levels set on the landing page apply everywhere (DEC-704, SCR-003).
 - Method: playwright
-- How: on `/`, open Sound and set ambient to 20% and music to 0. Go to the board. Read the gain values through the hook.
-- Pass evidence: the ambient gain matches 20% and the music gain is 0, within 0.01.
+- How: on `/`, open Sound and set ambient 20%, music 0, voice 50%. Go to the board. Read gains through the hook.
+- Pass evidence: ambient gain = the Sound dialog's own `levelToGain(0.2)` ± 0.01; music gain 0; voice gain = `levelToGain(0.5)` ± 0.01.
 - Fails if: the board starts at the default levels.
 
 ### EV-04 — iPads play nothing
@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: an audio start the browser refuses is an error: log it, and show it on the board as a toast with its code (CLAUDE.md "Errors").
 - Method: unit
 - How: a test that makes the mock context's `resume()` reject, then checks the host log entry and the toast.
-- Pass evidence: one error log line with a code (for example `audio-start-refused`) and one Story board toast with that code.
+- Pass evidence: one error log line with code `audio-start-refused` and one Story board toast with code `audio-start-refused`.
 - Fails if: the rejection is caught and dropped, or logged with no toast.
 
 ### EV-06 — The existing sound specs still pass
@@ -55,8 +55,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-11 — The levels survive a host restart
 - Requirement: the levels set on the landing page survive a host restart.
 - Method: playwright
-- How: set ambient to 20% on `/`, go to the board, restart the acceptance host, reload the board, and give one gesture.
-- Pass evidence: the ambient gain is still 20%.
+- How: set ambient 20% and voice 50% on `/`, go to the board, restart the acceptance host, reload the board.
+- Pass evidence: ambient and voice gains unchanged (± 0.01).
 - Fails if: the levels are kept only in memory.
 
 ## Assumptions surfaced

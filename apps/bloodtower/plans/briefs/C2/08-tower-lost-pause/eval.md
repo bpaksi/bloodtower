@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a tower lost mid-game pauses with Reconnect, Go on without the tower, and Quit (DEC-301).
 - Method: playwright
 - How: new `c2-tower-lost.spec.ts`, "tower drop in play pauses with three buttons": connect track, Begin, walk once, drop the mock tower.
-- Pass evidence: the board shows the pause naming the lost tower; the iPad offers exactly "Reconnect", "Go on without the tower" and "Quit story", in that order. No press is accepted on the move map while paused.
+- Pass evidence: the board shows the pause titled "Tower lost"; the iPad offers exactly "Reconnect", "Go on without" and "Quit", in that order. A tap on a move-map space while paused sends no act (host act log unchanged).
 - Fails if: only two buttons show, or play goes on.
 
 ### EV-02 — A drop during piece setup also pauses
@@ -26,13 +26,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Go on without asks to confirm, then the rest of the game uses the no-tower stand-ins (DEC-301, DEC-305).
 - Method: playwright
 - How: same spec: press Go on without; No; press again; Yes. Finish the day.
-- Pass evidence: No returns to the pause. Yes resumes play at the same node. The day's move-roll cue sends nothing. At the day's end there is no "where did it land" prompt; the board names the building the skull landed on, and the board is otherwise drawn as with the tower.
+- Pass evidence: No returns to the pause. Yes resumes play at the same node. The mock tower's sent list is empty from Yes until the day's end. At the day's end there is no "where did it land" prompt; the board names the building the skull landed on, and the board is otherwise drawn as with the tower.
 - Fails if: Go on without has no confirm, a tower command is still queued, or the skull prompt still asks the table.
 
 ### EV-04 — The simulated skull drop is seeded
 - Requirement: without the tower, the app draws where each skull lands, seeded (DEC-305).
 - Method: unit
-- How: engine test "simulated skull drop is seeded": the same seed and event log played twice; a different seed once.
+- How: engine test "simulated skull drop is seeded": the same seed and event log played twice; a different seed once. Stub `Math.random` to throw during the test; draws still succeed and match.
 - Pass evidence: same seed, same landing building each time; a different seed changes at least one of 20 drops over 20 days. The draw uses `eventRng(seed, seq)`, not `Math.random`.
 - Fails if: the draw is not seeded, or depends on wall-clock time.
 
@@ -47,14 +47,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Reconnect starts only on a press, and the tower check (MEC-018) runs before play goes on (DEC-301).
 - Method: playwright
 - How: same spec: drop the tower, wait 5 s, then press Reconnect.
-- Pass evidence: nothing is sent during the wait. After Reconnect: connect, then the tower check as C1 built it, then play at the same node. A failed reconnect shows its error code on the iPad that pressed and returns to the three-button pause.
+- Pass evidence: nothing is sent during the wait. After Reconnect: connect, then the board view's screen id is the C1 tower-check id, and play resumes only after its confirm, then play at the same node. A failed reconnect shows its error code on the iPad that pressed and returns to the three-button pause.
 - Fails if: the tower reconnects on its own, or play resumes before the tower check.
 
 ### EV-07 — Reconnect stays in the Menu after Go on without
 - Requirement: Reconnect from the Menu stays possible later (DEC-301, DEC-229).
 - Method: playwright
 - How: same spec: after Go on without, open the Menu.
-- Pass evidence: the Table group offers "Reconnect tower". It asks to confirm (DEC-230); Yes connects and runs the tower check; the rest of the game uses the tower again.
+- Pass evidence: the Table group offers "Reconnect tower". It asks to confirm (DEC-230); Yes connects and runs the tower check; the rest of the game uses the tower again. After Yes, the next move-roll cue is sent to the mock.
 - Fails if: the item is missing or greyed after Go on without.
 
 ### EV-08 — Quit from the pause
@@ -70,6 +70,20 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: screenshot the board at 1920×1080 and an iPad at 1024×768 on the pause and on the confirm; compare side by side with ./mockup.html sections `#pause` and `#confirm-without`.
 - Pass evidence: four images attached, matching wording and button order.
 - Fails if: a button is missing or out of order.
+
+### EV-13 — Pause and confirms match mockup (M "Paused", "Go on without confirm", "Quit confirm", "Reconnecting")
+- Requirement: DEC-301 per the mockup.
+- Method: playwright; board 1920×1080, iPad 768×1024
+- How: drop the mock tower mid-game; open each confirm.
+- Pass evidence: board "Tower lost" with line "The tower has gone quiet. The game waits." inside the DEC-705 frame, 0 board buttons; iPad same line + "Reconnect" (primary), "Go on without", "Quit". Go on without: title "Go on without", "Are you sure?", "Go on without" (primary), "Back". Quit: title "Quit story", "Are you sure?", "Quit story" (primary), "Back". Reconnecting: iPad 0 body buttons. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
+- Fails if: a label differs or a board button shows.
+
+### EV-14 — Menu Reconnect while without (M "Later: Menu Reconnect tower")
+- Requirement: UI-033.
+- Method: playwright
+- How: after Go on without, open the Menu.
+- Pass evidence: Table rows "Pause/Resume", "Reconnect tower", "Join another iPad", "Change who holds whom", "Reconnect tower" enabled; Close last.
+- Fails if: Reconnect tower is disabled or missing.
 
 ## Survival evals (one per survival invariant in plan.md)
 

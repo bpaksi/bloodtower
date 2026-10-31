@@ -39,6 +39,12 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-709: closed before coding (`decided`). Play again asks before it replaces an autosave.
 - [ ] SCR-019: closed before coding for this slice. C2 shows what the day slice records; an unrecorded value shows as unavailable.
 
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- Prefilled claims confirm with "Confirm" (mockup).
+- Optional 1–5 fun rating on the iPad is in C2 scope; it never blocks.
+- Stats title is the list label ("Game N").
+
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).

@@ -35,6 +35,11 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-502: closed before coding (`decided`). 1.0 keeps Short and Standard; Long waits.
 - [ ] DEC-508: closed before coding (`decided`). Dracula's 1.0 cut has no Long.
 
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- No summary line under Length (mockup); EV-02 no longer asserts "Length: Standard".
+- Long is removed from pack data, not greyed (mockup shows two buttons only).
+
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).

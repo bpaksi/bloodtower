@@ -11,7 +11,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-01 — The check runs between the tower block and the resumed chapter
 - Requirement: Continue runs the piece check after the tower block and before the saved chapter (DEC-283, DEC-710).
 - Method: playwright
-- How: new `c2-continue-check.spec.ts`, "continue after a restart": play to day 2 with the mock tower, quit, restart the host, run the Enter, press Continue on the session screen.
+- How: new `c2-continue-check.spec.ts`, "continue after a restart": play to day 2 with the mock tower, quit, restart the host, run the Enter, press Continue on the session screen. Seed the mock so no skull record has target `inside`.
 - Pass evidence: the screens come in this order: the tower choice, then the hero-minis step, then the skulls step, then day 2 in play. No step of Game settings, Claim heroes or the pack setup shows.
 - Fails if: the game resumes with no check, the check runs before the tower block, or a setup screen shows.
 
@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a press confirms each step; a skipped step stays unconfirmed (MEC-018).
 - Method: playwright
 - How: same spec: Done on the hero-minis step, Skip on the skulls step.
-- Pass evidence: in play, the top band marks "Skulls not checked" and does not mark the heroes. The event log has one confirm event for the minis and one skip event for the skulls.
+- Pass evidence: in play, the top band shows the unconfirmed outline badge beside Tower with a count of skipped steps and does not mark the heroes. The event log has one confirm event for the minis and one skip event for the skulls. With two iPads, both show Done and Skip on each step; the first press wins and the second changes nothing.
 - Fails if: a skip reads as confirmed, or a confirm is not logged.
 
 ### EV-04 — No rotate without the press
@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the drums step shows only when a saved position differs from where calibration left it (DEC-716).
 - Method: unit
 - How: engine test: a save with every drum at home; and a save written before this feature (no drum field).
-- Pass evidence: no drums step in either case, and no rotate is sent.
+- Pass evidence: no drums step in either case, and no rotate is sent. For the no-drum-field save, step 5 is hidden with no line (drums read as at home).
 - Fails if: the step shows, or a rotate is sent.
 
 ### EV-06 — A failed rotate is shown and not retried
@@ -54,7 +54,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the step asks the table to drop back as many skulls as the save recorded as "stayed inside" (DEC-717).
 - Method: unit
 - How: engine test: a save with skull records on days 1 to 3, two of them with target `inside`; and a save with none.
-- Pass evidence: the first save shows "Drop 2 skulls back into the tower". The second shows no trapped-skull step.
+- Pass evidence: the first save shows "Drop 2 skulls back in the top of the tower." The second shows no trapped-skull step.
 - Fails if: the count includes skulls that landed on buildings, or the step shows with 0.
 
 ### EV-08 — Without the tower, the tower steps drop out
@@ -71,13 +71,41 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: eight images attached, each matching its section's parts and order.
 - Fails if: a part is missing or out of order.
 
+### EV-13 — Drums confirm after the press
+- Requirement: P:36.
+- Method: server test
+- How: Turn the drums succeeds, then Done.
+- Pass evidence: the board view's step shows the expected side per drum; Done logs one confirm event for drums.
+- Fails if: no picture or no confirm event.
+
+### EV-14 — Foes and seals when present
+- Requirement: P:33–34.
+- Method: engine test
+- How: a save with one foe and one broken seal.
+- Pass evidence: steps in order minis, skulls, foes, seals.
+- Fails if: a step is missing or out of order.
+
+### EV-15 — Drum field updated by the check's rotate
+- Requirement: the piece check updates the saved drum positions (Bob 2026-10-31).
+- Method: server test
+- How: Turn the drums succeeds.
+- Pass evidence: the autosave's drum positions equal the sent positions.
+- Fails if: the autosave keeps the old positions.
+
+### EV-16 — Steps match mockup (M tabs 1–6, "Skipped mark")
+- Requirement: DEC-710 per the mockup; board 1920×1080, iPad 768×1024.
+- Method: playwright
+- How: walk every step; skip one.
+- Pass evidence: lines: 1 "Set each hero on their saved space."; 2 "Put the skulls back on each building."; 3 "Set the foes back where they stood."; 4 "Mark the broken seals."; 5 title "Turn the drums to the saved game"; 6 "Drop N skulls back in the top of the tower." (N real). Each board step has `img|svg|canvas` and 0 buttons. iPad 1–4 and 6: "Done" (primary), "Skip". Step 5: "Turn the drums" (primary), Done and Skip shown together as in the mockup, Done disabled until the press succeeded. After a skip, the board top band shows the outline badge beside Tower with count = skipped steps. (Body buttons only: `[data-screen] button`, excluding the bottom-bar Menu gear `bt-iconbtn`.)
+- Fails if: a line differs, a step lacks a picture, the board shows a button, or Done is pressable on step 5 before the drums turned.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-10 — The save is unchanged by the check
 - Requirement: running, skipping or abandoning the check does not change the saved drums or trapped count.
 - Method: unit
 - How: server test: read the autosave, run the check to the drums step, restart; read it again; then skip every step and read it again.
-- Pass evidence: the drum positions and the "inside" records are byte-equal across the three reads, until the first new day is played.
+- Pass evidence: the "inside" records are byte-equal across the three reads until the first new day is played. The drum positions change only by a successful Turn the drums during the check, which writes the sent positions to the autosave (Bob 2026-10-31).
 - Fails if: the check writes either field.
 
 ### EV-11 — The resumed game matches the save

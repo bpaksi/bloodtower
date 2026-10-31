@@ -97,6 +97,16 @@ Each feature is a vertical slice: engine, views, host, screens and e2e for one p
 - Runs: cloud
 - Model: sonnet
 
+## Mockup alignment (Bob 2026-10-31: "mockup wins; update plans and evals to match")
+
+Approved mockups 01, 03 to 09 and 11 override the feature folders where they differ. Each feature's plan.md has a "Mockup alignment" list; evals carry the matching checks. Rulings applied:
+- 03: board dialogs never scroll; the art shrinks first, then content is cut to fit.
+- 04: the Menu keeps Look up, Join another iPad and Change who holds whom.
+- 05: after the Enter, a host restart keeps tonight's tower choice.
+- 06: Continue is hidden from New game → Yes until Begin. No delete-game action, no delete confirm.
+- 11: the piece check's Turn the drums updates the saved drum positions.
+- Tower wording: "Tower not found" at connect, "Tower lost" for the mid-game drop, "without the tower" as the status line.
+
 ### Feature 10: Tower prototype: glyphs, facing, and the drums after calibrate (tower-poc)
 - Folder: [briefs/C2/10-tower-glyph-prototype](briefs/C2/10-tower-glyph-prototype/plan.md)
 - Depends on: its `approval.md` on `main`

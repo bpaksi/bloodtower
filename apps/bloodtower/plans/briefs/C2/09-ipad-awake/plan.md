@@ -35,6 +35,10 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-712: closed before coding (`decided`). While joined, the device page asks the browser to keep the screen on. A refused request is logged and shown on that iPad. If the iPad sleeps anyway, it is a drop (DEC-154).
 - [ ] DEC-154: closed before coding (`decided`). A drop mid-game pauses until every hero has a device again. Already built in C1; this feature does not change it.
 
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- The refused notice is one element: DeviceErrorBanner with the mockup copy and the code, dismissible, above the bottom bar.
+
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).

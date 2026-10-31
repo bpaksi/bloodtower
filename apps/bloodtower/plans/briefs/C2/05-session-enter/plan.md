@@ -28,7 +28,7 @@ Cutover: Y
 - Continue, restore, and restart must keep:
   - An autosave from before this feature still loads (its checkpoint has no session Enter state).
   - A restarted host mid-Enter starts the Enter again from the join; it never sends a tower command on restart.
-  - Whether this session is playing with or without the tower.
+  - Whether this session is playing with or without the tower. After the Enter has finished, a host restart keeps tonight's tower choice and does not ask the tower question again (Bob 2026-10-31; EV-16).
 
 ## Done-when (e2e)
 
@@ -46,6 +46,15 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] SCR-022: closed before coding (`decided`; the card says "Not designed yet" for the step list). The three steps in eval EV-03 are Claude's proposal from SCR-022's text and `packs/test` → Bob: OK?
 - [ ] SCR-006: closed before coding (`decided`). Dungeon Complete (#58) at volume 0, 1 and 2, each only after a press; Keep or try another.
 - [ ] DEC-104: closed before coding (`decided`). The board goes down before the tower block.
+
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- Base board setup steps: "Set the tower on the board." / "Lay out the board, kingdom edges matched." / "Sort the pieces: heroes, foes, skulls."
+- Tower question: "Wake the tower, or play tonight without it?"
+- Join QR shrinks to a corner QR from the first join (supersedes "large until every hero is claimed").
+- Volume buttons "Volume 0/1/2"; Keep and Try another show with them.
+- Connect failure status reads "Tower not found" (tower wording ruling).
+- Restart after the Enter keeps tonight's tower choice (Bob ruling, C-3).
 
 ## Eval approval
 

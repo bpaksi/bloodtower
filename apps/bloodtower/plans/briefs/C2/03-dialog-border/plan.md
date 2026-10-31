@@ -27,14 +27,19 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-05 all pass (verifier table on PR).
+- [ ] EV-01 … EV-06 all pass (verifier table on PR).
 - Not required: tuning the 5% on the TV (DEC-705 calls it a placeholder; Bob tunes it at G-C2). The Sound dialog on `/`, which is not on the board.
 
 ## AREA / DEC checklist
 
-- [ ] DEC-705: closed before coding (`decided`, Bob 2026-10-31). At least 5% of the board's height above and below and 5% of its width at each side. Long content is cut down or set smaller, never scrolled or clipped.
+- [ ] DEC-705: closed before coding (`decided`, Bob 2026-10-31). At least 5% of the board's height above and below and 5% of its width at each side. Long content: the art shrinks first, then content is cut to fit. Never scrolled, never clipped mid-line (Bob 2026-10-31).
 - [ ] SCR-013: closed before coding (`decided`). The board never scrolls and never clips text.
 - [ ] GC1-02 trace: the playtest note did not confirm which dialog filled the height. The likely culprit is `TowerPanel` in `StartupBoard.tsx`: a full-size tower still plus the join block. The eval covers every board dialog the e2e suite opens, so the culprit is caught whichever it was.
+
+## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
+
+- Board dialogs never scroll. Fit order: shrink the art first, then cut content (whole items) to fit (Bob ruling on Illusionist conflict).
+- EV-03 is a DOM check against M "Typical dialog" (painting visible, 0 board buttons), not a screenshot compare.
 
 ## Eval approval
 
