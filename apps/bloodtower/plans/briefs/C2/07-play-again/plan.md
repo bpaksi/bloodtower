@@ -44,6 +44,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - Prefilled claims confirm with "Confirm" (mockup).
 - Optional 1–5 fun rating on the iPad is in C2 scope; it never blocks.
 - Stats title is the list label ("Game N").
+- A quit game shows "—" for Time played, as in the mockup (Bob 2026-10-31).
 
 ## Eval approval
 

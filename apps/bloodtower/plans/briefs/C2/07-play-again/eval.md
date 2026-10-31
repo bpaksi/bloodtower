@@ -12,14 +12,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a game in tonight's list drills in to its stats (SCR-021, DEC-629).
 - Method: playwright
 - How: new `c2-play-again.spec.ts`, "drill in to a quit game": play 2 days (walk, enter one building, record the skull drop at the end of each day), then quit on day 3; on the session screen pick that game on the iPad.
-- Pass evidence: the board shows the game's stats: title "Game 1", story "Proving Grounds", ended "Quit", time played, quit on day 3, moves taken (the sum of the walks made), buildings entered 1, skull drops recorded 2 (one per day ended). The iPad offers Play again and Back. Time played is a duration > 0, not `unavailable` (the mockup's "—" is a placeholder).
+- Pass evidence: the board shows the game's stats: title "Game 1", story "Proving Grounds", ended "Quit", time played, quit on day 3, moves taken (the sum of the walks made), buildings entered 1, skull drops recorded 2 (one per day ended). The iPad offers Play again and Back. For a quit game, time played reads "—" (Bob 2026-10-31, as in the mockup).
 - Fails if: the counts do not match the game played, or the drill-in happens on the board.
 
 ### EV-02 — Unrecorded values show as unavailable
 - Requirement: unknown values are shown as unavailable, never as zero (root CLAUDE.md).
 - Method: unit
 - How: engine view test "stats before the first skull prompt": a game quit on day 1 before the day's skull prompt, and a game quit after one.
-- Pass evidence: the first reads skull drops `unavailable`; the second reads 1. Time played reads `unavailable` when the log has no start mark.
+- Pass evidence: the first reads skull drops `unavailable`; the second reads 1. Time played for a quit game reads "—" (Bob 2026-10-31).
 - Fails if: the first game shows 0.
 
 ### EV-03 — Play again keeps the story, settings and heroes
@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: SCR-019 slice per the mockup.
 - Method: playwright; board 1920×1080, iPad 768×1024
 - How: open a quit game from the list.
-- Pass evidence: board title = the list label ("Game N"); rows "Outcome" = "quit", "Time played" = a duration, every slice stat row from EV-01; an unrecorded value renders "unavailable" (never "0", "—" or blank); board 0 buttons. iPad body buttons "Play again" (primary), "Back", plus an optional 1–5 fun rating that never blocks.
+- Pass evidence: board title = the list label ("Game N"); rows "Outcome" = "quit", "Time played" = "—" for a quit game (Bob 2026-10-31), every slice stat row from EV-01; an unrecorded value renders "unavailable" (never "0" or blank; "—" only for Time played on a quit game); board 0 buttons. iPad body buttons "Play again" (primary), "Back", plus an optional 1–5 fun rating that never blocks.
 - Fails if: a row is missing, an unrecorded value is not "unavailable", or the rating blocks Play again.
 
 ### EV-14 — Play again confirm (M "Replace-save confirm")
@@ -98,7 +98,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: a game's stats survive a host restart.
 - Method: unit
 - How: server test: rebuild the stats from the event log after a restart.
-- Pass evidence: story, ended, time played, day ended, moves taken, buildings entered and skull drops are equal before and after the restart.
+- Pass evidence: story, ended, time played ("—"), day ended, moves taken, buildings entered and skull drops are equal before and after the restart.
 - Fails if: stats are kept only in memory.
 
 ## Assumptions surfaced
