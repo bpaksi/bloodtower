@@ -9,11 +9,11 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 ## Rules
 - The bottom toolbar is back on every iPad screen, with the gear (Menu) at its right. The toolbar is iPad chrome: it is not a body button and does not count against "one step, one primary button" (SCR-016).
 - The HUD-only iPad lock stays: on the happy path the iPad body shows only the HUD (the current step's line) and its flow buttons. Nothing exceptional sits on the happy path; every exception goes through the gear.
-- Each gear action starts on the iPad. The Story board shows the panel's full UI and only displays it (DEC-278 kept). Any choice in the panel is made on the iPad as a simple list of buttons, and the board mirrors each press. The iPad shows "See the Story board", plus the pick buttons when the panel needs a choice, plus Done/Back (Gamewright pick, pending Bob Q-GEAR-1).
-- An item is enabled only when it works right now. A disabled item shows its reason in one line under it.
+- Each gear action starts on the iPad. The Story board shows the panel's full UI and only displays it (DEC-278 kept). Any choice in the panel is made on the iPad as a simple list of buttons, and the board mirrors each press. The iPad shows "See the Story board", plus the pick buttons when the panel needs a choice, plus Done/Back (Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET).
+- An item is enabled only when it works right now. A disabled item shows its reason in one line under it (Bob approved 2026-10-31 6:14–6:15 PM ET: greyed out with a one-line reason).
 - The game pauses while a Story board panel is open and resumes on Done.
 - First press wins across iPads: a second iPad's press on the same item or panel while one is open changes nothing.
-- Help: a "?" button at the left end of the bottom toolbar, on every iPad screen. It opens a short help sheet on the iPad itself for the current screen: what the screen is and what to do next, from that screen's Loremaster help line (2026-10-31; the Help lines table in C2 feature 04's spec). Close returns to the same screen, unchanged. It is not a gear item, sends nothing to the host, and the game does not pause (Gamewright design, parent-approved 2026-10-31).
+- Help: a "?" button at the left end of the bottom toolbar, on every iPad screen. It opens a short help sheet on the iPad itself for the current screen: what the screen is and what to do next, from that screen's Loremaster help line (2026-10-31; the Help lines table in C2 feature 04's spec). Close returns to the same screen, unchanged. It is not a gear item, sends nothing to the host, and the game does not pause (Gamewright design, parent-approved 2026-10-31) (Bob approved the help design as drafted, 2026-10-31 6:14–6:15 PM ET).
 - Next-only iPad screens are kept to a minimum (Bob 2026-10-31 10:38 AM ET): a screen whose only action is Next is merged into the next screen or auto-advances when its narration or cue ends (4 s when it has no audio). Next stays only where a player must confirm the physical board.
 - Auto-advance (4 s): none in C2.
 
@@ -26,7 +26,7 @@ The happy path stays easy: the iPad body shows only the current step and its flo
   - Version + debug toggle line, then "Close" last (DEC-707).
 - Item names are exact, with no number prefix (the numbers in this list and any "N · " in the mockup are reference only).
 - Disabled items: greyed, never hidden (DEC-227), with a one-line reason under each, e.g. "Only in a game.", "The tower is connected.", "C3+" (items that need C3 features in a C2 build: Split party, Use a potion or item).
-- Panel open: the iPad shows "See the Story board", the panel's pick buttons as a simple list when it needs a choice (e.g. Volume 0/1/2, Keep, Try another; a hero, then an item), and Done (Back where there is a step back); the Story board shows the panel's full UI, display only, and mirrors each iPad pick (Gamewright pick, pending Bob Q-GEAR-1); the game is paused until Done. Another iPad that opens the Menu sees the panel's item disabled with the reason "Open on another iPad."
+- Panel open: the iPad shows "See the Story board", the panel's pick buttons as a simple list when it needs a choice (e.g. Volume 0/1/2, Keep, Try another; a hero, then an item), and Done (Back where there is a step back); the Story board shows the panel's full UI, display only, and mirrors each iPad pick (Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET); the game is paused until Done. Another iPad that opens the Menu sees the panel's item disabled with the reason "Open on another iPad."
 - Confirm sub-state for table-wide items (DEC-230), e.g. Save and quit; the confirm stays on the iPad.
 - Help open: a sheet on the iPad with the current screen's help line (Help lines below) and Close.
 
@@ -84,6 +84,6 @@ Close or Escape → the iPad screen under it, unchanged. Done → the screen und
 
 ## Open questions
 - Resolved: the Menu keeps Look up, Join another iPad and Change who holds whom (Bob 2026-10-31); the gear list above (Bob approved 2026-10-31 10:38). Portrait only.
-- Q-GEAR-1: picks inside a gear panel (volume, split, potion: hero then item) are iPad buttons; the Story board shows the full panel and mirrors them, display only, so DEC-278 is kept (Gamewright pick, pending Bob Q-GEAR-1).
-- Q-GEAR-2: Hero panel → Current party, Items → Use a potion or item, Roll → Look up (rules or a card) (Gamewright pick, pending Bob Q-GEAR-2).
+- Resolved Q-GEAR-1 (option a): picks inside a gear panel (volume, split, potion: hero then item) are made on the iPad with simple buttons; the Story board shows the full panel and mirrors them, display only, so DEC-278 is kept (Bob approved Q-GEAR-1 (a), 2026-10-31 6:13–6:14 PM ET).
+- Resolved Q-GEAR-2 (option a): the old Look up items are folded into the gear list: Hero panel → Current party, Items → Use a potion or item, Roll → Look up (rules or a card) (Bob approved Q-GEAR-2 (a), 2026-10-31 6:13–6:14 PM ET).
 - Which items are enabled in each C2 state: Pause/Resume, Current party, Use a potion or item and Split party only in a game; Tower only when the tower is lost or the session plays without it; Join another iPad always; Game board setup and Volume always (Gamewright default).
