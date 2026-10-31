@@ -108,8 +108,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-14 — A disabled item shows its reason
 - Requirement: an item is enabled only when it works now; a disabled item shows a one-line reason (DEC-227; Bob 2026-10-31 10:37 AM ET).
 - Method: unit (`chromeBar.test.ts`) + playwright
-- How: render the Menu in play with the tower connected in a C2 build.
-- Pass evidence: every `disabled` item has exactly one `[data-reason]` line: "Split party" and "Use a potion or item" read "C3+"; "Tower" reads "The tower is connected."; each disabled row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; enabled items have no reason line and no `.bt-row--disabled`.
+- How: render the Menu in play with the tower connected in a C2 build; then open the Menu on the session screen (no game yet).
+- Pass evidence: every `disabled` item has exactly one `[data-reason]` line: "Split party" and "Use a potion or item" read "C3+"; "Tower" reads "The tower is connected."; on the session screen "Look up" and "Pause/Resume" each read "Only in a game."; each disabled row is greyed (`.bt-row--disabled`, `aria-disabled="true"`, opacity .5) and still visible; enabled items have no reason line and no `.bt-row--disabled`.
 - Fails if: a disabled item has no reason, or an enabled item is greyed; or a disabled item is hidden, not greyed, or has a reason other than its listed text.
 
 ### EV-15 — First press wins across iPads
