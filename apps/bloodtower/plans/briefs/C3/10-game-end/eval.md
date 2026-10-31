@@ -11,14 +11,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-01 — A lost chapter ends the game
 - Requirement: MEC-032 .42.
 - Method: unit
-- How: `game/loop.test.ts`: chapter 2 lost on skulls.
+- How: `game/loop.test.ts`, fixture with `c3_end_after_chapter_1: false`: chapter 2 lost on skulls.
 - Pass evidence: the game exits lost; no chapter 3; the loss scene for `skulls` is picked (DEC-144).
 - Fails if: the next chapter opens.
 
 ### EV-02 — The loss scene matches the way it was lost
 - Requirement: DEC-144, DEC-043.
 - Method: unit
-- How: losses by skulls, by corruption, by fallen buildings.
+- How: losses by skulls, by a third corruption, by 4 fallen buildings (count: Gamewright proposal, pending Bob, Q-C3-05).
 - Pass evidence: each picks its own scene ID.
 - Fails if: one loss scene for all.
 
@@ -32,16 +32,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-04 — The record is written
 - Requirement: DEC-116, DEC-117.
 - Method: unit
-- How: finish a game.
-- Pass evidence: start and end time, active length, outcome and how it ended stored; each seated hero's games played +1, won +1 on a win.
-- Fails if: the record is not written on a loss.
+- How: two runs with 2 seated heroes: one lost, one won; each with a 30 s pause mid-game.
+- Pass evidence: both store start and end time, active length, outcome and how it ended. Loss: each seated hero's played +1, won unchanged. Win: played +1 and won +1. Active length = sum of unpaused time (±1 s), excluding the pause.
+- Fails if: the record is not written on a loss, a loss adds a win, or the pause counts toward active length.
 
 ### EV-05 — Stats come from stored stats
 - Requirement: SCR-019, DEC-627.
 - Method: unit
 - How: project the stats view after a game.
-- Pass evidence: outcome, time played, days, quests done, corruptions taken, gold left and key moments, all read from the event log.
-- Fails if: any number is computed from live state only.
+- Pass evidence: outcome, time played, days, quests done, corruptions taken, gold left and key moments, all read from the event log; after the end, mutate the live state (purse +50, day counter +3) and re-project: the stats view is unchanged.
+- Fails if: any stats value changes after the live state is mutated.
 
 ### EV-06 — Tonight's games shows the outcome
 - Requirement: DEC-214, SCR-021.

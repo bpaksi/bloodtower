@@ -39,16 +39,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Copy stays placeholder
 - Requirement: No story copy is invented in this feature.
 - Method: unit
-- How: scan every player-facing string in the pack.
-- Pass evidence: each starts with `[COPY:`.
+- How: scan every value under the schema fields `title`, `tagline`, `narration`, `text`, `label`, `line`, `goal`, `hook` and `summary` in every pack file, except the pack `title` (checked by EV-06).
+- Pass evidence: each starts with `[COPY:`; the scan's field list is the schema's full list of player-facing fields (a test fails if the schema gains a string field not in the list).
 - Fails if: a string is written prose.
 
 ### EV-06 — The title players see
 - Requirement: The Ruined Keep is the shown title; Proving Grounds the ID (DEC-665, DEC-666).
 - Method: playwright
 - How: `w3-pick-story.spec.ts`.
-- Pass evidence: the cover reads The Ruined Keep; the URL/state pack ID is `test`.
-- Fails if: the cover still reads Proving Grounds.
+- Pass evidence: the cover reads The Ruined Keep; the URL/state pack ID is `test`; the tagline is a `[COPY: …]` placeholder or The Ruined Keep's own tagline, not the slice's.
+- Fails if: the cover still reads Proving Grounds, or the old slice tagline shows.
+
+### EV-08 — Three items, each from its quest
+- Requirement: DEC-672, DEC-673, DEC-674 (three items; Gamewright default, Bob to confirm).
+- Method: unit
+- How: lint test "ruined keep items".
+- Pass evidence: the pack declares exactly 3 items: Tomas's Map (given by The Herald's "take the job", DEC-672), the Signet (given by The Barrow, DEC-662/DEC-054; used only by The Lock's "Turn the Signet", DEC-674), the oath-blade (given by The Shrine; +3 Wild vs The Warden, DEC-673).
+- Fails if: there are 2 or 4+ items, an item has no giving quest, or a quest gives the wrong item.
 
 ## Survival evals (one per survival invariant in plan.md)
 
@@ -56,8 +63,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-666: nothing gets renamed.
 - Method: unit
 - How: autosave on the old slice pack; load the new pack.
-- Pass evidence: the autosave is matched to pack `test` (it may be refused as an older version per feature 01's rule, never mismatched to another story).
-- Fails if: the autosave points at a missing pack.
+- Pass evidence: the old save is dropped per 01 EV-06 (row kept, no Continue) and that one `save skipped: pre-C3 format` log line names pack `test`; it is never matched to another pack.
+- Fails if: the autosave is resumed, is matched to another pack, or the log line names no pack or another pack.
 
 ## Assumptions surfaced
 
@@ -67,5 +74,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Q-C3-09: DEC-666 says the pack ID is Proving Grounds, but the folder's `pack_id` is `test`. Rename to `proving-grounds`, or keep `test`?
 - Q-C3-10: which spaces hold The Ambush ("a wild space"), The Lock and The Last Stand? DEC-662 names the kingdom only; P-003 used Muted Forest, Howling Desert and The Grass Sea. Are the probe's spaces the ruling?
-- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short?
+- Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? Gamewright proposal, pending Bob: 10 gold; short group pays all + 2 HP per present hero, never below 1.
 - Q-C3-11: The Last Stand's foe: DEC-647 draws a random level-3 foe. Is that the intent, or does the story name the oathsworn guard?

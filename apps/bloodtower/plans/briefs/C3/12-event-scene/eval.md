@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-027, UI-041.
 - Method: playwright
 - How: `c3-event.spec.ts` with a seed that draws a hazard.
-- Pass evidence: board: the painting and a Scroll; iPad: two cost buttons; after a press the effect line shows.
+- Pass evidence: board: the painting and a Scroll; iPad: two cost buttons; after pressing the hit-point cost the board shows the cost line `−2 hit points each` and each present hero's hit points drop by 2 on the hero panel.
 - Fails if: the cost is applied with no choice.
 
 ### EV-02 — Foes: Go around and Pay them off, no Fight
@@ -42,6 +42,34 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: board and iPad at the hazard and foes states; compare with ./mockup.html `#hazard`, `#foes`.
 - Pass evidence: four images matching.
 - Fails if: a part out of order.
+
+### EV-07 — Windfall shows a Reveal
+- Requirement: UI-036, DEC-029.
+- Method: playwright
+- How: seed for windfall, 2-hero group.
+- Pass evidence: the board shows a Reveal with "+5 gold"; purse +5 on the edge band; iPad shows Next only.
+- Fails if: no Reveal, or the amount differs.
+
+### EV-08 — The counter saved them
+- Requirement: DEC-027.
+- Method: playwright
+- How: seed for plague with a present Healer.
+- Pass evidence: the board shows the saved state `[COPY: counter saved]`; no cost buttons on the iPad, only Next; no hit points change.
+- Fails if: cost buttons show or a cost applies.
+
+### EV-09 — Disaster: Go around and Pay them off, no Fight
+- Requirement: DEC-028, Q-C3-02.
+- Method: playwright
+- How: seed that draws a disaster.
+- Pass evidence: exactly two choices, Go around and Pay them off; no Fight, enabled or disabled.
+- Fails if: Fight shows, or either choice is missing.
+
+### EV-10 — Two iPads press different choices: first wins
+- Requirement: DEC-019.
+- Method: playwright
+- How: 2 present heroes on two iPads at a hazard; press cost 1 on iPad A then cost 2 on iPad B within 200 ms.
+- Pass evidence: cost 1 is applied once; iPad B's press changes nothing; both iPads move on to the same next step.
+- Fails if: both costs apply, or cost 2 wins.
 
 ## Survival evals (one per survival invariant in plan.md)
 

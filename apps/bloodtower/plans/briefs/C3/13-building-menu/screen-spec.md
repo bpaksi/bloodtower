@@ -12,10 +12,10 @@ Let a group spend moves and gold at a building (MEC-036).
 
 ## States
 
-- **Menu** (UI-043): Each building shows its own offers plus Leave, and no Trade (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally, Virtue draw or Cleanse; sanctuary: Cure or Cleanse; village: Rest or Cleanse; bazaar: Cleanse only. Picks with move and gold cost, quest marker first, disabled when unaffordable, shrunk by skulls.
+- **Menu** (UI-043): Each building shows its own offers plus Leave, and no Trade (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally (5 gold + 1 move), Virtue draw (10 gold + 1 move) or Cleanse; sanctuary: Cure (10 gold + 1 move, first one free each chapter) or Cleanse; village: tavern Rest (+3 hit points per move; Gamewright default, Bob to confirm) or Cleanse; bazaar: Cleanse only (Gamewright proposal, pending Bob). Picks with move and gold cost, quest marker first, disabled when unaffordable, shrunk by skulls.
 - **Rally** (DEC-158): heals to full; the result on the board.
 - **Cure** (DEC-170, DEC-700): pick the hero, the corruption goes; free or priced.
-- **Rest** (MEC-075): pick moves; hit points per move.
+- **Rest** (MEC-075): the village's tavern rest (Gamewright default, Bob to confirm); pick moves; +3 hit points per move.
 - **Virtue draw** (DEC-544): the tile on a Reveal; a fifth means giving one back.
 - **Cleanse** (DEC-377): −1 skull, "+1 day".
 - **No Trade**: no Trade, shop or NPC pick at any building (DEC-502).
@@ -35,7 +35,7 @@ Back to the menu for the next pick, or the move map (UI-023) on Leave or no move
 
 ## OPEN questions
 
-- DEFAULT building menus (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally, Virtue draw or Cleanse; sanctuary: Cure or Cleanse; village: Rest or Cleanse; bazaar: Cleanse only.
+- DEFAULT building menus (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally (5 gold + 1 move), Virtue draw (10 gold + 1 move) or Cleanse; sanctuary: Cure (10 gold + 1 move, first one free each chapter) or Cleanse; village: tavern Rest (+3 hit points per move; Gamewright default, Bob to confirm) or Cleanse; bazaar: Cleanse only (Gamewright proposal, pending Bob).
 
 - Q-C3-13, Q-C3-14 (1.0 picks per building kind)
 - DEFAULT Q-C3-20 (Gamewright default, pending Bob's review): the hero picks which corruption a cure removes.

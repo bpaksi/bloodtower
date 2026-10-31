@@ -18,22 +18,22 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — No v1 import is left
 - Requirement: The v1 story-card shapes are gone (C2 audit).
 - Method: unit
-- How: `rg` check in a vitest: no file under `src/` imports `protocols/pack`, `protocols/storyCard` or `server/pack/load`.
-- Pass evidence: zero matches.
-- Fails if: a shim re-exports the v1 shapes under a new name.
+- How: vitest: (1) `protocols/pack.ts`, `protocols/storyCard.ts` and `server/pack/load.ts` do not exist; (2) `rg` finds no file under `src/` importing `protocols/pack`, `protocols/storyCard` or `server/pack/load`; (3) `rg` finds no declaration or re-export (`export type|interface|const|function`, `export { … as … }`, `export * from`) of the v1 symbols `StoryCard`, `StoryCardV1`, `PackV1`, `PackMetaV1`, `loadPackV1`, `loadStoryCard` anywhere under `src/`, and no module re-exports from a path under `server/pack/` other than `v2/`, `assets`, `camera`, `audio`.
+- Pass evidence: the three files are absent; zero import matches; zero symbol/re-export matches.
+- Fails if: any of the three files exists, or a shim re-exports the v1 shapes or loader under a new name or path.
 
 ### EV-03 — Pick story is unchanged
 - Requirement: The story list shows what it showed before (SCR-007).
 - Method: playwright
 - How: `w3-pick-story.spec.ts`: open Pick story.
-- Pass evidence: the same covers in the same order as on `main` before the change; Dracula still shows its settings without Long (C2 feature 01).
+- Pass evidence: the ordered pack ids and titles match a committed fixture `w3-pick-story.main.json` captured from `main` before the change; Dracula still shows its settings without Long (C2 feature 01).
 - Fails if: a story drops out, or Dracula shows as not ready when it was playable.
 
 ### EV-04 — A broken v2 pack fails loudly
 - Requirement: A pack that fails lint never reaches Pick story (pack lint, error rule).
 - Method: unit
-- How: load a copy of `packs/test` with a missing chapter ID.
-- Pass evidence: the loader returns a lint issue naming the file and the ID; the story shows as Not ready (SCR-009); no exception escapes.
+- How: load a copy of `packs/test` where one quest's `chapter:` is `ch-9`, which no chapter declares.
+- Pass evidence: the loader returns a lint issue with `file: …/quests.yaml` and `id: ch-9`; the story shows as Not ready (SCR-009); no exception escapes.
 - Fails if: the host crashes, or the story is listed as playable.
 
 ### EV-05 — Dead files removed
@@ -49,12 +49,19 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C3-07 (Bob, 2026-10-31): pre-C3 saves are dropped; the error rule; DEC-208.
 - Method: unit
 - How: seed the DB with an autosave written by `main` before this change; start the host.
-- Pass evidence: Pick story shows no Continue for it; the host log has one line naming the old version; a New game starts clean. No exception, no migration.
-- Fails if: the host throws at startup, Continue is offered for the old save, or the save is migrated and resumed.
+- Pass evidence: no Continue on the session screen (C2 06) or on Pick story; the host log has exactly one line `save skipped: pre-C3 format` with `{version}`; the row is still in the DB, unchanged (kept and ignored, Gamewright default, Bob to confirm); a New game starts clean. No exception, no migration.
+- Fails if: the host throws at startup, Continue is offered for the old save, the log line is missing or repeated, the row is deleted or rewritten, or the save is migrated and resumed.
+
+### EV-07 — Asset serving works on v2 paths only
+- Requirement: plan "keeps today's asset serving working on v2 paths only".
+- Method: unit
+- How: server test: GET one cover and one audio asset of `packs/test` by its v2 path, then by its old v1 path.
+- Pass evidence: both v2 GETs return 200 with the file's bytes; both v1 GETs return 404.
+- Fails if: a v2 path fails, or a v1 path still serves.
 
 ## Assumptions surfaced
 
-- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled).
+- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled). The row is kept and ignored, logging `save skipped: pre-C3 format` (Gamewright default, Bob to confirm).
 
 ## OPEN questions
 

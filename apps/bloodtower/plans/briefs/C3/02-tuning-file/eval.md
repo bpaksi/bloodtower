@@ -18,15 +18,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — No rules code holds a number
 - Requirement: Numbers come from the tuning file only (DEC-500).
 - Method: unit
-- How: change the skull supply to 30 in a test copy; build a new game state.
-- Pass evidence: the state's supply is 30.
-- Fails if: a hard-coded 24 survives anywhere in the engine.
+- How: in a test copy change four keys: skull supply 24→30, move floor 2→3, Standard event chance 40→50, won-quest gold 5→7. Build a new game state with a fixed seed and run one day and one won quest.
+- Pass evidence: supply total is 30; no move roll is below 3 over 1,000 seeded rolls; 10,000 Standard event draws give 50% ±2; the won quest adds 7 gold.
+- Fails if: any of the four is still the old value (a hard-coded number survives).
 
 ### EV-03 — A bad tuning file fails lint
 - Requirement: A missing or non-numeric value is a lint issue (pack lint).
 - Method: unit
-- How: delete `skulls.supply` from a test copy.
-- Pass evidence: lint names `tuning.yaml` and the key; the base pack does not load.
+- How: two cases on test copies: (a) delete `skulls.supply`; (b) set `skulls.supply: 'lots'`.
+- Pass evidence: in each case lint names `tuning.yaml` and `skulls.supply`; the base pack does not load.
 - Fails if: the engine falls back to a default silently.
 
 ## Survival evals (one per survival invariant in plan.md)
@@ -34,13 +34,20 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-04 — Continue keeps the game's tuning
 - Requirement: A game resumes with the numbers it began with.
 - Method: unit
-- How: start a game, autosave, change the tuning file, Continue.
-- Pass evidence: the resumed state's tuning equals the one at Begin.
+- How: start a game, autosave, change skull supply 24→30 in the tuning file, Continue.
+- Pass evidence: the resumed state's supply total is still 24 and its whole tuning equals the one at Begin.
 - Fails if: Continue reads the new file.
+
+### EV-05 — The two C3 switches are present and typed
+- Requirement: plan "Holds the two C3 switches" (Q-C3-01, Q-C3-02).
+- Method: unit
+- How: read the shipped `tuning.yaml`; then lint test copies with each switch deleted, and each set to `"yes"`.
+- Pass evidence: shipped file has `c3_end_after_chapter_1: true` and `fight_enabled: false`; each broken copy gives a lint issue naming the key.
+- Fails if: a switch is missing, has the wrong value, or a missing/non-boolean switch passes lint.
 
 ## Assumptions surfaced
 
-- Tuning is stored on the game state at Begin, so a mid-game file change has no effect. Bob: OK?
+- Tuning is stored on the game state at Begin, so a mid-game file change has no effect. Tuning is fixed at Begin (Gamewright default, Bob to confirm).
 - The file lives in the base pack, not the story pack; a story cannot override it in 1.0. OPEN Q-C3-08.
 
 ## OPEN questions

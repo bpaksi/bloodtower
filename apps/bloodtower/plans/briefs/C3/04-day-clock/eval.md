@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: 1 a night for 1–2 heroes; 1, and 2 every other night, for 3–4 (DEC-564).
 - Method: unit
 - How: sim four nights with 2 heroes and with 4.
-- Pass evidence: 2 heroes: 1,1,1,1. 4 heroes: the DEC-564 pattern (1,2,1,2 or as the card's phase sets it).
+- Pass evidence: 2 heroes: 1,1,1,1. 4 heroes, nights 1–4 of the game: exactly 1,2,1,2 (night 1 drops 1; even-numbered nights drop 2; Gamewright default for DEC-564's "every other day" phase, Bob to confirm). Same for 3 heroes.
 - Fails if: 4 heroes drop 2 every night, or 2 heroes ever drop 2.
 
 ### EV-03 — A won quest skips the whole night's drop
@@ -64,6 +64,34 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: refused; the Regroup step is the only node that changes groups.
 - Fails if: groups change during a turn.
 
+### EV-11 — Regroup changes groups at day start
+- Requirement: DEC-640, MEC-034 .38–.42.
+- Method: unit
+- How: 2 heroes in one group; at day start the Regroup node runs; press split; next day press join.
+- Pass evidence: the Regroup node offers split and join; after split there are 2 groups, each with its own turn that day; after join, 1 group.
+- Fails if: Regroup is not offered at day start, or the split/join does not change groups.
+
+### EV-12 — Oldest group goes first
+- Requirement: DEC-148.
+- Method: unit
+- How: create groups A, B, C in that order (C by a later split); run a day.
+- Pass evidence: turns run A, B, C in creation order, regardless of hero order or seat.
+- Fails if: any other order.
+
+### EV-13 — The adversary's move is skipped
+- Requirement: DEC-644.
+- Method: unit
+- How: run 3 full days with a fixed seed; read the node trace and event log.
+- Pass evidence: no `.23` node runs; no adversary event is logged.
+- Fails if: a `.23` node runs or an adversary event appears.
+
+### EV-14 — Four fallen buildings lose the game
+- Requirement: DEC-043 fallen-buildings loss; count 4 (Gamewright proposal, pending Bob, Q-C3-05), read from tuning key `loss.fallen_buildings`.
+- Method: unit
+- How: fixed board; fell buildings one by one with skulls at the close; supply kept above 0.
+- Pass evidence: after the 3rd falls the game goes on; when the 4th falls, the chapter check reports lost with reason `buildings` at MEC-033 .11; with the tuning key set to 5 in a test copy, the 4th does not lose.
+- Fails if: the loss fires at 3 or 5 fallen, fires before the drop resolves, or ignores the tuning key.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-09 — Continue mid-day replays nothing
@@ -78,7 +106,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: unit
 - How: restart after day 2's drop; rebuild from the event log.
 - Pass evidence: same supply, same skulls per building.
-- Fails if: the supply resets to 24.
+- Fails if: the supply resets to the tuning supply, or any building's skull count changes.
 
 ## Assumptions surfaced
 
@@ -87,4 +115,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - Q-C3-04: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives?
-- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it.
+- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. Gamewright proposal, pending Bob: 4 fallen buildings.

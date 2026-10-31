@@ -21,7 +21,14 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-MEC-036's menu for each 1.0 building kind, shrunk by its skulls (DEC-093), quest marker first (DEC-083). The 1.0 picks: the citadel rally (5 gold, heals to full, DEC-158) and virtue draw (10 gold, DEC-544); the sanctuary cure (10 gold, one corruption, first each chapter free, DEC-170, DEC-700); the tavern rest (+3 hit points a move, DEC-174, MEC-075); Cleanse on every standing building (−1 skull, DEC-377, shown "+1 day", DEC-686). Every pick costs 1 move (DEC-078); gold leaves the purse (DEC-176). Silver Tongue takes a quarter off (DEC-681). Talk and shop goods wait for 1.1 (DEC-502).
+MEC-036's menu for each 1.0 building kind, shrunk by its skulls (DEC-093), quest marker first (DEC-083). The 1.0 picks: the citadel rally (5 gold, heals to full, DEC-158) and virtue draw (10 gold, DEC-544); the sanctuary cure (10 gold, one corruption, first each chapter free, DEC-170, DEC-700); the village tavern rest (+3 hit points a move, DEC-174, MEC-075; the rest is the village's tavern rest, here and in feature 13: Gamewright default, Bob to confirm); Cleanse on every standing building (−1 skull, DEC-377, shown "+1 day", DEC-686). Every pick costs 1 move (DEC-078); gold leaves the purse (DEC-176). Silver Tongue takes a quarter off (DEC-681). Talk and shop goods wait for 1.1 (DEC-502).
+
+C3 menus (Gamewright proposal, pending Bob), all prices from tuning:
+- Citadel: Rally (5 gold + 1 move, heals to full), Virtue draw (10 gold + 1 move), or Cleanse.
+- Sanctuary: cure (10 gold + 1 move, first one free each chapter per hero), or Cleanse.
+- Village: tavern rest (+3 hit points per move), or Cleanse.
+- Bazaar: Cleanse only.
+- A fallen building is not enterable and offers nothing, Cleanse included.
 
 ## Cutover
 
@@ -32,13 +39,13 @@ Cutover: N
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - The free-cure-used flag per hero per chapter survives Continue and a restart (DEC-700).
+  - The free-cure-used flag per hero per chapter survives Continue (EV-08) and a host restart (EV-12) (DEC-700).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-08 all pass (verifier table on PR).
+- [ ] EV-01 … EV-12 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -63,8 +70,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
-- Q-C3-13: which picks does each 1.0 building kind offer? DEC-158 lists a citadel potion and an audience; DEC-502 cuts NPCs and shops. Are the potion and audience out of 1.0?
-- Q-C3-14: is there a 1.0 bazaar or village pick beyond rest and Cleanse, or are they Cleanse-only (P-003 gap 2 says "in 1.0 those sell nothing")?
+- Q-C3-13: which picks does each 1.0 building kind offer? DEC-158 lists a citadel potion and an audience; DEC-502 cuts NPCs and shops. Are the potion and audience out of 1.0? Gamewright proposal, pending Bob: citadel Rally/Virtue draw/Cleanse; sanctuary cure/Cleanse; village tavern rest/Cleanse; bazaar Cleanse only.
+- Q-C3-14: is there a 1.0 bazaar or village pick beyond rest and Cleanse, or are they Cleanse-only (P-003 gap 2 says "in 1.0 those sell nothing")? Gamewright proposal, pending Bob: village = tavern rest or Cleanse; bazaar = Cleanse only.
 
 ## Eval approval
 

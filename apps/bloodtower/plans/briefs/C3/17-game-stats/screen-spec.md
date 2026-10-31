@@ -22,7 +22,7 @@ Show the game in numbers (SCR-019).
 
 ## Mechanics behind it
 
-SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average.
+SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average. "Best" is the shortest active length of a won game of this story (Gamewright default, Bob to confirm); the average is over all finished games of this story.
 
 ## What happens next
 

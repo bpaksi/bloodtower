@@ -21,26 +21,26 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-The host and the engine read every story from pack format v2 (`server/pack/v2/load.ts`). The v1 loader and its story-card shapes go. Today's `packs/test` (already `format: 2`) keeps loading; Dracula stays listed as metadata (DEC-691). The asset half of the v1 loader is A1's job; this feature keeps today's asset serving working on v2 paths only.
+The host and the engine read every story from pack format v2 (`server/pack/v2/load.ts`). The v1 loader and its story-card shapes go. Today's `packs/test` (already `format: 2`) keeps loading; Dracula stays listed as metadata (DEC-691). The asset half of the v1 loader is A1's job; this feature keeps today's asset serving working on v2 paths only. Asset serving does not need `server/pack/load.ts`: it moves to `server/pack/assets.ts` (already in Touches), so `load.ts` is deleted outright and no v1 file survives.
 
 ## Cutover
 
 Cutover: Y
 
-- `server/pack/load.ts` v1 story metadata path and `protocols/pack.ts`, `storyCard.ts`: story loading reads pack format v2 only (C2 audit, "Lines for the C3 plan").
+- `server/pack/load.ts` (deleted whole; asset serving lives in `server/pack/assets.ts`) and `protocols/pack.ts`, `storyCard.ts`: story loading reads pack format v2 only (C2 audit, "Lines for the C3 plan").
 - Dead files: `server/timing/{log,stats}.ts`, `server/control/lock.ts` and their tests (C2 audit), unless a C2 feature already removed them.
 
 ## Survival invariants
 
 - Continue, restore, and restart must keep:
-  - An autosave written before this feature by the v1 path is dropped (Q-C3-07): it is not offered as Continue, the host logs one line naming the old version, and nothing crashes (the error rule). No migration code.
+  - An autosave written before this feature by the v1 path is dropped (Q-C3-07): it is not offered as Continue, the row is kept in the DB and ignored (Gamewright default, Bob to confirm), the host logs one line `save skipped: pre-C3 format` with the old version, and nothing crashes (the error rule). No migration code.
   - Pick story lists the same stories, in the same order, before and after.
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR).
+- [ ] EV-01 … EV-07 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist

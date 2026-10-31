@@ -18,16 +18,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-02 — The draw is seeded and weighted
 - Requirement: DEC-022 weights, DEC-669 chances.
 - Method: unit
-- How: 10,000 seeded draws at Standard.
-- Pass evidence: about 40% fire; types near 30/15/20/20/5/10; the same seed gives the same sequence.
+- How: 10,000 seeded draws at Standard, and 10,000 at Short.
+- Pass evidence: Standard 40% ±2 fire; Short 30% ±2 fire; types near 30/15/20/20/5/10; the same seed gives the same sequence.
 - Fails if: weights or chance off by more than 2 points, or unseeded.
 
 ### EV-03 — Hazard: the group picks one of two costs
 - Requirement: DEC-027.
 - Method: unit
-- How: hazard with no counter held.
-- Pass evidence: two cost options; the picked one is paid (e.g. −2 hit points to each present hero, DEC-703); a held counter cancels it instead.
-- Fails if: the cost is applied without a choice.
+- How: two cases with a fixed hazard seed (plague). (a) No present hero holds the counter: pick the hit-point cost. (b) A present Healer holds the counter (DEC-027, DEC-100).
+- Pass evidence: (a) exactly two cost options; after the pick each present hero has −2 hit points (DEC-703), nothing else changes. (b) no cost options are offered, no hit points or gold change, the event logs `cancelled by counter`; the counter is a class, so it is not consumed and the Healer still counters the next plague.
+- Fails if: (a) a cost is applied without a choice; (b) any cost is applied, a choice is offered, or the counter is removed.
 
 ### EV-04 — Go around never fells
 - Requirement: Go around −2 hit points, never below 1 (DEC-018, MEC-013).
@@ -53,7 +53,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-07 — Fight is hidden until C4
 - Requirement: Q-C3-02 (Bob, 2026-10-31): hide Fight until C4.
 - Method: unit
-- How: seeds that draw foes and disaster; read the offered choices; then flip the C4 switch in a test tuning file.
+- How: seeds that draw foes and disaster; read the offered choices; then set `fight_enabled: true` in a test tuning file.
 - Pass evidence: C3 tuning: only Go around and Pay them off are offered, and the battle loop is never entered. Switch on: Fight is offered too.
 - Fails if: Fight is offered, shown disabled, or auto-resolved in C3, or the battle loop is called.
 

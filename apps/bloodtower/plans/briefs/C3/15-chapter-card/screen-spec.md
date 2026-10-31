@@ -12,11 +12,13 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 
 ## States
 
-- **Chapter card** (UI-020): painting, "Chapter 1: The Roads", "Finish The Herald and The Ambush before the days run out.".
+- **Chapter card** (UI-020): painting, `[COPY: chapter 1 name]`, `[COPY: chapter 1 goal]`.
 - **Stamped won** (.15).
 - **Close Scroll** (.14): "The roads are quiet again.".
-- **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and "A seal breaks. Its glyph lends you strength: {boon}." (boon wording waits on Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off)
+- **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and `[COPY: seal break, {boon}]` (boon wording waits on Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off)
 - **Freed skulls** (.22 to .30): kingdom for each, then the building, as after a drop.
+- **C3 chapter 1 win** (Q-C3-01): the stamped card, then the close Scroll, then the outcome scene (feature 16); no seal, no freed skulls (Gamewright default, Bob to confirm).
+- Story text on this screen is `[COPY: ...]` per the rule (Gamewright default, Bob to confirm).
 
 ## Player actions
 

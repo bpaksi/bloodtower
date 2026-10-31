@@ -39,7 +39,7 @@ Cutover: Y
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-10 all pass (verifier table on PR).
+- [ ] EV-01 … EV-14 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -66,7 +66,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## OPEN questions
 
 - Q-C3-04: how is "days left" counted for 3–4 heroes, whose drop alternates 1 and 2 (DEC-564)? Floor of supply ÷ 1.5, or a count of the actual nights the pattern gives?
-- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it.
+- Q-C3-05: the fallen-buildings loss (DEC-043): how many fallen buildings lose the game? DEC-703 has no row for it. Gamewright proposal, pending Bob: 4 fallen buildings.
 
 ## Eval approval
 
