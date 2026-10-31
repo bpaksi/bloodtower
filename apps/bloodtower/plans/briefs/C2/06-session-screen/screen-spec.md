@@ -10,7 +10,7 @@ The hub between games (DEC-214, SCR-021, MEC-039 .27 to .32): go on, start fresh
 - After New game → Yes, Continue is hidden until Begin (Bob 2026-10-31).
 - Replace-save confirm: New game while an autosave exists → "This replaces the saved game. Are you sure?" (DEC-709; this line is card text).
 - Done confirm: "Are you sure?" (DEC-713, DEC-230).
-- Session over: board back to landing painting (SCR-002); iPads "The session is over", no buttons and no Menu gear, then leave (DEC-713).
+- Session over: board back to landing painting (SCR-002); iPads "The session is over", no body buttons, then leave (DEC-713). The toolbar stays (Bob 2026-10-31 10:37 AM ET): "?" works; every gear item is disabled with the reason "The session is over.".
 - All iPads dropped: board shows the join QR until one joins (DEC-712).
 
 ## Player actions

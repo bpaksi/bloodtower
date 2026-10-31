@@ -17,7 +17,7 @@ Start the evening once: join, base board out, tower decided and ready, before th
 
 ## Sound first on Pick story (Bob 2026-10-31 10:30 AM ET)
 Browsers block audio until a tap, so sound is the first thing on Pick story:
-1. State 7a, Enable sound: each iPad shows only the prompt "Tap once to turn on this iPad's sound." and one primary button "Enable sound", plus the chrome (bottom bar and Menu gear); nothing else (locked copy, Bob 2026-10-31 10:33 ET). Its tap unlocks that iPad's browser audio. Every iPad needs its own tap; one iPad's tap never unlocks another. No sound plays before it.
+1. State 7a, Enable sound: each iPad shows only the prompt "Tap once to turn on this iPad's sound." and one primary button "Enable sound", plus the chrome (bottom toolbar: "?" at the left, Menu gear at the right; feature 04); nothing else (locked copy, Bob 2026-10-31 10:33 ET). Its tap unlocks that iPad's browser audio. Every iPad needs its own tap; one iPad's tap never unlocks another. No sound plays before it. The Story board during 7a shows the Pick story backdrop with no volume line; "How loud should the tower be? Press one to hear it." shows only from 7b on (Gamewright design, parent-approved 2026-10-31).
 2. State 7b, set levels: right after its unlock, that iPad shows the volume step (state 7). Keep stays disabled until a volume has been played.
 3. After Keep: the story list.
 

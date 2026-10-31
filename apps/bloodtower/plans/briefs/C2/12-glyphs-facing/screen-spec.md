@@ -9,7 +9,7 @@ With the tower in play, map tower sides to board kingdoms and set the drums, bet
 1. Which glyphs can you see? (.13/.14): board "Which glyphs can you see on the tower?" (GATED on DEC-103 glyph ruling); iPad answer. PLACEHOLDER (DEC-103) until Bob's glyph ruling.
 2. Set the drums (.15): engine change, no screen beyond progress.
 3. Which kingdom does the lit side face? (.16 to .18, MEC-017): tower lights one side (on a press: assumed per tower safety); iPad taps that kingdom.
-4. Facing set (.19); then volume (feature 05 state 7).
+4. Facing set (.19); then the Enter ends. Volume runs on Pick story (feature 05 states 7a/7b).
 - Without tower: all skipped.
 
 ## Player actions
