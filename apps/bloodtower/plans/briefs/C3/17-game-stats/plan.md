@@ -21,7 +21,7 @@ Keep this a checklist; do not write a second design doc.
 
 ## What it does
 
-SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments, and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average.
+SCR-019 as its own screen after the outcome (DEC-627): outcome, time played, days, quests done, corruptions taken, gold left, key moments (no Seals broken in C3: no seal breaks, Q-C3-01), and the optional 1–5 fun rating that never blocks Next; DEC-116's active length against the best and the average.
 
 ## Cutover
 
@@ -38,7 +38,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR).
+- [ ] EV-01 … EV-07 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -52,7 +52,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## OPEN questions
 
 - Q-C3-18 (key moments)
-- Q-C3-21: the fun rating: one for the table, or one per iPad?
+- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad.
 
 ## Eval approval
 

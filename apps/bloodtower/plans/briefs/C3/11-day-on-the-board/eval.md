@@ -46,7 +46,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-06 — Screenshots match the screen spec
 - Requirement: SCR-014, UI-021, UI-022, UI-028, UI-047.
 - Method: screenshot
-- How: board 1920×1080 and iPad 1024×768 at: day roll, mid-turn, effects panel; compare side by side with ./mockup.html (Illusionist, from ./screen-spec.md) sections `#roll`, `#band`, `#effects`.
+- How: board 1920×1080 and iPad 768×1024 portrait (locked by Bob) at: day roll, mid-turn, effects panel; compare side by side with ./mockup.html (Illusionist, from ./screen-spec.md) sections `#roll`, `#band`, `#effects`.
 - Pass evidence: six images, parts and order matching.
 - Fails if: a part is missing.
 
@@ -66,4 +66,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - Q-C3-04 (days left for 3–4 heroes)
-- Q-C3-19: what does the threat bar (UI-047) show in 1.0: the coming drop only, or also skulled buildings near falling?
+- DEFAULT Q-C3-19 (Gamewright default, pending Bob's review): the threat bar shows only the coming drop.

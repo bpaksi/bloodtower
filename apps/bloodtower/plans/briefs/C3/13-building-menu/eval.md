@@ -39,13 +39,20 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-05 — Screenshots match
 - Requirement: UI-043.
 - Method: screenshot
-- How: iPad 1024×768 and board 1920×1080 at citadel, sanctuary, tavern; compare with ./mockup.html `#citadel`, `#sanctuary`, `#tavern`.
-- Pass evidence: six images matching.
+- How: iPad 768×1024 portrait (locked by Bob) and board 1920×1080 at citadel, sanctuary, village, bazaar; compare with ./mockup.html `#citadel`, `#sanctuary`, `#village`, `#bazaar`.
+- Pass evidence: eight images matching.
 - Fails if: a part missing.
+
+### EV-06 — Each building kind shows its own offers, no Trade
+- Requirement: building menus (Gamewright default per Bob's direction, pending Bob's review); DEC-502.
+- Method: playwright
+- How: `c3-building.spec.ts`: enter a citadel, a sanctuary, a village and a bazaar, unskulled, with gold and moves to spare.
+- Pass evidence: citadel: Rally, Virtue draw, Cleanse, Leave; sanctuary: Cure, Cleanse, Leave; village: Rest, Cleanse, Leave; bazaar: Cleanse, Leave. No Trade anywhere.
+- Fails if: a Trade, shop or NPC pick shows, or a pick shows at the wrong kind.
 
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — Continue keeps the menu
+### EV-07 — Continue keeps the menu
 - Requirement: DEC-700.
 - Method: playwright
 - How: quit inside a sanctuary after a free cure; Continue; re-enter.
@@ -58,5 +65,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
+- DEFAULT building menus (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally, Virtue draw or Cleanse; sanctuary: Cure or Cleanse; village: Rest or Cleanse; bazaar: Cleanse only.
+
 - Q-C3-13, Q-C3-14 (1.0 picks per building kind)
-- Q-C3-20: when a hero holds several corruptions, who picks which the cure removes: the hero, the group, or the oldest first?
+- DEFAULT Q-C3-20 (Gamewright default, pending Bob's review): the hero picks which corruption a cure removes.

@@ -23,6 +23,8 @@ Keep this a checklist; do not write a second design doc.
 
 UI-043 on the iPad: each pick with its move and gold cost, the quest marker first (UI-024, DEC-083), unaffordable picks disabled; the board shows the place's painting and each result. Corruption cures show which corruption goes.
 
+Each building shows its own offers plus Leave, and no Trade (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally, Virtue draw or Cleanse; sanctuary: Cure or Cleanse; village: Rest or Cleanse; bazaar: Cleanse only.
+
 ## Cutover
 
 Cutover: N
@@ -38,7 +40,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-06 all pass (verifier table on PR).
+- [ ] EV-01 … EV-07 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -59,8 +61,10 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## OPEN questions
 
+- DEFAULT building menus (Gamewright default per Bob's direction, pending Bob's review): citadel: Rally, Virtue draw or Cleanse; sanctuary: Cure or Cleanse; village: Rest or Cleanse; bazaar: Cleanse only.
+
 - Q-C3-13, Q-C3-14 (1.0 picks per building kind)
-- Q-C3-20: when a hero holds several corruptions, who picks which the cure removes: the hero, the group, or the oldest first?
+- DEFAULT Q-C3-20 (Gamewright default, pending Bob's review): the hero picks which corruption a cure removes.
 
 ## Eval approval
 

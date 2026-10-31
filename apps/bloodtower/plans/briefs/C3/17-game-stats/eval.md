@@ -43,9 +43,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: two images matching.
 - Fails if: a part out of order.
 
+### EV-06 — No Seals broken stat in C3
+- Requirement: Q-C3-01 (no seal breaks in C3); DEC-627.
+- Method: unit
+- How: project the stats view after a C3 game won on chapter 1, and after one lost.
+- Pass evidence: no Seals broken row, label or zero value in either.
+- Fails if: Seals broken shows, even as 0.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-06 — The rating is kept
+### EV-07 — The rating is kept
 - Requirement: SCR-019.
 - Method: unit
 - How: rate 4, restart, drill in.
@@ -54,9 +61,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Who gives the rating (one iPad or each) is OPEN Q-C3-21.
+- Each iPad gives its own rating (default Q-C3-21, pending Bob).
 
 ## OPEN questions
 
 - Q-C3-18 (key moments)
-- Q-C3-21: the fun rating: one for the table, or one per iPad?
+- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad.

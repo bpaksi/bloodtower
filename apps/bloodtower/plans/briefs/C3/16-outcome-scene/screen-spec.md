@@ -3,7 +3,7 @@
 - Brief: ./plan.md
 - Evals: ./eval.md
 - Cards: SCR-018, UI-046, DEC-144, DEC-627, DEC-663, DEC-664, CUE-003
-- Viewports: Story board 1920×1080 (Samsung TV), iPad 1024×768
+- Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
 - Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
 
 ## Purpose

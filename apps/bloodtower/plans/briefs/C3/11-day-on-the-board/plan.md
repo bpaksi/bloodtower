@@ -59,7 +59,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## OPEN questions
 
 - Q-C3-04 (days left for 3–4 heroes)
-- Q-C3-19: what does the threat bar (UI-047) show in 1.0: the coming drop only, or also skulled buildings near falling?
+- DEFAULT Q-C3-19 (Gamewright default, pending Bob's review): the threat bar shows only the coming drop.
 
 ## Eval approval
 

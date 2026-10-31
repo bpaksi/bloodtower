@@ -3,7 +3,7 @@
 - Brief: ./plan.md
 - Evals: ./eval.md
 - Cards: UI-020, UI-044, MEC-033, DEC-303, DEC-302, DEC-306, DEC-409, CUE-004, CUE-005
-- Viewports: Story board 1920×1080 (Samsung TV), iPad 1024×768
+- Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
 - Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); Menu on every device (UI-018). Story copy stays `[COPY: ...]`.
 
 ## Purpose
@@ -15,12 +15,12 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 - **Chapter card** (UI-020): painting, "Chapter 1: The Roads", "Finish The Herald and The Ambush before the days run out.".
 - **Stamped won** (.15).
 - **Close Scroll** (.14): "The roads are quiet again.".
-- **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and "A seal breaks. Its glyph lends you strength: {boon}." (boon wording waits on Q-C3-17).
+- **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and "A seal breaks. Its glyph lends you strength: {boon}." (boon wording waits on Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off)
 - **Freed skulls** (.22 to .30): kingdom for each, then the building, as after a drop.
 
 ## Player actions
 
-- iPad: Next; confirm the seal is broken (Done); name the kingdom and building for each freed skull.
+- iPad: Next; confirm the seal is broken (Done) (C4+ only; shown when c3_end_after_chapter_1 is off); name the kingdom and building for each freed skull.
 
 ## Mechanics behind it
 

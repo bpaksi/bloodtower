@@ -27,6 +27,10 @@ stories from pack v2 (01), tuning file (02), The Ruined Keep pack (03)
 
 Engine first, screens after. Each feature is one PR-sized slice with its tests. The engine features (01 to 10) sit outside `engine/loops/session`, so they build beside C2's serial 05 to 08 ([1.0-milestones.md](1.0-milestones.md), "Unblocking", item 3). Only feature 10 touches `engine/loops/game`, which C2 reworks, so it waits for C2 08. The screens (11 to 17) sit in the shell and wait for C2 06 (07 for the outcome and stats). Until a screen lands, its engine feature is proved by unit evals and the headless simulator. A feature over about 400 changed lines may split in review, as `docs/sdlc.md` allows.
 
+## Viewports
+
+Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob. Every screen spec, mockup and screenshot eval uses these.
+
 ## Out of scope
 
 - The battle loop (MEC-024, MEC-038), the Tomb (MEC-026, The Barrow) and battle-only corruption (Cursed, DEC-466): C4.
@@ -269,7 +273,7 @@ The deliverables listed under each feature's `Builds:`. The gameplay mechanics i
 
 ## OPEN questions (consolidated)
 
-Each is also listed in the feature files that need it. Three are answered (Bob, 2026-10-31); the rest are not ruled here. (Q-C3-06 is unused.)
+Each is also listed in the feature files that need it. Three are answered (Bob, 2026-10-31); three carry a Gamewright default pending Bob's review (Q-C3-19, 20, 21); the rest are not ruled here. (Q-C3-06 is unused.)
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win. The game ends won when chapter 1 is won; no seal break, no chapter 2 (features 09, 10, 16).
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4. Foes and disaster events offer Go around and Pay them off only; plain-scene battle options are hidden (features 05, 07, 12, 14).
@@ -288,11 +292,11 @@ Each is also listed in the feature files that need it. Three are answered (Bob, 
 - Q-C3-16: the gold amounts for Cruel, Greedy, Feral, Lost and Tempted are not in DEC-703's table. Which numbers? (features 08)
 - Q-C3-17: which glyph boons does The Ruined Keep name for each seal break (DEC-303 "a story may name it")? Or does the app pick and the base pack supply the boons? (features 09, 15)
 - Q-C3-18: "key moments" on the stats screen (SCR-019): which events count as one? No card lists them. (features 10, 17)
-- Q-C3-19: what does the threat bar (UI-047) show in 1.0: the coming drop only, or also skulled buildings near falling? (features 11)
-- Q-C3-20: when a hero holds several corruptions, who picks which the cure removes: the hero, the group, or the oldest first? (features 13)
+- DEFAULT Q-C3-19 (Gamewright default, pending Bob's review): the threat bar shows only the coming drop. (features 11)
+- DEFAULT Q-C3-20 (Gamewright default, pending Bob's review): the hero picks which corruption a cure removes. (features 13)
 - Q-C3-22: with Fight hidden, The Ambush finishes only by paying the toll (DEC-662). The toll amount is not carded, and a group that cannot pay cannot win chapter 1. What is the toll, and what happens when the purse is short? (features 03, 07, 14)
 - Q-C3-23: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line? (features 10, 16)
-- Q-C3-21: the fun rating: one for the table, or one per iPad? (features 17)
+- DEFAULT Q-C3-21 (Gamewright default, pending Bob's review): the fun rating is per iPad. (features 17)
 
 ## Results
 
