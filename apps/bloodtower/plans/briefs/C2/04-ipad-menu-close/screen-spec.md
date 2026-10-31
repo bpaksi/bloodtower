@@ -21,10 +21,11 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 - Toolbar (every iPad screen, UI-032): "?" at the left end, the gear (Menu) at the right end. Default after reload or Continue: Menu closed, help closed.
 - Open: centered dialog (UI-033), three groups (DEC-229) holding the gear list (Bob approved 2026-10-31 10:38):
   - Look up: 1 Current party; 6 Look up (rules or a card).
-  - Table: 2 Game board setup; 3 Volume; 4 Split party / Rejoin party (one item; the label toggles); 5 Use a potion or item; 7 Change who holds whom; 8 Join another iPad; 9 Tower (reconnect or play without it); Pause/Resume (kept from DEC-707; acts at once, no panel).
-  - Leave: 10 Save and quit (the existing Quit story flow).
+  - Table: 2 Game board setup; 3 Volume; 4 Split party (one item; shows "Rejoin party" when split); 5 Use a potion or item; 7 Change who holds whom; 8 Join another iPad; 9 Tower (reconnect or play without it); Pause/Resume (kept from DEC-707; acts at once, no panel).
+  - Leave: 10 Save and quit (the existing quit flow; confirm "Save and quit").
   - Version + debug toggle line, then "Close" last (DEC-707).
-- Disabled items: greyed, never hidden (DEC-227), with a one-line reason under each, e.g. "Only during a game.", "The tower is connected.", "C3+" (items that need C3 features in a C2 build: Split party / Rejoin party, Use a potion or item).
+- Item names are exact, with no number prefix (the numbers in this list and any "N · " in the mockup are reference only).
+- Disabled items: greyed, never hidden (DEC-227), with a one-line reason under each, e.g. "Only during a game.", "The tower is connected.", "C3+" (items that need C3 features in a C2 build: Split party, Use a potion or item).
 - Panel open: the iPad shows "See the Story board", the panel's pick buttons as a simple list when it needs a choice (e.g. Volume 0/1/2, Keep, Try another; a hero, then an item), and Done (Back where there is a step back); the Story board shows the panel's full UI, display only, and mirrors each iPad pick (Gamewright pick, pending Bob Q-GEAR-1); the game is paused until Done. Another iPad that opens the Menu sees the panel's item disabled with the reason "Open on another iPad."
 - Confirm sub-state for table-wide items (DEC-230), e.g. Save and quit; the confirm stays on the iPad.
 - Help open: a sheet on the iPad with the current screen's help line (Help lines below) and Close.
@@ -33,13 +34,13 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 1. Current party: heroes, HP, gold, items, corruptions and who holds whom.
 2. Game board setup: shows the physical setup again and re-runs the piece check.
 3. Volume: the Volume 0/1/2 step with Keep/Try another.
-4. Split party / Rejoin party: one item whose label toggles. It reads "Split party" while the party is together and "Rejoin party" while it is split (Gamewright pick).
+4. Split party: one item whose label toggles. It reads "Split party" while the party is together and "Rejoin party" while it is split (Gamewright pick).
 5. Use a potion or item: pick the hero, then the item.
 6. Look up: rules or a card.
 7. Change who holds whom.
 8. Join another iPad: shows the QR code.
 9. Tower: reconnect or play without it.
-10. Save and quit: the existing Quit flow (the Quit story confirm, DEC-230).
+10. Save and quit: the existing Quit flow (the "Save and quit" confirm, DEC-230).
 
 ## Help lines (Loremaster 2026-10-31; shown by "?" for the screen with that id)
 | Screen id | Help line |
