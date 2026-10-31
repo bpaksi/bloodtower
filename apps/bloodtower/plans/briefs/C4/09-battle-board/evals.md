@@ -92,23 +92,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: exactly 2 chips `[data-foe-trait]` reading Undead and Melee, from the pack entry.
 - Fails if: a missing, extra or different chip.
 
+### EV-13 — Round results show the cut and the hit
+- Requirement: DEC-703; Gamewright ruling.
+- Method: playwright
+- How: level-2 foe, 1 hero at 10 HP; win round 1 at round strength 3, lose round 2.
+- Pass evidence: round 1 reads "Round 1: {hero} struck for 2."; round 2 shows "−2 hit points" beside the hero, whose HP reads 8/10.
+- Fails if: a wrong cut, a wrong hit, or no −2 shown.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-13 — Board redraws after Continue
+### EV-14 — Board redraws after Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit mid-battle; Continue.
 - Pass evidence: same foe, wounds, heroes.
 - Fails if: blank or reset.
 
-### EV-14 — A beat interrupted by restart applies once
+### EV-15 — A beat interrupted by restart applies once
 - Requirement: restart or Continue during an auto-advancing beat (round result (won or lost), victory) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-15 — The gear comes back closed after a restart
+### EV-16 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

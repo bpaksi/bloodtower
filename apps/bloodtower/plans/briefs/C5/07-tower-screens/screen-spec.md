@@ -26,6 +26,7 @@ The Tower reuses the Tomb's two halves: the level's room map and the room view (
 ## Buttons (exact labels)
 
 - **Open the next door**, **Rest** (only at a found shrine; greyed otherwise), **Retreat**.
+- Stairs (the stair guard beaten): **Climb** goes up to the next level (Gamewright ruling).
 - A guard or stair battle hands to the round picker (C4 10).
 
 ## Tokens

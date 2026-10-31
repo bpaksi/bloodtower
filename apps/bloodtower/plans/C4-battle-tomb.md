@@ -126,7 +126,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, 05, C3 11, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Battle*.tsx` (new), `apps/bloodtower/src/web/components/board/FoePanel.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-battle.spec.ts`
 - Builds: UI-026, CUE-010
-- Done-when: EV-01 … EV-15
+- Done-when: EV-01 … EV-16
 - Open: Q-C4-14, Q-C4-15, Q-C4-05, Q-C4-17
 
 ### Feature 10: The round picker on the iPad: Fight or Retreat, then one action
@@ -135,7 +135,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 02, C2 06, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/RoundPicker*.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-round.spec.ts`
 - Builds: UI-027
-- Done-when: EV-01 … EV-11
+- Done-when: EV-01 … EV-12
 - Open: Q-C4-16, Q-C4-11
 
 ### Feature 11: The battle's end on screen: reward, retreat and fall
@@ -144,7 +144,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 03, 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/{BattleReward,RetreatResult}.tsx` (new), `apps/bloodtower/src/web/components/device/RewardTaker.tsx` (new)
 - Builds: UI-039, UI-040
-- Done-when: EV-01 … EV-14
+- Done-when: EV-01 … EV-15
 - Open: none, Q-C4-17
 
 ### Feature 12: The Tomb on screen: the map and the view, the iPad's three corridors
@@ -162,7 +162,7 @@ As in C3: Gamewright writes this plan and each feature folder `plans/briefs/C4/N
 - Depends on: 07, C3 15, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/SealBreak.tsx`, `apps/bloodtower/src/web/components/device/SkullPlacer.tsx`
 - Builds: UI-044
-- Done-when: EV-01 … EV-15
+- Done-when: EV-01 … EV-16
 - Open: Q-C4-10, Q-C4-17
 
 ### Feature 14: Fight on the event and quest scenes

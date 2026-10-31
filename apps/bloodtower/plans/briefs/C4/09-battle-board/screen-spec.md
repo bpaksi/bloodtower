@@ -29,7 +29,8 @@ UI-026 on the board: the foe painting (one placeholder per level (Gamewright pic
 
 ## Tokens
 
-- {foe}, {N}, {hero}
+- {foe}, {N}, {hero}, {foe level}
+- A won round shows the cut: `{N}` in "struck for {N}" is the wounds cut (DEC-703). A lost round shows −{foe level} hit points beside the hit hero (DEC-703; Gamewright ruling).
 
 ## What happens next
 

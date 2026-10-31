@@ -72,36 +72,43 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-10 — Beats auto-advance
-- Requirement: no Next on: reward Reveal, retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: retreat result, fall result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (reward Reveal, retreat result, fall result); once with narration (mock audio end event), once with audio off.
+- How: reach each beat (retreat result, fall result); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-11 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (reward Reveal, retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
+- How: reach each beat (retreat result, fall result) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
+### EV-12 — The reward Reveal waits for the Give to pick
+- Requirement: Gamewright ruling: a screen with a choice waits for that choice.
+- Method: playwright, fake clock
+- How: reach the reward Reveal with narration ending at once; advance the clock 30 s; then press Give to {hero}.
+- Pass evidence: the Reveal is still shown after 30 s; it moves on only after the Give to {hero} press.
+- Fails if: it advances without the pick.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-12 — Untaken card survives Continue
+### EV-13 — Untaken card survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: quit before pick; Continue.
 - Pass evidence: picker again, same card.
 - Fails if: card lost.
 
-### EV-13 — A beat interrupted by restart applies once
-- Requirement: restart or Continue during an auto-advancing beat (reward Reveal, retreat result, fall result) (Q-C4-17 (Gamewright pick, pending Bob)).
+### EV-14 — A beat interrupted by restart applies once
+- Requirement: restart or Continue during an auto-advancing beat (retreat result, fall result) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-14 — The gear comes back closed after a restart
+### EV-15 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

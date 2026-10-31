@@ -102,7 +102,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 01, C4 12, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/Tower*.tsx` (new), `apps/bloodtower/src/web/components/device/TowerPicker.tsx` (new)
 - Builds: MEC-076 (screens; UI cards to be filed)
-- Done-when: EV-01 … EV-11
+- Done-when: EV-01 … EV-12
 - Open: Q-C5-01
 
 ### Feature 08: The Warden on screen: phases and the tower show
@@ -111,7 +111,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Depends on: 02, C4 09, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/BossPhase.tsx` (new)
 - Builds: DEC-567, DEC-327
-- Done-when: EV-01 … EV-13
+- Done-when: EV-01 … EV-15
 - Open: Q-C5-02, Q-C5-08
 
 ### Feature 09: The last choice and the two endings on screen

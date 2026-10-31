@@ -58,16 +58,16 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-08 — Beats auto-advance
-- Requirement: no Next on: phase show, round result; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
+- Requirement: no Next on: phase show, round result, The Warden falls; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (phase show, round result); once with narration (mock audio end event), once with audio off.
+- How: reach each beat (phase show, round result, The Warden falls); once with narration (mock audio end event), once with audio off.
 - Pass evidence: the iPad shows no Next button; the beat advances on the audio end event, and 4 s (±200 ms) after it shows when there is no audio.
 - Fails if: a Next button shows, it advances early, or it waits for a press.
 
 ### EV-09 — Narration holds the beat past 4 s
 - Requirement: a beat with audio waits for its end event (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright, fake clock
-- How: reach each beat (phase show, round result) with narration playing; advance the clock 4.5 s with no audio end event.
+- How: reach each beat (phase show, round result, The Warden falls) with narration playing; advance the clock 4.5 s with no audio end event.
 - Pass evidence: the screen is still on the beat; it advances only after the end event fires.
 - Fails if: it advances at 4 s while narration plays.
 
@@ -78,28 +78,42 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: exactly 2 `[data-foe-trait]` chips: Melee, Humanoid.
 - Fails if: missing or other chips.
 
+### EV-11 — "The Warden falls" waits for its narration
+- Requirement: Gamewright ruling: The Warden falls auto-advances when its narration ends.
+- Method: playwright, fake clock
+- How: win the last round with narration playing; advance the clock 4.5 s with no audio end event, then fire it.
+- Pass evidence: still on "The Warden falls" at 4.5 s; advances only after the end event.
+- Fails if: it advances before narration ends, or shows a Next.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-11 — Phase redrawn after Continue
+### EV-12 — Phase redrawn after Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: phase 3, quit, Continue.
 - Pass evidence: phase 3 painting.
 - Fails if: phase 1.
 
-### EV-12 — A beat interrupted by restart applies once
-- Requirement: restart or Continue during an auto-advancing beat (phase show, round result) (Q-C4-17 (Gamewright pick, pending Bob)).
+### EV-13 — A beat interrupted by restart applies once
+- Requirement: restart or Continue during an auto-advancing beat (phase show, round result, The Warden falls) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-13 — The gear comes back closed after a restart
+### EV-14 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.
 - Pass evidence: no `[data-menu]` or `[data-panel]`; `paused: false`; every iPad shows the toolbar with "?" and the gear.
 - Fails if: the Menu or panel reopens, the game stays paused, or the toolbar is missing.
+
+### EV-15 — A restart during "The Warden falls" applies the win once
+- Requirement: Gamewright ruling; restart or Continue during an auto-advancing beat.
+- Method: playwright
+- How: during "The Warden falls", restart the host and Continue.
+- Pass evidence: "The Warden falls" or the next beat shows; `boss.defeated` appears exactly once in the state log.
+- Fails if: the beat is skipped with no win, or the win is applied twice.
 
 ## Assumptions surfaced
 

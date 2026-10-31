@@ -71,16 +71,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the room view shows each hero's HP as exactly `8/10 HP`, and the result line reads exactly "Every hero loses 2 hit points." (locked by Loremaster; the Rocks line reused).
 - Fails if: no change shown.
 
+### EV-10 — Climb takes the stairs
+- Requirement: Gamewright ruling: the Stairs state has Climb.
+- Method: playwright
+- How: beat the basement stair guard; press Climb.
+- Pass evidence: the iPad shows **Climb** on the Stairs state; after the press the map shows the main level, room 1.
+- Fails if: no Climb button, or the level does not change.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-10 — Map survives Continue
+### EV-11 — Map survives Continue
 - Requirement: DEC-360.
 - Method: playwright
 - How: quit on main; Continue.
 - Pass evidence: the same `[data-level]`, the same `[data-room][data-cleared]` set and the same group HP.
 - Fails if: reset.
 
-### EV-11 — The gear comes back closed after a restart
+### EV-12 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

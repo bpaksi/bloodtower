@@ -25,6 +25,7 @@ C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll,
 
 ## Buttons (exact labels)
 
+- Seal broken state: the iPad title is the seal's name, "The Road Seal", "The Keep Seal" or "The Warden's Seal" for seals 1–3 (Loremaster's story text; Gamewright ruling).
 - Seal step: **Seal broken** (confirms the tower's seal broke; replaces C3's Done).
 - Each freed skull: one button per kingdom by name (e.g. **Arisilon**), then one per building by name, then **Place skull**.
 

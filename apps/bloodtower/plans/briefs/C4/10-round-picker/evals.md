@@ -71,16 +71,23 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: after picking, hero 1's iPad shows **Change pick** (label pending Bob, Q-C4-18); tapping it brings the actions back, and the round uses hero 1's Cast a spell; once hero 2 has picked, **Change pick** is gone and hero 1's buttons are disabled.
 - Fails if: the old pick is used, or a change is possible after the last pick.
 
+### EV-10 — "All picked" goes straight to the round result
+- Requirement: Gamewright ruling: All picked does not hold.
+- Method: playwright, fake clock
+- How: 2 heroes; the last hero picks; do not advance the clock.
+- Pass evidence: the board shows the round result line in the same tick; no "All picked" hold and no Next.
+- Fails if: the board holds on "All picked", waits for a timer, or shows a Next.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-10 — Pick survives Continue
+### EV-11 — Pick survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: pick, quit, Continue.
 - Pass evidence: pick still ticked.
 - Fails if: lost.
 
-### EV-11 — The gear comes back closed after a restart
+### EV-12 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

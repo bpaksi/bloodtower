@@ -92,23 +92,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: kingdom buttons `Arisilon (N)`, `Brynthia (E)`, `Durnin (S)`, `Zenon (W)`; then building buttons Citadel, Sanctuary, Village, Bazaar, Tavern.
 - Fails if: any missing, extra or misnamed button.
 
+### EV-13 — The Seal broken title is the seal's name
+- Requirement: Gamewright ruling; Loremaster seal names.
+- Method: playwright
+- How: break seals 1, 2 and 3 in a fixture; stop on the Seal broken state each time.
+- Pass evidence: the iPad title reads exactly "The Road Seal", "The Keep Seal", "The Warden's Seal" in turn.
+- Fails if: a generic title or a wrong name.
+
 ## Survival evals (one per survival invariant in plan.md)
 
-### EV-13 — Skull placement survives Continue
+### EV-14 — Skull placement survives Continue
 - Requirement: DEC-675.
 - Method: playwright
 - How: place 1 of 2, quit, Continue.
 - Pass evidence: prompt for skull 2.
 - Fails if: restart at 1.
 
-### EV-14 — A beat interrupted by restart applies once
+### EV-15 — A beat interrupted by restart applies once
 - Requirement: restart or Continue during an auto-advancing beat (close Scroll, glyph and boon Reveal) (Q-C4-17 (Gamewright pick, pending Bob)).
 - Method: playwright
 - How: during each beat, restart the host and Continue.
 - Pass evidence: the same beat shows again, or the next one; its effect (gold, card, cut, seal, flag) is applied exactly once in the state log.
 - Fails if: the beat is skipped with no effect, or its effect is applied twice.
 
-### EV-15 — The gear comes back closed after a restart
+### EV-16 — The gear comes back closed after a restart
 - Requirement: after a restart and Continue on this screen the Menu and any gear panel come back closed, the game is not paused and the toolbar is back (C3 rule, Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: on this screen open a gear panel (Volume), restart the host, Continue.

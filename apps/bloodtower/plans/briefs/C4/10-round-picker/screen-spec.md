@@ -9,7 +9,7 @@
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
 - iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
-Auto-advance: no beat on this screen auto-advances; every step waits for a named button.
+Auto-advance: no beat on this screen auto-advances; every step waits for a named button. "All picked" is not a held beat: once the last present hero picks, the round runs and the board goes straight to the round result (C4 09) (Gamewright ruling).
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
 - All story and help text is `[COPY: ...]` until the story pass.
 
