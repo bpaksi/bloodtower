@@ -37,12 +37,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: both images attached; frame font-size at 3840×2160 = 2 × the 1920×1080 value ± 5%; frame box inside the 5% guides.
 - Fails if: the dialog grows to the full height at 4K, or stays a small 1080p box.
 
-### EV-05 — The board look specs still pass
-- Requirement: no regression in the board look (SCR-013).
+### EV-05 — The board look holds on every screen from splash
+- Requirement: no regression in the board look (SCR-013): from the splash start, the board keeps the landing painting, never scrolls and never clips text.
 - Method: playwright
-- How: `board-look.spec.ts` and `keeper-fit.spec.ts` on the PR head.
-- Pass evidence: all pass. Any screenshot baseline that changes because of the border is updated in the PR and listed in the body.
-- Fails if: a baseline is updated with no note.
+- How: `c2-dialog-border.spec.ts` ("every board dialog keeps the DEC-705 border") on the PR head, not in `testIgnore`. `/board` opens on `splash`; the spec walks splash, pick story, game settings, tower connect, claim heroes, the three setup steps, begin, play waiting, tower quiet and session, at 1920×1080 and 3840×2160. `board-look.spec.ts` and `keeper-fit.spec.ts` are not used: both are in `testIgnore` and still expect the board to open on pick-story.
+- Pass evidence: the spec passes; on every listed screen at both viewports the computed `background-image` of `main.bt-board` contains `/landing/hero.webp`, `document.scrollingElement.scrollHeight <= innerHeight + 1`, no element under `.bt-dialog-frame` has `overflow-y: auto|scroll`, and no own-text element overflows. The tower-connect, claim-heroes and tower-quiet screenshots are attached to the PR. Any screenshot baseline that changes is updated in the PR and listed in the body.
+- Fails if: any screen is skipped or the walk starts anywhere but splash, the painting is missing, the board scrolls, text is clipped, the spec is added to `testIgnore` or skipped on the desktop project, or a baseline is updated with no note.
 
 ### EV-06 — Long content fitted (M "Long content, fitted")
 - Requirement: board dialogs never scroll: the art shrinks first, then content is cut to fit (Bob 2026-10-31).

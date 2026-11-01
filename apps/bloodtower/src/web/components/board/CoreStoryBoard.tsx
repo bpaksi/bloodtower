@@ -4,9 +4,29 @@ import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
+import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
+
+/** The mockup's tower mark, small enough that the pause dialog stays a typical frame. */
+function TowerMark() {
+  return (
+    <div className="bt-tower-band" role="img" aria-label="The Tower">
+      <svg viewBox="0 0 30 40" width="45" height="60" aria-hidden="true">
+        <path d="M15 1 L18 10 L12 10 Z" fill="#2a2420" stroke="#c9a85a" strokeWidth="0.8" />
+        <circle cx="15" cy="6.5" r="1.3" fill="#d4543a" />
+        <path d="M10 13 L20 13 L22 37 L8 37 Z" fill="#1f1b18" stroke="#c9a85a" strokeWidth="0.9" />
+        <path
+          d="M13 37 v-4 a2 2 0 0 1 4 0 v4 Z"
+          fill="#0e0c0a"
+          stroke="#c9a85a"
+          strokeWidth="0.6"
+        />
+      </svg>
+    </div>
+  );
+}
 
 /** v2 story board. Startup is a centred dialog. Play is the move band or the place still. Display only. */
 export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boolean }) {
@@ -38,9 +58,10 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </p>
       ) : null}
       {paused ? (
-        <p className="bt-narration" role="status">
-          {paused}
-        </p>
+        <DialogFrame size="compact" className="bt-ink-in" data-tower-quiet="" role="status">
+          <TowerMark />
+          <p className="bt-startup-cue">The tower has gone quiet. The game waits.</p>
+        </DialogFrame>
       ) : null}
       {showMove && table ? (
         <header className="bt-band" data-band>
@@ -59,10 +80,12 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </header>
       ) : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor ? (
-        <p className="bt-waiting-pulse" data-waiting role="status">
-          {table.waitingFor}
-        </p>
+      {showMove && table?.waitingFor && !paused ? (
+        <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
+          <p className="bt-waiting-pulse" data-waiting role="status">
+            {table.waitingFor}
+          </p>
+        </DialogFrame>
       ) : null}
       {layer === "place" && place ? (
         <figure className="bt-place-still" data-place={place.building} data-still={place.stillId}>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "../components/board/board.css";
 import { PageCapture } from "../components/errors/PageCapture.tsx";
+import { StoryAudioShell } from "../components/title/StoryAudioShell.tsx";
 import { boardFonts } from "./fonts";
 import "./globals.css";
 
@@ -19,7 +20,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={boardFonts.variables}>
       <body>
-        <PageCapture>{children}</PageCapture>
+        <PageCapture>
+          <StoryAudioShell>{children}</StoryAudioShell>
+        </PageCapture>
       </body>
     </html>
   );

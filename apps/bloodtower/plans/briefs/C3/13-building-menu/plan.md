@@ -8,20 +8,20 @@ Keep this a checklist; do not write a second design doc.
 - Feature: 13-building-menu
 - Kind: screen
 - Owner: Gamewright (plan, evals); a Wright developer (build)
-- Related AREA/docs: AREA-097, AREA-099, UI-043, UI-024, MEC-036
+- Related AREA/docs: AREA-097, AREA-099, UI-043, MEC-036
 - Evals: ./eval.md
 - Screen spec: ./screen-spec.md
 - Mockup: none yet: the screen changes, see ./screen-spec.md. Illusionist draws ./mockup.html from it before Bob approves the evals
 - Risk: Med
 - Depends on: C3 feature 06 merged, C3 feature 08 merged, C2 feature 06 merged, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/PlaceMenu*.tsx`, `apps/bloodtower/src/web/components/board/**` (place painting and results), `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/e2e/tests/c3-building.spec.ts`
-- Builds: UI-043, UI-024
+- Builds: UI-043
 - Deps change: no
 - Runs: cloud
 
 ## What it does
 
-UI-043 on the iPad: each pick with its move and gold cost, the quest marker first (UI-024, DEC-083), unaffordable picks disabled; the board shows the place's painting and each result. Corruption cures show which corruption goes.
+UI-043 on the iPad: each pick with its move and gold cost, the quest marker first (UI-043, DEC-630, DEC-083), unaffordable picks disabled; the board shows the place's painting and each result. Corruption cures show which corruption goes.
 
 Each building shows its own offers plus Leave, and no Trade (Bob approved 2026-10-31): citadel: Rally (5 gold + 1 move), Virtue draw (10 gold + 1 move) or Cleanse (1 move, 0 gold, Bob approved 2026-10-31); sanctuary: Cure (10 gold + 1 move, first one free each chapter) or Cleanse; village: tavern Rest (+3 hit points per move; Bob approved 2026-10-31) or Cleanse; bazaar: Cleanse only (Bob approved 2026-10-31).
 
@@ -48,7 +48,6 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## AREA / DEC checklist
 
 - [ ] UI-043: closed before coding (`decided`).
-- [ ] UI-024: closed before coding (`decided`).
 - [ ] MEC-036: closed before coding (`decided`).
 - [ ] DEC-078: closed before coding (`decided`).
 - [ ] DEC-083: closed before coding (`decided`).
