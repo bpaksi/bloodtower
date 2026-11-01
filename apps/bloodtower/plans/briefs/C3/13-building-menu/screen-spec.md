@@ -28,7 +28,7 @@ Let a group spend moves and gold at a building (MEC-036).
 
 ## Mechanics behind it
 
-UI-043 on the iPad: each pick with its move and gold cost, the quest marker first (UI-024, DEC-083), unaffordable picks disabled; the board shows the place's painting and each result. Corruption cures show which corruption goes.
+UI-043 on the iPad: each pick with its move and gold cost, the quest marker first (UI-043, DEC-630, DEC-083), unaffordable picks disabled; the board shows the place's painting and each result. Corruption cures show which corruption goes.
 
 ## What happens next
 

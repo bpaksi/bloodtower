@@ -144,6 +144,276 @@ const questTypeSchema = z.strictObject({
   name: z.string().min(1).max(80),
 });
 
+const percentSchema = z.number().int().min(0).max(100);
+const intSchema = z.number().int();
+const positiveIntSchema = z.number().int().positive();
+const diceSchema = z.string().regex(/^\d*d\d+$/, {
+  message: "P2-1: dice look like 2d3 or d4.",
+});
+const fractionSchema = z.strictObject({
+  n: positiveIntSchema,
+  d: positiveIntSchema,
+});
+const heroRowSchema = z.strictObject({
+  fight: intSchema,
+  hit_points: positiveIntSchema,
+});
+const rangeSchema = z.strictObject({
+  min: positiveIntSchema,
+  max: positiveIntSchema,
+});
+
+/**
+ * DEC-703's tables. Values are data, not literals, so a playtest can change a
+ * placeholder without a schema edit (DEC-500, DEC-131).
+ */
+export const tuningSchema = z
+  .strictObject({
+    c3_end_after_chapter_1: z.boolean(),
+    fight_enabled: z.boolean(),
+    setup: z.strictObject({
+      purse_wheel: z.strictObject({
+        sides: z.array(positiveIntSchema).length(4),
+        floor: positiveIntSchema,
+      }),
+      difficulty: z.strictObject({
+        easy: z.strictObject({
+          foe_level: intSchema,
+          purse_percent: intSchema,
+          full_hit_points: positiveIntSchema,
+        }),
+        hard: z.strictObject({
+          foe_level: intSchema,
+          purse_percent: intSchema,
+          purse_round: z.literal("down"),
+        }),
+      }),
+      foe_level_by_chapter: z.strictObject({
+        chapter_1: positiveIntSchema,
+        per_chapter: intSchema,
+      }),
+      skull_supply: positiveIntSchema,
+    }),
+    day: z.strictObject({
+      move_roll: z.strictObject({
+        dice: diceSchema,
+        floor: z.number().int().nonnegative(),
+      }),
+      shifts: z.strictObject({
+        per_helping_virtue: intSchema,
+        per_corruption: intSchema,
+      }),
+      event_chance: z.strictObject({
+        short: percentSchema,
+        standard: percentSchema,
+      }),
+      event_weights: z.strictObject({
+        quiet: percentSchema,
+        windfall: percentSchema,
+        hazard: percentSchema,
+        foes: percentSchema,
+        disaster: percentSchema,
+        people: percentSchema,
+      }),
+      hazard: z.strictObject({ hit_points: intSchema }),
+      windfall: z.strictObject({ gold: intSchema }),
+      go_around: z.strictObject({
+        hit_points: intSchema,
+        minimum: positiveIntSchema,
+      }),
+    }),
+    skulls: z.strictObject({
+      supply: positiveIntSchema,
+      drops_a_night: z.strictObject({
+        heroes_1_to_2: positiveIntSchema,
+        heroes_3_to_4: z.strictObject({
+          each_night: positiveIntSchema,
+          every_other_night: positiveIntSchema,
+        }),
+      }),
+      quest_won_suppresses_drop: z.boolean(),
+      simulated_drop: z.strictObject({
+        skulls: positiveIntSchema,
+        kingdom_die: diceSchema,
+      }),
+      tower_drop: z
+        .array(
+          z.strictObject({
+            count: z.number().int().nonnegative(),
+            percent: percentSchema,
+          }),
+        )
+        .length(3),
+      seal_break: z.strictObject({
+        min: z.number().int().nonnegative(),
+        max: z.literal("held"),
+      }),
+    }),
+    battle: z.strictObject({
+      foe_count: z.strictObject({
+        per_level: positiveIntSchema,
+        per_extra_hero: positiveIntSchema,
+      }),
+      round_odds: z.strictObject({
+        min_percent: percentSchema,
+        max_percent: percentSchema,
+        heroes_divisor: positiveIntSchema,
+      }),
+      won_round: z.strictObject({
+        fraction: z.literal("half"),
+        round: z.literal("up"),
+        minimum: positiveIntSchema,
+      }),
+      lost_round: z.strictObject({
+        heroes: positiveIntSchema,
+        hit_points: z.literal("foe_level"),
+      }),
+      trait_extra_hit_points: positiveIntSchema,
+      step_up: z.strictObject({
+        chance: fractionSchema,
+        level: positiveIntSchema,
+      }),
+      hex: z.strictObject({
+        target: z.literal("random_attacking_hero"),
+        min_group: positiveIntSchema,
+      }),
+      shield_wall: z.strictObject({
+        cut_less: positiveIntSchema,
+        small_group_max_heroes: positiveIntSchema,
+        small_group_minimum_cut: positiveIntSchema,
+      }),
+      automatic_advantage: z.strictObject({
+        per_match: positiveIntSchema,
+        max: positiveIntSchema,
+      }),
+      potion_hit_points: positiveIntSchema,
+    }),
+    heroes: z.strictObject({
+      fighter: heroRowSchema,
+      ranger: heroRowSchema,
+      scout: heroRowSchema,
+      healer: heroRowSchema,
+      magic_user: heroRowSchema,
+      bard: heroRowSchema,
+      solo: z.strictObject({
+        fight: intSchema,
+        hit_points: intSchema,
+      }),
+    }),
+    spells: z.strictObject({
+      magic_missile: intSchema,
+      lightning: intSchema,
+      fireball: z.strictObject({
+        fraction: z.literal("half"),
+        round: z.literal("down"),
+      }),
+      mend: intSchema,
+      silver_tongue: z.strictObject({
+        off: z.literal("quarter"),
+      }),
+    }),
+    gold: z.strictObject({
+      won_battle: z.strictObject({
+        per_level: positiveIntSchema,
+        disaster: z.literal("double"),
+      }),
+      won_quest: intSchema,
+      lost_on_fall: z.strictObject({
+        per_level: positiveIntSchema,
+        split: z.boolean(),
+        capped: z.boolean(),
+      }),
+      citadel_rally: z.strictObject({
+        gold: intSchema,
+        moves: positiveIntSchema,
+        heal: z.literal("full"),
+      }),
+      sanctuary_cure: z.strictObject({
+        gold: intSchema,
+        moves: positiveIntSchema,
+        corruption: positiveIntSchema,
+        first_each_chapter: z.literal("free"),
+      }),
+      tavern_rest: z.strictObject({
+        hit_points: intSchema,
+      }),
+      virtue_draw: intSchema,
+    }),
+    tomb: z.strictObject({
+      rooms: z.strictObject({
+        short: rangeSchema,
+        standard: rangeSchema,
+        guardian_included: z.boolean(),
+      }),
+      deal: z.strictObject({
+        nothing: percentSchema,
+        battle: percentSchema,
+        trap: percentSchema,
+        at_least_battle: positiveIntSchema,
+        at_least_trap: positiveIntSchema,
+      }),
+      guardian: z.strictObject({
+        level_up: positiveIntSchema,
+      }),
+    }),
+    tower: z.strictObject({
+      rooms: z.strictObject({
+        kinds: z.tuple([z.literal("guard"), z.literal("trap"), z.literal("shrine")]),
+        each: fractionSchema,
+        third: z.literal("stair_guard"),
+      }),
+      guard: z.strictObject({
+        level_offset: intSchema,
+      }),
+      shrine: z.strictObject({
+        hit_points: intSchema,
+        once: z.boolean(),
+      }),
+      trap: z.strictObject({
+        hit_points: intSchema,
+      }),
+      warden: z.strictObject({
+        level: positiveIntSchema,
+        counts_as: z.literal("any_foe"),
+      }),
+    }),
+  })
+  .superRefine((tuning, ctx) => {
+    const weights = tuning.day.event_weights;
+    const weightSum =
+      weights.quiet +
+      weights.windfall +
+      weights.hazard +
+      weights.foes +
+      weights.disaster +
+      weights.people;
+    if (weightSum !== 100) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["day", "event_weights"],
+        message: "P2-1: event weights add up to 100 (DEC-022).",
+      });
+    }
+    const dropSum = tuning.skulls.tower_drop.reduce((sum, row) => sum + row.percent, 0);
+    if (dropSum !== 100) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["skulls", "tower_drop"],
+        message: "P2-1: tower drop chances add up to 100 (DEC-064).",
+      });
+    }
+    const deal = tuning.tomb.deal;
+    if (deal.nothing + deal.battle + deal.trap !== 100) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["tomb", "deal"],
+        message: "P2-1: tomb deal chances add up to 100 (DEC-604).",
+      });
+    }
+  });
+
+export type Tuning = z.infer<typeof tuningSchema>;
+
 export const baseContentPackSchema = z
   .strictObject({
     format: z.literal(2),
@@ -156,6 +426,8 @@ export const baseContentPackSchema = z
     building_types: z.array(buildingTypeSchema).min(1),
     quest_types: z.array(questTypeSchema).min(1),
     board: boardSchema,
+    /** DEC-703. The loader requires this file on a base pack; schema fixtures may omit it. */
+    tuning: tuningSchema.optional(),
     assets: z
       .array(
         z.strictObject({

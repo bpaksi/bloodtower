@@ -1,11 +1,11 @@
 import { pageServerOrigin } from "../serverOrigin.ts";
-import type { Layers } from "./layers.ts";
-import { CHANNELS, type Channel, type Levels } from "./levels.ts";
+import { reportAudioStartRefused } from "./audioError.ts";
+import { type Layers, pickLayers } from "./layers.ts";
+import { CHANNELS, type Channel, type Levels, levelToGain } from "./levels.ts";
 import { loopPointsFor } from "./loopPoints.ts";
 import { LayerMixer, type LoopChannel, type LoopHandle, type MixerBackend } from "./mixer.ts";
 import { type AudioFile, SIGNATURE } from "./tracks.ts";
 
-const FADE_IN_TIME_CONSTANT = 0.05;
 /** The bed gives way to the tower in about half a second. */
 const DUCK_TIME_CONSTANT = 0.12;
 
@@ -16,12 +16,27 @@ export const TEST_CLIPS: Record<Channel, { file: AudioFile; seconds: number }> =
   voice: { file: SIGNATURE.sting, seconds: 6.5 },
 };
 
+export interface BtAudioHook {
+  readonly contextState: AudioContextState | null;
+  readonly ambientPlaying: boolean;
+  readonly gains: Levels;
+}
+
+declare global {
+  interface Window {
+    __btAudio?: BtAudioHook;
+  }
+}
+
 /**
- * The Mac board's audio (R3-UI-03, R3-UI-60, R3-UI-64). The context is made on the first board
- * click or keypress, because browsers only allow audio after a gesture. Devices never create one.
+ * The Mac board's audio (R3-UI-03, R3-UI-60, R3-UI-64). The context is made on the first
+ * click or keypress, because browsers only allow audio after a gesture. One instance lives
+ * from the landing page onto the Story board. Devices never create one.
  */
 export class BoardAudio {
   private context: AudioContext | null = null;
+  /** True once the ambient source has started. Cleared when that layer goes silent. */
+  private ambientAudible = false;
   private gains = new Map<Channel, GainNode>();
   /** Every channel feeds this one gain, so the tower's sound can duck all of them (R3-UI-60). */
   private duck: GainNode | null = null;
@@ -46,6 +61,31 @@ export class BoardAudio {
     return this.context?.state === "running";
   }
 
+  /** The live context state, or null before the first gesture creates one. */
+  get contextState(): AudioContextState | null {
+    return this.context?.state ?? null;
+  }
+
+  /** True once the ambient bed's source has started and the layer is still on. */
+  get ambientPlaying(): boolean {
+    return this.ambientAudible && this.mixer?.current().ambient != null;
+  }
+
+  /** Channel gains. Stored levels stand in until the context exists. */
+  gainValues(): Levels {
+    return {
+      music: this.gainOf("music"),
+      ambient: this.gainOf("ambient"),
+      voice: this.gainOf("voice"),
+    };
+  }
+
+  private gainOf(channel: Channel): number {
+    const node = this.gains.get(channel);
+    if (node) return node.gain.value;
+    return levelToGain(this.levels[channel]);
+  }
+
   /**
    * Call from a click or keypress. Safe to call again. A key such as Escape is not a user
    * activation, so the context can start suspended; a later call resumes it.
@@ -67,20 +107,24 @@ export class BoardAudio {
     this.duck = duck;
     for (const channel of CHANNELS) {
       const gain = context.createGain();
-      gain.gain.value = this.levels[channel];
+      gain.gain.value = levelToGain(this.levels[channel]);
       gain.connect(duck);
       this.gains.set(channel, gain);
     }
     this.resume();
     this.mixer = new LayerMixer(this.backend(context));
-    if (this.pending) this.mixer.apply(this.pending);
+    if (!this.pending) {
+      this.pending = pickLayers({ screen: "splash", packId: null, visual: false });
+    }
+    this.mixer.apply(this.pending);
+    installBtAudioHook(this);
   }
 
   private resume(): void {
     const context = this.context;
     if (!context || context.state === "running") return;
     context.resume().catch((error: unknown) => {
-      console.warn("[bloodtower] audio still suspended", error);
+      reportAudioStartRefused(error);
     });
   }
 
@@ -88,9 +132,9 @@ export class BoardAudio {
     this.levels = levels;
     if (!this.context) return;
     for (const channel of CHANNELS) {
-      this.gains
-        .get(channel)
-        ?.gain.setTargetAtTime(levels[channel], this.context.currentTime, FADE_IN_TIME_CONSTANT);
+      const gain = this.gains.get(channel);
+      if (!gain) continue;
+      gain.gain.value = levelToGain(levels[channel]);
     }
   }
 
@@ -107,6 +151,7 @@ export class BoardAudio {
   /** The layers the board should hear now. Held until the context exists. */
   update(layers: Layers): void {
     this.pending = layers;
+    if (!layers.ambient) this.ambientAudible = false;
     this.mixer?.apply(layers);
   }
 
@@ -166,6 +211,7 @@ export class BoardAudio {
           } else {
             source.start(0);
           }
+          if (channel === "ambient") this.ambientAudible = true;
         });
         return {
           fadeOut: (fadeSeconds: number) => {
@@ -210,3 +256,19 @@ export class BoardAudio {
     return loaded;
   }
 }
+
+/** Publishes the live audio state tests read (`window.__btAudio`). */
+export const installBtAudioHook = (audio: BoardAudio): void => {
+  if (typeof window === "undefined") return;
+  window.__btAudio = {
+    get contextState() {
+      return audio.contextState;
+    },
+    get ambientPlaying() {
+      return audio.ambientPlaying;
+    },
+    get gains() {
+      return audio.gainValues();
+    },
+  };
+};

@@ -450,6 +450,17 @@ describe("pack:lint", () => {
   });
 });
 
+describe("dracula length", () => {
+  it("dracula offers short and standard only", () => {
+    const result = loadPackDir(join(loadConfig().packsDir, "dracula"));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const length = result.pack.settings.find((setting) => setting.id === "length");
+    expect(length?.options.map((option) => option.id)).toEqual(["short", "standard"]);
+    expect(length?.default).toBe("standard");
+  });
+});
+
 describe.skip("manifest fields on the repo packs (R1 test)", () => {
   const packsDir = () => loadConfig().packsDir;
 
@@ -484,7 +495,6 @@ describe.skip("manifest fields on the repo packs (R1 test)", () => {
           options: [
             { id: "short", label: "Short" },
             { id: "standard", label: "Standard" },
-            { id: "long", label: "Long" },
           ],
           default: "standard",
         },

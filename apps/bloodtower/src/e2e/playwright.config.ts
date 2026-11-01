@@ -21,8 +21,6 @@ export default defineConfig({
     "**/hunter-portraits.spec.ts",
     "**/keeper-fit.spec.ts",
     "**/opening-screens.spec.ts",
-    "**/sound-dialog.spec.ts",
-    "**/sound-unlock.spec.ts",
     "**/startup-shell.spec.ts",
     "**/visual-layer.spec.ts",
     "**/landing.spec.ts",
@@ -34,6 +32,10 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
+    launchOptions: {
+      // A lost gesture must fail. Chromium's default would let a suspended context look running.
+      args: ["--autoplay-policy=user-gesture-required"],
+    },
   },
   projects: [
     {

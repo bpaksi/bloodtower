@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import { CHANNELS, type Channel, type Levels } from "../../lib/audio/levels.ts";
 import { DialogFrame } from "./DialogFrame";
 
+export { levelToGain } from "../../lib/audio/levels.ts";
+
 const LABELS: Record<Channel, string> = {
   music: "Music",
   ambient: "Ambient",
