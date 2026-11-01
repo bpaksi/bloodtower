@@ -2,6 +2,7 @@ import type { LoopDefinition } from "../../loop/types.ts";
 import type { BoardGraph } from "../chapter/board.ts";
 import { neighborsOf, spaceName } from "../chapter/board.ts";
 import { groupById, playState } from "../chapter/playState.ts";
+import { isFallen } from "../day/clock.ts";
 import { handleEncounterLeave } from "../encounter/loop.ts";
 import { recordOffer } from "../session/shellRef.ts";
 
@@ -43,7 +44,7 @@ const offerMoveMap = (
     recordOffer(promptId, "walk");
   }
 
-  if (here.building) {
+  if (here.building && !isFallen(play, group.spaceId)) {
     const promptId = `enter--${local.groupId}--${group.spaceId}`;
     ctx.offerPrompt(promptId, "enter");
     recordOffer(promptId, "enter");
@@ -60,9 +61,11 @@ const offerEnterOrEndTurn = (
 ) => {
   const group = groupById(playState(), local.groupId);
   if (!group) return;
-  const promptId = `enter--${local.groupId}--${group.spaceId}`;
-  ctx.offerPrompt(promptId, "enter");
-  recordOffer(promptId, "enter");
+  if (!isFallen(playState(), group.spaceId)) {
+    const promptId = `enter--${local.groupId}--${group.spaceId}`;
+    ctx.offerPrompt(promptId, "enter");
+    recordOffer(promptId, "enter");
+  }
   const endId = `end-turn--${local.groupId}`;
   ctx.offerPrompt(endId, "end-turn");
   recordOffer(endId, "end-turn");
@@ -108,7 +111,8 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
         local.landedOnBuildingWithNoMoves &&
         group &&
         !group.insideBuilding &&
-        play.content.board.spaceById.get(group.spaceId)?.building
+        play.content.board.spaceById.get(group.spaceId)?.building &&
+        !isFallen(play, group.spaceId)
       ) {
         if (!local.awaitingPress) {
           offerEnterOrEndTurn(local, ctx);
@@ -131,7 +135,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     if (group?.insideBuilding) return false;
     if (local.landedOnBuildingWithNoMoves && group && !group.insideBuilding) {
       const here = playState().content.board.spaceById.get(group.spaceId);
-      if (here?.building) return false;
+      if (here?.building && !isFallen(playState(), group.spaceId)) return false;
     }
     return local.movesLeft <= 0 && !local.encounterPending;
   },
@@ -154,7 +158,7 @@ export const applyEnter = (groupId: string, spaceId: string): boolean => {
   const group = groupById(play, groupId);
   if (!group || group.spaceId !== spaceId) return false;
   const space = play.content.board.spaceById.get(spaceId);
-  if (!space?.building) return false;
+  if (!space?.building || isFallen(play, spaceId)) return false;
   group.insideBuilding = true;
   return true;
 };
@@ -164,6 +168,11 @@ export const handleGroupTurnPress = (
   promptId: string,
   actionId: string,
 ): GroupTurnLocal => {
+  // Regroup is the only step that splits or joins (DEC-640). A mid-turn press is refused.
+  if (actionId === "split" || actionId === "join" || actionId === "regroup") {
+    return { ...local, awaitingPress: false };
+  }
+
   if (actionId === "end-turn" && promptId === `end-turn--${local.groupId}`) {
     return {
       ...local,
