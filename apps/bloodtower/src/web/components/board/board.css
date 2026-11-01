@@ -2459,7 +2459,7 @@
 }
 
 .bt-board[data-screen="claim-heroes"] .bt-qr-lg {
-  width: min(100%, 16.5rem);
+  width: min(100%, calc(16.5rem * var(--bt-art-scale, 1)));
 }
 
 .bt-board[data-screen="claim-heroes"] .bt-startup-join {

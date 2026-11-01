@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { reportPageLog } from "../../lib/pageLog.ts";
 
 export type DialogFrameSize = "default" | "compact";
 
@@ -22,11 +23,11 @@ const LINE_SELECTOR = [
   ".bt-setting",
   ".bt-startup-progress",
   ".bt-teardown > li",
-  ".bt-hunter-roster > li",
 ].join(", ");
 
 const ART_SELECTOR = [
   "[data-dialog-art]",
+  ".bt-qr-lg",
   ".bt-tower-still",
   "[data-portrait-frame]",
   ".bt-carousel-plate",
@@ -182,7 +183,13 @@ export function DialogFrame({
     window.addEventListener("resize", run);
     if (document.fonts) {
       void document.fonts.ready.then(run).catch((error: unknown) => {
-        console.error("Dialog frame fit failed after fonts loaded.", error);
+        void reportPageLog({
+          level: "error",
+          code: "dialog-fit-failed",
+          message: `Dialog frame fit failed after fonts loaded. ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        });
       });
     }
     const art = frame.querySelector("img");
