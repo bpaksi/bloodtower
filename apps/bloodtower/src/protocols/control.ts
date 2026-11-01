@@ -20,6 +20,7 @@ export const CONTROL_ACTIONS = [
   "tower-connect",
   "tower-calibrate",
   "play-without-tower",
+  "board-set-up",
   "pick",
   "set",
   "volume-play",
@@ -46,6 +47,10 @@ export type ControlAction = z.infer<typeof controlActionSchema>;
  */
 export const FLOW_SCREENS = [
   "splash",
+  "table-join",
+  "base-board",
+  "tower-choice",
+  "tower-wake",
   "pick-story",
   "game-settings",
   "not-playable",

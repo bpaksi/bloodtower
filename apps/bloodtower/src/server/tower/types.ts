@@ -16,8 +16,9 @@ export type SoundResult = "written" | "failed";
  */
 export interface TowerPort {
   snapshot: () => TowerSnapshot;
-  connect: () => void;
-  calibrate: () => void;
+  /** `failed` when the tower did not answer. Nothing retries. */
+  connect: () => SoundResult;
+  calibrate: () => SoundResult;
   /**
    * Plays one library sound at a volume tier (0 loudest .. 3 mute) through tower-poc's
    * `sound.play-stateful` command. Resolves once the write is done or the command failed. It never

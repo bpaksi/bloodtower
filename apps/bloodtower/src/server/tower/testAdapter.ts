@@ -22,12 +22,12 @@ export const bloodtowerTowerFromMock = (mock: MockTower): BloodtowerTower => ({
   snapshot: () => toShell(mock.snapshot()),
   subscribe: (listener) => mock.onSnapshotChange(listener),
   runCapability: async (capabilityId, _params, log) => {
-    if (capabilityId === "tower.connect") {
-      mock.connect();
-      return "ok";
-    }
-    if (capabilityId === "tower.calibrate") {
-      mock.calibrate();
+    if (capabilityId === "tower.connect" || capabilityId === "tower.calibrate") {
+      const taken = capabilityId === "tower.connect" ? mock.connect() : mock.calibrate();
+      if (taken === "failed") {
+        log.error("tower-command-failed", `Tower command ${capabilityId} failed.`);
+        return "failed";
+      }
       return "ok";
     }
     if (capabilityId === "lighting.all-off") {

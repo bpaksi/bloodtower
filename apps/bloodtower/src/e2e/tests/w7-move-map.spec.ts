@@ -7,6 +7,7 @@ import { createEventStore } from "../../server/events/store.ts";
 import {
   type AcceptanceHost,
   captureFrames,
+  enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -79,7 +80,7 @@ const buildingTitle = (building: string) => building.charAt(0).toUpperCase() + b
 const heroName = (heroId: string | null) =>
   heroId && heroId in HERO_NAME ? HERO_NAME[heroId as (typeof HERO_IDS)[number]] : "";
 
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 /** Done on the three setup steps, Begin, then Continue through the four opening moments. No walk. */
@@ -103,13 +104,10 @@ const skipTowerToClaim = async (page: Page, joinCode: string) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-  await clickAct(page, "continue", "splash-play");
+  await enterWithoutTower(page);
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-  await page.locator('button[data-action="play-without-tower"]').click();
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
 };
 
@@ -638,7 +636,6 @@ test("W7 continue keeps an entered place and Leave returns to the move map", asy
     await board.goto("/board");
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(page, "continue", "splash-play");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game");
     await clickAct(page, "continue", "continue-pick-game");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");

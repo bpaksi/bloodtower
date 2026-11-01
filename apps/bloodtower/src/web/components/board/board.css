@@ -2341,7 +2341,10 @@
 .bt-board[data-screen="splash"] .bt-startup-stage,
 .bt-board[data-screen="setup"] .bt-startup-stage,
 .bt-board[data-screen="begin"] .bt-startup-stage,
-.bt-board[data-screen="tower-connect"] .bt-startup-stage {
+.bt-board[data-screen="table-join"] .bt-startup-stage,
+.bt-board[data-screen="base-board"] .bt-startup-stage,
+.bt-board[data-screen="tower-choice"] .bt-startup-stage,
+.bt-board[data-screen="tower-wake"] .bt-startup-stage {
   width: min(46rem, 92vw);
 }
 
@@ -2611,7 +2614,10 @@
 .bt-board[data-screen="splash"] .bt-startup-stage,
 .bt-board[data-screen="setup"] .bt-startup-stage,
 .bt-board[data-screen="begin"] .bt-startup-stage,
-.bt-board[data-screen="tower-connect"] .bt-startup-stage,
+.bt-board[data-screen="table-join"] .bt-startup-stage,
+.bt-board[data-screen="base-board"] .bt-startup-stage,
+.bt-board[data-screen="tower-choice"] .bt-startup-stage,
+.bt-board[data-screen="tower-wake"] .bt-startup-stage,
 .bt-board[data-screen="session"] .bt-startup-stage,
 .bt-board[data-screen="goodbye"] .bt-startup-stage {
   --bt-dialog-w: min(46rem, 100%);
@@ -2679,4 +2685,53 @@
   display: block;
   width: 2.8125rem;
   height: 3.75rem;
+}
+
+/* C2/05 session Enter. The join QR shrinks to a corner after the first iPad joins (DEC-274). */
+.bt-join-corner {
+  position: absolute;
+  right: clamp(1.25rem, 3vw, 3rem);
+  bottom: clamp(1.25rem, 3vh, 3rem);
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.bt-join-corner .bt-qr {
+  width: clamp(4.5rem, 7vw, 7.5rem);
+  padding: 0.25rem;
+}
+
+.bt-join-corner .bt-join-code {
+  font-size: clamp(0.9rem, 1.4vw, 1.5rem);
+}
+
+.bt-base-steps {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+  padding-left: 1.6rem;
+  text-align: left;
+}
+
+.bt-tower-status {
+  margin: 0;
+  color: var(--bt-blood, #8a1e14);
+  font-family: var(--bt-font-title);
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.bt-progress {
+  height: 6px;
+  margin: 0.9rem 10% 0;
+  background: #3b2a1e;
+}
+
+.bt-progress > span {
+  display: block;
+  width: 45%;
+  height: 100%;
+  background: #c9a85a;
 }

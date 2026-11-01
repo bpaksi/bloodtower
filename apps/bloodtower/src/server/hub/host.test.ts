@@ -168,7 +168,7 @@ describe("session hub (core)", () => {
       messages.some((m) => m.type === "deviceView"),
     );
     const latestDevice = [...device.log].reverse().find((m) => m.type === "deviceView");
-    expect(latestDevice?.payload.screen).toBe("splash");
+    expect(latestDevice?.payload.screen).toBe("base-board");
   });
 
   it("refuses control from the story board", async () => {
@@ -215,9 +215,8 @@ describe("session hub (core)", () => {
     const host = await start();
     const board = await helloBoard(host.port);
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await act(device, "tower-connect", "tower-connect");
-    await act(device, "tower-calibrate", "tower-calibrate");
-    await act(device, "new-pick-game", "new-game");
+    await act(device, "base-board-done", "board-set-up");
+    await act(device, "play-without-tower", "play-without-tower");
     await act(device, "continue-pick-story-test", "continue");
     await act(device, "continue-game-settings", "continue");
     await act(device, "hero-hold", "take", { heroId: "hero-a" });
@@ -232,13 +231,12 @@ describe("session hub (core)", () => {
     });
   });
 
-  it("steps a device from pick-game toward pick-story with act", async () => {
+  it("steps a device from the Enter to pick-story with act", async () => {
     const host = await start();
     await helloBoard(host.port);
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
-    await act(device, "tower-connect", "tower-connect");
-    await act(device, "tower-calibrate", "tower-calibrate");
-    await act(device, "new-pick-game", "new-game");
+    await act(device, "base-board-done", "board-set-up");
+    await act(device, "play-without-tower", "play-without-tower");
     await until(device.inbox, device.log, (messages) => {
       const state = [...messages].reverse().find((m) => m.type === "deviceView");
       return state?.type === "deviceView" && state.payload.screen === "pick-story";

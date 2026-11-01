@@ -25,8 +25,14 @@ describe("protocol v2 host switch-over", () => {
       v: 2,
       type: "boardView",
       payload: {
-        screen: "tower-connect",
-        levels: [{ id: "tower-connect", label: "Tower", shows: "Connect the tower." }],
+        screen: "tower-choice",
+        levels: [
+          {
+            id: "tower-choice",
+            label: "Tower",
+            shows: "Wake the tower, or play tonight without it?",
+          },
+        ],
         heroes: [],
         narration: null,
         actions: [],

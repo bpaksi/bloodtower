@@ -5,6 +5,7 @@ import { projectDayClock } from "../../views/day.ts";
 import { citadelForKingdom } from "../chapter/board.ts";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
 import { groupTurnLoop, handleGroupTurnPress } from "../group-turn/loop.ts";
+import { enterConnectEvents } from "../session/enterKit.ts";
 import type { ShellEvent } from "../session/events.ts";
 import { TEST_STORY } from "../session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
@@ -46,20 +47,7 @@ const setupThroughBegin = () => {
   const events: ShellEvent[] = [
     { kind: "start-session" as const, v: 1 as const, sessionId: "t", seed: "cue-test" },
     { kind: "device-join" as const, v: 1 as const, deviceId: "pad" },
-    {
-      kind: "press" as const,
-      v: 1 as const,
-      deviceId: "pad",
-      promptId: "tower-connect",
-      actionId: "tower-connect",
-    },
-    {
-      kind: "press" as const,
-      v: 1 as const,
-      deviceId: "pad",
-      promptId: "tower-calibrate",
-      actionId: "tower-calibrate",
-    },
+    ...enterConnectEvents("pad").slice(1),
     {
       kind: "press" as const,
       v: 1 as const,

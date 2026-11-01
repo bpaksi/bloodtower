@@ -9,20 +9,14 @@ import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { BOARD_SET_UP_PROMPT } from "./enter.ts";
 import type { ShellStory } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import type { ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
 /** Matches protocol v2 setup screens (private lines on these only). */
-const SETUP_SCREENS = new Set([
-  "pick-story",
-  "game-settings",
-  "tower-connect",
-  "claim-heroes",
-  "setup",
-  "begin",
-]);
+const SETUP_SCREENS = new Set(["pick-story", "game-settings", "claim-heroes", "setup", "begin"]);
 
 const isSetupScreen = (screen: ViewState["screen"]): boolean => SETUP_SCREENS.has(screen);
 
@@ -30,7 +24,7 @@ const buildingTitle = (building: string): string =>
   building.charAt(0).toUpperCase() + building.slice(1);
 
 const labelFor = (state: ShellState, promptId: string, actionId: string): string => {
-  if (promptId === "splash-play") return "Play";
+  if (promptId === BOARD_SET_UP_PROMPT) return "Board is set up";
   if (promptId === "continue-begin") return "Begin";
   if (promptId.startsWith("continue-setup-")) return "Done";
   if (promptId.startsWith("day-") && promptId.endsWith("-roll-done")) return "Take the move roll";
@@ -167,11 +161,23 @@ const buildPlace = (state: ShellState): PlaceStill | null => {
   };
 };
 
+const JOIN_LINE = "Scan with each iPad. Then pick who this iPad speaks for at the table.";
+/** SCR-022: the approved mockup wording, one line per step. */
+export const BASE_BOARD_STEPS = [
+  "Set the tower on the board.",
+  "Lay out the board, kingdom edges matched.",
+  "Sort the pieces: heroes, foes, skulls.",
+] as const;
+const TOWER_QUESTION = "Wake the tower, or play tonight without it?";
+const TOWER_FAILED_LINE = "The tower did not answer. Try again, or play without it.";
+
 const LEVEL_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 
 const STEP_NAME: Record<ShellState["screen"], string> = {
-  splash: "Splash",
-  "tower-connect": "Tower Connect",
+  "table-join": "Join",
+  "base-board": "Base board",
+  "tower-choice": "Tower",
+  "tower-wake": "Tower",
   "pick-story": "Pick Story",
   "game-settings": "Game settings",
   "claim-heroes": "Party Join",
@@ -192,14 +198,6 @@ const towerStrip = (state: ShellState): string => {
     return "calibrating";
   }
   return state.towerLinked ? "lost" : "no tower";
-};
-
-const towerLine = (state: ShellState): string => {
-  const strip = towerStrip(state);
-  if (strip === "connected") return "The tower is connected and calibrated.";
-  if (strip === "calibrating") return "The tower is connected. Calibrate it from an iPad.";
-  if (strip === "lost") return "The tower is lost. An iPad can reconnect.";
-  return "No tower yet. An iPad can connect it, or play on without it.";
 };
 
 const chosenOrBound = (state: ShellState): ShellStory | undefined =>
@@ -265,7 +263,16 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
   if ((state.screen === "play" || state.screen === "pause") && state.play) {
     return `Day ${state.play.dayNumber}`;
   }
-  if (state.screen === "splash") return "Blood Tower";
+  if (state.screen === "table-join") return JOIN_LINE;
+  if (state.screen === "base-board") return BASE_BOARD_STEPS.join("\n");
+  if (state.screen === "tower-choice") {
+    return state.enter?.failed ? TOWER_FAILED_LINE : TOWER_QUESTION;
+  }
+  if (state.screen === "tower-wake") {
+    if (state.enter?.step === "calibrate") return "The tower is awake. Calibrate it from an iPad.";
+    if (state.enter?.step === "calibrating") return "Calibrating the tower...";
+    return "Waking the tower...";
+  }
   if (state.screen === "pick-story") return title;
   if (state.screen === "not-playable") {
     const focused = state.stories.find((entry) => entry.card.id === state.focusStoryId);
@@ -281,7 +288,6 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
       })
       .join("\n");
   }
-  if (state.screen === "tower-connect") return towerLine(state);
   if (state.screen === "claim-heroes") {
     const roster = story?.heroes ?? [];
     const held = roster.filter((hero) => state.holdings[hero.id]).length;
@@ -325,6 +331,7 @@ const startupLevels = (state: ShellState, story: ShellStory | undefined): LoopLe
 };
 
 const screenLabel = (state: ShellState): string => {
+  if (state.screen === "tower-choice" && state.enter?.failed) return "Tower not found";
   if (state.screen === "setup") {
     const total = state.setupSteps.length;
     if (total === 0) return "Board setup";

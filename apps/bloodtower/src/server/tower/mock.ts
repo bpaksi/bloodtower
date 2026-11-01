@@ -19,6 +19,10 @@ export interface MockTower extends TowerPort {
    * A later idle is sent normally.
    */
   failNextIdle: () => void;
+  /** The next connect fails once: the tower is not found. A later connect works. */
+  failNextConnect: () => void;
+  /** The next calibrate fails once. A later calibrate works. */
+  failNextCalibrate: () => void;
   /** How many idle commands were dispatched while the link was up. */
   idleAttempts: () => number;
   /** `lighting.all-off`. Recorded as `{ type: "idle" }` once per dispatch. */
@@ -39,6 +43,8 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   let opened = false;
   let failSound = false;
   let failIdle = false;
+  let failConnect = false;
+  let failCalibrate = false;
   let idleAttempts = 0;
   const snapshotListeners = new Set<() => void>();
   const notifySnapshot = () => {
@@ -53,7 +59,12 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
   return {
     snapshot: () => snapshot,
     connect: () => {
-      if (opened && snapshot.connection === "connected") return;
+      if (opened && snapshot.connection === "connected") return "written";
+      if (failConnect) {
+        failConnect = false;
+        report("tower-command-failed", "The tower did not answer the connect.");
+        return "failed";
+      }
       opened = true;
       sent.push({ type: "connect" });
       snapshot = {
@@ -63,12 +74,25 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
         firmware: { state: "known", version: "mock" },
       };
       notifySnapshot();
+      return "written";
     },
     calibrate: () => {
-      if (snapshot.connection !== "connected") return;
+      if (snapshot.connection !== "connected") return "failed";
+      if (failCalibrate) {
+        failCalibrate = false;
+        report("tower-command-failed", "The tower did not answer the calibrate.");
+        return "failed";
+      }
       sent.push({ type: "calibrate" });
       snapshot = { ...snapshot, calibrated: { state: "known", calibrated: true } };
       notifySnapshot();
+      return "written";
+    },
+    failNextConnect: () => {
+      failConnect = true;
+    },
+    failNextCalibrate: () => {
+      failCalibrate = true;
     },
     playSound: async (soundIndex, volume) => {
       if (snapshot.connection !== "connected") {

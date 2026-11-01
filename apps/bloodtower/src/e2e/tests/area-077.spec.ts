@@ -9,6 +9,8 @@ import { createHostLogger } from "../../server/log/hostLog.ts";
 import type { MockTower } from "../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import {
+  enterWithoutTower,
+  enterWithTower,
   gateControls,
   holdHeroesFromTest,
   installSessionSocketHook,
@@ -98,7 +100,7 @@ const settle = async (page: Page, before: string) => {
   await expect.poll(async () => marker(page), { timeout: 15_000 }).not.toBe(before);
 };
 
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 /** Done on the three setup steps, Begin, then Continue through the four opening moments. No walk. */
@@ -122,13 +124,10 @@ const skipTowerToClaim = async (page: Page, joinCode: string) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-  await clickAct(page, "continue", "splash-play");
+  await enterWithoutTower(page);
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-  await page.locator('button[data-action="play-without-tower"]').click();
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
 };
 
@@ -261,19 +260,13 @@ const reachPlay = async (device: Page, joinCode: string, linked: boolean) => {
   await device.goto(`/join?code=${joinCode}`);
   await expect(device).toHaveURL(/\/device/);
   if (linked) {
-    await clickAct(device, "tower-connect", "tower-connect");
-    await clickAct(device, "tower-calibrate", "tower-calibrate");
-    await clickAct(device, "new-game", "new-pick-game");
+    await enterWithTower(device);
   } else {
-    await clickAct(device, "continue", "splash-play");
+    await enterWithoutTower(device);
   }
   await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(device, "continue", "continue-game-settings");
-  if (!linked) {
-    await expect(deviceMain(device)).toHaveAttribute("data-screen", "tower-connect");
-    await device.locator('button[data-action="play-without-tower"]').click();
-  }
   await expect(deviceMain(device)).toHaveAttribute("data-screen", "claim-heroes");
   await holdHeroesFromTest(device, [...HERO_IDS]);
   await clickAct(device, "continue", "continue-claim-heroes");
@@ -515,7 +508,7 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
   const board2 = await context2.newPage();
   try {
     await board2.goto("/board");
-    await expect(board2.locator("main.bt-board")).toHaveAttribute("data-screen", "splash");
+    await expect(board2.locator("main.bt-board")).toHaveAttribute("data-screen", "table-join");
     const sitting = readSitting(databasePath);
     expect(sitting.autosaveGameId).toBe(gameId);
     expect(sitting.outcomes).toEqual(["quit"]);
@@ -622,7 +615,6 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
   try {
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(page, "continue", "splash-play");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game");
     await clickAct(page, "continue", "continue-pick-game");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
@@ -672,9 +664,7 @@ test("AREA-077 a connected tower pauses on drop and a never-connected one does n
   try {
     await installSessionSocketHook(device);
     await device.goto(`/join?code=${linked.host.joinCode}`);
-    await clickAct(device, "tower-connect", "tower-connect");
-    await clickAct(device, "tower-calibrate", "tower-calibrate");
-    await clickAct(device, "new-game", "new-pick-game");
+    await enterWithTower(device);
     await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(device, "continue", "continue-game-settings");
     await holdHeroesFromTest(device, [...HERO_IDS]);

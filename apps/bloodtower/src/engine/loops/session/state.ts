@@ -9,9 +9,27 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-step6";
+export const SHELL_ENGINE_VERSION = "0.0.0-c2-05";
+
+/** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
+export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
+  "0.0.0-step6",
+  SHELL_ENGINE_VERSION,
+];
 
 export type PauseCause = "disconnect" | "tower-lost";
+
+/** Where the session Enter is (MEC-039). `null` on the state once the Enter has finished. */
+export type EnterStep = "join" | "board" | "choice" | "connecting" | "calibrate" | "calibrating";
+
+export type EnterState = {
+  step: EnterStep;
+  /** The last connect or calibrate failed; the choice shows "Tower not found". */
+  failed: boolean;
+};
+
+/** Tonight's tower choice. It lasts the session (DEC-152). */
+export type TowerChoice = "undecided" | "connect" | "without";
 
 export type AutosaveSnapshot = {
   gameId: string;
@@ -38,7 +56,9 @@ export type ShellState = {
   /** hero id → device id holding them, or null when unclaimed. */
   holdings: Record<string, string | null>;
   tower: TowerSnapshot;
-  towerSetupDone: boolean;
+  /** `null` once the Enter has finished. A checkpoint from before C2/05 has none. */
+  enter: EnterState | null;
+  towerChoice: TowerChoice;
   /**
    * True after this session pressed connect. A drop pauses only then (DEC-155 slice).
    * A session that never connected stays in play, including after Continue.
@@ -100,9 +120,10 @@ export const initialShellState = (input: {
     devices: new Set(),
     holdings: boundStory ? initialHoldings(boundStory) : {},
     tower: TOWER_DISCONNECTED,
-    towerSetupDone: false,
+    enter: { step: "join", failed: false },
+    towerChoice: "undecided",
     towerLinked: false,
-    screen: "splash",
+    screen: "table-join",
     setupAt: 0,
     setupSteps: [],
     openingIndex: -1,

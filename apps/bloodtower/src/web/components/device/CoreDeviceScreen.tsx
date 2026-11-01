@@ -12,7 +12,10 @@ const SCREEN_TITLE: Record<string, string> = {
   "pick-story": "Pick a story",
   "pick-game": "Pick a game",
   "game-settings": "Game settings",
-  "tower-connect": "Connect the tower",
+  "table-join": "Join",
+  "base-board": "Base board",
+  "tower-choice": "The tower",
+  "tower-wake": "The tower",
   "claim-heroes": "Party Join",
   setup: "Board setup",
   begin: "Begin",
@@ -26,7 +29,10 @@ const SCREEN_TITLE: Record<string, string> = {
 /** Existing step names (view.ts STEP_NAME). Shown as context; the instruction stays `shows`. */
 const STEP_CONTEXT: Record<string, string> = {
   splash: "Splash",
-  "tower-connect": "Tower Connect",
+  "table-join": "Join",
+  "base-board": "Base board",
+  "tower-choice": "Tower",
+  "tower-wake": "Tower",
   "pick-story": "Pick Story",
   "game-settings": "Game settings",
   "claim-heroes": "Party Join",
@@ -177,6 +183,8 @@ export function CoreDeviceScreen({
       ? setupPrompt.promptId.slice("continue-setup-".length)
       : undefined;
   const farewell = view.screen === "goodbye";
+  // The steps are on the Story board; the iPad shows only its one button (SCR-022).
+  const stepsOnBoard = view.screen === "base-board";
 
   return (
     <main className="bt-device" data-screen={view.screen} data-setup-step={setupStep}>
@@ -193,7 +201,7 @@ export function CoreDeviceScreen({
         ) : (
           <>
             <p
-              className="mt-2 text-lg"
+              className={stepsOnBoard ? "sr-only" : "mt-2 text-lg"}
               data-step-instruction=""
               data-day={view.table?.day}
               data-moves={view.table?.movesLeft ?? undefined}

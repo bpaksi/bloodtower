@@ -347,3 +347,66 @@ describe("story board startup chrome", () => {
     expect(markup).not.toContain("data-visual-layer");
   });
 });
+
+describe("session Enter board screens (C2/05)", () => {
+  const enterView = (screen: string, label: string, shows: string) =>
+    ({
+      screen,
+      levels: [join, { id: screen, label, shows }],
+      heroes,
+      narration: null,
+      actions: [],
+    }) as BoardView;
+
+  it("draws the join as a large QR with no button", () => {
+    const markup = html(enterView("table-join", "Join", "Scan with each iPad."));
+    expect(markup).toContain('data-startup-panel="table-join"');
+    expect(markup).toContain("bt-qr-lg");
+    expect(markup).not.toContain("data-join-corner");
+    expect(markup).not.toMatch(/<button/i);
+  });
+
+  it("draws the three base board steps and a corner QR, no button", () => {
+    const markup = html(
+      enterView(
+        "base-board",
+        "Base board",
+        [
+          "Set the tower on the board.",
+          "Lay out the board, kingdom edges matched.",
+          "Sort the pieces: heroes, foes, skulls.",
+        ].join("\n"),
+      ),
+    );
+    expect(markup.match(/<li/g)).toHaveLength(3);
+    expect(markup).toContain("Set the tower on the board.");
+    expect(markup).toContain("data-join-corner");
+    expect(markup).not.toContain("bt-qr-lg");
+    expect(markup).not.toMatch(/<button/i);
+  });
+
+  it("draws the tower question, and Tower not found after a failure", () => {
+    const asked = html(
+      enterView("tower-choice", "Tower", "Wake the tower, or play tonight without it?"),
+    );
+    expect(asked).toContain("Wake the tower, or play tonight without it?");
+    expect(asked).not.toContain("data-tower-status");
+    const failed = html(
+      enterView(
+        "tower-choice",
+        "Tower not found",
+        "The tower did not answer. Try again, or play without it.",
+      ),
+    );
+    expect(failed).toContain("Tower not found");
+    expect(failed).toContain("The tower did not answer. Try again, or play without it.");
+    expect(failed).not.toMatch(/<button/i);
+  });
+
+  it("draws a progress line while the tower wakes", () => {
+    const markup = html(enterView("tower-wake", "Tower", "Waking the tower..."));
+    expect(markup).toContain("data-tower-progress");
+    expect(markup).toContain("Waking the tower...");
+    expect(markup).not.toMatch(/<button/i);
+  });
+});

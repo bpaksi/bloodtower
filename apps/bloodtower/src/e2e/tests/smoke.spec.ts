@@ -104,7 +104,7 @@ test("typing a join code on /join lands on /device", async ({ browser }, testInf
     await page.getByLabel("Join code").fill(session.host.joinCode);
     await page.getByRole("button", { name: "Enter the table" }).click();
     await expect(page).toHaveURL(/\/device/);
-    await expect(page.locator("main")).toHaveAttribute("data-screen", "splash");
+    await expect(page.locator("main")).toHaveAttribute("data-screen", "base-board");
   } finally {
     await context.close().catch(() => undefined);
     await session.host.close();

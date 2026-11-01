@@ -6,14 +6,12 @@ export const PROTOCOL_VERSION = 2 as const;
 /**
  * Game-setup screens the projection covers (D33, C1 step 6).
  * `claim-heroes` is the v2 id for the R1 `party-join` screen.
- * `tower-connect` is connect and calibrate on one screen (SCR-005).
  * `setup` is one pack step at a time, including seals and skulls.
  * `begin` is the last screen before play (SCR-012).
  */
 export const SETUP_SCREENS = [
   "pick-story",
   "game-settings",
-  "tower-connect",
   "claim-heroes",
   "setup",
   "begin",
@@ -23,10 +21,16 @@ export type SetupScreen = z.infer<typeof setupScreenSchema>;
 
 /**
  * Runtime screens the host projects during play and between games (C1 steps 9 and 10).
- * `splash` is the designed start. Play skips tower connect and calibrate.
+ * `splash` is the board's placeholder before the host answers; the session starts at `table-join`.
+ * The session Enter runs once, before the first Pick story (C2/05, MEC-039):
+ * `table-join`, `base-board` (SCR-022), `tower-choice` (SCR-005) and `tower-wake` (connect, calibrate).
  */
 export const RUNTIME_SCREENS = [
   "splash",
+  "table-join",
+  "base-board",
+  "tower-choice",
+  "tower-wake",
   "pick-game",
   "play",
   "pause",

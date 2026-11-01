@@ -3,7 +3,10 @@ import type { BoardView, ViewScreen } from "bloodtower-protocols";
 /** Screens that use the centred startup dialog. Play and pause keep the table band. */
 export const STARTUP_SCREENS = new Set<ViewScreen>([
   "splash",
-  "tower-connect",
+  "table-join",
+  "base-board",
+  "tower-choice",
+  "tower-wake",
   "pick-story",
   "game-settings",
   "claim-heroes",
@@ -19,7 +22,10 @@ export const isStartupScreen = (screen: ViewScreen): boolean => STARTUP_SCREENS.
 
 const STEP_NAME: Record<ViewScreen, string> = {
   splash: "Splash",
-  "tower-connect": "Tower Connect",
+  "table-join": "Join",
+  "base-board": "Base board",
+  "tower-choice": "Tower",
+  "tower-wake": "Tower",
   "pick-story": "Pick Story",
   "game-settings": "Game settings",
   "claim-heroes": "Party Join",
@@ -190,8 +196,14 @@ export const waitingFor = (view: BoardView): string => {
       return joinFromBoard(view)
         ? "Waiting for an iPad to press Play."
         : "Waiting for the hall to open.";
-    case "tower-connect":
+    case "table-join":
+      return "Waiting for the first iPad to join.";
+    case "base-board":
+      return "Waiting for an iPad to say the board is set up.";
+    case "tower-choice":
       return "Waiting for an iPad to connect the tower, or to play without it.";
+    case "tower-wake":
+      return "Waiting for the tower.";
     case "pick-story":
       return "Waiting for an iPad to choose a story.";
     case "game-settings":
@@ -219,3 +231,24 @@ export const waitingFor = (view: BoardView): string => {
       return "Waiting.";
   }
 };
+
+/** SCR-022: the base board setup steps, one per line on the screen level. */
+export const baseBoardSteps = (view: BoardView): string[] =>
+  publicLine(view)
+    .split("\n")
+    .filter((line) => line.trim() !== "");
+
+/** A failed connect or calibrate shows this status above the tower question (MEC-039 .11). */
+export const towerChoiceStatus = (view: BoardView): string | null => {
+  const label = screenLevel(view)?.label ?? "";
+  return label === "Tower not found" ? label : null;
+};
+
+/** The corner QR stays on the board from the first join until the party picks heroes (DEC-274). */
+export const CORNER_QR_SCREENS = new Set<ViewScreen>([
+  "base-board",
+  "tower-choice",
+  "tower-wake",
+  "pick-story",
+  "game-settings",
+]);

@@ -50,6 +50,17 @@ export const setSettingEventV1 = z.object({
   optionId: z.string().min(1),
 });
 
+/**
+ * How a tower command the Enter sent ended. The host appends it after the command settles,
+ * so a failed connect or calibrate loops back to the tower choice (MEC-039 .11).
+ */
+export const towerResultEventV1 = z.object({
+  kind: z.literal("tower-result"),
+  v: z.literal(1),
+  capabilityId: z.enum(["tower.connect", "tower.calibrate"]),
+  ok: z.boolean(),
+});
+
 export const shellEventSchema = z.discriminatedUnion("kind", [
   startSessionEventV1,
   pressEventV1,
@@ -59,6 +70,7 @@ export const shellEventSchema = z.discriminatedUnion("kind", [
   heroHoldEventV1,
   focusStoryEventV1,
   setSettingEventV1,
+  towerResultEventV1,
 ]);
 
 export type ShellEvent = z.infer<typeof shellEventSchema>;

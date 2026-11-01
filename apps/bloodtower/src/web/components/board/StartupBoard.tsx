@@ -4,6 +4,8 @@ import type { BoardView } from "bloodtower-protocols";
 import { joinWarning } from "../../lib/boardView";
 import { JoinQr } from "../../lib/qr";
 import {
+  baseBoardSteps,
+  CORNER_QR_SCREENS,
   claimCount,
   doorFrame,
   hallOpening,
@@ -14,6 +16,7 @@ import {
   setupProgress,
   startupStatus,
   storyDoors,
+  towerChoiceStatus,
   waitingFor,
 } from "../../lib/startupBoard";
 import { GoodbyeTeardown } from "../GoodbyeTeardown";
@@ -120,17 +123,71 @@ function PickStoryPanel({ view }: { view: BoardView }) {
   );
 }
 
-function TowerPanel({ view }: { view: BoardView }) {
+function TableJoinPanel({ view }: { view: BoardView }) {
   const join = joinFromBoard(view);
-  const line = publicLine(view) || "No tower yet. An iPad can connect it, or play on without it.";
   return (
-    <div data-startup-panel="tower-connect">
+    <div data-startup-panel="table-join">
+      <p className="bt-kicker">The table</p>
+      <h1 className="bt-startup-title">Join the table</h1>
+      {join ? (
+        <>
+          <JoinBlock code={join.code} url={join.url} large />
+          <p className="bt-startup-cue">{publicLine(view)}</p>
+        </>
+      ) : (
+        <p className="bt-startup-cue">
+          The hall is opening. Packs and the table are still loading.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function BaseBoardPanel({ view }: { view: BoardView }) {
+  return (
+    <div data-startup-panel="base-board">
+      <p className="bt-kicker">On the table</p>
+      <h1 className="bt-startup-title">Base board</h1>
+      <ol className="bt-base-steps" data-base-steps="">
+        {baseBoardSteps(view).map((line) => (
+          <li key={line} className="bt-startup-cue">
+            {line}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function TowerChoicePanel({ view }: { view: BoardView }) {
+  const status = towerChoiceStatus(view);
+  return (
+    <div data-startup-panel="tower-choice">
       <p className="bt-kicker">Optional</p>
-      <h1 className="bt-startup-title">Connect the tower</h1>
+      <h1 className="bt-startup-title">The tower</h1>
       {/* biome-ignore lint/performance/noImgElement: landing painting already served as a static file */}
       <img className="bt-tower-still" src="/landing/hero.webp" alt="" />
-      <p className="bt-startup-cue">{line}</p>
-      {join ? <JoinBlock code={join.code} url={join.url} /> : null}
+      {status ? (
+        <p className="bt-tower-status" role="status" data-tower-status="">
+          {status}
+        </p>
+      ) : null}
+      <p className="bt-startup-cue">{publicLine(view)}</p>
+    </div>
+  );
+}
+
+function TowerWakePanel({ view }: { view: BoardView }) {
+  return (
+    <div data-startup-panel="tower-wake">
+      <p className="bt-kicker">Optional</p>
+      <h1 className="bt-startup-title">The tower</h1>
+      <p className="bt-startup-cue" data-tower-progress="">
+        {publicLine(view)}
+      </p>
+      <div className="bt-progress" aria-hidden="true">
+        <span />
+      </div>
     </div>
   );
 }
@@ -235,7 +292,10 @@ function StartupPanel({ view }: { view: BoardView }) {
   if (view.screen === "splash" || hallOpening(view)) return <SplashPanel view={view} />;
   if (view.screen === "pick-story") return <PickStoryPanel view={view} />;
   if (view.screen === "not-playable") return <NotPlayablePanel view={view} />;
-  if (view.screen === "tower-connect") return <TowerPanel view={view} />;
+  if (view.screen === "table-join") return <TableJoinPanel view={view} />;
+  if (view.screen === "base-board") return <BaseBoardPanel view={view} />;
+  if (view.screen === "tower-choice") return <TowerChoicePanel view={view} />;
+  if (view.screen === "tower-wake") return <TowerWakePanel view={view} />;
   if (view.screen === "game-settings") return <SettingsPanel view={view} />;
   if (view.screen === "claim-heroes") return <ClaimPanel view={view} />;
   if (view.screen === "setup") return <SetupPanel view={view} />;
@@ -269,6 +329,7 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
   const status = startupStatus(view);
   const waiting = waitingFor(view);
   const setupStep = setupStepId(view);
+  const join = joinFromBoard(view);
   return (
     <main
       className="bt-board"
@@ -289,6 +350,14 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
           <span data-status="devices">{status.devices}</span>
           <span data-status="step">{status.step}</span>
         </p>
+      ) : null}
+      {join && CORNER_QR_SCREENS.has(view.screen) ? (
+        <aside className="bt-join-corner" data-join-corner="" data-join-code={join.code}>
+          <div className="bt-qr">
+            <JoinQr url={join.url} />
+          </div>
+          <p className="bt-join-code">{join.code}</p>
+        </aside>
       ) : null}
       <div className="bt-startup-stage">
         <DialogFrame className="bt-ink-in" data-startup-dialog="">

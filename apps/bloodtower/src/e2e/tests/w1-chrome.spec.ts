@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
+  enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -66,8 +67,10 @@ const toClaim = async (page: Page, joinCode: string, ipad: boolean) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
+  await expectBar(page, ipad);
+  await expectMuted(page);
+  await enterWithoutTower(page);
   const walk = [
-    ["splash", "splash-play"],
     ["pick-story", `continue-pick-story-${STORY_ID}`],
     ["game-settings", "continue-game-settings"],
   ] as const;
@@ -77,10 +80,8 @@ const toClaim = async (page: Page, joinCode: string, ipad: boolean) => {
     await expectMuted(page);
     await clickAct(page, "continue", promptId);
   }
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
   await expectBar(page, ipad);
   await expectMuted(page);
-  await clickAct(page, "play-without-tower", "play-without-tower");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
   await expectBar(page, ipad);
   await expectMuted(page);
@@ -228,7 +229,6 @@ test("W1 a held hero, the Menu and a restart survive Continue", async ({ browser
   try {
     await installSessionSocketHook(again);
     await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(again, "continue", "splash-play");
     // The party pick is restored. This is a new iPad, so Hero A is taken by the one that sat down.
     await expect(deviceMain(again)).toHaveAttribute("data-screen", "claim-heroes");
     await expect(again.locator("[data-pick-status]")).toHaveText("1 of 4 picked");

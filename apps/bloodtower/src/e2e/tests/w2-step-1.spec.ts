@@ -4,7 +4,11 @@ import { loadConfig } from "../../server/config.ts";
 import { startSessionHost } from "../../server/hub/host.ts";
 import { createMockTower } from "../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
-import { installSessionSocketHook, startAcceptanceHost } from "./support/acceptance.ts";
+import {
+  enterWithoutTower,
+  installSessionSocketHook,
+  startAcceptanceHost,
+} from "./support/acceptance.ts";
 
 const WEB_ROOT = resolve(import.meta.dirname, "../../web/out");
 const STORY_ID = "test";
@@ -141,7 +145,7 @@ const expectStep = async (page: Page, context: string, instruction: string | Reg
   await expect(stepInstruction).toHaveText(instruction);
 };
 
-test("W2 tower-off walk shows Connect Tower before claim and keeps the step lines", async ({
+test("W2 the Enter asks the tower question once, before Pick story, and keeps the step lines", async ({
   browser,
 }, testInfo) => {
   test.skip(testInfo.project.name === "desktop", "Device checks run on phone and ipad.");
@@ -153,25 +157,14 @@ test("W2 tower-off walk shows Connect Tower before claim and keeps the step line
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${session.host.joinCode}`);
     await expect(page).toHaveURL(/\/device/);
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "splash");
-    await expectStep(page, "Splash", "Blood Tower");
-    await clickAct(page, "continue", "splash-play");
+    await expect(mainOf(page)).toHaveAttribute("data-screen", "base-board");
+    await expectStep(page, "Base board", /Set the tower on the board\./);
+    const setUp = mainOf(page).locator('button[data-prompt-id="base-board-done"]');
+    await expect(setUp).toHaveAccessibleName("Board is set up");
+    await setUp.click();
 
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "pick-story");
-    await expectStep(page, "Pick Story", "Proving Grounds");
-    await expect(page.getByRole("button", { name: "Pick Hero A" })).toHaveCount(0);
-    await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
-
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "game-settings");
-    await expectStep(page, "Game settings", /.+/);
-    await clickAct(page, "continue", "continue-game-settings");
-
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "tower-connect");
-    await expectStep(
-      page,
-      "Tower Connect",
-      "No tower yet. An iPad can connect it, or play on without it.",
-    );
+    await expect(mainOf(page)).toHaveAttribute("data-screen", "tower-choice");
+    await expectStep(page, "Tower", "Wake the tower, or play tonight without it?");
     const primary = mainOf(page).locator('[data-primary="true"]');
     await expect(primary).toHaveCount(1);
     await expect(primary).toHaveAccessibleName("Connect Tower");
@@ -186,7 +179,15 @@ test("W2 tower-off walk shows Connect Tower before claim and keeps the step line
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
 
     await skip.click();
-    await expect(mainOf(page)).not.toHaveAttribute("data-screen", "tower-connect");
+    await expect(mainOf(page)).toHaveAttribute("data-screen", "pick-story");
+    await expectStep(page, "Pick Story", "Proving Grounds");
+    await expect(page.getByRole("button", { name: "Pick Hero A" })).toHaveCount(0);
+    await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
+
+    await expect(mainOf(page)).toHaveAttribute("data-screen", "game-settings");
+    await expectStep(page, "Game settings", /.+/);
+    await clickAct(page, "continue", "continue-game-settings");
+
     await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
     await expectStep(page, "Party Join", /^\d+ of \d+ picked$/);
@@ -222,11 +223,9 @@ test("W2 Sound and Play without Tower leave the session, and levels survive a ho
   try {
     await installSessionSocketHook(device);
     await device.goto(`/join?code=${joinCode}`);
-    await clickAct(device, "continue", "splash-play");
+    await enterWithoutTower(device);
     await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(device, "continue", "continue-game-settings");
-    await expect(mainOf(device)).toHaveAttribute("data-screen", "tower-connect");
-    await device.locator('[data-action="play-without-tower"]').click();
     await expect(mainOf(device)).toHaveAttribute("data-screen", "claim-heroes");
     await device.locator('button[data-hunter="hero-a"]').click();
     await expect(device.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
@@ -270,8 +269,6 @@ test("W2 Sound and Play without Tower leave the session, and levels survive a ho
       const resumed = await context.newPage();
       await installSessionSocketHook(resumed);
       await resumed.goto(`/join?code=${restarted.joinCode}`);
-      await expect(mainOf(resumed)).toHaveAttribute("data-screen", "splash");
-      await clickAct(resumed, "continue", "splash-play");
       // The restart keeps the party (W4): Proving Grounds, hero-a still held on claim-heroes.
       // This page joins as a new iPad, so the first iPad's hold shows as taken.
       await expect(mainOf(resumed)).toHaveAttribute("data-screen", "claim-heroes");

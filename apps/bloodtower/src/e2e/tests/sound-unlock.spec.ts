@@ -7,6 +7,7 @@ import { createMockTower } from "../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import { levelToGain } from "../../web/lib/audio/levels.ts";
 import {
+  enterWithTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -24,7 +25,7 @@ declare global {
 
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 const WEB_ROOT = resolve(import.meta.dirname, "../../web/out");
 
 const clickAct = async (page: Page, actionId: string, promptId: string) => {
@@ -270,9 +271,7 @@ test("the bed carries from / onto /board with one gesture", async ({ browser }, 
     await expect(pad).toHaveURL(/\/device/);
 
     await test.step("pick-story", async () => {
-      await clickAct(pad as Page, "tower-connect", "tower-connect");
-      await clickAct(pad as Page, "tower-calibrate", "tower-calibrate");
-      await clickAct(pad as Page, "new-game", "new-pick-game");
+      await enterWithTower(pad as Page);
       await expect(page.locator("main.bt-board")).toHaveAttribute("data-screen", "pick-story");
       await expectBed(page);
     });

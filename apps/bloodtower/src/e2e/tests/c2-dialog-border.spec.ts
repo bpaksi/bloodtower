@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
+  enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -133,9 +134,7 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
     const device = await deviceContext.newPage();
     await installSessionSocketHook(device);
     await board.goto("/board");
-    await device.goto(`/join?code=${session.host.joinCode}`);
-    await expect(board.locator("main.bt-board")).toHaveAttribute("data-screen", "splash");
-    await expect(device.locator("main.bt-device")).toHaveAttribute("data-screen", "splash");
+    await expect(board.locator("main.bt-board")).toHaveAttribute("data-screen", "table-join");
 
     const measure = async (screen: string) => {
       for (const viewport of VIEWPORTS) {
@@ -185,7 +184,7 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
             areaRatio: frame.area / boardArea,
           });
         }
-        if (screen === "tower-connect" || screen === "claim-heroes" || screen === "tower-quiet") {
+        if (screen === "tower-choice" || screen === "claim-heroes" || screen === "tower-quiet") {
           await shot(board, `${screen}-${viewport.label}`);
         }
         if (screen === "tower-quiet" && viewport.label === "1920x1080") {
@@ -198,17 +197,21 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
       }
     };
 
-    await measure("splash");
-    await clickAct(device, "continue", "splash-play");
+    await measure("table-join");
+    await device.goto(`/join?code=${session.host.joinCode}`);
+    await expect(board.locator("main.bt-board")).toHaveAttribute("data-screen", "base-board");
+    await expect(device.locator("main.bt-device")).toHaveAttribute("data-screen", "base-board");
+    await measure("base-board");
+    await clickAct(device, "board-set-up", "base-board-done");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-choice");
+    await measure("tower-choice");
+    await clickAct(device, "play-without-tower", "play-without-tower");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await measure("pick-story");
     await clickAct(device, "continue", "continue-pick-story-test");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await measure("game-settings");
     await clickAct(device, "continue", "continue-game-settings");
-    await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-    await measure("tower-connect");
-    await device.locator('button[data-action="play-without-tower"]').click();
     await expect(board.locator("main")).toHaveAttribute("data-screen", "claim-heroes");
     await expect(board.locator("[data-hero]")).toHaveCount(6);
     for (const heroId of HEROES) {
@@ -233,9 +236,8 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
       const next = await board.locator("main").getAttribute("data-screen");
       if (next !== "setup") break;
     }
-    expect(steps, "the base board setup dialog has three steps").toEqual([
+    expect(steps, "the setup dialog has the engine step and the pack step").toEqual([
       "seals-and-skulls",
-      "lay-out-board",
       "place-heroes",
     ]);
 
@@ -336,13 +338,13 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
         .filter((row) => row.viewport === viewport.label)
         .map((row) => row.screen);
       for (const screen of [
-        "splash",
+        "table-join",
+        "base-board",
+        "tower-choice",
         "pick-story",
         "game-settings",
-        "tower-connect",
         "claim-heroes",
         "setup:seals-and-skulls",
-        "setup:lay-out-board",
         "setup:place-heroes",
         "begin",
         "play-waiting",
@@ -357,7 +359,7 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
       measured.find((row) => row.screen === screen && row.viewport === viewport)?.font;
     const widthAt = (screen: string, viewport: string) =>
       measured.find((row) => row.screen === screen && row.viewport === viewport)?.width;
-    for (const screen of ["tower-connect", "claim-heroes"]) {
+    for (const screen of ["tower-choice", "claim-heroes"]) {
       const small = fontAt(screen, "1920x1080");
       const large = fontAt(screen, "3840x2160");
       expect(small, `${screen} font at 1080p`).toBeGreaterThan(0);

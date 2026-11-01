@@ -10,6 +10,15 @@ import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
 import type { ShellEffect } from "./effects.ts";
+import {
+  applyTowerResult,
+  BOARD_SET_UP_PROMPT,
+  finishEnter,
+  firstDeviceJoined,
+  PLAY_WITHOUT_TOWER_PROMPT,
+  TOWER_CALIBRATE_PROMPT,
+  TOWER_CONNECT_PROMPT,
+} from "./enter.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
@@ -25,7 +34,7 @@ import {
   takePendingTowerCommands,
 } from "./shellRef.ts";
 import { initialShellState, type ShellState } from "./state.ts";
-import { TOWER_READY, towerReady } from "./tower.ts";
+import { towerReady } from "./tower.ts";
 
 export type ShellStepResult = {
   state: ShellState;
@@ -206,6 +215,21 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   if (e.kind === "device-join") {
     const next = { ...state, devices: new Set(state.devices), eventSeq: eventSeq + 1 };
     next.devices.add(e.deviceId);
+    if (firstDeviceJoined(next)) {
+      bindShellState(next);
+      resumeLoopsOrPauseOffers(next, eventSeq, effects);
+      clearShellState();
+    }
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
+  }
+
+  if (e.kind === "tower-result") {
+    const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
+    bindShellState(next);
+    applyTowerResult(next, e.capabilityId, e.ok);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }
@@ -331,24 +355,31 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     bindShellState(next);
     const top = next.loops.stack.at(-1) as LoopFrame | undefined;
 
-    if (e.promptId === "splash-play" && e.actionId === "continue") {
-      const session = sessionFrame(next);
-      if (session) {
-        const local = session.local as SessionLocal;
-        if (!next.autosave) next.activeGameId = `game-${next.eventSeq}`;
-        next.screen = next.autosave ? "pick-game" : "pick-story";
-        session.local = {
-          ...local,
-          phase: "hub",
-          towerStep: "done",
-          awaitingPress: false,
-          fromSessionScreen: false,
-        };
-      }
+    if (e.promptId === BOARD_SET_UP_PROMPT && next.enter?.step === "board") {
+      next.enter = { step: "choice", failed: false };
     } else if (
-      (e.promptId === "tower-connect" || e.promptId === "menu-connect") &&
-      e.actionId === "tower-connect"
+      e.promptId === TOWER_CONNECT_PROMPT &&
+      e.actionId === "tower-connect" &&
+      next.enter?.step === "choice"
     ) {
+      next.enter = { step: "connecting", failed: false };
+      next.towerLinked = true;
+      effects.push({ kind: "tower-command", v: 1, capabilityId: "tower.connect", params: {} });
+    } else if (
+      e.promptId === TOWER_CALIBRATE_PROMPT &&
+      e.actionId === "tower-calibrate" &&
+      next.enter?.step === "calibrate"
+    ) {
+      next.enter = { step: "calibrating", failed: false };
+      effects.push({ kind: "tower-command", v: 1, capabilityId: "tower.calibrate", params: {} });
+    } else if (
+      e.promptId === PLAY_WITHOUT_TOWER_PROMPT &&
+      e.actionId === "play-without-tower" &&
+      next.enter?.step === "choice"
+    ) {
+      next.towerChoice = "without";
+      finishEnter(next);
+    } else if (e.promptId === "menu-connect" && e.actionId === "tower-connect") {
       next.towerLinked = true;
       next.tower = {
         connection: "connected",
@@ -358,32 +389,6 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         kind: "tower-command",
         v: 1,
         capabilityId: "tower.connect",
-        params: {},
-      });
-      if (e.promptId === "tower-connect") {
-        const session = sessionFrame(next);
-        if (session && (session.local as SessionLocal).phase === "splash") {
-          const local = session.local as SessionLocal;
-          session.local = {
-            ...local,
-            phase: "tower",
-            towerStep: "calibrate",
-            awaitingPress: false,
-          };
-        }
-        const game = next.loops.stack.find((frame) => frame.loopId === "game");
-        if (game && (game.local as GameLocal).phase === "tower-connect") {
-          game.local = { phase: "claim-heroes", awaitingPress: false, playStarted: false };
-          next.screen = "claim-heroes";
-        }
-      }
-    } else if (e.promptId === "tower-calibrate" && e.actionId === "tower-calibrate") {
-      next.towerLinked = true;
-      next.tower = TOWER_READY;
-      effects.push({
-        kind: "tower-command",
-        v: 1,
-        capabilityId: "tower.calibrate",
         params: {},
       });
     } else if (
@@ -487,7 +492,6 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       next.sessionEnded = true;
       updateSessionLocal(next, {
         phase: "goodbye",
-        towerStep: "done",
         awaitingPress: false,
         fromSessionScreen: false,
         childOpen: false,

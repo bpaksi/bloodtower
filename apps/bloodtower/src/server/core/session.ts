@@ -21,7 +21,7 @@ import type { Clock } from "../timing/clock.ts";
 import type { BloodtowerTower } from "../tower/host.ts";
 import { runShellEffects } from "./effects.ts";
 import { shellCheckpointFromState } from "./shellCheckpoint.ts";
-import { continueShellFromCheckpoint, readLobbyCheckpoint } from "./shellContinue.ts";
+import { continueShellFromCheckpoint, LOBBY_RESUME, readSessionResume } from "./shellContinue.ts";
 
 export const GRACE_MS = 60_000;
 
@@ -45,6 +45,8 @@ export type CoreSessionOptions = {
   onChange: () => void;
   /** Holding grace after a socket drop. Tests pass a short value. */
   graceMs?: number;
+  /** A tower command the pressing iPad asked for failed. The hub shows it on that iPad. */
+  onDeviceError?: (deviceId: string, code: "tower-command-failed", message: string) => void;
 };
 
 export type CoreSession = {
@@ -69,6 +71,12 @@ export type CoreSession = {
     rows: readonly { deviceId: string; token: string; formFactor: "ipad" | "phone" }[],
   ) => void;
   resumeAutosave: () => boolean;
+  /**
+   * Call once the host is built. After a restart that came after the Enter, the session resumes
+   * with tonight's tower choice and no Enter (Bob 2026-10-31); otherwise the Enter starts at the join.
+   * It sends no tower command.
+   */
+  resumeSession: () => Promise<boolean>;
   /** DEC-208: keep the autosave row visible on pick-game without resuming play yet. */
   rememberAutosave: (row: { gameId: string; packId: string; day: number }) => void;
   syncTowerSnapshot: () => void;
@@ -159,6 +167,40 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     savedLobbySignature = signature;
   };
 
+  let savedMarker = "";
+
+  const writeStateCheckpoint = () => {
+    const gameId = state.activeGameId;
+    if (!gameId) return;
+    const afterSeq = options.store.nextSeq(gameId) - 1;
+    options.store.writeCheckpoint({
+      gameId,
+      day: 0,
+      afterEventSeq: Math.max(0, afterSeq),
+      stateJson: JSON.stringify(shellCheckpointFromState(state)),
+      atMonoMs: options.clock.monoMs(),
+      atWall: options.clock.wall(),
+      seed: state.seed,
+      packVersion: meta.packVersion,
+      engineVersion: meta.engineVersion,
+    });
+  };
+
+  /**
+   * Marks that the Enter finished, and that the evening ended. A host restart reads the latest
+   * checkpoint: after the Enter it resumes without one, after Done for tonight it starts a new one.
+   */
+  const persistSessionMarker = () => {
+    const marker = state.sessionEnded
+      ? "ended"
+      : state.enter === null && state.towerChoice !== "undecided"
+        ? `entered-${state.towerChoice}`
+        : "";
+    if (marker === "" || marker === savedMarker) return;
+    writeStateCheckpoint();
+    savedMarker = marker;
+  };
+
   const effectsCtx = () => ({
     store: options.store,
     tower: options.tower,
@@ -198,32 +240,6 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   };
 
   const apply = async (event: ShellEvent, deviceId: string | null) => {
-    if (
-      event.kind === "press" &&
-      event.promptId === "splash-play" &&
-      event.actionId === "continue" &&
-      !state.autosave
-    ) {
-      const lobby = readLobbyCheckpoint(options.store);
-      if (lobby) {
-        state = adoptLobby(lobby, state);
-        for (const frame of state.loops.stack) {
-          if (frame.loopId !== "game") continue;
-          const local = frame.local as GameLocal;
-          frame.local = { ...local, awaitingPress: false };
-        }
-        state = { ...state, offered: [] };
-        savedLobbySignature = lobbySignature(state);
-        const shellEffects: ShellEffect[] = [];
-        for (const effect of refreshOffersAfterRestore(state)) {
-          const parsed = shellEffectSchema.safeParse(effect);
-          if (parsed.success) shellEffects.push(parsed.data);
-        }
-        await runShellEffects(state, shellEffects, effectsCtx());
-        options.onChange();
-        return;
-      }
-    }
     const before = state;
     const result = stepShell(state, event);
     state = result.state;
@@ -249,7 +265,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
         state = { ...state, pause: null, stage: "playing", screen: "play" };
       }
-      state = { ...state, resumedFromAutosave: true };
+      state = {
+        ...state,
+        resumedFromAutosave: true,
+        // The Enter is tonight's, not the saved game's.
+        enter: null,
+        towerChoice: before.towerChoice,
+      };
     }
     appendShell(event, deviceId);
     if (event.kind === "press") {
@@ -285,9 +307,36 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         if (parsed.success) shellEffects.push(parsed.data);
       }
     }
-    await runShellEffects(state, shellEffects, effectsCtx());
+    const outcomes = await runShellEffects(state, shellEffects, effectsCtx());
+    for (const outcome of outcomes) {
+      if (outcome.capabilityId !== "tower.connect" && outcome.capabilityId !== "tower.calibrate") {
+        continue;
+      }
+      // Only the Enter waits on these. A connect from the play menu has no result to feed back.
+      if (!state.enter) continue;
+      const ok = outcome.result === "ok";
+      enqueue({ kind: "tower-result", v: 1, capabilityId: outcome.capabilityId, ok }, null);
+      if (!ok && deviceId) {
+        const message =
+          outcome.capabilityId === "tower.connect"
+            ? "The tower did not answer. Nothing was retried."
+            : "The tower did not calibrate. Nothing was retried.";
+        // After the result: the iPad changes screen when the choice comes back, and a change of
+        // screen clears its banner. The message must land on the screen that asks again.
+        applyQueue = applyQueue
+          .then(() => options.onDeviceError?.(deviceId, "tower-command-failed", message))
+          .catch((error: unknown) => {
+            const detail = error instanceof Error ? error.message : String(error);
+            options.log.error(
+              "core-apply",
+              detail.trim() === "" ? "The iPad error could not be sent." : detail,
+            );
+          });
+      }
+    }
     options.onChange();
     persistLobbyCheckpoint();
+    persistSessionMarker();
   };
 
   let applyQueue: Promise<void> = Promise.resolve();
@@ -389,6 +438,59 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           formFactor: row.formFactor,
         });
       }
+    },
+    resumeSession: async () => {
+      await applyQueue;
+      let saved: ShellState | null = null;
+      try {
+        saved = readSessionResume(options.store);
+      } catch (error: unknown) {
+        const detail = error instanceof Error ? error.message : String(error);
+        options.log.error(
+          "session-resume",
+          detail.trim() === "" ? "The last session could not be read." : detail,
+        );
+      }
+      if (!saved) {
+        // A restart during this Enter starts it again; this row says the last Enter was not finished.
+        writeStateCheckpoint();
+        savedMarker = "";
+        return false;
+      }
+      const resumed = saved;
+      applyQueue = applyQueue.then(async () => {
+        const lobby = LOBBY_RESUME.has(resumed.screen) && !resumed.autosave && !state.autosave;
+        if (lobby) {
+          state = { ...adoptLobby(resumed, state), devices: new Set(), towerLinked: false };
+          for (const frame of state.loops.stack) {
+            if (frame.loopId !== "game") continue;
+            const local = frame.local as GameLocal;
+            frame.local = { ...local, awaitingPress: false };
+          }
+          state = { ...state, offered: [] };
+          savedLobbySignature = lobbySignature(state);
+        } else {
+          const frame = state.loops.stack.find((row) => row.loopId === "session");
+          if (frame)
+            frame.local = { ...(frame.local as object), phase: "hub", awaitingPress: false };
+          state = {
+            ...state,
+            enter: null,
+            towerChoice: resumed.towerChoice,
+            screen: state.autosave ? "pick-game" : "pick-story",
+          };
+        }
+        const shellEffects: ShellEffect[] = [];
+        for (const effect of refreshOffersAfterRestore(state)) {
+          const parsed = shellEffectSchema.safeParse(effect);
+          if (parsed.success) shellEffects.push(parsed.data);
+        }
+        await runShellEffects(state, shellEffects, effectsCtx());
+        options.onChange();
+        persistSessionMarker();
+      });
+      await applyQueue;
+      return true;
     },
     syncTowerSnapshot: () => {
       enqueue({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);

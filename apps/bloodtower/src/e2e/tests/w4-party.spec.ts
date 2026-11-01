@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { DEVICE_TOKEN_KEY } from "../../web/lib/session.ts";
 import {
   captureFrames,
+  enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -40,29 +41,24 @@ const toSettings = async (page: Page, joinCode: string) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-  await clickAct(page, "continue", "splash-play");
+  await enterWithoutTower(page);
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(page, "continue", "continue-pick-story-test");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
 };
 
-/** Splash Play leaves the tower uncalibrated, so Continue stops on Connect Tower. */
+/** The tower question is asked once, in the Enter, so Game settings goes straight to Party Join. */
 const throughTowerToClaim = async (page: Page) => {
   await clickAct(page, "continue", "continue-game-settings");
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-  await clickAct(page, "play-without-tower", "play-without-tower");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
 };
 
 const backToGameSettings = async (page: Page) => {
   await clickAct(page, "back", "back-claim-heroes");
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-  await clickAct(page, "back", "back-tower-connect");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
 };
 
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 /** Same walk as area-077: three setup steps, Begin, then the four opening moments. */
@@ -425,8 +421,6 @@ test("W4 a restart keeps the party and backing out clears the setting", async ({
     await again.getByLabel("Rejoin token").fill(token);
     await again.getByRole("button", { name: "Rejoin" }).click();
     await expect(again).toHaveURL(/\/device/);
-    await expect(deviceMain(again)).toHaveAttribute("data-screen", "splash");
-    await clickAct(again, "continue", "splash-play");
     await expect(deviceMain(again)).toHaveAttribute("data-screen", "claim-heroes");
     await expect(again.getByRole("heading", { level: 1, name: "Pick a story" })).toHaveCount(0);
     await expect(again.locator("[data-pick-status]")).toHaveText("1 of 4 picked");
@@ -514,7 +508,7 @@ test("W4 Dracula stays not-playable and has no party size", async ({ browser }, 
   try {
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${session.host.joinCode}`);
-    await clickAct(page, "continue", "splash-play");
+    await enterWithoutTower(page);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
     await page.evaluate(() => {
       const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;

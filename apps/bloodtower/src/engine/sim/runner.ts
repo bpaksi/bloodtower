@@ -1,6 +1,7 @@
 import { createRng, type Rng } from "@dark-tower/rng";
 import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
 import { formatGroupAction } from "../loops/group-turn/loop.ts";
+import { enterConnectEvents } from "../loops/session/enterKit.ts";
 import type { ShellEvent } from "../loops/session/events.ts";
 import { TEST_STORY } from "../loops/session/pack.ts";
 import { initialShellState, type ShellState } from "../loops/session/state.ts";
@@ -22,20 +23,7 @@ export type GameSimResult = {
 const SETUP_EVENTS = (seed: string): ShellEvent[] => [
   { kind: "start-session", v: 1, sessionId: "sim", seed },
   { kind: "device-join", v: 1, deviceId: "sim-pad" },
-  {
-    kind: "press",
-    v: 1,
-    deviceId: "sim-pad",
-    promptId: "tower-connect",
-    actionId: "tower-connect",
-  },
-  {
-    kind: "press",
-    v: 1,
-    deviceId: "sim-pad",
-    promptId: "tower-calibrate",
-    actionId: "tower-calibrate",
-  },
+  ...enterConnectEvents("sim-pad").slice(1),
   { kind: "press", v: 1, deviceId: "sim-pad", promptId: "new-pick-game", actionId: "new-game" },
   { kind: "focus-story", v: 1, deviceId: "sim-pad", storyId: "test" },
   {

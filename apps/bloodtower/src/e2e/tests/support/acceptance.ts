@@ -285,3 +285,34 @@ export const doneEverySetupStep = async (pad: Page) => {
   }
   await expect(pad.locator("main")).toHaveAttribute("data-screen", "begin");
 };
+
+/**
+ * The session Enter without the tower (C2/05): the first iPad has joined, so the table is on
+ * base board setup. One press says the board is set up, then Play without Tower. After it the
+ * iPad is on Pick story (Pick Game while an autosave waits).
+ */
+export const enterWithoutTower = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await expect(main).toHaveAttribute("data-screen", "base-board", { timeout: 20_000 });
+  const setUp = main.locator('button[data-prompt-id="base-board-done"]');
+  await expect(setUp).toBeEnabled({ timeout: 20_000 });
+  await setUp.click();
+  await expect(main).toHaveAttribute("data-screen", "tower-choice", { timeout: 20_000 });
+  const skip = main.locator('button[data-prompt-id="play-without-tower"]');
+  await expect(skip).toBeEnabled({ timeout: 20_000 });
+  await skip.click();
+  await expect(main).not.toHaveAttribute("data-screen", "tower-choice", { timeout: 20_000 });
+};
+
+/** The Enter on the connect track, to the point where the tower is calibrated. */
+export const enterWithTower = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await expect(main).toHaveAttribute("data-screen", "base-board", { timeout: 20_000 });
+  await main.locator('button[data-prompt-id="base-board-done"]').click();
+  await expect(main).toHaveAttribute("data-screen", "tower-choice", { timeout: 20_000 });
+  await main.locator('button[data-prompt-id="tower-connect"]').click();
+  const calibrate = main.locator('button[data-prompt-id="tower-calibrate"]');
+  await expect(calibrate).toBeEnabled({ timeout: 20_000 });
+  await calibrate.click();
+  await expect(main).not.toHaveAttribute("data-screen", "tower-wake", { timeout: 20_000 });
+};
