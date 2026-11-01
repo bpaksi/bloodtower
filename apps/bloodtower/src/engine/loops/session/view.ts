@@ -3,6 +3,7 @@ import {
   OPENING_PLACEHOLDER,
   openingActiveIndex,
 } from "../../../protocols/opening.ts";
+import type { GearView } from "../../../protocols/v2/views.ts";
 import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
 import type { DayLocal } from "../day/loop.ts";
@@ -334,6 +335,74 @@ const screenLabel = (state: ShellState): string => {
   return STEP_NAME[state.screen];
 };
 
+const LOOKUP_CARDS = [
+  { id: "rules", title: "Rules of the tower" },
+  { id: "sample-card", title: "A sample card" },
+] as const;
+
+const helpScreenFor = (state: ShellState): string => {
+  if (state.screen === "pause" && state.pause?.cause === "tower-lost") return "tower-lost";
+  const mapped: Record<string, string> = {
+    splash: "waiting",
+    "pick-story": "pick-story",
+    "game-settings": "story-settings",
+    "tower-connect": "tower-choice",
+    "claim-heroes": "claim",
+    setup: "base-board-setup",
+    begin: "waiting",
+    "pick-game": "session-screen",
+    play: "play",
+    pause: "paused",
+    session: "session-screen",
+    goodbye: "session-over",
+    "not-playable": "pick-story",
+  };
+  return mapped[state.screen] ?? "play";
+};
+
+const gearSnapshot = (state: ShellState): GearView => {
+  const story = chosenOrBound(state);
+  const inGame = state.screen === "play" || state.screen === "pause";
+  const sessionScreen =
+    state.screen === "session" || state.screen === "goodbye" || state.screen === "pick-game";
+  return {
+    paused: state.gearPaused || state.stage === "paused",
+    panel: state.gearPanel,
+    owner: state.gearOwner,
+    picked: state.gearPicked,
+    volume: state.towerVolume,
+    pieceChecks: state.gearPieceChecks,
+    opens: state.gearOpens,
+    card: state.gearCard,
+    inGame,
+    towerConnected: state.tower.connection === "connected",
+    sessionScreen,
+    beforeBegin: !inGame && !sessionScreen,
+    partySplit: state.partySplit,
+    party: (story?.heroes ?? []).map((hero) => ({
+      id: hero.id,
+      name: hero.name,
+      hp: "unavailable",
+      gold: "unavailable",
+      items: "unavailable",
+      corruptions: "unavailable",
+      holder: state.holdings[hero.id] ?? null,
+    })),
+    cards: LOOKUP_CARDS.map((card) => ({ id: card.id, title: card.title })),
+    joinUrl: null,
+    setupSteps:
+      state.setupSteps.length > 0
+        ? state.setupSteps.map((step) => step.label)
+        : [
+            "Set the tower on the board.",
+            "Lay out the board, kingdom edges matched.",
+            "Sort the pieces: heroes, foes, skulls.",
+          ],
+    helpScreen: helpScreenFor(state),
+    firstHero: state.gearFirstHero,
+  };
+};
+
 export const projectShellView = (state: ShellState): ViewState => {
   const story = chosenOrBound(state);
   const screen = state.screen;
@@ -397,5 +466,6 @@ export const projectShellView = (state: ShellState): ViewState => {
     narration: momentId ? { lineId: momentId, text: OPENING_PLACEHOLDER } : null,
     table: momentId ? null : buildTable(state, title),
     place: momentId ? null : buildPlace(state),
+    gear: gearSnapshot(state),
   };
 };

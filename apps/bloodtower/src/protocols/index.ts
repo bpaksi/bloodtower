@@ -154,6 +154,7 @@ export {
   errorCodeSchema,
   errorMessageSchema,
   errorPayloadSchema,
+  type GearView,
   helloMessageSchema,
   helloPayloadSchema,
   loggedMessageSchema,

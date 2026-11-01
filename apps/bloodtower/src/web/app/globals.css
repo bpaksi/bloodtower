@@ -301,7 +301,69 @@ body {
   /* Same colour as the page. Transparent so the bottom corner windows show in the
    * side margins. The buttons keep their own fill and paint above the frame. */
   background: transparent;
-  z-index: 20;
+  position: relative;
+  z-index: 21;
+}
+
+.bt-bar--bottom {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bt-bar-mid {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.bt-help {
+  width: 2.75rem;
+  font-size: 1.35rem;
+}
+
+.bt-menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 17;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(0 0 0 / 35%);
+  cursor: pointer;
+}
+
+.bt-menu-dialog .bt-gear-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.bt-row--disabled {
+  opacity: 0.5;
+}
+
+.bt-gear-reason {
+  display: block;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.bt-menu-close {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.bt-gear-legacy {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
 }
 
 /* Theme B corners (DEC-233). One JPEG, four windows. Not a border-image: the

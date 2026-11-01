@@ -227,6 +227,18 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const before = state;
     const result = stepShell(state, event);
     state = result.state;
+    let logged: ShellEvent = event;
+    if (event.kind === "gear" && event.action === "done") {
+      logged = {
+        ...event,
+        ...(before.gearFirstHero ? { heroId: before.gearFirstHero } : {}),
+        ...(before.gearSecondHero ? { otherHeroId: before.gearSecondHero } : {}),
+      };
+    }
+    if (event.kind === "gear" && event.action === "keep-volume") {
+      const volume = event.volume ?? before.gearPreviewVolume ?? before.towerVolume;
+      logged = { ...event, volume };
+    }
     if (
       event.kind === "press" &&
       event.promptId === "continue-pick-game" &&
@@ -251,7 +263,9 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
       state = { ...state, resumedFromAutosave: true };
     }
-    appendShell(event, deviceId);
+    const persistGear =
+      event.kind !== "gear" || event.action === "keep-volume" || event.action === "done";
+    if (persistGear) appendShell(logged, deviceId);
     if (event.kind === "press") {
       const open =
         before.offered.find(
@@ -355,6 +369,40 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         enqueue({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId);
         return;
       }
+      if (promptId === "gear") {
+        const action = actionId;
+        if (
+          action !== "open" &&
+          action !== "pick" &&
+          action !== "done" &&
+          action !== "keep-volume" &&
+          action !== "try-another" &&
+          action !== "step-back"
+        ) {
+          options.log.error("gear-act", `Unknown gear action "${action}".`);
+          return;
+        }
+        const item = typeof args.item === "string" ? args.item : undefined;
+        const pick = typeof args.pick === "string" ? args.pick : undefined;
+        const heroId = typeof args.heroId === "string" ? args.heroId : undefined;
+        const otherHeroId = typeof args.otherHeroId === "string" ? args.otherHeroId : undefined;
+        const volume = typeof args.volume === "number" ? args.volume : undefined;
+        enqueue(
+          {
+            kind: "gear",
+            v: 1,
+            deviceId,
+            action,
+            ...(item ? { item } : {}),
+            ...(pick ? { pick } : {}),
+            ...(heroId ? { heroId } : {}),
+            ...(otherHeroId ? { otherHeroId } : {}),
+            ...(volume === 0 || volume === 1 || volume === 2 ? { volume } : {}),
+          },
+          deviceId,
+        );
+        return;
+      }
       enqueue({ kind: "press", v: 1, deviceId, promptId, actionId }, deviceId);
     },
     projectBoard: (join) => {
@@ -362,6 +410,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       const board = project(view, { kind: "board" });
       return {
         ...board,
+        ...(board.gear ? { gear: { ...board.gear, joinUrl: join.url } } : {}),
         levels: [
           {
             id: "join",
