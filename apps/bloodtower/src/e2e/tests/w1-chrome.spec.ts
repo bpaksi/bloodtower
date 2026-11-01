@@ -323,24 +323,33 @@ const expectToolbar = async (page: Page) => {
   expect(hit.gear || hit.scrim).toBe(true);
 };
 
+const gaveUp = (error: unknown): false => {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("Timeout")) return false;
+  throw error;
+};
+
 const advanceOpenings = async (page: Page) => {
   for (let i = 0; i < 6; i += 1) {
-    const opening = page
-      .locator('button[data-prompt-id^="continue-opening-"]')
-      .locator("visible=true");
+    const day = page.locator(
+      'button[data-prompt-id*="roll-done"], button[data-action-id="walk"], button[data-action-id="end-turn"]',
+    );
+    if ((await day.count()) > 0) return;
+    const opening = page.locator('button[data-prompt-id^="continue-opening-"]');
     if ((await opening.count()) === 0) return;
     const button = opening.first();
-    if (!(await button.isEnabled())) return;
+    const enabled = await button.isEnabled({ timeout: 1_000 }).catch(gaveUp);
+    if (!enabled) return;
     const clickable = await button
       .click({ trial: true, timeout: 1_000 })
       .then(() => true)
-      .catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : String(error);
-        if (!message.includes("Timeout")) throw error;
-        return false;
-      });
+      .catch(gaveUp);
     if (!clickable) return;
-    await button.click({ timeout: 3_000 });
+    const clicked = await button
+      .click({ timeout: 3_000 })
+      .then(() => true)
+      .catch(gaveUp);
+    if (!clicked) return;
   }
 };
 
@@ -556,6 +565,11 @@ test("the open Menu matches the gear list in play", async ({ browser }, testInfo
     await greyReason(page, "use-potion", "C3+");
     await expect(page.locator("[data-menu] [data-version]")).toHaveText(/^v\d+\.\d+\.\d+/);
     await expectCloseLast(page);
+    const menuBox = await box(page.locator("[data-menu]"));
+    const footerBox = await box(page.locator("footer.bt-bar--bottom"));
+    const closeBox = await box(page.locator("[data-menu]").getByRole("button", { name: "Close" }));
+    expect(menuBox.y + menuBox.height).toBeLessThanOrEqual(footerBox.y);
+    expect(closeBox.y + closeBox.height).toBeLessThanOrEqual(footerBox.y);
     await expect(page.locator('[data-gear-item="rejoin-party"]')).toHaveCount(0);
     await expectToolbar(page);
   } finally {
