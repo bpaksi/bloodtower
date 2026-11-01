@@ -23,11 +23,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: a Game settings screen (or any length buttons) shows between Choose and "Not playable yet", or either spec is edited to pass.
 
 ### EV-03 — The test pack is untouched
-- Requirement: only Dracula changes (DEC-502 scopes the cut to Dracula's settings).
+- Requirement: only Dracula changes (DEC-502 scopes the cut to Dracula's settings); the test pack (Proving Grounds) keeps all its settings, Long included.
 - Method: unit
-- How: the existing `load.test.ts` case "loads the test pack with its cover, tower and settings".
-- Pass evidence: `git diff origin/main...HEAD -- packs/test apps/bloodtower/src/server/pack/__fixtures__` is empty, and the test-pack case passes.
-- Fails if: the build edits a fixture or `packs/test` to make a test pass.
+- How: on PR head, run `git diff origin/main...HEAD -- packs/test`, and run the existing `apps/bloodtower/src/server/pack/load.test.ts` case "passes the v2 test pack" (in `describe("pack:lint")`, not skipped).
+- Pass evidence: the `git diff` output is empty, and the "passes the v2 test pack" case exists unskipped and unedited, runs, and passes.
+- Fails if: anything under `packs/test` changes, the "passes the v2 test pack" case is skipped or edited, or it fails.
 
 ### EV-04 — The pack still lints
 - Requirement: the edited pack is valid.
@@ -37,7 +37,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: the YAML is broken or a test elsewhere still expects Long.
 
 ### EV-05 — Long is gone from the Dracula pack only
-- Requirement: Dracula's pack data lists no Long length; the lengths are exactly Short and Standard, default Standard (DEC-502, DEC-508; Bob ruling 2026-10-31 19:28). Other packs and tests keep Long (Proving Grounds under EV-03; the `w3-pick-story.spec.ts` absence check under EV-02).
+- Requirement: Dracula's pack data lists no Long length; the lengths are exactly Short and Standard, default Standard (DEC-502, DEC-508; Bob ruling 2026-10-31 19:28). Other packs and tests keep Long (Proving Grounds under EV-03: empty `packs/test` diff plus the v2 test-pack lint case; the `w3-pick-story.spec.ts` absence check under EV-02).
 - Method: unit
 - How: `rg -n -i 'long' packs/dracula/pack.yaml` on PR head, plus the EV-01 test "dracula offers short and standard only" in `apps/bloodtower/src/server/pack/load.test.ts`. Specs under `apps/bloodtower/src/e2e/tests` are out of scope and stay unchanged.
 - Pass evidence: the `rg` returns no length entry with id `long` or label `Long`; the Dracula length options are exactly `short` and `standard` with default `standard`, and the EV-01 test passes.
