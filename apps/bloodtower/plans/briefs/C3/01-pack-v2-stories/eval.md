@@ -44,11 +44,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: a file stays with no importer.
 
 ### EV-06 — Asset serving works on v2 paths only
-- Requirement: plan "keeps today's asset serving working on v2 paths only".
+- Requirement: plan "keeps today's asset serving working on v2 paths only"; v2 has one asset route, `/packs/<id>/assets/<file>`, and the `/packs/<id>/asset/<assetId>` route is removed.
 - Method: unit
-- How: server test (`serve.test.ts`): the test creates a temporary pack that has one cover and one audio asset and GETs each by the repo's single asset URL scheme; then GETs a v1-shaped path such as `/packs/test/asset/<old id>` (`packs/test` has no cover or audio).
-- Pass evidence: both temp-pack GETs return 200 with the file's bytes; the v1-shaped GET returns 404.
-- Fails if: a v2 path fails, or a v1 path still serves.
+- How: server test (`serve.test.ts`): the test creates a temporary pack with one cover and one audio asset and GETs each at `/packs/<id>/assets/<file>`; then GETs `/packs/test/asset/<assetId>` using an assetId that exists in the `packs/test` asset index.
+- Pass evidence: both `/assets/<file>` GETs return 200 with the file's bytes; the `/asset/<assetId>` GET returns 404.
+- Fails if: an `/assets/<file>` GET fails, or the `/asset/<assetId>` GET returns 200.
 
 ## Survival evals (one per survival invariant in plan.md)
 
