@@ -10,6 +10,12 @@ export const DEFAULT_LEVELS: Levels = { music: 0.7, ambient: 0.7, voice: 0.8 };
 export const clampLevel = (value: unknown, fallback: number): number =>
   typeof value === "number" && Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback;
 
+/**
+ * The Sound dialog's slider fraction (0–1) as the gain the board plays.
+ * The dialog stores the fraction; the mixer applies this gain.
+ */
+export const levelToGain = (level: number): number => clampLevel(level, 0);
+
 /** Reads the saved levels. A missing, broken or blocked store gives the defaults. */
 export const readLevels = (storage: Pick<Storage, "getItem"> | undefined): Levels => {
   try {

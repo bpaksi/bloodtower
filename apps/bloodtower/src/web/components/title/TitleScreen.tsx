@@ -1,14 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BoardAudio } from "../../lib/audio/boardAudio.ts";
-import {
-  type Channel,
-  DEFAULT_LEVELS,
-  type Levels,
-  readLevels,
-  writeLevels,
-} from "../../lib/audio/levels.ts";
+import type { Channel } from "../../lib/audio/levels.ts";
+import { useOpenBoard, useStoryAudio } from "../../lib/audio/storyAudio.tsx";
 import { SoundDialog } from "../board/SoundDialog.tsx";
 import "../../styles/title-screen.css";
 import { BLOOD_TOWER_BANNER_SRC } from "./banner.ts";
@@ -28,6 +22,7 @@ const isLinkTarget = (event: Event) => {
 
 /**
  * A click on the landing screen opens the Story board on a Mac (a fine pointer).
+ * That open stays in this document, so the audio context keeps playing.
  * Links and Sound keep their own job. A key unlocks audio and stays on `/`.
  */
 const opensBoard = (event: Event) => {
@@ -57,30 +52,23 @@ const unlocksAudio = (event: Event) => {
 
 /** Opening title. The banner box stays open until Illusionist records a lockup path. */
 export function TitleScreen() {
-  const audioRef = useRef<BoardAudio | null>(null);
-  const levelsRef = useRef<Levels>(DEFAULT_LEVELS);
-  const [levels, setLevels] = useState<Levels>(DEFAULT_LEVELS);
+  const audio = useStoryAudio();
+  const openBoard = useOpenBoard();
   const [soundOpen, setSoundOpen] = useState(false);
 
   const unlockMac = () => {
     if (!macPointer()) return;
-    if (!audioRef.current) audioRef.current = new BoardAudio(levelsRef.current);
-    else audioRef.current.setLevels(levelsRef.current);
-    audioRef.current.unlock();
+    audio.unlock();
   };
   const unlockRef = useRef(unlockMac);
   unlockRef.current = unlockMac;
-
-  useEffect(() => {
-    const saved = readLevels(window.localStorage);
-    levelsRef.current = saved;
-    setLevels(saved);
-  }, []);
+  const openRef = useRef(openBoard);
+  openRef.current = openBoard;
 
   useEffect(() => {
     const onClick = (event: Event) => {
       if (unlocksAudio(event)) unlockRef.current();
-      if (opensBoard(event)) window.location.assign("/board");
+      if (opensBoard(event)) openRef.current();
     };
     const onKey = (event: Event) => {
       if (unlocksAudio(event)) unlockRef.current();
@@ -94,19 +82,13 @@ export function TitleScreen() {
   }, []);
 
   const openSound = () => {
-    const saved = readLevels(window.localStorage);
-    levelsRef.current = saved;
-    setLevels(saved);
+    audio.reload();
     setSoundOpen(true);
     unlockMac();
   };
 
   const onLevelChange = (channel: Channel, level: number) => {
-    const next = { ...levelsRef.current, [channel]: level };
-    levelsRef.current = next;
-    setLevels(next);
-    writeLevels(window.localStorage, next);
-    audioRef.current?.setLevels(next);
+    audio.setLevel(channel, level);
   };
 
   return (
@@ -123,7 +105,25 @@ export function TitleScreen() {
         />
         <p className="bt-title-kicker">Return to Dark Tower</p>
         <nav className="bt-title-actions" aria-label="Choose where to play">
-          <a className="bt-title-action" href="/board">
+          <a
+            className="bt-title-action"
+            href="/board"
+            onClick={(event) => {
+              if (!macPointer()) return;
+              if (
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey
+              ) {
+                return;
+              }
+              event.preventDefault();
+              unlockMac();
+              openBoard();
+            }}
+          >
             <span className="bt-title-action-label">Story board</span>
             <p className="bt-title-action-hint">
               Mac or TV — show the tale for everyone in the room.
@@ -140,12 +140,12 @@ export function TitleScreen() {
       </div>
       {soundOpen ? (
         <SoundDialog
-          levels={levels}
+          levels={audio.levels}
           onLevelChange={onLevelChange}
           onTest={(channel) => {
             if (!macPointer()) return;
             unlockMac();
-            audioRef.current?.test(channel);
+            audio.test(channel);
           }}
           onContinue={() => setSoundOpen(false)}
         />
