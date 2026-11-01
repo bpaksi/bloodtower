@@ -5,6 +5,7 @@ import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -446,6 +447,8 @@ test("W4 a restart keeps the party and backing out clears the setting", async ({
     await backToGameSettings(again);
     await clickAct(again, "back", "back-game-settings");
     await expect(deviceMain(again)).toHaveAttribute("data-screen", "pick-story");
+    // The rejoined iPad is a new browser session, so it unlocks its own sound first.
+    await setSoundAndKeep(again);
     await clickAct(again, "continue", "continue-pick-story-test");
     await expect(deviceMain(again)).toHaveAttribute("data-screen", "game-settings");
     await expect(again.locator('button[data-option="n-4"]')).toHaveAttribute(

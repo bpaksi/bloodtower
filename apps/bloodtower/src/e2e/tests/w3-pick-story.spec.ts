@@ -11,6 +11,7 @@ import {
 import {
   enterWithoutTower,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -443,6 +444,8 @@ test("a not-ready visit does not resume the Count", async ({ browser }, testInfo
     await page.goto(`/join?code=${restarted.host.joinCode}`);
     await expect(deviceMain(page)).not.toHaveAttribute("data-screen", "play");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
+    // This iPad is new to the browser session, so it unlocks its own sound first.
+    await setSoundAndKeep(page);
     await expect(page.locator('button[data-prompt-id="continue-pick-story-test"]')).toBeVisible();
     await expect(page.locator("main.bt-device p").first()).toHaveText("Proving Grounds");
     await expect(page.getByRole("heading", { name: "The Count of Vellmoor" })).toHaveCount(0);

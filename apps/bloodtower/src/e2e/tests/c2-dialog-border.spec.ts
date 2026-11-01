@@ -3,6 +3,7 @@ import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
@@ -208,6 +209,7 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
     await clickAct(device, "play-without-tower", "play-without-tower");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
     await measure("pick-story");
+    await setSoundAndKeep(device);
     await clickAct(device, "continue", "continue-pick-story-test");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await measure("game-settings");

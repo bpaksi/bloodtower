@@ -9,6 +9,7 @@ import {
   installSessionSocketHook,
   releaseTogether,
   sendPlayPressFromTest,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -205,11 +206,9 @@ test("quit from pause lands on session; continue resumes after host restart", as
   try {
     await installSessionSocketHook(page2);
     await page2.goto(`/join?code=${restarted.host.joinCode}`);
-    // The restart sends no tower command and asks no tower question: tonight's choice is kept
-    // and the Enter does not run again. The test wakes the mock tower itself, as a player would
-    // by waking it, so Continue does not meet a tower that is lost.
-    restarted.tower.connect();
-    restarted.tower.calibrate();
+    // Done for tonight ended the evening, so the restart runs a new Enter. A restart after an
+    // unfinished evening keeps the choice and skips it (c2-session-enter, EV-13).
+    await enterWithTower(page2);
     await expect(deviceMain(page2)).toHaveAttribute("data-screen", "pick-game", {
       timeout: 30_000,
     });
@@ -297,6 +296,7 @@ test("core: one winner per press, private wire, disconnect pause, run from event
     });
 
     await clickAct(pageA, "tower-calibrate", "tower-calibrate");
+    await setSoundAndKeep(pageA);
     await clickAct(pageA, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(pageA, "continue", "continue-game-settings");
     await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "claim-heroes", {

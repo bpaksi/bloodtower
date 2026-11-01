@@ -271,6 +271,9 @@ const reachPlay = async (device: Page, joinCode: string, linked: boolean) => {
   await holdHeroesFromTest(device, [...HERO_IDS]);
   await clickAct(device, "continue", "continue-claim-heroes");
   await finishSetup(device);
+  // The mock browser has no wake lock, so its notice can sit over the phone's Menu dialog.
+  const dismissWake = device.locator('[data-action="dismiss-wake-notice"]');
+  if ((await dismissWake.count()) > 0) await dismissWake.click();
 };
 
 const checkpointSeed = (databasePath: string): string => {

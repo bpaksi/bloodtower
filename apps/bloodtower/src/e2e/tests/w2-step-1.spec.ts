@@ -7,6 +7,7 @@ import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import {
   enterWithoutTower,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -180,6 +181,7 @@ test("W2 the Enter asks the tower question once, before Pick story, and keeps th
 
     await skip.click();
     await expect(mainOf(page)).toHaveAttribute("data-screen", "pick-story");
+    await setSoundAndKeep(page);
     await expectStep(page, "Pick Story", "Proving Grounds");
     await expect(page.getByRole("button", { name: "Pick Hero A" })).toHaveCount(0);
     await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
