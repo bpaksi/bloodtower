@@ -37,6 +37,19 @@ const issue = (file: string, path: string, rule: string, message: string): PackV
   message: message.startsWith(`${rule}:`) ? message : `${rule}: ${message}`,
 });
 
+/** Schema failures under `tuning` are issues in tuning.yaml, not the manifest. */
+const tuningSchemaIssues = (
+  packFile: string,
+  error: Parameters<typeof packV2Issues>[0],
+): PackV2LoadIssue[] =>
+  packV2Issues(error).map((item) => {
+    if (item.path === "tuning") return issue("tuning.yaml", "(file)", item.rule, item.message);
+    if (item.path.startsWith("tuning.")) {
+      return issue("tuning.yaml", item.path.slice("tuning.".length), item.rule, item.message);
+    }
+    return issue(packFile, item.path, item.rule, item.message);
+  });
+
 const isInside = (root: string, file: string) => file === root || file.startsWith(`${root}${sep}`);
 
 const readPackFile = (
@@ -166,7 +179,20 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
       issues.push(
         issue(name, "(file)", "P2-1", `Split file ${name} duplicates manifest field ${stem}.`),
       );
+      continue;
     }
+    if (stem !== "tuning") continue;
+    if (assembled.kind !== "base-content") {
+      issues.push(issue(name, "(file)", "P2-1", "Only the base pack holds tuning (Q-C3-08)."));
+      continue;
+    }
+    assembled.tuning = extra.value;
+  }
+
+  if (assembled.kind === "base-content" && !Object.hasOwn(assembled, "tuning")) {
+    issues.push(
+      issue("tuning.yaml", "(file)", "P2-1", "The base pack needs tuning.yaml (DEC-703)."),
+    );
   }
 
   if (issues.length > 0) return { ok: false, issues };
@@ -185,12 +211,7 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   if (kind === "base-content") {
     const parsed = baseContentPackSchema.safeParse(assembled);
     if (!parsed.success) {
-      return {
-        ok: false,
-        issues: packV2Issues(parsed.error).map((item) =>
-          issue(packFile, item.path, item.rule, item.message),
-        ),
-      };
+      return { ok: false, issues: tuningSchemaIssues(packFile, parsed.error) };
     }
     const media = mediaOnDiskIssues(root, parsed.data.assets, undefined, "P2-2");
     if (media.errors.length > 0) return { ok: false, issues: media.errors };

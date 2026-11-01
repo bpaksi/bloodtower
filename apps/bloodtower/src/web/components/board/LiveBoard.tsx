@@ -2,6 +2,9 @@
 
 import type { BoardView, ViewScreen } from "bloodtower-protocols";
 import { useEffect, useRef, useState } from "react";
+import { AUDIO_START_REFUSED, bindStoryBoardAudioErrors } from "../../lib/audio/audioError.ts";
+import { audioPackId, isVisualMoment, pickLayers } from "../../lib/audio/layers.ts";
+import { useStoryAudio } from "../../lib/audio/storyAudio.tsx";
 import { waitingStoryboard } from "../../lib/boardView";
 import { type ErrorToast, pushErrorToast, visibleErrorToasts } from "../../lib/errorToasts.ts";
 import {
@@ -17,12 +20,30 @@ import { StoryToasts } from "./StoryToasts.tsx";
 
 /** The story board for a live session. Display only (protocol v2 `boardView`). */
 export function LiveBoard() {
+  const audio = useStoryAudio();
   const [state, setState] = useState<BoardView>(waitingStoryboard());
   const [notice, setNotice] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ErrorToast[]>([]);
   const [debug, setDebug] = useState(false);
   const client = useRef<SessionClient | null>(null);
   const screen = useRef<ViewScreen>(state.screen);
+
+  useEffect(() => {
+    audio.update(
+      pickLayers({
+        screen: state.screen,
+        packId: audioPackId(state),
+        visual: isVisualMoment(state.narration),
+      }),
+    );
+  }, [audio, state]);
+
+  useEffect(() => {
+    return bindStoryBoardAudioErrors((entry) => {
+      const now = Date.now();
+      setToasts((current) => pushErrorToast(visibleErrorToasts(current, now), entry, now));
+    });
+  }, []);
 
   useEffect(() => {
     setDebug(new URLSearchParams(window.location.search).get("debug") === "1");
@@ -42,6 +63,8 @@ export function LiveBoard() {
         void reportPageLog({ ...reconnectLog(), source: "board" });
       },
       onLogged: (entry) => {
+        // The audio player already toasted this refusal. The host echo would count it twice.
+        if (entry.code === AUDIO_START_REFUSED) return;
         const now = Date.now();
         setToasts((current) => pushErrorToast(visibleErrorToasts(current, now), entry, now));
       },

@@ -3,7 +3,7 @@ import { startAcceptanceHost } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 // R3-UI-03, retargeted onto `/` (W2). Sound is a control on the landing. Levels survive a reload.
-// Desktop only. This file stays in testIgnore.
+// Desktop only. C2/02 runs this file (EV-06), so it is not in testIgnore.
 
 test("Sound on the landing opens the dialog, and its levels survive a reload", async ({
   browser,
