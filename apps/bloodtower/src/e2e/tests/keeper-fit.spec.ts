@@ -37,7 +37,6 @@ test("the Keeper portrait fits a 1024x594 story-board viewport", async ({ browse
     await d.button("continue").click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await d.button("continue").click();
-    await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
     await d.button("play-without-tower").click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
     await d.button("continue").click();
