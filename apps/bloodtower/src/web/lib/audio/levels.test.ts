@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { clampLevel, DEFAULT_LEVELS, LEVELS_KEY, readLevels, writeLevels } from "./levels.ts";
+import { levelToGain as dialogLevelToGain } from "../../components/board/SoundDialog.tsx";
+import {
+  clampLevel,
+  DEFAULT_LEVELS,
+  LEVELS_KEY,
+  levelToGain,
+  readLevels,
+  writeLevels,
+} from "./levels.ts";
 
 const memory = (initial: Record<string, string> = {}) => {
   const store = new Map(Object.entries(initial));
@@ -11,6 +19,13 @@ const memory = (initial: Record<string, string> = {}) => {
 };
 
 describe("sound levels", () => {
+  it("uses the Sound dialog's levelToGain for the gain the board plays", () => {
+    expect(dialogLevelToGain).toBe(levelToGain);
+    expect(levelToGain(0.2)).toBeCloseTo(0.2);
+    expect(levelToGain(0.5)).toBeCloseTo(0.5);
+    expect(levelToGain(0)).toBe(0);
+  });
+
   it("starts at the defaults when nothing is saved", () => {
     expect(readLevels(memory())).toEqual(DEFAULT_LEVELS);
   });
