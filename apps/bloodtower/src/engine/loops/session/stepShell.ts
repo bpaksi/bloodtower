@@ -11,6 +11,7 @@ import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
 import type { ShellEffect } from "./effects.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
+import { applyGear } from "./gear.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
 import { SESSION_ROOT_LOOP_ID } from "./registry.ts";
@@ -297,6 +298,12 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       setSerial: state.setSerial + 1,
       eventSeq: eventSeq + 1,
     };
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
+  }
+
+  if (e.kind === "gear") {
+    const next = applyGear(state, e);
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }

@@ -1,9 +1,10 @@
 "use client";
 
-import type { DeviceView, OfferedAction } from "bloodtower-protocols";
+import type { DeviceView, GearView, OfferedAction } from "bloodtower-protocols";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { GoodbyeTeardown } from "../GoodbyeTeardown.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
+import type { MenuContext } from "./gearMenu.ts";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
@@ -80,6 +81,135 @@ function StoryNav({
   );
 }
 
+const menuContext = (view: DeviceView): MenuContext | undefined => {
+  const gear = view.gear;
+  if (!gear) return undefined;
+  return {
+    inGame: gear.inGame,
+    beforeBegin: gear.beforeBegin,
+    sessionScreen: gear.sessionScreen,
+    towerConnected: gear.towerConnected,
+    partySplit: gear.partySplit,
+    blockedItem: gear.panel && gear.owner !== view.deviceId ? gear.panel : null,
+  };
+};
+
+const ownsPanel = (view: DeviceView): GearView | null => {
+  const gear = view.gear;
+  if (!gear?.panel || gear.owner !== view.deviceId) return null;
+  return gear;
+};
+
+function GearDevicePanel({
+  gear,
+  live,
+  onAct,
+}: {
+  gear: GearView;
+  live: boolean;
+  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
+}) {
+  const send = (actionId: string, args?: Record<string, unknown>) => onAct("gear", actionId, args);
+  const stepBack = Boolean(gear.card || gear.firstHero);
+  return (
+    <section data-gear-panel={gear.panel ?? ""}>
+      <h2>See the Story board</h2>
+      {gear.panel === "volume" ? (
+        <div className="mt-6 flex flex-col gap-3">
+          {([0, 1, 2] as const).map((level) => (
+            <button
+              key={level}
+              type="button"
+              className="bt-secondary"
+              disabled={!live}
+              onClick={() => send("pick", { pick: `Volume ${level}`, volume: level })}
+            >
+              {`Volume ${level}`}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="bt-secondary"
+            disabled={!live}
+            onClick={() => {
+              const level =
+                gear.picked === "Volume 0"
+                  ? 0
+                  : gear.picked === "Volume 1"
+                    ? 1
+                    : gear.picked === "Volume 2"
+                      ? 2
+                      : undefined;
+              send(
+                "keep-volume",
+                level === undefined ? {} : { pick: gear.picked ?? "", volume: level },
+              );
+            }}
+          >
+            Keep
+          </button>
+          <button
+            type="button"
+            className="bt-secondary"
+            disabled={!live}
+            onClick={() => send("try-another")}
+          >
+            Try another
+          </button>
+        </div>
+      ) : null}
+      {gear.panel === "look-up" ? (
+        <div className="mt-6 flex flex-col gap-3">
+          {gear.cards.map((card) => (
+            <button
+              key={card.id}
+              type="button"
+              className="bt-secondary"
+              disabled={!live}
+              onClick={() => send("pick", { pick: card.title })}
+            >
+              {card.title}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {gear.panel === "change-who-holds-whom" ? (
+        <div className="mt-6 flex flex-col gap-3">
+          {gear.party.map((hero) => (
+            <button
+              key={hero.id}
+              type="button"
+              className="bt-secondary"
+              disabled={!live}
+              onClick={() => send("pick", { pick: hero.name, heroId: hero.id })}
+            >
+              {hero.name}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {stepBack ? (
+        <button
+          type="button"
+          className="bt-secondary mt-6"
+          disabled={!live}
+          onClick={() => send("step-back")}
+        >
+          Back
+        </button>
+      ) : null}
+      <button
+        type="button"
+        className="bt-primary mt-6"
+        disabled={!live}
+        onClick={() => send("done")}
+      >
+        Done
+      </button>
+    </section>
+  );
+}
+
 const iconFor = (actionId: string): string => {
   if (actionId === "walk") return "→";
   if (actionId === "enter") return "⌂";
@@ -126,7 +256,9 @@ export function CoreDeviceScreen({
   const actions = openActions(view.actions);
   const back = actions.find((action) => action.actionId === "back");
   const body = actions.filter((action) => action.actionId !== "back" && !inMenu(action));
-  const quit = actions.find((action) => action.promptId === "menu-quit");
+  const quit =
+    actions.find((action) => action.promptId === "menu-quit") ??
+    actions.find((action) => action.actionId === "quit-story");
   const connect = actions.find((action) => action.promptId === "menu-connect");
   const isPinned = (action: OfferedAction) =>
     action.actionId === "continue" || action.label.trim().toLowerCase() === "cancel";
@@ -177,9 +309,16 @@ export function CoreDeviceScreen({
       ? setupPrompt.promptId.slice("continue-setup-".length)
       : undefined;
   const farewell = view.screen === "goodbye";
+  const panel = ownsPanel(view);
 
   return (
-    <main className="bt-device" data-screen={view.screen} data-setup-step={setupStep}>
+    <main
+      className="bt-device"
+      data-screen={view.screen}
+      data-setup-step={setupStep}
+      data-paused={view.gear?.paused ? "true" : "false"}
+      data-volume={view.gear?.volume ?? undefined}
+    >
       <div className="bt-scroll">
         <div className="bt-kicker" data-step-context>
           {STEP_CONTEXT[view.screen] ?? view.screen}
@@ -188,7 +327,9 @@ export function CoreDeviceScreen({
           {SCREEN_TITLE[view.screen] ?? view.screen}
         </h1>
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
-        {farewell ? (
+        {panel ? (
+          <GearDevicePanel gear={panel} live={live} onAct={onAct} />
+        ) : farewell ? (
           <GoodbyeTeardown shows={view.shows} />
         ) : (
           <>
@@ -355,10 +496,18 @@ export function CoreDeviceScreen({
           </>
         )}
       </div>
-      {farewell || pinned.length === 0 ? null : (
+      {panel || farewell || pinned.length === 0 ? null : (
         <div className="bt-pinned flex flex-col gap-3">{pinned.map(renderAction)}</div>
       )}
-      <ChromeBar live={live} back={back} connect={connect} quit={quit} onAct={onAct} />
+      <ChromeBar
+        live={live}
+        back={back}
+        connect={connect}
+        quit={quit}
+        onAct={onAct}
+        helpScreen={view.gear?.helpScreen}
+        menu={menuContext(view)}
+      />
     </main>
   );
 }

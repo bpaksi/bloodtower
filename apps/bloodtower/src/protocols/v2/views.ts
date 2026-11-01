@@ -56,6 +56,60 @@ const uniqueIds = (ids: string[], ctx: z.RefinementCtx, label: string) => {
   if (new Set(ids).size !== ids.length) issue(ctx, `A ${label} is listed twice.`);
 };
 
+/** Gear panels the iPad can open. The Story board only displays them. */
+export const GEAR_PANELS = [
+  "current-party",
+  "game-board-setup",
+  "volume",
+  "look-up",
+  "change-who-holds-whom",
+  "join-another-ipad",
+] as const;
+export const gearPanelSchema = z.enum(GEAR_PANELS);
+export type GearPanelId = z.infer<typeof gearPanelSchema>;
+
+const gearPartyHeroSchema = z.strictObject({
+  id: heroIdSchema,
+  name: z.string().min(1).max(80),
+  hp: z.string().min(1).max(40),
+  gold: z.string().min(1).max(40),
+  items: z.string().min(1).max(200),
+  corruptions: z.string().min(1).max(200),
+  holder: z.string().min(1).max(80).nullable(),
+});
+
+const gearCardSchema = z.strictObject({
+  id: z.string().min(1).max(40),
+  title: z.string().min(1).max(80),
+});
+
+/**
+ * Shared gear snapshot. Absent on views built before this field.
+ * `paused` is true while a panel is open. Closing the Menu is not in here.
+ */
+export const gearViewSchema = z.strictObject({
+  paused: z.boolean(),
+  panel: gearPanelSchema.nullable(),
+  owner: z.string().min(1).max(64).nullable(),
+  picked: z.string().min(1).max(80).nullable(),
+  volume: z.number().int().min(0).max(2),
+  pieceChecks: z.number().int().min(0).max(9999),
+  opens: z.number().int().min(0).max(9999),
+  card: z.string().min(1).max(80).nullable(),
+  inGame: z.boolean(),
+  towerConnected: z.boolean(),
+  sessionScreen: z.boolean(),
+  beforeBegin: z.boolean(),
+  partySplit: z.boolean(),
+  party: z.array(gearPartyHeroSchema).max(16),
+  cards: z.array(gearCardSchema).max(8),
+  joinUrl: z.string().min(1).max(500).nullable(),
+  setupSteps: z.array(z.string().min(1).max(200)).max(12),
+  helpScreen: z.string().min(1).max(40),
+  firstHero: z.string().min(1).max(80).nullable(),
+});
+export type GearView = z.infer<typeof gearViewSchema>;
+
 /**
  * Public view for the story board. Loop levels and the text each one shows,
  * which heroes are held, the public narration line, and the actions on offer.
@@ -72,6 +126,8 @@ export const boardViewPayloadSchema = z
     table: tableBandSchema.nullable().optional(),
     /** Place still and caption. Story board only, and only while a group is inside. */
     place: placeStillSchema.nullable().optional(),
+    /** Gear panel the Story board displays. Omitted when the host has no gear snapshot. */
+    gear: gearViewSchema.optional(),
   })
   .superRefine((value, ctx) => {
     refuseBoardContent(value, ctx);
@@ -153,6 +209,8 @@ export const deviceViewPayloadSchema = z
       )
       .max(8)
       .optional(),
+    /** Same gear snapshot as the board, so this iPad can press the panel's buttons. */
+    gear: gearViewSchema.optional(),
   })
   .superRefine((value, ctx) => {
     uniqueIds(

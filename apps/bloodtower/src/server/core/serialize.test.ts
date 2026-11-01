@@ -27,4 +27,21 @@ describe("serializeShellState", () => {
       id: spaceId,
     });
   });
+
+  it("drops an open gear panel and keeps the tower volume", () => {
+    const state: ShellState = {
+      ...initialShellState({ sessionId: "s1", seed: "checkpoint-seed" }),
+      towerVolume: 2,
+      gearPanel: "volume",
+      gearPaused: true,
+      gearOwner: "device-a",
+      gearOpens: 3,
+    };
+    const restored = deserializeShellState(serializeShellState(state));
+    expect(restored.gearPanel).toBeNull();
+    expect(restored.gearPaused).toBe(false);
+    expect(restored.gearOwner).toBeNull();
+    expect(restored.gearOpens).toBe(0);
+    expect(restored.towerVolume).toBe(2);
+  });
 });

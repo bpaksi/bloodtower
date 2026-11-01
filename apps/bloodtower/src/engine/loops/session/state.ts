@@ -1,3 +1,4 @@
+import type { GearPanelId } from "../../../protocols/v2/views.ts";
 import type { LoopRuntimeState, PromptSlot } from "../../loop/runtime.ts";
 import { emptyLoopRuntime } from "../../loop/runtime.ts";
 import type { LoopRegistry } from "../../loop/types.ts";
@@ -71,6 +72,21 @@ export type ShellState = {
   offered: PromptSlot[];
   playContent: PlayContent | null;
   play: PlayState | null;
+  /** Tower volume 0, 1, or 2. Kept across a panel close and a restart. */
+  towerVolume: 0 | 1 | 2;
+  /** C2 never splits the party. The label stays "Split party". */
+  partySplit: boolean;
+  /** Ephemeral. A restart clears these even if a checkpoint captured them. */
+  gearPanel: GearPanelId | null;
+  gearOwner: string | null;
+  gearPaused: boolean;
+  gearPicked: string | null;
+  gearCard: string | null;
+  gearPreviewVolume: 0 | 1 | 2 | null;
+  gearFirstHero: string | null;
+  gearSecondHero: string | null;
+  gearPieceChecks: number;
+  gearOpens: number;
 };
 
 export const initialHoldings = (story: ShellStory): Record<string, string | null> =>
@@ -117,5 +133,17 @@ export const initialShellState = (input: {
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,
+    towerVolume: 1,
+    partySplit: false,
+    gearPanel: null,
+    gearOwner: null,
+    gearPaused: false,
+    gearPicked: null,
+    gearCard: null,
+    gearPreviewVolume: null,
+    gearFirstHero: null,
+    gearSecondHero: null,
+    gearPieceChecks: 0,
+    gearOpens: 0,
   };
 };

@@ -2,6 +2,16 @@
 
 import { type ReactNode, useEffect, useState } from "react";
 import { ChromeBar } from "./ChromeBar.tsx";
+import type { MenuContext } from "./gearMenu.ts";
+
+const JOIN_MENU: MenuContext = {
+  inGame: false,
+  beforeBegin: true,
+  sessionScreen: false,
+  towerConnected: false,
+  partySplit: false,
+  blockedItem: null,
+};
 
 /**
  * Join landing. A device with a code waits, then the host opens /device.
@@ -28,7 +38,7 @@ export function JoinScreen({
   const shown = code ?? urlCode;
   const waitingOnHost = Boolean(shown) && !live;
   return (
-    <main className="bt-device" data-layout="ipad">
+    <main className="bt-device" data-layout="ipad" data-screen="join" data-paused="false">
       <div className="bt-scroll mx-auto flex w-full max-w-2xl flex-col gap-6">
         <header className="space-y-2">
           <p className="bt-kicker">iPad</p>
@@ -104,7 +114,7 @@ export function JoinScreen({
         )}
         {children}
       </div>
-      <ChromeBar live={live} />
+      <ChromeBar live={live} helpScreen="join" menu={JOIN_MENU} />
     </main>
   );
 }
