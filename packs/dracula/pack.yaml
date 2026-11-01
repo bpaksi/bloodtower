@@ -11,6 +11,5 @@ settings:
     options:
       - {id: short, label: Short}
       - {id: standard, label: Standard}
-      - {id: long, label: Long}
     default: standard
 playable: false
