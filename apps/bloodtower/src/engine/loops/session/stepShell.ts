@@ -33,6 +33,13 @@ import {
   takePendingCheckpoint,
   takePendingTowerCommands,
 } from "./shellRef.ts";
+import {
+  answerVolume,
+  applyVolumeResult,
+  pressVolume,
+  unlockSound,
+  VOLUME_TEST_SOUND,
+} from "./sound.ts";
 import { initialShellState, type ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
@@ -321,6 +328,33 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       setSerial: state.setSerial + 1,
       eventSeq: eventSeq + 1,
     };
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
+  }
+
+  if (
+    e.kind === "sound-unlock" ||
+    e.kind === "volume-play" ||
+    e.kind === "volume-result" ||
+    e.kind === "volume-answer"
+  ) {
+    const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
+    if (e.kind === "sound-unlock") unlockSound(next, e.deviceId);
+    else if (e.kind === "volume-result") applyVolumeResult(next, e.deviceId, e.level, e.ok);
+    else if (e.kind === "volume-answer") answerVolume(next, e.deviceId, e.answer);
+    else if (pressVolume(next, e.deviceId, e.level)) {
+      effects.push({
+        kind: "tower-command",
+        v: 1,
+        capabilityId: "sound.play-stateful",
+        params: { soundIndex: VOLUME_TEST_SOUND, volume: e.level },
+      });
+    }
+    // The story's Choose press must be offered again, as after a focus change.
+    resetGameAwaitingPress(next);
+    bindShellState(next);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }

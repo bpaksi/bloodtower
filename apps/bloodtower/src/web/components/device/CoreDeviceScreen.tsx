@@ -1,6 +1,17 @@
 "use client";
 
 import type { DeviceView, OfferedAction } from "bloodtower-protocols";
+import { useEffect, useState } from "react";
+
+import { pageLogContext, reportPageLog } from "../../lib/pageLog.ts";
+import {
+  AUDIO_START_REFUSED,
+  ENABLE_SOUND_LINE,
+  playRoomVolume,
+  prepareDeviceSound,
+  unlockDeviceSound,
+  VOLUME_LINE,
+} from "../../lib/volumeTest.ts";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { GoodbyeTeardown } from "../GoodbyeTeardown.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
@@ -94,6 +105,32 @@ const iconFor = (actionId: string): string => {
   return "";
 };
 
+/** The sound step's own buttons: Enable sound, the three volumes, Keep and Try another. */
+const isSoundAction = (action: OfferedAction) =>
+  action.actionId === "enable-sound" ||
+  action.actionId === "volume-play" ||
+  action.actionId === "volume-keep" ||
+  action.actionId === "volume-again";
+
+/** A refused browser audio call is logged, and the banner shows it to the person who tapped. */
+const audioFailure = (error: unknown): DeviceErrorBannerModel => {
+  const detail = error instanceof Error ? error.message : String(error);
+  const message =
+    detail.trim() === ""
+      ? "The browser refused to start audio."
+      : `The browser refused to start audio. ${detail}`;
+  const context = pageLogContext();
+  void reportPageLog({
+    level: "error",
+    code: AUDIO_START_REFUSED,
+    message,
+    source: "device",
+    device: context.device,
+    screen: context.screen,
+  });
+  return { code: AUDIO_START_REFUSED, message };
+};
+
 const inMenu = (action: OfferedAction) =>
   action.promptId === "menu-quit" || action.promptId === "menu-connect";
 
@@ -129,7 +166,18 @@ export function CoreDeviceScreen({
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
   onHold?: (heroId: string, action: "take" | "release") => void;
 }) {
-  const actions = openActions(view.actions);
+  const [audioError, setAudioError] = useState<DeviceErrorBannerModel | null>(null);
+  const enableSound = view.actions.find((action) => action.actionId === "enable-sound");
+  const volumes = view.actions.filter((action) => action.actionId === "volume-play");
+  const keep = view.actions.find((action) => action.actionId === "volume-keep");
+  const tryAnother = view.actions.find((action) => action.actionId === "volume-again");
+  const soundStep = view.screen === "pick-story" && (enableSound != null || volumes.length > 0);
+  const needsUnlock = enableSound != null;
+  useEffect(() => {
+    if (!needsUnlock) return;
+    prepareDeviceSound().catch((error: unknown) => setAudioError(audioFailure(error)));
+  }, [needsUnlock]);
+  const actions = openActions(view.actions).filter((action) => !isSoundAction(action));
   const back = actions.find((action) => action.actionId === "back");
   const body = actions.filter((action) => action.actionId !== "back" && !inMenu(action));
   const quit = actions.find((action) => action.promptId === "menu-quit");
@@ -185,6 +233,109 @@ export function CoreDeviceScreen({
   const farewell = view.screen === "goodbye";
   // The steps are on the Story board; the iPad shows only its one button (SCR-022).
   const stepsOnBoard = view.screen === "base-board";
+
+  if (soundStep) {
+    // Pick story starts with sound (Bob 2026-10-31): the prompt and its button, then the levels.
+    const banner = errorBanner ?? audioError;
+    return (
+      <main
+        className="bt-device"
+        data-screen={view.screen}
+        data-sound-step={enableSound ? "enable" : "levels"}
+      >
+        <div className="bt-scroll">
+          {banner ? <DeviceErrorBanner {...banner} /> : null}
+          {enableSound ? (
+            <>
+              <p className="mt-2 text-lg" data-step-instruction="">
+                {ENABLE_SOUND_LINE}
+              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  type="button"
+                  className="bt-primary"
+                  data-prompt-id={enableSound.promptId}
+                  data-action-id={enableSound.actionId}
+                  data-action={enableSound.actionId}
+                  disabled={!live}
+                  onClick={() => {
+                    setAudioError(null);
+                    // The resume starts inside this tap, as the browser requires.
+                    unlockDeviceSound().then(
+                      () => onAct(enableSound.promptId, enableSound.actionId),
+                      (error: unknown) => setAudioError(audioFailure(error)),
+                    );
+                  }}
+                >
+                  {enableSound.label}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-2 text-lg" data-step-instruction="">
+                {VOLUME_LINE}
+              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                {volumes.map((action, level) => (
+                  <button
+                    key={action.promptId}
+                    type="button"
+                    className="bt-secondary"
+                    data-prompt-id={action.promptId}
+                    data-action-id={action.actionId}
+                    data-action={action.actionId}
+                    disabled={!live}
+                    onClick={() => {
+                      setAudioError(null);
+                      try {
+                        playRoomVolume(level as 0 | 1 | 2);
+                      } catch (error) {
+                        setAudioError(audioFailure(error));
+                        return;
+                      }
+                      onAct(action.promptId, action.actionId);
+                    }}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-6 flex gap-3">
+                {keep ? (
+                  <button
+                    type="button"
+                    className="bt-primary"
+                    data-prompt-id={keep.promptId}
+                    data-action-id={keep.actionId}
+                    data-action={keep.actionId}
+                    disabled={!live || !keep.open}
+                    onClick={() => onAct(keep.promptId, keep.actionId)}
+                  >
+                    {keep.label}
+                  </button>
+                ) : null}
+                {tryAnother ? (
+                  <button
+                    type="button"
+                    className="bt-secondary"
+                    data-prompt-id={tryAnother.promptId}
+                    data-action-id={tryAnother.actionId}
+                    data-action={tryAnother.actionId}
+                    disabled={!live}
+                    onClick={() => onAct(tryAnother.promptId, tryAnother.actionId)}
+                  >
+                    {tryAnother.label}
+                  </button>
+                ) : null}
+              </div>
+            </>
+          )}
+        </div>
+        <ChromeBar live={live} back={back} connect={connect} quit={quit} onAct={onAct} />
+      </main>
+    );
+  }
 
   return (
     <main className="bt-device" data-screen={view.screen} data-setup-step={setupStep}>

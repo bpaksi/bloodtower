@@ -17,6 +17,7 @@ import {
   startupStatus,
   storyDoors,
   towerChoiceStatus,
+  volumeLine,
   waitingFor,
 } from "../../lib/startupBoard";
 import { GoodbyeTeardown } from "../GoodbyeTeardown";
@@ -103,7 +104,26 @@ function DoorPeek({ door, side }: { door: StoryDoor; side: "previous" | "next" }
   );
 }
 
+function VolumePanel({ line, live }: { line: string; live: boolean }) {
+  const text = <p className="bt-startup-cue bt-volume-line">{line}</p>;
+  return (
+    <div data-startup-panel="volume" data-volume-live={live ? "true" : "false"}>
+      <p className="bt-kicker">Before the story</p>
+      <h1 className="bt-startup-title">Sound</h1>
+      {live ? (
+        text
+      ) : (
+        <div className="bt-row--disabled" aria-disabled="true">
+          {text}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PickStoryPanel({ view }: { view: BoardView }) {
+  const volume = volumeLine(view);
+  if (volume) return <VolumePanel line={volume.line} live={volume.live} />;
   const { focus, previous, next } = doorFrame(storyDoors(view));
   const wide = previous != null || next != null;
   return (

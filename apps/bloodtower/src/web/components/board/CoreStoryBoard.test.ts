@@ -410,3 +410,30 @@ describe("session Enter board screens (C2/05)", () => {
     expect(markup).not.toMatch(/<button/i);
   });
 });
+
+describe("Pick story volume line (EV-14 7a and 7b)", () => {
+  const volume = (id: string): BoardView => ({
+    ...splashView,
+    screen: "pick-story",
+    actions: [],
+    levels: [
+      join,
+      { id, label: "Volume", shows: "How loud should the tower be? Press one to hear it." },
+      { id: "pick-story", label: "Pick Story", shows: "Proving Grounds" },
+    ],
+  });
+
+  it("greys the one volume line until an iPad has tapped Enable sound", () => {
+    const markup = html(volume("volume-line-off"));
+    expect(markup).toContain('class="bt-row--disabled" aria-disabled="true"');
+    expect(markup.match(/How loud should the tower be\? Press one to hear it\./g)).toHaveLength(1);
+    expect(markup).not.toMatch(/<button/i);
+  });
+
+  it("shows the line at full strength from then on", () => {
+    const markup = html(volume("volume-line"));
+    expect(markup).toContain("How loud should the tower be? Press one to hear it.");
+    expect(markup).not.toContain("bt-row--disabled");
+    expect(markup).not.toContain("aria-disabled");
+  });
+});

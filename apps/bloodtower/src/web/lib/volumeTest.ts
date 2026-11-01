@@ -48,3 +48,80 @@ export const volumeBoardCopy = (test: VolumeTest): { title: string; line: string
 /** The tower is playing or about to: Continue waits, and so does the answer. */
 export const volumeIsPlaying = (test: VolumeTest): boolean =>
   test.phase === "levels" || test.phase === "balance-bed" || test.phase === "balance-tower";
+
+/** The line on the board and on an iPad that is setting its level (SCR-006, Pick story). */
+export const VOLUME_LINE = "How loud should the tower be? Press one to hear it.";
+/** The only thing an iPad shows until its own Enable sound tap (Bob 2026-10-31 10:33 ET). */
+export const ENABLE_SOUND_LINE = "Tap once to turn on this iPad's sound.";
+
+/** A browser audio call an iPad's tap made was refused. Same code as the board's refusal. */
+export const AUDIO_START_REFUSED = "audio-start-refused";
+
+/** What the iPad's own audio did, for the e2e hook. Never sent to the host. */
+export interface DeviceSoundHook {
+  readonly contextState: AudioContextState | null;
+  /** One entry per Dungeon Complete this iPad played in the room, in order. */
+  readonly played: readonly { volume: number }[];
+}
+
+declare global {
+  interface Window {
+    __btDeviceSound?: DeviceSoundHook;
+  }
+}
+
+/** Tower tier 0 is loudest. The room sound follows it (GAP-HW-003 settles the real steps). */
+const ROOM_GAIN = [1, 0.5, 0.25] as const;
+const ROOM_TONE_HZ = 660;
+const ROOM_TONE_SECONDS = 0.6;
+
+let context: AudioContext | null = null;
+const playedLog: { volume: number }[] = [];
+
+/**
+ * This iPad's own audio context. It is made suspended and only a tap resumes it, so no sound
+ * can play before Enable sound. One iPad's tap never touches another's context.
+ */
+const deviceContext = (): AudioContext => {
+  if (!context) {
+    context = new AudioContext();
+    window.__btDeviceSound = {
+      get contextState() {
+        return context?.state ?? null;
+      },
+      played: playedLog,
+    };
+  }
+  return context;
+};
+
+/** Call while the Enable sound prompt shows, so the suspended context is there to read. */
+export const prepareDeviceSound = async (): Promise<void> => {
+  const ctx = deviceContext();
+  // An earlier tap on this page can let a new context start running. Hold it until Enable sound.
+  if (ctx.state === "running") await ctx.suspend();
+};
+
+/** Inside the tap's own handler: resume this iPad's context. A refusal is returned, not eaten. */
+export const unlockDeviceSound = async (): Promise<void> => {
+  await deviceContext().resume();
+};
+
+/** Plays Dungeon Complete's stand-in tone in the room at the pressed volume, after a tap. */
+export const playRoomVolume = (level: 0 | 1 | 2): void => {
+  const ctx = deviceContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.value = ROOM_TONE_HZ;
+  gain.gain.value = ROOM_GAIN[level];
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + ROOM_TONE_SECONDS);
+  playedLog.push({ volume: level });
+};
+
+/** Test isolation. Production never calls this. */
+export const resetDeviceSoundForTests = (): void => {
+  context = null;
+  playedLog.length = 0;
+};

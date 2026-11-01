@@ -308,30 +308,43 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
     }
     const outcomes = await runShellEffects(state, shellEffects, effectsCtx());
+    const tellDevice = (message: string) => {
+      if (!deviceId) return;
+      // After the result: the iPad changes screen when the choice comes back, and a change of
+      // screen clears its banner. The message must land on the screen that asks again.
+      applyQueue = applyQueue
+        .then(() => options.onDeviceError?.(deviceId, "tower-command-failed", message))
+        .catch((error: unknown) => {
+          const detail = error instanceof Error ? error.message : String(error);
+          options.log.error(
+            "core-apply",
+            detail.trim() === "" ? "The iPad error could not be sent." : detail,
+          );
+        });
+    };
     for (const outcome of outcomes) {
+      const ok = outcome.result === "ok";
+      if (outcome.capabilityId === "sound.play-stateful" && event.kind === "volume-play") {
+        // Only the volume step waits on this sound; Keep opens once the tower has played it.
+        enqueue(
+          { kind: "volume-result", v: 1, deviceId: event.deviceId, level: event.level, ok },
+          null,
+        );
+        if (!ok) tellDevice("The tower did not play that volume. Nothing was retried.");
+        continue;
+      }
       if (outcome.capabilityId !== "tower.connect" && outcome.capabilityId !== "tower.calibrate") {
         continue;
       }
       // Only the Enter waits on these. A connect from the play menu has no result to feed back.
       if (!state.enter) continue;
-      const ok = outcome.result === "ok";
       enqueue({ kind: "tower-result", v: 1, capabilityId: outcome.capabilityId, ok }, null);
-      if (!ok && deviceId) {
-        const message =
+      if (!ok) {
+        tellDevice(
           outcome.capabilityId === "tower.connect"
             ? "The tower did not answer. Nothing was retried."
-            : "The tower did not calibrate. Nothing was retried.";
-        // After the result: the iPad changes screen when the choice comes back, and a change of
-        // screen clears its banner. The message must land on the screen that asks again.
-        applyQueue = applyQueue
-          .then(() => options.onDeviceError?.(deviceId, "tower-command-failed", message))
-          .catch((error: unknown) => {
-            const detail = error instanceof Error ? error.message : String(error);
-            options.log.error(
-              "core-apply",
-              detail.trim() === "" ? "The iPad error could not be sent." : detail,
-            );
-          });
+            : "The tower did not calibrate. Nothing was retried.",
+        );
       }
     }
     options.onChange();
@@ -372,6 +385,11 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     rejoin: (token) => {
       const device = [...devices.values()].find((entry) => entry.token === token);
       if (!device) return { ok: false };
+      // A socket that came back inside the grace keeps its seat; the earlier drop must not fire.
+      if (device.grace) {
+        clearTimeout(device.grace);
+        device.grace = undefined;
+      }
       enqueue({ kind: "device-join", v: 1, deviceId: device.id }, device.id);
       return { ok: true, deviceId: device.id };
     },
@@ -395,6 +413,23 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         const storyId = args.storyId;
         if (typeof storyId !== "string") return;
         enqueue({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
+        return;
+      }
+      if (promptId === "sound-enable" && actionId === "enable-sound") {
+        enqueue({ kind: "sound-unlock", v: 1, deviceId }, deviceId);
+        return;
+      }
+      if (actionId === "volume-play" && /^volume-[012]$/.test(promptId)) {
+        const level = Number(promptId.slice("volume-".length));
+        enqueue({ kind: "volume-play", v: 1, deviceId, level }, deviceId);
+        return;
+      }
+      if (promptId === "volume-keep" && actionId === "volume-keep") {
+        enqueue({ kind: "volume-answer", v: 1, deviceId, answer: "keep" }, deviceId);
+        return;
+      }
+      if (promptId === "volume-again" && actionId === "volume-again") {
+        enqueue({ kind: "volume-answer", v: 1, deviceId, answer: "again" }, deviceId);
         return;
       }
       if (promptId === "set-setting" && actionId === "set") {

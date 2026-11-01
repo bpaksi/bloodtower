@@ -40,9 +40,8 @@ export type ControlAction = z.infer<typeof controlActionSchema>;
 
 /**
  * The flow screens, in order. The server holds the current one; no client sends it.
- * Splash is the first screen after load. Connect Tower follows Game settings (R3-UI-22), and a
- * story with `tower: none` skips it. The tower volume test (Proving Ground section 6a) follows
- * Connect Tower. Claim Hunters (`party-join`) is followed by one `setup` dialog per pack setup
+ * Splash is the first screen after load. The tower block runs once, in the session Enter
+ * (`table-join`, `base-board`, `tower-choice`, `tower-wake`), before Pick story. Claim Hunters (`party-join`) is followed by one `setup` dialog per pack setup
  * step, then Begin (R3-UI-22, R2-50..52). Quit is the end once play has been quit.
  */
 export const FLOW_SCREENS = [
@@ -54,7 +53,6 @@ export const FLOW_SCREENS = [
   "pick-story",
   "game-settings",
   "not-playable",
-  "tower-connect",
   "tower-volume-test",
   "party-join",
   "setup",

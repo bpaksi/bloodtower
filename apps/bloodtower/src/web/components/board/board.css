@@ -2715,6 +2715,15 @@
   text-align: left;
 }
 
+.bt-row--disabled {
+  opacity: 0.5;
+}
+
+.bt-volume-line {
+  margin: 0.8rem 0 0;
+  text-align: center;
+}
+
 .bt-tower-status {
   margin: 0;
   color: var(--bt-blood, #8a1e14);

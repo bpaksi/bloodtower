@@ -31,6 +31,15 @@ export type EnterState = {
 /** Tonight's tower choice. It lasts the session (DEC-152). */
 export type TowerChoice = "undecided" | "connect" | "without";
 
+// One iPad's sound step on Pick story (Bob 2026-10-31): `levels` after its Enable sound tap,
+// `done` after Keep. An iPad with no entry has not tapped yet. `played` is the volume whose
+// sound has played (the tower's answer on the connect track); `pending` waits for that answer.
+export type DeviceSound = {
+  phase: "levels" | "done";
+  played: number | null;
+  pending: number | null;
+};
+
 export type AutosaveSnapshot = {
   gameId: string;
   packId: string;
@@ -59,6 +68,10 @@ export type ShellState = {
   /** `null` once the Enter has finished. A checkpoint from before C2/05 has none. */
   enter: EnterState | null;
   towerChoice: TowerChoice;
+  /** Per iPad, by device id. Browser audio is lost on a reload, so a restart clears it. */
+  sound: Record<string, DeviceSound>;
+  /** The volume an iPad kept on Pick story, or null until one does. The move-roll cue uses it. */
+  keptVolume: number | null;
   /**
    * True after this session pressed connect. A drop pauses only then (DEC-155 slice).
    * A session that never connected stays in play, including after Continue.
@@ -122,6 +135,8 @@ export const initialShellState = (input: {
     tower: TOWER_DISCONNECTED,
     enter: { step: "join", failed: false },
     towerChoice: "undecided",
+    sound: {},
+    keptVolume: null,
     towerLinked: false,
     screen: "table-join",
     setupAt: 0,

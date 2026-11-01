@@ -61,6 +61,38 @@ export const towerResultEventV1 = z.object({
   ok: z.boolean(),
 });
 
+// An iPad tapped Enable sound: its browser audio is unlocked (Pick story, Bob 2026-10-31).
+export const soundUnlockEventV1 = z.object({
+  kind: z.literal("sound-unlock"),
+  v: z.literal(1),
+  deviceId: z.string().min(1),
+});
+
+// An iPad pressed one volume. The tower plays Dungeon Complete at it only on this press (SCR-006).
+export const volumePlayEventV1 = z.object({
+  kind: z.literal("volume-play"),
+  v: z.literal(1),
+  deviceId: z.string().min(1),
+  level: z.number().int().min(0).max(2),
+});
+
+// How the tower's Dungeon Complete at that volume ended. The host appends it.
+export const volumeResultEventV1 = z.object({
+  kind: z.literal("volume-result"),
+  v: z.literal(1),
+  deviceId: z.string().min(1),
+  level: z.number().int().min(0).max(2),
+  ok: z.boolean(),
+});
+
+// Keep the volume last played, or Try another.
+export const volumeAnswerEventV1 = z.object({
+  kind: z.literal("volume-answer"),
+  v: z.literal(1),
+  deviceId: z.string().min(1),
+  answer: z.enum(["keep", "again"]),
+});
+
 export const shellEventSchema = z.discriminatedUnion("kind", [
   startSessionEventV1,
   pressEventV1,
@@ -71,6 +103,10 @@ export const shellEventSchema = z.discriminatedUnion("kind", [
   focusStoryEventV1,
   setSettingEventV1,
   towerResultEventV1,
+  soundUnlockEventV1,
+  volumePlayEventV1,
+  volumeResultEventV1,
+  volumeAnswerEventV1,
 ]);
 
 export type ShellEvent = z.infer<typeof shellEventSchema>;

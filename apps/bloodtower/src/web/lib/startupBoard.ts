@@ -205,7 +205,9 @@ export const waitingFor = (view: BoardView): string => {
     case "tower-wake":
       return "Waiting for the tower.";
     case "pick-story":
-      return "Waiting for an iPad to choose a story.";
+      return volumeLine(view)
+        ? "Waiting for an iPad to set the volume."
+        : "Waiting for an iPad to choose a story.";
     case "game-settings":
       return "Waiting for an iPad to confirm these settings.";
     case "claim-heroes": {
@@ -237,6 +239,16 @@ export const baseBoardSteps = (view: BoardView): string[] =>
   publicLine(view)
     .split("\n")
     .filter((line) => line.trim() !== "");
+
+/**
+ * Pick story starts with the volume step (Bob 2026-10-31). Greyed until the first iPad taps
+ * Enable sound, full strength after. Null once an iPad has kept a volume: the story list shows.
+ */
+export const volumeLine = (view: BoardView): { line: string; live: boolean } | null => {
+  if (view.screen !== "pick-story") return null;
+  const level = view.levels.find((row) => row.id === "volume-line" || row.id === "volume-line-off");
+  return level ? { line: level.shows, live: level.id === "volume-line" } : null;
+};
 
 /** A failed connect or calibrate shows this status above the tower question (MEC-039 .11). */
 export const towerChoiceStatus = (view: BoardView): string | null => {

@@ -4,7 +4,12 @@ import { loadConfig } from "../../server/config.ts";
 import { startSessionHost } from "../../server/hub/host.ts";
 import { createMockTower, type MockTower } from "../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
-import { installSessionSocketHook, startAcceptanceHost } from "./support/acceptance.ts";
+import {
+  enterWithoutTowerKeepSound,
+  enterWithTowerKeepSound,
+  installSessionSocketHook,
+  startAcceptanceHost,
+} from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 const WEB_ROOT = resolve(import.meta.dirname, "../../web/out");
@@ -329,6 +334,196 @@ test("the splash no longer offers Continue or Connect Tower", async ({ browser }
       await expect(pad.page.getByRole("button", { name, exact: true })).toHaveCount(0);
     }
     await expect(board.page.getByText(/Continue|Connect Tower/)).toHaveCount(0);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await session.host.close();
+  }
+});
+
+const VOLUME_LINE = "How loud should the tower be? Press one to hear it.";
+const ENABLE_LINE = "Tap once to turn on this iPad's sound.";
+
+const audioState = (page: Page) =>
+  page.evaluate(
+    () =>
+      (window as unknown as { __btDeviceSound?: { contextState: string | null } }).__btDeviceSound
+        ?.contextState ?? null,
+  );
+
+const playedLog = (page: Page) =>
+  page.evaluate(
+    () =>
+      (
+        window as unknown as { __btDeviceSound?: { played: { volume: number }[] } }
+      ).__btDeviceSound?.played.map((row) => row.volume) ?? [],
+  );
+
+/** The iPad body's text: everything in the scroll area. */
+const bodyText = async (page: Page) =>
+  (await page.locator("main.bt-device .bt-scroll").innerText()).replace(/\n+/g, "\n").trim();
+
+const soundCommands = (tower: MockTower) =>
+  tower.sent().flatMap((row) => (row.type === "sound" ? [row] : []));
+
+test("Pick story starts with Enable sound on each iPad, then levels, Keep and the story list", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "c2-enter-sound" });
+  const contexts: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, session.baseURL);
+    contexts.push(board.context);
+    const padA = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(padA.context);
+    const padB = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(padB.context);
+    await enterWithoutTowerKeepSound(padA.page);
+    await expect(deviceMain(padB.page)).toHaveAttribute("data-screen", "pick-story");
+
+    // EV-15, EV-14 (7a): only the prompt and one primary button; audio suspended; nothing played.
+    for (const pad of [padA, padB]) {
+      await expect.poll(() => audioState(pad.page)).toBe("suspended");
+      expect(await bodyText(pad.page)).toBe(`${ENABLE_LINE}\nEnable sound`);
+      expect(await bodyLabels(pad.page)).toEqual(["Enable sound"]);
+      await expect(bodyButtons(pad.page).first()).toHaveClass(/bt-primary/);
+      expect(await playedLog(pad.page)).toEqual([]);
+    }
+    const greyed = board.page.locator('.bt-row--disabled[aria-disabled="true"]');
+    await expect(boardMain(board.page)).toHaveAttribute("data-screen", "pick-story");
+    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(1);
+    await expect(greyed.getByText(VOLUME_LINE)).toBeVisible();
+    await expect(board.page.locator("main button")).toHaveCount(0);
+    await shot(board.page, "sound-7a-board", testInfo);
+    await shot(padA.page, "sound-7a-ipad", testInfo);
+
+    // One iPad's tap unlocks only that iPad.
+    await press(padA.page, "sound-enable");
+    await expect.poll(() => audioState(padA.page)).toBe("running");
+    expect(await audioState(padB.page)).toBe("suspended");
+    expect(await bodyLabels(padB.page)).toEqual(["Enable sound"]);
+
+    // EV-16, EV-14 (7b): the levels show with Keep disabled; the board line is at full strength.
+    await expect
+      .poll(() => bodyLabels(padA.page))
+      .toEqual(["Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"]);
+    expect(await bodyText(padA.page)).toContain(VOLUME_LINE);
+    const keep = padA.page.locator('button[data-prompt-id="volume-keep"]');
+    await expect(keep).toBeDisabled();
+    await expect(keep).toHaveClass(/bt-primary/);
+    await expect(padA.page.locator('button[data-prompt-id^="continue-pick-story-"]')).toHaveCount(
+      0,
+    );
+    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(1);
+    await expect(board.page.locator('.bt-row--disabled, [aria-disabled="true"]')).toHaveCount(0);
+    await expect(board.page.locator("main button")).toHaveCount(0);
+    await shot(board.page, "sound-7b-board", testInfo);
+    await shot(padA.page, "sound-7b-ipad", testInfo);
+
+    // EV-17 (no tower): Keep waits for the iPad's own played-sound entry; no tower command.
+    await keep.click({ force: true });
+    await padA.page.waitForTimeout(500);
+    await expect(keep).toBeDisabled();
+    await press(padA.page, "volume-1");
+    await expect.poll(() => playedLog(padA.page)).toEqual([1]);
+    await expect(keep).toBeEnabled();
+    await shot(board.page, "sound-7c-board", testInfo);
+    await shot(padA.page, "sound-7c-ipad", testInfo);
+    expect(session.tower.sent()).toEqual([]);
+
+    // Try another clears Keep; then Volume 2 and Keep end the step; the story list follows.
+    await press(padA.page, "volume-again");
+    await expect(keep).toBeDisabled();
+    await press(padA.page, "volume-2");
+    await expect.poll(() => playedLog(padA.page)).toEqual([1, 2]);
+    await press(padA.page, "volume-keep");
+    await expect(
+      padA.page.locator('button[data-prompt-id^="continue-pick-story-"]').first(),
+    ).toBeVisible();
+    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(0);
+    expect(await bodyLabels(padB.page)).toEqual(["Enable sound"]);
+    expect(session.tower.sent()).toEqual([]);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await session.host.close();
+  }
+});
+
+test("connect track: a volume plays Dungeon Complete on the tower only on its press; Keep follows the tower", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "c2-enter-volume" });
+  const { tower } = session;
+  const contexts: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, session.baseURL);
+    contexts.push(board.context);
+    const pad = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(pad.context);
+    await enterWithTowerKeepSound(pad.page);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "pick-story");
+    await pad.page.waitForTimeout(3000);
+    expect(sentTypes(tower)).toEqual(["connect", "calibrate"]);
+
+    await press(pad.page, "sound-enable");
+    const keep = pad.page.locator('button[data-prompt-id="volume-keep"]');
+    await expect(keep).toBeDisabled();
+    await pad.page.waitForTimeout(1000);
+    expect(soundCommands(tower)).toEqual([]);
+
+    // Volume 0 plays once.
+    await press(pad.page, "volume-0");
+    await expect
+      .poll(() => soundCommands(tower))
+      .toEqual([{ type: "sound", soundIndex: 58, volume: 0 }]);
+    await expect(keep).toBeEnabled();
+    await pad.page.waitForTimeout(3000);
+    expect(soundCommands(tower)).toHaveLength(1);
+
+    // EV-09: Volume 1, Try another, Volume 2, Keep. Two more sounds, one per press.
+    await press(pad.page, "volume-again");
+    await expect(keep).toBeDisabled();
+    await press(pad.page, "volume-1");
+    await expect(keep).toBeEnabled();
+    await press(pad.page, "volume-again");
+    await press(pad.page, "volume-2");
+    await expect(keep).toBeEnabled();
+    expect(soundCommands(tower).map((row) => row.volume)).toEqual([0, 1, 2]);
+    await press(pad.page, "volume-keep");
+    await expect(
+      pad.page.locator('button[data-prompt-id^="continue-pick-story-"]').first(),
+    ).toBeVisible();
+    await pad.page.waitForTimeout(1500);
+    expect(soundCommands(tower)).toHaveLength(3);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await session.host.close();
+  }
+});
+
+test("connect track: a tower that does not play the sound leaves Keep disabled and shows the error", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "c2-enter-volume-fail" });
+  const { tower } = session;
+  const contexts: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, session.baseURL);
+    contexts.push(board.context);
+    const pad = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(pad.context);
+    await enterWithTowerKeepSound(pad.page);
+    await press(pad.page, "sound-enable");
+    tower.failNextSound();
+    await press(pad.page, "volume-1");
+    await expect(pad.page.locator('[data-error-code="tower-command-failed"]')).toBeVisible();
+    await expect(
+      board.page.locator('[data-error-code="tower-command-failed"]').first(),
+    ).toBeVisible();
+    await expect(pad.page.locator('button[data-prompt-id="volume-keep"]')).toBeDisabled();
+    expect(soundCommands(tower)).toEqual([]);
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await session.host.close();

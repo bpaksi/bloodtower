@@ -57,6 +57,9 @@ export const deserializeShellState = (row: SerializedShellState): ShellState => 
   enter: row.enter ?? null,
   towerChoice: row.towerChoice ?? (row.towerLinked ? "connect" : "without"),
   openingIndex: typeof row.openingIndex === "number" ? row.openingIndex : OPENING_MOMENTS.length,
+  // Browser audio does not survive a reload, so every iPad taps Enable sound again.
+  sound: {},
+  keptVolume: null,
   goodbyeTower: row.goodbyeTower ?? null,
   devices: new Set(row.devices),
   registry: createShellRegistry(),
