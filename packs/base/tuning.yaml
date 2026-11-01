@@ -1,0 +1,152 @@
+# DEC-703 placeholders (DEC-500, DEC-131). The engine reads these numbers from this file.
+# C3 switches (Q-C3-01, Q-C3-02). C4 and C5 flip them. No story pack overrides this file.
+c3_end_after_chapter_1: true
+fight_enabled: false
+
+setup:
+  purse_wheel:
+    sides: [10, 20, 30, 40]
+    floor: 10
+  difficulty:
+    easy:
+      foe_level: -1
+      purse_percent: 50
+      full_hit_points: 2
+    hard:
+      foe_level: 1
+      purse_percent: -25
+      purse_round: down
+  foe_level_by_chapter:
+    chapter_1: 1
+    per_chapter: 1
+  skull_supply: 24
+
+day:
+  move_roll:
+    dice: 2d3
+    floor: 2
+  shifts:
+    per_helping_virtue: 1
+    per_corruption: -1
+  event_chance:
+    short: 30
+    standard: 40
+  event_weights:
+    quiet: 30
+    windfall: 15
+    hazard: 20
+    foes: 20
+    disaster: 5
+    people: 10
+  hazard:
+    hit_points: -2
+  windfall:
+    gold: 5
+  go_around:
+    hit_points: -2
+    minimum: 1
+
+skulls:
+  supply: 24
+  drops_a_night:
+    heroes_1_to_2: 1
+    heroes_3_to_4:
+      each_night: 1
+      every_other_night: 2
+  quest_won_suppresses_drop: true
+  simulated_drop:
+    skulls: 1
+    kingdom_die: d4
+  tower_drop:
+    - {count: 0, percent: 30}
+    - {count: 1, percent: 50}
+    - {count: 2, percent: 20}
+  seal_break:
+    min: 0
+    max: held
+
+battle:
+  foe_count:
+    per_level: 4
+    per_extra_hero: 1
+  round_odds:
+    min_percent: 10
+    max_percent: 90
+    heroes_divisor: 2
+  won_round:
+    fraction: half
+    round: up
+    minimum: 2
+  lost_round:
+    heroes: 1
+    hit_points: foe_level
+  trait_extra_hit_points: 1
+  step_up:
+    chance: {n: 1, d: 3}
+    level: 1
+  hex:
+    target: random_attacking_hero
+    min_group: 3
+  shield_wall:
+    cut_less: 1
+    small_group_max_heroes: 2
+    small_group_minimum_cut: 2
+  automatic_advantage:
+    per_match: 1
+    max: 10
+  potion_hit_points: 4
+
+heroes:
+  fighter: {fight: 3, hit_points: 12}
+  ranger: {fight: 2, hit_points: 10}
+  scout: {fight: 2, hit_points: 9}
+  healer: {fight: 1, hit_points: 9}
+  magic_user: {fight: 1, hit_points: 8}
+  bard: {fight: 1, hit_points: 8}
+  solo: {fight: 1, hit_points: 2}
+
+spells:
+  magic_missile: -2
+  lightning: -6
+  fireball: {fraction: half, round: down}
+  mend: 3
+  silver_tongue: {off: quarter}
+
+gold:
+  won_battle: {per_level: 2, disaster: double}
+  won_quest: 5
+  lost_on_fall: {per_level: 2, split: true, capped: true}
+  citadel_rally: {gold: 5, moves: 1, heal: full}
+  sanctuary_cure: {gold: 10, moves: 1, corruption: 1, first_each_chapter: free}
+  tavern_rest: {hit_points: 3}
+  virtue_draw: 10
+
+tomb:
+  rooms:
+    short: {min: 4, max: 5}
+    standard: {min: 6, max: 7}
+    guardian_included: true
+  deal:
+    nothing: 40
+    battle: 30
+    trap: 30
+    at_least_battle: 1
+    at_least_trap: 1
+  guardian:
+    level_up: 1
+
+tower:
+  rooms:
+    kinds: [guard, trap, shrine]
+    each: {n: 1, d: 3}
+    third: stair_guard
+  guard:
+    level_offset: -2
+  shrine:
+    hit_points: 2
+    once: true
+  trap:
+    hit_points: -2
+  warden:
+    level: 5
+    counts_as: any_foe
