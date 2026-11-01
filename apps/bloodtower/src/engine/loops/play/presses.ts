@@ -1,6 +1,6 @@
 import type { LoopFrame } from "../../loop/types.ts";
 import type { DayLocal } from "../day/loop.ts";
-import { applySkullRecord, parseSkullRecordPrompt } from "../day/skull.ts";
+import { handleDayPress } from "../day/press.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { handleEncounterLeave } from "../encounter/loop.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
@@ -29,20 +29,6 @@ export const updatePlayFrameOnPress = (
   }
 
   if (top.loopId === "day") {
-    const local = top.local as DayLocal;
-    if (local.phase === "roll" && actionId === "continue") {
-      top.local = { ...local, awaitingPress: true };
-      return;
-    }
-    if (local.phase === "skull-prompt" && actionId === "continue") {
-      top.local = { ...local, awaitingPress: true };
-      return;
-    }
-    if (local.phase === "skull-place" && actionId === "record") {
-      const parsed = parseSkullRecordPrompt(promptId);
-      if (parsed && applySkullRecord(parsed.day, parsed.target)) {
-        top.local = { ...local, awaitingPress: true };
-      }
-    }
+    top.local = handleDayPress(top.local as DayLocal, promptId, actionId);
   }
 };
