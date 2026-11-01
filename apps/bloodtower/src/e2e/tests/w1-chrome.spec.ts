@@ -715,8 +715,11 @@ test("the toolbar is on every iPad screen, and ? help matches the current screen
     await holdHeroesFromTest(page, [...HERO_IDS]);
     await clickAct(page, "continue", "continue-claim-heroes");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
-    await checkHelp(page, "base-board-setup");
-    for (const id of SETUP_IDS) await clickAct(page, "continue", `continue-setup-${id}`);
+    for (const id of SETUP_IDS) {
+      await expectToolbar(page);
+      await checkHelp(page, "base-board-setup");
+      await clickAct(page, "continue", `continue-setup-${id}`);
+    }
     await clickAct(page, "continue", "continue-begin");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await advanceOpenings(page);
@@ -986,9 +989,11 @@ test("two iPads pressing Volume open one panel", async ({ browser }, testInfo) =
     await expect(deviceMain(second)).toHaveAttribute("data-screen", "claim-heroes");
     await openMenu(first);
     await openMenu(second);
+    // Press both without waiting for "enabled": once the winner lands, the loser's
+    // Volume goes disabled, and a normal click would wait on it until timeout.
     await Promise.all([
-      first.locator('[data-gear-item="volume"]').click(),
-      second.locator('[data-gear-item="volume"]').click(),
+      first.locator('[data-gear-item="volume"]').dispatchEvent("click"),
+      second.locator('[data-gear-item="volume"]').dispatchEvent("click"),
     ]);
     await expect(board.locator('[data-panel="volume"]')).toHaveCount(1);
     await expect(board.locator("main.bt-board")).toHaveAttribute("data-gear-opens", "1");
