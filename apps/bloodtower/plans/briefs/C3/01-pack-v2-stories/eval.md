@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Story loading uses pack format v2 only (C2 audit, C3 lines; MEC-078).
 - Method: unit
 - How: server test `pack/v2/load.test.ts` "loads every shipped story": load `packs/test` and `packs/dracula` metadata.
-- Pass evidence: both load through `v2/load.ts`; a spy on the v1 `load.ts` entry (or its absence from the module graph) shows zero calls.
+- Pass evidence: both load through `v2/load.ts`; `packs/test` loads in full, Dracula (`playable: false`) through the metadata-only path with no story content validated; a spy on the v1 `load.ts` entry (or its absence from the module graph) shows zero calls.
 - Fails if: any story still reaches the engine through `protocols/pack.ts` or `storyCard.ts`.
 
 ### EV-02 — No v1 import is left
@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: The story list shows what it showed before (SCR-007).
 - Method: playwright
 - How: `w3-pick-story.spec.ts`: open Pick story.
-- Pass evidence: the ordered pack ids and titles match a committed fixture `w3-pick-story.main.json` captured from `main` before the change; Dracula still shows its settings without Long (C2 feature 01).
+- Pass evidence: the ordered pack ids and titles match a committed fixture `src/e2e/tests/w3-pick-story.main.json` captured from `main` before the change; Dracula still shows its settings without Long (C2 feature 01), loaded through the metadata-only path.
 - Fails if: a story drops out, or Dracula shows as not ready when it was playable.
 
 ### EV-04 — A broken v2 pack fails loudly
@@ -46,8 +46,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-06 — Asset serving works on v2 paths only
 - Requirement: plan "keeps today's asset serving working on v2 paths only".
 - Method: unit
-- How: server test: GET one cover and one audio asset of `packs/test` by its v2 path, then by its old v1 path.
-- Pass evidence: both v2 GETs return 200 with the file's bytes; both v1 GETs return 404.
+- How: server test (`serve.test.ts`): the test creates a temporary pack that has one cover and one audio asset and GETs each by the repo's single asset URL scheme; then GETs a v1-shaped path such as `/packs/test/asset/<old id>` (`packs/test` has no cover or audio).
+- Pass evidence: both temp-pack GETs return 200 with the file's bytes; the v1-shaped GET returns 404.
 - Fails if: a v2 path fails, or a v1 path still serves.
 
 ## Survival evals (one per survival invariant in plan.md)
@@ -55,13 +55,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-07 — A pre-C3 autosave is dropped, without a crash
 - Requirement: Q-C3-07 (Bob, 2026-10-31): pre-C3 saves are dropped; the error rule; DEC-208.
 - Method: unit
-- How: seed the DB with an autosave written by `main` before this change; start the host.
-- Pass evidence: no Continue on the session screen (C2 06) or on Pick story; the host log has exactly one line `save skipped: pre-C3 format` with `{version}`; the row is still in the DB, unchanged (kept and ignored, Bob approved 2026-10-31); a New game starts clean. No exception, no migration.
+- How: unit test in `server/hub/host.test.ts`: seed the DB with an autosave row that has no `format` field (and a second case with `format: 1`); start the host with a spy on `log.warn`.
+- Pass evidence: no Continue on the session screen (C2 06) or on Pick story; `log.warn` is called exactly once with `save skipped: pre-C3 format none` (and `save skipped: pre-C3 format 1` in the second case); the autosave is not resumed and play starts fresh; the row is still in the DB, unchanged (kept and ignored, Bob approved 2026-10-31); a New game starts clean. No exception, no migration.
 - Fails if: the host throws at startup, Continue is offered for the old save, the log line is missing or repeated, the row is deleted or rewritten, or the save is migrated and resumed.
 
 ## Assumptions surfaced
 
-- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled). The row is kept and ignored, logging `save skipped: pre-C3 format` (Bob approved 2026-10-31).
+- An autosave from the v1 path is dropped, not migrated (Q-C3-07, ruled). The row is kept and ignored, logging `save skipped: pre-C3 format {version}` at warn (Bob approved 2026-10-31).
 
 ## OPEN questions
 
