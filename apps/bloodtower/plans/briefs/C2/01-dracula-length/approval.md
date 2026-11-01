@@ -2,7 +2,7 @@
 
 | Item | Approved by | When (America/Detroit) | Chat link | Version (commit sha of file) |
 |------|-------------|------------------------|-----------|------------------------------|
-| eval.md | pending Bob re-approval | 2026-10-31 | EV-03 revised | pending |
+| eval.md | Bob Paksi | 2026-11-01 05:14 | in chat: "c2-01 is approved" (EV-02, EV-03, EV-05, EV-06) | 36a1f88 |
 | mockup.html | n/a | | | no mockup: no screen change |
 
 Bob approved all ten C2 folders at once in chat, assumptions included ("Bob: OK?" lines in each eval.md). Any later edit to eval.md or mockup.html needs a new row.
@@ -11,4 +11,4 @@ Superseded 2026-10-31: Bob ruled at 7:28 PM ET (relayed by Wright) that Dracula 
 
 Also revised 2026-10-31: EV-05 now checks only `packs/dracula/pack.yaml` (no Long length; lengths exactly Short and Standard) instead of grepping all e2e specs, since legit Long hits remain in `w3-pick-story.spec.ts` (EV-02 absence check) and `opening-screens.spec.ts` (Proving Grounds, EV-03). Bob Paksi approved this at 7:40 PM ET.
 
-Also revised 2026-10-31: EV-03 revised (skipped R1 case replaced with the v2 case plus an empty packs/test diff). The old case "loads the test pack with its cover, tower and settings" sits in `describe.skip` and would fail on the format v2 test pack. Pending Bob re-approval.
+Also revised 2026-10-31: EV-03 revised (skipped R1 case replaced with the v2 case plus an empty packs/test diff). The old case "loads the test pack with its cover, tower and settings" sits in `describe.skip` and would fail on the format v2 test pack. Bob Paksi approved the revised eval.md (EV-02, EV-03, EV-05, EV-06) on 2026-11-01 at 5:14 AM ET in chat.
