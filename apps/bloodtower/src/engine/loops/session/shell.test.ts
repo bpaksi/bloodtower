@@ -485,7 +485,9 @@ describe("C2/06 session screen", () => {
       { kind: "game-record", v: 1, gameId: playing.activeGameId, outcome: "quit" },
     ]);
     expect(quit.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
-    expect(quit.state.games).toEqual([{ gameId: playing.activeGameId, outcome: "quit" }]);
+    expect(quit.state.games).toEqual([
+      expect.objectContaining({ gameId: playing.activeGameId, outcome: "quit" }),
+    ]);
     const open = quit.state.offered.filter((offer) => offer.open);
     expect(open.map((offer) => offer.actionId)).toEqual([
       "continue",
@@ -529,7 +531,7 @@ describe("C2/06 session screen", () => {
     const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story")).state;
     const two = {
       ...quit,
-      games: [...quit.games, { gameId: "game-2", outcome: "quit" as const }],
+      games: [...quit.games, { ...quit.games[0]!, gameId: "game-2" }],
     };
     // Any event runs the session screen again, which offers one row per game.
     const view = projectShellView(
@@ -548,14 +550,6 @@ describe("C2/06 session screen", () => {
       "No games yet tonight.",
     );
     expect(empty.actions.some((action) => action.label === "Continue")).toBe(false);
-  });
-
-  it("a press on a game row changes nothing yet (feature 07)", () => {
-    const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story")).state;
-    const after = stepShell(quit, press("ipad-0", "session-game-1", "open-game")).state;
-    expect(after.screen).toBe("session");
-    expect(after.confirm).toBeNull();
-    expect(after.games).toEqual(quit.games);
   });
 
   it("New game asks before replacing the save; Back keeps it (EV-04)", () => {

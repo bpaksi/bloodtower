@@ -405,9 +405,11 @@ test("without the tower: two games newest first, New game replaces the save only
       "Game 1 quit",
       "Done for tonight",
     ]);
-    // A game row is pressable and, until feature 07, does nothing.
+    // A game row is pressable: it opens that game's stats, and Back returns (C2/07).
     await clickAct(padA.page, "open-game", "session-game-1");
-    await expect(deviceMain(padA.page)).toHaveAttribute("data-screen", "session");
+    await expect(boardMain(board.page).locator("[data-startup-panel='game-stats']")).toBeVisible();
+    await clickAct(padA.page, "back", "stats-back");
+    await expect(boardMain(board.page).locator("[data-session-rows]")).toBeVisible();
 
     // EV-09: one drop blocks nothing; the last drop shows the join QR; a join brings it back.
     await padB.context.close();
