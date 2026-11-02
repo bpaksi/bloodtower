@@ -195,7 +195,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const marker = state.sessionEnded
       ? "ended"
       : state.enter === null && state.towerChoice !== "undecided"
-        ? `entered-${state.towerChoice}-${state.games.length}-${state.screen === "session" ? "session" : "game"}`
+        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => game.rating ?? "-").join("")}-${state.screen === "session" ? "session" : "game"}`
         : "";
     if (marker === "" || marker === savedMarker) return;
     writeStateCheckpoint();
@@ -585,7 +585,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         autosave: {
           gameId: row.gameId,
           packId: row.packId,
-          seed: options.seed,
+          // The game's own seed: Play again gives a game one that differs from the session's.
+          seed: options.store.lastCheckpoint(row.gameId)?.seed ?? options.seed,
           day: row.day,
         },
       };

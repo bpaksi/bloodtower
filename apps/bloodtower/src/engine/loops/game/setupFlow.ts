@@ -86,7 +86,7 @@ export const screenAfterBack = (state: ShellState, screen: ShellScreen): ShellSc
     state.setSerial = 0;
     return "pick-story";
   }
-  if (screen === "claim-heroes") return "game-settings";
+  if (screen === "claim-heroes") return state.playAgain ? null : "game-settings";
   if (screen === "setup") {
     if (state.setupAt > 0) {
       state.setupAt -= 1;

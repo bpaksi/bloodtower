@@ -334,9 +334,40 @@ function SessionRows({ session }: { session: SessionBoard }) {
   );
 }
 
+/** One game's stats (SCR-019, C2/07): the "Label: value" lines on the `game-stats` level. */
+const gameStats = (
+  view: BoardView,
+): { title: string; rows: { label: string; value: string }[] } | null => {
+  const level = view.levels.find((row) => row.id === "game-stats");
+  if (!level) return null;
+  const rows = level.shows.split("\n").flatMap((line) => {
+    const at = line.indexOf(": ");
+    return at > 0 ? [{ label: line.slice(0, at), value: line.slice(at + 2) }] : [];
+  });
+  return { title: level.label, rows };
+};
+
+function StatsPanel({ stats }: { stats: NonNullable<ReturnType<typeof gameStats>> }) {
+  return (
+    <div data-startup-panel="game-stats">
+      <p className="bt-kicker">Tonight's games</p>
+      <h1 className="bt-startup-title">{stats.title}</h1>
+      <dl className="bt-stat-rows" data-stat-rows="">
+        {stats.rows.map((row) => (
+          <div key={row.label} className="bt-stat-row" data-stat-row={row.label}>
+            <dt>{row.label}</dt>
+            <dd data-stat-value="">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 function SessionPanel({ view }: { view: BoardView }) {
   const session = sessionBoard(view);
   const join = joinFromBoard(view);
+  const stats = gameStats(view);
   if (session.dropped !== null && join) {
     return (
       <div data-startup-panel="session-dropped">
@@ -351,10 +382,15 @@ function SessionPanel({ view }: { view: BoardView }) {
     return (
       <div data-startup-panel="session-confirm">
         <h1 className="bt-startup-title">{session.confirm.title}</h1>
-        <p className="bt-startup-cue">{session.confirm.line}</p>
+        {session.confirm.line.split("\n").map((line) => (
+          <p key={line} className="bt-startup-cue">
+            {line}
+          </p>
+        ))}
       </div>
     );
   }
+  if (stats) return <StatsPanel stats={stats} />;
   return (
     <div data-startup-panel="session">
       <p className="bt-kicker">Between games</p>
@@ -411,7 +447,10 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
   if (view.screen === "session-over") return <SessionOverBoard view={view} />;
   const warning = joinWarning(view);
   const status = startupStatus(view);
-  const waiting = waitingFor(view);
+  const waiting =
+    view.screen === "session" && gameStats(view)
+      ? "Waiting for an iPad to play again or go back."
+      : waitingFor(view);
   const setupStep = setupStepId(view);
   const join = joinFromBoard(view);
   return (

@@ -71,7 +71,8 @@ export const runShellEffects = async (
           stateJson: JSON.stringify(shellCheckpointFromState(state)),
           atMonoMs: ctx.clock.monoMs(),
           atWall: ctx.clock.wall(),
-          seed: ctx.meta.seed,
+          // Play again gives the game its own seed; the checkpoint carries the game's.
+          seed: state.seed,
           packVersion: ctx.meta.packVersion,
           engineVersion: ctx.meta.engineVersion,
         });

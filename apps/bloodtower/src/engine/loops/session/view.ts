@@ -16,8 +16,15 @@ import {
   DONE_LINE,
   EMPTY_GAMES_LINE,
   gameNumber,
+  PLAY_AGAIN_LINE,
+  PLAY_AGAIN_TITLE,
+  RATING_LABEL,
+  RATING_OPTIONS,
+  RATING_SETTING,
+  RATING_UNSET,
   REPLACE_SAVE_LINE,
   SESSION_OVER_LINE,
+  statsLines,
   towerLine,
 } from "./hub.ts";
 import type { ShellStory } from "./pack.ts";
@@ -39,6 +46,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (promptId === "continue-begin") return "Begin";
   const game = gameNumber(promptId);
   if (game !== null && actionId === "open-game") return `Game ${game}`;
+  if (promptId === "continue-claim-heroes") return state.playAgain ? "Confirm" : "Continue";
   if (promptId.startsWith("continue-setup-")) return "Done";
   if (promptId.startsWith("day-") && promptId.endsWith("-roll-done")) return "Take the move roll";
   if (promptId === "menu-connect") return "Connect Tower";
@@ -63,6 +71,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "continue") return "Continue";
   if (actionId === "back") return "Back";
   if (actionId === "new-game") return "New game";
+  if (actionId === "play-again") return "Play again";
   if (actionId === "done-for-tonight") return "Done for tonight";
   if (actionId === "quit-story") return "Quit story";
   if (actionId === "reconnect") return "Reconnect";
@@ -315,7 +324,9 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
   // The session screen's line is the tower's state, or the question while one is asked (SCR-021).
   if (state.screen === "session") {
     if (state.confirm === "new-game") return REPLACE_SAVE_LINE;
+    if (state.confirm === "play-again") return `${PLAY_AGAIN_LINE}\n${REPLACE_SAVE_LINE}`;
     if (state.confirm === "done") return DONE_LINE;
+    if (state.statsGame !== null) return `Game ${state.statsGame}`;
     return towerLine(state);
   }
   if (state.screen === "session-over") return SESSION_OVER_LINE;
@@ -329,11 +340,28 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
 const sessionLevels = (state: ShellState): LoopLevel[] => {
   const levels: LoopLevel[] = [];
   if (state.confirm) {
+    const asked = {
+      done: { label: "Done for tonight", shows: DONE_LINE },
+      "new-game": { label: "New game", shows: REPLACE_SAVE_LINE },
+      "play-again": {
+        label: PLAY_AGAIN_TITLE,
+        shows: `${PLAY_AGAIN_LINE}\n${REPLACE_SAVE_LINE}`,
+      },
+    }[state.confirm];
+    levels.push({ id: "session-confirm", ...asked });
+    return levels;
+  }
+  const open = state.statsGame === null ? undefined : state.games[state.statsGame - 1];
+  if (open && state.statsGame !== null) {
+    const title = state.stories.find((story) => story.card.id === open.storyId)?.card.title;
     levels.push({
-      id: "session-confirm",
-      label: state.confirm === "done" ? "Done for tonight" : "New game",
-      shows: state.confirm === "done" ? DONE_LINE : REPLACE_SAVE_LINE,
+      id: "game-stats",
+      label: `Game ${state.statsGame}`,
+      shows: statsLines(open, title ?? open.storyId).join("\n"),
     });
+    // The last iPad leaving still brings the join QR (DEC-712).
+    if (state.devices.size === 0)
+      levels.push({ id: "session-dropped", label: "Join", shows: JOIN_LINE });
     return levels;
   }
   if (canContinue(state)) {
@@ -500,18 +528,28 @@ export const projectShellView = (state: ShellState): ViewState => {
   };
   const momentId = openingMomentId(state);
 
+  const ratedGame = state.statsGame === null ? undefined : state.games[state.statsGame - 1];
   const settings =
-    screen === "game-settings"
-      ? (story?.settings ?? []).map((setting) => {
-          const optionId = state.settingValues[setting.id] ?? setting.default;
-          return {
-            id: setting.id,
-            label: setting.label,
-            optionId,
-            options: setting.options.map((option) => ({ id: option.id, label: option.label })),
-          };
-        })
-      : undefined;
+    screen === "session" && ratedGame && !state.confirm
+      ? [
+          {
+            id: RATING_SETTING,
+            label: RATING_LABEL,
+            optionId: ratedGame.rating === null ? RATING_UNSET : String(ratedGame.rating),
+            options: RATING_OPTIONS.map((rating) => ({ id: rating, label: rating })),
+          },
+        ]
+      : screen === "game-settings"
+        ? (story?.settings ?? []).map((setting) => {
+            const optionId = state.settingValues[setting.id] ?? setting.default;
+            return {
+              id: setting.id,
+              label: setting.label,
+              optionId,
+              options: setting.options.map((option) => ({ id: option.id, label: option.label })),
+            };
+          })
+        : undefined;
 
   return {
     screen,

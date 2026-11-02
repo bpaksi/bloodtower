@@ -2512,6 +2512,35 @@
   color: var(--bt-iron-gall);
 }
 
+/* A game's stats (SCR-019, C2/07): one label and its value per row. */
+.bt-stat-rows {
+  margin: 0.8rem auto 0;
+  max-width: 36rem;
+  display: grid;
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.bt-stat-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, auto) 1fr;
+  gap: 0.25rem 1.2rem;
+  align-items: baseline;
+}
+
+.bt-stat-row dt {
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-label);
+  letter-spacing: 0.1em;
+  color: var(--bt-vellum-shadow);
+}
+
+.bt-stat-row dd {
+  margin: 0;
+  font-size: var(--bt-size-body);
+  color: var(--bt-iron-gall);
+}
+
 .bt-session-rows .bt-session-label {
   margin-top: 1rem;
   font-family: var(--bt-font-label);

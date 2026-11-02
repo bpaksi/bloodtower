@@ -1,7 +1,11 @@
 import { type BoardGraph, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
 import type { PlayContent, PlayState } from "../../engine/loops/chapter/playState.ts";
 import { createShellRegistry } from "../../engine/loops/session/registry.ts";
-import { SHELL_ENGINE_VERSION, type ShellState } from "../../engine/loops/session/state.ts";
+import {
+  SHELL_ENGINE_VERSION,
+  type ShellState,
+  type TonightGame,
+} from "../../engine/loops/session/state.ts";
 import { OPENING_MOMENTS } from "../../protocols/opening.ts";
 
 /** JSON-safe shell state for checkpoint rows (no registry, devices as a list). */
@@ -49,6 +53,20 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
   };
 };
 
+/** A game listed by C2/06 has no stats or start: its counts are not known, never zero. */
+const upgradeGame = (row: SerializedShellState, game: Partial<TonightGame>): TonightGame => ({
+  gameId: game.gameId ?? "",
+  outcome: game.outcome ?? "quit",
+  storyId: game.storyId ?? row.boundStoryId,
+  settingValues: game.settingValues ?? {},
+  holdings: game.holdings ?? {},
+  day: game.day ?? null,
+  moves: game.moves ?? null,
+  buildings: game.buildings ?? null,
+  skulls: game.skulls ?? null,
+  rating: game.rating ?? null,
+});
+
 export const deserializeShellState = (row: SerializedShellState): ShellState => ({
   ...row,
   version: SHELL_ENGINE_VERSION,
@@ -58,8 +76,12 @@ export const deserializeShellState = (row: SerializedShellState): ShellState => 
   enterThen: row.enterThen ?? null,
   continueRequested: false,
   // A checkpoint from before C2/06 has no list of tonight's games.
-  games: row.games ?? [],
+  games: (row.games ?? []).map((game) => upgradeGame(row, game)),
   confirm: null,
+  statsGame: null,
+  playAgain: row.playAgain ?? false,
+  // A checkpoint from before C2/07 has no counts for its game.
+  tally: row.tally ?? { moves: null, buildings: null, skulls: null, skullDay: null },
   towerChoice: row.towerChoice ?? (row.towerLinked ? "connect" : "without"),
   openingIndex: typeof row.openingIndex === "number" ? row.openingIndex : OPENING_MOMENTS.length,
   // Browser audio does not survive a reload, so every iPad taps Enable sound again.

@@ -1,5 +1,5 @@
 import type { LoopContext } from "../../loop/types.ts";
-import { beginContinue, beginNewGame, toPickStory } from "./hub.ts";
+import { beginContinue, beginNewGame, beginPlayAgain, toPickStory } from "./hub.ts";
 import { recordOffer } from "./shellRef.ts";
 import type { EnterStep, ShellState } from "./state.ts";
 
@@ -67,7 +67,8 @@ export const finishEnter = (state: ShellState): void => {
     beginContinue(state);
     return;
   }
-  if (then === "new-game") beginNewGame(state);
+  if (then === "play-again") beginPlayAgain(state);
+  else if (then === "new-game") beginNewGame(state);
   else toPickStory(state);
 };
 

@@ -51,7 +51,11 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
         return { local, passComplete: false };
       }
 
-      if (shell.screen === "pick-story" || shell.screen === "play") {
+      if (
+        shell.screen === "pick-story" ||
+        shell.screen === "claim-heroes" ||
+        shell.screen === "play"
+      ) {
         ctx.startChild("game");
         return {
           local: { ...local, phase: "running-game", childOpen: true, fromSessionScreen: false },

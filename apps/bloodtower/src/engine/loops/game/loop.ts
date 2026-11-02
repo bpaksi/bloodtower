@@ -65,7 +65,8 @@ const offerContinueOrBack = (
   }
   if (shell.screen === "claim-heroes") {
     offer("continue-claim-heroes", "continue");
-    offer("back-claim-heroes", "back");
+    // Play again skips Game settings, so there is no screen to go back to (DEC-708).
+    if (!shell.playAgain) offer("back-claim-heroes", "back");
     local.awaitingPress = true;
     return;
   }
@@ -109,6 +110,10 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
     // Continue from the session screen opens the saved game straight into play.
     if (shell.screen === "play") {
       return { phase: "play", awaitingPress: false, playStarted: false };
+    }
+    // Play again starts at the prefilled claims (DEC-708).
+    if (shell.screen === "claim-heroes") {
+      return { phase: "claim-heroes", awaitingPress: false, playStarted: false };
     }
     return { phase: "pick-story", awaitingPress: false, playStarted: false };
   },
