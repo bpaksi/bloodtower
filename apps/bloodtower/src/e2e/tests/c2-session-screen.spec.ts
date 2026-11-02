@@ -18,6 +18,7 @@ import {
   installSessionSocketHook,
   setSoundAndKeep,
   startAcceptanceHost,
+  waitForBoardAnimationsSettled,
 } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
@@ -66,6 +67,8 @@ const openPad = async (browser: Browser, baseURL: string, joinCode: string) => {
 };
 
 const shot = async (page: Page, name: string, testInfo: TestInfo) => {
+  // The board paints its dialog in; the picture waits for that to finish.
+  if ((await boardMain(page).count()) > 0) await waitForBoardAnimationsSettled(page);
   const dest = testInfo.outputPath(`${name}.png`);
   await page.screenshot({ path: dest, fullPage: false });
   copyToE2eArtifacts(testInfo, dest, `${name}.png`);
