@@ -6,6 +6,7 @@ import {
 import type { GearView } from "../../../protocols/v2/views.ts";
 import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
+import { ensureClock } from "../day/clock.ts";
 import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
@@ -25,6 +26,7 @@ import {
   REPLACE_SAVE_LINE,
   SESSION_OVER_LINE,
   statsLines,
+  TOWER_LOST,
   towerLine,
 } from "./hub.ts";
 import type { ShellStory } from "./pack.ts";
@@ -49,7 +51,6 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (promptId === "continue-claim-heroes") return state.playAgain ? "Confirm" : "Continue";
   if (promptId.startsWith("continue-setup-")) return "Done";
   if (promptId.startsWith("day-") && promptId.endsWith("-roll-done")) return "Take the move roll";
-  if (promptId === "menu-connect") return "Connect Tower";
   if (actionId === "walk") {
     const spaceId = promptId.split("--").slice(2).join("--");
     const name = state.play?.content.board.spaceById.get(spaceId)?.name ?? spaceId;
@@ -73,8 +74,10 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "new-game") return "New game";
   if (actionId === "play-again") return "Play again";
   if (actionId === "done-for-tonight") return "Done for tonight";
-  if (actionId === "quit-story") return "Quit story";
+  // The pause's buttons are short words (DEC-301); the Menu's is Quit story.
+  if (actionId === "quit-story") return promptId.startsWith("pause-") ? "Quit" : "Quit story";
   if (actionId === "reconnect") return "Reconnect";
+  if (actionId === "go-on-without") return "Go on without";
   if (promptId === "tower-connect" && actionId === "tower-connect") return "Connect Tower";
   if (actionId === "play-without-tower") return "Play without Tower";
   if (promptId === "tower-calibrate" && actionId === "tower-calibrate") return "Calibrate";
@@ -99,6 +102,23 @@ const heroName = (state: ShellState, heroId: string): string => {
     if (hero) return hero.name;
   }
   return heroId;
+};
+
+/**
+ * Without the tower the board names where each skull landed, so the table can place it
+ * (DEC-305; the board is otherwise drawn as with the tower).
+ */
+const simulatedSkullLine = (state: ShellState): string | null => {
+  const play = state.play;
+  if (!play) return null;
+  const day = state.loops.stack.find((frame) => frame.loopId === "day");
+  if (!day || (day.local as DayLocal).phase !== "skull-sim") return null;
+  const lines = ensureClock(play).nightDrops.map((drop) => {
+    const space = play.content.board.spaceById.get(drop.spaceId);
+    const building = space?.building ? buildingTitle(space.building) : "a building";
+    return `A skull falls on ${building}, ${space?.name ?? drop.spaceId}.`;
+  });
+  return lines.length > 0 ? lines.join(" ").slice(0, 120) : null;
 };
 
 const buildTable = (state: ShellState, chapter: string): TableBand | null => {
@@ -134,6 +154,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     }
   }
 
+  const skullLine = simulatedSkullLine(state);
   const actingHeroId = actingId;
   const actingName = actingHeroId ? heroName(state, actingHeroId) : null;
   const rolled = actingHeroId ? play.dayRolls[actingHeroId] : undefined;
@@ -148,7 +169,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     movesLeft,
     moveRoll: rolled ?? null,
     modifier: "none",
-    waitingFor: waiting && actingName ? `${actingName} is choosing` : null,
+    waitingFor: skullLine ?? (waiting && actingName ? `${actingName} is choosing` : null),
     groups: play.groups.map((group) => {
       const id = group.heroIds[0] ?? group.id;
       const space = board.spaceById.get(group.spaceId);
@@ -281,6 +302,7 @@ const openingMomentId = (state: ShellState): string | null => {
 
 const showsFor = (state: ShellState, title: string, story: ShellStory | undefined): string => {
   if (openingMomentId(state)) return OPENING_PLACEHOLDER;
+  if (state.screen === "pause" && state.pause?.cause === "tower-lost") return TOWER_LOST;
   if ((state.screen === "play" || state.screen === "pause") && state.play) {
     return `Day ${state.play.dayNumber}`;
   }
@@ -290,6 +312,11 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
     return state.enter?.failed ? TOWER_FAILED_LINE : TOWER_QUESTION;
   }
   if (state.screen === "tower-wake") {
+    if (state.reconnect) {
+      return state.reconnect.step === "calibrate"
+        ? "The tower is awake. Calibrate it from an iPad."
+        : "Calling the tower back...";
+    }
     if (state.enter?.step === "calibrate") return "The tower is awake. Calibrate it from an iPad.";
     if (state.enter?.step === "calibrating") return "Calibrating the tower...";
     return "Waking the tower...";
@@ -443,7 +470,7 @@ const helpScreenFor = (state: ShellState): string => {
 
 const gearSnapshot = (state: ShellState): GearView => {
   const story = chosenOrBound(state);
-  const inGame = state.screen === "play" || state.screen === "pause";
+  const inGame = state.screen === "play" || state.screen === "pause" || state.reconnect !== null;
   const sessionOver = state.screen === "session-over";
   const sessionScreen = state.screen === "session" || sessionOver;
   return {
@@ -456,7 +483,8 @@ const gearSnapshot = (state: ShellState): GearView => {
     opens: state.gearOpens,
     card: state.gearCard,
     inGame,
-    towerConnected: state.tower.connection === "connected",
+    // "Connected" here means in use: after Go on without the Menu offers the Tower again (DEC-301).
+    towerConnected: state.towerLinked && state.tower.connection === "connected",
     sessionScreen,
     sessionOver,
     beforeBegin: !inGame && !sessionScreen,

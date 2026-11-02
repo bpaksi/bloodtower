@@ -2,6 +2,7 @@ import type { EngineEffect } from "../../effects.ts";
 import type { LoopContext } from "../../loop/types.ts";
 import type { ShellEffect } from "./effects.ts";
 import { beginContinue, beginNewGame, beginPlayAgain, toPickStory } from "./hub.ts";
+import { endReconnect } from "./reconnect.ts";
 import { recordOffer } from "./shellRef.ts";
 import type { EnterStep, ShellState } from "./state.ts";
 
@@ -84,6 +85,17 @@ export const applyTowerResult = (
   ok: boolean,
   effects: Array<EngineEffect | ShellEffect>,
 ): void => {
+  // A Reconnect after a tower was lost mid-game: the connect, then the tower check (DEC-301).
+  const running = state.reconnect;
+  if (running) {
+    if (capabilityId === "tower.connect" && running.step === "connecting") {
+      if (ok) state.reconnect = { ...running, step: "calibrate" };
+      else endReconnect(state, false);
+    } else if (capabilityId === "tower.calibrate" && running.step === "calibrating") {
+      endReconnect(state, ok);
+    }
+    return;
+  }
   const step = state.enter?.step;
   if (capabilityId === "tower.connect" && step === "connecting") {
     state.enter = ok ? { step: "calibrate", failed: false } : { step: "choice", failed: true };

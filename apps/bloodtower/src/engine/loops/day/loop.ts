@@ -13,7 +13,7 @@ import { requestMoveRollCue } from "./cues.ts";
 import { offerRegroup, regroupNeeded } from "./regroup.ts";
 import { rollDayMoves } from "./roll.ts";
 import { dropsThisNight, kingdomFromD4 } from "./rules.ts";
-import { offerSimulatedPlacement, offerSkullPlacement } from "./skull.ts";
+import { offerSkullPlacement, simulateSkullDrop } from "./skull.ts";
 
 export type DayPhase =
   | "regroup"
@@ -21,6 +21,7 @@ export type DayPhase =
   | "groups"
   | "skull-prompt"
   | "skull-place"
+  | "skull-sim"
   | "check"
   | "done";
 
@@ -57,6 +58,47 @@ const leaveRegroup = (local: DayLocal): DayLocal => {
   return { ...local, phase: "roll", awaitingPress: false, awaitingChild: false };
 };
 
+/** Adds a game's skull-drop count the way a recorded drop does (SCR-019 slice). */
+const countSimulatedSkull = (day: number): void => {
+  const tally = shellState().tally;
+  if (day === tally.skullDay) return;
+  tally.skulls = (tally.skulls ?? 0) + 1;
+  tally.skullDay = day;
+};
+
+/**
+ * Without the tower the night's skulls are drawn, not asked for (DEC-305): the kingdom die as
+ * before, then a seeded building in it. The board then names where each landed (SCR-019).
+ */
+const simulateDrops = (local: DayLocal, count: number): DayLocal => {
+  const play = playState();
+  const shell = shellState();
+  const clock = ensureClock(play);
+  noteNode(play, ".36");
+  clock.pendingKingdoms = [];
+  clock.expectKingdom = null;
+  for (let i = 0; i < count; i++) {
+    const face = nextPlayRng(shell.seed, play).roll(clock.tuning.kingdomDie).total;
+    clock.pendingKingdoms.push(kingdomFromD4(face));
+  }
+  const kingdoms = clock.pendingKingdoms;
+  clock.pendingKingdoms = [];
+  let landed = 0;
+  for (const kingdom of kingdoms) {
+    if (clock.supply <= 0) break;
+    if (simulateSkullDrop(shell.seed, kingdom)) landed += 1;
+  }
+  if (landed > 0) countSimulatedSkull(play.dayNumber);
+  return {
+    ...local,
+    phase: "skull-sim",
+    awaitingPress: false,
+    awaitingChild: false,
+    skullPlaced: false,
+    skullsLeft: 0,
+  };
+};
+
 const startClose = (local: DayLocal): DayLocal => {
   const play = playState();
   const shell = shellState();
@@ -74,23 +116,7 @@ const startClose = (local: DayLocal): DayLocal => {
     noteNode(play, ".33");
     return { ...local, phase: "check", awaitingPress: false, awaitingChild: false, skullsLeft: 0 };
   }
-  if (!shell.towerLinked) {
-    noteNode(play, ".36");
-    clock.pendingKingdoms = [];
-    for (let i = 0; i < count; i++) {
-      const face = nextPlayRng(shell.seed, play).roll(clock.tuning.kingdomDie).total;
-      clock.pendingKingdoms.push(kingdomFromD4(face));
-    }
-    clock.expectKingdom = clock.pendingKingdoms[0] ?? null;
-    return {
-      ...local,
-      phase: "skull-place",
-      awaitingPress: false,
-      awaitingChild: false,
-      skullPlaced: false,
-      skullsLeft: count,
-    };
-  }
+  if (!shell.towerLinked) return simulateDrops(local, count);
   noteNode(play, ".11");
   clock.pendingKingdoms = [];
   clock.expectKingdom = null;
@@ -188,6 +214,29 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
       }
     }
 
+    // The tower went on without mid-night (Go on without): the rest of the night is drawn.
+    if (
+      !shell.towerLinked &&
+      (local.phase === "skull-prompt" || local.phase === "skull-place") &&
+      local.skullsLeft > 0
+    ) {
+      local = simulateDrops(local, local.skullsLeft);
+    }
+
+    if (local.phase === "skull-sim") {
+      // The press sets `skullPlaced`; a step that is not a press leaves the board's line standing.
+      if (!local.skullPlaced) {
+        if (!local.awaitingPress) {
+          const promptId = `skull-sim-day-${play.dayNumber}`;
+          ctx.offerPrompt(promptId, "continue");
+          recordOffer(promptId, "continue");
+        }
+        return { local: { ...local, awaitingPress: true }, passComplete: false };
+      }
+      noteNode(play, ".33");
+      local = { ...local, phase: "check", awaitingPress: false, skullPlaced: false };
+    }
+
     if (local.phase === "skull-prompt") {
       if (!local.awaitingPress) {
         const promptId = `skull-drop-day-${play.dayNumber}`;
@@ -212,9 +261,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
         noteNode(play, ".33");
         local = { ...local, phase: "check", awaitingPress: false };
       } else if (!local.awaitingPress) {
-        const kingdom = clock.pendingKingdoms[0];
-        if (kingdom) offerSimulatedPlacement(play.dayNumber, kingdom, ctx);
-        else offerSkullPlacement(play.dayNumber, ctx);
+        offerSkullPlacement(play.dayNumber, ctx);
         return {
           local: { ...local, awaitingPress: true, skullPlaced: false },
           passComplete: false,

@@ -150,9 +150,9 @@ describe("C2/07 a game's stats", () => {
   });
 
   it("shows a skull count as unavailable before the first skull, never zero (EV-02)", () => {
-    // Every turn is over and the day's skull is about to be recorded.
+    // Day 1 has begun and no skull has dropped yet.
     const early = drive(reachPlay(), (state) =>
-      openOffers(state).some((offer) => offer.actionId === "record"),
+      openOffers(state).some((offer) => offer.promptId.includes("roll-done")),
     );
     const first = step(quit(early.state), press("session-game-1", "open-game"));
     expect(statRows(first)["Skull drops recorded"]).toBe("unavailable");

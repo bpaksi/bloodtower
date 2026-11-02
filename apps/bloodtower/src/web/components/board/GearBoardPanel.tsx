@@ -10,6 +10,7 @@ const TITLE: Record<string, string> = {
   "look-up": "Look up",
   "change-who-holds-whom": "Change who holds whom",
   "join-another-ipad": "Join another iPad",
+  tower: "Tower",
 };
 
 /** Display only. The iPad presses; this panel never has a button. */
@@ -20,6 +21,11 @@ export function GearBoardPanel({ gear }: { gear: GearView }) {
     <section data-panel={gear.panel} data-piece-checks={gear.pieceChecks} data-volume={gear.volume}>
       <p>Game paused.</p>
       <h2>{title}</h2>
+      {gear.panel === "tower" ? (
+        <p data-tower-state={gear.towerConnected ? "in-play" : "without"}>
+          {gear.towerConnected ? "tower: in play" : "without the tower"}
+        </p>
+      ) : null}
       {gear.picked ? <p data-picked={gear.picked}>{gear.picked}</p> : null}
       {gear.panel === "current-party" ? (
         <ul data-party>

@@ -71,6 +71,11 @@ export const deserializeShellState = (row: SerializedShellState): ShellState => 
   ...row,
   version: SHELL_ENGINE_VERSION,
   towerLinked: row.towerLinked ?? false,
+  // A checkpoint from before C2/08 never went on without the tower.
+  towerWithout: row.towerWithout ?? false,
+  // A Reconnect does not survive a restart; the pause it began from stays.
+  reconnect: null,
+  screen: row.reconnect && row.pause ? "pause" : row.screen,
   // A checkpoint from before C2/05 has no Enter state: it was taken after the old tower block.
   enter: row.enter ?? null,
   enterThen: row.enterThen ?? null,

@@ -203,7 +203,37 @@ function GearDevicePanel({
           ))}
         </div>
       ) : null}
-      {stepBack ? (
+      {gear.panel === "tower" ? (
+        gear.picked === "Reconnect" || gear.picked === "Play without" ? (
+          <div className="mt-6 flex flex-col gap-3" data-tower-confirm={gear.picked}>
+            <p>Are you sure?</p>
+            <button
+              type="button"
+              className="bt-primary"
+              disabled={!live}
+              onClick={() => send("done")}
+            >
+              Yes
+            </button>
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-col gap-3">
+            {(["Reconnect", "Play without"] as const).map((pick) => (
+              <button
+                key={pick}
+                type="button"
+                className="bt-secondary"
+                data-tower-pick={pick}
+                disabled={!live}
+                onClick={() => send("pick", { pick })}
+              >
+                {pick}
+              </button>
+            ))}
+          </div>
+        )
+      ) : null}
+      {stepBack || (gear.panel === "tower" && gear.picked) ? (
         <button
           type="button"
           className="bt-secondary mt-6"
@@ -213,15 +243,139 @@ function GearDevicePanel({
           Back
         </button>
       ) : null}
+      {gear.panel === "tower" && gear.picked ? null : (
+        <button
+          type="button"
+          className="bt-primary mt-6"
+          disabled={!live}
+          onClick={() => send("done")}
+        >
+          Done
+        </button>
+      )}
+    </section>
+  );
+}
+
+const TOWER_LOST_CAPTION = "The tower has gone quiet. The game waits.";
+const QUIT_CONFIRM_LINE = "Leave the game? It will be saved.";
+
+/** The mockup's tower mark, as the board draws it. */
+function TowerMark() {
+  return (
+    <div className="bt-tower-band" role="img" aria-label="The Tower">
+      <svg viewBox="0 0 30 40" width="45" height="60" aria-hidden="true">
+        <path d="M15 1 L18 10 L12 10 Z" fill="#2a2420" stroke="#c9a85a" strokeWidth="0.8" />
+        <circle cx="15" cy="6.5" r="1.3" fill="#d4543a" />
+        <path d="M10 13 L20 13 L22 37 L8 37 Z" fill="#1f1b18" stroke="#c9a85a" strokeWidth="0.9" />
+        <path
+          d="M13 37 v-4 a2 2 0 0 1 4 0 v4 Z"
+          fill="#0e0c0a"
+          stroke="#c9a85a"
+          strokeWidth="0.6"
+        />
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * A tower lost mid-game (DEC-301, mockup "Paused, tower lost"): Reconnect, Go on without, Quit.
+ * Go on without and Quit each ask first; the question is this iPad's, nothing is sent until Yes.
+ */
+function TowerLostPause({
+  view,
+  live,
+  onAct,
+}: {
+  view: DeviceView;
+  live: boolean;
+  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
+}) {
+  const [asking, setAsking] = useState<"go-on-without" | "quit-story" | null>(null);
+  const find = (actionId: string) =>
+    openActions(view.actions).find((action) => action.actionId === actionId);
+  const reconnect = find("reconnect");
+  const goWithout = find("go-on-without");
+  const quit = find("quit-story");
+  const press = (action: OfferedAction | undefined, primary: boolean, label?: string) =>
+    action ? (
       <button
         type="button"
-        className="bt-primary mt-6"
+        className={primary ? "bt-primary" : "bt-secondary"}
+        data-prompt-id={action.promptId}
+        data-action-id={action.actionId}
+        data-action={action.actionId}
         disabled={!live}
-        onClick={() => send("done")}
+        onClick={() => {
+          setAsking(null);
+          onAct(action.promptId, action.actionId);
+        }}
       >
-        Done
+        {label ?? action.label}
       </button>
-    </section>
+    ) : null;
+  const ask = (action: OfferedAction | undefined, kind: "go-on-without" | "quit-story") =>
+    action ? (
+      <button
+        type="button"
+        className="bt-secondary"
+        data-pause-ask={kind}
+        disabled={!live}
+        onClick={() => setAsking(kind)}
+      >
+        {action.label}
+      </button>
+    ) : null;
+  const back = (
+    <button
+      type="button"
+      className="bt-secondary"
+      data-pause-back=""
+      onClick={() => setAsking(null)}
+    >
+      Back
+    </button>
+  );
+  return (
+    <div className="mt-2" data-pause-tower-lost={asking ?? "pause"}>
+      <TowerMark />
+      {asking === "go-on-without" ? (
+        <>
+          <h2 className="bt-title" data-pause-title="">
+            Go on without
+          </h2>
+          <p className="bt-caption" data-step-instruction="">
+            Are you sure?
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            {press(goWithout, true)}
+            {back}
+          </div>
+        </>
+      ) : asking === "quit-story" ? (
+        <>
+          <p className="bt-caption" data-step-instruction="">
+            {QUIT_CONFIRM_LINE}
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            {press(quit, true, "Leave")}
+            {back}
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="bt-caption" data-step-instruction="">
+            {TOWER_LOST_CAPTION}
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            {press(reconnect, true)}
+            {ask(goWithout, "go-on-without")}
+            {ask(quit, "quit-story")}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -374,8 +528,7 @@ function SessionButtons({
   );
 }
 
-const inMenu = (action: OfferedAction) =>
-  action.promptId === "menu-quit" || action.promptId === "menu-connect";
+const inMenu = (action: OfferedAction) => action.promptId === "menu-quit";
 
 /** Walk, Enter, and End turn. Leave stays outside this region (DEC-220). */
 const MOVE_CONTROLS = new Set(["walk", "enter", "end-turn"]);
@@ -434,7 +587,6 @@ export function CoreDeviceScreen({
   const quit =
     actions.find((action) => action.promptId === "menu-quit") ??
     actions.find((action) => action.actionId === "quit-story");
-  const connect = actions.find((action) => action.promptId === "menu-connect");
   const isPinned = (action: OfferedAction) =>
     action.actionId === "continue" || action.label.trim().toLowerCase() === "cancel";
   const pinned = body.filter(isPinned);
@@ -591,7 +743,6 @@ export function CoreDeviceScreen({
         <ChromeBar
           live={live}
           back={back}
-          connect={connect}
           quit={quit}
           onAct={onAct}
           helpScreen={view.gear?.helpScreen}
@@ -602,6 +753,8 @@ export function CoreDeviceScreen({
   }
 
   const panel = ownsPanel(view);
+  const towerLostPause =
+    view.screen === "pause" && actions.some((action) => action.actionId === "reconnect");
 
   return (
     <main
@@ -621,6 +774,8 @@ export function CoreDeviceScreen({
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
         {panel ? (
           <GearDevicePanel gear={panel} live={live} onAct={onAct} />
+        ) : towerLostPause ? (
+          <TowerLostPause view={view} live={live} onAct={onAct} />
         ) : sessionOver ? (
           <p className="mt-2 text-lg" data-step-instruction="">
             {view.shows}
@@ -832,7 +987,6 @@ export function CoreDeviceScreen({
       <ChromeBar
         live={live}
         back={back}
-        connect={connect}
         quit={quit}
         onAct={onAct}
         helpScreen={view.gear?.helpScreen}

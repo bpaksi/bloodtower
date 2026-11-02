@@ -88,7 +88,7 @@ export const gearRows = (ctx: MenuContext): GearRow[] => {
     row(ctx, "use-potion", "Table", "Use a potion or item", false, C3, false),
     row(ctx, "change-who-holds-whom", "Table", "Change who holds whom", true, null, true),
     row(ctx, "join-another-ipad", "Table", "Join another iPad", true, null, true),
-    row(ctx, "tower", "Table", "Tower", !ctx.towerConnected, TOWER_CONNECTED, false),
+    row(ctx, "tower", "Table", "Tower", !ctx.towerConnected, TOWER_CONNECTED, true),
     row(ctx, "pause-resume", "Table", "Pause/Resume", ctx.inGame, ONLY_IN_GAME, false),
     row(ctx, "save-and-quit", "Leave", "Save and quit", ctx.inGame, ONLY_IN_GAME, false),
   ];
@@ -96,11 +96,12 @@ export const gearRows = (ctx: MenuContext): GearRow[] => {
   return rows.map((item) => ({ ...item, enabled: false, reason: SESSION_OVER }));
 };
 
-export const menuContextFromOffers = (quit: boolean, connect: boolean): MenuContext => ({
+export const menuContextFromOffers = (quit: boolean): MenuContext => ({
   inGame: quit,
   beforeBegin: false,
   sessionScreen: !quit,
-  towerConnected: !connect,
+  // Outside a game with no gear snapshot the Tower stays greyed, as before.
+  towerConnected: !quit,
   partySplit: false,
   blockedItem: null,
 });

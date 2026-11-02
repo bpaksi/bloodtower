@@ -31,12 +31,14 @@ import {
 } from "./hub.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
+import { applyTowerPick, goOnWithout, pauseReturnOf, startReconnect } from "./reconnect.ts";
 import { SESSION_ROOT_LOOP_ID } from "./registry.ts";
 import {
   bindShellState,
   clearShellState,
   ensurePauseOffers,
   ensurePlayMenuOffers,
+  ensureReconnectOffers,
   matchOffer,
   requestCheckpoint,
   takePendingCheckpoint,
@@ -121,6 +123,10 @@ const resumeLoopsOrPauseOffers = (
   eventSeq: number,
   effects: ShellStepResult["effects"],
 ): void => {
+  if (next.reconnect) {
+    ensureReconnectOffers(next);
+    return;
+  }
   if (next.pause && next.screen === "pause") {
     ensurePauseOffers(next);
     return;
@@ -174,31 +180,41 @@ const sessionFrame = (state: ShellState) =>
   state.loops.stack.find((frame) => frame.loopId === "session");
 
 const pauseIfNeeded = (state: ShellState): void => {
-  if (state.stage !== "playing" && state.stage !== "paused") return;
+  // Piece setup is part of a started game (DEC-711): only a lost tower pauses it.
+  const pieceSetup =
+    state.stage === "lobby" && (state.screen === "setup" || state.screen === "begin");
+  if (state.stage !== "playing" && state.stage !== "paused" && !pieceSetup) return;
+  // A Reconnect in progress owns the screen until it ends.
+  if (state.reconnect) return;
   const story = state.stories.find((s) => s.card.id === state.boundStoryId);
   if (!story) return;
-  // Before the opening ends, the table is not built yet. Watch the seated count.
-  // An unpicked pool hero is not a missing seat.
-  const unheld = state.play
-    ? state.play.groups
-        .flatMap((group) => group.heroIds)
-        .some((heroId) => state.holdings[heroId] == null)
-    : heldCount(state) < partySize(state);
-  if (unheld) {
-    if (state.pause?.cause !== "disconnect") {
-      state.pauseSerial += 1;
+  if (!pieceSetup) {
+    // Before the opening ends, the table is not built yet. Watch the seated count.
+    // An unpicked pool hero is not a missing seat.
+    const unheld = state.play
+      ? state.play.groups
+          .flatMap((group) => group.heroIds)
+          .some((heroId) => state.holdings[heroId] == null)
+      : heldCount(state) < partySize(state);
+    if (unheld) {
+      if (state.pause?.cause !== "disconnect") {
+        state.pauseSerial += 1;
+      }
+      state.stage = "paused";
+      state.pause = { cause: "disconnect" };
+      state.screen = "pause";
+      return;
     }
-    state.stage = "paused";
-    state.pause = { cause: "disconnect" };
-    state.screen = "pause";
-    return;
   }
-  if (state.towerLinked && state.tower.connection !== "connected") {
+  if (state.towerLinked && !state.towerWithout && state.tower.connection !== "connected") {
     if (state.pause?.cause !== "tower-lost") {
       state.pauseSerial += 1;
     }
     state.stage = "paused";
-    state.pause = { cause: "tower-lost" };
+    state.pause = {
+      cause: "tower-lost",
+      returnTo: state.pause?.returnTo ?? pauseReturnOf(state) ?? "play",
+    };
     state.screen = "pause";
   }
 };
@@ -397,6 +413,14 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
 
   if (e.kind === "gear") {
     const next = applyGear(state, e);
+    // The Tower panel's Done carries the pick the iPad confirmed (the host adds it before logging).
+    if (e.action === "done" && e.item === "tower" && e.pick) {
+      next.eventSeq = eventSeq + 1;
+      bindShellState(next);
+      applyTowerPick(next, e.pick, effects);
+      resumeLoopsOrPauseOffers(next, eventSeq, effects);
+      clearShellState();
+    }
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }
@@ -456,18 +480,13 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       next.towerChoice = "without";
       next.towerLinked = false;
       finishEnter(next, effects);
-    } else if (e.promptId === "menu-connect" && e.actionId === "tower-connect") {
-      next.towerLinked = true;
-      next.tower = {
-        connection: "connected",
-        calibrated: { state: "known", calibrated: false },
-      };
-      effects.push({
-        kind: "tower-command",
-        v: 1,
-        capabilityId: "tower.connect",
-        params: {},
-      });
+    } else if (
+      e.promptId === TOWER_CALIBRATE_PROMPT &&
+      e.actionId === "tower-calibrate" &&
+      next.reconnect?.step === "calibrate"
+    ) {
+      next.reconnect = { ...next.reconnect, step: "calibrating" };
+      effects.push({ kind: "tower-command", v: 1, capabilityId: "tower.calibrate", params: {} });
     } else if (
       e.actionId === "quit-story" &&
       (e.promptId === "menu-quit" || (next.pause && e.promptId.startsWith("pause-")))
@@ -480,11 +499,18 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
           pushQuitRecord(next, effects);
         }
       }
-    } else if (next.pause && e.actionId === "reconnect" && e.promptId.startsWith("pause-")) {
-      const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
-      if (gameFrame) {
-        gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
-      }
+    } else if (
+      next.pause?.cause === "tower-lost" &&
+      e.actionId === "reconnect" &&
+      e.promptId.startsWith("pause-")
+    ) {
+      startReconnect(next, "pause", effects);
+    } else if (
+      next.pause?.cause === "tower-lost" &&
+      e.actionId === "go-on-without" &&
+      e.promptId.startsWith("pause-")
+    ) {
+      goOnWithout(next);
     } else if (isHubPrompt(e.promptId)) {
       applyHubPress(next, e.promptId, effects);
       // Continue from Pick story: the game loop moves on to the saved game as the Pick Game press did.

@@ -34,6 +34,8 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
 
   const warning = joinWarning(view);
   const paused = pauseText(view.screen);
+  // The pause for a lost tower says so; the screen line carries "Tower lost" (DEC-301).
+  const towerLost = view.levels.at(-1)?.shows === "Tower lost";
   const table = view.table ?? null;
   const place = view.place ?? null;
   const layer = place ? "place" : "move";
@@ -60,6 +62,11 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       {paused ? (
         <DialogFrame size="compact" className="bt-ink-in" data-tower-quiet="" role="status">
           <TowerMark />
+          {towerLost ? (
+            <p className="bt-label" data-tower-lost="">
+              Tower lost
+            </p>
+          ) : null}
           <p className="bt-startup-cue">The tower has gone quiet. The game waits.</p>
         </DialogFrame>
       ) : null}

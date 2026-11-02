@@ -64,6 +64,7 @@ export const GEAR_PANELS = [
   "look-up",
   "change-who-holds-whom",
   "join-another-ipad",
+  "tower",
 ] as const;
 export const gearPanelSchema = z.enum(GEAR_PANELS);
 export type GearPanelId = z.infer<typeof gearPanelSchema>;

@@ -1,5 +1,5 @@
 import type { KingdomId } from "../chapter/board.ts";
-import { playState } from "../chapter/playState.ts";
+import { nextPlayRng, playState } from "../chapter/playState.ts";
 import { recordOffer } from "../session/shellRef.ts";
 import { ensureClock, isFallen, recordBuildingDrop, recordHeldSkull } from "./clock.ts";
 
@@ -43,17 +43,29 @@ export const offerSkullPlacement = (
   recordOffer(insideId, "record");
 };
 
-/** Without the tower: buildings in the seeded kingdom only. Nothing is held back (DEC-306). */
-export const offerSimulatedPlacement = (
-  day: number,
-  kingdom: KingdomId,
-  ctx: { offerPrompt: (promptId: string, actionId: string) => void },
-): void => {
+/**
+ * Without the tower the app draws where the skull lands (DEC-305): a seeded draw among the
+ * standing buildings of the seeded kingdom, from the play stream (`eventRng(seed, seq)`), so a
+ * replay of the log lands on the same buildings. When that kingdom has none standing, any
+ * standing building can take it. Returns the building's space id, or null when no skull could
+ * be placed (none standing, or the supply is empty).
+ */
+export const simulateSkullDrop = (seed: string, kingdom: KingdomId): string | null => {
   const play = playState();
-  for (const space of play.content.board.spaces) {
-    if (space.kingdom !== kingdom || !space.building || isFallen(play, space.id)) continue;
-    offerBuilding(day, space.id, ctx);
-  }
+  const standing = play.content.board.spaces.filter(
+    (space) => space.building && !isFallen(play, space.id),
+  );
+  const inKingdom = standing.filter((space) => space.kingdom === kingdom);
+  const pool = inKingdom.length > 0 ? inKingdom : standing;
+  if (pool.length === 0) return null;
+  const space = nextPlayRng(seed, play).pick(pool);
+  if (!recordBuildingDrop(play, space.id, space.kingdom)) return null;
+  play.lastSkull = {
+    kingdom: space.kingdom,
+    spaceId: space.id,
+    building: space.building ?? null,
+  };
+  return space.id;
 };
 
 export const applySkullRecord = (day: number, target: string): boolean => {

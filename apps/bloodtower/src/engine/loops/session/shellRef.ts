@@ -72,25 +72,31 @@ export const takePendingTowerCommands = (): PendingTowerCommand[] => {
 export const ensurePauseOffers = (state: ShellState): void => {
   if (state.stage !== "paused" || !state.pause) return;
   const serial = state.pauseSerial;
-  const quitId = `pause-${serial}-quit`;
-  if (!state.offered.some((o) => o.promptId === quitId && o.actionId === "quit-story")) {
-    state.offered.push({ promptId: quitId, actionId: "quit-story", open: true });
-  }
-  if (state.pause.cause === "tower-lost") {
-    const reconnectId = `pause-${serial}-reconnect`;
-    if (!state.offered.some((o) => o.promptId === reconnectId && o.actionId === "reconnect")) {
-      state.offered.push({ promptId: reconnectId, actionId: "reconnect", open: true });
+  const offer = (promptId: string, actionId: string) => {
+    if (!state.offered.some((o) => o.promptId === promptId && o.actionId === actionId)) {
+      state.offered.push({ promptId, actionId, open: true });
     }
+  };
+  // Reconnect, Go on without, Quit: the order the iPad shows them (DEC-301).
+  if (state.pause.cause === "tower-lost") {
+    offer(`pause-${serial}-reconnect`, "reconnect");
+    offer(`pause-${serial}-go-without`, "go-on-without");
+  }
+  offer(`pause-${serial}-quit`, "quit-story");
+};
+
+/** The tower check a Reconnect runs asks for one press: Calibrate (MEC-018, as C1 built it). */
+export const ensureReconnectOffers = (state: ShellState): void => {
+  if (state.reconnect?.step !== "calibrate") return;
+  if (!state.offered.some((o) => o.promptId === "tower-calibrate")) {
+    state.offered.push({ promptId: "tower-calibrate", actionId: "tower-calibrate", open: true });
   }
 };
 
-/** Quit story, and connect when this session has never linked a tower, live in the iPad menu. */
+/** Quit story lives in the iPad menu. Reconnect is the Tower item there (DEC-301, DEC-229). */
 export const ensurePlayMenuOffers = (state: ShellState): void => {
   if (state.screen !== "play" || state.pause || state.stage !== "playing") return;
   if (!state.offered.some((offer) => offer.promptId === "menu-quit")) {
     state.offered.push({ promptId: "menu-quit", actionId: "quit-story", open: true });
-  }
-  if (!state.towerLinked && !state.offered.some((offer) => offer.promptId === "menu-connect")) {
-    state.offered.push({ promptId: "menu-connect", actionId: "tower-connect", open: true });
   }
 };

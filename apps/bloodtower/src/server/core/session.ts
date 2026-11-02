@@ -240,8 +240,19 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     });
   };
 
-  const apply = async (event: ShellEvent, deviceId: string | null) => {
+  const apply = async (raw: ShellEvent, deviceId: string | null) => {
     const before = state;
+    let event = raw;
+    // The Tower panel's Done carries the pick its owner confirmed, so the log (and a replay) holds it.
+    if (
+      event.kind === "gear" &&
+      event.action === "done" &&
+      before.gearPanel === "tower" &&
+      before.gearOwner === event.deviceId &&
+      before.gearPicked
+    ) {
+      event = { ...event, item: "tower", pick: before.gearPicked };
+    }
     const result = stepShell(state, event);
     state = result.state;
     let logged: ShellEvent = event;
@@ -283,8 +294,9 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         enterThen: null,
         confirm: null,
         sessionEnded: false,
-        towerChoice: live.towerChoice,
-        towerLinked: live.towerLinked || state.towerLinked,
+        // A game that went on without the tower stays without it, tower or not (DEC-301).
+        towerLinked: (live.towerLinked || state.towerLinked) && !state.towerWithout,
+        towerChoice: state.towerWithout ? "without" : live.towerChoice,
         games: live.games,
       };
     }
@@ -355,8 +367,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (outcome.capabilityId !== "tower.connect" && outcome.capabilityId !== "tower.calibrate") {
         continue;
       }
-      // Only the Enter waits on these. A connect from the play menu has no result to feed back.
-      if (!state.enter) continue;
+      // Only the Enter and a Reconnect wait on these.
+      if (!state.enter && !state.reconnect) continue;
       enqueue({ kind: "tower-result", v: 1, capabilityId: outcome.capabilityId, ok }, null);
       if (!ok) {
         tellDevice(

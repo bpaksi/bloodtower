@@ -28,6 +28,9 @@ export const handleDayPress = (local: DayLocal, promptId: string, actionId: stri
   if (local.phase === "skull-prompt" && actionId === "continue") {
     return { ...local, awaitingPress: true };
   }
+  if (local.phase === "skull-sim" && actionId === "continue") {
+    return { ...local, awaitingPress: true, skullPlaced: true };
+  }
   if (local.phase === "skull-place" && actionId === "record") {
     const parsed = parseSkullRecordPrompt(promptId);
     if (parsed && applySkullRecord(parsed.day, parsed.target)) {

@@ -28,7 +28,7 @@ describe("ChromeBar menu", () => {
 
   it("greys what it cannot offer", () => {
     const html = markup({ live: true, initialMenuOpen: true });
-    expect(menuContextFromOffers(false, false).towerConnected).toBe(true);
+    expect(menuContextFromOffers(false).towerConnected).toBe(true);
     for (const heading of ["Look up", "Table", "Leave"]) {
       expect(html).toContain(`>${heading}<`);
     }
@@ -46,7 +46,7 @@ describe("ChromeBar menu", () => {
     expect(html).toContain('data-reason="true"');
     const close = html.slice(html.lastIndexOf("<button", closeAt), closeAt);
     expect(close).not.toContain("disabled");
-    const rows = gearRows(menuContextFromOffers(false, false));
+    const rows = gearRows(menuContextFromOffers(false));
     const save = rows.find((item) => item.label === "Save and quit");
     const tower = rows.find((item) => item.label === "Tower");
     expect(save?.enabled).toBe(false);
@@ -82,7 +82,7 @@ describe("session over (C2/06 EV-17)", () => {
   });
 
   it("leaves the list alone while the session goes on", () => {
-    const rows = gearRows(menuContextFromOffers(false, false));
+    const rows = gearRows(menuContextFromOffers(false));
     expect(rows.some((item) => item.enabled)).toBe(true);
   });
 });

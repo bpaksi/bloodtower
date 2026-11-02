@@ -5,6 +5,11 @@ import {
 } from "../../../protocols/opening.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
 import { CONTINUE_PROMPT, canContinue } from "../session/hub.ts";
+import {
+  pauseGoWithoutPrompt,
+  pauseQuitPrompt,
+  pauseReconnectPrompt,
+} from "../session/reconnect.ts";
 import type { ShellScreen } from "../session/screens.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
 import {
@@ -139,12 +144,16 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
       syncScreen(local);
       shell.stage = shell.pause ? "paused" : "playing";
       if (shell.pause) {
+        const offer = (promptId: string, actionId: string) => {
+          ctx.offerPrompt(promptId, actionId);
+          recordOffer(promptId, actionId);
+        };
+        // Reconnect, Go on without, Quit: the order the iPad shows them (DEC-301).
         if (shell.pause.cause === "tower-lost") {
-          ctx.offerPrompt(`pause-${shell.pauseSerial}-reconnect`, "reconnect");
-          recordOffer(`pause-${shell.pauseSerial}-reconnect`, "reconnect");
+          offer(pauseReconnectPrompt(shell.pauseSerial), "reconnect");
+          offer(pauseGoWithoutPrompt(shell.pauseSerial), "go-on-without");
         }
-        ctx.offerPrompt(`pause-${shell.pauseSerial}-quit`, "quit-story");
-        recordOffer(`pause-${shell.pauseSerial}-quit`, "quit-story");
+        offer(pauseQuitPrompt(shell.pauseSerial), "quit-story");
         return { local, passComplete: false };
       }
       if (openingActiveIndex(shell.openingIndex)) {
@@ -240,8 +249,9 @@ export const handleGamePress = (
     };
   }
 
+  // A pause during piece setup is quit from the setup step it paused (DEC-711).
   if (
-    local.phase === "play" &&
+    (local.phase === "play" || shell.pause) &&
     actionId === "quit-story" &&
     (promptId === "menu-quit" || (shell.pause && promptId === `pause-${shell.pauseSerial}-quit`))
   ) {
@@ -250,18 +260,5 @@ export const handleGamePress = (
     shell.screen = "play";
     return { phase: "done", awaitingPress: false, playStarted: local.playStarted };
   }
-  if (
-    local.phase === "play" &&
-    shell.pause &&
-    promptId === `pause-${shell.pauseSerial}-reconnect` &&
-    actionId === "reconnect" &&
-    shell.pause.cause === "tower-lost"
-  ) {
-    shell.pause = null;
-    shell.stage = "playing";
-    shell.screen = "play";
-    return { ...local, awaitingPress: false };
-  }
-
   return { ...local, awaitingPress: false };
 };

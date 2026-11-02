@@ -5,6 +5,7 @@ import { project } from "../../views/project.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { enterConnectEvents, enterWithoutEvents } from "./enterKit.ts";
 import type { ShellEvent } from "./events.ts";
+import { towerLine } from "./hub.ts";
 import { mergeSetupSteps, type ShellStory, TEST_STORY } from "./pack.ts";
 import { PLACE_CAPTION } from "./placeCaption.ts";
 import { initialShellState } from "./state.ts";
@@ -279,7 +280,7 @@ describe("pauses", () => {
     expect(state.offered.some((o) => o.actionId === "quit-story" && o.open)).toBe(true);
   });
 
-  it("pauses on a lost tower until Reconnect is pressed", () => {
+  it("pauses on a lost tower until Reconnect is pressed, then runs the tower check", () => {
     let state = inPlay();
     state = stepShell(state, {
       kind: "tower-snapshot",
@@ -287,12 +288,86 @@ describe("pauses", () => {
       tower: TOWER_DISCONNECTED,
     }).state;
     expect(state.pause?.cause).toBe("tower-lost");
+    const serial = state.pauseSerial;
+    // Reconnect, Go on without, Quit, in that order (DEC-301).
+    expect(
+      projectShellView(state)
+        .actions.filter((action) => action.open)
+        .map((action) => action.label),
+    ).toEqual(["Reconnect", "Go on without", "Quit"]);
+    const pressed = stepShell(state, press("ipad-0", `pause-${serial}-reconnect`, "reconnect"));
+    state = pressed.state;
+    expect(pressed.effects).toContainEqual({
+      kind: "tower-command",
+      v: 1,
+      capabilityId: "tower.connect",
+      params: {},
+    });
+    expect(state.screen).toBe("tower-wake");
+    expect(state.pause).not.toBeNull();
+    state = stepShell(state, {
+      kind: "tower-result",
+      v: 1,
+      capabilityId: "tower.connect",
+      ok: true,
+    }).state;
+    // The tower check asks for one press before play goes on.
+    expect(state.screen).toBe("tower-wake");
+    expect(state.offered.map((offer) => offer.actionId)).toEqual(["tower-calibrate"]);
+    state = runPresses(state, [press("ipad-0", "tower-calibrate", "tower-calibrate")]);
+    state = stepShell(state, {
+      kind: "tower-result",
+      v: 1,
+      capabilityId: "tower.calibrate",
+      ok: true,
+    }).state;
+    expect(state.pause).toBeNull();
+    expect(state.reconnect).toBeNull();
+    expect(state.screen).toBe("play");
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_READY }).state;
+    expect(state.stage).toBe("playing");
+  });
+
+  it("a failed Reconnect goes back to the three-button pause", () => {
+    let state = inPlay();
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
     state = runPresses(state, [
       press("ipad-0", `pause-${state.pauseSerial}-reconnect`, "reconnect"),
     ]);
+    state = stepShell(state, {
+      kind: "tower-result",
+      v: 1,
+      capabilityId: "tower.connect",
+      ok: false,
+    }).state;
+    expect(state.screen).toBe("pause");
+    expect(state.reconnect).toBeNull();
+    expect(
+      projectShellView(state)
+        .actions.filter((action) => action.open)
+        .map((action) => action.actionId),
+    ).toEqual(["reconnect", "go-on-without", "quit-story"]);
+  });
+
+  it("Go on without keeps the game going with no tower and reads without the tower", () => {
+    let state = inPlay();
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    const pressed = stepShell(
+      state,
+      press("ipad-0", `pause-${state.pauseSerial}-go-without`, "go-on-without"),
+    );
+    state = pressed.state;
+    expect(pressed.effects.some((effect) => effect.kind === "tower-command")).toBe(false);
     expect(state.pause).toBeNull();
-    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_READY }).state;
-    expect(state.stage).toBe("playing");
+    expect(state.screen).toBe("play");
+    expect(state.towerWithout).toBe(true);
+    expect(state.towerLinked).toBe(false);
+    // The paused node offers its press again.
+    expect(state.offered.some((offer) => offer.open && offer.actionId === "continue")).toBe(true);
+    // A later snapshot of the same lost tower does not pause again.
+    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    expect(state.pause).toBeNull();
+    expect(towerLine(state)).toBe("without the tower");
   });
 });
 
@@ -827,7 +902,6 @@ describe("place stills", () => {
     expect(projectShellView(state).place).toBeNull();
     expect(state.offered.some((offer) => offer.actionId === "walk" && offer.open)).toBe(true);
     expect(state.offered.some((offer) => offer.promptId === "menu-quit")).toBe(true);
-    expect(state.offered.some((offer) => offer.promptId === "menu-connect")).toBe(true);
     state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
     expect(state.pause).toBeNull();
     expect(state.screen).toBe("play");

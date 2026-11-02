@@ -336,6 +336,11 @@ const runDay = (
       status = pressOffer(h, choose(h, "drop"));
       continue;
     }
+    const simulated = h.offers.find((offer) => offer.promptId.startsWith("skull-sim-day-"));
+    if (simulated) {
+      status = pressOffer(h, simulated);
+      continue;
+    }
     if (h.offers.some((offer) => offer.actionId === "record")) {
       opts?.beforeRecord?.();
       status = pressOffer(h, choose(h, "record", opts?.place?.(placed)));
@@ -781,7 +786,9 @@ describe("C3 04 day clock", () => {
             ? choose(h, "drop")
             : h.offers.some((row) => row.actionId === "done")
               ? choose(h, "done")
-              : choose(h, "record");
+              : h.offers.some((row) => row.promptId.startsWith("skull-sim-day-"))
+                ? (h.offers.find((row) => row.promptId.startsWith("skull-sim-day-")) as Offer)
+                : choose(h, "record");
         status = pressOffer(h, offer);
       }
       if (status !== "done") throw new Error("Continue did not finish the day.");
