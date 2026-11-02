@@ -67,4 +67,9 @@ export {
   type DeviceView,
   deviceViewMessageSchema,
   deviceViewPayloadSchema,
+  GEAR_PANELS,
+  type GearPanelId,
+  type GearView,
+  gearPanelSchema,
+  gearViewSchema,
 } from "./views.ts";

@@ -15,7 +15,7 @@ Source of truth for the toolbar, gear and help in C2 and C3 (Bob 2026-10-31 10:3
 - Evals: ./eval.md
 - Mockup: ./mockup.html
 - Risk: Low
-- Touches: `apps/bloodtower/src/web/components/device/ChromeBar.tsx`, `apps/bloodtower/src/web/components/device/chromeBar.test.ts` (new), `apps/bloodtower/src/web/app/globals.css` (Menu rules only), `apps/bloodtower/src/e2e/tests/w1-chrome.spec.ts`
+- Touches: `apps/bloodtower/src/web/components/device/ChromeBar.tsx`, `apps/bloodtower/src/web/components/device/chromeBar.test.ts` (new), `apps/bloodtower/src/web/app/globals.css` (Menu rules only), `apps/bloodtower/src/e2e/tests/w1-chrome.spec.ts`, `apps/bloodtower/src/web/components/device/gearMenu.ts` (new; gear list and help lines), `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx` and `JoinScreen.tsx` (toolbar on every screen), `apps/bloodtower/src/web/components/board/` (`GearBoardPanel.tsx` new, `CoreStoryBoard.tsx`, `StartupBoard.tsx`: gear panels on the Story board), `apps/bloodtower/src/engine/loops/session/` (`gear.ts` new, `gear.test.ts` new, `events.ts`, `state.ts`, `stepShell.ts`, `view.ts`: gear state, closed after restore), `apps/bloodtower/src/engine/views/` (`project.ts`, `state.ts`), `apps/bloodtower/src/protocols/` (`index.ts`, `v2/index.ts`, `v2/views.ts`: gear view), `apps/bloodtower/src/server/core/` (`session.ts`, `serialize.ts`, `serialize.test.ts`: gear act and serialize)
 
 ## Cutover
 

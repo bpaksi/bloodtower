@@ -23,6 +23,7 @@ import {
 import { GoodbyeTeardown } from "../GoodbyeTeardown";
 import { PortraitCard } from "../PortraitCard";
 import { DialogFrame } from "./DialogFrame";
+import { GearBoardPanel } from "./GearBoardPanel.tsx";
 
 /** Join QR and the six-digit code. Display only: the iPad does the pressing. */
 function JoinBlock({ code, url, large }: { code: string; url: string; large?: boolean }) {
@@ -355,6 +356,9 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
       data-board-layer="startup"
       data-screen={view.screen}
       data-setup-step={setupStep}
+      data-paused={view.gear?.paused ? "true" : "false"}
+      data-gear-opens={view.gear?.opens ?? 0}
+      data-volume={view.gear?.volume ?? undefined}
     >
       <div className="bt-board-backdrop" aria-hidden="true" />
       {warning ? (
@@ -377,6 +381,7 @@ export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean
           <p className="bt-join-code">{join.code}</p>
         </aside>
       ) : null}
+      {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
       <div className="bt-startup-stage">
         <DialogFrame className="bt-ink-in" data-startup-dialog="">
           <StartupPanel view={view} />

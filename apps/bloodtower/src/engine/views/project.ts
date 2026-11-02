@@ -74,6 +74,7 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
       actions: offered,
       table: state.table ?? null,
       place: state.place ?? null,
+      ...(state.gear ? { gear: state.gear } : {}),
     });
   }
 
@@ -116,5 +117,6 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     })),
     actions: state.actions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
     ...(state.settings && state.settings.length > 0 ? { settings: state.settings } : {}),
+    ...(state.gear ? { gear: state.gear } : {}),
   });
 }

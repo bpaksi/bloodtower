@@ -5,6 +5,7 @@ import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
 import { DialogFrame } from "./DialogFrame";
+import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
 
@@ -46,6 +47,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       data-board-mode="play"
       data-board-layer={layer}
       data-moment={momentId ?? undefined}
+      data-paused={view.gear?.paused ? "true" : "false"}
+      data-gear-opens={view.gear?.opens ?? 0}
+      data-volume={view.gear?.volume ?? undefined}
     >
       <div className="bt-board-backdrop" aria-hidden="true" />
       {warning ? (
@@ -90,6 +94,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           <figcaption>{place.caption}</figcaption>
         </figure>
       ) : null}
+      {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
       {debug ? (
         <pre className="mt-4 max-h-64 overflow-auto text-xs opacity-70">
           {JSON.stringify(view, null, 2)}

@@ -1,4 +1,5 @@
 import type { ViewScreen } from "../../protocols/v2/common.ts";
+import type { GearView } from "../../protocols/v2/views.ts";
 import type { CompassSlot } from "../loops/chapter/board.ts";
 
 export type PrivateLine = {
@@ -88,6 +89,8 @@ export type ViewState = {
   table?: TableBand | null;
   /** Story board only. Null when nobody is inside a place. */
   place?: PlaceStill | null;
+  /** Gear panel snapshot. Omitted on fixtures that predate the toolbar. */
+  gear?: GearView;
 };
 
 export type Audience = { kind: "board" } | { kind: "device"; deviceId: string };

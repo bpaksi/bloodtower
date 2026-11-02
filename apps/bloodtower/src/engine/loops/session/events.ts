@@ -93,6 +93,18 @@ export const volumeAnswerEventV1 = z.object({
   answer: z.enum(["keep", "again"]),
 });
 
+export const gearEventV1 = z.object({
+  kind: z.literal("gear"),
+  v: z.literal(1),
+  deviceId: z.string().min(1),
+  action: z.enum(["open", "pick", "done", "keep-volume", "try-another", "step-back"]),
+  item: z.string().min(1).max(64).optional(),
+  pick: z.string().min(1).max(80).optional(),
+  heroId: z.string().min(1).max(80).optional(),
+  otherHeroId: z.string().min(1).max(80).optional(),
+  volume: z.number().int().min(0).max(2).optional(),
+});
+
 export const shellEventSchema = z.discriminatedUnion("kind", [
   startSessionEventV1,
   pressEventV1,
@@ -107,6 +119,7 @@ export const shellEventSchema = z.discriminatedUnion("kind", [
   volumePlayEventV1,
   volumeResultEventV1,
   volumeAnswerEventV1,
+  gearEventV1,
 ]);
 
 export type ShellEvent = z.infer<typeof shellEventSchema>;

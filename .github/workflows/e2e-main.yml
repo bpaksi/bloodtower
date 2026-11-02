@@ -1,0 +1,49 @@
+# Full Playwright e2e suite on every push to main. Not a required check.
+# Setup mirrors check.yml (pnpm, .nvmrc node, bluetooth headers, frozen install).
+name: e2e-main
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-main
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: pnpm setup
+        uses: pnpm/action-setup@v4
+      - name: node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Bluetooth headers for the native tower library; nothing in CI connects to a tower.
+      - name: bluetooth and udev headers
+        run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
+      - name: playwright browsers
+        run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium
+      - name: build web export
+        run: pnpm --dir apps/bloodtower/src/web build
+      - name: playwright e2e
+        run: pnpm --dir apps/bloodtower e2e
+      - name: upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/bloodtower/src/e2e/playwright-report
+            apps/bloodtower/src/e2e/test-results
+          retention-days: 7
