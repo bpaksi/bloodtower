@@ -163,31 +163,6 @@ test("opening screens walk splash to play", async ({ browser }, testInfo) => {
       );
       await d.button("continue").click();
 
-      await test.step("Connect Tower follows Game settings: skip allowed, Back keeps the settings", async () => {
-        await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-        await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-        await expect(pad.getByRole("heading", { name: "Tower Connect" })).toBeVisible();
-        await expect(board.locator("[data-status='step']")).toContainText("Tower Connect");
-        await expect(d.button("play-without-tower")).toBeVisible();
-        await expect(d.button("continue")).toBeHidden();
-        await expect(d.button("back")).toBeEnabled();
-        await expect(pad.locator('[data-primary="true"]')).toHaveCount(1);
-        await expect(pad.locator('[data-primary="true"]')).toHaveText("Connect tower");
-        await expect(board.locator("button, input, textarea, select, a, [onclick]")).toHaveCount(0);
-        await shot(pad, "device-tower-connect");
-        await shot(board, "board-tower-connect");
-
-        // Back returns to Game settings with the chosen length; the tower is not touched.
-        await d.button("back").click();
-        await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
-        await expect(board.locator('[data-setting="length"] [data-setting-value]')).toHaveText(
-          "Long",
-        );
-        await d.button("continue").click();
-        await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
-        await d.button("play-without-tower").click();
-      });
-
       await test.step("The tower volume test with no tower is the room-sound check: nothing to play", async () => {
         await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
         await expect(board.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");

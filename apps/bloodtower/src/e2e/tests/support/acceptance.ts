@@ -285,3 +285,62 @@ export const doneEverySetupStep = async (pad: Page) => {
   }
   await expect(pad.locator("main")).toHaveAttribute("data-screen", "begin");
 };
+
+/**
+ * The session Enter without the tower (C2/05): the first iPad has joined, so the table is on
+ * base board setup. One press says the board is set up, then Play without Tower. After it the
+ * iPad is on Pick story (Pick Game while an autosave waits).
+ */
+export const enterWithoutTower = async (pad: Page) => {
+  await enterWithoutTowerKeepSound(pad);
+  await setSoundAndKeep(pad);
+};
+
+/**
+ * Pick story starts with sound (Bob 2026-10-31): Enable sound, a volume, Keep. Then the story
+ * list shows. Does nothing when the iPad is on Pick Game, which has no sound step.
+ */
+export const setSoundAndKeep = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await expect(main).toHaveAttribute("data-screen", /pick-story|pick-game/, { timeout: 20_000 });
+  if ((await main.getAttribute("data-screen")) !== "pick-story") return;
+  await main.locator('button[data-prompt-id="sound-enable"]').click();
+  await main.locator('button[data-prompt-id="volume-1"]').click();
+  const keep = main.locator('button[data-prompt-id="volume-keep"]');
+  await expect(keep).toBeEnabled({ timeout: 20_000 });
+  await keep.click();
+  await expect(main.locator('button[data-prompt-id="volume-keep"]')).toHaveCount(0);
+};
+
+/** The Enter without the tower, stopping at the first thing after the tower choice. */
+export const enterWithoutTowerKeepSound = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await expect(main).toHaveAttribute("data-screen", "base-board", { timeout: 20_000 });
+  const setUp = main.locator('button[data-prompt-id="base-board-done"]');
+  await expect(setUp).toBeEnabled({ timeout: 20_000 });
+  await setUp.click();
+  await expect(main).toHaveAttribute("data-screen", "tower-choice", { timeout: 20_000 });
+  const skip = main.locator('button[data-prompt-id="play-without-tower"]');
+  await expect(skip).toBeEnabled({ timeout: 20_000 });
+  await skip.click();
+  await expect(main).not.toHaveAttribute("data-screen", "tower-choice", { timeout: 20_000 });
+};
+
+/** The Enter on the connect track, to the point where the tower is calibrated. */
+export const enterWithTower = async (pad: Page) => {
+  await enterWithTowerKeepSound(pad);
+  await setSoundAndKeep(pad);
+};
+
+/** The Enter on the connect track, stopping at the first thing after calibrate. */
+export const enterWithTowerKeepSound = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await expect(main).toHaveAttribute("data-screen", "base-board", { timeout: 20_000 });
+  await main.locator('button[data-prompt-id="base-board-done"]').click();
+  await expect(main).toHaveAttribute("data-screen", "tower-choice", { timeout: 20_000 });
+  await main.locator('button[data-prompt-id="tower-connect"]').click();
+  const calibrate = main.locator('button[data-prompt-id="tower-calibrate"]');
+  await expect(calibrate).toBeEnabled({ timeout: 20_000 });
+  await calibrate.click();
+  await expect(main).not.toHaveAttribute("data-screen", "tower-wake", { timeout: 20_000 });
+};

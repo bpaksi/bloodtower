@@ -1,7 +1,10 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
+  enterWithoutTower,
+  enterWithTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -67,8 +70,10 @@ const toClaim = async (page: Page, joinCode: string, ipad: boolean) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
+  await expectBar(page, ipad);
+  await expectMuted(page);
+  await enterWithoutTower(page);
   const walk = [
-    ["splash", "splash-play"],
     ["pick-story", `continue-pick-story-${STORY_ID}`],
     ["game-settings", "continue-game-settings"],
   ] as const;
@@ -78,10 +83,8 @@ const toClaim = async (page: Page, joinCode: string, ipad: boolean) => {
     await expectMuted(page);
     await clickAct(page, "continue", promptId);
   }
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
   await expectBar(page, ipad);
   await expectMuted(page);
-  await clickAct(page, "play-without-tower", "play-without-tower");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
   await expectBar(page, ipad);
   await expectMuted(page);
@@ -229,7 +232,6 @@ test("W1 a held hero, the Menu and a restart survive Continue", async ({ browser
   try {
     await installSessionSocketHook(again);
     await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(again, "continue", "splash-play");
     await expect(again.locator("[data-menu]")).toHaveCount(0);
     await expect(again.locator('[data-action="menu"]')).toHaveCount(1);
     // The party pick is restored. This is a new iPad, so Hero A is taken by the one that sat down.
@@ -251,7 +253,7 @@ test("W1 a held hero, the Menu and a restart survive Continue", async ({ browser
 });
 
 const PORTRAIT = { viewport: { width: 768, height: 1024 }, hasTouch: true as const };
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 
 const skipUnlessIpad = (testInfo: { project: { name: string } }) => {
   test.skip(testInfo.project.name !== "ipad", "The approved mockup is iPad portrait.");
@@ -362,13 +364,10 @@ const reach = async (
   await installSessionSocketHook(page);
   await page.setViewportSize({ width: 768, height: 1024 });
   await page.goto(`/join?code=${joinCode}`);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-  await clickAct(page, "continue", "splash-play");
+  if (tower === "connect") await enterWithTower(page);
+  else await enterWithoutTower(page);
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-  if (tower === "connect") await clickAct(page, "tower-connect", "tower-connect");
-  else await clickAct(page, "play-without-tower", "play-without-tower");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
   if (stop === "claim") return;
   await holdHeroesFromTest(page, [...HERO_IDS]);
@@ -406,11 +405,9 @@ test("the Menu ends with Close on every screen it opens from", async ({ browser 
 
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${session.host.joinCode}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-    await clickAct(page, "continue", "splash-play");
+    await enterWithTower(page);
     await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(page, "continue", "continue-game-settings");
-    await clickAct(page, "tower-connect", "tower-connect");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
     await openMenu(page);
     await expectCloseLast(page);
@@ -698,18 +695,20 @@ test("the toolbar is on every iPad screen, and ? help matches the current screen
 
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${session.host.joinCode}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-    await checkHelp(page, "waiting");
-    await clickAct(page, "continue", "splash-play");
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "base-board");
+    await checkHelp(page, "base-board-setup");
+    await clickAct(page, "board-set-up", "base-board-done");
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-choice");
+    await checkHelp(page, "tower-choice");
+    await clickAct(page, "tower-connect", "tower-connect");
+    await clickAct(page, "tower-calibrate", "tower-calibrate");
+    await setSoundAndKeep(page);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
     await checkHelp(page, "pick-story");
     await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
     await checkHelp(page, "story-settings");
     await clickAct(page, "continue", "continue-game-settings");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-    await checkHelp(page, "tower-choice");
-    await clickAct(page, "tower-connect", "tower-connect");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
     await checkHelp(page, "claim");
     await holdHeroesFromTest(page, [...HERO_IDS]);
@@ -754,11 +753,8 @@ const finishFromClaim = async (page: Page) => {
 };
 
 const resumeSavedGame = async (page: Page) => {
-  await clickAct(page, "continue", "splash-play");
-  await expect(deviceMain(page)).not.toHaveAttribute("data-screen", "splash");
-  if ((await deviceMain(page).getAttribute("data-screen")) === "pick-game") {
-    await clickAct(page, "continue", "continue-pick-game");
-  }
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game", { timeout: 20_000 });
+  await clickAct(page, "continue", "continue-pick-game");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
 };
 

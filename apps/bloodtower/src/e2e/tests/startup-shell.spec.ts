@@ -212,7 +212,6 @@ test("start-up shell: one framed dialog, summary column, at laptop, iPad and TV 
 
     await test.step("Claim Hunters with the summary filled after Game settings and Connect Tower", async () => {
       await d.button("continue").click();
-      await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
       await d.button("play-without-tower").click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
       await d.button("continue").click();

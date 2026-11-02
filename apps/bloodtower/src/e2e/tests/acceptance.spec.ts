@@ -3,11 +3,13 @@ import { readRun } from "../../server/scripts/timingReport.ts";
 import { DEVICE_TOKEN_KEY } from "../../web/lib/session.ts";
 import {
   captureFrames,
+  enterWithTower,
   gateControls,
   holdHeroesFromTest,
   installSessionSocketHook,
   releaseTogether,
   sendPlayPressFromTest,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -74,9 +76,7 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/, { timeout: 30_000 });
-  await clickAct(page, "tower-connect", "tower-connect");
-  await clickAct(page, "tower-calibrate", "tower-calibrate");
-  await clickAct(page, "new-game", "new-pick-game");
+  await enterWithTower(page);
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes", {
@@ -114,7 +114,7 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
 
   // Wait until each step is the one on screen. Reading the attribute and clicking
   // immediately can still see the previous step after Done, then miss that button.
-  const setupIds = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+  const setupIds = ["seals-and-skulls", "place-heroes"] as const;
   for (const id of setupIds) {
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
     await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
@@ -206,8 +206,12 @@ test("quit from pause lands on session; continue resumes after host restart", as
   try {
     await installSessionSocketHook(page2);
     await page2.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(page2, "tower-connect", "tower-connect");
-    await clickAct(page2, "tower-calibrate", "tower-calibrate");
+    // Done for tonight ended the evening, so the restart runs a new Enter. A restart after an
+    // unfinished evening keeps the choice and skips it (c2-session-enter, EV-13).
+    await enterWithTower(page2);
+    await expect(deviceMain(page2)).toHaveAttribute("data-screen", "pick-game", {
+      timeout: 30_000,
+    });
     await expect(
       page2.locator('button[data-prompt-id="continue-pick-game"][data-action-id="continue"]'),
     ).toBeVisible({
@@ -272,6 +276,10 @@ test("core: one winner per press, private wire, disconnect pause, run from event
     await pageB.goto(joinPage);
 
     await test.step("one tower-connect press wins when both devices press together", async () => {
+      await clickAct(pageA, "board-set-up", "base-board-done");
+      await expect(deviceMain(pageB)).toHaveAttribute("data-screen", "tower-choice", {
+        timeout: 20_000,
+      });
       gateA.hold();
       gateB.hold();
       await clickAct(pageA, "tower-connect", "tower-connect");
@@ -288,7 +296,7 @@ test("core: one winner per press, private wire, disconnect pause, run from event
     });
 
     await clickAct(pageA, "tower-calibrate", "tower-calibrate");
-    await clickAct(pageA, "new-game", "new-pick-game");
+    await setSoundAndKeep(pageA);
     await clickAct(pageA, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(pageA, "continue", "continue-game-settings");
     await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "claim-heroes", {
@@ -318,7 +326,7 @@ test("core: one winner per press, private wire, disconnect pause, run from event
     await clickAct(pageA, "continue", "continue-claim-heroes");
     // Name each setup step. A generic Continue retargets after that button
     // detaches and can press Begin before this loop looks for it.
-    const setupIds = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+    const setupIds = ["seals-and-skulls", "place-heroes"] as const;
     let sawPrivateLine = false;
     for (const id of setupIds) {
       await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });

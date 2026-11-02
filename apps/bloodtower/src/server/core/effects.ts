@@ -19,11 +19,15 @@ export type EffectsContext = {
   replaying?: boolean;
 };
 
+/** How a tower command the effects sent ended. The caller feeds it back to the engine. */
+export type TowerOutcome = { capabilityId: string; result: "ok" | "failed" };
+
 export const runShellEffects = async (
   state: ShellState,
   effects: readonly ShellEffect[],
   ctx: EffectsContext,
-): Promise<void> => {
+): Promise<TowerOutcome[]> => {
+  const outcomes: TowerOutcome[] = [];
   for (const effect of effects) {
     switch (effect.kind) {
       case "view-refresh":
@@ -90,6 +94,7 @@ export const runShellEffects = async (
           );
           result = "failed";
         }
+        outcomes.push({ capabilityId: effect.capabilityId, result });
         if (effect.capabilityId === "lighting.all-off" && state.screen === "goodbye") {
           state.goodbyeTower = result === "ok" ? "idle" : "unavailable";
         }
@@ -99,6 +104,7 @@ export const runShellEffects = async (
         break;
     }
   }
+  return outcomes;
 };
 
 export const newGameId = () => `game-${randomBytes(6).toString("hex")}`;

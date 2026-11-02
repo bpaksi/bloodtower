@@ -50,6 +50,8 @@ export const errorCodeSchema = z.enum([
   "invalid-state",
   "private-on-storyboard",
   "storyboard-control",
+  /** A tower command the pressing iPad asked for did not take (C2/05, MEC-039 .11). */
+  "tower-command-failed",
 ]);
 export type ErrorCode = z.infer<typeof errorCodeSchema>;
 

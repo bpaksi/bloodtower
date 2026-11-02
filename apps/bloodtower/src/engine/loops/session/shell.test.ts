@@ -3,6 +3,8 @@ import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts"
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { enterConnectEvents, enterWithoutEvents } from "./enterKit.ts";
+import type { ShellEvent } from "./events.ts";
 import { mergeSetupSteps, type ShellStory, TEST_STORY } from "./pack.ts";
 import { PLACE_CAPTION } from "./placeCaption.ts";
 import { initialShellState } from "./state.ts";
@@ -26,7 +28,7 @@ const start = () =>
     sessionId: "sess-1",
   }).state;
 
-const runPresses = (state: ReturnType<typeof start>, presses: ReturnType<typeof press>[]) => {
+const runPresses = (state: ReturnType<typeof start>, presses: ShellEvent[]) => {
   let cursor = state;
   for (const p of presses) {
     cursor = stepShell(cursor, p).state;
@@ -34,55 +36,36 @@ const runPresses = (state: ReturnType<typeof start>, presses: ReturnType<typeof 
   return cursor;
 };
 
-describe("session loop tower setup", () => {
-  it("runs connect and calibrate once, then lands on pick-game", () => {
+describe("session loop start", () => {
+  it("starts on the join and runs the tower block once, in the Enter", () => {
     let state = start();
-    expect(state.screen).toBe("splash");
-    state = stepShell(state, press("ipad-0", "tower-connect", "tower-connect")).state;
-    expect(state.tower.connection).toBe("connected");
-    state = stepShell(state, press("ipad-0", "tower-calibrate", "tower-calibrate")).state;
-    expect(state.towerSetupDone).toBe(true);
-    expect(state.screen).toBe("pick-game");
+    expect(state.screen).toBe("table-join");
+    state = runPresses(state, enterConnectEvents());
+    expect(state.enter).toBeNull();
+    expect(state.towerChoice).toBe("connect");
+    expect(state.screen).toBe("pick-story");
     expect(state.towerLinked).toBe(true);
   });
 
-  it("Play on splash reaches pick-story and does not pause a tower that was never connected", () => {
+  it("Play without Tower reaches pick-story and does not pause a tower that was never connected", () => {
     let state = start();
-    expect(state.offered.some((offer) => offer.promptId === "splash-play" && offer.open)).toBe(
-      true,
-    );
     expect(state.activeGameId).toBe("game-1");
-    state = stepShell(state, press("ipad-0", "splash-play", "continue")).state;
+    state = runPresses(state, enterWithoutEvents());
     expect(state.activeGameId).toBe(`game-${state.eventSeq}`);
     expect(state.screen).toBe("pick-story");
     expect(state.towerLinked).toBe(false);
+    expect(state.towerChoice).toBe("without");
     state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
     expect(state.pause).toBeNull();
     expect(state.screen).toBe("pick-story");
   });
 
-  it("stays on splash when a tower snapshot is already ready", () => {
+  it("stays on the join when a tower snapshot is already ready", () => {
     let state = start();
     state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_READY }).state;
-    expect(state.screen).toBe("splash");
+    expect(state.screen).toBe("table-join");
     expect(state.towerLinked).toBe(false);
-    expect(state.offered.filter((offer) => offer.open).map((offer) => offer.promptId)).toEqual([
-      "splash-play",
-      "tower-connect",
-    ]);
-  });
-
-  it("keeps Play and Connect tower after the startup tower snapshot", () => {
-    let state = start();
-    state = stepShell(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
-    expect(state.screen).toBe("splash");
-    expect(state.offered.filter((offer) => offer.open).map((offer) => offer.promptId)).toEqual([
-      "splash-play",
-      "tower-connect",
-    ]);
-    state = stepShell(state, press("ipad-0", "splash-play", "continue")).state;
-    expect(state.screen).toBe("pick-story");
-    expect(state.pause).toBeNull();
+    expect(state.offered.filter((offer) => offer.open)).toEqual([]);
   });
 });
 
@@ -102,54 +85,13 @@ describe("setup steps include seals and skulls", () => {
 });
 
 describe("game setup forward and back", () => {
-  const throughTower = () =>
-    runPresses(start(), [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
-    ]);
+  const throughTower = () => runPresses(start(), [...enterConnectEvents()]);
 
   const chooseStory = (state: ReturnType<typeof start>) =>
     runPresses(state, [
       press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
     ]);
-
-  it("offers Connect Tower after game settings when the tower was never set up", () => {
-    let state = start();
-    state = runPresses(state, [
-      press("ipad-0", "splash-play", "continue"),
-      press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
-    ]);
-    const entered = stepShell(state, press("ipad-0", "continue-game-settings", "continue"));
-    expect(entered.state.screen).toBe("tower-connect");
-    expect(entered.state.towerLinked).toBe(false);
-    expect(entered.effects.some((effect) => effect.kind === "tower-command")).toBe(false);
-    const view = projectShellView(entered.state);
-    expect(view.levels.at(-1)?.label).toBe("Tower Connect");
-    expect(view.levels.at(-1)?.shows).toBe(
-      "No tower yet. An iPad can connect it, or play on without it.",
-    );
-    const connect = view.actions.find((action) => action.actionId === "tower-connect");
-    const skip = view.actions.find((action) => action.actionId === "play-without-tower");
-    expect(connect).toMatchObject({
-      promptId: "tower-connect",
-      label: "Connect Tower",
-      open: true,
-    });
-    expect(skip).toMatchObject({
-      promptId: "play-without-tower",
-      label: "Play without Tower",
-      open: true,
-    });
-
-    const skipped = stepShell(
-      entered.state,
-      press("ipad-0", "play-without-tower", "play-without-tower"),
-    );
-    expect(skipped.state.screen).toBe("claim-heroes");
-    expect(skipped.state.towerLinked).toBe(false);
-    expect(skipped.effects.some((effect) => effect.kind === "tower-command")).toBe(false);
-  });
 
   it("walks pick-story, game-settings, claim-heroes, each setup step, and begin forward", () => {
     let state = chooseStory(throughTower());
@@ -264,8 +206,7 @@ describe("pauses", () => {
   const inPlay = () => {
     let state = start();
     state = runPresses(state, [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
+      ...enterConnectEvents(),
       press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
       press("ipad-0", "continue-game-settings", "continue"),
@@ -363,8 +304,7 @@ describe("quit story and session screen", () => {
   it("ends as quit, keeps autosave, and lands on the session screen", () => {
     let state = start();
     state = runPresses(state, [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
+      ...enterConnectEvents(),
       press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
       press("ipad-0", "continue-game-settings", "continue"),
@@ -390,19 +330,16 @@ describe("quit story and session screen", () => {
     state = runPresses(state, [press("ipad-0", `pause-${state.pauseSerial}-quit`, "quit-story")]);
     expect(state.screen).toBe("session");
     expect(state.autosave).toEqual(autosave);
-    expect(state.towerSetupDone).toBe(true);
-    expect(state.screen).not.toBe("tower-connect");
+    expect(state.enter).toBeNull();
+  });
+
+  const withAutosave = () => ({
+    ...start(),
+    autosave: { gameId: "game-1", packId: "test", seed: "seed", day: 2 },
   });
 
   it("pauses on Continue when the autosave resumes but the tower is not ready (MEC-018)", () => {
-    let state = runPresses(start(), [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
-    ]);
-    state = {
-      ...state,
-      autosave: { gameId: "game-1", packId: "test", seed: "seed", day: 2 },
-    };
+    let state = runPresses(withAutosave(), enterConnectEvents());
     state = stepShell(state, {
       kind: "tower-snapshot",
       v: 1,
@@ -416,28 +353,10 @@ describe("quit story and session screen", () => {
   });
 
   it("offers Continue on pick-game while an autosave exists", () => {
-    let state = start();
-    state = runPresses(state, [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
-    ]);
-    state = {
-      ...state,
-      autosave: { gameId: "game-1", packId: "test", seed: "seed", day: 2 },
-    };
-    state = stepShell(state, {
-      kind: "start-session",
-      v: 1,
-      seed: "seed",
-      sessionId: "sess-2",
-    }).state;
-    state = runPresses(state, [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
-    ]);
-    state = { ...state, autosave: { gameId: "game-1", packId: "test", seed: "seed", day: 2 } };
+    const state = runPresses(withAutosave(), enterConnectEvents());
     expect(state.screen).toBe("pick-game");
     expect(state.autosave).not.toBeNull();
+    expect(state.offered.some((o) => o.promptId === "continue-pick-game" && o.open)).toBe(true);
   });
 });
 
@@ -445,8 +364,7 @@ describe("done for tonight", () => {
   it("reaches goodbye and ends the session", () => {
     let state = start();
     state = runPresses(state, [
-      press("ipad-0", "tower-connect", "tower-connect"),
-      press("ipad-0", "tower-calibrate", "tower-calibrate"),
+      ...enterConnectEvents(),
       press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
       press("ipad-0", "continue-game-settings", "continue"),
@@ -480,10 +398,9 @@ describe("done for tonight", () => {
 /** `momentCount` is how many opening Continues to press. `0` sits on grey-stair.01. */
 const throughOpening = (momentCount: number) => {
   let state = runPresses(start(), [
-    press("ipad-0", "splash-play", "continue"),
+    ...enterWithoutEvents(),
     press("ipad-0", `continue-pick-story-${"test"}`, "continue"),
     press("ipad-0", "continue-game-settings", "continue"),
-    press("ipad-0", "play-without-tower", "play-without-tower"),
   ]);
   for (const [index, hero] of TEST_STORY.heroes.entries()) {
     const deviceId = `ipad-${index}`;
@@ -516,8 +433,7 @@ const reachPlay = (linked: boolean) => {
   let state = start();
   const storyId = state.focusStoryId;
   state = runPresses(state, [
-    press("ipad-0", "tower-connect", "tower-connect"),
-    press("ipad-0", "tower-calibrate", "tower-calibrate"),
+    ...enterConnectEvents(),
     press("ipad-0", "new-pick-game", "new-game"),
     press("ipad-0", `continue-pick-story-${storyId}`, "continue"),
     press("ipad-0", "continue-game-settings", "continue"),
@@ -783,7 +699,7 @@ describe("metadata-only Pick Story door", () => {
       initialShellState({ sessionId: "s", seed: "seed", stories: [count, TEST_STORY] }),
       { kind: "start-session", v: 1, seed: "seed", sessionId: "sess-1" },
     ).state;
-    return stepShell(state, press("ipad-0", "splash-play", "continue")).state;
+    return runPresses(state, enterWithoutEvents());
   };
 
   it("keeps Proving Grounds bound and stops Choose on not-playable", () => {
@@ -880,10 +796,7 @@ describe("metadata-only Pick Story door", () => {
 });
 
 const chooseStoryForTest = () => {
-  let state = runPresses(start(), [
-    press("ipad-0", "tower-connect", "tower-connect"),
-    press("ipad-0", "tower-calibrate", "tower-calibrate"),
-  ]);
+  let state = runPresses(start(), [...enterConnectEvents()]);
   state = runPresses(state, [
     press("ipad-0", "new-pick-game", "new-game"),
     press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),

@@ -66,7 +66,6 @@ export const TEST_STORY: ShellStory = {
   ],
   setup: [
     ...ENGINE_SETUP_STEPS,
-    { id: "lay-out-board", label: "Lay out the board and orient the kingdoms." },
     { id: "place-heroes", label: "Stand each hero on their start building." },
   ],
   heroes: [

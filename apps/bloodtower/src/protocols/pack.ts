@@ -443,12 +443,7 @@ export const SETUP_LABEL_MAX = 200;
  * Steps the engine runs itself. They are flow screens, not pack setup steps, so `setup` never
  * names them (R3-UI-22).
  */
-export const ENGINE_SETUP_STEPS = [
-  "join",
-  "party-join",
-  "tower-connect",
-  "tower-volume-test",
-] as const;
+export const ENGINE_SETUP_STEPS = ["join", "party-join", "tower-volume-test"] as const;
 
 /**
  * One physical setup step (R-WIZ-5, R-WIZ-6): its own board dialog with Done and Back on the

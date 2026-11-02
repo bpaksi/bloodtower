@@ -181,6 +181,14 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       packVersion,
       store: eventStore,
       graceMs: options.graceMs,
+      onDeviceError: (deviceId, code, message) => {
+        // The error is already in the log, so the board has its toast. This one is for the
+        // iPad that pressed: it shows the message and its code. It is not logged a second time.
+        const payload = errorPayloadSchema.parse({ code, message });
+        for (const socket of deviceSockets.get(deviceId) ?? []) {
+          send(socket, { v: PROTOCOL_VERSION, type: "error", payload });
+        }
+      },
       tower,
       clock,
       log,
@@ -195,6 +203,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     throw error;
   }
   const autosaveRow = eventStore.getAutosave();
+  await engine.whenIdle();
   if (autosaveRow) {
     if (autosaveRow.sessionId !== sessionId) {
       eventStore.replaceAutosave({ ...autosaveRow, sessionId });
@@ -208,6 +217,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     });
     engine.syncTowerSnapshot();
   }
+  await engine.resumeSession();
 
   const clients = new Map<WebSocket, ClientState>();
   const deviceSockets = new Map<string, Set<WebSocket>>();

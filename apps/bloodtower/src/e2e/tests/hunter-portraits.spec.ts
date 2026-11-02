@@ -57,7 +57,6 @@ for (const size of SIZES) {
       await pad.locator('button[data-action="continue"]').click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
       await pad.locator('button[data-action="continue"]').click();
-      await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
       await pad.locator('button[data-action="play-without-tower"]').click();
       await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
       await pad.locator('button[data-action="continue"]').click();
@@ -155,7 +154,6 @@ test("Claim Hunters falls back to the initial on the board when a portrait fails
     await pad.locator('button[data-action="continue"]').click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "game-settings");
     await pad.locator('button[data-action="continue"]').click();
-    await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-connect");
     await pad.locator('button[data-action="play-without-tower"]').click();
     await expect(pad.locator("main")).toHaveAttribute("data-screen", "tower-volume-test");
     await pad.locator('button[data-action="continue"]').click();

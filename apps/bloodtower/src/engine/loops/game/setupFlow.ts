@@ -65,12 +65,9 @@ export const screenAfterContinue = (state: ShellState, screen: ShellScreen): She
       state.setSerial = 0;
       return "pick-story";
     }
-    // Connect Tower follows Game settings unless this session already calibrated (SCR-005).
-    // A story that already finished tower setup, including splash connect, skips the screen.
-    if (!state.towerSetupDone) return "tower-connect";
+    // The tower block runs once, in the session Enter (DEC-152).
     return "claim-heroes";
   }
-  if (screen === "tower-connect") return "claim-heroes";
   if (screen === "claim-heroes") {
     return state.setupSteps.length > 0 ? "setup" : "begin";
   }
@@ -89,8 +86,7 @@ export const screenAfterBack = (state: ShellState, screen: ShellScreen): ShellSc
     state.setSerial = 0;
     return "pick-story";
   }
-  if (screen === "tower-connect") return "game-settings";
-  if (screen === "claim-heroes") return state.towerSetupDone ? "game-settings" : "tower-connect";
+  if (screen === "claim-heroes") return "game-settings";
   if (screen === "setup") {
     if (state.setupAt > 0) {
       state.setupAt -= 1;

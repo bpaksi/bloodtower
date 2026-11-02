@@ -6,6 +6,7 @@ import { startSessionHost } from "../../server/hub/host.ts";
 import { createMockTower } from "../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import {
+  enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -15,7 +16,7 @@ import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 const WEB_ROOT = resolve(import.meta.dirname, "../../web/out");
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 const NOTICE = "This iPad may dim and sleep. Keep it awake in Settings to stay in the game.";
 const IPAD = { width: 768, height: 1024 } as const;
 
@@ -139,7 +140,6 @@ const errorLines = (databasePath: string, code: string): number => {
 const joinDevice = async (page: Page, joinCode: string) => {
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
 };
 
 const setVisibility = async (page: Page, state: "hidden" | "visible") => {
@@ -263,7 +263,7 @@ test("a refused wake lock is logged and shown", async ({ browser }, testInfo) =>
       .poll(() => errorLines(session.databasePath, "wake-lock-refused") - loggedBefore)
       .toBe(1);
     await expect(board.board.locator("[data-error-code='wake-lock-refused']")).toHaveCount(1);
-    await clickAct(page, "continue", "splash-play");
+    await enterWithoutTower(page);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
     await expect(banner).toBeVisible();
   } finally {
@@ -292,7 +292,7 @@ test("a browser with no wake lock API shows wake-lock-unavailable", async ({
       .poll(() => errorLines(session.databasePath, "wake-lock-unavailable") - loggedBefore)
       .toBe(1);
     await expect(board.board.locator("[data-error-code='wake-lock-unavailable']")).toHaveCount(1);
-    await clickAct(page, "continue", "splash-play");
+    await enterWithoutTower(page);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
   } finally {
     await board.context.close().catch(() => undefined);
@@ -313,7 +313,6 @@ test("reload of a joined iPad asks for the wake lock again", async ({ browser },
     await expect.poll(async () => screenCalls(await wakeCalls(page)).length).toBe(1);
     await page.reload();
     await expect(page).toHaveURL(/\/device/);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
     await expect.poll(async () => screenCalls(await wakeCalls(page)).length).toBe(2);
   } finally {
     await context.close().catch(() => undefined);
@@ -332,11 +331,9 @@ test("Done for tonight releases the wake lock", async ({ browser }, testInfo) =>
     await installSessionSocketHook(page);
     await joinDevice(page, session.host.joinCode);
     await expect.poll(async () => screenCalls(await wakeCalls(page)).length).toBe(1);
-    await clickAct(page, "continue", "splash-play");
+    await enterWithoutTower(page);
     await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(page, "continue", "continue-game-settings");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-    await clickAct(page, "play-without-tower", "play-without-tower");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
     await holdHeroesFromTest(page, [...HERO_IDS]);
     await clickAct(page, "continue", "continue-claim-heroes");
@@ -436,7 +433,7 @@ test("a host restart asks for the wake lock again", async ({ browser }, testInfo
       await expect
         .poll(async () => screenCalls(await wakeCalls(page)).length, { timeout: 20_000 })
         .toBe(2);
-      await expect(page.locator("button[data-prompt-id='splash-play']")).toBeEnabled();
+      await expect(page.locator("button[data-prompt-id='base-board-done']")).toBeEnabled();
     } finally {
       await restarted.close();
     }

@@ -21,13 +21,29 @@ const toShell = (snapshot: ReturnType<MockTower["snapshot"]>): ShellTowerSnapsho
 export const bloodtowerTowerFromMock = (mock: MockTower): BloodtowerTower => ({
   snapshot: () => toShell(mock.snapshot()),
   subscribe: (listener) => mock.onSnapshotChange(listener),
-  runCapability: async (capabilityId, _params, log) => {
-    if (capabilityId === "tower.connect") {
-      mock.connect();
+  runCapability: async (capabilityId, params, log) => {
+    if (capabilityId === "sound.play-stateful") {
+      const { soundIndex, volume } = params;
+      if (typeof soundIndex !== "number" || typeof volume !== "number") {
+        log.error(
+          "tower-command-failed",
+          "Tower command sound.play-stateful had no sound or volume.",
+        );
+        return "failed";
+      }
+      const taken = await mock.playSound(soundIndex, volume);
+      if (taken === "failed") {
+        log.error("tower-command-failed", "Tower command sound.play-stateful failed.");
+        return "failed";
+      }
       return "ok";
     }
-    if (capabilityId === "tower.calibrate") {
-      mock.calibrate();
+    if (capabilityId === "tower.connect" || capabilityId === "tower.calibrate") {
+      const taken = capabilityId === "tower.connect" ? mock.connect() : mock.calibrate();
+      if (taken === "failed") {
+        log.error("tower-command-failed", `Tower command ${capabilityId} failed.`);
+        return "failed";
+      }
       return "ok";
     }
     if (capabilityId === "lighting.all-off") {

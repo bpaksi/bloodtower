@@ -1,10 +1,9 @@
 import type { LoopDefinition } from "../../loop/types.ts";
+import { renderEnter } from "./enter.ts";
 import { recordOffer, shellState } from "./shellRef.ts";
-import { towerReady } from "./tower.ts";
 
 export type SessionLocal = {
-  phase: "splash" | "tower" | "hub" | "goodbye" | "running-game";
-  towerStep: "connect" | "calibrate" | "done";
+  phase: "enter" | "hub" | "goodbye" | "running-game";
   awaitingPress: boolean;
   fromSessionScreen: boolean;
   childOpen: boolean;
@@ -12,18 +11,10 @@ export type SessionLocal = {
 
 export type SessionResult = { ended: boolean };
 
-const offerSplash = (ctx: { offerPrompt: (promptId: string, actionId: string) => void }) => {
-  ctx.offerPrompt("splash-play", "continue");
-  recordOffer("splash-play", "continue");
-  ctx.offerPrompt("tower-connect", "tower-connect");
-  recordOffer("tower-connect", "tower-connect");
-};
-
 export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
   id: "session",
   enter: () => ({
-    phase: "splash",
-    towerStep: "connect",
+    phase: "enter",
     awaitingPress: false,
     fromSessionScreen: false,
     childOpen: false,
@@ -31,29 +22,14 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
   body: (local, ctx) => {
     const shell = shellState();
 
-    if (local.phase === "splash") {
-      shell.screen = "splash";
-      shell.stage = "lobby";
-      // A tower snapshot and a device drop both resume this loop and clear offers.
-      // Splash has to record Play and Connect tower again, the same way pick-game does.
-      offerSplash(ctx);
-      return { local: { ...local, awaitingPress: true }, passComplete: false };
-    }
-
-    if (!shell.towerSetupDone && local.phase === "tower") {
-      shell.screen = "tower-connect";
-      shell.stage = "lobby";
-      if (!towerReady(shell.tower)) {
-        ctx.offerPrompt("tower-calibrate", "tower-calibrate");
-        recordOffer("tower-calibrate", "tower-calibrate");
-        return {
-          local: { ...local, awaitingPress: true, towerStep: "calibrate" },
-          passComplete: false,
-        };
+    if (local.phase === "enter") {
+      if (shell.enter) {
+        // A tower snapshot, a device change and a restart all resume this loop and clear offers.
+        // The Enter step re-records its presses every pass, the same way pick-game does.
+        renderEnter(shell, ctx);
+        return { local: { ...local, awaitingPress: true }, passComplete: false };
       }
-      shell.towerSetupDone = true;
-      shell.screen = "pick-game";
-      local = { ...local, phase: "hub", towerStep: "done", awaitingPress: false };
+      local = { ...local, phase: "hub", awaitingPress: false };
     }
 
     if (local.phase === "hub") {
@@ -97,7 +73,6 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
         shell.stage = "lobby";
         local = {
           phase: "hub",
-          towerStep: local.towerStep,
           awaitingPress: false,
           fromSessionScreen: false,
           childOpen: false,

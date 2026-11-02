@@ -8,7 +8,12 @@ import {
   type TestInfo,
   test,
 } from "@playwright/test";
-import { installSessionSocketHook, startAcceptanceHost } from "./support/acceptance.ts";
+import {
+  enterWithoutTower,
+  installSessionSocketHook,
+  setSoundAndKeep,
+  startAcceptanceHost,
+} from "./support/acceptance.ts";
 
 const BOARD_SIZES = [
   { width: 1024, height: 594 },
@@ -154,8 +159,7 @@ const reachPickStory = async (page: Page, joinCode: string) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-  await clickAct(page, "continue", "splash-play");
+  await enterWithoutTower(page);
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
 };
 
@@ -439,8 +443,9 @@ test("a not-ready visit does not resume the Count", async ({ browser }, testInfo
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
     await expect(deviceMain(page)).not.toHaveAttribute("data-screen", "play");
-    await clickAct(page, "continue", "splash-play");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
+    // This iPad is new to the browser session, so it unlocks its own sound first.
+    await setSoundAndKeep(page);
     await expect(page.locator('button[data-prompt-id="continue-pick-story-test"]')).toBeVisible();
     await expect(page.locator("main.bt-device p").first()).toHaveText("Proving Grounds");
     await expect(page.getByRole("heading", { name: "The Count of Vellmoor" })).toHaveCount(0);

@@ -89,14 +89,20 @@ export const continueShellFromCheckpoint = (
   return { state, versionChangedLogged };
 };
 
-const LOBBY_RESUME = new Set(["game-settings", "claim-heroes", "setup", "begin"]);
+export const LOBBY_RESUME = new Set(["game-settings", "claim-heroes", "setup", "begin"]);
 
-/** A party setup saved before play. Splash is never a resume screen. */
-export const readLobbyCheckpoint = (store: EventStore): ShellState | null => {
+/**
+ * The state the last session left, when its Enter had finished and the evening had not ended.
+ * A checkpoint from before C2/05 has no Enter state, so it is not one (the Enter runs again).
+ * A party setup saved before play comes back with it (W4).
+ */
+export const readSessionResume = (store: EventStore): ShellState | null => {
   const row = store.latestCheckpoint();
   if (!row) return null;
-  const saved = parseShellCheckpoint(JSON.parse(row.stateJson) as unknown);
-  if (!LOBBY_RESUME.has(saved.screen) || saved.autosave) return null;
+  const raw = JSON.parse(row.stateJson) as { enter?: unknown };
+  if (raw.enter !== null) return null;
+  const saved = parseShellCheckpoint(raw);
+  if (saved.sessionEnded || saved.towerChoice === "undecided") return null;
   return saved;
 };
 

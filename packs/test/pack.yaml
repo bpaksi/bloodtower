@@ -33,8 +33,6 @@ start:
     - {hero: hero-d, kingdom: W}
 
 setup:
-  - id: lay-out-board
-    label: Lay out the board and orient the kingdoms.
   - id: place-heroes
     label: Stand each hero on their start building.
 

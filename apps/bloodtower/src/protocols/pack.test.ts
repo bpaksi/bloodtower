@@ -512,7 +512,7 @@ describe("setup steps", () => {
 
   it("rejects a step listed twice and a step the engine runs (V-1)", () => {
     expect(rules({ ...validPack(), setup: [step("a"), step("a")] })).toContain("V-1");
-    for (const id of ["join", "party-join", "tower-connect", "tower-volume-test"]) {
+    for (const id of ["join", "party-join", "tower-volume-test"]) {
       expect(rules({ ...validPack(), setup: [step(id)] }), id).toContain("V-1");
     }
   });

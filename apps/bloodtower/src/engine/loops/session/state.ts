@@ -10,9 +10,36 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-step6";
+export const SHELL_ENGINE_VERSION = "0.0.0-c2-05";
+
+/** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
+export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
+  "0.0.0-step6",
+  SHELL_ENGINE_VERSION,
+];
 
 export type PauseCause = "disconnect" | "tower-lost";
+
+/** Where the session Enter is (MEC-039). `null` on the state once the Enter has finished. */
+export type EnterStep = "join" | "board" | "choice" | "connecting" | "calibrate" | "calibrating";
+
+export type EnterState = {
+  step: EnterStep;
+  /** The last connect or calibrate failed; the choice shows "Tower not found". */
+  failed: boolean;
+};
+
+/** Tonight's tower choice. It lasts the session (DEC-152). */
+export type TowerChoice = "undecided" | "connect" | "without";
+
+// One iPad's sound step on Pick story (Bob 2026-10-31): `levels` after its Enable sound tap,
+// `done` after Keep. An iPad with no entry has not tapped yet. `played` is the volume whose
+// sound has played (the tower's answer on the connect track); `pending` waits for that answer.
+export type DeviceSound = {
+  phase: "levels" | "done";
+  played: number | null;
+  pending: number | null;
+};
 
 export type AutosaveSnapshot = {
   gameId: string;
@@ -39,7 +66,13 @@ export type ShellState = {
   /** hero id → device id holding them, or null when unclaimed. */
   holdings: Record<string, string | null>;
   tower: TowerSnapshot;
-  towerSetupDone: boolean;
+  /** `null` once the Enter has finished. A checkpoint from before C2/05 has none. */
+  enter: EnterState | null;
+  towerChoice: TowerChoice;
+  /** Per iPad, by device id. Browser audio is lost on a reload, so a restart clears it. */
+  sound: Record<string, DeviceSound>;
+  /** The volume an iPad kept on Pick story, or null until one does. The move-roll cue uses it. */
+  keptVolume: number | null;
   /**
    * True after this session pressed connect. A drop pauses only then (DEC-155 slice).
    * A session that never connected stays in play, including after Continue.
@@ -116,9 +149,12 @@ export const initialShellState = (input: {
     devices: new Set(),
     holdings: boundStory ? initialHoldings(boundStory) : {},
     tower: TOWER_DISCONNECTED,
-    towerSetupDone: false,
+    enter: { step: "join", failed: false },
+    towerChoice: "undecided",
+    sound: {},
+    keptVolume: null,
     towerLinked: false,
-    screen: "splash",
+    screen: "table-join",
     setupAt: 0,
     setupSteps: [],
     openingIndex: -1,

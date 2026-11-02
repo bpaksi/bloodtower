@@ -1,4 +1,8 @@
-import { SHELL_ENGINE_VERSION, type ShellState } from "../../engine/loops/session/state.ts";
+import {
+  SHELL_ENGINE_VERSION,
+  type ShellState,
+  SUPPORTED_CHECKPOINT_VERSIONS,
+} from "../../engine/loops/session/state.ts";
 import {
   deserializeShellState,
   type SerializedShellState,
@@ -6,7 +10,7 @@ import {
 } from "./serialize.ts";
 
 export type ShellCheckpointState = SerializedShellState & {
-  version: typeof SHELL_ENGINE_VERSION;
+  version: string;
 };
 
 export const shellCheckpointFromState = (state: ShellState): ShellCheckpointState =>
@@ -20,7 +24,7 @@ export const parseShellCheckpoint = (value: unknown): ShellState => {
     throw new Error("Checkpoint state must be an object.");
   }
   const row = value as ShellCheckpointState;
-  if (row.version !== SHELL_ENGINE_VERSION) {
+  if (!SUPPORTED_CHECKPOINT_VERSIONS.includes(row.version)) {
     throw new Error(`Checkpoint engine version ${String(row.version)} is not supported.`);
   }
   return deserializeShellState(row);

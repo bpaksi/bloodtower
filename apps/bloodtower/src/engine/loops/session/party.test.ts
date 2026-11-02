@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
+import { enterWithoutEvents } from "./enterKit.ts";
+import type { ShellEvent } from "./events.ts";
 import type { ShellStory } from "./pack.ts";
 import { TEST_STORY } from "./pack.ts";
 import { initialShellState } from "./state.ts";
@@ -36,31 +38,29 @@ const boot = (stories: ShellStory[] = [TEST_STORY]) => {
   }).state;
 };
 
-const run = (events: PressEvent[]) => {
+const run = (events: ShellEvent[]) => {
   for (const event of events) current = stepShell(current, event).state;
 };
 
+/** The session Enter, without the tower (MEC-039). */
+const enter = () => run(enterWithoutEvents());
+
 const toClaim = () => {
   boot();
-  run([press("splash-play", "continue"), press("continue-pick-story-test", "continue")]);
+  enter();
+  run([press("continue-pick-story-test", "continue")]);
   expect(current.screen).toBe("game-settings");
   expect(current.settingValues["party-size"]).toBe("n-4");
   continueToClaim();
 };
 
-/** Game settings now stops at Connect Tower until the tower was calibrated. */
 const continueToClaim = () => {
-  run([
-    press("continue-game-settings", "continue"),
-    press("play-without-tower", "play-without-tower"),
-  ]);
+  run([press("continue-game-settings", "continue")]);
   expect(current.screen).toBe("claim-heroes");
 };
 
 const backToSettings = () => {
   run([press("back-claim-heroes", "back")]);
-  expect(current.screen).toBe("tower-connect");
-  run([press("back-tower-connect", "back")]);
   expect(current.screen).toBe("game-settings");
 };
 
@@ -192,7 +192,7 @@ describe("party size and pick heroes", () => {
     boot([DRACULA, TEST_STORY]);
     expect(current.focusStoryId).toBe("test");
     expect(current.boundStoryId).toBe("test");
-    run([press("splash-play", "continue")]);
+    enter();
     current = stepShell(current, {
       kind: "focus-story",
       v: 1,

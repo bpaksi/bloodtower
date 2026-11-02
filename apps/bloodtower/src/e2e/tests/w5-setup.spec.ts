@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import {
+  enterWithoutTower,
   gateControls,
   holdHeroesFromTest,
   installSessionSocketHook,
@@ -11,12 +12,11 @@ import {
 
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "lay-out-board", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 const LABELS: Record<(typeof SETUP_IDS)[number], string> = {
   "seals-and-skulls": "Place the seals on the tower and load the skulls into the chute.",
-  "lay-out-board": "Lay out the board and orient the kingdoms.",
   "place-heroes": "Stand each hero on their start building.",
 };
 
@@ -40,13 +40,10 @@ const skipTowerToClaim = async (page: Page, joinCode: string) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-  await clickAct(page, "continue", "splash-play");
+  await enterWithoutTower(page);
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
   await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
   await clickAct(page, "continue", "continue-game-settings");
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-connect");
-  await page.locator('button[data-action="play-without-tower"]').click();
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
 };
 
@@ -151,7 +148,7 @@ test("W5 setup steps stay in order on the iPad and the Story board", async ({
       await expect(boardMain(board)).toHaveAttribute("data-screen", "setup");
       await expect(boardMain(board)).toHaveAttribute("data-setup-step", id);
       await expect(board.locator("[data-setup-step]")).toHaveCount(1);
-      await expect(board.locator("[data-setup-progress]")).toHaveText(`Step ${index + 1} of 3`);
+      await expect(board.locator("[data-setup-progress]")).toHaveText(`Step ${index + 1} of 2`);
       await expect(board.locator('[data-startup-panel="setup"]')).toContainText(LABELS[id]);
       await expect(board.locator("main button")).toHaveCount(0);
       await expect(board.locator("[data-hero-place]")).toHaveCount(0);
@@ -164,11 +161,8 @@ test("W5 setup steps stay in order on the iPad and the Story board", async ({
     }
 
     await clickAct(device, "back", "back-setup-place-heroes");
-    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "lay-out-board");
-    await expect(board.locator("[data-setup-progress]")).toHaveText("Step 2 of 3");
-    await clickAct(device, "back", "back-setup-lay-out-board");
     await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "seals-and-skulls");
-    await expect(board.locator("[data-setup-progress]")).toHaveText("Step 1 of 3");
+    await expect(board.locator("[data-setup-progress]")).toHaveText("Step 1 of 2");
     expect(session.tower.sent()).toEqual([]);
   } finally {
     await boardContext.close();
@@ -387,7 +381,7 @@ test("W5 a restart before Begin does not skip an undone setup step", async ({
     await skipTowerToClaim(device, session.host.joinCode);
     await claimAndEnterSetup(device);
     await clickAct(device, "continue", "continue-setup-seals-and-skulls");
-    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "lay-out-board");
+    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "place-heroes");
     expect(session.tower.sent()).toEqual([]);
   } finally {
     await context.close();
@@ -404,18 +398,17 @@ test("W5 a restart before Begin does not skip an undone setup step", async ({
   try {
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "splash");
-    await clickAct(page, "continue", "splash-play");
-    // The restart keeps the pre-play session (W4), so the kept Done on seals-and-skulls
-    // resumes on the next undone step, lay-out-board. Not on Begin, not on a walk.
+    // The restart keeps the pre-play session (W4) and tonight's tower choice, so there is no
+    // Enter: the kept Done on seals-and-skulls resumes on the next undone step, place-heroes.
+    // Not on Begin, not on a walk.
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
-    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "lay-out-board");
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "place-heroes");
     await expect(page.locator('button[data-action-id="walk"]')).toHaveCount(0);
     await expect(page.locator('button[data-prompt-id="continue-begin"]')).toBeDisabled();
     await expect(boardMain(board)).toHaveAttribute("data-screen", "setup");
     await expect(boardMain(board)).not.toHaveAttribute("data-moment", /.+/);
-    await clickAct(page, "continue", "continue-setup-lay-out-board");
-    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "place-heroes");
+    await clickAct(page, "continue", "continue-setup-place-heroes");
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin");
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {
     await boardContext.close();
@@ -458,7 +451,6 @@ test("W5 a restart on grey-stair.02 reloads that moment and offers no walk", asy
   try {
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(page, "continue", "splash-play");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game");
     await clickAct(page, "continue", "continue-pick-game");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");

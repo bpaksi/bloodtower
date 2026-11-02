@@ -4,6 +4,7 @@ import { type Browser, expect, type Page, type TestInfo, test } from "@playwrigh
 import { openDatabase } from "../../server/db/client.ts";
 import { createEventStore } from "../../server/events/store.ts";
 import {
+  enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -379,8 +380,8 @@ test("W6 weekend frames fit the Story board and the place still stays off the iP
 
     releaseBoard();
     await expect(board.locator("[data-join-code]")).toHaveAttribute("data-join-code", /^\d{6}$/);
-    await expect(board.locator('[data-startup-panel="splash"]')).toHaveCount(1);
-    await expect(board.locator("main")).toHaveAttribute("data-screen", "splash");
+    await expect(board.locator('[data-startup-panel="table-join"]')).toHaveCount(1);
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "table-join");
     const dialog = board.locator('[data-illusionist-asset="dialog-frame"]');
     await assertBoxInside(board, board.locator("[data-join-code] svg"), dialog);
     await expect(board.locator("[data-story-focus]")).toHaveCount(0);
@@ -391,9 +392,14 @@ test("W6 weekend frames fit the Story board and the place still stays off the iP
 
     await installSessionSocketHook(device);
     await device.goto(`/join?code=${session.host.joinCode}`);
-    await expect(deviceMain(device)).toHaveAttribute("data-screen", "splash");
-    await clickAct(device, "continue", "splash-play");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "base-board");
+    // The first join shrinks the QR to a corner (DEC-274, mockup state 2).
+    const cornerQr = await board.locator("[data-join-corner] .bt-qr").boundingBox();
+    if (!splashQr || !cornerQr) throw new Error("join QR missing");
+    expect(cornerQr.height).toBeLessThan(splashQr.height);
+    await enterWithoutTower(device);
     await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
+    await expect(board.locator("[data-join-corner]")).toHaveCount(1);
     await expect(board.locator('[data-startup-panel="pick-story"]')).toHaveCount(1);
     await expect(board.locator('[data-story-focus="test"]')).toBeVisible();
     await expect(board.locator("[data-story-focus] h2")).toHaveText("Proving Grounds");
@@ -410,15 +416,13 @@ test("W6 weekend frames fit the Story board and the place still stays off the iP
 
     await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(device, "continue", "continue-game-settings");
-    await expect(deviceMain(device)).toHaveAttribute("data-screen", "tower-connect");
-    await device.locator('button[data-action="play-without-tower"]').click();
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "claim-heroes");
     await holdHeroesFromTest(device, ["hero-a"]);
     await expect(board.locator('[data-startup-panel="claim-heroes"]')).toHaveCount(1);
     await expect(board.locator("[data-join-code]")).toBeVisible();
     const partyQr = await board.locator("[data-join-code] .bt-qr").boundingBox();
-    if (!splashQr || !partyQr) throw new Error("join QR missing");
-    expect(partyQr.height).toBeGreaterThan(splashQr.height);
+    if (!cornerQr || !partyQr) throw new Error("join QR missing");
+    expect(partyQr.height).toBeGreaterThan(cornerQr.height);
     const claimText = await board.locator('[data-startup-panel="claim-heroes"]').innerText();
     for (const name of HERO_NAMES) expect(claimText.split(name).length - 1).toBe(1);
     for (const name of [...KINGDOMS, ...CITADELS]) expect(claimText).not.toContain(name);
@@ -654,19 +658,16 @@ test("W6 waiting line honours reduced motion", async ({ browser }, testInfo) => 
     await board.goto("/board");
     await installSessionSocketHook(device);
     await device.goto(`/join?code=${session.host.joinCode}`);
-    await clickAct(device, "continue", "splash-play");
+    await enterWithoutTower(device);
     await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(device, "continue", "continue-game-settings");
-    await device.locator('button[data-action="play-without-tower"]').click();
     await holdHeroesFromTest(device, [...HERO_IDS]);
     await clickAct(device, "continue", "continue-claim-heroes");
     const deadline = Date.now() + 30_000;
     while ((await deviceMain(device).getAttribute("data-screen")) !== "play") {
       if (Date.now() > deadline) throw new Error("Did not reach play.");
       const screen = await deviceMain(device).getAttribute("data-screen");
-      if (screen === "tower-connect") {
-        await device.locator('button[data-action="play-without-tower"]').click();
-      } else if (screen === "setup" || screen === "begin") await clickCurrentSetupOrBegin(device);
+      if (screen === "setup" || screen === "begin") await clickCurrentSetupOrBegin(device);
       else await device.waitForTimeout(50);
     }
     await passOpening(device, board);
@@ -696,20 +697,16 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await first.board.goto("/board");
     await installSessionSocketHook(first.device);
     await first.device.goto(`/join?code=${session.host.joinCode}`);
-    await clickAct(first.device, "continue", "splash-play");
+    await enterWithoutTower(first.device);
     await clickAct(first.device, "continue", `continue-pick-story-${STORY_ID}`);
     await clickAct(first.device, "continue", "continue-game-settings");
-    await first.device.locator('button[data-action="play-without-tower"]').click();
     await holdHeroesFromTest(first.device, [...HERO_IDS]);
     await clickAct(first.device, "continue", "continue-claim-heroes");
     const deadline = Date.now() + 40_000;
     while ((await deviceMain(first.device).getAttribute("data-screen")) !== "play") {
       if (Date.now() > deadline) throw new Error("Did not reach play.");
       const screen = await deviceMain(first.device).getAttribute("data-screen");
-      if (screen === "tower-connect") {
-        await first.device.locator('button[data-action="play-without-tower"]').click();
-      } else if (screen === "setup" || screen === "begin")
-        await clickCurrentSetupOrBegin(first.device);
+      if (screen === "setup" || screen === "begin") await clickCurrentSetupOrBegin(first.device);
       else await first.device.waitForTimeout(50);
     }
     await passOpening(first.device, first.board);
@@ -754,7 +751,6 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await second.board.goto("/board");
     await installSessionSocketHook(second.device);
     await second.device.goto(`/join?code=${restarted.host.joinCode}`);
-    await clickAct(second.device, "continue", "splash-play");
     await expect(deviceMain(second.device)).toHaveAttribute("data-screen", "pick-game");
     await clickAct(second.device, "continue", "continue-pick-game");
     await expect(deviceMain(second.device)).toHaveAttribute("data-screen", "play");
@@ -789,7 +785,6 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await third.board.goto("/board");
     await installSessionSocketHook(third.device);
     await third.device.goto(`/join?code=${again.host.joinCode}`);
-    await clickAct(third.device, "continue", "splash-play");
     await clickAct(third.device, "continue", "continue-pick-game");
     await expect(deviceMain(third.device)).toHaveAttribute("data-screen", "play");
     await holdHeroesFromTest(third.device, [...HERO_IDS]);

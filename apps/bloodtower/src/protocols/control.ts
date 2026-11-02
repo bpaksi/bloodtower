@@ -20,6 +20,7 @@ export const CONTROL_ACTIONS = [
   "tower-connect",
   "tower-calibrate",
   "play-without-tower",
+  "board-set-up",
   "pick",
   "set",
   "volume-play",
@@ -39,17 +40,19 @@ export type ControlAction = z.infer<typeof controlActionSchema>;
 
 /**
  * The flow screens, in order. The server holds the current one; no client sends it.
- * Splash is the first screen after load. Connect Tower follows Game settings (R3-UI-22), and a
- * story with `tower: none` skips it. The tower volume test (Proving Ground section 6a) follows
- * Connect Tower. Claim Hunters (`party-join`) is followed by one `setup` dialog per pack setup
+ * Splash is the first screen after load. The tower block runs once, in the session Enter
+ * (`table-join`, `base-board`, `tower-choice`, `tower-wake`), before Pick story. Claim Hunters (`party-join`) is followed by one `setup` dialog per pack setup
  * step, then Begin (R3-UI-22, R2-50..52). Quit is the end once play has been quit.
  */
 export const FLOW_SCREENS = [
   "splash",
+  "table-join",
+  "base-board",
+  "tower-choice",
+  "tower-wake",
   "pick-story",
   "game-settings",
   "not-playable",
-  "tower-connect",
   "tower-volume-test",
   "party-join",
   "setup",
@@ -76,9 +79,6 @@ export const STORY_ID_MAX = PROMPT_ID_MAX - PICK_STORY_PROMPT_PREFIX.length;
 /** Continue and Back on Game settings (R3-UI-22, R3-UI-37). */
 export const GAME_SETTINGS_CONTINUE_ID = "continue-game-settings";
 export const GAME_SETTINGS_BACK_ID = "back-game-settings";
-/** Continue and Back on Connect Tower. Back never disconnects the tower. */
-export const TOWER_CONNECT_CONTINUE_ID = "continue-tower-connect";
-export const TOWER_CONNECT_BACK_ID = "back-tower-connect";
 /** Continue and Back on Claim Hunters. Back keeps every claim. */
 export const PARTY_JOIN_CONTINUE_ID = "continue-party-join";
 export const PARTY_JOIN_BACK_ID = "back-party-join";
