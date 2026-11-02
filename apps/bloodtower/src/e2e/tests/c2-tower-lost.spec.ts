@@ -100,6 +100,19 @@ const pressCount = (databasePath: string, gameId: string) =>
   withEvents(databasePath, gameId, (events) => events.filter((e) => e.kind === "control-press"))
     .length;
 
+/** Presses the host accepted (winner). It logs a refused press too, with winner false. */
+const wonPressCount = (databasePath: string, gameId: string) =>
+  withEvents(
+    databasePath,
+    gameId,
+    (events) =>
+      events.filter(
+        (e) =>
+          e.kind === "control-press" &&
+          (e.payload as { press?: { winner?: boolean } }).press?.winner === true,
+      ).length,
+  );
+
 const autosaveGameId = (databasePath: string): string => {
   const opened = openDatabase(databasePath);
   try {
@@ -169,6 +182,26 @@ const walkOnce = async (pad: Page) => {
   return readStatus(pad);
 };
 
+/** Reads the open walk press (prompt and action ids) off the move map without taking it. */
+const captureWalkPress = async (pad: Page) => {
+  const walk = deviceMain(pad).locator('[data-move-map] button[data-action-id="walk"]').first();
+  for (let guard = 0; guard < 200 && (await walk.count()) === 0; guard += 1) {
+    if (!(await sendPlayPressFromTest(pad))) await pad.waitForTimeout(50);
+    else await pad.waitForTimeout(20);
+  }
+  const promptId = await walk.getAttribute("data-prompt-id");
+  if (!promptId) throw new Error("The move map offers no walk to capture.");
+  return { promptId, actionId: "walk" };
+};
+
+/** Sends one act on the page's live session socket, as the UI's own tap does. */
+const sendActFromTest = (pad: Page, press: { promptId: string; actionId: string }) =>
+  pad.evaluate((act) => {
+    const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error("Socket is not open.");
+    socket.send(JSON.stringify({ v: 2, type: "act", payload: { ...act, args: {} } }));
+  }, press);
+
 const dropTower = async (session: { tower: { loseConnection: () => void } }, pad: Page) => {
   session.tower.loseConnection();
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "pause", { timeout: 20_000 });
@@ -220,6 +253,7 @@ test("connect track: the pause, Go on without, and the stand-ins (EV-01, 02, 03,
     // EV-01: a tower lost in play pauses with three buttons, in order; nothing else is offered.
     const walked = await walkOnce(pad.page);
     const gameId = autosaveGameId(databasePath);
+    const staleWalk = await captureWalkPress(pad.page);
     await dropTower(session, pad.page);
     await expect(deviceMain(pad.page).locator("[data-move-map]")).toHaveCount(0);
     await expect(deviceMain(pad.page).locator('button[data-action-id="walk"]')).toHaveCount(0);
@@ -228,6 +262,17 @@ test("connect track: the pause, Go on without, and the stand-ins (EV-01, 02, 03,
     const pressesBefore = pressCount(databasePath, gameId);
     await pad.page.waitForTimeout(300);
     expect(pressCount(databasePath, gameId)).toBe(pressesBefore);
+
+    // EV-01: a tap on a move-map space while paused registers nothing. The map is not drawn
+    // during the pause, so this replays the walk press captured before the drop over the same
+    // session socket the UI uses; the host's stepShell guard must refuse it. The host still logs
+    // the press, as a loser, so the count goes up by one and the accepted count does not.
+    const wonBefore = wonPressCount(databasePath, gameId);
+    await sendActFromTest(pad.page, staleWalk);
+    await expect.poll(() => pressCount(databasePath, gameId)).toBe(pressesBefore + 1);
+    expect(wonPressCount(databasePath, gameId)).toBe(wonBefore);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "pause");
+    await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Quit"]);
 
     // EV-13: the board frame and the iPad's lines; no board button.
     await expect(boardMain(board.page)).toHaveAttribute("data-screen", "pause");
