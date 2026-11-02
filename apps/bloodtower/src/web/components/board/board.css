@@ -2688,7 +2688,7 @@
 }
 
 /* C2/05 session Enter. The join QR shrinks to a corner after the first iPad joins (DEC-274). */
-.bt-join-corner {
+.bt-board > .bt-join-corner {
   position: absolute;
   right: clamp(1.25rem, 3vw, 3rem);
   bottom: clamp(1.25rem, 3vh, 3rem);

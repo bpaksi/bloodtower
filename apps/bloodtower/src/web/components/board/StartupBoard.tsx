@@ -108,8 +108,6 @@ function VolumePanel({ line, live }: { line: string; live: boolean }) {
   const text = <p className="bt-startup-cue bt-volume-line">{line}</p>;
   return (
     <div data-startup-panel="volume" data-volume-live={live ? "true" : "false"}>
-      <p className="bt-kicker">Before the story</p>
-      <h1 className="bt-startup-title">Sound</h1>
       {live ? (
         text
       ) : (

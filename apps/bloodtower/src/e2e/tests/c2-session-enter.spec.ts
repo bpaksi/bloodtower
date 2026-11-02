@@ -104,6 +104,14 @@ test("base board setup shows its steps and waits for one press", async ({ browse
     const cornerQr = await corner.locator(".bt-qr").boundingBox();
     expect(cornerQr?.height ?? 0).toBeGreaterThan(0);
     expect(cornerQr?.height ?? 0).toBeLessThan((largeQr?.height ?? 0) / 2);
+    const cornerBox = await corner.boundingBox();
+    const viewport = board.page.viewportSize();
+    expect((cornerBox?.x ?? 0) + (cornerBox?.width ?? 0) / 2).toBeGreaterThan(
+      (viewport?.width ?? 0) / 2,
+    );
+    expect((cornerBox?.y ?? 0) + (cornerBox?.height ?? 0) / 2).toBeGreaterThan(
+      (viewport?.height ?? 0) / 2,
+    );
     await expect(corner.locator(".bt-join-code")).toHaveText(session.host.joinCode);
     await expect(board.page.getByText("everyone", { exact: false })).toHaveCount(0);
 

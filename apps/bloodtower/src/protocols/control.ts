@@ -79,9 +79,6 @@ export const STORY_ID_MAX = PROMPT_ID_MAX - PICK_STORY_PROMPT_PREFIX.length;
 /** Continue and Back on Game settings (R3-UI-22, R3-UI-37). */
 export const GAME_SETTINGS_CONTINUE_ID = "continue-game-settings";
 export const GAME_SETTINGS_BACK_ID = "back-game-settings";
-/** Continue and Back on Connect Tower. Back never disconnects the tower. */
-export const TOWER_CONNECT_CONTINUE_ID = "continue-tower-connect";
-export const TOWER_CONNECT_BACK_ID = "back-tower-connect";
 /** Continue and Back on Claim Hunters. Back keeps every claim. */
 export const PARTY_JOIN_CONTINUE_ID = "continue-party-join";
 export const PARTY_JOIN_BACK_ID = "back-party-join";

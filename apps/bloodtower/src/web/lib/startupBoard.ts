@@ -205,9 +205,7 @@ export const waitingFor = (view: BoardView): string => {
     case "tower-wake":
       return "Waiting for the tower.";
     case "pick-story":
-      return volumeLine(view)
-        ? "Waiting for an iPad to set the volume."
-        : "Waiting for an iPad to choose a story.";
+      return "Waiting for an iPad to choose a story.";
     case "game-settings":
       return "Waiting for an iPad to confirm these settings.";
     case "claim-heroes": {
