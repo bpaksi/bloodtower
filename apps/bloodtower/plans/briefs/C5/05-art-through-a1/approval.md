@@ -51,14 +51,6 @@ One line per asset id in `packs/test/assets/index.json`; EV-05 checks every id i
 - [ ] vo.loremaster.finale_win_shattered — approved by Bob 
 - [ ] vo.loremaster.finale_win_oath — approved by Bob 
 - [ ] vo.loremaster.finale-loss — approved by Bob 
-- [ ] avatar.loremaster portrait — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster anchor — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-A — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-B — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-C — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-D — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-E — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-F — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-G — pending Bob ruling (8 AM Nov 1)
-- [ ] avatar.loremaster mouth-H — pending Bob ruling (8 AM Nov 1)
-- [ ] cover — pending Bob ruling (8 AM Nov 1)
+- [ ] painting.cover — 16:9 Ruined Keep cover for 1.0 (Bob locked Nov 2 2026 via Warden)
+
+Change note 2026-11-02: avatar.loremaster (portrait, anchor, mouth-A–H) removed — talking portrait deferred, not in 1.0 (Bob, Nov 1: Loremaster is audio + captions). Cover locked as painting.cover. Small tweak; no re-approval per Bob's Nov 1 rule.
