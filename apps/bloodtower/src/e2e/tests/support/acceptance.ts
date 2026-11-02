@@ -13,6 +13,8 @@ export interface AcceptanceHost {
   tower: MockTower;
   baseURL: string;
   databasePath: string;
+  /** The next `tower.connect` waits until the returned function is called. */
+  holdNextConnect: () => () => void;
 }
 
 /**
@@ -45,13 +47,26 @@ export const startAcceptanceHost = async (
     for (const suffix of ["", "-wal", "-shm"]) rmSync(`${databasePath}${suffix}`, { force: true });
   }
   const tower = createMockTower();
+  const base = bloodtowerTowerFromMock(tower);
+  let held: Promise<void> | null = null;
+  const gated: typeof base = {
+    ...base,
+    runCapability: async (capabilityId, params, log) => {
+      if (capabilityId === "tower.connect" && held) {
+        const wait = held;
+        held = null;
+        await wait;
+      }
+      return base.runCapability(capabilityId, params, log);
+    },
+  };
   const host = await startSessionHost({
     port: 0,
     host: "127.0.0.1",
     webRoot: WEB_ROOT,
     packsDir: config.packsDir,
     databasePath,
-    tower: bloodtowerTowerFromMock(tower),
+    tower: gated,
     towerWatchMs: 50,
     // The volume test waits about 4 s between sounds; the e2e run does not.
     sleep: async () => undefined,
@@ -59,7 +74,14 @@ export const startAcceptanceHost = async (
     graceMs: options?.graceMs ?? 100,
     lanHost: options?.lanHost,
   });
-  return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath };
+  const holdNextConnect = () => {
+    let release = () => {};
+    held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    return release;
+  };
+  return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath, holdNextConnect };
 };
 
 /** Let bt-ink-in (and other finite animations) finish before board screenshots. */
@@ -191,6 +213,7 @@ const PLAY_PRESS_PREFERENCE = ["continue", "record", "end-turn", "leave", "enter
 const PLAY_PRESS_SKIP = new Set([
   "quit-story",
   "reconnect",
+  "go-on-without",
   "new-game",
   "done-for-tonight",
   "back",

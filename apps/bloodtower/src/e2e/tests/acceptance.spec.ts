@@ -148,8 +148,10 @@ test("quit from pause lands on session; continue resumes after host restart", as
     tower.loseConnection();
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 30_000 });
 
+    // Quit asks first; Leave is the press (DEC-301).
+    await page.locator('button[data-pause-ask="quit-story"]').click();
     const quit = deviceMain(page).locator('button[data-action-id="quit-story"]');
-    await expect(quit).toHaveText("Quit story");
+    await expect(quit).toHaveText("Leave");
     await expect(page.getByRole("button", { name: "Quit game" })).toHaveCount(0);
     const quitPrompt = await quit.getAttribute("data-prompt-id");
     expect(quitPrompt).toMatch(/^pause-\d+-quit$/);

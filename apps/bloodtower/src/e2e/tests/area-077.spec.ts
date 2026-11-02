@@ -365,6 +365,13 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
         await settle(device, before);
         continue;
       }
+      // Without the tower the app draws the drop; the iPad only acknowledges it (DEC-305).
+      const drop = device.locator('button[data-prompt-id^="skull-sim-day-"]');
+      if ((await drop.count()) > 0) {
+        await drop.click();
+        await settle(device, before);
+        continue;
+      }
       const record = device.locator('button[data-action-id="record"]');
       if ((await record.count()) > 0) {
         const inside = device.locator('button[data-prompt-id$="--inside"]');
@@ -562,10 +569,8 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
     await finishSetup(device);
     await clickAct(device, "continue");
     await device.locator('[data-action="menu"]').click();
-    const menuConnect = device.locator('button[data-prompt-id="menu-connect"]');
-    await expect(menuConnect).toBeVisible();
-    await expect(menuConnect).toHaveAccessibleName("Connect Tower");
-    await expect(menuConnect).toHaveAttribute("data-action", "tower-connect");
+    // A game that never had the tower reaches it from the Menu's Tower item (DEC-301).
+    await expect(device.locator('button[data-gear-item="tower"]')).toBeEnabled();
     await device.locator('[data-action="menu"]').click();
     const before = await readStatus(device);
     expect(Number(before.moves)).toBeGreaterThanOrEqual(2);
@@ -654,7 +659,8 @@ test("AREA-077 a connected tower pauses on drop and a never-connected one does n
     linked.tower.loseConnection();
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "pause", { timeout: 20_000 });
     await expect(device.locator('button[data-action-id="reconnect"]')).toBeVisible();
-    await expect(device.locator('button[data-action-id="quit-story"]')).toBeVisible();
+    await expect(device.locator('button[data-pause-ask="go-on-without"]')).toBeVisible();
+    await expect(device.locator('button[data-pause-ask="quit-story"]')).toBeVisible();
   } finally {
     await context.close();
     await linked.host.close();
