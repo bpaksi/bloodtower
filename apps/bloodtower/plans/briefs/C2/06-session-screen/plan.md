@@ -12,6 +12,13 @@ Keep this a checklist; do not write a second design doc.
 - Mockup: ./mockup.html
 - Risk: High (session state, autosave, tower)
 - Touches: as feature 05, plus `apps/bloodtower/src/web/components/GoodbyeTeardown.tsx` and `apps/bloodtower/src/web/lib/goodbye.ts` (deleted), `apps/bloodtower/src/server/core/goodbyeIdle*.ts`
+  - Added by the build (one-line reasons):
+    - `apps/bloodtower/README.md` (the setup flow and Quit story paragraph named Pick Game)
+    - `apps/bloodtower/src/web/components/device/{gearMenu.ts,chromeBar.test.ts}` (every Menu item is disabled with "The session is over." after Done for tonight, EV-17)
+    - `apps/bloodtower/src/web/components/device/LiveDevice.tsx` (the `goodbye` screen id became `session-over`, and the waiting view no longer names `pick-game`; the iPad lets go on `session-over`, EV-14, EV-17)
+    - `apps/bloodtower/src/web/components/board/DialogFrame.tsx` (the paint-in line selector named `.bt-teardown`, now `.bt-session-rows`, EV-15)
+    - `apps/bloodtower/src/web/components/errors/errors.test.ts`, `apps/bloodtower/src/web/lib/session.test.ts` (their fixtures used the removed `pick-game` screen and prompt ids)
+    - `apps/bloodtower/src/protocols/control.ts` and `apps/bloodtower/src/web/lib/audio/layers.ts` (feature 05 already lists them; here `pick-game` and `goodbye` leave `FLOW_SCREENS` and the audio layers for `session-over`, EV-14)
 - Size: may pass 400 lines; the same review split as feature 05 applies.
 
 ## Cutover

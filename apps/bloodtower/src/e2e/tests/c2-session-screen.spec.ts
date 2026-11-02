@@ -605,3 +605,88 @@ test("Tower lost: Continue runs the tower block before the resumed game (EV-08)"
     await session.host.close();
   }
 });
+
+/**
+ * A fresh evening: no games tonight and no autosave. Play cannot reach this by itself (a game
+ * is recorded when it begins), so the stopped host's last checkpoint is emptied and the host
+ * restarts on it, which puts the evening back on the session screen (EV-15).
+ */
+const emptyTonight = (databasePath: string) =>
+  withDatabase(databasePath, (opened) => {
+    const store = createEventStore(opened.db);
+    const row = store.latestCheckpoint();
+    if (!row) throw new Error("No checkpoint to empty.");
+    const raw = JSON.parse(row.stateJson) as Record<string, unknown>;
+    store.writeCheckpoint({
+      gameId: row.gameId,
+      day: row.day,
+      afterEventSeq: row.afterEventSeq,
+      stateJson: JSON.stringify({ ...raw, games: [], autosave: null, screen: "session" }),
+      atMonoMs: row.atMonoMs + 1,
+      atWall: row.atWall,
+      seed: row.seed,
+      packVersion: row.packVersion,
+      engineVersion: row.engineVersion,
+    });
+    store.clearAutosave();
+  });
+
+test("a fresh evening: No games yet tonight., no Continue, no delete (EV-15)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(300_000);
+  const seed = "c2-06-fresh";
+  const first = await startAcceptanceHost(testInfo, { seed });
+  const { databasePath } = first;
+  const contexts: BrowserContext[] = [];
+  try {
+    const pad = await openPad(browser, first.baseURL, first.host.joinCode);
+    contexts.push(pad.context);
+    await playOneGame(pad.page, "without");
+  } finally {
+    await closeAll(contexts);
+    await first.host.close();
+  }
+  emptyTonight(databasePath);
+
+  const restarted = await startAcceptanceHost(testInfo, { databasePath, seed });
+  const next: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, restarted.baseURL);
+    next.push(board.context);
+    const pad = await openPad(browser, restarted.baseURL, restarted.host.joinCode);
+    next.push(pad.context);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "session", {
+      timeout: 30_000,
+    });
+    await expect(boardMain(board.page)).toHaveAttribute("data-screen", "session");
+
+    for (const [name, page] of [
+      ["board", board.page],
+      ["ipad", pad.page],
+    ] as const) {
+      const screen = page.locator("[data-screen]").first();
+      await expect(screen.getByText("No games yet tonight.")).toBeVisible();
+      await expect(screen.getByText("Continue", { exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /delete|remove/i })).toHaveCount(0);
+      expect(
+        await page
+          .locator("[aria-label]")
+          .evaluateAll(
+            (nodes) =>
+              nodes.filter((node) => /delete|remove/i.test(node.getAttribute("aria-label") ?? ""))
+                .length,
+          ),
+        `${name}: no aria-label names delete or remove`,
+      ).toBe(0);
+      await shot(page, `fresh-${name}`, testInfo);
+    }
+    // Board: no buttons at all. iPad: body buttons are New game and Done for tonight only.
+    await noButtons(boardMain(board.page));
+    expect(await bodyLabels(pad.page)).toEqual(["New game", "Done for tonight"]);
+    expect(await bodyLabels(pad.page)).not.toContain("Continue");
+  } finally {
+    await closeAll(next);
+    await restarted.host.close();
+  }
+});
