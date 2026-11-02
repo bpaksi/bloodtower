@@ -263,7 +263,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   if (e.kind === "tower-result") {
     const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
     bindShellState(next);
-    applyTowerResult(next, e.capabilityId, e.ok);
+    applyTowerResult(next, e.capabilityId, e.ok, effects);
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
@@ -344,7 +344,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     // The fun rating on a game's stats; it changes nothing else (SCR-019).
     if (state.screen === "session" && state.statsGame !== null && e.settingId === RATING_SETTING) {
       const next = { ...state, eventSeq: eventSeq + 1 };
-      rateOpenGame(next, e.optionId);
+      rateOpenGame(next, e.optionId, effects);
       effects.push({ kind: "view-refresh", v: 1 });
       return withEffects(next, effects);
     }
@@ -455,7 +455,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     ) {
       next.towerChoice = "without";
       next.towerLinked = false;
-      finishEnter(next);
+      finishEnter(next, effects);
     } else if (e.promptId === "menu-connect" && e.actionId === "tower-connect") {
       next.towerLinked = true;
       next.tower = {

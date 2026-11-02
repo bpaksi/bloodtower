@@ -3,6 +3,7 @@ import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts"
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
 import { enterWithoutEvents } from "./enterKit.ts";
+import { beginNewGame, rateOpenGame } from "./hub.ts";
 import { TEST_STORY } from "./pack.ts";
 import { initialShellState, type ShellState } from "./state.ts";
 import { stepShell } from "./stepShell.ts";
@@ -381,5 +382,93 @@ describe("C2/07 play again", () => {
     expect(levelOf(state, "session-games")?.shows).toBe("Game 2 quit\nGame 1 quit");
     // Game 1's own start is still the one Play again reads.
     expect(state.games[0]?.holdings).toEqual(ended.games[0]?.holdings);
+  });
+});
+
+describe("C2/07 refused presses are errors, not silence", () => {
+  const withoutSave = (state: ShellState): ShellState => ({ ...state, autosave: null });
+  const refusals = (result: ReturnType<typeof stepShell>) =>
+    result.effects.filter((effect) => effect.kind === "press-error");
+
+  it("Play again on a story that is gone changes nothing and reports invalid-state", () => {
+    const opened = step(withoutSave(quit(reachPlay())), press("session-game-1", "open-game"));
+    const result = stepShell({ ...opened, stories: [] }, press("stats-play-again", "play-again"));
+    expect(result.state.screen).toBe("session");
+    expect(result.state.playAgain).toBe(false);
+    expect(refusals(result)).toEqual([
+      expect.objectContaining({ code: "invalid-state", message: expect.stringContaining("story") }),
+    ]);
+  });
+
+  it("Play again on a story that is not playable reports invalid-state", () => {
+    const opened = step(withoutSave(quit(reachPlay())), press("session-game-1", "open-game"));
+    const stories = opened.stories.map((story) => ({
+      ...story,
+      card: { ...story.card, playable: false },
+    }));
+    const result = stepShell({ ...opened, stories }, press("stats-play-again", "play-again"));
+    expect(result.state.screen).toBe("session");
+    expect(refusals(result)).toHaveLength(1);
+  });
+
+  it("a Play again that starts reports nothing", () => {
+    const opened = step(withoutSave(quit(reachPlay())), press("session-game-1", "open-game"));
+    const result = stepShell(opened, press("stats-play-again", "play-again"));
+    expect(result.state.screen).toBe("claim-heroes");
+    expect(refusals(result)).toEqual([]);
+  });
+
+  it("a rating outside 1 to 5 is kept out and reported", () => {
+    const opened = step(quit(reachPlay()), press("session-game-1", "open-game"));
+    for (const optionId of ["9", "0", "2.5", "abc"]) {
+      const result = stepShell(opened, {
+        kind: "set-setting",
+        v: 1,
+        deviceId: "ipad-0",
+        settingId: "fun-rating",
+        optionId,
+      });
+      expect(result.state.games[0]?.rating).toBeNull();
+      expect(refusals(result)).toEqual([
+        expect.objectContaining({
+          code: "invalid-state",
+          message: expect.stringContaining("1 to 5"),
+        }),
+      ]);
+    }
+  });
+
+  it("a rating with no game open is reported", () => {
+    const effects: Parameters<typeof rateOpenGame>[2] = [];
+    rateOpenGame(quit(reachPlay()), "3", effects);
+    expect(effects).toEqual([
+      expect.objectContaining({ kind: "press-error", code: "invalid-state" }),
+    ]);
+  });
+
+  it("a valid rating reports nothing", () => {
+    const opened = step(quit(reachPlay()), press("session-game-1", "open-game"));
+    const result = stepShell(opened, {
+      kind: "set-setting",
+      v: 1,
+      deviceId: "ipad-0",
+      settingId: "fun-rating",
+      optionId: "3",
+    });
+    expect(refusals(result)).toEqual([]);
+  });
+
+  it("New game after Play again gets its own seed (DEC-217)", () => {
+    const ended = withoutSave(quit(reachPlay()));
+    const again = step(
+      ended,
+      press("session-game-1", "open-game"),
+      press("stats-play-again", "play-again"),
+    );
+    const fresh = { ...again };
+    beginNewGame(fresh);
+    expect(fresh.screen).toBe("pick-story");
+    expect(fresh.seed).not.toBe(again.seed);
+    expect(fresh.seed).not.toBe(ended.seed);
   });
 });

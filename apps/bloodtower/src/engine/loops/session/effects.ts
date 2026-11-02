@@ -32,12 +32,21 @@ export const checkpointWriteEffectV1 = z.object({
   day: z.number().int().min(1),
 });
 
+/** A press the engine could not honour. The host logs it, toasts the board and tells the pressing iPad. */
+export const pressErrorEffectV1 = z.object({
+  kind: z.literal("press-error"),
+  v: z.literal(1),
+  code: z.literal("invalid-state"),
+  message: z.string().min(1).max(300),
+});
+
 export const shellEffectSchema = z.discriminatedUnion("kind", [
   viewRefreshEffectV1,
   autosaveWriteEffectV1,
   gameRecordEffectV1,
   towerCommandEffectV1,
   checkpointWriteEffectV1,
+  pressErrorEffectV1,
 ]);
 
 export type ShellEffect = z.infer<typeof shellEffectSchema>;

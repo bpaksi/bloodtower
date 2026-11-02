@@ -1,4 +1,6 @@
+import type { EngineEffect } from "../../effects.ts";
 import type { LoopContext } from "../../loop/types.ts";
+import type { ShellEffect } from "./effects.ts";
 import { beginContinue, beginNewGame, beginPlayAgain, toPickStory } from "./hub.ts";
 import { recordOffer } from "./shellRef.ts";
 import type { EnterStep, ShellState } from "./state.ts";
@@ -59,7 +61,10 @@ export const firstDeviceJoined = (state: ShellState): boolean => {
  * The Enter is done. Pick story follows, with Continue above the stories while an autosave waits.
  * When the session screen ran the tower block again, the New game or Continue it came from goes on.
  */
-export const finishEnter = (state: ShellState): void => {
+export const finishEnter = (
+  state: ShellState,
+  effects: Array<EngineEffect | ShellEffect>,
+): void => {
   const then = state.enterThen;
   state.enter = null;
   state.enterThen = null;
@@ -67,7 +72,7 @@ export const finishEnter = (state: ShellState): void => {
     beginContinue(state);
     return;
   }
-  if (then === "play-again") beginPlayAgain(state);
+  if (then === "play-again") beginPlayAgain(state, effects);
   else if (then === "new-game") beginNewGame(state);
   else toPickStory(state);
 };
@@ -77,6 +82,7 @@ export const applyTowerResult = (
   state: ShellState,
   capabilityId: "tower.connect" | "tower.calibrate",
   ok: boolean,
+  effects: Array<EngineEffect | ShellEffect>,
 ): void => {
   const step = state.enter?.step;
   if (capabilityId === "tower.connect" && step === "connecting") {
@@ -84,7 +90,7 @@ export const applyTowerResult = (
   } else if (capabilityId === "tower.calibrate" && step === "calibrating") {
     if (ok) {
       state.towerChoice = "connect";
-      finishEnter(state);
+      finishEnter(state, effects);
       return;
     }
     state.enter = { step: "choice", failed: true };

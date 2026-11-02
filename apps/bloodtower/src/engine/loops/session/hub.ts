@@ -131,6 +131,8 @@ export const beginContinue = (state: ShellState): void => {
 
 // Pick story for a fresh game, with nothing carried over from an earlier one.
 export const toPickStory = (state: ShellState): void => {
+  // After Play again the state still holds that game's seed; a fresh game gets its own (DEC-217).
+  if (state.playAgain) state.seed = playAgainSeed(state);
   state.confirm = null;
   state.statsGame = null;
   state.playAgain = false;
@@ -165,12 +167,25 @@ export const playAgainSeed = (state: ShellState): string =>
  * and Game settings are skipped; claims come prefilled where that iPad is still joined (DEC-216).
  * Like New game, Continue is hidden until Begin writes the next autosave (DEC-709).
  */
-export const beginPlayAgain = (state: ShellState): void => {
+export const beginPlayAgain = (
+  state: ShellState,
+  effects: Array<EngineEffect | ShellEffect>,
+): void => {
   const game = state.statsGame === null ? undefined : state.games[state.statsGame - 1];
   const story = game ? state.stories.find((entry) => entry.card.id === game.storyId) : undefined;
   state.confirm = null;
   state.statsGame = null;
-  if (!game || !story?.card.playable) return;
+  if (!game || !story?.card.playable) {
+    effects.push({
+      kind: "press-error",
+      v: 1,
+      code: "invalid-state",
+      message: !game
+        ? "Play again has no game to replay."
+        : "That story cannot be played right now, so Play again did not start.",
+    });
+    return;
+  }
   state.seed = playAgainSeed(state);
   state.resumedFromAutosave = false;
   state.activeGameId = `game-${state.eventSeq}`;
@@ -256,11 +271,11 @@ export const applyHubPress = (
   }
   if (promptId === STATS_PLAY_AGAIN_PROMPT && state.confirm === null && state.statsGame !== null) {
     if (canContinue(state)) state.confirm = "play-again";
-    else if (!towerBlockFirst(state, "play-again")) beginPlayAgain(state);
+    else if (!towerBlockFirst(state, "play-again")) beginPlayAgain(state, effects);
     return;
   }
   if (promptId === PLAY_AGAIN_CONFIRM_PROMPT && state.confirm === "play-again") {
-    if (!towerBlockFirst(state, "play-again")) beginPlayAgain(state);
+    if (!towerBlockFirst(state, "play-again")) beginPlayAgain(state, effects);
     return;
   }
   if (promptId === DONE_PROMPT && state.confirm === null) {
@@ -322,10 +337,24 @@ export const statsLines = (game: TonightGame, storyTitle: string): string[] => [
   `Skull drops recorded: ${count(game.skulls)}`,
 ];
 
-/** The fun rating on the open stats screen. Anything outside 1 to 5 is ignored. */
-export const rateOpenGame = (state: ShellState, optionId: string): void => {
+/** The fun rating on the open stats screen. Anything outside 1 to 5 is an error, not a silent skip. */
+export const rateOpenGame = (
+  state: ShellState,
+  optionId: string,
+  effects: Array<EngineEffect | ShellEffect>,
+): void => {
   const game = state.statsGame === null ? undefined : state.games[state.statsGame - 1];
   const rating = Number(optionId);
-  if (!game || !Number.isInteger(rating) || rating < 1 || rating > 5) return;
+  if (!game || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+    effects.push({
+      kind: "press-error",
+      v: 1,
+      code: "invalid-state",
+      message: game
+        ? "That rating was not saved. Pick 1 to 5."
+        : "That rating was not saved because no game is open.",
+    });
+    return;
+  }
   state.games = state.games.map((row) => (row === game ? { ...row, rating } : row));
 };
