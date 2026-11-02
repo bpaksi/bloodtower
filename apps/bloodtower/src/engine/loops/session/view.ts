@@ -78,6 +78,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "quit-story") return promptId.startsWith("pause-") ? "Quit" : "Quit story";
   if (actionId === "reconnect") return "Reconnect";
   if (actionId === "go-on-without") return "Go on without";
+  if (actionId === "reconnect-cancel") return "Cancel";
   if (promptId === "tower-connect" && actionId === "tower-connect") return "Connect Tower";
   if (actionId === "play-without-tower") return "Play without Tower";
   if (promptId === "tower-calibrate" && actionId === "tower-calibrate") return "Calibrate";
@@ -116,7 +117,7 @@ const simulatedSkullLine = (state: ShellState): string | null => {
   const lines = ensureClock(play).nightDrops.map((drop) => {
     const space = play.content.board.spaceById.get(drop.spaceId);
     const building = space?.building ? buildingTitle(space.building) : "a building";
-    return `A skull falls on ${building}, ${space?.name ?? drop.spaceId}.`;
+    return `A skull falls on ${building}.`;
   });
   return lines.length > 0 ? lines.join(" ").slice(0, 120) : null;
 };

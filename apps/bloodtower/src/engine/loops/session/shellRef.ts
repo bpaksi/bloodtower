@@ -87,9 +87,17 @@ export const ensurePauseOffers = (state: ShellState): void => {
 
 /** The tower check a Reconnect runs asks for one press: Calibrate (MEC-018, as C1 built it). */
 export const ensureReconnectOffers = (state: ShellState): void => {
-  if (state.reconnect?.step !== "calibrate") return;
-  if (!state.offered.some((o) => o.promptId === "tower-calibrate")) {
-    state.offered.push({ promptId: "tower-calibrate", actionId: "tower-calibrate", open: true });
+  const running = state.reconnect;
+  if (!running) return;
+  const offer = (promptId: string, actionId: string) => {
+    if (!state.offered.some((o) => o.promptId === promptId && o.actionId === actionId)) {
+      state.offered.push({ promptId, actionId, open: true });
+    }
+  };
+  if (running.step === "calibrate") offer("tower-calibrate", "tower-calibrate");
+  // Only the Menu's Reconnect can be cancelled; the pause's has no body button (EV-13).
+  if (running.origin === "menu" && running.step !== "calibrating") {
+    offer("reconnect-cancel", "reconnect-cancel");
   }
 };
 

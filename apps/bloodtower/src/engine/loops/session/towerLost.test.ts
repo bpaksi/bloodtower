@@ -128,7 +128,7 @@ describe("C2/08 the simulated skull drop (DEC-305)", () => {
       if (pick.promptId.startsWith("skull-sim-day-")) {
         skullDays += 1;
         const view = projectShellView(state);
-        expect(view.table?.waitingFor).toMatch(/^A skull falls on /);
+        expect(view.table?.waitingFor).toMatch(/^A skull falls on [^,]+\.$/);
       }
       const result = stepShell(state, press(pick.promptId, pick.actionId));
       for (const effect of result.effects) {
@@ -223,7 +223,7 @@ describe("C2/08 review round 1", () => {
     expect(open(resumed).map((offer) => offer.actionId)).toEqual(expect.arrayContaining(before));
   });
 
-  it("the Tower panel's Play without is refused before the Enter", () => {
+  it("the Tower panel's Go on without is refused before the Enter", () => {
     const state = start("seed-g");
     const result = stepShell(state, {
       kind: "gear",
@@ -231,7 +231,7 @@ describe("C2/08 review round 1", () => {
       deviceId: "ipad-0",
       action: "done",
       item: "tower",
-      pick: "Play without",
+      pick: "Go on without",
     });
     expect(result.state.towerWithout).toBe(false);
     expect(result.effects).toContainEqual(
@@ -248,7 +248,7 @@ describe("C2/08 the Menu's Tower item (DEC-229, UI-033)", () => {
     return step(state, press(without?.promptId ?? "", "go-on-without"));
   };
 
-  it("EV-07 the Tower panel offers Reconnect and Play without, then reconnects on Yes", () => {
+  it("EV-07 the Tower panel offers Reconnect and Go on without, then reconnects on Yes", () => {
     let state = goneWithout();
     const gear = projectShellView(state).gear;
     expect(gear?.towerConnected).toBe(false);
@@ -288,6 +288,38 @@ describe("C2/08 the Menu's Tower item (DEC-229, UI-033)", () => {
     expect(state.towerWithout).toBe(false);
     expect(state.towerLinked).toBe(true);
     expect(state.towerChoice).toBe("connect");
+  });
+
+  it("EV-07 Cancel on the Menu's Reconnect returns to the Tower panel, playing without", () => {
+    let state = goneWithout();
+    state = step(
+      state,
+      { kind: "gear", v: 1, deviceId: "ipad-0", action: "open", item: "tower" },
+      { kind: "gear", v: 1, deviceId: "ipad-0", action: "done", item: "tower", pick: "Reconnect" },
+    );
+    expect(state.screen).toBe("tower-wake");
+    expect(labels(state)).toEqual(["Cancel"]);
+    state = step(state, press("reconnect-cancel", "reconnect-cancel"));
+    expect(state.screen).toBe("play");
+    expect(state.stage).toBe("playing");
+    expect(state.pause).toBeNull();
+    expect(state.reconnect).toBeNull();
+    expect(state.towerLinked).toBe(false);
+    expect(state.towerWithout).toBe(true);
+    expect(projectShellView(state).gear?.panel).toBe("tower");
+    // A late connect result after Cancel changes nothing.
+    state = step(state, { kind: "tower-result", v: 1, capabilityId: "tower.connect", ok: true });
+    expect(state.screen).toBe("play");
+    expect(state.towerWithout).toBe(true);
+  });
+
+  it("EV-13 the pause's Reconnect has no Cancel", () => {
+    let state = toPlay("seed-i", "connect");
+    state = step(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED });
+    const reconnect = open(state).find((offer) => offer.actionId === "reconnect");
+    state = step(state, press(reconnect?.promptId ?? "", "reconnect"));
+    expect(state.reconnect?.origin).toBe("pause");
+    expect(open(state).map((offer) => offer.actionId)).not.toContain("reconnect-cancel");
   });
 
   it("EV-07 a failed menu Reconnect leaves the game playing without the tower", () => {

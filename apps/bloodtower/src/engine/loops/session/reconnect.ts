@@ -15,7 +15,9 @@ export const pauseQuitPrompt = (serial: number): string => `pause-${serial}-quit
 
 /** The gear Tower panel's two picks (Bob 2026-10-31, DEC-229). The pick text is what the board mirrors. */
 export const TOWER_PICK_RECONNECT = "Reconnect";
-export const TOWER_PICK_WITHOUT = "Play without";
+export const RECONNECT_CANCEL_PROMPT = "reconnect-cancel";
+
+export const TOWER_PICK_WITHOUT = "Go on without";
 
 /** The screen a tower-lost pause came from, or null when a game is not in a state that pauses. */
 export const pauseReturnOf = (state: ShellState): PauseReturn | null => {
@@ -85,6 +87,20 @@ export const startReconnect = (
   effects.push({ kind: "tower-command", v: 1, capabilityId: "tower.connect", params: {} });
 };
 
+/**
+ * Cancel on a Reconnect the Menu started: the game keeps playing without the tower and the
+ * iPad that pressed is back on the Tower panel. The pause path has no Cancel (EV-13).
+ */
+export const cancelMenuReconnect = (state: ShellState, deviceId: string): void => {
+  if (state.reconnect?.origin !== "menu") return;
+  state.towerLinked = false;
+  resumeAfterTowerPause(state);
+  state.gearPanel = "tower";
+  state.gearOwner = deviceId;
+  state.gearPaused = true;
+  state.gearPicked = null;
+};
+
 /** The connect or the tower check ended. Success goes on; failure goes back to where it began. */
 export const endReconnect = (state: ShellState, ok: boolean): void => {
   const running = state.reconnect;
@@ -106,7 +122,7 @@ export const endReconnect = (state: ShellState, ok: boolean): void => {
   resumeAfterTowerPause(state);
 };
 
-/** The Menu's Tower panel: Yes on Reconnect, or Done on Play without. */
+/** The Menu's Tower panel: Yes on Reconnect, or Done on Go on without. */
 export const applyTowerPick = (state: ShellState, pick: string, effects: Effects): void => {
   if (pick === TOWER_PICK_RECONNECT) {
     if (state.pause?.cause === "tower-lost") startReconnect(state, "pause", effects);

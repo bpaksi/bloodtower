@@ -204,7 +204,7 @@ function GearDevicePanel({
         </div>
       ) : null}
       {gear.panel === "tower" ? (
-        gear.picked === "Reconnect" || gear.picked === "Play without" ? (
+        gear.picked === "Reconnect" || gear.picked === "Go on without" ? (
           <div className="mt-6 flex flex-col gap-3" data-tower-confirm={gear.picked}>
             <p>Are you sure?</p>
             <button
@@ -218,7 +218,7 @@ function GearDevicePanel({
           </div>
         ) : (
           <div className="mt-6 flex flex-col gap-3">
-            {(["Reconnect", "Play without"] as const).map((pick) => (
+            {(["Reconnect", "Go on without"] as const).map((pick) => (
               <button
                 key={pick}
                 type="button"

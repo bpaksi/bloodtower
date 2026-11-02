@@ -23,8 +23,6 @@ import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 
 const BOARD = { width: 1920, height: 1080 } as const;
 const IPAD = { width: 768, height: 1024 } as const;
-/** EV-09 compares an iPad at 1024×768. */
-const IPAD_LANDSCAPE = { width: 1024, height: 768 } as const;
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
 const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
@@ -219,7 +217,7 @@ const playToSimulatedDrop = async (pad: Page, board: Page) => {
   }
   await expect(drop).toBeVisible();
   const line = boardMain(board).locator("[data-waiting]");
-  await expect(line).toContainText(/^A skull falls on /);
+  await expect(line).toContainText(/^A skull falls on [^,]+\.$/);
   return (await line.innerText()).trim();
 };
 
@@ -281,9 +279,8 @@ test("connect track: the pause, Go on without, and the stand-ins (EV-01, 02, 03,
     await expect(boardMain(board.page).locator("button")).toHaveCount(0);
     await expect(deviceMain(pad.page).locator("[data-step-instruction]")).toHaveText(QUIET_LINE);
 
-    // EV-09: the pause at 1920×1080 and on an iPad at 1024×768.
+    // EV-09: the pause at 1920×1080 and on an iPad at 768×1024.
     await shot(board.page, "pause-board", testInfo);
-    await pad.page.setViewportSize(IPAD_LANDSCAPE);
     await shot(pad.page, "pause-ipad", testInfo);
 
     // EV-13, EV-03: Go on without asks first; Back returns to the pause.
@@ -296,7 +293,6 @@ test("connect track: the pause, Go on without, and the stand-ins (EV-01, 02, 03,
     await expect(bodyButtons(pad.page).first()).toHaveClass(/bt-primary/);
     await shot(pad.page, "go-on-without-confirm-ipad", testInfo);
     await shot(board.page, "go-on-without-confirm-board", testInfo);
-    await pad.page.setViewportSize(IPAD);
     await pad.page.locator("[data-pause-back]").click();
     await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Quit"]);
 
@@ -332,6 +328,7 @@ test("connect track: the pause, Go on without, and the stand-ins (EV-01, 02, 03,
     await expect(boardMain(board.page)).toContainText("Calling the tower back...");
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "tower-wake");
     await expect(bodyButtons(pad.page)).toHaveCount(0);
+    await expect(pad.page.locator('button[data-action-id="reconnect-cancel"]')).toHaveCount(0);
     release();
     const check = pad.page.locator('button[data-prompt-id="tower-calibrate"]');
     await expect(check).toBeEnabled({ timeout: 20_000 });
@@ -415,14 +412,27 @@ test("Go on without: confirm, no tower command, the board names the drop, the Me
       "without the tower",
     );
     await expect(deviceMain(pad.page).locator("h2")).toHaveText("See the Story board");
-    await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Play without", "Done"]);
+    await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Done"]);
     await pad.page.locator('[data-tower-pick="Reconnect"]').click();
     await expect(boardMain(board.page).locator("[data-picked]")).toHaveText("Reconnect");
     await expect.poll(() => bodyLabels(pad.page)).toEqual(["Yes", "Back"]);
     await bodyButtons(pad.page).getByText("Back", { exact: true }).click();
-    await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Play without", "Done"]);
+    await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Done"]);
     await pad.page.locator('[data-tower-pick="Reconnect"]').click();
     expect(types(tower).length).toBe(tower.sent().length);
+
+    // Cancel: the Menu's Reconnect offers Cancel beside Calibrate; it returns to the Tower panel.
+    await bodyButtons(pad.page).getByText("Yes", { exact: true }).click();
+    await expect(pad.page.locator('button[data-prompt-id="tower-calibrate"]')).toBeEnabled({
+      timeout: 20_000,
+    });
+    const cancel = pad.page.locator('button[data-action-id="reconnect-cancel"]');
+    await expect(cancel).toHaveText("Cancel");
+    await cancel.click();
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
+    await expect(boardMain(board.page).locator('[data-panel="tower"]')).toBeVisible();
+    await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Done"]);
+    await pad.page.locator('[data-tower-pick="Reconnect"]').click();
 
     // Yes connects and runs the tower check; the rest of the game uses the tower again.
     await bodyButtons(pad.page).getByText("Yes", { exact: true }).click();

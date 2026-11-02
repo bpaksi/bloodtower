@@ -11,7 +11,9 @@ Keep this a checklist; do not write a second design doc.
 - Evals: ./eval.md
 - Mockup: ./mockup.html
 - Risk: High (tower safety, seeded draws, restore)
-- Touches: `apps/bloodtower/src/engine/loops/{session,game,play,day}/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/protocols/v2/**`, `apps/bloodtower/src/server/core/**`, `apps/bloodtower/src/web/components/board/{CoreStoryBoard,WaitingDialog}.tsx`, `apps/bloodtower/src/web/components/device/{CoreDeviceScreen,ChromeBar}.tsx`, `apps/bloodtower/src/e2e/tests/{area-077,acceptance}.spec.ts`, `apps/bloodtower/src/e2e/tests/c2-tower-lost.spec.ts` (new)
+- Touches: `apps/bloodtower/src/engine/loops/{session,game,play,day}/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/protocols/v2/**`, `apps/bloodtower/src/server/core/**`, `apps/bloodtower/src/web/components/board/{CoreStoryBoard,WaitingDialog}.tsx`, `apps/bloodtower/src/web/components/device/{CoreDeviceScreen,ChromeBar}.tsx`, `apps/bloodtower/src/web/components/device/gearMenu.ts`, `apps/bloodtower/src/web/components/board/GearBoardPanel.tsx`, `apps/bloodtower/src/e2e/tests/{area-077,acceptance}.spec.ts`, `apps/bloodtower/src/e2e/tests/c2-tower-lost.spec.ts` (new)
+
+- Fix round 2 small tweaks under Bob's 11/1 rule: Touches widened (GearBoardPanel, gearMenu); 'Go on without' everywhere; menu Reconnect Cancel; skull line drops space; iPad shot 768x1024.
 
 ## Cutover
 

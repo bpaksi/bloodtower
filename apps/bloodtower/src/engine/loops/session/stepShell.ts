@@ -31,7 +31,14 @@ import {
 } from "./hub.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
-import { applyTowerPick, goOnWithout, pauseReturnOf, startReconnect } from "./reconnect.ts";
+import {
+  applyTowerPick,
+  cancelMenuReconnect,
+  goOnWithout,
+  pauseReturnOf,
+  RECONNECT_CANCEL_PROMPT,
+  startReconnect,
+} from "./reconnect.ts";
 import { SESSION_ROOT_LOOP_ID } from "./registry.ts";
 import {
   bindShellState,
@@ -499,6 +506,12 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     ) {
       next.reconnect = { ...next.reconnect, step: "calibrating" };
       effects.push({ kind: "tower-command", v: 1, capabilityId: "tower.calibrate", params: {} });
+    } else if (
+      e.promptId === RECONNECT_CANCEL_PROMPT &&
+      e.actionId === "reconnect-cancel" &&
+      next.reconnect?.origin === "menu"
+    ) {
+      cancelMenuReconnect(next, e.deviceId);
     } else if (
       e.actionId === "quit-story" &&
       (e.promptId === "menu-quit" || (next.pause && e.promptId.startsWith("pause-")))
