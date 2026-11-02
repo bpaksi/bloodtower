@@ -127,6 +127,10 @@ const resumeLoopsOrPauseOffers = (
     ensureReconnectOffers(next);
     return;
   }
+  if (next.pause?.cause === "tower-lost") {
+    // The stopped loops' open prompt is stale; they offer again when play goes on.
+    next.loops.prompt = null;
+  }
   if (next.pause && next.screen === "pause") {
     ensurePauseOffers(next);
     return;
@@ -426,6 +430,14 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   }
 
   if (e.kind === "press") {
+    // A lost tower stops play: only the pause's own presses (and a running Reconnect) count.
+    if (
+      state.pause?.cause === "tower-lost" &&
+      !state.reconnect &&
+      !e.promptId.startsWith("pause-")
+    ) {
+      return withEffects({ ...state, eventSeq: eventSeq + 1 }, effects);
+    }
     const prompt = matchOffer(state, e.promptId, e.actionId) ?? state.loops.prompt;
     if (
       !prompt ||

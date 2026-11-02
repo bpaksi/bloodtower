@@ -122,5 +122,15 @@ export const applyTowerPick = (state: ShellState, pick: string, effects: Effects
     }
     return;
   }
-  if (pick === TOWER_PICK_WITHOUT) goOnWithout(state);
+  if (pick === TOWER_PICK_WITHOUT) {
+    if (state.pause?.cause === "tower-lost" || pauseReturnOf(state) !== null) goOnWithout(state);
+    else {
+      effects.push({
+        kind: "press-error",
+        v: 1,
+        code: "invalid-state",
+        message: "The tower can only be set aside in a game.",
+      });
+    }
+  }
 };

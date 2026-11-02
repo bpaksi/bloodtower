@@ -110,8 +110,9 @@ describe("C2/08 the simulated skull drop (DEC-305)", () => {
     expect(a.length).toBeGreaterThanOrEqual(10);
     expect(again).toEqual(a);
     expect(other.length).toBeGreaterThanOrEqual(10);
-    const shared = Math.min(a.length, other.length);
-    expect(other.slice(0, shared)).not.toEqual(a.slice(0, shared));
+    // The game ends before day 20, so compare every day both seeds reached.
+    const days = Math.min(a.length, other.length);
+    expect(a.slice(0, days).some((spot, day) => spot !== other[day])).toBe(true);
   });
 
   it("EV-05 a game without the tower never pauses, asks nothing and sends no command", () => {
@@ -197,6 +198,45 @@ describe("C2/08 the pause (DEC-301, DEC-711)", () => {
     state = step(state, press(without?.promptId ?? "", "go-on-without"));
     state = step(state, press("menu-quit", "quit-story"));
     expect(projectShellView(state).levels.at(-1)?.shows).toBe("without the tower");
+  });
+});
+
+describe("C2/08 review round 1", () => {
+  it("a stale play press during the tower-lost pause is rejected and play resumes at the same node", () => {
+    let state = toPlay("seed-p", "connect");
+    const stale = open(state).find((offer) => !offer.promptId.startsWith("pause-"));
+    expect(stale).toBeDefined();
+    const before = open(state).map((offer) => offer.actionId);
+    state = step(state, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED });
+    expect(state.pause?.cause).toBe("tower-lost");
+    expect(state.loops.prompt).toBeNull();
+    const playBefore = JSON.stringify(state.play);
+    const stackBefore = JSON.stringify(state.loops.stack);
+    const result = stepShell(state, press(stale?.promptId ?? "", stale?.actionId ?? ""));
+    expect(result.effects.filter((effect) => effect.kind !== "view-refresh")).toEqual([]);
+    expect(JSON.stringify(result.state.play)).toBe(playBefore);
+    expect(JSON.stringify(result.state.loops.stack)).toBe(stackBefore);
+    expect(result.state.pause?.cause).toBe("tower-lost");
+    const without = open(result.state).find((offer) => offer.actionId === "go-on-without");
+    const resumed = step(result.state, press(without?.promptId ?? "", "go-on-without"));
+    expect(resumed.screen).toBe("play");
+    expect(open(resumed).map((offer) => offer.actionId)).toEqual(expect.arrayContaining(before));
+  });
+
+  it("the Tower panel's Play without is refused before the Enter", () => {
+    const state = start("seed-g");
+    const result = stepShell(state, {
+      kind: "gear",
+      v: 1,
+      deviceId: "ipad-0",
+      action: "done",
+      item: "tower",
+      pick: "Play without",
+    });
+    expect(result.state.towerWithout).toBe(false);
+    expect(result.effects).toContainEqual(
+      expect.objectContaining({ kind: "press-error", code: "invalid-state" }),
+    );
   });
 });
 
