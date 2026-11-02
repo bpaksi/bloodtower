@@ -423,6 +423,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       next.enter?.step === "choice"
     ) {
       next.towerChoice = "without";
+      next.towerLinked = false;
       finishEnter(next);
     } else if (e.promptId === "menu-connect" && e.actionId === "tower-connect") {
       next.towerLinked = true;

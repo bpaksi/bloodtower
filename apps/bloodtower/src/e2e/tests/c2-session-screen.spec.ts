@@ -581,6 +581,14 @@ test("Tower lost: New game runs the tower block before Pick story (EV-08, EV-13,
     // The block ends where New game was going: Pick story.
     await pad.page.locator('button[data-prompt-id="play-without-tower"]').click();
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "pick-story");
+    // Choosing to play without the tower clears the link: after the next game the line says so.
+    await playToBegin(pad.page);
+    await playThroughOpening(pad.page);
+    await quitGame(pad.page);
+    await expect(boardMain(board.page).locator("[data-session-row='tower']")).toHaveText(
+      "without the tower",
+    );
+    expect(session.tower.sent().length).toBe(sent);
   } finally {
     await closeAll(contexts);
     await session.host.close();

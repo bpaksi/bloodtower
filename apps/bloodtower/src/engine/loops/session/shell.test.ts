@@ -697,6 +697,11 @@ describe("C2/06 session screen", () => {
     );
     expect(without.state.screen).toBe("pick-story");
     expect(without.state.enter).toBeNull();
+    // The lost link is cleared, so the session line reads "without the tower", not "Tower lost".
+    expect(without.state.towerLinked).toBe(false);
+    expect(without.state.towerChoice).toBe("without");
+    expect(without.state.pause).toBeNull();
+    expect(without.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
   });
 
   it("Tower lost: Continue runs the tower block first, then loads the saved game (EV-08)", () => {
