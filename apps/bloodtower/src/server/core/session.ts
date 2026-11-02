@@ -14,7 +14,7 @@ import { refreshOffersAfterRestore, stepShell } from "../../engine/loops/session
 import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
-import type { BoardView, DeviceView } from "../../protocols/v2/index.ts";
+import type { BoardView, DeviceView, ErrorCode } from "../../protocols/v2/index.ts";
 import type { EventStore } from "../events/store.ts";
 import type { HostLogger } from "../log/hostLog.ts";
 import type { Clock } from "../timing/clock.ts";
@@ -46,7 +46,7 @@ export type CoreSessionOptions = {
   /** Holding grace after a socket drop. Tests pass a short value. */
   graceMs?: number;
   /** A tower command the pressing iPad asked for failed. The hub shows it on that iPad. */
-  onDeviceError?: (deviceId: string, code: "tower-command-failed", message: string) => void;
+  onDeviceError?: (deviceId: string, code: ErrorCode, message: string) => void;
 };
 
 export type CoreSession = {
@@ -195,7 +195,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const marker = state.sessionEnded
       ? "ended"
       : state.enter === null && state.towerChoice !== "undecided"
-        ? `entered-${state.towerChoice}-${state.games.length}-${state.screen === "session" ? "session" : "game"}`
+        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => game.rating ?? "-").join("")}-${state.screen === "session" ? "session" : "game"}`
         : "";
     if (marker === "" || marker === savedMarker) return;
     writeStateCheckpoint();
@@ -320,12 +320,12 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
     }
     const outcomes = await runShellEffects(state, shellEffects, effectsCtx());
-    const tellDevice = (message: string) => {
+    const tellDevice = (message: string, code: ErrorCode = "tower-command-failed") => {
       if (!deviceId) return;
       // After the result: the iPad changes screen when the choice comes back, and a change of
       // screen clears its banner. The message must land on the screen that asks again.
       applyQueue = applyQueue
-        .then(() => options.onDeviceError?.(deviceId, "tower-command-failed", message))
+        .then(() => options.onDeviceError?.(deviceId, code, message))
         .catch((error: unknown) => {
           const detail = error instanceof Error ? error.message : String(error);
           options.log.error(
@@ -334,6 +334,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           );
         });
     };
+    for (const effect of shellEffects) {
+      if (effect.kind !== "press-error") continue;
+      // A press that could not be honoured: the log line toasts the board, the pressing iPad
+      // shows the message with its code.
+      options.log.error(effect.code, effect.message, { device: deviceId });
+      tellDevice(effect.message, effect.code);
+    }
     for (const outcome of outcomes) {
       const ok = outcome.result === "ok";
       if (outcome.capabilityId === "sound.play-stateful" && event.kind === "volume-play") {
@@ -585,7 +592,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         autosave: {
           gameId: row.gameId,
           packId: row.packId,
-          seed: options.seed,
+          // The game's own seed: Play again gives a game one that differs from the session's.
+          seed: options.store.lastCheckpoint(row.gameId)?.seed ?? options.seed,
           day: row.day,
         },
       };

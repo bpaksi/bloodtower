@@ -2,10 +2,11 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { TEST_STORY } from "../../engine/loops/session/pack.ts";
+import { type ShellStory, TEST_STORY } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
 import { SHELL_ENGINE_VERSION } from "../../engine/loops/session/state.ts";
 import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
+import type { ErrorCode } from "../../protocols/v2/index.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore } from "../db/store.ts";
 import { createEventStore } from "../events/store.ts";
@@ -34,14 +35,15 @@ const harness = () => {
   let count = 0;
   /** One host process: a fresh session on the same database, with a fresh mock tower. */
   const boot = async (
-    onDeviceError?: (deviceId: string, code: "tower-command-failed", message: string) => void,
+    onDeviceError?: (deviceId: string, code: ErrorCode, message: string) => void,
+    stories: ShellStory[] = [TEST_STORY],
   ): Promise<{ session: CoreSession; tower: MockTower }> => {
     count += 1;
     const tower = createMockTower({ log });
     const session = createCoreSession({
       sessionId: `session-${count}`,
       seed: "seed",
-      stories: [TEST_STORY],
+      stories,
       playContent: PROVING_GROUNDS_PLAY,
       packVersion: "0.1.0",
       store,
@@ -389,5 +391,50 @@ describe("the session screen and a host restart (C2/06)", () => {
     await pressAs(second.session, pad, "session-new-confirm", "new-game");
     expect(second.session.state().screen).toBe("tower-choice");
     expect(second.tower.sent()).toEqual([]);
+  });
+});
+
+describe("a Play again the engine refuses", () => {
+  it("logs invalid-state for the board toast and shows the code on the pressing iPad", async () => {
+    const { boot, dir, sessions } = harness();
+    const story: ShellStory = { ...TEST_STORY, card: { ...TEST_STORY.card } };
+    const shown: Array<{ deviceId: string; code: string }> = [];
+    const { session } = await boot((deviceId, code) => shown.push({ deviceId, code }), [story]);
+    sessions.saveRoster({
+      sessionId: "session-1",
+      packId: "test",
+      packVersion: "0.1.0",
+      startedWall: "2026-10-30T00:00:00.000Z",
+      joinCode: "000000",
+      devices: [],
+      holdings: [],
+    });
+    const pad = await joinPad(session);
+    const act = (promptId: string, actionId: string, args: Record<string, unknown> = {}) =>
+      pressAs(session, pad, promptId, actionId, args);
+    await act("base-board-done", "board-set-up");
+    await act("play-without-tower", "play-without-tower");
+    await act("continue-pick-story-test", "continue");
+    await act("continue-game-settings", "continue");
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      await act("hero-hold", "take", { heroId });
+    }
+    await act("continue-claim-heroes", "continue");
+    for (const step of session.state().setupSteps)
+      await act(`continue-setup-${step.id}`, "continue");
+    await act("continue-begin", "continue");
+    for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
+    await act("menu-quit", "quit-story");
+    // The story stops being playable after the game, so Play again has nothing to start.
+    story.card.playable = false;
+    await act("session-game-1", "open-game");
+    await act("stats-play-again", "play-again");
+    await act("session-play-again-confirm", "play-again");
+    expect(session.state().screen).toBe("session");
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.every((row) => row.deviceId === pad && row.code === "invalid-state")).toBe(true);
+    const logs = join(dir, "logs");
+    const lines = readdirSync(logs).map((name) => readFileSync(join(logs, name), "utf8"));
+    expect(lines.join("\n")).toContain("invalid-state");
   });
 });

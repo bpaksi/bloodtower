@@ -261,6 +261,8 @@ const audioFailure = (error: unknown): DeviceErrorBannerModel => {
 
 /** The saved game's Continue on Pick story. It sits above the stories, never pinned with Choose. */
 const SAVED_CONTINUE_PROMPT = "continue-saved-game";
+/** The stats screen's Play again (SCR-019): the iPad shows a game's buttons and its rating there. */
+const STATS_PLAY_AGAIN_PROMPT = "stats-play-again";
 
 /**
  * SCR-021 on the iPad, top to bottom: Continue (only while an autosave exists), New game,
@@ -273,7 +275,7 @@ function SessionButtons({
 }: {
   view: DeviceView;
   live: boolean;
-  onAct: (promptId: string, actionId: string) => void;
+  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
 }) {
   const open = openActions(view.actions);
   const find = (actionId: string) => open.find((action) => action.actionId === actionId);
@@ -292,12 +294,49 @@ function SessionButtons({
     </button>
   );
   const back = find("back");
+  const statsAgain = open.find((action) => action.promptId === STATS_PLAY_AGAIN_PROMPT);
+  if (back && statsAgain) {
+    const rating = view.settings?.find((setting) => setting.id === "fun-rating");
+    return (
+      <div className="mt-6 flex flex-col gap-3" data-game-stats="">
+        {button(statsAgain, true)}
+        {button(back)}
+        {rating ? (
+          <div className="mt-4 flex flex-col gap-2" data-rating="">
+            <p className="bt-label" data-rating-label="">
+              {rating.label}
+            </p>
+            <div className="flex gap-2">
+              {rating.options.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className="bt-secondary"
+                  data-rating-option={option.id}
+                  aria-pressed={option.id === rating.optionId}
+                  disabled={!live}
+                  onClick={() =>
+                    onAct("set-setting", "set", { settingId: rating.id, optionId: option.id })
+                  }
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
   if (back) {
     const done = open.find((action) => action.promptId === "session-done-confirm");
-    const yes = done ?? find("new-game");
+    const again = open.find((action) => action.promptId === "session-play-again-confirm");
+    const yes = done ?? again ?? find("new-game");
+    const kind = done ? "done" : again ? "play-again" : "new-game";
     return (
-      <div className="mt-6 flex flex-col gap-3" data-session-confirm={done ? "done" : "new-game"}>
+      <div className="mt-6 flex flex-col gap-3" data-session-confirm={kind}>
         {done ? <h2 className="text-xl font-semibold">Done for tonight</h2> : null}
+        {again ? <h2 className="text-xl font-semibold">Play again?</h2> : null}
         {yes ? button(yes, true) : null}
         {button(back)}
       </div>
@@ -445,6 +484,9 @@ export function CoreDeviceScreen({
       ? setupPrompt.promptId.slice("continue-setup-".length)
       : undefined;
   const sessionOver = view.screen === "session-over";
+  // A game's stats take its name for the title; the rows are on the Story board.
+  const onStats =
+    onSessionScreen && view.actions.some((action) => action.promptId === STATS_PLAY_AGAIN_PROMPT);
   // The steps are on the Story board; the iPad shows only its one button (SCR-022).
   const stepsOnBoard = view.screen === "base-board";
 
@@ -574,7 +616,7 @@ export function CoreDeviceScreen({
           {STEP_CONTEXT[view.screen] ?? view.screen}
         </div>
         <h1 className="text-2xl font-semibold text-[var(--bt-accent)]">
-          {SCREEN_TITLE[view.screen] ?? view.screen}
+          {onStats ? view.shows : (SCREEN_TITLE[view.screen] ?? view.screen)}
         </h1>
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
         {panel ? (
@@ -585,7 +627,10 @@ export function CoreDeviceScreen({
           </p>
         ) : onSessionScreen ? (
           <>
-            <p className="mt-2 text-lg" data-step-instruction="">
+            <p
+              className={onStats ? "sr-only" : "mt-2 whitespace-pre-line text-lg"}
+              data-step-instruction=""
+            >
               {view.shows}
             </p>
             <SessionButtons view={view} live={live} onAct={onAct} />
@@ -669,6 +714,15 @@ export function CoreDeviceScreen({
             {view.heroes.map((hero) => (
               <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
                 <h2 className="text-lg font-medium">{hero.name}</h2>
+                {picking ? (
+                  <p className="text-[var(--bt-muted)]" data-claim-state={hero.claim ?? "open"}>
+                    {hero.claim === "yours"
+                      ? "this iPad"
+                      : hero.claim === "taken"
+                        ? "another iPad"
+                        : "unclaimed"}
+                  </p>
+                ) : null}
                 {hero.lines.map((line) => (
                   <p key={line.id} className="text-[var(--bt-muted)]" data-private-line={line.id}>
                     {line.text}
@@ -683,6 +737,7 @@ export function CoreDeviceScreen({
                     data-hunter={hero.id}
                     data-action="take"
                     data-claim={hero.claim ?? "open"}
+                    aria-pressed={picking ? hero.claim === "yours" : undefined}
                     disabled={
                       !live ||
                       hero.claim === "taken" ||

@@ -21,7 +21,14 @@ import {
 } from "./enter.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
 import { applyGear } from "./gear.ts";
-import { applyHubPress, hubOffers, isHubPrompt, recordGame } from "./hub.ts";
+import {
+  applyHubPress,
+  hubOffers,
+  isHubPrompt,
+  RATING_SETTING,
+  rateOpenGame,
+  recordGame,
+} from "./hub.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
 import { SESSION_ROOT_LOOP_ID } from "./registry.ts";
@@ -141,6 +148,23 @@ const resumeLoopsOrPauseOffers = (
   else ensurePlayMenuOffers(next);
 };
 
+/** Adds one press to the active game's counts: a walk, an Enter, a day's skull drop (SCR-019 slice). */
+const countPress = (
+  state: ShellState,
+  actionId: string,
+  moved: boolean,
+  skullRecorded: boolean,
+): void => {
+  const tally = state.tally;
+  if (actionId === "walk" && moved && tally.moves !== null) tally.moves += 1;
+  if (actionId === "enter" && moved && tally.buildings !== null) tally.buildings += 1;
+  const day = state.play?.dayNumber ?? null;
+  if (actionId === "record" && skullRecorded && day !== tally.skullDay) {
+    tally.skulls = (tally.skulls ?? 0) + 1;
+    tally.skullDay = day;
+  }
+};
+
 const playFingerprint = (state: ShellState): string =>
   state.play?.groups
     .map((group) => `${group.id}:${group.spaceId}:${group.insideBuilding ? 1 : 0}`)
@@ -239,7 +263,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   if (e.kind === "tower-result") {
     const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
     bindShellState(next);
-    applyTowerResult(next, e.capabilityId, e.ok);
+    applyTowerResult(next, e.capabilityId, e.ok, effects);
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
@@ -317,6 +341,13 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   }
 
   if (e.kind === "set-setting") {
+    // The fun rating on a game's stats; it changes nothing else (SCR-019).
+    if (state.screen === "session" && state.statsGame !== null && e.settingId === RATING_SETTING) {
+      const next = { ...state, eventSeq: eventSeq + 1 };
+      rateOpenGame(next, e.optionId, effects);
+      effects.push({ kind: "view-refresh", v: 1 });
+      return withEffects(next, effects);
+    }
     const story = state.chosenStoryId
       ? state.stories.find((s) => s.card.id === state.chosenStoryId)
       : null;
@@ -424,7 +455,7 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     ) {
       next.towerChoice = "without";
       next.towerLinked = false;
-      finishEnter(next);
+      finishEnter(next, effects);
     } else if (e.promptId === "menu-connect" && e.actionId === "tower-connect") {
       next.towerLinked = true;
       next.tower = {
@@ -531,7 +562,14 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       }
     } else {
       const before = playFingerprint(next);
+      const skullBefore = next.play?.lastSkull;
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
+      countPress(
+        next,
+        e.actionId,
+        playFingerprint(next) !== before,
+        next.play?.lastSkull !== skullBefore,
+      );
       if (
         (e.actionId === "walk" || e.actionId === "enter" || e.actionId === "leave") &&
         next.play &&

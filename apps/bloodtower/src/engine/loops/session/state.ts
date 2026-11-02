@@ -10,12 +10,13 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-c2-06";
+export const SHELL_ENGINE_VERSION = "0.0.0-c2-07";
 
 /** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
 export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
   "0.0.0-step6",
   "0.0.0-c2-05",
+  "0.0.0-c2-06",
   SHELL_ENGINE_VERSION,
 ];
 
@@ -50,17 +51,49 @@ export type AutosaveSnapshot = {
   day: number;
 };
 
-/** One game tonight, for the session screen's list (SCR-021). C2 games all end as `quit`. */
+/**
+ * What this game's presses have added up to (SCR-019 slice). A null count is not known:
+ * a game saved before C2/07 has no counts, and no skull is known until the first is recorded.
+ */
+export type GameTally = {
+  moves: number | null;
+  buildings: number | null;
+  /** Days on which a skull drop was recorded. A day that drops two skulls counts once. */
+  skulls: number | null;
+  /** The last day a drop was recorded on, so a second skull that day is not counted again. */
+  skullDay: number | null;
+};
+
+export const emptyTally = (): GameTally => ({
+  moves: 0,
+  buildings: 0,
+  skulls: null,
+  skullDay: null,
+});
+
+/** One game tonight, for the session screen's list and its stats (SCR-021, SCR-019). */
 export type TonightGame = {
   gameId: string;
   outcome: "quit" | "won" | "lost";
+  /** The story, settings and held heroes Play again starts from (DEC-708). */
+  storyId: string;
+  settingValues: Record<string, string>;
+  /** hero id → the iPad that held them when the game ended. */
+  holdings: Record<string, string>;
+  /** The day the game ended on, or null before the first day began. */
+  day: number | null;
+  moves: number | null;
+  buildings: number | null;
+  skulls: number | null;
+  /** The optional 1 to 5 fun rating; never blocks anything. */
+  rating: number | null;
 };
 
 /** What the session screen is asking "Are you sure?" about (DEC-709, DEC-713). */
-export type SessionConfirm = "new-game" | "done";
+export type SessionConfirm = "new-game" | "done" | "play-again";
 
 /** Where the tower block leads when the session screen ran it again (DEC-711). */
-export type EnterThen = "new-game" | "continue";
+export type EnterThen = "new-game" | "continue" | "play-again";
 
 export type ShellState = {
   version: typeof SHELL_ENGINE_VERSION;
@@ -115,6 +148,12 @@ export type ShellState = {
   games: TonightGame[];
   /** The session screen's "Are you sure?", or null. */
   confirm: SessionConfirm | null;
+  /** The game (its place in `games`, from 1) whose stats the session screen shows, or null. */
+  statsGame: number | null;
+  /** The active game began from Play again: its claims come prefilled and Pick story is skipped. */
+  playAgain: boolean;
+  /** The active game's counts. A restart keeps them with the checkpoint. */
+  tally: GameTally;
   /** Every action offered in the latest advance; the runtime keeps only one prompt slot. */
   offered: PromptSlot[];
   playContent: PlayContent | null;
@@ -183,6 +222,9 @@ export const initialShellState = (input: {
     sessionEnded: false,
     games: [],
     confirm: null,
+    statsGame: null,
+    playAgain: false,
+    tally: emptyTally(),
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,
