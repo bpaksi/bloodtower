@@ -48,13 +48,6 @@ const setupThroughBegin = () => {
     { kind: "start-session" as const, v: 1 as const, sessionId: "t", seed: "cue-test" },
     { kind: "device-join" as const, v: 1 as const, deviceId: "pad" },
     ...enterConnectEvents("pad").slice(1),
-    {
-      kind: "press" as const,
-      v: 1 as const,
-      deviceId: "pad",
-      promptId: "new-pick-game",
-      actionId: "new-game",
-    },
     { kind: "focus-story" as const, v: 1 as const, deviceId: "pad", storyId: "test" },
     {
       kind: "press" as const,

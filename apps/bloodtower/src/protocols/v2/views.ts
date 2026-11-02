@@ -99,6 +99,8 @@ export const gearViewSchema = z.strictObject({
   inGame: z.boolean(),
   towerConnected: z.boolean(),
   sessionScreen: z.boolean(),
+  /** Done for tonight was confirmed: every gear item is disabled (DEC-713). */
+  sessionOver: z.boolean(),
   beforeBegin: z.boolean(),
   partySplit: z.boolean(),
   party: z.array(gearPartyHeroSchema).max(16),

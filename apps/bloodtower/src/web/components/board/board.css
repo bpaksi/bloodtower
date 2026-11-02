@@ -2496,7 +2496,7 @@
   width: min(100%, 28rem);
 }
 
-.bt-teardown {
+.bt-session-rows {
   margin: 0.8rem auto 0;
   max-width: 36rem;
   padding: 0;
@@ -2504,37 +2504,40 @@
   text-align: left;
 }
 
-.bt-teardown li {
+.bt-session-rows li {
   margin: 0.45rem 0;
 }
 
-.bt-board .bt-teardown li {
+.bt-board .bt-session-rows li {
   color: var(--bt-iron-gall);
 }
 
-.bt-device .bt-teardown {
-  margin-top: 1.25rem;
-}
-
-.bt-device .bt-teardown li {
-  color: var(--bt-fg);
-  font-size: 1.25rem;
-}
-
-.bt-tower-state {
-  margin: 0.9rem 0 0;
-  text-align: center;
+.bt-session-rows .bt-session-label {
+  margin-top: 1rem;
   font-family: var(--bt-font-label);
   letter-spacing: 0.14em;
 }
 
-.bt-board .bt-tower-state {
+.bt-session-rows .bt-quit-mark,
+.bt-device .bt-quit-mark {
+  margin-left: 0.4rem;
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.1em;
   color: var(--bt-blood);
 }
 
-.bt-device .bt-tower-state {
+.bt-session-rows .bt-session-tower {
+  margin-top: 1rem;
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.14em;
+  color: var(--bt-blood);
+}
+
+.bt-device .bt-session-games-label {
+  margin-top: 1rem;
   color: var(--bt-muted);
-  font-size: 1.15rem;
+  font-family: var(--bt-font-label);
+  letter-spacing: 0.14em;
 }
 
 .bt-tower-still {
@@ -2618,8 +2621,7 @@
 .bt-board[data-screen="base-board"] .bt-startup-stage,
 .bt-board[data-screen="tower-choice"] .bt-startup-stage,
 .bt-board[data-screen="tower-wake"] .bt-startup-stage,
-.bt-board[data-screen="session"] .bt-startup-stage,
-.bt-board[data-screen="goodbye"] .bt-startup-stage {
+.bt-board[data-screen="session"] .bt-startup-stage {
   --bt-dialog-w: min(46rem, 100%);
 }
 

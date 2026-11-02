@@ -4,6 +4,7 @@ import {
   openingPromptId,
 } from "../../../protocols/opening.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
+import { CONTINUE_PROMPT, canContinue } from "../session/hub.ts";
 import type { ShellScreen } from "../session/screens.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
 import {
@@ -15,7 +16,6 @@ import {
 
 export type GameLocal = {
   phase:
-    | "pick-game"
     | "pick-story"
     | "not-playable"
     | "game-settings"
@@ -32,8 +32,7 @@ export type GameResult = { outcome: "quit" | "completed" };
 
 const syncScreen = (local: GameLocal) => {
   const shell = shellState();
-  if (local.phase === "pick-game") shell.screen = "pick-game";
-  else if (local.phase === "play") shell.screen = "play";
+  if (local.phase === "play") shell.screen = "play";
   else if (local.phase !== "done") shell.screen = local.phase;
 };
 
@@ -47,6 +46,8 @@ const offerContinueOrBack = (
     recordOffer(promptId, actionId);
   };
   if (shell.screen === "pick-story") {
+    // Continue sits above the stories while an autosave exists (DEC-709, DEC-283).
+    if (canContinue(shell)) offer(CONTINUE_PROMPT, "continue");
     offer(`continue-pick-story-${shell.focusStoryId}`, "continue");
     local.awaitingPress = true;
     return;
@@ -105,24 +106,14 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
   enter: () => {
     const shell = shellState();
     shell.stage = "lobby";
-    if (shell.screen === "pick-story") {
-      return { phase: "pick-story", awaitingPress: false, playStarted: false };
+    // Continue from the session screen opens the saved game straight into play.
+    if (shell.screen === "play") {
+      return { phase: "play", awaitingPress: false, playStarted: false };
     }
-    return { phase: "pick-game", awaitingPress: false, playStarted: false };
+    return { phase: "pick-story", awaitingPress: false, playStarted: false };
   },
   body: (local, ctx) => {
     const shell = shellState();
-
-    if (local.phase === "pick-game") {
-      syncScreen(local);
-      if (shell.autosave) {
-        ctx.offerPrompt("continue-pick-game", "continue");
-        recordOffer("continue-pick-game", "continue");
-      }
-      ctx.offerPrompt("new-pick-game", "new-game");
-      recordOffer("new-pick-game", "new-game");
-      return { local: { ...local, awaitingPress: true }, passComplete: false };
-    }
 
     if (
       local.phase === "pick-story" ||
@@ -180,22 +171,6 @@ export const handleGamePress = (
   actionId: string,
 ): GameLocal => {
   const shell = shellState();
-
-  if (local.phase === "pick-game") {
-    if (promptId === "new-pick-game" && actionId === "new-game") {
-      shell.screen = "pick-story";
-      shell.resumedFromAutosave = false;
-      shell.autosave = null;
-      shell.activeGameId = `game-${shell.eventSeq}`;
-      return { phase: "pick-story", awaitingPress: false, playStarted: false };
-    }
-    if (promptId === "continue-pick-game" && actionId === "continue" && shell.autosave) {
-      shell.resumedFromAutosave = true;
-      shell.screen = "play";
-      shell.stage = "playing";
-      return { phase: "play", awaitingPress: false, playStarted: false };
-    }
-  }
 
   if (actionId === "continue") {
     if (local.phase === "pick-story" && promptId === `continue-pick-story-${shell.focusStoryId}`) {
@@ -283,28 +258,5 @@ export const handleGamePress = (
     return { ...local, awaitingPress: false };
   }
 
-  return { ...local, awaitingPress: false };
-};
-
-export const handleSessionHubPress = (
-  local: import("../session/loop.ts").SessionLocal,
-  promptId: string,
-  actionId: string,
-): import("../session/loop.ts").SessionLocal => {
-  const shell = shellState();
-  if (shell.screen === "session" && promptId === "session-new-game" && actionId === "new-game") {
-    shell.screen = "pick-story";
-    shell.autosave = null;
-    shell.activeGameId = `game-${shell.eventSeq}`;
-    return { ...local, fromSessionScreen: true, awaitingPress: false, phase: "hub" };
-  }
-  if (
-    shell.screen === "session" &&
-    promptId === "session-done-tonight" &&
-    actionId === "done-for-tonight"
-  ) {
-    shell.screen = "goodbye";
-    return { ...local, phase: "goodbye", awaitingPress: false };
-  }
   return { ...local, awaitingPress: false };
 };

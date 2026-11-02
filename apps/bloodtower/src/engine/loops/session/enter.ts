@@ -1,4 +1,5 @@
 import type { LoopContext } from "../../loop/types.ts";
+import { beginContinue, beginNewGame, toPickStory } from "./hub.ts";
 import { recordOffer } from "./shellRef.ts";
 import type { EnterStep, ShellState } from "./state.ts";
 
@@ -54,12 +55,20 @@ export const firstDeviceJoined = (state: ShellState): boolean => {
   return true;
 };
 
-/** The Enter is done: the first Pick story (or Pick Game while an autosave waits) follows. */
+/**
+ * The Enter is done. Pick story follows, with Continue above the stories while an autosave waits.
+ * When the session screen ran the tower block again, the New game or Continue it came from goes on.
+ */
 export const finishEnter = (state: ShellState): void => {
+  const then = state.enterThen;
   state.enter = null;
-  if (!state.autosave) state.activeGameId = `game-${state.eventSeq}`;
-  state.screen = state.autosave ? "pick-game" : "pick-story";
-  state.stage = "lobby";
+  state.enterThen = null;
+  if (then === "continue") {
+    beginContinue(state);
+    return;
+  }
+  if (then === "new-game") beginNewGame(state);
+  else toPickStory(state);
 };
 
 /** A connect or calibrate the Enter sent has ended. */

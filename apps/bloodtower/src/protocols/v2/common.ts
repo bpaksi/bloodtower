@@ -31,11 +31,10 @@ export const RUNTIME_SCREENS = [
   "base-board",
   "tower-choice",
   "tower-wake",
-  "pick-game",
   "play",
   "pause",
   "session",
-  "goodbye",
+  "session-over",
 ] as const;
 
 /**

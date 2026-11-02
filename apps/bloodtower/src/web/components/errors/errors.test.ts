@@ -4,7 +4,7 @@ import { liveDeviceBanner } from "./DeviceErrorBanner.tsx";
 
 const waiting = deviceViewPayloadSchema.parse({
   deviceId: "d1",
-  screen: "pick-game",
+  screen: "splash",
   shows: "Waiting",
   heroes: [],
   actions: [],
@@ -16,6 +16,6 @@ describe("device errors", () => {
       code: "invalid-state",
       message: "Nope.",
     });
-    expect(waiting.screen).toBe("pick-game");
+    expect(waiting.screen).toBe("splash");
   });
 });

@@ -55,12 +55,16 @@ export const deserializeShellState = (row: SerializedShellState): ShellState => 
   towerLinked: row.towerLinked ?? false,
   // A checkpoint from before C2/05 has no Enter state: it was taken after the old tower block.
   enter: row.enter ?? null,
+  enterThen: row.enterThen ?? null,
+  continueRequested: false,
+  // A checkpoint from before C2/06 has no list of tonight's games.
+  games: row.games ?? [],
+  confirm: null,
   towerChoice: row.towerChoice ?? (row.towerLinked ? "connect" : "without"),
   openingIndex: typeof row.openingIndex === "number" ? row.openingIndex : OPENING_MOMENTS.length,
   // Browser audio does not survive a reload, so every iPad taps Enable sound again.
   sound: {},
   keptVolume: null,
-  goodbyeTower: row.goodbyeTower ?? null,
   towerVolume:
     row.towerVolume === 0 || row.towerVolume === 1 || row.towerVolume === 2 ? row.towerVolume : 1,
   partySplit: false,

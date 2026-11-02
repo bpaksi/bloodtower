@@ -289,7 +289,7 @@ export const doneEverySetupStep = async (pad: Page) => {
 /**
  * The session Enter without the tower (C2/05): the first iPad has joined, so the table is on
  * base board setup. One press says the board is set up, then Play without Tower. After it the
- * iPad is on Pick story (Pick Game while an autosave waits).
+ * iPad is on Pick story.
  */
 export const enterWithoutTower = async (pad: Page) => {
   await enterWithoutTowerKeepSound(pad);
@@ -298,12 +298,11 @@ export const enterWithoutTower = async (pad: Page) => {
 
 /**
  * Pick story starts with sound (Bob 2026-10-31): Enable sound, a volume, Keep. Then the story
- * list shows. Does nothing when the iPad is on Pick Game, which has no sound step.
+ * list shows, with Continue above it while an autosave waits.
  */
 export const setSoundAndKeep = async (pad: Page) => {
   const main = pad.locator("main.bt-device");
-  await expect(main).toHaveAttribute("data-screen", /pick-story|pick-game/, { timeout: 20_000 });
-  if ((await main.getAttribute("data-screen")) !== "pick-story") return;
+  await expect(main).toHaveAttribute("data-screen", "pick-story", { timeout: 20_000 });
   await main.locator('button[data-prompt-id="sound-enable"]').click();
   await main.locator('button[data-prompt-id="volume-1"]').click();
   const keep = main.locator('button[data-prompt-id="volume-keep"]');
@@ -343,4 +342,17 @@ export const enterWithTowerKeepSound = async (pad: Page) => {
   await expect(calibrate).toBeEnabled({ timeout: 20_000 });
   await calibrate.click();
   await expect(main).not.toHaveAttribute("data-screen", "tower-wake", { timeout: 20_000 });
+};
+
+/**
+ * Done for tonight from the session screen: the press, then the answer to Are you sure?
+ * (DEC-713). The board is on the landing painting after it.
+ */
+export const finishTonight = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await main.locator('button[data-prompt-id="session-done-tonight"]').click();
+  const confirm = main.locator('button[data-prompt-id="session-done-confirm"]');
+  await expect(confirm).toBeEnabled({ timeout: 20_000 });
+  await confirm.click();
+  await expect(main).toHaveAttribute("data-screen", "session-over", { timeout: 20_000 });
 };

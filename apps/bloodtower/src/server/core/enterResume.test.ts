@@ -141,8 +141,17 @@ describe("the Enter and a host restart", () => {
   });
 
   it("starts a new Enter after Done for tonight", async () => {
-    const { boot } = harness();
+    const { boot, store, sessions } = harness();
     const first = await boot();
+    sessions.saveRoster({
+      sessionId: "session-1",
+      packId: "test",
+      packVersion: "0.1.0",
+      startedWall: "2026-10-30T00:00:00.000Z",
+      joinCode: "000000",
+      devices: [],
+      holdings: [],
+    });
     const pad = await joinPad(first.session);
     const act = (promptId: string, actionId: string, args: Record<string, unknown> = {}) =>
       pressAs(first.session, pad, promptId, actionId, args);
@@ -161,7 +170,12 @@ describe("the Enter and a host restart", () => {
     for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
     await act("menu-quit", "quit-story");
     await act("session-done-tonight", "done-for-tonight");
+    expect(first.session.state().sessionEnded).toBe(false);
+    await act("session-done-confirm", "done-for-tonight");
     expect(first.session.state().sessionEnded).toBe(true);
+    expect(first.session.state().screen).toBe("session-over");
+    // The autosave survives Done for tonight (EV-05).
+    expect(store.getAutosave()).not.toBeNull();
 
     const second = await boot();
     expect(await second.session.resumeSession()).toBe(false);
@@ -253,8 +267,8 @@ describe("an autosave from before C2/05 (EV-18)", () => {
     const pad = await joinPad(session);
     await pressAs(session, pad, "base-board-done", "board-set-up");
     await pressAs(session, pad, "play-without-tower", "play-without-tower");
-    expect(session.state().screen).toBe("pick-game");
-    await pressAs(session, pad, "continue-pick-game", "continue");
+    expect(session.state().screen).toBe("pick-story");
+    await pressAs(session, pad, "continue-saved-game", "continue");
     const state = session.state();
     expect(state.screen).toBe("play");
     expect(state.play?.dayNumber).toBe(fixture.state.play.dayNumber);
@@ -267,5 +281,113 @@ describe("an autosave from before C2/05 (EV-18)", () => {
     const changes = store.listEvents(gameId).filter((row) => row.kind === "version-changed");
     expect(changes).toHaveLength(1);
     expect(tower.sent()).toEqual([]);
+  });
+});
+
+const HEROES = ["hero-a", "hero-b", "hero-c", "hero-d"];
+
+/** Pick story to Begin, the whole opening, then Quit story from the menu. */
+const playAndQuit = async (session: CoreSession, pad: string) => {
+  const act = (promptId: string, actionId: string, args: Record<string, unknown> = {}) =>
+    pressAs(session, pad, promptId, actionId, args);
+  await act("continue-pick-story-test", "continue");
+  await act("continue-game-settings", "continue");
+  for (const heroId of HEROES) await act("hero-hold", "take", { heroId });
+  await act("continue-claim-heroes", "continue");
+  for (const step of session.state().setupSteps) await act(`continue-setup-${step.id}`, "continue");
+  await act("continue-begin", "continue");
+  for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
+  await act("menu-quit", "quit-story");
+};
+
+const boardLine = (session: CoreSession, id: string) =>
+  session
+    .projectBoard({ code: "000000", url: "http://127.0.0.1/join", reachable: true })
+    .levels.find((level) => level.id === id)?.shows;
+
+describe("the session screen and a host restart (C2/06)", () => {
+  it("tonight's games survive a host restart, newest first, each quit (EV-12)", async () => {
+    const { boot, store, sessions } = harness();
+    const first = await boot();
+    sessions.saveRoster({
+      sessionId: "session-1",
+      packId: "test",
+      packVersion: "0.1.0",
+      startedWall: "2026-10-30T00:00:00.000Z",
+      joinCode: "000000",
+      devices: [],
+      holdings: [],
+    });
+    const pad = await joinPad(first.session);
+    await pressAs(first.session, pad, "base-board-done", "board-set-up");
+    await pressAs(first.session, pad, "play-without-tower", "play-without-tower");
+    await playAndQuit(first.session, pad);
+    expect(first.session.state().screen).toBe("session");
+    await pressAs(first.session, pad, "session-new-game", "new-game");
+    await pressAs(first.session, pad, "session-new-confirm", "new-game");
+    expect(first.session.state().screen).toBe("pick-story");
+    await playAndQuit(first.session, pad);
+    expect(first.session.state().games.map((game) => game.outcome)).toEqual(["quit", "quit"]);
+    const autosave = store.getAutosave();
+    expect(autosave).not.toBeNull();
+
+    const second = await boot();
+    second.session.rememberAutosave({
+      gameId: autosave?.gameId ?? "",
+      packId: "test",
+      day: 1,
+    });
+    expect(await second.session.resumeSession()).toBe(true);
+    expect(second.session.state().screen).toBe("session");
+    expect(boardLine(second.session, "session-games")).toBe("Game 2 quit\nGame 1 quit");
+    const rows = second.session
+      .projectDevice(pad)
+      .actions.filter((action) => action.actionId === "open-game")
+      .map((action) => action.label);
+    expect(rows).toEqual(["Game 2", "Game 1"]);
+    expect(second.tower.sent()).toEqual([]);
+  });
+
+  it("Tower lost survives a host restart and nothing reconnects (EV-13)", async () => {
+    const { boot, store, sessions } = harness();
+    const first = await boot();
+    sessions.saveRoster({
+      sessionId: "session-1",
+      packId: "test",
+      packVersion: "0.1.0",
+      startedWall: "2026-10-30T00:00:00.000Z",
+      joinCode: "000000",
+      devices: [],
+      holdings: [],
+    });
+    const pad = await joinPad(first.session);
+    await pressAs(first.session, pad, "base-board-done", "board-set-up");
+    await pressAs(first.session, pad, "tower-connect", "tower-connect");
+    await pressAs(first.session, pad, "tower-calibrate", "tower-calibrate");
+    first.session.syncTowerSnapshot();
+    await first.session.whenIdle();
+    await playAndQuit(first.session, pad);
+    expect(boardLine(first.session, "session")).toBe("tower: in play");
+    first.tower.loseConnection();
+    first.session.syncTowerSnapshot();
+    await first.session.whenIdle();
+    expect(boardLine(first.session, "session")).toBe("Tower lost");
+    const autosave = store.getAutosave();
+
+    const second = await boot();
+    second.session.rememberAutosave({
+      gameId: autosave?.gameId ?? "",
+      packId: "test",
+      day: 1,
+    });
+    expect(await second.session.resumeSession()).toBe(true);
+    expect(second.session.state().screen).toBe("session");
+    expect(boardLine(second.session, "session")).toBe("Tower lost");
+    expect(second.tower.sent()).toEqual([]);
+    // The next New game runs the tower block first.
+    await pressAs(second.session, pad, "session-new-game", "new-game");
+    await pressAs(second.session, pad, "session-new-confirm", "new-game");
+    expect(second.session.state().screen).toBe("tower-choice");
+    expect(second.tower.sent()).toEqual([]);
   });
 });

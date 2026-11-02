@@ -48,6 +48,9 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
     eventSeq: state.eventSeq + 1,
   };
 
+  // Every gear item is disabled once the session is over (DEC-713).
+  if (state.sessionEnded) return next;
+
   if (event.action === "open") {
     const item = event.item;
     if (!item || !isPanel(item)) return next;

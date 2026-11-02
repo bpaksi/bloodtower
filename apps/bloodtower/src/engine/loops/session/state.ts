@@ -10,11 +10,12 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-c2-05";
+export const SHELL_ENGINE_VERSION = "0.0.0-c2-06";
 
 /** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
 export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
   "0.0.0-step6",
+  "0.0.0-c2-05",
   SHELL_ENGINE_VERSION,
 ];
 
@@ -49,6 +50,18 @@ export type AutosaveSnapshot = {
   day: number;
 };
 
+/** One game tonight, for the session screen's list (SCR-021). C2 games all end as `quit`. */
+export type TonightGame = {
+  gameId: string;
+  outcome: "quit" | "won" | "lost";
+};
+
+/** What the session screen is asking "Are you sure?" about (DEC-709, DEC-713). */
+export type SessionConfirm = "new-game" | "done";
+
+/** Where the tower block leads when the session screen ran it again (DEC-711). */
+export type EnterThen = "new-game" | "continue";
+
 export type ShellState = {
   version: typeof SHELL_ENGINE_VERSION;
   sessionId: string;
@@ -68,6 +81,8 @@ export type ShellState = {
   tower: TowerSnapshot;
   /** `null` once the Enter has finished. A checkpoint from before C2/05 has none. */
   enter: EnterState | null;
+  /** Set when the session screen ran the tower block again; the Enter's end goes there. */
+  enterThen: EnterThen | null;
   towerChoice: TowerChoice;
   /** Per iPad, by device id. Browser audio is lost on a reload, so a restart clears it. */
   sound: Record<string, DeviceSound>;
@@ -91,16 +106,15 @@ export type ShellState = {
   pauseSerial: number;
   autosave: AutosaveSnapshot | null;
   activeGameId: string | null;
-  /** True after the player chose Continue on pick-game and passed the tower check. */
+  /** True after the player chose Continue and the saved game was loaded. */
   resumedFromAutosave: boolean;
+  /** Set for one step when Continue wants the saved game loaded; the host reads and clears it. */
+  continueRequested: boolean;
   sessionEnded: boolean;
-  /**
-   * Goodbye card tower line (DEC-219). `no-tower` when this session never connected.
-   * `unavailable` when the link is down or the idle command failed. `idle` after
-   * `lighting.all-off` is taken. `null` until Done for tonight, or while that command
-   * is still in flight.
-   */
-  goodbyeTower: "idle" | "no-tower" | "unavailable" | null;
+  /** Tonight's games, oldest first (SCR-021). A host restart keeps them with the checkpoint. */
+  games: TonightGame[];
+  /** The session screen's "Are you sure?", or null. */
+  confirm: SessionConfirm | null;
   /** Every action offered in the latest advance; the runtime keeps only one prompt slot. */
   offered: PromptSlot[];
   playContent: PlayContent | null;
@@ -150,6 +164,7 @@ export const initialShellState = (input: {
     holdings: boundStory ? initialHoldings(boundStory) : {},
     tower: TOWER_DISCONNECTED,
     enter: { step: "join", failed: false },
+    enterThen: null,
     towerChoice: "undecided",
     sound: {},
     keptVolume: null,
@@ -164,8 +179,10 @@ export const initialShellState = (input: {
     autosave: null,
     activeGameId: null,
     resumedFromAutosave: false,
+    continueRequested: false,
     sessionEnded: false,
-    goodbyeTower: null,
+    games: [],
+    confirm: null,
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,

@@ -20,7 +20,7 @@ afterEach(() => {
 });
 
 const tempDir = () => {
-  const dir = mkdtempSync(join(tmpdir(), "bloodtower-goodbye-"));
+  const dir = mkdtempSync(join(tmpdir(), "bloodtower-done-"));
   dirs.push(dir);
   return dir;
 };
@@ -33,7 +33,7 @@ const harness = () => {
   const log = createHostLogger({ dataDir: dir, mirror: false });
   const clock = stepClock();
   const state = initialShellState({ sessionId: "sess", seed: "seed", stories: [] });
-  state.screen = "goodbye";
+  state.screen = "session-over";
   state.sessionEnded = true;
   state.towerLinked = true;
   state.tower = TOWER_READY;
@@ -66,7 +66,7 @@ const errorLines = (dir: string) => {
   );
 };
 
-describe("goodbye idle", () => {
+describe("Done for tonight idle", () => {
   it("sends lighting.all-off once and records one quit", async () => {
     const { dir, opened, store, tower, state, ctx } = harness();
     try {
@@ -84,7 +84,6 @@ describe("goodbye idle", () => {
         ],
         ctx,
       );
-      expect(state.goodbyeTower).toBe("idle");
       expect(tower.sent().filter((item) => item.type === "idle")).toEqual([{ type: "idle" }]);
       expect(tower.idleAttempts()).toBe(1);
       await runShellEffects(
@@ -133,9 +132,8 @@ describe("goodbye idle", () => {
         ],
         ctx,
       );
-      expect(state.goodbyeTower).toBe("unavailable");
       expect(state.sessionEnded).toBe(true);
-      expect(state.screen).toBe("goodbye");
+      expect(state.screen).toBe("session-over");
       expect(tower.sent().filter((item) => item.type === "idle")).toHaveLength(1);
       expect(tower.idleAttempts()).toBe(1);
       const failures = errorLines(dir).filter(
@@ -147,7 +145,7 @@ describe("goodbye idle", () => {
     }
   });
 
-  it("clears the autosave row on new game", async () => {
+  it("keeps the autosave row: Done for tonight never clears it", async () => {
     const { opened, store, state, ctx } = harness();
     try {
       createSessionStore(opened.db).saveRoster({
@@ -160,10 +158,13 @@ describe("goodbye idle", () => {
         holdings: [],
       });
       store.replaceAutosave({ gameId: "game-quit", sessionId: "sess", packId: "test" });
+      await runShellEffects(
+        state,
+        [{ kind: "tower-command", v: 1, capabilityId: "lighting.all-off", params: {} }],
+        ctx,
+      );
       expect(store.getAutosave()?.gameId).toBe("game-quit");
-      await runShellEffects(state, [{ kind: "autosave-clear", v: 1 }], ctx);
-      expect(store.getAutosave()).toBeNull();
-      expect(state.screen).toBe("goodbye");
+      expect(state.screen).toBe("session-over");
     } finally {
       opened.close();
     }

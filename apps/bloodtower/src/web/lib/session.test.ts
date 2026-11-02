@@ -33,7 +33,7 @@ describe("openSession v2", () => {
         v: PROTOCOL_VERSION,
         type: "boardView",
         payload: {
-          screen: "pick-game",
+          screen: "splash",
           levels: [{ id: "join", label: "Join", shows: "Code 000000" }],
           heroes: [],
           narration: null,
@@ -63,6 +63,6 @@ describe("openSession v2", () => {
       onDeviceView: () => undefined,
       onError: () => undefined,
     });
-    expect(client.sendAct("new-pick-game", "new-game")).toBe(false);
+    expect(client.sendAct("session-new-game", "new-game")).toBe(false);
   });
 });

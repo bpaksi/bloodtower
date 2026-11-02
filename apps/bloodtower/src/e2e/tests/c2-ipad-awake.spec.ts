@@ -7,6 +7,7 @@ import { createMockTower } from "../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../server/tower/testAdapter.ts";
 import {
   enterWithoutTower,
+  finishTonight,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
@@ -349,8 +350,7 @@ test("Done for tonight releases the wake lock", async ({ browser }, testInfo) =>
     await clickAct(page, "quit-story", "menu-quit");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "session");
     const beforeLeave = screenCalls(await wakeCalls(page)).length;
-    await clickAct(page, "done-for-tonight", "session-done-tonight");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "goodbye");
+    await finishTonight(page);
     await expect
       .poll(async () => (await wakeCalls(page)).filter((call) => call.type === "release").length)
       .toBe(1);

@@ -10,6 +10,7 @@ import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -636,8 +637,8 @@ test("W7 continue keeps an entered place and Leave returns to the move map", asy
     await board.goto("/board");
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game");
-    await clickAct(page, "continue", "continue-pick-game");
+    await setSoundAndKeep(page);
+    await clickAct(page, "continue", "continue-saved-game");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     const restored = await readStatus(page);
     expect(restored.inside).toBe("true");

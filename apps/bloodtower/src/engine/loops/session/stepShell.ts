@@ -5,7 +5,7 @@ import type { LoopFrame } from "../../loop/types.ts";
 import { bindPlayState, initPlayState, seatAtCitadels } from "../chapter/playState.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
-import { handleGamePress, handleSessionHubPress } from "../game/loop.ts";
+import { handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
@@ -21,6 +21,7 @@ import {
 } from "./enter.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
 import { applyGear } from "./gear.ts";
+import { applyHubPress, hubOffers, isHubPrompt, recordGame } from "./hub.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
 import { SESSION_ROOT_LOOP_ID } from "./registry.ts";
@@ -67,21 +68,20 @@ const resetGameAwaitingPress = (state: ShellState): void => {
   frame.local = { ...local, awaitingPress: false };
 };
 
-const updateSessionLocal = (state: ShellState, local: SessionLocal): void => {
-  const frame = state.loops.stack.find((f) => f.loopId === "session");
-  if (frame) frame.local = local;
-};
-
+// The loop may not have run again after a press; the session screen must still offer its presses.
 const ensureSessionHubOffers = (state: ShellState): void => {
   if (state.screen !== "session") return;
   if (state.loops.stack.some((frame) => frame.loopId === "game")) return;
-  const hasNew = state.offered.some((offer) => offer.promptId === "session-new-game" && offer.open);
-  if (!hasNew) {
-    state.offered.push(
-      { promptId: "session-new-game", actionId: "new-game", open: true },
-      { promptId: "session-done-tonight", actionId: "done-for-tonight", open: true },
-    );
-  }
+  const wanted = hubOffers(state);
+  const missing = wanted.some(
+    (want) =>
+      !state.offered.some(
+        (offer) =>
+          offer.promptId === want.promptId && offer.actionId === want.actionId && offer.open,
+      ),
+  );
+  if (!missing) return;
+  state.offered = wanted.map((want) => ({ ...want, open: true }));
 };
 
 const collapsePlayLoopsOnQuit = (state: ShellState): void => {
@@ -96,6 +96,7 @@ const collapsePlayLoopsOnQuit = (state: ShellState): void => {
 const pushQuitRecord = (state: ShellState, effects: ShellStepResult["effects"]): void => {
   if (state.stage !== "ended") return;
   if (state.activeGameId) {
+    recordGame(state, state.activeGameId, "quit");
     effects.push({
       kind: "game-record",
       v: 1,
@@ -213,6 +214,8 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   if (e.kind === "tower-snapshot") {
     const next = { ...state, tower: e.tower, eventSeq: eventSeq + 1 };
     pauseIfNeeded(next);
+    // Binding clears the offers, so a setup screen must offer its presses again (Continue, Choose).
+    resetGameAwaitingPress(next);
     bindShellState(next);
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
@@ -222,7 +225,8 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
 
   if (e.kind === "device-join") {
     const next = { ...state, devices: new Set(state.devices), eventSeq: eventSeq + 1 };
-    next.devices.add(e.deviceId);
+    // After Done for tonight nobody is joined; a late rejoin does not seat a device again.
+    if (!next.sessionEnded) next.devices.add(e.deviceId);
     if (firstDeviceJoined(next)) {
       bindShellState(next);
       resumeLoopsOrPauseOffers(next, eventSeq, effects);
@@ -449,6 +453,24 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
       if (gameFrame) {
         gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
       }
+    } else if (isHubPrompt(e.promptId)) {
+      applyHubPress(next, e.promptId, effects);
+      // Continue from Pick story: the game loop moves on to the saved game as the Pick Game press did.
+      const gameFrame = next.loops.stack.find((frame) => frame.loopId === "game");
+      if (gameFrame && next.screen === "play") {
+        gameFrame.local = {
+          ...(gameFrame.local as GameLocal),
+          phase: "play",
+          awaitingPress: false,
+          playStarted: false,
+        };
+      }
+      if (next.screen === "play" && next.towerLinked && !towerReady(next.tower)) {
+        next.stage = "paused";
+        next.pause = { cause: "tower-lost" };
+        next.pauseSerial += 1;
+        next.screen = "pause";
+      }
     } else if (top?.loopId === "game") {
       const before = top.local as GameLocal;
       const beforeOpening = next.openingIndex;
@@ -506,12 +528,6 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
         next.pauseSerial += 1;
         next.screen = "pause";
       }
-    } else if (top?.loopId === "session") {
-      const local = handleSessionHubPress(top.local as SessionLocal, e.promptId, e.actionId);
-      updateSessionLocal(next, local);
-      if (e.promptId === "session-new-game" && e.actionId === "new-game") {
-        effects.push({ kind: "autosave-clear", v: 1 });
-      }
     } else {
       const before = playFingerprint(next);
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
@@ -528,27 +544,6 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
     ensureSessionHubOffers(next);
-    if (e.promptId === "session-done-tonight" && e.actionId === "done-for-tonight") {
-      next.screen = "goodbye";
-      next.sessionEnded = true;
-      updateSessionLocal(next, {
-        phase: "goodbye",
-        awaitingPress: false,
-        fromSessionScreen: false,
-        childOpen: false,
-      });
-      // Idle only while this session's link is still up (DEC-155, DEC-219). One command.
-      if (next.towerLinked && next.tower.connection === "connected") {
-        effects.push({
-          kind: "tower-command",
-          v: 1,
-          capabilityId: "lighting.all-off",
-          params: {},
-        });
-      } else {
-        next.goodbyeTower = next.towerLinked ? "unavailable" : "no-tower";
-      }
-    }
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }

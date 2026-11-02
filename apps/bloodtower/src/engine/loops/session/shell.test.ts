@@ -88,10 +88,7 @@ describe("game setup forward and back", () => {
   const throughTower = () => runPresses(start(), [...enterConnectEvents()]);
 
   const chooseStory = (state: ReturnType<typeof start>) =>
-    runPresses(state, [
-      press("ipad-0", "new-pick-game", "new-game"),
-      press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
-    ]);
+    runPresses(state, [press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue")]);
 
   it("walks pick-story, game-settings, claim-heroes, each setup step, and begin forward", () => {
     let state = chooseStory(throughTower());
@@ -207,7 +204,6 @@ describe("pauses", () => {
     let state = start();
     state = runPresses(state, [
       ...enterConnectEvents(),
-      press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
       press("ipad-0", "continue-game-settings", "continue"),
     ]);
@@ -305,7 +301,6 @@ describe("quit story and session screen", () => {
     let state = start();
     state = runPresses(state, [
       ...enterConnectEvents(),
-      press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
       press("ipad-0", "continue-game-settings", "continue"),
     ]);
@@ -345,27 +340,36 @@ describe("quit story and session screen", () => {
       v: 1,
       tower: TOWER_DISCONNECTED,
     }).state;
-    expect(state.offered.some((o) => o.promptId === "continue-pick-game" && o.open)).toBe(true);
-    state = runPresses(state, [press("ipad-0", "continue-pick-game", "continue")]);
+    expect(state.offered.some((o) => o.promptId === "continue-saved-game" && o.open)).toBe(true);
+    state = runPresses(state, [press("ipad-0", "continue-saved-game", "continue")]);
     expect(state.resumedFromAutosave).toBe(true);
     expect(state.stage).toBe("paused");
     expect(state.pause?.cause).toBe("tower-lost");
   });
 
-  it("offers Continue on pick-game while an autosave exists", () => {
+  it("offers Continue above the stories on Pick story while an autosave exists", () => {
     const state = runPresses(withAutosave(), enterConnectEvents());
-    expect(state.screen).toBe("pick-game");
+    expect(state.screen).toBe("pick-story");
     expect(state.autosave).not.toBeNull();
-    expect(state.offered.some((o) => o.promptId === "continue-pick-game" && o.open)).toBe(true);
+    const open = state.offered.filter((o) => o.open).map((o) => o.promptId);
+    expect(open[0]).toBe("continue-saved-game");
+    expect(open).toContain(`continue-pick-story-${state.focusStoryId}`);
+  });
+
+  it("offers no Continue on Pick story without an autosave (EV-02)", () => {
+    const state = runPresses(start(), enterConnectEvents());
+    expect(state.autosave).toBeNull();
+    expect(state.offered.some((o) => o.promptId === "continue-saved-game")).toBe(false);
+    const view = projectShellView(state);
+    expect(view.actions.some((action) => action.label === "Continue")).toBe(false);
   });
 });
 
 describe("done for tonight", () => {
-  it("reaches goodbye and ends the session", () => {
+  it("asks, then ends the session", () => {
     let state = start();
     state = runPresses(state, [
       ...enterConnectEvents(),
-      press("ipad-0", "new-pick-game", "new-game"),
       press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
       press("ipad-0", "continue-game-settings", "continue"),
     ]);
@@ -390,7 +394,11 @@ describe("done for tonight", () => {
       press("ipad-0", `pause-${state.pauseSerial}-quit`, "quit-story"),
       press("ipad-0", "session-done-tonight", "done-for-tonight"),
     ]);
-    expect(state.screen).toBe("goodbye");
+    expect(state.screen).toBe("session");
+    expect(state.confirm).toBe("done");
+    expect(state.sessionEnded).toBe(false);
+    state = runPresses(state, [press("ipad-0", "session-done-confirm", "done-for-tonight")]);
+    expect(state.screen).toBe("session-over");
     expect(state.sessionEnded).toBe(true);
   });
 });
@@ -434,7 +442,6 @@ const reachPlay = (linked: boolean) => {
   const storyId = state.focusStoryId;
   state = runPresses(state, [
     ...enterConnectEvents(),
-    press("ipad-0", "new-pick-game", "new-game"),
     press("ipad-0", `continue-pick-story-${storyId}`, "continue"),
     press("ipad-0", "continue-game-settings", "continue"),
   ]);
@@ -460,8 +467,15 @@ const reachPlay = (linked: boolean) => {
   return state;
 };
 
-describe("W8 quit, goodbye, and new game", () => {
-  it("menu quit keeps the autosave, records quit once, and offers only New game and Done for tonight", () => {
+const DONE = ["session-done-tonight", "session-done-confirm"] as const;
+
+const finishTonight = (state: ReturnType<typeof start>) => {
+  const first = stepShell(state, press("ipad-0", DONE[0], "done-for-tonight"));
+  return stepShell(first.state, press("ipad-0", DONE[1], "done-for-tonight"));
+};
+
+describe("C2/06 session screen", () => {
+  it("menu quit keeps the autosave, records the game once, and lists it (EV-01)", () => {
     const playing = reachPlay(false);
     const autosave = playing.autosave;
     const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
@@ -471,48 +485,164 @@ describe("W8 quit, goodbye, and new game", () => {
       { kind: "game-record", v: 1, gameId: playing.activeGameId, outcome: "quit" },
     ]);
     expect(quit.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    expect(quit.state.games).toEqual([{ gameId: playing.activeGameId, outcome: "quit" }]);
     const open = quit.state.offered.filter((offer) => offer.open);
-    expect(open.map((offer) => offer.actionId)).toEqual(["new-game", "done-for-tonight"]);
+    expect(open.map((offer) => offer.actionId)).toEqual([
+      "continue",
+      "new-game",
+      "open-game",
+      "done-for-tonight",
+    ]);
     const view = projectShellView(quit.state);
     expect(view.actions.filter((action) => action.open).map((action) => action.label)).toEqual([
+      "Continue",
       "New game",
+      "Game 1",
       "Done for tonight",
     ]);
+    expect(view.levels.map((level) => level.id)).toEqual([
+      "session-continue",
+      "session-games",
+      "table-status",
+      "session",
+    ]);
+    expect(view.levels.find((level) => level.id === "session-games")?.shows).toBe("Game 1 quit");
+    expect(view.levels.find((level) => level.id === "session")?.shows).toBe("without the tower");
     expect(view.actions.some((action) => action.label === "Play again")).toBe(false);
     expect(view.actions.some((action) => action.label === "Quit game")).toBe(false);
   });
 
-  it("idles a connected tower once on Done for tonight and not on a second press", () => {
+  it("names the tower's three states exactly (SCR-021, DEC-711)", () => {
+    const connected = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story")).state;
+    const line = (state: typeof connected) =>
+      projectShellView(state).levels.find((level) => level.id === "session")?.shows;
+    expect(line(connected)).toBe("tower: in play");
+    const lost = stepShell(connected, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED });
+    expect(line(lost.state)).toBe("Tower lost");
+    expect(lost.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    expect(lost.state.pause).toBeNull();
+    const without = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story")).state;
+    expect(line(without)).toBe("without the tower");
+  });
+
+  it("lists tonight's games newest first and shows the empty state (EV-15)", () => {
+    const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story")).state;
+    const two = {
+      ...quit,
+      games: [...quit.games, { gameId: "game-2", outcome: "quit" as const }],
+    };
+    // Any event runs the session screen again, which offers one row per game.
+    const view = projectShellView(
+      stepShell(two, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state,
+    );
+    expect(view.levels.find((level) => level.id === "session-games")?.shows).toBe(
+      "Game 2 quit\nGame 1 quit",
+    );
+    const rows = view.actions.filter((action) => action.actionId === "open-game");
+    expect(rows.map((action) => action.label)).toEqual(["Game 2", "Game 1"]);
+    const fresh = { ...quit, games: [], autosave: null };
+    const empty = projectShellView(
+      stepShell(fresh, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state,
+    );
+    expect(empty.levels.find((level) => level.id === "session-games")?.shows).toBe(
+      "No games yet tonight.",
+    );
+    expect(empty.actions.some((action) => action.label === "Continue")).toBe(false);
+  });
+
+  it("a press on a game row changes nothing yet (feature 07)", () => {
+    const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story")).state;
+    const after = stepShell(quit, press("ipad-0", "session-game-1", "open-game")).state;
+    expect(after.screen).toBe("session");
+    expect(after.confirm).toBeNull();
+    expect(after.games).toEqual(quit.games);
+  });
+
+  it("New game asks before replacing the save; Back keeps it (EV-04)", () => {
+    const quit = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story")).state;
+    const asked = stepShell(quit, press("ipad-0", "session-new-game", "new-game"));
+    expect(asked.state.screen).toBe("session");
+    expect(asked.state.confirm).toBe("new-game");
+    const view = projectShellView(asked.state);
+    expect(view.levels.find((level) => level.id === "session")?.shows).toBe(
+      "This replaces the saved game. Are you sure?",
+    );
+    expect(view.actions.filter((action) => action.open).map((action) => action.label)).toEqual([
+      "New game",
+      "Back",
+    ]);
+    const back = stepShell(asked.state, press("ipad-0", "session-confirm-back", "back"));
+    expect(back.state.confirm).toBeNull();
+    expect(back.state.autosave).toEqual(quit.autosave);
+    expect(back.state.screen).toBe("session");
+    const yes = stepShell(asked.state, press("ipad-0", "session-new-confirm", "new-game"));
+    expect(yes.state.screen).toBe("pick-story");
+    expect(yes.state.autosave).toBeNull();
+    expect(yes.state.play).toBeNull();
+    expect(yes.state.openingIndex).toBe(-1);
+    expect(yes.state.games).toEqual(quit.games);
+    // The old row stays in the database until Begin, so no effect clears it.
+    expect(yes.effects.some((effect) => effect.kind === "autosave-write")).toBe(false);
+    expect(yes.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    // Continue is hidden until Begin (EV-02 b).
+    const hidden = projectShellView(yes.state);
+    expect(hidden.actions.some((action) => action.label === "Continue")).toBe(false);
+  });
+
+  it("Done for tonight asks first; Back returns to the session screen (EV-05)", () => {
+    const quit = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story")).state;
+    const asked = stepShell(quit, press("ipad-0", DONE[0], "done-for-tonight"));
+    expect(asked.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    const view = projectShellView(asked.state);
+    expect(view.levels.find((level) => level.id === "session-confirm")).toEqual({
+      id: "session-confirm",
+      label: "Done for tonight",
+      shows: "Are you sure?",
+    });
+    expect(view.actions.filter((action) => action.open).map((action) => action.label)).toEqual([
+      "Done for tonight",
+      "Back",
+    ]);
+    const back = stepShell(asked.state, press("ipad-0", "session-confirm-back", "back"));
+    expect(back.state.screen).toBe("session");
+    expect(back.state.confirm).toBeNull();
+    expect(back.state.sessionEnded).toBe(false);
+  });
+
+  it("idles a connected tower once on Done for tonight, and not on a second press (EV-07)", () => {
     const playing = reachPlay(true);
     expect(playing.towerLinked).toBe(true);
     expect(playing.tower.connection).toBe("connected");
     const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
-    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
-    expect(done.state.screen).toBe("goodbye");
+    const asked = stepShell(quit.state, press("ipad-0", DONE[0], "done-for-tonight"));
+    expect(asked.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    const done = stepShell(asked.state, press("ipad-0", DONE[1], "done-for-tonight"));
+    expect(done.state.screen).toBe("session-over");
     expect(done.state.sessionEnded).toBe(true);
+    expect(done.state.devices.size).toBe(0);
     expect(done.effects.filter((effect) => effect.kind === "tower-command")).toEqual([
       { kind: "tower-command", v: 1, capabilityId: "lighting.all-off", params: {} },
     ]);
-    const again = stepShell(
-      done.state,
-      press("ipad-0", "session-done-tonight", "done-for-tonight"),
-    );
+    const again = stepShell(done.state, press("ipad-0", DONE[1], "done-for-tonight"));
     expect(again.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
-    expect(again.state.screen).toBe("goodbye");
+    expect(again.state.screen).toBe("session-over");
   });
 
-  it("sends no idle when the tower was never connected and shows no tower", () => {
+  it("sends no idle when the tower was never in play, and the view has no buttons (EV-07, EV-17)", () => {
     const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story"));
-    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    const done = finishTonight(quit.state);
     expect(done.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
-    expect(done.state.goodbyeTower).toBe("no-tower");
     expect(done.state.pause).toBeNull();
-    const shows = projectShellView(done.state).levels.find((level) => level.id === "goodbye");
-    expect(shows?.shows).toBe("no tower");
-    expect(projectShellView(done.state).actions.filter((action) => action.open)).toEqual([]);
+    const view = projectShellView(done.state);
+    expect(view.screen).toBe("session-over");
+    expect(view.levels.find((level) => level.id === "session-over")?.shows).toBe(
+      "The session is over",
+    );
+    expect(view.actions.filter((action) => action.open)).toEqual([]);
+    expect(view.gear?.sessionOver).toBe(true);
   });
 
-  it("quit on grey-stair.01 still shows no tower, not the opening line", () => {
+  it("quit on grey-stair.01 lists the game, not the opening line", () => {
     const playing = throughOpening(0);
     expect(playing.screen).toBe("play");
     expect(playing.openingIndex).toBe(0);
@@ -522,19 +652,16 @@ describe("W8 quit, goodbye, and new game", () => {
     expect(quit.state.openingIndex).toBe(0);
     expect(projectShellView(quit.state).narration).toBeNull();
     expect(projectShellView(quit.state).levels.find((level) => level.id === "session")?.shows).toBe(
-      "The session",
+      "without the tower",
     );
-    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    const done = finishTonight(quit.state);
     expect(done.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
-    expect(done.state.screen).toBe("goodbye");
-    expect(done.state.goodbyeTower).toBe("no-tower");
+    expect(done.state.screen).toBe("session-over");
     expect(done.state.openingIndex).toBe(0);
-    const view = projectShellView(done.state);
-    expect(view.narration).toBeNull();
-    expect(view.levels.find((level) => level.id === "goodbye")?.shows).toBe("no tower");
+    expect(projectShellView(done.state).narration).toBeNull();
   });
 
-  it("sends no idle when the link has dropped and shows unavailable", () => {
+  it("sends no idle when the link has dropped (EV-07)", () => {
     let playing = reachPlay(true);
     playing = stepShell(playing, {
       kind: "tower-snapshot",
@@ -546,21 +673,98 @@ describe("W8 quit, goodbye, and new game", () => {
       playing,
       press("ipad-0", `pause-${playing.pauseSerial}-quit`, "quit-story"),
     );
-    const done = stepShell(quit.state, press("ipad-0", "session-done-tonight", "done-for-tonight"));
+    const done = finishTonight(quit.state);
     expect(done.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
-    expect(done.state.goodbyeTower).toBe("unavailable");
-    expect(done.state.screen).toBe("goodbye");
+    expect(done.state.screen).toBe("session-over");
     expect(done.state.pause).toBeNull();
   });
 
-  it("new game clears the autosave, opens pick-story, and sends no idle", () => {
-    const quit = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story"));
-    expect(quit.state.autosave).not.toBeNull();
-    const started = stepShell(quit.state, press("ipad-0", "session-new-game", "new-game"));
-    expect(started.state.screen).toBe("pick-story");
-    expect(started.state.autosave).toBeNull();
-    expect(started.effects.some((effect) => effect.kind === "autosave-clear")).toBe(true);
-    expect(started.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+  it("Tower lost: New game runs the tower block first, and no command is sent before it (EV-08)", () => {
+    const quit = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story")).state;
+    const lost = stepShell(quit, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    const asked = stepShell(lost, press("ipad-0", "session-new-game", "new-game"));
+    expect(asked.state.confirm).toBe("new-game");
+    const yes = stepShell(asked.state, press("ipad-0", "session-new-confirm", "new-game"));
+    expect(yes.state.screen).toBe("tower-choice");
+    expect(yes.state.enter?.step).toBe("choice");
+    expect(yes.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    const choices = yes.state.offered.filter((offer) => offer.open).map((offer) => offer.actionId);
+    expect(choices).toEqual(["tower-connect", "play-without-tower"]);
+    // Playing on without the tower ends the block at Pick story.
+    const without = stepShell(
+      yes.state,
+      press("ipad-0", "play-without-tower", "play-without-tower"),
+    );
+    expect(without.state.screen).toBe("pick-story");
+    expect(without.state.enter).toBeNull();
+  });
+
+  it("Tower lost: Continue runs the tower block first, then loads the saved game (EV-08)", () => {
+    const quit = stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story")).state;
+    const lost = stepShell(quit, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state;
+    const block = stepShell(lost, press("ipad-0", "continue-saved-game", "continue"));
+    expect(block.state.screen).toBe("tower-choice");
+    expect(block.state.continueRequested).toBe(false);
+    expect(block.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
+    const after = runPresses(
+      block.state,
+      enterConnectEvents()
+        .slice(2)
+        .filter((event) => event.kind !== "device-join"),
+    );
+    expect(after.screen).toBe("play");
+    expect(after.continueRequested).toBe(true);
+    expect(after.resumedFromAutosave).toBe(true);
+  });
+
+  it("with the tower in play, New game and Continue skip the tower block", () => {
+    const quitOnce = () =>
+      stepShell(reachPlay(true), press("ipad-0", "menu-quit", "quit-story")).state;
+    const cont = stepShell(quitOnce(), press("ipad-0", "continue-saved-game", "continue"));
+    expect(cont.state.screen).toBe("play");
+    expect(cont.state.continueRequested).toBe(true);
+    const asked = stepShell(quitOnce(), press("ipad-0", "session-new-game", "new-game")).state;
+    const yes = stepShell(asked, press("ipad-0", "session-new-confirm", "new-game"));
+    expect(yes.state.screen).toBe("pick-story");
+  });
+
+  it("every iPad dropped between games asks for the join QR; one drop blocks nothing (EV-09)", () => {
+    const playing = reachPlay(false);
+    expect(playing.devices.size).toBeGreaterThan(1);
+    let state = stepShell(playing, press("ipad-0", "menu-quit", "quit-story")).state;
+    const ids = [...state.devices];
+    const droppedOne = stepShell(state, { kind: "device-drop", v: 1, deviceId: ids[0] ?? "" });
+    state = droppedOne.state;
+    expect(state.screen).toBe("session");
+    expect(state.pause).toBeNull();
+    expect(projectShellView(state).levels.some((level) => level.id === "session-dropped")).toBe(
+      false,
+    );
+    for (const deviceId of ids.slice(1)) {
+      state = stepShell(state, { kind: "device-drop", v: 1, deviceId }).state;
+    }
+    expect(state.screen).toBe("session");
+    expect(state.devices.size).toBe(0);
+    expect(projectShellView(state).levels.some((level) => level.id === "session-dropped")).toBe(
+      true,
+    );
+    state = stepShell(state, { kind: "device-join", v: 1, deviceId: "ipad-0" }).state;
+    const view = projectShellView(state);
+    expect(view.levels.some((level) => level.id === "session-dropped")).toBe(false);
+    expect(view.actions.some((action) => action.label === "Continue")).toBe(true);
+  });
+
+  it("no gear item opens after the session is over (EV-17)", () => {
+    const quit = stepShell(reachPlay(false), press("ipad-0", "menu-quit", "quit-story")).state;
+    const done = finishTonight(quit).state;
+    const opened = stepShell(done, {
+      kind: "gear",
+      v: 1,
+      deviceId: "ipad-0",
+      action: "open",
+      item: "volume",
+    }).state;
+    expect(opened.gearPanel).toBeNull();
   });
 });
 
@@ -798,7 +1002,6 @@ describe("metadata-only Pick Story door", () => {
 const chooseStoryForTest = () => {
   let state = runPresses(start(), [...enterConnectEvents()]);
   state = runPresses(state, [
-    press("ipad-0", "new-pick-game", "new-game"),
     press("ipad-0", `continue-pick-story-${state.focusStoryId}`, "continue"),
   ]);
   return state;

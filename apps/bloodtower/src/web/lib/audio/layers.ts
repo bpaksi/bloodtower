@@ -17,7 +17,6 @@ export const isVisualMoment = (_moment: unknown): boolean => false;
 
 export const isBeforePickGame = (screen: ViewScreen) =>
   screen === "splash" ||
-  screen === "pick-game" ||
   screen === "table-join" ||
   screen === "base-board" ||
   screen === "tower-choice" ||
@@ -35,7 +34,7 @@ const signatureOnly = (): Layers => ({ ambient: SIGNATURE.bed, music: null });
 
 export const pickLayers = (input: LayerInput): Layers => {
   if (input.visual) return { ambient: null, music: null };
-  if (input.screen === "goodbye") return signatureOnly();
+  if (input.screen === "session-over") return signatureOnly();
   return { ambient: SIGNATURE.bed, music: null };
 };
 

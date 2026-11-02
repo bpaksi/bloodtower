@@ -41,7 +41,7 @@ pnpm --dir apps/bloodtower build
 pnpm --dir apps/bloodtower start
 ```
 
-Open http://127.0.0.1:4787/ for the title page, then **Story board** or **Hunter** on an iPad. Setup is Pick Game → Pick Story → Game settings → Tower connect and calibrate → Claim heroes → pack setup steps → Begin → play (day slice). Continue on Pick Game restores an autosaved game (DEC-208). Health is http://127.0.0.1:4787/health and reports `protocol: 2`, `tower: "connection-and-sound"`, `effects: "sound-only"`.
+Open http://127.0.0.1:4787/ for the title page, then **Story board** or **Hunter** on an iPad. The evening starts at the join, then Base board setup and the tower choice (connect and calibrate, or play without it), then Pick Story → Game settings → Claim heroes → pack setup steps → Begin → play (day slice). Continue, above the stories on Pick Story and on the session screen, restores an autosaved game (DEC-208, DEC-709). Quit story lands on the session screen (Continue, New game, tonight's games, Done for tonight, the tower's state); Done for tonight returns the board to the landing painting (DEC-713). Health is http://127.0.0.1:4787/health and reports `protocol: 2`, `tower: "connection-and-sound"`, `effects: "sound-only"`.
 
 Errors and warnings are JSON lines under `data/logs/`. Pages send `log` on the v2 socket after hello, or `POST /log` as a fallback. The Story board shows logged errors as toasts.
 

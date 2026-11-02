@@ -11,6 +11,15 @@ import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { BOARD_SET_UP_PROMPT } from "./enter.ts";
+import {
+  canContinue,
+  DONE_LINE,
+  EMPTY_GAMES_LINE,
+  gameNumber,
+  REPLACE_SAVE_LINE,
+  SESSION_OVER_LINE,
+  towerLine,
+} from "./hub.ts";
 import type { ShellStory } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import { soundActions, soundStepOnBoard, VOLUME_LINE, volumeLineLive } from "./sound.ts";
@@ -28,6 +37,8 @@ const buildingTitle = (building: string): string =>
 const labelFor = (state: ShellState, promptId: string, actionId: string): string => {
   if (promptId === BOARD_SET_UP_PROMPT) return "Board is set up";
   if (promptId === "continue-begin") return "Begin";
+  const game = gameNumber(promptId);
+  if (game !== null && actionId === "open-game") return `Game ${game}`;
   if (promptId.startsWith("continue-setup-")) return "Done";
   if (promptId.startsWith("day-") && promptId.endsWith("-roll-done")) return "Take the move roll";
   if (promptId === "menu-connect") return "Connect Tower";
@@ -185,11 +196,10 @@ const STEP_NAME: Record<ShellState["screen"], string> = {
   "claim-heroes": "Party Join",
   setup: "Setup",
   begin: "Begin",
-  "pick-game": "Pick a game",
   play: "Play",
   pause: "Paused",
   session: "Session",
-  goodbye: "Goodbye",
+  "session-over": "Session over",
   "not-playable": "Not playable yet",
 };
 
@@ -302,15 +312,13 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
     );
   }
   if (state.screen === "begin") return "The table is set.";
-  if (state.screen === "pick-game") {
-    return state.autosave ? "A saved game can continue." : "A new game is ready.";
+  // The session screen's line is the tower's state, or the question while one is asked (SCR-021).
+  if (state.screen === "session") {
+    if (state.confirm === "new-game") return REPLACE_SAVE_LINE;
+    if (state.confirm === "done") return DONE_LINE;
+    return towerLine(state);
   }
-  if (state.screen === "goodbye") {
-    if (state.goodbyeTower === "idle") return "idle";
-    if (state.goodbyeTower === "no-tower") return "no tower";
-    return "unavailable";
-  }
-  if (state.screen === "session") return "The session";
+  if (state.screen === "session-over") return SESSION_OVER_LINE;
   return title;
 };
 
@@ -318,9 +326,37 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
  * Public lines the Story board paints. The screen line stays last so an iPad's
  * `shows` text stays that line. Join is added later and must keep the total at 8.
  */
+const sessionLevels = (state: ShellState): LoopLevel[] => {
+  const levels: LoopLevel[] = [];
+  if (state.confirm) {
+    levels.push({
+      id: "session-confirm",
+      label: state.confirm === "done" ? "Done for tonight" : "New game",
+      shows: state.confirm === "done" ? DONE_LINE : REPLACE_SAVE_LINE,
+    });
+    return levels;
+  }
+  if (canContinue(state)) {
+    levels.push({ id: "session-continue", label: "Continue", shows: "A saved game can continue." });
+  }
+  // Newest first, each marked by how it ended.
+  const rows = state.games.map((game, index) => `Game ${index + 1} ${game.outcome}`).reverse();
+  levels.push({
+    id: "session-games",
+    label: "Tonight's games",
+    shows: rows.length > 0 ? rows.join("\n") : EMPTY_GAMES_LINE,
+  });
+  // Every iPad dropped between games: the board shows the join QR until one joins (DEC-712).
+  if (state.devices.size === 0) {
+    levels.push({ id: "session-dropped", label: "Join", shows: JOIN_LINE });
+  }
+  return levels;
+};
+
 const startupLevels = (state: ShellState, story: ShellStory | undefined): LoopLevel[] => {
   if (state.screen === "play" || state.screen === "pause") return [];
   const leading: LoopLevel[] = [];
+  if (state.screen === "session") leading.push(...sessionLevels(state));
   if (state.screen === "pick-story") {
     for (const entry of state.stories.slice(0, 5)) {
       const door = doorLevel(entry, entry.card.id === state.focusStoryId);
@@ -368,11 +404,10 @@ const helpScreenFor = (state: ShellState): string => {
     "claim-heroes": "claim",
     setup: "base-board-setup",
     begin: "waiting",
-    "pick-game": "session-screen",
     play: "play",
     pause: "paused",
     session: "session-screen",
-    goodbye: "session-over",
+    "session-over": "session-over",
     "not-playable": "pick-story",
   };
   return mapped[state.screen] ?? "play";
@@ -381,8 +416,8 @@ const helpScreenFor = (state: ShellState): string => {
 const gearSnapshot = (state: ShellState): GearView => {
   const story = chosenOrBound(state);
   const inGame = state.screen === "play" || state.screen === "pause";
-  const sessionScreen =
-    state.screen === "session" || state.screen === "goodbye" || state.screen === "pick-game";
+  const sessionOver = state.screen === "session-over";
+  const sessionScreen = state.screen === "session" || sessionOver;
   return {
     paused: state.gearPaused || state.stage === "paused",
     panel: state.gearPanel,
@@ -395,6 +430,7 @@ const gearSnapshot = (state: ShellState): GearView => {
     inGame,
     towerConnected: state.tower.connection === "connected",
     sessionScreen,
+    sessionOver,
     beforeBegin: !inGame && !sessionScreen,
     partySplit: state.partySplit,
     party: (story?.heroes ?? []).map((hero) => ({

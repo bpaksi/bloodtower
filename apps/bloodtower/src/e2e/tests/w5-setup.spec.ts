@@ -3,10 +3,12 @@ import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import {
   enterWithoutTower,
+  finishTonight,
   gateControls,
   holdHeroesFromTest,
   installSessionSocketHook,
   releaseTogether,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -451,8 +453,8 @@ test("W5 a restart on grey-stair.02 reloads that moment and offers no walk", asy
   try {
     await installSessionSocketHook(page);
     await page.goto(`/join?code=${restarted.host.joinCode}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game");
-    await clickAct(page, "continue", "continue-pick-game");
+    await setSoundAndKeep(page);
+    await clickAct(page, "continue", "continue-saved-game");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await holdHeroesFromTest(page, [...HERO_IDS]);
     await expect(reopened.board.locator("main")).toHaveAttribute("data-moment", "grey-stair.02");
@@ -470,7 +472,9 @@ test("W5 a restart on grey-stair.02 reloads that moment and offers no walk", asy
   }
 });
 
-test("W5 quit on grey-stair.01 shows no tower on goodbye", async ({ browser }, testInfo) => {
+test("W5 quit on grey-stair.01 ends the session without a tower command", async ({
+  browser,
+}, testInfo) => {
   test.setTimeout(180_000);
   const session = await startAcceptanceHost(testInfo, { seed: "w5-quit-opening" });
   const context = await browser.newContext({ baseURL: session.baseURL });
@@ -488,12 +492,8 @@ test("W5 quit on grey-stair.01 shows no tower on goodbye", async ({ browser }, t
     await device.locator('[data-action="menu"]').click();
     await clickAct(device, "quit-story", "menu-quit");
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "session");
-    await clickAct(device, "done-for-tonight", "session-done-tonight");
-
-    await expect(deviceMain(device)).toHaveAttribute("data-screen", "goodbye");
-    await expect(boardMain(board)).toHaveAttribute("data-screen", "goodbye");
-    await expect(deviceMain(device).locator("[data-tower-state]")).toHaveText("no tower");
-    await expect(boardMain(board).locator("[data-tower-state]")).toHaveText("no tower");
+    await finishTonight(device);
+    await expect(boardMain(board)).toHaveAttribute("data-screen", "session-over");
     expect(session.tower.sent().filter((item) => item.type === "idle")).toHaveLength(0);
   } finally {
     await boardContext.close();
