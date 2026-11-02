@@ -266,7 +266,7 @@ assets:
     const testStory = catalog.stories.find((story) => story.card.id === "test");
     const dracula = catalog.stories.find((story) => story.card.id === "dracula");
     expect(testStory?.card.playable).toBe(true);
-    expect(testStory?.card.cover).toBeNull();
+    expect(testStory?.card.cover).toBe("/packs/test/assets/cover.png");
     expect(dracula?.card.playable).toBe(false);
     expect(dracula?.card.title).toBe("The Count of Vellmoor");
     expect(dracula?.card.players).toBeNull();

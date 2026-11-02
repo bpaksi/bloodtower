@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { coverSchema } from "../pack.ts";
 import { conditionSchema } from "./conditions.ts";
 import { effectSchema } from "./effects.ts";
 import {
@@ -79,6 +80,7 @@ export const storyPackSchema = z
     kind: z.literal("story"),
     pack_id: idSchema,
     title: z.string().min(1).max(120),
+    cover: coverSchema.optional(),
     version: semverSchema,
     engine_min: semverSchema,
     tagline: z.string().min(1).max(200).optional(),
