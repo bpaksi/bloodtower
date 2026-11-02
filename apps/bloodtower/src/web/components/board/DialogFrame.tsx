@@ -22,7 +22,7 @@ const LINE_SELECTOR = [
   ".bt-startup-cue",
   ".bt-setting",
   ".bt-startup-progress",
-  ".bt-teardown > li",
+  ".bt-session-rows > li",
 ].join(", ");
 
 const ART_SELECTOR = [

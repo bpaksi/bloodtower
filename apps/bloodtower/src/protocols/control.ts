@@ -59,11 +59,10 @@ export const FLOW_SCREENS = [
   "begin",
   "play",
   "quit",
-  "pick-game",
   "claim-heroes",
   "pause",
   "session",
-  "goodbye",
+  "session-over",
 ] as const;
 export const flowScreenSchema = z.enum(FLOW_SCREENS);
 export type FlowScreen = z.infer<typeof flowScreenSchema>;

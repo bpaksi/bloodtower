@@ -3,6 +3,5 @@ export {
   type GameResult,
   gameLoop,
   handleGamePress,
-  handleSessionHubPress,
 } from "./loop.ts";
 export * from "./setupFlow.ts";

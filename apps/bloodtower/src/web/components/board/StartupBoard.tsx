@@ -8,10 +8,12 @@ import {
   CORNER_QR_SCREENS,
   claimCount,
   doorFrame,
-  hallOpening,
+  EMPTY_GAMES_LINE,
   joinFromBoard,
   publicLine,
+  type SessionBoard,
   type StoryDoor,
+  sessionBoard,
   settingRows,
   setupProgress,
   startupStatus,
@@ -20,7 +22,6 @@ import {
   volumeLine,
   waitingFor,
 } from "../../lib/startupBoard";
-import { GoodbyeTeardown } from "../GoodbyeTeardown";
 import { PortraitCard } from "../PortraitCard";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
@@ -307,8 +308,64 @@ function LinePanel({ kicker, title, line }: { kicker: string; title: string; lin
   );
 }
 
+/** SCR-021 on the board: choices as plain lines, tonight's games, the tower's state. No buttons. */
+function SessionRows({ session }: { session: SessionBoard }) {
+  return (
+    <ul className="bt-session-rows" data-session-rows="">
+      {session.hasContinue ? <li data-session-row="continue">Continue</li> : null}
+      <li data-session-row="new-game">New game</li>
+      <li data-session-row="games-label" className="bt-session-label">
+        Tonight's games
+      </li>
+      {session.games.length === 0 ? (
+        <li data-session-row="empty">{EMPTY_GAMES_LINE}</li>
+      ) : (
+        session.games.map((game) => (
+          <li key={game.label} data-session-row="game">
+            {game.label} <span className="bt-quit-mark">{game.mark}</span>
+          </li>
+        ))
+      )}
+      <li data-session-row="done">Done for tonight</li>
+      <li data-session-row="tower" className="bt-session-tower">
+        {session.tower}
+      </li>
+    </ul>
+  );
+}
+
+function SessionPanel({ view }: { view: BoardView }) {
+  const session = sessionBoard(view);
+  const join = joinFromBoard(view);
+  if (session.dropped !== null && join) {
+    return (
+      <div data-startup-panel="session-dropped">
+        <p className="bt-kicker">Between games</p>
+        <h1 className="bt-startup-title">Join the table</h1>
+        <JoinBlock code={join.code} url={join.url} large />
+        <p className="bt-startup-cue">{session.dropped}</p>
+      </div>
+    );
+  }
+  if (session.confirm) {
+    return (
+      <div data-startup-panel="session-confirm">
+        <h1 className="bt-startup-title">{session.confirm.title}</h1>
+        <p className="bt-startup-cue">{session.confirm.line}</p>
+      </div>
+    );
+  }
+  return (
+    <div data-startup-panel="session">
+      <p className="bt-kicker">Between games</p>
+      <h1 className="bt-startup-title">Session</h1>
+      <SessionRows session={session} />
+    </div>
+  );
+}
+
 function StartupPanel({ view }: { view: BoardView }) {
-  if (view.screen === "splash" || hallOpening(view)) return <SplashPanel view={view} />;
+  if (view.screen === "splash") return <SplashPanel view={view} />;
   if (view.screen === "pick-story") return <PickStoryPanel view={view} />;
   if (view.screen === "not-playable") return <NotPlayablePanel view={view} />;
   if (view.screen === "table-join") return <TableJoinPanel view={view} />;
@@ -319,19 +376,8 @@ function StartupPanel({ view }: { view: BoardView }) {
   if (view.screen === "claim-heroes") return <ClaimPanel view={view} />;
   if (view.screen === "setup") return <SetupPanel view={view} />;
   if (view.screen === "begin") return <BeginPanel />;
-  if (view.screen === "session") {
-    return <LinePanel kicker="Between games" title="Session" line={publicLine(view)} />;
-  }
-  if (view.screen === "goodbye") {
-    return (
-      <div data-startup-panel="goodbye">
-        <p className="bt-kicker">Tonight</p>
-        <h1 className="bt-startup-title">Goodbye</h1>
-        <GoodbyeTeardown shows={publicLine(view)} />
-      </div>
-    );
-  }
-  return <LinePanel kicker="The table" title="Pick a game" line={publicLine(view)} />;
+  if (view.screen === "session") return <SessionPanel view={view} />;
+  return <LinePanel kicker="The table" title="Blood Tower" line={publicLine(view)} />;
 }
 
 /** Centred startup dialog over the landing painting. No controls. */
@@ -343,7 +389,26 @@ const setupStepId = (view: BoardView): string | undefined => {
   return promptId ? promptId.slice("continue-setup-".length) : undefined;
 };
 
+/** Done for tonight, confirmed: the landing painting alone. No dialog, no control (DEC-713, SCR-002). */
+function SessionOverBoard({ view }: { view: BoardView }) {
+  return (
+    <main
+      className="bt-board"
+      data-board-mode="startup"
+      data-board-layer="startup"
+      data-screen={view.screen}
+      data-paused="false"
+      data-gear-opens={view.gear?.opens ?? 0}
+      data-volume={view.gear?.volume ?? undefined}
+    >
+      <div className="bt-board-backdrop" aria-hidden="true" />
+      {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
+    </main>
+  );
+}
+
 export function StartupBoard({ view, debug }: { view: BoardView; debug?: boolean }) {
+  if (view.screen === "session-over") return <SessionOverBoard view={view} />;
   const warning = joinWarning(view);
   const status = startupStatus(view);
   const waiting = waitingFor(view);

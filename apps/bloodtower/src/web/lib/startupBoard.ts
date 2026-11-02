@@ -12,9 +12,8 @@ export const STARTUP_SCREENS = new Set<ViewScreen>([
   "claim-heroes",
   "setup",
   "begin",
-  "pick-game",
   "session",
-  "goodbye",
+  "session-over",
   "not-playable",
 ]);
 
@@ -31,11 +30,10 @@ const STEP_NAME: Record<ViewScreen, string> = {
   "claim-heroes": "Party Join",
   setup: "Setup",
   begin: "Begin",
-  "pick-game": "Pick a game",
   play: "Play",
   pause: "Paused",
   session: "Session",
-  goodbye: "Goodbye",
+  "session-over": "Session over",
   "not-playable": "Not playable yet",
 };
 
@@ -186,8 +184,40 @@ export const claimCount = (view: BoardView): string => {
   return `${held} of ${view.heroes.length} picked`;
 };
 
-export const hallOpening = (view: BoardView): boolean =>
-  view.screen === "pick-game" && view.levels.some((level) => level.id === "wait");
+/** One row of Tonight's games: "Game 2" and how it ended (SCR-021). */
+export type SessionGameRow = { label: string; mark: string };
+
+export type SessionBoard = {
+  hasContinue: boolean;
+  games: SessionGameRow[];
+  /** The tower line: "tower: in play", "without the tower" or "Tower lost". */
+  tower: string;
+  confirm: { title: string; line: string } | null;
+  /** Every iPad dropped between games: the join QR shows until one joins (DEC-712). */
+  // The join line shown with the QR, or null while an iPad is joined.
+  dropped: string | null;
+};
+
+export const EMPTY_GAMES_LINE = "No games yet tonight.";
+
+/** What the session screen paints, read from the board view's public levels. */
+export const sessionBoard = (view: BoardView): SessionBoard => {
+  const level = (id: string) => view.levels.find((row) => row.id === id);
+  const games: SessionGameRow[] = (level("session-games")?.shows ?? "")
+    .split("\n")
+    .flatMap((line) => {
+      const match = /^(Game \d+) (\S+)$/.exec(line);
+      return match?.[1] && match[2] ? [{ label: match[1], mark: match[2] }] : [];
+    });
+  const confirm = level("session-confirm");
+  return {
+    hasContinue: level("session-continue") !== undefined,
+    games,
+    tower: publicLine(view),
+    confirm: confirm ? { title: confirm.label, line: confirm.shows } : null,
+    dropped: level("session-dropped")?.shows ?? null,
+  };
+};
 
 /** R2-115: what the table is waiting for. Not a control. */
 export const waitingFor = (view: BoardView): string => {
@@ -219,14 +249,14 @@ export const waitingFor = (view: BoardView): string => {
       return "Waiting for an iPad to mark this step done.";
     case "begin":
       return "Waiting for an iPad to begin the story.";
-    case "pick-game":
-      return hallOpening(view)
-        ? "Waiting for the hall to open."
-        : "Waiting for an iPad to start or continue a game.";
-    case "session":
-      return "Waiting for an iPad to start a new game, or to be done for tonight.";
-    case "goodbye":
-      return "The evening is closing.";
+    case "session": {
+      const session = sessionBoard(view);
+      if (session.dropped !== null) return "Waiting for an iPad to join.";
+      if (session.confirm) return "Waiting for an iPad to answer.";
+      return "Waiting for an iPad to go on, start a new game, or be done for tonight.";
+    }
+    case "session-over":
+      return "";
     default:
       return "Waiting.";
   }

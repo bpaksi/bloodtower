@@ -7,6 +7,7 @@ import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 
@@ -751,8 +752,8 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await second.board.goto("/board");
     await installSessionSocketHook(second.device);
     await second.device.goto(`/join?code=${restarted.host.joinCode}`);
-    await expect(deviceMain(second.device)).toHaveAttribute("data-screen", "pick-game");
-    await clickAct(second.device, "continue", "continue-pick-game");
+    await setSoundAndKeep(second.device);
+    await clickAct(second.device, "continue", "continue-saved-game");
     await expect(deviceMain(second.device)).toHaveAttribute("data-screen", "play");
     await expect(second.board.locator("main")).toHaveAttribute("data-board-layer", "place");
     await expect(second.board.locator("[data-still]")).toHaveAttribute("data-still", still);
@@ -785,7 +786,8 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await third.board.goto("/board");
     await installSessionSocketHook(third.device);
     await third.device.goto(`/join?code=${again.host.joinCode}`);
-    await clickAct(third.device, "continue", "continue-pick-game");
+    await setSoundAndKeep(third.device);
+    await clickAct(third.device, "continue", "continue-saved-game");
     await expect(deviceMain(third.device)).toHaveAttribute("data-screen", "play");
     await holdHeroesFromTest(third.device, [...HERO_IDS]);
     await expect(third.board.locator("main")).toHaveAttribute("data-board-layer", "move");

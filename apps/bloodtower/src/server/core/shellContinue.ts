@@ -34,7 +34,7 @@ const shellEventsAfter = (store: EventStore, gameId: string, afterSeq: number): 
 const endsSittingReplay = (event: ShellEvent): boolean =>
   event.kind === "press" &&
   (event.actionId === "quit-story" ||
-    (event.promptId === "session-done-tonight" && event.actionId === "done-for-tonight"));
+    (event.promptId === "session-done-confirm" && event.actionId === "done-for-tonight"));
 
 const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): ShellState => {
   let state = start;

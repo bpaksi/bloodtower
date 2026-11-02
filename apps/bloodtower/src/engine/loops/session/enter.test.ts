@@ -222,7 +222,7 @@ describe("without the tower is kept for the session", () => {
     expect(state.screen).toBe("session");
 
     const seen: string[] = [];
-    run([press("session-new-game", "new-game")]);
+    run([press("session-new-game", "new-game"), press("session-new-confirm", "new-game")]);
     seen.push(state.screen);
     expect(seen).toEqual(["pick-story"]);
     expect(state.enter).toBeNull();

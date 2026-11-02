@@ -62,10 +62,6 @@ export const runShellEffects = async (
         });
         break;
       }
-      case "autosave-clear":
-        if (ctx.replaying) break;
-        ctx.store.clearAutosave();
-        break;
       case "checkpoint-write": {
         const afterSeq = ctx.store.nextSeq(effect.gameId) - 1;
         ctx.store.writeCheckpoint({
@@ -95,9 +91,6 @@ export const runShellEffects = async (
           result = "failed";
         }
         outcomes.push({ capabilityId: effect.capabilityId, result });
-        if (effect.capabilityId === "lighting.all-off" && state.screen === "goodbye") {
-          state.goodbyeTower = result === "ok" ? "idle" : "unavailable";
-        }
         break;
       }
       default:

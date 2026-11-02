@@ -24,7 +24,6 @@ const SETUP_EVENTS = (seed: string): ShellEvent[] => [
   { kind: "start-session", v: 1, sessionId: "sim", seed },
   { kind: "device-join", v: 1, deviceId: "sim-pad" },
   ...enterConnectEvents("sim-pad").slice(1),
-  { kind: "press", v: 1, deviceId: "sim-pad", promptId: "new-pick-game", actionId: "new-game" },
   { kind: "focus-story", v: 1, deviceId: "sim-pad", storyId: "test" },
   {
     kind: "press",

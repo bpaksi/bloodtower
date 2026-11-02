@@ -2,6 +2,7 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
   enterWithoutTower,
   enterWithTower,
+  finishTonight,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -734,8 +735,7 @@ test("the toolbar is on every iPad screen, and ? help matches the current screen
     await page.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "session", { timeout: 20_000 });
     await checkHelp(page, "session-screen");
-    await clickAct(page, "done-for-tonight", "session-done-tonight");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "goodbye");
+    await finishTonight(page);
     await checkHelp(page, "session-over");
   } finally {
     await context.close();
@@ -753,8 +753,8 @@ const finishFromClaim = async (page: Page) => {
 };
 
 const resumeSavedGame = async (page: Page) => {
-  await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-game", { timeout: 20_000 });
-  await clickAct(page, "continue", "continue-pick-game");
+  await setSoundAndKeep(page);
+  await clickAct(page, "continue", "continue-saved-game");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
 };
 

@@ -67,7 +67,7 @@ const WAKE_NOTICE_CSS = `
 
 const waiting = deviceViewPayloadSchema.parse({
   deviceId: "pending",
-  screen: "pick-game",
+  screen: "splash",
   shows: "Joining…",
   heroes: [],
   actions: [],
@@ -300,7 +300,7 @@ export function LiveDevice() {
   }, []);
 
   useEffect(() => {
-    if (state.screen === "goodbye") letGoRef.current();
+    if (state.screen === "session-over") letGoRef.current();
   }, [state.screen]);
 
   useEffect(() => {

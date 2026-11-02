@@ -77,7 +77,7 @@ export type CoreSession = {
    * It sends no tower command.
    */
   resumeSession: () => Promise<boolean>;
-  /** DEC-208: keep the autosave row visible on pick-game without resuming play yet. */
+  /** DEC-208: keep the autosave row visible for Continue without resuming play yet. */
   rememberAutosave: (row: { gameId: string; packId: string; day: number }) => void;
   syncTowerSnapshot: () => void;
   /** Wait until queued shell applies and effects have finished. */
@@ -187,14 +187,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   };
 
   /**
-   * Marks that the Enter finished, and that the evening ended. A host restart reads the latest
-   * checkpoint: after the Enter it resumes without one, after Done for tonight it starts a new one.
+   * Marks that the Enter finished, where the evening stands (the session screen or not, how many
+   * games tonight), and that the evening ended. A host restart reads the latest checkpoint:
+   * after the Enter it resumes without one, after Done for tonight it starts a new one.
    */
   const persistSessionMarker = () => {
     const marker = state.sessionEnded
       ? "ended"
       : state.enter === null && state.towerChoice !== "undecided"
-        ? `entered-${state.towerChoice}`
+        ? `entered-${state.towerChoice}-${state.games.length}-${state.screen === "session" ? "session" : "game"}`
         : "";
     if (marker === "" || marker === savedMarker) return;
     writeStateCheckpoint();
@@ -255,15 +256,11 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       const volume = event.volume ?? before.gearPreviewVolume ?? before.towerVolume;
       logged = { ...event, volume };
     }
-    if (
-      event.kind === "press" &&
-      event.promptId === "continue-pick-game" &&
-      event.actionId === "continue" &&
-      before.autosave &&
-      state.screen === "play"
-    ) {
+    const continued = state.continueRequested && state.autosave !== null;
+    if (continued && state.autosave) {
+      const live = { ...state, continueRequested: false };
       const resumed = continueShellFromCheckpoint(options.store, {
-        gameId: before.autosave.gameId,
+        gameId: state.autosave.gameId,
         packVersion: meta.packVersion,
         engineVersion: meta.engineVersion,
         meta,
@@ -280,9 +277,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       state = {
         ...state,
         resumedFromAutosave: true,
-        // The Enter is tonight's, not the saved game's.
+        continueRequested: false,
+        // The Enter, the tower choice and tonight's games are tonight's, not the saved game's.
         enter: null,
-        towerChoice: before.towerChoice,
+        enterThen: null,
+        confirm: null,
+        sessionEnded: false,
+        towerChoice: live.towerChoice,
+        towerLinked: live.towerLinked || state.towerLinked,
+        games: live.games,
       };
     }
     const persistGear =
@@ -310,12 +313,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       const parsed = shellEffectSchema.safeParse(effect);
       if (parsed.success) shellEffects.push(parsed.data);
     }
-    if (
-      event.kind === "press" &&
-      event.promptId === "continue-pick-game" &&
-      event.actionId === "continue" &&
-      state.screen === "play"
-    ) {
+    if (continued && state.screen === "play") {
       for (const effect of refreshOffersAfterRestore(state)) {
         const parsed = shellEffectSchema.safeParse(effect);
         if (parsed.success) shellEffects.push(parsed.data);
@@ -557,11 +555,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           const frame = state.loops.stack.find((row) => row.loopId === "session");
           if (frame)
             frame.local = { ...(frame.local as object), phase: "hub", awaitingPress: false };
+          // Back to the session screen if that is where the evening stood, else Pick story.
           state = {
             ...state,
             enter: null,
             towerChoice: resumed.towerChoice,
-            screen: state.autosave ? "pick-game" : "pick-story",
+            games: resumed.games,
+            screen: resumed.screen === "session" ? "session" : "pick-story",
           };
         }
         const shellEffects: ShellEffect[] = [];

@@ -64,3 +64,25 @@ describe("ChromeBar menu", () => {
     expect(Object.values(HELP_LINES).every((line) => line.length > 0)).toBe(true);
   });
 });
+
+describe("session over (C2/06 EV-17)", () => {
+  it("disables every gear item with the reason The session is over.", () => {
+    const rows = gearRows({
+      inGame: false,
+      beforeBegin: false,
+      sessionScreen: true,
+      towerConnected: false,
+      partySplit: false,
+      blockedItem: null,
+      sessionOver: true,
+    });
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((item) => !item.enabled)).toBe(true);
+    expect(rows.every((item) => item.reason === "The session is over.")).toBe(true);
+  });
+
+  it("leaves the list alone while the session goes on", () => {
+    const rows = gearRows(menuContextFromOffers(false, false));
+    expect(rows.some((item) => item.enabled)).toBe(true);
+  });
+});

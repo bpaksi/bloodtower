@@ -7,9 +7,8 @@ export type ShellScreen =
   | "base-board"
   | "tower-choice"
   | "tower-wake"
-  | "pick-game"
   | "session"
-  | "goodbye"
+  | "session-over"
   | "play"
   | "pause"
   | "not-playable";

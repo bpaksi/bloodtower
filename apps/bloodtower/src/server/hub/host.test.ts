@@ -174,7 +174,7 @@ describe("session hub (core)", () => {
   it("refuses control from the story board", async () => {
     const host = await start();
     const board = await helloBoard(host.port);
-    send(board.socket, "act", { promptId: "new-pick-game", actionId: "new-game", args: {} });
+    send(board.socket, "act", { promptId: "session-new-game", actionId: "new-game", args: {} });
     await until(board.inbox, board.log, (messages) =>
       messages.some((m) => m.type === "error" && m.payload.code === "storyboard-control"),
     );

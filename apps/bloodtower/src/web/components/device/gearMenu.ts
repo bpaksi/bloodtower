@@ -36,6 +36,7 @@ const ONLY_IN_GAME = "Only in a game.";
 const C3 = "C3+";
 const TOWER_CONNECTED = "The tower is connected.";
 const OPEN_ELSEWHERE = "Open on another iPad.";
+const SESSION_OVER = "The session is over.";
 
 export type MenuContext = {
   inGame: boolean;
@@ -44,6 +45,8 @@ export type MenuContext = {
   towerConnected: boolean;
   partySplit: boolean;
   blockedItem: string | null;
+  /** Done for tonight was confirmed: every item is disabled with a reason (DEC-713). */
+  sessionOver?: boolean;
 };
 
 export type GearGroup = "Look up" | "Table" | "Leave";
@@ -76,7 +79,7 @@ const row = (
 export const gearRows = (ctx: MenuContext): GearRow[] => {
   const lookEnabled = ctx.inGame || ctx.beforeBegin;
   const splitLabel = ctx.partySplit ? "Rejoin party" : "Split party";
-  return [
+  const rows: GearRow[] = [
     row(ctx, "current-party", "Look up", "Current party", ctx.inGame, ONLY_IN_GAME, true),
     row(ctx, "look-up", "Look up", "Look up", lookEnabled, ONLY_IN_GAME, true),
     row(ctx, "game-board-setup", "Table", "Game board setup", true, null, true),
@@ -89,6 +92,8 @@ export const gearRows = (ctx: MenuContext): GearRow[] => {
     row(ctx, "pause-resume", "Table", "Pause/Resume", ctx.inGame, ONLY_IN_GAME, false),
     row(ctx, "save-and-quit", "Leave", "Save and quit", ctx.inGame, ONLY_IN_GAME, false),
   ];
+  if (!ctx.sessionOver) return rows;
+  return rows.map((item) => ({ ...item, enabled: false, reason: SESSION_OVER }));
 };
 
 export const menuContextFromOffers = (quit: boolean, connect: boolean): MenuContext => ({

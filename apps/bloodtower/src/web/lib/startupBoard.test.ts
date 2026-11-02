@@ -1,6 +1,6 @@
 import type { BoardView } from "bloodtower-protocols";
 import { describe, expect, it } from "vitest";
-import { doorFrame, storyDoors } from "./startupBoard.ts";
+import { doorFrame, sessionBoard, storyDoors } from "./startupBoard.ts";
 
 const view = (levels: BoardView["levels"]): BoardView =>
   ({
@@ -52,5 +52,57 @@ describe("story doors", () => {
     expect(frame.focus?.id).toBe("test");
     expect(frame.previous).toBeNull();
     expect(frame.next?.id).toBe("dracula");
+  });
+});
+
+describe("session board (C2/06)", () => {
+  const session = (levels: BoardView["levels"]): BoardView =>
+    ({ screen: "session", levels, heroes: [], narration: null, actions: [] }) as BoardView;
+
+  it("reads Continue, the games newest first, and the tower line", () => {
+    const read = sessionBoard(
+      session([
+        { id: "session-continue", label: "Continue", shows: "A saved game can continue." },
+        { id: "session-games", label: "Tonight's games", shows: "Game 2 quit\nGame 1 quit" },
+        { id: "session", label: "Session", shows: "Tower lost" },
+      ]),
+    );
+    expect(read.hasContinue).toBe(true);
+    expect(read.games).toEqual([
+      { label: "Game 2", mark: "quit" },
+      { label: "Game 1", mark: "quit" },
+    ]);
+    expect(read.tower).toBe("Tower lost");
+    expect(read.confirm).toBeNull();
+    expect(read.dropped).toBeNull();
+  });
+
+  it("has no Continue and no rows on a fresh evening", () => {
+    const read = sessionBoard(
+      session([
+        { id: "session-games", label: "Tonight's games", shows: "No games yet tonight." },
+        { id: "session", label: "Session", shows: "without the tower" },
+      ]),
+    );
+    expect(read.hasContinue).toBe(false);
+    expect(read.games).toEqual([]);
+    expect(read.tower).toBe("without the tower");
+  });
+
+  it("reads a question and the all-dropped join line", () => {
+    const asked = sessionBoard(
+      session([
+        { id: "session-confirm", label: "Done for tonight", shows: "Are you sure?" },
+        { id: "session", label: "Session", shows: "Are you sure?" },
+      ]),
+    );
+    expect(asked.confirm).toEqual({ title: "Done for tonight", line: "Are you sure?" });
+    const dropped = sessionBoard(
+      session([
+        { id: "session-dropped", label: "Join", shows: "Scan with each iPad." },
+        { id: "session", label: "Session", shows: "tower: in play" },
+      ]),
+    );
+    expect(dropped.dropped).toBe("Scan with each iPad.");
   });
 });

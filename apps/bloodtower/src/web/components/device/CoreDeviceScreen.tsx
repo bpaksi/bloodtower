@@ -13,7 +13,6 @@ import {
   VOLUME_LINE,
 } from "../../lib/volumeTest.ts";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
-import { GoodbyeTeardown } from "../GoodbyeTeardown.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 import type { MenuContext } from "./gearMenu.ts";
 
@@ -22,7 +21,6 @@ const openActions = (actions: OfferedAction[]) => actions.filter((action) => act
 const SCREEN_TITLE: Record<string, string> = {
   splash: "Blood Tower",
   "pick-story": "Pick a story",
-  "pick-game": "Pick a game",
   "game-settings": "Game settings",
   "table-join": "Join",
   "base-board": "Base board",
@@ -34,7 +32,7 @@ const SCREEN_TITLE: Record<string, string> = {
   play: "The move",
   pause: "Paused",
   session: "Session",
-  goodbye: "Goodbye",
+  "session-over": "Tonight",
   "not-playable": "Not playable yet",
 };
 
@@ -50,11 +48,10 @@ const STEP_CONTEXT: Record<string, string> = {
   "claim-heroes": "Party Join",
   setup: "Setup",
   begin: "Begin",
-  "pick-game": "Pick a game",
   play: "Play",
   pause: "Paused",
   session: "Session",
-  goodbye: "Goodbye",
+  "session-over": "Session over",
   "not-playable": "Not playable yet",
 };
 
@@ -105,6 +102,7 @@ const menuContext = (view: DeviceView): MenuContext | undefined => {
     inGame: gear.inGame,
     beforeBegin: gear.beforeBegin,
     sessionScreen: gear.sessionScreen,
+    sessionOver: gear.sessionOver,
     towerConnected: gear.towerConnected,
     partySplit: gear.partySplit,
     blockedItem: gear.panel && gear.owner !== view.deviceId ? gear.panel : null,
@@ -261,6 +259,82 @@ const audioFailure = (error: unknown): DeviceErrorBannerModel => {
   return { code: AUDIO_START_REFUSED, message };
 };
 
+/** The saved game's Continue on Pick story. It sits above the stories, never pinned with Choose. */
+const SAVED_CONTINUE_PROMPT = "continue-saved-game";
+
+/**
+ * SCR-021 on the iPad, top to bottom: Continue (only while an autosave exists), New game,
+ * Tonight's games (each a pressable row, newest first), Done for tonight. A question replaces them.
+ */
+function SessionButtons({
+  view,
+  live,
+  onAct,
+}: {
+  view: DeviceView;
+  live: boolean;
+  onAct: (promptId: string, actionId: string) => void;
+}) {
+  const open = openActions(view.actions);
+  const find = (actionId: string) => open.find((action) => action.actionId === actionId);
+  const button = (action: OfferedAction, primary = false) => (
+    <button
+      key={`${action.promptId}:${action.actionId}`}
+      type="button"
+      className={primary ? "bt-primary" : "bt-secondary"}
+      data-prompt-id={action.promptId}
+      data-action-id={action.actionId}
+      data-action={action.actionId}
+      disabled={!live}
+      onClick={() => onAct(action.promptId, action.actionId)}
+    >
+      {action.label}
+    </button>
+  );
+  const back = find("back");
+  if (back) {
+    const done = open.find((action) => action.promptId === "session-done-confirm");
+    const yes = done ?? find("new-game");
+    return (
+      <div className="mt-6 flex flex-col gap-3" data-session-confirm={done ? "done" : "new-game"}>
+        {done ? <h2 className="text-xl font-semibold">Done for tonight</h2> : null}
+        {yes ? button(yes, true) : null}
+        {button(back)}
+      </div>
+    );
+  }
+  const games = open.filter((action) => action.actionId === "open-game");
+  const cont = find("continue");
+  const fresh = find("new-game");
+  const done = find("done-for-tonight");
+  return (
+    <div className="mt-6 flex flex-col gap-3" data-session-buttons="">
+      {cont ? button(cont, true) : null}
+      {fresh ? button(fresh) : null}
+      <h2 className="bt-session-games-label" data-games-label="">
+        Tonight's games
+      </h2>
+      {games.length === 0 ? <p data-games-empty="">No games yet tonight.</p> : null}
+      {games.map((game) => (
+        <button
+          key={game.promptId}
+          type="button"
+          className="bt-secondary"
+          data-prompt-id={game.promptId}
+          data-action-id={game.actionId}
+          data-action={game.actionId}
+          data-game-row=""
+          disabled={!live}
+          onClick={() => onAct(game.promptId, game.actionId)}
+        >
+          {game.label} <span className="bt-quit-mark">quit</span>
+        </button>
+      ))}
+      {done ? button(done) : null}
+    </div>
+  );
+}
+
 const inMenu = (action: OfferedAction) =>
   action.promptId === "menu-quit" || action.promptId === "menu-connect";
 
@@ -308,8 +382,16 @@ export function CoreDeviceScreen({
     prepareDeviceSound().catch((error: unknown) => setAudioError(audioFailure(error)));
   }, [needsUnlock]);
   const actions = openActions(view.actions).filter((action) => !isSoundAction(action));
-  const back = actions.find((action) => action.actionId === "back");
-  const body = actions.filter((action) => action.actionId !== "back" && !inMenu(action));
+  const onSessionScreen = view.screen === "session";
+  // The session screen draws its own Back inside the question; Pick story's Continue has its own place.
+  const back = onSessionScreen ? undefined : actions.find((action) => action.actionId === "back");
+  const savedContinue = onSessionScreen
+    ? undefined
+    : actions.find((action) => action.promptId === SAVED_CONTINUE_PROMPT);
+  const body = actions.filter(
+    (action) =>
+      action.actionId !== "back" && !inMenu(action) && action.promptId !== SAVED_CONTINUE_PROMPT,
+  );
   const quit =
     actions.find((action) => action.promptId === "menu-quit") ??
     actions.find((action) => action.actionId === "quit-story");
@@ -362,7 +444,7 @@ export function CoreDeviceScreen({
     view.screen === "setup" && setupPrompt
       ? setupPrompt.promptId.slice("continue-setup-".length)
       : undefined;
-  const farewell = view.screen === "goodbye";
+  const sessionOver = view.screen === "session-over";
   // The steps are on the Story board; the iPad shows only its one button (SCR-022).
   const stepsOnBoard = view.screen === "base-board";
 
@@ -497,8 +579,17 @@ export function CoreDeviceScreen({
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
         {panel ? (
           <GearDevicePanel gear={panel} live={live} onAct={onAct} />
-        ) : farewell ? (
-          <GoodbyeTeardown shows={view.shows} />
+        ) : sessionOver ? (
+          <p className="mt-2 text-lg" data-step-instruction="">
+            {view.shows}
+          </p>
+        ) : onSessionScreen ? (
+          <>
+            <p className="mt-2 text-lg" data-step-instruction="">
+              {view.shows}
+            </p>
+            <SessionButtons view={view} live={live} onAct={onAct} />
+          </>
         ) : (
           <>
             <p
@@ -521,6 +612,22 @@ export function CoreDeviceScreen({
               <p className="mt-2 text-[var(--bt-muted)]" data-pick-help="">
                 Who this iPad speaks for at the table
               </p>
+            ) : null}
+            {savedContinue ? (
+              <div className="mt-4 flex flex-col gap-3">
+                <button
+                  type="button"
+                  className="bt-secondary"
+                  data-prompt-id={savedContinue.promptId}
+                  data-action-id={savedContinue.actionId}
+                  data-action={savedContinue.actionId}
+                  data-saved-continue=""
+                  disabled={!live}
+                  onClick={() => onAct(savedContinue.promptId, savedContinue.actionId)}
+                >
+                  {savedContinue.label}
+                </button>
+              </div>
             ) : null}
             {view.settings?.map((setting) => (
               <div key={setting.id} className="mt-4 flex flex-col gap-3" data-setting={setting.id}>
@@ -664,7 +771,7 @@ export function CoreDeviceScreen({
           </>
         )}
       </div>
-      {panel || farewell || pinned.length === 0 ? null : (
+      {panel || sessionOver || onSessionScreen || pinned.length === 0 ? null : (
         <div className="bt-pinned flex flex-col gap-3">{pinned.map(renderAction)}</div>
       )}
       <ChromeBar
