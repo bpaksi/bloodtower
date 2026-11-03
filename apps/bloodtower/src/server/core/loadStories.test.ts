@@ -65,4 +65,20 @@ describe("Pick story doors (C2-14, EV-03)", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  it("reports a non-format-2 pack that cannot be read instead of dropping it silently", () => {
+    const root = mkdtempSync(join(tmpdir(), "pick-story-doors-"));
+    try {
+      for (const id of ["base", "test"]) {
+        cpSync(join(packsDir, id), join(root, id), { recursive: true });
+      }
+      mkdirSync(join(root, "empty-door"));
+      const catalog = loadStoryCatalog(root);
+      expect(catalog.stories.map((story) => story.card.id)).toEqual(["test"]);
+      expect(catalog.issues.length).toBeGreaterThan(0);
+      expect(catalog.issues.some((item) => item.file.includes("empty-door"))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });

@@ -188,8 +188,9 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
 
   /**
    * Marks that the Enter finished, where the evening stands (the session screen or not, how many
-   * games tonight, the focused Pick story door), and that the evening ended. A host restart reads the latest checkpoint:
-   * after the Enter it resumes without one, after Done for tonight it starts a new one.
+   * games tonight, the focused Pick story door), and that the evening ended. A host restart
+   * reads the latest checkpoint: after the Enter it resumes without one, after Done for tonight
+   * it starts a new one.
    */
   const persistSessionMarker = () => {
     const marker = state.sessionEnded
