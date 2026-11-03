@@ -9,7 +9,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Claude (brief). A Wright developer builds it.
 - Related AREA/docs: DEC-712, DEC-154, SCR-016, decision 0003 (errors)
 - Evals: ./eval.md
-- Mockup: none (no new screen; a refused request uses the existing `DeviceErrorBanner`)
+- Mockup: ./mockup.html (screen spec: ./screen-spec.md); the refused notice uses the existing `DeviceErrorBanner`
 - Risk: Med (browser API, error path)
 - Touches: `apps/bloodtower/src/web/components/device/LiveDevice.tsx`, `apps/bloodtower/src/web/lib/wakeLock.ts` (new), `apps/bloodtower/src/web/lib/wakeLock.test.ts` (new), `apps/bloodtower/src/web/lib/pageLogCodes.ts`, `apps/bloodtower/src/e2e/tests/c2-ipad-awake.spec.ts` (new)
 
