@@ -138,6 +138,8 @@ export const toPickStory = (state: ShellState): void => {
   state.playAgain = false;
   state.tally = emptyTally();
   state.resumedFromAutosave = false;
+  state.towerWithout = false;
+  state.reconnect = null;
   state.activeGameId = `game-${state.eventSeq}`;
   state.screen = "pick-story";
   state.stage = "lobby";
@@ -188,6 +190,8 @@ export const beginPlayAgain = (
   }
   state.seed = playAgainSeed(state);
   state.resumedFromAutosave = false;
+  state.towerWithout = false;
+  state.reconnect = null;
   state.activeGameId = `game-${state.eventSeq}`;
   state.focusStoryId = story.card.id;
   state.boundStoryId = story.card.id;

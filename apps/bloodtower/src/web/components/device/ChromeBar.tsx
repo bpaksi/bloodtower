@@ -20,7 +20,6 @@ type Offer = {
 export function ChromeBar({
   live,
   back,
-  connect,
   quit,
   onAct,
   helpScreen = "join",
@@ -29,7 +28,6 @@ export function ChromeBar({
 }: {
   live: boolean;
   back?: Offer;
-  connect?: Offer;
   quit?: Offer;
   onAct?: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
   helpScreen?: string;
@@ -40,7 +38,7 @@ export function ChromeBar({
   const [menuOpen, setMenuOpen] = useState(initialMenuOpen);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const context = menu ?? menuContextFromOffers(Boolean(quit), Boolean(connect));
+  const context = menu ?? menuContextFromOffers(Boolean(quit));
   const rows = gearRows(context);
 
   const closeMenu = () => {
@@ -92,11 +90,6 @@ export function ChromeBar({
                 setConfirmQuit(true);
                 return;
               }
-              if (item.id === "tower" && connect) {
-                setMenuOpen(false);
-                onAct?.(connect.promptId, connect.actionId);
-                return;
-              }
               if (item.id === "pause-resume") {
                 setMenuOpen(false);
                 return;
@@ -112,22 +105,6 @@ export function ChromeBar({
             ) : null}
           </button>
         ))}
-      {name === "Table" && connect ? (
-        <button
-          type="button"
-          className="bt-secondary"
-          data-prompt-id={connect.promptId}
-          data-action-id={connect.actionId}
-          data-action={connect.actionId}
-          disabled={!live || !onAct}
-          onClick={() => {
-            setMenuOpen(false);
-            onAct?.(connect.promptId, connect.actionId);
-          }}
-        >
-          {connect.label}
-        </button>
-      ) : null}
       {name === "Leave" && quit ? (
         <button
           type="button"

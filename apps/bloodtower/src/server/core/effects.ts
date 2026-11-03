@@ -80,6 +80,8 @@ export const runShellEffects = async (
       }
       case "tower-command": {
         if (ctx.replaying) break;
+        // The screens ("Calling the tower back...") show while the tower answers, not after.
+        ctx.onViewRefresh();
         let result: "ok" | "failed" = "failed";
         try {
           result = await ctx.tower.runCapability(effect.capabilityId, effect.params, ctx.log);

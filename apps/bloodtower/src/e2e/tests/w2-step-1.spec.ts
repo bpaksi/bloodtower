@@ -197,11 +197,8 @@ test("W2 the Enter asks the tower question once, before Pick story, and keeps th
     await expect(page.getByRole("button", { name: /^(Take|Claim|Hold)\b/ })).toHaveCount(0);
 
     await page.locator('[data-action="menu"]').click();
-    const menuConnect = page.locator('button[data-prompt-id="menu-connect"]');
-    if ((await menuConnect.count()) > 0) {
-      await expect(menuConnect).toHaveAccessibleName("Connect Tower");
-      await expect(menuConnect).toHaveAttribute("data-action", "tower-connect");
-    }
+    await expect(page.locator('button[data-prompt-id="menu-connect"]')).toHaveCount(0);
+    await expect(page.locator('[data-menu] [data-gear-item="tower"]')).toBeEnabled();
     await page.locator('[data-action="menu"]').click();
     await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
     await expect(page.locator('button[data-hunter="hero-a"]')).toBeVisible();

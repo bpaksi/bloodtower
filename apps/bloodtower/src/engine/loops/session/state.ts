@@ -10,17 +10,30 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-c2-07";
+export const SHELL_ENGINE_VERSION = "0.0.0-c2-08";
 
 /** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
 export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
   "0.0.0-step6",
   "0.0.0-c2-05",
   "0.0.0-c2-06",
+  "0.0.0-c2-07",
   SHELL_ENGINE_VERSION,
 ];
 
 export type PauseCause = "disconnect" | "tower-lost";
+
+/** The screen a tower-lost pause came from: Reconnect and Go on without return to it (DEC-711). */
+export type PauseReturn = "play" | "setup" | "begin";
+
+/**
+ * A Reconnect running after a tower was lost mid-game (DEC-301): the connect, then the tower check
+ * (MEC-018, as C1 built it). `origin` is where a failure returns to: the pause, or the play it came from.
+ */
+export type ReconnectState = {
+  step: "connecting" | "calibrate" | "calibrating";
+  origin: "pause" | "menu";
+};
 
 /** Where the session Enter is (MEC-039). `null` on the state once the Enter has finished. */
 export type EnterStep = "join" | "board" | "choice" | "connecting" | "calibrate" | "calibrating";
@@ -126,6 +139,13 @@ export type ShellState = {
    * A session that never connected stays in play, including after Continue.
    */
   towerLinked: boolean;
+  /**
+   * True once this game went on without the tower (DEC-301, Go on without). A Continue of the
+   * game keeps it: the tower is not asked for again and the skull drop stays simulated.
+   */
+  towerWithout: boolean;
+  /** A Reconnect in progress, or null. It is not kept across a restart. */
+  reconnect: ReconnectState | null;
   screen: ShellScreen;
   setupAt: number;
   setupSteps: { id: string; label: string }[];
@@ -135,7 +155,7 @@ export type ShellState = {
    */
   openingIndex: number;
   stage: "lobby" | "playing" | "paused" | "ended";
-  pause: { cause: PauseCause } | null;
+  pause: { cause: PauseCause; returnTo?: PauseReturn } | null;
   pauseSerial: number;
   autosave: AutosaveSnapshot | null;
   activeGameId: string | null;
@@ -208,6 +228,8 @@ export const initialShellState = (input: {
     sound: {},
     keptVolume: null,
     towerLinked: false,
+    towerWithout: false,
+    reconnect: null,
     screen: "table-join",
     setupAt: 0,
     setupSteps: [],
