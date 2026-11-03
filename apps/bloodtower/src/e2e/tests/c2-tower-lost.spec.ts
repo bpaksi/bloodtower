@@ -413,13 +413,15 @@ test("Go on without: confirm, no tower command, the board names the drop, the Me
     );
     await expect(deviceMain(pad.page).locator("h2")).toHaveText("See the Story board");
     await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Done"]);
+    const sentBeforePick = tower.sent().length;
     await pad.page.locator('[data-tower-pick="Reconnect"]').click();
     await expect(boardMain(board.page).locator("[data-picked]")).toHaveText("Reconnect");
     await expect.poll(() => bodyLabels(pad.page)).toEqual(["Yes", "Back"]);
     await bodyButtons(pad.page).getByText("Back", { exact: true }).click();
     await expect.poll(() => bodyLabels(pad.page)).toEqual(["Reconnect", "Go on without", "Done"]);
     await pad.page.locator('[data-tower-pick="Reconnect"]').click();
-    expect(types(tower).length).toBe(tower.sent().length);
+    // Picking Reconnect, Back and Reconnect again sends nothing to the tower until Yes.
+    expect(tower.sent().length).toBe(sentBeforePick);
 
     // Cancel: the Menu's Reconnect offers Cancel beside Calibrate; it returns to the Tower panel.
     await bodyButtons(pad.page).getByText("Yes", { exact: true }).click();
