@@ -447,13 +447,17 @@ test("a not-ready visit does not resume the Count", async ({ browser }, testInfo
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
     // This iPad is new to the browser session, so it unlocks its own sound first.
     await setSoundAndKeep(page);
-    await expect(page.locator('button[data-prompt-id="continue-pick-story-test"]')).toBeVisible();
-    await expect(page.locator("main.bt-device p").first()).toHaveText("Proving Grounds");
+    // The focused door comes back (EV-05) but the Count is not resumed.
+    await expect(
+      page.locator('button[data-prompt-id="continue-pick-story-dracula"]'),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: "The Count of Vellmoor" })).toHaveCount(0);
     await board.goto("/board");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
-    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-story-focus", "test");
-    await expect(board.locator("[data-story-focus] h2")).toHaveText("Proving Grounds");
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      "dracula",
+    );
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {
     await context2.close();

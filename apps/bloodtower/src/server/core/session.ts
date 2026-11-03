@@ -582,12 +582,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             towerChoice: resumed.towerChoice,
             games: resumed.games,
             screen: resumed.screen === "session" ? "session" : "pick-story",
-            // With an autosave the focused door comes back; without one Pick story starts on Proving Grounds.
-            focusStoryId:
-              state.autosave &&
-              state.stories.some((story) => story.card.id === resumed.focusStoryId)
-                ? resumed.focusStoryId
-                : state.focusStoryId,
+            // The focused door comes back if that story is still loaded, else the default.
+            focusStoryId: state.stories.some((story) => story.card.id === resumed.focusStoryId)
+              ? resumed.focusStoryId
+              : state.focusStoryId,
           };
         }
         const shellEffects: ShellEffect[] = [];
