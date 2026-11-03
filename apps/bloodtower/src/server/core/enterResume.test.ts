@@ -126,6 +126,24 @@ describe("the Enter and a host restart", () => {
     expect(second.tower.sent()).toEqual([]);
   });
 
+  it("keeps the focused Pick story door across a restart with an autosave (EV-05)", async () => {
+    const other: ShellStory = { ...TEST_STORY, card: { ...TEST_STORY.card, id: "other" } };
+    const { boot } = harness();
+    const first = await boot(undefined, [TEST_STORY, other]);
+    const pad = await joinPad(first.session);
+    await pressAs(first.session, pad, "base-board-done", "board-set-up");
+    await pressAs(first.session, pad, "play-without-tower", "play-without-tower");
+    await pressAs(first.session, pad, "focus-story", "focus", { storyId: "other" });
+    await first.session.whenIdle();
+    expect(first.session.state().focusStoryId).toBe("other");
+
+    const second = await boot(undefined, [TEST_STORY, other]);
+    second.session.rememberAutosave({ gameId: "game-x", packId: "test", day: 1 });
+    expect(await second.session.resumeSession()).toBe(true);
+    expect(second.session.state().screen).toBe("pick-story");
+    expect(second.session.state().focusStoryId).toBe("other");
+  });
+
   it("starts the Enter again from the join when the restart came mid-Enter (EV-19)", async () => {
     const { boot } = harness();
     const first = await boot();

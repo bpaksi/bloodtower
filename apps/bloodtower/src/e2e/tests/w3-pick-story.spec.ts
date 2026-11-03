@@ -555,10 +555,6 @@ test("a restart on Pick story keeps Continue and the focused door (EV-05)", asyn
   browser,
 }, testInfo) => {
   test.setTimeout(180_000);
-  // Known gap: with an autosave, the host restores Pick story but not the focused door. The fix
-  // is in server/core/session.ts (resumeSession), outside this brief's Touches. Remove this line
-  // when it lands; Playwright then fails the run until it does.
-  test.fail(true, "C2-14 EV-05: the focused door is lost on a host restart with an autosave");
   const first = await openPair(browser, testInfo, "c2-14-restart");
   const { databasePath } = first.session;
   try {
