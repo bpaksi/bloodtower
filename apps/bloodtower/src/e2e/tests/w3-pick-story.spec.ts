@@ -10,6 +10,7 @@ import {
 } from "@playwright/test";
 import {
   enterWithoutTower,
+  holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
   startAcceptanceHost,
@@ -446,16 +447,163 @@ test("a not-ready visit does not resume the Count", async ({ browser }, testInfo
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
     // This iPad is new to the browser session, so it unlocks its own sound first.
     await setSoundAndKeep(page);
-    await expect(page.locator('button[data-prompt-id="continue-pick-story-test"]')).toBeVisible();
-    await expect(page.locator("main.bt-device p").first()).toHaveText("Proving Grounds");
+    // The focused door comes back (EV-05) but the Count is not resumed.
+    await expect(
+      page.locator('button[data-prompt-id="continue-pick-story-dracula"]'),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: "The Count of Vellmoor" })).toHaveCount(0);
     await board.goto("/board");
     await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
-    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-story-focus", "test");
-    await expect(board.locator("[data-story-focus] h2")).toHaveText("Proving Grounds");
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      "dracula",
+    );
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {
     await context2.close();
+    await restarted.host.close();
+  }
+});
+
+// C2-14 (GC1-06): Pick story always shows every loaded story and waits for a press.
+const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const OPENING_IDS = ["grey-stair-01", "grey-stair-02", "grey-stair-03", "grey-stair-04"] as const;
+const PICK_WAIT_MS = 5000;
+
+/** Pick story with both doors and the iPad's carousel controls; nothing has moved on. */
+const expectPickStoryWaiting = async (board: Page, device: Page) => {
+  await device.waitForTimeout(PICK_WAIT_MS);
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
+  await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
+  await expect(board.locator("main")).not.toHaveAttribute("data-screen", "game-settings");
+  await expect(device.locator('button[data-action="story-prev"]')).toBeVisible();
+  await expect(device.locator('button[data-action="story-next"]')).toBeVisible();
+  await expect(board.locator("[data-story-focus]")).toHaveCount(1);
+  await expect(board.locator("[data-story-peek]")).toHaveCount(1);
+};
+
+/** From Pick story on Proving Grounds to the session screen: a whole setup, the opening, Quit. */
+const playToQuit = async (device: Page) => {
+  await clickAct(device, "continue", "continue-pick-story-test");
+  await clickAct(device, "continue", "continue-game-settings");
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "claim-heroes");
+  await holdHeroesFromTest(device, [...HERO_IDS]);
+  await clickAct(device, "continue", "continue-claim-heroes");
+  for (const id of SETUP_IDS) {
+    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", id, {
+      timeout: 20_000,
+    });
+    await clickAct(device, "continue", `continue-setup-${id}`);
+  }
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
+  await clickAct(device, "continue", "continue-begin");
+  for (const id of OPENING_IDS) await clickAct(device, "continue", `continue-opening-${id}`);
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
+  const dismissWake = device.locator('[data-action="dismiss-wake-notice"]');
+  if ((await dismissWake.count()) > 0) await dismissWake.click();
+  await device.locator('[data-action="menu"]').click();
+  await clickAct(device, "quit-story", "menu-quit");
+  await expect(deviceMain(device)).toHaveAttribute("data-screen", "session", {
+    timeout: 20_000,
+  });
+};
+
+test("Pick story waits 5 s on a cold start and after a quit; the iPad shows the carousel (EV-01, EV-02, EV-04)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(180_000);
+  const { session, context, board, device } = await openPair(browser, testInfo, "c2-14-wait");
+  try {
+    await expectPickStoryWaiting(board, device);
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-story-focus", "test");
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute("aria-current", "true");
+
+    const next = device.locator('button[data-action="story-next"]');
+    const previous = device.locator('button[data-action="story-prev"]');
+    await next.click();
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      "dracula",
+    );
+    await next.click();
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-story-focus", "test");
+    await previous.click();
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      "dracula",
+    );
+    await previous.click();
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-story-focus", "test");
+
+    // Quit a game, then New game: Pick story waits again.
+    await playToQuit(device);
+    await clickAct(device, "new-game", "session-new-game");
+    await clickAct(device, "new-game", "session-new-confirm");
+    await expectPickStoryWaiting(board, device);
+    await expect(device.locator('button[data-prompt-id="continue-saved-game"]')).toHaveCount(0);
+
+    // Choosing Dracula stops on not-ready and binds nothing.
+    await next.click();
+    await clickAct(device, "continue", "continue-pick-story-dracula");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "not-playable");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "not-playable");
+    await expect(board.locator("[data-setting]")).toHaveCount(0);
+  } finally {
+    await context.close();
+    await session.host.close();
+  }
+});
+
+test("a restart on Pick story keeps Continue and the focused door (EV-05)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(180_000);
+  const first = await openPair(browser, testInfo, "c2-14-restart");
+  const { databasePath } = first.session;
+  try {
+    await playToQuit(first.device);
+    await clickAct(first.device, "new-game", "session-new-game");
+    await clickAct(first.device, "new-game", "session-new-confirm");
+    await expect(deviceMain(first.device)).toHaveAttribute("data-screen", "pick-story");
+    await first.device.locator('button[data-action="story-next"]').click();
+    await expect(first.board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      "dracula",
+    );
+  } finally {
+    await first.context.close();
+    await first.session.host.close();
+  }
+
+  const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "c2-14-restart" });
+  const context = await browser.newContext({ baseURL: restarted.baseURL });
+  const device = await context.newPage();
+  const board = await context.newPage();
+  try {
+    await installSessionSocketHook(device);
+    await device.goto(`/join?code=${restarted.host.joinCode}`);
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story", {
+      timeout: 30_000,
+    });
+    await setSoundAndKeep(device);
+    await board.goto("/board");
+    await expect(board.locator("main")).toHaveAttribute("data-screen", "pick-story");
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      "dracula",
+    );
+    const order = await deviceMain(device)
+      .locator("button[data-prompt-id]")
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-prompt-id")));
+    expect(order.indexOf("continue-saved-game")).toBeGreaterThanOrEqual(0);
+    expect(order.indexOf("continue-saved-game")).toBeLessThan(
+      order.indexOf("continue-pick-story-dracula"),
+    );
+    await device.waitForTimeout(PICK_WAIT_MS);
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
+  } finally {
+    await context.close();
     await restarted.host.close();
   }
 });

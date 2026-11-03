@@ -97,31 +97,43 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     const door = classifyPackDoor(dir);
     if (door.kind === "skip") {
       const loaded = loadPackDir(dir);
-      if (loaded.ok && !loaded.playable) {
-        const pack = loaded.pack;
-        const file = pack.cover ? basename(pack.cover) : "";
-        const cover =
-          file && loaded.assets.byBasename.has(file) ? coverUrl(pack.pack_id, file) : null;
-        assetIndexes.push(loaded.assets);
-        stories.push({
-          card: {
-            id: pack.pack_id,
-            title: pack.title,
-            tagline: pack.tagline ?? null,
-            playable: false,
-            players: null,
-            cover,
-          },
-          settings: pack.settings.map((setting) => ({
-            id: setting.id,
-            label: setting.label,
-            options: setting.options.map((option) => ({ id: option.id, label: option.label })),
-            default: setting.default,
-          })),
-          setup: [],
-          heroes: [],
-        });
+      if (!loaded.ok) {
+        // A door that is not format 2 and cannot be read as metadata is reported, never dropped.
+        issues.push(...loaded.issues);
+        continue;
       }
+      if (loaded.playable) {
+        issues.push({
+          rule: "P2-1",
+          file: name.name,
+          path: "format",
+          message: `P2-1: pack ${name.name} is playable but not format 2, so it has no door.`,
+        });
+        continue;
+      }
+      const pack = loaded.pack;
+      const file = pack.cover ? basename(pack.cover) : "";
+      const cover =
+        file && loaded.assets.byBasename.has(file) ? coverUrl(pack.pack_id, file) : null;
+      assetIndexes.push(loaded.assets);
+      stories.push({
+        card: {
+          id: pack.pack_id,
+          title: pack.title,
+          tagline: pack.tagline ?? null,
+          playable: false,
+          players: null,
+          cover,
+        },
+        settings: pack.settings.map((setting) => ({
+          id: setting.id,
+          label: setting.label,
+          options: setting.options.map((option) => ({ id: option.id, label: option.label })),
+          default: setting.default,
+        })),
+        setup: [],
+        heroes: [],
+      });
       continue;
     }
     if (door.kind === "broken") {

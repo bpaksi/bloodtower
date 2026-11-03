@@ -11,7 +11,7 @@ Keep this a checklist; do not write a second design doc.
 - Evals: ./eval.md
 - Mockup: none (no design change: SCR-007 and UI-016 as built in W3)
 - Risk: Medium (a regression in the startup flow)
-- Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/server/core/loadStories.ts`, `apps/bloodtower/src/web/components/board/StartupBoard.tsx`, `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/e2e/tests/w3-pick-story.spec.ts`
+- Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/server/core/loadStories.ts`, `apps/bloodtower/src/server/core/session.ts`, `apps/bloodtower/src/web/components/board/StartupBoard.tsx`, `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/e2e/tests/w3-pick-story.spec.ts`
 - Depends on: feature 08 merged (the session shell is serial)
 
 ## The bug

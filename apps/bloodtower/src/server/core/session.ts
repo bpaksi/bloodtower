@@ -188,14 +188,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
 
   /**
    * Marks that the Enter finished, where the evening stands (the session screen or not, how many
-   * games tonight), and that the evening ended. A host restart reads the latest checkpoint:
-   * after the Enter it resumes without one, after Done for tonight it starts a new one.
+   * games tonight, the focused Pick story door), and that the evening ended. A host restart
+   * reads the latest checkpoint: after the Enter it resumes without one, after Done for tonight
+   * it starts a new one.
    */
   const persistSessionMarker = () => {
     const marker = state.sessionEnded
       ? "ended"
       : state.enter === null && state.towerChoice !== "undecided"
-        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => game.rating ?? "-").join("")}-${state.screen === "session" ? "session" : "game"}`
+        ? `entered-${state.towerChoice}-${state.games.length}-${state.games.map((game) => game.rating ?? "-").join("")}-${state.screen === "session" ? "session" : "game"}-${state.focusStoryId}`
         : "";
     if (marker === "" || marker === savedMarker) return;
     writeStateCheckpoint();
@@ -581,6 +582,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             towerChoice: resumed.towerChoice,
             games: resumed.games,
             screen: resumed.screen === "session" ? "session" : "pick-story",
+            // The focused door comes back if that story is still loaded, else the default.
+            focusStoryId: state.stories.some((story) => story.card.id === resumed.focusStoryId)
+              ? resumed.focusStoryId
+              : state.focusStoryId,
           };
         }
         const shellEffects: ShellEffect[] = [];

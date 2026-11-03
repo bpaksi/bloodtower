@@ -81,6 +81,7 @@ function DoorFocus({ door }: { door: StoryDoor }) {
     <article
       className="bt-carousel-focus"
       data-story-focus={door.id}
+      aria-current="true"
       data-playable={door.playable ? "true" : "false"}
     >
       <CoverPlate door={door} />
