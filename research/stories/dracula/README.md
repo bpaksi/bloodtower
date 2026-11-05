@@ -1,6 +1,6 @@
 # Story: Dracula / vampire (Halloween)
 
-> **Replaced (Bob, 2026-11-05):** [DEC-739](../../game-design/cards/DEC-739.md) drops the 1.0 cut. There is one Dracula, on the 1.1 engine, following [i6-outline.md](i6-outline.md); the mapping is in [bloodtower-map.md](bloodtower-map.md). The older files here and in [dracula-v2](../dracula-v2/README.md) are sources.
+> **Replaced (Bob, 2026-11-05):** [DEC-739](../../game-design/cards/DEC-739.md) drops the 1.0 cut. There is one Dracula, on the 1.1 engine, following [i6-outline.md](i6-outline.md); the mapping is in [bloodtower-map.md](bloodtower-map.md). Image inspiration is in [inspiration.md](inspiration.md). The older files here and in [dracula-v2](../dracula-v2/README.md) are sources.
 
 Status: idea. Nothing here is decided.
 
