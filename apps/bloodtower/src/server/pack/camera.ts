@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, join, sep } from "node:path";
-import type { PackLoadIssue } from "./load.ts";
+import type { PackV2LoadIssue as PackLoadIssue } from "./v2/load.ts";
 
 export const PACK_CAMERA_DIR = "camera";
 

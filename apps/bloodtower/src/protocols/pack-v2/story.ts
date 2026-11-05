@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { coverSchema } from "../pack.ts";
 import { conditionSchema } from "./conditions.ts";
 import { effectSchema } from "./effects.ts";
 import {
@@ -9,6 +8,7 @@ import {
   questTypeIdSchema,
   semverSchema,
 } from "./ids.ts";
+import { coverSchema } from "./metadata.ts";
 
 const entryPointSchema = z.strictObject({
   when: conditionSchema.optional(),

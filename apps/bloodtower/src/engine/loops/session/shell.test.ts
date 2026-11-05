@@ -884,7 +884,7 @@ describe("place stills", () => {
     expect(view.table?.movesLeft).toBe(before);
     expect(view.place).toEqual({
       building: "citadel",
-      stillId: "place.citadel",
+      stillId: "place-citadel.jpg",
       caption: PLACE_CAPTION.citadel,
     });
     const device = project(view, { kind: "device", deviceId: "ipad-0" });

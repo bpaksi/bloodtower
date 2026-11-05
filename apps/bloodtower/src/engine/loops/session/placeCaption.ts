@@ -3,11 +3,12 @@
 export const PLACE_BUILDINGS = ["village", "bazaar", "citadel", "sanctuary"] as const;
 export type PlaceBuilding = (typeof PLACE_BUILDINGS)[number];
 
+/** The still's file under the pack's `assets/` folder, served at `/packs/<id>/assets/<file>`. */
 export const PLACE_STILL_ID: Record<PlaceBuilding, string> = {
-  village: "place.village",
-  bazaar: "place.bazaar",
-  citadel: "place.citadel",
-  sanctuary: "place.sanctuary",
+  village: "place-village.jpg",
+  bazaar: "place-bazaar.jpg",
+  citadel: "place-citadel.jpg",
+  sanctuary: "place-sanctuary.jpg",
 };
 
 export const PLACE_CAPTION: Record<PlaceBuilding, string> = {

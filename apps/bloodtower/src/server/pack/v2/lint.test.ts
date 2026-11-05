@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadStoryCatalog } from "../../core/loadStories.ts";
 import { lintBuildSet, lintPackRoot, lintPath } from "../../scripts/packLint.ts";
-import { loadPackDir } from "../load.ts";
 import { loadPackV2Dir } from "./load.ts";
 
 const repoRoot = join(import.meta.dirname, "../../../../../../");
@@ -304,10 +303,12 @@ assets:
     try {
       cpSync(join(repoRoot, "packs", "dracula"), dir, { recursive: true });
       rmSync(join(dir, "assets", "cover.png"));
-      const result = loadPackDir(dir);
+      const result = loadPackV2Dir(dir);
       expect(result.ok).toBe(false);
       if (result.ok) return;
-      expect(result.issues.some((item) => item.rule === "V-2" && item.path === "cover")).toBe(true);
+      expect(result.issues.some((item) => item.rule === "P2-2" && item.path === "cover")).toBe(
+        true,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

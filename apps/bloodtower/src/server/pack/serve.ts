@@ -20,7 +20,7 @@ const pipeFile = (file: string, res: ServerResponse) => {
 };
 
 /**
- * `/packs/<packId>/assets/<file>`, `/packs/<packId>/asset/<assetId>`, and
+ * `/packs/<packId>/assets/<file>`, the one asset route (there is no by-asset-id route), and
  * `/packs/<packId>/camera/<momentId>.json` for optional camera-track sidecars, and
  * `/packs/<packId>/audio/<file>.m4a` for the pack's mood and music loops.
  * Only declared assets that resolved at load time are served. Traversal is refused.
@@ -80,22 +80,6 @@ export const tryServePackAssets = async (
       return true;
     }
     return sendPackFile(absolute, req, res);
-  }
-
-  if (parts[2] === "asset" && parts.length === 4) {
-    let assetId: string;
-    try {
-      assetId = decodeURIComponent(parts[3] ?? "");
-    } catch {
-      sendText(res, 400, "Bad request.\n");
-      return true;
-    }
-    const resolved = catalog.byId.get(assetId);
-    if (!resolved) {
-      sendText(res, 404, "Not found.\n");
-      return true;
-    }
-    return sendPackFile(resolved.absolute, req, res);
   }
 
   if (parts[2] !== "assets" || parts.length !== 4) {

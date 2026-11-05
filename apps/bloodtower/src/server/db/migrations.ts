@@ -92,4 +92,7 @@ export const MIGRATIONS: readonly string[] = [
     session_id TEXT NOT NULL REFERENCES sessions(id),
     pack_id TEXT NOT NULL
   )`,
+  // C3: the pack format the save was written under. Null on a row written before C3: that save
+  // is dropped (kept in the DB, ignored), never migrated.
+  `ALTER TABLE autosave ADD COLUMN format INTEGER`,
 ];

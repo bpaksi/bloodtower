@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   type Browser,
@@ -240,6 +240,40 @@ test("focused Proving Grounds fits, and only Dracula's cover is painted", async 
       await expectBoardQuiet(board, device);
     }
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+  } finally {
+    await context.close();
+    await session.host.close();
+  }
+});
+
+test("Pick story lists the same stories in the same order as main (C3-01 EV-03)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(90_000);
+  const fixture = JSON.parse(
+    readFileSync(join(import.meta.dirname, "w3-pick-story.main.json"), "utf8"),
+  ) as { id: string; title: string }[];
+  const { session, context, board, device } = await openPair(browser, testInfo, "w3-order");
+  try {
+    // From the default focus, Next walks the list in order and wraps back to the start.
+    const seen: { id: string; title: string }[] = [];
+    for (let step = 0; step < fixture.length; step += 1) {
+      const focus = board.locator("[data-story-focus]");
+      await expect(focus).toHaveAttribute("data-story-focus", fixture[step]?.id ?? "");
+      seen.push({
+        id: (await focus.getAttribute("data-story-focus")) ?? "",
+        title: (await board.locator("[data-story-focus] h2").innerText()).trim(),
+      });
+      await device.locator('button[data-action="story-next"]').click();
+    }
+    expect(seen).toEqual(fixture);
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
+      "data-story-focus",
+      fixture[0]?.id ?? "",
+    );
+    // Dracula is a metadata-only pack: listed, and not playable.
+    await device.locator('button[data-action="story-next"]').click();
+    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-playable", "false");
   } finally {
     await context.close();
     await session.host.close();

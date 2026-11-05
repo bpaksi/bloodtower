@@ -106,4 +106,6 @@ export const autosave = sqliteTable("autosave", {
   gameId: text("game_id").notNull(),
   sessionId: text("session_id").notNull(),
   packId: text("pack_id").notNull(),
+  /** Pack format the save was written under. Null on a row written before C3. */
+  format: integer("format"),
 });

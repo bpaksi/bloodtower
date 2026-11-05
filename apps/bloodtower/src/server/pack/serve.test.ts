@@ -1,11 +1,21 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
+import { loadStoryCatalog } from "../core/loadStories.ts";
 import { resolveAssetImage } from "./assets.ts";
-import { loadPackDir } from "./load.ts";
 import { tryServePackAssets } from "./serve.ts";
 
 const servers: ReturnType<typeof createServer>[] = [];
@@ -26,13 +36,32 @@ const fetchDrained = async (url: string) => {
   return res;
 };
 
+const temps: string[] = [];
+afterEach(() => {
+  for (const dir of temps.splice(0)) rmSync(dir, { recursive: true, force: true });
+});
+
+/** A temporary packs folder: the base pack and a copy of `packs/test` with one audio loop added. */
 const startPackServer = async () => {
-  const loaded = loadPackDir(join(loadConfig().packsDir, "test"));
-  expect(loaded.ok).toBe(true);
-  if (!loaded.ok) throw new Error("pack");
+  const packs = loadConfig().packsDir;
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "bloodtower-serve-")));
+  temps.push(root);
+  cpSync(join(packs, "base"), join(root, "base"), { recursive: true });
+  cpSync(join(packs, "test"), join(root, "test"), { recursive: true });
+  mkdirSync(join(root, "test", "audio"));
+  writeFileSync(join(root, "test", "audio", "loop.m4a"), "audio-bytes");
+  // One declared audio asset beside the cover and the stills.
+  writeFileSync(join(root, "test", "assets", "theme.m4a"), "theme-bytes");
+  const manifest = join(root, "test", "pack.yaml");
+  appendFileSync(
+    manifest,
+    "  - {id: music.theme, type: music, target: storyboard, status: final, path: assets/theme.m4a}\n",
+  );
+  const catalog = loadStoryCatalog(root);
+  expect(catalog.issues).toEqual([]);
   const server = createServer((req, res) => {
     void (async () => {
-      if (await tryServePackAssets([loaded.assets], req, res)) return;
+      if (await tryServePackAssets(catalog.assetIndexes, req, res)) return;
       res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
       res.end("Not found.\n");
     })();
@@ -41,55 +70,60 @@ const startPackServer = async () => {
   servers.push(server);
   const address = server.address();
   const port = address && typeof address === "object" ? address.port : 0;
-  return { port, loaded };
+  return { port, root, catalog };
 };
 
-describe.skip("pack asset HTTP (R1 packs/test)", () => {
-  it("serves a declared image and refuses traversal", async () => {
+describe("pack asset HTTP (v2 paths only, C3-01 EV-06)", () => {
+  it("serves the cover and a still at /packs/<id>/assets/<file> with the file's bytes", async () => {
+    const { port, root } = await startPackServer();
+    const base = `http://127.0.0.1:${port}`;
+    for (const file of ["cover.png", "place-village.jpg"]) {
+      const res = await fetch(`${base}/packs/test/assets/${file}`);
+      expect(res.status, file).toBe(200);
+      expect(res.headers.get("content-type"), file).toBe(
+        file.endsWith(".png") ? "image/png" : "image/jpeg",
+      );
+      const bytes = Buffer.from(await res.arrayBuffer());
+      expect(bytes.equals(readFileSync(join(root, "test", "assets", file))), file).toBe(true);
+    }
+  });
+
+  it("serves a declared audio asset at /packs/<id>/assets/<file> with the file's bytes", async () => {
+    const { port } = await startPackServer();
+    const res = await fetch(`http://127.0.0.1:${port}/packs/test/assets/theme.m4a`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("audio/mp4");
+    expect(Buffer.from(await res.arrayBuffer()).toString("utf8")).toBe("theme-bytes");
+  });
+
+  it("still serves the mood loops at /packs/<id>/audio/<file>", async () => {
+    const { port } = await startPackServer();
+    const res = await fetch(`http://127.0.0.1:${port}/packs/test/audio/loop.m4a`);
+    expect(res.status).toBe(200);
+    expect(Buffer.from(await res.arrayBuffer()).toString("utf8")).toBe("audio-bytes");
+  });
+
+  it("answers 404 on the removed /packs/<id>/asset/<assetId> route, for an id the pack indexes", async () => {
+    const { port, catalog } = await startPackServer();
+    const index = catalog.assetIndexes.find((item) => item.packId === "test");
+    const assetId = "place.village";
+    expect(index?.byId.has(assetId)).toBe(true);
+    const removed = await fetchDrained(`http://127.0.0.1:${port}/packs/test/asset/${assetId}`);
+    expect(removed.status).toBe(404);
+  });
+
+  it("refuses traversal, an undeclared file and an unknown pack", async () => {
     const { port } = await startPackServer();
     const base = `http://127.0.0.1:${port}`;
-
-    const byId = await fetch(`${base}/packs/test/asset/fx.hall`);
-    expect(byId.status).toBe(200);
-    expect(byId.headers.get("content-type")).toBe("image/png");
-    expect(Buffer.from(await byId.arrayBuffer()).length).toBeGreaterThan(0);
-
-    const byFile = await fetchDrained(`${base}/packs/test/assets/fx-hall.png`);
-    expect(byFile.status).toBe(200);
-    expect(byFile.headers.get("content-type")).toBe("image/png");
-
-    const traversal = await fetchDrained(`${base}/packs/test/assets/%2e%2e%2fsecret.png`);
-    expect(traversal.status).toBe(404);
-
-    const unknown = await fetchDrained(`${base}/packs/test/assets/not-declared.png`);
-    expect(unknown.status).toBe(404);
-
-    const fakePack = await fetchDrained(`${base}/packs/other/asset/fx.hall`);
-    expect(fakePack.status).toBe(404);
-
-    for (const momentId of ["grey-stair.01", "grey-stair.04"]) {
-      const camera = await fetch(`${base}/packs/test/camera/${momentId}.json`);
-      expect(camera.status).toBe(200);
-      expect(camera.headers.get("content-type")).toMatch(/json/);
-      const body = (await camera.json()) as { id: string };
-      expect(body.id).toBe(momentId);
+    for (const path of [
+      "/packs/test/assets/%2e%2e%2fpack.yaml",
+      "/packs/test/assets/not-declared.png",
+      "/packs/other/assets/cover.png",
+      "/packs/test/camera/not-a-moment.json",
+    ]) {
+      const res = await fetchDrained(`${base}${path}`);
+      expect(res.status, path).toBe(404);
     }
-
-    const missingCamera = await fetchDrained(`${base}/packs/test/camera/not-a-moment.json`);
-    expect(missingCamera.status).toBe(404);
-
-    const cameraTraversal = await fetchDrained(
-      `${base}/packs/test/camera/%2e%2e%2fassets%2ffx-hall.png`,
-    );
-    expect(cameraTraversal.status).toBe(404);
-
-    const cameraTraversalStem = await fetchDrained(
-      `${base}/packs/test/camera/%2e%2e%2fgrey-stair.04.json`,
-    );
-    expect(cameraTraversalStem.status).toBe(404);
-
-    const cameraSlash = await fetchDrained(`${base}/packs/test/camera/foo%2fbar.json`);
-    expect(cameraSlash.status).toBe(404);
   });
 });
 
