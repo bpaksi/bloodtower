@@ -9,4 +9,4 @@ links:
   - { rel: part-of, to: AREA-116 }
   - { rel: refines, to: MEC-052 }
 ---
-**Chapter:** The Keep. **Kind:** plain scene using the clues. See IDEA-173.
+**Chapter:** The Keep. **Kind:** plain scene that gives a clue, done once played (DEC-797). Accusing stays the talk action (DEC-184). See IDEA-173.
