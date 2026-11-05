@@ -79,4 +79,3 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-- **Q-420:** The naming pass: what do the people and places end up being called?
