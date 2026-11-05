@@ -41,7 +41,7 @@ The Long chapters open Durnin, then Zenon. In Short and Standard, the whole boar
 | Corruption and event names (MEC-059, MEC-060) | Oath-marks, and raider and keep events | All |
 | Nuggets and mood lines (MEC-064, MEC-065) | Village talk | All |
 | Place paintings, music (MEC-069, MEC-070) | Keep, roads and Tower; engine music plus a story theme | All |
-| The roaming adversary (DEC-738, DEC-775) | The Warden, once the reveal allows it (Q-432) | All |
+| The roaming adversary (DEC-738, DEC-775) | The Warden, from the end of The Barrow (DEC-791) | All |
 | Companions (MEC-049) | RtDT's 10 by tavern hire, plus one story replacement, an old keep sergeant | Standard, Long |
 | Traitor tricks (MEC-052) | Herald, trader and fence as suspects; the trick springs at The Keep's end | Standard, Long |
 | Lieutenants (MEC-051) | A raider captain, a hunter | Standard, Long |
