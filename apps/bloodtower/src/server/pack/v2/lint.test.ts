@@ -67,7 +67,7 @@ describe("pack format v2 lint", () => {
     }
   });
 
-  it.fails("says why spaces lose their region when pack.yaml has region labels with no id", () => {
+  it("says why spaces lose their region when pack.yaml has region labels with no id", () => {
     const root = mkdtempSync(join(tmpdir(), "pack-v2-"));
     try {
       const base = join(root, "base");
