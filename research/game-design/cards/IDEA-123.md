@@ -8,10 +8,10 @@ by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-104 }
   - { rel: needs, to: DEC-742 }
-  - { rel: raises, to: Q-412 }
+  - { rel: needs, to: DEC-748 }
 sources:
   - { file: "../stories/dracula/i6-outline.md" }
 ---
 **I6:** manipulate a hero into attacking her, then appear as her rescuer.
 
-**Bloodtower (draft):** his strikes hunt her hero, and her loyalty falls with each one. Effects and hints are Q-412.
+**Bloodtower:** he hunts her hero, and a landed strike lowers her loyalty, then takes her (DEC-746). **Castle moment (draft):** at the banquet he offers her his hand, and she answers in front of the heroes.

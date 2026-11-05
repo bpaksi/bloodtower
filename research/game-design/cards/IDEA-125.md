@@ -8,10 +8,10 @@ by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-104 }
   - { rel: needs, to: DEC-742 }
-  - { rel: raises, to: Q-412 }
+  - { rel: needs, to: DEC-748 }
 sources:
   - { file: "../stories/dracula/i6-outline.md" }
 ---
 **I6:** the sphere of darkness, reworked by DEC-742.
 
-**Bloodtower (draft):** extra skull pressure. He moves to the building with the most skulls and strikes it. Effects and hints are Q-412.
+**Bloodtower:** he goes to the building with the most skulls, and a landed strike adds a skull there, plus one extra drop at each chapter's end. **Castle moment (draft):** the lights go out on the tower level, so the Lift gives no warning.
