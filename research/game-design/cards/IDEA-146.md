@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest markers: fixed for the village, set by the reading for the hunt"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

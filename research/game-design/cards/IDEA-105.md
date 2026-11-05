@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Ludmila and Stefan: the tragedy, told through the Tome and the portraits"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

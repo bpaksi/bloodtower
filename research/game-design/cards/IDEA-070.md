@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Opening: a forged letter draws the heroes in, and the fog closes behind them"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

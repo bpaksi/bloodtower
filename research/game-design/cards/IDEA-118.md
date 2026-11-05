@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Mother Ursula: Agnes's abbess, a ghost in the procession"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

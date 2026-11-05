@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The ghost procession: once a chapter, the dead who tried before walk past"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

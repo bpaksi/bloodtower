@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: The Burgomaster's House, the letter's author is already dead"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

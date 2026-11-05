@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The castle crawl's progress picture is one tall cutaway, lit floor by floor as the heroes climb"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

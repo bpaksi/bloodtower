@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: The Long Night, defending the house against wolves, bats and a voice at the door"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

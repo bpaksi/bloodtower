@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: The Lantern & Bell, the heroes reach the inn and learn what the village fears"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

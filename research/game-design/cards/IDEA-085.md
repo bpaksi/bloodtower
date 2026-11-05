@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: Stefan's Blade, a Tomb at the reading's site, with wolves ringed outside"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The host: cures a bite, or seals a doorway against him"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

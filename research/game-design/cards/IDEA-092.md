@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The castle is the Tower crawl: crypts below, the great hall in the middle, the high tower above"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

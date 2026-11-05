@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: The Drawbridge, the loud way or the little gate"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"
