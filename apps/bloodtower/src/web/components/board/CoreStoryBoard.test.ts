@@ -339,6 +339,7 @@ describe("story board startup chrome", () => {
     });
     expect(markup).toContain('data-board-layer="place"');
     expect(markup).toContain('data-still="place.village"');
+    expect(markup).toContain("/packs/test/assets/place-village.jpg");
     expect(markup).toContain("Quiet roofs. A well, a few doors. Nothing stirs.");
     expect(markup).not.toContain("data-band");
     expect(markup).not.toContain("data-waiting");

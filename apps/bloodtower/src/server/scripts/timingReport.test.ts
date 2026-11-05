@@ -2,11 +2,10 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createPressLog } from "../control/lock.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type SessionStore } from "../db/store.ts";
 import { stepClock } from "../timing/clock.ts";
-import { createTimingLog } from "../timing/log.ts";
+import { createPressLog, createTimingLog } from "./timingFixtures.ts";
 import { formatTimingReport, parseReportArgs, readRun, timelineOf } from "./timingReport.ts";
 
 const dirs: string[] = [];

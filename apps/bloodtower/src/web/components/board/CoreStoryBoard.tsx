@@ -2,7 +2,7 @@
 
 import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
-import { packStillImageUrl } from "../../lib/packAsset";
+import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
@@ -97,7 +97,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       {layer === "place" && place ? (
         <figure className="bt-place-still" data-place={place.building} data-still={place.stillId}>
           {/* biome-ignore lint/performance/noImgElement: pack stills are static files on the session host */}
-          <img src={packStillImageUrl(place.stillId)} alt="" />
+          <img src={packStillImageUrl(placeStillFile(place.stillId))} alt="" />
           <figcaption>{place.caption}</figcaption>
         </figure>
       ) : null}

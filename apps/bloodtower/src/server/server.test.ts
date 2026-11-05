@@ -2,12 +2,13 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Database from "better-sqlite3";
-import { PROTOCOL_VERSION, packSchema } from "bloodtower-protocols";
+import { PROTOCOL_VERSION } from "bloodtower-protocols";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import QRCode from "qrcode";
 import { afterEach, describe, expect, it } from "vitest";
 import { parse } from "yaml";
+import { storyPackSchema } from "../protocols/pack-v2/index.ts";
 import { resolveStaticFile, startHost } from "./server.ts";
 
 const roots: string[] = [];
@@ -119,7 +120,7 @@ describe("dependencies this step pins for later steps", () => {
   it("parses YAML into the pack schema and encodes a join URL as a QR", async () => {
     const parsed = parse("pack_id: test\n");
     expect(parsed).toEqual({ pack_id: "test" });
-    expect(packSchema.safeParse(parsed).success).toBe(false);
+    expect(storyPackSchema.safeParse(parsed).success).toBe(false);
 
     const url = "http://127.0.0.1:4787/join?code=048213";
     const qr = QRCode.create(url);

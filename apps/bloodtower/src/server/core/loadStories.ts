@@ -1,19 +1,24 @@
-import { readdirSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
-import type { Asset } from "bloodtower-protocols";
+import { parse as parseYaml } from "yaml";
 import { type BoardSpaceInput, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { mergeSetupSteps, type ShellStory } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
-import { indexPackAssets, type PackAssetIndex, resolveCover } from "../pack/assets.ts";
-import { loadPackDir } from "../pack/load.ts";
-import { classifyPackDoor, loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
+import { idSchema } from "../../protocols/pack-v2/index.ts";
+import {
+  indexPackAssets,
+  type PackAsset,
+  type PackAssetIndex,
+  resolveCover,
+} from "../pack/assets.ts";
+import { loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
 
 export type StoryCatalog = {
   stories: ShellStory[];
   defaultPlay: PlayContent | null;
   issues: PackV2LoadIssue[];
-  /** Image catalogs for v2 story packs, so `/packs/<id>/asset/<assetId>` can serve stills. */
+  /** Image catalogs for the packs, so `/packs/<id>/assets/<file>` can serve covers and stills. */
   assetIndexes: PackAssetIndex[];
 };
 
@@ -25,9 +30,9 @@ const indexAssets = (
   packId: string,
   assets: readonly {
     id: string;
-    type: Asset["type"];
-    target: Asset["target"];
-    status: Asset["status"];
+    type: PackAsset["type"];
+    target: PackAsset["target"];
+    status: PackAsset["status"];
     path?: string;
   }[],
   cover?: string,
@@ -82,6 +87,47 @@ const playContentFor = (
   }
 };
 
+/**
+ * A story pack that failed to load, as a door that is not playable. It reads only the manifest's
+ * id and title; a base pack or an unreadable manifest gets no door (its issues are already
+ * reported, and a manifest that cannot be read adds one more).
+ */
+const notReadyStory = (
+  dir: string,
+  folder: string,
+  issues: PackV2LoadIssue[],
+): ShellStory | null => {
+  const manifest = ["pack.yaml", "pack.yml", "pack.json"]
+    .map((file) => join(dir, file))
+    .find((path) => existsSync(path));
+  if (!manifest) return null;
+  try {
+    const parsed: unknown = parseYaml(readFileSync(manifest, "utf8"));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const head = parsed as Record<string, unknown>;
+    if (head.kind === "base-content") return null;
+    const id = typeof head.pack_id === "string" && head.pack_id !== "" ? head.pack_id : folder;
+    // An id that cannot be a door is reported by the loader and gets no door (C2-14 EV-03).
+    if (!idSchema.safeParse(id).success) return null;
+    const title = typeof head.title === "string" && head.title !== "" ? head.title : id;
+    return {
+      card: { id, title, tagline: null, playable: false, players: null, cover: null },
+      settings: [],
+      setup: [],
+      heroes: [],
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    issues.push({
+      rule: "P2-1",
+      file: folder,
+      path: "(file)",
+      message: `P2-1: the manifest could not be read for Pick story: ${message}`,
+    });
+    return null;
+  }
+};
+
 export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   const root = realpathSync(resolve(packsDir));
   const stories: ShellStory[] = [];
@@ -92,25 +138,18 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
   for (const name of readdirSync(root, { withFileTypes: true })) {
     if (!name.isDirectory()) continue;
     const dir = join(root, name.name);
-    // A manifest that cannot be read or parsed is reported. A parsed manifest that is
-    // not format 2 is a metadata-only door when `playable` is false (the Count).
-    const door = classifyPackDoor(dir);
-    if (door.kind === "skip") {
-      const loaded = loadPackDir(dir);
-      if (!loaded.ok) {
-        // A door that is not format 2 and cannot be read as metadata is reported, never dropped.
-        issues.push(...loaded.issues);
-        continue;
-      }
-      if (loaded.playable) {
-        issues.push({
-          rule: "P2-1",
-          file: name.name,
-          path: "format",
-          message: `P2-1: pack ${name.name} is playable but not format 2, so it has no door.`,
-        });
-        continue;
-      }
+    // Every door loads through v2. A folder that does not load is reported, never dropped.
+    const loaded = loadPackV2Dir(dir, root);
+    if (!loaded.ok) {
+      issues.push(...loaded.issues);
+      // A pack that fails lint still shows on Pick story, as Not ready (SCR-009), never playable.
+      const notReady = notReadyStory(dir, name.name, issues);
+      if (notReady) stories.push(notReady);
+      continue;
+    }
+    if (loaded.kind === "base-content") continue;
+    if (loaded.kind === "metadata") {
+      // Dracula (DEC-691): listed with its title and settings, never bound as a story.
       const pack = loaded.pack;
       const file = pack.cover ? basename(pack.cover) : "";
       const cover =
@@ -136,16 +175,6 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
       });
       continue;
     }
-    if (door.kind === "broken") {
-      issues.push(...door.issues);
-      continue;
-    }
-    const loaded = loadPackV2Dir(dir, root);
-    if (!loaded.ok) {
-      issues.push(...loaded.issues);
-      continue;
-    }
-    if (loaded.kind === "base-content") continue;
     const story = loaded.pack;
     const coverFile = resolveCover(dir, "assets/cover.png");
     const cover = coverFile ? "assets/cover.png" : undefined;
