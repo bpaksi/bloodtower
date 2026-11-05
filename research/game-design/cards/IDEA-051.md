@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The tower is the Count's castle; night falls when the tower wakes"
-status: parked
+status: answered
 layer: story
 by: "Claude seed, 2026-10-13; kept by Bob, 2026-10-25"
 links:
@@ -12,3 +12,5 @@ sources:
 The tower is the Count's keep. Night falls when the tower wakes. Red and purple LED washes, bells and wolves as sounds.
 
 **Parked 2026-10-29:** 1.0 Dracula plays default tower cues and no night structure (DEC-502, DEC-508); back in Dracula v2. Ideas triage (DEC-612).
+
+**Back from parked, 2026-11-05 (DEC-739):** see the Tower unlock and tower cue cards under AREA-103 and AREA-107, both proposed.

@@ -13,3 +13,5 @@ sources:
 Gothic horror. A seasonal one-shot for Halloween, not a multi-session saga. Reacts to the open question of length (one session, or a short two-night arc).
 
 **Answered** by DEC-508 (1.0 Dracula: three chapters in one session). Found in the 2026-10-29 ideas triage (DEC-612).
+
+**Changed by DEC-739 (Bob, 2026-11-05):** DEC-508 is parked; the tone is now on the look card.

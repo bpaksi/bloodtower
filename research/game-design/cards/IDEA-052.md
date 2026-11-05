@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Day and night clock: travel and preparation by day, the vampire hunts at night"
-status: parked
+status: answered
 layer: story
 by: "Claude seed, 2026-10-13; kept by Bob, 2026-10-25"
 links:
@@ -12,3 +12,5 @@ sources:
 Daytime turns are safe for travel and preparation. At night the vampire hunts. Sunrise is the win timer, or the deadline to reach the crypt.
 
 **Parked 2026-10-29:** the 5-night structure waits for Dracula v2 (DEC-508). Ideas triage (DEC-612).
+
+**Back from parked, 2026-11-05 (DEC-739):** no counted nights; the engine's day close is dusk. See AREA-103.
