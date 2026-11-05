@@ -1,7 +1,7 @@
 ---
 type: area
 title: "Probe P-004: The Ruined Keep at Long, with every 1.1 feature"
-status: open
+status: decided
 layer: process
 release: "1.1"
 by: "Bob, 2026-11-05"

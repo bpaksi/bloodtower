@@ -21,7 +21,7 @@ Accepted by Bob as a draft to test in the probes, 2026-11-05 (DEC-792). The card
 | The Tower | The Captain's Stand | Battle with a lieutenant (MEC-051) | | yes | yes |
 | The Tower | The Lock | Plain scene | yes | yes | yes |
 | The Tower | The Last Stand | Plain scene, battle | yes | yes | yes |
-| | **Quests** | | **6** | **10** | **15** |
+| | **Quests** | | **6** | **10** | **15** (14 required; the lead is optional, DEC-087) |
 | | **Chapters** | | 3 | 3 | 5 (DEC-776) |
 
 The Long chapters open Durnin, then Zenon. In Short and Standard, the whole board opens at The Tower, as in 1.0.
@@ -52,6 +52,6 @@ The Long chapters open Durnin, then Zenon. In Short and Standard, the whole boar
 
 ## To check
 
-- **Clock:** 15 quests against the 24-skull supply (DEC-686). Long may need fewer drops, so the first Long probe tests this.
+- **Clock:** P-004 won with 14 of 24 skulls left, but with two casters ending fights fast. A party with no casters still has to test it.
 - **Hold:** five dungeon types still wait for the Tomb's build and playtest before their detail and code (DEC-486).
 - **Art and lines:** this adds about 9 quests' worth of scene pictures and lines, plus new tomb-style art for each dungeon type.
