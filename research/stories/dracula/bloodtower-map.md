@@ -60,7 +60,7 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 | Banquet and organ | First main level room | IDEA-093 |
 | Guardian portrait | Main level trap | IDEA-094 |
 | Flooded room | Basement guard room | IDEA-095 |
-| Wight swap | Basement trap, still open | IDEA-096, Q-416 |
+| Wight swap | Basement battle against a wight wearing the hero's face | IDEA-096, Q-416 |
 | Elevator | Tower level trap | IDEA-097 |
 | Guardian of Sorrow | Tower level stair room | IDEA-098 |
 | Where Strahd is | Seeded picture of the last room | IDEA-099 |
@@ -79,7 +79,6 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-- **Q-416:** How does the wight swap play on a shared board, with nothing private?
 - **Q-417:** Which quests does each length play?
 - **Q-419:** Is the hunter's kit story items, or reskinned gear and potions?
 - **Q-420:** The naming pass: what do the people and places end up being called?
