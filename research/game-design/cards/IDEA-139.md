@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The hunter's kit: stakes, garlic, silver and a crucifix"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"
@@ -15,3 +15,5 @@ sources:
 **Bloodtower:** renamed gear and potion cards, bought at buildings and held as physical cards (DEC-752).
 
 **Draft renames, by the printed effect:** Stake → Longswords (+1 Melee). Crucifix → Brass Talismans (+1 Magic). Silver → Dusky Cloaks (+1 Stealth), the weakest fit. Garlic → Blessed Sceptres (clears a skull from a building). The gear deck has no +Undead or +Beast card, so a stake cannot match Undead foes without changing a card's effect, which would then differ from its printing.
+
+**Settled by DEC-781:** the stake stays Longswords at +1 Melee. Undead Advantages come from holy water and renamed treasures. Silver is dropped, and Dusky Cloaks become a hunter's dark cloak.

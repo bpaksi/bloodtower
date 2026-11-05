@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Foe names: the engine's 12 types read as the Count's servants"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

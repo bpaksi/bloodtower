@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Object: the Lantern of Saint Ysolde, the holy symbol"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

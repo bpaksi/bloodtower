@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The cover and the Count's first image: the master on a balcony above his castle, under a moon full of bats"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

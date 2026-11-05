@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Motifs for the scene pictures: hospitality as a trap, home under siege, a living castle, a past that persists, uncertain faces"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

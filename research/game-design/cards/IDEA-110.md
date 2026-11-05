@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Wren Kessel: the gravedigger's daughter with a bolt for each name"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

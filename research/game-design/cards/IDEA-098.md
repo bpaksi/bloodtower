@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Room: The Heart of Sorrow, the stair room where the tower itself attacks"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

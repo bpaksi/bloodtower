@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest (Long only): The Eldest Witch, breaking the coven in its secret passages"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The lair: the seed picks one of four pictures for the last room"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

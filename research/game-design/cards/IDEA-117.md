@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Dorka Halasz: Lenka's friend, in her wedding dress, smiling too sweetly"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

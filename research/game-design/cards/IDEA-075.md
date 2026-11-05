@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Win scene: the Count is destroyed and the fog lifts"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

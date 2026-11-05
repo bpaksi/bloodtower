@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Room: The Swap, a hero is taken and a wight stands in their place"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The Count (Vlad): the one adversary, proud, jealous and patient"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

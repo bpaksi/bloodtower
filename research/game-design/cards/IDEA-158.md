@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "A parchment map of Vellmoor for the opening and the reading: a closed valley, with the castle over one edge"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

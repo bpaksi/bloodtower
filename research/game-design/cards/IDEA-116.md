@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Ilka Kessel: Wren's mother, taken for hiding the infant Lenka"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Old Berta: the teller, trapped by the mist forty years ago"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

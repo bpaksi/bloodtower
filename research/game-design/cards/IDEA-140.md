@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Clues: Oskar's letters, the shipping orders, the cipher and the violets"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"
