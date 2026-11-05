@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The four building types keep their jobs in Vellmoor's words"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

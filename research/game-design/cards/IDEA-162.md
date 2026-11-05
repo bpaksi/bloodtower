@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The Count's lair picture: a carved throne, a goblet of red, and a pale ghost at his shoulder"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

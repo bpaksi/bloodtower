@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Chapter bounds are the fog: it lifts forward, one kingdom and then two more, then the last"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

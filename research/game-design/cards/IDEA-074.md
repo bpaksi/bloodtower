@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Chapter 4, The Castle: the gate, then the Tower crawl to the Count"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

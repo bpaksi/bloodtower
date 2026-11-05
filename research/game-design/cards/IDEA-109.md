@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Tomas Varga: twenty years on the Count's gate, and he knows which door squeaks"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

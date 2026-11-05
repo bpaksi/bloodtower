@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Hero start: all together, on the road to the first kingdom's Village"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

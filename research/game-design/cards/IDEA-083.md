@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: The Open Grave, Father Oskar has risen, leaving his riddle behind"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

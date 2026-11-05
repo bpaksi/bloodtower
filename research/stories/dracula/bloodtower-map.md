@@ -1,6 +1,6 @@
 # Dracula: the I6 story mapped onto Bloodtower pieces
 
-Every row is drafted by Claude and `proposed`, except where a DEC card is named (DEC-739 to DEC-745, Bob, 2026-11-05). Cards are the source; this page is the index. Names are working names (DEC-740). Source: [i6-outline.md](i6-outline.md).
+Bob accepted these rows on 2026-11-05 (DEC-739 to DEC-745; DEC-786 for the rest), except the rooms held by DEC-780. Cards are the source; this page is the index. Names are working names (DEC-740). Source: [i6-outline.md](i6-outline.md).
 
 ## Story phases
 
@@ -79,5 +79,5 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-No question is open. Every `IDEA-` card above is still `proposed`, waiting for Bob's review.
+See AREA-115: Q-423 to Q-431.
 

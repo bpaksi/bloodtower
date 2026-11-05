@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Father Oskar: the priest who split the riddle, and rose"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

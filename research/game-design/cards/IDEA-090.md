@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Quest: Finding the Tome, his own hand explains the crime and Lenka's face"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

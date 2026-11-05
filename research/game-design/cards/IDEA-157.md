@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "The Drawbridge's picture: a walled keep on a crag above a chasm, one bridge and one small gate"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"

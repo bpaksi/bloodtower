@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Building NPCs: the frightened valley behind every door"
-status: proposed
+status: decided
 layer: story
 release: "1.1"
 by: "Claude, 2026-11-05"
