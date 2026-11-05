@@ -166,7 +166,7 @@ main { padding: 18px 24px 40px; min-width: 0; }
     <div class="box"><h4>SOUND, VOICE AND TEXT NEEDED</h4><div class="media" id="media"></div></div>
     <div class="box"><h4>NOTES</h4><ul id="notes"></ul></div>
   </div>
-  <p class="legend">Grey hatched boxes are placeholder art, labelled with the asset needed. Badge: <em class="st-have">have</em> exists in the repo, <em class="st-can-make">can-make</em> we can produce it (code, text-to-speech, the tower's own sounds and lights), <em class="st-missing">missing</em> needs art or a decision. Green IDs are on the design branch <code>chore/design-session-2026-10-21b</code>, not yet on main. Keys: &larr; &rarr;.</p>
+  <p class="legend">Grey hatched boxes are placeholder art, labelled with the asset needed. Badge: <em class="st-have">have</em> exists in the repo, <em class="st-can-make">can-make</em> we can produce it (code, text-to-speech, the tower's own sounds and lights), <em class="st-missing">missing</em> needs art or a decision. Green IDs came from the design branch <code>chore/design-session-2026-10-21b</code>, which has since merged to main. Keys: &larr; &rarr;.</p>
 </main>
 
 <script>
@@ -410,7 +410,7 @@ const STEPS = [
   ],
   line: { who: "Board", text: "3 heroes claimed · iPad 1: Hero A, Hero B · iPad 2: Hero C" },
   cue: "None.",
-  notes: ["SCR-010 vs DEC-045 is settled by DEC-098 (each iPad claims from the engine pool; a claimed hero greys out for the others). DEC-098 to DEC-101 are on the design branch, not yet on main.", "A party of up to 4 always leaves at least 2 of the 6 roles out, so the picks matter (DEC-100).", "The claim screen lays out any number of heroes, not a fixed 6 (DEC-099): a wrapping grid on both screens.", "Devices show text buttons only, no portraits (spec D31, R3-UI-51); the role line does the work a portrait would.", "Two devices claim at once: first press wins, the other sees 'Taken by iPad 1' (r2 §3.4)."],
+  notes: ["SCR-010 vs DEC-045 is settled by DEC-098 (each iPad claims from the engine pool; a claimed hero greys out for the others). DEC-098 to DEC-101 came from the design branch and are now on main.", "A party of up to 4 always leaves at least 2 of the 6 roles out, so the picks matter (DEC-100).", "The claim screen lays out any number of heroes, not a fixed 6 (DEC-099): a wrapping grid on both screens.", "Devices show text buttons only, no portraits (spec D31, R3-UI-51); the role line does the work a portrait would.", "Two devices claim at once: first press wins, the other sees 'Taken by iPad 1' (r2 §3.4)."],
   build: (h) => ({
     board: `${strip("Party join", "connected · calibrated", "2 iPads")}<div class="bd" style="justify-content:flex-start;padding-top:5cqw">
       <div class="cols"><div class="qr"></div><div class="dlg" style="padding:1cqw 2cqw"><div class="kick">CLAIM YOUR HEROES</div><div class="code">482 913</div><p class="small">3 claimed · choose 1 to 4</p></div></div>
@@ -618,7 +618,7 @@ const STEPS = [
   ],
   line: { who: "Board", text: "Day 1. Group 1 (Hero A, B, C) rolled 4, +1 for a virtue: 5 moves." },
   cue: "None decided.",
-  notes: ["DEC-102 (design branch) answers Q-043's shape: a seeded roll, +1 per helping virtue, −1 per corruption, never below a floor. The board shows the roll, each modifier and the total. The dice, floor and which virtues help are tuned in move-roll.html (same folder).", "MEC-002 (base RtDT move value, doubled for 1 spirit) is parked: spirit is gone (DEC-039) and reach is a seeded roll (DEC-034, DEC-079).", "Moves pay for walking and building actions alike (DEC-078)."],
+  notes: ["DEC-102 (then on the design branch) answers Q-043's shape: a seeded roll, +1 per helping virtue, −1 per corruption, never below a floor. The board shows the roll, each modifier and the total. The dice, floor and which virtues help are tuned in move-roll.html (same folder).", "MEC-002 (base RtDT move value, doubled for 1 spirit) is parked: spirit is gone (DEC-039) and reach is a seeded roll (DEC-034, DEC-079).", "Moves pay for walking and building actions alike (DEC-078)."],
   build: (h) => ({
     board: `${strip("Day 1 · roll")}<div class="bd"><div class="dlg"><div class="kick">DAY 1</div><h4>The road ahead</h4>
       <div class="row">${h.ph("still", "roll visual: die / dial / hourglass", { size: "square 720×720", style: "width:12cqw;height:12cqw" })}<div style="text-align:left"><p><b>Group 1</b> · Hero A, B, C</p><p style="font-size:4.5cqw;font-weight:700;margin:0">5 moves</p><p class="small">roll 4 · helping virtue +1 · corruptions 0 · floor 2 · <b>total 5</b> (example)</p></div></div></div></div>`,
@@ -635,7 +635,7 @@ const STEPS = [
   ],
   line: { who: "Prompt band", text: "Group 1 is moving: 5 moves left." },
   cue: "None.",
-  notes: ["SCR-014 now follows DEC-057 (design branch): every line shows on the Story board; iPads carry choices and taps only.", "One primary button per iPad screen (R2-02). With several heroes on one device, who acts follows the choice (R3-UI-53).", "Hero panels show 'unavailable' for HP and items until the state carries them, never zero (UI-011)."],
+  notes: ["SCR-014 now follows DEC-057 (then on the design branch): every line shows on the Story board; iPads carry choices and taps only.", "One primary button per iPad screen (R2-02). With several heroes on one device, who acts follows the choice (R3-UI-53).", "Hero panels show 'unavailable' for HP and items until the state carries them, never zero (UI-011)."],
   build: (h) => ({
     board: `${strip("Day 1 · Group 1")}<div class="side l" style="top:3.4cqw"><h5>NOW ACTING</h5><p>Group 1: Hero A, B, C</p><p>Corruption: 0</p><p>HP: <span class="unav">unavailable</span></p></div>
       <div class="side r"><h5>PROVING GROUND</h5><p>Purse <b>12</b></p><h5 style="margin-top:.6cqw">PARTY ITEMS</h5><p class="unav">none yet</p></div>

@@ -184,7 +184,7 @@ The 8 starting virtues are printed on RtDT's 4 hero boards, not tiles. The 12 he
 - **Guards are common.** Azkol's Idol, Golden Wolf Pelt, Wraps of Invisibility, Leather Armor and Blessed all shrink a hit, which backs the guard kind (DEC-367).
 - **Corruptions mostly cost money.** Seven of the twelve take spirit, which becomes money. With DEC-365's -1 move on top, Bloodtower's corruption is a mix of a slower group and a leaking purse.
 - **Six heroes, four boards.** RtDT's starting virtues are printed on 4 hero boards, but Bloodtower has 6 heroes (DEC-099). Two classes would have no board, or starting virtues become app-only.
-- **Six per class does not fit the tiles.** 16 tiles cannot give 6 classes 6 virtues each (DEC-156). Tiles shared between classes, or fewer virtues per class, would fix it.
+- **Six per class does not fit the tiles.** 16 tiles cannot give 6 classes 6 virtues each (DEC-156). Tiles shared between classes, or fewer virtues per class, would fix it. *Since settled:* each class has 2 intrinsic virtues in the app, the virtue pool is the 12 hero tiles dealt at random, and the 4 kingdom tiles are story rewards only (DEC-373, DEC-374, DEC-381).
 - **Spells have no piece.** RtDT has no spell card or tile, which supports keeping spells apart from virtues (Bob, 2026-10-27, still open). The three Scroll treasures (spend for +4 of one trait) are the nearest thing.
 - **Rulings this changes:** DEC-370 partly replaces DEC-368 (tiles stay in the box). DEC-121 (spells are virtues) and DEC-156 (six per class) wait on Q-268.
 - **Still missing:** the Spymaster's Stealth virtue name. The 4 kingdom virtues came from Bob's tile images on 2026-10-27.
