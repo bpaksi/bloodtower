@@ -2,6 +2,8 @@
 
 Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approvals and merges; Claude plans, builds and self-verifies. The full process is in [docs/sdlc.md](docs/sdlc.md).
 
+See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all changes.
+
 ## Repo map
 
 | Path | What |
