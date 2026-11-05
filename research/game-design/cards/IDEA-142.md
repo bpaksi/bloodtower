@@ -13,4 +13,4 @@ sources:
 ---
 **I6:** a land in a closed valley.
 
-**Bloodtower:** the printed board. Which kingdom plays which parish is set by the seed, and printed names stay on the spaces. The naming pass may change Vellmoor (Q-420).
+**Bloodtower:** the printed board. Which kingdom plays which parish is set by the seed, and printed names stay on the spaces. Vellmoor keeps its name (DEC-754).
