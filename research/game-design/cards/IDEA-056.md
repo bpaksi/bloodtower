@@ -12,3 +12,5 @@ sources:
 A hero who loses a fight is bitten instead of dying. They gain power but slowly turn, on a corruption-style track. A cure is needed before the final night.
 
 **Answered** by DEC-508: being turned is the corruption track, and a third corruption is the Turned ending. Found in the 2026-10-29 ideas triage (DEC-612).
+
+**Changed by DEC-739 (Bob, 2026-11-05):** DEC-508 is parked; bites are still corruption, on the bites card under AREA-104.

@@ -12,3 +12,5 @@ sources:
 Garlic, holy water, silver, stakes and a crucifix as gear. Sanctuaries supply them.
 
 **Answered** by DEC-508: the kit is story items in 1.0; garlic, silver and the crucifix wait for v2. Found in the 2026-10-29 ideas triage (DEC-612).
+
+**Changed by DEC-739 (Bob, 2026-11-05):** DEC-508 is parked; the kit is reopened on the kit card under AREA-105.
