@@ -1,6 +1,6 @@
 # 1.1 and Dracula: the reconciliation
 
-Claude's desk audit, 2026-11-05, for AREA-115. It reads the Dracula deck (IDEA-070 to IDEA-162, DEC-739 to DEC-756) against the 1.1 rulings, including the proposals in PR #371 (DEC-757 to DEC-784). It runs both ways. Nothing here is a ruling; the open questions are the Q- cards named below.
+Claude's desk audit, 2026-11-05, for AREA-115. Bob then moved 1.1 to The Ruined Keep and Dracula to a later drop (DEC-787, DEC-788), so Part 1 is now Dracula's list. It reads the Dracula deck (IDEA-070 to IDEA-162, DEC-739 to DEC-756) against the 1.1 rulings, including the proposals in PR #371 (DEC-757 to DEC-784). It runs both ways. Nothing here is a ruling; the open questions are the Q- cards named below.
 
 ## Part 1: what Dracula asks for that the engine does not have
 

@@ -1,6 +1,6 @@
 # The Ruined Keep in 1.1: every feature mapped
 
-Claude's draft for Bob's review, 2026-11-05 (AREA-115). Nothing here is decided except what names a DEC card. Names are working names. The spine is 1.0's six quests (DEC-636, DEC-662), kept as they are (DEC-789). Lengths grow as in DEC-790, and Long plays everything.
+Accepted by Bob as a draft to test in the probes, 2026-11-05 (DEC-792). The cards are IDEA-163 to IDEA-179, in AREA-116. Names are working names. The spine is 1.0's six quests (DEC-636, DEC-662), kept as they are (DEC-789). Lengths grow as in DEC-790, and Long plays everything.
 
 ## Quests by length
 

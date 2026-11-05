@@ -1,6 +1,6 @@
 ---
 type: area
-title: "1.1 readiness: reconciling Dracula with the 1.1 features before any code"
+title: "1.1 readiness: the steps before code, and reconciling the stories with the 1.1 features"
 status: open
 layer: process
 release: "1.1"
