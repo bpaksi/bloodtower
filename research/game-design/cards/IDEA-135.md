@@ -9,11 +9,11 @@ links:
   - { rel: part-of, to: AREA-105 }
   - { rel: refines, to: MEC-061 }
   - { rel: uses, to: AST-B22 }
-  - { rel: raises, to: Q-418 }
+  - { rel: needs, to: DEC-750 }
 sources:
   - { file: "../stories/dracula/i6-outline.md" }
   - { file: "../stories/dracula-v2/continuity-guide.md", note: "2.8" }
 ---
 **I6:** the Holy Symbol.
 
-**Bloodtower:** a key for the gate, which softens his strikes on the group carrying it. Found in IDEA-086.
+**Bloodtower:** a key for the gate, which softens his strikes on the group carrying it and frees a taken Lenka in the last room (DEC-750). Found in IDEA-086.

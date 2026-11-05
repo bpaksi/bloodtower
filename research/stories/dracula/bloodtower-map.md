@@ -79,9 +79,7 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-- **Q-421:** How do the heroes free a taken Lenka in the Tower's last room?
 - **Q-416:** How does the wight swap play on a shared board, with nothing private?
 - **Q-417:** Which quests does each length play?
-- **Q-418:** What exactly do the three objects do in play, beyond opening the gate?
 - **Q-419:** Is the hunter's kit story items, or reskinned gear and potions?
 - **Q-420:** The naming pass: what do the people and places end up being called?
