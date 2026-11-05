@@ -1,6 +1,6 @@
 # Story: Dracula / vampire (Halloween)
 
-> **1.0 cut (2026-10-28):** 1.0 ships this story cut down ([DEC-506](../../game-design/cards/DEC-506.md), [DEC-508](../../game-design/cards/DEC-508.md)): three chapters and ten plain set pieces ([set-piece-counts.md](set-piece-counts.md)). The full version is kept in [dracula-v2](../dracula-v2/README.md).
+> **Replaced (Bob, 2026-11-05):** [DEC-739](../../game-design/cards/DEC-739.md) drops the 1.0 cut. There is one Dracula, on the 1.1 engine, following [i6-outline.md](i6-outline.md); the mapping is in [bloodtower-map.md](bloodtower-map.md). Image inspiration is in [inspiration.md](inspiration.md). The older files here and in [dracula-v2](../dracula-v2/README.md) are sources.
 
 Status: idea. Nothing here is decided.
 
