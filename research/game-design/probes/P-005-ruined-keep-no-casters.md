@@ -6,7 +6,7 @@ A scripted 1.1 game played from the cards (DEC-634, DEC-803), aimed at what P-00
 
 - **Story:** The Ruined Keep at Long: five chapters, 14 required quests and one optional lead (DEC-792)
 - **Heroes:** Fighter 12 hit points, Scout 9, Ranger 10, Bard 8
-- **Foe levels:** 1, 2, 2, 3, 3 (DEC-794); The Warden 5; Tower guards 3 (DEC-702); the raider captain at chapter level +1 (DEC-775, still proposed)
+- **Foe levels:** 1, 2, 2, 3, 3 (DEC-794); The Warden 5; Tower guards 3 (DEC-702); the raider captain at chapter level +1 (DEC-775, a placeholder under DEC-806)
 - **Dice:** seed 5000 for the walk, seeds 7000 to 8999 for the batch
 
 **Result: the walked game lost on day 26 with the skull supply empty, inside the Tower and short of The Warden. It took 80 rounds over 22 battles, with 4 falls and 5 retreats. Over 2,000 seeds, this party won 63%.**
@@ -58,9 +58,9 @@ Gaps 2 and 3 came from reading the cards while setting up the script. The script
 
 1. **The clock bites with no casters.** This answers P-004's open point on DEC-776: skulls cause 93% of the losses, and the walked game ended in the Tower with the win in sight. The script likely understates a real table, since it never splits the party or plays for the clock. Numbers pass, then the playtest.
 2. **Travel days are the cost.** A won quest skips that night's drop (DEC-699), so skulls land on the days between quests and on failed tries. The Moat Lair's guardian cost a whole extra night here, and a Long game has more dungeons to retry.
-3. **A level 3 hunter on day 5 is harsh.** One meeting left the Fighter on 2 corruptions in chapter 2, with 13 quests to go. It comes from DEC-775's level +1, so it belongs with that ruling.
+3. **A level 3 hunter on day 5 is harsh.** One meeting left the Fighter on 2 corruptions in chapter 2, with 13 quests to go. It comes from DEC-775's level +1. At chapter level instead, the script's wins rise from 63% to 67%, so it's a modest lever for the numbers pass.
 4. **Gold still outruns prices.** The walked party ended on 328 gold unspent, against 12 for gear. The script spends too little to prove the size of this, but it agrees with P-004.
-5. **The strike outgrows the foes in Long.** It cuts 3 + the chapter number (DEC-775), so it reaches 8 in chapter 5 while foe levels stop at 3. Numbers pass.
+5. **The strike outgrows the foes in Long.** It cuts 3 + the chapter number (DEC-775), so it reaches 8 in chapter 5 while foe levels stop at 3. A flat 5 lifts the script's wins from 63% to 69%. Numbers pass.
 6. **Battle length held up in the walk:** 80 rounds over 22 battles is about 3.6 a battle, within DEC-315's 2 to 4, though the walk is only one game.
 
 ## Reached and not reached
@@ -75,7 +75,7 @@ Gaps 2 and 3 came from reading the cards while setting up the script. The script
 - It buys only two gear, once, and Cleanses only when it rallies with supply at 12 or less. Real tables spend more.
 - Skulls that the players place land on citadels, a simplification of DEC-092.
 - The hazard and event chances are simplified from MEC-072, at the 50% Long chance of DEC-703.
-- The Warden's strike uses DEC-775, which Bob has not ruled.
+- The Warden's strike uses DEC-775's numbers, which DEC-806 keeps as placeholders.
 
 The first script run had errors, all corrected before these numbers: a Sweep under guard hit everyone, The Three Altars had a guardian against DEC-773, and it bought and Cleansed nothing. Before those fixes it reported 53% wins.
 
@@ -83,6 +83,6 @@ The first script run had errors, all corrected before these numbers: a Sweep und
 
 | # | What | Used |
 |---|---|---|
-| P1 | Lieutenant level and strike numbers | DEC-775 as proposed |
+| P1 | Lieutenant level and strike numbers | DEC-775, kept as placeholders by DEC-806 |
 | P2 | Skull placement by the players | Citadels |
 | P3 | What heroes buy and when | The fixed policy above |
