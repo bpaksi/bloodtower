@@ -98,3 +98,35 @@ test("spaces with no region do not stop the export, other check errors do", () =
   assert.equal(board, undefined);
   assert.ok(problems.some((p) => p.includes("N has 0 Villages")));
 });
+
+test("a space with more than eight neighbours is refused and named", () => {
+  const hub = "N-bazaar";
+  // The ring gives N-bazaar two neighbours. Seven more, unslotted, make nine.
+  const extra = spaces
+    .map((s) => s.id)
+    .filter((id) => !id.startsWith("N-"))
+    .slice(0, 7);
+  const d = finished((draft) => {
+    for (const to of extra) setEdge(draft, spaces, { from: hub, to, slot: null });
+  });
+  const { board, problems } = toPackBoard(d, spaces);
+  assert.equal(board, undefined);
+  assert.ok(
+    problems.some((p) => p.includes(hub) && p.includes("9 neighbours")),
+    `problems: ${JSON.stringify(problems)}`,
+  );
+});
+
+test("a space with exactly eight neighbours still exports", () => {
+  const hub = "N-bazaar";
+  const extra = spaces
+    .map((s) => s.id)
+    .filter((id) => !id.startsWith("N-"))
+    .slice(0, 6);
+  const d = finished((draft) => {
+    for (const to of extra) setEdge(draft, spaces, { from: hub, to, slot: null });
+  });
+  const { board, problems } = toPackBoard(d, spaces);
+  assert.equal(problems, undefined);
+  assert.equal(space(board, hub).neighbours.length, 8);
+});
