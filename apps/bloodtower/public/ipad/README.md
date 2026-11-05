@@ -5,3 +5,8 @@ Engraved manuscript corners for the iPad shell (`/join` and `/device`). Bob lock
 Served at `/ipad/b-engraved-ipad-move-map.jpg`. The file lives in `apps/bloodtower/public/ipad/` and is linked into the Next public folder by `apps/bloodtower/src/web/public/ipad -> ../../../public/ipad`. `serveStatic` also falls back to this folder for `/ipad/`, the same way `/landing/` and `/audio/` do.
 
 The JPEG is the weekend mock, copied unchanged from `docs/ui-mocks/weekend-w1/b-engraved-ipad-move-map.jpg` (864×1152, sha256 `92625a3660c9bffe189c66ca13636b75b9c56e2c7b890bd3ca4c7f8488dc4f6f`). There are no sliced corner pieces. The parchment is painted into the page, so this file is not a `border-image` source. `IpadCorners` shows one window on each corner of the same JPEG.
+
+## ART-080 engraved corner PNGs
+
+Drawn engraved corners with transparent backgrounds (ART-080 / DEC-233 theme B / DEC-706), one drawing mirrored — not crops of the mock. Files: `corners/corner-{tl,tr,bl,br}.png` (512×512 RGBA). Wiring `IpadCorners.tsx`/CSS to use them is follow-up C2-13 code work.
+
