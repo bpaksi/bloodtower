@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { packStillImageUrl, placeStillFile } from "./packAsset.ts";
 
@@ -5,6 +7,22 @@ describe("placeStillFile", () => {
   it("maps a place still id to its file under assets/", () => {
     expect(placeStillFile("place.village")).toBe("place-village.jpg");
     expect(placeStillFile("place.sanctuary")).toBe("place-sanctuary.jpg");
+  });
+
+  it("lands on the file packs/test declares for each place still", () => {
+    const packRoot = join(import.meta.dirname, "../../../../../packs/test");
+    const manifest = readFileSync(join(packRoot, "pack.yaml"), "utf8");
+    const rows = [...manifest.matchAll(/\{id: (place\.[a-z]+),[^}]*path: assets\/([^,}\s]+)/g)];
+    expect(rows.map((row) => row[1]).sort()).toEqual([
+      "place.bazaar",
+      "place.citadel",
+      "place.sanctuary",
+      "place.village",
+    ]);
+    for (const [, id = "", file = ""] of rows) {
+      expect(placeStillFile(id), id).toBe(file);
+      readFileSync(join(packRoot, "assets", file));
+    }
   });
 });
 

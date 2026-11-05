@@ -1,10 +1,12 @@
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { PLACE_STILL_ID } from "../../../engine/loops/session/placeCaption.ts";
 import { loadConfig } from "../../config.ts";
 import { loadStoryCatalog } from "../../core/loadStories.ts";
 import { lintPath } from "../../scripts/packLint.ts";
+import { indexPackAssets } from "../assets.ts";
 import { loadPackV2Dir } from "./load.ts";
 
 const packsDir = loadConfig().packsDir;
@@ -174,6 +176,23 @@ describe("a broken v2 pack fails loudly (C3-01 EV-04)", () => {
       expect(again.issues.some((item) => item.file.includes("empty-"))).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("place stills reach the one asset route (C3-01 EV-06)", () => {
+  // The view names a place still by its asset id (`place.village`); the board turns that id into
+  // the file for `/packs/<id>/assets/<file>` (web `placeStillFile`, tested in packAsset.test.ts
+  // against the same manifest). Every id the engine can emit must name a still the pack declares
+  // and the one asset route can serve by file name.
+  it("serves a file for every engine place still id that packs/test declares", () => {
+    const result = loadPackV2Dir(join(packsDir, "test"), packsDir);
+    if (!result.ok || result.kind !== "story") throw new Error("packs/test is a story pack");
+    const index = indexPackAssets(join(packsDir, "test"), result.pack);
+    for (const id of Object.values(PLACE_STILL_ID)) {
+      const declared = result.pack.assets.find((asset) => asset.id === id);
+      expect(declared?.path, id).toBeDefined();
+      expect(index.byBasename.has(basename(declared?.path ?? "")), id).toBe(true);
     }
   });
 });

@@ -250,20 +250,22 @@ test("Pick story lists the same stories in the same order as main (C3-01 EV-03)"
   browser,
 }, testInfo) => {
   test.setTimeout(90_000);
-  const fixture = JSON.parse(
+  // Generated from the PR base by server/scripts/captureMainPickStory.ts; `source` names the commit.
+  const { stories: fixture } = JSON.parse(
     readFileSync(join(import.meta.dirname, "w3-pick-story.main.json"), "utf8"),
-  ) as { id: string; title: string }[];
+  ) as { stories: { id: string; title: string; playable: boolean }[] };
   const { session, context, board, device } = await openPair(browser, testInfo, "w3-order");
   try {
     // The carousel opens on the playable story. Next walks the list in order and wraps, so one
-    // full lap, read from the first fixture entry, must equal the list captured from main.
+    // full lap, rotated to the first fixture entry (the catalog's raw order), must equal it.
     const focus = board.locator("[data-story-focus]");
-    const lap: { id: string; title: string }[] = [];
+    const lap: { id: string; title: string; playable: boolean }[] = [];
     for (let step = 0; step < fixture.length; step += 1) {
       await expect(focus).toHaveAttribute("data-story-focus", /.+/);
       lap.push({
         id: (await focus.getAttribute("data-story-focus")) ?? "",
         title: (await board.locator("[data-story-focus] h2").innerText()).trim(),
+        playable: (await focus.getAttribute("data-playable")) === "true",
       });
       await device.locator('button[data-action="story-next"]').click();
     }

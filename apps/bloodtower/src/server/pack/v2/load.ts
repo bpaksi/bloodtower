@@ -142,6 +142,10 @@ const mergeBoardSpaces = (root: string, assembled: Record<string, unknown>): Pac
  * A story may keep its quests in `quests.yaml`: a list of quests, each naming its `chapter`.
  * They are appended to that chapter's `quests`. A chapter the manifest does not declare is a
  * P2-2 issue on `quests.yaml` that names the missing chapter id.
+ * This is the one split file beyond `board/` and `tuning.yaml`, and it exists because EV-04
+ * requires an issue on `…/quests.yaml` for a quest whose `chapter:` is undeclared: a quest nested
+ * in the manifest has no `chapter:` field (the nesting is the reference), so no manifest-only
+ * shape can raise that issue. A quest's `chapter` key is removed before the strict schema runs.
  */
 const mergeSplitQuests = (
   file: string,

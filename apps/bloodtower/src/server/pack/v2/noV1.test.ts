@@ -1,20 +1,17 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  declaredSymbols,
+  exportedSymbols,
+  scanTree,
+  sourceFiles,
+  V1_FILES,
+  V1_SYMBOLS,
+} from "./noV1Scan.ts";
 
 const src = resolve(import.meta.dirname, "../../..");
-const self = import.meta.filename;
-
-const V1_FILES = ["protocols/pack.ts", "protocols/storyCard.ts", "server/pack/load.ts"];
-const V1_SYMBOLS = [
-  "StoryCard",
-  "StoryCardV1",
-  "PackV1",
-  "PackMetaV1",
-  "loadPackV1",
-  "loadStoryCard",
-];
-const ALLOWED_PACK_REEXPORTS = new Set(["v2", "assets", "camera", "audio"]);
 const DEAD_FILES = [
   "server/timing/log.ts",
   "server/timing/log.test.ts",
@@ -23,86 +20,154 @@ const DEAD_FILES = [
   "server/control/lock.test.ts",
 ];
 
-const sources = (dir: string): string[] =>
-  readdirSync(dir).flatMap((name) => {
-    if (name === "node_modules" || name.startsWith(".")) return [];
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) return sources(path);
-    return /\.(ts|tsx|mjs)$/.test(name) && path !== self ? [path] : [];
-  });
-
-const files = sources(src).map((path) => ({ path, text: readFileSync(path, "utf8") }));
-
-/** Every module specifier a file imports, re-exports or dynamically imports. */
-const specifiers = (text: string): { spec: string; isExport: boolean }[] => {
-  const found: { spec: string; isExport: boolean }[] = [];
-  for (const match of text.matchAll(/\b(import|export)\b[^;]*?\bfrom\s*["']([^"']+)["']/g)) {
-    found.push({ spec: match[2] ?? "", isExport: match[1] === "export" });
-  }
-  for (const match of text.matchAll(/\bimport\s*["']([^"']+)["']/g)) {
-    found.push({ spec: match[1] ?? "", isExport: false });
-  }
-  for (const match of text.matchAll(/\bimport\(\s*["']([^"']+)["']\s*\)/g)) {
-    found.push({ spec: match[1] ?? "", isExport: false });
-  }
-  return found;
-};
-
-const resolved = (file: string, spec: string) => resolve(dirname(file), spec);
+// The v1 names come from the scanner's list, and fixture specifiers go through q(), so the scanner
+// meets no v1 text in this file and needs no exclusion.
+const q = (spec: string) => JSON.stringify(spec);
+const [CARD = "", , PACK_V1 = "", , LOAD_PACK = "", LOAD_CARD = ""] = V1_SYMBOLS;
 
 describe("no v1 import is left (C3-01 EV-02)", () => {
   it("has deleted the v1 story-card and loader files", () => {
     for (const file of V1_FILES) expect(existsSync(join(src, file)), file).toBe(false);
   });
 
+  const real = scanTree(src);
+
   it("imports none of them, by any path", () => {
-    const banned = new Set(V1_FILES.map((file) => join(src, file)));
-    const hits: string[] = [];
-    for (const { path, text } of files) {
-      for (const { spec } of specifiers(text)) {
-        const target = spec.startsWith(".") ? resolved(path, spec) : spec;
-        const bare = target.replace(/\.(ts|tsx)$/, "");
-        const isBanned = [...banned].some((file) => file.replace(/\.ts$/, "") === bare);
-        if (isBanned || /(?:^|\/)(?:protocols\/pack|protocols\/storyCard|pack\/load)$/.test(bare)) {
-          hits.push(`${relative(src, path)} -> ${spec}`);
-        }
-      }
-    }
-    expect(hits).toEqual([]);
+    expect(real.importHits).toEqual([]);
   });
 
-  it("declares or re-exports none of the v1 symbols", () => {
-    const hits: string[] = [];
-    for (const { path, text } of files) {
-      for (const name of V1_SYMBOLS) {
-        const declared = new RegExp(
-          `\\b(?:export\\s+)?(?:type|interface|const|let|function|class)\\s+${name}\\b`,
-        );
-        const exportList = new RegExp(`\\bexport\\s*(?:type\\s*)?\\{[^}]*\\b${name}\\b[^}]*\\}`);
-        if (declared.test(text) || exportList.test(text)) {
-          hits.push(`${relative(src, path)}: ${name}`);
-        }
-      }
-    }
-    expect(hits).toEqual([]);
+  it("declares or exports none of the v1 symbols", () => {
+    expect(real.symbolHits).toEqual([]);
   });
 
   it("re-exports nothing from server/pack except v2, assets, camera and audio", () => {
-    const packRoot = join(src, "server", "pack") + sep;
-    const hits: string[] = [];
-    for (const { path, text } of files) {
-      for (const { spec, isExport } of specifiers(text)) {
-        if (!isExport || !spec.startsWith(".")) continue;
-        const target = resolved(path, spec);
-        if (!`${target}`.startsWith(packRoot)) continue;
-        const first =
-          relative(packRoot, target)
-            .split(sep)[0]
-            ?.replace(/\.(ts|tsx)$/, "") ?? "";
-        if (!ALLOWED_PACK_REEXPORTS.has(first)) hits.push(`${relative(src, path)} -> ${spec}`);
+    expect(real.packReexportHits).toEqual([]);
+  });
+
+  it("scans this test and the scanner too, so a sibling helper cannot hide a shim", () => {
+    const scanned = sourceFiles(src).map((path) => relative(src, path));
+    expect(scanned).toContain("server/pack/v2/noV1.test.ts");
+    expect(scanned).toContain("server/pack/v2/noV1Scan.ts");
+  });
+});
+
+describe("the scanner catches a plausible shim (C3-01 EV-02)", () => {
+  it.each([
+    ["an alias of a local name", `const Local = 1;\nexport { Local as ${CARD} };`],
+    ["a type alias export", `type Local = {};\nexport type { Local as ${PACK_V1} };`],
+    ["an inline type specifier", `export { type Local as ${CARD}, other };`],
+    ["a quoted export name", `export { Local as "${LOAD_CARD}" };`],
+    [
+      "a multi-line list with comments",
+      `export {\n  a,\n  // the old shape\n  Local\n    as ${LOAD_PACK},\n  b,\n};`,
+    ],
+    ["a renamed re-export", `export { ${CARD} as Other } from ${q("./elsewhere.ts")};`],
+    ["a plain re-export", `export { ${CARD} } from ${q("./elsewhere.ts")};`],
+    ["a namespace alias", `export * as ${CARD} from ${q("./elsewhere.ts")};`],
+    ["a type declaration", `export type ${CARD} = { id: string };`],
+    ["an interface", `export interface ${PACK_V1} {}`],
+    ["a const", `export const ${LOAD_CARD} = () => 1;`],
+    ["a declared function", `export declare function ${LOAD_PACK}(): void;`],
+    ["an async function", `export async function ${LOAD_CARD}() {}`],
+    ["a var", `var ${CARD} = 1;`],
+    ["an enum", `export enum ${CARD} { A }`],
+  ])("flags %s", (_label, text) => {
+    expect([
+      ...declaredSymbols(text, V1_SYMBOLS),
+      ...exportedSymbols(text, V1_SYMBOLS),
+    ]).not.toEqual([]);
+  });
+
+  it.each([
+    ["a longer name", `export type Shell${CARD} = {};\nexport { Shell${CARD} };`],
+    ["a different alias", `export { ShellStory as Pick, type Other };`],
+    ["a re-export of an allowed module", `export * from ${q("./v2/load.ts")};`],
+    ["a call named from", `export function f() { return Array.from("x"); }`],
+    ["a mention in a line comment", `// the old type ${CARD} is gone\nexport const a = 1;`],
+    ["a mention in a block comment", `/* export type ${CARD} = {}; */\nexport const a = 1;`],
+  ])("passes %s", (_label, text) => {
+    expect([...declaredSymbols(text, V1_SYMBOLS), ...exportedSymbols(text, V1_SYMBOLS)]).toEqual(
+      [],
+    );
+  });
+
+  const withTree = (files: Record<string, string>, run: (root: string) => void) => {
+    const root = mkdtempSync(join(tmpdir(), "no-v1-"));
+    try {
+      for (const [file, text] of Object.entries(files)) {
+        mkdirSync(dirname(join(root, file)), { recursive: true });
+        writeFileSync(join(root, file), text);
       }
+      run(root);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
     }
-    expect(hits).toEqual([]);
+  };
+
+  it("reads every source extension, including .js .cjs .mts .cts and .jsx", () => {
+    const shim = `module.exports = {};\nexport { Local as ${CARD} };\n`;
+    const names = ["a.js", "b.cjs", "c.mts", "d.cts", "e.jsx", "f.mjs", "g.tsx"];
+    withTree(Object.fromEntries(names.map((name) => [`server/x/${name}`, shim])), (root) => {
+      expect(
+        scanTree(root)
+          .symbolHits.map((hit) => hit.split(":")[0])
+          .sort(),
+      ).toEqual(names.map((name) => `server/x/${name}`).sort());
+    });
+  });
+
+  it("flags a stray module that re-exports a deleted v1 file by any extension", () => {
+    withTree(
+      {
+        "server/a.ts": `export * from ${q("./pack/load")};`,
+        "server/b.js": `export * from ${q("./pack/load.js")};`,
+        "server/c.mts": `export { x } from ${q("../protocols/pack.ts")};`,
+        "server/d.cjs": `const m = require(${q("../protocols/storyCard")});`,
+        "server/e.ts": `export type * from ${q("../protocols/storyCard.ts")};`,
+        "server/ok.ts": `export * from ${q("./pack/v2/load.ts")};`,
+      },
+      (root) => {
+        expect(
+          scanTree(root)
+            .importHits.map((hit) => hit.split(" ")[0])
+            .sort(),
+        ).toEqual(["server/a.ts", "server/b.js", "server/c.mts", "server/d.cjs", "server/e.ts"]);
+      },
+    );
+  });
+
+  it("flags export * from a stray path under server/pack, and from the folder itself", () => {
+    withTree(
+      {
+        "server/pack/v2/load.ts": "export const ok = 1;",
+        "server/pack/assets.ts": "export const ok = 1;",
+        "server/pack/legacy.ts": "export const legacy = 1;",
+        "server/pack/shim.ts": `export * from ${q("./legacy.ts")};`,
+        "server/index.ts": `export * from ${q("./pack")};`,
+        "server/core/a.ts": `export * from ${q("../pack/legacy.js")};`,
+        "server/core/b.ts": `export * from ${q("../pack/v2/load.ts")};\nexport * from ${q("../pack/assets.ts")};`,
+      },
+      (root) => {
+        expect(
+          scanTree(root)
+            .packReexportHits.map((hit) => hit.split(" ")[0])
+            .sort(),
+        ).toEqual(["server/core/a.ts", "server/index.ts", "server/pack/shim.ts"]);
+      },
+    );
+  });
+
+  it("skips node_modules and dot folders only", () => {
+    withTree(
+      {
+        "node_modules/x/a.js": `export { Local as ${CARD} };`,
+        ".next/a.js": `export { Local as ${CARD} };`,
+        "web/a.js": `export { Local as ${CARD} };`,
+      },
+      (root) => {
+        expect(scanTree(root).symbolHits).toEqual([`web/a.js: ${CARD}`]);
+      },
+    );
   });
 });
 
