@@ -16,3 +16,5 @@ sources:
 **Proposal:** people the heroes meet. A pack maps each physical card to a story role, a recruit condition, an Advantage and a loss condition (E18). The recruiting hero keeps the card face up by their hero board. The iPad shows the story name and art. Still needs the list of which 10 cards are in Bob's box.
 
 **Parked 2026-10-30 (DEC-633):** Companions wait for 1.1 (DEC-502).
+
+**2026-11-05 (DEC-723):** the 10 cards are the default companions, not props for a story's own characters. Trims the proposal above.
