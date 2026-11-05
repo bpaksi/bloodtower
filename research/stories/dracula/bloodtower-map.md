@@ -19,7 +19,7 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 |---|---|---|
 | Strahd | Adversary with a token and one Portrait | IDEA-101 |
 | Ireena | Companion | IDEA-107 |
-| Ismark | Named NPC, no name yet | IDEA-102 |
+| Ismark | Named NPC, Andrei Morosz | IDEA-102 |
 | The burgomaster | Remembered voice | IDEA-103 |
 | Madam Eva | Named NPC at the Bazaar, no stereotype | IDEA-104 |
 | Tatyana and Sergei | Pictures and the Tome only | IDEA-105 |
@@ -78,4 +78,6 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 | Tower | The Count's castle, with its cues | IDEA-147, IDEA-151 |
 
 ## Still open
+
+No question is open. Every `IDEA-` card above is still `proposed`, waiting for Bob's review.
 

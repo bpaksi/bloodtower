@@ -1,6 +1,6 @@
 ---
 type: idea
-title: "Ludmila and Sergiu: the tragedy, told through the Tome and the portraits"
+title: "Ludmila and Stefan: the tragedy, told through the Tome and the portraits"
 status: proposed
 layer: story
 release: "1.1"

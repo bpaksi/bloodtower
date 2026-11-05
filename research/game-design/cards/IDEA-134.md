@@ -1,6 +1,6 @@
 ---
 type: idea
-title: "Object: Sergiu's blade, the weapon made to face him"
+title: "Object: Stefan's blade, the weapon made to face him"
 status: proposed
 layer: story
 release: "1.1"

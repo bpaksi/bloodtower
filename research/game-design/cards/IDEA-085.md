@@ -1,6 +1,6 @@
 ---
 type: idea
-title: "Quest: Sergiu's Blade, a Tomb at the reading's site, with wolves ringed outside"
+title: "Quest: Stefan's Blade, a Tomb at the reading's site, with wolves ringed outside"
 status: proposed
 layer: story
 release: "1.1"
