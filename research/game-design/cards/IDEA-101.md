@@ -16,4 +16,4 @@ sources:
 ---
 **I6:** the central villain, clever and self-preserving; the master of the place.
 
-**Bloodtower:** the adversary (MEC-050), Magic and Undead (draft traits), with one Portrait and at least 8 lines. Old, white moustache, all in black; his face stays hidden until IDEA-085. A physical adversary token stands in for him on the board.
+**Bloodtower:** the adversary (MEC-050), Magic and Undead (draft traits), with one Portrait and at least 8 lines. Ageless, dark-haired and in his prime (DEC-756), all in black; his face stays hidden until IDEA-085. A physical adversary token stands in for him on the board.

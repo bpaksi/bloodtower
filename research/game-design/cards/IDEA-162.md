@@ -9,8 +9,8 @@ links:
   - { rel: part-of, to: AREA-113 }
   - { rel: refines, to: IDEA-099 }
   - { rel: refines, to: IDEA-101 }
-  - { rel: raises, to: Q-422 }
+  - { rel: needs, to: DEC-756 }
 sources:
   - { file: "../stories/dracula/inspiration.md" }
 ---
-**Image 10.** **Bloodtower:** one of the four last-room pictures (his study, IDEA-099), and the pose for his Portrait. Goblet in hand: the host who invited them. The ghost behind him is Ludmila, whom he never won. How old he looks is Q-422.
+**Image 10.** **Bloodtower:** one of the four last-room pictures (his study, IDEA-099), and the pose for his Portrait. Goblet in hand: the host who invited them. The ghost behind him is Ludmila, whom he never won. He looks ageless, in his prime (DEC-756).

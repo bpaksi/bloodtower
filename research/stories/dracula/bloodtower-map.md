@@ -79,7 +79,5 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-- **Q-422:** How old does the Count look?
-
-No other question is open. Every `IDEA-` card above is still `proposed`, waiting for Bob's review.
+No question is open. Every `IDEA-` card above is still `proposed`, waiting for Bob's review.
 

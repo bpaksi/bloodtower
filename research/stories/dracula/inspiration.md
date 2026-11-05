@@ -17,7 +17,7 @@ Bob supplied 10 images on 2026-11-05 as inspiration only. They are copyrighted, 
 | 07 | `07_ravenloft_figure_and_framed_portrait.png` | Ink drawing of a cloaked young woman with a sword, a hand on her hip, beside a framed portrait of a noblewoman with her face; a Gothic arcade border above | One picture that says "the same face, centuries apart" and shows a woman with her own will | IDEA-160 |
 | 08 | `08_ravenloft_title_credits_contents_page.png` | The module's title, credits and contents page | Reference only; it adds nothing beyond the outline | none |
 | 09 | `09_ravenloft_adventure_front_cover.png` | Cover art: a caped vampire on a moonlit balcony, castle towers behind, bats in a teal sky | The master above his place, as the outline's visual brief asks | IDEA-161 |
-| 10 | `10_vampire_lord_goblet_throne_art.png` | Colour art of a pale, dark-haired noble on a carved throne, raising a goblet of red, with a pale ghostly shape in the mist behind him. Artist and source unverified; it looks like a later edition | Poise and menace at rest; a ghost at his shoulder; the goblet as his sign | IDEA-162, Q-422 |
+| 10 | `10_vampire_lord_goblet_throne_art.png` | Colour art of a pale, dark-haired noble on a carved throne, raising a goblet of red, with a pale ghostly shape in the mist behind him. Artist and source unverified; it looks like a later edition | Poise and menace at rest; a ghost at his shoulder; the goblet as his sign | IDEA-162, DEC-756 |
 
 ## Shared look
 
