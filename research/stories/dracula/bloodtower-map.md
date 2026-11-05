@@ -79,7 +79,7 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-- **Q-410:** What happens when Lenka is lost, and what are the story's endings now that the win is destroying the Count?
+- **Q-421:** How do the heroes free a taken Lenka in the Tower's last room?
 - **Q-412:** What does each of the Count's four goals change in play, and how do the heroes learn which one he has?
 - **Q-416:** How does the wight swap play on a shared board, with nothing private?
 - **Q-417:** Which quests does each length play?
