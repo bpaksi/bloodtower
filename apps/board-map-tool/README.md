@@ -45,5 +45,5 @@ Errors: a space with no region, a space with no neighbours, a slot used twice on
 - `pnpm install`: install (the app has no dependencies; it has its own lockfile).
 - `pnpm dev` or `pnpm start`: run the tool at http://127.0.0.1:4790.
 - `pnpm test`: the model, server and export tests. `pnpm build` runs the same tests.
-- `pnpm export-pack`: write `packs/base/board/spaces.json` from `~/Desktop/board-map.json` (`DATA_FILE` and `OUT` move them). Needs the root `pnpm install` for Biome.
+- `pnpm export-pack`: write `packs/base/board/spaces.json` from `~/Desktop/board-map.json` (`DATA_FILE` and `OUT` move them). Needs the root `pnpm install` for Biome (`BIOME` moves it); with no Biome it writes nothing.
 - `pnpm seed`: write `~/Desktop/board-map.json` (or `DATA_FILE`) from the board map, if there is none yet.

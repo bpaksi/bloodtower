@@ -1,6 +1,7 @@
 // Writes the base pack's board file from the board map file: `pnpm export-pack`.
 // Reads ~/Desktop/board-map.json (DATA_FILE moves it) and writes packs/base/board/spaces.json
-// (OUT moves it), then formats it with the repo's Biome so `pnpm check` passes.
+// (OUT moves it), then formats it with the repo's Biome (BIOME moves it) so `pnpm check` passes.
+// Biome is checked before anything is written, so a missing Biome never leaves an unformatted file.
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
@@ -35,13 +36,20 @@ if (loadProblems.length)
 const { board, problems } = toPackBoard(draft, spaces);
 if (!board) fail(`the map is not ready:\n  ${problems.join("\n  ")}`);
 
-await writeFile(output, `${JSON.stringify(board, null, 2)}\n`);
-const biome = join(repoRoot, "node_modules", ".bin", "biome");
+const biome = process.env.BIOME || join(repoRoot, "node_modules", ".bin", "biome");
 if (!existsSync(biome))
-  fail(`wrote ${output}, but Biome is not installed; run pnpm install at the root`);
+  fail(`Biome is not installed at ${biome}; run pnpm install at the root. Nothing was written`);
+
+await writeFile(output, `${JSON.stringify(board, null, 2)}\n`);
 const formatted = spawnSync(biome, ["format", "--write", output], { encoding: "utf8" });
+if (formatted.error) {
+  fail(
+    `wrote ${output}, but Biome could not start (${formatted.error.message}); the file is unformatted`,
+  );
+}
 if (formatted.status !== 0) {
-  fail(`wrote ${output}, but Biome could not format it:\n${formatted.stderr || formatted.stdout}`);
+  const why = formatted.stderr || formatted.stdout || `exit status ${formatted.status}`;
+  fail(`wrote ${output}, but Biome could not format it; the file is unformatted:\n${why}`);
 }
 const pairs = board.spaces.reduce((n, s) => n + s.neighbours.length, 0) / 2;
 console.log(`export-pack: wrote ${board.spaces.length} spaces and ${pairs} pairs to ${output}`);
