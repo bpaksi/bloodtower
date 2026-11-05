@@ -255,25 +255,35 @@ test("Pick story lists the same stories in the same order as main (C3-01 EV-03)"
   ) as { id: string; title: string }[];
   const { session, context, board, device } = await openPair(browser, testInfo, "w3-order");
   try {
-    // From the default focus, Next walks the list in order and wraps back to the start.
-    const seen: { id: string; title: string }[] = [];
+    // The carousel opens on the playable story. Next walks the list in order and wraps, so one
+    // full lap, read from the first fixture entry, must equal the list captured from main.
+    const focus = board.locator("[data-story-focus]");
+    const lap: { id: string; title: string }[] = [];
     for (let step = 0; step < fixture.length; step += 1) {
-      const focus = board.locator("[data-story-focus]");
-      await expect(focus).toHaveAttribute("data-story-focus", fixture[step]?.id ?? "");
-      seen.push({
+      await expect(focus).toHaveAttribute("data-story-focus", /.+/);
+      lap.push({
         id: (await focus.getAttribute("data-story-focus")) ?? "",
         title: (await board.locator("[data-story-focus] h2").innerText()).trim(),
       });
       await device.locator('button[data-action="story-next"]').click();
     }
-    expect(seen).toEqual(fixture);
-    await expect(board.locator("[data-story-focus]")).toHaveAttribute(
-      "data-story-focus",
-      fixture[0]?.id ?? "",
-    );
-    // Dracula is a metadata-only pack: listed, and not playable.
-    await device.locator('button[data-action="story-next"]').click();
-    await expect(board.locator("[data-story-focus]")).toHaveAttribute("data-playable", "false");
+    const start = lap.findIndex((entry) => entry.id === fixture[0]?.id);
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect([...lap.slice(start), ...lap.slice(0, start)]).toEqual(fixture);
+    // Back at the door it began on (the lap wrapped).
+    await expect(focus).toHaveAttribute("data-story-focus", lap[0]?.id ?? "");
+    // Dracula is a metadata-only pack: listed, not playable, and Choose stops on Not playable
+    // yet with no Short, Standard, Long or Difficulty settings (Long is gone from its YAML).
+    await expect(async () => {
+      if ((await focus.getAttribute("data-story-focus")) !== "dracula") {
+        await device.locator('button[data-action="story-next"]').click();
+      }
+      await expect(focus).toHaveAttribute("data-story-focus", "dracula", { timeout: 500 });
+    }).toPass();
+    await expect(focus).toHaveAttribute("data-playable", "false");
+    await clickAct(device, "continue", "continue-pick-story-dracula");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "not-playable");
+    await expect(device.getByRole("button", { name: "Long", exact: true })).toHaveCount(0);
   } finally {
     await context.close();
     await session.host.close();

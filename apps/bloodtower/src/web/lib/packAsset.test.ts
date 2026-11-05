@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { packStillImageUrl } from "./packAsset.ts";
+import { packStillImageUrl, placeStillFile } from "./packAsset.ts";
+
+describe("placeStillFile", () => {
+  it("maps a place still id to its file under assets/", () => {
+    expect(placeStillFile("place.village")).toBe("place-village.jpg");
+    expect(placeStillFile("place.sanctuary")).toBe("place-sanctuary.jpg");
+  });
+});
 
 const devPage = (hostname: string) => ({
   protocol: "http:",
