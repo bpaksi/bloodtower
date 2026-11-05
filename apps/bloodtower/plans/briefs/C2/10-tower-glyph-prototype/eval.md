@@ -61,5 +61,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- Answers are kept in the page's local storage. This is a prototype, not Bloodtower's event log → Claude; Bob: OK?
+- Answers are kept in the page's local storage. This is a prototype, not Bloodtower's event log → Claude; **Bob: OK** 2026-11-05 6:32 AM America/Detroit (browser local storage for chunked answers; not Bloodtower event log).
 - The box-up test is Bob's by hand. The page only records counts → plan.md.

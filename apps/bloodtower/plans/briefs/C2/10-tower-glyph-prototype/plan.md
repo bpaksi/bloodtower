@@ -28,7 +28,7 @@ Cutover: N
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-06 and EV-11 all pass (verifier table on PR) with the mock tower.
-- [ ] After the merge, Bob runs the page on the real tower and the findings note answers the questions in "What the run must answer". This is Bob's hardware run, not a verifier check.
+- [ ] After the merge, Bob runs the page on the real tower and the findings note answers the questions in "What the run must answer". This is Bob's hardware run, not a verifier check. **Still parked** (tower run + findings note not today; Bob 2026-11-05).
 - Not required: Bloodtower screens. Any automatic step: every tower action is a press.
 
 ## What the run must answer
@@ -42,8 +42,8 @@ Bob then rules Q-402 and the glyph prompts for MEC-039 .13 to .15 in a design se
 
 ## AREA / DEC checklist
 
-- [ ] DEC-103: closed before coding (`decided`). Prototype in tower-poc before Bloodtower builds the step.
-- [ ] MEC-017: closed before coding (`decided`). Light one side; a player taps the kingdom it faces.
+- [x] DEC-103: closed before coding (`decided`). Prototype in tower-poc before Bloodtower builds the step. (Bob confirmed closed 2026-11-05 6:32 AM ET)
+- [x] MEC-017: closed before coding (`decided`). Light one side; a player taps the kingdom it faces. (Bob confirmed closed 2026-11-05 6:32 AM ET)
 - [ ] Tower safety (root CLAUDE.md): nothing physical happens automatically. Calibrate, every light and every rotate is its own press.
 
 ## Eval approval
