@@ -8,8 +8,10 @@ by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-105 }
   - { rel: refines, to: IDEA-054 }
-  - { rel: raises, to: Q-419 }
+  - { rel: needs, to: DEC-752 }
 sources:
   - { file: "../stories/dracula-v2/dracula-asset-map.md", note: "section 5" }
 ---
-**Bloodtower:** 1.1 has gear and potion decks, and the kit could reskin them or stay story items, which is Q-419. Stake: Undead. Silver: Beast. Crucifix: Magic. Garlic: stops one strike.
+**Bloodtower:** renamed gear and potion cards, bought at buildings and held as physical cards (DEC-752).
+
+**Draft renames, by the printed effect:** Stake → Longswords (+1 Melee). Crucifix → Brass Talismans (+1 Magic). Silver → Dusky Cloaks (+1 Stealth), the weakest fit. Garlic → Blessed Sceptres (clears a skull from a building). The gear deck has no +Undead or +Beast card, so a stake cannot match Undead foes without changing a card's effect, which would then differ from its printing.
