@@ -21,6 +21,14 @@ export function toPackBoard(draft, spaces) {
   if (open.length) problems.push(`not completed in the tool: ${open.join(", ")}`);
   const { errors } = checkDraft(draft, spaces);
   problems.push(...errors.filter((e) => !e.endsWith("has no region")));
+  // A space has eight compass slots. A ninth neighbour makes the game throw when a hero moves
+  // (slottedNeighborsOf in apps/bloodtower), so it is refused here, at export.
+  for (const s of spaces) {
+    const count = neighboursOf(draft, s.id).length;
+    if (count > SLOT_ORDER.length) {
+      problems.push(`${s.id} has ${count} neighbours; a space has at most ${SLOT_ORDER.length}`);
+    }
+  }
   if (problems.length) return { problems };
 
   const board = {
