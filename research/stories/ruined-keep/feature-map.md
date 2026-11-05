@@ -52,6 +52,6 @@ The Long chapters open Durnin, then Zenon. In Short and Standard, the whole boar
 
 ## To check
 
-- **Clock:** P-004 won with 14 of 24 skulls left, but with two casters ending fights fast. A party with no casters still has to test it.
+- **Clock:** P-004 won with 14 of 24 skulls left, with two casters ending fights fast. P-005's script, with no casters, won 63% of 2,000 games, and skulls caused 93% of the losses. It's a plain policy, so the numbers pass and playtest still have to settle this.
 - **Hold:** five dungeon types still wait for the Tomb's build and playtest before their detail and code (DEC-486).
 - **Art and lines:** this adds about 9 quests' worth of scene pictures and lines, plus new tomb-style art for each dungeon type.
