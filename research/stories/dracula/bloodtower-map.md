@@ -79,6 +79,4 @@ Every row is drafted by Claude and `proposed`, except where a DEC card is named 
 
 ## Still open
 
-- **Q-417:** Which quests does each length play?
-- **Q-419:** Is the hunter's kit story items, or reskinned gear and potions?
 - **Q-420:** The naming pass: what do the people and places end up being called?
