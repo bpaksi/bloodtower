@@ -107,8 +107,8 @@ heroes:
 
 spells:
   magic_missile: -2
-  lightning: -6
-  fireball: {fraction: half, round: down}
+  lightning: -4 # DEC-801: a flat cut, once a battle (DEC-545)
+  fireball: -4 # DEC-801: a flat cut, once a battle; no longer halves
   mend: 3
   silver_tongue: {off: quarter}
 

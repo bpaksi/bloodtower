@@ -79,8 +79,8 @@ const DEC_703 = {
   },
   spells: {
     magic_missile: -2,
-    lightning: -6,
-    fireball: { fraction: "half", round: "down" },
+    lightning: -4,
+    fireball: -4,
     mend: 3,
     silver_tongue: { off: "quarter" },
   },
@@ -205,6 +205,25 @@ describe("tuning.yaml", () => {
       expect(Math.abs(percent - tuning.day.event_chance.standard)).toBeLessThanOrEqual(2);
     } finally {
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("cuts a flat 4 with Lightning and with Fireball, and Fireball no longer halves (DEC-801)", () => {
+    const tuning = tuningOf(basePack);
+    expect(tuning.spells.magic_missile).toBe(-2);
+    expect(tuning.spells.lightning).toBe(-4);
+    expect(tuning.spells.fireball).toBe(-4);
+
+    const halving = withTuning((text) =>
+      text.replace("fireball: -4", "fireball: {fraction: half, round: down}"),
+    );
+    const notANumber = withTuning((text) => text.replace("lightning: -4", "lightning: 'big'"));
+    try {
+      expectLint(halving.result, "spells.fireball");
+      expectLint(notANumber.result, "spells.lightning");
+    } finally {
+      rmSync(halving.dir, { recursive: true, force: true });
+      rmSync(notANumber.dir, { recursive: true, force: true });
     }
   });
 
