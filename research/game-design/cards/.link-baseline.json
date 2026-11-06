@@ -131,5 +131,8 @@
   "SCR-018|uses|AREA-043",
   "UI-001|refines|DEC-007",
   "UI-007|uses|DEC-019",
-  "UI-013|uses|DEC-054"
+  "UI-013|uses|DEC-054",
+  "UI-049|uses|MEC-074",
+  "UI-059|uses|MEC-074",
+  "UI-063|uses|MEC-073"
 ]

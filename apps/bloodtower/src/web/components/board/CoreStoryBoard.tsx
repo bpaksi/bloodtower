@@ -4,6 +4,7 @@ import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
+import { DayBandExtras, DayPanel, ThreatBar } from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { OpeningMoment } from "./OpeningMoment";
@@ -42,6 +43,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const momentId =
     view.narration && isOpeningMomentId(view.narration.lineId) ? view.narration.lineId : null;
   const showMove = layer === "move" && !momentId;
+  const dayPhase = table?.phase ?? null;
+  // The simulated drop keeps its waiting line ("A skull falls on …"); the kingdom panel sits below it.
+  const dayPanelShown = dayPhase !== null && dayPhase !== "turn" && dayPhase !== "skull-sim";
   return (
     <main
       className="bt-board"
@@ -71,7 +75,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </DialogFrame>
       ) : null}
       {showMove && table ? (
-        <header className="bt-band" data-band>
+        <header className="bt-band" id="band" data-band>
           {table.groups.map((group) => (
             <span key={group.heroId} data-health="unavailable">
               {group.heroName} unavailable
@@ -80,14 +84,17 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           <span data-purse="unavailable">unavailable</span>
           <span data-chapter>{table.chapter}</span>
           <span data-day>Day {table.day}</span>
+          <DayBandExtras table={table} />
           {table.actingGroup ? <span data-acting>{table.actingGroup}</span> : null}
           <span data-moves={table.movesLeft ?? "unavailable"}>
             {table.movesLeft == null ? "unavailable" : table.movesLeft}
           </span>
         </header>
       ) : null}
+      {showMove && table ? <ThreatBar table={table} /> : null}
+      {showMove && table && !paused ? <DayPanel table={table} /> : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor && !paused ? (
+      {showMove && table?.waitingFor && !paused && !dayPanelShown ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
           <p className="bt-waiting-pulse" data-waiting role="status">
             {table.waitingFor}
