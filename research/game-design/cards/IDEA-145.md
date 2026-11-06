@@ -3,7 +3,7 @@ type: idea
 title: "Chapter bounds are the fog: it lifts forward, one kingdom and then two more, then the last"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-103 }

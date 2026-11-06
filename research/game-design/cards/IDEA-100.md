@@ -3,7 +3,7 @@ type: idea
 title: "Other rooms: the old castle table becomes the pool of dealt rooms"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-106 }

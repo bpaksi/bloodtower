@@ -750,6 +750,51 @@ describe("gaps: process and story layers, and the 1.1 release", () => {
     expect(deliverable("mechanic-surface")(g)).toEqual(["1.0:MEC-002", "1.1:MEC-001"]);
   });
 
+  it("files an unreached 1.2 ruling as a 1.2 gap, after the 1.1 gaps (DEC-812)", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", release: "1.2" },
+      "DEC-002": { type: "decision", status: "decided", release: "1.1" },
+      "DEC-003": { type: "decision", status: "decided" },
+    });
+    expect(noDeliverable(g)).toEqual(["1.0:DEC-003", "1.1:DEC-002", "1.2:DEC-001"]);
+  });
+
+  it("lets a 1.2 ruling be reached by a deliverable of any release", () => {
+    for (const release of [undefined, "1.1", "1.2"]) {
+      const g = graphOf({
+        "DEC-001": { type: "decision", status: "decided", release: "1.2" },
+        "SCR-001": { type: "screen", release, links: [["needs", "DEC-001"]] },
+      });
+      expect(noDeliverable(g)).toEqual([]);
+    }
+  });
+
+  it("keeps a 1.1 ruling that only 1.2 deliverables reach on the 1.1 list", () => {
+    const g = graphOf({
+      "DEC-001": { type: "decision", status: "decided", release: "1.1" },
+      "DEC-002": { type: "decision", status: "decided" },
+      "SCR-001": { type: "screen", release: "1.2", links: [["needs", "DEC-001"]] },
+      "UI-001": { type: "ui", release: "1.2", links: [["uses", "DEC-002"]] },
+    });
+    expect(noDeliverable(g)).toEqual([
+      "1.0:DEC-002 (reached only from 1.2 deliverables)",
+      "1.1:DEC-001 (reached only from 1.2 deliverables)",
+    ]);
+  });
+
+  it("groups 1.2 gaps after the 1.1 groups", () => {
+    const g = graphOf({
+      "Q-003": { type: "question", release: "1.2" },
+      "Q-002": { type: "question", release: "1.1" },
+      "Q-001": { type: "question" },
+    });
+    expect(groupGaps(findGaps(g)).map((x) => `${x.release}:${x.rule}`)).toEqual([
+      "1.0:open-question",
+      "1.1:open-question",
+      "1.2:open-question",
+    ]);
+  });
+
   it("groups 1.1 gaps on their own, after the 1.0 groups", () => {
     const g = graphOf({
       "MEC-001": { type: "mechanic", release: "1.1" },

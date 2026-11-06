@@ -56,7 +56,9 @@ export function parseCard(file: string, text: string, schema: CardSchema): Card 
   if (layer !== null && !schema.layers?.includes(layer)) fail(`unknown layer "${String(layer)}"`);
   if ("release" in d && !(LATER_RELEASES as readonly unknown[]).includes(d.release)) {
     const hint = typeof d.release === "number" ? `; quote it: release: "${d.release}"` : "";
-    fail(`unknown release ${JSON.stringify(d.release)}: only "1.1", or no field for 1.0${hint}`);
+    fail(
+      `unknown release ${JSON.stringify(d.release)}: only ${LATER_RELEASES.map((r) => `"${r}"`).join(" or ")}, or no field for 1.0${hint}`,
+    );
   }
   if (typeof d.title !== "string" || !d.title.trim()) fail("title is required");
   const status = (d.status ?? "open") as Card["status"];

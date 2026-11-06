@@ -1,4 +1,5 @@
 import "./gaps.css";
+import { LATER_RELEASES } from "@dark-tower/workbench";
 import Link from "next/link";
 import { loadGaps } from "../../lib/gaps.ts";
 
@@ -6,13 +7,18 @@ export const dynamic = "force-dynamic";
 
 export default function GapsPage() {
   const { gaps, groups, titles } = loadGaps();
-  const later = gaps.filter((g) => g.release === "1.1").length;
-  // 1.0 groups keep the rule as their id; 1.1 groups (DEC-696) are prefixed.
+  const count = (release: string) => gaps.filter((g) => g.release === release).length;
+  const later = LATER_RELEASES.filter((r) => count(r) > 0);
+  // 1.0 groups keep the rule as their id; 1.1 and 1.2 groups (DEC-696, DEC-812) are prefixed
+  // with their release.
   const groupId = (g: (typeof groups)[number]) =>
-    g.release === "1.0" ? g.rule : `release-1.1-${g.rule}`;
+    g.release === "1.0" ? g.rule : `release-${g.release}-${g.rule}`;
   // The map links to /gaps#AREA-xxx: the first heading of an area keeps that id; later ones are
   // prefixed with their rule so no id appears twice.
-  const taken = new Set<string>([...groups.map(groupId), "release-1.1"]);
+  const taken = new Set<string>([
+    ...groups.map(groupId),
+    ...LATER_RELEASES.map((r) => `release-${r}`),
+  ]);
   const anchorFor = (rule: string, area: string | null) => {
     if (!area) return undefined;
     const id = taken.has(area) ? `${rule}-${area}` : area;
@@ -26,14 +32,17 @@ export default function GapsPage() {
         <p className="muted">
           {gaps.length} gaps: places where the design is thin. They are warnings, not errors. Each
           row opens its card; a card in several areas is listed under each.
-          {later > 0 && ` The ${later} gaps on cards that wait for 1.1 come last, on their own.`}
+          {later.length > 0 &&
+            ` Gaps on cards that wait for a later release come last, each release on its own: ${later
+              .map((r) => `${count(r)} for ${r}`)
+              .join(", ")}.`}
         </p>
       </section>
       {groups.map((g, i) => (
         <section key={groupId(g)} className="gap-group" id={groupId(g)}>
-          {g.release === "1.1" && groups[i - 1]?.release !== "1.1" && (
-            <h2 id="release-1.1">
-              Waits for 1.1 <span className="muted">{later}</span>
+          {g.release !== "1.0" && groups[i - 1]?.release !== g.release && (
+            <h2 id={`release-${g.release}`}>
+              Waits for {g.release} <span className="muted">{count(g.release)}</span>
             </h2>
           )}
           <h2>

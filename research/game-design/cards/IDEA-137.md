@@ -3,7 +3,7 @@ type: idea
 title: "Holy water: cures a bite, or spends as an Undead Advantage"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-105 }

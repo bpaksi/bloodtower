@@ -2,7 +2,7 @@
  * Gaps in the card graph, as pure functions. A gap is a warning that steers a design session; it
  * never fails a check. Each gap carries the card ID and the rule that found it. No Node imports.
  */
-import { type Card, type Graph, type Release, releaseOf } from "./graph-types.ts";
+import { type Card, type Graph, RELEASES, type Release, releaseOf } from "./graph-types.ts";
 
 export const GAP_RULES = [
   "open-question",
@@ -49,7 +49,6 @@ const REACH_RELS = ["needs", "uses"];
  * rulings are about how we design (DEC-695), story rulings are built by their pack (DEC-697).
  */
 const UNREACHED_LAYERS = ["process", "story"];
-const RELEASES: Release[] = ["1.0", "1.1"];
 
 function cardsOf(graph: Graph): Card[] {
   return Object.values(graph.nodes).flatMap((n) => (n.kind === "card" ? [n] : []));
@@ -89,10 +88,10 @@ function subtree(graph: Graph, area: string): Set<string> {
 
 /**
  * Every node reached from a live deliverable card by `needs` or `uses`, over any number of hops.
- * The walk neither starts at nor goes through a parked card (DEC-625). With `only`, it starts
- * only at deliverables of that release.
+ * The walk neither starts at nor goes through a parked card (DEC-625). It starts only at
+ * deliverables of release `upTo` or earlier.
  */
-function reachedFromDeliverables(graph: Graph, only?: Release): Set<string> {
+function reachedFromDeliverables(graph: Graph, upTo: Release): Set<string> {
   const out = new Map<string, string[]>();
   for (const e of graph.edges) {
     if (REACH_RELS.includes(e.rel)) out.set(e.from, [...(out.get(e.from) ?? []), e.to]);
@@ -104,7 +103,7 @@ function reachedFromDeliverables(graph: Graph, only?: Release): Set<string> {
   const seen = new Set<string>();
   const stack = cardsOf(graph)
     .filter((c) => DELIVERABLE_TYPES.includes(c.type) && c.status !== "parked")
-    .filter((c) => !only || releaseOf(c) === only)
+    .filter((c) => RELEASES.indexOf(releaseOf(c)) <= RELEASES.indexOf(upTo))
     .map((c) => c.id);
   while (stack.length > 0) {
     for (const to of out.get(stack.pop() as string) ?? []) {
@@ -172,15 +171,18 @@ export function findGaps(graph: Graph): Gap[] {
     gaps.push(gap(a, "conflict-unparked", `conflicts with ${e.to}`));
   }
 
-  // A 1.0 ruling must be reached from a 1.0 deliverable, since C2 builds only those (DEC-696).
-  const reached = reachedFromDeliverables(graph);
-  const reached10 = reachedFromDeliverables(graph, "1.0");
+  // A ruling must be reached from a deliverable of its own release or an earlier one, since each
+  // release builds only its own and earlier deliverables (DEC-696, DEC-812).
+  const reachedBy = new Map(RELEASES.map((r) => [r, reachedFromDeliverables(graph, r)]));
   for (const c of cards) {
     if (c.status !== "decided" || c.type !== "decision") continue;
     if (c.layer !== null && UNREACHED_LAYERS.includes(c.layer)) continue;
-    if (releaseOf(c) === "1.1" ? reached.has(c.id) : reached10.has(c.id)) continue;
-    const only11 = releaseOf(c) === "1.0" && reached.has(c.id);
-    gaps.push(gap(c, "no-deliverable", only11 ? "reached only from 1.1 deliverables" : undefined));
+    const own = RELEASES.indexOf(releaseOf(c));
+    if (reachedBy.get(RELEASES[own] as Release)?.has(c.id)) continue;
+    const later = RELEASES.slice(own + 1).find((r) => reachedBy.get(r)?.has(c.id));
+    gaps.push(
+      gap(c, "no-deliverable", later ? `reached only from ${later} deliverables` : undefined),
+    );
   }
 
   for (const c of cards) {
@@ -203,7 +205,7 @@ export function findGaps(graph: Graph): Gap[] {
 }
 
 export type GapGroup = {
-  /** 1.0 groups come first; the 1.0 list is what the C2 plan must close (DEC-696). */
+  /** Groups come in release order, 1.0 first; the 1.0 list is what the C2 plan must close (DEC-696). */
   release: Release;
   rule: GapRule;
   label: string;
@@ -214,7 +216,7 @@ export type GapGroup = {
 };
 
 /**
- * Gaps grouped by release (1.0 first), then rule, then area (areas in ID order, cards with no
+ * Gaps grouped by release (1.0, 1.1, then 1.2), then rule, then area (areas in ID order, cards with no
  * area last).
  */
 export function groupGaps(gaps: Gap[]): GapGroup[] {

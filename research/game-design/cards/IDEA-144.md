@@ -3,7 +3,7 @@ type: idea
 title: "Hero start: all together, on the road to the first kingdom's Village"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-103 }

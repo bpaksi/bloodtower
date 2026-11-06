@@ -130,9 +130,9 @@ Every card links `part-of` at least one area, so the Map page can count it. Link
 
 ## Releases
 
-A card that waits for 1.1 (DEC-502) carries `release: "1.1"`, quoted so YAML reads it as text (DEC-696). A card with no field is 1.0; a parked card needs none. The card lint fails any other value, `"1.0"` included.
+A card that waits for 1.1 (DEC-502) carries `release: "1.1"`, quoted so YAML reads it as text (DEC-696). A card that waits for 1.2 carries `release: "1.2"` (DEC-812: Dracula and the five non-Tomb dungeon types). A card with no field is 1.0; a parked card needs none. The card lint fails any other value, `"1.0"` included.
 
-The gaps report (`pnpm graph gaps`, `/gaps`) lists the 1.0 gaps first and the 1.1 gaps after them under "Waits for 1.1", so the 1.0 list is what the C2 plan must close. A 1.0 ruling must be reached from a 1.0 deliverable; one that only 1.1 deliverables reach stays on the 1.0 list, marked "reached only from 1.1 deliverables". A C2 step's `Builds:` lists only 1.0 deliverables.
+The gaps report (`pnpm graph gaps`, `/gaps`) lists the 1.0 gaps first, then the 1.1 gaps under "Waits for 1.1", then the 1.2 gaps under "Waits for 1.2", so the 1.0 list is what the C2 plan must close. A ruling must be reached from a deliverable of its own release or an earlier one: a 1.0 ruling from a 1.0 deliverable, a 1.1 ruling from a 1.0 or 1.1 one, a 1.2 ruling from any. One reached only from later deliverables stays on its own release's list, marked "reached only from 1.1 deliverables" (or 1.2). A C2 step's `Builds:` lists only 1.0 deliverables.
 
 ## How Claude adds a thread
 

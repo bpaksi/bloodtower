@@ -1,3 +1,4 @@
+import { LATER_RELEASES } from "@dark-tower/workbench";
 import { findGaps, type Gap, type GapGroup, groupGaps } from "@dark-tower/workbench/server";
 import { buildGraph } from "./cards.ts";
 
@@ -11,16 +12,16 @@ export function loadGaps(): { gaps: Gap[]; groups: GapGroup[]; titles: Record<st
 }
 
 /**
- * The text `pnpm graph gaps` prints: the 1.0 list by rule, then the 1.1 list under its own
- * heading (DEC-696), then a line `N gaps`.
+ * The text `pnpm graph gaps` prints: the 1.0 list by rule, then the 1.1 list and the 1.2 list,
+ * each under its own heading (DEC-696, DEC-812), then a line `N gaps`.
  */
 export function gapsText(): string {
   const { gaps, groups, titles } = loadGaps();
   const lines: string[] = [];
-  const later = gaps.filter((g) => g.release === "1.1").length;
+  const count = (release: string) => gaps.filter((g) => g.release === release).length;
   for (const g of groups) {
-    if (g.release === "1.1" && g === groups.find((x) => x.release === "1.1")) {
-      lines.push(`== Waits for 1.1 (${later}) ==`, "");
+    if (g.release !== "1.0" && g === groups.find((x) => x.release === g.release)) {
+      lines.push(`== Waits for ${g.release} (${count(g.release)}) ==`, "");
     }
     lines.push(`${g.label} (${g.count})`);
     for (const gap of g.byArea.length ? uniqueGaps(g) : []) {
@@ -32,8 +33,9 @@ export function gapsText(): string {
     }
     lines.push("");
   }
+  const split = LATER_RELEASES.filter((r) => count(r) > 0).map((r) => `${count(r)} for ${r}`);
   lines.push(
-    `${gaps.length} gaps${later ? ` (${gaps.length - later} for 1.0, ${later} for 1.1)` : ""}`,
+    `${gaps.length} gaps${split.length ? ` (${[`${count("1.0")} for 1.0`, ...split].join(", ")})` : ""}`,
   );
   return lines.join("\n");
 }

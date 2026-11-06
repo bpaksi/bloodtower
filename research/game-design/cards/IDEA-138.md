@@ -3,7 +3,7 @@ type: idea
 title: "The host: cures a bite, or seals a doorway against him"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-105 }

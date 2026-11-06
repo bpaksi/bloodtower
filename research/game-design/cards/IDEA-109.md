@@ -3,7 +3,7 @@ type: idea
 title: "Tomas Varga: twenty years on the Count's gate, and he knows which door squeaks"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-110 }

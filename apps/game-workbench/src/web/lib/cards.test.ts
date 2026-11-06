@@ -51,7 +51,7 @@ describe("card files", () => {
     expect(() => parseCard("UI-001.md", card("type: art\ntitle: x"))).toThrow(/ART-NNN/);
   });
 
-  it("accepts the five layers, process among them (DEC-695), and the 1.1 release (DEC-696)", () => {
+  it("accepts the five layers (DEC-695) and the 1.1 and 1.2 releases (DEC-696, DEC-812)", () => {
     for (const layer of ["core", "configurable", "optional", "story", "process"]) {
       expect(parseCard("DEC-001.md", card(`type: decision\ntitle: x\nlayer: ${layer}`)).layer).toBe(
         layer,
@@ -62,6 +62,8 @@ describe("card files", () => {
     );
     const later = parseCard("MEC-001.md", card('type: mechanic\ntitle: x\nrelease: "1.1"'));
     expect(later.data.release).toBe("1.1");
+    const latest = parseCard("MEC-001.md", card('type: mechanic\ntitle: x\nrelease: "1.2"'));
+    expect(latest.data.release).toBe("1.2");
     expect(() => parseCard("MEC-001.md", card('type: mechanic\ntitle: x\nrelease: "1.0"'))).toThrow(
       /unknown release/,
     );

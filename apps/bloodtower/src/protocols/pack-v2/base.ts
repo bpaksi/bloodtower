@@ -302,11 +302,9 @@ export const tuningSchema = z
     }),
     spells: z.strictObject({
       magic_missile: intSchema,
+      /** DEC-801: Lightning and Fireball each cut a flat amount, once a battle (DEC-545). */
       lightning: intSchema,
-      fireball: z.strictObject({
-        fraction: z.literal("half"),
-        round: z.literal("down"),
-      }),
+      fireball: intSchema,
       mend: intSchema,
       silver_tongue: z.strictObject({
         off: z.literal("quarter"),
