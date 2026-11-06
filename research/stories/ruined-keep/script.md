@@ -6,7 +6,7 @@ Draft by Claude for Bob's review, chapter by chapter (DEC-833). One script for 1
 
 **How to read it:** each row is one slot. The tag is the plan's `[COPY: …]` tag. A tag marked *new* is one the plans don't name yet; the code step adds it. "Was" shows the plan's sample line when there is one (DEC-836).
 
-**Status:** the opening and chapter 1 are accepted by Bob, 2026-11-06, working names included. Chapter 2 is drafted. Chapter 3, the finale, the endings, the losses, the shared lines, help text and 1.1's additions are still to come.
+**Status:** the opening and chapter 1 are accepted by Bob, 2026-11-06, working names included. Chapter 2 is accepted too. Chapter 3, the finale and the endings are drafted. The shared lines, help text and 1.1's additions are still to come.
 
 ## Names
 
@@ -116,3 +116,73 @@ The one 1.0 Tomb (MEC-026). The board lines are the Tomb's; any later Tomb story
 |---|---|---|
 | `seal break ch2, Loremaster` | The Keep gives up its dead, and a second seal cracks. The Tower waits. | C4 Q-C4-10 (kept) |
 | `seal-break-live, seal2` | The Keep Seal | C4 seal-break-live (kept) |
+
+## Chapter 3: The Tower (1.0)
+
+The whole board opens. Two quests: The Lock and The Last Stand. When both are done, the Tower unlocks (DEC-645), and the finale is The Warden in the Tower (DEC-662).
+
+### Chapter card
+
+| Tag | Line | Cards |
+|---|---|---|
+| `chapter 3 name` *new* | The Tower | DEC-662 |
+| `chapter 3 goal` *new* | Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb. | DEC-662, DEC-645, UI-020 |
+
+### The Lock (plain scene, the Howling Desert citadel)
+
+| Tag | Line | Cards |
+|---|---|---|
+| `the lock opening` *new* | The gate on the Tower road is sealed with iron and the Warden's crest. In the middle is a hollow the size of a ring. | DEC-662, Q-C3-10 |
+| `needs the Warden's Signet` | Needs the Warden's Signet | DEC-654 (the disabled option's reason) |
+| `the lock, option, signet` *new* | Turn the Signet | DEC-674 |
+| `the lock, option, force` *new* | Force it | DEC-674 (a level-up battle) |
+| `the lock, signet` *new* | The ring turns in the lock. The gate opens without a sound. | DEC-674 (the Signet is kept) |
+| `the lock, force` *new* | You set your shoulders to the gate. Behind it, something hears you. | DEC-674 (the battle starts) |
+| `the lock, force won` *new* | The gate gives. What guarded it doesn't get up. | DEC-674 |
+| `the lock end hook` *new* | The Tower road is open. | DEC-662 |
+
+### The Last Stand (plain scene with a battle, the Grass Sea)
+
+A random level 3 foe (Q-C3-11), read as the Warden's sworn guard.
+
+| Tag | Line | Cards |
+|---|---|---|
+| `the last stand opening` *new* | On the Grass Sea, his sworn guard waits in a line, shields locked. They wear his crest openly now. | DEC-662, Q-C3-11 |
+| `the last stand, option, fight` *new* | Hold the line | DEC-662 (level 3 battle) |
+| `the last stand, option, fall back` *new* | Fall back | **To rule:** the cards give only the battle. Claude's draft: leave, and the quest stays open (MEC-077 needs 2 or 3 options) |
+| `the last stand, won` *new* | The last of his guard goes down in the grass. Nothing stands between you and the Tower. | DEC-662 |
+| `the last stand, fall back` *new* | You give ground. They don't follow. They don't need to. | Draft, with the option above |
+
+### Chapter 3 won
+
+| Tag | Line | Cards |
+|---|---|---|
+| `chapter 3 win, Loremaster` | The gate is open and the last stand held. The Warden's door is open, for now. | C4 Q-C4-01 (C4's win line). Was: "The Lock is turned…", which misreads a forced gate |
+| `seal break ch3, Loremaster` | The last stand holds, and the third seal breaks. Only the Warden remains. | C4 Q-C4-10 (kept) |
+| `seal-break-live, seal3` *new* | The Tower Seal | C4 seal-break-live names only two |
+
+## The finale: the Tower (1.0)
+
+| Tag | Line | Cards |
+|---|---|---|
+| `tower opening` *new* | The Tower door stands open. Inside, the stairs climb into the dark. | MEC-076 |
+| `tower-screens, board` | The Tower. Level {N}. / Rooms found: {N}. / A door, shut and cold. / A shrine. You can rest here. / The stairs climb on. | C5 tower-screens (kept) |
+| `tower-screens, trap` | Every hero loses 2 hit points. | Locked by Loremaster, 2026-10-31 (kept) |
+| `boss-screen, opening` *new* | The Warden waits at the top, in what is left of his armour. "I kept it forty years," he says. "Then it spoke." | DEC-661, DEC-667 |
+| `boss-screen, board` | The Warden. Strength left: {N}. / The Warden changes. / The Warden falls. | C5 boss-screen (kept) |
+| `last choice, Warden falls` | The Warden falls. Beneath the keep lies the shard he swore to guard. Shatter it for good, or swear his oath and guard it in his place. | DEC-663, DEC-667 (kept) |
+| `option, break the seal` | Shatter the shard | DEC-663 (kept) |
+| `option, swear the oath` | Swear the oath | DEC-663 (kept) |
+| `finale-and-endings, board` | Choose together. / Waiting on: {hero}. / {hero} has voted. / The choice is made. | C5 Q-C5-03 (kept) |
+| `tie, vote again` | A tie. Vote once more. | C5 Q-C5-03 (kept) |
+
+## Endings (1.0)
+
+| Tag | Line | Cards |
+|---|---|---|
+| `finale win, seal shattered` | The shard shatters. The Tower's call goes quiet, and the roads are yours. | DEC-663 (kept) |
+| `finale win, seal holds` | You swear his oath and take up his watch. The Tower called to him once. It will call to you. | DEC-663. Was: "…Guard the shard well. The Tower called to him once, and it will call to you." Trimmed to one breath |
+| `credits` | Not used | Q-C5-09 picked no credits Scroll |
+| `skulls loss` | The last skull falls. The Tower's shadow covers the land, and the roads are his for good. | DEC-144 |
+| `corruption loss` *new* | One of you hears the Tower call, and goes to it. Without them, the hunt is over. | DEC-144. Avoids naming the mark, since 1.1 calls it an oath-mark (IDEA-177) |
+| `fallen buildings loss` *new* | Four strongholds have fallen. There is nowhere left to hold, and his raiders own the land. | DEC-144, Q-C3-05 |
