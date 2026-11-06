@@ -3,7 +3,7 @@ type: idea
 title: "The castle is the Tower crawl: crypts below, the great hall in the middle, the high tower above"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-106 }

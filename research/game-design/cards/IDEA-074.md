@@ -3,7 +3,7 @@ type: idea
 title: "Chapter 4, The Castle: the gate, then the Tower crawl to the Count"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-101 }

@@ -3,7 +3,7 @@ type: idea
 title: "Room: The Portrait, a painted gaze that holds a hero"
 status: proposed
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-106 }

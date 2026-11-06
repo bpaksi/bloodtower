@@ -3,7 +3,7 @@ type: idea
 title: "Chapter 1, The Mists: the first kingdom only, from the inn to the reading"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-101 }

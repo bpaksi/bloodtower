@@ -3,7 +3,7 @@ type: idea
 title: "Tower cues: the tower is the castle, with one signature for the Count"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-107 }

@@ -3,7 +3,7 @@ type: idea
 title: "Gargoyles watch from the walls: art for the animated statues, and the Count's spies in stone"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-113 }
