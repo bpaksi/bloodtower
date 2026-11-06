@@ -19,14 +19,18 @@ export const RELS = {
 } as const satisfies RelTable;
 
 /**
- * The release a card belongs to (DEC-696). A card says `release: "1.1"` when it waits for 1.1;
- * a card with no field is 1.0, and the lint fails any other value.
+ * The release a card belongs to (DEC-696, 1.2 by DEC-812). A card says `release: "1.1"` or
+ * `release: "1.2"` when it waits for that release; a card with no field is 1.0, and the lint
+ * fails any other value.
  */
-export type Release = "1.0" | "1.1";
-export const LATER_RELEASES = ["1.1"] as const;
+export type Release = "1.0" | "1.1" | "1.2";
+export const LATER_RELEASES = ["1.1", "1.2"] as const;
+/** Every release in order, 1.0 first. */
+export const RELEASES: readonly Release[] = ["1.0", ...LATER_RELEASES];
 
 export function releaseOf(card: { data: Record<string, unknown> }): Release {
-  return card.data.release === "1.1" ? "1.1" : "1.0";
+  const r = card.data.release;
+  return (LATER_RELEASES as readonly unknown[]).includes(r) ? (r as Release) : "1.0";
 }
 
 export type Link = { rel: string; to: string; note?: string };
