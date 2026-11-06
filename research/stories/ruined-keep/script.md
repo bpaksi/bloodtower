@@ -6,7 +6,7 @@ Draft by Claude for Bob's review, chapter by chapter (DEC-833). One script for 1
 
 **How to read it:** each row is one slot. The tag is the plan's `[COPY: …]` tag. A tag marked *new* is one the plans don't name yet; the code step adds it. "Was" shows the plan's sample line when there is one (DEC-836).
 
-**Status:** the opening and chapter 1 are accepted by Bob, 2026-11-06, working names included. Chapters 2 and 3, the finale, the endings, the losses, the shared lines, help text and 1.1's additions are still to come.
+**Status:** the opening and chapter 1 are accepted by Bob, 2026-11-06, working names included. Chapter 2 is drafted. Chapter 3, the finale, the endings, the losses, the shared lines, help text and 1.1's additions are still to come.
 
 ## Names
 
@@ -70,3 +70,49 @@ The C4 fight-buttons spec has sample lines for a plain scene with a battle: "Sha
 | `chapter 1 win, Loremaster` | The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years. | Q-C3-23 (C3's win line) |
 | `seal break ch1, Loremaster` | The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep. | C4 Q-C4-10. Was: "The roads are clear and a seal breaks. Ahead stands the Ruined Keep." The oath hint sets up IDEA-179 in 1.1 |
 | `seal-break-live, seal1` | The Road Seal | C4 seal-break-live (kept) |
+
+## Chapter 2: The Keep (1.0)
+
+Brynthia opens, and Arisilon stays walkable. Two quests in either order: The Barrow, then The Shrine (DEC-662). The reveal is in The Barrow: the raiders serve The Warden.
+
+### Chapter card
+
+| Tag | Line | Cards |
+|---|---|---|
+| `chapter 2 name` *new* | The Keep | DEC-662 |
+| `chapter 2 goal` *new* | Go down into the barrow under the old keep. Find the shrine on the road beside it. | DEC-662, UI-020 |
+
+### The Barrow (Tomb, under the keep)
+
+The one 1.0 Tomb (MEC-026). The board lines are the Tomb's; any later Tomb story may keep them or swap its own.
+
+| Tag | Line | Cards |
+|---|---|---|
+| `the barrow opening` *new* | The keep's gate hangs open. Steps go down under it, and the air that comes up is cold. | DEC-662 |
+| `tomb-screens, board` | The barrow. Rooms found: {N}. / Undead Advantage: {N}. / A cold corridor. Three doors wait. / You hear something behind the door. / A trap. / Something wakes in the dark. / The way out is open. | C4 tomb-screens. Was: "The Tomb. Rooms found…" and "The Exit is open." |
+| `tomb-screens, listen` | You listen down the corridor. | C4 tomb-screens (kept), DEC-618 |
+| `tomb-screens, pit` | The floor gives way. Choose one hero to take the fall and lose 4 hit points. | Locked by Loremaster, 2026-10-31, DEC-606 (kept) |
+| `tomb-screens, rocks` | Stones crash from the ceiling. Every hero loses 2 hit points. | Locked by Loremaster, 2026-10-31, DEC-606 (kept) |
+| `the barrow, guardian` *new* | The keep's dead garrison stands up from the floor, still in its rusted mail. | DEC-662 (the guardian), DEC-608 |
+| `the barrow, guardian falls` *new* | The last of the garrison falls. Its shield bears the crest the raiders scratched off: the Warden's. | DEC-662 (the reveal) |
+| `the barrow, signet` *new* | On one bony hand is a ring with the same crest: the Warden's Signet. | DEC-674 (story item, opens The Lock) |
+| `the barrow end hook` *new* | You climb back into the daylight. The raiders were never only raiders. | DEC-662 |
+| `the barrow, the warden rides` *new*, 1.1 | At the Tower, a door shut for forty years swings open. The Warden rides out. | DEC-791 (1.1: he first appears when The Barrow is done) |
+
+### The Shrine (plain scene, the sanctuary)
+
+| Tag | Line | Cards |
+|---|---|---|
+| `the shrine opening` *new* | The shrine stands by the road, its altar cracked. An oath is cut into the stone, with the Warden's name under it. | DEC-662 (where he swore his oath) |
+| `the shrine, option, pray` *new* | Pray at the altar | DEC-673 |
+| `the shrine, option, rest` *new* | Rest at the altar | DEC-837 |
+| `the shrine, pray` *new* | You pray. Under the altar stone lies a blade, the one he swore on. | DEC-673 (the oath-blade, +3 Wild against The Warden) |
+| `the shrine, rest` *new* | You sleep beside the altar. You wake with your wounds closed, and the stone gone cold. | DEC-837 (every present hero heals to full) |
+| `the shrine end hook` *new* | Whatever he swore here, he didn't keep it. | DEC-662 |
+
+### Chapter 2 won
+
+| Tag | Line | Cards |
+|---|---|---|
+| `seal break ch2, Loremaster` | The Keep gives up its dead, and a second seal cracks. The Tower waits. | C4 Q-C4-10 (kept) |
+| `seal-break-live, seal2` | The Keep Seal | C4 seal-break-live (kept) |
