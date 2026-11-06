@@ -4,10 +4,18 @@ import {
   openingActiveIndex,
 } from "../../../protocols/opening.ts";
 import type { GearView } from "../../../protocols/v2/views.ts";
-import type { LoopLevel, PlaceStill, TableBand, ViewState } from "../../views/state.ts";
+import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
+import type {
+  DaySkullView,
+  LoopLevel,
+  PlaceStill,
+  TableBand,
+  ViewState,
+} from "../../views/state.ts";
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
-import { ensureClock } from "../day/clock.ts";
+import { ensureClock, heroCount, heroSheet, isFallen } from "../day/clock.ts";
 import type { DayLocal } from "../day/loop.ts";
+import { daysLeft } from "../day/rules.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
@@ -63,7 +71,21 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   }
   if (actionId === "leave") return "Leave";
   if (actionId === "end-turn") return "End turn";
-  if (actionId === "record") return "Record";
+  if (actionId === "record") {
+    // Skull placement (DEC-092): one button per standing building, or the skull stayed inside (DEC-064).
+    const target = promptId.split("--").slice(2).join("--");
+    if (target === "inside") return "The skull stayed inside";
+    return state.play?.content.board.spaceById.get(target)?.name ?? "Record";
+  }
+  if (actionId === "split") {
+    const heroId = promptId.split("--").slice(2).join("--");
+    return `Split ${heroName(state, heroId)} off`;
+  }
+  if (actionId === "join") {
+    const other = state.play?.groups.find((row) => row.id === promptId.split("--")[2]);
+    return `Join ${other ? groupName(state, other.heroIds, other.id) : "the groups"}`;
+  }
+  if (promptId === "regroup-done") return "Stay as you are";
   if (promptId.startsWith("continue-pick-story-")) {
     const id = promptId.slice("continue-pick-story-".length);
     const story = state.stories.find((entry) => entry.card.id === id);
@@ -122,6 +144,89 @@ const simulatedSkullLine = (state: ShellState): string | null => {
   return lines.length > 0 ? lines.join(" ").slice(0, 120) : null;
 };
 
+const groupName = (state: ShellState, heroIds: readonly string[], fallback: string): string => {
+  const first = heroIds[0];
+  return first ? heroName(state, first) : fallback;
+};
+
+/**
+ * The day panels for the board (C3 feature 11): roll terms, days left, the coming drop,
+ * effects lines, skull placement and hero corruptions. Read from the day clock only.
+ */
+const buildDayPanels = (
+  state: ShellState,
+): Pick<
+  TableBand,
+  "daysLeft" | "threat" | "phase" | "rolls" | "effects" | "skull" | "corruptions"
+> => {
+  const play = state.play;
+  if (!play) return {};
+  const clock = ensureClock(play);
+  const heroes = heroCount(play);
+  const dayFrame = state.loops.stack.find((frame) => frame.loopId === "day");
+  const local = dayFrame ? (dayFrame.local as DayLocal) : undefined;
+  const phase = dayPhaseView(local?.phase, clock.effects.length > 0);
+
+  const rolls = play.turnOrder.flatMap((groupId) => {
+    const shift = clock.shifts[groupId];
+    const group = play.groups.find((row) => row.id === groupId);
+    if (!shift || !group) return [];
+    return [rollView({ groupId, name: groupName(state, group.heroIds, groupId), shift })];
+  });
+
+  let skull: DaySkullView | null = null;
+  if (phase === "skull" || phase === "skull-sim") {
+    const board = play.content.board;
+    const last = clock.nightDrops.at(-1);
+    const space = last ? board.spaceById.get(last.spaceId) : undefined;
+    const kingdomId =
+      phase === "skull-sim" ? last?.kingdom : (clock.expectKingdom ?? clock.pendingKingdoms[0]);
+    const kingdomLabel = kingdomId
+      ? (board.kingdoms.find((row) => row.id === kingdomId)?.label ?? kingdomId)
+      : null;
+    const buildings = board.spaces
+      .filter((row) => row.building && (!kingdomId || row.kingdom === kingdomId))
+      .map((row) => ({
+        spaceId: row.id,
+        name: row.name,
+        skulls: clock.skulls[row.id] ?? 0,
+        fallen: isFallen(play, row.id),
+      }));
+    const fell = clock.nightDrops
+      .filter((drop) => isFallen(play, drop.spaceId))
+      .map((drop) => board.spaceById.get(drop.spaceId)?.name ?? drop.spaceId);
+    skull = {
+      kingdomLabel:
+        phase === "skull-sim" && space
+          ? (board.kingdoms.find((row) => row.id === space.kingdom)?.label ?? space.kingdom)
+          : kingdomLabel,
+      buildings,
+      fell,
+    };
+  }
+
+  const left = heroes < 1 ? null : daysLeft(clock.supply, heroes, play.dayNumber, clock.tuning);
+  const corruptionHeroes = play.groups.flatMap((group) => group.heroIds);
+  return {
+    daysLeft: left,
+    threat: comingDrop({
+      heroes,
+      night: play.dayNumber,
+      questWon: clock.questsWon > 0,
+      tuning: clock.tuning,
+    }),
+    phase,
+    rolls,
+    effects: [...clock.effects],
+    skull,
+    corruptions: corruptionHeroes.map((heroId) => ({
+      heroId,
+      heroName: heroName(state, heroId),
+      count: heroSheet(clock, heroId).corruptions,
+    })),
+  };
+};
+
 const buildTable = (state: ShellState, chapter: string): TableBand | null => {
   if (state.screen !== "play" && state.screen !== "pause") return null;
   const play = state.play;
@@ -159,10 +264,12 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
   const actingHeroId = actingId;
   const actingName = actingHeroId ? heroName(state, actingHeroId) : null;
   const rolled = actingHeroId ? play.dayRolls[actingHeroId] : undefined;
+  const dayPanels = buildDayPanels(state);
 
   return {
     chapter,
     day: play.dayNumber,
+    ...dayPanels,
     health: "unavailable",
     purse: "unavailable",
     actingGroup: actingName,
@@ -450,6 +557,14 @@ const LOOKUP_CARDS = [
 
 const helpScreenFor = (state: ShellState): string => {
   if (state.screen === "pause" && state.pause?.cause === "tower-lost") return "tower-lost";
+  // The day on the board (C3 feature 11): once the opening is over and the day loop runs.
+  if (
+    state.screen === "play" &&
+    !openingMomentId(state) &&
+    state.loops.stack.some((frame) => frame.loopId === "day")
+  ) {
+    return "day-on-the-board";
+  }
   const mapped: Record<string, string> = {
     splash: "waiting",
     "pick-story": "pick-story",

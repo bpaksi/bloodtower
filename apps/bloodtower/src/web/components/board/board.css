@@ -2235,6 +2235,55 @@
   }
 }
 
+/* Day on the board (C3 feature 11): threat bar under the band (UI-047), day panels centred. */
+.bt-board[data-board-layer="move"] > .bt-threat {
+  position: absolute;
+  top: 4rem;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.2rem 1.25rem;
+  background: rgb(11 8 6 / 0.6);
+  color: var(--bt-bone);
+  font-size: 1rem;
+}
+
+.bt-threat-skulls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.bt-threat-skull {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: #8a1e14;
+}
+
+.bt-board[data-board-layer="move"] > [data-day-panel] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+}
+
+.bt-board[data-board-layer="move"] > [data-day-panel="skull-sim"] {
+  top: 72%;
+}
+
+[data-day-panel] ul {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
 .bt-place-still {
   margin: 0;
   width: min(100%, 64rem);

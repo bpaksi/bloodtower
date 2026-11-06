@@ -38,9 +38,56 @@ const tableGroupSchema = z.strictObject({
   alone: z.boolean(),
 });
 
+/** One group's move roll: the raw 2d3 and each modifier, so the board can show the sum (UI-021). */
+const dayRollSchema = z.strictObject({
+  groupId: z.string().min(1).max(80),
+  name: z.string().min(1).max(80),
+  /** Named `rolled`: the board refuses any key called `raw`. */
+  rolled: z.number().int().min(0).max(99),
+  virtue: z.number().int().min(-99).max(99),
+  terrain: z.number().int().min(-99).max(99),
+  corruption: z.number().int().min(-99).max(99),
+  total: z.number().int().min(0).max(99),
+});
+
+const skullBuildingSchema = z.strictObject({
+  spaceId: z.string().min(1).max(80),
+  name: z.string().min(1).max(80),
+  skulls: z.number().int().min(0).max(99),
+  fallen: z.boolean(),
+});
+
+/** Skull placement (DEC-092) and the simulated drop (DEC-305): the kingdom and its buildings. */
+const daySkullSchema = z.strictObject({
+  kingdomLabel: z.string().min(1).max(40).nullable(),
+  buildings: z.array(skullBuildingSchema).max(64),
+  /** Buildings that fell tonight, named for the board (DEC-093). */
+  fell: z.array(z.string().min(1).max(80)).max(16),
+});
+
+const heroCorruptionSchema = z.strictObject({
+  heroId: heroIdSchema,
+  heroName: z.string().min(1).max(80),
+  count: z.number().int().min(0).max(99),
+});
+
+/**
+ * The day on the board (C3 feature 11). Every field is optional so older views stay valid.
+ * `phase` says which panel the board paints; unknown numbers are null, never zero.
+ */
+export const DAY_PHASES = ["regroup", "roll", "turn", "skull", "skull-sim", "effects"] as const;
+
 const tableBandSchema = z.strictObject({
   chapter: z.string().min(1).max(120),
   day: z.number().int().min(0).max(99),
+  daysLeft: z.number().int().min(0).max(99).nullable().optional(),
+  /** The coming night's drop only (Q-C3-19). */
+  threat: z.number().int().min(0).max(9).nullable().optional(),
+  phase: z.enum(DAY_PHASES).nullable().optional(),
+  rolls: z.array(dayRollSchema).max(8).optional(),
+  effects: z.array(z.string().min(1).max(120)).max(16).optional(),
+  skull: daySkullSchema.nullable().optional(),
+  corruptions: z.array(heroCorruptionSchema).max(16).optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),

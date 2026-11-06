@@ -18,6 +18,9 @@ import type { MenuContext } from "./gearMenu.ts";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
+/** [COPY: regroup] The iPad asks; the board shows the same line (DEC-640). */
+const REGROUP_PROMPT = "Stay together, or split up?";
+
 const SCREEN_TITLE: Record<string, string> = {
   splash: "Blood Tower",
   "pick-story": "Pick a story",
@@ -808,6 +811,18 @@ export function CoreDeviceScreen({
             >
               {view.shows}
             </p>
+            {view.table?.phase === "regroup" ? (
+              <p className="mt-2 text-lg" data-day-step="regroup">
+                {REGROUP_PROMPT}
+              </p>
+            ) : null}
+            {view.table?.phase === "skull" ? (
+              <p className="mt-2 text-lg" data-day-step="skull">
+                {view.table.skull?.kingdomLabel
+                  ? `A skull falls in ${view.table.skull.kingdomLabel}. Where does it land?`
+                  : "A skull falls. Where does it land?"}
+              </p>
+            ) : null}
             {picking ? (
               <p className="mt-2 text-[var(--bt-muted)]" data-pick-help="">
                 Who this iPad speaks for at the table
