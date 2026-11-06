@@ -1,0 +1,19 @@
+{
+  "source": {
+    "commit": "39ee78a5c250c62f5f63c891f907a38c60a64acb",
+    "derivation": "loadStoryCatalog(packs) from the base commit's own server code and packs, raw order",
+    "script": "apps/bloodtower/src/server/scripts/captureMainPickStory.ts"
+  },
+  "stories": [
+    {
+      "id": "dracula",
+      "title": "The Count of Vellmoor",
+      "playable": false
+    },
+    {
+      "id": "test",
+      "title": "Proving Grounds",
+      "playable": true
+    }
+  ]
+}

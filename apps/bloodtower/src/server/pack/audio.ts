@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { extname, join, sep } from "node:path";
 import { isAllowedOrigin } from "../hub/origin.ts";
-import type { PackLoadIssue } from "./load.ts";
+import type { PackV2LoadIssue as PackLoadIssue } from "./v2/load.ts";
 
 export const PACK_AUDIO_DIR = "audio";
 export const PACK_AUDIO_EXTENSION = ".m4a";

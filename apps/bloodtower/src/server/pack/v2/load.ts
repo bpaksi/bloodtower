@@ -5,11 +5,19 @@ import {
   type BaseContentPack,
   baseContentPackSchema,
   flagCoverageIssues,
+  type PackMetadata,
+  packMetadataSchema,
   packV2Issues,
   type StoryPack,
   storyPackSchema,
 } from "../../../protocols/pack-v2/index.ts";
-import { mediaOnDiskIssues } from "../assets.ts";
+import {
+  indexPackAssets,
+  mediaOnDiskIssues,
+  type PackAssetIndex,
+  stillAspectIssues,
+  validateAssetsFolder,
+} from "../assets.ts";
 
 const MAX_FILE_BYTES = 2_000_000;
 
@@ -20,9 +28,22 @@ export interface PackV2LoadIssue {
   file: string;
   path: string;
   message: string;
+  /** The missing id the issue is about, when there is one (a chapter no manifest declares). */
+  id?: string;
 }
 
+/**
+ * `metadata` is a `playable: false` manifest with no `format` (DEC-691): only the manifest and
+ * `assets/` are read, and no story content is validated. It lists on Pick story and stops there.
+ */
 export type PackV2LoadResult =
+  | {
+      ok: true;
+      kind: "metadata";
+      pack: PackMetadata;
+      assets: PackAssetIndex;
+      warnings: PackV2LoadIssue[];
+    }
   | { ok: true; kind: "base-content"; pack: BaseContentPack; warnings: PackV2LoadIssue[] }
   | { ok: true; kind: "story"; pack: StoryPack; base: BaseContentPack; warnings: PackV2LoadIssue[] }
   | { ok: false; issues: PackV2LoadIssue[] };
@@ -154,23 +175,99 @@ const mergeBoardSpaces = (
   return issues;
 };
 
-/** Loads one v2 pack folder. Story packs resolve `base_pack` under the same parent directory. */
+/**
+ * A story may keep its quests in `quests.yaml`: a list of quests, each naming its `chapter`.
+ * They are appended to that chapter's `quests`. A chapter the manifest does not declare is a
+ * P2-2 issue on `quests.yaml` that names the missing chapter id.
+ * This is the one split file beyond `board/` and `tuning.yaml`, and it exists because EV-04
+ * requires an issue on `…/quests.yaml` for a quest whose `chapter:` is undeclared: a quest nested
+ * in the manifest has no `chapter:` field (the nesting is the reference), so no manifest-only
+ * shape can raise that issue. A quest's `chapter` key is removed before the strict schema runs.
+ */
+const mergeSplitQuests = (
+  file: string,
+  value: unknown,
+  assembled: Record<string, unknown>,
+): PackV2LoadIssue[] => {
+  if (!Array.isArray(value)) {
+    return [issue(file, "(file)", "P2-1", "quests.yaml is a list of quests.")];
+  }
+  const issues: PackV2LoadIssue[] = [];
+  const chapters = Array.isArray(assembled.chapters)
+    ? (assembled.chapters as Record<string, unknown>[])
+    : [];
+  for (const [index, row] of value.entries()) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) {
+      issues.push(issue(file, `${index}`, "P2-1", "A quest is an object."));
+      continue;
+    }
+    const { chapter: chapterId, ...quest } = row as Record<string, unknown>;
+    const target = chapters.find((chapter) => chapter && chapter.id === chapterId);
+    if (typeof chapterId !== "string" || !target) {
+      issues.push({
+        ...issue(
+          file,
+          `${index}.chapter`,
+          "P2-2",
+          `chapter ${String(chapterId)} is not declared by the manifest.`,
+        ),
+        id: String(chapterId),
+      });
+      continue;
+    }
+    target.quests = [...(Array.isArray(target.quests) ? target.quests : []), quest];
+  }
+  return issues;
+};
+
+const loadMetadataOnly = (
+  root: string,
+  packFile: string,
+  manifest: Record<string, unknown>,
+): PackV2LoadResult => {
+  const folder: PackV2LoadIssue[] = [];
+  validateAssetsFolder(root, (item) => folder.push(item));
+  if (folder.length > 0) return { ok: false, issues: folder };
+  const parsed = packMetadataSchema.safeParse(manifest);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      issues: packV2Issues(parsed.error).map((item) =>
+        issue(packFile, item.path, item.rule, item.message),
+      ),
+    };
+  }
+  const meta = parsed.data;
+  const media = mediaOnDiskIssues(root, [], meta.cover, "P2-2");
+  if (media.errors.length > 0) return { ok: false, issues: media.errors };
+  const indexed = indexPackAssets(root, { pack_id: meta.pack_id, assets: [], cover: meta.cover });
+  const shape = stillAspectIssues(indexed, { assets: [], cover: meta.cover });
+  if (shape.length > 0) return { ok: false, issues: shape };
+  const warnings = [...indexed.warnings, ...media.warnings];
+  return { ok: true, kind: "metadata", pack: meta, assets: { ...indexed, warnings }, warnings };
+};
+
+/**
+ * Loads one pack folder. Story packs resolve `base_pack` under the same parent directory.
+ * A `playable: false` manifest with no `format` loads as metadata only.
+ */
 export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResult => {
   let root = resolve(dir);
+  let names: string[];
   try {
     root = realpathSync(root);
+    names = readdirSync(root).sort();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { ok: false, issues: [issue(dir, "(file)", "P2-1", message)] };
   }
 
   const issues: PackV2LoadIssue[] = [];
-  const names = readdirSync(root).sort();
   const packFile = names.find((name) => MANIFEST_FILES.has(name));
   if (!packFile) {
     return {
       ok: false,
-      issues: [issue("(none)", "(file)", "P2-1", "The pack folder has no manifest.")],
+      issues: [issue(root, "(file)", "P2-1", "The pack folder has no manifest.")],
     };
   }
 
@@ -184,6 +281,9 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   }
 
   const assembled = { ...(read.value as Record<string, unknown>) };
+  if (assembled.format !== 2 && assembled.playable === false) {
+    return loadMetadataOnly(root, packFile, assembled);
+  }
   issues.push(...mergeBoardSpaces(root, packFile, assembled));
 
   for (const name of names) {
@@ -216,6 +316,10 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
       issues.push(
         issue(name, "(file)", "P2-1", `Split file ${name} duplicates manifest field ${stem}.`),
       );
+      continue;
+    }
+    if (stem === "quests" && assembled.kind === "story") {
+      issues.push(...mergeSplitQuests(name, extra.value, assembled));
       continue;
     }
     if (stem !== "tuning") continue;
@@ -327,39 +431,6 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
     issues: [issue(packFile, "kind", "P2-1", "A v2 pack kind is story or base-content.")],
   };
 };
-
-export type PackDoorClass =
-  | { kind: "v2" }
-  | { kind: "skip" }
-  | { kind: "broken"; issues: PackV2LoadIssue[] };
-
-/**
- * A door with no manifest, or a manifest that parses and is not format 2, is skipped.
- * A manifest that cannot be read or parsed is broken: the caller must keep those issues.
- */
-export const classifyPackDoor = (dir: string): PackDoorClass => {
-  try {
-    const root = realpathSync(resolve(dir));
-    const names = readdirSync(root);
-    const packFile = names.find((name) => MANIFEST_FILES.has(name));
-    if (!packFile) return { kind: "skip" };
-    const read = readPackFile(root, packFile);
-    if (!("ok" in read)) return { kind: "broken", issues: [read] };
-    if (!read.value || typeof read.value !== "object" || Array.isArray(read.value)) {
-      return {
-        kind: "broken",
-        issues: [issue(packFile, "(file)", "P2-1", "The pack manifest is a JSON object.")],
-      };
-    }
-    if ((read.value as { format?: unknown }).format !== 2) return { kind: "skip" };
-    return { kind: "v2" };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return { kind: "broken", issues: [issue(dir, "(file)", "P2-1", message)] };
-  }
-};
-
-export const isPackV2Manifest = (dir: string): boolean => classifyPackDoor(dir).kind === "v2";
 
 export const formatPackV2Issues = (issues: readonly PackV2LoadIssue[]): string[] =>
   issues.map(

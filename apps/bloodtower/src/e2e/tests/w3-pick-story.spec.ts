@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   type Browser,
@@ -240,6 +240,52 @@ test("focused Proving Grounds fits, and only Dracula's cover is painted", async 
       await expectBoardQuiet(board, device);
     }
     expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+  } finally {
+    await context.close();
+    await session.host.close();
+  }
+});
+
+test("Pick story lists the same stories in the same order as main (C3-01 EV-03)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(90_000);
+  // Generated from the PR base by server/scripts/captureMainPickStory.ts; `source` names the commit.
+  const { stories: fixture } = JSON.parse(
+    readFileSync(join(import.meta.dirname, "w3-pick-story.main.json"), "utf8"),
+  ) as { stories: { id: string; title: string; playable: boolean }[] };
+  const { session, context, board, device } = await openPair(browser, testInfo, "w3-order");
+  try {
+    // The carousel opens on the playable story. Next walks the list in order and wraps, so one
+    // full lap, rotated to the first fixture entry (the catalog's raw order), must equal it.
+    const focus = board.locator("[data-story-focus]");
+    const lap: { id: string; title: string; playable: boolean }[] = [];
+    for (let step = 0; step < fixture.length; step += 1) {
+      await expect(focus).toHaveAttribute("data-story-focus", /.+/);
+      lap.push({
+        id: (await focus.getAttribute("data-story-focus")) ?? "",
+        title: (await board.locator("[data-story-focus] h2").innerText()).trim(),
+        playable: (await focus.getAttribute("data-playable")) === "true",
+      });
+      await device.locator('button[data-action="story-next"]').click();
+    }
+    const start = lap.findIndex((entry) => entry.id === fixture[0]?.id);
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect([...lap.slice(start), ...lap.slice(0, start)]).toEqual(fixture);
+    // Back at the door it began on (the lap wrapped).
+    await expect(focus).toHaveAttribute("data-story-focus", lap[0]?.id ?? "");
+    // Dracula is a metadata-only pack: listed, not playable, and Choose stops on Not playable
+    // yet with no Short, Standard, Long or Difficulty settings (Long is gone from its YAML).
+    await expect(async () => {
+      if ((await focus.getAttribute("data-story-focus")) !== "dracula") {
+        await device.locator('button[data-action="story-next"]').click();
+      }
+      await expect(focus).toHaveAttribute("data-story-focus", "dracula", { timeout: 500 });
+    }).toPass();
+    await expect(focus).toHaveAttribute("data-playable", "false");
+    await clickAct(device, "continue", "continue-pick-story-dracula");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "not-playable");
+    await expect(device.getByRole("button", { name: "Long", exact: true })).toHaveCount(0);
   } finally {
     await context.close();
     await session.host.close();

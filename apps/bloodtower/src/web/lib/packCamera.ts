@@ -13,17 +13,12 @@ export const packCameraTrackUrl = (
   origin: string = pageServerOrigin(),
 ): string => `${origin}${cameraPath(packId, momentId)}`;
 
-/** Shipped still file under `assets/`, or a pack asset id when no extension is present. */
+/** Shipped still file under `assets/`. */
 export const packTrackStillUrl = (
   still: string,
   packId: string = DEFAULT_PACK_ID,
   origin: string = pageServerOrigin(),
-): string => {
-  if (/\.(png|jpe?g|webp)$/i.test(still)) {
-    return `${origin}/packs/${encodeURIComponent(packId)}/assets/${encodeURIComponent(still)}`;
-  }
-  return packStillImageUrl(still, packId, origin);
-};
+): string => packStillImageUrl(still, packId, origin);
 
 export const fetchCameraTrack = async (
   momentId: string,

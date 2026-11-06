@@ -1,12 +1,15 @@
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, join, sep } from "node:path";
-import type { Asset } from "bloodtower-protocols";
+import type { StoryPack } from "../../protocols/pack-v2/index.ts";
 import type { PackAudioIndex } from "./audio.ts";
 import { indexPackAudio } from "./audio.ts";
 import type { PackCameraIndex } from "./camera.ts";
 import { indexPackCamera } from "./camera.ts";
 import { type ImageSize, isSixteenByNine, readImageSize } from "./imageSize.ts";
-import type { PackLoadIssue } from "./load.ts";
+import type { PackV2LoadIssue as PackLoadIssue } from "./v2/load.ts";
+
+/** One manifest `assets` row, as the v2 story schema parses it. */
+export type PackAsset = StoryPack["assets"][number];
 
 export const PACK_ASSETS_DIR = "assets";
 
@@ -60,7 +63,7 @@ const resolveInsideAssets = (assetsDir: string, name: string): string | undefine
 };
 
 /** Candidate image paths for one manifest row, most specific first. */
-export const assetImageCandidates = (asset: Asset): string[] => {
+export const assetImageCandidates = (asset: PackAsset): string[] => {
   const names: string[] = [];
   const pushStem = (stem: string) => {
     for (const ext of IMAGE_EXTENSIONS) names.push(`${stem}${ext}`);
@@ -77,7 +80,7 @@ export const assetImageCandidates = (asset: Asset): string[] => {
   return [...new Set(names)];
 };
 
-export const resolveAssetImage = (assetsDir: string, asset: Asset): string | undefined => {
+export const resolveAssetImage = (assetsDir: string, asset: PackAsset): string | undefined => {
   let realAssetsDir: string;
   try {
     realAssetsDir = realpathSync(assetsDir);
@@ -173,7 +176,9 @@ export const validateAssetsFolder = (
   }
 };
 
-const expectsImageFile = (type: Asset["type"]) => type === "still" || type === "portrait";
+const expectsImageFile = (type: PackAsset["type"]) => type === "still" || type === "portrait";
+
+const AUDIO_ASSET_TYPES = new Set(["line", "sfx", "music", "ambient"]);
 
 const FILE_BACKED_TYPES = new Set(["still", "clip", "line", "sfx", "music", "ambient"]);
 
@@ -206,7 +211,7 @@ const mediaAsset = (asset: {
   type: string;
   status?: string;
   path?: string;
-}): Asset => ({
+}): PackAsset => ({
   id: asset.id,
   type: asset.type === "clip" ? "clip" : "still",
   target: "storyboard",
@@ -273,13 +278,21 @@ export const resolveCover = (packRoot: string, cover: string): string | undefine
 
 export const indexPackAssets = (
   packRoot: string,
-  pack: { pack_id: string; assets: readonly Asset[]; cover?: string },
+  pack: { pack_id: string; assets: readonly PackAsset[]; cover?: string },
 ): PackAssetIndex => {
   const assetsDir = join(packRoot, PACK_ASSETS_DIR);
   const warnings: PackLoadIssue[] = [];
   const byId = new Map<string, ResolvedPackAsset>();
   const byBasename = new Map<string, string>();
   for (const asset of pack.assets) {
+    if (AUDIO_ASSET_TYPES.has(asset.type)) {
+      // A declared audio file under assets/ is served by its file name on the one asset route.
+      const file = asset.path?.startsWith("assets/")
+        ? resolveInsidePack(packRoot, asset.path)
+        : undefined;
+      if (file) byBasename.set(basename(file), file);
+      continue;
+    }
     if (!expectsImageFile(asset.type)) continue;
     const absolute = resolveAssetImage(assetsDir, asset);
     if (!absolute) {
@@ -323,7 +336,7 @@ const sizeLabel = ({ width, height }: ImageSize) => `${width}x${height}`;
  */
 export const stillAspectIssues = (
   index: PackAssetIndex,
-  pack: { assets: readonly Asset[]; cover?: string },
+  pack: { assets: readonly PackAsset[]; cover?: string },
 ): PackLoadIssue[] => {
   const issues: PackLoadIssue[] = [];
   const check = (file: string, path: string, absolute: string, what: string) => {

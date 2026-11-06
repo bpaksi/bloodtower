@@ -12,7 +12,7 @@ export type StorySetting = {
   default: string;
 };
 
-export type StoryCard = {
+export type ShellStoryCard = {
   id: string;
   title: string;
   tagline: string | null;
@@ -24,7 +24,7 @@ export type StoryCard = {
 };
 
 export type ShellStory = {
-  card: StoryCard;
+  card: ShellStoryCard;
   settings: StorySetting[];
   setup: SetupStep[];
   heroes: { id: string; name: string }[];

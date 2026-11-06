@@ -23,7 +23,7 @@ import { type CoreSession, createCoreSession } from "../core/session.ts";
 import { openDatabase } from "../db/client.ts";
 import { createSessionStore, type StoredRun } from "../db/store.ts";
 import { storedRunFromEventLog } from "../events/rebuildRun.ts";
-import { createEventStore } from "../events/store.ts";
+import { AUTOSAVE_FORMAT, createEventStore } from "../events/store.ts";
 import { joinHost } from "../lanUrls.ts";
 import {
   createHostLogger,
@@ -204,7 +204,11 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   }
   const autosaveRow = eventStore.getAutosave();
   await engine.whenIdle();
-  if (autosaveRow) {
+  if (autosaveRow && autosaveRow.format !== AUTOSAVE_FORMAT) {
+    // Q-C3-07: a pre-C3 save is dropped, not migrated. The row stays in the DB, ignored: it is
+    // not offered as Continue and play starts fresh. A New game's first autosave replaces it.
+    log.warn("save-skipped", `save skipped: pre-C3 format ${autosaveRow.format ?? "none"}`);
+  } else if (autosaveRow) {
     if (autosaveRow.sessionId !== sessionId) {
       eventStore.replaceAutosave({ ...autosaveRow, sessionId });
     }

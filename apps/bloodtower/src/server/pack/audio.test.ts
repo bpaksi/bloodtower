@@ -4,9 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
+import { indexPackAssets } from "./assets.ts";
 import { devAudioAllowOrigin, indexPackAudio, isAudioPath, validateAudioFolder } from "./audio.ts";
-import { loadPackDir, loadR1Pack, type PackLoadIssue } from "./load.ts";
 import { tryServePackAssets } from "./serve.ts";
+import { loadPackV2Dir, type PackV2LoadIssue } from "./v2/load.ts";
 
 const packsDir = () => loadConfig().packsDir;
 
@@ -29,25 +30,13 @@ afterEach(async () => {
   }
 });
 
-const issuesFor = (dir: string): PackLoadIssue[] => {
-  const issues: PackLoadIssue[] = [];
+const issuesFor = (dir: string): PackV2LoadIssue[] => {
+  const issues: PackV2LoadIssue[] = [];
   validateAudioFolder(dir, (item) => issues.push(item));
   return issues;
 };
 
-describe.skip("pack audio folder (R1 packs/test)", () => {
-  it("loads the Proving Ground loops from packs/test/audio and indexes them by file name", () => {
-    const result = loadR1Pack(packsDir());
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect([...result.assets.audio.byFile.keys()].sort()).toEqual([
-      "night1-ambient.m4a",
-      "night2-ambient.m4a",
-      "pg-music.m4a",
-      "startup-ambient.m4a",
-    ]);
-  });
-
+describe("pack audio folder", () => {
   it("accepts flat .m4a files only", () => {
     const dir = copyPack("test");
     mkdirSync(join(dir, "audio"), { recursive: true });
@@ -57,6 +46,7 @@ describe.skip("pack audio folder (R1 packs/test)", () => {
 
   it("refuses a WAV master, a subfolder, and a file that is not audio", () => {
     const dir = copyPack("test");
+    mkdirSync(join(dir, "audio"), { recursive: true });
     writeFileSync(join(dir, "audio", "master.wav"), "x");
     mkdirSync(join(dir, "audio", "nested"));
     const messages = issuesFor(dir).map((item) => `${item.file}: ${item.message}`);
@@ -68,22 +58,13 @@ describe.skip("pack audio folder (R1 packs/test)", () => {
     );
   });
 
-  it("makes a playable pack with a bad audio file fail the load", () => {
-    const dir = copyPack("test");
-    writeFileSync(join(dir, "audio", "master.wav"), "x");
-    const result = loadPackDir(dir);
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.issues.map((item) => item.rule)).toContain("V-1");
-  });
-
   it("ignores the audio folder in a metadata-only pack (playable: false)", () => {
     const dir = copyPack("dracula");
     mkdirSync(join(dir, "audio"));
     writeFileSync(join(dir, "audio", "master.wav"), "x");
-    const result = loadPackDir(dir);
+    const result = loadPackV2Dir(dir);
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.playable).toBe(false);
+    if (result.ok) expect(result.kind).toBe("metadata");
   });
 
   it("indexes nothing when the pack has no audio folder", () => {
@@ -92,9 +73,11 @@ describe.skip("pack audio folder (R1 packs/test)", () => {
   });
 
   it("serves a declared loop at /packs/<id>/audio/<file> and refuses everything else", async () => {
-    const result = loadR1Pack(packsDir());
-    if (!result.ok) throw new Error("the test pack must load");
-    const catalogs = [result.assets];
+    const dir = copyPack("test");
+    mkdirSync(join(dir, "audio"));
+    writeFileSync(join(dir, "audio", "startup-ambient.m4a"), "x");
+    writeFileSync(join(dir, "audio", "pg-music.m4a"), "x");
+    const catalogs = [indexPackAssets(dir, { pack_id: "test", assets: [] })];
     server = createServer((req, res) => {
       void tryServePackAssets(catalogs, req, res).then((handled) => {
         if (!handled) res.writeHead(418).end();

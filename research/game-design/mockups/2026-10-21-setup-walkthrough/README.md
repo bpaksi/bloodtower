@@ -15,7 +15,7 @@ Open either HTML file in a browser (double-click, or `open walkthrough.html`). N
 
 ## Sources and choices
 
-- Cards from `research/game-design/cards/` on `main` at c240c90, plus DEC-098 to DEC-102, the DEC-001 and Q-002 update and the SCR-014 update from the design branch `chore/design-session-2026-10-21b` (green IDs on the page). Those rulings are not on `main` yet.
+- Cards from `research/game-design/cards/` on `main` at c240c90, plus DEC-098 to DEC-102, the DEC-001 and Q-002 update and the SCR-014 update from the design branch `chore/design-session-2026-10-21b` (green IDs on the page). Those rulings were not on `main` when this was drawn; they are now.
 - Also used: `apps/bloodtower/README.md` and `spec.md` (what R1 builds), `r2-screen-flow.md`, `landing-and-initial-screens.md`, `setup-wizard-and-summary.md`, `playthrough-ui-notes-2026-10-17.md`, `modifier-effects.md`, `tower-sound-inventory.md`, `asset-catalog.md`, `docs/art-direction/`.
 - The steps follow AREA-049's order: tower connect before pick story. The built POC does it the other way (gap on step 5).
 - The tower steps (orient, glyphs, seals) sit inside setup, after the board is laid out, not right after calibrate as IDEA-025 and MEC-017 say, because the player needs the board to tap a kingdom (gap on step 14).

@@ -5,6 +5,9 @@ import type { HostEventKind } from "./kinds.ts";
 
 export const AUTOSAVE_ROW_ID = 1;
 
+/** The pack format every autosave is written under. A row without it predates C3. */
+export const AUTOSAVE_FORMAT = 2;
+
 export type GameMeta = {
   seed: string;
   packVersion: string;
@@ -34,6 +37,9 @@ export type AutosaveRow = {
   sessionId: string;
   packId: string;
 };
+
+/** An autosave as read: its recorded pack format, or null on a row written before C3. */
+export type StoredAutosave = AutosaveRow & { format: number | null };
 
 export type StoredHostEvent = {
   gameId: string;
@@ -68,14 +74,21 @@ export interface EventStore {
   writeCheckpoint: (input: CheckpointInput) => StoredCheckpoint;
   lastCheckpoint: (gameId: string) => StoredCheckpoint | null;
   latestCheckpoint: () => StoredCheckpoint | null;
-  getAutosave: () => AutosaveRow | null;
+  getAutosave: () => StoredAutosave | null;
   setAutosave: (row: AutosaveRow) => void;
   replaceAutosave: (row: AutosaveRow) => void;
   /** Removes the one autosave row. New game on the session screen (DEC-208). */
   clearAutosave: () => void;
-  autosaveForSession: (sessionId: string) => AutosaveRow | null;
+  autosaveForSession: (sessionId: string) => StoredAutosave | null;
   hasEvents: (gameId: string) => boolean;
 }
+
+const autosaveFromSelect = (row: typeof autosave.$inferSelect): StoredAutosave => ({
+  gameId: row.gameId,
+  sessionId: row.sessionId,
+  packId: row.packId,
+  format: row.format,
+});
 
 const rowFromSelect = (row: typeof events.$inferSelect): StoredHostEvent => ({
   gameId: row.gameId,
@@ -188,8 +201,7 @@ export const createEventStore = (db: Db): EventStore => {
 
     getAutosave: () => {
       const row = db.select().from(autosave).where(eq(autosave.id, AUTOSAVE_ROW_ID)).get();
-      if (!row) return null;
-      return { gameId: row.gameId, sessionId: row.sessionId, packId: row.packId };
+      return row ? autosaveFromSelect(row) : null;
     },
 
     setAutosave: (row) => {
@@ -199,6 +211,7 @@ export const createEventStore = (db: Db): EventStore => {
           gameId: row.gameId,
           sessionId: row.sessionId,
           packId: row.packId,
+          format: AUTOSAVE_FORMAT,
         })
         .onConflictDoNothing()
         .run();
@@ -211,6 +224,7 @@ export const createEventStore = (db: Db): EventStore => {
           gameId: row.gameId,
           sessionId: row.sessionId,
           packId: row.packId,
+          format: AUTOSAVE_FORMAT,
         })
         .onConflictDoUpdate({
           target: autosave.id,
@@ -218,6 +232,7 @@ export const createEventStore = (db: Db): EventStore => {
             gameId: row.gameId,
             sessionId: row.sessionId,
             packId: row.packId,
+            format: AUTOSAVE_FORMAT,
           },
         })
         .run();
@@ -229,8 +244,7 @@ export const createEventStore = (db: Db): EventStore => {
 
     autosaveForSession: (sessionId) => {
       const row = db.select().from(autosave).where(eq(autosave.sessionId, sessionId)).get();
-      if (!row) return null;
-      return { gameId: row.gameId, sessionId: row.sessionId, packId: row.packId };
+      return row ? autosaveFromSelect(row) : null;
     },
 
     hasEvents: (gameId) => {

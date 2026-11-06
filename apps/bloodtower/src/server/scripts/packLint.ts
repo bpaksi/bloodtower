@@ -13,13 +13,7 @@ const resolveLintDir = (dir: string, cwd: string): string => {
   return resolve(cwd, dir);
 };
 
-import { formatLoadIssues, loadPackDir, type PackLoadResult } from "../pack/load.ts";
-import {
-  formatPackV2Issues,
-  isPackV2Manifest,
-  loadPackV2Dir,
-  type PackV2LoadResult,
-} from "../pack/v2/load.ts";
+import { formatPackV2Issues, loadPackV2Dir, type PackV2LoadResult } from "../pack/v2/load.ts";
 
 export interface LintReport {
   exitCode: number;
@@ -32,32 +26,27 @@ const formatWarning = (warning: { file: string; path: string; rule: string; mess
 /** Lints one folder. With no folder, lints the test pack under the configured `packsDir`. */
 export const lintPath = (dir: string | undefined, cwd: string): LintReport => {
   const resolved = resolveLintDir(dir ?? join(loadConfig().packsDir, "test"), cwd);
-  if (isPackV2Manifest(resolved)) {
-    let packsRoot = resolved;
-    while (basename(packsRoot) !== "packs" && basename(packsRoot) !== "packs-v2") {
-      const parent = dirname(packsRoot);
-      if (parent === packsRoot) break;
-      packsRoot = parent;
-    }
-    const rootName = basename(packsRoot);
-    const v2: PackV2LoadResult = loadPackV2Dir(
-      resolved,
-      rootName === "packs" || rootName === "packs-v2" ? packsRoot : undefined,
-    );
-    if (v2.ok) {
-      const lines = [`OK ${v2.pack.pack_id} ${v2.pack.version} (format v2)`];
-      for (const warning of v2.warnings) lines.push(formatWarning(warning));
-      return { exitCode: 0, lines };
-    }
-    return { exitCode: 1, lines: formatPackV2Issues(v2.issues) };
+  let packsRoot = resolved;
+  while (basename(packsRoot) !== "packs" && basename(packsRoot) !== "packs-v2") {
+    const parent = dirname(packsRoot);
+    if (parent === packsRoot) break;
+    packsRoot = parent;
   }
-  const result: PackLoadResult = loadPackDir(resolved);
+  const rootName = basename(packsRoot);
+  const result: PackV2LoadResult = loadPackV2Dir(
+    resolved,
+    rootName === "packs" || rootName === "packs-v2" ? packsRoot : undefined,
+  );
   if (result.ok) {
-    const lines = [`OK ${result.pack.pack_id} ${result.pack.version}`];
-    for (const warning of result.assets.warnings) lines.push(formatWarning(warning));
+    const lines = [
+      result.kind === "metadata"
+        ? `OK ${result.pack.pack_id} ${result.pack.version} (metadata only)`
+        : `OK ${result.pack.pack_id} ${result.pack.version} (format v2)`,
+    ];
+    for (const warning of result.warnings) lines.push(formatWarning(warning));
     return { exitCode: 0, lines };
   }
-  return { exitCode: 1, lines: formatLoadIssues(result.issues) };
+  return { exitCode: 1, lines: formatPackV2Issues(result.issues) };
 };
 
 /** Immediate child folders of a packs root. Hidden names are not doors. */
