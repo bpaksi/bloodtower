@@ -1,5 +1,6 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { groupById, playState } from "../chapter/playState.ts";
+import { beginQuest, openQuestAt, type QuestResult } from "../quest/quest.ts";
 import { recordOffer } from "../session/shellRef.ts";
 
 export type EncounterLocal = {
@@ -41,4 +42,14 @@ export const handleEncounterLeave = (groupId: string): void => {
   const group = groupById(play, groupId);
   if (!group) return;
   group.insideBuilding = false;
+};
+
+/** The Quest pick (DEC-083): enters the open quest at the group's space. The board waits (DEC-084). */
+export const handleQuestPick = (groupId: string): QuestResult => {
+  const play = playState();
+  const group = groupById(play, groupId);
+  if (!group) return { ok: false, reason: "unknown-group" };
+  const questId = openQuestAt(play, group.spaceId);
+  if (!questId) return { ok: false, reason: "unknown-quest" };
+  return beginQuest(play, groupId, questId);
 };
