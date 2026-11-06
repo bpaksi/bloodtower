@@ -32,9 +32,10 @@ export default function GapsPage() {
         <p className="muted">
           {gaps.length} gaps: places where the design is thin. They are warnings, not errors. Each
           row opens its card; a card in several areas is listed under each.
-          {later.map(
-            (r) => ` The ${count(r)} gaps on cards that wait for ${r} come after, on their own.`,
-          )}
+          {later.length > 0 &&
+            ` Gaps on cards that wait for a later release come last, each release on its own: ${later
+              .map((r) => `${count(r)} for ${r}`)
+              .join(", ")}.`}
         </p>
       </section>
       {groups.map((g, i) => (
