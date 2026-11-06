@@ -161,15 +161,17 @@ const movesCost = (store: PicksStore, kind: PickKind): number => {
 };
 
 /**
- * DEC-170 / DEC-552: the first corruption a hero carries is cured at the base price; every later one
- * (two or more carried) costs one higher price and it rises no further. DEC-552 gives no number and
- * tuning.yaml is outside this step, so 15 is a local placeholder until the pack carries the tier.
+ * DEC-170 / DEC-552: the free first cure (DEC-700) covers the base-price first corruption; every later
+ * paid cure costs one higher price and it rises no further. pickPrice only reaches here after the free
+ * cure is spent, so any remaining corruption (EV-02 start-at-2 → 1 left) is a later one. DEC-552 gives
+ * no number and tuning.yaml is outside this step, so 15 is a local placeholder until the pack carries
+ * the tier.
  */
 export const CURE_RISEN_GOLD = 15;
 
 const cureBase = (play: PlayState, store: PicksStore, heroId?: string): number => {
   const carried = heroId ? heroSheet(ensureClock(play), heroId).corruptions : 0;
-  return carried >= 2 ? Math.max(store.tuning.cure.gold, CURE_RISEN_GOLD) : store.tuning.cure.gold;
+  return carried >= 1 ? Math.max(store.tuning.cure.gold, CURE_RISEN_GOLD) : store.tuning.cure.gold;
 };
 
 const freeKey = (chapter: number, heroId: string): string => `${chapter}:${heroId}`;
