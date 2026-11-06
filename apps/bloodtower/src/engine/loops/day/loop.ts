@@ -1,5 +1,6 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { nextPlayRng, playState } from "../chapter/playState.ts";
+import { eventForGroup, eventTuningFrom } from "../event/index.ts";
 import { recordOffer, requestCheckpoint, shellState } from "../session/shellRef.ts";
 import {
   checkChapter,
@@ -193,6 +194,9 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
       if (local.awaitingChild) {
         const finished = ctx.getParentResult() as { groupId?: string } | undefined;
         if (!finished?.groupId) return { local, passComplete: false };
+        // MEC-034 .9: a group that ended in the wild or at a skulled building draws (MEC-072).
+        if (eventForGroup(play, shell.seed, finished.groupId, eventTuningFrom()))
+          noteNode(play, ".9");
         local = {
           ...local,
           groupIndex: local.groupIndex + 1,
