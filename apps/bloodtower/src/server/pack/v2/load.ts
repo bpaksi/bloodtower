@@ -105,7 +105,42 @@ const readPackFile = (
   }
 };
 
-const mergeBoardSpaces = (root: string, assembled: Record<string, unknown>): PackV2LoadIssue[] => {
+const idOf = (value: unknown): unknown =>
+  value && typeof value === "object" ? (value as { id?: unknown }).id : undefined;
+
+/**
+ * pack.yaml region labels win over the ones board/spaces.json generates (the documented order).
+ * When some of them have no id, spaces that point at a generated REG- id find no region, and the
+ * schema only says each region is unknown. This issue names the cause instead (#293).
+ */
+const overriddenRegionIssues = (
+  packFile: string,
+  yamlLabels: unknown[],
+  spaces: unknown,
+): PackV2LoadIssue[] => {
+  const idless = yamlLabels.filter((label) => typeof idOf(label) !== "string").length;
+  if (idless === 0 || !Array.isArray(spaces)) return [];
+  const known = new Set(yamlLabels.map(idOf).filter((id) => typeof id === "string"));
+  const lost = spaces.filter((space) => {
+    const region = (space as { region?: unknown } | null)?.region;
+    return typeof region === "string" && !known.has(region);
+  }).length;
+  if (lost === 0) return [];
+  return [
+    issue(
+      packFile,
+      "board.region_labels",
+      "P2-2",
+      `board.region_labels in ${packFile} replace the REG- labels in board/spaces.json, and ${idless} of them have no id, so ${lost} spaces point at a region that no longer exists. Give those labels their REG- ids, or remove board.region_labels from ${packFile} to use the generated ones.`,
+    ),
+  ];
+};
+
+const mergeBoardSpaces = (
+  root: string,
+  packFile: string,
+  assembled: Record<string, unknown>,
+): PackV2LoadIssue[] => {
   const issues: PackV2LoadIssue[] = [];
   const board = assembled.board;
   if (!board || typeof board !== "object" || Array.isArray(board)) return issues;
@@ -124,6 +159,8 @@ const mergeBoardSpaces = (root: string, assembled: Record<string, unknown>): Pac
     const yamlLabels = boardObj.region_labels;
     if (parsed.region_labels && !(Array.isArray(yamlLabels) && yamlLabels.length > 0)) {
       boardObj.region_labels = parsed.region_labels;
+    } else if (Array.isArray(yamlLabels) && yamlLabels.length > 0) {
+      issues.push(...overriddenRegionIssues(packFile, yamlLabels, parsed.spaces));
     }
     if (parsed.river_crossings && !boardObj.river_crossings) {
       boardObj.river_crossings = parsed.river_crossings;
@@ -247,7 +284,7 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
   if (assembled.format !== 2 && assembled.playable === false) {
     return loadMetadataOnly(root, packFile, assembled);
   }
-  issues.push(...mergeBoardSpaces(root, assembled));
+  issues.push(...mergeBoardSpaces(root, packFile, assembled));
 
   for (const name of names) {
     if (name === packFile || name === "board" || isMarkdownNote(name)) continue;

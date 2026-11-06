@@ -66,6 +66,32 @@ describe("pack format v2 lint", () => {
     }
   });
 
+  it("says why spaces lose their region when pack.yaml has region labels with no id", () => {
+    const root = mkdtempSync(join(tmpdir(), "pack-v2-"));
+    try {
+      const base = join(root, "base");
+      cpSync(basePack, base, { recursive: true });
+      const manifest = join(base, "pack.yaml");
+      writeFileSync(
+        manifest,
+        readFileSync(manifest, "utf8").replace(
+          "  spaces: []",
+          "  region_labels:\n    - {name: The Great Woods}\n  spaces: []",
+        ),
+      );
+      const result = loadPackV2Dir(base, root);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      const cause = result.issues.find((item) => item.file === "pack.yaml");
+      expect(cause?.rule).toBe("P2-2");
+      expect(cause?.path).toBe("board.region_labels");
+      expect(cause?.message).toMatch(/no id/);
+      expect(cause?.message).toMatch(/board\/spaces\.json/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("refuses an effect outside the fixed set", () => {
     const { root, storyDir } = tempPacksV2();
     try {
