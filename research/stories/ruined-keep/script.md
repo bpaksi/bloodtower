@@ -149,9 +149,9 @@ A random level 3 foe (Q-C3-11), read as the Warden's sworn guard.
 |---|---|---|
 | `the last stand opening` *new* | On the Grass Sea, his sworn guard waits in a line, shields locked. They wear his crest openly now. | DEC-662, Q-C3-11 |
 | `the last stand, option, fight` *new* | Hold the line | DEC-662 (level 3 battle) |
-| `the last stand, option, fall back` *new* | Fall back | **To rule:** the cards give only the battle. Claude's draft: leave, and the quest stays open (MEC-077 needs 2 or 3 options) |
+| `the last stand, option, fall back` *new* | Fall back | DEC-838 (leave at no cost; the quest stays open) |
 | `the last stand, won` *new* | The last of his guard goes down in the grass. Nothing stands between you and the Tower. | DEC-662 |
-| `the last stand, fall back` *new* | You give ground. They don't follow. They don't need to. | Draft, with the option above |
+| `the last stand, fall back` *new* | You give ground. They don't follow. They don't need to. | DEC-838 |
 
 ### Chapter 3 won
 
