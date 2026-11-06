@@ -3,7 +3,7 @@ type: area
 title: "Dracula: plot"
 status: open
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Bob, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-080 }

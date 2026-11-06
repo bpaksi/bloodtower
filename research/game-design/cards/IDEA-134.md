@@ -3,7 +3,7 @@ type: idea
 title: "Object: Stefan's blade, the weapon made to face him"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-105 }

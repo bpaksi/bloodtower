@@ -3,7 +3,7 @@ type: idea
 title: "Quest: The Drawbridge, the loud way or the little gate"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-109 }

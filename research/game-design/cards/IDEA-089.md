@@ -3,7 +3,7 @@ type: idea
 title: "Quest: The Earth Boxes, burn the three boxes in the last kingdom"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-109 }

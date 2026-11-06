@@ -3,7 +3,7 @@ type: idea
 title: "Quest (Long only): The Third Bride, hunting the Count's lieutenant who was Wren's mother"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-109 }

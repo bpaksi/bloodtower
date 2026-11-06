@@ -3,7 +3,7 @@ type: idea
 title: "The castle crawl's progress picture is one tall cutaway, lit floor by floor as the heroes climb"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-113 }

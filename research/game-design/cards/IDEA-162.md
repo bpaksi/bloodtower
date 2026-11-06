@@ -3,7 +3,7 @@ type: idea
 title: "The Count's lair picture: a carved throne, a goblet of red, and a pale ghost at his shoulder"
 status: decided
 layer: story
-release: "1.1"
+release: "1.2"
 by: "Claude, 2026-11-05"
 links:
   - { rel: part-of, to: AREA-113 }
