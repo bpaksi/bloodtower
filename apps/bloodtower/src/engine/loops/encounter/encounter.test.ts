@@ -11,6 +11,7 @@ import {
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import {
   applyPick,
+  CURE_RISEN_GOLD,
   configurePicks,
   ensurePicks,
   giveBackTile,
@@ -75,11 +76,18 @@ describe("building picks", () => {
     expect(sanctuary).toBeTruthy();
     setMoves(play, group.id, 5);
     setPurse(play, group.id, 30);
-    setHeroSheet(play, "fighter", { helpingVirtues: 0, corruptions: 2 });
+    setHeroSheet(play, "fighter", { helpingVirtues: 0, corruptions: 3 });
     expect(applyPick(play, SEED, group.id, "cure", { heroId: "fighter" }).ok).toBe(true);
     expect(ensurePicks(play).purse[group.id]).toBe(30);
+    // Carrying two: the DEC-170/DEC-552 rising price.
+    expect(pickPrice(play, group.id, "cure", "fighter")).toBe(CURE_RISEN_GOLD);
     expect(applyPick(play, SEED, group.id, "cure", { heroId: "fighter" }).ok).toBe(true);
-    expect(ensurePicks(play).purse[group.id]).toBe(20);
+    expect(ensurePicks(play).purse[group.id]).toBe(30 - CURE_RISEN_GOLD);
+    // Carrying one: back to the base price.
+    expect(pickPrice(play, group.id, "cure", "fighter")).toBe(10);
+    expect(applyPick(play, SEED, group.id, "cure", { heroId: "fighter" }).ok).toBe(true);
+    expect(ensurePicks(play).purse[group.id]).toBe(30 - CURE_RISEN_GOLD - 10);
+    ensurePicks(play).purse[group.id] = 20;
     // Chapter 2: the first is free again.
     setHeroSheet(play, "fighter", { helpingVirtues: 0, corruptions: 1 });
     ensurePicks(play).chapter = 2;
@@ -131,6 +139,24 @@ describe("building picks", () => {
     expect(ensureClock(play).skulls[spaceId]).toBe(1);
     expect(ensureClock(play).supply).toBe(supply + 1);
     expect(ensureClock(play).effects).toContain("+1 day");
+  });
+
+  it("EV-05b: Cleanse at 0 skulls is listed but disabled, refused, and buys no day", () => {
+    const { play, group, spaceId } = setup();
+    setMoves(play, group.id, 3);
+    setBuildingSkulls(play, spaceId, 0);
+    const clock = ensureClock(play);
+    const supply = clock.supply;
+    const opened = openMenu(play, group.id);
+    expect(opened.ok && opened.entries.find((e) => e.id === "cleanse")?.disabled).toBe(true);
+    expect(applyPick(play, SEED, group.id, "cleanse")).toEqual({ ok: false, reason: "no-target" });
+    expect(clock.supply).toBe(supply);
+    expect(clock.effects).not.toContain("+1 day");
+    expect(ensurePicks(play).moves[group.id]).toBe(3);
+    // Removing the last skull still grants the day.
+    setBuildingSkulls(play, spaceId, 1);
+    expect(applyPick(play, SEED, group.id, "cleanse").ok).toBe(true);
+    expect(ensureClock(play).supply).toBe(supply + 1);
   });
 
   it("EV-06: skulls shrink the citadel menu; Cleanse and Leave stay, Quest first", () => {

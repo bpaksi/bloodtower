@@ -160,6 +160,18 @@ const movesCost = (store: PicksStore, kind: PickKind): number => {
   return 1;
 };
 
+/**
+ * DEC-170 / DEC-552: the first corruption a hero carries is cured at the base price; every later one
+ * (two or more carried) costs one higher price and it rises no further. DEC-552 gives no number and
+ * tuning.yaml is outside this step, so 15 is a local placeholder until the pack carries the tier.
+ */
+export const CURE_RISEN_GOLD = 15;
+
+const cureBase = (play: PlayState, store: PicksStore, heroId?: string): number => {
+  const carried = heroId ? heroSheet(ensureClock(play), heroId).corruptions : 0;
+  return carried >= 2 ? Math.max(store.tuning.cure.gold, CURE_RISEN_GOLD) : store.tuning.cure.gold;
+};
+
 const freeKey = (chapter: number, heroId: string): string => `${chapter}:${heroId}`;
 
 export const freeCureAvailable = (play: PlayState, heroId: string): boolean =>
@@ -174,7 +186,7 @@ export const pickPrice = (
 ): number => {
   const store = ensurePicks(play);
   if (kind === "cure" && heroId && freeCureAvailable(play, heroId)) return 0;
-  const base = basePrice(store, kind);
+  const base = kind === "cure" ? cureBase(play, store, heroId) : basePrice(store, kind);
   return hasBard(play, groupId) && base > 0 ? silverTonguePrice(base) : base;
 };
 
@@ -233,7 +245,9 @@ export const openMenu = (
       id: kind,
       label,
       price,
-      disabled: moves < movesCost(store, kind) || purse < price,
+      // Cleanse on a building with no skulls has nothing to remove (still listed, EV-06).
+      disabled:
+        moves < movesCost(store, kind) || purse < price || (kind === "cleanse" && skulls < 1),
     };
   });
   return { ok: true, entries };
@@ -276,6 +290,8 @@ export const applyPick = (
   ) {
     return { ok: false, reason: "no-target" };
   }
+  if (kind === "cleanse" && (ensureClock(play).skulls[spaceId] ?? 0) < 1)
+    return { ok: false, reason: "no-target" };
   const price = pickPrice(play, groupId, kind, heroId);
   if ((store.purse[groupId] ?? 0) < price) return { ok: false, reason: "no-gold" };
 
