@@ -6,7 +6,7 @@ Draft by Claude for Bob's review, chapter by chapter (DEC-833). One script for 1
 
 **How to read it:** each row is one slot. The tag is the plan's `[COPY: …]` tag. A tag marked *new* is one the plans don't name yet; the code step adds it. "Was" shows the plan's sample line when there is one (DEC-836).
 
-**Status:** the opening and chapter 1 are accepted by Bob, 2026-11-06, working names included. Chapter 2 is accepted too. Chapter 3, the finale and the endings are drafted. The shared lines, help text and 1.1's additions are still to come.
+**Status:** 1.0's story lines are accepted by Bob, 2026-11-06: the opening, chapters 1 to 3, the finale and the endings, working names included. Still to come: the shared lines (regroup, events, counter saved, the battle and reward boards), help text and UI labels (DEC-836), and 1.1's additions (DEC-835).
 
 ## Names
 
