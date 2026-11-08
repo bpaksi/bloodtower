@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   // Static export: the bloodtower server serves ./out. There is no Next.js runtime in production.
   output: "export",
-  transpilePackages: ["bloodtower-protocols", "@talking-avatar/player", "@talking-avatar/formats"],
+  transpilePackages: ["bloodtower-protocols", "@asset-studio/player", "@asset-studio/formats"],
   // iPad on the LAN opens next dev by IPv4; allow private-range hostnames for HMR (Next 16+).
   allowedDevOrigins: [
     "10.*.*.*",

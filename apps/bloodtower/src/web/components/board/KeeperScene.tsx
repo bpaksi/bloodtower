@@ -1,7 +1,7 @@
 "use client";
 
-import { type AvatarManifest, avatarManifestSchema } from "@talking-avatar/formats";
-import { mouthFiles, TalkingAvatar } from "@talking-avatar/player";
+import { type AvatarManifest, avatarManifestSchema } from "@asset-studio/formats";
+import { mouthFiles, TalkingAvatar } from "@asset-studio/player";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   readBoardCaptionsEnabled,

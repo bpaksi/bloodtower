@@ -56,7 +56,7 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
 
 ### Step 1: Pin swap to `@asset-studio`
 - Depends on: G0, P2 S1 released (formats and player 0.2.0 on npm)
-- Touches: `apps/bloodtower/src/web/package.json`, `apps/bloodtower/src/web/components/board/KeeperScene.tsx`, `apps/bloodtower/src/web/lib/caption.ts`, `pnpm-lock.yaml`
+- Touches: `apps/bloodtower/src/web/package.json`, `apps/bloodtower/src/web/components/board/KeeperScene.tsx`, `apps/bloodtower/src/web/lib/caption.ts`, `apps/bloodtower/src/web/next.config.ts` (its `transpilePackages` names both packages; added 2026-11-08), `pnpm-lock.yaml`
 - Deps change: yes
 - Runs: cloud
 - Model: sonnet
@@ -207,3 +207,4 @@ Step 1 waits on P2 S1's 0.2.0 of formats and player. Steps 2 to 8 wait on P2 S9 
 
 - G0: Bob approved the plan on 2026-10-28, with no code changes yet. On 2026-11-07 Bob ruled that the game-design cards stand in for an `intent/` file ("Cards stand in"): DEC-382 to DEC-403 from 2026-10-28, and DEC-839 to DEC-844 for the G0b revision. No `apps/bloodtower/intent/` file is written for A1.
 - G0b: Bob approved on 2026-11-07 ("Lets approve both plans"), with P2's G0b (bpaksi/talking-avatar#14). Still no code until he says so. Revision of 2026-11-07 to match P2's revision (bpaksi/talking-avatar#14): asset-job.json, status from asset-studio, two phases, steps 9 and 10, G-A1 split.
+- Step 1: started 2026-11-08 on Bob's go-ahead ("this is my go-ahead to start code on A1"), after `@asset-studio/formats` and `@asset-studio/player` 0.2.0 reached npm. `next.config.ts` joined Touches: its `transpilePackages` list named the old packages.
