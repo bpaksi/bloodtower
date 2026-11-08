@@ -1,6 +1,6 @@
 # A1: asset-studio adapter, asset packaging and the `bt-assets` skill (build plan)
 
-**Status:** approved by Bob (G0 passed), 2026-10-28. **Revised 2026-11-07, waiting for Bob (G0b)** to match asset-studio's revised P2 (bpaksi/talking-avatar#14). Nothing is built. Bob said "no code changes yet": no step starts until he says so.
+**Status:** approved by Bob (G0 passed), 2026-10-28. **Revised 2026-11-07 and approved by Bob (G0b passed), 2026-11-07** to match asset-studio's revised P2 (bpaksi/talking-avatar#14). Nothing is built. Bob said "no code changes yet": no step starts until he says so.
 **Source:** game-design cards DEC-382 to DEC-403 (session 2026-10-28, PR bpaksi/bloodtower#298, AREA-089); DEC-199, DEC-202 (assets by stable ID through an index), DEC-207 and DEC-348 (avatar limits), DEC-349 (which lines are voiced), DEC-401 (glow masks), DEC-576 (Portrait numbers), DEC-578 (named moves), DEC-622 (asset IDs), DEC-623 (job fields), DEC-719 (mood stills), and DEC-839 to DEC-844 (session 2026-11-07, AREA-122). The tool side is asset-studio's plan P2 (`bpaksi/talking-avatar`, to be renamed `bpaksi/asset-studio`: `plans/P2-asset-studio.md`).
 **Goal:** a story's pack goes to an asset-studio job and back into the pack as finished files with an index, through `pnpm assets:needs|render|pack <story>`, driven by the `bt-assets` skill in studio or AI mode.
 **Two phases (DEC-843):** steps 1 to 8 and G-A1 build on asset-studio **0.2** and serve 1.0's art run (C5-05): voice, pictures, glow masks, studio approval. No talking Portrait ships in 1.0. Steps 9 and 10 and G-A1b build on asset-studio **0.3** for 1.1: talking avatars, the chin check and studio camera moves.
@@ -206,4 +206,4 @@ Step 1 waits on P2 S1's 0.2.0 of formats and player. Steps 2 to 8 wait on P2 S9 
 ## Results
 
 - G0: Bob approved the plan on 2026-10-28, with no code changes yet. Whether an `intent/` file is needed is still his call before step 1.
-- G0b (pending): revision of 2026-11-07 to match P2's revision (bpaksi/talking-avatar#14): asset-job.json, status from asset-studio, two phases, steps 9 and 10, G-A1 split.
+- G0b: Bob approved on 2026-11-07 ("Lets approve both plans"), with P2's G0b (bpaksi/talking-avatar#14). Still no code until he says so. Revision of 2026-11-07 to match P2's revision (bpaksi/talking-avatar#14): asset-job.json, status from asset-studio, two phases, steps 9 and 10, G-A1 split.
