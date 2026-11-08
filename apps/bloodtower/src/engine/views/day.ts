@@ -36,8 +36,10 @@ export const dayPhaseView = (
     case "skull-sim":
       return "skull-sim";
     case "check":
-    case "done":
       return hasEffects ? "effects" : "turn";
+    // Once the day is done the panel is gone; it must not linger into the next screen (Review A).
+    case "done":
+      return null;
     default:
       return null;
   }

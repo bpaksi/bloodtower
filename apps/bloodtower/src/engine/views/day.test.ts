@@ -50,6 +50,10 @@ describe("day phase", () => {
     expect(dayPhaseView("skull-place", false)).toBe("skull");
     expect(dayPhaseView("skull-sim", false)).toBe("skull-sim");
     expect(dayPhaseView("check", true)).toBe("effects");
+    expect(dayPhaseView("check", false)).toBe("turn");
+    // The day is over: no effects panel lingers past the loop (Review A).
+    expect(dayPhaseView("done", true)).toBeNull();
+    expect(dayPhaseView("done", false)).toBeNull();
     expect(dayPhaseView(undefined, false)).toBeNull();
   });
 });
@@ -74,7 +78,7 @@ describe("wire schema", () => {
       ],
       effects: ["+1 day"],
       skull: null,
-      corruptions: [{ heroId: "h", heroName: "Hero", count: 2 }],
+      corruptions: [{ heroId: "h", heroName: "Hero", panelHeroId: "h", count: 2 }],
       health: "unavailable",
       purse: "unavailable",
       actingGroup: null,

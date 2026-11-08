@@ -70,7 +70,13 @@ export type DaySkullView = {
   fell: string[];
 };
 
-export type HeroCorruptionView = { heroId: string; heroName: string; count: number };
+export type HeroCorruptionView = {
+  heroId: string;
+  heroName: string;
+  /** The group lead whose panel shows this hero (UI-030). */
+  panelHeroId: string;
+  count: number;
+};
 
 export type TableBand = {
   chapter: string;

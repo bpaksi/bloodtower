@@ -29,15 +29,24 @@ export function DayBandExtras({ table }: { table: Table }) {
       <span data-days-left={left ?? "unavailable"}>
         {left == null ? "days left unavailable" : `${left} days left`}
       </span>
-      {table.corruptions
-        ?.filter((hero) => hero.count > 0)
-        .map((hero) => (
-          <span key={hero.heroId} data-hero-corruptions={hero.heroId} data-count={hero.count}>
-            {hero.heroName}: {hero.count} {hero.count === 1 ? "corruption" : "corruptions"}
-          </span>
-        ))}
     </>
   );
+}
+
+/**
+ * One hero's corruptions on that hero's panel (UI-030). Nothing for a hero with none. The
+ * engine holds counts only; the names arrive with C3-08 (Bob 2026-11-07).
+ */
+export function HeroCorruptions({ table, heroId }: { table: Table; heroId: string }) {
+  const rows = (table.corruptions ?? []).filter(
+    (row) => row.panelHeroId === heroId && row.count > 0,
+  );
+  return rows.map((hero) => (
+    <span key={hero.heroId} data-hero-corruptions={hero.heroId} data-count={hero.count}>
+      {" "}
+      {hero.heroName}: {hero.count} {hero.count === 1 ? "corruption" : "corruptions"}
+    </span>
+  ));
 }
 
 export function ThreatBar({ table }: { table: Table }) {

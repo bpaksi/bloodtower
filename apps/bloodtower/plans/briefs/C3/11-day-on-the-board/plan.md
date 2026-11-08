@@ -62,6 +62,17 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - ANSWERED Q-C3-04 (Bob approved 2026-10-31): count the actual nights the 1,2,1,2 pattern gives. (days left for 3–4 heroes)
 - ANSWERED Q-C3-19 (Bob approved 2026-10-31): the threat bar shows only the coming drop.
 
+## Bob's rulings on blocked evals (2026-11-07)
+
+Touches stay as they are. Each blocked eval stays in the contract and goes live in the step named here.
+
+1. EV-03, EV-04, EV-14, EV-17, EV-18 and EV-06's effects-panel shots: the effects wait, its 4 s timer and the audio-end event go to a new engine step for the day loop (`loops/day/loop.ts`).
+2. EV-08, the names half: the engine keeps corruption counts only. The names come with C3-08. The count shows on the hero panel now.
+3. EV-15, EV-16: the host's split and use-item actions and a potion fixture go to their own step.
+4. EV-09, and EV-01's seeded virtue and corruption groups: a test-only day-clock seed hook (skulls per building, the next kingdom, hero sheets) goes to the new engine step from ruling 1.
+5. EV-05, and the Regroup stop of EV-11 and EV-13: the test story starts each hero in a different kingdom, so Regroup never shows. The same seed hook puts two heroes on one space.
+6. EV-19 found a bug: Continue does not keep the day clock (21 days left before the quit, 23 after). A test-first fix goes on its own `fix/` branch. The EV-19 e2e is live here, marked `test.fail` until that fix lands.
+
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).

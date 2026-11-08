@@ -4,7 +4,7 @@ import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
-import { DayBandExtras, DayPanel, ThreatBar } from "./DayPanels";
+import { DayBandExtras, DayPanel, HeroCorruptions, ThreatBar } from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { OpeningMoment } from "./OpeningMoment";
@@ -77,8 +77,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       {showMove && table ? (
         <header className="bt-band" id="band" data-band>
           {table.groups.map((group) => (
-            <span key={group.heroId} data-health="unavailable">
-              {group.heroName} unavailable
+            <span key={group.heroId} data-hero-panel={group.heroId}>
+              <span data-health="unavailable">{group.heroName} unavailable</span>
+              <HeroCorruptions table={table} heroId={group.heroId} />
             </span>
           ))}
           <span data-purse="unavailable">unavailable</span>

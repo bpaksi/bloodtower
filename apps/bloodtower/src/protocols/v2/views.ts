@@ -68,6 +68,8 @@ const daySkullSchema = z.strictObject({
 const heroCorruptionSchema = z.strictObject({
   heroId: heroIdSchema,
   heroName: z.string().min(1).max(80),
+  /** The hero whose panel (its group's lead, `groups[].heroId`) shows this row (UI-030). */
+  panelHeroId: heroIdSchema,
   count: z.number().int().min(0).max(99),
 });
 

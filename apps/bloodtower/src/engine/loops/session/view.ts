@@ -206,7 +206,9 @@ const buildDayPanels = (
   }
 
   const left = heroes < 1 ? null : daysLeft(clock.supply, heroes, play.dayNumber, clock.tuning);
-  const corruptionHeroes = play.groups.flatMap((group) => group.heroIds);
+  const corruptionHeroes = play.groups.flatMap((group) =>
+    group.heroIds.map((heroId) => ({ heroId, panelHeroId: group.heroIds[0] ?? heroId })),
+  );
   return {
     daysLeft: left,
     threat: comingDrop({
@@ -217,11 +219,13 @@ const buildDayPanels = (
     }),
     phase,
     rolls,
-    effects: [...clock.effects],
+    // Effects belong to the live day only: none once the day loop has left the stack.
+    effects: phase === "effects" ? [...clock.effects] : [],
     skull,
-    corruptions: corruptionHeroes.map((heroId) => ({
+    corruptions: corruptionHeroes.map(({ heroId, panelHeroId }) => ({
       heroId,
       heroName: heroName(state, heroId),
+      panelHeroId,
       count: heroSheet(clock, heroId).corruptions,
     })),
   };

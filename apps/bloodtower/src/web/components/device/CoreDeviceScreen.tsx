@@ -19,7 +19,7 @@ import type { MenuContext } from "./gearMenu.ts";
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
 /** [COPY: regroup] The iPad asks; the board shows the same line (DEC-640). */
-const REGROUP_PROMPT = "Stay together, or split up?";
+const REGROUP_PROMPT = "A new day. Stay together, or split up?";
 
 const SCREEN_TITLE: Record<string, string> = {
   splash: "Blood Tower",
