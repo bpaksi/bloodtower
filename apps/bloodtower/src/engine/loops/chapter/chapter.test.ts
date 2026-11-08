@@ -350,4 +350,59 @@ describe("chapter loop (MEC-033)", () => {
     expect(restored.boons).toEqual(boons);
     expect(restored.resumed).toBe(true);
   });
+
+  it("EV-12: Continue mid-placement resumes the placement, then chapter 2 enters once and plays", () => {
+    const run = setup({ c3End: false, tower: true });
+    ensureClock(run.play).held = 2;
+    script = { 1: { done: ["herald", "ambush"] } };
+    start(run);
+    const building = spaceIn("N", 0);
+    const frame = chapterFrame(run);
+    if (!frame) throw new Error("no chapter frame");
+    frame.local = handleChapterPress(
+      frame.local as ChapterLocal,
+      skullRecordPromptId(run.play.dayNumber, building),
+    );
+    resume(run);
+    const saved = snapshotChapters(run.play);
+    const savedDay = run.play.dayNumber;
+    expect(ensureChapters(run.play).skullsToPlace).toBe(1);
+
+    // A new process: the store comes from the save, then the loop starts again.
+    const again = setup({ c3End: false, tower: true });
+    again.play.dayNumber = savedDay;
+    const store = restoreChapters(again.play, saved);
+    script = { 2: { done: ["c2-a"] } };
+    start(again);
+    // Still placing chapter 1's last skull: no day ran, chapter 2 has not entered.
+    expect(again.play.dayNumber).toBe(savedDay);
+    expect(store.entered).toEqual([1]);
+    expect(again.runtime.prompt?.promptId).toContain("skull-record--");
+    expect(chapterResult(again)).toBeUndefined();
+
+    const resumedFrame = chapterFrame(again);
+    if (!resumedFrame) throw new Error("no chapter frame");
+    resumedFrame.local = handleChapterPress(
+      resumedFrame.local as ChapterLocal,
+      skullRecordPromptId(again.play.dayNumber, building),
+    );
+    resume(again);
+    expect(store.skullsToPlace).toBe(0);
+    expect(store.placing).toBeNull();
+    expect(chapterResult(again)).toMatchObject({ outcome: "won", chapter: 1, last: false });
+
+    // Chapter 2 enters exactly once, and its day plays on to a win.
+    const next = emptyLoopRuntime();
+    const nextEffects: EngineEffect[] = [];
+    startRootLoop(registry, again.seed, 0, next, nextEffects, "chapter");
+    expect(store.entered).toEqual([1, 2]);
+    expect(store.nodes.filter((n) => n === "enter:2")).toHaveLength(1);
+    expect(again.play.dayNumber).toBe(savedDay + 1);
+    expect(store.bounds).toEqual(["N", "E"]);
+    const end = nextEffects.find((e) => e.kind === "loop-end" && e.loopId === "chapter");
+    expect(end && "result" in end ? end.result : undefined).toMatchObject({
+      outcome: "won",
+      chapter: 2,
+    });
+  });
 });

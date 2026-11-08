@@ -130,7 +130,10 @@ const placeStep = (
   play: PlayState,
   ctx: BodyCtx,
 ): { local: ChapterLocal; passComplete: boolean } => {
-  if (store.skullsToPlace < 1) return { local: { ...local, phase: "done" }, passComplete: true };
+  if (store.skullsToPlace < 1) {
+    store.placing = null;
+    return { local: { ...local, phase: "done" }, passComplete: true };
+  }
   if (local.awaitingPress) return { local, passComplete: false };
   note(store, ".25");
   offerSkullPlacement(play.dayNumber, ctx);
@@ -146,6 +149,15 @@ export const chapterLoop: LoopDefinition<ChapterLocal, ChapterResult> = {
     const local: ChapterLocal = { ...blankLocal(), chapter: store.current };
     if (store.resumed) {
       store.resumed = false;
+      // Saved mid-placement: the won chapter's frame is still open; `current` is the next one.
+      if (store.placing)
+        return {
+          ...local,
+          chapter: store.placing,
+          phase: "place",
+          outcome: { kind: "won" },
+          resumed: true,
+        };
       return { ...local, resumed: true };
     }
     enterChapter(play, store, store.current);
@@ -195,6 +207,7 @@ export const chapterLoop: LoopDefinition<ChapterLocal, ChapterResult> = {
           }
           store.current = local.chapter + 1;
           if (shellState().towerLinked) {
+            store.placing = local.chapter;
             breakSeal(play, store, seed);
             return placeStep({ ...local, phase: "place", outcome }, store, play, ctx);
           }

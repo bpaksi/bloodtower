@@ -60,6 +60,11 @@ export type ChapterStore = {
   sealsDroppedOut: boolean;
   /** Freed skulls still to be placed on the board (DEC-409). */
   skullsToPlace: number;
+  /**
+   * The won chapter whose freed skulls are still being placed, else null. `current` has already
+   * moved on, so Continue reads this to resume the placement instead of the next chapter's days.
+   */
+  placing: number | null;
   /** The finale chapter (DEC-656): set by the Tower, which is C5. */
   towerUnlocked: boolean;
   towerWon: boolean;
@@ -96,6 +101,7 @@ export const configureChapters = (
     boons: [],
     sealsDroppedOut: false,
     skullsToPlace: 0,
+    placing: null,
     towerUnlocked: false,
     towerWon: false,
     resumed: false,
