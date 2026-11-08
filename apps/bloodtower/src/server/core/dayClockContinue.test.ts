@@ -14,7 +14,7 @@ import { parseShellCheckpoint, shellCheckpointFromState } from "./shellCheckpoin
 
 // C3 EV-19: Continue after a quit must bring back the day clock, not a blank one.
 describe("Continue keeps the day clock", () => {
-  it.fails("restores supply, skulls per building and the day log from the checkpoint", () => {
+  it("restores supply, skulls per building and the day log from the checkpoint", () => {
     const play = initPlayState("c3-day-1", PROVING_GROUNDS_PLAY);
     const state: ShellState = {
       ...initialShellState({ sessionId: "s1", seed: "c3-day-1" }),

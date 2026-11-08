@@ -253,6 +253,28 @@ export const captureDayResume = (play: PlayState, local: unknown): DayResume => 
   };
 };
 
+/** Copy of the day clock for a checkpoint, or null when this play has none yet (C3 EV-19). */
+export const captureClock = (play: PlayState): DayClock | null => {
+  const clock = clocks.get(play);
+  return clock ? structuredClone(clock) : null;
+};
+
+/** Puts a checkpoint's day clock back on the play state Continue rebuilt (C3 EV-19). */
+export const restoreClock = (play: PlayState, saved: DayClock): void => {
+  if (
+    typeof saved !== "object" ||
+    saved === null ||
+    !Number.isInteger(saved.supply) ||
+    saved.supply < 0 ||
+    typeof saved.skulls !== "object" ||
+    saved.skulls === null ||
+    !Array.isArray(saved.log)
+  ) {
+    throw new Error("The checkpoint's day clock is not readable.");
+  }
+  clocks.set(play, structuredClone(saved));
+};
+
 export const armDayResume = (play: PlayState, resume: DayResume): void => {
   ensureClock(play).resume = structuredClone(resume);
 };
