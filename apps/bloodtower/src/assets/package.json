@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "needs": "tsx needs/main.ts",
+    "import": "tsx import/main.ts",
     "render": "tsx render/main.ts"
   },
   "dependencies": {

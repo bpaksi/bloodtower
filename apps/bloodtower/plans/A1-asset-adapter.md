@@ -122,16 +122,20 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
   - `packs/test` is repacked from its imported drafts (step 6, if merged first) or left as it is. Either way, `pnpm pack:lint:all` passes.
 
 ### Step 6: One-time import and retirements (DEC-388, DEC-398)
+Split in two PRs. **6a** is the import code and tests (`assets:import`), with no removals. **6b** (branch `chore/bloodtower-retire-tts-explorer`) is the retirements, and only after Bob records the OneDrive backup (marker below).
 - Depends on: 2
-- Touches: `apps/bloodtower/src/assets/import/**`, `apps/Visuals/**` (removed), `.claude/skills/google-tts/**` (removed), root README or CLAUDE.md lines that name either
-- Deps change: yes (removing the tts-explorer package)
-- Runs: local (reads the work folder and the OneDrive backup)
+- Touches (6a): `apps/bloodtower/src/assets/import/**`, `apps/bloodtower/src/assets/index.ts` (one export line), the `assets:import` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and the root `package.json`, `apps/bloodtower/spec.md` (D44)
+- Touches (6b): `apps/Visuals/**` (removed), `.claude/skills/google-tts/**` (removed), the tts-explorer importer in `pnpm-lock.yaml`, the Visuals comment and override in `pnpm-workspace.yaml`. No root README or CLAUDE.md line names either, so none changes.
+- Deps change: no in 6a (no `sharp`: a RIFF/WAVE header check for audio, the header-only `server/pack/imageSize.ts` for images). Yes in 6b (removing the tts-explorer package from the lockfile).
+- Runs: cloud for 6a code and fake-provider tests. Local for the real funeral counts and for 6b (reads the work folder and the OneDrive backup).
 - Model: sonnet
 - Done when:
-  - `pnpm assets:import funeral` copies the funeral POC's voice lines and stills whose IDs are in `packs/dracula/script.yaml` into the Dracula work folder as drafts, as WAV masters and image masters, with their index entries. It prints matched, skipped (no ID match) and failed counts. The funeral POC's files are not changed.
-  - `pnpm assets:import test` does the same for the 4 place paintings in `packs/test/assets/`.
-  - Bob copies tts-explorer's `audio-cache/` to the OneDrive backup (`Backups/BloodTower/tts-explorer-cache/`), and the PR records it. Then `apps/Visuals/src/tts-explorer` and the `google-tts` skill are removed.
-  - Not required: importing the funeral POC's clips (the clip is parked, DEC-342).
+  - 6a: `pnpm assets:import funeral` seeds the funeral POC's voice lines whose IDs are in `packs/dracula/script.yaml` into the Dracula work folder's `tts-cache/`, so the next `asset-studio render --only voice` stores them as drafts (WAV master, m4a, index entry, correct `inputsHash`) with no provider call. It prints matched, skipped (no ID match) and failed counts, each skipped or failed ID with its reason. The funeral POC's files are not changed. A second run leaves the work folder's bytes identical.
+  - 6a: `pnpm assets:import test` checks the 4 place paintings in `packs/test/assets/` and writes the job; `render --only picture` then stores `place.village`, `place.bazaar`, `place.citadel` and `place.sanctuary` as drafts. Import is a thin wrapper here: the job's picture `source` is the pack file, and nothing is copied.
+  - 6a: a missing script, source or work folder is a coded error and nothing is written.
+  - 6a: the 6b guard is documented (D44): 6b removes nothing unless `BT_TTS_BACKUP_DONE` names the recorded backup note.
+  - 6b: Bob copies tts-explorer's `audio-cache/` to the OneDrive backup (`Backups/BloodTower/tts-explorer-cache/`), and the PR records it. Then `apps/Visuals/src/tts-explorer` and the `google-tts` skill are removed.
+  - Not required: importing the funeral POC's clips (the clip is parked, DEC-342) or its stills (the Dracula pack names no picture yet).
 
 ### Step 7: Board shows the asset ID (DEC-392)
 - Depends on: 5

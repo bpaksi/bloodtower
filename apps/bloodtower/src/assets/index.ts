@@ -1,3 +1,4 @@
+export { ImportError, runImport, runImportCli } from "./import/index.ts";
 export * from "./lint/index.ts";
 export {
   type BuildOptions,
