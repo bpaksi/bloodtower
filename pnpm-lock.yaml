@@ -150,15 +150,15 @@ importers:
 
   apps/bloodtower/src/web:
     dependencies:
+      '@asset-studio/formats':
+        specifier: 0.2.0
+        version: 0.2.0
+      '@asset-studio/player':
+        specifier: 0.2.0
+        version: 0.2.0(react@19.3.0)
       '@base-ui/react':
         specifier: 1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@talking-avatar/formats':
-        specifier: 0.1.0
-        version: 0.1.0
-      '@talking-avatar/player':
-        specifier: 0.1.0
-        version: 0.1.0(react@19.3.0)
       bloodtower-protocols:
         specifier: workspace:*
         version: link:../protocols
@@ -644,6 +644,16 @@ packages:
 
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
+
+  '@asset-studio/formats@0.2.0':
+    resolution: {integrity: sha512-5q8LvQPviwlU3xUF0E+DPDwLHsX+7x8iokCnTq3oZ+sCTC+zMeTN14XVYTLhOaw3QgJModTd5gFhD+xrOm5CRw==}
+    engines: {node: '>=22'}
+
+  '@asset-studio/player@0.2.0':
+    resolution: {integrity: sha512-Bf/Lp1adGYyMcrJemJswQNlarOR12j65Y+1tmzB6CvZciOTu4LrKcrt/Zz+e1Z531bwmJxv3Q1lli7z7DstuKw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -1645,16 +1655,6 @@ packages:
 
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
-
-  '@talking-avatar/formats@0.1.0':
-    resolution: {integrity: sha512-7vnDfTBffDUw3C0hSpbR6QXjzSkSFax3ztsAv4xlDI+0uaP/lmiuszm7qS3r2tE94kOFM5JYLtGmsliz4EwylQ==}
-    engines: {node: '>=22'}
-
-  '@talking-avatar/player@0.1.0':
-    resolution: {integrity: sha512-vPf/E2zXa2Q8/m9zJWCGGJ0FPQk9mZMAUTmNR75nDdzGd4gkAFB4owBLgdwDCSA/Db1PZ8Q7YTzWXQ0IvCXSjQ==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0
 
   '@testing-library/dom@10.4.2':
     resolution: {integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==}
@@ -3792,6 +3792,15 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
+  '@asset-studio/formats@0.2.0':
+    dependencies:
+      zod: 4.6.7
+
+  '@asset-studio/player@0.2.0(react@19.3.0)':
+    dependencies:
+      '@asset-studio/formats': 0.2.0
+      react: 19.3.0
+
   '@babel/code-frame@7.29.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.29.7
@@ -4632,15 +4641,6 @@ snapshots:
       '@tailwindcss/oxide': 4.3.3
       postcss: 8.5.30
       tailwindcss: 4.3.3
-
-  '@talking-avatar/formats@0.1.0':
-    dependencies:
-      zod: 4.6.7
-
-  '@talking-avatar/player@0.1.0(react@19.3.0)':
-    dependencies:
-      '@talking-avatar/formats': 0.1.0
-      react: 19.3.0
 
   '@testing-library/dom@10.4.2':
     dependencies:

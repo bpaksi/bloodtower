@@ -1,5 +1,6 @@
 import { type BoardGraph, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
 import type { PlayContent, PlayState } from "../../engine/loops/chapter/playState.ts";
+import { captureClock, type DayClock, restoreClock } from "../../engine/loops/day/clock.ts";
 import { createShellRegistry } from "../../engine/loops/session/registry.ts";
 import {
   SHELL_ENGINE_VERSION,
@@ -11,6 +12,8 @@ import { OPENING_MOMENTS } from "../../protocols/opening.ts";
 /** JSON-safe shell state for checkpoint rows (no registry, devices as a list). */
 export type SerializedShellState = Omit<ShellState, "devices" | "registry"> & {
   devices: string[];
+  /** The day clock lives beside `play`, not on it. A checkpoint from before C3 EV-19 has none. */
+  dayClock?: DayClock | null;
 };
 
 /** `JSON.stringify` turns a `Map` into `{}`; keep only the `spaces` list on disk. */
@@ -28,10 +31,11 @@ const rehydratePlayContent = (content: PlayContent): PlayContent => ({
   board: rehydrateBoard(content.board as BoardGraph),
 });
 
-const rehydratePlay = (play: PlayState): PlayState => ({
-  ...play,
-  content: rehydratePlayContent(play.content),
-});
+const rehydratePlay = (play: PlayState, dayClock: DayClock | null | undefined): PlayState => {
+  const rebuilt: PlayState = { ...play, content: rehydratePlayContent(play.content) };
+  if (dayClock) restoreClock(rebuilt, dayClock);
+  return rebuilt;
+};
 
 export const serializeShellState = (state: ShellState): SerializedShellState => {
   const { devices, registry: _registry, play, playContent, ...rest } = state;
@@ -50,6 +54,7 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
           },
         }
       : null,
+    dayClock: play ? captureClock(play) : null,
   };
 };
 
@@ -67,7 +72,7 @@ const upgradeGame = (row: SerializedShellState, game: Partial<TonightGame>): Ton
   rating: game.rating ?? null,
 });
 
-export const deserializeShellState = (row: SerializedShellState): ShellState => ({
+export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState): ShellState => ({
   ...row,
   version: SHELL_ENGINE_VERSION,
   towerLinked: row.towerLinked ?? false,
@@ -108,5 +113,5 @@ export const deserializeShellState = (row: SerializedShellState): ShellState => 
   devices: new Set(row.devices),
   registry: createShellRegistry(),
   playContent: row.playContent ? rehydratePlayContent(row.playContent) : null,
-  play: row.play ? rehydratePlay(row.play) : null,
+  play: row.play ? rehydratePlay(row.play, dayClock) : null,
 });
