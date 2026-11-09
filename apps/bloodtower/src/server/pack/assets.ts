@@ -1,5 +1,6 @@
-import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, extname, join, sep } from "node:path";
+import { type PackIndex, packIndexSchema } from "../../assets/lint/indexSchema.ts";
 import type { StoryPack } from "../../protocols/pack-v2/index.ts";
 import type { PackAudioIndex } from "./audio.ts";
 import { indexPackAudio } from "./audio.ts";
@@ -27,10 +28,22 @@ export interface ResolvedPackAsset {
   basename: string;
 }
 
+/** One `assets/index.json` entry whose file is on disk. */
+export interface ResolvedIndexEntry {
+  kind: string;
+  absolute: string;
+  basename: string;
+}
+
 export interface PackAssetIndex {
   packId: string;
   packRoot: string;
   byId: ReadonlyMap<string, ResolvedPackAsset>;
+  /**
+   * Every `assets/index.json` entry whose file is on disk, by asset id (D45). `line` and `glow`
+   * entries are listed here and wired to nothing.
+   */
+  indexed: ReadonlyMap<string, ResolvedIndexEntry>;
   /** Basename → absolute path. Only declared assets that resolved. */
   byBasename: ReadonlyMap<string, string>;
   /** Optional camera-track sidecars under `<pack>/camera/`. */
@@ -46,6 +59,72 @@ const warn = (file: string, path: string, message: string): PackLoadIssue => ({
   path,
   message: message.startsWith("W-asset:") ? message : `W-asset: ${message}`,
 });
+
+export const PACK_INDEX_FILE = "index.json";
+
+export type PackIndexRead =
+  | { index: PackIndex | undefined; issue?: undefined }
+  | { index?: undefined; issue: PackLoadIssue };
+
+/**
+ * The pack's generated `assets/index.json` (A1 step 5), or none when the pack has no such file.
+ * A file that cannot be read, is not JSON or does not match the index schema is an `A1-9` issue.
+ */
+export const readPackAssetIndex = (packRoot: string): PackIndexRead => {
+  const file = join(packRoot, PACK_ASSETS_DIR, PACK_INDEX_FILE);
+  const label = `${PACK_ASSETS_DIR}/${PACK_INDEX_FILE}`;
+  const bad = (message: string): PackIndexRead => ({
+    issue: { rule: "A1-9", file: label, path: "(file)", message: `A1-9: ${message}` },
+  });
+  try {
+    const stat = lstatSync(file);
+    if (!stat.isFile()) return bad("assets/index.json must be a regular file.");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { index: undefined };
+    return bad(error instanceof Error ? error.message : String(error));
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(file, "utf8"));
+  } catch (error) {
+    return bad(
+      `assets/index.json is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  const parsed = packIndexSchema.safeParse(raw);
+  if (!parsed.success) {
+    return bad(
+      `assets/index.json does not match the index schema: ${parsed.issues
+        .map((i) => `${i.path}: ${i.message}`)
+        .join("; ")}`,
+    );
+  }
+  return { index: parsed.data };
+};
+
+/** A file named by the index, inside the real assets folder, or undefined. */
+const resolveIndexedFile = (
+  assetsDir: string,
+  name: string,
+  accept: (file: string) => boolean,
+): string | undefined => {
+  if (name === "" || name.includes("/") || name.includes("\\") || name.includes("\0")) {
+    return undefined;
+  }
+  const path = join(assetsDir, name);
+  let real: string;
+  try {
+    real = realpathSync(path);
+  } catch {
+    return undefined;
+  }
+  if (!isInside(assetsDir, real) || !statSync(real).isFile() || !accept(basename(real))) {
+    return undefined;
+  }
+  return real;
+};
+
+const isM4a = (name: string) => extname(name).toLowerCase() === ".m4a";
 
 /** `assetsDir` must already be real, so a symlinked parent (macOS `/var` → `/private/var`) cannot fail the containment test. */
 const resolveInsideAssets = (assetsDir: string, name: string): string | undefined => {
@@ -235,6 +314,7 @@ export const mediaOnDiskIssues = (
   assets: readonly { id: string; type: string; status?: string; path?: string }[],
   cover: string | undefined,
   rule: string,
+  index?: PackIndex,
 ): { errors: PackLoadIssue[]; warnings: PackLoadIssue[] } => {
   const errors: PackLoadIssue[] = [];
   const warnings: PackLoadIssue[] = [];
@@ -249,8 +329,29 @@ export const mediaOnDiskIssues = (
   const note = (file: string, path: string, message: string) => {
     warnings.push(warn(file, path, message));
   };
+  let realAssets: string | undefined;
+  if (index) {
+    try {
+      realAssets = realpathSync(join(packRoot, PACK_ASSETS_DIR));
+    } catch {
+      realAssets = undefined;
+    }
+  }
   for (const asset of assets) {
     if (!FILE_BACKED_TYPES.has(asset.type)) continue;
+    const indexed = index?.assets[asset.id];
+    if (indexed) {
+      // The generated index names this asset's file (D45). A file missing on disk is a missing file.
+      const accept = AUDIO_ASSET_TYPES.has(asset.type) ? isM4a : isImageFileName;
+      const file =
+        realAssets === undefined ? undefined : resolveIndexedFile(realAssets, indexed.file, accept);
+      if (file) continue;
+      const message = `${asset.type} ${asset.id} is missing ${PACK_ASSETS_DIR}/${indexed.file} (named by index.json) on disk.`;
+      if (asset.status === "placeholder") {
+        note("pack.yaml", `assets.${asset.id}.path`, message);
+      } else fail(`${PACK_ASSETS_DIR}/${indexed.file}`, `assets.${asset.id}.path`, message);
+      continue;
+    }
     let found: string | undefined;
     if (asset.path) found = resolveInsidePack(packRoot, asset.path);
     const bareName = asset.path !== undefined && !asset.path.includes("/");
@@ -289,7 +390,44 @@ export const indexPackAssets = (
   const warnings: PackLoadIssue[] = [];
   const byId = new Map<string, ResolvedPackAsset>();
   const byBasename = new Map<string, string>();
+  const indexed = new Map<string, ResolvedIndexEntry>();
+  const index = readPackAssetIndex(packRoot).index;
+  let realAssets: string | undefined;
+  try {
+    realAssets = realpathSync(assetsDir);
+  } catch {
+    realAssets = undefined;
+  }
+  const fromIndex = (id: string, accept: (file: string) => boolean): string | undefined => {
+    const entry = index?.assets[id];
+    if (!entry || realAssets === undefined) return undefined;
+    return resolveIndexedFile(realAssets, entry.file, accept);
+  };
+  if (index && realAssets !== undefined) {
+    for (const [id, entry] of Object.entries(index.assets)) {
+      const absolute = resolveIndexedFile(realAssets, entry.file, () => true);
+      if (absolute) indexed.set(id, { kind: entry.kind, absolute, basename: basename(absolute) });
+    }
+  }
   for (const asset of pack.assets) {
+    if (index?.assets[asset.id]) {
+      if (AUDIO_ASSET_TYPES.has(asset.type)) {
+        const file = fromIndex(asset.id, isM4a);
+        if (file) byBasename.set(basename(file), file);
+        continue;
+      }
+      if (!expectsImageFile(asset.type)) continue;
+      const absolute = fromIndex(asset.id, isImageFileName);
+      if (!absolute) {
+        if (asset.status !== "placeholder") {
+          warnings.push(warn("assets.yaml", asset.id, `No image file for asset ${asset.id}.`));
+        }
+        continue;
+      }
+      byId.set(asset.id, { absolute, basename: basename(absolute) });
+      byBasename.set(basename(absolute), absolute);
+      continue;
+    }
     if (AUDIO_ASSET_TYPES.has(asset.type)) {
       // A declared audio file under assets/ is served by its file name on the one asset route.
       const file = asset.path?.startsWith("assets/")
@@ -324,6 +462,7 @@ export const indexPackAssets = (
     packId: pack.pack_id,
     packRoot,
     byId,
+    indexed,
     byBasename,
     camera,
     audio,

@@ -62,12 +62,12 @@ export const lintPathWithIndex = async (
 ): Promise<LintReport> => {
   const report = lintPath(dir, cwd);
   const resolved = resolveLintDir(dir ?? join(loadConfig().packsDir, "test"), cwd);
-  const issues = await lintPackAssets(resolved, release);
-  if (issues === undefined) return report;
-  if (issues.length === 0) return report;
+  const found = await lintPackAssets(resolved, release);
+  if (found === undefined) return report;
+  if (found.errors.length === 0 && found.warnings.length === 0) return report;
   return {
-    exitCode: 1,
-    lines: [...report.lines, ...formatIssues(issues)],
+    exitCode: found.errors.length > 0 ? 1 : report.exitCode,
+    lines: [...report.lines, ...formatIssues(found.errors), ...formatIssues(found.warnings)],
   };
 };
 
