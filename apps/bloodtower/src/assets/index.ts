@@ -1,3 +1,4 @@
+export * from "./lint/index.ts";
 export {
   type BuildOptions,
   type BuildResult,
