@@ -2,7 +2,7 @@
 
 Builds asset-studio P2 S3-fix to S9 (release 0.2), then Bloodtower A1 steps 2 to 8, up to Bob's G-A1. Claude is the manager only: it makes worktrees, briefs and launches subagents, runs the review loop, merges, and keeps this file current. It writes no product code itself.
 
-**Bob's rulings, 2026-11-08:** every code-writing subagent runs on Sonnet ("use Sennett for the code writing sub agents"). No art generation today: no real image-provider call, no A1-4 render and no G-A1 art run until Bob lifts the hold; code and tests with fake providers go on. Claude handles S9, the 0.2 release, on Bob's npm login ("Can you handle S9").
+**Bob's rulings, 2026-11-08:** every code-writing subagent runs on Sonnet ("use Sennett for the code writing sub agents"). No art generation today: no real image-provider call, no A1-4 render and no G-A1 art run until Bob lifts the hold; code and tests with fake providers go on. Claude handles S9, the 0.2 release, on Bob's npm login ("Can you handle S9"). "Yes, merge on green": Claude squash-merges once CI is green and the latest review says `Blocking: none`. S7 Touches widened ("Grant all four"). "Let's go with your recommendations, can review after build": multi-profile keys `<id>~<profile>`, job sounds stored as drafts, and the manager's later defaults.
 
 **Assumption, not a ruling:** Claude runs asset-studio's remaining P2 steps, since Bob asked for this plan to build them. Before each step starts, Claude checks for an open PR or `agent/*` branch on that step and stops it if one exists.
 
@@ -44,14 +44,36 @@ At most four developers run at once.
 - A1-6: access to the OneDrive backup.
 - Any `needs-bob` PR, and G-A1.
 
-## Open before W0
-
-- **S7 Touches.** Its brief grants `packages/studio/**` only, but a web studio needs new dependencies in the root lockfile and wiring for `asset-studio studio`. The S3-seam covers the wiring; the lockfile still needs Bob's widening of S7's Touches before W1.
-
 ## Status
+
+Updated 2026-11-09.
 
 | Step | PR | State |
 |---|---|---|
-| P2 S1, S2, S3 | #15, #16, #17 | merged |
-| S3-fix brief | #20 | open, green |
-| Everything else | — | not started |
+| P2 S1 to S9 (bpaksi/asset-studio) | #15 to #33 | merged. 0.2.1 was partial (formats and player only); **0.2.2 published all four packages on 2026-11-09** |
+| A1-2 `assets:needs` | #398 | merged |
+| A1-4 `assets:render` | #399 | merged (A1-4c real render pending Bob) |
+| A1-3 lint | #400 | merged |
+| A1-6a `assets:import` | #401 | merged |
+| A1-5 `assets:pack` | #404 | merged |
+| A1-8 `bt-assets` skill, `assets:redo` | #405 | merged |
+| A1-7 board asset ID | #406 | merged |
+| A1-6b retirements | — | pending Bob (OneDrive backup record; guarded by `BT_TTS_BACKUP_DONE`) |
+| G-A1 | — | pending Bob |
+
+## Open for Bob
+
+- 272 Dracula `~no-agnes` variant lines are silent as `invalid-id` (asset-studio's id pattern rejects `~` inside the id).
+- The 7 `*-whisper` cast entries get duplicate portraits (35).
+- `assets:needs` emits the `music` kind but the lint refuses it (A1-15).
+- Partial-pack ruling A: A1-19 warns outside `--release` (D45). Confirm.
+- Studio mode always fails `AS-GLOW-2` for a story with a glow mask (D43, D47).
+- G-A1-01 "board/TV plays line once" has no A1 step that plays a packed line. Add a playback step, or reword G-A1.
+- A1-4c: the real render of 3 Dracula lines, after the art hold.
+- 6b: the OneDrive backup of tts-explorer's `audio-cache/`.
+- 12 e2e tests fail on main (w1-chrome 2, w4-party 4, w6-board-layers 3, w7-move-map 3). A separate fix session; the w6 test edit awaits Bob's OK.
+- IMP-8 (A1-6a import test) times out at 60 s on a loaded machine; fix on branch `fix/bloodtower-imp8-slow-test`, PR pending.
+
+## Process slip
+
+During the A1-6a spike one dummy-key Gemini request was made (HTTP 400, no charge), against the no-provider-call rule. Later tests use a whitelisted env with no keys.
