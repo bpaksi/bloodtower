@@ -149,14 +149,14 @@ Split in two PRs. **6a** is the import code and tests (`assets:import`), with no
   - Viewports: 1920×1080 board.
 
 ### Step 8: The `bt-assets` skill
-- Depends on: 4, 5, 6
-- Touches: `.claude/skills/bt-assets/**`, root `CLAUDE.md` (the Commands table)
+- Depends on: 4, 5, 6a
+- Touches: `.claude/skills/bt-assets/**`, root `CLAUDE.md` (the Commands table), `apps/bloodtower/src/assets/redo/**`, one export line in `src/assets/index.ts`, the `assets:redo` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and root `package.json`, `apps/bloodtower/spec.md` (D47), and one line in `docs/sdlc.md`'s skill list
 - Deps change: no
-- Runs: local
+- Runs: cloud (code and fake-spawn tests; the real run is G-A1)
 - Model: sonnet
 - Done when:
-  - The skill runs, for one story: `needs`, then `render` (studio or AI mode, asked once), then `pack`.
-  - It takes "redo `<ID>`: `<note>`" into asset-studio's notes for that story, and runs the one-time import.
+  - The skill runs, for one story: `needs`, then `render` (studio or AI mode, asked once), then `pack`. A runner test with a fake spawn injects a failure at each and checks the later ones do not run.
+  - It takes "redo `<ID>`: `<note>`" into asset-studio's notes for that story (`assets:redo`, a wrapper over `reject`), and runs the one-time import.
   - It never marks an asset final (DEC-384).
   - It stops on any error and shows it with its code.
 
