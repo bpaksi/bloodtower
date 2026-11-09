@@ -3,6 +3,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   renameSync,
   rmSync,
   statSync,
@@ -61,6 +62,8 @@ export interface ImportResult {
   skipped: Outcome[];
   failed: Outcome[];
   notes: string[];
+  /** Voiced job lines, and how many of them a voice render would reuse from the cache. */
+  voice: { voiced: number; reused: number } | undefined;
   workRoot: string;
 }
 
@@ -148,7 +151,7 @@ const planFuneral = (
   const voices = new Map(job.cast.map((member) => [member.id, member.voice]));
   const planned: Planned[] = [];
   const manifest = readManifestLines(join(assetsDir, "manifest.json"));
-  const assetsReal = resolve(assetsDir);
+  const assetsReal = realpathSync(assetsDir);
   for (const entry of manifest) {
     const line = lines.get(entry.id);
     if (line === undefined) {
@@ -179,7 +182,16 @@ const planFuneral = (
       result.skipped.push({ id: entry.id, reason: target.reason });
       continue;
     }
-    const source = resolve(assetsReal, entry.path);
+    let source = resolve(assetsReal, entry.path);
+    try {
+      source = realpathSync(source);
+    } catch (error) {
+      result.failed.push({
+        id: entry.id,
+        reason: `cannot read ${entry.path}: ${errorText(error)}`,
+      });
+      continue;
+    }
     if (isAbsolute(entry.path) || !isInside(assetsReal, source)) {
       result.failed.push({
         id: entry.id,
@@ -237,6 +249,7 @@ export const runImport = (source: SourceName, options: ImportOptions): ImportRes
     skipped: [],
     failed: [],
     notes: [],
+    voice: undefined,
     workRoot: paths.root,
   };
 
@@ -265,6 +278,7 @@ export const runImport = (source: SourceName, options: ImportOptions): ImportRes
       "stills: not imported. The Dracula pack names no picture yet, and a still reaches the work folder through a job picture or portrait source (A2).",
     );
     commit(planned, result, workFolder, built.job);
+    result.voice = countReuse(built.job, paths.root, model);
   } else {
     const built = buildJob(story, { packsDir });
     const places = built.job.pictures.filter((p) => p.kind === "place");
@@ -314,4 +328,20 @@ const commit = (planned: Planned[], result: ImportResult, workFolder: string, jo
   const target = jobPath(workFolder, job.story);
   const current = isFile(target) ? readFileSync(target, "utf8") : undefined;
   if (current !== serializeJob(job)) writeJob(workFolder, job);
+};
+
+/**
+ * Against the job's voiced lines and the cache as it stands after the import: a line is
+ * reused when its one speech segment is cached. Every other line a render sends to the provider.
+ */
+const countReuse = (job: Job, storyRoot: string, model: string) => {
+  const voices = new Map(job.cast.map((member) => [member.id, member.voice]));
+  let reused = 0;
+  for (const line of job.lines) {
+    const voice = voices.get(line.speaker);
+    if (voice === undefined) continue;
+    const target = cacheFileFor(storyRoot, line.text, voice, model);
+    if ("file" in target && existsSync(target.file)) reused += 1;
+  }
+  return { voiced: job.lines.length, reused };
 };

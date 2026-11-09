@@ -43,6 +43,8 @@ const parseArgs = (argv: readonly string[]): Args | string => {
   };
 };
 
+const paid = (r: ImportResult) => (r.voice?.voiced ?? 0) - (r.voice?.reused ?? 0);
+
 const format = (result: ImportResult): string => {
   const head =
     `assets:import ${result.source} -> ${result.story}` +
@@ -54,7 +56,7 @@ const format = (result: ImportResult): string => {
     ...result.failed.map((f) => `  failed ${f.id}: ${f.reason}`),
     ...result.notes,
     result.source === "funeral"
-      ? `next: pnpm assets:needs ${result.story}, then the asset-studio render (--only voice) reuses the seeded audio and stores it as drafts.`
+      ? `next: render --only voice would call gemini for ${paid(result)} of ${result.voice?.voiced ?? 0} voiced lines (${result.voice?.reused ?? 0} reuse the import). Run pnpm assets:needs ${result.story} first; the render needs GEMINI_API_KEY and spends on the paid lines.`
       : `next: render --only picture stores the ${result.matched.length} place paintings as drafts.`,
   ];
   return `${lines.join("\n")}\n`;

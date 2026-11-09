@@ -1,6 +1,14 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildJob, workPathsFor } from "../index.ts";
@@ -162,8 +170,8 @@ const cachePath = (f: Fixture, line: PocLine, model: string): string => {
   return target.file;
 };
 
-describe("A1-06 assets:import funeral", () => {
-  it("A1-06a: prints matched 3, skipped 1, failed 1 with each reason; the source tree hash is unchanged", () => {
+describe("IMP assets:import funeral", () => {
+  it("IMP-1: prints matched 3, skipped 1, failed 1 with each reason; the source tree hash is unchanged", () => {
     const f = fixture();
     const before = snapshot(f.poc);
     const r = run(["funeral"], f, FAKE);
@@ -178,7 +186,7 @@ describe("A1-06 assets:import funeral", () => {
     }
   });
 
-  it("A1-06b: a second run leaves the work folder bytes identical and changes no status", {
+  it("IMP-2: a second run leaves the work folder bytes identical and changes no status", {
     timeout: 60_000,
   }, () => {
     const f = fixture();
@@ -197,7 +205,7 @@ describe("A1-06 assets:import funeral", () => {
     expect(JSON.stringify(readIndex(workPathsFor(f.work, "dracula")))).toBe(statuses);
   });
 
-  it("A1-06c: a later render --only voice stores the imported audio as a draft with no provider call", {
+  it("IMP-3: a later render --only voice stores the imported audio as a draft with no provider call", {
     timeout: 60_000,
   }, () => {
     const f = fixture();
@@ -214,7 +222,7 @@ describe("A1-06 assets:import funeral", () => {
     expect(r.stdout).toContain("rendered");
   });
 
-  it("A1-06d: a different model keys a different cache file; the default is the Gemini default", () => {
+  it("IMP-4: a different model keys a different cache file; the default is the Gemini default", () => {
     const f = fixture();
     const real = run(["funeral"], f, {});
     expect(real.out).toContain(`voice model ${DEFAULT_TTS_MODEL}`);
@@ -224,7 +232,7 @@ describe("A1-06 assets:import funeral", () => {
     expect(readdirSync(dir)).toHaveLength(6);
   });
 
-  it("A1-06e: audio already in the tts-cache with other bytes is kept and reported, never overwritten", () => {
+  it("IMP-5: audio already in the tts-cache with other bytes is kept and reported, never overwritten", () => {
     const f = fixture();
     const first = POC_LINES[0] as PocLine;
     const file = cachePath(f, first, FAKE_TTS_MODEL);
@@ -237,7 +245,7 @@ describe("A1-06 assets:import funeral", () => {
     expect(readFileSync(file).equals(rendered)).toBe(true);
   });
 
-  it("A1-06f: a line whose text or speaker differs from the script, or that has pause markup, is skipped", () => {
+  it("IMP-6: a line whose text or speaker differs from the script, or that has pause markup, is skipped", () => {
     const lines: PocLine[] = [
       { id: "funeral.01.vo-01", speaker: "narrator", text: "Changed.", bytes: wav() },
       { id: "funeral.01.vo-02", speaker: "witness", text: "Follow me.", bytes: wav() },
@@ -259,7 +267,7 @@ describe("A1-06 assets:import funeral", () => {
     expect(r.code).toBe(0);
   });
 
-  it("A1-06g: a repeated line is a silent caption, so it has no voiced job line and is skipped", () => {
+  it("IMP-7: a repeated line is a silent caption, so it has no voiced job line and is skipped", () => {
     const script = `- id: "funeral.01"
   lines:
     - {id: "funeral.01.vo-01", speaker: guide, text: "Follow me."}
@@ -274,8 +282,8 @@ describe("A1-06 assets:import funeral", () => {
   });
 });
 
-describe("A1-06 assets:import test", () => {
-  it("A1-06h: the four place paintings are drafts after the documented render --only picture", {
+describe("IMP assets:import test", () => {
+  it("IMP-8: the four place paintings are drafts after the documented render --only picture", {
     timeout: 60_000,
   }, () => {
     const f = fixture();
@@ -295,8 +303,8 @@ describe("A1-06 assets:import test", () => {
   });
 });
 
-describe("A1-06 failures write nothing", () => {
-  it("A1-06i: a missing script is BT-IMPORT-2", () => {
+describe("IMP failures write nothing", () => {
+  it("IMP-9: a missing script is BT-IMPORT-2", () => {
     const f = fixture();
     const empty = tempDir("nopacks");
     mkdirSync(join(empty, "dracula"));
@@ -311,7 +319,7 @@ describe("A1-06 failures write nothing", () => {
     expect(readdirSync(f.work)).toEqual([]);
   });
 
-  it("A1-06j: a missing POC source is BT-IMPORT-3", () => {
+  it("IMP-10: a missing POC source is BT-IMPORT-3", () => {
     const f = fixture();
     const r = run(
       ["funeral", "--work-folder", f.work, "--packs-dir", f.packs, "--poc-dir", tempDir("none")],
@@ -324,7 +332,7 @@ describe("A1-06 failures write nothing", () => {
     expect(readdirSync(f.work)).toEqual([]);
   });
 
-  it("A1-06k: no work folder is AS-CONFIG-1 and nothing is read or written", () => {
+  it("IMP-11: no work folder is AS-CONFIG-1 and nothing is read or written", () => {
     const f = fixture();
     const before = snapshot(f.packs);
     const r = run(["funeral", "--packs-dir", f.packs, "--poc-dir", f.poc], f, FAKE, false);
@@ -334,7 +342,7 @@ describe("A1-06 failures write nothing", () => {
     expect(readdirSync(f.config)).toEqual([]);
   });
 
-  it("A1-06l: an unknown source or option is a BT-IMPORT-1 usage error, exit 2", () => {
+  it("IMP-12: an unknown source or option is a BT-IMPORT-1 usage error, exit 2", () => {
     const f = fixture();
     for (const argv of [["nope"], [], ["funeral", "--bogus"], ["funeral", "test"]]) {
       const r = run(argv, f, FAKE);
@@ -345,11 +353,11 @@ describe("A1-06 failures write nothing", () => {
   });
 });
 
-describe("A1-06 the render reuses the seed with the fakes off", () => {
+describe("IMP the render reuses the seed with the fakes off", () => {
   // The spike: a placeholder key, no network (a preload makes `fetch` throw), the default model.
   // Needs afconvert, the real m4a converter, so it runs on macOS only.
   it.skipIf(process.platform !== "darwin")(
-    "A1-06m: render --only voice reuses the seeded audio with no provider call",
+    "IMP-13: render --only voice reuses the seeded audio with no provider call",
     { timeout: 60_000 },
     () => {
       const script = `- id: "funeral.01"
@@ -378,7 +386,7 @@ describe("A1-06 the render reuses the seed with the fakes off", () => {
 });
 
 describe("checkWav", () => {
-  it("A1-06n: accepts a whole 16-bit PCM WAV and names why it refuses others", () => {
+  it("IMP-14: accepts a whole 16-bit PCM WAV and names why it refuses others", () => {
     expect(checkWav(wav(10))).toEqual({ channels: 1, sampleRate: 24000, frames: 10 });
     expect(checkWav(Buffer.from("nope"))).toBe("shorter than a RIFF header");
     expect(checkWav(Buffer.alloc(64))).toBe("not a RIFF/WAVE file");
@@ -386,5 +394,30 @@ describe("checkWav", () => {
     const float = wav(10);
     float.writeUInt16LE(3, 20);
     expect(checkWav(float)).toMatch(/not 16-bit PCM/);
+  });
+});
+
+describe("IMP paid-call warning and symlinks", () => {
+  it("IMP-15: the next line counts the voiced job lines a render would still send to the provider", () => {
+    const f = fixture();
+    const r = run(["funeral"], f, FAKE);
+    // vo-01..03 are seeded; vo-04 (corrupt) and vo-05 (pause markup) are not.
+    expect(r.out).toContain(
+      "render --only voice would call gemini for 2 of 5 voiced lines (3 reuse the import)",
+    );
+    const again = run(["funeral"], f, FAKE);
+    expect(again.out).toContain("for 2 of 5 voiced lines (3 reuse");
+  });
+
+  it("IMP-16: a manifest path that is a symlink out of the POC assets folder is failed, not read", () => {
+    const f = fixture();
+    const outside = join(tempDir("outside"), "secret.wav");
+    writeFileSync(outside, wav(2400, 7));
+    const link = join(f.poc, "assets", "audio", "lines", "funeral.01.vo-01.narrator.wav");
+    rmSync(link);
+    symlinkSync(outside, link);
+    const r = run(["funeral"], f, FAKE);
+    expect(r.out).toMatch(/failed funeral\.01\.vo-01: path .* leaves the POC assets folder/);
+    expect(r.out).toContain("matched 2, skipped 1, failed 2");
   });
 });
