@@ -141,13 +141,28 @@ const entryIssues = (id: string, e: PackIndexEntry, index: PackIndex): Issue[] =
   return out;
 };
 
-/** Index-only rules: kinds, moods, captions, glow sizes, missing ids, drafts. No file is read. */
-export const lintIndexEntries = (index: PackIndex, options: LintOptions): Issue[] => {
-  const out: Issue[] = [];
+export interface LintReport {
+  /** Problems that fail the lint. */
+  errors: Issue[];
+  /** Problems that are reported but do not fail it. */
+  warnings: Issue[];
+}
+
+/** Most ids a missing-id warning names; the count covers all of them. */
+const WARN_IDS_SHOWN = 5;
+
+/**
+ * Index-only rules: kinds, moods, captions, glow sizes, missing ids, drafts. No file is read.
+ * A referenced id with no entry is an error in a release and one warning with a count otherwise
+ * (D45: a partial pack is allowed until it ships).
+ */
+export const lintIndexEntriesReport = (index: PackIndex, options: LintOptions): LintReport => {
+  const errors: Issue[] = [];
+  const warnings: Issue[] = [];
   for (const [id, entry] of Object.entries(index.assets)) {
-    out.push(...entryIssues(id, entry, index));
+    errors.push(...entryIssues(id, entry, index));
     if (options.release && entry.status === "draft") {
-      out.push(
+      errors.push(
         indexIssue(
           id,
           LINT_RULE.draft,
@@ -156,30 +171,49 @@ export const lintIndexEntries = (index: PackIndex, options: LintOptions): Issue[
       );
     }
   }
+  const absent: string[] = [];
   for (const id of options.referenced) {
-    if (index.assets[id] === undefined) {
-      const mate = id.startsWith("glow.") ? `painting.${id.slice(5)}` : undefined;
-      out.push(
-        indexIssue(
-          id,
-          LINT_RULE.missingId,
-          mate
-            ? `the pack references this mask but the index has no entry for it (paired with ${mate}).`
-            : "the pack references this id but the index has no entry for it (R-AST-ORG-8).",
-        ),
-      );
-    }
+    if (index.assets[id] !== undefined) continue;
+    absent.push(id);
+    if (!options.release) continue;
+    const mate = id.startsWith("glow.") ? `painting.${id.slice(5)}` : undefined;
+    errors.push(
+      indexIssue(
+        id,
+        LINT_RULE.missingId,
+        mate
+          ? `the pack references this mask but the index has no entry for it (paired with ${mate}).`
+          : "the pack references this id but the index has no entry for it (R-AST-ORG-8).",
+      ),
+    );
+  }
+  if (!options.release && absent.length > 0) {
+    const shown = absent.slice(0, WARN_IDS_SHOWN).join(", ");
+    const more =
+      absent.length > WARN_IDS_SHOWN ? `, and ${absent.length - WARN_IDS_SHOWN} more` : "";
+    warnings.push(
+      issue(
+        INDEX_FILE,
+        "(file)",
+        LINT_RULE.missingId,
+        `${absent.length} referenced id${absent.length === 1 ? " has" : "s have"} no index entry yet (${shown}${more}). A release needs every one (R-AST-ORG-8).`,
+      ),
+    );
   }
   // A mask without its painting is a pairing error even when nothing references it.
   for (const id of Object.keys(index.assets)) {
     if (id.startsWith("glow.") && index.assets[`painting.${id.slice(5)}`] === undefined) {
-      out.push(
+      errors.push(
         indexIssue(id, LINT_RULE.missingId, `has no paired painting.${id.slice(5)} in the index.`),
       );
     }
   }
-  return out;
+  return { errors, warnings };
 };
+
+/** `lintIndexEntriesReport`'s errors alone. */
+export const lintIndexEntries = (index: PackIndex, options: LintOptions): Issue[] =>
+  lintIndexEntriesReport(index, options).errors;
 
 /** File rules for glow masks: the file is grayscale and is the size the index says. */
 export const lintGlowFiles = async (index: PackIndex, root: string): Promise<Issue[]> => {
@@ -313,43 +347,60 @@ export interface IndexLintInput {
 }
 
 /** Parses the index text and runs every rule. */
-export const lintIndexText = async (input: IndexLintInput): Promise<Issue[]> => {
+export const lintIndexTextReport = async (input: IndexLintInput): Promise<LintReport> => {
   let raw: unknown;
   try {
     raw = JSON.parse(input.text);
   } catch (error) {
-    return [
-      issue(
-        INDEX_FILE,
-        "(file)",
-        LINT_RULE.index,
-        `${LINT_RULE.index}: not valid JSON: ${errorText(error)}`,
-      ),
-    ];
+    return {
+      errors: [
+        issue(
+          INDEX_FILE,
+          "(file)",
+          LINT_RULE.index,
+          `${LINT_RULE.index}: not valid JSON: ${errorText(error)}`,
+        ),
+      ],
+      warnings: [],
+    };
   }
   const parsed = packIndexSchema.safeParse(raw);
   if (!parsed.success) {
-    return parsed.issues.map((p) =>
-      issue(INDEX_FILE, p.path, LINT_RULE.index, `${LINT_RULE.index}: ${p.message}`),
-    );
+    return {
+      errors: parsed.issues.map((p) =>
+        issue(INDEX_FILE, p.path, LINT_RULE.index, `${LINT_RULE.index}: ${p.message}`),
+      ),
+      warnings: [],
+    };
   }
   const index = parsed.data;
-  return [
-    ...lintIndexEntries(index, input.options),
-    ...(await lintGlowFiles(index, input.options.root)),
-    ...(await lintAvatar(index, input.options.root)),
-  ];
+  const entries = lintIndexEntriesReport(index, input.options);
+  return {
+    errors: [
+      ...entries.errors,
+      ...(await lintGlowFiles(index, input.options.root)),
+      ...(await lintAvatar(index, input.options.root)),
+    ],
+    warnings: entries.warnings,
+  };
 };
+
+/** `lintIndexTextReport`'s errors alone. */
+export const lintIndexText = async (input: IndexLintInput): Promise<Issue[]> =>
+  (await lintIndexTextReport(input)).errors;
 
 /** Lints the index file text at `<packDir>/assets/index.json` (which must exist). */
 export const lintPackIndex = async (
   packDir: string,
   referenced: readonly string[],
   release: boolean,
-): Promise<Issue[]> => {
-  const fail = (error: unknown): Issue[] => [
-    issue(INDEX_FILE, "(file)", LINT_RULE.index, `${LINT_RULE.index}: ${errorText(error)}`),
-  ];
+): Promise<LintReport> => {
+  const fail = (error: unknown): LintReport => ({
+    errors: [
+      issue(INDEX_FILE, "(file)", LINT_RULE.index, `${LINT_RULE.index}: ${errorText(error)}`),
+    ],
+    warnings: [],
+  });
   let root: string;
   let text: string;
   try {
@@ -358,5 +409,5 @@ export const lintPackIndex = async (
   } catch (error) {
     return fail(error);
   }
-  return lintIndexText({ text, options: { root, referenced, release } });
+  return lintIndexTextReport({ text, options: { root, referenced, release } });
 };

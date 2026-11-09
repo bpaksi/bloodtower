@@ -2,17 +2,20 @@ import { existsSync } from "node:fs";
 import { basename, join } from "node:path";
 import { buildJobFromDir } from "../needs/build.ts";
 import { assetKeys } from "../needs/deps.ts";
-import { type Issue, NeedsError } from "../needs/issues.ts";
-import { lintPackIndex } from "./lint.ts";
+import { NeedsError } from "../needs/issues.ts";
+import { type LintReport, lintPackIndex } from "./lint.ts";
 import { INDEX_FILE } from "./rules.ts";
 
 export * from "./indexSchema.ts";
 export {
   CAPTION_MAX,
+  type LintReport,
   lintAvatar,
   lintGlowFiles,
   lintIndexEntries,
+  lintIndexEntriesReport,
   lintIndexText,
+  lintIndexTextReport,
   lintPackIndex,
 } from "./lint.ts";
 export {
@@ -32,19 +35,20 @@ export const referencedIds = (packDir: string): string[] => {
 };
 
 /**
- * `pack:lint`'s index step: undefined when the pack has no `assets/index.json`, else the issues
- * (empty when clean). A pack the job cannot be built from reports the job's own issues.
+ * `pack:lint`'s index step: undefined when the pack has no `assets/index.json`, else the errors
+ * and warnings (both empty when clean). A pack the job cannot be built from reports the job's own
+ * issues as errors.
  */
 export const lintPackAssets = async (
   packDir: string,
   release: boolean,
-): Promise<Issue[] | undefined> => {
+): Promise<LintReport | undefined> => {
   if (!existsSync(join(packDir, INDEX_FILE))) return undefined;
   let referenced: string[];
   try {
     referenced = referencedIds(packDir);
   } catch (error) {
-    if (error instanceof NeedsError) return [...error.issues];
+    if (error instanceof NeedsError) return { errors: [...error.issues], warnings: [] };
     throw error;
   }
   return lintPackIndex(packDir, referenced, release);

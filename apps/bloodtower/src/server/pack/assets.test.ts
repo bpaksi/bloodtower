@@ -32,6 +32,18 @@ describe("V-1 assets folder", () => {
     expect(packWith({ "index.json": "{}", "door.m4a": "x", "DOOR.M4A": "x" })).toEqual([]);
   });
 
+  it("names the fix for a leftover temp file of an interrupted assets:pack", () => {
+    const name = `${"a".repeat(64)}.webp.tmp-4242`;
+    const issues = packWith({ [name]: "x", "index.json.tmp-7": "x" });
+    expect(issues).toHaveLength(2);
+    for (const item of issues) {
+      expect(item.rule).toBe("V-1");
+      expect(item.message).toContain("assets:pack");
+      expect(item.message).toContain("again or delete assets/");
+    }
+    expect(issues[0]?.message).toContain(name);
+  });
+
   it("rejects other json, other audio and subfolders", () => {
     const issues = packWith({ "index.json.bak": "x", "other.json": "x", "door.mp3": "x" }, ["sub"]);
     expect(issues.map((i) => i.file).sort()).toEqual([

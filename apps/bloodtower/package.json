@@ -14,6 +14,7 @@
     "assets:needs": "pnpm -F bloodtower-assets needs",
     "assets:import": "pnpm -F bloodtower-assets run import",
     "assets:render": "pnpm -F bloodtower-assets render",
+    "assets:pack": "pnpm -F bloodtower-assets run pack",
     "playtest": "pnpm -F bloodtower-server playtest",
     "simulate": "pnpm -F bloodtower-server simulate"
   },

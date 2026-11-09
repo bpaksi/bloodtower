@@ -110,7 +110,7 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
 
 ### Step 5: `assets:pack` and the generated index
 - Depends on: 3, 4
-- Touches: `apps/bloodtower/src/assets/pack/**`, `apps/bloodtower/src/server/pack/{assets.ts,load.ts}` and their tests, `packs/test/assets/**`
+- Touches: `apps/bloodtower/src/assets/pack/**`, `src/assets/index.ts` (one export line), `src/assets/lint/{lint.ts,index.ts,lint.test.ts}` and `src/server/scripts/packLint.ts` (A1-19 becomes a warning in a non-release lint, D45), the `assets:pack` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and the root `package.json`, `apps/bloodtower/src/server/pack/{assets.ts,v2/load.ts}` and their tests, `src/server/core/loadStories.ts` only if needed, `apps/bloodtower/spec.md` (D45). Not `packs/test/assets/**`: `packs/test` is not repacked.
 - Deps change: no
 - Runs: local (writes into a pack)
 - Model: opus (changes how the loader finds files)
@@ -119,7 +119,8 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
   - If the export's `source` hash differs from the pack's current hash, it warns, naming the story, and goes on.
   - It removes files the new index no longer names, and only those. A test covers it.
   - The pack loader resolves an `assets[]` ID through `index.json` when it is there, and through the old `path` otherwise. Every existing pack test passes.
-  - `packs/test` is repacked from its imported drafts (step 6, if merged first) or left as it is. Either way, `pnpm pack:lint:all` passes.
+  - `packs/test` is left as it is (no committed `index.json`), so the board and e2e are unchanged. `pnpm pack:lint:all` passes. A partial pack packs: in a non-release lint A1-19 (a referenced id with no entry) is a warning with a count; `pack:lint --release` still fails it (D45).
+  - Not required: camera or YAML writes (step 10), avatars (step 9), wiring lines or glow to the engine, repacking `packs/test` or Dracula, WAV conversion (a WAV export stops the run with A1-21).
 
 ### Step 6: One-time import and retirements (DEC-388, DEC-398)
 Split in two PRs. **6a** is the import code and tests (`assets:import`), with no removals. **6b** (branch `chore/bloodtower-retire-tts-explorer`) is the retirements, and only after Bob records the OneDrive backup (marker below).

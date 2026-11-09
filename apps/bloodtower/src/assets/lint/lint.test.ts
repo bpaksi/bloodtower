@@ -13,6 +13,7 @@ import {
   lintAvatar,
   lintGlowFiles,
   lintIndexEntries,
+  lintIndexEntriesReport,
   lintIndexText,
   lintPackAssets,
   MOUTH_SHAPES,
@@ -146,24 +147,37 @@ describe("A1-03a/b kind, mood, caption, drafts, missing ids", () => {
     only(at(["x [pause oops"]), LINT_RULE.caption, id);
   });
 
-  it("missing id: an id the pack references with no entry fails A1-19", () => {
+  it("missing id: a release fails A1-19 per id; otherwise one warning with the count", () => {
     const index = indexOf({ "place.village": entry("place") });
-    const issues = lintIndexEntries(index, {
+    const refs = { ...base, referenced: ["place.village", "place.bazaar"] };
+    only(lintIndexEntries(index, { ...refs, release: true }), LINT_RULE.missingId, "place.bazaar");
+    expect(lintIndexEntries(index, refs)).toEqual([]);
+    const warned = lintIndexEntriesReport(index, refs).warnings;
+    expect(rules(warned)).toEqual([LINT_RULE.missingId]);
+    expect(warned[0]?.message).toContain("1 referenced id has no index entry yet");
+    expect(warned[0]?.message).toContain("place.bazaar");
+    const many = lintIndexEntriesReport(index, {
       ...base,
-      referenced: ["place.village", "place.bazaar"],
-    });
-    only(issues, LINT_RULE.missingId, "place.bazaar");
+      referenced: ["place.village", ...[1, 2, 3, 4, 5, 6, 7].map((n) => `place.p${n}`)],
+    }).warnings;
+    expect(many[0]?.message).toContain("7 referenced ids have no index entry yet");
+    expect(many[0]?.message).toContain("and 2 more");
     expect(lintIndexEntries(index, { ...base, referenced: ["place.village"] })).toEqual([]);
+    expect(
+      lintIndexEntriesReport(index, { ...base, referenced: ["place.village"] }).warnings,
+    ).toEqual([]);
   });
 
   it("missing id: painting.cover and glow.cover are a pair", () => {
     const refs = ["painting.cover", "glow.cover"];
-    const issues = lintIndexEntries(indexOf({ "painting.cover": entry("painting") }), {
-      ...base,
-      referenced: refs,
-    });
+    const index = indexOf({ "painting.cover": entry("painting") });
+    const issues = lintIndexEntries(index, { ...base, referenced: refs, release: true });
     only(issues, LINT_RULE.missingId, "glow.cover");
     expect(issues[0]?.message).toContain("painting.cover");
+    expect(
+      lintIndexEntriesReport(index, { ...base, referenced: refs }).warnings[0]?.message,
+    ).toContain("glow.cover");
+    // A mask whose painting is absent is a pairing error even in a partial pack.
     const orphan = lintIndexEntries(indexOf({ "glow.cover": entry("glow") }), base);
     only(orphan, LINT_RULE.missingId, "glow.cover");
   });
@@ -399,6 +413,11 @@ describe("A1-03a pack:lint wiring", () => {
     }
     if (drop) delete assets[drop];
     await writeImage(join(story, "assets/glow.png"), 16, 9, () => [7, 7, 7]);
+    // The loader resolves an indexed id to its file, so each indexed file is on disk (D45).
+    for (const e of Object.values(assets)) {
+      if (e.kind !== "glow")
+        await writeImage(join(story, "assets", e.file), 16, 9, () => [7, 7, 7]);
+    }
     writeFileSync(join(story, INDEX_FILE), JSON.stringify({ assets }));
   };
 
@@ -438,11 +457,16 @@ describe("A1-03a pack:lint wiring", () => {
     expect((await lintPathWithIndex(join(r, "test"), r, true)).exitCode).toBe(0);
   });
 
-  it("a referenced id missing from the index fails, with and without --release", async () => {
+  it("a referenced id missing from the index warns A1-19 with a count; --release fails", async () => {
     const r = packsDir();
     await writeIndex(join(r, "test"), "final", "place.bazaar");
     const report = await lintPathWithIndex(join(r, "test"), r);
-    expect(report.exitCode).toBe(1);
-    expect(report.lines.join("\n")).toMatch(/rule=A1-19 .*place\.bazaar/);
+    expect(report.exitCode).toBe(0);
+    expect(report.lines.join("\n")).toMatch(
+      /rule=A1-19 .*1 referenced id has no index entry yet \(place\.bazaar\)/,
+    );
+    const release = await lintPathWithIndex(join(r, "test"), r, true);
+    expect(release.exitCode).toBe(1);
+    expect(release.lines.join("\n")).toMatch(/rule=A1-19 .*place\.bazaar/);
   });
 });

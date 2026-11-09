@@ -25,4 +25,5 @@ export {
   workPathsFor,
   writeJob,
 } from "./needs/job.ts";
+export { type PackIo, runPack } from "./pack/index.ts";
 export { failedAssets, type RenderIo, runRender } from "./render/index.ts";
