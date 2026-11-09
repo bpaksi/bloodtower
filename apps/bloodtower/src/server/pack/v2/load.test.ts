@@ -5,6 +5,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -324,6 +325,28 @@ describe("the loader resolves assets[] through assets/index.json (A1-05c, D45)",
     try {
       const result = load(root);
       expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("expected a load error");
+      expect(result.issues[0]?.rule).toBe("P2-2");
+      expect(result.issues[0]?.message).toContain("is missing");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("an indexed file that cannot be read is its own error, not a missing file", () => {
+    const root = withIndex(
+      JSON.stringify({ assets: { "place.village": entry("place.village", HASH("a")) } }),
+    );
+    try {
+      // A link that points at itself: realpath fails with ELOOP, not ENOENT.
+      symlinkSync(HASH("a"), join(root, "test/assets", HASH("a")));
+      const result = load(root);
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("expected a load error");
+      expect(result.issues[0]?.rule).toBe("P2-2");
+      expect(result.issues[0]?.message).toContain("cannot read");
+      expect(result.issues[0]?.message).toContain("ELOOP");
+      expect(result.issues[0]?.message).not.toContain("is missing");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

@@ -110,7 +110,7 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
 
 ### Step 5: `assets:pack` and the generated index
 - Depends on: 3, 4
-- Touches: `apps/bloodtower/src/assets/pack/**`, `src/assets/index.ts` (one export line), `src/assets/lint/{lint.ts,lint.test.ts}` and `src/server/scripts/packLint.ts` (A1-19 becomes a warning in a non-release lint, D45), the `assets:pack` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and the root `package.json`, `apps/bloodtower/src/server/pack/{assets.ts,v2/load.ts}` and their tests, `src/server/core/loadStories.ts` only if needed, `apps/bloodtower/spec.md` (D45). Not `packs/test/assets/**`: `packs/test` is not repacked.
+- Touches: `apps/bloodtower/src/assets/pack/**`, `src/assets/index.ts` (one export line), `src/assets/lint/{lint.ts,index.ts,lint.test.ts}` and `src/server/scripts/packLint.ts` (A1-19 becomes a warning in a non-release lint, D45), the `assets:pack` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and the root `package.json`, `apps/bloodtower/src/server/pack/{assets.ts,v2/load.ts}` and their tests, `src/server/core/loadStories.ts` only if needed, `apps/bloodtower/spec.md` (D45). Not `packs/test/assets/**`: `packs/test` is not repacked.
 - Deps change: no
 - Runs: local (writes into a pack)
 - Model: opus (changes how the loader finds files)

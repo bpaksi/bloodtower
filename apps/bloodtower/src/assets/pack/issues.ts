@@ -10,6 +10,10 @@ export const PACK_RULE = {
   noJob: "A1-23",
   /** The `asset-studio` export bin failed; the `AS-EXPORT-n` code is passed through. */
   exportBin: "A1-24",
+  /** Another `assets:pack` holds the story's lock. */
+  locked: "A1-25",
+  /** The story folder resolves outside the packs folder. */
+  outsidePacks: "A1-22",
 } as const;
 
 export const packIssue = (file: string, path: string, rule: string, message: string): Issue =>

@@ -62,6 +62,9 @@ const warn = (file: string, path: string, message: string): PackLoadIssue => ({
 
 export const PACK_INDEX_FILE = "index.json";
 
+/** A temp name `assets:pack` leaves if it is killed mid-copy. */
+export const PACK_TEMP_FILE = /^(?:[0-9a-f]{64}\.(?:webp|m4a)|index\.json)\.tmp-\d+$/;
+
 export type PackIndexRead =
   | { index: PackIndex | undefined; issue?: undefined }
   | { index?: undefined; issue: PackLoadIssue };
@@ -102,7 +105,7 @@ export const readPackAssetIndex = (packRoot: string): PackIndexRead => {
   return { index: parsed.data };
 };
 
-/** A file named by the index, inside the real assets folder, or undefined. */
+/** A file named by the index, inside the real assets folder, or undefined when it is not there. Any other read error throws. */
 const resolveIndexedFile = (
   assetsDir: string,
   name: string,
@@ -115,8 +118,10 @@ const resolveIndexedFile = (
   let real: string;
   try {
     real = realpathSync(path);
-  } catch {
-    return undefined;
+  } catch (error) {
+    // Only a missing file is "missing"; EACCES, ELOOP and the rest are their own error (decision 0003).
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
   }
   if (!isInside(assetsDir, real) || !statSync(real).isFile() || !accept(basename(real))) {
     return undefined;
@@ -254,7 +259,9 @@ export const validateAssetsFolder = (
         rule: "V-1",
         file: label,
         path: "(file)",
-        message: "V-1: An assets file must be an image, index.json or an .m4a sound.",
+        message: PACK_TEMP_FILE.test(name)
+          ? `V-1: ${name} is a leftover from an interrupted assets:pack; run assets:pack ${basename(packRoot)} again or delete ${label}.`
+          : "V-1: An assets file must be an image, index.json or an .m4a sound.",
       });
     }
   }
@@ -343,8 +350,20 @@ export const mediaOnDiskIssues = (
     if (indexed) {
       // The generated index names this asset's file (D45). A file missing on disk is a missing file.
       const accept = AUDIO_ASSET_TYPES.has(asset.type) ? isM4a : isImageFileName;
-      const file =
-        realAssets === undefined ? undefined : resolveIndexedFile(realAssets, indexed.file, accept);
+      let file: string | undefined;
+      try {
+        file =
+          realAssets === undefined
+            ? undefined
+            : resolveIndexedFile(realAssets, indexed.file, accept);
+      } catch (error) {
+        fail(
+          `${PACK_ASSETS_DIR}/${indexed.file}`,
+          `assets.${asset.id}.path`,
+          `${asset.type} ${asset.id}: cannot read ${PACK_ASSETS_DIR}/${indexed.file} (named by index.json): ${error instanceof Error ? error.message : String(error)}`,
+        );
+        continue;
+      }
       if (file) continue;
       const message = `${asset.type} ${asset.id} is missing ${PACK_ASSETS_DIR}/${indexed.file} (named by index.json) on disk.`;
       if (asset.status === "placeholder") {
@@ -401,11 +420,29 @@ export const indexPackAssets = (
   const fromIndex = (id: string, accept: (file: string) => boolean): string | undefined => {
     const entry = index?.assets[id];
     if (!entry || realAssets === undefined) return undefined;
-    return resolveIndexedFile(realAssets, entry.file, accept);
+    return indexedOrWarn(id, entry.file, accept);
+  };
+  const indexedOrWarn = (
+    id: string,
+    name: string,
+    accept: (file: string) => boolean,
+  ): string | undefined => {
+    try {
+      return realAssets === undefined ? undefined : resolveIndexedFile(realAssets, name, accept);
+    } catch (error) {
+      warnings.push(
+        warn(
+          `${PACK_ASSETS_DIR}/${name}`,
+          id,
+          `cannot read ${PACK_ASSETS_DIR}/${name} (named by index.json): ${error instanceof Error ? error.message : String(error)}`,
+        ),
+      );
+      return undefined;
+    }
   };
   if (index && realAssets !== undefined) {
     for (const [id, entry] of Object.entries(index.assets)) {
-      const absolute = resolveIndexedFile(realAssets, entry.file, () => true);
+      const absolute = indexedOrWarn(id, entry.file, () => true);
       if (absolute) indexed.set(id, { kind: entry.kind, absolute, basename: basename(absolute) });
     }
   }

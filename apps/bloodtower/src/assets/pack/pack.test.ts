@@ -1,5 +1,14 @@
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildJob } from "../needs/build.ts";
@@ -11,6 +20,7 @@ import {
   hashedFiles,
   mixed,
   pack,
+  paths,
   readPackIndex,
   renderAll,
   STORY,
@@ -363,5 +373,61 @@ describe("A1-05b/D3: a failed write leaves the old pack as it was", () => {
     });
     expect(result.code).toBe(1);
     expect(existsSync(join(s.packDir, "assets"))).toBe(false);
+  }, 90000);
+});
+
+describe("an interrupted run, a second run and a linked story folder", () => {
+  it("removes exact leftover temp files at the start and prints each", async () => {
+    const s = await mixed();
+    const assets = join(s.packDir, "assets");
+    const a = `${"a".repeat(64)}.webp.tmp-123`;
+    const b = "index.json.tmp-9";
+    const keep = [`${"a".repeat(64)}.png.tmp-1`, "notes.tmp-5", `${"b".repeat(64)}.webp`];
+    for (const name of [a, b, ...keep]) writeFileSync(join(assets, name), "x");
+    const result = await pack(s);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain(`removed leftover ${a}`);
+    expect(result.out).toContain(`removed leftover ${b}`);
+    expect(existsSync(join(assets, a))).toBe(false);
+    expect(existsSync(join(assets, b))).toBe(false);
+    for (const name of keep) expect(existsSync(join(assets, name))).toBe(true);
+  }, 90000);
+
+  it("a second run while the story lock is held stops with A1-25 naming the lock", async () => {
+    const s = await mixed();
+    const lock = join(paths(s).root, ".pack-lock");
+    mkdirSync(lock);
+    const before = snapshot(s.packs);
+    const result = await pack(s);
+    expect(result.code).toBe(1);
+    expect(result.err).toContain("rule=A1-25");
+    expect(result.err).toContain(lock);
+    expect(snapshot(s.packs)).toBe(before);
+    rmSync(lock, { recursive: true });
+    expect((await pack(s)).code).toBe(0);
+    expect(existsSync(lock)).toBe(false);
+  }, 90000);
+
+  it("two concurrent runs: one packs, the other is refused by the lock, the lock is released", async () => {
+    const s = await mixed();
+    const [one, two] = await Promise.all([pack(s), pack(s)]);
+    expect([one.code, two.code].sort()).toEqual([0, 1]);
+    const refused = one.code === 1 ? one : two;
+    expect(refused.err).toContain("rule=A1-25");
+    expect(existsSync(join(paths(s).root, ".pack-lock"))).toBe(false);
+    expect(Object.keys(readPackIndex(s.packDir).assets)).toHaveLength(2);
+  }, 90000);
+
+  it("a story folder that is a link out of the packs folder stops with A1-22", async () => {
+    const s = await mixed();
+    const outside = join(tempDir("outside"), STORY);
+    renameSync(s.packDir, outside);
+    symlinkSync(outside, s.packDir);
+    const before = snapshot(outside);
+    const result = await pack(s);
+    expect(result.code).toBe(1);
+    expect(result.err).toContain("rule=A1-22");
+    expect(result.err).toContain("outside the packs folder");
+    expect(snapshot(outside)).toBe(before);
   }, 90000);
 });

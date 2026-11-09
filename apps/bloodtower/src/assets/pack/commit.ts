@@ -34,6 +34,8 @@ export const realCommitIo: CommitIo = {
 export interface CommitInput {
   /** `packs/<story>`. */
   packDir: string;
+  /** The packs folder; `packDir` must resolve inside it. */
+  packsDir: string;
   /** The folder the export wrote (already checked). */
   exportDir: string;
   /** New `assets/index.json` text. */
@@ -112,6 +114,15 @@ export const commitPack = (input: CommitInput): CommitResult => {
     packReal = realpathSync(input.packDir);
   } catch (error) {
     return fail(input.packDir, `cannot read the pack folder: ${errorText(error)}`);
+  }
+  let packsReal: string;
+  try {
+    packsReal = realpathSync(input.packsDir);
+  } catch (error) {
+    return fail(input.packsDir, `cannot read the packs folder: ${errorText(error)}`);
+  }
+  if (!packReal.startsWith(`${packsReal}${sep}`)) {
+    return fail(input.packDir, `the story folder resolves outside the packs folder (${packReal}).`);
   }
   const assetsDir = join(packReal, "assets");
   const assetsStat = lstatOrUndefined(assetsDir);

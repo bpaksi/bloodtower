@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { lintIndexTextReport } from "../lint/lint.ts";
 import { buildJob, defaultPacksDir } from "../needs/build.ts";
 import { assetKeys, CliError, resolveWorkFolder } from "../needs/deps.ts";
@@ -11,6 +11,7 @@ import { assetStudioBin, realSpawn, type SpawnFn } from "../render/spawn.ts";
 import { type CommitIo, commitPack } from "./commit.ts";
 import { readExportIndex } from "./exportIndex.ts";
 import { PACK_RULE, PackError, packIssue } from "./issues.ts";
+import { removeLeftovers, takeLock } from "./lock.ts";
 import { mapExport, serializeIndex } from "./map.ts";
 
 export interface PackIo {
@@ -80,6 +81,7 @@ export const runPack = async (argv: readonly string[], io: PackIo): Promise<numb
     return 2;
   }
   let temp: string | undefined;
+  let release: (() => void) | undefined;
   try {
     // The work folder comes first: with none set, nothing is read, written or spawned (AS-CONFIG-1).
     const workFolder = resolveWorkFolder(io.env, io.cwd, args.workFolder);
@@ -103,6 +105,10 @@ export const runPack = async (argv: readonly string[], io: PackIo): Promise<numb
       ]);
     }
     const built = buildJob(args.story, { packsDir });
+
+    // One run per story at a time, for the whole run (A1-25).
+    release = takeLock(dirname(job));
+    for (const name of removeLeftovers(packDir)) io.out(`removed leftover ${name}\n`);
 
     // Real folder of our own, outside the work folder (export refuses an out folder inside it).
     temp = realpathSync(mkdtempSync(join(tmpdir(), "bt-pack-")));
@@ -158,6 +164,7 @@ export const runPack = async (argv: readonly string[], io: PackIo): Promise<numb
     }
     const committed = commitPack({
       packDir,
+      packsDir,
       exportDir,
       indexText,
       files,
@@ -185,6 +192,13 @@ export const runPack = async (argv: readonly string[], io: PackIo): Promise<numb
     io.err(`assets:pack: ${errorText(error)}\n`);
     return 1;
   } finally {
+    if (release !== undefined) {
+      try {
+        release();
+      } catch (error) {
+        io.err(`assets:pack: could not release the lock: ${errorText(error)}\n`);
+      }
+    }
     if (temp !== undefined) {
       try {
         rmSync(temp, { recursive: true, force: true });
