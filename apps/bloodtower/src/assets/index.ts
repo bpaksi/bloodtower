@@ -24,3 +24,4 @@ export {
   workPathsFor,
   writeJob,
 } from "./needs/job.ts";
+export { failedAssets, type RenderIo, runRender } from "./render/index.ts";

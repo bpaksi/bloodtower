@@ -99,12 +99,12 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
 
 ### Step 4: `assets:render`
 - Depends on: 2 (asset-studio 0.2)
-- Touches: `apps/bloodtower/src/assets/render/**`
+- Touches: `apps/bloodtower/src/assets/render/**`, `src/assets/index.ts` (one export line), the `assets:render` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and the root `package.json`, `apps/bloodtower/spec.md` (D43)
 - Deps change: no
-- Runs: local (calls paid APIs with Bob's key)
+- Runs: cloud for code and fake-provider tests; local only for the A1-04c evidence (a real render calls paid APIs with Bob's key)
 - Model: sonnet
 - Done when:
-  - `pnpm assets:render <story> [--ai] [--only voice|picture]` runs `needs`, then asset-studio `render` on the job. It prints what was made, what failed (each with its code) and what is still missing. It exits non-zero when anything failed.
+  - `pnpm assets:render <story> [--ai] [--only voice|picture]` runs `needs`, then runs the `asset-studio` bin's `render` on the job (the cli library reads the work folder; `render` and `export` are only the bin). It prints what was made, what failed (each with its code) and what is still missing. It exits non-zero when anything failed.
   - With no work folder set, it stops with asset-studio's `AS-CONFIG-1` message and does nothing else.
   - CI tests use asset-studio's fake providers. Bob renders 3 Dracula lines for real, as evidence in the PR.
 
