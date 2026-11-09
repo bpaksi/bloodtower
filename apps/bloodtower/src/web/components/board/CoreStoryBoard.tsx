@@ -4,6 +4,7 @@ import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
+import { AssetIdLabel } from "./AssetIdLabel";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { OpeningMoment } from "./OpeningMoment";
@@ -101,6 +102,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           <figcaption>{place.caption}</figcaption>
         </figure>
       ) : null}
+      {layer === "place" && place ? <AssetIdLabel assetId={place.stillId} /> : null}
       {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
       {debug ? (
         <pre className="mt-4 max-h-64 overflow-auto text-xs opacity-70">

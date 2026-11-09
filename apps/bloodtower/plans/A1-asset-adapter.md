@@ -140,12 +140,14 @@ Split in two PRs. **6a** is the import code and tests (`assets:import`), with no
 
 ### Step 7: Board shows the asset ID (DEC-392)
 - Depends on: 5
-- Touches: `apps/bloodtower/src/web/components/board/**`, `apps/bloodtower/src/server/config.ts`
+- Touches: `apps/bloodtower/src/web/components/board/**`, the web `next.config.ts` (the env mapping only), one new e2e spec under `apps/bloodtower/src/e2e/tests/`, `apps/bloodtower/spec.md` (D46)
 - Deps change: no
 - Runs: cloud
 - Model: sonnet
 - Done when:
-  - With `SHOW_ASSET_IDS=1`, the board shows the current Portrait, Painting, Scroll or Reveal asset ID in small type in the bottom-left corner, inside the safe area. With it unset, nothing shows. Unit test plus one e2e screenshot.
+  - With `SHOW_ASSET_IDS=1`, the board shows the id of the asset on screen in a fixed `[data-asset-id-label]`, bottom-left inside the safe margin, 14-16 px at 1920×1080. Unset or any other value: the element is not in the DOM. No id: no element. A new asset replaces the label (A1-07b). Unit tests.
+  - Scope: only the ids `board/**` already knows (the Keeper line id, `CameraStill`'s `assetId`, the place still id). Portrait, Scroll and Reveal are not yet on the board (D46).
+  - No overlap with the caption or the Keeper controls at 1920×1080 (e2e, flagged build), not on the iPad pages, one screenshot.
   - Viewports: 1920×1080 board.
 
 ### Step 8: The `bt-assets` skill
