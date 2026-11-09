@@ -89,7 +89,7 @@ export const failedAssets = (
     const match = CODE_LINE.exec(line);
     if (match === null || NOT_AN_ASSET.has(match[1] as string)) continue;
     const message = match[2] as string;
-    const id = byLength.find((key) => message.startsWith(key));
+    const id = byLength.find((key) => message.startsWith(`${key}:`));
     found.push({ code: match[1] as string, id: id ?? "-" });
   }
   return found;
@@ -120,14 +120,25 @@ export const runRender = async (argv: readonly string[], io: RenderIo): Promise<
     if (args.only !== undefined) binArgs.push("--only", args.only);
     if (args.ai) binArgs.push("--ai");
     binArgs.push("--work-folder", workFolder);
+    // The child's output goes to the person as it is written; it is also kept for the summary.
+    let streamed = false;
     const result = await (io.spawn ?? realSpawn)(process.execPath, binArgs, {
       env: io.env,
       cwd: io.cwd,
+      onStdout: (text) => {
+        streamed = true;
+        io.out(text);
+      },
+      onStderr: (text) => {
+        streamed = true;
+        io.err(text);
+      },
     });
-    if (result.stderr !== "")
-      io.err(result.stderr.endsWith("\n") ? result.stderr : `${result.stderr}\n`);
-    if (result.stdout !== "")
-      io.out(result.stdout.endsWith("\n") ? result.stdout : `${result.stdout}\n`);
+    if (!streamed) {
+      // A spawn function that does not stream: pass the collected output through once.
+      if (result.stderr !== "") io.err(result.stderr);
+      if (result.stdout !== "") io.out(result.stdout);
+    }
 
     const after = readIndex(paths);
     const made = Object.keys(after).filter(
@@ -140,9 +151,14 @@ export const runRender = async (argv: readonly string[], io: RenderIo): Promise<
       result.stderr,
       rows.map((row) => row.id),
     );
-    if (reported === null) {
-      // The bin stopped before it rendered (for example AS-FAKE-2); its stderr has the reason.
-      io.err(`assets:render: render did not finish (exit ${result.code}).\n`);
+    const exit = result.signal === undefined ? `exit ${result.code}` : `killed by ${result.signal}`;
+    if (reported === null || (result.code !== 0 && failures.length === 0)) {
+      // The bin stopped without naming a failed asset (a crash, a kill, AS-FAKE-2…): say why.
+      const tail = result.stderr.trim().split("\n").slice(-5).join("\n");
+      io.err(
+        `assets:render: render did not finish (${result.signal === undefined ? exit : `render was ${exit}`})${tail === "" ? "" : `; last stderr:\n${tail}`}\n`,
+      );
+      if (reported !== null) io.out(`made ${made}, failed 0, missing ${missing}\n`);
       return result.code === 0 ? 1 : result.code;
     }
     const failed = Number(reported[1]);

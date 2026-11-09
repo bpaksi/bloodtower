@@ -6,13 +6,21 @@ export interface SpawnResult {
   code: number;
   stdout: string;
   stderr: string;
+  /** Set when the child was ended by a signal (code is then 128). */
+  signal?: string;
 }
 
 /** Runs a program to the end. Injected so a test can spy on it or stand in for the bin. */
 export type SpawnFn = (
   command: string,
   args: readonly string[],
-  options: { env: Readonly<Record<string, string | undefined>>; cwd: string },
+  options: {
+    env: Readonly<Record<string, string | undefined>>;
+    cwd: string;
+    /** Called with each chunk as the child writes it. */
+    onStdout?: (text: string) => void;
+    onStderr?: (text: string) => void;
+  },
 ) => Promise<SpawnResult>;
 
 /**
@@ -31,14 +39,21 @@ export const realSpawn: SpawnFn = (command, args, options) =>
     const child = spawn(command, [...args], { env, cwd: options.cwd, stdio: "pipe" });
     const out: Buffer[] = [];
     const err: Buffer[] = [];
-    child.stdout.on("data", (chunk: Buffer) => out.push(chunk));
-    child.stderr.on("data", (chunk: Buffer) => err.push(chunk));
+    child.stdout.on("data", (chunk: Buffer) => {
+      out.push(chunk);
+      options.onStdout?.(chunk.toString("utf8"));
+    });
+    child.stderr.on("data", (chunk: Buffer) => {
+      err.push(chunk);
+      options.onStderr?.(chunk.toString("utf8"));
+    });
     child.on("error", reject);
     child.on("close", (code, signal) => {
       resolve({
         code: code ?? (signal === null ? 1 : 128),
         stdout: Buffer.concat(out).toString("utf8"),
         stderr: Buffer.concat(err).toString("utf8"),
+        ...(signal === null ? {} : { signal }),
       });
     });
   });

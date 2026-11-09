@@ -39,7 +39,7 @@ const whitelistEnv = (s: Setup, extra: Record<string, string> = {}) => ({
 const run = async (
   s: Setup,
   argv: string[],
-  options: { withWorkFolder?: boolean; spawn?: SpawnFn; fakes?: boolean } = {},
+  options: { withWorkFolder?: boolean; spawn?: SpawnFn; fakes?: boolean; cwd?: string } = {},
 ) => {
   let out = "";
   let err = "";
@@ -55,7 +55,7 @@ const run = async (
         options.fakes === false
           ? { ...whitelistEnv(s), ASSET_STUDIO_FAKE_PROVIDERS: "" }
           : whitelistEnv(s),
-      cwd: tempDir("cwd"),
+      cwd: options.cwd ?? tempDir("cwd"),
       out: (t) => {
         out += t;
       },
@@ -99,18 +99,20 @@ describe("A1-04a: render counts under fake providers", () => {
 });
 
 describe("A1-04a: --only leaves the other media alone, avatar is not offered", () => {
-  it("--only voice changes only voice ids and --only picture only picture ids", async () => {
+  it("--only voice on a fresh work folder makes exactly the voice ids", async () => {
     const s = setup();
     const voice = await run(s, ["fx", "--only", "voice"]);
     expect(voice.code).toBe(0);
+    expect(voice.out).toContain("rendered 2, failed 0");
     expect(keysOf(s)).toEqual(VOICE_IDS);
-    const voiceEntries = readIndex(workPathsFor(s.workFolder, "fx"));
+  }, 60000);
 
+  it("--only picture --ai on a fresh work folder makes exactly the picture ids", async () => {
+    const s = setup();
     const picture = await run(s, ["fx", "--only", "picture", "--ai"]);
     expect(picture.code).toBe(0);
-    expect(keysOf(s)).toEqual([...PICTURE_IDS, ...VOICE_IDS].sort());
-    const after = readIndex(workPathsFor(s.workFolder, "fx"));
-    for (const id of VOICE_IDS) expect(after[id]).toEqual(voiceEntries[id]);
+    expect(picture.out).toContain("rendered 2, failed 0");
+    expect(keysOf(s)).toEqual(PICTURE_IDS);
   }, 60000);
 
   it("--only avatar exits 2 with a usage message and spawns nothing", async () => {
@@ -134,9 +136,11 @@ describe("A1-04b: no work folder", () => {
   it("stops with AS-CONFIG-1, changes nothing and never spawns the bin", async () => {
     const s = setup();
     await run(s, ["fx", "--ai"]);
-    const before = snapshot(s.workFolder);
+    const cwd = tempDir("cwd");
+    const before = [s.workFolder, s.packs, cwd].map(snapshot);
     let spawned = 0;
     const result = await run(s, ["fx", "--ai"], {
+      cwd,
       withWorkFolder: false,
       spawn: async (...args) => {
         spawned++;
@@ -146,7 +150,7 @@ describe("A1-04b: no work folder", () => {
     expect(result.code).not.toBe(0);
     expect(result.err).toContain("AS-CONFIG-1");
     expect(spawned).toBe(0);
-    expect(snapshot(s.workFolder)).toBe(before);
+    expect([s.workFolder, s.packs, cwd].map(snapshot)).toEqual(before);
   }, 60000);
 });
 
@@ -161,6 +165,15 @@ describe("A1-04b: partial failure", () => {
     expect(keysOf(s)).toEqual(["fixture.01.vo-01", ...PICTURE_IDS].sort());
   }, 60000);
 
+  it("matches a job key only when the message continues with a colon", () => {
+    expect(failedAssets("AS-VOICE-5: a.1x: too long.\n", ["a.1", "a.1x"])).toEqual([
+      { code: "AS-VOICE-5", id: "a.1x" },
+    ]);
+    expect(failedAssets("AS-VOICE-5: a.1x: too long.\n", ["a.1"])).toEqual([
+      { code: "AS-VOICE-5", id: "-" },
+    ]);
+  });
+
   it("reads a code and a job key from the bin's stderr and ignores the summary lines", () => {
     const stderr =
       "AS-FAKE-1: fake providers in use\nAS-VOICE-5: fixture.01.vo-02: too long.\nAS-RENDER-2: 1 failed.\n";
@@ -168,6 +181,47 @@ describe("A1-04b: partial failure", () => {
       { code: "AS-VOICE-5", id: "fixture.01.vo-02" },
     ]);
   });
+});
+
+describe("A1-04b: the bin ends without naming a failed asset", () => {
+  const fake =
+    (result: { code: number; stdout?: string; stderr?: string; signal?: string }): SpawnFn =>
+    async () => ({ stdout: "", stderr: "", ...result });
+
+  it("names the signal when the bin is killed", async () => {
+    const result = await run(setup(), ["fx"], {
+      spawn: fake({ code: 128, signal: "SIGTERM" }),
+    });
+    expect(result.code).toBe(128);
+    expect(result.err).toContain("render was killed by SIGTERM");
+  });
+
+  it("prints the exit code and the stderr tail for a crash with no AS- line", async () => {
+    const result = await run(setup(), ["fx"], {
+      spawn: fake({ code: 3, stdout: "rendered 0, failed 0\n", stderr: "boom: out of memory\n" }),
+    });
+    expect(result.code).toBe(3);
+    expect(result.err).toContain("render did not finish (exit 3)");
+    expect(result.err).toContain("boom: out of memory");
+  });
+
+  it("passes the child's output through as it is written", async () => {
+    const chunks: string[] = [];
+    const result = await run(setup(), ["fx", "--only", "voice"], {
+      spawn: async (command, args, options) =>
+        realSpawn(command, args, {
+          ...options,
+          onStderr: (text) => {
+            chunks.push(text);
+            options.onStderr?.(text);
+          },
+        }),
+    });
+    expect(result.code).toBe(0);
+    expect(chunks.join("")).toContain("AS-FAKE-1");
+    expect(result.err).toContain("AS-FAKE-1");
+    expect(result.out).toContain("rendered 2, failed 0");
+  }, 60000);
 });
 
 describe("A1-04b: missing key", () => {
