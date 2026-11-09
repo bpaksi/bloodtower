@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -24,13 +24,17 @@ const CUE = {
 };
 const REPO_PACKS = resolve(import.meta.dirname, "../../../../../packs");
 
-const run = (argv: string[], env: Record<string, string | undefined> = {}) => {
+const run = (
+  argv: string[],
+  env: Record<string, string | undefined> = {},
+  dirs: { cwd?: string; configDir?: string } = {},
+) => {
   let out = "";
   let err = "";
-  const configDir = tempDir("config");
+  const configDir = dirs.configDir ?? tempDir("config");
   const code = runNeeds(argv, {
     env: { ASSET_STUDIO_CONFIG_DIR: configDir, ...env },
-    cwd: tempDir("cwd"),
+    cwd: dirs.cwd ?? tempDir("cwd"),
     out: (t) => {
       out += t;
     },
@@ -40,6 +44,17 @@ const run = (argv: string[], env: Record<string, string | undefined> = {}) => {
   });
   return { code, out, err };
 };
+
+/** Every file under a folder with a hash of its bytes, so a changed byte shows. */
+const snapshot = (dir: string): string =>
+  readdirSync(dir, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile())
+    .map((e) => {
+      const file = join(e.parentPath, e.name);
+      return `${file} ${createHash("sha256").update(readFileSync(file)).digest("hex")}`;
+    })
+    .sort()
+    .join("\n");
 
 const issuesOf = (fn: () => unknown) => {
   try {
@@ -158,10 +173,16 @@ describe("A1-02a: pack to job, work folder, needs list", () => {
 
   it("stops with AS-CONFIG-1 and writes nothing when no work folder is set", () => {
     const cwd = tempDir("cwd");
-    const { code, err } = run(["test"], {});
+    const configDir = tempDir("config");
+    const packs = tempDir("pack");
+    const dir = fullPack(packs);
+    const before = snapshot(dir);
+    const { code, err } = run(["fx", "--packs-dir", packs], {}, { cwd, configDir });
     expect(code).toBe(3);
     expect(err).toContain("AS-CONFIG-1");
     expect(readdirSync(cwd)).toEqual([]);
+    expect(readdirSync(configDir)).toEqual([]);
+    expect(snapshot(dir)).toBe(before);
   });
 
   it("leaves the previous job when the write fails, and no temp file", () => {
@@ -208,15 +229,13 @@ describe("A1-02a: pack to job, work folder, needs list", () => {
           rename: () => {
             throw new Error("rename failed");
           },
-          remove: (p) => {
-            if (existsSync(p)) writeFileSync(p, "");
-            expect(existsSync(p)).toBe(true);
-          },
+          remove: (p) => rmSync(p, { force: true }),
           log: () => {},
         },
       ),
     ).toThrow("rename failed");
     expect(readFileSync(path, "utf8")).toBe(before);
+    expect(readdirSync(join(wf, "fx"))).toEqual(["asset-job.json"]);
   });
 
   it("reports each key with its status from a seeded index.json", () => {
@@ -289,6 +308,23 @@ describe("A1-02b: cast, counts and ID sets", () => {
     expect(reasons).toEqual({ "invalid-id": 272, private: 188, repeated: 36 });
     // 710 script lines are all accounted for: voiced + silent.
     expect(job.lines.length + silent.length).toBe(710);
+  });
+
+  it("keeps the Loremaster audio-only (no moods) even with no voiced line", () => {
+    const cast = `${CAST}`;
+    const dir = writeStoryPack(tempDir("pack"), "fx", {
+      files: {
+        "cast.yaml": cast,
+        "script.yaml":
+          '- id: m.01\n  lines:\n    - {id: m.01.vo-01, speaker: guide, text: "Hi."}\n',
+      },
+    });
+    const { job } = buildJobFromDir("fx", dir);
+    const narrator = job.cast.find((c) => c.id === "narrator");
+    expect(narrator?.voice).toBeUndefined();
+    expect(narrator?.moods).toEqual([]);
+    const ids = computeRows(job, workPathsFor(tempDir("wf"), "fx")).map((r) => r.id);
+    expect(ids.filter((id) => id.startsWith("portrait.narrator"))).toEqual([]);
   });
 
   it("makes the Loremaster audio-only and gives a cast member with no voiced line stills only", () => {
@@ -425,10 +461,9 @@ describe("A1-02d: invalid input and optional split files", () => {
 
   it("never writes into the pack", () => {
     const dir = fullPack(tempDir("pack"));
-    const list = () => readdirSync(dir, { recursive: true }).sort().join();
-    const before = list();
+    const before = snapshot(dir);
     run(["fx", "--packs-dir", resolve(dir, ".."), "--work-folder", tempDir("wf")]);
-    expect(list()).toBe(before);
+    expect(snapshot(dir)).toBe(before);
   });
 
   it("reports file, path and rule for a pack that does not match its schema", () => {
@@ -538,6 +573,27 @@ describe("A1-02d: invalid input and optional split files", () => {
     const injected = { ...job, cast: job.cast.map((c) => ({ ...c, status: "final" })) };
     expect(jobSchema.safeParse(injected).success).toBe(false);
     expect(jobSchema.safeParse({ ...job, status: "final" }).success).toBe(false);
+  });
+
+  it("reports a dangling script.yaml symlink instead of treating it as absent", () => {
+    const dir = writeStoryPack(tempDir("pack"), "fx", { files: { "cast.yaml": CAST } });
+    symlinkSync(join(dir, "gone.yaml"), join(dir, "script.yaml"));
+    const found = issuesOf(() => buildJobFromDir("fx", dir));
+    expect(found.map((i) => `${i.file} ${i.path} ${i.rule}`)).toContain("script.yaml (file) A1-1");
+  });
+
+  it("lists the first silent captions with reasons on stderr, all with --verbose", () => {
+    const root = tempDir("pack");
+    fullPack(root);
+    const brief = run(["fx", "--packs-dir", root, "--work-folder", tempDir("wf")]);
+    expect(brief.err).toContain("silent captions: 7");
+    expect(brief.err).toContain("fill-in  fixture.02.vo-01  file=script.yaml");
+    expect(brief.err).toContain("--verbose lists all");
+    const all = run(["fx", "--verbose", "--packs-dir", root, "--work-folder", tempDir("wf")]);
+    expect(all.err).toContain(
+      "legacy-inline  -  file=pack.yaml path=chapters.0.start.effects.0.lines.0",
+    );
+    expect(all.err).not.toContain("--verbose lists all");
   });
 
   it("reports a missing pack folder", () => {

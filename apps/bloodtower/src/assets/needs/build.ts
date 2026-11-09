@@ -361,8 +361,8 @@ const buildCast = (files: PackFiles, manifest: Manifest): Cast => {
       id: entry.id,
       name: entry.name,
       ...(speaks && entry.voice ? { voice: entry.voice } : {}),
-      // Loremaster: audio only, no portraits (D8). A cast member with no voiced line: stills only.
-      moods: speaks && LOREMASTER_IDS.includes(entry.id) ? [] : [...MOODS],
+      // Loremaster: audio only, never a portrait (D8). Others without a voiced line: stills only.
+      moods: LOREMASTER_IDS.includes(entry.id) ? [] : [...MOODS],
     };
   });
   return { members, lines, silent };

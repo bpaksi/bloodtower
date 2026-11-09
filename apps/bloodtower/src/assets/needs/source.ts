@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { extname, isAbsolute, join, relative, sep } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { type Issue, issue, RULE } from "./issues.ts";
@@ -27,8 +27,19 @@ export class PackFiles {
     this.root = real;
   }
 
+  /**
+   * Whether an optional file is there. Only ENOENT means absent; a dangling symlink or a
+   * permission error counts as present, so the read that follows reports it (decision 0003).
+   */
   has(rel: string): boolean {
-    return existsSync(join(this.root, rel));
+    try {
+      lstatSync(join(this.root, rel));
+      return true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      this.issues.push(issue(rel, "(file)", RULE.file, errorText(error)));
+      return false;
+    }
   }
 
   /** The bytes of one file, or undefined with an issue. The path must stay inside the pack. */
