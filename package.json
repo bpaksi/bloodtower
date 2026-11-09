@@ -14,6 +14,7 @@
     "check": "biome check . && pnpm check:repo && pnpm -r --if-present typecheck && pnpm -r --workspace-concurrency=1 --if-present test && pnpm pack:lint:all",
     "pack:lint": "pnpm --dir apps/bloodtower pack:lint",
     "pack:lint:all": "pnpm --dir apps/bloodtower pack:lint:all",
+    "assets:needs": "pnpm --dir apps/bloodtower assets:needs",
     "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && pnpm brief:lint && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
     "brief:lint": "node scripts/check-briefs.mjs",
     "graph": "node apps/game-workbench/src/web/cli/graph.ts",
