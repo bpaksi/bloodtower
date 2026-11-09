@@ -32,6 +32,7 @@ See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all chan
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |
 | `apps/tower-poc` | `pnpm e2e` | Builds, then runs Playwright on port 4748 at three viewports |
+| `apps/bloodtower` | `pnpm e2e` | Builds, then runs Playwright on port 4788 (or the worktree's `.wt.json` e2e port) at three viewports |
 
 ## How work flows
 
