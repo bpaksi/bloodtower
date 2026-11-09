@@ -67,7 +67,7 @@ export const lintPathWithIndex = async (
   if (issues.length === 0) return report;
   return {
     exitCode: 1,
-    lines: [...(report.exitCode === 0 ? [] : report.lines), ...formatIssues(issues)],
+    lines: [...report.lines, ...formatIssues(issues)],
   };
 };
 

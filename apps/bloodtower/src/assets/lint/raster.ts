@@ -23,22 +23,25 @@ export const readRaster = async (file: string): Promise<Raster> => {
   return { width: info.width, height: info.height, data: new Uint8Array(data) };
 };
 
-/** DEC-207: the anchor box sits fully inside the portrait (fractions, positive size). */
+/**
+ * DEC-207: the anchor box sits fully inside the portrait. `x, y` is the mouth centre and `w, h`
+ * the box size, all fractions (story-pack-format.md): `x ± w/2` and `y ± h/2` stay within 0..1.
+ */
 export const anchorInBounds = (a: Anchor): boolean =>
   [a.x, a.y, a.w, a.h].every(Number.isFinite) &&
-  a.x >= 0 &&
-  a.y >= 0 &&
   a.w > 0 &&
   a.h > 0 &&
-  a.x + a.w <= 1 &&
-  a.y + a.h <= 1;
+  a.x - a.w / 2 >= 0 &&
+  a.y - a.h / 2 >= 0 &&
+  a.x + a.w / 2 <= 1 &&
+  a.y + a.h / 2 <= 1;
 
-/** The anchor box in whole pixels, rounded outward so a box edge never splits a pixel. */
+/** The anchor box (centre form) in whole pixels, rounded outward so a box edge never splits a pixel. */
 export const anchorPixels = (a: Anchor, width: number, height: number) => ({
-  x0: Math.floor(a.x * width),
-  y0: Math.floor(a.y * height),
-  x1: Math.min(width, Math.ceil((a.x + a.w) * width)),
-  y1: Math.min(height, Math.ceil((a.y + a.h) * height)),
+  x0: Math.max(0, Math.floor((a.x - a.w / 2) * width)),
+  y0: Math.max(0, Math.floor((a.y - a.h / 2) * height)),
+  x1: Math.min(width, Math.ceil((a.x + a.w / 2) * width)),
+  y1: Math.min(height, Math.ceil((a.y + a.h / 2) * height)),
 });
 
 /** Pixels that differ between two same-size rasters outside the anchor box. */

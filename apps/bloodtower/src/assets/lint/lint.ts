@@ -61,7 +61,17 @@ const entryIssues = (id: string, e: PackIndexEntry, index: PackIndex): Issue[] =
         ),
       );
     }
-  } else if (!isSoundKind(e.kind) && !isOtherKind(e.kind)) {
+  } else if (isSoundKind(e.kind)) {
+    if (PICTURE_KINDS.includes(prefix as (typeof PICTURE_KINDS)[number]) || prefix === "glow") {
+      out.push(
+        indexIssue(
+          id,
+          LINT_RULE.kind,
+          `the id starts with "${prefix}", a picture name, but the kind is "${e.kind}".`,
+        ),
+      );
+    }
+  } else if (!isOtherKind(e.kind)) {
     out.push(
       indexIssue(
         id,

@@ -15,6 +15,7 @@ import {
   lintIndexEntries,
   lintIndexText,
   lintPackAssets,
+  MOUTH_SHAPES,
   outsideAnchorChanges,
   packIndexSchema,
   readRaster,
@@ -30,6 +31,8 @@ afterAll(() => {
   for (const r of roots) rmSync(r, { recursive: true, force: true });
 });
 
+const allMouths = (file: string): Record<string, string> =>
+  Object.fromEntries(MOUTH_SHAPES.map((s) => [s, file]));
 const base = { root: "/unused", referenced: [] as string[], release: false };
 const rules = (issues: Issue[]) => issues.map((i) => i.rule);
 /** Exactly one issue, with the given rule, naming the asset id in path and message. */
@@ -44,6 +47,33 @@ describe("A1-03 index schema (step 5 imports it)", () => {
   it("parses ID -> {kind, file, size, captions, status}", () => {
     const parsed = packIndexSchema.safeParse({ assets: { "place.village": entry("place") } });
     expect(parsed.success).toBe(true);
+  });
+
+  it("accepts sound sizes in seconds and rejects an avatar with fewer than eight mouths", () => {
+    const sound = packIndexSchema.safeParse({
+      assets: { "door.a": entry("effect", { size: { seconds: 1.5 } }) },
+    });
+    expect(sound.success).toBe(true);
+    const few = packIndexSchema.safeParse({
+      assets: {},
+      avatar: {
+        dir: "a",
+        portrait: "p.png",
+        anchor: { x: 0.5, y: 0.5, w: 0.2, h: 0.2 },
+        mouths: { REST: "r.png" },
+      },
+    });
+    expect(few.success).toBe(false);
+    const all = packIndexSchema.safeParse({
+      assets: {},
+      avatar: {
+        dir: "a",
+        portrait: "p.png",
+        anchor: { x: 0.5, y: 0.5, w: 0.2, h: 0.2 },
+        mouths: allMouths("m.png"),
+      },
+    });
+    expect(all.success).toBe(true);
   });
 
   it("rejects a bad entry with rule A1-9 naming the path", async () => {
@@ -81,6 +111,14 @@ describe("A1-03a/b kind, mood, caption, drafts, missing ids", () => {
       lintIndexEntries(indexOf({ "tomb.crypt": entry("painting") }), base),
       LINT_RULE.kind,
       "tomb.crypt",
+    );
+  });
+
+  it("kind: a sound id cannot use a picture name (painting.x with kind effect)", () => {
+    only(
+      lintIndexEntries(indexOf({ "painting.x": entry("effect") }), base),
+      LINT_RULE.kind,
+      "painting.x",
     );
   });
 
@@ -191,9 +229,9 @@ describe("A1-03a glow masks", () => {
 describe("A1-03a avatar rules", () => {
   const W = 64;
   const H = 80;
-  const anchor = { x: 0.25, y: 0.5, w: 0.5, h: 0.25 }; // pixels x 16..48, y 40..60
+  const anchor = { x: 0.5, y: 0.625, w: 0.5, h: 0.25 }; // centre form: pixels x 16..48, y 40..60
   const portraitPixel = vignette(W, H);
-  const names = ["REST", "MBP", "CONS-EE", "EH-AE", "AH", "OH-ER", "OO-W", "FV"];
+  const names = [...MOUTH_SHAPES];
 
   const kit = async (
     label: string,
@@ -241,18 +279,18 @@ describe("A1-03a avatar rules", () => {
     expect(issues[0]?.message).toContain("1 pixels");
   });
 
-  it("an anchor that overflows the portrait fails A1-12", async () => {
+  it("an anchor box that overflows the portrait fails A1-12 (x, y is the centre)", async () => {
     const { dir, index } = await kit("bounds", () => ({ edit: inside }));
-    const bad = {
-      ...index,
-      avatar: { ...index.avatar!, anchor: { x: 0.75, y: 0.5, w: 0.5, h: 0.25 } },
-    };
-    const issues = await lintAvatar(bad, dir);
-    only(issues, LINT_RULE.anchorBounds, "avatar");
+    const avatar = index.avatar;
+    if (!avatar) throw new Error("fixture has an avatar");
+    const bad = { ...index, avatar: { ...avatar, anchor: { x: 0.05, y: 0.5, w: 0.2, h: 0.25 } } };
+    only(await lintAvatar(bad, dir), LINT_RULE.anchorBounds, "avatar");
+    expect(anchorInBounds({ x: 0.05, y: 0.5, w: 0.2, h: 0.25 })).toBe(false);
+    expect(anchorInBounds({ x: 0.9, y: 0.5, w: 0.15, h: 0.25 })).toBe(true);
+    expect(anchorInBounds({ x: 0.95, y: 0.5, w: 0.15, h: 0.25 })).toBe(false);
     expect(anchorInBounds(anchor)).toBe(true);
-    expect(anchorInBounds({ x: 0, y: 0, w: 1, h: 1 })).toBe(true);
-    expect(anchorInBounds({ x: -0.1, y: 0, w: 0.5, h: 0.5 })).toBe(false);
-    expect(anchorInBounds({ x: 0, y: 0, w: 0, h: 0.5 })).toBe(false);
+    expect(anchorInBounds({ x: 0.5, y: 0.5, w: 1, h: 1 })).toBe(true);
+    expect(anchorInBounds({ x: 0.5, y: 0.5, w: 0, h: 0.5 })).toBe(false);
   });
 
   it("the black-vignette recipe passes the dark edge, its inverse fails A1-14", async () => {
@@ -261,7 +299,7 @@ describe("A1-03a avatar rules", () => {
     await writeImage(join(dir, "avatars/g/u.png"), 128, 160, unvignetted(128, 160));
     const at = (portrait: string) =>
       lintAvatar(
-        indexOf({}, { dir: "avatars/g", portrait, anchor, mouths: { REST: portrait } }),
+        indexOf({}, { dir: "avatars/g", portrait, anchor, mouths: allMouths(portrait) }),
         dir,
       );
     expect(await at("v.png")).toEqual([]);
@@ -273,7 +311,7 @@ describe("A1-03a avatar rules", () => {
   it("an avatar folder outside the pack is refused", async () => {
     const dir = root("trav");
     const issues = await lintAvatar(
-      indexOf({}, { dir: "../x", portrait: "p.png", anchor, mouths: { REST: "p.png" } }),
+      indexOf({}, { dir: "../x", portrait: "p.png", anchor, mouths: allMouths("p.png") }),
       dir,
     );
     only(issues, LINT_RULE.index, "avatar");
@@ -296,18 +334,17 @@ describe("A1-03 regression: the legacy Keeper kit", () => {
     expect(rules(issues)).not.toContain(LINT_RULE.index);
   });
 
-  it("REST is identical to the portrait; the other seven change pixels outside anchor.json", async () => {
-    // Finding recorded for Bob: the legacy mouths were cut before DEC-207 and spill past anchor.json.
+  it("under the centre-form anchor all eight mouths are clean (0 flagged)", async () => {
     const issues = await lintAvatar(
       indexOf({}, { dir: "avatars/keeper", portrait: "portrait.png", anchor, mouths }),
       join(keeper, "../.."),
     );
-    const flagged = issues.filter((i) => i.rule === LINT_RULE.outsideAnchor);
-    expect(flagged).toHaveLength(7);
-    expect(flagged.some((i) => i.message.includes("mouth REST"))).toBe(false);
+    expect(issues.filter((i) => i.rule === LINT_RULE.outsideAnchor)).toEqual([]);
     const portrait = await readRaster(join(keeper, "portrait.png"));
-    const rest = await readRaster(join(keeper, "mouths/REST.png"));
-    expect(outsideAnchorChanges(portrait, rest, anchor)).toBe(0);
+    for (const shape of shapes) {
+      const frame = await readRaster(join(keeper, `mouths/${shape}.png`));
+      expect(outsideAnchorChanges(portrait, frame, anchor)).toBe(0);
+    }
   });
 });
 
@@ -327,7 +364,7 @@ describe("A1-03c scope", () => {
         dir: "avatars/g",
         portrait: "p.png",
         anchor: { x: 0.25, y: 0.5, w: 0.5, h: 0.25 },
-        mouths: { REST: "REST.png" },
+        mouths: allMouths("REST.png"),
       },
     );
     expect(packIndexSchema.safeParse(JSON.parse(JSON.stringify(index))).success).toBe(true);
@@ -379,6 +416,15 @@ describe("A1-03a pack:lint wiring", () => {
     const report = await lintPathWithIndex(join(r, "test"), r);
     expect(report.exitCode).toBe(0);
     expect(report.lines[0]).toContain("OK test");
+  });
+
+  it("an index issue keeps lintPath's own lines and warnings", async () => {
+    const r = packsDir();
+    await writeIndex(join(r, "test"), "final", "place.bazaar");
+    const plain = lintPath(join(r, "test"), r);
+    const report = await lintPathWithIndex(join(r, "test"), r);
+    expect(report.lines.slice(0, plain.lines.length)).toEqual(plain.lines);
+    expect(report.lines.length).toBeGreaterThan(plain.lines.length);
   });
 
   it("--release rejects a draft, naming rule and id", async () => {

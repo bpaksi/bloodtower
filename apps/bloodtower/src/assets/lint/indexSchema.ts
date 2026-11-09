@@ -8,13 +8,24 @@ export const OTHER_KINDS = ["line", "glow"] as const;
 export const STATUSES = ["draft", "final"] as const;
 
 export type IndexStatus = (typeof STATUSES)[number];
-export type IndexSize = { width: number; height: number } | { bytes: number };
+/** Pictures and masks: `{width, height}`. Sounds: `{seconds}`. Voiced lines: `{seconds}` or `{bytes}`. */
+export type IndexSize = { width: number; height: number } | { seconds: number } | { bytes: number };
+export const MOUTH_SHAPES = [
+  "REST",
+  "MBP",
+  "CONS-EE",
+  "EH-AE",
+  "AH",
+  "OH-ER",
+  "OO-W",
+  "FV",
+] as const;
 
 export interface PackIndexEntry {
   kind: string;
   /** File name under `<pack>/assets/`. */
   file: string;
-  /** Pixels for a picture or mask, bytes for a sound or line. */
+  /** Pixels for a picture or mask, seconds for a sound or line (bytes also accepted). */
   size: IndexSize;
   /** What the board shows for this asset: one caption per spoken line, empty otherwise. */
   captions: string[];
@@ -28,7 +39,7 @@ export interface PackIndexAvatar {
   portrait: string;
   /** Fractions of the portrait: x, y, w, h. */
   anchor: { x: number; y: number; w: number; h: number };
-  /** Mouth shape name -> frame file. */
+  /** All eight shapes (DEC-207), mouth shape name -> frame file. */
   mouths: Record<string, string>;
 }
 
@@ -54,6 +65,7 @@ const finite = (v: unknown): v is number => typeof v === "number" && Number.isFi
 const parseSize = (v: unknown): IndexSize | undefined => {
   if (!isRecord(v)) return undefined;
   if (posInt(v.width) && posInt(v.height)) return { width: v.width, height: v.height };
+  if (finite(v.seconds) && v.seconds > 0) return { seconds: v.seconds };
   if (posInt(v.bytes)) return { bytes: v.bytes };
   return undefined;
 };
@@ -87,10 +99,12 @@ const parseAvatar = (v: unknown, problems: SchemaProblem[]): PackIndexAvatar | u
   }
   if (
     !isRecord(mouths) ||
-    Object.keys(mouths).length === 0 ||
-    !Object.values(mouths).every((f) => typeof f === "string" && f !== "")
+    !MOUTH_SHAPES.every((shape) => typeof mouths[shape] === "string" && mouths[shape] !== "")
   ) {
-    bad(".mouths", "must map each mouth shape to a file name.");
+    bad(
+      ".mouths",
+      `must map all eight shapes (${MOUTH_SHAPES.join(", ")}) to a file name (DEC-207).`,
+    );
     ok = false;
   }
   if (!ok) return undefined;
@@ -129,7 +143,10 @@ const safeParse = (raw: unknown): ParseResult => {
         problems.push({ path: `${at}.file`, message: "must be a non-empty string." });
       }
       if (!size) {
-        problems.push({ path: `${at}.size`, message: "must be {width, height} or {bytes}." });
+        problems.push({
+          path: `${at}.size`,
+          message: "must be {width, height}, {seconds} or {bytes}.",
+        });
       }
       if (!captionsOk) problems.push({ path: `${at}.captions`, message: "must be strings." });
       if (!statusOk) {
