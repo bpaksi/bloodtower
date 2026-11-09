@@ -20,7 +20,7 @@ Drives the root `pnpm assets:*` commands for one story. Work folder layout: spec
 
 ## Redo
 
-"redo `<ID>`: `<note>`" becomes `pnpm assets:redo <story> <ID> "<note>"`, the exact id and the exact note, for the story the person named. An unknown story (`A1-26`) or id (`AS-ID-1`) is an error: show it, never guess the nearest name. If the asset is final, `assets:redo` stops with `A1-28` (redoing it drops it from the next pack and the next render pays for it again). Tell the person that, and only if they still want it, ask again before running it with `--final`. Then offer `assets:render` for a new draft (after the money notice above). The note stays in asset-studio's notes.
+"redo `<ID>`: `<note>`" becomes `pnpm assets:redo <story> <ID> "<note>"`, the exact id and the exact note, for the story the person named. An unknown story (`A1-26`) or id (`AS-ID-1`) is an error: show it, never guess the nearest name. If the asset is final, `assets:redo` stops with `A1-28` (redoing it drops it from the next pack and the next render pays for it again). Tell the person that, and only if they still want it, ask again before running it with `--final`. After a redo, re-render in the same mode the asset came from: a studio asset (such as a place painting, which comes from a studio master) needs its master file replaced, then `assets:render` without `--ai`; an AI asset needs `assets:render --ai`. A render with the other mode makes 0 for the redone id and leaves it `rejected`; if the render reports made 0 for that id, say so plainly. Offer `assets:render` for a new draft (after the money notice above). The note stays in asset-studio's notes.
 
 ## Import (one time)
 

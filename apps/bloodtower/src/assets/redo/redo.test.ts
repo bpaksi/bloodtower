@@ -309,6 +309,14 @@ describe("A1-08: the skill never marks anything final", () => {
     expect(at).toEqual([...at].sort((a, b) => a - b));
   });
 
+  it("SKILL.md tells the agent to re-render in the asset's own mode after a redo", () => {
+    const text = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+    expect(text).toMatch(/same mode the asset came from/);
+    expect(text).toMatch(/without `--ai`/);
+    expect(text).toMatch(/`assets:render --ai`/);
+    expect(text).toMatch(/made 0 for that id, say so plainly/);
+  });
+
   it("front matter names the skill and its triggers", () => {
     const text = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
     expect(text).toMatch(/^---\nname: bt-assets\ndescription: .+\n---\n/);
