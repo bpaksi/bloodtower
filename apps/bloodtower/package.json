@@ -13,6 +13,7 @@
     "pack:lint:all": "pnpm -F bloodtower-server pack:lint -- --all",
     "assets:needs": "pnpm -F bloodtower-assets needs",
     "assets:import": "pnpm -F bloodtower-assets run import",
+    "assets:render": "pnpm -F bloodtower-assets render",
     "playtest": "pnpm -F bloodtower-server playtest",
     "simulate": "pnpm -F bloodtower-server simulate"
   },

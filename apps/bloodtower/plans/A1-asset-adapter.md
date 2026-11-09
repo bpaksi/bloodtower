@@ -83,12 +83,12 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
 
 ### Step 3: BT asset lint
 - Depends on: 2
-- Touches: `apps/bloodtower/src/assets/lint/**`, `apps/bloodtower/src/server/scripts/packLint.ts`
-- Deps change: no
+- Touches: `apps/bloodtower/src/assets/lint/**`, `apps/bloodtower/src/assets/index.ts` (one line), `apps/bloodtower/src/assets/package.json` and `pnpm-lock.yaml` (`sharp` at `0.35.5`, the version the cli uses), `apps/bloodtower/src/server/scripts/packLint.ts`, `apps/bloodtower/src/server/pack/assets.ts` and its test (V-1 widened to the exact name `index.json` and `*.m4a`), `apps/bloodtower/spec.md` (D42)
+- Deps change: yes (`sharp` 0.35.5, already in the lockfile)
 - Runs: cloud
 - Model: sonnet
 - Done when:
-  - The pack lint (`pnpm pack:lint <story>`) also checks the pack's `assets/index.json` when it is there:
+  - The pack lint (`pnpm pack:lint <story>`) also checks the pack's `assets/index.json` when it is there, and `--release` also rejects any draft:
     - DEC-207's limits that need no chin line on every avatar: frames match, lines fit (at most 120 characters, DEC-576) and dark edges. The chin check comes in step 9.
     - Picture kinds are one of painting, portrait, foe, place, item, cover; sound kinds effect or ambience; moods are DEC-344's five (DEC-844).
     - A glow mask `glow.<entry>` matches its `painting.<entry>`'s size (DEC-401, DEC-844).
@@ -99,12 +99,12 @@ asset-job.json ──► @asset-studio/cli render [--ai] ──► work folder (
 
 ### Step 4: `assets:render`
 - Depends on: 2 (asset-studio 0.2)
-- Touches: `apps/bloodtower/src/assets/render/**`
+- Touches: `apps/bloodtower/src/assets/render/**`, `src/assets/index.ts` (one export line), the `assets:render` scripts in `src/assets/package.json`, `apps/bloodtower/package.json` and the root `package.json`, `apps/bloodtower/spec.md` (D43)
 - Deps change: no
-- Runs: local (calls paid APIs with Bob's key)
+- Runs: cloud for code and fake-provider tests; local only for the A1-04c evidence (a real render calls paid APIs with Bob's key)
 - Model: sonnet
 - Done when:
-  - `pnpm assets:render <story> [--ai] [--only voice|picture]` runs `needs`, then asset-studio `render` on the job. It prints what was made, what failed (each with its code) and what is still missing. It exits non-zero when anything failed.
+  - `pnpm assets:render <story> [--ai] [--only voice|picture]` runs `needs`, then runs the `asset-studio` bin's `render` on the job (the cli library reads the work folder; `render` and `export` are only the bin). It prints what was made, what failed (each with its code) and what is still missing. It exits non-zero when anything failed.
   - With no work folder set, it stops with asset-studio's `AS-CONFIG-1` message and does nothing else.
   - CI tests use asset-studio's fake providers. Bob renders 3 Dracula lines for real, as evidence in the PR.
 

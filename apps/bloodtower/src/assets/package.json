@@ -11,12 +11,14 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "needs": "tsx needs/main.ts",
-    "import": "tsx import/main.ts"
+    "import": "tsx import/main.ts",
+    "render": "tsx render/main.ts"
   },
   "dependencies": {
     "@asset-studio/cli": "0.2.2",
     "@asset-studio/formats": "0.2.2",
     "@asset-studio/player": "0.2.2",
+    "sharp": "0.35.5",
     "tsx": "4.23.15",
     "yaml": "2.9.1"
   },

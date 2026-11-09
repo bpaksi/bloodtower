@@ -1,4 +1,5 @@
 export { ImportError, runImport, runImportCli } from "./import/index.ts";
+export * from "./lint/index.ts";
 export {
   type BuildOptions,
   type BuildResult,
@@ -24,3 +25,4 @@ export {
   workPathsFor,
   writeJob,
 } from "./needs/job.ts";
+export { failedAssets, type RenderIo, runRender } from "./render/index.ts";
