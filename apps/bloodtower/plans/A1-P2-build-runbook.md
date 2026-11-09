@@ -68,11 +68,11 @@ Updated 2026-11-09.
 - `assets:needs` emits the `music` kind but the lint refuses it (A1-15).
 - Partial-pack ruling A: A1-19 warns outside `--release` (D45). Confirm.
 - Studio mode always fails `AS-GLOW-2` for a story with a glow mask (D43, D47).
-- G-A1-01 "the board plays the line once" has no A1 step that plays a packed line. Add a playback step, or reword G-A1.
+- G-A1-01 "board/TV plays line once" has no A1 step that plays a packed line. Add a playback step, or reword G-A1.
 - A1-4c: the real render of 3 Dracula lines, after the art hold.
 - 6b: the OneDrive backup of tts-explorer's `audio-cache/`.
 - 12 e2e tests fail on main (w1-chrome 2, w4-party 4, w6-board-layers 3, w7-move-map 3). A separate fix session; the w6 test edit awaits Bob's OK.
-- IMP-8 (A1-6a import test) times out at 60 s on a loaded machine; a fix PR is in progress.
+- IMP-8 (A1-6a import test) times out at 60 s on a loaded machine; fix on branch `fix/bloodtower-imp8-slow-test`, PR pending.
 
 ## Process slip
 
