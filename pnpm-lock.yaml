@@ -52,6 +52,31 @@ importers:
         specifier: 10.0.6
         version: 10.0.6
 
+  apps/bloodtower/src/assets:
+    dependencies:
+      '@asset-studio/cli':
+        specifier: 0.2.2
+        version: 0.2.2(@types/node@22.20.5)
+      '@asset-studio/formats':
+        specifier: 0.2.2
+        version: 0.2.2
+      '@asset-studio/player':
+        specifier: 0.2.2
+        version: 0.2.2(react@19.3.0)
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: 5.0.4
+        version: 5.0.4(@types/node@22.20.5)(jsdom@29.1.1)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
   apps/bloodtower/src/e2e:
     devDependencies:
       '@playwright/test':
@@ -151,11 +176,11 @@ importers:
   apps/bloodtower/src/web:
     dependencies:
       '@asset-studio/formats':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.2.2
+        version: 0.2.2
       '@asset-studio/player':
-        specifier: 0.2.0
-        version: 0.2.0(react@19.3.0)
+        specifier: 0.2.2
+        version: 0.2.2(react@19.3.0)
       '@base-ui/react':
         specifier: 1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -645,12 +670,17 @@ packages:
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
 
-  '@asset-studio/formats@0.2.0':
-    resolution: {integrity: sha512-5q8LvQPviwlU3xUF0E+DPDwLHsX+7x8iokCnTq3oZ+sCTC+zMeTN14XVYTLhOaw3QgJModTd5gFhD+xrOm5CRw==}
+  '@asset-studio/cli@0.2.2':
+    resolution: {integrity: sha512-MtvNHYXBWljbz6rauOyMyjQnJ38UvuDNtfej8PNhLSJ8j9iHubIdcihBnECBPzGz6AsuO0xIluljItGbGOmO0A==}
+    engines: {node: '>=22'}
+    hasBin: true
+
+  '@asset-studio/formats@0.2.2':
+    resolution: {integrity: sha512-460xFYk2jVglceD+Z1Beq/c4W0gvKMQ0UUwWCahQUjvoPFVko7xJxdPbIM/PCpc1MpoQcWHd7qel+uEOrsT8KQ==}
     engines: {node: '>=22'}
 
-  '@asset-studio/player@0.2.0':
-    resolution: {integrity: sha512-Bf/Lp1adGYyMcrJemJswQNlarOR12j65Y+1tmzB6CvZciOTu4LrKcrt/Zz+e1Z531bwmJxv3Q1lli7z7DstuKw==}
+  '@asset-studio/player@0.2.2':
+    resolution: {integrity: sha512-73sAL09ba9e80ZF+6QGY4Aw/TiUWSYmZQnwMkK6uXMbjpE5KEFpMj9lDljM7V2dUvRQ6n1TYo+tYZBRpPmJ80g==}
     engines: {node: '>=22'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
@@ -3792,13 +3822,20 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
-  '@asset-studio/formats@0.2.0':
+  '@asset-studio/cli@0.2.2(@types/node@22.20.5)':
+    dependencies:
+      '@asset-studio/formats': 0.2.2
+      sharp: 0.35.5(@types/node@22.20.5)
+    transitivePeerDependencies:
+      - '@types/node'
+
+  '@asset-studio/formats@0.2.2':
     dependencies:
       zod: 4.6.7
 
-  '@asset-studio/player@0.2.0(react@19.3.0)':
+  '@asset-studio/player@0.2.2(react@19.3.0)':
     dependencies:
-      '@asset-studio/formats': 0.2.0
+      '@asset-studio/formats': 0.2.2
       react: 19.3.0
 
   '@babel/code-frame@7.29.7':

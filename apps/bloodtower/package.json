@@ -11,6 +11,7 @@
     "e2e": "pnpm -F bloodtower-e2e e2e",
     "pack:lint": "pnpm -F bloodtower-server pack:lint",
     "pack:lint:all": "pnpm -F bloodtower-server pack:lint -- --all",
+    "assets:needs": "pnpm -F bloodtower-assets needs",
     "playtest": "pnpm -F bloodtower-server playtest",
     "simulate": "pnpm -F bloodtower-server simulate"
   },
