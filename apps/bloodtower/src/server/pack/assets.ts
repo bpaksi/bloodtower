@@ -94,8 +94,13 @@ export const resolveAssetImage = (assetsDir: string, asset: PackAsset): string |
   return undefined;
 };
 
+/** Non-image files `assets/` may hold (A1 step 3): the generated index and `.m4a` sounds. */
+export const isAllowedAssetsFile = (name: string) =>
+  isImageFileName(name) || name === "index.json" || extname(name).toLowerCase() === ".m4a";
+
 /**
- * V-1: `assets/` may hold only image files, no nested folders.
+ * V-1: `assets/` may hold only image files, the exact name `index.json` and `.m4a` sounds, no
+ * nested folders.
  * Missing `assets/` is allowed.
  */
 export const validateAssetsFolder = (
@@ -165,12 +170,12 @@ export const validateAssetsFolder = (
       });
       continue;
     }
-    if (!isImageFileName(name)) {
+    if (!isAllowedAssetsFile(name)) {
       push({
         rule: "V-1",
         file: label,
         path: "(file)",
-        message: "V-1: An assets file must be an image.",
+        message: "V-1: An assets file must be an image, index.json or an .m4a sound.",
       });
     }
   }
