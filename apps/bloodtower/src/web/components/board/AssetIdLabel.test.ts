@@ -16,6 +16,10 @@ describe("AssetIdLabel (A1-07)", () => {
     expect(markup).toContain(">ts-keeper-001<");
   });
 
+  it("is hidden from screen readers", () => {
+    expect(label("ts-keeper-001", "1")).toContain('aria-hidden="true"');
+  });
+
   it.each([
     ["unset", undefined],
     ["0", "0"],
@@ -33,7 +37,7 @@ describe("AssetIdLabel (A1-07)", () => {
     }
   });
 
-  it("replaces the label in the same render when the asset changes (A1-07b)", () => {
+  it("two renders with two ids each show only their own id, no state kept (A1-07b)", () => {
     const first = label("ts-keeper-001", "1");
     const second = label("ts-keeper-002", "1");
     expect(first).toContain("ts-keeper-001");

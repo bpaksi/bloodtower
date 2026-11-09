@@ -18,7 +18,7 @@ export function AssetIdLabel({
   if (!assetIdsShown(flag)) return null;
   if (typeof assetId !== "string" || assetId === "") return null;
   return (
-    <p className="bt-asset-id" data-asset-id-label="">
+    <p className="bt-asset-id" data-asset-id-label="" aria-hidden="true">
       {assetId}
     </p>
   );
