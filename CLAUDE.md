@@ -27,7 +27,7 @@ See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all chan
 | root | `pnpm assets:render <story> [--ai] [--only voice\|picture] [--work-folder <dir>] [--packs-dir <dir>]` | Bloodtower: renders the job with asset-studio. Can spend money on a real provider; `--ai` is AI image mode. Non-zero on any failure |
 | root | `pnpm assets:pack <story> [--drafts] [--work-folder <dir>] [--packs-dir <dir>]` | Bloodtower: copies exported finals (and with `--drafts`, drafts) into the pack and writes `assets/index.json`. Needs an earlier render |
 | root | `pnpm assets:import <funeral\|test> [--work-folder <dir>] [--packs-dir <dir>] [--poc-dir <dir>] [--model <name>]` | Bloodtower: seeds the voice cache from the funeral proof of concept |
-| root | `pnpm assets:redo <story> <id> <note> [--work-folder <dir>] [--packs-dir <dir>]` | Bloodtower: records a redo note on one asset through asset-studio. Never approves |
+| root | `pnpm assets:redo <story> <id> <note> [--final] [--work-folder <dir>] [--packs-dir <dir>]` | Bloodtower: records a redo note on one asset through asset-studio. Never approves |
 | root | `pnpm land <branch>` | Optional local recheck for Bob (rebase on `main`, `pnpm check`, fast-forward the local `main`). Not the merge path. Refuses in a Claude session |
 | `apps/tower-poc` | `pnpm dev` | Server (`tsx watch`, port 4747) plus `next dev` |
 | `apps/tower-poc` | `pnpm build && pnpm start` | One process on port 4747 serving the built UI and `/ws` |

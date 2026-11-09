@@ -138,6 +138,41 @@ describe("A1-08: assets:redo", () => {
     expect(readdirSync(cwd)).toEqual([]);
   });
 
+  it("refuses to redo a final asset with A1-28 unless --final is given, then warns", async () => {
+    const s = setup();
+    await render(s);
+    const paths = workPathsFor(s.workFolder, "fx");
+    const index = JSON.parse(readFileSync(paths.index, "utf8"));
+    index["glow.cover"].status = "final";
+    writeFileSync(paths.index, JSON.stringify(index));
+    const before = readFileSync(paths.index, "utf8");
+
+    const refused = await redo(s, ["fx", "glow.cover", "tighter"]);
+    expect(refused.code).toBe(1);
+    expect(refused.err).toContain("A1-28");
+    expect(refused.err).toContain("drops it from the next pack");
+    expect(refused.err).toContain("pays for it again");
+    expect(refused.err).toContain("--final");
+    expect(readFileSync(paths.index, "utf8")).toBe(before);
+
+    const allowed = await redo(s, ["fx", "glow.cover", "tighter", "--final"]);
+    expect(allowed.code).toBe(0);
+    expect(allowed.err).toContain("warning A1-28");
+    expect((readIndex(paths)["glow.cover"] as { status: string }).status).toBe("rejected");
+  }, 60000);
+
+  it("rejects an unknown option instead of folding it into the note", async () => {
+    const s = setup();
+    await render(s);
+    const paths = workPathsFor(s.workFolder, "fx");
+    const before = readFileSync(paths.index, "utf8");
+    const result = await redo(s, ["fx", "glow.cover", "--verbose", "tighter"]);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain("Unknown option --verbose");
+    expect(result.err).toContain("Usage: assets:redo");
+    expect(readFileSync(paths.index, "utf8")).toBe(before);
+  }, 60000);
+
   it("needs a story, an id and a note", async () => {
     const s = setup();
     for (const argv of [[], ["fx"], ["fx", "glow.cover"]]) {
@@ -220,23 +255,58 @@ describe("A1-08a/b: the needs -> render -> pack order", () => {
   });
 });
 
+/** What would approve an asset: a call, a property access, an import, the CLI verb or a script. */
+const APPROVE =
+  /\bapprove\s*\(|\[\s*["']approve["']\s*\]|\bapprove\b[^\n]*\bfrom\b|assets:approve|asset-studio approve|["'`]approve["'`]/;
+
+/** `--final` is allowed only on an `assets:redo` line, the person's own flag for a final asset. */
+const badFinal = (text: string): boolean =>
+  text.split("\n").some((line) => line.includes("--final") && !line.includes("assets:redo"));
+
 describe("A1-08: the skill never marks anything final", () => {
-  it("has a SKILL.md, no approve call and no --final anywhere in the skill folder or the redo code", () => {
+  it("would catch each form of an approve call", () => {
+    for (const sample of [
+      "approve(job, paths, id)",
+      "asset.approve (job)",
+      'cli["approve"](job)',
+      "cli['approve'](job)",
+      'spawn(bin, ["approve", job, id])',
+      "import { approve } from '@asset-studio/cli'",
+      "pnpm assets:approve fx id",
+      "asset-studio approve job id",
+    ]) {
+      expect(APPROVE.test(sample), sample).toBe(true);
+    }
+    expect(APPROVE.test("the studio approval is Bob's")).toBe(false);
+    expect(badFinal("pnpm assets:redo fx id note --final")).toBe(false);
+    expect(badFinal("pnpm assets:pack fx --final")).toBe(true);
+  });
+
+  it("has a SKILL.md, no approve call and no stray --final in the skill folder or the redo code", () => {
     expect(existsSync(join(SKILL_DIR, "SKILL.md"))).toBe(true);
     const files = [
       ...readdirSync(SKILL_DIR, { recursive: true, withFileTypes: true })
         .filter((e) => e.isFile())
         .map((e) => join(e.parentPath, e.name)),
       ...readdirSync(import.meta.dirname)
-        .filter((n) => n.endsWith(".ts") && !n.endsWith(".test.ts"))
+        .filter((n) => n.endsWith(".ts") && !n.endsWith(".test.ts") && n !== "cli.ts")
         .map((n) => join(import.meta.dirname, n)),
+      join(import.meta.dirname, "cli.ts"),
     ];
     for (const file of files) {
       const text = readFileSync(file, "utf8");
-      expect(text, file).not.toMatch(
-        /\bapprove\s*\(|\bapprove\b[^\n]*from|assets:approve|asset-studio approve|--final/,
-      );
+      expect(APPROVE.test(text), file).toBe(false);
+      if (!file.endsWith("redo/cli.ts")) expect(badFinal(text), file).toBe(false);
     }
+  });
+
+  it("SKILL.md lists assets:needs, assets:render, assets:pack in that order", () => {
+    const text = readFileSync(join(SKILL_DIR, "SKILL.md"), "utf8");
+    const at = ["assets:needs", "assets:render", "assets:pack"].map((c) =>
+      text.indexOf(`pnpm ${c}`),
+    );
+    expect(at.every((n) => n >= 0)).toBe(true);
+    expect(at).toEqual([...at].sort((a, b) => a - b));
   });
 
   it("front matter names the skill and its triggers", () => {
