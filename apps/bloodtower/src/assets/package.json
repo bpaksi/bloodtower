@@ -10,7 +10,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "needs": "tsx needs/main.ts"
+    "needs": "tsx needs/main.ts",
+    "import": "tsx import/main.ts"
   },
   "dependencies": {
     "@asset-studio/cli": "0.2.2",
