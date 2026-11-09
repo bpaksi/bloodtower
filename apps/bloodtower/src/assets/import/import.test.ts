@@ -10,6 +10,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { buildJob, workPathsFor } from "../index.ts";
 import type { Io } from "../needs/cli.ts";
@@ -283,16 +284,59 @@ describe("IMP assets:import funeral", () => {
 });
 
 describe("IMP assets:import test", () => {
+  it("IMP-8a: the real packs/test job lists the four place paintings, each with a source file", () => {
+    const places = buildJob("test", { packsDir: REPO_PACKS }).job.pictures.filter(
+      (p) => p.kind === "place",
+    );
+    expect(places.map((p) => p.id).sort()).toEqual([
+      "place.bazaar",
+      "place.citadel",
+      "place.sanctuary",
+      "place.village",
+    ]);
+    for (const p of places) {
+      expect(p.source).toBeDefined();
+      expect(statSync(p.source ?? "").isFile()).toBe(true);
+    }
+  });
+
+  // The real packs/test art is 1280x720 and the dashboard profile is 3840x2160, which took 25-205 s
+  // in sharp. This runs the same import and render on a copy of the pack with 16x9 sources and a
+  // 32x18 profile, so it proves the same drafts without the pixel work.
   it("IMP-8: the four place paintings are drafts after the documented render --only picture", {
-    timeout: 60_000,
-  }, () => {
+    timeout: 30_000,
+  }, async () => {
     const f = fixture();
-    const argv = ["test", "--work-folder", f.work, "--packs-dir", REPO_PACKS];
+    const real = join(REPO_PACKS, "test");
+    const packDir = join(f.packs, "test");
+    mkdirSync(join(packDir, "assets"), { recursive: true });
+    writeFileSync(join(packDir, "pack.yaml"), readFileSync(join(real, "pack.yaml")));
+    const tiny = await sharp({
+      create: { width: 16, height: 9, channels: 3, background: "#446688" },
+    })
+      .jpeg()
+      .toBuffer();
+    const png = await sharp({
+      create: { width: 16, height: 9, channels: 3, background: "#664422" },
+    })
+      .png()
+      .toBuffer();
+    writeFileSync(join(packDir, "assets", "cover.png"), png);
+    for (const name of ["village", "bazaar", "citadel", "sanctuary"]) {
+      writeFileSync(join(packDir, "assets", `place-${name}.jpg`), tiny);
+    }
+    const argv = ["test", "--work-folder", f.work, "--packs-dir", f.packs];
     const r = run(argv, f, FAKE, false);
     expect(r.out).toContain("matched 4, skipped 0, failed 0");
     expect(r.code).toBe(0);
     // Import wrote the job and nothing else; the render step makes the drafts.
     expect(readdirSync(join(f.work, "test"))).toEqual(["asset-job.json"]);
+    const jobFile = join(f.work, "test", "asset-job.json");
+    const job = JSON.parse(readFileSync(jobFile, "utf8"));
+    job.profiles = { dashboard: { width: 32, height: 18 } };
+    writeFileSync(jobFile, JSON.stringify(job, null, 2));
+    // The cover has no hand-placed glow mask, so this render exits 1 on it, as the real pack does;
+    // the places are what the test reads.
     render(f.work, f.config, "test", "picture");
     const index = readIndex(workPathsFor(f.work, "test"));
     const places = Object.keys(index)
