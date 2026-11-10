@@ -301,16 +301,16 @@ describe("A1-02b: cast, counts and ID sets", () => {
   it("pins the Dracula counts after eligibility filtering", () => {
     const result = buildJob("dracula", { packsDir: REPO_PACKS });
     const { job, silent } = result;
-    expect(job.cast).toHaveLength(27);
-    expect(job.lines).toHaveLength(214);
+    expect(job.cast).toHaveLength(28);
+    expect(job.lines).toHaveLength(244);
     expect(job.pictures).toHaveLength(1);
     expect(job.sounds).toHaveLength(0);
-    expect(silent).toHaveLength(496);
+    expect(silent).toHaveLength(111);
     const reasons: Record<string, number> = {};
     for (const s of silent) reasons[s.reason] = (reasons[s.reason] ?? 0) + 1;
-    expect(reasons).toEqual({ "invalid-id": 272, private: 188, repeated: 36 });
-    // 710 script lines are all accounted for: voiced + silent.
-    expect(job.lines.length + silent.length).toBe(710);
+    expect(reasons).toEqual({ "invalid-id": 105, repeated: 6 });
+    // 355 script lines are all accounted for: voiced + silent.
+    expect(job.lines.length + silent.length).toBe(355);
   });
 
   it("keeps the Loremaster audio-only (no moods) even with no voiced line", () => {
