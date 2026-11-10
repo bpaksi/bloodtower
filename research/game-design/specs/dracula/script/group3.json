@@ -1,0 +1,198 @@
+[
+  {
+    "id": "enc-wrong-face.01~vo-01",
+    "speaker": "narrator",
+    "text": "Mist rolls across the street and back. For one breath, you cannot see your own hands.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-mist-remembers.01~vo-01",
+    "speaker": "narrator",
+    "text": "The mist comes in close and stops being weather. It knows where you have been.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-the-window.01~vo-01",
+    "speaker": "narrator",
+    "text": "The mist parts on a high window. A woman in white climbs onto the sill.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-wine-for-no-one.01~vo-01",
+    "speaker": "narrator",
+    "text": "A table laid for two in an empty room. Wine poured for a guest who never came.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-brothers.01~vo-01",
+    "speaker": "narrator",
+    "text": "Two brothers fight in the fog below the castle. One takes the other's bright sword, and uses it.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-third-hums.01~vo-01",
+    "speaker": "narrator",
+    "text": "In the fog a woman hums a lullaby. The tune climbs toward the castle stair.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-road-returns.01~vo-01",
+    "speaker": "narrator",
+    "text": "An hour on the road out. Then the same milestone, the same shrine, the same crow.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-wedding-uphill.01~vo-01",
+    "speaker": "narrator",
+    "text": "A wedding climbs the hill in the mist. Pale women behind a veiled girl. There is no groom.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "enc-at-the-door.01~vo-01",
+    "speaker": "narrator",
+    "text": "Three knocks. You raise what holy thing you carry, and the mist will not cross the sill.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-strike.01~replace-a-hero.vo-01",
+    "speaker": "narrator",
+    "text": "The cold comes first. Then a hand in the mist, and teeth at your throat.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-strike.01~win-lenka.vo-01",
+    "speaker": "narrator",
+    "text": "Violets on the sill where Lenka sleeps, still wet. She keeps one, and says nothing.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-strike.01~destroy-the-blade.vo-01",
+    "speaker": "narrator",
+    "text": "Frost creeps up Stefan's blade from the point. Its light goes thin.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-strike.01~darkness.vo-01",
+    "speaker": "narrator",
+    "text": "Mist goes door to door through the parish. By morning, one more house stands dark.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-strike.guarded~vo-01",
+    "speaker": "narrator",
+    "text": "He reaches for more than you can give, and stops. The cold takes your strength instead.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-strike.lantern~vo-01",
+    "speaker": "narrator",
+    "text": "The Lantern flares. What he meant for you breaks on its light, and only the cold gets through.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-withdraws.01~vo-01",
+    "speaker": "count",
+    "text": "Enough. Keep your day. I have others.",
+    "est_s": 6.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-withdraws.02~vo-01",
+    "speaker": "narrator",
+    "text": "The mist draws back up the hill, and the cold goes with it. For today, he is gone.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-takes-lenka.01~vo-01",
+    "speaker": "narrator",
+    "text": "Every lamp goes out at once. When they come back, Lenka's cloak lies empty on the floor.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-takes-lenka.02~vo-01",
+    "speaker": "count",
+    "text": "She is home now. Come and ask her yourselves.",
+    "est_s": 7.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "count-takes-lenka.03~vo-01",
+    "speaker": "narrator",
+    "text": "On the hill, one more window is lit. She can still be brought back. The hunt goes on.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "tower-opening.01~vo-01",
+    "speaker": "narrator",
+    "text": "The castle doors stand open, as if you were expected. Candles burn all the way up the stair.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "tower-opening.02~vo-01",
+    "speaker": "narrator",
+    "text": "Somewhere above, a table is being laid for guests.",
+    "est_s": 7.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-win.01~vo-01",
+    "speaker": "narrator",
+    "text": "The cards are read. For the first time since you came, you know where to go.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-win.02~vo-01",
+    "speaker": "narrator",
+    "text": "The blade and the Lantern are yours. On the hill, one lit window goes dark.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-win.03~vo-01",
+    "speaker": "narrator",
+    "text": "The Tome is read. You know what he wants now, and he knows that you know.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "seal-break.01~vo-01",
+    "speaker": "narrator",
+    "text": "The mist thins at the parish edge, and the first seal breaks. His hold on Vellmoor slips.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "seal-break.02~vo-01",
+    "speaker": "narrator",
+    "text": "A second seal cracks. Down in the valley, a church bell rings that has been silent since spring.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "seal-break.03~vo-01",
+    "speaker": "narrator",
+    "text": "The third seal breaks. Nothing stands between you and his door now.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  }
+]

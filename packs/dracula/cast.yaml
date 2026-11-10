@@ -17,6 +17,13 @@
   mouths: {rest: m.anton.rest, mbp: m.anton.mbp, cons_ee: m.anton.cons_ee, eh_ae: m.anton.eh_ae, ah: m.anton.ah, oh_er: m.anton.oh_er, oo_w: m.anton.oo_w, fv: m.anton.fv}
   anchor: {x: 0.5, y: 0.7}   # placeholder
 
+- id: andrei
+  name: "Andrei Morosz"
+  voice: {provider: gemini-tts, name: Orus, style: "tired, guarded, a brother's grief", audition: true}
+  portrait: por.andrei
+  mouths: {rest: m.andrei.rest, mbp: m.andrei.mbp, cons_ee: m.andrei.cons_ee, eh_ae: m.andrei.eh_ae, ah: m.andrei.ah, oh_er: m.andrei.oh_er, oo_w: m.andrei.oo_w, fv: m.andrei.fv}
+  anchor: {x: 0.5, y: 0.7}   # placeholder
+
 - id: count
   name: "The Count (Vlad)"
   voice: {provider: gemini-tts, name: Algieba, style: "smooth, courtly, menacing"}

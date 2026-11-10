@@ -1,0 +1,28 @@
+# Dracula, Group 5 (15/15): `n5-final-confrontation` (rewrite)
+
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n5-final-confrontation.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+
+- **Where / kind:** Castle, tower level, room 3: the lair and the boss battle (MEC-076). `~<lair>` per the seeded lair (IDEA-099)
+- **D-01 intent:** The lair (`~<lair>` x4), the boss battle, Lenka freed by the Lantern
+- **D-02:** §4: Lenka is freed in the lair's end hook if `lenka-taken` is set and the Lantern is present (`lenka.saved_by = lantern`); the ending then plays `finale-win.rescued` (with `~freed`). A retreat keeps progress (DEC-360). The Count is seen here for the first time: old, as locked canon has it.
+- **Painting (`painting.n5-final-confrontation`, Illusionist, one line):** Four lair paintings (`painting.n5-final-confrontation~<lair>`), each with a tall, very old man in black, his face shown only here: family-crypt (open coffins by lamplight, one shut); ludmilas-chapel (a bricked window, fresh violets on the altar); the-height (an open tower top over a sea of mist); his-study (walls of letters, a pen set down).
+
+**Estimates:** 0.40 s per word + 4.0 s, fitted to the 13 Charon masters in C5-05 (`/workspace/c5-05-art/voice/MANIFEST.md`); expect about ±3 s. Cap 20 s (about 40 words). Captions = spoken text, word for word. A line whose speaker is not with the group is skipped (D-02 §10), and the narrator carries the plot without it. Ids: base `<scene>.NN~vo-01`, goal or lair `<scene>.NN~<value>.vo-01`, events `<scene>.<event>~vo-01`.
+
+| Asset id | Speaker (voice) | Spoken text | Caption | Est. s | When / intent | Status |
+|---|---|---|---|---|---|---|
+| `n5-final-confrontation.01~family-crypt.vo-01` | narrator (Charon) | His family's crypt, under everything. Every coffin is open but one. He stands beside it, old, and very tall. | His family's crypt, under everything. Every coffin is open but one. He stands beside it, old, and very tall. | 11.6 | lair: family-crypt | DRAFT |
+| `n5-final-confrontation.01~ludmilas-chapel.vo-01` | narrator (Charon) | A small cold chapel, its window bricked shut. Fresh violets on the altar. He kneels there, old, and rises as you enter. | A small cold chapel, its window bricked shut. Fresh violets on the altar. He kneels there, old, and rises as you enter. | 12.8 | lair: ludmilas-chapel | DRAFT |
+| `n5-final-confrontation.01~the-height.vo-01` | narrator (Charon) | The top of the highest tower, open to the wind, where the guard once stood. | The top of the highest tower, open to the wind, where the guard once stood. | 10.0 | lair: the-height; clip 1 of 2 (caption cap 120) | DRAFT |
+| `n5-final-confrontation.01~the-height.vo-02` | narrator (Charon) | The valley lies under the mist below. He waits at the edge, old, and patient. | The valley lies under the mist below. He waits at the edge, old, and patient. | 10.0 | clip 2 of 2, plays right after n5-final-confrontation.01~the-height.vo-01 | DRAFT |
+| `n5-final-confrontation.01~his-study.vo-01` | narrator (Charon) | A study lined with letters, every one in the same fine old hand. The hand that wrote to you. He sets down his pen. | A study lined with letters, every one in the same fine old hand. The hand that wrote to you. He sets down his pen. | 13.6 | lair: his-study (pays off the opening's letter) | DRAFT |
+| `n5-final-confrontation.02~vo-01` | count (Algieba) | You have come a long way to be refused. I know the feeling. | You have come a long way to be refused. I know the feeling. | 9.2 | the Count, seen at last | DRAFT |
+| `n5-final-confrontation.03~vo-01` | narrator (Charon) | He moves faster than an old man should, and the cold comes with him. | He moves faster than an old man should, and the cold comes with him. | 9.6 | the boss battle starts | DRAFT |
+| `n5-final-confrontation.04~vo-01` | lenka (Leda) (skipped if absent) | My name is Lenka Morosz. I am not her. And if I were, I would say what she said. No. | My name is Lenka Morosz. I am not her. And if I were, I would say what she said. No. | 12.0 | Lenka, if with the group (kept from the original .06) | DRAFT |
+| `n5-final-confrontation.lantern~vo-01` | narrator (Charon) | The Lantern's light goes into the dark where he kept her, and she walks out of it on her own. | The Lantern's light goes into the dark where he kept her, and she walks out of it on her own. | 12.0 | event: the end hook frees Lenka (lenka-taken and the Lantern present) | DRAFT |
+| `n5-final-confrontation.stroke~vo-01` | narrator (Charon) | Stefan's blade finds his heart, and for the first time in four hundred years he looks surprised. | Stefan's blade finds his heart, and for the first time in four hundred years he looks surprised. | 10.8 | event: the battle is won (from the original .07) | DRAFT |
+| `n5-final-confrontation.retreat~vo-01` | narrator (Charon) | You fall back down the stair. He does not follow. He has time, and he knows you will come back. | You fall back down the stair. He does not follow. He has time, and he knows you will come back. | 12.0 | event: a retreat (progress kept, DEC-360) | DRAFT |
+
+**On-screen labels:** none needed beyond the engine's standard screens.
+
+**Totals:** 11 lines, est. 123.6 s (every line counted, including variants and events). Longest 13.6 s.
