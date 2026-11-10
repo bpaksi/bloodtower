@@ -61,21 +61,21 @@ The finale (the Tower crawl and the boss battle) is not counted as a quest, the 
 - **Bounds:** K1 only; the fog closes the rest (IDEA-145). Start: all heroes on K1's Village space (IDEA-144).
 - **Order:** the Inn first, then the House, then the Long Night. The Open Grave may be played at any time. The Reading is always last, and it closes the chapter. A quest's marker appears when the quest before it ends (Gamewright pick, as The Herald comes before The Ambush). Markers are fixed (IDEA-146).
 - **New rule hooks:** Lenka as a companion (DEC-741, DEC-782; Q-428). The other four old hunters can be met at their own buildings (DEC-745; Q-431). A plain-scene choice with a battle (The Long Night). The reading's seeded values: the sites, his goal and the lair (Q-425). The Count's piece enters at the end of The Reading (DEC-791 setting; D-02 DEC-859).
-- **Expected length:** Short and Standard, about 5 to 8 days. This is a placeholder for the numbers pass, and play times are measured, not guessed (R-LEN-4).
+- **Expected length:** Short and Standard, about 7 days at Short and 8 at Standard, for 2 heroes (D-03 §6). These are estimates until the numbers pass, and play times are measured, not guessed (R-LEN-4).
 
 ### Chapter 2: The Hunt
 
 - **Goal:** bring back the blade and the Lantern.
 - **Bounds:** kingdoms A and B open, and K1 stays open (IDEA-145). The blade and the Lantern can be taken in either order.
 - **New rule hooks:** the first Tombs in Dracula (MEC-026), with Short and Standard tomb sizes (DEC-669). The Count shows himself after the blade and leaves (IDEA-085). The lid choice (DEC-781). The Fly-Eater's price, a bite or a story item, guarded at 2 bites (MEC-013). Lieutenants stand on the board in Short and Standard (DEC-783).
-- **Expected length:** about 6 to 9 days (placeholder).
+- **Expected length:** about 9 days at Short and 10 at Standard, for 2 heroes (D-03 §6).
 
 ### Chapter 3: The Truth
 
 - **Goal:** burn his earth and find the Tome.
 - **Bounds:** K4 opens, and every kingdom is open from here on.
 - **New rule hooks:** a standing box adds 1 skull in K4 at each day's close (DEC-779). The Tome names his goal (DEC-747) and gives +1 Wild against him (DEC-750). Its end call opens chapter 4.
-- **Expected length:** about 3 to 6 days (placeholder).
+- **Expected length:** about 4 days at Short and 6 at Standard, for 2 heroes (D-03 §6).
 
 ### Chapter 4: The Castle (the finale chapter, DEC-356)
 
@@ -88,7 +88,7 @@ The finale (the Tower crawl and the boss battle) is not counted as a quest, the 
   - Dealt rooms fill the rest (IDEA-100). The last room is the lair, with one of four seeded pictures (IDEA-099), and the boss battle is fought there.
   - Fixed rooms, hook choices and the missing-hero effect wait for DEC-780 and Q-427 (D-02).
 - **New rule hooks:** the Count stops roaming and waits (DEC-738). The goal's castle moment (DEC-748). Lenka is freed by the Lantern in the last room (DEC-750). The blade gives +3 Wild against him.
-- **Expected length:** about 3 to 5 days (placeholder).
+- **Expected length:** about 6 days at Short and 7 at Standard, for 2 heroes (D-03 §6).
 
 ## Finale and endings
 
