@@ -1,6 +1,6 @@
 # C5-05 Ruined Keep art and voice specs
 
-Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives every asset ID in [C5-05 approval.md](../../../apps/bloodtower/plans/briefs/C5/05-art-through-a1/approval.md) a size, format, look and acceptance bar. The brief has IDs only. Nothing here authorizes a paid image or voice run (Bob's Nov 8 art hold), changes an eval, or ticks an approval. **LOCKED** cites a decided card, a resolved C5 question or accepted script text. **ADOPTED** is the Warden ruling of 2026-11-10 relayed via Wright (§6). **PROPOSED** is new here and undecided; it never overrides a card. All sizes stay PROPOSED pending Wright's screen check. The G-A1 trio (`painting.cover`, `glow.cover`, the seal-break-1 line) is specified in [A1-art-specs.md](A1-art-specs.md) on its own branch.
+Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives every asset ID in [C5-05 approval.md](../../../apps/bloodtower/plans/briefs/C5/05-art-through-a1/approval.md) a size, format, look and acceptance bar. The brief has IDs only. Nothing here authorizes a paid image or voice run (Bob's Nov 8 art hold), changes an eval, or ticks an approval. **LOCKED** cites a decided card, a resolved C5 question or accepted script text. **ADOPTED** is the Warden ruling of 2026-11-10 relayed via Wright (§6). **PROPOSED** is new here and undecided; it never overrides a card. **CONFIRMED** marks a size checked against main in Wright's screen check 2026-11-10 (foes, tomb sections, traps, maps); other sizes stay PROPOSED. The G-A1 trio (`painting.cover`, `glow.cover`, the seal-break-1 line) is specified in [A1-art-specs.md](A1-art-specs.md) on its own branch.
 
 ## Common rules
 
@@ -38,7 +38,7 @@ All five chapter/scene paintings and both endings: kind `painting`; **3840×2160
 
 ## 2. Foes
 
-Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at the centre (DEC-329), stills with only the hit shake and spell flash (DEC-347, DEC-562). **PROPOSED size:** 1920×1080, 16:9, subject inside the central 90% so the hit shake never shows an edge. Master PNG, shipped WebP.
+Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at the centre (DEC-329), stills with only the hit shake and spell flash (DEC-347, DEC-562). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×1080, 16:9 (DEC-347: no drift, so 1080p suffices). Subject inside the central 90% so the hit shake never shows an edge. In Tomb and Tower battles the battle screen takes over the 8:9 view half (DEC-592), so the painting is fitted into it, not shown 1:1: keep the foe's head and body inside the central 8:9 column (the middle 960 px of 1920) so a fit-to-height crop still reads. Master PNG, shipped WebP.
 
 **Foe levels.** One painting per foe level, swapping C4's placeholders (Q-C4-15). Each is a Beginning-state painting; the other four foe states fall back to it (DEC-332). Levels rise one step a chapter (DEC-185; `packs/base/tuning.yaml` chapter_1: 1).
 
@@ -75,13 +75,14 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 | `tomb.keep-crypt~left-corridor`, `~ahead-corridor`, `~right-corridor` | That section with an open way on |
 | `tomb.keep-crypt~left-wall`, `~ahead-wall`, `~right-wall` | That section closed by a solid wall (DEC-584) |
 
-- **PROPOSED size:** each section 2560×2160 master, so left+ahead+right join at 7680×2160 with 320 px of blend overlap at each seam; any section pair must join without a seam whatever mix of corridor and wall (DEC-585). No card sets section size or overlap; Wright confirms against the Tomb view component before the run.
-- **Traps.** 1.0 has two traps, one painting each (DEC-606), which take over the view half while the group takes the loss (DEC-592). PROPOSED size: the same frame as one tomb section.
+- **Size, CONFIRMED (Wright screen check 2026-11-10):** each section 1920×2160 (8:9, the view half at 4K, DEC-583), master PNG, shipped WebP. Left, ahead and right join edge to edge at 5760×2160 with **no overlap**; the blend is painted into each section's edges, so any corridor/wall mix joins without a seam (DEC-585).
+- **Traps.** 1.0 has two traps, one painting each (DEC-606), which take over the view half while the group takes the loss (DEC-592). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×2160 (8:9), filling the view half (DEC-592); a single picture, not a tomb-section frame and not joined to the sections.
   - `trap.pit` (ADOPTED `painting.trap-pit`): the floor gives way under one hero. Source: “The floor gives way. Choose one hero to take the fall and lose 4 hit points.”
   - `trap.falling-rocks` (ADOPTED `painting.trap-falling-rocks`): stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.”
 
 **Acceptance checks**
 
+- [ ] **TB-00** Each section and each trap decodes at exactly 1920×2160; the three sections joined edge to edge make 5760×2160.
 - [ ] **TB-01** All eight seamless with each other at every joint (corridor/corridor, corridor/wall, wall/wall), checked as all 8 room combinations.
 - [ ] **TB-02** Same stone, light and palette across the six sections and both traps.
 - [ ] **TB-03** IDs pass A1-15 under the ADOPTED renames in §6.1 (the checklist forms fail).
@@ -91,7 +92,7 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 
 `map.tower-basement`, `map.tower-main`, `map.tower-top` (ADOPTED `painting.tower-{basement,main,top}-map`, §6.1): the Tower's three levels (DEC-364, DEC-566), each with distinct art (DEC-364). The board reuses the Tomb's two halves (Q-C5-01): the level's room map left, the room view right; DEC-566 says “One picture: the level's room map.”
 
-- **PROPOSED content:** one painted backdrop per level for the map half, a top-down plan in aged ink on dark parchment that the engine draws rooms on: basement (rough-hewn, damp), main (great hall stone), top (open battlements, sky). PROPOSED size: 1920×2160 (the map half at 4K); static, no drift.
+- **PROPOSED content:** one painted backdrop per level for the map half, a top-down plan in aged ink on dark parchment that the engine draws rooms on: basement (rough-hewn, damp), main (great hall stone), top (open battlements, sky). **Size, CONFIRMED (Wright screen check 2026-11-10):** 1920×2160 (8:9, the map half at 4K); static, no drift.
 - **Acceptance:** distinct per level at TV distance; engine-drawn rooms, the glowing current room and labels stay legible over it (game-look §4a); IDs pass A1-15 under the §6.1 renames.
 
 ## 5. Sounds and Loremaster lines
@@ -121,7 +122,7 @@ The listen sounds must not tell the room kind apart by loudness alone; a wrong h
 
 ## 6. Mismatches and gaps: ADOPTED fixes
 
-**ADOPTED: Warden ruling 2026-11-10 relayed via Wright** (speaking for Bob; all seven fixes 6.1–6.7). Sub-decisions (a)–(d) are Gamewright's, made under that ruling. The C5-05 approval checklist now lists these IDs (change note 2026-11-10 in `approval.md`; Bob's Nov 1 small-tweak rule). Outside C5/05, `C5/09-finale-and-endings/eval.md` still names `vo.loremaster.finale_win_shattered`; that eval is left unchanged here. No shipped ID is renamed silently; A1's job/export boundary records old-to-new provenance (A1-P2 “Risk: legacy IDs”). Sizes elsewhere in this file stay PROPOSED pending Wright's screen check.
+**ADOPTED: Warden ruling 2026-11-10 relayed via Wright** (speaking for Bob; all seven fixes 6.1–6.7). Sub-decisions (a)–(d) are Gamewright's, made under that ruling. The C5-05 approval checklist now lists these IDs (change note 2026-11-10 in `approval.md`; Bob's Nov 1 small-tweak rule). Outside C5/05, `C5/09-finale-and-endings/eval.md` still names `vo.loremaster.finale_win_shattered`; that eval is left unchanged here. No shipped ID is renamed silently; A1's job/export boundary records old-to-new provenance (A1-P2 “Risk: legacy IDs”). Sizes are marked CONFIRMED where Wright's screen check 2026-11-10 covered them, PROPOSED otherwise.
 
 **6.1 Kinds that fail A1-15 (ADOPTED).** `tomb`, `trap` and `map` are not kinds (lint test “a bespoke kind (tomb, map, music) fails A1-15”).
 
@@ -178,15 +179,25 @@ The listen sounds must not tell the room kind apart by loudness alone; a wrong h
 
 - **Sub-decision (d), Gamewright:** no separate `portrait.warden`. `foe.warden~phase-1` is his one picture under DEC-661. His boss-screen opening line stays a silent caption (only the Loremaster is voiced, Q-C5-07), so there are no stills or mouths (DEC-719). `foe.warden~phase-1` therefore carries his likeness: face readable at TV distance, same face and armour in phases 2 and 3 (§2 FO-03).
 
-**6.6 The garrison guardian (ADOPTED).** The Barrow's guardian is “the keep's dead garrison … still in its rusted mail” (script; DEC-662, DEC-608), and its fall is the reveal. Without its own painting it would fall back to the quest foe one level up (`foe.level-3` on a normal chapter 2, DEC-608), which shows living guards wearing the crest. Added: **`foe.keep-garrison`**, one Beginning painting (§2 size, PROPOSED): undead soldiers rising in rusted mail, shields bearing the Warden's crest. The story names its own guardian (DEC-608).
+**6.6 The garrison guardian (ADOPTED).** The Barrow's guardian is “the keep's dead garrison … still in its rusted mail” (script; DEC-662, DEC-608), and its fall is the reveal. Without its own painting it would fall back to the quest foe one level up (`foe.level-3` on a normal chapter 2, DEC-608), which shows living guards wearing the crest. Added: **`foe.keep-garrison`**, one Beginning painting (§2 size, CONFIRMED by Wright screen check 2026-11-10): undead soldiers rising in rusted mail, shields bearing the Warden's crest. The story names its own guardian (DEC-608).
 
 **6.7 Tomb sounds deferred to 1.1 (ADOPTED).** `snd.tomb-door` and `snd.tomb-guardian-reveal` are struck from the 1.0 checklist and no file is made. DEC-593 put the Tomb's door and guardian cues on the 1.0 list, but DEC-609 (Bob, 2026-10-29: “move out of 1.0”) moved them to 1.1. Their 1.1 picks are tower sounds, not board files: door SND-056, guardian SND-066 then the horn (DEC-768, CUE-017, both release 1.1). In 1.0 the guardian uses the battle's own cues (DEC-609).
 
-**6.8 Other gaps (OPEN, not part of the ruling):**
+**6.8 Gamewright rulings and follow-ups**
 
-- The Tower's room-view half (Q-C5-01) has no paintings on the checklist; only the level maps are there. Reuse `painting.keep-crypt~*`, or add a Tower view style.
-- Tower guards are foe level +1 per Tower level (DEC-566), so a level above 4 may occur; no `foe.level-5`+ exists and no level cap was found in `packs/base/tuning.yaml`. Confirm the cap or the fallback.
-- Citation fix: final approval of every asset is C5-05 **EV-04** (`eval.md`); `approval.md`'s “EV-05 checks every id is ticked” was corrected to EV-04 in this branch (docs-only).
+**ADOPTED, Gamewright design call 2026-11-10:**
+
+1. **Tower room view.** In 1.0 the Tower's room-view half (Q-C5-01 reuses the Tomb's two halves) reuses the `painting.keep-crypt~*` sections. Unique Tower-room art is deferred to 1.1. No new checklist IDs.
+2. **Foe level cap.** Foe level is capped at 4: `step_up` never raises a foe past 4, so there is no `foe.level-5`. Tower guards are level 3 (DEC-702: the adversary's level − 2, every room and Tower level). The Warden is the adversary and uses his own `foe.warden~phase-*` paintings, not `foe.level-*`.
+
+**Code follow-ups (coding lane; not part of this docs PR):**
+
+- `packs/base/tuning.yaml` has no maximum foe level; add the cap of 4 so `step_up` and difficulty offsets cannot exceed it (ruling 2).
+- `apps/bloodtower/src/assets/needs/build.ts` tags every board picture with the one 3840×2160 16:9 dashboard profile. The 8:9 maps, tomb sections and traps (1920×2160) need their own profile, or they will be cropped or padded.
+
+**Still open:** none from this file's §6.
+
+Citation fix: final approval of every asset is C5-05 **EV-04** (`eval.md`); `approval.md`'s “EV-05 checks every id is ticked” was corrected to EV-04 in this branch (docs-only).
 
 ## 7. No repaint
 
