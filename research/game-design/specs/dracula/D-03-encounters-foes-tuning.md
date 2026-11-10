@@ -208,4 +208,4 @@ Nothing here is Dracula-only. Every Dracula-only number is in §5 and lives in `
 
 ## OPEN RULINGS (Bob), continued from D-02
 
-None. Nothing in D-03 reverses a Bob lock or changes scope. Every call above is decided by Gamewright under the standing rule. Still with Bob from earlier: Lenka's face (she stays veiled meanwhile) and the Vellmoor cover.
+None. Nothing in D-03 reverses a Bob lock or changes scope. Every call above is decided by Gamewright under the standing rule. Lenka's face (DEC-892) and the Vellmoor cover (DEC-893) were settled on 2026-11-10.

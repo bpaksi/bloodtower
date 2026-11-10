@@ -181,7 +181,7 @@ Ruling 1 was Bob's, relayed by Warden at 2:16 PM ET. Rulings 2 to 6 were decided
 5. **The lieutenant quests:** chapters 2 and 3, deferred with Long (DEC-866).
 6. **Script timing:** Loremaster drafts the lines now, marked draft (DEC-867).
 
-Still with Bob: Lenka's face (she stays veiled meanwhile) and the Vellmoor cover.
+Lenka's face (DEC-892) and the Vellmoor cover (DEC-893) were settled on 2026-11-10.
 
 Q-424 to Q-431 are settled in D-02.
 

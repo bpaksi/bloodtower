@@ -22,7 +22,7 @@
 - **G-9. Guard and Lantern lines are event moments, not state variants.** `count-strike.guarded~vo-NN` plays once when the guard turns a strike aside. It is one shared line for both the two-bite guard and the blade at its +1 floor. `count-strike.lantern~vo-NN` plays when the Lantern stops the goal's strike. Neither uses a `~` state variant (G-2).
 - **Copy:** the strike choice labels (Fight, Ward, Endure) and the disabled Ward's reason line are Loremaster's copy. D-04 references them, and the labels in this file are working labels.
 - **G-6. Endings are narrator-led.** The narrator (Charon) carries each ending, with at most one companion line in it, and that line is skipped if the companion is absent (§10).
-- **Lenka stays hidden in the art until her reveal** in `n4-finding-the-tome` (Bob's Oct 16 lock; a possible change is pending with Bob). Before the reveal every picture shows her veiled, turned away or in shadow (`portrait.lenka~veiled`). From the Tome on she shows her face (`portrait.lenka`). This is also part of Q-428's answer.
+- **Lenka's face is shown from chapter 1** (DEC-892, Gamewright under Bob's delegation, 2026-11-10; it replaces Bob's Oct 16 hidden-until-reveal lock). She wears a travelling hood with her face clear (`portrait.lenka`). The reveal in `n4-finding-the-tome` is told by a change to her face, her reveal state (`portrait.lenka~revealed`). This is also part of Q-428's answer.
 
 ## Gamewright rulings G-10 to G-18 (decided, 2026-11-10)
 
@@ -54,7 +54,7 @@
 | DEC-851 | Q-427 | DEC-566's shape is kept. Fixed rooms by position. The Count stays in the lair at the top, and at the Swap he only speaks through the wight. The Heart of Sorrow is the tower level's second room. A solo Swap takes the companion, or the wight wears the hero's own face |
 | DEC-780 (edited) | the castle clash | Fixed rooms, yes. No stance and no choice in a hook. The rooms that need a choice are traps with DEC-489's two-loss choice |
 | IDEA-094, IDEA-095, IDEA-097 (edited) | the on-guard clash | The Portrait and the Lift are traps with a two-loss choice. The Flooded Room is a fixed guard whose foe strikes first |
-| DEC-852 | Q-428 | Every way of losing Lenka leads to "taken": she never falls, walks off or turns. Her hero's fall passes her to another present hero, or she is taken. Veiled art until the Tome |
+| DEC-852 | Q-428 | Every way of losing Lenka leads to "taken": she never falls, walks off or turns. Her hero's fall passes her to another present hero, or she is taken. Her face is shown from chapter 1, and the reveal is a change to her face (DEC-892) |
 | DEC-853 | Q-429 | The blade starts at +3, and each landed blade strike takes 1, down to a floor of +1. It is never destroyed. A fallen carrier keeps every story item. The gate counts the objects held by the present group |
 | DEC-854 | Q-430 | Traitor at Standard only, tied to chapter 3. The suspects are Jakob, Andrei and Marta, Marta is met in chapter 3, and each has a written trick |
 | DEC-855 | Q-431 | The ten defaults stay as tavern hires, without Tomas the Scout (ruling 10). The four story companions (Lenka, Agnes, Wren, Emeric; Tomas is removed) are asked at their buildings for 0 gold and 1 move. Each has one moment that raises loyalty and one that lowers it |
@@ -140,7 +140,7 @@ The old encounter rules go. These are: one encounter per round on top of the nor
 - **Her hero falls.** She passes to another present hero, picked on the iPads. If none is present, she is taken.
 - **Loyalty moments.** The Long Night's "stop them / talk them down" raises it a step and "lift the latch" lowers it. The Funeral raises it a step automatically when the quest finishes with her present (Gamewright, 2026-11-10), and the engine's corruption rule lowers it (DEC-721).
 - **Freed:** in the lair's end hook, if `lenka-taken` is set and the Lantern is present (DEC-750). That sets `lenka.saved_by = lantern` at that moment. If she stays with or rejoins the party, it is set to `party` then, always before any finale line is picked (G-8). The ending follows DEC-746: `finale-win.rescued` (with `~freed` lines when `saved_by` is `lantern`) or `finale-win.lenka-lost` (G-4, G-5).
-- **Art:** veiled until the Tome (see above). Her talking avatar uses the veiled portrait until `n4-finding-the-tome` and her face after it.
+- **Art:** her face is clear from chapter 1 (see above). Her talking avatar uses `portrait.lenka` until `n4-finding-the-tome` and `portrait.lenka~revealed` after it.
 
 ## 5. The castle (DEC-851, DEC-780, IDEA-094, IDEA-095, IDEA-097, Q-427)
 
