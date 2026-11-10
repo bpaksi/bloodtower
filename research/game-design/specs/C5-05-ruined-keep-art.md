@@ -1,6 +1,6 @@
 # C5-05 Ruined Keep art and voice specs
 
-Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives every asset ID in [C5-05 approval.md](../../../apps/bloodtower/plans/briefs/C5/05-art-through-a1/approval.md) a size, format, look and acceptance bar. The brief has IDs only. Nothing here authorizes a paid image or voice run (Bob's Nov 8 art hold), changes an eval, or ticks an approval. **LOCKED** cites a decided card, a resolved C5 question or accepted script text. **PROPOSED** is new here and undecided; it never overrides a card. The G-A1 trio (`painting.cover`, `glow.cover`, the seal-break-1 line) is specified in [A1-art-specs.md](A1-art-specs.md) on its own branch.
+Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives every asset ID in [C5-05 approval.md](../../../apps/bloodtower/plans/briefs/C5/05-art-through-a1/approval.md) a size, format, look and acceptance bar. The brief has IDs only. Nothing here authorizes a paid image or voice run (Bob's Nov 8 art hold), changes an eval, or ticks an approval. **LOCKED** cites a decided card, a resolved C5 question or accepted script text. **ADOPTED** is the Warden ruling of 2026-11-10 relayed via Wright (§6). **PROPOSED** is new here and undecided; it never overrides a card. All sizes stay PROPOSED pending Wright's screen check. The G-A1 trio (`painting.cover`, `glow.cover`, the seal-break-1 line) is specified in [A1-art-specs.md](A1-art-specs.md) on its own branch.
 
 ## Common rules
 
@@ -49,7 +49,9 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 | `foe.level-3` | The Warden's sworn guard in a shield line, his crest worn openly (script, The Last Stand is a level 3 battle). |
 | `foe.level-4` | Heavier oathsworn guards in dark plate, the Tower behind them. |
 
-**The Warden's phases.** Three paintings, one per phase (Q-C5-02); a phase change at two thirds and one third of his wounds (DEC-567), shown with a shake and sound when no tower is connected (Q-C5-08). He is the keep's fallen last lord, a ruined knight (DEC-661), “in what is left of his armour” (script, boss-screen opening). Same figure, face and armour in all three.
+**The Barrow's guardian (§6.6, ADOPTED):** `foe.keep-garrison`, the keep's dead garrison rising in rusted mail, shields bearing the Warden's crest (script; DEC-608, DEC-662). Shown only inside the Tomb, so the crest may show.
+
+**The Warden's phases.** Three paintings, one per phase (Q-C5-02); a phase change at two thirds and one third of his wounds (DEC-567), shown with a shake and sound when no tower is connected (Q-C5-08). He is the keep's fallen last lord, a ruined knight (DEC-661), “in what is left of his armour” (script, boss-screen opening). Same figure, face and armour in all three. `foe.warden~phase-1` is also his one Portrait under DEC-661 (§6.5 (d)); no `portrait.warden`.
 
 | Asset id | PROPOSED subject |
 |---|---|
@@ -68,60 +70,62 @@ Kind `foe`; one painting each. Shown on the battle board (UI-026), the foe at th
 
 **Tomb style `keep-crypt`.** The one 1.0 Tomb (DEC-593) under the keep, its view half one wide room joined from three sections, left, ahead and right, each painted as a corridor and as a wall, edges blending, the view panning left to right and back (DEC-583, DEC-584, DEC-585); the story supplies the style (DEC-588). Look (PROPOSED from script): a cold crypt of the keep's dead garrison: rough stone vaults, niches, rusted mail, damp, torchlight from the party only. “A cold corridor. Three doors wait.”
 
-| Checklist id | Content |
+| Checklist id (ADOPTED id `painting.keep-crypt~…`, §6.1) | Content |
 |---|---|
 | `tomb.keep-crypt~left-corridor`, `~ahead-corridor`, `~right-corridor` | That section with an open way on |
 | `tomb.keep-crypt~left-wall`, `~ahead-wall`, `~right-wall` | That section closed by a solid wall (DEC-584) |
 
 - **PROPOSED size:** each section 2560×2160 master, so left+ahead+right join at 7680×2160 with 320 px of blend overlap at each seam; any section pair must join without a seam whatever mix of corridor and wall (DEC-585). No card sets section size or overlap; Wright confirms against the Tomb view component before the run.
 - **Traps.** 1.0 has two traps, one painting each (DEC-606), which take over the view half while the group takes the loss (DEC-592). PROPOSED size: the same frame as one tomb section.
-  - `trap.pit`: the floor gives way under one hero. Source: “The floor gives way. Choose one hero to take the fall and lose 4 hit points.”
-  - `trap.falling-rocks`: stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.”
+  - `trap.pit` (ADOPTED `painting.trap-pit`): the floor gives way under one hero. Source: “The floor gives way. Choose one hero to take the fall and lose 4 hit points.”
+  - `trap.falling-rocks` (ADOPTED `painting.trap-falling-rocks`): stones crashing from the vault onto the group. Source: “Stones crash from the ceiling. Every hero loses 2 hit points.”
 
 **Acceptance checks**
 
 - [ ] **TB-01** All eight seamless with each other at every joint (corridor/corridor, corridor/wall, wall/wall), checked as all 8 room combinations.
 - [ ] **TB-02** Same stone, light and palette across the six sections and both traps.
-- [ ] **TB-03** IDs pass A1-15 after the renames in §6 (they fail as listed).
+- [ ] **TB-03** IDs pass A1-15 under the ADOPTED renames in §6.1 (the checklist forms fail).
 - [ ] **TB-04** Bob approves each final.
 
 ## 4. The Tower's levels
 
-`map.tower-basement`, `map.tower-main`, `map.tower-top`: the Tower's three levels (DEC-364, DEC-566), each with distinct art (DEC-364). The board reuses the Tomb's two halves (Q-C5-01): the level's room map left, the room view right; DEC-566 says “One picture: the level's room map.”
+`map.tower-basement`, `map.tower-main`, `map.tower-top` (ADOPTED `painting.tower-{basement,main,top}-map`, §6.1): the Tower's three levels (DEC-364, DEC-566), each with distinct art (DEC-364). The board reuses the Tomb's two halves (Q-C5-01): the level's room map left, the room view right; DEC-566 says “One picture: the level's room map.”
 
 - **PROPOSED content:** one painted backdrop per level for the map half, a top-down plan in aged ink on dark parchment that the engine draws rooms on: basement (rough-hewn, damp), main (great hall stone), top (open battlements, sky). PROPOSED size: 1920×2160 (the map half at 4K); static, no drift.
-- **Acceptance:** distinct per level at TV distance; engine-drawn rooms, the glowing current room and labels stay legible over it (game-look §4a); IDs pass A1-15 after §6 renames.
+- **Acceptance:** distinct per level at TV distance; engine-drawn rooms, the glowing current room and labels stay legible over it (game-look §4a); IDs pass A1-15 under the §6.1 renames.
 
 ## 5. Sounds and Loremaster lines
 
 **Sounds.** Kind `effect`; supplied PCM WAV masters, shipped m4a; no sound-generation provider (A1-P2 inventory). Played on the Story board's Mac speakers (DEC-201, DEC-618). PROPOSED loudness: about −20 LUFS, under the voice (game-look §6). Short, dry and physical (game-look §6).
 
-| Checklist id | LOCKED content (DEC-618) | PROPOSED duration |
-|---|---|---|
-| `snd.listen_nothing` | Still air | 1.5–2.5 s |
-| `snd.listen_trap` | A click and a drip | 1.5–2.5 s |
-| `snd.listen_battle` | Shuffling and breathing | 1.5–2.5 s |
-| `snd.tomb-door` | none in 1.0: see §6 deferral | n/a |
-| `snd.tomb-guardian-reveal` | none in 1.0: see §6 deferral | n/a |
+**Ruined Keep set:** no sound effects in 1.0 after §6.7 (both Tomb sounds deferred to 1.1).
+
+**Outside the Ruined Keep set: engine defaults in `packs/base`** (§6.2, sub-decision (a); DEC-618 “three engine-default Mac sounds … A story may swap them”; DEC-199, DEC-622 base pack):
+
+| Asset id (ADOPTED) | Was | LOCKED content (DEC-618) | PROPOSED duration |
+|---|---|---|---|
+| `snd.listen-nothing` | `snd.listen_nothing` | Still air | 1.5–2.5 s |
+| `snd.listen-trap` | `snd.listen_trap` | A click and a drip | 1.5–2.5 s |
+| `snd.listen-battle` | `snd.listen_battle` | Shuffling and breathing | 1.5–2.5 s |
 
 The listen sounds must not tell the room kind apart by loudness alone; a wrong hint (1 in 5, DEC-618) must sound the same as a true one.
 
-**Loremaster lines** (voiced; quoted only from `research/stories/ruined-keep/script.md`, 1.0 lines accepted by Bob 2026-11-06). The explicit mapping is in §6.
+**Loremaster lines** (voiced; quoted only from `research/stories/ruined-keep/script.md`, 1.0 lines accepted by Bob 2026-11-06). The full ID-to-line mapping is in §6.3 and §6.4: 13 lines.
 
 **Acceptance checks**
 
-- [ ] **SD-01** Each sound decodes as m4a, kind `effect`, duration recorded, loudness within ±2 LU of the PROPOSED target.
+- [ ] **SD-01** Each sound decodes as m4a, kind `effect`, duration recorded, loudness within ±2 LU of the PROPOSED target; the three listen sounds are indexed in `packs/base/assets/`, not `packs/test`.
 - [ ] **SD-02** Each line's caption equals its script text byte for byte; ≤ 120 characters; ≤ 20 s.
 - [ ] **SD-03** No line or sound outside the Loremaster and the checklist (C5-05 EV-03).
-- [ ] **SD-04** Bob approves each final.
+- [ ] **SD-04** Bob approves each final (C5-05 EV-04).
 
-## 6. Mismatches and gaps: PROPOSED fixes (none decided)
+## 6. Mismatches and gaps: ADOPTED fixes
 
-Each fix needs Warden's (or Bob's) ruling and then a C5-05 approval checklist update under Bob's Nov 1 small-tweak rule. No shipped ID is renamed silently; A1's job/export boundary records the old-to-new provenance (A1-P2 “Risk: legacy IDs”).
+**ADOPTED: Warden ruling 2026-11-10 relayed via Wright** (speaking for Bob; all seven fixes 6.1–6.7). Sub-decisions (a)–(d) are Gamewright's, made under that ruling. The C5-05 approval checklist still lists the old IDs; updating it to these IDs is the next step (Bob's Nov 1 small-tweak rule), done in the same change that renames them. No shipped ID is renamed silently; A1's job/export boundary records old-to-new provenance (A1-P2 “Risk: legacy IDs”). Sizes elsewhere in this file stay PROPOSED pending Wright's screen check.
 
-**6.1 Kinds that fail A1-15** (`tomb`, `trap`, `map` are not kinds; the lint test “a bespoke kind (tomb, map, music) fails A1-15” covers them):
+**6.1 Kinds that fail A1-15 (ADOPTED).** `tomb`, `trap` and `map` are not kinds (lint test “a bespoke kind (tomb, map, music) fails A1-15”).
 
-| Checklist id | PROPOSED id | Kind |
+| Checklist id | ADOPTED id | Kind |
 |---|---|---|
 | `tomb.keep-crypt~left-corridor` … `~right-wall` (6) | `painting.keep-crypt~left-corridor` … `painting.keep-crypt~right-wall` | painting |
 | `trap.pit` | `painting.trap-pit` | painting |
@@ -132,54 +136,57 @@ Each fix needs Warden's (or Bob's) ruling and then a C5-05 approval checklist up
 
 `snd.*` with kind `effect` passes A1-15 (a sound's prefix only must not be a picture kind), so it is not renamed for its kind.
 
-**6.2 Kebab-case** (DEC-622 lowercase kebab-case; underscores fail):
+**6.2 Kebab-case (ADOPTED).** DEC-622 requires lowercase kebab-case.
 
-| Checklist id | PROPOSED id |
+| Checklist id | ADOPTED id |
 |---|---|
 | `snd.listen_nothing` | `snd.listen-nothing` |
 | `snd.listen_trap` | `snd.listen-trap` |
 | `snd.listen_battle` | `snd.listen-battle` |
 | `vo.loremaster.finale_win_shattered`, `vo.loremaster.finale_win_oath` | see 6.3 |
 
-The C4 tomb-crawl and tomb-screens evals name `snd.listen_*`; a rename updates them in the same change. DEC-618 makes the listen sounds engine defaults that a story may swap, so whether they ship in `packs/base` or `packs/test` is also OPEN.
+- **Sub-decision (a), Gamewright:** `snd.listen-*` live in `packs/base` as engine defaults (DEC-618), a story may swap them (DEC-199), and they are listed outside the Ruined Keep set (§5). They leave the C5-05 `packs/test` checklist.
+- The C4 tomb-crawl and tomb-screens evals and screen spec name `snd.listen_*`; the rename updates them in the same change.
 
-**6.3 `vo.loremaster.*` to script lines.** The checklist form is not a script-line ID (`scene.moment~variant`, DEC-622). PROPOSED line IDs follow A1-P2's `seal-break.01~vo-01` default.
+**6.3 `vo.loremaster.*` to script lines (ADOPTED).** The checklist form is not a script-line ID (`scene.moment~variant`, DEC-622). Line IDs follow A1-P2's `seal-break.01~vo-01` form. No other IDs exist for these lines (none in `packs/test`, the script or the checklist), so this form is used throughout.
 
-| Checklist id | PROPOSED line id | Script tag | Locked text |
+| Checklist id | ADOPTED line id | Script tag | Locked text |
 |---|---|---|---|
 | `vo.loremaster.chapter-1` | `chapter-card.01~vo-01` | `chapter 1 goal` | “Hear the herald in Greyford. Then open the forest road.” |
 | `vo.loremaster.chapter-2` | `chapter-card.02~vo-01` | `chapter 2 goal` | “Go down into the barrow under the old keep. Find the shrine on the road beside it.” |
 | `vo.loremaster.chapter-3` | `chapter-card.03~vo-01` | `chapter 3 goal` | “Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb.” |
+| (new) | `chapter-win.01~vo-01` | `chapter 1 win, Loremaster` | “The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years.” |
 | `vo.loremaster.seal-break-1` | `seal-break.01~vo-01` (A1-P2 default) | `seal break ch1, Loremaster` | “The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep.” |
 | `vo.loremaster.seal-break-2` | `seal-break.02~vo-01` | `seal break ch2, Loremaster` | “The Keep gives up its dead, and a second seal cracks. The Tower waits.” |
+| (new) | `chapter-win.03~vo-01` | `chapter 3 win, Loremaster` | “The gate is open and the last stand held. The Warden's door is open, for now.” |
 | `vo.loremaster.seal-break-3` | `seal-break.03~vo-01` | `seal break ch3, Loremaster` | “The last stand holds, and the third seal breaks. Only the Warden remains.” |
 | `vo.loremaster.finale_win_shattered` | `finale-win.shattered~vo-01` | `finale win, seal shattered` | “The shard shatters. The Tower's call goes quiet, and the roads are yours.” |
 | `vo.loremaster.finale_win_oath` | `finale-win.oath~vo-01` | `finale win, seal holds` | “You swear his oath and take up his watch. The Tower called to him once. It will call to you.” |
 
-- **OPEN (chapter cards):** Q-C5-07 voices “chapter cards”, but the script's chapter card has a name and a goal, neither tagged Loremaster. The goal lines are PROPOSED above. Alternative: name and goal read together (for example “The Roads. Hear the herald in Greyford. Then open the forest road.”), which would be a new joined text needing Bob's OK.
-- **GAP:** the script has two more Loremaster-tagged lines with no checklist ID: `chapter 1 win, Loremaster` (“The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years.”) and `chapter 3 win, Loremaster` (“The gate is open and the last stand held. The Warden's door is open, for now.”). PROPOSED: add `chapter-win.01~vo-01` and `chapter-win.03~vo-01`, or leave them silent captions; Bob's call.
+- **Sub-decision (b), Gamewright:** chapter cards voice the locked chapter-goal lines as Loremaster (Q-C5-07 “chapter cards”), IDs `chapter-card.0N~vo-01`. The chapter name (“The Roads”, “The Keep”, “The Tower”) stays a caption title, not voiced; no new joined text.
+- **Sub-decision (c), Gamewright:** the two Loremaster-tagged win lines for chapters 1 and 3 are voiced as `chapter-win.01~vo-01` and `chapter-win.03~vo-01`, text as quoted. Chapter 2 has no win line in the script, so there is no `chapter-win.02`. Both are fixed one-off lines under 120 characters (106 and 77), so DEC-349 allows voice.
 
-**6.4 Three loss lines, one `finale-loss` ID.** The script has three accepted loss lines (DEC-144; Q-C3-05); DEC-663 said “one Scroll line”, which the script has since split by cause.
+**6.4 Three loss lines, one `finale-loss` ID (ADOPTED).** The script has three accepted loss lines (DEC-144; Q-C3-05); DEC-663's “one Scroll line” is superseded by the script's split by cause. `vo.loremaster.finale-loss` is replaced by three lines; one shared `painting.finale-loss` stays (§1).
 
-| Script tag | Locked text | PROPOSED line id |
+| Script tag | Locked text | ADOPTED line id |
 |---|---|---|
 | `skulls loss` | “The last skull falls. The Tower's shadow covers the land, and the roads are his for good.” | `finale-loss.skulls~vo-01` |
 | `corruption loss` | “One of you hears the Tower call, and goes to it. Without them, the hunt is over.” | `finale-loss.corruption~vo-01` |
 | `fallen buildings loss` | “Four strongholds have fallen. There is nowhere left to hold, and his raiders own the land.” | `finale-loss.fallen-buildings~vo-01` |
 
-PROPOSED: replace `vo.loremaster.finale-loss` with these three, and keep one shared `painting.finale-loss` (§1). Alternative: voice only one loss line and leave the other two silent captions.
+**6.5 The Warden's Portrait (ADOPTED).** DEC-661 gives the Warden “one Portrait, a ruined knight”.
 
-**6.5 The Warden's Portrait.** DEC-661 gives the Warden “one Portrait, a ruined knight”; the checklist has none. His boss-screen opening line is not voiced (only the Loremaster is, Q-C5-07), so a Portrait would be stills only, no mouths (DEC-719). PROPOSED: add `portrait.warden`, a neutral mood still, 900 px tall at 1080p, chin at or above 74%, edges fading to 60% black (DEC-576; DEC-207 dark edges), the same face and armour as `foe.warden~phase-1`. Alternative: rule that the phase-1 foe painting serves as his one picture, and record that DEC-661's Portrait is not in 1.0.
+- **Sub-decision (d), Gamewright:** no separate `portrait.warden`. `foe.warden~phase-1` is his one picture under DEC-661. His boss-screen opening line stays a silent caption (only the Loremaster is voiced, Q-C5-07), so there are no stills or mouths (DEC-719). `foe.warden~phase-1` therefore carries his likeness: face readable at TV distance, same face and armour in phases 2 and 3 (§2 FO-03).
 
-**6.6 The garrison guardian.** The Barrow's guardian is “the keep's dead garrison … still in its rusted mail” (script; DEC-662, DEC-608), and its fall is the reveal. The checklist has no painting for it, so it would fall back to the quest foe one level up (`foe.level-3` on a normal chapter 2, DEC-608), which shows living guards wearing the crest. PROPOSED: add `foe.keep-garrison` (one Beginning painting, §2 size): undead soldiers rising in rusted mail, shields bearing the Warden's crest. The story may name its own guardian (DEC-608).
+**6.6 The garrison guardian (ADOPTED).** The Barrow's guardian is “the keep's dead garrison … still in its rusted mail” (script; DEC-662, DEC-608), and its fall is the reveal. Without its own painting it would fall back to the quest foe one level up (`foe.level-3` on a normal chapter 2, DEC-608), which shows living guards wearing the crest. Added: **`foe.keep-garrison`**, one Beginning painting (§2 size, PROPOSED): undead soldiers rising in rusted mail, shields bearing the Warden's crest. The story names its own guardian (DEC-608).
 
-**6.7 Tomb sounds deferred to 1.1.** `snd.tomb-door` and `snd.tomb-guardian-reveal` match the Tomb's door and guardian cues. DEC-593 put those cues on the 1.0 list, but DEC-609 (Bob, 2026-10-29: “move out of 1.0”) moved the Tomb's own cues to 1.1. Their 1.1 picks are tower sounds, not board files: door SND-056, guardian SND-066 then the horn (DEC-768, CUE-017, both release 1.1). In 1.0 the guardian uses the battle's own cues (DEC-609). PROPOSED: strike both from the 1.0 checklist with a 1.1 deferral note, and make no file. Alternative: keep them as board-only Mac sounds, which would be a new 1.0 scope choice for Bob.
+**6.7 Tomb sounds deferred to 1.1 (ADOPTED).** `snd.tomb-door` and `snd.tomb-guardian-reveal` are struck from the 1.0 checklist and no file is made. DEC-593 put the Tomb's door and guardian cues on the 1.0 list, but DEC-609 (Bob, 2026-10-29: “move out of 1.0”) moved them to 1.1. Their 1.1 picks are tower sounds, not board files: door SND-056, guardian SND-066 then the horn (DEC-768, CUE-017, both release 1.1). In 1.0 the guardian uses the battle's own cues (DEC-609).
 
-**6.8 Other gaps (OPEN):**
+**6.8 Other gaps (OPEN, not part of the ruling):**
 
 - The Tower's room-view half (Q-C5-01) has no paintings on the checklist; only the level maps are there. Reuse `painting.keep-crypt~*`, or add a Tower view style.
 - Tower guards are foe level +1 per Tower level (DEC-566), so a level above 4 may occur; no `foe.level-5`+ exists and no level cap was found in `packs/base/tuning.yaml`. Confirm the cap or the fallback.
-- `approval.md` says “EV-05 checks every id is ticked”; the final-approval eval is EV-04 (already noted in A1-P2).
+- Citation fix: final approval of every asset is C5-05 **EV-04** (`eval.md`); `approval.md`'s “EV-05 checks every id is ticked” was corrected to EV-04 in this branch (docs-only).
 
 ## 7. No repaint
 

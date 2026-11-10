@@ -7,7 +7,7 @@
 
 ## Art finals (Bob)
 
-One line per asset id in `packs/test/assets/index.json`; EV-05 checks every id is ticked.
+One line per asset id in `packs/test/assets/index.json`; EV-04 checks every id is ticked.
 
 - [ ] place.village — approved by Bob 
 - [ ] place.bazaar — approved by Bob 
