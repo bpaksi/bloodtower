@@ -318,3 +318,22 @@ These moments are taken out of `script.yaml`. Line ids are stable, so these ids 
 - `enc-third-hums.01.private.tomas`
 - `enc-third-hums.01.private.wren`
 - `enc-third-hums.01.private.emeric`
+
+## Retired ids (Loremaster, 2026-11-10, Tomas retired)
+
+Tomas Varga is cut from the story (Sergeant Pavel Dorn goes with him). These moments and lines are taken out of `script.yaml`. They are **retired and must never be reused**. `tomas`, `tomas-whisper`, and `dorn` are removed from `cast.yaml`. Their portrait and mouth ids (`por.tomas`, `m.tomas.*`, `por.dorn`, `m.dorn.*`) were placeholders only; the pack has no asset files for them.
+
+Tomas-named moments (cut outright):
+
+- `n2-burgomasters-funeral.mourner-returns.tomas`
+- `n23-catacombs-of-saint-ysolde.rejoin.tomas`
+- `n23-catacombs-of-saint-ysolde.07~lookalike-is-tomas`
+- `n5-ending-turned.02~tomas`
+- `enc-wrong-face.02~lookalike-is-tomas`
+
+Lines cut from moments that remain:
+
+- `n1-lantern-and-bell.02.vo-02`
+- `n5-ending-rescued.04.vo-02`
+- `n5-ending-rescued.05.vo-02`
+- `enc-wine-for-no-one.01.vo-02`
