@@ -118,10 +118,10 @@ Against about 3 to 5 strikes, there are enough Wards to turn about two thirds of
 | Ward | 1 holy water or the host: he withdraws | DEC-858 |
 | The earth box | 1 skull a day on a K4 building while any box stands; none on a quest-won night | DEC-779, DEC-870 |
 | Darkness | 1 skull on the most-skulled building at the ends of chapters 2 and 3 | DEC-748, DEC-871 |
-| The Long Night: lift the latch | 1 bite on Lenka's hero (guarded) + 1 skull on K1's Citadel | IDEA-082 |
+| The Long Night (a trap, D-04) | Hold them back: wolves at level 1. Talk them down: 1 skull on K1's Village. Lift the latch: 1 bite on the hero who set off the scene (guarded), no battle | IDEA-082, DEC-875, DEC-876 |
 | The Fly-Eater's price | 1 bite (guarded) or 1 story item | IDEA-088 |
 | The Funeral's lid | Nail it: 1 foe fewer, and a loss costs 1 story item. Watch it: full strength, and a loss costs 1 bite (guarded) | rulings.md, DEC-781 |
-| The Drawbridge | The bridge: 1 skull on the most-skulled building, and the Banquet's foes strike first. The gate: 1 extra move (or 2 hit points each) | DEC-857 |
+| The Drawbridge | The bridge: 1 skull on the most-skulled building, and the Banquet's foes strike first. The little gate: 2 hit points from each present hero, free with Marta unmasked | DEC-857, DEC-883 |
 | The Portrait | Look away: every hero loses 2 hit points. Cover it: 1 potion | IDEA-094 |
 | The Lift | Ride it: each rider loses 3 hit points. Climb: 2 gold each. Under Darkness, ride only | IDEA-097 |
 | The Swap | The hero returns at half their hit points, rounded up. A retreat brings them back next time, with 1 bite (guarded) | DEC-751 |
