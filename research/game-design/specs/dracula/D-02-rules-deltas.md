@@ -24,6 +24,23 @@
 - **G-6. Endings are narrator-led.** The narrator (Charon) carries each ending, with at most one companion line in it, and that line is skipped if the companion is absent (§10).
 - **Lenka stays hidden in the art until her reveal** in `n4-finding-the-tome` (Bob's Oct 16 lock; a possible change is pending with Bob). Before the reveal every picture shows her veiled, turned away or in shadow (`portrait.lenka~veiled`). From the Tome on she shows her face (`portrait.lenka`). This is also part of Q-428's answer.
 
+## Gamewright rulings G-10 to G-18 (decided, 2026-11-10)
+
+- **G-10.** Tomas is removed from Dracula for good (§9).
+- **G-11.** At the Open Grave, "Bar the gate" costs 2 hit points to the one present hero the group picks to bar it (DEC-019). The other option is the battle.
+- **G-12.** The Funeral's reward is **the nail**, not holy water. It is a story item, a fixed Ward source, given once a game (DEC-872). The nail is spent only on a Ward: it doesn't cure and gives no Undead Advantage. A Ward spends the nail first, then holy water, then the host.
+- **G-13.** Lenka's loyalty rises a step automatically when the Funeral finishes with her present (§4).
+- **G-14.** `nx-pressed-flower` plays only while Lenka is with the party.
+- **G-15.** The procession's ghost is drawn at Begin from a seeded list (DEC-849). The list is Ursula, Jozef and Gerhardt (`procession-ghosts`), one ghost a procession.
+- **G-16.** Marta is an ally at the gate only while she is with the party and is not the traitor (§7, §8).
+- **G-17.** Clue lines use `<scene>.clue-<suspect>~vo-NN` (§8, DEC-856).
+- **G-18.** The Fly-Eater's price is a bite (guarded) or one held story item, holy water or the host. A quest object is never asked for (G-1). No line names or counts the hunters (§10).
+
+- **G-19. Long, when it returns (deferred, DEC-866):**
+  - The traitor plays at Standard and Long (§8).
+  - `n4-eldest-witch` is a Tomb (MEC-026).
+  - The third lieutenant is a board-only foe, with no quest scene of its own.
+
 ## Decisions
 
 | Card | Settles | Decision (one line) |
@@ -40,7 +57,7 @@
 | DEC-852 | Q-428 | Every way of losing Lenka leads to "taken": she never falls, walks off or turns. Her hero's fall passes her to another present hero, or she is taken. Veiled art until the Tome |
 | DEC-853 | Q-429 | The blade starts at +3, and each landed blade strike takes 1, down to a floor of +1. It is never destroyed. A fallen carrier keeps every story item. The gate counts the objects held by the present group |
 | DEC-854 | Q-430 | Traitor at Standard only, tied to chapter 3. The suspects are Jakob, Andrei and Marta, Marta is met in chapter 3, and each has a written trick |
-| DEC-855 | Q-431 | The ten defaults stay as tavern hires, without Tomas the Scout (ruling 10). The five story companions are asked at their buildings for 0 gold and 1 move. Each has one moment that raises loyalty and one that lowers it |
+| DEC-855 | Q-431 | The ten defaults stay as tavern hires, without Tomas the Scout (ruling 10). The four story companions (Lenka, Agnes, Wren, Emeric; Tomas is removed) are asked at their buildings for 0 gold and 1 move. Each has one moment that raises loyalty and one that lowers it |
 | DEC-856 | the line-id form | `<scene>.<NN>~vo-NN` for a base line and `<scene>.<NN>~<value>.vo-NN` for a goal or lair line. One `~` per id (DEC-622, `assetIdSchema`) |
 | DEC-856 (also) | the endings | `finale-win.<ending>` / `finale-loss.<ending>`, with `~freed` chosen by `lenka.saved_by` (G-4 to G-6) |
 | DEC-857 | IDEA-091's "his notice" | The bridge is fast. It costs 1 skull on the most-skulled building, and the Banquet's statues strike first. The little gate needs Marta and costs 1 extra move. No track is added |
@@ -71,6 +88,7 @@ DEC-735 gave the traitor alone a seeded pick. DEC-849 makes that a general story
 | `blade-site`, `lantern-site` | A building in kingdom A or B (IDEA-084) | `n1-fortune-reading` |
 | `tome-site` | A building in K4 | `n1-fortune-reading` |
 | `lair` | `family-crypt`, `ludmilas-chapel`, `the-height`, `his-study` (IDEA-099) | A hint at the reading, then shown when the lair is entered |
+| `procession-ghosts` | An order of `ursula`, `jozef` and `gerhardt` (G-15) | Each `nx-midnight-procession` play takes the next one |
 | `traitor` | Jakob, Andrei, Marta (DEC-854), Standard only | Unmasked, or sprung at chapter 3's end (DEC-736) |
 
 **Markers.** MEC-055's fixed markers gain a second form, "placed from a seeded value". At the reveal, the board names the site and the players set the physical marker, with a Done prompt (DEC-278). Nothing is drawn as a map (D-01 locked constraints). D-01's collision rule applies.
@@ -120,7 +138,7 @@ The old encounter rules go. These are: one encounter per round on top of the nor
 - **Joins** at `n1-burgomasters-house` as a quest reward (DEC-065). The group picks her hero on the iPads (one button per present hero). She starts steady (DEC-774), and a hero holds one companion (DEC-072).
 - **Loss routes.** She never falls in a battle, walks out or turns into a foe. Each of those (DEC-071, DEC-722), and the win-Lenka strike at wavering, sets `lenka-taken` and carries her to the castle (DEC-746). She is an app-only companion (DEC-723), so no card leaves the table. A story names a companion's loss route. That needs an engine slot, which is part of DEC-848's companion work. *She did not choose him* (i6-outline), so she never fights for him. She never turns into a foe (ruling 9).
 - **Her hero falls.** She passes to another present hero, picked on the iPads. If none is present, she is taken.
-- **Loyalty moments.** The Long Night's "stop them / talk them down" raises it a step and "lift the latch" lowers it. The Funeral (Dorka's wake) raises it if the group stays for the lid, and the engine's corruption rule lowers it (DEC-721).
+- **Loyalty moments.** The Long Night's "stop them / talk them down" raises it a step and "lift the latch" lowers it. The Funeral raises it a step automatically when the quest finishes with her present (Gamewright, 2026-11-10), and the engine's corruption rule lowers it (DEC-721).
 - **Freed:** in the lair's end hook, if `lenka-taken` is set and the Lantern is present (DEC-750). That sets `lenka.saved_by = lantern` at that moment. If she stays with or rejoins the party, it is set to `party` then, always before any finale line is picked (G-8). The ending follows DEC-746: `finale-win.rescued` (with `~freed` lines when `saved_by` is `lantern`) or `finale-win.lenka-lost` (G-4, G-5).
 - **Art:** veiled until the Tome (see above). Her talking avatar uses the veiled portrait until `n4-finding-the-tome` and her face after it.
 
@@ -161,37 +179,38 @@ DEC-566's shape stays: three levels of three rooms, a stair room on the basement
 There is no attention track (DEC-054: no new tracks), and in chapter 4 he waits in the Tower and doesn't strike (DEC-738). So his notice is paid in the valley and at the first door:
 
 - **The bridge (loud):** costs no extra move. It places 1 skull on the most-skulled building (`skull` effect), and it sets `bridge-loud`, which gives the Banquet `foe-first`. This is a room effect, not finale escalation, because the Count's strength is unchanged (DEC-361).
-- **The little gate (quiet):** enabled only while Marta is an ally, meaning she was met and is not the sprung traitor (DEC-854). In Short, which has no traitor, she waits at the gate, as the old `n5-drawbridge` has her. It costs 1 extra move. With no move left the option is disabled with a reason. "Move" as a plain-scene cost kind is checked in D-04, and if DEC-642's cost doesn't cover it, the cost becomes 2 hit points each.
+- **The little gate (quiet):** enabled only while Marta is an ally: she is with the party and is not the traitor (Gamewright, 2026-11-10). At Standard she joins the party when she is met at `n4-earth-boxes`, and she leaves it if she springs or is unmasked as the traitor. At Short, which has no traitor, she waits at the gate and joins there, as the old `n5-drawbridge` has her. It costs 1 extra move. With no move left the option is disabled with a reason. "Move" as a plain-scene cost kind is checked in D-04, and if DEC-642's cost doesn't cover it, the cost becomes 2 hit points each.
 - Either option finishes the quest and fires the Tower trigger (DEC-645, IDEA-147).
 
 ## 8. The traitor (DEC-854, Q-430)
 
-- **Lengths:** Standard only (ruling 3). Short has none, within MEC-052's floor of 0. Long is deferred (DEC-866).
+- **Lengths:** Standard only today (ruling 3). Short has none, within MEC-052's floor of 0. When Long returns, the traitor also plays in Long (Gamewright, 2026-11-10; Long is deferred, DEC-866).
 - **Chapter:** chapter 3 (DEC-736 needs a chapter that ends before the finale). Unmasked or not, it is settled before the Castle.
-- **Suspects (DEC-735):** Jakob Brenner (the bookkeeper), Andrei Morosz (the brother) and Marta Varga (Tomas's niece). Marta is moved earlier: she is met at the K4 Village box in `n4-earth-boxes`, half-turned, as in vellmoor-expansion's idea. The seed picks the traitor (DEC-849), and clues against the others are false leads.
+- **Marta and the little gate (G-16):** Marta opens the little gate only while she is with the party and is not the traitor. At Standard she joins the party at `n4-earth-boxes` and leaves it if she is the traitor, whether she springs or is unmasked. At Short, which has no traitor, she waits at the gate and counts as with the party there.
+- **Suspects (DEC-735):** Jakob Brenner (the bookkeeper), Andrei Morosz (the brother) and Marta Varga (once in castle service). Marta is moved earlier: she is met at the K4 Village box in `n4-earth-boxes`, half-turned, as in vellmoor-expansion's idea. The seed picks the traitor (DEC-849), and clues against the others are false leads.
 - **Clues** (IDEA-140; MEC-052 sets the count to unmask in the numbers pass):
   - `n1-open-grave` (Oskar's letters)
   - `n3-fly-eaters-cell` (Jakob's own story)
   - `enc-ledger-page` as a wild clue event
   - `n4-earth-boxes` (the shipping orders)
   - Emeric's free clue a chapter (DEC-782)
-  - Each source has a line per suspect (`~` is not used for the traitor; the suspect's line is chosen by the engine's clue slot, MEC-052).
+  - Each source has a line per suspect, with the id `<scene>.clue-<suspect>~vo-NN`, as in `n1-open-grave.clue-marta~vo-01` (Gamewright, 2026-11-10). It is an event moment, not a `~` variant, and the engine's clue slot picks the suspect's line (MEC-052).
 - **The trick at chapter 3's end** echoes the Long Night: someone lets him in.
   - Jakob sells the group's road: the Count's piece is set on Lenka's hero's group, and a strike lands with no Ward offered.
   - Andrei opens the house: if Lenka is present she is taken (`lenka-taken`). Otherwise 2 skulls go on the K1 Citadel.
   - Marta bars the little gate: the Drawbridge offers only the bridge.
 - **Unmasked:** the trick never springs, and the unmasked suspect's help is the reward.
-  - Marta opens the little gate for free (no extra move).
+  - Marta, unmasked, is not an ally. Her help is to lower the bridge quietly: the bridge places no skull and does not set `bridge-loud` (Gamewright, 2026-11-10).
   - Jakob gives one holy water.
   - Andrei raises Lenka's loyalty a step.
 
 ## 9. Companions (DEC-855, Q-431)
 
-- **Defaults:** RtDT's ten stay at the tavern as priced hires (DEC-723, DEC-724, 20 gold, DEC-774), with Dracula's names for their lines only, captions as default (DEC-723). Tomas the Scout (DEC-731) is dropped from Dracula (ruling 10, DEC-498 lets a story remove content), so Tomas Varga is the only Tomas.
-- **The five story companions** are app-only (DEC-782). Each is asked at their own building as a building pick for 0 gold and 1 move. It is DEC-724's pick with the price set to 0, offered once that building's kingdom is open:
+- **Defaults:** RtDT's ten stay at the tavern as priced hires (DEC-723, DEC-724, 20 gold, DEC-774), with Dracula's names for their lines only, captions as default (DEC-723). Tomas the Scout (DEC-731) is dropped from Dracula (ruling 10, DEC-498 lets a story remove content).
+- **Tomas is gone for good** (Gamewright, 2026-11-10): Tomas Varga is not a companion, a speaker or a pick. No line names him.
+- **The four story companions** are app-only (DEC-782). Each is asked at their own building as a building pick for 0 gold and 1 move. It is DEC-724's pick with the price set to 0, offered once that building's kingdom is open:
   - Agnes at K1 Sanctuary
   - Emeric at K1 Bazaar
-  - Tomas at kingdom A Citadel
   - Wren at kingdom B Village
   - Lenka joins by quest (§4)
   - The collision rule moves a pick when its building holds a quest marker.
@@ -200,12 +219,13 @@ There is no attention track (DEC-054: no new tracks), and in chapter 4 he waits 
 | Companion | Up a step | Down a step |
 |---|---|---|
 | Agnes | The procession ghost (Mother Ursula) answered | The Fly-Eater's price paid with a bite on her hero |
-| Tomas | The little gate taken with Marta | Marta the sprung traitor |
 | Wren | The procession ghost (Jozef) answered; with Long, the Third Bride beaten (deferred) | The Funeral's lid watched, not nailed |
 | Emeric | The Tome found | `enc-ledger-page` followed to a false lead |
 | Lenka | See §4 | See §4 |
 
 ## 10. Line ids (DEC-856)
+
+**No line names or counts the hunters** (G-18). Lines say "you" and "one of you". They never say "the four of you", "both of you" or a hero's name, because the party is any size and drawn from the pool.
 
 DEC-622 keeps `scene.moment~variant` and drops `.private`. The A1 line form is `seal-break.01~vo-01`, and `assetIdSchema` allows one `~`, with dots on either side.
 

@@ -73,9 +73,9 @@ Everything below is The Ruined Keep's flow unless it is marked **Dracula**.
 
 | Beat | Story board | Present iPads | Source |
 |---|---|---|---|
-| Opening | The goal's strike painting. The next of the goal's two `enc-*` openings (group 3) plays on a Scroll | The labels **Fight**, **Ward** and **Endure**, picked together. Ward is greyed out with the reason **"Needs holy water or the host"** when no present hero holds either | DEC-019, DEC-654; group 3 labels |
+| Opening | The goal's strike painting. The next of the goal's two `enc-*` openings (group 3) plays on a Scroll | The labels **Fight**, **Ward** and **Endure**, picked together. Ward is greyed out with the reason **"Needs holy water or the host"** when no present hero holds a Ward item. The nail is a Ward item too (D-02 G-12), so Loremaster updates the reason to name it | DEC-019, DEC-654; group 3 labels |
 | Fight | C4's battle screens, as a skirmish of up to 3 rounds. The foe panel shows round N of 3 | The battle buttons. Retreat as in any battle | DEC-778, DEC-360, C4 |
-| A round is won, or Ward | `count-withdraws.01`, then `.02`. Ward plays `enc-at-the-door.01` first. A Ward spends holy water before the host, so no extra pick screen is needed | HUD line | DEC-858 |
+| A round is won, or Ward | `count-withdraws.01`, then `.02`. Ward plays `enc-at-the-door.01` first. A Ward spends the nail first, then holy water, then the host (D-02 G-12), so no extra pick screen is needed | HUD line | DEC-858 |
 | He goes home | "Move the Count's piece to the Tower." This is a physical-board confirm, so it keeps Done | Done | C3 Next rule |
 | Lands (no round won, a retreat, or Endure) | One of three lines. It is `count-strike.01~<goal>` when the strike lands. The guard event, `count-strike.guarded`, plays when a hero is at 2 bites or the blade is at its floor. The Lantern event, `count-strike.lantern`, plays when the Lantern is present (G-9). Then the cost Reveal (UI-036) names the hero and what was lost | HUD line, auto-advance | DEC-850, UI-036 |
 | Lenka taken | `count-takes-lenka.01` … `.03` play when the win-Lenka strike lands at wavering (DEC-852) | HUD line | DEC-746 |
@@ -103,7 +103,9 @@ Everything below is The Ruined Keep's flow unless it is marked **Dracula**.
 | Option (copy by Loremaster) | Needs | Cost and effect | Disabled reason |
 |---|---|---|---|
 | The bridge | All three objects among the present heroes (DEC-749) | 1 skull on the most-skulled building, and `bridge-loud` | "You need the blade, the Lantern and the Tome here" (D-02 §6) |
-| The little gate | The three objects, and Marta as an ally (unmasked, or not the traitor; at Short she waits there) | **2 hit points from each present hero.** Move is not a cost kind (DEC-693), so D-02's fallback applies. An unmasked Marta opens it for free | The objects reason first. Then "Marta isn't with you" (Loremaster's copy) |
+| The little gate | The three objects, and Marta as an ally: with the party and not the traitor (D-02 G-16; at Short she waits there and joins) | **2 hit points from each present hero.** Move is not a cost kind (DEC-693), so D-02's fallback applies | The objects reason first. Then "Marta isn't with you" (Loremaster's copy) |
+
+If Marta was unmasked, the bridge places no skull and doesn't set `bridge-loud` (D-02 §8).
 | Turn back | — | The quest is left (MEC-037), and the marker stays | — |
 
 - **Turn back** is added so the scene is never a dead end when both options are greyed out. A group can reach the space before it holds all three objects.
@@ -132,7 +134,7 @@ The climb uses The Ruined Keep's Tower loop and screens unchanged (MEC-076, DEC-
 
 **The Heart of Sorrow (DEC-879):**
 - Its named foe is **the Heart**, at level 4 (D-03 §1).
-- With the tower connected, its shaking plays the tower's rumble: **SND-077**, "Titans", from the sound-feel session in PR #409. That PR is open. It is picked by the AI listen's tone, per DEC-846 (#409).
+- With the tower connected, its shaking plays the tower's rumble: **SND-077**, "Titans", from the tower sound-feel session (#409, merged as fa54784). It is picked by the AI listen's tone, per DEC-846.
 - Without the tower the cue is skipped (DEC-305). The room's painting and lines `.02` and `.03` already carry the shaking, so no story beat is lost. D-01's "Story board fallback" means this.
 
 ## 8. Finale and ending selection (DEC-884)
@@ -153,6 +155,12 @@ The climb uses The Ruined Keep's Tower loop and screens unchanged (MEC-076, DEC-
 - The endings are narrator-led, with at most one companion line each (G-6).
 - The outcome scene auto-advances to Game stats, with no Next (SCR-018, DEC-627).
 - **Game stats** (SCR-019) adds Dracula's key moments: his goal, strikes turned away and landed, Lenka's ending, and the traitor (unmasked or sprung).
+
+## 8a. Scene conditions
+
+- `nx-pressed-flower` is skipped unless Lenka is with the party (D-02 G-14).
+- Each `nx-midnight-procession` plays the next ghost in the seeded `procession-ghosts` order (D-02 G-15).
+- At the Open Grave, "Bar the gate" asks the group to pick the hero who bars it. There is one button per present hero, and the board mirrors the press (DEC-019).
 
 ## 9. Quit
 
@@ -183,14 +191,12 @@ This is The Ruined Keep's flow unchanged:
    - Both raise Lenka's loyalty a step.
    - **Lift the latch:** a bite and no battle. It lowers her loyalty a step.
    - D-03 §5's latch row is updated, and the latch no longer adds a skull. Loremaster's `n1-long-night.latch-after` note ("the skull lands") needs to change. The line can stay as mood.
-2. **The latch bite (DEC-876)** goes to the hero who set off the scene. The engine picks, and the group doesn't choose. This is a story effect aimed by the engine, a DEC-848 menu target. It is not a DEC-693 cost, so DEC-693's "the group picks" still holds for costs. The guard applies at 2 bites.
+2. **The latch bite (DEC-876)** goes to one present hero **the group picks**, as Bob's DEC-693 has it for a plain-scene corruption. The iPads show one button per present hero, and the board mirrors the press (DEC-019). The guard applies at 2 bites: a hero at 2 bites is greyed out with the reason "Already twice bitten" (Loremaster's copy). If every present hero is at 2 bites, the latch is greyed out with that reason. This replaces the steering's engine pick, so no Bob ruling is needed (ruling 13, Gamewright, option B).
 3. **Event-moment ids** use `<scene>.<event>~vo-NN` (DEC-856, amended).
 4. **The Banquet's win-Lenka moment** plays only if Lenka is with the party (DEC-877).
 5. **The darkness castle moment** plays on entering the Tower level while the Lift is on hold (DEC-878).
 6. **At the Heart of Sorrow** the named foe is the Heart (level 4). Its shaking uses the tower rumble cue from #409 (SND-077), and the tower is optional (DEC-879).
 
-## OPEN RULINGS (Bob), continued from 13
+## RULING 13 (closed 2026-11-10, Gamewright)
 
-13. **The latch bite and DEC-693.** DEC-693 (Bob) says a plain-scene corruption goes to "one present hero the group picks". The latch's engine-picked bite is filed as a targeted effect, not a cost, so DEC-693 still holds for costs. Is that reading all right?
-    - (A, recommended) Yes: effects may target, and costs stay as DEC-693.
-    - (B) No: the group picks the hero, and DEC-876 is reversed.
+13. **The latch bite and DEC-693:** option B was taken, so the group picks the hero, per DEC-693 (DEC-876). No Bob lock is reversed, and D-04 has no open Bob rulings.
