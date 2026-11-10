@@ -3,7 +3,7 @@
 **Status:** draft by Gamewright, 2026-11-10, for Bob through Warden. Design only, no code. Names are working names (DEC-740, DEC-754, DEC-755). The rules text says hero; the players see and hear "hunter" (DEC-531).
 **Order:** Bob's go of 2026-11-10 (via Warden): finish the whole Dracula design by Thu 2026-11-12, 11:36 AM ET. Gamewright owns the requirements and rules. Loremaster writes the plot, the scripts and the VO text in the Charon voice. Illusionist renders the art.
 **Template:** The Ruined Keep is the shipped reference ([C3 plan](../../../../apps/bloodtower/plans/C3-ruined-keep.md), [feature map](../../../stories/ruined-keep/feature-map.md), [script](../../../stories/ruined-keep/script.md), [C5-05 art](../C5-05-ruined-keep-art.md)). This page copies its shape: chapters, each with quests at places, a chapter card, a chapter win and a seal break; then the Tower finale, the endings and the loss scenes.
-**Sources:** the Dracula cards AREA-080 to AREA-113 (DEC-739 to DEC-756, DEC-779 to DEC-783, IDEA-070 to IDEA-162, Q-423 to Q-431), [i6-outline.md](../../../stories/dracula/i6-outline.md), [bloodtower-map.md](../../../stories/dracula/bloodtower-map.md), the scene scripts in `assets/stories/dracula/scripts/`, `packs/dracula/`, and the [board map](../../board-map.md). The D-00 inventory sits beside the patch handed to the runner, not in the repo.
+**Sources:** the Dracula cards AREA-080 to AREA-113 (DEC-739 to DEC-756, DEC-779 to DEC-783, IDEA-070 to IDEA-162, Q-423 to Q-431), [i6-outline.md](../../../stories/dracula/i6-outline.md), [bloodtower-map.md](../../../stories/dracula/bloodtower-map.md), the scene scripts in `assets/stories/dracula/scripts/`, `packs/dracula/`, and the [board map](../../board-map.md). The D-00 inventory is [inventory.md](inventory.md).
 
 ## Locked constraints (Bob)
 
@@ -96,7 +96,7 @@ The Ruined Keep ends with a group vote on the last choice (C5-09). Dracula has n
 
 ## Beats Loremaster must write
 
-Scene ids are the existing `n<night>-…` ones. A new scene takes its night's prefix (night 5 is the castle). Line ids follow DEC-622: `<scene>.<NN>~vo-01`, the same form as `seal-break.01~vo-01`. Every existing scene is rewritten around the new plot (IDEA-153): Lenka free, pool heroes, nothing private, the day clock and no "five nights".
+Scene ids are the existing `n<night>-…` ones. A new scene takes its night's prefix (night 5 is the castle). Line ids follow DEC-622: `<scene>.<NN>~vo-01`, the same form as `seal-break.01~vo-01`. Endings are `finale-win.<ending>.<NN>~vo-01` and `finale-loss.<ending>.<NN>~vo-01`, after The Ruined Keep's `finale-win.shattered~vo-01`. The losses carry no `n5-` prefix because they can fire in any chapter. Every existing scene is rewritten around the new plot (IDEA-153): Lenka free, pool heroes, nothing private, the day clock and no "five nights".
 
 | Beat id | Status | Intent (one line) |
 |---|---|---|
@@ -132,11 +132,11 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | `n5-heart-of-sorrow` | new | The stair room where the castle itself attacks (with a Story board fallback) |
 | `n5-castle-moment.<goal>` (4) | new | His goal's moment in the castle (DEC-748) |
 | `n5-final-confrontation` | rewrite | The lair (`~<lair>` × 4), the boss battle, Lenka freed by the Lantern |
-| `n5-ending-rescued` | rewrite | The win with Lenka free: he falls, the fog lifts |
-| `n5-ending-lenka-lost` | new | The win with her lost: he falls, and she does not come back |
-| `n5-ending-turned` | rewrite | A hunter takes the third bite and turns (any chapter) |
-| `n5-ending-valley-falls` | new | The last villager turns; the valley is his |
-| `n5-ending-houses-fall` | new (OPEN RULING 4) | Four houses have fallen to him |
+| `finale-win.rescued` | rewrite (was `n5-ending-rescued`) | The win with Lenka free: he falls, the fog lifts. `~freed` lines when the Lantern freed her (D-02) |
+| `finale-win.lenka-lost` | new | The win with her lost: he falls, and she does not come back |
+| `finale-loss.turned` | rewrite (was `n5-ending-turned`) | A hunter takes the third bite and turns (any chapter) |
+| `finale-loss.valley-falls` | new | The last villager turns; the valley is his (any chapter) |
+| `finale-loss.houses-fall` | new (OPEN RULING 4) | Four houses have fallen to him (any chapter) |
 | `n5-ending-endures`, `n5-ending-taken` | retire | Their meaning is gone (DEC-746) |
 | Help, UI and shared lines | new | As The Ruined Keep's still-to-come list: regroup, events (IDEA-132's renames), corruption names (IDEA-131), building lines (IDEA-112, IDEA-143) |
 
@@ -175,7 +175,7 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 1. **The arc's unit.** (A) Keep the Nov 5 four chapters on the day clock (DEC-753). "Night" survives only in the scene ids and in the copy's mood. (B) Bring back 4+1 nights as five chapters: split The Hunt into a blade kingdom and a Lantern kingdom, with night 5 the castle. This re-rules IDEA-072 and DEC-753 and adds a seal break. (C) Four chapters, with the copy counting "nights" by chapter (chapter 2 reads as nights 2 and 3).
 2. **Long length.** (A) Long comes back to the Dracula pack in its drop, with 14 quests (DEC-753); C2-01's cut stands until then. (B) Short and Standard only, and the two lieutenant quests are cut. (C) Add Long after a probe shows the 24-skull clock lasts.
 3. **The traitor (Q-430).** (A) Standard and Long only. It springs at chapter 3's end (the Tome's call). The suspects are Jakob, Andrei and Marta, and Marta is first met in chapter 3. (B) No traitor in Dracula. (C) Every length, with Short's clue coming from the reading.
-4. **The fallen-buildings loss.** (A) Its own loss scene, The Houses Fall (`n5-ending-houses-fall`). (B) The Valley Falls covers both the skull loss and the fallen-buildings loss, with one scene.
+4. **The fallen-buildings loss.** (A) Its own loss scene, The Houses Fall (`finale-loss.houses-fall`). (B) The Valley Falls covers both the skull loss and the fallen-buildings loss, with one scene.
 5. **Where the Long lieutenant quests go.** (A) The Third Bride in chapter 2 and The Eldest Witch in chapter 3. (B) Both in chapter 3. (C) Both in chapter 2.
 6. **When the script is written (DEC-785).** (A) Loremaster writes the beats and draft lines now, all marked draft, and revises them after the probes. (B) Hold the lines until the Dracula probes have run, as DEC-785 says, and write only the beat outlines now.
 
