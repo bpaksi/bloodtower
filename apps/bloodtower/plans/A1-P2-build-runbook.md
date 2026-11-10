@@ -1,6 +1,6 @@
 # A1 + P2 build runbook
 
-Builds asset-studio P2 S3-fix to S9 (release 0.2), then Bloodtower A1 steps 2 to 8, up to Bob's G-A1. Claude is the manager only: it makes worktrees, briefs and launches subagents, runs the review loop, merges, and keeps this file current. It writes no product code itself.
+Builds asset-studio P2 S3-fix to S9 (release 0.2), then Bloodtower A1 steps 2 to 8 and 8b, up to Bob's G-A1. Claude is the manager only: it makes worktrees, briefs and launches subagents, runs the review loop, merges, and keeps this file current. It writes no product code itself.
 
 **Bob's rulings, 2026-11-08:** every code-writing subagent runs on Sonnet ("use Sennett for the code writing sub agents"). No art generation today: no real image-provider call, no A1-4 render and no G-A1 art run until Bob lifts the hold; code and tests with fake providers go on. Claude handles S9, the 0.2 release, on Bob's npm login ("Can you handle S9"). "Yes, merge on green": Claude squash-merges once CI is green and the latest review says `Blocking: none`. S7 Touches widened ("Grant all four"). "Let's go with your recommendations, can review after build": multi-profile keys `<id>~<profile>`, job sounds stored as drafts, and the manager's later defaults.
 
@@ -22,7 +22,8 @@ Each wave starts when everything it depends on has merged. Steps in one wave run
 | W5 | bloodtower | **A1-3** lint · **A1-4** render · **A1-6** import/retirements | A1-2 | Merge order 3, 4, 6. A1-4 and A1-6 are `Runs: local`; their code and fake-provider tests run in subagents, the paid-key and OneDrive evidence waits for Bob's OK |
 | W6 | bloodtower | **A1-5** `assets:pack` | A1-3, A1-4 | |
 | W7 | bloodtower | **A1-7** board asset ID · **A1-8** `bt-assets` skill | A1-5 (A1-8 also 4, 6) | |
-| G-A1 | — | Bob's sign-off on the Mac and the TV | A1-7, A1-8 | Stop here |
+| W8 | bloodtower | **A1-8b-2** demo playback | A1-5, A1-7, A1-8b-1 | Plays the packed line on the board. A1-8b-1 (demo pack and job) is in flight separately |
+| G-A1 | — | Bob's sign-off on the Mac and the TV | A1-7, A1-8, A1-8b-2 | Stop here |
 
 At most four developers run at once.
 
@@ -59,7 +60,7 @@ Updated 2026-11-10.
 | A1-8 `bt-assets` skill, `assets:redo` | #405 | merged |
 | A1-7 board asset ID | #406 | merged |
 | A1-8b-1 demo pack and job | (this PR) | in progress (`packs/test` title and demo line row, `~` ids, the line in the job) |
-| A1-8b-2 demo playback | — | not started; needs a designed trigger and data path, sized separately (Opus) |
+| A1-8b-2 demo playback | — | specified 2026-11-10 (Opus); not started |
 | e2e on main | #408, #410, #411 | merged: IMP-8 fast and deterministic (#408); e2e green on main, 178 passed (#410, #411) |
 | A1-6b retirements | — | pending Bob (OneDrive backup record; guarded by `BT_TTS_BACKUP_DONE`) |
 | G-A1 | — | pending Bob; depends on 8b-2 |
@@ -69,7 +70,7 @@ Updated 2026-11-10.
 - `assets:needs` emits the `music` kind but the lint refuses it (A1-15).
 - Partial-pack ruling A: A1-19 warns outside `--release` (D45). Confirm.
 - Studio mode always fails `AS-GLOW-2` for a story with a glow mask (D43, D47).
-- G-A1-01 "board/TV plays line once": no playback exists. Step 8b-2 sizes it (see the plan; it needs a designed trigger and data path).
+- G-A1-01 playback: Gamewright 2026-11-10, option (b). The host has no existing path that plays a packed line, so the gate stays and A1-8b-2 is the proof step.
 - A1-4c: the real render of the Ruined Keep line `seal-break.01~vo-01` (G-A1-01), after the art hold.
 - The provisional Loremaster voice (Charon) is Bob's to confirm or change at G-A1 (D48).
 - 6b: the OneDrive backup of tts-explorer's `audio-cache/`.
