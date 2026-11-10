@@ -2741,6 +2741,8 @@
 
 .bt-join-corner .bt-join-code {
   font-size: clamp(0.9rem, 1.4vw, 1.5rem);
+  /* The title face's figures stand taller than 1em; at line-height 1 they spill the line box. */
+  line-height: 1.25;
 }
 
 .bt-base-steps {
