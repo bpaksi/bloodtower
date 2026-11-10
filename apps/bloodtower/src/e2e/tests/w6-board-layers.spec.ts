@@ -241,7 +241,7 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await clickAct(second.device, "leave");
     await expect.poll(async () => (await readStatus(second.device)).inside).toBe("false");
     await expect(second.board.locator("main")).toHaveAttribute("data-board-layer", "move");
-    await expect(second.board.locator("[data-chapter]")).toHaveText("Proving Grounds");
+    await expect(second.board.locator("[data-chapter]")).toHaveText("The Ruined Keep");
     outside = await readStatus(second.device);
   } finally {
     await second.boardContext.close();

@@ -14,16 +14,15 @@ export const spaceIdSchema = z.string().regex(/^[NESW]-[a-z0-9]+(?:-[a-z0-9]+)*$
   message: "P2-1: a space id is {kingdom}-{slug} (DEC-225).",
 });
 
-export const assetIdSchema = z
-  .string()
-  .refine(
-    (value) =>
-      /^[a-z0-9][a-z0-9._@-]*$/.test(value) &&
-      !value.includes("..") &&
-      !value.includes("/") &&
-      !value.includes("\\"),
-    { message: "P2-2: an asset id is a manifest id, not a path." },
-  );
+export const assetIdSchema = z.string().refine(
+  (value) =>
+    // `<base>` or `<base>~<variant>`: at most one `~`, both sides non-empty (asset-studio's id shape).
+    /^[a-z0-9][a-z0-9._@-]*(?:~[a-z0-9][a-z0-9._@-]*)?$/.test(value) &&
+    !value.includes("..") &&
+    !value.includes("/") &&
+    !value.includes("\\"),
+  { message: "P2-2: an asset id is a manifest id, not a path." },
+);
 
 export const terrainSchema = z.enum([
   "desert",

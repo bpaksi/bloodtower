@@ -401,21 +401,30 @@ describe("A1-03a pack:lint wiring", () => {
     "place.bazaar",
     "place.citadel",
     "place.sanctuary",
+    "seal-break.01~vo-01",
   ];
   const writeIndex = async (story: string, status: "draft" | "final", drop?: string) => {
     const assets: Record<string, ReturnType<typeof entry>> = {};
     for (const id of refs) {
-      const kind = id.split(".")[0] as string;
+      const kind = id.startsWith("seal-break") ? "line" : (id.split(".")[0] as string);
       assets[id] =
-        kind === "glow"
-          ? entry("glow", { file: "glow.png", size: { width: 16, height: 9 }, status })
-          : entry(kind, { status, size: { width: 16, height: 9 } });
+        kind === "line"
+          ? entry("line", {
+              file: "line.m4a",
+              size: { seconds: 1 },
+              captions: ["A caption."],
+              status,
+            })
+          : kind === "glow"
+            ? entry("glow", { file: "glow.png", size: { width: 16, height: 9 }, status })
+            : entry(kind, { status, size: { width: 16, height: 9 } });
     }
     if (drop) delete assets[drop];
     await writeImage(join(story, "assets/glow.png"), 16, 9, () => [7, 7, 7]);
     // The loader resolves an indexed id to its file, so each indexed file is on disk (D45).
     for (const e of Object.values(assets)) {
-      if (e.kind !== "glow")
+      if (e.kind === "line") writeFileSync(join(story, "assets", e.file), "m4a");
+      else if (e.kind !== "glow")
         await writeImage(join(story, "assets", e.file), 16, 9, () => [7, 7, 7]);
     }
     writeFileSync(join(story, INDEX_FILE), JSON.stringify({ assets }));

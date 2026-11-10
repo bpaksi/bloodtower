@@ -163,7 +163,7 @@ describe("a broken v2 pack fails loudly (C3-01 EV-04)", () => {
         ["test", false],
       ]);
       expect(catalog.stories.find((story) => story.card.id === "test")?.card.title).toBe(
-        "Proving Grounds",
+        "The Ruined Keep",
       );
       expect(catalog.defaultPlay).toBeNull();
       expect(
