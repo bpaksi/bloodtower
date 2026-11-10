@@ -3,7 +3,7 @@
 **Status:** draft by Gamewright, 2026-11-10, for Bob through Warden. Design only, no code. Names are working names (DEC-740, DEC-754, DEC-755). The rules text says hero; the players see and hear "hunter" (DEC-531).
 **Order:** Bob's go of 2026-11-10 (via Warden): finish the whole Dracula design by Thu 2026-11-12, 11:36 AM ET. Gamewright owns the requirements and rules. Loremaster writes the plot, the scripts and the VO text in the Charon voice. Illusionist renders the art.
 **Template:** The Ruined Keep is the shipped reference ([C3 plan](../../../../apps/bloodtower/plans/C3-ruined-keep.md), [feature map](../../../stories/ruined-keep/feature-map.md), [script](../../../stories/ruined-keep/script.md), [C5-05 art](../C5-05-ruined-keep-art.md)). This page copies its shape: chapters, each with quests at places, a chapter card, a chapter win and a seal break; then the Tower finale, the endings and the loss scenes.
-**Sources:** the Dracula cards AREA-080 to AREA-113 (DEC-739 to DEC-756, DEC-779 to DEC-783, IDEA-070 to IDEA-162, Q-423 to Q-431), [i6-outline.md](../../../stories/dracula/i6-outline.md), [bloodtower-map.md](../../../stories/dracula/bloodtower-map.md), the scene scripts in `assets/stories/dracula/scripts/`, `packs/dracula/`, and the [board map](../../board-map.md). The D-00 inventory sits beside the patch handed to the runner, not in the repo.
+**Sources:** the Dracula cards AREA-080 to AREA-113 (DEC-739 to DEC-756, DEC-779 to DEC-783, IDEA-070 to IDEA-162, Q-423 to Q-431), [i6-outline.md](../../../stories/dracula/i6-outline.md), [bloodtower-map.md](../../../stories/dracula/bloodtower-map.md), the scene scripts in `assets/stories/dracula/scripts/`, `packs/dracula/`, and the [board map](../../board-map.md). The D-00 inventory is [inventory.md](inventory.md).
 
 ## Locked constraints (Bob)
 
@@ -11,7 +11,7 @@
 - The Story board has no digital board and no hero markers (Bob 2026-10-24). The reading names its sites in words and on the cards it turns. The parchment map (IDEA-158) and the castle cutaway (IDEA-156) are paintings, with no pins and no hero markers on them. Players move the physical pieces: heroes, quest markers, skulls and the Count's piece.
 - The iPad picks are simple lists of buttons (C3 iPad rules). Nothing is private: DEC-745 and Q-416 end the private iPad content.
 - Charon is the locked Loremaster (narrator) voice (Bob 2026-11-10).
-- The structure is Bob's 2026-11-05 deck: four chapters over the 1.1 engine's day clock (DEC-753, IDEA-071 to IDEA-074, IDEA-148). OPEN RULING 1 asks whether the older 4+1 nights should come back.
+- The structure is Bob's 2026-11-05 deck: four chapters over the 1.1 engine's day clock (DEC-753, IDEA-071 to IDEA-074, IDEA-148). Bob confirmed it on 2026-11-10 (ruling 1, DEC-868): the 4+1 nights do not come back.
 
 ## Premise
 
@@ -27,7 +27,7 @@ The Count is not a final room. He is a piece on the board with one hidden goal e
 | **Win, Lenka lost** | The Count falls, but Lenka was taken and the Lantern is not in the last room | MEC-076 won | DEC-746, IDEA-075 |
 | **Turned** (loss) | A hero takes a third bite (corruption) | MEC-013, D-DRA-5 | IDEA-076, IDEA-131 |
 | **The Valley Falls** (loss) | The last skull drops and the supply is empty | DEC-686 | IDEA-076, IDEA-133 |
-| **The Houses Fall** (loss) | The fourth building falls | Q-C3-05 (engine rule) | OPEN RULING 4 |
+| **The Houses Fall** (loss) | The fourth building falls | Q-C3-05 (engine rule) | Ruling 4, DEC-863 |
 
 Losing Lenka is never a loss (DEC-746). A Tower retreat keeps progress (DEC-360). No strike alone can give the third bite (DEC-775, DEC-778's guard).
 
@@ -44,12 +44,12 @@ Losing Lenka is never a loss (DEC-746). A Tower retreat keeps progress (DEC-360)
 | 2 | The Hunt | The Catacombs of Saint Ysolde | `n23-catacombs-of-saint-ysolde` | Tomb | Seeded building, kingdom B | yes | yes | yes | The Lantern (IDEA-086, IDEA-135) |
 | 2 | The Hunt | The Funeral | `n2-burgomasters-funeral` | Plain scene, battle | Kingdom A Sanctuary | | yes | yes | Holy water; the lid choice (IDEA-087, DEC-781) |
 | 2 | The Hunt | The Fly-Eater's Cell | `n3-fly-eaters-cell` | Plain scene | Kingdom B Citadel | | yes | yes | The clue that places the earth boxes (IDEA-088) |
-| 2 | The Hunt | The Third Bride | `n23-third-bride` *new* | Plain scene, lieutenant battle (MEC-051) | Kingdom A or B, seeded | | | yes | Wren's tie (IDEA-154); OPEN RULING 5 |
+| 2 | The Hunt | The Third Bride | `n23-third-bride` *new* | Plain scene, lieutenant battle (MEC-051) | Kingdom A or B, seeded | | | yes | Wren's tie (IDEA-154). **Deferred** with Long (DEC-866) |
 | 3 | The Truth | The Earth Boxes | `n4-earth-boxes` | Two plain scenes, battle | K4 Sanctuary, then K4 Village | | yes | yes | Boxes burned: the daily skull stops (IDEA-089, DEC-779, D-DRA-12) |
 | 3 | The Truth | Finding the Tome | `n4-finding-the-tome` | Plain scene | Seeded building, K4 | yes | yes | yes | The Tome; his goal named; the call to the castle (IDEA-090, IDEA-136) |
-| 3 | The Truth | The Eldest Witch | `n4-eldest-witch` *new* | Plain scene, lieutenant battle | K4, seeded | | | yes | The coven broken (IDEA-155); OPEN RULING 5 |
+| 3 | The Truth | The Eldest Witch | `n4-eldest-witch` *new* | Plain scene, lieutenant battle | K4, seeded | | | yes | The coven broken (IDEA-155). **Deferred** with Long (DEC-866) |
 | 4 | The Castle | The Drawbridge | `n5-drawbridge` | Plain scene | A Tower-adjacent space | yes | yes | yes | The Tower unlocks (IDEA-091, IDEA-147) |
-| | | **Quests** | | | | **8** | **12** | **14** | |
+| | | **Quests** | | | | **8** | **12** | **14 (deferred)** | |
 
 The finale (the Tower crawl and the boss battle) is not counted as a quest, the same as in The Ruined Keep.
 
@@ -60,22 +60,22 @@ The finale (the Tower crawl and the boss battle) is not counted as a quest, the 
 - **Goal:** reach the inn, find the dead man's house, keep Lenka through the night and hear the reading.
 - **Bounds:** K1 only; the fog closes the rest (IDEA-145). Start: all heroes on K1's Village space (IDEA-144).
 - **Order:** the Inn first, then the House, then the Long Night. The Open Grave may be played at any time. The Reading is always last, and it closes the chapter. A quest's marker appears when the quest before it ends (Gamewright pick, as The Herald comes before The Ambush). Markers are fixed (IDEA-146).
-- **New rule hooks:** Lenka as a companion (DEC-741, DEC-782; Q-428). The other four old hunters can be met at their own buildings (DEC-745; Q-431). A plain-scene choice with a battle (The Long Night). The reading's seeded values: the sites, his goal and the lair (Q-425). The Count starts roaming at the first day's close (DEC-775).
-- **Expected length:** Short and Standard, about 5 to 8 days. This is a placeholder for the numbers pass, and play times are measured, not guessed (R-LEN-4).
+- **New rule hooks:** Lenka as a companion (DEC-741, DEC-782; Q-428). The other four old hunters can be met at their own buildings (DEC-745; Q-431). A plain-scene choice with a battle (The Long Night). The reading's seeded values: the sites, his goal and the lair (Q-425). The Count's piece enters at the end of The Reading (DEC-791 setting; D-02 DEC-859).
+- **Expected length:** Short and Standard, about 7 days at Short and 8 at Standard, for 2 heroes (D-03 §6). These are estimates until the numbers pass, and play times are measured, not guessed (R-LEN-4).
 
 ### Chapter 2: The Hunt
 
 - **Goal:** bring back the blade and the Lantern.
 - **Bounds:** kingdoms A and B open, and K1 stays open (IDEA-145). The blade and the Lantern can be taken in either order.
 - **New rule hooks:** the first Tombs in Dracula (MEC-026), with Short and Standard tomb sizes (DEC-669). The Count shows himself after the blade and leaves (IDEA-085). The lid choice (DEC-781). The Fly-Eater's price, a bite or a story item, guarded at 2 bites (MEC-013). Lieutenants stand on the board in Short and Standard (DEC-783).
-- **Expected length:** about 6 to 9 days (placeholder).
+- **Expected length:** about 9 days at Short and 10 at Standard, for 2 heroes (D-03 §6).
 
 ### Chapter 3: The Truth
 
 - **Goal:** burn his earth and find the Tome.
 - **Bounds:** K4 opens, and every kingdom is open from here on.
 - **New rule hooks:** a standing box adds 1 skull in K4 at each day's close (DEC-779). The Tome names his goal (DEC-747) and gives +1 Wild against him (DEC-750). Its end call opens chapter 4.
-- **Expected length:** about 3 to 6 days (placeholder).
+- **Expected length:** about 4 days at Short and 6 at Standard, for 2 heroes (D-03 §6).
 
 ### Chapter 4: The Castle (the finale chapter, DEC-356)
 
@@ -88,7 +88,7 @@ The finale (the Tower crawl and the boss battle) is not counted as a quest, the 
   - Dealt rooms fill the rest (IDEA-100). The last room is the lair, with one of four seeded pictures (IDEA-099), and the boss battle is fought there.
   - Fixed rooms, hook choices and the missing-hero effect wait for DEC-780 and Q-427 (D-02).
 - **New rule hooks:** the Count stops roaming and waits (DEC-738). The goal's castle moment (DEC-748). Lenka is freed by the Lantern in the last room (DEC-750). The blade gives +3 Wild against him.
-- **Expected length:** about 3 to 5 days (placeholder).
+- **Expected length:** about 6 days at Short and 7 at Standard, for 2 heroes (D-03 §6).
 
 ## Finale and endings
 
@@ -96,7 +96,7 @@ The Ruined Keep ends with a group vote on the last choice (C5-09). Dracula has n
 
 ## Beats Loremaster must write
 
-Scene ids are the existing `n<night>-…` ones. A new scene takes its night's prefix (night 5 is the castle). Line ids follow DEC-622: `<scene>.<NN>~vo-01`, the same form as `seal-break.01~vo-01`. Every existing scene is rewritten around the new plot (IDEA-153): Lenka free, pool heroes, nothing private, the day clock and no "five nights".
+Scene ids are the existing `n<night>-…` ones. A new scene takes its night's prefix (night 5 is the castle). Line ids follow DEC-622: `<scene>.<NN>~vo-01`, the same form as `seal-break.01~vo-01`. Endings are `finale-win.<ending>.<NN>~vo-01` and `finale-loss.<ending>.<NN>~vo-01`, after The Ruined Keep's `finale-win.shattered~vo-01`. The losses carry no `n5-` prefix because they can fire in any chapter. Every existing scene is rewritten around the new plot (IDEA-153): Lenka free, pool heroes, nothing private, the day clock and no "five nights".
 
 | Beat id | Status | Intent (one line) |
 |---|---|---|
@@ -111,15 +111,15 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | `n23-catacombs-of-saint-ysolde` | rewrite | Moving bones around the Lantern; the lookalike goes to the castle |
 | `n2-burgomasters-funeral` | rewrite | Dorka rises at her own wake; the lid choice; a new reason she goes up the hill |
 | `n3-fly-eaters-cell` | rewrite | Jakob sells where the boxes went, for a bite or an item |
-| `n23-third-bride` | new (Long) | The lieutenant who was Wren's mother; Wren's tie ends |
+| `n23-third-bride` | new (Long, deferred) | The lieutenant who was Wren's mother; Wren's tie ends |
 | `n4-earth-boxes` | rewrite | Burn three boxes across K4; three rotating clips and a last-box clip |
 | `n4-finding-the-tome` | rewrite | His own hand: Ludmila, Stefan, Lenka's face; his goal named (`~<goal>`); the call to the castle |
-| `n4-eldest-witch` | new (Long) | Break the coven in its passages |
+| `n4-eldest-witch` | new (Long, deferred) | Break the coven in its passages |
 | `chapter-win.01` … `.03` | new | The chapter is won, in one line each |
 | `seal-break.01` … `.03` | new | His hold on the valley cracks, once a chapter (IDEA-152) |
 | `nx-pressed-flower` | rewrite | His violets turn up wherever Lenka sleeps: courtship as threat (IDEA-078), shared, not private |
 | `nx-midnight-procession` | rewrite | Once a chapter the dead who tried walk past, and one ghost speaks to a companion's tie (IDEA-077) |
-| `count-strike.<goal>` (4) | new | His landed strike for each goal: a bite, Lenka's loyalty, the blade, a skull (DEC-748) |
+| `count-strike.NN~<goal>` (D-02 §3) | new | His landed strike for each goal: a bite, Lenka's loyalty, the blade, a skull (DEC-748) |
 | `count-withdraws` | new | Beaten, he leaves the board for the day, and he says so (IDEA-126) |
 | `count-takes-lenka` | new | His strike carries Lenka to the castle, and play goes on (DEC-746) |
 | `enc-*` (11) | source | The old hunter-token encounters, mined for his arrivals and strikes; Loremaster keeps the ids it reuses |
@@ -130,13 +130,13 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | `n5-the-swap` | new | A friend vanishes and a wight wears their face; win them back (DEC-751) |
 | `n5-flooded-room`, `n5-lift` | new (held by Q-427) | Zombies under the water; a machine that crushes the careless |
 | `n5-heart-of-sorrow` | new | The stair room where the castle itself attacks (with a Story board fallback) |
-| `n5-castle-moment.<goal>` (4) | new | His goal's moment in the castle (DEC-748) |
+| `n5-castle-moment.NN~<goal>` (4) | new | His goal's moment in the castle (DEC-748) |
 | `n5-final-confrontation` | rewrite | The lair (`~<lair>` × 4), the boss battle, Lenka freed by the Lantern |
-| `n5-ending-rescued` | rewrite | The win with Lenka free: he falls, the fog lifts |
-| `n5-ending-lenka-lost` | new | The win with her lost: he falls, and she does not come back |
-| `n5-ending-turned` | rewrite | A hunter takes the third bite and turns (any chapter) |
-| `n5-ending-valley-falls` | new | The last villager turns; the valley is his |
-| `n5-ending-houses-fall` | new (OPEN RULING 4) | Four houses have fallen to him |
+| `finale-win.rescued` | rewrite (was `n5-ending-rescued`) | The win with Lenka free: he falls, the fog lifts. `~freed` lines when the Lantern freed her (D-02) |
+| `finale-win.lenka-lost` | new | The win with her lost: he falls, and she does not come back |
+| `finale-loss.turned` | rewrite (was `n5-ending-turned`) | A hunter takes the third bite and turns (any chapter) |
+| `finale-loss.valley-falls` | new | The last villager turns; the valley is his (any chapter) |
+| `finale-loss.houses-fall` | new (ruling 4) | Four houses have fallen to him (any chapter) |
 | `n5-ending-endures`, `n5-ending-taken` | retire | Their meaning is gone (DEC-746) |
 | Help, UI and shared lines | new | As The Ruined Keep's still-to-come list: regroup, events (IDEA-132's renames), corruption names (IDEA-131), building lines (IDEA-112, IDEA-143) |
 
@@ -147,7 +147,7 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | Chapters with bounds, a card, a win and a seal break (MEC-033, MEC-054, DEC-303) | The seeded reading: object sites, the goal and the lair (Q-425) |
 | The day clock, the skull drop and the days-left display (MEC-034, DEC-686) | The Count's four goals: target, strike and castle moment (DEC-748; Q-426) |
 | Plain scenes with one choice (MEC-077), and Tombs (MEC-026) | Lenka: a companion who can be taken and won back (DEC-746; Q-428) |
-| The 1.1 roaming adversary (DEC-738, DEC-775) | His skirmish-and-withdraw strike (DEC-778, proposed) |
+| The 1.1 roaming adversary (DEC-738, DEC-775) | His skirmish-and-withdraw strike (DEC-778) |
 | The Tower crawl and boss battle (MEC-076, DEC-356) | Fixed castle rooms, hook choices and the vanishing hero (DEC-780, DEC-751; Q-424, Q-427) |
 | Buildings, Cleanse and the skull menu shrink (C3-06) | An earth box adding a daily skull (DEC-779) |
 | Corruption, with the third one losing (C3-08, MEC-013), renamed bites | All three objects needed for the gate (DEC-749), and the objects' effects (DEC-750; Q-429) |
@@ -159,27 +159,31 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 
 ## Clashes with the existing sources
 
-1. **Nights against chapters.** D-DRA-1 to D-DRA-4 (Oct 14) and ruling 12 (Oct 15) set 4+1 nights: one kingdom a night, with night 5 the castle. The Nov 5 cards replace that with four chapters on the day clock (IDEA-079, IDEA-148, DEC-753). The scene ids keep the night numbers (`n23-…` already spans two nights). The lines "Five nights. No more will be given." (`n1-fortune-reading.12`) and "Five nights. Three keys." (`n5-drawbridge.01`) need rewriting, pending OPEN RULING 1.
-2. **Length.** The approved C2-01 brief takes Long out of `packs/dracula/pack.yaml` for the 1.0 cut (DEC-508). DEC-739 parked that cut, and DEC-753 gives Long 14 quests. The brief stays true for today's unplayable pack. OPEN RULING 2.
+1. **Nights against chapters.** D-DRA-1 to D-DRA-4 (Oct 14) and ruling 12 (Oct 15) set 4+1 nights: one kingdom a night, with night 5 the castle. The Nov 5 cards replace that with four chapters on the day clock (IDEA-079, IDEA-148, DEC-753). The scene ids keep the night numbers (`n23-…` already spans two nights). The lines "Five nights. No more will be given." (`n1-fortune-reading.12`) and "Five nights. Three keys." (`n5-drawbridge.01`) need rewriting (ruling 1: four chapters).
+2. **Length.** The approved C2-01 brief takes Long out of `packs/dracula/pack.yaml` for the 1.0 cut (DEC-508). DEC-739 parked that cut, and DEC-753 gives Long 14 quests. The brief stays true for today's unplayable pack. Ruling 2: Short and Standard only (DEC-866).
 3. **Premise.** The scripts and `pack.yaml`'s tagline ("The Count has taken Lenka") follow D-DRA-10. DEC-741 makes her free. The tagline needs new copy.
-4. **Endings.** Rescued, Endures, Taken and Turned are replaced by DEC-746's four. The engine's fallen-buildings loss adds a fifth (OPEN RULING 4).
-5. **Private and fixed-hunter content.** There are 159 `target: ipad:<hunter>` moments, the `.private.<hunter>` moments and `~no-<hunter>` variants, written for four fixed hunters. DEC-745 makes those hunters companions, and Q-416 rules out private content. The variants become `~no-<companion>`, and private lines go to the Story board or are cut.
+4. **Endings.** Rescued, Endures, Taken and Turned are replaced by DEC-746's four. The engine's fallen-buildings loss adds a fifth (ruling 4, DEC-863).
+5. **Private and fixed-hunter content.** There are 159 `target: ipad:<hunter>` moments, the `.private.<hunter>` moments and `~no-<hunter>` variants, written for four fixed hunters. DEC-745 makes those hunters companions, and Q-416 rules out private content. D-02 retires those variants: a line whose speaker is absent is skipped, and private lines go to the Story board or are cut (DEC-856).
 6. **The hunter token.** D-DRA-11 is gone (DEC-310), so the `enc-*` encounters are source material only. The "2 story skulls a night" cap and "+1 foe on night 5" break DEC-361 and are dropped. The `~boxes-left` finale variants are replaced by DEC-779.
 7. **Line ids.** `packs/dracula/script.yaml` uses `<moment>.vo-NN`. DEC-622 and #413 use `<base>~vo-NN`. A variant line (`…~no-tomas.vo-01`) has no agreed form yet. This is for D-02 and code.
 8. **Names.** Sergiu becomes Stefan and Vadoma becomes Berta (DEC-755). Scene ids, prop ids (`sergiu-blade`) and cast ids (`vadoma`) stay as they are, and only the text changes.
-9. **Script timing.** DEC-785 writes the script after the probes. Bob's go of 2026-11-10 has Loremaster writing now. OPEN RULING 6.
-10. **Marta and the traitor.** Marta first appears in chapter 4, after the last chapter end at which the trick could spring (Q-430). OPEN RULING 3.
+9. **Script timing.** DEC-785 writes the script after the probes. Bob's go of 2026-11-10 has Loremaster writing now. Ruling 6: drafts now (DEC-867).
+10. **Marta and the traitor.** Marta first appears in chapter 4, after the last chapter end at which the trick could spring (Q-430). Ruling 3: Marta is met in chapter 3 (DEC-854).
 
-## OPEN RULINGS (Bob)
+## RULINGS (closed 2026-11-10)
 
-1. **The arc's unit.** (A) Keep the Nov 5 four chapters on the day clock (DEC-753). "Night" survives only in the scene ids and in the copy's mood. (B) Bring back 4+1 nights as five chapters: split The Hunt into a blade kingdom and a Lantern kingdom, with night 5 the castle. This re-rules IDEA-072 and DEC-753 and adds a seal break. (C) Four chapters, with the copy counting "nights" by chapter (chapter 2 reads as nights 2 and 3).
-2. **Long length.** (A) Long comes back to the Dracula pack in its drop, with 14 quests (DEC-753); C2-01's cut stands until then. (B) Short and Standard only, and the two lieutenant quests are cut. (C) Add Long after a probe shows the 24-skull clock lasts.
-3. **The traitor (Q-430).** (A) Standard and Long only. It springs at chapter 3's end (the Tome's call). The suspects are Jakob, Andrei and Marta, and Marta is first met in chapter 3. (B) No traitor in Dracula. (C) Every length, with Short's clue coming from the reading.
-4. **The fallen-buildings loss.** (A) Its own loss scene, The Houses Fall (`n5-ending-houses-fall`). (B) The Valley Falls covers both the skull loss and the fallen-buildings loss, with one scene.
-5. **Where the Long lieutenant quests go.** (A) The Third Bride in chapter 2 and The Eldest Witch in chapter 3. (B) Both in chapter 3. (C) Both in chapter 2.
-6. **When the script is written (DEC-785).** (A) Loremaster writes the beats and draft lines now, all marked draft, and revises them after the probes. (B) Hold the lines until the Dracula probes have run, as DEC-785 says, and write only the beat outlines now.
+Ruling 1 was Bob's, relayed by Warden at 2:16 PM ET. Rulings 2 to 6 were decided by Gamewright under Bob's standing rule that design rulings are Gamewright's (relayed by Warden, 2026-11-10).
 
-Q-424 to Q-429 and Q-431 are rules questions. They go to D-02 with a recommendation each.
+1. **The arc's unit:** four chapters on the day clock, per Nov 5 (A). Decided by Bob (DEC-868).
+2. **Long length:** Short and Standard only, per the approved C2-01. Long-only content stays specced, marked deferred until Long returns, and D-03's tuning leaves it out (DEC-866).
+3. **The traitor:** Standard only, since Long is deferred. It springs at chapter 3's end, and Marta is met in chapter 3 (DEC-854).
+4. **The fallen-buildings loss:** its own scene, `finale-loss.houses-fall` (DEC-863).
+5. **The lieutenant quests:** chapters 2 and 3, deferred with Long (DEC-866).
+6. **Script timing:** Loremaster drafts the lines now, marked draft (DEC-867).
+
+Still with Bob: Lenka's face (she stays veiled meanwhile) and the Vellmoor cover.
+
+Q-424 to Q-431 are settled in D-02.
 
 ## Next: D-02 rules deltas
 
