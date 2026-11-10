@@ -92,7 +92,7 @@ Everything below is The Ruined Keep's flow unless it is marked **Dracula**.
   - A right accusation sets the suspect unmasked. It plays `traitor.<suspect>-unmasked~vo-01` and Reveals the help (D-02 §8).
   - A wrong accusation follows the engine's traitor rules (MEC-052, DEC-183) and plays `traitor.wrong~vo-01`. It is the one wrong-accusation line, the same for every suspect.
 - **At chapter 3's close,** after `chapter-win.03` (DEC-736):
-  - If still hidden, the traitor springs. `traitor.<suspect>-sprung~vo-01` plays over their painting, then the trick's Reveal.
+  - If still hidden, the traitor springs. `traitor.<suspect>-sprung~vo-01` plays over the suspect's portrait (`portrait.<suspect>`, D-06), then the trick's Reveal.
   - If already unmasked, nothing plays.
 - **Ids:** these are event moments (`<scene>.<event>~vo-NN`, DEC-856, DEC-877). The scene is `traitor`, and the suspects are `jakob`, `andrei` and `marta`. That makes 7 lines: 3 unmasked, 3 sprung and 1 wrong. They are for Loremaster.
 
