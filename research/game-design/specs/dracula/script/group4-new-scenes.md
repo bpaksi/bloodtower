@@ -4,7 +4,7 @@
 
 **Scope:** Short and Standard only. Deferred: `n4-eldest-witch` (Long, group 7). `n23-third-bride` is a board-only Long foe with no copy (D-02 G-19). On hold: `n5-lift`. Rev 3 adds `n5-flooded-room` (D-06).
 
-**Speakers and voices:** `narrator` = Charon ("slow, low, ominous storyteller"); `count` = Algieba ("smooth, courtly, menacing"), a voice only, never seen until his lair; `lenka` = Leda ("young, earnest, stubborn"). No pool companion speaks, so no line needs an absence variant. No Tomas. Lenka's face is never described, and she never turns. Everything is spoken to the whole table, and nothing is private. No counted nights.
+**Speakers and voices:** `narrator` = Charon ("slow, low, ominous storyteller"); `count` = Algieba ("smooth, courtly, menacing"), a voice only, never seen until his lair; `lenka` = Leda ("young, earnest, stubborn"). No pool companion speaks, so no line needs an absence variant. No Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; see lenka-look.md), and she never turns. Everything is spoken to the whole table, and nothing is private. No counted nights.
 
 **Ids (DEC-856):** base lines are `<scene>.NN~vo-NN`. Outcome and room events are event moments, `<scene>.<event>~vo-NN` (the form Gamewright OK'd for group 3), because DEC-856 allows no option or state variants. Goal lines are `n5-castle-moment.NN~<goal>.vo-NN`.
 
@@ -15,7 +15,7 @@
 - **Kind:** Plain scene with a battle (MEC-077). K1 Citadel, the burgomaster's house. Chapter 1, after the Burgomaster's House
 - **D-01 beat:** `n1-long-night`: Wolves at the shutters, then one of you walks to the door: stop them, talk them down, or lift the latch. Reward: Lenka kept, or the Count let in: a bite and a skull (IDEA-082)
 - **D-02:** D-02 §3 and §4, Gamewright 2026-11-10: in chapter 1 the Count is only a voice (DEC-859). The scene is a trap with a choice of losses: Hold them back = a chapter-level wolf battle; Talk them down = no battle, 1 skull on the Village; Lift the latch = a bite on one present hero, no skull, no battle. Who takes the latch bite: the group chooses (Bob's DEC-693, per the parent's 2026-11-10 note). D-04 §11.2 (DEC-876) has the engine pick instead, pending OPEN RULING 13. The copy is neutral ("one of you"), so it works either way. Hold or Talk raise Lenka's loyalty a step; the Latch lowers it a step. Lenka is present.
-- **Painting (Illusionist, one line):** The burgomaster's hall by lamplight: barred shutters, garlic on the sills, mist curling under the door. A hunter in silhouette has a hand on the latch. Lenka is seen from behind, dark braid and mourning dress, a cord at her neck. Wolf shadows press against the shutters. No faces. The Count is not shown.
+- **Painting (Illusionist, one line):** The burgomaster's hall by lamplight: barred shutters, garlic on the sills, mist curling under the door. A hunter in silhouette has a hand on the latch. Lenka stands in the hall, face clear under her travelling hood, dark braid and mourning dress, a cord at her neck. Wolf shadows press against the shutters. The hunters have no faces. The Count is not shown.
 
 | Asset id | Speaker (voice) | Spoken text | Caption | Est. s | When / intent | Status |
 |---|---|---|---|---|---|---|

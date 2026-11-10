@@ -8,7 +8,7 @@
 
 **Speakers:** `narrator` (Charon, "slow, low, ominous storyteller") unless marked otherwise. Endings are narrator-led, with at most one companion line each (Gamewright). One line, `finale-win.rescued.04`, is Lenka (`lenka`, Leda, "young, earnest, stubborn"). The pool companions may be absent, so none of them speaks in an ending and no `~no-<companion>` variants are needed.
 
-**Canon checks:** Lenka's face is never described (voice, hands, braid, mourning dress and Anton's ring on its cord only). The Count is shown only fallen, as dust in the lair. In the losses he is unseen. No ending implies a lost quest object (Gamewright: strikes take gold, health or buildings only). The retired `n5-ending-endures` and `n5-ending-taken` are not reused. The Turned loss is added as `finale-loss.turned` (D-02 G-4), rewritten from main's `n5-ending-turned.md` with no per-hunter lines.
+**Canon checks:** Lenka's face is shown (travelling hood, braid, mourning dress, Anton's ring; after the Tome, the violet mark — see lenka-look.md). The Count is shown only fallen, as dust in the lair. In the losses he is unseen. No ending implies a lost quest object (Gamewright: strikes take gold, health or buildings only). The retired `n5-ending-endures` and `n5-ending-taken` are not reused. The Turned loss is added as `finale-loss.turned` (D-02 G-4), rewritten from main's `n5-ending-turned.md` with no per-hunter lines.
 
 **Estimates:** 0.40 s per word + 4.0 s, fitted to the 13 Charon masters in C5-05 (`/workspace/c5-05-art/voice/MANIFEST.md`); expect about ±3 s. Cap 20 s (about 40 words). Captions = spoken text, word for word.
 
@@ -16,7 +16,7 @@
 
 - **D-01 beat:** `n5-ending-rescued`: The win with Lenka free: he falls, the fog lifts
 - **Trigger:** Win, Lenka free: the Count falls in the lair, and Lenka is with the hunters, or the Lantern is held there and frees her (MEC-076; DEC-746, DEC-750).
-- **Painting (Illusionist, one line):** Dawn through a high castle window. Sun falls on a drift of dust shaped like a kneeling man. Lenka is seen from behind (dark braid, mourning dress, a cord at her neck) among the hunters, who are in silhouette. Two faint figures fade into the light, their backs to us: a man with a sword and a woman with violets. Mist drains out of the valley below. No faces.
+- **Painting (Illusionist, one line):** Dawn through a high castle window. Sun falls on a drift of dust shaped like a kneeling man. Lenka stands among the hunters, her face clear (dark braid, mourning dress, a cord at her neck, the violet mark of the reveal). The hunters are in silhouette. Two faint figures fade into the light, their backs to us: a man with a sword and a woman with violets. Mist drains out of the valley below.
 
 | Asset id | Speaker | Spoken text | Caption | Est. s | When | Intent (D-01) | Status |
 |---|---|---|---|---|---|---|---|

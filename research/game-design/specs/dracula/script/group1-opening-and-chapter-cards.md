@@ -40,7 +40,7 @@ Intent (D-01): "Each chapter's name and goal, in one breath". The chapter name i
 - Card 1 says "his daughter", not "Lenka": the table meets her at the house. It also avoids "the dead man's house", because the inn is where they learn Anton is dead.
 - Card 3 no longer mentions the earth boxes, which are a quest at some lengths only (Gamewright rule: the cards never vary by length). D-01's goal "burn his earth" is left to that quest's own opening.
 - "Mist", not "fog", to match the chapter name The Mists. "Parish" is the in-world word for a kingdom. Kingdom names are never spoken.
-- No mention of the Count's goal, Ludmila, Lenka's likeness, the swap, or the Count showing himself after the blade. Lenka's face is never described (her face stays hidden in the art pending Bob's ruling). The Count is unseen; the lit castle and the letter's old hand are the only hints.
+- No mention of the Count's goal, Ludmila, Lenka's likeness, the swap, or the Count showing himself after the blade. Lenka's face is clear from chapter 1 (travelling hood); the reveal change is not spoiled here (see lenka-look.md). The Count is unseen; the lit castle and the letter's old hand are the only hints.
 - Source: the scripts on main at `assets/stories/dracula/scripts/`.
 
 ## Open questions
