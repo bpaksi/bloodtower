@@ -45,13 +45,6 @@
   mouths: {rest: m.dorka.rest, mbp: m.dorka.mbp, cons_ee: m.dorka.cons_ee, eh_ae: m.dorka.eh_ae, ah: m.dorka.ah, oh_er: m.dorka.oh_er, oo_w: m.dorka.oo_w, fv: m.dorka.fv}
   anchor: {x: 0.5, y: 0.7}   # placeholder
 
-- id: dorn
-  name: "Sergeant Pavel Dorn"
-  voice: {provider: gemini-tts, name: Schedar, style: "plain, tired, accusing", audition: true}
-  portrait: por.dorn
-  mouths: {rest: m.dorn.rest, mbp: m.dorn.mbp, cons_ee: m.dorn.cons_ee, eh_ae: m.dorn.eh_ae, ah: m.dorn.ah, oh_er: m.dorn.oh_er, oo_w: m.dorn.oo_w, fv: m.dorn.fv}
-  anchor: {x: 0.5, y: 0.7}   # placeholder
-
 - id: emeric
   name: "Emeric Lutz"
   voice: {provider: gemini-tts, name: Fenrir, style: "nervous, fast, breathless"}
@@ -136,13 +129,6 @@
   mouths: {rest: m.oskar.rest, mbp: m.oskar.mbp, cons_ee: m.oskar.cons_ee, eh_ae: m.oskar.eh_ae, ah: m.oskar.ah, oh_er: m.oskar.oh_er, oo_w: m.oskar.oo_w, fv: m.oskar.fv}
   anchor: {x: 0.5, y: 0.7}   # placeholder
 
-- id: tomas
-  name: "Tomas Varga"
-  voice: {provider: gemini-tts, name: Algenib, style: "gruff, low, unhurried"}
-  portrait: por.tomas
-  mouths: {rest: m.tomas.rest, mbp: m.tomas.mbp, cons_ee: m.tomas.cons_ee, eh_ae: m.tomas.eh_ae, ah: m.tomas.ah, oh_er: m.tomas.oh_er, oo_w: m.tomas.oo_w, fv: m.tomas.fv}
-  anchor: {x: 0.5, y: 0.7}   # placeholder
-
 - id: ursula
   name: "Mother Ursula"
   voice: {provider: gemini-tts, name: Vindemiatrix, style: "stern, cold, grieving", audition: true}
@@ -175,13 +161,6 @@
   voice: {provider: gemini-tts, name: Kore, style: "calm, dry, quietly stern; whispered inner aside"}
   portrait: por.agnes
   mouths: {rest: m.agnes.rest, mbp: m.agnes.mbp, cons_ee: m.agnes.cons_ee, eh_ae: m.agnes.eh_ae, ah: m.agnes.ah, oh_er: m.agnes.oh_er, oo_w: m.agnes.oo_w, fv: m.agnes.fv}
-  anchor: {x: 0.5, y: 0.7}   # placeholder
-
-- id: tomas-whisper
-  name: "Tomas Varga (whisper)"
-  voice: {provider: gemini-tts, name: Algenib, style: "gruff, low, unhurried; whispered inner aside"}
-  portrait: por.tomas
-  mouths: {rest: m.tomas.rest, mbp: m.tomas.mbp, cons_ee: m.tomas.cons_ee, eh_ae: m.tomas.eh_ae, ah: m.tomas.ah, oh_er: m.tomas.oh_er, oo_w: m.tomas.oo_w, fv: m.tomas.fv}
   anchor: {x: 0.5, y: 0.7}   # placeholder
 
 - id: wren-whisper

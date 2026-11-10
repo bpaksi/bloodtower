@@ -11,7 +11,7 @@
   source: n1-burgomasters-house.md
   lines:
     - {id: "n1-burgomasters-house.02.vo-01", speaker: agnes, note: "kneeling by the body", text: "He fought. There's skin under his nails, and it is cold."}
-    - {id: "n1-burgomasters-house.02.vo-02", speaker: tomas, text: "Anton never fought anyone in his life. He fined me twice and was right both times."}
+    - {id: "n1-burgomasters-house.02.vo-02", speaker: narrator, text: "Anton never fought anyone in his life. He fined men twice and was right both times."}
 - id: "n1-burgomasters-house.03"
   source: n1-burgomasters-house.md
   lines:
@@ -35,7 +35,7 @@
 - id: "n1-burgomasters-house.07"
   source: n1-burgomasters-house.md
   lines:
-    - {id: "n1-burgomasters-house.07.vo-01", speaker: tomas, text: "He took her up the hill. I know that road. I know that gate."}
+    - {id: "n1-burgomasters-house.07.vo-01", speaker: wren, text: "He took her up the hill."}
     - {id: "n1-burgomasters-house.07.vo-02", speaker: agnes, note: "thumb on her scar", text: "Then we bring her down it."}
 - id: "n1-burgomasters-house.08"
   source: n1-burgomasters-house.md
@@ -150,8 +150,7 @@
 - id: "n1-lantern-and-bell.02"
   source: n1-lantern-and-bell.md
   lines:
-    - {id: "n1-lantern-and-bell.02.vo-01", speaker: hanne, text: "Varga. I'd heard you were dead."}
-    - {id: "n1-lantern-and-bell.02.vo-02", speaker: tomas, note: "taps the axe haft three times", text: "Not for lack of trying, lass."}
+    - {id: "n1-lantern-and-bell.02.vo-01", speaker: hanne, text: "Sit by the fire, loves. Nobody comes to Vellmoor this late in the year on purpose."}
 - id: "n1-lantern-and-bell.03"
   source: n1-lantern-and-bell.md
   lines:
@@ -161,7 +160,7 @@
   source: n1-lantern-and-bell.md
   lines:
     - {id: "n1-lantern-and-bell.04.vo-01", speaker: emeric, text: "I'm looking for Father Oskar? I have a letter. That is, he sent me a letter. That is, I'm expected. I think."}
-    - {id: "n1-lantern-and-bell.04.vo-02", speaker: tomas, note: "laying a black-sealed letter on the table", text: "So am I, lad."}
+    - {id: "n1-lantern-and-bell.04.vo-02", speaker: narrator, text: "Another black-sealed letter is laid on the table."}
 - id: "n1-lantern-and-bell.05"
   source: n1-lantern-and-bell.md
   lines:
@@ -173,7 +172,7 @@
   source: n1-lantern-and-bell.md
   lines:
     - {id: "n1-lantern-and-bell.06.vo-01", speaker: emeric, text: "He split it between us so no single one of us could... oh. That's very clever."}
-    - {id: "n1-lantern-and-bell.06.vo-02", speaker: tomas, text: "It's a riddle that got a priest killed."}
+    - {id: "n1-lantern-and-bell.06.vo-02", speaker: wren, text: "Clever got him buried."}
 - id: "n1-lantern-and-bell.07"
   source: n1-lantern-and-bell.md
   lines:
@@ -292,7 +291,7 @@
 - id: "n2-burgomasters-funeral.06"
   source: n2-burgomasters-funeral.md
   lines:
-    - {id: "n2-burgomasters-funeral.06.vo-01", speaker: tomas, text: "Everyone out! Behind me!"}
+    - {id: "n2-burgomasters-funeral.06.vo-01", speaker: narrator, text: "A shout goes up. Everyone out. Get behind the benches."}
     - {id: "n2-burgomasters-funeral.06.vo-02", speaker: dorka, text: "He's so kind. She's in the lady's rooms, in a white dress. She won't stop saying no. He's so patient with her."}
 - id: "n2-burgomasters-funeral.07"
   source: n2-burgomasters-funeral.md
@@ -303,10 +302,6 @@
   source: n2-burgomasters-funeral.md
   lines:
     - {id: "n2-burgomasters-funeral.mourner-returns.agnes.vo-01", speaker: agnes, text: "I followed the cloak. A castle servant, laying a violet on Anton's grave. He said, \"She still refuses,\" and went up to the east wing. The lady's rooms."}
-- id: "n2-burgomasters-funeral.mourner-returns.tomas"
-  source: n2-burgomasters-funeral.md
-  lines:
-    - {id: "n2-burgomasters-funeral.mourner-returns.tomas.vo-01", speaker: tomas, text: "Followed him to the grave. Castle livery. Left a violet for Anton and said, \"She still refuses.\" Then up the hill to the east wing. The lady's rooms."}
 - id: "n2-burgomasters-funeral.mourner-returns.wren"
   source: n2-burgomasters-funeral.md
   lines:
@@ -352,7 +347,7 @@
   source: n23-catacombs-of-saint-ysolde.md
   lines:
     - {id: "n23-catacombs-of-saint-ysolde.02.vo-01", speaker: wren, text: "Passage split. Left smells of lamp oil. Right smells of nothing. Nothing's worse."}
-    - {id: "n23-catacombs-of-saint-ysolde.02.vo-02", speaker: tomas, text: "Then we split too, lass, and we meet at the saint."}
+    - {id: "n23-catacombs-of-saint-ysolde.02.vo-02", speaker: narrator, text: "Then you split, and you meet at the saint."}
 - id: "n23-catacombs-of-saint-ysolde.03"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
@@ -361,10 +356,6 @@
   source: n23-catacombs-of-saint-ysolde.md
   lines:
     - {id: "n23-catacombs-of-saint-ysolde.rejoin.agnes.vo-01", speaker: agnes, text: "There was plainchant in my passage, in my own voice. Something down here has learned how we sound. Trust faces before voices tonight."}
-- id: "n23-catacombs-of-saint-ysolde.rejoin.tomas"
-  source: n23-catacombs-of-saint-ysolde.md
-  lines:
-    - {id: "n23-catacombs-of-saint-ysolde.rejoin.tomas.vo-01", speaker: tomas, text: "Guard bones in my wall, lass, with the notch in the teeth we filed for luck. Any of us who doesn't know that notch isn't one of us."}
 - id: "n23-catacombs-of-saint-ysolde.rejoin.wren"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
@@ -376,8 +367,8 @@
 - id: "n23-catacombs-of-saint-ysolde.rejoin-combined"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
-    - {id: "n23-catacombs-of-saint-ysolde.rejoin-combined.vo-01", speaker: tomas, text: "Guard bones with the notch, and a coffin carried up this week."}
-    - {id: "n23-catacombs-of-saint-ysolde.rejoin-combined.vo-02", speaker: wren, text: "Then he's moving his old garrison up the hill. For the last night."}
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin-combined.vo-01", speaker: wren, text: "Guard bones with the notch, and a coffin carried up this week."}
+    - {id: "n23-catacombs-of-saint-ysolde.rejoin-combined.vo-02", speaker: wren, text: "Then he's moving his old garrison up the hill."}
 - id: "n23-catacombs-of-saint-ysolde.05"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
@@ -392,7 +383,7 @@
   source: n23-catacombs-of-saint-ysolde.md
   lines:
     - {id: "n23-catacombs-of-saint-ysolde.07.vo-01", speaker: narrator, text: "Holy water hisses on one of you like fat in a pan."}
-    - {id: "n23-catacombs-of-saint-ysolde.07.vo-02", speaker: tomas, note: "axe up", text: "Show me your left hand. Now."}
+    - {id: "n23-catacombs-of-saint-ysolde.07.vo-02", speaker: wren, text: "Hand. Left one. Now."}
 - id: "n23-catacombs-of-saint-ysolde.08"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
@@ -406,11 +397,6 @@
   source: n23-catacombs-of-saint-ysolde.md
   lines:
     - {id: "n23-catacombs-of-saint-ysolde.09~lookalike-hidden.vo-01", speaker: narrator, text: "You climb into the air. Everyone has a shadow. You count them twice."}
-- id: "n23-catacombs-of-saint-ysolde.07~lookalike-is-tomas"
-  source: n23-catacombs-of-saint-ysolde.md
-  lines:
-    - {id: "n23-catacombs-of-saint-ysolde.07~lookalike-is-tomas.vo-01", speaker: narrator, text: "Holy water hisses on one of you like fat in a pan."}
-    - {id: "n23-catacombs-of-saint-ysolde.07~lookalike-is-tomas.vo-02", speaker: wren, text: "Hand. Left one. Now."}
 - id: "n23-catacombs-of-saint-ysolde.06~night3"
   source: n23-catacombs-of-saint-ysolde.md
   lines:
@@ -430,17 +416,18 @@
 - id: "n23-sergius-blade.01~citadel"
   source: n23-sergius-blade.md
   lines:
-    - {id: "n23-sergius-blade.01~citadel.vo-01", speaker: narrator, text: "Behind the armoury door, which squeaks exactly as Tomas said it would, the cloth falls away. The blade throws light on the ceiling, though there is no candle."}
+    - {id: "n23-sergius-blade.01~citadel.vo-01", speaker: narrator, text: "Behind the armoury door, which squeaks on its hinge, the cloth falls away."}
+    - {id: "n23-sergius-blade.01~citadel.vo-02", speaker: narrator, text: "The blade throws light on the ceiling, though there is no candle."}
 - id: "n23-sergius-blade.02"
   source: n23-sergius-blade.md
   lines:
     - {id: "n23-sergius-blade.02.vo-01", speaker: wren, text: "There's a name on the cross-guard. \"Sergiu.\""}
-    - {id: "n23-sergius-blade.02.vo-02", speaker: tomas, text: "The old lords had a younger son by that name. The guard used to drink to him. Nobody remembered why."}
+    - {id: "n23-sergius-blade.02.vo-02", speaker: wren, text: "Younger son of the old lords. The guard drank to him. Nobody remembered why."}
 - id: "n23-sergius-blade.grip-shared"
   source: n23-sergius-blade.md
   lines:
     - {id: "n23-sergius-blade.grip-shared.vo-01", speaker: emeric, text: "The grip's wrapped in the weave from Lenka's shawl. Gerhardt called it the old house."}
-    - {id: "n23-sergius-blade.grip-shared.vo-02", speaker: tomas, text: "And the guard drank to the son who kept the window. Her shawl, his sword. One house."}
+    - {id: "n23-sergius-blade.grip-shared.vo-02", speaker: wren, text: "The guard drank to the son who kept the window. Her shawl, his sword. One house."}
 - id: "n23-sergius-blade.03"
   source: n23-sergius-blade.md
   lines:
@@ -459,8 +446,8 @@
 - id: "n23-sergius-blade.06"
   source: n23-sergius-blade.md
   lines:
-    - {id: "n23-sergius-blade.06.vo-01", speaker: narrator, text: "Tomas lifts the sword. The light in it turns gold, and the Count steps back, once, as a man steps back from a fire."}
-    - {id: "n23-sergius-blade.06.vo-02", speaker: count, text: "Put that down, soldier. It was never yours. It was never anyone's but his."}
+    - {id: "n23-sergius-blade.06.vo-01", speaker: narrator, text: "The sword is lifted. The light in it turns gold, and the Count steps back, once, as a man steps back from a fire."}
+    - {id: "n23-sergius-blade.06.vo-02", speaker: count, text: "Put that down. It was never yours. It was never anyone's but his."}
 - id: "n23-sergius-blade.07"
   source: n23-sergius-blade.md
   lines:
@@ -492,8 +479,8 @@
 - id: "n3-fly-eaters-cell.03"
   source: n3-fly-eaters-cell.md
   lines:
-    - {id: "n3-fly-eaters-cell.03.vo-01", speaker: tomas, text: "Brenner. You paid the guard on Fridays. You knew where the girls went."}
-    - {id: "n3-fly-eaters-cell.03.vo-02", speaker: jakob, text: "I knew what they cost, Sergeant Varga. That's a different column."}
+    - {id: "n3-fly-eaters-cell.03.vo-01", speaker: wren, text: "Brenner. You paid the guard on Fridays. You knew where the girls went."}
+    - {id: "n3-fly-eaters-cell.03.vo-02", speaker: jakob, text: "I knew what they cost. That's a different column."}
 - id: "n3-fly-eaters-cell.04"
   source: n3-fly-eaters-cell.md
   lines:
@@ -567,8 +554,8 @@
 - id: "n4-earth-boxes.04"
   source: n4-earth-boxes.md
   lines:
-    - {id: "n4-earth-boxes.04.vo-01", speaker: tomas, text: "I helped carry these. Twenty years ago, first week in the guard. Told it was the old lord's garden soil."}
-    - {id: "n4-earth-boxes.04.vo-02", speaker: agnes, text: "Then you're helping carry them out again, Varga. That's what penance looks like. Heavy."}
+    - {id: "n4-earth-boxes.04.vo-01", speaker: narrator, text: "The guard carried these twenty years ago, the first week. They were told it was the old lord's garden soil."}
+    - {id: "n4-earth-boxes.04.vo-02", speaker: agnes, text: "Then you're helping carry them out again. That's what penance looks like. Heavy."}
 - id: "n4-earth-boxes.05"
   source: n4-earth-boxes.md
   lines:
@@ -626,7 +613,7 @@
   source: n4-finding-the-tome.md
   lines:
     - {id: "n4-finding-the-tome.03.vo-01", speaker: emeric, text: "\"I loved Ludmila of the high meadow. She loved my brother Sergiu. On their wedding night I made a bargain with what answers when God does not, and I killed my brother with his own sword.\""}
-    - {id: "n4-finding-the-tome.03.vo-02", speaker: tomas, text: "The sword we're carrying. Sergiu's."}
+    - {id: "n4-finding-the-tome.03.vo-02", speaker: wren, text: "The sword we're carrying. Sergiu's."}
 - id: "n4-finding-the-tome.04"
   source: n4-finding-the-tome.md
   lines:
@@ -672,17 +659,17 @@
 - id: "n5-drawbridge.03"
   source: n5-drawbridge.md
   lines:
-    - {id: "n5-drawbridge.03.vo-01", speaker: tomas, text: "He's said the words; the front door's his, and he'll watch every step. The little gate's twenty yards left, the long way round. It squeaks."}
+    - {id: "n5-drawbridge.03.vo-01", speaker: narrator, text: "He's said the words. The front door is his; he'll watch every step. The little gate is twenty yards left. It squeaks."}
     - {id: "n5-drawbridge.03.vo-02", speaker: wren, text: "Long way costs time. Front way costs surprise."}
 - id: "n5-drawbridge.04"
   source: n5-drawbridge.md
   lines:
     - {id: "n5-drawbridge.04.vo-01", speaker: narrator, text: "The little gate opens a hand's width. A girl in a maid's apron over faded castle livery stands behind it with a lamp turned low."}
-    - {id: "n5-drawbridge.04.vo-02", speaker: marta, text: "Uncle Tomas. You came back over the wall."}
+    - {id: "n5-drawbridge.04.vo-02", speaker: marta, text: "I'm Marta. I pour his wine up there."}
 - id: "n5-drawbridge.05"
   source: n5-drawbridge.md
   lines:
-    - {id: "n5-drawbridge.05.vo-01", speaker: tomas, text: "I did, love. I'm sorry it took me so long. Where is she, the burgomaster's girl?"}
+    - {id: "n5-drawbridge.05.vo-01", speaker: wren, text: "The burgomaster's girl. Where is she?"}
     - {id: "n5-drawbridge.05.vo-02", speaker: marta, text: "The high room, at the top of the stair behind the gallery. In a white dress. She hasn't said yes. Not once. I'll open the gate if you ask. It's the slow way, but he never watches it."}
 - id: "n5-drawbridge.07~gate"
   source: n5-drawbridge.md
@@ -737,12 +724,10 @@
   source: n5-ending-rescued.md
   lines:
     - {id: "n5-ending-rescued.04.vo-01", speaker: wren, note: "the brides are ash; one ribbon on the stair", text: "Ilka Kessel. Put back right."}
-    - {id: "n5-ending-rescued.04.vo-02", speaker: tomas, text: "I'll dig with you, lass. I owe a lot of graves."}
 - id: "n5-ending-rescued.05"
   source: n5-ending-rescued.md
   lines:
     - {id: "n5-ending-rescued.05.vo-01", speaker: emeric, text: "I'm going to finish the treatise, and put his name on the title page: Gerhardt Albrecht. And all of yours."}
-    - {id: "n5-ending-rescued.05.vo-02", speaker: tomas, text: "Leave mine off, lad. Write \"the guard at the gate.\""}
 - id: "n5-ending-rescued.07"
   source: n5-ending-rescued.md
   lines:
@@ -778,11 +763,6 @@
   lines:
     - {id: "n5-ending-turned.02~agnes.vo-01", speaker: narrator, text: "Sister Agnes goes still. Then her reliquary drops from her hand, and the burn on her palm is gone."}
     - {id: "n5-ending-turned.02~agnes.vo-02", speaker: agnes, text: "I prayed for him for ten years. I should have prayed for myself."}
-- id: "n5-ending-turned.02~tomas"
-  source: n5-ending-turned.md
-  lines:
-    - {id: "n5-ending-turned.02~tomas.vo-01", speaker: narrator, text: "Tomas Varga goes still. Then he lowers the axe and turns to face the hunters, the way he used to face the gate."}
-    - {id: "n5-ending-turned.02~tomas.vo-02", speaker: tomas, text: "I stood his gate three years. Looks like I'm standing it again."}
 - id: "n5-ending-turned.02~wren"
   source: n5-ending-turned.md
   lines:
@@ -890,7 +870,7 @@
   source: n5-portrait-gallery.md
   lines:
     - {id: "n5-portrait-gallery.05.vo-01", speaker: count, note: "source: Stoker", text: "\"Yes, I too can love; you yourselves can tell it from the past. Is it not so?\""}
-    - {id: "n5-portrait-gallery.05.vo-02", speaker: tomas, text: "We've read your past, my lord. It's the reason we brought a stake."}
+    - {id: "n5-portrait-gallery.05.vo-02", speaker: wren, text: "We've read your past, my lord. It's the reason we brought a stake."}
 - id: "n5-portrait-gallery.combine"
   source: n5-portrait-gallery.md
   lines:
@@ -923,7 +903,8 @@
 - id: "nx-pressed-flower.00~night2"
   source: nx-pressed-flower.md
   lines:
-    - {id: "nx-pressed-flower.00~night2.vo-01", speaker: narrator, text: "Dusk on the second night. Tomas Varga goes home first. Marta's shutters hang open, the nails pried out and laid in a neat row on the sill. Her bed is cold. On the pillow lies a letter on heavy cream paper: \"Come home.\""}
+    - {id: "nx-pressed-flower.00~night2.vo-01", speaker: narrator, text: "At dusk, Marta's shutters hang open, the nails pried out and laid in a neat row on the sill."}
+    - {id: "nx-pressed-flower.00~night2.vo-02", speaker: narrator, text: "Her bed is cold. On the pillow lies a letter on heavy cream paper: \"Come home.\""}
 - id: "nx-pressed-flower.01~night2"
   source: nx-pressed-flower.md
   lines:
@@ -1000,10 +981,6 @@
   source: tokens-and-encounters.md
   lines:
     - {id: "enc-wrong-face.02~lookalike-is-agnes.vo-01", speaker: narrator, text: "The thing wearing the Sister's face never once crossed itself. The real Agnes is found in the church porch, praying, cold to the elbows."}
-- id: "enc-wrong-face.02~lookalike-is-tomas"
-  source: tokens-and-encounters.md
-  lines:
-    - {id: "enc-wrong-face.02~lookalike-is-tomas.vo-01", speaker: narrator, text: "The thing wearing Tomas's face had ten whole fingers. The real Tomas is found behind the well, swearing, his axe still in his hand."}
 - id: "enc-wrong-face.02~lookalike-is-wren"
   source: tokens-and-encounters.md
   lines:
@@ -1080,8 +1057,7 @@
 - id: "enc-wine-for-no-one.01"
   source: tokens-and-encounters.md
   lines:
-    - {id: "enc-wine-for-no-one.01.vo-01", speaker: marta, text: "Uncle? You shouldn't be here. He drinks at midnight, and he counts the glasses."}
-    - {id: "enc-wine-for-no-one.01.vo-02", speaker: tomas, text: "I came back for you, lass. I always meant to."}
+    - {id: "enc-wine-for-no-one.01.vo-01", speaker: narrator, text: "A table laid for two in an empty room. Wine poured for a guest who never came."}
 - id: "enc-wine-for-no-one.02"
   source: tokens-and-encounters.md
   lines:
