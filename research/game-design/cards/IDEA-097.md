@@ -14,3 +14,5 @@ sources:
 **I6:** understanding the mechanism matters as much as surviving it.
 
 **Bloodtower:** a tower level trap with its own painting. Bold rides it and takes the blow; on guard works out the mechanism and halves it.
+
+**Gamewright, D-02 (2026-11-10):** no stance (DEC-780). It is tower-level room 1, a fixed trap with DEC-489's two-loss choice. Ride it: each rider loses 3 hit points. Climb the shaft: 2 gold each. Under the Darkness goal, the smaller loss is not offered.

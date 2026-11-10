@@ -60,7 +60,7 @@ The finale (the Tower crawl and the boss battle) is not counted as a quest, the 
 - **Goal:** reach the inn, find the dead man's house, keep Lenka through the night and hear the reading.
 - **Bounds:** K1 only; the fog closes the rest (IDEA-145). Start: all heroes on K1's Village space (IDEA-144).
 - **Order:** the Inn first, then the House, then the Long Night. The Open Grave may be played at any time. The Reading is always last, and it closes the chapter. A quest's marker appears when the quest before it ends (Gamewright pick, as The Herald comes before The Ambush). Markers are fixed (IDEA-146).
-- **New rule hooks:** Lenka as a companion (DEC-741, DEC-782; Q-428). The other four old hunters can be met at their own buildings (DEC-745; Q-431). A plain-scene choice with a battle (The Long Night). The reading's seeded values: the sites, his goal and the lair (Q-425). The Count starts roaming at the first day's close (DEC-775).
+- **New rule hooks:** Lenka as a companion (DEC-741, DEC-782; Q-428). The other four old hunters can be met at their own buildings (DEC-745; Q-431). A plain-scene choice with a battle (The Long Night). The reading's seeded values: the sites, his goal and the lair (Q-425). The Count's piece enters at the end of The Reading (DEC-791 setting; D-02 DEC-859).
 - **Expected length:** Short and Standard, about 5 to 8 days. This is a placeholder for the numbers pass, and play times are measured, not guessed (R-LEN-4).
 
 ### Chapter 2: The Hunt
@@ -119,7 +119,7 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | `seal-break.01` … `.03` | new | His hold on the valley cracks, once a chapter (IDEA-152) |
 | `nx-pressed-flower` | rewrite | His violets turn up wherever Lenka sleeps: courtship as threat (IDEA-078), shared, not private |
 | `nx-midnight-procession` | rewrite | Once a chapter the dead who tried walk past, and one ghost speaks to a companion's tie (IDEA-077) |
-| `count-strike.<goal>` (4) | new | His landed strike for each goal: a bite, Lenka's loyalty, the blade, a skull (DEC-748) |
+| `count-strike.NN~<goal>` (D-02 §3) | new | His landed strike for each goal: a bite, Lenka's loyalty, the blade, a skull (DEC-748) |
 | `count-withdraws` | new | Beaten, he leaves the board for the day, and he says so (IDEA-126) |
 | `count-takes-lenka` | new | His strike carries Lenka to the castle, and play goes on (DEC-746) |
 | `enc-*` (11) | source | The old hunter-token encounters, mined for his arrivals and strikes; Loremaster keeps the ids it reuses |
@@ -130,7 +130,7 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | `n5-the-swap` | new | A friend vanishes and a wight wears their face; win them back (DEC-751) |
 | `n5-flooded-room`, `n5-lift` | new (held by Q-427) | Zombies under the water; a machine that crushes the careless |
 | `n5-heart-of-sorrow` | new | The stair room where the castle itself attacks (with a Story board fallback) |
-| `n5-castle-moment.<goal>` (4) | new | His goal's moment in the castle (DEC-748) |
+| `n5-castle-moment.NN~<goal>` (4) | new | His goal's moment in the castle (DEC-748) |
 | `n5-final-confrontation` | rewrite | The lair (`~<lair>` × 4), the boss battle, Lenka freed by the Lantern |
 | `finale-win.rescued` | rewrite (was `n5-ending-rescued`) | The win with Lenka free: he falls, the fog lifts. `~freed` lines when the Lantern freed her (D-02) |
 | `finale-win.lenka-lost` | new | The win with her lost: he falls, and she does not come back |
@@ -163,7 +163,7 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 2. **Length.** The approved C2-01 brief takes Long out of `packs/dracula/pack.yaml` for the 1.0 cut (DEC-508). DEC-739 parked that cut, and DEC-753 gives Long 14 quests. The brief stays true for today's unplayable pack. OPEN RULING 2.
 3. **Premise.** The scripts and `pack.yaml`'s tagline ("The Count has taken Lenka") follow D-DRA-10. DEC-741 makes her free. The tagline needs new copy.
 4. **Endings.** Rescued, Endures, Taken and Turned are replaced by DEC-746's four. The engine's fallen-buildings loss adds a fifth (OPEN RULING 4).
-5. **Private and fixed-hunter content.** There are 159 `target: ipad:<hunter>` moments, the `.private.<hunter>` moments and `~no-<hunter>` variants, written for four fixed hunters. DEC-745 makes those hunters companions, and Q-416 rules out private content. The variants become `~no-<companion>`, and private lines go to the Story board or are cut.
+5. **Private and fixed-hunter content.** There are 159 `target: ipad:<hunter>` moments, the `.private.<hunter>` moments and `~no-<hunter>` variants, written for four fixed hunters. DEC-745 makes those hunters companions, and Q-416 rules out private content. D-02 retires those variants: a line whose speaker is absent is skipped, and private lines go to the Story board or are cut (DEC-856).
 6. **The hunter token.** D-DRA-11 is gone (DEC-310), so the `enc-*` encounters are source material only. The "2 story skulls a night" cap and "+1 foe on night 5" break DEC-361 and are dropped. The `~boxes-left` finale variants are replaced by DEC-779.
 7. **Line ids.** `packs/dracula/script.yaml` uses `<moment>.vo-NN`. DEC-622 and #413 use `<base>~vo-NN`. A variant line (`…~no-tomas.vo-01`) has no agreed form yet. This is for D-02 and code.
 8. **Names.** Sergiu becomes Stefan and Vadoma becomes Berta (DEC-755). Scene ids, prop ids (`sergiu-blade`) and cast ids (`vadoma`) stay as they are, and only the text changes.

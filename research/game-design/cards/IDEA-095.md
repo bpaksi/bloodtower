@@ -14,3 +14,5 @@ sources:
 **I6:** the room hides the enemy.
 
 **Bloodtower:** a basement guard battle against zombies. The water hides them, so the foe strikes first unless the group entered on guard.
+
+**Gamewright, D-02 (2026-11-10):** no on guard (DEC-780). It is basement room 1, a fixed guard battle with `foe-first` (DEC-848): the water always hides them.
