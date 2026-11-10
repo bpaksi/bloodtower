@@ -8,7 +8,7 @@
 
 ## Totals
 
-**111 picture and mask assets.** By kind: painting 65, portrait 17, foe 15, item 9, place 4, glow 1. Of these, 5 are on hold.
+**111 picture and mask assets.** By kind: painting 65, portrait 17, foe 15, item 9, place 4, glow 1. Of these, 2 are on hold: `portrait.ludmila` and `painting.n5-lift`.
 
 **255 voiced lines** (groups 1 to 6), est. 48 min. By speaker: narrator 189, vadoma 13, lenka 11, count 11, jakob 11, hanne 5, emeric 3, marta 2, anton 1, andrei 1, wren 1, oskar 1, agnes 1, dorka 1, ludmila 1, ursula 1, jozef 1, gerhardt 1.
 
@@ -34,12 +34,14 @@
 2. **The Count** is a silhouette until his lair: hand, mist, cloak, cold. His face first shows in `painting.lair~*` and `foe.count~phase-*`.
    - The Portrait Gallery's portraits keep every face cracked, varnish-dark or turned away.
    - There is no `portrait.count`. His lines are a voice only, like the Loremaster's.
-3. **Lenka** stays veiled until her reveal at `n4-finding-the-tome` (D-02 §4; Bob's Oct 16 lock; a change is pending with Bob).
-   - Until then the only Lenka art is `portrait.lenka~veiled`, or Lenka seen from behind.
-   - `portrait.lenka` and `portrait.ludmila` (the same face) are on hold.
+3. **Lenka's face is shown from chapter 1** (DEC-892, Gamewright under Bob's delegation, 2026-11-10 4:19 PM ET). She wears a travelling hood, and her face is clear.
+   - The reveal at `n4-finding-the-tome` is told by a change to her face, her reveal state. It is not told by unveiling her.
+   - `portrait.lenka` is her face from chapter 1. `portrait.lenka~revealed` is the same face in its reveal state, used from the Tome on.
+   - This replaces Bob's Oct 16 hidden-until-reveal lock.
+   - `portrait.ludmila` (the same face) stays on hold.
 4. **Bites** are two small marks, at the throat or the wrist. There is no gore and no visual corruption on hunters.
 5. **Light.** Days are overcast grey-blue. Dawn is the only warm sky (the win endings, `painting.lair~the-height`). Night interiors are candle-yellow on blue-black, and candle gold stays rare (game-look §2). Mist is white.
-6. **The Vellmoor cover** (`painting.cover`, `glow.cover`) is listed and **on hold** pending Bob.
+6. **The Vellmoor cover** (`painting.cover`, `glow.cover`) is repainted in oil to match the scenes (DEC-893, Bob via Warden, 2026-11-10). It replaces the old sepia `packs/dracula/assets/cover.png`, and it is off hold.
 7. **No hunter is depicted as a specific hero.** The party is drawn from the pool, so hunters are silhouettes, hands or backs, never a set face (DEC-098). The Swap's wight wears a shadowed face.
 
 ## Continuity rules kept from `dracula-art-continuity.md` (2026-10-16)
@@ -53,7 +55,7 @@
 | Dorka: a wedding dress and two bites. Peaceful and too pale before she rises | Kept, with bites as two small marks |
 | Anton: round and soft, not like the Count. He fell at her door and lies in the parlour with the poker | Kept (C-5 default) |
 | Props: the blade, the Lantern, the Tome, the cream letter and the violet as in the props table | Kept. No legible names on them, under the no-text rule |
-| Ludmila's face is hidden everywhere until the Tome. A veiled girl stays veiled | Kept, and widened to Lenka (ruling 3) |
+| Ludmila's portrait in the gallery is the covered canvas until the gallery scene | Kept. Lenka's face is shown from chapter 1 (ruling 3, DEC-892) |
 | Pre-ending art never shows Lenka at an open window | Kept |
 | Tomas (fingers, the lookalike tell), Ilka and the third bride | **Retired.** Tomas is removed (D-02 G-10). Ilka is deferred with Long |
 | All-ink style. Lenka captive from the start. The Count's face at the blade's door. Private iPad art. Key objects | **Retired** (rulings 1 to 3; DEC-741; DEC-057; C-11) |
@@ -70,7 +72,7 @@ Batches 1 to 3 are the whole Short path (P1), so a Short game can be played end 
 | `painting.opening` | painting | 3840×2160 | oil | The fogged valley road at overcast grey-blue day: a lone signpost to Vellmoor, the fog bank closing behind. The castle on its height is only a dark shape in the mist, upper third | `opening.01`–`.06` | P1 |
 | `painting.ch1-the-mists` | painting | 3840×2160 | oil | Vellmoor's first parish in mist: the crossroads, the inn's lit window (the one warm light), and the hill road up to the burgomaster's house | `chapter-card.01` | P1 |
 | `painting.n1-lantern-and-bell` | painting | 3840×2160 | oil | The inn: low beams, a roaring fire, garlic over every window, the road outside going white. Hanne is stout with a cleaver in her apron. Faces are turned from the viewer | `n1-lantern-and-bell` | P1 |
-| `painting.n1-burgomasters-house` | painting | 3840×2160 | oil | A tall stone house, black crepe on the door. In the parlour Anton lies with a poker in his hand. The upstairs window is open on the castle. Lenka is veiled, seen from behind | `n1-burgomasters-house` | P1 |
+| `painting.n1-burgomasters-house` | painting | 3840×2160 | oil | A tall stone house, black crepe on the door. In the parlour Anton lies with a poker in his hand. The upstairs window is open on the castle. Lenka in her travelling hood, her face clear (DEC-892) | `n1-burgomasters-house` | P1 |
 | `painting.n1-long-night` | painting | 3840×2160 | oil | Group 4's line: the hall by lamplight, barred shutters, garlic on the sills, mist under the door, a hunter in silhouette with a hand on the latch, Lenka from behind, wolf shadows on the shutters. No faces | `n1-long-night` | P1 |
 | `painting.n1-fortune-reading` | painting | 3840×2160 | oil | Berta's painted wagon, its wheels sunk in mud. Candles, an accordion, soft worn cards on a cloth. Her hands are seen, not her face. No card names or text | `n1-fortune-reading` | P1 |
 | `painting.vellmoor-map` | painting | 1920×2160 | ink | The parchment map of the closed valley: four parishes, the castle over one edge (IDEA-158). No pins, no hero markers and no text (D-01) | The opening and the Reading (map half) | P1 |
@@ -115,7 +117,7 @@ Batches 1 to 3 are the whole Short path (P1), so a Short game can be played end 
 | `painting.count-strike~destroy-the-blade` | painting | 3840×2160 | oil | Frost creeping up a sword laid on a table. The Count unseen | The strike scene for the goal (D-04 §4) | P1 |
 | `painting.count-strike~darkness` | painting | 3840×2160 | oil | Mist going door to door down a parish street, lamps going out. The Count unseen | The strike scene for the goal (D-04 §4) | P1 |
 | `painting.count-takes-lenka` | painting | 3840×2160 | oil | Every lamp out; Lenka's empty cloak on the floor; one more lit window on the hill | `count-takes-lenka` | P1 |
-| `painting.nx-pressed-flower` | painting | 3840×2160 | oil | A single pressed violet on a sill by a sleeping girl's veil. Plays only with Lenka present | `nx-pressed-flower` | P1 |
+| `painting.nx-pressed-flower` | painting | 3840×2160 | oil | A single pressed violet on a sill beside Lenka's folded travelling hood. Plays only with Lenka present | `nx-pressed-flower` | P1 |
 | `painting.nx-midnight-procession` | painting | 3840×2160 | oil | Dead hunters in old coats walk past at midnight, carrying lanterns that give no light. No ghost is singled out, since the ghost is seeded | `nx-midnight-procession` | P1 |
 | `item.sergiu-blade` | item | 1920×1080 (PROPOSED) | oil | A long, plain-hilted sword of bright steel, half-wrapped in rotted crimson cloth, faint gold light. No legible name | Reveal (UI-036) | P1 |
 | `item.lantern-of-saint-ysolde` | item | 1920×1080 (PROPOSED) | oil | A small silver lamp whose flame burns without oil | Reveal (UI-036) | P1 |
@@ -162,6 +164,8 @@ Batches 1 to 3 are the whole Short path (P1), so a Short game can be played end 
 | `painting.finale-loss~turned` | painting | 3840×2160 | oil | A hunter's fallen weapon by a doorway, eyes in the dark gone the wrong colour | `finale-loss.turned` | P1 |
 | `painting.finale-loss~valley-falls` | painting | 3840×2160 | oil | The valley dark under mist, no lit window anywhere | `finale-loss.valley-falls` | P1 |
 | `painting.finale-loss~houses-fall` | painting | 3840×2160 | oil | Four burned and broken houses in the parishes | `finale-loss.houses-fall` | P1 |
+| `painting.cover` | painting | 3840×2160 | oil | The Vellmoor cover, repainted in oil to match the scenes, replacing the old sepia cover (DEC-893). The Count is a silhouette on a balcony above his castle, under a moon full of bats (IDEA-161, IDEA-150). Night, no warm sky (ruling 5). No text | Story picker and pack cover | P1 |
+| `glow.cover` | glow | 3840×2160 (same as the cover) | mask | The cover's glow mask: the castle's one lit window only (as A1-art-specs §2's rules) | Story picker | P1 |
 
 ### Batch 4: Standard-only scenes
 
@@ -178,7 +182,8 @@ Batches 1 to 3 are the whole Short path (P1), so a Short game can be played end 
 
 | Asset id | Kind | Size | Style | What it shows | Used by | Priority |
 |---|---|---|---|---|---|---|
-| `portrait.lenka~veiled` | portrait | 2048×2048 (PROPOSED) | oil | Lenka veiled: dark braid, mourning dress, face hidden behind a black veil | Voiced lines (DEC-349, DEC-719). Talking-avatar mouths after asset-studio 0.3 (DEC-843) | P2 |
+| `portrait.lenka` | portrait | 2048×2048 (PROPOSED) | oil | Lenka from chapter 1: dark braid, mourning dress, a travelling hood, her face clear (DEC-892) | Voiced lines (DEC-349, DEC-719). Talking-avatar mouths after asset-studio 0.3 (DEC-843) | P2 |
+| `portrait.lenka~revealed` | portrait | 2048×2048 (PROPOSED) | oil | Lenka in her reveal state, from `n4-finding-the-tome` on: the same face, framing and hood as `portrait.lenka`, changed only in the face (for example a stillness and an old-portrait cast that makes Ludmila's likeness plain). It is not an unveiling. Illusionist proposes the change for Gamewright's sign-off | Her voiced lines after the reveal | P2 |
 | `portrait.agnes` | portrait | 2048×2048 (PROPOSED) | oil | Agnes: tall, gaunt, iron-grey hair under a plain coif, a cross-shaped burn scar on her right palm | Voiced lines (DEC-349, DEC-719). Talking-avatar mouths after asset-studio 0.3 (DEC-843) | P2 |
 | `portrait.wren` | portrait | 2048×2048 (PROPOSED) | oil | Wren: wiry, chestnut hair tied with black funeral ribbon, green oilskin, crossbow | Voiced lines (DEC-349, DEC-719). Talking-avatar mouths after asset-studio 0.3 (DEC-843) | P2 |
 | `portrait.emeric` | portrait | 2048×2048 (PROPOSED) | oil | Emeric: barely twenty, round wire spectacles (real lenses), a too-big tweed coat, garlic string. No boy-wizard look | Voiced lines (DEC-349, DEC-719). Talking-avatar mouths after asset-studio 0.3 (DEC-843) | P2 |
@@ -198,10 +203,7 @@ Batches 1 to 3 are the whole Short path (P1), so a Short game can be played end 
 
 | Asset id | Kind | Size | Style | What it shows | Used by | Priority |
 |---|---|---|---|---|---|---|
-| `painting.cover` | painting | 3840×2160 | oil | The Vellmoor cover. ON HOLD pending Bob | Story picker and cover | hold |
-| `glow.cover` | glow | 3840×2160 (same as the cover) | mask | The cover's glow mask. ON HOLD with the cover | Story picker | hold |
-| `portrait.lenka` | portrait | 2048×2048 (PROPOSED) | oil | Lenka unveiled, with Ludmila's face. ON HOLD with her reveal (Bob) | After the reveal | hold |
-| `portrait.ludmila` | portrait | 2048×2048 (PROPOSED) | oil | Ludmila: Lenka's face, a white dress, violets. ON HOLD with Lenka's face | Her voiced line | hold |
+| `portrait.ludmila` | portrait | 2048×2048 (PROPOSED) | oil | Ludmila: Lenka's face, a white dress, violets. ON HOLD | Her voiced line | hold |
 | `painting.n5-lift` | painting | 1920×2160 | oil | The Lift: a crushing machine in a shaft. ON HOLD with IDEA-097 | Tower level room 1 | hold |
 
 **Reused, not repainted:** no tower-room art beyond `painting.castle-halls~*` (C5-05 §6.8, ruling 1 shape). No sound effects: every Dracula cue is a tower sound (SND-077 for the Heart, DEC-879), skipped without the tower (DEC-305).
@@ -214,7 +216,7 @@ Batches 1 to 3 are the whole Short path (P1), so a Short game can be played end 
 - [ ] **DA-04** Rulings 1 to 7 hold:
   - Ink only on the five ink assets.
   - No Count face before the lair art.
-  - No Lenka face anywhere.
+  - Lenka's face is clear in her hood from chapter 1. `portrait.lenka~revealed` is the same face, changed only in its reveal state.
   - Bites as two small marks.
   - Grey-blue days, warm skies only at dawn.
   - No set hunter faces.
