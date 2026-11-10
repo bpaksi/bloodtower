@@ -121,7 +121,7 @@ The listen sounds must not tell the room kind apart by loudness alone; a wrong h
 
 ## 6. Mismatches and gaps: ADOPTED fixes
 
-**ADOPTED: Warden ruling 2026-11-10 relayed via Wright** (speaking for Bob; all seven fixes 6.1–6.7). Sub-decisions (a)–(d) are Gamewright's, made under that ruling. The C5-05 approval checklist still lists the old IDs; updating it to these IDs is the next step (Bob's Nov 1 small-tweak rule), done in the same change that renames them. No shipped ID is renamed silently; A1's job/export boundary records old-to-new provenance (A1-P2 “Risk: legacy IDs”). Sizes elsewhere in this file stay PROPOSED pending Wright's screen check.
+**ADOPTED: Warden ruling 2026-11-10 relayed via Wright** (speaking for Bob; all seven fixes 6.1–6.7). Sub-decisions (a)–(d) are Gamewright's, made under that ruling. The C5-05 approval checklist now lists these IDs (change note 2026-11-10 in `approval.md`; Bob's Nov 1 small-tweak rule). Outside C5/05, `C5/09-finale-and-endings/eval.md` still names `vo.loremaster.finale_win_shattered`; that eval is left unchanged here. No shipped ID is renamed silently; A1's job/export boundary records old-to-new provenance (A1-P2 “Risk: legacy IDs”). Sizes elsewhere in this file stay PROPOSED pending Wright's screen check.
 
 **6.1 Kinds that fail A1-15 (ADOPTED).** `tomb`, `trap` and `map` are not kinds (lint test “a bespoke kind (tomb, map, music) fails A1-15”).
 
