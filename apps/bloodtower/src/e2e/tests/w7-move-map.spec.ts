@@ -304,7 +304,7 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
     }
     await expect(band.locator("[data-purse]")).toHaveText(/unavailable/);
     expect(await band.locator("[data-purse]").innerText()).not.toMatch(/\b0\b/);
-    await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
+    await expect(board.locator("[data-chapter]")).toHaveText("The Ruined Keep");
     await expect(board.locator("[data-day]")).toHaveText(/^Day \d+$/);
     await expect(board.locator("[data-acting]")).toHaveText(heroName(now.hero));
     await expect(board.locator("[data-moves]")).toHaveAttribute("data-moves", now.moves ?? "");

@@ -105,13 +105,31 @@ export const storyPackSchema = z
     chapters: z.array(chapterSchema).min(1),
     assets: z
       .array(
-        z.strictObject({
-          id: assetIdSchema,
-          type: z.enum(["still", "portrait", "line", "music", "ambient", "sfx", "clip"]),
-          target: z.enum(["storyboard", "ipad", "phone"]),
-          status: z.enum(["placeholder", "draft", "final"]),
-          path: z.string().optional(),
-        }),
+        z
+          .strictObject({
+            id: assetIdSchema,
+            type: z.enum(["still", "portrait", "line", "music", "ambient", "sfx", "clip"]),
+            target: z.enum(["storyboard", "ipad", "phone"]),
+            status: z.enum(["placeholder", "draft", "final"]),
+            path: z.string().optional(),
+            /** A `line` row only: who speaks it and its fixed text, for `assets:needs` (D48). */
+            speaker: idSchema.optional(),
+            text: z.string().min(1).max(2000).optional(),
+          })
+          .superRefine((row, ctx) => {
+            if (row.type !== "line" && (row.speaker !== undefined || row.text !== undefined)) {
+              ctx.addIssue({
+                code: "custom",
+                message: "P2-1: speaker and text belong on a line asset only.",
+              });
+            }
+            if ((row.speaker === undefined) !== (row.text === undefined)) {
+              ctx.addIssue({
+                code: "custom",
+                message: "P2-1: a line asset names both speaker and text, or neither.",
+              });
+            }
+          }),
       )
       .default([]),
   })

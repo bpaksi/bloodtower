@@ -151,12 +151,13 @@ describe("A1-02a: pack to job, work folder, needs list", () => {
     expect(text.code).toBe(0);
     expect(text.out).toBe(
       [
-        "glow.cover       glow      missing",
-        "painting.cover   painting  missing",
-        "place.bazaar     place     missing",
-        "place.citadel    place     missing",
-        "place.sanctuary  place     missing",
-        "place.village    place     missing",
+        "glow.cover           glow      missing",
+        "painting.cover       painting  missing",
+        "place.bazaar         place     missing",
+        "place.citadel        place     missing",
+        "place.sanctuary      place     missing",
+        "place.village        place     missing",
+        "seal-break.01~vo-01  line      missing",
         "",
       ].join("\n"),
     );
@@ -290,9 +291,11 @@ describe("A1-02b: cast, counts and ID sets", () => {
       "place.citadel",
       "place.sanctuary",
       "place.village",
+      "seal-break.01~vo-01",
     ]);
-    expect(job.cast).toEqual([]);
-    expect(job.lines).toEqual([]);
+    // The demo line row (D48) brings the built-in Loremaster, audio only.
+    expect(job.cast.map((c) => [c.id, c.moods])).toEqual([["narrator", []]]);
+    expect(job.lines.map((l) => l.id)).toEqual(["seal-break.01~vo-01"]);
   });
 
   it("pins the Dracula counts after eligibility filtering", () => {

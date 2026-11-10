@@ -46,7 +46,7 @@ At most four developers run at once.
 
 ## Status
 
-Updated 2026-11-09.
+Updated 2026-11-10.
 
 | Step | PR | State |
 |---|---|---|
@@ -58,21 +58,31 @@ Updated 2026-11-09.
 | A1-5 `assets:pack` | #404 | merged |
 | A1-8 `bt-assets` skill, `assets:redo` | #405 | merged |
 | A1-7 board asset ID | #406 | merged |
+| A1-8b-1 demo pack and job | (this PR) | in progress (`packs/test` title and demo line row, `~` ids, the line in the job) |
+| A1-8b-2 demo playback | — | not started; needs a designed trigger and data path, sized separately (Opus) |
+| e2e on main | #408, #410, #411 | merged: IMP-8 fast and deterministic (#408); e2e green on main, 178 passed (#410, #411) |
 | A1-6b retirements | — | pending Bob (OneDrive backup record; guarded by `BT_TTS_BACKUP_DONE`) |
-| G-A1 | — | pending Bob |
+| G-A1 | — | pending Bob; depends on 8b-2 |
 
 ## Open for Bob
 
-- 272 Dracula `~no-agnes` variant lines are silent as `invalid-id` (asset-studio's id pattern rejects `~` inside the id).
-- The 7 `*-whisper` cast entries get duplicate portraits (35).
 - `assets:needs` emits the `music` kind but the lint refuses it (A1-15).
 - Partial-pack ruling A: A1-19 warns outside `--release` (D45). Confirm.
 - Studio mode always fails `AS-GLOW-2` for a story with a glow mask (D43, D47).
-- G-A1-01 "board/TV plays line once" has no A1 step that plays a packed line. Add a playback step, or reword G-A1.
-- A1-4c: the real render of 3 Dracula lines, after the art hold.
+- G-A1-01 "board/TV plays line once": no playback exists. Step 8b-2 sizes it (see the plan; it needs a designed trigger and data path).
+- A1-4c: the real render of the Ruined Keep line `seal-break.01~vo-01` (G-A1-01), after the art hold.
+- The provisional Loremaster voice (Charon) is Bob's to confirm or change at G-A1 (D48).
 - 6b: the OneDrive backup of tts-explorer's `audio-cache/`.
-- 12 e2e tests fail on main (w1-chrome 2, w4-party 4, w6-board-layers 3, w7-move-map 3). A separate fix session; the w6 test edit awaits Bob's OK.
-- IMP-8 (A1-6a import test) times out at 60 s on a loaded machine; fix on branch `fix/bloodtower-imp8-slow-test`, PR pending.
+
+**Deferred with Dracula (past 1.2), Bob 2026-11-10:** the real funeral import counts; the 272 `~no-agnes` lines silent as `invalid-id` (the `~` form now exists, D48, but the Dracula ids are not renamed); the 7 `*-whisper` duplicate portraits (35).
+
+## Follow-ups
+
+- Restore the SCR-013 startup-frame fit and QR-size e2e checks (lost in #410).
+- The e2e webServer 180 s timeout now covers the build.
+- `a1-asset-id-label.spec.ts:13` comment is stale.
+- `e2e:install` installs WebKit, which no test uses.
+- IMP-8 render exit-code assertion (non-blocking from #408).
 
 ## Process slip
 

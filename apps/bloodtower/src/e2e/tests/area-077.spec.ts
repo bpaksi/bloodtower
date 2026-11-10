@@ -328,7 +328,7 @@ test("AREA-077 cold start plays, enters every place, and leaves the session", as
 
     await expect(board.locator("[data-band] [data-health]").first()).toHaveText(/unavailable/);
     await expect(board.locator("[data-band] [data-purse]")).toHaveText(/unavailable/);
-    await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
+    await expect(board.locator("[data-chapter]")).toHaveText("The Ruined Keep");
     await expect(board.locator("[data-day]")).toHaveText(/Day \d+/);
     await expect(board.locator("[data-waiting]")).toHaveText(/is choosing/);
     await expect(device.locator("[data-bottom-bar]")).toBeVisible();
