@@ -1,7 +1,7 @@
 ---
 type: idea
 title: "Room: The Portrait, a painted gaze that holds a hero"
-status: proposed
+status: decided
 layer: story
 release: "1.2"
 by: "Claude, 2026-11-05"
@@ -17,3 +17,5 @@ sources:
 **Bloodtower:** a main level trap with its own painting. On guard halves it. The same gallery holds a covered canvas of IDEA-105.
 
 **Gamewright, D-02 (2026-11-10):** no on guard (DEC-780). It is a fixed main-level trap with DEC-489's two-loss choice. Look away: every hero loses 2 hit points. Cover the canvas: 1 potion. The scene is `n5-portrait-gallery`.
+
+Decided by Gamewright, 2026-11-10, under Bob's standing rule that design rulings are Gamewright's (relayed by Warden, 2026-11-10). The Gamewright D-02 settlement above is what is decided.
