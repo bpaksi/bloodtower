@@ -25,7 +25,7 @@ describe("Pick story doors (C2-14, EV-03)", () => {
     ]);
     expect(pickStoryDoors(catalog)).toEqual([
       { id: "dracula", title: "The Count of Vellmoor", focus: false },
-      { id: "test", title: "Proving Grounds", focus: true },
+      { id: "test", title: "The Ruined Keep", focus: true },
     ]);
   });
 

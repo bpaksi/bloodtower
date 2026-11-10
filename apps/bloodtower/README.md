@@ -18,7 +18,7 @@ The Mac runs this host. The Story board is display-only at `/board`. Hero device
 | `plans/` | Milestone plans |
 | `docs/` | Notes that are not the spec |
 | `src/web/`, `src/server/`, `src/protocols/`, `src/engine/` | Code parts, each its own package |
-| `src/e2e/` | Playwright: phone and iPad on WebKit, desktop on Chromium |
+| `src/e2e/` | Playwright: phone, iPad and desktop viewports, all on Chromium |
 | `data/` | SQLite and `logs/` (gitignored). A worktree uses the `dataDir` in `.wt.json`. Created when the host starts. |
 | `../../packs/` | Format v2 story packs (`test` is the Proving Grounds slice; `dracula` is metadata-only). |
 | `../../packs/base/` | Shared board graph and hero roster for v2 packs. |
@@ -54,7 +54,7 @@ cd apps/bloodtower
 pnpm dev      # server (tsx watch, port 4787) + next dev on port 3000
 pnpm build    # pack:lint:all, then the web static export
 pnpm start    # one process serving the export; run pnpm build first
-pnpm e2e      # Playwright on port 4788 (first time: pnpm -F bloodtower-e2e e2e:install)
+pnpm e2e      # builds, then Playwright on port 4788 (first time: pnpm -F bloodtower-e2e e2e:install)
 pnpm simulate --games 1000 --days 10 --seed s   # headless Proving Grounds slice
 ```
 

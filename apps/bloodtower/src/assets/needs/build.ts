@@ -40,6 +40,17 @@ export const MOODS = ["neutral", "friendly", "scared", "angry", "sly"] as const;
 /** Speakers that are the Loremaster: audio and captions only, no portrait (D8). */
 export const LOREMASTER_IDS: readonly string[] = ["narrator", "loremaster"];
 
+/**
+ * The Loremaster a `line` row in `assets[]` falls back to when the pack has no `cast.yaml`
+ * entry for `narrator` (D48). The voice, Gemini TTS Charon, is provisional: the requirements
+ * name it as the documented narrator voice, not as an approved Ruined Keep Loremaster voice.
+ */
+export const LOREMASTER_DEFAULT: CastEntry = {
+  id: "narrator",
+  name: "Loremaster",
+  voice: { provider: "gemini-tts", voiceId: "Charon", style: "slow, low, ominous storyteller" },
+};
+
 export type SilentReason =
   | "fill-in"
   | "repeated"
@@ -146,8 +157,14 @@ const readArt = (
   manifest: Manifest,
   profiles: string[],
   skipped: Skipped[],
-): { pictures: JobPicture[]; sounds: JobSound[]; byPath: Map<string, string> } => {
+): {
+  pictures: JobPicture[];
+  sounds: JobSound[];
+  byPath: Map<string, string>;
+  declared: ScriptLine[];
+} => {
   const pictures: JobPicture[] = [];
+  const declared: ScriptLine[] = [];
   const byPath = new Map<string, string>();
   const sounds: JobSound[] = [];
   const source = (rel: string | undefined, id: string, at: string): string | undefined => {
@@ -215,6 +232,18 @@ const readArt = (
         return;
       }
       case "line":
+        // A `line` row with speaker and text is a voiced line (D48); a bare one is a file.
+        if (asset.speaker !== undefined && asset.text !== undefined) {
+          if (!validId(asset.id, at)) return;
+          declared.push({
+            moment: "assets",
+            id: asset.id,
+            speaker: asset.speaker,
+            text: asset.text,
+            path: at,
+          });
+          return;
+        }
         skipped.push({
           id: asset.id,
           file: "pack.yaml",
@@ -232,7 +261,7 @@ const readArt = (
         return;
     }
   });
-  return { pictures, sounds, byPath };
+  return { pictures, sounds, byPath, declared };
 };
 
 /**
@@ -301,9 +330,16 @@ interface Cast {
 }
 
 /** DEC-349, D2 and the manager defaults: which lines are voiced, and the cast they make. */
-const buildCast = (files: PackFiles, manifest: Manifest): Cast => {
+const buildCast = (files: PackFiles, manifest: Manifest, declared: readonly ScriptLine[]): Cast => {
   const castFile = files.has(CAST_FILE) ? readCast(files) : [];
-  const script: ScriptLine[] = files.has(SCRIPT_FILE) ? readScript(files) : [];
+  const script: ScriptLine[] = [...(files.has(SCRIPT_FILE) ? readScript(files) : []), ...declared];
+  // D48: a declared line spoken by the Loremaster, with no cast.yaml entry, gets the built-in one.
+  if (
+    declared.some((line) => line.speaker === LOREMASTER_DEFAULT.id) &&
+    !castFile.some((entry) => entry.id === LOREMASTER_DEFAULT.id)
+  ) {
+    castFile.push({ ...LOREMASTER_DEFAULT });
+  }
   const byId = new Map<string, CastEntry>(castFile.map((c) => [c.id, c]));
   const seen = new Map<string, number>();
   for (const line of script) seen.set(line.text, (seen.get(line.text) ?? 0) + 1);
@@ -405,7 +441,7 @@ export const buildJobFromDir = (
     );
   }
   const art = readArt(files, manifest, Object.keys(profiles), skipped);
-  const cast = buildCast(files, manifest);
+  const cast = buildCast(files, manifest, art.declared);
   const moments = readMoments(files, art.byPath);
   if (files.issues.length > 0) throw new NeedsError(files.issues);
 
