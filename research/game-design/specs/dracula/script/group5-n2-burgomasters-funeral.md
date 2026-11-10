@@ -1,11 +1,11 @@
 # Dracula, Group 5 (7/15): `n2-burgomasters-funeral` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n2-burgomasters-funeral.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n2-burgomasters-funeral.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** Kingdom A Sanctuary: the wake. Chapter 2 (Standard). Plain scene with a battle. Reward: the lid choice (IDEA-087, DEC-781). Nailing gives the nail, a Ward source, which replaces the old holy water (Gamewright 2026-11-10)
 - **D-01 intent:** Dorka rises at her own wake; the lid choice; a new reason she goes up the hill
 - **D-02:** Gamewright 2026-11-10: the nail is a Ward source and counts once against the Count's strikes. Lenka's loyalty rises a step automatically when the funeral ends with her present, with no choice, marked by `lenka-stays`. §9: Wren's loyalty drops if the lid is watched, not nailed.
-- **Painting (`painting.n2-burgomasters-funeral`, Illusionist, one line):** A candlelit village church at a wake: a burgomaster's coffin on trestles and a second, open coffin holding a girl in a wedding dress. Every candle leans toward it. Mourners on benches, faces turned away. No Lenka face. The Count is not shown.
+- **Painting (`painting.n2-burgomasters-funeral`, Illusionist, one line):** A candlelit village church at a wake: a burgomaster's coffin on trestles and a second, open coffin holding a girl in a wedding dress. Every candle leans toward it. Mourners on benches. If Lenka is in frame, her face is clear under a travelling hood, with no reveal mark (the Funeral is before the Tome). The Count is not shown.
 
 **Estimates:** 0.40 s per word + 4.0 s, fitted to the 13 Charon masters in C5-05 (`/workspace/c5-05-art/voice/MANIFEST.md`); expect about ±3 s. Cap 20 s (about 40 words). Captions = spoken text, word for word. A line whose speaker is not with the group is skipped (D-02 §10), and the narrator carries the plot without it. Ids: base `<scene>.NN~vo-01`, goal or lair `<scene>.NN~<value>.vo-01`, events `<scene>.<event>~vo-01`.
 

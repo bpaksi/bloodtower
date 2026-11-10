@@ -1,6 +1,6 @@
 # Dracula, Group 5 (14/15): `n5-portrait-gallery` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n5-portrait-gallery.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n5-portrait-gallery.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** Castle, main level, room 2: the Portrait. A fixed trap with a choice of two losses (IDEA-094, DEC-851)
 - **D-01 intent:** Four hundred years of one face; the portrait holds a hero

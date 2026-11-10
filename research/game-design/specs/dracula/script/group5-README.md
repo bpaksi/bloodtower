@@ -1,11 +1,11 @@
 # Dracula, Group 5: the 15 rewritten scenes (index)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10 (rev 4, with Gamewright's D-06 fixes applied). There is one file per scene, `group5-<scene>.md`, and all the lines are combined in `group5.json`. Estimates use 0.40 s/word + 4.0 s. Captions = spoken text.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10 (rev 5, Lenka's face shown from ch.1; reveal changes it). There is one file per scene, `group5-<scene>.md`, and all the lines are combined in `group5.json`. Estimates use 0.40 s/word + 4.0 s. Captions = spoken text.
 
 | Scene | Lines | Est. s |
 |---|---|---|
 | n1-lantern-and-bell | 8 | 83.6 |
-| n1-burgomasters-house | 11 | 124.4 |
+| n1-burgomasters-house | 11 | 125.6 |
 | n1-open-grave | 14 | 160.0 |
 | n1-fortune-reading | 16 | 152.4 |
 | n23-sergius-blade | 8 | 85.2 |
@@ -19,7 +19,7 @@
 | n5-drawbridge | 11 | 118.4 |
 | n5-portrait-gallery | 7 | 78.8 |
 | n5-final-confrontation | 11 | 123.6 |
-| **Total** | **162** | **1777.6** (longest 14.8) |
+| **Total** | **162** | **1778.8** (longest 14.8) |
 
 ## Gamewright answers applied (2026-11-10)
 - **Tomas** is out for good. No lines.
@@ -43,7 +43,7 @@
 ## Calls made
 0. **Captions are 120 characters at most** (A1-13, D-06). A line that ran over is either cut or split into two consecutive clips of the same moment, `…~vo-01` then `…~vo-02` (the `vo-NN` clip slot of DEC-856, as in the old `script.yaml`). Splitting this way means no later line has to be renumbered. The Drawbridge also gains `bridge-quiet` for an unmasked Marta (G-16).
 1. At the blade door the Count is a silhouette only. The `his-study` lair pays off the opening's letter.
-2. Ludmila's portrait stays covered. "Lenka's face" appears only as the Tome's statement of what was hidden, and it is never described.
+2. Ludmila's portrait stays covered. Lenka's face is shown from chapter 1 (travelling hood, face clear). The Tome is the reveal: her face changes (violet mark; see lenka-look.md); it is not unveiled. "Lenka's face" in the Tome line is that statement of the returned soul.
 3. Dorka gets a new reason: she went to offer herself.
 4. The earth-box clips are events: `box-1`, `box-2` and `box-last`.
 5. The Reading, Tome and Blade lines don't name a building, because the board names the sites.

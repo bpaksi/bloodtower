@@ -4,7 +4,7 @@
 
 **Scope:** `n4-eldest-witch` (IDEA-155), a Tomb (D-02 G-19). D-01 and D-02 G-19 make **`n23-third-bride`** the third Long lieutenant: a board-only foe with no quest scene, so it has no copy, and its earlier draft lines are dropped. Its D-01 reward (Wren's tie, IDEA-154) stands as written. In Short and Standard the lieutenants stand on the board as a guard and a hunter with no named quest (DEC-783, DEC-737). The traitor plays at Standard and Long (G-19), so the group 5 clue lines and the group 6 `traitor.*` lines serve Long as they are.
 
-**Rules applied:** the same as groups 1 to 6. One `~` per id. Companion lines are event moments, skipped when the speaker is absent. No line names or counts the hunters. No "night". The Count is unseen. Lenka's face is never described. **Estimates:** 0.40 s per word + 4.0 s, fitted to the 13 Charon masters in C5-05 (`/workspace/c5-05-art/voice/MANIFEST.md`); expect about ±3 s. Cap 20 s (about 40 words). Captions = spoken text, word for word.
+**Rules applied:** the same as groups 1 to 6. One `~` per id. Companion lines are event moments, skipped when the speaker is absent. No line names or counts the hunters. No "night". The Count is unseen. Lenka's face is shown from chapter 1; the Tome changes it (see lenka-look.md). **Estimates:** 0.40 s per word + 4.0 s, fitted to the 13 Charon masters in C5-05 (`/workspace/c5-05-art/voice/MANIFEST.md`); expect about ±3 s. Cap 20 s (about 40 words). Captions = spoken text, word for word.
 
 ## `n4-eldest-witch`
 

@@ -1,6 +1,6 @@
 # Dracula, Group 5 (1/15): `n1-lantern-and-bell` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n1-lantern-and-bell.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n1-lantern-and-bell.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** K1 Village: the Lantern and Bell inn. Chapter 1, first quest (plain scene)
 - **D-01 intent:** The inn's fear; the four old hunters named as people who can be found

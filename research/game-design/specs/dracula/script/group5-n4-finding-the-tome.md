@@ -1,10 +1,10 @@
 # Dracula, Group 5 (10/15): `n4-finding-the-tome` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n4-finding-the-tome.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n4-finding-the-tome.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** Seeded building in K4: Finding the Tome (plain scene). Chapter 3. Reward: the Tome; his goal named; the call to the castle (IDEA-090, DEC-747)
 - **D-01 intent:** His own hand: Ludmila, Stefan, Lenka's face; his goal named (`~<goal>`); the call to the castle
-- **D-02:** §2: `count-goal` is named here (`~<goal>`). +1 Wild against him (DEC-750). The end call opens chapter 4. §4: Lenka's art unveils from here on, but the VO still never describes her face. Lines must read whether Lenka is with the group or taken.
+- **D-02:** §2: `count-goal` is named here (`~<goal>`). +1 Wild against him (DEC-750). The end call opens chapter 4. §4: from the Tome on, Lenka's art uses the revealed look (her face changes; it is not unveiled). See lenka-look.md. Lines must read whether Lenka is with the group or taken.
 - **Painting (`painting.n4-finding-the-tome`, Illusionist, one line):** A heavy green leather book open on a desk, its brass clasp shaped like a closed eye. Old violets are pressed in the gutter, and two hands of writing show on facing pages. Candlelight. No figures. The Count is not shown.
 
 **Estimates:** 0.40 s per word + 4.0 s, fitted to the 13 Charon masters in C5-05 (`/workspace/c5-05-art/voice/MANIFEST.md`); expect about ±3 s. Cap 20 s (about 40 words). Captions = spoken text, word for word. A line whose speaker is not with the group is skipped (D-02 §10), and the narrator carries the plot without it. Ids: base `<scene>.NN~vo-01`, goal or lair `<scene>.NN~<value>.vo-01`, events `<scene>.<event>~vo-01`.

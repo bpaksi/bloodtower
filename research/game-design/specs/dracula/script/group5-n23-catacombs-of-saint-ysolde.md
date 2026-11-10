@@ -1,6 +1,6 @@
 # Dracula, Group 5 (6/15): `n23-catacombs-of-saint-ysolde` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n23-catacombs-of-saint-ysolde.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n23-catacombs-of-saint-ysolde.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** Seeded building in kingdom B: the Catacombs (Tomb). Chapter 2. Reward: the Lantern (IDEA-086)
 - **D-01 intent:** Moving bones around the Lantern; the lookalike goes to the castle

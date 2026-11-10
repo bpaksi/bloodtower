@@ -2,7 +2,7 @@
 
 **Status: DRAFT** (every line pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Sources: D-01 "Beats Loremaster must write", D-02 §3, §4 and §10 (`/workspace/dracula/D-02/D-02-rules-deltas.md`), main's `assets/stories/dracula/scripts/tokens-and-encounters.md` (the `enc-*` source), and the C5-05 Ruined Keep masters (`/workspace/c5-05-art/voice/MANIFEST.md`).
 
-**Speakers:** `narrator` (Charon, "slow, low, ominous storyteller") unless marked otherwise. Two lines are `count` (Algieba), heard only as a voice: the Count stays unseen and is described only by hand, mist, cold and violets. Everything is spoken to the whole table. Nothing is private, and no single hunter "hears" anything. Lenka's face is never described.
+**Speakers:** `narrator` (Charon, "slow, low, ominous storyteller") unless marked otherwise. Two lines are `count` (Algieba), heard only as a voice: the Count stays unseen and is described only by hand, mist, cold and violets. Everything is spoken to the whole table. Nothing is private, and no single hunter "hears" anything. Lenka's face is shown from chapter 1 (travelling hood, face clear). The Tome changes it; it is not unveiled (see lenka-look.md).
 
 **Ids (DEC-856):** a base line is `<scene>.NN~vo-NN`. A goal line is `<scene>.NN~<value>.vo-NN`, with one `~` per id. The goal values are `replace-a-hero`, `win-lenka`, `destroy-the-blade` and `darkness` (D-02 `count-goal`). Event moments are `<scene>.<event>~vo-NN`.
 
@@ -70,7 +70,7 @@ Strikes play in chapters 2 and 3 only (Gamewright, 2026-11-10). In chapter 4 the
 ## count-takes-lenka
 
 - **D-01/D-02 beat:** `count-takes-lenka`: His strike carries Lenka to the castle, and play goes on (DEC-746). D-02 §4: the win-lenka strike at wavering, or her hero falling with no one to pass her to, sets `lenka-taken`
-- **Notes:** It says plainly that she can be won back (DEC-746). She never turns and never becomes a foe. Her face is never described, only her cloak. The Count is a voice only. "She is home now" ties to the `come-home-letter` prop without spoiling Ludmila.
+- **Notes:** It says plainly that she can be won back (DEC-746). She never turns and never becomes a foe. Her face is clear; the empty travelling cloak is what remains. The Count is a voice only. "She is home now" ties to the `come-home-letter` prop without spoiling Ludmila.
 
 | Asset id | Speaker | Spoken text | Caption | Est. s | When / intent | Status |
 |---|---|---|---|---|---|---|

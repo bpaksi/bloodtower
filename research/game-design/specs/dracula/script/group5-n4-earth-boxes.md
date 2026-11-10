@@ -1,6 +1,6 @@
 # Dracula, Group 5 (9/15): `n4-earth-boxes` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n4-earth-boxes.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n4-earth-boxes.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** K4: two plain scenes with a battle, K4 Sanctuary then K4 Village. Chapter 3 (Standard). Reward: boxes burned, so the daily skull stops (IDEA-089, DEC-779)
 - **D-01 intent:** Burn three boxes across K4; three rotating clips and a last-box clip

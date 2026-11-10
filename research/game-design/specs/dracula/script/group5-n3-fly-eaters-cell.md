@@ -1,6 +1,6 @@
 # Dracula, Group 5 (8/15): `n3-fly-eaters-cell` (rewrite)
 
-**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n3-fly-eaters-cell.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is never described, and the Count is unseen until his lair.
+**Status: DRAFT** (pending DEC-785 / OPEN RULING 6). Loremaster, 2026-11-10. Rewritten from main's `assets/stories/dracula/scripts/n3-fly-eaters-cell.md` around the new plot: Lenka free (she joins at the Burgomaster's House), pool heroes, four chapters, nothing private, Short and Standard only, no Tomas. Lenka's face is shown from chapter 1 (travelling hood, face clear; the Tome changes it — see lenka-look.md). The Count is unseen until his lair.
 
 - **Where / kind:** Kingdom B Citadel: the lockhouse. Chapter 2 (Standard). Plain scene. Reward: the clue that places the earth boxes (IDEA-088)
 - **D-01 intent:** Jakob sells where the boxes went, for a bite or an item
