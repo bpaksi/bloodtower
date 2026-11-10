@@ -1,0 +1,310 @@
+[
+  {
+    "id": "n1-long-night.01~vo-01",
+    "speaker": "narrator",
+    "text": "Dark comes down on the burgomaster's house. You bar the shutters and hang garlic over every sill.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.02~vo-01",
+    "speaker": "narrator",
+    "text": "Wolves come out of the mist and circle the house. They do not howl. They scratch at the shutters, patient.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.03~vo-01",
+    "speaker": "narrator",
+    "text": "Then three knocks, and a voice at the door, soft and courteous.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.04~vo-01",
+    "speaker": "count",
+    "text": "Only open it. One door always opens, in the end.",
+    "est_s": 8.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.05~vo-01",
+    "speaker": "narrator",
+    "text": "A hunter stands and walks to the door, slow, like someone half asleep. A hand is already on the latch.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.06~vo-01",
+    "speaker": "lenka",
+    "text": "Don't answer him. Whatever he says, don't answer.",
+    "est_s": 7.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.stop~vo-01",
+    "speaker": "narrator",
+    "text": "You pull them back from the door by the arms. The wolves hit the shutters all at once.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.stop-won~vo-01",
+    "speaker": "narrator",
+    "text": "The last wolf runs back into the mist. The scratching stops. Lenka lets out a breath she has held for an hour.",
+    "est_s": 12.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.talk~vo-01",
+    "speaker": "narrator",
+    "text": "You talk low and steady until the hand lets go of the latch. Outside, the voice laughs once, and goes to the village.",
+    "est_s": 13.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.latch~vo-01",
+    "speaker": "narrator",
+    "text": "The latch lifts. Cold comes in with the mist. When the lamps steady, there is blood at a hunter's throat.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.talk-after~vo-01",
+    "speaker": "narrator",
+    "text": "Down in the village, a bell rings for someone who will not wake.",
+    "est_s": 9.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.latch-after~vo-01",
+    "speaker": "narrator",
+    "text": "The door slams on the mist. The wolves are gone. Lenka does not look at any of you.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n1-long-night.07~vo-01",
+    "speaker": "narrator",
+    "text": "Grey light at last. The wolves are gone, and Lenka is still with you.",
+    "est_s": 9.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.01~vo-01",
+    "speaker": "narrator",
+    "text": "A long hall, and a feast laid for many. Every candle is lit. Every chair is empty.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.02~vo-01",
+    "speaker": "narrator",
+    "text": "At the far end an organ is playing. A tall shape sits at it, its back to you.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.03~vo-01",
+    "speaker": "count",
+    "text": "Sit. Eat. You have come so far, and so rudely.",
+    "est_s": 8.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.04~vo-01",
+    "speaker": "narrator",
+    "text": "Step closer, and the bench is empty. The keys go on moving without him.",
+    "est_s": 9.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.05~vo-01",
+    "speaker": "narrator",
+    "text": "Behind you, the doors swing shut. Along the walls, the stone statues turn their heads.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.foe-first~vo-01",
+    "speaker": "narrator",
+    "text": "They have known you were coming since the bridge. They move first.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-banquet.won~vo-01",
+    "speaker": "narrator",
+    "text": "The last statue breaks across the floor. The organ stops in the middle of a note.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-flooded-room.01~vo-01",
+    "speaker": "narrator",
+    "text": "A vaulted cellar under the castle, flooded to the knee. The water is black, and very still.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-flooded-room.02~vo-01",
+    "speaker": "narrator",
+    "text": "Something moves under the surface. Then something else. The water was never empty.",
+    "est_s": 9.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-flooded-room.foe-first~vo-01",
+    "speaker": "narrator",
+    "text": "Hands come up out of the black water before you can raise a blade. The drowned dead strike first.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-flooded-room.won~vo-01",
+    "speaker": "narrator",
+    "text": "The last of them sinks back into the water, and stays down. The ripples take a long time to stop.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-flooded-room.retreat~vo-01",
+    "speaker": "narrator",
+    "text": "You climb back up the steps, soaked to the bone. Below, the water goes still again, and waits.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.01~vo-01",
+    "speaker": "narrator",
+    "text": "A crypt under the castle, low and cold. Old coffins line the walls, their lids pushed aside.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.02~vo-01",
+    "speaker": "narrator",
+    "text": "The lamps gutter. When they steady, one of you stands a step apart, and does not blink.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.03~vo-01",
+    "speaker": "narrator",
+    "text": "It wears your friend's face, and its smile is too wide. Behind the stone, someone is knocking.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.won~vo-01",
+    "speaker": "narrator",
+    "text": "The wight falls apart in grave dust. Your friend climbs out of a coffin behind it, cold, and alive.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.solo-companion~vo-01",
+    "speaker": "narrator",
+    "text": "The lamps gutter. When they steady, your companion stands a step apart. It wears their face, and smiles too wide.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.solo-companion-won~vo-01",
+    "speaker": "narrator",
+    "text": "The wight falls apart in grave dust. Your companion climbs out of a coffin behind it, cold, and alive.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.solo-self~vo-01",
+    "speaker": "narrator",
+    "text": "The lamps gutter. Across the crypt stands someone in your clothes, with your own face. It smiles first.",
+    "est_s": 11.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.solo-self-won~vo-01",
+    "speaker": "narrator",
+    "text": "It falls apart in grave dust, and your face goes with it. You are alone again, and glad of it.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-the-swap.retreat~vo-01",
+    "speaker": "narrator",
+    "text": "You fall back up the stair. Behind you, something with a friend's face waits among the coffins.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-heart-of-sorrow.01~vo-01",
+    "speaker": "narrator",
+    "text": "A round room near the top of the castle. In the middle, a great heart of glass hangs on chains, beating.",
+    "est_s": 12.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-heart-of-sorrow.02~vo-01",
+    "speaker": "narrator",
+    "text": "With every beat the floor tilts. Stone grinds. The whole tower leans, and leans back.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-heart-of-sorrow.03~vo-01",
+    "speaker": "narrator",
+    "text": "Halberds rattle on their hooks. The heart beats faster, and the whole room turns on you.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-heart-of-sorrow.won~vo-01",
+    "speaker": "narrator",
+    "text": "The heart cracks, and the beating stops. The tower settles, and is still.",
+    "est_s": 9.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-castle-moment.01~replace-a-hero.vo-01",
+    "speaker": "narrator",
+    "text": "The wight turns its borrowed face toward you. The voice that comes out of it is his.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-castle-moment.02~replace-a-hero.vo-01",
+    "speaker": "count",
+    "text": "Look closely. You could not tell us apart. Soon, neither will they.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-castle-moment.01~win-lenka.vo-01",
+    "speaker": "narrator",
+    "text": "A hand comes out of the dark at the head of the table, palm up, held out to Lenka.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-castle-moment.02~win-lenka.vo-01",
+    "speaker": "lenka",
+    "text": "No. Not to you. Not ever.",
+    "est_s": 6.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-castle-moment.01~destroy-the-blade.vo-01",
+    "speaker": "narrator",
+    "text": "The heart's beat turns toward Stefan's blade. Whatever the room throws, it throws at the one who carries it.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "n5-castle-moment.01~darkness.vo-01",
+    "speaker": "narrator",
+    "text": "As you reach the top floor, every candle goes out at once. From here, you climb in the dark.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  }
+]

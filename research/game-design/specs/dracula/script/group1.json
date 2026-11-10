@@ -1,0 +1,72 @@
+[
+  {
+    "id": "opening.01~vo-01",
+    "speaker": "narrator",
+    "text": "A letter brought you to Vellmoor. Heavy paper, a fine old-fashioned hand. It is signed Anton Morosz, burgomaster.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "opening.02~vo-01",
+    "speaker": "narrator",
+    "text": "It asks for hunters. Our dead do not stay in the ground, it says. Come quickly. Come before the snow.",
+    "est_s": 12.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "opening.03~vo-01",
+    "speaker": "narrator",
+    "text": "This year the valley has buried more of its own than in the ten years before. It is All Hallows' Eve.",
+    "est_s": 12.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "opening.04~vo-01",
+    "speaker": "narrator",
+    "text": "You come down the last hill at dusk. On the far ridge stands a castle, every window lit for the first time in years.",
+    "est_s": 13.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "opening.05~vo-01",
+    "speaker": "narrator",
+    "text": "Behind you, the mist comes down over the road. It does not drift. It falls, like a lid. When it thins, the road is gone.",
+    "est_s": 14.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "opening.06~vo-01",
+    "speaker": "narrator",
+    "text": "There is no way back. Ahead, at the crossroads, a lamp burns over the door of an inn. The Lantern and Bell.",
+    "est_s": 12.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-card.01~vo-01",
+    "speaker": "narrator",
+    "text": "Find the burgomaster's house. Keep his daughter safe till dawn. Then have your fortunes read.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-card.02~vo-01",
+    "speaker": "narrator",
+    "text": "Two new parishes open. Bring back Stefan's blade and the Lantern of Saint Ysolde.",
+    "est_s": 9.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-card.03~vo-01",
+    "speaker": "narrator",
+    "text": "The last parish opens. Find the Tome there, and learn the truth of him.",
+    "est_s": 9.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "chapter-card.04~vo-01",
+    "speaker": "narrator",
+    "text": "Carry the blade, the Lantern and the Tome to his gate. Climb, and destroy him.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  }
+]

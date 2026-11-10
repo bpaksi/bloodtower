@@ -1,0 +1,1298 @@
+[
+  {
+    "id": "n1-lantern-and-bell.01~vo-01",
+    "speaker": "narrator",
+    "text": "The Lantern and Bell is the only inn at the crossroads. Low beams, a roaring fire, garlic over every window.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.02~vo-01",
+    "speaker": "hanne",
+    "text": "Sit by the fire, loves. Nobody comes to Vellmoor this late in the year on purpose.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.03~vo-01",
+    "speaker": "narrator",
+    "text": "You lay the letter on the table. Hanne reads the name, and her face goes still.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.04~vo-01",
+    "speaker": "hanne",
+    "text": "That's not Anton's hand. Anton wrote like a clerk. And Anton Morosz died at dusk, at his daughter's door.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.05~vo-01",
+    "speaker": "hanne",
+    "text": "There were others like you, once. Sister Agnes keeps the church.",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.05~vo-02",
+    "speaker": "hanne",
+    "text": "The apothecary's boy, Emeric, haunts the market. Wren Kessel digs graves over the hill.",
+    "est_s": 9.6,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.06~vo-01",
+    "speaker": "hanne",
+    "text": "Find them, if you mean to stay. And you will stay. Nobody leaves Vellmoor now. Not since spring.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-lantern-and-bell.07~vo-01",
+    "speaker": "hanne",
+    "text": "Go up the hill to the burgomaster's house. His girl is still there. For now.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n1-lantern-and-bell"
+  },
+  {
+    "id": "n1-burgomasters-house.01~vo-01",
+    "speaker": "narrator",
+    "text": "A tall stone house on the hill road, black crepe on the door. Anton Morosz kept the valley's ledgers for thirty years.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.02~vo-01",
+    "speaker": "narrator",
+    "text": "He found his daughter on the church step as a baby. When the mist came, he stood at her door with a poker, and stayed.",
+    "est_s": 14.0,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.03~vo-01",
+    "speaker": "anton",
+    "text": "You will not have her. Not while I'm in this house.",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.04~vo-01",
+    "speaker": "narrator",
+    "text": "His son Andrei meets you on the stair, still in his shirtsleeves. He has not slept.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.05~vo-01",
+    "speaker": "andrei",
+    "text": "Father wrote no letter. But you came, so stay. Keep my sister. I can't, not against that.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.06~vo-01",
+    "speaker": "narrator",
+    "text": "On the sill of her room, a pressed mountain violet. Mountain violets do not grow in the valley.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.07~vo-01",
+    "speaker": "narrator",
+    "text": "On her dresser, a letter on cream paper, in the same old hand as yours. Come home, it says. You have been away so long.",
+    "est_s": 14.0,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.08~vo-01",
+    "speaker": "narrator",
+    "text": "Lenka comes down in her mourning black, her father's seal ring on a cord at her neck.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.09~vo-01",
+    "speaker": "lenka",
+    "text": "He has written to me since spring. I burned every letter. They kept coming. I won't sit in this house and wait for him.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.10~vo-01",
+    "speaker": "lenka",
+    "text": "I'm coming with you. Choose which of you I walk beside.",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-burgomasters-house.11~vo-01",
+    "speaker": "narrator",
+    "text": "Outside, the light is going. On the road below, the wolves have begun to gather.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n1-burgomasters-house"
+  },
+  {
+    "id": "n1-open-grave.01~vo-01",
+    "speaker": "narrator",
+    "text": "The soil around Father Oskar's grave is heaped outward, in a ring. Whatever left the coffin did not need a spade.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.02~vo-01",
+    "speaker": "wren",
+    "text": "Dug from the inside. Fingers, not claws. He was a tidy man. He folded the shroud.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.03~vo-01",
+    "speaker": "narrator",
+    "text": "In the vestry, letters in Oskar's hand, four lines in four margins, as if he knew he would not finish.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.04~vo-01",
+    "speaker": "narrator",
+    "text": "He keeps the faith of the dead. He rests where the guard once stood.",
+    "est_s": 9.6,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.04~vo-02",
+    "speaker": "narrator",
+    "text": "He lies beneath what was dug. He sleeps in the name of the first.",
+    "est_s": 9.6,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.05~vo-01",
+    "speaker": "narrator",
+    "text": "Someone is standing in the next row of graves, in a priest's cassock gone black with earth.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.06~vo-01",
+    "speaker": "oskar",
+    "text": "You came. I asked so many, and you are the ones who came. He will call her by another name. Don't let her answer.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.07~vo-01",
+    "speaker": "narrator",
+    "text": "The priest's gentle face splits into hunger, and he comes for the living.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.rest~vo-01",
+    "speaker": "narrator",
+    "text": "Oskar lies down in his own grave again, and this time he stays. Someone should say the words.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.leave~vo-01",
+    "speaker": "narrator",
+    "text": "You hold the churchyard gate shut while it shakes, and bar it, and it costs you blood. Behind it, he is still standing.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.clue-jakob~vo-01",
+    "speaker": "narrator",
+    "text": "In the last letter, a line underscored twice: the bookkeeper knows every door in that castle. Ask him what he sold.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.clue-andrei~vo-01",
+    "speaker": "narrator",
+    "text": "In the last letter, a line underscored twice: the son has been seen on the hill road after dark. Ask him why.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.clue-marta~vo-01",
+    "speaker": "narrator",
+    "text": "In the last letter, a line underscored twice: the girl who pours his wine still comes down to the village. For whom?",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-open-grave.08~vo-01",
+    "speaker": "narrator",
+    "text": "Somewhere in the village the bell begins to ring, and nobody is pulling the rope.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n1-open-grave"
+  },
+  {
+    "id": "n1-fortune-reading.01~vo-01",
+    "speaker": "narrator",
+    "text": "Old Berta came into the valley before the mist, and could not leave after. She has read cards for every burgomaster.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.02~vo-01",
+    "speaker": "vadoma",
+    "text": "Sit down. I have been expecting you since spring. Cut the cards. He is listening.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.03~vo-01",
+    "speaker": "vadoma",
+    "text": "A sword that was a brother's. It still remembers the sun. Look for it where the board shows you.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.04~vo-01",
+    "speaker": "vadoma",
+    "text": "A saint's light, carried out of a burning house and lost among the dead. It is waiting to be carried again.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.05~vo-01",
+    "speaker": "vadoma",
+    "text": "His own book, in his own hand. Do not open it until you hold the other two.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.06~family-crypt.vo-01",
+    "speaker": "vadoma",
+    "text": "He waits below, among his fathers. Where the dead of his house are kept.",
+    "est_s": 9.6,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.06~ludmilas-chapel.vo-01",
+    "speaker": "vadoma",
+    "text": "He waits where he prays, though he has nothing left to pray to.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.06~the-height.vo-01",
+    "speaker": "vadoma",
+    "text": "He waits high up, where the guard once stood watch over the valley.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.06~his-study.vo-01",
+    "speaker": "vadoma",
+    "text": "He waits among his letters, at the desk where he writes in that fine old hand.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.07~replace-a-hero.vo-01",
+    "speaker": "vadoma",
+    "text": "He wants a seat at your table. Count the chairs.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.07~win-lenka.vo-01",
+    "speaker": "vadoma",
+    "text": "He wants her to open the last door herself.",
+    "est_s": 7.6,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.07~destroy-the-blade.vo-01",
+    "speaker": "vadoma",
+    "text": "He wants a brother's grief buried again.",
+    "est_s": 6.8,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.07~darkness.vo-01",
+    "speaker": "vadoma",
+    "text": "He wants the whole valley on its knees.",
+    "est_s": 7.2,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.08~vo-01",
+    "speaker": "emeric",
+    "text": "Is that a metaphor? Please tell me that's a metaphor.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.09~vo-01",
+    "speaker": "vadoma",
+    "text": "Everything is a metaphor, little scholar, until it bites you.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n1-fortune-reading.10~vo-01",
+    "speaker": "narrator",
+    "text": "The sun comes up grey and warms nothing. On the hill, a door opens. He is walking now.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n1-fortune-reading"
+  },
+  {
+    "id": "n23-sergius-blade.01~vo-01",
+    "speaker": "narrator",
+    "text": "Down the last stair, in a lead-lined chest, the rotted cloth falls away. The blade gives light, though no candle burns.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.02~vo-01",
+    "speaker": "narrator",
+    "text": "There is a name cut into the cross-guard. Stefan.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.03~vo-01",
+    "speaker": "narrator",
+    "text": "Outside, the wolves stop all at once. A tall shape stands in the doorway, black against the mist.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.04~vo-01",
+    "speaker": "count",
+    "text": "Listen to them, the children of the dark. What music they make!",
+    "est_s": 8.8,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.05~vo-01",
+    "speaker": "narrator",
+    "text": "The light in the blade turns gold, and the shape in the doorway steps back, once, as a man steps back from a fire.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.06~vo-01",
+    "speaker": "count",
+    "text": "Put that down. It was never yours. It was never anyone's but his.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.07~vo-01",
+    "speaker": "narrator",
+    "text": "Then the doorway is empty, and the wolves begin again.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-sergius-blade.08~vo-01",
+    "speaker": "narrator",
+    "text": "The blade keeps its light all the way to the road. Something on four legs follows at a distance, and does not catch up.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n23-sergius-blade"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.01~vo-01",
+    "speaker": "narrator",
+    "text": "A stair goes down further than the hill is tall. Behind you, the wall closes like a mouth.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.02~vo-01",
+    "speaker": "narrator",
+    "text": "The bones in the walls are not where they were. Every time you look back, the passage behind you is a different shape.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.03~vo-01",
+    "speaker": "narrator",
+    "text": "At the bottom, in a niche, a small silver lamp. Its flame burns white and does not move in the draught.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.04~vo-01",
+    "speaker": "agnes",
+    "text": "Saint Ysolde. I carried you out of the fire. I lost you on the road. Forgive me.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.05~vo-01",
+    "speaker": "narrator",
+    "text": "As you lift it, the flame leans toward you, the way a dog leans toward its owner.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.06~vo-01",
+    "speaker": "narrator",
+    "text": "On the way up, an empty coffin stands on the stair, fresh earth on its lid.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.06~vo-02",
+    "speaker": "narrator",
+    "text": "Whatever lay in it has gone up to the castle, wearing someone's face.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n23-catacombs-of-saint-ysolde.07~vo-01",
+    "speaker": "narrator",
+    "text": "You climb into the air. It is the first time any of you has been glad of the mist.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "n23-catacombs-of-saint-ysolde"
+  },
+  {
+    "id": "n2-burgomasters-funeral.01~vo-01",
+    "speaker": "narrator",
+    "text": "Vellmoor buries its burgomaster without a priest. Hanne reads the words, badly, from Oskar's book.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.02~vo-01",
+    "speaker": "narrator",
+    "text": "Beside Anton lies a second coffin. Dorka Halasz, nineteen, in her wedding dress.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.02~vo-02",
+    "speaker": "narrator",
+    "text": "Her mother said she had waited long enough.",
+    "est_s": 7.2,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.03~vo-01",
+    "speaker": "narrator",
+    "text": "She went up the hill alone, the week before you came. She meant to offer herself, if he would leave her friend alone.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.04~vo-01",
+    "speaker": "lenka",
+    "text": "She never told me. She just went. He found me on the church step, and now I'm putting him in the ground beside it.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.05~vo-01",
+    "speaker": "narrator",
+    "text": "The lid of the second coffin is not nailed. Every candle in the church leans toward it.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.nailed~vo-01",
+    "speaker": "narrator",
+    "text": "The hammer is very loud in the little church. Her mother does not scream. She just stops breathing for a while.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.nailed-after~vo-01",
+    "speaker": "narrator",
+    "text": "Under the nails, something knocks, once, and then is still.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.nailed-after~vo-02",
+    "speaker": "narrator",
+    "text": "Her mother pulls one bent nail from the lid and presses it into your hand. Keep it. It held her.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.watched~vo-01",
+    "speaker": "narrator",
+    "text": "You wait, to be sure. Nobody looks away from the coffin, so nobody sees the candles go out along the back wall.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.06~vo-01",
+    "speaker": "narrator",
+    "text": "Then Dorka Halasz sits up in her wedding dress, and it is the sweetest smile anyone in the room has ever seen.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.07~vo-01",
+    "speaker": "dorka",
+    "text": "Come to me. Leave these others and come to me. He's so kind. He's so patient. He'll wait for her as long as it takes.",
+    "est_s": 14.0,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.won~vo-01",
+    "speaker": "narrator",
+    "text": "When it is done, Dorka is only a girl in a wedding dress again, with a peace on her face she did not have a minute ago.",
+    "est_s": 14.8,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.lenka-stays~vo-01",
+    "speaker": "lenka",
+    "text": "You stayed to the end. Not everyone stays, for me.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n2-burgomasters-funeral.08~vo-01",
+    "speaker": "narrator",
+    "text": "They bury Anton Morosz at dawn, properly. On the lid, someone has left a pressed violet. No one saw who.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n2-burgomasters-funeral"
+  },
+  {
+    "id": "n3-fly-eaters-cell.01~vo-01",
+    "speaker": "narrator",
+    "text": "Jakob Brenner kept the castle's books for twenty years.",
+    "est_s": 7.6,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.01~vo-02",
+    "speaker": "narrator",
+    "text": "Then one spring he walked down the hill and asked to be locked up, for safety. Whose safety, he would not say.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.02~vo-01",
+    "speaker": "jakob",
+    "text": "Visitors! The blood is the life, friends. Flies are only a little life. One must start small.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.03~vo-01",
+    "speaker": "jakob",
+    "text": "You want to know where his earth went. I wrote the shipping orders. Plans cost. Debit, credit.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.04~vo-01",
+    "speaker": "jakob",
+    "text": "Something that matters. A drop of your blood on my tongue, or a thing you carry that he fears.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.blood~vo-01",
+    "speaker": "jakob",
+    "text": "Oh, he does like you. I can taste it. Debit.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.item~vo-01",
+    "speaker": "jakob",
+    "text": "He'll hate that I have this. Lovely. Debit.",
+    "est_s": 7.2,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.paid~vo-01",
+    "speaker": "jakob",
+    "text": "Three boxes, in the last parish. One under the chapel, two on the village carts. He sleeps in one, turn and turn about.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.refused~vo-01",
+    "speaker": "jakob",
+    "text": "He sleeps in boxes. That's all you get for nothing. Credit nothing, debit nothing.",
+    "est_s": 9.6,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.clue-jakob~vo-01",
+    "speaker": "jakob",
+    "text": "Who let him in? Not me. I only kept the books. The books never open a door.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.clue-andrei~vo-01",
+    "speaker": "jakob",
+    "text": "Ask the burgomaster's boy where he walks at dusk. The Master pays well for a son's grief.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.clue-marta~vo-01",
+    "speaker": "jakob",
+    "text": "The little maid pours his wine and counts his glasses. She counts other things too.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.05~vo-01",
+    "speaker": "jakob",
+    "text": "I don't want to talk to you. You don't count now. The Master is at hand.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n3-fly-eaters-cell.06~vo-01",
+    "speaker": "narrator",
+    "text": "Behind you, the cell fills with flies again, and Jakob is singing a counting song under his breath.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n3-fly-eaters-cell"
+  },
+  {
+    "id": "n4-earth-boxes.01~vo-01",
+    "speaker": "narrator",
+    "text": "The mist is so thick now that noon looks like evening.",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.01~vo-02",
+    "speaker": "narrator",
+    "text": "Long boxes of black earth, nailed shut, stencilled in a neat ledger hand. Garden soil. Handle with care.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.02~vo-01",
+    "speaker": "emeric",
+    "text": "Grave earth, but not this valley's. They must rest in their own earth, or not at all.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.box-1~vo-01",
+    "speaker": "narrator",
+    "text": "The earth burns like peat. Somewhere up on the hill, someone feels it.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.box-2~vo-01",
+    "speaker": "narrator",
+    "text": "This box screams as it burns. Not the wood. The earth.",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.box-last~vo-01",
+    "speaker": "narrator",
+    "text": "The last box goes up in one breath. On the hill, for the first time in a generation, a castle window goes dark.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.03~vo-01",
+    "speaker": "narrator",
+    "text": "By the village carts, a girl in a maid's apron and faded castle livery watches you burn his earth. She doesn't stop you.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.04~vo-01",
+    "speaker": "marta",
+    "text": "I pour his wine. I've poured it for years. I still come home at dusk, when he lets me. Whose side does that put me on?",
+    "est_s": 14.4,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.05~vo-01",
+    "speaker": "count",
+    "text": "You think to baffle me, with your pale faces all in a row, like sheep in a butcher's.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.clue-jakob~vo-01",
+    "speaker": "narrator",
+    "text": "On the bottom of a box lid, an order slip: one extra box, sent to the lockhouse, signed J.B.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.clue-andrei~vo-01",
+    "speaker": "narrator",
+    "text": "On the bottom of a box lid, an order slip: delivered by the burgomaster's own cart. Received by the son.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.clue-marta~vo-01",
+    "speaker": "narrator",
+    "text": "On the bottom of a box lid, an order slip: delivered by the little gate. Opened by M.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-earth-boxes.06~vo-01",
+    "speaker": "narrator",
+    "text": "Wherever he lies now, he lies uneasy.",
+    "est_s": 6.8,
+    "status": "DRAFT",
+    "scene": "n4-earth-boxes"
+  },
+  {
+    "id": "n4-finding-the-tome.01~vo-01",
+    "speaker": "narrator",
+    "text": "A heavy book in faded green leather, clasped with a brass lock shaped like a closed eye.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.01~vo-02",
+    "speaker": "narrator",
+    "text": "The lock opens before anyone touches it. He wants this read.",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.02~vo-01",
+    "speaker": "narrator",
+    "text": "I, Vlad, first son of this house, set down how I lost my soul, so whoever reads may know it was not taken. I gave it.",
+    "est_s": 14.4,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.03~vo-01",
+    "speaker": "narrator",
+    "text": "I loved Ludmila of the high meadow. She loved my brother Stefan.",
+    "est_s": 8.8,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.03~vo-02",
+    "speaker": "narrator",
+    "text": "On their wedding day I made a bargain, and killed my brother with his own sword.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.04~vo-01",
+    "speaker": "ludmila",
+    "text": "I will open the window, but not for him. If I come again, I will choose again, and it will not be you.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.05~vo-01",
+    "speaker": "narrator",
+    "text": "The last page is fresh ink. She has come again, in the burgomaster's house. Ludmila's soul. Lenka's face. She says no.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.06~replace-a-hero.vo-01",
+    "speaker": "narrator",
+    "text": "And beneath it, his plan. One of them will wear my mark and sit at their table, and they will not know until it is done.",
+    "est_s": 14.4,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.06~win-lenka.vo-01",
+    "speaker": "narrator",
+    "text": "And beneath it, his plan. She will turn from them, a step at a time, until she opens the last door herself.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.06~destroy-the-blade.vo-01",
+    "speaker": "narrator",
+    "text": "And beneath it, his plan. My brother's blade will grow dull in their hands, until it cannot finish what she begins.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.06~darkness.vo-01",
+    "speaker": "narrator",
+    "text": "And beneath it, his plan. House by house, the valley will go dark, until there is no one left to say no.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.07~vo-01",
+    "speaker": "lenka",
+    "text": "My name is Lenka Morosz. I am not her. And if I were, I would still say no.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.08~vo-01",
+    "speaker": "count",
+    "text": "Your girls that you all love are mine already. Come up the hill, and see.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "n4-finding-the-tome.09~vo-01",
+    "speaker": "narrator",
+    "text": "Dawn does not come. Only a greyness, and the castle above it, every window lit.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n4-finding-the-tome"
+  },
+  {
+    "id": "nx-pressed-flower.01~vo-01",
+    "speaker": "narrator",
+    "text": "In the grey before dawn, a pressed violet on the sill where Lenka slept. The shutters were barred till dawn.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "nx-pressed-flower"
+  },
+  {
+    "id": "nx-pressed-flower.02~vo-01",
+    "speaker": "narrator",
+    "text": "A violet under Lenka's pillow, flat as paper, its stem tied with one gold thread from a wedding veil.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "nx-pressed-flower"
+  },
+  {
+    "id": "nx-pressed-flower.03~vo-01",
+    "speaker": "narrator",
+    "text": "A violet on the step where Lenka slept, wrapped in a scrap of painted canvas. Someone has been painting her.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "nx-pressed-flower"
+  },
+  {
+    "id": "nx-pressed-flower.04~vo-01",
+    "speaker": "lenka",
+    "text": "Another one. He wants me to know he can reach the window. He wants you to know it too.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "nx-pressed-flower"
+  },
+  {
+    "id": "nx-midnight-procession.01~vo-01",
+    "speaker": "narrator",
+    "text": "At the twelfth stroke the dead come walking.",
+    "est_s": 7.2,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.01~vo-02",
+    "speaker": "narrator",
+    "text": "Every hunter who ever climbed that hill is in the line. They do not stop. One of them does.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.ursula~vo-01",
+    "speaker": "ursula",
+    "text": "Sister Agnes kept my infirmary after me, and kept it badly. Tell her I am not angry. Tell her to come and ask me why.",
+    "est_s": 14.0,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.jozef~vo-01",
+    "speaker": "jozef",
+    "text": "Tell Wren Kessel it was the right stake. She did right by her father. Tell her there is more, if she will walk with me.",
+    "est_s": 14.0,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.gerhardt~vo-01",
+    "speaker": "gerhardt",
+    "text": "Tell the apothecary's boy his page one was wrong. The affliction is not sent. It is invited.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.answer~vo-01",
+    "speaker": "narrator",
+    "text": "You step into the line beside the ghost, and walk a while with the dead. You step out knowing something you did not.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.turn-away~vo-01",
+    "speaker": "narrator",
+    "text": "You turn away. The ghost bows, and leaves a vial of water on the step, cold enough to ring.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "nx-midnight-procession.02~vo-01",
+    "speaker": "narrator",
+    "text": "The line walks on toward the castle. By morning there may be one more lantern in it, unless you are careful.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "nx-midnight-procession"
+  },
+  {
+    "id": "n5-drawbridge.01~vo-01",
+    "speaker": "narrator",
+    "text": "Three objects. A brother's blade, a saint's light, and his own book. The castle road is the only road left in Vellmoor.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.02~vo-01",
+    "speaker": "narrator",
+    "text": "A chasm with no bottom, and across it the drawbridge, raised. Along the wall, a little side gate the servants used.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.03~vo-01",
+    "speaker": "count",
+    "text": "Welcome to my house! Enter freely and of your own will!",
+    "est_s": 8.4,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.04~vo-01",
+    "speaker": "marta",
+    "text": "Marta. I pour his wine up there. I'll open the little gate, if you ask. It's the slow way, but he never watches it.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.05~vo-01",
+    "speaker": "lenka",
+    "text": "And don't you dare leave me at the bottom of the hill. I'm coming up with you.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.bridge~vo-01",
+    "speaker": "narrator",
+    "text": "The drawbridge comes down, slow as a held breath. You walk in by the front door, as guests.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.bridge~vo-02",
+    "speaker": "narrator",
+    "text": "Above you, something on the battlements turns its head.",
+    "est_s": 7.6,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.bridge-quiet~vo-01",
+    "speaker": "narrator",
+    "text": "Someone inside works the chains. The drawbridge comes down without a sound. Nothing on the battlements turns its head.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.gate~vo-01",
+    "speaker": "narrator",
+    "text": "You go the long way, along the lip of the chasm, the way the servant girls once left. It costs you.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.gate~vo-02",
+    "speaker": "narrator",
+    "text": "But nothing on the battlements turns its head.",
+    "est_s": 7.2,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-drawbridge.turn-back~vo-01",
+    "speaker": "narrator",
+    "text": "Not yet. You turn back down the road. The castle will wait. It has always waited.",
+    "est_s": 10.4,
+    "status": "DRAFT",
+    "scene": "n5-drawbridge"
+  },
+  {
+    "id": "n5-portrait-gallery.01~vo-01",
+    "speaker": "narrator",
+    "text": "A long gallery of the house's portraits. The eyes follow you. That is ordinary. What is not ordinary is that some blink.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-portrait-gallery.02~vo-01",
+    "speaker": "emeric",
+    "text": "Same face. Four hundred years of fashions, and the same face. That's not a family. That's a man.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-portrait-gallery.03~vo-01",
+    "speaker": "narrator",
+    "text": "One painted lord holds your eyes and will not let go. The longer you look, the harder it is to remember why you came.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-portrait-gallery.look-away~vo-01",
+    "speaker": "narrator",
+    "text": "You tear your eyes away, and it costs you. The painted lord smiles and lets you pass.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-portrait-gallery.cover~vo-01",
+    "speaker": "narrator",
+    "text": "You throw a cloth over the frame. Under it, something knocks, once, and is still.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-portrait-gallery.04~vo-01",
+    "speaker": "narrator",
+    "text": "At the end of the gallery hangs one canvas under a cloth that has never been lifted. You leave it be.",
+    "est_s": 12.4,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-portrait-gallery.05~vo-01",
+    "speaker": "narrator",
+    "text": "The wall turns. A stair goes up into the dark.",
+    "est_s": 8.0,
+    "status": "DRAFT",
+    "scene": "n5-portrait-gallery"
+  },
+  {
+    "id": "n5-final-confrontation.01~family-crypt.vo-01",
+    "speaker": "narrator",
+    "text": "His family's crypt, under everything. Every coffin is open but one. He stands beside it, old, and very tall.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.01~ludmilas-chapel.vo-01",
+    "speaker": "narrator",
+    "text": "A small cold chapel, its window bricked shut. Fresh violets on the altar. He kneels there, old, and rises as you enter.",
+    "est_s": 12.8,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.01~the-height.vo-01",
+    "speaker": "narrator",
+    "text": "The top of the highest tower, open to the wind, where the guard once stood.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.01~the-height.vo-02",
+    "speaker": "narrator",
+    "text": "The valley lies under the mist below. He waits at the edge, old, and patient.",
+    "est_s": 10.0,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.01~his-study.vo-01",
+    "speaker": "narrator",
+    "text": "A study lined with letters, every one in the same fine old hand. The hand that wrote to you. He sets down his pen.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.02~vo-01",
+    "speaker": "count",
+    "text": "You have come a long way to be refused. I know the feeling.",
+    "est_s": 9.2,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.03~vo-01",
+    "speaker": "narrator",
+    "text": "He moves faster than an old man should, and the cold comes with him.",
+    "est_s": 9.6,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.04~vo-01",
+    "speaker": "lenka",
+    "text": "My name is Lenka Morosz. I am not her. And if I were, I would say what she said. No.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.lantern~vo-01",
+    "speaker": "narrator",
+    "text": "The Lantern's light goes into the dark where he kept her, and she walks out of it on her own.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.stroke~vo-01",
+    "speaker": "narrator",
+    "text": "Stefan's blade finds his heart, and for the first time in four hundred years he looks surprised.",
+    "est_s": 10.8,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  },
+  {
+    "id": "n5-final-confrontation.retreat~vo-01",
+    "speaker": "narrator",
+    "text": "You fall back down the stair. He does not follow. He has time, and he knows you will come back.",
+    "est_s": 12.0,
+    "status": "DRAFT",
+    "scene": "n5-final-confrontation"
+  }
+]
