@@ -99,11 +99,13 @@ Cures follow D-DRA-6: a Sanctuary cure, holy water or the host (IDEA-137, IDEA-1
 |---|---|---|---|
 | `nx-midnight-procession`, turning away (once a chapter, chapters 1 to 3) | 1 holy water | up to 3 | up to 3 |
 | `n23-catacombs-of-saint-ysolde`, the guardian's fall | The host | 1 | 1 |
-| `n2-burgomasters-funeral` | 1 holy water (IDEA-087) | — | 1 |
+| `n2-burgomasters-funeral`: the nail (D-02 G-12), once, when the lid is nailed | The nail (a Ward only) | — | 1 |
 | Jakob unmasked, when he is not the traitor's trick (DEC-854) | 1 holy water | — | 0 or 1 |
 | **About a game** | | **3 to 4** | **5 to 6** |
 
 Against about 3 to 5 strikes, there are enough Wards to turn about two thirds of them. Spending one on a cure instead is a real choice.
+
+**Check with the nail (D-02 G-12, rechecked):** the Funeral now gives the nail in place of holy water, and the nail still counts as one Ward, once a game. So the counts hold: Short 3 to 4 Wards, Standard 5 to 6. What changes is the cures. The nail can't cure, so Standard has one cure-capable item fewer: 4 to 5 holy water or host. Watching the lid gives no nail (−1 Ward). Paying the Fly-Eater with holy water or the host costs one more. So a Standard table that does both has about 3 to 4.
 
 ## 5. Dracula's own numbers (pack data, DEC-873)
 
@@ -113,15 +115,16 @@ Against about 3 to 5 strikes, there are enough Wards to turn about two thirds of
 | The Tome | +1 Wild against the Count | DEC-750 |
 | The Lantern | The goal's strike doesn't land for its group; −2 on the hit-point loss | DEC-850 |
 | Lenka | −2 on her hero's strike loss | DEC-782 |
-| Agnes, Tomas, Wren, Emeric | Heal 2 at the end of each turn / a guard / +2 Undead / 1 clue a chapter | DEC-782 |
+| Agnes, Wren, Emeric | Heal 2 at the end of each turn / +2 Undead / 1 clue a chapter (Tomas removed, D-02 G-10) | DEC-782 |
 | Devoted companion | +1 on the effect's number | DEC-774 |
 | Ward | 1 holy water or the host: he withdraws | DEC-858 |
 | The earth box | 1 skull a day on a K4 building while any box stands; none on a quest-won night | DEC-779, DEC-870 |
 | Darkness | 1 skull on the most-skulled building at the ends of chapters 2 and 3 | DEC-748, DEC-871 |
-| The Long Night (a trap, D-04) | Hold them back: wolves at level 1. Talk them down: 1 skull on K1's Village. Lift the latch: 1 bite on the hero who set off the scene (guarded), no battle | IDEA-082, DEC-875, DEC-876 |
-| The Fly-Eater's price | 1 bite (guarded) or 1 story item | IDEA-088 |
+| The Open Grave | Bar the gate: 2 hit points to the hero the group picks. Or the battle | D-02 G-11 |
+| The Long Night (a trap, D-04) | Hold them back: wolves at level 1. Talk them down: 1 skull on K1's Village. Lift the latch: 1 bite on a present hero the group picks (guarded), no battle | IDEA-082, DEC-875, DEC-876 |
+| The Fly-Eater's price | 1 bite (guarded), or 1 holy water or the host | IDEA-088, D-02 G-18 |
 | The Funeral's lid | Nail it: 1 foe fewer, and a loss costs 1 story item. Watch it: full strength, and a loss costs 1 bite (guarded) | rulings.md, DEC-781 |
-| The Drawbridge | The bridge: 1 skull on the most-skulled building, and the Banquet's foes strike first. The little gate: 2 hit points from each present hero, free with Marta unmasked | DEC-857, DEC-883 |
+| The Drawbridge | The bridge: 1 skull on the most-skulled building, and the Banquet's foes strike first; neither applies if Marta was unmasked. The little gate: 2 hit points from each present hero, with Marta an ally | DEC-857, DEC-883 |
 | The Portrait | Look away: every hero loses 2 hit points. Cover it: 1 potion | IDEA-094 |
 | The Lift | Ride it: each rider loses 3 hit points. Climb: 2 gold each. Under Darkness, ride only | IDEA-097 |
 | The Swap | The hero returns at half their hit points, rounded up. A retreat brings them back next time, with 1 bite (guarded) | DEC-751 |

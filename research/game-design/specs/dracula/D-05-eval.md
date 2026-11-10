@@ -40,7 +40,7 @@
    - Landed costs follow D-02 §3, with the guard and the Lantern and Lenka softening.
 4. **Goals:** a seeded quarter each. Darkness adds 1 skull at the ends of chapters 2 and 3 (DEC-871).
 5. **Earth boxes (Standard):** each standing box adds 1 skull a day to a K4 building, at most 1 a day and none on a quest night (DEC-870), until the boxes are burned.
-6. **Wards:** D-03 §4's sources. Holy water is spent on a Ward before a cure.
+6. **Wards:** D-03 §4's sources. The Funeral's nail is Ward-only. Ward spends the nail, then holy water, then the host. Holy water is spent on a Ward before a cure.
 7. **Lenka:**
    - She joins at the House and gives her hero −2 on strike losses.
    - Loyalty runs on the D-02 §4 steps. Hold +1, the Funeral +1, and the Lenka goal's strikes −1. At wavering, the next landed Lenka strike takes her.
@@ -73,7 +73,7 @@ These are table games from the cards, as P-002 to P-005 were (DEC-634), then liv
 | Id | Check | Pass evidence | Fails if |
 |---|---|---|---|
 | PT-C1-01 | Chapter 1 stays in K1, and its markers appear in order | The Inn, the House and the Long Night in order. The Open Grave whenever it is present. The Reading last | A marker shows early, or a non-K1 space is open |
-| PT-C1-02 | The Long Night's three options and their costs | Hold: a battle at level 1. Talk: 1 skull on K1's Village, no battle. Latch: a bite on the hero who set off the scene, no battle (DEC-875, DEC-876) | Latch adds a battle or a skull, or the group is asked who takes the bite |
+| PT-C1-02 | The Long Night's three options and their costs | Hold: a battle at level 1. Talk: 1 skull on K1's Village, no battle. Latch: a bite on the present hero the group picks, no battle, and a hero at 2 bites is greyed out (DEC-875, DEC-876) | Latch adds a battle or a skull, the engine picks the hero, or a hero at 2 bites can be picked |
 | PT-C1-03 | The Count enters only at the end of The Reading, and there are no chapter 1 strikes | The piece-setup picture after `n1-fortune-reading`, and no strike before it | A strike, or his piece, in chapter 1 before The Reading |
 | PT-C2-01 | Strike flow | The opening plays, then Fight, Ward and Endure. Ward is greyed out with "Needs holy water or the host" when nothing is held. Winning a round or Warding plays `count-withdraws` and the Tower Done | Ward is enabled with no item, or a strike happens twice in one day |
 | PT-C2-02 | The guard and the Lantern as events | A hero at 2 bites gets `count-strike.guarded` and loses hit points. The Lantern present gives `count-strike.lantern` and the loss less 2 | A third bite from a strike, or a goal variant played in their place |
@@ -123,4 +123,4 @@ The other ending checks may be forced with seeded or fixture games, as C5-09's e
 
 ## OPEN RULINGS (Bob), continued from D-04
 
-None new. Open ruling 13 (D-04: the latch bite and DEC-693) is still open.
+None. Ruling 13 is closed (Gamewright, option B, D-04).

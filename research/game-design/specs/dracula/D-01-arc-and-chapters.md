@@ -42,12 +42,12 @@ Losing Lenka is never a loss (DEC-746). A Tower retreat keeps progress (DEC-360)
 | 1 | The Mists | The Reading | `n1-fortune-reading` | Plain scene; seeds the game | K1 Bazaar | yes | yes | yes | The sites, the lair picture and his goal in hints (IDEA-084) |
 | 2 | The Hunt | Stefan's Blade | `n23-sergius-blade` | Tomb (MEC-026) | Seeded building, kingdom A | yes | yes | yes | The blade (IDEA-085, IDEA-134) |
 | 2 | The Hunt | The Catacombs of Saint Ysolde | `n23-catacombs-of-saint-ysolde` | Tomb | Seeded building, kingdom B | yes | yes | yes | The Lantern (IDEA-086, IDEA-135) |
-| 2 | The Hunt | The Funeral | `n2-burgomasters-funeral` | Plain scene, battle | Kingdom A Sanctuary | | yes | yes | Holy water; the lid choice (IDEA-087, DEC-781) |
+| 2 | The Hunt | The Funeral | `n2-burgomasters-funeral` | Plain scene, battle | Kingdom A Sanctuary | | yes | yes | The nail, a Ward item (D-02 G-12); the lid choice (IDEA-087, DEC-781) |
 | 2 | The Hunt | The Fly-Eater's Cell | `n3-fly-eaters-cell` | Plain scene | Kingdom B Citadel | | yes | yes | The clue that places the earth boxes (IDEA-088) |
-| 2 | The Hunt | The Third Bride | `n23-third-bride` *new* | Plain scene, lieutenant battle (MEC-051) | Kingdom A or B, seeded | | | yes | Wren's tie (IDEA-154). **Deferred** with Long (DEC-866) |
+| 2 | The Hunt | The Third Bride | `n23-third-bride` *new* | Board-only lieutenant foe, no quest scene, when Long returns (D-02 G-19) | Kingdom A or B, seeded | | | yes | Wren's tie (IDEA-154). **Deferred** with Long (DEC-866) |
 | 3 | The Truth | The Earth Boxes | `n4-earth-boxes` | Two plain scenes, battle | K4 Sanctuary, then K4 Village | | yes | yes | Boxes burned: the daily skull stops (IDEA-089, DEC-779, D-DRA-12) |
 | 3 | The Truth | Finding the Tome | `n4-finding-the-tome` | Plain scene | Seeded building, K4 | yes | yes | yes | The Tome; his goal named; the call to the castle (IDEA-090, IDEA-136) |
-| 3 | The Truth | The Eldest Witch | `n4-eldest-witch` *new* | Plain scene, lieutenant battle | K4, seeded | | | yes | The coven broken (IDEA-155). **Deferred** with Long (DEC-866) |
+| 3 | The Truth | The Eldest Witch | `n4-eldest-witch` *new* | Tomb (MEC-026), when Long returns (D-02 G-19) | K4, seeded | | | yes | The coven broken (IDEA-155). **Deferred** with Long (DEC-866) |
 | 4 | The Castle | The Drawbridge | `n5-drawbridge` | Plain scene | A Tower-adjacent space | yes | yes | yes | The Tower unlocks (IDEA-091, IDEA-147) |
 | | | **Quests** | | | | **8** | **12** | **14 (deferred)** | |
 
@@ -152,7 +152,7 @@ Scene ids are the existing `n<night>-…` ones. A new scene takes its night's pr
 | Buildings, Cleanse and the skull menu shrink (C3-06) | An earth box adding a daily skull (DEC-779) |
 | Corruption, with the third one losing (C3-08, MEC-013), renamed bites | All three objects needed for the gate (DEC-749), and the objects' effects (DEC-750; Q-429) |
 | Gear and potions, renamed as the hunter's kit (DEC-752, DEC-781) | Story items: holy water and the host (IDEA-137, IDEA-138) |
-| Companions (MEC-049), one per hero (DEC-072) | Five story companions met at their buildings (DEC-782; Q-431) |
+| Companions (MEC-049), one per hero (DEC-072) | Four story companions: Lenka by quest, and Agnes, Wren and Emeric at their buildings (DEC-782; Q-431; Tomas removed, D-02 G-10) |
 | Lieutenants and the traitor trick (MEC-051, MEC-052) | The Long Night's let-him-in choice; the traitor's suspects (Q-430) |
 | Foe reskins and story foes (MEC-058, DEC-326) | Werewolf and Vampire Spawn (IDEA-128) |
 | Outcome and stats screens (C3-16, C3-17); the Loremaster in Charon | No last-choice vote; the ending is set by Lenka's state |
