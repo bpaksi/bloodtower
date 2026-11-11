@@ -20,6 +20,8 @@
     "assets:pack": "pnpm --dir apps/bloodtower assets:pack",
     "assets:redo": "pnpm --dir apps/bloodtower assets:redo",
     "check:repo": "node scripts/check-pins.mjs && node scripts/check-imports.mjs && pnpm brief:lint && node --test \"scripts/*.test.mjs\" \".claude/hooks/*.test.mjs\"",
+    "check:cards": "pnpm --filter game-workbench-web --filter @dark-tower/workbench test",
+    "check:packs": "pnpm pack:lint:all && pnpm --filter bloodtower-engine --filter bloodtower-server --filter bloodtower-assets --filter bloodtower-web --workspace-concurrency=1 test",
     "brief:lint": "node scripts/check-briefs.mjs",
     "graph": "node apps/game-workbench/src/web/cli/graph.ts",
     "card-id": "node scripts/card-id.mjs",

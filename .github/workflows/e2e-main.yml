@@ -1,10 +1,19 @@
-# Full Playwright e2e suite on every push to main. Not a required check.
+# Full Playwright e2e suite on pushes to main. Not a required check: the gate is the `e2e`
+# job in check.yml, which runs the same steps on the pull request. This run is the record
+# on main. A push that only touches trees the Bloodtower build never reads is skipped (the
+# same trees as E2E_SAFE_TREES in scripts/ci-scope.mjs).
 # Setup mirrors check.yml (pnpm, .nvmrc node, bluetooth headers, frozen install).
 name: e2e-main
 
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "research/**"
+      - "docs/**"
+      - "assets/stories/**"
+      - "assets/app-icon/**"
+      - ".claude/**"
   workflow_dispatch:
 
 concurrency:

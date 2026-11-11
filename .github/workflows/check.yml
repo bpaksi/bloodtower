@@ -1,22 +1,31 @@
-# Branch protection on main requires the job named `check`. The job always runs and
-# reports, including when the app suite is skipped. A path filter on `on:` would skip
-# the workflow entirely, and the required check would never report.
+# Branch protection on main requires the job named `check`. It is the last job here and
+# always runs and reports: it passes only when `scope` passed and `suite` and `e2e` each
+# passed or were not needed. A path filter on `on:` would skip the workflow entirely, and
+# the required check would never report.
 #
-# Gitleaks always runs. It fails this job when the pull request's commits, or the
-# commits in a push to main, contain a secret. It does not audit the repository's
+# Gitleaks always runs (job `scope`). It fails the workflow when the pull request's commits,
+# or the commits in a push to main, contain a secret. It does not audit the repository's
 # full history (no schedule and no workflow_dispatch). fetch-depth 0 only makes that
 # commit range available locally.
 #
-# Lite CI (Bob / Warden, 2026-10-25/26): when every changed path is docs, game design,
-# packs, or a root asset-only tree, skip apt, pnpm install, and `pnpm check`. The job
-# still exits green. Any other path, including a mix on a push to main, runs the full
-# suite. Allowlist:
-#   research/game-design/**
-#   docs/**                  (ui-mocks, art-direction, deliveries, this tree)
-#   packs/**                 (repo-root packs; there is no apps/bloodtower/packs)
-#   assets/stories/**        (story scripts)
-#   assets/app-icon/**       (icon images)
-# Anything under apps/, including app docs and app asset folders, is full CI.
+# What runs is decided by scripts/ci-scope.mjs from the changed paths:
+#
+#   Full CI     any path outside the lite allowlist: `pnpm check`.
+#   Lite CI     (Bob / Warden, 2026-10-25/26) every changed path is on the allowlist:
+#                 research/game-design/**   runs `pnpm check:cards` (the card lint)
+#                 packs/**                  runs `pnpm check:packs` (pack lint, pack-reading tests)
+#                 docs/**                   (ui-mocks, art-direction, deliveries, this tree)
+#                 assets/stories/**         (story scripts)
+#                 assets/app-icon/**        (icon images)
+#               A lite change skips Biome, typecheck and the rest of `pnpm check`. The card
+#               and pack checks were added on 2026-11-11 after PR #420, a lite change, merged
+#               with a broken card link and a stale pack count and turned main red.
+#   e2e         pull requests only: the Playwright suite, when a changed path can reach the
+#               Bloodtower build (apps/bloodtower, packages, packs, root config, workflows).
+#               Pushes to main run it from e2e-main.yml.
+#
+# Anything under apps/, including app docs and app asset folders, is full CI. A range that
+# cannot be diffed runs everything.
 name: check
 
 on:
@@ -35,9 +44,14 @@ permissions:
   pull-requests: read
 
 jobs:
-  check:
+  scope:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
+    outputs:
+      needs_full_ci: ${{ steps.scope.outputs.needs_full_ci }}
+      needs_cards: ${{ steps.scope.outputs.needs_cards }}
+      needs_packs: ${{ steps.scope.outputs.needs_packs }}
+      needs_e2e: ${{ steps.scope.outputs.needs_e2e }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,32 +71,39 @@ jobs:
           zero="0000000000000000000000000000000000000000"
           summary="${GITHUB_STEP_SUMMARY:-/dev/null}"
 
-          finish() {
-            local mode="$1"
-            local detail="$2"
-            echo "needs_full_ci=${mode}" >> "$GITHUB_OUTPUT"
-            echo "CI scope: needs_full_ci=${mode} — ${detail}"
+          report() {
+            echo "CI scope: $1"
             {
               echo "## CI scope"
               echo
-              echo "\`needs_full_ci=${mode}\`. ${detail}"
+              echo "$1"
             } >> "$summary"
+          }
+
+          # Unknown range: run everything. A missing base (first push, force-push whose
+          # previous tip was not fetched) must not look like a docs-only change.
+          run_everything() {
+            {
+              echo "needs_full_ci=true"
+              echo "needs_cards=false"
+              echo "needs_packs=false"
+              echo "needs_e2e=true"
+            } >> "$GITHUB_OUTPUT"
+            report "$1 Runs: pnpm check, the e2e suite."
             exit 0
           }
 
-          # Unknown range: run the suite. A missing base (first push, force-push
-          # whose previous tip was not fetched) must not look like a docs-only change.
           if [ -z "$base" ] || [ "$base" = "$zero" ]; then
             echo "::warning::No base commit to diff (base=${base:-empty})."
-            finish true "No base commit to diff against, so the app suite runs."
+            run_everything "No base commit to diff against."
           fi
           if ! git cat-file -e "${base}^{commit}" >/dev/null 2>&1; then
             echo "::warning::Base commit ${base} is not in this checkout."
-            finish true "The base commit is not in this checkout, so the app suite runs."
+            run_everything "The base commit is not in this checkout."
           fi
           if ! git cat-file -e "${head}^{commit}" >/dev/null 2>&1; then
             echo "::warning::Head commit ${head} is not in this checkout."
-            finish true "The head commit is not in this checkout, so the app suite runs."
+            run_everything "The head commit is not in this checkout."
           fi
 
           if [ "$CI_SCOPE_EVENT" = "pull_request" ]; then
@@ -90,7 +111,7 @@ jobs:
             # that landed on main after the branch point.
             if ! files="$(git diff --name-only --no-renames "${base}...${head}")"; then
               echo "::warning::git diff failed for ${base}...${head}."
-              finish true "The pull request diff could not be listed, so the app suite runs."
+              run_everything "The pull request diff could not be listed."
             fi
           else
             # Push to main. Net tree diff plus every commit in the range, so a
@@ -109,32 +130,18 @@ jobs:
               done <<< "$commits"
             )"; then
               echo "::warning::git diff failed for push ${base}..${head}."
-              finish true "The push diff could not be listed, so the app suite runs."
+              run_everything "The push diff could not be listed."
             fi
           fi
 
-          outside=""
-          lite_count=0
-          sorted="$(printf '%s\n' "$files" | sort -u)"
-          while IFS= read -r path; do
-            [ -z "$path" ] && continue
-            case "$path" in
-              research/game-design | research/game-design/*) lite_count=$((lite_count + 1)) ;;
-              docs | docs/*) lite_count=$((lite_count + 1)) ;;
-              packs | packs/*) lite_count=$((lite_count + 1)) ;;
-              assets/stories | assets/stories/*) lite_count=$((lite_count + 1)) ;;
-              assets/app-icon | assets/app-icon/*) lite_count=$((lite_count + 1)) ;;
-              *) outside+="${path}"$'\n' ;;
-            esac
-          done <<< "$sorted"
-
-          if [ -n "$outside" ]; then
-            echo "Paths outside the lite allowlist:"
-            printf '%s' "$outside" | sed '/^$/d' | head -n 40 || true
-            finish true "A changed path is outside the docs/design/packs allowlist, so the app suite runs."
+          # The runner image ships Node; the classifier has no dependencies.
+          if ! scope="$(printf '%s\n' "$files" | node scripts/ci-scope.mjs)"; then
+            echo "::warning::scripts/ci-scope.mjs failed."
+            run_everything "The changed paths could not be classified."
           fi
 
-          finish false "Every changed path is docs, game-design, packs, story scripts, or app icons (${lite_count} paths). Apt, pnpm install, and pnpm check are skipped."
+          printf '%s\n' "$scope" | grep -E '^needs_[a-z0-9_]+=(true|false)$' >> "$GITHUB_OUTPUT"
+          report "$(printf '%s\n' "$scope" | sed -n 's/^detail=//p')"
       - name: gitleaks
         # v3.0.0. GITLEAKS_VERSION matches scripts/gitleaks-protect.mjs (default rules).
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
@@ -143,22 +150,101 @@ jobs:
           GITLEAKS_VERSION: "8.30.1"
           GITLEAKS_ENABLE_COMMENTS: "false"
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  suite:
+    needs: scope
+    if: >-
+      needs.scope.outputs.needs_full_ci == 'true' ||
+      needs.scope.outputs.needs_cards == 'true' ||
+      needs.scope.outputs.needs_packs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: pnpm setup
-        if: steps.scope.outputs.needs_full_ci == 'true'
         uses: pnpm/action-setup@v4
       - name: node setup
-        if: steps.scope.outputs.needs_full_ci == 'true'
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
       # Bluetooth headers for the native tower library; nothing in CI connects to a tower.
       - name: bluetooth and udev headers
-        if: steps.scope.outputs.needs_full_ci == 'true'
         run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
       - name: pnpm install
-        if: steps.scope.outputs.needs_full_ci == 'true'
         run: pnpm install --frozen-lockfile
       - name: pnpm check
-        if: steps.scope.outputs.needs_full_ci == 'true'
+        if: needs.scope.outputs.needs_full_ci == 'true'
         run: pnpm check
+      - name: card lint
+        if: needs.scope.outputs.needs_cards == 'true'
+        run: pnpm check:cards
+      - name: pack checks
+        if: needs.scope.outputs.needs_packs == 'true'
+        run: pnpm check:packs
+
+  # Same steps as e2e-main.yml, which runs the suite on pushes to main.
+  e2e:
+    needs: scope
+    if: github.event_name == 'pull_request' && needs.scope.outputs.needs_e2e == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: pnpm setup
+        uses: pnpm/action-setup@v4
+      - name: node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Bluetooth headers for the native tower library; nothing in CI connects to a tower.
+      - name: bluetooth and udev headers
+        run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
+      - name: playwright browsers
+        run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium
+      - name: build web export
+        run: pnpm --dir apps/bloodtower/src/web build
+      - name: playwright e2e
+        run: pnpm --dir apps/bloodtower e2e
+      - name: upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/bloodtower/src/e2e/playwright-report
+            apps/bloodtower/src/e2e/test-results
+          retention-days: 7
+
+  # The required status. `always()` matters: a skipped job counts as a pass for branch
+  # protection, so this job must run and fail when an earlier job failed or was cancelled.
+  check:
+    needs: [scope, suite, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: gate
+        env:
+          SCOPE_RESULT: ${{ needs.scope.result }}
+          SUITE_RESULT: ${{ needs.suite.result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "scope=${SCOPE_RESULT} suite=${SUITE_RESULT} e2e=${E2E_RESULT}"
+          ok=true
+          # `suite` and `e2e` are skipped when scope says they are not needed. They are
+          # also skipped when scope failed, which the first test catches.
+          [ "$SCOPE_RESULT" = "success" ] || ok=false
+          case "$SUITE_RESULT" in success | skipped) ;; *) ok=false ;; esac
+          case "$E2E_RESULT" in success | skipped) ;; *) ok=false ;; esac
+          if [ "$ok" != true ]; then
+            echo "::error::check failed: scope=${SCOPE_RESULT} suite=${SUITE_RESULT} e2e=${E2E_RESULT}"
+            exit 1
+          fi

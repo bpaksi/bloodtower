@@ -9,3 +9,11 @@ pre-commit:
       # Runs the full check when code or config is staged. Docs-only commits skip it.
       glob: "*.{ts,tsx,js,mjs,cjs,json,css,yaml,yml}"
       run: pnpm check
+    cards:
+      # A card-only commit stages no code, so `check` above skips it. The card lint
+      # (apps/game-workbench/src/web/lib/cards.test.ts) runs here instead.
+      # Two patterns: `**/` needs a folder, so the first covers the documents at the top.
+      glob:
+        - "research/game-design/*.md"
+        - "research/game-design/**/*.md"
+      run: pnpm check:cards
