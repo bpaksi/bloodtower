@@ -18,8 +18,8 @@ See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all chan
 
 | From | Command | Does |
 |---|---|---|
-| root | `pnpm install` | Dependencies and git hooks. Commits then run Gitleaks 8.30.1 on staged changes (`scripts/gitleaks-protect.mjs`; default rules, one RFC 6455 nonce allow) |
-| root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package |
+| root | `pnpm install` | Dependencies and git hooks. Commits then run Gitleaks 8.30.1 on staged changes (`scripts/gitleaks-protect.mjs`; default rules, one RFC 6455 nonce allow). A code commit also runs `scripts/pre-commit-check.mjs`: Biome, the static repo checks, then typecheck and tests for the app or package the staged files are in. It is not the full check |
+| root | `pnpm check` | Biome, repo checks (pins, cross-app imports, hook tests), then typecheck and unit tests in every package. Run it before opening a PR; the commit hook no longer does |
 | root | `pnpm check:cards` / `pnpm check:packs` | The card lint, and the pack lint plus the tests that read packs. Lite CI runs them; a commit that stages a `research/game-design/` file runs the first |
 | root | `pnpm build` | Builds every app |
 | root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | Make / remove a step worktree at `../BloodTower-work/<branch>` with its own ports and SQLite folder in `.wt.json` |

@@ -72,7 +72,7 @@ Use the `new-app` skill, or by hand:
 
 | From | Command | Does |
 |---|---|---|
-| root | `pnpm install` | installs dependencies and git hooks (`lefthook install`). Every commit then runs Gitleaks on the staged changes |
+| root | `pnpm install` | installs dependencies and git hooks (`lefthook install`). Every commit then runs Gitleaks on the staged changes, and a code commit runs the checks its staged files can break (`scripts/pre-commit-check.mjs`) |
 | root | `pnpm check` | lint, repo checks, typecheck and unit tests for every app and package |
 | root | `pnpm build` | builds every app |
 | root | `pnpm -F <app> dev` | runs one app in dev (same as `pnpm dev` inside its folder) |
