@@ -21,7 +21,7 @@ const NEW_BRANCH_FLAGS = new Set(["-b", "-B", "-c", "-C", "--orphan"]);
 const RESET_MODES = new Set(["--hard", "--soft", "--mixed", "--keep", "--merge"]);
 
 const SKIP_WHY =
-  "The pre-commit hook runs pnpm check, which gates every code commit (docs/sdlc.md). Fix what it reports, or ask Bob.";
+  "The pre-commit hook runs the checks the staged files can break, on every code commit (docs/sdlc.md). Fix what it reports, or ask Bob.";
 // `git commit` options that take the next word as their value, so a message is not read as a flag.
 const COMMIT_OPTIONS_WITH_VALUE = new Set([
   "-m",
