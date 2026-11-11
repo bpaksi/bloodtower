@@ -1,6 +1,6 @@
 # Bloodtower
 
-Many small apps around the *Return to Dark Tower* tower. Bob owns intent, approvals and merges; Claude plans, builds and self-verifies. The full process is in [docs/sdlc.md](docs/sdlc.md).
+Many small apps around the *Return to Dark Tower* tower. Bob owns intent and approvals; Claude plans, builds and self-verifies. The coordinator merges a PR once CI and review pass; Claude Code opens PRs and never merges them. The full process is in [docs/sdlc.md](docs/sdlc.md).
 
 See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all changes.
 
@@ -41,7 +41,7 @@ See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all chan
 2. One branch per plan step: `<type>/<app>-<slug>` (repo-wide work: `chore/<slug>`). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
 4. Before handing over, run `pnpm check`, push the branch and open a PR with the evidence and the plan step id in the body.
-5. CI runs Gitleaks on the PR, and `pnpm check` unless the diff stays on the lite allowlist (game-design, docs, packs, story scripts, app icons). A lite diff runs the card lint when it touches cards and the pack checks when it touches packs. A PR that can reach the Bloodtower build also runs the e2e suite, and a red e2e fails `check`. The `verifier` posts one run. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
+5. CI runs Gitleaks on the PR, and `pnpm check` unless the diff stays on the lite allowlist (game-design, docs, packs, story scripts, app icons). A lite diff runs the card lint when it touches cards and the pack checks when it touches packs. A PR that can reach the Bloodtower build also runs the e2e suite, and a red e2e fails `check`. The `verifier` posts the eval table on the PR head and again after each fix round that changes code. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
 
 ## Conventions
 
@@ -75,6 +75,7 @@ Never eat, hide or ignore an error, however small ([decision 0003](research/deci
 | `no-main-commit` | Committing on `main` (`commit`, `merge`, `cherry-pick`, `revert`, `am`, `rebase`, `pull`) or moving it (`reset`, `branch -f`, `update-ref`, a `:main` refspec). On every branch: a commit that skips the pre-commit check (`--no-verify`, `-n`, `LEFTHOOK=0`, `core.hooksPath`) |
 | `pin-guard` | Changing or removing a pinned version, installing another one, `up --latest` with no package names, or editing `scripts/pinned-versions.json` |
 | `test-lock` | Changing test files on a `fix/*` branch after its first commit, except removing a `.fails` marker |
+| `worktree-guard` | In a `pnpm wt` worktree (one with a `.wt.json`): any edit or shell write outside that worktree. Temp folders stay writable |
 
 The hooks also read shell commands, so `sed -i`, `rm`, `mv`, a redirect or a script aimed at a protected file is blocked too. So is a git command that would throw away uncommitted work in an intent file or the pin list, such as `git clean`, `git stash`, `git checkout -- .`, `git restore <folder>` or `git reset --hard`. A hook that crashes blocks the call, and a commit or a discarding command is blocked when git cannot say which branch or folder it applies to; run it from the repo folder or with `git -C <path>`. That reading is best effort: a command the hook does not understand is not permission. The rules above hold either way.
 
