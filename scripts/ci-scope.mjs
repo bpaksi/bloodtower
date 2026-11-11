@@ -31,8 +31,22 @@ const otherApp = (path) => under(path, "apps") && !under(path, "apps/bloodtower"
 
 const rootMarkdown = (path) => !path.includes("/") && path.endsWith(".md");
 
+/**
+ * Bloodtower's own plans, notes and markdown. The web build, the host and the e2e tests read
+ * none of them (checked 2026-11-11). Of the 61 changes to the app merged since 2026-10-28, 23
+ * touched nothing else.
+ * They still run `pnpm check`, which holds the brief lint.
+ */
+const bloodtowerDocs = (path) =>
+  under(path, "apps/bloodtower/plans") ||
+  under(path, "apps/bloodtower/docs") ||
+  (under(path, "apps/bloodtower") && path.endsWith(".md"));
+
 const e2eSafe = (path) =>
-  E2E_SAFE_TREES.some((tree) => under(path, tree)) || otherApp(path) || rootMarkdown(path);
+  E2E_SAFE_TREES.some((tree) => under(path, tree)) ||
+  otherApp(path) ||
+  rootMarkdown(path) ||
+  bloodtowerDocs(path);
 
 /** `paths` is every path the change touches. Blank entries are ignored. */
 export const classify = (paths) => {
