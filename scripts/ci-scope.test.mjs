@@ -77,11 +77,42 @@ describe("ci-scope", () => {
     }
   });
 
+  it("skips the e2e suite for Bloodtower's plans, notes and markdown, which still run pnpm check", () => {
+    for (const path of [
+      "apps/bloodtower/README.md",
+      "apps/bloodtower/spec.md",
+      "apps/bloodtower/plans/C3-ruined-keep.md",
+      "apps/bloodtower/plans/briefs/C3/04-day-clock/eval.md",
+      "apps/bloodtower/plans/briefs/C3/11-day-on-the-board/mockup.html",
+      "apps/bloodtower/plans/briefs/C3/11-day-on-the-board/mockup.png",
+      "apps/bloodtower/docs/playtests/2026-10-31-G-C1.md",
+      "apps/bloodtower/docs/playtests/2026-10-20-1120.json",
+      "apps/bloodtower/public/ipad/README.md",
+    ]) {
+      assert.deepEqual(flags([path]), { ...NONE, needs_full_ci: true }, path);
+    }
+  });
+
+  it("still runs the e2e suite when a Bloodtower docs change comes with code or assets", () => {
+    for (const path of [
+      "apps/bloodtower/package.json",
+      "apps/bloodtower/src/server/index.ts",
+      "apps/bloodtower/src/e2e/tests/smoke.spec.ts",
+      "apps/bloodtower/public/ipad/corner.png",
+      "apps/bloodtower/plans.ts",
+      "apps/bloodtower/docs.json",
+    ]) {
+      assert.equal(classify([path]).needs_e2e, true, path);
+      assert.equal(classify(["apps/bloodtower/README.md", path]).needs_e2e, true, path);
+    }
+  });
+
   it("does not take a look-alike folder for an allowlisted tree", () => {
     assert.equal(classify(["docs-old/notes.md"]).needs_full_ci, true);
     assert.equal(classify(["packs2/x.yaml"]).needs_full_ci, true);
     assert.equal(classify(["apps/bloodtower-tools/x.ts"]).needs_e2e, false);
-    assert.equal(classify(["apps/bloodtower/README.md"]).needs_e2e, true);
+    assert.equal(classify(["apps/bloodtower/plans-old/x.ts"]).needs_e2e, true);
+    assert.equal(classify(["packs/dracula/CONVERSION-NOTES.md"]).needs_e2e, true);
   });
 
   it("ignores blank lines and repeated paths, and an empty change runs nothing", () => {

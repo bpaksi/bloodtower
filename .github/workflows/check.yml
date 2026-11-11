@@ -22,6 +22,7 @@
 #               with a broken card link and a stale pack count and turned main red.
 #   e2e         pull requests only: the Playwright suite, when a changed path can reach the
 #               Bloodtower build (apps/bloodtower, packages, packs, root config, workflows).
+#               The app's own plans/, docs/ and markdown cannot, so they skip it.
 #               Pushes to main run it from e2e-main.yml.
 #
 # Anything under apps/, including app docs and app asset folders, is full CI. A range that
