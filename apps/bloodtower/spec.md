@@ -5,6 +5,7 @@
 | Status | Written in R1 steps 1 and 2 from the approved plan (G0, 2026-10-15). |
 | Source | [plans/archive/R1-step1-foundation.md](plans/archive/R1-step1-foundation.md). This spec follows that plan. A choice the plan left open is a decision in §1. |
 | Spec version | 1 (2026-10-15). §1a, the engine core decisions, added 2026-10-23 |
+| Reading it today | Note added 2026-11-11; it changes no decision. This file began as the R1 spec and is now the app's architecture decision log. §1 and §1a (D1 to D48) are still added to and still hold unless a later row says otherwise. §3.1 (protocol v2) and §4.1 (pack format v2) describe the code. The R1 summary below, §3.0 (the retired wire), §4 before §4.1 (the v1 pack, whose loader C3 feature 01 removed), §7 and §8 are the R1 record. The other sections were not rechecked for this note, so check one against the code before relying on it. The game's rules are not here: they are the design cards in `research/game-design/cards/`, and what each milestone builds is in `plans/` ([README](README.md#how-work-reaches-the-code)). |
 
 R1 is the thin foundation. It loads a story pack, shows a display-only Story board, lets devices join and press, and writes timing marks. It plays no story beyond the loaded pack's moment list. The tower is connection only: no cue is sent. The socket hub publishes one session to the board and the devices.
 

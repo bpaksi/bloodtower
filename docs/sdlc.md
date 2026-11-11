@@ -1,6 +1,6 @@
 # How Bloodtower applies the AI-Native SDLC Playbook
 
-Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead, and Claude Code (running locally on the Mac) plans, builds, self-verifies and merges through pull requests on `bpaksi/bloodtower`. Bob's sign-off is required only at the named gates (below); merging is not one of them.
+Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead. Agents plan, build and self-verify, and every change reaches `main` through a pull request on `bpaksi/bloodtower` that the coordinator merges ("Who runs the agents" and "Named roles" say which agent does what; Claude Code opens PRs and never merges them). Bob's sign-off is required only at the named gates (below); merging is not one of them.
 
 The repo holds many apps. **Process, guardrails and Claude config are shared at the root; intent, spec and plans belong to each app.**
 
@@ -50,6 +50,24 @@ Promoting an Experiment to Full: write a spec from what was learned, then contin
 | Branches | `<type>/<app>-<slug>` (e.g. `feat/tower-poc-lights`); repo-wide work uses `chore/<slug>` |
 | Commits | Conventional commits with the app as scope: `feat(tower-poc): …` |
 
+## Where IDs live
+
+Documents, commits and code comments cite IDs. Each kind has one home.
+
+| ID looks like | What it is | Where to find it |
+|---|---|---|
+| `DEC-143`, `MEC-038`, `Q-401`, `SCR-007`, `UI-026`, `CUE-010`, `AREA-097`, `IDEA-`, `OPT-`, `ART-`, `SND-`, `AST-B08` and the other card prefixes | A game-design card | `research/game-design/cards/<ID>.md`, or `pnpm graph show <ID>`. The prefixes are listed in [cards/README.md](../research/game-design/cards/README.md) |
+| `D36` | A row in an app's architecture decision log | That app's `spec.md`, §1. Bloodtower's run D1 to D48 |
+| `0003` | A cross-app decision record | `research/decisions/NNNN-*.md` |
+| `EV-19` | One check in a feature's evals. Numbers restart in each feature | `apps/bloodtower/plans/briefs/<plan>/<##-feature>/eval.md` |
+| `C3-06`, `C2/05`, `A1-7` | A feature or step of a milestone plan | `apps/bloodtower/plans/<plan>-*.md` and its folder under `plans/briefs/` |
+| `G-plan`, `G-C2`, `G-1.0`, `G0`, `G-A` | A gate Bob signs | "Human gates" below, and the plan that names the gate |
+| `GC1-04` | A follow-up from the G-C1 playtest | `apps/bloodtower/docs/playtests/2026-10-31-G-C1.md` |
+| `P-006` | A probe: a scripted game played from the cards | `research/game-design/probes/` |
+| `RV-C1`, `RV-P3` | A row of the RtDT review check | `research/game-design/design-check-rtdt-review.md` |
+| `R-ENG-7`, `R-SES-17`, `R3-UI-22` | An early requirement. History: a card wins where they differ (DEC-610) | `research/game-design/requirements.md` and the other pre-card documents |
+| `PRD-12`, `AT-12b`, `SC-2` | The funeral POC's requirements, acceptance tests and success criteria | `apps/burgomaster-funeral-poc/docs/PRD.md` |
+
 ## Guardrails (skills are advisory, hooks and checks enforce)
 
 Hooks see Claude's edit tools exactly and read shell commands on a best-effort basis: they catch the ordinary ways to change a file (`sed -i`, `rm`, `mv`, redirects, scripts) but cannot follow everything a shell can do. Where a rule can be checked on the result, `pnpm check` does that too, and it gates every commit.
@@ -75,7 +93,7 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 ```text
 CLAUDE.md                       # < 1 page: repo map, commands, conventions, known mistakes
 apps/<app>/CLAUDE.md            # optional, app-specific notes only (Claude loads it when working in that folder)
-REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; Important vs Nit; nit cap 5
+REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; what blocks (as §4); nit cap 5
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # fresh context: runs the feature's eval.md and posts the eval table (screenshot EVs side by side, no pixel threshold); no eval.md: checks + Playwright + screenshots; reports, never fixes code or evals (model: haiku)
@@ -91,6 +109,9 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/skills/stitch/SKILL.md             # third-party: drives the `stitch` CLI (Stitch designs, DESIGN.md); project bound in .stitch.json
 .claude/skills/scrollytelling/SKILL.md     # third-party: guidance for scroll-driven pages (layout patterns, accessibility, performance)
 .claude/skills/bt-assets/SKILL.md             # Bloodtower: needs, render, pack, import and redo for a story's assets
+.claude/skills/bt-design-session/SKILL.md     # Bloodtower: a game-design session in its own worktree, one question at a time, one card commit per ruling
+.claude/skills/cleanup-worktrees/SKILL.md     # report merged step worktrees and branches, delete after Bob's OK
+.claude/skills/google-tts/SKILL.md            # text to speech with the Gemini API, for voice lines
 ```
 
 ## Commands
@@ -136,6 +157,21 @@ An app plan names which of these it uses. Batch evidence (below) is posted for B
 - **Coding agents are Cursor cloud agents.** Wright (Bob's Grok Bot build partner) launches one per plan step, each on its own branch. Each cloud agent follows `.claude/agents/developer.md`, runs `pnpm check`, and opens a PR on `bpaksi/bloodtower` with the plan step id and evidence.
 - **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and he merges when CI is green and nothing is blocking.
 - **Claude Code on the Mac** stays valid for tower and hardware work, which needs the Bluetooth link. Local agents use the `pnpm wt` worktree flow below; cloud agents already run in their own clones, so they skip it.
+
+## Named roles
+
+The plans, briefs and cards name these roles. This table records how the documents use each name (collected 2026-11-11); it sets no new rule.
+
+| Name | What the documents have it do | Where that is said |
+|---|---|---|
+| Bob | Owns intent and the design rulings, approves plans, evals and mockups, signs the gates, and runs anything on the real tower | "Human gates" above; `CLAUDE.md` |
+| Wright | Bob's Grok Bot build partner. The coordinator: launches the developers, runs the review loop, squash-merges code PRs | "Who runs the agents" above; `AGENTS.md`; `.claude/agents/coordinator.md` |
+| Gamewright | Game design and planning. Writes each feature's `plan.md` and `eval.md`, makes design proposals for Bob to accept, reviews requirements with Wright, and reviews and squash-merges design-session PRs | `apps/bloodtower/plans/briefs/README.md`; "Requirement review before build" below; the `bt-design-session` skill |
+| Warden | Review and the rules of the process. Reviews briefs for completeness, may record Bob's approval in `approval.md`, and set the lite CI rule with Bob | `apps/bloodtower/plans/briefs/README.md`; the lite CI rows in this file |
+| Illusionist | The look, art, voices and sound. Draws each screen feature's `mockup.html` and owns the render pipeline | `apps/bloodtower/plans/briefs/README.md`; `research/game-design/asset-organization.md` |
+| Loremaster | Story scripts and lines. Also the name of the in-game narrator in the packs, so read it in context | `research/stories/dracula/dracula-asset-map.md`; `apps/bloodtower/plans/A1-asset-adapter.md` |
+| Claude Code | Runs on Bob's Mac. Writes plans and feature folders, runs design sessions, and does tower and hardware work with Bob. Opens PRs and never merges them | "Who runs the agents" and "Local mode" in this file |
+| Cursor cloud agents | The developers: one per plan step, each on its own branch, following `.claude/agents/developer.md` | "Who runs the agents" above |
 
 ## Local mode (cloud agents unavailable)
 
