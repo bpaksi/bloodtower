@@ -2,6 +2,8 @@
 
 > **1.0 cut (2026-10-28):** this describes the full Dracula. For 1.0, [DEC-508](../../game-design/cards/DEC-508.md) overrides it where they differ. The full version is kept in [dracula-v2](../dracula-v2/continuity-guide.md).
 
+> **Superseded, 2026-11-10 (Gamewright):** Lenka's face is shown from chapter 1. Her everyday look is a travelling hood with her face clear. At the Tome reveal her face changes; it is not unveiled. This replaces the Oct 16 lock that hid her face until the reveal, and the notes below that say to show her only from behind, in shadow, or through a doorway. Ludmila's gallery portrait stays covered. The Count's look is unchanged. The living brief is [lenka-look.md](../../game-design/specs/dracula/script/lenka-look.md). This guide still describes the older five-night script in places; use the D-01 to D-06 specs and the script folder for current plot.
+
 Owner: **Loremaster** · Created 2026-10-16 · Status: draft. Settled calls are Loremaster's; Bob's rulings in §4.2.
 Built from Gamewright's draft art bible (`dracula-art-continuity.md`, "bible") and art audit (`dracula-art-audit.md`, "audit"), both 2026-10-16. Their `file:line` citations are kept.
 Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets/stories/dracula/scripts/cast.md · `props` = assets/stories/dracula/scripts/props.md · `tok` = assets/stories/dracula/scripts/tokens-and-encounters.md · `open` = research/stories/dracula/opening-scene.md · `mech` = research/stories/dracula/mechanics-map.md · scene scripts by file name (all in assets/stories/dracula/scripts/).
@@ -60,7 +62,7 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 - **Fixed:** 19, foundling, presses mountain violets (cast:37). **Ludmila's face** (n5-portrait-gallery.md:26–27). Hair/eyes/build: **Illusionist decides alone** (Bob), one shared Lenka/Ludmila face sheet.
 - **Before taken:** never on screen. **Captive:** white dress, high room; never bitten, no marks (rulings.md:33). Final: holds the last violets, opens the window.
 - **Where held (C-8, settled):** "the lady's rooms" = the high room at the top of the stair behind the gallery, in the east wing.
-- **Spoilers (Bob):** Lenka's face is **never shown until the reveal**: only from behind, at a window, in shadow, through a doorway. Her voice carries warmth. Ludmila's portrait stays covered until the reveal. No open window with Lenka in pre-ending art.
+- **Spoilers (Bob):** Lenka's face is **shown from chapter 1** (travelling hood, face clear). At the Tome it changes (violet mark); it is not unveiled. See lenka-look.md. (Supersedes the Oct 16 hide-the-face lock.) Her voice carries warmth. Ludmila's portrait stays covered until the reveal. No open window with Lenka in pre-ending art.
 
 ### 1.8 The Count (Vlad)
 - **Fixed:** tall, all in black, pale long fingers (tok:138); one ageless face across 400 years of portraits (n5-portrait-gallery.md:6); the dark-haired brother (tok:109,116). Beautiful very old handwriting (cream letter, Tome).
@@ -430,7 +432,7 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 
 ### 4.2 Bob's rulings (2026-10-16)
 - **C-6 Count's look (Q1): old throughout.** Aged, white moustache, all in black, tall, pale long fingers, every night. He is shown **young only in memories** (e.g. the Sergiu duel memory, tok:109,116) **and in the gallery portraits** (n5-portrait-gallery.md:6). No feeding/hunger change. n23-sergius-blade.md:44 stands as written.
-- **Lenka / Ludmila (Q2): Lenka's face is never shown until the reveal.** Show her only from behind, at a window, in shadow, or through a doorway. Her voice carries warmth (direct `lenka` reads warm; add "warm" to the style). **Ludmila's portrait stays covered** until the gallery reveal.
+- **Lenka / Ludmila (Q2, superseded 2026-11-10):** Lenka's face is shown from chapter 1 (travelling hood, face clear). At the Tome her face changes (violet mark); it is not unveiled. See lenka-look.md. Her voice carries warmth (direct `lenka` reads warm; add "warm" to the style). **Ludmila's portrait stays covered** until the gallery reveal.
 - **Lenka / Ludmila look (Q5): Illusionist decides alone.** One shared face sheet, locked once made; no Bob sign-off needed.
 - **C-4 Marta (Q3): at home on night 1** (n1-lantern-and-bell.md:60 stands; do **not** apply the earlier 3a edit). **The Count summons her at night-2 dusk:** `nx-pressed-flower.00~night2` (+ `~no-tomas`, `.00.private.tomas~night2`; nx-pressed-flower.md:31–40): shutters pried, nails in a row on the sill, cream `come-home-letter` on her pillow, Marta gone. Funeral `.end.private.tomas` already revised (n2-burgomasters-funeral.md:178). **Art (one answer):** night 1 at home, shutters nailed, asleep by day; night-2 dusk on, her room empty; at the castle from then on (pours his wine, keeps the little gate); first seen in person at n5-drawbridge. See N-2.
 - **Narrator (Q6): voice only, no face.** `por.narrator` = a neutral **lantern emblem**.

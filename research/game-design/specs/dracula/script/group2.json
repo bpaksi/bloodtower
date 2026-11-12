@@ -1,0 +1,177 @@
+[
+  {
+    "id": "finale-win.rescued.01~vo-01",
+    "speaker": "narrator",
+    "text": "He falls in his own house. What is left of him is dust, and for a moment the dust keeps a shape, kneeling.",
+    "est_s": 13.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.02~vo-01",
+    "speaker": "narrator",
+    "text": "Lenka stands with you, Anton's ring on its cord at her throat.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.02~vo-02",
+    "speaker": "narrator",
+    "text": "She does not look at the dust. She looks at the window, and the morning.",
+    "est_s": 10.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.02~freed.vo-01",
+    "speaker": "narrator",
+    "text": "The Lantern's light finds Lenka where he kept her. The cold leaves her hands. She crosses the room to you on her own.",
+    "est_s": 13.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.03~vo-01",
+    "speaker": "narrator",
+    "text": "In the light stand two shapes, not quite there.",
+    "est_s": 7.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.03~vo-02",
+    "speaker": "narrator",
+    "text": "A young man with a sword like the one you carry. A woman holding violets. Then they are gone.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.04~vo-01",
+    "speaker": "lenka",
+    "text": "She told him no. So did I. Take me home.",
+    "est_s": 8.0,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.05~vo-01",
+    "speaker": "narrator",
+    "text": "Down in the valley, doors open. People stand in the street and look up at a sky they have not seen since spring.",
+    "est_s": 13.2,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.rescued.06~vo-01",
+    "speaker": "narrator",
+    "text": "The mist lifts off Vellmoor. The road out is there again, and nobody takes it today.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.lenka-lost.01~vo-01",
+    "speaker": "narrator",
+    "text": "He falls in his own house. What is left of him is dust. The castle goes quiet around you, all at once.",
+    "est_s": 12.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.lenka-lost.02~vo-01",
+    "speaker": "narrator",
+    "text": "You search for Lenka until the candles burn down. Every door opens for you now. Every room is empty.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.lenka-lost.03~vo-01",
+    "speaker": "narrator",
+    "text": "In the room where he kept her, the window stands open. On the sill lie Anton's ring on its cord, and one pressed violet.",
+    "est_s": 13.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.lenka-lost.04~vo-01",
+    "speaker": "narrator",
+    "text": "Below, the mist pulls back off the roads. The valley is free. Whether she is, no one can say.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-win.lenka-lost.05~vo-01",
+    "speaker": "narrator",
+    "text": "He is gone, and the sun comes back to Vellmoor. You came for the burgomaster's daughter. You go home with his ring.",
+    "est_s": 12.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.valley-falls.01~vo-01",
+    "speaker": "narrator",
+    "text": "In every parish the doors stand open, and no one stands in them. The bells have stopped.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.valley-falls.02~vo-01",
+    "speaker": "narrator",
+    "text": "The people of Vellmoor walk up the hill through the mist, quiet, in their best clothes. None of them looks back.",
+    "est_s": 12.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.valley-falls.03~vo-01",
+    "speaker": "narrator",
+    "text": "At the castle, every window is lit. Somewhere above, someone is playing the organ.",
+    "est_s": 9.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.valley-falls.04~vo-01",
+    "speaker": "narrator",
+    "text": "The last skull falls. The mist closes over Vellmoor, and the valley is his for good.",
+    "est_s": 10.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.turned.01~vo-01",
+    "speaker": "narrator",
+    "text": "The third bite is not the worst one. It is only the last. Somewhere a heartbeat stops, and another starts, slower.",
+    "est_s": 12.4,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.turned.02~vo-01",
+    "speaker": "narrator",
+    "text": "A hunter goes very still. Then they turn, and walk out into the mist, toward the hill.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.turned.03~vo-01",
+    "speaker": "narrator",
+    "text": "Nobody calls after them. On the hill, one more window is lit.",
+    "est_s": 8.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.turned.04~vo-01",
+    "speaker": "narrator",
+    "text": "A hunter is his now. The hunt is over, and the mist stays down.",
+    "est_s": 9.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.houses-fall.01~vo-01",
+    "speaker": "narrator",
+    "text": "The fourth house falls. Its shutters hang open, and the garlic on its sills has gone black.",
+    "est_s": 10.8,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.houses-fall.02~vo-01",
+    "speaker": "narrator",
+    "text": "There is no door left in Vellmoor that will hold. From now on, someone is asked in, and goes.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  },
+  {
+    "id": "finale-loss.houses-fall.03~vo-01",
+    "speaker": "narrator",
+    "text": "Four houses have fallen. There is nowhere left to shut a door, and he walks in where he likes.",
+    "est_s": 11.6,
+    "status": "DRAFT"
+  }
+]

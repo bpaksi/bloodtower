@@ -1,4 +1,13 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -6,7 +15,7 @@ import { PLACE_STILL_ID } from "../../../engine/loops/session/placeCaption.ts";
 import { loadConfig } from "../../config.ts";
 import { loadStoryCatalog } from "../../core/loadStories.ts";
 import { lintPath } from "../../scripts/packLint.ts";
-import { indexPackAssets } from "../assets.ts";
+import { indexPackAssets, stillAspectIssues } from "../assets.ts";
 import { loadPackV2Dir } from "./load.ts";
 
 const packsDir = loadConfig().packsDir;
@@ -154,7 +163,7 @@ describe("a broken v2 pack fails loudly (C3-01 EV-04)", () => {
         ["test", false],
       ]);
       expect(catalog.stories.find((story) => story.card.id === "test")?.card.title).toBe(
-        "Proving Grounds",
+        "The Ruined Keep",
       );
       expect(catalog.defaultPlay).toBeNull();
       expect(
@@ -193,6 +202,183 @@ describe("place stills reach the one asset route (C3-01 EV-06)", () => {
       const declared = result.pack.assets.find((asset) => asset.id === id);
       expect(declared?.path, id).toBeDefined();
       expect(index.byBasename.has(basename(declared?.path ?? "")), id).toBe(true);
+    }
+  });
+});
+
+describe("the loader resolves assets[] through assets/index.json (A1-05c, D45)", () => {
+  const HASH = (c: string) => `${c.repeat(64)}.webp`;
+  /** A WebP header the loader can size: VP8X, width and height minus one. */
+  const webp = (width: number, height: number) => {
+    const b = Buffer.alloc(40);
+    b.write("RIFF", 0, "latin1");
+    b.writeUInt32LE(32, 4);
+    b.write("WEBPVP8X", 8, "latin1");
+    b.writeUIntLE(width - 1, 24, 3);
+    b.writeUIntLE(height - 1, 27, 3);
+    return b;
+  };
+  const entry = (id: string, file: string) => ({
+    kind: id.split(".")[0] as string,
+    file,
+    size: { width: 1920, height: 1080 },
+    captions: [] as string[],
+    status: "final",
+  });
+  const withIndex = (index: string | undefined, files: Record<string, Buffer> = {}) => {
+    const root = copyPacks("base", "test");
+    for (const [name, data] of Object.entries(files)) {
+      writeFileSync(join(root, "test/assets", name), data);
+    }
+    if (index !== undefined) writeFileSync(join(root, "test/assets/index.json"), index);
+    return root;
+  };
+  const load = (root: string) => loadPackV2Dir(join(root, "test"), root);
+
+  it("an indexed id resolves to its hash file, 16:9 check unchanged", () => {
+    const root = withIndex(
+      JSON.stringify({ assets: { "place.village": entry("place.village", HASH("a")) } }),
+      { [HASH("a")]: webp(1920, 1080) },
+    );
+    try {
+      const result = load(root);
+      expect(result.ok).toBe(true);
+      if (!result.ok || result.kind !== "story") throw new Error("story pack");
+      const index = indexPackAssets(join(root, "test"), result.pack);
+      expect(index.byId.get("place.village")?.basename).toBe(HASH("a"));
+      expect(index.byBasename.has(HASH("a"))).toBe(true);
+      expect(index.indexed.get("place.village")?.kind).toBe("place");
+      // The other places still resolve through their old path.
+      expect(index.byId.get("place.bazaar")?.basename).toBe("place-bazaar.jpg");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("an indexed still that is not 16:9 fails the same V-aspect rule", () => {
+    const root = withIndex(
+      JSON.stringify({ assets: { "place.village": entry("place.village", HASH("a")) } }),
+      { [HASH("a")]: webp(1000, 1000) },
+    );
+    try {
+      const result = load(root);
+      if (!result.ok || result.kind !== "story") throw new Error("story pack");
+      const index = indexPackAssets(join(root, "test"), result.pack);
+      const issues = stillAspectIssues(index, result.pack).filter(
+        (item) => item.path === "place.village",
+      );
+      expect(issues.map((item) => item.rule)).toEqual(["V-aspect"]);
+      expect(issues[0]?.file).toBe(`assets/${HASH("a")}`);
+      expect(issues[0]?.message).toContain("1000x1000");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a pack with no index loads exactly as before", () => {
+    const root = withIndex(undefined);
+    try {
+      const before = loadPackV2Dir(join(packsDir, "test"), packsDir);
+      const result = load(root);
+      expect(result).toEqual(before);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a bad index (not JSON, or not the schema) fails the load with A1-9", () => {
+    for (const text of ["{nope", JSON.stringify({ assets: { "place.village": { kind: "x" } } })]) {
+      const root = withIndex(text);
+      try {
+        const result = load(root);
+        expect(result.ok).toBe(false);
+        if (result.ok) throw new Error("expected a load error");
+        expect(result.issues.map((item) => item.rule)).toEqual(["A1-9"]);
+        expect(result.issues[0]?.file).toBe("assets/index.json");
+        const catalog = loadStoryCatalog(root);
+        expect(catalog.issues.some((item) => item.rule === "A1-9")).toBe(true);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("a declared asset whose indexed file is missing still fails the load", () => {
+    const root = withIndex(
+      JSON.stringify({ assets: { "place.village": entry("place.village", HASH("a")) } }),
+    );
+    try {
+      const result = load(root);
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("expected a load error");
+      expect(result.issues[0]?.rule).toBe("P2-2");
+      expect(result.issues[0]?.message).toContain(HASH("a"));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("an index name that leaves the assets folder is not followed", () => {
+    const root = withIndex(
+      JSON.stringify({ assets: { "place.village": entry("place.village", "../pack.yaml") } }),
+    );
+    try {
+      const result = load(root);
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("expected a load error");
+      expect(result.issues[0]?.rule).toBe("P2-2");
+      expect(result.issues[0]?.message).toContain("is missing");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("an indexed file that cannot be read is its own error, not a missing file", () => {
+    const root = withIndex(
+      JSON.stringify({ assets: { "place.village": entry("place.village", HASH("a")) } }),
+    );
+    try {
+      // A link that points at itself: realpath fails with ELOOP, not ENOENT.
+      symlinkSync(HASH("a"), join(root, "test/assets", HASH("a")));
+      const result = load(root);
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("expected a load error");
+      expect(result.issues[0]?.rule).toBe("P2-2");
+      expect(result.issues[0]?.message).toContain("cannot read");
+      expect(result.issues[0]?.message).toContain("ELOOP");
+      expect(result.issues[0]?.message).not.toContain("is missing");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("a sound row adds its .m4a to byBasename", () => {
+    const root = copyPacks("base", "test");
+    try {
+      const pack = join(root, "test");
+      const m4a = `${"d".repeat(64)}.m4a`;
+      writeFileSync(join(pack, "assets", m4a), "audio");
+      writeFileSync(
+        join(pack, "assets/index.json"),
+        JSON.stringify({
+          assets: {
+            "door.creak": {
+              kind: "effect",
+              file: m4a,
+              size: { seconds: 1 },
+              captions: [],
+              status: "final",
+            },
+          },
+        }),
+      );
+      const index = indexPackAssets(pack, {
+        pack_id: "test",
+        assets: [{ id: "door.creak", type: "sfx", target: "storyboard", status: "final" }],
+      });
+      expect(index.byBasename.get(m4a)).toBe(join(realpathSync(pack), "assets", m4a));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
     }
   });
 });

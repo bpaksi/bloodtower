@@ -15,6 +15,7 @@ import {
   indexPackAssets,
   mediaOnDiskIssues,
   type PackAssetIndex,
+  readPackAssetIndex,
   stillAspectIssues,
   validateAssetsFolder,
 } from "../assets.ts";
@@ -238,7 +239,9 @@ const loadMetadataOnly = (
     };
   }
   const meta = parsed.data;
-  const media = mediaOnDiskIssues(root, [], meta.cover, "P2-2");
+  const packIndex = readPackAssetIndex(root);
+  if (packIndex.issue) return { ok: false, issues: [packIndex.issue] };
+  const media = mediaOnDiskIssues(root, [], meta.cover, "P2-2", packIndex.index);
   if (media.errors.length > 0) return { ok: false, issues: media.errors };
   const indexed = indexPackAssets(root, { pack_id: meta.pack_id, assets: [], cover: meta.cover });
   const shape = stillAspectIssues(indexed, { assets: [], cover: meta.cover });
@@ -338,6 +341,10 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
 
   if (issues.length > 0) return { ok: false, issues };
 
+  // A generated assets/index.json that cannot be read stops the load (A1-9, D45).
+  const packIndex = readPackAssetIndex(root);
+  if (packIndex.issue) return { ok: false, issues: [packIndex.issue] };
+
   const format = assembled.format;
   if (format !== 2) {
     return {
@@ -354,7 +361,7 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
     if (!parsed.success) {
       return { ok: false, issues: tuningSchemaIssues(packFile, parsed.error) };
     }
-    const media = mediaOnDiskIssues(root, parsed.data.assets, undefined, "P2-2");
+    const media = mediaOnDiskIssues(root, parsed.data.assets, undefined, "P2-2", packIndex.index);
     if (media.errors.length > 0) return { ok: false, issues: media.errors };
     return { ok: true, kind: "base-content", pack: parsed.data, warnings: media.warnings };
   }
@@ -415,7 +422,7 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
     }
     if (issues.length > 0) return { ok: false, issues };
 
-    const media = mediaOnDiskIssues(root, story.assets, undefined, "P2-2");
+    const media = mediaOnDiskIssues(root, story.assets, undefined, "P2-2", packIndex.index);
     if (media.errors.length > 0) return { ok: false, issues: media.errors };
     return {
       ok: true,

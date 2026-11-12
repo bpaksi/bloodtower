@@ -1,0 +1,56 @@
+[
+  {
+    "id": "n4-eldest-witch.01~vo-01",
+    "scene": "n4-eldest-witch",
+    "speaker": "narrator",
+    "text": "Under the last parish the walls are hollow. Doors open in the stone where no doors were, and shut again behind you.",
+    "est_s": 12.8,
+    "tag": "Long only, deferred",
+    "status": "DRAFT"
+  },
+  {
+    "id": "n4-eldest-witch.emeric~vo-01",
+    "scene": "n4-eldest-witch",
+    "speaker": "emeric",
+    "text": "Gerhardt wrote about them. Older than the Count, he said. They'll sell to anyone. Page nine. He bought.",
+    "est_s": 11.2,
+    "tag": "Long only, deferred",
+    "status": "DRAFT"
+  },
+  {
+    "id": "n4-eldest-witch.guardian~vo-01",
+    "scene": "n4-eldest-witch",
+    "speaker": "narrator",
+    "text": "Out of the wall steps the eldest of the coven, bent double, with his violets braided into her grey hair.",
+    "est_s": 12.0,
+    "tag": "Long only, deferred",
+    "status": "DRAFT"
+  },
+  {
+    "id": "n4-eldest-witch.witch~vo-01",
+    "scene": "n4-eldest-witch",
+    "speaker": "eldest-witch",
+    "text": "We were here first. He only promised we'd be here last.",
+    "est_s": 8.4,
+    "tag": "Long only, deferred",
+    "status": "DRAFT"
+  },
+  {
+    "id": "n4-eldest-witch.guardian-falls~vo-01",
+    "scene": "n4-eldest-witch",
+    "speaker": "narrator",
+    "text": "The eldest falls, and the coven is broken. The doors in the stone are only doors now.",
+    "est_s": 10.8,
+    "tag": "Long only, deferred",
+    "status": "DRAFT"
+  },
+  {
+    "id": "n4-eldest-witch.02~vo-01",
+    "scene": "n4-eldest-witch",
+    "speaker": "narrator",
+    "text": "You climb back into the grey daylight. Up on the hill, he is a little more alone.",
+    "est_s": 10.8,
+    "tag": "Long only, deferred",
+    "status": "DRAFT"
+  }
+]

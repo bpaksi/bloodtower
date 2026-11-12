@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   // Static export: the bloodtower server serves ./out. There is no Next.js runtime in production.
   output: "export",
-  transpilePackages: ["bloodtower-protocols", "@talking-avatar/player", "@talking-avatar/formats"],
+  transpilePackages: ["bloodtower-protocols", "@asset-studio/player", "@asset-studio/formats"],
   // iPad on the LAN opens next dev by IPv4; allow private-range hostnames for HMR (Next 16+).
   allowedDevOrigins: [
     "10.*.*.*",
@@ -26,6 +26,9 @@ const config: NextConfig = {
     "172.31.*.*",
     "169.254.*.*",
   ],
+  // A1-07 (D46): `SHOW_ASSET_IDS=1` at build time makes the board label the asset on screen. Any other
+  // value is off. Static export, so the flag is fixed when the web UI is built.
+  env: { NEXT_PUBLIC_SHOW_ASSET_IDS: process.env.SHOW_ASSET_IDS === "1" ? "1" : "" },
   // Agent guidance for this repo lives in the root CLAUDE.md, so skip the generated AGENTS.md.
   agentRules: false,
 };

@@ -32,6 +32,10 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
+    // Headless Chromium refuses the screen wake lock unless it is granted, so every touch
+    // project showed the wake-lock-refused notice over the device controls (#342).
+    // c2-ipad-awake stubs navigator.wakeLock itself to test the refusal.
+    permissions: ["screen-wake-lock"],
     launchOptions: {
       // A lost gesture must fail. Chromium's default would let a suspended context look running.
       args: ["--autoplay-policy=user-gesture-required"],
@@ -52,7 +56,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm -F bloodtower-server start",
+    // Build first, the same as tower-poc: a stale or missing export fails most specs.
+    // `--dir`: the root package is also named `bloodtower`, so `-F bloodtower` would build every app.
+    command: "pnpm --dir apps/bloodtower build && pnpm -F bloodtower-server start",
     cwd: repoRoot,
     url: `${baseURL}/health`,
     env: {

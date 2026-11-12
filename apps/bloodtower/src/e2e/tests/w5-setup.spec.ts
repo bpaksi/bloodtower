@@ -362,7 +362,7 @@ test("W5 Begin plays four opening moments before any walk", async ({ browser }, 
     await expect(device.locator("[data-kingdom='Durnin (S)']")).toContainText("Howling Desert");
     await expect(device.locator("[data-kingdom='Zenon (W)']")).toContainText("Hissing Groves");
     await expect(board.locator("[data-band] [data-moves]")).toHaveText(/unavailable/);
-    await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
+    await expect(board.locator("[data-chapter]")).toHaveText("The Ruined Keep");
     expect(session.tower.sent()).toEqual([]);
   } finally {
     await boardContext.close();

@@ -5,6 +5,7 @@ import { cameraStillImageStyle } from "../../lib/cameraStillStyle.ts";
 import { type CameraTrack, STILL_ASPECT_DEFAULT } from "../../lib/cameraTrack.ts";
 import { packStillImageUrl } from "../../lib/packAsset.ts";
 import { fetchCameraTrack, packTrackStillUrl, preloadStill } from "../../lib/packCamera.ts";
+import { AssetIdLabel } from "./AssetIdLabel.tsx";
 
 /**
  * Story-board still with an optional camera track (pan/zoom). Falls back to a static image
@@ -102,6 +103,7 @@ export function CameraStill({
         }}
         style={imageStyle}
       />
+      <AssetIdLabel assetId={assetId} />
     </div>
   );
 }

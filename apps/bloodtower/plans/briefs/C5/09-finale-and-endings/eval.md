@@ -47,7 +47,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C5-07 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 - Method: playwright
 - How: win with `seal_broken`.
-- Pass evidence: the board plays audio asset `vo.loremaster.finale_win_shattered` and shows the line; the beat auto-advances on its end.
+- Pass evidence: the board plays audio asset `finale-win.shattered~vo-01` and shows the line; the beat auto-advances on its end.
 - Fails if: silent, or another clip.
 
 ### EV-07 — The toolbar is on every state

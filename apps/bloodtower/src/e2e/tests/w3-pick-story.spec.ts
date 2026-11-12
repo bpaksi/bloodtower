@@ -181,7 +181,7 @@ test.beforeEach(({ browserName: _browserName }, testInfo) => {
   test.skip(testInfo.project.name === "desktop", "The desktop viewport is not a W3 board size.");
 });
 
-test("focused Proving Grounds fits, and only Dracula's cover is painted", async ({
+test("focused The Ruined Keep fits, and only Dracula's cover is painted", async ({
   browser,
 }, testInfo) => {
   test.setTimeout(90_000);
@@ -200,7 +200,7 @@ test("focused Proving Grounds fits, and only Dracula's cover is painted", async 
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "pick-story");
     for (const size of BOARD_SIZES) {
       await board.setViewportSize(size);
-      await expect(board.locator("[data-story-focus] h2")).toHaveText("Proving Grounds");
+      await expect(board.locator("[data-story-focus] h2")).toHaveText("The Ruined Keep");
       await expect(
         board.locator('[data-story-peek="dracula"][data-carousel-side="next"]'),
       ).toHaveCount(1);
@@ -219,7 +219,7 @@ test("focused Proving Grounds fits, and only Dracula's cover is painted", async 
       await expectCarousel(board);
       for (const line of [
         "Pick a story",
-        "Proving Grounds",
+        "The Ruined Keep",
         "The Count of Vellmoor",
         DAY_SLICE,
         PLAYERS,
@@ -303,7 +303,7 @@ test("Previous and Next wrap on pick-story and do not connect", async ({ browser
     );
     await expect(previous).toHaveAccessibleName("Previous");
     await expect(next).toHaveAccessibleName("Next");
-    await expect(choose).toHaveAccessibleName("Choose Proving Grounds");
+    await expect(choose).toHaveAccessibleName("Choose The Ruined Keep");
     for (const button of [previous, next, choose]) {
       await expect(button).toBeVisible();
       await expect(button).toBeEnabled();
@@ -378,7 +378,7 @@ test("focused Dracula fits with its cover", async ({ browser }, testInfo) => {
   }
 });
 
-test("Choose on Dracula stops, and Back still chooses Proving Grounds", async ({
+test("Choose on Dracula stops, and Back still chooses The Ruined Keep", async ({
   browser,
 }, testInfo) => {
   test.setTimeout(90_000);
@@ -529,7 +529,7 @@ const expectPickStoryWaiting = async (board: Page, device: Page) => {
   await expect(board.locator("[data-story-peek]")).toHaveCount(1);
 };
 
-/** From Pick story on Proving Grounds to the session screen: a whole setup, the opening, Quit. */
+/** From Pick story on The Ruined Keep to the session screen: a whole setup, the opening, Quit. */
 const playToQuit = async (device: Page) => {
   await clickAct(device, "continue", "continue-pick-story-test");
   await clickAct(device, "continue", "continue-game-settings");
