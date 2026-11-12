@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-672, UI-042.
 - Method: playwright
 - How: `c3-quest.spec.ts`: reach The Herald.
-- Pass evidence: board: painting and `[COPY: ...]` narration; iPad: exactly two options: 'Ask for pay' → '+10 gold'; 'Take the job' → 'Tomas's Map', each a button; no auto-advance (fake clock: still on the choice 5 s after it shows).
+- Pass evidence: board: painting and the quest's narration from the Copy table (quest.herald.opening); iPad: exactly two options: 'Ask for pay first' → '+10 gold'; 'Take the job' → 'Tomas's Map', each a button; no auto-advance (fake clock: still on the choice 5 s after it shows).
 - Fails if: options on the board, either gain label differs, or the step advances without a press.
 
 ### EV-02 — Item option disabled
@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-037 end.
 - Method: playwright
 - How: finish The Herald from its village; let the rewards step auto-advance.
-- Pass evidence: the board shows the end hook `[COPY: …]`; the end hook auto-advances and returns the iPad to the village's building menu with the quest marker gone.
+- Pass evidence: the board shows the end hook "\"The forest road,\" Tomas says. \"That's where they wait.\""; the end hook auto-advances and returns the iPad to the village's building menu with the quest marker gone.
 - Fails if: the end hook is skipped, or the iPad lands elsewhere.
 
 ### EV-10 — The toolbar is on every state

@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-144.
 - Method: playwright
 - How: `c3-outcome.spec.ts`: a seeded game run to an empty supply (fixture shortens the supply).
-- Pass evidence: scene id `loss-skulls`, its Painting and `[COPY: ...]` narration; exactly one summary line matching `/^\d+ days\. \d+ quests done\. \d+ skulls on the board\.$/` with the fixture's numbers; iPads Next only.
+- Pass evidence: scene id `loss-skulls`, its Painting and the skulls-loss narration from the Copy table (loss.skulls); exactly one summary line matching `/^\d+ days\. \d+ quests done\. \d+ skulls on the board\.$/` with the fixture's numbers; iPads Next only.
 - Fails if: a Done button, another scene id, or the summary does not match.
 
 ### EV-02 — The corruption loss
@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C3-01; Q-C3-23 (Bob approved 2026-10-31).
 - Method: playwright
 - How: C3 tuning; win chapter 1.
-- Pass evidence: in order: the DEC-144 win scene (scene id `win`) plays, then the Loremaster line `[COPY: chapter 1 win, Loremaster]` (DEC-232), then the summary line; no Next.
+- Pass evidence: in order: the DEC-144 win scene (scene id `win`) plays, then the Loremaster line "The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years." (DEC-232), then the summary line; no Next.
 - Fails if: a loss scene, no scene, the Loremaster line is missing or comes before the scene, a finale line (DEC-663/664) shows, or no summary.
 
 ### EV-06 — The outcome auto-advances to Game stats
@@ -122,4 +122,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## OPEN questions
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
-- ANSWERED Q-C3-23 (Bob approved 2026-10-31): the DEC-144 win scene plays, then the Loremaster line `[COPY: chapter 1 win, Loremaster]`. Was: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder `[COPY: chapter 1 win]`, or the finale's win scene without the line?
+- ANSWERED Q-C3-23 (Bob approved 2026-10-31): the DEC-144 win scene plays, then the Loremaster line "The roads are open. On the far hill, a fire burns in the old keep, where no one has lived for forty years.". Was: which win scene and line play for the C3 win? DEC-663 and DEC-664 write the win for the finale, after the last choice, which C3 never reaches. Use a placeholder line, or the finale's win scene without the line?

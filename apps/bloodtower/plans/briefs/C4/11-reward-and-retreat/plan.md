@@ -51,6 +51,29 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-016: closed before coding (`decided`).
 - [ ] DEC-177: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `board.victory` | Victory. You found {N} gold and a card. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 2 | `board.who-takes` | Who takes {item}? | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 3 | `button.give` | Give to {hero} | screen-spec (exact label; one per present hero) |
+| 4 | `board.taken` | {hero} takes {item}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 5 | `board.retreat` | You fell back. It cost {item}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 6 | `board.fall` | {hero} fell. It cost {item}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 7 | `board.step-up` | The foe grows stronger. | locked 2026-10-31 (Loremaster); same text in screen-spec (shown with the retreat or fall line only when the step-up roll hits) |
+| 8 | `reveal.gold` | {N} gold | mockup.html (the Reveal's gold) |
+| 9 | `chip.foe-level` | Foe level {N} → {N+1} | screen-spec (data format, DEC-555) |
+| 10 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster) |
+| 11 | `ipad.see-board` | See the Story board. | new - Loremaster (first drawn in mockup.html) |
+| 12 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 13 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 14 | `help.title` | Help | C2 feature 04 |
+| 15 | `help.reward-and-retreat` | Tap Give to {hero} on an iPad to choose who takes the card. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 16 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - Resolved Q-C4-17: Does the C2-04 auto-advance rule (advance when narration or cue ends, or after 4 s with no audio) also apply to battle round results and Reveals? Options: (a) yes, every beat in C4 and C5 (round results, victory, reward/retreat/fall, trap, close Scroll, glyph/boon Reveal, boss phase show, win line) follows it; (b) battle beats wait for a press on any iPad; (c) round results hold 2 s, other beats follow the rule. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C4 09, 11, 12, 13; C5 08, 09)

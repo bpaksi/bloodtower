@@ -54,7 +54,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-027.
 - Method: playwright
 - How: seed for plague with a present Healer.
-- Pass evidence: the board shows the saved state `[COPY: counter saved]`; no buttons in the iPad body (it auto-advances); no hit points change.
+- Pass evidence: the board shows the saved line "{counter} saved you. Nothing is lost." (Copy table: hazard.saved); no buttons in the iPad body (it auto-advances); no hit points change.
 - Fails if: cost buttons show or a cost applies.
 
 ### EV-08 — Disaster: Go around and Pay them off, no Fight

@@ -68,7 +68,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: MEC-033 start.
 - Method: unit
 - How: start chapter 1; read the emitted outputs.
-- Pass evidence: in order: the chapter cue, the narration hook (a `[COPY: …]` id), the chapter card view; each exactly once, before day 1's Regroup.
+- Pass evidence: in order: the chapter cue, the narration hook (the chapter-1 opening line, Copy table: chapter.1.opening in ./plan.md), the chapter card view; each exactly once, before day 1's Regroup.
 - Fails if: any is missing, repeated, or out of order.
 
 ## Survival evals (one per survival invariant in plan.md)

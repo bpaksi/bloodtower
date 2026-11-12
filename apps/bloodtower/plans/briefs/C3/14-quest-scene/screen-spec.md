@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: UI-042, UI-025, UI-036, MEC-037, MEC-077, DEC-642, DEC-653, DEC-654, DEC-692, DEC-693, DEC-714, DEC-700
 - Viewports: Story board 1920×1080 (Samsung TV), iPad 768×1024 portrait (locked by Bob)
-- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "A quest is in front of you. Pick one of its options.". Story copy stays `[COPY: ...]`.
+- Rules for every screen: the board is display only and never scrolls or clips (SCR-013); iPads carry choices and taps only, and every story line shows on the board (SCR-014, DEC-057); one step, one primary button on the iPad (SCR-016); the bottom toolbar on every iPad state, "?" help at the left and the gear (Menu) at the right (C2 feature 04; Bob 2026-10-31 10:37/10:38); the happy path never needs the gear. Help text (Loremaster 2026-10-31): "A quest is in front of you. Pick one of its options.". Story copy is in the Copy table in ./plan.md.
 
 ## Purpose
 
@@ -12,7 +12,7 @@ Play a quest's one choice and its outcome (MEC-037, MEC-077).
 
 ## States
 
-- **Opening** (.3): narration `[COPY: the herald opening]` (The Herald) on a Scroll.
+- **Opening** (.3): narration "Tomas the herald meets you at the well. \"They take a cart a week now. Will you go?\"" (The Herald; Copy table: quest.herald.opening) on a Scroll.
 - **Track** (UI-025): steps done and to come (one step for a plain scene).
 - **Choice** (UI-042, MEC-077 .1): 2–3 options, costs shown, missing-item options disabled. Options are buttons on the iPad; a choice, no auto-advance.
 - **Corruption cost**: pick the hero who takes it (DEC-693); one button per present hero, no auto-advance.
@@ -30,7 +30,7 @@ UI-042: the quest's painting and narration on a Scroll, the 2 or 3 options on th
 
 ## What happens next
 
-The quest's end hook (`[COPY: the herald end hook]`), back to the building menu; a done quest may end the chapter at the day's close.
+The quest's end hook ("\"The forest road,\" Tomas says. \"That's where they wait.\""; Copy table: quest.herald.end-hook), back to the building menu; a done quest may end the chapter at the day's close.
 
 ## OPEN questions
 

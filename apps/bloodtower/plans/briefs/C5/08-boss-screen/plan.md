@@ -48,6 +48,35 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-327: closed before coding (`decided`).
 - [ ] UI-026: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `boss.opening` | The Warden waits at the top, in what is left of his armour. "I kept it forty years," he says. "Then it spoke." | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) ('boss-screen, opening'; DEC-661, DEC-667) |
+| 2 | `board.foe` | The Warden. Strength left: {N}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 3 | `board.round` | Round {N}: {hero} struck for {N}. | C4-09 board line; Gamewright keeps 'struck for {N}' (mockup) |
+| 4 | `board.phase` | The Warden changes. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 5 | `board.falls` | The Warden falls. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 6 | `chip.traits` | Melee, Humanoid | DEC-688 |
+| 7 | `chip.ability` | Crushing blow | DEC-688 |
+| 8 | `ipad.warden` | The Warden | mockup.html (iPad title) |
+| 9 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster) |
+| 10 | `ipad.see-board` | See the Story board. | new - Loremaster (first drawn in mockup.html) |
+| 11 | `button.fight` | Fight | screen-spec (exact label) |
+| 12 | `button.retreat` | Retreat | screen-spec (exact label) |
+| 13 | `button.attack` | Attack | screen-spec (exact label) |
+| 14 | `button.cast` | Cast a spell | screen-spec (exact label) |
+| 15 | `button.advantage` | Spend an Advantage | screen-spec (exact label) |
+| 16 | `button.potion` | Drink a potion | screen-spec (exact label) |
+| 17 | `button.guard` | Guard | screen-spec (exact label) |
+| 18 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 19 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 20 | `help.title` | Help | C2 feature 04 |
+| 21 | `help.boss-screen` | The Warden's last battle. Pick Fight or Retreat on your iPad, then your action. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 22 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - Q-C4-17 (auto-advance timing, Gamewright pick (a), approved by Bob 2026-10-31 6:16 PM ET) applies to this screen; see C4 plan.

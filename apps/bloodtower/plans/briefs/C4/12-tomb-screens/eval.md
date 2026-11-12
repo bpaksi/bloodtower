@@ -12,8 +12,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-583.
 - Method: playwright
 - How: enter The Barrow.
-- Pass evidence: map left, view right.
-- Fails if: one half.
+- Pass evidence: map left, view right; the board's state lines read "The Tomb. Rooms found: {N}." and "The Exit is open." under the test pack, and "The barrow. Rooms found: {N}." and "The way out is open." under The Ruined Keep pack.
+- Fails if: one half, or a pack shows the other pack's lines.
 
 ### EV-02 — Three corridor cards
 - Requirement: DEC-591.
