@@ -432,9 +432,6 @@ test.describe("C3/11 the day on the board", () => {
   test("EV-19: two heroes, Continue after a quit on day 3 shows the same clock", async ({
     browser,
   }, testInfo) => {
-    // Found 2026-11-07: Continue does not keep the skull clock (21 days left before the quit,
-    // 23 after). Bob ruled a test-first fix on its own fix/ branch; that fix removes this marker.
-    test.fail(true, "Continue resets the day clock's supply and skulls (bug, own fix/ branch).");
     test.setTimeout(300_000);
     const { session, context, pad, board } = await startGame(browser, testInfo, TWO);
     try {

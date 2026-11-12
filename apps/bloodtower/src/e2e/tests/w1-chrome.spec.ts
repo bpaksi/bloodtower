@@ -723,7 +723,7 @@ test("the toolbar is on every iPad screen, and ? help matches the current screen
     await clickAct(page, "continue", "continue-begin");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await advanceOpenings(page);
-    await checkHelp(page, "play");
+    await checkHelp(page, "day-on-the-board");
 
     session.tower.loseConnection();
     session.host.syncTower();
