@@ -30,8 +30,9 @@ export const ROOT_CONFIG = new Set([
 ]);
 
 /**
- * Suites too slow for every commit. bloodtower-assets takes about 88 s, 63% of `pnpm check`
- * (measured 2026-11-11): pack.test.ts renders through the real asset-studio bin in each test.
+ * Suites too slow for every commit. bloodtower-assets takes about 20 s, more than every other
+ * Bloodtower part together (measured 2026-11-12, after its pack tests stopped rendering through
+ * the real asset-studio bin in each test; before that it was 88 s).
  */
 export const TOUCHED_ONLY = new Set(["bloodtower-assets"]);
 

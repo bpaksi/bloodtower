@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import { lstatSync, readdirSync, readFileSync, readlinkSync, writeFileSync } from "node:fs";
+import { cpSync, lstatSync, readdirSync, readFileSync, readlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { approve, loadJob, readIndex, reject } from "@asset-studio/cli";
+import { buildJob } from "../needs/build.ts";
 import { tempDir, writeStoryPack } from "../needs/fixtures.ts";
-import { workPathsFor } from "../needs/job.ts";
+import { workPathsFor, writeJob } from "../needs/job.ts";
 import { runRender } from "../render/cli.ts";
 import { gradientPng, RENDER_CAST } from "../render/fixtures.ts";
 import { realSpawn, type SpawnFn } from "../render/spawn.ts";
@@ -63,8 +64,8 @@ export const setup = (options: { voiced?: boolean } = {}): Setup => {
   return { packs, packDir, workFolder: tempDir("work"), configDir: tempDir("config") };
 };
 
-/** Runs `assets:render --ai` (fake providers) so the work folder holds a draft of every id. */
-export const renderAll = async (s: Setup): Promise<void> => {
+/** Runs `assets:render --ai` (fake providers) through the real bin. About 3.8 s a run. */
+export const renderForReal = async (s: Setup): Promise<void> => {
   let err = "";
   const code = await runRender(
     [STORY, "--ai", "--packs-dir", s.packs, "--work-folder", s.workFolder],
@@ -78,6 +79,43 @@ export const renderAll = async (s: Setup): Promise<void> => {
     },
   );
   if (code !== 0) throw new Error(`fixture render failed (${code}): ${err}`);
+};
+
+/** The work folder a real render left, kept by the content of the pack it rendered. */
+const renderedWork = new Map<string, string>();
+
+const isEmpty = (dir: string) => readdirSync(dir).length === 0;
+
+/** The pack's files and their hashes, without the folder they sit in. */
+const packKey = (s: Setup): string =>
+  createHash("sha256").update(snapshot(s.packDir).replaceAll(s.packDir, "")).digest("hex");
+
+/**
+ * Leaves the work folder holding a draft of every id, as `assets:render --ai` does.
+ *
+ * The first pack with a given content is rendered through the real bin, and its work folder is
+ * copied aside before the test touches it. A later pack with the same content gets that copy and
+ * a job file of its own. That is all a render would have written: the job is the one file that
+ * names the pack's folder (`runRender` writes it the same way), and the rest is keyed by content.
+ * Each render takes about 3.8 s and this fixture is asked for one in almost every pack test.
+ *
+ * A work folder or a config folder that already holds something is always rendered for real.
+ */
+export const renderAll = async (s: Setup): Promise<void> => {
+  if (!isEmpty(s.workFolder) || !isEmpty(s.configDir)) return renderForReal(s);
+  const key = packKey(s);
+  const kept = renderedWork.get(key);
+  if (kept !== undefined) {
+    cpSync(kept, s.workFolder, { recursive: true });
+    writeJob(s.workFolder, buildJob(STORY, { packsDir: s.packs }).job);
+    return;
+  }
+  await renderForReal(s);
+  // A render that wrote to the config folder cannot be stood in for by the work folder alone.
+  if (!isEmpty(s.configDir)) return;
+  const copy = tempDir("work-rendered");
+  cpSync(s.workFolder, copy, { recursive: true });
+  renderedWork.set(key, copy);
 };
 
 export const paths = (s: Setup) => workPathsFor(s.workFolder, STORY);

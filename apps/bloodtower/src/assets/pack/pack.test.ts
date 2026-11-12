@@ -18,11 +18,14 @@ import { type CommitIo, realCommitIo } from "./commit.ts";
 import {
   approveIds,
   hashedFiles,
+  jobFile,
   mixed,
   pack,
   paths,
   readPackIndex,
   renderAll,
+  renderForReal,
+  type Setup,
   STORY,
   setup,
   snapshot,
@@ -429,5 +432,38 @@ describe("an interrupted run, a second run and a linked story folder", () => {
     expect(result.err).toContain("rule=A1-22");
     expect(result.err).toContain("outside the packs folder");
     expect(snapshot(outside)).toBe(before);
+  }, 90000);
+});
+
+describe("the render fixture: a copied work folder is what a real render leaves", () => {
+  // The work folder without its location: each file's hash, and the job with its folders blanked.
+  const shape = (s: Setup) => ({
+    job: readFileSync(jobFile(s), "utf8")
+      .replaceAll(s.packs, "<packs>")
+      .replaceAll(s.workFolder, "<work>"),
+    files: snapshot(s.workFolder)
+      .replaceAll(s.workFolder, "<work>")
+      .split("\n")
+      .filter((line) => !line.includes("asset-job.json")),
+  });
+
+  // The voiced pack holds pictures and voice lines, so it covers every kind the fixture renders.
+  it("every file and the job match a real render, byte for byte", async () => {
+    // The first render of this pack content is real and is kept; any later one is the copy.
+    await renderAll(setup({ voiced: true }));
+    const copied = setup({ voiced: true });
+    await renderAll(copied);
+    const real = setup({ voiced: true });
+    await renderForReal(real);
+
+    const want = shape(real);
+    const got = shape(copied);
+    expect(want.files.length).toBeGreaterThan(10);
+    expect(got.files).toEqual(want.files);
+    expect(got.job).toBe(want.job);
+    // The job names this pack's own folder, not the folder of the pack that was rendered first.
+    const job = readFileSync(jobFile(copied), "utf8");
+    expect(job).toContain(copied.packs);
+    expect(job).not.toContain(real.packs);
   }, 90000);
 });
