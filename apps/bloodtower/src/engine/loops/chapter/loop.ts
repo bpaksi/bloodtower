@@ -1,12 +1,7 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { ensureClock, noteNode } from "../day/clock.ts";
 import type { DayResult } from "../day/loop.ts";
-import {
-  applySkullRecord,
-  offerSkullPlacement,
-  parseSkullRecordPrompt,
-  SKULL_STAYED_INSIDE_TARGET,
-} from "../day/skull.ts";
+import { applySkullRecord, offerSkullPlacement, parseSkullRecordPrompt } from "../day/skull.ts";
 import { ensureQuests } from "../quest/store.ts";
 import { shellState } from "../session/shellRef.ts";
 import {
@@ -251,8 +246,7 @@ export const handleChapterPress = (local: ChapterLocal, promptId: string): Chapt
   const play = playState();
   const store = ensureChapters(play);
   const record = parseSkullRecordPrompt(promptId);
-  if (local.phase !== "place" || !record || record.target === SKULL_STAYED_INSIDE_TARGET)
-    return local;
+  if (local.phase !== "place" || !record) return local;
   if (!applySkullRecord(record.day, record.target)) return local;
   store.skullsToPlace -= 1;
   noteNode(play, ".29");

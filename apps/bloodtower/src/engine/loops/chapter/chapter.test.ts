@@ -216,9 +216,6 @@ describe("chapter loop (MEC-033)", () => {
       const frame = chapterFrame(run);
       if (!frame) throw new Error("no chapter frame");
       const prompt = skullRecordPromptId(run.play.dayNumber, building);
-      // The tower keeps nothing back: "stayed inside" is not a place for a freed skull.
-      const inside = skullRecordPromptId(run.play.dayNumber, "inside");
-      expect(handleChapterPress(frame.local as ChapterLocal, inside)).toBe(frame.local);
       frame.local = handleChapterPress(frame.local as ChapterLocal, prompt);
       resume(run);
     }
@@ -233,6 +230,27 @@ describe("chapter loop (MEC-033)", () => {
     const next = emptyLoopRuntime();
     startRootLoop(registry, run.seed, 0, next, [], "chapter");
     expect(store.entered).toEqual([1, 2]);
+  });
+
+  it("EV-04b: a freed skull that stayed inside is consumed like a placement", () => {
+    const run = setup({ c3End: false, tower: true });
+    ensureClock(run.play).held = 2;
+    script = { 1: { done: ["herald", "ambush"] } };
+    start(run);
+    const store = ensureChapters(run.play);
+    expect(store.skullsToPlace).toBe(2);
+    for (let i = 0; i < 2; i++) {
+      const frame = chapterFrame(run);
+      if (!frame) throw new Error("no chapter frame");
+      const inside = skullRecordPromptId(run.play.dayNumber, "inside");
+      const next = handleChapterPress(frame.local as ChapterLocal, inside);
+      expect(next.awaitingPress).toBe(false);
+      expect(store.skullsToPlace).toBe(1 - i);
+      frame.local = next;
+      resume(run);
+    }
+    expect(store.skullsToPlace).toBe(0);
+    expect(chapterResult(run)).toMatchObject({ outcome: "won", chapter: 1, last: false });
   });
 
   it("EV-05: without the tower the seals drop out", () => {
