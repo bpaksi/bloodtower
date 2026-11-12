@@ -173,7 +173,7 @@ Bob approved adding step 8b on 2026-11-10; the manager split it in two.
 - Done when:
   - `packs/test` has title The Ruined Keep and id `test`; the parsed manifest differs from before only in the title and the appended row. `pnpm pack:lint:all` passes; the existing test-pack unit and e2e tests pass with title expectations changed only.
   - `assetIdSchema` accepts `<base>~<variant>` (one `~`, both sides non-empty) and nothing looser; valid and invalid ids are tested.
-  - A `type: line` row in `assets[]` with `speaker` and `text` becomes a job line; with no `cast.yaml` entry, `narrator` gets a built-in Loremaster with the provisional Charon voice and no moods. `assets:needs test` lists `seal-break.01~vo-01` (line), `painting.cover`, exactly one `glow.cover` and the four places, and no portrait. Inline narrate lines stay silent.
+  - A `type: line` row in `assets[]` with `speaker` and `text` becomes a job line; with no `cast.yaml` entry, `narrator` gets a built-in Loremaster with the Charon voice (locked, Bob 2026-11-10, DEC-902) and no moods. `assets:needs test` lists `seal-break.01~vo-01` (line), `painting.cover`, exactly one `glow.cover` and the four places, and no portrait. Inline narrate lines stay silent.
   - A declared line with no file in the pack is unavailable, not a load failure; the pack loads and lints with no `assets/index.json`.
   - With fake providers, `assets:render test --ai` then `assets:pack test --drafts` on a temp copy of the pack makes the loader list the line and `glow.cover`.
   - No packed file, WAV, master or `index.json` is committed under `packs/test/assets/`.

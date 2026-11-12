@@ -53,7 +53,6 @@ The happy path stays easy: the iPad body shows only the current step and its flo
 | tower-choice | Tap Connect Tower to play with the tower, or Play without Tower for tonight. |
 | connecting | The app is reaching the tower. Keep it switched on and close by. |
 | tower-failed | The tower didn't answer. Check it's on, then tap Connect Tower or Play without Tower. |
-| enable-sound | Tap Enable sound so this iPad can play the story's voice and sound. |
 | volume | Set how loud the tower is. Press a volume to hear it, then tap Keep. |
 | pick-story | Tap the story you want to play tonight. |
 | story-settings | Choose the game length and options for tonight's story. |

@@ -8,19 +8,19 @@ Keep this a checklist; do not write a second design doc.
 - Feature: 02-boss-battle
 - Kind: engine
 - Owner: Gamewright (plan, evals); a Wright developer (build)
-- Related AREA/docs: AREA-097, DEC-567, DEC-557, DEC-361, DEC-549, DEC-327
+- Related AREA/docs: AREA-097, DEC-567, DEC-557, DEC-361, DEC-327
 - Evals: ./eval.md
 - Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 01, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/rules/battle/boss.ts` (new), `packs/test/**` (The Warden)
-- Builds: DEC-567, DEC-361, DEC-549
+- Builds: DEC-567, DEC-361
 - Deps change: no
 - Runs: cloud
 
 ## What it does
 
-DEC-567: The Warden (level 5, base tuning, Q-C3-08) has an 8-card deck with two Rends and no Falter; at two thirds and one third wounds left he changes phase: a new painting (three in all (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET), Q-C5-02), one more Rend, a stronger ability. No false death; Inventive cannot end it.
+DEC-567: The Warden (level 5, base tuning, Q-C3-08) has an 8-card deck with two Rends and no Falter; at two thirds and one third wounds left he changes phase: a new painting (three in all (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET), Q-C5-02), one more Rend, a stronger ability. No false death; nothing but wounds ends it (Inventive, DEC-549, is 1.1: 1.0 has no potions, DEC-502, DEC-581).
 
 ## Cutover
 
@@ -45,7 +45,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-567: closed before coding (`decided`).
 - [ ] DEC-557: closed before coding (`decided`).
 - [ ] DEC-361: closed before coding (`decided`).
-- [ ] DEC-549: closed before coding (`decided`).
+- DEC-549 is release 1.1 and is not built here (DEC-696). Its Inventive block returns with potions in 1.1.
 - [ ] DEC-327: closed before coding (`decided`).
 
 ## Values (filled from cards)
