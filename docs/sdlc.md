@@ -110,7 +110,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/skills/scrollytelling/SKILL.md     # third-party: guidance for scroll-driven pages (layout patterns, accessibility, performance)
 .claude/skills/bt-assets/SKILL.md             # Bloodtower: needs, render, pack, import and redo for a story's assets
 .claude/skills/bt-design-session/SKILL.md     # Bloodtower: a game-design session in its own worktree, one question at a time, one card commit per ruling
-.claude/skills/cleanup-worktrees/SKILL.md     # report merged step worktrees and branches, delete after Bob's OK
+.claude/skills/cleanup-worktrees/SKILL.md     # run `pnpm cleanup:worktrees`, show the table, remove the SAFE rows after Bob's OK
 .claude/skills/google-tts/SKILL.md            # text to speech with the Gemini API, for voice lines
 ```
 
@@ -121,6 +121,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 | root | `pnpm check` | lint, repo checks (pins, cross-app imports, hook tests), typecheck and unit tests across every app and package |
 | root | `pnpm build` | builds every app |
 | root | `pnpm wt <branch>` / `pnpm wt:rm <branch>` | make / remove a step worktree at `../BloodTower-work/<branch>` with its own `.wt.json` (see Parallel work) |
+| root | `pnpm cleanup:worktrees [--apply]` | report the local worktrees and branches whose work is on `origin/main`; with `--apply` remove them (see §8) |
 | root | `pnpm land <branch>` | optional local recheck: rebase on `main`, rerun `pnpm check`, fast-forward the local `main`. Not the merge path; PRs are. Refuses inside a Claude session. |
 | root | `pnpm -F <app> <script>` | one app's script (same as running it inside the app folder) |
 | app | `pnpm dev` / `pnpm start` / `pnpm e2e` | defined per app in its README |
@@ -157,6 +158,7 @@ An app plan names which of these it uses. Batch evidence (below) is posted for B
 - **Coding agents are Cursor cloud agents.** Wright (Bob's Grok Bot build partner) launches one per plan step, each on its own branch. Each cloud agent follows `.claude/agents/developer.md`, runs `pnpm check`, and opens a PR on `bpaksi/bloodtower` with the plan step id and evidence.
 - **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and he merges when CI is green and nothing is blocking.
 - **Claude Code on the Mac** stays valid for tower and hardware work, which needs the Bluetooth link. Local agents use the `pnpm wt` worktree flow below; cloud agents already run in their own clones, so they skip it.
+- **Claude Desktop sessions** each make their own worktree under `.claude/worktrees/` on a `claude/<name>` branch. They do not use `pnpm wt`, so they have no `.wt.json` and no `worktree-guard`. A session that ends without a PR, or whose PR has merged, removes that worktree and branch (§8).
 
 ## Named roles
 
@@ -296,6 +298,15 @@ Token use and wall-clock time are the same problem here: on 2026-10-19 the visua
 - **Fresh coordinator per batch.** Start a new coordinator session for each batch; do not keep one session running all day.
 - **Link, do not paste.** Brief a developer with the PR number and the finding ids, not the text of every report.
 - **Opus where it pays.** Round 1 review, and steps marked `Model: opus`. Everything else runs on Sonnet or Haiku.
+
+### 8. Cleaning up
+
+Local worktrees and branches should mirror open work: one branch per open PR, plus anything still being built. Squash merges and `gh pr merge --delete-branch` remove only the remote branch, so the local side drifts unless something removes it.
+
+- **After a merge by the coordinator:** `pnpm wt:rm <branch>` (§4, step 7).
+- **Everything else** (Desktop session worktrees, branches with no worktree, detached review worktrees, a PR merged by hand or by a cloud agent): `pnpm cleanup:worktrees`. It prints SAFE and KEEP rows and changes nothing; `--apply` removes the SAFE rows (`git worktree remove` without `--force`, then `git branch -D`, then `git worktree prune`). A row is SAFE only when it is clean, has no open PR, and its tip is a merged PR's head or inside it, or it holds no commit beyond `origin/main`. It never touches `main`, the main checkout, the worktree it runs in, or the remote.
+- **When:** after each batch (the coordinator includes the report in its summary and does not apply it), and when Bob runs `/cleanup-worktrees`. Bob says OK before anything is removed. A KEEP row with unmerged commits or uncommitted files is Bob's to push, finish or drop.
+- **A Desktop session** that ends with no PR removes its own worktree and branch, or leaves it for the next report.
 
 ## Metrics we'll actually glance at
 

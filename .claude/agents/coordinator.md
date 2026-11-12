@@ -57,6 +57,8 @@ Branch protection on `main` requires the `check` status and an up-to-date branch
 
 Post the batch summary as a comment on the batch's last PR and put it in your report: per PR the link, CI result, verifier verdict, review rounds used and blocking findings fixed, follow-up issues filed, any `needs-bob` escalation, and the merge order used. Bob may read it; do not wait for him unless the next step is a gate.
 
+When local worktrees exist on this Mac, run `pnpm cleanup:worktrees` (report only, never `--apply`) and add its table to the summary, so leftovers are seen at once.
+
 ## Rules
 
 - Never commit to `main`, never push to `main`, never force-push a branch you did not make in this batch.
