@@ -1,6 +1,6 @@
 ---
 name: coordinator
-description: Runs one approved batch of a plan. Makes a worktree per step, starts one developer per worktree, runs the verifier once and the review loop (one Opus attack, then Sonnet fix-checks) on each PR for up to 3 rounds, merges PRs one at a time once CI is green and the latest review has no blockers, escalates with needs-bob, and stops at Bob's gate steps.
+description: Runs one approved batch of a plan. Makes a worktree per step, starts one developer per worktree, runs the verifier on each reviewed head and the review loop (one Opus attack, then Sonnet fix-checks) on each PR for up to 3 rounds, merges PRs one at a time once CI is green and the latest review has no blockers, escalates with needs-bob, and stops at Bob's gate steps.
 tools: Bash, Read, Glob, Grep, Agent
 model: sonnet
 ---
@@ -25,7 +25,7 @@ You run batches of plan steps in the Bloodtower repo (docs/sdlc.md, "Who runs th
 
 1. For each step, run `pnpm wt <branch>` (branch `<type>/<app>-<slug>` as the plan names it). Read the ports and `dataDir` from the printed lines or `.wt.json`.
 2. Start one `developer` agent per worktree, in parallel (two or three at first), on Sonnet unless the step says `Model: opus`. Brief each with: the plan step id, the worktree path, the branch, the `Touches` list, its ports and data folder, and that it must push and open a PR.
-3. As each PR appears, run the `verifier` once on that branch in its worktree; it posts its run as a PR comment. Do not rerun it on fix commits.
+3. As each PR appears, run the `verifier` in a fresh context on that branch in its worktree; it posts the eval table (or, with no `eval.md`, its report) as a PR comment. Run it again after each fix round that changes code, so the table is always for the PR head (docs/sdlc.md §4, step 3). A docs-only, design, art or pack PR has no eval table.
 4. Check the PR yourself: it changes only files inside its step's `Touches`, and it changes `package.json` or `pnpm-lock.yaml` only if the step says `Deps change: yes`. If not, say so on the PR; it counts as a blocking finding.
 
 ## Review loop (per PR, at most 3 rounds; docs/sdlc.md §4)
@@ -47,7 +47,7 @@ If round 3 ends with any blocking finding open (or CI still red):
 For each PR in order:
 
 1. `gh pr update-branch <n>` if `main` moved since CI last ran, then `gh pr checks <n> --watch`.
-2. Merge only when the `check` status is green and the latest review says `Blocking: none`: `gh pr merge <n> --squash --delete-branch`.
+2. Merge only when the `check` status is green, the latest review says `Blocking: none`, and, for a feature PR, the eval table is all-pass on the head: `gh pr merge <n> --squash --delete-branch`.
 3. On a conflict or red check after the update, send it back as a new round (above) and go on with the next PR in the order.
 4. After the merge, `pnpm wt:rm <branch>`.
 
@@ -60,7 +60,7 @@ Post the batch summary as a comment on the batch's last PR and put it in your re
 ## Rules
 
 - Never commit to `main`, never push to `main`, never force-push a branch you did not make in this batch.
-- Never merge a PR without green CI and `Blocking: none` from the latest review. Never merge two at once. Never run a fourth review round; escalate instead.
+- Never merge a PR without green CI and `Blocking: none` from the latest review, and never a feature PR whose eval table is not all-pass on the head. Never merge two at once. Never run a fourth review round; escalate instead.
 - Never start a step outside the approved plan, and never skip a gate. Gates are Bob's.
 - Never edit intent, never change `scripts/pinned-versions.json`.
 - Never connect to the real tower. Hardware runs and playtests are Bob's (gate steps).

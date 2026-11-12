@@ -1,6 +1,6 @@
 # How Bloodtower applies the AI-Native SDLC Playbook
 
-Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead, and Claude Code (running locally on the Mac) plans, builds, self-verifies and merges through pull requests on `bpaksi/bloodtower`. Bob's sign-off is required only at the named gates (below); merging is not one of them.
+Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead. Agents plan, build and self-verify, and every change reaches `main` through a pull request on `bpaksi/bloodtower` that the coordinator merges ("Who runs the agents" and "Named roles" say which agent does what; Claude Code opens PRs and never merges them). Bob's sign-off is required only at the named gates (below); merging is not one of them.
 
 The repo holds many apps. **Process, guardrails and Claude config are shared at the root; intent, spec and plans belong to each app.**
 
@@ -20,8 +20,8 @@ apps/<app>/intent/NNNN-*.md ──accept──► apps/<app>/spec.md ──appro
 | 1. Plan | New ideas and changes get an intent file in Bob's words | `apps/<app>/intent/NNNN-*.md` | Accept intent |
 | 2. Design | Claude drafts or updates the app's spec and flags conflicts. Cross-app decisions also get a record in `research/decisions/`. | `apps/<app>/spec.md` (with decision log) | Approve spec |
 | 3. Build | Plan mode first. One plan per milestone; each step is one branch in its own worktree and one PR. Steps carry `Depends on`, `Touches`, `Deps change` and `Runs`, and the plan groups them into batches (see Parallel work). Deviations update the plan **in the same commit**. | `apps/<app>/plans/Mx-*.md`, root `CLAUDE.md`, `.claude/` | Approve plan (gate G-plan) |
-| 4. Test | The developer runs `pnpm check` in its worktree and puts the output in the PR body. GitHub Actions runs the `check` job on every PR. It reruns `pnpm check` unless every changed path is on the lite allowlist (game-design, docs, packs, story scripts, app icons); those runs still execute Gitleaks and pass the job (Bob / Warden, 2026-10-25/26). The verifier, launched in a fresh context, posts the eval table on the PR. | Vitest, Playwright, screenshots, `.github/workflows/check.yml` | Only at a named gate (playtest, judgement) |
-| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs Gitleaks and `pnpm check` on commit; CI runs Gitleaks on every PR and `pnpm check` except on a lite docs/design/packs diff; one adversarial review (round 1) posts findings, the developer fixes the blockers, and fix-check rounds confirm the fixes, for up to 3 rounds in all. The coordinator squash-merges, one PR at a time, once CI is green and the latest review says `Blocking: none`, and, for a feature PR, the eval table is all-pass on the head (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
+| 4. Test | The developer runs `pnpm check` in its worktree and puts the output in the PR body. GitHub Actions runs the `check` workflow on every PR. It reruns `pnpm check` unless every changed path is on the lite allowlist (game-design, docs, packs, story scripts, app icons; Bob / Warden, 2026-10-25/26). A lite change still runs Gitleaks, the card lint when it touches `research/game-design/` and the pack checks when it touches `packs/`. A PR that can reach the Bloodtower build also runs the Playwright suite (see Merging). The verifier, launched in a fresh context, posts the eval table on the PR. | Vitest, Playwright, screenshots, `.github/workflows/check.yml` | Only at a named gate (playtest, judgement) |
+| 5. Deploy → **Merge** | Every change reaches `main` through a PR on `bpaksi/bloodtower`. Lefthook runs Gitleaks on every commit, and on a code commit the part of `pnpm check` the staged files can break (`scripts/pre-commit-check.mjs`); CI runs Gitleaks on every PR, `pnpm check` except on a lite docs/design/packs diff (which runs the card lint and the pack checks instead), and the e2e suite when the diff can reach the Bloodtower build; one adversarial review (round 1) posts findings, the developer fixes the blockers, and fix-check rounds confirm the fixes, for up to 3 rounds in all. The coordinator squash-merges, one PR at a time, once CI is green and the latest review says `Blocking: none`, and, for a feature PR, the eval table is all-pass on the head (see Merging). | `REVIEW.md`, `.claude/settings.json` hooks, PRs | None. Bob may look at any PR; it is optional. Nobody commits to `main` directly. |
 | 6. Maintain | Skipped during Explore. Findings become gap entries, research notes, or a new intent. | Gap register, `research/` | — |
 
 ## Tiers
@@ -50,9 +50,27 @@ Promoting an Experiment to Full: write a spec from what was learned, then contin
 | Branches | `<type>/<app>-<slug>` (e.g. `feat/tower-poc-lights`); repo-wide work uses `chore/<slug>` |
 | Commits | Conventional commits with the app as scope: `feat(tower-poc): …` |
 
+## Where IDs live
+
+Documents, commits and code comments cite IDs. Each kind has one home.
+
+| ID looks like | What it is | Where to find it |
+|---|---|---|
+| `DEC-143`, `MEC-038`, `Q-401`, `SCR-007`, `UI-026`, `CUE-010`, `AREA-097`, `IDEA-`, `OPT-`, `ART-`, `SND-`, `AST-B08` and the other card prefixes | A game-design card | `research/game-design/cards/<ID>.md`, or `pnpm graph show <ID>`. The prefixes are listed in [cards/README.md](../research/game-design/cards/README.md) |
+| `D36` | A row in an app's architecture decision log | That app's `spec.md`, §1. Bloodtower's run D1 to D48 |
+| `0003` | A cross-app decision record | `research/decisions/NNNN-*.md` |
+| `EV-19` | One check in a feature's evals. Numbers restart in each feature | `apps/bloodtower/plans/briefs/<plan>/<##-feature>/eval.md` |
+| `C3-06`, `C2/05`, `A1-7` | A feature or step of a milestone plan | `apps/bloodtower/plans/<plan>-*.md` and its folder under `plans/briefs/` |
+| `G-plan`, `G-C2`, `G-1.0`, `G0`, `G-A` | A gate Bob signs | "Human gates" below, and the plan that names the gate |
+| `GC1-04` | A follow-up from the G-C1 playtest | `apps/bloodtower/docs/playtests/2026-10-31-G-C1.md` |
+| `P-006` | A probe: a scripted game played from the cards | `research/game-design/probes/` |
+| `RV-C1`, `RV-P3` | A row of the RtDT review check | `research/game-design/design-check-rtdt-review.md` |
+| `R-ENG-7`, `R-SES-17`, `R3-UI-22` | An early requirement. History: a card wins where they differ (DEC-610) | `research/game-design/requirements.md` and the other pre-card documents |
+| `PRD-12`, `AT-12b`, `SC-2` | The funeral POC's requirements, acceptance tests and success criteria | `apps/burgomaster-funeral-poc/docs/PRD.md` |
+
 ## Guardrails (skills are advisory, hooks and checks enforce)
 
-Hooks see Claude's edit tools exactly and read shell commands on a best-effort basis: they catch the ordinary ways to change a file (`sed -i`, `rm`, `mv`, redirects, scripts) but cannot follow everything a shell can do. Where a rule can be checked on the result, `pnpm check` does that too, and it gates every commit.
+Hooks see Claude's edit tools exactly and read shell commands on a best-effort basis: they catch the ordinary ways to change a file (`sed -i`, `rm`, `mv`, redirects, scripts) but cannot follow everything a shell can do. Where a rule can be checked on the result, `pnpm check` does that too. Its static checks (pins, cross-app imports, briefs) run on every code commit, and the whole of it runs in CI on the pull request.
 
 Reading a shell command is a guess about where it runs. When a `cd` or `git -C` cannot be read for certain (a variable, a glob, a pipe, a folder that is not there), the hooks check the command against every folder it might run in, including the one the call started in, and block if any of them is hit. A variable or a command substitution may name a folder that is none of those, so a git command that discards work across a folder is refused outright when its target is one; give it a literal path. Known limits, where the hooks do not see the change of folder at all: `pushd`, a `cd` inside `{ … }` or after `then`, a here-document, and a command substitution used as a path, quoted or not. Pipelines are read the way zsh runs them. The limits matter most for git commands that discard uncommitted work, because nothing is left for the reviewer to see.
 
@@ -61,8 +79,8 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 | No edits to `apps/*/intent/**` by Claude (Bob's words) | PreToolUse hook on edits and shell commands → exit 2. Backstop: `adversary-bugs` checks the diff. |
 | No direct commits on `main` | PreToolUse hook on git commands that commit on `main` or move it → exit 2. `main` changes only by a squash-merged PR. |
 | A developer agent writes only inside its own worktree | `worktree-guard` PreToolUse hook on edits and shell writes, active in any checkout with a `.wt.json` → exit 2. Temp folders stay writable; the main checkout and other worktrees do not, even when they sit in a temp folder. |
-| A PR merges only on green CI | `check` workflow on every PR. Branch protection on `main` requires the `check` status and an up-to-date branch. The coordinator also merges only when the latest review ends in `Blocking: none`, and, for a feature PR, when the eval table is all-pass on the head. |
-| The ordinary ways to skip `pnpm check` on a commit are blocked | The same hook blocks `--no-verify`, `-n`, `LEFTHOOK=0` and `core.hooksPath` on committing git commands, on every branch → exit 2. Docs-only commits skip `pnpm check` by design (`lefthook.yml`). Gitleaks still scans the staged changes. CI skips the app suite the same way when a PR or a push to main stays inside the lite allowlist in `.github/workflows/check.yml` (Bob / Warden, 2026-10-25/26). The `check` job still runs Gitleaks and reports green. |
+| A PR merges only on green CI | `check` workflow on every PR. Branch protection on `main` requires the `check` status and an up-to-date branch. `check` is the workflow's last job: it passes only when the Gitleaks scan, the suite the diff needs and, where it ran, the e2e suite all passed. The coordinator also merges only when the latest review ends in `Blocking: none`, and, for a feature PR, when the eval table is all-pass on the head. |
+| The ordinary ways to skip the pre-commit check are blocked | The same hook blocks `--no-verify`, `-n`, `LEFTHOOK=0` and `core.hooksPath` on committing git commands, on every branch → exit 2. A code commit runs `scripts/pre-commit-check.mjs` (2026-11-11): Biome and the static repo checks always, then typecheck and tests for the app or shared package the staged files are in, plus the packages that depend on it. A root config file runs the full `pnpm check`. One slow suite, `bloodtower-assets` (about 88 s), runs only when a staged file is inside it or under `packs/`. The full `pnpm check` is the developer's before the PR and CI's on it. Docs-only commits skip the check by design (`lefthook.yml`). Gitleaks still scans the staged changes, and a commit that stages a file under `research/game-design/` runs the card lint (`pnpm check:cards`). CI skips the app suite the same way when a PR or a push to main stays inside the lite allowlist in `scripts/ci-scope.mjs` (Bob / Warden, 2026-10-25/26). It still runs Gitleaks, the card lint for a `research/game-design/` change and the pack checks (`pnpm check:packs`) for a `packs/` change. Those two were added on 2026-11-11, after lite PR #420 merged with a broken card link and a stale pack count and turned `main` red. |
 | Pinned `ultimatedarktower` cannot be bumped silently | Pins live in `scripts/pinned-versions.json`. `scripts/check-pins.mjs` in `pnpm check` fails on any other version in a `package.json` or the lockfile. A PreToolUse hook warns earlier, on the edit or install command. |
 | No raw-bytes message type in a tower protocol | Protocol unit test plus an `adversary-bugs` check |
 | Test-first bug fixes | `/bugfix` skill: commit the failing test first. A hook blocks edits and shell changes to test files on `fix/*` branches after the first commit. Removing a `.fails` marker, and nothing else, stays allowed so the fix can be proven. |
@@ -75,7 +93,7 @@ Reading a shell command is a guess about where it runs. When a `cd` or `git -C` 
 ```text
 CLAUDE.md                       # < 1 page: repo map, commands, conventions, known mistakes
 apps/<app>/CLAUDE.md            # optional, app-specific notes only (Claude loads it when working in that folder)
-REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; Important vs Nit; nit cap 5
+REVIEW.md                       # review passes: bugs, physical-action safety, spec/plan compliance; what blocks (as §4); nit cap 5
 .claude/settings.json           # hooks + permissions
 .claude/hooks/*.mjs, format.sh    # guards, with hooks.test.mjs run by pnpm check
 .claude/agents/verifier.md      # fresh context: runs the feature's eval.md and posts the eval table (screenshot EVs side by side, no pixel threshold); no eval.md: checks + Playwright + screenshots; reports, never fixes code or evals (model: haiku)
@@ -90,6 +108,10 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/skills/gap-entry/SKILL.md          # gap with evidence + confidence
 .claude/skills/stitch/SKILL.md             # third-party: drives the `stitch` CLI (Stitch designs, DESIGN.md); project bound in .stitch.json
 .claude/skills/scrollytelling/SKILL.md     # third-party: guidance for scroll-driven pages (layout patterns, accessibility, performance)
+.claude/skills/bt-assets/SKILL.md             # Bloodtower: needs, render, pack, import and redo for a story's assets
+.claude/skills/bt-design-session/SKILL.md     # Bloodtower: a game-design session in its own worktree, one question at a time, one card commit per ruling
+.claude/skills/cleanup-worktrees/SKILL.md     # report merged step worktrees and branches, delete after Bob's OK
+.claude/skills/google-tts/SKILL.md            # text to speech with the Gemini API, for voice lines
 ```
 
 ## Commands
@@ -135,6 +157,21 @@ An app plan names which of these it uses. Batch evidence (below) is posted for B
 - **Coding agents are Cursor cloud agents.** Wright (Bob's Grok Bot build partner) launches one per plan step, each on its own branch. Each cloud agent follows `.claude/agents/developer.md`, runs `pnpm check`, and opens a PR on `bpaksi/bloodtower` with the plan step id and evidence.
 - **Wright (Bob's Grok Bot build partner) is the coordinator** (`.claude/agents/coordinator.md`). He runs the adversary loop (§4), either by asking the step's cloud agent to run the `adversary-*` instructions or by launching separate reviewer cloud agents with them, and he merges when CI is green and nothing is blocking.
 - **Claude Code on the Mac** stays valid for tower and hardware work, which needs the Bluetooth link. Local agents use the `pnpm wt` worktree flow below; cloud agents already run in their own clones, so they skip it.
+
+## Named roles
+
+The plans, briefs and cards name these roles. This table records how the documents use each name (collected 2026-11-11); it sets no new rule.
+
+| Name | What the documents have it do | Where that is said |
+|---|---|---|
+| Bob | Owns intent and the design rulings, approves plans, evals and mockups, signs the gates, and runs anything on the real tower | "Human gates" above; `CLAUDE.md` |
+| Wright | Bob's Grok Bot build partner. The coordinator: launches the developers, runs the review loop, squash-merges code PRs | "Who runs the agents" above; `AGENTS.md`; `.claude/agents/coordinator.md` |
+| Gamewright | Game design and planning. Writes each feature's `plan.md` and `eval.md`, makes design proposals for Bob to accept, reviews requirements with Wright, and reviews and squash-merges design-session PRs | `apps/bloodtower/plans/briefs/README.md`; "Requirement review before build" below; the `bt-design-session` skill |
+| Warden | Review and the rules of the process. Reviews briefs for completeness, may record Bob's approval in `approval.md`, and set the lite CI rule with Bob | `apps/bloodtower/plans/briefs/README.md`; the lite CI rows in this file |
+| Illusionist | The look, art, voices and sound. Draws each screen feature's `mockup.html` and owns the render pipeline | `apps/bloodtower/plans/briefs/README.md`; `research/game-design/asset-organization.md` |
+| Loremaster | Story scripts and lines. Also the name of the in-game narrator in the packs, so read it in context | `research/stories/dracula/dracula-asset-map.md`; `apps/bloodtower/plans/A1-asset-adapter.md` |
+| Claude Code | Runs on Bob's Mac. Writes plans and feature folders, runs design sessions, and does tower and hardware work with Bob. Opens PRs and never merges them | "Who runs the agents" and "Local mode" in this file |
+| Cursor cloud agents | The developers: one per plan step, each on its own branch, following `.claude/agents/developer.md` | "Who runs the agents" above |
 
 ## Local mode (cloud agents unavailable)
 
@@ -214,12 +251,17 @@ Approving the plan (G-plan) approves its batches. A step may not start before it
 ### 4. Merging: pull requests, serial
 
 1. The developer commits in its worktree, pushes the branch and opens a PR with `gh pr create`. The body names the plan step id and carries the evidence (the `pnpm check` exit code and test counts, what was not verified).
-2. CI (`.github/workflows/check.yml`) runs Gitleaks on the pull request's commits. It runs `pnpm check` unless every changed path is under `research/game-design/`, `docs/`, `packs/`, `assets/stories/`, or `assets/app-icon/` (lite CI; Bob / Warden, 2026-10-25/26). A push to main that also touches any other path runs the full suite. The job name stays `check`.
+2. CI (`.github/workflows/check.yml`) runs Gitleaks on the pull request's commits, then decides the rest from the changed paths (`scripts/ci-scope.mjs`, with its own tests):
+   - **Full.** Any path outside the lite allowlist runs `pnpm check`. A push to main that touches such a path does too.
+   - **Lite** (Bob / Warden, 2026-10-25/26). Every changed path is under `research/game-design/`, `docs/`, `packs/`, `assets/stories/`, or `assets/app-icon/`. It skips `pnpm check`. A `research/game-design/` change runs the card lint (`pnpm check:cards`); a `packs/` change runs the pack lint and the tests that read packs (`pnpm check:packs`).
+   - **e2e.** A pull request that touches `apps/bloodtower/`, `packages/`, `packs/`, a root config file, `scripts/` or a workflow also runs the Playwright suite. Other apps, `research/`, `docs/`, `.claude/`, root documents, and Bloodtower's own `plans/`, `docs/` and markdown files do not: nothing the build, the host or the e2e tests read is in them. Pushes to main run it from `e2e-main.yml`, which is not required.
+
+   The required status is still the job named `check`. It is now the last job and fails if any job before it failed or was cancelled.
 3. The verifier (`.claude/agents/verifier.md`) is launched in a fresh context, never in the implementer's session. It posts the eval table on each head that A/B review reads, and after each code-changing fix round.
 4. **Review loop, at most 3 rounds.** Each report ends in `Blocking: none` or `Blocking: <count>`. GitHub does not let an account approve its own PR and every agent posts as Bob, so the `Blocking:` lines are what count.
    - **Round 1, adversarial (Opus).** `adversary-bugs` attacks the diff: bugs, edge cases, races, security and privacy, tower safety, weak tests, plus every `REVIEW.md` pass. If the step claims PRD, AT or SC ids, `adversary-prd` (Haiku) checks those in parallel by reading; otherwise it does not run. Docs-only PRs get one Sonnet `adversary-bugs` pass for consistency and nothing else.
    - **Rounds 2 and 3, fix-check (Sonnet).** `adversary-bugs` with a Sonnet override reads only the open findings and `git diff <last reviewed sha>..HEAD`. It confirms each finding is fixed and that the fix broke nothing next to it. It does not hunt for new problems; a new blocker is allowed only when the fix itself caused it.
-   - **Trust CI.** Reviewers do not run `pnpm install`, `pnpm check` or the full e2e suite: on a change outside the lite allowlist, CI and the developer did, on the same head. A lite docs/design/packs PR did not run the app suite. A reviewer may run single spec files or a throwaway probe to prove a suspicion.
+   - **Trust CI.** Reviewers do not run `pnpm install`, `pnpm check` or the full e2e suite: on a change outside the lite allowlist, CI and the developer did, on the same head, and CI ran the e2e suite when the diff could reach the Bloodtower build. A lite docs/design/packs PR ran only the card lint and the pack checks. A reviewer may run single spec files or a throwaway probe to prove a suspicion.
    - **What blocks** (nothing else does): a regression against `main`; a `Done when` item that is not met, or not proven by a test that can fail; a broken standing rule (tower safety, privacy, D7-style message rules, unknown shown as zero, an error eaten, hidden or not shown to the person whose action caused it, in code the PR adds or changes); a change outside `Touches` or an unflagged dependency change. Everything else is non-blocking: a nit (cap 5), a spec hole for Bob, or a follow-up the coordinator files as an issue.
    - **Short reports.** At most about 1,500 characters: findings with file, line, what breaks and how to reproduce. No restated test counts or measurement tables unless they prove a blocker. Later rounds and the developer read every report, so length costs every round after it.
    The developer fixes the blocking findings, pushes, and answers on the PR in one short comment (finding → commit). Claude Code's agent `model:` field takes an alias (`opus`, `sonnet`, `haiku`) or a full Claude model id, and the Agent tool can override it per call; that is how rounds 2 and 3 run `adversary-bugs` on Sonnet.

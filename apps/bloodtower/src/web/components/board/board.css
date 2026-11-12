@@ -26,6 +26,11 @@
   --bt-size-number: clamp(2.5rem, 3.4vw, 4rem);
   --bt-size-prompt: clamp(2.25rem, 3.2vw, 3.75rem);
   --bt-size-label: 1.75rem;
+  /* Safe margin: the board's own outer padding (A1-07). */
+  --bt-safe-x: clamp(1rem, 2.2vw, 2.25rem);
+  --bt-safe-y: clamp(0.8rem, 1.6vh, 1.6rem);
+  /* Asset id label: 15.4px at 1920 wide, never under 14px or over 16px. */
+  --bt-size-asset-id: clamp(0.875rem, 0.8vw, 1rem);
   --bt-tracking-label: 0.12em;
   --bt-rule-gold: 1px solid color-mix(in srgb, var(--bt-candle) 55%, transparent);
   --bt-ease-ink: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -43,7 +48,7 @@
   height: 100dvh;
   max-height: 100dvh;
   min-height: 0;
-  padding: clamp(0.7rem, 1.6vh, 1.4rem) clamp(1rem, 2.2vw, 2.25rem) clamp(0.8rem, 1.6vh, 1.6rem);
+  padding: clamp(0.7rem, 1.6vh, 1.4rem) var(--bt-safe-x) var(--bt-safe-y);
   overflow: hidden;
   color: var(--bt-bone);
   font-family: var(--bt-font-body);
@@ -2736,6 +2741,8 @@
 
 .bt-join-corner .bt-join-code {
   font-size: clamp(0.9rem, 1.4vw, 1.5rem);
+  /* The title face's figures stand taller than 1em; at line-height 1 they spill the line box. */
+  line-height: 1.25;
 }
 
 .bt-base-steps {
@@ -2774,4 +2781,19 @@
   width: 45%;
   height: 100%;
   background: #c9a85a;
+}
+
+/* Asset id label (A1-07, D46). Debug only: rendered when the build has SHOW_ASSET_IDS=1. */
+.bt-board .bt-asset-id {
+  position: fixed;
+  bottom: var(--bt-safe-y);
+  left: var(--bt-safe-x);
+  z-index: 20;
+  margin: 0;
+  color: var(--bt-parchment-dark);
+  font-family: var(--bt-font-label);
+  font-size: var(--bt-size-asset-id);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }

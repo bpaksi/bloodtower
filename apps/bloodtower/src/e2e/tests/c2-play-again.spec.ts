@@ -279,7 +279,7 @@ test("drill in to a quit game, Play again with prefilled claims, and its seed (E
     await expect(boardMain(board.page).locator("h1")).toHaveText("Game 1");
     await expect(boardMain(board.page).locator("[data-stat-row]")).toHaveCount(7);
     expect(await statRows(board.page)).toEqual({
-      Story: "Proving Grounds",
+      Story: "The Ruined Keep",
       Outcome: "quit",
       "Time played": "—",
       "Quit on day": "3",

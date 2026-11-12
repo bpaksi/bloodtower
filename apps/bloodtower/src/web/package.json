@@ -11,8 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@asset-studio/formats": "0.2.0",
-    "@asset-studio/player": "0.2.0",
+    "@asset-studio/formats": "0.2.2",
+    "@asset-studio/player": "0.2.2",
     "@base-ui/react": "1.9.0",
     "bloodtower-protocols": "workspace:*",
     "class-variance-authority": "0.7.1",

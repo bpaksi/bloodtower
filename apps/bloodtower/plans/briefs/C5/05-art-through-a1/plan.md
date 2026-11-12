@@ -8,7 +8,7 @@ Keep this a checklist; do not write a second design doc.
 - Feature: 05-art-through-a1
 - Kind: pack
 - Owner: Gamewright (plan, evals); a Wright developer (build)
-- Related AREA/docs: AREA-097, A1 plan, DEC-199, DEC-202, DEC-349, DEC-386, DEC-593
+- Related AREA/docs: AREA-097, A1 plan, DEC-199, DEC-202, DEC-349, DEC-386, DEC-593; art specs (PROPOSED parts unruled): [C5-05-ruined-keep-art.md](../../../../../../research/game-design/specs/C5-05-ruined-keep-art.md)
 - Evals: ./eval.md
 - Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "traitor.jakob-unmasked~vo-01",
+    "speaker": "narrator",
+    "text": "Jakob sets down his ledger. You found the right column, he says. He hands you holy water, and asks to be locked in.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  },
+  {
+    "id": "traitor.andrei-unmasked~vo-01",
+    "speaker": "narrator",
+    "text": "Andrei sits down on the stair. The voice promised him his sister would be spared. He will not open a door for it again.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  },
+  {
+    "id": "traitor.marta-unmasked~vo-01",
+    "speaker": "narrator",
+    "text": "Marta turns the key over in her hand. You know, then. When you reach his bridge, it will come down without a sound.",
+    "est_s": 13.2,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  },
+  {
+    "id": "traitor.wrong~vo-01",
+    "speaker": "narrator",
+    "text": "The wrong name. The one you accused only stares at you. Somewhere on the hill, someone is laughing.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  },
+  {
+    "id": "traitor.jakob-sprung~vo-01",
+    "speaker": "narrator",
+    "text": "Jakob kept his ledger open all along. He sold him your road, and he is already on it.",
+    "est_s": 11.2,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  },
+  {
+    "id": "traitor.andrei-sprung~vo-01",
+    "speaker": "narrator",
+    "text": "At the burgomaster's house, Andrei lifts the latch and stands aside. He was promised mercy. The mist goes in.",
+    "est_s": 11.6,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  },
+  {
+    "id": "traitor.marta-sprung~vo-01",
+    "speaker": "narrator",
+    "text": "At the castle, the little gate is barred from inside. Marta has gone up to pour his wine, and will not come down again.",
+    "est_s": 13.6,
+    "status": "DRAFT",
+    "lengths": "Standard, Long"
+  }
+]
