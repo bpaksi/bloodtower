@@ -62,6 +62,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: 2 present heroes; the Selfish holder tries to give a virtue tile (and an item) to the other; then the other hero gives one to the Selfish holder.
 - Pass evidence: the holder's give is refused and nothing moves; the other hero's give to the holder succeeds.
 - Fails if: the holder can give a card, or Selfish also blocks receiving.
+- Note (Gamewright, 2026-11-12, DEC-894): 1.0 has no hero-to-hero give action and DEC-544 forbids tile trades, so this runs against a stand-in pass rule in test code that would move a tile and an item. It tests the engine's `may this hero give?` guard, which every card-passing rule must call. No give action ships.
 
 ### EV-08 — Corruptions outside C3 are never drawn
 - Requirement: DEC-466 (C4), DEC-467 and DEC-469 (1.1, DEC-718).
@@ -69,6 +70,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: fixed seed; 1,000 corruption draws in C3.
 - Pass evidence: DEC-466, DEC-467 and DEC-469 never appear; every draw is in the C3 set.
 - Fails if: any of the three is drawn.
+
+### EV-11 — Price order: free cure, Silver Tongue, then Tempted once
+- Requirement: DEC-896, DEC-477, DEC-700.
+- Method: unit
+- How: (a) two Tempted holders in one group; a rally; (b) a Tempted holder's first cure of the chapter; (c) a Tempted holder's second cure; (d) a Silver Tongue holder buying at a village or bazaar price with a Tempted holder in the group.
+- Pass evidence: (a) 5 + 2 = 7, not 9; (b) 0, with no surcharge; (c) the cure price for the hero's corruption count plus 2; (d) the quarter off is taken before the +2 and never cuts the +2.
+- Fails if: Tempted stacks per holder, a free cure takes a surcharge, or the surcharge is discounted.
+- Added by Gamewright 2026-11-12 under Bob's 11/1 small-tweak rule; no amount changes.
+
+### EV-12 — Gold losses fire per holder from their own part
+- Requirement: DEC-896, DEC-176, DEC-470, DEC-472.
+- Method: unit
+- How: two heroes both hold Cruel, with 5 and 1 gold in their own parts; the group takes a village pick. Then an Uncertain holder picks at a building and also holds Feral.
+- Pass evidence: the first hero loses 2 and the second loses 1, down to 0, and nothing is taken from another hero. The Uncertain holder's turn ends after the pick, and Feral then fires once: the order is pay, pick-triggered losses, Uncertain's end of turn, turn-end losses.
+- Fails if: a loss is shared, a loss goes below 0 or takes from another hero's part, or Feral does not fire after Uncertain.
+- Added by Gamewright 2026-11-12 under Bob's 11/1 small-tweak rule; no amount changes.
+
+### EV-13 — A save from before this feature is refused; the tuning keys are required
+- Requirement: DEC-895, DEC-703.
+- Method: unit
+- How: Continue on a count-only fixture taken from `main` before this feature; then load a base tuning file with one of the five corruption keys removed.
+- Pass evidence: Continue refuses the save as unreadable and offers a new game, with no corruption invented; the tuning load fails with the missing key named, and `pnpm pack:lint:all` fails on it.
+- Fails if: the save loads with counts and no IDs, a corruption is backfilled, or a missing key falls back to a default.
+- Added by Gamewright 2026-11-12 under Bob's 11/1 small-tweak rule.
 
 ## Survival evals (one per survival invariant in plan.md)
 

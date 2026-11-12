@@ -11,18 +11,20 @@ Start the evening once: join, base board out, tower decided and ready, before th
 4. Tower choice (.5, SCR-005): "Wake the tower, or play tonight without it?". iPad: Connect Tower (primary), Play without Tower.
 5. Connecting / Calibrating (.8 to .10, CUE-011): board progress state. No iPad buttons.
 6. Connect or calibrate failed (.11): back to state 4 (DEC-711 notes the loop). status "Tower not found", line "The tower did not answer. Try again, or play without it.".
-7. Volume (.20 to .25, SCR-006, SND-058): moved to the start of Pick story, after Enable sound (Bob 2026-10-31 10:30 AM ET; see "Sound first on Pick story"). Board "How loud should the tower be? Press one to hear it."; iPad Volume 0 / 1 / 2, each plays Dungeon Complete once only on press; Keep and Try another show with them (mockup). Keep is disabled until a volume has been played.
-8. Without tower: states 5 and 6 skipped (DEC-275, DEC-305); Enable sound and the levels still run on Pick story, for the iPad's level only.
+7. Volume (.20 to .25, SCR-006, SND-058): moved to the start of Pick story, connect track only (Bob 2026-10-31 10:30 AM ET; DEC-903 removed the per-iPad Enable sound step before it; see "Sound on Pick story"). Board "How loud should the tower be? Press one to hear it."; iPad Volume 0 / 1 / 2, each plays Dungeon Complete once only on press; Keep and Try another show with them (mockup). Keep is disabled until a volume has been played.
+8. Without tower: states 5, 6 and 7 skipped (DEC-275, DEC-305, DEC-903). No volume step and no volume line; Pick story opens on the story list.
 - Glyphs and facing (.13 to .19) left out until feature 12.
 
-## Sound first on Pick story (Bob 2026-10-31 10:30 AM ET)
-Browsers block audio until a tap, so sound is the first thing on Pick story:
-1. State 7a, Enable sound: each iPad shows only the prompt "Tap once to turn on this iPad's sound." and one primary button "Enable sound", plus the chrome (bottom toolbar: "?" at the left, Menu gear at the right; feature 04); nothing else (locked copy, Bob 2026-10-31 10:33 ET). Its tap unlocks that iPad's browser audio. Every iPad needs its own tap; one iPad's tap never unlocks another. No sound plays before it. The Story board during 7a shows the Pick story backdrop with the volume line "How loud should the tower be? Press one to hear it." greyed out; it shows at full strength from 7b on (Bob 2026-10-31 6:15 PM ET; reverses the earlier no-line default).
-2. State 7b, set levels: right after its unlock, that iPad shows the volume step (state 7). Keep stays disabled until a volume has been played.
-3. After Keep: the story list.
+## Sound on Pick story (DEC-903, Gamewright 2026-11-12)
+No iPad plays sound, so there is no per-iPad unlock (DEC-201). The Story board's audio is unlocked by the first click or key on the landing page (SCR-003, feature 02).
+1. Connect track: Pick story opens on the volume step (state 7) on every iPad. The Story board shows the line "How loud should the tower be? Press one to hear it." at full strength. Keep stays disabled until a volume has been played on the tower.
+2. After Keep: the story list.
+3. Without tower: no volume step, no volume line; Pick story opens on the story list.
+
+Removed 2026-11-12 (DEC-903): state 7a, the prompt "Tap once to turn on this iPad's sound.", its button "Enable sound" (locked copy, Bob 2026-10-31 10:33 AM ET), and the greyed-out board volume line (Bob 2026-10-31 6:15 PM ET).
 
 ## Player actions
-Scan QR; Board is set up (any iPad); Connect Tower / Play without Tower; Enable sound (each iPad, on Pick story); Volume 0/1/2; Keep (disabled until a volume has played) / Try another. Nothing physical without a press (SCR-005).
+Scan QR; Board is set up (any iPad); Connect Tower / Play without Tower; Volume 0/1/2; Keep (disabled until a volume has played) / Try another. Nothing physical without a press (SCR-005).
 
 ## Mechanics
 MEC-039, DEC-273, DEC-274, DEC-152, DEC-275, DEC-104 (board before tower), DEC-278, SCR-015, SCR-022, SCR-005, SCR-006, UI-010, CUE-011, AREA-100.
@@ -30,7 +32,7 @@ MEC-039, DEC-273, DEC-274, DEC-152, DEC-275, DEC-104 (board before tower), DEC-2
 - Restart: mid-Enter starts again from the join; after the Enter, on a restart the session resumes with tonight's tower choice and no Enter (no tower question) (Bob 2026-10-31).
 
 ## What happens next
-Today: Pick story (SCR-007) for the first game, starting with Enable sound and levels. After feature 06: the session screen (SCR-021).
+Today: Pick story (SCR-007) for the first game, starting with the levels (connect track only). After feature 06: the session screen (SCR-021).
 
 ## Open questions
 - Resolved: the three step texts above ship (mockup wins). Art per step still has no ART card.

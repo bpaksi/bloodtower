@@ -101,7 +101,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-13 — The happy path never needs the Menu
 - Requirement: the happy path uses only the iPad body's flow buttons; exceptions go through the gear (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
-- How: run the C2 happy path (join → claim → Enter → Pick story → Enable sound → Volume Keep → settings → Begin → base board setup → day one) with Menu opens counted.
+- How: run the C2 happy path (join → claim → Enter → Pick story → Volume Keep (connect track) → settings → Begin → base board setup → day one) with Menu opens counted.
 - Pass evidence: the run ends in play with Menu open count 0 and help open count 0.
 - Fails if: any step can only be reached through the gear or help.
 

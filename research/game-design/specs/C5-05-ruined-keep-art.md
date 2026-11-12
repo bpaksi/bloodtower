@@ -10,7 +10,7 @@ Design-only handoff by Gamewright, 2026-11-10 (ET), for Illusionist. It gives ev
 - **Pipeline (LOCKED):** AI drafts through A1, then Bob approves each final in the studio (Q-C5-06); masters and WAVs stay in the work folder; shipped files are content-hashed WebP and m4a with `index.json` (DEC-386, DEC-622). Old saves keep working because IDs are stable (DEC-202; C5-05 EV-05).
 - **Panning Paintings (LOCKED):** a story Painting that drifts is 16:9 at 3840×2160, 1.5× max zoom, key detail out of the bottom third (DEC-206, DEC-575). Base-game-style stills that do not move need only 1080p (DEC-347).
 - **Spoiler rule (from DEC-662, script):** no art shown before The Barrow may show the Warden's crest whole. Raiders' shields have the crest scratched off; the sworn guard wear it openly only in chapter 3.
-- **Voice (LOCKED):** only the Loremaster's lines are voiced (Q-C5-07; DEC-349), audio plus captions, no Portrait (approval change note, Nov 2). Voice and its provisional status, format, loudness and duration rules are as for `seal-break.01~vo-01` in [A1-art-specs.md](A1-art-specs.md) §3: Charon provisional, final voice pending; WAV master to m4a; about −18 LUFS (R3-UI-60, game-look §6); estimated over 20 s rejected (A1-P2 D6); caption ≤ 120 characters (DEC-576).
+- **Voice (LOCKED):** only the Loremaster's lines are voiced (Q-C5-07; DEC-349), audio plus captions, no Portrait (approval change note, Nov 2). Voice, format, loudness and duration rules are as for `seal-break.01~vo-01` in [A1-art-specs.md](A1-art-specs.md) §3: Charon, locked (Bob 2026-11-10, DEC-902); WAV master to m4a; about −18 LUFS (R3-UI-60, game-look §6); estimated over 20 s rejected (A1-P2 D6); caption ≤ 120 characters (DEC-576).
 
 ---
 

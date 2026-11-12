@@ -22,3 +22,12 @@ Play again → (tower block if lost, DEC-711) → skips Pick story and Game sett
 ## Open questions
 - Which stats the day slice records is not listed on a card; the brief says "unavailable" for the rest. Need the C2 stats list.
 - Resolved: the optional fun rating shows for a quit game and never blocks (mockup). A quit game shows "—" for Time played, as in the mockup (Bob 2026-10-31).
+
+## Copy (locked 2026-11-12, DEC-897)
+
+While an autosave exists, Play again opens one dialog on the iPad and the same lines on the Story board:
+- Title: "Play again?"
+- Lines: "Same heroes, a fresh board." and "This replaces the saved game. Are you sure?"
+- Buttons: "Play again" (primary), "Back".
+- Story board band: "Waiting for an iPad to play again or go back." (Bob, 2026-11-02 and 2026-11-10, unchanged.)
+- No autosave: no dialog; Play again goes straight to the claims.
