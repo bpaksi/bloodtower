@@ -64,13 +64,13 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 2 | `chapter.1.name` | The Roads | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) |
 | 3 | `chapter.1.goal` | Hear the herald in Greyford. Then open the forest road. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) |
 | 4 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster); the auto-advance tick (Bob 2026-10-31 10:38) |
-| 5 | `chapter.stamp.won` | Cleared | new - Loremaster (the stamp on the won card; mockup drew 'won' as a stand-in); DRAFT - needs Gamewright |
+| 5 | `chapter.stamp.won` | Cleared | new - Loremaster (the stamp on the won card; mockup drew 'won' as a stand-in); final |
 | 6 | `chapter.close-scroll` | The roads are quiet again. | locked: the close line (Bob approved 2026-10-31, screen-spec); mockup's longer sample is not used |
 | 7 | `chapter.2.name` | The Keep | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (C4+; the card is the same view) |
 | 8 | `chapter.2.goal` | Go down into the barrow under the old keep. Find the shrine on the road beside it. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (C4+) |
 | 9 | `chapter.3.name` | The Tower | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (C4+) |
 | 10 | `chapter.3.goal` | Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (C4+) |
-| 11 | `seal.boon` | Its glyph lends you strength: {boon}. | new - Loremaster (C4+ only, shown when c3_end_after_chapter_1 is off; the app picks the boon, Q-C3-17);; replaces the old placeholder; DRAFT - needs Gamewright |
+| 11 | `seal.boon` | Its glyph lends you strength: {boon}. | placeholder - reconfirm at C4 boons (approved placeholder; C4+ only, shown when c3_end_after_chapter_1 is off; the app picks the boon, Q-C3-17) |
 | 12 | `seal.done` | Done | C3 button; C4-13 replaces it with 'Seal broken' (C4+ only) |
 | 13 | `skulls.prompt` | Skulls are freed. Choose a kingdom. | C4-13 board line (C4+ only; same view) |
 | 14 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |

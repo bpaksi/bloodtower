@@ -54,13 +54,13 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
-| 1 | `board.title` | The Tomb. Rooms found: {N}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 1 | `board.title` | The Tomb. Rooms found: {N}. | locked 2026-10-31 (Loremaster); same text in screen-spec; pack: test pack and evals |
 | 2 | `board.undead` | Undead Advantage: {N}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 3 | `board.corridor` | A cold corridor. Three doors wait. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 4 | `board.listen-hint` | You hear something behind the door. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 5 | `board.trap` | A trap. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 6 | `board.battle` | Something wakes in the dark. | locked 2026-10-31 (Loremaster); same text in screen-spec |
-| 7 | `board.exit` | The Exit is open. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 7 | `board.exit` | The Exit is open. | locked 2026-10-31 (Loremaster); same text in screen-spec; pack: test pack and evals |
 | 8 | `ipad.choose-way` | Choose a way | mockup.html (iPad prompt over the three cards) |
 | 9 | `button.left` | Left | screen-spec (exact label) |
 | 10 | `button.ahead` | Ahead | screen-spec (exact label) |
@@ -78,8 +78,8 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 22 | `ipad.exit.title` | The Exit | mockup.html |
 | 23 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster) |
 | 24 | `ipad.see-board` | See the Story board. | new - Loremaster (first drawn in mockup.html) |
-| 25 | `pack.board.title` | The barrow. Rooms found: {N}. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (Ruined Keep pack skin of board.title) |
-| 26 | `pack.board.exit` | The way out is open. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (Ruined Keep pack skin of board.exit) |
+| 25 | `pack.board.title` | The barrow. Rooms found: {N}. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (pack: The Ruined Keep and its evals; skin of board.title) |
+| 26 | `pack.board.exit` | The way out is open. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (pack: The Ruined Keep and its evals; skin of board.exit) |
 | 27 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
 | 28 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
 | 29 | `help.title` | Help | C2 feature 04 |

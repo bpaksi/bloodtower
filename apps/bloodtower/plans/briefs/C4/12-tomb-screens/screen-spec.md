@@ -19,7 +19,7 @@ DEC-583's two halves side by side: the map (found rooms, current glowing, doorwa
 
 ## States and player actions
 
-- Board: shows the state and every line "The Tomb. Rooms found: {N}. / Undead Advantage: {N}. / A cold corridor. Three doors wait. / You hear something behind the door. / A trap. / Something wakes in the dark. / The Exit is open." (Copy table: board.* rows); never scrolls.
+- Board: shows the state and every line "The Tomb. Rooms found: {N}. / Undead Advantage: {N}. / A cold corridor. Three doors wait. / You hear something behind the door. / A trap. / Something wakes in the dark. / The Exit is open." (Copy table: board.* rows); never scrolls. The test pack shows "The Tomb…" and "The Exit is open."; The Ruined Keep pack shows "The barrow…" and "The way out is open." (Copy table: pack.board.*).
 - Pit (its own state): the iPad title is "Who takes the fall?" (Gamewright pick; Loremaster can override); the board and iPad read "The floor gives way. Choose one hero to take the fall and lose 4 hit points." (Copy table: trap.pit; locked); the iPads show one button per present hero; the first press takes 4 HP from that hero only, then the trap ends (DEC-606; Sentinel recheck 4).
 - Falling Rocks: every hero −2 HP; the board advances after its beat.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.

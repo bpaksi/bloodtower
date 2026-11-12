@@ -74,11 +74,13 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 19 | `button.change-pick` | Change pick | Q-C4-18 (Bob approved 2026-10-31) |
 | 20 | `ipad.sitting-out` | You are sitting out this battle. Watch the board. | locked 2026-10-31 (Loremaster); in screen-spec and EV-04 |
 | 21 | `ipad.group-chose-retreat` | The group chose Retreat. | new - Loremaster (EV-05: shown on iPad B when the group's Retreat wins) |
-| 22 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
-| 23 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
-| 24 | `help.title` | Help | C2 feature 04 |
-| 25 | `help.round-picker` | Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked. | locked 2026-10-31 (Loremaster); same text in screen-spec |
-| 26 | `help.close` | Close | C2 feature 04 |
+| 22 | `round.strike-bark.vo-01` | Now. Strike hard! | PT-31 / LQ-5 B (1.0 strike bark). Fires on the round picker's Attack button (Gamewright confirmed). Spoken by the hero who taps Strike, in that hero's voice; the engine picks one of the two at random. Caption equals the spoken text. |
+| 23 | `round.strike-bark.vo-02` | Stand with me. Strike! | PT-31 / LQ-5 B (1.0 strike bark). Fires on the round picker's Attack button (Gamewright confirmed). Spoken by the hero who taps Strike, in that hero's voice; the engine picks one of the two at random. Caption equals the spoken text. |
+| 24 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 25 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 26 | `help.title` | Help | C2 feature 04 |
+| 27 | `help.round-picker` | Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 28 | `help.close` | Close | C2 feature 04 |
 
 ## OPEN questions
 

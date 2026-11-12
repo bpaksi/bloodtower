@@ -64,6 +64,15 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] MEC-016: closed before coding (`decided`).
 - [ ] MEC-018: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `chapter.1.opening` | The roads out of Greyford are closed. Raiders have taken every cart for a month, and the lord's men are not coming. | research/stories/ruined-keep/script.md ('opening'; Bob accepted 2026-11-06); the narration hook EV-09 checks; 115 characters, one caption |
+| 2 | `chapter.card` | (see C3-15 Copy table: chapter.label, chapter.1.name, chapter.1.goal) | C3-15's Copy table owns the chapter card text |
+
 ## OPEN questions
 
 - ANSWERED Q-C3-01 (Bob, 2026-10-31 10:09 AM ET): clearing chapter 1 counts as the C3 win.
