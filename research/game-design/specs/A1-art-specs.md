@@ -82,7 +82,7 @@ Common rules for all three:
 | Asset id | `seal-break.01~vo-01`, a voiced line (moment `seal-break-1`), Default (Gamewright) demo assignment, decision 1. Provenance: maps from the C5-05 checklist ID `vo.loremaster.seal-break-1` to this job line only; no shipped ID is renamed. |
 | Purpose / where used | The G-A1 demo: the Loremaster narrates over `painting.cover` with `glow.cover` on the Story board, once, with the exact caption (G-A1-01). Loremaster is audio plus captions, no Portrait, no mouths (C5-05 approval change note, Nov 2; DEC-843). Played on the board's Mac speakers only (DEC-201). |
 | Text (LOCKED) | “The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep.” Source: `research/stories/ruined-keep/script.md`, Chapter 1 won, tag `seal break ch1, Loremaster`, accepted by Bob 2026-11-06. 97 characters (≤ 120, DEC-576/A1-13); fixed text, plays once, so it may be voiced (DEC-349). Caption = this text exactly, no pause markup. |
-| Voice | Gemini TTS **Charon**, “slow, low, ominous storyteller” (existing narrator voice, `assets/stories/dracula/scripts/cast.md`). **Provisional:** no source approves Charon as Ruined Keep's Loremaster; **final voice approval is pending** (Warden decision (a)). Style direction (PROPOSED, never spoken, P2-04b): grim, plain, unhurried, like reading an old record aloud; no theatrical swell (DEC-834). |
+| Voice | Gemini TTS **Charon**, “slow, low, ominous storyteller” (existing narrator voice, `assets/stories/dracula/scripts/cast.md`). **Locked:** Bob locked Charon as the Loremaster voice on 2026-11-10 (D-01); DEC-902 applies it to the Ruined Keep's Loremaster too. (Before 2026-11-12 this row read: no source approves Charon for the Ruined Keep, final voice pending.) Style direction (PROPOSED, never spoken, P2-04b): grim, plain, unhurried, like reading an old record aloud; no theatrical swell (DEC-834). |
 | Format | **Set by the repo:** PCM WAV master in the work folder → m4a shipped (P2-04a, DEC-386); duration measured and stored in the index (A1-P2 inventory). **PROPOSED:** mono, 24 kHz, 16-bit master (Gemini's native PCM; the repo sets no rate for real lines; the 22050 Hz rule in P2-04b is the pause-only/fixture case). m4a AAC-LC ~96 kb/s mono (PROPOSED). |
 | Loudness | **Set by the repo (requirement note, not a DEC card):** voice at about −18 LUFS integrated (R3-UI-60 in `playthrough-ui-notes-2026-10-17.md`; game-look.md §6: lines measure ≈ −18 LUFS, UI sounds ≈ −20 LUFS under VO). **PROPOSED:** −18 ±1 LUFS integrated, true peak ≤ −1 dBTP. |
 | Duration | **Set by the repo:** a line estimated over 20 s is rejected before any paid call; exactly 20 s passes (P1 preflight, A1-P2 D6). **PROPOSED target:** 7–10 s (19 words at a slow pace), with ≤ 250 ms of silence head and tail. |
@@ -100,7 +100,7 @@ Common rules for all three:
 
 **Open decisions**
 
-- **OPEN (Bob via Warden):** final Loremaster voice; Charon is provisional.
+- **Settled (Bob 2026-11-10, DEC-902):** the Loremaster voice is Charon.
 - **PROPOSED:** sample rate/bit depth, AAC bitrate, loudness tolerance and true-peak ceiling, 7–10 s target.
 - **OPEN (Wright, A1 runbook):** G-A1-01's “board/TV plays line once” has no A1 step that plays a packed line; add a playback step or reword G-A1.
 
@@ -112,7 +112,7 @@ A1 step 4's manual evidence: Bob renders 3 real Dracula lines with his key, afte
 
 | # | Line id | Speaker (voice, style) | Text (exact) | Why this one |
 |---|---|---|---|---|
-| 1 | `n1-burgomasters-house.06.vo-01` | `narrator` (Gemini Charon, “slow, low, ominous storyteller”) | The maid saw the end from the kitchen door. She tells it to the floor, not to you. | Short narration in Charon, the voice provisionally proposed for the Loremaster, so it doubles as an audition. |
+| 1 | `n1-burgomasters-house.06.vo-01` | `narrator` (Gemini Charon, “slow, low, ominous storyteller”) | The maid saw the end from the kitchen door. She tells it to the floor, not to you. | Short narration in Charon, the locked Loremaster voice (DEC-902). |
 | 2 | `n1-burgomasters-house.07.vo-02` | `agnes` (Gemini Kore, “calm, dry, quietly stern”), note “thumb on her scar” | Then we bring her down it. | Very short, a second voice and a quiet, stern mood; its `note` checks that a direction is never spoken. |
 | 3 | `n1-fortune-reading.10.vo-01` | `emeric` (Gemini Fenrir, “nervous, fast, breathless”) | Two lives... is that a metaphor? Please tell me that's a metaphor. | A third voice at the opposite pace and mood; ellipsis, question and apostrophe test delivery and caption text. |
 

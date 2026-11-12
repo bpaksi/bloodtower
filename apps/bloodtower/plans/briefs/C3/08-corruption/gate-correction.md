@@ -39,7 +39,7 @@ Under `gold` in the existing base tuning file, propose a nested `corruption` obj
 - Names/layout are proposals, not existing keys. Loss magnitudes mean subtract; surcharge means add. Never change the amounts or use the test-copy 3 as a shipped value.
 - Numbers source: `apps/bloodtower/plans/C3-ruined-keep.md:307,326–327` and this feature's approved Q-C3-15/16; gold-loss cards explicitly left amounts to the numbers pass. `AREA-099.md:4` is still open; that does not reopen the approved feature amounts.
 - EV-05's original test remains unchanged: Cruel=3 in a copied tuning file must yield −3. These names make it addressable; they add no eval.
-- **UNRESOLVED compatibility:** required keys versus defaults for old tuning files/saved games is not ruled by Q-C3-16. Do not silently choose fallback, re-seeding or migration behavior. Owner: Wright → Warden.
+- **RULED (DEC-895):** the five keys are required in the base tuning file, with no defaults; a missing key fails pack lint. Was unresolved: required keys versus defaults for old tuning files/saved games is not ruled by Q-C3-16. Do not silently choose fallback, re-seeding or migration behavior. Owner: Wright → Warden.
 
 ## Seventeen checklist dispositions and source authority
 
@@ -49,19 +49,23 @@ Under `gold` in the existing base tuning file, propose a nested `corruption` obj
 - AREA-097 is decided (`research/game-design/cards/AREA-097.md:10–12`). AREA-099 remains open (`AREA-099.md:4,10`); no wholesale area closure.
 - DEC-684's old body says proposal, but the acceptance at lines 22 and frontmatter `decided` settle it. DEC-552's accepted one-rise cap (lines 15–22) refines DEC-170; it supplies no approved higher amount.
 
-## EV-07 give action — NOT FOUND / UNRESOLVED, not added to Touches
+## RULED 2026-11-12 (Gamewright): the three blocked calls
+
+The three calls that blocked this gate are made. They are cards, not edits to the approved evals: [DEC-894](../../../../../../research/game-design/cards/DEC-894.md) (EV-07 and DEC-544), [DEC-895](../../../../../../research/game-design/cards/DEC-895.md) (old saves and tuning keys) and [DEC-896](../../../../../../research/game-design/cards/DEC-896.md) (several holders, Tempted and the free cure). EV-01 to EV-10 stay as approved; EV-11 to EV-13 are added in `eval.md`. Cursed stays out of C3 (Bob, 2026-10-31) and none of the three touches it. With these, C3-08 is unblocked, and C3-13 and C4-05 can unblock behind it. The sections below keep the audit as found; each UNRESOLVED mark now points at its ruling.
+
+## EV-07 give action — NOT FOUND; RULED by DEC-894 (a guard, no give action), not added to Touches
 
 - No hero-to-hero virtue/item give action was found in main's `apps/bloodtower/src` TypeScript surfaces. Search terms: `give`, `transfer`, `trade`, `Selfish`, `selfish`; inspected the quest/encounter owners and group-turn action dispatcher.
 - Closest similarly named action is `apps/bloodtower/src/engine/loops/encounter/picks.ts:342–351`, `giveBackTile`: removes a tile from the group's pool, has no recipient, and is **not** EV-07 giving. Tiles are group-keyed at lines 65,204–205,315–320. Do not repurpose this return as a transfer.
 - `apps/bloodtower/src/engine/loops/quest/quest.ts:218–223` grants a scene reward item to its picked hero; `loops/quest/store.ts:30–31,77–78` holds per-hero story items. These are award/storage, not existing hero-to-hero giving.
 - `apps/bloodtower/src/engine/loops/session/gear.ts:31–40` swaps device holders, not cards. `loops/group-turn/loop.ts:166–215` handles regroup refusals, end-turn, walk, enter and leave, not giving.
 - Actual decision conflict: `research/game-design/cards/DEC-476.md:19–21` blocks giving wherever another rule permits it, allows receiving; `DEC-544.md:12–19` explicitly says heroes do not swap virtue tiles, and give-back is the only way to shed one. Approved EV-07 nevertheless asks virtue-tile **and** item giving, and successful receiving.
-- **UNRESOLVED:** whether a real give API is intended in C3, what permits item transfer, and how the approved tile-giving eval is reconciled with DEC-544. No exact existing give-action file can be cited because none was found. Owner: Gamewright → Wright → Warden for decision. Do not invent a path/API, alter EV-07 or treat its approval as a silent repeal of DEC-544. No new give/ownership/UI paths in this repair.
+- **RULED (DEC-894):** no give API in C3; DEC-544 stands; the guard `may this hero give?` lives in `rules/corruption/` and EV-07 runs on a stand-in pass. Was unresolved: whether a real give API is intended in C3, what permits item transfer, and how the approved tile-giving eval is reconciled with DEC-544. No exact existing give-action file can be cited because none was found. Owner: Gamewright → Wright → Warden for decision. Do not invent a path/API, alter EV-07 or treat its approval as a silent repeal of DEC-544. No new give/ownership/UI paths in this repair.
 
 ## Other genuinely unresolved semantics / compatibility (not new approval)
 
-- **UNRESOLVED:** pre-feature count-only corruption saves have no named IDs (`loops/day/clock.ts:5–8,104–120`). EV-09/10 require the new named corruptions to survive Continue/restart, but do not decide migration of earlier count-only saves. No reset or random backfill is authorized. Owner: Wright → Warden.
-- **UNRESOLVED:** multiple holders' same-trigger penalties / Tempted surcharges and Tempted's interaction with Silver Tongue/free cure are not quantified by Q-C3-16 or its single-holder EV-05. DEC-477 says after haggle (`DEC-477.md:20`); that does not itself specify a new discount-order rule for the current building price seam (`loops/encounter/picks.ts:182–192`). Owner: Gamewright → Wright → Warden. Do not broaden EV-05 or choose new prices in this repair.
+- **RULED (DEC-895):** a save from before this feature is refused by Continue (a save-format version bump); no backfill. Was unresolved: pre-feature count-only corruption saves have no named IDs (`loops/day/clock.ts:5–8,104–120`). EV-09/10 require the new named corruptions to survive Continue/restart, but do not decide migration of earlier count-only saves. No reset or random backfill is authorized. Owner: Wright → Warden.
+- **RULED (DEC-896):** price order is free cure, base, haggle, Silver Tongue, then Tempted +2 once per buy; gold losses fire per holder from that holder's own part. Was unresolved: multiple holders' same-trigger penalties / Tempted surcharges and Tempted's interaction with Silver Tongue/free cure are not quantified by Q-C3-16 or its single-holder EV-05. DEC-477 says after haggle (`DEC-477.md:20`); that does not itself specify a new discount-order rule for the current building price seam (`loops/encounter/picks.ts:182–192`). Owner: Gamewright → Wright → Warden. Do not broaden EV-05 or choose new prices in this repair.
 - Already decided, not reopened: per-hero gold accounting under the pooled display (`DEC-176.md:12`; corruption cards target the holder's part); most-corrupted-hero movement (DEC-684); player chooses a named cure removal (`DEC-465.md:13–18`). Their implementation fit is Wright's issue, not permission for a purse/storage/UI refactor outside Touches.
 
 ## HELD — separate second-cure patch (NOT part of C3-08 gate)
