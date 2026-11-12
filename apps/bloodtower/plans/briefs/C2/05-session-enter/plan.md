@@ -56,15 +56,13 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - Connect failure status reads "Tower not found" (tower wording ruling).
 - Restart after the Enter keeps tonight's tower choice (Bob ruling, C-3).
 
-## Sound first on Pick story (Bob 2026-10-31 10:30 AM ET)
+## Sound on Pick story (DEC-903, Gamewright 2026-11-12)
 
-Bob: "Some browsers will block volume? if so then we need to prompt user on the story page to enable set volume levels. This will be the first thing to happen; enable sound, set levels."
-- The first step on Pick story is an "Enable sound" prompt on each iPad: one tap unlocks that iPad's browser audio (resume the Web Audio context and play inside the tap's handler). No sound plays on that iPad before its tap.
-- Locked copy (Bob 2026-10-31 10:33 ET): state 7a shows only the prompt "Tap once to turn on this iPad's sound." and one button "Enable sound", plus the chrome (bottom toolbar: "?" at the left, Menu gear at the right; feature 04); nothing else.
-- During 7a the Story board shows the Pick story backdrop with the volume line "How loud should the tower be? Press one to hear it." greyed out; full strength from 7b on (Bob 2026-10-31 6:15 PM ET, relayed; EV-14, EV-10).
-- Each iPad needs its own unlock; one iPad's tap never unlocks another.
-- Then the player sets levels: the volume step (Volume 0/1/2, Keep, Try another; SCR-006) shows on that iPad right after its unlock, and the story list follows Keep. The volume step leaves the Enter and runs here; on the connect track a volume press also plays Dungeon Complete on the tower (still only on a press).
-- Keep stays disabled until a volume has been played (no default volume is kept; this settles EV-09's "Also" line).
+Replaces "Sound first on Pick story" (Bob 2026-10-31 10:30 AM ET). No iPad ever plays sound (DEC-201), so the per-iPad "Enable sound" step is gone.
+- The Story board's audio is unlocked by the first click or key on the landing page (SCR-003, feature 02).
+- Connect track: Pick story opens on the volume step (Volume 0/1/2, Keep, Try another; SCR-006) on each iPad, each press plays Dungeon Complete on the tower, and the story list follows Keep. Keep stays disabled until a volume has been played (no default volume is kept; this settles EV-09's "Also" line).
+- Without tower: no volume step and no volume line; Pick story opens on the story list.
+- Removed copy: "Tap once to turn on this iPad's sound.", "Enable sound" (locked Bob 2026-10-31 10:33 ET), and the greyed volume line during 7a (Bob 6:15 PM ET).
 
 ## Eval approval
 

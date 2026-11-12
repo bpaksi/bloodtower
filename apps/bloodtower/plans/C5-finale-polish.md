@@ -56,7 +56,7 @@ As in C3 and C4. Folders are `plans/briefs/C5/NN-<feature>/`.
 - Kind: engine
 - Depends on: 01, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/engine/rules/battle/boss.ts` (new), `packs/test/**` (The Warden)
-- Builds: DEC-567, DEC-361, DEC-549
+- Builds: DEC-567, DEC-361
 - Done-when: EV-01 … EV-08
 - Open: Q-C5-02
 

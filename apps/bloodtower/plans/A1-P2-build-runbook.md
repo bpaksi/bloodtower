@@ -72,7 +72,7 @@ Updated 2026-11-10.
 - Studio mode always fails `AS-GLOW-2` for a story with a glow mask (D43, D47).
 - G-A1-01 playback: Gamewright 2026-11-10, option (b). The host has no existing path that plays a packed line, so the gate stays and A1-8b-2 is the proof step.
 - A1-4c: the real render of the Ruined Keep line `seal-break.01~vo-01` (G-A1-01), after the art hold.
-- The provisional Loremaster voice (Charon) is Bob's to confirm or change at G-A1 (D48).
+- The Loremaster voice is Charon, locked by Bob on 2026-11-10 (D-01, DEC-902). G-A1 no longer asks him to confirm it; he still ticks every final (DEC-384).
 - 6b: the OneDrive backup of tts-explorer's `audio-cache/`.
 
 **Deferred with Dracula (past 1.2), Bob 2026-11-10:** the real funeral import counts; the 272 `~no-agnes` lines silent as `invalid-id` (the `~` form now exists, D48, but the Dracula ids are not renamed); the 7 `*-whisper` duplicate portraits (35).

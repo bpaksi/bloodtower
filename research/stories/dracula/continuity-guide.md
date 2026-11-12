@@ -62,7 +62,7 @@ Short paths: `chars` = research/stories/dracula/characters.md · `cast` = assets
 - **Fixed:** 19, foundling, presses mountain violets (cast:37). **Ludmila's face** (n5-portrait-gallery.md:26–27). Hair/eyes/build: **Illusionist decides alone** (Bob), one shared Lenka/Ludmila face sheet.
 - **Before taken:** never on screen. **Captive:** white dress, high room; never bitten, no marks (rulings.md:33). Final: holds the last violets, opens the window.
 - **Where held (C-8, settled):** "the lady's rooms" = the high room at the top of the stair behind the gallery, in the east wing.
-- **Spoilers (Bob):** Lenka's face is **shown from chapter 1** (travelling hood, face clear). At the Tome it changes (violet mark); it is not unveiled. See lenka-look.md. (Supersedes the Oct 16 hide-the-face lock.) Her voice carries warmth. Ludmila's portrait stays covered until the reveal. No open window with Lenka in pre-ending art.
+- **Spoilers (Bob):** Lenka's face is **shown from chapter 1** (travelling hood, face clear). At the Tome it changes (violet mark); it is not unveiled. See lenka-look.md. (Supersedes the Oct 16 hide-the-face lock.) Her voice carries warmth. Ludmila's portrait is never uncovered (DEC-892). No open window with Lenka in pre-ending art.
 
 ### 1.8 The Count (Vlad)
 - **Fixed:** tall, all in black, pale long fingers (tok:138); one ageless face across 400 years of portraits (n5-portrait-gallery.md:6); the dark-haired brother (tok:109,116). Beautiful very old handwriting (cream letter, Tome).
@@ -84,7 +84,7 @@ Oskar, Vadoma, Jakob, Marta, Ilka, Ludmila, Ursula, Dorn, Jozef, Gerhardt, Sergi
 |---|---|---|
 | Count's face | `n23-sergius-blade.03` | any clear face |
 | Count = Agnes's traveler | `n23-sergius-blade.05` | traveler's face in Agnes flashbacks |
-| Lenka = Ludmila | Tome / gallery canvas | Ludmila's face anywhere; bridal "veiled girl" stays veiled (tok:293) |
+| Lenka = Ludmila | Tome (`n4-finding-the-tome`; the gallery canvas stays covered) | Ludmila's face anywhere; bridal "veiled girl" stays veiled (tok:293) |
 | Lookalike | catacombs unmask | ten-fingered Tomas / plain-glass Emeric on the Story board |
 | Ilka = third bride | gallery / final | full face of the singing woman (tok:358) |
 | Mother bolt = Ilka | n5-final-confrontation.md:24 | legible name |
@@ -187,7 +187,7 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
 |---|---|---|---|---|---|---|
 | `.01` clip (:14) | all present hunters, the line of dead | the line passing through | ghosts' lanterns | — | — | midnight, tower dim; mist |
-| `.01~night1` (:111) | + **a girl in a white nightdress walking up the hill, looking back** (Lenka) | far, on the hill road | nightdress | — | — | **Lenka's face must not show**: back view or face lost in mist/shadow (Bob rule; see §4.3 N-1) |
+| `.01~night1` (:111) | + **a girl in a white nightdress walking up the hill, looking back** (Lenka) | far, on the hill road | nightdress | — | — | **Lenka's face shows** (travelling hood, face clear; DEC-892 replaced the Oct 16 rule) |
 | `.01~no-drop` (:114) | as `.01` | — | — | — | — | — |
 | `.02` Story board text (:18) | — | — | — | — | — | — |
 | `.03.private.<h>` clips (:21–39) | spotlit hunter + their ghost only | ghost stopped, facing them | Ursula: abbess's habit; Dorn: castle livery; Jozef: gravedigger; Gerhardt: scholar's coat | **Ursula: two bites at the neck** (n2:37); Jozef "smiling and pale" | Emeric scene: Tome referenced, not shown | iPad, ghost-grey |
@@ -290,7 +290,7 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.08~all-burned / some-left / none-burned` (:61–67) | — | — | — | — | ash / boxes still standing | dusk |
 
 ### 2.12 n4-finding-the-tome (night 4, after midnight, K4 Tome building) — DONE
-**Constants.** The Tome: heavy, faded green leather, brass clasp shaped like a **closed eye**, pages in the Count's beautiful old hand, violets pressed in the gutter (props:10; n4-finding-the-tome.md:6). In every moment (:10). Location per building (burned archive / chained abbey library / fence's crate under velvet / lord's study desk) (:16–23). Blade and Holy Symbol held by their keepers. **No Ludmila or Lenka face anywhere in this scene** (no illustrations of her in the Tome; reveal is the gallery). Ludmila and Lenka are **voices only** (:37, :66).
+**Constants.** The Tome: heavy, faded green leather, brass clasp shaped like a **closed eye**, pages in the Count's beautiful old hand, violets pressed in the gutter (props:10; n4-finding-the-tome.md:6). In every moment (:10). Location per building (burned archive / chained abbey library / fence's crate under velvet / lord's study desk) (:16–23). Blade and Holy Symbol held by their keepers. **Ludmila has no face anywhere in this scene; this is the reveal** (DEC-892: Lenka's face changes, `portrait.lenka~revealed`). Ludmila and Lenka are **voices only** (:37, :66).
 
 | Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
 |---|---|---|---|---|---|---|
@@ -316,21 +316,21 @@ Entry format: **Present** (and away) · **Positions** · **Wearing / holding** �
 | `.07~gate` (:49) / `~drawbridge` (:51) | all present | the long way / the front | — | — | drawbridge: something on the battlements turns its head | — |
 
 ### 2.14 n5-portrait-gallery (night 5, the long gallery) — DONE
-**Constants.** 400 years of house portraits; **every Vlad portrait the same face — young** (Bob: young only in portraits/memories) (n5-portrait-gallery.md:6). At the end, a **covered canvas** (Ludmila) until `.04`. Some eyes blink; one hostile portrait. **The reveal moment is `.04`**: from here on Lenka's/Ludmila's face may be shown. Night, candle-sconces, music-box waltz.
+**Constants.** 400 years of house portraits; **every Vlad portrait the same face — young** (Bob: young only in portraits/memories) (n5-portrait-gallery.md:6). At the end, a **covered canvas** (Ludmila), never uncovered (DEC-892). Some eyes blink; one hostile portrait. **`.04` is not a reveal** (DEC-892): the cloth stays on; the reveal is `n4-finding-the-tome`. Night, candle-sconces, music-box waltz.
 
 | Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
 |---|---|---|---|---|---|---|
 | `.01` clip (:13) | all present | walking the gallery | — | — | portraits' eyes following | sconces |
 | `.02` (:17) / `~no-emeric` (:61) | Emeric, Wren | — | — | — | same young face in many fashions; covered canvas at the end | — |
 | `.03` clip (:21) | hostile portrait | a painted arm reaching out | — | — | frame splintering | — |
-| `.04` (:25) / `~no-agnes` (:55) | Agnes pulls the cloth (`~no-agnes`: canvas uncovered, Wren speaks) | at the last canvas | — | — | **REVEAL: girl in a white dress holding mountain violets — Lenka's face, 400-year-old paint** | — |
+| `.04` (:25) / `~no-agnes` (:55) | The canvas stays covered (DEC-892) | at the last canvas | — | — | **No reveal here**; the reveal was `n4-finding-the-tome` | — |
 | `.05` (:29) / `~no-tomas` (:58) | Count's **voice through every painted mouth** (no figure), Tomas | — | — | — | — | — |
 | `.06.private.*` (:34–41) | picker | — | — | — | Agnes: "The one who prayed" (asleep in a chapel with reliquary); Tomas: young guard at the gate looking at his boots; Wren: fresh tacky portrait of **Ilka** (chestnut hair, funeral ribbon, bride's veil); Emeric: Gerhardt at a desk, wine with no reflection | iPad |
 | `.combine` (:43; `~no-agnes` :63, `~no-wren` :66, `~no-agnes-no-wren` :69) | Story board; Agnes, Wren (variants: others) | — | — | — | the gallery wall: Ilka's wet portrait, "The one who prayed"; **no Lenka portrait** (only Ludmila's) | sconces; plays before `.07` |
 | `.07` (:51) | all present | the wall turning | — | — | stair up into the dark | dark |
 
 ### 2.15 n5-final-confrontation (night 5, the high room) — DONE
-**Constants.** The high room where Ludmila stepped from the window; **window shut** until `.06` (n5-final-confrontation.md:6). **Lenka** (face now allowed: post-reveal) in a **white dress**, sitting "bound by nothing", never bitten, no marks (rulings.md:33). On the stair: **three brides**, barefoot — two pale sisters (Striga minis) and **Ilka** (app only; face fully shown from here). Count: old, white moustache. Sword carrier ≠ Lenka's guard (`guard-chosen` :73).
+**Constants.** The high room where Ludmila stepped from the window; **window shut** until `.06` (n5-final-confrontation.md:6). **Lenka** (revealed face, `portrait.lenka~revealed`) in a **white dress**, sitting "bound by nothing", never bitten, no marks (rulings.md:33). On the stair: **three brides**, barefoot — two pale sisters (Striga minis) and **Ilka** (app only; face fully shown from here). Count: old, white moustache. Sword carrier ≠ Lenka's guard (`guard-chosen` :73).
 
 | Moment | Present / away | Positions | Wearing / holding | Marks | Props | Time / light |
 |---|---|---|---|---|---|---|
@@ -445,7 +445,7 @@ Parenthesised labels ("(thought)", "(whisper)", "(far off)") are style, not a ne
 |---|---|---|---|
 | N-1 | Night-1 procession shows "a girl in a nightdress… walking up the hill, **looking back**" — Lenka on screen before the reveal, facing the camera | nx-midnight-procession.md:112 vs Bob's Lenka rule | Draw her from behind / far off; "looking back" = head turned, face lost in mist. No line change. **Resolved:** Illusionist accepted; Lenka drawn from behind / lost in mist, no line change. |
 | N-2 | **Marta summons timing.** The Count says "Marta pours my wine now" in `n23-sergius-blade.08.private.tomas`, which can play on **night 2**; Jakob (night 3) says she has the gate key; Tomas's funeral end-line (night 2) says "Marta's still behind it". Bob: home on night 1, summoned later | n23-sergius-blade.md:67; n3-fly-eaters-cell.md:49; n2-burgomasters-funeral.md:178 vs n1-lantern-and-bell.md:60 | The summons beat must land **between the end of night 1 and the first night-2 scene**: **RESOLVED:** `nx-pressed-flower.00~night2` (first night-2 moment, before `.01~night2`): Tomas finds shutters pried, Marta gone, cream `come-home-letter` on her pillow; `~no-tomas` narrator variant; `.00.private.tomas~night2`. Funeral `.end.private.tomas` rewritten (she went back on her own feet). Art: Marta at home night 1; absent (empty room) at night-2 dusk; at the castle afterwards. |
-| N-3 | When is "the reveal" for Lenka's face? The Tome (night 4) confirms she is Ludmila; the gallery (night 5) shows the face | n4-finding-the-tome.md:44 vs n5-portrait-gallery.md:26 | Reveal = **`n5-portrait-gallery.04`** (the cloth comes off). Tome scene stays voice-only for Lenka/Ludmila. **Resolved:** reveal = `n5-portrait-gallery.04`; Tome scene voice-only. |
+| N-3 | When is "the reveal" for Lenka's face? The Tome (night 4) confirms she is Ludmila; the gallery (night 5) shows the face | n4-finding-the-tome.md:44 vs n5-portrait-gallery.md:26 | **Superseded 2026-11-12 (DEC-892):** reveal = **`n4-finding-the-tome`** (a change to Lenka's face); the gallery cloth over Ludmila's canvas is never lifted. Was: reveal = `n5-portrait-gallery.04`. |
 | N-4 | Marta's dress: "faded castle livery" vs "a castle maid's apron" | tok:327; cast:31 vs n5-drawbridge.md:28 | Both: maid's apron over faded livery. **Resolved:** sources aligned to "maid's apron over faded castle livery" (n5-drawbridge.04 + `~no-tomas` and their script.yaml lines; tokens-and-encounters wine-for-no-one beat and still prompt, tok:327,331). Main's #38 trim removed the wine-for-no-one narrator line, so that encounter has no apron text in script.yaml (Marta/Tomas VO only). |
 | N-5 | Variant id style differs: `n1-open-grave.08~fight-lost-no-wren` (hyphen) vs `n2-burgomasters-funeral.07~fight-lost~no-wren` (tilde) | n1-open-grave.md:79; packs/dracula/script.yaml:454 vs :736 (post-rename ids) | Use `~fight-lost~no-wren`; ids are stable (script.yaml:2), so **Resolved:** Gamewright ruled 2026-10-16 that the tilde wins (`base~variant`), so the id is renamed in the script and script.yaml. |
 | N-6 | (History) n1 scripts said targets play on `dashboard`; the funeral and script.yaml said `storyboard` / Story board. No script says `dashboard` now | n1-lantern-and-bell.md:9 vs n2-burgomasters-funeral.md:9; script.yaml:3 | Wording only: Story board. (Bob's rename commit may not have reached these files on this branch.) **Resolved:** all story scripts now say `storyboard` / Story board, using main's iPad wording (n1-lantern-and-bell.md:9); the funeral's Targets line (n2-burgomasters-funeral.md:9) keeps the shorter wording, same meaning; code untouched. |

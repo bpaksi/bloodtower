@@ -12,8 +12,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the session Enter runs .1 to .12 and .20 to .25 in order (MEC-039).
 - Method: unit
 - How: new engine test in `engine/loops/session/`, "enter runs MEC-039 in order": step a fresh session through both tracks with the mock tower, recording each board node and prompt.
-- Pass evidence: connect track: join → first iPad → base board setup → "Board is set up" → tower choice → Connect Tower → calibrating → calibrate → body. Without track: the same up to the tower choice → Play without Tower → body. Body (Pick story): Enable sound → volume pick → volume played → keep → story list (Bob 2026-10-31 10:30 AM ET). Nothing else in between.
-- Fails if: base board setup comes after the tower block (DEC-104), the volume test is missing or still runs in the Enter, Enable sound is not the first step of Pick story, or the tower choice comes after Pick story.
+- Pass evidence: connect track: join → first iPad → base board setup → "Board is set up" → tower choice → Connect Tower → calibrating → calibrate → body. Without track: the same up to the tower choice → Play without Tower → body. Body (Pick story): connect track: volume pick → volume played → keep → story list (Bob 2026-10-31 10:30 AM ET; DEC-903 removed the Enable sound step before it). Without track: the story list directly, with no volume step. Nothing else in between.
+- Fails if: base board setup comes after the tower block (DEC-104), the volume test is missing on the connect track or still runs in the Enter, any iPad shows an Enable sound step, the without-tower track shows a volume step, or the tower choice comes after Pick story.
 
 ### EV-02 — The game loop no longer connects the tower
 - Requirement: the tower block runs once per session, in the Enter (DEC-152, MEC-039).
@@ -67,15 +67,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-09 — The volume test: one volume per press, keep or try another
 - Requirement: Dungeon Complete at the picked volume, then Keep or try another (SCR-006, MEC-039 .20 to .25).
 - Method: playwright
-- How: same spec, on Pick story after Enable sound: pick volume 1, then "Try another", pick 2, then "Keep". Also pick Volume 0 once; one `sound.play-stateful` with volume 0.
+- How: same spec, on Pick story (connect track): pick volume 1, then "Try another", pick 2, then "Keep". Also pick Volume 0 once; one `sound.play-stateful` with volume 0.
 - Pass evidence: two `sound.play-stateful` commands for Dungeon Complete (#58), with volume 1 and then 2. After Keep, the session's kept volume is 2, and the next tower sound that takes a volume (the move-roll cue) is sent with volume 2.
 - Fails if: Keep keeps the first volume, or later sounds ignore the kept volume.
 
 ### EV-10 — Screenshots match the mockup
 - Requirement: the base board setup, the tower choice and the volume test on the board and the iPad (SCR-022, SCR-005, SCR-006; mockup).
 - Method: screenshot
-- How: screenshot the board at 1920×1080 and the iPad at 768×1024 portrait on each of the volume states 7a, 7b and 7c and on the base board setup and tower choice screens; compare side by side with ./mockup.html, mockup.html#s=N (tab names per EV-14).
-- Pass evidence: the EV-14 DOM checks pass; ten screenshot pairs (setup, tower choice, 7a, 7b, 7c) attached for review only; the 7a pair shows the Pick story backdrop on the board with the volume line greyed.
+- How: screenshot the board at 1920×1080 and the iPad at 768×1024 portrait on each of the volume states 7b and 7c and on the base board setup and tower choice screens; compare side by side with ./mockup.html, mockup.html#s=N (tab names per EV-14).
+- Pass evidence: the EV-14 DOM checks pass; eight screenshot pairs (setup, tower choice, 7b, 7c) attached for review only (the retired 7a pair is dropped, DEC-903; `mockup.html` still carries a 7a tab, which is not part of the screens).
 - Fails if: the board shows controls, or a screen is missing.
 
 ### EV-11 — test pack drops lay-out-board
@@ -102,30 +102,30 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-14 — Enter screens match the mockup
 - Requirement: DOM checks; board 1920×1080, iPad 768×1024 portrait. (Body buttons only: `[data-screen] button`, excluding the bottom toolbar's "?" and Menu gear `bt-iconbtn`.)
 - Method: playwright
-- How: walk M tabs 1, 2, 3, 4, 5, 6, 7a, 7b, 7c.
-- Pass evidence: Join (M "1"): board QR `img|canvas|svg` and join URL `/^https?:\/\/.+\/join/`; iPad `Pick <hero>` rows and counter `/^\d+ of \d+ picked$/`. First iPad joined (M "2"): board step 1 line and a corner QR; that iPad shows a waiting line and 0 body buttons. Base board setup (M "3"): board `li` ×3 per EV-03; board 0 buttons; iPad one body button "Board is set up", primary. Tower choice (M "4"): board line "Wake the tower, or play tonight without it?"; iPad "Connect Tower" (primary) then "Play without Tower"; splash shows neither "Continue" nor "Connect Tower". Connecting (M "5"): iPad 0 body buttons; board non-empty progress line. Failed (M "6"): status "Tower not found" and line "The tower did not answer. Try again, or play without it."; iPad "Connect Tower", "Play without Tower"; error code on the pressing iPad (EV-08). Enable sound (M "7a"): board shows the Pick story backdrop and exactly one "How loud should the tower be? Press one to hear it." inside `.bt-row--disabled[aria-disabled="true"]`, visible; iPad body shows only "Tap once to turn on this iPad's sound." and one primary button "Enable sound". Levels, Keep disabled (M "7b"): board line "How loud should the tower be? Press one to hear it.", not inside `.bt-row--disabled` or `[aria-disabled="true"]`; iPad "Volume 0", "Volume 1", "Volume 2", "Keep" (primary, `disabled`), "Try another", all shown together as in the mockup. Volume played, Keep enabled (M "7c"): same line and buttons after a volume press; Keep enabled.
-- Fails if: any board screen has a `button`, an iPad shows extra/missing body buttons, or a line differs.; or the volume line is missing or at full strength in 7a, or still greyed in 7b.
+- How: walk M tabs 1, 2, 3, 4, 5, 6, 7b, 7c (tab 7a is retired, DEC-903).
+- Pass evidence: Join (M "1"): board QR `img|canvas|svg` and join URL `/^https?:\/\/.+\/join/`; iPad `Pick <hero>` rows and counter `/^\d+ of \d+ picked$/`. First iPad joined (M "2"): board step 1 line and a corner QR; that iPad shows a waiting line and 0 body buttons. Base board setup (M "3"): board `li` ×3 per EV-03; board 0 buttons; iPad one body button "Board is set up", primary. Tower choice (M "4"): board line "Wake the tower, or play tonight without it?"; iPad "Connect Tower" (primary) then "Play without Tower"; splash shows neither "Continue" nor "Connect Tower". Connecting (M "5"): iPad 0 body buttons; board non-empty progress line. Failed (M "6"): status "Tower not found" and line "The tower did not answer. Try again, or play without it."; iPad "Connect Tower", "Play without Tower"; error code on the pressing iPad (EV-08). Levels, Keep disabled (M "7b"): board line "How loud should the tower be? Press one to hear it.", not inside `.bt-row--disabled` or `[aria-disabled="true"]`; iPad "Volume 0", "Volume 1", "Volume 2", "Keep" (primary, `disabled`), "Try another", all shown together as in the mockup. Volume played, Keep enabled (M "7c"): same line and buttons after a volume press; Keep enabled.
+- Fails if: any board screen has a `button`, an iPad shows extra/missing body buttons, or a line differs.; or the volume line is missing or greyed in 7b, or any iPad body shows Enable sound.
 
-### EV-15 — Audio stays blocked until the Enable sound tap, per iPad
-- Requirement: Bob 2026-10-31 10:30 AM ET: Enable sound is the first step on Pick story; each iPad needs its own unlock.
+### EV-15 — No iPad asks to enable sound or plays any
+- Requirement: DEC-201, DEC-903. (Replaces "Audio stays blocked until the Enable sound tap, per iPad", Bob 2026-10-31 10:30 AM ET, changed 2026-11-12 by Gamewright with Warden's clearance.)
 - Method: playwright
-- How: two iPad contexts reach Pick story (launch Chromium without `--autoplay-policy=no-user-gesture-required`). Before any tap, read each iPad's `AudioContext.state` and the page's played-sound log. iPad A taps "Enable sound"; read both again.
-- Pass evidence: before the tap each iPad's body shows exactly the line "Tap once to turn on this iPad's sound." and one primary button "Enable sound" (0 other body buttons, no other text, no story list; chrome only otherwise, locked copy Bob 2026-10-31 10:33 ET), `AudioContext.state` is `suspended`, and no sound has played. After A's tap: A's state is `running`; B is still `suspended` and still shows only "Enable sound".
-- Fails if: the prompt or button wording differs, anything else shows in the body, audio starts or a sound plays before the tap, the story list or levels show first, or one iPad's tap unlocks another.
+- How: two iPad contexts reach Pick story on each track; read each iPad's page text and played-sound log.
+- Pass evidence: no iPad body shows "Enable sound" or "Tap once to turn on this iPad's sound."; no sound plays in any iPad context on a press or otherwise; every sound is a tower command or plays on the Story board page.
+- Fails if: an iPad shows an unlock step, or an iPad context plays a sound.
 
-### EV-16 — Levels show after the unlock
-- Requirement: Bob 2026-10-31 10:30 AM ET: then the player sets levels.
+### EV-16 — Levels open Pick story on the connect track only
+- Requirement: DEC-903; Bob 2026-10-31 10:30 AM ET: the player sets levels.
 - Method: playwright
-- How: same spec: tap "Enable sound" on one iPad.
-- Pass evidence: that iPad next shows "Volume 0", "Volume 1", "Volume 2", "Keep" and "Try another" with the line "How loud should the tower be? Press one to hear it."; the story list shows only after Keep.
-- Fails if: the levels are skipped, show before the tap, or the story list shows before Keep.
+- How: reach Pick story on the connect track, then on Play without Tower.
+- Pass evidence: connect track: each iPad opens on "Volume 0", "Volume 1", "Volume 2", "Keep" and "Try another" with the board line "How loud should the tower be? Press one to hear it."; the story list shows only after Keep. Without tower: the story list shows at once, with no volume buttons and no volume line.
+- Fails if: the levels are skipped on the connect track, show without a tower, or the story list shows before Keep on the connect track.
 
 ### EV-17 — Keep is disabled before any playback
 - Requirement: Bob 2026-10-31 10:30 AM ET: Keep stays disabled until a volume has been played.
 - Method: playwright
-- How: same spec, run twice. With the tower (connect track): after Enable sound, read Keep and press it; then press Volume 1 and wait for the mock tower's `sound.play-stateful` command; read Keep. Without the tower (Play without Tower): the same, but wait for the iPad's played-sound log to record the Volume 1 sound.
-- Pass evidence: on both tracks, before any volume press Keep has `disabled`, pressing it changes nothing and no volume is stored. With the tower: Keep turns enabled only after the mock logged `sound.play-stateful` for Volume 1. Without the tower: the mock got no command, and Keep turns enabled only after the iPad's played-sound log has the Volume 1 entry. Keep then stores volume 1.
-- Fails if: Keep is enabled before the proof of playback on either track, a default volume is kept, or the no-tower track sends a tower command.
+- How: connect track: read Keep and press it; then press Volume 1 and wait for the mock tower's `sound.play-stateful` command; read Keep. (Without the tower there is no volume step, DEC-903.)
+- Pass evidence: before any volume press Keep has `disabled`, pressing it changes nothing and no volume is stored. Keep turns enabled only after the mock logged `sound.play-stateful` for Volume 1. Keep then stores volume 1.
+- Fails if: Keep is enabled before the mock logged playback, or a default volume is kept.
 
 ## Survival evals (one per survival invariant in plan.md)
 
@@ -155,4 +155,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - SCR-022's three step texts in EV-03 are the approved mockup wording.
 - The board's line on the tower choice reads "Wake the tower, or play tonight without it?" (MEC-039 .5; approved mockup) → MEC-039.
 - Volume picks are labelled "Volume 0/1/2" (approved mockup).
-- The levels are the existing volume step (SCR-006) moved to Pick story after Enable sound; on the without-tower track they set the iPad's level only. Bob approved 2026-10-31 10:33 ET: levels = existing Volume 0/1/2 step with Keep/Try another, moved to Pick story.
+- The levels are the existing volume step (SCR-006) moved to Pick story; on the without-tower track there is no volume step (DEC-903). Bob approved 2026-10-31 10:33 ET: levels = existing Volume 0/1/2 step with Keep/Try another, moved to Pick story.
