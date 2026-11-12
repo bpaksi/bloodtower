@@ -47,6 +47,39 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-118: closed before coding (`decided`).
 - [ ] DEC-129: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `board.prompt` | Fight or Retreat? | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 2 | `board.waiting` | Waiting on: {hero}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 3 | `board.picked` | {hero} has picked. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 4 | `board.all-picked` | Everyone has picked. The round begins. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 5 | `ipad.round` | Round {N} | mockup.html (round label) |
+| 6 | `ipad.prompt` | Fight or Retreat? | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 7 | `button.fight` | Fight | screen-spec (exact label) |
+| 8 | `button.retreat` | Retreat | screen-spec (exact label) |
+| 9 | `button.attack` | Attack | screen-spec (exact label) |
+| 10 | `button.cast` | Cast a spell | screen-spec (exact label) |
+| 11 | `button.advantage` | Spend an Advantage | screen-spec (exact label) |
+| 12 | `button.potion` | Drink a potion | screen-spec (exact label) |
+| 13 | `button.guard` | Guard | screen-spec (exact label) |
+| 14 | `spell.lightning` | Lightning | screen-spec (exact label; spell names come from the pack) |
+| 15 | `spell.fireball` | Fireball | screen-spec (exact label) |
+| 16 | `spell.magic-missile` | Magic Missile | screen-spec (exact label) |
+| 17 | `potion.target` | On {hero} | screen-spec (exact label) |
+| 18 | `pick.summary` | {hero}: {action} | mockup.html (the picked state) |
+| 19 | `button.change-pick` | Change pick | Q-C4-18 (Bob approved 2026-10-31) |
+| 20 | `ipad.sitting-out` | You are sitting out this battle. Watch the board. | locked 2026-10-31 (Loremaster); in screen-spec and EV-04 |
+| 21 | `ipad.group-chose-retreat` | The group chose Retreat. | new - Loremaster (EV-05: shown on iPad B when the group's Retreat wins) |
+| 22 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 23 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 24 | `help.title` | Help | C2 feature 04 |
+| 25 | `help.round-picker` | Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 26 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - Resolved Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).

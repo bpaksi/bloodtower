@@ -7,11 +7,11 @@
 ## Rules for every screen
 
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
-- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
+- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is this screen's help line in the Copy table in ./plan.md.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
 Auto-advance: no beat on this screen auto-advances; every step waits for a named button. "All picked" is not a held beat: once the last present hero picks, the round runs and the board goes straight to the round result (C4 09) (Gamewright ruling).
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
-- All story and help text is `[COPY: ...]` until the story pass.
+- All story and help text is in the Copy table in ./plan.md (Loremaster, 2026-11-12).
 
 ## Purpose
 
@@ -19,15 +19,15 @@ UI-027: the group picks Fight or Retreat; then each present hero picks one actio
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: round-picker, board = "Fight or Retreat? / Waiting on: {hero}. / {hero} has picked. / Everyone has picked. The round begins."]`; never scrolls.
+- Board: shows the state and every line "Fight or Retreat? / Waiting on: {hero}. / {hero} has picked. / Everyone has picked. The round begins." (Copy table: board.* rows); never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, round-picker = "Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked."]`, `data-help-screen` = `round-picker`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, "Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked." (Copy table: help.round-picker), `data-help-screen` = `round-picker`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
 - Step 1, the group (every present iPad): **Fight**, **Retreat**.
 - Step 2, each present hero: **Attack**, **Cast a spell** (then the spell: **Lightning**, **Fireball**, **Magic Missile**), **Spend an Advantage**, **Drink a potion** (then **On {hero}**), **Guard** (guard virtue). An action the hero cannot take is greyed with its label. After picking: **Change pick** until the last present hero has picked (approved by Bob 2026-10-31 6:16 PM ET, Q-C4-18).
-- A sat-out hero: no buttons; `[COPY: sitting out = "You are sitting out this battle. Watch the board."]`.
+- A sat-out hero: no buttons; "You are sitting out this battle. Watch the board." (Copy table: ipad.sitting-out).
 
 ## Tokens
 

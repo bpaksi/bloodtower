@@ -50,6 +50,35 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] UI-036: closed before coding (`decided`).
 - [ ] DEC-466: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `board.foe` | Foe: {foe}. Strength left: {N}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 2 | `board.round-won` | Round {N}: {hero} struck for {N}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 3 | `board.round-lost` | Round {N}: the foe hit {hero}. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 4 | `board.cursed` | {hero} is Cursed: 4 of {N} count. | locked 2026-10-31 (Loremaster); same text in screen-spec (Q-C4-05) |
+| 5 | `board.victory` | The foe falls. Victory. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 6 | `chip.cursed` | 4 of {N} | mockup.html (the Cursed hero's panel chip; Q-C4-05) |
+| 7 | `chip.lost-round` | −{foe level} hit points | screen-spec (Tokens; DEC-703) |
+| 8 | `chip.traits` | Beast, Magic, Humanoid, Melee, Undead, Stealth | DEC-068 (the foe trait names; two per foe) |
+| 9 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster) |
+| 10 | `ipad.see-board` | See the Story board. | new - Loremaster (first drawn in mockup.html) for an iPad that has no choice to make |
+| 11 | `button.fight` | Fight | screen-spec (exact label) |
+| 12 | `button.retreat` | Retreat | screen-spec (exact label) |
+| 13 | `button.attack` | Attack | screen-spec (exact label) |
+| 14 | `button.cast` | Cast a spell | screen-spec (exact label) |
+| 15 | `button.advantage` | Spend an Advantage | screen-spec (exact label) |
+| 16 | `button.potion` | Drink a potion | screen-spec (exact label) |
+| 17 | `button.guard` | Guard | screen-spec (exact label) |
+| 18 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 19 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 20 | `help.title` | Help | C2 feature 04 |
+| 21 | `help.battle-board` | Pick Fight or Retreat on your iPad, then Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 22 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - Resolved Q-C4-17: Does the C2-04 auto-advance rule (advance when narration or cue ends, or after 4 s with no audio) also apply to battle round results and Reveals? Options: (a) yes, every beat in C4 and C5 (round results, victory, reward/retreat/fall, trap, close Scroll, glyph/boon Reveal, boss phase show, win line) follows it; (b) battle beats wait for a press on any iPad; (c) round results hold 2 s, other beats follow the rule. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET). (features C4 09, 11, 12, 13; C5 08, 09)

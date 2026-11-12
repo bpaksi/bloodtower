@@ -7,11 +7,11 @@
 ## Rules for every screen
 
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
-- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
+- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is this screen's help line in the Copy table in ./plan.md.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
 Auto-advance: each phase show, the round result and "The Warden falls" have no Next; each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
-- All story and help text is `[COPY: ...]` until the story pass.
+- All story and help text is in the Copy table in ./plan.md (Loremaster, 2026-11-12).
 
 ## Purpose
 
@@ -19,10 +19,10 @@ The foe panel for The Warden with a phase change: new painting (Gamewright pick,
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: boss-screen, board = "The Warden. Strength left: {N}. / The Warden changes. / The Warden falls."]`; never scrolls.
+- Board: shows the state and every line "The Warden. Strength left: {N}. / The Warden changes. / The Warden falls." (Copy table: board.* rows); never scrolls.
 - Round result: after each round the board shows the result line, then advances per the Auto-advance line above (no Next).
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, boss-screen = "The Warden's last battle. Pick Fight or Retreat on your iPad, then your action."]`, `data-help-screen` = `boss-screen`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, "The Warden's last battle. Pick Fight or Retreat on your iPad, then your action." (Copy table: help.boss-screen), `data-help-screen` = `boss-screen`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

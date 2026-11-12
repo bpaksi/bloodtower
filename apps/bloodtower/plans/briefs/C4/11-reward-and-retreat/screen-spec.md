@@ -7,11 +7,11 @@
 ## Rules for every screen
 
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
-- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
+- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is this screen's help line in the Copy table in ./plan.md.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
 Auto-advance: "Card taken" (after a Give to {hero} press), the retreat result and the fall result have no Next; the reward Reveal does not auto-advance: a screen with a choice waits for that choice, so it waits for the **Give to {hero}** pick (Gamewright ruling); each advances when its narration or cue ends, or after 4 s when it has no audio (C2-04 rule; Q-C4-17 (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)).
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
-- All story and help text is `[COPY: ...]` until the story pass.
+- All story and help text is in the Copy table in ./plan.md (Loremaster, 2026-11-12).
 
 ## Purpose
 
@@ -19,9 +19,9 @@ UI-040: the gold and drawn card on a Reveal; the iPads pick who takes the card. 
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: reward-and-retreat, board = "Victory. You found {N} gold and a card. / Who takes {item}? / {hero} takes {item}. / You fell back. It cost {item}. / {hero} fell. It cost {item}. / The foe grows stronger."]`; never scrolls.
+- Board: shows the state and every line "Victory. You found {N} gold and a card. / Who takes {item}? / {hero} takes {item}. / You fell back. It cost {item}. / {hero} fell. It cost {item}. / The foe grows stronger." (Copy table: board.* rows); never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, reward-and-retreat = "Tap Give to {hero} on an iPad to choose who takes the card."]`, `data-help-screen` = `reward-and-retreat`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, "Tap Give to {hero} on an iPad to choose who takes the card." (Copy table: help.reward-and-retreat), `data-help-screen` = `reward-and-retreat`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 

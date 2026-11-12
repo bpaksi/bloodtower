@@ -53,6 +53,38 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-018: closed before coding (`decided`).
 - [ ] DEC-023: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `event.words (sample)` | Smoke on the road ahead. Something burned here last night. | sample for The Roads; every event's own words come from the pack's event entry, not from this brief (mockup.html, Loremaster 2026-10-31) |
+| 2 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster); the auto-advance tick (Bob 2026-10-31 10:38) |
+| 3 | `event.quiet` | The road is still. Nothing comes. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 4 | `event.windfall` | Fortune smiles. You find {reward}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 5 | `reveal.gain` | +{N} gold | EV-06 ("+5 gold"); "+N" in mockup |
+| 6 | `event.hazard` | Trouble on the road. {effect}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 7 | `hazard.saved` | {counter} saved you. Nothing is lost. | new - Loremaster; {counter} = the hero or item that countered it (EV-07); DRAFT - needs Gamewright (token name) |
+| 8 | `hazard.cost.hp` | −2 hit points each | EV-01 (verbatim) |
+| 9 | `hazard.cost.warriors` | Lose {N} warriors | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); DRAFT - needs Gamewright (see report) |
+| 10 | `hazard.cost.gold` | Lose {N} gold | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 11 | `hazard.cost.spirit` | Lose {N} spirit | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); DRAFT - needs Gamewright (see report) |
+| 12 | `hazard.cost.corruption` | Take a corruption | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 13 | `event.foes` | Foes block the way. Stand fast or turn back. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); the disaster event uses the same line (C4-14 does the same) |
+| 14 | `choice.go-around` | Go around | DEC-023, DEC-028 (named in the spec) |
+| 15 | `choice.pay-off` | Pay them off (5 gold) | DEC-023; cost from events.pay_off = 5 gold (Bob approved 2026-10-31); label form matches C4-14 |
+| 16 | `event.people.rumour` | A stranger leans close. '{rumour}' | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 17 | `event.people.trick` | A stranger smiles too wide. You've been tricked: {effect}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 18 | `choice.listen` | Listen | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); DRAFT - needs Bob (default, pending Bob) |
+| 19 | `choice.walk-on` | Walk on | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); DRAFT - needs Bob (default, pending Bob) |
+| 20 | `waiting.other-group` | The other group is deciding. | new - Loremaster (EV-03: the waiting line on absent heroes' iPads) |
+| 21 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 22 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 23 | `help.title` | Help | C2 feature 04 |
+| 24 | `help.event-scene` | Something happened on the road. Make a choice if one is shown; the scene moves on by itself. | locked 2026-10-31 (Loremaster); same text in screen-spec and EV-12 |
+| 25 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.
