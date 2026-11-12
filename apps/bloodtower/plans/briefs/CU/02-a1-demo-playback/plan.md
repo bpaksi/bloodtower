@@ -50,7 +50,7 @@ Cutover: N
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-06 all pass (verifier table on PR).
-- Not required: a real paid render (A1-4c, G-A1), a talking Portrait, a named camera move (Q-451), playing Dracula lines, new iPad UI.
+- Not required: a real paid render (A1-4c, G-A1), a talking Portrait, a named camera move (Q-451, answered by DEC-898; a 1.1 matter), playing Dracula lines, new iPad UI.
 
 ## AREA / DEC checklist
 
@@ -58,8 +58,8 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-843: closed before coding (0.2 serves 1.0; no talking Portrait ships in 1.0).
 - [ ] DEC-384: closed before coding (a runner never marks an asset final).
 - [ ] G-A1-01 / G-A1-04: closed before coding (the gate stays; this step is the proof; the trigger is a once-only demo entry).
-- [ ] Q-451 (camera move): deferred, owner Bob, not needed here (out of scope).
-- [ ] Charon is provisional in the A1 runbook (D48): deferred, owner Bob at G-A1; this step plays whatever voice the draft has and does not depend on the ruling (see the open question in catchup/design-freeze.md).
+- [x] Q-451 (camera move): answered by DEC-898 (Gamewright's triage, 2026-11-12); not needed here (out of scope).
+- [x] Charon is locked (DEC-902, Bob's lock of 2026-11-10; the runbook and manifest are updated by the rulings patch). This step plays whatever voice the draft has and does not depend on the ruling; design-freeze question 1 asks Bob to confirm the lock covers the Ruined Keep.
 
 ## Eval approval
 

@@ -62,4 +62,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## Assumptions surfaced
 
 - The demo entry is a developer-controlled trigger, not a button → A1 Step 8b-2 "no new UI" and G-A1-04; Bob: confirm at G-A1.
-- The voice on the draft may be the provisional Charon → Bob: Charon provisional or locked? (design-freeze question 1); this step does not depend on the answer.
+- The voice on the draft is Charon, the locked Loremaster voice (DEC-902, Gamewright's rulings, 2026-11-12; Bob's lock of 2026-11-10; design-freeze question 1 asks Bob to confirm it covers the Ruined Keep). This step does not depend on the answer.
