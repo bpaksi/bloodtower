@@ -19,7 +19,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C4-10.
 - Method: playwright
 - How: win chapters 1 and 2.
-- Pass evidence: two different `[COPY]` keys.
+- Pass evidence: two different seal lines (Copy table: seal.line.1, seal.line.2).
 - Fails if: same key.
 
 ### EV-03 — Freed skulls picked on the iPad
@@ -128,6 +128,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## OPEN questions
 
-- Resolved Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: `[COPY: seal break ch1, Loremaster = "The roads are clear and a seal breaks. Ahead stands the Ruined Keep."]`, `[COPY: seal break ch2, Loremaster = "The Keep gives up its dead, and a second seal cracks. The Tower waits."]`, `[COPY: seal break ch3, Loremaster = "The last stand holds, and the third seal breaks. Only the Warden remains."]`; (b) the Narrator, one shared line `[COPY: seal break, Narrator]`. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- Resolved Q-C4-10 **[Bob taste call]**: Who speaks the seal-break line at each chapter win? Options: (a) the Loremaster, one line per chapter: "The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep." (Copy table: seal.line.1), "The Keep gives up its dead, and a second seal cracks. The Tower waits." (Copy table: seal.line.2), "The last stand holds, and the third seal breaks. Only the Warden remains." (Copy table: seal.line.3); (b) the Narrator, one shared line "A seal breaks. The tower shudders.". Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
 > Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders."

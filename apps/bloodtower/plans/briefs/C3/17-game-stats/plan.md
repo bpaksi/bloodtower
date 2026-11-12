@@ -50,6 +50,39 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-627: closed before coding (`decided`).
 - [ ] SCR-021: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `stats.title` | Tonight's tale | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 2 | `stats.outcome` | Outcome: {outcome} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); {outcome} is Won or Lost (screen-spec) |
+| 3 | `stats.outcome.won` | Won | screen-spec (Outcome: Won or Lost) |
+| 4 | `stats.outcome.lost` | Lost | screen-spec (Outcome: Won or Lost) |
+| 5 | `stats.time` | Time played: {T} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 6 | `stats.days` | Days: {N} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 7 | `stats.quests` | Quests done: {Q} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 8 | `stats.corruptions` | Corruptions: {C} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 9 | `stats.gold` | Gold: {G} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 10 | `stats.moments.title` | Key moments | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 11 | `stats.moment.quest` | Day {N}: {quest} done. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (Q-C3-18) |
+| 12 | `stats.moment.corruption` | Day {N}: {hero} took a corruption. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (Q-C3-18) |
+| 13 | `stats.moment.item` | Day {N}: {hero} gained {item}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (Q-C3-18) |
+| 14 | `stats.moment.building` | Day {N}: {building} fell. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (Q-C3-18) |
+| 15 | `stats.moment.chapter` | Day {N}: Chapter won. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (Q-C3-18) |
+| 16 | `stats.length` | Length: {L} (best {B} · average {A}) | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (SCR-019, DEC-116) |
+| 17 | `rating.label` | How was tonight? | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (Q-C3-21) |
+| 18 | `rating.values` | 1 2 3 4 5 | screen-spec (optional 1-5 on the iPads) |
+| 19 | `rating.board` | {R1} · {R2} | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) (the TV shows each seat's rating, e.g. "4 · 2") |
+| 20 | `button.play-again` | Play again | screen-spec (pinned order: first) |
+| 21 | `button.back` | Back | screen-spec (pinned order: second) |
+| 22 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 23 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 24 | `help.title` | Help | C2 feature 04 |
+| 25 | `help.game-stats` | Here's how tonight went. Rate it if you like, then tap Play again. | locked 2026-10-31 (Loremaster); same text in screen-spec and EV-12 |
+| 26 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - ANSWERED Q-C3-18 (Bob approved 2026-10-31): key moments are quest done, item gained, building fallen, corruption taken, chapter won. (key moments)

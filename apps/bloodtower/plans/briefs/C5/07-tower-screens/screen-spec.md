@@ -7,11 +7,11 @@
 ## Rules for every screen
 
 - Viewports: Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob.
-- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is `[COPY: help, <screen>]`.
+- iPad bottom toolbar on every iPad screen: **?** (help) at the left, the **gear** at the right. Help text is this screen's help line in the Copy table in ./plan.md.
 - Gear panels display on the Story board; their picks are made on the iPad. The gear never opens a panel on the iPad alone.
 Auto-advance: no beat on this screen auto-advances; every step waits for a named button.
 - The board is display only and never scrolls or clips (SCR-013); every story line shows on the board (SCR-014, DEC-057). One primary button per step (SCR-016).
-- All story and help text is `[COPY: ...]` until the story pass.
+- All story and help text is in the Copy table in ./plan.md (Loremaster, 2026-11-12).
 
 ## Purpose
 
@@ -19,9 +19,9 @@ The Tower reuses the Tomb's two halves: the level's room map and the room view (
 
 ## States and player actions
 
-- Board: shows the state and every line `[COPY: tower-screens, board = "The Tower. Level {N}. / Rooms found: {N}. / A door, shut and cold. / A shrine. You can rest here. / The stairs climb on."]`; never scrolls.
+- Board: shows the state and every line "The Tower. Level {N}. / Rooms found: {N}. / A door, shut and cold. / A shrine. You can rest here. / The stairs climb on." (Copy table: board.* rows); never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, `[COPY: help, tower-screens = "Tap Open the next door to go deeper. Tap Rest at a shrine, or Retreat to fall back."]`, `data-help-screen` = `tower-screens`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, "Tap Open the next door to go deeper. Tap Rest at a shrine, or Retreat to fall back." (Copy table: help.tower-screens), `data-help-screen` = `tower-screens`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
@@ -41,7 +41,7 @@ Back to the loop that called it (see ./plan.md).
 
 - Level map: one row of 3 rooms per level, the stair guard last, levels basement / main / tower (DEC-566).
 - Shrine +2 HP each, once; trap −2 HP each (DEC-703).
-- Trap line: "Every hero loses 2 hit points." (locked by Loremaster, 2026-10-31), the second sentence of the Tomb's Falling Rocks line (C4-12 `[COPY: tomb-screens, rocks]`), reused for the Tower trap.
+- Trap line: "Every hero loses 2 hit points." (locked by Loremaster, 2026-10-31), the second sentence of the Tomb's Falling Rocks line (C4-12 "Stones crash from the ceiling. Every hero loses 2 hit points."), reused for the Tower trap.
 
 ## OPEN questions
 

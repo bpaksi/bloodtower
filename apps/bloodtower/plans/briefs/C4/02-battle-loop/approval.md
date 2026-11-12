@@ -4,3 +4,4 @@
 |------|-------------|------------------------|-----------|------------------------------|
 | eval.md | Bob | 2026-10-31 6:16 PM ("Approve all") | | |
 | mockup.html | n/a | | | no mockup: no screen change |
+| eval.md | Bob | 2026-11-12 6:01 PM ET, via Warden, batch re-approval | | 4575ffef |
