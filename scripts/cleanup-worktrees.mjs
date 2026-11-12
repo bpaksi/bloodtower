@@ -1,4 +1,4 @@
-// `pnpm cleanup:worktrees [--apply] [--json]`: finds the local worktrees and branches whose work is
+// `pnpm cleanup:worktrees [--apply] [--json] [--keep <name>]...`: finds the local worktrees and branches whose work is
 // safely on `origin/main` and, with `--apply`, removes them (docs/sdlc.md, "Cleaning up").
 //
 // It covers what `pnpm wt:rm` cannot: Desktop-app session worktrees (`.claude/worktrees/*`),
@@ -235,14 +235,20 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   try {
     git(root, "fetch", "--prune", "--quiet");
-    const rows = survey({ root, prs: readPrs(root) });
+    // `--keep <name>` (repeatable) holds a row back, for example a branch of a Desktop session Bob still uses.
+    const held = new Set(args.flatMap((a, i) => (args[i - 1] === "--keep" ? [a] : [])));
+    const rows = survey({ root, prs: readPrs(root) }).map((row) =>
+      held.has(row.name) && row.action === "SAFE"
+        ? { ...row, action: "KEEP", reason: "held back with --keep" }
+        : row,
+    );
     if (args.includes("--json")) console.log(JSON.stringify(rows, null, 2));
     else console.log(formatTable(rows));
     if (args.includes("--apply")) {
       const results = applyCleanup({ root, rows });
       for (const r of results) console.log(`${r.ok ? "ok  " : "FAIL"} ${r.name}: ${r.message}`);
       if (results.some((r) => !r.ok)) process.exit(1);
-    } else {
+    } else if (!args.includes("--json")) {
       console.log("\nReport only. Re-run with --apply to remove the SAFE rows.");
     }
   } catch (error) {
