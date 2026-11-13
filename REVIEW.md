@@ -14,23 +14,12 @@ The `adversary-bugs` agent (which replaced the `reviewer` agent) runs these pass
 3. **Spec and plan compliance.** The diff does what the plan step says and no more. Any deviation is recorded in the plan or spec in the same branch. Decision-log entries (D1…) are respected.
 4. **Repo rules.** No imports across app folders. Dependencies are exact pins. `ultimatedarktower` and `scripts/pinned-versions.json` are unchanged. No edits under `apps/*/intent/`: check the diff itself, because the hook that guards intent reads shell commands only on a best-effort basis. No secrets.
 
-## Severity
+## What blocks, and the report
 
-| Level | Meaning | Limit |
-|---|---|---|
-| Important | Must be fixed before merge: a bug, a safety problem, or an unrecorded deviation | No limit |
-| Nit | Style, naming or a small simplification | At most 5, most useful first |
+These follow the review loop in [docs/sdlc.md](docs/sdlc.md) §4, which was trimmed on 2026-10-19 (PR #102). Where an older habit and that section differ, the section wins.
 
-## Report format
-
-Start with one line: **Ready to merge**, or **Not ready: N Important**.
-
-Then list findings, Important first. Each finding has:
-
-- `file:line`
-- what is wrong, in one sentence
-- a concrete failure: the input or state, and the wrong result
-
-End with what was not reviewed, and why.
+- **Blocking.** Only what §4 "What blocks" lists: a regression against `main`; a `Done when` item not met, or not proven by a test that can fail; a broken standing rule (pass 2 above, privacy, a message-type rule, an unknown shown as zero, an edit to intent, an error eaten or hidden); a change outside the step's `Touches` or an undeclared dependency change. An "Important" in the passes above is a blocking finding.
+- **Non-blocking.** Nits (at most 5, most useful first), spec holes for Bob or Gamewright, and follow-ups marked `Follow-up:`.
+- **Report.** The format is in [.claude/agents/adversary-bugs.md](.claude/agents/adversary-bugs.md), "Post on the PR": the round and head sha first, findings with file, line, what breaks and how to reproduce, and a last line that is exactly `Blocking: none` or `Blocking: <count>`. Say what was not reviewed, and why.
 
 A finding needs evidence from the code. If something is only a suspicion, say so and label it a question, not a finding.

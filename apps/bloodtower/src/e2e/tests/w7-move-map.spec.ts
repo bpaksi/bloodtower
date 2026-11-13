@@ -82,6 +82,9 @@ const heroName = (heroId: string | null) =>
   heroId && heroId in HERO_NAME ? HERO_NAME[heroId as (typeof HERO_IDS)[number]] : "";
 
 const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+
+/** The day-end skull step: the tower drop prompt, or the drawn drop without the tower (DEC-305). */
+const SKULL_STEP = 'button[data-prompt-id*="skull-drop"], button[data-prompt-id^="skull-sim-day-"]';
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 /** Done on the three setup steps, Begin, then Continue through the four opening moments. No walk. */
@@ -301,7 +304,7 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
     }
     await expect(band.locator("[data-purse]")).toHaveText(/unavailable/);
     expect(await band.locator("[data-purse]").innerText()).not.toMatch(/\b0\b/);
-    await expect(board.locator("[data-chapter]")).toHaveText("Proving Grounds");
+    await expect(board.locator("[data-chapter]")).toHaveText("The Ruined Keep");
     await expect(board.locator("[data-day]")).toHaveText(/^Day \d+$/);
     await expect(board.locator("[data-acting]")).toHaveText(heroName(now.hero));
     await expect(board.locator("[data-moves]")).toHaveAttribute("data-moves", now.moves ?? "");
@@ -373,7 +376,8 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
     await expect(device.locator(`[data-prompt-id="end-turn--${now.hero}"]`)).toHaveCount(0);
     await expect(device.getByText(/\brest\b/i)).toHaveCount(0);
     const next = await readStatus(device);
-    const skull = device.locator('button[data-prompt-id*="skull-drop"]');
+    // The day's skull step: the drop prompt, or without the tower the drawn drop (DEC-305).
+    const skull = device.locator(SKULL_STEP);
     if ((await skull.count()) > 0) {
       await expect(device.locator("[data-move-map]")).toHaveCount(0);
     } else {
@@ -397,7 +401,7 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
       const groupLeftover = Number(acting.moves);
       await clickAct(device, "end-turn");
       await settle(device, before);
-      const skullNow = device.locator('button[data-prompt-id*="skull-drop"]');
+      const skullNow = device.locator(SKULL_STEP);
       if ((await skullNow.count()) > 0) {
         sawSkull = true;
         await expect(device.locator("[data-move-map]")).toHaveCount(0);

@@ -1,13 +1,14 @@
 "use client";
 
-import { type AvatarManifest, avatarManifestSchema } from "@talking-avatar/formats";
-import { mouthFiles, TalkingAvatar } from "@talking-avatar/player";
+import { type AvatarManifest, avatarManifestSchema } from "@asset-studio/formats";
+import { mouthFiles, TalkingAvatar } from "@asset-studio/player";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   readBoardCaptionsEnabled,
   shouldToggleBoardCaptionsFromKeyboard,
   writeBoardCaptionsEnabled,
 } from "../../lib/boardCaptions.ts";
+import { AssetIdLabel } from "./AssetIdLabel.tsx";
 import { KeeperBoardCaption } from "./KeeperBoardCaption.tsx";
 import {
   KEEPER_BASE_URL,
@@ -129,6 +130,7 @@ export function KeeperScene({
   if (failed || !manifest) {
     return (
       <div className="bt-keeper" data-keeper-plate="" ref={plateRef}>
+        <AssetIdLabel assetId={lineId} />
         {captionSlot}
         <button
           type="button"
@@ -155,6 +157,7 @@ export function KeeperScene({
         onEnd={() => onLineEnded?.(keeperLine)}
       />
       {captionSlot}
+      <AssetIdLabel assetId={lineId} />
       <button
         type="button"
         className="bt-caption-toggle"

@@ -54,7 +54,7 @@ Then give Bob a short brief: the topic, what is already decided (by ID), the ope
 - **IDs come from `pnpm -s --dir <wt> card-id <PREFIX> [count]`**, run just before you write the cards (`DEC`, `Q`, `IDEA`, `OPT`, `MEC`…). It prints one ID per line. An ID you reserve and then do not use stays unused; IDs are never reused anyway.
 - If an answer is already in a card or document, link it instead of making a new card.
 - Keep each area to about 10 direct links; add a sub-area (`part-of` the parent) instead of crowding it.
-- **One commit per idea**, in the worktree: `git -C <wt> commit -m "docs(game-design): <the ruling> (DEC-nnn)"`. `pnpm check` runs the card lint on commit; fix what it reports.
+- **One commit per idea**, in the worktree: `git -C <wt> commit -m "docs(game-design): <the ruling> (DEC-nnn)"`. The commit runs the card lint (`pnpm check:cards`), and CI runs it again on the PR; fix what it reports.
 - A prompt that starts with **Ask** from the workbench means answer only: edit nothing. When Bob then says "record everything", turn the answers into cards as above.
 - Refer to every piece by ID in chat and commits.
 

@@ -6,6 +6,17 @@ pre-commit:
       # scripts/gitleaks-protect.mjs uses gitleaks 8.30.1 on PATH or downloads that release.
       run: node scripts/gitleaks-protect.mjs
     check:
-      # Runs the full check when code or config is staged. Docs-only commits skip it.
+      # When code or config is staged: Biome, the static repo checks, then typecheck and tests
+      # for the app or shared package the staged files are in (scripts/pre-commit-check.mjs).
+      # A root config file runs the full `pnpm check`. Docs-only commits skip this command.
+      # CI runs the whole of `pnpm check` on the pull request; that is the gate.
       glob: "*.{ts,tsx,js,mjs,cjs,json,css,yaml,yml}"
-      run: pnpm check
+      run: node scripts/pre-commit-check.mjs
+    cards:
+      # A card-only commit stages no code, so `check` above skips it. The card lint
+      # (apps/game-workbench/src/web/lib/cards.test.ts) runs here instead.
+      # Two patterns: `**/` needs a folder, so the first covers the documents at the top.
+      glob:
+        - "research/game-design/*.md"
+        - "research/game-design/**/*.md"
+      run: pnpm check:cards

@@ -98,7 +98,7 @@ feel:
   lengthMs: 2300                      # from Bob's Play press to his Stopped press; the tower does not report when a sound ends
 ```
 
-Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a tone outside the list above. The older fields (mood, readsAs, strength, answerLengthMs, note) were dropped on 2026-10-26, when the review moved out of tower-poc. The code is `apps/game-workbench/src/web/lib/feel.ts`.
+Every field is optional. One that was not recorded is left out, never written as 0 or "". The block records only the feeling. Which mechanics or cues use a sound is decided later, when the mechanics are prototyped (Bob, 2026-10-21). The card lint (`pnpm check`) fails a `feel:` block on a card that is not a sound, an unknown field, or a tone outside the list above. An AI listen of each sound goes in the card body as one line marked "AI listen, not approved", never in `feel:` (DEC-845). The older fields (mood, readsAs, strength, answerLengthMs, note) were dropped on 2026-10-26, when the review moved out of tower-poc. The code is `apps/game-workbench/src/web/lib/feel.ts`.
 
 ## Status
 

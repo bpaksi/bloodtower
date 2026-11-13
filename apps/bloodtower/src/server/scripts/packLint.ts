@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, realpathSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { lintPackAssets } from "../../assets/lint/index.ts";
+import { formatIssues } from "../../assets/needs/issues.ts";
 import { loadConfig } from "../config.ts";
 
 /** Repo root from `src/server/scripts` (same layout as `config.ts`). */
@@ -47,6 +49,26 @@ export const lintPath = (dir: string | undefined, cwd: string): LintReport => {
     return { exitCode: 0, lines };
   }
   return { exitCode: 1, lines: formatPackV2Issues(result.issues) };
+};
+
+/**
+ * `lintPath`, then the pack's `assets/index.json` when it has one (A1 step 3). A pack without an
+ * index lints exactly as `lintPath` does. `release` also rejects any draft in the index.
+ */
+export const lintPathWithIndex = async (
+  dir: string | undefined,
+  cwd: string,
+  release = false,
+): Promise<LintReport> => {
+  const report = lintPath(dir, cwd);
+  const resolved = resolveLintDir(dir ?? join(loadConfig().packsDir, "test"), cwd);
+  const found = await lintPackAssets(resolved, release);
+  if (found === undefined) return report;
+  if (found.errors.length === 0 && found.warnings.length === 0) return report;
+  return {
+    exitCode: found.errors.length > 0 ? 1 : report.exitCode,
+    lines: [...report.lines, ...formatIssues(found.errors), ...formatIssues(found.warnings)],
+  };
 };
 
 /** Immediate child folders of a packs root. Hidden names are not doors. */
@@ -115,11 +137,15 @@ const entry = process.argv[1];
 if (entry && import.meta.url === pathToFileURL(resolve(entry)).href) {
   const args = process.argv.slice(2).filter((arg) => arg !== "--");
   const all = args.includes("--all");
-  if ((all && args.length !== 1) || (!all && args.length > 1)) {
-    console.error("Usage: pack:lint [dir] | pack:lint --all");
+  const release = args.includes("--release");
+  const rest = args.filter((arg) => arg !== "--release");
+  if ((all && (rest.length !== 1 || release)) || (!all && rest.length > 1)) {
+    console.error("Usage: pack:lint [dir] [--release] | pack:lint --all");
     process.exit(2);
   }
-  const report = all ? lintBuildSet(process.cwd()) : lintPath(args[0], process.cwd());
+  const report = all
+    ? lintBuildSet(process.cwd())
+    : await lintPathWithIndex(rest[0], process.cwd(), release);
   const write = report.exitCode === 0 ? console.log : console.error;
   for (const line of report.lines) write(line);
   process.exit(report.exitCode);

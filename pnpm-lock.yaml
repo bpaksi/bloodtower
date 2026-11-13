@@ -52,6 +52,34 @@ importers:
         specifier: 10.0.6
         version: 10.0.6
 
+  apps/bloodtower/src/assets:
+    dependencies:
+      '@asset-studio/cli':
+        specifier: 0.2.2
+        version: 0.2.2(@types/node@22.20.5)
+      '@asset-studio/formats':
+        specifier: 0.2.2
+        version: 0.2.2
+      '@asset-studio/player':
+        specifier: 0.2.2
+        version: 0.2.2(react@19.3.0)
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@22.20.5)
+      tsx:
+        specifier: 4.23.15
+        version: 4.23.15
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: 5.0.4
+        version: 5.0.4(@types/node@22.20.5)(jsdom@29.1.1)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
   apps/bloodtower/src/e2e:
     devDependencies:
       '@playwright/test':
@@ -150,15 +178,15 @@ importers:
 
   apps/bloodtower/src/web:
     dependencies:
+      '@asset-studio/formats':
+        specifier: 0.2.2
+        version: 0.2.2
+      '@asset-studio/player':
+        specifier: 0.2.2
+        version: 0.2.2(react@19.3.0)
       '@base-ui/react':
         specifier: 1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@talking-avatar/formats':
-        specifier: 0.1.0
-        version: 0.1.0
-      '@talking-avatar/player':
-        specifier: 0.1.0
-        version: 0.1.0(react@19.3.0)
       bloodtower-protocols:
         specifier: workspace:*
         version: link:../protocols
@@ -644,6 +672,21 @@ packages:
 
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
+
+  '@asset-studio/cli@0.2.2':
+    resolution: {integrity: sha512-MtvNHYXBWljbz6rauOyMyjQnJ38UvuDNtfej8PNhLSJ8j9iHubIdcihBnECBPzGz6AsuO0xIluljItGbGOmO0A==}
+    engines: {node: '>=22'}
+    hasBin: true
+
+  '@asset-studio/formats@0.2.2':
+    resolution: {integrity: sha512-460xFYk2jVglceD+Z1Beq/c4W0gvKMQ0UUwWCahQUjvoPFVko7xJxdPbIM/PCpc1MpoQcWHd7qel+uEOrsT8KQ==}
+    engines: {node: '>=22'}
+
+  '@asset-studio/player@0.2.2':
+    resolution: {integrity: sha512-73sAL09ba9e80ZF+6QGY4Aw/TiUWSYmZQnwMkK6uXMbjpE5KEFpMj9lDljM7V2dUvRQ6n1TYo+tYZBRpPmJ80g==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -1645,16 +1688,6 @@ packages:
 
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
-
-  '@talking-avatar/formats@0.1.0':
-    resolution: {integrity: sha512-7vnDfTBffDUw3C0hSpbR6QXjzSkSFax3ztsAv4xlDI+0uaP/lmiuszm7qS3r2tE94kOFM5JYLtGmsliz4EwylQ==}
-    engines: {node: '>=22'}
-
-  '@talking-avatar/player@0.1.0':
-    resolution: {integrity: sha512-vPf/E2zXa2Q8/m9zJWCGGJ0FPQk9mZMAUTmNR75nDdzGd4gkAFB4owBLgdwDCSA/Db1PZ8Q7YTzWXQ0IvCXSjQ==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0
 
   '@testing-library/dom@10.4.2':
     resolution: {integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==}
@@ -3792,6 +3825,22 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
+  '@asset-studio/cli@0.2.2(@types/node@22.20.5)':
+    dependencies:
+      '@asset-studio/formats': 0.2.2
+      sharp: 0.35.5(@types/node@22.20.5)
+    transitivePeerDependencies:
+      - '@types/node'
+
+  '@asset-studio/formats@0.2.2':
+    dependencies:
+      zod: 4.6.7
+
+  '@asset-studio/player@0.2.2(react@19.3.0)':
+    dependencies:
+      '@asset-studio/formats': 0.2.2
+      react: 19.3.0
+
   '@babel/code-frame@7.29.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.29.7
@@ -4632,15 +4681,6 @@ snapshots:
       '@tailwindcss/oxide': 4.3.3
       postcss: 8.5.30
       tailwindcss: 4.3.3
-
-  '@talking-avatar/formats@0.1.0':
-    dependencies:
-      zod: 4.6.7
-
-  '@talking-avatar/player@0.1.0(react@19.3.0)':
-    dependencies:
-      '@talking-avatar/formats': 0.1.0
-      react: 19.3.0
 
   '@testing-library/dom@10.4.2':
     dependencies:

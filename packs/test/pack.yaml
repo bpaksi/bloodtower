@@ -1,7 +1,7 @@
 format: 2
 kind: story
 pack_id: test
-title: Proving Grounds
+title: The Ruined Keep
 cover: assets/cover.png
 version: 0.1.0
 engine_min: 0.1.0
@@ -70,3 +70,6 @@ assets:
   - {id: place.bazaar, type: still, target: storyboard, status: final, path: assets/place-bazaar.jpg}
   - {id: place.citadel, type: still, target: storyboard, status: final, path: assets/place-citadel.jpg}
   - {id: place.sanctuary, type: still, target: storyboard, status: final, path: assets/place-sanctuary.jpg}
+  # Demo line (A1 step 8b-1, D48). Provenance: checklist id vo.loremaster.seal-break-1 -> this id.
+  # Voice is provisional (Charon). No file yet: it stays unavailable (caption only) until packed.
+  - {id: "seal-break.01~vo-01", type: line, target: storyboard, status: placeholder, speaker: narrator, text: "The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep."}

@@ -4,6 +4,7 @@ import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
+import { AssetIdLabel } from "./AssetIdLabel";
 import { DayBandExtras, DayPanel, HeroCorruptions, ThreatBar } from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
@@ -43,9 +44,6 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const momentId =
     view.narration && isOpeningMomentId(view.narration.lineId) ? view.narration.lineId : null;
   const showMove = layer === "move" && !momentId;
-  const dayPhase = table?.phase ?? null;
-  // The simulated drop keeps its waiting line ("A skull falls on …"); the kingdom panel sits below it.
-  const dayPanelShown = dayPhase !== null && dayPhase !== "turn" && dayPhase !== "skull-sim";
   return (
     <main
       className="bt-board"
@@ -95,7 +93,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       {showMove && table ? <ThreatBar table={table} /> : null}
       {showMove && table && !paused ? <DayPanel table={table} /> : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor && !paused && !dayPanelShown ? (
+      {showMove && table?.waitingFor && !paused ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
           <p className="bt-waiting-pulse" data-waiting role="status">
             {table.waitingFor}
@@ -109,6 +107,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           <figcaption>{place.caption}</figcaption>
         </figure>
       ) : null}
+      {layer === "place" && place ? <AssetIdLabel assetId={place.stillId} /> : null}
       {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
       {debug ? (
         <pre className="mt-4 max-h-64 overflow-auto text-xs opacity-70">
