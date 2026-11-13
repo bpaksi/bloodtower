@@ -26,7 +26,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: DEC-119.
 - Method: playwright
 - How: hero at 0.
-- Pass evidence: that iPad shows `[COPY: sitting out = "You are sitting out this battle. Watch the board."]` and no buttons.
+- Pass evidence: that iPad shows "You are sitting out this battle. Watch the board." (Copy table: ipad.sitting-out) and no buttons.
 - Fails if: picker shown.
 
 ### EV-04 — Screenshots match
@@ -40,7 +40,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the plan's rule: the first press on any present iPad decides; the others' buttons disable.
 - Method: playwright
 - How: 3 iPads; iPad A presses Retreat, then iPad B presses Fight 200 ms later.
-- Pass evidence: the battle retreats; iPad B's press is ignored and its buttons are disabled with `[COPY: the group chose Retreat]`.
+- Pass evidence: the battle retreats; iPad B's press is ignored and its buttons are disabled with "The group chose Retreat." (Copy table: ipad.group-chose-retreat).
 - Fails if: B's Fight wins, or both are applied.
 
 ### EV-06 — The toolbar is on every state

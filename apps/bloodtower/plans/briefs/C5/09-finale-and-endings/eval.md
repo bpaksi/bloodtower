@@ -19,14 +19,14 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: Q-C5-03.
 - Method: playwright
 - How: split vote.
-- Pass evidence: `[COPY: tie, vote again = "A tie. Vote once more."]` then a second vote.
+- Pass evidence: "A tie. Vote once more." (Copy table: tie.line) then a second vote.
 - Fails if: no re-vote.
 
 ### EV-03 — Line for the flag
 - Requirement: DEC-664.
 - Method: playwright
 - How: each flag.
-- Pass evidence: the matching `[COPY: finale win, ...]`.
+- Pass evidence: the matching finale win line (Copy table: win.shattered or win.holds).
 - Fails if: wrong.
 
 ### EV-04 — No credits (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)
@@ -116,6 +116,6 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Resolved Q-C5-03 **[Bob taste call]**: Who makes the last choice in the Tower (DEC-663)? Options: (a) each present hero votes on their iPad; a tie re-votes once, then the seeded draw (DEC-011) breaks it; (b) the hero who struck the last blow chooses; (c) the vote must be unanimous; it repeats until it is. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 - Resolved Q-C5-07 **[Bob taste call]**: Which lines are voiced in 1.0 (DEC-349)? Options: (a) the Loremaster's lines only (chapter cards, seal breaks, the two win lines, the loss); (b) none; all text on Scrolls. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
-- Resolved Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll `[COPY: credits]`. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
+- Resolved Q-C5-09 **[Bob taste call]**: After a finale win line, before the outcome scene: Options: (a) nothing extra: the win line, then the outcome scene; (b) a short credits Scroll "Blood Tower: The Ruined Keep. Thank you for playing.". Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 
-> Note (Q-C5-09): the pick is (a), no credits Scroll, so `[COPY: credits]` is not folded. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." (Credits line not folded.)
+> Note (Q-C5-09): the pick is (a), no credits Scroll, so the credits line is not folded. If Bob picks (b): "Blood Tower: The Ruined Keep. Thank you for playing." (Credits line not folded.)

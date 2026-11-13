@@ -22,12 +22,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: phase 2 then 3; +1 Rend each.
 - Fails if: missed.
 
-### EV-03 — Inventive cannot end it
-- Requirement: DEC-549.
+### EV-03 — Nothing but wounds ends it
+- Requirement: DEC-567, DEC-361. (Inventive, DEC-549, is 1.1: no potions in 1.0, DEC-502, DEC-581. Its block returns with 1.1. Changed 2026-11-12 by Gamewright under Bob's 11/1 small-tweak rule; the original check cannot run in 1.0.)
 - Method: unit
-- How: The Warden in phase 3 at 2 wounds; a hero plays Inventive.
-- Pass evidence: The Warden still has 2 wounds and the battle continues; log `inventive.blocked`.
-- Fails if: the battle ends or wounds change.
+- How: The Warden in phase 3 at 2 wounds; the group takes every round action the 1.0 engine offers.
+- Pass evidence: his wounds change only by a Fight cut; the battle ends only at 0 wounds (won) or when every hero falls; there is no Inventive card in the 1.0 pool (DEC-581).
+- Fails if: any action ends the battle early or changes his wounds otherwise.
 
 ### EV-04 — Falls at 0
 - Requirement: DEC-567.

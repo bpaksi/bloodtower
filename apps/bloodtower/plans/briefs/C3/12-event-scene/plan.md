@@ -53,6 +53,35 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-018: closed before coding (`decided`).
 - [ ] DEC-023: closed before coding (`decided`).
 
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `event.words (sample)` | Smoke on the road ahead. Something burned here last night. | sample for The Roads; every event's own words come from the pack's event entry, not from this brief (mockup.html, Loremaster 2026-10-31) |
+| 2 | `tick.auto` | Moves on by itself. | locked 2026-10-31 (Loremaster); the auto-advance tick (Bob 2026-10-31 10:38) |
+| 3 | `event.quiet` | The road is still. Nothing comes. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 4 | `event.windfall` | Fortune smiles. You find {reward}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 5 | `reveal.gain` | +{N} gold | EV-06 ("+5 gold"); "+N" in mockup |
+| 6 | `event.hazard` | Trouble on the road. {effect}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 7 | `hazard.saved` | {counter} saved you. Nothing is lost. | new - Loremaster. {counter} is the item or ability name when there is one (e.g. "The lantern saved you."), otherwise the hero's name (EV-07) |
+| 8 | `hazard.cost.hp.label` | Lose {N} hit points | EV-01; a 1.0 hazard costs hit points only (Gamewright confirmed); the board then shows the line in the next row |
+| 9 | `hazard.cost.hp` | −2 hit points each | EV-01 (verbatim) |
+| 10 | `event.foes` | Foes block the way. Stand fast or turn back. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); the disaster event uses the same line (C4-14 does the same) |
+| 11 | `choice.go-around` | Go around | DEC-023, DEC-028 (named in the spec) |
+| 12 | `choice.pay-off` | Pay them off (5 gold) | final: DEC-023; cost from events.pay_off = 5 gold (Bob approved 2026-10-31); label form matches C4-14 |
+| 13 | `event.people.rumour` | A stranger leans close. '{rumour}' | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 14 | `event.people.trick` | A stranger smiles too wide. You've been tricked: {effect}. | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31) |
+| 15 | `choice.listen` | Listen | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); pending Bob (Gamewright default) |
+| 16 | `choice.walk-on` | Walk on | new - Loremaster; first drawn in mockup.html (Loremaster copy, 2026-10-31); pending Bob (Gamewright default) |
+| 17 | `waiting.other-group` | The other group is deciding. | new - Loremaster (EV-03: the waiting line on absent heroes' iPads) |
+| 18 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
+| 19 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
+| 20 | `help.title` | Help | C2 feature 04 |
+| 21 | `help.event-scene` | Something happened on the road. Make a choice if one is shown; the scene moves on by itself. | locked 2026-10-31 (Loremaster); same text in screen-spec and EV-12 |
+| 22 | `help.close` | Close | C2 feature 04 |
+
 ## OPEN questions
 
 - ANSWERED Q-C3-02 (Bob, 2026-10-31 10:09 AM ET): hide Fight until C4.

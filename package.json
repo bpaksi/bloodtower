@@ -28,6 +28,7 @@
     "land": "node scripts/land.mjs",
     "wt": "node scripts/wt.mjs add",
     "wt:rm": "node scripts/wt.mjs rm",
+    "cleanup:worktrees": "node scripts/cleanup-worktrees.mjs",
     "build": "pnpm pack:lint:all && pnpm --filter \"./apps/*\" --if-present build",
     "lint": "biome check .",
     "format": "biome check --write ."

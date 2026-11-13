@@ -12,7 +12,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: UI-020.
 - Method: playwright
 - How: `c3-chapter.spec.ts`: Begin a game.
-- Pass evidence: the card for The Roads: painting, name, goal `[COPY: ...]`; no Next on the iPad; it auto-advances.
+- Pass evidence: the card for The Roads: painting, name "The Roads", goal "Hear the herald in Greyford. Then open the forest road."; no Next on the iPad; it auto-advances.
 - Fails if: no card.
 
 ### EV-02 — Stamped won, then the seal (C4+ only; not run in C3)
