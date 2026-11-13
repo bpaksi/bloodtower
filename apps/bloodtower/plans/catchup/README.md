@@ -62,7 +62,60 @@ Rounded to a quarter day, except that the Cursor part uses 0.125 steps for Med a
 
 Gates: **43** blocks 44. **44** blocks steps 50 to 57, 59, 60 and the amended steps 06, 09, 11, 13, 17, 24, 25, 28, 33 and 58. **45** blocks every step with [COPY] slots or new copy (06 to 10, 14, 22, 24 to 29, 40, 52, 54 to 57, 60). **62** waits for Bob's run (Mon Nov 16). Done by the rulings patch (so the work is on main once the docs PR with it lands): **46** (C3-08), **47** (C2-07 text) and **48** (gap triage).
 
+## Nov 12 audit fold-in (docs and issues only; Bob via Warden, Nov 13 2026)
+
+Bob's two Dark Tower reviews of Nov 12 are folded into this plan as **docs and issues only**. No runner build, no code, no Cursor. Sources, kept in `docs/audits/`: [2026-11-12-dark-tower-consolidated-audit.md](../../../../docs/audits/2026-11-12-dark-tower-consolidated-audit.md) (30 findings, repair packages F1-F8, decisions D1-D7, tests R01-R09, H01-H03, P01) and [2026-11-12-f1-tomb-to-battle-package.md](../../../../docs/audits/2026-11-12-f1-tomb-to-battle-package.md) (the F1 package, TB-01 to TB-14). The audit itself ran no code, simulation, hardware check or human playtest: treat every "already-decided drift" item as unverified until the code is inspected.
+
+**Sequence rule.** F1 and the rulings D1-D6 go **ahead of** the C4 and C5 loops: #445 (C4-02 battle loop), #446 (C4-03 retreat, fall, reward), #449 (C4-06 Tomb crawl), #459 (C5-01), #460 (C5-02), #461 (C5-03) and #462 (C5-04). They are not new queue steps: no weekdays, runner time or Cursor dollars are added to the totals above until Warden opens F1. The audit's own order stays: D1-D3 and F1/F2 edits in parallel -> sync diagrams -> D6, D4, D5 rulings -> inspect the code and run R01-R09 -> Bob's H01-H03 -> simulations -> human playtests (P01).
+
+### F1: Tomb-to-battle contracts (HELD)
+
+| Item | Status |
+|---|---|
+| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall), EE-01 (forced turn end not propagated) |
+| Tests | TB-01 to TB-14 and R01 (specified, not run) |
+| Gamewright confirmation 1 (Nov 13, 5:50 AM ET) | **Received.** Entry terminal gate routing as written: MEC-038 alone applies the stance once, on a genuine entry; after each entry effect the gate runs game loss first, then foe gone = won, then all fallen = fallen close; no Fight/Retreat, round card or roll after a terminal entry; Continue replays nothing |
+| Gamewright confirmation 2 (Nov 13, 5:50 AM ET) | **Received.** **TB-03 is a Gamewright ruling:** a foe killed by Bold never uses its later pre-round ability (Ambush, Fire breath, or any other) |
+| Build | **HELD** until Warden relays more. When it opens, one runner inspects the code first; it may end as docs and tests only if the code already conforms |
+| Out of scope | Mutual Spines and trap zero/shortfall (D2), skull-loss dispatch (D1), CB-02, CB-03, QD-02, QD-04 |
+| Issue | #505 |
+
+### Rulings awaiting Gamewright (D1-D6)
+
+All six are **awaiting Gamewright rulings**. They block the regression tests and the C4/C5 battle work named below. D7 (BE-04, BE-03 derived glyph value) is feature gated and parked with 1.1.
+
+| Decision | Findings | Question | Blocks | Issue |
+|---|---|---|---|---|
+| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check | R03 | #499 |
+| D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
+| D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation | R04; #445, #460 | #501 |
+| D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
+| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope | R06 | #502 |
+| D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
+
+### Mapping of the 30 findings into the v1.0 plan
+
+| Finding(s) | Destination | Plan hook |
+|---|---|---|
+| QD-03, CB-01, QD-01, EE-01 (F1) | **v1.0 now, held.** Two Gamewright confirmations received; inspect the code, then build; TB-01 to TB-14 and R01 | Before #445, #446, #449 (#505) |
+| EE-02, BE-02 (F2) | v1.0 after F1; D6 first | Before the encounter-related C4 steps (#507) |
+| LC-03 (F3) | v1.0 core schedules after D6; the Long overlay is 1.1 | Day loop, #441 follow-up (#507) |
+| CB-02, TP-01 (F4) | v1.0 after F1 | #446, #459 (#507) |
+| LC-02, LC-06, TP-03 (F5) | v1.0 | #435 (C3-10), #462 (C5-04) (#507) |
+| QD-02, QD-04 (F6) | v1.0 after single stance ownership | #449 (#507) |
+| BE-03 base payout (F7) | v1.0; the derived glyph text is parked 1.1 | #437 (#507) |
+| LC-01 (D1) | Gamewright rules first (high); drives R03 | #499 |
+| QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work | #500, #501 -> #445, #460 |
+| QD-06 (D4), BE-05 (D5) | Gamewright rules; block R05 and R06 | #504, #502 |
+| LC-04 | v1.0 verification: R07 fault injection, then Bob's real-Tower run | #484 |
+| TP-04, H03 | v1.0 hardware: H01 and H03 on Bob's Monday run | #484, #489 |
+| EE-03 | Coverage gap, mainly 1.1. Note only: the P-006 numbers do not prove the omitted mechanics | #475 (parked) |
+| BE-01, BE-04, CB-03, TP-02 (F8), D7, glyph part of BE-03, Long overlay, H02 | **Parked to 1.1**, label `parked-1.1` | #506 |
+| LC-05 | Withdrawn (DEC-886/D-04 already decide it). Keep a story-specific conformance test | none |
+
 ## The runner queue (v1.0)
+
+**Audit gate (Nov 13):** F1 (#505) and the rulings D1-D6 (#499-#504) sit ahead of orders 28 to 46 (#445, #446, #449, #459 to #462). See "Nov 12 audit fold-in" above. Order numbers and totals are unchanged until Warden opens F1.
 
 Columns: **Weekdays** is the step total, **Runner** the build part, **Cursor** the review part in weekdays and dollars at $2.73.
 
@@ -169,6 +222,7 @@ The C3, C4 and C5 briefs all pass `node scripts/check-briefs.mjs` on main and ca
 - **Bob, open:** re-approval rows for the changed evals and for CU/01 and CU/02 (a batch is fine); the three locks the rulings touch (see design-freeze.md): caravans, Charon's scope, PT-24's removal of locked copy; PT-05's tower label parked (say so if he wants it back in step 06).
 - **Bob gates:** G-C3, G-C4, G-A1 (needs the art hold lifted, A1-4c render and step 31), C5-10 (G-1.0). Bob also ticks every art final in C5-05.
 - **Gamewright and Loremaster:** steps 43 to 45 and 62.
+- **Gamewright, audit rulings:** D1-D6 (#499-#504), awaiting. F1 (#505) is held with both Gamewright confirmations received; Warden decides when it opens.
 
 ## Parked: 1.1 after v1.0 (Bob 11-12)
 
@@ -179,5 +233,6 @@ Bob said to finish v1.0 before any 1.1 design, so there is **no 1.1 or 1.2 outli
 | 42 | PARKED (1.1): PT-01 UI-051, UI-053, UI-056 and UI-064 rewrite to words plus physical pieces | Gamewright | PT-01, PT-09 | #468 |
 | 49 | PARKED (1.1): Gamewright: probe P-008 (tower cell, split policy, forced-concentration run) | Gamewright | PT-05, PT-06, PT-11 | #475 |
 | 61 | PARKED (1.2): Loremaster: patch packs/dracula/script.yaml so the gallery cloth is never lifted (Lenka's reveal is at n4) | Loremaster | — | — |
+| - | PARKED (1.1): Dark Tower audit items outside v1.0 (BE-01, BE-04, CB-03, TP-02, glyph parts, Long overlay, D7, H02, EE-03) | Gamewright | - | #506 |
 
 Also parked, with no issue: the 1.1 and 1.2 sections of the design freeze and the gap map are reference only; the 16 gaps the triage moved to 1.1 wait with them. When 1.0 ships, 1.1 planning starts from DEC-785 and DEC-831, as the design freeze says.
