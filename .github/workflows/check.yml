@@ -207,7 +207,7 @@ jobs:
       - name: pnpm install
         run: pnpm install --frozen-lockfile
       - name: playwright browsers
-        run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium
+        run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium webkit
       - name: build web export
         run: pnpm --dir apps/bloodtower/src/web build
       - name: playwright e2e

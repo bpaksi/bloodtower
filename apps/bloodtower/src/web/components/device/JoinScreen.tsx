@@ -57,6 +57,7 @@ export function JoinScreen({
           </article>
         ) : (
           <form
+            suppressHydrationWarning
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
@@ -70,6 +71,7 @@ export function JoinScreen({
               <input
                 className="min-h-14 bg-[var(--bt-card)] px-3 text-3xl tracking-[0.35em]"
                 name="code"
+                suppressHydrationWarning
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 pattern="\d{6}"
@@ -85,6 +87,7 @@ export function JoinScreen({
         )}
         {shown ? null : (
           <form
+            suppressHydrationWarning
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
@@ -98,6 +101,7 @@ export function JoinScreen({
               <input
                 className="min-h-14 bg-[var(--bt-card)] px-3 text-xl"
                 name="token"
+                suppressHydrationWarning
                 value={token}
                 disabled={!live && !onRejoin}
                 onChange={(event) => setToken(event.target.value)}

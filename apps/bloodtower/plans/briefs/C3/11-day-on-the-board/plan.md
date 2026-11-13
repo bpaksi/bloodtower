@@ -71,7 +71,7 @@ Touches stay as they are. Each blocked eval stays in the contract and goes live 
 3. EV-15, EV-16: the host's split and use-item actions and a potion fixture go to their own step.
 4. EV-09, and EV-01's seeded virtue and corruption groups: a test-only day-clock seed hook (skulls per building, the next kingdom, hero sheets) goes to the new engine step from ruling 1.
 5. EV-05, and the Regroup stop of EV-11 and EV-13: the test story starts each hero in a different kingdom, so Regroup never shows. The same seed hook puts two heroes on one space.
-6. EV-19 found a bug: Continue does not keep the day clock (21 days left before the quit, 23 after). A test-first fix goes on its own `fix/` branch. The EV-19 e2e is live here, marked `test.fail` until that fix lands.
+6. EV-19 found a bug: Continue does not keep the day clock (21 days left before the quit, 23 after). A test-first fix goes on its own `fix/` branch. The EV-19 e2e is live here (no longer marked `test.fail`).
 
 ## Eval approval
 

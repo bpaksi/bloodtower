@@ -54,6 +54,18 @@ export default defineConfig({
       name: "desktop",
       use: { browserName: "chromium", viewport: { width: 1440, height: 900 } },
     },
+    {
+      // iOS-style engine, scoped to the hydration guard only (#414).
+      name: "webkit",
+      testMatch: "**/join-hydration.spec.ts",
+      use: {
+        browserName: "webkit",
+        viewport: { width: 390, height: 844 },
+        hasTouch: true,
+        // WebKit rejects the Chromium-only autoplay flag from the shared launchOptions.
+        launchOptions: { args: [] },
+      },
+    },
   ],
   webServer: {
     // Build first, the same as tower-poc: a stale or missing export fails most specs.

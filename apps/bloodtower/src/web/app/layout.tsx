@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={boardFonts.variables}>
+    <html lang="en" className={boardFonts.variables} suppressHydrationWarning>
       <body>
         <PageCapture>
           <StoryAudioShell>{children}</StoryAudioShell>
