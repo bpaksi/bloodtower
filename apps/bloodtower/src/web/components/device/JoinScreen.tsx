@@ -57,6 +57,7 @@ export function JoinScreen({
           </article>
         ) : (
           <form
+            suppressHydrationWarning
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
@@ -86,6 +87,7 @@ export function JoinScreen({
         )}
         {shown ? null : (
           <form
+            suppressHydrationWarning
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
