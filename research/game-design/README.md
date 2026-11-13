@@ -33,6 +33,7 @@ A ruling is often refined by later ones. `pnpm graph show <ID>` lists them under
 | [cards/](cards/) | Every ruling, question, mechanic, screen, UI piece, cue, art piece and tower output, as cards |
 | [probes/](probes/) | Scripted games played from the cards alone, and the numbers pass (P-001 to P-006). A rules gap found there becomes a `Q-` card |
 | [playtests/](playtests/) | Paper playtests: three personas walked through the screens and the table, with findings and fixes (first: 2026-11-12, v1 to v1.2) |
+| [audit-rulings-2026-11-13.md](audit-rulings-2026-11-13.md) | Gamewright's rulings on D1 to D6 of the Dark Tower consolidated audit, and the two design items from Hammer's status check (DEC-905 to DEC-914) |
 | [specs/](specs/) | Build specifications drawn from the cards: art specs, asset requirements, and the Dracula story's D-01 to D-06 |
 | [mockups/](mockups/) | Dated screen mockups from design sessions |
 | [glossary.md](glossary.md) | One meaning per word |
