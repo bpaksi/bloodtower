@@ -13,7 +13,7 @@ Keep this a checklist; do not write a second design doc.
 - Screen spec: none
 - Mockup: none (no screen change)
 - Risk: Med
-- Depends on: C3 feature 01 merged, C3 feature 02 merged, and its `approval.md` on `main`
+- Depends on: C3 feature 01 merged, C3 feature 02 merged, C3 feature 18 merged (the schema and lint it fills), and its `approval.md` on `main`
 - Touches: `packs/test/**` (the Proving Grounds pack, DEC-666), `apps/bloodtower/src/server/pack/v2/lint.test.ts`
 - Builds: AREA-097
 - Deps change: no
