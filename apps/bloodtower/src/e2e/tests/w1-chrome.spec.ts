@@ -649,6 +649,7 @@ const HELP_STOPS: Record<string, string> = {
   claim: "Tap Pick for the hero this iPad speaks for at the table.",
   "base-board-setup":
     "Lay out the board and pieces as shown. Tap Board is set up when the table is ready.",
+  "day-on-the-board": "A new day begins. Move your heroes, then choose where to go.",
   play: "The game is on. Follow the prompts on this iPad and the Story board.",
   "tower-lost": "The tower stopped answering and the game waits. Tap Reconnect, or Go on without.",
   "session-screen": "Your saved games are here. Tap Continue for the last one, or New game.",
