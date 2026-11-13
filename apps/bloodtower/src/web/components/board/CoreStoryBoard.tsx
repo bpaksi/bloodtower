@@ -5,6 +5,7 @@ import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
 import { AssetIdLabel } from "./AssetIdLabel";
+import { DayBandExtras, DayPanel, HeroCorruptions, ThreatBar } from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { OpeningMoment } from "./OpeningMoment";
@@ -72,21 +73,25 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </DialogFrame>
       ) : null}
       {showMove && table ? (
-        <header className="bt-band" data-band>
+        <header className="bt-band" id="band" data-band>
           {table.groups.map((group) => (
-            <span key={group.heroId} data-health="unavailable">
-              {group.heroName} unavailable
+            <span key={group.heroId} data-hero-panel={group.heroId}>
+              <span data-health="unavailable">{group.heroName} unavailable</span>
+              <HeroCorruptions table={table} heroId={group.heroId} />
             </span>
           ))}
           <span data-purse="unavailable">unavailable</span>
           <span data-chapter>{table.chapter}</span>
           <span data-day>Day {table.day}</span>
+          <DayBandExtras table={table} />
           {table.actingGroup ? <span data-acting>{table.actingGroup}</span> : null}
           <span data-moves={table.movesLeft ?? "unavailable"}>
             {table.movesLeft == null ? "unavailable" : table.movesLeft}
           </span>
         </header>
       ) : null}
+      {showMove && table ? <ThreatBar table={table} /> : null}
+      {showMove && table && !paused ? <DayPanel table={table} /> : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
       {showMove && table?.waitingFor && !paused ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">

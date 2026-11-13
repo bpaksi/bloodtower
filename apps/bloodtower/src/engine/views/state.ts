@@ -52,9 +52,44 @@ export type TableGroup = {
 };
 
 /** Story-board status band. Health and purse stay unavailable until a pack supplies them. */
+export type DayPhaseView = "regroup" | "roll" | "turn" | "skull" | "skull-sim" | "effects";
+
+export type DayRollView = {
+  groupId: string;
+  name: string;
+  rolled: number;
+  virtue: number;
+  terrain: number;
+  corruption: number;
+  total: number;
+};
+
+export type DaySkullView = {
+  kingdomLabel: string | null;
+  buildings: { spaceId: string; name: string; skulls: number; fallen: boolean }[];
+  fell: string[];
+};
+
+export type HeroCorruptionView = {
+  heroId: string;
+  heroName: string;
+  /** The group lead whose panel shows this hero (UI-030). */
+  panelHeroId: string;
+  count: number;
+};
+
 export type TableBand = {
   chapter: string;
   day: number;
+  /** Nights the supply still covers (DEC-686). Null when not known. */
+  daysLeft?: number | null;
+  /** The coming night's drop only (Q-C3-19). */
+  threat?: number | null;
+  phase?: DayPhaseView | null;
+  rolls?: DayRollView[];
+  effects?: string[];
+  skull?: DaySkullView | null;
+  corruptions?: HeroCorruptionView[];
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;
