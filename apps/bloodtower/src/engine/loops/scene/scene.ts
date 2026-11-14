@@ -1,5 +1,7 @@
 /** Plain-scene type (MEC-037) and its one step (MEC-077). Data only plus the lint. */
 
+import type { PackPlainScene } from "../../../protocols/pack-v2/scenes.ts";
+
 export type SceneCost =
   | { kind: "gold"; amount: number }
   /** Hit points from each present hero, stopping at 1 (DEC-714). */
@@ -40,6 +42,30 @@ export const MAX_EFFECTS = 3;
 /** Options the group sees: a battle option is hidden, not disabled (Q-C3-02). */
 export const visibleOptions = (scene: PlainScene): SceneOption[] =>
   scene.options.filter((option) => !option.battle);
+
+/**
+ * A pack's plain scene in the engine's shape (C3-18). The pack lists a battle as an effect so
+ * DEC-692 can count it; here it becomes the option's `battle` flag and leaves the effect list.
+ */
+export const sceneFromPack = (scene: PackPlainScene): PlainScene => ({
+  id: scene.id,
+  options: scene.options.map((option): SceneOption => {
+    const effects: SceneEffect[] = [];
+    let battle = false;
+    for (const effect of option.effects) {
+      if (effect.kind === "battle") battle = true;
+      else effects.push({ ...effect });
+    }
+    return {
+      id: option.id,
+      label: option.label,
+      ...(option.needs_item !== undefined ? { needsItem: option.needs_item } : {}),
+      ...(option.cost !== undefined ? { cost: { ...option.cost } } : {}),
+      effects,
+      ...(battle ? { battle: true } : {}),
+    };
+  }),
+});
 
 /** Lint problems for one scene; empty when it is sound. */
 export const lintScene = (scene: PlainScene): string[] => {

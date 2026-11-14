@@ -40,5 +40,32 @@ export {
   type TowerMode,
   towerModeSchema,
 } from "./metadata.ts";
+export {
+  endingsSchema,
+  LOSS_WAYS,
+  lossSceneSchema,
+  MAX_OPTION_EFFECTS,
+  MAX_SCENE_OPTIONS,
+  MIN_SCENE_OPTIONS,
+  type PackEndings,
+  type PackPlainScene,
+  type PackQuestPlace,
+  type PackSceneCost,
+  type PackSceneEffect,
+  type PackSceneItem,
+  type PackSceneOption,
+  plainSceneSchema,
+  QUEST_PLACE_TYPES,
+  questPlaceSchema,
+  SCENE_COST_KINDS,
+  SCENE_EFFECT_KINDS,
+  sceneCostSchema,
+  sceneDataIssues,
+  sceneEffectSchema,
+  sceneItemSchema,
+  sceneLabelForPath,
+  sceneOptionSchema,
+  winLineSchema,
+} from "./scenes.ts";
 export { flagCoverageIssues } from "./semantic.ts";
 export { type StoryPack, storyPackSchema } from "./story.ts";

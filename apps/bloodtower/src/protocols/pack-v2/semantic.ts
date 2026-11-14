@@ -57,6 +57,20 @@ export const flagCoverageIssues = (story: StoryPack): PackV2Issue[] => {
     }
   }
 
+  for (const scene of story.scenes ?? []) {
+    for (const option of scene.options) {
+      for (const effect of option.effects) {
+        if (effect.kind === "flag") flagWrites.add(effect.flag);
+      }
+    }
+  }
+  for (const [wi, line] of (story.endings?.win ?? []).entries()) {
+    if (!line.when) continue;
+    for (const flag of flagReadsInCondition(line.when)) {
+      flagReads.push({ flag, path: `endings.win.${wi}.when` });
+    }
+  }
+
   const issues: PackV2Issue[] = [];
   for (const read of flagReads) {
     if (!flagWrites.has(read.flag)) {

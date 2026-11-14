@@ -9,6 +9,7 @@ import {
   semverSchema,
 } from "./ids.ts";
 import { coverSchema } from "./metadata.ts";
+import { endingsSchema, plainSceneSchema, questPlaceSchema, sceneItemSchema } from "./scenes.ts";
 
 const entryPointSchema = z.strictObject({
   when: conditionSchema.optional(),
@@ -26,6 +27,10 @@ const questSchema = z.strictObject({
   quest_type: questTypeIdSchema,
   label: z.string().min(1).max(120).optional(),
   when: conditionSchema.optional(),
+  /** The space it stands on and whether that is a village or the wild (C3-18, DEC-662). */
+  place: questPlaceSchema.optional(),
+  /** The plain scene that is this quest's one step (MEC-077), by id in `scenes`. */
+  scene: idSchema.optional(),
 });
 
 const chapterSchema = z.strictObject({
@@ -103,6 +108,12 @@ export const storyPackSchema = z
       })
       .default({}),
     chapters: z.array(chapterSchema).min(1),
+    /** Plain scenes (MEC-077) that quests name (C3-18). Absent in a pack that has none. */
+    scenes: z.array(plainSceneSchema).optional(),
+    /** Quest items, each with the quest and option that gives it (DEC-653, C3-18). */
+    items: z.array(sceneItemSchema).optional(),
+    /** Win lines by flag (DEC-664) and one loss scene per way to lose (DEC-043). */
+    endings: endingsSchema.optional(),
     assets: z
       .array(
         z

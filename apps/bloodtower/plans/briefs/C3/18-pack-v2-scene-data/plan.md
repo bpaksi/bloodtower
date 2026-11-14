@@ -63,6 +63,14 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] MEC-037: closed before coding (`decided`).
 - [ ] MEC-077: closed before coding (`decided`).
 
+## Build notes (2026-11-14)
+
+- Layout: a quest takes `place: {space, type: village|wild}` and `scene: <id>`; the story takes `scenes`, `items` (`from: {quest, option?}`; `option` only when that quest is a plain scene) and `endings` (`win` lines with `id`, `when`, `text`; `loss` with `way`, `text`). A battle is the effect `{kind: battle}`; the engine converter (`sceneFromPack`) turns it into `battle: true`.
+- Lint runs in the loader (`pack/v2/load.ts`), so `packLint.ts` needed no change. A quest whose `place.space` is not on the base board is also a P2-2 issue.
+- Copy scan: it is C3-03's (EV-05, `lint.test.ts`). The new player-facing strings use only keys on its list (`label`, `text`).
+- `quest_type` stays required with its six values; C3-03 must pick one for each plain-scene quest or raise it.
+- A quest with no plain scene (the Tomb) gets no quest def in the store until C4.
+
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).
