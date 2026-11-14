@@ -194,6 +194,8 @@ const startGame = async (
 const expectStacked = async (board: Page, lines: string[]) => {
   const panel = board.locator("#skull");
   await expect(panel).toBeVisible({ timeout: 20_000 });
+  await expect(panel.locator("[data-skull-heading]")).toHaveText("Night falls");
+  await expect(panel.locator("[data-skull-kingdom], [data-skull-buildings]")).toHaveCount(0);
   const items = panel.locator("[data-skull-line]");
   await expect(items).toHaveCount(lines.length);
   expect(await items.allTextContents()).toEqual(lines);

@@ -174,6 +174,12 @@ describe("CU/03 the board's skull lines (PT-07)", () => {
     expect(five).toHaveLength(5);
     expect(five?.join(" ").length).toBeGreaterThan(120);
     expect(five?.every((line) => line === "A skull falls on Sanctuary.")).toBe(true);
+    // Four lines of the longest real title (Sanctuary, 27 characters a line): 108 in all, 111
+    // joined by spaces. This story's titles cannot take four lines past 120 (see the PR report).
+    const longest = linesAfter(Array(4).fill("W-akartus"));
+    expect(longest).toEqual(Array(4).fill("A skull falls on Sanctuary."));
+    expect(longest?.every((line) => line.length === 27)).toBe(true);
+    expect(longest?.reduce((sum, line) => sum + line.length, 0)).toBe(108);
     const four = linesAfter(["N-egans-end", "N-dayside", "S-howling-desert", "W-anza"]);
     expect(four).toEqual([
       "A skull falls on Village.",

@@ -40,6 +40,7 @@ type WireTable = {
   skull?: {
     kingdomLabel: string | null;
     buildings: { spaceId: string; skulls: number }[];
+    lines?: string[];
   } | null;
 };
 type HookWindow = {
@@ -378,7 +379,7 @@ test.describe("C3/11 the day on the board", () => {
       expect(kingdom).toBeTruthy();
       const panel = board.locator("#skull");
       await expect(panel).toBeVisible();
-      await expect(panel).toContainText(String(kingdom));
+      await expect(panel).toContainText("Night falls");
       // The no-tower lines sit in the skull panel (CU/03), not in a second waiting box.
       await expect(panel.locator("[data-skull-line]").first()).toContainText(/skull/i);
       await expectToolbar(pad);
@@ -476,12 +477,8 @@ test.describe("C3/11 the day on the board", () => {
       const after = (await wireTable(board))?.skull;
       expect(after?.kingdomLabel).toBe(before?.kingdomLabel);
       expect(after?.buildings).toEqual(before?.buildings);
-      for (const building of after?.buildings ?? []) {
-        await expect(board.locator(`#skull [data-building="${building.spaceId}"]`)).toHaveAttribute(
-          "data-skulls",
-          String(building.skulls),
-        );
-      }
+      // The no-tower panel shows the lines only (CU/03); the counts ride the wire.
+      expect((await wireTable(board))?.skull?.lines).toEqual(before?.lines);
     } finally {
       await context.close();
       await session.host.close();

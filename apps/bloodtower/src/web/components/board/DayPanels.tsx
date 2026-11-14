@@ -104,15 +104,35 @@ export function DayPanel({ table }: { table: Table }) {
       </DialogFrame>
     );
   }
-  if (phase === "skull" || phase === "skull-sim") {
+  if (phase === "skull-sim") {
+    // PT-07: the no-tower night shows a heading and one line per skull, stacked (CU/03 mockup).
+    const skull = table.skull;
+    return (
+      <DialogFrame size="compact" className="bt-ink-in" id="skull" data-day-panel={phase}>
+        <h2 data-skull-heading="">Night falls</h2>
+        <ul data-skull-lines="">
+          {(skull?.lines ?? []).map((line, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: two skulls can land on one building; drop order is the identity
+            <li key={`${line}-${index}`} data-skull-line="">
+              {line}
+            </li>
+          ))}
+        </ul>
+        {(skull?.fell ?? []).map((name) => (
+          <p key={name} data-fell={name}>
+            {name} falls.
+          </p>
+        ))}
+      </DialogFrame>
+    );
+  }
+  if (phase === "skull") {
     const skull = table.skull;
     return (
       <DialogFrame size="compact" className="bt-ink-in" id="skull" data-day-panel={phase}>
         <p data-skull-kingdom={skull?.kingdomLabel ?? "unavailable"}>
           {skull?.kingdomLabel
-            ? phase === "skull-sim"
-              ? `A skull falls in ${skull.kingdomLabel}.`
-              : `A skull falls in ${skull.kingdomLabel}. Choose a building.`
+            ? `A skull falls in ${skull.kingdomLabel}. Choose a building.`
             : "A skull falls. Choose a building."}
         </p>
         <ul data-skull-buildings="">
@@ -127,16 +147,6 @@ export function DayPanel({ table }: { table: Table }) {
             </li>
           ))}
         </ul>
-        {phase === "skull-sim" && (skull?.lines ?? []).length > 0 ? (
-          <ul data-skull-lines="">
-            {(skull?.lines ?? []).map((line, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: two skulls can land on one building; drop order is the identity
-              <li key={`${line}-${index}`} data-skull-line="">
-                {line}
-              </li>
-            ))}
-          </ul>
-        ) : null}
         {(skull?.fell ?? []).map((name) => (
           <p key={name} data-fell={name}>
             {name} falls.
