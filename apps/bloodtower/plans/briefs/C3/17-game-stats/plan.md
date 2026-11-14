@@ -11,13 +11,14 @@ Keep this a checklist; do not write a second design doc.
 - Related AREA/docs: AREA-097, AREA-099, SCR-019, SCR-021
 - Evals: ./eval.md
 - Screen spec: ./screen-spec.md
-- Mockup: none yet: the screen changes, see ./screen-spec.md. Illusionist draws ./mockup.html from it before Bob approves the evals
+- Mockup: none yet: the screen changes, see ./screen-spec.md. Illusionist draws ./mockup.html from it before Bob approves the evals. Amended 2026-11-14 (PT-04): the length line gains two states, "Best: this game" and "No win yet to compare"; the Illusionist adds `#best-first` and `#best-none` to mockup.html (EV-19).
 - Risk: Low
 - Depends on: C3 feature 16 merged, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/GameStats.tsx` (extends C2 07's quit-game stats), `apps/bloodtower/src/web/components/device/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/e2e/tests/c3-stats.spec.ts`
 - Builds: SCR-019, DEC-116
 - Deps change: no
 - Runs: cloud
+- Amended 2026-11-14 for PT-03, PT-04, PT-10 (step 44): added EV-13 to EV-20; two Copy slots (`stats.best.first`, `stats.best.none`) as `[COPY: ...]`. EV-03 is unchanged (its fixture is one key). Rulings adopted by Bob 2026-11-14 are applied to EV-15 and EV-18; no approved eval is changed in place. Needs Bob's new approval row. Illusionist adds mockup states `#best-first` and `#best-none`; mockup.html is not edited here.
 
 ## What it does
 
@@ -34,12 +35,13 @@ Cutover: N
 - Continue, restore, and restart must keep:
   - The gear Menu and any gear panel come back closed, the game not paused, the toolbar on every iPad, and item states recomputed (EV-12).
   - The fun rating, once given, is stored with the game and shown on drill-in from tonight's games.
+  - The best and average figures and the best-line state are recomputed from the stored records after a restart (EV-20).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-12 all pass (verifier table on PR).
+- [ ] EV-01 … EV-20 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -49,6 +51,9 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-117: closed before coding (`decided`).
 - [ ] DEC-627: closed before coding (`decided`).
 - [ ] SCR-021: closed before coding (`decided`).
+- [ ] PT-03 ruling recorded as a DEC by step 43 (#469); closed before coding.
+- [ ] PT-04 ruling recorded as a DEC by step 43 (#469); closed before coding.
+- [ ] PT-10 ruling recorded as a DEC by step 43 (#469); closed before coding.
 
 ## Copy
 
@@ -82,6 +87,8 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 24 | `help.title` | Help | C2 feature 04 |
 | 25 | `help.game-stats` | Here's how tonight went. Rate it if you like, then tap Play again. | locked 2026-10-31 (Loremaster); same text in screen-spec and EV-12 |
 | 26 | `help.close` | Close | C2 feature 04 |
+| 27 | `stats.best.first` | [COPY: Best: this game] | ruling PT-04 (2026-11-12) gives these words; Loremaster confirms and places it in the length line (step 45) |
+| 28 | `stats.best.none` | [COPY: No win yet to compare] | ruling PT-04 (2026-11-12) gives these words; Loremaster confirms and places it in the length line (step 45) |
 
 ## OPEN questions
 

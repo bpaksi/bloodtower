@@ -11,16 +11,17 @@ Keep this a checklist; do not write a second design doc.
 - Related AREA/docs: AREA-097, UI-044, DEC-303
 - Evals: ./eval.md
 - Screen spec: ./screen-spec.md
-- Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals
+- Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals. Amended 2026-11-14 (PT-21): the Seal broken state becomes the seal row of Set the table (C3/15), after the next chapter's card; the Illusionist adds `#set-table-seal` (EV-22); the Seal broken screen's `#seal` tab is reworked there.
 - Depends on: 07, C3 15, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/SealBreak.tsx`, `apps/bloodtower/src/web/components/device/SkullPlacer.tsx`
 - Builds: UI-044
 - Deps change: no
 - Runs: cloud
+- Amended 2026-11-14 for PT-21 (step 44): added EV-17 to EV-24; edited EV-01, EV-05, EV-06, EV-07, EV-08 and EV-13 in place, each marked Amended 2026-11-14 (PT-21) (the seal step is now a row in Set the table, after the next chapter's card; the Reveal stays right after the seal break; the freed-skull picks come after Done). Five Copy slots as `[COPY: ...]`. Needs Bob's new approval row. Illusionist adds `#set-table-seal`.
 
 ## What it does
 
-C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll, the lit seal, the glyph and boon on a Reveal with the Loremaster's seal line (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-10), then the freed-skull prompts on the iPad (kingdom, then building). The C3 "Done" confirm becomes the real pick: the iPad confirms which seal broke on the tower.
+C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll, the lit seal, the glyph and boon on a Reveal with the Loremaster's seal line (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-10), then the freed-skull prompts on the iPad (kingdom, then building). The C3 "Done" confirm becomes the real pick: the iPad confirms which seal broke on the tower. PT-21: that confirm is the seal row of "Set the table", which follows the next chapter's card (story first); the freed-skull picks stay separate choices and come after Set the table's Done (Bob, 2026-11-14, adopted; Gamewright to confirm); Done is not gated on the rows.
 
 ## Cutover
 
@@ -34,18 +35,20 @@ Cutover: N
   - A half-placed set of freed skulls resumes at the next skull.
   - After a restart and Continue, the Menu and any gear panel come back closed.
   - A beat interrupted by restart shows again or the next one shows, its effect applied once.
+  - A restart in Set the table resumes it and records the seal and its boon once (EV-23).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-16 all pass (verifier table on PR).
+- [ ] EV-01 … EV-24 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
 
 - [ ] UI-044: closed before coding (`decided`).
 - [ ] DEC-303: closed before coding (`decided`).
+- [ ] PT-21 ruling recorded as a DEC by step 43 (#469); closed before coding.
 
 ## Copy
 
@@ -83,6 +86,11 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 28 | `help.title` | Help | C2 feature 04 |
 | 29 | `help.seal-break-live` | Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 30 | `help.close` | Close | C2 feature 04 |
+| 31 | `table.title` | [COPY: Set the table] | ruling PT-21; same slot as C3/15 `table.title`; Loremaster confirms (step 45) |
+| 32 | `table.row.seal` | [COPY: the seal row, with the seal's name] | new - Loremaster (step 45); replaces the `button.seal-broken` press |
+| 33 | `table.row.tokens` | [COPY: the quest tokens row] | new - Loremaster (step 45) |
+| 34 | `table.row.skulls` | [COPY: the freed skulls row] | new - Loremaster (step 45) |
+| 35 | `table.done` | [COPY: Done label for Set the table] | new - Loremaster (step 45) |
 
 ## OPEN questions
 
