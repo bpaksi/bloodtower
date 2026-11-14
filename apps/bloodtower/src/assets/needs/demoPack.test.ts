@@ -21,10 +21,29 @@ describe("A1-8b-1 Done when 1: packs/test is The Ruined Keep, id test", () => {
   it("differs from the baseline manifest only in the title and the appended rows", () => {
     const before = manifest(join(import.meta.dirname, "fixtures/test-pack.before.yaml"));
     const after = manifest(join(REPO_PACKS, "test/pack.yaml"));
-    const { title: oldTitle, assets: oldAssets, ...restBefore } = before;
-    const { title: newTitle, assets: newAssets, ...restAfter } = after;
+    // C3-03 replaced the day slice's tagline and chapters, and added scenes, items and endings.
+    // Everything else in the manifest is still pinned to the baseline.
+    const {
+      title: oldTitle,
+      assets: oldAssets,
+      tagline: oldTagline,
+      chapters: _oldChapters,
+      ...restBefore
+    } = before;
+    const {
+      title: newTitle,
+      assets: newAssets,
+      tagline: newTagline,
+      chapters: _newChapters,
+      scenes: _scenes,
+      items: _items,
+      endings: _endings,
+      ...restAfter
+    } = after;
     expect(oldTitle).toBe("Proving Grounds");
     expect(newTitle).toBe("The Ruined Keep");
+    expect(oldTagline).toBe("AREA-077 day slice — Enter and Leave only.");
+    expect(newTagline).toBe("[COPY: The Ruined Keep tagline]");
     expect(restAfter).toEqual(restBefore);
     expect(after.pack_id).toBe("test");
     const rows = newAssets as unknown[];

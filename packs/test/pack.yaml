@@ -5,7 +5,7 @@ title: The Ruined Keep
 cover: assets/cover.png
 version: 0.1.0
 engine_min: 0.1.0
-tagline: AREA-077 day slice — Enter and Leave only.
+tagline: "[COPY: The Ruined Keep tagline]"
 base_pack: base
 playable: true
 players: {min: 1, max: 4}
@@ -44,16 +44,16 @@ game:
         flag: proving-grounds-open
 
 chapters:
-  - id: proving-grounds
+  - id: the-roads
     index: 1
-    kingdoms: [N, E, S, W]
+    kingdoms: [N]
     timed_beats: []
     start:
       effects:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "Walk the kingdoms. Enter a building or leave it. That is the whole of today."}
+            - {speaker: narrator, text: "[COPY: opening, the heroes gather at the Arisilon citadel and take to the roads]"}
     end:
       when:
         type: flag
@@ -62,8 +62,136 @@ chapters:
         - kind: narrate
           target: storyboard
           lines:
-            - {speaker: narrator, text: "The sun sets on the Proving Grounds."}
-    quests: []
+            - {speaker: narrator, text: "[COPY: chapter 1 closes, the roads are clear]"}
+    quests:
+      - {id: herald, scene: herald, place: {space: N-egans-end, type: village}}
+      - {id: ambush, scene: ambush, place: {space: N-muted-forest, type: wild}}
+
+  - id: the-keep
+    index: 2
+    kingdoms: [N, E]
+    timed_beats: []
+    start:
+      effects:
+        - kind: narrate
+          target: storyboard
+          lines:
+            - {speaker: narrator, text: "[COPY: chapter 2 opens, Brynthia opens and the ruined keep is in view]"}
+    quests:
+      - {id: barrow, quest_type: tomb, place: {space: E-utars-barrows, type: wild}}
+      - {id: shrine, scene: shrine, place: {space: E-greater-tombstones, type: village}}
+
+  - id: the-tower
+    index: 3
+    kingdoms: [N, E, S, W]
+    timed_beats: []
+    start:
+      effects:
+        - kind: narrate
+          target: storyboard
+          lines:
+            - {speaker: narrator, text: "[COPY: chapter 3 opens, the whole board and the road to the Tower]"}
+    # The last choice is the plain scene `tower-end`; its flag picks the win line (DEC-664).
+    end:
+      effects:
+        - kind: narrate
+          target: storyboard
+          lines:
+            - {speaker: narrator, text: "[COPY: The Warden falls, the last choice in the Tower]"}
+    quests:
+      - {id: lock, scene: lock, place: {space: S-howling-desert, type: wild}}
+      - {id: last-stand, scene: last-stand, place: {space: W-the-grass-sea, type: wild}}
+
+scenes:
+  - id: herald
+    options:
+      - id: take-the-job
+        label: "[COPY: Take the job]"
+        effects:
+          - {kind: item, item: tomas-map}
+      - id: ask-pay-first
+        label: "[COPY: Ask for pay first]"
+        effects:
+          - {kind: gold, amount: 10}
+  # The toll is 10 gold; a short group pays all its gold plus 2 HP per present hero, never below
+  # 1 HP, and the quest finishes (Q-C3-22). The engine owns that rule; the pack names the cost.
+  - id: ambush
+    options:
+      - id: fight
+        label: "[COPY: Fight the raiders]"
+        effects:
+          - {kind: battle}
+      - id: pay-the-toll
+        label: "[COPY: Pay the toll]"
+        cost: {kind: toll}
+        effects:
+          - {kind: flag, flag: ambush-toll-paid}
+  - id: shrine
+    options:
+      - id: pray-at-the-altar
+        label: "[COPY: Pray at the altar]"
+        effects:
+          - {kind: item, item: oath-blade}
+      - id: leave-the-shrine
+        label: "[COPY: Leave the shrine]"
+        effects:
+          - {kind: flag, flag: shrine-left}
+  - id: lock
+    options:
+      - id: turn-the-signet
+        label: "[COPY: Turn the Signet]"
+        needs_item: signet
+        effects:
+          - {kind: flag, flag: lock-opened}
+      - id: force-it
+        label: "[COPY: Force it]"
+        effects:
+          - {kind: battle}
+  # The foe is the random level-3 foe the engine draws (DEC-647); a battle effect names none.
+  - id: last-stand
+    options:
+      - id: hold-the-gate
+        label: "[COPY: Hold the gate]"
+        effects:
+          - {kind: battle}
+      - id: rally-the-guard
+        label: "[COPY: Rally the guard]"
+        effects:
+          - {kind: flag, flag: last-stand-rallied}
+  - id: tower-end
+    options:
+      - id: break-the-seal
+        label: "[COPY: Break what is sealed under the keep]"
+        effects:
+          - {kind: flag, flag: ending-break}
+      - id: swear-the-oath
+        label: "[COPY: Swear The Warden's oath and guard it]"
+        effects:
+          - {kind: flag, flag: ending-oath}
+
+items:
+  - id: tomas-map
+    label: "[COPY: Tomas's Map]"
+    from: {quest: herald, option: take-the-job}
+  - id: signet
+    label: "[COPY: The Warden's Signet]"
+    from: {quest: barrow}
+  - id: oath-blade
+    label: "[COPY: The Warden's oath-blade]"
+    from: {quest: shrine, option: pray-at-the-altar}
+
+endings:
+  win:
+    - id: win-break
+      when: {type: flag, flag: ending-break}
+      text: "[COPY: win, the heroes break what is sealed]"
+    - id: win-oath
+      when: {type: flag, flag: ending-oath}
+      text: "[COPY: win, the heroes swear The Warden's oath]"
+  loss:
+    - {way: corruption, text: "[COPY: loss, corruption overcomes the heroes]"}
+    - {way: skulls, text: "[COPY: loss, the skulls fill the tower]"}
+    - {way: buildings, text: "[COPY: loss, the buildings fall]"}
 
 assets:
   - {id: place.village, type: still, target: storyboard, status: final, path: assets/place-village.jpg}
