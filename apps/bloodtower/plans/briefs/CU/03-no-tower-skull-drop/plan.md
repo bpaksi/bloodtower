@@ -10,6 +10,7 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (brief, evals); a Wright developer, runner anvil (build)
 - Related AREA/docs: GitHub issue #476; PT-07 in `research/game-design/playtests/2026-11-12-paper-playtest-v1-v1.2.md`; `plans/catchup/design-freeze.md` section H (PT-07); DEC-305, DEC-092; C2/08 eval EV-04 and its "A skull falls on <building>" line; C3-04 (merged)
 - Evals: ./eval.md
+- Amended 2026-11-14 (PT-07, Bob: "Reword to five"): EV-06 now takes exactly 5 skulls/lines, because four lines of the longest title ("Sanctuary") total 108 characters and cannot pass 120. Marked in place. Bob adds the new approval row after merge-ready.
 - Screen spec: none
 - Mockup: ./mockup.html (a Gamewright draft for the Illusionist to replace)
 - Risk: Med

@@ -45,11 +45,11 @@ Unit tests live in `apps/bloodtower/src/engine/loops/day/day.test.ts` (day loop 
 - Pass evidence: the skull lands in kingdom E; exactly two kingdom draws are used for that skull; a skull in a later night starts with a fresh single draw.
 - Fails if: it picks any standing building without a reroll (today's fallback), or it rerolls more than once. The case where the rerolled kingdom is also empty is EV-15.
 
-### EV-06 — One line per skull, none cut
+### EV-06 — One line per skull, none cut (Amended 2026-11-14 (PT-07, Bob))
 - Requirement: PT-07: the board shows one line per skull, "A skull falls on <building>.", stacked, never cut short; Bob approved the line (C2/08).
 - Method: unit
-- How: test in `src/engine/loops/session/towerLost.test.ts` style: a night with 4 skulls on 4 buildings with long titles (the longest building title in the test story). Read the board's skull lines from the view.
-- Pass evidence: exactly 4 lines; each equals `A skull falls on <title>.` with the building's own title; the lines together are longer than 120 characters and none is truncated; two skulls on the same building give two identical lines, not one.
+- How: test in `src/engine/loops/session/towerLost.test.ts` style: a night with 5 skulls on 5 buildings with long titles (the longest building title in the test story). Read the board's skull lines from the view.
+- Pass evidence: exactly 5 lines; each equals `A skull falls on <title>.` with the building's own title; the lines together are longer than 120 characters and none is truncated; two skulls on the same building give two identical lines, not one.
 - Fails if: lines are joined into one string, cut at 120 characters (today's `.slice(0, 120)`), deduplicated, or the building shows as "a building".
 
 ### EV-07 — The board stacks the lines
