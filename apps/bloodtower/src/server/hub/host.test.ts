@@ -397,7 +397,7 @@ describe.each([
     const { log, calls } = warnSpy();
     const host = await startAt(databasePath, log);
     expect(calls).toEqual([
-      { code: "save-skipped", message: `save skipped: pre-C3 format ${version}` },
+      { code: "save-skipped", message: `save skipped: pre-C3 format ${version} (pack test)` },
     ]);
     expect(readAutosave(databasePath)).toEqual(before);
 
@@ -408,6 +408,22 @@ describe.each([
     expect(offered(device).some((a) => a.promptId === "continue-saved-game")).toBe(false);
     expect(calls).toHaveLength(1);
     expect(readAutosave(databasePath)).toEqual(before);
+  });
+
+  it("names pack test in its one skipped log line and matches no other pack (C3-03 EV-08)", async () => {
+    const databasePath = join(tempDir(), "session.sqlite");
+    seedAutosave(databasePath, format);
+    const before = readAutosave(databasePath);
+    const { log, calls } = warnSpy();
+    const host = await startAt(databasePath, log);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.message).toMatch(/^save skipped: pre-C3 format .* \(pack test\)$/);
+    expect(readAutosave(databasePath)).toEqual(before);
+    const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
+    await press(device, "base-board-done", "board-set-up");
+    await press(device, "play-without-tower", "play-without-tower");
+    await whenOffered(device, "continue-pick-story-test");
+    expect(offered(device).some((a) => a.promptId === "continue-saved-game")).toBe(false);
   });
 
   it("lets a New game run clean and replaces the old row with a format 2 save", async () => {

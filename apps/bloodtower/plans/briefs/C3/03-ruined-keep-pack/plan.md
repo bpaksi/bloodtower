@@ -14,7 +14,7 @@ Keep this a checklist; do not write a second design doc.
 - Mockup: none (no screen change)
 - Risk: Med
 - Depends on: C3 feature 01 merged, C3 feature 02 merged, C3 feature 18 and feature 19 merged (the schema and lint it fills), and its `approval.md` on `main`
-- Touches: `packs/test/**` (the Proving Grounds pack, DEC-666), `apps/bloodtower/src/server/pack/v2/lint.test.ts`
+- Touches: `packs/test/**` (the Proving Grounds pack, DEC-666), `apps/bloodtower/src/server/pack/v2/lint.test.ts`, and the tests that pinned the old day-slice pack: `apps/bloodtower/src/server/pack/v2/sceneData.test.ts`, `apps/bloodtower/src/server/pack/v2/load.test.ts`, `apps/bloodtower/src/assets/needs/demoPack.test.ts`, `apps/bloodtower/src/e2e/tests/w3-pick-story.spec.ts`, and for EV-08 `apps/bloodtower/src/server/hub/host.ts` (the pre-C3 log line only) and `apps/bloodtower/src/server/hub/host.test.ts`
 - Builds: AREA-097
 - Deps change: no
 - Runs: cloud

@@ -207,7 +207,10 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   if (autosaveRow && autosaveRow.format !== AUTOSAVE_FORMAT) {
     // Q-C3-07: a pre-C3 save is dropped, not migrated. The row stays in the DB, ignored: it is
     // not offered as Continue and play starts fresh. A New game's first autosave replaces it.
-    log.warn("save-skipped", `save skipped: pre-C3 format ${autosaveRow.format ?? "none"}`);
+    log.warn(
+      "save-skipped",
+      `save skipped: pre-C3 format ${autosaveRow.format ?? "none"} (pack ${autosaveRow.packId})`,
+    );
   } else if (autosaveRow) {
     if (autosaveRow.sessionId !== sessionId) {
       eventStore.replaceAutosave({ ...autosaveRow, sessionId });

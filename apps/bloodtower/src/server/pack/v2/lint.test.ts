@@ -1,15 +1,33 @@
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
+import { storyPackSchema } from "../../../protocols/pack-v2/story.ts";
 import { loadStoryCatalog } from "../../core/loadStories.ts";
 import { lintBuildSet, lintPackRoot, lintPath } from "../../scripts/packLint.ts";
-import { loadPackV2Dir } from "./load.ts";
+import { formatPackV2Issues, loadPackV2Dir } from "./load.ts";
 
 const repoRoot = join(import.meta.dirname, "../../../../../../");
 const packsV2 = join(repoRoot, "packs");
 const basePack = join(packsV2, "base");
 const testPack = join(packsV2, "test");
+
+const tempPacksV2 = () => {
+  const root = mkdtempSync(join(tmpdir(), "pack-v2-root-"));
+  const storyDir = join(root, "test");
+  cpSync(testPack, storyDir, { recursive: true });
+  cpSync(basePack, join(root, "base"), { recursive: true });
+  return { root, storyDir };
+};
 
 describe("pack format v2 lint", () => {
   it("loads the base content pack with 60 board spaces", () => {
@@ -42,14 +60,6 @@ describe("pack format v2 lint", () => {
     expect(report.exitCode).toBe(0);
     expect(report.lines[0]).toContain("OK test");
   });
-
-  const tempPacksV2 = () => {
-    const root = mkdtempSync(join(tmpdir(), "pack-v2-root-"));
-    const storyDir = join(root, "test");
-    cpSync(testPack, storyDir, { recursive: true });
-    cpSync(basePack, join(root, "base"), { recursive: true });
-    return { root, storyDir };
-  };
 
   it("refuses an unknown manifest key (no code in packs)", () => {
     const { root, storyDir } = tempPacksV2();
@@ -301,6 +311,8 @@ assets:
       "Place the seals on the tower and load the skulls into the chute.",
       "Stand each hero on their start building.",
     ]);
+    expect(testStory?.card.title).toBe("The Ruined Keep");
+    expect(testStory?.card.tagline).toMatch(/^\[COPY: /);
   });
 
   it("lints every door under the configured packs folder", () => {
@@ -356,5 +368,343 @@ assets:
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+type Loaded = Extract<ReturnType<typeof loadPackV2Dir>, { ok: true; kind: "story" }>;
+
+const loadKeep = (): Loaded["pack"] => {
+  const result = loadPackV2Dir(testPack, packsV2);
+  if (!result.ok || result.kind !== "story") {
+    throw new Error(`test pack did not load: ${JSON.stringify(result)}`);
+  }
+  return result.pack;
+};
+
+const questsOf = (pack: Loaded["pack"]) => pack.chapters.flatMap((c) => c.quests);
+
+describe("The Ruined Keep pack (C3-03)", () => {
+  it("EV-02 ruined keep skeleton: three chapters, six quests, DEC-662's places and kingdoms", () => {
+    const pack = loadKeep();
+    expect(pack.title).toBe("The Ruined Keep");
+    expect(pack.pack_id).toBe("test");
+    expect(pack.chapters.map((c) => ({ id: c.id, index: c.index, kingdoms: c.kingdoms }))).toEqual([
+      { id: "the-roads", index: 1, kingdoms: ["N"] },
+      { id: "the-keep", index: 2, kingdoms: ["N", "E"] },
+      { id: "the-tower", index: 3, kingdoms: ["N", "E", "S", "W"] },
+    ]);
+    expect(pack.chapters.map((c) => c.quests.map((q) => q.id))).toEqual([
+      ["herald", "ambush"],
+      ["barrow", "shrine"],
+      ["lock", "last-stand"],
+    ]);
+    expect(questsOf(pack)).toHaveLength(6);
+    const place = (id: string) => questsOf(pack).find((q) => q.id === id)?.place;
+    expect(place("herald")).toEqual({ space: "N-egans-end", type: "village" });
+    expect(place("ambush")).toEqual({ space: "N-muted-forest", type: "wild" });
+    expect(place("barrow")?.space).toBe("E-utars-barrows");
+    // The schema's place type is village or wild only, so a sanctuary is the building's "village" side.
+    expect(place("shrine")).toEqual({ space: "E-greater-tombstones", type: "village" });
+    expect(place("lock")?.space).toBe("S-howling-desert");
+    expect(place("last-stand")?.space).toBe("W-the-grass-sea");
+    // The Barrow is the one Tomb; the five others are plain scenes with no quest_type.
+    expect(questsOf(pack).map((q) => q.quest_type ?? null)).toEqual([
+      null,
+      null,
+      "tomb",
+      null,
+      null,
+      null,
+    ]);
+    const sceneQuests = questsOf(pack).filter((q) => q.quest_type === undefined);
+    expect(sceneQuests.every((q) => q.scene !== undefined)).toBe(true);
+    // Each place sits on the board space DEC-662 names (building read from the base board).
+    const board = JSON.parse(readFileSync(join(basePack, "board", "spaces.json"), "utf8")) as {
+      spaces: Array<{ id: string; name: string; building?: string }>;
+    };
+    const spaceOf = (id: string) => board.spaces.find((s) => s.id === place(id)?.space);
+    expect(spaceOf("herald")?.building).toBe("village");
+    expect(spaceOf("shrine")?.building).toBe("sanctuary");
+    expect(spaceOf("ambush")?.name).toBe("Muted Forest");
+    expect(spaceOf("lock")?.name).toBe("Howling Desert");
+    expect(spaceOf("last-stand")?.name).toBe("The Grass Sea");
+  });
+
+  it("DEC-692: Ambush pays a toll and fights; the Last Stand fights a foe the pack does not name", () => {
+    const pack = loadKeep();
+    const scene = (id: string) => pack.scenes?.find((s) => s.id === id);
+    const ambush = scene("ambush");
+    expect(ambush?.options.map((o) => o.id)).toEqual(["fight", "pay-the-toll"]);
+    expect(ambush?.options[1]?.cost).toEqual({ kind: "toll" });
+    expect(ambush?.options[0]?.effects.some((e) => e.kind === "battle")).toBe(true);
+    const last = scene("last-stand");
+    expect(last?.options.some((o) => o.effects.some((e) => e.kind === "battle"))).toBe(true);
+    // DEC-647: the schema has no foe field on a battle effect, so the engine draws the level-3 foe.
+    for (const option of last?.options ?? []) {
+      for (const effect of option.effects) {
+        if (effect.kind === "battle") expect(Object.keys(effect)).toEqual(["kind"]);
+      }
+    }
+    // Hit points and corruption appear only as costs; the one cost in the pack is the toll.
+    const costs = (pack.scenes ?? []).flatMap((s) => s.options.map((o) => o.cost?.kind ?? null));
+    expect(costs.filter((k) => k !== null)).toEqual(["toll"]);
+  });
+
+  it("EV-07 ruined keep items: three items, each from its own quest", () => {
+    const pack = loadKeep();
+    expect(pack.items).toEqual([
+      expect.objectContaining({
+        id: "tomas-map",
+        from: { quest: "herald", option: "take-the-job" },
+      }),
+      expect.objectContaining({ id: "signet", from: { quest: "barrow" } }),
+      expect.objectContaining({
+        id: "oath-blade",
+        from: { quest: "shrine", option: "pray-at-the-altar" },
+      }),
+    ]);
+    const optionsNeeding = (pack.scenes ?? []).flatMap((s) =>
+      s.options.filter((o) => o.needs_item !== undefined).map((o) => `${s.id}/${o.id}`),
+    );
+    expect(optionsNeeding).toEqual(["lock/turn-the-signet"]);
+    const lock = pack.scenes?.find((s) => s.id === "lock");
+    expect(lock?.options.find((o) => o.id === "turn-the-signet")?.needs_item).toBe("signet");
+    // Given only where DEC-672, DEC-673 say; the Signet comes from the Tomb game, not a scene.
+    const givers = (pack.scenes ?? []).flatMap((s) =>
+      s.options.flatMap((o) =>
+        o.effects.flatMap((e) => (e.kind === "item" ? [`${s.id}/${o.id}:${e.item}`] : [])),
+      ),
+    );
+    expect(givers.sort()).toEqual([
+      "herald/take-the-job:tomas-map",
+      "shrine/pray-at-the-altar:oath-blade",
+    ]);
+  });
+
+  it("EV-04 the endings branch on a flag set by the Tower's last choice", () => {
+    const pack = loadKeep();
+    const tower = pack.chapters.find((c) => c.id === "the-tower");
+    expect(tower?.end?.effects.length).toBeGreaterThan(0);
+    const choice = pack.scenes?.find((s) => s.id === "tower-end");
+    expect(choice?.options).toHaveLength(2);
+    const flagsSet = (choice?.options ?? []).map((o) =>
+      o.effects.flatMap((e) => (e.kind === "flag" ? [e.flag] : [])),
+    );
+    expect(flagsSet.every((f) => f.length === 1)).toBe(true);
+    const [a, b] = flagsSet.flat();
+    expect(a).not.toBe(b);
+    const win = pack.endings?.win ?? [];
+    expect(win).toHaveLength(2);
+    expect(win.map((l) => l.when)).toEqual([
+      { type: "flag", flag: a, value: true },
+      { type: "flag", flag: b, value: true },
+    ]);
+    expect(pack.endings?.loss.map((l) => l.way).sort()).toEqual([
+      "buildings",
+      "corruption",
+      "skulls",
+    ]);
+  });
+
+  interface RawOption {
+    id: string;
+    cost?: unknown;
+    effects: unknown[];
+  }
+  interface RawDoc {
+    scenes: Array<{ id: string; options: RawOption[] }>;
+    endings: { win: Array<Record<string, unknown>>; loss: unknown[] };
+  }
+  interface ZodDef {
+    type?: string;
+    shape?: Record<string, unknown>;
+    element?: unknown;
+    options?: unknown[];
+    getter?: () => unknown;
+    in?: unknown;
+    innerType?: unknown;
+  }
+
+  const withScenes = (edit: (doc: RawDoc) => void) => {
+    const { root, storyDir } = tempPacksV2();
+    const manifest = join(storyDir, "pack.yaml");
+    const doc = parseYaml(readFileSync(manifest, "utf8"));
+    edit(doc);
+    writeFileSync(manifest, stringifyYaml(doc));
+    return { root, storyDir };
+  };
+
+  it("EV-03 a copy of The Ambush with a fourth effect fails lint, naming the option", () => {
+    const { root, storyDir } = withScenes((doc) => {
+      const ambush = doc.scenes.find((s) => s.id === "ambush");
+      const toll = ambush?.options.find((o) => o.id === "pay-the-toll");
+      if (!toll) throw new Error("no toll option");
+      toll.effects = [
+        { kind: "flag", flag: "f1" },
+        { kind: "flag", flag: "f2" },
+        { kind: "flag", flag: "f3" },
+        { kind: "flag", flag: "f4" },
+      ];
+    });
+    try {
+      const result = loadPackV2Dir(storyDir, root);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.issues.some((i) => i.message.includes("pay-the-toll"))).toBe(true);
+      expect(formatPackV2Issues(result.issues).join("\n")).toContain("pay-the-toll");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("EV-03 a copy of The Ambush with an item as its cost fails lint, naming the option", () => {
+    const { root, storyDir } = withScenes((doc) => {
+      const ambush = doc.scenes.find((s) => s.id === "ambush");
+      const toll = ambush?.options.find((o) => o.id === "pay-the-toll");
+      if (!toll) throw new Error("no toll option");
+      toll.cost = { kind: "item", item: "signet" };
+    });
+    try {
+      const result = loadPackV2Dir(storyDir, root);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.issues.some((i) => i.message.includes("pay-the-toll"))).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("EV-04 a win line with no condition, or a missing loss way, fails lint", () => {
+    const noCond = withScenes((doc) => {
+      delete doc.endings.win[0]?.when;
+    });
+    const noLoss = withScenes((doc) => {
+      doc.endings.loss.pop();
+    });
+    try {
+      for (const { root, storyDir } of [noCond, noLoss]) {
+        const result = loadPackV2Dir(storyDir, root);
+        expect(result.ok).toBe(false);
+      }
+    } finally {
+      rmSync(noCond.root, { recursive: true, force: true });
+      rmSync(noLoss.root, { recursive: true, force: true });
+    }
+  });
+
+  // EV-05. The fields that carry player-facing text. The pack `title` is checked by EV-06.
+  const COPY_FIELDS = [
+    "title",
+    "tagline",
+    "narration",
+    "text",
+    "label",
+    "line",
+    "goal",
+    "hook",
+    "summary",
+  ];
+  // String fields that are ids, references, paths or engine-owned strings, not story copy.
+  const NOT_COPY_FIELDS = [
+    "pack_id",
+    "cover",
+    "version",
+    "engine_min",
+    "base_pack",
+    "id",
+    "when",
+    "hero",
+    "default",
+    "kingdom",
+    "speaker",
+    "voice",
+    "cue",
+    "token",
+    "space",
+    "lead",
+    "flag",
+    "counter",
+    "chapter",
+    "scene",
+    "item",
+    "needs_item",
+    "quest",
+    "option",
+    "quest_type",
+    "path",
+    "from",
+  ];
+
+  /** Names of every string-valued field the story schema declares, found by walking the schema. */
+  const stringFieldNames = (
+    schema: unknown,
+    name: string,
+    out: Set<string>,
+    seen: Set<unknown>,
+  ) => {
+    if (seen.has(schema)) return;
+    seen.add(schema);
+    const def = (schema as { _zod?: { def?: ZodDef } })._zod?.def;
+    if (!def) return;
+    switch (def.type) {
+      case "string":
+        out.add(name);
+        return;
+      case "object":
+        for (const [key, child] of Object.entries(def.shape ?? {})) {
+          stringFieldNames(child, key, out, seen);
+        }
+        return;
+      case "array":
+        stringFieldNames(def.element, name, out, seen);
+        return;
+      case "union":
+        for (const option of def.options ?? []) stringFieldNames(option, name, out, seen);
+        return;
+      case "lazy":
+        stringFieldNames(def.getter?.(), name, out, seen);
+        return;
+      case "pipe":
+        stringFieldNames(def.in, name, out, seen);
+        return;
+      default:
+        if (def.innerType) stringFieldNames(def.innerType, name, out, seen);
+    }
+  };
+
+  it("EV-05 the copy scan's field list is every free-text string field in the schema", () => {
+    const found = new Set<string>();
+    stringFieldNames(storyPackSchema, "(root)", found, new Set());
+    const known = new Set([...COPY_FIELDS, ...NOT_COPY_FIELDS]);
+    const unlisted = [...found].filter((name) => !known.has(name));
+    // A new string field must be added to COPY_FIELDS or NOT_COPY_FIELDS, so it is not skipped.
+    expect(unlisted).toEqual([]);
+    for (const name of ["tagline", "text", "label", "title"]) expect(found.has(name)).toBe(true);
+  });
+
+  it("EV-05 every player-facing value in the pack files is a [COPY: ...] placeholder", () => {
+    const strays: string[] = [];
+    const walk = (node: unknown, path: string, key: string | undefined) => {
+      if (Array.isArray(node)) {
+        for (const [i, item] of node.entries()) walk(item, `${path}.${i}`, key);
+      } else if (node && typeof node === "object") {
+        for (const [k, v] of Object.entries(node)) walk(v, `${path}.${k}`, k);
+      } else if (typeof node === "string" && key !== undefined && COPY_FIELDS.includes(key)) {
+        // The pack title is checked by EV-06. Party-size and setup labels are engine-owned
+        // setup text that the setup screens and their e2e specs read verbatim; the demo line is the
+        // one asset row with text.
+        if (path === "pack.yaml.title") return;
+        if (/^pack\.yaml\.(settings|setup)\./.test(path)) return;
+        // The demo voice line is locked text that assets/needs/demoPack.test.ts pins (A1-8b-1).
+        if (/^pack\.yaml\.assets\.\d+\.text$/.test(path)) return;
+        if (!node.startsWith("[COPY:")) strays.push(`${path}=${node}`);
+      }
+    };
+    for (const file of readdirSync(testPack)) {
+      if (!/\.(ya?ml|json)$/.test(file)) continue;
+      const text = readFileSync(join(testPack, file), "utf8");
+      walk(file.endsWith(".json") ? JSON.parse(text) : parseYaml(text), file, undefined);
+    }
+    expect(strays).toEqual([]);
   });
 });

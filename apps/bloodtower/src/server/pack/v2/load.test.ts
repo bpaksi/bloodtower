@@ -127,11 +127,15 @@ describe("a broken v2 pack fails loudly (C3-01 EV-04)", () => {
   it("loads the same copy when the quest names a declared chapter (control)", () => {
     const root = copyPacks("base", "test");
     try {
-      writeQuests(root, "proving-grounds");
+      writeQuests(root, "the-roads");
       const result = loadPackV2Dir(join(root, "test"), root);
       expect(result.ok).toBe(true);
       if (!result.ok || result.kind !== "story") return;
-      expect(result.pack.chapters[0]?.quests.map((quest) => quest.id)).toEqual(["lost-tomb"]);
+      expect(result.pack.chapters[0]?.quests.map((quest) => quest.id)).toEqual([
+        "herald",
+        "ambush",
+        "lost-tomb",
+      ]);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

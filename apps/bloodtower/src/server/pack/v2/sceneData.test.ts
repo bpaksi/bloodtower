@@ -94,8 +94,24 @@ const loadStory = (edit: (manifest: Manifest) => void): PackV2LoadResult => {
 /** The test pack plus the scene data above. */
 const withScenes = (manifest: Manifest) => {
   Object.assign(manifest, parseYaml(SCENE_YAML));
-  const chapter = manifest.chapters[0];
-  if (chapter) chapter.quests = structuredClone(QUESTS);
+  // The real pack (C3-03) declares quests in every chapter; keep only the four fixture quests,
+  // all in chapter 1, so ids and scene names do not collide.
+  for (const [index, chapter] of manifest.chapters.entries()) {
+    chapter.quests = index === 0 ? structuredClone(QUESTS) : [];
+  }
+};
+
+/** The test pack with the C3-18 fields removed: the shape a pack had before this step. */
+const withoutSceneFields = (manifest: Manifest) => {
+  delete manifest.scenes;
+  delete manifest.items;
+  delete manifest.endings;
+  for (const chapter of manifest.chapters) {
+    chapter.quests = (chapter.quests as Array<Record<string, unknown>>).map((quest) => {
+      const { place: _place, scene: _scene, ...rest } = quest;
+      return { ...rest, quest_type: rest.quest_type ?? "tomb" };
+    });
+  }
 };
 
 const scene = (manifest: Manifest, id: string) => {
@@ -129,9 +145,8 @@ describe("C3-18 EV-01: existing packs still load", () => {
     expect(report.lines[0]).toMatch(new RegExp(`^OK ${id} `));
   });
 
-  it("the loaded test story gains none of the new fields", () => {
-    const result = loadPackV2Dir(join(packsDir, "test"), packsDir);
-    const pack = story(result);
+  it("a story with none of the new fields loads and gains none of them", () => {
+    const pack = story(loadStory(withoutSceneFields));
     expect(pack).not.toHaveProperty("scenes");
     expect(pack).not.toHaveProperty("items");
     expect(pack).not.toHaveProperty("endings");
