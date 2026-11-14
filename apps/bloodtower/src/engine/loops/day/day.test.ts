@@ -18,6 +18,7 @@ import {
 } from "../session/shellRef.ts";
 import { initialShellState, type ShellState } from "../session/state.ts";
 import { stepShell } from "../session/stepShell.ts";
+import { projectShellView } from "../session/view.ts";
 import {
   armDayResume,
   captureClock,
@@ -1039,6 +1040,16 @@ describe("CU/03 no-tower skull drop (PT-07)", () => {
       expect(shellEffectSchema.safeParse(errors[0]).success).toBe(true);
       expect(ensureClock(h.play).nightDrops).toEqual([]);
       expect(ensureClock(h.play).supply).toBe(24);
+      // No skull line is shown for it: the board view of that night carries none.
+      h.shell.loops.stack.push({
+        loopId: "day",
+        phase: "body",
+        local: { ...h.local, phase: "skull-sim" },
+      } as never);
+      h.shell.screen = "play";
+      const skull = projectShellView(h.shell).table?.skull;
+      expect(skull).toBeDefined();
+      expect(skull?.lines).toEqual([]);
     } finally {
       closeHarness();
     }
