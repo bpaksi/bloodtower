@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { assetIdSchema } from "../pack-v2/ids.ts";
 import {
   deviceIdSchema,
   heroIdSchema,
@@ -19,6 +20,24 @@ const narrationSchema = z.strictObject({
   lineId: lineIdSchema,
   text: z.string().min(1).max(2000),
 });
+
+/**
+ * A packed line the Story board plays from the Mac (A1-8b-2, D49). Ids and text only: the board
+ * fetches each file from the host by asset id (`/packs/<packId>/by-id/<id>`), so no message
+ * carries file bytes. `audio`, `painting` and `glow` are null when that file is not packed, and
+ * the caption still shows. `play` goes up by one on each explicit play; a board plays only when
+ * it sees `play` change, never on the first view after it loads (a reload does not replay).
+ */
+export const packedLineSchema = z.strictObject({
+  packId: z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/),
+  lineId: assetIdSchema,
+  caption: z.string().min(1).max(500),
+  audio: assetIdSchema.nullable(),
+  painting: assetIdSchema.nullable(),
+  glow: assetIdSchema.nullable(),
+  play: z.number().int().min(1).max(1_000_000),
+});
+export type PackedLine = z.infer<typeof packedLineSchema>;
 
 const placeStillSchema = z.strictObject({
   building: z.enum(["village", "bazaar", "citadel", "sanctuary"]),
@@ -180,6 +199,8 @@ export const boardViewPayloadSchema = z
     place: placeStillSchema.nullable().optional(),
     /** Gear panel the Story board displays. Omitted when the host has no gear snapshot. */
     gear: gearViewSchema.optional(),
+    /** The demo's packed line (A1-8b-2, D49). Omitted until the demo entry plays one. */
+    packedLine: packedLineSchema.nullable().optional(),
   })
   .superRefine((value, ctx) => {
     refuseBoardContent(value, ctx);

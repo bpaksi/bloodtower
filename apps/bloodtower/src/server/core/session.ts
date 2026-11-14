@@ -14,12 +14,23 @@ import { refreshOffersAfterRestore, stepShell } from "../../engine/loops/session
 import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
-import type { BoardView, DeviceView, ErrorCode } from "../../protocols/v2/index.ts";
+import type { BoardView, DeviceView, ErrorCode, PackedLine } from "../../protocols/v2/index.ts";
 import type { EventStore } from "../events/store.ts";
 import type { HostLogger } from "../log/hostLog.ts";
 import type { Clock } from "../timing/clock.ts";
 import type { BloodtowerTower } from "../tower/host.ts";
+import {
+  DEMO_GLOW,
+  DEMO_LINE_ENV,
+  DEMO_PAINTING,
+  DEMO_PROMPT_ID,
+  demoLineFromEnv,
+  demoNarrateEffect,
+  isDemoAction,
+  packMediaFor,
+} from "./demoLine.ts";
 import { runShellEffects } from "./effects.ts";
+import { runNarrate } from "./narrate.ts";
 import { shellCheckpointFromState } from "./shellCheckpoint.ts";
 import { continueShellFromCheckpoint, LOBBY_RESUME, readSessionResume } from "./shellContinue.ts";
 
@@ -47,6 +58,11 @@ export type CoreSessionOptions = {
   graceMs?: number;
   /** A tower command the pressing iPad asked for failed. The hub shows it on that iPad. */
   onDeviceError?: (deviceId: string, code: ErrorCode, message: string) => void;
+  /**
+   * The line the demo entry plays (A1-8b-2, D49), or null when the entry is off. Omitted, it is
+   * read from `BLOODTOWER_DEMO_LINE`.
+   */
+  demoLine?: string | null;
 };
 
 export type CoreSession = {
@@ -109,6 +125,19 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
   if (options.playContent) state = { ...state, playContent: options.playContent };
 
   const devices = new Map<string, DeviceRecord>();
+
+  // The controlled once-only demo entry (A1-8b-2). Held here, not in the engine state: it is no
+  // gameplay event, so no checkpoint or replay carries it and a restore never plays it again.
+  let demoLineId: string | null;
+  if (options.demoLine !== undefined) demoLineId = options.demoLine;
+  else {
+    const fromEnv = demoLineFromEnv(process.env);
+    if (fromEnv.error) options.log.error("demo-line-env", fromEnv.error);
+    demoLineId = fromEnv.lineId;
+  }
+  let packedLine: PackedLine | null = null;
+  let demoPlays = 0;
+
   const meta = {
     seed: options.seed,
     packVersion: options.packVersion,
@@ -397,6 +426,86 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       });
   };
 
+  const playDemoLine = (deviceId: string, actionId: string) => {
+    if (!isDemoAction(actionId)) {
+      options.log.error("demo-line-act", `Unknown demo action "${actionId}".`, {
+        device: deviceId,
+      });
+      return;
+    }
+    if (demoLineId === null) {
+      options.log.warn(
+        "demo-line-off",
+        `The demo entry is off. Start the host with ${DEMO_LINE_ENV}=<line id> to use it.`,
+        { device: deviceId },
+      );
+      return;
+    }
+    if (actionId === "play" && demoPlays > 0) {
+      options.log.warn(
+        "demo-line-once",
+        `${demoLineId} has played once. The explicit replay is action "replay".`,
+        { device: deviceId },
+      );
+      return;
+    }
+    if (actionId === "replay" && demoPlays === 0) {
+      options.log.warn("demo-line-replay", `${demoLineId} has not played yet; nothing to replay.`, {
+        device: deviceId,
+      });
+      return;
+    }
+    const story = options.stories.find((entry) => entry.card.id === state.boundStoryId);
+    const media = story ? packMediaFor(story) : undefined;
+    const effect = media ? demoNarrateEffect(media, demoLineId) : undefined;
+    if (!media || !effect) {
+      options.log.error(
+        "demo-line-missing",
+        `Story ${state.boundStoryId} has no line asset ${demoLineId} with a speaker and text.`,
+        { device: deviceId },
+      );
+      return;
+    }
+    const result = runNarrate(effect, media, {
+      play: demoPlays + 1,
+      painting: DEMO_PAINTING,
+      glow: DEMO_GLOW,
+    });
+    if (!result.ok) {
+      options.log.error("demo-line-narrate", result.message, { device: deviceId });
+      return;
+    }
+    if (result.line.audio === null) {
+      // Caption only: the line's file is not packed or not on disk. Unavailable, not a failure.
+      options.log.warn(
+        "demo-line-audio",
+        `${demoLineId} has no packed audio on this host; the board shows the caption only.`,
+        { device: deviceId },
+      );
+    }
+    demoPlays += 1;
+    packedLine = result.line;
+    options.log.info(
+      "demo-line",
+      `${actionId === "play" ? "Played" : "Replayed"} ${demoLineId} (play ${demoPlays}).${
+        result.unavailable.length > 0 ? ` Not packed: ${result.unavailable.join(", ")}.` : ""
+      }`,
+      { device: deviceId },
+    );
+    options.onChange();
+  };
+
+  const queueDemoLine = (deviceId: string, actionId: string) => {
+    applyQueue = applyQueue
+      .then(() => playDemoLine(deviceId, actionId))
+      .catch((error: unknown) => {
+        const detail = error instanceof Error ? error.message : String(error);
+        options.log.error("demo-line", detail.trim() === "" ? "The demo line failed." : detail, {
+          device: deviceId,
+        });
+      });
+  };
+
   enqueue({ kind: "start-session", v: 1, sessionId: options.sessionId, seed: options.seed }, null);
   enqueue({ kind: "tower-snapshot", v: 1, tower: options.tower.snapshot() }, null);
 
@@ -471,6 +580,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         enqueue({ kind: "set-setting", v: 1, deviceId, settingId, optionId }, deviceId);
         return;
       }
+      if (promptId === DEMO_PROMPT_ID) {
+        queueDemoLine(deviceId, actionId);
+        return;
+      }
       if (promptId === "gear") {
         const action = actionId;
         if (
@@ -513,6 +626,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       return {
         ...board,
         ...(board.gear ? { gear: { ...board.gear, joinUrl: join.url } } : {}),
+        ...(packedLine ? { packedLine } : {}),
         levels: [
           {
             id: "join",

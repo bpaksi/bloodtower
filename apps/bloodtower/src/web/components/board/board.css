@@ -1,7 +1,7 @@
 /* Story board look. Tokens and frames from docs/art-direction/{game-look.md,tokens.css,mocks/story-board.html}.
    Scoped to .bt-board so iPad screens keep the R2 opening-screen CSS. */
 
-:is(.bt-board, .bt-sound-backdrop) {
+:is(.bt-board, .bt-sound-backdrop, .bt-packed-line) {
   /* palette */
   --bt-void: #0b0806;
   --bt-soot: #1a1310;
@@ -2845,4 +2845,112 @@
   line-height: 1;
   letter-spacing: 0.04em;
   pointer-events: none;
+}
+
+/*
+ * The demo's packed line (A1-8b-2, D49): painting.cover with glow.cover over it, the caption, the
+ * voice from the Mac. One full-board layer above the board and below the toasts (z-index 30) and
+ * the Sound dialog (50). The painting and its mask are two images in the same box with the same
+ * fit, so the lit windows stay on the painting at every size. The glow only changes opacity.
+ */
+.bt-packed-line {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  padding: var(--bt-safe-y) var(--bt-safe-x);
+  background: var(--bt-void);
+  color: var(--bt-bone);
+}
+
+.bt-packed-picture {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.bt-packed-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.bt-packed-glow {
+  /* glow.cover is a luminance mask (DEC-401): white lets the warm light through, black hides it.
+     Same box and fit as the painting (cover, centred), so the light stays on the windows. The light
+     is a warm colour screened at most 0.5 over the painting, so even a mask that is all white only
+     warms the cover and never hides it. */
+  background: radial-gradient(circle, var(--bt-candle), var(--bt-flame));
+  -webkit-mask-image: var(--bt-glow-mask);
+  mask-image: var(--bt-glow-mask);
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  mask-mode: luminance;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0.45;
+  animation-name: bt-packed-glow-flicker;
+  animation-duration: 3.4s;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+
+/* The window flicker's steps, scaled to at most 0.5. Stepped, never a sine (game-look section 5). */
+@keyframes bt-packed-glow-flicker {
+  0% {
+    opacity: 0.5;
+  }
+  17% {
+    opacity: 0.39;
+  }
+  29% {
+    opacity: 0.48;
+  }
+  52% {
+    opacity: 0.31;
+  }
+  61% {
+    opacity: 0.45;
+  }
+  83% {
+    opacity: 0.36;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-packed-glow {
+    animation: none;
+    opacity: 0.45;
+  }
+}
+
+/* Caption over the lower third, on a dark band so it stays legible on any painting. */
+.bt-packed-caption {
+  position: relative;
+  margin: 0 auto;
+  max-width: 60ch;
+  padding: 0.6em 1em;
+  border-radius: 0.3em;
+  background: color-mix(in srgb, var(--bt-void) 72%, transparent);
+  color: var(--bt-bone);
+  font-family: var(--bt-font-body);
+  font-size: var(--bt-size-caption);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
 }

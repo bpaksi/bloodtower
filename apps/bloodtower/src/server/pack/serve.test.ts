@@ -127,6 +127,163 @@ describe("pack asset HTTP (v2 paths only, C3-01 EV-06)", () => {
   });
 });
 
+const LINE_ID = "seal-break.01~vo-01";
+const hashName = (seed: string, ext: string) => `${seed.repeat(64).slice(0, 64)}.${ext}`;
+
+/** A copy of `packs/test` with a hand-written `assets/index.json`, as `assets:pack --drafts` writes it. */
+const startPackedServer = async () => {
+  const packs = loadConfig().packsDir;
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "bloodtower-by-id-")));
+  temps.push(root);
+  cpSync(join(packs, "base"), join(root, "base"), { recursive: true });
+  cpSync(join(packs, "test"), join(root, "test"), { recursive: true });
+  const files = {
+    line: hashName("a", "m4a"),
+    painting: hashName("b", "webp"),
+    glow: hashName("c", "webp"),
+  };
+  const assets = join(root, "test", "assets");
+  writeFileSync(join(assets, files.line), "line-bytes");
+  writeFileSync(join(assets, files.painting), "painting-bytes");
+  writeFileSync(join(assets, files.glow), "glow-bytes");
+  const entry = (kind: string, file: string, size: object, captions: string[] = []) => ({
+    kind,
+    file,
+    size,
+    captions,
+    status: "draft",
+  });
+  writeFileSync(
+    join(assets, "index.json"),
+    JSON.stringify({
+      assets: {
+        "glow.cover": entry("glow", files.glow, { width: 1280, height: 720 }),
+        "painting.cover": entry("painting", files.painting, { width: 1280, height: 720 }),
+        [LINE_ID]: entry("line", files.line, { seconds: 5 }, ["The roads are clear."]),
+      },
+    }),
+  );
+  const catalog = loadStoryCatalog(root);
+  const server = createServer((req, res) => {
+    void (async () => {
+      if (await tryServePackAssets(catalog.assetIndexes, req, res)) return;
+      res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Not found.\n");
+    })();
+  });
+  await new Promise<void>((resolveListen) => server.listen(0, "127.0.0.1", () => resolveListen()));
+  servers.push(server);
+  const address = server.address();
+  const port = address && typeof address === "object" ? address.port : 0;
+  return { base: `http://127.0.0.1:${port}`, files };
+};
+
+describe("A1-8b-2 EV-03: the host serves a packed file by asset id", () => {
+  it("serves a packed line, painting and glow at /packs/<id>/by-id/<assetId> with the right type", async () => {
+    const { base } = await startPackedServer();
+    const cases = [
+      [LINE_ID, "audio/mp4", "line-bytes"],
+      ["painting.cover", "image/webp", "painting-bytes"],
+      ["glow.cover", "image/webp", "glow-bytes"],
+    ] as const;
+    for (const [id, type, body] of cases) {
+      const res = await fetch(`${base}/packs/test/by-id/${encodeURIComponent(id)}`);
+      expect(res.status, id).toBe(200);
+      expect(res.headers.get("content-type"), id).toBe(type);
+      expect(Buffer.from(await res.arrayBuffer()).toString("utf8"), id).toBe(body);
+    }
+    // `~` needs no escaping, so the raw id works too.
+    const raw = await fetch(`${base}/packs/test/by-id/${LINE_ID}`);
+    expect(raw.status).toBe(200);
+    expect(Buffer.from(await raw.arrayBuffer()).toString("utf8")).toBe("line-bytes");
+  });
+
+  it("answers HEAD with the type and no body", async () => {
+    const { base } = await startPackedServer();
+    const res = await fetch(`${base}/packs/test/by-id/${LINE_ID}`, { method: "HEAD" });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("audio/mp4");
+  });
+
+  it("answers 404 for an unknown id, a declared id the index does not name, and another pack", async () => {
+    const { base } = await startPackedServer();
+    for (const path of [
+      "/packs/test/by-id/painting.nowhere",
+      // Declared in pack.yaml and on disk, but not in index.json: the by-id route is the index only.
+      "/packs/test/by-id/place.village",
+      "/packs/test/by-id/portrait.loremaster",
+      "/packs/other/by-id/painting.cover",
+      "/packs/test/by-id/",
+      "/packs/test/by-id/painting.cover/extra",
+    ]) {
+      const res = await fetchDrained(`${base}${path}`);
+      expect(res.status, path).toBe(404);
+      expect(res.headers.get("content-type"), path).toBe("text/plain; charset=utf-8");
+    }
+  });
+
+  it("does not serve index.json as a listing on any route, nor a file by its hash name", async () => {
+    const { base, files } = await startPackedServer();
+    for (const path of [
+      "/packs/test/by-id/index.json",
+      "/packs/test/by-id/index",
+      "/packs/test/assets/index.json",
+      "/packs/test/by-id/%2e%2e%2fassets%2findex.json",
+      "/packs/test/by-id/..%2Fpack.yaml",
+      `/packs/test/by-id/${files.line}`,
+      "/packs/test/by-id",
+      "/packs/test",
+    ]) {
+      const res = await fetch(`${base}${path}`);
+      const text = await res.text();
+      expect(res.status, path).toBe(404);
+      expect(text, path).not.toContain(LINE_ID);
+      expect(text, path).not.toContain('"assets"');
+    }
+  });
+
+  it("answers 404 when the packed file is not on disk (caption only, EV-05)", async () => {
+    const packs = loadConfig().packsDir;
+    const root = realpathSync(mkdtempSync(join(tmpdir(), "bloodtower-by-id-missing-")));
+    temps.push(root);
+    cpSync(join(packs, "base"), join(root, "base"), { recursive: true });
+    cpSync(join(packs, "test"), join(root, "test"), { recursive: true });
+    writeFileSync(
+      join(root, "test", "assets", "index.json"),
+      JSON.stringify({
+        assets: {
+          [LINE_ID]: {
+            kind: "line",
+            file: hashName("d", "m4a"),
+            size: { seconds: 5 },
+            captions: ["The roads are clear."],
+            status: "draft",
+          },
+        },
+      }),
+    );
+    const catalog = loadStoryCatalog(root);
+    expect(catalog.assetIndexes.find((item) => item.packId === "test")?.indexed.has(LINE_ID)).toBe(
+      false,
+    );
+    const server = createServer((req, res) => {
+      void (async () => {
+        if (await tryServePackAssets(catalog.assetIndexes, req, res)) return;
+        res.writeHead(500);
+        res.end();
+      })();
+    });
+    await new Promise<void>((resolveListen) =>
+      server.listen(0, "127.0.0.1", () => resolveListen()),
+    );
+    servers.push(server);
+    const address = server.address();
+    const port = address && typeof address === "object" ? address.port : 0;
+    const res = await fetchDrained(`http://127.0.0.1:${port}/packs/test/by-id/${LINE_ID}`);
+    expect(res.status).toBe(404);
+  });
+});
+
 describe("resolveAssetImage", () => {
   it("resolves by manifest path stem in an isolated assets folder", () => {
     const dir = mkdtempSync(join(tmpdir(), "bloodtower-resolve-"));
