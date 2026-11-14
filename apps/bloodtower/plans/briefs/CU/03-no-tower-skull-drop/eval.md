@@ -52,18 +52,18 @@ Unit tests live in `apps/bloodtower/src/engine/loops/day/day.test.ts` (day loop 
 - Pass evidence: exactly 5 lines; each equals `A skull falls on <title>.` with the building's own title; the lines together are longer than 120 characters and none is truncated; two skulls on the same building give two identical lines, not one.
 - Fails if: lines are joined into one string, cut at 120 characters (today's `.slice(0, 120)`), deduplicated, or the building shows as "a building".
 
-### EV-07 — The board stacks the lines
+### EV-07 — The board stacks the lines (Amended 2026-11-14 (PT-07, Bob))
 - Requirement: PT-07, SCR-019 slice: the lines are stacked on the Story board, none hidden.
 - Method: playwright
-- How: Story board 1920x1080, no tower, a test tuning with 4 skulls in the night; step to the skull-sim day panel.
+- How: Story board 1920x1080, no tower; the browser spec feeds the Story board a `boardView` frame carrying four skull lines (the `lines` field) and steps to the skull-sim day panel. The real host's own line generation is covered by EV-06 (the unit test) plus a real-host run in the same spec that shows the real single line.
 - Pass evidence: 4 elements (one per line) in the skull panel, each fully visible (not overflow-clipped; `scrollHeight` equals `clientHeight` on the panel), in drop order, none pressable.
 - Fails if: one paragraph holds all lines, a line is clipped, or the panel takes a press.
 
-### EV-08 — Screenshot matches the mockup
+### EV-08 — Screenshot matches the mockup (Amended 2026-11-14 (PT-07, Bob))
 - Requirement: the stacked skull lines look as drafted (Gamewright draft; the Illusionist replaces it).
 - Method: screenshot
 - How: screenshot the board's skull panel at 1920x1080 with 3 lines; compare side by side with ./mockup.html section `#stacked`.
-- Pass evidence: both images attached; the panel heading, then three lines one under another in drop order, spacing and order match; no line cut.
+- Pass evidence: both images attached; the panel heading, then three lines one under another in drop order; the heading, order, stacking, centring and the heading gap match the mockup, and the type size and line pitch follow the board's 28px TV scale (Bob, 2026-11-14); no line cut.
 - Fails if: lines run on one row, or a line is missing or cut.
 
 ### EV-09 — No unseeded randomness

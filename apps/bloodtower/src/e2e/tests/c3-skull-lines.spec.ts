@@ -211,6 +211,16 @@ const expectStacked = async (board: Page, lines: string[]) => {
   }
   expect([...tops].sort((a, b) => a - b)).toEqual(tops);
   expect(new Set(tops).size).toBe(lines.length);
+  // Centred, with the mockup's 12px between the heading and the first line (EV-08).
+  const gap = await panel.evaluate((el) => {
+    const heading = el.querySelector("[data-skull-heading]")?.getBoundingClientRect();
+    const first = el.querySelector("[data-skull-line]")?.getBoundingClientRect();
+    return heading && first ? first.top - heading.bottom : null;
+  });
+  expect(gap).toBeCloseTo(12, 0);
+  for (const node of [panel.locator("[data-skull-heading]"), items.first()]) {
+    expect(await node.evaluate((el) => getComputedStyle(el).textAlign)).toBe("center");
+  }
   const whole = await panel.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
   expect(whole).toBe(true);
   await expect(panel.locator("button, a, [role=button]")).toHaveCount(0);
@@ -230,7 +240,7 @@ const shot = async (page: Page, testInfo: TestInfo, name: string) => {
 };
 
 test.describe("CU/03 stacked skull lines", () => {
-  test("EV-07 the real host's lines stack, whole and unpressable", async ({
+  test("EV-07 real-host run: the real single line stacks, whole and unpressable", async ({
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
@@ -250,7 +260,7 @@ test.describe("CU/03 stacked skull lines", () => {
     }
   });
 
-  test("EV-07 and EV-08 four lines, then three, stack one under another", async ({
+  test("EV-07 fed frame: four skull lines in the boardView stack one under another", async ({
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);

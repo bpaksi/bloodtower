@@ -2289,6 +2289,20 @@
   list-style: none;
 }
 
+/* CU/03 (PT-07, Bob 2026-11-14): the no-tower skull panel is centred, with the mockup's 12px
+   between the heading and the first line. Type size and line pitch stay on the board's scale. */
+[data-day-panel="skull-sim"] {
+  text-align: center;
+}
+
+[data-day-panel="skull-sim"] h2 {
+  margin: 0 0 12px;
+}
+
+[data-day-panel="skull-sim"] ul {
+  margin-top: 0;
+}
+
 .bt-place-still {
   margin: 0;
   width: min(100%, 64rem);
