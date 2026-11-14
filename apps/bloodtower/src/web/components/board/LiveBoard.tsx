@@ -4,6 +4,7 @@ import type { BoardView, ViewScreen } from "bloodtower-protocols";
 import { useEffect, useRef, useState } from "react";
 import { AUDIO_START_REFUSED, bindStoryBoardAudioErrors } from "../../lib/audio/audioError.ts";
 import { audioPackId, isVisualMoment, pickLayers } from "../../lib/audio/layers.ts";
+import { type PackedLine, playOnView, type SeenPlay } from "../../lib/audio/packedLine.ts";
 import { useStoryAudio } from "../../lib/audio/storyAudio.tsx";
 import { waitingStoryboard } from "../../lib/boardView";
 import { type ErrorToast, pushErrorToast, visibleErrorToasts } from "../../lib/errorToasts.ts";
@@ -16,6 +17,7 @@ import {
 } from "../../lib/pageLog.ts";
 import { openSession, type SessionClient, sessionUrl, storyboardHello } from "../../lib/session";
 import { CoreStoryBoard } from "./CoreStoryBoard";
+import { PackedLineScene } from "./PackedLineScene.tsx";
 import { StoryToasts } from "./StoryToasts.tsx";
 
 /** The story board for a live session. Display only (protocol v2 `boardView`). */
@@ -27,6 +29,9 @@ export function LiveBoard() {
   const [debug, setDebug] = useState(false);
   const client = useRef<SessionClient | null>(null);
   const screen = useRef<ViewScreen>(state.screen);
+  // The demo's packed line (A1-8b-2): played only when this page sees a new play start.
+  const seenPlay = useRef<SeenPlay>(undefined);
+  const [packedLine, setPackedLine] = useState<PackedLine | null>(null);
 
   useEffect(() => {
     audio.update(
@@ -70,6 +75,9 @@ export function LiveBoard() {
       },
       onBoardView: (next) => {
         screen.current = next.screen;
+        const played = playOnView(seenPlay.current, next.packedLine);
+        seenPlay.current = played.seen;
+        if (played.start) setPackedLine(played.start);
         setNotice(null);
         setState(next);
       },
@@ -113,6 +121,14 @@ export function LiveBoard() {
         </p>
       ) : null}
       <CoreStoryBoard view={state} debug={debug} />
+      {packedLine ? (
+        <PackedLineScene
+          key={packedLine.play}
+          line={packedLine}
+          volume={audio.levels.voice}
+          onDone={() => setPackedLine(null)}
+        />
+      ) : null}
     </>
   );
 }

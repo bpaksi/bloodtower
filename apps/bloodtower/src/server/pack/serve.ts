@@ -19,8 +19,12 @@ const pipeFile = (file: string, res: ServerResponse) => {
   stream.pipe(res);
 };
 
+/** `/packs/<packId>/by-id/<assetId>`: a packed file named by `assets/index.json` (A1-8b-2). */
+export const BY_ID_SEGMENT = "by-id";
+
 /**
- * `/packs/<packId>/assets/<file>`, the one asset route (there is no by-asset-id route), and
+ * `/packs/<packId>/assets/<file>`, the asset route by file name, and
+ * `/packs/<packId>/by-id/<assetId>` for a file `assets/index.json` names (A1-8b-2, D49), and
  * `/packs/<packId>/camera/<momentId>.json` for optional camera-track sidecars, and
  * `/packs/<packId>/audio/<file>.m4a` for the pack's mood and music loops.
  * Only declared assets that resolved at load time are served. Traversal is refused.
@@ -64,6 +68,29 @@ export const tryServePackAssets = async (
       return true;
     }
     return sendPackFile(absolute, req, res);
+  }
+
+  if (parts[2] === BY_ID_SEGMENT) {
+    // One packed file per request, named by its asset id in `assets/index.json` (A1-8b-2, D49).
+    // The index itself is never a route: an id that is not an index entry with its file on disk
+    // is a 404, the same as an unknown id.
+    if (parts.length !== 4) {
+      sendText(res, 404, "Not found.\n");
+      return true;
+    }
+    let assetId: string;
+    try {
+      assetId = decodeURIComponent(parts[3] ?? "");
+    } catch {
+      sendText(res, 400, "Bad request.\n");
+      return true;
+    }
+    const entry = catalog.indexed.get(assetId);
+    if (!entry) {
+      sendText(res, 404, "Not found.\n");
+      return true;
+    }
+    return sendPackFile(entry.absolute, req, res);
   }
 
   if (parts[2] === "audio" && parts.length === 4) {

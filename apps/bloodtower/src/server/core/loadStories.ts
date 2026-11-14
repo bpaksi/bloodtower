@@ -13,6 +13,7 @@ import {
   resolveCover,
 } from "../pack/assets.ts";
 import { loadPackV2Dir, type PackV2LoadIssue } from "../pack/v2/load.ts";
+import { attachPackMedia } from "./demoLine.ts";
 
 export type StoryCatalog = {
   stories: ShellStory[];
@@ -178,12 +179,13 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     const story = loaded.pack;
     const coverFile = resolveCover(dir, "assets/cover.png");
     const cover = coverFile ? "assets/cover.png" : undefined;
-    assetIndexes.push(indexAssets(dir, story.pack_id, story.assets, cover));
+    const assetIndex = indexAssets(dir, story.pack_id, story.assets, cover);
+    assetIndexes.push(assetIndex);
     // The pick pool is every base hero. Party size decides how many sit; start assignments
     // only place the ones who do.
     const heroes = loaded.base.heroes.map((hero) => ({ id: hero.id, name: hero.name }));
     const packSteps = story.setup.map((step) => ({ id: step.id, label: step.label }));
-    stories.push({
+    const shellStory: ShellStory = {
       card: {
         id: story.pack_id,
         title: story.title,
@@ -200,6 +202,19 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
       })),
       setup: mergeSetupSteps(packSteps),
       heroes,
+    };
+    stories.push(shellStory);
+    // The demo entry's line rows and packed files (A1-8b-2, D49). Ids only.
+    attachPackMedia(shellStory, {
+      packId: story.pack_id,
+      lines: new Map(
+        story.assets.flatMap((row) =>
+          row.type === "line" && row.speaker !== undefined && row.text !== undefined
+            ? [[row.id, { speaker: row.speaker, text: row.text }] as const]
+            : [],
+        ),
+      ),
+      indexed: assetIndex.indexed,
     });
 
     if (story.playable && !defaultPlay) {
