@@ -24,7 +24,8 @@ const timedBeatSchema = z.strictObject({
 
 const questSchema = z.strictObject({
   id: idSchema,
-  quest_type: questTypeIdSchema,
+  /** Omitted by a plain-scene quest (C3-19); lint requires a `scene` then. */
+  quest_type: questTypeIdSchema.optional(),
   label: z.string().min(1).max(120).optional(),
   when: conditionSchema.optional(),
   /** The space it stands on and whether that is a village or the wild (C3-18, DEC-662). */

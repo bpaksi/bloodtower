@@ -26,6 +26,13 @@ export type QuestStore = {
   defs: QuestDef[];
   /** Space id → quest id for each quest marker (DEC-083). */
   bySpace: Record<string, string>;
+  /**
+   * Every chapter's markers, from the pack (C3-19). `bySpace` holds the current chapter's only.
+   * Absent in an autosave from before C3-19; `bySpace` then stands as saved.
+   */
+  markersByChapter?: Record<number, Record<string, string>>;
+  /** The chapter whose markers `bySpace` holds; set with `markersByChapter`. */
+  chapter?: number;
   done: string[];
   progress: Record<string, QuestProgress>;
   /** Hero id → story items held (DEC-653). */
@@ -56,12 +63,36 @@ export const ensureQuests = (play: PlayState): QuestStore => {
 
 export const configureQuests = (
   play: PlayState,
-  options: { defs?: QuestDef[]; bySpace?: Record<string, string>; tuning?: Partial<QuestTuning> },
+  options: {
+    defs?: QuestDef[];
+    bySpace?: Record<string, string>;
+    markersByChapter?: Record<number, Record<string, string>>;
+    /** The current chapter; with `markersByChapter` it picks the live markers. */
+    chapter?: number;
+    tuning?: Partial<QuestTuning>;
+  },
 ): QuestStore => {
   const store = ensureQuests(play);
   if (options.defs) store.defs = options.defs;
   if (options.bySpace) store.bySpace = options.bySpace;
+  if (options.markersByChapter) {
+    store.markersByChapter = options.markersByChapter;
+    const chapters = Object.keys(options.markersByChapter).map(Number);
+    const first = chapters.length > 0 ? Math.min(...chapters) : 1;
+    setQuestChapter(play, options.chapter ?? store.chapter ?? first);
+  }
   if (options.tuning) store.tuning = { ...store.tuning, ...options.tuning };
+  return store;
+};
+
+/**
+ * Makes `chapter` the current one: only its quest markers are live (C3-19). A store with no
+ * per-chapter markers (a hand-set `bySpace`, or an older autosave) keeps `bySpace` as it is.
+ */
+export const setQuestChapter = (play: PlayState, chapter: number): QuestStore => {
+  const store = ensureQuests(play);
+  store.chapter = chapter;
+  if (store.markersByChapter) store.bySpace = { ...(store.markersByChapter[chapter] ?? {}) };
   return store;
 };
 
@@ -86,13 +117,19 @@ export type QuestPackData = {
  */
 export const questsFromPack = (
   story: QuestPackData,
-): { defs: QuestDef[]; bySpace: Record<string, string> } => {
+): {
+  defs: QuestDef[];
+  bySpace: Record<string, string>;
+  markersByChapter: Record<number, Record<string, string>>;
+} => {
   const scenes = new Map((story.scenes ?? []).map((scene) => [scene.id, scene]));
   const defs: QuestDef[] = [];
-  const bySpace: Record<string, string> = {};
+  const markersByChapter: Record<number, Record<string, string>> = {};
   for (const chapter of story.chapters) {
+    const markers: Record<string, string> = {};
+    markersByChapter[chapter.index] = markers;
     for (const quest of chapter.quests) {
-      if (quest.place) bySpace[quest.place.space] = quest.id;
+      if (quest.place) markers[quest.place.space] = quest.id;
       if (quest.scene === undefined) continue;
       const scene = scenes.get(quest.scene);
       if (!scene) {
@@ -101,12 +138,20 @@ export const questsFromPack = (
       defs.push({ id: quest.id, chapter: chapter.index, scene: sceneFromPack(scene) });
     }
   }
-  return { defs, bySpace };
+  // `bySpace` is the first chapter's markers; the store swaps it as the chapter changes.
+  const first = Math.min(...story.chapters.map((c) => c.index));
+  return { defs, bySpace: { ...(markersByChapter[first] ?? {}) }, markersByChapter };
 };
 
 /** Loads the pack's quests into the store; tuning stays as configured. */
-export const configureQuestsFromPack = (play: PlayState, story: QuestPackData): QuestStore =>
-  configureQuests(play, questsFromPack(story));
+export const configureQuestsFromPack = (
+  play: PlayState,
+  story: QuestPackData,
+  chapter?: number,
+): QuestStore => {
+  const loaded = questsFromPack(story);
+  return configureQuests(play, chapter === undefined ? loaded : { ...loaded, chapter });
+};
 
 /** Done quests against the chapter's quests (DEC-041). */
 export const chapterProgress = (
