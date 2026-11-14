@@ -216,7 +216,8 @@ const playToSimulatedDrop = async (pad: Page, board: Page) => {
     else await pad.waitForTimeout(10);
   }
   await expect(drop).toBeVisible();
-  const line = boardMain(board).locator("[data-waiting]");
+  // CU/03: the no-tower lines stack in the skull panel; the waiting box is gone in skull-sim.
+  const line = boardMain(board).locator("#skull [data-skull-line]").first();
   await expect(line).toContainText(/^A skull falls on [^,]+\.$/);
   return (await line.innerText()).trim();
 };

@@ -20,6 +20,7 @@ Keep this a checklist; do not write a second design doc.
   - `apps/bloodtower/src/engine/loops/session/effects.ts` and `apps/bloodtower/src/server/core/session.ts`: the distinct error code `skull-no-building` for EV-15, so the host log and the Story-board toast name it instead of `invalid-state`.
   - `apps/bloodtower/src/server/core/skullNoBuilding.test.ts` (new test): EV-15's logged error with its code, in the shape the Story-board toast carries.
   - `apps/bloodtower/src/web/components/board/DayPanels.tsx` also drops the kingdom headline and building list from the skull-sim panel (heading "Night falls" and the lines only, as the mockup).
+  - `apps/bloodtower/src/e2e/tests/c2-tower-lost.spec.ts` (`playToSimulatedDrop` only; Bob: "Add to Touches", review round 1): it read the skull line from `[data-waiting]`, which is null in skull-sim now, so it reads `#skull [data-skull-line]`.
   - `apps/bloodtower/src/e2e/tests/c3-skull-lines.spec.ts` (new spec) and its one-line edit of `c3-day.spec.ts`: the board no longer shows the skull line in a second waiting box, so the old `[data-waiting]` check reads the panel's lines.
 - Builds: PT-07 (issue #476)
 - Deps change: no
