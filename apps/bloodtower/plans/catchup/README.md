@@ -127,7 +127,8 @@ Columns: **Weekdays** is the step total, **Runner** the build part, **Cursor** t
 | 4 | 04 | Art and voice landing PR (Dracula batches 1-5, Lenka, cover and glow, C5-05 art and voice) | hammer | 0.25 | 0.25 | 0 / $0.00 | D3 | — | C5-05 code follow-up if still open | #433 |
 | 5 | 59 | Tooling: gaps.ts skips parked cards in the mechanic rule (one line and a test) | hammer | 0.5 | 0.25 | 0.25 / $0.68 | D4 | — | Step 44 (brief CU/12) | #486 |
 | 5a | 63 | C3-18 pack v2 schema and lint: quest places, plain scenes, items, endings, DEC-692 and DEC-693 rules (found blocking step 05 on 2026-11-13) | anvil | 1.5 | 1 | 0.5 / $1.36 | D5 | — | C3-01, C3-07 (merged) | issue to open |
-| 6 | 05 | C3-03 The Ruined Keep pack (quests, scenes, items, places) | hammer | 2 | 2 | 0 / $0.00 | D6 | — | C3-01, C3-02 (merged); step 63 merged | #434 |
+| 5b | 64 | C3-19 quest type optional, quest markers per chapter, one quest per space (follow-ups of step 63) | anvil | 1 | 0.75 | 0.25 / $0.68 | D5 | — | Step 63 merged (#514) | issue to open |
+| 6 | 05 | C3-03 The Ruined Keep pack (quests, scenes, items, places) | hammer | 2 | 2 | 0 / $0.00 | D6 | — | C3-01, C3-02 (merged); steps 63 and 64 merged | #434 |
 | 7 | 50 | PT-07: no-tower skull drop goes to the standing building with the fewest skulls | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D7 | PT-07 | Steps 43, 44; C3-04 (merged) | #476 |
 | 8 | 51 | PT-18 and PT-06: Split and Rejoin as queued gear actions; no daily Regroup prompt; per-split-group shift | anvil | 2.25 | 1.875 | 0.375 / $1.02 | D9 | PT-18, PT-06 | Step 02 (#384 merged), steps 43, 44 | #477 |
 | 9 | 52 | PT-19: Back undoes a move-map tap until a trigger fires; "Fix my position" gear item | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D10 | PT-19 | Steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #478 |

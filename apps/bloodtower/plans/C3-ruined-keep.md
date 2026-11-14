@@ -62,7 +62,7 @@ Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob. Ev
 |---|---|---|---|---|
 | 01 | [Stories load from pack v2; the v1 loader goes](briefs/C3/01-pack-v2-stories/plan.md) | engine | its approval.md on main | no |
 | 02 | [The tuning file holds DEC-703's numbers](briefs/C3/02-tuning-file/plan.md) | engine | its approval.md on main | no |
-| 03 | [The Ruined Keep pack: chapters, quests, scenes and endings as data](briefs/C3/03-ruined-keep-pack/plan.md) | engine (pack) | 01, 02, 18 | no |
+| 03 | [The Ruined Keep pack: chapters, quests, scenes and endings as data](briefs/C3/03-ruined-keep-pack/plan.md) | engine (pack) | 01, 02, 18, 19 | no |
 | 04 | [The day: Regroup, the move roll, the skull drop as the game clock](briefs/C3/04-day-clock/plan.md) | engine | 02 | no |
 | 05 | [Events in the wild: the seeded draw and its six tracks](briefs/C3/05-event-loop/plan.md) | engine | 04 | no |
 | 06 | [Buildings: the menu, rally, cure, rest, virtue draw and Cleanse](briefs/C3/06-building-picks/plan.md) | engine | 02, 04 | no |
@@ -78,6 +78,7 @@ Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob. Ev
 | 16 | [The outcome scene: win or loss](briefs/C3/16-outcome-scene/plan.md) | screen | 10, C2 07 | yes |
 | 17 | [Game stats: the game in numbers](briefs/C3/17-game-stats/plan.md) | screen | 16 | yes |
 | 18 | [Pack v2 holds quests with places, plain scenes, items and endings; lint enforces DEC-692 and DEC-693](briefs/C3/18-pack-v2-scene-data/plan.md) | engine (schema, lint) | 01, 07 | no |
+| 19 | [A scene quest may omit quest_type; quest markers go live per chapter; one quest per space](briefs/C3/19-quest-type-and-markers/plan.md) | engine (schema, lint, quest store) | 18 | no |
 
 ### Feature 01: Stories load from pack v2; the v1 loader goes
 - Folder: [briefs/C3/01-pack-v2-stories](briefs/C3/01-pack-v2-stories/plan.md)
@@ -104,7 +105,7 @@ Story board 1920×1080 (Samsung TV); iPad 768×1024, portrait, locked by Bob. Ev
 ### Feature 03: The Ruined Keep pack: chapters, quests, scenes and endings as data
 - Folder: [briefs/C3/03-ruined-keep-pack](briefs/C3/03-ruined-keep-pack/plan.md)
 - Kind: engine (pack)
-- Depends on: 01, 02, 18, and its `approval.md` on `main`
+- Depends on: 01, 02, 18, 19, and its `approval.md` on `main`
 - C2 overlap: none
 - Touches: `packs/test/**` (the Proving Grounds pack, DEC-666), `apps/bloodtower/src/server/pack/v2/lint.test.ts`
 - Builds: AREA-097
