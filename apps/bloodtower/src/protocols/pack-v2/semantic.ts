@@ -26,6 +26,37 @@ const walkEntry = (
   }
 };
 
+/** Quest lint (C3-19): a quest without `quest_type` names a scene; one quest per space. */
+export const questShapeIssues = (story: StoryPack): PackV2Issue[] => {
+  const issues: PackV2Issue[] = [];
+  const bySpace = new Map<string, string>();
+  for (const [ci, chapter] of story.chapters.entries()) {
+    for (const [qi, quest] of chapter.quests.entries()) {
+      const path = `chapters.${ci}.quests.${qi}`;
+      if (quest.quest_type === undefined && quest.scene === undefined) {
+        issues.push({
+          rule: "P2-1",
+          path,
+          message: `P2-1: quest ${quest.id} has no quest_type and no scene; a quest omits its type only when it names a scene.`,
+        });
+      }
+      const space = quest.place?.space;
+      if (space === undefined) continue;
+      const other = bySpace.get(space);
+      if (other !== undefined) {
+        issues.push({
+          rule: "P2-1",
+          path: `${path}.place.space`,
+          message: `P2-1: quests ${other} and ${quest.id} share space ${space}; a space holds one quest marker.`,
+        });
+      } else {
+        bySpace.set(space, quest.id);
+      }
+    }
+  }
+  return issues;
+};
+
 /** Semantic lint: flags read in conditions must be set or cleared somewhere in the story. */
 export const flagCoverageIssues = (story: StoryPack): PackV2Issue[] => {
   const flagReads: Array<{ flag: string; path: string }> = [];
@@ -71,7 +102,7 @@ export const flagCoverageIssues = (story: StoryPack): PackV2Issue[] => {
     }
   }
 
-  const issues: PackV2Issue[] = [];
+  const issues: PackV2Issue[] = questShapeIssues(story);
   for (const read of flagReads) {
     if (!flagWrites.has(read.flag)) {
       issues.push({
