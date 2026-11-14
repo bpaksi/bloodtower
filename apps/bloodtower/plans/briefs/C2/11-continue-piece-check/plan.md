@@ -11,8 +11,9 @@ Keep this a checklist; do not write a second design doc.
 - Evals: ./eval.md
 - Mockup: ./mockup.html
 - Risk: High (autosave, tower safety)
-- Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`, `apps/bloodtower/src/engine/loops/day/skull.ts` (read the "inside" records only), `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/protocols/v2/**`, `apps/bloodtower/src/server/{core,tower}/**`, `apps/bloodtower/src/web/components/board/{StartupBoard,CoreStoryBoard}.tsx`, `apps/bloodtower/src/web/components/board/board.css`, `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/e2e/tests/c2-continue-check.spec.ts` (new)
+- Touches: `apps/bloodtower/src/engine/loops/{session,game}/**`, `apps/bloodtower/src/engine/loops/day/skull.ts` (read the "inside" records only), `apps/bloodtower/src/engine/loops/quest/**` (read the quest tokens only), `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/protocols/v2/**`, `apps/bloodtower/src/server/{core,tower}/**`, `apps/bloodtower/src/web/components/board/{StartupBoard,CoreStoryBoard}.tsx`, `apps/bloodtower/src/web/components/board/board.css`, `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/e2e/tests/c2-continue-check.spec.ts` (new)
 - Depends on: feature 08 merged (the session shell is serial), and feature 10's findings note on `main` with Bob's run answering "What the run must answer" item 3 (the rotate)
+- Amended 2026-11-14 for PT-08 (step 44): added EV-17 to EV-24 (a quest-tokens step; 1.0 pieces only) and edited EV-01, EV-08 and EV-16 in place, each marked Amended 2026-11-14 (PT-08); EV-18 pins the step order (Bob, 2026-11-14, adopted). Touches gains `apps/bloodtower/src/engine/loops/quest/**` (read the quest tokens only). Needs Bob's new approval row. The Illusionist adds a mockup tab.
 
 ## Before the build
 
@@ -33,6 +34,7 @@ Continue (session screen or Pick story) → the tower block if this session has 
 2. Skulls on buildings: one picture with each building's saved skull count.
 3. Foes on the board, if the save has any.
 4. Broken seals, if any chapter win broke one.
+4a. Quest tokens (PT-08, amended 2026-11-14; order board pieces, quest tokens, tower steps: Bob, 2026-11-14, adopted), if any quest is open: each open token on its space; a done quest is not listed. Tower or not (a board piece). The numbered steps below keep their numbers; this one sits between 4 and 5.
 5. Tower only: "Turn the drums to the saved game", shown only when a drum's saved position differs from where calibration left it. One press of Turn the drums sends one `mechanics.rotate-drum` per drum that is off, in top, middle, bottom order. Then a picture shows what each side should show, and the table confirms. Done and Skip show with Turn the drums (mockup); Done stays disabled until the press succeeds.
 6. Tower only: "Drop N skulls back in the top of the tower.", shown only when N > 0. N is the count of skull records whose target is "inside" (DEC-717).
 
@@ -44,12 +46,13 @@ A skipped step stays unconfirmed (MEC-018): the board marks it in the top band u
   - The saved drum positions and the trapped count, unchanged by running the check, by skipping it, or by a host restart part-way through it.
   - The resumed game: same day, positions, purse, claims and seed as the save (DEC-675).
   - The check's progress: a host restart mid-check resumes at the step it was on, never at step 1 and never past it.
+  - The quest-tokens step reads the saved quest state and never writes it; a restart on that step resumes there (EV-23, EV-24).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-16 all pass (verifier table on PR).
+- [ ] EV-01 … EV-24 all pass (verifier table on PR).
 - Not required: the chapter-end check (MEC-018's short optional one; C3). Glyph boons (DEC-601: 1.1). Telling a trapped skull from one that came out (Q-032).
 
 ## AREA / DEC checklist
@@ -61,11 +64,14 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-305, DEC-306: closed before coding (`decided`). Without the tower, steps 5 and 6 drop out.
 - [ ] Tower safety (root CLAUDE.md): no rotate without the press; a failed rotate is not retried on its own.
 - [ ] Errors (decision 0003): a failed rotate is logged, shown on the iPad that pressed with its error code, and toasted on the Story board.
+- [ ] PT-08 ruling recorded as a DEC by step 43 (#469); closed before coding.
+- [ ] MEC-033 .3 quest tokens (read only): closed before coding (`decided`).
 
 ## Mockup alignment (Bob 2026-10-31: the approved mockup wins)
 
 - Trapped-skull line: "Drop N skulls back in the top of the tower."
 - Skipped mark: an outline badge with a count beside Tower in the top band.
+- Amended 2026-11-14 (PT-08): a quest-tokens tab after Broken seals; the Illusionist adds it, mockup.html is not edited here (EV-22).
 - Drums step shows Turn the drums, Done, Skip together; Done disabled until the press.
 - Old save: step 5 hidden, no line.
 - The check's Turn the drums updates the saved drum positions (Bob ruling, C-1; supersedes EV-10's no-write).
