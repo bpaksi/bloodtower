@@ -2883,18 +2883,58 @@
 }
 
 .bt-packed-glow {
+  /* glow.cover is a luminance mask (DEC-401): white lets the warm light through, black hides it.
+     Same box and fit as the painting (cover, centred), so the light stays on the windows. The light
+     is a warm colour screened at most 0.5 over the painting, so even a mask that is all white only
+     warms the cover and never hides it. */
+  background: radial-gradient(circle, var(--bt-candle), var(--bt-flame));
+  -webkit-mask-image: var(--bt-glow-mask);
+  mask-image: var(--bt-glow-mask);
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  mask-mode: luminance;
   mix-blend-mode: screen;
   pointer-events: none;
-  animation-name: bt-window-flicker;
+  opacity: 0.45;
+  animation-name: bt-packed-glow-flicker;
   animation-duration: 3.4s;
   animation-timing-function: steps(1, end);
   animation-iteration-count: infinite;
 }
 
+/* The window flicker's steps, scaled to at most 0.5. Stepped, never a sine (game-look section 5). */
+@keyframes bt-packed-glow-flicker {
+  0% {
+    opacity: 0.5;
+  }
+  17% {
+    opacity: 0.39;
+  }
+  29% {
+    opacity: 0.48;
+  }
+  52% {
+    opacity: 0.31;
+  }
+  61% {
+    opacity: 0.45;
+  }
+  83% {
+    opacity: 0.36;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bt-packed-glow {
     animation: none;
-    opacity: 0.9;
+    opacity: 0.45;
   }
 }
 

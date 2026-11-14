@@ -47,7 +47,11 @@ describe("A1-8b-2 PackedLineScene", () => {
     expect(painting).toBeGreaterThan(-1);
     expect(glow).toBeGreaterThan(painting);
     expect(markup).toContain(`src="${ORIGIN}/packs/test/by-id/painting.cover"`);
-    expect(markup).toContain(`src="${ORIGIN}/packs/test/by-id/glow.cover"`);
+    // The glow is a mask over a light layer, not a picture: no <img> for it.
+    expect(markup).toContain(
+      `--bt-glow-mask:url(&quot;${ORIGIN}/packs/test/by-id/glow.cover&quot;)`,
+    );
+    expect(markup.match(/<img/gu)).toHaveLength(1);
     // Both layers share the one class that sizes and places them.
     expect(markup.match(/class="bt-packed-layer[^"]*"/gu)).toHaveLength(2);
   });
@@ -78,5 +82,16 @@ describe("A1-8b-2 PackedLineScene", () => {
     const glow = /\.bt-packed-glow\s*\{([^}]*)\}/u.exec(css)?.[1] ?? "";
     expect(glow).toMatch(/mix-blend-mode:\s*screen/u);
     expect(glow).not.toMatch(/inset|transform|top|left|width|height/u);
+    // The mask is light by luminance, fitted like the painting, never drawn as an opaque picture.
+    expect(glow).toMatch(/(?<!-)mask-image:\s*var\(--bt-glow-mask\)/u);
+    expect(glow).toMatch(/mask-mode:\s*luminance/u);
+    expect(glow).toMatch(/(?<!-)mask-size:\s*cover/u);
+    expect(glow).toMatch(/(?<!-)mask-position:\s*center/u);
+    const frames = /@keyframes bt-packed-glow-flicker\s*\{([\s\S]*?)\n\}/u.exec(css)?.[1] ?? "";
+    const opacities = [...`${glow}${frames}`.matchAll(/opacity:\s*([\d.]+)/gu)].map((m) =>
+      Number(m[1]),
+    );
+    expect(opacities.length).toBeGreaterThan(1);
+    expect(Math.max(...opacities)).toBeLessThanOrEqual(0.5);
   });
 });

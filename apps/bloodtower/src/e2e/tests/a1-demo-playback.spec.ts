@@ -1,6 +1,7 @@
 import { cpSync, mkdtempSync, readFileSync, realpathSync, rmSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { inflateSync } from "node:zlib";
 import {
   type Browser,
   type BrowserContext,
@@ -218,11 +219,90 @@ const imageLoaded = (page: Page, selector: string) =>
     )
     .toBe(true);
 
-const shot = async (page: Page, testInfo: TestInfo, name: string) => {
+const shot = async (page: Page, testInfo: TestInfo, name: string): Promise<Buffer> => {
   const path = testInfo.outputPath(`${name}.png`);
-  await page.screenshot({ path });
+  const png = await page.screenshot({ path });
   await testInfo.attach(name, { path, contentType: "image/png" });
   copyToE2eArtifacts(testInfo, path, `${name}.png`);
+  return png;
+};
+
+type Pixels = { width: number; height: number; channels: number; data: Uint8Array };
+
+/** An 8-bit, non-interlaced RGB or RGBA PNG (what Chromium's screenshot writes), decoded. */
+const decodePng = (png: Buffer): Pixels => {
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let channels = 0;
+  const idat: Buffer[] = [];
+  while (offset < png.length) {
+    const length = png.readUInt32BE(offset);
+    const type = png.toString("ascii", offset + 4, offset + 8);
+    const body = png.subarray(offset + 8, offset + 8 + length);
+    if (type === "IHDR") {
+      width = body.readUInt32BE(0);
+      height = body.readUInt32BE(4);
+      const depth = body[8];
+      const color = body[9];
+      if (depth !== 8 || body[12] !== 0 || (color !== 2 && color !== 6)) {
+        throw new Error(`Unsupported PNG: depth ${depth}, colour ${color}, interlace ${body[12]}`);
+      }
+      channels = color === 6 ? 4 : 3;
+    } else if (type === "IDAT") idat.push(body);
+    else if (type === "IEND") break;
+    offset += 12 + length;
+  }
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = width * channels;
+  const data = new Uint8Array(height * stride);
+  for (let y = 0; y < height; y++) {
+    const filter = raw[y * (stride + 1)];
+    for (let x = 0; x < stride; x++) {
+      const value = raw[y * (stride + 1) + 1 + x] ?? 0;
+      const a = x >= channels ? (data[y * stride + x - channels] ?? 0) : 0;
+      const b = y > 0 ? (data[(y - 1) * stride + x] ?? 0) : 0;
+      const c = x >= channels && y > 0 ? (data[(y - 1) * stride + x - channels] ?? 0) : 0;
+      let out = value;
+      if (filter === 1) out = value + a;
+      else if (filter === 2) out = value + b;
+      else if (filter === 3) out = value + ((a + b) >> 1);
+      else if (filter === 4) {
+        const p = a + b - c;
+        const pa = Math.abs(p - a);
+        const pb = Math.abs(p - b);
+        const pc = Math.abs(p - c);
+        out = value + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c);
+      }
+      data[y * stride + x] = out & 0xff;
+    }
+  }
+  return { width, height, channels, data };
+};
+
+/** Share of near-white pixels and the spread of luma in a CSS-pixel box (the screenshot is 1:1). */
+const sampleRegion = (
+  image: Pixels,
+  box: { x: number; y: number; width: number; height: number },
+) => {
+  const lumas: number[] = [];
+  let white = 0;
+  for (let y = Math.round(box.y); y < box.y + box.height; y += 6) {
+    for (let x = Math.round(box.x); x < box.x + box.width; x += 6) {
+      const i = (y * image.width + x) * image.channels;
+      const [r = 0, g = 0, b = 0] = [image.data[i], image.data[i + 1], image.data[i + 2]];
+      if (r >= 240 && g >= 240 && b >= 240) white += 1;
+      lumas.push(0.2126 * r + 0.7152 * g + 0.0722 * b);
+    }
+  }
+  const mean = lumas.reduce((sum, v) => sum + v, 0) / lumas.length;
+  const spread = Math.sqrt(lumas.reduce((sum, v) => sum + (v - mean) ** 2, 0) / lumas.length);
+  return {
+    samples: lumas.length,
+    nearWhite: white / lumas.length,
+    lumaMean: mean,
+    lumaSpread: spread,
+  };
 };
 
 const PORTRAIT_REQUEST = /portrait|mouth|avatar/iu;
@@ -249,24 +329,38 @@ test("EV-01, EV-02, EV-06: the packed line plays once with the locked caption ov
 
     // EV-02: the cover with the glow over it in the same box.
     await imageLoaded(board.page, "[data-packed-painting]");
-    await imageLoaded(board.page, "[data-packed-glow]");
+    await expect(board.page.locator('[data-packed-glow][data-glow-state="ready"]')).toHaveCount(1, {
+      timeout: 15_000,
+    });
     const paintingBox = await board.page.locator("[data-packed-painting]").boundingBox();
     const glowBox = await board.page.locator("[data-packed-glow]").boundingBox();
     expect(paintingBox).not.toBeNull();
     expect(glowBox).toEqual(paintingBox);
     expect(paintingBox?.width).toBeGreaterThan(0);
-    const [paintingFit, glowFit] = await Promise.all(
-      ["[data-packed-painting]", "[data-packed-glow]"].map((selector) =>
-        board.page
-          .locator(selector)
-          .evaluate(
-            (node) =>
-              `${getComputedStyle(node).objectFit} ${getComputedStyle(node).objectPosition}`,
-          ),
-      ),
-    );
+    // The painting is fitted with object-fit, the mask with mask-size: the same fit, the same place.
+    const paintingFit = await board.page
+      .locator("[data-packed-painting]")
+      .evaluate(
+        (node) => `${getComputedStyle(node).objectFit} ${getComputedStyle(node).objectPosition}`,
+      );
+    const glowFit = await board.page.locator("[data-packed-glow]").evaluate((node) => {
+      const style = getComputedStyle(node);
+      return `${style.maskSize || style.webkitMaskSize} ${style.maskPosition || style.webkitMaskPosition}`;
+    });
     expect(glowFit).toBe(paintingFit);
-    await shot(board.page, testInfo, "a1-8b-2-cover-and-glow");
+    await board.page.waitForTimeout(300);
+    const png = await shot(board.page, testInfo, "a1-8b-2-cover-and-glow");
+    // The cover stays visible under the glow. asset-studio's fake mask is white over the left half,
+    // so that half is where an opaque glow would hide the painting: sample it above the caption.
+    if (!paintingBox) throw new Error("no painting box");
+    const region = sampleRegion(decodePng(png), {
+      x: paintingBox.x + paintingBox.width * 0.05,
+      y: paintingBox.y + paintingBox.height * 0.05,
+      width: paintingBox.width * 0.4,
+      height: paintingBox.height * 0.55,
+    });
+    expect(region.nearWhite, JSON.stringify(region)).toBeLessThan(0.02);
+    expect(region.lumaSpread, JSON.stringify(region)).toBeGreaterThan(12);
 
     // EV-01: the audio element for that id starts once and ends once.
     await expect
@@ -284,7 +378,10 @@ test("EV-01, EV-02, EV-06: the packed line plays once with the locked caption ov
 
     // Files came by asset id from the host; no portrait or mouth was asked for.
     const byId = board.requests.filter((url) => url.includes("/packs/test/by-id/"));
-    expect(byId.map((url) => decodeURIComponent(new URL(url).pathname)).sort()).toEqual(
+    // The mask is fetched twice (a load probe and the CSS mask), so compare the set of paths.
+    expect(
+      [...new Set(byId.map((url) => decodeURIComponent(new URL(url).pathname)))].sort(),
+    ).toEqual(
       [
         "/packs/test/by-id/glow.cover",
         "/packs/test/by-id/painting.cover",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { reportAudioStartRefused } from "../../lib/audio/audioError.ts";
 import {
   afterVoiceMs,
@@ -13,6 +13,9 @@ import { AssetIdLabel } from "./AssetIdLabel.tsx";
 
 /** The voice could not be fetched or decoded. The caption stays; the error is logged and toasted. */
 export const PACKED_LINE_AUDIO = "packed-line-audio";
+
+/** The glow mask could not be loaded. The cover stays without it; logged and toasted. */
+export const PACKED_LINE_GLOW = "packed-line-glow";
 
 /**
  * The demo's packed line on the Story board (A1-8b-2, D49): `painting.cover` with `glow.cover`
@@ -42,6 +45,7 @@ export function PackedLineScene({
   done.current = onDone;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startedAt = useRef(0);
+  const [glowState, setGlowState] = useState<"loading" | "ready" | "failed">("loading");
 
   const finishIn = (ms: number) => {
     if (timer.current) clearTimeout(timer.current);
@@ -90,6 +94,31 @@ export function PackedLineScene({
     });
   }, []);
 
+  // The mask is a CSS mask image, so its load is watched here: the e2e and the log need to know.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: one mask per mount.
+  useEffect(() => {
+    if (!line.glow || typeof Image === "undefined") return;
+    let live = true;
+    const probe = new Image();
+    probe.onload = () => {
+      if (live) setGlowState("ready");
+    };
+    probe.onerror = () => {
+      if (!live) return;
+      setGlowState("failed");
+      void reportPageLog({
+        level: "error",
+        code: PACKED_LINE_GLOW,
+        message: `The glow mask ${line.glow} could not be loaded. The cover shows without it.`,
+        source: "board",
+      });
+    };
+    probe.src = packedFileUrl(line.packId, line.glow, origin);
+    return () => {
+      live = false;
+    };
+  }, []);
+
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
@@ -116,12 +145,14 @@ export function PackedLineScene({
             alt=""
           />
           {line.glow ? (
-            // biome-ignore lint/performance/noImgElement: a packed file on the session host.
-            <img
+            // The mask is grayscale light (DEC-401): white where windows glow, black elsewhere. It
+            // masks a warm light layer by luminance; it is never drawn as a picture itself.
+            <div
               className="bt-packed-layer bt-packed-glow"
               data-packed-glow={line.glow}
-              src={url(line.glow)}
-              alt=""
+              data-glow-state={glowState}
+              aria-hidden="true"
+              style={{ "--bt-glow-mask": `url("${url(line.glow)}")` } as CSSProperties}
             />
           ) : null}
         </div>
