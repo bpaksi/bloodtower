@@ -13,14 +13,15 @@ Keep this a checklist; do not write a second design doc.
 - Screen spec: none (engine only; screens are in this cycle's screen features)
 - Mockup: none (no screen change)
 - Depends on: 01, and its `approval.md` on `main`
-- Touches: `apps/bloodtower/src/engine/loops/battle/**` (new level), `apps/bloodtower/src/engine/rules/battle/**`
+- Touches: `apps/bloodtower/src/engine/loops/battle/**` (new level), `apps/bloodtower/src/engine/rules/battle/**`, `packs/base/tuning.yaml` (the silent-seat seconds, a placeholder)
 - Builds: MEC-038, MEC-024, DEC-118, DEC-129, DEC-130, DEC-643, DEC-649, DEC-650, DEC-655, DEC-607, DEC-553
 - Deps change: no
 - Runs: cloud
+- Amended 2026-11-14 for PT-20 (step 44): added EV-12 to EV-21; edited EV-05 in place (it now allows the offer, still no auto pick; marked Amended 2026-11-14 (PT-20)). Rulings adopted by Bob 2026-11-14 are applied to EV-12, EV-13, EV-16, EV-19 and added as EV-20 and EV-21. Touches gains `packs/base/tuning.yaml` (the 30 s placeholder). Needs Bob's new approval row.
 
 ## What it does
 
-MEC-038's loop as a new level: foe abilities and bold/on guard before round 1; each round Fight or Retreat together, then one action per present hero (no timer (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET), Q-C4-11), spells first, the seeded round card (8, no repeats), cut or hit, a hero at 0 takes a corruption and sits out. Exits on foe gone, retreat or all fallen.
+MEC-038's loop as a new level: foe abilities and bold/on guard before round 1; each round Fight or Retreat together, then one action per present hero (no timer on the round (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET), Q-C4-11; PT-20: a seat silent for 30 s, a tuning placeholder, draws "Pick for <hero>" on the other iPads, which sets Guard if the hero can Guard, otherwise a normal attack; any acting-group iPad shows it, for standing heroes who have not picked, round pick only; the clock restarts at 0 on Continue), spells first, the seeded round card (8, no repeats), cut or hit, a hero at 0 takes a corruption and sits out. Exits on foe gone, retreat or all fallen.
 
 ## Cutover
 
@@ -32,12 +33,14 @@ Cutover: N
 
 - Continue, restore, and restart must keep:
   - Continue mid-battle resumes at the saved node (DEC-675): same round, foe wounds, deck position and picks made.
+  - A silent seat's offer is recomputed after Continue; the picks already made are kept (EV-19).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-11 all pass (verifier table on PR).
+- [ ] EV-01 … EV-21 all pass (verifier table on PR).
+- [ ] wire `hint.first-battle` (CU/09 ships the hint registry; Bob, 2026-11-14, adopted).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
@@ -56,6 +59,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-649: closed before coding (`decided`).
 - [ ] DEC-650: closed before coding (`decided`).
 - [ ] DEC-655: closed before coding (`decided`).
+- [ ] PT-20 ruling recorded as a DEC by step 43 (#469); closed before coding.
 
 ## OPEN questions
 

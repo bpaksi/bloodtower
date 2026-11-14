@@ -11,12 +11,13 @@ Keep this a checklist; do not write a second design doc.
 - Related AREA/docs: AREA-097, UI-026, CUE-010, UI-030, UI-036, DEC-466
 - Evals: ./eval.md
 - Screen spec: ./screen-spec.md
-- Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals
+- Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals. Amended 2026-11-14 (PT-17): the Fight/Retreat state gains the warning line and the foe panel's hero mark; the Illusionist adds `#battle-warn` (EV-23).
 - Depends on: 02, 05, C3 11, and its `approval.md` on `main`
-- Touches: `apps/bloodtower/src/web/components/board/Battle*.tsx` (new), `apps/bloodtower/src/web/components/board/FoePanel.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-battle.spec.ts`
+- Touches: `apps/bloodtower/src/web/components/board/Battle*.tsx` (new), `apps/bloodtower/src/web/components/board/FoePanel.tsx` (new), `apps/bloodtower/src/engine/views/**` (read the corruption count), `apps/bloodtower/src/e2e/tests/c4-battle.spec.ts`
 - Builds: UI-026, CUE-010
 - Deps change: no
 - Runs: cloud
+- Amended 2026-11-14 for PT-17 (step 44): added EV-17 to EV-25 (the warning line and the foe-panel mark; the edge band mark is CU/10). Two Copy slots as `[COPY: ...]`. Touches gains `engine/views/**`. Rulings adopted by Bob 2026-11-14 are applied to EV-19 and added as EV-25; no approved eval is changed in place. Needs Bob's new approval row. Illusionist adds mockup state `#battle-warn`.
 
 ## What it does
 
@@ -34,12 +35,13 @@ Cutover: N
   - After Continue mid-battle the board redraws the same foe, wounds and heroes.
   - After a restart and Continue, the Menu and any gear panel come back closed.
   - A beat interrupted by restart shows again or the next one shows, its effect applied once.
+  - The warning line and the foe-panel mark are redrawn from the saved corruption count after Continue (EV-24).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-16 all pass (verifier table on PR).
+- [ ] EV-01 … EV-25 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
@@ -49,6 +51,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] UI-030: closed before coding (`decided`).
 - [ ] UI-036: closed before coding (`decided`).
 - [ ] DEC-466: closed before coding (`decided`).
+- [ ] PT-17 ruling recorded as a DEC by step 43 (#469); closed before coding.
 
 ## Copy
 
@@ -78,6 +81,8 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 20 | `help.title` | Help | C2 feature 04 |
 | 21 | `help.battle-board` | Pick Fight or Retreat on your iPad, then Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 22 | `help.close` | Close | C2 feature 04 |
+| 23 | `board.corruption-warning` | [COPY: Fight/Retreat warning for a hero one fall from defeat, LQ-2] | ruling PT-17; LQ-2 default A "{hero} bears two oath-marks. A third ends the oath." is a proposal, not a lock; Loremaster fills it (step 45) |
+| 24 | `foe-panel.corruption-mark` | [COPY: text alternative for the mark] | new - Loremaster (step 45) |
 
 ## OPEN questions
 

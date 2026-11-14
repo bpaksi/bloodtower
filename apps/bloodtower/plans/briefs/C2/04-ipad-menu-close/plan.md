@@ -32,7 +32,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-18 all pass (verifier table on PR).
+- [ ] EV-01 … EV-18 all pass (verifier table on PR). Amended 2026-11-14 (PT-24, DEC-903): EV-11 (Pick story 7b/7c) and EV-12 (Volume greyed with a reason when there is no tower) changed in place; new Loremaster string `gear.volume.no-tower`; Bob's new approval row covers them.
 - In scope: the gear list (Bob approved 2026-10-31 10:38) in the DEC-229 groups (spec "States"); Pause/Resume stays as a direct Table action. Unusable items are greyed with a one-line reason, never hidden (DEC-227); in C2, Split party (shows "Rejoin party" when split) and Use a potion or item show greyed with the reason "C3+".
 - Rules (Bob 2026-10-31 10:37 AM ET):
 - The bottom toolbar is back on every iPad screen, with the gear (Menu) at its right. The toolbar is iPad chrome: it is not a body button and does not count against "one step, one primary button" (SCR-016).

@@ -11,17 +11,18 @@ Keep this a checklist; do not write a second design doc.
 - Related AREA/docs: AREA-097, AREA-099, UI-020, UI-044, MEC-033
 - Evals: ./eval.md
 - Screen spec: ./screen-spec.md
-- Mockup: none yet: the screen changes, see ./screen-spec.md. Illusionist draws ./mockup.html from it before Bob approves the evals
+- Mockup: none yet: the screen changes, see ./screen-spec.md. Illusionist draws ./mockup.html from it before Bob approves the evals. Amended 2026-11-14 (PT-21): a new "Set the table" state after the next chapter's card, with and without the seal row; the Illusionist adds `#set-table` and `#set-table-no-tower` (EV-22).
 - Risk: Med
 - Depends on: C3 feature 09 merged, C2 feature 06 merged, and its `approval.md` on `main`
-- Touches: `apps/bloodtower/src/web/components/board/ChapterCard.tsx` (new), `apps/bloodtower/src/web/components/board/SealBreak.tsx` (new), `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/e2e/tests/c3-chapter.spec.ts`
+- Touches: `apps/bloodtower/src/web/components/board/ChapterCard.tsx` (new), `apps/bloodtower/src/web/components/board/SealBreak.tsx` (new), `apps/bloodtower/src/web/components/board/SetTheTable.tsx` (new), `apps/bloodtower/src/engine/loops/chapter/**` (the chapter end order), `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/e2e/tests/c3-chapter.spec.ts`
 - Builds: UI-020, UI-044
 - Deps change: no
 - Runs: cloud
+- Amended 2026-11-14 for PT-21 (step 44): added EV-16 to EV-24; edited EV-02 and EV-07 in place (EV-02 marked Amended 2026-11-14 (PT-21): Reveal right after the seal break, freed-skull picks after Done); six Copy slots as `[COPY: ...]`. Needs Bob's new approval row. Illusionist adds mockup states `#set-table` and `#set-table-no-tower`.
 
 ## What it does
 
-UI-020 at each chapter's start (painting, name, goal) and stamped won at its end; UI-044: the chapter's close on a Scroll, then the seal break on a Reveal with the glyph and its boon (DEC-303), then the freed-skull placement (DEC-409). Without the tower the seal part is skipped (DEC-306).
+UI-020 at each chapter's start (painting, name, goal) and stamped won at its end; UI-044: the chapter's close on a Scroll, then the seal break on a Reveal with the glyph and its boon (DEC-303), then the freed-skull placement (DEC-409). Without the tower the seal part is skipped (DEC-306). PT-21: the story comes first (stamped card, close Scroll, the next chapter's card and opening); then one "Set the table" step holds the 1.0 chores (lit seal, freed skulls, quest tokens), one check each and one Done.
 
 ## Cutover
 
@@ -34,12 +35,13 @@ Cutover: N
 - Continue, restore, and restart must keep:
   - The gear Menu and any gear panel come back closed, the game not paused, the toolbar on every iPad, and item states recomputed (EV-15).
   - Continue does not replay a chapter card already shown (DEC-675).
+  - Continue in Set the table resumes it and applies nothing twice (EV-23).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-15 all pass (verifier table on PR).
+- [ ] EV-01 … EV-24 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled; battle, the Tomb and the Tower (C4, C5).
 
 ## AREA / DEC checklist
@@ -53,6 +55,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-409: closed before coding (`decided`).
 - [ ] CUE-004: closed before coding (`decided`).
 - [ ] CUE-005: closed before coding (`decided`).
+- [ ] PT-21 ruling recorded as a DEC by step 43 (#469); closed before coding.
 
 ## Copy
 
@@ -78,6 +81,12 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 16 | `help.title` | Help | C2 feature 04 |
 | 17 | `help.chapter-card` | This is your chapter goal. Finish it before the days run out. | locked 2026-10-31 (Loremaster); same text in screen-spec and EV-12 |
 | 18 | `help.close` | Close | C2 feature 04 |
+| 19 | `table.title` | [COPY: Set the table] | ruling PT-21 names the step "Set the table"; Loremaster confirms (step 45) |
+| 20 | `table.row.seal` | [COPY: the lit seal row, with the seal's name] | new - Loremaster (step 45); C4+ shows the seal's name |
+| 21 | `table.row.tokens` | [COPY: the quest tokens row, naming each quest] | new - Loremaster (step 45) |
+| 22 | `table.row.skulls` | [COPY: the freed skulls row] | new - Loremaster (step 45); C4+ only |
+| 23 | `table.done` | [COPY: Done label for Set the table] | new - Loremaster (step 45); one Done (C2/04) |
+| 24 | `help.set-the-table` | [COPY: help text for Set the table] | new - Loremaster (step 45) |
 
 ## OPEN questions
 

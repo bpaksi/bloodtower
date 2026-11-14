@@ -11,16 +11,17 @@ Keep this a checklist; do not write a second design doc.
 - Related AREA/docs: AREA-097, UI-027, DEC-118, DEC-129
 - Evals: ./eval.md
 - Screen spec: ./screen-spec.md
-- Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals
+- Mockup: none yet; Illusionist draws ./mockup.html from ./screen-spec.md before Bob approves the evals. Amended 2026-11-14 (PT-20): the waiting state gains a Pick for button after 30 s; the Illusionist adds `#pick-for` (EV-18).
 - Depends on: 02, C2 06, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/device/RoundPicker*.tsx` (new), `apps/bloodtower/src/e2e/tests/c4-round.spec.ts`
 - Builds: UI-027
 - Deps change: no
 - Runs: cloud
+- Amended 2026-11-14 for PT-20 (step 44): added EV-13 to EV-21 (the picker side; the loop is C4/02). Rulings adopted by Bob 2026-11-14 are applied to EV-13, EV-14 and EV-19 and added as EV-20 and EV-21; no approved eval is changed in place. Two Copy slots as `[COPY: ...]`. Needs Bob's new approval row. Illusionist adds mockup state `#pick-for`.
 
 ## What it does
 
-UI-027: the group picks Fight or Retreat; then each present hero picks one action, all at once (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-16); the board ticks each hero who has picked. No timer (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-11).
+UI-027: the group picks Fight or Retreat; then each present hero picks one action, all at once (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-16); the board ticks each hero who has picked. No timer on the round (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-11). PT-20: when a seat has been silent for 30 s, the other iPads show "Pick for <hero>", which picks Guard for that hero if the hero can Guard, otherwise a normal attack; any iPad of the acting group, sat-out heroes' included, shows it, for standing heroes who have not picked, round pick only (the loop is C4/02).
 
 ## Cutover
 
@@ -33,12 +34,13 @@ Cutover: N
 - Continue, restore, and restart must keep:
   - A pick made before a quit is still shown after Continue.
   - After a restart and Continue, the Menu and any gear panel come back closed.
+  - A Pick for button is recomputed after Continue; picks already made are kept (EV-19).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 … EV-12 all pass (verifier table on PR).
+- [ ] EV-01 … EV-21 all pass (verifier table on PR).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
@@ -46,6 +48,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] UI-027: closed before coding (`decided`).
 - [ ] DEC-118: closed before coding (`decided`).
 - [ ] DEC-129: closed before coding (`decided`).
+- [ ] PT-20 ruling recorded as a DEC by step 43 (#469); closed before coding.
 
 ## Copy
 
@@ -81,6 +84,8 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 26 | `help.title` | Help | C2 feature 04 |
 | 27 | `help.round-picker` | Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 28 | `help.close` | Close | C2 feature 04 |
+| 29 | `button.pick-for` | [COPY: Pick for {hero}] | ruling PT-20 gives "Pick for <hero>"; Loremaster confirms the label (step 45) |
+| 30 | `ipad.pick-for.note` | [COPY: optional line saying what it sets, Guard or an attack] | new - Loremaster decides if one is wanted (step 45) |
 
 ## OPEN questions
 

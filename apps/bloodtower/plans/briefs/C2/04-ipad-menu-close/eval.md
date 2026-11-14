@@ -79,13 +79,15 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: a third button, or Back sends an act or closes the Menu.
 
 ### EV-11 — The toolbar is on every iPad screen
+- Amended 2026-11-14 (PT-24, DEC-903): Pick story tab 7a (the Enable sound step) is retired; the walk stops on 7b/7c only.
 - Requirement: every iPad screen has the bottom toolbar with "?" at the left end and the gear at the right end (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
-- How: (iPad portrait 768×1024) walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7a/7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, glyphs-facing, session screen, game stats, session over.
+- How: (iPad portrait 768×1024) walk the C2 e2e path and stop on every iPad screen and state: join, claim, waiting, Enter steps (05 states 1–6), Pick story 7b/7c, Story settings, base board setup, in play, paused, tower lost, piece check, glyphs-facing, session screen, game stats, session over.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible inside the viewport; its first control is "?" and its last is the gear; nothing in the iPad body covers them.
 - Fails if: any screen or state lacks the toolbar, "?" or the gear.
 
 ### EV-12 — Gear actions open on the Story board and pause the game
+- Amended 2026-11-14 (PT-24, DEC-903): the Volume item is no longer "always" enabled; with no tower (Play without Tower) it stays visible and greyed with a reason line, never hidden (DEC-227, DEC-903). Bob, 2026-11-14.
 - Requirement: an enabled gear item starts on the iPad and its UI shows on the Story board; the game pauses while the panel is open and resumes on Done (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
 - How: (board 1920×1080 + iPad 768×1024, in play) for each enabled item in turn (Current party, Game board setup, Volume, Look up, Change who holds whom, Join another iPad), open it from the gear, then press Done.
@@ -95,8 +97,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
   - Join another iPad: the board shows a QR code and the join URL, and the URL matches the host's join URL.
   - Look up: the board shows the rules/card list; picking one card on the iPad opens that card on the board.
   - Change who holds whom: after a swap on the iPad and Done, the host's holdings show the new holder, and it is still the new holder after a host restart and Continue.
-  - Volume: after picking a level and Keep, the host reports the new volume level, and it is still that level after the panel closes and reopens.
-- Fails if: the panel shows on the iPad, the game runs while a panel is open, Done does not resume, or any item opens but its outcome above is missing.
+  - Volume: after picking a level and Keep, the host reports the new volume level, and it is still that level after the panel closes and reopens. Amended 2026-11-14 (PT-24, DEC-903): this applies with a tower connected. With Play without Tower, the Menu still lists "Volume", disabled, with the reason line from the Copy slot `gear.volume.no-tower` (new Loremaster string, `[COPY: gear.volume.no-tower]`); pressing it opens no panel, sends no frame and does not pause the game; the item is present in the DOM, not absent.
+- Fails if: the panel shows on the iPad, the game runs while a panel is open, Done does not resume, any item opens but its outcome above is missing, or (amended) Volume is hidden or enabled without a tower, or its reason line is missing.
 
 ### EV-13 — The happy path never needs the Menu
 - Requirement: the happy path uses only the iPad body's flow buttons; exceptions go through the gear (Bob 2026-10-31 10:37 AM ET).
