@@ -379,7 +379,8 @@ test.describe("C3/11 the day on the board", () => {
       const panel = board.locator("#skull");
       await expect(panel).toBeVisible();
       await expect(panel).toContainText(String(kingdom));
-      await expect(board.locator("[data-waiting]")).toContainText(/skull/i);
+      // The no-tower lines sit in the skull panel (CU/03), not in a second waiting box.
+      await expect(panel.locator("[data-skull-line]").first()).toContainText(/skull/i);
       await expectToolbar(pad);
       await checkHelp(pad, board, "#skull");
 

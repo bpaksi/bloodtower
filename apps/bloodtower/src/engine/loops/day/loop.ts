@@ -1,6 +1,7 @@
-import type { LoopDefinition } from "../../loop/types.ts";
+import type { LoopContext, LoopDefinition } from "../../loop/types.ts";
 import { nextPlayRng, playState } from "../chapter/playState.ts";
 import { eventForGroup, eventTuningFrom } from "../event/index.ts";
+import { skullNoBuildingEffect } from "../session/effects.ts";
 import { recordOffer, requestCheckpoint, shellState } from "../session/shellRef.ts";
 import {
   checkChapter,
@@ -68,26 +69,34 @@ const countSimulatedSkull = (day: number): void => {
 };
 
 /**
- * Without the tower the night's skulls are drawn, not asked for (DEC-305): the kingdom die as
- * before, then a seeded building in it. The board then names where each landed (SCR-019).
+ * Without the tower the night's skulls are drawn, not asked for (DEC-305, PT-07): one at a time,
+ * the kingdom die, then the standing building in it with the fewest skulls. The board then names
+ * where each landed (SCR-019). A skull with no standing building in two kingdoms does not drop
+ * and is logged as an error (Q3.1).
  */
-const simulateDrops = (local: DayLocal, count: number): DayLocal => {
+const simulateDrops = (
+  local: DayLocal,
+  count: number,
+  effects: LoopContext<DayLocal>["effects"],
+): DayLocal => {
   const play = playState();
   const shell = shellState();
   const clock = ensureClock(play);
   noteNode(play, ".36");
   clock.pendingKingdoms = [];
   clock.expectKingdom = null;
-  for (let i = 0; i < count; i++) {
-    const face = nextPlayRng(shell.seed, play).roll(clock.tuning.kingdomDie).total;
-    clock.pendingKingdoms.push(kingdomFromD4(face));
-  }
-  const kingdoms = clock.pendingKingdoms;
-  clock.pendingKingdoms = [];
+  const drawKingdom = () =>
+    kingdomFromD4(nextPlayRng(shell.seed, play).roll(clock.tuning.kingdomDie).total);
   let landed = 0;
-  for (const kingdom of kingdoms) {
-    if (clock.supply <= 0) break;
-    if (simulateSkullDrop(shell.seed, kingdom)) landed += 1;
+  for (let i = 0; i < count; i++) {
+    const drop = simulateSkullDrop(shell.seed, drawKingdom);
+    if (drop.landed) {
+      landed += 1;
+    } else if (drop.reason === "no-building") {
+      effects.push(skullNoBuildingEffect(play.dayNumber) as unknown as (typeof effects)[number]);
+    } else {
+      break;
+    }
   }
   if (landed > 0) countSimulatedSkull(play.dayNumber);
   return {
@@ -100,7 +109,7 @@ const simulateDrops = (local: DayLocal, count: number): DayLocal => {
   };
 };
 
-const startClose = (local: DayLocal): DayLocal => {
+const startClose = (local: DayLocal, effects: LoopContext<DayLocal>["effects"]): DayLocal => {
   const play = playState();
   const shell = shellState();
   const clock = ensureClock(play);
@@ -117,7 +126,7 @@ const startClose = (local: DayLocal): DayLocal => {
     noteNode(play, ".33");
     return { ...local, phase: "check", awaitingPress: false, awaitingChild: false, skullsLeft: 0 };
   }
-  if (!shell.towerLinked) return simulateDrops(local, count);
+  if (!shell.towerLinked) return simulateDrops(local, count, effects);
   noteNode(play, ".11");
   clock.pendingKingdoms = [];
   clock.expectKingdom = null;
@@ -207,7 +216,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
 
       const groupId = play.turnOrder[local.groupIndex];
       if (local.groupIndex >= play.turnOrder.length || !groupId) {
-        local = startClose(local);
+        local = startClose(local, ctx.effects);
       } else {
         const moves = play.dayRolls[groupId] ?? clock.tuning.moveFloor;
         noteNode(play, ".5");
@@ -224,7 +233,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
       (local.phase === "skull-prompt" || local.phase === "skull-place") &&
       local.skullsLeft > 0
     ) {
-      local = simulateDrops(local, local.skullsLeft);
+      local = simulateDrops(local, local.skullsLeft, ctx.effects);
     }
 
     if (local.phase === "skull-sim") {

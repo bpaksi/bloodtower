@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
+import { recordBuildingDrop } from "../day/clock.ts";
+import type { DayLocal } from "../day/loop.ts";
 import { enterConnectEvents, enterWithoutEvents } from "./enterKit.ts";
 import { TEST_STORY } from "./pack.ts";
 import { initialShellState, type ShellState } from "./state.ts";
@@ -128,7 +130,10 @@ describe("C2/08 the simulated skull drop (DEC-305)", () => {
       if (pick.promptId.startsWith("skull-sim-day-")) {
         skullDays += 1;
         const view = projectShellView(state);
-        expect(view.table?.waitingFor).toMatch(/^A skull falls on [^,]+\.$/);
+        expect(view.table?.skull?.lines?.length).toBeGreaterThanOrEqual(1);
+        for (const line of view.table?.skull?.lines ?? []) {
+          expect(line).toMatch(/^A skull falls on [^,]+\.$/);
+        }
       }
       const result = stepShell(state, press(pick.promptId, pick.actionId));
       for (const effect of result.effects) {
@@ -139,6 +144,43 @@ describe("C2/08 the simulated skull drop (DEC-305)", () => {
     }
     expect(skullDays).toBe(2);
     expect(commands).toEqual([]);
+  });
+});
+
+describe("CU/03 the board's skull lines (PT-07)", () => {
+  const linesAfter = (spaceIds: string[]): string[] | undefined => {
+    const state = toPlay("seed-lines", "without");
+    const play = state.play;
+    const day = state.loops.stack.find((frame) => frame.loopId === "day");
+    if (!play || !day) throw new Error("The test needs a day in play.");
+    (day.local as DayLocal).phase = "skull-sim";
+    for (const spaceId of spaceIds) {
+      const space = play.content.board.spaceById.get(spaceId);
+      if (!space) throw new Error(`No space ${spaceId}.`);
+      recordBuildingDrop(play, spaceId, space.kingdom);
+    }
+    return projectShellView(state).table?.skull?.lines;
+  };
+
+  it("EV-06 one line per skull, stacked, none cut, none merged", () => {
+    const lines = linesAfter(["N-upper-ice-fangs", "N-upper-ice-fangs", "E-greater-tombstones"]);
+    expect(lines).toEqual([
+      "A skull falls on Sanctuary.",
+      "A skull falls on Sanctuary.",
+      "A skull falls on Sanctuary.",
+    ]);
+    // Past the old 120-character cut: five long-titled skulls all stay whole.
+    const five = linesAfter([...Array(3).fill("W-akartus"), ...Array(2).fill("N-upper-ice-fangs")]);
+    expect(five).toHaveLength(5);
+    expect(five?.join(" ").length).toBeGreaterThan(120);
+    expect(five?.every((line) => line === "A skull falls on Sanctuary.")).toBe(true);
+    const four = linesAfter(["N-egans-end", "N-dayside", "S-howling-desert", "W-anza"]);
+    expect(four).toEqual([
+      "A skull falls on Village.",
+      "A skull falls on Bazaar.",
+      "A skull falls on Citadel.",
+      "A skull falls on Village.",
+    ]);
   });
 });
 

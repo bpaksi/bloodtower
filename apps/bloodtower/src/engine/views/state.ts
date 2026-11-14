@@ -68,6 +68,8 @@ export type DaySkullView = {
   kingdomLabel: string | null;
   buildings: { spaceId: string; name: string; skulls: number; fallen: boolean }[];
   fell: string[];
+  /** One "A skull falls on <building>." per skull of the night, in drop order (PT-07). */
+  lines?: string[];
 };
 
 export type HeroCorruptionView = {

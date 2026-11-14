@@ -127,6 +127,16 @@ export function DayPanel({ table }: { table: Table }) {
             </li>
           ))}
         </ul>
+        {phase === "skull-sim" && (skull?.lines ?? []).length > 0 ? (
+          <ul data-skull-lines="">
+            {(skull?.lines ?? []).map((line, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: two skulls can land on one building; drop order is the identity
+              <li key={`${line}-${index}`} data-skull-line="">
+                {line}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {(skull?.fell ?? []).map((name) => (
           <p key={name} data-fell={name}>
             {name} falls.
