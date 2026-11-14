@@ -9,6 +9,8 @@ import {
   packMetadataSchema,
   packV2Issues,
   type StoryPack,
+  sceneDataIssues,
+  sceneLabelForPath,
   storyPackSchema,
 } from "../../../protocols/pack-v2/index.ts";
 import {
@@ -58,6 +60,18 @@ const issue = (file: string, path: string, rule: string, message: string): PackV
   path,
   message: message.startsWith(`${rule}:`) ? message : `${rule}: ${message}`,
 });
+
+/** A schema issue inside `scenes` names its scene and option, not only their indexes (C3-18). */
+const namedSceneMessage = (
+  input: unknown,
+  item: { rule: string; path: string; message: string },
+): string => {
+  const label = sceneLabelForPath(input, item.path);
+  if (!label || item.message.includes(label)) return item.message;
+  const prefix = `${item.rule}: `;
+  const body = item.message.startsWith(prefix) ? item.message.slice(prefix.length) : item.message;
+  return `${prefix}${label}: ${body}`;
+};
 
 /** Schema failures under `tuning` are issues in tuning.yaml, not the manifest. */
 const tuningSchemaIssues = (
@@ -372,12 +386,12 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
       return {
         ok: false,
         issues: packV2Issues(parsed.error).map((item) =>
-          issue(packFile, item.path, item.rule, item.message),
+          issue(packFile, item.path, item.rule, namedSceneMessage(assembled, item)),
         ),
       };
     }
     const story = parsed.data;
-    const semantic = flagCoverageIssues(story);
+    const semantic = [...flagCoverageIssues(story), ...sceneDataIssues(story)];
     if (semantic.length > 0) {
       return {
         ok: false,
@@ -418,6 +432,21 @@ export const loadPackV2Dir = (dir: string, packsV2Root?: string): PackV2LoadResu
             `hero ${assignment.hero} is not in base pack ${story.base_pack}.`,
           ),
         );
+      }
+    }
+    const spaceIds = new Set(baseLoaded.pack.board.spaces.map((space) => space.id));
+    for (const [ci, chapter] of story.chapters.entries()) {
+      for (const [qi, quest] of chapter.quests.entries()) {
+        if (quest.place && !spaceIds.has(quest.place.space)) {
+          issues.push(
+            issue(
+              packFile,
+              `chapters.${ci}.quests.${qi}.place.space`,
+              "P2-2",
+              `quest ${quest.id} stands on space ${quest.place.space}, which is not on the base pack ${story.base_pack} board.`,
+            ),
+          );
+        }
       }
     }
     if (issues.length > 0) return { ok: false, issues };
