@@ -2,6 +2,7 @@
 
 import type { BoardView } from "bloodtower-protocols";
 import { useEffect, useState } from "react";
+import { CORRUPTION_LOSS_LIMIT } from "../../../engine/loops/day/rules.ts";
 import { DialogFrame } from "./DialogFrame";
 
 type Table = NonNullable<BoardView["table"]>;
@@ -93,6 +94,35 @@ export function HeroCorruptions({ table, heroId }: { table: Table; heroId: strin
     <span key={hero.heroId} data-hero-corruptions={hero.heroId} data-count={hero.count}>
       {" "}
       {hero.heroName}: {hero.count} {hero.count === 1 ? "corruption" : "corruptions"}
+    </span>
+  ));
+}
+
+/** [band.mark.label] Loremaster, step 45 (CU/10). `{hero}` is the one hero who carries the mark. */
+const markLabel = (hero: string) => `${hero} has two corruptions. A third ends the game.`;
+
+/**
+ * The corruption mark (PT-17, UI-028): an icon per hero one corruption short of the loss limit,
+ * inside the lead's panel span. Display only: no words, no button, no action. A count that is not
+ * known draws nothing, never a zero.
+ */
+export function HeroCorruptionMarks({ table, heroId }: { table: Table; heroId: string }) {
+  const rows = (table.corruptions ?? []).filter(
+    (row) => row.panelHeroId === heroId && row.count === CORRUPTION_LOSS_LIMIT - 1,
+  );
+  return rows.map((hero) => (
+    <span
+      key={hero.heroId}
+      className="bt-corruption-mark"
+      data-corruption-mark={hero.heroId}
+      role="img"
+      aria-label={markLabel(hero.heroName)}
+    >
+      <svg viewBox="0 0 20 20" width="1em" height="1em" aria-hidden="true">
+        <path d="M10 1 L19 18 H1 Z" fill="#8a1e14" stroke="#e8dcc0" strokeWidth="1.2" />
+        <rect x="9" y="7" width="2" height="6" fill="#e8dcc0" />
+        <rect x="9" y="14" width="2" height="2" fill="#e8dcc0" />
+      </svg>
     </span>
   ));
 }

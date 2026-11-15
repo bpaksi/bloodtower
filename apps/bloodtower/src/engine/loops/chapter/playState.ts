@@ -1,4 +1,5 @@
 import { eventRng } from "@dark-tower/rng";
+import { setHeroSheet } from "../day/clock.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -136,6 +137,30 @@ export const seatAtCitadels = (
  */
 export const TEST_SEAT_TOGETHER = "~test-seat-together";
 
+/**
+ * TEST ONLY (CU/10). A seed carrying `~test-corruption:hero-b=2,hero-c=1` starts those heroes
+ * with those corruptions (whole numbers, 0 to 9), so an e2e can reach the band mark without play.
+ * Put it before `~test-seat-together`, which must stay last. Real seeds never carry it.
+ */
+export const TEST_CORRUPTION = "~test-corruption:";
+
+const TEST_CORRUPTION_PATTERN = /~test-corruption:([\w,=-]*)/;
+
+const corruptionsFromTestSeed = (seed: string): [string, number][] => {
+  const match = TEST_CORRUPTION_PATTERN.exec(seed);
+  if (!match) return [];
+  return (match[1] ?? "")
+    .split(",")
+    .filter((part) => part.length > 0)
+    .map((part) => {
+      const [heroId, count] = part.split("=");
+      if (!heroId || !/^\d$/.test(count ?? "")) {
+        throw new Error(`The test corruption seed needs hero=count (0 to 9), got "${part}".`);
+      }
+      return [heroId, Number(count)];
+    });
+};
+
 const seatTogetherForTest = (groups: GroupState[], turnOrder: string[]): GroupState[] => {
   const ordered = turnOrder.flatMap((id) => groups.filter((group) => group.id === id));
   const lead = ordered[0];
@@ -167,7 +192,7 @@ export const initPlayState = (seed: string, content: PlayContent): PlayState => 
     : groups;
   const turnOrder = seated === groups ? shuffledOrder : seated.map((group) => group.id);
 
-  return {
+  const play: PlayState = {
     content,
     groups: seated,
     turnOrder,
@@ -180,6 +205,10 @@ export const initPlayState = (seed: string, content: PlayContent): PlayState => 
     booted: true,
     childInput: null,
   };
+  for (const [heroId, corruptions] of corruptionsFromTestSeed(seed)) {
+    setHeroSheet(play, heroId, { helpingVirtues: 0, corruptions });
+  }
+  return play;
 };
 
 export const groupById = (play: PlayState, groupId: string): GroupState | undefined =>
