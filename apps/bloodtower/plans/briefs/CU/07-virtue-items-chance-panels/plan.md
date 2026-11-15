@@ -64,27 +64,33 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-408: closed before coding (`decided`).
 - [ ] DEC-114: closed before coding (`decided`).
 - [ ] DEC-196: closed before coding (`decided`).
-- [ ] Rulings Q7.1 to Q7.4 below written into the step-43 DEC; closed before coding. Gamewright confirms the 1.0 deck's virtue list from C3-06 before coding (Q7.1).
+- [ ] Rulings Q7.1 to Q7.4 below written into the step-43 DEC; closed before coding. The 1.0 deck's virtue list is confirmed by DEC-934 (Gamewright, 2026-11-15), closed.
 
 ## Copy
 
-Exact player-facing text is Loremaster's, step 45. A build fills every `[COPY: ...]` row from the final table, never from the mockup.
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
-| 1 | `virtue.title` | [COPY: panel title] | Loremaster, step 45 |
-| 2 | `virtue.line` | [COPY: one line per virtue, {virtue} and {effect}] | Loremaster; examples in UI-037 |
-| 3 | `virtue.choice.prompt` | [COPY: the choice a virtue asks, {virtue}] | Loremaster |
-| 4 | `items.title` | [COPY: party items panel title] | Loremaster |
+| 1 | `virtue.title` | Virtues today | new - Loremaster. Board panel title after the whose-turn banner (UI-037) |
+| 2 | `virtue.line` | {virtue}: {effect} | UI-037 (one line per virtue); `{effect}` is the virtue tile's own text, never rewritten here |
+| 2a | `virtue.line` example | Infused: remove 1 skull in Brynthia | locked UI-037 (Bob accepted 2026-10-30); example of row 2 |
+| 2b | `virtue.line` example | Relentless: +1 Wild until the next roll | locked UI-037; also drawn in mockup.html |
+| 2c | `virtue.line` example | Fortunate: a second pick today | locked UI-037 |
+| 3 | `virtue.choice.prompt` | {virtue} asks you to choose. | new - Loremaster. One generic line on the board and the iPad when a virtue asks a choice (Q7.1, tested with Infused); the buttons are the choices themselves, for Infused the building names. Replaces the mockup's "A virtue asks" |
+| 4 | `items.title` | What the party carries | UI-013 ("What the party carries"); Loremaster confirms |
 | 5 | `items.empty` | No potions or items to use. | locked 2026-10-31 (Loremaster), the gear reason line in C3 11 |
-| 6 | `items.row` | [COPY: {hero}, {item}] | Loremaster |
-| 7 | `chance.spin` | Spin | UI-045 and DEC-114 name the button; Loremaster confirms |
-| 8 | `chance.result` | [COPY: the amount, {N}] | Loremaster |
-| 9 | `chance.notower` | [COPY: result line with no tower] | Loremaster |
+| 6 | `items.row` | {hero}: {item} | mockup.html layout (Gamewright draft); one row per held item, one hero name per row |
+| 6a | `items.row.empty` | {hero}: No potions or items to use. | new - Loremaster. A hero who holds nothing: the locked line of row 5 after the hero's name (mockup, Hero C) |
+| 6b | `items.paused` | Game paused. | C2 feature 04 mockup (a panel open pauses the game); unchanged |
+| 6c | `chance.title` | Starting purse | mockup.html heading (Gamewright draft); DEC-110 names the purse step |
+| 7 | `chance.spin` | Spin | UI-045 and DEC-114 name the button; Loremaster confirms. Checked against the spec: kept |
+| 8 | `chance.result` | The lights stop on {N} gold. | new - Loremaster. Board line as the result lands with the tower (UI-045, DEC-114); `{N}` is the purse |
+| 9 | `chance.notower` | The wheel stops on {N} gold. | new - Loremaster. Board line with no tower: shown at once, no "tower" or "lights" words (EV-10, Q7.4); the coin sound is a cue, not words |
 
 ## Rulings (Bob, 2026-11-14, adopted)
 
-- Q7.1 Bob, 2026-11-14, adopted: build the virtue choice list generic; test it with Infused (DEC-406, asks for a building). Flagged for Gamewright: confirm the 1.0 deck's list of choice-asking virtues from C3-06.
+- Q7.1 Bob, 2026-11-14, adopted: build the virtue choice list generic; test it with Infused (DEC-406, asks for a building). Gamewright, 2026-11-15 (DEC-934): the 1.0 deck is the 8 pool tiles (DEC-581) and Infused is the only turn-start choice; the list stays generic.
 - Q7.2 Bob, 2026-11-14, adopted: the use-item host action is built here, behind the existing gear item "Use a potion or item". The host Split goes to CU/04. Queue step 12 (#441) shrinks to the day-loop effects wait and the test seed hook (see catchup/README.md row 12).
 - Q7.3 Bob, 2026-11-14, adopted: UI-013 opens from "Use a potion or item"; "Current party" keeps HP, gold and the item count.
 - Q7.4 Bob, 2026-11-14, adopted: with no tower the spin shows the result at once on the board and plays the coin sound on the board speakers (DEC-201, DEC-903). With the tower the chase command is sent only on the press.
