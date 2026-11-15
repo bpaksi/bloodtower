@@ -3,10 +3,11 @@ import {
   OPENING_PLACEHOLDER,
   openingActiveIndex,
 } from "../../../protocols/opening.ts";
-import type { GearView } from "../../../protocols/v2/views.ts";
+import { AUTO_ADVANCE_MS, type GearView } from "../../../protocols/v2/views.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
   DaySkullView,
+  GroupsCardView,
   LoopLevel,
   PlaceStill,
   TableBand,
@@ -15,6 +16,8 @@ import type {
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
 import { ensureClock, heroCount, heroSheet, isFallen } from "../day/clock.ts";
 import type { DayLocal } from "../day/loop.ts";
+import { partyIsSplit, regroupPicks, regroupQueue } from "../day/regroup.ts";
+import { splitShiftOf } from "../day/roll.ts";
 import { daysLeft } from "../day/rules.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
@@ -77,15 +80,6 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
     if (target === "inside") return "The skull stayed inside";
     return state.play?.content.board.spaceById.get(target)?.name ?? "Record";
   }
-  if (actionId === "split") {
-    const heroId = promptId.split("--").slice(2).join("--");
-    return `Split ${heroName(state, heroId)} off`;
-  }
-  if (actionId === "join") {
-    const other = state.play?.groups.find((row) => row.id === promptId.split("--")[2]);
-    return `Join ${other ? groupName(state, other.heroIds, other.id) : "the groups"}`;
-  }
-  if (promptId === "regroup-done") return "Stay as you are";
   if (promptId.startsWith("continue-pick-story-")) {
     const id = promptId.slice("continue-pick-story-".length);
     const story = state.stories.find((entry) => entry.card.id === id);
@@ -161,7 +155,7 @@ const buildDayPanels = (
   state: ShellState,
 ): Pick<
   TableBand,
-  "daysLeft" | "threat" | "phase" | "rolls" | "effects" | "skull" | "corruptions"
+  "daysLeft" | "threat" | "phase" | "rolls" | "effects" | "skull" | "corruptions" | "groupsCard"
 > => {
   const play = state.play;
   if (!play) return {};
@@ -175,8 +169,28 @@ const buildDayPanels = (
     const shift = clock.shifts[groupId];
     const group = play.groups.find((row) => row.id === groupId);
     if (!shift || !group) return [];
-    return [rollView({ groupId, name: groupName(state, group.heroIds, groupId), shift })];
+    return [
+      rollView({
+        groupId,
+        name: groupName(state, group.heroIds, groupId),
+        shift: { ...shift, split: splitShiftOf(shift) },
+      }),
+    ];
   });
+
+  // The groups card: only while the roll of a day whose start applied a queued change (Q4.1).
+  const groupsCard: GroupsCardView | null =
+    local?.phase === "roll" && play.regroupCardDay === play.dayNumber && play.dayNumber > 0
+      ? {
+          day: play.dayNumber,
+          holdMs: AUTO_ADVANCE_MS,
+          groups: play.turnOrder.flatMap((groupId) => {
+            const group = play.groups.find((row) => row.id === groupId);
+            if (!group || group.heroIds.length === 0) return [];
+            return [{ groupId, heroNames: group.heroIds.map((id) => heroName(state, id)) }];
+          }),
+        }
+      : null;
 
   let skull: DaySkullView | null = null;
   if (phase === "skull" || phase === "skull-sim") {
@@ -233,6 +247,7 @@ const buildDayPanels = (
       panelHeroId,
       count: heroSheet(clock, heroId).corruptions,
     })),
+    groupsCard,
   };
 };
 
@@ -286,7 +301,11 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     moveRoll: rolled ?? null,
     modifier: "none",
     // The no-tower skull lines sit in the skull panel (PT-07), not in a second waiting box.
-    waitingFor: waiting && actingName && !onSkullSim(state) ? `${actingName} is choosing` : null,
+    // Nor in a box over the groups card (CU/04): both sit centred on the board.
+    waitingFor:
+      waiting && actingName && !onSkullSim(state) && !dayPanels.groupsCard
+        ? `${actingName} is choosing`
+        : null,
     groups: play.groups.map((group) => {
       const id = group.heroIds[0] ?? group.id;
       const space = board.spaceById.get(group.spaceId);
@@ -593,6 +612,20 @@ const helpScreenFor = (state: ShellState): string => {
   return mapped[state.screen] ?? "play";
 };
 
+/** The Split party panel: picks against the groups after the queue, and the queue (PT-18). */
+const regroupSnapshot = (state: ShellState, inGame: boolean): NonNullable<GearView["regroup"]> => {
+  const play = state.play;
+  if (!play || !inGame) return { open: false, picks: [], queue: [] };
+  const row = (entry: { kind: "split" | "join"; heroId: string }) => ({
+    kind: entry.kind,
+    heroId: entry.heroId,
+    name: heroName(state, entry.heroId),
+  });
+  const picks = regroupPicks(play).map(row);
+  const queue = regroupQueue(play).map(row);
+  return { open: picks.length > 0, picks, queue };
+};
+
 const gearSnapshot = (state: ShellState): GearView => {
   const story = chosenOrBound(state);
   const inGame = state.screen === "play" || state.screen === "pause" || state.reconnect !== null;
@@ -613,7 +646,8 @@ const gearSnapshot = (state: ShellState): GearView => {
     sessionScreen,
     sessionOver,
     beforeBegin: !inGame && !sessionScreen,
-    partySplit: state.partySplit,
+    partySplit: state.play ? partyIsSplit(state.play) : false,
+    regroup: regroupSnapshot(state, inGame && !sessionOver),
     party: (story?.heroes ?? []).map((hero) => ({
       id: hero.id,
       name: hero.name,

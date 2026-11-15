@@ -330,8 +330,12 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         games: live.games,
       };
     }
+    // A Split party pick changes the play state (the queue, PT-18), so a replay must see it.
     const persistGear =
-      event.kind !== "gear" || event.action === "keep-volume" || event.action === "done";
+      event.kind !== "gear" ||
+      event.action === "keep-volume" ||
+      event.action === "done" ||
+      (event.action === "pick" && event.item === "split");
     if (persistGear) appendShell(logged, deviceId);
     if (event.kind === "press") {
       const open =
@@ -362,12 +366,16 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
     }
     const outcomes = await runShellEffects(state, shellEffects, effectsCtx());
-    const tellDevice = (message: string, code: ErrorCode = "tower-command-failed") => {
-      if (!deviceId) return;
+    const tellDevice = (
+      message: string,
+      code: ErrorCode = "tower-command-failed",
+      target: string | null = deviceId,
+    ) => {
+      if (!target) return;
       // After the result: the iPad changes screen when the choice comes back, and a change of
       // screen clears its banner. The message must land on the screen that asks again.
       applyQueue = applyQueue
-        .then(() => options.onDeviceError?.(deviceId, code, message))
+        .then(() => options.onDeviceError?.(target, code, message))
         .catch((error: unknown) => {
           const detail = error instanceof Error ? error.message : String(error);
           options.log.error(
@@ -380,10 +388,12 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       if (effect.kind !== "press-error") continue;
       // A press that could not be honoured: the log line toasts the board, the pressing iPad
       // shows the message with its code.
-      options.log.error(effect.code, effect.message, { device: deviceId });
+      // A queued Split or Rejoin is told to the iPad that queued it, not the one that pressed.
+      const target = effect.deviceId ?? deviceId;
+      options.log.error(effect.code, effect.message, { device: target });
       // The iPad's error codes are a fixed set; a code of the engine's own rides in the text.
-      if (effect.code === "invalid-state") tellDevice(effect.message, effect.code);
-      else tellDevice(`${effect.message} (${effect.code})`, "invalid-state");
+      if (effect.code === "invalid-state") tellDevice(effect.message, effect.code, target);
+      else tellDevice(`${effect.message} (${effect.code})`, "invalid-state", target);
     }
     for (const outcome of outcomes) {
       const ok = outcome.result === "ok";

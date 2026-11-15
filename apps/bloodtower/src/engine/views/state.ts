@@ -61,7 +61,17 @@ export type DayRollView = {
   virtue: number;
   terrain: number;
   corruption: number;
+  /** The per-split-group shift (PT-06). Omitted when the party is not split. */
+  split?: number;
   total: number;
+};
+
+/** The groups card on a day whose start applied a queued change (PT-18, Q4.1). */
+export type GroupsCardView = {
+  day: number;
+  /** How long the board shows it, from `AUTO_ADVANCE_MS` (Q4.4). */
+  holdMs: number;
+  groups: { groupId: string; heroNames: string[] }[];
 };
 
 export type DaySkullView = {
@@ -92,6 +102,7 @@ export type TableBand = {
   effects?: string[];
   skull?: DaySkullView | null;
   corruptions?: HeroCorruptionView[];
+  groupsCard?: GroupsCardView | null;
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;

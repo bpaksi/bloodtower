@@ -57,7 +57,8 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Method: playwright
 - How: queue a split on day 2; at day 3 start read the board.
 - Pass evidence: the board shows the two groups and their heroes; no `button`, link or pressable element in the card; it leaves by itself after about 4 seconds (3.5 to 6 s) and the roll panel follows; neither iPad offers a regroup choice.
-- Fails if: a Continue/Done button is present, the card waits for a press, or it lasts a different time than the existing 4 s auto-advance (EV-28 pins the constant). A day with nothing queued is EV-25.
+- Fails if: a Continue/Done button is present, the card waits for a press, or it lasts a different time than the exported 4 s constant (EV-28 pins the constant). A day with nothing queued is EV-25.
+- Amended 2026-11-15 (PT-18, Bob): "the existing 4 s auto-advance" read as the exported constant of EV-28; nothing else changed.
 
 ### EV-08 — Nothing moves mid-day
 - Requirement: PT-18: the queued action takes effect at the next day start only; DEC-821 and the group's turn are not disturbed.
@@ -139,11 +140,12 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Fails if: both actions stay queued, the split still applies, or the cancel logs an error.
 
 ### EV-28 — The 4 s is the shared constant
-- Requirement: Q4.4 (Bob, 2026-11-14, adopted): one constant shared with the existing 4 s auto-advance.
+- Amended 2026-11-15 (PT-18, Bob): no day-loop 4 s auto-advance exists yet (C3-11 Ruling 1 is unbuilt), so the constant is defined here for the groups card and that future timer must read it.
+- Requirement: Q4.4 (Bob, 2026-11-14, adopted): one exported constant for the groups card's 4 s duration, which the future day-loop timer step (C3-11 Ruling 1) must read too; not a tuning key. The card times itself on the board and the engine goes straight on to the roll.
 - Method: unit
-- How: source check of the constant that the groups card and the day loop's existing 4 s auto-advance read; change its value in a test and replay a queue-and-apply day.
-- Pass evidence: one exported constant is read by both; changing it moves both the groups card time and the auto-advance; no new key appears in `packs/base/tuning.yaml` for it (EV-06's schema copy still passes).
-- Fails if: the card has its own literal 4000 or a new tuning key.
+- How: source check that the groups card reads the exported constant and has no literal 4000 of its own; change the constant's value in a test and replay a queue-and-apply day.
+- Pass evidence: one exported constant; the card's duration on a queue-and-apply day equals it and moves when it changes; the day loop does not wait for the card (the roll is offered at once); no new key appears in `packs/base/tuning.yaml` for it (EV-06's schema copy still passes).
+- Fails if: the card has its own literal 4000, a second constant, or a new tuning key.
 
 ### EV-29 — The host drives the queue
 - Requirement: Q7.2 (Bob, 2026-11-14, adopted): the host's split action is built here; `c3-day.spec.ts` EV-15 and EV-16 stop being `fixme`.
