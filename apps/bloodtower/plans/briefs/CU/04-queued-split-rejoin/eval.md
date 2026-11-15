@@ -72,7 +72,8 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Method: screenshot
 - How: iPad 768x1024 portrait, gear open on Split party with 2 heroes; compare side by side with ./mockup.html section `#gear-split`.
 - Pass evidence: both images attached; title, one pick per hero, Back, and the queued note in the same order; copy slots show the Loremaster text, not `[COPY: ...]`, once step 45 lands (the mockup keeps the slots).
-- Fails if: a hero pick or Back is missing, or any other row shows.
+- Fails if: a hero pick or Back is missing, or any other row shows besides the standing See the story board row (`[data-see-board]`) that every gear panel carries between the "PLAY / The move" header and the panel content (Bob, 2026-11-15).
+- Amended 2026-11-15 (PT-18, Bob): "any other row shows" now allows the standing See the story board row. Note for the Illusionist: `mockup.html` `#gear-split` does not draw that row.
 
 ### EV-10 — Day-start card screenshot
 - Requirement: the groups card looks as drafted.
