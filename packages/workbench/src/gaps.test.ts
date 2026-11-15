@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { findGaps, GAP_RULE_LABEL, type Gap, gapsPerArea, groupGaps } from "./gaps.ts";
 import type { Card, CardStatus, Graph } from "./graph-types.ts";
@@ -804,5 +805,68 @@ describe("gaps: process and story layers, and the 1.1 release", () => {
       "1.0:no-deliverable",
       "1.1:mechanic-surface",
     ]);
+  });
+});
+
+describe("gaps: parked mechanics are closed (DEC-901)", () => {
+  const surfaceIds = (g: Graph) =>
+    findGaps(g)
+      .filter((x) => x.rule === "mechanic-surface")
+      .map((x) => x.id);
+
+  it("EV-01: a parked mechanic with no surface is not a gap", () => {
+    const g = graphOf({ "MEC-001": { type: "mechanic", status: "parked" } });
+    expect(findGaps(g)).toEqual([]);
+  });
+
+  it("EV-02: a mechanic that is not parked and has no surface still shows, in ID order", () => {
+    const g = graphOf({
+      "MEC-004": { type: "mechanic", status: "answered" },
+      "MEC-003": { type: "mechanic", status: "decided" },
+      "MEC-002": { type: "mechanic", status: "proposed" },
+      "MEC-001": { type: "mechanic", status: "open" },
+      "MEC-005": { type: "mechanic", status: "parked" },
+    });
+    expect(surfaceIds(g)).toEqual(["MEC-001", "MEC-002", "MEC-003", "MEC-004"]);
+  });
+
+  it("EV-03: parked is skipped in every release", () => {
+    const g = graphOf({
+      "MEC-001": { type: "mechanic", status: "parked", release: "1.0" },
+      "MEC-002": { type: "mechanic", status: "parked", release: "1.1" },
+      "MEC-003": { type: "mechanic", status: "parked", release: "1.2" },
+      "MEC-004": { type: "mechanic", status: "open", release: "1.1" },
+    });
+    const gaps = findGaps(g);
+    expect(gaps.map((x) => x.id)).toEqual(["MEC-004"]);
+    expect(gaps[0]?.release).toBe("1.1");
+  });
+
+  it("EV-04b: the other rules report as before next to a parked mechanic", () => {
+    const g = graphOf({
+      "MEC-001": { type: "mechanic", status: "parked" },
+      "Q-001": { type: "question" },
+      "AREA-001": { type: "area" },
+      "DEC-001": { type: "decision", status: "decided" },
+      "OPT-001": { type: "option", links: [["conflicts", "OPT-002"]] },
+      "OPT-002": { type: "option" },
+    });
+    const by = (rule: string) =>
+      findGaps(g)
+        .filter((x) => x.rule === rule)
+        .map((x) => x.id);
+    expect(by("open-question")).toEqual(["Q-001"]);
+    expect(by("area-undecided")).toEqual(["AREA-001"]);
+    expect(by("no-deliverable")).toEqual(["DEC-001"]);
+    expect(by("conflict-unparked")).toEqual(["OPT-001"]);
+    expect(by("mechanic-surface")).toEqual([]);
+  });
+
+  it("EV-11: gaps.ts imports nothing from node", () => {
+    const head = readFileSync(new URL("./gaps.ts", import.meta.url), "utf8")
+      .split("\n")
+      .slice(0, 20)
+      .join("\n");
+    expect(head).not.toContain("node:");
   });
 });

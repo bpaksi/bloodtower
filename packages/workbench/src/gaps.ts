@@ -149,7 +149,9 @@ export function findGaps(graph: Graph): Gap[] {
     }
   }
   for (const c of cards) {
-    if (c.type === "mechanic" && !surface.has(c.id)) gaps.push(gap(c, "mechanic-surface"));
+    if (c.type === "mechanic" && c.status !== "parked" && !surface.has(c.id)) {
+      gaps.push(gap(c, "mechanic-surface"));
+    }
   }
 
   const pairs = new Set<string>();
