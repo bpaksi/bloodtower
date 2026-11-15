@@ -96,7 +96,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 ## Assumptions surfaced
 
-- The card's "one virtue line" is the pack's `ability` → decided (Bob, 2026-11-14, adopted); EV-11.
+- The card's "one virtue line" is still the pack's `ability` field (Bob, 2026-11-14, adopted; EV-11). DEC-936: in the base pack that field becomes the class's two intrinsic virtue names; Copy rows 7a–7l are the one-line descriptions, keyed on the virtue name. EV-11's test-pack words ("Duel", "Heal") are unaffected.
 - "Another iPad is waiting for a hero" is not built in 1.0 → decided (Bob, 2026-11-14, adopted); EV-12.
 - "Picked" and "Open" stay → decided (Bob, 2026-11-14, adopted); Loremaster kept both words in step 45; EV-02.
 - Class names come from the pack `role` and are worded by Loremaster (step 45, Copy row 4) → none.

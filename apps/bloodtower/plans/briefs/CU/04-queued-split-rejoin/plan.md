@@ -40,7 +40,7 @@ Cutover: Y
 
 - The daily `regroup` phase prompt (`regroup-split--`, `regroup-join--`, `regroup-done` offers on the happy path) dies; the phase survives only to apply a queued change.
 - The disabled "C3+" state of the gear's Split party row dies.
-- `REGROUP_PROMPT` ("A new day. Stay together, or split up?") on `CoreDeviceScreen.tsx` is removed from the happy path. Its copy slot is the Loremaster's (step 45); do not write story copy.
+- `REGROUP_PROMPT` ("A new day. Stay together, or split up?") on `CoreDeviceScreen.tsx` is removed from the happy path. Loremaster signs it off in Copy (Removed strings); there is no replacement prompt.
 
 ## Survival invariants
 
@@ -57,7 +57,8 @@ Cutover: Y
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-11, EV-21 … EV-24 and EV-25 … EV-29 all pass (verifier table on PR).
-- Not required: the P-008 tuning run (parked, 1.1); the exact Loremaster copy for the day-start card and the gear panel (`[COPY: ...]` slots, step 45).
+- Copy text: the Copy table below (step 45); EV-09 and EV-10 check it.
+- Not required: the P-008 tuning run (parked, 1.1).
 
 ## AREA / DEC checklist
 
@@ -65,6 +66,33 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-640 (Regroup at day start; the daily step is superseded by PT-18), DEC-148, DEC-821, DEC-079 (the shift is the modifier slot), DEC-615, DEC-684: read; closed before coding.
 - [ ] MEC-034 .38 reworded by step 43 to "a split or join was queued"; closed before coding.
 - [ ] Open questions below answered; closed before coding.
+- [ ] Loremaster Copy table (step 45) holds the strings named in the mockup; closed before coding. Filled 2026-11-15; `split-party-none` is proposed only (the code is not edited in this docs PR).
+
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `gear.item.split-party` | Split party | locked C2 feature 04 (gear item 4, Bob approved 2026-10-31); the label while the party is together. Unchanged |
+| 2 | `gear.item.rejoin-party` | Rejoin party | locked C2 feature 04; the same item's label while two groups share a space (`partyIsSplit`). Unchanged |
+| 3 | `split-party-help` | Pick who splits off, or who rejoins others on the same space. It takes effect at the start of the next day. Pick the other action for the same hero to cancel. | new - Loremaster. The help line on the gear panel (mockup `#gear-split`). Covers both titles, Split party and Rejoin party. Says the three rules: pick a hero, next day start (DEC-926, DEC-640), an opposite pick cancels (Q4.2). Only valid picks are listed, so the line does not mention group size |
+| 4 | `button.split-off` | Split {hero} off | main (`CoreDeviceScreen.tsx`, mockup `#gear-split`); Loremaster confirms. `{hero}` is the one hero who would leave their group |
+| 5 | `button.rejoin` | Rejoin {hero} | main (`CoreDeviceScreen.tsx`); Loremaster confirms. `{hero}` is the one hero whose group would merge with the older group on the same space (DEC-148) |
+| 6 | `button.back` | Back | main (the panel's Back, `data-gear-back`); unchanged. Closes the panel; the queue is kept |
+| 7 | `queued-confirm` | Queued: takes effect at the start of the next day. | new - Loremaster. Refines the mockup's sample "Queued: takes effect at the next day." The note stays on the panel even when the queue is empty, so it reads as a heading, not as if something is already queued |
+| 8 | `board.day` | Day {N} | mockup `#day-start` and `DayPanels.tsx`; unchanged |
+| 9 | `board.group-line` | Group {N}: {heroes} | mockup `#day-start` and `DayPanels.tsx`; `{heroes}` is the comma-separated names of that group's heroes. Unchanged. "Group" names a travelling set; it does not count the party |
+| 10 | `day-start-groups` | This is how the party travels today. | new - Loremaster. The one line under the groups on the 4 s card (EV-07, EV-10). Shown only when a queued change just applied; never a question (Q4.1). Works for a split or a rejoin; no hunter count |
+| 11 | `split-party-none` | No hero can split off or rejoin now. | new - Loremaster. Reason line for the greyed gear item when the table is in a game but no pick is on offer (no hero in a group of 2 or more, and no two groups share a space). Same short style as the gear's other reasons ("Only in a game.", "Only with the tower."). Proposed only: this docs PR does not edit `gearMenu.ts`; the string ships with the next build that touches that file |
+
+### Removed strings
+
+The daily Regroup prompt is cut (PT-18, DEC-926, Cutover). Loremaster confirms it is not replaced: the groups card is display only and is never a question.
+
+| # | Slot or id | Removed text | Where it lived | Sign-off |
+|---|------------|--------------|----------------|----------|
+| R1 | `REGROUP_PROMPT` / C3/11 `[COPY: regroup]` | A new day. Stay together, or split up? | iPad and board at day start whenever two heroes shared a space | removed by CU/04 (PT-18, DEC-926); Loremaster, 2026-11-15, no replacement line |
 
 ## Rulings (Bob, 2026-11-14, adopted)
 

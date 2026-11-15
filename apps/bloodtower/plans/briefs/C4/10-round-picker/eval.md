@@ -82,7 +82,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: PT-20 (Bob, 2026-11-14, adopted): a seat silent for 30 s gives every other iPad of the acting group, the iPads of sat-out heroes included, "Pick for <hero>", only for standing heroes who have not picked.
 - Method: playwright
 - How: `c4-round.spec.ts`, (fake clock) 4 iPads A, B, C, D: D's hero sits out at 0 HP (its iPad shows "You are sitting out this battle. Watch the board."); A and B pick; C does not; read each iPad at 29.9 s and at 30.0 s.
-- Pass evidence: at 29.9 s no Pick for button anywhere; at 30.0 s A, B and D each show one button `[data-pick-for]` reading `[COPY: Pick for {hero}]` with C's hero name, and no button for A, B or D's hero; C's iPad shows none; D's iPad still shows the sitting-out line with the button; the board still reads "Waiting on: {C's hero}." (Copy table: board.waiting).
+- Pass evidence: at 29.9 s no Pick for button anywhere; at 30.0 s A, B and D each show one button `[data-pick-for]` reading the Copy table's `button.pick-for` with C's hero name, and no button for A, B or D's hero; C's iPad shows none; D's iPad still shows the sitting-out line with the button; the board still reads "Waiting on: {C's hero}." (Copy table: board.waiting). The Copy table's `ipad.pick-for.note` sits with the button.
 - Fails if: the button shows early, on C's own iPad, is missing from the sat-out hero's iPad, is offered for a hero who picked or sits out, has the wrong name, or the board stops naming C.
 
 ### EV-14 — Tapping it picks Guard for that hero (PT-20)
@@ -160,13 +160,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## Assumptions surfaced
 
 - Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
-- PT-20 (picker side): the offer is a button, not a gear item or a dialog; its words are Loremaster's slot (`[COPY: Pick for {hero}]`), taken from the ruling's "Pick for <hero>".
+- PT-20 (picker side): the offer is a button, not a gear item or a dialog; its words are the Copy table's `button.pick-for` ("Pick for {hero}"), taken from the ruling's "Pick for <hero>".
 - The round engine, the 30 s value and the Guard default are C4/02; this brief only shows and sends the press.
 
 ## OPEN questions
 
 - Resolved Q-C4-16 **[Bob taste call]**: Round actions on the iPads (DEC-129): all at once or in turn? Options: (a) all at once; the board ticks each hero who has picked, and the round runs when all have; (b) in turn order, one iPad at a time. Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
 - Resolved Q-C4-11 **[Bob taste call]**: Does a battle round have a timer on the iPads? Options: (a) no timer; the round waits for every present hero; (b) 30 seconds, then a missing pick becomes a normal attack (DEC-129). Gamewright pick: (a) (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET).
-- OPEN (PT-20; Loremaster to confirm): does the button say what it sets (Guard, or an attack)? A Loremaster call (step 45).
+- ANSWERED (PT-20; Loremaster, 2026-11-15, step 45): yes, a short note is wanted. Copy table `ipad.pick-for.note`: "Sets Guard, or a normal attack if they cannot Guard."
 - ANSWERED (PT-20, Bob, 2026-11-14, adopted): a sat-out hero's iPad shows Pick for too, for standing heroes who have not picked (EV-13); round pick only (EV-21).
 - ANSWERED (PT-20, Bob, 2026-11-14, adopted): a hero without a guard virtue gets a normal attack (EV-14, EV-20).
