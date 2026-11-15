@@ -64,7 +64,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-408: closed before coding (`decided`).
 - [ ] DEC-114: closed before coding (`decided`).
 - [ ] DEC-196: closed before coding (`decided`).
-- [ ] Rulings Q7.1 to Q7.4 below written into the step-43 DEC; closed before coding. Gamewright confirms the 1.0 deck's virtue list from C3-06 before coding (Q7.1).
+- [ ] Rulings Q7.1 to Q7.4 below written into the step-43 DEC; closed before coding. The 1.0 deck's virtue list is confirmed by DEC-934 (Gamewright, 2026-11-15), closed.
 
 ## Copy
 
@@ -84,7 +84,7 @@ Exact player-facing text is Loremaster's, step 45. A build fills every `[COPY: .
 
 ## Rulings (Bob, 2026-11-14, adopted)
 
-- Q7.1 Bob, 2026-11-14, adopted: build the virtue choice list generic; test it with Infused (DEC-406, asks for a building). Flagged for Gamewright: confirm the 1.0 deck's list of choice-asking virtues from C3-06.
+- Q7.1 Bob, 2026-11-14, adopted: build the virtue choice list generic; test it with Infused (DEC-406, asks for a building). Gamewright, 2026-11-15 (DEC-934): the 1.0 deck is the 8 pool tiles (DEC-581) and Infused is the only turn-start choice; the list stays generic.
 - Q7.2 Bob, 2026-11-14, adopted: the use-item host action is built here, behind the existing gear item "Use a potion or item". The host Split goes to CU/04. Queue step 12 (#441) shrinks to the day-loop effects wait and the test seed hook (see catchup/README.md row 12).
 - Q7.3 Bob, 2026-11-14, adopted: UI-013 opens from "Use a potion or item"; "Current party" keeps HP, gold and the item count.
 - Q7.4 Bob, 2026-11-14, adopted: with no tower the spin shows the result at once on the board and plays the coin sound on the board speakers (DEC-201, DEC-903). With the tower the chase command is sent only on the press.
