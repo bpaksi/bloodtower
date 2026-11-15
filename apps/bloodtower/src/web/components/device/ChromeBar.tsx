@@ -221,11 +221,23 @@ export function ChromeBar({
               Back
             </button>
           ) : (
-            <button type="button" className="bt-ghost" data-action="back" disabled>
+            <button
+              type="button"
+              className="bt-ghost"
+              data-action="back"
+              aria-disabled="true"
+              disabled
+            >
               Back
             </button>
           )}
-          <button type="button" className="bt-ghost" data-action="replay" disabled>
+          <button
+            type="button"
+            className="bt-ghost"
+            data-action="replay"
+            aria-disabled="true"
+            disabled
+          >
             Replay
           </button>
         </span>
