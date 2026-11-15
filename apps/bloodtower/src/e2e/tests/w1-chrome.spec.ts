@@ -67,6 +67,103 @@ const expectMuted = async (page: Page) => {
   expect(media.playing).toBe(0);
 };
 
+const CENTRE_TOLERANCE = 8;
+const END_GAP_TOLERANCE = 12;
+const VIEWPORTS = [
+  { width: 768, height: 1024 },
+  { width: 1024, height: 768 },
+] as const;
+
+/** Back and Replay sit in the middle of the bar as a pair, whatever the ends weigh. */
+const expectCentred = async (page: Page) => {
+  const bar = page.locator("[data-bottom-bar]");
+  const view = page.viewportSize();
+  if (!view) throw new Error("No viewport.");
+  const help = await box(bar.locator('[data-action="help"]'));
+  const back = await box(bar.locator('[data-action="back"]'));
+  const replay = await box(bar.locator('[data-action="replay"]'));
+  const menu = await box(bar.locator('[data-action="menu"]'));
+  const pairCentre = (back.x + replay.x + replay.width) / 2;
+  expect(Math.abs(pairCentre - view.width / 2)).toBeLessThanOrEqual(CENTRE_TOLERANCE);
+  const leftGap = back.x - (help.x + help.width);
+  const rightGap = menu.x - (replay.x + replay.width);
+  expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(END_GAP_TOLERANCE);
+};
+
+const expectReplayGreyed = async (page: Page) => {
+  const replay = page.locator('[data-bottom-bar] [data-action="replay"]');
+  await expect(replay).toBeVisible();
+  await expect(replay).toBeDisabled();
+  await expect(replay).toHaveAttribute("aria-disabled", "true");
+};
+
+const countFrames = async (page: Page) => {
+  await page.evaluate(() => {
+    const win = window as unknown as {
+      __btSessionSocket?: WebSocket & { __counted?: boolean };
+      __btFrames?: number;
+    };
+    const socket = win.__btSessionSocket;
+    if (!socket || socket.__counted) return;
+    const send = socket.send.bind(socket);
+    win.__btFrames = 0;
+    socket.send = (data) => {
+      win.__btFrames = (win.__btFrames ?? 0) + 1;
+      return send(data);
+    };
+    socket.__counted = true;
+  });
+};
+
+const frameCount = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __btFrames?: number }).__btFrames ?? 0);
+
+/** A forced press on Replay sends no frame, and no view ever offers a Replay action. */
+const expectReplayInert = async (page: Page, hosted: boolean) => {
+  await expectReplayGreyed(page);
+  const replay = page.locator('[data-bottom-bar] [data-action="replay"]');
+  if (!hosted) {
+    await replay.click({ force: true });
+    await expectReplayGreyed(page);
+    return;
+  }
+  await countFrames(page);
+  const before = await frameCount(page);
+  const screen = await deviceMain(page).getAttribute("data-screen");
+  await replay.click({ force: true });
+  await page.waitForTimeout(150);
+  expect(await frameCount(page)).toBe(before);
+  await expect(deviceMain(page)).toHaveAttribute("data-screen", screen ?? "");
+  const offered = await page.evaluate(
+    () =>
+      (
+        window as unknown as {
+          __btLastDeviceView?: { actions: { actionId: string }[] };
+        }
+      ).__btLastDeviceView?.actions.some((action) => action.actionId === "replay") ?? false,
+  );
+  expect(offered).toBe(false);
+  await expectReplayGreyed(page);
+};
+
+/** Order, centre, and the greyed controls, in one place for every screen. */
+const expectFullBar = async (page: Page, hosted: boolean) => {
+  await expectBar(page, true);
+  await expectCentred(page);
+  const bar = page.locator("[data-bottom-bar]");
+  await expect(bar.locator('[data-action="back"]')).toBeVisible();
+  await expect(bar.locator('[data-action="replay"]')).toBeVisible();
+  await expectReplayInert(page, hosted);
+};
+
+const barBox = async (page: Page) => box(page.locator("[data-bottom-bar]"));
+
+const expectSameBox = (a: { x: number; y: number; width: number; height: number }, b: typeof a) => {
+  for (const key of ["x", "y", "width", "height"] as const) {
+    expect(Math.abs(a[key] - b[key])).toBeLessThanOrEqual(1);
+  }
+};
+
 const toClaim = async (page: Page, joinCode: string, ipad: boolean) => {
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
@@ -140,6 +237,134 @@ test("W1 /join with no code shows the bar, a disabled Back and Replay, and the g
   await menu.click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Join" })).toBeVisible();
+});
+
+test("CU/06 EV-02 EV-03 EV-05 EV-08 /join keeps the order, the centre and the greyed pair", async ({
+  page,
+}, testInfo) => {
+  skipUnlessIpad(testInfo);
+  for (const size of VIEWPORTS) {
+    await page.setViewportSize(size);
+    await page.goto("/join");
+    await expect(page.getByRole("heading", { name: "Join" })).toBeVisible();
+    await expectFullBar(page, false);
+    const bar = page.locator("[data-bottom-bar]");
+    await expect(bar.locator('[data-action="back"]')).toBeDisabled();
+    const closed = await barBox(page);
+
+    await bar.locator('[data-action="menu"]').click();
+    await expect(page.locator("[data-menu]")).toHaveCount(1);
+    await expect(page.locator('[data-menu] [data-action="back"]')).toHaveCount(0);
+    await expect(page.locator('[data-menu] [data-action="replay"]')).toHaveCount(0);
+    await expectFullBar(page, false);
+    expectSameBox(await barBox(page), closed);
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-menu]")).toHaveCount(0);
+  }
+});
+
+test("CU/06 EV-01 EV-02 EV-03 EV-05 EV-08 the walk keeps the bar still while an offer arrives", async ({
+  browser,
+}, testInfo) => {
+  skipUnlessIpad(testInfo);
+  test.setTimeout(180_000);
+  for (const size of VIEWPORTS) {
+    const session = await startAcceptanceHost(testInfo, { seed: `cu06-walk-${size.width}` });
+    const context = await browser.newContext({
+      baseURL: session.baseURL,
+      viewport: size,
+      hasTouch: true,
+    });
+    const page = await context.newPage();
+    try {
+      await installSessionSocketHook(page);
+      await page.goto("/join");
+      await expectFullBar(page, false);
+      const noCode = await barBox(page);
+      await expect(page.locator('[data-bottom-bar] [data-action="back"]')).toBeDisabled();
+
+      await page.goto(`/join?code=${session.host.joinCode}`);
+      await expect(page).toHaveURL(/\/device/);
+      await expectFullBar(page, true);
+      await enterWithoutTower(page);
+      let sawBackOffer = false;
+      const walk = [
+        ["pick-story", `continue-pick-story-${STORY_ID}`],
+        ["game-settings", "continue-game-settings"],
+      ] as const;
+      const checkScreen = async () => {
+        await expectFullBar(page, true);
+        expectSameBox(await barBox(page), noCode);
+        const back = page.locator('[data-bottom-bar] [data-action="back"]');
+        if (await back.isEnabled()) sawBackOffer = true;
+      };
+      for (const [screen, promptId] of walk) {
+        await expect(deviceMain(page)).toHaveAttribute("data-screen", screen);
+        await checkScreen();
+        await clickAct(page, "continue", promptId);
+      }
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
+      await checkScreen();
+      expect(sawBackOffer).toBe(true);
+
+      const bar = page.locator("[data-bottom-bar]");
+      await bar.locator('[data-action="menu"]').click();
+      await expect(page.locator("[data-menu]")).toHaveCount(1);
+      await expect(page.locator('[data-menu] [data-action="back"]')).toHaveCount(0);
+      await expect(page.locator('[data-menu] [data-action="replay"]')).toHaveCount(0);
+      await expectFullBar(page, true);
+      await expect(bar.locator('[data-action="back"]')).toBeEnabled();
+      await page.keyboard.press("Escape");
+      await expect(page.locator("[data-menu]")).toHaveCount(0);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  }
+});
+
+test("CU/06 EV-07 Continue after a host restart keeps the order and the greyed Replay", async ({
+  browser,
+}, testInfo) => {
+  skipUnlessIpad(testInfo);
+  test.setTimeout(120_000);
+  const size = VIEWPORTS[0];
+  const session = await startAcceptanceHost(testInfo, { seed: "cu06-survive" });
+  const { databasePath } = session;
+  const context = await browser.newContext({
+    baseURL: session.baseURL,
+    viewport: size,
+    hasTouch: true,
+  });
+  const page = await context.newPage();
+  try {
+    await toClaim(page, session.host.joinCode, true);
+    await holdHeroesFromTest(page, ["hero-a"]);
+  } finally {
+    await context.close();
+    await session.host.close();
+  }
+
+  const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "cu06-survive" });
+  const context2 = await browser.newContext({
+    baseURL: restarted.baseURL,
+    viewport: size,
+    hasTouch: true,
+  });
+  const again = await context2.newPage();
+  try {
+    await installSessionSocketHook(again);
+    await again.goto(`/join?code=${restarted.host.joinCode}`);
+    await expect(deviceMain(again)).toHaveAttribute("data-screen", "claim-heroes");
+    await expect(again.locator("[data-menu]")).toHaveCount(0);
+    await expectFullBar(again, true);
+    const back = again.locator('[data-bottom-bar] [data-action="back"]');
+    await expect(back).toBeVisible();
+    await expect(again.locator('[data-bottom-bar] [data-action="replay"]')).toBeDisabled();
+  } finally {
+    await context2.close();
+    await restarted.host.close();
+  }
 });
 
 test("W1 the bar, Menu dialog, pinned Continue and no page scroll on claim-heroes", async ({
