@@ -23,7 +23,7 @@ Keep this a checklist; do not write a second design doc.
 
 DEC-571, never built (PT-16): the first battle, building visit, event, skull drop and day's end in a game each open with a one-sentence hint on a Scroll (UI-035) on the Story board, once per game, spoken by the narrator (Charon; LQ-3 option A, Bob, 2026-11-14, adopted; Loremaster to confirm), auto-advancing after 4 seconds. During an art hold the hint is a caption under the art, not a Scroll. A "Hints" toggle on Game settings (SCR-008), default on, switches them all off for the game. Look up (DEC-229) gains a Rules group with one page per loop, and its "A sample card" placeholder is dropped. On main today: no hint code or toggle exists; the gear's Look up holds two placeholders ("Rules of the tower", "A sample card", `LOOKUP_CARDS` in `view.ts`); `settingLevels` shows at most four setting rows.
 
-All words are `[COPY: ...]` slots (see Copy). Gamewright writes no story copy.
+All words are in the Copy table (Loremaster, step 45, filled 2026-11-15). Gamewright writes no story copy.
 
 ## Cutover
 
@@ -49,25 +49,30 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Every player-facing string is a slot. Loremaster fills the exact text (step 45, no waiver) before the screen builds; a build shows that text, never the sample in mockup.html.
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
-| # | Slot | Where | Exact text |
-|---|------|-------|------------|
-| 1 | `hint.first-battle` | Scroll (or art-hold caption), first battle (narrator, one plain sentence) | [COPY: hint.first-battle] |
-| 2 | `hint.first-building` | Scroll, first building visit | [COPY: hint.first-building] |
-| 3 | `hint.first-event` | Scroll, first event | [COPY: hint.first-event] |
-| 4 | `hint.first-skull-drop` | Scroll, first skull drop | [COPY: hint.first-skull-drop] |
-| 5 | `hint.first-day-end` | Scroll, first day's end | [COPY: hint.first-day-end] |
-| 6 | `settings.hints.label` | Game settings row label (iPad) | [COPY: settings.hints.label] |
-| 7 | `settings.hints.on` | the "on" option | [COPY: settings.hints.on] |
-| 8 | `settings.hints.off` | the "off" option | [COPY: settings.hints.off] |
-| 9 | `lookup.rules.group` | Look up group heading | [COPY: lookup.rules.group] |
-| 10 | `lookup.rules.battle` (title and page) | Rules page, battle | [COPY: lookup.rules.battle] |
-| 11 | `lookup.rules.building` | Rules page, building visit | [COPY: lookup.rules.building] |
-| 12 | `lookup.rules.event` | Rules page, event | [COPY: lookup.rules.event] |
-| 13 | `lookup.rules.skull-drop` | Rules page, skull drop | [COPY: lookup.rules.skull-drop] |
-| 14 | `lookup.rules.day-end` | Rules page, day's end | [COPY: lookup.rules.day-end] |
-| 15 | `help.settings` | "?" help on Game settings, if the toggle changes its line | [COPY: help.settings] |
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `hint.first-battle` | A battle runs in rounds. Choose Fight or Retreat, then each hero picks one action. | new - Loremaster; narrator (Charon); LQ-3 A, Bob, 2026-11-14, adopted; Loremaster confirms. Gamewright ruled the narrator speaks the first-time hints. Audio plus caption: the caption equals the spoken text. Scroll on the board, or a caption under the art during an art hold; auto-advances after 4 s. First battle. Same rule as `help.round-picker` |
+| 2 | `hint.first-building` | Entering a building is free. Each choice inside costs one move. | new - Loremaster; narrator (Charon); LQ-3 A, Bob, 2026-11-14, adopted; Loremaster confirms. Gamewright ruled the narrator speaks the first-time hints. Audio plus caption: the caption equals the spoken text. Scroll on the board, or a caption under the art during an art hold; auto-advances after 4 s. First building visit (DEC-220, DEC-078) |
+| 3 | `hint.first-event` | Something happens where you stand. Hear it out, then choose how to answer. | new - Loremaster; narrator (Charon); LQ-3 A, Bob, 2026-11-14, adopted; Loremaster confirms. Gamewright ruled the narrator speaks the first-time hints. Audio plus caption: the caption equals the spoken text. Scroll on the board, or a caption under the art during an art hold; auto-advances after 4 s. First event |
+| 4 | `hint.first-skull-drop` | Each skull that falls shrinks a building's menu, and the fourth destroys it. | new - Loremaster; narrator (Charon); LQ-3 A, Bob, 2026-11-14, adopted; Loremaster confirms. Gamewright ruled the narrator speaks the first-time hints. Audio plus caption: the caption equals the spoken text. Scroll on the board, or a caption under the art during an art hold; auto-advances after 4 s. First skull drop (DEC-093) |
+| 5 | `hint.first-day-end` | The day ends when every turn is done. Night brings skulls, and the days left count down. | new - Loremaster; narrator (Charon); LQ-3 A, Bob, 2026-11-14, adopted; Loremaster confirms. Gamewright ruled the narrator speaks the first-time hints. Audio plus caption: the caption equals the spoken text. Scroll on the board, or a caption under the art during an art hold; auto-advances after 4 s. First day's end (DEC-686) |
+| 6 | `settings.hints.label` | Hints | Bob, 2026-11-14, adopted (the toggle is named "Hints" in this brief and DEC-571); Game settings row label, iPad and board |
+| 7 | `settings.hints.on` | On | new - Loremaster; the "on" option, selected by default |
+| 8 | `settings.hints.off` | Off | new - Loremaster; the "off" option |
+| 9 | `lookup.rules.group` | Rules | new - Loremaster; Look up group heading (DEC-229, DEC-571) |
+| 10a | `lookup.rules.battle` title | Battle | new - Loremaster; the row on the iPad and the page title on the board |
+| 10b | `lookup.rules.battle` page | A battle runs in rounds. Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. A foe you flee from stays and grows. A hero who falls to 0 hit points takes a corruption. A third corruption ends the game. | new - Loremaster; built from the locked `help.round-picker` (2026-10-31), DEC-016, DEC-119 and DEC-043. Board page, display only |
+| 11a | `lookup.rules.building` title | Building visit | new - Loremaster |
+| 11b | `lookup.rules.building` page | Entering a building is free, and so is leaving. Each choice inside costs one move. Each skull shrinks a building's menu, and the fourth destroys it. Cleanse takes a skull off. | new - Loremaster; DEC-220, DEC-078, DEC-093, DEC-377. Board page, display only |
+| 12a | `lookup.rules.event` title | Event | new - Loremaster |
+| 12b | `lookup.rules.event` page | An event stops you where you stand. Hear what happens, then choose how to answer. A hazard costs hit points. | new - Loremaster; a 1.0 hazard costs hit points only (Gamewright, confirmed; C3 12). Board page, display only |
+| 13a | `lookup.rules.skull-drop` title | Skull drop | new - Loremaster |
+| 13b | `lookup.rules.skull-drop` page | At night a skull may fall on a building. Each skull shrinks its menu, and the fourth destroys it. Four fallen buildings lose the game. Cleanse takes a skull off a building. | new - Loremaster; DEC-093, DEC-915, DEC-377. Board page, display only |
+| 14a | `lookup.rules.day-end` title | Day's end | new - Loremaster |
+| 14b | `lookup.rules.day-end` page | The day ends when every group has had its turn. Night effects play and a skull may fall. Each skull is a day: when the skulls run out, the game is lost. Cleanse buys a day back. | new - Loremaster; MEC-034, DEC-686 (the skull supply is the days left; Cleanse is +1 day). Board page, display only |
+| 15 | `help.settings` | Choose the game length and options for tonight's story. | locked 2026-10-31 (Loremaster), `story-settings` in the C2 feature 04 help table. The Hints toggle is one of the "options", so the line is unchanged |
 
 ## AREA / DEC checklist
 
@@ -78,7 +83,7 @@ Every player-facing string is a slot. Loremaster fills the exact text (step 45, 
 - [ ] SCR-008: closed before coding (`decided`; Game settings).
 - [ ] DEC-639: closed before coding (`decided`; the engine's settings come first).
 - [ ] Q-259: closed before coding (answered by DEC-571).
-- [ ] Copy table filled by Loremaster (step 45): closed before coding.
+- [ ] Copy table filled by Loremaster (step 45): closed before coding. Filled 2026-11-15, all 15 slots; no DRAFT rows.
 
 ## Decided (was OPEN)
 

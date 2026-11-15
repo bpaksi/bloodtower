@@ -57,25 +57,26 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text is Loremaster's, step 45. A build shows the locked rows below and fills every `[COPY: ...]` row from the final table, never from the mockup.
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
 | 1 | `pick.button` | Pick Hero A | locked: DEC-232 (Bob 2026-10-25); unchanged, iPad |
 | 2 | `pick.count` | N of N picked | locked: DEC-232; unchanged |
 | 3 | `pick.help` | Who this iPad speaks for at the table | locked: DEC-232; unchanged |
-| 4 | `card.class` | [COPY: class names, from the pack role] | Loremaster, step 45 |
-| 5 | `card.fight` | [COPY: label for the fight number {N}] | Loremaster, step 45 |
-| 6 | `card.hp` | [COPY: label for hit points {N}] | Loremaster, step 45 |
+| 4 | `card.class` | fighter: Fighter; healer: Healer; magic-user: Magic-user; scout: Scout; ranger: Ranger; scholar: Scholar; bard: Bard | new - Loremaster. One word per pack `role` (the six roles in `packs/base/pack.yaml`, plus bard, which `tuning.yaml` already lists). Capital first letter only; the hyphen in Magic-user is kept as in the mockup |
+| 5 | `card.fight` | Fight {N} | new - Loremaster. The fight number from `tuning.yaml` (`fight`) |
+| 6 | `card.hp` | Hit points {N} | new - Loremaster. The hit points from `tuning.yaml` (`hit_points`); "hit points" is the game's word everywhere |
+| 6a | `card.unavailable` | unavailable | screen-spec States ("A field not known reads unavailable, never 0"); used after the label, for example "Fight unavailable" |
 | 7 | `card.line` | the pack's `ability` word for the hero (for example "Duel") | decided: Bob, 2026-11-14, adopted |
-| 7a | `card.ability.<word>` | [COPY: one line per ability word, optional] | Loremaster, step 45; until filled the card shows the pack's `ability` as is |
-| 8 | `card.state.seated` | Picked / Open (kept from main) | decided: Bob, 2026-11-14, adopted; Loremaster may reword in step 45 |
+| 7a | `card.ability.<word>` | (none: the card shows the pack's `ability` word as is) | DRAFT - needs Gamewright. The row is optional. The pack's six words (Duel, Heal, Glyph, Disarm, Track, Lore) have no mechanic written on any card (the Scholar and its Lore were dropped by DEC-378), so Loremaster writes no line that could promise a rule. Question: what does each word do in 1.0? Loremaster then writes one plain line per word. Until then the card shows the word alone, as Bob adopted |
+| 8 | `card.state.seated` | Picked / Open | kept from main, not reworded: decided: Bob, 2026-11-14, adopted. "Picked" greys the card of a seated hero; "Open" is the free pool |
 
 ## Decided (was OPEN)
 
 - "One virtue line" is the pack's `ability`. Loremaster may give each ability word a line in the Copy table (row 7a). Bob, 2026-11-14, adopted.
 - "Another iPad is waiting for a hero" is NOT built in 1.0 (design-freeze section H omits it); step 43's DEC says so. Bob, 2026-11-14, adopted.
-- The card words "Picked" and "Open" stay; Loremaster may reword in step 45. Bob, 2026-11-14, adopted.
+- The card words "Picked" and "Open" stay; Loremaster kept both words in step 45 (Copy row 8). Bob, 2026-11-14, adopted.
 
 ## Eval approval
 
