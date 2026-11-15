@@ -1,6 +1,6 @@
 # C3 — The Ruined Keep: a full game, simple (build plan)
 
-**Status:** draft for Bob, 2026-10-31. Gamewright plans only and writes no code. Not yet at G0.
+**Status:** building. Bob approved the plan with its briefs on 2026-10-31 (lint-green; each brief's `approval.md` holds the row, and [1.0-milestones.md](1.0-milestones.md) records the batch). Features 01–07, 09, 11, 18 and 19 are merged; 08, 10 and 12–17 sit in the [catch-up queue](catchup/README.md) with their gates; G-C3 not yet run. This section is the record.
 **Source:** [1.0-milestones.md](1.0-milestones.md) (C3 row and "Unblocking", on PR #335's branch `docs/bloodtower-c2-plan`), the [C2 audit](../docs/audit/C2-audit.md)'s "Lines for the C3 plan" (same branch), the 1.0 scope (DEC-691 to DEC-697), The Ruined Keep (AREA-097, DEC-659 to DEC-667, DEC-672 to DEC-674), the probes P-001 to P-003 (AREA-096, AREA-098), the numbers pass (AREA-099, DEC-699 to DEC-703), the skull clock (DEC-686), the loops MEC-032 to MEC-037, MEC-072, MEC-077 and the screens SCR-014, SCR-018, SCR-019.
 **Goal:** a whole simple game of The Ruined Keep (AREA-097, the one 1.0 story, DEC-691) on pack v2: moving, events, the skull clock, corruption, chapters, buildings, plain scenes, win and loss, with the outcome and stats screens, on DEC-703's placeholder numbers (DEC-500).
 **Exit condition:** every feature's eval table is all-pass on its PR, and Bob signs off at G-C3: The Ruined Keep played to a win and to a loss. In C3, clearing chapter 1 counts as the win (Bob, 2026-10-31, Q-C3-01).
@@ -337,4 +337,17 @@ Gamewright proposals for the numbers, Bob approved 2026-10-31 (each tagged "(Bob
 
 ## Results
 
-- (none yet)
+- **Briefs (2026-10-31):** Bob approved every feature folder's evals in chat (10:27 AM proposal lines; merge approved 6:30 PM). The ten 2026-10-31 briefs are 01 to 09 and 11; each `approval.md` holds the row. Features 18 and 19 were approved later, when the build found C3-03 blocked (rows below).
+- **Feature 02, tuning file (2026-10-31, PR #350):** the base tuning file holds the DEC-703 numbers.
+- **Feature 01, pack v2 stories (2026-11-05, PR #373):** stories load from pack v2; the v1 loader is removed.
+- **Feature 04, day clock (2026-11-01, PR #352):** the day is the skull clock. Follow-up (2026-11-08, PR #391): the day clock is restored on Continue (EV-19).
+- **Feature 06, building picks (2026-11-06, PR #378):** building picks in the encounter loop.
+- **Features 05 and 07, event loop and quests/plain scenes (2026-11-06, PR #386):** landed in the runner's catch-up merge of job `j-20261106-0bba`; no dedicated PR titles the features, so this row is the record. The event and quest loop code first appears there in its C3 shape (the loops themselves date to C1 step 8, PR #205).
+- **Feature 09, chapter loop (2026-11-12, PR #393):** the chapter loop (queue step 01).
+- **Feature 11, day on the board (2026-11-12, PR #384):** the day loop on the board (queue step 02). Amended since by the playtest fixes: CU/03 no-tower skull drop (PR #522) and CU/04 queued Split and Rejoin with no daily Regroup prompt (PR #523). Its follow-up — the day-loop effects wait and test seed hook — is queue order 22, still blocked with no brief.
+- **Feature 18, pack v2 scene data (2026-11-14, PR #514):** quest places, plain scenes, items and endings in pack v2 (queue step 63). Found blocking C3-03 on 2026-11-13; Bob approved the new schema step in chat 2026-11-13 6:34 PM ET after choosing "new schema step first".
+- **Feature 19, quest type and markers (2026-11-14, PR #517):** `quest_type` optional, quest markers per chapter, one quest per space (queue step 64). Bob approved 2026-11-14 7:17 AM ET after ruling `quest_type` may be omitted. Left three things blocking C3-03, recorded in its brief.
+- **Feature 03, The Ruined Keep pack (2026-11-14, PR #518):** the one 1.0 story as a pack v2 door: quests, scenes, items, places (queue step 05).
+- **Feature 08, corruption — not merged:** its gate correction (bounded Touches repair, unresolved items recorded) landed 2026-11-08 as PR #395. The build waits on Bob's re-approval of the amended eval (EV-11 to EV-13); queue order 23.
+- **Features 10 and 12 to 17 — not merged:** game end (queue order 12) and the screens (orders 13 to 17) wait in the catch-up queue behind their gates, mostly the Copy table (step 45, landed 2026-11-15 as PRs #528 to #531) and brief re-approvals.
+- **G-C3:** not yet run. Exit remains: The Ruined Keep played to a win and to a loss, clearing chapter 1 counting as the win (Q-C3-01).
