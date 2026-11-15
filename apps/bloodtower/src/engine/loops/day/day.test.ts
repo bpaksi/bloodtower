@@ -1,10 +1,11 @@
 import { eventRng } from "@dark-tower/rng";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import { projectDayClock } from "../../views/day.ts";
 import { citadelForKingdom } from "../chapter/board.ts";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
 import { groupTurnLoop, handleGroupTurnPress } from "../group-turn/loop.ts";
+import { shellEffectSchema } from "../session/effects.ts";
 import { enterConnectEvents } from "../session/enterKit.ts";
 import type { ShellEvent } from "../session/events.ts";
 import { TEST_STORY } from "../session/pack.ts";
@@ -17,8 +18,10 @@ import {
 } from "../session/shellRef.ts";
 import { initialShellState, type ShellState } from "../session/state.ts";
 import { stepShell } from "../session/stepShell.ts";
+import { projectShellView } from "../session/view.ts";
 import {
   armDayResume,
+  captureClock,
   captureDayResume,
   clockLog,
   clockSnapshot,
@@ -29,6 +32,7 @@ import {
   placeTargets,
   rebuildClock,
   recordBuildingDrop,
+  restoreClock,
   setBuildingSkulls,
   setHeroSheet,
 } from "./clock.ts";
@@ -40,6 +44,7 @@ import {
   applySkullRecord,
   offerSkullPlacement,
   parseSkullRecordPrompt,
+  simulateSkullDrop,
   skullRecordPromptId,
 } from "./skull.ts";
 
@@ -196,6 +201,7 @@ type Harness = {
   offers: Offer[];
   child: string | null;
   parent: { groupId?: string } | undefined;
+  effects: unknown[];
 };
 
 const idleLocal = (): DayLocal => ({
@@ -224,7 +230,15 @@ const boot = (seed: string, heroes: string[], tower: boolean): Harness => {
   shell.seed = seed;
   shell.towerLinked = tower;
   bindShellState(shell);
-  return { play, shell, local: idleLocal(), offers: [], child: null, parent: undefined };
+  return {
+    play,
+    shell,
+    local: idleLocal(),
+    offers: [],
+    child: null,
+    parent: undefined,
+    effects: [],
+  };
 };
 
 const closeHarness = (): void => {
@@ -237,7 +251,7 @@ const dayCtx = (h: Harness) => ({
   loopId: "day",
   seed: h.shell.seed,
   eventSeq: 1,
-  effects: [],
+  effects: h.effects as never[],
   tracePhase: () => {},
   recordEnd: () => {},
   offerPrompt: (promptId: string, actionId: string) => {
@@ -853,6 +867,266 @@ describe("C3 04 day clock", () => {
       expect(rebuilt).toEqual(live);
       expect(rebuilt.supply).toBeLessThan(tuning.supply);
       expect(rebuilt.skulls).toEqual(live.skulls);
+    } finally {
+      closeHarness();
+    }
+  });
+});
+
+/** The die faces a test hands the draw, in order; `draws` counts how many were taken. */
+const faces = (...order: Array<"N" | "E" | "S" | "W">) => {
+  let draws = 0;
+  return {
+    draw: () => {
+      const next = order[draws];
+      draws += 1;
+      if (!next) throw new Error("The test stream ran out of kingdom draws.");
+      return next;
+    },
+    get draws() {
+      return draws;
+    },
+  };
+};
+
+const inKingdom = (h: Harness, kingdom: string): string[] =>
+  h.play.content.board.spaces
+    .filter((space) => space.building && space.kingdom === kingdom)
+    .map((space) => space.id);
+
+const setCounts = (h: Harness, ids: string[], counts: number[]): void => {
+  ids.forEach((id, index) => {
+    setBuildingSkulls(h.play, id, counts[index] ?? 0);
+  });
+};
+
+const landing = (
+  seed: string,
+  setup: (h: Harness) => void,
+  order: Array<"N" | "E" | "S" | "W">,
+) => {
+  const h = boot(seed, ["a", "b"], false);
+  try {
+    setup(h);
+    const stream = faces(...order);
+    const result = simulateSkullDrop(seed, stream.draw);
+    return { result, draws: stream.draws, skulls: { ...ensureClock(h.play).skulls }, h };
+  } finally {
+    closeHarness();
+  }
+};
+
+const seeds = (count: number): string[] => Array.from({ length: count }, (_, i) => `cu03-${i}`);
+
+describe("CU/03 no-tower skull drop (PT-07)", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("EV-01 sim drop picks fewest skulls", () => {
+    for (const seed of seeds(30)) {
+      const row = landing(seed, (h) => setCounts(h, inKingdom(h, "N"), [2, 0, 1, 3]), ["N"]);
+      const ids = ["N-egans-end", "N-dayside", "N-upper-ice-fangs", "N-radiant-mountains"];
+      expect(row.result).toEqual({ landed: true, spaceId: ids[1] });
+      expect(ids.map((id) => row.skulls[id] ?? 0)).toEqual([2, 1, 1, 3]);
+    }
+  });
+
+  it("EV-02 ties go to the seeded pick", () => {
+    const ids = ["N-egans-end", "N-dayside", "N-upper-ice-fangs"];
+    const seen = new Set<string>();
+    for (const seed of seeds(60)) {
+      const row = landing(seed, (h) => setCounts(h, inKingdom(h, "N"), [0, 0, 0, 2]), ["N"]);
+      if (!row.result.landed) throw new Error("A tied drop must land.");
+      expect(ids).toContain(row.result.spaceId);
+      seen.add(row.result.spaceId);
+    }
+    expect(seen.size).toBe(3);
+    const again = (): unknown =>
+      landing("cu03-S", (h) => setCounts(h, inKingdom(h, "N"), [0, 0, 0, 2]), ["N"]).result;
+    expect(again()).toEqual(again());
+  });
+
+  it("EV-03 counts are read again between skulls of one night", () => {
+    const h = boot("ev-03", ["a", "b", "c", "d"], false);
+    try {
+      const tuning = {
+        skulls: {
+          drops_a_night: { heroes_3_to_4: { each_night: 3 } },
+          simulated_drop: { kingdom_die: "1d1" },
+        },
+      };
+      configureDayClock(h.play, { tuning, supply: 24 });
+      const north = inKingdom(h, "N");
+      // citadel last: it is fallen, the other three stand with one skull each.
+      setCounts(h, north, [1, 1, 1, 4]);
+      runDay(h);
+      const drops = ensureClock(h.play).nightDrops.map((drop) => drop.spaceId);
+      expect(drops).toHaveLength(3);
+      expect(new Set(drops).size).toBe(3);
+      const counts = ensureClock(h.play).skulls;
+      expect(north.slice(0, 3).map((id) => counts[id])).toEqual([2, 2, 2]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-04 a fallen building never takes a skull", () => {
+    for (const seed of seeds(20)) {
+      const row = landing(seed, (h) => setCounts(h, inKingdom(h, "N"), [4, 3, 4, 4]), ["N"]);
+      expect(row.result).toEqual({ landed: true, spaceId: "N-dayside" });
+      expect(row.skulls["N-egans-end"]).toBe(4);
+    }
+  });
+
+  it("EV-05 an empty kingdom rerolls once", () => {
+    for (const seed of seeds(10)) {
+      const h = boot(seed, ["a", "b"], false);
+      try {
+        setCounts(h, inKingdom(h, "N"), [4, 4, 4, 4]);
+        const first = faces("N", "E");
+        const result = simulateSkullDrop(seed, first.draw);
+        expect(result.landed).toBe(true);
+        if (!result.landed) continue;
+        expect(h.play.content.board.spaceById.get(result.spaceId)?.kingdom).toBe("E");
+        expect(first.draws).toBe(2);
+        const next = faces("S");
+        expect(simulateSkullDrop(seed, next.draw).landed).toBe(true);
+        expect(next.draws).toBe(1);
+      } finally {
+        closeHarness();
+      }
+    }
+  });
+
+  it("EV-15 a rerolled kingdom that is also empty drops no skull and logs one error", () => {
+    for (const seed of seeds(20)) {
+      const h = boot(seed, ["a", "b", "c", "d"], false);
+      try {
+        setCounts(h, inKingdom(h, "N"), [4, 4, 4, 4]);
+        setCounts(h, inKingdom(h, "E"), [4, 4, 4, 4]);
+        const supply = ensureClock(h.play).supply;
+        const before = { ...ensureClock(h.play).skulls };
+        const stream = faces("N", "E");
+        expect(simulateSkullDrop(seed, stream.draw)).toEqual({
+          landed: false,
+          reason: "no-building",
+        });
+        expect(stream.draws).toBe(2);
+        expect(ensureClock(h.play).supply).toBe(supply);
+        expect(ensureClock(h.play).skulls).toEqual(before);
+        const next = faces("S");
+        expect(simulateSkullDrop(seed, next.draw).landed).toBe(true);
+        expect(next.draws).toBe(1);
+      } finally {
+        closeHarness();
+      }
+    }
+  });
+
+  it("EV-15 the night logs one skull-no-building error the host accepts, and shows no line", () => {
+    const h = boot("ev-15-loop", ["a", "b"], false);
+    try {
+      // N and E all fallen; the die is always N then E, so every drawn skull finds nothing.
+      configureDayClock(h.play, {
+        tuning: { skulls: { simulated_drop: { kingdom_die: "1d1" } } },
+        supply: 24,
+      });
+      setCounts(h, inKingdom(h, "N"), [4, 4, 4, 4]);
+      runDay(h);
+      const errors = h.effects.filter(
+        (effect) => (effect as { kind?: string }).kind === "press-error",
+      );
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toMatchObject({ code: "skull-no-building" });
+      expect(shellEffectSchema.safeParse(errors[0]).success).toBe(true);
+      expect(ensureClock(h.play).nightDrops).toEqual([]);
+      expect(ensureClock(h.play).supply).toBe(24);
+      // No skull line is shown for it: the board view of that night carries none.
+      h.shell.loops.stack.push({
+        loopId: "day",
+        phase: "body",
+        local: { ...h.local, phase: "skull-sim" },
+      } as never);
+      h.shell.screen = "play";
+      const skull = projectShellView(h.shell).table?.skull;
+      expect(skull).toBeDefined();
+      expect(skull?.lines).toEqual([]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-09 no unseeded randomness: a replay lands the same, another seed differs", () => {
+    vi.spyOn(globalThis.Math, "random").mockImplementation(() => {
+      throw new Error("Ambient randomness is not the seeded stream.");
+    });
+    const run = (seed: string): string[] => {
+      const h = boot(seed, ["a", "b"], false);
+      try {
+        setCounts(h, inKingdom(h, "N"), [0, 0, 0, 0]);
+        runDay(h);
+        runDay(h);
+        runDay(h);
+        return clockLog(h.play).flatMap((event) => (event.kind === "drop" ? [event.spaceId] : []));
+      } finally {
+        closeHarness();
+      }
+    };
+    const a = run("ev-09");
+    expect(run("ev-09")).toEqual(a);
+    expect(a.length).toBeGreaterThan(0);
+    const others = seeds(10).map((seed) => run(seed));
+    expect(others.some((row) => row.join() !== a.join())).toBe(true);
+  });
+
+  it("EV-11 the same seed and log land the same skulls after a rebuild", () => {
+    const play3 = (): { landed: string[]; h: Harness } => {
+      const h = boot("ev-11", ["a", "b"], false);
+      runDay(h);
+      runDay(h);
+      runDay(h);
+      return {
+        landed: clockLog(h.play).flatMap((event) => (event.kind === "drop" ? [event.spaceId] : [])),
+        h,
+      };
+    };
+    const first = play3();
+    const live = clockSnapshot(first.h.play);
+    const log = clockLog(first.h.play);
+    closeHarness();
+    const second = play3();
+    try {
+      expect(second.landed).toEqual(first.landed);
+      expect(first.landed.length).toBeGreaterThan(0);
+      expect(rebuildClock(dayTuningFrom(), log).skulls).toEqual(live.skulls);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-12 and EV-13 counts, supply and the fallen set survive Continue, and fallen stays fallen", () => {
+    const h = boot("ev-12-cu03", ["a", "b"], false);
+    try {
+      setCounts(h, inKingdom(h, "N"), [4, 3, 3, 3]);
+      runDay(h);
+      runDay(h);
+      const clock = ensureClock(h.play);
+      const saved = captureClock(h.play);
+      if (!saved) throw new Error("No clock to save.");
+      const before = {
+        skulls: { ...clock.skulls },
+        supply: clock.supply,
+        nightDrops: [...clock.nightDrops],
+      };
+      const fresh = boot("ev-12-cu03", ["a", "b"], false);
+      restoreClock(fresh.play, saved);
+      const restored = ensureClock(fresh.play);
+      expect(restored.skulls).toEqual(before.skulls);
+      expect(restored.supply).toBe(before.supply);
+      expect(restored.nightDrops).toEqual(before.nightDrops);
+      const fallenBefore = Object.keys(before.skulls).filter((id) => (before.skulls[id] ?? 0) >= 4);
+      runDay(fresh);
+      for (const id of fallenBefore)
+        expect(ensureClock(fresh.play).skulls[id]).toBe(before.skulls[id]);
     } finally {
       closeHarness();
     }

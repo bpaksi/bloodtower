@@ -381,7 +381,9 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       // A press that could not be honoured: the log line toasts the board, the pressing iPad
       // shows the message with its code.
       options.log.error(effect.code, effect.message, { device: deviceId });
-      tellDevice(effect.message, effect.code);
+      // The iPad's error codes are a fixed set; a code of the engine's own rides in the text.
+      if (effect.code === "invalid-state") tellDevice(effect.message, effect.code);
+      else tellDevice(`${effect.message} (${effect.code})`, "invalid-state");
     }
     for (const outcome of outcomes) {
       const ok = outcome.result === "ok";

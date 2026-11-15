@@ -128,21 +128,25 @@ const heroName = (state: ShellState, heroId: string): string => {
 };
 
 /**
- * Without the tower the board names where each skull landed, so the table can place it
- * (DEC-305; the board is otherwise drawn as with the tower).
+ * Without the tower the board names where each skull landed, one line per skull in drop order,
+ * so the table can place it (DEC-305, PT-07). No line is cut, joined or dropped.
  */
-const simulatedSkullLine = (state: ShellState): string | null => {
+const simulatedSkullLines = (state: ShellState): string[] => {
   const play = state.play;
-  if (!play) return null;
+  if (!play) return [];
   const day = state.loops.stack.find((frame) => frame.loopId === "day");
-  if (!day || (day.local as DayLocal).phase !== "skull-sim") return null;
-  const lines = ensureClock(play).nightDrops.map((drop) => {
+  if (!day || (day.local as DayLocal).phase !== "skull-sim") return [];
+  return ensureClock(play).nightDrops.map((drop) => {
     const space = play.content.board.spaceById.get(drop.spaceId);
     const building = space?.building ? buildingTitle(space.building) : "a building";
     return `A skull falls on ${building}.`;
   });
-  return lines.length > 0 ? lines.join(" ").slice(0, 120) : null;
 };
+
+const onSkullSim = (state: ShellState): boolean =>
+  state.loops.stack.some(
+    (frame) => frame.loopId === "day" && (frame.local as DayLocal).phase === "skull-sim",
+  );
 
 const groupName = (state: ShellState, heroIds: readonly string[], fallback: string): string => {
   const first = heroIds[0];
@@ -202,6 +206,7 @@ const buildDayPanels = (
           : kingdomLabel,
       buildings,
       fell,
+      ...(phase === "skull-sim" ? { lines: simulatedSkullLines(state) } : {}),
     };
   }
 
@@ -264,7 +269,6 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     }
   }
 
-  const skullLine = simulatedSkullLine(state);
   const actingHeroId = actingId;
   const actingName = actingHeroId ? heroName(state, actingHeroId) : null;
   const rolled = actingHeroId ? play.dayRolls[actingHeroId] : undefined;
@@ -281,7 +285,8 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     movesLeft,
     moveRoll: rolled ?? null,
     modifier: "none",
-    waitingFor: skullLine ?? (waiting && actingName ? `${actingName} is choosing` : null),
+    // The no-tower skull lines sit in the skull panel (PT-07), not in a second waiting box.
+    waitingFor: waiting && actingName && !onSkullSim(state) ? `${actingName} is choosing` : null,
     groups: play.groups.map((group) => {
       const id = group.heroIds[0] ?? group.id;
       const space = board.spaceById.get(group.spaceId);

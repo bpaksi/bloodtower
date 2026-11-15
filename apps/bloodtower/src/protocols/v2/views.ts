@@ -82,6 +82,8 @@ const daySkullSchema = z.strictObject({
   buildings: z.array(skullBuildingSchema).max(64),
   /** Buildings that fell tonight, named for the board (DEC-093). */
   fell: z.array(z.string().min(1).max(80)).max(16),
+  /** The simulated drop, one line per skull in drop order, never cut or merged (PT-07). */
+  lines: z.array(z.string().min(1).max(120)).max(16).optional(),
 });
 
 const heroCorruptionSchema = z.strictObject({

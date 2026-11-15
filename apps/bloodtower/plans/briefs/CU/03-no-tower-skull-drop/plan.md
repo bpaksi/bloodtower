@@ -10,11 +10,20 @@ Keep this a checklist; do not write a second design doc.
 - Owner: Gamewright (brief, evals); a Wright developer, runner anvil (build)
 - Related AREA/docs: GitHub issue #476; PT-07 in `research/game-design/playtests/2026-11-12-paper-playtest-v1-v1.2.md`; `plans/catchup/design-freeze.md` section H (PT-07); DEC-305, DEC-092; C2/08 eval EV-04 and its "A skull falls on <building>" line; C3-04 (merged)
 - Evals: ./eval.md
+- Amended 2026-11-14 (PT-07, Bob: "Reword to five"): EV-06 now takes exactly 5 skulls/lines, because four lines of the longest title ("Sanctuary") total 108 characters and cannot pass 120. Marked in place. Also EV-07 (Bob, "Reword EV-07"): its How now says the browser spec feeds the board a `boardView` frame with four skull lines, with the real host's line generation covered by EV-06 plus a real-host single-line run in the same spec. Also EV-08 (Bob, "Yes, keep 28px"): its pass evidence now says heading, order, stacking, centring and the heading gap match the mockup, and type size and line pitch follow the board's 28px TV scale. Marked in place. Bob adds the new approval row after merge-ready.
 - Screen spec: none
 - Mockup: ./mockup.html (a Gamewright draft for the Illusionist to replace)
 - Risk: Med
 - Depends on: its approval.md on main; step 43 (#469) and step 44 (#470) merged; C3-04 merged (it is)
-- Touches: `apps/bloodtower/src/engine/loops/day/skull.ts` (`simulateSkullDrop`), `apps/bloodtower/src/engine/loops/day/loop.ts` (`simulateDrops`), `apps/bloodtower/src/engine/loops/session/view.ts` (`simulatedSkullLine`), `apps/bloodtower/src/engine/loops/day/day.test.ts`, `apps/bloodtower/src/engine/loops/session/towerLost.test.ts`, `apps/bloodtower/src/web/components/board/DayPanels.tsx` (stack the lines), `apps/bloodtower/src/e2e/tests/c3-day.spec.ts` or a new spec beside it
+- Touches: `apps/bloodtower/src/engine/loops/day/skull.ts` (`simulateSkullDrop`), `apps/bloodtower/src/engine/loops/day/loop.ts` (`simulateDrops`), `apps/bloodtower/src/engine/loops/session/view.ts` (`simulatedSkullLine`), `apps/bloodtower/src/engine/loops/day/day.test.ts`, `apps/bloodtower/src/engine/loops/session/towerLost.test.ts`, `apps/bloodtower/src/web/components/board/DayPanels.tsx` (stack the lines), `apps/bloodtower/src/e2e/tests/c3-day.spec.ts` or a new spec beside it, plus these, added by Bob's "Widen both" ruling (2026-11-14) after the build found the brief could not be built inside the list:
+  - `apps/bloodtower/src/protocols/v2/views.ts` and `apps/bloodtower/src/engine/views/state.ts`: the optional `lines: string[]` (max 16, each up to 120 characters) on the skull view. The wire had no field for one line per skull, and `waitingFor` is capped at 120 characters.
+  - `apps/bloodtower/src/engine/loops/session/effects.ts` and `apps/bloodtower/src/server/core/session.ts`: the distinct error code `skull-no-building` for EV-15, so the host log and the Story-board toast name it instead of `invalid-state`.
+  - `apps/bloodtower/src/server/core/skullNoBuilding.test.ts` (new test): EV-15's logged error with its code, in the shape the Story-board toast carries.
+  - `apps/bloodtower/src/server/hub/skullToast.test.ts` (new test): a `skull-no-building` error logged on the host arrives on a Story-board socket as a `logged` toast carrying that code (EV-15).
+  - `apps/bloodtower/src/web/components/board/DayPanels.tsx` also drops the kingdom headline and building list from the skull-sim panel (heading "Night falls" and the lines only, as the mockup).
+  - `apps/bloodtower/src/web/components/board/board.css` (one rule block scoped to `[data-day-panel="skull-sim"]`; Bob: "Yes, keep 28px"): centres the skull lines and sets the mockup's 12px heading gap for EV-08.
+  - `apps/bloodtower/src/e2e/tests/c2-tower-lost.spec.ts` (`playToSimulatedDrop` only; Bob: "Add to Touches", review round 1): it read the skull line from `[data-waiting]`, which is null in skull-sim now, so it reads `#skull [data-skull-line]`.
+  - `apps/bloodtower/src/e2e/tests/c3-skull-lines.spec.ts` (new spec) and its one-line edit of `c3-day.spec.ts`: the board no longer shows the skull line in a second waiting box, so the old `[data-waiting]` check reads the panel's lines.
 - Builds: PT-07 (issue #476)
 - Deps change: no
 - Runs: cloud
