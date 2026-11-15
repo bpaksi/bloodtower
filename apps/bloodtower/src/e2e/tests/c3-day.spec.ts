@@ -1,9 +1,18 @@
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { type Browser, errors, expect, type Page, type TestInfo, test } from "@playwright/test";
+import {
+  type Browser,
+  type BrowserContext,
+  errors,
+  expect,
+  type Page,
+  type TestInfo,
+  test,
+} from "@playwright/test";
 import {
   captureFrames,
   enterWithoutTower,
+  enterWithoutTowerKeepSound,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -42,7 +51,7 @@ type WireRoll = {
 };
 type WireTable = {
   day: number;
-  groups?: { heroId: string }[];
+  groups?: { heroId: string; spaceId: string }[];
   groupsCard?: { day: number; holdMs: number; groups: { heroNames: string[] }[] } | null;
   daysLeft?: number | null;
   phase?: string | null;
@@ -289,6 +298,8 @@ const startGame = async (
   databasePath?: string,
   /** CU/04: every hero in one group on one space (the test-only seat hook). */
   seatTogether = false,
+  /** CU/04: a second iPad joins and holds the last hero; the first holds the rest. */
+  secondPad = false,
 ) => {
   // A LAN join address keeps the loopback warning off the board's band in the EV-06 shots.
   const session = await startAcceptanceHost(testInfo, {
@@ -309,7 +320,22 @@ const startGame = async (
   await installSendCounter(pad);
   await grantWakeLock(pad);
   await pad.goto(`/join?code=${session.host.joinCode}`);
-  await enterWithoutTower(pad);
+  let pad2: Page | null = null;
+  let pad2Frames: string[] = [];
+  let context2: BrowserContext | null = null;
+  if (secondPad) {
+    await enterWithoutTowerKeepSound(pad);
+    context2 = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    pad2 = await context2.newPage();
+    pad2Frames = captureFrames(pad2);
+    await installSessionSocketHook(pad2);
+    await grantWakeLock(pad2);
+    await pad2.goto(`/join?code=${session.host.joinCode}`);
+    await expect(pad2).toHaveURL(/\/device/);
+    await setSoundAndKeep(pad);
+  } else {
+    await enterWithoutTower(pad);
+  }
   await clickAct(pad, "continue", `continue-pick-story-${STORY_ID}`);
   const size = pad.locator(
     `button[data-setting="party-size"][data-option="n-${heroes.length}"][data-action="set"]`,
@@ -317,7 +343,12 @@ const startGame = async (
   await size.click();
   await expect(size).toHaveAttribute("aria-pressed", "true");
   await clickAct(pad, "continue", "continue-game-settings");
-  await holdHeroesFromTest(pad, [...heroes]);
+  if (pad2) {
+    await holdHeroesFromTest(pad, heroes.slice(0, -1));
+    await holdHeroesFromTest(pad2, heroes.slice(-1));
+  } else {
+    await holdHeroesFromTest(pad, [...heroes]);
+  }
   await clickAct(pad, "continue", "continue-claim-heroes");
   for (const id of SETUP_IDS) {
     await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
@@ -327,7 +358,7 @@ const startGame = async (
   for (const id of OPENING_IDS) {
     await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
   }
-  return { session, context, pad, board, padFrames, boardFrames };
+  return { session, context, pad, board, padFrames, boardFrames, pad2, pad2Frames, context2 };
 };
 
 /** The board panel's lines, checked against the engine's own roll as it went out on the wire. */
@@ -679,6 +710,24 @@ const noRegroupOffer = (pad: Page) =>
     ),
   );
 
+/**
+ * One iPad shows no Regroup question: no regroup offer on its socket, no regroup button, no
+ * "Stay together" text, and no groups card or its controls (the card is the board's only).
+ */
+const expectNoRegroupOnPad = async (pad: Page, what: string) => {
+  expect(await noRegroupOffer(pad), `${what}: regroup offer`).toBe(true);
+  const main = deviceMain(pad);
+  await expect(main.locator('button[data-prompt-id^="regroup"]')).toHaveCount(0);
+  await expect(main.locator("[data-groups-card], [data-day-step='regroup']")).toHaveCount(0);
+  await expect(main).not.toContainText(REGROUP_TEXT);
+};
+
+/** Both iPads; the test must have joined the second. */
+const bothPads = (game: { pad: Page; pad2: Page | null }): Page[] => {
+  if (!game.pad2) throw new Error("This check needs the second iPad.");
+  return [game.pad, game.pad2];
+};
+
 test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
   test.beforeEach(({ browserName: _browserName }, testInfo) => {
     test.skip(testInfo.project.name !== "ipad", "The mockup is iPad portrait and a 1920 board.");
@@ -688,11 +737,16 @@ test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const game = await startGame(browser, testInfo, TWO, undefined, true);
+    const game = await startGame(browser, testInfo, TWO, undefined, true, true);
     const { session, context, pad, board } = game;
     try {
       await clickAct(pad, "continue");
-      await playUntil(pad, board, atPhase(board, "roll", 4), "day 4's roll");
+      for (const day of [2, 3, 4]) {
+        await playUntil(pad, board, atPhase(board, "roll", day), `day ${day}'s roll`);
+        for (const [index, page] of bothPads(game).entries()) {
+          await expectNoRegroupOnPad(page, `iPad ${index + 1}, day ${day} start`);
+        }
+      }
       await expect(board.locator("#roll")).toBeVisible();
       const tables = framesOf(game.boardFrames, "boardView").flatMap((view) =>
         view.table ? [view.table as WireTable] : [],
@@ -705,20 +759,23 @@ test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
         const first = tables.find((table) => table.day === day && table.phase);
         expect(first?.phase, `day ${day}`).toBe("roll");
       }
-      const offers = framesOf(game.padFrames, "deviceView").flatMap(
-        (view) => (view.actions as { promptId: string }[] | undefined) ?? [],
-      );
-      expect(offers.length).toBeGreaterThan(0);
-      expect(offers.filter((offer) => offer.promptId.startsWith("regroup"))).toEqual([]);
-      for (const frames of [game.padFrames, game.boardFrames]) {
+      // Every offer either iPad ever got, from its first frame.
+      for (const frames of [game.padFrames, game.pad2Frames]) {
+        const offers = framesOf(frames, "deviceView").flatMap(
+          (view) => (view.actions as { promptId: string }[] | undefined) ?? [],
+        );
+        expect(offers.length).toBeGreaterThan(0);
+        expect(offers.filter((offer) => offer.promptId.startsWith("regroup"))).toEqual([]);
+      }
+      for (const frames of [game.padFrames, game.pad2Frames, game.boardFrames]) {
         expect(frames.some((text) => text.includes(REGROUP_TEXT))).toBe(false);
       }
       await expect(boardMain(board)).not.toContainText(REGROUP_TEXT);
-      await expect(deviceMain(pad)).not.toContainText(REGROUP_TEXT);
       await expect(board.locator("[data-groups-card]")).toHaveCount(0);
       // Still one group: nothing split it.
       expect((await wireTable(board))?.groups).toHaveLength(1);
     } finally {
+      await game.context2?.close();
       await context.close();
       await session.host.close();
     }
@@ -728,13 +785,9 @@ test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(360_000);
-    const { session, context, pad, board } = await startGame(
-      browser,
-      testInfo,
-      TWO,
-      undefined,
-      true,
-    );
+    const game = await startGame(browser, testInfo, TWO, undefined, true, true);
+    const { session, context, pad, board } = game;
+    const pad2 = bothPads(game)[1] as Page;
     try {
       await clickAct(pad, "continue");
       await playUntil(pad, board, atPhase(board, "turn", 2), "day 2's turn");
@@ -790,8 +843,9 @@ test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
       expect((await wireTable(board))?.groups).toHaveLength(1);
       await expect(board.locator("[data-hero-panel]")).toHaveCount(1);
 
-      // EV-21: quit and Continue keeps the queue.
-      await saveQuitContinue(pad, TWO);
+      // EV-21: quit and Continue keeps the queue. Each iPad takes its hero back.
+      await saveQuitContinue(pad, ["hero-a"]);
+      await holdHeroesFromTest(pad2, ["hero-b"]);
       await expect.poll(async () => (await wireTable(board))?.day, { timeout: 20_000 }).toBe(2);
       expect((await wireTable(board))?.groups).toHaveLength(1);
       await board.evaluate(() => {
@@ -810,7 +864,10 @@ test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
       await expect(board.locator("#roll")).toHaveCount(0);
       // Nothing else sits over the card (EV-10): no waiting box while it shows.
       await expect(board.locator("[data-play-waiting]")).toHaveCount(0);
-      expect(await noRegroupOffer(pad)).toBe(true);
+      // EV-07: neither iPad offers a regroup choice or shows the card's controls.
+      for (const [index, page] of bothPads(game).entries()) {
+        await expectNoRegroupOnPad(page, `iPad ${index + 1}, card day`);
+      }
       // The card's frame fits and inks in first; the shot waits for that, inside the 4 s.
       await board.waitForFunction(() => {
         const frame = document.querySelector("[data-groups-card]");
@@ -849,8 +906,73 @@ test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
       await expect(board.locator("[data-groups-card]")).toHaveCount(0);
       expect((await wireTable(board))?.groupsCard ?? null).toBeNull();
       expect((await wireTable(board))?.groups).toHaveLength(2);
-      expect(await noRegroupOffer(pad)).toBe(true);
+      for (const [index, page] of bothPads(game).entries()) {
+        await expectNoRegroupOnPad(page, `iPad ${index + 1}, quiet day 4`);
+      }
     } finally {
+      await game.context2?.close();
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test("EV-24: a queued Rejoin that cannot apply toasts on the Story board and tells the iPad that queued it", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(360_000);
+    const game = await startGame(browser, testInfo, TWO, undefined, true, true);
+    const { session, context, pad, board } = game;
+    const pad2 = bothPads(game)[1] as Page;
+    try {
+      await clickAct(pad, "continue");
+      await playUntil(pad, board, atPhase(board, "turn", 2), "day 2's turn");
+      await sendAct(pad, "gear", "pick", { item: "split", pick: "split", heroId: "hero-b" });
+      await playUntil(pad, board, atPhase(board, "roll", 3), "day 3's roll");
+      expect((await wireTable(board))?.groups).toHaveLength(2);
+
+      // The second iPad queues the Rejoin while the two groups share a space.
+      await sendAct(pad2, "gear", "pick", { item: "split", pick: "join", heroId: "hero-b" });
+      await clickAct(pad, "continue");
+      // The first group walks off, so at day 4 the groups no longer share a space.
+      // Poll: the walk prompt reaches the iPad a moment after the Continue.
+      const sendWalk = () =>
+        pad.evaluate(() => {
+          const win = window as unknown as HookWindow;
+          const walk = (win.__btLastDeviceView?.actions ?? []).find(
+            (action) => action.open && action.promptId.startsWith("walk--"),
+          );
+          if (!walk || !win.__btSessionSocket) return false;
+          win.__btSessionSocket.send(
+            JSON.stringify({
+              v: 2,
+              type: "act",
+              payload: { promptId: walk.promptId, actionId: "walk", args: {} },
+            }),
+          );
+          return true;
+        });
+      await expect.poll(sendWalk, { timeout: 15_000 }).toBe(true);
+      await expect
+        .poll(async () => new Set((await wireTable(board))?.groups?.map((g) => g.spaceId)).size)
+        .toBe(2);
+      await playUntil(pad, board, atPhase(board, "roll", 4), "day 4's roll");
+
+      // Nothing applied, never silent: the board toasts the code, the queuing iPad is told.
+      expect((await wireTable(board))?.groups).toHaveLength(2);
+      await expect(board.locator('[data-error-code="regroup-dropped"]')).toBeVisible({
+        timeout: 10_000,
+      });
+      const banner = deviceMain(pad2).locator('[data-presentation="banner"]');
+      await expect(banner).toBeVisible({ timeout: 10_000 });
+      await expect(banner).toContainText("regroup-dropped");
+      await expect(banner).toContainText("Rejoin");
+      await expect(board.locator("[data-groups-card]")).toHaveCount(0);
+      // The first iPad did not queue it, so it is not told.
+      await expect(
+        deviceMain(pad).locator('[data-presentation="banner"]', { hasText: "regroup-dropped" }),
+      ).toHaveCount(0);
+    } finally {
+      await game.context2?.close();
       await context.close();
       await session.host.close();
     }
