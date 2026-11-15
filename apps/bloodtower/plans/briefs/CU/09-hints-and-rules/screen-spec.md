@@ -4,7 +4,7 @@
 - Evals: ./eval.md
 - Cards: DEC-571, DEC-229, UI-035, SCR-008, DEC-639, DEC-708, DEC-278
 - Viewports: Story board 1920×1080, iPad 768×1024 portrait
-- Rules for every screen: the board is display only and never scrolls or clips; iPads carry choices and taps only and every story line shows on the board; the bottom toolbar on every iPad state. Words are `[COPY: ...]` slots from plan.md.
+- Rules for every screen: the board is display only and never scrolls or clips; iPads carry choices and taps only and every story line shows on the board; the bottom toolbar on every iPad state. Words are the Copy table's text in plan.md.
 
 ## Purpose
 

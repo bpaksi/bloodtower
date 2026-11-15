@@ -98,5 +98,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - The card's "one virtue line" is the pack's `ability` → decided (Bob, 2026-11-14, adopted); EV-11.
 - "Another iPad is waiting for a hero" is not built in 1.0 → decided (Bob, 2026-11-14, adopted); EV-12.
-- "Picked" and "Open" stay → decided (Bob, 2026-11-14, adopted); Loremaster may reword in step 45; EV-02.
-- Class names come from the pack `role` and are worded by Loremaster (step 45) → none.
+- "Picked" and "Open" stay → decided (Bob, 2026-11-14, adopted); Loremaster kept both words in step 45; EV-02.
+- Class names come from the pack `role` and are worded by Loremaster (step 45, Copy row 4) → none.

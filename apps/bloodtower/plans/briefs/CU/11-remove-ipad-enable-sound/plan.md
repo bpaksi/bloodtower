@@ -27,7 +27,7 @@ On main today every iPad on Pick story shows only "Tap once to turn on this iPad
 
 - Bob re-approves the changed C2/04 and C2/05 evals (C2/05's text was amended by #485 at 6:36 PM ET on 2026-11-12, after the 6:01 PM batch re-approval row; C2/04 EV-11 and EV-12 were amended by step 44 on 2026-11-14); his batch approval row for step 44 covers both.
 - The Illusionist changes the C2/05 mockup (not drafted here).
-- Loremaster signs off the removed strings (step 45).
+- Loremaster signs off the removed strings (step 45): done, Bob signed off 2026-11-15 (see Copy).
 
 ## Amendments to the C2 briefs
 
@@ -71,14 +71,29 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] DEC-903: closed before coding (`decided`).
 - [ ] DEC-201: closed before coding (`decided`; all sound on the Story board).
 - [ ] DEC-274: closed before coding (`decided`; the Enter's tower block).
-- [ ] Loremaster sign-off of the removed strings (step 45): closed before merge.
-- [ ] Loremaster writes the one new string `gear.volume.no-tower` (step 45): closed before coding.
+- [x] Loremaster sign-off of the removed strings (step 45): Bob signed off on 2026-11-15 (see Copy, Removed strings); closed.
+- [x] Loremaster writes the one new string `gear.volume.no-tower` (step 45): written 2026-11-15 (see Copy row 1); closed.
 
 ## Copy
 
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
-| 1 | `gear.volume.no-tower` | [COPY: reason line for the greyed gear Volume item with no tower] | Loremaster, step 45 (new string); the build never invents it |
+| 1 | `gear.volume.no-tower` | Only with the tower. | new - Loremaster (step 45). Reason line for the greyed gear Volume item when the table plays without the tower; same short style as the gear's other reasons ("Only in a game.", "The tower is connected."). No hero or story words |
+| 2 | `volume.line` | How loud should the tower be? Press one to hear it. | locked: C2/05 screen-spec state 7 (SCR-006). Kept unchanged. Under DEC-903 it plays only on the connect track, at full strength from the first view, and never with Play without Tower |
+
+### Removed strings (Loremaster sign-off)
+
+Bob signed off on removing the three strings below on 2026-11-15 (6:28 AM ET), under PT-24 and DEC-903 (no iPad plays sound). Loremaster confirms nothing else in the story or help copy points at them.
+
+| # | Slot or id | Removed text | Where it lived | Sign-off |
+|---|------------|--------------|----------------|----------|
+| R1 | prompt `sound-enable` (`ENABLE_SOUND_LINE`) | Tap once to turn on this iPad's sound. | iPad, first view of Pick story; locked, Bob 2026-10-31 10:33 AM ET | Bob, 2026-11-15, signed off |
+| R2 | action `enable-sound` (button label) | Enable sound | iPad, Pick story; locked, Bob 2026-10-31 10:33 AM ET | Bob, 2026-11-15, signed off |
+| R3 | help `enable-sound` (`gearMenu.ts`) | Tap Enable sound so this iPad can play the story's voice and sound. (the 2026-10-31 help list had: Tap once so this iPad can play the story's voice and sound.) | the iPad "?" help for the Enable sound state | Bob, 2026-11-15, signed off |
+
+Also gone, not a separate string: the greyed copy of row 2's line on the board during the old Enable sound step (Bob 6:15 PM ET 2026-10-31; C2/05 "Removed 2026-11-12"). The kept lines are `volume.line` (row 2) and the iPad help `volume` ("Set how loud the tower is. Press a volume to hear it, then tap Keep.", locked C2/04), which now show on the connect track only.
 
 ## Decided (was OPEN)
 

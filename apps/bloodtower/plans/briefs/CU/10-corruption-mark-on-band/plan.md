@@ -59,11 +59,11 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text is Loremaster's, step 45 (LQ-2). Until then every slot is a `[COPY: ...]` placeholder; a build must not invent words.
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
-| 1 | `band.mark.label` | [COPY: spoken label for the mark, with {hero}] | Loremaster, step 45; the aria-label of the icon (decided: icon plus aria-label, no visible words) |
+| 1 | `band.mark.label` | {hero} has two corruptions. A third ends the game. | new - Loremaster (LQ-2). The aria-label of the icon, read by a screen reader; no visible words (decided). `{hero}` is the one hero who carries the mark. Uses the band's own word "corruptions" (the band already shows "N corruptions") and not the Keep's "oath-mark" (1.1, IDEA-177), so the label is true in every 1.0 story; "A third ends the game" is DEC-043 and DEC-676 |
 | 2 | `band.mark.glyph` | (icon, no text) | Gamewright draft; Illusionist draws the final icon |
 
 ## Decided (was OPEN)
