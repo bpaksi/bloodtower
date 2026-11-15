@@ -17,7 +17,7 @@ Keep this a checklist; do not write a second design doc.
 - Builds: UI-027
 - Deps change: no
 - Runs: cloud
-- Amended 2026-11-14 for PT-20 (step 44): added EV-13 to EV-21 (the picker side; the loop is C4/02). Rulings adopted by Bob 2026-11-14 are applied to EV-13, EV-14 and EV-19 and added as EV-20 and EV-21; no approved eval is changed in place. Two Copy slots as `[COPY: ...]`. Needs Bob's new approval row. Illusionist adds mockup state `#pick-for`.
+- Amended 2026-11-14 for PT-20 (step 44): added EV-13 to EV-21 (the picker side; the loop is C4/02). Rulings adopted by Bob 2026-11-14 are applied to EV-13, EV-14 and EV-19 and added as EV-20 and EV-21; no approved eval is changed in place. Two Copy slots (`button.pick-for`, `ipad.pick-for.note`) filled 2026-11-15 (step 45). Needs Bob's new approval row. Illusionist adds mockup state `#pick-for`.
 
 ## What it does
 
@@ -52,7 +52,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 29–30 filled 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
@@ -84,8 +84,8 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 26 | `help.title` | Help | C2 feature 04 |
 | 27 | `help.round-picker` | Choose Fight or Retreat, then each hero picks Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. The round starts when everyone has picked. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 28 | `help.close` | Close | C2 feature 04 |
-| 29 | `button.pick-for` | [COPY: Pick for {hero}] | ruling PT-20 gives "Pick for <hero>"; Loremaster confirms the label (step 45) |
-| 30 | `ipad.pick-for.note` | [COPY: optional line saying what it sets, Guard or an attack] | new - Loremaster decides if one is wanted (step 45) |
+| 29 | `button.pick-for` | Pick for {hero} | ruling PT-20 (Bob, 2026-11-14, adopted) and DEC-928 give "Pick for <hero>"; Loremaster confirms the label. `{hero}` is the one standing hero who has not picked |
+| 30 | `ipad.pick-for.note` | Sets Guard, or a normal attack if they cannot Guard. | new - Loremaster. A short note is wanted: the press is not a choice, and the default is not obvious from the button alone (Guard if that hero can, otherwise a normal attack; DEC-928, EV-14, EV-20). "They" is the hero named on the button. The locked `help.round-picker` line is unchanged |
 
 ## OPEN questions
 

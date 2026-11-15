@@ -71,16 +71,16 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Requirement: the Split party panel looks as drafted (Gamewright draft; the Illusionist replaces it).
 - Method: screenshot
 - How: iPad 768x1024 portrait, gear open on Split party with 2 heroes; compare side by side with ./mockup.html section `#gear-split`.
-- Pass evidence: both images attached; title, one pick per hero, Back, and the queued note in the same order; copy slots show the Loremaster text, not `[COPY: ...]`, once step 45 lands (the mockup keeps the slots).
-- Fails if: a hero pick or Back is missing, or any other row shows besides the standing See the story board row (`[data-see-board]`) that every gear panel carries between the "PLAY / The move" header and the panel content (Bob, 2026-11-15).
+- Pass evidence: both images attached; title, one pick per hero, Back, and the queued note in the same order; the text slots show the Loremaster text from step 45 (Copy rows 3, 4, 5 and 7) and no placeholder text from `mockup.html` reaches the screen.
+- Fails if: a hero pick or Back is missing, or any other row shows besides the standing See the story board row (`[data-see-board]`) that every gear panel carries between the "PLAY / The move" header and the panel content (Bob, 2026-11-15), or placeholder text shows.
 - Amended 2026-11-15 (PT-18, Bob): "any other row shows" now allows the standing See the story board row. Note for the Illusionist: `mockup.html` `#gear-split` does not draw that row.
 
 ### EV-10 — Day-start card screenshot
 - Requirement: the groups card looks as drafted.
 - Method: screenshot
 - How: board 1920x1080 at the day-start card after a queued split; compare side by side with ./mockup.html section `#day-start`.
-- Pass evidence: both images attached; "Day N", one line per group listing its heroes, no button.
-- Fails if: a button shows or a group is missing.
+- Pass evidence: both images attached; "Day N", one line per group listing its heroes, no button, and the Copy table's `day-start-groups` line under the groups.
+- Fails if: a button shows, a group is missing, or placeholder text shows.
 
 ### EV-11 — No tower command from a split, join or queue
 - Requirement: CLAUDE.md tower safety: nothing physical happens automatically.
@@ -164,3 +164,4 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - The 4 s is a shared constant, not tuning (EV-28) → decided, Q4.4 (Bob, 2026-11-14, adopted).
 - The host split action lives here (EV-29) → Q7.2 (Bob, 2026-11-14, adopted); the use-item host action is in CU/07.
 - The PT-18 and PT-06 DEC ids → step 43 (#469); not invented here.
+- All copy, including the day-start card line and the gear panel help, is in the Loremaster Copy table in plan.md (step 45, filled 2026-11-15); EV-09 and EV-10 require that text. `split-party-none` is proposed only and is not wired in this docs PR.
