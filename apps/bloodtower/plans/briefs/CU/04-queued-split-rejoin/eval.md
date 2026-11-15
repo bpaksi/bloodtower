@@ -148,11 +148,12 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Fails if: the card has its own literal 4000, a second constant, or a new tuning key.
 
 ### EV-29 — The host drives the queue
-- Requirement: Q7.2 (Bob, 2026-11-14, adopted): the host's split action is built here; `c3-day.spec.ts` EV-15 and EV-16 stop being `fixme`.
+- Requirement: Q7.2 (Bob, 2026-11-14, adopted): the host's split action is built here; `c3-day.spec.ts` EV-15 and EV-16 stop being `fixme` (split halves only).
 - Method: playwright
-- How: with the real host and a test story with 2 heroes on one space, the host queues a split and a rejoin through its action; run to the next day start; check `c3-day.spec.ts` for the `fixme` on EV-15 and EV-16.
-- Pass evidence: both effects occur exactly as with an iPad pick (same queue entries, same day-start apply); the `fixme` rows for EV-15 and EV-16 are gone and those specs run and pass.
-- Fails if: the host action splits at once, bypasses the queue, or the two `fixme` rows remain.
+- How: with the real host and a test story with 2 heroes on one space, the host queues a split and a rejoin through its action; run to the next day start; check `c3-day.spec.ts` for the split halves of C3-11 EV-15 and EV-16.
+- Pass evidence: both effects occur exactly as with an iPad pick (same queue entries, same day-start apply); the split halves of EV-15 and EV-16 run and pass; the use-item halves (EV-15 use-item half, EV-16 use-item reason) stay `fixme`, owned by CU/07.
+- Fails if: the host action splits at once, bypasses the queue, or a split-half `fixme` row remains.
+- Amended 2026-11-15 (PT-18, Bob): Bob's option A ruling split the C3-11 EV-15/EV-16 `fixme` row into a live split half and a use-item half that stays `fixme` for CU/07; the How, Pass evidence and Fails if now say so.
 
 ## Assumptions surfaced
 
