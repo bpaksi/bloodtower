@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse as parseYaml } from "yaml";
+import { dayTuningFrom } from "../../engine/loops/day/rules.ts";
 import {
   autosaveGame,
   beginGame,
@@ -34,7 +35,7 @@ const DEC_703 = {
   },
   day: {
     move_roll: { dice: "2d3", floor: 2 },
-    shifts: { per_helping_virtue: 1, per_corruption: -1 },
+    shifts: { per_helping_virtue: 1, per_corruption: -1, per_split_group: -1 },
     event_chance: { short: 30, standard: 40 },
     event_weights: { quiet: 30, windfall: 15, hazard: 20, foes: 20, disaster: 5, people: 10 },
     hazard: { hit_points: -2 },
@@ -272,6 +273,38 @@ describe("tuning.yaml", () => {
     } finally {
       for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it("CU/04 EV-06 day.shifts.per_split_group is -1, required, and spelled exactly (PT-06)", () => {
+    const tuning = tuningOf(basePack);
+    expect(tuning.day.shifts.per_split_group).toBe(-1);
+    expect(dayTuningFrom(tuning).perSplitGroup).toBe(-1);
+    const dirs: string[] = [];
+    try {
+      for (const edit of [
+        (text: string) => text.replace(/\n {4}per_split_group: -1\n/, "\n"),
+        (text: string) => text.replace("per_split_group: -1", "per_split_groups: -1"),
+      ]) {
+        const run = withTuning(edit);
+        dirs.push(run.dir);
+        expectLint(run.result, "shifts");
+      }
+    } finally {
+      for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("CU/04 EV-28 the groups card reads AUTO_ADVANCE_MS: no literal 4000, no tuning key", () => {
+    const src = join(import.meta.dirname, "../..");
+    const panels = readFileSync(join(src, "web/components/board/DayPanels.tsx"), "utf8");
+    expect(panels).toContain("card.holdMs");
+    expect(panels).not.toMatch(/\b4_?000\b/);
+    const view = readFileSync(join(src, "engine/loops/session/view.ts"), "utf8");
+    expect(view).toContain("holdMs: AUTO_ADVANCE_MS");
+    const views = readFileSync(join(src, "protocols/v2/views.ts"), "utf8");
+    expect(views.match(/export const AUTO_ADVANCE_MS = /g)).toHaveLength(1);
+    const tuning = readFileSync(join(basePack, "tuning.yaml"), "utf8");
+    expect(tuning).not.toMatch(/4_?000|auto_advance|groups_card|card_ms/);
   });
 
   it("Continue keeps the tuning fixed at Begin", () => {

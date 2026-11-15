@@ -1,6 +1,7 @@
 import { mkdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { expect, type Page, type TestInfo } from "@playwright/test";
+import { TEST_SEAT_TOGETHER } from "../../../engine/loops/chapter/playState.ts";
 import { loadConfig } from "../../../server/config.ts";
 import { type SessionHost, startSessionHost } from "../../../server/hub/host.ts";
 import { createMockTower, type MockTower } from "../../../server/tower/mock.ts";
@@ -27,6 +28,11 @@ export const startAcceptanceHost = async (
   options?: {
     databasePath?: string;
     seed?: string;
+    /**
+     * TEST ONLY (C3-11 ruling 5, CU/04): seat every hero in one group on one space, so a test
+     * can split and rejoin. It marks the seed; real seeds never carry the marker.
+     */
+    seatTogether?: boolean;
     graceMs?: number;
     /** Join address for the story board. Undefined keeps the loopback warning. */
     lanHost?: () => string | undefined;
@@ -70,7 +76,9 @@ export const startAcceptanceHost = async (
     towerWatchMs: 50,
     // The volume test waits about 4 s between sounds; the e2e run does not.
     sleep: async () => undefined,
-    seed: options?.seed,
+    seed: options?.seatTogether
+      ? `${options.seed ?? "seat-together"}${TEST_SEAT_TOGETHER}`
+      : options?.seed,
     graceMs: options?.graceMs ?? 100,
     lanHost: options?.lanHost,
   });

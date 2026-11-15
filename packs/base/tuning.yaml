@@ -28,6 +28,9 @@ day:
   shifts:
     per_helping_virtue: 1
     per_corruption: -1
+    # PT-06, DEC-918: every group while the party is split, a group of one included. Floor 2
+    # stays. A placeholder until the P-008 probe (parked).
+    per_split_group: -1
   event_chance:
     short: 30
     standard: 40

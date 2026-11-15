@@ -1,13 +1,17 @@
 import { eventRng } from "@dark-tower/rng";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
-import { projectDayClock } from "../../views/day.ts";
+import { AUTO_ADVANCE_MS } from "../../../protocols/v2/views.ts";
+import { deserializeShellState, serializeShellState } from "../../../server/core/serialize.ts";
+import { gearRows, type MenuContext } from "../../../web/components/device/gearMenu.ts";
+import { projectDayClock, rollLine } from "../../views/day.ts";
 import { citadelForKingdom } from "../chapter/board.ts";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
 import { groupTurnLoop, handleGroupTurnPress } from "../group-turn/loop.ts";
-import { shellEffectSchema } from "../session/effects.ts";
+import { REGROUP_DROPPED, shellEffectSchema } from "../session/effects.ts";
 import { enterConnectEvents } from "../session/enterKit.ts";
 import type { ShellEvent } from "../session/events.ts";
+import { applyGear } from "../session/gear.ts";
 import { TEST_STORY } from "../session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import {
@@ -39,6 +43,14 @@ import {
 import { MOVE_ROLL_CUE_SOUND_INDEX } from "./cues.ts";
 import { type DayLocal, type DayResult, dayLoop } from "./loop.ts";
 import { handleDayPress } from "./press.ts";
+import {
+  applyJoin,
+  applySplit,
+  partyIsSplit,
+  projectedGroups,
+  queueRegroupPick,
+  regroupPicks,
+} from "./regroup.ts";
 import { buildingMenu, CITADEL_ABOVE_CLEANSE, dayTuningFrom, kingdomFromD4 } from "./rules.ts";
 import {
   applySkullRecord,
@@ -302,23 +314,23 @@ const choose = (h: Harness, kind: string, id?: string): Offer => {
 const runDay = (
   h: Harness,
   opts?: {
-    regroup?: "done" | "split" | "join";
-    splitHero?: string;
     questWins?: number;
     place?: (index: number) => string | undefined;
     onRoll?: () => void;
     beforeRecord?: () => void;
-    onRegroup?: (offers: Offer[]) => void;
+    /** Called as each group's turn starts, with the group and its moves (CU/04 EV-08). */
+    onTurn?: (groupId: string, moves: number) => void;
   },
 ): DayResult => {
   let status = beginDay(h);
-  let regroup = opts?.regroup ?? "done";
   let wins = opts?.questWins ?? 0;
   let placed = 0;
   for (let guard = 0; guard < 48 && status !== "done"; guard++) {
     if (status === "child") {
       const groupId = h.child;
       if (!groupId) throw new Error("Group turn started without a group.");
+      const input = h.play.childInput;
+      opts?.onTurn?.(groupId, input?.kind === "group-turn" ? input.moves : -1);
       if (wins > 0) {
         markQuestWon(h.play);
         wins -= 1;
@@ -328,19 +340,6 @@ const runDay = (
       continue;
     }
     if (status !== "prompt") throw new Error(`Day stuck in ${h.local.phase} (${status}).`);
-    if (h.offers.some((offer) => offer.actionId === "done")) {
-      opts?.onRegroup?.(h.offers);
-      const kind = regroup === "split" && opts?.splitHero ? "split" : regroup;
-      const id = kind === "split" ? opts?.splitHero : undefined;
-      if (regroup !== "done") regroup = "done";
-      h.local = handleDayPress(
-        h.local,
-        choose(h, kind, id).promptId,
-        kind === "split" ? "split" : kind,
-      );
-      status = pump(h);
-      continue;
-    }
     if (h.offers.some((offer) => offer.promptId.includes("roll-done"))) {
       opts?.onRoll?.();
       status = pressOffer(h, choose(h, "roll"));
@@ -405,10 +404,10 @@ describe("C3 04 day clock", () => {
       ];
       h.play.turnOrder = ["virtue", "corrupt"];
       expect(h.play.rngSeq).toBe(1);
-      let status = beginDay(h);
+      // No Regroup prompt (CU/04): the day start goes straight to the roll.
+      const status = beginDay(h);
       expect(status).toBe("prompt");
-      status = pressOffer(h, choose(h, "done"));
-      expect(status).toBe("prompt");
+      expect(h.offers.map((offer) => offer.promptId)).toEqual(["day-1-roll-done"]);
       const shifts = ensureClock(h.play).shifts;
       const virtue = shifts.virtue;
       const corrupt = shifts.corrupt;
@@ -416,15 +415,18 @@ describe("C3 04 day clock", () => {
       expect(corrupt).toBeDefined();
       expect(eventRng(seed, 1).roll("2d3").total).toBe(virtue?.raw);
       expect(eventRng(seed, 2).roll("2d3").total).toBe(corrupt?.raw);
+      // Two groups: the party is split, so each also takes the split shift (PT-06, CU/04).
       expect(virtue).toMatchObject({
         virtue: 1,
         corruption: 0,
-        total: Math.max(2, (virtue?.raw ?? 0) + 1),
+        split: -1,
+        total: Math.max(2, (virtue?.raw ?? 0) + 1 - 1),
       });
       expect(corrupt).toMatchObject({
         virtue: 0,
         corruption: -2,
-        total: Math.max(2, (corrupt?.raw ?? 0) - 2),
+        split: -1,
+        total: Math.max(2, (corrupt?.raw ?? 0) - 2 - 1),
       });
       expect(virtue?.total).toBeGreaterThanOrEqual(2);
       expect(corrupt?.total).toBeGreaterThanOrEqual(2);
@@ -618,7 +620,7 @@ describe("C3 04 day clock", () => {
     }
   });
 
-  it("EV-08 regroup is the only step that splits or joins", () => {
+  it("EV-08 the day start is the only step that splits or joins (CU/04: queued)", () => {
     const h = boot("ev-08", ["a", "b"], false);
     try {
       const board = h.play.content.board;
@@ -655,17 +657,24 @@ describe("C3 04 day clock", () => {
         "split",
       );
       expect(groupSignature(h.play)).toBe(before);
-      const status = beginDay(h);
-      expect(status).toBe("prompt");
-      pressOffer(h, choose(h, "split", "a"));
-      expect(h.play.groups).toHaveLength(2);
-      expect(groupSignature(h.play)).not.toBe(before);
+      // Nothing queued: the day start asks nothing and splits nothing.
+      expect(beginDay(h)).toBe("prompt");
+      expect(h.offers.map((offer) => offer.promptId)).toEqual(["day-1-roll-done"]);
+      expect(groupSignature(h.play)).toBe(before);
+      closeHarness();
+      const q = boot("ev-08-queued", ["a", "b"], false);
+      q.play.groups = structuredClone(h.play.groups);
+      q.play.turnOrder = ["G"];
+      expect(queueRegroupPick(q.play, "split", "a", "pad")).toBe(true);
+      expect(groupSignature(q.play)).toBe(before);
+      beginDay(q);
+      expect(q.play.groups).toHaveLength(2);
     } finally {
       closeHarness();
     }
   });
 
-  it("EV-09 regroup at day start splits, then the next day can join", () => {
+  it("EV-09 a queued split applies at a day start, then a queued rejoin the next", () => {
     const h = boot("ev-09", ["hero-a", "hero-b"], false);
     try {
       const spaceId = citadelForKingdom(h.play.content.board, "N").id;
@@ -679,20 +688,15 @@ describe("C3 04 day clock", () => {
         },
       ];
       h.play.turnOrder = ["G"];
-      const regroupOffersSeen: string[][] = [];
-      runDay(h, {
-        regroup: "split",
-        splitHero: "hero-a",
-        onRegroup: (offers) => regroupOffersSeen.push(offers.map((offer) => offer.actionId)),
-      });
-      expect(regroupOffersSeen[0]).toContain("split");
-      expect(regroupOffersSeen[1]).toContain("join");
+      queueRegroupPick(h.play, "split", "hero-a", "pad");
+      runDay(h);
       expect(h.play.groups).toHaveLength(2);
       expect(new Set(ensureClock(h.play).turns).size).toBe(2);
-      const next = beginDay(h);
-      expect(next).toBe("prompt");
-      expect(h.offers.map((offer) => offer.actionId)).toContain("join");
-      h.local = handleDayPress(h.local, choose(h, "join").promptId, "join");
+      expect(regroupPicks(h.play)).toContainEqual({ kind: "join", heroId: "hero-a" });
+      // The groups walked nowhere (the harness ends each turn in place): they still share a space.
+      queueRegroupPick(h.play, "join", "hero-b", "pad");
+      expect(h.play.groups).toHaveLength(2);
+      beginDay(h);
       expect(h.play.groups).toHaveLength(1);
     } finally {
       closeHarness();
@@ -720,7 +724,8 @@ describe("C3 04 day clock", () => {
         },
       ];
       h.play.turnOrder = ["A", "B"];
-      runDay(h, { regroup: "split", splitHero: "hero-a" });
+      queueRegroupPick(h.play, "split", "hero-a", "pad");
+      runDay(h);
       expect(ensureClock(h.play).turns).toEqual(["A", "B", "split-hero-a-2"]);
     } finally {
       closeHarness();
@@ -798,11 +803,9 @@ describe("C3 04 day clock", () => {
           ? choose(h, "roll")
           : h.offers.some((row) => row.promptId.startsWith("skull-drop"))
             ? choose(h, "drop")
-            : h.offers.some((row) => row.actionId === "done")
-              ? choose(h, "done")
-              : h.offers.some((row) => row.promptId.startsWith("skull-sim-day-"))
-                ? (h.offers.find((row) => row.promptId.startsWith("skull-sim-day-")) as Offer)
-                : choose(h, "record");
+            : h.offers.some((row) => row.promptId.startsWith("skull-sim-day-"))
+              ? (h.offers.find((row) => row.promptId.startsWith("skull-sim-day-")) as Offer)
+              : choose(h, "record");
         status = pressOffer(h, offer);
       }
       if (status !== "done") throw new Error("Continue did not finish the day.");
@@ -815,10 +818,7 @@ describe("C3 04 day clock", () => {
       let status = beginDay(h);
       while (status !== "child") {
         if (status !== "prompt") throw new Error(`Could not reach day 3 (${h.local.phase}).`);
-        const offer = h.offers.some((row) => row.actionId === "done")
-          ? choose(h, "done")
-          : choose(h, "roll");
-        status = pressOffer(h, offer);
+        status = pressOffer(h, choose(h, "roll"));
       }
       return h;
     };
@@ -1127,6 +1127,557 @@ describe("CU/03 no-tower skull drop (PT-07)", () => {
       runDay(fresh);
       for (const id of fallenBefore)
         expect(ensureClock(fresh.play).skulls[id]).toBe(before.skulls[id]);
+    } finally {
+      closeHarness();
+    }
+  });
+});
+
+/** A rngSeq where the next draws of 2d3 on `seed` read `raws`, in order (EV-05 fixes the roll). */
+const seqWithRaws = (seed: string, raws: number[]): number => {
+  for (let seq = 1; seq < 5000; seq++) {
+    if (raws.every((raw, index) => eventRng(seed, seq + index).roll("2d3").total === raw))
+      return seq;
+  }
+  throw new Error(`No stream position on ${seed} reads ${raws.join(", ")}.`);
+};
+
+const oneSpace = (h: Harness, groups: Array<{ id: string; heroIds: string[] }>): string => {
+  const spaceId = citadelForKingdom(h.play.content.board, "N").id;
+  h.play.groups = groups.map((group, order) => ({
+    id: group.id,
+    heroIds: [...group.heroIds],
+    spaceId,
+    insideBuilding: false,
+    order,
+  }));
+  h.play.turnOrder = groups.map((group) => group.id);
+  return spaceId;
+};
+
+const pressErrors = (h: Harness) =>
+  h.effects.filter((effect) => (effect as { kind?: string }).kind === "press-error") as Array<{
+    code: string;
+    message: string;
+    deviceId?: string;
+  }>;
+
+const MENU: MenuContext = {
+  inGame: true,
+  beforeBegin: false,
+  sessionScreen: false,
+  towerConnected: false,
+  partySplit: false,
+  regroupOpen: true,
+  blockedItem: null,
+};
+
+const splitLabel = (h: Harness): string =>
+  gearRows({ ...MENU, partySplit: partyIsSplit(h.play) }).find((row) => row.id === "split-party")
+    ?.label ?? "missing";
+
+/** A gear pick the way an iPad sends it on its open Split party panel. */
+const gearPick = (h: Harness, kind: "split" | "join", heroId: string, deviceId = "pad") => {
+  let state = applyGear(h.shell, { deviceId, action: "open", item: "split-party" });
+  state = applyGear(state, { deviceId, action: "pick", item: "split", pick: kind, heroId });
+  state = applyGear(state, { deviceId, action: "done" });
+  h.shell = state;
+  bindShellState(state);
+};
+
+describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
+  it("EV-02 Split party offers only heroes in a group of 2 or more, and a pick only queues", () => {
+    const h = boot("cu04-ev02", ["hero-a", "hero-b", "hero-c"], false);
+    try {
+      oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      h.play.groups.push({
+        id: "L",
+        heroIds: ["hero-c"],
+        spaceId: citadelForKingdom(h.play.content.board, "S").id,
+        insideBuilding: false,
+        order: 1,
+      });
+      h.play.turnOrder = ["G", "L"];
+      const splits = regroupPicks(h.play).filter((pick) => pick.kind === "split");
+      expect(splits.map((pick) => pick.heroId)).toEqual(["hero-a", "hero-b"]);
+      const row = gearRows({ ...MENU, partySplit: partyIsSplit(h.play) }).find(
+        (item) => item.id === "split-party",
+      );
+      expect(row).toMatchObject({ label: "Split party", enabled: true, reason: null, panel: true });
+      const before = groupSignature(h.play);
+      gearPick(h, "split", "hero-b");
+      expect(h.play.regroupQueue).toEqual([{ kind: "split", heroId: "hero-b", deviceId: "pad" }]);
+      expect(groupSignature(h.play)).toBe(before);
+      h.shell.screen = "play";
+      h.play.dayNumber = 1;
+      expect(projectShellView(h.shell).gear?.regroup?.queue).toEqual([
+        { kind: "split", heroId: "hero-b", name: "hero-b" },
+      ]);
+      // A lone hero is never offered: a pick for hero-c changes nothing.
+      gearPick(h, "split", "hero-c");
+      expect(h.play.regroupQueue).toHaveLength(1);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-03 a queued split applies at the next day start, before the roll, once", () => {
+    const h = boot("cu04-ev03", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      runDay(h);
+      runDay(h, {
+        onTurn: () => {
+          if ((h.play.regroupQueue ?? []).length === 0) gearPick(h, "split", "hero-b");
+        },
+      });
+      expect(h.play.dayNumber).toBe(2);
+      expect(Object.keys(ensureClock(h.play).shifts)).toEqual(["G"]);
+      expect(h.play.groups).toHaveLength(1);
+      expect(h.play.regroupQueue).toHaveLength(1);
+
+      expect(beginDay(h)).toBe("prompt");
+      expect(h.play.dayNumber).toBe(3);
+      expect(h.play.groups).toHaveLength(2);
+      const last = h.play.turnOrder.at(-1);
+      const splitOff = h.play.groups.find((group) => group.id === last);
+      expect(splitOff?.heroIds).toEqual(["hero-b"]);
+      expect(splitOff?.order).toBe(Math.max(...h.play.groups.map((group) => group.order)));
+      expect(Object.keys(ensureClock(h.play).shifts).sort()).toEqual([...h.play.turnOrder].sort());
+      expect(h.play.regroupQueue).toEqual([]);
+      expect(h.play.regroupCardDay).toBe(3);
+      expect(dayTrace(h.play).nodes).toContain(".38");
+
+      // Day 4 adds no further split and shows no card.
+      runDay(h);
+      expect(h.play.dayNumber).toBe(4);
+      expect(h.play.groups).toHaveLength(2);
+      expect(h.play.regroupCardDay).toBeNull();
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-04 Rejoin is queued the same way; the merged group keeps the older place", () => {
+    const h = boot("cu04-ev04", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(h, [
+        { id: "G", heroIds: ["hero-a"] },
+        { id: "S", heroIds: ["hero-b"] },
+      ]);
+      runDay(h);
+      runDay(h);
+      expect(splitLabel(h)).toBe("Rejoin party");
+      runDay(h, {
+        onTurn: () => {
+          if ((h.play.regroupQueue ?? []).length === 0) gearPick(h, "join", "hero-b");
+        },
+      });
+      expect(h.play.dayNumber).toBe(3);
+      expect(h.play.groups).toHaveLength(2);
+      expect(splitLabel(h)).toBe("Rejoin party");
+      expect(beginDay(h)).toBe("prompt");
+      expect(h.play.groups).toEqual([
+        expect.objectContaining({ id: "G", heroIds: ["hero-a", "hero-b"], order: 0 }),
+      ]);
+      expect(h.play.turnOrder).toEqual(["G"]);
+      expect(Object.keys(ensureClock(h.play).shifts)).toEqual(["G"]);
+      expect(splitLabel(h)).toBe("Split party");
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-05 each group takes the per-split-group shift while split, floor 2, read from tuning", () => {
+    const seed = "cu04-ev05";
+    const seq = seqWithRaws(seed, [4, 2]);
+    const split = boot(seed, ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(split, [
+        { id: "G", heroIds: ["hero-a"] },
+        { id: "S", heroIds: ["hero-b"] },
+      ]);
+      split.play.rngSeq = seq;
+      beginDay(split);
+      const shifts = ensureClock(split.play).shifts as Record<string, Record<string, number>>;
+      expect(shifts.G).toEqual({ raw: 4, virtue: 0, corruption: 0, split: -1, total: 3 });
+      // A split-off group of one also takes it; raw 2 stays at the floor.
+      expect(shifts.S).toEqual({ raw: 2, virtue: 0, corruption: 0, split: -1, total: 2 });
+      const rolls = projectShellView({ ...split.shell, screen: "play" }).table?.rolls ?? [];
+      expect(rolls.map((roll) => rollLine(roll))).toEqual([
+        "hero-a: 3 (−1 split)",
+        "hero-b: 2 (−1 split)",
+      ]);
+      expect(rolls[0]).toMatchObject({ corruption: 0, split: -1 });
+    } finally {
+      closeHarness();
+    }
+
+    for (const [raw, total] of [
+      [4, 4],
+      [2, 2],
+    ] as const) {
+      const one = boot(seed, ["hero-a", "hero-b"], false);
+      try {
+        oneSpace(one, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+        one.play.rngSeq = seqWithRaws(seed, [raw]);
+        beginDay(one);
+        expect(ensureClock(one.play).shifts.G).toEqual({ raw, virtue: 0, corruption: 0, total });
+      } finally {
+        closeHarness();
+      }
+    }
+
+    // The shift is the tuning key's: -2 moves the total.
+    const tuned = boot(seed, ["hero-a", "hero-b"], false);
+    try {
+      configureDayClock(tuned.play, { tuning: { day: { shifts: { per_split_group: -2 } } } });
+      oneSpace(tuned, [
+        { id: "G", heroIds: ["hero-a"] },
+        { id: "S", heroIds: ["hero-b"] },
+      ]);
+      tuned.play.rngSeq = seqWithRaws(seed, [6, 6]);
+      beginDay(tuned);
+      expect(ensureClock(tuned.play).shifts.G?.total).toBe(4);
+      expect(ensureClock(tuned.play).shifts.S?.total).toBe(4);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-08 a pick mid-turn moves nothing until the day start", () => {
+    const h = boot("cu04-ev08", ["hero-a", "hero-b", "hero-c"], false);
+    try {
+      const spaceId = oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      h.play.groups.push({
+        id: "L",
+        heroIds: ["hero-c"],
+        spaceId: citadelForKingdom(h.play.content.board, "S").id,
+        insideBuilding: false,
+        order: 1,
+      });
+      h.play.turnOrder = ["G", "L"];
+      runDay(h);
+      const seen: string[] = [];
+      let movesAtPick = -1;
+      runDay(h, {
+        onTurn: (groupId, moves) => {
+          seen.push(groupId);
+          if (groupId === "G") {
+            movesAtPick = moves;
+            gearPick(h, "split", "hero-a");
+            expect(h.play.groups).toHaveLength(2);
+            expect(h.play.groups[0]).toMatchObject({
+              id: "G",
+              heroIds: ["hero-a", "hero-b"],
+              spaceId,
+            });
+          }
+        },
+      });
+      expect(movesAtPick).toBeGreaterThan(0);
+      expect(seen).toEqual(["G", "L"]);
+      expect(h.play.groups).toHaveLength(2);
+      expect(h.play.turnOrder).toEqual(["G", "L"]);
+      beginDay(h);
+      expect(h.play.groups).toHaveLength(3);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-11 a queue, its apply and the day start card send no tower command", () => {
+    const commandsFor = (queue: boolean): unknown[] => {
+      const h = boot("cu04-ev11", ["hero-a", "hero-b"], true);
+      try {
+        oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+        takePendingTowerCommands();
+        const picked: unknown[] = [];
+        if (queue) {
+          const result = stepShell(h.shell, {
+            kind: "gear",
+            v: 1,
+            deviceId: "pad",
+            action: "pick",
+            item: "split",
+            pick: "split",
+            heroId: "hero-b",
+          });
+          bindShellState(result.state);
+          h.shell = result.state;
+          picked.push(...result.effects.filter((effect) => effect.kind === "tower-command"));
+          expect(h.play.regroupQueue).toHaveLength(1);
+        }
+        runDay(h, { place: () => undefined });
+        if (queue) {
+          expect(h.play.groups).toHaveLength(2);
+          queueRegroupPick(h.play, "join", "hero-b", "pad");
+        }
+        beginDay(h);
+        if (queue) expect(h.play.groups).toHaveLength(1);
+        return [...picked, ...takePendingTowerCommands()];
+      } finally {
+        closeHarness();
+      }
+    };
+    const control = commandsFor(false);
+    const queued = commandsFor(true);
+    expect(queued).toEqual(control);
+    expect(queued.every((command) => JSON.stringify(command).includes("sound"))).toBe(true);
+  });
+
+  it("EV-22 groups, spaces and turn order survive a save and restore; the queue too", () => {
+    const h = boot("cu04-ev22", ["hero-a", "hero-b", "hero-c"], false);
+    try {
+      oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b", "hero-c"] }]);
+      queueRegroupPick(h.play, "split", "hero-c", "pad");
+      runDay(h);
+      queueRegroupPick(h.play, "split", "hero-a", "pad");
+      const saved = JSON.parse(JSON.stringify(serializeShellState(h.shell)));
+      const restored = deserializeShellState(saved);
+      const play = restored.play;
+      expect(play?.groups).toEqual(h.play.groups);
+      expect(play?.turnOrder).toEqual(h.play.turnOrder);
+      expect(play?.groups.map((group) => group.spaceId)).toEqual(
+        h.play.groups.map((group) => group.spaceId),
+      );
+      expect(play?.turnOrder.at(-1)).toBe("split-hero-c-1");
+      expect(play?.regroupQueue).toEqual([{ kind: "split", heroId: "hero-a", deviceId: "pad" }]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-23 an unsplit, unqueued party rolls as before, with no split term and no regroup node", () => {
+    for (const heroes of [
+      ["hero-a", "hero-b"],
+      ["hero-a", "hero-b", "hero-c", "hero-d"],
+    ]) {
+      const h = boot(`cu04-ev23-${heroes.length}`, heroes, false);
+      try {
+        oneSpace(h, [{ id: "G", heroIds: heroes }]);
+        for (let day = 1; day <= 5; day++) {
+          const seq = h.play.rngSeq;
+          // The roll is the first draw of the day: the stream is where it was with the prompt.
+          const raw = eventRng(h.shell.seed, seq).roll("2d3").total;
+          runDay(h);
+          expect(ensureClock(h.play).shifts).toEqual({
+            G: { raw, virtue: 0, corruption: 0, total: Math.max(2, raw) },
+          });
+        }
+        const nodes = dayTrace(h.play).nodes;
+        for (const node of [".38", ".39", ".40", ".41", ".42"]) expect(nodes).not.toContain(node);
+        expect(h.play.regroupCardDay).toBeNull();
+      } finally {
+        closeHarness();
+      }
+    }
+  });
+
+  it("EV-24 an action that cannot apply is dropped with its code, told to its iPad, never silent", () => {
+    // A queued Rejoin, then the groups stop sharing a space.
+    const rejoin = boot("cu04-ev24-join", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(rejoin, [
+        { id: "G", heroIds: ["hero-a"] },
+        { id: "S", heroIds: ["hero-b"] },
+      ]);
+      expect(queueRegroupPick(rejoin.play, "join", "hero-b", "pad-2")).toBe(true);
+      const away = rejoin.play.groups[1];
+      if (!away) throw new Error("No second group.");
+      away.spaceId = citadelForKingdom(rejoin.play.content.board, "S").id;
+      const before = structuredClone(rejoin.play.groups);
+      beginDay(rejoin);
+      expect(rejoin.play.groups).toEqual(before);
+      const errors = pressErrors(rejoin);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toMatchObject({ code: REGROUP_DROPPED, deviceId: "pad-2" });
+      expect(errors[0]?.message).toContain("Rejoin");
+      expect(shellEffectSchema.safeParse(errors[0]).success).toBe(true);
+      expect(rejoin.play.regroupQueue).toEqual([]);
+      expect(rejoin.play.regroupCardDay).toBeNull();
+    } finally {
+      closeHarness();
+    }
+
+    // A queued split of a hero who is no longer in a group of 2 or more.
+    const split = boot("cu04-ev24-split", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(split, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      expect(queueRegroupPick(split.play, "split", "hero-b", "pad")).toBe(true);
+      const group = split.play.groups[0];
+      if (!group) throw new Error("No group.");
+      group.heroIds = ["hero-b"];
+      const before = structuredClone(split.play.groups);
+      beginDay(split);
+      expect(split.play.groups).toEqual(before);
+      const errors = pressErrors(split);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toMatchObject({ code: REGROUP_DROPPED, deviceId: "pad" });
+      expect(shellEffectSchema.safeParse(errors[0]).success).toBe(true);
+      expect(split.play.regroupQueue).toEqual([]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("EV-26 queued actions stack and apply in the order picked", () => {
+    const run = (order: Array<["split" | "join", string]>) => {
+      const h = boot("cu04-ev26", ["hero-a", "hero-b", "hero-c", "hero-d"], false);
+      try {
+        oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b", "hero-c", "hero-d"] }]);
+        for (const [kind, heroId] of order) gearPick(h, kind, heroId);
+        const queued = (h.play.regroupQueue ?? []).map((entry) => [entry.kind, entry.heroId]);
+        h.shell.screen = "play";
+        h.play.dayNumber = 1;
+        const panel = projectShellView(h.shell).gear?.regroup?.queue ?? [];
+        const before = groupSignature(h.play);
+        beginDay(h);
+        return {
+          queued,
+          panel: panel.map((row) => [row.kind, row.heroId]),
+          unchangedBefore: before === "G:hero-a+hero-b+hero-c+hero-d",
+          groups: groupSignature(h.play),
+          left: h.play.regroupQueue,
+          errors: pressErrors(h),
+        };
+      } finally {
+        closeHarness();
+      }
+    };
+    const first = run([
+      ["split", "hero-a"],
+      ["split", "hero-b"],
+      ["join", "hero-c"],
+    ]);
+    const second = run([
+      ["split", "hero-b"],
+      ["split", "hero-a"],
+      ["join", "hero-c"],
+    ]);
+    expect(first.queued).toEqual([
+      ["split", "hero-a"],
+      ["split", "hero-b"],
+      ["join", "hero-c"],
+    ]);
+    expect(first.panel).toEqual(first.queued);
+    expect(second.queued).toEqual([
+      ["split", "hero-b"],
+      ["split", "hero-a"],
+      ["join", "hero-c"],
+    ]);
+    expect(second.panel).toEqual(second.queued);
+    expect(first.unchangedBefore && second.unchangedBefore).toBe(true);
+    // The rejoin merges the oldest other group back, which the pick order decided.
+    expect(first.groups).toBe("G:hero-a+hero-c+hero-d|split-hero-b-2:hero-b");
+    expect(second.groups).toBe("G:hero-b+hero-c+hero-d|split-hero-a-2:hero-a");
+    for (const result of [first, second]) {
+      expect(result.left).toEqual([]);
+      expect(result.errors).toEqual([]);
+    }
+  });
+
+  it("EV-27 an opposite pick for the same hero cancels the queued one, with no error", () => {
+    const h = boot("cu04-ev27", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      gearPick(h, "split", "hero-b");
+      expect(regroupPicks(h.play)).toContainEqual({ kind: "join", heroId: "hero-b" });
+      gearPick(h, "join", "hero-b");
+      expect(h.play.regroupQueue).toEqual([]);
+      const before = groupSignature(h.play);
+      beginDay(h);
+      expect(groupSignature(h.play)).toBe(before);
+      expect(h.play.regroupCardDay).toBeNull();
+      expect(pressErrors(h)).toEqual([]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  // The source half (no literal in the card, no tuning key) is in server/pack/tuning.test.ts:
+  // the engine may not read files.
+  it("EV-28 the groups card's time is the exported constant, and moves when it changes", async () => {
+    expect(AUTO_ADVANCE_MS).toBe(4000);
+
+    const cardHold = (project: typeof projectShellView): number | undefined => {
+      const h = boot("cu04-ev28", ["hero-a", "hero-b"], false);
+      try {
+        oneSpace(h, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+        queueRegroupPick(h.play, "split", "hero-b", "pad");
+        // The day loop does not wait for the card: the roll is offered at once.
+        expect(beginDay(h)).toBe("prompt");
+        expect(h.offers.map((offer) => offer.promptId)).toEqual(["day-1-roll-done"]);
+        h.shell.screen = "play";
+        h.shell.loops.stack.push({ loopId: "day", phase: "body", local: h.local } as never);
+        return project(h.shell).table?.groupsCard?.holdMs;
+      } finally {
+        closeHarness();
+      }
+    };
+    expect(cardHold(projectShellView)).toBe(AUTO_ADVANCE_MS);
+    vi.resetModules();
+    vi.doMock("../../../protocols/v2/views.ts", async (original) => ({
+      ...(await original<object>()),
+      AUTO_ADVANCE_MS: 1234,
+    }));
+    try {
+      const changed = await import("../session/view.ts");
+      expect(cardHold(changed.projectShellView)).toBe(1234);
+    } finally {
+      vi.doUnmock("../../../protocols/v2/views.ts");
+      vi.resetModules();
+    }
+  });
+
+  it("EV-29 the host's split action queues exactly as an iPad pick does", () => {
+    const viaPanel = boot("cu04-ev29", ["hero-a", "hero-b"], false);
+    let panelQueue: unknown;
+    try {
+      oneSpace(viaPanel, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      gearPick(viaPanel, "split", "hero-b");
+      panelQueue = structuredClone(viaPanel.play.regroupQueue);
+    } finally {
+      closeHarness();
+    }
+    const viaHost = boot("cu04-ev29", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(viaHost, [{ id: "G", heroIds: ["hero-a", "hero-b"] }]);
+      // The host's act: a split pick with no panel open (the act a Continue replays, too).
+      viaHost.shell = applyGear(viaHost.shell, {
+        deviceId: "pad",
+        action: "pick",
+        item: "split",
+        pick: "split",
+        heroId: "hero-b",
+      });
+      expect(viaHost.shell.gearPanel).toBeNull();
+      expect(viaHost.play.regroupQueue).toEqual(panelQueue);
+      expect(viaHost.play.groups).toHaveLength(1);
+      beginDay(viaHost);
+      expect(groupSignature(viaHost.play)).toBe("G:hero-a|split-hero-b-1:hero-b");
+      // While another iPad's panel is open, the host act is refused: one owner at a time.
+      const open = applyGear(viaHost.shell, { deviceId: "other", action: "open", item: "volume" });
+      const refused = applyGear(open, {
+        deviceId: "pad",
+        action: "pick",
+        item: "split",
+        pick: "join",
+        heroId: "hero-b",
+      });
+      expect(refused.play?.regroupQueue).toEqual([]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("applySplit and applyJoin still refuse an impossible change", () => {
+    const h = boot("cu04-apply", ["hero-a", "hero-b"], false);
+    try {
+      oneSpace(h, [{ id: "G", heroIds: ["hero-a"] }]);
+      expect(applySplit(h.play, "G", "hero-a")).toBeNull();
+      expect(applyJoin(h.play, "G", "G")).toBe(false);
+      expect(projectedGroups(h.play).groups).toEqual(h.play.groups);
     } finally {
       closeHarness();
     }

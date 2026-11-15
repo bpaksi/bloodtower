@@ -559,7 +559,8 @@ test("the open Menu matches the gear list in play", async ({ browser }, testInfo
     expect(await gearLabels(page)).toEqual([...GEAR_LIST]);
     await expect(page.locator("[data-menu] h2")).toHaveText(["Look up", "Table", "Leave"]);
     await greyReason(page, "tower", "The tower is connected.");
-    await greyReason(page, "split-party", "C3+");
+    // CU/04: Split party is live; with no hero in a group of 2 or more it has nothing to pick.
+    await greyReason(page, "split-party", "[COPY: split-party-none]");
     await greyReason(page, "use-potion", "C3+");
     await expect(page.locator("[data-menu] [data-version]")).toHaveText(/^v\d+\.\d+\.\d+/);
     await expectCloseLast(page);
@@ -935,7 +936,8 @@ test("a disabled item shows its reason", async ({ browser }, testInfo) => {
   try {
     await reach(playPage, playing.host.joinCode, "connect", "play");
     await openMenu(playPage);
-    await greyReason(playPage, "split-party", "C3+");
+    // CU/04: Split party is live; with no hero in a group of 2 or more it has nothing to pick.
+    await greyReason(playPage, "split-party", "[COPY: split-party-none]");
     await greyReason(playPage, "use-potion", "C3+");
     await greyReason(playPage, "tower", "The tower is connected.");
     await expect(playPage.locator('[data-gear-item="volume"]')).toBeEnabled();

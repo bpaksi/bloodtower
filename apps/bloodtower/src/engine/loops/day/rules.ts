@@ -10,6 +10,8 @@ export type DayTuning = {
   moveFloor: number;
   perVirtue: number;
   perCorruption: number;
+  /** Each group's shift while the party is split, a group of one included (PT-06, DEC-918). */
+  perSplitGroup: number;
   supply: number;
   dropOneOrTwo: number;
   dropThreeOrFourEach: number;
@@ -24,6 +26,7 @@ const BASE_DAY_TUNING: DayTuning = {
   moveFloor: 2,
   perVirtue: 1,
   perCorruption: -1,
+  perSplitGroup: -1,
   supply: 24,
   dropOneOrTwo: 1,
   dropThreeOrFourEach: 1,
@@ -56,6 +59,7 @@ export const dayTuningFrom = (source?: unknown): DayTuning => {
     moveFloor: whole(move.floor, base.moveFloor),
     perVirtue: whole(shifts.per_helping_virtue, base.perVirtue),
     perCorruption: whole(shifts.per_corruption, base.perCorruption),
+    perSplitGroup: whole(shifts.per_split_group, base.perSplitGroup),
     supply: whole(skulls.supply, base.supply),
     dropOneOrTwo: whole(drops.heroes_1_to_2, base.dropOneOrTwo),
     dropThreeOrFourEach: whole(many.each_night, base.dropThreeOrFourEach),
@@ -154,5 +158,6 @@ export const applyMoveTotal = (
   raw: number,
   virtueShift: number,
   corruptionShift: number,
+  splitShift: number,
   floor: number,
-): number => Math.max(floor, raw + virtueShift + corruptionShift);
+): number => Math.max(floor, raw + virtueShift + corruptionShift + splitShift);

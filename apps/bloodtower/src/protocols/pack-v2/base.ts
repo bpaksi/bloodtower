@@ -202,6 +202,8 @@ export const tuningSchema = z
       shifts: z.strictObject({
         per_helping_virtue: intSchema,
         per_corruption: intSchema,
+        /** PT-06, DEC-918: each group's shift while the party is split (DEC-079 slot). */
+        per_split_group: intSchema,
       }),
       event_chance: z.strictObject({
         short: percentSchema,

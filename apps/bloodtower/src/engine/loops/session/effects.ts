@@ -3,6 +3,9 @@ import { z } from "zod";
 /** Error code logged when a no-tower skull has nowhere to land (Q3.1). */
 export const SKULL_NO_BUILDING = "skull-no-building" as const;
 
+/** Error code logged when a queued Split or Rejoin cannot apply at the day start (CU/04, Q4.2). */
+export const REGROUP_DROPPED = "regroup-dropped" as const;
+
 export const viewRefreshEffectV1 = z.object({
   kind: z.literal("view-refresh"),
   v: z.literal(1),
@@ -39,8 +42,13 @@ export const checkpointWriteEffectV1 = z.object({
 export const pressErrorEffectV1 = z.object({
   kind: z.literal("press-error"),
   v: z.literal(1),
-  code: z.enum(["invalid-state", SKULL_NO_BUILDING]),
+  code: z.enum(["invalid-state", SKULL_NO_BUILDING, REGROUP_DROPPED]),
   message: z.string().min(1).max(300),
+  /**
+   * The iPad to tell when it is not the one whose press stepped the engine: a queued Split or
+   * Rejoin is reported to the iPad that queued it (CU/04 EV-24). Omitted: the pressing iPad.
+   */
+  deviceId: z.string().min(1).optional(),
 });
 
 /**

@@ -66,7 +66,34 @@ const dayRollSchema = z.strictObject({
   virtue: z.number().int().min(-99).max(99),
   terrain: z.number().int().min(-99).max(99),
   corruption: z.number().int().min(-99).max(99),
+  /** The per-split-group shift while the party is split (PT-06). Absent on older views: 0. */
+  split: z.number().int().min(-99).max(99).optional(),
   total: z.number().int().min(0).max(99),
+});
+
+/**
+ * How long a no-button day card stays on the board before it leaves by itself, in ms (Q4.4).
+ * One constant: the groups card reads it now, and the day loop's 4 s timer (C3-11 Ruling 1)
+ * must read it too when that step is built. It is not a tuning key.
+ */
+export const AUTO_ADVANCE_MS = 4000;
+
+/**
+ * The groups card (PT-18, Q4.1): only on a day whose start applied a queued Split or Rejoin.
+ * One row per group in turn order, each with its heroes. No button; it leaves by itself.
+ */
+const groupsCardSchema = z.strictObject({
+  day: z.number().int().min(1).max(99),
+  holdMs: z.number().int().min(1).max(60_000),
+  groups: z
+    .array(
+      z.strictObject({
+        groupId: z.string().min(1).max(80),
+        heroNames: z.array(z.string().min(1).max(80)).min(1).max(8),
+      }),
+    )
+    .min(1)
+    .max(8),
 });
 
 const skullBuildingSchema = z.strictObject({
@@ -111,6 +138,7 @@ const tableBandSchema = z.strictObject({
   effects: z.array(z.string().min(1).max(120)).max(16).optional(),
   skull: daySkullSchema.nullable().optional(),
   corruptions: z.array(heroCorruptionSchema).max(16).optional(),
+  groupsCard: groupsCardSchema.nullable().optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),
@@ -135,6 +163,7 @@ export const GEAR_PANELS = [
   "change-who-holds-whom",
   "join-another-ipad",
   "tower",
+  "split",
 ] as const;
 export const gearPanelSchema = z.enum(GEAR_PANELS);
 export type GearPanelId = z.infer<typeof gearPanelSchema>;
@@ -147,6 +176,23 @@ const gearPartyHeroSchema = z.strictObject({
   items: z.string().min(1).max(200),
   corruptions: z.string().min(1).max(200),
   holder: z.string().min(1).max(80).nullable(),
+});
+
+/** One Split party pick or queued action, by hero (PT-18, Q4.2). */
+const regroupRowSchema = z.strictObject({
+  kind: z.enum(["split", "join"]),
+  heroId: heroIdSchema,
+  name: z.string().min(1).max(80),
+});
+
+/**
+ * The Split party panel: the picks on offer (read against the groups after the queue) and the
+ * queue in pick order. `open` is false when there is nothing to pick or cancel.
+ */
+const gearRegroupSchema = z.strictObject({
+  open: z.boolean(),
+  picks: z.array(regroupRowSchema).max(32),
+  queue: z.array(regroupRowSchema).max(32),
 });
 
 const gearCardSchema = z.strictObject({
@@ -174,6 +220,8 @@ export const gearViewSchema = z.strictObject({
   sessionOver: z.boolean(),
   beforeBegin: z.boolean(),
   partySplit: z.boolean(),
+  /** Absent on views built before CU/04. */
+  regroup: gearRegroupSchema.optional(),
   party: z.array(gearPartyHeroSchema).max(16),
   cards: z.array(gearCardSchema).max(8),
   joinUrl: z.string().min(1).max(500).nullable(),
