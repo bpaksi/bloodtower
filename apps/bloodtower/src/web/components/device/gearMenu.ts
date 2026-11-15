@@ -37,6 +37,8 @@ const C3 = "C3+";
 const TOWER_CONNECTED = "The tower is connected.";
 const OPEN_ELSEWHERE = "Open on another iPad.";
 const SESSION_OVER = "The session is over.";
+/** [COPY: split-party-none] Loremaster slot (step 45): nobody can split off or rejoin now. */
+export const SPLIT_NONE = "[COPY: split-party-none]";
 
 export type MenuContext = {
   inGame: boolean;
@@ -44,6 +46,8 @@ export type MenuContext = {
   sessionScreen: boolean;
   towerConnected: boolean;
   partySplit: boolean;
+  /** Split party has a pick or a queued action to cancel (PT-18). Absent: nothing to pick. */
+  regroupOpen?: boolean;
   blockedItem: string | null;
   /** Done for tonight was confirmed: every item is disabled with a reason (DEC-713). */
   sessionOver?: boolean;
@@ -84,7 +88,15 @@ export const gearRows = (ctx: MenuContext): GearRow[] => {
     row(ctx, "look-up", "Look up", "Look up", lookEnabled, ONLY_IN_GAME, true),
     row(ctx, "game-board-setup", "Table", "Game board setup", true, null, true),
     row(ctx, "volume", "Table", "Volume", true, null, true),
-    row(ctx, "split-party", "Table", splitLabel, false, C3, false),
+    row(
+      ctx,
+      "split-party",
+      "Table",
+      splitLabel,
+      ctx.inGame && ctx.regroupOpen === true,
+      ctx.inGame ? SPLIT_NONE : ONLY_IN_GAME,
+      true,
+    ),
     row(ctx, "use-potion", "Table", "Use a potion or item", false, C3, false),
     row(ctx, "change-who-holds-whom", "Table", "Change who holds whom", true, null, true),
     row(ctx, "join-another-ipad", "Table", "Join another iPad", true, null, true),

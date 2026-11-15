@@ -34,6 +34,8 @@ A ruling is often refined by later ones. `pnpm graph show <ID>` lists them under
 | [probes/](probes/) | Scripted games played from the cards alone, and the numbers pass (P-001 to P-006). A rules gap found there becomes a `Q-` card |
 | [playtests/](playtests/) | Paper playtests: three personas walked through the screens and the table, with findings and fixes (first: 2026-11-12, v1 to v1.2) |
 | [audit-rulings-2026-11-13.md](audit-rulings-2026-11-13.md) | Gamewright's rulings on D1 to D6 of the Dark Tower consolidated audit, and the two design items from Hammer's status check (DEC-905 to DEC-914) |
+| [cu-flag-rulings-2026-11-15.md](cu-flag-rulings-2026-11-15.md) | Gamewright's rulings on the four open CU/03, CU/04 and CU/07 flags: the night's stop at the loss, the groups card, the freed-skull pick order and the 1.0 virtue deck (DEC-931 to DEC-934) |
+| [cu-copy-rulings-2026-11-15.md](cu-copy-rulings-2026-11-15.md) | Gamewright's answers to Loremaster's CU/05, CU/08 and CU/10 copy questions (DEC-935, DEC-936) |
 | [specs/](specs/) | Build specifications drawn from the cards: art specs, asset requirements, and the Dracula story's D-01 to D-06 |
 | [mockups/](mockups/) | Dated screen mockups from design sessions |
 | [glossary.md](glossary.md) | One meaning per word |

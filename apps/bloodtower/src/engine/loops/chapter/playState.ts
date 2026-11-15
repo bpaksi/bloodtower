@@ -31,6 +31,16 @@ export type GroupState = {
   order: number;
 };
 
+/** A queued gear action (PT-18): Split takes the hero off; Rejoin joins the hero's group. */
+export type RegroupKind = "split" | "join";
+
+export type QueuedRegroup = {
+  kind: RegroupKind;
+  heroId: string;
+  /** The iPad that picked it, told if it cannot apply. Null for a pick with no iPad. */
+  deviceId: string | null;
+};
+
 export type PlayState = {
   content: PlayContent;
   groups: GroupState[];
@@ -42,6 +52,13 @@ export type PlayState = {
   /** Moves rolled for the current day, per group id. */
   dayRolls: Record<string, number>;
   lastSkull: { kingdom: KingdomId; spaceId: string; building: string | null } | null;
+  /**
+   * Split and Rejoin picked from the gear, in pick order (PT-18, Q4.2). They apply at the next
+   * day start, before the roll. Absent on a checkpoint from before CU/04: nothing queued.
+   */
+  regroupQueue?: QueuedRegroup[];
+  /** The day whose start applied a queued change, so the board shows the groups card (Q4.1). */
+  regroupCardDay?: number | null;
   booted: boolean;
   /** Input for the next child loop (group turn or encounter). */
   childInput:
@@ -112,6 +129,20 @@ export const seatAtCitadels = (
   });
 };
 
+/**
+ * TEST ONLY (C3-11 ruling 5, CU/04). A seed ending in this marker seats every hero in one group
+ * on the first group's citadel, so an e2e can split and rejoin. Real seeds are random hex
+ * (`randomBytes(8).toString("hex")`) or a story's own, and never carry it.
+ */
+export const TEST_SEAT_TOGETHER = "~test-seat-together";
+
+const seatTogetherForTest = (groups: GroupState[], turnOrder: string[]): GroupState[] => {
+  const ordered = turnOrder.flatMap((id) => groups.filter((group) => group.id === id));
+  const lead = ordered[0];
+  if (!lead) return groups;
+  return [{ ...lead, heroIds: ordered.flatMap((group) => group.heroIds) }];
+};
+
 export const initPlayState = (seed: string, content: PlayContent): PlayState => {
   const rng = eventRng(seed, 0);
   const assignments = content.start.assignments;
@@ -130,16 +161,22 @@ export const initPlayState = (seed: string, content: PlayContent): PlayState => 
   for (const group of groups) {
     group.order = orderMap.get(group.id) ?? group.order;
   }
-  const turnOrder = [...groups].sort((a, b) => a.order - b.order).map((g) => g.id);
+  const shuffledOrder = [...groups].sort((a, b) => a.order - b.order).map((g) => g.id);
+  const seated = seed.endsWith(TEST_SEAT_TOGETHER)
+    ? seatTogetherForTest(groups, shuffledOrder)
+    : groups;
+  const turnOrder = seated === groups ? shuffledOrder : seated.map((group) => group.id);
 
   return {
     content,
-    groups,
+    groups: seated,
     turnOrder,
     dayNumber: 0,
     rngSeq: 1,
     dayRolls: {},
     lastSkull: null,
+    regroupQueue: [],
+    regroupCardDay: null,
     booted: true,
     childInput: null,
   };

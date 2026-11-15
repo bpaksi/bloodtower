@@ -27,4 +27,4 @@ The setup steps run as today.
 
 ## Decided (was OPEN)
 
-- The card's line is the pack's `ability`; "Another iPad is waiting for a hero" is not built in 1.0; "Picked" and "Open" stay (Loremaster may reword). Bob, 2026-11-14, adopted. See plan.md.
+- The card's line is the pack's `ability` field, now the class's two intrinsic virtues (DEC-936, Copy table in ./plan.md); "Another iPad is waiting for a hero" is not built in 1.0; "Picked" and "Open" stay (Loremaster may reword). Bob, 2026-11-14, adopted.

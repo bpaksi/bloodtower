@@ -18,8 +18,9 @@ import type { MenuContext } from "./gearMenu.ts";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
-/** [COPY: regroup] The iPad asks; the board shows the same line (DEC-640). */
-const REGROUP_PROMPT = "A new day. Stay together, or split up?";
+/** [COPY: split-party-help] and [COPY: queued-confirm]: Loremaster slots (step 45). */
+const SPLIT_HELP = "[COPY: split-party-help]";
+const QUEUED_NOTE = "[COPY: queued-confirm] Queued: takes effect at the next day.";
 
 const SCREEN_TITLE: Record<string, string> = {
   splash: "Blood Tower",
@@ -108,7 +109,14 @@ const menuContext = (view: DeviceView): MenuContext | undefined => {
     sessionOver: gear.sessionOver,
     towerConnected: gear.towerConnected,
     partySplit: gear.partySplit,
-    blockedItem: gear.panel && gear.owner !== view.deviceId ? gear.panel : null,
+    regroupOpen: gear.regroup?.open ?? false,
+    // The Split party row opens the `split` panel.
+    blockedItem:
+      gear.panel && gear.owner !== view.deviceId
+        ? gear.panel === "split"
+          ? "split-party"
+          : gear.panel
+        : null,
   };
 };
 
@@ -117,6 +125,72 @@ const ownsPanel = (view: DeviceView): GearView | null => {
   if (!gear?.panel || gear.owner !== view.deviceId) return null;
   return gear;
 };
+
+const regroupLabel = (row: { kind: "split" | "join"; name: string }) =>
+  row.kind === "split" ? `Split ${row.name} off` : `Rejoin ${row.name}`;
+
+/**
+ * Split party (PT-18, CU/04 mockup `#gear-split`): one pick per hero, Back, then the queue. A
+ * pick is queued for the next day start; nothing splits now.
+ */
+function SplitDevicePanel({
+  gear,
+  live,
+  onAct,
+}: {
+  gear: GearView;
+  live: boolean;
+  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
+}) {
+  const regroup = gear.regroup ?? { open: false, picks: [], queue: [] };
+  return (
+    <section data-gear-panel="split">
+      <p className="bt-kicker" data-see-board="">
+        See the Story board
+      </p>
+      <h2>{gear.partySplit ? "Rejoin party" : "Split party"}</h2>
+      <p data-copy="split-party-help">{SPLIT_HELP}</p>
+      <div className="mt-6 flex flex-col gap-3">
+        {regroup.picks.map((pick) => (
+          <button
+            key={`${pick.kind}-${pick.heroId}`}
+            type="button"
+            className="bt-secondary"
+            data-regroup-pick={pick.kind}
+            data-hero={pick.heroId}
+            disabled={!live}
+            onClick={() =>
+              onAct("gear", "pick", { item: "split", pick: pick.kind, heroId: pick.heroId })
+            }
+          >
+            {regroupLabel(pick)}
+          </button>
+        ))}
+        <button
+          type="button"
+          className="bt-secondary"
+          data-gear-back=""
+          disabled={!live}
+          onClick={() => onAct("gear", "done")}
+        >
+          Back
+        </button>
+      </div>
+      <div className="mt-6" data-regroup-queued="">
+        <p data-copy="queued-confirm">{QUEUED_NOTE}</p>
+        {regroup.queue.length > 0 ? (
+          <ol data-regroup-queue="">
+            {regroup.queue.map((row) => (
+              <li key={`${row.kind}-${row.heroId}`} data-queued={row.kind} data-hero={row.heroId}>
+                {regroupLabel(row)}
+              </li>
+            ))}
+          </ol>
+        ) : null}
+      </div>
+    </section>
+  );
+}
 
 function GearDevicePanel({
   gear,
@@ -127,6 +201,7 @@ function GearDevicePanel({
   live: boolean;
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
 }) {
+  if (gear.panel === "split") return <SplitDevicePanel gear={gear} live={live} onAct={onAct} />;
   const send = (actionId: string, args?: Record<string, unknown>) => onAct("gear", actionId, args);
   const stepBack = Boolean(gear.card || gear.firstHero);
   return (
@@ -811,11 +886,6 @@ export function CoreDeviceScreen({
             >
               {view.shows}
             </p>
-            {view.table?.phase === "regroup" ? (
-              <p className="mt-2 text-lg" data-day-step="regroup">
-                {REGROUP_PROMPT}
-              </p>
-            ) : null}
             {view.table?.phase === "skull" ? (
               <p className="mt-2 text-lg" data-day-step="skull">
                 {view.table.skull?.kingdomLabel

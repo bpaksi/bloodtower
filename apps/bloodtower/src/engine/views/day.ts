@@ -64,7 +64,7 @@ export const comingDrop = (input: {
 export const rollView = (input: {
   groupId: string;
   name: string;
-  shift: { raw: number; virtue: number; corruption: number; total: number };
+  shift: { raw: number; virtue: number; corruption: number; split?: number; total: number };
 }): DayRollView => ({
   groupId: input.groupId,
   name: input.name,
@@ -72,17 +72,19 @@ export const rollView = (input: {
   virtue: input.shift.virtue,
   terrain: 0,
   corruption: input.shift.corruption,
+  ...(input.shift.split ? { split: input.shift.split } : {}),
   total: input.shift.total,
 });
 
 const signed = (n: number, word: string): string =>
   n < 0 ? `(−${Math.abs(n)} ${word})` : `(+${n} ${word})`;
 
-/** `<Group name>: <total>` then one term per modifier: virtue, terrain, corruption (EV-01). */
+/** `<Group name>: <total>` then one term per modifier: virtue, terrain, corruption, split (EV-01). */
 export const rollLine = (roll: DayRollView): string => {
   const terms: string[] = [];
   if (roll.virtue !== 0) terms.push(signed(roll.virtue, "virtue"));
   if (roll.terrain !== 0) terms.push(signed(roll.terrain, "terrain"));
   if (roll.corruption !== 0) terms.push(signed(roll.corruption, "corruption"));
+  if (roll.split) terms.push(signed(roll.split, "split"));
   return [`${roll.name}: ${roll.total}`, ...terms].join(" ");
 };

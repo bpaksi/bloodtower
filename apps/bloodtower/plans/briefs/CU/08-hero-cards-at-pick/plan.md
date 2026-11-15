@@ -57,25 +57,37 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text is Loremaster's, step 45. A build shows the locked rows below and fills every `[COPY: ...]` row from the final table, never from the mockup.
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471); rows 7 and 7a–7l updated the same day for DEC-936. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
 | 1 | `pick.button` | Pick Hero A | locked: DEC-232 (Bob 2026-10-25); unchanged, iPad |
 | 2 | `pick.count` | N of N picked | locked: DEC-232; unchanged |
 | 3 | `pick.help` | Who this iPad speaks for at the table | locked: DEC-232; unchanged |
-| 4 | `card.class` | [COPY: class names, from the pack role] | Loremaster, step 45 |
-| 5 | `card.fight` | [COPY: label for the fight number {N}] | Loremaster, step 45 |
-| 6 | `card.hp` | [COPY: label for hit points {N}] | Loremaster, step 45 |
-| 7 | `card.line` | the pack's `ability` word for the hero (for example "Duel") | decided: Bob, 2026-11-14, adopted |
-| 7a | `card.ability.<word>` | [COPY: one line per ability word, optional] | Loremaster, step 45; until filled the card shows the pack's `ability` as is |
-| 8 | `card.state.seated` | Picked / Open (kept from main) | decided: Bob, 2026-11-14, adopted; Loremaster may reword in step 45 |
+| 4 | `card.class` | fighter: Fighter; healer: Healer; magic-user: Magic-user; scout: Scout; ranger: Ranger; bard: Bard | new - Loremaster; Scholar dropped (DEC-378, DEC-936: the Bard replaces the Scholar). One word per 1.0 class. Capital first letter only; the hyphen in Magic-user is kept as in the mockup. A pack follow-up (DEC-936) still has to change `role: scholar` to `bard` |
+| 5 | `card.fight` | Fight {N} | new - Loremaster. The fight number from `tuning.yaml` (`fight`) |
+| 6 | `card.hp` | Hit points {N} | new - Loremaster. The hit points from `tuning.yaml` (`hit_points`); "hit points" is the game's word everywhere |
+| 6a | `card.unavailable` | unavailable | screen-spec States ("A field not known reads unavailable, never 0"); used after the label, for example "Fight unavailable" |
+| 7 | `card.line` | fighter: Shield Wall, Weapon Master; healer: Lightning, Mend; magic-user: Magic Missile, Fireball; scout: Shadow, Slip Past; ranger: Beast Hunter, Pathfinder; bard: Silver Tongue, Rally | DEC-936 and DEC-380. The card shows that class's two intrinsic virtues, in DEC-380 order. The pack's `ability` field holds these two names (Bob's 2026-11-14 choice stands: the line is still the pack field). The C1 placeholders Duel, Heal, Glyph, Disarm, Track and Lore, and any `card.ability.<word>` ids for them, are dropped and have no lines. A pack follow-up (Wright) writes the new `ability` values |
+| 7a | `card.virtue.shield-wall` | Shield Wall. Takes the foe's hit for the party, at reduced damage. | new - Loremaster (DEC-936, DEC-380, DEC-319). Fighter guard. 66 characters. DEC-556 sets the reduced hit (a seeded quarter to half, at least 1) |
+| 7b | `card.virtue.weapon-master` | Weapon Master. +1 against a Melee foe. | new - Loremaster (DEC-936, DEC-380, DEC-545, DEC-324). Fighter Advantage; +1 strength on a Melee match. 38 characters |
+| 7c | `card.virtue.lightning` | Lightning. A holy strike that cuts the foe 4, once a battle. | new - Loremaster (DEC-936, DEC-379, DEC-545, DEC-801). Healer spell. A dungeon counts as one battle (DEC-122). 60 characters |
+| 7d | `card.virtue.mend` | Mend. Heals 3 hit points to each hero in the group, once a day. | new - Loremaster (DEC-936, DEC-380, DEC-545). Healer perk; never above full (DEC-545, in the source note so the line stays under 80). 63 characters |
+| 7e | `card.virtue.magic-missile` | Magic Missile. Cuts the foe 2 every round. | new - Loremaster (DEC-936, DEC-379, DEC-545). Magic user's unlimited spell. 42 characters |
+| 7f | `card.virtue.fireball` | Fireball. Cuts the foe 4, once a battle. | new - Loremaster (DEC-936, DEC-379, DEC-545, DEC-801). Magic user spell. 40 characters |
+| 7g | `card.virtue.shadow` | Shadow. +1 against a Stealth foe. | new - Loremaster (DEC-936, DEC-380, DEC-545, DEC-324). Scout Advantage; +1 strength on a Stealth match. 33 characters |
+| 7h | `card.virtue.slip-past` | Slip Past. Once a quest, skips one trap or one room's cost. | new - Loremaster (DEC-936, DEC-380, DEC-545). Scout perk. 59 characters |
+| 7i | `card.virtue.beast-hunter` | Beast Hunter. +1 against a Beast foe. | new - Loremaster (DEC-936, DEC-380, DEC-545, DEC-324). Ranger Advantage; +1 strength on a Beast match. 37 characters |
+| 7j | `card.virtue.pathfinder` | Pathfinder. +1 to the move roll in the wild. | new - Loremaster (DEC-936, DEC-380, DEC-545, DEC-102). Ranger perk. 44 characters |
+| 7k | `card.virtue.silver-tongue` | Silver Tongue. A quarter off gold prices the group pays at a building. | new - Loremaster (DEC-936, DEC-681, DEC-545). Bard perk. 1.0 reach is every gold building price, rounded down, at least 1 off (DEC-681); village and bazaar wording returns in 1.1. 70 characters |
+| 7l | `card.virtue.rally` | Rally. +1 Wild in battle, which matches any foe. | new - Loremaster (DEC-936, DEC-380, DEC-545, DEC-068). Bard Advantage. Wild counts as any trait (DEC-068). 48 characters |
+| 8 | `card.state.seated` | Picked / Open | kept from main, not reworded: decided: Bob, 2026-11-14, adopted. "Picked" greys the card of a seated hero; "Open" is the free pool |
 
 ## Decided (was OPEN)
 
-- "One virtue line" is the pack's `ability`. Loremaster may give each ability word a line in the Copy table (row 7a). Bob, 2026-11-14, adopted.
+- "One virtue line" is still the pack's `ability` field (Bob, 2026-11-14, adopted). DEC-936: that field holds the class's two intrinsic virtues from DEC-380, and rows 7a–7l give one plain line per virtue name. The C1 ability words are dropped.
 - "Another iPad is waiting for a hero" is NOT built in 1.0 (design-freeze section H omits it); step 43's DEC says so. Bob, 2026-11-14, adopted.
-- The card words "Picked" and "Open" stay; Loremaster may reword in step 45. Bob, 2026-11-14, adopted.
+- The card words "Picked" and "Open" stay; Loremaster kept both words in step 45 (Copy row 8). Bob, 2026-11-14, adopted.
 
 ## Eval approval
 

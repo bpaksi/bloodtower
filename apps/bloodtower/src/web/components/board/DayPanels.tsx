@@ -1,13 +1,15 @@
 "use client";
 
 import type { BoardView } from "bloodtower-protocols";
+import { useEffect, useState } from "react";
 import { DialogFrame } from "./DialogFrame";
 
 type Table = NonNullable<BoardView["table"]>;
 type Roll = NonNullable<Table["rolls"]>[number];
+type GroupsCard = NonNullable<Table["groupsCard"]>;
 
-/** [COPY: regroup] Loremaster sample text; the board shows it, the iPad carries the choice. */
-export const REGROUP_LINE = "A new day. Stay together, or split up?";
+/** [COPY: day-start-groups] Loremaster slot (step 45) under the groups card. */
+const GROUPS_CARD_COPY = "[COPY: day-start-groups]";
 
 const signed = (n: number, word: string) =>
   n < 0 ? `(−${Math.abs(n)} ${word})` : `(+${n} ${word})`;
@@ -18,7 +20,53 @@ export function rollText(roll: Roll): string {
   if (roll.virtue !== 0) terms.push(signed(roll.virtue, "virtue"));
   if (roll.terrain !== 0) terms.push(signed(roll.terrain, "terrain"));
   if (roll.corruption !== 0) terms.push(signed(roll.corruption, "corruption"));
+  if (roll.split) terms.push(signed(roll.split, "split"));
   return [`${roll.name}: ${roll.total}`, ...terms].join(" ");
+}
+
+/**
+ * The groups card (PT-18, CU/04 mockup `#day-start`): "Day N" and one line per group with its
+ * heroes. No button. It leaves by itself after `holdMs`, the engine's `AUTO_ADVANCE_MS` (Q4.4),
+ * and the roll panel follows. Shown once per day: the timer is keyed on the card's day.
+ */
+function useGroupsCard(card: GroupsCard | null | undefined): GroupsCard | null {
+  const [doneDay, setDoneDay] = useState<number | null>(null);
+  const day = card?.day ?? null;
+  const holdMs = card?.holdMs ?? null;
+  useEffect(() => {
+    if (day === null || holdMs === null) return;
+    const timer = setTimeout(() => setDoneDay(day), holdMs);
+    return () => clearTimeout(timer);
+  }, [day, holdMs]);
+  if (!card || doneDay === card.day) return null;
+  return card;
+}
+
+function GroupsCardPanel({ card }: { card: GroupsCard }) {
+  return (
+    <DialogFrame
+      size="compact"
+      className="bt-ink-in"
+      id="groups-card"
+      // Placed like the other day panels (board.css centres every [data-day-panel] above the band).
+      data-day-panel="groups-card"
+      data-groups-card=""
+      data-hold-ms={card.holdMs}
+      role="status"
+      // The draft centres the card's lines (CU/04 mockup #day-start).
+      style={{ textAlign: "center" }}
+    >
+      <h2 data-groups-day="">Day {card.day}</h2>
+      <ul data-groups="">
+        {card.groups.map((group, index) => (
+          <li key={group.groupId} data-group={group.groupId}>
+            Group {index + 1}: {group.heroNames.join(", ")}
+          </li>
+        ))}
+      </ul>
+      <p data-copy="day-start-groups">{GROUPS_CARD_COPY}</p>
+    </DialogFrame>
+  );
 }
 
 /** Edge band extras (UI-028, DEC-686) and the threat bar (UI-047). Display only. */
@@ -69,25 +117,11 @@ export function ThreatBar({ table }: { table: Table }) {
   );
 }
 
-/** Day start, roll, skull and effects panels. One at a time, chosen by `table.phase`. */
+/** Groups card, roll, skull and effects panels. One at a time, chosen by `table.phase`. */
 export function DayPanel({ table }: { table: Table }) {
   const phase = table.phase ?? null;
-  if (phase === "regroup") {
-    return (
-      <DialogFrame size="compact" className="bt-ink-in" id="regroup" data-day-panel="regroup">
-        <p className="bt-label">Day {table.day}</p>
-        <p data-regroup-line="">{REGROUP_LINE}</p>
-        <ul data-groups="">
-          {table.groups.map((group) => (
-            <li key={group.heroId} data-group={group.heroId}>
-              {group.heroName} · {group.spaceName}
-              {group.alone ? " · alone" : ""}
-            </li>
-          ))}
-        </ul>
-      </DialogFrame>
-    );
-  }
+  const card = useGroupsCard(phase === "roll" ? table.groupsCard : null);
+  if (card) return <GroupsCardPanel card={card} />;
   if (phase === "roll") {
     return (
       <DialogFrame size="compact" className="bt-ink-in" id="roll" data-day-panel="roll">

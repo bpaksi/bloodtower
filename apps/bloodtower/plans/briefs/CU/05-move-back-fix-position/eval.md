@@ -49,7 +49,7 @@ Unit tests sit beside `apps/bloodtower/src/engine/loops/group-turn/loop.ts` (or 
 - Requirement: PT-19, Q5.3 (Bob, 2026-11-14, adopted): the gear's Game board setup gains "Fix my position": it moves the group's recorded space, charges nothing, fires nothing, logs a correction.
 - Method: unit
 - How: after a trigger fired on T (no Back possible), apply the correction to a neighbour N of T for the group, with 2 moves left.
-- Pass evidence: the group's space is N; moves left 2; no encounter, event or foe starts; no hero stat changes; the event log has one `correction` entry with the group and the from and to spaces; the board shows one line naming the correction (a `[COPY: ...]` slot until step 45).
+- Pass evidence: the group's space is N; moves left 2; no encounter, event or foe starts; no hero stat changes; the event log has one `correction` entry with the group and the from and to spaces; the board shows one line naming the correction, equal to the Copy table's `board.fix-position-done` with that hero and space filled in.
 - Fails if: it costs a move, starts the arrival trigger of N, changes hit points or gold, leaves no log entry, or shows no board line. A far space is EV-31.
 
 ### EV-07 — The gear panel carries the control
@@ -77,8 +77,8 @@ Unit tests sit beside `apps/bloodtower/src/engine/loops/group-turn/loop.ts` (or 
 - Requirement: the gear panel looks as drafted (Gamewright draft; the Illusionist replaces it).
 - Method: screenshot
 - How: iPad 768x1024 portrait, Game board setup open, Fix my position picked; compare side by side with ./mockup.html section `#fix-position`.
-- Pass evidence: both images attached; setup list, the control, group pick, space pick, Done in the same order; the text slots show the Loremaster text from step 45 and no `[COPY:` string reaches the screen.
-- Fails if: a pick or Done is missing, or `[COPY:` text shows.
+- Pass evidence: both images attached; setup list, the control, group pick, space pick, Done in the same order; the text slots show the Loremaster text from step 45 (Copy rows 7 to 12) and no placeholder text from `mockup.html` reaches the screen.
+- Fails if: a pick or Done is missing, or placeholder text shows.
 
 ### EV-11 — No tower command
 - Requirement: CLAUDE.md tower safety.
@@ -170,4 +170,4 @@ Unit tests sit beside `apps/bloodtower/src/engine/loops/group-turn/loop.ts` (or 
 
 - What counts as a trigger; Back repeats; the valid spaces for a correction; where it may run; no limit → decided, Q5.1 to Q5.3 (Bob, 2026-11-14, adopted) and pinned by EV-26 to EV-31.
 - The PT-19 DEC id → step 43 (#469); not invented here.
-- All copy, including the board's correction line, is a `[COPY: ...]` slot until the Loremaster Copy table (step 45) lands; EV-10 requires the real text, so it cannot pass before then.
+- All copy, including the board's correction line, is in the Loremaster Copy table in plan.md (step 45, filled 2026-11-15); EV-10 requires that text. Row 13 is confirmed by DEC-935: the control is greyed with `fix-position.not-now` in a battle, a scene or a building menu; a press that still gets through is refused under EV-30, not EV-08; Game board setup stays enabled.

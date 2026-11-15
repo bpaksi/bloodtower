@@ -1,4 +1,5 @@
 import { GEAR_PANELS, type GearPanelId } from "../../../protocols/v2/views.ts";
+import { queueRegroupPick } from "../day/regroup.ts";
 import type { ShellState } from "./state.ts";
 
 type GearEvent = {
@@ -13,6 +14,24 @@ type GearEvent = {
 
 const isPanel = (item: string): item is GearPanelId =>
   (GEAR_PANELS as readonly string[]).includes(item);
+
+/** The Menu row is `split-party`; its panel is `split`, the name the board shows (C3-11 EV-15). */
+export const SPLIT_ROW = "split-party";
+export const SPLIT_PANEL = "split" satisfies GearPanelId;
+
+const panelFor = (item: string): string => (item === SPLIT_ROW ? SPLIT_PANEL : item);
+
+/**
+ * A Split party pick (PT-18). The iPad sends it with `item: "split"`; the host logs every such
+ * pick (server/core/session.ts), so a replay after Continue queues it again with no panel open.
+ * The same act with no panel open is the host's split action (Q7.2).
+ */
+const queuePick = (state: ShellState, event: GearEvent): boolean => {
+  const kind = event.pick === "split" || event.pick === "join" ? event.pick : null;
+  if (!kind || !event.heroId || !state.play) return false;
+  // The play state is changed in place, as the loops do: the day clock is keyed on it.
+  return queueRegroupPick(state.play, kind, event.heroId, event.deviceId);
+};
 
 const isVolume = (value: number | null | undefined): value is 0 | 1 | 2 =>
   value === 0 || value === 1 || value === 2;
@@ -52,8 +71,9 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
   if (state.sessionEnded) return next;
 
   if (event.action === "open") {
-    const item = event.item;
+    const item = event.item ? panelFor(event.item) : undefined;
     if (!item || !isPanel(item)) return next;
+    if (item === SPLIT_PANEL && !next.play) return next;
     if (next.gearPanel) return next;
     next.gearPanel = item;
     next.gearOwner = event.deviceId;
@@ -69,8 +89,17 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
   }
 
   const owns = next.gearOwner === event.deviceId && next.gearPanel !== null;
+  if (event.action === "pick" && event.item === SPLIT_PANEL) {
+    // On the owner's open panel, or with no panel open (a replay, or the host's own action).
+    if (next.gearPanel !== null && !(owns && next.gearPanel === SPLIT_PANEL)) return next;
+    if (queuePick(next, event) && owns)
+      next.gearPicked = event.pick === "split" ? "Split" : "Rejoin";
+    return next;
+  }
   if (event.action === "pick") {
     if (!owns) return next;
+    // A Split party pick always comes with the panel's item; without it nothing is queued.
+    if (next.gearPanel === SPLIT_PANEL) return next;
     if (event.pick) next.gearPicked = event.pick;
     if (next.gearPanel === "look-up" && event.pick) next.gearCard = event.pick;
     if (next.gearPanel === "volume" && isVolume(event.volume)) {

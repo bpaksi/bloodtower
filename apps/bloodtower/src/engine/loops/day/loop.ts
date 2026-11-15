@@ -12,7 +12,7 @@ import {
   recordSkippedDrop,
 } from "./clock.ts";
 import { requestMoveRollCue } from "./cues.ts";
-import { offerRegroup, regroupNeeded } from "./regroup.ts";
+import { applyRegroupQueue, regroupQueue } from "./regroup.ts";
 import { rollDayMoves } from "./roll.ts";
 import { dropsThisNight, kingdomFromD4 } from "./rules.ts";
 import { offerSkullPlacement, simulateSkullDrop } from "./skull.ts";
@@ -50,6 +50,33 @@ const freshLocal = (): DayLocal => ({
   skullPlaced: false,
   skullsLeft: 0,
 });
+
+const heroNameOf = (heroId: string): string => {
+  for (const story of shellState().stories) {
+    const hero = story.heroes.find((row) => row.id === heroId);
+    if (hero) return hero.name;
+  }
+  return heroId;
+};
+
+/**
+ * The day start (DEC-640 timing, PT-18): a queued Split or Rejoin applies here, before the roll.
+ * There is no prompt. A day whose start applied a change marks the board's groups card (Q4.1);
+ * an action that cannot apply is dropped with its error (Q4.2).
+ */
+const applyQueuedRegroup = (effects: LoopContext<DayLocal>["effects"]): void => {
+  const play = playState();
+  play.regroupCardDay = null;
+  if (regroupQueue(play).length === 0) return;
+  noteNode(play, ".38");
+  const applied = applyRegroupQueue(play, heroNameOf, (error) => {
+    effects.push(error as unknown as (typeof effects)[number]);
+  });
+  if (applied < 1) return;
+  noteNode(play, ".41");
+  noteNode(play, ".39");
+  play.regroupCardDay = play.dayNumber;
+};
 
 const leaveRegroup = (local: DayLocal): DayLocal => {
   const play = playState();
@@ -176,16 +203,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
     const clock = ensureClock(play);
 
     if (local.phase === "regroup") {
-      if (regroupNeeded(play)) {
-        if (!local.awaitingPress) {
-          noteNode(play, ".38");
-          offerRegroup(ctx);
-          return { local: { ...local, awaitingPress: true }, passComplete: false };
-        }
-        noteNode(play, ".42");
-      } else {
-        noteNode(play, ".38");
-      }
+      applyQueuedRegroup(ctx.effects);
       local = leaveRegroup(local);
     }
 

@@ -11,12 +11,14 @@ const TITLE: Record<string, string> = {
   "change-who-holds-whom": "Change who holds whom",
   "join-another-ipad": "Join another iPad",
   tower: "Tower",
+  split: "Split party",
 };
 
 /** Display only. The iPad presses; this panel never has a button. */
 export function GearBoardPanel({ gear }: { gear: GearView }) {
   if (!gear.panel) return null;
-  const title = TITLE[gear.panel] ?? gear.panel;
+  const title =
+    gear.panel === "split" && gear.partySplit ? "Rejoin party" : (TITLE[gear.panel] ?? gear.panel);
   return (
     <section data-panel={gear.panel} data-piece-checks={gear.pieceChecks} data-volume={gear.volume}>
       <p>Game paused.</p>
@@ -68,6 +70,16 @@ export function GearBoardPanel({ gear }: { gear: GearView }) {
             </li>
           ))}
         </ul>
+      ) : null}
+      {gear.panel === "split" ? (
+        // The queue in pick order (Q4.2); it applies at the next day start, before the roll.
+        <ol data-regroup-queue="">
+          {(gear.regroup?.queue ?? []).map((row) => (
+            <li key={`${row.kind}-${row.heroId}`} data-queued={row.kind} data-hero={row.heroId}>
+              {row.kind === "split" ? `Split ${row.name} off` : `Rejoin ${row.name}`}
+            </li>
+          ))}
+        </ol>
       ) : null}
       {gear.panel === "join-another-ipad" && gear.joinUrl ? (
         <div data-qr>

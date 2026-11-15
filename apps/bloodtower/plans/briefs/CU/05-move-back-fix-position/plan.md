@@ -13,7 +13,7 @@ Keep this a checklist; do not write a second design doc.
 - Screen spec: none
 - Mockup: ./mockup.html (a Gamewright draft for the Illusionist to replace)
 - Risk: High
-- Depends on: its approval.md on main; steps 43 (#469), 44 (#470) and 45 (Loremaster Copy table) done. No story copy is written here: every string is a `[COPY: ...]` slot.
+- Depends on: its approval.md on main; steps 43 (#469), 44 (#470) and 45 (Loremaster Copy table) done. Its strings are in the Copy table below (Loremaster, step 45).
 - Touches: `apps/bloodtower/src/engine/loops/group-turn/loop.ts` (undo log, back offer), `apps/bloodtower/src/engine/loops/session/gear.ts` (the correction), `apps/bloodtower/src/engine/loops/session/view.ts`, `apps/bloodtower/src/protocols/v2/views.ts` (gear panel fields), `apps/bloodtower/src/web/components/device/CoreDeviceScreen.tsx`, `apps/bloodtower/src/web/components/device/ChromeBar.tsx` (Back on the move map), `apps/bloodtower/src/web/components/board/GearBoardPanel.tsx` (the Game board setup panel and the board's correction line), `apps/bloodtower/src/engine/loops/group-turn/*.test.ts` or `apps/bloodtower/src/engine/loops/day/day.test.ts`, `apps/bloodtower/src/e2e/tests/w7-move-map.spec.ts`
 - Builds: PT-19 (issue #478)
 - Deps change: no
@@ -49,20 +49,40 @@ Cutover: N
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-11, EV-21 … EV-25 and EV-26 … EV-31 all pass (verifier table on PR).
-- Not required: the copy text itself (step 45).
+- Copy text: the Copy table below (step 45); EV-10 checks it.
 
 ## AREA / DEC checklist
 
 - [ ] PT-19 ruling recorded as a DEC by step 43 (#469); closed before coding. The brief does not invent its id.
 - [ ] DEC-035 (tap the space), DEC-209 (Back undoes only until the outcome shows; luck never re-rolls), DEC-220 (Enter and Leave are free), MEC-035, UI-023: read; closed before coding.
-- [ ] Loremaster Copy table (step 45) holds the `[COPY: ...]` strings named in the mockup; closed before coding.
+- [ ] Loremaster Copy table (step 45) holds the strings named in the mockup; closed before coding. Filled 2026-11-15; row 13 confirmed by DEC-935 (no DRAFT rows).
 - [ ] Rulings Q5.1 to Q5.3 below written into the step-43 DEC; closed before coding.
+
+## Copy
+
+Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #471). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+
+| # | Slot | Exact text | Source |
+|---|------|------------|--------|
+| 1 | `move.moves-left` | Moves left: {N} | main (`CoreDeviceScreen.tsx`); unchanged |
+| 2 | `button.walk` | {space name} | main (`view.ts` labels a walk with the space's own name); unchanged. The mockup's "Go to Neighbour N" is sample text and is not built |
+| 3 | `button.end-turn` | End turn | main (`view.ts`); unchanged |
+| 4 | `toolbar.back` | Back | main (`view.ts`, `ChromeBar.tsx`); the same word as on every other iPad screen. On the move map it is enabled after a tap and disabled at the turn start or after a trigger (EV-05, EV-09) |
+| 5 | `toolbar.replay` | Replay | C2 feature 04 toolbar (Back and Replay centre, PT-23); unchanged |
+| 6 | `gear.item.game-board-setup` | Game board setup | locked C2 feature 04 (gear item 2, Bob approved 2026-10-31); unchanged |
+| 7 | `gear.fix-position` | Fix my position | Q5.3 (Bob, 2026-11-14, adopted) and DEC-229 name the control; Loremaster confirms the words |
+| 8 | `fix-position.help` | Use this if a piece was moved by mistake. Pick whose group it is and where it really stands. It costs no moves and nothing starts. | new - Loremaster. Shown on the iPad panel and mirrored on the board (mockup `fix-position-help`). Says the three rules of Q5.3: any space, free, silent |
+| 9 | `fix-position.group.label` | Whose group? | new - Loremaster. The options are the lead hero's name, `{hero}`, as the band names a group (CU/10). Replaces the mockup's "Hero group: Group 1" |
+| 10 | `fix-position.space.label` | Where does it stand? | new - Loremaster. The options are the board's space names, as on the move map. Replaces the mockup's "Space: ..." |
+| 11 | `button.done` | Done | locked C2 feature 04 (every gear panel ends on Done and the game resumes); unchanged |
+| 12 | `board.fix-position-done` | {hero}'s group is set on {space}. | new - Loremaster. The one board line for the correction (EV-06). `{hero}` is the group's lead hero, one name, never the whole party. No move, battle or luck wording, because nothing happened in the story |
+| 13 | `fix-position.not-now` | Only on the move map or between loops. | new - Loremaster; confirmed DEC-935. Reason line when Fix my position is greyed in a battle, a scene or a building menu, in the style of the gear's other reasons ("Only in a game."). The Game board setup gear row stays enabled (the piece check is still useful). A press that still gets through is refused under EV-30 (its own error code, no state change, logged and toasted), not EV-08. EV-08 stays the refusal for a space or group that does not exist |
 
 ## Rulings (Bob, 2026-11-14, adopted)
 
 - Q5.1 Bob, 2026-11-14, adopted: a trigger is any arrival that starts an encounter, event, foe or quest scene. Enter and End turn also close the Back window. Spending the last move does not close it (Back gives the move back).
 - Q5.2 Bob, 2026-11-14, adopted: Back repeats; each press undoes one tap, back to the turn start or the last trigger. Luck never re-rolls.
-- Q5.3 Bob, 2026-11-14, adopted: "Fix my position" allows any space, only on the move map or between loops (not during a battle, scene or building menu), with no limit. It is logged and the board shows a line (Loremaster string, step 45).
+- Q5.3 Bob, 2026-11-14, adopted: "Fix my position" allows any space, only on the move map or between loops (not during a battle, scene or building menu), with no limit. It is logged and the board shows a line (Copy row 12, `board.fix-position-done`).
 
 ## Eval approval
 

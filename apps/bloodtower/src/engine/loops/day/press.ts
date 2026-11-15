@@ -1,27 +1,11 @@
-import { playState } from "../chapter/playState.ts";
 import type { DayLocal } from "./loop.ts";
-import { applyJoin, applySplit, parseJoinPrompt, parseSplitPrompt } from "./regroup.ts";
 import { applySkullRecord, parseSkullRecordPrompt } from "./skull.ts";
 
-/** Presses the day loop understands. Group-turn split and join never reach this. */
+/**
+ * Presses the day loop understands. The day start asks nothing (PT-18): Split and Rejoin are
+ * queued from the gear, so no press splits or joins a group.
+ */
 export const handleDayPress = (local: DayLocal, promptId: string, actionId: string): DayLocal => {
-  if (local.phase === "regroup") {
-    if (actionId === "done" && promptId === "regroup-done") {
-      return { ...local, awaitingPress: true };
-    }
-    if (actionId === "split") {
-      const parsed = parseSplitPrompt(promptId);
-      if (parsed) applySplit(playState(), parsed.groupId, parsed.heroId);
-      return { ...local, awaitingPress: false };
-    }
-    if (actionId === "join") {
-      const parsed = parseJoinPrompt(promptId);
-      if (parsed) applyJoin(playState(), parsed.aId, parsed.bId);
-      return { ...local, awaitingPress: false };
-    }
-    return local;
-  }
-
   if (local.phase === "roll" && actionId === "continue") {
     return { ...local, awaitingPress: true };
   }

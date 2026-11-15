@@ -57,7 +57,8 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Method: playwright
 - How: queue a split on day 2; at day 3 start read the board.
 - Pass evidence: the board shows the two groups and their heroes; no `button`, link or pressable element in the card; it leaves by itself after about 4 seconds (3.5 to 6 s) and the roll panel follows; neither iPad offers a regroup choice.
-- Fails if: a Continue/Done button is present, the card waits for a press, or it lasts a different time than the existing 4 s auto-advance (EV-28 pins the constant). A day with nothing queued is EV-25.
+- Fails if: a Continue/Done button is present, the card waits for a press, or it lasts a different time than the exported 4 s constant (EV-28 pins the constant). A day with nothing queued is EV-25.
+- Amended 2026-11-15 (PT-18, Bob): "the existing 4 s auto-advance" read as the exported constant of EV-28; nothing else changed.
 
 ### EV-08 — Nothing moves mid-day
 - Requirement: PT-18: the queued action takes effect at the next day start only; DEC-821 and the group's turn are not disturbed.
@@ -70,15 +71,16 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Requirement: the Split party panel looks as drafted (Gamewright draft; the Illusionist replaces it).
 - Method: screenshot
 - How: iPad 768x1024 portrait, gear open on Split party with 2 heroes; compare side by side with ./mockup.html section `#gear-split`.
-- Pass evidence: both images attached; title, one pick per hero, Back, and the queued note in the same order; copy slots show the Loremaster text, not `[COPY: ...]`, once step 45 lands (the mockup keeps the slots).
-- Fails if: a hero pick or Back is missing, or any other row shows.
+- Pass evidence: both images attached; title, one pick per hero, Back, and the queued note in the same order; the text slots show the Loremaster text from step 45 (Copy rows 3, 4, 5 and 7) and no placeholder text from `mockup.html` reaches the screen.
+- Fails if: a hero pick or Back is missing, or any other row shows besides the standing See the story board row (`[data-see-board]`) that every gear panel carries between the "PLAY / The move" header and the panel content (Bob, 2026-11-15), or placeholder text shows.
+- Amended 2026-11-15 (PT-18, Bob): "any other row shows" now allows the standing See the story board row. Note for the Illusionist: `mockup.html` `#gear-split` does not draw that row.
 
 ### EV-10 — Day-start card screenshot
 - Requirement: the groups card looks as drafted.
 - Method: screenshot
 - How: board 1920x1080 at the day-start card after a queued split; compare side by side with ./mockup.html section `#day-start`.
-- Pass evidence: both images attached; "Day N", one line per group listing its heroes, no button.
-- Fails if: a button shows or a group is missing.
+- Pass evidence: both images attached; "Day N", one line per group listing its heroes, no button, and the Copy table's `day-start-groups` line under the groups.
+- Fails if: a button shows, a group is missing, or placeholder text shows.
 
 ### EV-11 — No tower command from a split, join or queue
 - Requirement: CLAUDE.md tower safety: nothing physical happens automatically.
@@ -139,18 +141,20 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - Fails if: both actions stay queued, the split still applies, or the cancel logs an error.
 
 ### EV-28 — The 4 s is the shared constant
-- Requirement: Q4.4 (Bob, 2026-11-14, adopted): one constant shared with the existing 4 s auto-advance.
+- Amended 2026-11-15 (PT-18, Bob): no day-loop 4 s auto-advance exists yet (C3-11 Ruling 1 is unbuilt), so the constant is defined here for the groups card and that future timer must read it.
+- Requirement: Q4.4 (Bob, 2026-11-14, adopted): one exported constant for the groups card's 4 s duration, which the future day-loop timer step (C3-11 Ruling 1) must read too; not a tuning key. The card times itself on the board and the engine goes straight on to the roll.
 - Method: unit
-- How: source check of the constant that the groups card and the day loop's existing 4 s auto-advance read; change its value in a test and replay a queue-and-apply day.
-- Pass evidence: one exported constant is read by both; changing it moves both the groups card time and the auto-advance; no new key appears in `packs/base/tuning.yaml` for it (EV-06's schema copy still passes).
-- Fails if: the card has its own literal 4000 or a new tuning key.
+- How: source check that the groups card reads the exported constant and has no literal 4000 of its own; change the constant's value in a test and replay a queue-and-apply day.
+- Pass evidence: one exported constant; the card's duration on a queue-and-apply day equals it and moves when it changes; the day loop does not wait for the card (the roll is offered at once); no new key appears in `packs/base/tuning.yaml` for it (EV-06's schema copy still passes).
+- Fails if: the card has its own literal 4000, a second constant, or a new tuning key.
 
 ### EV-29 — The host drives the queue
-- Requirement: Q7.2 (Bob, 2026-11-14, adopted): the host's split action is built here; `c3-day.spec.ts` EV-15 and EV-16 stop being `fixme`.
+- Requirement: Q7.2 (Bob, 2026-11-14, adopted): the host's split action is built here; `c3-day.spec.ts` EV-15 and EV-16 stop being `fixme` (split halves only).
 - Method: playwright
-- How: with the real host and a test story with 2 heroes on one space, the host queues a split and a rejoin through its action; run to the next day start; check `c3-day.spec.ts` for the `fixme` on EV-15 and EV-16.
-- Pass evidence: both effects occur exactly as with an iPad pick (same queue entries, same day-start apply); the `fixme` rows for EV-15 and EV-16 are gone and those specs run and pass.
-- Fails if: the host action splits at once, bypasses the queue, or the two `fixme` rows remain.
+- How: with the real host and a test story with 2 heroes on one space, the host queues a split and a rejoin through its action; run to the next day start; check `c3-day.spec.ts` for the split halves of C3-11 EV-15 and EV-16.
+- Pass evidence: both effects occur exactly as with an iPad pick (same queue entries, same day-start apply); the split halves of EV-15 and EV-16 run and pass; the use-item halves (EV-15 use-item half, EV-16 use-item reason) stay `fixme`, owned by CU/07.
+- Fails if: the host action splits at once, bypasses the queue, or a split-half `fixme` row remains.
+- Amended 2026-11-15 (PT-18, Bob): Bob's option A ruling split the C3-11 EV-15/EV-16 `fixme` row into a live split half and a use-item half that stays `fixme` for CU/07; the How, Pass evidence and Fails if now say so.
 
 ## Assumptions surfaced
 
@@ -160,3 +164,4 @@ Unit tests: `apps/bloodtower/src/engine/loops/day/day.test.ts`. E2E: `apps/blood
 - The 4 s is a shared constant, not tuning (EV-28) → decided, Q4.4 (Bob, 2026-11-14, adopted).
 - The host split action lives here (EV-29) → Q7.2 (Bob, 2026-11-14, adopted); the use-item host action is in CU/07.
 - The PT-18 and PT-06 DEC ids → step 43 (#469); not invented here.
+- All copy, including the day-start card line and the gear panel help, is in the Loremaster Copy table in plan.md (step 45, filled 2026-11-15); EV-09 and EV-10 require that text. `split-party-none` is proposed only and is not wired in this docs PR.
