@@ -55,7 +55,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] PT-19 ruling recorded as a DEC by step 43 (#469); closed before coding. The brief does not invent its id.
 - [ ] DEC-035 (tap the space), DEC-209 (Back undoes only until the outcome shows; luck never re-rolls), DEC-220 (Enter and Leave are free), MEC-035, UI-023: read; closed before coding.
-- [ ] Loremaster Copy table (step 45) holds the strings named in the mockup; closed before coding. Filled 2026-11-15; one row (13) is a DRAFT for Gamewright.
+- [ ] Loremaster Copy table (step 45) holds the strings named in the mockup; closed before coding. Filled 2026-11-15; row 13 confirmed by DEC-935 (no DRAFT rows).
 - [ ] Rulings Q5.1 to Q5.3 below written into the step-43 DEC; closed before coding.
 
 ## Copy
@@ -76,7 +76,7 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #4
 | 10 | `fix-position.space.label` | Where does it stand? | new - Loremaster. The options are the board's space names, as on the move map. Replaces the mockup's "Space: ..." |
 | 11 | `button.done` | Done | locked C2 feature 04 (every gear panel ends on Done and the game resumes); unchanged |
 | 12 | `board.fix-position-done` | {hero}'s group is set on {space}. | new - Loremaster. The one board line for the correction (EV-06). `{hero}` is the group's lead hero, one name, never the whole party. No move, battle or luck wording, because nothing happened in the story |
-| 13 | `fix-position.not-now` | Only on the move map or between loops. | DRAFT - needs Gamewright. Reason line if the control is greyed during a battle, scene or building menu, in the style of the gear's other reason lines ("Only in a game."). Question: is the control greyed with this reason, or left enabled and refused with an error code (EV-08)? Use this text if greyed |
+| 13 | `fix-position.not-now` | Only on the move map or between loops. | new - Loremaster; confirmed DEC-935. Reason line when Fix my position is greyed in a battle, a scene or a building menu, in the style of the gear's other reasons ("Only in a game."). The Game board setup gear row stays enabled (the piece check is still useful). A press that still gets through is refused under EV-30 (its own error code, no state change, logged and toasted), not EV-08. EV-08 stays the refusal for a space or group that does not exist |
 
 ## Rulings (Bob, 2026-11-14, adopted)
 

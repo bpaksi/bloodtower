@@ -170,4 +170,4 @@ Unit tests sit beside `apps/bloodtower/src/engine/loops/group-turn/loop.ts` (or 
 
 - What counts as a trigger; Back repeats; the valid spaces for a correction; where it may run; no limit → decided, Q5.1 to Q5.3 (Bob, 2026-11-14, adopted) and pinned by EV-26 to EV-31.
 - The PT-19 DEC id → step 43 (#469); not invented here.
-- All copy, including the board's correction line, is in the Loremaster Copy table in plan.md (step 45, filled 2026-11-15); EV-10 requires that text. Row 13 is a DRAFT until Gamewright rules on greyed or refused.
+- All copy, including the board's correction line, is in the Loremaster Copy table in plan.md (step 45, filled 2026-11-15); EV-10 requires that text. Row 13 is confirmed by DEC-935: the control is greyed with `fix-position.not-now` in a battle, a scene or a building menu; a press that still gets through is refused under EV-30, not EV-08; Game board setup stays enabled.
