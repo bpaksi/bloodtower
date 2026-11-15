@@ -328,14 +328,16 @@ export const enterWithoutTower = async (pad: Page) => {
 };
 
 /**
- * Pick story starts with sound (Bob 2026-10-31): Enable sound, a volume, Keep. Then the story
- * list shows, with Continue above it while an autosave waits.
+ * Pick story on the connect track opens on the volume step (DEC-903): a volume, then Keep, and
+ * the story list shows. On Play without Tower there is no volume step and the list shows at
+ * once, so this only waits for Pick story. Name kept for the many callers.
  */
 export const setSoundAndKeep = async (pad: Page) => {
   const main = pad.locator("main.bt-device");
   await expect(main).toHaveAttribute("data-screen", "pick-story", { timeout: 20_000 });
-  await main.locator('button[data-prompt-id="sound-enable"]').click();
-  await main.locator('button[data-prompt-id="volume-1"]').click();
+  const volume = main.locator('button[data-prompt-id="volume-1"]');
+  if ((await volume.count()) === 0) return;
+  await volume.click();
   const keep = main.locator('button[data-prompt-id="volume-keep"]');
   await expect(keep).toBeEnabled({ timeout: 20_000 });
   await keep.click();

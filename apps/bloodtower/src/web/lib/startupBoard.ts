@@ -269,13 +269,14 @@ export const baseBoardSteps = (view: BoardView): string[] =>
     .filter((line) => line.trim() !== "");
 
 /**
- * Pick story starts with the volume step (Bob 2026-10-31). Greyed until the first iPad taps
- * Enable sound, full strength after. Null once an iPad has kept a volume: the story list shows.
+ * Pick story starts with the volume step on the connect track (DEC-903). The line is at full
+ * strength from the first view (`live` stays for the panel and is always true). Null on Play
+ * without Tower and once an iPad has kept a volume: the story list shows.
  */
-export const volumeLine = (view: BoardView): { line: string; live: boolean } | null => {
+export const volumeLine = (view: BoardView): { line: string; live: true } | null => {
   if (view.screen !== "pick-story") return null;
-  const level = view.levels.find((row) => row.id === "volume-line" || row.id === "volume-line-off");
-  return level ? { line: level.shows, live: level.id === "volume-line" } : null;
+  const level = view.levels.find((row) => row.id === "volume-line");
+  return level ? { line: level.shows, live: true } : null;
 };
 
 /** A failed connect or calibrate shows this status above the tower question (MEC-039 .11). */

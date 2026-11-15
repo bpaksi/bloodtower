@@ -9,7 +9,6 @@ export const HELP_LINES: Record<string, string> = {
   connecting: "The app is reaching the tower. Keep it switched on and close by.",
   "tower-failed":
     "The tower didn't answer. Check it's on, then tap Connect Tower or Play without Tower.",
-  "enable-sound": "Tap Enable sound so this iPad can play the story's voice and sound.",
   volume: "Set how loud the tower is. Press a volume to hear it, then tap Keep.",
   "pick-story": "Tap the story you want to play tonight.",
   "story-settings": "Choose the game length and options for tonight's story.",
@@ -35,6 +34,8 @@ export const MENU_VERSION = "v0.0.0";
 const ONLY_IN_GAME = "Only in a game.";
 const C3 = "C3+";
 const TOWER_CONNECTED = "The tower is connected.";
+/** Copy slot `gear.volume.no-tower` (Loremaster, step 45): Volume is greyed without the tower. */
+export const VOLUME_NO_TOWER = "Only with the tower.";
 const OPEN_ELSEWHERE = "Open on another iPad.";
 const SESSION_OVER = "The session is over.";
 /** [COPY: split-party-none] Loremaster slot (step 45): nobody can split off or rejoin now. */
@@ -87,7 +88,7 @@ export const gearRows = (ctx: MenuContext): GearRow[] => {
     row(ctx, "current-party", "Look up", "Current party", ctx.inGame, ONLY_IN_GAME, true),
     row(ctx, "look-up", "Look up", "Look up", lookEnabled, ONLY_IN_GAME, true),
     row(ctx, "game-board-setup", "Table", "Game board setup", true, null, true),
-    row(ctx, "volume", "Table", "Volume", true, null, true),
+    row(ctx, "volume", "Table", "Volume", ctx.towerConnected, VOLUME_NO_TOWER, true),
     row(
       ctx,
       "split-party",

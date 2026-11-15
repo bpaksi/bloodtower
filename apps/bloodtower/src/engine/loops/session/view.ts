@@ -42,7 +42,7 @@ import {
 } from "./hub.ts";
 import type { ShellStory } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
-import { soundActions, soundStepOnBoard, VOLUME_LINE, volumeLineLive } from "./sound.ts";
+import { soundActions, soundStepOnBoard, VOLUME_LINE } from "./sound.ts";
 import type { ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
@@ -555,12 +555,8 @@ const startupLevels = (state: ShellState, story: ShellStory | undefined): LoopLe
     }
   }
   if (soundStepOnBoard(state)) {
-    // Greyed until the first iPad has tapped Enable sound; full strength from then on.
-    leading.push({
-      id: volumeLineLive(state) ? "volume-line" : "volume-line-off",
-      label: "Volume",
-      shows: VOLUME_LINE,
-    });
+    // Full strength from the first view, on the connect track only (DEC-903).
+    leading.push({ id: "volume-line", label: "Volume", shows: VOLUME_LINE });
   }
   if (state.screen === "game-settings") leading.push(...settingLevels(state, story));
   leading.push(statusLevel(state));

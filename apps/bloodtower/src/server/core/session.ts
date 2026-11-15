@@ -285,6 +285,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     }
     const result = stepShell(state, event);
     state = result.state;
+    for (const line of result.logs ?? []) options.log.debug(line.code, line.message);
     let logged: ShellEvent = event;
     if (event.kind === "gear" && event.action === "done") {
       logged = {
@@ -566,10 +567,6 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         const storyId = args.storyId;
         if (typeof storyId !== "string") return;
         enqueue({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
-        return;
-      }
-      if (promptId === "sound-enable" && actionId === "enable-sound") {
-        enqueue({ kind: "sound-unlock", v: 1, deviceId }, deviceId);
         return;
       }
       if (actionId === "volume-play" && /^volume-[012]$/.test(promptId)) {

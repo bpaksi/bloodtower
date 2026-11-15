@@ -51,20 +51,22 @@ import {
   takePendingCheckpoint,
   takePendingTowerCommands,
 } from "./shellRef.ts";
-import {
-  answerVolume,
-  applyVolumeResult,
-  pressVolume,
-  unlockSound,
-  VOLUME_TEST_SOUND,
-} from "./sound.ts";
+import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
 import { initialShellState, type ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
 export type ShellStepResult = {
   state: ShellState;
   effects: Array<EngineEffect | ShellEffect>;
+  /** Lines the host writes to its log for an event the step accepted and expected (never errors). */
+  logs?: ShellLogLine[];
 };
+
+/** A `debug` line an event step asks the host to write (the engine has no logger of its own). */
+export type ShellLogLine = { level: "debug"; code: string; message: string };
+
+/** The code of the one debug line an old `sound-unlock` event writes (DEC-903). */
+export const OLD_SOUND_UNLOCK_LOG = "old-event-ignored";
 
 const withEffects = (state: ShellState, effects: ShellStepResult["effects"]): ShellStepResult => ({
   state,
@@ -395,15 +397,25 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     return withEffects(next, effects);
   }
 
-  if (
-    e.kind === "sound-unlock" ||
-    e.kind === "volume-play" ||
-    e.kind === "volume-result" ||
-    e.kind === "volume-answer"
-  ) {
+  if (e.kind === "sound-unlock") {
+    // Retired by DEC-903: an old saved log still holds it. Accepted and ignored on purpose, with
+    // one debug line. An expected, fully recovered case, so not an error and not the unknown path.
+    return {
+      state: { ...state, eventSeq: eventSeq + 1 },
+      effects,
+      logs: [
+        {
+          level: "debug",
+          code: OLD_SOUND_UNLOCK_LOG,
+          message: `Ignored the retired "sound-unlock" event from ${e.deviceId} (no iPad plays sound).`,
+        },
+      ],
+    };
+  }
+
+  if (e.kind === "volume-play" || e.kind === "volume-result" || e.kind === "volume-answer") {
     const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
-    if (e.kind === "sound-unlock") unlockSound(next, e.deviceId);
-    else if (e.kind === "volume-result") applyVolumeResult(next, e.deviceId, e.level, e.ok);
+    if (e.kind === "volume-result") applyVolumeResult(next, e.deviceId, e.level, e.ok);
     else if (e.kind === "volume-answer") answerVolume(next, e.deviceId, e.answer);
     else if (pressVolume(next, e.deviceId, e.level)) {
       effects.push({
