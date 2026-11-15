@@ -998,7 +998,7 @@ test("gear actions open on the Story board and pause the game", async ({ browser
   let holderB = "";
   try {
     await board.goto("/board");
-    await reach(device, session.host.joinCode, "skip", "claim");
+    await reach(device, session.host.joinCode, "connect", "claim");
     await installSessionSocketHook(other);
     await other.setViewportSize({ width: 768, height: 1024 });
     await other.goto(`/join?code=${session.host.joinCode}`);
@@ -1198,7 +1198,7 @@ test("two iPads pressing Volume open one panel", async ({ browser }, testInfo) =
   const board = await boardContext.newPage();
   try {
     await board.goto("/board");
-    await reach(first, session.host.joinCode, "skip", "claim");
+    await reach(first, session.host.joinCode, "connect", "claim");
     await installSessionSocketHook(second);
     await second.goto(`/join?code=${session.host.joinCode}`);
     await expect(deviceMain(second)).toHaveAttribute("data-screen", "claim-heroes");
@@ -1240,7 +1240,7 @@ test("a gear panel survives a restart closed", async ({ browser }, testInfo) => 
   let reasons: string[] = [];
   try {
     await board.goto("/board");
-    await reach(page, session.host.joinCode, "skip", "play");
+    await reach(page, session.host.joinCode, "connect", "play");
     await openMenu(page);
     reasons = await page.locator("[data-menu] [data-gear-item]").evaluateAll((nodes) =>
       nodes.map((node) => {
@@ -1283,7 +1283,14 @@ test("a gear panel survives a restart closed", async ({ browser }, testInfo) => 
         return `${node.getAttribute("data-gear-item")}:${disabled ? "off" : "on"}:${reason}`;
       }),
     );
-    expect(after).toEqual(reasons);
+    // A restart never reconnects the tower by itself (tower safety), so the two rows that follow
+    // the tower link read "no tower" now. Every other row reads as it did before the restart.
+    const towerRows = (rows: string[]) =>
+      rows.filter((row) => row.startsWith("volume:") || row.startsWith("tower:"));
+    expect(after.filter((row) => !towerRows([row]).length)).toEqual(
+      reasons.filter((row) => !towerRows([row]).length),
+    );
+    expect(towerRows(after)).toEqual(["volume:off:Only with the tower.", "tower:on:"]);
   } finally {
     await boardContext2.close();
     await context2.close();
