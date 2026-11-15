@@ -327,39 +327,30 @@ test("CU/06 EV-07 Continue after a host restart keeps the order and the greyed R
   browser,
 }, testInfo) => {
   skipUnlessIpad(testInfo);
-  test.setTimeout(120_000);
-  const size = VIEWPORTS[0];
+  test.setTimeout(180_000);
   const session = await startAcceptanceHost(testInfo, { seed: "cu06-survive" });
   const { databasePath } = session;
-  const context = await browser.newContext({
-    baseURL: session.baseURL,
-    viewport: size,
-    hasTouch: true,
-  });
+  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
   const page = await context.newPage();
   try {
-    await toClaim(page, session.host.joinCode, true);
-    await holdHeroesFromTest(page, ["hero-a"]);
+    await reach(page, session.host.joinCode, "skip", "play");
+    await expectFullBar(page, true);
   } finally {
     await context.close();
     await session.host.close();
   }
 
   const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "cu06-survive" });
-  const context2 = await browser.newContext({
-    baseURL: restarted.baseURL,
-    viewport: size,
-    hasTouch: true,
-  });
+  const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
   const again = await context2.newPage();
   try {
     await installSessionSocketHook(again);
     await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await expect(deviceMain(again)).toHaveAttribute("data-screen", "claim-heroes");
+    await resumeSavedGame(again);
+    await expect(deviceMain(again)).toHaveAttribute("data-screen", "play");
     await expect(again.locator("[data-menu]")).toHaveCount(0);
     await expectFullBar(again, true);
-    const back = again.locator('[data-bottom-bar] [data-action="back"]');
-    await expect(back).toBeVisible();
+    await expect(again.locator('[data-bottom-bar] [data-action="back"]')).toBeVisible();
     await expect(again.locator('[data-bottom-bar] [data-action="replay"]')).toBeDisabled();
   } finally {
     await context2.close();
