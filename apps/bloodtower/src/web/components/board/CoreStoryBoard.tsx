@@ -8,6 +8,7 @@ import { AssetIdLabel } from "./AssetIdLabel";
 import { DayBandExtras, DayPanel, HeroCorruptions, ThreatBar } from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
+import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
 
@@ -44,6 +45,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const momentId =
     view.narration && isOpeningMomentId(view.narration.lineId) ? view.narration.lineId : null;
   const showMove = layer === "move" && !momentId;
+  // The hint is the loop's first beat: a Scroll holds the step back; under art it is a caption.
+  const hint = view.hint ?? null;
+  const holding = hint !== null && !hint.caption;
   return (
     <main
       className="bt-board"
@@ -51,6 +55,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       data-board-mode="play"
       data-board-layer={layer}
       data-moment={momentId ?? undefined}
+      data-hint-hold={holding ? "true" : undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
       data-gear-opens={view.gear?.opens ?? 0}
       data-volume={view.gear?.volume ?? undefined}
@@ -91,9 +96,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </header>
       ) : null}
       {showMove && table ? <ThreatBar table={table} /> : null}
-      {showMove && table && !paused ? <DayPanel table={table} /> : null}
+      {showMove && table && !paused && !holding ? <DayPanel table={table} /> : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor && !paused ? (
+      {showMove && table?.waitingFor && !paused && !holding ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
           <p className="bt-waiting-pulse" data-waiting role="status">
             {table.waitingFor}
@@ -108,6 +113,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </figure>
       ) : null}
       {layer === "place" && place ? <AssetIdLabel assetId={place.stillId} /> : null}
+      {hint && !paused ? <HintScroll hint={hint} /> : null}
       {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
       {debug ? (
         <pre className="mt-4 max-h-64 overflow-auto text-xs opacity-70">

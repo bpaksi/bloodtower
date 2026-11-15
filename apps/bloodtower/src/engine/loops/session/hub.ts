@@ -1,5 +1,6 @@
 import { hashSeed } from "@dark-tower/rng";
 import type { EngineEffect } from "../../effects.ts";
+import { resetHints } from "../../hints/flow.ts";
 import { refreshSetupSteps } from "../game/setupFlow.ts";
 import type { ShellEffect } from "./effects.ts";
 import { emptyTally, initialHoldings, type ShellState, type TonightGame } from "./state.ts";
@@ -141,6 +142,7 @@ export const toPickStory = (state: ShellState): void => {
   state.towerWithout = false;
   state.reconnect = null;
   state.activeGameId = `game-${state.eventSeq}`;
+  resetHints(state);
   state.screen = "pick-story";
   state.stage = "lobby";
   state.pause = null;
@@ -193,6 +195,8 @@ export const beginPlayAgain = (
   state.towerWithout = false;
   state.reconnect = null;
   state.activeGameId = `game-${state.eventSeq}`;
+  // Play again keeps the table's Hints choice (it rides in `settingValues`), but each hint shows once more.
+  resetHints(state);
   state.focusStoryId = story.card.id;
   state.boundStoryId = story.card.id;
   state.chosenStoryId = story.card.id;

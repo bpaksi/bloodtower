@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HINT_TEXT_MISSING, HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/registry.ts";
 
 /** Error code logged when a no-tower skull has nowhere to land (Q3.1). */
 export const SKULL_NO_BUILDING = "skull-no-building" as const;
@@ -42,7 +43,14 @@ export const checkpointWriteEffectV1 = z.object({
 export const pressErrorEffectV1 = z.object({
   kind: z.literal("press-error"),
   v: z.literal(1),
-  code: z.enum(["invalid-state", SKULL_NO_BUILDING, REGROUP_DROPPED]),
+  code: z.enum([
+    "invalid-state",
+    SKULL_NO_BUILDING,
+    REGROUP_DROPPED,
+    HINT_TEXT_MISSING,
+    HINTS_AFTER_SETUP,
+    RULES_PAGE_MISSING,
+  ]),
   message: z.string().min(1).max(300),
   /**
    * The iPad to tell when it is not the one whose press stepped the engine: a queued Split or

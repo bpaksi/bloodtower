@@ -96,6 +96,20 @@ const groupsCardSchema = z.strictObject({
     .max(8),
 });
 
+/**
+ * A first-time hint (CU/09, DEC-571): one sentence on the Story board, no button, over the loop's
+ * first view. Under art (`caption`) it is a line under the picture, not a Scroll. It ends by itself
+ * after `holdMs` (the engine's `AUTO_ADVANCE_MS`). `voiceId` names the narrator clip to play.
+ */
+export const hintViewSchema = z.strictObject({
+  id: z.string().regex(/^hint\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/),
+  text: z.string().min(1).max(120),
+  caption: z.boolean(),
+  holdMs: z.number().int().min(1).max(60_000),
+  voiceId: z.string().min(1).max(80).nullable(),
+});
+export type HintView = z.infer<typeof hintViewSchema>;
+
 const skullBuildingSchema = z.strictObject({
   spaceId: z.string().min(1).max(80),
   name: z.string().min(1).max(80),
@@ -198,6 +212,8 @@ const gearRegroupSchema = z.strictObject({
 const gearCardSchema = z.strictObject({
   id: z.string().min(1).max(40),
   title: z.string().min(1).max(80),
+  /** A heading the iPad lists the card under (Look up, Rules). Absent on an ungrouped card. */
+  group: z.string().min(1).max(40).optional(),
 });
 
 /**
@@ -213,6 +229,9 @@ export const gearViewSchema = z.strictObject({
   pieceChecks: z.number().int().min(0).max(9999),
   opens: z.number().int().min(0).max(9999),
   card: z.string().min(1).max(80).nullable(),
+  /** The open Look up card's title and page (display only on the board). Absent when none is open. */
+  cardTitle: z.string().min(1).max(80).nullable().optional(),
+  cardPage: z.string().min(1).max(600).nullable().optional(),
   inGame: z.boolean(),
   towerConnected: z.boolean(),
   sessionScreen: z.boolean(),
@@ -247,6 +266,8 @@ export const boardViewPayloadSchema = z
     table: tableBandSchema.nullable().optional(),
     /** Place still and caption. Story board only, and only while a group is inside. */
     place: placeStillSchema.nullable().optional(),
+    /** The first-time hint on now (CU/09). Story board only; the iPads show nothing new. */
+    hint: hintViewSchema.nullable().optional(),
     /** Gear panel the Story board displays. Omitted when the host has no gear snapshot. */
     gear: gearViewSchema.optional(),
     /** The demo's packed line (A1-8b-2, D49). Omitted until the demo entry plays one. */

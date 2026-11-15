@@ -1,4 +1,5 @@
 import type { GearPanelId } from "../../../protocols/v2/views.ts";
+import type { HintId } from "../../hints/copy.ts";
 import type { LoopRuntimeState, PromptSlot } from "../../loop/runtime.ts";
 import { emptyLoopRuntime } from "../../loop/runtime.ts";
 import type { LoopRegistry } from "../../loop/types.ts";
@@ -178,6 +179,12 @@ export type ShellState = {
   offered: PromptSlot[];
   playContent: PlayContent | null;
   play: PlayState | null;
+  /** Hint ids already shown this game (CU/09). A checkpoint keeps them, so none repeats. */
+  hintsShown: string[];
+  /** The hint on the Story board now, or null. It ends after `AUTO_ADVANCE_MS`; not kept across a restart. */
+  hint: HintId | null;
+  /** Hints earned while another was showing; they follow one at a time. */
+  hintQueue: string[];
   /** Tower volume 0, 1, or 2. Kept across a panel close and a restart. */
   towerVolume: 0 | 1 | 2;
   /** C2 never splits the party. The label stays "Split party". */
@@ -250,6 +257,9 @@ export const initialShellState = (input: {
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,
+    hintsShown: [],
+    hint: null,
+    hintQueue: [],
     towerVolume: 1,
     partySplit: false,
     gearPanel: null,

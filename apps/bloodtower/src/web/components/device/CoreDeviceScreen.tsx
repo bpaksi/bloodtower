@@ -1,7 +1,7 @@
 "use client";
 
 import type { DeviceView, GearView, OfferedAction } from "bloodtower-protocols";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import { pageLogContext, reportPageLog } from "../../lib/pageLog.ts";
 import {
@@ -253,16 +253,20 @@ function GearDevicePanel({
       ) : null}
       {gear.panel === "look-up" ? (
         <div className="mt-6 flex flex-col gap-3">
-          {gear.cards.map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              className="bt-secondary"
-              disabled={!live}
-              onClick={() => send("pick", { pick: card.title })}
-            >
-              {card.title}
-            </button>
+          {gear.cards.map((card, index) => (
+            <Fragment key={card.id}>
+              {card.group && card.group !== gear.cards[index - 1]?.group ? (
+                <h3 data-lookup-group={card.group}>{card.group}</h3>
+              ) : null}
+              <button
+                type="button"
+                className="bt-secondary"
+                disabled={!live}
+                onClick={() => send("pick", { pick: card.id })}
+              >
+                {card.title}
+              </button>
+            </Fragment>
           ))}
         </div>
       ) : null}

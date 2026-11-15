@@ -74,6 +74,7 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
       actions: offered,
       table: state.table ?? null,
       place: state.place ?? null,
+      ...(state.hint ? { hint: state.hint } : {}),
       ...(state.gear ? { gear: state.gear } : {}),
     });
   }

@@ -111,6 +111,7 @@ export {
   errorMessageSchema,
   errorPayloadSchema,
   type GearView,
+  type HintView,
   helloMessageSchema,
   helloPayloadSchema,
   loggedMessageSchema,

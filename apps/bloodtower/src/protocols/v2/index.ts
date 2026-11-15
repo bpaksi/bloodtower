@@ -72,6 +72,7 @@ export {
   type GearView,
   gearPanelSchema,
   gearViewSchema,
+  type HintView,
   type PackedLine,
   packedLineSchema,
 } from "./views.ts";

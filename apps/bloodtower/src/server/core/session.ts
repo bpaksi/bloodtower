@@ -15,6 +15,7 @@ import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
 import type { BoardView, DeviceView, ErrorCode, PackedLine } from "../../protocols/v2/index.ts";
+import { AUTO_ADVANCE_MS } from "../../protocols/v2/views.ts";
 import type { EventStore } from "../events/store.ts";
 import type { HostLogger } from "../log/hostLog.ts";
 import type { Clock } from "../timing/clock.ts";
@@ -423,6 +424,24 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     options.onChange();
     persistLobbyCheckpoint();
     persistSessionMarker();
+    scheduleHintEnd();
+  };
+
+  // A first-time hint ends after the engine's one auto-advance time (CU/09). The timer only asks:
+  // the end is an event, so a replay or a restart sees the same game.
+  let hintTimer: ReturnType<typeof setTimeout> | undefined;
+  let hintTimerFor: string | null = null;
+  const scheduleHintEnd = (): void => {
+    if (state.hint === hintTimerFor) return;
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = undefined;
+    hintTimerFor = state.hint;
+    const hintId = state.hint;
+    if (!hintId) return;
+    hintTimer = setTimeout(() => {
+      hintTimer = undefined;
+      enqueue({ kind: "hint-end", v: 1, hintId }, null);
+    }, AUTO_ADVANCE_MS);
   };
 
   let applyQueue: Promise<void> = Promise.resolve();
@@ -763,6 +782,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     },
     whenIdle: () => applyQueue,
     cancelDisconnects: () => {
+      if (hintTimer) clearTimeout(hintTimer);
+      hintTimer = undefined;
       for (const record of devices.values()) {
         if (!record.grace) continue;
         clearTimeout(record.grace);
