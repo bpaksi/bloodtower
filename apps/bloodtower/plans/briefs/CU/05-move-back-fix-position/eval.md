@@ -125,13 +125,15 @@ Unit tests sit beside `apps/bloodtower/src/engine/loops/group-turn/loop.ts` (or 
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-21 — Continue keeps the undo window
+- Amended 2026-11-16 (Bob, chat: "I accept server level for CU/05 EV-21 and defer EV-22 until arrival scenes exist"): checked at server level by `server/core/fixPositionContinue.test.ts`, not in Playwright.
 - Requirement: the recorded space, moves left and undo log survive Continue.
-- Method: playwright
+- Method: unit
 - How: tap a quiet neighbour, quit, Continue, press Back.
 - Pass evidence: after Continue the group is on the tapped space with moves minus one; Back returns it to S with the move.
 - Fails if: Continue clears the undo log or the group's space.
 
 ### EV-22 — A played trigger is not replayed or undone after Continue
+- Deferred 2026-11-16 (Bob, chat: "I accept server level for CU/05 EV-21 and defer EV-22 until arrival scenes exist"): `main` has no arrival scene to play, so this has no test until arrival scenes exist. The verifier lists it as deferred, not failed.
 - Requirement: no Back after a trigger, also after Continue.
 - Method: playwright
 - How: tap the trigger space, play it, quit, Continue.

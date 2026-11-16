@@ -53,6 +53,12 @@ export function GearBoardPanel({ gear }: { gear: GearView }) {
           ))}
         </ol>
       ) : null}
+      {gear.panel === "game-board-setup" && gear.fixPosition ? (
+        <p data-copy="fix-position-help">
+          Use this if a piece was moved by mistake. Pick whose group it is and where it really
+          stands. It costs no moves and nothing starts.
+        </p>
+      ) : null}
       {gear.panel === "volume" ? <p>How loud should the tower be? Press one to hear it.</p> : null}
       {gear.panel === "look-up" ? (
         gear.card && gear.cardPage ? (

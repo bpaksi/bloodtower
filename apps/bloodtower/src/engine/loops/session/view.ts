@@ -37,6 +37,7 @@ import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
 import { type GroupTurnLocal, virtuePanelOf, virtuePromptId } from "../group-turn/loop.ts";
 import { BOARD_SET_UP_PROMPT } from "./enter.ts";
+import { fixPositionRefusal } from "./gear.ts";
 import {
   canContinue,
   DONE_LINE,
@@ -726,6 +727,20 @@ const regroupSnapshot = (state: ShellState, inGame: boolean): NonNullable<GearVi
   return { open: picks.length > 0, picks, queue };
 };
 
+/** Fix my position's picks: each group by its lead hero, every space by name (CU/05). */
+const fixPositionSnapshot = (state: ShellState, inGame: boolean): GearView["fixPosition"] => {
+  const play = state.play;
+  if (!play || !inGame) return undefined;
+  return {
+    groups: play.groups.flatMap((group) => {
+      const lead = group.heroIds[0];
+      return lead ? [{ heroId: lead, name: heroName(state, lead), spaceId: group.spaceId }] : [];
+    }),
+    spaces: play.content.board.spaces.map((space) => ({ id: space.id, name: space.name })),
+    refusal: fixPositionRefusal(state),
+  };
+};
+
 /** The heroes of the group that acts now: the only ones who may use an item (CU/13, EV-20). */
 const actingHeroes = (state: ShellState): string[] => {
   const { actingId } = actingGroupOf(state);
@@ -757,6 +772,7 @@ const gearSnapshot = (state: ShellState): GearView => {
   const inGame = state.screen === "play" || state.screen === "pause" || state.reconnect !== null;
   const sessionOver = state.screen === "session-over";
   const sessionScreen = state.screen === "session" || sessionOver;
+  const fix = fixPositionSnapshot(state, inGame && !sessionOver);
   return {
     paused: state.gearPaused || state.stage === "paused",
     panel: state.gearPanel,
@@ -774,6 +790,7 @@ const gearSnapshot = (state: ShellState): GearView => {
     beforeBegin: !inGame && !sessionScreen,
     partySplit: state.play ? partyIsSplit(state.play) : false,
     regroup: regroupSnapshot(state, inGame && !sessionOver),
+    ...(fix ? { fixPosition: fix } : {}),
     party: (story?.heroes ?? []).map((hero) => partyHero(state, hero.id, hero.name)),
     actingHeroes: actingHeroes(state),
     cards: RULES_PAGES.map((card) => ({ id: card.id, title: card.title, group: RULES_GROUP })),
