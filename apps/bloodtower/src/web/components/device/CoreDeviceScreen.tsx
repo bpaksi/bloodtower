@@ -4,6 +4,7 @@ import type { DeviceView, GearView, OfferedAction } from "bloodtower-protocols";
 import { Fragment, useState } from "react";
 
 import { VOLUME_LINE } from "../../lib/volumeTest.ts";
+import { ITEMS_EMPTY } from "../board/PartyItemsPanel.tsx";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 import type { MenuContext } from "./gearMenu.ts";
@@ -105,12 +106,15 @@ const menuContext = (view: DeviceView): MenuContext | undefined => {
     towerConnected: gear.towerConnected,
     partySplit: gear.partySplit,
     regroupOpen: gear.regroup?.open ?? false,
-    // The Split party row opens the `split` panel.
+    itemsHeld: gear.party.some((hero) => (hero.heldItems?.length ?? 0) > 0),
+    // The Split party row opens the `split` panel; Use a potion or item opens `items`.
     blockedItem:
       gear.panel && gear.owner !== view.deviceId
         ? gear.panel === "split"
           ? "split-party"
-          : gear.panel
+          : gear.panel === "items"
+            ? "use-potion"
+            : gear.panel
         : null,
   };
 };
@@ -184,6 +188,70 @@ function SplitDevicePanel({
         ) : null}
       </div>
     </section>
+  );
+}
+
+/** Keys for a hero's items: two of the same item get their own, in the order held. */
+const itemKeys = (items: { id: string; name: string }[]) => {
+  const seen = new Map<string, number>();
+  return items.map((item) => {
+    const nth = (seen.get(item.id) ?? 0) + 1;
+    seen.set(item.id, nth);
+    return { key: `${item.id}-${nth}`, item };
+  });
+};
+
+/**
+ * Use a potion or item (Q7.2, Q7.3): pick a hero of the acting group, then an item, then Done.
+ * This is the one route to using an item; the Story board only shows what the party carries.
+ */
+function ItemsDevicePanel({
+  gear,
+  live,
+  onAct,
+}: {
+  gear: GearView;
+  live: boolean;
+  onAct: (actionId: string, args?: Record<string, unknown>) => void;
+}) {
+  const acting = new Set(gear.actingHeroes ?? []);
+  const holders = gear.party.filter(
+    (hero) => acting.has(hero.id) && (hero.heldItems?.length ?? 0) > 0,
+  );
+  const chosen = gear.party.find((hero) => hero.id === gear.firstHero);
+  return (
+    <div className="mt-6 flex flex-col gap-3" data-items-flow>
+      {gear.picked ? <p data-items-used>{gear.picked}</p> : null}
+      {chosen ? (
+        itemKeys(chosen.heldItems ?? []).map(({ key, item }) => (
+          <button
+            key={key}
+            type="button"
+            className="bt-secondary"
+            data-use-item={item.id}
+            disabled={!live}
+            onClick={() => onAct("pick", { item: "items", pick: item.id, heroId: chosen.id })}
+          >
+            {item.name}
+          </button>
+        ))
+      ) : holders.length > 0 ? (
+        holders.map((hero) => (
+          <button
+            key={hero.id}
+            type="button"
+            className="bt-secondary"
+            data-items-hero={hero.id}
+            disabled={!live}
+            onClick={() => onAct("pick", { pick: hero.name, heroId: hero.id })}
+          >
+            {hero.name}
+          </button>
+        ))
+      ) : (
+        <p data-items-empty>{ITEMS_EMPTY}</p>
+      )}
+    </div>
   );
 }
 
@@ -280,6 +348,7 @@ function GearDevicePanel({
           ))}
         </div>
       ) : null}
+      {gear.panel === "items" ? <ItemsDevicePanel gear={gear} live={live} onAct={send} /> : null}
       {gear.panel === "tower" ? (
         gear.picked === "Reconnect" || gear.picked === "Go on without" ? (
           <div className="mt-6 flex flex-col gap-3" data-tower-confirm={gear.picked}>

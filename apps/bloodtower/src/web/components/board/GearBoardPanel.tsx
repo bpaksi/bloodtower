@@ -2,6 +2,7 @@
 
 import type { GearView } from "bloodtower-protocols";
 import { JoinQr } from "../../lib/qr.ts";
+import { ITEMS_TITLE, PartyItemsPanel } from "./PartyItemsPanel.tsx";
 
 const TITLE: Record<string, string> = {
   "current-party": "Current party",
@@ -12,6 +13,7 @@ const TITLE: Record<string, string> = {
   "join-another-ipad": "Join another iPad",
   tower: "Tower",
   split: "Split party",
+  items: ITEMS_TITLE,
 };
 
 /** Display only. The iPad presses; this panel never has a button. */
@@ -43,6 +45,7 @@ export function GearBoardPanel({ gear }: { gear: GearView }) {
           ))}
         </ul>
       ) : null}
+      {gear.panel === "items" ? <PartyItemsPanel party={gear.party} /> : null}
       {gear.panel === "game-board-setup" ? (
         <ol data-setup-steps>
           {gear.setupSteps.map((step) => (

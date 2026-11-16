@@ -777,7 +777,7 @@ test("the open Menu matches the gear list in play", async ({ browser }, testInfo
     await greyReason(page, "tower", "The tower is connected.");
     // CU/04: Split party is live; with no hero in a group of 2 or more it has nothing to pick.
     await greyReason(page, "split-party", "[COPY: split-party-none]");
-    await greyReason(page, "use-potion", "C3+");
+    await greyReason(page, "use-potion", "No potions or items to use.");
     await expect(page.locator("[data-menu] [data-version]")).toHaveText(/^v\d+\.\d+\.\d+/);
     await expectCloseLast(page);
     const menuBox = await box(page.locator("[data-menu]"));
@@ -1037,7 +1037,8 @@ test("gear actions open on the Story board and pause the game", async ({ browser
     await expect(heroA.locator("[data-name]")).toHaveText("Hero A");
     await expect(heroA.locator("[data-hp]")).toContainText("unavailable");
     await expect(heroA.locator("[data-gold]")).toContainText("unavailable");
-    await expect(heroA.locator("[data-items]")).toContainText("unavailable");
+    // CU/13: the count is known, so nothing held reads "0 held", not blank. HP and gold are not.
+    await expect(heroA.locator("[data-items]")).toContainText("Items 0 held");
     await expect(heroA.locator("[data-corruptions]")).toContainText("unavailable");
     holderA = (await heroA.getAttribute("data-holder")) ?? "";
     holderB = (await party.locator('[data-hero="hero-b"]').getAttribute("data-holder")) ?? "";
@@ -1153,7 +1154,7 @@ test("a disabled item shows its reason", async ({ browser }, testInfo) => {
     await openMenu(playPage);
     // CU/04: Split party is live; with no hero in a group of 2 or more it has nothing to pick.
     await greyReason(playPage, "split-party", "[COPY: split-party-none]");
-    await greyReason(playPage, "use-potion", "C3+");
+    await greyReason(playPage, "use-potion", "No potions or items to use.");
     await greyReason(playPage, "tower", "The tower is connected.");
     await expect(playPage.locator('[data-gear-item="volume"]')).toBeEnabled();
     await expect(playPage.locator('[data-gear-item="volume"]')).not.toHaveClass(/bt-row--disabled/);

@@ -7,6 +7,9 @@ export const SKULL_NO_BUILDING = "skull-no-building" as const;
 /** Error code logged when a queued Split or Rejoin cannot apply at the day start (CU/04, Q4.2). */
 export const REGROUP_DROPPED = "regroup-dropped" as const;
 
+/** Error code logged and toasted when a use-item act is refused (CU/13, EV-20). */
+export const USE_ITEM_REFUSED = "use-item-refused" as const;
+
 export const viewRefreshEffectV1 = z.object({
   kind: z.literal("view-refresh"),
   v: z.literal(1),
@@ -50,6 +53,7 @@ export const pressErrorEffectV1 = z.object({
     HINT_TEXT_MISSING,
     HINTS_AFTER_SETUP,
     RULES_PAGE_MISSING,
+    USE_ITEM_REFUSED,
   ]),
   message: z.string().min(1).max(300),
   /**
