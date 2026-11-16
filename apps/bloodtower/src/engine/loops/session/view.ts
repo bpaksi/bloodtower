@@ -405,6 +405,8 @@ const buildBuilding = (state: ShellState): BuildingPanelView | null => {
       })),
     result,
     holdMs: AUTO_ADVANCE_MS,
+    skulls: group ? (ensureClock(play).skulls[group.spaceId] ?? 0) : 0,
+    movesLeft: local.movesLeft ?? null,
   };
 };
 

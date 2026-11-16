@@ -203,6 +203,8 @@ const buildingPanelSchema = z.strictObject({
     })
     .nullable(),
   holdMs: z.number().int().min(1).max(60_000),
+  skulls: z.number().int().min(0).max(99),
+  movesLeft: z.number().int().min(0).max(99).nullable(),
 });
 
 const tableBandSchema = z.strictObject({

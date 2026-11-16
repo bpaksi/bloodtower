@@ -207,13 +207,17 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const { session, context, pad } = await startGame(browser, testInfo, {
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
       seed: seedAt(CITADEL, `~test-gold:hero-a=20~test-skulls:${CITADEL}=2`),
     });
     try {
       await enterBuilding(pad);
       expect(await labelsOf(pad)).toEqual(["Cleanse"]);
       await expect(pad.locator('button[data-action-id="leave"]')).toHaveCount(1);
+      // "2 skulls shown on the board" (EV-04).
+      const onBoard = board.locator("[data-building-board]");
+      await expect(onBoard).toHaveAttribute("data-skulls", "2", { timeout: 20_000 });
+      await expect(onBoard).toContainText("2 skulls");
     } finally {
       await closeAll(context, session.host);
     }
@@ -241,39 +245,36 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     }
   });
 
-  test("EV-08: Rest offers 1 to the moves left, and the pick spends them", async ({
+  test("EV-08: village, hero at 4/12, 3 moves: the picker offers 1-3; 2 give 10/12 and leave 1 move", async ({
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
+    // The seed `c3-bld-m1` rolls 3 moves on the first day (2d3, checked against the engine's RNG).
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: seedAt(VILLAGE, "~test-hp:hero-a=4/12"),
+      seed: `c3-bld-m1~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
     });
     try {
       await enterBuilding(pad);
+      await expect(board.locator("[data-building-board]")).toHaveAttribute("data-moves", "3", {
+        timeout: 20_000,
+      });
       await optionByLabel(pad, "Rest").click();
-      const picker = deviceMain(pad).locator('[data-building="rest-moves"]');
-      await expect(picker).toBeVisible();
-      const counts = await options(pad).allInnerTexts();
-      const most = counts.length;
-      expect(most).toBeGreaterThanOrEqual(2);
-      expect(counts.map((text) => text.trim())).toEqual(
-        Array.from({ length: most }, (_, index) => String(index + 1)),
-      );
-      await options(pad).nth(1).click();
+      await expect(deviceMain(pad).locator('[data-building="rest-moves"]')).toBeVisible();
+      expect((await labelsOf(pad)).map((text) => text.trim())).toEqual(["1", "2", "3"]);
+      await optionByLabel(pad, "2").click();
       await expect(deviceMain(pad).locator("[data-building-result]")).toHaveText(
         "You rest and recover.",
       );
-      // +3 a move: two moves take Hero A from 4/12 to 10/12 (the moves rolled are not fixed, so
-      // "3 offered, 1 left" is the engine test's; here the range follows the moves left).
+      // 4 + 2 x 3 = 10 of 12 on the hero panel; 1 move left on the board.
+      await expect(board.locator("[data-building-board]")).toHaveAttribute("data-moves", "1");
       await openGearItem(pad, "current-party");
       await expect(heroRow(board, "hero-a")).toContainText("HP 10/12", { timeout: 20_000 });
       await pad.locator("[data-gear-panel] button.bt-primary", { hasText: "Done" }).click();
       await clickAct(pad, "build");
-      if (most > 2) {
-        await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
-        await optionByLabel(pad, "Rest").click();
-        await expect(options(pad)).toHaveCount(most - 2);
-      }
+      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
+      await optionByLabel(pad, "Rest").click();
+      await expect(deviceMain(pad).locator('[data-building="rest-moves"]')).toBeVisible();
+      expect(await labelsOf(pad)).toEqual(["1"]);
     } finally {
       await closeAll(context, session.host);
     }
@@ -303,6 +304,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       // Hero A still holds Feral: the Cure's hero list still names Hero A.
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
       await optionByLabel(pad, "Cure").click();
+      await expect(deviceMain(pad).locator('[data-building="who"]')).toBeVisible();
       expect((await labelsOf(pad)).sort()).toEqual(["Hero A", "Hero C"]);
     } finally {
       await closeAll(context, session.host);

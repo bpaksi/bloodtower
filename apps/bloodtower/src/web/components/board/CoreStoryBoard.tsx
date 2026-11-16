@@ -5,6 +5,7 @@ import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
 import { AssetIdLabel } from "./AssetIdLabel";
+import { BuildingBoardPanel } from "./BuildingBoardPanel";
 import { ChanceSpin } from "./ChanceSpin";
 import {
   DayBandExtras,
@@ -126,6 +127,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </figure>
       ) : null}
       {layer === "place" && place ? <AssetIdLabel assetId={place.stillId} /> : null}
+      {layer === "place" && table?.building && !paused ? (
+        <BuildingBoardPanel table={table} />
+      ) : null}
       {hint && !paused ? <HintScroll hint={hint} /> : null}
       {view.gear ? <GearBoardPanel gear={view.gear} /> : null}
       {debug ? (

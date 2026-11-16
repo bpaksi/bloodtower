@@ -143,6 +143,10 @@ export type BuildingPanelView = {
   options: BuildingOptionView[];
   result: BuildingResultView | null;
   holdMs: number;
+  /** Skulls on this building now, for the board (EV-04). */
+  skulls: number;
+  /** Moves the group has left (EV-08). Null when not known. */
+  movesLeft: number | null;
 };
 
 export type TableBand = {
