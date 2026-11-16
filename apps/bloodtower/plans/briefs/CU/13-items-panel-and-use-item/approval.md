@@ -3,6 +3,7 @@
 | Item | Approved by | When (America/Detroit) | Chat link | Version (commit sha of file) |
 |------|-------------|------------------------|-----------|------------------------------|
 | eval.md | Bob | 2026-11-15, in chat ("I approve the CU/13, CU/14 and CU/15 evals") | | blob 7c088c1a |
+| eval.md | Bob | 2026-11-16, in chat ("I approve the CU/13 EV-12 reword ..."), EV-12 reworded | | blob ca187d3a |
 | plan.md Touches | PENDING | PENDING | | PENDING |
 | mockup.html | PENDING | PENDING | | PENDING (same file as CU/07's mockup.html, blob a504f662, a Gamewright draft for the Illusionist to replace) |
 
