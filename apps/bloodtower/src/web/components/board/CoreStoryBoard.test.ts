@@ -1,8 +1,18 @@
 import type { BoardView } from "bloodtower-protocols";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { CORRUPTION_LOSS_LIMIT } from "../../../engine/loops/day/rules.ts";
 import { CoreStoryBoard } from "./CoreStoryBoard.tsx";
+
+// CU/10 EV-03 second case: the web reads the limit through the engine module, so a mock of it
+// moves the threshold. The mutable holder lets one case run with a limit of 4.
+const limit = vi.hoisted(() => ({ value: 3 }));
+vi.mock("../../../engine/loops/day/rules.ts", () => ({
+  get CORRUPTION_LOSS_LIMIT() {
+    return limit.value;
+  },
+}));
 
 const join = {
   id: "join",
@@ -435,5 +445,108 @@ describe("Pick story volume line (CU/11 EV-03)", () => {
     expect(markup).toContain("How loud should the tower be? Press one to hear it.");
     expect(markup).not.toContain("bt-row--disabled");
     expect(markup).not.toContain("aria-disabled");
+  });
+});
+
+// CU/10 (PT-17): the corruption mark on the band.
+describe("corruption mark on the band", () => {
+  const groupOf = (id: string, name: string) => ({
+    heroId: id,
+    heroName: name,
+    kingdom: "N" as const,
+    kingdomLabel: "Arisilon (N)",
+    spaceId: "n-citadel",
+    spaceName: "Radiant Mountains",
+    building: "citadel",
+    inside: false,
+    alone: true,
+  });
+  const band = (counts?: { a?: number; b?: number }, lead: "a" | "b" = "a") =>
+    html({
+      screen: "play",
+      levels: [join, { id: "play", label: "play", shows: "Day 1" }],
+      heroes,
+      narration: null,
+      actions: [],
+      table: {
+        chapter: "Proving Grounds",
+        day: 1,
+        health: "unavailable",
+        purse: "unavailable",
+        actingGroup: "Hero A",
+        actingHeroId: "hero-a",
+        movesLeft: 3,
+        moveRoll: 3,
+        modifier: "none",
+        waitingFor: null,
+        groups: [groupOf("hero-a", "Hero A"), groupOf("hero-c", "Hero C")],
+        ...(counts
+          ? {
+              corruptions: [
+                {
+                  heroId: "hero-a",
+                  heroName: "Hero A",
+                  panelHeroId: "hero-a",
+                  count: counts.a ?? 0,
+                },
+                {
+                  heroId: "hero-b",
+                  heroName: "Hero B",
+                  panelHeroId: lead === "a" ? "hero-a" : "hero-b",
+                  count: counts.b ?? 0,
+                },
+              ],
+            }
+          : {}),
+      },
+      place: null,
+    } as BoardView);
+  const marks = (markup: string) => markup.match(/data-corruption-mark="[^"]+"/g) ?? [];
+
+  it("EV-02: no mark at 0 or 1, one at 2", () => {
+    expect(marks(band({ a: 0 }))).toEqual([]);
+    expect(marks(band({ a: 1 }))).toEqual([]);
+    expect(marks(band({ a: 2 }))).toEqual(['data-corruption-mark="hero-a"']);
+  });
+
+  it("EV-01: the mark is an icon with the Copy label, no words, no button", () => {
+    const markup = band({ a: 2 });
+    const mark = /<span class="bt-corruption-mark"[^>]*>.*?<\/span>/.exec(markup)?.[0] ?? "";
+    expect(mark).toContain('role="img"');
+    expect(mark).toContain('aria-label="Hero A has two corruptions. A third ends the game."');
+    expect(mark).toContain("<svg");
+    expect(mark.replace(/<[^>]*>/g, "")).toBe("");
+    expect(mark).not.toMatch(/<button|data-action/);
+  });
+
+  it("EV-10: a non-lead hero's mark sits in the lead's span, one per hero", () => {
+    const markup = band({ a: 0, b: 2 });
+    expect(marks(markup)).toEqual(['data-corruption-mark="hero-b"']);
+    const span = /<span data-hero-panel="hero-a">.*?<\/span><span data-hero-panel="hero-c">/.exec(
+      markup,
+    )?.[0];
+    expect(span).toContain('data-corruption-mark="hero-b"');
+    expect(span).toContain("Hero B has two corruptions");
+    expect(marks(band({ a: 2, b: 2 }))).toEqual([
+      'data-corruption-mark="hero-a"',
+      'data-corruption-mark="hero-b"',
+    ]);
+  });
+
+  it("EV-03: the threshold is the engine's loss limit minus one", () => {
+    limit.value = 3;
+    expect(CORRUPTION_LOSS_LIMIT).toBe(3);
+    expect(marks(band({ a: 2 }))).toHaveLength(1);
+    limit.value = 4;
+    expect(marks(band({ a: 2 }))).toEqual([]);
+    expect(marks(band({ a: 3 }))).toHaveLength(1);
+    limit.value = 3;
+  });
+
+  it("EV-08: unknown counts draw no mark and no zero", () => {
+    const markup = band();
+    expect(marks(markup)).toEqual([]);
+    expect(markup).toContain('data-health="unavailable"');
+    expect(markup).not.toMatch(/0 corruptions/);
   });
 });

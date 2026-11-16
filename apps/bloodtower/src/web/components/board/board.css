@@ -2257,6 +2257,16 @@
   font-size: 1rem;
 }
 
+/* CU/10: the corruption mark sits in the lead's panel span, a hero one corruption from defeat. */
+.bt-corruption-mark {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0.3rem;
+  font-size: 26px; /* the mockup's 26px mark; the band line stays 1.2rem */
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .bt-threat-skulls {
   display: inline-flex;
   align-items: center;
