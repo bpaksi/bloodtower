@@ -222,3 +222,52 @@ test("CU/05 Fix my position lives in Game board setup and moves the group for fr
     await session.host.close();
   }
 });
+
+test("CU/05 Back still works after a host restart and Continue (EV-21)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(240_000);
+  const session = await hostFor(testInfo, "cu05-continue");
+  const { databasePath } = session;
+  const first = await openTable(browser, testInfo, session);
+  let start: Awaited<ReturnType<typeof readStatus>>;
+  try {
+    start = await readStatus(first.device);
+    const here = spaceById.get(start.space ?? "");
+    const next = here?.adjacent[0];
+    expect(next).toBeTruthy();
+    const before = await marker(first.device);
+    await clickAct(first.device, "walk", `walk--${start.hero}--${next}`);
+    await settle(first.device, before);
+    expect((await readStatus(first.device)).moves).toBe(String(Number(start.moves) - 1));
+  } finally {
+    await first.context.close();
+    await session.host.close();
+  }
+
+  const restarted = await startAcceptanceHost(testInfo, {
+    databasePath,
+    seed: "cu05-continue",
+    lanHost: REACHABLE_JOIN,
+  });
+  const context = await browser.newContext({ baseURL: restarted.baseURL });
+  const device = await context.newPage();
+  try {
+    await installSessionSocketHook(device);
+    await device.goto(`/join?code=${restarted.host.joinCode}`);
+    await expect(device).toHaveURL(/\/device/);
+    await setSoundAndKeep(device);
+    await clickAct(device, "continue", "continue-saved-game");
+    await expect(deviceMain(device)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
+    const back = device.locator('button[data-action="back"]');
+    await expect(back).toBeEnabled({ timeout: 20_000 });
+    await back.click();
+    await expect
+      .poll(async () => (await readStatus(device)).space, { timeout: 15_000 })
+      .toBe(start.space);
+    expect((await readStatus(device)).moves).toBe(start.moves);
+  } finally {
+    await context.close();
+    await restarted.host.close();
+  }
+});
