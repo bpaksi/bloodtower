@@ -240,3 +240,13 @@ Bob said to finish v1.0 before any 1.1 design, so there is **no 1.1 or 1.2 outli
 | - | PARKED (1.1): Dark Tower audit items outside v1.0 (BE-01, BE-04, CB-03, TP-02, glyph parts, Long overlay, D7, H02, EE-03) | Gamewright | - | #506 |
 
 Also parked, with no issue: the 1.1 and 1.2 sections of the design freeze and the gap map are reference only; the 16 gaps the triage moved to 1.1 wait with them. When 1.0 ships, 1.1 planning starts from DEC-785 and DEC-831, as the design freeze says.
+
+## Bob's rulings, 2026-11-16 (chat)
+
+- **Gamewright recommendations adopted** ("Adopt the Gamewright recommendations for 1, 2 and 3"):
+  1. CU/03: when a night's skull drop loses the game, the night stops there; no further drops. The build for this is a follow-up to CU/03 (#522), not yet scheduled.
+  2. CU/04: the 4-second groups card shows only on a day when a queued split or rejoin applied; it never asks a question.
+  3. C3/15 and C4/13: the freed-skull picks come after Set the table's Done.
+- **Still open:** the 1.0 virtue deck list from C3-06 (the Gamewright names it).
+- **Touches amendments accepted** ("I accept the coordinator's Touches amendments"): C3-08 (#537), CU/05 (#542), CU/13 (#541) and C3/20 (#545), each made by the coordinator under Bob's delegation.
+- **Eval approvals recorded:** CU/03, CU/04 and CU/10 at their current blobs (rows in each `approval.md`).
