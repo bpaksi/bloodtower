@@ -1,6 +1,8 @@
 import { randomBytes } from "node:crypto";
 import type { ShellEffect } from "../../engine/loops/session/effects.ts";
 import type { ShellState } from "../../engine/loops/session/state.ts";
+import { activeMsOf, latestRecordOf, startedWallOf, tapCounts } from "../events/gameStats.ts";
+import type { GameRecordPayloadV1 } from "../events/kinds.ts";
 import type { EventStore } from "../events/store.ts";
 import type { HostLogger } from "../log/hostLog.ts";
 import type { Clock } from "../timing/clock.ts";
@@ -45,14 +47,41 @@ export const runShellEffects = async (
       }
       case "game-record": {
         if (ctx.replaying) break;
-        const already = ctx.store
-          .listEvents(effect.gameId)
-          .some((row) => row.kind === "game-record");
-        if (already) break;
+        const rows = ctx.store.listEvents(effect.gameId);
+        // A quit, Continue, then the final outcome are rows in the log and the latest is the
+        // record (PT-03). The same outcome again with nothing new (no press, no play time, same
+        // day) writes nothing: a second Quit right after Continue is one record (DEC-218).
+        const last = latestRecordOf(rows);
+        const payload: GameRecordPayloadV1 = {
+          v: 1,
+          gameId: effect.gameId,
+          outcome: effect.outcome,
+          storyId: effect.storyId ?? null,
+          length: effect.length ?? null,
+          difficulty: effect.difficulty ?? null,
+          partySize: effect.partySize ?? null,
+          heroIds: effect.heroIds ?? [],
+          ...(effect.how ? { how: effect.how } : {}),
+          sceneId: effect.sceneId ?? null,
+          endDay: effect.endDay ?? null,
+          startedWall: startedWallOf(rows),
+          endedWall: ctx.clock.wall(),
+          activeMs: activeMsOf(rows),
+          taps: tapCounts(rows).total,
+        };
+        if (
+          last &&
+          last.outcome === payload.outcome &&
+          last.taps === payload.taps &&
+          last.activeMs === payload.activeMs &&
+          last.endDay === payload.endDay
+        ) {
+          break;
+        }
         ctx.store.append({
           gameId: effect.gameId,
           kind: "game-record",
-          payload: { v: 1, gameId: effect.gameId, outcome: effect.outcome },
+          payload,
           atMonoMs: ctx.clock.monoMs(),
           atWall: ctx.clock.wall(),
           deviceId: null,
@@ -60,6 +89,10 @@ export const runShellEffects = async (
           packVersion: ctx.meta.packVersion,
           engineVersion: ctx.meta.engineVersion,
         });
+        // A finished game clears the autosave, so Continue is not offered for it (DEC-208).
+        if (effect.outcome !== "quit" && ctx.store.getAutosave()?.gameId === effect.gameId) {
+          ctx.store.clearAutosave();
+        }
         break;
       }
       case "checkpoint-write": {

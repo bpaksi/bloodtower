@@ -38,6 +38,7 @@ import {
 } from "./gear.ts";
 import {
   applyHubPress,
+  gameRecordEffect,
   hubOffers,
   isHubPrompt,
   RATING_SETTING,
@@ -131,12 +132,7 @@ const pushQuitRecord = (state: ShellState, effects: ShellStepResult["effects"]):
   if (state.stage !== "ended") return;
   if (state.activeGameId) {
     recordGame(state, state.activeGameId, "quit");
-    effects.push({
-      kind: "game-record",
-      v: 1,
-      gameId: state.activeGameId,
-      outcome: "quit",
-    });
+    effects.push(gameRecordEffect(state, state.activeGameId, "quit"));
   }
   if (state.autosave) {
     effects.push({ kind: "autosave-write", v: 1, gameId: state.autosave.gameId });
