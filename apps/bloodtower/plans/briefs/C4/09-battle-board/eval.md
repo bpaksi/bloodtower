@@ -100,7 +100,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: a wrong cut, a wrong hit, or no −2 shown.
 
 ### EV-17 — The Fight/Retreat board line warns of a hero one fall from defeat (PT-17)
-- Requirement: PT-17: while a hero with 2 corruptions stands in the battle, the Fight/Retreat board line adds the warning (`[COPY: Fight/Retreat warning, LQ-2]`, with the hero's name).
+- Requirement: PT-17: while a hero with 2 corruptions stands in the battle, the Fight/Retreat board line adds the warning (Copy table `board.corruption-warning`, with the hero's name).
 - Method: playwright
 - How: `c4-battle.spec.ts`: 2 heroes, hero 1 at 2 corruptions, hero 2 at 1; reach the Fight/Retreat choice.
 - Pass evidence: the board line `[data-corruption-warning]` names hero 1 with the Copy table text, in addition to "Fight or Retreat?"; it does not name hero 2.
@@ -189,7 +189,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
 - PT-17: the mark threshold is "one corruption from defeat": 2 corruptions while DEC-676's loss is the third.
-- PT-17: the warning text is Loremaster's (LQ-2, default A: "<hero> bears two oath-marks. A third ends the oath."); the build shows the Copy table row once step 45 fills it.
+- PT-17: the warning text is the Copy table's `board.corruption-warning` (Loremaster, 2026-11-16): "{hero}: two corruptions. A third ends the game." LQ-2 default A's "oath-marks" was a proposal, not a lock, and is not used (the Keep's 1.1 wording, IDEA-177).
 
 ## OPEN questions
 
