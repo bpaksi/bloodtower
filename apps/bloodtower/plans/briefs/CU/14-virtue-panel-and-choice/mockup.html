@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CU/07 Virtue, items and chance panels (Gamewright draft)</title>
+<style>
+body{margin:0;background:#1a1410;color:#e8dcc0;font:20px Georgia,serif}
+.board{width:1920px;height:1080px;position:relative;background:#2a2420;overflow:hidden;margin-bottom:24px}
+.band{padding:14px 28px;border-bottom:2px solid #c9a85a;background:#1f1b18}
+.panel{position:absolute;left:560px;top:240px;width:800px;border:3px double #c9a85a;background:#1f1b18;padding:28px;text-align:center}
+.panel li{list-style:none;margin:10px 0;text-align:left}
+.ph{position:absolute;left:560px;top:600px;width:800px;height:300px;border:3px dashed #8a1e14;color:#8a1e14;display:flex;align-items:center;justify-content:center;font-style:italic}
+.ipad{width:768px;height:1024px;background:#2a2420;position:relative;text-align:center;display:inline-block;margin-right:24px;vertical-align:top}
+.btn{display:block;margin:16px 80px;padding:18px;border:2px solid #c9a85a}
+.bar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:12px 24px;border-top:1px solid #c9a85a}
+h2{margin-top:50px}.note{padding:8px 28px;color:#c9a85a}
+</style></head><body>
+<div class="board" id="virtue" data-viewport="1920x1080"><header class="band">Band: Hero A, Hero B, purse, Day 3</header>
+<div class="panel" data-panel="virtue"><h2 style="margin-top:0">[COPY: virtue title]</h2><ul><li>[COPY: virtue line] Relentless: +1 Wild until the next roll</li><li>[COPY: virtue line] Infused: asks a building (the iPad shows the choice)</li></ul></div>
+<p class="note">Gamewright draft for the Illusionist to replace. Sample virtues only. Turn-start virtue panel (UI-037).</p></div>
+<div class="board" id="items" data-viewport="1920x1080"><header class="band">Band</header>
+<div class="panel" data-panel="items"><h2 style="margin-top:0">[COPY: items title]</h2><ul><li>[COPY: hero, item] Hero A: healing potion</li><li>[COPY: hero, item] Hero B: lantern</li><li>Hero C: No potions or items to use.</li></ul><p>Game paused.</p></div>
+<p class="note">Party items panel (UI-013), opened from the gear.</p></div>
+<div class="board" id="chance" data-viewport="1920x1080"><header class="band">Band</header>
+<div class="panel" data-panel="chance"><h2 style="margin-top:0">[COPY: result] 14 gold</h2></div><div class="ph">PLACEHOLDER: the tower lights chase and stop</div>
+<p class="note">Game of chance (UI-045): result on the board.</p></div>
+<div class="ipad" id="ipad-virtue" data-viewport="768x1024"><h2>A virtue asks</h2><span class="btn">[COPY: choice 1]</span><span class="btn">[COPY: choice 2]</span><div class="bar"><span>?</span><span>Back &nbsp; Replay</span><span>gear</span></div></div>
+<div class="ipad" id="ipad-chance" data-viewport="768x1024"><h2>Starting purse</h2><span class="btn">Spin</span><div class="bar"><span>?</span><span>Back &nbsp; Replay</span><span>gear</span></div></div>
+</body></html>
