@@ -53,10 +53,11 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-11 — Nothing physical without a press
+- Amended 2026-11-15 (PT-24, Bob approved in chat): a host restart never reconnects the tower, so "exactly one `sound.play-stateful` after the press" could not hold after a restart.
 - Requirement: root CLAUDE.md "Tower safety"; C2/05 EV-07, EV-19.
 - Method: playwright
-- How: connect track: join, reach Pick story, reload each iPad, restart the host and Continue, then read the mock tower's log before any Volume press.
-- Pass evidence: zero tower commands before the first Volume press; after the press exactly one `sound.play-stateful`.
+- How: connect track: join, reach Pick story, reload each iPad, restart the host and Continue, reading the mock tower's log throughout; separately, press Volume on the connected tower (before any restart).
+- Pass evidence: zero tower commands after join, after each iPad reload, and after a host restart plus Continue, before any Volume press; a Volume press on a connected tower (before any restart) sends exactly one `sound.play-stateful`.
 - Fails if: a load, restore or Continue sends a sound, or the removed unlock press was replaced by an automatic one.
 
 ### EV-12 — An old autosave and an old `sound-unlock` event still load
@@ -67,11 +68,12 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: restore throws, the event is silently dropped with no log at all, or it is logged as an error for an expected case.
 
 ### EV-13 — Kept volume, tower choice and board audio unlock survive
+- Amended 2026-11-15 (PT-24, Bob approved in chat): `keptVolume` resets on restore (pre-existing) and no tower is linked after a restart, so a kept volume cannot reach a cue after a restart.
 - Requirement: the plan's Survival invariants.
 - Method: playwright
-- How: connect track: Keep volume 1, restart the host, Continue; then Play without Tower in a second session and restart; then open the landing page and click once.
-- Pass evidence: the kept volume (1) is still the one the move-roll cue sends; the no-tower session resumes without a tower question or volume step; the board plays its sound after the first landing click as before.
-- Fails if: the volume resets, the tower question returns, or the board's audio needs a new unlock.
+- How: connect track: Keep volume 1 and read the game's first move-roll cue (no restart); then restart the host and Continue; then Play without Tower in a second session and restart; then open the landing page and click once.
+- Pass evidence: the first move-roll cue is sent at volume 1; after the restart and Continue no tower command is sent; the no-tower session resumes without a tower question or volume step; the board plays its sound after the first landing click as before.
+- Fails if: the cue ignores the kept volume, a restart or Continue sends a tower command, the tower question returns, or the board's audio needs a new unlock.
 
 ### EV-14 — The gear Volume item is greyed, not hidden, with no tower
 - Requirement: Bob, 2026-11-14 (ruled): DEC-227, DEC-903; amends C2/04 EV-12.

@@ -93,6 +93,13 @@ const DEC_703 = {
     sanctuary_cure: { gold: 10, moves: 1, corruption: 1, first_each_chapter: "free" },
     tavern_rest: { hit_points: 3 },
     virtue_draw: 10,
+    corruption: {
+      cruel_loss: 2,
+      greedy_loss: 2,
+      feral_loss: 2,
+      lost_loss: 1,
+      tempted_buy_extra: 2,
+    },
   },
   tomb: {
     rooms: {
@@ -324,6 +331,49 @@ describe("tuning.yaml", () => {
       expect(resumed.play?.tuning).not.toEqual(changed);
     } finally {
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("C3-08 EV-05: Cruel's key is read from the file, so 3 in a copy gives a loss of 3", () => {
+    const { dir, result } = withTuning((text) => text.replace("cruel_loss: 2", "cruel_loss: 3"));
+    try {
+      expect(result.ok).toBe(true);
+      if (!result.ok || result.kind !== "base-content" || !result.pack.tuning) {
+        throw new Error("The edited base pack did not load tuning.");
+      }
+      expect(result.pack.tuning.gold.corruption.cruel_loss).toBe(3);
+      expect(dayTuningFrom(result.pack.tuning).corruption.cruelLoss).toBe(3);
+      expect(dayTuningFrom(tuningOf(basePack)).corruption).toEqual({
+        cruelLoss: 2,
+        greedyLoss: 2,
+        feralLoss: 2,
+        lostLoss: 1,
+        temptedBuyExtra: 2,
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("C3-08 EV-13: each of the five corruption keys is required, with no default", () => {
+    for (const key of [
+      "cruel_loss",
+      "greedy_loss",
+      "feral_loss",
+      "lost_loss",
+      "tempted_buy_extra",
+    ]) {
+      const { dir, result } = withTuning((text) =>
+        text
+          .split("\n")
+          .filter((line) => !line.trim().startsWith(`${key}:`))
+          .join("\n"),
+      );
+      try {
+        expectLint(result, key);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     }
   });
 });

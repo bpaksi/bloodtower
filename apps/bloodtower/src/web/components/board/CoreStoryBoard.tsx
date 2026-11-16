@@ -5,7 +5,13 @@ import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
 import { AssetIdLabel } from "./AssetIdLabel";
-import { DayBandExtras, DayPanel, HeroCorruptions, ThreatBar } from "./DayPanels";
+import {
+  DayBandExtras,
+  DayPanel,
+  HeroCorruptionMarks,
+  HeroCorruptions,
+  ThreatBar,
+} from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HintScroll } from "./HintScroll";
@@ -82,6 +88,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           {table.groups.map((group) => (
             <span key={group.heroId} data-hero-panel={group.heroId}>
               <span data-health="unavailable">{group.heroName} unavailable</span>
+              <HeroCorruptionMarks table={table} heroId={group.heroId} />
               <HeroCorruptions table={table} heroId={group.heroId} />
             </span>
           ))}

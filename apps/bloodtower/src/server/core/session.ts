@@ -33,7 +33,12 @@ import {
 import { runShellEffects } from "./effects.ts";
 import { runNarrate } from "./narrate.ts";
 import { shellCheckpointFromState } from "./shellCheckpoint.ts";
-import { continueShellFromCheckpoint, LOBBY_RESUME, readSessionResume } from "./shellContinue.ts";
+import {
+  continueShellFromCheckpoint,
+  LOBBY_RESUME,
+  readSessionResume,
+  SaveUnreadableError,
+} from "./shellContinue.ts";
 
 export const GRACE_MS = 60_000;
 
@@ -286,6 +291,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     }
     const result = stepShell(state, event);
     state = result.state;
+    for (const line of result.logs ?? []) options.log.debug(line.code, line.message);
     let logged: ShellEvent = event;
     if (event.kind === "gear" && event.action === "done") {
       logged = {
@@ -301,35 +307,46 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const continued = state.continueRequested && state.autosave !== null;
     if (continued && state.autosave) {
       const live = { ...state, continueRequested: false };
-      const resumed = continueShellFromCheckpoint(options.store, {
-        gameId: state.autosave.gameId,
-        packVersion: meta.packVersion,
-        engineVersion: meta.engineVersion,
-        meta,
-        atMonoMs: options.clock.monoMs(),
-        atWall: options.clock.wall(),
-      });
-      state = {
-        ...resumed.state,
-        tower: options.tower.snapshot(),
-      };
-      if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
-        state = { ...state, pause: null, stage: "playing", screen: "play" };
+      let resumed: ReturnType<typeof continueShellFromCheckpoint> | null = null;
+      try {
+        resumed = continueShellFromCheckpoint(options.store, {
+          gameId: state.autosave.gameId,
+          packVersion: meta.packVersion,
+          engineVersion: meta.engineVersion,
+          meta,
+          atMonoMs: options.clock.monoMs(),
+          atWall: options.clock.wall(),
+          log: options.log,
+        });
+      } catch (error) {
+        // DEC-895: an unreadable save is refused (already logged with its code). The table
+        // stays where it was with no saved game offered, so it starts a new one.
+        if (!(error instanceof SaveUnreadableError)) throw error;
+        state = { ...before, autosave: null, continueRequested: false };
       }
-      state = {
-        ...state,
-        resumedFromAutosave: true,
-        continueRequested: false,
-        // The Enter, the tower choice and tonight's games are tonight's, not the saved game's.
-        enter: null,
-        enterThen: null,
-        confirm: null,
-        sessionEnded: false,
-        // A game that went on without the tower stays without it, tower or not (DEC-301).
-        towerLinked: (live.towerLinked || state.towerLinked) && !state.towerWithout,
-        towerChoice: state.towerWithout ? "without" : live.towerChoice,
-        games: live.games,
-      };
+      if (resumed) {
+        state = {
+          ...resumed.state,
+          tower: options.tower.snapshot(),
+        };
+        if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
+          state = { ...state, pause: null, stage: "playing", screen: "play" };
+        }
+        state = {
+          ...state,
+          resumedFromAutosave: true,
+          continueRequested: false,
+          // The Enter, the tower choice and tonight's games are tonight's, not the saved game's.
+          enter: null,
+          enterThen: null,
+          confirm: null,
+          sessionEnded: false,
+          // A game that went on without the tower stays without it, tower or not (DEC-301).
+          towerLinked: (live.towerLinked || state.towerLinked) && !state.towerWithout,
+          towerChoice: state.towerWithout ? "without" : live.towerChoice,
+          games: live.games,
+        };
+      }
     }
     // A Split party pick changes the play state (the queue, PT-18), so a replay must see it.
     const persistGear =
@@ -587,10 +604,6 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         enqueue({ kind: "focus-story", v: 1, deviceId, storyId }, deviceId);
         return;
       }
-      if (promptId === "sound-enable" && actionId === "enable-sound") {
-        enqueue({ kind: "sound-unlock", v: 1, deviceId }, deviceId);
-        return;
-      }
       if (actionId === "volume-play" && /^volume-[012]$/.test(promptId)) {
         const level = Number(promptId.slice("volume-".length));
         enqueue({ kind: "volume-play", v: 1, deviceId, level }, deviceId);
@@ -772,11 +785,19 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           meta,
           atMonoMs: options.clock.monoMs(),
           atWall: options.clock.wall(),
+          log: options.log,
         });
         state = resumed.state;
         options.onChange();
         return true;
-      } catch {
+      } catch (error) {
+        // The refusal is already logged with its code by Continue; any other failure is logged here.
+        if (!(error instanceof SaveUnreadableError)) {
+          options.log.error(
+            "resume-autosave",
+            error instanceof Error ? error.message : String(error),
+          );
+        }
         return false;
       }
     },

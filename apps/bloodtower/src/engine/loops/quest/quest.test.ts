@@ -23,7 +23,7 @@ describe("quest survival", () => {
     const { play, groupId } = questPlay(["h1", "h2"]);
     ok(beginQuest(play, groupId, "herald"));
     ok(chooseOption(play, groupId, "herald", "job"));
-    ok(pickHero(play, groupId, "herald", "h2"));
+    ok(pickHero(play, groupId, "herald", "h2", "seed"));
     const saved = snapshotQuests(play);
 
     const again = questPlay(["h1", "h2"]);
@@ -53,7 +53,7 @@ describe("quest survival", () => {
     expect(store.progress.herald).toEqual({ optionId: "job", costPaid: true, next: 0 });
     const view = ok(beginQuest(again.play, again.groupId, "herald")).view;
     expect(view.pending).toEqual({ kind: "item", heroes: ["h1", "h2"] });
-    ok(pickHero(again.play, again.groupId, "herald", "h1"));
+    ok(pickHero(again.play, again.groupId, "herald", "h1", "seed"));
     expect(heroItems(again.play, "h1")).toEqual(["tomas-map"]);
     expect(ensureQuests(again.play).done).toContain("herald");
   });

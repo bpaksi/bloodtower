@@ -29,6 +29,8 @@ What main does today: the band (`CoreStoryBoard.tsx`, `data-band`) draws one `[d
 
 The Illusionist's `mockup.html` replaces the Gamewright draft before Bob approves.
 
+- Amended 2026-11-15 (judgement delegated by Bob): EV-04 deferred in place to the step 12 (C3/20) live seed hook; the CU/10 seed sets counts at game start only, so the e2e keeps a `fixme` for EV-04. Needs Bob's new approval row for eval.md.
+
 ## Cutover
 
 Cutover: N

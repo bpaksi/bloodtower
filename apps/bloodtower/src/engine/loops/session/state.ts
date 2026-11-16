@@ -11,16 +11,13 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-c2-08";
+export const SHELL_ENGINE_VERSION = "0.0.0-c3-08";
 
-/** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
-export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
-  "0.0.0-step6",
-  "0.0.0-c2-05",
-  "0.0.0-c2-06",
-  "0.0.0-c2-07",
-  SHELL_ENGINE_VERSION,
-];
+/**
+ * Checkpoints written by these engines still load. C3-08 stores corruptions by ID, and a save with
+ * only counts is refused, not migrated (DEC-895): every earlier version is gone from this list.
+ */
+export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [SHELL_ENGINE_VERSION];
 
 export type PauseCause = "disconnect" | "tower-lost";
 
@@ -48,8 +45,8 @@ export type EnterState = {
 /** Tonight's tower choice. It lasts the session (DEC-152). */
 export type TowerChoice = "undecided" | "connect" | "without";
 
-// One iPad's sound step on Pick story (Bob 2026-10-31): `levels` after its Enable sound tap,
-// `done` after Keep. An iPad with no entry has not tapped yet. `played` is the volume whose
+// One iPad's volume step on Pick story (connect track only, DEC-903): `levels` until Keep, then
+// `done`. An iPad with no entry is at the start of `levels`. `played` is the volume whose
 // sound has played (the tower's answer on the connect track); `pending` waits for that answer.
 export type DeviceSound = {
   phase: "levels" | "done";

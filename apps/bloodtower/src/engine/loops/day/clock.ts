@@ -5,6 +5,8 @@ import { type DayTuning, dayTuningFrom, fallenLimit } from "./rules.ts";
 export type HeroSheet = {
   helpingVirtues: number;
   corruptions: number;
+  /** The named corruptions held, by ID (MEC-080). Absent for a hero set up with a count only. */
+  named?: string[];
 };
 
 export type MoveShift = {
@@ -24,7 +26,9 @@ export type DayLogEvent =
   | { kind: "held" }
   | { kind: "skip-drop" };
 
-export type DayLoss = { lost: false } | { lost: true; reason: "skulls" | "buildings" };
+export type DayLoss =
+  | { lost: false }
+  | { lost: true; reason: "skulls" | "buildings" | "corruption" };
 
 export type DayClock = {
   tuning: DayTuning;
@@ -113,11 +117,18 @@ export const setHeroSheet = (play: PlayState, heroId: string, sheet: HeroSheet):
   ensureClock(play).heroes[heroId] = {
     helpingVirtues: sheet.helpingVirtues,
     corruptions: sheet.corruptions,
+    ...(sheet.named ? { named: [...sheet.named] } : {}),
   };
 };
 
 export const heroSheet = (clock: DayClock, heroId: string): HeroSheet =>
   clock.heroes[heroId] ?? { helpingVirtues: 0, corruptions: 0 };
+
+/** True once a third corruption has lost the game: every open loop stops (DEC-676). */
+export const isCorruptionLoss = (play: PlayState): boolean => {
+  const outcome = ensureClock(play).outcome;
+  return outcome?.lost === true && outcome.reason === "corruption";
+};
 
 export const markQuestWon = (play: PlayState): void => {
   ensureClock(play).questsWon += 1;

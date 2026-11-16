@@ -8,6 +8,7 @@ import {
   enterWithoutTowerKeepSound,
   enterWithTowerKeepSound,
   installSessionSocketHook,
+  playToDayRoll,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
@@ -51,9 +52,15 @@ const openBoard = async (browser: Browser, baseURL: string) => {
   return { context, page };
 };
 
-const openPad = async (browser: Browser, baseURL: string, joinCode: string) => {
+const openPad = async (
+  browser: Browser,
+  baseURL: string,
+  joinCode: string,
+  beforeGoto?: (page: Page) => Promise<unknown>,
+) => {
   const context = await browser.newContext({ baseURL, viewport: IPAD, hasTouch: true });
   const page = await context.newPage();
+  await beforeGoto?.(page);
   await installSessionSocketHook(page);
   await page.goto(`/join?code=${joinCode}`);
   await expect(page).toHaveURL(/\/device/);
@@ -288,6 +295,16 @@ for (const track of ["without", "connect"] as const) {
       await expect(again.page.locator('button[data-prompt-id="play-without-tower"]')).toHaveCount(
         0,
       );
+      await expect(again.page.locator('button[data-prompt-id="tower-connect"]')).toHaveCount(0);
+      if (track === "without") {
+        // EV-13: no tower question and no volume step; the story list shows at once.
+        await expect(
+          again.page.locator('button[data-prompt-id^="continue-pick-story-"]').first(),
+        ).toBeVisible();
+        await expect(again.page.getByRole("button", { name: "Volume 1", exact: true })).toHaveCount(
+          0,
+        );
+      }
       expect(tower.sent()).toEqual([]);
     } finally {
       for (const context of contexts) await context.close().catch(() => undefined);
@@ -349,22 +366,37 @@ test("the splash no longer offers Continue or Connect Tower", async ({ browser }
 });
 
 const VOLUME_LINE = "How loud should the tower be? Press one to hear it.";
-const ENABLE_LINE = "Tap once to turn on this iPad's sound.";
+const VOLUME_ROWS = ["Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"];
 
-const audioState = (page: Page) =>
-  page.evaluate(
-    () =>
-      (window as unknown as { __btDeviceSound?: { contextState: string | null } }).__btDeviceSound
-        ?.contextState ?? null,
-  );
+/** Counts every audio start in a context, from before any page script runs (EV-05). */
+const countAudioStarts = (page: Page) =>
+  page.addInitScript(() => {
+    const w = window as unknown as { __audioStarts: string[] };
+    w.__audioStarts = [];
+    const push = (what: string) => w.__audioStarts.push(what);
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (...args) {
+      push("media.play");
+      return play.apply(this, args);
+    };
+    const Ctx = window.AudioContext;
+    if (Ctx) {
+      const resume = Ctx.prototype.resume;
+      Ctx.prototype.resume = function (...args) {
+        push("context.resume");
+        return resume.apply(this, args);
+      };
+      window.AudioContext = class extends Ctx {
+        constructor(...args: ConstructorParameters<typeof AudioContext>) {
+          super(...args);
+          push("context.new");
+        }
+      };
+    }
+  });
 
-const playedLog = (page: Page) =>
-  page.evaluate(
-    () =>
-      (
-        window as unknown as { __btDeviceSound?: { played: { volume: number }[] } }
-      ).__btDeviceSound?.played.map((row) => row.volume) ?? [],
-  );
+const audioStarts = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __audioStarts?: string[] }).__audioStarts ?? []);
 
 /** The iPad body's text: everything in the scroll area. */
 const bodyText = async (page: Page) =>
@@ -373,11 +405,80 @@ const bodyText = async (page: Page) =>
 const soundCommands = (tower: MockTower) =>
   tower.sent().flatMap((row) => (row.type === "sound" ? [row] : []));
 
-test("Pick story starts with Enable sound on each iPad, then levels, Keep and the story list", async ({
+test("connect track: Pick story opens on the volume step on each iPad, no unlock, no iPad audio (EV-01, EV-03, EV-05)", async ({
   browser,
 }, testInfo) => {
   test.setTimeout(120_000);
   const session = await startAcceptanceHost(testInfo, { seed: "c2-enter-sound" });
+  const contexts: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, session.baseURL);
+    contexts.push(board.context);
+    const padA = await openPad(browser, session.baseURL, session.host.joinCode, countAudioStarts);
+    contexts.push(padA.context);
+    const padB = await openPad(browser, session.baseURL, session.host.joinCode, countAudioStarts);
+    contexts.push(padB.context);
+    await enterWithTowerKeepSound(padA.page);
+    await expect(deviceMain(padB.page)).toHaveAttribute("data-screen", "pick-story");
+
+    for (const pad of [padA, padB]) {
+      await expect.poll(() => bodyLabels(pad.page)).toEqual(VOLUME_ROWS);
+      const text = await bodyText(pad.page);
+      expect(text).toContain(VOLUME_LINE);
+      expect(text).not.toContain("Enable");
+      expect(text).not.toContain("Tap once");
+      await expect(pad.page.locator("button", { hasText: "Enable" })).toHaveCount(0);
+    }
+    const keep = padA.page.locator('button[data-prompt-id="volume-keep"]');
+    await expect(keep).toBeDisabled();
+    await expect(keep).toHaveClass(/bt-primary/);
+    // The board line is at full strength from the first view.
+    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(1);
+    await expect(board.page.locator('.bt-row--disabled, [aria-disabled="true"]')).toHaveCount(0);
+    await expect(board.page.locator("main button")).toHaveCount(0);
+    await shot(board.page, "sound-board", testInfo);
+    await shot(padA.page, "sound-ipad", testInfo);
+
+    // EV-17 / EV-03: Volume 1, Try another, Volume 2, Keep; two sounds on the tower, one per press.
+    await press(padA.page, "volume-1");
+    await expect.poll(() => soundCommands(session.tower).length).toBe(1);
+    await expect(keep).toBeEnabled();
+    await press(padA.page, "volume-again");
+    await expect(keep).toBeDisabled();
+    await press(padA.page, "volume-2");
+    await expect.poll(() => soundCommands(session.tower).length).toBe(2);
+    expect(soundCommands(session.tower)).toEqual([
+      { type: "sound", soundIndex: 58, volume: 1 },
+      { type: "sound", soundIndex: 58, volume: 2 },
+    ]);
+    await expect(keep).toBeEnabled();
+    await press(padA.page, "volume-keep");
+    await expect(
+      padA.page.locator('button[data-prompt-id^="continue-pick-story-"]').first(),
+    ).toBeVisible();
+    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(0);
+    expect(await bodyLabels(padB.page)).toEqual(VOLUME_ROWS);
+
+    // EV-03: the next move-roll cue (sound #1) goes to the tower at the kept volume, 2.
+    await playToDayRoll(padA.page);
+    await expect
+      .poll(() => soundCommands(session.tower).map((row) => `${row.soundIndex}@${row.volume}`))
+      .toEqual(["58@1", "58@2", "1@2"]);
+
+    // EV-05: neither iPad context started any audio.
+    expect(await audioStarts(padA.page)).toEqual([]);
+    expect(await audioStarts(padB.page)).toEqual([]);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await session.host.close();
+  }
+});
+
+test("Play without Tower: no volume step, no volume line, the story list at once (EV-04)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "c2-enter-no-volume" });
   const contexts: BrowserContext[] = [];
   try {
     const board = await openBoard(browser, session.baseURL);
@@ -388,72 +489,162 @@ test("Pick story starts with Enable sound on each iPad, then levels, Keep and th
     contexts.push(padB.context);
     await enterWithoutTowerKeepSound(padA.page);
     await expect(deviceMain(padB.page)).toHaveAttribute("data-screen", "pick-story");
-
-    // EV-15, EV-14 (7a): only the prompt and one primary button; audio suspended; nothing played.
-    for (const pad of [padA, padB]) {
-      await expect.poll(() => audioState(pad.page)).toBe("suspended");
-      expect(await bodyText(pad.page)).toBe(`${ENABLE_LINE}\nEnable sound`);
-      expect(await bodyLabels(pad.page)).toEqual(["Enable sound"]);
-      await expect(bodyButtons(pad.page).first()).toHaveClass(/bt-primary/);
-      expect(await playedLog(pad.page)).toEqual([]);
-    }
-    const greyed = board.page.locator('.bt-row--disabled[aria-disabled="true"]');
     await expect(boardMain(board.page)).toHaveAttribute("data-screen", "pick-story");
-    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(1);
-    await expect(greyed.getByText(VOLUME_LINE)).toBeVisible();
-    await expect(board.page.locator("main button")).toHaveCount(0);
-    await shot(board.page, "sound-7a-board", testInfo);
-    await shot(padA.page, "sound-7a-ipad", testInfo);
-
-    // One iPad's tap unlocks only that iPad.
-    await press(padA.page, "sound-enable");
-    await expect.poll(() => audioState(padA.page)).toBe("running");
-    expect(await audioState(padB.page)).toBe("suspended");
-    expect(await bodyLabels(padB.page)).toEqual(["Enable sound"]);
-
-    // EV-16, EV-14 (7b): the levels show with Keep disabled; the board line is at full strength.
-    await expect
-      .poll(() => bodyLabels(padA.page))
-      .toEqual(["Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"]);
-    expect(await bodyText(padA.page)).toContain(VOLUME_LINE);
-    const keep = padA.page.locator('button[data-prompt-id="volume-keep"]');
-    await expect(keep).toBeDisabled();
-    await expect(keep).toHaveClass(/bt-primary/);
-    await expect(padA.page.locator('button[data-prompt-id^="continue-pick-story-"]')).toHaveCount(
-      0,
-    );
-    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(1);
-    await expect(board.page.locator('.bt-row--disabled, [aria-disabled="true"]')).toHaveCount(0);
-    await expect(board.page.locator("main button")).toHaveCount(0);
-    await shot(board.page, "sound-7b-board", testInfo);
-    await shot(padA.page, "sound-7b-ipad", testInfo);
-
-    // EV-17 (no tower): Keep waits for the iPad's own played-sound entry; no tower command.
-    await keep.click({ force: true });
-    await padA.page.waitForTimeout(500);
-    await expect(keep).toBeDisabled();
-    await press(padA.page, "volume-1");
-    await expect.poll(() => playedLog(padA.page)).toEqual([1]);
-    await expect(keep).toBeEnabled();
-    await shot(board.page, "sound-7c-board", testInfo);
-    await shot(padA.page, "sound-7c-ipad", testInfo);
+    for (const pad of [padA, padB]) {
+      const stories = pad.page.locator('button[data-prompt-id^="continue-pick-story-"]').first();
+      await expect(stories).toBeVisible();
+      for (const name of ["Volume 0", "Volume 1", "Volume 2", "Keep", "Try another"]) {
+        await expect(pad.page.getByRole("button", { name, exact: true })).toHaveCount(0);
+      }
+      expect(await bodyText(pad.page)).not.toContain("Enable");
+    }
+    await expect(board.page.getByText(/How loud/)).toHaveCount(0);
+    await padA.page.waitForTimeout(1000);
+    expect(soundCommands(session.tower)).toEqual([]);
     expect(session.tower.sent()).toEqual([]);
-
-    // Try another clears Keep; then Volume 2 and Keep end the step; the story list follows.
-    await press(padA.page, "volume-again");
-    await expect(keep).toBeDisabled();
-    await press(padA.page, "volume-2");
-    await expect.poll(() => playedLog(padA.page)).toEqual([1, 2]);
-    await press(padA.page, "volume-keep");
-    await expect(
-      padA.page.locator('button[data-prompt-id^="continue-pick-story-"]').first(),
-    ).toBeVisible();
-    await expect(board.page.getByText(VOLUME_LINE)).toHaveCount(0);
-    expect(await bodyLabels(padB.page)).toEqual(["Enable sound"]);
-    expect(session.tower.sent()).toEqual([]);
+    await shot(board.page, "no-volume-board", testInfo);
+    await shot(padA.page, "no-volume-ipad", testInfo);
   } finally {
     for (const context of contexts) await context.close().catch(() => undefined);
     await session.host.close();
+  }
+});
+
+/** Counts every frame this page's sockets send, from before any page script runs. */
+const countSentFrames = (page: Page) =>
+  page.addInitScript(() => {
+    const send = WebSocket.prototype.send;
+    WebSocket.prototype.send = function (this: WebSocket, data) {
+      const win = window as unknown as { __sentFrames?: number };
+      win.__sentFrames = (win.__sentFrames ?? 0) + 1;
+      return send.call(this, data);
+    };
+  });
+
+const sentFrames = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __sentFrames?: number }).__sentFrames ?? 0);
+
+test("the gear Volume item in a game: greyed with the reason without the tower, enabled with it (EV-14)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(180_000);
+  const without = await startAcceptanceHost(testInfo, { seed: "c2-enter-gear-without" });
+  const contexts: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, without.baseURL);
+    contexts.push(board.context);
+    const pad = await openPad(browser, without.baseURL, without.host.joinCode, countSentFrames);
+    contexts.push(pad.context);
+    await enterWithoutTowerKeepSound(pad.page);
+    await playToDayRoll(pad.page);
+    await pad.page.locator('[data-action="menu"]').click();
+    const menu = pad.page.locator("[data-menu]");
+    const item = menu.locator('[data-gear-item="volume"]');
+    await expect(item).toBeVisible();
+    await expect(item).toBeDisabled();
+    await expect(item.locator("[data-reason]")).toHaveText("Only with the tower.");
+    // In its place under "Table": after the Table heading and Game board setup, before Split party.
+    const text = (await menu.innerText()).toLowerCase();
+    expect(text.indexOf("table")).toBeGreaterThan(-1);
+    expect(text.indexOf("table")).toBeLessThan(text.indexOf("volume"));
+    expect(text.indexOf("game board setup")).toBeLessThan(text.indexOf("volume"));
+    expect(text.indexOf("volume")).toBeLessThan(text.indexOf("split party"));
+    const before = await sentFrames(pad.page);
+    await item.dispatchEvent("click");
+    await item.click({ force: true });
+    await pad.page.waitForTimeout(800);
+    expect(await sentFrames(pad.page)).toBe(before);
+    await expect(board.page.locator('[data-panel="volume"]')).toHaveCount(0);
+    await expect(boardMain(board.page)).toHaveAttribute("data-paused", "false");
+    expect(without.tower.sent()).toEqual([]);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await without.host.close();
+  }
+
+  const connected = await startAcceptanceHost(testInfo, { seed: "c2-enter-gear-connect" });
+  const more: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, connected.baseURL);
+    more.push(board.context);
+    const pad = await openPad(browser, connected.baseURL, connected.host.joinCode);
+    more.push(pad.context);
+    await enterWithTowerKeepSound(pad.page);
+    await press(pad.page, "volume-1");
+    await press(pad.page, "volume-keep");
+    await playToDayRoll(pad.page);
+    await pad.page.locator('[data-action="menu"]').click();
+    const item = pad.page.locator('[data-menu] [data-gear-item="volume"]');
+    await expect(item).toBeEnabled();
+    await expect(item.locator("[data-reason]")).toHaveCount(0);
+    await item.click();
+    await expect(board.page.locator('[data-panel="volume"]')).toBeVisible();
+  } finally {
+    for (const context of more) await context.close().catch(() => undefined);
+    await connected.host.close();
+  }
+});
+
+test("nothing physical without a press: join, Pick story, reload each iPad, restart and Continue send no sound (EV-11)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(240_000);
+  const seed = "c2-enter-volume-survive";
+  const session = await startAcceptanceHost(testInfo, { seed });
+  const contexts: BrowserContext[] = [];
+  let restarted: Awaited<ReturnType<typeof startSessionHost>> | null = null;
+  try {
+    const padA = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(padA.context);
+    const padB = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(padB.context);
+    await enterWithTowerKeepSound(padA.page);
+    for (const pad of [padA, padB]) {
+      await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "pick-story");
+      await pad.page.reload();
+      await expect.poll(() => bodyLabels(pad.page)).toEqual(VOLUME_ROWS);
+    }
+    await padA.page.waitForTimeout(2000);
+    expect(soundCommands(session.tower)).toEqual([]);
+
+    // One game on the way, so the restart has a saved game to Continue.
+    await press(padA.page, "volume-1");
+    await expect.poll(() => soundCommands(session.tower).length).toBe(1);
+    await press(padA.page, "volume-keep");
+    await playToDayRoll(padA.page);
+    await padA.context.close();
+    await padB.context.close();
+
+    // Restart the host. Both iPads rejoin: nothing physical goes out on load.
+    const tower = createMockTower();
+    restarted = await restartHost(session, seed, tower);
+    const againA = await openPad(browser, session.baseURL, restarted.joinCode);
+    contexts.push(againA.context);
+    const againB = await openPad(browser, session.baseURL, restarted.joinCode);
+    contexts.push(againB.context);
+    for (const pad of [againA, againB]) {
+      await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "pick-story");
+      await expect.poll(() => bodyLabels(pad.page)).toEqual(VOLUME_ROWS);
+    }
+    await againA.page.waitForTimeout(2000);
+    expect(tower.sent()).toEqual([]);
+
+    // A restart never reconnects the tower, so the link is down: a Volume press counts as played
+    // for Keep but sends nothing. Then Continue restores the saved game, still silent.
+    await press(againA.page, "volume-1");
+    await expect(againA.page.locator('button[data-prompt-id="volume-keep"]')).toBeEnabled();
+    await press(againA.page, "volume-keep");
+    await press(againA.page, "continue-saved-game");
+    // The saved game was played with the tower, so it resumes paused until the tower is back.
+    await expect(deviceMain(againA.page)).toHaveAttribute("data-screen", /^(play|pause)$/, {
+      timeout: 30_000,
+    });
+    await againA.page.waitForTimeout(2000);
+    expect(tower.sent()).toEqual([]);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await restarted?.close().catch(() => undefined);
+    await session.host.close().catch(() => undefined);
   }
 });
 
@@ -474,7 +665,6 @@ test("connect track: a volume plays Dungeon Complete on the tower only on its pr
     await pad.page.waitForTimeout(3000);
     expect(sentTypes(tower)).toEqual(["connect", "calibrate"]);
 
-    await press(pad.page, "sound-enable");
     const keep = pad.page.locator('button[data-prompt-id="volume-keep"]');
     await expect(keep).toBeDisabled();
     await pad.page.waitForTimeout(1000);
@@ -510,6 +700,31 @@ test("connect track: a volume plays Dungeon Complete on the tower only on its pr
   }
 });
 
+test("connect track: the kept volume is the one the move-roll cue sends (EV-13)", async ({
+  browser,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const session = await startAcceptanceHost(testInfo, { seed: "c2-enter-keep-one" });
+  const contexts: BrowserContext[] = [];
+  try {
+    const board = await openBoard(browser, session.baseURL);
+    contexts.push(board.context);
+    const pad = await openPad(browser, session.baseURL, session.host.joinCode);
+    contexts.push(pad.context);
+    await enterWithTowerKeepSound(pad.page);
+    await press(pad.page, "volume-1");
+    await expect.poll(() => soundCommands(session.tower).length).toBe(1);
+    await press(pad.page, "volume-keep");
+    await playToDayRoll(pad.page);
+    await expect
+      .poll(() => soundCommands(session.tower).map((row) => `${row.soundIndex}@${row.volume}`))
+      .toEqual(["58@1", "1@1"]);
+  } finally {
+    for (const context of contexts) await context.close().catch(() => undefined);
+    await session.host.close();
+  }
+});
+
 test("connect track: a tower that does not play the sound leaves Keep disabled and shows the error", async ({
   browser,
 }, testInfo) => {
@@ -523,7 +738,6 @@ test("connect track: a tower that does not play the sound leaves Keep disabled a
     const pad = await openPad(browser, session.baseURL, session.host.joinCode);
     contexts.push(pad.context);
     await enterWithTowerKeepSound(pad.page);
-    await press(pad.page, "sound-enable");
     tower.failNextSound();
     await press(pad.page, "volume-1");
     await expect(pad.page.locator('[data-error-code="tower-command-failed"]')).toBeVisible();

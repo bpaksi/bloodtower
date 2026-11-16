@@ -13,6 +13,7 @@ import {
   captureFrames,
   enterWithoutTower,
   enterWithoutTowerKeepSound,
+  enterWithTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -300,6 +301,8 @@ const startGame = async (
   seatTogether = false,
   /** CU/04: a second iPad joins and holds the last hero; the first holds the rest. */
   secondPad = false,
+  /** Connect track with the mock tower: the gear Volume item is enabled only then (DEC-903). */
+  withTower = false,
 ) => {
   // A LAN join address keeps the loopback warning off the board's band in the EV-06 shots.
   const session = await startAcceptanceHost(testInfo, {
@@ -333,6 +336,8 @@ const startGame = async (
     await pad2.goto(`/join?code=${session.host.joinCode}`);
     await expect(pad2).toHaveURL(/\/device/);
     await setSoundAndKeep(pad);
+  } else if (withTower) {
+    await enterWithTower(pad);
   } else {
     await enterWithoutTower(pad);
   }
@@ -553,7 +558,15 @@ test.describe("C3/11 the day on the board", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const { session, context, pad, board } = await startGame(browser, testInfo, FOUR);
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      FOUR,
+      undefined,
+      false,
+      false,
+      true,
+    );
     const { databasePath } = session;
     const readMenu = async (page: Page) =>
       page.locator("[data-menu] [data-gear-item]").evaluateAll((items) =>
@@ -598,7 +611,17 @@ test.describe("C3/11 the day on the board", () => {
       await expect(boardMain(board2)).toHaveAttribute("data-paused", "false");
       await expectToolbar(pad2);
       await pad2.locator('[data-action="menu"]').click();
-      expect(await readMenu(pad2)).toEqual(menuBefore);
+      // A restart never reconnects the tower by itself, so Volume and Tower now read "no tower".
+      // Every other row reads as it did before the restart.
+      const towerRow = (row: { id: string | null }) => row.id === "volume" || row.id === "tower";
+      const menuAfter = await readMenu(pad2);
+      expect(menuAfter.filter((row) => !towerRow(row))).toEqual(
+        menuBefore.filter((row) => !towerRow(row)),
+      );
+      expect(menuAfter.filter(towerRow)).toEqual([
+        { id: "volume", enabled: false, reason: "Only with the tower." },
+        { id: "tower", enabled: true, reason: null },
+      ]);
     } finally {
       await context2.close();
       await restarted.host.close();

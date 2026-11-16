@@ -1,3 +1,13 @@
+import {
+  applyPickLosses,
+  applyTurnEndLosses,
+  cleanseBlocked,
+  endsTurnAfterPick,
+  groupPurseGold,
+  type HeroGold,
+  removeCorruption,
+  temptedExtra,
+} from "../../rules/corruption/index.ts";
 import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isFallen } from "../day/clock.ts";
@@ -69,6 +79,8 @@ export type PicksStore = {
   quests: string[];
   /** `${chapter}:${heroId}` for each free cure already used (DEC-700). */
   freeCures: string[];
+  /** Groups whose turn has ended this day; an Uncertain pick or the loop sets it (DEC-468). */
+  turnEnded?: Record<string, boolean>;
   log: PickEvent[];
 };
 
@@ -111,6 +123,7 @@ export type PickRefusal =
   | "no-moves"
   | "no-gold"
   | "no-target"
+  | "feverish"
   | "give-back-first";
 
 export type PickResult = { ok: true; event: PickEvent } | { ok: false; reason: PickRefusal };
@@ -189,7 +202,9 @@ export const pickPrice = (
   const store = ensurePicks(play);
   if (kind === "cure" && heroId && freeCureAvailable(play, heroId)) return 0;
   const base = kind === "cure" ? cureBase(play, store, heroId) : basePrice(store, kind);
-  return hasBard(play, groupId) && base > 0 ? silverTonguePrice(base) : base;
+  // DEC-896: free cure, base, Silver Tongue, then Tempted's +2 once, never discounted.
+  const haggled = hasBard(play, groupId) && base > 0 ? silverTonguePrice(base) : base;
+  return haggled + temptedExtra(play, groupId, haggled);
 };
 
 export const setPurse = (play: PlayState, groupId: string, gold: number): void => {
@@ -249,7 +264,9 @@ export const openMenu = (
       price,
       // Cleanse on a building with no skulls has nothing to remove (still listed, EV-06).
       disabled:
-        moves < movesCost(store, kind) || purse < price || (kind === "cleanse" && skulls < 1),
+        moves < movesCost(store, kind) ||
+        purse < price ||
+        (kind === "cleanse" && (skulls < 1 || cleanseBlocked(play, groupId, skulls))),
     };
   });
   return { ok: true, entries };
@@ -278,7 +295,7 @@ export const applyPick = (
   seed: string,
   groupId: string,
   kind: PickKind,
-  options: { heroId?: string } = {},
+  options: { heroId?: string; corruptionId?: string; gold?: HeroGold } = {},
 ): PickResult => {
   const gate = pickGate(play, groupId, kind);
   if (!gate.ok) return gate;
@@ -294,6 +311,8 @@ export const applyPick = (
   }
   if (kind === "cleanse" && (ensureClock(play).skulls[spaceId] ?? 0) < 1)
     return { ok: false, reason: "no-target" };
+  if (kind === "cleanse" && cleanseBlocked(play, groupId, ensureClock(play).skulls[spaceId] ?? 0))
+    return { ok: false, reason: "feverish" };
   const price = pickPrice(play, groupId, kind, heroId);
   if ((store.purse[groupId] ?? 0) < price) return { ok: false, reason: "no-gold" };
 
@@ -301,10 +320,7 @@ export const applyPick = (
   if (kind === "cure") {
     const sheet = heroSheet(clock, heroId as string);
     if (sheet.corruptions < 1) return { ok: false, reason: "no-target" };
-    clock.heroes[heroId as string] = {
-      ...sheet,
-      corruptions: Math.max(0, sheet.corruptions - store.tuning.cure.corruption),
-    };
+    removeCorruption(play, heroId as string, store.tuning.cure.corruption, options.corruptionId);
     if (price === 0) store.freeCures.push(freeKey(store.chapter, heroId as string));
   } else if (kind === "rally") {
     const hp = store.hp[heroId as string];
@@ -336,7 +352,31 @@ export const applyPick = (
     ...(kind === "cure" ? { free: price === 0 } : {}),
   };
   store.log.push(event);
+  // Order (EV-12): pay, pick-triggered losses, Uncertain ends the turn, turn-end losses.
+  const gold = options.gold ?? groupPurseGold(store.purse, groupId);
+  applyPickLosses(play, groupId, play.content.board.spaceById.get(group.spaceId)?.building, gold);
+  if (endsTurnAfterPick(play, groupId)) {
+    store.moves[groupId] = 0;
+    endGroupTurn(play, groupId, gold);
+  }
   return { ok: true, event };
+};
+
+/** A new turn for the group: the ended flag clears (called when the group's turn starts). */
+export const beginGroupTurn = (play: PlayState, groupId: string): void => {
+  const store = ensurePicks(play);
+  store.turnEnded = { ...store.turnEnded, [groupId]: false };
+};
+
+export const turnHasEnded = (play: PlayState, groupId: string): boolean =>
+  ensurePicks(play).turnEnded?.[groupId] === true;
+
+/** The group's turn ends once: turn-end losses fire here and never twice (DEC-472, DEC-473). */
+export const endGroupTurn = (play: PlayState, groupId: string, gold?: HeroGold): void => {
+  const store = ensurePicks(play);
+  if (turnHasEnded(play, groupId)) return;
+  store.turnEnded = { ...store.turnEnded, [groupId]: true };
+  applyTurnEndLosses(play, groupId, gold ?? groupPurseGold(store.purse, groupId));
 };
 
 /** Resolves the give-back prompt a fifth tile opens (DEC-544). */
