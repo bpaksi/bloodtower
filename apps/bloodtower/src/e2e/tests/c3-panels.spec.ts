@@ -596,6 +596,14 @@ test.describe("CU/15 the game of chance: the Spin and the starting purse", () =>
       expect(sent).toHaveLength(1);
       expect(sent[0]?.sequence).toBeTruthy();
       expect(sent[0]?.soundIndex).toBeGreaterThan(0);
+      // No raw bytes: every recorded row has only the named command fields.
+      for (const row of session.tower.sent()) {
+        expect(
+          Object.keys(row).every((key) =>
+            ["type", "sequence", "soundIndex", "volume"].includes(key),
+          ),
+        ).toBe(true);
+      }
       // The tower plays the sound: the board plays none (DEC-114).
       expect(await coinCues(board)).toBe(0);
       await shot(board, testInfo, "cu15-ev12-board-chance-result");
