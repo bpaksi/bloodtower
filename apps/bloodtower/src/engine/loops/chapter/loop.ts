@@ -28,13 +28,16 @@ export type ChapterLocal = {
   awaitingPress: boolean;
 };
 
-export type ChapterOutcome = { kind: "won" | "lost"; reason?: "skulls" | "buildings" };
+export type ChapterOutcome = {
+  kind: "won" | "lost";
+  reason?: "skulls" | "buildings" | "corruption";
+};
 
 export type ChapterResult = {
   chapterId: string;
   chapter?: number;
   outcome?: "won" | "lost";
-  reason?: "skulls" | "buildings";
+  reason?: "skulls" | "buildings" | "corruption";
   /** Won and last: the game ends (C3 chapter 1, or the finale). */
   last?: boolean;
 };

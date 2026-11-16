@@ -1,5 +1,6 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { groupById, playState } from "../chapter/playState.ts";
+import { isCorruptionLoss } from "../day/clock.ts";
 import { beginQuest, openQuestAt, type QuestResult } from "../quest/quest.ts";
 import { recordOffer } from "../session/shellRef.ts";
 
@@ -25,6 +26,8 @@ export const encounterLoop: LoopDefinition<EncounterLocal, EncounterResult> = {
     return { groupId: input.groupId, awaitingLeave: false };
   },
   body: (local, ctx) => {
+    // DEC-676: a third corruption stops the encounter at once.
+    if (isCorruptionLoss(playState())) return { local, passComplete: true };
     if (!local.awaitingLeave) {
       const promptId = `leave--${local.groupId}`;
       ctx.offerPrompt(promptId, "leave");
@@ -33,7 +36,7 @@ export const encounterLoop: LoopDefinition<EncounterLocal, EncounterResult> = {
     }
     return { local, passComplete: true };
   },
-  exit: (local) => local.awaitingLeave,
+  exit: (local) => local.awaitingLeave || isCorruptionLoss(playState()),
   resultUp: () => ({ left: true }),
 };
 

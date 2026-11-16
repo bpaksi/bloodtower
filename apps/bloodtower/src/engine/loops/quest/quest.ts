@@ -1,5 +1,6 @@
+import { gainCorruption } from "../../rules/corruption/index.ts";
 import { groupById, type PlayState } from "../chapter/playState.ts";
-import { ensureClock, heroSheet, markQuestWon } from "../day/clock.ts";
+import { markQuestWon } from "../day/clock.ts";
 import { ensurePicks } from "../encounter/picks.ts";
 import { type PlainScene, type SceneOption, visibleOptions } from "../scene/scene.ts";
 import { ensureQuests, type QuestDef, type QuestStore } from "./store.ts";
@@ -198,6 +199,7 @@ export const pickHero = (
   groupId: string,
   questId: string,
   heroId: string,
+  seed: string,
 ): QuestResult => {
   if (!groupById(play, groupId)) return { ok: false, reason: "unknown-group" };
   const store = ensureQuests(play);
@@ -210,11 +212,11 @@ export const pickHero = (
   if (!pending) return { ok: false, reason: "nothing-to-pick" };
   if (!pending.heroes.includes(heroId)) return { ok: false, reason: "not-pickable" };
   if (pending.kind === "corruption") {
-    const clock = ensureClock(play);
-    const sheet = heroSheet(clock, heroId);
-    clock.heroes[heroId] = { ...sheet, corruptions: sheet.corruptions + 1 };
+    const gained = gainCorruption(play, seed, heroId);
     progress.costPaid = true;
-    store.log.push(`cost-corruption:${heroId}`);
+    store.log.push(`cost-corruption:${heroId}:${gained.id}`);
+    // DEC-676: the third corruption loses at once. No later effect, reward or drop runs.
+    if (gained.lost) return { ok: true, view: viewOf(play, groupId, def) };
   } else {
     const effect = option.effects[progress.next];
     if (effect?.kind !== "item") return { ok: false, reason: "nothing-to-pick" };

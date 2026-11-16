@@ -25,11 +25,11 @@ describe("plain scenes", () => {
     expect(view.pending).toEqual({ kind: "item", heroes: ["h1", "h2"] });
     expect(view.done).toBe(false);
     // A hero in another group is not pickable.
-    expect(pickHero(b.play, b.groupId, "herald", "h3")).toEqual({
+    expect(pickHero(b.play, b.groupId, "herald", "h3", "seed")).toEqual({
       ok: false,
       reason: "not-pickable",
     });
-    ok(pickHero(b.play, b.groupId, "herald", "h2"));
+    ok(pickHero(b.play, b.groupId, "herald", "h2", "seed"));
     expect(heroItems(b.play, "h2")).toEqual(["tomas-map"]);
     expect(heroItems(b.play, "h1")).toEqual([]);
   });
@@ -83,7 +83,7 @@ describe("plain scenes", () => {
     const view = ok(chooseOption(play, groupId, "t", "a")).view;
     expect(view.pending).toEqual({ kind: "corruption", heroes: ["h1", "h2"] });
     expect(heroSheet(ensureClock(play), "h1").corruptions).toBe(0);
-    ok(pickHero(play, groupId, "t", "h2"));
+    ok(pickHero(play, groupId, "t", "h2", "seed"));
     expect(heroSheet(ensureClock(play), "h2").corruptions).toBe(1);
     expect(heroSheet(ensureClock(play), "h1").corruptions).toBe(0);
     expect(ensureQuests(play).done).toContain("t");
@@ -124,7 +124,7 @@ describe("plain scenes", () => {
     const day = play.dayNumber;
     ok(beginQuest(play, groupId, "herald"));
     ok(chooseOption(play, groupId, "herald", "job"));
-    ok(pickHero(play, groupId, "herald", "h1"));
+    ok(pickHero(play, groupId, "herald", "h1", "seed"));
     expect(JSON.stringify({ ...ensureClock(play), questsWon: 0 })).toBe(before);
     expect(play.dayNumber).toBe(day);
   });

@@ -4,6 +4,7 @@ import { SHELL_ENGINE_VERSION } from "../../engine/loops/session/state.ts";
 import { stepShell } from "../../engine/loops/session/stepShell.ts";
 import { parseHostPayload } from "../events/kinds.ts";
 import type { AppendEventInput, EventStore, GameMeta } from "../events/store.ts";
+import type { HostLogger } from "../log/hostLog.ts";
 import { parseShellCheckpoint } from "./shellCheckpoint.ts";
 
 export type ShellContinueInput = {
@@ -13,7 +14,20 @@ export type ShellContinueInput = {
   meta: GameMeta;
   atMonoMs: number;
   atWall: string;
+  /** Where a refused save is logged as an error. Optional so a caller with no log still throws. */
+  log?: HostLogger;
 };
+
+/** The checkpoint cannot be read: an older save format, or damage. Continue offers a new game. */
+export class SaveUnreadableError extends Error {
+  readonly code = "save-unreadable";
+  readonly gameId: string;
+  constructor(gameId: string, detail: string) {
+    super(`The save for game ${gameId} cannot be read: ${detail}`);
+    this.name = "SaveUnreadableError";
+    this.gameId = gameId;
+  }
+}
 
 export type ShellContinueResult = {
   state: ShellState;
@@ -55,7 +69,18 @@ export const continueShellFromCheckpoint = (
     throw new Error(`No checkpoint for game ${input.gameId}.`);
   }
 
-  let state = parseShellCheckpoint(JSON.parse(checkpoint.stateJson) as unknown);
+  // DEC-895: a save from before named corruptions is refused, never migrated or backfilled.
+  let state: ShellState;
+  try {
+    state = parseShellCheckpoint(JSON.parse(checkpoint.stateJson) as unknown);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    input.log?.error(
+      "save-unreadable",
+      `Game ${input.gameId} has a save Continue cannot read (engine ${checkpoint.engineVersion}): ${detail}`,
+    );
+    throw new SaveUnreadableError(input.gameId, detail);
+  }
 
   const versionsDiffer =
     checkpoint.engineVersion !== input.engineVersion ||
