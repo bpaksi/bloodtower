@@ -1,5 +1,5 @@
 import { playState } from "../chapter/playState.ts";
-import { eventOptions, eventTuningFrom } from "../event/index.ts";
+import { eventOptions, eventTuningFrom, refreshLedger } from "../event/index.ts";
 import { type DayLocal, parseEventChoicePrompt } from "./loop.ts";
 import { applySkullRecord, parseSkullRecordPrompt } from "./skull.ts";
 
@@ -10,7 +10,9 @@ import { applySkullRecord, parseSkullRecordPrompt } from "./skull.ts";
 export const handleDayPress = (local: DayLocal, promptId: string, actionId: string): DayLocal => {
   if (local.phase === "event" && actionId === "choose") {
     const press = parseEventChoicePrompt(promptId);
-    const open = eventOptions(playState(), eventTuningFrom());
+    const play = playState();
+    if (local.eventGroup) refreshLedger(play, local.eventGroup);
+    const open = eventOptions(play, eventTuningFrom());
     const taken = local.eventPicked ?? null;
     if (
       press &&

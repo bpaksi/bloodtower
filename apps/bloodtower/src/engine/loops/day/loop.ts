@@ -9,6 +9,7 @@ import {
   eventTuningFrom,
   loadLedger,
   type OptionId,
+  refreshLedger,
   settleEvent,
 } from "../event/index.ts";
 import { skullNoBuildingEffect } from "../session/effects.ts";
@@ -262,6 +263,8 @@ const eventScene = (
   }
 
   if (open.status === "open") {
+    // A potion used or gold spent while the choice was open changed the sheets (C3/12 review).
+    refreshLedger(play, groupId);
     const picked = local.eventPicked ?? null;
     if (picked === null) {
       const options = eventOptions(play, tuning);

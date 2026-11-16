@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
-import { ensureClock, heroSheet } from "../day/clock.ts";
+import { ensureClock, heroSheet, setHeroSheet } from "../day/clock.ts";
 import { openDayWait } from "../day/wait.ts";
 import { eventState } from "../event/index.ts";
 import { enterWithoutEvents } from "./enterKit.ts";
@@ -148,6 +148,19 @@ describe("C3/12 the event scene (engine and wire)", () => {
     state = endWait(state);
     expect(eventOf(state)).toBeNull();
     expect(sheetOf(state, lead).hp?.hp).toBe(before - 2);
+  });
+
+  it("hit points changed while the choice is open (a potion) are what the cost then takes from", () => {
+    let state = toEvent(`~test-event:hazard-storm${all("~test-hp:", "5/9")}`);
+    const scene = eventOf(state);
+    const lead = scene?.heroIds[0] ?? "";
+    // The gear's potion raises the sheet while the two costs are on the iPad.
+    if (!state.play) throw new Error("No play state.");
+    setHeroSheet(state.play, lead, { ...sheetOf(state, lead), hp: { hp: 9, max: 9 } });
+    const pick = scene?.options.find((o) => o.optionId === "hit-points");
+    if (!pick) throw new Error("No hit-point cost.");
+    state = step(state, press(pick.promptId, "choose", holderOf(state)));
+    expect(sheetOf(state, lead).hp?.hp).toBe(7);
   });
 
   it("an iPad that holds no present hero sees no choice and its press is refused with words", () => {

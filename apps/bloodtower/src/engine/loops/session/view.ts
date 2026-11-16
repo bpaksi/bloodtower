@@ -37,7 +37,13 @@ import { partyIsSplit, regroupPicks, regroupQueue } from "../day/regroup.ts";
 import { splitShiftOf } from "../day/roll.ts";
 import { daysLeft } from "../day/rules.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
-import { eventOptions, eventState, eventTuningFrom, type OptionId } from "../event/index.ts";
+import {
+  eventOptions,
+  eventState,
+  eventTuningFrom,
+  type OptionId,
+  refreshLedger,
+} from "../event/index.ts";
 import {
   onPurseStep,
   PURSE_STEP_LABEL,
@@ -397,6 +403,7 @@ const buildEvent = (state: ShellState): EventSceneView | null => {
   if (!event || !group || event.groupId !== group.id) return null;
   const clock = ensureClock(play);
   const stage = local.eventStage ?? "choose";
+  if (event.status === "open") refreshLedger(play, group.id);
   const options =
     stage === "choose" && event.status === "open"
       ? eventOptions(play, eventTuningFrom()).map((option) => ({

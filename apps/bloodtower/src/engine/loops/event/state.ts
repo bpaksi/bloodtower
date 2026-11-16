@@ -169,7 +169,10 @@ export const eventForGroup = (
       }
     : drawEvent(seed, play.dayNumber, groupId, tuning, length);
   if (!drawn) return null;
-  if (state.forcedLine) drawn.line = state.forcedLine;
+  if (state.forcedLine) {
+    drawn.line = state.forcedLine;
+    state.forcedLine = null;
+  }
   state.open = drawn;
   return drawn;
 };

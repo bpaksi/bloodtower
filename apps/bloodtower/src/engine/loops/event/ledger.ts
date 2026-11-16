@@ -29,6 +29,15 @@ export const loadLedger = (
   }
 };
 
+/**
+ * Reads the group's hit points and gold again from the sheets, keeping each hero's role. A potion
+ * used or gold spent while a choice is open changes the sheet; the rules must see that (C3/12).
+ */
+export const refreshLedger = (play: PlayState, groupId: string): void => {
+  const ledgers = eventState(play).heroes;
+  loadLedger(play, groupId, (heroId) => ledgers[heroId]?.role ?? "");
+};
+
 /** Writes the ledger's known hit points and gold back to the heroes' sheets. */
 export const commitLedger = (play: PlayState, groupId: string): void => {
   const group = groupById(play, groupId);
