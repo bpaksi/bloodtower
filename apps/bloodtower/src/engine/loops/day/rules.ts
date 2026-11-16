@@ -1,3 +1,4 @@
+import { type CorruptionTuning, corruptionTuningFrom } from "../../rules/corruption/tuning.ts";
 import type { KingdomId } from "../chapter/board.ts";
 
 /**
@@ -25,6 +26,8 @@ export type DayTuning = {
   questSkips: boolean;
   kingdomDie: string;
   loss: { fallen_buildings: number };
+  /** Gold the corruptions take or add (C3-08, Q-C3-16). */
+  corruption: CorruptionTuning;
 };
 
 const BASE_DAY_TUNING: DayTuning = {
@@ -40,6 +43,7 @@ const BASE_DAY_TUNING: DayTuning = {
   questSkips: true,
   kingdomDie: "d4",
   loss: { fallen_buildings: 4 },
+  corruption: corruptionTuningFrom(),
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -76,6 +80,7 @@ export const dayTuningFrom = (source?: unknown): DayTuning => {
         : base.questSkips,
     kingdomDie: typeof simulated.kingdom_die === "string" ? simulated.kingdom_die : base.kingdomDie,
     loss: { fallen_buildings: whole(loss.fallen_buildings, base.loss.fallen_buildings) },
+    corruption: corruptionTuningFrom(root),
   };
 };
 

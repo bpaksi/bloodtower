@@ -10,16 +10,13 @@ import type { ShellScreen } from "./screens.ts";
 import type { TowerSnapshot } from "./tower.ts";
 import { TOWER_DISCONNECTED } from "./tower.ts";
 
-export const SHELL_ENGINE_VERSION = "0.0.0-c2-08";
+export const SHELL_ENGINE_VERSION = "0.0.0-c3-08";
 
-/** Checkpoints written by these engines still load (EV-18). Their missing Enter state reads as "not entered". */
-export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [
-  "0.0.0-step6",
-  "0.0.0-c2-05",
-  "0.0.0-c2-06",
-  "0.0.0-c2-07",
-  SHELL_ENGINE_VERSION,
-];
+/**
+ * Checkpoints written by these engines still load. C3-08 stores corruptions by ID, and a save with
+ * only counts is refused, not migrated (DEC-895): every earlier version is gone from this list.
+ */
+export const SUPPORTED_CHECKPOINT_VERSIONS: readonly string[] = [SHELL_ENGINE_VERSION];
 
 export type PauseCause = "disconnect" | "tower-lost";
 

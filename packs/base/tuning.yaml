@@ -123,6 +123,13 @@ gold:
   sanctuary_cure: {gold: 10, moves: 1, corruption: 1, first_each_chapter: free}
   tavern_rest: {hit_points: 3}
   virtue_draw: 10
+  # C3-08 (Q-C3-16, DEC-895): gold a corruption takes on its trigger, and Tempted's buy surcharge.
+  corruption:
+    cruel_loss: 2
+    greedy_loss: 2
+    feral_loss: 2
+    lost_loss: 1
+    tempted_buy_extra: 2
 
 tomb:
   rooms:
