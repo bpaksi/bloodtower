@@ -1,7 +1,8 @@
 import { hashSeed } from "@dark-tower/rng";
 import type { EngineEffect } from "../../effects.ts";
 import { resetHints } from "../../hints/flow.ts";
-import { refreshSetupSteps } from "../game/setupFlow.ts";
+import type { GameEnd } from "../game/end.ts";
+import { partySize, refreshSetupSteps } from "../game/setupFlow.ts";
 import type { ShellEffect } from "./effects.ts";
 import { emptyTally, initialHoldings, type ShellState, type TonightGame } from "./state.ts";
 import { towerReady } from "./tower.ts";
@@ -365,4 +366,69 @@ export const rateOpenGame = (
     return;
   }
   state.games = state.games.map((row) => (row === game ? { ...row, rating } : row));
+};
+
+/** A game setting's value for the record: the chosen option, else the default, else unknown. */
+const settingValue = (state: ShellState, settingId: string): string | null => {
+  const story = state.stories.find(
+    (entry) => entry.card.id === (state.chosenStoryId ?? state.boundStoryId),
+  );
+  const setting = story?.settings.find((entry) => entry.id === settingId);
+  if (!setting) return state.settingValues[settingId] ?? null;
+  return state.settingValues[settingId] ?? setting.default ?? null;
+};
+
+/** The heroes seated at the start. The play state keeps them after a hold changes; before it, the holds. */
+const seatedHeroIds = (state: ShellState): string[] =>
+  state.play ? state.play.groups.flatMap((group) => group.heroIds) : Object.keys(heldNow(state));
+
+/**
+ * The record effect for a game (DEC-116, DEC-117, PT-04). The host stamps the times and the
+ * active length from the log; the engine only says what it knows.
+ */
+export const gameRecordEffect = (
+  state: ShellState,
+  gameId: string,
+  outcome: "quit" | "won" | "lost",
+  end?: GameEnd,
+): Extract<ShellEffect, { kind: "game-record" }> => ({
+  kind: "game-record",
+  v: 1,
+  gameId,
+  outcome,
+  storyId: state.chosenStoryId ?? state.boundStoryId,
+  length: settingValue(state, "length"),
+  difficulty: settingValue(state, "difficulty"),
+  partySize: partySize(state),
+  heroIds: seatedHeroIds(state),
+  how: outcome === "quit" ? "quit" : outcome === "won" ? "won" : (end?.reason ?? "skulls"),
+  sceneId: end?.sceneId ?? null,
+  endDay: state.play && state.play.dayNumber > 0 ? state.play.dayNumber : null,
+});
+
+/**
+ * MEC-032 close (.43, DEC-116): the game ended won or lost. It writes the game's record (the
+ * latest record for a game id is the one that counts, PT-03), joins tonight's list as won or
+ * lost, and clears the autosave so Continue is not offered for a finished game (DEC-208).
+ */
+export const finishGame = (
+  state: ShellState,
+  end: GameEnd,
+  effects: Array<EngineEffect | ShellEffect>,
+): void => {
+  const gameId = state.activeGameId;
+  if (!gameId) {
+    // No game id means nothing can be recorded; that is an error, never a silent skip.
+    effects.push({
+      kind: "press-error",
+      v: 1,
+      code: "invalid-state",
+      message: "The game ended but has no game id, so no record was written.",
+    });
+    return;
+  }
+  recordGame(state, gameId, end.outcome);
+  effects.push(gameRecordEffect(state, gameId, end.outcome, end));
+  state.autosave = null;
+  state.resumedFromAutosave = false;
 };

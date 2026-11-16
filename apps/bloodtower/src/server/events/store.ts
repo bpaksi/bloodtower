@@ -1,4 +1,4 @@
-import { and, desc, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt, min } from "drizzle-orm";
 import type { Db } from "../db/client.ts";
 import { autosave, checkpoints, events } from "../db/schema.ts";
 import type { HostEventKind } from "./kinds.ts";
@@ -81,6 +81,8 @@ export interface EventStore {
   clearAutosave: () => void;
   autosaveForSession: (sessionId: string) => StoredAutosave | null;
   hasEvents: (gameId: string) => boolean;
+  /** Every game id with a log, oldest first. The records and totals read across them. */
+  listGameIds: () => string[];
 }
 
 const autosaveFromSelect = (row: typeof autosave.$inferSelect): StoredAutosave => ({
@@ -246,6 +248,15 @@ export const createEventStore = (db: Db): EventStore => {
       const row = db.select().from(autosave).where(eq(autosave.sessionId, sessionId)).get();
       return row ? autosaveFromSelect(row) : null;
     },
+
+    listGameIds: () =>
+      db
+        .select({ gameId: events.gameId, first: min(events.id) })
+        .from(events)
+        .groupBy(events.gameId)
+        .orderBy(min(events.id))
+        .all()
+        .map((row) => row.gameId),
 
     hasEvents: (gameId) => {
       const row = db

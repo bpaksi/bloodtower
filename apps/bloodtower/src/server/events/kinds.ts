@@ -21,6 +21,7 @@ export const HOST_EVENT_KINDS = [
   "stat",
   "version-changed",
   "game-record",
+  "play-clock",
 ] as const;
 
 export type HostEventKind = (typeof HOST_EVENT_KINDS)[number];
@@ -32,10 +33,50 @@ const assertV1 = (parsed: unknown): Record<string, unknown> => {
   return parsed as Record<string, unknown>;
 };
 
+/** What a press was, for the tap counts (PT-10). A flow button is any press on a play or setup screen. */
+export const PRESS_KINDS = ["flow-button", "menu", "help"] as const;
+export type PressKind = (typeof PRESS_KINDS)[number];
+
+/** How a game ended (DEC-043): quit, won, or the way it was lost. */
+export const GAME_HOWS = ["quit", "won", "corruption", "skulls", "buildings"] as const;
+export type GameHow = (typeof GAME_HOWS)[number];
+
+/**
+ * The game's record (DEC-116, DEC-117). A game id can hold more than one: a quit, then the final
+ * outcome after Continue. The latest one is the record (PT-03); the log is append-only.
+ * Fields past the outcome are absent on a row an older host wrote.
+ */
 export type GameRecordPayloadV1 = {
   v: 1;
   gameId: string;
   outcome: "quit" | "won" | "lost";
+  storyId?: string | null;
+  length?: string | null;
+  difficulty?: string | null;
+  partySize?: number | null;
+  heroIds?: string[];
+  how?: GameHow;
+  sceneId?: string | null;
+  endDay?: number | null;
+  /** The game's first play start, from the log, UTC. */
+  startedWall?: string | null;
+  endedWall?: string;
+  /** The sum of unpaused play time over the whole game, up to this record. Null: unknown. */
+  activeMs?: number | null;
+  /** Every counted press so far, over the whole game (PT-10). */
+  taps?: number;
+};
+
+/** The game clock: it runs while the game is played and stops for a pause, a quit or the end. */
+export type PlayClockPayloadV1 = { v: 1; running: boolean };
+
+export type ControlPressPayloadV1 = {
+  v: 1;
+  press: ControlPress;
+  /** Absent on a press an older host logged. */
+  kind?: PressKind;
+  /** The game day the press was made on; 0 before day 1. */
+  day?: number | null;
 };
 
 export type VersionChangedPayloadV1 = {
@@ -63,7 +104,7 @@ export const parseHostPayload = <K extends HostEventKind>(
   : K extends "shell"
     ? { v: 1; event: ShellEvent }
     : K extends "control-press"
-      ? { v: 1; press: ControlPress }
+      ? ControlPressPayloadV1
       : K extends "timing-mark-open"
         ? { v: 1; mark: TimingMark }
         : K extends "timing-mark-close"
@@ -72,7 +113,9 @@ export const parseHostPayload = <K extends HostEventKind>(
             ? { v: 1; stat: StatEvent }
             : K extends "game-record"
               ? GameRecordPayloadV1
-              : VersionChangedPayloadV1 => {
+              : K extends "play-clock"
+                ? PlayClockPayloadV1
+                : VersionChangedPayloadV1 => {
   const parsed = assertV1(JSON.parse(payloadJson));
   switch (kind) {
     case "engine": {
@@ -88,7 +131,20 @@ export const parseHostPayload = <K extends HostEventKind>(
     case "control-press": {
       const press = controlPressSchema.safeParse(parsed.press);
       if (!press.success) throw new Error(press.error.message);
-      return { v: 1, press: press.data } as never;
+      const out: ControlPressPayloadV1 = { v: 1, press: press.data };
+      if (parsed.kind !== undefined) {
+        if (!(PRESS_KINDS as readonly unknown[]).includes(parsed.kind)) {
+          throw new Error("control-press kind must be flow-button, menu, or help.");
+        }
+        out.kind = parsed.kind as PressKind;
+      }
+      if (parsed.day !== undefined) {
+        if (parsed.day !== null && !Number.isInteger(parsed.day)) {
+          throw new Error("control-press day must be a whole number or null.");
+        }
+        out.day = parsed.day as number | null;
+      }
+      return out as never;
     }
     case "timing-mark-open": {
       const mark = timingMarkSchema.safeParse(parsed.mark);
@@ -136,7 +192,46 @@ export const parseHostPayload = <K extends HostEventKind>(
       if (parsed.outcome !== "quit" && parsed.outcome !== "won" && parsed.outcome !== "lost") {
         throw new Error("game-record outcome must be quit, won, or lost.");
       }
-      return { v: 1, gameId: parsed.gameId, outcome: parsed.outcome } as never;
+      const record: GameRecordPayloadV1 = {
+        v: 1,
+        gameId: parsed.gameId,
+        outcome: parsed.outcome,
+      };
+      if (parsed.how !== undefined) {
+        if (!(GAME_HOWS as readonly unknown[]).includes(parsed.how)) {
+          throw new Error("game-record how must be quit, won, corruption, skulls, or buildings.");
+        }
+        record.how = parsed.how as GameHow;
+      }
+      for (const key of ["storyId", "length", "difficulty", "sceneId", "startedWall"] as const) {
+        const value = parsed[key];
+        if (value === undefined) continue;
+        if (value !== null && typeof value !== "string") {
+          throw new Error(`game-record ${key} must be text or null.`);
+        }
+        record[key] = value as string | null;
+      }
+      for (const key of ["partySize", "endDay", "activeMs"] as const) {
+        const value = parsed[key];
+        if (value === undefined) continue;
+        if (value !== null && (typeof value !== "number" || !Number.isFinite(value))) {
+          throw new Error(`game-record ${key} must be a number or null.`);
+        }
+        record[key] = value as number | null;
+      }
+      if (parsed.heroIds !== undefined) {
+        if (!Array.isArray(parsed.heroIds) || parsed.heroIds.some((id) => typeof id !== "string")) {
+          throw new Error("game-record heroIds must be a list of text.");
+        }
+        record.heroIds = parsed.heroIds as string[];
+      }
+      if (typeof parsed.endedWall === "string") record.endedWall = parsed.endedWall;
+      if (typeof parsed.taps === "number") record.taps = parsed.taps;
+      return record as never;
+    }
+    case "play-clock": {
+      if (typeof parsed.running !== "boolean") throw new Error("play-clock needs running.");
+      return { v: 1, running: parsed.running } as never;
     }
     case "version-changed": {
       for (const key of [
