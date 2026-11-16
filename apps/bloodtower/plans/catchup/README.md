@@ -68,7 +68,7 @@ Bob's two Dark Tower reviews of Nov 12 are folded into this plan as **docs and i
 
 **Sequence rule.** F1 and the rulings D1-D6 go **ahead of** the C4 and C5 loops: #445 (C4-02 battle loop), #446 (C4-03 retreat, fall, reward), #449 (C4-06 Tomb crawl), #459 (C5-01), #460 (C5-02), #461 (C5-03) and #462 (C5-04). They are not new queue steps: no weekdays, runner time or Cursor dollars are added to the totals above until Warden opens F1. The audit's own order stays: D1-D3 and F1/F2 edits in parallel -> sync diagrams -> D6, D4, D5 rulings -> inspect the code and run R01-R09 -> Bob's H01-H03 -> simulations -> human playtests (P01).
 
-### F1: Tomb-to-battle contracts (HELD)
+### F1: Tomb-to-battle contracts (hold lifted 2026-11-16)
 
 | Item | Status |
 |---|---|
@@ -76,7 +76,7 @@ Bob's two Dark Tower reviews of Nov 12 are folded into this plan as **docs and i
 | Tests | TB-01 to TB-14 and R01 (specified, not run) |
 | Gamewright confirmation 1 (Nov 13, 5:50 AM ET) | **Received.** Entry terminal gate routing as written: MEC-038 alone applies the stance once, on a genuine entry; after each entry effect the gate runs game loss first, then foe gone = won, then all fallen = fallen close; no Fight/Retreat, round card or roll after a terminal entry; Continue replays nothing |
 | Gamewright confirmation 2 (Nov 13, 5:50 AM ET) | **Received.** **TB-03 is a Gamewright ruling:** a foe killed by Bold never uses its later pre-round ability (Ambush, Fire breath, or any other) |
-| Build | **HELD** until Warden relays more. When it opens, one runner inspects the code first; it may end as docs and tests only if the code already conforms |
+| Build | **Not held.** Bob lifted the hold on 2026-11-16. Brief: [F1/01-tomb-to-battle](../briefs/F1/01-tomb-to-battle/plan.md), eval approval **pending Bob**; no coding before it. One runner (Anvil) inspects the code first; it may end as docs and tests only if the code already conforms |
 | Out of scope | Mutual Spines and trap zero/shortfall (D2), skull-loss dispatch (D1), CB-02, CB-03, QD-02, QD-04 |
 | Issue | #505 |
 
@@ -97,7 +97,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 
 | Finding(s) | Destination | Plan hook |
 |---|---|---|
-| QD-03, CB-01, QD-01, EE-01 (F1) | **v1.0 now, held.** Two Gamewright confirmations received; inspect the code, then build; TB-01 to TB-14 and R01 | Before #445, #446, #449 (#505) |
+| QD-03, CB-01, QD-01, EE-01 (F1) | **v1.0 now, not held (2026-11-16).** Two Gamewright confirmations received, brief drafted, eval approval pending Bob; inspect the code, then build; TB-01 to TB-14 and R01 | Before #445, #446, #449 (#505) |
 | EE-02, BE-02 (F2) | v1.0 after F1; D6 first | Before the encounter-related C4 steps (#507) |
 | LC-03 (F3) | v1.0 core schedules after D6; the Long overlay is 1.1 | Day loop, #441 follow-up (#507) |
 | CB-02, TP-01 (F4) | v1.0 after F1 | #446, #459 (#507) |
@@ -226,7 +226,7 @@ The C3, C4 and C5 briefs all pass `node scripts/check-briefs.mjs` on main and ca
 - **Bob, open:** re-approval rows for the changed evals and for CU/01 and CU/02 (a batch is fine); the three locks the rulings touch (see design-freeze.md): caravans, Charon's scope, PT-24's removal of locked copy; PT-05's tower label parked (say so if he wants it back in step 06).
 - **Bob gates:** G-C3, G-C4, G-A1 (needs the art hold lifted, A1-4c render and step 31), C5-10 (G-1.0). Bob also ticks every art final in C5-05.
 - **Gamewright and Loremaster:** steps 43 to 45 and 62.
-- **Gamewright, audit rulings:** D1-D6 (#499-#504), awaiting. F1 (#505) is held with both Gamewright confirmations received; Warden decides when it opens.
+- **Gamewright, audit rulings:** D1-D6 (#499-#504), awaiting. F1 (#505) is not held (Bob, 2026-11-16); its brief is drafted and waits on Bob's eval approval.
 
 ## Parked: 1.1 after v1.0 (Bob 11-12)
 
