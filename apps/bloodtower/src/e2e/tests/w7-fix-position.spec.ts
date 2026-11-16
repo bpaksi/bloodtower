@@ -163,6 +163,13 @@ test("CU/05 Back undoes a tap, repeats, and is gone at the turn start (EV-05, EV
     expect((await readStatus(device)).moves).toBe(String(moves - 1));
     await expect(back).toBeEnabled();
     await device.screenshot({ path: "test-results/cu05/move-map-after-tap.png" });
+    // EV-09: End turn sits below the map; scroll it into view and keep that frame too.
+    const endTurn = device.locator('button[data-action-id="end-turn"]');
+    await endTurn.scrollIntoViewIfNeeded();
+    await expect(endTurn).toBeVisible();
+    await expect(endTurn).toContainText("End turn");
+    await device.screenshot({ path: "test-results/cu05/move-map-end-turn.png" });
+    await device.locator('button[data-action-id="walk"]').first().scrollIntoViewIfNeeded();
     await testInfo.attach("move-map-after-tap", {
       body: await device.screenshot(),
       contentType: "image/png",
