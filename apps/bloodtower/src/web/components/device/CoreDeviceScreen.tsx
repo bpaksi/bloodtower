@@ -604,7 +604,7 @@ const SLOT_POINT: Record<(typeof COMPASS_SLOTS)[number], { x: number; y: number 
 
 /** v2 device UI: text and icon controls. Place stills stay on the Story board. */
 export function CoreDeviceScreen({
-  live,
+  live: connected,
   view,
   errorBanner,
   onAct,
@@ -616,6 +616,8 @@ export function CoreDeviceScreen({
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
   onHold?: (heroId: string, action: "take" | "release") => void;
 }) {
+  // A hint is on the Story board: this iPad keeps its prior screen, every control greyed (CU/09).
+  const live = connected && !view.held;
   const volumes = view.actions.filter((action) => action.actionId === "volume-play");
   const keep = view.actions.find((action) => action.actionId === "volume-keep");
   const tryAnother = view.actions.find((action) => action.actionId === "volume-again");

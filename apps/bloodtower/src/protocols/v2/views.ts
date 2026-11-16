@@ -329,6 +329,11 @@ export const deviceViewPayloadSchema = z
     /** Same status band as the board. No place still and no caption. */
     table: tableBandSchema.nullable().optional(),
     /**
+     * True while a first-time hint is on the Story board (CU/09): this is the screen from before
+     * the hint, kept as it was, and every control on it is greyed until the hint ends.
+     */
+    held: z.literal(true).optional(),
+    /**
      * Pick Story doors, in catalog order. Present only while the board is listing doors.
      * Previous and Next send `focus-story`; the iPad does not draw the carousel.
      */

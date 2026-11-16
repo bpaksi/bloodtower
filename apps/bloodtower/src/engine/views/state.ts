@@ -139,6 +139,11 @@ export type ViewState = {
   place?: PlaceStill | null;
   /** The first-time hint on the board now (CU/09). Story board only. */
   hint?: HintView | null;
+  /**
+   * While a hint shows, the iPads keep the screen before it (CU/09): this table and these
+   * actions replace `table` and `actions` for a device. The Story board ignores it.
+   */
+  deviceHold?: { table: TableBand | null; actions: ViewAction[] } | null;
   /** Gear panel snapshot. Omitted on fixtures that predate the toolbar. */
   gear?: GearView;
 };

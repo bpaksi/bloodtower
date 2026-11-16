@@ -105,6 +105,7 @@ export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState
   hintsShown: row.hintsShown ?? [],
   hint: null,
   hintQueue: [],
+  hintHold: null,
   gearPanel: null,
   gearOwner: null,
   gearPaused: false,

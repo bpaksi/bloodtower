@@ -728,7 +728,8 @@ export const projectShellView = (state: ShellState): ViewState => {
         : [],
   }));
 
-  // A hint is the loop's first beat: the iPads keep their prior screen until it ends.
+  // A hint is the loop's first beat: the view offers nothing until it ends. The iPads keep the
+  // screen before it through `deviceHold`.
   const offeredNow = state.hint && state.screen === "play" ? [] : state.offered;
   const actions: ViewState["actions"] = offeredNow.map((offer) =>
     offer.open
@@ -792,6 +793,7 @@ export const projectShellView = (state: ShellState): ViewState => {
     table: momentId ? null : buildTable(state, title),
     place: momentId ? null : buildPlace(state),
     hint: momentId ? null : buildHint(state),
+    deviceHold: !momentId && state.hint && state.screen === "play" ? state.hintHold : null,
     gear: gearSnapshot(state),
   };
 };

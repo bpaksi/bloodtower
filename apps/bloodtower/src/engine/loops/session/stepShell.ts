@@ -1,8 +1,8 @@
 import { openingActiveIndex, openingFinishedIndex } from "../../../protocols/opening.ts";
 import type { EngineEffect } from "../../effects.ts";
 import { HINTS_OFF, HINTS_ON, HINTS_SETTING_ID, rulesPage } from "../../hints/copy.ts";
-import { applyHints, endHint } from "../../hints/flow.ts";
-import { HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/registry.ts";
+import { applyHints, endHint, hintsOn } from "../../hints/flow.ts";
+import { HINT_IDS, HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/registry.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
 import { bindPlayState, initPlayState, seatAtCitadels } from "../chapter/playState.ts";
@@ -55,8 +55,9 @@ import {
   takePendingTowerCommands,
 } from "./shellRef.ts";
 import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
-import { initialShellState, type ShellState } from "./state.ts";
+import { type HintHold, initialShellState, type ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
+import { projectShellView } from "./view.ts";
 
 export type ShellStepResult = {
   state: ShellState;
@@ -728,10 +729,31 @@ export const runShellEvents = (events: ShellEvent[]) => {
  * One step of the shell. Hints (CU/09) and Rules pages ride on top of the core step: a loop the step
  * entered earns its hint once per game; a Look up pick with no page is an error, never silent.
  */
+const mayStartHint = (state: ShellState): boolean =>
+  state.screen === "play" &&
+  state.hint === null &&
+  hintsOn(state) &&
+  HINT_IDS.some((id) => !state.hintsShown.includes(id));
+
 export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult => {
+  // The loop runtime changes its stack in place, so the screen the iPads show must be read before
+  // the step runs. It is only needed while a hint can still start.
+  const held: HintHold | null = mayStartHint(state)
+    ? (() => {
+        const view = projectShellView(state);
+        return { table: view.table ?? null, actions: view.actions };
+      })()
+    : null;
   const result = stepShellCore(state, event);
   const { state: kept, extra } = applyHints(result.state, result.effects);
   let next = kept;
+  // A hint is the loop's first beat: the iPads keep the screen they had before the step, greyed,
+  // until the hint ends. The Story board shows the hint; it is never held back.
+  if (next.hint === null) {
+    if (next.hintHold) next = { ...next, hintHold: null };
+  } else if (next.hintHold === null) {
+    next = { ...next, hintHold: held ?? { table: null, actions: [] } };
+  }
   if (next.gearPanel === "look-up" && next.gearCard && !rulesPage(next.gearCard)) {
     extra.push({
       kind: "press-error",

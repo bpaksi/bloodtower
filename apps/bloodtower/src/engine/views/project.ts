@@ -101,11 +101,15 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
       focus: level.shows.startsWith("In focus"),
     }));
 
+  const held = state.deviceHold ?? null;
+  const deviceActions = held ? held.actions : state.actions;
+
   return deviceViewPayloadSchema.parse({
     deviceId: audience.deviceId,
     screen: state.screen,
     shows: current.shows,
-    table: state.table ?? null,
+    table: held ? held.table : (state.table ?? null),
+    ...(held ? { held: true } : {}),
     ...(doors.length > 0 ? { doors } : {}),
     heroes: heroesOnDevice.map((hero) => ({
       id: hero.id,
@@ -116,7 +120,7 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
           ? hero.lines.map((line) => ({ id: line.id, text: line.text }))
           : [],
     })),
-    actions: state.actions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
+    actions: deviceActions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
     ...(state.settings && state.settings.length > 0 ? { settings: state.settings } : {}),
     ...(state.gear ? { gear: state.gear } : {}),
   });
