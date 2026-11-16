@@ -17,7 +17,7 @@ Keep this a checklist; do not write a second design doc.
 - Builds: UI-026, CUE-010
 - Deps change: no
 - Runs: cloud
-- Amended 2026-11-14 for PT-17 (step 44): added EV-17 to EV-25 (the warning line and the foe-panel mark; the edge band mark is CU/10). Two Copy slots as `[COPY: ...]`. Touches gains `engine/views/**`. Rulings adopted by Bob 2026-11-14 are applied to EV-19 and added as EV-25; no approved eval is changed in place. Needs Bob's new approval row. Illusionist adds mockup state `#battle-warn`.
+- Amended 2026-11-14 for PT-17 (step 44): added EV-17 to EV-25 (the warning line and the foe-panel mark; the edge band mark is CU/10). Two Copy slots (`board.corruption-warning`, `foe-panel.corruption-mark`) filled 2026-11-16 (step 45). Touches gains `engine/views/**`. Rulings adopted by Bob 2026-11-14 are applied to EV-19 and added as EV-25; no approved eval is changed in place. Needs Bob's new approval row. Illusionist adds mockup state `#battle-warn`.
 
 ## What it does
 
@@ -55,7 +55,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 23–24 filled 2026-11-16 (step 45). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
@@ -81,8 +81,8 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 20 | `help.title` | Help | C2 feature 04 |
 | 21 | `help.battle-board` | Pick Fight or Retreat on your iPad, then Attack, Cast a spell, Spend an Advantage, Drink a potion or Guard. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 22 | `help.close` | Close | C2 feature 04 |
-| 23 | `board.corruption-warning` | [COPY: Fight/Retreat warning for a hero one fall from defeat, LQ-2] | ruling PT-17; LQ-2 default A "{hero} bears two oath-marks. A third ends the oath." is a proposal, not a lock; Loremaster fills it (step 45) |
-| 24 | `foe-panel.corruption-mark` | [COPY: text alternative for the mark] | new - Loremaster (step 45) |
+| 23 | `board.corruption-warning` | {hero}: two corruptions. A third ends the game. | new - Loremaster (PT-17, DEC-925, LQ-2). Fight/Retreat board warning, one line naming every standing marked hero (EV-19). `{hero}` is that hero's name, or the names joined when more than one is marked; a sat-out hero at 0 hit points is not named (EV-25). Uses the band's word "corruptions" and "A third ends the game" (CU/10 `band.mark.label`, DEC-043, DEC-676; Gamewright, 2026-11-15). LQ-2 default A's "oath-marks" is the Keep's 1.1 wording (IDEA-177) and is not used. The colon form stays grammatical for one name or many. Not a lock of default A |
+| 24 | `foe-panel.corruption-mark` | {hero} has two corruptions. A third ends the game. | new - Loremaster (PT-17, DEC-925). Text alternative for the mark on that hero's foe-panel entry (EV-20), not colour alone. `{hero}` is the one marked hero. Same words as CU/10 `band.mark.label` (DEC-043, DEC-676) |
 
 ## OPEN questions
 

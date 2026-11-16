@@ -17,7 +17,7 @@ Keep this a checklist; do not write a second design doc.
 - Builds: UI-044
 - Deps change: no
 - Runs: cloud
-- Amended 2026-11-14 for PT-21 (step 44): added EV-17 to EV-24; edited EV-01, EV-05, EV-06, EV-07, EV-08 and EV-13 in place, each marked Amended 2026-11-14 (PT-21) (the seal step is now a row in Set the table, after the next chapter's card; the Reveal stays right after the seal break; the freed-skull picks come after Done). Five Copy slots as `[COPY: ...]`. Needs Bob's new approval row. Illusionist adds `#set-table-seal`.
+- Amended 2026-11-14 for PT-21 (step 44): added EV-17 to EV-24; edited EV-01, EV-05, EV-06, EV-07, EV-08 and EV-13 in place, each marked Amended 2026-11-14 (PT-21) (the seal step is now a row in Set the table, after the next chapter's card; the Reveal stays right after the seal break; the freed-skull picks come after Done). Five Copy slots (`table.title`, `table.row.seal`, `table.row.tokens`, `table.row.skulls`, `table.done`) filled 2026-11-16 (step 45). Needs Bob's new approval row. Illusionist adds `#set-table-seal`.
 
 ## What it does
 
@@ -52,7 +52,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 31–35 filled 2026-11-16 (step 45). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
@@ -86,11 +86,11 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 28 | `help.title` | Help | C2 feature 04 |
 | 29 | `help.seal-break-live` | Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull. | locked 2026-10-31 (Loremaster); same text in screen-spec |
 | 30 | `help.close` | Close | C2 feature 04 |
-| 31 | `table.title` | [COPY: Set the table] | ruling PT-21; same slot as C3/15 `table.title`; Loremaster confirms (step 45) |
-| 32 | `table.row.seal` | [COPY: the seal row, with the seal's name] | new - Loremaster (step 45); replaces the `button.seal-broken` press |
-| 33 | `table.row.tokens` | [COPY: the quest tokens row] | new - Loremaster (step 45) |
-| 34 | `table.row.skulls` | [COPY: the freed skulls row] | new - Loremaster (step 45) |
-| 35 | `table.done` | [COPY: Done label for Set the table] | new - Loremaster (step 45) |
+| 31 | `table.title` | Set the table | ruling PT-21 and DEC-929 name the step "Set the table"; Loremaster confirms the words. Same slot as C3/15 `table.title` |
+| 32 | `table.row.seal` | {seal} | new - Loremaster (PT-21, DEC-929). Replaces the `button.seal-broken` press. `{seal}` is the locked name from rows 2–4 (The Road Seal, The Keep Seal, The Warden's Seal). EV-13 requires the row to read exactly that name, not a generic title. The row is absent with no tower (DEC-306, EV-21) |
+| 33 | `table.row.tokens` | Quest tokens: {quests} | new - Loremaster (PT-21, DEC-929). `{quests}` is the comma-separated names of the next chapter's quest tokens, as in C3/15 EV-17 ("The Barrow, The Shrine"). Same slot as C3/15 `table.row.tokens` |
+| 34 | `table.row.skulls` | Freed skulls: {N} | new - Loremaster (PT-21, DEC-929, DEC-409). `{N}` is how many skulls were freed. The row is a check; the kingdom-then-building picks come after Done (EV-17, DEC-933). Shown only when skulls were freed; absent with no tower (EV-21). Same slot as C3/15 `table.row.skulls` |
+| 35 | `table.done` | Done | new - Loremaster; the one primary button (C2/04, PT-21, EV-24). Unchanged from every other physical-confirm Done. Same slot as C3/15 `table.done` |
 
 ## OPEN questions
 

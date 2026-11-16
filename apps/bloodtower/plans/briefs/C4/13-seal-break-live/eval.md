@@ -191,4 +191,4 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 > Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders."
 - ANSWERED (PT-21, Bob, 2026-11-14, adopted; Gamewright to confirm): the freed-skull picks come after Set the table's Done (EV-01, EV-17).
 - ANSWERED (PT-21, Bob, 2026-11-14, adopted): Done is not gated on ticking every row (EV-24).
-- OPEN (PT-21, copy; Loremaster to confirm, adopted by Bob 2026-11-14): Loremaster rewrites `button.seal-broken` as the row label and `help.seal-break-live` for the checklist in step 45.
+- ANSWERED (PT-21, copy; Loremaster, 2026-11-16, step 45): the seal row label is `{seal}` (Copy table `table.row.seal`; EV-13). `help.seal-break-live` still reads the old "Tap Seal broken…" line and was not rewritten in this pass.
