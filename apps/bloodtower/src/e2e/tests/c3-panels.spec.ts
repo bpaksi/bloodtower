@@ -361,10 +361,10 @@ const VIRTUE_MOCKUP = join(
 );
 /** Skulls on one building of each kingdom, so Infused has something to take whatever kingdom acts. */
 const SKULLS = "~test-skulls:N-egans-end=2,E-duwani=1,S-southern-wastes=2,W-anza=1";
-const INFUSED_SEED = `c3-day-1~test-virtues:hero-a=infused+fortunate${SKULLS}`;
+const INFUSED_SEED = `c3-day-1~test-virtue-ids:hero-a=infused+fortunate${SKULLS}`;
 const FIXTURE_SEED =
-  "c3-day-1~test-virtues:hero-a=fixture,hero-b=fixture,hero-c=fixture,hero-d=fixture";
-const FORTUNATE_SEED = "c3-day-1~test-virtues:hero-a=fortunate";
+  "c3-day-1~test-virtue-ids:hero-a=fixture,hero-b=fixture,hero-c=fixture,hero-d=fixture";
+const FORTUNATE_SEED = "c3-day-1~test-virtue-ids:hero-a=fortunate";
 const virtuePanel = (board: Page) => board.locator('[data-panel="virtue"]');
 const virtueOptions = (pad: Page) => deviceMain(pad).locator("button[data-virtue-option]");
 const virtueButtons = (pad: Page) =>

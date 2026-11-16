@@ -79,6 +79,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Scope here: only the items panel on the board (`#items`, board 1920x1080) and its iPad flow; the virtue and chance pairs are 54b and 54c. 2 images here (board items panel, and the iPad item pick).
 - Requirement: the three board states and two iPad states are as drawn.
 - Method: screenshot
-- How: board 1920x1080 at the virtue panel, the items panel and the chance result, and iPad 768x1024 at the virtue choice and at Spin; compare each side by side with `./mockup.html` sections `#virtue`, `#items`, `#chance`, `#ipad-virtue`, `#ipad-chance`. Ten images attached.
-- Pass evidence: named parts present and in the same order in each pair (panel title, lines, "Game paused." on the items panel, the result line, the choice buttons, Spin, the toolbar).
+- How: board 1920x1080 at the items panel, compared side by side with `./mockup.html` section `#items`; and iPad 768x1024 at the item pick, taken as a screenshot with no mockup comparison (the mockup has no item-pick state). Two images attached.
+- Pass evidence: board pair: named parts present and in the same order (panel title, lines, "Game paused." on the items panel, the toolbar). iPad screenshot: the item and hero pick buttons and the toolbar are shown, with no art.
+- Amended 2026-11-16 (Bob, chat: "I approve the CU/13 EV-12 reword to compare only the board pair against the mockup, and take the iPad item pick as a screenshot with no mockup"): the Scope line said 2 images and How said ten; the mockup has no iPad item-pick state.
 - Fails if: a part is missing, a panel clips, or the iPad shows art.

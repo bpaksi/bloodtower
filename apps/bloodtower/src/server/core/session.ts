@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { ControlPress } from "bloodtower-protocols";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
+import { openEffectsWait } from "../../engine/loops/day/wait.ts";
 import type { GameLocal } from "../../engine/loops/game/loop.ts";
 import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
@@ -69,6 +70,16 @@ export type CoreSessionOptions = {
    * read from `BLOODTOWER_DEMO_LINE`.
    */
   demoLine?: string | null;
+  /**
+   * How the effects wait's 4 s are timed (C3/20). Omitted, `setTimeout`. A test passes its own
+   * so it can move the time; the engine never sees a clock. Returns a function that cancels.
+   */
+  waitTimer?: (fire: () => void, ms: number) => () => void;
+  /**
+   * TEST ONLY (C3/20): lets `applyTestSeed` change the running game. Production never sets it,
+   * and no protocol message reaches it.
+   */
+  allowTestSeed?: boolean;
 };
 
 export type CoreSession = {
@@ -102,6 +113,16 @@ export type CoreSession = {
   /** DEC-208: keep the autosave row visible for Continue without resuming play yet. */
   rememberAutosave: (row: { gameId: string; packId: string; day: number }) => void;
   syncTowerSnapshot: () => void;
+  /**
+   * The board says the narration line `lineId` ended. It ends the effects wait only when that line
+   * is the wait's own; any other id is ignored with a debug line.
+   */
+  narrationEnded: (lineId: string) => void;
+  /**
+   * TEST ONLY: set the test-seed markers on the running game (skulls, kingdom, sheets, ...).
+   * Refused, logged as an error and thrown, unless the host was built with `allowTestSeed`.
+   */
+  applyTestSeed: (markers: string) => Promise<void>;
   /** Wait until queued shell applies and effects have finished. */
   whenIdle: () => Promise<void>;
   /** Cancel holding-grace timers so shutdown does not record a drop on the saved game. */
@@ -443,6 +464,39 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     persistLobbyCheckpoint();
     persistSessionMarker();
     scheduleHintEnd();
+    scheduleEffectsWait();
+  };
+
+  // The day loop's effects wait (C3/20). The engine names it; this runs it. With a narration line
+  // the wait ends on the line's audio end only. With none it ends after `maxMs`. A paused game
+  // does not count down; the full time runs again when play goes on. The end is an event, so a
+  // replay or a restart sees the same game.
+  let waitCancel: (() => void) | undefined;
+  let waitTimerFor: string | null = null;
+  const startWaitTimer =
+    options.waitTimer ??
+    ((fire: () => void, ms: number) => {
+      const handle = setTimeout(fire, ms);
+      return () => clearTimeout(handle);
+    });
+  const scheduleEffectsWait = (): void => {
+    const wait = openEffectsWait(state.loops.stack);
+    const running =
+      wait !== null &&
+      wait.lineId === null &&
+      state.stage === "playing" &&
+      state.pause === null &&
+      !state.gearPaused;
+    const key = running && wait ? wait.id : null;
+    if (key === waitTimerFor) return;
+    waitCancel?.();
+    waitCancel = undefined;
+    waitTimerFor = key;
+    if (!key || !wait) return;
+    waitCancel = startWaitTimer(() => {
+      waitCancel = undefined;
+      enqueue({ kind: "wait-end", v: 1, waitId: key, cause: "timeout" }, null);
+    }, wait.maxMs);
   };
 
   // A first-time hint ends after the engine's one auto-advance time (CU/09). The timer only asks:
@@ -802,8 +856,52 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         return false;
       }
     },
+    narrationEnded: (lineId) => {
+      applyQueue = applyQueue
+        .then(async () => {
+          const wait = openEffectsWait(state.loops.stack);
+          if (!wait || wait.lineId !== lineId) {
+            options.log.debug(
+              "narration-ended-ignored",
+              `Ignored the end of "${lineId}": no open wait is waiting on that line.`,
+            );
+            return;
+          }
+          await apply({ kind: "wait-end", v: 1, waitId: wait.id, cause: "audio-end" }, null);
+        })
+        .catch((error: unknown) => {
+          const detail = error instanceof Error ? error.message : String(error);
+          options.log.error(
+            "core-apply",
+            detail.trim() === "" ? "Core session apply failed." : detail,
+          );
+        });
+    },
+    applyTestSeed: async (markers) => {
+      if (!options.allowTestSeed) {
+        const message = "The test seed is off on this host. It is for tests only.";
+        options.log.error("test-seed-refused", message);
+        throw new Error(message);
+      }
+      let failure: unknown = null;
+      // The event is logged, so a replay (Continue) sets the same seed once.
+      applyQueue = applyQueue.then(async () => {
+        try {
+          await apply({ kind: "test-seed", v: 1, markers }, null);
+        } catch (error) {
+          failure = error;
+          const detail = error instanceof Error ? error.message : String(error);
+          options.log.error("test-seed-failed", detail.trim() === "" ? "The seed failed." : detail);
+        }
+      });
+      await applyQueue;
+      if (failure) throw failure;
+    },
     whenIdle: () => applyQueue,
     cancelDisconnects: () => {
+      waitCancel?.();
+      waitCancel = undefined;
+      waitTimerFor = null;
       if (hintTimer) clearTimeout(hintTimer);
       hintTimer = undefined;
       for (const record of devices.values()) {

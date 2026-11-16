@@ -9,7 +9,7 @@ import { projectShellView } from "../session/view.ts";
 import { type GroupTurnLocal, virtuePromptId } from "./loop.ts";
 
 const SEED =
-  "s~test-virtues:hero-a=infused+fortunate,hero-b=fixture~test-skulls:N-egans-end=2,N-dayside=1,N-upper-ice-fangs=0";
+  "s~test-virtue-ids:hero-a=infused+fortunate,hero-b=fixture~test-skulls:N-egans-end=2,N-dayside=1,N-upper-ice-fangs=0";
 
 /** A game in play at the start of `acting`'s turn, offers built as after a restore. */
 const turnStart = (acting: string, virtue: GroupTurnLocal["virtue"] | undefined): ShellState => {

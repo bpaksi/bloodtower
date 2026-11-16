@@ -11,7 +11,7 @@ import {
 } from "./index.ts";
 
 const SEED =
-  "s~test-virtues:hero-a=infused+fortunate,hero-b=fixture~test-skulls:N-egans-end=2,N-dayside=1,N-upper-ice-fangs=0,N-radiant-mountains=4";
+  "s~test-virtue-ids:hero-a=infused+fortunate,hero-b=fixture~test-skulls:N-egans-end=2,N-dayside=1,N-upper-ice-fangs=0,N-radiant-mountains=4";
 const play = (seed = SEED) => initPlayState(seed, PROVING_GROUNDS_PLAY);
 const groupOf = (p: ReturnType<typeof play>, heroId: string) =>
   p.groups.find((g) => g.heroIds.includes(heroId))?.id ?? "";
@@ -75,7 +75,7 @@ describe("turn-start virtues (CU/14)", () => {
   });
 
   it("no Infused line when no building has a skull", () => {
-    const p = play("s~test-virtues:hero-a=infused");
+    const p = play("s~test-virtue-ids:hero-a=infused");
     expect(hasVirtuePanel(p, groupOf(p, "hero-a"))).toBe(false);
   });
 

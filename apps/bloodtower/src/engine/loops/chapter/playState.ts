@@ -1,5 +1,11 @@
 import { eventRng } from "@dark-tower/rng";
-import { ensureClock, heroSheet, setBuildingSkulls, setHeroSheet } from "../day/clock.ts";
+import {
+  ensureClock,
+  heroSheet,
+  markQuestWon,
+  setBuildingSkulls,
+  setHeroSheet,
+} from "../day/clock.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -171,12 +177,12 @@ export const TEST_ITEMS = "~test-items:";
 export const TEST_HP = "~test-hp:";
 export const TEST_GOLD = "~test-gold:";
 /**
- * TEST ONLY (CU/14). `~test-virtues:hero-a=infused+fortunate` gives heroes virtues at the start,
- * and `~test-skulls:N-egans-end=2` puts skulls on buildings, so an e2e reaches a turn-start virtue
- * with no play. Same placement rule as the markers above.
+ * TEST ONLY (CU/14). `~test-virtue-ids:hero-a=infused+fortunate` gives heroes named virtues at
+ * the start (not `~test-virtues:`, which counts helping virtues), so an e2e reaches a turn-start
+ * virtue with no play. Skulls come from `~test-skulls:` below. Same placement rule as the above.
  */
-export const TEST_VIRTUES = "~test-virtues:";
-export const TEST_SKULLS = "~test-skulls:";
+export const TEST_VIRTUE_IDS = "~test-virtue-ids:";
+const SHAPE_IDS = /^[\w-]+(\+[\w-]+)*$/;
 
 const testMarker = (seed: string, marker: string, shape: RegExp): [string, string][] => {
   const start = seed.indexOf(marker);
@@ -194,10 +200,65 @@ const testMarker = (seed: string, marker: string, shape: RegExp): [string, strin
     });
 };
 
-const applyHeroTestSeeds = (play: PlayState, seed: string): void => {
+/**
+ * TEST ONLY (C3/20). More markers of the same hook: `~test-virtues:hero-a=1` (helping virtues),
+ * `~test-skulls:<spaceId>=3` (skulls on a building), `~test-kingdom:E+S` (the kingdoms the next
+ * drops land in, in order) and `~test-effects-line:<lineId>` (the narration the effects wait ends
+ * on). A field a marker does not name stays unset. Put them before `~test-seat-together`. Real
+ * seeds never carry them.
+ */
+export const TEST_VIRTUES = "~test-virtues:";
+export const TEST_SKULLS = "~test-skulls:";
+export const TEST_KINGDOM = "~test-kingdom:";
+export const TEST_EFFECTS_LINE = "~test-effects-line:";
+/**
+ * `~test-effect:cleanse+quest-won`, for a running game: "a Cleanse happened today" (its "+1 day"
+ * line) and "a quest was won today" (the night's drop is skipped). They stand in for play.
+ */
+export const TEST_EFFECT = "~test-effect:";
+
+/** Every marker the hook reads. A seed with none of them is a real seed. */
+export const TEST_SEED_MARKERS = [
+  TEST_SEAT_TOGETHER,
+  TEST_CORRUPTION,
+  TEST_ITEMS,
+  TEST_HP,
+  TEST_GOLD,
+  TEST_VIRTUES,
+  TEST_VIRTUE_IDS,
+  TEST_SKULLS,
+  TEST_KINGDOM,
+  TEST_EFFECTS_LINE,
+  TEST_EFFECT,
+] as const;
+
+export const isTestSeed = (seed: string): boolean =>
+  TEST_SEED_MARKERS.some((marker) => seed.includes(marker));
+
+const KINGDOM_IDS: readonly string[] = ["N", "E", "S", "W"];
+
+const markerBody = (seed: string, marker: string, body: RegExp): string | null => {
+  const start = seed.indexOf(marker);
+  if (start < 0) return null;
+  return body.exec(seed.slice(start + marker.length))?.[0] ?? "";
+};
+
+/**
+ * The one test-seed hook (C3/20). It sets the day clock's sheets, skulls, kingdoms and items from
+ * the markers in a seed string, at the start of a game (`initPlayState`) or, through the host's
+ * test-only door, while one runs. CU/10's `~test-corruption:` and CU/13's items, hit points and gold
+ * are read here, not beside it. A seed with no marker changes nothing.
+ */
+export const applyTestSeed = (play: PlayState, seed: string): void => {
   const clock = ensureClock(play);
   const merge = (heroId: string, change: Partial<ReturnType<typeof heroSheet>>) =>
     setHeroSheet(play, heroId, { ...heroSheet(clock, heroId), ...change });
+  for (const [heroId, corruptions] of corruptionsFromTestSeed(seed)) {
+    merge(heroId, { corruptions });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_VIRTUES, /^\d$/)) {
+    merge(heroId, { helpingVirtues: Number(value) });
+  }
   for (const [heroId, value] of testMarker(seed, TEST_ITEMS, /^[\w-]+(\+[\w-]+)*$/)) {
     merge(heroId, { items: value.split("+") });
   }
@@ -208,16 +269,40 @@ const applyHeroTestSeeds = (play: PlayState, seed: string): void => {
   for (const [heroId, value] of testMarker(seed, TEST_GOLD, /^\d+$/)) {
     merge(heroId, { gold: Number(value) });
   }
-  for (const [heroId, value] of testMarker(seed, TEST_VIRTUES, /^[\w-]+(\+[\w-]+)*$/)) {
+  for (const [heroId, value] of testMarker(seed, TEST_VIRTUE_IDS, SHAPE_IDS)) {
     merge(heroId, { virtues: value.split("+") });
   }
   for (const [spaceId, value] of testMarker(seed, TEST_SKULLS, /^\d$/)) {
     if (!play.content.board.spaceById.get(spaceId)?.building) {
-      throw new Error(
-        `The test seed marker ${TEST_SKULLS} names "${spaceId}", which is no building.`,
-      );
+      throw new Error(`The test skull seed names "${spaceId}", which is not a building.`);
     }
     setBuildingSkulls(play, spaceId, Number(value));
+  }
+  const kingdoms = markerBody(seed, TEST_KINGDOM, /^[A-Z+]*/);
+  if (kingdoms !== null) {
+    const ids = kingdoms.split("+").filter((id) => id.length > 0);
+    const bad = ids.find((id) => !KINGDOM_IDS.includes(id));
+    if (bad || ids.length === 0) {
+      throw new Error(`The test kingdom seed needs kingdoms from N, E, S, W, got "${bad ?? ""}".`);
+    }
+    clock.seedKingdoms = ids as KingdomId[];
+  }
+  const effects = markerBody(seed, TEST_EFFECT, /^[a-z+-]*/);
+  if (effects !== null) {
+    for (const name of effects.split("+")) {
+      if (name === "cleanse") {
+        if (!clock.effects.includes("+1 day")) clock.effects.push("+1 day");
+      } else if (name === "quest-won") {
+        markQuestWon(play);
+      } else {
+        throw new Error(`The test effect seed knows cleanse and quest-won, got "${name}".`);
+      }
+    }
+  }
+  const line = markerBody(seed, TEST_EFFECTS_LINE, /^[\w.-]*/);
+  if (line !== null) {
+    if (line === "") throw new Error("The test effects-line seed needs a line id.");
+    clock.effectsLine = line;
   }
 };
 
@@ -265,10 +350,7 @@ export const initPlayState = (seed: string, content: PlayContent): PlayState => 
     booted: true,
     childInput: null,
   };
-  for (const [heroId, corruptions] of corruptionsFromTestSeed(seed)) {
-    setHeroSheet(play, heroId, { helpingVirtues: 0, corruptions });
-  }
-  applyHeroTestSeeds(play, seed);
+  applyTestSeed(play, seed);
   return play;
 };
 

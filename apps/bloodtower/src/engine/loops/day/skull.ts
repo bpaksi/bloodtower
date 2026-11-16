@@ -34,8 +34,12 @@ export const offerSkullPlacement = (
   ctx: { offerPrompt: (promptId: string, actionId: string) => void },
 ): void => {
   const play = playState();
+  // When the drop's kingdom is known, only that kingdom's standing buildings are offered (DEC-092);
+  // a press on another is refused by `applySkullRecord` anyway.
+  const expected = ensureClock(play).expectKingdom;
   for (const space of play.content.board.spaces) {
     if (!space.building || isFallen(play, space.id)) continue;
+    if (expected && space.kingdom !== expected) continue;
     offerBuilding(day, space.id, ctx);
   }
   const insideId = skullRecordPromptId(day, SKULL_STAYED_INSIDE_TARGET);

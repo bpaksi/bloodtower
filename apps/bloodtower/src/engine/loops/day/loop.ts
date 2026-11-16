@@ -10,12 +10,14 @@ import {
   heroCount,
   noteNode,
   recordSkippedDrop,
+  takeSeedKingdom,
 } from "./clock.ts";
 import { requestMoveRollCue } from "./cues.ts";
 import { applyRegroupQueue, regroupQueue } from "./regroup.ts";
 import { rollDayMoves } from "./roll.ts";
 import { dropsThisNight, kingdomFromD4 } from "./rules.ts";
 import { offerSkullPlacement, simulateSkullDrop } from "./skull.ts";
+import { type EffectsWait, effectsWaitFor } from "./wait.ts";
 
 export type DayPhase =
   | "regroup"
@@ -24,6 +26,7 @@ export type DayPhase =
   | "skull-prompt"
   | "skull-place"
   | "skull-sim"
+  | "effects"
   | "check"
   | "done";
 
@@ -35,6 +38,13 @@ export type DayLocal = {
   /** Set by a skull-record press. The body spends it and asks for the next skull. */
   skullPlaced: boolean;
   skullsLeft: number;
+  /**
+   * The effects panel's wait, as data (C3/20): the engine names it and never times it. The host
+   * runs the timer and the audio-end event and answers with `wait-end`. Absent on an old save.
+   */
+  wait?: EffectsWait | null;
+  /** Set by `wait-end`. The body then leaves the wait for the chapter exit check. */
+  waitDone?: boolean;
 };
 
 export type DayResult = {
@@ -43,6 +53,8 @@ export type DayResult = {
 };
 
 const freshLocal = (): DayLocal => ({
+  wait: null,
+  waitDone: false,
   phase: "regroup",
   groupIndex: 0,
   awaitingPress: false,
@@ -113,6 +125,7 @@ const simulateDrops = (
   clock.pendingKingdoms = [];
   clock.expectKingdom = null;
   const drawKingdom = () =>
+    takeSeedKingdom(clock) ??
     kingdomFromD4(nextPlayRng(shell.seed, play).roll(clock.tuning.kingdomDie).total);
   let landed = 0;
   for (let i = 0; i < count; i++) {
@@ -157,6 +170,11 @@ const startClose = (local: DayLocal, effects: LoopContext<DayLocal>["effects"]):
   noteNode(play, ".11");
   clock.pendingKingdoms = [];
   clock.expectKingdom = null;
+  const seeded = takeSeedKingdom(clock);
+  if (seeded) {
+    clock.pendingKingdoms = [seeded];
+    clock.expectKingdom = seeded;
+  }
   return {
     ...local,
     phase: "skull-prompt",
@@ -305,6 +323,31 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
       } else {
         return { local, passComplete: false };
       }
+    }
+
+    // The effects panel (DEC-699): shown when the night had an effect. The engine only names the
+    // wait; it moves on when the host answers `wait-end` (audio ended, or the 4 s were up).
+    if (
+      local.phase === "check" &&
+      !local.waitDone &&
+      clock.effects.length > 0 &&
+      !(clock.outcome?.lost === true && clock.outcome.reason === "corruption")
+    ) {
+      for (const drop of clock.nightDrops) {
+        const name = play.content.board.spaceById.get(drop.spaceId)?.name ?? drop.spaceId;
+        clock.effects.push(`A skull lands on ${name}.`);
+      }
+      local = {
+        ...local,
+        phase: "effects",
+        awaitingPress: false,
+        wait: effectsWaitFor(play.dayNumber, clock.effectsLine ?? null),
+      };
+    }
+
+    if (local.phase === "effects") {
+      if (!local.waitDone) return { local, passComplete: false };
+      local = { ...local, phase: "check", wait: null };
     }
 
     if (local.phase === "check") {

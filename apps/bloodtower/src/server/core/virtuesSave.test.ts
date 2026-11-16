@@ -9,7 +9,7 @@ import { parseShellCheckpoint, shellCheckpointFromState } from "./shellCheckpoin
 
 // CU/14 survival invariant: virtues are recomputed from the game, and a pick made this turn stays made.
 describe("a save and turn-start virtues", () => {
-  const SEED = "cu-14-save~test-virtues:hero-a=infused+fortunate~test-skulls:N-egans-end=2";
+  const SEED = "cu-14-save~test-virtue-ids:hero-a=infused+fortunate~test-skulls:N-egans-end=2";
   const local = (picks: GroupTurnLocal["virtue"]): GroupTurnLocal => ({
     groupId: "hero-a",
     movesLeft: 2,
