@@ -147,6 +147,7 @@ test("CU/05 Back undoes a tap, repeats, and is gone at the turn start (EV-05, EV
   const session = await hostFor(testInfo, "cu05-back");
   const { context, device } = await openTable(browser, testInfo, session);
   try {
+    await device.setViewportSize({ width: 768, height: 1024 });
     const start = await readStatus(device);
     const moves = Number(start.moves);
     expect(moves).toBeGreaterThanOrEqual(2);
@@ -185,6 +186,7 @@ test("CU/05 Fix my position lives in Game board setup and moves the group for fr
   const session = await hostFor(testInfo, "cu05-fix");
   const { context, board, device } = await openTable(browser, testInfo, session);
   try {
+    await device.setViewportSize({ width: 768, height: 1024 });
     const start = await readStatus(device);
     const target = spaces.spaces.find(
       (space) =>
@@ -206,8 +208,7 @@ test("CU/05 Fix my position lives in Game board setup and moves the group for fr
       body: await device.screenshot(),
       contentType: "image/png",
     });
-    await panel.locator("[data-fix-position-set]").click();
-    await expect(board.locator("[data-picked]")).toContainText("'s group is set on");
+    await expect(panel.getByText("Set it")).toHaveCount(0);
     await device.getByRole("button", { name: "Done", exact: true }).click();
     await expect.poll(async () => (await readStatus(device)).space).toBe(target?.id);
     expect((await readStatus(device)).moves).toBe(start.moves);

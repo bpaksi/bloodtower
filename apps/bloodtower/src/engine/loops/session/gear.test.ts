@@ -185,4 +185,39 @@ describe("Fix my position (CU/05)", () => {
     applyFixPosition(b.state, event);
     expect(b.group.spaceId).toBe(a.group.spaceId);
   });
+
+  it("EV-30: refused in a battle, a scene, a quest; accepted between loops", () => {
+    const { state, group, hero, play } = seated();
+    const to = play.content.board.spaces[2]!.id;
+    const pick = {
+      deviceId: "d",
+      action: "pick" as const,
+      item: "fix-position",
+      heroId: hero,
+      pick: to,
+    };
+    const frame = (loopId: string) =>
+      ({ ...state, loops: { ...state.loops, stack: [{ loopId, local: {} }] } }) as never;
+    for (const loopId of ["encounter", "quest", "scene", "battle"]) {
+      const refused = applyFixPosition(frame(loopId), pick);
+      expect(refused.error?.code, loopId).toBe("fix-position-not-now");
+    }
+    expect(group.spaceId).not.toBe(to);
+    expect(applyFixPosition(frame("day"), pick).error).toBeUndefined();
+    expect(group.spaceId).toBe(to);
+  });
+
+  it("a stray device with no panel of its own is refused", () => {
+    const { state, hero, play } = seated();
+    const open = applyGear(state, { deviceId: "a", action: "open", item: "game-board-setup" });
+    const to = play.content.board.spaces[2]!.id;
+    const refused = applyFixPosition(open, {
+      deviceId: "b",
+      action: "pick",
+      item: "fix-position",
+      heroId: hero,
+      pick: to,
+    });
+    expect(refused.error?.code).toBe("fix-position-not-now");
+  });
 });

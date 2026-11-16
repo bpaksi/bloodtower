@@ -195,23 +195,24 @@ const FIX_POSITION_NOT_NOW = "Only on the move map or between loops.";
  * Fix my position (CU/05, Q5.3): pick whose group and where it really stands. One press sends the
  * correction; it costs no move and starts nothing. Greyed with its reason in a battle or a scene.
  */
+type FixPick = { open: boolean; heroId: string; spaceId: string };
+
 function FixPositionControl({
   gear,
   live,
-  onAct,
+  pick,
+  setPick,
 }: {
   gear: GearView;
   live: boolean;
-  onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
+  pick: FixPick;
+  setPick: (next: FixPick) => void;
 }) {
   const fix = gear.fixPosition;
-  const [open, setOpen] = useState(false);
-  const [heroId, setHeroId] = useState("");
-  const [spaceId, setSpaceId] = useState("");
   if (!fix || fix.groups.length === 0) return null;
   const blocked = fix.refusal !== null;
-  const group = heroId || fix.groups[0]?.heroId || "";
-  const space = spaceId || fix.spaces[0]?.id || "";
+  const group = pick.heroId || fix.groups[0]?.heroId || "";
+  const space = pick.spaceId || fix.spaces[0]?.id || "";
   return (
     <div className="mt-6 flex flex-col gap-3" data-fix-position="">
       <button
@@ -219,12 +220,12 @@ function FixPositionControl({
         className="bt-secondary"
         data-fix-position-open=""
         disabled={!live || blocked}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => setPick({ ...pick, open: !pick.open })}
       >
         Fix my position
       </button>
       {blocked ? <p data-copy="fix-position-not-now">{FIX_POSITION_NOT_NOW}</p> : null}
-      {open && !blocked ? (
+      {pick.open && !blocked ? (
         <>
           <p data-copy="fix-position-help">{FIX_POSITION_HELP}</p>
           <label>
@@ -233,7 +234,7 @@ function FixPositionControl({
               data-fix-position-group=""
               value={group}
               disabled={!live}
-              onChange={(event) => setHeroId(event.target.value)}
+              onChange={(event) => setPick({ ...pick, heroId: event.target.value })}
             >
               {fix.groups.map((row) => (
                 <option key={row.heroId} value={row.heroId}>
@@ -248,7 +249,7 @@ function FixPositionControl({
               data-fix-position-space=""
               value={space}
               disabled={!live}
-              onChange={(event) => setSpaceId(event.target.value)}
+              onChange={(event) => setPick({ ...pick, spaceId: event.target.value })}
             >
               {fix.spaces.map((row) => (
                 <option key={row.id} value={row.id}>
@@ -257,17 +258,6 @@ function FixPositionControl({
               ))}
             </select>
           </label>
-          <button
-            type="button"
-            className="bt-secondary"
-            data-fix-position-set=""
-            disabled={!live}
-            onClick={() =>
-              onAct("gear", "pick", { item: "fix-position", heroId: group, pick: space })
-            }
-          >
-            Set it
-          </button>
         </>
       ) : null}
     </div>
@@ -283,6 +273,7 @@ function GearDevicePanel({
   live: boolean;
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
 }) {
+  const [fixPick, setFixPick] = useState<FixPick>({ open: false, heroId: "", spaceId: "" });
   if (gear.panel === "split") return <SplitDevicePanel gear={gear} live={live} onAct={onAct} />;
   const send = (actionId: string, args?: Record<string, unknown>) => onAct("gear", actionId, args);
   const stepBack = Boolean(gear.card || gear.firstHero);
@@ -296,7 +287,7 @@ function GearDevicePanel({
               <li key={step}>{step}</li>
             ))}
           </ol>
-          <FixPositionControl gear={gear} live={live} onAct={onAct} />
+          <FixPositionControl gear={gear} live={live} pick={fixPick} setPick={setFixPick} />
           {gear.picked ? <p data-picked={gear.picked}>{gear.picked}</p> : null}
         </>
       ) : null}
@@ -423,7 +414,18 @@ function GearDevicePanel({
           type="button"
           className="bt-primary mt-6"
           disabled={!live}
-          onClick={() => send("done")}
+          onClick={() => {
+            // Done carries a pending Fix my position pick first (CU/05 Copy: no extra button).
+            const fix = gear.fixPosition;
+            if (gear.panel === "game-board-setup" && fixPick.open && fix && !fix.refusal) {
+              send("pick", {
+                item: "fix-position",
+                heroId: fixPick.heroId || fix.groups[0]?.heroId || "",
+                pick: fixPick.spaceId || fix.spaces[0]?.id || "",
+              });
+            }
+            send("done");
+          }}
         >
           Done
         </button>

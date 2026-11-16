@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { neighborsOf } from "../chapter/board.ts";
 import { initPlayState } from "../chapter/playState.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
-import { bindShellState, clearShellState } from "../session/shellRef.ts";
+import { bindShellState, clearShellState, takePendingTowerCommands } from "../session/shellRef.ts";
 import { initialShellState } from "../session/state.ts";
 import {
   type ArrivalProbe,
@@ -225,5 +225,34 @@ describe("Back on the move map (CU/05)", () => {
     expect(offers.map((o) => o.actionId)).toContain("end-turn");
     void path;
     expect(groupTurnLoop.exit(held, {} as never)).toBe(false);
+  });
+
+  it("EV-29: an encounter, event, foe or quest arrival each close the window", () => {
+    for (const kind of ["encounter", "event", "foe", "quest"]) {
+      const { group, path, local, walk, back } = chain(3);
+      const probe: ArrivalProbe = (_play, _group, spaceId) => {
+        void kind;
+        return spaceId === path[1];
+      };
+      const l = walk(local, path[1]!, probe);
+      expect(l.undo, kind).toEqual([]);
+      expect(back(l).movesLeft, kind).toBe(l.movesLeft);
+      expect(group.spaceId, kind).toBe(path[1]);
+    }
+    clearShellState();
+  });
+
+  it("EV-11, EV-23, EV-25: a tap and Back send no tower command and replay to the same stream", () => {
+    const run = () => {
+      const { play, path, local, walk, back } = chain(3);
+      const l = back(walk(walk(local, path[1]!, never), path[2]!, never));
+      expect(takePendingTowerCommands()).toEqual([]);
+      clearShellState();
+      return { seq: play.rngSeq, moves: l.movesLeft, snap: JSON.stringify(play.groups) };
+    };
+    const a = run();
+    const b = run();
+    expect(a).toEqual(b);
+    expect(a.seq).toBe(initPlayState("back-test", PROVING_GROUNDS_PLAY).rngSeq);
   });
 });
