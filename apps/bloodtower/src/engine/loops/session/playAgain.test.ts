@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
+import { openDayWait } from "../day/wait.ts";
 import { enterWithoutEvents } from "./enterKit.ts";
 import { beginNewGame, rateOpenGame } from "./hub.ts";
 import { TEST_STORY } from "./pack.ts";
@@ -16,6 +17,13 @@ const press = (promptId: string, actionId: string, deviceId = "ipad-0"): PressEv
   promptId,
   actionId,
 });
+
+/** The iPad that holds a hero of the event's group: only it may pick (DEC-019, C3/12). */
+const pickerOf = (state: ShellState, promptId: string): string => {
+  const groupId = promptId.startsWith("event-choice--") ? promptId.split("--")[1] : undefined;
+  const hero = state.play?.groups.find((row) => row.id === groupId)?.heroIds[0];
+  return (hero && state.holdings[hero]) || "ipad-0";
+};
 
 const step = (state: ShellState, ...events: Parameters<typeof stepShell>[1][]) => {
   let cursor = state;
@@ -78,10 +86,17 @@ const drive = (start: ShellState, stop: (state: ShellState) => boolean) => {
   let walkedThisTurn = false;
   let enteredThisTurn = false;
   for (let index = 0; index < 400 && !stop(state); index += 1) {
+    const wait = openDayWait(state.loops.stack);
+    if (wait) {
+      // The host's part: an event's result wait ended (C3/12).
+      state = step(state, { kind: "wait-end", v: 1, waitId: wait.id, cause: "timeout" });
+      continue;
+    }
     const open = openOffers(state);
     const find = (actionId: string) => open.find((offer) => offer.actionId === actionId);
     const pick =
       find("continue") ??
+      find("choose") ??
       find("record") ??
       find("done") ??
       find("leave") ??
@@ -101,7 +116,7 @@ const drive = (start: ShellState, stop: (state: ShellState) => boolean) => {
       walkedThisTurn = false;
       enteredThisTurn = false;
     }
-    state = step(state, press(pick.promptId, pick.actionId));
+    state = step(state, press(pick.promptId, pick.actionId, pickerOf(state, pick.promptId)));
   }
   if (!stop(state)) {
     const open = openOffers(state).map((offer) => `${offer.promptId}/${offer.actionId}`);

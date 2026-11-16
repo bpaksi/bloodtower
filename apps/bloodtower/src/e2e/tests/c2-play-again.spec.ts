@@ -199,6 +199,7 @@ const playUntilDay = async (pad: Page, untilDay: number) => {
     const find = (actionId: string) => open.find((row) => row.actionId === actionId);
     const pick =
       find("continue") ??
+      find("choose") ??
       find("record") ??
       find("done") ??
       find("leave") ??

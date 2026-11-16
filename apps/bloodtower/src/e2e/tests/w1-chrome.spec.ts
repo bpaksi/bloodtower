@@ -1045,8 +1045,9 @@ test("gear actions open on the Story board and pause the game", async ({ browser
     const party = await openPanel("current-party");
     const heroA = party.locator('[data-hero="hero-a"]');
     await expect(heroA.locator("[data-name]")).toHaveText("Hero A");
-    await expect(heroA.locator("[data-hp]")).toContainText("unavailable");
-    await expect(heroA.locator("[data-gold]")).toContainText("unavailable");
+    // A seated hero has the card's hit points and a share of the starting purse (C3/12).
+    await expect(heroA.locator("[data-hp]")).toContainText(/HP \d+\/\d+/);
+    await expect(heroA.locator("[data-gold]")).toContainText(/Gold \d+/);
     // CU/13: the count is known, so nothing held reads "0 held", not blank. HP and gold are not.
     await expect(heroA.locator("[data-items]")).toContainText("Items 0 held");
     await expect(heroA.locator("[data-corruptions]")).toContainText("unavailable");

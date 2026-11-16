@@ -97,6 +97,11 @@ const harness = () => {
       log,
       onChange: () => {},
       graceMs: 10,
+      // An event's result wait (C3/12) ends on the next tick, so these tests press through it.
+      waitTimer: (fire) => {
+        const handle = setTimeout(fire, 0);
+        return () => clearTimeout(handle);
+      },
     });
     await session.whenIdle();
     return { session, tower };
@@ -199,9 +204,31 @@ const press = async (table: Table, prefix: string, actionId: string) => {
 /** The first sensible press: Continue, Done, Leave, End turn. Never a walk or a record. */
 const nextPress = (table: Table) => {
   const open = table.open();
-  return ["continue", "done", "leave", "end-turn"]
+  return ["continue", "choose", "done", "leave", "end-turn"]
     .map((actionId) => open.find((action) => action.actionId === actionId))
     .find((action) => action !== undefined);
+};
+
+/**
+ * No button for the table's own iPad: an event is up. A hero's own iPad picks (DEC-019, C3/12): after
+ * a restart the table's new iPad does not hold them, so the holder presses. A running result wait
+ * is given a tick to end. Throws when nothing at all can move.
+ */
+const settleEvent = async (table: Table): Promise<void> => {
+  const state = table.session.state();
+  const offer = state.offered.find((row) => row.open && row.actionId === "choose");
+  if (offer) {
+    const groupId = offer.promptId.split("--")[1];
+    const lead = state.play?.groups.find((row) => row.id === groupId)?.heroIds[0];
+    const holder = lead ? state.holdings[lead] : null;
+    if (!holder) throw new Error("An event waits for a pick, but no iPad holds its heroes.");
+    table.session.act(holder, offer.promptId, offer.actionId, {});
+    await table.session.whenIdle();
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  await table.session.whenIdle();
+  if (!nextPress(table)) throw new Error("Nothing to press.");
 };
 
 /** Plays on until `drops` simulated skull drops were pressed past. Returns where each landed. */
@@ -209,7 +236,10 @@ const playDrops = async (table: Table, drops: number): Promise<string[]> => {
   const landed: string[] = [];
   for (let guard = 0; guard < 400 && landed.length < drops; guard += 1) {
     const pick = nextPress(table);
-    if (!pick) throw new Error("Nothing to press.");
+    if (!pick) {
+      await settleEvent(table);
+      continue;
+    }
     if (pick.promptId.startsWith("skull-sim-day-")) {
       const spot = table.session.state().play?.lastSkull?.spaceId;
       if (!spot) throw new Error("A simulated drop landed nowhere.");
@@ -229,7 +259,10 @@ const toSkullRecord = async (table: Table): Promise<string[]> => {
       .map((action) => action.promptId);
     if (records.length > 0) return records;
     const pick = nextPress(table);
-    if (!pick) throw new Error("Nothing to press before the skull record.");
+    if (!pick) {
+      await settleEvent(table);
+      continue;
+    }
     await table.act(pick.promptId, pick.actionId);
   }
   throw new Error("The skull record was never asked for.");

@@ -29,3 +29,24 @@ export const openEffectsWait = (stack: readonly LoopFrame[]): EffectsWait | null
   if (!local || local.phase !== "effects" || local.waitDone || !local.wait) return null;
   return local.wait;
 };
+
+/** The event scene's result step waits the same way (C3/12): one id per day and group. */
+export const eventWaitFor = (day: number, groupId: string, lineId: string | null): EffectsWait => ({
+  id: `event-day-${day}-${groupId}`,
+  maxMs: AUTO_ADVANCE_MS,
+  lineId,
+});
+
+/** The event result wait the day loop is in now and has not finished, or null. */
+export const openEventWait = (stack: readonly LoopFrame[]): EffectsWait | null => {
+  const frame = stack.find((row) => row.loopId === "day");
+  const local = frame?.local as
+    | { phase?: string; wait?: EffectsWait | null; waitDone?: boolean }
+    | undefined;
+  if (!local || local.phase !== "event" || local.waitDone || !local.wait) return null;
+  return local.wait;
+};
+
+/** Whichever wait the day loop is in: the effects panel's or an event's. The host runs it. */
+export const openDayWait = (stack: readonly LoopFrame[]): EffectsWait | null =>
+  openEffectsWait(stack) ?? openEventWait(stack);

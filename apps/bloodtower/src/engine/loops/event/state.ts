@@ -29,6 +29,17 @@ export type EventOption = { id: OptionId; enabled: boolean };
 
 export type EventStatus = "open" | "resolved" | "battle";
 
+/** What the scene shows once the event is settled (C3/12). Structured; the board words it. */
+export type EventResult =
+  | { kind: "quiet" }
+  | { kind: "windfall"; gold: number }
+  | { kind: "saved"; counterHeroId: string }
+  | { kind: "rumour" }
+  | { kind: "hit-points"; amount: number }
+  | { kind: "lose-turn" }
+  | { kind: "went-around"; amount: number }
+  | { kind: "paid"; gold: number };
+
 export type OpenEvent = {
   groupId: string;
   day: number;
@@ -38,15 +49,28 @@ export type OpenEvent = {
   status: EventStatus;
   /** What happened, in order, for the day's effects panel. */
   log: string[];
+  /** Set when the event settles (C3/12). Absent on a save from before the scene. */
+  result?: EventResult | null;
+  /** The narration line whose audio end ends the result step, or null for the 4 s timer. */
+  line?: string | null;
 };
 
-export type HeroLedger = { role: string; hitPoints: number; gold: number };
+/** Hit points and gold are null when the game does not know them: never shown or spent as 0. */
+export type HeroLedger = { role: string; hitPoints: number | null; gold: number | null };
+
+/** TEST ONLY (C3/12): the next draw is this event, or none at all. Consumed by one draw. */
+export type ForcedEvent =
+  | "none"
+  | { type: EventType; hazard: HazardId | null; offer: "rumour" | "trick" | null };
 
 type EventState = {
   open: OpenEvent | null;
   heroes: Record<string, HeroLedger>;
   /** Groups that lose their next turn (a hazard's second cost). */
   lostTurns: string[];
+  forced?: ForcedEvent | null;
+  /** TEST ONLY: the narration line the next drawn event carries. */
+  forcedLine?: string | null;
 };
 
 const states = new WeakMap<PlayState, EventState>();
@@ -60,8 +84,10 @@ export const eventState = (play: PlayState): EventState => {
 };
 
 export const setHeroLedger = (play: PlayState, heroId: string, ledger: HeroLedger): void => {
-  if (!Number.isInteger(ledger.hitPoints) || !Number.isInteger(ledger.gold) || ledger.gold < 0) {
-    throw new Error("Hit points and gold are whole numbers; gold is zero or more.");
+  const goodHp = ledger.hitPoints === null || Number.isInteger(ledger.hitPoints);
+  const goodGold = ledger.gold === null || (Number.isInteger(ledger.gold) && ledger.gold >= 0);
+  if (!goodHp || !goodGold) {
+    throw new Error("Hit points and gold are whole numbers (gold zero or more), or unknown.");
   }
   eventState(play).heroes[heroId] = { ...ledger };
 };
@@ -130,8 +156,20 @@ export const eventForGroup = (
   if (kept?.status === "open" && kept.groupId === groupId && kept.day === play.dayNumber)
     return kept;
   if (!eventEligible(play, groupId)) return null;
-  const drawn = drawEvent(seed, play.dayNumber, groupId, tuning, length);
+  const forced = state.forced ?? null;
+  if (forced === "none") return null;
+  state.forced = null;
+  const drawn = forced
+    ? {
+        groupId,
+        day: play.dayNumber,
+        ...forced,
+        status: "open" as const,
+        log: [],
+      }
+    : drawEvent(seed, play.dayNumber, groupId, tuning, length);
   if (!drawn) return null;
+  if (state.forcedLine) drawn.line = state.forcedLine;
   state.open = drawn;
   return drawn;
 };

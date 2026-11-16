@@ -199,8 +199,10 @@ test.describe("CU/13 the party items panel and the use-item flow", () => {
       await expect(heroRow(board, "hero-a")).toContainText("Items 1 held");
       await expect(heroRow(board, "hero-b")).toContainText("Items 2 held");
       await expect(heroRow(board, "hero-c")).toContainText("Items 0 held");
-      await expect(heroRow(board, "hero-d")).toContainText("HP unavailable");
-      await expect(heroRow(board, "hero-d")).toContainText("Gold unavailable");
+      // A seated hero now has the card's hit points and a share of the purse (C3/12); a hero who
+      // is not seated has neither, and that reads unavailable (CU/13 EV-13).
+      await expect(heroRow(board, "hero-f")).toContainText("HP unavailable");
+      await expect(heroRow(board, "hero-f")).toContainText("Gold unavailable");
       await expect(party).not.toContainText("Healing potion");
       await expect(party.locator("button")).toHaveCount(0);
       await closePanel(pad, board);

@@ -1,6 +1,16 @@
 import type { LoopContext, LoopDefinition } from "../../loop/types.ts";
 import { nextPlayRng, playState } from "../chapter/playState.ts";
-import { eventForGroup, eventTuningFrom } from "../event/index.ts";
+import {
+  chooseOption,
+  commitLedger,
+  eventForGroup,
+  eventOptions,
+  eventState,
+  eventTuningFrom,
+  loadLedger,
+  type OptionId,
+  settleEvent,
+} from "../event/index.ts";
 import { skullNoBuildingEffect } from "../session/effects.ts";
 import { recordOffer, requestCheckpoint, shellState } from "../session/shellRef.ts";
 import {
@@ -17,7 +27,7 @@ import { applyRegroupQueue, regroupQueue } from "./regroup.ts";
 import { rollDayMoves } from "./roll.ts";
 import { dropsThisNight, kingdomFromD4 } from "./rules.ts";
 import { offerSkullPlacement, simulateSkullDrop } from "./skull.ts";
-import { type EffectsWait, effectsWaitFor } from "./wait.ts";
+import { type EffectsWait, effectsWaitFor, eventWaitFor } from "./wait.ts";
 
 export type DayPhase =
   | "regroup"
@@ -27,6 +37,7 @@ export type DayPhase =
   | "skull-place"
   | "skull-sim"
   | "effects"
+  | "event"
   | "check"
   | "done";
 
@@ -45,6 +56,28 @@ export type DayLocal = {
   wait?: EffectsWait | null;
   /** Set by `wait-end`. The body then leaves the wait for the chapter exit check. */
   waitDone?: boolean;
+  /**
+   * The event scene after a group's turn (C3/12): `choose` while the present heroes pick (or
+   * before a no-choice event settles), `result` while its result waits. `eventGroup` is the group.
+   */
+  eventStage?: "choose" | "result";
+  eventGroup?: string | null;
+  /** The option a press picked. The body applies it once and clears it. */
+  eventPicked?: OptionId | null;
+};
+
+/** Prompt id of one event choice (C3/12). The choice list is the same for any event. */
+export const EVENT_CHOICE_PREFIX = "event-choice--";
+export const eventChoicePromptId = (groupId: string, optionId: OptionId): string =>
+  `${EVENT_CHOICE_PREFIX}${groupId}--${optionId}`;
+
+export const parseEventChoicePrompt = (
+  promptId: string,
+): { groupId: string; optionId: OptionId } | null => {
+  if (!promptId.startsWith(EVENT_CHOICE_PREFIX)) return null;
+  const [groupId, optionId] = promptId.slice(EVENT_CHOICE_PREFIX.length).split("--");
+  if (!groupId || !optionId) return null;
+  return { groupId, optionId: optionId as OptionId };
 };
 
 export type DayResult = {
@@ -69,6 +102,30 @@ const heroNameOf = (heroId: string): string => {
     if (hero) return hero.name;
   }
   return heroId;
+};
+
+const heroRoleOf = (heroId: string): string => {
+  for (const story of shellState().stories) {
+    const hero = story.heroes.find((row) => row.id === heroId);
+    if (hero) return hero.card?.role ?? "";
+  }
+  return "";
+};
+
+/** The event scene opens for a group that just finished its turn (C3/12). */
+const enterEvent = (local: DayLocal, groupId: string): DayLocal => {
+  loadLedger(playState(), groupId, heroRoleOf);
+  return {
+    ...local,
+    phase: "event",
+    eventStage: "choose",
+    eventGroup: groupId,
+    eventPicked: null,
+    wait: null,
+    waitDone: false,
+    awaitingChild: false,
+    awaitingPress: false,
+  };
 };
 
 /**
@@ -185,6 +242,75 @@ const startClose = (local: DayLocal, effects: LoopContext<DayLocal>["effects"]):
   };
 };
 
+/**
+ * The event scene (C3/12). A choice waits for a press (the present heroes' iPads, first press
+ * wins); an event with no choice settles at once. Either way the effect is applied here, once, and
+ * the result step then waits like the effects panel: the host answers `wait-end` (audio ended, or
+ * the 4 s were up). A Continue replays the same presses and `wait-end`, so nothing applies twice.
+ */
+const eventScene = (
+  local: DayLocal,
+  ctx: LoopContext<DayLocal>,
+): ReturnType<NonNullable<typeof dayLoop.body>> => {
+  const play = playState();
+  const shell = shellState();
+  const tuning = eventTuningFrom();
+  const groupId = local.eventGroup;
+  const open = eventState(play).open;
+  if (!groupId || !open || open.groupId !== groupId) {
+    throw new Error("The day is at an event, but no event is open for the group.");
+  }
+
+  if (open.status === "open") {
+    const picked = local.eventPicked ?? null;
+    if (picked === null) {
+      const options = eventOptions(play, tuning);
+      if (options.length > 0) {
+        for (const option of options) {
+          if (!option.enabled) continue;
+          const promptId = eventChoicePromptId(groupId, option.id);
+          ctx.offerPrompt(promptId, "choose");
+          recordOffer(promptId, "choose");
+        }
+        return { local: { ...local, eventStage: "choose" }, passComplete: false };
+      }
+      settleEvent(play, tuning);
+    } else {
+      chooseOption(play, tuning, picked);
+    }
+    commitLedger(play, groupId);
+    const gameId = shell.activeGameId ?? shell.autosave?.gameId;
+    if (gameId) requestCheckpoint(gameId, play.dayNumber);
+  }
+
+  if (open.status === "battle") {
+    throw new Error("A fight in an event waits for the battle loop, which is not built yet.");
+  }
+
+  if (!local.wait) {
+    local = {
+      ...local,
+      eventStage: "result",
+      eventPicked: null,
+      wait: eventWaitFor(play.dayNumber, groupId, open.line ?? null),
+      waitDone: false,
+    };
+  }
+  if (!local.waitDone) return { local, passComplete: false };
+  return dayLoop.body(
+    {
+      ...local,
+      phase: "groups",
+      eventStage: undefined,
+      eventGroup: null,
+      eventPicked: null,
+      wait: null,
+      waitDone: false,
+    },
+    ctx,
+  );
+};
+
 const lostOf = (outcome: DayLoss): DayResult["lost"] =>
   outcome.lost ? { reason: outcome.reason } : null;
 
@@ -244,19 +370,33 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
       if (local.awaitingChild) {
         const finished = ctx.getParentResult() as { groupId?: string } | undefined;
         if (!finished?.groupId) return { local, passComplete: false };
-        // MEC-034 .9: a group that ended in the wild or at a skulled building draws (MEC-072).
-        if (eventForGroup(play, shell.seed, finished.groupId, eventTuningFrom()))
-          noteNode(play, ".9");
         local = {
           ...local,
           groupIndex: local.groupIndex + 1,
           awaitingChild: false,
           awaitingPress: false,
         };
+        // MEC-034 .9: a group that ended in the wild or at a skulled building draws (MEC-072).
+        if (eventForGroup(play, shell.seed, finished.groupId, eventTuningFrom())) {
+          noteNode(play, ".9");
+          local = enterEvent(local, finished.groupId);
+        }
+      }
+
+      // A hazard's second cost: the group loses its next turn (DEC-027). It is skipped once.
+      const lost = eventState(play).lostTurns;
+      while (local.phase === "groups") {
+        const next = play.turnOrder[local.groupIndex];
+        const at = next ? lost.indexOf(next) : -1;
+        if (!next || at < 0) break;
+        lost.splice(at, 1);
+        local = { ...local, groupIndex: local.groupIndex + 1 };
       }
 
       const groupId = play.turnOrder[local.groupIndex];
-      if (local.groupIndex >= play.turnOrder.length || !groupId) {
+      if (local.phase !== "groups") {
+        // The event scene is up: its block below runs in this pass.
+      } else if (local.groupIndex >= play.turnOrder.length || !groupId) {
         local = startClose(local, ctx.effects);
       } else {
         const moves = play.dayRolls[groupId] ?? clock.tuning.moveFloor;
@@ -267,6 +407,8 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
         return { local: { ...local, awaitingChild: true }, passComplete: false };
       }
     }
+
+    if (local.phase === "event") return eventScene(local, ctx);
 
     // The tower went on without mid-night (Go on without): the rest of the night is drawn.
     if (
