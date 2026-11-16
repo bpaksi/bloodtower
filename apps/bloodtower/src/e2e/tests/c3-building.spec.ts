@@ -31,6 +31,20 @@ const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-st
 
 type HookWindow = { __btSessionSocket?: WebSocket };
 
+/** Counts every frame the iPad sends, so help can be shown to send nothing (EV-14). */
+const installSendCounter = async (page: Page) => {
+  await page.addInitScript(() => {
+    const send = WebSocket.prototype.send;
+    WebSocket.prototype.send = function (this: WebSocket, data) {
+      const win = window as unknown as { __btSent?: number };
+      win.__btSent = (win.__btSent ?? 0) + 1;
+      return send.call(this, data);
+    };
+  });
+};
+const sentCount = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __btSent?: number }).__btSent ?? 0);
+
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 
 const grantWakeLock = async (page: Page) => {
@@ -63,6 +77,8 @@ const startGame = async (
     databasePath?: string;
     /** CU/14: heroes stay in their own groups, and a second iPad holds the last hero. */
     apart?: boolean;
+    /** The building result's 4 s run on `session.waitClock` (EV-15 to EV-17). */
+    fakeWait?: boolean;
   },
 ) => {
   const apart = options.apart === true;
@@ -71,6 +87,7 @@ const startGame = async (
     databasePath: options.databasePath,
     lanHost: () => "192.0.2.10",
     seatTogether: !apart,
+    fakeWait: options.fakeWait,
   });
   const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
   const pad = await context.newPage();
@@ -78,6 +95,7 @@ const startGame = async (
   await board.setViewportSize(BOARD_SIZE);
   await board.goto("/board");
   await installSessionSocketHook(pad);
+  await installSendCounter(pad);
   await grantWakeLock(pad);
   await pad.goto(`/join?code=${session.host.joinCode}`);
   let pad2: Page | null = null;
@@ -385,6 +403,406 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       await expect(optionByLabel(pad2, "Cure")).not.toContainText("free");
     } finally {
       await closeAll(context2, restarted.host);
+    }
+  });
+});
+
+const HELP_LINE = "Choose what to do in this building, or Leave.";
+const FALLEN_LINE = "This building has fallen. No one can enter.";
+const TILES = "~test-tiles:hero-a=courage+mercy+wisdom+honor";
+
+const expectToolbar = async (page: Page) => {
+  const footer = page.locator("footer.bt-bar--bottom");
+  await expect(footer).toBeVisible();
+  await expect(footer).toBeInViewport();
+  const buttons = footer.locator("button");
+  await expect(buttons.first()).toHaveText("?");
+  await expect(buttons.last()).toHaveAttribute("data-action", "menu");
+  for (const end of [buttons.first(), buttons.last()]) {
+    const box = await end.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) continue;
+    const onTop = await page.evaluate(
+      ({ x, y }) => document.elementFromPoint(x, y)?.closest("footer.bt-bar--bottom") != null,
+      { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+    );
+    expect(onTop).toBe(true);
+  }
+};
+
+/** "?" then Close: the building-menu sheet, nothing sent, the same step after (EV-14). */
+const checkHelp = async (pad: Page, step: string) => {
+  const sentBefore = await sentCount(pad);
+  const paused = await deviceMain(pad).getAttribute("data-paused");
+  await pad.locator('footer.bt-bar--bottom [data-action="help"]').click();
+  const sheet = pad.locator("[data-help]");
+  await expect(sheet).toHaveAttribute("data-help-screen", "building-menu");
+  await expect(sheet.locator("p")).toHaveText(HELP_LINE);
+  await expect(deviceMain(pad)).toHaveAttribute("data-paused", paused ?? "false");
+  await sheet.getByRole("button", { name: "Close" }).click();
+  await expect(sheet).toHaveCount(0);
+  expect(await sentCount(pad)).toBe(sentBefore);
+  await expect(deviceMain(pad).locator(`[data-building="${step}"]`)).toBeVisible();
+};
+
+const stepIs = (pad: Page, step: string) => deviceMain(pad).locator(`[data-building="${step}"]`);
+const boardMoves = (board: Page) => board.locator("[data-building-board]");
+
+/** Shots for EV-05: the iPad portrait and the board, attached to the report. */
+const shoot = async (testInfo: TestInfo, name: string, pad: Page, board: Page) => {
+  await board.waitForTimeout(400);
+  await testInfo.attach(`${name}-ipad`, {
+    body: await pad.screenshot(),
+    contentType: "image/png",
+  });
+  await testInfo.attach(`${name}-board`, {
+    body: await board.screenshot(),
+    contentType: "image/png",
+  });
+};
+
+/** Close the host, start another on the same file, join and Continue; the heroes are held again. */
+const resumeGame = async (
+  browser: Browser,
+  testInfo: TestInfo,
+  from: { databasePath: string; seed: string; fakeWait?: boolean },
+) => {
+  const session = await startAcceptanceHost(testInfo, {
+    databasePath: from.databasePath,
+    seed: from.seed,
+    seatTogether: true,
+    fakeWait: from.fakeWait,
+  });
+  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+  const pad = await context.newPage();
+  const board = await context.newPage();
+  await board.setViewportSize(BOARD_SIZE);
+  await board.goto("/board");
+  await installSessionSocketHook(pad);
+  await installSendCounter(pad);
+  await grantWakeLock(pad);
+  await pad.goto(`/join?code=${session.host.joinCode}`);
+  await clickAct(pad, "continue", "continue-saved-game");
+  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+  await holdHeroesFromTest(pad, [...FOUR]);
+  return { session, context, pad, board };
+};
+
+const quitToSession = async (pad: Page) => {
+  await pad.locator('[data-action="menu"]').click();
+  await pad.locator('button[data-gear-item="save-and-quit"]').click();
+  await pad.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
+  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", { timeout: 30_000 });
+};
+
+test.describe("C3/13 the building menu: the iPad and the board render", () => {
+  test.beforeEach(({ browserName: _browserName }, testInfo) => {
+    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
+  });
+
+  test("EV-05, EV-11, EV-12, EV-14: the board paints the place and the rally; every step has the toolbar and help", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: seedAt(CITADEL, "~test-gold:hero-a=20~test-hp:hero-a=4/12"),
+      fakeWait: true,
+    });
+    try {
+      await enterBuilding(pad);
+      // The citadel's painting while the menu is open.
+      await expect(board.locator('.bt-place-still[data-place="citadel"] img')).toBeVisible();
+      await expect(board.locator("[data-building-board-title]")).toHaveText("Citadel");
+      await expectToolbar(pad);
+      await checkHelp(pad, "menu");
+      await shoot(testInfo, "ev05-citadel", pad, board);
+      await optionByLabel(pad, "Rally").click();
+      // The result: words on the iPad, no Next; hero name and 12/12 on the board.
+      await expect(stepIs(pad, "result")).toBeVisible();
+      await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-building-auto]")).toHaveText(
+        "Moves on by itself.",
+      );
+      await expect(board.locator("[data-building-board-line]")).toHaveText(
+        /^Warriors join your ranks: \+\d+\.$/,
+      );
+      await expect(board.locator("[data-building-board-detail]")).toHaveText("Hero A 12/12");
+      await expectToolbar(pad);
+      await checkHelp(pad, "result");
+      // 3.9 s: still here. 4.1 s: back on the menu (or the move map).
+      session.waitClock?.advance(3_800);
+      await pad.waitForTimeout(300);
+      await expect(stepIs(pad, "result")).toBeVisible();
+      session.waitClock?.advance(300);
+      await expect(stepIs(pad, "menu")).toBeVisible({ timeout: 20_000 });
+      // The 5 gold left the purse: 15 gold; one pick of 20 is not enough for two Virtue draws.
+      await expect(optionByLabel(pad, "Rally")).toBeEnabled();
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-05 (sanctuary, village, bazaar), EV-12: each menu has the toolbar", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(420_000);
+    const cases: [string, string, string][] = [
+      ["sanctuary", SANCTUARY, "~test-gold:hero-a=30~test-named:hero-a=feral+lost"],
+      ["village", VILLAGE, "~test-hp:hero-a=4/12"],
+      ["bazaar", BAZAAR, ""],
+    ];
+    for (const [name, space, extra] of cases) {
+      const { session, context, pad, board } = await startGame(browser, testInfo, {
+        seed: seedAt(space, extra),
+      });
+      try {
+        await enterBuilding(pad);
+        await expect(board.locator(`.bt-place-still[data-place="${name}"] img`)).toBeVisible();
+        await expectToolbar(pad);
+        await shoot(testInfo, `ev05-${name}`, pad, board);
+        if (name === "sanctuary") {
+          await optionByLabel(pad, "Cure").click();
+          await expect(stepIs(pad, "who")).toBeVisible();
+          await expect(optionByLabel(pad, "Hero A")).toContainText("free");
+          await expectToolbar(pad);
+          await checkHelp(pad, "who");
+          await optionByLabel(pad, "Hero A").click();
+          await expect(stepIs(pad, "corruption")).toBeVisible();
+          await expectToolbar(pad);
+          await checkHelp(pad, "corruption");
+        }
+        if (name === "village") {
+          await optionByLabel(pad, "Rest").click();
+          await expect(stepIs(pad, "rest-moves")).toBeVisible();
+          await expectToolbar(pad);
+          await checkHelp(pad, "rest-moves");
+        }
+      } finally {
+        await closeAll(context, session.host);
+      }
+    }
+  });
+
+  test("EV-09, EV-12, EV-14, EV-15: Virtue draw reveals, then a give-back of five tile buttons that never auto-advances", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: seedAt(CITADEL, `~test-gold:hero-a=30${TILES}`),
+      fakeWait: true,
+    });
+    try {
+      await enterBuilding(pad);
+      await optionByLabel(pad, "Virtue").click();
+      // The Reveal: the drawn tile on the board, no Next on the iPad.
+      await expect(stepIs(pad, "result")).toBeVisible();
+      await expect(board.locator("[data-building-board-line]")).toHaveText(
+        /^You gain a virtue: .+\.$/,
+      );
+      await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
+      await expectToolbar(pad);
+      await shoot(testInfo, "ev05-virtue-draw", pad, board);
+      session.waitClock?.advance(4_100);
+      // Its own give-back step: five tile buttons, no Next.
+      await expect(stepIs(pad, "give-back")).toBeVisible({ timeout: 20_000 });
+      expect(await labelsOf(pad)).toEqual(["Tile 1", "Tile 2", "Tile 3", "Tile 4", "Tile 5 (new)"]);
+      await expect(pad.getByRole("button", { name: "Next" })).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-building-prompt]")).toHaveText(
+        "You can hold four virtues. Give one back.",
+      );
+      await expect(board.locator("[data-building-board-tile]")).toHaveCount(5);
+      await expectToolbar(pad);
+      await checkHelp(pad, "give-back");
+      await shoot(testInfo, "ev05-give-back", pad, board);
+      // Still here 5 s later, with or without an audio-end event.
+      session.waitClock?.advance(5_000);
+      await pad.waitForTimeout(300);
+      await expect(stepIs(pad, "give-back")).toBeVisible();
+      await optionByLabel(pad, "Tile 5 \\(new\\)").click();
+      await expect(stepIs(pad, "menu")).toBeVisible({ timeout: 20_000 });
+      // Group holds 4: a second draw reveals and gives back again (it would not with 3).
+      await optionByLabel(pad, "Virtue").click();
+      await expect(stepIs(pad, "result")).toBeVisible();
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-15: Cleanse auto-advances after 4 s and shows its badge", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: seedAt(CITADEL, `~test-skulls:${CITADEL}=1`),
+      fakeWait: true,
+    });
+    try {
+      await enterBuilding(pad);
+      await optionByLabel(pad, "Cleanse").click();
+      await expect(stepIs(pad, "result")).toBeVisible();
+      await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
+      await expect(board.locator("[data-building-board-line]")).toHaveText(
+        "The skulls are cleared from this building.",
+      );
+      await expect(board.locator("[data-building-board-badge]")).toHaveText("−1 skull · +1 day");
+      await expectToolbar(pad);
+      await shoot(testInfo, "ev05-cleanse", pad, board);
+      session.waitClock?.advance(3_800);
+      await pad.waitForTimeout(300);
+      await expect(stepIs(pad, "result")).toBeVisible();
+      session.waitClock?.advance(300);
+      await expect(stepIs(pad, "result")).toHaveCount(0, { timeout: 20_000 });
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-10, EV-12: a fallen building is not enterable and says so", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: seedAt(VILLAGE, `~test-skulls:${VILLAGE}=4`),
+    });
+    try {
+      await expect(deviceMain(pad).locator("[data-building-fallen]")).toHaveText(FALLEN_LINE, {
+        timeout: 20_000,
+      });
+      await expect(pad.locator('button[data-action-id="enter"]')).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-building]")).toHaveCount(0);
+      await expectToolbar(pad);
+      await shoot(testInfo, "ev05-fallen", pad, board);
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-13: the happy path never opens the Menu or help", async ({ browser }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad } = await startGame(browser, testInfo, {
+      seed: `c3-bld-m1~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
+    });
+    try {
+      await enterBuilding(pad);
+      await optionByLabel(pad, "Rest").click();
+      await optionByLabel(pad, "1").click();
+      await expect(deviceMain(pad).locator("[data-building-result]")).toHaveText(
+        "You rest and recover.",
+      );
+      await clickAct(pad, "build");
+      await expect(stepIs(pad, "menu")).toBeVisible();
+      await clickAct(pad, "leave");
+      await expect(deviceMain(pad).locator("[data-move-map]")).toBeVisible({ timeout: 20_000 });
+      await expect(pad.locator("[data-menu]")).toHaveCount(0);
+      await expect(pad.locator("[data-help]")).toHaveCount(0);
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  for (const how of ["restart", "quit"] as const) {
+    test(`EV-17, EV-20: the give-back after a ${how} shows the same five tiles; cost spent once; the pick leaves 4`, async ({
+      browser,
+    }, testInfo) => {
+      test.setTimeout(420_000);
+      const seed = seedAt(CITADEL, `~test-gold:hero-a=30${TILES}`);
+      const first = await startGame(browser, testInfo, { seed, fakeWait: true });
+      const { databasePath } = first.session;
+      let tiles: string[] = [];
+      let movesBefore = "";
+      try {
+        await enterBuilding(first.pad);
+        movesBefore = (await boardMoves(first.board).getAttribute("data-moves")) ?? "";
+        await optionByLabel(first.pad, "Virtue").click();
+        await expect(stepIs(first.pad, "result")).toBeVisible();
+        first.session.waitClock?.advance(4_100);
+        await expect(stepIs(first.pad, "give-back")).toBeVisible({ timeout: 20_000 });
+        tiles = await first.pad.locator("[data-building-option]").allInnerTexts();
+        expect(tiles).toHaveLength(5);
+        if (how === "quit") await quitToSession(first.pad);
+      } finally {
+        await closeAll(first.context, first.session.host);
+      }
+      const again = await resumeGame(browser, testInfo, { databasePath, seed, fakeWait: true });
+      try {
+        await expect(stepIs(again.pad, "give-back")).toBeVisible({ timeout: 30_000 });
+        expect(await again.pad.locator("[data-building-option]").allInnerTexts()).toEqual(tiles);
+        await expectToolbar(again.pad);
+        await optionByLabel(again.pad, "Tile 2").click();
+        await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 20_000 });
+        // One move spent, once.
+        await expect(boardMoves(again.board)).toHaveAttribute(
+          "data-moves",
+          String(Number(movesBefore) - 1),
+        );
+        // 30 - 10 = 20 gold: a second Virtue draw is still open, a third would not be.
+        await expect(optionByLabel(again.pad, "Virtue")).toBeEnabled();
+      } finally {
+        await closeAll(again.context, again.session.host);
+      }
+    });
+  }
+
+  for (const pick of ["Rally", "Cleanse"] as const) {
+    test(`EV-17: a restart during the ${pick} result resumes it and applies it once`, async ({
+      browser,
+    }, testInfo) => {
+      test.setTimeout(420_000);
+      const seed = seedAt(
+        CITADEL,
+        `~test-gold:hero-a=20~test-hp:hero-a=4/12~test-skulls:${CITADEL}=1`,
+      );
+      const first = await startGame(browser, testInfo, { seed, fakeWait: true });
+      const { databasePath } = first.session;
+      let movesBefore = "";
+      try {
+        await enterBuilding(first.pad);
+        movesBefore = (await boardMoves(first.board).getAttribute("data-moves")) ?? "";
+        await optionByLabel(first.pad, pick).click();
+        await expect(stepIs(first.pad, "result")).toBeVisible();
+      } finally {
+        await closeAll(first.context, first.session.host);
+      }
+      const again = await resumeGame(browser, testInfo, { databasePath, seed, fakeWait: true });
+      try {
+        await expect(stepIs(again.pad, "result")).toBeVisible({ timeout: 30_000 });
+        again.session.waitClock?.advance(4_100);
+        await expect(stepIs(again.pad, "result")).toHaveCount(0, { timeout: 20_000 });
+        // Exactly one move spent, however many times the step came back.
+        const left = await boardMoves(again.board).getAttribute("data-moves");
+        expect(
+          left === null || Number(left) === Number(movesBefore) - 1 || left === "unavailable",
+        ).toBe(true);
+      } finally {
+        await closeAll(again.context, again.session.host);
+      }
+    });
+  }
+
+  test("EV-19: a Volume panel open at a restart comes back closed, unpaused, with the toolbar", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(420_000);
+    const seed = seedAt(CITADEL, "~test-gold:hero-a=20~test-hp:hero-a=4/12");
+    const first = await startGame(browser, testInfo, { seed });
+    const { databasePath } = first.session;
+    try {
+      await enterBuilding(first.pad);
+      await first.pad.locator('[data-action="menu"]').click();
+      await first.pad.locator('button[data-gear-item="volume"]').click();
+      await expect(first.board.locator('[data-panel="volume"]')).toBeVisible({ timeout: 20_000 });
+    } finally {
+      await closeAll(first.context, first.session.host);
+    }
+    const again = await resumeGame(browser, testInfo, { databasePath, seed });
+    try {
+      await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 30_000 });
+      await expect(again.pad.locator("[data-menu]")).toHaveCount(0);
+      await expect(again.pad.locator("[data-panel]")).toHaveCount(0);
+      await expect(deviceMain(again.pad)).toHaveAttribute("data-paused", "false");
+      await expectToolbar(again.pad);
+    } finally {
+      await closeAll(again.context, again.session.host);
     }
   });
 });

@@ -278,6 +278,15 @@ export const buildingModel = (
         promptId: buildPromptId(group, serial, "who", heroId),
         actionId: "build" as const,
         label: nameOf(heroId),
+        // Each hero's own price: the first cure of a chapter is free per hero (DEC-700).
+        ...(step.pick === "cure"
+          ? (() => {
+              const price = pickPrice(play, group, "cure", heroId);
+              return {
+                detail: costLine("cure", ensurePicks(play).tuning.cure.moves, price, price === 0),
+              };
+            })()
+          : {}),
         enabled: true,
       })),
     };

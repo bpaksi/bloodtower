@@ -52,6 +52,7 @@ export type TableGroup = {
   building: string | null;
   inside: boolean;
   alone: boolean;
+  fallen?: boolean;
 };
 
 /** Story-board status band. Health and purse stay unavailable until a pack supplies them. */

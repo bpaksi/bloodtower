@@ -55,6 +55,8 @@ const tableGroupSchema = z.strictObject({
   building: z.string().min(1).max(40).nullable(),
   inside: z.boolean(),
   alone: z.boolean(),
+  /** The building the group stands on has fallen: no Enter (DEC-093). Absent on older views. */
+  fallen: z.boolean().optional(),
 });
 
 /** One group's move roll: the raw 2d3 and each modifier, so the board can show the sum (UI-021). */

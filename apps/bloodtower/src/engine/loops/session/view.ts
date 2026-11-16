@@ -512,6 +512,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
         building: space?.building ?? null,
         inside: group.insideBuilding,
         alone: group.heroIds.length === 1,
+        ...(space?.building && isFallen(play, group.spaceId) ? { fallen: true } : {}),
       };
     }),
   };

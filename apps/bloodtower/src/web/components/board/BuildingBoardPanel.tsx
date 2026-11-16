@@ -32,6 +32,19 @@ export function BuildingBoardPanel({ table }: { table: Table }) {
           ? "Moves unavailable"
           : `${building.movesLeft} ${building.movesLeft === 1 ? "move" : "moves"} left`}
       </p>
+      {!result && building.step !== "menu" && building.prompt ? (
+        <p data-building-board-prompt="">{building.prompt}</p>
+      ) : null}
+      {building.step === "give-back" ? (
+        <ol data-building-board-tiles="">
+          {building.options.map((option) => (
+            <li key={option.promptId} data-building-board-tile="">
+              {option.label}
+              {option.detail ? ` · ${option.detail}` : ""}
+            </li>
+          ))}
+        </ol>
+      ) : null}
       {result ? (
         <div data-building-board-result={result.pick}>
           <p data-building-board-line="">{result.line}</p>

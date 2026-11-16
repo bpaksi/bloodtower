@@ -8,6 +8,7 @@ import { ITEMS_EMPTY } from "../board/PartyItemsPanel.tsx";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 import type { MenuContext } from "./gearMenu.ts";
+import { FallenNote, PlaceMenu } from "./PlaceMenu.tsx";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
@@ -1128,43 +1129,12 @@ export function CoreDeviceScreen({
               </section>
             ))}
             {view.screen === "play" && view.table?.building ? (
-              <section className="mt-4" data-building={view.table.building.step}>
-                <h2 className="text-lg font-medium" data-building-title="">
-                  {view.table.building.title}
-                </h2>
-                {view.table.building.prompt ? (
-                  <p data-building-prompt="">{view.table.building.prompt}</p>
-                ) : null}
-                {view.table.building.result ? (
-                  <p data-building-result="">{view.table.building.result.line}</p>
-                ) : null}
-                <div className="mt-3 flex flex-col gap-3">
-                  {view.table.building.options.map((option) => (
-                    <button
-                      key={option.promptId}
-                      type="button"
-                      className="bt-secondary"
-                      data-prompt-id={option.promptId}
-                      data-action-id="build"
-                      data-action="build"
-                      data-building-option=""
-                      disabled={!live || !option.enabled}
-                      title={option.reason ?? undefined}
-                      onClick={() => onAct(option.promptId, "build")}
-                    >
-                      {option.label}
-                      {option.detail ? (
-                        <span
-                          className="block text-sm text-[var(--bt-muted)]"
-                          data-building-cost=""
-                        >
-                          {option.detail}
-                        </span>
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              </section>
+              <PlaceMenu
+                building={view.table.building}
+                heldHeroIds={view.heroes.map((hero) => hero.id)}
+                live={live}
+                onAct={onAct}
+              />
             ) : null}
             {virtueAsk ? (
               <section className="mt-4" data-virtue-choice={virtueAsk.virtueId}>
@@ -1243,6 +1213,7 @@ export function CoreDeviceScreen({
                   </p>
                 ) : null}
                 {mapExtras.map(renderAction)}
+                {acting?.fallen ? <FallenNote /> : null}
               </section>
             ) : null}
             {view.screen === "pick-story" && view.doors && view.doors.length > 1 ? (
