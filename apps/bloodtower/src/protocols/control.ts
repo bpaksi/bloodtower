@@ -32,6 +32,7 @@ export const CONTROL_ACTIONS = [
   "walk",
   "enter",
   "leave",
+  "build",
   "end-turn",
   "record",
   "spin",

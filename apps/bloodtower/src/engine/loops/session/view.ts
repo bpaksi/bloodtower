@@ -20,6 +20,7 @@ import { isPurseAmount } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
+  BuildingPanelView,
   ChanceView,
   DaySkullView,
   GroupsCardView,
@@ -36,6 +37,13 @@ import { partyIsSplit, regroupPicks, regroupQueue } from "../day/regroup.ts";
 import { splitShiftOf } from "../day/roll.ts";
 import { daysLeft } from "../day/rules.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
+import {
+  COPY as BUILDING_COPY,
+  buildingModel,
+  corruptionName,
+  rallyResult,
+  virtueResult,
+} from "../encounter/menu.ts";
 import {
   onPurseStep,
   PURSE_STEP_LABEL,
@@ -96,6 +104,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
     return building ? `Enter ${buildingTitle(building)}` : "Enter";
   }
   if (actionId === "leave") return "Leave";
+  if (actionId === "build") return buildingLabel(state, promptId);
   if (actionId === "end-turn") return "End turn";
   if (actionId === "record") {
     // Skull placement (DEC-092): one button per standing building, or the skull stayed inside (DEC-064).
@@ -123,6 +132,24 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "play-without-tower") return "Play without Tower";
   if (promptId === "tower-calibrate" && actionId === "tower-calibrate") return "Calibrate";
   return actionId;
+};
+
+/** The words on a building button, read from the menu step the encounter is on. */
+const buildingLabel = (state: ShellState, promptId: string): string => {
+  const top = state.loops.stack.at(-1);
+  if (!state.play || top?.loopId !== "encounter") return "Choose";
+  const model = buildingModel(state.play, top.local as EncounterLocal, (id) => heroName(state, id));
+  return model.options.find((option) => option.promptId === promptId)?.label ?? "Choose";
+};
+
+/** Why a closed building button is closed (UI-043): the menu's own reason, never "Already taken". */
+const buildingReason = (state: ShellState, promptId: string): string => {
+  const top = state.loops.stack.at(-1);
+  if (!state.play || top?.loopId !== "encounter") return "Already taken.";
+  const model = buildingModel(state.play, top.local as EncounterLocal, (id) => heroName(state, id));
+  return (
+    model.options.find((option) => option.promptId === promptId)?.reason ?? "Not possible now."
+  );
 };
 
 /** Walk offers carry the compass slot of their neighbour (UI-023). */
@@ -299,12 +326,13 @@ export const actingGroupOf = (state: ShellState): ActingGroup => {
       const local = frame.local as EncounterLocal;
       actingId = local.groupId;
       waiting = true;
+      if (local.movesLeft !== undefined) movesLeft = local.movesLeft;
       continue;
     }
     if (frame.loopId === "group-turn") {
       const local = frame.local as GroupTurnLocal;
       actingId = actingId ?? local.groupId;
-      movesLeft = local.movesLeft;
+      movesLeft = movesLeft ?? local.movesLeft;
       if (!waiting) waiting = local.awaitingPress;
       break;
     }
@@ -321,6 +349,66 @@ export const actingGroupOf = (state: ShellState): ActingGroup => {
 
 /** The prompt line when a virtue asks a choice (Loremaster, `virtue.choice.prompt`). */
 const virtueAsks = (name: string) => `${name} asks you to choose.`;
+
+/** The building menu (C3/13): only while the encounter is on top of the loops. */
+const buildBuilding = (state: ShellState): BuildingPanelView | null => {
+  const play = state.play;
+  const top = state.loops.stack.at(-1);
+  if (!play || top?.loopId !== "encounter") return null;
+  const local = top.local as EncounterLocal;
+  const group = play.groups.find((row) => row.id === local.groupId);
+  const model = buildingModel(play, local, (id) => heroName(state, id));
+  let result: BuildingPanelView["result"] = null;
+  if (model.result) {
+    const done = model.result;
+    const who = done.heroId ? heroName(state, done.heroId) : null;
+    const hp = done.hp ? `${done.hp.hp}/${done.hp.max}` : null;
+    const line =
+      done.pick === "rally"
+        ? rallyResult(done.hp?.gained ?? 0)
+        : done.pick === "virtue-draw"
+          ? virtueResult(virtueName(done.tile ?? ""))
+          : done.pick === "cure"
+            ? BUILDING_COPY.cureResult
+            : done.pick === "rest"
+              ? BUILDING_COPY.restResult
+              : BUILDING_COPY.cleanseResult;
+    result = {
+      pick: done.pick,
+      line,
+      detail:
+        done.pick === "cure"
+          ? [who, done.corruptionId ? corruptionName(done.corruptionId) : null]
+              .filter(Boolean)
+              .join(" · ") || null
+          : who && hp
+            ? `${who} ${hp}`
+            : null,
+      badge: done.pick === "cleanse" ? BUILDING_COPY.cleanseBadge : null,
+      auto: done.auto,
+    };
+  }
+  return {
+    title: model.title,
+    step: model.step,
+    heroIds: group ? [...group.heroIds] : [],
+    prompt: model.prompt,
+    // Leave is its own action on the actions list, never a `build` press.
+    options: model.options
+      .filter((option) => option.actionId === "build")
+      .map((option) => ({
+        promptId: option.promptId,
+        label: option.label,
+        detail: option.detail ?? null,
+        enabled: option.enabled,
+        reason: option.reason ?? null,
+      })),
+    result,
+    holdMs: AUTO_ADVANCE_MS,
+    skulls: group ? (ensureClock(play).skulls[group.spaceId] ?? 0) : 0,
+    movesLeft: local.movesLeft ?? null,
+  };
+};
 
 /** The turn-start virtue panel (CU/14): only while a group's turn is on top of the loops. */
 const buildVirtue = (state: ShellState): VirtuePanelView | null => {
@@ -395,6 +483,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     day: play.dayNumber,
     ...dayPanels,
     virtue: buildVirtue(state),
+    building: buildBuilding(state),
     health: "unavailable",
     purse: "unavailable",
     actingGroup: actingName,
@@ -725,6 +814,13 @@ const helpScreenFor = (state: ShellState): string => {
   ) {
     return "day-on-the-board";
   }
+  if (
+    state.screen === "play" &&
+    !openingMomentId(state) &&
+    state.loops.stack.at(-1)?.loopId === "encounter"
+  ) {
+    return "building-menu";
+  }
   const mapped: Record<string, string> = {
     splash: "waiting",
     "pick-story": "pick-story",
@@ -858,7 +954,8 @@ const shownActions = (state: ShellState): ViewState["actions"] => {
           actionId: offer.actionId,
           label: labelFor(state, offer.promptId, offer.actionId),
           open: false,
-          reason: "Already taken.",
+          reason:
+            offer.actionId === "build" ? buildingReason(state, offer.promptId) : "Already taken.",
           deviceId: null,
         },
   );

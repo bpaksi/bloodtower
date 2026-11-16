@@ -2,7 +2,7 @@ import type { LoopFrame } from "../../loop/types.ts";
 import type { DayLocal } from "../day/loop.ts";
 import { handleDayPress } from "../day/press.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
-import { handleEncounterLeave } from "../encounter/loop.ts";
+import { handleBuildingPress, handleEncounterLeave } from "../encounter/loop.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { handleGroupTurnPress } from "../group-turn/loop.ts";
 
@@ -23,7 +23,9 @@ export const updatePlayFrameOnPress = (
     const local = top.local as EncounterLocal;
     if (actionId === "leave" && promptId === `leave--${local.groupId}`) {
       handleEncounterLeave(local.groupId);
-      top.local = { ...local, awaitingLeave: true };
+      top.local = { ...local, left: true, awaitingPress: false };
+    } else if (actionId === "build") {
+      top.local = handleBuildingPress(local, promptId);
     }
     return;
   }

@@ -436,8 +436,8 @@ describe("audit R07 (LC-04, DEC-218): the terminal record", () => {
 });
 
 describe("audit R07 (LC-04): payment and reward (engine calls; no press reaches them yet)", () => {
-  // AUDIT-BUG LC-04: the purse, moves and pick log live in a WeakMap that the checkpoint never writes, so Continue loses a payment.
-  it.fails("R07-08 a stop after a payment: Continue keeps the debit and pays nothing twice", async () => {
+  // Fixed by C3/13: the checkpoint now writes the picks store, so Continue keeps a payment (LC-04, picks part).
+  it("R07-08 a stop after a payment: Continue keeps the debit and pays nothing twice", async () => {
     const h = harness();
     const first = await reachPlay(h, "without");
     await press(first, "day-1-roll-done", "continue");

@@ -12,7 +12,7 @@ import {
   seatAtCitadels,
 } from "../chapter/playState.ts";
 import type { DayLocal } from "../day/loop.ts";
-import type { EncounterLocal } from "../encounter/loop.ts";
+import { type EncounterLocal, endBuildingWait, takeBuildingRefusal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
@@ -401,6 +401,20 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     // nothing: an expected race, not an error, so one debug line.
     const dayFrame = state.loops.stack.find((frame) => frame.loopId === "day");
     const local = dayFrame?.local as DayLocal | undefined;
+    const dayWaits = Boolean(
+      dayFrame && local && local.phase === "effects" && local.wait?.id === e.waitId,
+    );
+    if (!dayWaits) {
+      // A building result's wait (C3/13) ends the same way, through its own frame.
+      const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
+      if (endBuildingWait(next.loops.stack, e.waitId)) {
+        bindShellState(next);
+        resumeLoopsOrPauseOffers(next, eventSeq, effects);
+        clearShellState();
+        effects.push({ kind: "view-refresh", v: 1 });
+        return withEffects(next, effects);
+      }
+    }
     if (!dayFrame || !local || local.phase !== "effects" || local.wait?.id !== e.waitId) {
       return {
         state: { ...state, eventSeq: eventSeq + 1 },
@@ -763,6 +777,16 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
           requestCheckpoint(next.activeGameId, next.play.dayNumber);
         }
       }
+      if (e.actionId === "build") {
+        // C3/13: a building press the encounter did not take is an error to log, never a silent
+        // no-op. A press it took changed gold, hit points, moves or tiles, so a Continue must see it.
+        const refusal = takeBuildingRefusal(next.loops.stack);
+        if (refusal) {
+          effects.push({ kind: "press-error", v: 1, code: "invalid-state", message: refusal });
+        } else if (next.play && next.activeGameId) {
+          requestCheckpoint(next.activeGameId, next.play.dayNumber);
+        }
+      }
       countPress(
         next,
         e.actionId,
@@ -798,7 +822,7 @@ export const refreshOffersAfterRestore = (state: ShellState): ShellEffect[] => {
       frame.local = { ...local, awaitingPress: false };
     } else if (frame.loopId === "encounter") {
       const local = frame.local as EncounterLocal;
-      frame.local = { ...local, awaitingLeave: false };
+      frame.local = { ...local, awaitingLeave: false, awaitingPress: false };
     } else if (frame.loopId === "game" && openingActiveIndex(state.openingIndex)) {
       const local = frame.local as GameLocal;
       frame.local = { ...local, awaitingPress: false, playStarted: false };
