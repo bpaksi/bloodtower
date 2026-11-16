@@ -827,7 +827,8 @@ export function CoreDeviceScreen({
       action.actionId !== "back" &&
       !inMenu(action) &&
       action.promptId !== SAVED_CONTINUE_PROMPT &&
-      !isVirtueOption(action),
+      !isVirtueOption(action) &&
+      action.actionId !== "build",
   );
   // A virtue that asks (CU/14, EV-03): the acting group's iPads get one button per option, whatever
   // the virtue. Another group's iPad holds none of its heroes, so it draws no list.
@@ -1126,6 +1127,45 @@ export function CoreDeviceScreen({
                 ) : null}
               </section>
             ))}
+            {view.screen === "play" && view.table?.building ? (
+              <section className="mt-4" data-building={view.table.building.step}>
+                <h2 className="text-lg font-medium" data-building-title="">
+                  {view.table.building.title}
+                </h2>
+                {view.table.building.prompt ? (
+                  <p data-building-prompt="">{view.table.building.prompt}</p>
+                ) : null}
+                {view.table.building.result ? (
+                  <p data-building-result="">{view.table.building.result.line}</p>
+                ) : null}
+                <div className="mt-3 flex flex-col gap-3">
+                  {view.table.building.options.map((option) => (
+                    <button
+                      key={option.promptId}
+                      type="button"
+                      className="bt-secondary"
+                      data-prompt-id={option.promptId}
+                      data-action-id="build"
+                      data-action="build"
+                      data-building-option=""
+                      disabled={!live || !option.enabled}
+                      title={option.reason ?? undefined}
+                      onClick={() => onAct(option.promptId, "build")}
+                    >
+                      {option.label}
+                      {option.detail ? (
+                        <span
+                          className="block text-sm text-[var(--bt-muted)]"
+                          data-building-cost=""
+                        >
+                          {option.detail}
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             {virtueAsk ? (
               <section className="mt-4" data-virtue-choice={virtueAsk.virtueId}>
                 <h2 className="text-lg font-medium" data-virtue-prompt="">

@@ -112,6 +112,39 @@ export type VirtuePanelView = {
   picked: { virtueId: string; name: string; label: string }[];
 };
 
+/**
+ * The building menu (C3/13, UI-043). `prompt` is the iPad's line for the step; `result` is the
+ * board's line for a finished pick (SCR-014). Each option is one button, offered by `promptId`;
+ * `detail` is its cost line, and a disabled option says why. A step with no Next (`auto`) ends by
+ * itself after `holdMs` or when its narration ends.
+ */
+export type BuildingOptionView = {
+  promptId: string;
+  label: string;
+  detail: string | null;
+  enabled: boolean;
+  reason: string | null;
+};
+
+export type BuildingResultView = {
+  pick: string;
+  line: string;
+  /** The hero the pick helped and the corruption that went, named for the table. */
+  detail: string | null;
+  badge: string | null;
+  auto: boolean;
+};
+
+export type BuildingPanelView = {
+  title: string;
+  step: "menu" | "who" | "corruption" | "rest-moves" | "give-back" | "result";
+  heroIds: string[];
+  prompt: string | null;
+  options: BuildingOptionView[];
+  result: BuildingResultView | null;
+  holdMs: number;
+};
+
 export type TableBand = {
   chapter: string;
   day: number;
@@ -127,6 +160,8 @@ export type TableBand = {
   groupsCard?: GroupsCardView | null;
   /** The turn-start virtue panel, only while it shows (CU/14). */
   virtue?: VirtuePanelView | null;
+  /** The building menu while a group is inside a building (C3/13). */
+  building?: BuildingPanelView | null;
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;

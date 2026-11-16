@@ -1,6 +1,11 @@
 import { type BoardGraph, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
 import type { PlayContent, PlayState } from "../../engine/loops/chapter/playState.ts";
 import { captureClock, type DayClock, restoreClock } from "../../engine/loops/day/clock.ts";
+import {
+  type PicksStore,
+  picksSaved,
+  restorePicksStore,
+} from "../../engine/loops/encounter/picks.ts";
 import { createShellRegistry } from "../../engine/loops/session/registry.ts";
 import {
   SHELL_ENGINE_VERSION,
@@ -14,6 +19,12 @@ export type SerializedShellState = Omit<ShellState, "devices" | "registry"> & {
   devices: string[];
   /** The day clock lives beside `play`, not on it. A checkpoint from before C3 EV-19 has none. */
   dayClock?: DayClock | null;
+  /**
+   * The building picks (C3/13): the free cures used, the virtue tiles held and a give-back owed.
+   * A checkpoint from before C3/13 has none: a game that never used the building menu has none to
+   * keep, and the store starts blank.
+   */
+  picks?: PicksStore | null;
 };
 
 /** `JSON.stringify` turns a `Map` into `{}`; keep only the `spaces` list on disk. */
@@ -31,9 +42,14 @@ const rehydratePlayContent = (content: PlayContent): PlayContent => ({
   board: rehydrateBoard(content.board as BoardGraph),
 });
 
-const rehydratePlay = (play: PlayState, dayClock: DayClock | null | undefined): PlayState => {
+const rehydratePlay = (
+  play: PlayState,
+  dayClock: DayClock | null | undefined,
+  picks: PicksStore | null | undefined,
+): PlayState => {
   const rebuilt: PlayState = { ...play, content: rehydratePlayContent(play.content) };
   if (dayClock) restoreClock(rebuilt, dayClock);
+  if (picks) restorePicksStore(rebuilt, picks);
   return rebuilt;
 };
 
@@ -55,6 +71,7 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
         }
       : null,
     dayClock: play ? captureClock(play) : null,
+    picks: play ? picksSaved(play) : null,
   };
 };
 
@@ -72,7 +89,11 @@ const upgradeGame = (row: SerializedShellState, game: Partial<TonightGame>): Ton
   rating: game.rating ?? null,
 });
 
-export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState): ShellState => ({
+export const deserializeShellState = ({
+  dayClock,
+  picks,
+  ...row
+}: SerializedShellState): ShellState => ({
   ...row,
   version: SHELL_ENGINE_VERSION,
   towerLinked: row.towerLinked ?? false,
@@ -122,5 +143,5 @@ export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState
   devices: new Set(row.devices),
   registry: createShellRegistry(),
   playContent: row.playContent ? rehydratePlayContent(row.playContent) : null,
-  play: row.play ? rehydratePlay(row.play, dayClock) : null,
+  play: row.play ? rehydratePlay(row.play, dayClock, picks) : null,
 });

@@ -6,6 +6,7 @@ import {
   setBuildingSkulls,
   setHeroSheet,
 } from "../day/clock.ts";
+import { ensurePicks } from "../encounter/picks.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -70,7 +71,7 @@ export type PlayState = {
   /** Input for the next child loop (group turn or encounter). */
   childInput:
     | { kind: "group-turn"; groupId: string; moves: number }
-    | { kind: "encounter"; groupId: string }
+    | { kind: "encounter"; groupId: string; movesLeft?: number }
     | null;
 };
 
@@ -217,6 +218,15 @@ export const TEST_EFFECTS_LINE = "~test-effects-line:";
  */
 export const TEST_EFFECT = "~test-effect:";
 
+/**
+ * TEST ONLY (C3/13). `~test-named:hero-a=feral+lost` gives a hero those named corruptions (and
+ * their count), so an e2e reaches the Cure's corruption pick. `~test-tiles:hero-a=courage+mercy+
+ * wisdom+honor` gives the hero's group those virtue tiles for the building menu's draw. Same
+ * placement rule as the others. Real seeds never carry them.
+ */
+export const TEST_NAMED = "~test-named:";
+export const TEST_TILES = "~test-tiles:";
+
 /** Every marker the hook reads. A seed with none of them is a real seed. */
 export const TEST_SEED_MARKERS = [
   TEST_SEAT_TOGETHER,
@@ -230,6 +240,8 @@ export const TEST_SEED_MARKERS = [
   TEST_KINGDOM,
   TEST_EFFECTS_LINE,
   TEST_EFFECT,
+  TEST_NAMED,
+  TEST_TILES,
 ] as const;
 
 export const isTestSeed = (seed: string): boolean =>
@@ -268,6 +280,15 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
   }
   for (const [heroId, value] of testMarker(seed, TEST_GOLD, /^\d+$/)) {
     merge(heroId, { gold: Number(value) });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_NAMED, SHAPE_IDS)) {
+    const named = value.split("+");
+    merge(heroId, { named, corruptions: named.length });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_TILES, SHAPE_IDS)) {
+    const group = play.groups.find((row) => row.heroIds.includes(heroId));
+    if (!group) throw new Error(`The test tile seed names "${heroId}", who is in no group.`);
+    ensurePicks(play).tiles[group.id] = value.split("+");
   }
   for (const [heroId, value] of testMarker(seed, TEST_VIRTUE_IDS, SHAPE_IDS)) {
     merge(heroId, { virtues: value.split("+") });

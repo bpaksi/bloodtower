@@ -176,6 +176,35 @@ const virtuePanelSchema = z.strictObject({
     .max(8),
 });
 
+/** The building menu (C3/13, UI-043): one panel for every step of it. */
+const buildingPanelSchema = z.strictObject({
+  title: z.string().min(1).max(60),
+  step: z.enum(["menu", "who", "corruption", "rest-moves", "give-back", "result"]),
+  heroIds: z.array(heroIdSchema).max(16),
+  prompt: z.string().min(1).max(160).nullable(),
+  options: z
+    .array(
+      z.strictObject({
+        promptId: z.string().min(1).max(200),
+        label: z.string().min(1).max(120),
+        detail: z.string().min(1).max(160).nullable(),
+        enabled: z.boolean(),
+        reason: z.string().min(1).max(160).nullable(),
+      }),
+    )
+    .max(16),
+  result: z
+    .strictObject({
+      pick: z.string().min(1).max(40),
+      line: z.string().min(1).max(160),
+      detail: z.string().min(1).max(160).nullable(),
+      badge: z.string().min(1).max(60).nullable(),
+      auto: z.boolean(),
+    })
+    .nullable(),
+  holdMs: z.number().int().min(1).max(60_000),
+});
+
 const tableBandSchema = z.strictObject({
   chapter: z.string().min(1).max(120),
   day: z.number().int().min(0).max(99),
@@ -189,6 +218,7 @@ const tableBandSchema = z.strictObject({
   corruptions: z.array(heroCorruptionSchema).max(16).optional(),
   groupsCard: groupsCardSchema.nullable().optional(),
   virtue: virtuePanelSchema.nullable().optional(),
+  building: buildingPanelSchema.nullable().optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),

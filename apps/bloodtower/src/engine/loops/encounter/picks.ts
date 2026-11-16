@@ -10,7 +10,7 @@ import {
 } from "../../rules/corruption/index.ts";
 import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
-import { ensureClock, heroSheet, isFallen } from "../day/clock.ts";
+import { ensureClock, heroSheet, isFallen, setHeroSheet } from "../day/clock.ts";
 import { buildingMenu } from "../day/rules.ts";
 
 /** Prices and amounts for the 1.0 picks. Defaults match packs/base/tuning.yaml (DEC-703). */
@@ -60,6 +60,12 @@ export type PickEvent = {
   chapter: number;
   gold: number;
   free?: boolean;
+  /** Moves a rest spent. */
+  moves?: number;
+  /** The corruption a cure took off, when the hero chose one. */
+  corruptionId?: string;
+  /** The tile a virtue draw added. */
+  tile?: string;
 };
 
 export type HeroHp = { hp: number; max: number };
@@ -276,6 +282,7 @@ const pickGate = (
   play: PlayState,
   groupId: string,
   kind: PickKind,
+  count = 1,
 ): { ok: true; store: PicksStore; spaceId: string } | { ok: false; reason: PickRefusal } => {
   const opened = openMenu(play, groupId);
   if (!opened.ok) return opened;
@@ -283,7 +290,7 @@ const pickGate = (
     return { ok: false, reason: "not-offered" };
   const store = ensurePicks(play);
   if (store.giveBack[groupId]) return { ok: false, reason: "give-back-first" };
-  if ((store.moves[groupId] ?? 0) < movesCost(store, kind))
+  if ((store.moves[groupId] ?? 0) < movesCost(store, kind) * count)
     return { ok: false, reason: "no-moves" };
   const spaceId = groupById(play, groupId)?.spaceId ?? "";
   return { ok: true, store, spaceId };
@@ -295,9 +302,11 @@ export const applyPick = (
   seed: string,
   groupId: string,
   kind: PickKind,
-  options: { heroId?: string; corruptionId?: string; gold?: HeroGold } = {},
+  options: { heroId?: string; corruptionId?: string; gold?: HeroGold; count?: number } = {},
 ): PickResult => {
-  const gate = pickGate(play, groupId, kind);
+  // A rest is one pick for `count` moves, +3 hit points a move (MEC-075); no other pick repeats.
+  const count = kind === "rest" ? Math.max(1, Math.floor(options.count ?? 1)) : 1;
+  const gate = pickGate(play, groupId, kind, count);
   if (!gate.ok) return gate;
   const { store, spaceId } = gate;
   const group = groupById(play, groupId);
@@ -327,7 +336,7 @@ export const applyPick = (
     if (hp) hp.hp = hp.max;
   } else if (kind === "rest") {
     const hp = store.hp[heroId as string];
-    if (hp) hp.hp = Math.min(hp.max, hp.hp + store.tuning.restHitPoints);
+    if (hp) hp.hp = Math.min(hp.max, hp.hp + store.tuning.restHitPoints * count);
   } else if (kind === "virtue-draw") {
     const tile = nextPlayRng(seed, play).pick([...VIRTUE_TILES]);
     const tiles = store.tiles[groupId] ?? [];
@@ -342,13 +351,16 @@ export const applyPick = (
   }
 
   store.purse[groupId] = (store.purse[groupId] ?? 0) - price;
-  store.moves[groupId] = (store.moves[groupId] ?? 0) - movesCost(store, kind);
+  store.moves[groupId] = (store.moves[groupId] ?? 0) - movesCost(store, kind) * count;
   const event: PickEvent = {
     kind,
     groupId,
     chapter: store.chapter,
     gold: price,
     ...(heroId ? { heroId } : {}),
+    ...(kind === "rest" ? { moves: count } : {}),
+    ...(kind === "cure" && options.corruptionId ? { corruptionId: options.corruptionId } : {}),
+    ...(kind === "virtue-draw" ? { tile: store.tiles[groupId]?.at(-1) } : {}),
     ...(kind === "cure" ? { free: price === 0 } : {}),
   };
   store.log.push(event);
@@ -418,4 +430,88 @@ export const restorePicksFromLog = (
   store.log = [...log];
   store.freeCures = rebuildFreeCures(log);
   return store;
+};
+
+/*
+ * The live bridge (C3/13). In a running game a hero's gold and hit points live on the day clock's
+ * sheets and the moves live on the group's turn; the picks store above is the model the rules read.
+ * `loadLive` fills the store from the live state before a menu is read or a pick is made, and
+ * `commitLive` writes what the pick changed back. A value the sheet does not know stays unknown:
+ * a hero with no gold sheet adds nothing to the purse, and a hero with no hit points is no target.
+ */
+
+/** The purse of a group: the gold its heroes carry, each as the sheet states it. */
+export const livePurse = (play: PlayState, groupId: string): number => {
+  const group = groupById(play, groupId);
+  if (!group) return 0;
+  const clock = ensureClock(play);
+  return group.heroIds.reduce((sum, id) => sum + (heroSheet(clock, id).gold ?? 0), 0);
+};
+
+/** True when at least one hero of the group has a gold figure. A group with none has no known purse. */
+export const purseKnown = (play: PlayState, groupId: string): boolean => {
+  const group = groupById(play, groupId);
+  const clock = ensureClock(play);
+  return Boolean(group?.heroIds.some((id) => heroSheet(clock, id).gold !== undefined));
+};
+
+export const loadLive = (play: PlayState, groupId: string, movesLeft: number): void => {
+  const store = ensurePicks(play);
+  const group = groupById(play, groupId);
+  const clock = ensureClock(play);
+  store.purse[groupId] = livePurse(play, groupId);
+  store.moves[groupId] = movesLeft;
+  for (const heroId of group?.heroIds ?? []) {
+    const hp = heroSheet(clock, heroId).hp;
+    if (hp) store.hp[heroId] = { hp: hp.hp, max: hp.max };
+    else delete store.hp[heroId];
+  }
+};
+
+/** Writes the store's gold and hit points back to the sheets and returns the moves left. */
+export const commitLive = (play: PlayState, groupId: string): number => {
+  const store = ensurePicks(play);
+  const group = groupById(play, groupId);
+  const clock = ensureClock(play);
+  if (group) {
+    let owed = livePurse(play, groupId) - (store.purse[groupId] ?? 0);
+    for (const heroId of group.heroIds) {
+      const sheet = heroSheet(clock, heroId);
+      const hp = store.hp[heroId];
+      const gold = sheet.gold;
+      const taken = gold !== undefined && owed > 0 ? Math.min(gold, owed) : 0;
+      owed -= taken;
+      setHeroSheet(play, heroId, {
+        ...sheet,
+        ...(hp ? { hp: { hp: hp.hp, max: hp.max } } : {}),
+        ...(gold !== undefined ? { gold: gold - taken } : {}),
+      });
+    }
+  }
+  return store.moves[groupId] ?? 0;
+};
+
+/** Heroes of the group a Rally or Rest can help: those whose hit points are known. */
+export const healTargets = (play: PlayState, groupId: string): string[] => {
+  const clock = ensureClock(play);
+  return (groupById(play, groupId)?.heroIds ?? []).filter((id) => heroSheet(clock, id).hp);
+};
+
+/** Heroes a Cure can help: those holding at least one corruption (Q-C3-20). */
+export const cureTargets = (play: PlayState, groupId: string): string[] => {
+  const clock = ensureClock(play);
+  return (groupById(play, groupId)?.heroIds ?? []).filter(
+    (id) => heroSheet(clock, id).corruptions > 0,
+  );
+};
+
+/** A copy of the picks store for a checkpoint. */
+export const picksSaved = (play: PlayState): PicksStore => structuredClone(ensurePicks(play));
+
+/** Puts a saved picks store back on the play a Continue rebuilt. */
+export const restorePicksStore = (play: PlayState, saved: PicksStore): void => {
+  if (typeof saved !== "object" || saved === null || !Array.isArray(saved.log)) {
+    throw new Error("The checkpoint's building picks are not readable.");
+  }
+  stores.set(play, structuredClone(saved));
 };
