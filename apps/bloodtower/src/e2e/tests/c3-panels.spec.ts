@@ -631,12 +631,27 @@ test.describe("CU/15 the game of chance: the Spin and the starting purse", () =>
       await expect(chance).toBeVisible({ timeout: 20_000 });
       expect(await coinCues(board)).toBe(0);
       // Two presses straight after each other: the second arrives from "another iPad's" socket path.
+      // The panel must go straight from waiting to result: no chase state in between.
+      await board.evaluate(() => {
+        const w = window as unknown as { __chanceStates?: string[] };
+        w.__chanceStates = [];
+        new MutationObserver(() => {
+          const v = document.querySelector("#chance")?.getAttribute("data-chance");
+          const log = w.__chanceStates ?? [];
+          if (v && log.at(-1) !== v) log.push(v);
+        }).observe(document.body, { subtree: true, attributes: true, childList: true });
+      });
       await sendAct(pad, "spin-setup-starting-purse", "spin", {});
       await sendAct(pad, "spin-setup-starting-purse", "spin", {});
       const result = chance.locator("[data-chance-result]");
       await expect(result).toHaveText(/^The wheel stops on (10|20|30|40) gold\.$/, {
-        timeout: 2_000,
+        timeout: 1_000,
       });
+      expect(
+        await board.evaluate(
+          () => (window as unknown as { __chanceStates?: string[] }).__chanceStates,
+        ),
+      ).toEqual(["result"]);
       const text = await result.textContent();
       await pad.waitForTimeout(1_000);
       await expect(result).toHaveText(text ?? "");
