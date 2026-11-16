@@ -22,9 +22,9 @@ import {
   volumeLine,
   waitingFor,
 } from "../../lib/startupBoard";
-import { PortraitCard } from "../PortraitCard";
 import { DialogFrame } from "./DialogFrame";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
+import { HeroCard } from "./HeroCard";
 
 /** Join QR and the six-digit code. Display only: the iPad does the pressing. */
 function JoinBlock({ code, url, large }: { code: string; url: string; large?: boolean }) {
@@ -247,10 +247,7 @@ function ClaimPanel({ view }: { view: BoardView }) {
       {join ? <JoinBlock code={join.code} url={join.url} large /> : null}
       <ul className="bt-hunter-roster">
         {view.heroes.map((hero) => (
-          <li key={hero.id} data-hero={hero.id} data-held={hero.held ? "true" : "false"}>
-            <PortraitCard name={hero.name} label={hero.name} compact />
-            <p className="bt-claim-state">{hero.held ? "Picked" : "Open"}</p>
-          </li>
+          <HeroCard key={hero.id} hero={hero} />
         ))}
       </ul>
     </div>

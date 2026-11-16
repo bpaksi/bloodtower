@@ -14,7 +14,7 @@ Keep this a checklist; do not write a second design doc.
 - Mockup: ./mockup.html (a Gamewright draft for the Illusionist to replace)
 - Risk: Low
 - Depends on: its approval.md on main; step 43 (#469) PT-15 DEC; step 45 Copy table
-- Touches: `apps/bloodtower/src/web/components/board/StartupBoard.tsx` (ClaimPanel), `apps/bloodtower/src/web/components/board/HeroCard.tsx` (new), `apps/bloodtower/src/web/components/board/board.css`, `apps/bloodtower/src/protocols/v2/common.ts` and `views.ts` (public hero card fields), `apps/bloodtower/src/engine/loops/session/view.ts` (fills them from the pack and tuning), `apps/bloodtower/src/web/components/board/CoreStoryBoard.test.ts`, `apps/bloodtower/src/e2e/tests/w4-party.spec.ts`
+- Touches: `apps/bloodtower/src/web/components/board/StartupBoard.tsx` (ClaimPanel), `apps/bloodtower/src/web/components/board/HeroCard.tsx` (new), `apps/bloodtower/src/web/components/board/board.css`, `apps/bloodtower/src/protocols/v2/common.ts` and `views.ts` (public hero card fields), `apps/bloodtower/src/engine/loops/session/view.ts` (fills them from the pack and tuning), `apps/bloodtower/src/web/components/board/CoreStoryBoard.test.ts`, `apps/bloodtower/src/e2e/tests/w4-party.spec.ts`; Touches amended 2026-11-15 (Bob, chat): also `apps/bloodtower/src/engine/loops/session/pack.ts` (optional `card` on each `ShellStory` hero), `apps/bloodtower/src/server/core/loadStories.ts` (fills it from the pack and tuning), `apps/bloodtower/src/engine/views/state.ts` and `apps/bloodtower/src/engine/views/project.ts` (carry it to the board payload only), and new `*.test.ts` files beside them
 - Builds: PT-15 (board cards only)
 - Deps change: no
 - Runs: cloud

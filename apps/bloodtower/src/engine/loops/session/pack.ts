@@ -23,11 +23,19 @@ export type ShellStoryCard = {
   cover?: string | null;
 };
 
+/** What the Pick board's hero card shows. Each field is absent when the pack does not give it. */
+export type HeroCardData = {
+  role?: string;
+  ability?: string;
+  fight?: number;
+  hitPoints?: number;
+};
+
 export type ShellStory = {
   card: ShellStoryCard;
   settings: StorySetting[];
   setup: SetupStep[];
-  heroes: { id: string; name: string }[];
+  heroes: { id: string; name: string; card?: HeroCardData }[];
 };
 
 /** DEC-110: every game runs seals and skulls so the tower can drop skulls later (DEC-222). */

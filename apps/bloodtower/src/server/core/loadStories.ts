@@ -183,7 +183,21 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     assetIndexes.push(assetIndex);
     // The pick pool is every base hero. Party size decides how many sit; start assignments
     // only place the ones who do.
-    const heroes = loaded.base.heroes.map((hero) => ({ id: hero.id, name: hero.name }));
+    const tuningHeroes = loaded.base.tuning?.heroes;
+    const heroes = loaded.base.heroes.map((hero) => {
+      // The tuning key for the magic user is `magic_user`; a role with no row (scholar until the
+      // pack follow-up) leaves fight and hit points unset, which the board reads as unavailable.
+      const row = tuningHeroes?.[hero.role.replace("-", "_") as keyof typeof tuningHeroes];
+      return {
+        id: hero.id,
+        name: hero.name,
+        card: {
+          role: hero.role,
+          ability: hero.ability,
+          ...(row ? { fight: row.fight, hitPoints: row.hit_points } : {}),
+        },
+      };
+    });
     const packSteps = story.setup.map((step) => ({ id: step.id, label: step.label }));
     const shellStory: ShellStory = {
       card: {

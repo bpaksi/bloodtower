@@ -770,6 +770,7 @@ export const projectShellView = (state: ShellState): ViewState => {
     id: hero.id,
     name: hero.name,
     deviceId: state.holdings[hero.id] ?? null,
+    ...(screen === "claim-heroes" && hero.card ? { card: hero.card } : {}),
     lines:
       isSetupScreen(screen) && screen !== "claim-heroes"
         ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
