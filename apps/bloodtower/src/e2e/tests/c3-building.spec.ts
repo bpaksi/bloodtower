@@ -144,6 +144,16 @@ const enterBuilding = async (pad: Page) => {
   await expect(deviceMain(pad).locator("[data-building]")).toBeVisible({ timeout: 20_000 });
 };
 
+const openGearItem = async (pad: Page, id: string) => {
+  await pad.locator('[data-action="menu"]').click();
+  const row = pad.locator(`[data-menu] button[data-gear-item="${id}"]`);
+  await expect(row).toBeEnabled();
+  await row.click();
+};
+
+const heroRow = (board: Page, heroId: string) =>
+  board.locator(`[data-panel="current-party"] [data-hero="${heroId}"]`);
+
 const closeAll = async (context: BrowserContext, host: { close: () => Promise<void> }) => {
   await context.close();
   await host.close();
@@ -235,7 +245,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const { session, context, pad } = await startGame(browser, testInfo, {
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
       seed: seedAt(VILLAGE, "~test-hp:hero-a=4/12"),
     });
     try {
@@ -253,6 +263,11 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       await expect(deviceMain(pad).locator("[data-building-result]")).toHaveText(
         "You rest and recover.",
       );
+      // +3 a move: two moves take Hero A from 4/12 to 10/12 (the moves rolled are not fixed, so
+      // "3 offered, 1 left" is the engine test's; here the range follows the moves left).
+      await openGearItem(pad, "current-party");
+      await expect(heroRow(board, "hero-a")).toContainText("HP 10/12", { timeout: 20_000 });
+      await pad.locator("[data-gear-panel] button.bt-primary", { hasText: "Done" }).click();
       await clickAct(pad, "build");
       if (most > 2) {
         await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
@@ -264,7 +279,37 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     }
   });
 
-  test("EV-02, EV-07, EV-18: Cure reads free; the hero picks the corruption; Continue keeps the price", async ({
+  test("EV-07: the iPad lists only corrupted heroes, then that hero's corruptions; Lost goes, Feral stays", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad } = await startGame(browser, testInfo, {
+      seed: seedAt(SANCTUARY, "~test-gold:hero-a=30~test-named:hero-a=feral+lost,hero-c=greedy"),
+    });
+    try {
+      await enterBuilding(pad);
+      await optionByLabel(pad, "Cure").click();
+      // Hero A and Hero C hold corruptions; B and D hold none and are not offered.
+      await expect(deviceMain(pad).locator('[data-building="who"]')).toBeVisible();
+      expect((await labelsOf(pad)).sort()).toEqual(["Hero A", "Hero C"]);
+      await optionByLabel(pad, "Hero A").click();
+      await expect(deviceMain(pad).locator('[data-building="corruption"]')).toBeVisible();
+      expect(await labelsOf(pad)).toEqual(["Feral", "Lost"]);
+      await optionByLabel(pad, "Lost").click();
+      await expect(deviceMain(pad).locator("[data-building-result]")).toHaveText(
+        "The corruption is lifted.",
+      );
+      await clickAct(pad, "build");
+      // Hero A still holds Feral: the Cure's hero list still names Hero A.
+      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
+      await optionByLabel(pad, "Cure").click();
+      expect((await labelsOf(pad)).sort()).toEqual(["Hero A", "Hero C"]);
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-02, EV-18: Cure reads free, then its price; Continue keeps the price", async ({
     browser,
   }, testInfo) => {
     test.setTimeout(420_000);
