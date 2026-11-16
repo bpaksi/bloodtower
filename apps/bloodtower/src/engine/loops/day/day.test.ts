@@ -1787,3 +1787,24 @@ describe("C3/20 EV-03 the night's drop reads the seed", () => {
     }
   });
 });
+
+describe("C3/20 EV-05 two heroes on one space: no Regroup prompt, the queued split applies at day start", () => {
+  it("seats both on one space by the marker, offers no regroup, and splits at the next day start", () => {
+    const h = boot("c3-20-ev05~test-seat-together", ["hero-a", "hero-b"], false);
+    try {
+      expect(h.play.groups).toHaveLength(1);
+      expect(h.play.groups[0]?.heroIds).toEqual(expect.arrayContaining(["hero-a", "hero-b"]));
+      const first = beginDay(h);
+      expect(first).toBe("prompt");
+      expect(h.offers.filter((offer) => offer.promptId.startsWith("regroup"))).toEqual([]);
+      expect(h.local.phase).toBe("roll");
+      queueRegroupPick(h.play, "split", "hero-b", "pad");
+      // Day 2's start applies it, with no prompt on the way.
+      runDay(h);
+      expect(h.play.groups).toHaveLength(2);
+      expect(h.play.regroupCardDay).toBe(2);
+    } finally {
+      closeHarness();
+    }
+  });
+});

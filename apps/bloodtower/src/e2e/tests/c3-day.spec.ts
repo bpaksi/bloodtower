@@ -959,13 +959,44 @@ test.describe("C3/11 the day on the board", () => {
     }
   });
 
-  // Not live: these read a Regroup prompt that CU/04 (#523) removed. Seeding two heroes on one
-  // space cannot bring back a prompt the engine no longer offers, and none is faked here.
-  // Suggested reword for Bob: "no Regroup prompt; the queued split applies at day start and the
-  // groups card shows" (CU/04's own spec covers that).
-  test.fixme("C3/20 EV-05, and the Regroup stop of C3/11 EV-05, EV-11 and EV-13: blocked by CU/04, which removed the Regroup prompt", async () => {});
+  test("EV-05, EV-11, EV-12, EV-13 (day start, groups card): no Regroup prompt, the queued split applies and the card shows", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    // Two heroes seated on one space by the seed hook, with a split queued from the host's action.
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      TWO,
+      undefined,
+      true,
+    );
+    try {
+      await clickAct(pad, "continue");
+      await playUntil(pad, board, atPhase(board, "turn", 2), "day 2's turn");
+      expect((await wireTable(board))?.groups).toHaveLength(1);
+      await sendAct(pad, "gear", "pick", { item: "split", pick: "split", heroId: "hero-b" });
+      await playUntil(pad, board, atPhase(board, "roll", 3), "day 3's roll");
 
-  // Not mine: the corruption names come with C3-08.
+      // The queued split applied at day start and the card shows, with nothing pressable.
+      const card = board.locator("[data-groups-card]");
+      await expect(card).toBeVisible({ timeout: 5_000 });
+      await expect(card.locator("[data-group]")).toHaveText(["Group 1: Hero A", "Group 2: Hero B"]);
+      await expect(card.locator("button, a, [role='button'], [tabindex]")).toHaveCount(0);
+      await expect(boardMain(board).locator("button")).toHaveCount(0);
+      await expectNoRegroupOnPad(pad, "the day-start stop");
+      expect((await wireTable(board))?.groups).toHaveLength(2);
+      // The toolbar and help stand on this stop, and help changes nothing.
+      await expectToolbar(pad);
+      await checkHelp(pad, board, "[data-groups-card], #roll");
+      // The happy path to here never opened the Menu.
+      await expect(boardMain(board)).toHaveAttribute("data-gear-opens", "0");
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
   test.fixme("EV-08 (names): the engine keeps corruption counts only; the names come with C3-08", async () => {});
 });
 
