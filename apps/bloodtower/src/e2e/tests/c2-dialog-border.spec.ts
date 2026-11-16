@@ -229,6 +229,7 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
       const step = (await board.locator("main").getAttribute("data-setup-step")) ?? "setup";
       steps.push(step);
       await measure(`setup:${step}`);
+      if (step === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
       const prompt = device.locator(
         'button[data-prompt-id^="continue-setup-"][data-action-id="continue"]',
       );
@@ -241,6 +242,7 @@ test("every board dialog keeps the DEC-705 border", async ({ browser }, testInfo
     expect(steps, "the setup dialog has the engine step and the pack step").toEqual([
       "seals-and-skulls",
       "place-heroes",
+      "starting-purse",
     ]);
 
     await expect(board.locator("main")).toHaveAttribute("data-screen", "begin");

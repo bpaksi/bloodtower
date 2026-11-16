@@ -199,7 +199,8 @@ test("W5 Done on place-heroes opens Begin, and Back locks it again", async ({
 
     await clickAct(device, "back", "back-begin");
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "setup");
-    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "place-heroes");
+    // The purse is already spun, so Back from Begin lands on its Continue (CU/15).
+    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "starting-purse");
     await expect(device.locator("[data-begin-lock]")).toHaveText("The setup steps are not done.");
     await expect(device.locator('button[data-prompt-id="continue-begin"]')).toBeDisabled();
     expect(session.tower.sent()).toEqual([]);
