@@ -470,7 +470,7 @@ test("W1 a held hero, the Menu and a restart survive Continue", async ({ browser
 });
 
 const PORTRAIT = { viewport: { width: 768, height: 1024 }, hasTouch: true as const };
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 
 const skipUnlessIpad = (testInfo: { project: { name: string } }) => {
   test.skip(testInfo.project.name !== "ipad", "The approved mockup is iPad portrait.");
@@ -591,7 +591,10 @@ const reach = async (
   await clickAct(page, "continue", "continue-claim-heroes");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
   if (stop === "setup") return;
-  for (const id of SETUP_IDS) await clickAct(page, "continue", `continue-setup-${id}`);
+  for (const id of SETUP_IDS) {
+    if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
+    await clickAct(page, "continue", `continue-setup-${id}`);
+  }
   await clickAct(page, "continue", "continue-begin");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
   await advanceOpenings(page);
@@ -637,7 +640,10 @@ test("the Menu ends with Close on every screen it opens from", async ({ browser 
     await expectCloseLast(page);
     await page.locator('[data-action="menu"]').click();
 
-    for (const id of SETUP_IDS) await clickAct(page, "continue", `continue-setup-${id}`);
+    for (const id of SETUP_IDS) {
+      if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
+      await clickAct(page, "continue", `continue-setup-${id}`);
+    }
     await clickAct(page, "continue", "continue-begin");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await openMenu(page);
@@ -936,6 +942,7 @@ test("the toolbar is on every iPad screen, and ? help matches the current screen
     for (const id of SETUP_IDS) {
       await expectToolbar(page);
       await checkHelp(page, "base-board-setup");
+      if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
       await clickAct(page, "continue", `continue-setup-${id}`);
     }
     await clickAct(page, "continue", "continue-begin");
@@ -964,7 +971,10 @@ test("the toolbar is on every iPad screen, and ? help matches the current screen
 const finishFromClaim = async (page: Page) => {
   await clickAct(page, "continue", "continue-claim-heroes");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
-  for (const id of SETUP_IDS) await clickAct(page, "continue", `continue-setup-${id}`);
+  for (const id of SETUP_IDS) {
+    if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
+    await clickAct(page, "continue", `continue-setup-${id}`);
+  }
   await clickAct(page, "continue", "continue-begin");
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
   await advanceOpenings(page);

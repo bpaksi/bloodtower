@@ -4,6 +4,7 @@ import {
   openingPromptId,
 } from "../../../protocols/opening.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
+import { drawPurse, isPurseAmount } from "../../rules/purse/index.ts";
 import { CONTINUE_PROMPT, canContinue } from "../session/hub.ts";
 import {
   pauseGoWithoutPrompt,
@@ -11,13 +12,22 @@ import {
   pauseReconnectPrompt,
 } from "../session/reconnect.ts";
 import type { ShellScreen } from "../session/screens.ts";
-import { recordOffer, shellState } from "../session/shellRef.ts";
+import { recordOffer, requestTowerCommand, shellState } from "../session/shellRef.ts";
 import {
   allHeroesHeld,
   bindStoryChoice,
+  PURSE_STEP_ID,
+  SPIN_ACTION,
+  SPIN_PROMPT,
   screenAfterBack,
   screenAfterContinue,
+  towerSpins,
 } from "./setupFlow.ts";
+
+/** The tower's light chase for the spin (`lighting.sequence`), with the coin sound alongside it. */
+const PURSE_SPIN_SEQUENCE = "twinkle";
+/** Placeholder library sound for the coin cue, until Bob's sound notes pick one (as CUE-006). */
+const PURSE_COIN_SOUND = 1;
 
 export type GameLocal = {
   phase:
@@ -81,7 +91,12 @@ const offerContinueOrBack = (
       local.awaitingPress = false;
       return;
     }
-    offer(`continue-setup-${step.id}`, "continue");
+    // The starting purse asks for one Spin; Continue comes once the purse is set (UI-045, SCR-016).
+    if (step.id === PURSE_STEP_ID && !isPurseAmount(shell.startingPurse)) {
+      offer(SPIN_PROMPT, SPIN_ACTION);
+    } else {
+      offer(`continue-setup-${step.id}`, "continue");
+    }
     offer(`back-setup-${step.id}`, "back");
     local.awaitingPress = true;
     return;
@@ -186,6 +201,26 @@ export const handleGamePress = (
 ): GameLocal => {
   const shell = shellState();
 
+  if (actionId === SPIN_ACTION) {
+    // The purse is set once (EV-11): a second press, or one with the purse already set, changes nothing.
+    if (local.phase !== "setup" || promptId !== SPIN_PROMPT)
+      return { ...local, awaitingPress: false };
+    if (shell.setupSteps[shell.setupAt]?.id !== PURSE_STEP_ID) return local;
+    if (isPurseAmount(shell.startingPurse)) return { ...local, awaitingPress: false };
+    shell.startingPurse = drawPurse(shell.seed);
+    if (towerSpins(shell)) {
+      // Only on the press (EV-08): the tower chases its lights and plays the coin sound (DEC-114).
+      requestTowerCommand("lighting.sequence", {
+        sequence: PURSE_SPIN_SEQUENCE,
+        soundIndex: PURSE_COIN_SOUND,
+      });
+    } else {
+      // No tower (Q7.4): the result is on the board at once and the board plays the coin sound.
+      shell.purseCue += 1;
+    }
+    return { ...local, awaitingPress: false };
+  }
+
   if (actionId === "continue") {
     if (local.phase === "pick-story" && promptId === `continue-pick-story-${shell.focusStoryId}`) {
       const focused = shell.stories.find((story) => story.card.id === shell.focusStoryId);
@@ -214,6 +249,10 @@ export const handleGamePress = (
     if (local.phase === "setup") {
       const step = shell.setupSteps[shell.setupAt];
       if (!step || promptId !== `continue-setup-${step.id}`) return local;
+      // Continue waits for the spin: a stale press cannot step past an unset purse.
+      if (step.id === PURSE_STEP_ID && !isPurseAmount(shell.startingPurse)) {
+        return { ...local, awaitingPress: false };
+      }
       shell.setupAt += 1;
       const next = screenAfterContinue(shell, "setup");
       if (!next) return local;

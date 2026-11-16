@@ -66,6 +66,7 @@ const toSetup = (seed: string, track: "connect" | "without") => {
 const toPlay = (seed: string, track: "connect" | "without") => {
   let state = toSetup(seed, track);
   for (const setup of state.setupSteps) {
+    if (setup.id === "starting-purse") state = step(state, press(`spin-setup-${setup.id}`, "spin"));
     state = step(state, press(`continue-setup-${setup.id}`, "continue"));
   }
   state = step(state, press("continue-begin", "continue"));

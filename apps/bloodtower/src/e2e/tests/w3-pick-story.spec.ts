@@ -513,7 +513,7 @@ test("a not-ready visit does not resume the Count", async ({ browser }, testInfo
 
 // C2-14 (GC1-06): Pick story always shows every loaded story and waits for a press.
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair-01", "grey-stair-02", "grey-stair-03", "grey-stair-04"] as const;
 const PICK_WAIT_MS = 5000;
 
@@ -540,6 +540,7 @@ const playToQuit = async (device: Page) => {
     await expect(deviceMain(device)).toHaveAttribute("data-setup-step", id, {
       timeout: 20_000,
     });
+    if (id === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
     await clickAct(device, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(device)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });

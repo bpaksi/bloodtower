@@ -188,6 +188,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       chosenStoryId: current.chosenStoryId,
       setupAt: current.setupAt,
       boundStoryId: current.boundStoryId,
+      // The spin changes nothing else: without it the purse would never reach a checkpoint (CU/15).
+      startingPurse: current.startingPurse,
     });
 
   let savedLobbySignature = "";
@@ -445,6 +447,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           null,
         );
         if (!ok) tellDevice("The tower did not play that volume. Nothing was retried.");
+        continue;
+      }
+      if (outcome.capabilityId === "lighting.sequence") {
+        // The starting purse's Spin (CU/15): the purse is set whatever the lights did, but the
+        // iPad that pressed must hear that the chase did not run (decision 0003).
+        if (!ok)
+          tellDevice(
+            "The tower did not run the light chase. The purse is set. Nothing was retried.",
+          );
         continue;
       }
       if (outcome.capabilityId !== "tower.connect" && outcome.capabilityId !== "tower.calibrate") {

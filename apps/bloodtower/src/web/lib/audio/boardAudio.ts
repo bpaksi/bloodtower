@@ -120,6 +120,19 @@ export class BoardAudio {
     installBtAudioHook(this);
   }
 
+  /**
+   * The starting purse's coin cue (CU/15, Q7.4): one short sound on the board speakers, outside the
+   * three channel levels so a muted bed does not mute it. False when the browser has no audio.
+   */
+  playCoin(schedule: (context: AudioContext, out: AudioNode) => void): boolean {
+    this.unlock();
+    const context = this.context;
+    if (!context || !this.duck) return false;
+    this.resume();
+    schedule(context, this.duck);
+    return true;
+  }
+
   private resume(): void {
     const context = this.context;
     if (!context || context.state === "running") return;

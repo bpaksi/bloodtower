@@ -27,14 +27,19 @@ export interface MockTower extends TowerPort {
   idleAttempts: () => number;
   /** `lighting.all-off`. Recorded as `{ type: "idle" }` once per dispatch. */
   idle: () => Promise<"written" | "failed">;
+  /**
+   * `lighting.sequence` (CU/15, the starting purse's light chase). Recorded as
+   * `{ type: "sequence", sequence, soundIndex? }` once per dispatch; no raw bytes.
+   */
+  lightSequence: (sequence: string, soundIndex?: number) => Promise<"written" | "failed">;
   /** Drops the link while keeping prior calibration readings (tower-lost pause). */
   loseConnection: () => void;
   onSnapshotChange: (listener: () => void) => () => void;
 }
 
 /**
- * In-memory tower for CI. It records connect, calibrate, sounds, and idle
- * (`lighting.all-off` as `{ type: "idle" }`). It never records a light cue or raw bytes.
+ * In-memory tower for CI. It records connect, calibrate, sounds, idle (`lighting.all-off` as
+ * `{ type: "idle" }`) and light sequences (`lighting.sequence`, CU/15). It never records raw bytes.
  * Battery stays unavailable until a test sets a reading. Zero is a reading only when set.
  */
 export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
@@ -118,6 +123,21 @@ export const createMockTower = (options: MockTowerOptions = {}): MockTower => {
         failIdle = false;
         return "failed";
       }
+      return "written";
+    },
+    lightSequence: async (sequence, soundIndex) => {
+      if (snapshot.connection !== "connected") {
+        report(
+          "tower-command-failed",
+          `Light sequence ${sequence} was not sent because the tower is not connected.`,
+        );
+        return "failed";
+      }
+      sent.push({
+        type: "sequence",
+        sequence,
+        ...(soundIndex === undefined ? {} : { soundIndex }),
+      });
       return "written";
     },
     failNextIdle: () => {

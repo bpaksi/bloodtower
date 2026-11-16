@@ -38,6 +38,12 @@ const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-st
 const clickCurrentSetupOrBegin = async (page: Page) => {
   const screen = await deviceMain(page).getAttribute("data-screen");
   if (screen === "setup") {
+    // The starting-purse step asks for its Spin before Continue (CU/15).
+    const spin = page.locator('button[data-action-id="spin"]');
+    if ((await spin.count()) > 0) {
+      await spin.click();
+      await expect(spin).toHaveCount(0);
+    }
     const step = page.locator(
       'button[data-prompt-id^="continue-setup-"][data-action-id="continue"]',
     );

@@ -38,6 +38,22 @@ export const bloodtowerTowerFromMock = (mock: MockTower): BloodtowerTower => ({
       }
       return "ok";
     }
+    if (capabilityId === "lighting.sequence") {
+      const { sequence, soundIndex } = params;
+      if (typeof sequence !== "string") {
+        log.error("tower-command-failed", "Tower command lighting.sequence had no sequence.");
+        return "failed";
+      }
+      const taken = await mock.lightSequence(
+        sequence,
+        typeof soundIndex === "number" ? soundIndex : undefined,
+      );
+      if (taken === "failed") {
+        log.error("tower-command-failed", "Tower command lighting.sequence failed.");
+        return "failed";
+      }
+      return "ok";
+    }
     if (capabilityId === "tower.connect" || capabilityId === "tower.calibrate") {
       const taken = capabilityId === "tower.connect" ? mock.connect() : mock.calibrate();
       if (taken === "failed") {

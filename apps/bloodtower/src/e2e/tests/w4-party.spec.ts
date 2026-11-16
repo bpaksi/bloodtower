@@ -59,7 +59,7 @@ const backToGameSettings = async (page: Page) => {
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
 };
 
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 /** Same walk as area-077: three setup steps, Begin, then the four opening moments. */
@@ -67,6 +67,7 @@ const finishSetup = async (page: Page) => {
   for (const id of SETUP_IDS) {
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
     await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id);
+    if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
     await clickAct(page, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });

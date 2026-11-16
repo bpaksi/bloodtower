@@ -5,6 +5,7 @@ import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
 import { AssetIdLabel } from "./AssetIdLabel";
+import { ChanceSpin } from "./ChanceSpin";
 import {
   DayBandExtras,
   DayPanel,
@@ -40,6 +41,9 @@ function TowerMark() {
 
 /** v2 story board. Startup is a centred dialog. Play is the move band or the place still. Display only. */
 export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boolean }) {
+  // The starting-purse step has its own panel (CU/15); every other startup screen is the dialog.
+  if (view.screen === "setup" && view.chance)
+    return <ChanceSpin view={view} chance={view.chance} />;
   if (isStartupScreen(view.screen)) return <StartupBoard view={view} debug={debug} />;
 
   const warning = joinWarning(view);

@@ -114,6 +114,8 @@ describe("game setup forward and back", () => {
 
     for (const step of state.setupSteps) {
       expect(state.screen).toBe("setup");
+      if (step.id === "starting-purse")
+        state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
       state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
     }
     expect(state.screen).toBe("begin");
@@ -175,6 +177,8 @@ describe("game setup forward and back", () => {
     const second = steps[1];
     if (!first || !second) throw new Error("Expected at least two setup steps.");
 
+    if (first.id === "starting-purse")
+      state = runPresses(state, [press("ipad-0", `spin-setup-${first.id}`, "spin")]);
     state = runPresses(state, [press("ipad-0", `continue-setup-${first.id}`, "continue")]);
     expect(state.screen).toBe("setup");
     expect(state.setupAt).toBe(1);
@@ -191,6 +195,8 @@ describe("game setup forward and back", () => {
     let state = atClaimHeroes();
     state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
     for (const step of state.setupSteps) {
+      if (step.id === "starting-purse")
+        state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
       state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
     }
     expect(state.screen).toBe("begin");
@@ -221,6 +227,8 @@ describe("pauses", () => {
     }
     state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
     for (const step of state.setupSteps) {
+      if (step.id === "starting-purse")
+        state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
       state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
     }
     state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
@@ -392,6 +400,8 @@ describe("quit story and session screen", () => {
     }
     state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
     for (const step of state.setupSteps) {
+      if (step.id === "starting-purse")
+        state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
       state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
     }
     state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
@@ -461,6 +471,8 @@ describe("done for tonight", () => {
     }
     state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
     for (const step of state.setupSteps) {
+      if (step.id === "starting-purse")
+        state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
       state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
     }
     state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
@@ -498,6 +510,8 @@ const throughOpening = (momentCount: number) => {
   }
   state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
   for (const step of state.setupSteps) {
+    if (step.id === "starting-purse")
+      state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
     state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
   }
   state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);
@@ -533,6 +547,8 @@ const reachPlay = (linked: boolean) => {
   }
   state = runPresses(state, [press("ipad-0", "continue-claim-heroes", "continue")]);
   for (const step of state.setupSteps) {
+    if (step.id === "starting-purse")
+      state = runPresses(state, [press("ipad-0", `spin-setup-${step.id}`, "spin")]);
     state = runPresses(state, [press("ipad-0", `continue-setup-${step.id}`, "continue")]);
   }
   state = runPresses(state, [press("ipad-0", "continue-begin", "continue")]);

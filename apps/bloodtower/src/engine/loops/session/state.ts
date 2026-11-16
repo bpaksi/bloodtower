@@ -155,6 +155,16 @@ export type ShellState = {
   setupAt: number;
   setupSteps: { id: string; label: string }[];
   /**
+   * The starting purse the spin set (CU/15, DEC-114), or null before the spin. It is set once: a
+   * later press changes nothing. A checkpoint keeps it, so Continue never offers the spin again.
+   */
+  startingPurse: number | null;
+  /**
+   * Counts the spins that played the board's coin cue (no tower, Q7.4). Ephemeral: a restart
+   * clears it, so nothing sounds after Continue. The board plays the cue when this goes up.
+   */
+  purseCue: number;
+  /**
    * Opening moment index after Begin. `-1` before Begin, `OPENING_MOMENTS.length` once
    * Continue has left the last moment. A checkpoint keeps this so Continue can resume it.
    */
@@ -249,6 +259,8 @@ export const initialShellState = (input: {
     screen: "table-join",
     setupAt: 0,
     setupSteps: [],
+    startingPurse: null,
+    purseCue: 0,
     openingIndex: -1,
     stage: "lobby",
     pause: null,

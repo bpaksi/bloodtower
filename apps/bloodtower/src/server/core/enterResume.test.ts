@@ -201,6 +201,7 @@ describe("the Enter and a host restart", () => {
     }
     await act("continue-claim-heroes", "continue");
     for (const step of first.session.state().setupSteps) {
+      if (step.id === "starting-purse") await act(`spin-setup-${step.id}`, "spin");
       await act(`continue-setup-${step.id}`, "continue");
     }
     await act("continue-begin", "continue");
@@ -331,7 +332,10 @@ const playAndQuit = async (session: CoreSession, pad: string) => {
   await act("continue-game-settings", "continue");
   for (const heroId of HEROES) await act("hero-hold", "take", { heroId });
   await act("continue-claim-heroes", "continue");
-  for (const step of session.state().setupSteps) await act(`continue-setup-${step.id}`, "continue");
+  for (const step of session.state().setupSteps) {
+    if (step.id === "starting-purse") await act(`spin-setup-${step.id}`, "spin");
+    await act(`continue-setup-${step.id}`, "continue");
+  }
   await act("continue-begin", "continue");
   for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
   await act("menu-quit", "quit-story");
@@ -455,8 +459,10 @@ describe("a Play again the engine refuses", () => {
       await act("hero-hold", "take", { heroId });
     }
     await act("continue-claim-heroes", "continue");
-    for (const step of session.state().setupSteps)
+    for (const step of session.state().setupSteps) {
+      if (step.id === "starting-purse") await act(`spin-setup-${step.id}`, "spin");
       await act(`continue-setup-${step.id}`, "continue");
+    }
     await act("continue-begin", "continue");
     for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
     await act("menu-quit", "quit-story");

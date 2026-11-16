@@ -26,7 +26,7 @@ const BOARD = { width: 1920, height: 1080 } as const;
 const IPAD = { width: 768, height: 1024 } as const;
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair-01", "grey-stair-02", "grey-stair-03", "grey-stair-04"] as const;
 const REPLACE_LINE = "This replaces the saved game. Are you sure?";
 const JOIN_LINE = "Scan with each iPad. Then pick who this iPad speaks for at the table";
@@ -124,6 +124,7 @@ const playToBegin = async (pad: Page) => {
   await clickAct(pad, "continue", "continue-claim-heroes");
   for (const id of SETUP_IDS) {
     await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+    if (id === "starting-purse") await clickAct(pad, "spin", "spin-setup-starting-purse");
     await clickAct(pad, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
@@ -379,6 +380,7 @@ test("without the tower: two games newest first, New game replaces the save only
       await expect(deviceMain(padA.page)).toHaveAttribute("data-setup-step", id, {
         timeout: 20_000,
       });
+      if (id === "starting-purse") await clickAct(padA.page, "spin", "spin-setup-starting-purse");
       await clickAct(padA.page, "continue", `continue-setup-${id}`);
     }
     await expect(deviceMain(padA.page)).toHaveAttribute("data-screen", "begin");

@@ -74,6 +74,7 @@ const reachPlay = (hints: "on" | "off" = "on"): ShellState => {
   }
   state = step(state, press("continue-claim-heroes", "continue"));
   for (const setup of state.setupSteps) {
+    if (setup.id === "starting-purse") state = step(state, press(`spin-setup-${setup.id}`, "spin"));
     state = step(state, press(`continue-setup-${setup.id}`, "continue"));
   }
   state = step(state, press("continue-begin", "continue"));

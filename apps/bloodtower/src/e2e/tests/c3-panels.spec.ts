@@ -11,6 +11,7 @@ import {
 import {
   enterWithoutTower,
   enterWithoutTowerKeepSound,
+  enterWithTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -29,7 +30,7 @@ const STORY_ID = "test";
 const FOUR = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
 const PORTRAIT = { viewport: { width: 768, height: 1024 }, hasTouch: true as const };
 const BOARD_SIZE = { width: 1920, height: 1080 };
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 const NO_ITEMS = "No potions or items to use.";
 const MOCKUP = join(
@@ -123,6 +124,7 @@ const startGame = async (
   await clickAct(pad, "continue", "continue-claim-heroes");
   for (const id of SETUP_IDS) {
     await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+    if (id === "starting-purse") await clickAct(pad, "spin", "spin-setup-starting-purse");
     await clickAct(pad, "continue", `continue-setup-${id}`);
   }
   await clickAct(pad, "continue", "continue-begin");
@@ -493,6 +495,237 @@ test.describe("CU/14 the turn-start virtue panel and the choice list", () => {
       await expect(deviceMain(pad).locator("[data-move-map]")).toBeVisible();
     } finally {
       await closeAll(context, session.host);
+    }
+  });
+});
+
+const CHANCE_MOCKUP = join(
+  import.meta.dirname,
+  "../../../plans/briefs/CU/15-purse-spin/mockup.html",
+);
+
+const chanceMockupShot = async (browser: Browser, testInfo: TestInfo, id: string, name: string) => {
+  const mock = await browser.newContext({ viewport: { width: 1000, height: 1100 } });
+  try {
+    const page = await mock.newPage();
+    await page.goto(pathToFileURL(CHANCE_MOCKUP).href);
+    const path = testInfo.outputPath(`${name}.png`);
+    await page.locator(id).screenshot({ path });
+    await testInfo.attach(name, { path, contentType: "image/png" });
+  } finally {
+    await mock.close();
+  }
+};
+
+type SentTower = ReturnType<
+  Awaited<ReturnType<typeof startAcceptanceHost>>["tower"]["sent"]
+>[number];
+const sequences = (sent: readonly SentTower[]) => sent.filter((row) => row.type === "sequence");
+const coinCues = (board: Page) =>
+  board.evaluate(() => (window as unknown as { __btCoinCues?: number }).__btCoinCues ?? 0);
+
+/** Join, choose the tower track, pick the test story and hold the four heroes, to the purse step. */
+const reachPurseStep = async (
+  browser: Browser,
+  testInfo: TestInfo,
+  options: { tower: boolean; seed: string; databasePath?: string },
+) => {
+  const session = await startAcceptanceHost(testInfo, {
+    seed: options.seed,
+    databasePath: options.databasePath,
+    lanHost: () => "192.0.2.10",
+  });
+  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+  const pad = await context.newPage();
+  const board = await context.newPage();
+  await board.setViewportSize(BOARD_SIZE);
+  await board.goto("/board");
+  await installSessionSocketHook(pad);
+  await grantWakeLock(pad);
+  await pad.goto(`/join?code=${session.host.joinCode}`);
+  if (options.tower) await enterWithTower(pad);
+  else await enterWithoutTower(pad);
+  await clickAct(pad, "continue", `continue-pick-story-${STORY_ID}`);
+  await clickAct(pad, "continue", "continue-game-settings");
+  await holdHeroesFromTest(pad, [...FOUR]);
+  await clickAct(pad, "continue", "continue-claim-heroes");
+  for (const id of SETUP_IDS.slice(0, -1)) {
+    await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+    await clickAct(pad, "continue", `continue-setup-${id}`);
+  }
+  await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", "starting-purse", {
+    timeout: 20_000,
+  });
+  return { session, context, pad, board };
+};
+
+test.describe("CU/15 the game of chance: the Spin and the starting purse", () => {
+  test.beforeEach(({ browserName: _browserName }, testInfo) => {
+    test.skip(testInfo.project.name !== "ipad", "The approved mockup is the 1920x1080 board.");
+  });
+
+  test("EV-08, EV-12: with the tower nothing runs until the press, then one command, and the tower plays the sound", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await reachPurseStep(browser, testInfo, {
+      tower: true,
+      seed: "cu15-tower",
+    });
+    try {
+      const chance = board.locator("#chance");
+      await expect(chance).toBeVisible({ timeout: 20_000 });
+      await expect(chance).toContainText("Starting purse");
+      await expect(chance.locator("[data-chance-result]")).toHaveCount(0);
+      // Ten seconds of waiting: the tower receives nothing on its own.
+      await pad.waitForTimeout(10_000);
+      expect(sequences(session.tower.sent())).toHaveLength(0);
+      const spin = pad.locator('button[data-prompt-id="spin-setup-starting-purse"]');
+      await expect(spin).toHaveText("Spin");
+      await expect(pad.locator("main.bt-device [data-gear-panel], main.bt-device img")).toHaveCount(
+        0,
+      );
+      await shot(pad, testInfo, "cu15-ev12-ipad-spin");
+      await chanceMockupShot(browser, testInfo, "#ipad-chance", "cu15-ev12-mockup-ipad-chance");
+      await spin.click();
+      await expect(chance.locator("[data-chance-result]")).toHaveText(
+        /^The lights stop on (10|20|30|40) gold\.$/,
+        { timeout: 20_000 },
+      );
+      const sent = sequences(session.tower.sent());
+      expect(sent).toHaveLength(1);
+      expect(sent[0]?.sequence).toBeTruthy();
+      expect(sent[0]?.soundIndex).toBeGreaterThan(0);
+      // No raw bytes: every recorded row has only the named command fields.
+      for (const row of session.tower.sent()) {
+        expect(
+          Object.keys(row).every((key) =>
+            ["type", "sequence", "soundIndex", "volume"].includes(key),
+          ),
+        ).toBe(true);
+      }
+      // The tower plays the sound: the board plays none (DEC-114).
+      expect(await coinCues(board)).toBe(0);
+      await shot(board, testInfo, "cu15-ev12-board-chance-result");
+      await chanceMockupShot(browser, testInfo, "#chance", "cu15-ev12-mockup-chance");
+      // Spin is spent; Continue is the one primary button now.
+      await expect(spin).toHaveCount(0);
+      await expect(
+        pad.locator('button[data-prompt-id="continue-setup-starting-purse"]'),
+      ).toBeEnabled();
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-10, EV-11, EV-13: with no tower the result is at once, one coin cue on the board, a second press changes nothing", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await reachPurseStep(browser, testInfo, {
+      tower: false,
+      seed: "cu15-no-tower",
+    });
+    try {
+      const chance = board.locator("#chance");
+      await expect(chance).toBeVisible({ timeout: 20_000 });
+      expect(await coinCues(board)).toBe(0);
+      // Two presses straight after each other: the second arrives from "another iPad's" socket path.
+      // The panel must go straight from waiting to result: no chase state in between.
+      await board.evaluate(() => {
+        const w = window as unknown as { __chanceStates?: string[] };
+        w.__chanceStates = [];
+        new MutationObserver(() => {
+          const v = document.querySelector("#chance")?.getAttribute("data-chance");
+          const log = w.__chanceStates ?? [];
+          if (v && log.at(-1) !== v) log.push(v);
+        }).observe(document.body, { subtree: true, attributes: true, childList: true });
+      });
+      await sendAct(pad, "spin-setup-starting-purse", "spin", {});
+      await sendAct(pad, "spin-setup-starting-purse", "spin", {});
+      const result = chance.locator("[data-chance-result]");
+      await expect(result).toHaveText(/^The wheel stops on (10|20|30|40) gold\.$/, {
+        timeout: 1_000,
+      });
+      expect(
+        await board.evaluate(
+          () => (window as unknown as { __chanceStates?: string[] }).__chanceStates,
+        ),
+      ).toEqual(["result"]);
+      const text = await result.textContent();
+      await pad.waitForTimeout(1_000);
+      await expect(result).toHaveText(text ?? "");
+      expect(await coinCues(board)).toBe(1);
+      expect(sequences(session.tower.sent())).toHaveLength(0);
+      await expect(chance).not.toContainText(/tower|lights/i);
+      // No iPad plays sound (DEC-903).
+      expect(
+        await pad.evaluate(
+          () => (window as unknown as { __btCoinCues?: number }).__btCoinCues ?? 0,
+        ),
+      ).toBe(0);
+      expect(await pad.locator("audio").count()).toBe(0);
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-14, EV-15: a restart keeps the set purse, offers no second spin, and plays and sends nothing", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const first = await reachPurseStep(browser, testInfo, { tower: true, seed: "cu15-restart" });
+    const { databasePath } = first.session;
+    let amount = "";
+    try {
+      await clickAct(first.pad, "spin", "spin-setup-starting-purse");
+      const result = first.board.locator("#chance [data-chance-result]");
+      await expect(result).toHaveText(/gold\.$/, { timeout: 20_000 });
+      expect(sequences(first.session.tower.sent())).toHaveLength(1);
+      amount = (await result.getAttribute("data-chance-amount")) ?? "";
+      expect(amount).toMatch(/^(10|20|30|40)$/);
+    } finally {
+      await closeAll(first.context, first.session.host);
+    }
+    const restarted = await startAcceptanceHost(testInfo, {
+      databasePath,
+      seed: "cu15-restart",
+      lanHost: () => "192.0.2.10",
+    });
+    const context = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
+    const pad = await context.newPage();
+    const board = await context.newPage();
+    await board.setViewportSize(BOARD_SIZE);
+    await board.goto("/board");
+    try {
+      await installSessionSocketHook(pad);
+      await grantWakeLock(pad);
+      await pad.goto(`/join?code=${restarted.host.joinCode}`);
+      await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", "starting-purse", {
+        timeout: 20_000,
+      });
+      await expect(board.locator("#chance [data-chance-result]")).toHaveAttribute(
+        "data-chance-amount",
+        amount,
+        { timeout: 20_000 },
+      );
+      // No second Spin is offered; nothing plays or is sent without a new press.
+      await expect(pad.locator('button[data-action-id="spin"]')).toHaveCount(0);
+      await expect(
+        pad.locator('button[data-prompt-id="continue-setup-starting-purse"]'),
+      ).toBeEnabled();
+      await pad.waitForTimeout(2_000);
+      expect(await coinCues(board)).toBe(0);
+      expect(sequences(restarted.tower.sent())).toHaveLength(0);
+      // The same purse goes on with Continue.
+      await clickAct(pad, "continue", "continue-setup-starting-purse");
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "begin");
+      // Nothing runs after Continue either: no chase resumes or repeats, no cue plays.
+      await pad.waitForTimeout(2_000);
+      expect(sequences(restarted.tower.sent())).toHaveLength(0);
+      expect(await coinCues(board)).toBe(0);
+    } finally {
+      await closeAll(context, restarted.host);
     }
   });
 });

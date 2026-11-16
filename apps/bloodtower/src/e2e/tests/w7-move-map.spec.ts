@@ -81,7 +81,7 @@ const buildingTitle = (building: string) => building.charAt(0).toUpperCase() + b
 const heroName = (heroId: string | null) =>
   heroId && heroId in HERO_NAME ? HERO_NAME[heroId as (typeof HERO_IDS)[number]] : "";
 
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 
 /** The day-end skull step: the tower drop prompt, or the drawn drop without the tower (DEC-305). */
 const SKULL_STEP = 'button[data-prompt-id*="skull-drop"], button[data-prompt-id^="skull-sim-day-"]';
@@ -92,6 +92,7 @@ const finishSetup = async (page: Page) => {
   for (const id of SETUP_IDS) {
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
     await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id);
+    if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
     await clickAct(page, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });

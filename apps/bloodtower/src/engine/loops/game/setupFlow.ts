@@ -17,11 +17,41 @@ export const setupBackPrompt = (stepId: string) => `back-setup-${stepId}`;
 export const chosenStory = (state: ShellState) =>
   state.stories.find((story) => story.card.id === state.chosenStoryId);
 
+/** The core setup step that hosts the game of chance (DEC-110 step 6, DEC-114, UI-045; copy `chance.title`). */
+export const PURSE_STEP_ID = "starting-purse";
+export const PURSE_STEP_LABEL = "Starting purse";
+export const SPIN_PROMPT = `spin-setup-${PURSE_STEP_ID}`;
+export const SPIN_ACTION = "spin";
+
+/** The tower runs the spin only while it is linked and connected; otherwise the board does (Q7.4). */
+export const towerSpins = (state: ShellState): boolean =>
+  state.towerLinked && state.tower.connection === "connected";
+
+/** True while the setup screen is on the starting-purse step. */
+export const onPurseStep = (state: ShellState): boolean =>
+  state.screen === "setup" && state.setupSteps[state.setupAt]?.id === PURSE_STEP_ID;
+
+/**
+ * The story's steps with the purse step added. The purse is a core step (DEC-110) that follows the
+ * heroes' placement and comes before the story's extras; with no placement step it follows the seals.
+ */
+const withPurseStep = (steps: readonly { id: string; label: string }[]) => {
+  const rest = steps.filter((step) => step.id !== PURSE_STEP_ID);
+  const after = Math.max(
+    rest.findIndex((step) => step.id === "place-heroes"),
+    rest.findIndex((step) => step.id === "seals-and-skulls"),
+  );
+  const row = { id: PURSE_STEP_ID, label: PURSE_STEP_LABEL };
+  return [...rest.slice(0, after + 1), row, ...rest.slice(after + 1)];
+};
+
 export const refreshSetupSteps = (state: ShellState): void => {
   const story = chosenStory(state);
   // `story.setup` is already merged with the engine seals step when the host loads the catalog.
-  state.setupSteps = story ? [...story.setup] : [];
+  state.setupSteps = story ? withPurseStep(story.setup) : [];
   state.setupAt = 0;
+  // A new setup list is a new game's setup: the purse is spun again for it.
+  state.startingPurse = null;
 };
 
 /** How many heroes this story seats. Party size wins; otherwise every hero. */

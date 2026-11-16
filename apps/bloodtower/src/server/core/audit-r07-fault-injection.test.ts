@@ -147,7 +147,10 @@ const reachPlay = async (h: Harness, track: Track): Promise<Table> => {
   await act("continue-game-settings", "continue");
   for (const heroId of HEROES) await act("hero-hold", "take", { heroId });
   await act("continue-claim-heroes", "continue");
-  for (const step of session.state().setupSteps) await act(`continue-setup-${step.id}`, "continue");
+  for (const step of session.state().setupSteps) {
+    if (step.id === "starting-purse") await act(`spin-setup-${step.id}`, "spin");
+    await act(`continue-setup-${step.id}`, "continue");
+  }
   await act("continue-begin", "continue");
   for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
   return table;

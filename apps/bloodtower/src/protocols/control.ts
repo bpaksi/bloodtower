@@ -34,6 +34,7 @@ export const CONTROL_ACTIONS = [
   "leave",
   "end-turn",
   "record",
+  "spin",
 ] as const;
 export const controlActionSchema = z.enum(CONTROL_ACTIONS);
 export type ControlAction = z.infer<typeof controlActionSchema>;

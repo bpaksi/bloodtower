@@ -79,7 +79,10 @@ const padFor = async (session: CoreSession) => {
 type Act = Awaited<ReturnType<typeof padFor>>["act"];
 
 const toBegin = async (session: CoreSession, act: Act) => {
-  for (const step of session.state().setupSteps) await act(`continue-setup-${step.id}`, "continue");
+  for (const step of session.state().setupSteps) {
+    if (step.id === "starting-purse") await act(`spin-setup-${step.id}`, "spin");
+    await act(`continue-setup-${step.id}`, "continue");
+  }
   await act("continue-begin", "continue");
   for (const moment of OPENING_MOMENTS) await act(openingPromptId(moment), "continue");
 };

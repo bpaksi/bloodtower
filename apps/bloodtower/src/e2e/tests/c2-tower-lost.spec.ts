@@ -25,7 +25,7 @@ const BOARD = { width: 1920, height: 1080 } as const;
 const IPAD = { width: 768, height: 1024 } as const;
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair-01", "grey-stair-02", "grey-stair-03", "grey-stair-04"] as const;
 const QUIET_LINE = "The tower has gone quiet. The game waits.";
 const QUIT_LINE = "Leave the game? It will be saved.";
@@ -141,6 +141,7 @@ const toFirstSetup = async (pad: Page, track: "connect" | "without") => {
 const setupToPlay = async (pad: Page) => {
   for (const id of SETUP_IDS) {
     await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+    if (id === "starting-purse") await clickAct(pad, "spin", "spin-setup-starting-purse");
     await clickAct(pad, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });

@@ -5,6 +5,8 @@ export interface TowerSent {
   /** For `sound`: the library sound index and the volume tier 0..3. */
   soundIndex?: number;
   volume?: number;
+  /** For `sequence`: the light sequence id of the `lighting.sequence` command (CU/15). */
+  sequence?: string;
 }
 
 /** How one tower sound ended. `written` means the write completed; no sound end is awaited. */
