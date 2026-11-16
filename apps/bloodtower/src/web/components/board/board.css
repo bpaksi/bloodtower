@@ -2293,6 +2293,21 @@
   top: 72%;
 }
 
+/* CU/14 (UI-037): the turn-start virtue panel sits under the band, above the move area. */
+.bt-board[data-board-layer="move"] > [data-panel="virtue"] {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+}
+
+[data-panel="virtue"] ul {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
 [data-day-panel] ul {
   margin: 0.4rem 0 0;
   padding: 0;

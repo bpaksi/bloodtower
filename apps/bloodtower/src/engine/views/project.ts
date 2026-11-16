@@ -26,6 +26,9 @@ const toOffered = (action: ViewAction): OfferedAction =>
         reason: action.reason,
       };
 
+/** Prompt ids of a virtue's options start with this (group-turn loop). */
+const VIRTUE_CHOICE_PREFIX = "virtue-choice--";
+
 const offeredTo = (action: ViewAction, deviceId: string) =>
   action.deviceId === null || action.deviceId === deviceId;
 
@@ -107,7 +110,15 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     }));
 
   const held = state.deviceHold ?? null;
-  const deviceActions = held ? held.actions : state.actions;
+  // A virtue's choice goes to the iPads of the acting group only (CU/14, EV-03): another group's
+  // iPad is not offered its buttons.
+  const virtueHeroes = state.table?.virtue?.heroIds ?? [];
+  const holdsActing = state.heroes.some(
+    (hero) => hero.deviceId === audience.deviceId && virtueHeroes.includes(hero.id),
+  );
+  const deviceActions = (held ? held.actions : state.actions).filter(
+    (action) => holdsActing || !action.promptId.startsWith(VIRTUE_CHOICE_PREFIX),
+  );
 
   return deviceViewPayloadSchema.parse({
     deviceId: audience.deviceId,

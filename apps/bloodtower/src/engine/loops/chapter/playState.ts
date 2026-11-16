@@ -1,5 +1,5 @@
 import { eventRng } from "@dark-tower/rng";
-import { ensureClock, heroSheet, setHeroSheet } from "../day/clock.ts";
+import { ensureClock, heroSheet, setBuildingSkulls, setHeroSheet } from "../day/clock.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -170,6 +170,13 @@ const corruptionsFromTestSeed = (seed: string): [string, number][] => {
 export const TEST_ITEMS = "~test-items:";
 export const TEST_HP = "~test-hp:";
 export const TEST_GOLD = "~test-gold:";
+/**
+ * TEST ONLY (CU/14). `~test-virtues:hero-a=infused+fortunate` gives heroes virtues at the start,
+ * and `~test-skulls:N-egans-end=2` puts skulls on buildings, so an e2e reaches a turn-start virtue
+ * with no play. Same placement rule as the markers above.
+ */
+export const TEST_VIRTUES = "~test-virtues:";
+export const TEST_SKULLS = "~test-skulls:";
 
 const testMarker = (seed: string, marker: string, shape: RegExp): [string, string][] => {
   const start = seed.indexOf(marker);
@@ -200,6 +207,17 @@ const applyHeroTestSeeds = (play: PlayState, seed: string): void => {
   }
   for (const [heroId, value] of testMarker(seed, TEST_GOLD, /^\d+$/)) {
     merge(heroId, { gold: Number(value) });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_VIRTUES, /^[\w-]+(\+[\w-]+)*$/)) {
+    merge(heroId, { virtues: value.split("+") });
+  }
+  for (const [spaceId, value] of testMarker(seed, TEST_SKULLS, /^\d$/)) {
+    if (!play.content.board.spaceById.get(spaceId)?.building) {
+      throw new Error(
+        `The test seed marker ${TEST_SKULLS} names "${spaceId}", which is no building.`,
+      );
+    }
+    setBuildingSkulls(play, spaceId, Number(value));
   }
 };
 

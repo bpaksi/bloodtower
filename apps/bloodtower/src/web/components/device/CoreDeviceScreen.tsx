@@ -656,6 +656,18 @@ function SessionButtons({
 
 const inMenu = (action: OfferedAction) => action.promptId === "menu-quit";
 
+/** A virtue option rides the `record` action under a `virtue-choice--` prompt id (group-turn loop). */
+const isVirtueOption = (action: OfferedAction) =>
+  action.actionId === "record" && action.promptId.startsWith("virtue-choice--");
+
+/** The pending virtue choice when this iPad holds a hero of the acting group, else null. */
+const virtueChoiceFor = (view: DeviceView) => {
+  const virtue = view.table?.virtue;
+  if (view.screen !== "play" || !virtue?.choice) return null;
+  const holds = view.heroes.some((hero) => virtue.heroIds.includes(hero.id));
+  return holds ? virtue.choice : null;
+};
+
 /** Walk, Enter, and End turn. Leave stays outside this region (DEC-220). */
 const MOVE_CONTROLS = new Set(["walk", "enter", "end-turn"]);
 
@@ -703,8 +715,14 @@ export function CoreDeviceScreen({
     : actions.find((action) => action.promptId === SAVED_CONTINUE_PROMPT);
   const body = actions.filter(
     (action) =>
-      action.actionId !== "back" && !inMenu(action) && action.promptId !== SAVED_CONTINUE_PROMPT,
+      action.actionId !== "back" &&
+      !inMenu(action) &&
+      action.promptId !== SAVED_CONTINUE_PROMPT &&
+      !isVirtueOption(action),
   );
+  // A virtue that asks (CU/14, EV-03): the acting group's iPads get one button per option, whatever
+  // the virtue. Another group's iPad holds none of its heroes, so it draws no list.
+  const virtueAsk = virtueChoiceFor(view);
   const quit =
     actions.find((action) => action.promptId === "menu-quit") ??
     actions.find((action) => action.actionId === "quit-story");
@@ -995,6 +1013,35 @@ export function CoreDeviceScreen({
                 ) : null}
               </section>
             ))}
+            {virtueAsk ? (
+              <section className="mt-4" data-virtue-choice={virtueAsk.virtueId}>
+                <h2 className="text-lg font-medium" data-virtue-prompt="">
+                  {virtueAsk.prompt}
+                </h2>
+                <div className="mt-3 flex flex-col gap-3">
+                  {virtueAsk.options.map((option) => {
+                    const action = view.actions.find(
+                      (row) => row.promptId === option.promptId && row.open,
+                    );
+                    return (
+                      <button
+                        key={option.promptId}
+                        type="button"
+                        className="bt-secondary"
+                        data-prompt-id={option.promptId}
+                        data-action-id="record"
+                        data-action="record"
+                        data-virtue-option=""
+                        disabled={!live || !option.enabled || !action}
+                        onClick={() => onAct(option.promptId, "record")}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
             {showMoveMap ? (
               <section className="bt-move-map" data-move-map aria-label="Move">
                 <p className="bt-tower-up" data-tower-up>

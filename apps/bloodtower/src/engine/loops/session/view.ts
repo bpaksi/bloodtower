@@ -16,6 +16,7 @@ import {
 } from "../../hints/copy.ts";
 import { inNightPhase } from "../../hints/flow.ts";
 import { heldItems, itemName } from "../../rules/items/index.ts";
+import { virtueName } from "../../rules/virtues/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
   DaySkullView,
@@ -24,6 +25,7 @@ import type {
   PlaceStill,
   TableBand,
   ViewState,
+  VirtuePanelView,
 } from "../../views/state.ts";
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
 import { ensureClock, heroCount, heroSheet, isFallen } from "../day/clock.ts";
@@ -33,7 +35,7 @@ import { splitShiftOf } from "../day/roll.ts";
 import { daysLeft } from "../day/rules.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { partySize } from "../game/setupFlow.ts";
-import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { type GroupTurnLocal, virtuePanelOf, virtuePromptId } from "../group-turn/loop.ts";
 import { BOARD_SET_UP_PROMPT } from "./enter.ts";
 import {
   canContinue,
@@ -307,6 +309,42 @@ export const actingGroupOf = (state: ShellState): ActingGroup => {
   return { actingId, movesLeft, waiting };
 };
 
+/** The prompt line when a virtue asks a choice (Loremaster, `virtue.choice.prompt`). */
+const virtueAsks = (name: string) => `${name} asks you to choose.`;
+
+/** The turn-start virtue panel (CU/14): only while a group's turn is on top of the loops. */
+const buildVirtue = (state: ShellState): VirtuePanelView | null => {
+  const play = state.play;
+  const top = state.loops.stack.at(-1);
+  if (!play || top?.loopId !== "group-turn") return null;
+  const local = top.local as GroupTurnLocal;
+  const panel = virtuePanelOf(play, local);
+  if (!panel) return null;
+  const group = play.groups.find((row) => row.id === local.groupId);
+  const choice = panel.choice
+    ? {
+        virtueId: panel.choice.virtueId,
+        prompt: virtueAsks(virtueName(panel.choice.virtueId)),
+        options: panel.choice.options.map((option) => ({
+          promptId: virtuePromptId(local.groupId, panel.choice?.virtueId ?? "", option.id),
+          label: option.label,
+          enabled: option.enabled,
+        })),
+      }
+    : null;
+  return {
+    title: panel.title,
+    heroIds: group ? [...group.heroIds] : [],
+    lines: panel.lines,
+    choice,
+    picked: Object.entries(local.virtue?.picks ?? {}).map(([virtueId, pick]) => ({
+      virtueId,
+      name: virtueName(virtueId),
+      label: pick.label,
+    })),
+  };
+};
+
 const buildTable = (state: ShellState, chapter: string): TableBand | null => {
   if (state.screen !== "play" && state.screen !== "pause") return null;
   const play = state.play;
@@ -324,6 +362,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     chapter,
     day: play.dayNumber,
     ...dayPanels,
+    virtue: buildVirtue(state),
     health: "unavailable",
     purse: "unavailable",
     actingGroup: actingName,

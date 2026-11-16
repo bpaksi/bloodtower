@@ -10,7 +10,7 @@ import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
-import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { type GroupTurnLocal, isVirtuePrompt, virtuePressRefusal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
 import { type ShellEffect, USE_ITEM_REFUSED } from "./effects.ts";
 import {
@@ -682,6 +682,20 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       const before = playFingerprint(next);
       const skullBefore = next.play?.lastSkull;
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
+      if (isVirtuePrompt(e.promptId)) {
+        // CU/14: a virtue's pick the turn did not take is an error to log, never a silent no-op.
+        const top = next.loops.stack.at(-1);
+        const refusal =
+          top?.loopId === "group-turn"
+            ? virtuePressRefusal(top.local as GroupTurnLocal, e.promptId, e.actionId)
+            : "A virtue pick arrived when no group turn was open, so nothing changed.";
+        if (refusal) {
+          effects.push({ kind: "press-error", v: 1, code: "invalid-state", message: refusal });
+        } else if (next.play && next.activeGameId) {
+          // The pick changed skulls and the turn's picks, so a Continue must see it.
+          requestCheckpoint(next.activeGameId, next.play.dayNumber);
+        }
+      }
       countPress(
         next,
         e.actionId,
