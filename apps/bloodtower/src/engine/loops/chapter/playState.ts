@@ -225,6 +225,11 @@ export const TEST_EFFECT = "~test-effect:";
  * placement rule as the others. Real seeds never carry them.
  */
 export const TEST_NAMED = "~test-named:";
+/**
+ * TEST ONLY (C3/13). `~test-at:N-upper-ice-fangs` puts every group on that space at the start, so
+ * an e2e meets each kind of building without walking to it. Same placement rule as the others.
+ */
+export const TEST_AT = "~test-at:";
 export const TEST_TILES = "~test-tiles:";
 
 /** Every marker the hook reads. A seed with none of them is a real seed. */
@@ -242,6 +247,7 @@ export const TEST_SEED_MARKERS = [
   TEST_EFFECT,
   TEST_NAMED,
   TEST_TILES,
+  TEST_AT,
 ] as const;
 
 export const isTestSeed = (seed: string): boolean =>
@@ -307,6 +313,13 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
       throw new Error(`The test kingdom seed needs kingdoms from N, E, S, W, got "${bad ?? ""}".`);
     }
     clock.seedKingdoms = ids as KingdomId[];
+  }
+  const at = markerBody(seed, TEST_AT, /^[\w-]*/);
+  if (at !== null) {
+    if (!play.content.board.spaceById.has(at)) {
+      throw new Error(`The test position seed names "${at}", which is not a space.`);
+    }
+    for (const group of play.groups) group.spaceId = at;
   }
   const effects = markerBody(seed, TEST_EFFECT, /^[a-z+-]*/);
   if (effects !== null) {

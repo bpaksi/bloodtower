@@ -65,10 +65,10 @@ const enc = (state: ShellState) =>
   state.loops.stack.find((f) => f.loopId === "encounter")?.local as EncounterLocal;
 
 describe("building menu (C3/13)", () => {
-  it("EV-01/06: the citadel shows Rally, Virtue, Cleanse and Leave with move and gold costs", () => {
+  it("EV-01/06: the citadel shows Rally, Virtue and Cleanse (Leave is its own action) with move and gold costs", () => {
     const state = inside("citadel", "~test-gold:hero-a=20~test-hp:hero-a=4/12");
     const labels = panel(state)?.options.map((o) => o.label);
-    expect(labels).toEqual(["Rally", "Virtue", "Cleanse", "Leave"]);
+    expect(labels).toEqual(["Rally", "Virtue", "Cleanse"]);
     expect(optionFor(state, "Rally")?.detail).toBe("1 move · 5 gold · heals to full");
     expect(optionFor(state, "Virtue")?.detail).toBe("1 move · 10 gold");
     expect(optionFor(state, "Cleanse")?.detail).toBe("1 move");
@@ -84,9 +84,9 @@ describe("building menu (C3/13)", () => {
       panel(
         inside(kind, "~test-gold:hero-a=20~test-hp:hero-a=4/12~test-named:hero-a=feral"),
       )?.options.map((o) => o.label);
-    expect(names("sanctuary")).toEqual(["Cure", "Cleanse", "Leave"]);
-    expect(names("village")).toEqual(["Rest", "Cleanse", "Leave"]);
-    expect(names("bazaar")).toEqual(["Cleanse", "Leave"]);
+    expect(names("sanctuary")).toEqual(["Cure", "Cleanse"]);
+    expect(names("village")).toEqual(["Rest", "Cleanse"]);
+    expect(names("bazaar")).toEqual(["Cleanse"]);
   });
 
   it("EV-03: an unaffordable pick is shown closed with its reason, not hidden", () => {
@@ -102,7 +102,7 @@ describe("building menu (C3/13)", () => {
     const state = inside("citadel", "~test-gold:hero-a=20");
     setBuildingSkulls(state.play!, state.play!.groups[0]!.spaceId, 2);
     refreshOffersAfterRestore(state);
-    expect(panel(state)?.options.map((o) => o.label)).toEqual(["Cleanse", "Leave"]);
+    expect(panel(state)?.options.map((o) => o.label)).toEqual(["Cleanse"]);
   });
 
   it("EV-02/18: the first cure reads free; after it the next shows its price; Continue keeps that", () => {
@@ -258,11 +258,7 @@ describe("building menu (C3/13)", () => {
       waitId: wait.id,
       cause: "timeout",
     } as never).state;
-    state = press(
-      state,
-      panel(state)!.options.find((o) => o.label === "Leave")!.promptId,
-      "leave",
-    ).state;
+    state = press(state, "leave--hero-a", "leave").state;
     const turn = state.loops.stack.find((f) => f.loopId === "group-turn")?.local as GroupTurnLocal;
     expect(turn.movesLeft).toBe(2);
     expect(state.play!.groups[0]!.insideBuilding).toBe(false);

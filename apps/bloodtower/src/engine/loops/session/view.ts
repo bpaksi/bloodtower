@@ -393,13 +393,16 @@ const buildBuilding = (state: ShellState): BuildingPanelView | null => {
     step: model.step,
     heroIds: group ? [...group.heroIds] : [],
     prompt: model.prompt,
-    options: model.options.map((option) => ({
-      promptId: option.promptId,
-      label: option.label,
-      detail: option.detail ?? null,
-      enabled: option.enabled,
-      reason: option.reason ?? null,
-    })),
+    // Leave is its own action on the actions list, never a `build` press.
+    options: model.options
+      .filter((option) => option.actionId === "build")
+      .map((option) => ({
+        promptId: option.promptId,
+        label: option.label,
+        detail: option.detail ?? null,
+        enabled: option.enabled,
+        reason: option.reason ?? null,
+      })),
     result,
     holdMs: AUTO_ADVANCE_MS,
   };
