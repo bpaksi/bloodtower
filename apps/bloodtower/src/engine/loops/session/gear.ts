@@ -194,6 +194,13 @@ export const applyFixPosition = (state: ShellState, event: GearEvent): FixPositi
   ): FixPositionResult => ({ state: next, error: { code, message } });
 
   const play = next.play;
+  // On the owner's open Game board setup panel, or with no panel open (a replay after Continue).
+  if (
+    next.gearPanel !== null &&
+    !(next.gearOwner === event.deviceId && next.gearPanel === "game-board-setup")
+  ) {
+    return refuse(FIX_POSITION_NOT_NOW, "Fix my position runs from the Game board setup panel.");
+  }
   const refusal = fixPositionRefusal(next);
   if (refusal) return refuse(FIX_POSITION_NOT_NOW, refusal);
   const group = play?.groups.find((row) => event.heroId && row.heroIds.includes(event.heroId));
@@ -225,6 +232,7 @@ export const applyFixPosition = (state: ShellState, event: GearEvent): FixPositi
       top.local = {
         ...local,
         undo: [],
+        awaitEnd: local.movesLeft <= 0,
         awaitingPress: false,
         landedOnBuildingWithNoMoves: false,
       } satisfies GroupTurnLocal;

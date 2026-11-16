@@ -20,6 +20,8 @@ export type GroupTurnLocal = {
    * a trigger, Enter and End turn (Q5.1). Absent on a save made before CU/05: read as empty.
    */
   undo?: { fromSpaceId: string }[];
+  /** A correction at 0 moves: the turn waits for End turn instead of ending by itself (Q5.3). */
+  awaitEnd?: boolean;
 };
 
 /**
@@ -91,7 +93,8 @@ const offerEnterOrEndTurn = (
 ) => {
   const group = groupById(playState(), local.groupId);
   if (!group) return;
-  if (!isFallen(playState(), group.spaceId)) {
+  const here = playState().content.board.spaceById.get(group.spaceId);
+  if (here?.building && !isFallen(playState(), group.spaceId)) {
     const promptId = `enter--${local.groupId}--${group.spaceId}`;
     ctx.offerPrompt(promptId, "enter");
     recordOffer(promptId, "enter");
@@ -162,7 +165,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
         return { local, passComplete: false };
       }
       // The last move was a tap Back can still give back (Q5.1): the turn waits for Back or End turn.
-      if (undoOf(local).length > 0 && group && !group.insideBuilding) {
+      if ((undoOf(local).length > 0 || local.awaitEnd) && group && !group.insideBuilding) {
         if (!local.awaitingPress) {
           offerEnterOrEndTurn(local, ctx);
           return { local: { ...local, awaitingPress: true }, passComplete: false };
@@ -187,7 +190,12 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
       const here = playState().content.board.spaceById.get(group.spaceId);
       if (here?.building && !isFallen(playState(), group.spaceId)) return false;
     }
-    return local.movesLeft <= 0 && !local.encounterPending && undoOf(local).length === 0;
+    return (
+      local.movesLeft <= 0 &&
+      !local.encounterPending &&
+      undoOf(local).length === 0 &&
+      !local.awaitEnd
+    );
   },
   resultUp: (local) => {
     // DEC-472, DEC-473: turn-end gold losses, once (an Uncertain pick already ended the turn).
@@ -235,6 +243,7 @@ export const handleGroupTurnPress = (
       awaitingPress: false,
       landedOnBuildingWithNoMoves: false,
       undo: [],
+      awaitEnd: false,
     };
   }
 

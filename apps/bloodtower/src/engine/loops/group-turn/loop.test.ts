@@ -206,4 +206,24 @@ describe("Back on the move map (CU/05)", () => {
     expect(group.spaceId).toBe(path[1]);
     clearShellState();
   });
+
+  it("a held turn at 0 moves offers Enter only on a building space", () => {
+    const { play, group, path, local } = chain(0);
+    const plain = play.content.board.spaces.find((sp) => !sp.building)!;
+    group.spaceId = plain.id;
+    void path;
+    const held = { ...local, undo: [{ fromSpaceId: path[0]! }], awaitingPress: false };
+    const { offers } = runGroupTurnBody(play, held);
+    expect(offers.map((o) => o.actionId)).toEqual(["back", "end-turn"]);
+  });
+
+  it("after a correction at 0 moves the turn waits for End turn", () => {
+    const { play, path, local } = chain(0);
+    const held = { ...local, undo: [], awaitEnd: true, awaitingPress: false };
+    const { result, offers } = runGroupTurnBody(play, held);
+    expect(result.passComplete).toBe(false);
+    expect(offers.map((o) => o.actionId)).toContain("end-turn");
+    void path;
+    expect(groupTurnLoop.exit(held, {} as never)).toBe(false);
+  });
 });
