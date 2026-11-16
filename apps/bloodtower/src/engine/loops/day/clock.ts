@@ -7,6 +7,12 @@ export type HeroSheet = {
   corruptions: number;
   /** The named corruptions held, by ID (MEC-080). Absent for a hero set up with a count only. */
   named?: string[];
+  /** Hit points now and the most the hero can hold. Absent: not known, shown as unavailable. */
+  hp?: { hp: number; max: number };
+  /** Gold the hero carries. Absent: not known. */
+  gold?: number;
+  /** Item ids held (CU/13). Absent or empty: nothing held. Each id is one item. */
+  items?: string[];
 };
 
 export type MoveShift = {
@@ -118,6 +124,9 @@ export const setHeroSheet = (play: PlayState, heroId: string, sheet: HeroSheet):
     helpingVirtues: sheet.helpingVirtues,
     corruptions: sheet.corruptions,
     ...(sheet.named ? { named: [...sheet.named] } : {}),
+    ...(sheet.hp ? { hp: { ...sheet.hp } } : {}),
+    ...(sheet.gold !== undefined ? { gold: sheet.gold } : {}),
+    ...(sheet.items ? { items: [...sheet.items] } : {}),
   };
 };
 

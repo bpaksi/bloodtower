@@ -28,6 +28,8 @@ export type DayTuning = {
   loss: { fallen_buildings: number };
   /** Gold the corruptions take or add (C3-08, Q-C3-16). */
   corruption: CorruptionTuning;
+  /** Hit points a potion gives (`battle.potion_hit_points`, CU/13). */
+  potionHitPoints: number;
 };
 
 const BASE_DAY_TUNING: DayTuning = {
@@ -44,6 +46,7 @@ const BASE_DAY_TUNING: DayTuning = {
   kingdomDie: "d4",
   loss: { fallen_buildings: 4 },
   corruption: corruptionTuningFrom(),
+  potionHitPoints: 4,
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -63,6 +66,7 @@ export const dayTuningFrom = (source?: unknown): DayTuning => {
   const many = isRecord(drops.heroes_3_to_4) ? drops.heroes_3_to_4 : {};
   const simulated = isRecord(skulls.simulated_drop) ? skulls.simulated_drop : {};
   const loss = isRecord(root.loss) ? root.loss : {};
+  const battle = isRecord(root.battle) ? root.battle : {};
   const base = BASE_DAY_TUNING;
   return {
     moveDice: typeof move.dice === "string" ? move.dice : base.moveDice,
@@ -81,6 +85,7 @@ export const dayTuningFrom = (source?: unknown): DayTuning => {
     kingdomDie: typeof simulated.kingdom_die === "string" ? simulated.kingdom_die : base.kingdomDie,
     loss: { fallen_buildings: whole(loss.fallen_buildings, base.loss.fallen_buildings) },
     corruption: corruptionTuningFrom(root),
+    potionHitPoints: whole(battle.potion_hit_points, base.potionHitPoints),
   };
 };
 

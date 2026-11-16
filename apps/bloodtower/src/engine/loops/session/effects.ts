@@ -11,6 +11,9 @@ export const REGROUP_DROPPED = "regroup-dropped" as const;
 export const FIX_POSITION_NOT_NOW = "fix-position-not-now" as const;
 export const FIX_POSITION_BAD_TARGET = "fix-position-bad-target" as const;
 
+/** Error code logged and toasted when a use-item act is refused (CU/13, EV-20). */
+export const USE_ITEM_REFUSED = "use-item-refused" as const;
+
 export const viewRefreshEffectV1 = z.object({
   kind: z.literal("view-refresh"),
   v: z.literal(1),
@@ -56,6 +59,8 @@ export const pressErrorEffectV1 = z.object({
     RULES_PAGE_MISSING,
     FIX_POSITION_NOT_NOW,
     FIX_POSITION_BAD_TARGET,
+
+    USE_ITEM_REFUSED,
   ]),
   message: z.string().min(1).max(300),
   /**

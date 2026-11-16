@@ -1,5 +1,5 @@
 import { eventRng } from "@dark-tower/rng";
-import { setHeroSheet } from "../day/clock.ts";
+import { ensureClock, heroSheet, setHeroSheet } from "../day/clock.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -161,6 +161,48 @@ const corruptionsFromTestSeed = (seed: string): [string, number][] => {
     });
 };
 
+/**
+ * TEST ONLY (CU/13). Seed markers that give heroes items, hit points and gold at the start, so an
+ * e2e can reach the items panel without play: `~test-items:hero-b=potion+potion`,
+ * `~test-hp:hero-b=2/10` (hit points / most) and `~test-gold:hero-b=7`. Put them before
+ * `~test-seat-together`, which must stay last. Real seeds never carry them.
+ */
+export const TEST_ITEMS = "~test-items:";
+export const TEST_HP = "~test-hp:";
+export const TEST_GOLD = "~test-gold:";
+
+const testMarker = (seed: string, marker: string, shape: RegExp): [string, string][] => {
+  const start = seed.indexOf(marker);
+  if (start < 0) return [];
+  const body = /^[\w,=+/-]*/.exec(seed.slice(start + marker.length))?.[0] ?? "";
+  return body
+    .split(",")
+    .filter((part) => part.length > 0)
+    .map((part) => {
+      const [heroId, value] = part.split("=");
+      if (!heroId || value === undefined || !shape.test(value)) {
+        throw new Error(`The test seed marker ${marker} cannot read "${part}".`);
+      }
+      return [heroId, value];
+    });
+};
+
+const applyHeroTestSeeds = (play: PlayState, seed: string): void => {
+  const clock = ensureClock(play);
+  const merge = (heroId: string, change: Partial<ReturnType<typeof heroSheet>>) =>
+    setHeroSheet(play, heroId, { ...heroSheet(clock, heroId), ...change });
+  for (const [heroId, value] of testMarker(seed, TEST_ITEMS, /^[\w-]+(\+[\w-]+)*$/)) {
+    merge(heroId, { items: value.split("+") });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_HP, /^\d+\/\d+$/)) {
+    const [hp, max] = value.split("/").map(Number);
+    merge(heroId, { hp: { hp: hp ?? 0, max: max ?? 0 } });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_GOLD, /^\d+$/)) {
+    merge(heroId, { gold: Number(value) });
+  }
+};
+
 const seatTogetherForTest = (groups: GroupState[], turnOrder: string[]): GroupState[] => {
   const ordered = turnOrder.flatMap((id) => groups.filter((group) => group.id === id));
   const lead = ordered[0];
@@ -208,6 +250,7 @@ export const initPlayState = (seed: string, content: PlayContent): PlayState => 
   for (const [heroId, corruptions] of corruptionsFromTestSeed(seed)) {
     setHeroSheet(play, heroId, { helpingVirtues: 0, corruptions });
   }
+  applyHeroTestSeeds(play, seed);
   return play;
 };
 

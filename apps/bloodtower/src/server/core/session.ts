@@ -348,12 +348,14 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         };
       }
     }
-    // A Split party pick (the queue, PT-18) and a Fix my position pick (CU/05) change the play state, so a replay must see them.
+    // A Split party pick changes the play state (the queue, PT-18), and a use-item pick changes
+    // a hero's items and hit points (CU/13), so a replay must see both.
     const persistGear =
       event.kind !== "gear" ||
       event.action === "keep-volume" ||
       event.action === "done" ||
-      (event.action === "pick" && (event.item === "split" || event.item === "fix-position"));
+      (event.action === "pick" &&
+        (event.item === "split" || event.item === "items" || event.item === "fix-position"));
     if (persistGear) appendShell(logged, deviceId);
     if (event.kind === "press") {
       const open =

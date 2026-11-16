@@ -639,10 +639,6 @@ test.describe("C3/11 the day on the board", () => {
       "Ruling 2: the engine keeps corruption counts only; the names come with C3-08.",
     ],
     [
-      "EV-15 (the use-item half), EV-16 (the use-item reason)",
-      "Ruling 3 / Q7.2: the split halves are live in CU/04 below; the host's use-item action and a potion fixture go to CU/07.",
-    ],
-    [
       "EV-09, EV-01 (seeded virtue and corruption groups)",
       "Ruling 4: a test-only day-clock seed hook (skulls per building, the next kingdom, hero sheets) goes to the new engine step.",
     ],

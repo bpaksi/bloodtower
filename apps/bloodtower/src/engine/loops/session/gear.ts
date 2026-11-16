@@ -1,11 +1,13 @@
 import { GEAR_PANELS, type GearPanelId } from "../../../protocols/v2/views.ts";
 import { rulesPage } from "../../hints/copy.ts";
+import { anyItemHeld, itemName, refusalMessage, useItem } from "../../rules/items/index.ts";
 import { spaceName } from "../chapter/board.ts";
 import { queueRegroupPick } from "../day/regroup.ts";
 import { hasOpenEvent } from "../event/index.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { FIX_POSITION_BAD_TARGET, FIX_POSITION_NOT_NOW } from "./effects.ts";
 import type { ShellState } from "./state.ts";
+import { actingGroupOf } from "./view.ts";
 
 export type GearEvent = {
   deviceId: string;
@@ -24,7 +26,12 @@ const isPanel = (item: string): item is GearPanelId =>
 export const SPLIT_ROW = "split-party";
 export const SPLIT_PANEL = "split" satisfies GearPanelId;
 
-const panelFor = (item: string): string => (item === SPLIT_ROW ? SPLIT_PANEL : item);
+/** The Menu row is `use-potion`; its panel is `items`, the name the board shows (CU/13). */
+export const ITEMS_ROW = "use-potion";
+export const ITEMS_PANEL = "items" satisfies GearPanelId;
+
+const panelFor = (item: string): string =>
+  item === SPLIT_ROW ? SPLIT_PANEL : item === ITEMS_ROW ? ITEMS_PANEL : item;
 
 /**
  * A Split party pick (PT-18). The iPad sends it with `item: "split"`; the host logs every such
@@ -79,6 +86,8 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
     const item = event.item ? panelFor(event.item) : undefined;
     if (!item || !isPanel(item)) return next;
     if (item === SPLIT_PANEL && !next.play) return next;
+    // The panel needs something to show: with nothing held the open is refused quietly (EV-19).
+    if (item === ITEMS_PANEL && !(next.play && anyItemHeld(next.play))) return next;
     if (next.gearPanel) return next;
     next.gearPanel = item;
     next.gearOwner = event.deviceId;
@@ -94,6 +103,8 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
   }
 
   const owns = next.gearOwner === event.deviceId && next.gearPanel !== null;
+  // The use-item pick is applied by `applyUseItem`, which can refuse it with a reason.
+  if (event.action === "pick" && event.item === ITEMS_PANEL) return next;
   if (event.action === "pick" && event.item === SPLIT_PANEL) {
     // On the owner's open panel, or with no panel open (a replay, or the host's own action).
     if (next.gearPanel !== null && !(owns && next.gearPanel === SPLIT_PANEL)) return next;
@@ -116,6 +127,7 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
       next.gearPreviewVolume = event.volume;
       next.gearPicked = event.pick ?? `Volume ${event.volume}`;
     }
+    if (next.gearPanel === ITEMS_PANEL && event.heroId) next.gearFirstHero = event.heroId;
     if (next.gearPanel === "change-who-holds-whom" && event.heroId) {
       if (!next.gearFirstHero) next.gearFirstHero = event.heroId;
       else if (event.heroId !== next.gearFirstHero) next.gearSecondHero = event.heroId;
@@ -232,4 +244,41 @@ export const applyFixPosition = (state: ShellState, event: GearEvent): FixPositi
     }
   }
   return { state: next, moved: top?.loopId === "group-turn" };
+};
+
+/** A use-item act: a pick with the items panel's `item`, a hero and the item's id (Q7.2). */
+export const isUseItemAct = (event: GearEvent): boolean =>
+  event.action === "pick" && event.item === ITEMS_PANEL && !!event.pick && !!event.heroId;
+
+/**
+ * The gear's use-item flow, and the host's own action: the same act. With the items panel open on
+ * this iPad it is the flow's last pick; with no panel open it is the host's action or a replay.
+ * A refusal changes nothing and comes back as `error` for the engine to log and toast (EV-20).
+ */
+export const applyUseItem = (
+  state: ShellState,
+  event: GearEvent,
+  heroName: (heroId: string) => string,
+): { state: ShellState; error: string | null } => {
+  const next: ShellState = {
+    ...state,
+    holdings: { ...state.holdings },
+    eventSeq: state.eventSeq + 1,
+  };
+  if (state.sessionEnded) return { state: next, error: null };
+  const owns = next.gearOwner === event.deviceId && next.gearPanel !== null;
+  // Panel state never decides whether the act applies. The host logs every use pick and not the
+  // opens, so a replay has no panel and must reach the same result as the live act.
+  const { pick: itemId, heroId } = event;
+  if (!itemId || !heroId) return { state: next, error: null };
+  if (!next.play) {
+    return { state: next, error: "No game is being played, so no item can be used." };
+  }
+  const result = useItem(next.play, actingGroupOf(state).actingId, heroId, itemId);
+  if (!result.ok) return { state: next, error: refusalMessage(result, heroName) };
+  if (owns) {
+    next.gearPicked = `${heroName(heroId)} used ${itemName(itemId) ?? "unavailable"}.`;
+    next.gearFirstHero = null;
+  }
+  return { state: next, error: null };
 };
