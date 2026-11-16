@@ -705,6 +705,10 @@ test.describe("CU/15 the game of chance: the Spin and the starting purse", () =>
       // The same purse goes on with Continue.
       await clickAct(pad, "continue", "continue-setup-starting-purse");
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "begin");
+      // Nothing runs after Continue either: no chase resumes or repeats, no cue plays.
+      await pad.waitForTimeout(2_000);
+      expect(sequences(restarted.tower.sent())).toHaveLength(0);
+      expect(await coinCues(board)).toBe(0);
     } finally {
       await closeAll(context, restarted.host);
     }

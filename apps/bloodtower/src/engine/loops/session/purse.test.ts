@@ -125,6 +125,8 @@ describe("CU/15 the starting purse step", () => {
     expect(again.state.startingPurse).toBe(first.state.startingPurse);
     expect(again.state.purseCue).toBe(1);
     expect(towerCommands(again.effects)).toEqual([]);
+    // The purse is the shown result (the board's amount is read from it).
+    expect(chance(again.state)?.amount).toBe(first.state.startingPurse);
   });
 
   it("EV-09: the draw is seeded, never below the floor, and Back keeps the set purse", () => {
