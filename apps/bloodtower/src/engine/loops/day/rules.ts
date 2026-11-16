@@ -1,6 +1,12 @@
 import type { KingdomId } from "../chapter/board.ts";
 
 /**
+ * The corruptions that lose the game at once: a hero's third (DEC-043, DEC-676). One copy; the
+ * board's band mark (CU/10) shows one short of it, and C3-08 reuses it.
+ */
+export const CORRUPTION_LOSS_LIMIT = 3;
+
+/**
  * Numbers the day reads. Defaults match packs/base/tuning.yaml (DEC-703).
  * `loss.fallen_buildings` is Q-C3-05 (4). The base file has no loss block yet, so a
  * test copy can set the key and the check reads it.

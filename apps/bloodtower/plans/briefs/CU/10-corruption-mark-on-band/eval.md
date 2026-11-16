@@ -35,6 +35,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: raise hero A from 1 to 2 mid-game, then (fixture) lower hero B to 1.
 - Pass evidence: hero A gains the mark and hero B loses it on the next board view, without a reload.
 - Fails if: the mark is stuck from first render.
+- Deferred 2026-11-15 to the step 12 live seed hook (judgement delegated by Bob). The CU/10 seed sets counts only at game start; the spec keeps a `test.fixme` for it.
 
 ### EV-05 — Display only
 - Requirement: PT-17 "Display only"; DEC-676 untouched.
