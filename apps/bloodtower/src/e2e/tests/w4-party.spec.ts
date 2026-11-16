@@ -284,6 +284,29 @@ test("W4 the story board party frame is display-only", async ({ browser }, testI
       await expect(row).toHaveAttribute("data-held", "false");
       await expect(row.getByText("Open", { exact: true })).toBeVisible();
     }
+    // CU/08: every pool hero has a card with class, fight, hit points and the pack's line. The
+    // values come from the pack and tuning, so Hero A (fighter) reads Fight 3, Hit points 12.
+    const cardA = frame.locator('[data-hero="hero-a"]');
+    await expect(cardA.locator("[data-card-class]")).toHaveText("Fighter");
+    await expect(cardA.locator("[data-card-fight]")).toHaveText("Fight 3");
+    await expect(cardA.locator("[data-card-hp]")).toHaveText("Hit points 12");
+    await expect(cardA.locator("[data-card-line]")).not.toHaveText("");
+    await expect(cardA.locator("[data-portrait-frame]")).toHaveCount(1);
+    await expect(frame.locator("[data-hero] [data-card-line]")).toHaveCount(HEROES.length);
+    await expect(frame.getByText(/waiting for a hero/i)).toHaveCount(0);
+    await expect(frame.locator("[data-hero]").first()).not.toHaveAttribute("role", "button");
+    // EV-06: six cards fit the board with no scroll and no clipping.
+    const fit = await board.evaluate(() => {
+      const root = document.documentElement;
+      const cards = [...document.querySelectorAll("[data-hero]")].map((card) => {
+        const r = card.getBoundingClientRect();
+        return r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight;
+      });
+      return { scrolls: root.scrollHeight > root.clientHeight, cards };
+    });
+    expect(fit.scrolls).toBe(false);
+    expect(fit.cards).toHaveLength(HEROES.length);
+    expect(fit.cards.every(Boolean)).toBe(true);
     await expect(frame.getByText("Claimed", { exact: true })).toHaveCount(0);
     await expect(frame.getByText("Unclaimed", { exact: true })).toHaveCount(0);
     await expect(frame.locator("[data-join-code]")).toBeVisible();
