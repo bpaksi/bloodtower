@@ -32,4 +32,4 @@ The POC's setup runs Pick Game → Pick Story → Game settings → Tower connec
 - **Continue's piece check** shows where each piece belongs (DEC-710).
 - **Joined iPads stay awake** (DEC-712).
 
-Open: Q-402 (drums and trapped skulls on Continue after calibration) needs a real-tower check in tower-poc before the Continue step.
+Q-402 (drums and trapped skulls on Continue after calibration) is closed by the real-tower check of 2026-11-15 (DEC-937). Still open: IDEA-024, whether seals on trap skulls.
