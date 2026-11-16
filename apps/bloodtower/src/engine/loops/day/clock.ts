@@ -54,6 +54,10 @@ export type DayClock = {
   expectKingdom: KingdomId | null;
   outcome: DayLoss | null;
   resume: DayResume | null;
+  /** TEST ONLY: kingdoms the next drops land in, first first (seed hook). Absent or empty: drawn. */
+  seedKingdoms?: KingdomId[];
+  /** TEST ONLY: the narration line id the effects wait ends on (seed hook). Absent: no audio. */
+  effectsLine?: string | null;
 };
 
 export type DayResume = {
@@ -85,7 +89,13 @@ const blankClock = (tuning: DayTuning): DayClock => ({
   expectKingdom: null,
   outcome: null,
   resume: null,
+  seedKingdoms: [],
+  effectsLine: null,
 });
+
+/** The seeded kingdom for the next drop, if the test seed named one. Used once. */
+export const takeSeedKingdom = (clock: DayClock): KingdomId | null =>
+  clock.seedKingdoms?.shift() ?? null;
 
 export const ensureClock = (play: PlayState): DayClock => {
   const existing = clocks.get(play);

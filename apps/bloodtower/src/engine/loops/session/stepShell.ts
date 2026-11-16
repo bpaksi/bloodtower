@@ -5,7 +5,13 @@ import { applyHints, endHint, hintsOn } from "../../hints/flow.ts";
 import { HINT_IDS, HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/registry.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
-import { bindPlayState, initPlayState, seatAtCitadels } from "../chapter/playState.ts";
+import {
+  applyTestSeed,
+  bindPlayState,
+  initPlayState,
+  seatAtCitadels,
+} from "../chapter/playState.ts";
+import type { DayLocal } from "../day/loop.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress } from "../game/loop.ts";
@@ -378,6 +384,42 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     if (next === state) return withEffects(state, effects);
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects({ ...next, eventSeq: eventSeq + 1 }, effects);
+  }
+
+  if (e.kind === "test-seed") {
+    // TEST ONLY: a host built for tests set markers on the running game (C3/20).
+    if (!state.play) throw new Error("There is no running game to seed.");
+    applyTestSeed(state.play, e.markers);
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects({ ...state, eventSeq: eventSeq + 1 }, effects);
+  }
+
+  if (e.kind === "wait-end") {
+    // The effects wait is over (C3/20). A late or repeated end, or one for another wait, changes
+    // nothing: an expected race, not an error, so one debug line.
+    const dayFrame = state.loops.stack.find((frame) => frame.loopId === "day");
+    const local = dayFrame?.local as DayLocal | undefined;
+    if (!dayFrame || !local || local.phase !== "effects" || local.wait?.id !== e.waitId) {
+      return {
+        state: { ...state, eventSeq: eventSeq + 1 },
+        effects,
+        logs: [
+          {
+            level: "debug",
+            code: "wait-end-ignored",
+            message: `Ignored a wait-end for "${e.waitId}" (${e.cause}): that wait is not open.`,
+          },
+        ],
+      };
+    }
+    const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
+    const frame = next.loops.stack.find((row) => row.loopId === "day");
+    if (frame) frame.local = { ...local, waitDone: true };
+    bindShellState(next);
+    resumeLoopsOrPauseOffers(next, eventSeq, effects);
+    clearShellState();
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
   }
 
   if (e.kind === "set-setting" && e.settingId === HINTS_SETTING_ID) {
