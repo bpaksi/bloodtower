@@ -21,6 +21,7 @@ const toOffered = (action: ViewAction): OfferedAction =>
         promptId: action.promptId,
         actionId: action.actionId,
         label: action.label,
+        ...(action.slot ? { slot: action.slot } : {}),
         open: false,
         reason: action.reason,
       };

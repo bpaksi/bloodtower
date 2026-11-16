@@ -57,7 +57,7 @@ import {
 import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
 import { type HintHold, initialShellState, type ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
-import { projectShellView } from "./view.ts";
+import { captureHintHold } from "./view.ts";
 
 export type ShellStepResult = {
   state: ShellState;
@@ -738,12 +738,7 @@ const mayStartHint = (state: ShellState): boolean =>
 export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult => {
   // The loop runtime changes its stack in place, so the screen the iPads show must be read before
   // the step runs. It is only needed while a hint can still start.
-  const held: HintHold | null = mayStartHint(state)
-    ? (() => {
-        const view = projectShellView(state);
-        return { table: view.table ?? null, actions: view.actions };
-      })()
-    : null;
+  const held: HintHold | null = mayStartHint(state) ? captureHintHold(state) : null;
   const result = stepShellCore(state, event);
   const { state: kept, extra } = applyHints(result.state, result.effects);
   let next = kept;

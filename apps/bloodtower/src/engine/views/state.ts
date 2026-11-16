@@ -31,7 +31,7 @@ export type ViewAction = {
   actionId: string;
   label: string;
   deviceId: string | null;
-} & ({ open: true; slot?: CompassSlot } | { open: false; reason: string });
+} & ({ open: true; slot?: CompassSlot } | { open: false; reason: string; slot?: CompassSlot });
 
 export type PlaceStill = {
   building: "village" | "bazaar" | "citadel" | "sanctuary";

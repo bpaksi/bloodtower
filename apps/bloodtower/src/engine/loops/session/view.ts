@@ -14,6 +14,7 @@ import {
   RULES_PAGES,
   rulesPage,
 } from "../../hints/copy.ts";
+import { inNightPhase } from "../../hints/flow.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
   DaySkullView,
@@ -53,7 +54,7 @@ import {
 import type { ShellStory, StorySetting } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import { soundActions, soundStepOnBoard, VOLUME_LINE } from "./sound.ts";
-import type { ShellState } from "./state.ts";
+import type { HintHold, ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
 /** Matches protocol v2 setup screens (private lines on these only). */
@@ -714,22 +715,7 @@ const gearSnapshot = (state: ShellState): GearView => {
   };
 };
 
-export const projectShellView = (state: ShellState): ViewState => {
-  const story = chosenOrBound(state);
-  const screen = state.screen;
-  const title = story?.card.title ?? "Story";
-  const heroes = (story?.heroes ?? []).map((hero) => ({
-    id: hero.id,
-    name: hero.name,
-    deviceId: state.holdings[hero.id] ?? null,
-    lines:
-      isSetupScreen(screen) && screen !== "claim-heroes"
-        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
-        : [],
-  }));
-
-  // A hint is the loop's first beat: the view offers nothing until it ends. The iPads keep the
-  // screen before it through `deviceHold`.
+const shownActions = (state: ShellState): ViewState["actions"] => {
   const offeredNow = state.hint && state.screen === "play" ? [] : state.offered;
   const actions: ViewState["actions"] = offeredNow.map((offer) =>
     offer.open
@@ -750,8 +736,49 @@ export const projectShellView = (state: ShellState): ViewState => {
           deviceId: null,
         },
   );
-
   actions.push(...soundActions(state));
+  return actions;
+};
+
+/**
+ * What the iPads keep showing while a hint is on the board: the table and the controls as they
+ * stand now, every control closed on the wire so nothing reads one as a press to send. Cheaper
+ * than a whole view, because the host asks for it before each step that might start a hint.
+ */
+export const captureHintHold = (state: ShellState): HintHold => {
+  const story = chosenOrBound(state);
+  return {
+    table: buildTable(state, story?.card.title ?? "Story"),
+    // The night's last control is spent once pressed: the iPad keeps the table, with no controls.
+    actions: (inNightPhase(state) ? [] : shownActions(state)).map((action) => ({
+      promptId: action.promptId,
+      actionId: action.actionId,
+      label: action.label,
+      deviceId: action.deviceId,
+      ...(action.open && action.slot ? { slot: action.slot } : {}),
+      open: false as const,
+      reason: "Wait for the hint to end.",
+    })),
+  };
+};
+
+export const projectShellView = (state: ShellState): ViewState => {
+  const story = chosenOrBound(state);
+  const screen = state.screen;
+  const title = story?.card.title ?? "Story";
+  const heroes = (story?.heroes ?? []).map((hero) => ({
+    id: hero.id,
+    name: hero.name,
+    deviceId: state.holdings[hero.id] ?? null,
+    lines:
+      isSetupScreen(screen) && screen !== "claim-heroes"
+        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
+        : [],
+  }));
+
+  // A hint is the loop's first beat: the view offers nothing until it ends. The iPads keep the
+  // screen before it through `deviceHold`.
+  const actions = shownActions(state);
 
   const screenLevel: LoopLevel = {
     id: screen,

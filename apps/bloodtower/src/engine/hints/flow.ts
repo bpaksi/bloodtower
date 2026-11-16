@@ -23,6 +23,12 @@ const dayPhase = (state: ShellState): string | null => {
   return frame ? ((frame.local as DayLocal | undefined)?.phase ?? null) : null;
 };
 
+/** The day loop is in its night steps (a skull is being placed or shown). */
+export const inNightPhase = (state: ShellState): boolean => {
+  const phase = dayPhase(state);
+  return phase !== null && SKULL_PHASES.has(phase);
+};
+
 /**
  * The hint loops this step entered, in order. `encounter` is the building visit; the skull drop
  * is the day loop reaching its night phases; the day ends when the day loop does.

@@ -10,6 +10,9 @@ import type { MenuContext } from "./gearMenu.ts";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
+/** The controls to draw. A held screen (a hint is on the board) draws its closed ones, greyed. */
+const drawnActions = (view: DeviceView) => (view.held ? view.actions : openActions(view.actions));
+
 /** [COPY: split-party-help] and [COPY: queued-confirm]: Loremaster slots (step 45). */
 const SPLIT_HELP = "[COPY: split-party-help]";
 const QUEUED_NOTE = "[COPY: queued-confirm] Queued: takes effect at the next day.";
@@ -368,7 +371,7 @@ function TowerLostPause({
 }) {
   const [asking, setAsking] = useState<"go-on-without" | "quit-story" | null>(null);
   const find = (actionId: string) =>
-    openActions(view.actions).find((action) => action.actionId === actionId);
+    drawnActions(view).find((action) => action.actionId === actionId);
   const reconnect = find("reconnect");
   const goWithout = find("go-on-without");
   const quit = find("quit-story");
@@ -485,7 +488,7 @@ function SessionButtons({
   live: boolean;
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
 }) {
-  const open = openActions(view.actions);
+  const open = drawnActions(view);
   const find = (actionId: string) => open.find((action) => action.actionId === actionId);
   const button = (action: OfferedAction, primary = false) => (
     <button
@@ -622,7 +625,7 @@ export function CoreDeviceScreen({
   const keep = view.actions.find((action) => action.actionId === "volume-keep");
   const tryAnother = view.actions.find((action) => action.actionId === "volume-again");
   const soundStep = view.screen === "pick-story" && volumes.length > 0;
-  const actions = openActions(view.actions).filter((action) => !isSoundAction(action));
+  const actions = drawnActions(view).filter((action) => !isSoundAction(action));
   const onSessionScreen = view.screen === "session";
   // The session screen draws its own Back inside the question; Pick story's Continue has its own place.
   const back = onSessionScreen ? undefined : actions.find((action) => action.actionId === "back");
