@@ -29,7 +29,13 @@ import {
   TOWER_CONNECT_PROMPT,
 } from "./enter.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
-import { applyGear, applyUseItem, isUseItemAct } from "./gear.ts";
+import {
+  applyFixPosition,
+  applyGear,
+  applyUseItem,
+  FIX_POSITION_ITEM,
+  isUseItemAct,
+} from "./gear.ts";
 import {
   applyHubPress,
   hubOffers,
@@ -511,6 +517,29 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     bindShellState(next);
     resumeLoopsOrPauseOffers(next, eventSeq, effects);
     clearShellState();
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(next, effects);
+  }
+
+  if (e.kind === "gear" && e.action === "pick" && e.item === FIX_POSITION_ITEM) {
+    // Fix my position (CU/05, Q5.3): one pick moves a group's recorded space. A refusal changes
+    // nothing and is logged, toasted and shown with its code (EV-08, EV-30).
+    const fixed = applyFixPosition(state, e);
+    const next = fixed.state;
+    if (fixed.error) {
+      effects.push({
+        kind: "press-error",
+        v: 1,
+        code: fixed.error.code,
+        message: fixed.error.message,
+        deviceId: e.deviceId,
+      });
+    } else if (fixed.moved) {
+      // The move map offers again from the new space (the offers are rebuilt by the loop).
+      bindShellState(next);
+      resumeLoopsOrPauseOffers(next, eventSeq, effects);
+      clearShellState();
+    }
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
   }

@@ -375,7 +375,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       event.kind !== "gear" ||
       event.action === "keep-volume" ||
       event.action === "done" ||
-      (event.action === "pick" && (event.item === "split" || event.item === "items"));
+      (event.action === "pick" &&
+        (event.item === "split" || event.item === "items" || event.item === "fix-position"));
     if (persistGear) appendShell(logged, deviceId);
     if (event.kind === "press") {
       const open =
