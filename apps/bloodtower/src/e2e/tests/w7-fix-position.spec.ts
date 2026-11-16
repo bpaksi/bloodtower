@@ -162,6 +162,7 @@ test("CU/05 Back undoes a tap, repeats, and is gone at the turn start (EV-05, EV
     await settle(device, before);
     expect((await readStatus(device)).moves).toBe(String(moves - 1));
     await expect(back).toBeEnabled();
+    await device.screenshot({ path: "test-results/cu05/move-map-after-tap.png" });
     await testInfo.attach("move-map-after-tap", {
       body: await device.screenshot(),
       contentType: "image/png",
@@ -204,6 +205,7 @@ test("CU/05 Fix my position lives in Game board setup and moves the group for fr
     await expect(panel.getByText("Whose group?")).toBeVisible();
     await expect(panel.getByText("Where does it stand?")).toBeVisible();
     await panel.locator("[data-fix-position-space]").selectOption(target?.id ?? "");
+    await device.screenshot({ path: "test-results/cu05/fix-position.png" });
     await testInfo.attach("fix-position", {
       body: await device.screenshot(),
       contentType: "image/png",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { neighborsOf } from "../chapter/board.ts";
 import { initPlayState } from "../chapter/playState.ts";
+import { ensureClock, setHeroSheet } from "../day/clock.ts";
 import { eventState } from "../event/state.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { bindShellState, clearShellState, takePendingTowerCommands } from "../session/shellRef.ts";
@@ -272,7 +273,11 @@ describe("Back on the move map (CU/05)", () => {
   it("EV-11, EV-23, EV-25: a tap and Back send no tower command and replay to the same stream", () => {
     const run = () => {
       const { play, path, local, walk, back } = chain(3);
+      setHeroSheet(play, "hero-a", { helpingVirtues: 1, corruptions: 2 });
+      const sheets = JSON.stringify(ensureClock(play).heroes);
       const l = back(walk(walk(local, path[1]!, never), path[2]!, never));
+      // EV-25: hero state is untouched by a tap and Back.
+      expect(JSON.stringify(ensureClock(play).heroes)).toBe(sheets);
       expect(takePendingTowerCommands()).toEqual([]);
       clearShellState();
       return { seq: play.rngSeq, moves: l.movesLeft, snap: JSON.stringify(play.groups) };

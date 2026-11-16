@@ -214,3 +214,42 @@ describe("Fix my position survives Continue", () => {
     expect(second.session.state().play?.groups.find((g) => g.id === groupId)?.spaceId).toBe(start);
   });
 });
+
+// EV-23: the seeded stream position is the same before a tap, after Back and after a save and restore.
+describe("EV-23 stream position across a checkpoint", () => {
+  it("rngSeq survives a save and restore, and a tap with Back leaves it alone", async () => {
+    const { initPlayState } = await import("../../engine/loops/chapter/playState.ts");
+    const { initialShellState } = await import("../../engine/loops/session/state.ts");
+    const { parseShellCheckpoint, shellCheckpointFromState } = await import("./shellCheckpoint.ts");
+    const { handleGroupTurnPress, backPromptId } = await import(
+      "../../engine/loops/group-turn/loop.ts"
+    );
+    const { bindShellState, clearShellState } = await import(
+      "../../engine/loops/session/shellRef.ts"
+    );
+    const { neighborsOf } = await import("../../engine/loops/chapter/board.ts");
+    const play = initPlayState("ev23", PROVING_GROUNDS_PLAY);
+    const state = { ...initialShellState({ sessionId: "s", seed: "ev23" }), play };
+    bindShellState(state);
+    const group = play.groups[0];
+    if (!group) throw new Error("No group.");
+    const to = neighborsOf(play.content.board, group.spaceId)[0]?.id ?? "";
+    const before = play.rngSeq;
+    const local = {
+      groupId: group.id,
+      movesLeft: 2,
+      awaitingPress: true,
+      encounterPending: false,
+      landedOnBuildingWithNoMoves: false,
+      undo: [],
+    };
+    const tapped = handleGroupTurnPress(local, `walk--${group.id}--${to}`, "walk", () => false);
+    handleGroupTurnPress(tapped, backPromptId(group.id), "back");
+    clearShellState();
+    expect(play.rngSeq).toBe(before);
+    const restored = parseShellCheckpoint(
+      JSON.parse(JSON.stringify(shellCheckpointFromState(state))) as unknown,
+    );
+    expect(restored.play?.rngSeq).toBe(before);
+  });
+});
