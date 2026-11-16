@@ -362,6 +362,11 @@ const playToBegin = async (device: Device) => {
   }
   await press(device, "continue-claim-heroes", "continue");
   for (let step = 0; step < 12; step += 1) {
+    const spin = offered(device).find((a) => a.promptId.startsWith("spin-setup-"));
+    if (spin) {
+      await press(device, spin.promptId, "spin");
+      continue;
+    }
     const next = offered(device).find((a) => a.promptId.startsWith("continue-setup-"));
     if (!next) break;
     await press(device, next.promptId, "continue");

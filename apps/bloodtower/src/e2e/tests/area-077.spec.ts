@@ -102,7 +102,7 @@ const settle = async (page: Page, before: string) => {
   await expect.poll(async () => marker(page), { timeout: 15_000 }).not.toBe(before);
 };
 
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 /** Done on the three setup steps, Begin, then Continue through the four opening moments. No walk. */
@@ -110,6 +110,7 @@ const finishSetup = async (page: Page) => {
   for (const id of SETUP_IDS) {
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
     await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id);
+    if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
     await clickAct(page, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });

@@ -25,7 +25,7 @@ declare global {
 
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const WEB_ROOT = resolve(import.meta.dirname, "../../web/out");
 
 const clickAct = async (page: Page, actionId: string, promptId: string) => {
@@ -292,6 +292,8 @@ test("the bed carries from / onto /board with one gesture", async ({ browser }, 
           "data-setup-step",
           id,
         );
+        if (id === "starting-purse")
+          await clickAct(pad as Page, "spin", "spin-setup-starting-purse");
         await clickAct(pad as Page, "continue", `continue-setup-${id}`);
       }
     });

@@ -56,6 +56,7 @@ const reachPlay = (): ShellState => {
   state = claimAll(state);
   state = step(state, press("continue-claim-heroes", "continue"));
   for (const setup of state.setupSteps) {
+    if (setup.id === "starting-purse") state = step(state, press(`spin-setup-${setup.id}`, "spin"));
     state = step(state, press(`continue-setup-${setup.id}`, "continue"));
   }
   state = step(state, press("continue-begin", "continue"));
@@ -254,11 +255,17 @@ describe("C2/07 play again", () => {
     state = step(state, press("continue-claim-heroes", "continue"));
     for (const setup of state.setupSteps) {
       seen.add(state.screen);
+      if (setup.id === "starting-purse")
+        state = step(state, press(`spin-setup-${setup.id}`, "spin"));
       state = step(state, press(`continue-setup-${setup.id}`, "continue"));
     }
     expect(seen).toEqual(new Set(["setup"]));
     expect(state.screen).toBe("begin");
-    expect(state.setupSteps.map((setup) => setup.id)).toEqual(["seals-and-skulls", "place-heroes"]);
+    expect(state.setupSteps.map((setup) => setup.id)).toEqual([
+      "seals-and-skulls",
+      "place-heroes",
+      "starting-purse",
+    ]);
     state = step(state, press("continue-begin", "continue"));
     expect(state.screen).toBe("play");
     expect(state.autosave?.seed).toBe(again.seed);
@@ -355,6 +362,8 @@ describe("C2/07 play again", () => {
     expect(yes.effects.some((effect) => effect.kind === "autosave-write")).toBe(false);
     let state = step(yes.state, press("continue-claim-heroes", "continue"));
     for (const setup of state.setupSteps) {
+      if (setup.id === "starting-purse")
+        state = step(state, press(`spin-setup-${setup.id}`, "spin"));
       state = step(state, press(`continue-setup-${setup.id}`, "continue"));
     }
     const begun = stepShell(state, press("continue-begin", "continue"));
@@ -372,6 +381,8 @@ describe("C2/07 play again", () => {
       press("continue-claim-heroes", "continue"),
     );
     for (const setup of state.setupSteps) {
+      if (setup.id === "starting-purse")
+        state = step(state, press(`spin-setup-${setup.id}`, "spin"));
       state = step(state, press(`continue-setup-${setup.id}`, "continue"));
     }
     state = step(state, press("continue-begin", "continue"));

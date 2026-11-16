@@ -99,10 +99,11 @@ const walkFullSetup = async (page: Page, joinCode: string, board?: Page) => {
 
   // Wait until each step is the one on screen. Reading the attribute and clicking
   // immediately can still see the previous step after Done, then miss that button.
-  const setupIds = ["seals-and-skulls", "place-heroes"] as const;
+  const setupIds = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
   for (const id of setupIds) {
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
     await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+    if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
     await clickAct(page, "continue", `continue-setup-${id}`);
   }
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });
@@ -307,7 +308,7 @@ test("core: one winner per press, private wire, disconnect pause, run from event
     await clickAct(pageA, "continue", "continue-claim-heroes");
     // Name each setup step. A generic Continue retargets after that button
     // detaches and can press Begin before this loop looks for it.
-    const setupIds = ["seals-and-skulls", "place-heroes"] as const;
+    const setupIds = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
     let sawPrivateLine = false;
     for (const id of setupIds) {
       await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
@@ -315,6 +316,7 @@ test("core: one winner per press, private wire, disconnect pause, run from event
       await expect(pageA.getByText("Only Hero A hears this.")).toBeVisible();
       await expect(pageA.getByText("Only Hero D hears this.")).toHaveCount(0);
       sawPrivateLine = true;
+      if (id === "starting-purse") await clickAct(pageA, "spin", "spin-setup-starting-purse");
       await clickAct(pageA, "continue", `continue-setup-${id}`);
     }
     await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "begin", { timeout: 20_000 });

@@ -316,6 +316,15 @@ export const gearViewSchema = z.strictObject({
 });
 export type GearView = z.infer<typeof gearViewSchema>;
 
+/** The starting-purse step's board panel (CU/15, UI-045). The amount is never shown as zero when unknown. */
+const chanceSchema = z.strictObject({
+  title: z.string().min(1).max(60),
+  amount: z.union([z.number().int().min(0).max(9999), z.literal("unavailable")]).nullable(),
+  line: z.string().min(1).max(120).nullable(),
+  cue: z.number().int().min(0).max(9999),
+});
+export type ChanceView = z.infer<typeof chanceSchema>;
+
 /**
  * Public view for the story board. Loop levels and the text each one shows,
  * which heroes are held, the public narration line, and the actions on offer.
@@ -336,6 +345,8 @@ export const boardViewPayloadSchema = z
     hint: hintViewSchema.nullable().optional(),
     /** Gear panel the Story board displays. Omitted when the host has no gear snapshot. */
     gear: gearViewSchema.optional(),
+    /** The starting purse's spin result and coin cue (CU/15). Present only on that setup step. */
+    chance: chanceSchema.nullable().optional(),
     /** The demo's packed line (A1-8b-2, D49). Omitted until the demo entry plays one. */
     packedLine: packedLineSchema.nullable().optional(),
   })

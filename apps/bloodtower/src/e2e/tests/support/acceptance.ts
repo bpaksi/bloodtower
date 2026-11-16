@@ -439,7 +439,7 @@ export const finishTonight = async (pad: Page) => {
 /** The story and heroes the test pack uses. */
 const TEST_STORY_ID = "test";
 const TEST_HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"];
-const TEST_SETUP_IDS = ["seals-and-skulls", "place-heroes"];
+const TEST_SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"];
 
 const pressAct = async (page: Page, actionId: string, promptId: string) => {
   const button = page.locator(`button[data-prompt-id="${promptId}"][data-action-id="${actionId}"]`);
@@ -459,7 +459,10 @@ export const playToDayRoll = async (pad: Page) => {
   await holdHeroesFromTest(pad, TEST_HERO_IDS);
   await pressAct(pad, "continue", "continue-claim-heroes");
   await expect(main).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
-  for (const id of TEST_SETUP_IDS) await pressAct(pad, "continue", `continue-setup-${id}`);
+  for (const id of TEST_SETUP_IDS) {
+    if (id === "starting-purse") await pressAct(pad, "spin", "spin-setup-starting-purse");
+    await pressAct(pad, "continue", `continue-setup-${id}`);
+  }
   await pressAct(pad, "continue", "continue-begin");
   await expect(main).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
   const day = pad.locator('button[data-prompt-id*="roll-done"], button[data-action-id="walk"]');

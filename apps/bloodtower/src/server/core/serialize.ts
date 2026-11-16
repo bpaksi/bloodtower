@@ -103,6 +103,9 @@ export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState
   // A checkpoint from before CU/09 has no hint record: nothing shown yet, and Hints is on (an
   // absent `hints` setting reads as on). A hint that was on the board is not kept: it was shown.
   hintsShown: row.hintsShown ?? [],
+  // A checkpoint from before CU/15 has no purse: it was never spun. The cue never survives a restart.
+  startingPurse: row.startingPurse ?? null,
+  purseCue: 0,
   hint: null,
   hintQueue: [],
   hintHold: null,

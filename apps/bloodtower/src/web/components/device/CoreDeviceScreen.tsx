@@ -878,10 +878,14 @@ export function CoreDeviceScreen({
     );
   };
   const showHold = picking || view.screen === "begin";
-  const setupPrompt = view.actions.find((action) => action.promptId.startsWith("continue-setup-"));
+  // The starting-purse step offers Spin first, then Continue (CU/15): either names the step.
+  const setupPrompt = view.actions.find(
+    (action) =>
+      action.promptId.startsWith("continue-setup-") || action.promptId.startsWith("spin-setup-"),
+  );
   const setupStep =
     view.screen === "setup" && setupPrompt
-      ? setupPrompt.promptId.slice("continue-setup-".length)
+      ? setupPrompt.promptId.replace(/^(continue|spin)-setup-/, "")
       : undefined;
   const sessionOver = view.screen === "session-over";
   // A game's stats take its name for the title; the rows are on the Story board.

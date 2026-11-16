@@ -85,6 +85,8 @@ describe("startup board copy", () => {
     expect(view.levels.at(-1)?.shows.startsWith("Screen ")).toBe(false);
 
     for (const step of state.setupSteps) {
+      if (step.id === "starting-purse")
+        state = run(state, [press(`spin-setup-${step.id}`, "spin")]);
       state = run(state, [press(`continue-setup-${step.id}`, "continue")]);
     }
     expect(state.screen).toBe("begin");

@@ -149,6 +149,19 @@ export type ViewSetting = {
   options: { id: string; label: string }[];
 };
 
+/**
+ * The game of chance on the Story board (CU/15, UI-045): the starting-purse step. `amount` is null
+ * before the spin and "unavailable" when a purse is set but not a usable number (never zero).
+ * `line` is the copy the board paints once there is a result. `cue` counts the spins that ask the
+ * board to play the coin sound (no tower, Q7.4); the board plays it when the count goes up.
+ */
+export type ChanceView = {
+  title: string;
+  amount: number | "unavailable" | null;
+  line: string | null;
+  cue: number;
+};
+
 export type ViewState = {
   screen: ViewScreen;
   levels: LoopLevel[];
@@ -170,6 +183,8 @@ export type ViewState = {
   deviceHold?: { table: TableBand | null; actions: ViewAction[] } | null;
   /** Gear panel snapshot. Omitted on fixtures that predate the toolbar. */
   gear?: GearView;
+  /** The starting-purse step's board panel. Story board only; null elsewhere. */
+  chance?: ChanceView | null;
 };
 
 export type Audience = { kind: "board" } | { kind: "device"; deviceId: string };

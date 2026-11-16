@@ -15,7 +15,7 @@ import {
 const FOUR = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
 const PORTRAIT = { viewport: { width: 768, height: 1024 }, hasTouch: true as const };
 const BOARD_SIZE = { width: 1920, height: 1080 };
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 const BUILDING_HINT = "Entering a building is free. Each choice inside costs one move.";
 
@@ -55,6 +55,7 @@ const beginPlay = async (pad: Page) => {
     await expect(pad.locator("main.bt-device")).toHaveAttribute("data-setup-step", id, {
       timeout: 20_000,
     });
+    if (id === "starting-purse") await clickAct(pad, "spin", "spin-setup-starting-purse");
     await clickAct(pad, "continue", `continue-setup-${id}`);
   }
   await clickAct(pad, "continue", "continue-begin");

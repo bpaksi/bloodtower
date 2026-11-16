@@ -186,11 +186,19 @@ describe("game setup has no tower step", () => {
       run([{ kind: "hero-hold", v: 1, deviceId: "ipad-0", heroId: hero.id, action: "take" }]);
     }
     run([press("continue-claim-heroes", "continue")]);
-    for (const step of [...state.setupSteps]) run([press(`continue-setup-${step.id}`, "continue")]);
+    for (const step of [...state.setupSteps]) {
+      if (step.id === "starting-purse") run([press(`spin-setup-${step.id}`, "spin")]);
+      run([press(`continue-setup-${step.id}`, "continue")]);
+    }
     expect(state.screen).toBe("begin");
     expect([...screens]).toEqual(["pick-story", "game-settings", "claim-heroes", "setup", "begin"]);
-    expect(commands).toEqual([]);
-    expect(state.setupSteps.map((step) => step.id)).toEqual(["seals-and-skulls", "place-heroes"]);
+    // Setup asks nothing of the tower on its own; the one command is the starting purse's Spin (CU/15).
+    expect(commands).toEqual(["lighting.sequence"]);
+    expect(state.setupSteps.map((step) => step.id)).toEqual([
+      "seals-and-skulls",
+      "place-heroes",
+      "starting-purse",
+    ]);
   });
 });
 
@@ -215,7 +223,10 @@ describe("without the tower is kept for the session", () => {
       run([{ kind: "hero-hold", v: 1, deviceId: "ipad-0", heroId: hero.id, action: "take" }]);
     }
     run([press("continue-claim-heroes", "continue")]);
-    for (const step of [...state.setupSteps]) run([press(`continue-setup-${step.id}`, "continue")]);
+    for (const step of [...state.setupSteps]) {
+      if (step.id === "starting-purse") run([press(`spin-setup-${step.id}`, "spin")]);
+      run([press(`continue-setup-${step.id}`, "continue")]);
+    }
     run([press("continue-begin", "continue")]);
     for (const moment of OPENING_MOMENTS) run([press(openingPromptId(moment), "continue")]);
     run([press("menu-quit", "quit-story")]);

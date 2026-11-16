@@ -71,6 +71,20 @@ const SETUP_EVENTS = (seed: string): ShellEvent[] => [
     promptId: "continue-setup-place-heroes",
     actionId: "continue",
   },
+  {
+    kind: "press",
+    v: 1,
+    deviceId: "sim-pad",
+    promptId: "spin-setup-starting-purse",
+    actionId: "spin",
+  },
+  {
+    kind: "press",
+    v: 1,
+    deviceId: "sim-pad",
+    promptId: "continue-setup-starting-purse",
+    actionId: "continue",
+  },
   { kind: "press", v: 1, deviceId: "sim-pad", promptId: "continue-begin", actionId: "continue" },
   ...OPENING_MOMENTS.map(
     (momentId): ShellEvent => ({

@@ -169,6 +169,7 @@ describe("party size and pick heroes", () => {
     current = hold("hero-a", "take");
     run([press("continue-claim-heroes", "continue")]);
     for (const step of current.setupSteps) {
+      if (step.id === "starting-purse") run([press(`spin-setup-${step.id}`, "spin")]);
       run([press(`continue-setup-${step.id}`, "continue")]);
     }
     run([press("continue-begin", "continue")]);

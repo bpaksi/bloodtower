@@ -17,7 +17,7 @@ import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
 const WEB_ROOT = resolve(import.meta.dirname, "../../web/out");
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const NOTICE = "This iPad may dim and sleep. Keep it awake in Settings to stay in the game.";
 const IPAD = { width: 768, height: 1024 } as const;
 
@@ -341,6 +341,7 @@ test("Done for tonight releases the wake lock", async ({ browser }, testInfo) =>
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
     for (const id of SETUP_IDS) {
       await expect(deviceMain(page)).toHaveAttribute("data-setup-step", id);
+      if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
       await clickAct(page, "continue", `continue-setup-${id}`);
     }
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin");

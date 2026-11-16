@@ -188,6 +188,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       chosenStoryId: current.chosenStoryId,
       setupAt: current.setupAt,
       boundStoryId: current.boundStoryId,
+      // The spin changes nothing else: without it the purse would never reach a checkpoint (CU/15).
+      startingPurse: current.startingPurse,
     });
 
   let savedLobbySignature = "";

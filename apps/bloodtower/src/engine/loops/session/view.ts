@@ -16,9 +16,11 @@ import {
 } from "../../hints/copy.ts";
 import { inNightPhase } from "../../hints/flow.ts";
 import { heldItems, itemName } from "../../rules/items/index.ts";
+import { isPurseAmount } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
+  ChanceView,
   DaySkullView,
   GroupsCardView,
   LoopLevel,
@@ -34,7 +36,13 @@ import { partyIsSplit, regroupPicks, regroupQueue } from "../day/regroup.ts";
 import { splitShiftOf } from "../day/roll.ts";
 import { daysLeft } from "../day/rules.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
-import { partySize } from "../game/setupFlow.ts";
+import {
+  onPurseStep,
+  PURSE_STEP_LABEL,
+  partySize,
+  SPIN_ACTION,
+  towerSpins,
+} from "../game/setupFlow.ts";
 import { type GroupTurnLocal, virtuePanelOf, virtuePromptId } from "../group-turn/loop.ts";
 import { BOARD_SET_UP_PROMPT } from "./enter.ts";
 import { fixPositionRefusal } from "./gear.ts";
@@ -100,6 +108,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
     const story = state.stories.find((entry) => entry.card.id === id);
     return story ? `Choose ${story.card.title}` : "Choose";
   }
+  if (actionId === SPIN_ACTION) return "Spin";
   if (actionId === "continue") return "Continue";
   if (actionId === "back") return "Back";
   if (actionId === "new-game") return "New game";
@@ -343,6 +352,28 @@ const buildVirtue = (state: ShellState): VirtuePanelView | null => {
       name: virtueName(virtueId),
       label: pick.label,
     })),
+  };
+};
+
+/** Board lines for the spin's result (Loremaster, `chance.result` and `chance.notower`). */
+const chanceResult = (amount: number, tower: boolean) =>
+  tower ? `The lights stop on ${amount} gold.` : `The wheel stops on ${amount} gold.`;
+
+/** The starting-purse step's board panel (CU/15): only while that setup step is on screen. */
+const buildChance = (state: ShellState): ChanceView | null => {
+  if (!onPurseStep(state)) return null;
+  const purse = state.startingPurse;
+  if (purse === null) {
+    return { title: PURSE_STEP_LABEL, amount: null, line: null, cue: state.purseCue };
+  }
+  if (!isPurseAmount(purse)) {
+    return { title: PURSE_STEP_LABEL, amount: "unavailable", line: null, cue: state.purseCue };
+  }
+  return {
+    title: PURSE_STEP_LABEL,
+    amount: purse,
+    line: chanceResult(purse, towerSpins(state)),
+    cue: state.purseCue,
   };
 };
 
@@ -918,5 +949,6 @@ export const projectShellView = (state: ShellState): ViewState => {
     hint: momentId ? null : buildHint(state),
     deviceHold: !momentId && state.hint && state.screen === "play" ? state.hintHold : null,
     gear: gearSnapshot(state),
+    chance: buildChance(state),
   };
 };

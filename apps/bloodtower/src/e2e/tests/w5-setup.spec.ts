@@ -14,12 +14,13 @@ import {
 
 const STORY_ID = "test";
 const HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"] as const;
-const SETUP_IDS = ["seals-and-skulls", "place-heroes"] as const;
+const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 
 const LABELS: Record<(typeof SETUP_IDS)[number], string> = {
   "seals-and-skulls": "Place the seals on the tower and load the skulls into the chute.",
   "place-heroes": "Stand each hero on their start building.",
+  "starting-purse": "Starting purse",
 };
 
 const PACK_ROOT = join(import.meta.dirname, "../../../../../packs/test");
@@ -150,7 +151,7 @@ test("W5 setup steps stay in order on the iPad and the Story board", async ({
       await expect(boardMain(board)).toHaveAttribute("data-screen", "setup");
       await expect(boardMain(board)).toHaveAttribute("data-setup-step", id);
       await expect(board.locator("[data-setup-step]")).toHaveCount(1);
-      await expect(board.locator("[data-setup-progress]")).toHaveText(`Step ${index + 1} of 2`);
+      await expect(board.locator("[data-setup-progress]")).toHaveText(`Step ${index + 1} of 3`);
       await expect(board.locator('[data-startup-panel="setup"]')).toContainText(LABELS[id]);
       await expect(board.locator("main button")).toHaveCount(0);
       await expect(board.locator("[data-hero-place]")).toHaveCount(0);
@@ -158,13 +159,14 @@ test("W5 setup steps stay in order on the iPad and the Story board", async ({
       await assertNoStandIn(board);
 
       if (index < SETUP_IDS.length - 1) {
+        if (id === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
         await clickAct(device, "continue", `continue-setup-${id}`);
       }
     }
 
-    await clickAct(device, "back", "back-setup-place-heroes");
-    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "seals-and-skulls");
-    await expect(board.locator("[data-setup-progress]")).toHaveText("Step 1 of 2");
+    await clickAct(device, "back", "back-setup-starting-purse");
+    await expect(deviceMain(device)).toHaveAttribute("data-setup-step", "place-heroes");
+    await expect(board.locator("[data-setup-progress]")).toHaveText("Step 2 of 3");
     expect(session.tower.sent()).toEqual([]);
   } finally {
     await boardContext.close();
@@ -185,6 +187,7 @@ test("W5 Done on place-heroes opens Begin, and Back locks it again", async ({
     await skipTowerToClaim(device, session.host.joinCode);
     await claimAndEnterSetup(device);
     for (const id of SETUP_IDS) {
+      if (id === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
       await clickAct(device, "continue", `continue-setup-${id}`);
       expect(session.tower.sent()).toEqual([]);
     }
@@ -228,6 +231,7 @@ test("W5 two iPads pressing Begin together open one grey-stair.01", async ({
     await clickAct(pageA, "continue", "continue-claim-heroes");
     for (const id of SETUP_IDS) {
       await expect(deviceMain(pageA)).toHaveAttribute("data-setup-step", id);
+      if (id === "starting-purse") await clickAct(pageA, "spin", "spin-setup-starting-purse");
       await clickAct(pageA, "continue", `continue-setup-${id}`);
     }
     await expect(deviceMain(pageA)).toHaveAttribute("data-screen", "begin");
@@ -285,7 +289,10 @@ test("W5 Begin plays four opening moments before any walk", async ({ browser }, 
   try {
     await skipTowerToClaim(device, session.host.joinCode);
     await claimAndEnterSetup(device);
-    for (const id of SETUP_IDS) await clickAct(device, "continue", `continue-setup-${id}`);
+    for (const id of SETUP_IDS) {
+      if (id === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
+      await clickAct(device, "continue", `continue-setup-${id}`);
+    }
     await clickAct(device, "continue", "continue-begin");
 
     for (const id of OPENING_IDS) {
@@ -410,6 +417,9 @@ test("W5 a restart before Begin does not skip an undone setup step", async ({
     await expect(boardMain(board)).toHaveAttribute("data-screen", "setup");
     await expect(boardMain(board)).not.toHaveAttribute("data-moment", /.+/);
     await clickAct(page, "continue", "continue-setup-place-heroes");
+    await expect(deviceMain(page)).toHaveAttribute("data-setup-step", "starting-purse");
+    await clickAct(page, "spin", "spin-setup-starting-purse");
+    await clickAct(page, "continue", "continue-setup-starting-purse");
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "begin");
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
   } finally {
@@ -431,7 +441,10 @@ test("W5 a restart on grey-stair.02 reloads that moment and offers no walk", asy
   try {
     await skipTowerToClaim(device, session.host.joinCode);
     await claimAndEnterSetup(device);
-    for (const id of SETUP_IDS) await clickAct(device, "continue", `continue-setup-${id}`);
+    for (const id of SETUP_IDS) {
+      if (id === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
+      await clickAct(device, "continue", `continue-setup-${id}`);
+    }
     await clickAct(device, "continue", "continue-begin");
     await expect(boardMain(board)).toHaveAttribute("data-moment", "grey-stair.01");
     await clickAct(device, "continue", openingPrompt("grey-stair.01"));
@@ -483,7 +496,10 @@ test("W5 quit on grey-stair.01 ends the session without a tower command", async 
   try {
     await skipTowerToClaim(device, session.host.joinCode);
     await claimAndEnterSetup(device);
-    for (const id of SETUP_IDS) await clickAct(device, "continue", `continue-setup-${id}`);
+    for (const id of SETUP_IDS) {
+      if (id === "starting-purse") await clickAct(device, "spin", "spin-setup-starting-purse");
+      await clickAct(device, "continue", `continue-setup-${id}`);
+    }
     await clickAct(device, "continue", "continue-begin");
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "play");
     await expect(boardMain(board)).toHaveAttribute("data-moment", "grey-stair.01");
