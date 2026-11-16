@@ -3,6 +3,7 @@
 | Item | Approved by | When (America/Detroit) | Chat link | Version (commit sha of file) |
 |------|-------------|------------------------|-----------|------------------------------|
 | eval.md | Bob | 2026-11-14 6:05 PM ET, in chat ("Approve the batch") | | blob 29f81f32 |
+| eval.md | Bob | 2026-11-16, in chat ("I approve the CU/03, CU/04 and CU/10 evals at their current blobs") | | blob 239320cd |
 | mockup.html | Bob | 2026-11-14 6:05 PM ET, in chat ("Approve the batch"), as a Gamewright draft for the Illusionist to replace | | blob 53481502 |
 | eval.md | Bob | 2026-11-15 6:28 AM ET, via Warden, step 44 / #470, amended evals approved as merged | | blob 6eab7fbf |
 | plan.md Touches | Bob | 2026-11-15 6:28 AM ET, via Warden, step 44 / #470, widened Touches approved as merged | | blob df800331 |
