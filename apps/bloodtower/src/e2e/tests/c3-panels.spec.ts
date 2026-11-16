@@ -659,13 +659,14 @@ test.describe("CU/15 the game of chance: the Spin and the starting purse", () =>
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const first = await reachPurseStep(browser, testInfo, { tower: false, seed: "cu15-restart" });
+    const first = await reachPurseStep(browser, testInfo, { tower: true, seed: "cu15-restart" });
     const { databasePath } = first.session;
     let amount = "";
     try {
       await clickAct(first.pad, "spin", "spin-setup-starting-purse");
       const result = first.board.locator("#chance [data-chance-result]");
       await expect(result).toHaveText(/gold\.$/, { timeout: 20_000 });
+      expect(sequences(first.session.tower.sent())).toHaveLength(1);
       amount = (await result.getAttribute("data-chance-amount")) ?? "";
       expect(amount).toMatch(/^(10|20|30|40)$/);
     } finally {

@@ -449,6 +449,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         if (!ok) tellDevice("The tower did not play that volume. Nothing was retried.");
         continue;
       }
+      if (outcome.capabilityId === "lighting.sequence") {
+        // The starting purse's Spin (CU/15): the purse is set whatever the lights did, but the
+        // iPad that pressed must hear that the chase did not run (decision 0003).
+        if (!ok)
+          tellDevice(
+            "The tower did not run the light chase. The purse is set. Nothing was retried.",
+          );
+        continue;
+      }
       if (outcome.capabilityId !== "tower.connect" && outcome.capabilityId !== "tower.calibrate") {
         continue;
       }
