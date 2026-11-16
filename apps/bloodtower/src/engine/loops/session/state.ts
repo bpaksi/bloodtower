@@ -1,7 +1,9 @@
 import type { GearPanelId } from "../../../protocols/v2/views.ts";
+import type { HintId } from "../../hints/copy.ts";
 import type { LoopRuntimeState, PromptSlot } from "../../loop/runtime.ts";
 import { emptyLoopRuntime } from "../../loop/runtime.ts";
 import type { LoopRegistry } from "../../loop/types.ts";
+import type { ViewState } from "../../views/state.ts";
 import type { PlayContent, PlayState } from "../chapter/playState.ts";
 import type { ShellStory } from "./pack.ts";
 import { PROVING_GROUNDS_PLAY } from "./playContent.ts";
@@ -105,6 +107,12 @@ export type SessionConfirm = "new-game" | "done" | "play-again";
 /** Where the tower block leads when the session screen ran it again (DEC-711). */
 export type EnterThen = "new-game" | "continue" | "play-again";
 
+/** The iPad half of the view a hint holds: the screen before the hint began. */
+export type HintHold = {
+  table: NonNullable<ViewState["table"]> | null;
+  actions: ViewState["actions"];
+};
+
 export type ShellState = {
   version: typeof SHELL_ENGINE_VERSION;
   sessionId: string;
@@ -175,6 +183,17 @@ export type ShellState = {
   offered: PromptSlot[];
   playContent: PlayContent | null;
   play: PlayState | null;
+  /** Hint ids already shown this game (CU/09). A checkpoint keeps them, so none repeats. */
+  hintsShown: string[];
+  /** The hint on the Story board now, or null. It ends after `AUTO_ADVANCE_MS`; not kept across a restart. */
+  hint: HintId | null;
+  /** Hints earned while another was showing; they follow one at a time. */
+  hintQueue: string[];
+  /**
+   * What the iPads keep showing while a hint is on the board (the table and the offers the step
+   * before it left, with every button greyed). Null when no hint shows. Not kept across a restart.
+   */
+  hintHold: HintHold | null;
   /** Tower volume 0, 1, or 2. Kept across a panel close and a restart. */
   towerVolume: 0 | 1 | 2;
   /** C2 never splits the party. The label stays "Split party". */
@@ -247,6 +266,10 @@ export const initialShellState = (input: {
     offered: [],
     playContent: PROVING_GROUNDS_PLAY,
     play: null,
+    hintsShown: [],
+    hint: null,
+    hintQueue: [],
+    hintHold: null,
     towerVolume: 1,
     partySplit: false,
     gearPanel: null,

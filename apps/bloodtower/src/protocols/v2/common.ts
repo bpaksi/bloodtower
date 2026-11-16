@@ -74,6 +74,8 @@ const closedActionSchema = z.strictObject({
   promptId: promptIdSchema,
   actionId: actionIdSchema,
   label: z.string().min(1).max(200),
+  /** A held screen (CU/09) keeps a walk's compass slot so the map stays as it was, greyed. */
+  slot: z.enum(["N", "NE", "E", "SE", "S", "SW", "W", "NW"]).optional(),
   open: z.literal(false),
   reason: z.string().min(1).max(200),
 });

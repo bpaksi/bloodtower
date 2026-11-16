@@ -1,4 +1,5 @@
 import { GEAR_PANELS, type GearPanelId } from "../../../protocols/v2/views.ts";
+import { rulesPage } from "../../hints/copy.ts";
 import { queueRegroupPick } from "../day/regroup.ts";
 import type { ShellState } from "./state.ts";
 
@@ -101,7 +102,12 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
     // A Split party pick always comes with the panel's item; without it nothing is queued.
     if (next.gearPanel === SPLIT_PANEL) return next;
     if (event.pick) next.gearPicked = event.pick;
-    if (next.gearPanel === "look-up" && event.pick) next.gearCard = event.pick;
+    if (next.gearPanel === "look-up" && event.pick) {
+      next.gearCard = event.pick;
+      // A Rules page is named by its title on the board's "picked" line (CU/09).
+      const page = rulesPage(event.pick);
+      if (page) next.gearPicked = page.title;
+    }
     if (next.gearPanel === "volume" && isVolume(event.volume)) {
       next.gearPreviewVolume = event.volume;
       next.gearPicked = event.pick ?? `Volume ${event.volume}`;

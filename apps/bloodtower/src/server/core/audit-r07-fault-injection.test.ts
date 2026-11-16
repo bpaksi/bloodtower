@@ -142,6 +142,8 @@ const reachPlay = async (h: Harness, track: Track): Promise<Table> => {
     await act("play-without-tower", "play-without-tower");
   }
   await act("continue-pick-story-test", "continue");
+  // These tests press through whole days: Hints off, so no first-time hint holds a step back (CU/09).
+  await act("set-setting", "set", { settingId: "hints", optionId: "off" });
   await act("continue-game-settings", "continue");
   for (const heroId of HEROES) await act("hero-hold", "take", { heroId });
   await act("continue-claim-heroes", "continue");

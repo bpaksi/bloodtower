@@ -52,8 +52,12 @@ export function GearBoardPanel({ gear }: { gear: GearView }) {
       ) : null}
       {gear.panel === "volume" ? <p>How loud should the tower be? Press one to hear it.</p> : null}
       {gear.panel === "look-up" ? (
-        gear.card ? (
-          <p data-card={gear.card}>{gear.card}</p>
+        gear.card && gear.cardPage ? (
+          // A Rules page (CU/09): the title and its words. Display only, no button (DEC-278).
+          <div data-card={gear.card}>
+            <h3>{gear.cardTitle}</h3>
+            <p data-card-page>{gear.cardPage}</p>
+          </div>
         ) : (
           <ul data-cards>
             {gear.cards.map((card) => (

@@ -1,7 +1,7 @@
 "use client";
 
 import type { DeviceView, GearView, OfferedAction } from "bloodtower-protocols";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { VOLUME_LINE } from "../../lib/volumeTest.ts";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
@@ -9,6 +9,9 @@ import { ChromeBar } from "./ChromeBar.tsx";
 import type { MenuContext } from "./gearMenu.ts";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
+
+/** The controls to draw. A held screen (a hint is on the board) draws its closed ones, greyed. */
+const drawnActions = (view: DeviceView) => (view.held ? view.actions : openActions(view.actions));
 
 /** [COPY: split-party-help] and [COPY: queued-confirm]: Loremaster slots (step 45). */
 const SPLIT_HELP = "[COPY: split-party-help]";
@@ -245,16 +248,20 @@ function GearDevicePanel({
       ) : null}
       {gear.panel === "look-up" ? (
         <div className="mt-6 flex flex-col gap-3">
-          {gear.cards.map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              className="bt-secondary"
-              disabled={!live}
-              onClick={() => send("pick", { pick: card.title })}
-            >
-              {card.title}
-            </button>
+          {gear.cards.map((card, index) => (
+            <Fragment key={card.id}>
+              {card.group && card.group !== gear.cards[index - 1]?.group ? (
+                <h3 data-lookup-group={card.group}>{card.group}</h3>
+              ) : null}
+              <button
+                type="button"
+                className="bt-secondary"
+                disabled={!live}
+                onClick={() => send("pick", { pick: card.id })}
+              >
+                {card.title}
+              </button>
+            </Fragment>
           ))}
         </div>
       ) : null}
@@ -364,7 +371,7 @@ function TowerLostPause({
 }) {
   const [asking, setAsking] = useState<"go-on-without" | "quit-story" | null>(null);
   const find = (actionId: string) =>
-    openActions(view.actions).find((action) => action.actionId === actionId);
+    drawnActions(view).find((action) => action.actionId === actionId);
   const reconnect = find("reconnect");
   const goWithout = find("go-on-without");
   const quit = find("quit-story");
@@ -481,7 +488,7 @@ function SessionButtons({
   live: boolean;
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
 }) {
-  const open = openActions(view.actions);
+  const open = drawnActions(view);
   const find = (actionId: string) => open.find((action) => action.actionId === actionId);
   const button = (action: OfferedAction, primary = false) => (
     <button
@@ -600,7 +607,7 @@ const SLOT_POINT: Record<(typeof COMPASS_SLOTS)[number], { x: number; y: number 
 
 /** v2 device UI: text and icon controls. Place stills stay on the Story board. */
 export function CoreDeviceScreen({
-  live,
+  live: connected,
   view,
   errorBanner,
   onAct,
@@ -612,11 +619,13 @@ export function CoreDeviceScreen({
   onAct: (promptId: string, actionId: string, args?: Record<string, unknown>) => void;
   onHold?: (heroId: string, action: "take" | "release") => void;
 }) {
+  // A hint is on the Story board: this iPad keeps its prior screen, every control greyed (CU/09).
+  const live = connected && !view.held;
   const volumes = view.actions.filter((action) => action.actionId === "volume-play");
   const keep = view.actions.find((action) => action.actionId === "volume-keep");
   const tryAnother = view.actions.find((action) => action.actionId === "volume-again");
   const soundStep = view.screen === "pick-story" && volumes.length > 0;
-  const actions = openActions(view.actions).filter((action) => !isSoundAction(action));
+  const actions = drawnActions(view).filter((action) => !isSoundAction(action));
   const onSessionScreen = view.screen === "session";
   // The session screen draws its own Back inside the question; Pick story's Continue has its own place.
   const back = onSessionScreen ? undefined : actions.find((action) => action.actionId === "back");

@@ -106,6 +106,13 @@ export const gearEventV1 = z.object({
   volume: z.number().int().min(0).max(2).optional(),
 });
 
+/** The hint on the board has been up for `AUTO_ADVANCE_MS`. The host appends it from its timer. */
+export const hintEndEventV1 = z.object({
+  kind: z.literal("hint-end"),
+  v: z.literal(1),
+  hintId: z.string().min(1).max(64),
+});
+
 export const shellEventSchema = z.discriminatedUnion("kind", [
   startSessionEventV1,
   pressEventV1,
@@ -121,6 +128,7 @@ export const shellEventSchema = z.discriminatedUnion("kind", [
   volumeResultEventV1,
   volumeAnswerEventV1,
   gearEventV1,
+  hintEndEventV1,
 ]);
 
 export type ShellEvent = z.infer<typeof shellEventSchema>;

@@ -100,6 +100,12 @@ export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState
   towerVolume:
     row.towerVolume === 0 || row.towerVolume === 1 || row.towerVolume === 2 ? row.towerVolume : 1,
   partySplit: false,
+  // A checkpoint from before CU/09 has no hint record: nothing shown yet, and Hints is on (an
+  // absent `hints` setting reads as on). A hint that was on the board is not kept: it was shown.
+  hintsShown: row.hintsShown ?? [],
+  hint: null,
+  hintQueue: [],
+  hintHold: null,
   gearPanel: null,
   gearOwner: null,
   gearPaused: false,

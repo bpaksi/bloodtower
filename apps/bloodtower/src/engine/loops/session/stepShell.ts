@@ -1,5 +1,8 @@
 import { openingActiveIndex, openingFinishedIndex } from "../../../protocols/opening.ts";
 import type { EngineEffect } from "../../effects.ts";
+import { HINTS_OFF, HINTS_ON, HINTS_SETTING_ID, rulesPage } from "../../hints/copy.ts";
+import { applyHints, endHint, hintsOn } from "../../hints/flow.ts";
+import { HINT_IDS, HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/registry.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
 import { bindPlayState, initPlayState, seatAtCitadels } from "../chapter/playState.ts";
@@ -52,8 +55,9 @@ import {
   takePendingTowerCommands,
 } from "./shellRef.ts";
 import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
-import { initialShellState, type ShellState } from "./state.ts";
+import { type HintHold, initialShellState, type ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
+import { captureHintHold } from "./view.ts";
 
 export type ShellStepResult = {
   state: ShellState;
@@ -232,7 +236,7 @@ const pauseIfNeeded = (state: ShellState): void => {
   }
 };
 
-export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult => {
+const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult => {
   const parsed = shellEventSchema.safeParse(event);
   if (!parsed.success) {
     throw new Error(`Invalid shell event: ${parsed.error.message}`);
@@ -367,6 +371,41 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
+  }
+
+  if (e.kind === "hint-end") {
+    const next = endHint(state, e.hintId);
+    if (next === state) return withEffects(state, effects);
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects({ ...next, eventSeq: eventSeq + 1 }, effects);
+  }
+
+  if (e.kind === "set-setting" && e.settingId === HINTS_SETTING_ID) {
+    // Hints is set at setup only (DEC-571). A late action is refused and the value stays.
+    if (state.screen !== "game-settings" || !state.chosenStoryId) {
+      effects.push({
+        kind: "press-error",
+        v: 1,
+        code: HINTS_AFTER_SETUP,
+        message: "Hints can only be changed on Game settings, before the story begins.",
+        deviceId: e.deviceId,
+      });
+      return withEffects(state, effects);
+    }
+    if (e.optionId !== HINTS_ON && e.optionId !== HINTS_OFF) return withEffects(state, effects);
+    if ((state.settingValues[HINTS_SETTING_ID] ?? HINTS_ON) === e.optionId) {
+      return withEffects(state, effects);
+    }
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(
+      {
+        ...state,
+        settingValues: { ...state.settingValues, [HINTS_SETTING_ID]: e.optionId },
+        setSerial: state.setSerial + 1,
+        eventSeq: eventSeq + 1,
+      },
+      effects,
+    );
   }
 
   if (e.kind === "set-setting") {
@@ -684,4 +723,42 @@ export const runShellEvents = (events: ShellEvent[]) => {
     effects.push(...result.effects);
   }
   return { state, effects };
+};
+
+/**
+ * One step of the shell. Hints (CU/09) and Rules pages ride on top of the core step: a loop the step
+ * entered earns its hint once per game; a Look up pick with no page is an error, never silent.
+ */
+const mayStartHint = (state: ShellState): boolean =>
+  state.screen === "play" &&
+  state.hint === null &&
+  hintsOn(state) &&
+  HINT_IDS.some((id) => !state.hintsShown.includes(id));
+
+export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult => {
+  // The loop runtime changes its stack in place, so the screen the iPads show must be read before
+  // the step runs. It is only needed while a hint can still start.
+  const held: HintHold | null = mayStartHint(state) ? captureHintHold(state) : null;
+  const result = stepShellCore(state, event);
+  const { state: kept, extra } = applyHints(result.state, result.effects);
+  let next = kept;
+  // A hint is the loop's first beat: the iPads keep the screen they had before the step, greyed,
+  // until the hint ends. The Story board shows the hint; it is never held back.
+  if (next.hint === null) {
+    if (next.hintHold) next = { ...next, hintHold: null };
+  } else if (next.hintHold === null) {
+    next = { ...next, hintHold: held ?? { table: null, actions: [] } };
+  }
+  if (next.gearPanel === "look-up" && next.gearCard && !rulesPage(next.gearCard)) {
+    extra.push({
+      kind: "press-error",
+      v: 1,
+      code: RULES_PAGE_MISSING,
+      message: `Look up has no page for "${next.gearCard}".`,
+      ...(event.kind === "gear" ? { deviceId: event.deviceId } : {}),
+    });
+    next = { ...next, gearCard: null };
+  }
+  if (next === result.state && extra.length === 0) return result;
+  return { ...result, state: next, effects: [...result.effects, ...extra] };
 };

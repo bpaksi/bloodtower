@@ -1,5 +1,5 @@
 import type { ViewScreen } from "../../protocols/v2/common.ts";
-import type { GearView } from "../../protocols/v2/views.ts";
+import type { GearView, HintView } from "../../protocols/v2/views.ts";
 import type { CompassSlot } from "../loops/chapter/board.ts";
 
 export type PrivateLine = {
@@ -31,7 +31,7 @@ export type ViewAction = {
   actionId: string;
   label: string;
   deviceId: string | null;
-} & ({ open: true; slot?: CompassSlot } | { open: false; reason: string });
+} & ({ open: true; slot?: CompassSlot } | { open: false; reason: string; slot?: CompassSlot });
 
 export type PlaceStill = {
   building: "village" | "bazaar" | "citadel" | "sanctuary";
@@ -137,6 +137,13 @@ export type ViewState = {
   table?: TableBand | null;
   /** Story board only. Null when nobody is inside a place. */
   place?: PlaceStill | null;
+  /** The first-time hint on the board now (CU/09). Story board only. */
+  hint?: HintView | null;
+  /**
+   * While a hint shows, the iPads keep the screen before it (CU/09): this table and these
+   * actions replace `table` and `actions` for a device. The Story board ignores it.
+   */
+  deviceHold?: { table: TableBand | null; actions: ViewAction[] } | null;
   /** Gear panel snapshot. Omitted on fixtures that predate the toolbar. */
   gear?: GearView;
 };

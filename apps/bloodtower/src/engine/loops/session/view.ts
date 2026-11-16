@@ -3,7 +3,18 @@ import {
   OPENING_PLACEHOLDER,
   openingActiveIndex,
 } from "../../../protocols/opening.ts";
-import { AUTO_ADVANCE_MS, type GearView } from "../../../protocols/v2/views.ts";
+import { AUTO_ADVANCE_MS, type GearView, type HintView } from "../../../protocols/v2/views.ts";
+import {
+  HINT_TEXT,
+  HINTS_COPY,
+  HINTS_OFF,
+  HINTS_ON,
+  HINTS_SETTING_ID,
+  RULES_GROUP,
+  RULES_PAGES,
+  rulesPage,
+} from "../../hints/copy.ts";
+import { inNightPhase } from "../../hints/flow.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
   DaySkullView,
@@ -40,10 +51,10 @@ import {
   TOWER_LOST,
   towerLine,
 } from "./hub.ts";
-import type { ShellStory } from "./pack.ts";
+import type { ShellStory, StorySetting } from "./pack.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import { soundActions, soundStepOnBoard, VOLUME_LINE } from "./sound.ts";
-import type { ShellState } from "./state.ts";
+import type { HintHold, ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
 
 /** Matches protocol v2 setup screens (private lines on these only). */
@@ -340,6 +351,22 @@ const buildPlace = (state: ShellState): PlaceStill | null => {
   };
 };
 
+/** The first-time hint on the board (CU/09). Under a place's art it is a caption, never a Scroll. */
+const buildHint = (state: ShellState): HintView | null => {
+  if (!state.hint || state.screen !== "play") return null;
+  const text = HINT_TEXT[state.hint];
+  if (!text) return null;
+  return {
+    id: state.hint,
+    text,
+    caption: buildPlace(state) !== null,
+    holdMs: AUTO_ADVANCE_MS,
+    // TODO(CU/09): the narrator clips (Charon) are not recorded yet; `voiceId` stays null until
+    // asset-studio packs one per hint id, then it carries the hint id for the board to play.
+    voiceId: null,
+  };
+};
+
 const JOIN_LINE = "Scan with each iPad. Then pick who this iPad speaks for at the table.";
 /** SCR-022: the approved mockup wording, one line per step. */
 export const BASE_BOARD_STEPS = [
@@ -406,16 +433,39 @@ const doorLevel = (story: ShellStory, focused: boolean): LoopLevel | null => {
   };
 };
 
-const settingLevels = (state: ShellState, story: ShellStory | undefined): LoopLevel[] => {
+/** The engine's own rows come first in every story (DEC-639); the story's own follow. */
+const ENGINE_SETTING_IDS = ["length", "difficulty", "party-size"];
+
+const HINTS_ROW: StorySetting = {
+  id: HINTS_SETTING_ID,
+  label: HINTS_COPY.label,
+  options: [
+    { id: HINTS_ON, label: HINTS_COPY.on },
+    { id: HINTS_OFF, label: HINTS_COPY.off },
+  ],
+  default: HINTS_ON,
+};
+
+/** Game settings rows in order: the engine's rows, then Hints, then the story's own (CU/09). */
+const settingRows = (story: ShellStory | undefined): StorySetting[] => {
   if (!story) return [];
+  const engine = story.settings.filter((row) => ENGINE_SETTING_IDS.includes(row.id));
+  const own = story.settings.filter((row) => !ENGINE_SETTING_IDS.includes(row.id));
+  return [...engine, HINTS_ROW, ...own];
+};
+
+/** Room for the engine's three rows, Hints and one of the story's own on the board. */
+const SETTING_LEVEL_CAP = 5;
+
+const settingLevels = (state: ShellState, story: ShellStory | undefined): LoopLevel[] => {
   const levels: LoopLevel[] = [];
-  for (const setting of story.settings) {
+  for (const setting of settingRows(story)) {
     const id = `setting-${setting.id}`;
     if (!LEVEL_ID.test(id)) continue;
     const chosen = state.settingValues[setting.id] ?? setting.default;
     const option = setting.options.find((row) => row.id === chosen);
     levels.push({ id, label: setting.label, shows: option?.label ?? chosen });
-    if (levels.length === 4) break;
+    if (levels.length === SETTING_LEVEL_CAP) break;
   }
   return levels;
 };
@@ -463,8 +513,8 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
     return focused?.card.title ?? title;
   }
   if (state.screen === "game-settings") {
-    if (!story || story.settings.length === 0) return "Nothing to set.";
-    return story.settings
+    if (!story) return "Nothing to set.";
+    return settingRows(story)
       .map((setting) => {
         const chosen = state.settingValues[setting.id] ?? setting.default;
         const option = setting.options.find((row) => row.id === chosen);
@@ -560,7 +610,7 @@ const startupLevels = (state: ShellState, story: ShellStory | undefined): LoopLe
   }
   if (state.screen === "game-settings") leading.push(...settingLevels(state, story));
   leading.push(statusLevel(state));
-  return leading.slice(0, 6);
+  return leading.slice(0, 7);
 };
 
 const screenLabel = (state: ShellState): string => {
@@ -573,11 +623,6 @@ const screenLabel = (state: ShellState): string => {
   }
   return STEP_NAME[state.screen];
 };
-
-const LOOKUP_CARDS = [
-  { id: "rules", title: "Rules of the tower" },
-  { id: "sample-card", title: "A sample card" },
-] as const;
 
 const helpScreenFor = (state: ShellState): string => {
   if (state.screen === "pause" && state.pause?.cause === "tower-lost") return "tower-lost";
@@ -653,7 +698,9 @@ const gearSnapshot = (state: ShellState): GearView => {
       corruptions: "unavailable",
       holder: state.holdings[hero.id] ?? null,
     })),
-    cards: LOOKUP_CARDS.map((card) => ({ id: card.id, title: card.title })),
+    cards: RULES_PAGES.map((card) => ({ id: card.id, title: card.title, group: RULES_GROUP })),
+    cardTitle: rulesPage(state.gearCard)?.title ?? null,
+    cardPage: rulesPage(state.gearCard)?.page ?? null,
     joinUrl: null,
     setupSteps:
       state.setupSteps.length > 0
@@ -668,21 +715,9 @@ const gearSnapshot = (state: ShellState): GearView => {
   };
 };
 
-export const projectShellView = (state: ShellState): ViewState => {
-  const story = chosenOrBound(state);
-  const screen = state.screen;
-  const title = story?.card.title ?? "Story";
-  const heroes = (story?.heroes ?? []).map((hero) => ({
-    id: hero.id,
-    name: hero.name,
-    deviceId: state.holdings[hero.id] ?? null,
-    lines:
-      isSetupScreen(screen) && screen !== "claim-heroes"
-        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
-        : [],
-  }));
-
-  const actions: ViewState["actions"] = state.offered.map((offer) =>
+const shownActions = (state: ShellState): ViewState["actions"] => {
+  const offeredNow = state.hint && state.screen === "play" ? [] : state.offered;
+  const actions: ViewState["actions"] = offeredNow.map((offer) =>
     offer.open
       ? {
           promptId: offer.promptId,
@@ -701,8 +736,49 @@ export const projectShellView = (state: ShellState): ViewState => {
           deviceId: null,
         },
   );
-
   actions.push(...soundActions(state));
+  return actions;
+};
+
+/**
+ * What the iPads keep showing while a hint is on the board: the table and the controls as they
+ * stand now, every control closed on the wire so nothing reads one as a press to send. Cheaper
+ * than a whole view, because the host asks for it before each step that might start a hint.
+ */
+export const captureHintHold = (state: ShellState): HintHold => {
+  const story = chosenOrBound(state);
+  return {
+    table: buildTable(state, story?.card.title ?? "Story"),
+    // The night's last control is spent once pressed: the iPad keeps the table, with no controls.
+    actions: (inNightPhase(state) ? [] : shownActions(state)).map((action) => ({
+      promptId: action.promptId,
+      actionId: action.actionId,
+      label: action.label,
+      deviceId: action.deviceId,
+      ...(action.open && action.slot ? { slot: action.slot } : {}),
+      open: false as const,
+      reason: "Wait for the hint to end.",
+    })),
+  };
+};
+
+export const projectShellView = (state: ShellState): ViewState => {
+  const story = chosenOrBound(state);
+  const screen = state.screen;
+  const title = story?.card.title ?? "Story";
+  const heroes = (story?.heroes ?? []).map((hero) => ({
+    id: hero.id,
+    name: hero.name,
+    deviceId: state.holdings[hero.id] ?? null,
+    lines:
+      isSetupScreen(screen) && screen !== "claim-heroes"
+        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
+        : [],
+  }));
+
+  // A hint is the loop's first beat: the view offers nothing until it ends. The iPads keep the
+  // screen before it through `deviceHold`.
+  const actions = shownActions(state);
 
   const screenLevel: LoopLevel = {
     id: screen,
@@ -723,7 +799,7 @@ export const projectShellView = (state: ShellState): ViewState => {
           },
         ]
       : screen === "game-settings"
-        ? (story?.settings ?? []).map((setting) => {
+        ? settingRows(story).map((setting) => {
             const optionId = state.settingValues[setting.id] ?? setting.default;
             return {
               id: setting.id,
@@ -743,6 +819,8 @@ export const projectShellView = (state: ShellState): ViewState => {
     narration: momentId ? { lineId: momentId, text: OPENING_PLACEHOLDER } : null,
     table: momentId ? null : buildTable(state, title),
     place: momentId ? null : buildPlace(state),
+    hint: momentId ? null : buildHint(state),
+    deviceHold: !momentId && state.hint && state.screen === "play" ? state.hintHold : null,
     gear: gearSnapshot(state),
   };
 };

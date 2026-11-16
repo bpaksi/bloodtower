@@ -1059,15 +1059,14 @@ test("gear actions open on the Story board and pause the game", async ({ browser
     await donePanel();
 
     await openPanel("look-up");
-    await device.getByRole("button", { name: "Rules of the tower" }).click();
-    await expect(board.locator("[data-picked]")).toHaveAttribute(
-      "data-picked",
-      "Rules of the tower",
-      {
-        timeout: 500,
-      },
+    // CU/09: the Rules group replaces the old placeholders; each page is display only on the board.
+    await device.getByRole("button", { name: "Battle" }).click();
+    await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Battle", {
+      timeout: 500,
+    });
+    await expect(board.locator("[data-card] [data-card-page]")).toContainText(
+      "A battle runs in rounds.",
     );
-    await expect(board.locator("[data-card]")).toHaveText("Rules of the tower");
     await donePanel();
 
     await openPanel("join-another-ipad");

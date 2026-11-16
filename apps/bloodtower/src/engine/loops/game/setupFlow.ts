@@ -1,3 +1,4 @@
+import { HINTS_ON, HINTS_SETTING_ID } from "../../hints/copy.ts";
 import { mergeSetupSteps } from "../session/pack.ts";
 import type { ShellScreen } from "../session/screens.ts";
 import type { ShellState } from "../session/state.ts";
@@ -109,9 +110,10 @@ export const bindStoryChoice = (state: ShellState, storyId: string): boolean => 
   if (!story?.card.playable) return false;
   state.chosenStoryId = storyId;
   state.boundStoryId = storyId;
-  state.settingValues = Object.fromEntries(
-    story.settings.map((setting) => [setting.id, setting.default]),
-  );
+  state.settingValues = {
+    ...Object.fromEntries(story.settings.map((setting) => [setting.id, setting.default])),
+    [HINTS_SETTING_ID]: HINTS_ON,
+  };
   state.setSerial = 0;
   state.holdings = Object.fromEntries(story.heroes.map((hero) => [hero.id, null]));
   refreshSetupSteps(state);
