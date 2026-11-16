@@ -328,14 +328,16 @@ export const enterWithoutTower = async (pad: Page) => {
 };
 
 /**
- * Pick story starts with sound (Bob 2026-10-31): Enable sound, a volume, Keep. Then the story
- * list shows, with Continue above it while an autosave waits.
+ * Pick story on the connect track opens on the volume step (DEC-903): a volume, then Keep, and
+ * the story list shows. On Play without Tower there is no volume step and the list shows at
+ * once, so this only waits for Pick story. Name kept for the many callers.
  */
 export const setSoundAndKeep = async (pad: Page) => {
   const main = pad.locator("main.bt-device");
   await expect(main).toHaveAttribute("data-screen", "pick-story", { timeout: 20_000 });
-  await main.locator('button[data-prompt-id="sound-enable"]').click();
-  await main.locator('button[data-prompt-id="volume-1"]').click();
+  const volume = main.locator('button[data-prompt-id="volume-1"]');
+  if ((await volume.count()) === 0) return;
+  await volume.click();
   const keep = main.locator('button[data-prompt-id="volume-keep"]');
   await expect(keep).toBeEnabled({ timeout: 20_000 });
   await keep.click();
@@ -386,4 +388,41 @@ export const finishTonight = async (pad: Page) => {
   await expect(confirm).toBeEnabled({ timeout: 20_000 });
   await confirm.click();
   await expect(main).toHaveAttribute("data-screen", "session-over", { timeout: 20_000 });
+};
+
+/** The story and heroes the test pack uses. */
+const TEST_STORY_ID = "test";
+const TEST_HERO_IDS = ["hero-a", "hero-b", "hero-c", "hero-d"];
+const TEST_SETUP_IDS = ["seals-and-skulls", "place-heroes"];
+
+const pressAct = async (page: Page, actionId: string, promptId: string) => {
+  const button = page.locator(`button[data-prompt-id="${promptId}"][data-action-id="${actionId}"]`);
+  await expect(button).toBeEnabled({ timeout: 20_000 });
+  await button.click();
+};
+
+/**
+ * From Pick story's story list to the first day's roll: story, settings, four heroes held by
+ * this iPad, setup, Begin and the opening moments. The move-roll cue goes out on the way.
+ */
+export const playToDayRoll = async (pad: Page) => {
+  const main = pad.locator("main.bt-device");
+  await pressAct(pad, "continue", `continue-pick-story-${TEST_STORY_ID}`);
+  await pressAct(pad, "continue", "continue-game-settings");
+  await expect(main).toHaveAttribute("data-screen", "claim-heroes", { timeout: 20_000 });
+  await holdHeroesFromTest(pad, TEST_HERO_IDS);
+  await pressAct(pad, "continue", "continue-claim-heroes");
+  await expect(main).toHaveAttribute("data-screen", "setup", { timeout: 20_000 });
+  for (const id of TEST_SETUP_IDS) await pressAct(pad, "continue", `continue-setup-${id}`);
+  await pressAct(pad, "continue", "continue-begin");
+  await expect(main).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
+  const day = pad.locator('button[data-prompt-id*="roll-done"], button[data-action-id="walk"]');
+  for (let i = 0; i < 8 && (await day.count()) === 0; i += 1) {
+    const opening = pad.locator('button[data-prompt-id^="continue-opening-"]').first();
+    if (await opening.isEnabled({ timeout: 1_000 }).catch(() => false)) {
+      await opening.click({ timeout: 3_000 }).catch(() => undefined);
+    }
+    await pad.waitForTimeout(200);
+  }
+  await expect(day.first()).toBeVisible({ timeout: 20_000 });
 };

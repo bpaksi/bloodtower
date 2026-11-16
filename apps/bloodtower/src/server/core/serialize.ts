@@ -94,7 +94,7 @@ export const deserializeShellState = ({ dayClock, ...row }: SerializedShellState
   tally: row.tally ?? { moves: null, buildings: null, skulls: null, skullDay: null },
   towerChoice: row.towerChoice ?? (row.towerLinked ? "connect" : "without"),
   openingIndex: typeof row.openingIndex === "number" ? row.openingIndex : OPENING_MOMENTS.length,
-  // Browser audio does not survive a reload, so every iPad taps Enable sound again.
+  // Each iPad starts its volume step again after a restart; nothing plays on its own.
   sound: {},
   keptVolume: null,
   towerVolume:

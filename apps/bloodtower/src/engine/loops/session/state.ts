@@ -44,8 +44,8 @@ export type EnterState = {
 /** Tonight's tower choice. It lasts the session (DEC-152). */
 export type TowerChoice = "undecided" | "connect" | "without";
 
-// One iPad's sound step on Pick story (Bob 2026-10-31): `levels` after its Enable sound tap,
-// `done` after Keep. An iPad with no entry has not tapped yet. `played` is the volume whose
+// One iPad's volume step on Pick story (connect track only, DEC-903): `levels` until Keep, then
+// `done`. An iPad with no entry is at the start of `levels`. `played` is the volume whose
 // sound has played (the tower's answer on the connect track); `pending` waits for that answer.
 export type DeviceSound = {
   phase: "levels" | "done";

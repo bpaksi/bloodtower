@@ -1,12 +1,11 @@
 import type { ViewAction } from "../../views/state.ts";
-import type { ShellState } from "./state.ts";
+import type { DeviceSound, ShellState } from "./state.ts";
 
 /** Dungeon Complete (#58): the one sound the volume step plays (SCR-006, SND-058). */
 export const VOLUME_TEST_SOUND = 58;
 /** The volume a move-roll cue uses until an iPad keeps one (GAP-HW-003). */
 export const DEFAULT_TOWER_VOLUME = 2;
 
-export const SOUND_ENABLE_PROMPT = "sound-enable";
 export const VOLUME_KEEP_PROMPT = "volume-keep";
 export const VOLUME_AGAIN_PROMPT = "volume-again";
 export const volumePrompt = (level: number): string => `volume-${level}`;
@@ -20,28 +19,28 @@ export const VOLUME_LINE = "How loud should the tower be? Press one to hear it."
 export const towerPlaysVolume = (state: ShellState): boolean =>
   state.towerChoice === "connect" && state.towerLinked;
 
-/** True while Pick story still shows the sound step on the board: nobody has kept a volume. */
+/**
+ * The volume step runs on Pick story on the connect track only (DEC-903). Play without Tower has
+ * no volume step and no volume line, and no iPad plays sound.
+ */
+export const volumeStepOn = (state: ShellState): boolean =>
+  state.screen === "pick-story" && state.towerChoice === "connect";
+
+/** True while Pick story still shows the volume step on the board: nobody has kept a volume. */
 export const soundStepOnBoard = (state: ShellState): boolean =>
-  state.screen === "pick-story" && state.keptVolume === null;
+  volumeStepOn(state) && state.keptVolume === null;
 
-/** Greyed until the first iPad has tapped Enable sound (Bob 2026-10-31 6:15 PM ET). */
-export const volumeLineLive = (state: ShellState): boolean => Object.keys(state.sound).length > 0;
-
-/** An iPad's tap on Enable sound. Only Pick story has the step. */
-export const unlockSound = (state: ShellState, deviceId: string): void => {
-  if (state.screen !== "pick-story" || state.sound[deviceId]) return;
-  state.sound = { ...state.sound, [deviceId]: { phase: "levels", played: null, pending: null } };
-};
+/** An iPad with no entry is at the start of its volume step. */
+const ownSound = (state: ShellState, deviceId: string): DeviceSound =>
+  state.sound[deviceId] ?? { phase: "levels", played: null, pending: null };
 
 /**
- * A volume press. Returns true when the tower must play Dungeon Complete at it. Without the
- * tower the iPad has already played it, so the press counts as played right away.
+ * A volume press. Returns true when the tower must play Dungeon Complete at it. If the link is
+ * down no sound can play, so the press counts as played right away. No iPad plays sound.
  */
 export const pressVolume = (state: ShellState, deviceId: string, level: number): boolean => {
-  const own = state.sound[deviceId];
-  if (state.screen !== "pick-story" || own?.phase !== "levels" || own.pending !== null) {
-    return false;
-  }
+  const own = ownSound(state, deviceId);
+  if (!volumeStepOn(state) || own.phase !== "levels" || own.pending !== null) return false;
   if (towerPlaysVolume(state)) {
     state.sound = { ...state.sound, [deviceId]: { ...own, played: null, pending: level } };
     return true;
@@ -57,8 +56,8 @@ export const applyVolumeResult = (
   level: number,
   ok: boolean,
 ): void => {
-  const own = state.sound[deviceId];
-  if (own?.phase !== "levels" || own.pending !== level) return;
+  const own = ownSound(state, deviceId);
+  if (own.phase !== "levels" || own.pending !== level) return;
   state.sound = {
     ...state.sound,
     [deviceId]: { ...own, played: ok ? level : null, pending: null },
@@ -71,8 +70,8 @@ export const answerVolume = (
   deviceId: string,
   answer: "keep" | "again",
 ): void => {
-  const own = state.sound[deviceId];
-  if (state.screen !== "pick-story" || own?.phase !== "levels" || own.pending !== null) return;
+  const own = ownSound(state, deviceId);
+  if (!volumeStepOn(state) || own.phase !== "levels" || own.pending !== null) return;
   if (answer === "again") {
     state.sound = { ...state.sound, [deviceId]: { ...own, played: null } };
     return;
@@ -84,20 +83,10 @@ export const answerVolume = (
 
 /** The sound step's buttons for one iPad. A finished iPad gets none and sees the story list. */
 export const soundActions = (state: ShellState): ViewAction[] => {
-  if (state.screen !== "pick-story") return [];
+  if (!volumeStepOn(state)) return [];
   const actions: ViewAction[] = [];
   for (const deviceId of state.devices) {
-    const own = state.sound[deviceId];
-    if (!own) {
-      actions.push({
-        promptId: SOUND_ENABLE_PROMPT,
-        actionId: "enable-sound",
-        label: "Enable sound",
-        deviceId,
-        open: true,
-      });
-      continue;
-    }
+    const own = ownSound(state, deviceId);
     if (own.phase === "done") continue;
     for (const level of VOLUME_LEVELS) {
       actions.push({

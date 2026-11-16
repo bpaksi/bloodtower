@@ -61,7 +61,8 @@ export const towerResultEventV1 = z.object({
   ok: z.boolean(),
 });
 
-// An iPad tapped Enable sound: its browser audio is unlocked (Pick story, Bob 2026-10-31).
+// Retired (DEC-903): no iPad plays sound, so nothing sends this now. It stays parseable so an old
+// saved event log still loads; stepShell ignores it in its own branch with one debug line.
 export const soundUnlockEventV1 = z.object({
   kind: z.literal("sound-unlock"),
   v: z.literal(1),
