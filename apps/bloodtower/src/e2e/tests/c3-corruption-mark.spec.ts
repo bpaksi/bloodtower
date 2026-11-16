@@ -17,7 +17,7 @@ import {
 /**
  * CU/10 (PT-17): the corruption mark on the edge band. The counts come from the test-only seed
  * marker `~test-corruption:` (engine `playState.ts`), which sets them at the start of the game.
- * The seed cannot change a count mid-game, so EV-04's live raise and lower is `fixme` below.
+ * EV-04 sets the counts live through the host's test-only door (C3/20).
  */
 
 const STORY_ID = "test";
@@ -302,9 +302,33 @@ test.describe("CU/10 the corruption mark on the band", () => {
     }
   });
 
-  test.fixme("EV-04: the mark moves with the count mid-game, without a reload", async () => {
-    // The test-only seed sets counts when the game starts. Raising hero A and lowering hero B
-    // while the game runs needs a live seed hook (step 12) or a real quest cost and cure on the
-    // way, neither of which this step's Touches reach. The unit test renders the band per count.
+  test("EV-04: the mark moves with the count mid-game, without a reload", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(240_000);
+    // C3/20: the live form of the seed hook. The host's test-only door sets the counts while the
+    // game runs; the band follows on the board's own socket.
+    const seed = "c3-day-1~test-corruption:hero-a=1,hero-b=2";
+    const { session, context, pad, board } = await startGame(browser, testInfo, FOUR, { seed });
+    try {
+      await toMidTurn(pad, board);
+      expect(await markIds(board)).toEqual(["hero-b"]);
+      const reloads: string[] = [];
+      board.on("framenavigated", (frame) => {
+        if (frame === board.mainFrame()) reloads.push(frame.url());
+      });
+      await session.host.applyTestSeed("~test-corruption:hero-a=2,hero-b=1");
+      await expect.poll(() => markIds(board), { timeout: 20_000 }).toEqual(["hero-a"]);
+      await expect(
+        board.locator('[data-band] [data-hero-panel="hero-b"] [data-hero-corruptions="hero-b"]'),
+      ).toContainText("1 corruption");
+      await expect(board.locator('[data-band] [data-corruption-mark="hero-a"]')).toHaveAttribute(
+        "aria-label",
+        label("Hero A"),
+      );
+      expect(reloads).toEqual([]);
+    } finally {
+      await closeAll(context, session.host);
+    }
   });
 });

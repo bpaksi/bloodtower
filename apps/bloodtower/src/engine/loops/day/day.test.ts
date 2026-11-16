@@ -340,6 +340,12 @@ const runDay = (
       status = pump(h);
       continue;
     }
+    if (status === "wait" && h.local.phase === "effects") {
+      // The host's part (C3/20): the wait ended, so it answers `wait-end`.
+      h.local = { ...h.local, waitDone: true };
+      status = pump(h);
+      continue;
+    }
     if (status !== "prompt") throw new Error(`Day stuck in ${h.local.phase} (${status}).`);
     if (h.offers.some((offer) => offer.promptId.includes("roll-done"))) {
       opts?.onRoll?.();
@@ -1702,6 +1708,101 @@ describe("C3-08 EV-01 a third corruption stops the day loop", () => {
       expect(turns).toHaveLength(1);
       expect(ensureClock(h.play).nightDrops).toEqual([]);
       expect(dayTrace(h.play).nodes).not.toContain(".35");
+    } finally {
+      closeHarness();
+    }
+  });
+});
+
+describe("C3/20 EV-01 the effects wait is an engine step", () => {
+  /** Plays one night to the effects wait. `cleanse` stands for a Cleanse's "+1 day" earlier in the day. */
+  const toEffects = (seed: string, cleanse = false) => {
+    const h = boot(seed, ["a", "b", "c", "d"], false);
+    let status = beginDay(h);
+    if (cleanse) ensureClock(h.play).effects.push("+1 day");
+    for (let guard = 0; guard < 48 && h.local.phase !== "effects"; guard++) {
+      if (status === "child") {
+        if (h.child && !cleanse) markQuestWon(h.play);
+        h.parent = { groupId: h.child ?? "" };
+        status = pump(h);
+        continue;
+      }
+      const offer = h.offers[0];
+      if (!offer) throw new Error(`Stuck in ${h.local.phase}.`);
+      status = pressOffer(h, offer);
+    }
+    return h;
+  };
+
+  it("offers the wait as data: its id, 4 s at most, no line, and no press", () => {
+    const h = toEffects("c3-20-ev01");
+    try {
+      expect(h.local.phase).toBe("effects");
+      expect(h.local.wait).toEqual({ id: "effects-day-1", maxMs: AUTO_ADVANCE_MS, lineId: null });
+      expect(AUTO_ADVANCE_MS).toBe(4000);
+      expect(h.offers).toEqual([]);
+    } finally {
+      closeHarness();
+    }
+  });
+
+  it("lists the night's effect and its drop, one line each, and only moves on at wait-end", () => {
+    const h = toEffects("c3-20-ev01-lines", true);
+    try {
+      const lines = ensureClock(h.play).effects;
+      expect(ensureClock(h.play).nightDrops).toHaveLength(1);
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toBe("+1 day");
+      expect(lines[1]).toMatch(/^A skull lands on /);
+      // Pumping again changes nothing: the engine never advances on its own.
+      for (let i = 0; i < 3; i++) expect(pump(h)).toBe("wait");
+      expect(h.local.phase).toBe("effects");
+      h.local = { ...h.local, waitDone: true };
+      expect(pump(h)).toBe("done");
+    } finally {
+      closeHarness();
+    }
+  });
+});
+
+describe("C3/20 EV-03 the night's drop reads the seed", () => {
+  it("lands in the seeded kingdom and each building keeps its seeded count", () => {
+    const inE = PROVING_GROUNDS_PLAY.board.spaces.filter((s) => s.building && s.kingdom === "E");
+    const first = inE[0];
+    if (!first) throw new Error("The board needs a building in E.");
+    const h = boot(`c3-20-ev03~test-skulls:${first.id}=3~test-kingdom:E`, ["a", "b"], false);
+    try {
+      runDay(h);
+      const clock = ensureClock(h.play);
+      expect(clock.nightDrops).toHaveLength(1);
+      expect(clock.nightDrops[0]?.kingdom).toBe("E");
+      const landed = clock.nightDrops[0]?.spaceId ?? "";
+      for (const space of inE) {
+        const seeded = space.id === first.id ? 3 : 0;
+        expect(clock.skulls[space.id] ?? 0).toBe(seeded + (space.id === landed ? 1 : 0));
+      }
+      expect(clock.seedKingdoms).toEqual([]);
+    } finally {
+      closeHarness();
+    }
+  });
+});
+
+describe("C3/20 EV-05 two heroes on one space: no Regroup prompt, the queued split applies at day start", () => {
+  it("seats both on one space by the marker, offers no regroup, and splits at the next day start", () => {
+    const h = boot("c3-20-ev05~test-seat-together", ["hero-a", "hero-b"], false);
+    try {
+      expect(h.play.groups).toHaveLength(1);
+      expect(h.play.groups[0]?.heroIds).toEqual(expect.arrayContaining(["hero-a", "hero-b"]));
+      const first = beginDay(h);
+      expect(first).toBe("prompt");
+      expect(h.offers.filter((offer) => offer.promptId.startsWith("regroup"))).toEqual([]);
+      expect(h.local.phase).toBe("roll");
+      queueRegroupPick(h.play, "split", "hero-b", "pad");
+      // Day 2's start applies it, with no prompt on the way.
+      runDay(h);
+      expect(h.play.groups).toHaveLength(2);
+      expect(h.play.regroupCardDay).toBe(2);
     } finally {
       closeHarness();
     }

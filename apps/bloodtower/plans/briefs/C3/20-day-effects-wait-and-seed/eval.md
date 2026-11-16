@@ -18,7 +18,7 @@ Keep this a checklist; do not write a second design doc.
 ### EV-02 — C3/11's blocked evals go live, unmodified
 - Requirement: rulings 1, 4 and 5. The blocked contract is already written and approved; this step makes it pass.
 - Method: playwright
-- How: each eval keeps its own method (playwright or unit). Unblock C3/11's set in `c3-day.spec.ts`: EV-01 (its seeded virtue and corruption groups), EV-03, EV-04, EV-05, EV-06 (its effects-panel shots), EV-09, EV-11 and EV-13 (their Regroup stops), EV-14, EV-17, EV-18. No eval text changes.
+- How: each eval keeps its own method (playwright or unit). Unblock C3/11's set in `c3-day.spec.ts`: EV-01 (its seeded virtue and corruption groups), EV-03, EV-04, EV-05, EV-06 (its effects-panel shots), EV-09, EV-11 and EV-13 (their day-start stops), EV-14, EV-17, EV-18. No eval text changes.
 - Pass evidence: each passes with the fake clock and the seed hook; the verifier table lists each by ID.
 - Fails if: any stays blocked, is edited to pass, or passes only through a change to C3-11's screens.
 
@@ -37,12 +37,13 @@ Keep this a checklist; do not write a second design doc.
 - Also: the live (mid-game) form of the seed. CU/10's EV-04 (raise hero A to 2 and lower hero B to 1 while the game runs, and the band mark follows) was deferred to this step on 2026-11-15 (judgement delegated by Bob); its `test.fixme` in `c3-corruption-mark.spec.ts` goes live and passes here.
 - Fails if: CU/10's EV-04 stays `fixme`, CU/10's narrow seed is bypassed, duplicated, or its test needs changing.
 
-### EV-05 — The seed hook seats two heroes on one space, and Regroup shows
-- Requirement: ruling 5. The test story seats each hero in a different kingdom, so Regroup never shows without the seed.
+### EV-05 — The seed hook seats two heroes on one space; no Regroup prompt shows
+- Amended 2026-11-16 (Bob, chat 2026-11-16: "I approve rewording C3/20 EV-05 and the C3/11 Regroup stops to: no Regroup prompt; the queued split applies at day start and the groups card shows"): CU/04 (#523) removed the daily Regroup prompt, so seeding two heroes on one space cannot bring it back.
+- Requirement: ruling 5. The test story seats each hero in a different kingdom; the seed puts two on one space.
 - Method: unit
-- How: seed two heroes on one space; run to day start.
-- Pass evidence: Regroup shows (split or join offered); the `seatTogether` marker rule holds — real seeds never carry the marker.
-- Fails if: Regroup never shows, or the marker leaks into a real seed.
+- How: seed two heroes on one space with a queued split; run to day start.
+- Pass evidence: no Regroup prompt shows; the queued split applies at day start and the groups card shows; the `seatTogether` marker rule holds — real seeds never carry the marker.
+- Fails if: a Regroup prompt shows, the queued split does not apply, or the marker leaks into a real seed.
 
 ### EV-06 — The seed hook is test-only
 - Requirement: the hook never runs in a production game (the `seatTogether` rule generalized).

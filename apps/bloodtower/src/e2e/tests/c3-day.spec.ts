@@ -9,6 +9,7 @@ import {
   type TestInfo,
   test,
 } from "@playwright/test";
+import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
 import {
   captureFrames,
   enterWithoutTower,
@@ -70,6 +71,8 @@ type HookWindow = {
   __btCardGoneAt?: number | null;
   __btSent?: number;
   __btSessionSocket?: WebSocket;
+  /** The Story board's own socket, to report a narration line ended. */
+  __btBoardSocket?: WebSocket;
   __btLastDeviceView?: { actions: { promptId: string; actionId: string; open: boolean }[] };
 };
 
@@ -84,6 +87,7 @@ const installBoardHook = async (page: Page) => {
       constructor(url: string | URL, protocols?: string | string[]) {
         super(url, protocols);
         if (!String(url).includes("/ws")) return;
+        (window as unknown as HookWindow).__btBoardSocket = this;
         this.addEventListener("message", (event) => {
           let message: { type?: string; payload?: unknown } | null = null;
           try {
@@ -303,13 +307,16 @@ const startGame = async (
   secondPad = false,
   /** Connect track with the mock tower: the gear Volume item is enabled only then (DEC-903). */
   withTower = false,
+  /** C3/20: seed markers added to the game seed, and the fake clock for the effects wait. */
+  extra: { markers?: string; fakeWait?: boolean } = {},
 ) => {
   // A LAN join address keeps the loopback warning off the board's band in the EV-06 shots.
   const session = await startAcceptanceHost(testInfo, {
-    seed: "c3-day-1",
+    seed: `c3-day-1${extra.markers ?? ""}`,
     databasePath,
     lanHost: () => "192.0.2.10",
     seatTogether,
+    fakeWait: extra.fakeWait,
   });
   const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
   const pad = await context.newPage();
@@ -628,28 +635,369 @@ test.describe("C3/11 the day on the board", () => {
     }
   });
 
-  // Bob's rulings, 2026-11-07 (recorded in ../../../plans/briefs/C3/11-day-on-the-board/plan.md).
-  const blocked: Array<[string, string]> = [
-    [
-      "EV-03, EV-04, EV-14, EV-17, EV-18, EV-06 (effects shots)",
-      "Ruling 1: the effects wait, its 4 s timer and the audio-end event go to a new engine step for the day loop (loops/day/loop.ts).",
-    ],
-    [
-      "EV-08 (names)",
-      "Ruling 2: the engine keeps corruption counts only; the names come with C3-08.",
-    ],
-    [
-      "EV-09, EV-01 (seeded virtue and corruption groups)",
-      "Ruling 4: a test-only day-clock seed hook (skulls per building, the next kingdom, hero sheets) goes to the new engine step.",
-    ],
-    [
-      "EV-05, EV-11 and EV-13 (the Regroup stop)",
-      "Ruling 5: the test story starts each hero in another kingdom, so Regroup never shows; the same seed hook puts two heroes on one space.",
-    ],
-  ];
-  for (const [ids, reason] of blocked) {
-    test.fixme(`${ids}: ${reason}`, async () => {});
-  }
+  // C3/20: C3/11's blocked evals, live, the contract unchanged. The effects wait runs on the host's
+  // fake clock; the seed hook sets the day (`~test-*` markers, and the host's test-only live seed).
+
+  /** Two heroes to day 2's effects panel, with `markers` set live once day 2's turn shows. */
+  const toEffectsPanel = async (
+    session: Awaited<ReturnType<typeof startGame>>["session"],
+    pad: Page,
+    board: Page,
+    markers: string,
+  ) => {
+    await toDayTwo(pad, board);
+    await session.host.applyTestSeed(markers);
+    await playUntil(pad, board, atPhase(board, "effects", 2), "day 2's effects panel");
+    await expect(board.locator("#effects")).toBeVisible();
+  };
+
+  const effectLines = (board: Page) => board.locator("#effects [data-effect]").allTextContents();
+  const reportNarrationEnded = (board: Page, lineId: string) =>
+    board.evaluate((id) => {
+      const socket = (window as unknown as HookWindow).__btBoardSocket;
+      if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error("No board socket.");
+      socket.send(JSON.stringify({ v: 2, type: "narration-ended", payload: { lineId: id } }));
+    }, lineId);
+
+  test("EV-03: a won quest shows +1 day and no drop line; days left do not move", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      TWO,
+      undefined,
+      false,
+      false,
+      false,
+      { fakeWait: true },
+    );
+    try {
+      await toEffectsPanel(session, pad, board, "~test-effect:quest-won");
+      expect(await effectLines(board)).toEqual(["+1 day"]);
+      await expect(board.locator("#band [data-days-left]")).toHaveText("23 days left");
+      session.waitClock?.advance(4_000);
+      await expect(board.locator("#band [data-day]")).toHaveText("Day 3", { timeout: 20_000 });
+      // The won night dropped nothing: days left unchanged.
+      await expect(board.locator("#band [data-days-left]")).toHaveText("23 days left");
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test("EV-04, EV-14, EV-06 (effects shots), EV-11 and EV-13 (effects stop): one line per effect, no Next, 4 s with no audio", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      TWO,
+      undefined,
+      false,
+      false,
+      false,
+      { fakeWait: true },
+    );
+    try {
+      await toEffectsPanel(session, pad, board, "~test-effect:cleanse");
+      const lines = await effectLines(board);
+      const night = (await wireTable(board))?.skull;
+      expect(night).toBeDefined();
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toBe("+1 day");
+      expect(lines[1]).toMatch(/^A skull lands on /);
+      // No totals row, no recap, no button on the board or a Next on the iPad.
+      await expect(board.locator("#effects")).not.toContainText(/total|recap|summary/i);
+      await expect(board.locator("#effects button")).toHaveCount(0);
+      await expect(deviceMain(pad).locator('button[data-action-id="continue"]')).toHaveCount(0);
+      // The toolbar and help stand on the effects stop (EV-11, EV-13); help changes nothing.
+      await expectToolbar(pad);
+      await checkHelp(pad, board, "#effects");
+      await shot(board, testInfo, "ev06-board-effects");
+      await shot(pad, testInfo, "ev06-ipad-effects");
+      // No audio: still here at 3.9 s, gone at 4.1 s (EV-14), and the day goes on.
+      session.waitClock?.advance(3_900);
+      await pad.waitForTimeout(200);
+      await expect(board.locator("#effects")).toBeVisible();
+      session.waitClock?.advance(200);
+      await expect(board.locator("#band [data-day]")).toHaveText("Day 3", { timeout: 20_000 });
+      await expect(board.locator("#effects")).toHaveCount(0);
+      // The happy path never needed the gear (EV-12).
+      await expect(boardMain(board)).toHaveAttribute("data-gear-opens", "0");
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test("EV-14, EV-17: a narrated effects panel waits for its audio end, never a timer", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      TWO,
+      undefined,
+      false,
+      false,
+      false,
+      { fakeWait: true, markers: "~test-effects-line:effects.line-1" },
+    );
+    try {
+      await toEffectsPanel(session, pad, board, "~test-effect:cleanse");
+      await expect(deviceMain(pad).locator('button[data-action-id="continue"]')).toHaveCount(0);
+      // 4.5 s with no audio end: the iPad and the board are still on the step.
+      session.waitClock?.advance(4_500);
+      await pad.waitForTimeout(300);
+      await expect(board.locator("#effects")).toBeVisible();
+      expect((await wireTable(board))?.phase).toBe("effects");
+      // Another line's end does nothing.
+      await reportNarrationEnded(board, "another.line");
+      await pad.waitForTimeout(300);
+      await expect(board.locator("#effects")).toBeVisible();
+      // Its own line's end moves on.
+      await reportNarrationEnded(board, "effects.line-1");
+      await expect(board.locator("#band [data-day]")).toHaveText("Day 3", { timeout: 20_000 });
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test("EV-18: a restart or a quit during the effects panel resumes it once, with each effect applied once", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(420_000);
+    const databasePath = testInfo.outputPath("ev18.sqlite");
+    const first = await startGame(browser, testInfo, TWO, databasePath, false, false, false, {
+      fakeWait: true,
+    });
+    let host = first.session;
+    let context = first.context;
+    let pad = first.pad;
+    let board = first.board;
+    try {
+      await toEffectsPanel(host, pad, board, "~test-effect:cleanse");
+      const before = await effectLines(board);
+      expect(before).toHaveLength(2);
+      let daysBefore = (await board.locator("#band [data-days-left]").textContent()) ?? "";
+
+      // Run 1: the host restarts before the panel advances, then Continue.
+      await context.close();
+      await host.host.close();
+      for (const run of ["restart", "quit"] as const) {
+        if (run === "restart") {
+          host = await startAcceptanceHost(testInfo, {
+            databasePath,
+            seed: "c3-day-1",
+            fakeWait: true,
+          });
+          context = await browser.newContext({ baseURL: host.baseURL, ...PORTRAIT });
+          pad = await context.newPage();
+          board = await context.newPage();
+          await board.setViewportSize(BOARD_SIZE);
+          await installBoardHook(board);
+          await board.goto("/board");
+          await installSessionSocketHook(pad);
+          await grantWakeLock(pad);
+          await pad.goto(`/join?code=${host.host.joinCode}`);
+          await setSoundAndKeep(pad);
+          await clickAct(pad, "continue", "continue-saved-game");
+          await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", {
+            timeout: 30_000,
+          });
+          await holdHeroesFromTest(pad, [...TWO]);
+        } else {
+          // Run 2: quit from the Menu on the same step, then Continue from the session screen.
+          await pad.locator('[data-action="menu"]').click();
+          await pad.locator('button[data-gear-item="save-and-quit"]').click();
+          await pad.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
+          await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", {
+            timeout: 30_000,
+          });
+          await clickAct(pad, "continue", "continue-saved-game");
+          await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", {
+            timeout: 30_000,
+          });
+          await holdHeroesFromTest(pad, [...TWO]);
+        }
+        // The same step shows again, with the same lines: none lost, none doubled.
+        await expect
+          .poll(async () => (await wireTable(board))?.phase, { timeout: 30_000 })
+          .toBe("effects");
+        expect(await effectLines(board)).toEqual(before);
+        await expect(board.locator("#band [data-days-left]")).toHaveText(daysBefore);
+        host.waitClock?.advance(4_000);
+        await expect(board.locator("#band [data-day]")).toHaveText(
+          run === "restart" ? "Day 3" : "Day 4",
+          { timeout: 20_000 },
+        );
+        // Applied once: the count read at the panel stays after the day goes on.
+        await expect(board.locator("#band [data-days-left]")).toHaveText(daysBefore);
+        if (run === "restart") {
+          // Back onto the effects panel for the quit run: play on to a second panel on day 3.
+          await playUntil(pad, board, atPhase(board, "turn", 3), "day 3's turn");
+          await host.host.applyTestSeed("~test-effect:cleanse");
+          await playUntil(pad, board, atPhase(board, "effects", 3), "day 3's effects panel");
+          before.splice(0, before.length, ...(await effectLines(board)));
+          daysBefore = (await board.locator("#band [data-days-left]").textContent()) ?? "";
+          expect(before).toHaveLength(2);
+        }
+      }
+    } finally {
+      await context.close();
+      await host.host.close();
+    }
+  });
+
+  test("EV-01 (seeded groups): a helping virtue and a corruption show in the day roll", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(240_000);
+    const { session, context, board } = await startGame(
+      browser,
+      testInfo,
+      TWO,
+      undefined,
+      false,
+      false,
+      false,
+      { markers: "~test-virtues:hero-a=1~test-corruption:hero-b=1" },
+    );
+    try {
+      await expectRollMatchesEngine(board, 1);
+      const rolls = (await wireTable(board))?.rolls ?? [];
+      const a = rolls.find((row) => row.virtue > 0);
+      const b = rolls.find((row) => row.corruption < 0);
+      expect(a?.virtue).toBe(1);
+      expect(b?.corruption).toBe(-1);
+      const lines = await board.locator("#roll li[data-roll]").allTextContents();
+      expect(lines.filter((line) => line.includes("(+1 virtue)"))).toHaveLength(1);
+      expect(lines.filter((line) => line.includes("(−1 corruption)"))).toHaveLength(1);
+      // A group with no modifier shows the total alone: none here, both heroes carry one.
+      expect(lines).toHaveLength(2);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test("EV-09: a seeded drop into a kingdom with a 3-skull building, placed on the iPad, makes it fall", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(420_000);
+    const inE = PROVING_GROUNDS_PLAY.board.spaces.filter(
+      (space) => space.building && space.kingdom === "E",
+    );
+    const target = inE[0];
+    const other = inE[1];
+    if (!target || !other) throw new Error("The test board needs two buildings in E.");
+    // Four heroes: night 1 drops one skull, night 2 drops two. Night 1 goes to E and so does night
+    // 2's first; the second skull of night 2 shows the building that fell.
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      FOUR,
+      undefined,
+      false,
+      false,
+      true,
+      { fakeWait: true, markers: `~test-skulls:${target.id}=3~test-kingdom:E+E` },
+    );
+    const record = (day: number, spaceId: string) =>
+      pad.locator(
+        `button[data-prompt-id="skull-record--${day}--${spaceId}"][data-action-id="record"]`,
+      );
+    const padBuildings = async () =>
+      (
+        await pad
+          .locator('button[data-action-id="record"]')
+          .evaluateAll((buttons) =>
+            buttons.map((button) => button.getAttribute("data-prompt-id") ?? ""),
+          )
+      )
+        .map((id) => id.split("--").slice(2).join("--"))
+        .filter((id) => id !== "inside")
+        .sort();
+    const standingInE = inE.map((space) => space.id).sort();
+    try {
+      // Night 1: the board names E and the iPad lists only E's standing buildings.
+      await playUntil(pad, board, atPhase(board, "skull", 1), "day 1's skull placement");
+      const first = await wireTable(board);
+      expect(first?.skull?.kingdomLabel).toContain("(E)");
+      expect((first?.skull?.buildings ?? []).map((row) => row.spaceId).sort()).toEqual(standingInE);
+      await clickAct(pad, "continue");
+      await expect(record(1, other.id)).toBeVisible({ timeout: 20_000 });
+      expect(await padBuildings()).toEqual(standingInE);
+      await record(1, other.id).click();
+
+      // Night 2, first skull: E again, with the 3-skull building listed and not auto-advanced.
+      await playUntil(pad, board, atPhase(board, "skull", 2), "day 2's skull placement");
+      await clickAct(pad, "continue");
+      await expect(record(2, target.id)).toBeVisible({ timeout: 20_000 });
+      expect(await padBuildings()).toEqual(standingInE);
+      session.waitClock?.advance(5_000);
+      await pad.waitForTimeout(300);
+      expect((await wireTable(board))?.phase).toBe("skull");
+      const seeded = (await wireTable(board))?.skull?.buildings.find(
+        (row) => row.spaceId === target.id,
+      );
+      expect(seeded?.skulls).toBe(3);
+
+      // The press makes it fall: the board names it, and it leaves the iPad's list.
+      await record(2, target.id).click();
+      await expect(board.locator("[data-fell]").first()).toBeVisible({ timeout: 20_000 });
+      await expect(record(2, target.id)).toHaveCount(0);
+      expect((await padBuildings()).includes(target.id)).toBe(false);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test("EV-05, EV-11, EV-12, EV-13 (day start, groups card): no Regroup prompt, the queued split applies and the card shows", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    // Two heroes seated on one space by the seed hook, with a split queued from the host's action.
+    const { session, context, pad, board } = await startGame(
+      browser,
+      testInfo,
+      TWO,
+      undefined,
+      true,
+    );
+    try {
+      await clickAct(pad, "continue");
+      await playUntil(pad, board, atPhase(board, "turn", 2), "day 2's turn");
+      expect((await wireTable(board))?.groups).toHaveLength(1);
+      await sendAct(pad, "gear", "pick", { item: "split", pick: "split", heroId: "hero-b" });
+      await playUntil(pad, board, atPhase(board, "roll", 3), "day 3's roll");
+
+      // The queued split applied at day start and the card shows, with nothing pressable.
+      const card = board.locator("[data-groups-card]");
+      await expect(card).toBeVisible({ timeout: 5_000 });
+      await expect(card.locator("[data-group]")).toHaveText(["Group 1: Hero A", "Group 2: Hero B"]);
+      await expect(card.locator("button, a, [role='button'], [tabindex]")).toHaveCount(0);
+      await expect(boardMain(board).locator("button")).toHaveCount(0);
+      await expectNoRegroupOnPad(pad, "the day-start stop");
+      expect((await wireTable(board))?.groups).toHaveLength(2);
+      // The toolbar and help stand on this stop, and help changes nothing.
+      await expectToolbar(pad);
+      await checkHelp(pad, board, "[data-groups-card], #roll");
+      // The happy path to here never opened the Menu.
+      await expect(boardMain(board)).toHaveAttribute("data-gear-opens", "0");
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
+
+  test.fixme("EV-08 (names): the engine keeps corruption counts only; the names come with C3-08", async () => {});
 });
 
 const MOCKUP = join(
