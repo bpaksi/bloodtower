@@ -76,3 +76,11 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-15 (step 45, #4
 ## Eval approval
 
 - See ./approval.md (must be filled before coding; it is PENDING until Bob dates a row).
+
+## Build notes (the CU/14 developer, 2026-11-16)
+
+- Touches extras the build needed, for the coordinator to amend: `engine/loops/day/clock.ts` (`HeroSheet.virtues`), `engine/loops/chapter/playState.ts` (the narrow seeds `~test-virtues:` and `~test-skulls:`), `engine/loops/session/stepShell.ts` (log a refused virtue press; checkpoint after a pick), `engine/loops/session/view.ts` (the virtue view), `engine/views/state.ts` (the view type), `web/components/board/board.css` (the panel's place), unit tests beside the code, `server/core/virtuesSave.test.ts`.
+- A virtue option rides the existing `record` action under a `virtue-choice--<group>--<virtue>--<option>` prompt id, so `protocols/control.ts` is untouched.
+- The panel shows from the turn start until the group's first move (walk, Enter, End turn) or 8 seconds (client hold); a choice still open keeps it up until answered (DEC-934: the pick never blocks the move map).
+- Lines built: Infused (DEC-406, DEC-934) and Fortunate; Relentless and Mend wait for the roll's doubles and the heal state, which main does not keep. `fixture` is the test-only choice virtue (EV-03). No citadel draw: virtues come only from the seeds.
+- Infused's pick removes the skull and returns it to the supply. "That building's menu gets back what the skull took" (DEC-406) is not built: no menu state exists on main.

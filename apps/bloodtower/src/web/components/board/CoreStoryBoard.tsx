@@ -17,6 +17,7 @@ import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
+import { VirtuePanel } from "./VirtuePanel";
 
 /** The mockup's tower mark, small enough that the pause dialog stays a typical frame. */
 function TowerMark() {
@@ -104,8 +105,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       ) : null}
       {showMove && table ? <ThreatBar table={table} /> : null}
       {showMove && table && !paused && !holding ? <DayPanel table={table} /> : null}
+      {showMove && table?.virtue && !paused && !holding ? <VirtuePanel table={table} /> : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor && !paused && !holding ? (
+      {showMove && table?.waitingFor && !table.virtue && !paused && !holding ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
           <p className="bt-waiting-pulse" data-waiting role="status">
             {table.waitingFor}

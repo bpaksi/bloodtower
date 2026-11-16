@@ -13,6 +13,8 @@ export type HeroSheet = {
   gold?: number;
   /** Item ids held (CU/13). Absent or empty: nothing held. Each id is one item. */
   items?: string[];
+  /** Virtue ids held (CU/14). Absent or empty: none. */
+  virtues?: string[];
 };
 
 export type MoveShift = {
@@ -137,6 +139,7 @@ export const setHeroSheet = (play: PlayState, heroId: string, sheet: HeroSheet):
     ...(sheet.hp ? { hp: { ...sheet.hp } } : {}),
     ...(sheet.gold !== undefined ? { gold: sheet.gold } : {}),
     ...(sheet.items ? { items: [...sheet.items] } : {}),
+    ...(sheet.virtues ? { virtues: [...sheet.virtues] } : {}),
   };
 };
 

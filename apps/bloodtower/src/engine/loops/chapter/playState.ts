@@ -176,6 +176,13 @@ const corruptionsFromTestSeed = (seed: string): [string, number][] => {
 export const TEST_ITEMS = "~test-items:";
 export const TEST_HP = "~test-hp:";
 export const TEST_GOLD = "~test-gold:";
+/**
+ * TEST ONLY (CU/14). `~test-virtue-ids:hero-a=infused+fortunate` gives heroes named virtues at
+ * the start (not `~test-virtues:`, which counts helping virtues), so an e2e reaches a turn-start
+ * virtue with no play. Skulls come from `~test-skulls:` below. Same placement rule as the above.
+ */
+export const TEST_VIRTUE_IDS = "~test-virtue-ids:";
+const SHAPE_IDS = /^[\w-]+(\+[\w-]+)*$/;
 
 const testMarker = (seed: string, marker: string, shape: RegExp): [string, string][] => {
   const start = seed.indexOf(marker);
@@ -218,6 +225,7 @@ export const TEST_SEED_MARKERS = [
   TEST_HP,
   TEST_GOLD,
   TEST_VIRTUES,
+  TEST_VIRTUE_IDS,
   TEST_SKULLS,
   TEST_KINGDOM,
   TEST_EFFECTS_LINE,
@@ -260,6 +268,9 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
   }
   for (const [heroId, value] of testMarker(seed, TEST_GOLD, /^\d+$/)) {
     merge(heroId, { gold: Number(value) });
+  }
+  for (const [heroId, value] of testMarker(seed, TEST_VIRTUE_IDS, SHAPE_IDS)) {
+    merge(heroId, { virtues: value.split("+") });
   }
   for (const [spaceId, value] of testMarker(seed, TEST_SKULLS, /^\d$/)) {
     if (!play.content.board.spaceById.get(spaceId)?.building) {

@@ -1,4 +1,10 @@
 import type { LoopDefinition } from "../../loop/types.ts";
+import {
+  applyVirtueChoice,
+  hasVirtuePanel,
+  type VirtuePanel,
+  virtuePanel,
+} from "../../rules/virtues/index.ts";
 import type { BoardGraph } from "../chapter/board.ts";
 import { neighborsOf, spaceName } from "../chapter/board.ts";
 import { groupById, type PlayState, playState } from "../chapter/playState.ts";
@@ -15,6 +21,12 @@ export type GroupTurnLocal = {
   encounterPending: boolean;
   /** Last walk spent all moves on a building space; Enter must be offered before the turn ends (DEC-220). */
   landedOnBuildingWithNoMoves: boolean;
+  /**
+   * The turn-start virtue step (CU/14, UI-037). `open` shows the board panel until the group's
+   * first move; `picks` holds what a virtue that asked was answered this turn, by virtue id, with
+   * the label the board mirrors. Absent on a turn saved before CU/14: no panel, no choice.
+   */
+  virtue?: { open: boolean; picks: Record<string, { optionId: string; label: string }> };
   /**
    * The taps Back can still undo, oldest first (PT-19, Q5.2): the space each one left. Cleared by
    * a trigger, Enter and End turn (Q5.1). Absent on a save made before CU/05: read as empty.
@@ -49,6 +61,51 @@ const parseWalkPrompt = (promptId: string): string | null => {
   return parts.slice(2).join("--");
 };
 
+const VIRTUE_PREFIX = "virtue-choice";
+
+/** The press of a virtue's option rides the existing `record` action; the prompt id says which. */
+export const virtuePromptId = (groupId: string, virtueId: string, optionId: string) =>
+  `${VIRTUE_PREFIX}--${groupId}--${virtueId}--${optionId}`;
+
+const parseVirtuePrompt = (
+  promptId: string,
+): { groupId: string; virtueId: string; optionId: string } | null => {
+  const parts = promptId.split("--");
+  if (parts.length < 4 || parts[0] !== VIRTUE_PREFIX) return null;
+  return { groupId: parts[1] ?? "", virtueId: parts[2] ?? "", optionId: parts.slice(3).join("--") };
+};
+
+export const isVirtuePrompt = (promptId: string): boolean => parseVirtuePrompt(promptId) !== null;
+
+const pickedIds = (local: GroupTurnLocal): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(local.virtue?.picks ?? {}).map(([id, pick]) => [id, pick.optionId]),
+  );
+
+/** The turn-start virtue panel as the views read it: null once nothing is left to show. */
+export const virtuePanelOf = (play: PlayState, local: GroupTurnLocal): VirtuePanel | null => {
+  if (!local.virtue) return null;
+  const panel = virtuePanel(play, local.groupId, pickedIds(local));
+  if (!local.virtue.open && panel.choice === null) return null;
+  return panel.lines.length > 0 ? panel : null;
+};
+
+/** One button per enabled option of the virtue that asks. The move map never waits for it (DEC-479). */
+const offerVirtueChoice = (
+  local: GroupTurnLocal,
+  ctx: { offerPrompt: (a: string, b: string) => void },
+) => {
+  if (!local.virtue) return;
+  const choice = virtuePanel(playState(), local.groupId, pickedIds(local)).choice;
+  if (!choice) return;
+  for (const option of choice.options) {
+    if (!option.enabled) continue;
+    const promptId = virtuePromptId(local.groupId, choice.virtueId, option.id);
+    ctx.offerPrompt(promptId, "record");
+    recordOffer(promptId, "record");
+  }
+};
+
 const offerMoveMap = (
   local: GroupTurnLocal,
   ctx: { offerPrompt: (a: string, b: string) => void },
@@ -74,6 +131,7 @@ const offerMoveMap = (
     recordOffer(promptId, "enter");
   }
 
+  offerVirtueChoice(local, ctx);
   offerBack(local, ctx);
   const endId = `end-turn--${local.groupId}`;
   ctx.offerPrompt(endId, "end-turn");
@@ -99,6 +157,7 @@ const offerEnterOrEndTurn = (
     ctx.offerPrompt(promptId, "enter");
     recordOffer(promptId, "enter");
   }
+  offerVirtueChoice(local, ctx);
   offerBack(local, ctx);
   const endId = `end-turn--${local.groupId}`;
   ctx.offerPrompt(endId, "end-turn");
@@ -121,6 +180,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
       awaitingPress: false,
       encounterPending: false,
       landedOnBuildingWithNoMoves: false,
+      virtue: { open: hasVirtuePanel(play, input.groupId), picks: {} },
       undo: [],
     };
   },
@@ -225,6 +285,44 @@ export const applyEnter = (groupId: string, spaceId: string): boolean => {
   return true;
 };
 
+/**
+ * A press of a virtue's option. First press wins: a virtue already answered this turn refuses a
+ * second one (it is no longer offered, so only a stale press gets here). A refusal changes nothing;
+ * `virtuePressRefusal` tells the shell, which logs it.
+ */
+const pressVirtueChoice = (
+  local: GroupTurnLocal,
+  press: { groupId: string; virtueId: string; optionId: string },
+): GroupTurnLocal => {
+  const reopened = { ...local, awaitingPress: false };
+  if (!local.virtue || press.groupId !== local.groupId) return reopened;
+  if (local.virtue.picks[press.virtueId]) return reopened;
+  const label = applyVirtueChoice(playState(), local.groupId, press.virtueId, press.optionId);
+  if (label === null) return reopened;
+  return {
+    ...reopened,
+    virtue: {
+      ...local.virtue,
+      picks: { ...local.virtue.picks, [press.virtueId]: { optionId: press.optionId, label } },
+    },
+  };
+};
+
+/**
+ * The words for a virtue press the turn did not take, or null when it took it. The shell logs and
+ * toasts it (CLAUDE.md, Errors). Read after the press, from the same local the press produced.
+ */
+export const virtuePressRefusal = (
+  local: GroupTurnLocal,
+  promptId: string,
+  actionId: string,
+): string | null => {
+  const press = parseVirtuePrompt(promptId);
+  if (actionId !== "record" || !press) return null;
+  if (local.virtue?.picks[press.virtueId]?.optionId === press.optionId) return null;
+  return `The virtue ${press.virtueId} could not take "${press.optionId}", so nothing changed.`;
+};
+
 export const handleGroupTurnPress = (
   local: GroupTurnLocal,
   promptId: string,
@@ -234,6 +332,19 @@ export const handleGroupTurnPress = (
   // Regroup is the only step that splits or joins (DEC-640). A mid-turn press is refused.
   if (actionId === "split" || actionId === "join" || actionId === "regroup") {
     return { ...local, awaitingPress: false };
+  }
+
+  const virtue = parseVirtuePrompt(promptId);
+  if (actionId === "record" && virtue) {
+    return pressVirtueChoice(local, virtue);
+  }
+
+  // The panel is for the start of the turn: the first move, Enter or End turn closes it.
+  if (
+    local.virtue?.open &&
+    (actionId === "walk" || actionId === "enter" || actionId === "end-turn")
+  ) {
+    local = { ...local, virtue: { ...local.virtue, open: false } };
   }
 
   if (actionId === "end-turn" && promptId === `end-turn--${local.groupId}`) {

@@ -93,6 +93,25 @@ export type HeroCorruptionView = {
   count: number;
 };
 
+/**
+ * The turn-start virtue panel (CU/14, UI-037). Lines are the group's virtues that apply now. A
+ * virtue that asks a choice has `choice`, with one option per button; `heroIds` is the acting
+ * group, so only an iPad holding one of them is offered the buttons. `picked` mirrors the answers.
+ */
+export type VirtueChoiceView = {
+  virtueId: string;
+  prompt: string;
+  options: { promptId: string; label: string; enabled: boolean }[];
+};
+
+export type VirtuePanelView = {
+  title: string;
+  heroIds: string[];
+  lines: { id: string; text: string }[];
+  choice: VirtueChoiceView | null;
+  picked: { virtueId: string; name: string; label: string }[];
+};
+
 export type TableBand = {
   chapter: string;
   day: number;
@@ -106,6 +125,8 @@ export type TableBand = {
   skull?: DaySkullView | null;
   corruptions?: HeroCorruptionView[];
   groupsCard?: GroupsCardView | null;
+  /** The turn-start virtue panel, only while it shows (CU/14). */
+  virtue?: VirtuePanelView | null;
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;

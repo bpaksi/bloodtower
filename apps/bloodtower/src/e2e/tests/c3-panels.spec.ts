@@ -10,8 +10,10 @@ import {
 } from "@playwright/test";
 import {
   enterWithoutTower,
+  enterWithoutTowerKeepSound,
   holdHeroesFromTest,
   installSessionSocketHook,
+  setSoundAndKeep,
   startAcceptanceHost,
   waitForBoardAnimationsSettled,
 } from "./support/acceptance.ts";
@@ -69,13 +71,19 @@ const clickAct = async (page: Page, actionId: string, promptId?: string) => {
 const startGame = async (
   browser: Browser,
   testInfo: TestInfo,
-  options: { seed: string; databasePath?: string },
+  options: {
+    seed: string;
+    databasePath?: string;
+    /** CU/14: heroes stay in their own groups, and a second iPad holds the last hero. */
+    apart?: boolean;
+  },
 ) => {
+  const apart = options.apart === true;
   const session = await startAcceptanceHost(testInfo, {
     seed: options.seed,
     databasePath: options.databasePath,
     lanHost: () => "192.0.2.10",
-    seatTogether: true,
+    seatTogether: !apart,
   });
   const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
   const pad = await context.newPage();
@@ -85,7 +93,20 @@ const startGame = async (
   await installSessionSocketHook(pad);
   await grantWakeLock(pad);
   await pad.goto(`/join?code=${session.host.joinCode}`);
-  await enterWithoutTower(pad);
+  let pad2: Page | null = null;
+  let context2: BrowserContext | null = null;
+  if (apart) {
+    await enterWithoutTowerKeepSound(pad);
+    context2 = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    pad2 = await context2.newPage();
+    await installSessionSocketHook(pad2);
+    await grantWakeLock(pad2);
+    await pad2.goto(`/join?code=${session.host.joinCode}`);
+    await expect(pad2).toHaveURL(/\/device/);
+    await setSoundAndKeep(pad);
+  } else {
+    await enterWithoutTower(pad);
+  }
   await clickAct(pad, "continue", `continue-pick-story-${STORY_ID}`);
   const size = pad.locator(
     `button[data-setting="party-size"][data-option="n-4"][data-action="set"]`,
@@ -93,7 +114,12 @@ const startGame = async (
   await size.click();
   await expect(size).toHaveAttribute("aria-pressed", "true");
   await clickAct(pad, "continue", "continue-game-settings");
-  await holdHeroesFromTest(pad, [...FOUR]);
+  if (pad2) {
+    await holdHeroesFromTest(pad, FOUR.slice(0, -1));
+    await holdHeroesFromTest(pad2, FOUR.slice(-1));
+  } else {
+    await holdHeroesFromTest(pad, [...FOUR]);
+  }
   await clickAct(pad, "continue", "continue-claim-heroes");
   for (const id of SETUP_IDS) {
     await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
@@ -106,7 +132,7 @@ const startGame = async (
   // Past the roll panel: a hero's group is acting.
   await clickAct(pad, "continue");
   await expect(board.locator("#band [data-days-left]")).toBeVisible({ timeout: 20_000 });
-  return { session, context, pad, board };
+  return { session, context, pad, board, pad2, context2 };
 };
 
 /** One act on the iPad's own socket: the host's own action path (Q7.2, EV-17). */
@@ -324,6 +350,149 @@ test.describe("CU/13 the party items panel and the use-item flow", () => {
       await expect(heroRow(board2, "hero-b")).toContainText("Items 2 held");
     } finally {
       await closeAll(context2, restarted.host);
+    }
+  });
+});
+
+/** CU/14 (54b): the turn-start virtue panel (UI-037) and the generic virtue choice list. */
+const VIRTUE_MOCKUP = join(
+  import.meta.dirname,
+  "../../../plans/briefs/CU/14-virtue-panel-and-choice/mockup.html",
+);
+/** Skulls on one building of each kingdom, so Infused has something to take whatever kingdom acts. */
+const SKULLS = "~test-skulls:N-egans-end=2,E-duwani=1,S-southern-wastes=2,W-anza=1";
+const INFUSED_SEED = `c3-day-1~test-virtue-ids:hero-a=infused+fortunate${SKULLS}`;
+const FIXTURE_SEED =
+  "c3-day-1~test-virtue-ids:hero-a=fixture,hero-b=fixture,hero-c=fixture,hero-d=fixture";
+const FORTUNATE_SEED = "c3-day-1~test-virtue-ids:hero-a=fortunate";
+const virtuePanel = (board: Page) => board.locator('[data-panel="virtue"]');
+const virtueOptions = (pad: Page) => deviceMain(pad).locator("button[data-virtue-option]");
+const virtueButtons = (pad: Page) =>
+  deviceMain(pad).locator('button[data-prompt-id^="virtue-choice--"]');
+
+const mockupShot = async (browser: Browser, testInfo: TestInfo, id: string, name: string) => {
+  const mock = await browser.newContext({ viewport: { width: 1000, height: 1100 } });
+  try {
+    const page = await mock.newPage();
+    await page.goto(pathToFileURL(VIRTUE_MOCKUP).href);
+    const path = testInfo.outputPath(`${name}.png`);
+    await page.locator(id).screenshot({ path });
+    await testInfo.attach(name, { path, contentType: "image/png" });
+  } finally {
+    await mock.close();
+  }
+};
+
+test.describe("CU/14 the turn-start virtue panel and the choice list", () => {
+  test.beforeEach(({ browserName: _browserName }, testInfo) => {
+    test.skip(testInfo.project.name !== "ipad", "The approved mockup is the 1920x1080 board.");
+  });
+
+  test("EV-01, EV-04: an automatic virtue shows on the board with no press and no iPad button", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: FORTUNATE_SEED,
+    });
+    try {
+      const panel = virtuePanel(board);
+      await expect(panel).toBeVisible({ timeout: 20_000 });
+      await expect(panel.locator("h2")).toHaveText("Virtues today");
+      await expect(panel.locator("li")).toHaveText(["Fortunate: a second pick today"]);
+      // No button for it on the iPad, and the move map is already open: nothing held it back.
+      await expect(virtueButtons(pad)).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-virtue-choice]")).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-move-map]")).toBeVisible();
+      // EV-04: no use icon or button outside the gear; the toolbar is "?", Back, Replay and the gear.
+      await expect(deviceMain(pad).locator('[data-action="use"], [data-use-item]')).toHaveCount(0);
+      const bar = deviceMain(pad).locator("[data-bottom-bar]");
+      await expect(bar.locator("button")).toHaveText(["?", "Back", "Replay", ""]);
+      // The panel is gone once the group moves.
+      await deviceMain(pad).locator('button[data-action-id="walk"]').first().click();
+      await expect(panel).toHaveCount(0, { timeout: 20_000 });
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-02: a group with no virtue sees no panel and goes straight to the move map", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: BARE_SEED,
+    });
+    try {
+      await expect(deviceMain(pad).locator("[data-move-map]")).toBeVisible({ timeout: 20_000 });
+      await expect(virtuePanel(board)).toHaveCount(0);
+      await expect(board.locator("[data-virtue-lines]")).toHaveCount(0);
+    } finally {
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-03: the fixture virtue offers 3 buttons to the acting group's iPad only; first press wins", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, context2, pad, pad2, board } = await startGame(browser, testInfo, {
+      seed: FIXTURE_SEED,
+      apart: true,
+    });
+    if (!pad2 || !context2) throw new Error("The second iPad did not join.");
+    try {
+      const acting = await deviceMain(pad).locator("[data-step-instruction]").first();
+      await expect(acting).toHaveAttribute("data-acting-hero", /hero-/, { timeout: 20_000 });
+      const hero = await acting.getAttribute("data-acting-hero");
+      // Hero D is the second iPad's; every other hero is the first's.
+      const [mine, other] = hero === "hero-d" ? [pad2, pad] : [pad, pad2];
+      await expect(virtueOptions(mine)).toHaveCount(3, { timeout: 20_000 });
+      await expect(virtueOptions(other)).toHaveCount(0);
+      await expect(virtueButtons(other)).toHaveCount(0);
+      await expect(virtuePanel(board)).toContainText("Fixture asks you to choose.");
+      await shot(mine, testInfo, "cu14-ev12-ipad-fixture-choice");
+      await virtueOptions(mine).nth(1).click();
+      // The board mirrors the pick; the buttons are gone; nothing can pick twice.
+      await expect(virtuePanel(board).locator("[data-virtue-picked]")).toHaveText(
+        "Fixture: Second",
+      );
+      await expect(virtueOptions(mine)).toHaveCount(0);
+      await expect(virtuePanel(board).locator("[data-virtue-asks]")).toHaveCount(0);
+    } finally {
+      await context2.close();
+      await closeAll(context, session.host);
+    }
+  });
+
+  test("EV-12, EV-16: Infused offers its kingdom's buildings; one press, mirrored, and the same list as the fixture", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
+      seed: INFUSED_SEED,
+    });
+    try {
+      const panel = virtuePanel(board);
+      await expect(panel).toBeVisible({ timeout: 20_000 });
+      await expect(panel.locator("li").first()).toContainText("Infused: remove 1 skull in ");
+      await expect(panel.locator("li").nth(1)).toHaveText("Fortunate: a second pick today");
+      await expect(panel).toContainText("Infused asks you to choose.");
+      // One button per standing building of the kingdom; only the one with a skull can be pressed.
+      const options = virtueOptions(pad);
+      await expect(options).toHaveCount(4);
+      await expect(options.locator("xpath=self::button[not(@disabled)]")).toHaveCount(1);
+      await shot(pad, testInfo, "cu14-ev12-ipad-virtue-choice");
+      await shot(board, testInfo, "cu14-ev12-board-virtue-panel");
+      await mockupShot(browser, testInfo, "#virtue", "cu14-ev12-mockup-virtue");
+      await mockupShot(browser, testInfo, "#ipad-virtue", "cu14-ev12-mockup-ipad-virtue");
+      await options.locator("xpath=self::button[not(@disabled)]").click();
+      await expect(panel.locator("[data-virtue-picked]")).toContainText("Infused: ");
+      await expect(options).toHaveCount(0);
+      // The move map never waited for it.
+      await expect(deviceMain(pad).locator("[data-move-map]")).toBeVisible();
+    } finally {
+      await closeAll(context, session.host);
     }
   });
 });

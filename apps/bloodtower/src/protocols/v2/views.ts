@@ -141,6 +141,41 @@ const heroCorruptionSchema = z.strictObject({
  */
 export const DAY_PHASES = ["regroup", "roll", "turn", "skull", "skull-sim", "effects"] as const;
 
+/** The turn-start virtue panel (CU/14, UI-037). The options are the choice list, whatever the virtue. */
+const virtuePanelSchema = z.strictObject({
+  title: z.string().min(1).max(60),
+  heroIds: z.array(heroIdSchema).max(16),
+  lines: z
+    .array(z.strictObject({ id: z.string().min(1).max(40), text: z.string().min(1).max(160) }))
+    .min(1)
+    .max(8),
+  choice: z
+    .strictObject({
+      virtueId: z.string().min(1).max(40),
+      prompt: z.string().min(1).max(120),
+      options: z
+        .array(
+          z.strictObject({
+            promptId: z.string().min(1).max(200),
+            label: z.string().min(1).max(120),
+            enabled: z.boolean(),
+          }),
+        )
+        .min(1)
+        .max(16),
+    })
+    .nullable(),
+  picked: z
+    .array(
+      z.strictObject({
+        virtueId: z.string().min(1).max(40),
+        name: z.string().min(1).max(40),
+        label: z.string().min(1).max(120),
+      }),
+    )
+    .max(8),
+});
+
 const tableBandSchema = z.strictObject({
   chapter: z.string().min(1).max(120),
   day: z.number().int().min(0).max(99),
@@ -153,6 +188,7 @@ const tableBandSchema = z.strictObject({
   skull: daySkullSchema.nullable().optional(),
   corruptions: z.array(heroCorruptionSchema).max(16).optional(),
   groupsCard: groupsCardSchema.nullable().optional(),
+  virtue: virtuePanelSchema.nullable().optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),
