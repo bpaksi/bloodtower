@@ -37,6 +37,8 @@ Amended by step 44 on 2026-11-14 (Bob, 2026-11-14; each marked "Amended 2026-11-
 - C2/04 EV-11: "Pick story 7a/7b/7c" is now "Pick story 7b/7c" (7a is retired).
 - C2/04 EV-12 and screen-spec "Which items are enabled": with no tower the gear Volume item stays visible and greyed with a reason line (DEC-227, DEC-903); new Loremaster string `gear.volume.no-tower`. C2/04 plan.md carries a note.
 
+Amended 2026-11-15 (PT-24, Bob approved in chat, step 60): CU/11 EV-11 and EV-13 reworded in place, because a host restart never reconnects the tower and `keptVolume` resets on restore (pre-existing); each is marked in eval.md.
+
 Still open, not an eval edit:
 - C2/05 mockup.html keeps tab 7a ("Tap once to turn on this iPad's sound." / "Enable sound") and a greyed 7b board line until the Illusionist removes tab 7a and makes 7b's board line full strength. The mockup stays unedited here. EV-10 and EV-14 already say tab 7a is retired.
 
