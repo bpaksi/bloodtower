@@ -572,8 +572,16 @@ describe("C2/06 session screen", () => {
     const quit = stepShell(playing, press("ipad-0", "menu-quit", "quit-story"));
     expect(quit.state.screen).toBe("session");
     expect(quit.state.autosave).toEqual(autosave);
-    expect(quit.effects.filter((effect) => effect.kind === "game-record")).toEqual([
-      { kind: "game-record", v: 1, gameId: playing.activeGameId, outcome: "quit" },
+    // The record also carries what DEC-116 asks for: the story, party size, heroes and how it ended.
+    expect(quit.effects.filter((effect) => effect.kind === "game-record")).toMatchObject([
+      {
+        kind: "game-record",
+        v: 1,
+        gameId: playing.activeGameId,
+        outcome: "quit",
+        how: "quit",
+        sceneId: null,
+      },
     ]);
     expect(quit.effects.filter((effect) => effect.kind === "tower-command")).toHaveLength(0);
     expect(quit.state.games).toEqual([

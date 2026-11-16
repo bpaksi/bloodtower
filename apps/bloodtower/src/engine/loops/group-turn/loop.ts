@@ -192,11 +192,17 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     if (isCorruptionLoss(play)) return { local, passComplete: true };
 
     if (local.encounterPending) {
-      const done = ctx.getParentResult() as { left?: boolean } | undefined;
+      const done = ctx.getParentResult() as { left?: boolean; movesLeft?: number } | undefined;
       if (!done?.left) {
         return { local, passComplete: false };
       }
-      local = { ...local, encounterPending: false, awaitingPress: false };
+      // The picks spent moves inside the building; the walk goes on with what is left (UI-043).
+      local = {
+        ...local,
+        encounterPending: false,
+        awaitingPress: false,
+        ...(done.movesLeft !== undefined ? { movesLeft: done.movesLeft } : {}),
+      };
     }
 
     // DEC-468: an Uncertain pick ended the turn; the moves left are lost.
@@ -205,7 +211,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     }
 
     if (group?.insideBuilding) {
-      play.childInput = { kind: "encounter", groupId: local.groupId };
+      play.childInput = { kind: "encounter", groupId: local.groupId, movesLeft: local.movesLeft };
       ctx.startChild("encounter");
       return { local: { ...local, encounterPending: true }, passComplete: false };
     }

@@ -425,7 +425,7 @@ test("W7 acting iPad move map spends one space and loses leftover moves", async 
   }
 });
 
-test("W7 Enter shows the place still on the story board and Leave is the only place action", async ({
+test("W7 Enter shows the place still on the story board and Leave is always a place action", async ({
   browser,
 }, testInfo) => {
   test.setTimeout(240_000);
@@ -488,10 +488,10 @@ test("W7 Enter shows the place still on the story board and Leave is the only pl
         await expect(device.locator("[data-move-map]")).toHaveCount(0);
         await expect(device.locator('button[data-action-id="walk"]')).toHaveCount(0);
         await expect(device.locator('button[data-action-id="end-turn"]')).toHaveCount(0);
-        const placeButtons = device.locator("main button[data-action-id]");
-        await expect(placeButtons).toHaveCount(1);
-        await expect(placeButtons).toHaveAttribute("data-action-id", "leave");
-        await expect(placeButtons).toContainText("Leave");
+        // C3/13: the building's own picks sit beside Leave now; Leave is still always there.
+        const leaveButton = device.locator('main button[data-action-id="leave"]');
+        await expect(leaveButton).toHaveCount(1);
+        await expect(leaveButton).toContainText("Leave");
         const labels = await device.locator("main button").allInnerTexts();
         for (const label of labels) {
           expect(label).not.toMatch(/search|fight|talk|event|foe|battle/i);

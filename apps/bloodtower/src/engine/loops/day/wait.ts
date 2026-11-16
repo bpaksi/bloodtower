@@ -1,5 +1,6 @@
 import { AUTO_ADVANCE_MS } from "../../../protocols/v2/views.ts";
 import type { LoopFrame } from "../../loop/types.ts";
+import { openBuildingWait } from "../encounter/loop.ts";
 
 /**
  * The effects panel's wait, as data (C3/20, C3/11 ruling 1). The engine holds no clock: it names
@@ -26,8 +27,9 @@ export const effectsWaitFor = (day: number, lineId: string | null): EffectsWait 
 export const openEffectsWait = (stack: readonly LoopFrame[]): EffectsWait | null => {
   const frame = stack.find((row) => row.loopId === "day");
   const local = frame?.local as { phase?: string; wait?: EffectsWait | null; waitDone?: boolean };
-  if (!local || local.phase !== "effects" || local.waitDone || !local.wait) return null;
-  return local.wait;
+  if (local && local.phase === "effects" && !local.waitDone && local.wait) return local.wait;
+  // A building result with no Next waits the same way (C3/13, EV-15, EV-16): same host timer.
+  return openBuildingWait(stack);
 };
 
 /** The event scene's result step waits the same way (C3/12): one id per day and group. */
