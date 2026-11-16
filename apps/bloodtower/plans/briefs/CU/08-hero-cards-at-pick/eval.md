@@ -54,7 +54,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: the Pick board and iPad are as drawn.
 - Method: screenshot
 - How: board 1920x1080 with two heroes seated and iPad 768x1024 on the Pick screen; compare both side by side with `./mockup.html` (same viewports). Four images attached.
-- Pass evidence: board: heading, count, four cards in a row (portrait, class, fight, hit points, line), two greyed, QR in the corner; iPad: the locked words and the toolbar, no card data. Order and parts match.
+- Pass evidence: board: heading, count, one card per pool hero in a row (portrait, class, fight, hit points, line), seated heroes greyed, join QR visible and clear of the cards; the "Waiting for an iPad to pick the party." band may show; iPad: the locked words and the toolbar, no card data. Order and parts of the cards match.
+- Amended 2026-11-16 (Bob, chat: "I approve the CU/08 EV-07 and EV-10 rewords"): the mockup is a Gamewright draft. It draws four cards, a corner QR and one pick button. `startup-frames-fit.spec.ts:171` (DEC-274, SCR-013) requires the join QR larger than the corner QR on `claim-heroes`, `w4-party.spec.ts` requires the waiting band, and DEC-232 and EV-03 require one pick button per hero.
 - Fails if: a part is missing, the greyed cards are not distinct, or the iPad differs.
 
 ### EV-08 — Cards are display only
@@ -90,8 +91,9 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-10 — Continue keeps held cards greyed
 - Requirement: held cards, the iPad words and a closed Menu after Continue.
 - Method: playwright
-- How: seat two heroes, restart the host, Continue to Pick.
-- Pass evidence: the same two cards greyed from the restored game; the iPad words equal EV-03; no `[data-menu]` open; the toolbar on every iPad.
+- How: seat two heroes, restart the host, rejoin and Continue to Pick.
+- Pass evidence: the same two cards greyed from the restored game; the iPad words equal EV-03; no `[data-menu]` open; the toolbar on every iPad. Going Back from Pick clears the picks on purpose (D31, `shell.test.ts` "backs out of claim-heroes and game-settings per D31"); that path is not under test.
+- Amended 2026-11-16 (Bob, chat: "I approve the CU/08 EV-07 and EV-10 rewords"): states the D31 Back rule; seats kept across Back would be a separate engine step with its own DEC.
 - Fails if: cards reset to open, or the Menu comes back open.
 
 ## Assumptions surfaced
