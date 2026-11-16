@@ -1,6 +1,7 @@
 import type { ViewScreen } from "../../protocols/v2/common.ts";
 import type { GearView, HintView } from "../../protocols/v2/views.ts";
 import type { CompassSlot } from "../loops/chapter/board.ts";
+import type { HeroCardData } from "../loops/session/pack.ts";
 
 export type PrivateLine = {
   id: string;
@@ -13,6 +14,8 @@ export type SeatedHero = {
   name: string;
   deviceId: string | null;
   lines: PrivateLine[];
+  /** Board only, at Pick (CU/08). Never copied to a device view. */
+  card?: HeroCardData;
 };
 
 export type LoopLevel = {

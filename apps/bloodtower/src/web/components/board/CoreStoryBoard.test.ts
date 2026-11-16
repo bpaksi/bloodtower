@@ -165,6 +165,76 @@ describe("story board startup chrome", () => {
     expect(markup).not.toContain("data-hero-place");
   });
 
+  describe("hero cards at Pick (CU/08)", () => {
+    const pickView = (cards: BoardView["heroes"]) =>
+      html({
+        ...splashView,
+        screen: "claim-heroes",
+        levels: [join, { id: "claim-heroes", label: "claim-heroes", shows: "1 of 2 picked" }],
+        heroes: cards,
+      });
+
+    it("EV-01/EV-11: shows class, fight, hit points and the pack's own line per hero", () => {
+      const markup = pickView([
+        {
+          id: "hero-a",
+          name: "Hero A",
+          held: true,
+          role: "fighter",
+          fight: 3,
+          hitPoints: 12,
+          ability: "Duel",
+        },
+        {
+          id: "hero-c",
+          name: "Hero C",
+          held: false,
+          role: "magic-user",
+          fight: 1,
+          hitPoints: 8,
+          ability: "Heal",
+        },
+      ]);
+      expect(markup).toContain(">Fighter<");
+      expect(markup).toContain(">Magic-user<");
+      expect(markup).toContain("Fight 3");
+      expect(markup).toContain("Hit points 12");
+      expect(markup).toContain("Fight 1");
+      expect(markup).toContain("Hit points 8");
+      expect(markup).toContain(">Duel<");
+      expect(markup).toContain(">Heal<");
+      expect(markup).toContain('data-held="true"');
+      expect(markup).toContain(">Picked<");
+      expect(markup).toContain(">Open<");
+    });
+
+    it("EV-05: an unknown field reads unavailable, never 0", () => {
+      const markup = pickView([{ id: "hero-f", name: "Hero F", held: false, role: "scholar" }]);
+      expect(markup).toContain("Fight unavailable");
+      expect(markup).toContain("Hit points unavailable");
+      expect(markup).not.toMatch(/Fight 0|Hit points 0/);
+      expect(markup).toContain('data-card-class="">unavailable<');
+      expect(markup).toContain('data-card-line="">unavailable<');
+    });
+
+    it("EV-08: a card is display only", () => {
+      const markup = pickView([
+        {
+          id: "hero-a",
+          name: "Hero A",
+          held: false,
+          role: "fighter",
+          fight: 3,
+          hitPoints: 12,
+          ability: "Duel",
+        },
+      ]);
+      expect(markup).not.toMatch(/<button/i);
+      expect(markup).not.toContain("data-action");
+      expect(markup).not.toContain("waiting for a hero");
+    });
+  });
+
   it("draws setup and begin as table instructions, not a map", () => {
     const setup = html({
       ...splashView,

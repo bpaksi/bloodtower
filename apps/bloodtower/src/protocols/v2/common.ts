@@ -128,6 +128,15 @@ export const publicHeroSchema = z.strictObject({
   id: heroIdSchema,
   name: z.string().min(1).max(80),
   held: z.boolean(),
+  /**
+   * Hero card fields for the Story board at Pick (CU/08, PT-15). Absent when the pack or tuning
+   * does not give one; the board then reads "unavailable", never zero. Board payload only: no
+   * device view carries them (DEC-201).
+   */
+  role: z.string().min(1).max(40).optional(),
+  fight: z.number().int().optional(),
+  hitPoints: z.number().int().optional(),
+  ability: z.string().min(1).max(120).optional(),
 });
 
 export const envelopeSchema = z.strictObject({
