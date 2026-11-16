@@ -237,8 +237,8 @@ const startPick = (local: EncounterLocal, kind: PickKind): EncounterLocal => {
   if (kind === "cure") {
     const heroes = cureTargets(play, group);
     if (heroes.length === 0) return refused(local, "No one here holds a corruption.");
-    const only = heroes.length === 1 ? heroes[0] : undefined;
-    return only ? afterCureHero(local, only) : toStep(local, { kind: "who", pick: "cure" });
+    // The iPad always names who is cured, even when one hero holds a corruption (EV-07).
+    return toStep(local, { kind: "who", pick: "cure" });
   }
   return refused(local, REFUSALS["not-offered"]);
 };

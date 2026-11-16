@@ -108,10 +108,9 @@ describe("building menu (C3/13)", () => {
   it("EV-02/18: the first cure reads free; after it the next shows its price; Continue keeps that", () => {
     let state = inside("sanctuary", "~test-gold:hero-a=30~test-named:hero-a=feral");
     expect(optionFor(state, "Cure")?.detail).toBe("1 move · free");
-    state = press(
-      state,
-      optionFor(state, "Cure")!.promptId === "" ? "" : optionFor(state, "Cure")!.promptId,
-    ).state;
+    state = press(state, optionFor(state, "Cure")!.promptId).state;
+    expect(panel(state)?.step).toBe("who");
+    state = press(state, panel(state)!.options[0]!.promptId).state;
     expect(panel(state)?.step).toBe("result");
     expect(panel(state)?.result?.line).toBe("The corruption is lifted.");
     state = press(state, panel(state)!.options[0]!.promptId).state;
@@ -133,6 +132,9 @@ describe("building menu (C3/13)", () => {
   it("EV-07: Cure lists only corrupted heroes, then the corruptions; only the chosen one goes", () => {
     let state = inside("sanctuary", "~test-gold:hero-a=30~test-named:hero-a=feral+lost");
     state = press(state, optionFor(state, "Cure")!.promptId).state;
+    expect(panel(state)?.step).toBe("who");
+    expect(panel(state)?.options.map((o) => o.label)).toEqual(["Hero A"]);
+    state = press(state, panel(state)!.options[0]!.promptId).state;
     expect(panel(state)?.step).toBe("corruption");
     expect(panel(state)?.options.map((o) => o.label)).toEqual(["Feral", "Lost"]);
     state = press(state, panel(state)!.options[1]!.promptId).state;

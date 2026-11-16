@@ -154,6 +154,13 @@ const openGearItem = async (pad: Page, id: string) => {
 const heroRow = (board: Page, heroId: string) =>
   board.locator(`[data-panel="current-party"] [data-hero="${heroId}"]`);
 
+/** The picks of a building by label, Leave as its own action, and nothing to trade (EV-06). */
+const expectPicks = async (pad: Page, picks: string[]) => {
+  expect(await labelsOf(pad)).toEqual(picks);
+  await expect(pad.locator('button[data-action-id="leave"]')).toHaveCount(1);
+  await expect(deviceMain(pad)).not.toContainText(/trade|shop|merchant|npc/i);
+};
+
 const closeAll = async (context: BrowserContext, host: { close: () => Promise<void> }) => {
   await context.close();
   await host.close();
@@ -173,7 +180,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     });
     try {
       await enterBuilding(pad);
-      expect(await labelsOf(pad)).toEqual(["Rally", "Virtue", "Cleanse"]);
+      await expectPicks(pad, ["Rally", "Virtue", "Cleanse"]);
       await expect(optionByLabel(pad, "Rally")).toContainText("1 move · 5 gold");
       await expect(optionByLabel(pad, "Virtue")).toContainText("1 move · 10 gold");
       await expect(optionByLabel(pad, "Cleanse")).toContainText("1 move");
@@ -232,14 +239,14 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     });
     try {
       await enterBuilding(village.pad);
-      expect(await labelsOf(village.pad)).toEqual(["Rest", "Cleanse"]);
+      await expectPicks(village.pad, ["Rest", "Cleanse"]);
     } finally {
       await closeAll(village.context, village.session.host);
     }
     const bazaar = await startGame(browser, testInfo, { seed: seedAt(BAZAAR) });
     try {
       await enterBuilding(bazaar.pad);
-      expect(await labelsOf(bazaar.pad)).toEqual(["Cleanse"]);
+      await expectPicks(bazaar.pad, ["Cleanse"]);
     } finally {
       await closeAll(bazaar.context, bazaar.session.host);
     }
@@ -284,7 +291,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const { session, context, pad } = await startGame(browser, testInfo, {
+    const { session, context, pad, board } = await startGame(browser, testInfo, {
       seed: seedAt(SANCTUARY, "~test-gold:hero-a=30~test-named:hero-a=feral+lost,hero-c=greedy"),
     });
     try {
@@ -300,6 +307,8 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       await expect(deviceMain(pad).locator("[data-building-result]")).toHaveText(
         "The corruption is lifted.",
       );
+      // The board names the hero and the corruption that went.
+      await expect(board.locator("[data-building-board-detail]")).toHaveText("Hero A · Lost");
       await clickAct(pad, "build");
       // Hero A still holds Feral: the Cure's hero list still names Hero A.
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
@@ -322,10 +331,13 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     try {
       const { pad } = first;
       await enterBuilding(pad);
-      expect(await labelsOf(pad)).toEqual(["Cure", "Cleanse"]);
+      await expectPicks(pad, ["Cure", "Cleanse"]);
       await expect(optionByLabel(pad, "Cure")).toContainText("1 move · free");
       await optionByLabel(pad, "Cure").click();
-      // Only Hero A holds corruptions, so the hero step is skipped and the corruptions are listed.
+      // Only Hero A holds corruptions: the hero step lists just Hero A, then the corruptions.
+      await expect(deviceMain(pad).locator('[data-building="who"]')).toBeVisible();
+      expect(await labelsOf(pad)).toEqual(["Hero A"]);
+      await optionByLabel(pad, "Hero A").click();
       await expect(deviceMain(pad).locator('[data-building="corruption"]')).toBeVisible();
       expect(await labelsOf(pad)).toEqual(["Feral", "Lost"]);
       await optionByLabel(pad, "Lost").click();
