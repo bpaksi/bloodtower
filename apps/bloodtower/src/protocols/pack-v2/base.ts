@@ -338,6 +338,14 @@ export const tuningSchema = z
         hit_points: intSchema,
       }),
       virtue_draw: intSchema,
+      /** C3-08 (DEC-895): required, no defaults. Losses are magnitudes; the extra is added to a buy. */
+      corruption: z.strictObject({
+        cruel_loss: positiveIntSchema,
+        greedy_loss: positiveIntSchema,
+        feral_loss: positiveIntSchema,
+        lost_loss: positiveIntSchema,
+        tempted_buy_extra: positiveIntSchema,
+      }),
     }),
     tomb: z.strictObject({
       rooms: z.strictObject({

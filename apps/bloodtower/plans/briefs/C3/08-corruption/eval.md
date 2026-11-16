@@ -86,6 +86,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the first hero loses 2 and the second loses 1, down to 0, and nothing is taken from another hero. The Uncertain holder's turn ends after the pick, and Feral then fires once: the order is pay, pick-triggered losses, Uncertain's end of turn, turn-end losses.
 - Fails if: a loss is shared, a loss goes below 0 or takes from another hero's part, or Feral does not fire after Uncertain.
 - Added by Gamewright 2026-11-12 under Bob's 11/1 small-tweak rule; no amount changes.
+- Amended 2026-11-15 (Bob, chat): the game has one purse per group and no per-hero part yet, and this feature does not refactor it. The check runs against a per-hero gold ledger kept in test code (as DEC-894 did for EV-07), with the engine's loss hook taking the amount from the holder's entry and never below 0. No per-hero part ships; the real purse split is a later feature.
 
 ### EV-13 — A save from before this feature is refused; the tuning keys are required
 - Requirement: DEC-895, DEC-703.

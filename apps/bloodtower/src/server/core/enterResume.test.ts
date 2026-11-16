@@ -257,8 +257,8 @@ describe("a failed connect (EV-08)", () => {
   });
 });
 
-describe("an autosave from before C2/05 (EV-18)", () => {
-  it("loads, logs one version-changed, and Continue resumes its day and positions", async () => {
+describe("an autosave from before C3-08 (C3-08 EV-13, DEC-895)", () => {
+  it("is refused by Continue: logged as an error, no game resumed, a new game stays on offer", async () => {
     const fixture = JSON.parse(
       readFileSync(join(import.meta.dirname, "fixtures", "pre-c2-05-checkpoint.json"), "utf8"),
     ) as {
@@ -272,7 +272,7 @@ describe("an autosave from before C2/05 (EV-18)", () => {
       };
     };
     expect(fixture.engineVersion).not.toBe(SHELL_ENGINE_VERSION);
-    const { boot, store, sessions } = harness();
+    const { boot, store, sessions, dir } = harness();
     const gameId = fixture.state.autosave.gameId;
     store.writeCheckpoint({
       gameId,
@@ -307,16 +307,16 @@ describe("an autosave from before C2/05 (EV-18)", () => {
     expect(session.state().screen).toBe("pick-story");
     await pressAs(session, pad, "continue-saved-game", "continue");
     const state = session.state();
-    expect(state.screen).toBe("play");
-    expect(state.play?.dayNumber).toBe(fixture.state.play.dayNumber);
-    expect(state.play?.groups.map((group) => `${group.id}:${group.spaceId}`)).toEqual(
-      (fixture.state.play.groups as Array<{ id: string; spaceId: string }>).map(
-        (group) => `${group.id}:${group.spaceId}`,
-      ),
+    // Nothing is resumed or invented, and the table is not sent into a play screen.
+    expect(state.screen).not.toBe("play");
+    expect(state.play).toBeNull();
+    expect(state.autosave).toBeNull();
+    expect(store.listEvents(gameId).filter((row) => row.kind === "version-changed")).toHaveLength(
+      0,
     );
-    expect(state.towerChoice).toBe("without");
-    const changes = store.listEvents(gameId).filter((row) => row.kind === "version-changed");
-    expect(changes).toHaveLength(1);
+    const logs = join(dir, "logs");
+    const lines = readdirSync(logs).map((name) => readFileSync(join(logs, name), "utf8"));
+    expect(lines.join("\n")).toContain("save-unreadable");
     expect(tower.sent()).toEqual([]);
   });
 });

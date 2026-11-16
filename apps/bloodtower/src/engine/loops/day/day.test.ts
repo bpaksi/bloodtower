@@ -4,6 +4,7 @@ import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts"
 import { AUTO_ADVANCE_MS } from "../../../protocols/v2/views.ts";
 import { deserializeShellState, serializeShellState } from "../../../server/core/serialize.ts";
 import { gearRows, type MenuContext } from "../../../web/components/device/gearMenu.ts";
+import { gainCorruption } from "../../rules/corruption/index.ts";
 import { projectDayClock, rollLine } from "../../views/day.ts";
 import { citadelForKingdom } from "../chapter/board.ts";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
@@ -1678,6 +1679,29 @@ describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
       expect(applySplit(h.play, "G", "hero-a")).toBeNull();
       expect(applyJoin(h.play, "G", "G")).toBe(false);
       expect(projectedGroups(h.play).groups).toEqual(h.play.groups);
+    } finally {
+      closeHarness();
+    }
+  });
+});
+
+describe("C3-08 EV-01 a third corruption stops the day loop", () => {
+  it("loses with reason corruption: no later group, drop or night runs", () => {
+    const h = boot("c3-08-day", ["a", "b"], true);
+    try {
+      setHeroSheet(h.play, "a", { helpingVirtues: 0, corruptions: 2, named: ["cruel", "greedy"] });
+      const turns: string[] = [];
+      const result = runDay(h, {
+        onTurn: (groupId) => {
+          turns.push(groupId);
+          if (turns.length === 1) expect(gainCorruption(h.play, "seed", "a").lost).toBe(true);
+        },
+      });
+      expect(result.lost).toEqual({ reason: "corruption" });
+      // Only the first group played; no skull dropped; the day never reached its night.
+      expect(turns).toHaveLength(1);
+      expect(ensureClock(h.play).nightDrops).toEqual([]);
+      expect(dayTrace(h.play).nodes).not.toContain(".35");
     } finally {
       closeHarness();
     }

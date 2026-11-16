@@ -39,7 +39,7 @@ export type DayLocal = {
 
 export type DayResult = {
   dayNumber: number;
-  lost: null | { reason: "skulls" | "buildings" };
+  lost: null | { reason: "skulls" | "buildings" | "corruption" };
 };
 
 const freshLocal = (): DayLocal => ({
@@ -201,6 +201,11 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
     const play = playState();
     const shell = shellState();
     const clock = ensureClock(play);
+
+    // DEC-676: a third corruption loses at once: no later group, drop or event runs.
+    if (clock.outcome?.lost === true && clock.outcome.reason === "corruption") {
+      local = { ...local, phase: "done", awaitingPress: false, awaitingChild: false };
+    }
 
     if (local.phase === "regroup") {
       applyQueuedRegroup(ctx.effects);

@@ -1,3 +1,4 @@
+import { virtuesCount } from "../../rules/corruption/index.ts";
 import { groupById, nextPlayRng, type PlayState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, type MoveShift } from "./clock.ts";
 import { applyMoveTotal } from "./rules.ts";
@@ -22,7 +23,8 @@ export const rollDayMoves = (play: PlayState, seed: string): void => {
     const group = groupById(play, groupId);
     if (!group) continue;
     const sheets = group.heroIds.map((heroId) => heroSheet(clock, heroId));
-    const virtues = sheets.reduce((sum, sheet) => sum + sheet.helpingVirtues, 0);
+    // DEC-474: a Feeble holder's virtues add nothing.
+    const virtues = group.heroIds.reduce((sum, heroId) => sum + virtuesCount(clock, heroId), 0);
     const corruption = sheets.reduce((max, sheet) => Math.max(max, sheet.corruptions), 0);
     const virtueShift = virtues === 0 ? 0 : virtues * clock.tuning.perVirtue;
     const corruptionShift = corruption === 0 ? 0 : corruption * clock.tuning.perCorruption;
