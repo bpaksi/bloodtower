@@ -15,6 +15,7 @@ import {
   rulesPage,
 } from "../../hints/copy.ts";
 import { inNightPhase } from "../../hints/flow.ts";
+import { heldItems, itemName } from "../../rules/items/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
   DaySkullView,
@@ -124,7 +125,8 @@ const slotFor = (state: ShellState, promptId: string, actionId: string): { slot?
   return found ? { slot: found.slot } : {};
 };
 
-const heroName = (state: ShellState, heroId: string): string => {
+/** A hero's name from the stories the table loaded, or the id when none names it. */
+export const heroName = (state: ShellState, heroId: string): string => {
   for (const story of state.stories) {
     const hero = story.heroes.find((row) => row.id === heroId);
     if (hero) return hero.name;
@@ -262,15 +264,23 @@ const buildDayPanels = (
   };
 };
 
-const buildTable = (state: ShellState, chapter: string): TableBand | null => {
-  if (state.screen !== "play" && state.screen !== "pause") return null;
-  const play = state.play;
-  if (!play) return null;
-  const board = play.content.board;
+type ActingGroup = {
+  /** The acting group's id (the id of its lead hero), or null when no group acts. */
+  actingId: string | null;
+  movesLeft: number | null;
+  waiting: boolean;
+};
 
+/**
+ * Which group acts now, read from the loop stack (the Story board's "whose turn" and the use-item
+ * rule share it, so they cannot disagree). A game with no play state has no acting group.
+ */
+export const actingGroupOf = (state: ShellState): ActingGroup => {
+  const play = state.play;
   let actingId: string | null = null;
   let movesLeft: number | null = null;
   let waiting = false;
+  if (!play) return { actingId, movesLeft, waiting };
 
   for (const frame of [...state.loops.stack].reverse()) {
     if (frame.loopId === "encounter") {
@@ -294,6 +304,16 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
       break;
     }
   }
+  return { actingId, movesLeft, waiting };
+};
+
+const buildTable = (state: ShellState, chapter: string): TableBand | null => {
+  if (state.screen !== "play" && state.screen !== "pause") return null;
+  const play = state.play;
+  if (!play) return null;
+  const board = play.content.board;
+
+  const { actingId, movesLeft, waiting } = actingGroupOf(state);
 
   const actingHeroId = actingId;
   const actingName = actingHeroId ? heroName(state, actingHeroId) : null;
@@ -667,6 +687,32 @@ const regroupSnapshot = (state: ShellState, inGame: boolean): NonNullable<GearVi
   return { open: picks.length > 0, picks, queue };
 };
 
+/** The heroes of the group that acts now: the only ones who may use an item (CU/13, EV-20). */
+const actingHeroes = (state: ShellState): string[] => {
+  const { actingId } = actingGroupOf(state);
+  const group = state.play?.groups.find((row) => row.id === actingId);
+  return group ? [...group.heroIds] : [];
+};
+
+/**
+ * One hero on the gear's party view. HP, gold and items come from the hero's sheet; a value the
+ * game does not know reads "unavailable", never 0 (root CLAUDE.md, EV-13).
+ */
+const partyHero = (state: ShellState, heroId: string, name: string) => {
+  const sheet = state.play ? heroSheet(ensureClock(state.play), heroId) : null;
+  const held = state.play ? heldItems(state.play, heroId) : null;
+  return {
+    id: heroId,
+    name,
+    hp: sheet?.hp ? `${sheet.hp.hp}/${sheet.hp.max}` : "unavailable",
+    gold: sheet?.gold !== undefined ? String(sheet.gold) : "unavailable",
+    items: held ? `${held.length} held` : "unavailable",
+    corruptions: "unavailable",
+    holder: state.holdings[heroId] ?? null,
+    heldItems: (held ?? []).map((id) => ({ id, name: itemName(id) ?? "unavailable" })),
+  };
+};
+
 const gearSnapshot = (state: ShellState): GearView => {
   const story = chosenOrBound(state);
   const inGame = state.screen === "play" || state.screen === "pause" || state.reconnect !== null;
@@ -689,15 +735,8 @@ const gearSnapshot = (state: ShellState): GearView => {
     beforeBegin: !inGame && !sessionScreen,
     partySplit: state.play ? partyIsSplit(state.play) : false,
     regroup: regroupSnapshot(state, inGame && !sessionOver),
-    party: (story?.heroes ?? []).map((hero) => ({
-      id: hero.id,
-      name: hero.name,
-      hp: "unavailable",
-      gold: "unavailable",
-      items: "unavailable",
-      corruptions: "unavailable",
-      holder: state.holdings[hero.id] ?? null,
-    })),
+    party: (story?.heroes ?? []).map((hero) => partyHero(state, hero.id, hero.name)),
+    actingHeroes: actingHeroes(state),
     cards: RULES_PAGES.map((card) => ({ id: card.id, title: card.title, group: RULES_GROUP })),
     cardTitle: rulesPage(state.gearCard)?.title ?? null,
     cardPage: rulesPage(state.gearCard)?.page ?? null,

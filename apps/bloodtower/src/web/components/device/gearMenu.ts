@@ -32,10 +32,11 @@ export const HELP_LINES: Record<string, string> = {
 export const MENU_VERSION = "v0.0.0";
 
 const ONLY_IN_GAME = "Only in a game.";
-const C3 = "C3+";
 const TOWER_CONNECTED = "The tower is connected.";
 /** Copy slot `gear.volume.no-tower` (Loremaster, step 45): Volume is greyed without the tower. */
 export const VOLUME_NO_TOWER = "Only with the tower.";
+/** Copy slot `items.empty` (locked 2026-10-31, Loremaster): no hero holds a potion or item. */
+export const NO_ITEMS = "No potions or items to use.";
 const OPEN_ELSEWHERE = "Open on another iPad.";
 const SESSION_OVER = "The session is over.";
 /** [COPY: split-party-none] Loremaster slot (step 45): nobody can split off or rejoin now. */
@@ -47,6 +48,8 @@ export type MenuContext = {
   sessionScreen: boolean;
   towerConnected: boolean;
   partySplit: boolean;
+  /** Some hero holds a potion or item (CU/13). Absent: nothing held. */
+  itemsHeld?: boolean;
   /** Split party has a pick or a queued action to cancel (PT-18). Absent: nothing to pick. */
   regroupOpen?: boolean;
   blockedItem: string | null;
@@ -98,7 +101,15 @@ export const gearRows = (ctx: MenuContext): GearRow[] => {
       ctx.inGame ? SPLIT_NONE : ONLY_IN_GAME,
       true,
     ),
-    row(ctx, "use-potion", "Table", "Use a potion or item", false, C3, false),
+    row(
+      ctx,
+      "use-potion",
+      "Table",
+      "Use a potion or item",
+      ctx.inGame && ctx.itemsHeld === true,
+      ctx.inGame ? NO_ITEMS : ONLY_IN_GAME,
+      true,
+    ),
     row(ctx, "change-who-holds-whom", "Table", "Change who holds whom", true, null, true),
     row(ctx, "join-another-ipad", "Table", "Join another iPad", true, null, true),
     row(ctx, "tower", "Table", "Tower", !ctx.towerConnected, TOWER_CONNECTED, true),

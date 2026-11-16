@@ -178,6 +178,7 @@ export const GEAR_PANELS = [
   "join-another-ipad",
   "tower",
   "split",
+  "items",
 ] as const;
 export const gearPanelSchema = z.enum(GEAR_PANELS);
 export type GearPanelId = z.infer<typeof gearPanelSchema>;
@@ -190,6 +191,11 @@ const gearPartyHeroSchema = z.strictObject({
   items: z.string().min(1).max(200),
   corruptions: z.string().min(1).max(200),
   holder: z.string().min(1).max(80).nullable(),
+  /** The items held, by id and name (CU/13). A name that is not known reads "unavailable". */
+  heldItems: z
+    .array(z.strictObject({ id: z.string().min(1).max(40), name: z.string().min(1).max(80) }))
+    .max(16)
+    .optional(),
 });
 
 /** One Split party pick or queued action, by hero (PT-18, Q4.2). */
@@ -242,6 +248,8 @@ export const gearViewSchema = z.strictObject({
   /** Absent on views built before CU/04. */
   regroup: gearRegroupSchema.optional(),
   party: z.array(gearPartyHeroSchema).max(16),
+  /** Hero ids of the acting group: only these may use an item (CU/13, EV-20). */
+  actingHeroes: z.array(heroIdSchema).max(16).optional(),
   cards: z.array(gearCardSchema).max(8),
   joinUrl: z.string().min(1).max(500).nullable(),
   setupSteps: z.array(z.string().min(1).max(200)).max(12),

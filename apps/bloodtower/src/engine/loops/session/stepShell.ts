@@ -12,7 +12,7 @@ import { handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
-import type { ShellEffect } from "./effects.ts";
+import { type ShellEffect, USE_ITEM_REFUSED } from "./effects.ts";
 import {
   applyTowerResult,
   BOARD_SET_UP_PROMPT,
@@ -23,7 +23,7 @@ import {
   TOWER_CONNECT_PROMPT,
 } from "./enter.ts";
 import { type ShellEvent, shellEventSchema } from "./events.ts";
-import { applyGear } from "./gear.ts";
+import { applyGear, applyUseItem, isUseItemAct } from "./gear.ts";
 import {
   applyHubPress,
   hubOffers,
@@ -57,7 +57,7 @@ import {
 import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
 import { type HintHold, initialShellState, type ShellState } from "./state.ts";
 import { towerReady } from "./tower.ts";
-import { captureHintHold } from "./view.ts";
+import { captureHintHold, heroName } from "./view.ts";
 
 export type ShellStepResult = {
   state: ShellState;
@@ -471,6 +471,22 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     clearShellState();
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects(next, effects);
+  }
+
+  if (e.kind === "gear" && isUseItemAct(e)) {
+    // The gear's use-item flow and the host's own action are this one path (Q7.2, EV-17).
+    const used = applyUseItem(state, e, (heroId) => heroName(state, heroId));
+    if (used.error) {
+      effects.push({
+        kind: "press-error",
+        v: 1,
+        code: USE_ITEM_REFUSED,
+        message: used.error,
+        deviceId: e.deviceId,
+      });
+    }
+    effects.push({ kind: "view-refresh", v: 1 });
+    return withEffects(used.state, effects);
   }
 
   if (e.kind === "gear") {
