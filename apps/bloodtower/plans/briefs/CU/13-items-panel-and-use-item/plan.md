@@ -30,6 +30,13 @@ The gear keeps the single route to using an item (Bob's gear rule). This part bu
 
 What main has today: no item model. `gearSnapshot` returns the string "unavailable" for every hero's HP, gold and items (`engine/loops/session/view.ts`); the gear row "Use a potion or item" is greyed with the reason "C3+" (`gearMenu.ts`); `potion_hit_points: 4` is in `packs/base/tuning.yaml` and nothing reads it; C3-11's use-item evals are `fixme` (`c3-day.spec.ts`).
 
+## Build notes (developer, 2026-11-16)
+
+- The tuning key is `battle.potion_hit_points` in `packs/base/tuning.yaml`, not `day.potion_hit_points`.
+- A potion is refused (`use-item-refused`) when the hero's hit points are not known; no real game sets HP before C4.
+- Files the build touched beyond the Touches list, for the coordinator to fold in: `engine/loops/session/stepShell.ts`, `engine/loops/session/effects.ts` (the `use-item-refused` code), `engine/loops/day/clock.ts`, `engine/loops/day/rules.ts`, `engine/loops/chapter/playState.ts` (seed markers `~test-items:`, `~test-hp:`, `~test-gold:`), `e2e/tests/w1-chrome.spec.ts`, and the new unit tests.
+- A use-item act applies whatever panel is open, so a live act and a replay after Continue agree.
+
 ## Cutover
 
 Cutover: N

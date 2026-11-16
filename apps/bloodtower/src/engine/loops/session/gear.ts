@@ -178,10 +178,8 @@ export const applyUseItem = (
   };
   if (state.sessionEnded) return { state: next, error: null };
   const owns = next.gearOwner === event.deviceId && next.gearPanel !== null;
-  // Another iPad's open panel, or another kind of panel, leaves the act alone.
-  if (next.gearPanel !== null && !(owns && next.gearPanel === ITEMS_PANEL)) {
-    return { state: next, error: null };
-  }
+  // Panel state never decides whether the act applies. The host logs every use pick and not the
+  // opens, so a replay has no panel and must reach the same result as the live act.
   const { pick: itemId, heroId } = event;
   if (!itemId || !heroId) return { state: next, error: null };
   if (!next.play) {

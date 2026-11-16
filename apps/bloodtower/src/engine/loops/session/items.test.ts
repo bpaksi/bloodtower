@@ -137,3 +137,23 @@ describe("use-item through the gear (CU/13)", () => {
     expect(heroA).toMatchObject({ hp: "unavailable", gold: "unavailable", items: "0 held" });
   });
 });
+
+describe("a use-item act with another panel open (round 1 blocker)", () => {
+  it("applies live, as it will on replay with no panel open", () => {
+    let state = inPlay("hero-b");
+    state = stepShell(state, {
+      kind: "gear",
+      v: 1,
+      deviceId: "pad-1",
+      action: "open",
+      item: "tower",
+    }).state;
+    const live = gear(state, {
+      deviceId: "pad-2",
+      item: "items",
+      pick: "potion",
+      heroId: "hero-b",
+    });
+    expect(potionOf(live.state, "hero-b")).toMatchObject({ hp: "6/10", items: "1 held" });
+  });
+});
