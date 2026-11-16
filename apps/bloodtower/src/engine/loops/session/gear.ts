@@ -1,9 +1,13 @@
 import { GEAR_PANELS, type GearPanelId } from "../../../protocols/v2/views.ts";
 import { rulesPage } from "../../hints/copy.ts";
+import { spaceName } from "../chapter/board.ts";
 import { queueRegroupPick } from "../day/regroup.ts";
+import { hasOpenEvent } from "../event/index.ts";
+import type { GroupTurnLocal } from "../group-turn/loop.ts";
+import { FIX_POSITION_BAD_TARGET, FIX_POSITION_NOT_NOW } from "./effects.ts";
 import type { ShellState } from "./state.ts";
 
-type GearEvent = {
+export type GearEvent = {
   deviceId: string;
   action: "open" | "pick" | "done" | "keep-volume" | "try-another" | "step-back";
   item?: string;
@@ -143,4 +147,88 @@ export const applyGear = (state: ShellState, event: GearEvent): ShellState => {
   if (swapA && swapB) swapHolders(next, swapA, swapB);
   clearPanel(next);
   return next;
+};
+
+/** The gear item and pick that carry a correction on the existing gear event (CU/05). */
+export const FIX_POSITION_ITEM = "fix-position";
+
+/** Text of the refusal in a battle, a scene or a building menu (Copy row 13). */
+export const FIX_POSITION_NOT_NOW_LINE = "Only on the move map or between loops.";
+
+/**
+ * Fix my position runs on the move map or between loops, never inside a building, a battle, a
+ * scene or an open event (Q5.3). Null when it may run.
+ */
+export const fixPositionRefusal = (state: ShellState): string | null => {
+  const play = state.play;
+  if (!play) return FIX_POSITION_NOT_NOW_LINE;
+  if (state.screen !== "play" && state.screen !== "pause") return FIX_POSITION_NOT_NOW_LINE;
+  if (play.groups.some((group) => group.insideBuilding)) return FIX_POSITION_NOT_NOW_LINE;
+  if (hasOpenEvent(play)) return FIX_POSITION_NOT_NOW_LINE;
+  const top = state.loops.stack.at(-1)?.loopId;
+  if (top === "encounter" || top === "quest" || top === "scene" || top === "battle") {
+    return FIX_POSITION_NOT_NOW_LINE;
+  }
+  return null;
+};
+
+export type FixPositionResult = {
+  state: ShellState;
+  /** Set when the pick was refused: no state changed (EV-08, EV-30). */
+  error?: { code: typeof FIX_POSITION_NOT_NOW | typeof FIX_POSITION_BAD_TARGET; message: string };
+  /** True when a group's space changed, so the move map must offer again from the new space. */
+  moved?: boolean;
+};
+
+/**
+ * Fix my position (PT-19, Q5.3): moves a group's recorded space to any space. It charges no move,
+ * starts no trigger, changes no hero and sends no tower command. The pick is the gear event
+ * `{item: "fix-position", heroId: <a hero of the group>, pick: <space id>}`; the host logs it like
+ * every gear event, so a replay after Continue applies it again.
+ */
+export const applyFixPosition = (state: ShellState, event: GearEvent): FixPositionResult => {
+  const next: ShellState = { ...state, eventSeq: state.eventSeq + 1 };
+  const refuse = (
+    code: typeof FIX_POSITION_NOT_NOW | typeof FIX_POSITION_BAD_TARGET,
+    message: string,
+  ): FixPositionResult => ({ state: next, error: { code, message } });
+
+  const play = next.play;
+  const refusal = fixPositionRefusal(next);
+  if (refusal) return refuse(FIX_POSITION_NOT_NOW, refusal);
+  const group = play?.groups.find((row) => event.heroId && row.heroIds.includes(event.heroId));
+  if (!play || !group) {
+    return refuse(
+      FIX_POSITION_BAD_TARGET,
+      `Fix my position: no group holds hero "${event.heroId ?? ""}".`,
+    );
+  }
+  const to = event.pick;
+  if (!to || !play.content.board.spaceById.has(to)) {
+    return refuse(FIX_POSITION_BAD_TARGET, `Fix my position: no space "${to ?? ""}" on the board.`);
+  }
+  const board = play.content.board;
+  const lead = group.heroIds[0] ?? group.id;
+  const heroName = next.stories
+    .flatMap((story) => story.heroes)
+    .find((hero) => hero.id === lead)?.name;
+  // The board line (Copy row 12, `board.fix-position-done`). The group's own record is the only change.
+  group.spaceId = to;
+  const owns = next.gearOwner === event.deviceId && next.gearPanel === "game-board-setup";
+  if (owns) next.gearPicked = `${heroName ?? lead}'s group is set on ${spaceName(board, to)}.`;
+
+  // The Back window is closed: a Back would carry the group to a space it never left.
+  const top = next.loops.stack.at(-1);
+  if (top?.loopId === "group-turn") {
+    const local = top.local as GroupTurnLocal;
+    if (local.groupId === group.id) {
+      top.local = {
+        ...local,
+        undo: [],
+        awaitingPress: false,
+        landedOnBuildingWithNoMoves: false,
+      } satisfies GroupTurnLocal;
+    }
+  }
+  return { state: next, moved: top?.loopId === "group-turn" };
 };

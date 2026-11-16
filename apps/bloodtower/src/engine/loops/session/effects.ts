@@ -7,6 +7,10 @@ export const SKULL_NO_BUILDING = "skull-no-building" as const;
 /** Error code logged when a queued Split or Rejoin cannot apply at the day start (CU/04, Q4.2). */
 export const REGROUP_DROPPED = "regroup-dropped" as const;
 
+/** Error codes for Fix my position (CU/05, Q5.3): a press in a battle, scene or building menu; a space or group that does not exist. */
+export const FIX_POSITION_NOT_NOW = "fix-position-not-now" as const;
+export const FIX_POSITION_BAD_TARGET = "fix-position-bad-target" as const;
+
 export const viewRefreshEffectV1 = z.object({
   kind: z.literal("view-refresh"),
   v: z.literal(1),
@@ -50,6 +54,8 @@ export const pressErrorEffectV1 = z.object({
     HINT_TEXT_MISSING,
     HINTS_AFTER_SETUP,
     RULES_PAGE_MISSING,
+    FIX_POSITION_NOT_NOW,
+    FIX_POSITION_BAD_TARGET,
   ]),
   message: z.string().min(1).max(300),
   /**

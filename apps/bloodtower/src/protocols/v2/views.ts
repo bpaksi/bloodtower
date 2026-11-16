@@ -217,6 +217,20 @@ const gearCardSchema = z.strictObject({
 });
 
 /**
+ * Fix my position (CU/05, Q5.3): the groups (by lead hero) and every board space to pick from.
+ * `refusal` is the reason line when the control is greyed in a battle, a scene or a building menu.
+ */
+const gearFixPositionSchema = z.strictObject({
+  groups: z
+    .array(z.strictObject({ heroId: heroIdSchema, name: z.string().min(1).max(80) }))
+    .max(16),
+  spaces: z
+    .array(z.strictObject({ id: z.string().min(1).max(80), name: z.string().min(1).max(80) }))
+    .max(400),
+  refusal: z.string().min(1).max(120).nullable(),
+});
+
+/**
  * Shared gear snapshot. Absent on views built before this field.
  * `paused` is true while a panel is open. Closing the Menu is not in here.
  */
@@ -241,6 +255,8 @@ export const gearViewSchema = z.strictObject({
   partySplit: z.boolean(),
   /** Absent on views built before CU/04. */
   regroup: gearRegroupSchema.optional(),
+  /** Absent on views built before CU/05, and outside a game. */
+  fixPosition: gearFixPositionSchema.optional(),
   party: z.array(gearPartyHeroSchema).max(16),
   cards: z.array(gearCardSchema).max(8),
   joinUrl: z.string().min(1).max(500).nullable(),
