@@ -5,7 +5,8 @@ import {
 } from "../../../protocols/opening.ts";
 import type { LoopDefinition } from "../../loop/types.ts";
 import { drawPurse, isPurseAmount } from "../../rules/purse/index.ts";
-import { CONTINUE_PROMPT, canContinue } from "../session/hub.ts";
+import type { ChapterResult } from "../chapter/loop.ts";
+import { CONTINUE_PROMPT, canContinue, finishGame } from "../session/hub.ts";
 import {
   pauseGoWithoutPrompt,
   pauseQuitPrompt,
@@ -13,6 +14,7 @@ import {
 } from "../session/reconnect.ts";
 import type { ShellScreen } from "../session/screens.ts";
 import { recordOffer, requestTowerCommand, shellState } from "../session/shellRef.ts";
+import { type GameEnd, gameEndFrom } from "./end.ts";
 import {
   allHeroesHeld,
   bindStoryChoice,
@@ -41,9 +43,17 @@ export type GameLocal = {
     | "done";
   awaitingPress: boolean;
   playStarted: boolean;
+  /** The last chapter whose report this game has read (MEC-032 .42). Absent in an older save: 0. */
+  lastChapter?: number;
+  /** Set when a chapter report ended the game; the close writes the record from it. */
+  end?: GameEnd | null;
 };
 
-export type GameResult = { outcome: "quit" | "completed" };
+export type GameResult = {
+  outcome: "quit" | "completed" | "won" | "lost";
+  reason?: GameEnd["reason"];
+  sceneId?: string;
+};
 
 const syncScreen = (local: GameLocal) => {
   const shell = shellState();
@@ -182,14 +192,40 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
           return { local: { ...local, playStarted: true }, passComplete: false };
         }
       }
+      // MEC-032 .41 to .44: one chapter per pass. A chapter's report is read once; a lost one
+      // or the last won one ends the game, any other won one opens the next chapter (DEC-133).
+      const report = ctx.getParentResult() as Partial<ChapterResult> | undefined;
+      if (
+        report?.chapterId &&
+        report.outcome &&
+        (report.chapter ?? 0) > (local.lastChapter ?? 0) &&
+        !shell.loops.stack.some((frame) => frame.loopId === "chapter")
+      ) {
+        const next = gameEndFrom(report);
+        const read = { ...local, lastChapter: report.chapter ?? 0 };
+        if (next === "next") {
+          ctx.startChild("chapter");
+          return { local: { ...read, playStarted: true }, passComplete: false };
+        }
+        if (next) return { local: { ...read, phase: "done", end: next }, passComplete: true };
+      }
       return { local, passComplete: false };
     }
 
     return { local: { ...local, phase: "done" }, passComplete: true };
   },
   exit: (local) => local.phase === "done",
-  resultUp: () => {
+  // MEC-032 close (.43): the record is written once, here, with the autosave cleared (DEC-208).
+  close: (local, ctx) => {
+    if (local.end) finishGame(shellState(), local.end, ctx.effects);
+  },
+  resultUp: (local) => {
     const shell = shellState();
+    if (local.end) {
+      const result: GameResult = { outcome: local.end.outcome, sceneId: local.end.sceneId };
+      if (local.end.reason) result.reason = local.end.reason;
+      return result;
+    }
     return { outcome: shell.stage === "ended" ? "quit" : "completed" };
   },
 };

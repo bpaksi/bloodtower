@@ -17,6 +17,7 @@ import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
 import type { BoardView, DeviceView, ErrorCode, PackedLine } from "../../protocols/v2/index.ts";
 import { AUTO_ADVANCE_MS } from "../../protocols/v2/views.ts";
+import { type PressKind, parseHostPayload } from "../events/kinds.ts";
 import type { EventStore } from "../events/store.ts";
 import type { HostLogger } from "../log/hostLog.ts";
 import type { Clock } from "../timing/clock.ts";
@@ -285,16 +286,46 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     });
   };
 
-  const logPress = (press: ControlPress) => {
+  const logPress = (press: ControlPress, kind: PressKind, day: number) => {
     const gameId = gameIdOf(state);
     if (!gameId) return;
     options.store.append({
       gameId,
       kind: "control-press",
-      payload: { v: 1, press },
+      // The kind and the day let the tap counts come from the log alone (PT-10).
+      payload: { v: 1, press, kind, day },
       atMonoMs: options.clock.monoMs(),
       atWall: options.clock.wall(),
       deviceId: press.deviceId,
+      ...meta,
+    });
+  };
+
+  // The game clock: it runs while the game is played and stops for a pause, a quit or the end.
+  // Each change is a logged row, so the active length survives a restart (DEC-107, PT-10).
+  const clockLogged = new Map<string, boolean>();
+  const playClockRunning = (): boolean => state.screen === "play" && state.stage === "playing";
+  const syncPlayClock = () => {
+    const gameId = gameIdOf(state);
+    if (!gameId) return;
+    // The log is the truth; the map only saves reading it on every event.
+    let logged = clockLogged.get(gameId);
+    if (logged === undefined) {
+      logged = false;
+      for (const row of options.store.listEvents(gameId)) {
+        if (row.kind === "play-clock") logged = parseHostPayload("play-clock", row.payload).running;
+      }
+    }
+    const running = playClockRunning();
+    clockLogged.set(gameId, running);
+    if (running === logged) return;
+    options.store.append({
+      gameId,
+      kind: "play-clock",
+      payload: { v: 1, running },
+      atMonoMs: options.clock.monoMs(),
+      atWall: options.clock.wall(),
+      deviceId: null,
       ...meta,
     });
   };
@@ -386,17 +417,38 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           (offer) =>
             offer.promptId === event.promptId && offer.actionId === event.actionId && offer.open,
         ) != null;
-      logPress({
-        deviceId: event.deviceId,
-        promptId: event.promptId,
-        action: event.actionId as ControlPress["action"],
-        atMonoMs: options.clock.monoMs(),
-        atWall: options.clock.wall(),
-        winner: open,
-        screen: before.screen,
-        nextScreen: open && before.screen !== state.screen ? state.screen : null,
-      });
+      logPress(
+        {
+          deviceId: event.deviceId,
+          promptId: event.promptId,
+          action: event.actionId as ControlPress["action"],
+          atMonoMs: options.clock.monoMs(),
+          atWall: options.clock.wall(),
+          winner: open,
+          screen: before.screen,
+          nextScreen: open && before.screen !== state.screen ? state.screen : null,
+        },
+        event.promptId.startsWith("menu-") ? "menu" : "flow-button",
+        before.play?.dayNumber ?? 0,
+      );
+    } else if (event.kind === "gear" && event.action === "open" && event.item) {
+      // Opening the Menu or the help panel is an iPad control-press too (PT-10).
+      logPress(
+        {
+          deviceId: event.deviceId,
+          promptId: `gear-open-${event.item}`.slice(0, 64),
+          action: "pick",
+          atMonoMs: options.clock.monoMs(),
+          atWall: options.clock.wall(),
+          winner: before.gearPanel === null,
+          screen: before.screen,
+          nextScreen: null,
+        },
+        event.item === "look-up" ? "help" : "menu",
+        before.play?.dayNumber ?? 0,
+      );
     }
+    syncPlayClock();
     const shellEffects: ShellEffect[] = [];
     for (const effect of result.effects) {
       const parsed = shellEffectSchema.safeParse(effect);

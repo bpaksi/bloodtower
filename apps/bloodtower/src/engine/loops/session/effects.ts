@@ -30,6 +30,22 @@ export const gameRecordEffectV1 = z.object({
   v: z.literal(1),
   gameId: z.string(),
   outcome: z.enum(["quit", "won", "lost"]),
+  /**
+   * What the record holds beyond the outcome (DEC-116, PT-04). Optional so a quit before the game
+   * began, and an older log, still parse. Unknown is null, never zero.
+   */
+  storyId: z.string().nullable().optional(),
+  length: z.string().nullable().optional(),
+  difficulty: z.string().nullable().optional(),
+  /** Seated heroes at the start, and who they were. */
+  partySize: z.number().int().min(0).nullable().optional(),
+  heroIds: z.array(z.string()).optional(),
+  /** How it ended: quit, won, or the way it was lost (DEC-043). */
+  how: z.enum(["quit", "won", "corruption", "skulls", "buildings"]).optional(),
+  /** The scene the end plays (DEC-144); absent on a quit. */
+  sceneId: z.string().nullable().optional(),
+  /** The day the game ended on, null before the first day. */
+  endDay: z.number().int().nullable().optional(),
 });
 
 export const towerCommandEffectV1 = z.object({
