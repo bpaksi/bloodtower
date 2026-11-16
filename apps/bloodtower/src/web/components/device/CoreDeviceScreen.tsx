@@ -212,7 +212,11 @@ function FixPositionControl({
   if (!fix || fix.groups.length === 0) return null;
   const blocked = fix.refusal !== null;
   const group = pick.heroId || fix.groups[0]?.heroId || "";
-  const space = pick.spaceId || fix.spaces[0]?.id || "";
+  const space =
+    pick.spaceId ||
+    fix.groups.find((row) => row.heroId === group)?.spaceId ||
+    fix.spaces[0]?.id ||
+    "";
   return (
     <div className="mt-6 flex flex-col gap-3" data-fix-position="">
       <button
@@ -421,7 +425,12 @@ function GearDevicePanel({
               send("pick", {
                 item: "fix-position",
                 heroId: fixPick.heroId || fix.groups[0]?.heroId || "",
-                pick: fixPick.spaceId || fix.spaces[0]?.id || "",
+                pick:
+                  fixPick.spaceId ||
+                  fix.groups.find((row) => row.heroId === (fixPick.heroId || fix.groups[0]?.heroId))
+                    ?.spaceId ||
+                  fix.spaces[0]?.id ||
+                  "",
               });
             }
             send("done");

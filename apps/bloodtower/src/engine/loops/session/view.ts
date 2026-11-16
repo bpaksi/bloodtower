@@ -675,7 +675,7 @@ const fixPositionSnapshot = (state: ShellState, inGame: boolean): GearView["fixP
   return {
     groups: play.groups.flatMap((group) => {
       const lead = group.heroIds[0];
-      return lead ? [{ heroId: lead, name: heroName(state, lead) }] : [];
+      return lead ? [{ heroId: lead, name: heroName(state, lead), spaceId: group.spaceId }] : [];
     }),
     spaces: play.content.board.spaces.map((space) => ({ id: space.id, name: space.name })),
     refusal: fixPositionRefusal(state),

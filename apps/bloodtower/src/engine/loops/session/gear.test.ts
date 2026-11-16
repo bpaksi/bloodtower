@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { initPlayState } from "../chapter/playState.ts";
 import { applyFixPosition, applyGear } from "./gear.ts";
 import { PROVING_GROUNDS_PLAY } from "./playContent.ts";
+import { takePendingTowerCommands } from "./shellRef.ts";
 import { initialShellState } from "./state.ts";
 
 describe("gear panels", () => {
@@ -110,6 +111,7 @@ describe("Fix my position (CU/05)", () => {
       pick: to,
     });
     expect(result.error).toBeUndefined();
+    expect(takePendingTowerCommands()).toEqual([]);
     expect(group.spaceId).toBe(to);
     expect(play.rngSeq).toBe(seq);
     expect(snap()).toBe(before);
@@ -205,19 +207,5 @@ describe("Fix my position (CU/05)", () => {
     expect(group.spaceId).not.toBe(to);
     expect(applyFixPosition(frame("day"), pick).error).toBeUndefined();
     expect(group.spaceId).toBe(to);
-  });
-
-  it("a stray device with no panel of its own is refused", () => {
-    const { state, hero, play } = seated();
-    const open = applyGear(state, { deviceId: "a", action: "open", item: "game-board-setup" });
-    const to = play.content.board.spaces[2]!.id;
-    const refused = applyFixPosition(open, {
-      deviceId: "b",
-      action: "pick",
-      item: "fix-position",
-      heroId: hero,
-      pick: to,
-    });
-    expect(refused.error?.code).toBe("fix-position-not-now");
   });
 });

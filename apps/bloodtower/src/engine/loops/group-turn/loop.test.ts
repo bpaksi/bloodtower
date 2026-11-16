@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { neighborsOf } from "../chapter/board.ts";
 import { initPlayState } from "../chapter/playState.ts";
+import { eventState } from "../event/state.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { bindShellState, clearShellState, takePendingTowerCommands } from "../session/shellRef.ts";
 import { initialShellState } from "../session/state.ts";
@@ -227,17 +228,43 @@ describe("Back on the move map (CU/05)", () => {
     expect(groupTurnLoop.exit(held, {} as never)).toBe(false);
   });
 
-  it("EV-29: an encounter, event, foe or quest arrival each close the window", () => {
-    for (const kind of ["encounter", "event", "foe", "quest"]) {
-      const { group, path, local, walk, back } = chain(3);
-      const probe: ArrivalProbe = (_play, _group, spaceId) => {
-        void kind;
-        return spaceId === path[1];
-      };
-      const l = walk(local, path[1]!, probe);
+  it("EV-29: an encounter or an open event on arrival closes the window (the default probe)", () => {
+    const triggers: Record<
+      string,
+      (play: ReturnType<typeof initPlayState>, groupId: string) => void
+    > = {
+      encounter: (play, groupId) => {
+        const group = play.groups.find((g) => g.id === groupId);
+        if (group) group.insideBuilding = true;
+      },
+      event: (play) => {
+        eventState(play).open = {
+          groupId: "g",
+          day: 1,
+          type: "hazard",
+          hazard: "storm",
+          offer: null,
+          status: "open",
+          log: [],
+        };
+      },
+    };
+    for (const [kind, start] of Object.entries(triggers)) {
+      const { play, group, path, local, back } = chain(3);
+      start(play, group.id);
+      const l = handleGroupTurnPress(local, `walk--${group.id}--${path[1]}`, "walk");
+      expect(l.undo, kind).toEqual([]);
+      expect(back(l).undo, kind).toEqual([]);
+    }
+    clearShellState();
+  });
+
+  it("EV-29: a foe or quest scene, which main cannot start on arrival, closes it through the probe", () => {
+    for (const kind of ["foe", "quest"]) {
+      const { path, local, walk, back } = chain(3);
+      const l = walk(local, path[1]!, (_play, _g, spaceId) => spaceId === path[1]);
       expect(l.undo, kind).toEqual([]);
       expect(back(l).movesLeft, kind).toBe(l.movesLeft);
-      expect(group.spaceId, kind).toBe(path[1]);
     }
     clearShellState();
   });

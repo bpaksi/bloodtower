@@ -222,7 +222,13 @@ const gearCardSchema = z.strictObject({
  */
 const gearFixPositionSchema = z.strictObject({
   groups: z
-    .array(z.strictObject({ heroId: heroIdSchema, name: z.string().min(1).max(80) }))
+    .array(
+      z.strictObject({
+        heroId: heroIdSchema,
+        name: z.string().min(1).max(80),
+        spaceId: z.string().min(1).max(80).optional(),
+      }),
+    )
     .max(16),
   spaces: z
     .array(z.strictObject({ id: z.string().min(1).max(80), name: z.string().min(1).max(80) }))

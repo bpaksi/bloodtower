@@ -185,6 +185,7 @@ describe("Fix my position survives Continue", () => {
     const groupId = walk.promptId.split("--")[1];
     const spaceOf = () => session.state().play?.groups.find((g) => g.id === groupId)?.spaceId;
     const start = spaceOf();
+    const seq = session.state().play?.rngSeq;
     await act(walk.promptId, walk.actionId);
     const tapped = spaceOf();
     expect(tapped).not.toBe(start);
@@ -207,7 +208,9 @@ describe("Fix my position survives Continue", () => {
       .projectDevice(second.session.state().devices.values().next().value as string)
       .actions.find((o) => o.open && o.actionId === "back");
     expect(back).toBeDefined();
+    expect(second.session.state().play?.rngSeq).toBe(seq);
     await second.act(back?.promptId ?? "", "back");
+    expect(second.session.state().play?.rngSeq).toBe(seq);
     expect(second.session.state().play?.groups.find((g) => g.id === groupId)?.spaceId).toBe(start);
   });
 });
