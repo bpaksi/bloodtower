@@ -36,12 +36,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: line count = effect count (2); the Cleanse line reads "+1 day" (allowed, DEC-699); no totals row; no recap text; no Next on the iPad (body shows no buttons); it auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET), then runs the chapter exit check and day 3 starts.
 - Fails if: a totals row or recap shows, line count ≠ effect count, "+1 day" is missing, or the panel does not auto-advance.
 
-### EV-05 — Regroup on the iPad only
-- Requirement: DEC-640, SCR-016.
+### EV-05 — No Regroup prompt; the groups card on the board
+- Amended 2026-11-16 (Bob, chat 2026-11-16: "I approve rewording C3/20 EV-05 and the C3/11 Regroup stops to: no Regroup prompt; the queued split applies at day start and the groups card shows"): CU/04 (#523) removed the daily Regroup prompt; the queued split applies at day start.
+- Requirement: DEC-640, SCR-016, as changed by CU/04.
 - Method: playwright
-- How: 2 heroes, day 2 start.
-- Pass evidence: each iPad offers split or join; the board shows the Regroup line `[COPY: regroup]` (spec: "A new day. Stay together, or split up?" is sample text) and the groups; nothing on the board is pressable.
-- Fails if: the board takes a press.
+- How: 2 heroes with a queued split, day 2 start.
+- Pass evidence: no iPad offers split or join; the queued split applies at day start and the groups card shows on the board; nothing on the board is pressable.
+- Fails if: a Regroup prompt shows, the queued split does not apply, or the board takes a press.
 
 ### EV-06 — Screenshots match the screen spec
 - Requirement: SCR-014, UI-021, UI-022, UI-028, UI-047.
@@ -81,21 +82,21 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-11 — The toolbar is on every state
 - Requirement: every iPad state of this screen has the bottom toolbar, "?" at the left and the gear at the right (Bob 2026-10-31 10:37 AM ET; Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
-- How: (iPad portrait 768×1024) stop on each state: Day start (Regroup), day roll, mid-turn, skull placement, effects panel.
+- How: (iPad portrait 768×1024) stop on each state: Day start (groups card), day roll, mid-turn, skull placement, effects panel.
 - Pass evidence: on each stop, `footer.bt-bar--bottom` is visible in the viewport; its first control is "?" and its last is the gear; no body element covers them.
 - Fails if: any state lacks the toolbar, "?" or the gear.
 
 ### EV-12 — The happy path never needs the gear
 - Requirement: this screen's happy path uses only the iPad body's flow buttons (Bob 2026-10-31 10:37 AM ET).
 - Method: playwright
-- How: play this screen's happy path through Day start (Regroup), day roll, mid-turn, skull placement, effects panel, counting Menu and help opens.
+- How: play this screen's happy path through Day start (groups card), day roll, mid-turn, skull placement, effects panel, counting Menu and help opens.
 - Pass evidence: Menu open count 0 and help open count 0; the screen reaches its next screen.
 - Fails if: any step can only be reached through the gear or help.
 
 ### EV-13 — Help matches this screen
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (Bob 2026-10-31 10:38 AM ET).
 - Method: playwright
-- How: on each state (Day start (Regroup), day roll, mid-turn, skull placement, effects panel) press "?", then Close.
+- How: on each state (Day start (groups card), day roll, mid-turn, skull placement, effects panel) press "?", then Close.
 - Pass evidence: the sheet's `data-help-screen` is `day-on-the-board` and its text is exactly "A new day begins. Move your heroes, then choose where to go." (Loremaster 2026-10-31); the host sends nothing and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows another screen's text, pauses the game or changes state.
 
