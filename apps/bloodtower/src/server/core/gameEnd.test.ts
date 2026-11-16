@@ -122,7 +122,14 @@ const padFor = async (session: CoreSession): Promise<Pad> => {
 };
 
 /** A game of `heroes` heroes from the first screen to the first day. */
-const startGame = async (session: CoreSession, heroes: string[]): Promise<Pad> => {
+const startGame = async (
+  session: CoreSession,
+  heroes: string[],
+  hooks: {
+    beforeBegin?: (pad: Pad) => Promise<void>;
+    afterBegin?: (pad: Pad) => Promise<void>;
+  } = {},
+): Promise<Pad> => {
   const pad = await padFor(session);
   await pad.act("base-board-done", "board-set-up");
   await pad.act("play-without-tower", "play-without-tower");
@@ -140,7 +147,9 @@ const startGame = async (session: CoreSession, heroes: string[]): Promise<Pad> =
     if (step.id === "starting-purse") await pad.act(`spin-setup-${step.id}`, "spin");
     await pad.act(`continue-setup-${step.id}`, "continue");
   }
+  await hooks.beforeBegin?.(pad);
   await pad.act("continue-begin", "continue");
+  await hooks.afterBegin?.(pad);
   for (const moment of OPENING_MOMENTS) await pad.act(openingPromptId(moment), "continue");
   return pad;
 };
@@ -186,17 +195,46 @@ const playOn = async (session: CoreSession, pad: Pad, until: () => boolean) => {
   }
 };
 
+/**
+ * Two iPads, each holding one of two heroes. The game starts, plays 10 s, the second iPad
+ * drops for `pauseMs` (the game pauses), and it plays 5 s more before the opening moments.
+ */
+const startPausedGame = async (
+  session: CoreSession,
+  clock: { advance: (ms: number) => void },
+  pauseMs: number,
+) => {
+  let second: Pad | undefined;
+  return startGame(session, ["hero-a", "hero-b"], {
+    beforeBegin: async (first) => {
+      second = await padFor(session);
+      await first.act("hero-hold", "release", { heroId: "hero-b" });
+      await second.act("hero-hold", "take", { heroId: "hero-b" });
+    },
+    afterBegin: async () => {
+      if (!second) throw new Error("No second iPad.");
+      clock.advance(10_000);
+      session.disconnect(second.deviceId);
+      await new Promise((resolve) => setTimeout(resolve, 40));
+      await session.whenIdle();
+      expect(session.state().stage).toBe("paused");
+      clock.advance(pauseMs);
+      await second.act("hero-hold", "take", { heroId: "hero-b" });
+      expect(session.state().stage).toBe("playing");
+      clock.advance(5_000);
+    },
+  });
+};
+
 const HEROES = ["hero-a", "hero-b", "hero-c", "hero-d"];
 const ended = (session: CoreSession) => session.state().screen === "session";
 
 describe("the game's record, written once per outcome (C3/10)", () => {
-  it("EV-04, EV-08: a won and a lost game each write a record, clear the autosave; the pause is not played time", async () => {
+  it("EV-04, EV-08: a lost game writes a record with a 30 s pause left out of its active length, and clears the autosave", async () => {
     const { boot, store, clock } = harness();
     const session = await boot();
-    const pad = await startGame(session, HEROES.slice(0, 2));
-    clock.advance(10_000);
+    const pad = await startPausedGame(session, clock, 30_000);
     armChapters(session, "loss");
-    // A 30 s pause: the second hero's iPad is not holding them (here the only iPad drops).
     await playOn(session, pad, () => ended(session));
     expect(ended(session)).toBe(true);
     const gameId = session.state().games[0]?.gameId ?? "";
@@ -209,8 +247,10 @@ describe("the game's record, written once per outcome (C3/10)", () => {
       storyId: "test",
     });
     expect(record?.heroIds).toEqual(["hero-a", "hero-b"]);
-    expect(record?.startedWall).not.toBeNull();
-    expect(record?.endedWall).toBeDefined();
+    // Start and end time, and 10 s + 5 s of play: the 30 s pause is not counted (within 1 s).
+    expect(record?.startedWall).toBe("2026-10-15T18:00:00.000Z");
+    expect(record?.endedWall).toBe("2026-10-15T18:00:45.000Z");
+    expect(Math.abs((record?.activeMs ?? 0) - 15_000)).toBeLessThanOrEqual(1_000);
     expect(activeMsOf(rows)).toBe(record?.activeMs);
     expect(heroTotals(projectGameRecords(store))).toEqual({
       "hero-a": { played: 1, won: 0 },
@@ -222,13 +262,18 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     expect(session.state().offered.some((o) => o.promptId === "continue-saved-game")).toBe(false);
   });
 
-  it("EV-04: a won game adds a win; EV-09: the record and row survive a restart", async () => {
-    const { boot, store } = harness();
+  it("EV-04: a won game with a 30 s pause adds a win and leaves the pause out of its length; EV-09: the record and row survive a restart", async () => {
+    const { boot, store, clock } = harness();
     const first = await boot();
-    const pad = await startGame(first, HEROES.slice(0, 2));
+    const pad = await startPausedGame(first, clock, 30_000);
     armChapters(first, "win");
     await playOn(first, pad, () => ended(first));
     expect(first.state().games[0]?.outcome).toBe("won");
+    const won = projectGameRecords(store)[0];
+    expect(won).toMatchObject({ outcome: "won", how: "won", sceneId: "win" });
+    expect(won?.startedWall).toBe("2026-10-15T18:00:00.000Z");
+    expect(won?.endedWall).toBe("2026-10-15T18:00:45.000Z");
+    expect(Math.abs((won?.activeMs ?? 0) - 15_000)).toBeLessThanOrEqual(1_000);
     expect(heroTotals(projectGameRecords(store))).toEqual({
       "hero-a": { played: 1, won: 1 },
       "hero-b": { played: 1, won: 1 },
@@ -296,6 +341,9 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     await pad.act("session-new-confirm", "new-game");
     expect(session.state().screen).toBe("pick-story");
     expect(session.state().activeGameId).not.toBe(quitId);
+    // Continue is not offered for A once the table is starting a new game.
+    expect(session.state().autosave).toBeNull();
+    expect(session.state().offered.some((o) => o.promptId === "continue-saved-game")).toBe(false);
     const again = await startGame2(session, pad);
     armChapters(session, "win");
     await playOn(session, again, () => session.state().games.length === 2 && ended(session));
@@ -304,6 +352,66 @@ describe("the game's record, written once per outcome (C3/10)", () => {
       [true, "quit"],
       [false, "won"],
     ]);
+  });
+
+  it("EV-12: a quit game continued and then lost has one record, lost, and one row tonight", async () => {
+    const { boot, store } = harness();
+    const first = await boot();
+    const pad = await startGame(first, HEROES.slice(0, 2));
+    await pad.act("menu-quit", "quit-story");
+    const gameId = first.state().games[0]?.gameId ?? "";
+    const second = await boot();
+    const autosave = store.getAutosave();
+    second.rememberAutosave({ gameId: autosave?.gameId ?? "", packId: "test", day: 1 });
+    expect(await second.resumeSession()).toBe(true);
+    const again = await padFor(second);
+    await again.act("continue-saved-game", "continue");
+    armChapters(second, "loss");
+    await playOn(second, again, () => ended(second));
+    const records = projectGameRecords(store);
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ gameId, outcome: "lost", how: "skulls" });
+    expect(second.state().games.map((g) => g.outcome)).toEqual(["lost"]);
+    expect(
+      store
+        .listEvents(gameId)
+        .filter((row) => row.kind === "game-record")
+        .map((row) => JSON.parse(row.payload).outcome),
+    ).toEqual(["quit", "lost"]);
+    // A lost game was a quit game once: only the final outcome counts toward played and won.
+    expect(heroTotals(records)).toEqual({
+      "hero-a": { played: 1, won: 0 },
+      "hero-b": { played: 1, won: 0 },
+    });
+  });
+
+  it("EV-13: Play again from the quit game's screen leaves its record quit, with no Continue for it", async () => {
+    const { boot, store } = harness();
+    const session = await boot();
+    const pad = await startGame(session, HEROES.slice(0, 2));
+    await pad.act("menu-quit", "quit-story");
+    const quitId = session.state().games[0]?.gameId ?? "";
+    await pad.act("session-game-1", "open-game");
+    await pad.act("stats-play-again", "play-again");
+    await pad.act("session-play-again-confirm", "play-again");
+    expect(session.state().screen).toBe("claim-heroes");
+    await pad.act("continue-claim-heroes", "continue");
+    for (const step of session.state().setupSteps) {
+      if (step.id === "starting-purse") await pad.act(`spin-setup-${step.id}`, "spin");
+      await pad.act(`continue-setup-${step.id}`, "continue");
+    }
+    await pad.act("continue-begin", "continue");
+    for (const moment of OPENING_MOMENTS) await pad.act(openingPromptId(moment), "continue");
+    armChapters(session, "win");
+    await playOn(session, pad, () => session.state().games.length === 2 && ended(session));
+    const records = projectGameRecords(store);
+    expect(records.map((r) => [r.gameId === quitId, r.outcome])).toEqual([
+      [true, "quit"],
+      [false, "won"],
+    ]);
+    // The new game ended, so no autosave is left: Continue is not offered for either game.
+    expect(store.getAutosave()).toBeNull();
+    expect(session.state().offered.some((o) => o.promptId === "continue-saved-game")).toBe(false);
   });
 
   it("EV-14: totals and the average count won and lost records only", () => {
