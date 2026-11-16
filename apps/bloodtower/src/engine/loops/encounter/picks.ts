@@ -257,9 +257,13 @@ export const openMenu = (
     const kind = LABEL_TO_KIND[label];
     if (!kind) return { id: label.toLowerCase(), label, price: null, disabled: false };
     // A cure's price depends on the hero; the menu shows the group's cheapest.
+    // Only a hero who holds a corruption can be cured, so only their price counts (UI-043).
+    const curable = here.group.heroIds.filter((hero) => heroSheet(clock, hero).corruptions > 0);
     const heroPrices =
       kind === "cure"
-        ? here.group.heroIds.map((hero) => pickPrice(play, groupId, kind, hero))
+        ? (curable.length > 0 ? curable : here.group.heroIds).map((hero) =>
+            pickPrice(play, groupId, kind, hero),
+          )
         : [pickPrice(play, groupId, kind)];
     const price = Math.min(...heroPrices);
     const moves = store.moves[groupId] ?? 0;
