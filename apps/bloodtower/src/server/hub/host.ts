@@ -73,6 +73,10 @@ export interface SessionHostOptions {
   seed?: string;
   /** Device holding grace after a drop. E2e passes a short value. */
   graceMs?: number;
+  /** How the effects wait's 4 s are timed (C3/20). Omitted, real time. E2e passes a movable one. */
+  waitTimer?: (fire: () => void, ms: number) => () => void;
+  /** TEST ONLY (C3/20): lets `applyTestSeed` change the running game. Production never sets it. */
+  allowTestSeed?: boolean;
 }
 
 export interface SessionHost {
@@ -83,6 +87,8 @@ export interface SessionHost {
   loadRun: () => StoredRun;
   /** Publish the tower snapshot when it has changed since the last broadcast. */
   syncTower: () => void;
+  /** TEST ONLY: set test-seed markers on the running game. Refused unless `allowTestSeed` was set. */
+  applyTestSeed: (markers: string) => Promise<void>;
 }
 
 const header = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
@@ -181,6 +187,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       packVersion,
       store: eventStore,
       graceMs: options.graceMs,
+      waitTimer: options.waitTimer,
+      allowTestSeed: options.allowTestSeed === true,
       onDeviceError: (deviceId, code, message) => {
         // The error is already in the log, so the board has its toast. This one is for the
         // iPad that pressed: it shows the message and its code. It is not logged a second time.
@@ -548,6 +556,23 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   };
 
   /**
+   * The Story board says a narration line ended (D7, D36). Only the board may; the core acts on it
+   * only when the line is the open wait's own.
+   */
+  const onNarrationEnded = (socket: WebSocket, client: ClientState, message: ClientMessage) => {
+    if (message.type !== "narration-ended") return;
+    if (client.role === "pending") {
+      sendError(socket, "invalid-state", "Say hello before anything else.", message.id);
+      return;
+    }
+    if (client.role !== "storyboard") {
+      sendError(socket, "invalid-state", "Only the story board reports a line ended.", message.id);
+      return;
+    }
+    engine.narrationEnded(message.payload.lineId);
+  };
+
+  /**
    * A page log (D39). It changes no game state. Source, device id and session come from
    * this socket after hello (D12), never from the payload. A pending socket is refused:
    * it has no role, so it cannot claim the story board or a device. A storyboard line
@@ -614,6 +639,8 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
     if (message.data.type === "hello") onHello(socket, client, message.data);
     else if (message.data.type === "log") onLog(socket, client, message.data);
     else if (message.data.type === "act") onAct(socket, client, message.data);
+    else if (message.data.type === "narration-ended")
+      onNarrationEnded(socket, client, message.data);
   };
 
   const http = createServer((req, res) => {
@@ -747,6 +774,7 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
       return base;
     },
     syncTower,
+    applyTestSeed: (markers) => engine.applyTestSeed(markers),
     close: () => {
       if (closingPromise) return closingPromise;
       closing = true;

@@ -113,6 +113,27 @@ export const hintEndEventV1 = z.object({
   hintId: z.string().min(1).max(64),
 });
 
+/**
+ * The day loop's effects wait is over (C3/20). The host appends it from the narration's audio-end
+ * event, or from its 4 s timer when the panel has no audio. It is logged, so a replay applies it once.
+ */
+export const waitEndEventV1 = z.object({
+  kind: z.literal("wait-end"),
+  v: z.literal(1),
+  waitId: z.string().min(1).max(80),
+  cause: z.enum(["audio-end", "timeout"]),
+});
+
+/**
+ * TEST ONLY (C3/20). The test-seed markers set on a running game. Only a host built for tests
+ * writes it, so a replay of a test game sees the same seed once; a real game's log never holds it.
+ */
+export const testSeedEventV1 = z.object({
+  kind: z.literal("test-seed"),
+  v: z.literal(1),
+  markers: z.string().min(1).max(600),
+});
+
 export const shellEventSchema = z.discriminatedUnion("kind", [
   startSessionEventV1,
   pressEventV1,
@@ -129,6 +150,8 @@ export const shellEventSchema = z.discriminatedUnion("kind", [
   volumeAnswerEventV1,
   gearEventV1,
   hintEndEventV1,
+  waitEndEventV1,
+  testSeedEventV1,
 ]);
 
 export type ShellEvent = z.infer<typeof shellEventSchema>;

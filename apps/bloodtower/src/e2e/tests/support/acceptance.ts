@@ -16,7 +16,40 @@ export interface AcceptanceHost {
   databasePath: string;
   /** The next `tower.connect` waits until the returned function is called. */
   holdNextConnect: () => () => void;
+  /** Present when the host was started with `fakeWait`: moves the effects wait's time (C3/20). */
+  waitClock: WaitClock | null;
 }
+
+/** The effects wait's 4 s, moved by the test. Nothing fires until `advance` passes its time. */
+export interface WaitClock {
+  advance: (ms: number) => void;
+  /** Timers set and not yet fired or cancelled. */
+  pending: () => number;
+}
+
+const createWaitClock = () => {
+  let now = 0;
+  const timers = new Set<{ at: number; fire: () => void }>();
+  const clock: WaitClock = {
+    advance: (ms) => {
+      now += ms;
+      const due = [...timers].filter((timer) => timer.at <= now).sort((a, b) => a.at - b.at);
+      for (const timer of due) {
+        timers.delete(timer);
+        timer.fire();
+      }
+    },
+    pending: () => timers.size,
+  };
+  const set = (fire: () => void, ms: number) => {
+    const timer = { at: now + ms, fire };
+    timers.add(timer);
+    return () => {
+      timers.delete(timer);
+    };
+  };
+  return { clock, set };
+};
 
 /**
  * One session host per test, in this worker, with the mock tower the test can read.
@@ -33,6 +66,8 @@ export const startAcceptanceHost = async (
      * can split and rejoin. It marks the seed; real seeds never carry the marker.
      */
     seatTogether?: boolean;
+    /** The effects wait's 4 s run on `waitClock`, not real time (C3/20, the fake clock). */
+    fakeWait?: boolean;
     graceMs?: number;
     /** Join address for the story board. Undefined keeps the loopback warning. */
     lanHost?: () => string | undefined;
@@ -66,7 +101,11 @@ export const startAcceptanceHost = async (
       return base.runCapability(capabilityId, params, log);
     },
   };
+  const fake = options?.fakeWait ? createWaitClock() : null;
   const host = await startSessionHost({
+    // TEST ONLY: this host is built for tests, so the live seed is allowed (C3/20).
+    allowTestSeed: true,
+    waitTimer: fake?.set,
     port: 0,
     host: "127.0.0.1",
     webRoot: WEB_ROOT,
@@ -89,7 +128,14 @@ export const startAcceptanceHost = async (
     });
     return release;
   };
-  return { host, tower, baseURL: `http://127.0.0.1:${host.port}`, databasePath, holdNextConnect };
+  return {
+    host,
+    tower,
+    baseURL: `http://127.0.0.1:${host.port}`,
+    databasePath,
+    holdNextConnect,
+    waitClock: fake?.clock ?? null,
+  };
 };
 
 /** Let bt-ink-in (and other finite animations) finish before board screenshots. */
