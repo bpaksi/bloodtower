@@ -238,7 +238,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
   }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad } = await startGame(browser, testInfo, {
-      seed: seedAt(CITADEL, "~test-gold:hero-a=3~test-hp:hero-a=4/12"),
+      seed: seedAt(CITADEL, "~test-gold:hero-a=3,hero-b=0,hero-c=0,hero-d=0~test-hp:hero-a=4/12"),
     });
     try {
       await enterBuilding(pad);
@@ -307,6 +307,8 @@ test.describe("C3/13 the building menu: engine and wire", () => {
         timeout: 20_000,
       });
       await optionByLabel(pad, "Rest").click();
+      // The seated heroes all have hit points now (C3/12), so Rest first asks who rests.
+      await optionByLabel(pad, "Hero A").click();
       await expect(deviceMain(pad).locator('[data-building="rest-moves"]')).toBeVisible();
       expect((await labelsOf(pad)).map((text) => text.trim())).toEqual(["1", "2", "3"]);
       await optionByLabel(pad, "2").click();
@@ -321,6 +323,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       await clickAct(pad, "build");
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
       await optionByLabel(pad, "Rest").click();
+      await optionByLabel(pad, "Hero A").click();
       await expect(deviceMain(pad).locator('[data-building="rest-moves"]')).toBeVisible();
       expect(await labelsOf(pad)).toEqual(["1"]);
     } finally {

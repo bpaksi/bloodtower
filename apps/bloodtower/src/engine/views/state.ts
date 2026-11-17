@@ -113,6 +113,39 @@ export type VirtuePanelView = {
   picked: { virtueId: string; name: string; label: string }[];
 };
 
+/** The event scene on the table (C3/12, UI-041). The board words it; the engine sends structure. */
+export type EventSceneView = {
+  groupId: string;
+  heroIds: string[];
+  type: "quiet" | "windfall" | "hazard" | "foes" | "disaster" | "people";
+  hazard: "plague" | "lost" | "storm" | "trick" | null;
+  offer: "rumour" | "trick" | null;
+  stage: "choose" | "result";
+  options: {
+    promptId: string;
+    optionId: "hit-points" | "lose-turn" | "go-around" | "pay-off" | "fight";
+    enabled: boolean;
+  }[];
+  result:
+    | { kind: "quiet" }
+    | { kind: "windfall"; gold: number }
+    | { kind: "saved"; counterHeroId: string; counterName: string }
+    | { kind: "rumour" }
+    | { kind: "hit-points"; amount: number }
+    | { kind: "lose-turn" }
+    | { kind: "went-around"; amount: number }
+    | { kind: "paid"; gold: number }
+    | null;
+  line: string | null;
+  heroes: {
+    heroId: string;
+    name: string;
+    hp: { hp: number; max: number } | null;
+    gold: number | null;
+  }[];
+  purse: number | null;
+};
+
 /**
  * The building menu (C3/13, UI-043). `prompt` is the iPad's line for the step; `result` is the
  * board's line for a finished pick (SCR-014). Each option is one button, offered by `promptId`;
@@ -165,6 +198,8 @@ export type TableBand = {
   groupsCard?: GroupsCardView | null;
   /** The turn-start virtue panel, only while it shows (CU/14). */
   virtue?: VirtuePanelView | null;
+  /** The event scene after a group's turn, only while it shows (C3/12). */
+  event?: EventSceneView | null;
   /** The building menu while a group is inside a building (C3/13). */
   building?: BuildingPanelView | null;
   health: "unavailable";

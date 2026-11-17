@@ -5,14 +5,17 @@ import { applyHints, endHint, hintsOn } from "../../hints/flow.ts";
 import { HINT_IDS, HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/registry.ts";
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
+import { isPurseAmount } from "../../rules/purse/index.ts";
 import {
   applyTestSeed,
   bindPlayState,
   initPlayState,
   seatAtCitadels,
 } from "../chapter/playState.ts";
-import type { DayLocal } from "../day/loop.ts";
+import { type DayLocal, parseEventChoicePrompt } from "../day/loop.ts";
+import { eventPressRefusal } from "../day/press.ts";
 import { type EncounterLocal, endBuildingWait, takeBuildingRefusal } from "../encounter/loop.ts";
+import { seedHeroSheets } from "../event/index.ts";
 import type { GameLocal } from "../game/loop.ts";
 import { handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
@@ -137,6 +140,24 @@ const pushQuitRecord = (state: ShellState, effects: ShellStepResult["effects"]):
   if (state.autosave) {
     effects.push({ kind: "autosave-write", v: 1, gameId: state.autosave.gameId });
   }
+};
+
+/**
+ * Only an iPad that holds a present hero may pick at an event (DEC-019). A press from any other
+ * device is refused with words, never dropped quietly. Null when the press is not an event pick.
+ * The core session asks before it logs a press, so a replay never depends on who holds a hero.
+ */
+export const eventPressDeviceRefusal = (
+  state: ShellState,
+  deviceId: string,
+  promptId: string,
+  actionId: string,
+): string | null => {
+  const press = parseEventChoicePrompt(promptId);
+  if (!press || actionId !== "choose" || !state.play) return null;
+  const group = state.play.groups.find((row) => row.id === press.groupId);
+  const present = group?.heroIds.some((heroId) => state.holdings[heroId] === deviceId) ?? false;
+  return present ? null : "Only the heroes at the event can choose.";
 };
 
 const resumeLoopsOrPauseOffers = (
@@ -397,13 +418,12 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
   }
 
   if (e.kind === "wait-end") {
-    // The effects wait is over (C3/20). A late or repeated end, or one for another wait, changes
+    // The effects wait, or an event's result wait (C3/12), is over (C3/20). A late or repeated end, or one for another wait, changes
     // nothing: an expected race, not an error, so one debug line.
     const dayFrame = state.loops.stack.find((frame) => frame.loopId === "day");
     const local = dayFrame?.local as DayLocal | undefined;
-    const dayWaits = Boolean(
-      dayFrame && local && local.phase === "effects" && local.wait?.id === e.waitId,
-    );
+    const waiting = local?.phase === "effects" || (local?.phase === "event" && !local.waitDone);
+    const dayWaits = Boolean(dayFrame && local && waiting && local.wait?.id === e.waitId);
     if (!dayWaits) {
       // A building result's wait (C3/13) ends the same way, through its own frame.
       const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
@@ -415,7 +435,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
         return withEffects(next, effects);
       }
     }
-    if (!dayFrame || !local || local.phase !== "effects" || local.wait?.id !== e.waitId) {
+    if (!dayFrame || !local || !waiting || local.wait?.id !== e.waitId) {
       return {
         state: { ...state, eventSeq: eventSeq + 1 },
         effects,
@@ -736,6 +756,16 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
             assignments: seatAtCitadels(next.playContent.start.assignments, seated),
           },
         });
+        // C3/12: each seated hero's hit points from the hero card, and the starting purse split
+        // across the party. A value the card or the purse does not give stays unknown.
+        seedHeroSheets(
+          next.play,
+          seated.map((heroId) => {
+            const hitPoints = story?.heroes.find((hero) => hero.id === heroId)?.card?.hitPoints;
+            return { id: heroId, ...(hitPoints !== undefined ? { hitPoints } : {}) };
+          }),
+          isPurseAmount(next.startingPurse) ? next.startingPurse : null,
+        );
       }
       if (
         next.openingIndex !== beforeOpening &&
@@ -763,6 +793,17 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       const before = playFingerprint(next);
       const skullBefore = next.play?.lastSkull;
       updatePlayFrameOnPress(next.loops.stack, e.promptId, e.actionId);
+      if (parseEventChoicePrompt(e.promptId)) {
+        // C3/12: a pick the scene did not take is an error to log, never a silent no-op.
+        const top = next.loops.stack.at(-1);
+        const refusal =
+          top?.loopId === "day"
+            ? eventPressRefusal(top.local as DayLocal, e.promptId, e.actionId)
+            : "An event pick arrived when no day was open, so nothing changed.";
+        if (refusal) {
+          effects.push({ kind: "press-error", v: 1, code: "invalid-state", message: refusal });
+        }
+      }
       if (isVirtuePrompt(e.promptId)) {
         // CU/14: a virtue's pick the turn did not take is an error to log, never a silent no-op.
         const top = next.loops.stack.at(-1);

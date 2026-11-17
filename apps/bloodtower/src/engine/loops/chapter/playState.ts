@@ -7,6 +7,7 @@ import {
   setHeroSheet,
 } from "../day/clock.ts";
 import { ensurePicks } from "../encounter/picks.ts";
+import { forceEvent, forceEventLine } from "../event/ledger.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -212,6 +213,9 @@ export const TEST_VIRTUES = "~test-virtues:";
 export const TEST_SKULLS = "~test-skulls:";
 export const TEST_KINGDOM = "~test-kingdom:";
 export const TEST_EFFECTS_LINE = "~test-effects-line:";
+/** TEST ONLY (C3/12). The next draw is this event (or `none` stops them), and its narration line. */
+export const TEST_EVENT = "~test-event:";
+export const TEST_EVENT_LINE = "~test-event-line:";
 /**
  * TEST ONLY (C3/13). `~test-building-line:<lineId>` gives Rally, Virtue draw and Cleanse results a
  * narration line, so an e2e reaches the audio-end path with mock audio. No real clip is packed yet.
@@ -251,6 +255,8 @@ export const TEST_SEED_MARKERS = [
   TEST_EFFECTS_LINE,
   TEST_BUILDING_LINE,
   TEST_EFFECT,
+  TEST_EVENT,
+  TEST_EVENT_LINE,
   TEST_NAMED,
   TEST_TILES,
   TEST_AT,
@@ -339,6 +345,10 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
       }
     }
   }
+  const forced = markerBody(seed, TEST_EVENT, /^[a-z-]*/);
+  if (forced !== null) forceEvent(play, forced);
+  const eventLine = markerBody(seed, TEST_EVENT_LINE, /^[\w.-]*/);
+  if (eventLine !== null) forceEventLine(play, eventLine);
   const line = markerBody(seed, TEST_EFFECTS_LINE, /^[\w.-]*/);
   if (line !== null) {
     if (line === "") throw new Error("The test effects-line seed needs a line id.");

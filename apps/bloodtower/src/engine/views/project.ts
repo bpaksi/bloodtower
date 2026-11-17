@@ -29,6 +29,9 @@ const toOffered = (action: ViewAction): OfferedAction =>
 /** Prompt ids of a virtue's options start with this (group-turn loop). */
 const VIRTUE_CHOICE_PREFIX = "virtue-choice--";
 
+/** Prompt ids of an event's choices start with this (day loop, C3/12). */
+const EVENT_CHOICE_PREFIX = "event-choice--";
+
 const offeredTo = (action: ViewAction, deviceId: string) =>
   action.deviceId === null || action.deviceId === deviceId;
 
@@ -117,8 +120,15 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
   const holdsActing = state.heroes.some(
     (hero) => hero.deviceId === audience.deviceId && virtueHeroes.includes(hero.id),
   );
+  // An event's choice goes to the iPads of the present heroes only (DEC-019, C3/12, EV-03).
+  const eventHeroes = state.table?.event?.heroIds ?? [];
+  const holdsPresent = state.heroes.some(
+    (hero) => hero.deviceId === audience.deviceId && eventHeroes.includes(hero.id),
+  );
   const deviceActions = (held ? held.actions : state.actions).filter(
-    (action) => holdsActing || !action.promptId.startsWith(VIRTUE_CHOICE_PREFIX),
+    (action) =>
+      (holdsActing || !action.promptId.startsWith(VIRTUE_CHOICE_PREFIX)) &&
+      (holdsPresent || !action.promptId.startsWith(EVENT_CHOICE_PREFIX)),
   );
 
   return deviceViewPayloadSchema.parse({

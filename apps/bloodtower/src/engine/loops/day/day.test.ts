@@ -354,6 +354,17 @@ const runDay = (
       status = pump(h);
       continue;
     }
+    if (status === "wait" && h.local.phase === "event") {
+      // The host's part (C3/12): the event's result wait ended, so it answers `wait-end`.
+      h.local = { ...h.local, waitDone: true };
+      status = pump(h);
+      continue;
+    }
+    const eventChoice = h.offers.find((offer) => offer.actionId === "choose");
+    if (status === "prompt" && eventChoice) {
+      status = pressOffer(h, eventChoice);
+      continue;
+    }
     if (status === "wait" && h.local.phase === "effects") {
       // The host's part (C3/20): the wait ended, so it answers `wait-end`.
       h.local = { ...h.local, waitDone: true };

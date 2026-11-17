@@ -209,6 +209,74 @@ const buildingPanelSchema = z.strictObject({
   movesLeft: z.number().int().min(0).max(99).nullable(),
 });
 
+/**
+ * The event scene (C3/12, UI-041). Structured, never worded: the Story board words it from the Copy
+ * table. `options` is the choice list, one button per option, present only while the heroes pick.
+ * `heroIds` are the present heroes; only an iPad holding one is offered the buttons. A hero's hit
+ * points or gold the game does not know are null (unavailable), never zero.
+ */
+export const EVENT_TYPES_VIEW = [
+  "quiet",
+  "windfall",
+  "hazard",
+  "foes",
+  "disaster",
+  "people",
+] as const;
+
+const eventResultSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("quiet") }),
+  z.strictObject({ kind: z.literal("windfall"), gold: z.number().int().min(0).max(999) }),
+  z.strictObject({
+    kind: z.literal("saved"),
+    counterHeroId: heroIdSchema,
+    counterName: z.string().min(1).max(80),
+  }),
+  z.strictObject({ kind: z.literal("rumour") }),
+  z.strictObject({ kind: z.literal("hit-points"), amount: z.number().int().min(-99).max(99) }),
+  z.strictObject({ kind: z.literal("lose-turn") }),
+  z.strictObject({ kind: z.literal("went-around"), amount: z.number().int().min(-99).max(99) }),
+  z.strictObject({ kind: z.literal("paid"), gold: z.number().int().min(0).max(999) }),
+]);
+
+const eventViewSchema = z.strictObject({
+  groupId: z.string().min(1).max(80),
+  heroIds: z.array(heroIdSchema).min(1).max(16),
+  type: z.enum(EVENT_TYPES_VIEW),
+  hazard: z.enum(["plague", "lost", "storm", "trick"]).nullable(),
+  offer: z.enum(["rumour", "trick"]).nullable(),
+  stage: z.enum(["choose", "result"]),
+  options: z
+    .array(
+      z.strictObject({
+        promptId: z.string().min(1).max(200),
+        optionId: z.enum(["hit-points", "lose-turn", "go-around", "pay-off", "fight"]),
+        enabled: z.boolean(),
+      }),
+    )
+    .max(4),
+  result: eventResultSchema.nullable(),
+  /** The narration line whose audio end ends the result step, or null for the 4 s timer. */
+  line: z.string().min(1).max(80).nullable(),
+  heroes: z
+    .array(
+      z.strictObject({
+        heroId: heroIdSchema,
+        name: z.string().min(1).max(80),
+        hp: z
+          .strictObject({
+            hp: z.number().int().min(-99).max(999),
+            max: z.number().int().min(0).max(999),
+          })
+          .nullable(),
+        gold: z.number().int().min(0).max(9999).nullable(),
+      }),
+    )
+    .max(16),
+  /** The group's gold together, or null when any hero's gold is not known. */
+  purse: z.number().int().min(0).max(9999).nullable(),
+});
+
 const tableBandSchema = z.strictObject({
   chapter: z.string().min(1).max(120),
   day: z.number().int().min(0).max(99),
@@ -223,6 +291,8 @@ const tableBandSchema = z.strictObject({
   groupsCard: groupsCardSchema.nullable().optional(),
   virtue: virtuePanelSchema.nullable().optional(),
   building: buildingPanelSchema.nullable().optional(),
+  /** The event scene after a group's turn, only while it shows (C3/12). */
+  event: eventViewSchema.nullable().optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),
