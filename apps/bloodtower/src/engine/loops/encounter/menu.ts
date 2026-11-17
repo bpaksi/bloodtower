@@ -278,6 +278,15 @@ export const buildingModel = (
         promptId: buildPromptId(group, serial, "who", heroId),
         actionId: "build" as const,
         label: nameOf(heroId),
+        // Each hero's own price: the first cure of a chapter is free per hero (DEC-700).
+        ...(step.pick === "cure"
+          ? (() => {
+              const price = pickPrice(play, group, "cure", heroId);
+              return {
+                detail: costLine("cure", ensurePicks(play).tuning.cure.moves, price, price === 0),
+              };
+            })()
+          : {}),
         enabled: true,
       })),
     };
@@ -343,9 +352,16 @@ export const buildingModel = (
   };
 };
 
-/** The wait a new auto-advancing result starts with. No narration line is packed for these yet. */
-export const resultWait = (groupId: string, serial: number): BuildingWait => ({
+/**
+ * The wait a new auto-advancing result starts with. No narration line is packed for these yet, so a
+ * real game waits the 4 s; `lineId` is set only by the test seed `~test-building-line:`.
+ */
+export const resultWait = (
+  groupId: string,
+  serial: number,
+  lineId: string | null = null,
+): BuildingWait => ({
   id: `building-${groupId}-${serial}`.slice(0, 80),
   maxMs: AUTO_ADVANCE_MS,
-  lineId: null,
+  lineId,
 });

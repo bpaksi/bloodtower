@@ -217,6 +217,11 @@ export const TEST_EFFECTS_LINE = "~test-effects-line:";
 export const TEST_EVENT = "~test-event:";
 export const TEST_EVENT_LINE = "~test-event-line:";
 /**
+ * TEST ONLY (C3/13). `~test-building-line:<lineId>` gives Rally, Virtue draw and Cleanse results a
+ * narration line, so an e2e reaches the audio-end path with mock audio. No real clip is packed yet.
+ */
+export const TEST_BUILDING_LINE = "~test-building-line:";
+/**
  * `~test-effect:cleanse+quest-won`, for a running game: "a Cleanse happened today" (its "+1 day"
  * line) and "a quest was won today" (the night's drop is skipped). They stand in for play.
  */
@@ -248,6 +253,7 @@ export const TEST_SEED_MARKERS = [
   TEST_SKULLS,
   TEST_KINGDOM,
   TEST_EFFECTS_LINE,
+  TEST_BUILDING_LINE,
   TEST_EFFECT,
   TEST_EVENT,
   TEST_EVENT_LINE,
@@ -347,6 +353,11 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
   if (line !== null) {
     if (line === "") throw new Error("The test effects-line seed needs a line id.");
     clock.effectsLine = line;
+  }
+  const buildingLine = markerBody(seed, TEST_BUILDING_LINE, /^[\w.-]*/);
+  if (buildingLine !== null) {
+    if (buildingLine === "") throw new Error("The test building-line seed needs a line id.");
+    clock.buildingLine = buildingLine;
   }
 };
 

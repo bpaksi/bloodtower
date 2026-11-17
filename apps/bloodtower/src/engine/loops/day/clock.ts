@@ -60,6 +60,8 @@ export type DayClock = {
   seedKingdoms?: KingdomId[];
   /** TEST ONLY: the narration line id the effects wait ends on (seed hook). Absent: no audio. */
   effectsLine?: string | null;
+  /** TEST ONLY: the narration line id a building result's wait ends on (seed hook). Absent: no audio. */
+  buildingLine?: string | null;
 };
 
 export type DayResume = {
@@ -93,6 +95,7 @@ const blankClock = (tuning: DayTuning): DayClock => ({
   resume: null,
   seedKingdoms: [],
   effectsLine: null,
+  buildingLine: null,
 });
 
 /** The seeded kingdom for the next drop, if the test seed named one. Used once. */

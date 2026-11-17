@@ -149,7 +149,9 @@ const toResult = (
   const serial = nextSerial(local);
   const result: BuildingResult = {
     ...fields,
-    wait: fields.auto ? resultWait(local.groupId, serial) : null,
+    wait: fields.auto
+      ? resultWait(local.groupId, serial, ensureClock(playState()).buildingLine ?? null)
+      : null,
     waitDone: false,
   };
   return {

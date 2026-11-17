@@ -8,6 +8,7 @@ import { ITEMS_EMPTY } from "../board/PartyItemsPanel.tsx";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 import type { MenuContext } from "./gearMenu.ts";
+import { FallenNote, PlaceMenu } from "./PlaceMenu.tsx";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
 
@@ -963,6 +964,8 @@ export function CoreDeviceScreen({
     );
   }
 
+  // The building menu is the whole screen (UI-043): the move heading, roster and hero lines step aside.
+  const inBuilding = view.screen === "play" && Boolean(view.table?.building);
   const panel = ownsPanel(view);
   const towerLostPause =
     view.screen === "pause" && actions.some((action) => action.actionId === "reconnect");
@@ -976,10 +979,10 @@ export function CoreDeviceScreen({
       data-volume={view.gear?.volume ?? undefined}
     >
       <div className="bt-scroll">
-        <div className="bt-kicker" data-step-context>
+        <div className="bt-kicker" data-step-context hidden={inBuilding}>
           {STEP_CONTEXT[view.screen] ?? view.screen}
         </div>
-        <h1 className="text-2xl font-semibold text-[var(--bt-accent)]">
+        <h1 className="text-2xl font-semibold text-[var(--bt-accent)]" hidden={inBuilding}>
           {onStats ? view.shows : (SCREEN_TITLE[view.screen] ?? view.screen)}
         </h1>
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
@@ -1004,7 +1007,7 @@ export function CoreDeviceScreen({
         ) : (
           <>
             <p
-              className={stepsOnBoard ? "sr-only" : "mt-2 text-lg"}
+              className={stepsOnBoard || inBuilding ? "sr-only" : "mt-2 text-lg"}
               data-step-instruction=""
               data-day={view.table?.day}
               data-moves={view.table?.movesLeft ?? undefined}
@@ -1068,8 +1071,9 @@ export function CoreDeviceScreen({
                 ))}
               </div>
             ))}
+            {acting?.fallen && showMoveMap ? <FallenNote building={acting.building} /> : null}
             {view.table ? (
-              <ul className="mt-4" data-roster>
+              <ul className="mt-4" data-roster hidden={inBuilding}>
                 {view.table.groups.map((group) => (
                   <li
                     key={group.heroId}
@@ -1085,7 +1089,7 @@ export function CoreDeviceScreen({
               </ul>
             ) : null}
             {view.heroes.map((hero) => (
-              <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
+              <section key={hero.id} className="mt-4" data-hero-panel={hero.id} hidden={inBuilding}>
                 <h2 className="text-lg font-medium">{hero.name}</h2>
                 {picking ? (
                   <p className="text-[var(--bt-muted)]" data-claim-state={hero.claim ?? "open"}>
@@ -1128,43 +1132,15 @@ export function CoreDeviceScreen({
               </section>
             ))}
             {view.screen === "play" && view.table?.building ? (
-              <section className="mt-4" data-building={view.table.building.step}>
-                <h2 className="text-lg font-medium" data-building-title="">
-                  {view.table.building.title}
-                </h2>
-                {view.table.building.prompt ? (
-                  <p data-building-prompt="">{view.table.building.prompt}</p>
-                ) : null}
-                {view.table.building.result ? (
-                  <p data-building-result="">{view.table.building.result.line}</p>
-                ) : null}
-                <div className="mt-3 flex flex-col gap-3">
-                  {view.table.building.options.map((option) => (
-                    <button
-                      key={option.promptId}
-                      type="button"
-                      className="bt-secondary"
-                      data-prompt-id={option.promptId}
-                      data-action-id="build"
-                      data-action="build"
-                      data-building-option=""
-                      disabled={!live || !option.enabled}
-                      title={option.reason ?? undefined}
-                      onClick={() => onAct(option.promptId, "build")}
-                    >
-                      {option.label}
-                      {option.detail ? (
-                        <span
-                          className="block text-sm text-[var(--bt-muted)]"
-                          data-building-cost=""
-                        >
-                          {option.detail}
-                        </span>
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              </section>
+              <PlaceMenu
+                building={view.table.building}
+                heldHeroIds={view.heroes.map((hero) => hero.id)}
+                live={live}
+                offered={view.actions.some(
+                  (a) => (a.actionId === "build" || a.actionId === "leave") && a.open,
+                )}
+                onAct={onAct}
+              />
             ) : null}
             {virtueAsk ? (
               <section className="mt-4" data-virtue-choice={virtueAsk.virtueId}>

@@ -599,6 +599,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
         building: space?.building ?? null,
         inside: group.insideBuilding,
         alone: group.heroIds.length === 1,
+        ...(space?.building && isFallen(play, group.spaceId) ? { fallen: true } : {}),
       };
     }),
   };
@@ -893,6 +894,13 @@ const screenLabel = (state: ShellState): string => {
 
 const helpScreenFor = (state: ShellState): string => {
   if (state.screen === "pause" && state.pause?.cause === "tower-lost") return "tower-lost";
+  if (
+    state.screen === "play" &&
+    !openingMomentId(state) &&
+    state.loops.stack.at(-1)?.loopId === "encounter"
+  ) {
+    return "building-menu";
+  }
   // The day on the board (C3 feature 11): once the opening is over and the day loop runs.
   if (
     state.screen === "play" &&
@@ -900,13 +908,6 @@ const helpScreenFor = (state: ShellState): string => {
     state.loops.stack.some((frame) => frame.loopId === "day")
   ) {
     return "day-on-the-board";
-  }
-  if (
-    state.screen === "play" &&
-    !openingMomentId(state) &&
-    state.loops.stack.at(-1)?.loopId === "encounter"
-  ) {
-    return "building-menu";
   }
   const mapped: Record<string, string> = {
     splash: "waiting",
