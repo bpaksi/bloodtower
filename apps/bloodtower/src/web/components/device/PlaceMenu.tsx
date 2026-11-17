@@ -103,10 +103,18 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
 }
 
 /** The fallen building's note on the move map (DEC-093, mockup `#s=10`): there is no Enter. */
-export function FallenNote() {
+export function FallenNote({ building }: { building: string | null }) {
+  const name = building ? building.charAt(0).toUpperCase() + building.slice(1) : null;
   return (
-    <p className="mt-3 text-lg" data-building-fallen="" role="status">
-      {FALLEN_LINE}
-    </p>
+    <section className="mt-3" data-fallen-box="" role="status">
+      {name ? (
+        <h2 className="text-lg font-medium" data-fallen-title="">
+          {name} <span data-fallen-tag="">Fallen</span>
+        </h2>
+      ) : null}
+      <p className="text-lg" data-building-fallen="">
+        {FALLEN_LINE}
+      </p>
+    </section>
   );
 }

@@ -1071,7 +1071,7 @@ export function CoreDeviceScreen({
                 ))}
               </div>
             ))}
-            {acting?.fallen && showMoveMap ? <FallenNote /> : null}
+            {acting?.fallen && showMoveMap ? <FallenNote building={acting.building} /> : null}
             {view.table ? (
               <ul className="mt-4" data-roster hidden={inBuilding}>
                 {view.table.groups.map((group) => (

@@ -722,6 +722,8 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       await expect(deviceMain(pad).locator("[data-building-fallen]")).toHaveText(FALLEN_LINE, {
         timeout: 20_000,
       });
+      await expect(deviceMain(pad).locator("[data-fallen-title]")).toContainText("Village");
+      await expect(deviceMain(pad).locator("[data-fallen-tag]")).toHaveText("Fallen");
       await expect(pad.locator('button[data-action-id="enter"]')).toHaveCount(0);
       await expect(deviceMain(pad).locator("[data-building-title]")).toHaveCount(0);
       await expectToolbar(pad);
