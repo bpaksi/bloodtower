@@ -623,6 +623,9 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       // Group holds 4: a second draw reveals and gives back again (it would not with 3).
       await optionByLabel(pad, "Virtue").click();
       await expect(stepIs(pad, "result")).toBeVisible();
+      session.waitClock?.advance(4_100);
+      await expect(stepIs(pad, "give-back")).toBeVisible({ timeout: 20_000 });
+      expect(await labelsOf(pad)).toHaveLength(5);
     } finally {
       await closeAll(context, session.host);
     }
@@ -705,7 +708,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       browser,
     }, testInfo) => {
       test.setTimeout(420_000);
-      const seed = seedAt(CITADEL, `~test-gold:hero-a=30${TILES}`);
+      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=20${TILES}`;
       const first = await startGame(browser, testInfo, { seed, fakeWait: true });
       const { databasePath } = first.session;
       let tiles: string[] = [];
@@ -735,23 +738,33 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
           "data-moves",
           String(Number(movesBefore) - 1),
         );
-        // 30 - 10 = 20 gold: a second Virtue draw is still open, a third would not be.
+        // 20 - 10 = 10 gold left: one more draw is open. After it, 0 is left and Virtue is closed,
+        // so the first draw cost 10 gold exactly once (not 0, not 20).
         await expect(optionByLabel(again.pad, "Virtue")).toBeEnabled();
+        await optionByLabel(again.pad, "Virtue").click();
+        await expect(stepIs(again.pad, "result")).toBeVisible();
+        again.session.waitClock?.advance(4_100);
+        await expect(stepIs(again.pad, "give-back")).toBeVisible({ timeout: 20_000 });
+        await optionByLabel(again.pad, "Tile 1").click();
+        await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 20_000 });
+        await expect(optionByLabel(again.pad, "Virtue")).toBeDisabled();
       } finally {
         await closeAll(again.context, again.session.host);
       }
     });
   }
 
-  for (const pick of ["Rally", "Cleanse"] as const) {
-    test(`EV-17: a restart during the ${pick} result resumes it and applies it once`, async ({
+  for (const [pick, how] of [
+    ["Rally", "restart"],
+    ["Rally", "quit"],
+    ["Cleanse", "restart"],
+    ["Cleanse", "quit"],
+  ] as const) {
+    test(`EV-17: a ${how} during the ${pick} result resumes it and applies it once`, async ({
       browser,
     }, testInfo) => {
       test.setTimeout(420_000);
-      const seed = seedAt(
-        CITADEL,
-        `~test-gold:hero-a=20~test-hp:hero-a=4/12~test-skulls:${CITADEL}=1`,
-      );
+      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=20~test-hp:hero-a=4/12~test-skulls:${CITADEL}=1`;
       const first = await startGame(browser, testInfo, { seed, fakeWait: true });
       const { databasePath } = first.session;
       let movesBefore = "";
@@ -760,6 +773,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
         movesBefore = (await boardMoves(first.board).getAttribute("data-moves")) ?? "";
         await optionByLabel(first.pad, pick).click();
         await expect(stepIs(first.pad, "result")).toBeVisible();
+        if (how === "quit") await quitToSession(first.pad);
       } finally {
         await closeAll(first.context, first.session.host);
       }
@@ -769,10 +783,15 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
         again.session.waitClock?.advance(4_100);
         await expect(stepIs(again.pad, "result")).toHaveCount(0, { timeout: 20_000 });
         // Exactly one move spent, however many times the step came back.
-        const left = await boardMoves(again.board).getAttribute("data-moves");
-        expect(
-          left === null || Number(left) === Number(movesBefore) - 1 || left === "unavailable",
-        ).toBe(true);
+        await expect(boardMoves(again.board)).toHaveAttribute(
+          "data-moves",
+          String(Number(movesBefore) - 1),
+          { timeout: 20_000 },
+        );
+        if (pick === "Cleanse") {
+          // Its skull went: the board reads 0 skulls (and one only before).
+          await expect(boardMoves(again.board)).toHaveAttribute("data-skulls", "0");
+        }
       } finally {
         await closeAll(again.context, again.session.host);
       }
@@ -786,8 +805,21 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
     const seed = seedAt(CITADEL, "~test-gold:hero-a=20~test-hp:hero-a=4/12");
     const first = await startGame(browser, testInfo, { seed });
     const { databasePath } = first.session;
+    const readMenu = (page: Page) =>
+      page.locator("[data-menu] [data-gear-item]").evaluateAll((items) =>
+        items.map((item) => ({
+          id: item.getAttribute("data-gear-item"),
+          enabled: !(item as HTMLButtonElement).disabled,
+          reason: item.querySelector("[data-reason]")?.textContent ?? null,
+        })),
+      );
+    let menuBefore: Awaited<ReturnType<typeof readMenu>> = [];
     try {
       await enterBuilding(first.pad);
+      await first.pad.locator('[data-action="menu"]').click();
+      menuBefore = await readMenu(first.pad);
+      expect(menuBefore.length).toBeGreaterThan(0);
+      await first.pad.keyboard.press("Escape");
       await openGearItem(first.pad, "current-party");
       await expect(first.board.locator('[data-panel="current-party"]')).toBeVisible({
         timeout: 20_000,
@@ -799,7 +831,9 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
     try {
       await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 30_000 });
       await expect(again.pad.locator("[data-menu]")).toHaveCount(0);
-      await expect(again.pad.locator("[data-panel]")).toHaveCount(0);
+      await expect(again.board.locator("[data-panel]")).toHaveCount(0);
+      await again.pad.locator('[data-action="menu"]').click();
+      expect(await readMenu(again.pad)).toEqual(menuBefore);
       await expect(deviceMain(again.pad)).toHaveAttribute("data-paused", "false");
       await expectToolbar(again.pad);
     } finally {

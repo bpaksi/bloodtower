@@ -11,7 +11,7 @@ type Props = {
   /** Hero ids this iPad holds. Only the acting group's iPads get the buttons (UI-043). */
   heldHeroIds: string[];
   live: boolean;
-  /** An open `build` offer reached this iPad: after a Continue the held heroes can read empty. */
+  /** An open `build` or `leave` offer reached this iPad: after a Continue the held heroes can read empty. */
   offered: boolean;
   onAct: (promptId: string, actionId: string) => void;
 };

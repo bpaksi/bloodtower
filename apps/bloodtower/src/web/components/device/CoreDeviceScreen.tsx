@@ -1133,7 +1133,9 @@ export function CoreDeviceScreen({
                 building={view.table.building}
                 heldHeroIds={view.heroes.map((hero) => hero.id)}
                 live={live}
-                offered={view.actions.some((a) => a.actionId === "build" && a.open)}
+                offered={view.actions.some(
+                  (a) => (a.actionId === "build" || a.actionId === "leave") && a.open,
+                )}
                 onAct={onAct}
               />
             ) : null}
