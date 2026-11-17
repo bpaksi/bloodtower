@@ -42,6 +42,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Method: screenshot
 - How: iPad 768×1024 portrait (locked by Bob) and board 1920×1080 at citadel, sanctuary, village, bazaar; and the result states Virtue draw, Virtue give-back, Cleanse and Fallen building; compare each with ./mockup.html `#s=0` to `#s=3` and `#s=7` to `#s=10`.
 - Pass evidence: sixteen images where every part the mockup shows is present with the Copy table's words: on the iPad the building title, the prompt, each pick with its cost line (moves first, then gold, per EV-01), Leave and the bottom toolbar, with no move-map layer behind the menu and no part cut off (give-back shows all five tiles); on the board the building's painting and the result lines. The iPad keeps its shell theme (DEC-233 theme B), the board keeps its place still, and the mockup's parchment skin, per-row icons, framed place card and tile art are not required.
+- Amended 2026-11-17 (Bob, chat: "I approve both EV-05 clarifications for C3/13"): (1) the iPad shell's engraved frame and bottom bar (Back, Replay, "?" and the gear) are not a move-map layer; "no move-map layer" means the move-map content (compass, roster, "The move" heading) is hidden while a menu is open. (2) Fallen building: the pass evidence is the iPad part only. The mockup draws no board frame for it, so the board shows the move band as usual.
 - Fails if: a part is missing, cut off or covered, or a word differs from the Copy table.
 
 ### EV-06 — Each building kind shows its own offers, no Trade
