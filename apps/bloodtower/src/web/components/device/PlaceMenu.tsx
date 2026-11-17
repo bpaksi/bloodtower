@@ -11,6 +11,8 @@ type Props = {
   /** Hero ids this iPad holds. Only the acting group's iPads get the buttons (UI-043). */
   heldHeroIds: string[];
   live: boolean;
+  /** An open `build` offer reached this iPad: after a Continue the held heroes can read empty. */
+  offered: boolean;
   onAct: (promptId: string, actionId: string) => void;
 };
 
@@ -20,14 +22,18 @@ type Props = {
  * are buttons here and the words of each result are on the Story board (SCR-014); a result with no
  * Next moves on by itself (EV-15), so the iPad shows only that line and "Moves on by itself.".
  */
-export function PlaceMenu({ building, heldHeroIds, live, onAct }: Props) {
-  const mine = building.heroIds.some((id) => heldHeroIds.includes(id));
+export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props) {
+  const mine =
+    building.heroIds.some((id) => heldHeroIds.includes(id)) ||
+    (heldHeroIds.length === 0 && offered);
   const result = building.result;
   return (
     <section
       className="bt-place-menu mt-4"
       data-building={building.step}
       data-building-mine={mine ? "true" : "false"}
+      data-building-heroes={building.heroIds.join(",")}
+      data-held-heroes={heldHeroIds.join(",")}
       aria-label={building.title}
     >
       <h2 className="text-lg font-medium" data-building-title="">

@@ -669,7 +669,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
         timeout: 20_000,
       });
       await expect(pad.locator('button[data-action-id="enter"]')).toHaveCount(0);
-      await expect(deviceMain(pad).locator("[data-building]")).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-building-title]")).toHaveCount(0);
       await expectToolbar(pad);
       await shoot(testInfo, "ev05-fallen", pad, board);
     } finally {
@@ -788,9 +788,10 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
     const { databasePath } = first.session;
     try {
       await enterBuilding(first.pad);
-      await first.pad.locator('[data-action="menu"]').click();
-      await first.pad.locator('button[data-gear-item="volume"]').click();
-      await expect(first.board.locator('[data-panel="volume"]')).toBeVisible({ timeout: 20_000 });
+      await openGearItem(first.pad, "current-party");
+      await expect(first.board.locator('[data-panel="current-party"]')).toBeVisible({
+        timeout: 20_000,
+      });
     } finally {
       await closeAll(first.context, first.session.host);
     }
