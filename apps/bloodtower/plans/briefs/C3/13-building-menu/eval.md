@@ -36,12 +36,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: the menu shows Cleanse and Leave only (2 skulls on a citadel; Bob approved 2026-10-31); 2 skulls shown on the board.
 - Fails if: Rally or Virtue draw is offered.
 
-### EV-05 — Screenshots match
+### EV-05 — Screenshots match in content
+- Amended 2026-11-17 (Bob, chat: "I approve the C3/13 EV-05 reword"): the mockup is a Gamewright draft. The iPad keeps its shell theme (DEC-233 theme B), the board keeps its place still, and the engine skips the quest row, so the parchment skin, per-row icons, framed place card, tile art and quest row are not required.
 - Requirement: UI-043.
 - Method: screenshot
-- How: iPad 768×1024 portrait (locked by Bob) and board 1920×1080 at citadel, sanctuary, village, bazaar; compare with ./mockup.html `#s=0` (citadel), `#s=1` (sanctuary), `#s=2` (village), `#s=3` (bazaar); and the result states `#s=7` (Virtue draw), `#s=8` (Virtue give-back), `#s=9` (Cleanse), `#s=10` (Fallen building).
-- Pass evidence: eight images matching.
-- Fails if: a part missing.
+- How: iPad 768×1024 portrait (locked by Bob) and board 1920×1080 at citadel, sanctuary, village, bazaar; and the result states Virtue draw, Virtue give-back, Cleanse and Fallen building; compare each with ./mockup.html `#s=0` to `#s=3` and `#s=7` to `#s=10`.
+- Pass evidence: sixteen images where every part the mockup shows is present with the Copy table's words: on the iPad the building title, the prompt, each pick with its cost line (moves first, then gold, per EV-01), Leave and the bottom toolbar, with no move-map layer behind the menu and no part cut off (give-back shows all five tiles); on the board the building's painting and the result lines. The iPad keeps its shell theme (DEC-233 theme B), the board keeps its place still, and the mockup's parchment skin, per-row icons, framed place card and tile art are not required.
+- Fails if: a part is missing, cut off or covered, or a word differs from the Copy table.
 
 ### EV-06 — Each building kind shows its own offers, no Trade
 - Requirement: building menus (Bob approved 2026-10-31); DEC-502.
