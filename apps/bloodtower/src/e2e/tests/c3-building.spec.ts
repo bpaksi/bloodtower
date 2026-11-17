@@ -45,6 +45,28 @@ const installSendCounter = async (page: Page) => {
 const sentCount = (page: Page) =>
   page.evaluate(() => (window as unknown as { __btSent?: number }).__btSent ?? 0);
 
+/** Keeps the board's socket, so a test can report that a narration line ended (EV-15, EV-16). */
+const installBoardSocket = async (page: Page) => {
+  await page.addInitScript(() => {
+    const Native = window.WebSocket;
+    class BoardSocket extends Native {
+      constructor(url: string | URL, protocols?: string | string[]) {
+        super(url, protocols);
+        if (String(url).includes("/ws")) {
+          (window as unknown as { __btBoardSocket?: WebSocket }).__btBoardSocket = this;
+        }
+      }
+    }
+    window.WebSocket = BoardSocket;
+  });
+};
+const reportNarrationEnded = (board: Page, lineId: string) =>
+  board.evaluate((id) => {
+    const socket = (window as unknown as { __btBoardSocket?: WebSocket }).__btBoardSocket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error("No board socket.");
+    socket.send(JSON.stringify({ v: 2, type: "narration-ended", payload: { lineId: id } }));
+  }, lineId);
+
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 
 const grantWakeLock = async (page: Page) => {
@@ -93,6 +115,7 @@ const startGame = async (
   const pad = await context.newPage();
   const board = await context.newPage();
   await board.setViewportSize(BOARD_SIZE);
+  await installBoardSocket(board);
   await board.goto("/board");
   await installSessionSocketHook(pad);
   await installSendCounter(pad);
@@ -764,7 +787,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       browser,
     }, testInfo) => {
       test.setTimeout(420_000);
-      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=20~test-hp:hero-a=4/12~test-skulls:${CITADEL}=1`;
+      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=10~test-hp:hero-a=4/12~test-skulls:${CITADEL}=1`;
       const first = await startGame(browser, testInfo, { seed, fakeWait: true });
       const { databasePath } = first.session;
       let movesBefore = "";
@@ -780,14 +803,29 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       const again = await resumeGame(browser, testInfo, { databasePath, seed, fakeWait: true });
       try {
         await expect(stepIs(again.pad, "result")).toBeVisible({ timeout: 30_000 });
+        if (pick === "Rally") {
+          await expect(again.board.locator("[data-building-board-detail]")).toHaveText(
+            "Hero A 12/12",
+          );
+        }
         again.session.waitClock?.advance(4_100);
-        await expect(stepIs(again.pad, "result")).toHaveCount(0, { timeout: 20_000 });
+        await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 20_000 });
         // Exactly one move spent, however many times the step came back.
         await expect(boardMoves(again.board)).toHaveAttribute(
           "data-moves",
           String(Number(movesBefore) - 1),
           { timeout: 20_000 },
         );
+        if (pick === "Rally") {
+          // 10 gold, 5 spent once: one more Rally is affordable and then none (a double spend
+          // would have closed it already, no spend would leave a third).
+          await optionByLabel(again.pad, "Rally").click();
+          await expect(stepIs(again.pad, "result")).toBeVisible();
+          again.session.waitClock?.advance(4_100);
+          await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 20_000 });
+          await expect(optionByLabel(again.pad, "Rally")).toBeDisabled();
+          await expect(optionByLabel(again.pad, "Rally")).toContainText("5 gold");
+        }
         if (pick === "Cleanse") {
           // Its skull went: the board reads 0 skulls (and one only before).
           await expect(boardMoves(again.board)).toHaveAttribute("data-skulls", "0");
@@ -840,4 +878,41 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       await closeAll(again.context, again.session.host);
     }
   });
+
+  for (const [pick, extra] of [
+    ["Rally", "~test-hp:hero-a=4/12"],
+    ["Cleanse", `~test-skulls:${CITADEL}=1`],
+    ["Virtue", TILES.slice(0, TILES.lastIndexOf("+"))],
+  ] as const) {
+    test(`EV-15, EV-16: a narrated ${pick} result waits for its audio end, never a timer`, async ({
+      browser,
+    }, testInfo) => {
+      test.setTimeout(300_000);
+      const line = `building.${pick.toLowerCase()}`;
+      const { session, context, pad, board } = await startGame(browser, testInfo, {
+        seed: seedAt(CITADEL, `~test-gold:hero-a=30${extra}~test-building-line:${line}`),
+        fakeWait: true,
+      });
+      try {
+        await enterBuilding(pad);
+        await optionByLabel(pad, pick).click();
+        await expect(stepIs(pad, "result")).toBeVisible();
+        await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
+        // 4.5 s on the clock, no audio end: the iPad and the board are still on the step.
+        session.waitClock?.advance(4_500);
+        await pad.waitForTimeout(300);
+        await expect(stepIs(pad, "result")).toBeVisible();
+        await expect(board.locator("[data-building-board-line]")).toBeVisible();
+        // Another line's end does nothing.
+        await reportNarrationEnded(board, "another.line");
+        await pad.waitForTimeout(300);
+        await expect(stepIs(pad, "result")).toBeVisible();
+        // Its own line's end moves on, to the menu (3 tiles held: no give-back).
+        await reportNarrationEnded(board, line);
+        await expect(stepIs(pad, "menu")).toBeVisible({ timeout: 20_000 });
+      } finally {
+        await closeAll(context, session.host);
+      }
+    });
+  }
 });
