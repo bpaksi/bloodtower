@@ -182,7 +182,7 @@ const optionByLabel = (pad: Page, label: string) =>
 /** Press Enter on the move map and wait for the building's menu. */
 const enterBuilding = async (pad: Page) => {
   await clickAct(pad, "enter");
-  await expect(deviceMain(pad).locator("[data-building]")).toBeVisible({ timeout: 20_000 });
+  await expect(deviceMain(pad).locator("section[data-building]")).toBeVisible({ timeout: 20_000 });
 };
 
 const openGearItem = async (pad: Page, id: string) => {
@@ -474,6 +474,11 @@ const boardMoves = (board: Page) => board.locator("[data-building-board]");
 /** Shots for EV-05: the iPad portrait and the board, attached to the report. */
 const shoot = async (testInfo: TestInfo, name: string, pad: Page, board: Page) => {
   await board.waitForTimeout(400);
+  const dir = process.env.BT_SHOTS_DIR;
+  if (dir) {
+    await pad.screenshot({ path: `${dir}/${name}-ipad.png` });
+    await board.screenshot({ path: `${dir}/${name}-board.png` });
+  }
   await testInfo.attach(`${name}-ipad`, {
     body: await pad.screenshot(),
     contentType: "image/png",
@@ -912,6 +917,45 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
         await expect(stepIs(pad, "menu")).toBeVisible({ timeout: 20_000 });
       } finally {
         await closeAll(context, session.host);
+      }
+    });
+  }
+
+  for (const how of ["restart", "quit"] as const) {
+    test(`EV-17: a ${how} during the Virtue result resumes it and applies it once`, async ({
+      browser,
+    }, testInfo) => {
+      test.setTimeout(420_000);
+      // Three tiles held: the draw ends in the menu, not a give-back. 10 gold, 3 moves.
+      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=10~test-tiles:hero-a=courage+mercy+wisdom`;
+      const first = await startGame(browser, testInfo, { seed, fakeWait: true });
+      const { databasePath } = first.session;
+      let movesBefore = "";
+      try {
+        await enterBuilding(first.pad);
+        movesBefore = (await boardMoves(first.board).getAttribute("data-moves")) ?? "";
+        await optionByLabel(first.pad, "Virtue").click();
+        await expect(stepIs(first.pad, "result")).toBeVisible();
+        if (how === "quit") await quitToSession(first.pad);
+      } finally {
+        await closeAll(first.context, first.session.host);
+      }
+      const again = await resumeGame(browser, testInfo, { databasePath, seed, fakeWait: true });
+      try {
+        await expect(stepIs(again.pad, "result")).toBeVisible({ timeout: 30_000 });
+        again.session.waitClock?.advance(4_100);
+        await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 20_000 });
+        // One move spent, once.
+        await expect(boardMoves(again.board)).toHaveAttribute(
+          "data-moves",
+          String(Number(movesBefore) - 1),
+        );
+        // 10 gold, the draw cost 10 once: nothing left, Virtue is shown closed with its price
+        // (a draw that was never paid would leave it open).
+        await expect(optionByLabel(again.pad, "Virtue")).toBeDisabled();
+        await expect(optionByLabel(again.pad, "Virtue")).toContainText("10 gold");
+      } finally {
+        await closeAll(again.context, again.session.host);
       }
     });
   }

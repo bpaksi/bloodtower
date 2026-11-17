@@ -964,6 +964,8 @@ export function CoreDeviceScreen({
     );
   }
 
+  // The building menu is the whole screen (UI-043): the move heading, roster and hero lines step aside.
+  const inBuilding = view.screen === "play" && Boolean(view.table?.building);
   const panel = ownsPanel(view);
   const towerLostPause =
     view.screen === "pause" && actions.some((action) => action.actionId === "reconnect");
@@ -977,10 +979,10 @@ export function CoreDeviceScreen({
       data-volume={view.gear?.volume ?? undefined}
     >
       <div className="bt-scroll">
-        <div className="bt-kicker" data-step-context>
+        <div className="bt-kicker" data-step-context hidden={inBuilding}>
           {STEP_CONTEXT[view.screen] ?? view.screen}
         </div>
-        <h1 className="text-2xl font-semibold text-[var(--bt-accent)]">
+        <h1 className="text-2xl font-semibold text-[var(--bt-accent)]" hidden={inBuilding}>
           {onStats ? view.shows : (SCREEN_TITLE[view.screen] ?? view.screen)}
         </h1>
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
@@ -1005,7 +1007,7 @@ export function CoreDeviceScreen({
         ) : (
           <>
             <p
-              className={stepsOnBoard ? "sr-only" : "mt-2 text-lg"}
+              className={stepsOnBoard || inBuilding ? "sr-only" : "mt-2 text-lg"}
               data-step-instruction=""
               data-day={view.table?.day}
               data-moves={view.table?.movesLeft ?? undefined}
@@ -1069,8 +1071,9 @@ export function CoreDeviceScreen({
                 ))}
               </div>
             ))}
+            {acting?.fallen && showMoveMap ? <FallenNote /> : null}
             {view.table ? (
-              <ul className="mt-4" data-roster>
+              <ul className="mt-4" data-roster hidden={inBuilding}>
                 {view.table.groups.map((group) => (
                   <li
                     key={group.heroId}
@@ -1086,7 +1089,7 @@ export function CoreDeviceScreen({
               </ul>
             ) : null}
             {view.heroes.map((hero) => (
-              <section key={hero.id} className="mt-4" data-hero-panel={hero.id}>
+              <section key={hero.id} className="mt-4" data-hero-panel={hero.id} hidden={inBuilding}>
                 <h2 className="text-lg font-medium">{hero.name}</h2>
                 {picking ? (
                   <p className="text-[var(--bt-muted)]" data-claim-state={hero.claim ?? "open"}>
@@ -1216,7 +1219,6 @@ export function CoreDeviceScreen({
                   </p>
                 ) : null}
                 {mapExtras.map(renderAction)}
-                {acting?.fallen ? <FallenNote /> : null}
               </section>
             ) : null}
             {view.screen === "pick-story" && view.doors && view.doors.length > 1 ? (
