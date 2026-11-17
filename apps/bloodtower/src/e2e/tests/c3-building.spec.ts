@@ -17,7 +17,7 @@ import {
 
 /**
  * C3/13 PR A (UI-043): the building menu through the real host, on the iPad's fallback render.
- * The group is put on a building of each kind with the test seed `~test-at:<space>`; gold, hit
+ * The group is put on a building of each kind with the test seed `~test-event:none~test-at:<space>`; gold, hit
  * points, corruptions and skulls come from the other test markers. Every hero sits in one group
  * (`seatTogether`). PR B draws the final screens and the screenshots.
  */
@@ -169,7 +169,7 @@ const SANCTUARY = "N-upper-ice-fangs";
 const VILLAGE = "N-egans-end";
 const BAZAAR = "N-dayside";
 
-const seedAt = (space: string, extra = "") => `c3-bld~test-at:${space}${extra}`;
+const seedAt = (space: string, extra = "") => `c3-bld~test-event:none~test-at:${space}${extra}`;
 
 const options = (pad: Page) => deviceMain(pad).locator("[data-building-option]");
 const labelsOf = async (pad: Page) => {
@@ -183,6 +183,15 @@ const optionByLabel = (pad: Page, label: string) =>
 const enterBuilding = async (pad: Page) => {
   await clickAct(pad, "enter");
   await expect(deviceMain(pad).locator("section[data-building]")).toBeVisible({ timeout: 20_000 });
+};
+
+/**
+ * Press a pick that heals. Rally and Rest ask "who" first (every hero's hit points are known): choose Hero A.
+ */
+const pickOffer = async (pad: Page, label: string, hero = "Hero A") => {
+  await optionByLabel(pad, label).click();
+  await expect(deviceMain(pad).locator('[data-building="who"]')).toBeVisible();
+  await optionByLabel(pad, hero).click();
 };
 
 const openGearItem = async (pad: Page, id: string) => {
@@ -217,7 +226,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
   }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad } = await startGame(browser, testInfo, {
-      seed: seedAt(CITADEL, "~test-gold:hero-a=20~test-hp:hero-a=4/12"),
+      seed: seedAt(CITADEL, "~test-gold:hero-a=20,hero-b=0,hero-c=0,hero-d=0~test-hp:hero-a=4/12"),
     });
     try {
       await enterBuilding(pad);
@@ -256,7 +265,10 @@ test.describe("C3/13 the building menu: engine and wire", () => {
   }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: seedAt(CITADEL, `~test-gold:hero-a=20~test-skulls:${CITADEL}=2`),
+      seed: seedAt(
+        CITADEL,
+        `~test-gold:hero-a=20,hero-b=0,hero-c=0,hero-d=0~test-skulls:${CITADEL}=2`,
+      ),
     });
     try {
       await enterBuilding(pad);
@@ -299,16 +311,15 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     test.setTimeout(300_000);
     // The seed `c3-bld-m1` rolls 3 moves on the first day (2d3, checked against the engine's RNG).
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: `c3-bld-m1~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
+      seed: `c3-bld-m1~test-event:none~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
     });
     try {
       await enterBuilding(pad);
       await expect(board.locator("[data-building-board]")).toHaveAttribute("data-moves", "3", {
         timeout: 20_000,
       });
-      await optionByLabel(pad, "Rest").click();
+      await pickOffer(pad, "Rest");
       // The seated heroes all have hit points now (C3/12), so Rest first asks who rests.
-      await optionByLabel(pad, "Hero A").click();
       await expect(deviceMain(pad).locator('[data-building="rest-moves"]')).toBeVisible();
       expect((await labelsOf(pad)).map((text) => text.trim())).toEqual(["1", "2", "3"]);
       await optionByLabel(pad, "2").click();
@@ -322,8 +333,7 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       await pad.locator("[data-gear-panel] button.bt-primary", { hasText: "Done" }).click();
       await clickAct(pad, "build");
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
-      await optionByLabel(pad, "Rest").click();
-      await optionByLabel(pad, "Hero A").click();
+      await pickOffer(pad, "Rest");
       await expect(deviceMain(pad).locator('[data-building="rest-moves"]')).toBeVisible();
       expect(await labelsOf(pad)).toEqual(["1"]);
     } finally {
@@ -336,7 +346,10 @@ test.describe("C3/13 the building menu: engine and wire", () => {
   }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: seedAt(SANCTUARY, "~test-gold:hero-a=30~test-named:hero-a=feral+lost,hero-c=greedy"),
+      seed: seedAt(
+        SANCTUARY,
+        "~test-gold:hero-a=30,hero-b=0,hero-c=0,hero-d=0~test-named:hero-a=feral+lost,hero-c=greedy",
+      ),
     });
     try {
       await enterBuilding(pad);
@@ -368,7 +381,10 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(420_000);
-    const seed = seedAt(SANCTUARY, "~test-gold:hero-a=30~test-named:hero-a=feral+lost");
+    const seed = seedAt(
+      SANCTUARY,
+      "~test-gold:hero-a=30,hero-b=0,hero-c=0,hero-d=0~test-named:hero-a=feral+lost",
+    );
     const first = await startGame(browser, testInfo, { seed });
     const { databasePath } = first.session;
     let closed = false;
@@ -536,7 +552,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
   }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: seedAt(CITADEL, "~test-gold:hero-a=20~test-hp:hero-a=4/12"),
+      seed: seedAt(CITADEL, "~test-gold:hero-a=20,hero-b=0,hero-c=0,hero-d=0~test-hp:hero-a=4/12"),
       fakeWait: true,
     });
     try {
@@ -547,7 +563,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       await expectToolbar(pad);
       await checkHelp(pad, "menu");
       await shoot(testInfo, "ev05-citadel", pad, board);
-      await optionByLabel(pad, "Rally").click();
+      await pickOffer(pad, "Rally");
       // The result: words on the iPad, no Next; hero name and 12/12 on the board.
       await expect(stepIs(pad, "result")).toBeVisible();
       await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
@@ -578,7 +594,11 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
   }, testInfo) => {
     test.setTimeout(420_000);
     const cases: [string, string, string][] = [
-      ["sanctuary", SANCTUARY, "~test-gold:hero-a=30~test-named:hero-a=feral+lost"],
+      [
+        "sanctuary",
+        SANCTUARY,
+        "~test-gold:hero-a=30,hero-b=0,hero-c=0,hero-d=0~test-named:hero-a=feral+lost",
+      ],
       ["village", VILLAGE, "~test-hp:hero-a=4/12"],
       ["bazaar", BAZAAR, ""],
     ];
@@ -603,7 +623,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
           await checkHelp(pad, "corruption");
         }
         if (name === "village") {
-          await optionByLabel(pad, "Rest").click();
+          await pickOffer(pad, "Rest");
           await expect(stepIs(pad, "rest-moves")).toBeVisible();
           await expectToolbar(pad);
           await checkHelp(pad, "rest-moves");
@@ -619,7 +639,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
   }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: seedAt(CITADEL, `~test-gold:hero-a=30${TILES}`),
+      seed: seedAt(CITADEL, `~test-gold:hero-a=30,hero-b=0,hero-c=0,hero-d=0${TILES}`),
       fakeWait: true,
     });
     try {
@@ -714,11 +734,11 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
   test("EV-13: the happy path never opens the Menu or help", async ({ browser }, testInfo) => {
     test.setTimeout(300_000);
     const { session, context, pad } = await startGame(browser, testInfo, {
-      seed: `c3-bld-m1~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
+      seed: `c3-bld-m1~test-event:none~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
     });
     try {
       await enterBuilding(pad);
-      await optionByLabel(pad, "Rest").click();
+      await pickOffer(pad, "Rest");
       await optionByLabel(pad, "1").click();
       await expect(deviceMain(pad).locator("[data-building-result]")).toHaveText(
         "You rest and recover.",
@@ -739,7 +759,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       browser,
     }, testInfo) => {
       test.setTimeout(420_000);
-      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=20${TILES}`;
+      const seed = `c3-bld-m1~test-event:none~test-at:${CITADEL}~test-gold:hero-a=20,hero-b=0,hero-c=0,hero-d=0${TILES}`;
       const first = await startGame(browser, testInfo, { seed, fakeWait: true });
       const { databasePath } = first.session;
       let tiles: string[] = [];
@@ -795,14 +815,15 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       browser,
     }, testInfo) => {
       test.setTimeout(420_000);
-      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=10~test-hp:hero-a=4/12~test-skulls:${CITADEL}=1`;
+      const seed = `c3-bld-m1~test-event:none~test-at:${CITADEL}~test-gold:hero-a=10,hero-b=0,hero-c=0,hero-d=0~test-hp:hero-a=4/12,hero-b=4/12~test-skulls:${CITADEL}=1`;
       const first = await startGame(browser, testInfo, { seed, fakeWait: true });
       const { databasePath } = first.session;
       let movesBefore = "";
       try {
         await enterBuilding(first.pad);
         movesBefore = (await boardMoves(first.board).getAttribute("data-moves")) ?? "";
-        await optionByLabel(first.pad, pick).click();
+        if (pick === "Rally") await pickOffer(first.pad, pick);
+        else await optionByLabel(first.pad, pick).click();
         await expect(stepIs(first.pad, "result")).toBeVisible();
         if (how === "quit") await quitToSession(first.pad);
       } finally {
@@ -827,7 +848,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
         if (pick === "Rally") {
           // 10 gold, 5 spent once: one more Rally is affordable and then none (a double spend
           // would have closed it already, no spend would leave a third).
-          await optionByLabel(again.pad, "Rally").click();
+          await pickOffer(again.pad, "Rally", "Hero B");
           await expect(stepIs(again.pad, "result")).toBeVisible();
           again.session.waitClock?.advance(4_100);
           await expect(stepIs(again.pad, "menu")).toBeVisible({ timeout: 20_000 });
@@ -848,7 +869,10 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(420_000);
-    const seed = seedAt(CITADEL, "~test-gold:hero-a=20~test-hp:hero-a=4/12");
+    const seed = seedAt(
+      CITADEL,
+      "~test-gold:hero-a=20,hero-b=0,hero-c=0,hero-d=0~test-hp:hero-a=4/12",
+    );
     const first = await startGame(browser, testInfo, { seed });
     const { databasePath } = first.session;
     const readMenu = (page: Page) =>
@@ -898,12 +922,16 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
       test.setTimeout(300_000);
       const line = `building.${pick.toLowerCase()}`;
       const { session, context, pad, board } = await startGame(browser, testInfo, {
-        seed: seedAt(CITADEL, `~test-gold:hero-a=30${extra}~test-building-line:${line}`),
+        seed: seedAt(
+          CITADEL,
+          `~test-gold:hero-a=30,hero-b=0,hero-c=0,hero-d=0${extra}~test-building-line:${line}`,
+        ),
         fakeWait: true,
       });
       try {
         await enterBuilding(pad);
-        await optionByLabel(pad, pick).click();
+        if (pick === "Rally") await pickOffer(pad, pick);
+        else await optionByLabel(pad, pick).click();
         await expect(stepIs(pad, "result")).toBeVisible();
         await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
         // 4.5 s on the clock, no audio end: the iPad and the board are still on the step.
@@ -930,7 +958,7 @@ test.describe("C3/13 the building menu: the iPad and the board render", () => {
     }, testInfo) => {
       test.setTimeout(420_000);
       // Three tiles held: the draw ends in the menu, not a give-back. 10 gold, 3 moves.
-      const seed = `c3-bld-m1~test-at:${CITADEL}~test-gold:hero-a=10~test-tiles:hero-a=courage+mercy+wisdom`;
+      const seed = `c3-bld-m1~test-event:none~test-at:${CITADEL}~test-gold:hero-a=10,hero-b=0,hero-c=0,hero-d=0~test-tiles:hero-a=courage+mercy+wisdom`;
       const first = await startGame(browser, testInfo, { seed, fakeWait: true });
       const { databasePath } = first.session;
       let movesBefore = "";
