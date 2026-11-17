@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { ControlPress } from "bloodtower-protocols";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
-import { openEffectsWait } from "../../engine/loops/day/wait.ts";
+import { openDayWait } from "../../engine/loops/day/wait.ts";
 import type { GameLocal } from "../../engine/loops/game/loop.ts";
 import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
@@ -11,7 +11,11 @@ import {
   SHELL_ENGINE_VERSION,
   type ShellState,
 } from "../../engine/loops/session/state.ts";
-import { refreshOffersAfterRestore, stepShell } from "../../engine/loops/session/stepShell.ts";
+import {
+  eventPressDeviceRefusal,
+  refreshOffersAfterRestore,
+  stepShell,
+} from "../../engine/loops/session/stepShell.ts";
 import { towerReady } from "../../engine/loops/session/tower.ts";
 import { projectShellView } from "../../engine/loops/session/view.ts";
 import { project } from "../../engine/views/project.ts";
@@ -544,7 +548,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       return () => clearTimeout(handle);
     });
   const scheduleEffectsWait = (): void => {
-    const wait = openEffectsWait(state.loops.stack);
+    const wait = openDayWait(state.loops.stack);
     const running =
       wait !== null &&
       wait.lineId === null &&
@@ -711,6 +715,14 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       record.grace.unref?.();
     },
     act: (deviceId, promptId, actionId, args) => {
+      // C3/12, DEC-019: only an iPad holding a present hero may pick at an event. The refusal is
+      // asked before the press is logged, so a Continue replays only presses that were taken.
+      const eventRefusal = eventPressDeviceRefusal(state, deviceId, promptId, actionId);
+      if (eventRefusal) {
+        options.log.error("event-press-refused", eventRefusal);
+        options.onDeviceError?.(deviceId, "invalid-state", eventRefusal);
+        return;
+      }
       if (promptId === "hero-hold" && (actionId === "take" || actionId === "release")) {
         const heroId = args.heroId;
         if (typeof heroId !== "string") return;
@@ -923,7 +935,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     narrationEnded: (lineId) => {
       applyQueue = applyQueue
         .then(async () => {
-          const wait = openEffectsWait(state.loops.stack);
+          const wait = openDayWait(state.loops.stack);
           if (!wait || wait.lineId !== lineId) {
             options.log.debug(
               "narration-ended-ignored",

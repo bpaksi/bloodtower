@@ -23,6 +23,7 @@ import type {
   BuildingPanelView,
   ChanceView,
   DaySkullView,
+  EventSceneView,
   GroupsCardView,
   LoopLevel,
   PlaceStill,
@@ -32,7 +33,7 @@ import type {
 } from "../../views/state.ts";
 import { type CompassSlot, slottedNeighborsOf } from "../chapter/board.ts";
 import { ensureClock, heroCount, heroSheet, isFallen } from "../day/clock.ts";
-import type { DayLocal } from "../day/loop.ts";
+import { type DayLocal, eventChoicePromptId, parseEventChoicePrompt } from "../day/loop.ts";
 import { partyIsSplit, regroupPicks, regroupQueue } from "../day/regroup.ts";
 import { splitShiftOf } from "../day/roll.ts";
 import { daysLeft } from "../day/rules.ts";
@@ -44,6 +45,13 @@ import {
   rallyResult,
   virtueResult,
 } from "../encounter/menu.ts";
+import {
+  eventOptions,
+  eventState,
+  eventTuningFrom,
+  type OptionId,
+  refreshLedger,
+} from "../event/index.ts";
 import {
   onPurseStep,
   PURSE_STEP_LABEL,
@@ -85,6 +93,29 @@ const isSetupScreen = (screen: ViewState["screen"]): boolean => SETUP_SCREENS.ha
 const buildingTitle = (building: string): string =>
   building.charAt(0).toUpperCase() + building.slice(1);
 
+/**
+ * The words of an event choice (Copy table, C3/12): hazard.cost.hp.label, choice.go-around and
+ * choice.pay-off. The lose-a-turn cost has no line in the Copy table yet, so it reads a plain
+ * placeholder until Loremaster writes one.
+ */
+const eventOptionLabel = (id: OptionId | undefined): string => {
+  const tuning = eventTuningFrom();
+  switch (id) {
+    case "hit-points":
+      return `Lose ${Math.abs(tuning.hazardHitPoints)} hit points`;
+    case "lose-turn":
+      return "Lose a turn";
+    case "go-around":
+      return "Go around";
+    case "pay-off":
+      return `Pay them off (${tuning.payOff} gold)`;
+    case "fight":
+      return "Fight";
+    default:
+      return "Choose";
+  }
+};
+
 const labelFor = (state: ShellState, promptId: string, actionId: string): string => {
   if (promptId === BOARD_SET_UP_PROMPT) return "Board is set up";
   if (promptId === "continue-begin") return "Begin";
@@ -104,6 +135,7 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
     return building ? `Enter ${buildingTitle(building)}` : "Enter";
   }
   if (actionId === "leave") return "Leave";
+  if (actionId === "choose") return eventOptionLabel(parseEventChoicePrompt(promptId)?.optionId);
   if (actionId === "build") return buildingLabel(state, promptId);
   if (actionId === "end-turn") return "End turn";
   if (actionId === "record") {
@@ -338,6 +370,11 @@ export const actingGroupOf = (state: ShellState): ActingGroup => {
     }
     if (frame.loopId === "day") {
       const local = frame.local as DayLocal;
+      if (local.phase === "event" && local.eventGroup) {
+        // The event scene belongs to the group that just moved, not to the next one in order.
+        actingId = local.eventGroup;
+        break;
+      }
       const index = local.phase === "roll" ? 0 : local.groupIndex;
       actingId = play.turnOrder[index] ?? play.turnOrder[0] ?? null;
       waiting = local.awaitingPress && local.phase !== "done";
@@ -443,6 +480,55 @@ const buildVirtue = (state: ShellState): VirtuePanelView | null => {
   };
 };
 
+/** The event scene (C3/12): only while the day loop is at an event. Words come from the board. */
+const buildEvent = (state: ShellState): EventSceneView | null => {
+  const play = state.play;
+  const day = state.loops.stack.find((frame) => frame.loopId === "day");
+  const local = day?.local as DayLocal | undefined;
+  if (!play || !local || local.phase !== "event" || !local.eventGroup) return null;
+  const event = eventState(play).open;
+  const group = play.groups.find((row) => row.id === local.eventGroup);
+  if (!event || !group || event.groupId !== group.id) return null;
+  const clock = ensureClock(play);
+  const stage = local.eventStage ?? "choose";
+  if (event.status === "open") refreshLedger(play, group.id);
+  const options =
+    stage === "choose" && event.status === "open"
+      ? eventOptions(play, eventTuningFrom()).map((option) => ({
+          promptId: eventChoicePromptId(group.id, option.id),
+          optionId: option.id,
+          enabled: option.enabled,
+        }))
+      : [];
+  const heroes = group.heroIds.map((heroId) => {
+    const sheet = heroSheet(clock, heroId);
+    return {
+      heroId,
+      name: heroName(state, heroId),
+      hp: sheet.hp ? { hp: sheet.hp.hp, max: sheet.hp.max } : null,
+      gold: sheet.gold ?? null,
+    };
+  });
+  const known = heroes.every((hero) => hero.gold !== null);
+  const result = event.result ?? null;
+  return {
+    groupId: group.id,
+    heroIds: [...group.heroIds],
+    type: event.type,
+    hazard: event.hazard,
+    offer: event.offer,
+    stage,
+    options,
+    result:
+      result?.kind === "saved"
+        ? { ...result, counterName: heroName(state, result.counterHeroId) }
+        : result,
+    line: event.line ?? null,
+    heroes,
+    purse: known ? heroes.reduce((sum, hero) => sum + (hero.gold ?? 0), 0) : null,
+  };
+};
+
 /** Board lines for the spin's result (Loremaster, `chance.result` and `chance.notower`). */
 const chanceResult = (amount: number, tower: boolean) =>
   tower ? `The lights stop on ${amount} gold.` : `The wheel stops on ${amount} gold.`;
@@ -483,6 +569,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     day: play.dayNumber,
     ...dayPanels,
     virtue: buildVirtue(state),
+    event: buildEvent(state),
     building: buildBuilding(state),
     health: "unavailable",
     purse: "unavailable",

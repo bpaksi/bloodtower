@@ -4,6 +4,7 @@ import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
 import { recordBuildingDrop } from "../day/clock.ts";
 import type { DayLocal } from "../day/loop.ts";
+import { openDayWait } from "../day/wait.ts";
 import { enterConnectEvents, enterWithoutEvents } from "./enterKit.ts";
 import { TEST_STORY } from "./pack.ts";
 import { initialShellState, type ShellState } from "./state.ts";
@@ -22,6 +23,13 @@ const press = (promptId: string, actionId: string, deviceId = "ipad-0"): PressEv
   promptId,
   actionId,
 });
+
+/** The iPad that holds a hero of the event's group: only it may pick (DEC-019, C3/12). */
+const pickerOf = (state: ShellState, promptId: string): string => {
+  const groupId = promptId.startsWith("event-choice--") ? promptId.split("--")[1] : undefined;
+  const hero = state.play?.groups.find((row) => row.id === groupId)?.heroIds[0];
+  return (hero && state.holdings[hero]) || "ipad-0";
+};
 
 const step = (state: ShellState, ...events: Event[]) => {
   let cursor = state;
@@ -87,7 +95,12 @@ const landings = (seed: string, drops: number): string[] => {
   let state = toPlay(seed, "without");
   const landed: string[] = [];
   for (let guard = 0; guard < 2000 && landed.length < drops; guard += 1) {
-    const pick = ["continue", "record", "done", "leave", "end-turn"]
+    const wait = openDayWait(state.loops.stack);
+    if (wait) {
+      state = step(state, { kind: "wait-end", v: 1, waitId: wait.id, cause: "timeout" });
+      continue;
+    }
+    const pick = ["continue", "choose", "record", "done", "leave", "end-turn"]
       .map((actionId) => open(state).find((offer) => offer.actionId === actionId))
       .find((offer) => offer !== undefined);
     if (!pick) break;
@@ -95,7 +108,7 @@ const landings = (seed: string, drops: number): string[] => {
       const spot = state.play?.lastSkull?.spaceId;
       if (spot) landed.push(spot);
     }
-    state = step(state, press(pick.promptId, pick.actionId));
+    state = step(state, press(pick.promptId, pick.actionId, pickerOf(state, pick.promptId)));
   }
   return landed;
 };

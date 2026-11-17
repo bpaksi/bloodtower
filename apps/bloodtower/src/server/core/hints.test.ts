@@ -11,6 +11,7 @@ import {
   hintsForLoops,
   RULES_PAGE_MISSING,
 } from "../../engine/hints/registry.ts";
+import { openDayWait } from "../../engine/loops/day/wait.ts";
 import { enterWithoutEvents } from "../../engine/loops/session/enterKit.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
 import type { ShellStory } from "../../engine/loops/session/pack.ts";
@@ -104,10 +105,17 @@ const drive = (
       state = step(state, { kind: "hint-end", v: 1, hintId: state.hint });
       continue;
     }
+    const wait = openDayWait(state.loops.stack);
+    if (wait) {
+      // The host's part: an event's result wait ended (C3/12).
+      state = step(state, { kind: "wait-end", v: 1, waitId: wait.id, cause: "timeout" });
+      continue;
+    }
     const open = openOffers(state);
     const find = (actionId: string) => open.find((offer) => offer.actionId === actionId);
     const pick =
       find("continue") ??
+      find("choose") ??
       find("record") ??
       find("done") ??
       find("leave") ??
@@ -121,7 +129,14 @@ const drive = (
       walked = false;
       entered = false;
     }
-    state = step(state, press(pick.promptId, pick.actionId));
+    const groupId = pick.promptId.startsWith("event-choice--")
+      ? pick.promptId.split("--")[1]
+      : null;
+    const lead = state.play?.groups.find((row) => row.id === groupId)?.heroIds[0];
+    state = step(
+      state,
+      press(pick.promptId, pick.actionId, (lead && state.holdings[lead]) || "ipad-0"),
+    );
   }
   return { state, seen };
 };

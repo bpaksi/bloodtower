@@ -209,7 +209,9 @@ describe("C3/20 EV-06 route audit: nothing in production reaches the seed fields
     });
     await session.whenIdle();
     const clock = ensureClock(play);
-    expect(clock.heroes["hero-a"]).toBeUndefined();
+    // The sheet exists (hit points and gold from the card and the purse, C3/12); no seed text set it.
+    expect(clock.heroes["hero-a"]?.corruptions ?? 0).toBe(0);
+    expect(clock.heroes["hero-a"]?.helpingVirtues ?? 0).toBe(0);
     expect(clock.skulls).toEqual({});
     expect(clock.seedKingdoms).toEqual([]);
   });
