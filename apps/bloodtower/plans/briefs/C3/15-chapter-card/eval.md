@@ -128,7 +128,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Fails if: it advances on a timer or audio end.
 
 ### EV-20 — The step's words come from the Copy table
-- Requirement: PT-21; Loremaster fills the slots (step 45).
+- Requirement: PT-21; Copy table rows 19–24 (step 45).
 - Method: playwright
 - How: read the title, each row label, the Done label and the help text on the iPad and the board.
 - Pass evidence: each equals its Copy table row (`table.title`, `table.row.seal`, `table.row.tokens`, `table.row.skulls`, `table.done`, `help.set-the-table`); no `[COPY:` text reaches a screen.
@@ -189,5 +189,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - ANSWERED Q-C3-17 (Bob approved 2026-10-31): the base pack supplies the boons and the app picks; The Ruined Keep names none in 1.0. (which boons)
 - ANSWERED (PT-21, Bob, 2026-11-14, adopted): Done is not gated on ticking every row (EV-24).
-- ANSWERED (PT-21, Bob, 2026-11-14, adopted): the glyph and boon Reveal (DEC-303) stays right after the seal break as a story beat (EV-02; C4/13 EV-01). Loremaster rewrites `button.seal-broken` as the row label and `help.seal-break-live` for the checklist in step 45.
+- ANSWERED (PT-21, Bob, 2026-11-14, adopted): the glyph and boon Reveal (DEC-303) stays right after the seal break as a story beat (EV-02; C4/13 EV-01). The seal confirm is the Set the table row `{seal}` (Copy table `table.row.seal`). C3/15 help for the checklist is `help.set-the-table`; C4/13's `help.seal-break-live` is rewritten in the same pass.
 - ANSWERED (PT-21, Bob, 2026-11-14, adopted; Gamewright to confirm): the freed-skull picks come after Set the table's Done (EV-02; C4 only).

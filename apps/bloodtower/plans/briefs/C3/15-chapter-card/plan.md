@@ -59,7 +59,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 19–24 filled 2026-11-18 (step 45), reusing C4/13. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
@@ -81,12 +81,12 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 | 16 | `help.title` | Help | C2 feature 04 |
 | 17 | `help.chapter-card` | This is your chapter goal. Finish it before the days run out. | locked 2026-10-31 (Loremaster); same text in screen-spec and EV-12 |
 | 18 | `help.close` | Close | C2 feature 04 |
-| 19 | `table.title` | [COPY: Set the table] | ruling PT-21 names the step "Set the table"; Loremaster confirms (step 45) |
-| 20 | `table.row.seal` | [COPY: the lit seal row, with the seal's name] | new - Loremaster (step 45); C4+ shows the seal's name |
-| 21 | `table.row.tokens` | [COPY: the quest tokens row, naming each quest] | new - Loremaster (step 45) |
-| 22 | `table.row.skulls` | [COPY: the freed skulls row] | new - Loremaster (step 45); C4+ only |
-| 23 | `table.done` | [COPY: Done label for Set the table] | new - Loremaster (step 45); one Done (C2/04) |
-| 24 | `help.set-the-table` | [COPY: help text for Set the table] | new - Loremaster (step 45) |
+| 19 | `table.title` | Set the table | ruling PT-21 and DEC-929 name the step "Set the table"; Loremaster confirms the words. Same slot as C4/13 `table.title` |
+| 20 | `table.row.seal` | {seal} | new - Loremaster (PT-21, DEC-929). Reuses C4/13 `table.row.seal`. `{seal}` is the locked name (The Road Seal, The Keep Seal, The Warden's Seal). The row is absent with no tower (DEC-306, EV-16). C4+ |
+| 21 | `table.row.tokens` | Quest tokens: {quests} | new - Loremaster (PT-21, DEC-929). Reuses C4/13 `table.row.tokens`. `{quests}` is the comma-separated names of the next chapter's quest tokens, as in EV-17 ("The Barrow, The Shrine") |
+| 22 | `table.row.skulls` | Freed skulls: {N} | new - Loremaster (PT-21, DEC-929, DEC-409). Reuses C4/13 `table.row.skulls`. `{N}` is how many skulls were freed. Shown only when skulls were freed; absent with no tower (EV-16). The kingdom-then-building picks come after Done. C4+ only |
+| 23 | `table.done` | Done | new - Loremaster; the one primary button (C2/04, PT-21, EV-24). Unchanged from every other physical-confirm Done. Same slot as C4/13 `table.done` |
+| 24 | `help.set-the-table` | Tick the rows that show as an aid, then tap Done. You do not have to tick them all. | new - Loremaster (PT-21, DEC-929, EV-21, EV-24). Help for this step only (`data-help-screen` = `set-the-table`). Rows that do not apply are absent (no tower, or no skulls freed), so the line does not name them. Done is not gated on the ticks |
 
 ## OPEN questions
 
