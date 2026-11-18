@@ -60,7 +60,6 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 31–3
 | 2 | `seal.1.name` | The Road Seal | locked 2026-10-31 (Loremaster); EV-04, EV-07 |
 | 3 | `seal.2.name` | The Keep Seal | locked 2026-10-31 (Loremaster); EV-04, EV-07 |
 | 4 | `seal.3.name` | The Warden's Seal | locked 2026-10-31 (Loremaster); EV-04, EV-07 |
-| 5 | `button.seal-broken` | Seal broken | screen-spec (exact label; replaces C3's Done) |
 | 6 | `seal.line.1` | The roads are clear, and a seal breaks like an old oath giving way. Ahead stands the Ruined Keep. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06); replaces the 10-31 line "The roads are clear and a seal breaks. Ahead stands the Ruined Keep." (Q-C4-10 pick a) |
 | 7 | `seal.line.2` | The Keep gives up its dead, and a second seal cracks. The Tower waits. | locked 2026-10-31 (Loremaster); kept in research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (Q-C4-10 pick a) |
 | 8 | `seal.line.3` | The last stand holds, and the third seal breaks. Only the Warden remains. | locked 2026-10-31 (Loremaster); kept in research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (Q-C4-10 pick a) |
@@ -91,6 +90,14 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 31–3
 | 33 | `table.row.tokens` | Quest tokens: {quests} | new - Loremaster (PT-21, DEC-929). `{quests}` is the comma-separated names of the next chapter's quest tokens, as in C3/15 EV-17 ("The Barrow, The Shrine"). Same slot as C3/15 `table.row.tokens` |
 | 34 | `table.row.skulls` | Freed skulls: {N} | new - Loremaster (PT-21, DEC-929, DEC-409). `{N}` is how many skulls were freed. The row is a check; the kingdom-then-building picks come after Done (EV-17, DEC-933). Shown only when skulls were freed; absent with no tower (EV-21). Same slot as C3/15 `table.row.skulls` |
 | 35 | `table.done` | Done | new - Loremaster; the one primary button (C2/04, PT-21, EV-24). Unchanged from every other physical-confirm Done. Same slot as C3/15 `table.done` |
+
+### Removed strings
+
+The Seal broken confirm is cut (PT-21, DEC-929). Set the table's Done (`table.done`) replaces it.
+
+| # | Slot or id | Removed text | Where it lived | Sign-off |
+|---|------------|--------------|----------------|----------|
+| R1 | `button.seal-broken` | Seal broken | iPad confirm after the seal break; locked 2026-10-31, screen-spec | removed by PT-21, DEC-929; Loremaster, 2026-11-18. Replaced by `table.done` ("Done") |
 
 ## OPEN questions
 
