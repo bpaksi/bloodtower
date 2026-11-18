@@ -13,8 +13,8 @@ Keep this a checklist; do not write a second design doc.
 - Screen spec: none
 - Mockup: none (no new screen state: the existing Enter button and the existing building menu with two rows, as DEC-943)
 - Risk: Med (turn flow in `group-turn/loop.ts`; the first real win)
-- Depends on: its approval.md on main, and **F1/03 merged** (`docs/live-quests-brief-2026-11-18`; it needs F1/02). **It comes after D1 (#558) and D4 (#562) merge, because it edits `group-turn/loop.ts`** at the gates D4 opens and next to the lines D1 may change. It does not start before all four have merged.
-- **Goes before G-C3** (Bob's Ruined Keep playthrough, queue order 26): with it, chapter 1 can be won in real play.
+- Depends on: its approval.md on main, and D1 (#558), F1/02 (`docs/ee01-brief-2026-11-18`), F1/03 (`docs/live-quests-brief-2026-11-18`) and D4 (#562) merged. **Build order (Wright, 2026-11-18): D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3.** It comes after D1 and D4 because it edits `group-turn/loop.ts` at the gates D4 opens and next to the lines D1 may change. It does not start before all four have merged.
+- **Goes after D4 and before G-C3** (Bob's Ruined Keep playthrough, queue order 26): with it, chapter 1 can be won in real play.
 - Builds: DEC-641, DEC-951; MEC-035 and MEC-036 Enter "on a wild quest marker"
 - Deps change: no
 - Runs: cloud
@@ -49,17 +49,17 @@ Cards: DEC-951 (new, this brief).
 
 ### Overlaps and merge order
 
-- **DEPENDENCY D1 (#558): `group-turn/loop.ts`.** D1 may swap the `isCorruptionLoss` stops (~192, ~252, ~268) for a general loss read; ~252 sits in `exit`, which this step also edits (~257). **D1 merges first**; this step rebases on it.
-- **DEPENDENCY and OVERLAP D4 (#562): `group-turn/loop.ts` (the same five gates, ~128, ~155, ~225, ~257, ~289) and `picks.ts` `openMenu` (~247 to ~262).** **D4 merges first.** This step widens D4's gate to spaces with no building and adds its wild branch next to D4's fallen branch. D4's eval.md is not edited; its EVs must still pass.
-- **DEPENDENCY F1/03 (`docs/live-quests-brief-2026-11-18`):** the live Ambush marker and the chapter plan that ends the game. **No file overlap**: F1/03 touches `stepShell.ts` ~761, this step ~212.
-- **DEPENDENCY F1/02 (`docs/ee01-brief-2026-11-18`, via F1/03): `picks.ts` `openMenu`, `menu.ts`, `stepShell.ts`.** F1/02's Quest row, quest step and turn end are used as they are. Different hunks (`openMenu`'s quest flag and `menu.ts` ~182, ~66, ~247 against this step's ~241 and ~240).
+- **DEPENDENCY D1 (#558): `group-turn/loop.ts`.** D1 may swap the `isCorruptionLoss` stops (~192, ~252, ~268) for a general loss read; ~252 sits in `exit`, which this step also edits (~257). **D1 merges first** (in parallel with F1/02); this step rebases on it.
+- **DEPENDENCY and OVERLAP D4 (#562): `group-turn/loop.ts` (the same five gates, ~128, ~155, ~225, ~257, ~289) and `picks.ts` `openMenu` (~247 to ~262).** **D4 merges first** (after F1/03). This step widens D4's gate to spaces with no building and adds its wild branch next to D4's fallen branch. D4's eval.md is not edited; its EVs must still pass.
+- **DEPENDENCY F1/03 (`docs/live-quests-brief-2026-11-18`; after D1 and F1/02, before D4):** the live Ambush marker and the chapter plan that ends the game. **No file overlap**: F1/03 touches `stepShell.ts` ~761, this step ~212.
+- **DEPENDENCY F1/02 (`docs/ee01-brief-2026-11-18`; in parallel with D1, before F1/03): `picks.ts` `openMenu`, `menu.ts`, `stepShell.ts`.** F1/02's Quest row, quest step and turn end are used as they are. Different hunks (`openMenu`'s quest flag and `menu.ts` ~182, ~66, ~247 against this step's ~241 and ~240).
 - **No F1/01 overlap.** The Ambush's Fight option stays hidden while `fight_enabled` is false (`visibleOptions`), as now.
 - **OVERLAP D5 (`docs/d5-brief-2026-11-18`): `picks.ts`, `menu.ts`** (D5's purse read ~177 and gold helpers, not `openMenu`'s first lines or `buildingNameOf`). The Ambush's toll is D5's rule (DEC-944: a toll stays with the heroes present); this step only reaches it. Whichever lands second rebases.
 - **OVERLAP D6 (`docs/d6-brief-2026-11-18`): `picks.ts`, `menu.ts`** (Fortunate state, `costLine`; different functions). D6's free pick can be a wild quest's pick. Whichever lands second rebases.
 - **No C3-14 (#437) file overlap.** C3-14 draws the quest scene; its title source is the menu model's title, which now names the space.
 - **No C3/15 (#438) file overlap.** A chapter won in real play now reaches C3/15's close; in C3 the game ends first (Q-C3-01).
 - **README:** this step's mapping row sits after TP-04 (clear of F1/02's and F1/03's rows), and G-C3's dependency is in the "Bob gates" line; F1/03 edits G-C3's queue row. No README line is shared.
-- **Merge order:** D1, D4, F1/02, F1/03 → this step → G-C3.
+- **Merge order (Wright, 2026-11-18):** D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3.
 
 ## What it does
 
