@@ -32,8 +32,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-04 — Screenshots match
 - Requirement: UI-044.
 - Method: screenshot
-- How: mockup `#seal`, `#skull`.
-- Pass evidence: pixel diff under 1% against `#seal`, `#skull`.
+- How: mockup `#set-table-seal`; skull picks `#s=3` (Freed skull: kingdom) and `#s=4` (Freed skull: building). Those skull tabs have no element id.
+- Pass evidence: pixel diff under 1% against `#set-table-seal`, `#s=3`, `#s=4`.
 - Fails if: any image over 1% diff.
 
 ### EV-05 — Seal broken confirms the tower's seal (Amended 2026-11-14 (PT-21))
