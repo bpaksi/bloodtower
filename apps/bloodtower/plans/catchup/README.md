@@ -86,7 +86,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 
 | Decision | Findings | Question | Blocks | Issue |
 |---|---|---|---|---|
-| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check. **Ruled** (DEC-905, #509); brief [D1/01-skull-loss-dispatch](../briefs/D1/01-skull-loss-dispatch/plan.md) drafted 2026-11-18, eval approval **pending Bob** | R03 (fixtures b to e; a waits on the battle loop) | #499 |
+| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check. **Ruled** (DEC-905, #509); brief [D1/01-skull-loss-dispatch](../briefs/D1/01-skull-loss-dispatch/plan.md) drafted 2026-11-18, eval approval **pending Bob** | R03 (fixtures b to e; a is a test-only D1 follow-up PR after F1, Wright 2026-11-18); DEC-938 rules the record's chapter | #499 |
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
 | D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |

@@ -14,7 +14,7 @@ Keep this a checklist; do not write a second design doc.
 - Mockup: none (no screen change)
 - Risk: High (game-loss state, restore)
 - Depends on: its approval.md on main. No step dependency: everything it changes is on main at 9ccd052.
-- Builds: DEC-905, DEC-931 (R03 fixtures b to e); MEC-033 .11 and .27, MEC-034 .19 and .36 as the cards now read
+- Builds: DEC-905, DEC-931, DEC-938 (R03 fixtures b to e); MEC-033 .11 and .27, MEC-034 .19 and .36 as the cards now read
 - Deps change: no
 - Runs: cloud
 
@@ -33,9 +33,13 @@ Keep this a checklist; do not write a second design doc.
 
 - **No file in this Touches list is in F1's Touches** (F1: MEC-026, MEC-038, the battle and Tomb loop code and fixtures, TB tests, one e2e spec). D1 touches no battle or Tomb file.
 - **POSSIBLE OVERLAP F1: `apps/bloodtower/src/engine/loops/day/clock.ts`**, only if F1's game-loss gate (TB-07) edits it rather than reading `isCorruptionLoss`. D1 adds, it does not rename. The later of the two PRs rebases.
-- **Interface, not a file overlap:** the battle trait drops (DEC-559 Magic, Humanoid) live in `apps/bloodtower/src/engine/loops/battle/**` (F1 / C4-02 #445), which is not on main. They must drop through `recordBuildingDrop` / `simulateSkullDrop` so they get D1's check. R03 fixture (a) is not an EV here (see Open questions).
-- **Not F1, but overlaps C3/15 (#438):** `apps/bloodtower/src/engine/loops/chapter/**`. C3/15 moves the freed-skull picks after Set the table's Done (DEC-929, DEC-933). D1 does not reorder; it only adds the check after each freed skull lands.
-- **Merge order:** F1 first (in flight). D1 may merge before or after F1; whichever lands second rebases on `loops/day/clock.ts`. D1 before C3/15; C3/15 keeps D1's check (EV-05, EV-11) when it reorders the close.
+- **Interface, not a file overlap:** the battle trait drops (DEC-559 Magic, Humanoid) live in `apps/bloodtower/src/engine/loops/battle/**` (F1 / C4-02 #445), which is not on main. They must drop through `recordBuildingDrop` / `simulateSkullDrop` so they get D1's check.
+- **OVERLAP C3/15 (#438): `apps/bloodtower/src/engine/loops/chapter/**`.** C3/15 moves the freed-skull picks after Set the table's Done (DEC-929, DEC-933). D1 does not reorder; it only adds the check after each freed skull lands. Whichever of D1 and C3/15 lands second rebases, and C3/15 keeps D1's check (EV-05, EV-11).
+- **Merge order:** F1 first (in flight). D1 may merge before or after F1; whichever lands second rebases on `loops/day/clock.ts`.
+
+### Follow-up (Wright, 2026-11-18)
+
+- **R03 fixture (a)**, a Magic or Humanoid skull dropped in a live battle that loses the game at once (no later round, reward or prompt), is a **test-only D1 follow-up PR, built after F1 merges**. It is not an F1 change and not a C4-02 (#445) amendment. It reuses D1's check through the battle loop's skull drop.
 
 ## What it does
 
@@ -72,20 +76,19 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - [ ] EV-09 (e2e, Playwright) passes.
 - [ ] EV-10 to EV-12 (survival) pass.
 - [ ] Anvil's report lists changed files, test commands and results, and any drift found.
-- Not required: R03 fixture (a) in a live battle; a physical Tower run; loss scene copy.
+- Not required: R03 fixture (a) in a live battle (the test-only follow-up PR after F1); a physical Tower run; loss scene copy.
 
 ## AREA / DEC checklist
 
-- [ ] DEC-905 (with the DEC-915 and DEC-933 amendments) and DEC-931 read; this brief follows them; no rule is changed here.
+- [ ] DEC-905 (with the DEC-915 and DEC-933 amendments), DEC-931 and DEC-938 read; this brief follows them; no rule is changed here.
 - [ ] DEC-676 (the stop), DEC-686 (trimmed by DEC-905), DEC-559 (Magic and Humanoid drops), DEC-092, DEC-093, DEC-919, DEC-929 read.
 - [ ] MEC-033 (.11, .25 to .29), MEC-034 (.19, .33, .36), MEC-032 (.43 to .49) read; no card edit is needed (#509 already made them).
 - [ ] C3/04 EV-05 and EV-12 say the loss is reported "at MEC-033 .11". DEC-905 moved the moment to the skull. Their approved eval.md is not edited; the day still hands up `lost` with the same reason, so they still pass. Bob's approval of this eval.md covers the timing change.
 - [ ] No AREA or DEC card reverses a Bob lock; none is needed from Bob beyond the eval approval.
 
-## Open questions (not ruled here)
+## Open questions
 
-- **OQ-D1-1 (Wright):** who carries R03 fixture (a) and the Humanoid skull in a live battle: an F1 follow-up, a C4-02 (#445) eval amendment with Bob's re-approval, or a D1 follow-up after the battle loop is on main?
-- **OQ-D1-2 (Gamewright):** when a freed skull loses after a won chapter, which chapter does the game record name: the chapter that closed, or the next one whose card has already shown under DEC-929? EV-05 does not assert it.
+- None open. Answered: R03 fixture (a) goes in a test-only D1 follow-up after F1 (Wright, 2026-11-18; see Follow-up). The chapter on the record after a freed-skull loss is the closing chapter (DEC-938; EV-05).
 
 ## Eval approval
 

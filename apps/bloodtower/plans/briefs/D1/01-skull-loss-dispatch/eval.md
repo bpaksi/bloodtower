@@ -39,11 +39,11 @@ All fixtures: the base board (16 buildings, 4 per kingdom), tuning `loss.fallen_
 - Fails if: the reason is `buildings` in (i), a skull loss overwrites `corruption` in (ii), or two losses are recorded.
 
 ### EV-05 — A freed skull that fells the fourth building loses the game (R03 b)
-- Requirement: DEC-905 as amended by DEC-933: the loss check runs after each freed skull lands; the rest are never asked; the next chapter never starts; the record says lost.
+- Requirement: DEC-905 as amended by DEC-933, and DEC-938: the loss check runs after each freed skull lands; the rest are never asked; the next chapter never starts; the record says lost in the closing chapter.
 - Method: unit
 - How: `chapter.test.ts` "D1 EV-05", with the C3/09 EV-04 fixture (`c3End: false`, tower, held 2, the seeded break frees 2). Before the win, three buildings fallen and one building at 3. Press the first freed skull onto the building at 3.
-- Pass evidence: outcome lost, reason `buildings`; no second freed-skull prompt; `skullsToPlace` is not decremented by a skull that was never asked; the chapter hands up `outcome: "lost"` with reason `buildings`; `store.entered` stays `[1]` (chapter 2's enter and its quest tokens never run); the game ends lost once.
-- Fails if: the second freed skull is offered, the chapter hands up `won`, or chapter 2 enters.
+- Pass evidence: outcome lost, reason `buildings`; no second freed-skull prompt; `skullsToPlace` is not decremented by a skull that was never asked; the chapter hands up `outcome: "lost"` with reason `buildings`; `store.entered` stays `[1]` (chapter 2's enter and its quest tokens never run); the chapter result and the game record name chapter 1, not chapter 2; the game ends lost once.
+- Fails if: the second freed skull is offered, the chapter hands up `won`, chapter 2 enters, or the record names chapter 2.
 
 ### EV-06 — No early loss
 - Requirement: DEC-905, DEC-915: lost only at supply 0 or 4 fallen.
@@ -99,6 +99,6 @@ All fixtures: the base board (16 buildings, 4 per kingdom), tuning `loss.fallen_
 ## Assumptions surfaced
 - The fatal skull's own line shows, then the loss; no effects panel (DEC-931 "then the loss scene plays"; DEC-905 "no later step").
 - A skull that stays inside the tower leaves the supply, so it can empty it (DEC-905 "the moment a skull leaves the supply"; DEC-686).
-- R03 (a), a Magic or Humanoid skull in a live battle, is not an EV here: no battle loop is on main → OQ-D1-1 in plan.md.
-- Which chapter the record names after a freed-skull loss is not asserted → OQ-D1-2 in plan.md.
+- R03 (a), a Magic or Humanoid skull in a live battle, is not an EV here: no battle loop is on main → the test-only D1 follow-up PR after F1 (Wright, 2026-11-18).
+- The record names the closing chapter after a freed-skull loss → DEC-938 (EV-05).
 - C3/04 EV-05 and EV-12 still pass as written; only the moment the loss is set moves (DEC-905).
