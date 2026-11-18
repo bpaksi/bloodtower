@@ -72,7 +72,7 @@ Bob's two Dark Tower reviews of Nov 12 are folded into this plan as **docs and i
 
 | Item | Status |
 |---|---|
-| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall), EE-01 (forced turn end not propagated) |
+| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall). EE-01 (forced turn end not propagated) moved to its own step, F1/02, on 2026-11-18 (Wright) |
 | Tests | TB-01 to TB-14 and R01 (specified, not run) |
 | Gamewright confirmation 1 (Nov 13, 5:50 AM ET) | **Received.** Entry terminal gate routing as written: MEC-038 alone applies the stance once, on a genuine entry; after each entry effect the gate runs game loss first, then foe gone = won, then all fallen = fallen close; no Fight/Retreat, round card or roll after a terminal entry; Continue replays nothing |
 | Gamewright confirmation 2 (Nov 13, 5:50 AM ET) | **Received.** **TB-03 is a Gamewright ruling:** a foe killed by Bold never uses its later pre-round ability (Ambush, Fire breath, or any other) |
@@ -112,6 +112,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | EE-03 | Coverage gap, mainly 1.1. Note only: the P-006 numbers do not prove the omitted mechanics | #475 (parked) |
 | BE-01, BE-04, CB-03, TP-02 (F8), D7, glyph part of BE-03, Long overlay, H02 | **Parked to 1.1**, label `parked-1.1` | #506 |
 | LC-05 | Withdrawn (DEC-886/D-04 already decide it). Keep a story-specific conformance test | none |
+| EE-01 (F1/02; moved out of F1/01 on 2026-11-18, Wright) | v1.0 now. Brief [F1/02-quest-ends-turn](../briefs/F1/02-quest-ends-turn/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-821 (provisional, DEC-914) and DEC-948. It wires the iPad Quest row and ends the turn after a quest pick. **It goes ahead of D4** (#504, PR #562), which builds on its Quest row and quest source. The F1 row above now means QD-03, CB-01, QD-01 only | #505 follow-up (issue to open) |
 
 ## The runner queue (v1.0)
 
