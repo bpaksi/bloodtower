@@ -15,6 +15,7 @@ import {
   ThreatBar,
 } from "./DayPanels";
 import { DialogFrame } from "./DialogFrame";
+import { EventScene } from "./EventScene";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
@@ -60,6 +61,9 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   // The hint is the loop's first beat: a Scroll holds the step back; under art it is a caption.
   const hint = view.hint ?? null;
   const holding = hint !== null && !hint.caption;
+  // An event scene replaces the day panels while it shows (C3/12); health and purse join the band.
+  const event = showMove ? (table?.event ?? null) : null;
+  const eventHero = (heroId: string) => event?.heroes.find((hero) => hero.heroId === heroId);
   return (
     <main
       className="bt-board"
@@ -93,12 +97,25 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         <header className="bt-band" id="band" data-band>
           {table.groups.map((group) => (
             <span key={group.heroId} data-hero-panel={group.heroId}>
-              <span data-health="unavailable">{group.heroName} unavailable</span>
+              {eventHero(group.heroId)?.hp ? (
+                <span
+                  data-health={`${eventHero(group.heroId)?.hp?.hp}/${eventHero(group.heroId)?.hp?.max}`}
+                >
+                  {group.heroName} {eventHero(group.heroId)?.hp?.hp}/
+                  {eventHero(group.heroId)?.hp?.max}
+                </span>
+              ) : (
+                <span data-health="unavailable">{group.heroName} unavailable</span>
+              )}
               <HeroCorruptionMarks table={table} heroId={group.heroId} />
               <HeroCorruptions table={table} heroId={group.heroId} />
             </span>
           ))}
-          <span data-purse="unavailable">unavailable</span>
+          {event && event.purse !== null ? (
+            <span data-purse={event.purse}>{event.purse} gold</span>
+          ) : (
+            <span data-purse="unavailable">unavailable</span>
+          )}
           <span data-chapter>{table.chapter}</span>
           <span data-day>Day {table.day}</span>
           <DayBandExtras table={table} />
@@ -109,10 +126,13 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
         </header>
       ) : null}
       {showMove && table ? <ThreatBar table={table} /> : null}
-      {showMove && table && !paused && !holding ? <DayPanel table={table} /> : null}
-      {showMove && table?.virtue && !paused && !holding ? <VirtuePanel table={table} /> : null}
+      {event && !paused && !holding ? <EventScene scene={event} /> : null}
+      {showMove && table && !event && !paused && !holding ? <DayPanel table={table} /> : null}
+      {showMove && table?.virtue && !event && !paused && !holding ? (
+        <VirtuePanel table={table} />
+      ) : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor && !table.virtue && !paused && !holding ? (
+      {showMove && table?.waitingFor && !table.virtue && !event && !paused && !holding ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
           <p className="bt-waiting-pulse" data-waiting role="status">
             {table.waitingFor}
