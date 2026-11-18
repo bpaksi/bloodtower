@@ -15,19 +15,18 @@ Auto-advance: the close Scroll and the glyph/boon Reveal have no Next; each adva
 
 ## Purpose
 
-C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll, the lit seal, the glyph and boon on a Reveal with the Loremaster's seal line (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-10), then the freed-skull prompts on the iPad (kingdom, then building). The C3 "Done" confirm becomes the real pick: the iPad confirms which seal broke on the tower.
+C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll, the next chapter's card (story first; PT-21), then Set the table, the glyph and boon on a Reveal with the Loremaster's seal line (Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET) (Q-C4-10), then the freed-skull prompts on the iPad (kingdom, then building). The C3 "Done" confirm is now the seal row of Set the table: the iPad confirms which seal broke on the tower (PT-21, DEC-929, EV-22). Set the table comes after the next chapter's card. Title `table.title` "Set the table". Rows in order: the seal's name (`table.row.seal` "{seal}"), "Freed skulls: {N}" (`table.row.skulls`), "Quest tokens: {quests}" (`table.row.tokens`). One Done (`table.done`), not gated on ticks. Skull kingdom and building picks stay after Done. No seal or skull rows without the tower.
 
 ## States and player actions
 
 - Board: shows the state and every line "The chapter is won. A seal breaks. / {hero} gained {item}. / Skulls are freed. Choose a kingdom." (Copy table: board.* rows); never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, "Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull." (Copy table: help.seal-break-live), `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, "Tick the rows on Set the table as an aid, then tap Done. Then pick a kingdom and a building for each freed skull and tap Place skull." (Copy table: help.seal-break-live), `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
-- Seal broken state: the iPad title is the seal's name, "The Road Seal", "The Keep Seal" or "The Warden's Seal" for seals 1–3 (Loremaster's story text; Gamewright ruling).
-- Seal step: **Seal broken** (confirms the tower's seal broke; replaces C3's Done).
-- Each freed skull: one button per kingdom by name (e.g. **Arisilon**), then one per building by name, then **Place skull**.
+- Set the table (after the next chapter's card; mockup `#set-table-seal`): title **Set the table** (Copy table: `table.title`). Check rows in order: the seal's name (`table.row.seal` "{seal}"; "The Road Seal", "The Keep Seal" or "The Warden's Seal" for seals 1–3; Loremaster's story text; Gamewright ruling), **Freed skulls: {N}** (`table.row.skulls`), **Quest tokens: {quests}** (`table.row.tokens`). One **Done** (`table.done`), not gated on ticks. Skull kingdom and building picks stay after Done. No seal or skull rows without the tower.
+- Each freed skull (after Done): one button per kingdom by name (e.g. **Arisilon**), then one per building by name, then **Place skull**.
 
 ## Tokens
 
@@ -51,4 +50,4 @@ Back to the loop that called it (see ./plan.md).
 
 ## Log events
 
-- `chapter.stamp`: the chapter stamp shows. `scroll.shown`: the close Scroll plays. `seal.broken`: Seal broken is pressed. `glyph.revealed`: the glyph and boon Reveal shows. `skulls.placed`: the last freed skull is placed.
+- `chapter.stamp`: the chapter stamp shows. `scroll.shown`: the close Scroll plays. `chapter.card`: the next chapter's card shows (story first; EV-01). `seal.broken`: the tower's seal break (EV-01; the Set the table seal check records `seal_broken` when Done is pressed, for a ticked row only; EV-05, EV-24). `glyph.revealed`: the glyph and boon Reveal shows. `table.done`: Set the table's Done is pressed. `skulls.placed`: the last freed skull is placed.

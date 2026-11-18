@@ -32,8 +32,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 ### EV-04 — Screenshots match
 - Requirement: UI-044.
 - Method: screenshot
-- How: mockup `#seal`, `#skull`.
-- Pass evidence: pixel diff under 1% against `#seal`, `#skull`.
+- How: mockup `#set-table-seal`; skull picks `#s=3` (Freed skull: kingdom) and `#s=4` (Freed skull: building). Those skull tabs have no element id.
+- Pass evidence: pixel diff under 1% against `#set-table-seal`, `#s=3`, `#s=4`.
 - Fails if: any image over 1% diff.
 
 ### EV-05 — Seal broken confirms the tower's seal (Amended 2026-11-14 (PT-21))
@@ -61,7 +61,7 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Requirement: "?" opens a help sheet on the iPad for this screen; Close returns to the same state; help does not pause and sends nothing (C2-04, C3 rule).
 - Method: playwright
 - How: on each state (close Scroll, Set the table, glyph and boon Reveal, skull kingdom pick, skull building pick) press "?", then Close.
-- Pass evidence: the sheet's `data-help-screen` is `seal-break-live` and its text is exactly "Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull." (Loremaster 2026-10-31); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
+- Pass evidence: the sheet's `data-help-screen` is `seal-break-live` and its text is exactly the Copy table `help.seal-break-live` line (Loremaster, 2026-11-18; PT-21 rewrite); the host receives 0 messages from the iPad while it is open and `paused` is unchanged; after Close the same state shows.
 - Fails if: help is missing, shows on the board, shows another screen's text, sends a message, pauses the game or changes state.
 
 ### EV-09 — Beats auto-advance
@@ -191,4 +191,5 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 > Note (Q-C4-10): the docs use pick (a), the Loremaster per chapter. If Bob picks (b), the Narrator line kept for it is: "A seal breaks. The tower shudders."
 - ANSWERED (PT-21, Bob, 2026-11-14, adopted; Gamewright to confirm): the freed-skull picks come after Set the table's Done (EV-01, EV-17).
 - ANSWERED (PT-21, Bob, 2026-11-14, adopted): Done is not gated on ticking every row (EV-24).
-- ANSWERED (PT-21, copy; Loremaster, 2026-11-16, step 45): the seal row label is `{seal}` (Copy table `table.row.seal`; EV-13). `help.seal-break-live` still reads the old "Tap Seal broken…" line and was not rewritten in this pass.
+- ANSWERED (PT-21, copy; Loremaster, 2026-11-16, step 45): the seal row label is `{seal}` (Copy table `table.row.seal`; EV-13).
+- ANSWERED (PT-21, copy; Loremaster, 2026-11-18, step 45): `help.seal-break-live` is rewritten so it no longer says "Tap Seal broken…". The confirm is Set the table's Done; the skull-pick sentence is unchanged.
