@@ -7,7 +7,7 @@ import {
   startRootLoop,
 } from "../../loop/runtime.ts";
 import type { LoopDefinition, LoopRegistry } from "../../loop/types.ts";
-import { checkChapter, ensureClock, markQuestWon } from "../day/clock.ts";
+import { checkChapter, ensureClock, markQuestWon, setBuildingSkulls } from "../day/clock.ts";
 import type { DayResult } from "../day/loop.ts";
 import { skullRecordPromptId } from "../day/skull.ts";
 import { ensureQuests } from "../quest/store.ts";
@@ -422,5 +422,102 @@ describe("chapter loop (MEC-033)", () => {
       outcome: "won",
       chapter: 2,
     });
+  });
+});
+
+/*
+ * D1 / 01-skull-loss-dispatch: a freed skull that fells the fourth building loses the game at once
+ * (DEC-905 as amended by DEC-933, DEC-938). The C3/09 EV-04 fixture: tower, held 2, the break frees 2.
+ */
+describe("D1 a freed skull that loses the game", () => {
+  /** Three buildings fallen (south and west) and one at 3, then the won chapter breaks a seal. */
+  const toBreak = (): { run: Run; fatal: string } => {
+    const run = setup({ c3End: false, tower: true });
+    ensureClock(run.play).held = 2;
+    for (const id of [spaceIn("S", 0), spaceIn("S", 1), spaceIn("W", 0)]) {
+      setBuildingSkulls(run.play, id, 4);
+    }
+    const fatal = spaceIn("W", 1);
+    setBuildingSkulls(run.play, fatal, 3);
+    script = { 1: { done: ["herald", "ambush"] } };
+    start(run);
+    return { run, fatal };
+  };
+
+  const pressFreed = (run: Run, target: string): void => {
+    const frame = chapterFrame(run);
+    if (!frame) throw new Error("no chapter frame");
+    frame.local = handleChapterPress(
+      frame.local as ChapterLocal,
+      skullRecordPromptId(run.play.dayNumber, target),
+    );
+    // Clear the open prompt, so a prompt offered after this press is the only one left to see.
+    run.runtime.prompt = null;
+    resume(run);
+  };
+
+  const expectLostAtFirstFreedSkull = (run: Run): void => {
+    const store = ensureChapters(run.play);
+    expect(ensureClock(run.play).outcome).toEqual({ lost: true, reason: "buildings" });
+    // The second freed skull is never asked and never counted.
+    expect(store.skullsToPlace).toBe(1);
+    expect(run.runtime.prompt).toBeNull();
+    expect(chapterResult(run)).toMatchObject({
+      outcome: "lost",
+      reason: "buildings",
+      chapter: 1,
+      last: false,
+    });
+    expect(store.entered).toEqual([1]);
+    expect(store.placing).toBeNull();
+    expect(store.nodes).not.toContain("enter:2");
+  };
+
+  it("EV-05: the first freed skull fells the fourth building; the rest are never asked", () => {
+    const { run, fatal } = toBreak();
+    const store = ensureChapters(run.play);
+    expect(store.skullsToPlace).toBe(2);
+    expect(run.runtime.prompt?.promptId).toContain("skull-record--");
+    pressFreed(run, fatal);
+    expectLostAtFirstFreedSkull(run);
+    // A second press on any standing building changes nothing.
+    const before = { ...ensureClock(run.play).skulls };
+    const frame = chapterFrame(run);
+    const other = spaceIn("N", 2);
+    if (frame) {
+      handleChapterPress(
+        frame.local as ChapterLocal,
+        skullRecordPromptId(run.play.dayNumber, other),
+      );
+    }
+    expect(ensureClock(run.play).skulls).toEqual(before);
+    expect(store.skullsToPlace).toBe(1);
+  });
+
+  it("EV-11: Continue mid freed-skull placement, then the fatal skull loses the same way", () => {
+    const first = toBreak();
+    const saved = snapshotChapters(first.run.play);
+    const savedDay = first.run.play.dayNumber;
+    expect(ensureChapters(first.run.play).skullsToPlace).toBe(2);
+
+    // A new process: the store comes from the save; the board's skulls come back too.
+    const again = setup({ c3End: false, tower: true });
+    again.play.dayNumber = savedDay;
+    for (const id of [spaceIn("S", 0), spaceIn("S", 1), spaceIn("W", 0)]) {
+      setBuildingSkulls(again.play, id, 4);
+    }
+    setBuildingSkulls(again.play, first.fatal, 3);
+    const store = restoreChapters(again.play, saved);
+    script = { 2: { done: ["c2-a"] } };
+    start(again);
+    // Still placing: no seal broke again, no skulls freed again, chapter 2 not entered.
+    expect(store.brokenSeals).toHaveLength(1);
+    expect(store.skullsToPlace).toBe(2);
+    expect(store.entered).toEqual([1]);
+    expect(again.runtime.prompt?.promptId).toContain("skull-record--");
+
+    pressFreed(again, first.fatal);
+    expectLostAtFirstFreedSkull(again);
+    expect(again.play.dayNumber).toBe(savedDay);
   });
 });

@@ -1,5 +1,6 @@
 import { playState } from "../chapter/playState.ts";
 import { eventOptions, eventTuningFrom, refreshLedger } from "../event/index.ts";
+import { isGameLost } from "./clock.ts";
 import { type DayLocal, parseEventChoicePrompt } from "./loop.ts";
 import { applySkullRecord, parseSkullRecordPrompt } from "./skull.ts";
 
@@ -35,6 +36,8 @@ export const handleDayPress = (local: DayLocal, promptId: string, actionId: stri
     return { ...local, awaitingPress: true, skullPlaced: true };
   }
   if (local.phase === "skull-place" && actionId === "record") {
+    // The game is lost: no further skull is recorded (DEC-905, DEC-676).
+    if (isGameLost(playState())) return local;
     const parsed = parseSkullRecordPrompt(promptId);
     if (parsed && applySkullRecord(parsed.day, parsed.target)) {
       return { ...local, awaitingPress: true, skullPlaced: true };

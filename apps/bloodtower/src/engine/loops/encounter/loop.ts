@@ -1,6 +1,6 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { groupById, playState } from "../chapter/playState.ts";
-import { ensureClock, heroSheet, isCorruptionLoss } from "../day/clock.ts";
+import { ensureClock, heroSheet, isGameLost } from "../day/clock.ts";
 import { beginQuest, openQuestAt, type QuestResult } from "../quest/quest.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
 import {
@@ -68,7 +68,7 @@ export const encounterLoop: LoopDefinition<EncounterLocal, EncounterResult> = {
   },
   body: (local, ctx) => {
     // DEC-676: a third corruption stops the encounter at once.
-    if (isCorruptionLoss(playState())) return { local, passComplete: true };
+    if (isGameLost(playState())) return { local, passComplete: true };
     if (local.left) return { local, passComplete: true };
 
     let current = local;
@@ -84,7 +84,7 @@ export const encounterLoop: LoopDefinition<EncounterLocal, EncounterResult> = {
     offerStep(current, ctx);
     return { local: { ...current, awaitingPress: true }, passComplete: false };
   },
-  exit: (local) => Boolean(local.left) || isCorruptionLoss(playState()),
+  exit: (local) => Boolean(local.left) || isGameLost(playState()),
   resultUp: (local) => ({ left: true, movesLeft: local.movesLeft }),
 };
 

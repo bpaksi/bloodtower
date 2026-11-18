@@ -155,6 +155,12 @@ export const isCorruptionLoss = (play: PlayState): boolean => {
   return outcome?.lost === true && outcome.reason === "corruption";
 };
 
+/**
+ * True once the game is lost for any reason (DEC-676, DEC-905): a third corruption, the last skull
+ * out of the supply, or the fourth fallen building. Every open loop stops; no skull follows.
+ */
+export const isGameLost = (play: PlayState): boolean => ensureClock(play).outcome?.lost === true;
+
 export const markQuestWon = (play: PlayState): void => {
   ensureClock(play).questsWon += 1;
 };
@@ -188,6 +194,17 @@ const spendSupply = (clock: DayClock): boolean => {
   return true;
 };
 
+/**
+ * The loss check after a skull leaves the supply or lands (DEC-905, DEC-915): supply 0, then the
+ * fourth fallen building, in `checkChapter`'s order. A loss already set is never overwritten, so a
+ * third corruption keeps its reason. A game still going is left as it was.
+ */
+const settleLoss = (clock: DayClock): void => {
+  if (clock.outcome?.lost === true) return;
+  const verdict = checkChapter(clock);
+  if (verdict.lost) clock.outcome = verdict;
+};
+
 /** One skull on a building. The 4th skull is what makes `isFallen` true. */
 export const recordBuildingDrop = (
   play: PlayState,
@@ -195,6 +212,7 @@ export const recordBuildingDrop = (
   kingdom: KingdomId,
 ): boolean => {
   const clock = ensureClock(play);
+  if (clock.outcome?.lost === true) return false;
   if (isFallen(play, spaceId)) return false;
   if (!spendSupply(clock)) return false;
   clock.skulls[spaceId] = (clock.skulls[spaceId] ?? 0) + 1;
@@ -207,16 +225,19 @@ export const recordBuildingDrop = (
     clock.pendingKingdoms.shift();
     clock.expectKingdom = clock.pendingKingdoms[0] ?? null;
   }
+  settleLoss(clock);
   return true;
 };
 
 export const recordHeldSkull = (play: PlayState): boolean => {
   const clock = ensureClock(play);
+  if (clock.outcome?.lost === true) return false;
   if (clock.expectKingdom) return false;
   if (!spendSupply(clock)) return false;
   clock.held += 1;
   clock.log.push({ kind: "held" });
   clock.events.push({ kind: "held-skull" });
+  settleLoss(clock);
   return true;
 };
 
