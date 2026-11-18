@@ -15,18 +15,19 @@ Mark the start and the end of each chapter, and show the seal and glyph the win 
 - **Chapter card** (UI-020): painting, "The Roads", "Hear the herald in Greyford. Then open the forest road." (Copy table: chapter.1.name, chapter.1.goal).
 - **Stamped won** (.15).
 - **Close Scroll** (.14): "The roads are quiet again.".
-- **Seal break** (.18 to .21, tower only): lit seal, break it, the glyph and "Its glyph lends you strength: {boon}." (Copy table: seal.boon; the base pack supplies the boon, Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off)
-- **Freed skulls** (.22 to .30; C4+ only, not in C3: shown when c3_end_after_chapter_1 is off): kingdom for each, then the building, as after a drop.
+- **Set the table** (PT-21, DEC-929, after the next chapter's card; mockup `#set-table` and `#set-table-no-tower`): title "Set the table" (Copy table: `table.title`). Rows in order: the seal's name (`table.row.seal` "{seal}"), "Freed skulls: {N}" (`table.row.skulls`; only when skulls were freed, C4+), "Quest tokens: {quests}" (`table.row.tokens`). One **Done** (`table.done`), not gated on ticks. No seal or skull rows without the tower (`#set-table-no-tower` lists the quest tokens only). Skull kingdom and building picks stay after Done (C4+). Help for this step is `help.set-the-table`: "Tick the rows that show as an aid, then tap Done. You do not have to tick them all."
+- **Seal break** / glyph Reveal (.18 to .21, tower only): lit seal, the glyph and "Its glyph lends you strength: {boon}." (Copy table: seal.boon; the base pack supplies the boon, Q-C3-17). (C4+ only; shown when c3_end_after_chapter_1 is off). The Reveal stays right after the seal break as a story beat.
+- **Freed skulls** (.22 to .30; C4+ only, not in C3: shown when c3_end_after_chapter_1 is off): after Set the table's Done, kingdom for each, then the building, as after a drop.
 - **C3 chapter 1 win** (Q-C3-01): the stamped card, then the close Scroll, then the outcome scene (feature 16); no seal, no freed skulls (Bob approved 2026-10-31).
 - Story text on this screen is in the Copy table in ./plan.md; the close line is the one Bob approved 2026-10-31.
 
 ## Player actions
 
-- iPad: no Next; the chapter card, the stamped card and the close Scroll each auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET). Confirm the seal is broken (Done) (C4+ only; shown when c3_end_after_chapter_1 is off); name the kingdom and building for each freed skull.
+- iPad: no Next; the chapter card, the stamped card and the close Scroll each auto-advances when its narration or cue ends (4 s with no audio; Bob 2026-10-31 10:38 AM ET). Set the table waits for **Done** (not gated on ticks). After Done, name the kingdom and building for each freed skull (C4+ only; shown when c3_end_after_chapter_1 is off).
 
 ## Mechanics behind it
 
-UI-020 at each chapter's start (painting, name, goal) and stamped won at its end; UI-044: the chapter's close on a Scroll, then the seal break on a Reveal with the glyph and its boon (DEC-303), then the freed-skull placement (DEC-409). Without the tower the seal part is skipped (DEC-306).
+UI-020 at each chapter's start (painting, name, goal) and stamped won at its end; UI-044: the chapter's close on a Scroll, then the next chapter's card (story first; PT-21), then Set the table, the seal break on a Reveal with the glyph and its boon (DEC-303), then the freed-skull placement after Done (DEC-409). Without the tower the seal and skull rows are skipped (DEC-306).
 
 ## What happens next
 
