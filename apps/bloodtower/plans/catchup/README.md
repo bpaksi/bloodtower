@@ -90,7 +90,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
 | D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
-| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope | R06 | #502 |
+| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope. **Ruled** (DEC-911, #509); brief [D5/01-pool-pays](../briefs/D5/01-pool-pays/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-944 rules which gold moves the pool pays | R06 | #502 |
 | D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
 
 ### Mapping of the 30 findings into the v1.0 plan
