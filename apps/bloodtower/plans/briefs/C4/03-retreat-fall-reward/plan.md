@@ -32,12 +32,14 @@ Cutover: N
 
 - Continue, restore, and restart must keep:
   - A grown foe keeps its level across Continue and across days.
+  - A retreated or fallen Tomb battle leaves the room uncleared with its living foe's count; battle reward, fall penalty and the battle-end hook happen once (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: EV-12, EV-13, EV-14).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-11 all pass (verifier table on PR).
+- [ ] EV-12 … EV-14 (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: a retreat or fall leaves the Tomb room uncleared with the foe's count; loss, reward and penalty happen once) pass.
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist

@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-06; survival evals last (EV-06).
+- Done-when: EV-01 … EV-14; survival evals last (EV-11, EV-14).
+- Amended 2026-11-18: EV-12 to EV-14 moved from F1 / 01-tomb-to-battle (#505), Bob 2026-11-18 7:12 AM ET (F1 became cards-only). Needs Bob's new approval row.
 
 ## Checks
 
@@ -78,6 +79,24 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: still level 2.
 - Fails if: any step.
 
+### Moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: retreat keeps the room uncleared (EV-12, EV-13)
+
+Source: F1 / 01-tomb-to-battle eval.md and docs/audits/2026-11-12-f1-tomb-to-battle-package.md section 4. Fixtures: own-turn Tomb visit, zero corruptions unless set, no companion, guard, conditional Advantage, item or story effect unless named; foe level and status fixed, status draw forced no-step where a count is asserted. Use direct fixture state and injected card and RNG outcomes.
+
+### EV-12 — Retreat keeps the room uncleared (moved from F1 TB-09 / EV-09)
+- Requirement: DEC-497, DEC-651, QD-01: a living foe stays, count kept, no board token, no move cost.
+- Method: unit
+- How: living foe, count 7; forced retreat status draw no-step; a last-attack fixture that changes nothing; retreat and return to the Tomb.
+- Pass evidence: room uncleared; count 7; no external foe token; Tomb result left; group stays on the Tomb space; no move spent.
+- Fails if: the room clears, the count resets or drops, or a move is charged.
+
+### EV-13 — Retreat's last attack fells everyone (moved from F1 TB-11 / EV-11)
+- Requirement: DEC-671, DEC-497, QD-01.
+- Method: unit
+- How: standing foe, one hero 1 HP, no corruption or companion; lethal retreat card; forced status no-step.
+- Pass evidence: classified fallen and outside the Tomb; the foe stays, room uncleared; fall penalties once; no second last attack on return through the caller.
+- Fails if: a second last attack, a cleared room, or penalties twice.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-11 — A grown foe survives Continue
@@ -86,6 +105,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: grow a foe, quit, Continue.
 - Pass evidence: same level on the board.
 - Fails if: reset.
+
+### EV-14 — Loss, reward and penalty happen once (moved from F1 EV-17, Bob 2026-11-18 7:12 AM ET)
+- Requirement: DEC-676 and DEC-905 (one game-loss unwind), DEC-119 and DEC-120 (battle close once), the quest wrapper owns the quest reward.
+- Method: unit
+- How: run C4 / 02 EV-23, EV-26, EV-28 and C4 / 06 EV-16 B (moved from F1 TB-02, TB-05, TB-07, TB-14 B) with a counter on the game-loss exit, the battle-end hook, the battle reward and the fall penalty.
+- Pass evidence: each counter is exactly 1 where it applies and 0 elsewhere (game loss only in EV-28; no battle reward in EV-26 or EV-28).
+- Fails if: any counter is 2, or a loss and a normal close both fire.
 
 ## Assumptions surfaced
 

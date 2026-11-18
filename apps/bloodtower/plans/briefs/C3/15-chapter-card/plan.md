@@ -74,7 +74,7 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 19–2
 | 9 | `chapter.3.name` | The Tower | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (C4+) |
 | 10 | `chapter.3.goal` | Open the sealed gate on the Tower road. Break his guard on the Grass Sea. Then climb. | research/stories/ruined-keep/script.md (Bob accepted 2026-11-06) (C4+) |
 | 11 | `seal.boon` | Its glyph lends you strength: {boon}. | placeholder - reconfirm at C4 boons (approved placeholder; C4+ only, shown when c3_end_after_chapter_1 is off; the app picks the boon, Q-C3-17) |
-| 12 | `seal.done` | Done | C3 button; C4-13 replaces it with 'Seal broken' (C4+ only) |
+| 12 | `seal.done` | Done | C3 button; C4-13 keeps Done, which now confirms Set the table (PT-21, DEC-929), and the seal break follows |
 | 13 | `skulls.prompt` | Skulls are freed. Choose a kingdom. | C4-13 board line (C4+ only; same view) |
 | 14 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
 | 15 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |

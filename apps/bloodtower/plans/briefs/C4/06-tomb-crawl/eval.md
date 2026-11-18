@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-10; survival evals last (EV-10).
+- Done-when: EV-01 … EV-18; survival evals last (EV-14, EV-18).
+- Amended 2026-11-18: EV-15 to EV-18 moved from F1 / 01-tomb-to-battle (#505), Bob 2026-11-18 7:12 AM ET (F1 became cards-only). Needs Bob's new approval row.
 
 ## Checks
 
@@ -99,6 +100,31 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no move or gold spent; board sound `snd.listen_nothing` / `snd.listen_trap` / `snd.listen_battle` by kind, each time.
 - Fails if: a cost, a refusal, or a wrong sound id.
 
+### Moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: the Tomb room and its foe across visits (EV-15 to EV-17)
+
+Source: F1 / 01-tomb-to-battle eval.md and docs/audits/2026-11-12-f1-tomb-to-battle-package.md section 4. Fixtures: own-turn Tomb visit, zero corruptions unless set, no companion, guard, conditional Advantage, item or story effect unless named; foe level and status fixed. Rewards are release-appropriate (no gear, potion or treasure deck loot in 1.0). Rules: MEC-026 .16 (passes the stance and foe, applies nothing) and .18 (a battle room clears only on won).
+
+### EV-15 — Another group meets the same foe (moved from F1 TB-10 / EV-10)
+- Requirement: DEC-151, DEC-602, DEC-651, DEC-682: same room and foe, one fresh Bold cut.
+- Method: unit
+- How: Continue from C4 / 03 EV-12's save; second group of the same size; same level and status; new genuine visit with Bold.
+- Pass evidence: same room and foe identity (not regenerated); one cut 7 to 6; room not pre-cleared.
+- Fails if: the foe is refilled or regenerated, or the room starts cleared.
+
+### EV-16 — Leave, and a guardian falling to Bold (moved from F1 TB-14 / EV-14)
+- Requirement: DEC-490, DEC-491, DEC-494, DEC-821, QD-01.
+- Method: unit
+- How: A: Leave before opening the next room. B: the guardian falls to entry Bold in a safe fixture.
+- Pass evidence: A: exits with no room, foe or reward change (leaving before entering clears nothing). B: guardian cleared, Tomb done, battle close once; only the quest wrapper pays the quest reward.
+- Fails if: Leave clears a room or pays out, or the battle reward and quest reward double up.
+
+### EV-17 — Entry, retreat and re-entry end to end (moved from F1 EV-15; R01 minus EE-01)
+- Requirement: R01: exactly one stance effect, no actions after a terminal entry, a retreat leaves the room uncleared. The quest turn-end clause of R01 is EE-01 and stays out of scope.
+- Method: playwright
+- How: one spec under `apps/bloodtower/src/e2e/tests/` with seeded state. (a) Bold into a count-1 foe: the page goes straight to the won result with no Fight/Retreat buttons. (b) On guard into a 1-HP hero: straight to the fallen result with no action buttons. (c) A count-7 foe, Retreat, back at the Tomb: the room shows uncleared, then a second visit with Bold shows count 6. (d) Reload mid-battle after the cut and Continue: the count does not drop again.
+- Pass evidence: each state is reached with the named buttons absent or present as stated; the counts are 0, 7 and 6 as stated; the reload leaves the count unchanged.
+- Fails if: any action control shows after a terminal entry, the room clears on retreat, or Continue cuts again.
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-14 — Rooms kept across Continue
@@ -107,6 +133,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - How: clear 3 rooms, quit, Continue, re-enter.
 - Pass evidence: same layout, 3 cleared.
 - Fails if: new layout.
+
+### EV-18 — An uncleared room survives restore (moved from F1 EV-16, room-flag part, Bob 2026-11-18 7:12 AM ET)
+- Requirement: the F1 survival invariant: a retreated or fallen battle leaves the room uncleared with its living foe's count (DEC-497, DEC-651, DEC-675).
+- Method: unit
+- How: save and restore after a retreat and after a fall; resume; compare with an uninterrupted run. The entry-effect part of the same check is EV-32 in C4 / 02.
+- Pass evidence: the room flag, the foe's count and the Tomb result equal the uninterrupted run.
+- Fails if: a restore clears the room or loses the foe's count.
 
 ## Assumptions surfaced
 
