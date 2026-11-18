@@ -52,7 +52,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Copy
 
-Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 31–35 filled 2026-11-16 (step 45). Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
+Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 31–35 filled 2026-11-16 (step 45); row 29 rewritten 2026-11-18 (step 45) for PT-21. Beat order is the table order. A build shows the text below, not the sample text in mockup.html. Locked lines are copied verbatim and cite their source. Words in braces are filled in by the app. Captions equal the spoken text and stay at or under 120 characters. A source marked DRAFT is a best draft waiting on the named owner.
 
 | # | Slot | Exact text | Source |
 |---|------|------------|--------|
@@ -84,7 +84,7 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12; rows 31–3
 | 26 | `toolbar.help` | ? | C2 feature 04 (Bob 2026-10-31 10:37); aria-label "Help" |
 | 27 | `toolbar.menu` | (gear icon, aria-label "Menu") | C2 feature 04 (Bob 2026-10-31 10:37); icon, no visible text |
 | 28 | `help.title` | Help | C2 feature 04 |
-| 29 | `help.seal-break-live` | Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull. | locked 2026-10-31 (Loremaster); same text in screen-spec |
+| 29 | `help.seal-break-live` | Tick the rows on Set the table as an aid, then tap Done. Then pick a kingdom and a building for each freed skull and tap Place skull. | new - Loremaster (PT-21, DEC-929, EV-08, EV-24). Rewritten: the Seal broken press is gone; the confirm is Set the table's Done (rows 31–35). The second sentence is the locked 2026-10-31 skull-pick instruction, kept. Help is the same on every state of this screen (`data-help-screen` = `seal-break-live`), including Set the table; C3/15 uses `help.set-the-table` for that step alone |
 | 30 | `help.close` | Close | C2 feature 04 |
 | 31 | `table.title` | Set the table | ruling PT-21 and DEC-929 name the step "Set the table"; Loremaster confirms the words. Same slot as C3/15 `table.title` |
 | 32 | `table.row.seal` | {seal} | new - Loremaster (PT-21, DEC-929). Replaces the `button.seal-broken` press. `{seal}` is the locked name from rows 2–4 (The Road Seal, The Keep Seal, The Warden's Seal). EV-13 requires the row to read exactly that name, not a generic title. The row is absent with no tower (DEC-306, EV-21) |
