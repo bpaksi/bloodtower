@@ -93,6 +93,8 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | D5 (high) | BE-05 | Absent-hero funding and present-group debit scope | R06 | #502 |
 | D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
 
+**D4 brief** (#504): ruled by DEC-910 (#509), with DEC-942 and DEC-943 for the two cases it left; brief [D4/01-fallen-building-keeps-quest](../briefs/D4/01-fallen-building-keeps-quest/plan.md) drafted 2026-11-18, eval approval **pending Bob**. Independent of F1, D2 and D3; with D1 either order.
+
 ### Mapping of the 30 findings into the v1.0 plan
 
 | Finding(s) | Destination | Plan hook |
