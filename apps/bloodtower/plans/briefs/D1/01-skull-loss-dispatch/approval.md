@@ -5,6 +5,6 @@
 | eval.md | Bob | 2026-11-18 7:02 AM ET, in Anvil's chat ("Test plans approved") | | blob b935a408 |
 | mockup.html | n/a | | | no mockup: no screen change |
 
-APPROVED. This brief was drafted on 2026-11-18 for issue #499 (ruling DEC-905, #509). Bob approved eval.md as written on 2026-11-18 at 7:02 AM ET (first row, version blob b935a408). The build may start.
+PENDING RE-APPROVAL. This brief was drafted on 2026-11-18 for issue #499 (ruling DEC-905, #509). Bob approved eval.md on 2026-11-18 at 7:02 AM ET (first row, version blob b935a408). Gamewright's follow-up commit then changed eval.md (now blob 00683f56). The build waits until Bob approves that version.
 
 Bob's approval also covers the timing note on C3/04 EV-05 and EV-12 (plan.md, AREA / DEC checklist): the loss is now set at the skull, not first at MEC-033 .11.
