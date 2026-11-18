@@ -46,11 +46,11 @@ All fixtures: own-turn Tomb visit or plain battle as named; no Advantage, compan
 - Fails if: the fallen hero is benched, kept at 0, or the Tomb ends.
 
 ### EV-06 — A trap fells every hero: the Tomb fails, no gold lost
-- Requirement: DEC-906, DEC-642, MEC-037 .6, DEC-177.
+- Requirement: DEC-906, DEC-940, DEC-642, MEC-037 .6, DEC-177.
 - Method: unit
 - How: `R04-EV-06`. (a) Two heroes at 2 and 1 HP; Falling Rocks. (b) Solo hero at 4 HP; Pit. Group purse 30.
-- Pass evidence: Tomb result `failed`; the quest is failed; the group is back on the Tomb's board space; purse 30; each hero 1 HP with corruptions +1; no further room prompt; no gold-loss line.
-- Fails if: gold is taken, the result is `left` or unset, a hero is left at 0, or another room is offered.
+- Pass evidence: Tomb result `failed`; the quest is failed; the group is back on the Tomb's board space; purse 30; each hero 1 HP with corruptions +1; no further room prompt; no gold-loss line; the trap room is marked cleared in the kept tomb layout (DEC-940).
+- Fails if: gold is taken, the result is `left` or unset, a hero is left at 0, another room is offered, or the trap room stays live.
 
 ### EV-07 — A trap's third corruption loses the game at once
 - Requirement: DEC-906, DEC-676.
@@ -94,6 +94,27 @@ All fixtures: own-turn Tomb visit or plain battle as named; no Advantage, compan
 - Pass evidence: the existing game-loss unwind runs once (outcome `corruption`); no battle close: no fall penalty, no gold loss, no reward, no battle-ends hook.
 - Fails if: the battle closes as fallen, or any close step runs before or after the loss.
 
+### EV-16 — Falling Rocks is one effect, then the loss check
+- Requirement: DEC-939, DEC-906, DEC-676.
+- Method: unit
+- How: `R04-EV-16`. Two heroes: A at 2 HP with 2 corruptions, B at 2 HP with 0; Falling Rocks (2 each). Run again with the heroes in the other group order.
+- Pass evidence: both runs: A 1 HP with 3 corruptions, B 1 HP with 1 corruption; the game-loss unwind runs once (outcome `corruption`); no Tomb result, room prompt or quest result after it; the HP and corruption counts are the same in both orders.
+- Fails if: B does not pay (the trap stopped at A), the loss fires before B pays, the unwind runs twice, or the counts depend on hero order.
+
+### EV-17 — A paid trap room is spent; a battle room keeps F1's rule
+- Requirement: DEC-940, DEC-491, F1 EV-09 (battle rooms).
+- Method: unit
+- How: `R04-EV-17`. (a) EV-05's trap room (one hero fell), then a new genuine entry into the same room. (b) EV-06 (a)'s trap room (every hero fell): read the kept tomb layout, then a fixture entry into that room on a later visit. (c) Regression: F1's TB-09 fixture (retreat from a battle room).
+- Pass evidence: (a) and (b): the room is marked cleared; the entry is an empty room: no trap drawn, no HP lost, no corruption. (c) the battle room is still uncleared with the foe's count kept.
+- Fails if: a spent trap is drawn or paid again, a total fall leaves the trap room live, or the battle room clears on retreat.
+
+### EV-18 — A Spines tie is a seeded pick, no prompt
+- Requirement: DEC-941, DEC-553, DEC-011.
+- Method: unit
+- How: `R04-EV-18`. Spine Fiends at count 3; two standing heroes, both fight number 3, both at 5 HP; inject a won round (cut 1). Run 20 seeds, and run each seed twice.
+- Pass evidence: each run: exactly one hero loses 1 HP, and it is one of the two tied heroes; no prompt is offered; the same seed gives the same hero both times; across the 20 seeds each tied hero is hit at least once.
+- Fails if: both heroes are hit, a prompt opens, the same seed gives different heroes, or the pick follows seat or tap order (one hero every time).
+
 ## Survival evals (one per survival invariant in plan.md)
 
 ### EV-13 — Continue after a trap fall
@@ -118,8 +139,8 @@ All fixtures: own-turn Tomb visit or plain battle as named; no Advantage, compan
 - Fails if: any step needs a direct state write after the start, a fallen hero is benched in the Tomb, Spines fires on the final cut, or gold is lost to a trap.
 
 ## Assumptions surfaced
-- Falling Rocks hero order, and whether the others still pay after a third-corruption fall, is not asserted → OQ-D2-2 in plan.md.
-- Whether a trap room that fells everyone is marked cleared is not asserted → OQ-D2-3.
-- Spines' tie-break is not asserted; fixtures use distinct fight numbers → OQ-D2-4.
+- Falling Rocks is one effect; every hero pays before the loss check → DEC-939 (EV-16).
+- A paid trap room is cleared even after a total fall; battle rooms keep F1's rule → DEC-940 (EV-06, EV-17).
+- A Spines tie is a seeded pick among the tied standing heroes → DEC-941 (EV-18); other fixtures use distinct fight numbers.
 - No Advantages in any fixture; their cut size is Q-214 and Q-312, not this brief.
-- If the loops already conform, EV-01 to EV-15 land as tests with no code change.
+- If the loops already conform, EV-01 to EV-18 land as tests with no code change.

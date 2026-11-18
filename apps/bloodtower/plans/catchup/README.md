@@ -105,7 +105,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | QD-02, QD-04 (F6) | v1.0 after single stance ownership | #449 (#507) |
 | BE-03 base payout (F7) | v1.0; the derived glyph text is parked 1.1 | #437 (#507) |
 | LC-01 (D1) | Gamewright rules first (high); drives R03 | #499 |
-| QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work. **D2 ruled** (DEC-906, DEC-907, #509); brief [D2/01-trap-fall-and-spines](../briefs/D2/01-trap-fall-and-spines/plan.md) drafted 2026-11-18, eval approval **pending Bob**; builds after F1 | #500, #501 -> #445, #460 |
+| QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work. **D2 ruled** (DEC-906, DEC-907, #509); brief [D2/01-trap-fall-and-spines](../briefs/D2/01-trap-fall-and-spines/plan.md) drafted 2026-11-18, eval approval **pending Bob** (normal brief approval). **Sequencing (Wright, 2026-11-18):** D2 is its own step after F1 merges, ahead of C4-02 (#445) and C4-06 (#449), which rebase on it if they land first; it does not join them, so no approved eval reopens. DEC-939 to DEC-941 settle its three Gamewright questions | #500, #501 -> #445, #460 |
 | QD-06 (D4), BE-05 (D5) | Gamewright rules; block R05 and R06 | #504, #502 |
 | LC-04 | v1.0 verification: R07 fault injection, then Bob's real-Tower run | #484 |
 | TP-04, H03 | v1.0 hardware: H01 and H03 on Bob's Monday run | #484, #489 |

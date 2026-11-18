@@ -13,8 +13,8 @@ Keep this a checklist; do not write a second design doc.
 - Screen spec: none
 - Mockup: none (no screen change)
 - Risk: High (fall, corruption and game-loss state; restore)
-- Depends on: its approval.md on main; F1 (#505) merged; a battle loop and a Tomb loop on main (see Touches)
-- Builds: DEC-906, DEC-907 (the CB-06 part; F1 builds the entry part); MEC-026 .12 to .15 and .18, MEC-038 .11 and .16 to .25 as the cards now read
+- Depends on: its approval.md on main (normal brief approval); F1 (#505) merged
+- Builds: DEC-906, DEC-907 (the CB-06 part; F1 builds the entry part), DEC-939, DEC-940, DEC-941; MEC-026 .12 to .15 and .18, MEC-038 .11 and .16 to .25 as the cards now read
 - Deps change: no
 - Runs: cloud
 
@@ -31,8 +31,8 @@ Keep this a checklist; do not write a second design doc.
 
 ### Merge order
 
-- F1 merges first. D2 starts from main after F1, so it builds on F1's single stance owner and its terminal gate.
-- If the Tomb or battle loop still is not on main after F1, D2 waits for C4-02 (#445) and C4-06 (#449), or its EVs move into those steps by an eval amendment that Bob approves (OQ-D2-1).
+- **Sequencing (Wright, 2026-11-18):** D2 builds as its own step after F1 merges, ahead of C4-02 (#445) and C4-06 (#449); if either of those lands first, it rebases on D2. D2 does not join them: that would reopen evals Bob has approved. Its approval goes through the normal brief approval (./approval.md).
+- D2 starts from main after F1, so it builds on F1's single stance owner and its terminal gate.
 - D2 does not touch any D1 file. The D1 and D2 patches can merge in either order.
 
 ## What it does
@@ -41,7 +41,8 @@ Keep this a checklist; do not write a second design doc.
 2. **Every hero falls to a trap.** The Tomb result is failed, the quest fails (DEC-642, MEC-037 .6), and the group leaves the Tomb to its board space. No gold is lost (no foe level, DEC-177). The corruptions stay.
 3. **A trap's third corruption** loses the game at once through the existing game-loss path (DEC-676).
 4. **Final cut and Spines (DEC-907).** A won round cuts first. If the cut leaves the foe gone, the battle is won at once and Spines does not fire. If the foe still stands, Spines fires (DEC-553: the hero with the highest fight number takes 1); if that fells the last standing hero, the battle is fallen with the foe standing.
-5. **Close once.** Reward, fall penalties and the battle-ends hook each happen once (DEC-907).
+5. **Falling Rocks is one effect** (DEC-939): all heroes pay, then the loss check. **A paid trap room is cleared**, even after a total fall (DEC-940). **A Spines tie** is a seeded pick (DEC-941).
+6. **Close once.** Reward, fall penalties and the battle-ends hook each happen once (DEC-907).
 
 **Inspect first.** If the loops already conform, D2 is tests only. A contradicted rule: stop that case and report it. Do not invent a rule.
 
@@ -65,7 +66,7 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 to EV-12 pass (verifier table on PR).
+- [ ] EV-01 to EV-12 and EV-16 to EV-18 pass (verifier table on PR).
 - [ ] EV-15 (e2e, R04 through the session) passes.
 - [ ] EV-13 to EV-14 (survival) pass.
 - [ ] Anvil's report lists changed files, test commands and results, and any drift found.
@@ -73,18 +74,19 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## AREA / DEC checklist
 
-- [ ] DEC-906 and DEC-907 read; this brief follows them; no rule is changed here.
+- [ ] DEC-906, DEC-907, DEC-939, DEC-940 and DEC-941 read; this brief follows them; no rule is changed here.
 - [ ] DEC-606, DEC-496 (shortfall), DEC-119 (fall in battle: corruption, sit out, back at 1), DEC-607 (on guard halves), DEC-642 and MEC-037 .6 (a fall fails the quest), DEC-177 (gold loss is by foe level), DEC-676 (third corruption), DEC-714 (plain-scene floor), DEC-553 (Spines), DEC-671 read.
 - [ ] MEC-026 (.12 to .15, .18) and MEC-038 (.11, .16, .17 to .25) read; no card edit is needed (#509 already made them).
 - [ ] C4/06 EV-06 (approved) says a short hero "pays what they can and takes a corruption". DEC-906 adds "and is back at 1 hit point at once". C4/06's eval.md is not edited; D2's EV-03 holds the addition.
 - [ ] No AREA or DEC card reverses a Bob lock; none is needed from Bob beyond the eval approval.
 
-## Open questions (not ruled here)
+## Open questions
 
-- **OQ-D2-1 (Wright):** the battle and Tomb loops are not on main. Does D2 build as its own step after F1 (and after C4-02 and C4-06 if F1 does not land the loops), or do its EVs join C4-02 and C4-06 by an eval amendment that Bob re-approves?
-- **OQ-D2-2 (Gamewright):** Falling Rocks hits every hero. If one hero's fall is a third corruption, do the other heroes still take their loss before the stop? DEC-906 says the loss comes "before anything else resolves" but does not order the heroes. EV-07 asserts only the one loss and nothing after the Tomb step.
-- **OQ-D2-3 (Gamewright):** when a trap fells every hero, is that trap room marked cleared? MEC-026 .18 and C4/06 EV-06 mark a trap room cleared; F1 says a room clears only on won (for battle rooms). EV-06 does not assert it.
-- **OQ-D2-4 (Gamewright):** Spines' target when two heroes tie for the highest fight number is not on any card. Fixtures avoid ties.
+- None open. Answered:
+  - Sequencing: its own step after F1, ahead of C4-02 and C4-06 (Wright, 2026-11-18; see Merge order).
+  - Falling Rocks is one effect: every hero pays, every fall applies, then the loss check (DEC-939; EV-16).
+  - A paid trap room is cleared even when every hero falls; battle rooms keep F1's rule (DEC-940; EV-06, EV-17).
+  - A Spines tie is a seeded pick among the tied standing heroes, no prompt (DEC-941; EV-18).
 
 ## Eval approval
 
