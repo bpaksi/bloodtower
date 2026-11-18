@@ -86,7 +86,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 
 | Decision | Findings | Question | Blocks | Issue |
 |---|---|---|---|---|
-| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check | R03 | #499 |
+| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check. **Ruled** (DEC-905, #509); brief [D1/01-skull-loss-dispatch](../briefs/D1/01-skull-loss-dispatch/plan.md) drafted 2026-11-18, eval approval **pending Bob** | R03 (fixtures b to e; a is a test-only D1 follow-up PR after F1, Wright 2026-11-18); DEC-938 rules the record's chapter | #499 |
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
 | D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
@@ -107,7 +107,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | QD-02, QD-04 (F6) | v1.0 after single stance ownership | #449 (#507) |
 | BE-03 base payout (F7) | v1.0; the derived glyph text is parked 1.1 | #437 (#507) |
 | LC-01 (D1) | Gamewright rules first (high); drives R03 | #499 |
-| QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work | #500, #501 -> #445, #460 |
+| QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work. **D2 ruled** (DEC-906, DEC-907, #509); brief [D2/01-trap-fall-and-spines](../briefs/D2/01-trap-fall-and-spines/plan.md) drafted 2026-11-18, eval approval **pending Bob** (normal brief approval). **Sequencing (Wright, 2026-11-18):** D2 is its own step after F1 merges, ahead of C4-02 (#445) and C4-06 (#449), which rebase on it if they land first; it does not join them, so no approved eval reopens. DEC-939 to DEC-941 settle its three Gamewright questions | #500, #501 -> #445, #460 |
 | QD-06 (D4), BE-05 (D5) | Gamewright rules; block R05 and R06 | #504, #502 |
 | LC-04 | v1.0 verification: R07 fault injection, then Bob's real-Tower run | #484 |
 | TP-04, H03 | v1.0 hardware: H01 and H03 on Bob's Monday run | #484, #489 |
@@ -228,7 +228,7 @@ The C3, C4 and C5 briefs all pass `node scripts/check-briefs.mjs` on main and ca
 - **Bob, open:** re-approval rows for the changed evals and for CU/01 and CU/02 (a batch is fine); the three locks the rulings touch (see design-freeze.md): caravans, Charon's scope, PT-24's removal of locked copy; PT-05's tower label parked (say so if he wants it back in step 06).
 - **Bob gates:** G-C3, G-C4, G-A1 (needs the art hold lifted, A1-4c render and step 31), C5-10 (G-1.0). Bob also ticks every art final in C5-05.
 - **Gamewright and Loremaster:** steps 43 to 45 and 62.
-- **Gamewright, audit rulings:** D1-D6 (#499-#504), awaiting. F1 (#505) is not held (Bob, 2026-11-16); its brief is drafted and waits on Bob's eval approval.
+- **Gamewright, audit rulings:** D1-D6 (#499-#504) ruled in #509 (DEC-905 to DEC-913). D1's brief is drafted and waits on Bob's eval approval. F1 (#505) is not held (Bob, 2026-11-16); its brief is drafted and waits on Bob's eval approval.
 
 ## Parked: 1.1 after v1.0 (Bob 11-12)
 
