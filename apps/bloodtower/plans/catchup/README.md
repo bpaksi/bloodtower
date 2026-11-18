@@ -109,6 +109,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | LC-01 (D1) | Gamewright rules first (high); drives R03 | #499 |
 | QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work. **D2 ruled** (DEC-906, DEC-907, #509); brief [D2/01-trap-fall-and-spines](../briefs/D2/01-trap-fall-and-spines/plan.md) drafted 2026-11-18, eval approval **pending Bob** (normal brief approval). **Sequencing (Wright, 2026-11-18):** D2 is its own step after F1 merges, ahead of C4-02 (#445) and C4-06 (#449), which rebase on it if they land first; it does not join them, so no approved eval reopens. DEC-939 to DEC-941 settle its three Gamewright questions | #500, #501 -> #445, #460 |
 | QD-06 (D4), BE-05 (D5) | Gamewright rules; block R05 and R06 | #504, #502 |
+| Live quests (F1/03; the gap found while briefing F1/02, Wright 2026-11-18) | v1.0 now. Brief [F1/03-live-quests](../briefs/F1/03-live-quests/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-949. A real game loads its quests and chapter plan from the story pack, the Quest row reaches `handleQuestPick`, and the chapter store is saved. **After F1/02, before D4's build and before G-C3.** Enter on a wild quest marker (DEC-641, the Ambush) is not in it and still blocks G-C3's win; proposed as its own step after D4 | issue to open |
 | LC-04 | v1.0 verification: R07 fault injection, then Bob's real-Tower run | #484 |
 | TP-04, H03 | v1.0 hardware: H01 and H03 on Bob's Monday run | #484, #489 |
 | EE-03 | Coverage gap, mainly 1.1. Note only: the P-006 numbers do not prove the omitted mechanics | #475 (parked) |
@@ -152,7 +153,7 @@ Columns: **Weekdays** is the step total, **Runner** the build part, **Cursor** t
 | 23 | 13 | C3-08 corruption (unblocked by DEC-894 to DEC-896) | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D33 | — | Stop lifted; C3-06 and C3-07 merged; Bob's re-approval of the amended eval (EV-11 to EV-13 added; step 44) | **Gates:** Bob re-approval row for the changed eval.md (step 44) | #442 |
 | 24 | 14 | C3-13 building menu on the iPad | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D34 | — | Step 13 (C3-08) merged | **Gates:** Copy table by Loremaster (step 45) | #443 |
 | 25 | 58 | C2-11 Continue piece check: add every physical piece (PT-08, 1.0 pieces) | anvil | 2.5 | 2 | 0.5 / $1.36 | D37 | PT-08 | Bob's tower run on Mon Nov 16 (C2-10; D1) and its findings note on main; steps 43, 44 | **Gates:** Bob's tower run (dated Mon Nov 16); brief amendment and Bob re-approval of the changed eval.md (step 44) | #484 |
-| 26 | 15 | G-C3: Bob plays The Ruined Keep to a win and to a loss | Bob | 0 | 0 | 0 / $0.00 | D37 | — | C3 01-17 | — |
+| 26 | 15 | G-C3: Bob plays The Ruined Keep to a win and to a loss | Bob | 0 | 0 | 0 / $0.00 | D37 | — | C3 01-17; F1/03 live quests (and Enter on a wild quest marker, DEC-641, for the win) | — |
 | 27 | 16 | C4-01 tuning switches | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D37 | — | C3-02, C3-09, C3-10 | #444 |
 | 28 | 17 | C4-02 battle loop | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D39 | PT-20 | C4-01; step 44 (brief amendment) | #445 |
 | 29 | 18 | C4-03 retreat, fall, reward | anvil | 1.25 | 0.875 | 0.375 / $1.02 | D40 | — | C4-02 | #446 |
