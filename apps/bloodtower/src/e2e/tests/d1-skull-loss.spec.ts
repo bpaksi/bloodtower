@@ -229,6 +229,8 @@ test.describe("D1 the fatal skull ends the game", () => {
   // BLOCKED, named in the D1 build report: the live host never configures chapters (only tests
   // do), so a day's loss does not end the game and day 2 rolls. Wiring chapters into the host is
   // outside D1's Touches. The body is EV-09's contract, not weakened.
+  // Ruled 2026-11-18 (Bob's approved F1/03, via Warden): F1/03 (live quests) wires live chapter
+  // loading and removes this fixme; D1 ships with it.
   test.fixme("EV-09 (game end) day 2 never rolls, Game 1 lost, no Continue", async ({
     browser,
   }, testInfo) => {
