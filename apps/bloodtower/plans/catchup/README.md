@@ -86,7 +86,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 
 | Decision | Findings | Question | Blocks | Issue |
 |---|---|---|---|---|
-| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check | R03 | #499 |
+| D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check. **Ruled** (DEC-905, #509); brief [D1/01-skull-loss-dispatch](../briefs/D1/01-skull-loss-dispatch/plan.md) drafted 2026-11-18, eval approval **pending Bob** | R03 (fixtures b to e; a waits on the battle loop) | #499 |
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
 | D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
@@ -226,7 +226,7 @@ The C3, C4 and C5 briefs all pass `node scripts/check-briefs.mjs` on main and ca
 - **Bob, open:** re-approval rows for the changed evals and for CU/01 and CU/02 (a batch is fine); the three locks the rulings touch (see design-freeze.md): caravans, Charon's scope, PT-24's removal of locked copy; PT-05's tower label parked (say so if he wants it back in step 06).
 - **Bob gates:** G-C3, G-C4, G-A1 (needs the art hold lifted, A1-4c render and step 31), C5-10 (G-1.0). Bob also ticks every art final in C5-05.
 - **Gamewright and Loremaster:** steps 43 to 45 and 62.
-- **Gamewright, audit rulings:** D1-D6 (#499-#504), awaiting. F1 (#505) is not held (Bob, 2026-11-16); its brief is drafted and waits on Bob's eval approval.
+- **Gamewright, audit rulings:** D1-D6 (#499-#504) ruled in #509 (DEC-905 to DEC-913). D1's brief is drafted and waits on Bob's eval approval. F1 (#505) is not held (Bob, 2026-11-16); its brief is drafted and waits on Bob's eval approval.
 
 ## Parked: 1.1 after v1.0 (Bob 11-12)
 
