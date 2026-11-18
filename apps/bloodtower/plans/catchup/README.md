@@ -88,7 +88,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 |---|---|---|---|---|
 | D1 (high) | LC-01 | Generic terminal-loss dispatch and unwind outside the existing check. **Ruled** (DEC-905, #509); brief [D1/01-skull-loss-dispatch](../briefs/D1/01-skull-loss-dispatch/plan.md) drafted 2026-11-18, eval approval **pending Bob** | R03 (fixtures b to e; a is a test-only D1 follow-up PR after F1, Wright 2026-11-18); DEC-938 rules the record's chapter | #499 |
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
-| D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation | R04; #445, #460 | #501 |
+| D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation. **Ruled** (DEC-908, DEC-909, #509); brief [D3/01-ward-and-boss-deck](../briefs/D3/01-ward-and-boss-deck/plan.md) drafted 2026-11-18, eval approval **pending Bob**; proposed: its own step after F1 and D2, ahead of C4-02 and C5-02 (Wright to confirm) | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
 | D5 (high) | BE-05 | Absent-hero funding and present-group debit scope | R06 | #502 |
 | D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
