@@ -21,7 +21,7 @@ C3 built UI-044's seal step behind the switch; C4 turns it on. The close Scroll,
 
 - Board: shows the state and every line "The chapter is won. A seal breaks. / {hero} gained {item}. / Skulls are freed. Choose a kingdom." (Copy table: board.* rows); never scrolls.
 - Gear: opens its panel on the Story board; picks on the iPad. Toolbar: **?** left, gear right.
-- Help (?): a help sheet on the iPad, "Tap Seal broken once the tower's seal breaks. Then pick a kingdom and a building for each freed skull and tap Place skull." (Copy table: help.seal-break-live), `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
+- Help (?): a help sheet on the iPad, "Tick the rows on Set the table as an aid, then tap Done. Then pick a kingdom and a building for each freed skull and tap Place skull." (Copy table: help.seal-break-live), `data-help-screen` = `seal-break-live`; it sends nothing to the host and does not pause.
 
 ## Buttons (exact labels)
 
