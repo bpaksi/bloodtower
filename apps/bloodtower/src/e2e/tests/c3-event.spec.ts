@@ -406,8 +406,9 @@ test.describe("C3/12 the event scene: the painting, the words and the choice", (
     browser,
   }, testInfo) => {
     test.setTimeout(420_000);
-    // Apart: the acting group's iPad chooses, the other iPad shows the waiting line.
-    const apart = await play(browser, testInfo, seedFor("hazard-storm", "", false), "apart");
+    // Apart: every group starts at the village (~test-at), so the first group in the turn order
+    // draws the event. The acting group's iPad chooses, the other iPad shows the waiting line.
+    const apart = await play(browser, testInfo, seedFor("hazard-storm"), "apart");
     try {
       const { pad, pad2 } = apart;
       if (!pad2) throw new Error("No second iPad.");
@@ -453,6 +454,28 @@ test.describe("C3/12 the event scene: the painting, the words and the choice", (
     } finally {
       await closeAll(game);
       await game.context2?.close();
+    }
+  });
+
+  test("EV-07: a healer in the group saves the hero from a plague: the saved line, no buttons, no loss", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const game = await play(browser, testInfo, seedFor("hazard-plague"));
+    const { pad, board } = game;
+    try {
+      await expect(board.locator("[data-event-result='saved']")).toBeVisible();
+      await expect(words(board)).toHaveText(/ saved you\. Nothing is lost\.$/);
+      await expect(board.locator("[data-event-cost]")).toHaveCount(0);
+      await expect(options(pad)).toHaveCount(0);
+      await expect(bodyButtons(pad).filter({ hasText: /Next|Continue/ })).toHaveCount(0);
+      await expect(deviceMain(pad).locator("[data-action-id]")).toHaveCount(0);
+      for (const id of FOUR) await expect(health(board, id)).toHaveAttribute("data-health", "9/9");
+      await tick(game, 4_100);
+      await expect(scene(board)).toHaveCount(0, { timeout: 20_000 });
+      for (const id of FOUR) await expect(health(board, id)).toHaveAttribute("data-health", "9/9");
+    } finally {
+      await closeAll(game);
     }
   });
 

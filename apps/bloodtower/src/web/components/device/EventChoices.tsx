@@ -14,6 +14,14 @@ export const eventSceneFor = (view: DeviceView): Scene | null =>
 export const holdsPresentHero = (view: DeviceView, scene: Scene): boolean =>
   view.heroes.some((hero) => scene.heroIds.includes(hero.id));
 
+/** Copy table words by option id, for an option whose action is closed and so carries no label. */
+export const OPTION_LABELS: Record<string, string> = {
+  "hit-points": "Lose 2 hit points",
+  "lose-turn": "Lose a turn",
+  "go-around": "Go around",
+  "pay-off": "Pay them off (5 gold)",
+};
+
 /** The event's pick buttons are drawn here, not in the generic action list. */
 export const isEventChoice = (action: Offered): boolean => action.actionId === "choose";
 
@@ -59,7 +67,7 @@ export function EventChoices({
               disabled={!live || !option.enabled || !action}
               onClick={() => onAct(option.promptId, "choose")}
             >
-              {action?.label ?? option.optionId}
+              {action?.label ?? OPTION_LABELS[option.optionId] ?? option.optionId}
             </button>
           );
         })}

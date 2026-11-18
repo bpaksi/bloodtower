@@ -101,6 +101,19 @@ describe("C3/12 the event choices on the iPad", () => {
     expect(poor).toMatch(/data-event-option="pay-off"[^>]*disabled/);
   });
 
+  it("a closed Pay them off, with no action, reads its Copy label and is disabled (EV-02)", () => {
+    const base = view(scene("foes", ["go-around", "pay-off"]), ["hero-a"], false);
+    const closed = {
+      ...base,
+      actions: base.actions.filter((row) => !row.promptId.endsWith("pay-off")),
+    };
+    const markup = html(closed);
+    expect(markup).toMatch(
+      /<button[^>]*data-event-option="pay-off"[^>]*disabled[^>]*>Pay them off \(5 gold\)<\/button>/,
+    );
+    expect(markup).not.toMatch(/>pay-off</);
+  });
+
   it("never draws a Fight option, even if one is offered (Q-C3-02)", () => {
     const markup = html(view(scene("foes", ["fight", "go-around", "pay-off"])));
     expect(markup).not.toMatch(/fight/i);
