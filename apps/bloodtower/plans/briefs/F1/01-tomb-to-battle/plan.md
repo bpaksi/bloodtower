@@ -19,6 +19,8 @@ Keep this a checklist; do not write a second design doc.
 - Deps change: no
 - Runs: cloud
 
+> **Scope change, Bob 2026-11-18 7:12 AM ET: F1 is cards-only.** The battle loop and the Tomb engine are not built (they are C4 features 02, 03 and 06), so this step edits MEC-026 (.16, .18) and MEC-038 (.37 to .44) only. No code, no tests. The TB-01 to TB-14 and EV-01 to EV-17 obligations moved to C4: battle loop and entry gate to 02 (EV-22 to EV-32), retreat and close to 03 (EV-12 to EV-14), the Tomb to 06 (EV-15 to EV-18). Read the Touches, Done-when and eval.md below as superseded by that move; eval.md is kept as the source text.
+
 ## What it does
 
 Fixes the Tomb-to-battle hand-off so that:

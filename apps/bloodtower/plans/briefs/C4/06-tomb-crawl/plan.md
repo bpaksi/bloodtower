@@ -32,12 +32,14 @@ Cutover: N
 
 - Continue, restore, and restart must keep:
   - A half-explored Tomb is kept: Continue and later visits show the same rooms, found and cleared.
+  - A battle room cleared only on won: a retreat or fall leaves it uncleared with its living foe's count, kept across restore (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: EV-15, EV-17, EV-18).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-14 all pass (verifier table on PR).
+- [ ] EV-15 … EV-18 (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: the same room and foe across groups, Leave and a guardian felled by Bold, the end-to-end entry/retreat/re-entry spec, an uncleared room kept across restore) pass.
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
