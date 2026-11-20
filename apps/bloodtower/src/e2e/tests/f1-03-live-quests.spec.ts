@@ -27,8 +27,10 @@ const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as cons
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 const START = "N-radiant-mountains";
 const VILLAGE = "N-egans-end";
-const TAKE = "[COPY: Take the job]";
-const PAY = "[COPY: Ask for pay first]";
+// The Herald's options, found by option id (DEC-949), so pack copy edits don't break this spec.
+const TAKE = "--qopt--take-the-job";
+const PAY = "--qopt--ask-pay-first";
+const LEAVE = "--qleave";
 
 type Space = { id: string; adjacent: string[] };
 const spaces = JSON.parse(
@@ -69,6 +71,15 @@ const labelsOf = async (pad: Page) => {
   await expect(options(pad).first()).toBeVisible({ timeout: 20_000 });
   return (await options(pad).allInnerTexts()).map((text) => text.split("\n")[0]?.trim() ?? "");
 };
+const questIdsOf = async (pad: Page) => {
+  await expect(options(pad).first()).toBeVisible({ timeout: 20_000 });
+  const ids = await options(pad).evaluateAll((els) =>
+    els.map((el) => el.getAttribute("data-prompt-id") ?? ""),
+  );
+  return ids.map((id) => id.match(/--(qopt--.+|qleave)$/)?.[0] ?? id);
+};
+const optionById = (pad: Page, suffix: string) =>
+  deviceMain(pad).locator(`[data-building-option][data-prompt-id$="${suffix}"]`);
 const optionByLabel = (pad: Page, label: string) =>
   options(pad).filter({ hasText: new RegExp(`^${label.replace(/[[\]]/g, "\\$&")}`) });
 
@@ -144,9 +155,9 @@ test.describe("F1/03 a real game's Herald, from the story pack", () => {
 
       await quest.click();
       await expect(deviceMain(one.pad).locator('[data-building="quest"]')).toBeVisible();
-      expect(await labelsOf(one.pad)).toEqual([TAKE, PAY, "Leave"]);
+      expect(await questIdsOf(one.pad)).toEqual([TAKE, PAY, LEAVE]);
 
-      await optionByLabel(one.pad, PAY).click();
+      await optionById(one.pad, PAY).click();
       await expect(deviceMain(one.pad).locator('[data-building="menu"]')).toBeVisible();
       expect(await labelsOf(one.pad)).toEqual(["Rest", "Cleanse"]);
       await expect(optionByLabel(one.pad, "Rest")).toBeDisabled();

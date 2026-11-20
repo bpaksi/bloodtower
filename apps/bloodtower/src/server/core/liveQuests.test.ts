@@ -177,8 +177,17 @@ const pressLabel = async (game: Game, label: string) => {
   await game.pad.act(found.promptId, found.actionId);
 };
 
-const HERALD_TAKE = "[COPY: Take the job]";
-const HERALD_PAY = "[COPY: Ask for pay first]";
+// The Herald's options, found by option id (DEC-949), so pack copy edits don't break these tests.
+const HERALD_TAKE = "--qopt--take-the-job";
+const HERALD_PAY = "--qopt--ask-pay-first";
+const QUEST_LEAVE = "--qleave";
+const questIds = (game: Game) =>
+  model(game).options.map((o) => o.promptId.match(/--(qopt--.+|qleave)$/)?.[0] ?? o.promptId);
+const pressOption = async (game: Game, suffix: string) => {
+  const found = model(game).options.find((o) => o.promptId.endsWith(suffix));
+  if (!found) throw new Error(`No "${suffix}" in ${JSON.stringify(questIds(game))}`);
+  await game.pad.act(found.promptId, found.actionId);
+};
 
 describe("quests and chapters live from the pack in a real game (F1/03)", () => {
   it("EV-03: when play begins chapter 1 is entered and its markers are open", async () => {
@@ -233,8 +242,8 @@ describe("quests and chapters live from the pack in a real game (F1/03)", () => 
     expect(first).toMatchObject({ label: "Quest", enabled: true });
     expect(first?.detail).toContain("1 move");
     await pressLabel(game, "Quest");
-    expect(model(game).options.map((o) => o.label)).toEqual([HERALD_TAKE, HERALD_PAY, "Leave"]);
-    await pressLabel(game, HERALD_PAY);
+    expect(questIds(game)).toEqual([HERALD_TAKE, HERALD_PAY, QUEST_LEAVE]);
+    await pressOption(game, HERALD_PAY);
     expect(ensureQuests(play).done).toEqual(["herald"]);
     expect(ensureQuests(play).log).toContain("gold:10");
     expect(ensureClock(play).questsWon).toBe(1);
@@ -259,7 +268,7 @@ describe("quests and chapters live from the pack in a real game (F1/03)", () => 
     await toGroupTurn(b);
     await pressOffer(b, "enter");
     await pressLabel(b, "Quest");
-    expect(model(b).options.map((o) => o.label)).toEqual([HERALD_TAKE, HERALD_PAY, "Leave"]);
+    expect(questIds(b)).toEqual([HERALD_TAKE, HERALD_PAY, QUEST_LEAVE]);
 
     // (c) The session catches a throw from the play start; the marker's own call shows it.
     expect(() => applyQuestTestSeed(playOf(a), "~test-quest:N-dayside=nope")).toThrow(/nope/);
@@ -295,7 +304,7 @@ const doHerald = async (game: Game) => {
   await toGroupTurn(game);
   await pressOffer(game, "enter");
   await pressLabel(game, "Quest");
-  await pressLabel(game, HERALD_PAY);
+  await pressOption(game, HERALD_PAY);
 };
 
 /** The Ambush by engine calls: Enter on a wild quest marker is not built (DEC-641). */
