@@ -683,6 +683,12 @@ describe("The Ruined Keep pack (C3-03)", () => {
   });
 
   it("EV-05 every player-facing value in the pack files is a [COPY: ...] placeholder", () => {
+    // Paths Loremaster has filled. Future copy PRs add their filled paths here in the
+    // same PR. Unlisted player-facing values must still start with "[COPY:".
+    const filledCopyPaths = new Set([
+      "pack.yaml.scenes.0.options.0.label", // herald / take-the-job
+      "pack.yaml.scenes.0.options.1.label", // herald / ask-pay-first
+    ]);
     const strays: string[] = [];
     const walk = (node: unknown, path: string, key: string | undefined) => {
       if (Array.isArray(node)) {
@@ -697,6 +703,7 @@ describe("The Ruined Keep pack (C3-03)", () => {
         if (/^pack\.yaml\.(settings|setup)\./.test(path)) return;
         // The demo voice line is locked text that assets/needs/demoPack.test.ts pins (A1-8b-1).
         if (/^pack\.yaml\.assets\.\d+\.text$/.test(path)) return;
+        if (filledCopyPaths.has(path)) return;
         if (!node.startsWith("[COPY:")) strays.push(`${path}=${node}`);
       }
     };
