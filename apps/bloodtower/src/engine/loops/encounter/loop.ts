@@ -1,6 +1,6 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { groupById, playState } from "../chapter/playState.ts";
-import { ensureClock, heroSheet, isCorruptionLoss } from "../day/clock.ts";
+import { ensureClock, heroSheet, isGameLost } from "../day/clock.ts";
 import {
   beginQuest,
   chooseOption,
@@ -80,7 +80,7 @@ export const encounterLoop: LoopDefinition<EncounterLocal, EncounterResult> = {
   },
   body: (local, ctx) => {
     // DEC-676: a third corruption stops the encounter at once.
-    if (isCorruptionLoss(playState())) return { local, passComplete: true };
+    if (isGameLost(playState())) return { local, passComplete: true };
     if (local.left) return { local, passComplete: true };
 
     let current = local;
@@ -96,7 +96,7 @@ export const encounterLoop: LoopDefinition<EncounterLocal, EncounterResult> = {
     offerStep(current, ctx);
     return { local: { ...current, awaitingPress: true }, passComplete: false };
   },
-  exit: (local) => Boolean(local.left) || isCorruptionLoss(playState()),
+  exit: (local) => Boolean(local.left) || isGameLost(playState()),
   resultUp: (local) => ({ left: true, movesLeft: local.movesLeft }),
 };
 
@@ -319,8 +319,8 @@ const questPress = (
   loadLive(play, local.groupId, movesOf(local));
   const result = run(play);
   if (!result.ok) return refused(local, QUEST_REFUSALS[result.reason]);
-  // DEC-676: a third corruption stops the game; no turn-end loss runs and no step is offered.
-  if (isCorruptionLoss(play)) {
+  // DEC-676, DEC-905: a lost game (any reason) stops the quest; no turn-end loss runs and no step is offered.
+  if (isGameLost(play)) {
     const movesLeft = commitLive(play, local.groupId);
     return { ...local, movesLeft, awaitingPress: false, refusal: null };
   }

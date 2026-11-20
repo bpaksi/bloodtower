@@ -1,12 +1,24 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { EngineEffect } from "../../effects.ts";
-import { emptyLoopRuntime, type LoopRuntimeState, startRootLoop } from "../../loop/runtime.ts";
+import {
+  advanceLoops,
+  emptyLoopRuntime,
+  type LoopRuntimeState,
+  startRootLoop,
+} from "../../loop/runtime.ts";
 import type { LoopDefinition, LoopRegistry } from "../../loop/types.ts";
 import { type ChapterPlan, configureChapters, ensureChapters } from "../chapter/chapters.ts";
-import { chapterLoop } from "../chapter/loop.ts";
+import { type ChapterLocal, chapterLoop, handleChapterPress } from "../chapter/loop.ts";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
-import { checkChapter, ensureClock, markQuestWon, setBuildingSkulls } from "../day/clock.ts";
+import {
+  checkChapter,
+  ensureClock,
+  markQuestWon,
+  recordBuildingDrop,
+  setBuildingSkulls,
+} from "../day/clock.ts";
 import type { DayResult } from "../day/loop.ts";
+import { skullRecordPromptId } from "../day/skull.ts";
 import { ensureQuests } from "../quest/store.ts";
 import type { ShellEffect } from "../session/effects.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
@@ -50,6 +62,10 @@ type DayScript = {
   fall?: string[];
   /** A third corruption loses the game on this day (DEC-676). */
   corruption?: boolean;
+  /** Skull counts set before the night's drops (D1). */
+  skulls?: Record<string, number>;
+  /** The buildings the night's skulls land on, in order, through the real clock (D1). */
+  drops?: string[];
 };
 let script: Record<number, DayScript> = {};
 const holder: { play: PlayState } = { play: undefined as unknown as PlayState };
@@ -73,9 +89,18 @@ const standInDay: LoopDefinition<{ n: number }, DayResult> = {
       markQuestWon(play);
     }
     for (const space of step.fall ?? []) setBuildingSkulls(play, space, 4);
+    for (const [space, count] of Object.entries(step.skulls ?? {})) {
+      setBuildingSkulls(play, space, count);
+    }
     const clock = ensureClock(play);
     if (step.supply !== undefined) clock.supply = step.supply;
-    clock.outcome = step.corruption ? { lost: true, reason: "corruption" } : checkChapter(clock);
+    // The night's skulls go through the real clock; a lost game refuses the ones after it (D1).
+    for (const space of step.drops ?? []) {
+      const kingdom = play.content.board.spaceById.get(space)?.kingdom;
+      if (kingdom) recordBuildingDrop(play, space, kingdom);
+    }
+    if (step.corruption) clock.outcome = { lost: true, reason: "corruption" };
+    else if (!clock.outcome?.lost) clock.outcome = checkChapter(clock);
     return { local, passComplete: true };
   },
   exit: () => true,
@@ -219,6 +244,79 @@ describe("game loop end (MEC-032)", () => {
     start(run);
     expect(gameResult(run)).toBeUndefined();
     expect(records(run)).toHaveLength(0);
+  });
+});
+
+/*
+ * D1 / 01-skull-loss-dispatch EV-07: a game lost at a skull closes once, with the reason, and
+ * nothing after it starts. The stand-in day sends the night's skulls through the real clock.
+ */
+describe("D1 EV-07 the game end runs once with the reason", () => {
+  const closes = (run: Run) =>
+    run.effects.filter((e) => e.kind === "loop-end" && e.loopId === "game");
+
+  const expectOneLoss = (run: Run, reason: "skulls" | "buildings", scene: string) => {
+    expect(closes(run)).toHaveLength(1);
+    expect(gameResult(run)).toMatchObject({ outcome: "lost", reason, sceneId: scene });
+    expect(records(run)).toHaveLength(1);
+    expect(records(run)[0]).toMatchObject({ outcome: "lost", how: reason, sceneId: scene });
+    expect(records(run).filter((r) => r.outcome === "won")).toEqual([]);
+    expect(ensureChapters(run.play).entered).toEqual([1]);
+    expect(run.play.dayNumber).toBe(1);
+  };
+
+  it("a simulated night: the second skull after a fallen fourth building is refused", () => {
+    const run = setup({ c3End: false });
+    const east = [0, 1, 2, 3].map((n) => spaceIn("E", n));
+    script = {
+      1: {
+        supply: 10,
+        skulls: {
+          [east[0] as string]: 4,
+          [east[1] as string]: 4,
+          [east[2] as string]: 4,
+          [east[3] as string]: 3,
+        },
+        drops: [east[3] as string, spaceIn("N", 2)],
+      },
+    };
+    start(run);
+    expectOneLoss(run, "buildings", "loss-buildings");
+    expect(ensureClock(run.play).supply).toBe(9);
+    expect(ensureClock(run.play).nightDrops).toHaveLength(1);
+  });
+
+  it("the last skull from the supply: the next is refused", () => {
+    const run = setup({ c3End: false });
+    script = { 1: { supply: 1, drops: [spaceIn("N", 2), spaceIn("N", 3)] } };
+    start(run);
+    expectOneLoss(run, "skulls", "loss-skulls");
+    expect(ensureClock(run.play).supply).toBe(0);
+    expect(ensureClock(run.play).nightDrops).toHaveLength(1);
+  });
+
+  it("a freed skull that fells the fourth building: chapter 1 is named, chapter 2 never enters", () => {
+    const run = setup({ c3End: false });
+    run.shell.towerLinked = true;
+    ensureClock(run.play).held = 2;
+    for (const id of [spaceIn("S", 0), spaceIn("S", 1), spaceIn("W", 0)]) {
+      setBuildingSkulls(run.play, id, 4);
+    }
+    const fatal = spaceIn("W", 1);
+    setBuildingSkulls(run.play, fatal, 3);
+    script = { 1: { done: ["herald", "ambush"] } };
+    start(run);
+    expect(gameResult(run)).toBeUndefined();
+    const frame = run.runtime.stack.find((f) => f.loopId === "chapter");
+    if (!frame) throw new Error("no chapter frame");
+    frame.local = handleChapterPress(
+      frame.local as ChapterLocal,
+      skullRecordPromptId(run.play.dayNumber, fatal),
+    );
+    advanceLoops(registry, "game-loop", 0, run.runtime, run.effects);
+    expectOneLoss(run, "buildings", "loss-buildings");
+    expect(run.play.dayNumber).toBe(1);
+    expect(run.shell.autosave).toBeNull();
   });
 });
 

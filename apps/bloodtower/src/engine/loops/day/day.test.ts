@@ -1020,6 +1020,10 @@ describe("CU/03 no-tower skull drop (PT-07)", () => {
         if (!result.landed) continue;
         expect(h.play.content.board.spaceById.get(result.spaceId)?.kingdom).toBe("E");
         expect(first.draws).toBe(2);
+        // Four N buildings were already fallen, so that skull lost the game (DEC-905, D1). The
+        // clock is reopened here only to count the next draw.
+        expect(ensureClock(h.play).outcome).toEqual({ lost: true, reason: "buildings" });
+        ensureClock(h.play).outcome = null;
         const next = faces("S");
         expect(simulateSkullDrop(seed, next.draw).landed).toBe(true);
         expect(next.draws).toBe(1);

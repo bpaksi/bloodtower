@@ -1,5 +1,5 @@
 import type { LoopDefinition } from "../../loop/types.ts";
-import { ensureClock, noteNode } from "../day/clock.ts";
+import { ensureClock, isGameLost, noteNode } from "../day/clock.ts";
 import type { DayResult } from "../day/loop.ts";
 import { applySkullRecord, offerSkullPlacement, parseSkullRecordPrompt } from "../day/skull.ts";
 import { ensureQuests } from "../quest/store.ts";
@@ -128,6 +128,22 @@ const placeStep = (
   play: PlayState,
   ctx: BodyCtx,
 ): { local: ChapterLocal; passComplete: boolean } => {
+  // DEC-905, DEC-933, DEC-938: a freed skull that lost the game ends the chapter at once. The
+  // skulls left are never asked, the next chapter never enters, and the record names this chapter.
+  const loss = ensureClock(play).outcome;
+  if (loss?.lost === true) {
+    note(store, "lost");
+    store.placing = null;
+    return {
+      local: {
+        ...local,
+        phase: "done",
+        awaitingPress: false,
+        outcome: { kind: "lost", reason: loss.reason },
+      },
+      passComplete: true,
+    };
+  }
   if (store.skullsToPlace < 1) {
     store.placing = null;
     return { local: { ...local, phase: "done" }, passComplete: true };
@@ -250,6 +266,8 @@ export const handleChapterPress = (local: ChapterLocal, promptId: string): Chapt
   const store = ensureChapters(play);
   const record = parseSkullRecordPrompt(promptId);
   if (local.phase !== "place" || !record) return local;
+  // A freed skull after the loss is never asked for; a late press changes nothing (DEC-905).
+  if (isGameLost(play)) return local;
   if (!applySkullRecord(record.day, record.target)) return local;
   store.skullsToPlace -= 1;
   noteNode(play, ".29");

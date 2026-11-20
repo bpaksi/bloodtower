@@ -8,7 +8,7 @@ import {
 import type { BoardGraph } from "../chapter/board.ts";
 import { neighborsOf, spaceName } from "../chapter/board.ts";
 import { groupById, type PlayState, playState } from "../chapter/playState.ts";
-import { isCorruptionLoss, isFallen } from "../day/clock.ts";
+import { isFallen, isGameLost } from "../day/clock.ts";
 import { handleEncounterLeave } from "../encounter/loop.ts";
 import { beginGroupTurn, endGroupTurn, turnHasEnded } from "../encounter/picks.ts";
 import { hasOpenEvent } from "../event/index.ts";
@@ -189,7 +189,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     const group = groupById(play, local.groupId);
 
     // DEC-676: a third corruption stops the turn at once.
-    if (isCorruptionLoss(play)) return { local, passComplete: true };
+    if (isGameLost(play)) return { local, passComplete: true };
 
     if (local.encounterPending) {
       const done = ctx.getParentResult() as { left?: boolean; movesLeft?: number } | undefined;
@@ -249,7 +249,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     return { local, passComplete: false };
   },
   exit: (local) => {
-    if (isCorruptionLoss(playState())) return true;
+    if (isGameLost(playState())) return true;
     const group = groupById(playState(), local.groupId);
     if (group?.insideBuilding) return false;
     if (local.landedOnBuildingWithNoMoves && group && !group.insideBuilding) {
@@ -265,7 +265,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
   },
   resultUp: (local) => {
     // DEC-472, DEC-473: turn-end gold losses, once (an Uncertain pick already ended the turn).
-    if (!isCorruptionLoss(playState())) endGroupTurn(playState(), local.groupId);
+    if (!isGameLost(playState())) endGroupTurn(playState(), local.groupId);
     return { groupId: local.groupId };
   },
 };
