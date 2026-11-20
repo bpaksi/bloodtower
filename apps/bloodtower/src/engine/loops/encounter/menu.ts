@@ -2,6 +2,7 @@ import { AUTO_ADVANCE_MS } from "../../../protocols/v2/views.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { groupById, type PlayState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet } from "../day/clock.ts";
+import { beginQuest } from "../quest/quest.ts";
 import {
   cureTargets,
   ensurePicks,
@@ -30,6 +31,9 @@ export const COPY = {
   rest: "Rest",
   cleanse: "Cleanse",
   leave: "Leave",
+  quest: "Quest",
+  corruptionHero: "Who takes the corruption?",
+  rewardHero: "Who takes the reward?",
   next: "Next",
   curePick: "Who does this?",
   restPrompt: "How many spaces will you move?",
@@ -69,6 +73,10 @@ export type BuildingStep =
   | { kind: "corruption"; heroId: string }
   | { kind: "rest-moves"; heroId: string }
   | { kind: "give-back" }
+  /** The open quest's options and Leave (DEC-948). C3-14 draws its scene here. */
+  | { kind: "quest"; questId: string }
+  /** The quest waits on a hero: who takes the corruption, or the reward. */
+  | { kind: "quest-hero"; questId: string; pending: "corruption" | "item" }
   | { kind: "result"; result: BuildingResult };
 
 /** The slice of the encounter's local the model reads. */
@@ -179,7 +187,17 @@ const menuOptions = (play: PlayState, local: BuildingLocal): BuildingOption[] | 
   const options: BuildingOption[] = [];
   for (const entry of opened.entries) {
     if (entry.id === "leave") continue;
-    if (entry.id === "quest") continue;
+    if (entry.id === "quest") {
+      options.push({
+        promptId: buildPromptId(local.groupId, serial, "pick", "quest"),
+        actionId: "build",
+        label: COPY.quest,
+        detail: plural(1, "move"),
+        enabled: !entry.disabled,
+        ...(entry.disabled ? { reason: "No moves left." } : {}),
+      });
+      continue;
+    }
     const kind = entry.id as PickKind;
     const heroes =
       kind === "cure"
@@ -317,6 +335,43 @@ export const buildingModel = (
         label: String(index + 1),
         enabled: true,
       })),
+    };
+  }
+
+  if (step.kind === "quest" || step.kind === "quest-hero") {
+    // The buttons are the quest's own: its visible options by the pack's labels, then Leave (DEC-948).
+    loadLive(play, group, movesOf(local));
+    const opened = beginQuest(play, group, step.questId);
+    const view = opened.ok ? opened.view : null;
+    if (step.kind === "quest-hero") {
+      return {
+        ...base,
+        prompt: step.pending === "corruption" ? COPY.corruptionHero : COPY.rewardHero,
+        options: (view?.pending?.heroes ?? []).map((heroId) => ({
+          promptId: buildPromptId(group, serial, "qhero", heroId),
+          actionId: "build" as const,
+          label: nameOf(heroId),
+          enabled: true,
+        })),
+      };
+    }
+    return {
+      ...base,
+      prompt: null,
+      options: [
+        ...(view?.options ?? []).map((row) => ({
+          promptId: buildPromptId(group, serial, "qopt", row.id),
+          actionId: "build" as const,
+          label: row.label,
+          enabled: !row.disabled,
+        })),
+        {
+          promptId: buildPromptId(group, serial, "qleave"),
+          actionId: "build" as const,
+          label: COPY.leave,
+          enabled: true,
+        },
+      ],
     };
   }
 

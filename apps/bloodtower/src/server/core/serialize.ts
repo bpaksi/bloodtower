@@ -7,6 +7,7 @@ import {
   restorePicksStore,
 } from "../../engine/loops/encounter/picks.ts";
 import { captureEventState, restoreEventState } from "../../engine/loops/event/index.ts";
+import { type QuestStore, restoreQuests, snapshotQuests } from "../../engine/loops/quest/store.ts";
 import { createShellRegistry } from "../../engine/loops/session/registry.ts";
 import {
   SHELL_ENGINE_VERSION,
@@ -28,6 +29,11 @@ export type SerializedShellState = Omit<ShellState, "devices" | "registry"> & {
    * keep, and the store starts blank.
    */
   picks?: PicksStore | null;
+  /**
+   * The quest store (F1/02): the open markers, each quest's progress, the done list and the items.
+   * A checkpoint from before F1/02 has none, and the store starts blank.
+   */
+  quests?: QuestStore | null;
 };
 
 /** `JSON.stringify` turns a `Map` into `{}`; keep only the `spaces` list on disk. */
@@ -49,11 +55,13 @@ const rehydratePlay = (
   play: PlayState,
   dayClock: DayClock | null | undefined,
   picks: PicksStore | null | undefined,
+  quests: QuestStore | null | undefined,
   saved?: unknown,
 ): PlayState => {
   const rebuilt: PlayState = { ...play, content: rehydratePlayContent(play.content) };
   if (dayClock) restoreClock(rebuilt, dayClock);
   if (picks) restorePicksStore(rebuilt, picks);
+  if (quests) restoreQuests(rebuilt, JSON.stringify(quests));
   if (saved) restoreEventState(rebuilt, saved);
   return rebuilt;
 };
@@ -78,6 +86,7 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
     dayClock: play ? captureClock(play) : null,
     eventState: play ? captureEventState(play) : null,
     picks: play ? picksSaved(play) : null,
+    quests: play ? (JSON.parse(snapshotQuests(play)) as QuestStore) : null,
   };
 };
 
@@ -99,6 +108,7 @@ export const deserializeShellState = ({
   dayClock,
   eventState: savedEvents,
   picks,
+  quests,
   ...row
 }: SerializedShellState): ShellState => ({
   ...row,
@@ -150,5 +160,5 @@ export const deserializeShellState = ({
   devices: new Set(row.devices),
   registry: createShellRegistry(),
   playContent: row.playContent ? rehydratePlayContent(row.playContent) : null,
-  play: row.play ? rehydratePlay(row.play, dayClock, picks, savedEvents) : null,
+  play: row.play ? rehydratePlay(row.play, dayClock, picks, quests, savedEvents) : null,
 });

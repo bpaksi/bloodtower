@@ -12,6 +12,7 @@ import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isFallen, setHeroSheet } from "../day/clock.ts";
 import { buildingMenu } from "../day/rules.ts";
+import { ensureQuests } from "../quest/store.ts";
 
 /** Prices and amounts for the 1.0 picks. Defaults match packs/base/tuning.yaml (DEC-703). */
 export type PickTuning = {
@@ -81,8 +82,6 @@ export type PicksStore = {
   tiles: Record<string, string[]>;
   /** Set when a draw went past four tiles; the group must give one back. */
   giveBack: Record<string, boolean>;
-  /** Spaces carrying a quest marker (DEC-083). */
-  quests: string[];
   /** `${chapter}:${heroId}` for each free cure already used (DEC-700). */
   freeCures: string[];
   /** Groups whose turn has ended this day; an Uncertain pick or the loop sets it (DEC-468). */
@@ -103,7 +102,6 @@ export const ensurePicks = (play: PlayState): PicksStore => {
     hp: {},
     tiles: {},
     giveBack: {},
-    quests: [],
     freeCures: [],
     log: [],
   };
@@ -225,11 +223,25 @@ export const setHeroHp = (play: PlayState, heroId: string, hp: number, max: numb
 export const setVirtueTiles = (play: PlayState, groupId: string, tiles: string[]): void => {
   ensurePicks(play).tiles[groupId] = [...tiles];
 };
+/** The quest id a bare test marker uses when no quest def is behind it. */
+const BARE_MARKER_QUEST = "marker";
+
+/** Puts a quest marker on a space, or takes it off: the quest store's, which `openMenu` reads (DEC-083). */
 export const setQuestMarker = (play: PlayState, spaceId: string, present: boolean): void => {
-  const store = ensurePicks(play);
-  store.quests = store.quests.filter((id) => id !== spaceId);
-  if (present) store.quests.push(spaceId);
+  const quests = ensureQuests(play);
+  if (present) quests.bySpace[spaceId] ??= BARE_MARKER_QUEST;
+  else delete quests.bySpace[spaceId];
 };
+
+/** True while the space holds a quest marker of this chapter that is not done (as `openQuestAt` reads it). */
+const questOpenAt = (play: PlayState, spaceId: string): boolean => {
+  const quests = ensureQuests(play);
+  const id = quests.bySpace[spaceId];
+  return Boolean(id) && !quests.done.includes(id as string);
+};
+
+/** The Quest pick costs one move (DEC-948). */
+export const QUEST_MOVES = 1;
 
 const spaceOf = (play: PlayState, groupId: string) => {
   const group = groupById(play, groupId);
@@ -251,9 +263,18 @@ export const openMenu = (
   const labels = buildingMenu(
     ABOVE_CLEANSE[here.space.building] ?? [],
     skulls,
-    store.quests.includes(here.space.id),
+    questOpenAt(play, here.space.id),
   );
   const entries: MenuEntry[] = labels.map((label) => {
+    if (label === "Quest") {
+      // Listed while a quest is open; greyed with no move left (DEC-948).
+      return {
+        id: "quest",
+        label,
+        price: null,
+        disabled: (store.moves[groupId] ?? 0) < QUEST_MOVES,
+      };
+    }
     const kind = LABEL_TO_KIND[label];
     if (!kind) return { id: label.toLowerCase(), label, price: null, disabled: false };
     // A cure's price depends on the hero; the menu shows the group's cheapest.
@@ -298,6 +319,27 @@ const pickGate = (
     return { ok: false, reason: "no-moves" };
   const spaceId = groupById(play, groupId)?.spaceId ?? "";
   return { ok: true, store, spaceId };
+};
+
+/** Whether the group can take the Quest pick now. It changes nothing. */
+export const questPickGate = (
+  play: PlayState,
+  groupId: string,
+): { ok: true } | { ok: false; reason: PickRefusal } => {
+  const opened = openMenu(play, groupId);
+  if (!opened.ok) return opened;
+  if (!opened.entries.some((entry) => entry.id === "quest"))
+    return { ok: false, reason: "not-offered" };
+  const store = ensurePicks(play);
+  if (store.giveBack[groupId]) return { ok: false, reason: "give-back-first" };
+  if ((store.moves[groupId] ?? 0) < QUEST_MOVES) return { ok: false, reason: "no-moves" };
+  return { ok: true };
+};
+
+/** The quest pick took hold: its move is spent. */
+export const spendQuestMove = (play: PlayState, groupId: string): void => {
+  const store = ensurePicks(play);
+  store.moves[groupId] = (store.moves[groupId] ?? 0) - QUEST_MOVES;
 };
 
 /** One pick. Costs the tuning's moves and gold; Leave is never a pick and is free. */
@@ -395,6 +437,12 @@ export const endGroupTurn = (play: PlayState, groupId: string, gold?: HeroGold):
   applyTurnEndLosses(play, groupId, gold ?? groupPurseGold(store.purse, groupId));
 };
 
+/** A quest done or left ends the group's turn, the way Uncertain's pick does (DEC-821, DEC-948). */
+export const endTurnAfterQuest = (play: PlayState, groupId: string): void => {
+  ensurePicks(play).moves[groupId] = 0;
+  endGroupTurn(play, groupId);
+};
+
 /** Resolves the give-back prompt a fifth tile opens (DEC-544). */
 export const giveBackTile = (play: PlayState, groupId: string, tile: string): boolean => {
   const store = ensurePicks(play);
@@ -472,23 +520,53 @@ export const loadLive = (play: PlayState, groupId: string, movesLeft: number): v
   }
 };
 
-/** Writes the store's gold and hit points back to the sheets and returns the moves left. */
+/** Each hero's part of a gain: an equal split, then each odd coin to a hero holding the least (DEC-646). */
+const gainShares = (
+  play: PlayState,
+  heroIds: readonly string[],
+  gain: number,
+): Map<string, number> => {
+  const clock = ensureClock(play);
+  const shares = new Map<string, number>();
+  if (heroIds.length === 0) return shares;
+  const each = Math.floor(gain / heroIds.length);
+  const held = new Map(heroIds.map((id) => [id, (heroSheet(clock, id).gold ?? 0) + each] as const));
+  for (const id of heroIds) shares.set(id, each);
+  for (let coin = gain - each * heroIds.length; coin > 0; coin--) {
+    const least = heroIds.reduce((low, id) =>
+      (held.get(id) ?? 0) < (held.get(low) ?? 0) ? id : low,
+    );
+    held.set(least, (held.get(least) ?? 0) + 1);
+    shares.set(least, (shares.get(least) ?? 0) + 1);
+  }
+  return shares;
+};
+
+/**
+ * Writes the store's gold and hit points back to the sheets and returns the moves left. A cost comes
+ * off the heroes in order. A net gain (a quest's gold, DEC-178) is split equally and each odd coin
+ * goes to a hero holding the least, ties by seat (DEC-646). A hero whose gold was unknown starts
+ * from 0 on a gain.
+ */
 export const commitLive = (play: PlayState, groupId: string): number => {
   const store = ensurePicks(play);
   const group = groupById(play, groupId);
   const clock = ensureClock(play);
   if (group) {
-    let owed = livePurse(play, groupId) - (store.purse[groupId] ?? 0);
+    const delta = livePurse(play, groupId) - (store.purse[groupId] ?? 0);
+    let owed = delta;
+    const gains = delta < 0 ? gainShares(play, group.heroIds, -delta) : new Map<string, number>();
     for (const heroId of group.heroIds) {
       const sheet = heroSheet(clock, heroId);
       const hp = store.hp[heroId];
       const gold = sheet.gold;
       const taken = gold !== undefined && owed > 0 ? Math.min(gold, owed) : 0;
       owed -= taken;
+      const gained = gains.get(heroId) ?? 0;
       setHeroSheet(play, heroId, {
         ...sheet,
         ...(hp ? { hp: { hp: hp.hp, max: hp.max } } : {}),
-        ...(gold !== undefined ? { gold: gold - taken } : {}),
+        ...(gold !== undefined || gained > 0 ? { gold: (gold ?? 0) - taken + gained } : {}),
       });
     }
   }
