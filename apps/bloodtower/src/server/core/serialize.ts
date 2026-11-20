@@ -1,4 +1,10 @@
 import { type BoardGraph, buildBoardGraph } from "../../engine/loops/chapter/board.ts";
+import {
+  type ChapterStore,
+  restoreChapters,
+  snapshotChapters,
+  tryChapters,
+} from "../../engine/loops/chapter/chapters.ts";
 import type { PlayContent, PlayState } from "../../engine/loops/chapter/playState.ts";
 import { captureClock, type DayClock, restoreClock } from "../../engine/loops/day/clock.ts";
 import {
@@ -34,6 +40,11 @@ export type SerializedShellState = Omit<ShellState, "devices" | "registry"> & {
    * A checkpoint from before F1/02 has none, and the store starts blank.
    */
   quests?: QuestStore | null;
+  /**
+   * The chapter store (F1/03): the plan, the chapter now running and what has run. A checkpoint
+   * from before F1/03 has none, and the game restores with no chapter store (DEC-949).
+   */
+  chapters?: ChapterStore | null;
 };
 
 /** `JSON.stringify` turns a `Map` into `{}`; keep only the `spaces` list on disk. */
@@ -57,11 +68,13 @@ const rehydratePlay = (
   picks: PicksStore | null | undefined,
   quests: QuestStore | null | undefined,
   saved?: unknown,
+  chapters?: ChapterStore | null,
 ): PlayState => {
   const rebuilt: PlayState = { ...play, content: rehydratePlayContent(play.content) };
   if (dayClock) restoreClock(rebuilt, dayClock);
   if (picks) restorePicksStore(rebuilt, picks);
   if (quests) restoreQuests(rebuilt, JSON.stringify(quests));
+  if (chapters) restoreChapters(rebuilt, JSON.stringify(chapters));
   if (saved) restoreEventState(rebuilt, saved);
   return rebuilt;
 };
@@ -87,6 +100,8 @@ export const serializeShellState = (state: ShellState): SerializedShellState => 
     eventState: play ? captureEventState(play) : null,
     picks: play ? picksSaved(play) : null,
     quests: play ? (JSON.parse(snapshotQuests(play)) as QuestStore) : null,
+    chapters:
+      play && tryChapters(play) ? (JSON.parse(snapshotChapters(play)) as ChapterStore) : null,
   };
 };
 
@@ -109,6 +124,7 @@ export const deserializeShellState = ({
   eventState: savedEvents,
   picks,
   quests,
+  chapters,
   ...row
 }: SerializedShellState): ShellState => ({
   ...row,
@@ -160,5 +176,5 @@ export const deserializeShellState = ({
   devices: new Set(row.devices),
   registry: createShellRegistry(),
   playContent: row.playContent ? rehydratePlayContent(row.playContent) : null,
-  play: row.play ? rehydratePlay(row.play, dayClock, picks, quests, savedEvents) : null,
+  play: row.play ? rehydratePlay(row.play, dayClock, picks, quests, savedEvents, chapters) : null,
 });

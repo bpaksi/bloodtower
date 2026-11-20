@@ -73,6 +73,7 @@ import {
 } from "./shellRef.ts";
 import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
 import { type HintHold, initialShellState, type ShellState } from "./state.ts";
+import { configureStoryPlay } from "./storyPlay.ts";
 import { towerReady } from "./tower.ts";
 import { captureHintHold, heroName } from "./view.ts";
 
@@ -768,6 +769,8 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
           }),
           isPurseAmount(next.startingPurse) ? next.startingPurse : null,
         );
+        // F1/03 (DEC-949): the pack's quests and chapter plan, before the test marker below.
+        configureStoryPlay(next.play, story?.play);
         // TEST ONLY (F1/02): `~test-quest:` opens a fixture quest at a space; no marker, no change.
         applyQuestTestSeed(next.play, next.seed);
       }

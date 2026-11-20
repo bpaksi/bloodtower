@@ -5,6 +5,7 @@ import { type BoardSpaceInput, buildBoardGraph } from "../../engine/loops/chapte
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { mergeSetupSteps, type ShellStory } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
+import type { StoryPlayData } from "../../engine/loops/session/storyPlay.ts";
 import { idSchema } from "../../protocols/pack-v2/index.ts";
 import {
   indexPackAssets,
@@ -87,6 +88,39 @@ const playContentFor = (
     return null;
   }
 };
+
+type LoadedStory = Extract<ReturnType<typeof loadPackV2Dir>, { ok: true; kind: "story" }>;
+
+/**
+ * The quests and chapter plan a real game reads from the story pack (F1/03, DEC-949). A quest
+ * with no place is left out of its chapter's goal. Numbers come from the base tuning; with no
+ * tuning there is no chapter plan, and the quests still load.
+ */
+const storyPlayData = (
+  story: LoadedStory["pack"],
+  tuning: LoadedStory["base"]["tuning"],
+): StoryPlayData => ({
+  quests: { chapters: story.chapters, scenes: story.scenes },
+  chapters: tuning
+    ? {
+        chapters: story.chapters.map((chapter) => ({
+          id: chapter.id,
+          index: chapter.index,
+          kingdoms: chapter.kingdoms,
+          quests: chapter.quests.flatMap((quest) =>
+            quest.place ? [{ id: quest.id, spaceId: quest.place.space }] : [],
+          ),
+        })),
+        seals: [],
+        c3EndAfterChapter1: tuning.c3_end_after_chapter_1,
+        foeLevel: {
+          chapter1: tuning.setup.foe_level_by_chapter.chapter_1,
+          perChapter: tuning.setup.foe_level_by_chapter.per_chapter,
+        },
+        sealBreakMin: tuning.skulls.seal_break.min,
+      }
+    : null,
+});
 
 /**
  * A story pack that failed to load, as a door that is not playable. It reads only the manifest's
@@ -216,6 +250,7 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
       })),
       setup: mergeSetupSteps(packSteps),
       heroes,
+      play: storyPlayData(story, loaded.base.tuning),
     };
     stories.push(shellStory);
     // The demo entry's line rows and packed files (A1-8b-2, D49). Ids only.

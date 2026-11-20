@@ -166,7 +166,8 @@ const startGame = async (
 
 const CITADEL = "N-radiant-mountains";
 const SANCTUARY = "N-upper-ice-fangs";
-const VILLAGE = "N-egans-end";
+// F1/03: Egan's End now holds the live Herald, so its menu starts with Quest; Duwani has no quest.
+const VILLAGE = "E-duwani";
 const BAZAAR = "N-dayside";
 
 const seedAt = (space: string, extra = "") => `c3-bld~test-event:none~test-at:${space}${extra}`;
@@ -309,9 +310,10 @@ test.describe("C3/13 the building menu: engine and wire", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    // The seed `c3-bld-m1` rolls 3 moves on the first day (2d3, checked against the engine's RNG).
+    // The seed `c3-bld-m5` rolls 3 moves on the first day (2d3, checked against the engine's RNG).
+    // F1/03 moved the village to Duwani; the roll reads the whole seed, so `m1` (3 before) became `m5`.
     const { session, context, pad, board } = await startGame(browser, testInfo, {
-      seed: `c3-bld-m1~test-event:none~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
+      seed: `c3-bld-m5~test-event:none~test-at:${VILLAGE}~test-hp:hero-a=4/12`,
     });
     try {
       await enterBuilding(pad);
