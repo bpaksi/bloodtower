@@ -72,7 +72,7 @@ Bob's two Dark Tower reviews of Nov 12 are folded into this plan as **docs and i
 
 | Item | Status |
 |---|---|
-| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall), EE-01 (forced turn end not propagated) |
+| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall). EE-01 (forced turn end not propagated) moved to its own step, F1/02, on 2026-11-18 (Wright) |
 | Tests | TB-01 to TB-14 and R01 (specified, not run) |
 | Gamewright confirmation 1 (Nov 13, 5:50 AM ET) | **Received.** Entry terminal gate routing as written: MEC-038 alone applies the stance once, on a genuine entry; after each entry effect the gate runs game loss first, then foe gone = won, then all fallen = fallen close; no Fight/Retreat, round card or roll after a terminal entry; Continue replays nothing |
 | Gamewright confirmation 2 (Nov 13, 5:50 AM ET) | **Received.** **TB-03 is a Gamewright ruling:** a foe killed by Bold never uses its later pre-round ability (Ambush, Fire breath, or any other) |
@@ -90,7 +90,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
 | D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation. **Ruled** (DEC-908, DEC-909, #509); brief [D3/01-ward-and-boss-deck](../briefs/D3/01-ward-and-boss-deck/plan.md) drafted 2026-11-18, eval approval **pending Bob**; proposed: its own step after F1 and D2, ahead of C4-02 and C5-02 (Wright to confirm) | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
-| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope | R06 | #502 |
+| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope. **Ruled** (DEC-911, #509); brief [D5/01-pool-pays](../briefs/D5/01-pool-pays/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-944 rules which gold moves the pool pays | R06 | #502 |
 | D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
 
 **D4 brief** (#504): ruled by DEC-910 (#509), with DEC-942 and DEC-943 for the two cases it left; brief [D4/01-fallen-building-keeps-quest](../briefs/D4/01-fallen-building-keeps-quest/plan.md) drafted 2026-11-18, eval approval **pending Bob**. Independent of F1, D2 and D3; with D1 either order.
@@ -100,8 +100,8 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | Finding(s) | Destination | Plan hook |
 |---|---|---|
 | QD-03, CB-01, QD-01, EE-01 (F1) | **v1.0 now, not held (2026-11-16).** Two Gamewright confirmations received, brief drafted, eval approval pending Bob; inspect the code, then build; TB-01 to TB-14 and R01 | Before #445, #446, #449 (#505) |
-| EE-02, BE-02 (F2) | v1.0 after F1; D6 first | Before the encounter-related C4 steps (#507) |
-| LC-03 (F3) | v1.0 core schedules after D6; the Long overlay is 1.1 | Day loop, #441 follow-up (#507) |
+| EE-02, BE-02 (F2) | v1.0 after F1; D6 first. **BE-02 is built by the D6 brief** [D6/01-drop-counter-and-free-pick](../briefs/D6/01-drop-counter-and-free-pick/plan.md) (drafted 2026-11-18, eval approval **pending Bob**; DEC-912, DEC-913, DEC-945 to DEC-947), with DEC-572's once-per-turn Cleanse; F2 keeps EE-02's dispatch half (test only if main conforms) | Before the encounter-related C4 steps (#507) |
+| LC-03 (F3) | v1.0 core schedules are built by the D6 brief; the Long overlay is 1.1. D6 supersedes C3/04 EV-02, EV-04 and C3/11 EV-02's 2-hero numbers (Bob's approval). EE-01's quest turn-end (DEC-821) has no step yet: F1's brief leaves it out | Day loop, #441 follow-up (#507) |
 | CB-02, TP-01 (F4) | v1.0 after F1 | #446, #459 (#507) |
 | LC-02, LC-06, TP-03 (F5) | v1.0 | #435 (C3-10), #462 (C5-04) (#507) |
 | QD-02, QD-04 (F6) | v1.0 after single stance ownership | #449 (#507) |
@@ -115,6 +115,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | EE-03 | Coverage gap, mainly 1.1. Note only: the P-006 numbers do not prove the omitted mechanics | #475 (parked) |
 | BE-01, BE-04, CB-03, TP-02 (F8), D7, glyph part of BE-03, Long overlay, H02 | **Parked to 1.1**, label `parked-1.1` | #506 |
 | LC-05 | Withdrawn (DEC-886/D-04 already decide it). Keep a story-specific conformance test | none |
+| EE-01 (F1/02; moved out of F1/01 on 2026-11-18, Wright) | v1.0 now. Brief [F1/02-quest-ends-turn](../briefs/F1/02-quest-ends-turn/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-821 (provisional, DEC-914) and DEC-948. It wires the iPad Quest row and ends the turn after a quest pick. **It goes ahead of D4** (#504, PR #562), which builds on its Quest row and quest source. The F1 row above now means QD-03, CB-01, QD-01 only | #505 follow-up (issue to open) |
 
 ## The runner queue (v1.0)
 
