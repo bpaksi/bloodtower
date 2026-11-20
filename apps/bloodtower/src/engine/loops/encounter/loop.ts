@@ -1,7 +1,16 @@
 import type { LoopDefinition } from "../../loop/types.ts";
 import { groupById, playState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isGameLost } from "../day/clock.ts";
-import { beginQuest, openQuestAt, type QuestResult } from "../quest/quest.ts";
+import {
+  beginQuest,
+  chooseOption,
+  leaveQuest,
+  openQuestAt,
+  pickHero,
+  type QuestRefusal,
+  type QuestResult,
+  type QuestView,
+} from "../quest/quest.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
 import {
   type BuildingLocal,
@@ -18,12 +27,15 @@ import {
   applyPick,
   commitLive,
   cureTargets,
+  endTurnAfterQuest,
   ensurePicks,
   giveBackTile,
   healTargets,
   loadLive,
   type PickKind,
   type PickRefusal,
+  questPickGate,
+  spendQuestMove,
 } from "./picks.ts";
 
 /**
@@ -256,6 +268,67 @@ const afterCureHero = (local: EncounterLocal, heroId: string): EncounterLocal =>
   });
 };
 
+const QUEST_REFUSALS: Record<QuestRefusal, string> = {
+  "unknown-group": REFUSALS["unknown-group"],
+  "unknown-quest": "There is no open quest here.",
+  "already-done": "That quest is already done.",
+  "not-offered": REFUSALS["not-offered"],
+  disabled: REFUSALS["not-offered"],
+  "not-chosen": "That press does not fit what the building is asking.",
+  "nothing-to-pick": "That press does not fit what the building is asking.",
+  "not-pickable": REFUSALS["no-target"],
+};
+
+/** The step a quest view asks for: a hero pick, or its options. */
+const questStep = (view: QuestView): BuildingStep =>
+  view.pending
+    ? { kind: "quest-hero", questId: view.questId, pending: view.pending.kind }
+    : { kind: "quest", questId: view.questId };
+
+/**
+ * The quest is done or left: the turn ends at once (DEC-821, DEC-948). Moves go to 0, the turn-end
+ * losses run once, the gold the quest paid reaches the sheets, and the building shows its menu with
+ * every pick greyed and Leave open. The quest's moves are read from the live state first.
+ */
+const endQuestTurn = (local: EncounterLocal): EncounterLocal => {
+  const play = playState();
+  endTurnAfterQuest(play, local.groupId);
+  const movesLeft = commitLive(play, local.groupId);
+  return toStep({ ...local, movesLeft }, { kind: "menu" });
+};
+
+/** The Quest pick (DEC-083, DEC-948): 1 move, then the quest's own step. */
+const startQuest = (local: EncounterLocal): EncounterLocal => {
+  const play = playState();
+  loadLive(play, local.groupId, movesOf(local));
+  const gate = questPickGate(play, local.groupId);
+  if (!gate.ok) return refused(local, REFUSALS[gate.reason]);
+  const opened = handleQuestPick(local.groupId);
+  if (!opened.ok) return refused(local, QUEST_REFUSALS[opened.reason]);
+  spendQuestMove(play, local.groupId);
+  const movesLeft = commitLive(play, local.groupId);
+  return toStep({ ...local, movesLeft }, questStep(opened.view));
+};
+
+/** One press inside the quest: `run` takes it against the live state; the step then follows the quest. */
+const questPress = (
+  local: EncounterLocal,
+  run: (play: ReturnType<typeof playState>) => QuestResult,
+): EncounterLocal => {
+  const play = playState();
+  loadLive(play, local.groupId, movesOf(local));
+  const result = run(play);
+  if (!result.ok) return refused(local, QUEST_REFUSALS[result.reason]);
+  // DEC-676, DEC-905: a lost game (any reason) stops the quest; no turn-end loss runs and no step is offered.
+  if (isGameLost(play)) {
+    const movesLeft = commitLive(play, local.groupId);
+    return { ...local, movesLeft, awaitingPress: false, refusal: null };
+  }
+  if (result.view.done) return endQuestTurn(local);
+  const movesLeft = commitLive(play, local.groupId);
+  return toStep({ ...local, movesLeft }, questStep(result.view));
+};
+
 /**
  * One press on the building's own buttons (action `build`). A press that does not fit the step it
  * names is refused, not ignored: `refusal` carries the words, and the shell logs and toasts them.
@@ -271,7 +344,24 @@ export const handleBuildingPress = (local: EncounterLocal, promptId: string): En
   const step = stepOf(local);
 
   if (press.verb === "pick" && step.kind === "menu") {
+    if (press.arg === "quest") return startQuest(local);
     return startPick(local, press.arg as PickKind);
+  }
+  if (press.verb === "qopt" && step.kind === "quest") {
+    return questPress(local, (play) => chooseOption(play, local.groupId, step.questId, press.arg));
+  }
+  if (press.verb === "qhero" && step.kind === "quest-hero") {
+    const seed = shellState().seed;
+    return questPress(local, (play) =>
+      pickHero(play, local.groupId, step.questId, press.arg, seed),
+    );
+  }
+  if (press.verb === "qleave" && step.kind === "quest") {
+    // Leaving partway is a retreat: the progress stays and the turn ends (DEC-821, DEC-948).
+    if (!leaveQuest(playState(), step.questId))
+      return refused(local, QUEST_REFUSALS["unknown-quest"]);
+    loadLive(playState(), local.groupId, movesOf(local));
+    return endQuestTurn(local);
   }
   if (press.verb === "who" && step.kind === "who") {
     const heroes =

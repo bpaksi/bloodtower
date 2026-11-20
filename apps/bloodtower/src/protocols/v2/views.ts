@@ -181,7 +181,16 @@ const virtuePanelSchema = z.strictObject({
 /** The building menu (C3/13, UI-043): one panel for every step of it. */
 const buildingPanelSchema = z.strictObject({
   title: z.string().min(1).max(60),
-  step: z.enum(["menu", "who", "corruption", "rest-moves", "give-back", "result"]),
+  step: z.enum([
+    "menu",
+    "who",
+    "corruption",
+    "rest-moves",
+    "give-back",
+    "result",
+    "quest",
+    "quest-hero",
+  ]),
   heroIds: z.array(heroIdSchema).max(16),
   prompt: z.string().min(1).max(160).nullable(),
   options: z

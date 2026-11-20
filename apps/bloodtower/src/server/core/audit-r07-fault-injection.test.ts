@@ -494,8 +494,8 @@ describe("audit R07 (LC-04): payment and reward (engine calls; no press reaches 
     expect(restored.log).toEqual(picksBefore.log);
   });
 
-  // AUDIT-BUG LC-04: quest progress and the purse are not in the checkpoint, so Continue loses a quest reward and lets it be won again.
-  it.fails("R07-09 a stop after a reward: Continue keeps the gold and the quest cannot pay twice", async () => {
+  // LC-04 fixed by F1/02 (quest progress and purse now in the checkpoint).
+  it("R07-09 a stop after a reward: Continue keeps the gold and the quest cannot pay twice", async () => {
     const h = harness();
     const first = await reachPlay(h, "without");
     await press(first, "day-1-roll-done", "continue");
