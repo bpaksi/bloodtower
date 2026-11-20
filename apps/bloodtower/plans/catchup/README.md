@@ -93,7 +93,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | D5 (high) | BE-05 | Absent-hero funding and present-group debit scope. **Ruled** (DEC-911, #509); brief [D5/01-pool-pays](../briefs/D5/01-pool-pays/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-944 rules which gold moves the pool pays | R06 | #502 |
 | D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
 
-**D4 brief** (#504): ruled by DEC-910 (#509), with DEC-942 and DEC-943 for the two cases it left; brief [D4/01-fallen-building-keeps-quest](../briefs/D4/01-fallen-building-keeps-quest/plan.md) drafted 2026-11-18, eval approval **pending Bob**. Independent of F1, D2 and D3; with D1 either order.
+**D4 brief** (#504): ruled by DEC-910 (#509), with DEC-942 and DEC-943 for the two cases it left; brief [D4/01-fallen-building-keeps-quest](../briefs/D4/01-fallen-building-keeps-quest/plan.md) drafted 2026-11-18, eval approval **pending Bob**. Depends on F1/02 and F1/03 (its e2e needs their Quest row and the live quest); independent of F1/01, D2 and D3. Build order (Wright, 2026-11-18): D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3.
 
 ### Mapping of the 30 findings into the v1.0 plan
 
@@ -112,6 +112,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | Live quests (F1/03; the gap found while briefing F1/02, Wright 2026-11-18) | v1.0 now. Brief [F1/03-live-quests](../briefs/F1/03-live-quests/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-949. A real game loads its quests and chapter plan from the story pack, the Quest row reaches `handleQuestPick`, and the chapter store is saved. **After F1/02, before D4's build and before G-C3.** Enter on a wild quest marker (DEC-641, the Ambush) is not in it and still blocks G-C3's win; proposed as its own step after D4 | issue to open |
 | LC-04 | v1.0 verification: R07 fault injection, then Bob's real-Tower run | #484 |
 | TP-04, H03 | v1.0 hardware: H01 and H03 on Bob's Monday run | #484, #489 |
+| Wild quest Enter (F1/04; DEC-641, assigned by Wright 2026-11-18) | v1.0 now. Brief [F1/04-wild-quest-enter](../briefs/F1/04-wild-quest-enter/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-951. A group can Enter a wild space holding a live quest marker (the Ambush at Muted Forest), so chapter 1 can be won in real play. **Build order (Wright, 2026-11-18): D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3** (it edits `group-turn/loop.ts`) | issue to open |
 | EE-03 | Coverage gap, mainly 1.1. Note only: the P-006 numbers do not prove the omitted mechanics | #475 (parked) |
 | BE-01, BE-04, CB-03, TP-02 (F8), D7, glyph part of BE-03, Long overlay, H02 | **Parked to 1.1**, label `parked-1.1` | #506 |
 | LC-05 | Withdrawn (DEC-886/D-04 already decide it). Keep a story-specific conformance test | none |
@@ -228,7 +229,7 @@ The C3, C4 and C5 briefs all pass `node scripts/check-briefs.mjs` on main and ca
 - **Stop lifts:** every runner step. #393, #384 and #414 are tracked by issues #431, #432 and #414.
 - **Bob's tower run, Mon Nov 16 (D1):** C2-10, his own time. C2-11 (step 58) and C2-13 (step 62) follow it; no blocked status.
 - **Bob, open:** re-approval rows for the changed evals and for CU/01 and CU/02 (a batch is fine); the three locks the rulings touch (see design-freeze.md): caravans, Charon's scope, PT-24's removal of locked copy; PT-05's tower label parked (say so if he wants it back in step 06).
-- **Bob gates:** G-C3, G-C4, G-A1 (needs the art hold lifted, A1-4c render and step 31), C5-10 (G-1.0). Bob also ticks every art final in C5-05.
+- **Bob gates:** G-C3 (last in the build order D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3, so The Ruined Keep can be won in real play), G-C4, G-A1 (needs the art hold lifted, A1-4c render and step 31), C5-10 (G-1.0). Bob also ticks every art final in C5-05.
 - **Gamewright and Loremaster:** steps 43 to 45 and 62.
 - **Gamewright, audit rulings:** D1-D6 (#499-#504) ruled in #509 (DEC-905 to DEC-913). D1's brief is drafted and waits on Bob's eval approval. F1 (#505) is not held (Bob, 2026-11-16); its brief is drafted and waits on Bob's eval approval.
 
