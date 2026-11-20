@@ -22,13 +22,23 @@ export const applyQuestTestSeed = (play: PlayState, seed: string): void => {
     if (!space || !play.content.board.spaceById.has(space)) {
       throw new Error(`The test quest seed names "${space}", which is not a space.`);
     }
+    const store = ensureQuests(play);
+    // F1/03: a store that holds the pack's defs opens a pack quest and loads no fixture defs.
+    if (store.defs.length > 0) {
+      if (!quest || !store.defs.some((def) => def.id === quest)) {
+        throw new Error(
+          `The test quest seed names "${quest}", which is not a quest in the pack (${store.defs.map((def) => def.id).join(", ")}).`,
+        );
+      }
+      store.bySpace[space] = quest;
+      continue;
+    }
     const scene = quest ? FIXTURE_SCENES[quest] : undefined;
     if (!quest || !scene) {
       throw new Error(
         `The test quest seed names "${quest}", which is not a quest fixture (${Object.keys(FIXTURE_SCENES).join(", ")}).`,
       );
     }
-    const store = ensureQuests(play);
     store.defs = [
       ...store.defs.filter((def) => def.id !== quest),
       { id: quest, chapter: 1, scene },
