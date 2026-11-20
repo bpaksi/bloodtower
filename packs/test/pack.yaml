@@ -106,11 +106,11 @@ scenes:
   - id: herald
     options:
       - id: take-the-job
-        label: "[COPY: Take the job]"
+        label: "Take the job"
         effects:
           - {kind: item, item: tomas-map}
       - id: ask-pay-first
-        label: "[COPY: Ask for pay first]"
+        label: "Ask for pay first"
         effects:
           - {kind: gold, amount: 10}
   # The toll is 10 gold; a short group pays all its gold plus 2 HP per present hero, never below
