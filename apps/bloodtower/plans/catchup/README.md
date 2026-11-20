@@ -72,7 +72,7 @@ Bob's two Dark Tower reviews of Nov 12 are folded into this plan as **docs and i
 
 | Item | Status |
 |---|---|
-| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall), EE-01 (forced turn end not propagated) |
+| Findings | QD-03 (stance effect applied by both caller and callee), CB-01 (entry effects bypass terminal handling), QD-01 (room cleared after retreat/fall). EE-01 (forced turn end not propagated) moved to its own step, F1/02, on 2026-11-18 (Wright) |
 | Tests | TB-01 to TB-14 and R01 (specified, not run) |
 | Gamewright confirmation 1 (Nov 13, 5:50 AM ET) | **Received.** Entry terminal gate routing as written: MEC-038 alone applies the stance once, on a genuine entry; after each entry effect the gate runs game loss first, then foe gone = won, then all fallen = fallen close; no Fight/Retreat, round card or roll after a terminal entry; Continue replays nothing |
 | Gamewright confirmation 2 (Nov 13, 5:50 AM ET) | **Received.** **TB-03 is a Gamewright ruling:** a foe killed by Bold never uses its later pre-round ability (Ambush, Fire breath, or any other) |
@@ -90,7 +90,7 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | D2 (high) | QD-05, CB-06 | Trap exact-zero/shortfall recovery; mutual-terminal Spines outcome | R04; #445, #460 | #500 |
 | D3 (high) | CB-04, CB-05 | Ward deterministic cancellation; boss-phase live-deck operation. **Ruled** (DEC-908, DEC-909, #509); brief [D3/01-ward-and-boss-deck](../briefs/D3/01-ward-and-boss-deck/plan.md) drafted 2026-11-18, eval approval **pending Bob**; proposed: its own step after F1 and D2, ahead of C4-02 and C5-02 (Wright to confirm) | R04; #445, #460 | #501 |
 | D4 (high) | QD-06 | Required-marker emergency relocation: destination, bounds, identity and progress, confirmation | R05 | #504 |
-| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope | R06 | #502 |
+| D5 (high) | BE-05 | Absent-hero funding and present-group debit scope. **Ruled** (DEC-911, #509); brief [D5/01-pool-pays](../briefs/D5/01-pool-pays/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-944 rules which gold moves the pool pays | R06 | #502 |
 | D6 (before exact tests) | LC-03, BE-02 | Pair counter through quest-win nights; Fortunate free pick versus forced turn-end | F2, F3; R02, R03 | #503 |
 
 **D4 brief** (#504): ruled by DEC-910 (#509), with DEC-942 and DEC-943 for the two cases it left; brief [D4/01-fallen-building-keeps-quest](../briefs/D4/01-fallen-building-keeps-quest/plan.md) drafted 2026-11-18, eval approval **pending Bob**. Depends on F1/02 and F1/03 (its e2e needs their Quest row and the live quest); independent of F1/01, D2 and D3. Build order (Wright, 2026-11-18): D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3.
@@ -100,8 +100,8 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | Finding(s) | Destination | Plan hook |
 |---|---|---|
 | QD-03, CB-01, QD-01, EE-01 (F1) | **v1.0 now, not held (2026-11-16).** Two Gamewright confirmations received, brief drafted, eval approval pending Bob; inspect the code, then build; TB-01 to TB-14 and R01 | Before #445, #446, #449 (#505) |
-| EE-02, BE-02 (F2) | v1.0 after F1; D6 first | Before the encounter-related C4 steps (#507) |
-| LC-03 (F3) | v1.0 core schedules after D6; the Long overlay is 1.1 | Day loop, #441 follow-up (#507) |
+| EE-02, BE-02 (F2) | v1.0 after F1; D6 first. **BE-02 is built by the D6 brief** [D6/01-drop-counter-and-free-pick](../briefs/D6/01-drop-counter-and-free-pick/plan.md) (drafted 2026-11-18, eval approval **pending Bob**; DEC-912, DEC-913, DEC-945 to DEC-947), with DEC-572's once-per-turn Cleanse; F2 keeps EE-02's dispatch half (test only if main conforms) | Before the encounter-related C4 steps (#507) |
+| LC-03 (F3) | v1.0 core schedules are built by the D6 brief; the Long overlay is 1.1. D6 supersedes C3/04 EV-02, EV-04 and C3/11 EV-02's 2-hero numbers (Bob's approval). EE-01's quest turn-end (DEC-821) has no step yet: F1's brief leaves it out | Day loop, #441 follow-up (#507) |
 | CB-02, TP-01 (F4) | v1.0 after F1 | #446, #459 (#507) |
 | LC-02, LC-06, TP-03 (F5) | v1.0 | #435 (C3-10), #462 (C5-04) (#507) |
 | QD-02, QD-04 (F6) | v1.0 after single stance ownership | #449 (#507) |
@@ -109,12 +109,14 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | LC-01 (D1) | Gamewright rules first (high); drives R03 | #499 |
 | QD-05, CB-06 (D2); CB-04, CB-05 (D3) | Gamewright rules; block R04 and the C4/C5 battle work. **D2 ruled** (DEC-906, DEC-907, #509); brief [D2/01-trap-fall-and-spines](../briefs/D2/01-trap-fall-and-spines/plan.md) drafted 2026-11-18, eval approval **pending Bob** (normal brief approval). **Sequencing (Wright, 2026-11-18):** D2 is its own step after F1 merges, ahead of C4-02 (#445) and C4-06 (#449), which rebase on it if they land first; it does not join them, so no approved eval reopens. DEC-939 to DEC-941 settle its three Gamewright questions | #500, #501 -> #445, #460 |
 | QD-06 (D4), BE-05 (D5) | Gamewright rules; block R05 and R06 | #504, #502 |
+| Live quests (F1/03; the gap found while briefing F1/02, Wright 2026-11-18) | v1.0 now. Brief [F1/03-live-quests](../briefs/F1/03-live-quests/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-949. A real game loads its quests and chapter plan from the story pack, the Quest row reaches `handleQuestPick`, and the chapter store is saved. **After F1/02, before D4's build and before G-C3.** Enter on a wild quest marker (DEC-641, the Ambush) is not in it and still blocks G-C3's win; proposed as its own step after D4 | issue to open |
 | LC-04 | v1.0 verification: R07 fault injection, then Bob's real-Tower run | #484 |
 | TP-04, H03 | v1.0 hardware: H01 and H03 on Bob's Monday run | #484, #489 |
 | Wild quest Enter (F1/04; DEC-641, assigned by Wright 2026-11-18) | v1.0 now. Brief [F1/04-wild-quest-enter](../briefs/F1/04-wild-quest-enter/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-951. A group can Enter a wild space holding a live quest marker (the Ambush at Muted Forest), so chapter 1 can be won in real play. **Build order (Wright, 2026-11-18): D1 and F1/02 in parallel, then F1/03, then D4, then F1/04, then G-C3** (it edits `group-turn/loop.ts`) | issue to open |
 | EE-03 | Coverage gap, mainly 1.1. Note only: the P-006 numbers do not prove the omitted mechanics | #475 (parked) |
 | BE-01, BE-04, CB-03, TP-02 (F8), D7, glyph part of BE-03, Long overlay, H02 | **Parked to 1.1**, label `parked-1.1` | #506 |
 | LC-05 | Withdrawn (DEC-886/D-04 already decide it). Keep a story-specific conformance test | none |
+| EE-01 (F1/02; moved out of F1/01 on 2026-11-18, Wright) | v1.0 now. Brief [F1/02-quest-ends-turn](../briefs/F1/02-quest-ends-turn/plan.md) drafted 2026-11-18, eval approval **pending Bob**; DEC-821 (provisional, DEC-914) and DEC-948. It wires the iPad Quest row and ends the turn after a quest pick. **It goes ahead of D4** (#504, PR #562), which builds on its Quest row and quest source. The F1 row above now means QD-03, CB-01, QD-01 only | #505 follow-up (issue to open) |
 
 ## The runner queue (v1.0)
 
@@ -153,7 +155,7 @@ Columns: **Weekdays** is the step total, **Runner** the build part, **Cursor** t
 | 23 | 13 | C3-08 corruption (unblocked by DEC-894 to DEC-896) | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D33 | — | Stop lifted; C3-06 and C3-07 merged; Bob's re-approval of the amended eval (EV-11 to EV-13 added; step 44) | **Gates:** Bob re-approval row for the changed eval.md (step 44) | #442 |
 | 24 | 14 | C3-13 building menu on the iPad | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D34 | — | Step 13 (C3-08) merged | **Gates:** Copy table by Loremaster (step 45) | #443 |
 | 25 | 58 | C2-11 Continue piece check: add every physical piece (PT-08, 1.0 pieces) | anvil | 2.5 | 2 | 0.5 / $1.36 | D37 | PT-08 | Bob's tower run on Mon Nov 16 (C2-10; D1) and its findings note on main; steps 43, 44 | **Gates:** Bob's tower run (dated Mon Nov 16); brief amendment and Bob re-approval of the changed eval.md (step 44) | #484 |
-| 26 | 15 | G-C3: Bob plays The Ruined Keep to a win and to a loss | Bob | 0 | 0 | 0 / $0.00 | D37 | — | C3 01-17 | — |
+| 26 | 15 | G-C3: Bob plays The Ruined Keep to a win and to a loss | Bob | 0 | 0 | 0 / $0.00 | D37 | — | C3 01-17; F1/03 live quests (and Enter on a wild quest marker, DEC-641, for the win) | — |
 | 27 | 16 | C4-01 tuning switches | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D37 | — | C3-02, C3-09, C3-10 | #444 |
 | 28 | 17 | C4-02 battle loop | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D39 | PT-20 | C4-01; step 44 (brief amendment) | #445 |
 | 29 | 18 | C4-03 retreat, fall, reward | anvil | 1.25 | 0.875 | 0.375 / $1.02 | D40 | — | C4-02 | #446 |
