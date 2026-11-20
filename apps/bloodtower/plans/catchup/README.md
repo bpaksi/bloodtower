@@ -100,8 +100,8 @@ All six are **awaiting Gamewright rulings**. They block the regression tests and
 | Finding(s) | Destination | Plan hook |
 |---|---|---|
 | QD-03, CB-01, QD-01, EE-01 (F1) | **v1.0 now, not held (2026-11-16).** Two Gamewright confirmations received, brief drafted, eval approval pending Bob; inspect the code, then build; TB-01 to TB-14 and R01 | Before #445, #446, #449 (#505) |
-| EE-02, BE-02 (F2) | v1.0 after F1; D6 first | Before the encounter-related C4 steps (#507) |
-| LC-03 (F3) | v1.0 core schedules after D6; the Long overlay is 1.1 | Day loop, #441 follow-up (#507) |
+| EE-02, BE-02 (F2) | v1.0 after F1; D6 first. **BE-02 is built by the D6 brief** [D6/01-drop-counter-and-free-pick](../briefs/D6/01-drop-counter-and-free-pick/plan.md) (drafted 2026-11-18, eval approval **pending Bob**; DEC-912, DEC-913, DEC-945 to DEC-947), with DEC-572's once-per-turn Cleanse; F2 keeps EE-02's dispatch half (test only if main conforms) | Before the encounter-related C4 steps (#507) |
+| LC-03 (F3) | v1.0 core schedules are built by the D6 brief; the Long overlay is 1.1. D6 supersedes C3/04 EV-02, EV-04 and C3/11 EV-02's 2-hero numbers (Bob's approval). EE-01's quest turn-end (DEC-821) has no step yet: F1's brief leaves it out | Day loop, #441 follow-up (#507) |
 | CB-02, TP-01 (F4) | v1.0 after F1 | #446, #459 (#507) |
 | LC-02, LC-06, TP-03 (F5) | v1.0 | #435 (C3-10), #462 (C5-04) (#507) |
 | QD-02, QD-04 (F6) | v1.0 after single stance ownership | #449 (#507) |
