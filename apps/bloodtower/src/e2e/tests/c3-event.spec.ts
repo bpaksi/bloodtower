@@ -283,6 +283,33 @@ const shoot = async (testInfo: TestInfo, name: string, pad: Page, board: Page) =
   });
 };
 
+/**
+ * The iPad hands its heroes back before the host goes down. A save keeps the holder's device id,
+ * and a host restart cannot log that device's drop (a quit stops the replay before it), so
+ * without this the new iPad cannot take the heroes and is not at the event (DEC-019). The
+ * releases are logged presses: a Continue replays them.
+ */
+const releaseHeroes = async (pad: Page) => {
+  await pad.evaluate(
+    (heroes) => {
+      const socket = (window as unknown as { __btSessionSocket?: WebSocket }).__btSessionSocket;
+      if (!socket || socket.readyState !== WebSocket.OPEN)
+        throw new Error("Session socket is not open.");
+      for (const heroId of heroes) {
+        socket.send(
+          JSON.stringify({
+            v: 2,
+            type: "act",
+            payload: { promptId: "hero-hold", actionId: "release", args: { heroId } },
+          }),
+        );
+      }
+    },
+    [...FOUR],
+  );
+  await pad.waitForTimeout(500);
+};
+
 const quitToSession = async (pad: Page) => {
   await pad.locator('[data-action="menu"]').click();
   await pad.locator('button[data-gear-item="save-and-quit"]').click();
@@ -699,8 +726,10 @@ test.describe("C3/12 the event scene: the painting, the words and the choice", (
     const { databasePath } = first.session;
     let before: string[] = [];
     try {
+      await expect(options(first.pad)).toHaveCount(2, { timeout: 30_000 });
       before = await options(first.pad).allInnerTexts();
       expect(before).toHaveLength(2);
+      await releaseHeroes(first.pad);
       await quitToSession(first.pad);
     } finally {
       await closeAll(first);
@@ -741,6 +770,7 @@ test.describe("C3/12 the event scene: the painting, the words and the choice", (
       if (await volume.isEnabled()) await volume.click();
       else await first.pad.locator('[data-menu] button[data-gear-item="current-party"]').click();
       await expect(first.board.locator("[data-panel]")).toBeVisible({ timeout: 20_000 });
+      await releaseHeroes(first.pad);
     } finally {
       await closeAll(first);
     }

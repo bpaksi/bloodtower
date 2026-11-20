@@ -1,6 +1,7 @@
 "use client";
 
 import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
+import { Fragment } from "react";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
 import { isStartupScreen } from "../../lib/startupBoard";
@@ -21,6 +22,23 @@ import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
 import { StartupBoard } from "./StartupBoard";
 import { VirtuePanel } from "./VirtuePanel";
+
+/** A hero's hit points on the edge band; unknown ones read unavailable, never zero. */
+function BandHealth({
+  name,
+  hp,
+}: {
+  name: string;
+  hp: { hp: number; max: number } | null | undefined;
+}) {
+  return hp ? (
+    <span data-health={`${hp.hp}/${hp.max}`}>
+      {name} {hp.hp}/{hp.max}
+    </span>
+  ) : (
+    <span data-health="unavailable">{name} unavailable</span>
+  );
+}
 
 /** The mockup's tower mark, small enough that the pause dialog stays a typical frame. */
 function TowerMark() {
@@ -96,20 +114,23 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       {showMove && table ? (
         <header className="bt-band" id="band" data-band>
           {table.groups.map((group) => (
-            <span key={group.heroId} data-hero-panel={group.heroId}>
-              {eventHero(group.heroId)?.hp ? (
-                <span
-                  data-health={`${eventHero(group.heroId)?.hp?.hp}/${eventHero(group.heroId)?.hp?.max}`}
-                >
-                  {group.heroName} {eventHero(group.heroId)?.hp?.hp}/
-                  {eventHero(group.heroId)?.hp?.max}
-                </span>
-              ) : (
-                <span data-health="unavailable">{group.heroName} unavailable</span>
-              )}
-              <HeroCorruptionMarks table={table} heroId={group.heroId} />
-              <HeroCorruptions table={table} heroId={group.heroId} />
-            </span>
+            <Fragment key={group.heroId}>
+              <span data-hero-panel={group.heroId}>
+                <BandHealth name={group.heroName} hp={eventHero(group.heroId)?.hp} />
+                <HeroCorruptionMarks table={table} heroId={group.heroId} />
+                <HeroCorruptions table={table} heroId={group.heroId} />
+              </span>
+              {/* The other present heroes of the acting group get their own panel while an event shows (EV-01). */}
+              {eventHero(group.heroId)
+                ? event?.heroes
+                    .filter((hero) => !table.groups.some((other) => other.heroId === hero.heroId))
+                    .map((hero) => (
+                      <span key={hero.heroId} data-hero-panel={hero.heroId}>
+                        <BandHealth name={hero.name} hp={hero.hp} />
+                      </span>
+                    ))
+                : null}
+            </Fragment>
           ))}
           {event && event.purse !== null ? (
             <span data-purse={event.purse}>{event.purse} gold</span>
