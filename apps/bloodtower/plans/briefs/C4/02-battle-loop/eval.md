@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-11; survival evals last (EV-11).
+- Done-when: EV-01 … EV-32; survival evals last (EV-11, EV-19, EV-32).
+- Amended 2026-11-18: EV-22 to EV-32 moved from F1 / 01-tomb-to-battle (#505), Bob 2026-11-18 7:12 AM ET (F1 became cards-only). Needs Bob's new approval row.
 
 ## Checks
 
@@ -141,7 +142,88 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: no `pick-for` offer exists on any iPad and nothing is picked; the first Fight or Retreat press from any iPad still decides it.
 - Fails if: a `pick-for` offer shows for Fight or Retreat, or anything is chosen without a press.
 
+### Moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: entry effect and terminal gate (EV-22 to EV-31)
+
+Source: F1 / 01-tomb-to-battle eval.md (TB-01 to TB-14) and docs/audits/2026-11-12-f1-tomb-to-battle-package.md section 4. Fixtures: own-turn Tomb visit, zero corruptions unless set, no companion, guard, conditional Advantage, item or story effect unless named. Foe level and status fixed. Use direct fixture state and injected card and RNG outcomes; no new simulator. Assert no unintended normal round or card resolution, not that every RNG stream is untouched. Rules: MEC-038 .37 to .44 (the stance, then the terminal gates .43 and .44), DEC-907 (gate order: game loss, foe gone, all fallen).
+
+### EV-22 — Bold, foe survives (moved from F1 TB-01 / EV-01)
+- Requirement: DEC-607: Bold removes one head/wound before round 1, no card draw.
+- Method: unit
+- How: foe count 5, no pre-round ability; fresh Bold entry; stop before the first round.
+- Pass evidence: count 4; exactly one cut; zero round-card reveals from Bold; no round resolved.
+- Fails if: a second cut (caller and callee both apply it), a card drawn for Bold, or a round started.
+
+### EV-23 — Bold kills the foe on entry (moved from F1 TB-02 / EV-02)
+- Requirement: DEC-607, DEC-119, CB-01: a terminal entry ends the battle as won with no action UI (MEC-038 .43).
+- Method: unit
+- How: non-guardian room, foe count 1; fresh Bold entry; let the gate finish.
+- Pass evidence: foe 0, result won, room cleared; no Fight/Retreat or hero-action prompt; no Strike, round roll or landed card; the battle reward once.
+- Fails if: the battle opens Fight/Retreat or rolls a round after the foe is gone, or the reward is paid twice or not at all.
+
+### EV-24 — Bold kills a foe that has an entry ability (moved from F1 TB-03 / EV-03)
+- Requirement: DEC-907 (Gamewright ruling, 2026-11-13): a foe killed by Bold never uses its later pre-round ability.
+- Method: unit
+- How: foe count 1 with Ambush, and again with Fire breath; Bold.
+- Pass evidence: result won before any ability runs; hero HP unchanged by the ability; the ability is not logged as used.
+- Fails if: the dead foe's Ambush or Fire breath still hits or logs.
+
+### EV-25 — On guard entry is survivable (moved from F1 TB-04 / EV-04)
+- Requirement: DEC-607, DEC-650: On guard lands one next-card attack.
+- Method: unit
+- How: one hero 5 HP, no modifiers; stub the next card to one 2-HP hit; enter On guard; stop before the first round.
+- Pass evidence: hero 3 HP; one card consumed and landed; no second entry attack from the caller; battle still active.
+- Fails if: the hit lands twice (caller and callee), or no card is consumed.
+
+### EV-26 — On guard fells the whole group (moved from F1 TB-05 / EV-05)
+- Requirement: DEC-119, CB-01: all fallen ends the battle before any action UI (MEC-038 .43).
+- Method: unit
+- How: one hero 1 HP, no corruptions, no companion; stub the entry card to a 2-HP hit; enter On guard; let the close finish.
+- Pass evidence: one fall and one corruption; no action picker or round; closes fallen; hero restored to 1 HP; room uncleared, foe stays; no retreat last attack; the gold penalty once.
+- Fails if: a round card or Fight/Retreat appears, a second last attack runs, or the room clears.
+
+### EV-27 — A pre-round ability fells the group (moved from F1 TB-06 / EV-06)
+- Requirement: DEC-553, DEC-119: the gate runs after a before-round-1 ability (MEC-038 .44).
+- Method: unit
+- How: one hero 1 HP, no corruptions, no companion; Dragon; Bold leaves the foe alive.
+- Pass evidence: one cut, then Fire breath once; all-fallen gate before any action UI; fallen close; room uncleared.
+- Fails if: action UI opens after the ability, or the ability runs twice.
+
+### EV-28 — An entry fall that is the third corruption (moved from F1 TB-07 / EV-07)
+- Requirement: DEC-676, DEC-905, DEC-907: the game loss comes first.
+- Method: unit
+- How: one hero at 2 corruptions, own-turn Tomb entry, lethal entry damage, no companion.
+- Pass evidence: the existing game-loss unwind, once; no round, reward, other group turn or second corruption; outcome recorded through the existing loss path.
+- Fails if: the battle closes as ordinary fallen, a reward or round runs, or the corruption counts twice.
+
+### EV-29 — Partial entry fall (moved from F1 TB-08 / EV-08)
+- Requirement: DEC-119: a fallen hero sits out and returns at battle end.
+- Method: unit
+- How: two heroes, 1 HP and 5 HP; one 2-HP entry hit on the first; On guard.
+- Pass evidence: first sits out with one corruption; second stands; the battle continues with only the standing hero eligible; the fallen hero is not targeted again; restored at battle end.
+- Fails if: the fallen hero acts or is hit again, or the battle ends early.
+
+### EV-30 — Continue after an applied Bold cut (moved from F1 TB-12 / EV-12)
+- Requirement: DEC-675, DEC-682: Continue is not a new entry.
+- Method: unit
+- How: save after the one cut (count 4, any pending ability in the save); restore; resume the next node.
+- Pass evidence: no second cut or entry cue or ability replay; count unchanged except a genuinely pending future effect; stream and deck position kept.
+- Fails if: restore cuts again or replays the entry cue.
+
+### EV-31 — Continue after an On guard attack (moved from F1 TB-13 / EV-13)
+- Requirement: DEC-675, LC-04 (intended behaviour, not crash-atomicity).
+- Method: unit
+- How: save after the entry card landed (hero 3 HP, card consumed); restore.
+- Pass evidence: no duplicate card, damage or corruption; deck consumption kept; only the pending node runs.
+- Fails if: the card is drawn again or damage repeats.
+
 ## Survival evals (one per survival invariant in plan.md)
+
+### EV-32 — Continue and restore keep the entry effect (moved from F1 EV-16, Bob 2026-11-18 7:12 AM ET)
+- Requirement: the F1 survival invariant on saved battles: a restore never repeats an entry effect (DEC-675).
+- Method: unit
+- How: save and restore at four points (after the cut, after the On guard attack, after a retreat, after a fall); resume; compare the state with an uninterrupted run. The Tomb room flag part of this check is EV-18 in C4 / 06.
+- Pass evidence: counts, HP, corruptions, card and deck position equal the uninterrupted run; no entry effect is logged twice.
+- Fails if: a restore repeats an entry effect.
 
 ### EV-11 — Continue resumes mid-round
 - Requirement: DEC-675.

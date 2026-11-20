@@ -34,12 +34,14 @@ Cutover: N
 - Continue, restore, and restart must keep:
   - Continue mid-battle resumes at the saved node (DEC-675): same round, foe wounds, deck position and picks made.
   - A silent seat's offer is recomputed after Continue; the picks already made are kept (EV-19).
+  - A saved battle after the Tomb stance cut or On guard attack resumes at the next pending node with no second cut, attack or ability (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: EV-30, EV-31, EV-32).
 
 ## Done-when (e2e)
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-21 all pass (verifier table on PR).
+- [ ] EV-22 … EV-32 (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: the Tomb entry stance owned once by the battle, the terminal gates .43/.44, Continue after entry) pass.
 - [ ] wire `hint.first-battle` (CU/09 ships the hint registry; Bob, 2026-11-14, adopted).
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
