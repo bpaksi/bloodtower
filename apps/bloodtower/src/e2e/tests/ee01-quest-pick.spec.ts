@@ -8,8 +8,9 @@ import {
 
 /**
  * F1/02 EV-10 (EE-01, DEC-948): the Quest row on the iPad, a quest won, the turn spent.
- * The quest is opened with the TEST ONLY marker `~test-quest:<space>=<quest>`: no real game loads
- * quests from the pack yet. The group stands in the village; every hero sits in one group.
+ * The quest is opened with the TEST ONLY marker `~test-quest:<space>=<quest>`. After F1/03, that
+ * marker loads the pack's Herald, so the buttons are found by option id, not by label (the pack
+ * copy may still be a placeholder). The group stands in the village; every hero sits in one group.
  */
 
 const STORY_ID = "test";
@@ -91,13 +92,25 @@ test.describe("F1/02 the Quest row and the quest pick", () => {
       await expect(quest).toBeEnabled();
       await expect(quest).toContainText("1 move");
 
-      // Quest: the quest's own buttons.
+      // Quest: the quest's own buttons, found by option id (stable across pack copy).
       await quest.click();
       await expect(deviceMain(pad).locator('[data-building="quest"]')).toBeVisible();
-      expect(await labelsOf(pad)).toEqual(["Ask for pay", "Take the job", "Leave"]);
+      await expect(options(pad)).toHaveCount(3);
+      const takeTheJob = deviceMain(pad).locator(
+        '[data-building-option][data-prompt-id$="--qopt--take-the-job"]',
+      );
+      const askForPay = deviceMain(pad).locator(
+        '[data-building-option][data-prompt-id$="--qopt--ask-pay-first"]',
+      );
+      const leaveQuest = deviceMain(pad).locator(
+        '[data-building-option][data-prompt-id$="--qleave"]',
+      );
+      await expect(takeTheJob).toBeEnabled();
+      await expect(askForPay).toBeEnabled();
+      await expect(leaveQuest).toBeEnabled();
 
       // Ask for pay: the turn is spent, the menu has no Quest and every pick is greyed.
-      await optionByLabel(pad, "Ask for pay").click();
+      await askForPay.click();
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
       expect(await labelsOf(pad)).toEqual(["Rest", "Cleanse"]);
       await expect(optionByLabel(pad, "Rest")).toBeDisabled();

@@ -1,3 +1,5 @@
+import type { StoryPlayData } from "./storyPlay.ts";
+
 /** Story metadata the shell loops use. No I/O; tests pass fixtures. */
 export type SetupStep = {
   id: string;
@@ -36,6 +38,8 @@ export type ShellStory = {
   settings: StorySetting[];
   setup: SetupStep[];
   heroes: { id: string; name: string; card?: HeroCardData }[];
+  /** The pack's quests and chapter plan for a real game (F1/03). Absent: the story plays bare. */
+  play?: StoryPlayData;
 };
 
 /** DEC-110: every game runs seals and skulls so the tower can drop skulls later (DEC-222). */
