@@ -581,7 +581,8 @@ describe("C3 04 day clock", () => {
         "Leave",
       ]);
       expect(buildingMenu(CITADEL_ABOVE_CLEANSE, 3, true)).toEqual(["Quest", "Cleanse", "Leave"]);
-      expect(buildingMenu(CITADEL_ABOVE_CLEANSE, 4, true)).toEqual([]);
+      expect(buildingMenu(CITADEL_ABOVE_CLEANSE, 4, false)).toEqual([]);
+      expect(buildingMenu(CITADEL_ABOVE_CLEANSE, 4, true)).toEqual(["Quest", "Leave"]);
       expect(ensureClock(h.play).skulls[spaceId]).toBe(4);
       expect(placeTargets(h.play)).not.toContain(spaceId);
 

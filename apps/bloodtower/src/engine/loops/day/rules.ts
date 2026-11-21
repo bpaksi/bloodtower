@@ -169,7 +169,8 @@ export const buildingMenu = (
   if (!Number.isInteger(skulls) || skulls < 0) {
     throw new Error("Skulls on a building are a whole number.");
   }
-  if (skulls >= 4) return [];
+  // A fallen building keeps only an open quest (DEC-910): Quest, then Leave.
+  if (skulls >= 4) return quest ? ["Quest", "Leave"] : [];
   const left = [...aboveCleanse];
   for (let i = 0; i < skulls && left.length > 0; i++) left.pop();
   const menu = [...left, "Cleanse", "Leave"];

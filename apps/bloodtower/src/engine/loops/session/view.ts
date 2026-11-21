@@ -60,6 +60,7 @@ import {
   towerSpins,
 } from "../game/setupFlow.ts";
 import { type GroupTurnLocal, virtuePanelOf, virtuePromptId } from "../group-turn/loop.ts";
+import { openQuestAt } from "../quest/quest.ts";
 import { BOARD_SET_UP_PROMPT } from "./enter.ts";
 import { fixPositionRefusal } from "./gear.ts";
 import {
@@ -612,7 +613,9 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
         building: space?.building ?? null,
         inside: group.insideBuilding,
         alone: group.heroIds.length === 1,
-        ...(space?.building && isFallen(play, group.spaceId) ? { fallen: true } : {}),
+        ...(space?.building && isFallen(play, group.spaceId) && !openQuestAt(play, group.spaceId)
+          ? { fallen: true }
+          : {}),
       };
     }),
   };
