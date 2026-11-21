@@ -491,7 +491,8 @@ describe("C3 04 day clock", () => {
         closeHarness();
       }
     };
-    expect(nights("two", ["a", "b"])).toEqual([1, 1, 1, 1]);
+    // D6 (DEC-824, DEC-912): a pair's fourth counted night drops nothing.
+    expect(nights("two", ["a", "b"])).toEqual([1, 1, 1, 0]);
     expect(nights("four", ["a", "b", "c", "d"])).toEqual([1, 2, 1, 2]);
     expect(nights("three", ["a", "b", "c"])).toEqual([1, 2, 1, 2]);
   });
@@ -529,7 +530,8 @@ describe("C3 04 day clock", () => {
     const two = projectDayClock({ supply: 12, heroes: 2, night: 1, tuning });
     const four = projectDayClock({ supply: 12, heroes: 4, night: 1, tuning });
     const early = projectDayClock({ supply: 2, heroes: 4, night: 1, tuning });
-    expect(two.daysLeft).toBe(12);
+    // D6 (DEC-947): a no-drop night counts as a day, so 12 skulls last 15 nights for a pair.
+    expect(two.daysLeft).toBe(15);
     expect(four.daysLeft).toBe(8);
     expect(early.daysLeft).toBe(2);
   });
@@ -790,15 +792,17 @@ describe("C3 04 day clock", () => {
         expect(buildings).toHaveLength(4);
         for (const space of buildings) setBuildingSkulls(h.play, space.id, 3);
         let last: DayResult = { dayNumber: 0, lost: null };
-        for (let index = 0; index < 4; index++) {
+        // D6: a pair's fourth counted night drops nothing, so the fourth skull lands on day 5.
+        for (let day = 0; day < 5; day++) {
+          const index = day < 3 ? day : day - 1;
           const spaceId = buildings[index]?.id;
           last = runDay(h, {
             place: () => spaceId,
             beforeRecord: () => {
-              if (index === 3) expect(ensureClock(h.play).outcome).toBeNull();
+              if (day === 4) expect(ensureClock(h.play).outcome).toBeNull();
             },
           });
-          if (index < 3) expect(last.lost).toBeNull();
+          if (day < 4) expect(last.lost).toBeNull();
         }
         const fallen = Object.values(ensureClock(h.play).skulls).filter(
           (count) => count >= 4,

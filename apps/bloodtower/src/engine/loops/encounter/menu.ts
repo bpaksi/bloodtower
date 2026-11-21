@@ -4,12 +4,15 @@ import { groupById, type PlayState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet } from "../day/clock.ts";
 import { beginQuest } from "../quest/quest.ts";
 import {
+  cleansedHere,
   cureTargets,
   ensurePicks,
+  freePickPending,
   healTargets,
   loadLive,
   MAX_VIRTUE_TILES,
   type MenuEntry,
+  movesNeeded,
   openMenu,
   type PickKind,
   pickPrice,
@@ -61,6 +64,8 @@ export type BuildingResult = {
   hp?: { hp: number; max: number; gained: number };
   corruptionId?: string;
   tile?: string;
+  /** The pick was the group's free pick (DEC-913): the menu stays open at 0 moves. */
+  free?: boolean;
   /** No Next: it moves on by itself when its narration or cue ends, or after 4 s (EV-15). */
   auto: boolean;
   wait: BuildingWait | null;
@@ -213,14 +218,8 @@ const menuOptions = (play: PlayState, local: BuildingLocal): BuildingOption[] | 
           : (entry.price ?? 0)
         : (entry.price ?? 0);
     const free = kind === "cure" && heroes.length > 0 && price === 0;
-    const moves =
-      kind === "rally"
-        ? store.tuning.rally.moves
-        : kind === "cure"
-          ? store.tuning.cure.moves
-          : kind === "cleanse"
-            ? store.tuning.cleanse.moves
-            : 1;
+    // A pending free pick takes no move (DEC-913, DEC-946); the cost line and the refusal read that.
+    const moves = movesNeeded(play, local.groupId, kind);
     let enabled = !entry.disabled;
     let reason: string | undefined;
     if (needsTarget && heroes.length === 0) {
@@ -232,11 +231,19 @@ const menuOptions = (play: PlayState, local: BuildingLocal): BuildingOption[] | 
       reason = "Gold is not known.";
     } else if (entry.disabled) {
       reason =
-        kind === "cleanse" && movesOf(local) >= moves && purse >= price
-          ? "There are no skulls to clear."
-          : refusalReason(entry, movesOf(local), moves, purse, price);
+        kind === "cleanse" && cleansedHere(play, local.groupId)
+          ? refusalReason(entry, movesOf(local), 0, purse, price)
+          : kind === "cleanse" && movesOf(local) >= moves && purse >= price
+            ? "There are no skulls to clear."
+            : refusalReason(entry, movesOf(local), moves, purse, price);
     }
-    const detail = kind === "rest" ? "tavern · +3 HP per move" : costLine(kind, moves, price, free);
+    const restLine = "tavern · +3 HP per move";
+    const detail =
+      kind === "rest"
+        ? freePickPending(play, local.groupId)
+          ? `${costLine(kind, moves, null, false)} · ${restLine}`
+          : restLine
+        : costLine(kind, moves, price, free);
     options.push({
       promptId: buildPromptId(local.groupId, serial, "pick", kind),
       actionId: "build",
@@ -325,7 +332,9 @@ export const buildingModel = (
   }
 
   if (step.kind === "rest-moves") {
-    const most = Math.min(Math.max(0, movesOf(local)), 12);
+    // A pending free pick waives one move, so one more than the moves left can be rested (DEC-946).
+    const bonus = freePickPending(play, group) ? 1 : 0;
+    const most = Math.min(Math.max(0, movesOf(local) + bonus), 12);
     return {
       ...base,
       prompt: COPY.restPrompt,
