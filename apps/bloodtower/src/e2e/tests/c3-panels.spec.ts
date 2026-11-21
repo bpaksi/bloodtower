@@ -343,8 +343,8 @@ test.describe("CU/13 the party items panel and the use-item flow", () => {
       await grantWakeLock(pad2);
       await pad2.goto(`/join?code=${restarted.host.joinCode}`);
       await clickAct(pad2, "continue", "continue-saved-game");
-      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await holdHeroesFromTest(pad2, [...FOUR]);
+      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(board2.locator("[data-panel]")).toHaveCount(0);
       await expect(board2.locator("main.bt-board")).toHaveAttribute("data-paused", "false");
       await openGearItem(pad2, "current-party");

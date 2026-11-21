@@ -203,10 +203,17 @@ describe("a tower lost mid-game", () => {
     second.session.rememberAutosave({ gameId: saved.gameId, packId: saved.packId, day: 1 });
     const pad2 = await joinPad(second.session);
     const act2 = pressWith(second.session, pad2);
-    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
-      await act2("hero-hold", "take", { heroId });
-    }
+    // A tower snapshot rebuilds the session screen's offers, so Continue is offered (the hero
+    // picks that used to do this now come after Continue).
+    second.session.syncTowerSnapshot();
+    await second.session.whenIdle();
     await act2("continue-saved-game", "continue");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick the unheld heroes.
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      if (second.session.state().holdings[heroId] == null) {
+        await act2("hero-hold", "take", { heroId });
+      }
+    }
     const resumed = second.session.state();
     expect(resumed.screen).toBe("play");
     expect(resumed.towerWithout).toBe(true);

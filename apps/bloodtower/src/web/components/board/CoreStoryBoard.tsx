@@ -4,7 +4,7 @@ import { type BoardView, isOpeningMomentId } from "bloodtower-protocols";
 import { Fragment } from "react";
 import { joinWarning, pauseText } from "../../lib/boardView";
 import { packStillImageUrl, placeStillFile } from "../../lib/packAsset";
-import { isStartupScreen } from "../../lib/startupBoard";
+import { claimCount, isStartupScreen } from "../../lib/startupBoard";
 import { AssetIdLabel } from "./AssetIdLabel";
 import { BuildingBoardPanel } from "./BuildingBoardPanel";
 import { ChanceSpin } from "./ChanceSpin";
@@ -70,6 +70,8 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const paused = pauseText(view.screen);
   // The pause for a lost tower says so; the screen line carries "Tower lost" (DEC-301).
   const towerLost = view.levels.at(-1)?.shows === "Tower lost";
+  // A drop pause shows the pick count in place of the tower line (DEC-953); its screen line is it.
+  const rePick = paused !== null && /^\d+ of \d+ picked$/.test(view.levels.at(-1)?.shows ?? "");
   const table = view.table ?? null;
   const place = view.place ?? null;
   const layer = place ? "place" : "move";
@@ -108,7 +110,13 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
               Tower lost
             </p>
           ) : null}
-          <p className="bt-startup-cue">The tower has gone quiet. The game waits.</p>
+          {rePick ? (
+            <p className="bt-startup-cue" data-pick-status={claimCount(view)}>
+              {claimCount(view)}
+            </p>
+          ) : (
+            <p className="bt-startup-cue">The tower has gone quiet. The game waits.</p>
+          )}
         </DialogFrame>
       ) : null}
       {showMove && table ? (

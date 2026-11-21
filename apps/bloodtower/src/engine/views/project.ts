@@ -91,8 +91,11 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     });
   }
 
+  // The disconnect pause picks as the Pick screen does (DEC-953). The view state carries no pause
+  // cause, so the pause's count line ("N of N picked", set only for that cause) says which one.
+  const rePick = state.screen === "pause" && /^\d+ of \d+ picked$/.test(current.shows);
   const heroesOnDevice =
-    state.screen === "claim-heroes"
+    state.screen === "claim-heroes" || rePick
       ? state.heroes
       : state.screen === "begin"
         ? state.heroes.filter(
@@ -141,7 +144,7 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
     heroes: heroesOnDevice.map((hero) => ({
       id: hero.id,
       name: hero.name,
-      ...(state.screen === "claim-heroes" ? { claim: claimFor(hero.deviceId) } : {}),
+      ...(state.screen === "claim-heroes" || rePick ? { claim: claimFor(hero.deviceId) } : {}),
       lines:
         hero.deviceId === audience.deviceId
           ? hero.lines.map((line) => ({ id: line.id, text: line.text }))

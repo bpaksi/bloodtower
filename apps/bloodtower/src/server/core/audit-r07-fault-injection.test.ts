@@ -183,8 +183,12 @@ const restart = async (h: Harness, track: Track): Promise<Table> => {
   });
   expect(await session.resumeSession()).toBe(true);
   const table = await tableFor(session);
-  for (const heroId of HEROES) await table.act("hero-hold", "take", { heroId });
   await table.act("continue-saved-game", "continue");
+  // Continue seats the saved party on the iPads joined now (CU/16): this iPad holds nothing yet, so
+  // the game waits in the re-pick pause until it picks the unheld heroes.
+  for (const heroId of HEROES) {
+    if (session.state().holdings[heroId] == null) await table.act("hero-hold", "take", { heroId });
+  }
   expect(session.state().screen).toBe("play");
   return table;
 };

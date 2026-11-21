@@ -356,8 +356,8 @@ const resumeGame = async (
   await grantWakeLock(pad);
   await pad.goto(`/join?code=${session.host.joinCode}`);
   await clickAct(pad, "continue", "continue-saved-game");
-  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   await holdHeroesFromTest(pad, [...FOUR]);
+  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   return { session, context, pad, board };
 };
 

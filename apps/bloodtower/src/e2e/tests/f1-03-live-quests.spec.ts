@@ -193,10 +193,11 @@ test.describe("F1/03 a real game's Herald, from the story pack", () => {
     try {
       await two.pad.goto(`/join?code=${restarted.host.joinCode}`);
       await clickAct(two.pad, "continue", "continue-saved-game");
+      // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+      await holdHeroesFromTest(two.pad, [HERO]);
       await expect(deviceMain(two.pad)).toHaveAttribute("data-screen", "play", {
         timeout: 30_000,
       });
-      await holdHeroesFromTest(two.pad, [HERO]);
 
       // Play on, as a table does, to the group's next turn at Egan's End; then Enter.
       const enter = two.pad.locator('button[data-action-id="enter"]');

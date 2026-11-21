@@ -227,7 +227,7 @@ const playFingerprint = (state: ShellState): string =>
 const sessionFrame = (state: ShellState) =>
   state.loops.stack.find((frame) => frame.loopId === "session");
 
-const pauseIfNeeded = (state: ShellState): void => {
+export const pauseIfNeeded = (state: ShellState): void => {
   // Piece setup is part of a started game (DEC-711): only a lost tower pauses it.
   const pieceSetup =
     state.stage === "lobby" && (state.screen === "setup" || state.screen === "begin");
@@ -368,6 +368,16 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     }
     if (e.action === "take") {
       if (next.holdings[e.heroId] != null || heldCount(next) >= partySize(next)) {
+        return withEffects(state, effects);
+      }
+      // The disconnect pause picks for the seated party only: an unseated hero is not offered
+      // there and a hold on one is refused (CU/16 EV-04).
+      if (
+        next.stage === "paused" &&
+        next.pause?.cause === "disconnect" &&
+        next.play &&
+        !next.play.groups.some((group) => group.heroIds.includes(e.heroId))
+      ) {
         return withEffects(state, effects);
       }
       next.holdings[e.heroId] = e.deviceId;

@@ -3,6 +3,7 @@ import type { ControlPress } from "bloodtower-protocols";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { openDayWait } from "../../engine/loops/day/wait.ts";
 import type { GameLocal } from "../../engine/loops/game/loop.ts";
+import { seatOnContinue } from "../../engine/loops/session/continueSeats.ts";
 import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
 import type { ShellStory } from "../../engine/loops/session/pack.ts";
@@ -404,6 +405,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           towerChoice: state.towerWithout ? "without" : live.towerChoice,
           games: live.games,
         };
+        // The saved party sits on the iPads joined now: a hold stays only for one of them (DEC-952).
+        state = seatOnContinue(state, live);
       }
     }
     // A Split party pick changes the play state (the queue, PT-18), and a use-item pick changes
@@ -918,7 +921,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           atWall: options.clock.wall(),
           log: options.log,
         });
-        state = resumed.state;
+        state = seatOnContinue(resumed.state, state);
         options.onChange();
         return true;
       } catch (error) {
