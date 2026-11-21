@@ -228,6 +228,22 @@ const bodyButtons = (pad: Page) => deviceMain(pad).locator("button");
 const health = (board: Page, heroId: string) =>
   board.locator(`#band [data-hero-panel="${heroId}"] [data-health]`);
 
+/**
+ * The edge band shows hit points only while an event is open (C3/12). After
+ * `[data-event-scene]` is gone, the same numbers are on Current party.
+ */
+const expectPartyHealth = async (pad: Page, board: Page, hp: string) => {
+  await pad.locator('[data-action="menu"]').click();
+  const row = pad.locator('[data-menu] button[data-gear-item="current-party"]');
+  await expect(row).toBeEnabled({ timeout: 20_000 });
+  await row.click();
+  for (const id of FOUR) {
+    await expect(
+      board.locator(`[data-panel="current-party"] [data-hero="${id}"] [data-hp]`),
+    ).toHaveText(`HP ${hp}`, { timeout: 20_000 });
+  }
+};
+
 /** Time on the host's fake clock, then a beat for the views to arrive. */
 const tick = async (game: Game, ms: number) => {
   game.session.waitClock?.advance(ms);
@@ -500,7 +516,7 @@ test.describe("C3/12 the event scene: the painting, the words and the choice", (
       for (const id of FOUR) await expect(health(board, id)).toHaveAttribute("data-health", "9/9");
       await tick(game, 4_100);
       await expect(scene(board)).toHaveCount(0, { timeout: 20_000 });
-      for (const id of FOUR) await expect(health(board, id)).toHaveAttribute("data-health", "9/9");
+      await expectPartyHealth(pad, board, "9/9");
     } finally {
       await closeAll(game);
     }
@@ -671,14 +687,7 @@ test.describe("C3/12 the event scene: the painting, the words and the choice", (
         }
         again.session.waitClock?.advance(4_100);
         await expect(scene(again.board)).toHaveCount(0, { timeout: 20_000 });
-        await again.pad.locator('[data-action="menu"]').click();
-        await again.pad.locator('[data-menu] button[data-gear-item="current-party"]').click();
-        await expect(
-          again.board.locator('[data-panel="current-party"] [data-hero="hero-a"]'),
-        ).toContainText("7", { timeout: 20_000 });
-        await expect(
-          again.board.locator('[data-panel="current-party"] [data-hero="hero-a"]'),
-        ).not.toContainText("5/9");
+        await expectPartyHealth(again.pad, again.board, "7/9");
       } finally {
         await closeAll(again);
       }
