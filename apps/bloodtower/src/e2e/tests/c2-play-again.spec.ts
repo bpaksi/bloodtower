@@ -434,8 +434,10 @@ test("Continue after Play again resumes the new game's seed and replay (EV-11)",
     });
     expect(autosaveSeed(databasePath)).toBe(newSeed);
     await clickAct(pad.page, "continue", "continue-saved-game");
-    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    // The saved game never linked a tower, so the re-pick does not open a tower pause.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(pad.page).locator("[data-roster]")).toBeVisible({ timeout: 20_000 });
     const after = await readStatus(pad.page);
     expect(after.day).toBe(before?.day);
