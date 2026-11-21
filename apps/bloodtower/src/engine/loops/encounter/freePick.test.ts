@@ -199,15 +199,20 @@ describe("D6 01 Fortunate's free pick", () => {
   });
 
   it("EV-08 (a) Cleanse once per building per turn, the free pick kept", () => {
-    let state = inside("village", `${FORT}~test-hp:hero-a=4/12`, 1, { skulls: 2 });
+    // Eval's "2 skulls, then Rest" cannot be played: a remaining skull strips Rest (DEC-093).
+    // One skull lets Rest return after the first Cleanse; the second Cleanse is still refused
+    // as once-per-turn ("Cleanse is not possible now."), not "There are no skulls to clear."
+    let state = inside("village", `${FORT}~test-hp:hero-a=4/12`, 1, { skulls: 1 });
     const first = option(state, "Cleanse").promptId;
     state = finish(press(state, "Cleanse"));
-    expect(skullsAt(state)).toBe(1);
+    expect(skullsAt(state)).toBe(0);
     const row = option(state, "Cleanse");
     expect(row.enabled).toBe(false);
     expect(row.reason).toBe("Cleanse is not possible now.");
     expect(row.detail).toMatch(/^0 moves/);
-    // The press is refused with those words; the skull stays and the free pick is not spent.
+    expect(option(state, "Rest").enabled).toBe(true);
+    expect(option(state, "Rest").detail).toMatch(/^0 moves/);
+    // The press is refused with those words; no skull returns and the free pick is not spent.
     // A closed row is not offered, so the press goes straight to the encounter's handler.
     bindShellState(state);
     try {
@@ -217,10 +222,19 @@ describe("D6 01 Fortunate's free pick", () => {
     } finally {
       clearShellState();
     }
-    expect(skullsAt(state)).toBe(1);
+    expect(skullsAt(state)).toBe(0);
     expect(freePickPending(playOf(state), groupId(state))).toBe(true);
     expect(ensurePicks(playOf(state)).freePickDay?.[groupId(state)]).toBeUndefined();
     expect(first).toContain("--pick--cleanse");
+    // The refused press did not spend the free pick: Rest for 1 heals +3 and takes no move.
+    // Direct handleBuildingPress does not rebuild offers; refresh so Rest is an open press.
+    refreshOffersAfterRestore(state);
+    const hpBefore = heroSheet(ensureClock(playOf(state)), "hero-a").hp;
+    expect(hpBefore).toEqual({ hp: 4, max: 12 });
+    const movesBefore = movesOf(state);
+    state = rest(state, 1);
+    expect(heroSheet(ensureClock(playOf(state)), "hero-a").hp).toEqual({ hp: 7, max: 12 });
+    expect(movesOf(state)).toBe(movesBefore);
   });
 
   it("EV-08 (b) no Fortunate: the same turn stays Cleansed, the next day it is open again", () => {
