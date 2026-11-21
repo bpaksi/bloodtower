@@ -1,5 +1,13 @@
+import {
+  type GoldMap,
+  gainPresent,
+  payPool,
+  poolSides,
+  poolTotal,
+} from "../../rules/purse/index.ts";
 import type { PlayState } from "../chapter/playState.ts";
 import { groupById } from "../chapter/playState.ts";
+import { ensureClock, heroSheet, setHeroSheet } from "../day/clock.ts";
 import type { EventTuning } from "./rules.ts";
 import {
   type EventOption,
@@ -28,16 +36,22 @@ const presentHeroes = (play: PlayState, event: OpenEvent): [string, HeroLedger][
   });
 };
 
-/** The group's pooled purse: the sum of the present heroes' shares (DEC-178). */
+/** The pool: the present heroes' gold on the ledger plus every other seated hero's sheet gold (DEC-911, DEC-944). */
 export const purseOf = (play: PlayState, groupId: string): number => {
   const group = groupById(play, groupId);
   if (!group) throw new Error(`Unknown group ${groupId}.`);
   const heroes = eventState(play).heroes;
-  return group.heroIds.reduce((sum, id) => {
+  const present = group.heroIds.reduce((sum, id) => {
     const ledger = heroes[id];
     if (!ledger) throw new Error(`Hit points and gold for ${id} are unknown.`);
     return sum + (ledger.gold ?? 0);
   }, 0);
+  const clock = ensureClock(play);
+  const absent = poolSides(play, groupId).absent.reduce(
+    (sum, id) => sum + (heroSheet(clock, id).gold ?? 0),
+    0,
+  );
+  return present + absent;
 };
 
 /** True when every present hero's gold is known, so a pay-off can be checked (never as zero). */
@@ -47,38 +61,55 @@ export const purseKnown = (play: PlayState, groupId: string): boolean => {
   return Boolean(group?.heroIds.every((id) => heroes[id] && heroes[id].gold !== null));
 };
 
-/** Equal parts; the first heroes take the remainder. */
-const split = (amount: number, parts: number): number[] =>
-  Array.from(
-    { length: parts },
-    (_, i) => Math.floor(amount / parts) + (i < amount % parts ? 1 : 0),
-  );
-
+/**
+ * A gain goes to the heroes present, equal shares, each odd coin to a hero holding the least (DEC-178,
+ * DEC-646). A hero whose gold is unknown stays unknown: their part is not written.
+ */
 const earn = (heroes: [string, HeroLedger][], amount: number): void => {
-  split(amount, heroes.length).forEach((part, i) => {
-    const hero = heroes[i];
-    if (hero && hero[1].gold !== null) hero[1].gold += part;
-  });
+  const held: GoldMap = Object.fromEntries(heroes.map(([id, h]) => [id, h.gold ?? 0]));
+  const next = gainPresent(
+    held,
+    heroes.map(([id]) => id),
+    amount,
+  );
+  for (const [id, hero] of heroes) if (hero.gold !== null) hero.gold = next[id] ?? hero.gold;
 };
 
-/** A cost is paid equally; when one hero's part runs short the others cover the gap (DEC-178). */
-const spend = (heroes: [string, HeroLedger][], amount: number): void => {
-  const total = heroes.reduce((sum, [, h]) => sum + (h.gold ?? 0), 0);
-  if (total < amount) throw new Error("The purse is short.");
-  let left = amount;
-  split(amount, heroes.length).forEach((part, i) => {
-    const hero = heroes[i];
-    if (!hero || hero[1].gold === null) return;
-    const paid = Math.min(part, hero[1].gold);
-    hero[1].gold -= paid;
-    left -= paid;
-  });
-  for (const [, hero] of heroes) {
-    if (left <= 0) break;
-    if (hero.gold === null) continue;
-    const paid = Math.min(left, hero.gold);
-    hero.gold -= paid;
-    left -= paid;
+/**
+ * A cost is a priced choice the pool pays (DEC-911, DEC-944): the heroes present first, in DEC-911's
+ * order; the heroes elsewhere only for what the present heroes together lack. The present part is
+ * written on the ledger (`commitLedger` carries it to the sheets); the absent part goes straight to
+ * their sheets, which `commitLedger` never touches.
+ */
+const spend = (
+  play: PlayState,
+  groupId: string,
+  heroes: [string, HeroLedger][],
+  amount: number,
+) => {
+  const clock = ensureClock(play);
+  const sides = poolSides(play, groupId);
+  const presentGold: GoldMap = {};
+  for (const [id, hero] of heroes) if (hero.gold !== null) presentGold[id] = hero.gold;
+  const absentGold: GoldMap = {};
+  for (const id of sides.absent) {
+    const gold = heroSheet(clock, id).gold;
+    if (gold !== undefined) absentGold[id] = gold;
+  }
+  const before = { ...presentGold, ...absentGold };
+  if (poolTotal(before) < amount) throw new Error("The purse is short.");
+  const paid = payPool(
+    before,
+    sides.present.filter((id) => id in presentGold),
+    sides.absent.filter((id) => id in absentGold),
+    amount,
+  );
+  for (const [id, hero] of heroes) if (hero.gold !== null) hero.gold = paid.gold[id] ?? hero.gold;
+  for (const id of sides.absent) {
+    const gold = paid.gold[id];
+    if (gold !== undefined && gold !== absentGold[id]) {
+      setHeroSheet(play, id, { ...heroSheet(clock, id), gold });
+    }
   }
 };
 
@@ -176,7 +207,7 @@ export const chooseOption = (play: PlayState, tuning: EventTuning, id: OptionId)
       done(event, "went around", { kind: "went-around", amount: tuning.goAroundHitPoints });
       break;
     case "pay-off":
-      spend(heroes, tuning.payOff);
+      spend(play, event.groupId, heroes, tuning.payOff);
       done(event, `paid ${tuning.payOff} gold`, { kind: "paid", gold: tuning.payOff });
       break;
     case "fight":

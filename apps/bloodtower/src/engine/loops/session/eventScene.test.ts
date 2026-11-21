@@ -180,10 +180,13 @@ describe("C3/12 the event scene (engine and wire)", () => {
 
   it("foes offer Go around and Pay them off, never Fight; Pay is off at 4 gold and on at 5", () => {
     const pay = (s: ShellState) => eventOf(s)?.options.find((o) => o.optionId === "pay-off");
-    const poor = toEvent(`~test-event:foes${all("~test-gold:", "4")}`);
+    // D5: the pool pays, so only hero-a holds gold (4, then 5) and the others hold 0: the pool is 4, then 5.
+    const only = (gold: number) =>
+      `~test-gold:${ALL.map((id) => `${id}=${id === "hero-a" ? gold : 0}`).join(",")}`;
+    const poor = toEvent(`~test-event:foes${only(4)}`);
     expect(eventOf(poor)?.options.map((o) => o.optionId)).toEqual(["go-around", "pay-off"]);
     expect(pay(poor)?.enabled).toBe(false);
-    const rich = toEvent(`~test-event:foes${all("~test-gold:", "5")}`);
+    const rich = toEvent(`~test-event:foes${only(5)}`);
     expect(pay(rich)?.enabled).toBe(true);
     expect(eventOf(rich)?.options.some((o) => o.optionId === "fight")).toBe(false);
   });
