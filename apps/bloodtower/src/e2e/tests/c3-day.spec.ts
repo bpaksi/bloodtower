@@ -482,16 +482,16 @@ test.describe("C3/11 the day on the board", () => {
     }
   });
 
-  /** Two heroes to day 2's turn: 24 days left on day 1, 23 after day 1's drop (EV-02). */
+  /** Two heroes to day 2's turn: 31 days left on day 1, 30 after day 1's drop (EV-02; D6 EV-05). */
   const toDayTwo = async (pad: Page, board: Page) => {
     const band = board.locator("#band");
     await clickAct(pad, "continue");
-    await expect(band.locator("[data-days-left]")).toHaveText("24 days left", {
+    await expect(band.locator("[data-days-left]")).toHaveText("31 days left", {
       timeout: 20_000,
     });
     await playUntil(pad, board, atPhase(board, "turn", 2), "day 2's turn");
     await expect(band.locator("[data-day]")).toHaveText("Day 2");
-    await expect(band.locator("[data-days-left]")).toHaveText("23 days left");
+    await expect(band.locator("[data-days-left]")).toHaveText("30 days left");
     await expect(band).not.toContainText("skulls");
   };
 
@@ -521,7 +521,8 @@ test.describe("C3/11 the day on the board", () => {
       await playUntil(pad, board, atPhase(board, "turn", 3), "day 3's turn");
       await expect(band.locator("[data-day]")).toHaveText("Day 3");
       const leftBefore = await band.locator("[data-days-left]").textContent();
-      expect(leftBefore).toBe("22 days left");
+      // D6: after day 2's drop, 22 skulls, counting from the third counted night (DEC-947).
+      expect(leftBefore).toBe("29 days left");
       // The night's skull panel before the quit, seeded, for the skull half after Continue.
       await playUntil(pad, board, atPhase(board, "skull-sim", 3), "day 3's skull");
       const before = (await wireTable(board))?.skull;
@@ -677,11 +678,12 @@ test.describe("C3/11 the day on the board", () => {
     try {
       await toEffectsPanel(session, pad, board, "~test-effect:quest-won");
       expect(await effectLines(board)).toEqual(["+1 day"]);
-      await expect(board.locator("#band [data-days-left]")).toHaveText("23 days left");
+      // D6 (DEC-947): 23 skulls count 30 nights from the next counted night, and tonight is added.
+      await expect(board.locator("#band [data-days-left]")).toHaveText("31 days left");
       session.waitClock?.advance(4_000);
       await expect(board.locator("#band [data-day]")).toHaveText("Day 3", { timeout: 20_000 });
-      // The won night dropped nothing: days left unchanged.
-      await expect(board.locator("#band [data-days-left]")).toHaveText("23 days left");
+      // The won night dropped nothing and did not move N: the added night is spent (30 left).
+      await expect(board.locator("#band [data-days-left]")).toHaveText("30 days left");
     } finally {
       await context.close();
       await session.host.close();

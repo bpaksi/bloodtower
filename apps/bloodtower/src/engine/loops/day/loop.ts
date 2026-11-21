@@ -220,7 +220,9 @@ const startClose = (local: DayLocal, effects: LoopContext<DayLocal>["effects"]):
     return { ...local, phase: "check", awaitingPress: false, awaitingChild: false, skullsLeft: 0 };
   }
   const heroes = heroCount(play);
-  const count = heroes < 1 ? 0 : dropsThisNight(heroes, play.dayNumber, clock.tuning);
+  // DEC-912: any night but a won-quest night is counted, then tonight's drop is read from the count.
+  clock.nightsCounted += 1;
+  const count = heroes < 1 ? 0 : dropsThisNight(heroes, clock.nightsCounted, clock.tuning);
   noteNode(play, ".35");
   if (count < 1 || clock.supply <= 0) {
     noteNode(play, ".33");

@@ -45,6 +45,8 @@ export type DayClock = {
   skulls: Record<string, number>;
   held: number;
   questsWon: number;
+  /** Counted nights so far: a won-quest night does not count, any other night adds 1 (DEC-912). */
+  nightsCounted: number;
   effects: string[];
   shifts: Record<string, MoveShift>;
   nodes: string[];
@@ -82,6 +84,7 @@ const blankClock = (tuning: DayTuning): DayClock => ({
   skulls: {},
   held: 0,
   questsWon: 0,
+  nightsCounted: 0,
   effects: [],
   shifts: {},
   nodes: [],
@@ -329,7 +332,12 @@ export const restoreClock = (play: PlayState, saved: DayClock): void => {
   ) {
     throw new Error("The checkpoint's day clock is not readable.");
   }
-  clocks.set(play, structuredClone(saved));
+  const restored = structuredClone(saved);
+  // A checkpoint saved before the counter: the calendar day is the nearest count it can have.
+  if (!Number.isInteger(restored.nightsCounted) || restored.nightsCounted < 0) {
+    restored.nightsCounted = Math.max(0, play.dayNumber - 1);
+  }
+  clocks.set(play, restored);
 };
 
 export const armDayResume = (play: PlayState, resume: DayResume): void => {
