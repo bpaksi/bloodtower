@@ -213,11 +213,13 @@ export const startSessionHost = async (options: SessionHostOptions): Promise<Ses
   const autosaveRow = eventStore.getAutosave();
   await engine.whenIdle();
   if (autosaveRow && autosaveRow.format !== AUTOSAVE_FORMAT) {
-    // Q-C3-07: a pre-C3 save is dropped, not migrated. The row stays in the DB, ignored: it is
-    // not offered as Continue and play starts fresh. A New game's first autosave replaces it.
+    // Q-C3-07: a save from before the current format is dropped, not migrated. The row stays in
+    // the DB, ignored: it is not offered as Continue and play starts fresh. A New game's first
+    // autosave replaces it. Format 2 is a C3 save, written under the C3 tuning switches.
+    const era = autosaveRow.format === 2 ? "pre-C4" : "pre-C3";
     log.warn(
       "save-skipped",
-      `save skipped: pre-C3 format ${autosaveRow.format ?? "none"} (pack ${autosaveRow.packId})`,
+      `save skipped: ${era} format ${autosaveRow.format ?? "none"} (pack ${autosaveRow.packId})`,
     );
   } else if (autosaveRow) {
     if (autosaveRow.sessionId !== sessionId) {

@@ -86,7 +86,7 @@ describe("the loader gives a story its quests and chapter plan (F1/03)", () => {
       },
     ]);
     expect(plan?.seals).toEqual([]);
-    expect(plan?.c3EndAfterChapter1).toBe(true);
+    expect(plan?.c3EndAfterChapter1).toBe(false);
     expect(plan?.foeLevel).toEqual({ chapter1: 1, perChapter: 1 });
     expect(plan?.sealBreakMin).toBe(0);
     expect(storyOf(catalog, "dracula")?.play).toBeUndefined();
@@ -122,13 +122,13 @@ describe("the loader gives a story its quests and chapter plan (F1/03)", () => {
       const tuning = join(tuned, "base", "tuning.yaml");
       const original = readFileSync(tuning, "utf8");
       const edited = original
-        .replace("c3_end_after_chapter_1: true", "c3_end_after_chapter_1: false")
+        .replace("c3_end_after_chapter_1: false", "c3_end_after_chapter_1: true")
         .replace("chapter_1: 1", "chapter_1: 2");
       expect(edited).not.toBe(original);
       writeFileSync(tuning, edited);
       const catalog = loadStoryCatalog(tuned);
       const plan = storyOf(catalog, "test")?.play?.chapters;
-      expect(plan?.c3EndAfterChapter1).toBe(false);
+      expect(plan?.c3EndAfterChapter1).toBe(true);
       expect(plan?.foeLevel.chapter1).toBe(2);
     } finally {
       rmSync(tuned, { recursive: true, force: true });

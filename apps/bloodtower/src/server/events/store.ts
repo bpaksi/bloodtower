@@ -5,8 +5,8 @@ import type { HostEventKind } from "./kinds.ts";
 
 export const AUTOSAVE_ROW_ID = 1;
 
-/** The pack format every autosave is written under. A row without it predates C3. */
-export const AUTOSAVE_FORMAT = 2;
+/** The pack format every autosave is written under. A row without it predates C3; format 2 is a C3 save (C4 switches differ, Q-C3-07). */
+export const AUTOSAVE_FORMAT = 3;
 
 export type GameMeta = {
   seed: string;

@@ -4,6 +4,7 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { TEST_SEAT_TOGETHER } from "../../../engine/loops/chapter/playState.ts";
 import { loadConfig } from "../../../server/config.ts";
 import { type SessionHost, startSessionHost } from "../../../server/hub/host.ts";
+import type { HostLogger } from "../../../server/log/hostLog.ts";
 import { createMockTower, type MockTower } from "../../../server/tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../../../server/tower/testAdapter.ts";
 
@@ -69,6 +70,10 @@ export const startAcceptanceHost = async (
     /** The effects wait's 4 s run on `waitClock`, not real time (C3/20, the fake clock). */
     fakeWait?: boolean;
     graceMs?: number;
+    /** Packs folder to load instead of the repo's, so a test can edit a copy's tuning (C4-01). */
+    packsDir?: string;
+    /** Host logger, so a test can read what the host logged (C4-01). */
+    log?: HostLogger;
     /** Join address for the story board. Undefined keeps the loopback warning. */
     lanHost?: () => string | undefined;
   },
@@ -109,7 +114,8 @@ export const startAcceptanceHost = async (
     port: 0,
     host: "127.0.0.1",
     webRoot: WEB_ROOT,
-    packsDir: config.packsDir,
+    packsDir: options?.packsDir ?? config.packsDir,
+    ...(options?.log ? { log: options.log } : {}),
     databasePath,
     tower: gated,
     towerWatchMs: 50,

@@ -378,8 +378,8 @@ const waitForNewAutosave = async (databasePath: string) => {
   const startMs = Date.now();
   for (;;) {
     const row = readAutosave(databasePath);
-    if (row && row.gameId !== OLD_GAME && row.format === 2) return row;
-    if (Date.now() - startMs > 5000) throw new Error("no new format 2 autosave was written");
+    if (row && row.gameId !== OLD_GAME && row.format === 3) return row;
+    if (Date.now() - startMs > 5000) throw new Error("no new format 3 autosave was written");
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
 };
@@ -387,7 +387,9 @@ const waitForNewAutosave = async (databasePath: string) => {
 describe.each([
   { label: "no format", format: null, version: "none" },
   { label: "format: 1", format: 1, version: "1" },
-])("a pre-C3 autosave with $label (C3-01 EV-07)", ({ format, version }) => {
+  { label: "format: 2 (a C3 save)", format: 2, version: "2" },
+])("a pre-C4 autosave with $label (C3-01 EV-07, C4-01 EV-06)", ({ format, version }) => {
+  const era = format === 2 ? "pre-C4" : "pre-C3";
   it("warns once, keeps the row unchanged, offers no Continue, and starts fresh", async () => {
     const databasePath = join(tempDir(), "session.sqlite");
     seedAutosave(databasePath, format);
@@ -402,7 +404,7 @@ describe.each([
     const { log, calls } = warnSpy();
     const host = await startAt(databasePath, log);
     expect(calls).toEqual([
-      { code: "save-skipped", message: `save skipped: pre-C3 format ${version} (pack test)` },
+      { code: "save-skipped", message: `save skipped: ${era} format ${version} (pack test)` },
     ]);
     expect(readAutosave(databasePath)).toEqual(before);
 
@@ -422,7 +424,9 @@ describe.each([
     const { log, calls } = warnSpy();
     const host = await startAt(databasePath, log);
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.message).toMatch(/^save skipped: pre-C3 format .* \(pack test\)$/);
+    expect(calls[0]?.message).toMatch(
+      new RegExp(`^save skipped: ${era} format .* \\(pack test\\)$`),
+    );
     expect(readAutosave(databasePath)).toEqual(before);
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
     await press(device, "base-board-done", "board-set-up");
@@ -431,7 +435,7 @@ describe.each([
     expect(offered(device).some((a) => a.promptId === "continue-saved-game")).toBe(false);
   });
 
-  it("lets a New game run clean and replaces the old row with a format 2 save", async () => {
+  it("lets a New game run clean and replaces the old row with a format 3 save", async () => {
     const databasePath = join(tempDir(), "session.sqlite");
     seedAutosave(databasePath, format);
     const { log, calls } = warnSpy();
@@ -440,13 +444,13 @@ describe.each([
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
     await playToBegin(device);
     const row = await waitForNewAutosave(databasePath);
-    expect(row.format).toBe(2);
+    expect(row.format).toBe(3);
     expect(calls.filter((call) => call.code === "save-skipped")).toHaveLength(1);
   });
 });
 
-describe("a format 2 autosave (C3-01 EV-07)", () => {
-  it("is written as format 2 and Continue restores it after a restart", async () => {
+describe("a format 3 autosave (C3-01 EV-07)", () => {
+  it("is written as format 3 and Continue restores it after a restart", async () => {
     const databasePath = join(tempDir(), "session.sqlite");
     const first = warnSpy();
     const host = await startAt(databasePath, first.log);
@@ -454,7 +458,7 @@ describe("a format 2 autosave (C3-01 EV-07)", () => {
     const device = await helloDevice(host.port, { formFactor: "ipad", joinCode: host.joinCode });
     await playToBegin(device);
     const written = await waitForNewAutosave(databasePath);
-    expect(written.format).toBe(2);
+    expect(written.format).toBe(3);
     for (const socket of sockets.splice(0)) socket.close();
     await host.close();
     hosts.splice(hosts.indexOf(host), 1);
@@ -469,6 +473,6 @@ describe("a format 2 autosave (C3-01 EV-07)", () => {
       const view = [...pad.log].reverse().find((m) => m.type === "deviceView");
       return view?.type === "deviceView" && view.payload.screen !== "pick-story";
     });
-    expect(readAutosave(databasePath)?.format).toBe(2);
+    expect(readAutosave(databasePath)?.format).toBe(3);
   });
 });

@@ -1,7 +1,7 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { tryChapters } from "../../engine/loops/chapter/chapters.ts";
 import type { PlayState } from "../../engine/loops/chapter/playState.ts";
 import { ensureClock, heroSheet } from "../../engine/loops/day/clock.ts";
@@ -27,8 +27,25 @@ import { deserializeShellState, type SerializedShellState } from "./serialize.ts
 import { type CoreSession, createCoreSession } from "./session.ts";
 import { shellCheckpointFromState } from "./shellCheckpoint.ts";
 
-const packsDir = join(import.meta.dirname, "../../../../../packs");
+const repoPacksDir = join(import.meta.dirname, "../../../../../packs");
+
+/**
+ * These tests pin the C3 end (chapter 1 won ends the game). C4 turned that switch off in the
+ * base tuning (C4-01), so they load a copy of the packs with it back on.
+ */
+const packsDir = mkdtempSync(join(tmpdir(), "live-quests-packs-"));
+for (const id of ["base", "test", "dracula"]) {
+  cpSync(join(repoPacksDir, id), join(packsDir, id), { recursive: true });
+}
+const tuningFile = join(packsDir, "base", "tuning.yaml");
+const c3Tuning = readFileSync(tuningFile, "utf8").replace(
+  "c3_end_after_chapter_1: false",
+  "c3_end_after_chapter_1: true",
+);
+if (!c3Tuning.includes("c3_end_after_chapter_1: true")) throw new Error("tuning has no C3 switch");
+writeFileSync(tuningFile, c3Tuning);
 const catalog = loadStoryCatalog(packsDir);
+afterAll(() => rmSync(packsDir, { recursive: true, force: true }));
 
 const dirs: string[] = [];
 const closers: Array<() => void> = [];
