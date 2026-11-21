@@ -3025,3 +3025,38 @@
   font-style: italic;
   color: var(--bt-vellum-shadow);
 }
+
+/* C3/12 (UI-041): the event scene is a painting over a Scroll, centred in the move layer. */
+.bt-board[data-board-layer="move"] > .bt-event {
+  position: absolute;
+  top: 54%;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: min(60%, 1100px);
+  transform: translate(-50%, -50%);
+}
+
+.bt-event-painting {
+  width: 100%;
+  height: 340px;
+  margin: 0;
+  border: 2px solid var(--bt-candle, #c9a85a);
+  background: linear-gradient(180deg, #2a2420, #14100d);
+}
+
+.bt-event-reveal {
+  margin: 0.6rem 0 0;
+  color: var(--bt-candle, #c9a85a);
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+[data-event-tick] {
+  margin: 0.4rem 0 0;
+  opacity: 0.7;
+  font-style: italic;
+}
