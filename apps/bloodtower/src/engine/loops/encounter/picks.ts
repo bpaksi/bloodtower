@@ -8,6 +8,13 @@ import {
   removeCorruption,
   temptedExtra,
 } from "../../rules/corruption/index.ts";
+import {
+  gainOnSheets,
+  payFromSheets,
+  poolGold,
+  sheetGoldMap,
+  sheetHeroGold,
+} from "../../rules/purse/index.ts";
 import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isFallen, setHeroSheet } from "../day/clock.ts";
@@ -74,8 +81,14 @@ export type HeroHp = { hp: number; max: number };
 export type PicksStore = {
   tuning: PickTuning;
   chapter: number;
-  /** Gold in each group's purse. */
+  /**
+   * The pool each group can spend (D5, DEC-911): in a running game every seated hero's gold, loaded by
+   * `loadLive`. A test that sets it by hand with no sheet gold treats it as the group's own purse.
+   */
   purse: Record<string, number>;
+  /** Gold a group's pending choices owe the pool, and gold they gained, until `settleGold` writes both. */
+  owed?: Record<string, number>;
+  gained?: Record<string, number>;
   /** Moves left this turn, per group. */
   moves: Record<string, number>;
   hp: Record<string, HeroHp>;
@@ -369,6 +382,7 @@ export const applyPick = (
   if (kind === "cleanse" && cleanseBlocked(play, groupId, ensureClock(play).skulls[spaceId] ?? 0))
     return { ok: false, reason: "feverish" };
   const price = pickPrice(play, groupId, kind, heroId);
+  // The pool pays (DEC-911): affordable means every seated hero's gold together.
   if ((store.purse[groupId] ?? 0) < price) return { ok: false, reason: "no-gold" };
 
   const clock = ensureClock(play);
@@ -396,7 +410,7 @@ export const applyPick = (
     if (!clock.effects.includes("+1 day")) clock.effects.push("+1 day");
   }
 
-  store.purse[groupId] = (store.purse[groupId] ?? 0) - price;
+  spendGold(play, groupId, price);
   store.moves[groupId] = (store.moves[groupId] ?? 0) - movesCost(store, kind) * count;
   const event: PickEvent = {
     kind,
@@ -411,7 +425,9 @@ export const applyPick = (
   };
   store.log.push(event);
   // Order (EV-12): pay, pick-triggered losses, Uncertain ends the turn, turn-end losses.
-  const gold = options.gold ?? groupPurseGold(store.purse, groupId);
+  // DEC-896: the price is paid first (in DEC-911's order), then each loss comes off its holder alone.
+  settleGold(play, groupId);
+  const gold = options.gold ?? ownGold(play, groupId);
   applyPickLosses(play, groupId, play.content.board.spaceById.get(group.spaceId)?.building, gold);
   if (endsTurnAfterPick(play, groupId)) {
     store.moves[groupId] = 0;
@@ -434,12 +450,14 @@ export const endGroupTurn = (play: PlayState, groupId: string, gold?: HeroGold):
   const store = ensurePicks(play);
   if (turnHasEnded(play, groupId)) return;
   store.turnEnded = { ...store.turnEnded, [groupId]: true };
-  applyTurnEndLosses(play, groupId, gold ?? groupPurseGold(store.purse, groupId));
+  applyTurnEndLosses(play, groupId, gold ?? ownGold(play, groupId));
 };
 
 /** A quest done or left ends the group's turn, the way Uncertain's pick does (DEC-821, DEC-948). */
 export const endTurnAfterQuest = (play: PlayState, groupId: string): void => {
   ensurePicks(play).moves[groupId] = 0;
+  // The gold the quest paid or won reaches the sheets before a turn-end loss reads them (DEC-896).
+  settleGold(play, groupId);
   endGroupTurn(play, groupId);
 };
 
@@ -511,7 +529,10 @@ export const loadLive = (play: PlayState, groupId: string, movesLeft: number): v
   const store = ensurePicks(play);
   const group = groupById(play, groupId);
   const clock = ensureClock(play);
-  store.purse[groupId] = livePurse(play, groupId);
+  // The pool: every seated hero's gold across all groups (D5, DEC-911).
+  store.purse[groupId] = poolGold(play);
+  store.owed = { ...store.owed, [groupId]: 0 };
+  store.gained = { ...store.gained, [groupId]: 0 };
   store.moves[groupId] = movesLeft;
   for (const heroId of group?.heroIds ?? []) {
     const hp = heroSheet(clock, heroId).hp;
@@ -520,54 +541,74 @@ export const loadLive = (play: PlayState, groupId: string, movesLeft: number): v
   }
 };
 
-/** Each hero's part of a gain: an equal split, then each odd coin to a hero holding the least (DEC-646). */
-const gainShares = (
-  play: PlayState,
-  heroIds: readonly string[],
-  gain: number,
-): Map<string, number> => {
-  const clock = ensureClock(play);
-  const shares = new Map<string, number>();
-  if (heroIds.length === 0) return shares;
-  const each = Math.floor(gain / heroIds.length);
-  const held = new Map(heroIds.map((id) => [id, (heroSheet(clock, id).gold ?? 0) + each] as const));
-  for (const id of heroIds) shares.set(id, each);
-  for (let coin = gain - each * heroIds.length; coin > 0; coin--) {
-    const least = heroIds.reduce((low, id) =>
-      (held.get(id) ?? 0) < (held.get(low) ?? 0) ? id : low,
-    );
-    held.set(least, (held.get(least) ?? 0) + 1);
-    shares.set(least, (shares.get(least) ?? 0) + 1);
-  }
-  return shares;
+/** True when any seated hero has a gold figure: the sheets, not a test's hand-set purse, hold the gold. */
+const sheetsHoldGold = (play: PlayState): boolean => Object.keys(sheetGoldMap(play)).length > 0;
+
+/** A priced choice takes `amount` from the pool. `settleGold` writes it to the sheets. */
+export const spendGold = (play: PlayState, groupId: string, amount: number): void => {
+  if (amount <= 0) return;
+  const store = ensurePicks(play);
+  store.purse[groupId] = (store.purse[groupId] ?? 0) - amount;
+  store.owed = { ...store.owed, [groupId]: (store.owed?.[groupId] ?? 0) + amount };
+};
+
+/** A gain for the heroes present (DEC-178). `settleGold` writes it to the sheets. */
+export const earnGold = (play: PlayState, groupId: string, amount: number): void => {
+  if (amount <= 0) return;
+  const store = ensurePicks(play);
+  store.purse[groupId] = (store.purse[groupId] ?? 0) + amount;
+  store.gained = { ...store.gained, [groupId]: (store.gained?.[groupId] ?? 0) + amount };
+};
+
+/** The gold the heroes present hold now, counting what the pending choices have not yet written. */
+export const presentGold = (play: PlayState, groupId: string): number => {
+  const store = ensurePicks(play);
+  if (!sheetsHoldGold(play)) return store.purse[groupId] ?? 0;
+  const pending = (store.purse[groupId] ?? 0) - poolGold(play);
+  return Math.max(0, livePurse(play, groupId) + pending);
 };
 
 /**
- * Writes the store's gold and hit points back to the sheets and returns the moves left. A cost comes
- * off the heroes in order. A net gain (a quest's gold, DEC-178) is split equally and each odd coin
- * goes to a hero holding the least, ties by seat (DEC-646). A hero whose gold was unknown starts
- * from 0 on a gain.
+ * Writes the pending gold to the sheets: what the choices owe is paid in DEC-911's order (the heroes
+ * present first, then those elsewhere); what they gained goes to the heroes present, each odd coin to
+ * a hero holding least (DEC-646). Any other change to the pool since `loadLive` settles the same way.
+ * With no gold on any sheet (a test that set the purse by hand) there is nothing to write.
  */
+export const settleGold = (play: PlayState, groupId: string): void => {
+  const store = ensurePicks(play);
+  let owed = store.owed?.[groupId] ?? 0;
+  let gained = store.gained?.[groupId] ?? 0;
+  store.owed = { ...store.owed, [groupId]: 0 };
+  store.gained = { ...store.gained, [groupId]: 0 };
+  if (!sheetsHoldGold(play)) return;
+  const stray = poolGold(play) - owed + gained - (store.purse[groupId] ?? 0);
+  if (stray > 0) owed += stray;
+  else gained -= stray;
+  const unpaid = payFromSheets(play, groupId, owed);
+  if (unpaid > 0) throw new Error(`The pool is ${unpaid} gold short of what the choice cost.`);
+  gainOnSheets(play, groupId, gained);
+};
+
+/** Each hero's own gold: where the losses that are never covered come from (DEC-896). */
+const ownGold = (play: PlayState, groupId: string): HeroGold => {
+  const store = ensurePicks(play);
+  if (!sheetsHoldGold(play)) return groupPurseGold(store.purse, groupId);
+  return sheetHeroGold(play, (taken) => {
+    store.purse[groupId] = (store.purse[groupId] ?? 0) - taken;
+  });
+};
+
+/** Writes the store's gold and hit points back to the sheets and returns the moves left. */
 export const commitLive = (play: PlayState, groupId: string): number => {
   const store = ensurePicks(play);
   const group = groupById(play, groupId);
   const clock = ensureClock(play);
   if (group) {
-    const delta = livePurse(play, groupId) - (store.purse[groupId] ?? 0);
-    let owed = delta;
-    const gains = delta < 0 ? gainShares(play, group.heroIds, -delta) : new Map<string, number>();
+    settleGold(play, groupId);
     for (const heroId of group.heroIds) {
-      const sheet = heroSheet(clock, heroId);
       const hp = store.hp[heroId];
-      const gold = sheet.gold;
-      const taken = gold !== undefined && owed > 0 ? Math.min(gold, owed) : 0;
-      owed -= taken;
-      const gained = gains.get(heroId) ?? 0;
-      setHeroSheet(play, heroId, {
-        ...sheet,
-        ...(hp ? { hp: { hp: hp.hp, max: hp.max } } : {}),
-        ...(gold !== undefined || gained > 0 ? { gold: (gold ?? 0) - taken + gained } : {}),
-      });
+      if (!hp) continue;
+      setHeroSheet(play, heroId, { ...heroSheet(clock, heroId), hp: { hp: hp.hp, max: hp.max } });
     }
   }
   return store.moves[groupId] ?? 0;
