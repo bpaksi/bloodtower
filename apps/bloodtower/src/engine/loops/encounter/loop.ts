@@ -27,8 +27,10 @@ import {
   applyPick,
   commitLive,
   cureTargets,
+  endFreePick,
   endTurnAfterQuest,
   ensurePicks,
+  freePickPending,
   giveBackTile,
   healTargets,
   loadLive,
@@ -123,6 +125,8 @@ export const handleEncounterLeave = (groupId: string): void => {
   const group = groupById(play, groupId);
   if (!group) return;
   group.insideBuilding = false;
+  // DEC-913, DEC-945: leaving ends the pending free pick unspent.
+  endFreePick(play, groupId);
 };
 
 const REFUSALS: Record<PickRefusal, string> = {
@@ -134,6 +138,7 @@ const REFUSALS: Record<PickRefusal, string> = {
   "no-gold": "There is not enough gold for that.",
   "no-target": "No hero can take that pick now.",
   feverish: "A Feverish hero stops the Cleanse at three skulls.",
+  cleansed: "Cleanse is not possible now.",
   "give-back-first": "A virtue must be given back first.",
 };
 
@@ -182,7 +187,10 @@ const afterResult = (local: EncounterLocal): EncounterLocal => {
   if (store.giveBack[local.groupId] && stepOf(local).kind !== "give-back") {
     return toStep(local, { kind: "give-back" });
   }
-  if (movesOf(local) <= 0) {
+  // A pending free pick keeps the menu open at 0 moves, and so does the free pick just taken (DEC-913).
+  const step = stepOf(local);
+  const tookFree = step.kind === "result" && step.result.free === true;
+  if (movesOf(local) <= 0 && !tookFree && !freePickPending(play, local.groupId)) {
     handleEncounterLeave(local.groupId);
     return { ...local, left: true, awaitingPress: false };
   }
@@ -222,6 +230,7 @@ const applyLive = (local: EncounterLocal, pick: Apply): EncounterLocal => {
       : {}),
     ...(result.event.corruptionId ? { corruptionId: result.event.corruptionId } : {}),
     ...(pick.kind === "virtue-draw" && result.event.tile ? { tile: result.event.tile } : {}),
+    ...(result.free ? { free: true } : {}),
   };
   const auto = pick.kind === "rally" || pick.kind === "virtue-draw" || pick.kind === "cleanse";
   return toResult(moved, { ...fields, auto });
@@ -380,7 +389,9 @@ export const handleBuildingPress = (local: EncounterLocal, promptId: string): En
   }
   if (press.verb === "moves" && step.kind === "rest-moves") {
     const count = Number(press.arg);
-    if (!Number.isInteger(count) || count < 1 || count > movesOf(local)) {
+    // A pending free pick waives one move, so a rest may run one move past the moves left (DEC-946).
+    const most = movesOf(local) + (freePickPending(playState(), local.groupId) ? 1 : 0);
+    if (!Number.isInteger(count) || count < 1 || count > most) {
       return refused(local, REFUSALS["no-moves"]);
     }
     return applyLive(local, { kind: "rest", heroId: step.heroId, count });

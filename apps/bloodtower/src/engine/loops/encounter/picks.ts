@@ -15,6 +15,7 @@ import {
   sheetGoldMap,
   sheetHeroGold,
 } from "../../rules/purse/index.ts";
+import { groupVirtueIds } from "../../rules/virtues/index.ts";
 import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isFallen, setHeroSheet } from "../day/clock.ts";
@@ -99,6 +100,12 @@ export type PicksStore = {
   freeCures: string[];
   /** Groups whose turn has ended this day; an Uncertain pick or the loop sets it (DEC-468). */
   turnEnded?: Record<string, boolean>;
+  /** The day each group last took its Fortunate free pick (DEC-945). Spent only when taken. */
+  freePickDay?: Record<string, number>;
+  /** The building a group's pending free pick waits at; a turn end or Leave clears it (DEC-913). */
+  freePending?: Record<string, string>;
+  /** The buildings each group has Cleansed this turn; a new turn clears the list (DEC-572, DEC-946). */
+  cleansed?: Record<string, string[]>;
   log: PickEvent[];
 };
 
@@ -141,9 +148,12 @@ export type PickRefusal =
   | "no-gold"
   | "no-target"
   | "feverish"
+  | "cleansed"
   | "give-back-first";
 
-export type PickResult = { ok: true; event: PickEvent } | { ok: false; reason: PickRefusal };
+export type PickResult =
+  | { ok: true; event: PickEvent; free: boolean }
+  | { ok: false; reason: PickRefusal };
 
 export type MenuEntry = {
   id: string;
@@ -188,6 +198,40 @@ const movesCost = (store: PicksStore, kind: PickKind): number => {
   if (kind === "cure") return store.tuning.cure.moves;
   if (kind === "cleanse") return store.tuning.cleanse.moves;
   return 1;
+};
+
+const FORTUNATE = "fortunate";
+
+/** True while the group's free pick (DEC-913) waits at the building it stands in. */
+export const freePickPending = (play: PlayState, groupId: string): boolean => {
+  const at = ensurePicks(play).freePending?.[groupId];
+  return at !== undefined && at === groupById(play, groupId)?.spaceId;
+};
+
+/** The pending free pick ends unspent: a Leave or a turn end (DEC-945). */
+export const endFreePick = (play: PlayState, groupId: string): void => {
+  const store = ensurePicks(play);
+  if (store.freePending?.[groupId] === undefined) return;
+  const { [groupId]: _gone, ...rest } = store.freePending;
+  store.freePending = rest;
+};
+
+/** The moves a pick of `count` takes: a pending free pick waives one pick's worth (DEC-946). */
+export const movesNeeded = (
+  play: PlayState,
+  groupId: string,
+  kind: PickKind,
+  count = 1,
+): number => {
+  const store = ensurePicks(play);
+  const cost = movesCost(store, kind);
+  return cost * count - (freePickPending(play, groupId) ? cost : 0);
+};
+
+/** True when the group has already Cleansed the building it stands in this turn (DEC-572). */
+export const cleansedHere = (play: PlayState, groupId: string): boolean => {
+  const spaceId = groupById(play, groupId)?.spaceId;
+  return spaceId !== undefined && Boolean(ensurePicks(play).cleansed?.[groupId]?.includes(spaceId));
 };
 
 /**
@@ -308,9 +352,10 @@ export const openMenu = (
       price,
       // Cleanse on a building with no skulls has nothing to remove (still listed, EV-06).
       disabled:
-        moves < movesCost(store, kind) ||
+        moves < movesNeeded(play, groupId, kind) ||
         purse < price ||
-        (kind === "cleanse" && (skulls < 1 || cleanseBlocked(play, groupId, skulls))),
+        (kind === "cleanse" &&
+          (skulls < 1 || cleansedHere(play, groupId) || cleanseBlocked(play, groupId, skulls))),
     };
   });
   return { ok: true, entries };
@@ -328,7 +373,7 @@ const pickGate = (
     return { ok: false, reason: "not-offered" };
   const store = ensurePicks(play);
   if (store.giveBack[groupId]) return { ok: false, reason: "give-back-first" };
-  if ((store.moves[groupId] ?? 0) < movesCost(store, kind) * count)
+  if ((store.moves[groupId] ?? 0) < movesNeeded(play, groupId, kind, count))
     return { ok: false, reason: "no-moves" };
   const spaceId = groupById(play, groupId)?.spaceId ?? "";
   return { ok: true, store, spaceId };
@@ -377,6 +422,7 @@ export const applyPick = (
   ) {
     return { ok: false, reason: "no-target" };
   }
+  if (kind === "cleanse" && cleansedHere(play, groupId)) return { ok: false, reason: "cleansed" };
   if (kind === "cleanse" && (ensureClock(play).skulls[spaceId] ?? 0) < 1)
     return { ok: false, reason: "no-target" };
   if (kind === "cleanse" && cleanseBlocked(play, groupId, ensureClock(play).skulls[spaceId] ?? 0))
@@ -411,7 +457,19 @@ export const applyPick = (
   }
 
   spendGold(play, groupId, price);
-  store.moves[groupId] = (store.moves[groupId] ?? 0) - movesCost(store, kind) * count;
+  const wasFree = freePickPending(play, groupId);
+  store.moves[groupId] = (store.moves[groupId] ?? 0) - movesNeeded(play, groupId, kind, count);
+  if (kind === "cleanse") {
+    store.cleansed = {
+      ...store.cleansed,
+      [groupId]: [...(store.cleansed?.[groupId] ?? []), spaceId],
+    };
+  }
+  if (wasFree) {
+    // The free pick is taken: the day's use is spent (DEC-945) and no second one follows (DEC-913).
+    store.freePickDay = { ...store.freePickDay, [groupId]: play.dayNumber };
+    endFreePick(play, groupId);
+  }
   const event: PickEvent = {
     kind,
     groupId,
@@ -433,13 +491,25 @@ export const applyPick = (
     store.moves[groupId] = 0;
     endGroupTurn(play, groupId, gold);
   }
-  return { ok: true, event };
+  // DEC-913, DEC-945: a group holding Fortunate that has not taken its free pick today gets it after
+  // a first pick, unless the pick ended the turn.
+  if (
+    !wasFree &&
+    !turnHasEnded(play, groupId) &&
+    store.freePickDay?.[groupId] !== play.dayNumber &&
+    groupVirtueIds(play, groupId).includes(FORTUNATE)
+  ) {
+    store.freePending = { ...store.freePending, [groupId]: spaceId };
+  }
+  return { ok: true, event, free: wasFree };
 };
 
-/** A new turn for the group: the ended flag clears (called when the group's turn starts). */
+/** A new turn for the group: the ended flag and the turn's Cleansed buildings clear. */
 export const beginGroupTurn = (play: PlayState, groupId: string): void => {
   const store = ensurePicks(play);
   store.turnEnded = { ...store.turnEnded, [groupId]: false };
+  store.cleansed = { ...store.cleansed, [groupId]: [] };
+  endFreePick(play, groupId);
 };
 
 export const turnHasEnded = (play: PlayState, groupId: string): boolean =>
@@ -450,6 +520,7 @@ export const endGroupTurn = (play: PlayState, groupId: string, gold?: HeroGold):
   const store = ensurePicks(play);
   if (turnHasEnded(play, groupId)) return;
   store.turnEnded = { ...store.turnEnded, [groupId]: true };
+  endFreePick(play, groupId);
   applyTurnEndLosses(play, groupId, gold ?? ownGold(play, groupId));
 };
 

@@ -11,6 +11,7 @@ import {
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import {
   applyPick,
+  beginGroupTurn,
   CURE_RISEN_GOLD,
   configurePicks,
   ensurePicks,
@@ -242,6 +243,8 @@ describe("building picks", () => {
     expect(ensurePicks(play).moves[group.id]).toBe(2);
     expect(ensurePicks(play).purse[group.id]).toBe(8);
 
+    // D6 (DEC-572): one Cleanse per building per turn, so the empty-purse Cleanse is a later turn.
+    beginGroupTurn(play, group.id);
     setPurse(play, group.id, 0);
     expect(applyPick(play, SEED, group.id, "cleanse").ok).toBe(true);
     expect(ensureClock(play).skulls[spaceId]).toBe(0);

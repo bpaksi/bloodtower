@@ -308,7 +308,13 @@ const buildDayPanels = (
     };
   }
 
-  const left = heroes < 1 ? null : daysLeft(clock.supply, heroes, play.dayNumber, clock.tuning);
+  // DEC-947: count from the next counted night; a quest won today adds tonight, which it spends.
+  const tonight = clock.nightsCounted + 1;
+  const questSkipsTonight = clock.questsWon > 0 && clock.tuning.questSkips;
+  const left =
+    heroes < 1
+      ? null
+      : daysLeft(clock.supply, heroes, tonight, clock.tuning) + (questSkipsTonight ? 1 : 0);
   const corruptionHeroes = play.groups.flatMap((group) =>
     group.heroIds.map((heroId) => ({ heroId, panelHeroId: group.heroIds[0] ?? heroId })),
   );
@@ -316,7 +322,7 @@ const buildDayPanels = (
     daysLeft: left,
     threat: comingDrop({
       heroes,
-      night: play.dayNumber,
+      night: tonight,
       questWon: clock.questsWon > 0,
       tuning: clock.tuning,
     }),

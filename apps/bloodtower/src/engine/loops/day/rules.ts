@@ -111,42 +111,49 @@ export const fallenLimit = (tuning: DayTuning): number => {
   return value;
 };
 
-/** Skulls that leave the supply tonight (DEC-564). Night 1 is the first night. */
-export const dropsThisNight = (heroes: number, night: number, tuning: DayTuning): number => {
+/**
+ * Skulls that leave the supply on the night counted as N (DEC-912, DEC-822, DEC-824, DEC-564).
+ * N is the saved counter of counted nights, not the calendar day; the first counted night is 1.
+ * Solo: a drop on odd N. Pair: a drop unless N is a multiple of 4. Three or four: the "each"
+ * count on odd N, the "other" count on even N.
+ */
+export const dropsThisNight = (heroes: number, counted: number, tuning: DayTuning): number => {
   if (!Number.isInteger(heroes) || heroes < 1) {
     throw new Error("The night's drop needs the hero count.");
   }
-  if (!Number.isInteger(night) || night < 1) {
-    throw new Error("The night's drop needs a night number from 1.");
+  if (!Number.isInteger(counted) || counted < 1) {
+    throw new Error("The night's drop needs a counted night from 1.");
   }
-  if (heroes <= 2) return tuning.dropOneOrTwo;
-  return night % 2 === 0 ? tuning.dropThreeOrFourOther : tuning.dropThreeOrFourEach;
+  if (heroes === 1) return counted % 2 === 1 ? tuning.dropOneOrTwo : 0;
+  if (heroes === 2) return counted % 4 === 0 ? 0 : tuning.dropOneOrTwo;
+  return counted % 2 === 0 ? tuning.dropThreeOrFourOther : tuning.dropThreeOrFourEach;
 };
 
 /**
- * Nights the supply still covers, counting the 1,2,1,2 pattern from tonight (Q-C3-04).
- * A night counts even when its drop is larger than the skulls still left.
+ * Nights the supply still covers, counting from the night counted as `from` (N + 1 for the saved
+ * counter N). A night with no drop counts as a day (DEC-947), and so does a night whose drop is
+ * larger than the skulls still left (Q-C3-04).
  */
 export const daysLeft = (
   supply: number,
   heroes: number,
-  night: number,
+  from: number,
   tuning: DayTuning,
 ): number => {
   if (!Number.isInteger(supply) || supply < 0) {
     throw new Error("Days left needs a whole skull supply.");
   }
   if (supply === 0) return 0;
-  const perNight = dropsThisNight(heroes, night, tuning);
-  if (perNight < 1) throw new Error("The night drop is at least one skull.");
-  if (heroes <= 2) return Math.ceil(supply / perNight);
+  const cycle = [0, 1, 2, 3].reduce(
+    (sum, at) => sum + dropsThisNight(heroes, from + at, tuning),
+    0,
+  );
+  if (cycle < 1) throw new Error("The nights drop at least one skull in four.");
   let left = supply;
-  let at = night;
+  let at = from;
   let days = 0;
   while (left > 0) {
-    const drop = dropsThisNight(heroes, at, tuning);
-    if (drop < 1) throw new Error("The night drop is at least one skull.");
-    left -= drop;
+    left -= dropsThisNight(heroes, at, tuning);
     days += 1;
     at += 1;
   }
