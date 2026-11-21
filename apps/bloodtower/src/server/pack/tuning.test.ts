@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse as parseYaml } from "yaml";
 import { dayTuningFrom } from "../../engine/loops/day/rules.ts";
+import { eventTuningFrom } from "../../engine/loops/event/rules.ts";
 import {
   autosaveGame,
   beginGame,
@@ -22,8 +23,9 @@ const basePack = join(repoRoot, "packs", "base");
 
 /** Fixture copied from DEC-703's rows: setup, day and moves, skulls, battle, heroes, gold, Tomb and Tower. */
 const DEC_703 = {
-  c3_end_after_chapter_1: true,
-  fight_enabled: false,
+  c3_end_after_chapter_1: false,
+  c4_end_after_chapter_3: true,
+  fight_enabled: true,
   setup: {
     purse_wheel: { sides: [10, 20, 30, 40], floor: 10 },
     difficulty: {
@@ -247,25 +249,52 @@ describe("tuning.yaml", () => {
     }
   });
 
-  it("requires the two C3 switches to be booleans", () => {
+  it("C4-01 EV-01 base tuning has Fight on, the C3 end off and the C4 end on", () => {
     const raw = parseYaml(readFileSync(join(basePack, "tuning.yaml"), "utf8")) as Tuning;
-    expect(raw.c3_end_after_chapter_1).toBe(true);
-    expect(raw.fight_enabled).toBe(false);
+    expect(raw.fight_enabled).toBe(true);
+    expect(raw.c3_end_after_chapter_1).toBe(false);
+    expect(raw.c4_end_after_chapter_3).toBe(true);
     const loaded = tuningOf(basePack);
-    expect(loaded.c3_end_after_chapter_1).toBe(true);
-    expect(loaded.fight_enabled).toBe(false);
+    expect(loaded.fight_enabled).toBe(true);
+    expect(loaded.c3_end_after_chapter_1).toBe(false);
+    expect(loaded.c4_end_after_chapter_3).toBe(true);
+    expect(eventTuningFrom(loaded).fightEnabled).toBe(true);
+  });
 
+  it("C4-01 EV-04 an unknown switch is rejected and the field is named", () => {
+    const run = withTuning((text) =>
+      text.replace("\nfight_enabled: true\n", "\nfight_enabled: true\nfight_enable: true\n"),
+    );
+    try {
+      expect(run.result.ok).toBe(false);
+      if (run.result.ok) return;
+      expect(
+        run.result.issues.some(
+          (item) => item.file.includes("tuning.yaml") && item.message.includes('"fight_enable"'),
+        ),
+      ).toBe(true);
+    } finally {
+      rmSync(run.dir, { recursive: true, force: true });
+    }
+  });
+
+  it("requires the three switches to be booleans", () => {
     const cases = [
-      (text: string) => text.replace("\nc3_end_after_chapter_1: true\n", "\n"),
-      (text: string) => text.replace("\nfight_enabled: false\n", "\n"),
+      (text: string) => text.replace("\nc3_end_after_chapter_1: false\n", "\n"),
+      (text: string) => text.replace("\nc4_end_after_chapter_3: true\n", "\n"),
+      (text: string) => text.replace("\nfight_enabled: true\n", "\n"),
       (text: string) =>
-        text.replace("c3_end_after_chapter_1: true", 'c3_end_after_chapter_1: "yes"'),
-      (text: string) => text.replace("fight_enabled: false", 'fight_enabled: "yes"'),
+        text.replace("c3_end_after_chapter_1: false", 'c3_end_after_chapter_1: "yes"'),
+      (text: string) =>
+        text.replace("c4_end_after_chapter_3: true", 'c4_end_after_chapter_3: "yes"'),
+      (text: string) => text.replace("fight_enabled: true", 'fight_enabled: "yes"'),
     ];
     const keys = [
       "c3_end_after_chapter_1",
+      "c4_end_after_chapter_3",
       "fight_enabled",
       "c3_end_after_chapter_1",
+      "c4_end_after_chapter_3",
       "fight_enabled",
     ];
     const dirs: string[] = [];

@@ -24,7 +24,7 @@ import type { ShellEffect } from "../session/effects.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { bindShellState, clearShellState } from "../session/shellRef.ts";
 import { initialShellState, type ShellState } from "../session/state.ts";
-import { type LossWay, lossSceneId, pickWinLine } from "./end.ts";
+import { CHAPTER_3_WIN_COPY, gameEndFrom, type LossWay, lossSceneId, pickWinLine } from "./end.ts";
 import { type GameResult, gameLoop } from "./loop.ts";
 
 const spaceIn = (kingdom: string, n: number): string => {
@@ -126,7 +126,7 @@ type Run = {
   effects: EngineEffect[];
 };
 
-const setup = (options: { c3End: boolean }): Run => {
+const setup = (options: { c3End: boolean; c4End?: boolean }): Run => {
   script = {};
   const shell = initialShellState({ sessionId: "t", seed: "game-loop" });
   shell.screen = "play";
@@ -138,7 +138,11 @@ const setup = (options: { c3End: boolean }): Run => {
   shell.autosave = { gameId: "game-1", packId: "test", seed: "game-loop", day: 1 };
   holder.play = play;
   bindShellState(shell);
-  configureChapters(play, { ...PLAN, c3EndAfterChapter1: options.c3End });
+  configureChapters(play, {
+    ...PLAN,
+    c3EndAfterChapter1: options.c3End,
+    c4EndAfterChapter3: options.c4End ?? false,
+  });
   return { shell, play, runtime: emptyLoopRuntime(), effects: [] };
 };
 
@@ -186,6 +190,51 @@ describe("game loop end (MEC-032)", () => {
     expect(ensureChapters(run.play).entered).toEqual([1]);
     expect(records(run)).toHaveLength(1);
     expect(records(run)[0]).toMatchObject({ outcome: "won", how: "won", sceneId: "win" });
+  });
+
+  it("C4-01 EV-02: with the C4 switches, a chapter 1 win opens chapter 2 and ends nothing", () => {
+    const run = setup({ c3End: false, c4End: true });
+    script = { 1: { done: ["herald", "ambush"] } };
+    start(run);
+    expect(gameResult(run)).toBeUndefined();
+    expect(ensureChapters(run.play).entered).toEqual([1, 2]);
+    expect(records(run)).toHaveLength(0);
+  });
+
+  it("C4-01 EV-03: chapter 3 won ends the C4 game won, with end chapter_3 and no chapter 4", () => {
+    const run = setup({ c3End: false, c4End: true });
+    script = {
+      1: { done: ["herald", "ambush"] },
+      2: { done: ["c2-a"] },
+      3: { done: ["c3-a"] },
+    };
+    start(run);
+    expect(gameResult(run)).toMatchObject({ outcome: "won", sceneId: "win" });
+    expect(ensureChapters(run.play).entered).toEqual([1, 2, 3]);
+    expect(
+      gameEndFrom({ chapterId: "ch-3", chapter: 3, outcome: "won", last: true, end: "chapter_3" }),
+    ).toEqual({
+      outcome: "won",
+      sceneId: "win",
+      chapter: 3,
+      end: "chapter_3",
+    });
+    expect(CHAPTER_3_WIN_COPY).toBe(
+      '[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden\'s door is open, for now."]',
+    );
+    expect(records(run)).toHaveLength(1);
+    expect(records(run)[0]).toMatchObject({ outcome: "won", how: "won", sceneId: "win" });
+  });
+
+  it("C4-01 EV-03: with the C4 switch off, chapter 3 won does not end the game", () => {
+    const run = setup({ c3End: false, c4End: false });
+    script = {
+      1: { done: ["herald", "ambush"] },
+      2: { done: ["c2-a"] },
+      3: { done: ["c3-a"] },
+    };
+    start(run);
+    expect(ensureChapters(run.play).entered).toEqual([1, 2, 3]);
   });
 
   it("EV-08: a finished game clears the autosave in the shell", () => {

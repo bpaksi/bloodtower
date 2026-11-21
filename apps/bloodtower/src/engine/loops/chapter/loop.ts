@@ -7,6 +7,7 @@ import { shellState } from "../session/shellRef.ts";
 import {
   type ChapterStore,
   chapterDef,
+  endsAtC4Chapter,
   endsGame,
   ensureChapters,
   isFinale,
@@ -40,6 +41,8 @@ export type ChapterResult = {
   reason?: "skulls" | "buildings" | "corruption";
   /** Won and last: the game ends (C3 chapter 1, or the finale). */
   last?: boolean;
+  /** Set when the C4 switch ended the game at chapter 3 (Q-C4-01): the record's `end`. */
+  end?: "chapter_3";
 };
 
 const blankLocal = (): ChapterLocal => ({
@@ -210,7 +213,8 @@ export const chapterLoop: LoopDefinition<ChapterLocal, ChapterResult> = {
             passComplete: true,
           };
         }
-        const finale = isFinale(store, local.chapter);
+        // The C4 end rule stops at chapter 3 before any Tower exists (Q-C4-01).
+        const finale = isFinale(store, local.chapter) && !endsAtC4Chapter(store, local.chapter);
         if (finale && questsAllDone(play, store, local.chapter)) store.towerUnlocked = true;
         const won = finale ? store.towerWon : questsAllDone(play, store, local.chapter);
         if (won) {
@@ -253,6 +257,7 @@ export const chapterLoop: LoopDefinition<ChapterLocal, ChapterResult> = {
       last: won && (endsGame(store, local.chapter) || isFinale(store, local.chapter)),
     };
     if (local.outcome?.reason) result.reason = local.outcome.reason;
+    if (result.last && endsAtC4Chapter(store, local.chapter)) result.end = "chapter_3";
     return result;
   },
 };

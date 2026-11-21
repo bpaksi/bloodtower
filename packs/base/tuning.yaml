@@ -1,7 +1,9 @@
 # DEC-703 placeholders (DEC-500, DEC-131). The engine reads these numbers from this file.
-# C3 switches (Q-C3-01, Q-C3-02). C4 and C5 flip them. No story pack overrides this file.
-c3_end_after_chapter_1: true
-fight_enabled: false
+# The game switches (Q-C3-01, Q-C3-02, Q-C4-01). C4 turns Fight on and moves the end to chapter 3;
+# C5 feature 04 turns that end off. No story pack overrides this file.
+c3_end_after_chapter_1: false
+c4_end_after_chapter_3: true
+fight_enabled: true
 
 setup:
   purse_wheel:

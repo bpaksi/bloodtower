@@ -24,6 +24,11 @@ export type ChapterPlan = {
   seals: SealDef[];
   /** `c3_end_after_chapter_1` (Q-C3-01). */
   c3EndAfterChapter1: boolean;
+  /**
+   * `c4_end_after_chapter_3` (Q-C4-01): winning chapter 3 ends the game won. Absent reads as off
+   * until the story loader passes the switch on.
+   */
+  c4EndAfterChapter3?: boolean;
   /** `skulls.seal_break.min`; the top is the skulls held in the tower. */
   sealBreakMin: number;
   /** `foe_level_by_chapter` (DEC-185). */
@@ -120,9 +125,19 @@ export const chapterDef = (store: ChapterStore, index: number): ChapterDef => {
 export const isFinale = (store: ChapterStore, index: number): boolean =>
   index === Math.max(...store.plan.chapters.map((c) => c.index));
 
-/** In C3 clearing chapter 1 is the last act of the game (Q-C3-01). */
+/** The chapter the C4 end rule stops at (Q-C4-01). */
+export const C4_END_CHAPTER = 3;
+
+/**
+ * Clearing chapter 1 ends the game in C3 (Q-C3-01); clearing chapter 3 ends it in C4 (Q-C4-01).
+ * Each is its own tuning switch, and C5 turns both off.
+ */
 export const endsGame = (store: ChapterStore, index: number): boolean =>
-  store.plan.c3EndAfterChapter1 && index === 1;
+  (store.plan.c3EndAfterChapter1 && index === 1) || endsAtC4Chapter(store, index);
+
+/** The C4 switch is what ends the game at this chapter. */
+export const endsAtC4Chapter = (store: ChapterStore, index: number): boolean =>
+  store.plan.c4EndAfterChapter3 === true && index === C4_END_CHAPTER;
 
 /** Saved with the autosave; Continue restores it whole (DEC-151, DEC-303). */
 export const snapshotChapters = (play: PlayState): string => JSON.stringify(ensureChapters(play));
