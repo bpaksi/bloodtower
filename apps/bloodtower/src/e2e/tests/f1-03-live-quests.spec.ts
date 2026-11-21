@@ -208,9 +208,16 @@ test.describe("F1/03 a real game's Herald, from the story pack", () => {
             )
             .first();
           // The roll panel animates, so its button is never "stable": press it without waiting.
-          if ((await next.count()) > 0) await next.click({ force: true, timeout: 10_000 });
-          else await two.pad.waitForTimeout(250);
+          // The panel can swap or unmount between the count and the click (an event scene, the
+          // next prompt). A short, lost click is that race: look again. The loop guard and the
+          // assertion below still fail the test when Enter never comes.
+          if ((await next.count()) > 0) {
+            await next.click({ force: true, timeout: 2_000 }).catch((error: unknown) => {
+              if (!(error instanceof Error) || error.name !== "TimeoutError") throw error;
+            });
+          } else await two.pad.waitForTimeout(250);
         }
+        await expect(enter).toHaveCount(1, { timeout: 5_000 });
       });
       await test.step("press Enter at Egan's End", async () => {
         await enter.click({ timeout: 10_000 });

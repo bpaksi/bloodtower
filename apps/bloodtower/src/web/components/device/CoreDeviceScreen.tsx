@@ -7,6 +7,7 @@ import { VOLUME_LINE } from "../../lib/volumeTest.ts";
 import { ITEMS_EMPTY } from "../board/PartyItemsPanel.tsx";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
+import { EventChoices, eventSceneFor, isEventChoice } from "./EventChoices.tsx";
 import type { MenuContext } from "./gearMenu.ts";
 import { FallenNote, PlaceMenu } from "./PlaceMenu.tsx";
 
@@ -829,11 +830,13 @@ export function CoreDeviceScreen({
       !inMenu(action) &&
       action.promptId !== SAVED_CONTINUE_PROMPT &&
       !isVirtueOption(action) &&
+      !isEventChoice(action) &&
       action.actionId !== "build",
   );
   // A virtue that asks (CU/14, EV-03): the acting group's iPads get one button per option, whatever
   // the virtue. Another group's iPad holds none of its heroes, so it draws no list.
   const virtueAsk = virtueChoiceFor(view);
+  const eventScene = eventSceneFor(view);
   const quit =
     actions.find((action) => action.promptId === "menu-quit") ??
     actions.find((action) => action.actionId === "quit-story");
@@ -957,7 +960,7 @@ export function CoreDeviceScreen({
           back={back}
           quit={quit}
           onAct={onAct}
-          helpScreen={view.gear?.helpScreen}
+          helpScreen={eventScene ? "event-scene" : view.gear?.helpScreen}
           menu={menuContext(view)}
         />
       </main>
@@ -1142,6 +1145,9 @@ export function CoreDeviceScreen({
                 onAct={onAct}
               />
             ) : null}
+            {eventScene ? (
+              <EventChoices view={view} scene={eventScene} live={live} onAct={onAct} />
+            ) : null}
             {virtueAsk ? (
               <section className="mt-4" data-virtue-choice={virtueAsk.virtueId}>
                 <h2 className="text-lg font-medium" data-virtue-prompt="">
@@ -1251,7 +1257,7 @@ export function CoreDeviceScreen({
         back={back}
         quit={quit}
         onAct={onAct}
-        helpScreen={view.gear?.helpScreen}
+        helpScreen={eventScene ? "event-scene" : view.gear?.helpScreen}
         menu={menuContext(view)}
       />
     </main>
