@@ -3,7 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { type Browser, type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { openDatabase } from "../../server/db/client.ts";
-import { autosave } from "../../server/db/schema.ts";
+import { autosave, checkpoints } from "../../server/db/schema.ts";
+import { createSessionStore } from "../../server/db/store.ts";
 import { createEventStore } from "../../server/events/store.ts";
 import { createHostLogger, type HostLogger } from "../../server/log/hostLog.ts";
 import {
@@ -87,26 +88,37 @@ const spyLogger = (dataDir: string): { log: HostLogger; warnings: string[] } => 
   return { log, warnings };
 };
 
-const withStore = <T>(
-  databasePath: string,
-  read: (store: ReturnType<typeof createEventStore>) => T,
-) => {
+type SavedPlan = { checkpointId: number; plan: Record<string, unknown> };
+
+/**
+ * The applied chapter plan, from the newest checkpoint that holds one.
+ *
+ * `lastCheckpoint` orders by day descending, so the opening's day-1 snapshot (written before
+ * `configureStoryPlay`, `chapters` null) hides the later day-0 markers. A quit writes one of
+ * those with the plan fixed at Begin. The Continue press writes another of the restored game.
+ */
+const chapterPlanSaved = (databasePath: string): SavedPlan | null => {
   const opened = openDatabase(databasePath);
   try {
-    return read(createEventStore(opened.db));
+    const gameId = opened.db.select().from(autosave).all()[0]?.gameId;
+    if (!gameId) return null;
+    const rows = opened.db
+      .select()
+      .from(checkpoints)
+      .all()
+      .filter((row) => row.gameId === gameId)
+      .sort((a, b) => b.id - a.id);
+    for (const row of rows) {
+      const state = JSON.parse(row.stateJson) as {
+        chapters?: { plan?: Record<string, unknown> } | null;
+      };
+      if (state.chapters?.plan) return { checkpointId: row.id, plan: state.chapters.plan };
+    }
+    return null;
   } finally {
     opened.close();
   }
 };
-
-const chapterPlanSaved = (databasePath: string) =>
-  withStore(databasePath, (store) => {
-    const gameId = store.getAutosave()?.gameId;
-    const json = gameId ? store.lastCheckpoint(gameId)?.stateJson : undefined;
-    if (!json) return null;
-    const state = JSON.parse(json) as { chapters?: { plan?: Record<string, unknown> } | null };
-    return state.chapters?.plan ?? null;
-  });
 
 const playToBegin = async (pad: Page) => {
   await clickAct(pad, "continue", `continue-pick-story-${STORY_ID}`);
@@ -142,7 +154,7 @@ test("EV-05: the tuning read at Begin survives Continue, whatever the file says 
   const first = await startAcceptanceHost(testInfo, { seed, packsDir });
   const { databasePath } = first;
   const contexts: BrowserContext[] = [];
-  let atBegin: Record<string, unknown> | null = null;
+  let atBegin: SavedPlan | null = null;
   try {
     const pad = await openPad(browser, first.baseURL, first.host.joinCode);
     contexts.push(pad.context);
@@ -152,15 +164,20 @@ test("EV-05: the tuning read at Begin survives Continue, whatever the file says 
     await quitGame(pad.page);
     atBegin = chapterPlanSaved(databasePath);
     // The switches the game began under: the C4 values from the repo's tuning.
-    expect(atBegin).toMatchObject({ c3EndAfterChapter1: false });
+    expect(atBegin?.plan).toMatchObject({
+      c3EndAfterChapter1: false,
+      c4EndAfterChapter3: true,
+    });
   } finally {
     await closeAll(contexts);
     await first.host.close();
   }
 
-  // Edit the tuning file between Begin and Continue: the C3 end back on.
+  // Edit the tuning file between Begin and Continue. Both switches move, so a re-read shows.
   editTuning(packsDir, (text) =>
-    text.replace("c3_end_after_chapter_1: false", "c3_end_after_chapter_1: true"),
+    text
+      .replace("c3_end_after_chapter_1: false", "c3_end_after_chapter_1: true")
+      .replace("c4_end_after_chapter_3: true", "c4_end_after_chapter_3: false"),
   );
 
   const second = await startAcceptanceHost(testInfo, { databasePath, seed, packsDir });
@@ -168,14 +185,19 @@ test("EV-05: the tuning read at Begin survives Continue, whatever the file says 
   try {
     const pad = await openPad(browser, second.baseURL, second.host.joinCode);
     next.push(pad.context);
-    await enterWithoutTowerKeepSound(pad.page);
-    await setSoundAndKeep(pad.page);
+    // The evening already entered and quit to the session screen, so a restart resumes there.
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "session", {
+      timeout: 30_000,
+    });
     await clickAct(pad.page, "continue", "continue-saved-game");
     await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
     await quitGame(pad.page);
+    const kept = chapterPlanSaved(databasePath);
+    // A checkpoint written after Continue, not the Begin marker read again.
+    expect(kept?.checkpointId).toBeGreaterThan(atBegin?.checkpointId ?? 0);
     // The game kept the Begin values; the edited file was not read.
-    expect(chapterPlanSaved(databasePath)).toEqual(atBegin);
+    expect(kept?.plan).toEqual(atBegin?.plan);
   } finally {
     await closeAll(next);
     await second.host.close();
@@ -189,15 +211,23 @@ test("EV-06: a C3 save is not resumed under C4; one log line; a new game can Beg
   test.setTimeout(300_000);
   const databasePath = join(mkdtempSync(join(tmpdir(), "c4-01-save-")), "session.sqlite");
   // A save written under the C3 switches: format 2, the format before AUTOSAVE_FORMAT 3.
-  withStore(databasePath, (store) =>
-    store.replaceAutosave({
+  // The autosave row references its session, so the parent row has to exist first.
+  const opened = openDatabase(databasePath);
+  try {
+    createSessionStore(opened.db).saveRoster({
+      sessionId: "session-old",
+      packId: STORY_ID,
+      packVersion: "0.1.0",
+      startedWall: "2026-10-30T00:00:00.000Z",
+      joinCode: "000000",
+      devices: [],
+      holdings: [],
+    });
+    createEventStore(opened.db).replaceAutosave({
       gameId: "c3-game",
       sessionId: "session-old",
       packId: STORY_ID,
-    }),
-  );
-  const opened = openDatabase(databasePath);
-  try {
+    });
     opened.db.update(autosave).set({ format: 2 }).run();
   } finally {
     opened.close();
