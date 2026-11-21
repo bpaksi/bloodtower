@@ -113,6 +113,7 @@ const storyPlayData = (
         })),
         seals: [],
         c3EndAfterChapter1: tuning.c3_end_after_chapter_1,
+        c4EndAfterChapter3: tuning.c4_end_after_chapter_3,
         foeLevel: {
           chapter1: tuning.setup.foe_level_by_chapter.chapter_1,
           perChapter: tuning.setup.foe_level_by_chapter.per_chapter,

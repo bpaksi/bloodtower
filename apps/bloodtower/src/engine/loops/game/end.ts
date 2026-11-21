@@ -17,7 +17,13 @@ export type GameEnd = {
   sceneId: string;
   /** The chapter the game ended in. */
   chapter: number;
+  /** Set when the C4 switch ended the game at chapter 3 (Q-C4-01): the record's `end`. */
+  end?: "chapter_3";
 };
+
+/** Placeholder win copy for the C4 chapter 3 end (Q-C4-01); the real line replaces it. */
+export const CHAPTER_3_WIN_COPY =
+  '[COPY: chapter 3 win, Loremaster = "The Lock is turned and the last stand held. The Warden\'s door is open, for now."]';
 
 export const WIN_SCENE_ID = "win";
 
@@ -36,7 +42,11 @@ export const gameEndFrom = (result: Partial<ChapterResult>): GameEnd | "next" | 
     const reason: LossWay = result.reason ?? "skulls";
     return { outcome: "lost", reason, sceneId: lossSceneId(reason), chapter };
   }
-  if (result.last) return { outcome: "won", sceneId: WIN_SCENE_ID, chapter };
+  if (result.last) {
+    const won: GameEnd = { outcome: "won", sceneId: WIN_SCENE_ID, chapter };
+    if (result.end) won.end = result.end;
+    return won;
+  }
   return "next";
 };
 

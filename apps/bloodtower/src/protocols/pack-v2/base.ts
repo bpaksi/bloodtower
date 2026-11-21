@@ -170,6 +170,8 @@ const rangeSchema = z.strictObject({
 export const tuningSchema = z
   .strictObject({
     c3_end_after_chapter_1: z.boolean(),
+    // Q-C4-01: winning chapter 3 ends the game won, until C5's finale exists.
+    c4_end_after_chapter_3: z.boolean(),
     fight_enabled: z.boolean(),
     setup: z.strictObject({
       purse_wheel: z.strictObject({
