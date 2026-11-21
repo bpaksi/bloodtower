@@ -16,7 +16,7 @@ import {
 } from "../../hints/copy.ts";
 import { inNightPhase } from "../../hints/flow.ts";
 import { heldItems, itemName } from "../../rules/items/index.ts";
-import { isPurseAmount } from "../../rules/purse/index.ts";
+import { isPurseAmount, poolSides } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import type {
@@ -308,7 +308,13 @@ const buildDayPanels = (
     };
   }
 
-  const left = heroes < 1 ? null : daysLeft(clock.supply, heroes, play.dayNumber, clock.tuning);
+  // DEC-947: count from the next counted night; a quest won today adds tonight, which it spends.
+  const tonight = clock.nightsCounted + 1;
+  const questSkipsTonight = clock.questsWon > 0 && clock.tuning.questSkips;
+  const left =
+    heroes < 1
+      ? null
+      : daysLeft(clock.supply, heroes, tonight, clock.tuning) + (questSkipsTonight ? 1 : 0);
   const corruptionHeroes = play.groups.flatMap((group) =>
     group.heroIds.map((heroId) => ({ heroId, panelHeroId: group.heroIds[0] ?? heroId })),
   );
@@ -316,7 +322,7 @@ const buildDayPanels = (
     daysLeft: left,
     threat: comingDrop({
       heroes,
-      night: play.dayNumber,
+      night: tonight,
       questWon: clock.questsWon > 0,
       tuning: clock.tuning,
     }),
@@ -525,7 +531,14 @@ const buildEvent = (state: ShellState): EventSceneView | null => {
         : result,
     line: event.line ?? null,
     heroes,
-    purse: known ? heroes.reduce((sum, hero) => sum + (hero.gold ?? 0), 0) : null,
+    // The pool (DEC-911, DEC-944): the heroes present plus every other seated hero's gold.
+    purse: known
+      ? heroes.reduce((sum, hero) => sum + (hero.gold ?? 0), 0) +
+        poolSides(play, group.id).absent.reduce(
+          (sum, id) => sum + (heroSheet(clock, id).gold ?? 0),
+          0,
+        )
+      : null,
   };
 };
 

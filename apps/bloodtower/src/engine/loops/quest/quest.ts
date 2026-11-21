@@ -1,7 +1,7 @@
 import { gainCorruption } from "../../rules/corruption/index.ts";
 import { groupById, type PlayState } from "../chapter/playState.ts";
 import { markQuestWon } from "../day/clock.ts";
-import { ensurePicks } from "../encounter/picks.ts";
+import { earnGold, ensurePicks, presentGold, spendGold } from "../encounter/picks.ts";
 import { type PlainScene, type SceneOption, visibleOptions } from "../scene/scene.ts";
 import { ensureQuests, type QuestDef, type QuestStore } from "./store.ts";
 
@@ -94,10 +94,9 @@ const viewOf = (play: PlayState, groupId: string, def: QuestDef): QuestView => {
 
 const finish = (play: PlayState, groupId: string, def: QuestDef): void => {
   const store = ensureQuests(play);
-  const picks = ensurePicks(play);
   const heroes = presentHeroes(play, groupId);
-  // DEC-700: quest gold to each present hero.
-  picks.purse[groupId] = (picks.purse[groupId] ?? 0) + store.tuning.questGold * heroes.length;
+  // DEC-700: quest gold to each present hero; a gain goes to the heroes present (DEC-944).
+  earnGold(play, groupId, store.tuning.questGold * heroes.length);
   store.done.push(def.id);
   delete store.progress[def.id];
   markQuestWon(play);
@@ -114,7 +113,9 @@ const runEffects = (play: PlayState, groupId: string, def: QuestDef): void => {
     const effect = option.effects[progress.next];
     if (!effect || effect.kind === "item") return;
     if (effect.kind === "gold") {
-      picks.purse[groupId] = Math.max(0, (picks.purse[groupId] ?? 0) + effect.amount);
+      // A gain goes to the heroes present; a spend is a priced choice the pool pays (DEC-944, DEC-911).
+      if (effect.amount >= 0) earnGold(play, groupId, effect.amount);
+      else spendGold(play, groupId, Math.min(-effect.amount, picks.purse[groupId] ?? 0));
       store.log.push(`gold:${effect.amount}`);
     } else {
       if (!store.flags.includes(effect.flag)) store.flags.push(effect.flag);
@@ -139,18 +140,20 @@ const payCost = (play: PlayState, groupId: string, option: SceneOption): boolean
     }
   };
   if (cost.kind === "gold") {
-    picks.purse[groupId] = (picks.purse[groupId] ?? 0) - cost.amount;
+    spendGold(play, groupId, cost.amount);
     store.log.push(`cost-gold:${cost.amount}`);
   } else if (cost.kind === "hp") {
     cutHitPoints(cost.amount);
     store.log.push(`cost-hp:${cost.amount}`);
   } else if (cost.kind === "toll") {
-    const purse = picks.purse[groupId] ?? 0;
+    // DEC-944: the toll stays with the heroes present (Q-C3-22): their own gold pays it, or all of it
+    // goes and each loses hit points. The pool's other heroes are never asked.
+    const purse = presentGold(play, groupId);
     const toll = store.tuning.tollGold;
     if (purse >= toll) {
-      picks.purse[groupId] = purse - toll;
+      spendGold(play, groupId, toll);
     } else {
-      picks.purse[groupId] = 0;
+      spendGold(play, groupId, purse);
       cutHitPoints(store.tuning.tollHitPoints);
     }
     store.log.push("cost-toll");

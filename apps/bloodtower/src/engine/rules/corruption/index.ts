@@ -113,9 +113,9 @@ export type HeroGold = {
 };
 
 /**
- * 1.0 tracks one purse per group, not each hero's part (DEC-176 is not built yet). This ledger
- * reads that purse for every hero of the group, so each loss comes off it, never below 0.
- * EV-12 runs against a per-hero ledger kept in test code.
+ * Test-only fallback (D5): a running game reads each hero's own sheet gold (`sheetHeroGold` in the
+ * purse rules). Only a test that sets a group purse by hand, with no gold on any sheet, lands here:
+ * the one purse stands for every hero of the group, so each loss comes off it, never below 0.
  */
 export const groupPurseGold = (purse: Record<string, number>, groupId: string): HeroGold => ({
   get: () => purse[groupId] ?? 0,
