@@ -49,7 +49,7 @@ export const offerSkullPlacement = (
 
 export type SimulatedDrop =
   | { landed: true; spaceId: string }
-  | { landed: false; reason: "no-building" | "supply" };
+  | { landed: false; reason: "no-building" | "supply" | "lost" };
 
 /**
  * Without the tower the app draws where the skull lands (DEC-305, PT-07): the kingdom by the die
@@ -62,6 +62,8 @@ export type SimulatedDrop =
 export const simulateSkullDrop = (seed: string, drawKingdom: () => KingdomId): SimulatedDrop => {
   const play = playState();
   const clock = ensureClock(play);
+  // DEC-676, DEC-905: once the game is lost no later skull is drawn, so no draw is spent on it.
+  if (clock.outcome?.lost === true) return { landed: false, reason: "lost" };
   if (clock.supply <= 0) return { landed: false, reason: "supply" };
   const standingIn = (kingdom: KingdomId) =>
     play.content.board.spaces.filter(
@@ -88,6 +90,8 @@ export const applySkullRecord = (day: number, target: string): boolean => {
   const play = playState();
   if (play.dayNumber !== day) return false;
   const clock = ensureClock(play);
+  // A skull recorded after the loss is refused: nothing changes (DEC-905).
+  if (clock.outcome?.lost === true) return false;
 
   if (target === SKULL_STAYED_INSIDE_TARGET) {
     if (!recordHeldSkull(play)) return false;

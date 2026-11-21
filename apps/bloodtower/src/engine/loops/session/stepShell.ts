@@ -21,6 +21,7 @@ import { handleGamePress } from "../game/loop.ts";
 import { allHeroesHeld, heldCount, partySize } from "../game/setupFlow.ts";
 import { type GroupTurnLocal, isVirtuePrompt, virtuePressRefusal } from "../group-turn/loop.ts";
 import { updatePlayFrameOnPress } from "../play/presses.ts";
+import { applyQuestTestSeed } from "../quest/testSeed.ts";
 import { type ShellEffect, USE_ITEM_REFUSED } from "./effects.ts";
 import {
   applyTowerResult,
@@ -72,6 +73,7 @@ import {
 } from "./shellRef.ts";
 import { answerVolume, applyVolumeResult, pressVolume, VOLUME_TEST_SOUND } from "./sound.ts";
 import { type HintHold, initialShellState, type ShellState } from "./state.ts";
+import { configureStoryPlay } from "./storyPlay.ts";
 import { towerReady } from "./tower.ts";
 import { captureHintHold, heroName } from "./view.ts";
 
@@ -413,6 +415,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     // TEST ONLY: a host built for tests set markers on the running game (C3/20).
     if (!state.play) throw new Error("There is no running game to seed.");
     applyTestSeed(state.play, e.markers);
+    applyQuestTestSeed(state.play, e.markers);
     effects.push({ kind: "view-refresh", v: 1 });
     return withEffects({ ...state, eventSeq: eventSeq + 1 }, effects);
   }
@@ -766,6 +769,10 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
           }),
           isPurseAmount(next.startingPurse) ? next.startingPurse : null,
         );
+        // F1/03 (DEC-949): the pack's quests and chapter plan, before the test marker below.
+        configureStoryPlay(next.play, story?.play);
+        // TEST ONLY (F1/02): `~test-quest:` opens a fixture quest at a space; no marker, no change.
+        applyQuestTestSeed(next.play, next.seed);
       }
       if (
         next.openingIndex !== beforeOpening &&

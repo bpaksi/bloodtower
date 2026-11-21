@@ -171,7 +171,15 @@ export type BuildingResultView = {
 
 export type BuildingPanelView = {
   title: string;
-  step: "menu" | "who" | "corruption" | "rest-moves" | "give-back" | "result";
+  step:
+    | "menu"
+    | "who"
+    | "corruption"
+    | "rest-moves"
+    | "give-back"
+    | "quest"
+    | "quest-hero"
+    | "result";
   heroIds: string[];
   prompt: string | null;
   options: BuildingOptionView[];

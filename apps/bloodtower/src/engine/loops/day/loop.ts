@@ -190,6 +190,8 @@ const simulateDrops = (
     const drop = simulateSkullDrop(shell.seed, drawKingdom);
     if (drop.landed) {
       landed += 1;
+      // DEC-905, DEC-931: the fatal skull's line shows, then the loss; no later skull is drawn.
+      if (clock.outcome?.lost === true) break;
     } else if (drop.reason === "no-building") {
       effects.push(skullNoBuildingEffect(play.dayNumber) as unknown as (typeof effects)[number]);
     } else {
@@ -314,6 +316,19 @@ const eventScene = (
   );
 };
 
+/**
+ * MEC-033 .11, the backstop exit check. A skull sets the loss the moment it leaves the supply or
+ * lands (DEC-905), so this only finds a loss nothing set earlier; one already set is kept as it is.
+ */
+const exitCheck = (
+  play: ReturnType<typeof playState>,
+  clock: ReturnType<typeof ensureClock>,
+): DayLoss => {
+  noteNode(play, "MEC-033.11");
+  if (clock.outcome?.lost !== true) clock.outcome = checkChapter(clock);
+  return clock.outcome;
+};
+
 const lostOf = (outcome: DayLoss): DayResult["lost"] =>
   outcome.lost ? { reason: outcome.reason } : null;
 
@@ -349,9 +364,15 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
     const shell = shellState();
     const clock = ensureClock(play);
 
-    // DEC-676: a third corruption loses at once: no later group, drop or event runs.
-    if (clock.outcome?.lost === true && clock.outcome.reason === "corruption") {
-      local = { ...local, phase: "done", awaitingPress: false, awaitingChild: false };
+    // DEC-676: a loss ends the day at once: no later group, skull, effects panel or event runs.
+    // A third corruption stops anywhere. An emptied supply or a fourth fallen building (DEC-905) is
+    // set at the skull; the fatal no-tower skull's own line still waits for its press (DEC-931).
+    if (clock.outcome?.lost === true && local.phase !== "done") {
+      const waitsOnLine = local.phase === "skull-sim" && !local.skullPlaced;
+      if (clock.outcome.reason === "corruption" || !waitsOnLine) {
+        if (clock.outcome.reason !== "corruption") exitCheck(play, clock);
+        local = { ...local, phase: "done", awaitingPress: false, awaitingChild: false };
+      }
     }
 
     if (local.phase === "regroup") {
@@ -455,7 +476,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
           awaitingPress: false,
         };
       }
-      const more = local.skullsLeft > 0 && clock.supply > 0;
+      const more = local.skullsLeft > 0 && clock.supply > 0 && clock.outcome?.lost !== true;
       if (!more) {
         noteNode(play, ".33");
         local = { ...local, phase: "check", awaitingPress: false };
@@ -476,7 +497,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
       local.phase === "check" &&
       !local.waitDone &&
       clock.effects.length > 0 &&
-      !(clock.outcome?.lost === true && clock.outcome.reason === "corruption")
+      clock.outcome?.lost !== true
     ) {
       for (const drop of clock.nightDrops) {
         const name = play.content.board.spaceById.get(drop.spaceId)?.name ?? drop.spaceId;
@@ -496,8 +517,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
     }
 
     if (local.phase === "check") {
-      noteNode(play, "MEC-033.11");
-      clock.outcome = checkChapter(clock);
+      exitCheck(play, clock);
       local = { ...local, phase: "done", awaitingPress: false };
     }
 
@@ -514,10 +534,7 @@ export const dayLoop: LoopDefinition<DayLocal, DayResult> = {
   resultUp: () => {
     const play = playState();
     const clock = ensureClock(play);
-    if (!clock.outcome) {
-      noteNode(play, "MEC-033.11");
-      clock.outcome = checkChapter(clock);
-    }
+    if (!clock.outcome) clock.outcome = exitCheck(play, clock);
     return { dayNumber: play.dayNumber, lost: lostOf(clock.outcome) };
   },
 };
