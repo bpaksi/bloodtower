@@ -10,6 +10,9 @@ import type { LoopDefinition, LoopRegistry } from "../../loop/types.ts";
 import { checkChapter, ensureClock, markQuestWon, setBuildingSkulls } from "../day/clock.ts";
 import type { DayResult } from "../day/loop.ts";
 import { skullRecordPromptId } from "../day/skull.ts";
+import { openMenu } from "../encounter/picks.ts";
+import { groupTurnLoop } from "../group-turn/loop.ts";
+import { openQuestAt } from "../quest/quest.ts";
 import { ensureQuests } from "../quest/store.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { bindShellState, clearShellState } from "../session/shellRef.ts";
@@ -519,5 +522,54 @@ describe("D1 a freed skull that loses the game", () => {
     pressFreed(again, first.fatal);
     expectLostAtFirstFreedSkull(again);
     expect(again.play.dayNumber).toBe(savedDay);
+  });
+});
+
+describe("D4 a later chapter's quest on a fallen building", () => {
+  it("EV-08: chapter 2's quest is placed on the fallen building and works the same (DEC-942)", () => {
+    const run = setup({ c3End: false, tower: false });
+    const fallen = spaceIn("E", 0);
+    setBuildingSkulls(run.play, fallen, 4);
+    script = { 1: { done: ["herald", "ambush"] } };
+    start(run);
+    expect(chapterResult(run)).toMatchObject({ outcome: "won", chapter: 1, last: false });
+    // Chapter 2 enters on the next run of the chapter loop.
+    startRootLoop(registry, run.seed, 0, emptyLoopRuntime(), [], "chapter");
+    expect(ensureChapters(run.play).entered).toEqual([1, 2]);
+    expect(openQuestAt(run.play, fallen)).toBe("c2-a");
+    const holders = Object.entries(ensureQuests(run.play).bySpace).filter(
+      ([, id]) => id === "c2-a",
+    );
+    expect(holders).toEqual([[fallen, "c2-a"]]);
+
+    const group = run.play.groups[0];
+    if (!group) throw new Error("no group");
+    group.spaceId = fallen;
+    group.insideBuilding = false;
+    const offers: string[] = [];
+    groupTurnLoop.body(
+      {
+        groupId: group.id,
+        movesLeft: 2,
+        awaitingPress: false,
+        encounterPending: false,
+        landedOnBuildingWithNoMoves: false,
+      },
+      {
+        loopId: "group-turn",
+        seed: run.seed,
+        eventSeq: 1,
+        effects: [],
+        tracePhase: () => {},
+        recordEnd: () => {},
+        offerPrompt: (promptId) => offers.push(promptId),
+        startChild: () => {},
+        setParentResult: () => {},
+        getParentResult: () => undefined,
+      },
+    );
+    expect(offers).toContain(`enter--${group.id}--${fallen}`);
+    const opened = openMenu(run.play, group.id);
+    expect(opened.ok && opened.entries.map((entry) => entry.label)).toEqual(["Quest", "Leave"]);
   });
 });

@@ -12,6 +12,7 @@ import { isFallen, isGameLost } from "../day/clock.ts";
 import { handleEncounterLeave } from "../encounter/loop.ts";
 import { beginGroupTurn, endGroupTurn, turnHasEnded } from "../encounter/picks.ts";
 import { hasOpenEvent } from "../event/index.ts";
+import { openQuestAt } from "../quest/quest.ts";
 import { recordOffer } from "../session/shellRef.ts";
 
 export type GroupTurnLocal = {
@@ -106,6 +107,10 @@ const offerVirtueChoice = (
   }
 };
 
+/** Fallen and no open quest: nothing to enter (DEC-910). A fallen building with an open quest stays a place. */
+const fallenClosed = (play: PlayState, spaceId: string): boolean =>
+  isFallen(play, spaceId) && openQuestAt(play, spaceId) === null;
+
 const offerMoveMap = (
   local: GroupTurnLocal,
   ctx: { offerPrompt: (a: string, b: string) => void },
@@ -125,7 +130,7 @@ const offerMoveMap = (
     recordOffer(promptId, "walk");
   }
 
-  if (here.building && !isFallen(play, group.spaceId)) {
+  if (here.building && !fallenClosed(play, group.spaceId)) {
     const promptId = `enter--${local.groupId}--${group.spaceId}`;
     ctx.offerPrompt(promptId, "enter");
     recordOffer(promptId, "enter");
@@ -152,7 +157,7 @@ const offerEnterOrEndTurn = (
   const group = groupById(playState(), local.groupId);
   if (!group) return;
   const here = playState().content.board.spaceById.get(group.spaceId);
-  if (here?.building && !isFallen(playState(), group.spaceId)) {
+  if (here?.building && !fallenClosed(playState(), group.spaceId)) {
     const promptId = `enter--${local.groupId}--${group.spaceId}`;
     ctx.offerPrompt(promptId, "enter");
     recordOffer(promptId, "enter");
@@ -222,7 +227,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
         group &&
         !group.insideBuilding &&
         play.content.board.spaceById.get(group.spaceId)?.building &&
-        !isFallen(play, group.spaceId)
+        !fallenClosed(play, group.spaceId)
       ) {
         if (!local.awaitingPress) {
           offerEnterOrEndTurn(local, ctx);
@@ -254,7 +259,7 @@ export const groupTurnLoop: LoopDefinition<GroupTurnLocal, GroupTurnResult> = {
     if (group?.insideBuilding) return false;
     if (local.landedOnBuildingWithNoMoves && group && !group.insideBuilding) {
       const here = playState().content.board.spaceById.get(group.spaceId);
-      if (here?.building && !isFallen(playState(), group.spaceId)) return false;
+      if (here?.building && !fallenClosed(playState(), group.spaceId)) return false;
     }
     return (
       local.movesLeft <= 0 &&
@@ -286,7 +291,7 @@ export const applyEnter = (groupId: string, spaceId: string): boolean => {
   const group = groupById(play, groupId);
   if (!group || group.spaceId !== spaceId) return false;
   const space = play.content.board.spaceById.get(spaceId);
-  if (!space?.building || isFallen(play, spaceId)) return false;
+  if (!space?.building || fallenClosed(play, spaceId)) return false;
   group.insideBuilding = true;
   return true;
 };
