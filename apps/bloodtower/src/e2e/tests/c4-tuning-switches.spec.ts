@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { type Browser, type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { openDatabase } from "../../server/db/client.ts";
+import { autosave } from "../../server/db/schema.ts";
 import { createEventStore } from "../../server/events/store.ts";
 import { createHostLogger, type HostLogger } from "../../server/log/hostLog.ts";
 import {
@@ -182,15 +183,12 @@ test("EV-05: the tuning read at Begin survives Continue, whatever the file says 
   }
 });
 
-// Blocked: telling a C3 save from a C4 one needs AUTOSAVE_FORMAT 3 (server/events/store.ts) and the
-// `pre-C4 format` line (server/hub/host.ts), both outside this brief's Touches. Remove `fixme`
-// when that change lands; the body is the contract.
-test.fixme("EV-06: a C3 save is not resumed under C4; one log line; a new game can Begin", async ({
+test("EV-06: a C3 save is not resumed under C4; one log line; a new game can Begin", async ({
   browser,
 }, testInfo) => {
   test.setTimeout(300_000);
   const databasePath = join(mkdtempSync(join(tmpdir(), "c4-01-save-")), "session.sqlite");
-  // A save written under the C3 switches (`c3_end_after_chapter_1: true`, `fight_enabled: false`).
+  // A save written under the C3 switches: format 2, the format before AUTOSAVE_FORMAT 3.
   withStore(databasePath, (store) =>
     store.replaceAutosave({
       gameId: "c3-game",
@@ -198,6 +196,12 @@ test.fixme("EV-06: a C3 save is not resumed under C4; one log line; a new game c
       packId: STORY_ID,
     }),
   );
+  const opened = openDatabase(databasePath);
+  try {
+    opened.db.update(autosave).set({ format: 2 }).run();
+  } finally {
+    opened.close();
+  }
   const { log, warnings } = spyLogger(join(tmpdir(), "c4-01-log"));
   const session = await startAcceptanceHost(testInfo, { databasePath, seed: "c4-01-ev06", log });
   const contexts: BrowserContext[] = [];
