@@ -277,6 +277,65 @@ describe("story board startup chrome", () => {
     expect(begin).not.toContain("data-hero-place");
   });
 
+  it("C3/12 EV-01: an event gives every present hero of the one group a band panel with hit points", () => {
+    const ids = ["hero-a", "hero-b", "hero-c", "hero-d"];
+    const markup = html({
+      screen: "play",
+      levels: [join, { id: "play", label: "play", shows: "Day 1" }],
+      heroes,
+      narration: null,
+      actions: [],
+      table: {
+        chapter: "Proving Grounds",
+        day: 1,
+        health: "unavailable",
+        purse: "unavailable",
+        actingGroup: "Hero A",
+        actingHeroId: "hero-a",
+        movesLeft: null,
+        moveRoll: null,
+        modifier: "none",
+        waitingFor: null,
+        groups: [
+          {
+            heroId: "hero-a",
+            heroName: "Hero A",
+            kingdom: "N",
+            kingdomLabel: "Arisilon (N)",
+            spaceId: "n-citadel",
+            spaceName: "Radiant Mountains",
+            building: "citadel",
+            inside: false,
+            alone: false,
+          },
+        ],
+        event: {
+          groupId: "hero-a",
+          heroIds: ids,
+          type: "hazard",
+          hazard: "storm",
+          offer: null,
+          stage: "result",
+          options: [],
+          result: { kind: "hit-points", amount: -2 },
+          line: null,
+          heroes: ids.map((heroId) => ({
+            heroId,
+            name: `Hero ${heroId.slice(-1).toUpperCase()}`,
+            hp: { hp: 7, max: 9 },
+            gold: 1,
+          })),
+          purse: 4,
+        },
+      },
+      place: null,
+    } as BoardView);
+    for (const id of ids) {
+      expect(markup).toMatch(new RegExp(`<span data-hero-panel="${id}"><span data-health="7/9">`));
+    }
+    expect(markup.match(/data-health="7\/9"/g)).toHaveLength(4);
+  });
+
   it("keeps the play band and waiting pulse, and drops the roster", () => {
     const markup = html({
       screen: "play",
