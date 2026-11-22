@@ -40,6 +40,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 … EV-14 all pass (verifier table on PR).
 - [ ] EV-15 … EV-18 (moved from F1 (#505), Bob 2026-11-18 7:12 AM ET: the same room and foe across groups, Leave and a guardian felled by Bold, the end-to-end entry/retreat/re-entry spec, an uncleared room kept across restore) pass.
+- [ ] EV-19 … EV-21 (moved from D2 / 01 (#585), Bob 2026-11-22 "Yes, option (a)": the Tomb's trap fall, result, quest fail, spent room, session run and Continue; DEC-906, DEC-907, DEC-939 to DEC-941) pass.
 - Not required: anything this feature's OPEN questions leave unruled until Bob answers; the Tower finale and A1 art (C5).
 
 ## AREA / DEC checklist
