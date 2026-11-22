@@ -190,8 +190,10 @@ test("EV-05: the tuning read at Begin survives Continue, whatever the file says 
       timeout: 30_000,
     });
     await clickAct(pad.page, "continue", "continue-saved-game");
-    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    // The saved game never linked a tower, so the re-pick does not open a tower pause.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await quitGame(pad.page);
     const kept = chapterPlanSaved(databasePath);
     // A checkpoint written after Continue, not the Begin marker read again.

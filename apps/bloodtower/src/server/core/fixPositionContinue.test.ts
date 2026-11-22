@@ -108,8 +108,13 @@ describe("Fix my position survives Continue", () => {
       day: store.lastCheckpoint(row.gameId)?.day ?? 1,
     });
     expect(await second.session.resumeSession()).toBe(true);
-    for (const heroId of HEROES) await second.act("hero-hold", "take", { heroId });
     await second.act("continue-saved-game", "continue");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick the unheld heroes.
+    for (const heroId of HEROES) {
+      if (second.session.state().holdings[heroId] == null) {
+        await second.act("hero-hold", "take", { heroId });
+      }
+    }
     expect(second.session.state().screen).toBe("play");
     expect(second.session.state().play?.groups[0]?.spaceId).toBe(target.id);
   });
@@ -204,8 +209,13 @@ describe("Fix my position survives Continue", () => {
       day: store.lastCheckpoint(row.gameId)?.day ?? 1,
     });
     expect(await second.session.resumeSession()).toBe(true);
-    for (const heroId of HEROES) await second.act("hero-hold", "take", { heroId });
     await second.act("continue-saved-game", "continue");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick the unheld heroes.
+    for (const heroId of HEROES) {
+      if (second.session.state().holdings[heroId] == null) {
+        await second.act("hero-hold", "take", { heroId });
+      }
+    }
     expect(second.session.state().screen).toBe("play");
     expect(second.session.state().play?.groups.find((g) => g.id === groupId)?.spaceId).toBe(tapped);
     const back = second.session

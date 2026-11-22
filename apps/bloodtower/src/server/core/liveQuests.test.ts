@@ -133,6 +133,14 @@ const realGame = async (
     if (!(await again.session.resumeSession())) throw new Error("The save was not resumed.");
     const next: Game = { ...again, store, restart };
     await again.pad.act("continue-saved-game", "continue");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick the unheld heroes.
+    for (const group of again.session.state().play?.groups ?? []) {
+      for (const heroId of group.heroIds) {
+        if (again.session.state().holdings[heroId] == null) {
+          await again.pad.act("hero-hold", "take", { heroId });
+        }
+      }
+    }
     return next;
   };
   const storyId = options.storyId ?? "test";

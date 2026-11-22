@@ -3,6 +3,7 @@ import type { ControlPress } from "bloodtower-protocols";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { openDayWait } from "../../engine/loops/day/wait.ts";
 import type { GameLocal } from "../../engine/loops/game/loop.ts";
+import { seatOnContinue } from "../../engine/loops/session/continueSeats.ts";
 import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/effects.ts";
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
 import type { ShellStory } from "../../engine/loops/session/pack.ts";
@@ -390,6 +391,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
           state = { ...state, pause: null, stage: "playing", screen: "play" };
         }
+        // A game that went on without the tower stays without it, tower or not (DEC-301).
+        // Play without Tower on Continue's tower block is that choice too (DEC-711): the saved
+        // link must not come back, or seating opens a tower-lost pause that still offers the
+        // play button (C2/06 EV-08).
+        const playWithout =
+          state.towerWithout ||
+          (state.towerLinked && live.towerChoice === "without" && !live.towerLinked);
         state = {
           ...state,
           resumedFromAutosave: true,
@@ -399,11 +407,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           enterThen: null,
           confirm: null,
           sessionEnded: false,
-          // A game that went on without the tower stays without it, tower or not (DEC-301).
-          towerLinked: (live.towerLinked || state.towerLinked) && !state.towerWithout,
-          towerChoice: state.towerWithout ? "without" : live.towerChoice,
+          towerLinked: playWithout ? false : live.towerLinked || state.towerLinked,
+          towerChoice: playWithout ? "without" : live.towerChoice,
+          towerWithout: playWithout,
           games: live.games,
         };
+        // The saved party sits on the iPads joined now: a hold stays only for one of them (DEC-952).
+        state = seatOnContinue(state, live);
       }
     }
     // A Split party pick changes the play state (the queue, PT-18), and a use-item pick changes
@@ -918,7 +928,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           atWall: options.clock.wall(),
           log: options.log,
         });
-        state = resumed.state;
+        state = seatOnContinue(resumed.state, state);
         options.onChange();
         return true;
       } catch (error) {

@@ -603,8 +603,8 @@ test("AREA-077 continue after a walk stays in play when the tower was never conn
     await page.goto(`/join?code=${restarted.host.joinCode}`);
     await setSoundAndKeep(page);
     await clickAct(page, "continue", "continue-saved-game");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await holdHeroesFromTest(page, [...HERO_IDS]);
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     const restored = await readStatus(page);
     expect(restored.space).toBe(snapshot?.space);
     expect(restored.moves).toBe(snapshot?.moves);

@@ -469,8 +469,8 @@ test("W5 a restart on grey-stair.02 reloads that moment and offers no walk", asy
     await page.goto(`/join?code=${restarted.host.joinCode}`);
     await setSoundAndKeep(page);
     await clickAct(page, "continue", "continue-saved-game");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await holdHeroesFromTest(page, [...HERO_IDS]);
+    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     await expect(reopened.board.locator("main")).toHaveAttribute("data-moment", "grey-stair.02");
     await expect(page.locator('button[data-action-id="walk"]')).toHaveCount(0);
     await expect(page.locator('button[data-action-id="enter"]')).toHaveCount(0);

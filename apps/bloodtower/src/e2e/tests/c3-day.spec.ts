@@ -536,8 +536,9 @@ test.describe("C3/11 the day on the board", () => {
         timeout: 30_000,
       });
       await clickAct(pad, "continue", "continue-saved-game");
-      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+      // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
       await holdHeroesFromTest(pad, [...TWO]);
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       // Continue lands on day 3: at the step it left, or at the day's start from the last save.
       await expect.poll(async () => (await wireTable(board))?.day, { timeout: 20_000 }).toBe(3);
       await expect(band.locator("[data-day]")).toHaveText("Day 3");
@@ -611,8 +612,12 @@ test.describe("C3/11 the day on the board", () => {
       await pad2.goto(`/join?code=${restarted.host.joinCode}`);
       await setSoundAndKeep(pad2);
       await clickAct(pad2, "continue", "continue-saved-game");
-      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await holdHeroesFromTest(pad2, [...FOUR]);
+      // The restarted table has no tower. The re-pick (CU/16) ends the iPad pause and the tower
+      // pause shows; the table goes on without it, as before this test's Continue.
+      await pad2.locator('button[data-pause-ask="go-on-without"]').click({ timeout: 30_000 });
+      await pad2.locator('button[data-action-id="go-on-without"]').click();
+      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(pad2.locator("[data-menu]")).toHaveCount(0);
       await expect(pad2.locator("[data-panel]")).toHaveCount(0);
       await expect(board2.locator("[data-panel]")).toHaveCount(0);
@@ -810,10 +815,10 @@ test.describe("C3/11 the day on the board", () => {
           await pad.goto(`/join?code=${host.host.joinCode}`);
           await setSoundAndKeep(pad);
           await clickAct(pad, "continue", "continue-saved-game");
+          await holdHeroesFromTest(pad, [...TWO]);
           await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", {
             timeout: 30_000,
           });
-          await holdHeroesFromTest(pad, [...TWO]);
         } else {
           // Run 2: quit from the Menu on the same step, then Continue from the session screen.
           await pad.locator('[data-action="menu"]').click();
@@ -823,10 +828,10 @@ test.describe("C3/11 the day on the board", () => {
             timeout: 30_000,
           });
           await clickAct(pad, "continue", "continue-saved-game");
+          await holdHeroesFromTest(pad, [...TWO]);
           await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", {
             timeout: 30_000,
           });
-          await holdHeroesFromTest(pad, [...TWO]);
         }
         // The same step shows again, with the same lines: none lost, none doubled.
         await expect
@@ -1069,8 +1074,8 @@ const saveQuitContinue = async (pad: Page, heroes: readonly string[]) => {
   await pad.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", { timeout: 30_000 });
   await clickAct(pad, "continue", "continue-saved-game");
-  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   await holdHeroesFromTest(pad, [...heroes]);
+  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
 };
 
 const noRegroupOffer = (pad: Page) =>

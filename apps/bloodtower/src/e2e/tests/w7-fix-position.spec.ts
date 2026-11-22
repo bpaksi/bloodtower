@@ -268,6 +268,8 @@ test("CU/05 Back still works after a host restart and Continue (EV-21)", async (
     await expect(device).toHaveURL(/\/device/);
     await setSoundAndKeep(device);
     await clickAct(device, "continue", "continue-saved-game");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    await holdHeroesFromTest(device, [...HERO_IDS]);
     await expect(deviceMain(device)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
     const back = device.locator('button[data-action="back"]');
     await expect(back).toBeEnabled({ timeout: 20_000 });

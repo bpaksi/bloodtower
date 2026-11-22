@@ -177,6 +177,14 @@ describe("a game's stats and Play again across a host restart (C2/07)", () => {
     expect(await second.resumeSession()).toBe(true);
     const resumedPad = await padFor(second);
     await resumedPad.act("continue-saved-game", "continue");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick the unheld heroes.
+    for (const group of second.state().play?.groups ?? []) {
+      for (const heroId of group.heroIds) {
+        if (second.state().holdings[heroId] == null) {
+          await resumedPad.act("hero-hold", "take", { heroId });
+        }
+      }
+    }
     const resumed = second.state();
     expect(resumed.screen).toBe("play");
     expect(resumed.seed).toBe(newSeed);
