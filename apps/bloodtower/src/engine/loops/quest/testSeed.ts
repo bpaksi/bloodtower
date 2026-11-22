@@ -1,6 +1,6 @@
 import type { PlayState } from "../chapter/playState.ts";
 import type { PlainScene } from "../scene/scene.ts";
-import { AMBUSH, HERALD } from "./fixtures.ts";
+import { AMBUSH, CURSE, HERALD } from "./fixtures.ts";
 import { ensureQuests } from "./store.ts";
 
 /**
@@ -13,7 +13,11 @@ import { ensureQuests } from "./store.ts";
  */
 export const TEST_QUEST = "~test-quest:";
 
-const FIXTURE_SCENES: Record<string, PlainScene> = { herald: HERALD, ambush: AMBUSH };
+const FIXTURE_SCENES: Record<string, PlainScene> = {
+  herald: HERALD,
+  ambush: AMBUSH,
+  curse: CURSE,
+};
 
 const MARKER = /~test-quest:([\w-]*)=([\w-]*)/g;
 
@@ -25,6 +29,11 @@ export const applyQuestTestSeed = (play: PlayState, seed: string): void => {
     const store = ensureQuests(play);
     // F1/03: a store that holds the pack's defs opens a pack quest and loads no fixture defs.
     if (store.defs.length > 0) {
+      // C3/14: a fixture the pack does not carry (the corruption cost) is added beside the pack's quests.
+      const fixture = quest ? FIXTURE_SCENES[quest] : undefined;
+      if (quest && fixture && !store.defs.some((def) => def.id === quest)) {
+        store.defs = [...store.defs, { id: quest, chapter: 1, scene: fixture }];
+      }
       if (!quest || !store.defs.some((def) => def.id === quest)) {
         throw new Error(
           `The test quest seed names "${quest}", which is not a quest in the pack (${store.defs.map((def) => def.id).join(", ")}).`,

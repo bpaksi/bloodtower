@@ -407,6 +407,11 @@ const gearPartyHeroSchema = z.strictObject({
     .array(z.strictObject({ id: z.string().min(1).max(40), name: z.string().min(1).max(80) }))
     .max(16)
     .optional(),
+  /** Story items a quest handed over (C3/14): carried, never usable. Not counted by "Use a potion or item". */
+  storyItems: z
+    .array(z.strictObject({ id: z.string().min(1).max(80), name: z.string().min(1).max(80) }))
+    .max(16)
+    .optional(),
 });
 
 /** One Split party pick or queued action, by hero (PT-18, Q4.2). */

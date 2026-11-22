@@ -25,6 +25,20 @@ export const AMBUSH: PlainScene = {
   ],
 };
 
+/** TEST ONLY (C3/14, EV-07): an option that costs one corruption, for a hero the group picks (DEC-693). */
+export const CURSE: PlainScene = {
+  id: "curse",
+  options: [
+    {
+      id: "take-the-curse",
+      label: "Take the curse",
+      cost: { kind: "corruption" },
+      effects: [{ kind: "gold", amount: 10 }],
+    },
+    { id: "walk-away", label: "Walk away", effects: [{ kind: "flag", flag: "walked" }] },
+  ],
+};
+
 export const LOCK: PlainScene = {
   id: "lock",
   options: [

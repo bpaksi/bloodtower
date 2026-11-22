@@ -1,4 +1,5 @@
 import type { BoardView } from "bloodtower-protocols";
+import { questItemName } from "../../../engine/views/questItems.ts";
 import { DialogFrame } from "./DialogFrame";
 
 type Table = NonNullable<BoardView["table"]>;
@@ -50,16 +51,9 @@ export const QUEST_SCENE_COPY = {
   badgeGold: (n: number) => `+${n}`,
   badgeQuestGold: (n: number) => `quest +${n}`,
   auto: "Moves on by itself.",
+  /** Copy table `choice.prompt` (Loremaster): the question over the options. */
+  choicePrompt: "Will you help?",
 } as const;
-
-/** Names of the story items quests hand over (pack `items`, Loremaster Copy). An unknown id reads as itself. */
-export const QUEST_ITEM_NAMES: Record<string, string> = {
-  "tomas-map": "Tomas's Map",
-  signet: "The Warden's Signet",
-  "oath-blade": "The Warden's oath-blade",
-};
-
-export const questItemName = (id: string): string => QUEST_ITEM_NAMES[id] ?? id;
 
 /** The quest's words for this step, one line each (SCR-014: every story line shows on the board). */
 export function questWords(quest: Quest): string[] {
@@ -129,7 +123,15 @@ export function QuestScene({ quest }: { quest: Quest }) {
       data-quest-phase={quest.phase}
       data-quest-option={quest.optionId ?? undefined}
     >
-      <figure className="bt-quest-painting" data-quest-painting="" aria-hidden="true" />
+      {/* No quest art exists yet: the mockup's dashed placeholder stands in the frame. */}
+      <figure className="bt-quest-painting" data-quest-painting="">
+        <figcaption data-quest-placeholder="">
+          PLACEHOLDER: quest painting: {copy?.title ?? quest.questId} (no art)
+        </figcaption>
+        {quest.phase === "choose" ? (
+          <p data-quest-prompt="">{QUEST_SCENE_COPY.choicePrompt}</p>
+        ) : null}
+      </figure>
       <DialogFrame
         size="compact"
         className="bt-ink-in"

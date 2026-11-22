@@ -34,8 +34,15 @@ const END_HOOK = '"The forest road," Tomas says. "That\'s where they wait."';
 
 const GOLD = (value: Record<string, number>) =>
   `~test-gold:${FOUR.map((id) => `${id}=${value[id] ?? 0}`).join(",")}`;
-const seedFor = (quest: string, gold = GOLD({})) =>
-  `c3q~test-event:none~test-at:${VILLAGE}${quest === "herald" ? "" : `~test-quest:${VILLAGE}=${quest}`}${gold}`;
+/** The group stands in the village; `extra` rides on the seed (a narration line, say). */
+const seedFor = (gold = GOLD({}), extra = "") =>
+  `c3q~test-event:none~test-at:${VILLAGE}${gold}${extra}`;
+
+/** Opens another pack quest (or a test fixture) at the village once the game runs: the chapter's own marker is laid first. */
+const openQuestAtVillage = (
+  game: { session: { host: { applyTestSeed: (m: string) => Promise<void> } } },
+  quest: string,
+) => game.session.host.applyTestSeed(`~test-quest:${VILLAGE}=${quest}`);
 
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 
@@ -51,6 +58,36 @@ const installSendCounter = async (page: Page) => {
 };
 const sentCount = (page: Page) =>
   page.evaluate(() => (window as unknown as { __btSent?: number }).__btSent ?? 0);
+
+const installBoardSocket = async (page: Page) => {
+  await page.addInitScript(() => {
+    const Native = window.WebSocket;
+    class BoardSocket extends Native {
+      constructor(url: string | URL, protocols?: string | string[]) {
+        super(url, protocols);
+        if (String(url).includes("/ws")) {
+          const win = window as unknown as { __btBoardSocket?: WebSocket; __btNarr?: string[] };
+          win.__btBoardSocket = this;
+          // Every view frame that carries a narration line (EV-16: none replays after Continue).
+          this.addEventListener("message", (event) => {
+            if (typeof event.data === "string" && /"narration":\{/.test(event.data)) {
+              win.__btNarr = [...(win.__btNarr ?? []), event.data.slice(0, 200)];
+            }
+          });
+        }
+      }
+    }
+    window.WebSocket = BoardSocket;
+  });
+};
+const narrationFrames = (board: Page) =>
+  board.evaluate(() => (window as unknown as { __btNarr?: string[] }).__btNarr ?? []);
+const reportNarrationEnded = (board: Page, lineId: string) =>
+  board.evaluate((id) => {
+    const socket = (window as unknown as { __btBoardSocket?: WebSocket }).__btBoardSocket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error("No board socket.");
+    socket.send(JSON.stringify({ v: 2, type: "narration-ended", payload: { lineId: id } }));
+  }, lineId);
 
 const grantWakeLock = async (page: Page) => {
   await page.addInitScript(() => {
@@ -81,6 +118,7 @@ const openTable = async (
   const pad = await context.newPage();
   const board = await context.newPage();
   await board.setViewportSize(BOARD_SIZE);
+  await installBoardSocket(board);
   await board.goto("/board");
   await installSessionSocketHook(pad);
   await installSendCounter(pad);
@@ -92,8 +130,9 @@ const openTable = async (
 const startGame = async (
   browser: Browser,
   testInfo: TestInfo,
-  options: { seed: string; databasePath?: string },
+  options: { seed: string; databasePath?: string; party?: readonly string[] },
 ) => {
+  const party = options.party ?? FOUR;
   const session = await startAcceptanceHost(testInfo, {
     seed: options.seed,
     databasePath: options.databasePath,
@@ -105,12 +144,12 @@ const startGame = async (
   await enterWithoutTower(pad);
   await clickAct(pad, "continue", `continue-pick-story-${STORY_ID}`);
   const size = pad.locator(
-    `button[data-setting="party-size"][data-option="n-4"][data-action="set"]`,
+    `button[data-setting="party-size"][data-option="n-${party.length}"][data-action="set"]`,
   );
   await size.click();
   await expect(size).toHaveAttribute("aria-pressed", "true");
   await clickAct(pad, "continue", "continue-game-settings");
-  await holdHeroesFromTest(pad, [...FOUR]);
+  await holdHeroesFromTest(pad, [...party]);
   await clickAct(pad, "continue", "continue-claim-heroes");
   for (const id of SETUP_IDS) {
     await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
@@ -236,7 +275,7 @@ test.describe("C3/14 the quest scene", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const game = await startGame(browser, testInfo, { seed: seedFor("herald") });
+    const game = await startGame(browser, testInfo, { seed: seedFor() });
     const { pad, board } = game;
     try {
       await openQuest(game);
@@ -320,6 +359,10 @@ test.describe("C3/14 the quest scene", () => {
 
       // EV-03: the hero's panel shows the item.
       await pad.locator('[data-action="menu"]').click();
+      // A story item is carried, not usable: the item row stays greyed with its reason.
+      const useRow = pad.locator('[data-menu] button[data-gear-item="use-potion"]');
+      await expect(useRow).toBeDisabled();
+      await expect(useRow).toContainText("No potions or items to use.");
       await pad.locator('[data-menu] button[data-gear-item="current-party"]').click();
       await expect(
         board.locator('[data-panel="current-party"] [data-hero="hero-b"]'),
@@ -331,7 +374,7 @@ test.describe("C3/14 the quest scene", () => {
 
   test("EV-12, EV-10: help matches the quest on every state", async ({ browser }, testInfo) => {
     test.setTimeout(300_000);
-    const game = await startGame(browser, testInfo, { seed: seedFor("herald") });
+    const game = await startGame(browser, testInfo, { seed: seedFor() });
     const { pad, board } = game;
     try {
       await openQuest(game);
@@ -352,11 +395,155 @@ test.describe("C3/14 the quest scene", () => {
     }
   });
 
+  test("EV-06: The Ambush shows no Fight; a short purse reads its price and stays enabled", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const game = await startGame(browser, testInfo, { seed: seedFor(GOLD({ "hero-a": 6 })) });
+    const { pad, board } = game;
+    try {
+      await openQuestAtVillage(game, "ambush");
+      await openQuest(game);
+      await expect(board.locator("[data-quest-title]")).toHaveText("The Ambush");
+      await expect(lines(board)).toHaveText([
+        "Felled trees block the forest road. Men step out from behind them, bows drawn.",
+        "Their shields have had a crest scratched off.",
+      ]);
+      await expect(questOptions(pad)).toHaveCount(1);
+      await expect(deviceMain(pad)).not.toContainText("Fight");
+      await expect(scene(board)).not.toContainText("Fight");
+      const toll = optionById(pad, "pay-the-toll");
+      await expect(toll).toContainText("Pay the toll (10 gold)");
+      await expect(toll).toHaveClass(/bt-primary/);
+      await expect(deviceMain(pad).locator(".bt-primary")).toHaveCount(1);
+      await expect(toll.locator("[data-quest-cost]")).toHaveText("6 gold · 2 hit points each");
+      await expect(toll).toBeEnabled();
+      await toll.click();
+      await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
+      await expect(lines(board).first()).toHaveText(
+        "You don't have ten. They take what you have, and a beating for the rest.",
+      );
+      await tick(game, 4_100);
+      await expect(lines(board)).toHaveText([
+        "The road is clear. Past the trees, the old keep stands on its hill.",
+      ]);
+    } finally {
+      await closeAll(game);
+    }
+  });
+
+  test("EV-02: an item option the group lacks is greyed, with the item's name", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const game = await startGame(browser, testInfo, { seed: seedFor() });
+    try {
+      await openQuestAtVillage(game, "lock");
+      await openQuest(game);
+      const turn = optionById(game.pad, "turn-the-signet");
+      await expect(turn).toBeVisible();
+      await expect(turn).toBeDisabled();
+      await expect(turn.locator("[data-quest-item]")).toHaveText("Needs The Warden's Signet");
+    } finally {
+      await closeAll(game);
+    }
+  });
+
+  test("EV-07: a corruption cost asks which hero takes it, and waits for the press", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    // Hero C starts with one corruption, so the band's mark (at two) shows who took the new one.
+    const game = await startGame(browser, testInfo, {
+      seed: seedFor(GOLD({}), "~test-named:hero-c=feral"),
+    });
+    const { pad, board } = game;
+    try {
+      await openQuestAtVillage(game, "curse");
+      await openQuest(game);
+      await optionById(pad, "take-the-curse").click();
+      await expect(phase(board, "hero")).toBeVisible({ timeout: 20_000 });
+      await expect(lines(board)).toHaveText(["Who takes the corruption?"]);
+      await expect(heroButtons(pad)).toHaveCount(4);
+      await expectToolbar(pad);
+      await tick(game, 5_000);
+      await expect(heroButtons(pad)).toHaveCount(4);
+      await deviceMain(pad)
+        .locator('[data-building-option][data-prompt-id$="--qhero--hero-c"]')
+        .click();
+      await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
+      await tick(game, 4_100);
+      await expect(phase(board, "end")).toBeVisible({ timeout: 20_000 });
+      await tick(game, 4_100);
+      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
+      // Leave: the move map's band shows one mark, on hero C only.
+      await pad.locator('button[data-action-id="leave"]').click();
+      await expect(board.locator("[data-corruption-mark]")).toHaveCount(1, { timeout: 20_000 });
+      await expect(board.locator('[data-corruption-mark="hero-c"]')).toHaveCount(1);
+    } finally {
+      await closeAll(game);
+    }
+  });
+
+  test("EV-13, EV-14: a narrated closing step waits for its audio end, never a timer", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const line = "quest.herald";
+    const game = await startGame(browser, testInfo, {
+      seed: seedFor(GOLD({}), `~test-building-line:${line}`),
+    });
+    const { pad, board } = game;
+    try {
+      await openQuest(game);
+      await optionById(pad, "ask-pay-first").click();
+      for (const next of ["end", "menu"] as const) {
+        const here = next === "end" ? phase(board, "rewards") : phase(board, "end");
+        await expect(here).toBeVisible({ timeout: 20_000 });
+        await expect(deviceMain(pad).locator("[data-building-option]")).toHaveCount(0);
+        // 4.5 s on the clock, no audio end: the iPad and the board are still on the step.
+        await tick(game, 4_500);
+        await expect(here).toBeVisible();
+        // Another line's end does nothing.
+        await reportNarrationEnded(board, "another.line");
+        await pad.waitForTimeout(300);
+        await expect(here).toBeVisible();
+        // Its own line's end moves on.
+        await reportNarrationEnded(board, line);
+        if (next === "end") await expect(phase(board, "end")).toBeVisible({ timeout: 20_000 });
+      }
+      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
+    } finally {
+      await closeAll(game);
+    }
+  });
+
+  test("EV-04: with 2 heroes present, only they get quest gold", async ({ browser }, testInfo) => {
+    test.setTimeout(300_000);
+    // A party of two: the quest's present heroes are exactly hero A and hero B; no one else is at the table.
+    const party = ["hero-a", "hero-b"] as const;
+    const game = await startGame(browser, testInfo, { seed: seedFor(), party });
+    const { pad, board } = game;
+    try {
+      await openQuest(game);
+      await optionById(pad, "ask-pay-first").click();
+      await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
+      await expect(board.locator('[data-badge="quest-gold"]')).toHaveText(["quest +5", "quest +5"]);
+      await expect(board.locator('[data-badge="quest-gold"]')).toHaveCount(party.length);
+    } finally {
+      await closeAll(game);
+    }
+  });
+
   test("EV-15, EV-16, EV-17: Continue reopens the choice; a restart on a closing step pays once", async ({
     browser,
   }, testInfo) => {
-    test.setTimeout(420_000);
-    const seed = seedFor("herald");
+    test.setTimeout(480_000);
+    const seed = seedFor();
     const first = await startGame(browser, testInfo, { seed });
     const { databasePath } = first.session;
     const quit = async (game: Game) => {
@@ -382,7 +569,25 @@ test.describe("C3/14 the quest scene", () => {
       await holdHeroesFromTest(pad, [...FOUR]);
       return { session, context, pad, board };
     };
+    /** Every Menu row with its state and reason, then the Menu closed again. */
+    const menuStates = async (pad: Page) => {
+      await pad.locator('[data-action="menu"]').click();
+      const rows = pad.locator("[data-menu] button[data-gear-item]");
+      await expect(rows.first()).toBeVisible();
+      const states = await rows.evaluateAll((els) =>
+        els.map((el) => ({
+          id: el.getAttribute("data-gear-item"),
+          disabled: (el as HTMLButtonElement).disabled,
+          text: (el.textContent ?? "").trim(),
+        })),
+      );
+      await pad.locator("[data-menu]").getByRole("button", { name: "Close" }).click();
+      await expect(pad.locator("[data-menu]")).toHaveCount(0);
+      return states;
+    };
     await openQuest(first);
+    const menuBefore = await menuStates(first.pad);
+    expect(menuBefore.length).toBeGreaterThan(3);
     // EV-17: a gear panel is open (Current party; Volume is greyed without the tower) when the host stops.
     await first.pad.locator('[data-action="menu"]').click();
     await first.pad.locator('[data-menu] button[data-gear-item="current-party"]').click();
@@ -393,22 +598,23 @@ test.describe("C3/14 the quest scene", () => {
 
     const second = await resume();
     try {
-      // EV-16, EV-17: the same choice; Menu and panels closed; not paused; toolbar back.
+      // EV-16, EV-17: the same choice, the narration not replayed; Menu and panels closed; not paused.
       await expect(second.board.locator("[data-quest-scene]")).toBeVisible({ timeout: 20_000 });
       await expect(phase(second.board, "choose")).toBeVisible();
+      await expect(lines(second.board)).toHaveText([OPENING]);
       await expect(questOptions(second.pad)).toHaveCount(2);
+      expect(await narrationFrames(second.board)).toEqual([]);
       await expect(second.pad.locator("[data-menu]")).toHaveCount(0);
       await expect(second.pad.locator("[data-panel], [data-gear-panel]")).toHaveCount(0);
       await expect(second.board.locator("[data-panel]")).toHaveCount(0);
       await expect(deviceMain(second.pad)).toHaveAttribute("data-paused", "false");
       await expectToolbar(second.pad);
+      expect(await menuStates(second.pad)).toEqual(menuBefore);
 
-      // Ask for pay: the rewards step, then the end hook; restart on the end hook.
+      // Ask for pay: the rewards step. EV-15 run 1: the host stops there, with no quit.
       await optionById(second.pad, "ask-pay-first").click();
       await expect(phase(second.board, "rewards")).toBeVisible({ timeout: 20_000 });
-      await tick(second, 4_100);
-      await expect(phase(second.board, "end")).toBeVisible({ timeout: 20_000 });
-      await quit(second);
+      await closeAll(second);
     } catch (error) {
       await closeAll(second);
       throw error;
@@ -416,15 +622,27 @@ test.describe("C3/14 the quest scene", () => {
 
     const third = await resume();
     try {
-      // EV-15: the same step, once; 10 gold shared and 5 quest gold each is 30 in all.
-      await expect(phase(third.board, "end")).toBeVisible({ timeout: 20_000 });
+      // The same step shows again and moves on once; then the end hook. EV-15 run 2: quit there.
+      await expect(phase(third.board, "rewards")).toBeVisible({ timeout: 20_000 });
       await tick(third, 4_100);
-      await expect(deviceMain(third.pad).locator('[data-building="menu"]')).toBeVisible({
+      await expect(phase(third.board, "end")).toBeVisible({ timeout: 20_000 });
+      await quit(third);
+    } catch (error) {
+      await closeAll(third);
+      throw error;
+    }
+
+    const fourth = await resume();
+    try {
+      // 10 gold shared and 5 quest gold each is 30 in all, paid once across both restarts.
+      await expect(phase(fourth.board, "end")).toBeVisible({ timeout: 20_000 });
+      await tick(fourth, 4_100);
+      await expect(deviceMain(fourth.pad).locator('[data-building="menu"]')).toBeVisible({
         timeout: 20_000,
       });
-      expect(await gearGold(third.pad, third.board)).toBe(30);
+      expect(await gearGold(fourth.pad, fourth.board)).toBe(30);
     } finally {
-      await closeAll(third);
+      await closeAll(fourth);
     }
   });
 });

@@ -137,4 +137,62 @@ describe("C3/14 the quest on the iPad", () => {
       "play",
     );
   });
+
+  it("EV-06: the Ambush shows the toll as the one primary button and no Fight", () => {
+    const html = render(
+      building(
+        {
+          questId: "ambush",
+          phase: "choose",
+          track: { done: 0, total: 1 },
+          optionId: null,
+          options: [
+            option({
+              promptId: "t",
+              optionId: "pay-the-toll",
+              cost: { kind: "toll", amount: 10, hitPoints: 2, purse: 6 },
+            }),
+          ],
+          pending: null,
+          reveal: null,
+          rewards: null,
+        },
+        [
+          {
+            promptId: "t",
+            label: "Pay the toll (10 gold)",
+            detail: null,
+            enabled: true,
+            reason: null,
+          },
+        ],
+      ),
+    );
+    expect(html.match(/bt-primary/g)).toHaveLength(1);
+    expect(html).toMatch(
+      /class="bt-primary"[^>]*data-prompt-id="t"|data-prompt-id="t"[^>]*class="bt-primary"/,
+    );
+    expect(html).toContain("6 gold · 2 hit points each");
+    expect(html).not.toContain("Fight");
+    // Two options: neither is primary (no label decides it).
+    const two = render(
+      building(
+        {
+          questId: "herald",
+          phase: "choose",
+          track: { done: 0, total: 1 },
+          optionId: null,
+          options: [option({ promptId: "a" }), option({ promptId: "b" })],
+          pending: null,
+          reveal: null,
+          rewards: null,
+        },
+        [
+          { promptId: "a", label: "Next", detail: null, enabled: true, reason: null },
+          { promptId: "b", label: "Take the job", detail: null, enabled: true, reason: null },
+        ],
+      ),
+    );
+    expect(two).not.toContain("bt-primary");
+  });
 });

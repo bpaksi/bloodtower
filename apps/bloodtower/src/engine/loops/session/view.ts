@@ -19,6 +19,7 @@ import { heldItems, itemName } from "../../rules/items/index.ts";
 import { isPurseAmount, poolSides } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
+import { questItemName } from "../../views/questItems.ts";
 import type {
   BuildingPanelView,
   ChanceView,
@@ -397,13 +398,6 @@ export const actingGroupOf = (state: ShellState): ActingGroup => {
 
 /** The prompt line when a virtue asks a choice (Loremaster, `virtue.choice.prompt`). */
 const virtueAsks = (name: string) => `${name} asks you to choose.`;
-
-/** Names of the story items quests hand over (Copy table, C3/14); the pack ids are the keys. */
-const QUEST_ITEM_NAMES: Record<string, string> = {
-  "tomas-map": "Tomas's Map",
-  signet: "The Warden's Signet",
-  "oath-blade": "The Warden's oath-blade",
-};
 
 /** Words of the quest's two closing steps; the board paints its own copy by quest id (C3/14). */
 const QUEST_RESULT_LINE = { rewards: "The quest is done.", end: "The quest is over." } as const;
@@ -1083,22 +1077,23 @@ const actingHeroes = (state: ShellState): string[] => {
  */
 const partyHero = (state: ShellState, heroId: string, name: string) => {
   const sheet = state.play ? heroSheet(ensureClock(state.play), heroId) : null;
-  // Story items a quest handed over (DEC-653) sit in the quest store; the party view lists them too (C3/14, EV-03).
-  const held = state.play
-    ? [...heldItems(state.play, heroId), ...(ensureQuests(state.play).items[heroId] ?? [])]
-    : null;
+  const held = state.play ? heldItems(state.play, heroId) : null;
+  // Story items a quest handed over (DEC-653) sit in the quest store. They are carried, not usable:
+  // the party view shows them apart, and the "Use a potion or item" row never counts them (C3/14).
+  const story = state.play ? (ensureQuests(state.play).items[heroId] ?? []) : [];
   return {
     id: heroId,
     name,
     hp: sheet?.hp ? `${sheet.hp.hp}/${sheet.hp.max}` : "unavailable",
     gold: sheet?.gold !== undefined ? String(sheet.gold) : "unavailable",
-    items: held ? `${held.length} held` : "unavailable",
+    items: held ? `${held.length + story.length} held` : "unavailable",
     corruptions: "unavailable",
     holder: state.holdings[heroId] ?? null,
     heldItems: (held ?? []).map((id) => ({
       id,
-      name: itemName(id) ?? QUEST_ITEM_NAMES[id] ?? "unavailable",
+      name: itemName(id) ?? "unavailable",
     })),
+    storyItems: story.map((id) => ({ id, name: questItemName(id) })),
   };
 };
 

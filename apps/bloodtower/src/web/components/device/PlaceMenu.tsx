@@ -1,5 +1,5 @@
 import type { DeviceView } from "bloodtower-protocols";
-import { questItemName } from "../board/QuestScene.tsx";
+import { questItemName } from "../../../engine/views/questItems.ts";
 
 type BuildingPanel = NonNullable<NonNullable<DeviceView["table"]>["building"]>;
 
@@ -65,6 +65,12 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
   const quest = building.quest ?? null;
   // The words of a finished quest are on the Story board (SCR-014); the iPad keeps the tick only.
   const showResultLine = !quest;
+  // One step, one primary button (SCR-016): Next on a result; the only option of a quest's choice
+  // (The Ambush shows its toll alone in C3). Never decided by a button's label.
+  const soleChoice =
+    quest?.phase === "choose" && quest.options.length === 1 ? quest.options[0]?.promptId : null;
+  const primary =
+    building.step === "result" ? (building.options[0]?.promptId ?? null) : (soleChoice ?? null);
   const prompt = quest?.phase === "choose" ? QUEST_PAD_COPY.prompt : building.prompt;
   return (
     <section
@@ -116,7 +122,7 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
               <button
                 key={option.promptId}
                 type="button"
-                className={option.label === "Next" ? "bt-primary" : "bt-secondary"}
+                className={primary === option.promptId ? "bt-primary" : "bt-secondary"}
                 data-prompt-id={option.promptId}
                 data-action-id="build"
                 data-action="build"

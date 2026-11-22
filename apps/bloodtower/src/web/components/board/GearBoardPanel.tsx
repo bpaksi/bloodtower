@@ -39,6 +39,11 @@ export function GearBoardPanel({ gear }: { gear: GearView }) {
               <span data-hp>HP {hero.hp}</span>
               <span data-gold>Gold {hero.gold}</span>
               <span data-items>Items {hero.items}</span>
+              {(hero.storyItems ?? []).length > 0 ? (
+                <span data-story-items>
+                  {(hero.storyItems ?? []).map((item) => item.name).join(", ")}
+                </span>
+              ) : null}
               <span data-corruptions>Corruptions {hero.corruptions}</span>
               <span data-holder-name>Holder {hero.holder ?? "nobody"}</span>
             </li>

@@ -3115,3 +3115,24 @@
   width: 100%;
   max-width: none;
 }
+
+.bt-quest-painting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+[data-quest-placeholder] {
+  padding: 0.3rem 1rem;
+  border: 1px dashed #a33;
+  color: #d88;
+  font-style: italic;
+}
+
+[data-quest-prompt] {
+  margin: 0;
+  color: var(--bt-candle, #c9a85a);
+  font-size: 2.2rem;
+}
