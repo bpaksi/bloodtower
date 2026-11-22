@@ -438,8 +438,8 @@ test.describe("C3/13 the building menu: engine and wire", () => {
       await grantWakeLock(pad2);
       await pad2.goto(`/join?code=${restarted.host.joinCode}`);
       await clickAct(pad2, "continue", "continue-saved-game");
-      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await holdHeroesFromTest(pad2, [...FOUR]);
+      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(deviceMain(pad2).locator('[data-building="menu"]')).toBeVisible({
         timeout: 30_000,
       });
@@ -532,8 +532,8 @@ const resumeGame = async (
   await grantWakeLock(pad);
   await pad.goto(`/join?code=${session.host.joinCode}`);
   await clickAct(pad, "continue", "continue-saved-game");
-  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   await holdHeroesFromTest(pad, [...FOUR]);
+  await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   return { session, context, pad, board };
 };
 

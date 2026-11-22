@@ -980,9 +980,17 @@ const finishFromClaim = async (page: Page) => {
   await advanceOpenings(page);
 };
 
-const resumeSavedGame = async (page: Page) => {
+const resumeSavedGame = async (page: Page, options: { goOnWithoutTower?: boolean } = {}) => {
   await setSoundAndKeep(page);
   await clickAct(page, "continue", "continue-saved-game");
+  // Continue seats the saved party on the iPads joined now (CU/16): a fresh browser is a new iPad,
+  // so it picks the heroes, then play goes on.
+  await holdHeroesFromTest(page, [...HERO_IDS]);
+  if (options.goOnWithoutTower) {
+    // The restarted table has no tower: once the heroes are picked its pause shows (ask, confirm).
+    await page.locator('button[data-pause-ask="go-on-without"]').click({ timeout: 20_000 });
+    await page.locator('button[data-action-id="go-on-without"]').click();
+  }
   await expect(deviceMain(page)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
 };
 
@@ -1113,6 +1121,9 @@ test("gear actions open on the Story board and pause the game", async ({ browser
   }
 
   const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "c2-04-panels" });
+  // The saved game had the tower: the restarted table has it connected again (CU/16).
+  restarted.tower.connect();
+  restarted.tower.calibrate();
   const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
   const boardContext2 = await browser.newContext({
     baseURL: restarted.baseURL,
@@ -1128,8 +1139,15 @@ test("gear actions open on the Story board and pause the game", async ({ browser
     await openGear(again, "current-party");
     const party = board2.locator('[data-panel="current-party"]');
     await expect(party.locator('[data-hero="hero-a"]')).toBeVisible();
-    await expect(party.locator('[data-hero="hero-a"]')).toHaveAttribute("data-holder", holderB);
-    await expect(party.locator('[data-hero="hero-b"]')).toHaveAttribute("data-holder", holderA);
+    // The fresh browser is a new iPad (CU/16): it picked every hero, so it holds both, and neither
+    // old holder does.
+    const newHolderA =
+      (await party.locator('[data-hero="hero-a"]').getAttribute("data-holder")) ?? "";
+    const newHolderB =
+      (await party.locator('[data-hero="hero-b"]').getAttribute("data-holder")) ?? "";
+    expect(newHolderA).not.toBe("");
+    expect(newHolderA).toBe(newHolderB);
+    expect([holderA, holderB]).not.toContain(newHolderA);
   } finally {
     await boardContext2.close();
     await context2.close();
@@ -1282,7 +1300,7 @@ test("a gear panel survives a restart closed", async ({ browser }, testInfo) => 
     await board2.goto("/board");
     await installSessionSocketHook(again);
     await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await resumeSavedGame(again);
+    await resumeSavedGame(again, { goOnWithoutTower: true });
     await expect(board2.locator("[data-panel]")).toHaveCount(0);
     await expect(board2.locator("main.bt-board")).toHaveAttribute("data-paused", "false");
     await expectToolbar(again);

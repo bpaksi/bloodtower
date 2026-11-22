@@ -569,8 +569,10 @@ test("Continue keeps without the tower after a host restart (EV-11)", async ({
       timeout: 30_000,
     });
     await clickAct(pad.page, "continue", "continue-saved-game");
-    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    // The save already went on without the tower, and this host has it connected again.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await playToSimulatedDrop(pad.page, board.page);
     await expect(deviceMain(pad.page)).not.toHaveAttribute("data-screen", "pause");
     expect(restarted.tower.sent().length).toBe(sentBefore);

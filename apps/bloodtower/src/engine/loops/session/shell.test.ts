@@ -1103,3 +1103,101 @@ const chooseStoryForTest = () => {
   ]);
   return state;
 };
+
+describe("CU/16 the disconnect pause has the Pick rows (DEC-953)", () => {
+  const takeHero = (deviceId: string, heroId: string): ShellEvent => ({
+    kind: "hero-hold",
+    v: 1,
+    deviceId,
+    heroId,
+    action: "take",
+  });
+
+  /** A game of party size 2 in play: device-1 holds hero A, device-2 holds hero B. */
+  const twoInPlay = () => {
+    let state = runPresses(start(), [
+      ...enterWithoutEvents(),
+      press("device-1", "continue-pick-story-test", "continue"),
+      {
+        kind: "set-setting",
+        v: 1,
+        deviceId: "device-1",
+        settingId: "party-size",
+        optionId: "n-2",
+      },
+      press("device-1", "continue-game-settings", "continue"),
+      { kind: "device-join", v: 1, deviceId: "device-1" },
+      { kind: "device-join", v: 1, deviceId: "device-2" },
+      takeHero("device-1", "hero-a"),
+      takeHero("device-2", "hero-b"),
+      press("device-1", "continue-claim-heroes", "continue"),
+    ]);
+    for (const step of state.setupSteps) {
+      if (step.id === "starting-purse")
+        state = runPresses(state, [press("device-1", `spin-setup-${step.id}`, "spin")]);
+      state = runPresses(state, [press("device-1", `continue-setup-${step.id}`, "continue")]);
+    }
+    state = runPresses(state, [press("device-1", "continue-begin", "continue")]);
+    return runPresses(
+      state,
+      OPENING_MOMENTS.map((moment) => press("device-1", openingPromptId(moment), "continue")),
+    );
+  };
+
+  const deviceOf = (state: ReturnType<typeof start>, deviceId: string) =>
+    project(projectShellView(state), { kind: "device", deviceId });
+
+  it("CU/16 EV-06 the iPad lists the seated heroes with their claim, and a count", () => {
+    let state = twoInPlay();
+    state = runPresses(state, [
+      { kind: "device-join", v: 1, deviceId: "device-3" },
+      { kind: "device-drop", v: 1, deviceId: "device-2" },
+    ]);
+    expect(state.pause?.cause).toBe("disconnect");
+    const third = deviceOf(state, "device-3");
+    expect(third.screen).toBe("pause");
+    expect(third.shows).toBe("1 of 2 picked");
+    expect(third.heroes.map((hero) => [hero.id, hero.claim])).toEqual([
+      ["hero-a", "taken"],
+      ["hero-b", "open"],
+    ]);
+    const first = deviceOf(state, "device-1");
+    expect(first.heroes.map((hero) => [hero.id, hero.claim])).toEqual([
+      ["hero-a", "yours"],
+      ["hero-b", "open"],
+    ]);
+    expect(projectShellView(state).levels.at(-1)?.label).toBe("Paused");
+  });
+
+  it("CU/16 EV-06 a lost tower's pause shows no Pick rows", () => {
+    let state = twoInPlay();
+    state = { ...state, towerLinked: true, towerWithout: false };
+    state = runPresses(state, [
+      { kind: "device-join", v: 1, deviceId: "device-3" },
+      { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED },
+    ]);
+    expect(state.pause?.cause).toBe("tower-lost");
+    const third = deviceOf(state, "device-3");
+    expect(third.shows).toBe("Tower lost");
+    expect(third.heroes.every((hero) => hero.claim === undefined)).toBe(true);
+  });
+
+  it("CU/16 EV-07 a mid-game drop pauses with the same rows, and the pick goes on", () => {
+    let state = twoInPlay();
+    state = runPresses(state, [
+      { kind: "device-join", v: 1, deviceId: "device-3" },
+      { kind: "device-drop", v: 1, deviceId: "device-2" },
+    ]);
+    expect(state.stage).toBe("paused");
+    expect(state.pause?.cause).toBe("disconnect");
+    expect(state.holdings["hero-b"] ?? null).toBeNull();
+    expect(deviceOf(state, "device-3").shows).toBe("1 of 2 picked");
+    expect(deviceOf(state, "device-3").heroes[1]?.claim).toBe("open");
+
+    state = runPresses(state, [takeHero("device-3", "hero-b")]);
+    expect(state.holdings["hero-b"]).toBe("device-3");
+    expect(state.stage).toBe("playing");
+    expect(state.pause).toBeNull();
+    expect(state.screen).toBe("play");
+  });
+});

@@ -4,7 +4,8 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 
 - Brief: ./plan.md
 - Mockup: none
-- Done-when: EV-01 … EV-18; survival evals last (EV-14, EV-18).
+- Done-when: EV-01 … EV-21; survival evals last (EV-14, EV-18, EV-21).
+- Amended 2026-11-22: EV-19 to EV-21 moved from D2 / 01 (#585; DEC-906, DEC-907, DEC-939 to DEC-941), Bob "Yes, option (a)". Needs Bob's approval row.
 - Amended 2026-11-18: EV-15 to EV-18 moved from F1 / 01-tomb-to-battle (#505), Bob 2026-11-18 7:12 AM ET (F1 became cards-only). Needs Bob's new approval row.
 
 ## Checks
@@ -140,6 +141,27 @@ Source: F1 / 01-tomb-to-battle eval.md and docs/audits/2026-11-12-f1-tomb-to-bat
 - How: save and restore after a retreat and after a fall; resume; compare with an uninterrupted run. The entry-effect part of the same check is EV-32 in C4 / 02.
 - Pass evidence: the room flag, the foe's count and the Tomb result equal the uninterrupted run.
 - Fails if: a restore clears the room or loses the foe's count.
+
+### EV-19 — A trap fall in the Tomb (moved from D2 EV-01, 02, 05, 06, 07, 16, 17)
+- Requirement: DEC-906, DEC-939, DEC-940, DEC-642, DEC-676, DEC-177; the Tomb calls `springTrap` (`rules/trap`) and honours `allFell`, `gameLost`, `roomCleared`.
+- Method: unit
+- How: (a) Pit at 4 HP of two heroes, and Falling Rocks fell one of two: the next room prompt is offered with both heroes in the group, none benched. (b) Every hero falls (Rocks 2 and 1 HP; solo Pit at 4 HP; purse 30). (c) Solo hero at 3 HP and 2 corruptions, Pit. (d) A at 2 HP with 2 corruptions, B at 2 HP, Rocks, in both group orders. (e) Re-enter a spent trap room later, after (a) and after (b).
+- Pass evidence: (a) prompt offered, fallen hero at 1 HP. (b) Tomb result `failed`, quest failed, group on the Tomb's board space, purse 30, no room prompt, no gold line, trap room cleared in the kept layout. (c) and (d) the one game-loss unwind (outcome `corruption`) runs once; no Tomb result, room prompt or quest result after it; (d) A 3 corruptions, B 1, same in both orders. (e) the room is empty: no trap, no HP lost.
+- Fails if: a fallen hero is benched, gold is taken, a further room is offered after a total fall or a loss, the unwind runs twice, or a spent trap is paid again.
+
+### EV-20 — Trap fall through the session (moved from D2 EV-15)
+- Requirement: R04, DEC-906, DEC-907.
+- Method: unit
+- How: a seeded game driven by presses into a Tomb: Falling Rocks fells one of two heroes, then a Spine Fiends battle room (count 1) is won on a forced won round; second seed: a Pit fells a solo hero.
+- Pass evidence: the fallen hero is offered in the next room; the battle shows won with no Spines line; the solo fall returns the group to the board, quest failed, purse unchanged.
+- Fails if: a step needs a direct state write, a hero is benched, Spines fires on the final cut, or gold is lost to a trap.
+
+### EV-21 — Continue after a trap fall (moved from D2 EV-13)
+- Requirement: DEC-675.
+- Method: unit
+- How: a hero at 4 HP, Pit; save after the trap is paid; restore; resume.
+- Pass evidence: hero 1 HP, corruptions 1, the trap not paid again, next room prompt offered, state equals an uninterrupted run.
+- Fails if: the trap is paid twice, the corruption repeats, or HP resets.
 
 ## Assumptions surfaced
 

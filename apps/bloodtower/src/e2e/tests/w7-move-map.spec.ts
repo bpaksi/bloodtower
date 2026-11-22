@@ -644,6 +644,8 @@ test("W7 continue keeps an entered place and Leave returns to the move map", asy
     await page.goto(`/join?code=${restarted.host.joinCode}`);
     await setSoundAndKeep(page);
     await clickAct(page, "continue", "continue-saved-game");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    await holdHeroesFromTest(page, [...HERO_IDS]);
     await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
     const restored = await readStatus(page);
     expect(restored.inside).toBe("true");

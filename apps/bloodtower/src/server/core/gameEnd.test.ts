@@ -108,6 +108,21 @@ type Pad = {
   act: (p: string, a: string, args?: Record<string, unknown>) => Promise<void>;
 };
 
+/**
+ * Continue, then the re-pick (CU/16): Continue seats the saved party on the iPads joined now, so
+ * this iPad picks every seated hero that nobody holds before play goes on.
+ */
+const continueAndSeat = async (session: CoreSession, pad: Pad): Promise<void> => {
+  await pad.act("continue-saved-game", "continue");
+  for (const group of session.state().play?.groups ?? []) {
+    for (const heroId of group.heroIds) {
+      if (session.state().holdings[heroId] == null) {
+        await pad.act("hero-hold", "take", { heroId });
+      }
+    }
+  }
+};
+
 const padFor = async (session: CoreSession): Promise<Pad> => {
   const joined = session.join({ joinCode: "000000", formFactor: "ipad" });
   await session.whenIdle();
@@ -305,7 +320,7 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     expect(await second.resumeSession()).toBe(true);
     expect(projectGameRecords(store)).toHaveLength(1);
     const again = await padFor(second);
-    await again.act("continue-saved-game", "continue");
+    await continueAndSeat(second, again);
     armChapters(second, "win");
     await playOn(second, again, () => ended(second));
     const records = projectGameRecords(store);
@@ -365,7 +380,7 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     second.rememberAutosave({ gameId: autosave?.gameId ?? "", packId: "test", day: 1 });
     expect(await second.resumeSession()).toBe(true);
     const again = await padFor(second);
-    await again.act("continue-saved-game", "continue");
+    await continueAndSeat(second, again);
     armChapters(second, "loss");
     await playOn(second, again, () => ended(second));
     const records = projectGameRecords(store);
@@ -545,7 +560,7 @@ describe("tap counts and active length come from the log (PT-10)", () => {
     second.rememberAutosave({ gameId: autosave?.gameId ?? "", packId: "test", day: 1 });
     expect(await second.resumeSession()).toBe(true);
     const again = await padFor(second);
-    await again.act("continue-saved-game", "continue");
+    await continueAndSeat(second, again);
     clock.advance(20_000);
     withDay(second, 1);
     await tap(again, 3);

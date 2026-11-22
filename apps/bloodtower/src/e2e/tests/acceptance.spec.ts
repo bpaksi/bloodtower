@@ -200,10 +200,10 @@ test("quit from pause lands on session; continue resumes after host restart", as
       timeout: 20_000,
     });
     await clickAct(page2, "continue", "continue-saved-game");
+    await holdHeroesFromTest(page2, [...HERO_IDS]);
     await expect(deviceMain(page2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(page2).getByText(/Day 3/i)).toBeVisible({ timeout: 20_000 });
     await expect(page2.getByText(/seed/i)).toHaveCount(0);
-    await holdHeroesFromTest(page2, [...HERO_IDS]);
     let walked = false;
     const walkDeadline = Date.now() + 120_000;
     while (Date.now() < walkDeadline && !walked) {

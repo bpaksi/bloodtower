@@ -182,11 +182,27 @@ body {
   color: var(--bt-accent);
 }
 
+/* #592 / DEC-233 theme B: the iPad is one full parchment page with dark ink. The ink and
+ * the control colours are re-pointed here, so every iPad control reads dark on parchment. */
 .bt-device {
+  --bt-fg: #2a1d14;
+  --bt-muted: #5a4630;
+  --bt-card: #f3ead2;
+  --bt-line: #8a6f47;
+  --bt-accent: #3b2a1e;
+  --bt-accent-ink: #f3ead2;
+  --bt-danger: #8e1b1b;
   display: flex;
   flex-direction: column;
   height: 100dvh;
   overflow: hidden;
+  color: var(--bt-fg);
+  background-color: #e9d9b4;
+  background-image: radial-gradient(
+    ellipse at 50% 40%,
+    transparent 55%,
+    rgb(138 111 71 / 28%) 100%
+  );
 }
 
 .bt-scroll {
@@ -298,8 +314,7 @@ body {
   gap: 0.75rem;
   padding: 0.5rem 1.5rem calc(0.5rem + env(safe-area-inset-bottom));
   border-top: 1px solid var(--bt-line);
-  /* Same colour as the page. Transparent so the bottom corner windows show in the
-   * side margins. The buttons keep their own fill and paint above the frame. */
+  /* Transparent: the parchment page and the bottom corners show through. */
   background: transparent;
   position: relative;
   z-index: 21;
@@ -374,8 +389,8 @@ body {
   opacity: 0;
 }
 
-/* Theme B corners (DEC-233). One JPEG, four windows. Not a border-image: the
- * parchment is painted into the mock. Sits under the bar and the Menu dialog. */
+/* Theme B corners (DEC-233). Four drawn corners (ART-080) on the parchment page.
+ * Sits under the bar and the Menu dialog. */
 .bt-ipad-corners {
   position: fixed;
   inset: 0;
@@ -389,39 +404,31 @@ body {
   width: var(--bt-ipad-corner);
   height: var(--bt-ipad-corner);
   background-repeat: no-repeat;
-  background-size: 100vw 100dvh;
+  background-size: contain;
 }
 
 .bt-ipad-corner-tl {
   top: 0;
   left: 0;
   background-position: left top;
-  -webkit-mask-image: radial-gradient(circle at top left, #000 58%, transparent 100%);
-  mask-image: radial-gradient(circle at top left, #000 58%, transparent 100%);
 }
 
 .bt-ipad-corner-tr {
   top: 0;
   right: 0;
   background-position: right top;
-  -webkit-mask-image: radial-gradient(circle at top right, #000 58%, transparent 100%);
-  mask-image: radial-gradient(circle at top right, #000 58%, transparent 100%);
 }
 
 .bt-ipad-corner-bl {
   bottom: 0;
   left: 0;
   background-position: left bottom;
-  -webkit-mask-image: radial-gradient(circle at bottom left, #000 58%, transparent 100%);
-  mask-image: radial-gradient(circle at bottom left, #000 58%, transparent 100%);
 }
 
 .bt-ipad-corner-br {
   bottom: 0;
   right: 0;
   background-position: right bottom;
-  -webkit-mask-image: radial-gradient(circle at bottom right, #000 58%, transparent 100%);
-  mask-image: radial-gradient(circle at bottom right, #000 58%, transparent 100%);
 }
 
 .bt-bottom-bar .bt-ghost {

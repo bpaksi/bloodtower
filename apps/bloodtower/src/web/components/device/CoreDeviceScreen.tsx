@@ -852,7 +852,11 @@ export function CoreDeviceScreen({
   const walks = mapActions.filter((action) => action.actionId === "walk");
   const mapExtras = mapActions.filter((action) => action.actionId !== "walk");
   const scrolling = body.filter((action) => !isPinned(action) && !inMoveMap(action));
-  const picking = view.screen === "claim-heroes";
+  // The disconnect pause picks as the Pick screen does (DEC-953); its line is "N of N picked",
+  // the tower-lost pause's is not (DEC-301).
+  const picking =
+    view.screen === "claim-heroes" ||
+    (view.screen === "pause" && /^\d+ of \d+ picked$/.test(view.shows));
   const pickMatch = picking ? /^(\d+) of (\d+) picked$/.exec(view.shows) : null;
   const seated = pickMatch ? Number(pickMatch[1]) : 0;
   const party = pickMatch ? Number(pickMatch[2]) : 0;
@@ -1032,7 +1036,7 @@ export function CoreDeviceScreen({
                   : "A skull falls. Where does it land?"}
               </p>
             ) : null}
-            {picking ? (
+            {picking && view.screen === "claim-heroes" ? (
               <p className="mt-2 text-[var(--bt-muted)]" data-pick-help="">
                 Who this iPad speaks for at the table
               </p>

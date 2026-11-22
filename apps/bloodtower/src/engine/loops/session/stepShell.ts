@@ -202,16 +202,24 @@ const resumeLoopsOrPauseOffers = (
   else ensurePlayMenuOffers(next);
 };
 
+/** An Enter press is a building only when its space has one; a wild quest marker is not (DEC-951). */
+const enteredSpaceHasBuilding = (state: ShellState, promptId: string): boolean => {
+  const spaceId = promptId.split("--")[2];
+  return Boolean(spaceId && state.play?.content.board.spaceById.get(spaceId)?.building);
+};
+
 /** Adds one press to the active game's counts: a walk, an Enter, a day's skull drop (SCR-019 slice). */
 const countPress = (
   state: ShellState,
   actionId: string,
   moved: boolean,
   skullRecorded: boolean,
+  enteredBuilding = true,
 ): void => {
   const tally = state.tally;
   if (actionId === "walk" && moved && tally.moves !== null) tally.moves += 1;
-  if (actionId === "enter" && moved && tally.buildings !== null) tally.buildings += 1;
+  if (actionId === "enter" && moved && enteredBuilding && tally.buildings !== null)
+    tally.buildings += 1;
   const day = state.play?.dayNumber ?? null;
   if (actionId === "record" && skullRecorded && day !== tally.skullDay) {
     tally.skulls = (tally.skulls ?? 0) + 1;
@@ -227,7 +235,7 @@ const playFingerprint = (state: ShellState): string =>
 const sessionFrame = (state: ShellState) =>
   state.loops.stack.find((frame) => frame.loopId === "session");
 
-const pauseIfNeeded = (state: ShellState): void => {
+export const pauseIfNeeded = (state: ShellState): void => {
   // Piece setup is part of a started game (DEC-711): only a lost tower pauses it.
   const pieceSetup =
     state.stage === "lobby" && (state.screen === "setup" || state.screen === "begin");
@@ -368,6 +376,16 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     }
     if (e.action === "take") {
       if (next.holdings[e.heroId] != null || heldCount(next) >= partySize(next)) {
+        return withEffects(state, effects);
+      }
+      // The disconnect pause picks for the seated party only: an unseated hero is not offered
+      // there and a hold on one is refused (CU/16 EV-04).
+      if (
+        next.stage === "paused" &&
+        next.pause?.cause === "disconnect" &&
+        next.play &&
+        !next.play.groups.some((group) => group.heroIds.includes(e.heroId))
+      ) {
         return withEffects(state, effects);
       }
       next.holdings[e.heroId] = e.deviceId;
@@ -840,6 +858,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
         e.actionId,
         playFingerprint(next) !== before,
         next.play?.lastSkull !== skullBefore,
+        enteredSpaceHasBuilding(next, e.promptId),
       );
       if (
         (e.actionId === "walk" || e.actionId === "enter" || e.actionId === "leave") &&
