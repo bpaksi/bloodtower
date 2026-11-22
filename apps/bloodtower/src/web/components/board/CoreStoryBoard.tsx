@@ -20,6 +20,7 @@ import { EventScene } from "./EventScene";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
+import { QuestScene } from "./QuestScene";
 import { StartupBoard } from "./StartupBoard";
 import { VirtuePanel } from "./VirtuePanel";
 
@@ -81,6 +82,8 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const holding = hint !== null && !hint.caption;
   // An event scene replaces the day panels while it shows (C3/12); health and purse join the band.
   const event = showMove ? (table?.event ?? null) : null;
+  // A quest in progress replaces the building's still and panel with its own scene (C3/14).
+  const quest = layer === "place" ? (table?.building?.quest ?? null) : null;
   const eventHero = (heroId: string) => event?.heroes.find((hero) => hero.heroId === heroId);
   return (
     <main
@@ -160,15 +163,16 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           </p>
         </DialogFrame>
       ) : null}
-      {layer === "place" && place ? (
+      {layer === "place" && place && !quest ? (
         <figure className="bt-place-still" data-place={place.building} data-still={place.stillId}>
           {/* biome-ignore lint/performance/noImgElement: pack stills are static files on the session host */}
           <img src={packStillImageUrl(placeStillFile(place.stillId))} alt="" />
           <figcaption>{place.caption}</figcaption>
         </figure>
       ) : null}
-      {layer === "place" && place ? <AssetIdLabel assetId={place.stillId} /> : null}
-      {layer === "place" && table?.building && !paused ? (
+      {layer === "place" && place && !quest ? <AssetIdLabel assetId={place.stillId} /> : null}
+      {layer === "place" && quest && !paused ? <QuestScene quest={quest} /> : null}
+      {layer === "place" && table?.building && !quest && !paused ? (
         <BuildingBoardPanel table={table} />
       ) : null}
       {hint && !paused ? <HintScroll hint={hint} /> : null}

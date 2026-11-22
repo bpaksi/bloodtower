@@ -1,10 +1,45 @@
 import type { DeviceView } from "bloodtower-protocols";
+import { questItemName } from "../board/QuestScene.tsx";
 
 type BuildingPanel = NonNullable<NonNullable<DeviceView["table"]>["building"]>;
 
 /** Copy rows 28 and 29 of the brief's Copy table (Loremaster). */
 export const FALLEN_LINE = "This building has fallen. No one can enter.";
 export const AUTO_LINE = "Moves on by itself.";
+
+type QuestOption = NonNullable<NonNullable<BuildingPanel["quest"]>["options"]>[number];
+
+/** Copy table, C3/14 (Loremaster 2026-11-12): the iPad's quest lines. */
+export const QUEST_PAD_COPY = {
+  prompt: "Will you help?",
+  needs: (item: string) => `Needs ${item}`,
+  use: (item: string) => `Use ${item}`,
+  cost: (n: number) => `cost: ${n} gold`,
+} as const;
+
+/** The cost line of a quest option, or null. A short toll says what it will take (Q-C3-22). */
+export const questCostLine = (option: QuestOption): string | null => {
+  const cost = option.cost;
+  if (!cost) return null;
+  if (cost.kind === "toll") {
+    return cost.purse !== null && cost.purse < cost.amount
+      ? `${cost.purse} gold · ${cost.hitPoints} hit points each`
+      : `${cost.amount} gold`;
+  }
+  if (cost.kind === "gold") return QUEST_PAD_COPY.cost(cost.amount);
+  if (cost.kind === "hp") return `cost: ${cost.amount} hit points each`;
+  return "cost: 1 corruption";
+};
+
+/** What an option gives: gold as "+N gold", an item by name. */
+export const questGainLine = (option: QuestOption): string | null => {
+  const parts = option.gains.map((gain) =>
+    gain.kind === "gold"
+      ? `${gain.amount > 0 ? "+" : ""}${gain.amount} gold`
+      : questItemName(gain.item),
+  );
+  return parts.length > 0 ? parts.join(", ") : null;
+};
 
 type Props = {
   building: BuildingPanel;
@@ -27,10 +62,16 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
     building.heroIds.some((id) => heldHeroIds.includes(id)) ||
     (heldHeroIds.length === 0 && offered);
   const result = building.result;
+  const quest = building.quest ?? null;
+  // The words of a finished quest are on the Story board (SCR-014); the iPad keeps the tick only.
+  const showResultLine = !quest;
+  const prompt = quest?.phase === "choose" ? QUEST_PAD_COPY.prompt : building.prompt;
   return (
     <section
       className="bt-place-menu mt-4"
       data-building={building.step}
+      data-quest-scene={quest ? quest.questId : undefined}
+      data-quest-phase={quest ? quest.phase : undefined}
       data-building-mine={mine ? "true" : "false"}
       data-building-heroes={building.heroIds.join(",")}
       data-held-heroes={heldHeroIds.join(",")}
@@ -39,16 +80,18 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
       <h2 className="text-lg font-medium" data-building-title="">
         {building.title}
       </h2>
-      {mine && building.prompt ? (
+      {mine && prompt ? (
         <p className="mt-1 italic" data-building-prompt="">
-          {building.prompt}
+          {prompt}
         </p>
       ) : null}
       {mine && result ? (
         <div data-building-result-box="">
-          <p className="mt-2 text-lg" data-building-result="">
-            {result.line}
-          </p>
+          {showResultLine ? (
+            <p className="mt-2 text-lg" data-building-result="">
+              {result.line}
+            </p>
+          ) : null}
           {result.auto ? (
             <p className="text-[var(--bt-muted)]" data-building-auto="">
               {AUTO_LINE}
@@ -60,30 +103,55 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
         <div
           className={`mt-3 flex flex-col gap-3${building.step === "rest-moves" ? " bt-place-moves" : ""}`}
         >
-          {building.options.map((option) => (
-            <button
-              key={option.promptId}
-              type="button"
-              className={option.label === "Next" ? "bt-primary" : "bt-secondary"}
-              data-prompt-id={option.promptId}
-              data-action-id="build"
-              data-action="build"
-              data-building-option=""
-              data-building-enabled={option.enabled ? "true" : "false"}
-              disabled={!live || !option.enabled}
-              aria-describedby={option.reason ? `${option.promptId}-why` : undefined}
-              onClick={() => onAct(option.promptId, "build")}
-            >
-              <span className="flex flex-col items-center">
-                <span data-building-label="">{option.label}</span>
-                {option.detail ? (
-                  <span className="block text-sm text-[var(--bt-muted)]" data-building-cost="">
-                    {option.detail}
-                  </span>
-                ) : null}
-              </span>
-            </button>
-          ))}
+          {building.options.map((option) => {
+            const row = quest?.options.find((q) => q.promptId === option.promptId);
+            const cost = row ? questCostLine(row) : null;
+            const gain = row ? questGainLine(row) : null;
+            const itemLine = row?.needsItem
+              ? row.held
+                ? QUEST_PAD_COPY.use(questItemName(row.needsItem))
+                : QUEST_PAD_COPY.needs(questItemName(row.needsItem))
+              : null;
+            return (
+              <button
+                key={option.promptId}
+                type="button"
+                className={option.label === "Next" ? "bt-primary" : "bt-secondary"}
+                data-prompt-id={option.promptId}
+                data-action-id="build"
+                data-action="build"
+                data-building-option=""
+                data-building-enabled={option.enabled ? "true" : "false"}
+                disabled={!live || !option.enabled}
+                aria-describedby={option.reason ? `${option.promptId}-why` : undefined}
+                onClick={() => onAct(option.promptId, "build")}
+              >
+                <span className="flex flex-col items-center">
+                  <span data-building-label="">{option.label}</span>
+                  {option.detail ? (
+                    <span className="block text-sm text-[var(--bt-muted)]" data-building-cost="">
+                      {option.detail}
+                    </span>
+                  ) : null}
+                  {itemLine ? (
+                    <span className="block text-sm text-[var(--bt-muted)]" data-quest-item="">
+                      {itemLine}
+                    </span>
+                  ) : null}
+                  {cost ? (
+                    <span className="block text-sm text-[var(--bt-muted)]" data-quest-cost="">
+                      {cost}
+                    </span>
+                  ) : null}
+                  {gain ? (
+                    <span className="block text-sm text-[var(--bt-muted)]" data-quest-gain="">
+                      {gain}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            );
+          })}
           {building.options
             .filter((option) => !option.enabled && option.reason)
             .map((option) => (

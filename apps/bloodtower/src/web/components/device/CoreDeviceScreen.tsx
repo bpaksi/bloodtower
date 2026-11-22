@@ -8,7 +8,7 @@ import { ITEMS_EMPTY } from "../board/PartyItemsPanel.tsx";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 import { EventChoices, eventSceneFor, isEventChoice } from "./EventChoices.tsx";
-import type { MenuContext } from "./gearMenu.ts";
+import { helpScreenFor, type MenuContext } from "./gearMenu.ts";
 import { FallenNote, PlaceMenu } from "./PlaceMenu.tsx";
 
 const openActions = (actions: OfferedAction[]) => actions.filter((action) => action.open);
@@ -960,7 +960,7 @@ export function CoreDeviceScreen({
           back={back}
           quit={quit}
           onAct={onAct}
-          helpScreen={eventScene ? "event-scene" : view.gear?.helpScreen}
+          helpScreen={helpScreenFor(view, eventScene !== null)}
           menu={menuContext(view)}
         />
       </main>
@@ -1257,7 +1257,7 @@ export function CoreDeviceScreen({
         back={back}
         quit={quit}
         onAct={onAct}
-        helpScreen={eventScene ? "event-scene" : view.gear?.helpScreen}
+        helpScreen={helpScreenFor(view, eventScene !== null)}
         menu={menuContext(view)}
       />
     </main>
