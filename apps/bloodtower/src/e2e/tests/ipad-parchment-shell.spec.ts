@@ -86,7 +86,7 @@ const expectParchmentShell = async (page: Page, shot: string) => {
   await expect(deviceMain(page)).toBeVisible({ timeout: 20_000 });
   await page.screenshot({ path: test.info().outputPath(`${shot}.png`) });
   const paint = await readPaint(page);
-  // The iPad page paints the theme B parchment: --bt-parchment, #e9d9b4.
+  // The iPad page paints the theme B parchment, #e9d9b4 (same value as the board token; iPad pages do not load it).
   expect(paint.pageColor).toBe("rgb(233, 217, 180)");
   for (const corner of paint.corners) {
     expect(corner.image).not.toMatch(/move-map|\.jpg/);
