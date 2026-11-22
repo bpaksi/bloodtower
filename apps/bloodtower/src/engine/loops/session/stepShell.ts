@@ -202,16 +202,24 @@ const resumeLoopsOrPauseOffers = (
   else ensurePlayMenuOffers(next);
 };
 
+/** An Enter press is a building only when its space has one; a wild quest marker is not (DEC-951). */
+const enteredSpaceHasBuilding = (state: ShellState, promptId: string): boolean => {
+  const spaceId = promptId.split("--")[2];
+  return Boolean(spaceId && state.play?.content.board.spaceById.get(spaceId)?.building);
+};
+
 /** Adds one press to the active game's counts: a walk, an Enter, a day's skull drop (SCR-019 slice). */
 const countPress = (
   state: ShellState,
   actionId: string,
   moved: boolean,
   skullRecorded: boolean,
+  enteredBuilding = true,
 ): void => {
   const tally = state.tally;
   if (actionId === "walk" && moved && tally.moves !== null) tally.moves += 1;
-  if (actionId === "enter" && moved && tally.buildings !== null) tally.buildings += 1;
+  if (actionId === "enter" && moved && enteredBuilding && tally.buildings !== null)
+    tally.buildings += 1;
   const day = state.play?.dayNumber ?? null;
   if (actionId === "record" && skullRecorded && day !== tally.skullDay) {
     tally.skulls = (tally.skulls ?? 0) + 1;
@@ -840,6 +848,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
         e.actionId,
         playFingerprint(next) !== before,
         next.play?.lastSkull !== skullBefore,
+        enteredSpaceHasBuilding(next, e.promptId),
       );
       if (
         (e.actionId === "walk" || e.actionId === "enter" || e.actionId === "leave") &&
