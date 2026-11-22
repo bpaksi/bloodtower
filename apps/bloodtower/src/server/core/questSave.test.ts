@@ -134,7 +134,8 @@ describe("a save and a quest pick (F1/02)", () => {
     expect(ensureQuests(play).done).toEqual(["herald"]);
     expect(ensureClock(play).questsWon).toBe(1);
     expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(13);
-    expect(model(restored).options.map((o) => o.label)).toEqual(["Rest", "Cleanse", "Leave"]);
+    // C3/14: a Continue on the rewards step shows it again; the effects above ran once.
+    expect(model(restored).step).toBe("result");
     expect(turnHasEnded(play, enc(restored).groupId)).toBe(true);
     expect(ensurePicks(play).moves[enc(restored).groupId]).toBe(0);
 

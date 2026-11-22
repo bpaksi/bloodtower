@@ -178,6 +178,65 @@ const virtuePanelSchema = z.strictObject({
     .max(8),
 });
 
+/**
+ * The quest scene (C3/14, UI-042): structure only; the board words it from the Copy table by
+ * `questId`. It rides on the building panel while the group is inside a quest.
+ */
+const questSceneSchema = z.strictObject({
+  questId: z.string().min(1).max(80),
+  phase: z.enum(["choose", "hero", "rewards", "end"]),
+  /** Steps done and steps to come (UI-025); a plain scene is one step. */
+  track: z.strictObject({
+    done: z.number().int().min(0).max(9),
+    total: z.number().int().min(1).max(9),
+  }),
+  /** The option the group took, once it has taken one. */
+  optionId: z.string().min(1).max(80).nullable(),
+  options: z
+    .array(
+      z.strictObject({
+        promptId: z.string().min(1).max(200),
+        optionId: z.string().min(1).max(80),
+        needsItem: z.string().min(1).max(80).nullable(),
+        held: z.boolean(),
+        cost: z
+          .strictObject({
+            kind: z.enum(["gold", "hp", "corruption", "toll"]),
+            amount: z.number().int().min(0).max(999),
+            hitPoints: z.number().int().min(0).max(99),
+            /** Gold the present heroes hold; null when not known (never zero). */
+            purse: z.number().int().min(0).max(9999).nullable(),
+          })
+          .nullable(),
+        gains: z
+          .array(
+            z.discriminatedUnion("kind", [
+              z.strictObject({
+                kind: z.literal("gold"),
+                amount: z.number().int().min(-999).max(999),
+              }),
+              z.strictObject({ kind: z.literal("item"), item: z.string().min(1).max(80) }),
+            ]),
+          )
+          .max(3),
+      }),
+    )
+    .max(3),
+  /** The hero pick being asked: a corruption cost or an item. */
+  pending: z.enum(["corruption", "item"]).nullable(),
+  /** The item shown in the Reveal while its hero pick is open. */
+  reveal: z.string().min(1).max(80).nullable(),
+  /** The finished quest's rewards, in the rewards and end steps. */
+  rewards: z
+    .strictObject({
+      gold: z.number().int().min(0).max(999),
+      questGold: z.number().int().min(0).max(999),
+      items: z.array(z.string().min(1).max(80)).max(3),
+      presentHeroes: z.number().int().min(1).max(16),
+    })
+    .nullable(),
+});
+
 /** The building menu (C3/13, UI-043): one panel for every step of it. */
 const buildingPanelSchema = z.strictObject({
   title: z.string().min(1).max(60),
@@ -216,6 +275,8 @@ const buildingPanelSchema = z.strictObject({
   holdMs: z.number().int().min(1).max(60_000),
   skulls: z.number().int().min(0).max(99),
   movesLeft: z.number().int().min(0).max(99).nullable(),
+  /** The quest scene, only while the group is inside a quest (C3/14). */
+  quest: questSceneSchema.nullable().optional(),
 });
 
 /**

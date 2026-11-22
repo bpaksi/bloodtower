@@ -11,6 +11,7 @@ import {
   type QuestResult,
   type QuestView,
 } from "../quest/quest.ts";
+import { ensureQuests } from "../quest/store.ts";
 import { recordOffer, shellState } from "../session/shellRef.ts";
 import {
   type BuildingLocal,
@@ -20,6 +21,7 @@ import {
   isBuildPrompt,
   movesOf,
   parseBuildPrompt,
+  type QuestResultInfo,
   resultWait,
   stepOf,
 } from "./menu.ts";
@@ -183,6 +185,19 @@ const toResult = (
 /** After a result (or a give-back): the give-back if one is due, the move map if no moves are left, else the menu. */
 const afterResult = (local: EncounterLocal): EncounterLocal => {
   const play = playState();
+  // A finished quest shows its rewards, then its end hook, then the menu with every pick greyed
+  // and Leave open (C3/14, EV-09). The turn already ended when the quest finished (DEC-821).
+  const closing = stepOf(local);
+  if (closing.kind === "result" && closing.result.quest) {
+    if (closing.result.quest.phase === "rewards") {
+      return toResult(local, {
+        pick: "quest",
+        auto: true,
+        quest: { ...closing.result.quest, phase: "end" },
+      });
+    }
+    return toStep(local, { kind: "menu" });
+  }
   const store = ensurePicks(play);
   if (store.giveBack[local.groupId] && stepOf(local).kind !== "give-back") {
     return toStep(local, { kind: "give-back" });
@@ -299,11 +314,37 @@ const questStep = (view: QuestView): BuildingStep =>
  * losses run once, the gold the quest paid reaches the sheets, and the building shows its menu with
  * every pick greyed and Leave open. The quest's moves are read from the live state first.
  */
-const endQuestTurn = (local: EncounterLocal): EncounterLocal => {
+const settleQuestTurn = (local: EncounterLocal): EncounterLocal => {
   const play = playState();
   endTurnAfterQuest(play, local.groupId);
   const movesLeft = commitLive(play, local.groupId);
-  return toStep({ ...local, movesLeft }, { kind: "menu" });
+  return { ...local, movesLeft };
+};
+
+const endQuestTurn = (local: EncounterLocal): EncounterLocal =>
+  toStep(settleQuestTurn(local), { kind: "menu" });
+
+/** What a finished quest paid, read from the option the group took (MEC-037 .9, DEC-700). */
+const questRewards = (
+  local: EncounterLocal,
+  questId: string,
+  optionId: string,
+): QuestResultInfo => {
+  const play = playState();
+  const store = ensureQuests(play);
+  const option = store.defs
+    .find((def) => def.id === questId)
+    ?.scene.options.find((row) => row.id === optionId);
+  const effects = option?.effects ?? [];
+  return {
+    phase: "rewards",
+    questId,
+    optionId,
+    gold: effects.reduce((sum, e) => (e.kind === "gold" && e.amount > 0 ? sum + e.amount : sum), 0),
+    questGold: store.tuning.questGold,
+    items: effects.flatMap((e) => (e.kind === "item" ? [e.item] : [])),
+    presentHeroes: groupById(play, local.groupId)?.heroIds.length ?? 0,
+  };
 };
 
 /** The Quest pick (DEC-083, DEC-948): 1 move, then the quest's own step. */
@@ -322,10 +363,14 @@ const startQuest = (local: EncounterLocal): EncounterLocal => {
 /** One press inside the quest: `run` takes it against the live state; the step then follows the quest. */
 const questPress = (
   local: EncounterLocal,
+  questId: string,
+  optionPressed: string | null,
   run: (play: ReturnType<typeof playState>) => QuestResult,
 ): EncounterLocal => {
   const play = playState();
   loadLive(play, local.groupId, movesOf(local));
+  // The finished quest's progress is deleted, so the option it took is read before the press.
+  const optionId = optionPressed ?? ensureQuests(play).progress[questId]?.optionId ?? null;
   const result = run(play);
   if (!result.ok) return refused(local, QUEST_REFUSALS[result.reason]);
   // DEC-676, DEC-905: a lost game (any reason) stops the quest; no turn-end loss runs and no step is offered.
@@ -333,7 +378,16 @@ const questPress = (
     const movesLeft = commitLive(play, local.groupId);
     return { ...local, movesLeft, awaitingPress: false, refusal: null };
   }
-  if (result.view.done) return endQuestTurn(local);
+  if (result.view.done) {
+    const settled = settleQuestTurn(local);
+    return optionId
+      ? toResult(settled, {
+          pick: "quest",
+          auto: true,
+          quest: questRewards(local, questId, optionId),
+        })
+      : toStep(settled, { kind: "menu" });
+  }
   const movesLeft = commitLive(play, local.groupId);
   return toStep({ ...local, movesLeft }, questStep(result.view));
 };
@@ -357,11 +411,13 @@ export const handleBuildingPress = (local: EncounterLocal, promptId: string): En
     return startPick(local, press.arg as PickKind);
   }
   if (press.verb === "qopt" && step.kind === "quest") {
-    return questPress(local, (play) => chooseOption(play, local.groupId, step.questId, press.arg));
+    return questPress(local, step.questId, press.arg, (play) =>
+      chooseOption(play, local.groupId, step.questId, press.arg),
+    );
   }
   if (press.verb === "qhero" && step.kind === "quest-hero") {
     const seed = shellState().seed;
-    return questPress(local, (play) =>
+    return questPress(local, step.questId, null, (play) =>
       pickHero(play, local.groupId, step.questId, press.arg, seed),
     );
   }

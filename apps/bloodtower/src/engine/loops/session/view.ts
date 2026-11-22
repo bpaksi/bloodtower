@@ -27,6 +27,7 @@ import type {
   GroupsCardView,
   LoopLevel,
   PlaceStill,
+  QuestSceneView,
   TableBand,
   ViewState,
   VirtuePanelView,
@@ -45,6 +46,7 @@ import {
   rallyResult,
   virtueResult,
 } from "../encounter/menu.ts";
+import { presentGold, purseKnown } from "../encounter/picks.ts";
 import {
   eventOptions,
   eventState,
@@ -61,6 +63,8 @@ import {
 } from "../game/setupFlow.ts";
 import { type GroupTurnLocal, virtuePanelOf, virtuePromptId } from "../group-turn/loop.ts";
 import { openQuestAt } from "../quest/quest.ts";
+import { ensureQuests } from "../quest/store.ts";
+import { visibleOptions } from "../scene/scene.ts";
 import { BOARD_SET_UP_PROMPT } from "./enter.ts";
 import { fixPositionRefusal } from "./gear.ts";
 import {
@@ -394,6 +398,89 @@ export const actingGroupOf = (state: ShellState): ActingGroup => {
 /** The prompt line when a virtue asks a choice (Loremaster, `virtue.choice.prompt`). */
 const virtueAsks = (name: string) => `${name} asks you to choose.`;
 
+/** Words of the quest's two closing steps; the board paints its own copy by quest id (C3/14). */
+const QUEST_RESULT_LINE = { rewards: "The quest is done.", end: "The quest is over." } as const;
+
+/** The quest scene (C3/14): structure for the board and the iPad. Null outside a quest. */
+const buildQuestScene = (
+  play: NonNullable<ShellState["play"]>,
+  local: EncounterLocal,
+  model: ReturnType<typeof buildingModel>,
+): QuestSceneView | null => {
+  const step = local.step;
+  const store = ensureQuests(play);
+  const group = play.groups.find((row) => row.id === local.groupId);
+  if (step?.kind === "result" && step.result.quest) {
+    const info = step.result.quest;
+    return {
+      questId: info.questId,
+      phase: info.phase,
+      track: { done: 1, total: 1 },
+      optionId: info.optionId,
+      options: [],
+      pending: null,
+      reveal: null,
+      rewards: {
+        gold: info.gold,
+        questGold: info.questGold,
+        items: info.items,
+        presentHeroes: info.presentHeroes,
+      },
+    };
+  }
+  if (step?.kind !== "quest" && step?.kind !== "quest-hero") return null;
+  const def = store.defs.find((row) => row.id === step.questId);
+  if (!def) return null;
+  const heroes = group?.heroIds ?? [];
+  const taken = store.progress[step.questId]?.optionId ?? null;
+  const purse = purseKnown(play, local.groupId) ? presentGold(play, local.groupId) : null;
+  const options = visibleOptions(def.scene).map((option) => {
+    const row = model.options.find((o) => o.promptId.endsWith(`--qopt--${option.id}`));
+    const cost = option.cost;
+    return {
+      promptId: row?.promptId ?? "",
+      optionId: option.id,
+      needsItem: option.needsItem ?? null,
+      held: option.needsItem
+        ? heroes.some((hero) => store.items[hero]?.includes(option.needsItem as string))
+        : true,
+      cost: cost
+        ? {
+            kind: cost.kind,
+            amount:
+              cost.kind === "toll" ? store.tuning.tollGold : "amount" in cost ? cost.amount : 1,
+            hitPoints: cost.kind === "toll" ? store.tuning.tollHitPoints : 0,
+            purse,
+          }
+        : null,
+      gains: option.effects.flatMap((e): QuestSceneView["options"][number]["gains"] =>
+        e.kind === "gold"
+          ? [{ kind: "gold", amount: e.amount }]
+          : e.kind === "item"
+            ? [{ kind: "item", item: e.item }]
+            : [],
+      ),
+    };
+  });
+  const pending = step.kind === "quest-hero" ? step.pending : null;
+  const takenOption = def.scene.options.find((o) => o.id === taken);
+  const reveal =
+    pending === "item"
+      ? ((takenOption?.effects.find((e) => e.kind === "item") as { item: string } | undefined)
+          ?.item ?? null)
+      : null;
+  return {
+    questId: step.questId,
+    phase: step.kind === "quest-hero" ? "hero" : "choose",
+    track: { done: 0, total: 1 },
+    optionId: taken,
+    options: options.filter((o) => o.promptId !== ""),
+    pending,
+    reveal,
+    rewards: null,
+  };
+};
+
 /** The building menu (C3/13): only while the encounter is on top of the loops. */
 const buildBuilding = (state: ShellState): BuildingPanelView | null => {
   const play = state.play;
@@ -408,15 +495,17 @@ const buildBuilding = (state: ShellState): BuildingPanelView | null => {
     const who = done.heroId ? heroName(state, done.heroId) : null;
     const hp = done.hp ? `${done.hp.hp}/${done.hp.max}` : null;
     const line =
-      done.pick === "rally"
-        ? rallyResult(done.hp?.gained ?? 0)
-        : done.pick === "virtue-draw"
-          ? virtueResult(virtueName(done.tile ?? ""))
-          : done.pick === "cure"
-            ? BUILDING_COPY.cureResult
-            : done.pick === "rest"
-              ? BUILDING_COPY.restResult
-              : BUILDING_COPY.cleanseResult;
+      done.pick === "quest"
+        ? QUEST_RESULT_LINE[done.quest?.phase ?? "rewards"]
+        : done.pick === "rally"
+          ? rallyResult(done.hp?.gained ?? 0)
+          : done.pick === "virtue-draw"
+            ? virtueResult(virtueName(done.tile ?? ""))
+            : done.pick === "cure"
+              ? BUILDING_COPY.cureResult
+              : done.pick === "rest"
+                ? BUILDING_COPY.restResult
+                : BUILDING_COPY.cleanseResult;
     result = {
       pick: done.pick,
       line,
@@ -451,6 +540,7 @@ const buildBuilding = (state: ShellState): BuildingPanelView | null => {
     holdMs: AUTO_ADVANCE_MS,
     skulls: group ? (ensureClock(play).skulls[group.spaceId] ?? 0) : 0,
     movesLeft: local.movesLeft ?? null,
+    quest: buildQuestScene(play, local, model),
   };
 };
 

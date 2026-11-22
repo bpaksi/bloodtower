@@ -118,11 +118,11 @@ scenes:
   - id: ambush
     options:
       - id: fight
-        label: "[COPY: Fight the raiders]"
+        label: "Fight"
         effects:
           - {kind: battle}
       - id: pay-the-toll
-        label: "[COPY: Pay the toll]"
+        label: "Pay the toll (10 gold)"
         cost: {kind: toll}
         effects:
           - {kind: flag, flag: ambush-toll-paid}
