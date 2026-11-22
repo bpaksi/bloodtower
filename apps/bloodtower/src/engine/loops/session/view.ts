@@ -861,9 +861,19 @@ const openingMomentId = (state: ShellState): string | null => {
   return OPENING_MOMENTS[state.openingIndex] ?? null;
 };
 
+/** The hero ids in `play.groups`: the party that plays, not the roster. */
+const seatedHeroIds = (state: ShellState): string[] =>
+  state.play?.groups.flatMap((group) => group.heroIds) ?? [];
+
 const showsFor = (state: ShellState, title: string, story: ShellStory | undefined): string => {
   if (openingMomentId(state)) return OPENING_PLACEHOLDER;
   if (state.screen === "pause" && state.pause?.cause === "tower-lost") return TOWER_LOST;
+  // The disconnect pause counts the seated heroes picked, as the Pick screen does (DEC-953).
+  if (state.screen === "pause" && state.pause?.cause === "disconnect" && state.play) {
+    const seated = seatedHeroIds(state);
+    const held = seated.filter((heroId) => state.holdings[heroId] != null).length;
+    return `${held} of ${seated.length} picked`;
+  }
   if ((state.screen === "play" || state.screen === "pause") && state.play) {
     return `Day ${state.play.dayNumber}`;
   }
@@ -1184,16 +1194,21 @@ export const projectShellView = (state: ShellState): ViewState => {
   const story = chosenOrBound(state);
   const screen = state.screen;
   const title = story?.card.title ?? "Story";
-  const heroes = (story?.heroes ?? []).map((hero) => ({
-    id: hero.id,
-    name: hero.name,
-    deviceId: state.holdings[hero.id] ?? null,
-    ...(screen === "claim-heroes" && hero.card ? { card: hero.card } : {}),
-    lines:
-      isSetupScreen(screen) && screen !== "claim-heroes"
-        ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
-        : [],
-  }));
+  // The disconnect pause lists the seated party only (DEC-953); every other screen the roster.
+  const seated =
+    screen === "pause" && state.pause?.cause === "disconnect" ? seatedHeroIds(state) : null;
+  const heroes = (story?.heroes ?? [])
+    .filter((hero) => seated === null || seated.includes(hero.id))
+    .map((hero) => ({
+      id: hero.id,
+      name: hero.name,
+      deviceId: state.holdings[hero.id] ?? null,
+      ...(screen === "claim-heroes" && hero.card ? { card: hero.card } : {}),
+      lines:
+        isSetupScreen(screen) && screen !== "claim-heroes"
+          ? [{ id: `${screen}.private.${hero.id}`, text: `Only ${hero.name} hears this.` }]
+          : [],
+    }));
 
   // A hint is the loop's first beat: the view offers nothing until it ends. The iPads keep the
   // screen before it through `deviceHold`.

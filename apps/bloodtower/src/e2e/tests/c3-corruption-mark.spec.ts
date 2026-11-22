@@ -224,8 +224,8 @@ test.describe("CU/10 the corruption mark on the band", () => {
       await grantWakeLock(pad2);
       await pad2.goto(`/join?code=${restarted.host.joinCode}`);
       await clickAct(pad2, "continue", "continue-saved-game");
-      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await holdHeroesFromTest(pad2, [...FOUR]);
+      await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(board2.locator("[data-band]")).toBeVisible({ timeout: 20_000 });
       await expect.poll(() => markIds(board2), { timeout: 20_000 }).toEqual(["hero-b"]);
       await expect(

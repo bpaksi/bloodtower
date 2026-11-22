@@ -185,7 +185,9 @@ Each gets its folder as soon as what it waits on is on `main`.
 | Feature | Waits on | Builds |
 |---|---|---|
 | 12: Glyphs and facing in the session's Enter (MEC-039 .13 to .19) | 05, and Bob's ruling on the glyph prompts after feature 10 | MEC-017 |
-| 13: iPad corners from ART-080 (DEC-706, GC1-03) | 04, and ART-080 on `main` (Bob) | ART-080 |
+| 13: iPad corners from ART-080 (DEC-706, GC1-03) | 04, and ART-080 on `main` (Bob) | ART-080. Wired by #593 (fix #592): `IpadCorners` draws the four PNGs on a full parchment page |
+
+The iPad frame standard is full parchment (DEC-233), per Bob's 2026-11-22 ruling. The C3/13 and C3/14 mockups follow in #595.
 
 ### Step G-C2: Bob plays the evening
 - Owner: Bob (gates G-playtest and G-signoff)

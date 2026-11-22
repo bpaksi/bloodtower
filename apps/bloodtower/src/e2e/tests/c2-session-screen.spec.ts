@@ -321,8 +321,10 @@ test("connect track: the session screen, its confirms, Done for tonight, and a n
     );
     expect(autosaveSeed(databasePath)).toBe(seed);
     await clickAct(pad.page, "continue", "continue-saved-game");
-    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    // This evening already connected the tower, so the re-pick ends on play.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(pad.page).locator("[data-roster]")).toBeVisible({ timeout: 20_000 });
     const after = await readStatus(pad.page);
     expect(after.day).toBe(before?.day);
@@ -517,8 +519,10 @@ test("a restart during play: Pick story with Continue above the stories, no Ente
       order.indexOf(`continue-pick-story-${STORY_ID}`),
     );
     await clickAct(pad.page, "continue", "continue-saved-game");
-    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+    // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
+    // The saved game never linked a tower, so the re-pick does not open a tower pause.
     await holdHeroesFromTest(pad.page, [...HERO_IDS]);
+    await expect(deviceMain(pad.page)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
     await expect(deviceMain(pad.page).locator("[data-roster]")).toBeVisible({ timeout: 20_000 });
     const after = await readStatus(pad.page);
     expect(after.day).toBe(before?.day);

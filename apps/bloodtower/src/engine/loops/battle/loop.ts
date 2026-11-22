@@ -40,6 +40,8 @@ export type FoeInput = {
   /** Starting count. Absent: the tuning's count for the level and the heroes present. */
   wounds?: number;
   startAbility?: FoeAbility | null;
+  /** DEC-553: Spine Fiends' Spines, on a won round. Only the foe's own ability; absent for any other. */
+  wonRoundAbility?: "spines" | null;
   /** The foe's 8 round cards (DEC-649). */
   cards: RoundCard[];
   disaster?: boolean;
@@ -110,6 +112,7 @@ export type BattleState = {
     level: number;
     wounds: number;
     startAbility: FoeAbility | null;
+    wonRoundAbility?: "spines" | null;
     disaster: boolean;
   };
   cards: RoundCard[];
@@ -314,6 +317,17 @@ const roll = (s: BattleState, strength: number): boolean => {
   return eventRng(`${s.seed}:roll`, s.rollSeq++).chance(odds);
 };
 
+/** DEC-553, DEC-941: the standing hero with the highest fight number takes 1; a tie is a seeded pick. */
+const spines = (s: BattleState, ports: BattlePorts): void => {
+  const alive = standing(s);
+  if (alive.length === 0) return;
+  const top = Math.max(...alive.map((h) => h.fight));
+  const tied = alive.filter((h) => h.fight === top);
+  const target = tied.length === 1 ? (tied[0] as BattleHero) : rand(s).pick(tied);
+  note(s, "round.spines", { heroId: target.id, amount: 1, tied: tied.length });
+  hit(s, target, 1, ports);
+};
+
 const resolveRound = (s: BattleState, ports: BattlePorts): void => {
   note(s, "round.actions", { round: s.round, picks: structuredClone(s.picks) });
   // .8: spells cut first, flat cuts before any halving (DEC-655).
@@ -338,6 +352,9 @@ const resolveRound = (s: BattleState, ports: BattlePorts): void => {
     const cut = wonRoundCut(s.tuning, strength);
     s.foe.wounds = Math.max(0, s.foe.wounds - cut);
     note(s, "round.result", { round: s.round, won: true, strength, cut });
+    // DEC-907: the cut comes first. A foe the cut leaves gone is won at once and Spines never fires.
+    if (settle(s, ports)) return;
+    if (s.foe.wonRoundAbility === "spines") spines(s, ports);
   } else {
     const guard = standing(s).find((h) => s.picks[h.id]?.kind === "guard");
     const target = guard ?? pickTarget(s, standing(s));
@@ -404,6 +421,7 @@ export const startBattle = (config: BattleConfig, ports: BattlePorts = {}): Batt
       level: config.foe.level,
       wounds: config.foe.wounds ?? foeWounds(config.tuning, config.foe.level, heroes.length),
       startAbility: config.foe.startAbility ?? null,
+      wonRoundAbility: config.foe.wonRoundAbility ?? null,
       disaster: config.foe.disaster ?? false,
     },
     cards: structuredClone(config.foe.cards),

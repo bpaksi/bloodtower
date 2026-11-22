@@ -203,10 +203,17 @@ describe("a tower lost mid-game", () => {
     second.session.rememberAutosave({ gameId: saved.gameId, packId: saved.packId, day: 1 });
     const pad2 = await joinPad(second.session);
     const act2 = pressWith(second.session, pad2);
-    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
-      await act2("hero-hold", "take", { heroId });
-    }
+    // A tower snapshot rebuilds the session screen's offers, so Continue is offered (the hero
+    // picks that used to do this now come after Continue).
+    second.session.syncTowerSnapshot();
+    await second.session.whenIdle();
     await act2("continue-saved-game", "continue");
+    // Continue seats the saved party on the iPads joined now (CU/16): pick the unheld heroes.
+    for (const heroId of ["hero-a", "hero-b", "hero-c", "hero-d"]) {
+      if (second.session.state().holdings[heroId] == null) {
+        await act2("hero-hold", "take", { heroId });
+      }
+    }
     const resumed = second.session.state();
     expect(resumed.screen).toBe("play");
     expect(resumed.towerWithout).toBe(true);
@@ -215,6 +222,36 @@ describe("a tower lost mid-game", () => {
     const drops = await playDrops(second.session, pad2, 1);
     expect(drops).toHaveLength(1);
     expect(second.tower.sent().length).toBe(sentBefore);
+  });
+
+  it("Play without Tower on Continue resumes unlinked and in play (C2/06 EV-08)", async () => {
+    const { boot } = harness();
+    const first = await boot();
+    const { pad, act } = await reachPlay(first.session, "connect");
+    await act("menu-quit", "quit-story");
+    expect(first.session.state().screen).toBe("session");
+
+    // The tower drops between games. Continue runs the tower block before the save loads.
+    first.tower.loseConnection();
+    first.session.syncTowerSnapshot();
+    await first.session.whenIdle();
+    expect(first.session.state().screen).toBe("session");
+    await act("continue-saved-game", "continue");
+    expect(first.session.state().screen).toBe("tower-choice");
+    const sentAtChoice = first.tower.sent().length;
+
+    await act("play-without-tower", "play-without-tower");
+    const resumed = first.session.state();
+    expect(resumed.screen).toBe("play");
+    expect(resumed.pause).toBeNull();
+    expect(resumed.stage).toBe("playing");
+    expect(resumed.towerLinked).toBe(false);
+    expect(resumed.towerWithout).toBe(true);
+    expect(resumed.towerChoice).toBe("without");
+    const open = openActions(first.session, pad).map((action) => action.actionId);
+    expect(open).not.toContain("reconnect");
+    expect(open).not.toContain("go-on-without");
+    expect(first.tower.sent().length).toBe(sentAtChoice);
   });
 
   it("a failed Reconnect shows its code on the iPad that pressed and asks again", async () => {
