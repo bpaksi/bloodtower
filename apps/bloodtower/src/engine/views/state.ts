@@ -190,7 +190,13 @@ export type QuestSceneView = {
   }[];
   pending: "corruption" | "item" | null;
   reveal: string | null;
-  rewards: { gold: number; questGold: number; items: string[]; presentHeroes: number } | null;
+  rewards: {
+    gold: number;
+    questGold: number;
+    items: string[];
+    presentHeroes: number;
+    tollShort: boolean;
+  } | null;
 };
 
 export type BuildingPanelView = {

@@ -65,6 +65,8 @@ export type QuestResultInfo = {
   questGold: number;
   items: string[];
   presentHeroes: number;
+  /** The toll took all the group's gold and cost hit points (Q-C3-22). False for any other option. */
+  tollShort: boolean;
 };
 
 /** What a finished pick says. The board shows it; names are filled in by the view. */

@@ -38,6 +38,7 @@ import {
   loadLive,
   type PickKind,
   type PickRefusal,
+  presentGold,
   questPickGate,
   spendQuestMove,
 } from "./picks.ts";
@@ -329,6 +330,7 @@ const questRewards = (
   local: EncounterLocal,
   questId: string,
   optionId: string,
+  tollShort: boolean,
 ): QuestResultInfo => {
   const play = playState();
   const store = ensureQuests(play);
@@ -344,6 +346,7 @@ const questRewards = (
     questGold: store.tuning.questGold,
     items: effects.flatMap((e) => (e.kind === "item" ? [e.item] : [])),
     presentHeroes: groupById(play, local.groupId)?.heroIds.length ?? 0,
+    tollShort,
   };
 };
 
@@ -371,6 +374,11 @@ const questPress = (
   loadLive(play, local.groupId, movesOf(local));
   // The finished quest's progress is deleted, so the option it took is read before the press.
   const optionId = optionPressed ?? ensureQuests(play).progress[questId]?.optionId ?? null;
+  // The toll is short when the heroes present hold less than it asks, read before it is paid.
+  const store = ensureQuests(play);
+  const tollShort =
+    store.defs.find((def) => def.id === questId)?.scene.options.find((row) => row.id === optionId)
+      ?.cost?.kind === "toll" && presentGold(play, local.groupId) < store.tuning.tollGold;
   const result = run(play);
   if (!result.ok) return refused(local, QUEST_REFUSALS[result.reason]);
   // DEC-676, DEC-905: a lost game (any reason) stops the quest; no turn-end loss runs and no step is offered.
@@ -384,7 +392,7 @@ const questPress = (
       ? toResult(settled, {
           pick: "quest",
           auto: true,
-          quest: questRewards(local, questId, optionId),
+          quest: questRewards(local, questId, optionId, tollShort),
         })
       : toStep(settled, { kind: "menu" });
   }

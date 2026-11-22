@@ -233,6 +233,7 @@ const questSceneSchema = z.strictObject({
       questGold: z.number().int().min(0).max(999),
       items: z.array(z.string().min(1).max(80)).max(3),
       presentHeroes: z.number().int().min(1).max(16),
+      tollShort: z.boolean(),
     })
     .nullable(),
 });

@@ -425,6 +425,7 @@ const buildQuestScene = (
         questGold: info.questGold,
         items: info.items,
         presentHeroes: info.presentHeroes,
+        tollShort: info.tollShort,
       },
     };
   }
