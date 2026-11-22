@@ -22,8 +22,8 @@ const striga = (over: Partial<BattleConfig["foe"]> = {}): BattleConfig["foe"] =>
   cards: cards(0),
   ...over,
 });
-const caster = (id: string, spells: SpellId[], seatOrder = 0) =>
-  hero(id, { spells, deviceId: `pad-${id}`, fight: 1 + seatOrder * 0 });
+const caster = (id: string, spells: SpellId[]) =>
+  hero(id, { spells, deviceId: `pad-${id}`, fight: 1 });
 const make = (over: Partial<BattleConfig> = {}) =>
   startBattle(config({ foe: striga(), script: { rolls: Array(20).fill(false) }, ...over }));
 
@@ -141,6 +141,8 @@ describe("R04-D3-EV-06 the Ward is per battle", () => {
       ["b", atk],
     ]);
     expect(two.foe.wardUsed).toBe(true);
+    const left = choose(two, "pad-a", "retreat");
+    expect(left.result?.kind).toBe("retreated");
     const next = round(make({ heroes: heroes() }), [
       ["a", spell("magic_missile")],
       ["b", atk],

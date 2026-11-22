@@ -247,10 +247,10 @@ export const addBossRend = (state: BattleState, rend: Partial<RoundCard> = {}): 
   if (s.node === "closed") throw new Error("A closed battle takes no boss phase.");
   s.phases += 1;
   const card: RoundCard = {
-    id: `rend-phase-${s.phases}`,
     name: "Rend",
     hit: null,
     ...rend,
+    id: `rend-phase-${s.phases}`,
     rend: true,
   };
   s.cards.push(card);

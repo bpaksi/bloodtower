@@ -42,6 +42,7 @@ const until = (seed: string, drawLeft: number): BattleState => {
 };
 const reveals = (s: BattleState) =>
   s.log.filter((e) => e.kind === "round.reveal").map((e) => e.data.card as string);
+const POS_S1 = 4;
 const hp = (s: BattleState) => s.heroes[0]?.hp ?? -1;
 const rendCount = (s: BattleState) => s.cards.filter((c) => c.rend).length;
 
@@ -84,6 +85,23 @@ describe("R04-D3-EV-07 a phase shuffles its Rend into the draw pile only", () =>
       return pick(pick(w, "a", { kind: "attack" }), "b", { kind: "attack" });
     })();
     expect(hp(won)).toBe(hp(base));
+  });
+});
+
+describe("R04-D3-EV-07 the Rend's seeded place in the draw pile", () => {
+  const place = (seed: string) =>
+    deckPiles(addBossRend(until(seed, 5))).draw.indexOf("rend-phase-1");
+  it("is fixed for a fixed seed", () => {
+    expect(place("s1")).toBe(POS_S1);
+  });
+  it("is not always first (or last) across seeds", () => {
+    const spots = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"].map(place);
+    expect(spots.some((p) => p > 0)).toBe(true);
+    expect(new Set(spots).size).toBeGreaterThan(1);
+  });
+  it("a caller cannot override the Rend's id", () => {
+    const s = addBossRend(addBossRend(until("s1", 5), { id: "c1" }));
+    expect(new Set(s.cards.map((c) => c.id)).size).toBe(s.cards.length);
   });
 });
 
