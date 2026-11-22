@@ -51,7 +51,7 @@ For each PR in order:
 3. On a conflict or red check after the update, send it back as a new round (above) and go on with the next PR in the order.
 4. After the merge, `pnpm wt:rm <branch>`.
 
-Branch protection on `main` requires the `check` status and an up-to-date branch. The review condition is yours to enforce: merge only after the latest review reports `Blocking: none`.
+Branch protection on `main` requires the `check` status. The branch need not be up to date; `e2e-main.yml` catches clashes after the merge. The review condition is yours to enforce: merge only after the latest review reports `Blocking: none`.
 
 ## After the batch
 
