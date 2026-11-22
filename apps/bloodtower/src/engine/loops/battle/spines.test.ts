@@ -110,11 +110,11 @@ describe("R04-EV-12 Spines' third corruption loses the game first", () => {
 describe("R04-EV-14 Continue after Spines lands", () => {
   it("resumes at the next node and does not fire Spines or the cut again", () => {
     const heroes = [hero("a", { fight: 3, hp: 1, max: 5 }), hero("b", { fight: 1, hp: 5, max: 5 })];
-    const live = wonRound(make({ foe: fiends(6), heroes }));
+    const live = wonRound(make({ foe: fiends(4), heroes }));
     const back = continueBattle(saveBattle(live));
     expect(back).toEqual({ ...live, silence: { elapsed: 0, paused: false } });
     expect(kinds(back).filter((k) => k === "round.spines")).toHaveLength(1);
-    expect(back.foe.wounds).toBe(4);
+    expect(back.foe.wounds).toBe(2);
     expect(back.node).toBe("choice");
     expect(heroOf(back, "a").out).toBe(true);
     expect(back.deckPos).toBe(live.deckPos);

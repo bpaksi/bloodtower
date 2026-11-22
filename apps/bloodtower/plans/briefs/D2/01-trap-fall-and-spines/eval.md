@@ -111,7 +111,7 @@ All fixtures: own-turn Tomb visit or plain battle as named; no Advantage, compan
 ### EV-18 — A Spines tie is a seeded pick, no prompt
 - Requirement: DEC-941, DEC-553, DEC-011.
 - Method: unit
-- How: `R04-EV-18`. Spine Fiends at count 3; two standing heroes, both fight number 3, both at 5 HP; inject a won round (cut 1). Run 20 seeds, and run each seed twice.
+- How: `R04-EV-18`. Spine Fiends at count 9; two standing heroes, both fight number 3, both at 5 HP; inject a won round (cut 3, so the foe stands and the tie is reached). Run 20 seeds, and run each seed twice.
 - Pass evidence: each run: exactly one hero loses 1 HP, and it is one of the two tied heroes; no prompt is offered; the same seed gives the same hero both times; across the 20 seeds each tied hero is hit at least once.
 - Fails if: both heroes are hit, a prompt opens, the same seed gives different heroes, or the pick follows seat or tap order (one hero every time).
 
@@ -127,7 +127,7 @@ All fixtures: own-turn Tomb visit or plain battle as named; no Advantage, compan
 ### EV-14 — Continue after Spines lands
 - Requirement: survival invariant 2; DEC-675.
 - Method: unit
-- How: `R04-EV-14`. EV-11 (b); save after Spines lands; restore; resume.
+- How: `R04-EV-14`. EV-11 (b) with Spine Fiends at count 4 (the cut of 2 leaves the foe at 2); save after Spines lands; restore; resume.
 - Pass evidence: foe count 2; Spines fired once in the log; the felled hero still sits out; the next node is Fight/Retreat; card and deck position equal an uninterrupted run.
 - Fails if: Spines or the cut repeats, or the sit-out is lost.
 

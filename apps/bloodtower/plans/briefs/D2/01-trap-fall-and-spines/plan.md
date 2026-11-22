@@ -26,7 +26,8 @@ Keep this a checklist; do not write a second design doc.
 - OVERLAP F1: `apps/bloodtower/src/engine/loops/battle/**` (the won round, MEC-038 .11: cut, then the DEC-907 gate, then Spines only if the foe stands).
 - OVERLAP F1: `apps/bloodtower/src/engine/rules/battle/**` (Spines, if the foe abilities live there).
 - OVERLAP F1: new unit tests beside the battle and Tomb tests (F1 adds TB-01 to TB-14 there). D2's tests are `R04-*` (names in eval.md), in their own `describe` blocks.
-- **Files touched (Anvil, after F1 ruled cards-only and C4/02's engine level landed in #584):** `apps/bloodtower/src/engine/rules/trap/index.ts` and `trap.test.ts` (new: the trap loss and fall rule, EV-01 to EV-08, EV-16); `apps/bloodtower/src/engine/loops/battle/loop.ts` (Spines in the won round: `wonRoundAbility`, `round.spines`) and `loops/battle/spines.test.ts` (new: EV-10, EV-11, EV-12, EV-14, EV-18). **Blocked (no Tomb loop on main, C4-06):** EV-06 quest and board half, EV-13, EV-15, EV-17; they need `loops/tomb/**`.
+- **Files touched (Anvil, after F1 ruled cards-only and C4/02's engine level landed in #584):** `apps/bloodtower/src/engine/rules/trap/index.ts` and `trap.test.ts` (new: the trap loss and fall rule, EV-01 to EV-08, EV-16); `apps/bloodtower/src/engine/loops/battle/loop.ts` (Spines in the won round: `wonRoundAbility`, `round.spines`) and `loops/battle/spines.test.ts` (new: EV-10, EV-11, EV-12, EV-14, EV-18).
+- **Scope (Bob, 2026-11-22, "Yes, option (a)"):** D2 builds the trap rule (`rules/trap`) and Spines in the battle loop. The Tomb clauses go to C4-06 (see its eval EV-19 to EV-21): the next-room prompt of EV-01, 02 and 05; the Tomb result, quest fail, return to the board and nothing-after of EV-06, 07 and 16; EV-13, 15 and 17. C4-06 must call `springTrap` and honour `allFell`, `gameLost` and `roomCleared`.
 - Read only, on main: `apps/bloodtower/src/engine/rules/corruption/index.ts` (`gainCorruption`, the third-corruption outcome), `apps/bloodtower/src/engine/loops/day/clock.ts` (hero `hp`, `isCorruptionLoss`), `apps/bloodtower/src/engine/loops/quest/quest.ts` (DEC-714's plain-scene floor, which D2 must not change).
 - Cards: none. #509 already edited MEC-026 .15, MEC-038 .11, DEC-553, DEC-606 and DEC-119.
 
@@ -67,9 +68,8 @@ Cutover: N
 
 Contract is ./eval.md. List EV IDs; do not restate them.
 
-- [ ] EV-01 to EV-12 and EV-16 to EV-18 pass (verifier table on PR).
-- [ ] EV-15 (e2e, R04 through the session) passes.
-- [ ] EV-13 to EV-14 (survival) pass.
+- [ ] EV-01 to EV-12, EV-14, EV-16 and EV-18 pass at the rule and battle level, less the Tomb clauses moved to C4-06 (verifier table on PR).
+- Moved to C4-06 (Bob 2026-11-22): the Tomb clauses of EV-01, 02, 05, 06, 07, 16; EV-13, 15 and 17.
 - [ ] Anvil's report lists changed files, test commands and results, and any drift found.
 - Not required: the Tomb or battle screens; Advantages on traps; companions; balance claims.
 
