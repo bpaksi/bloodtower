@@ -73,7 +73,8 @@ All fixtures: plain battle, no Advantage, companion, item or story effect unless
 - Pass evidence: 9 distinct reveals before any repeat; the reshuffle returns all 9 including the added Rend; each round the view data's cards-left and Rends-left equal the draw pile's actual counts.
 - Fails if: a card repeats before 9 reveals, the added Rend is lost at the reshuffle, or the counts disagree with the pile.
 
-### EV-10 — End to end through the session (R04)
+### EV-10 — End to end through the session (R04) — Moved to C4/04 (Bob, 2026-11-22)
+- Moved because nothing on main starts a battle from play, and this brief keeps `loops/chapter/**` read-only; C4/04 is the step that starts battles from play. It is C4/04's EV-09. Original text kept below.
 - Requirement: R04's Ward and boss-deck cases; DEC-908, DEC-909.
 - Method: unit
 - How: one test that drives a seeded game through the session step shell by presses (as `towerLost.test.ts` does) into a battle with the Striga: (a) Lightning and Magic Missile in round 1; then a second seed (b) a boss-deck fixture battle where a won round crosses a phase line with 3 cards in the draw pile.

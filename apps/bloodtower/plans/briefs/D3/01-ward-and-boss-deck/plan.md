@@ -66,7 +66,7 @@ Cutover: N
 Contract is ./eval.md. List EV IDs; do not restate them.
 
 - [ ] EV-01 to EV-09 pass (verifier table on PR), or any blocked one is marked blocked with the exact reason.
-- [ ] EV-10 (e2e, R04 through the session) passes.
+- [x] EV-10 (e2e, R04 through the session): moved to C4/04 as its EV-09 (Bob, 2026-11-22). Nothing on main starts a battle from play, and this brief keeps `loops/chapter/**` read-only. D3 merges on its engine tests.
 - [ ] EV-11 to EV-12 (survival) pass.
 - [ ] Anvil's report lists changed files, test commands and results, and any drift found.
 - Not required: the boss screen; The Warden's real thresholds and ability numbers; balance claims (DEC-908 and DEC-909 are "check in playtest").

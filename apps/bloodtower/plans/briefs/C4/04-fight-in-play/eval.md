@@ -66,6 +66,13 @@ Keep it a checklist. Strict: a plausible wrong build must fail.
 - Pass evidence: same three options.
 - Fails if: redrawn.
 
+### EV-09 — Ward and boss deck end to end through the session (From D3 EV-10, Bob, 2026-11-22; pending Bob's approval with the C4/04 brief)
+- Requirement: R04's Ward and boss-deck cases; DEC-908, DEC-909 (engine rules built and unit-tested in D3/01).
+- Method: unit
+- How: one test that drives a seeded game through the session step shell by presses (as `towerLost.test.ts` does) into a battle started from play (the Fight of EV-01) with the Striga: (a) Lightning and Magic Missile in round 1; then a second seed (b) a boss-deck fixture battle where a won round crosses a phase line with 3 cards in the draw pile.
+- Pass evidence: (a) the foe count drops by 4 and the Missile is the cancelled spell; (b) the next round's view data shows cards left 3 + 1 and Rends left one higher, and the card face-up when the phase fired was resolved, not replaced.
+- Fails if: any step needs a direct state write after the start, the Ward cancels the strong spell, or the phase touches the face-up card.
+
 ## Assumptions surfaced
 
 - Picks marked "(Gamewright pick, approved by Bob 2026-10-31 6:16 PM ET)" are drafts; an eval tied to one changes if Bob picks otherwise.
