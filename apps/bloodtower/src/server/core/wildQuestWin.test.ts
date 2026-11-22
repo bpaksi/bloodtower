@@ -180,6 +180,12 @@ const offer = (game: Game, actionId: string) =>
   game.session.state().offered.find((o) => o.open && o.actionId === actionId);
 
 const pressOffer = async (game: Game, actionId: string) => {
+  // C3/14: a finished quest shows its rewards and end-hook steps first; each closes on a wait timer
+  // (0 ms in this test), so give those timers their turn before reading the offers.
+  for (let i = 0; i < 20 && !offer(game, actionId); i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    await game.session.whenIdle();
+  }
   const found = offer(game, actionId);
   if (!found) throw new Error(`No open "${actionId}" offer.`);
   await game.pad.act(found.promptId, found.actionId);
@@ -417,7 +423,7 @@ describe("Enter on a wild quest marker in a real game (F1/04)", () => {
     const before = goldOf(game);
     await pressLabel(game, "Quest");
     // The pack's own words, exactly: the toll, then Leave. Fight is hidden (no battles yet).
-    expect(model(game).options.map((o) => o.label)).toEqual(["[COPY: Pay the toll]", "Leave"]);
+    expect(model(game).options.map((o) => o.label)).toEqual(["Pay the toll (10 gold)", "Leave"]);
     await pressOption(game, TOLL);
     await pressOffer(game, "leave");
     const after = goldOf(game);
