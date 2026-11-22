@@ -597,8 +597,9 @@ test.describe("C3/14 the quest scene", () => {
       });
       const { context, pad, board } = await openTable(browser, session);
       await clickAct(pad, "continue", "continue-saved-game");
-      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+      // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
       await holdHeroesFromTest(pad, [...FOUR]);
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       return { session, context, pad, board };
     };
     /** Every Menu row with its state and reason, then the Menu closed again. */
@@ -727,8 +728,9 @@ test.describe("C3/14 the quest scene", () => {
     const game: Game = { session, context, pad, board };
     try {
       await clickAct(pad, "continue", "continue-saved-game");
-      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+      // Continue seats the saved party on the iPads joined now (CU/16): pick, then play goes on.
       await holdHeroesFromTest(pad, [...FOUR]);
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
       await tick(game, 4_100);
       await expect(phase(board, "end")).toBeVisible({ timeout: 20_000 });

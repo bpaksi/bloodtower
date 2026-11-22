@@ -110,3 +110,7 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 ## Note (Bob's option (a), 2026-11-22)
 
 EV-15's no-quit restart on the end hook resumes on the rewards step (the host saves on a press, not on a wait's end), pays the quest once, and is accepted under Bob's option (a) as covered by #589.
+
+## Note (iPad frame standard, 2026-11-22)
+
+Bob ruled on 2026-11-22 in the coordinator-session chat that the iPad frame standard is full parchment (DEC-233): edge to edge, with engraved corners and the toolbar on the parchment, as #593 builds it. The dark framed inset in the C3/13 and C3/14 mockups is superseded (mockup update tracked in issue #595). EV-05's iPad half is scored against the full-parchment shell.
