@@ -316,6 +316,8 @@ test.describe("C3/14 the quest scene", () => {
       );
       await expect(deviceMain(pad).locator("[data-building-prompt]")).toHaveText("Will you help?");
       await expectToolbar(pad);
+      // EV-05: the iPad header shows the step label, as the mockup draws it.
+      await expect(deviceMain(pad).locator("[data-quest-step-label]")).toHaveText("Present heroes");
       await shoot(testInfo, "ev05-choice", pad, board);
       // No auto-advance: still on the choice 5 s later.
       await tick(game, 5_000);
@@ -330,6 +332,8 @@ test.describe("C3/14 the quest scene", () => {
       await expect(heroButtons(pad)).toHaveText(["Hero A", "Hero B", "Hero C", "Hero D"]);
       await expect(board.locator("[data-reveal-card] [data-item-placeholder]")).toBeVisible();
       await expectToolbar(pad);
+      // EV-05: the iPad header shows the step label, as the mockup draws it.
+      await expect(deviceMain(pad).locator("[data-quest-step-label]")).toHaveText("Item");
       await shoot(testInfo, "ev05-item", pad, board);
       await tick(game, 5_000);
       await expect(heroButtons(pad)).toHaveCount(4);
@@ -351,6 +355,8 @@ test.describe("C3/14 the quest scene", () => {
       await expect(deviceMain(pad).locator("[data-building-option]")).toHaveCount(0);
       await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
       await expectToolbar(pad);
+      // EV-05: the iPad header shows the step label, as the mockup draws it.
+      await expect(deviceMain(pad).locator("[data-quest-step-label]")).toHaveText("Rewards");
       await shoot(testInfo, "ev05-rewards", pad, board);
 
       // EV-13: it moves on by itself, at 4 s; the end hook is next.

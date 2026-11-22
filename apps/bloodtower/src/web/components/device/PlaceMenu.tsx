@@ -15,7 +15,23 @@ export const QUEST_PAD_COPY = {
   needs: (item: string) => `Needs ${item}`,
   use: (item: string) => `Use ${item}`,
   cost: (n: number) => `cost: ${n} gold`,
+  // The mockup's header label, one per step (screen-spec; the end hook keeps the place name only).
+  stepChoose: "Present heroes",
+  stepItem: "Item",
+  stepCorruption: "Corruption",
+  stepRewards: "Rewards",
 } as const;
+
+/** The step label the mockup draws in the iPad header, or null where it draws none. */
+export const questStepLabel = (quest: BuildingPanel["quest"] | null): string | null => {
+  if (!quest) return null;
+  if (quest.phase === "choose") return QUEST_PAD_COPY.stepChoose;
+  if (quest.phase === "rewards") return QUEST_PAD_COPY.stepRewards;
+  if (quest.phase === "hero") {
+    return quest.pending === "corruption" ? QUEST_PAD_COPY.stepCorruption : QUEST_PAD_COPY.stepItem;
+  }
+  return null;
+};
 
 /** The cost line of a quest option, or null. A short toll says what it will take (Q-C3-22). */
 export const questCostLine = (option: QuestOption): string | null => {
@@ -77,6 +93,7 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
     building.step === "quest-hero"
       ? [...building.options].sort((a, b) => heroOf(a.promptId).localeCompare(heroOf(b.promptId)))
       : building.options;
+  const stepLabel = questStepLabel(quest);
   const prompt = quest?.phase === "choose" ? QUEST_PAD_COPY.prompt : building.prompt;
   return (
     <section
@@ -89,6 +106,11 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
       data-held-heroes={heldHeroIds.join(",")}
       aria-label={building.title}
     >
+      {stepLabel ? (
+        <p className="text-center text-lg font-medium" data-quest-step-label="">
+          {stepLabel}
+        </p>
+      ) : null}
       <h2 className="text-lg font-medium" data-building-title="">
         {building.title}
       </h2>
