@@ -264,8 +264,9 @@ const menuOptions = (play: PlayState, local: BuildingLocal): BuildingOption[] | 
 
 const buildingNameOf = (play: PlayState, groupId: string): string => {
   const group = groupById(play, groupId);
-  const building = group ? play.content.board.spaceById.get(group.spaceId)?.building : undefined;
-  return building ? buildingTitle(building) : "Building";
+  const space = group ? play.content.board.spaceById.get(group.spaceId) : undefined;
+  if (!space) return "Building";
+  return space.building ? buildingTitle(space.building) : space.name;
 };
 
 /** The model of the step the encounter is on. `nameOf` turns a hero id into the name the table sees. */
