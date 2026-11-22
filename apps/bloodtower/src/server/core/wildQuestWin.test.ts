@@ -8,10 +8,10 @@ import type { PlayState } from "../../engine/loops/chapter/playState.ts";
 import { ensureClock, heroSheet } from "../../engine/loops/day/clock.ts";
 import type { EncounterLocal } from "../../engine/loops/encounter/loop.ts";
 import { buildingModel } from "../../engine/loops/encounter/menu.ts";
-import { ensurePicks } from "../../engine/loops/encounter/picks.ts";
+import { ensurePicks, setMoves } from "../../engine/loops/encounter/picks.ts";
 import { eventEligible } from "../../engine/loops/event/state.ts";
 import { openQuestAt } from "../../engine/loops/quest/quest.ts";
-import { ensureQuests } from "../../engine/loops/quest/store.ts";
+import { BASE_QUEST_TUNING, ensureQuests } from "../../engine/loops/quest/store.ts";
 import { TEST_STORY } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
 import { OPENING_MOMENTS, openingPromptId } from "../../protocols/opening.ts";
@@ -24,7 +24,11 @@ import { stepClock } from "../timing/clock.ts";
 import { createMockTower } from "../tower/mock.ts";
 import { bloodtowerTowerFromMock } from "../tower/testAdapter.ts";
 import { loadStoryCatalog } from "./loadStories.ts";
-import { deserializeShellState, type SerializedShellState } from "./serialize.ts";
+import {
+  deserializeShellState,
+  type SerializedShellState,
+  serializeShellState,
+} from "./serialize.ts";
 import { type CoreSession, createCoreSession } from "./session.ts";
 import { shellCheckpointFromState } from "./shellCheckpoint.ts";
 
@@ -276,6 +280,12 @@ const walkTo = async (game: Game, target: string) => {
   throw new Error(`Never reached ${target}.`);
 };
 
+/** The hero's gold after the Ambush: the toll first (all of it when short), then the quest gold. */
+const goldAfterAmbush = (before: number): number =>
+  (before >= BASE_QUEST_TUNING.tollGold ? before - BASE_QUEST_TUNING.tollGold : 0) +
+  BASE_QUEST_TUNING.questGold;
+const goldOf = (game: Game): number => heroSheet(ensureClock(playOf(game)), "hero-a").gold ?? 0;
+
 const ended = (game: Game) => game.session.state().screen === "session";
 const records = (game: Game) => projectGameRecords(game.store);
 
@@ -369,24 +379,46 @@ describe("Enter on a wild quest marker in a real game (F1/04)", () => {
   it("EV-10a: Continue inside a wild marker's menu keeps the menu and the moves", async () => {
     const game = await realGame(SEED, ["hero-a"]);
     await enterForestMenu(game);
-    const movesBefore = ensurePicks(playOf(game)).moves[groupOf(game).id];
-    const resumed = await restartFromCheckpoint(game);
-    expect(groupOf(resumed).insideBuilding).toBe(true);
-    expect(model(resumed).title).toBe("Muted Forest");
-    expect(model(resumed).options.map((o) => o.label)).toEqual(["Quest", "Leave"]);
-    expect(ensurePicks(playOf(resumed)).moves[groupOf(resumed).id]).toBe(movesBefore);
+    // One move left, as the eval sets it up: Quest is still enabled.
+    setMoves(playOf(game), groupOf(game).id, 1);
+    for (const frame of game.session.state().loops.stack) {
+      if (frame.loopId === "encounter" || frame.loopId === "group-turn") {
+        (frame.local as { movesLeft: number }).movesLeft = 1;
+      }
+    }
+    expect(ensurePicks(playOf(game)).moves[groupOf(game).id]).toBe(1);
+    // Serialize and rehydrate the shell, as a Continue reads a save.
+    const back = deserializeShellState(
+      JSON.parse(JSON.stringify(serializeShellState(game.session.state()))),
+    );
+    const play = back.play;
+    if (!play) throw new Error("No play after rehydrate.");
+    const frame = back.loops.stack.find((row) => row.loopId === "encounter");
+    expect(play.groups[0]?.insideBuilding).toBe(true);
+    const rebuilt = buildingModel(play, frame?.local as EncounterLocal, (id: string) => id);
+    expect(rebuilt.title).toBe("Muted Forest");
+    expect(rebuilt.options.map((o) => o.label)).toEqual(["Quest", "Leave"]);
+    expect(rebuilt.options[0]).toMatchObject({ label: "Quest", enabled: true });
+    expect(rebuilt.options[0]?.detail).toContain("1 move");
+    expect(ensurePicks(play).moves[play.groups[0]?.id ?? ""]).toBe(1);
   });
 
-  it("EV-10c: a done Ambush stays done after Continue and offers no Enter", async () => {
+  it("EV-10c: a done Ambush stays done after Continue; its gold is paid once", async () => {
     const game = await realGame(SEED, ["hero-a"]);
     await enterForestMenu(game);
+    const before = goldOf(game);
     await pressLabel(game, "Quest");
+    // The pack's own words, exactly: the toll, then Leave. Fight is hidden (no battles yet).
+    expect(model(game).options.map((o) => o.label)).toEqual(["[COPY: Pay the toll]", "Leave"]);
     await pressOption(game, TOLL);
     await pressOffer(game, "leave");
+    const after = goldOf(game);
+    expect(after).toBe(goldAfterAmbush(before));
     const resumed = await restartFromCheckpoint(game);
     expect(ensureQuests(playOf(resumed)).done.filter((id) => id === "ambush")).toHaveLength(1);
     expect(openQuestAt(playOf(resumed), FOREST)).toBeNull();
     expect(offer(resumed, "enter")).toBeUndefined();
+    expect(goldOf(resumed)).toBe(after);
   });
 
   it("EV-08: chapter 1 is won in a real game through Enter on the wild marker", async () => {

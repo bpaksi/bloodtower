@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
-import { setBuildingSkulls } from "../day/clock.ts";
+import { ensureClock, heroSheet, setBuildingSkulls, setHeroSheet } from "../day/clock.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
 import { buildingModel } from "../encounter/menu.ts";
-import { configurePicks, ensurePicks, openMenu, setMoves, setPurse } from "../encounter/picks.ts";
+import {
+  configurePicks,
+  ensurePicks,
+  openMenu,
+  presentGold,
+  setMoves,
+} from "../encounter/picks.ts";
 import { AMBUSH, HERALD } from "../quest/fixtures.ts";
 import { openQuestAt } from "../quest/quest.ts";
-import { configureQuests, ensureQuests } from "../quest/store.ts";
+import { BASE_QUEST_TUNING, configureQuests, ensureQuests } from "../quest/store.ts";
 import { TEST_STORY } from "../session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { initialShellState, type ShellState } from "../session/state.ts";
@@ -40,7 +46,11 @@ const build = (
   group.insideBuilding = options.inside === true;
   configurePicks(play, { chapter: 1 });
   setMoves(play, group.id, moves);
-  setPurse(play, group.id, options.purse ?? 15);
+  // The sheets hold the gold: `loadLive` resets the purse to the pool when a menu opens.
+  setHeroSheet(play, "hero-a", {
+    ...heroSheet(ensureClock(play), "hero-a"),
+    gold: options.purse ?? 15,
+  });
   configureQuests(play, {
     defs: DEFS,
     markersByChapter: {
@@ -160,35 +170,40 @@ describe("Enter on a wild quest marker (F1/04)", () => {
   });
 
   it("EV-04: the menu is Quest, then Leave, titled with the space's name", () => {
-    const state = press(build(), enterId(build()), "enter");
     const inside = press(build(), enterId(build()), "enter");
     expect(groupOf(inside).insideBuilding).toBe(true);
-    const play = playOf(inside);
-    const menu = openMenu(play, groupOf(inside).id);
+    const menu = openMenu(playOf(inside), groupOf(inside).id);
     expect(menu.ok && menu.entries.map((e) => e.id)).toEqual(["quest"]);
     const m = model(inside);
     expect(m.title).toBe("Muted Forest");
     expect(m.options.map((o) => o.label)).toEqual(["Quest", "Leave"]);
     expect(m.options[0]?.detail).toContain("1 move");
     expect(m.options[0]?.enabled).toBe(true);
-    expect(state).toBeDefined();
-    expect(projectShellView(inside).place ?? null).toBeNull();
+    const view = projectShellView(inside);
+    expect(view.table?.building?.skulls).toBe(0);
+    expect(view.place ?? null).toBeNull();
   });
 
-  it("EV-05: Quest plays the Ambush; the turn ends; the space is plain wild after", () => {
+  it("EV-05: Quest plays the Ambush; the toll is paid; the turn ends; the space is plain wild after", () => {
     let state = build({ purse: 15 });
+    const group = groupOf(state).id;
     state = press(state, enterId(state), "enter");
     expect(movesOf(state)).toBe(2);
+    expect(presentGold(playOf(state), group)).toBe(15);
     state = pressRow(state, "Quest");
     expect(movesOf(state)).toBe(1);
-    const labels = model(state).options.map((o) => o.label);
-    expect(labels).toContain("Pay the toll");
-    expect(labels).not.toContain("Fight them");
+    // The toll is the visible option; Fight stays hidden (no battles yet).
+    expect(model(state).options.map((o) => o.label)).toEqual(["Pay the toll", "Leave"]);
     state = pressRow(state, "Pay the toll");
     expect(ensureQuests(playOf(state)).done).toContain("ambush");
+    // 15 - the toll, then the quest gold for the one hero present (DEC-944, DEC-700).
+    const { tollGold, questGold } = BASE_QUEST_TUNING;
+    const expected = 15 - tollGold + questGold;
+    expect(presentGold(playOf(state), group)).toBe(expected);
     expect(movesOf(state)).toBe(0);
-    expect(model(state).options.map((o) => o.label)).not.toContain("Quest");
+    expect(model(state).options.map((o) => o.label)).toEqual(["Leave"]);
     state = pressRow(state, "Leave");
+    expect(heroSheet(ensureClock(playOf(state)), "hero-a").gold).toBe(expected);
     expect(groupOf(state).insideBuilding).toBe(false);
     expect(openQuestAt(playOf(state), FOREST)).toBeNull();
     expect(canEnterHere(playOf(state), FOREST)).toBe(false);
