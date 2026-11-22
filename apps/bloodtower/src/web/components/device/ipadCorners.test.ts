@@ -11,7 +11,7 @@ const APP_ROOT = join(import.meta.dirname, "../../../..");
 const MOCK_JPEG = "/ipad/b-engraved-ipad-move-map.jpg";
 
 describe("DEC-233 theme B iPad corners", () => {
-  it.fails("draws four clean engraved corners, not windows on the move-map mock (#592)", () => {
+  it("draws four clean engraved corners, not windows on the move-map mock (#592)", () => {
     const html = renderToStaticMarkup(createElement(IpadCorners));
     expect(html).toContain('data-ipad-corners="theme-b"');
     expect(html).not.toContain(MOCK_JPEG);

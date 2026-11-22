@@ -141,43 +141,42 @@ test.describe("#592 the iPad shell is one parchment page", () => {
     test.skip(testInfo.project.name !== "ipad", "The shell is the iPad's.");
   });
 
-  test.fail(
-    "join screen, move map and building menu paint parchment with dark ink",
-    async ({ browser }, testInfo) => {
-      test.setTimeout(300_000);
-      const { session, context, pad } = await startAtBuilding(browser, testInfo);
-      try {
-        await pad.goto("/join");
-        await expectParchmentShell(pad, "join");
-        await pad.goto(`/join?code=${session.host.joinCode}`);
-        await enterWithoutTower(pad);
-        await clickAct(pad, "continue", "continue-pick-story-test");
-        await pad.locator(`button[data-setting="party-size"][data-option="n-4"]`).click();
-        await clickAct(pad, "continue", "continue-game-settings");
-        await holdHeroesFromTest(pad, [...FOUR]);
-        await clickAct(pad, "continue", "continue-claim-heroes");
-        for (const id of SETUP_IDS) {
-          await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
-          if (id === "starting-purse") await clickAct(pad, "spin", "spin-setup-starting-purse");
-          await expectParchmentShell(pad, `setup-${id}`);
-          await clickAct(pad, "continue", `continue-setup-${id}`);
-        }
-        await clickAct(pad, "continue", "continue-begin");
-        for (const id of OPENING_IDS) {
-          await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
-        }
-        await clickAct(pad, "continue");
-        await expect(pad.locator("[data-move-map]")).toBeVisible({ timeout: 20_000 });
-        await expectParchmentShell(pad, "move-map");
-        await clickAct(pad, "enter");
-        await expect(deviceMain(pad).locator("section[data-building]")).toBeVisible({
-          timeout: 20_000,
-        });
-        await expectParchmentShell(pad, "building-menu");
-      } finally {
-        await context.close();
-        await session.host.close();
+  test("join screen, move map and building menu paint parchment with dark ink", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const { session, context, pad } = await startAtBuilding(browser, testInfo);
+    try {
+      await pad.goto("/join");
+      await expectParchmentShell(pad, "join");
+      await pad.goto(`/join?code=${session.host.joinCode}`);
+      await enterWithoutTower(pad);
+      await clickAct(pad, "continue", "continue-pick-story-test");
+      await pad.locator(`button[data-setting="party-size"][data-option="n-4"]`).click();
+      await clickAct(pad, "continue", "continue-game-settings");
+      await holdHeroesFromTest(pad, [...FOUR]);
+      await clickAct(pad, "continue", "continue-claim-heroes");
+      for (const id of SETUP_IDS) {
+        await expect(deviceMain(pad)).toHaveAttribute("data-setup-step", id, { timeout: 20_000 });
+        if (id === "starting-purse") await clickAct(pad, "spin", "spin-setup-starting-purse");
+        await expectParchmentShell(pad, `setup-${id}`);
+        await clickAct(pad, "continue", `continue-setup-${id}`);
       }
-    },
-  );
+      await clickAct(pad, "continue", "continue-begin");
+      for (const id of OPENING_IDS) {
+        await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
+      }
+      await clickAct(pad, "continue");
+      await expect(pad.locator("[data-move-map]")).toBeVisible({ timeout: 20_000 });
+      await expectParchmentShell(pad, "move-map");
+      await clickAct(pad, "enter");
+      await expect(deviceMain(pad).locator("section[data-building]")).toBeVisible({
+        timeout: 20_000,
+      });
+      await expectParchmentShell(pad, "building-menu");
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  });
 });
