@@ -46,7 +46,7 @@ If round 3 ends with any blocking finding open (or CI still red):
 
 For each PR in order:
 
-1. `gh pr update-branch <n>` if `main` moved since CI last ran, then `gh pr checks <n> --watch`.
+1. Optional: `gh pr update-branch <n>` only when the PR has a merge conflict, or the change is risky against what just landed. Then `gh pr checks <n> --watch`.
 2. Merge only when the `check` status is green, the latest review says `Blocking: none`, and, for a feature PR, the eval table is all-pass on the head: `gh pr merge <n> --squash --delete-branch`.
 3. On a conflict or red check after the update, send it back as a new round (above) and go on with the next PR in the order.
 4. After the merge, `pnpm wt:rm <branch>`.
