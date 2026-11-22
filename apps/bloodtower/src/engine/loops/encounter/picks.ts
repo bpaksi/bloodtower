@@ -20,6 +20,7 @@ import type { PlayState } from "../chapter/playState.ts";
 import { groupById, nextPlayRng } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, isFallen, setHeroSheet } from "../day/clock.ts";
 import { buildingMenu } from "../day/rules.ts";
+import { openQuestAt } from "../quest/quest.ts";
 import { ensureQuests } from "../quest/store.ts";
 
 /** Prices and amounts for the 1.0 picks. Defaults match packs/base/tuning.yaml (DEC-703). */
@@ -290,12 +291,9 @@ export const setQuestMarker = (play: PlayState, spaceId: string, present: boolea
   else delete quests.bySpace[spaceId];
 };
 
-/** True while the space holds a quest marker of this chapter that is not done (as `openQuestAt` reads it). */
-const questOpenAt = (play: PlayState, spaceId: string): boolean => {
-  const quests = ensureQuests(play);
-  const id = quests.bySpace[spaceId];
-  return Boolean(id) && !quests.done.includes(id as string);
-};
+/** True while the space holds a quest marker of this chapter that is not done: `openQuestAt`, the one source. */
+const questOpenAt = (play: PlayState, spaceId: string): boolean =>
+  openQuestAt(play, spaceId) !== null;
 
 /** The Quest pick costs one move (DEC-948). */
 export const QUEST_MOVES = 1;
@@ -306,14 +304,32 @@ const spaceOf = (play: PlayState, groupId: string) => {
   return { group, space: play.content.board.spaceById.get(group.spaceId) };
 };
 
-/** Opening a menu: refused for a fallen building (EV-10). */
+/** Opening a menu: refused for a fallen building with no open quest (EV-10). */
 export const openMenu = (
   play: PlayState,
   groupId: string,
 ): { ok: true; entries: MenuEntry[] } | { ok: false; reason: PickRefusal } => {
   const here = spaceOf(play, groupId);
-  if (!here?.space?.building) return { ok: false, reason: "unknown-group" };
-  if (isFallen(play, here.space.id)) return { ok: false, reason: "fallen" };
+  if (!here?.space) return { ok: false, reason: "unknown-group" };
+  // A wild space with an open quest marker: Quest, then Leave. Not a building: no Cleanse (DEC-951).
+  if (!here.space.building) {
+    if (!questOpenAt(play, here.space.id)) return { ok: false, reason: "unknown-group" };
+    return {
+      ok: true,
+      entries: [
+        {
+          id: "quest",
+          label: "Quest",
+          price: null,
+          disabled: (ensurePicks(play).moves[groupId] ?? 0) < QUEST_MOVES,
+        },
+      ],
+    };
+  }
+  // A fallen building with an open quest still opens: Quest, then Leave (DEC-910).
+  if (isFallen(play, here.space.id) && !questOpenAt(play, here.space.id)) {
+    return { ok: false, reason: "fallen" };
+  }
   const store = ensurePicks(play);
   const clock = ensureClock(play);
   const skulls = clock.skulls[here.space.id] ?? 0;
