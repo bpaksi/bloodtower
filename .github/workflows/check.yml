@@ -23,6 +23,7 @@
 #   e2e         pull requests only: the Playwright suite, when a changed path can reach the
 #               Bloodtower build (apps/bloodtower, packages, packs, root config, workflows).
 #               The app's own plans/, docs/ and markdown cannot, so they skip it.
+#               The suite is split into four parallel shards over one build per shard.
 #               Pushes to main run it from e2e-main.yml.
 #
 # Anything under apps/, including app docs and app asset folders, is full CI. A range that
@@ -186,12 +187,22 @@ jobs:
         if: needs.scope.outputs.needs_packs == 'true'
         run: pnpm check:packs
 
-  # Same steps as e2e-main.yml, which runs the suite on pushes to main.
+  # Same steps as e2e-main.yml, which runs the suite on pushes to main. Four shards run in
+  # parallel (`--shard=N/4`). The matrix legs are named `e2e (1)` .. `e2e (4)`; branch
+  # protection requires only `check`, so those names are free to change. `needs.e2e.result`
+  # is the combined result: failure if any shard failed, cancelled if any was cancelled,
+  # skipped when the job's `if` skips the whole matrix, success otherwise. The gate in
+  # `check` reads it that way unchanged.
   e2e:
     needs: scope
     if: github.event_name == 'pull_request' && needs.scope.outputs.needs_e2e == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 25
+    strategy:
+      # One shard failing must not hide the others.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - name: pnpm setup
@@ -208,15 +219,19 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: playwright browsers
         run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium webkit
-      - name: build web export
-        run: pnpm --dir apps/bloodtower/src/web build
-      - name: playwright e2e
-        run: pnpm --dir apps/bloodtower e2e
+      # The same build the e2e webServer would run (pack lint, then next build). Done once
+      # here; E2E_PREBUILT=1 tells the webServer not to build it again.
+      - name: build
+        run: pnpm --dir apps/bloodtower build
+      - name: playwright e2e (shard ${{ matrix.shard }}/4)
+        env:
+          E2E_PREBUILT: "1"
+        run: pnpm --dir apps/bloodtower e2e --shard=${{ matrix.shard }}/4
       - name: upload report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             apps/bloodtower/src/e2e/playwright-report
             apps/bloodtower/src/e2e/test-results
