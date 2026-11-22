@@ -29,6 +29,8 @@ export type RoundCard = {
   name: string;
   /** Hit points the card takes off the hero it lands on. Null: the foe's level (tuning lost_round). */
   hit: number | null;
+  /** DEC-567, DEC-909: a Rend card, counted by the foe panel's "Rends left". */
+  rend?: boolean;
 };
 
 /** DEC-553: an ability that fires once before round 1. Ambush hits one random hero for the foe's level. */
@@ -42,6 +44,10 @@ export type FoeInput = {
   startAbility?: FoeAbility | null;
   /** DEC-553: Spine Fiends' Spines, on a won round. Only the foe's own ability; absent for any other. */
   wonRoundAbility?: "spines" | null;
+  /** DEC-553, DEC-908: the Striga's Ward cancels the weakest spell once a battle. */
+  ward?: boolean;
+  /** DEC-553: the Titan's Colossus halves each surviving spell, rounded down, after the flat cuts. */
+  colossus?: boolean;
   /** The foe's 8 round cards (DEC-649). */
   cards: RoundCard[];
   disaster?: boolean;
@@ -113,6 +119,11 @@ export type BattleState = {
     wounds: number;
     startAbility: FoeAbility | null;
     wonRoundAbility?: "spines" | null;
+    /** The foe holds a Ward (DEC-908). */
+    ward: boolean;
+    /** The Ward has cancelled a spell this battle. */
+    wardUsed: boolean;
+    colossus: boolean;
     disaster: boolean;
   };
   cards: RoundCard[];
@@ -132,6 +143,8 @@ export type BattleState = {
   deck: string[];
   deckPos: number;
   cycle: number;
+  /** Boss phases fired so far (DEC-909): names each added Rend and seeds each shuffle. */
+  phases: number;
   rollSeq: number;
   randSeq: number;
   silence: { elapsed: number; paused: boolean };
@@ -195,6 +208,59 @@ const drawCard = (s: BattleState): RoundCard => {
   const card = s.cards.find((c) => c.id === id);
   if (!card) throw new Error(`The deck names a card "${String(id)}" the foe does not have.`);
   return card;
+};
+
+/** The three piles of DEC-909: the draw pile, the discards, and the card face-up. */
+export type DeckPiles = {
+  draw: string[];
+  discards: string[];
+  faceUp: string | null;
+  /** The foe panel's view data: cards left in the draw pile, and the Rends among them. */
+  cardsLeft: number;
+  rendsLeft: number;
+  /** Every card the deck holds, the Rends a phase added included (the cycle). */
+  held: number;
+};
+
+export const deckPiles = (s: BattleState): DeckPiles => {
+  const draw = s.deck.slice(s.deckPos);
+  const faceUp = s.deckPos > 0 ? (s.deck[s.deckPos - 1] ?? null) : null;
+  const rends = new Set(s.cards.filter((c) => c.rend).map((c) => c.id));
+  return {
+    draw,
+    discards: s.deck.slice(0, Math.max(0, s.deckPos - 1)),
+    faceUp,
+    cardsLeft: draw.length,
+    rendsLeft: draw.filter((id) => rends.has(id)).length,
+    held: s.cards.length,
+  };
+};
+
+/**
+ * DEC-909, DEC-658: a boss phase adds one Rend to the draw pile and shuffles that pile, seeded in
+ * the battle's stream. The discards and the face-up card stay. The caller (C5-02's boss rules, or a
+ * test trigger) fires it once per phase line crossed, in order. An empty draw pile makes the Rend its
+ * only card; a later reveal that empties the pile reshuffles every card, the added Rends included.
+ */
+export const addBossRend = (state: BattleState, rend: Partial<RoundCard> = {}): BattleState => {
+  const s = structuredClone(state);
+  if (s.node === "closed") throw new Error("A closed battle takes no boss phase.");
+  s.phases += 1;
+  const card: RoundCard = {
+    id: `rend-phase-${s.phases}`,
+    name: "Rend",
+    hit: null,
+    ...rend,
+    rend: true,
+  };
+  s.cards.push(card);
+  const draw = eventRng(`${s.seed}:phase:${s.phases}`, 0).shuffle([
+    ...s.deck.slice(s.deckPos),
+    card.id,
+  ]);
+  s.deck = [...s.deck.slice(0, s.deckPos), ...draw];
+  note(s, "boss.phase", { phase: s.phases, card: card.id, cardsLeft: draw.length });
+  return s;
 };
 
 const cardHit = (s: BattleState, card: RoundCard): number => card.hit ?? s.foe.level;
@@ -331,16 +397,27 @@ const spines = (s: BattleState, ports: BattlePorts): void => {
 const resolveRound = (s: BattleState, ports: BattlePorts): void => {
   note(s, "round.actions", { round: s.round, picks: structuredClone(s.picks) });
   // .8: spells cut first, flat cuts before any halving (DEC-655).
-  const cuts: { heroId: string; spell: SpellId; cut: number }[] = [];
+  let cuts: { heroId: string; spell: SpellId; cut: number }[] = [];
   for (const h of standing(s)) {
     const action = s.picks[h.id];
     if (action?.kind !== "spell") continue;
     h.usedSpells.push(action.spell);
     cuts.push({ heroId: h.id, spell: action.spell, cut: s.tuning.spellCut[action.spell] });
   }
+  // DEC-908: (1) the Ward cancels the weakest spell once; the cancelled spell is cast and spent.
+  // An equal cut cancels the first in seat order (the heroes' order), never by tap.
+  let cancelled: { heroId: string; spell: SpellId; cut: number } | null = null;
+  if (s.foe.ward && !s.foe.wardUsed && cuts.length > 0) {
+    const weakest = Math.min(...cuts.map((c) => c.cut));
+    cancelled = cuts.find((c) => c.cut === weakest) ?? null;
+    s.foe.wardUsed = true;
+    cuts = cuts.filter((c) => c !== cancelled);
+  }
+  // (2) the surviving flat cuts, then (3) any halving, rounded down (DEC-655, DEC-553).
+  if (s.foe.colossus) cuts = cuts.map((c) => ({ ...c, cut: Math.floor(c.cut / 2) }));
   const total = cuts.reduce((sum, c) => sum + c.cut, 0);
   s.foe.wounds = Math.max(0, s.foe.wounds - total);
-  note(s, "round.spells", { cuts, total });
+  note(s, "round.spells", { cuts, total, cancelled });
   // .36, DEC-643: a foe the spells felled ends the round: no Strike, roll or card lands.
   if (settle(s, ports)) return;
   const attackers = standing(s).filter((h) => s.picks[h.id]?.kind === "attack");
@@ -422,6 +499,9 @@ export const startBattle = (config: BattleConfig, ports: BattlePorts = {}): Batt
       wounds: config.foe.wounds ?? foeWounds(config.tuning, config.foe.level, heroes.length),
       startAbility: config.foe.startAbility ?? null,
       wonRoundAbility: config.foe.wonRoundAbility ?? null,
+      ward: config.foe.ward ?? false,
+      wardUsed: false,
+      colossus: config.foe.colossus ?? false,
       disaster: config.foe.disaster ?? false,
     },
     cards: structuredClone(config.foe.cards),
@@ -445,6 +525,7 @@ export const startBattle = (config: BattleConfig, ports: BattlePorts = {}): Batt
     deck: [],
     deckPos: 0,
     cycle: 0,
+    phases: 0,
     rollSeq: 0,
     randSeq: 0,
     silence: { elapsed: 0, paused: false },
@@ -580,6 +661,7 @@ export const continueBattle = (saved: string, ports: BattlePorts = {}): BattleSt
     throw new Error("The saved battle is not usable.");
   }
   s.silence = { elapsed: 0, paused: false };
+  s.phases ??= 0;
   advance(s, ports);
   return s;
 };
