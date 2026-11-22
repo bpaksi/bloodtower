@@ -69,6 +69,19 @@ const clickAct = async (page: Page, actionId: string, promptId?: string) => {
   await button.click();
 };
 
+type WaitTicker = { advance: (ms: number) => void };
+
+/** Ends the quest's rewards step and its end hook (the wait clock), until the building menu is back. */
+const endQuestSteps = async (pad: Page, waitClock: { advance: (ms: number) => void } | null) => {
+  const menu = deviceMain(pad).locator('[data-building="menu"]');
+  for (const expected of ["result", "result"]) {
+    await expect(deviceMain(pad).locator(`[data-building="${expected}"]`)).toBeVisible();
+    waitClock?.advance(5_000);
+    await pad.waitForTimeout(300);
+  }
+  await expect(menu).toBeVisible();
+};
+
 const options = (pad: Page) => deviceMain(pad).locator("[data-building-option]");
 const labelsOf = async (pad: Page) => {
   await expect(options(pad).first()).toBeVisible({ timeout: 20_000 });
@@ -132,7 +145,7 @@ const pressBetween = async (pad: Page): Promise<boolean> => {
 };
 
 /** Walks by the move map, day after day, until Enter shows at `target`. */
-const walkToEnter = async (pad: Page, target: string) => {
+const walkToEnter = async (pad: Page, target: string, waitClock: WaitTicker | null) => {
   const enter = pad.locator('button[data-action-id="enter"]');
   for (let guard = 0; guard < 120; guard += 1) {
     const at = await where(pad)
@@ -152,7 +165,10 @@ const walkToEnter = async (pad: Page, target: string) => {
         continue;
       }
     }
-    if (!(await pressBetween(pad))) await pad.waitForTimeout(250);
+    if (!(await pressBetween(pad))) {
+      waitClock?.advance(5_000);
+      await pad.waitForTimeout(250);
+    }
   }
   throw new Error(`Never reached Enter at ${target}.`);
 };
@@ -194,9 +210,12 @@ test.describe("F1/04 chapter 1 won through Enter on the wild marker", () => {
   }, testInfo) => {
     test.setTimeout(420_000);
     const packsDir = c3Packs();
-    const { host, baseURL, databasePath } = await startAcceptanceHost(testInfo, {
+    // C3/14: a finished quest shows its rewards and end-hook steps before the menu; each ends on the
+    // host's wait clock, which the test advances (`endQuestSteps`).
+    const { host, baseURL, databasePath, waitClock } = await startAcceptanceHost(testInfo, {
       seed: SEED,
       packsDir,
+      fakeWait: true,
     });
     const context = await browser.newContext({ baseURL, ...PORTRAIT });
     const pad = await context.newPage();
@@ -211,7 +230,7 @@ test.describe("F1/04 chapter 1 won through Enter on the wild marker", () => {
       await startGame(pad, board);
 
       // Muted Forest: the wild marker holds the Ambush.
-      await walkToEnter(pad, FOREST);
+      await walkToEnter(pad, FOREST, waitClock);
       // The label is "Enter"; the button carries a leading icon glyph in its text.
       await expect(pad.locator('button[data-action-id="enter"]').first()).toHaveText(/Enter$/);
       await clickAct(pad, "enter");
@@ -229,7 +248,7 @@ test.describe("F1/04 chapter 1 won through Enter on the wild marker", () => {
       await expect(deviceMain(pad).locator('[data-building="quest"]')).toBeVisible();
       expect(await idsOf(pad)).toEqual([TOLL, LEAVE]);
       await optionById(pad, TOLL).click();
-      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
+      await endQuestSteps(pad, waitClock);
       await expect(optionByLabel(pad, "Quest")).toHaveCount(0);
       await pad.locator('button[data-action-id="leave"]').click();
       await expect(deviceMain(pad).locator("section[data-building]")).toHaveCount(0, {
@@ -237,7 +256,7 @@ test.describe("F1/04 chapter 1 won through Enter on the wild marker", () => {
       });
 
       // Egan's End: the Herald.
-      await walkToEnter(pad, VILLAGE);
+      await walkToEnter(pad, VILLAGE, waitClock);
       await clickAct(pad, "enter");
       await expect(deviceMain(pad).locator("section[data-building]")).toBeVisible({
         timeout: 20_000,
@@ -245,13 +264,16 @@ test.describe("F1/04 chapter 1 won through Enter on the wild marker", () => {
       expect((await labelsOf(pad))[0]).toBe("Quest");
       await optionByLabel(pad, "Quest").click();
       await optionById(pad, PAY).click();
-      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
+      await endQuestSteps(pad, waitClock);
       await pad.locator('button[data-action-id="leave"]').click();
 
       // Play on to the day's end: the game ends won and the record is written once.
       for (let guard = 0; guard < 200; guard += 1) {
         if ((await deviceMain(pad).getAttribute("data-screen")) === "session") break;
-        if (!(await pressBetween(pad))) await pad.waitForTimeout(250);
+        if (!(await pressBetween(pad))) {
+          waitClock?.advance(5_000);
+          await pad.waitForTimeout(250);
+        }
       }
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", {
         timeout: 20_000,
