@@ -70,7 +70,9 @@ export default defineConfig({
   webServer: {
     // Build first, the same as tower-poc: a stale or missing export fails most specs.
     // `--dir`: the root package is also named `bloodtower`, so `-F bloodtower` would build every app.
-    command: "pnpm --dir apps/bloodtower build && pnpm -F bloodtower-server start",
+    // CI sets E2E_PREBUILT=1 only after its own `pnpm --dir apps/bloodtower build` step, so the
+    // build runs once there. Locally it is unset and the build still runs first.
+    command: `${process.env.E2E_PREBUILT === "1" ? "" : "pnpm --dir apps/bloodtower build && "}pnpm -F bloodtower-server start`,
     cwd: repoRoot,
     url: `${baseURL}/health`,
     env: {

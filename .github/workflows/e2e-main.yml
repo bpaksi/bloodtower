@@ -3,6 +3,7 @@
 # on main. A push that only touches paths the Bloodtower build never reads is skipped: the
 # trees in E2E_SAFE_TREES and the app's own plans, notes and markdown (`bloodtowerDocs`), both
 # in scripts/ci-scope.mjs.
+# The suite runs as four parallel shards (`--shard=N/4`), as in check.yml.
 # Setup mirrors check.yml (pnpm, .nvmrc node, bluetooth headers, frozen install).
 name: e2e-main
 
@@ -30,7 +31,12 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 25
+    strategy:
+      # One shard failing must not hide the others.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - name: pnpm setup
@@ -47,15 +53,19 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: playwright browsers
         run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium webkit
-      - name: build web export
-        run: pnpm --dir apps/bloodtower/src/web build
-      - name: playwright e2e
-        run: pnpm --dir apps/bloodtower e2e
+      # The same build the e2e webServer would run (pack lint, then next build). Done once
+      # here; E2E_PREBUILT=1 tells the webServer not to build it again.
+      - name: build
+        run: pnpm --dir apps/bloodtower build
+      - name: playwright e2e (shard ${{ matrix.shard }}/4)
+        env:
+          E2E_PREBUILT: "1"
+        run: pnpm --dir apps/bloodtower e2e --shard=${{ matrix.shard }}/4
       - name: upload report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             apps/bloodtower/src/e2e/playwright-report
             apps/bloodtower/src/e2e/test-results
