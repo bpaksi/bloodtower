@@ -104,6 +104,16 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
               {result.line}
             </p>
           ) : null}
+          {result.auto && quest ? (
+            // The mockup's progress ticks: the step moves on by itself (filled, filled, then open).
+            <p
+              className="mt-3 text-[var(--bt-muted)]"
+              data-quest-ticks={quest.phase}
+              aria-hidden="true"
+            >
+              {quest.phase === "end" ? "● ● ●" : "● ● ○"}
+            </p>
+          ) : null}
           {result.auto ? (
             <p className="text-[var(--bt-muted)]" data-building-auto="">
               {AUTO_LINE}

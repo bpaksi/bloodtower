@@ -15,7 +15,7 @@ Keep this a checklist; do not write a second design doc.
 - Risk: Med
 - Depends on: C3 feature 07 merged, C2 feature 06 merged, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/QuestScene.tsx` (new), `apps/bloodtower/src/web/components/device/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/e2e/tests/c3-quest.spec.ts`
-- Touches amendment by the coordinator, pending Bob's OK (2026-11-22): C3/13 and F1/02 made the quest a step of the building panel, so the step splits in two PRs and the Touches list grows.
+- Touches amendment, approved by Bob 2026-11-22 in chat ("approve … the C3/14 Touches"): C3/13 and F1/02 made the quest a step of the building panel, so the step splits in two PRs and the Touches list grows.
   - PR A (engine and wire): `apps/bloodtower/src/protocols/v2/views.ts`, `apps/bloodtower/src/engine/views/state.ts`, `apps/bloodtower/src/engine/loops/session/view.ts`, `apps/bloodtower/src/engine/loops/encounter/loop.ts`, `apps/bloodtower/src/engine/loops/encounter/menu.ts` (the `BuildingResult` type only), `packs/test/pack.yaml` (the two Ambush labels), and the tests that read the quest flow: `encounter/questPick.test.ts`, `encounter/questScene.test.ts` (new), `server/core/questSave.test.ts`, `server/pack/v2/lint.test.ts`, `e2e/tests/ee01-quest-pick.spec.ts`, `e2e/tests/f1-03-live-quests.spec.ts`.
   - PR B (iPad and board, stacked on A): the original Touches (`board/QuestScene.tsx`, `device/**`, `engine/views/**`, `e2e/tests/c3-quest.spec.ts`) plus `board/CoreStoryBoard.tsx`, `board/board.css`, `engine/loops/session/view.ts` (the party view lists the quest items a hero holds, with their names) and the unit tests beside the components. The Ambush and Lock screens (EV-06, EV-02) are covered by render and engine tests; their e2e waits for F1/04 (no Enter on a wild space).
   - Copy is hardcoded by quest id in `QuestScene.tsx` (as C3/12 does with `EVENT_COPY`); the pack schema does not change.
@@ -106,3 +106,7 @@ Exact player-facing text for this screen, by Loremaster, 2026-11-12. Beat order 
 ## Eval approval
 
 - See ./approval.md (must be filled before coding).
+
+## Note (Bob's option (a), 2026-11-22)
+
+EV-15's no-quit restart on the end hook resumes on the rewards step (the host saves on a press, not on a wait's end), pays the quest once, and is accepted under Bob's option (a) as covered by #589.

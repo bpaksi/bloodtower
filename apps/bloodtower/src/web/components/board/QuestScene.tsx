@@ -167,6 +167,11 @@ export function QuestScene({ quest }: { quest: Quest }) {
                 {QUEST_SCENE_COPY.badgeGold(rewards.gold)}
               </span>
             ) : null}
+            {rewards.items.map((item) => (
+              <span key={item} className="bt-quest-badge bt-quest-badge--item" data-badge="item">
+                {questItemName(item)}
+              </span>
+            ))}
             {Array.from({ length: rewards.presentHeroes }, (_, index) => (
               <span
                 // biome-ignore lint/suspicious/noArrayIndexKey: one badge per present hero, in order

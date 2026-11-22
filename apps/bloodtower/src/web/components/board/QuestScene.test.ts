@@ -53,6 +53,14 @@ describe("C3/14 the quest scene's words (Copy table)", () => {
     expect(html).toContain("quest +5");
     expect(html).toContain("Moves on by itself.");
     expect(html).toContain('data-track-done="1"');
+    // An item reward is a red badge naming the item.
+    const item = render({
+      ...base,
+      phase: "rewards",
+      optionId: "take-the-job",
+      rewards: { gold: 0, questGold: 5, items: ["tomas-map"], presentHeroes: 1, tollShort: false },
+    });
+    expect(item).toMatch(/data-badge="item"[^>]*>Tomas&#x27;s Map</);
   });
 
   it("the Ambush words a paid toll and a short one apart, and ends on its hook", () => {

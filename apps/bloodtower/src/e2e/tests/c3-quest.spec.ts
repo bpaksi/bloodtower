@@ -346,6 +346,8 @@ test.describe("C3/14 the quest scene", () => {
       await expect(board.locator("[data-quest-rewards-line]")).toContainText("Tomas's Map");
       await expect(lines(board).first()).toContainText("Tomas hands you a map");
       await expect(board.locator("[data-quest-tick]")).toHaveText("Moves on by itself.");
+      await expect(board.locator('[data-badge="item"]')).toHaveText("Tomas's Map");
+      await expect(deviceMain(pad).locator("[data-quest-ticks]")).toHaveText("● ● ○");
       await expect(deviceMain(pad).locator("[data-building-option]")).toHaveCount(0);
       await expect(pad.locator('button[data-action-id="build"]')).toHaveCount(0);
       await expectToolbar(pad);

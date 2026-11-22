@@ -130,6 +130,8 @@ describe("C3/14 the quest on the iPad", () => {
       result: { pick: "quest", line: "The quest is done.", detail: null, badge: null, auto: true },
     });
     expect(html).toContain("Moves on by itself.");
+    expect(html).toContain("● ● ○");
+    expect(html.indexOf("data-quest-ticks")).toBeLessThan(html.indexOf("data-building-auto"));
     expect(html).not.toContain("The quest is done.");
     expect(html).not.toContain("data-building-option");
     expect(helpScreenFor({ table: { building: { quest: {} } } }, false)).toBe("quest-scene");

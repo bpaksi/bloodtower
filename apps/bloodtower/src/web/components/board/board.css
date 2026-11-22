@@ -3161,3 +3161,9 @@
   font-style: italic;
   text-align: center;
 }
+
+.bt-quest-badge--item {
+  border-color: #8a1e14;
+  background: #8a1e14;
+  color: #e8dcc0;
+}
