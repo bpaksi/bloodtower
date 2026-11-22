@@ -310,7 +310,22 @@ export const openMenu = (
   groupId: string,
 ): { ok: true; entries: MenuEntry[] } | { ok: false; reason: PickRefusal } => {
   const here = spaceOf(play, groupId);
-  if (!here?.space?.building) return { ok: false, reason: "unknown-group" };
+  if (!here?.space) return { ok: false, reason: "unknown-group" };
+  // A wild space with an open quest marker: Quest, then Leave. Not a building: no Cleanse (DEC-951).
+  if (!here.space.building) {
+    if (!questOpenAt(play, here.space.id)) return { ok: false, reason: "unknown-group" };
+    return {
+      ok: true,
+      entries: [
+        {
+          id: "quest",
+          label: "Quest",
+          price: null,
+          disabled: (ensurePicks(play).moves[groupId] ?? 0) < QUEST_MOVES,
+        },
+      ],
+    };
+  }
   // A fallen building with an open quest still opens: Quest, then Leave (DEC-910).
   if (isFallen(play, here.space.id) && !questOpenAt(play, here.space.id)) {
     return { ok: false, reason: "fallen" };
