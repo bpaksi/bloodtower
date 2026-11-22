@@ -5,19 +5,20 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ChromeBar } from "./ChromeBar.tsx";
-import { IPAD_CORNER_FRAME_URL, IpadCorners } from "./IpadCorners.tsx";
+import { IpadCorners } from "./IpadCorners.tsx";
 
 const APP_ROOT = join(import.meta.dirname, "../../../..");
+const MOCK_JPEG = "/ipad/b-engraved-ipad-move-map.jpg";
 
 describe("DEC-233 theme B iPad corners", () => {
-  it("points the shell at the engraved mock, one window per corner", () => {
-    expect(IPAD_CORNER_FRAME_URL).toBe("/ipad/b-engraved-ipad-move-map.jpg");
+  it.fails("draws four clean engraved corners, not windows on the move-map mock (#592)", () => {
     const html = renderToStaticMarkup(createElement(IpadCorners));
     expect(html).toContain('data-ipad-corners="theme-b"');
-    expect(html).toContain(IPAD_CORNER_FRAME_URL);
+    expect(html).not.toContain(MOCK_JPEG);
     expect(html.match(/data-ipad-corner="/g)).toHaveLength(4);
     for (const corner of ["tl", "tr", "bl", "br"]) {
       expect(html).toContain(`data-ipad-corner="${corner}"`);
+      expect(html).toContain(`/ipad/corners/corner-${corner}.png`);
     }
   });
 
@@ -28,7 +29,8 @@ describe("DEC-233 theme B iPad corners", () => {
     expect(html).not.toContain("dialog-frame");
     const board = readFileSync(join(import.meta.dirname, "../board/board.css"), "utf8");
     expect(board).toContain("/board/dialog-frame/dialog-frame.svg");
-    expect(board).not.toContain(IPAD_CORNER_FRAME_URL);
+    expect(board).not.toContain(MOCK_JPEG);
+    expect(board).not.toContain("/ipad/corners/");
     expect(board).not.toContain("data-ipad-corner");
   });
 
