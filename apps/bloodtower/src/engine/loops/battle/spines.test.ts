@@ -67,7 +67,7 @@ describe("R04-EV-11 Spines on a non-final cut", () => {
   it("(b) hits only the highest fight number; the fight goes on with one standing hero", () => {
     const s = wonRound(
       make({
-        foe: fiends(6),
+        foe: fiends(3),
         heroes: [hero("a", { fight: 3, hp: 1, max: 5 }), hero("b", { fight: 1, hp: 5, max: 5 })],
       }),
     );
