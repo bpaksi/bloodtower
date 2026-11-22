@@ -56,9 +56,24 @@ export const tileLabel = (index: number, count: number): string =>
 /** A wait the host runs for a result with no Next (EV-15, EV-16): same shape as the day's. */
 export type BuildingWait = { id: string; maxMs: number; lineId: string | null };
 
+/** A finished quest's rewards and which of its two closing steps this is (C3/14, MEC-037 .9). */
+export type QuestResultInfo = {
+  phase: "rewards" | "end";
+  questId: string;
+  optionId: string;
+  gold: number;
+  questGold: number;
+  items: string[];
+  presentHeroes: number;
+  /** The toll took all the group's gold and cost hit points (Q-C3-22). False for any other option. */
+  tollShort: boolean;
+};
+
 /** What a finished pick says. The board shows it; names are filled in by the view. */
 export type BuildingResult = {
-  pick: PickKind;
+  pick: PickKind | "quest";
+  /** Set on the quest's rewards and end-hook steps; the effects were applied before they showed. */
+  quest?: QuestResultInfo;
   heroId?: string;
   /** Rally and Rest: hit points after, the most, and the points gained. */
   hp?: { hp: number; max: number; gained: number };

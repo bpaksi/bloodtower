@@ -157,8 +157,11 @@ test.describe("F1/03 a real game's Herald, from the story pack", () => {
       await expect(deviceMain(one.pad).locator('[data-building="quest"]')).toBeVisible();
       expect(await questIdsOf(one.pad)).toEqual([TAKE, PAY, LEAVE]);
 
+      // C3/14: the rewards step and the end hook (4 s each, no audio) come before the menu.
       await optionById(one.pad, PAY).click();
-      await expect(deviceMain(one.pad).locator('[data-building="menu"]')).toBeVisible();
+      await expect(deviceMain(one.pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
       expect(await labelsOf(one.pad)).toEqual(["Rest", "Cleanse"]);
       await expect(optionByLabel(one.pad, "Rest")).toBeDisabled();
       await expect(optionByLabel(one.pad, "Cleanse")).toBeDisabled();

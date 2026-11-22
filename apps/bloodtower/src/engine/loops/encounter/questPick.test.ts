@@ -10,7 +10,7 @@ import { PROVING_GROUNDS_PLAY } from "../session/playContent.ts";
 import { bindShellState } from "../session/shellRef.ts";
 import { initialShellState, type ShellState } from "../session/state.ts";
 import { refreshOffersAfterRestore, stepShell } from "../session/stepShell.ts";
-import { type EncounterLocal, handleBuildingPress } from "./loop.ts";
+import { type EncounterLocal, handleBuildingPress, openBuildingWait } from "./loop.ts";
 import { buildingModel } from "./menu.ts";
 import { beginGroupTurn, ensurePicks, turnHasEnded } from "./picks.ts";
 
@@ -105,6 +105,20 @@ const option = (state: ShellState, label: string) => {
   if (!found) throw new Error(`no "${label}" in ${labels(state).join(", ")}`);
   return found;
 };
+/** C3/14: a finished quest shows its rewards, then its end hook, each ended by the host's wait-end. */
+const endWait = (state: ShellState): ShellState => {
+  const wait = openBuildingWait(state.loops.stack);
+  if (!wait) throw new Error("no open wait");
+  return stepShell(state, { kind: "wait-end", v: 1, waitId: wait.id, cause: "timeout" } as never)
+    .state;
+};
+const closeQuest = (state: ShellState): ShellState => {
+  const rewards = model(state);
+  if (rewards.result?.quest?.phase !== "rewards") throw new Error("not on the rewards step");
+  const hook = endWait(state);
+  if (model(hook).result?.quest?.phase !== "end") throw new Error("not on the end hook");
+  return endWait(hook);
+};
 const press = (state: ShellState, label: string): ShellState => {
   const found = option(state, label);
   return stepShell(state, {
@@ -194,6 +208,17 @@ describe("the Quest row and the quest pick (F1/02)", () => {
     expect(movesOf(state)).toBe(0);
     expect(enc(state).movesLeft).toBe(0);
     expect(gold(state)).toBe(13);
+    // C3/14: the rewards step, then the end hook, then the menu; the effects ran once, before them.
+    expect(model(state).step).toBe("result");
+    expect(model(state).result?.quest).toMatchObject({
+      phase: "rewards",
+      questId: "herald",
+      gold: 10,
+      questGold: 5,
+      presentHeroes: 1,
+    });
+    state = closeQuest(state);
+    expect(gold(state)).toBe(13);
     const now = model(state);
     expect(now.step).toBe("menu");
     expect(labels(state)).toEqual(["Rest", "Cleanse", "Leave"]);
@@ -255,6 +280,8 @@ describe("the Quest row and the quest pick (F1/02)", () => {
     expect(gold(state, "hero-b")).toBe(5);
     expect(turnHasEnded(play, groupId(state))).toBe(true);
     expect(movesOf(state)).toBe(0);
+    expect(model(state).result?.quest).toMatchObject({ phase: "rewards", items: ["tomas-map"] });
+    state = closeQuest(state);
     expect(model(state).step).toBe("menu");
   });
 

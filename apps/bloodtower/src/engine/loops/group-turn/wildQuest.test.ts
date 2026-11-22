@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet, setBuildingSkulls, setHeroSheet } from "../day/clock.ts";
-import type { EncounterLocal } from "../encounter/loop.ts";
+import { type EncounterLocal, openBuildingWait } from "../encounter/loop.ts";
 import { buildingModel } from "../encounter/menu.ts";
 import {
   configurePicks,
@@ -201,6 +201,18 @@ describe("Enter on a wild quest marker (F1/04)", () => {
     const expected = 15 - tollGold + questGold;
     expect(presentGold(playOf(state), group)).toBe(expected);
     expect(movesOf(state)).toBe(0);
+    // C3/14: the rewards step, then the end hook, each closed by its wait, then the menu.
+    expect(model(state).options).toEqual([]);
+    for (let i = 0; i < 2; i++) {
+      const wait = openBuildingWait(state.loops.stack);
+      if (!wait) throw new Error("no open wait");
+      state = stepShell(state, {
+        kind: "wait-end",
+        v: 1,
+        waitId: wait.id,
+        cause: "timeout",
+      } as never).state;
+    }
     expect(model(state).options.map((o) => o.label)).toEqual(["Leave"]);
     state = pressRow(state, "Leave");
     expect(heroSheet(ensureClock(playOf(state)), "hero-a").gold).toBe(expected);

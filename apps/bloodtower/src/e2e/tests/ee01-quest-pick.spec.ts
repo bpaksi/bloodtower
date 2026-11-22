@@ -110,8 +110,11 @@ test.describe("F1/02 the Quest row and the quest pick", () => {
       await expect(leaveQuest).toBeEnabled();
 
       // Ask for pay: the turn is spent, the menu has no Quest and every pick is greyed.
+      // C3/14: the rewards step and the end hook (4 s each, no audio) come before the menu.
       await askForPay.click();
-      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible();
+      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
       expect(await labelsOf(pad)).toEqual(["Rest", "Cleanse"]);
       await expect(optionByLabel(pad, "Rest")).toBeDisabled();
       await expect(optionByLabel(pad, "Cleanse")).toBeDisabled();

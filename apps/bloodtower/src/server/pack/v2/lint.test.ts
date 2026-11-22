@@ -688,6 +688,8 @@ describe("The Ruined Keep pack (C3-03)", () => {
     const filledCopyPaths = new Set([
       "pack.yaml.scenes.0.options.0.label", // herald / take-the-job
       "pack.yaml.scenes.0.options.1.label", // herald / ask-pay-first
+      "pack.yaml.scenes.1.options.0.label", // ambush / fight (hidden in C3)
+      "pack.yaml.scenes.1.options.1.label", // ambush / pay-the-toll
     ]);
     const strays: string[] = [];
     const walk = (node: unknown, path: string, key: string | undefined) => {

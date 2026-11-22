@@ -169,6 +169,36 @@ export type BuildingResultView = {
   auto: boolean;
 };
 
+/** The quest scene on the building panel (C3/14, UI-042); the board words it from the Copy table. */
+export type QuestSceneView = {
+  questId: string;
+  phase: "choose" | "hero" | "rewards" | "end";
+  track: { done: number; total: number };
+  optionId: string | null;
+  options: {
+    promptId: string;
+    optionId: string;
+    needsItem: string | null;
+    held: boolean;
+    cost: {
+      kind: "gold" | "hp" | "corruption" | "toll";
+      amount: number;
+      hitPoints: number;
+      purse: number | null;
+    } | null;
+    gains: ({ kind: "gold"; amount: number } | { kind: "item"; item: string })[];
+  }[];
+  pending: "corruption" | "item" | null;
+  reveal: string | null;
+  rewards: {
+    gold: number;
+    questGold: number;
+    items: string[];
+    presentHeroes: number;
+    tollShort: boolean;
+  } | null;
+};
+
 export type BuildingPanelView = {
   title: string;
   step:
@@ -189,6 +219,8 @@ export type BuildingPanelView = {
   skulls: number;
   /** Moves the group has left (EV-08). Null when not known. */
   movesLeft: number | null;
+  /** The quest scene, only while the group is inside a quest (C3/14). */
+  quest?: QuestSceneView | null;
 };
 
 export type TableBand = {
