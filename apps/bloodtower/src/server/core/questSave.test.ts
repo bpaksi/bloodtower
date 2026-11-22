@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { initPlayState, type PlayState } from "../../engine/loops/chapter/playState.ts";
 import { ensureClock, heroSheet } from "../../engine/loops/day/clock.ts";
-import { type EncounterLocal, handleBuildingPress } from "../../engine/loops/encounter/loop.ts";
+import {
+  type EncounterLocal,
+  handleBuildingPress,
+  openBuildingWait,
+} from "../../engine/loops/encounter/loop.ts";
 import { buildingModel } from "../../engine/loops/encounter/menu.ts";
 import { beginGroupTurn, ensurePicks, turnHasEnded } from "../../engine/loops/encounter/picks.ts";
 import type { GroupTurnLocal } from "../../engine/loops/group-turn/loop.ts";
@@ -23,6 +27,13 @@ const roundTrip = (state: ShellState): ShellState => {
   const restored = parseShellCheckpoint(row);
   refreshOffersAfterRestore(restored);
   return restored;
+};
+
+const endWait = (state: ShellState): ShellState => {
+  const wait = openBuildingWait(state.loops.stack);
+  if (!wait) throw new Error("no open wait");
+  return stepShell(state, { kind: "wait-end", v: 1, waitId: wait.id, cause: "timeout" } as never)
+    .state;
 };
 
 const inVillage = (moves: number): ShellState => {
@@ -139,11 +150,40 @@ describe("a save and a quest pick (F1/02)", () => {
     expect(turnHasEnded(play, enc(restored).groupId)).toBe(true);
     expect(ensurePicks(play).moves[enc(restored).groupId]).toBe(0);
 
+    // Both closing steps end on the host's wait-end; then the same menu as before C3/14, same gold.
+    const closed = endWait(endWait(restored));
+    expect(model(closed).options.map((o) => o.label)).toEqual(["Rest", "Cleanse", "Leave"]);
+    expect(heroSheet(ensureClock(playOf(closed)), "hero-a").gold).toBe(13);
+    expect(ensureQuests(playOf(closed)).done).toEqual(["herald"]);
+
     bindShellState(restored);
     const replay = handleBuildingPress(enc(restored), oldPress);
     expect(replay.refusal).toBe("That press is for a step the building has moved past.");
     expect(ensureQuests(play).done).toEqual(["herald"]);
     expect(ensureClock(play).questsWon).toBe(1);
     expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(13);
+  });
+
+  it("C3/14 EV-15: a save and reload on the end hook shows it again and the quest is paid once", () => {
+    let state = inVillage(2);
+    state = press(state, "Quest");
+    state = press(state, "Ask for pay");
+    state = endWait(state);
+    expect(model(state).result?.quest?.phase).toBe("end");
+    const log = ensureQuests(playOf(state)).log.length;
+
+    const restored = roundTrip(state);
+    const play = playOf(restored);
+    expect(model(restored).result?.quest?.phase).toBe("end");
+    expect(ensureQuests(play).log.length).toBe(log);
+    expect(ensureQuests(play).done).toEqual(["herald"]);
+    expect(ensureClock(play).questsWon).toBe(1);
+    expect(heroSheet(ensureClock(play), "hero-a").gold).toBe(13);
+
+    const closed = endWait(restored);
+    expect(model(closed).step).toBe("menu");
+    expect(ensureClock(playOf(closed)).questsWon).toBe(1);
+    expect(heroSheet(ensureClock(playOf(closed)), "hero-a").gold).toBe(13);
+    expect(ensureQuests(playOf(closed)).log.length).toBe(log);
   });
 });

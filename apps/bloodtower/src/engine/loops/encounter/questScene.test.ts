@@ -12,7 +12,8 @@ import { projectShellView } from "../session/view.ts";
 import { type EncounterLocal, openBuildingWait } from "./loop.ts";
 
 // C3/14 (UI-042, UI-025, UI-036, MEC-037 .9): what the quest scene carries on the building panel, and
-// the two closing steps (rewards, end hook) that follow a finished quest.
+// the two closing steps (rewards, end hook) that follow a finished quest. EV-15 (a real save and
+// reload) is in server/core/questSave.test.ts, which owns the checkpoint.
 
 const VILLAGE = "N-egans-end";
 const DEFS: QuestDef[] = [
@@ -151,20 +152,6 @@ describe("C3/14 the quest scene on the building panel", () => {
     expect(panel(state)?.step).toBe("menu");
     expect(panel(state)?.quest ?? null).toBeNull();
     expect(gold(state, "hero-a")).toBe(10);
-  });
-
-  it("EV-15: a restart on the end hook shows the same step and the quest is not paid twice", () => {
-    let state = pressLabel(inQuest("herald"), "Quest");
-    state = pressLabel(state, "Ask for pay");
-    state = endWait(state);
-    const before = ensureQuests(state.play as never).log.length;
-    refreshOffersAfterRestore(state);
-    expect(panel(state)?.quest?.phase).toBe("end");
-    expect(ensureQuests(state.play as never).log.length).toBe(before);
-    expect(ensureQuests(state.play as never).done).toEqual(["herald"]);
-    state = endWait(state);
-    expect(ensureClock(state.play as never).questsWon).toBe(1);
-    expect(panel(state)?.step).toBe("menu");
   });
 
   it("EV-06: a paid toll and a short toll are told apart on the rewards step", () => {
