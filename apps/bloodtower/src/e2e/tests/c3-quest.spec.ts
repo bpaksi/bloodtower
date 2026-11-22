@@ -6,12 +6,15 @@ import {
   type TestInfo,
   test,
 } from "@playwright/test";
+import { openDatabase } from "../../server/db/client.ts";
+import { createEventStore } from "../../server/events/store.ts";
 import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
+import { settlePageAnimations } from "./support/animations.ts";
 
 /**
  * C3/14 (UI-042, UI-025, UI-036, MEC-037): the quest scene on the board and the iPad, through the
@@ -236,7 +239,9 @@ const checkHelp = async (pad: Page, board: Page) => {
 };
 
 const shoot = async (testInfo: TestInfo, name: string, pad: Page, board: Page) => {
-  await board.waitForTimeout(400);
+  // The Scroll inks in; shoot after it settles, so it is not clipped mid-reveal.
+  await settlePageAnimations(board);
+  await settlePageAnimations(pad);
   const dir = process.env.BT_SHOTS_DIR;
   if (dir) {
     await pad.screenshot({ path: `${dir}/${name}-ipad.png` });
@@ -247,6 +252,19 @@ const shoot = async (testInfo: TestInfo, name: string, pad: Page, board: Page) =
     body: await board.screenshot(),
     contentType: "image/png",
   });
+};
+
+/** The host's event log for the saved game (append-only; a replay adds nothing). */
+const hostEvents = (databasePath: string) => {
+  const opened = openDatabase(databasePath);
+  try {
+    const store = createEventStore(opened.db);
+    const save = store.getAutosave();
+    if (!save) throw new Error("No autosave.");
+    return store.listEvents(save.gameId).map((e) => ({ kind: e.kind, payload: e.payload }));
+  } finally {
+    opened.close();
+  }
 };
 
 const gearGold = async (pad: Page, board: Page) => {
@@ -309,7 +327,8 @@ test.describe("C3/14 the quest scene", () => {
       await expect(phase(board, "hero")).toBeVisible({ timeout: 20_000 });
       await expect(board.locator("[data-reveal]")).toHaveText("Tomas's Map");
       await expect(lines(board)).toHaveText(["Who takes the reward?"]);
-      await expect(heroButtons(pad)).toHaveCount(4);
+      await expect(heroButtons(pad)).toHaveText(["Hero A", "Hero B", "Hero C", "Hero D"]);
+      await expect(board.locator("[data-reveal-card] [data-item-placeholder]")).toBeVisible();
       await expectToolbar(pad);
       await shoot(testInfo, "ev05-item", pad, board);
       await tick(game, 5_000);
@@ -367,6 +386,11 @@ test.describe("C3/14 the quest scene", () => {
       await expect(
         board.locator('[data-panel="current-party"] [data-hero="hero-b"]'),
       ).toContainText("Items 1 held", { timeout: 20_000 });
+      // The item's name is on that hero's panel, and only there.
+      await expect(
+        board.locator('[data-panel="current-party"] [data-hero="hero-b"] [data-story-items]'),
+      ).toHaveText("Tomas's Map");
+      await expect(board.locator('[data-panel="current-party"] [data-story-items]')).toHaveCount(1);
     } finally {
       await closeAll(game);
     }
@@ -399,7 +423,11 @@ test.describe("C3/14 the quest scene", () => {
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    const game = await startGame(browser, testInfo, { seed: seedFor(GOLD({ "hero-a": 6 })) });
+    // Two present heroes and a purse of 6 (hero A holds it all).
+    const game = await startGame(browser, testInfo, {
+      seed: seedFor(GOLD({ "hero-a": 6 })),
+      party: ["hero-a", "hero-b"],
+    });
     const { pad, board } = game;
     try {
       await openQuestAtVillage(game, "ambush");
@@ -449,13 +477,13 @@ test.describe("C3/14 the quest scene", () => {
     }
   });
 
-  test("EV-07: a corruption cost asks which hero takes it, and waits for the press", async ({
+  test("EV-07: a corruption cost asks which of the 2 present heroes takes it, and waits", async ({
     browser,
   }, testInfo) => {
     test.setTimeout(300_000);
-    // Hero C starts with one corruption, so the band's mark (at two) shows who took the new one.
     const game = await startGame(browser, testInfo, {
-      seed: seedFor(GOLD({}), "~test-named:hero-c=feral"),
+      seed: seedFor(),
+      party: ["hero-a", "hero-b"],
     });
     const { pad, board } = game;
     try {
@@ -464,12 +492,12 @@ test.describe("C3/14 the quest scene", () => {
       await optionById(pad, "take-the-curse").click();
       await expect(phase(board, "hero")).toBeVisible({ timeout: 20_000 });
       await expect(lines(board)).toHaveText(["Who takes the corruption?"]);
-      await expect(heroButtons(pad)).toHaveCount(4);
+      await expect(heroButtons(pad)).toHaveText(["Hero A", "Hero B"]);
       await expectToolbar(pad);
       await tick(game, 5_000);
-      await expect(heroButtons(pad)).toHaveCount(4);
+      await expect(heroButtons(pad)).toHaveText(["Hero A", "Hero B"]);
       await deviceMain(pad)
-        .locator('[data-building-option][data-prompt-id$="--qhero--hero-c"]')
+        .locator('[data-building-option][data-prompt-id$="--qhero--hero-b"]')
         .click();
       await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
       await tick(game, 4_100);
@@ -478,10 +506,12 @@ test.describe("C3/14 the quest scene", () => {
       await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible({
         timeout: 20_000,
       });
-      // Leave: the move map's band shows one mark, on hero C only.
+      // Leave: the band's panel shows +1 corruption on hero B, and nothing for hero A.
       await pad.locator('button[data-action-id="leave"]').click();
-      await expect(board.locator("[data-corruption-mark]")).toHaveCount(1, { timeout: 20_000 });
-      await expect(board.locator('[data-corruption-mark="hero-c"]')).toHaveCount(1);
+      const bandB = board.locator('#band [data-hero-corruptions="hero-b"]');
+      await expect(bandB).toHaveAttribute("data-count", "1", { timeout: 20_000 });
+      await expect(bandB).toContainText("Hero B: 1 corruption");
+      await expect(board.locator('#band [data-hero-corruptions="hero-a"]')).toHaveCount(0);
     } finally {
       await closeAll(game);
     }
@@ -596,6 +626,18 @@ test.describe("C3/14 the quest scene", () => {
     });
     await closeAll(first);
 
+    // The host stops on the rewards step with no quit; then Continue, move on and quit on the end hook.
+    const stayOn = async (name: string, onStep: (game: Game) => Promise<void>) => {
+      const game = await resume();
+      try {
+        await onStep(game);
+      } catch (error) {
+        await closeAll(game);
+        throw error;
+      }
+      return name;
+    };
+
     const second = await resume();
     try {
       // EV-16, EV-17: the same choice, the narration not replayed; Menu and panels closed; not paused.
@@ -611,7 +653,7 @@ test.describe("C3/14 the quest scene", () => {
       await expectToolbar(second.pad);
       expect(await menuStates(second.pad)).toEqual(menuBefore);
 
-      // Ask for pay: the rewards step. EV-15 run 1: the host stops there, with no quit.
+      // Ask for pay: the rewards step. EV-15 run 1a: the host stops there, with no quit.
       await optionById(second.pad, "ask-pay-first").click();
       await expect(phase(second.board, "rewards")).toBeVisible({ timeout: 20_000 });
       await closeAll(second);
@@ -619,30 +661,82 @@ test.describe("C3/14 the quest scene", () => {
       await closeAll(second);
       throw error;
     }
-
-    const third = await resume();
+    // Run 2: Continue shows the rewards again; it moves on once; quit and Continue on the end hook.
+    await stayOn("rewards-to-end", async (game) => {
+      await expect(phase(game.board, "rewards")).toBeVisible({ timeout: 20_000 });
+      await tick(game, 4_100);
+      await expect(phase(game.board, "end")).toBeVisible({ timeout: 20_000 });
+      await quit(game);
+    });
+    // The end: 10 gold shared and 5 quest gold each is 30 in all, paid once across every restart.
+    const last = await resume();
     try {
-      // The same step shows again and moves on once; then the end hook. EV-15 run 2: quit there.
-      await expect(phase(third.board, "rewards")).toBeVisible({ timeout: 20_000 });
-      await tick(third, 4_100);
-      await expect(phase(third.board, "end")).toBeVisible({ timeout: 20_000 });
-      await quit(third);
-    } catch (error) {
-      await closeAll(third);
-      throw error;
-    }
-
-    const fourth = await resume();
-    try {
-      // 10 gold shared and 5 quest gold each is 30 in all, paid once across both restarts.
-      await expect(phase(fourth.board, "end")).toBeVisible({ timeout: 20_000 });
-      await tick(fourth, 4_100);
-      await expect(deviceMain(fourth.pad).locator('[data-building="menu"]')).toBeVisible({
+      await expect(phase(last.board, "end")).toBeVisible({ timeout: 20_000 });
+      await tick(last, 4_100);
+      await expect(deviceMain(last.pad).locator('[data-building="menu"]')).toBeVisible({
         timeout: 20_000,
       });
-      expect(await gearGold(fourth.pad, fourth.board)).toBe(30);
+      // The quest marker is gone: the menu has no Quest row.
+      await expect(
+        deviceMain(last.pad)
+          .locator("[data-building-option]")
+          .filter({ hasText: /^Quest/ }),
+      ).toHaveCount(0);
+      expect(await gearGold(last.pad, last.board)).toBe(30);
+      // The host's event log: the option pressed once, each closing step ended once.
+      const log = hostEvents(databasePath);
+      expect(
+        log.filter((e) => e.kind === "shell" && e.payload.includes("--qopt--ask-pay-first")),
+      ).toHaveLength(1);
+      const waitEnds = log.flatMap((e) => /"waitId":"(building-[^"]+)"/.exec(e.payload)?.[1] ?? []);
+      expect(waitEnds).toHaveLength(2);
+      expect(new Set(waitEnds).size).toBe(2);
     } finally {
-      await closeAll(fourth);
+      await closeAll(last);
+    }
+  });
+
+  test("EV-15: a quit and Continue on the rewards step shows it again and pays once", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const seed = seedFor();
+    const first = await startGame(browser, testInfo, { seed });
+    const { databasePath } = first.session;
+    await openQuest(first);
+    await optionById(first.pad, "ask-pay-first").click();
+    await expect(phase(first.board, "rewards")).toBeVisible({ timeout: 20_000 });
+    await first.pad.locator('[data-action="menu"]').click();
+    await first.pad.locator('button[data-gear-item="save-and-quit"]').click();
+    await first.pad.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
+    await expect(deviceMain(first.pad)).toHaveAttribute("data-screen", "session", {
+      timeout: 30_000,
+    });
+    await closeAll(first);
+
+    const session = await startAcceptanceHost(testInfo, {
+      databasePath,
+      seed,
+      lanHost: () => "192.0.2.10",
+      seatTogether: true,
+      fakeWait: true,
+    });
+    const { context, pad, board } = await openTable(browser, session);
+    const game: Game = { session, context, pad, board };
+    try {
+      await clickAct(pad, "continue", "continue-saved-game");
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+      await holdHeroesFromTest(pad, [...FOUR]);
+      await expect(phase(board, "rewards")).toBeVisible({ timeout: 20_000 });
+      await tick(game, 4_100);
+      await expect(phase(board, "end")).toBeVisible({ timeout: 20_000 });
+      await tick(game, 4_100);
+      await expect(deviceMain(pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
+      expect(await gearGold(pad, board)).toBe(30);
+    } finally {
+      await closeAll(game);
     }
   });
 });

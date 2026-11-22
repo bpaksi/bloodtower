@@ -71,6 +71,12 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
     quest?.phase === "choose" && quest.options.length === 1 ? quest.options[0]?.promptId : null;
   const primary =
     building.step === "result" ? (building.options[0]?.promptId ?? null) : (soleChoice ?? null);
+  // The hero pick lists the heroes in seat order, A then B (the mockup); other steps keep the engine's order.
+  const heroOf = (promptId: string) => promptId.split("--qhero--")[1] ?? "";
+  const orderedOptions =
+    building.step === "quest-hero"
+      ? [...building.options].sort((a, b) => heroOf(a.promptId).localeCompare(heroOf(b.promptId)))
+      : building.options;
   const prompt = quest?.phase === "choose" ? QUEST_PAD_COPY.prompt : building.prompt;
   return (
     <section
@@ -109,7 +115,7 @@ export function PlaceMenu({ building, heldHeroIds, live, offered, onAct }: Props
         <div
           className={`mt-3 flex flex-col gap-3${building.step === "rest-moves" ? " bt-place-moves" : ""}`}
         >
-          {building.options.map((option) => {
+          {orderedOptions.map((option) => {
             const row = quest?.options.find((q) => q.promptId === option.promptId);
             const cost = row ? questCostLine(row) : null;
             const gain = row ? questGainLine(row) : null;

@@ -123,15 +123,25 @@ export function QuestScene({ quest }: { quest: Quest }) {
       data-quest-phase={quest.phase}
       data-quest-option={quest.optionId ?? undefined}
     >
-      {/* No quest art exists yet: the mockup's dashed placeholder stands in the frame. */}
-      <figure className="bt-quest-painting" data-quest-painting="">
-        <figcaption data-quest-placeholder="">
-          PLACEHOLDER: quest painting: {copy?.title ?? quest.questId} (no art)
-        </figcaption>
-        {quest.phase === "choose" ? (
-          <p data-quest-prompt="">{QUEST_SCENE_COPY.choicePrompt}</p>
-        ) : null}
-      </figure>
+      {/* The item Reveal (UI-036): the mockup's card, the item's name over its art placeholder. */}
+      {quest.reveal ? (
+        <figure className="bt-quest-card" data-reveal-card="">
+          <p className="bt-quest-reveal" data-reveal="" data-reveal-item={quest.reveal}>
+            {questItemName(quest.reveal)}
+          </p>
+          <div data-item-placeholder="">PLACEHOLDER: item art: none</div>
+        </figure>
+      ) : (
+        /* No quest art exists yet: the mockup's dashed placeholder stands in the frame. */
+        <figure className="bt-quest-painting" data-quest-painting="">
+          <figcaption data-quest-placeholder="">
+            PLACEHOLDER: quest painting: {copy?.title ?? quest.questId} (no art)
+          </figcaption>
+          {quest.phase === "choose" ? (
+            <p data-quest-prompt="">{QUEST_SCENE_COPY.choicePrompt}</p>
+          ) : null}
+        </figure>
+      )}
       <DialogFrame
         size="compact"
         className="bt-ink-in"
@@ -149,11 +159,6 @@ export function QuestScene({ quest }: { quest: Quest }) {
             {line}
           </p>
         ))}
-        {quest.reveal ? (
-          <p className="bt-quest-reveal" data-reveal="" data-reveal-item={quest.reveal}>
-            {questItemName(quest.reveal)}
-          </p>
-        ) : null}
         {rewards && quest.phase === "rewards" && gains.length > 0 ? (
           <div data-quest-rewards="">
             <p data-quest-rewards-line="">{QUEST_SCENE_COPY.rewardsLine(gains.join(", "))}</p>
