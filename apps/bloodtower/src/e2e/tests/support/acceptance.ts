@@ -144,6 +144,20 @@ export const startAcceptanceHost = async (
   };
 };
 
+/**
+ * C3/15: chapter 1's card shows after the opening and moves on by itself after 4 s (EV-11). On
+ * the fake clock nothing moves it, so this waits for the card, moves the clock and waits for it
+ * to go. A spec on real time needs none of this.
+ */
+export const passChapterCard = async (pad: Page, clock: Pick<WaitClock, "advance"> | null) => {
+  const main = pad.locator("main.bt-device");
+  if (clock) {
+    await expect(main).toHaveAttribute("data-chapter-stage", "card", { timeout: 20_000 });
+    clock.advance(4_000);
+  }
+  await expect(main).not.toHaveAttribute("data-chapter-stage", "card", { timeout: 20_000 });
+};
+
 /** Let bt-ink-in (and other finite animations) finish before board screenshots. */
 export const waitForBoardAnimationsSettled = async (page: Page) => {
   await page.waitForFunction(() => {

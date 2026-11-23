@@ -93,7 +93,7 @@ const PLAN: ChapterPlan = {
   c3EndAfterChapter1: true,
   sealBreakMin: 2,
   foeLevel: { chapter1: 1, perChapter: 1 },
-  seals: [{ id: "seal-a", glyph: "glyph-a", boon: "boon-a" }],
+  seals: [{ id: "seal-a", name: "Seal A", glyph: "glyph-a", boon: "boon-a" }],
   chapters: [
     {
       id: "ch-1",

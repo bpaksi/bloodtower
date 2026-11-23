@@ -10,6 +10,7 @@ import type { LoopDefinition, LoopRegistry } from "../../loop/types.ts";
 import { type ChapterPlan, configureChapters, ensureChapters } from "../chapter/chapters.ts";
 import { type ChapterLocal, chapterLoop, handleChapterPress } from "../chapter/loop.ts";
 import { initPlayState, type PlayState } from "../chapter/playState.ts";
+import { passChapterBeats } from "../chapter/testBeats.ts";
 import {
   checkChapter,
   ensureClock,
@@ -38,7 +39,7 @@ const PLAN: ChapterPlan = {
   c3EndAfterChapter1: true,
   sealBreakMin: 2,
   foeLevel: { chapter1: 1, perChapter: 1 },
-  seals: [{ id: "seal-a", glyph: "glyph-a", boon: "boon-a" }],
+  seals: [{ id: "seal-a", name: "Seal A", glyph: "glyph-a", boon: "boon-a" }],
   chapters: [
     {
       id: "ch-1",
@@ -146,8 +147,14 @@ const setup = (options: { c3End: boolean; c4End?: boolean }): Run => {
   return { shell, play, runtime: emptyLoopRuntime(), effects: [] };
 };
 
-const start = (run: Run): void =>
+const advance = (run: Run): void =>
+  advanceLoops(registry, "game-loop", 0, run.runtime, run.effects);
+
+/** Starts the game, ending each chapter beat as the host does (C3/15). */
+const start = (run: Run, options: { stopAtTable?: boolean } = {}): void => {
   startRootLoop(registry, "game-loop", 0, run.runtime, run.effects, "game");
+  passChapterBeats(run.runtime, run.play, () => advance(run), options);
+};
 
 const gameResult = (run: Run): GameResult | undefined => {
   const end = run.effects.find((e) => e.kind === "loop-end" && e.loopId === "game");
@@ -310,7 +317,6 @@ describe("D1 EV-07 the game end runs once with the reason", () => {
     expect(records(run)).toHaveLength(1);
     expect(records(run)[0]).toMatchObject({ outcome: "lost", how: reason, sceneId: scene });
     expect(records(run).filter((r) => r.outcome === "won")).toEqual([]);
-    expect(ensureChapters(run.play).entered).toEqual([1]);
     expect(run.play.dayNumber).toBe(1);
   };
 
@@ -331,6 +337,7 @@ describe("D1 EV-07 the game end runs once with the reason", () => {
     };
     start(run);
     expectOneLoss(run, "buildings", "loss-buildings");
+    expect(ensureChapters(run.play).entered).toEqual([1]);
     expect(ensureClock(run.play).supply).toBe(9);
     expect(ensureClock(run.play).nightDrops).toHaveLength(1);
   });
@@ -340,11 +347,12 @@ describe("D1 EV-07 the game end runs once with the reason", () => {
     script = { 1: { supply: 1, drops: [spaceIn("N", 2), spaceIn("N", 3)] } };
     start(run);
     expectOneLoss(run, "skulls", "loss-skulls");
+    expect(ensureChapters(run.play).entered).toEqual([1]);
     expect(ensureClock(run.play).supply).toBe(0);
     expect(ensureClock(run.play).nightDrops).toHaveLength(1);
   });
 
-  it("a freed skull that fells the fourth building: chapter 1 is named, chapter 2 never enters", () => {
+  it("a freed skull that fells the fourth building: chapter 1 is named, chapter 2's days never start", () => {
     const run = setup({ c3End: false });
     run.shell.towerLinked = true;
     ensureClock(run.play).held = 2;
@@ -362,8 +370,10 @@ describe("D1 EV-07 the game end runs once with the reason", () => {
       frame.local as ChapterLocal,
       skullRecordPromptId(run.play.dayNumber, fatal),
     );
-    advanceLoops(registry, "game-loop", 0, run.runtime, run.effects);
+    advance(run);
     expectOneLoss(run, "buildings", "loss-buildings");
+    // PT-21: chapter 2's card (its enter) and Set the table came before the freed skulls.
+    expect(ensureChapters(run.play).entered).toEqual([1, 2]);
     expect(run.play.dayNumber).toBe(1);
     expect(run.shell.autosave).toBeNull();
   });

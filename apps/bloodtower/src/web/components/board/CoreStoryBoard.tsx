@@ -8,6 +8,7 @@ import { claimCount, isStartupScreen } from "../../lib/startupBoard";
 import { AssetIdLabel } from "./AssetIdLabel";
 import { BuildingBoardPanel } from "./BuildingBoardPanel";
 import { ChanceSpin } from "./ChanceSpin";
+import { ChapterCard } from "./ChapterCard";
 import {
   DayBandExtras,
   DayPanel,
@@ -21,6 +22,8 @@ import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
 import { QuestScene } from "./QuestScene";
+import { SealBreak } from "./SealBreak";
+import { SetTheTableBoard } from "./SetTheTable";
 import { StartupBoard } from "./StartupBoard";
 import { VirtuePanel } from "./VirtuePanel";
 
@@ -87,12 +90,15 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   // A quest in progress replaces the building's still and panel with its own scene (C3/14).
   const quest = layer === "place" ? (table?.building?.quest ?? null) : null;
   const eventHero = (heroId: string) => event?.heroes.find((hero) => hero.heroId === heroId);
+  // The chapter's beats (C3/15) replace the day panels while one shows.
+  const beat = showMove && !paused ? (table?.chapterBeat ?? null) : null;
   return (
     <main
       className="bt-board"
       data-screen={view.screen}
       data-board-mode="play"
       data-board-layer={layer}
+      data-chapter-stage={beat?.stage ?? undefined}
       data-moment={momentId ?? undefined}
       data-hint-hold={holding ? "true" : undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
@@ -159,7 +165,17 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       ) : null}
       {showMove && table ? <ThreatBar table={table} /> : null}
       {event && !paused && !holding ? <EventScene scene={event} /> : null}
-      {showMove && table && !event && !paused && !holding ? <DayPanel table={table} /> : null}
+      {beat && !holding ? (
+        beat.stage === "reveal" ? (
+          <SealBreak beat={beat} />
+        ) : (
+          <ChapterCard beat={beat} />
+        )
+      ) : null}
+      {beat?.table && !holding ? <SetTheTableBoard table={beat.table} /> : null}
+      {showMove && table && !event && !beat && !paused && !holding ? (
+        <DayPanel table={table} />
+      ) : null}
       {showMove && table?.virtue && !event && !paused && !holding ? (
         <VirtuePanel table={table} />
       ) : null}

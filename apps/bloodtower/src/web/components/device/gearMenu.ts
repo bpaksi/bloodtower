@@ -26,6 +26,8 @@ export const HELP_LINES: Record<string, string> = {
   "building-menu": "Choose what to do in this building, or Leave.",
   "quest-scene": "A quest is in front of you. Pick one of its options.",
   "chapter-card": "This is your chapter goal. Finish it before the days run out.",
+  "set-the-table":
+    "Tick the rows that show as an aid, then tap Done. You do not have to tick them all.",
   "outcome-scene": "The chapter is over. See how it ended; the game stats come next.",
 };
 

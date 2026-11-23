@@ -2,7 +2,7 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
-import { tryChapters } from "../../engine/loops/chapter/chapters.ts";
+import { openChapterWait, tryChapters } from "../../engine/loops/chapter/chapters.ts";
 import type { PlayState } from "../../engine/loops/chapter/playState.ts";
 import { ensureClock, heroSheet } from "../../engine/loops/day/clock.ts";
 import type { EncounterLocal } from "../../engine/loops/encounter/loop.ts";
@@ -162,7 +162,18 @@ const realGame = async (
   }
   await pad.act("continue-begin", "continue");
   for (const moment of OPENING_MOMENTS) await pad.act(openingPromptId(moment), "continue");
+  await pastChapterBeats(session);
   return { session, pad, store, restart };
+};
+
+/** The chapter card (C3/15) ends on the host's wait timer, which this file runs at 0 ms. */
+const pastChapterBeats = async (session: CoreSession) => {
+  for (let guard = 0; guard < 50; guard += 1) {
+    if (!openChapterWait(session.state().loops.stack, session.state().play)) return;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await session.whenIdle();
+  }
+  throw new Error("The chapter's beat never ended.");
 };
 
 const playOf = (game: Game): PlayState => {
@@ -478,7 +489,11 @@ describe("Continue mid chapter 1 (F1/03 survival)", () => {
     expect(ended(resumed)).toBe(true);
     expect(records(resumed)).toHaveLength(1);
     expect(records(resumed)[0]).toMatchObject({ outcome: "won", sceneId: "win" });
-    expect(tryChapters(play)?.outputs).toEqual(before);
+    // The start is not replayed; the win adds only its stamp cue (C3/15, EV-06).
+    expect(tryChapters(play)?.outputs).toEqual([
+      ...(before ?? []),
+      { kind: "cue", chapter: 1, cue: "CUE-005" },
+    ]);
     expect(tryChapters(play)?.entered).toEqual([1]);
     expect(ensureQuests(play).done.filter((id) => id === "herald")).toHaveLength(1);
   });

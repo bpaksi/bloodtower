@@ -2,6 +2,7 @@ import type { ViewScreen } from "../../protocols/v2/common.ts";
 import type { GearView, HintView } from "../../protocols/v2/views.ts";
 import type { CompassSlot } from "../loops/chapter/board.ts";
 import type { HeroCardData } from "../loops/session/pack.ts";
+import type { ChapterBeatView } from "./chapter.ts";
 
 export type PrivateLine = {
   id: string;
@@ -242,6 +243,8 @@ export type TableBand = {
   event?: EventSceneView | null;
   /** The building menu while a group is inside a building (C3/13). */
   building?: BuildingPanelView | null;
+  /** The chapter's card, stamp, close, Reveal or Set the table, only while it shows (C3/15). */
+  chapterBeat?: ChapterBeatView | null;
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;

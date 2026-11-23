@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { ControlPress } from "bloodtower-protocols";
+import { openChapterWait } from "../../engine/loops/chapter/chapters.ts";
 import type { PlayContent } from "../../engine/loops/chapter/playState.ts";
 import { openDayWait } from "../../engine/loops/day/wait.ts";
 import type { GameLocal } from "../../engine/loops/game/loop.ts";
@@ -558,7 +559,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       return () => clearTimeout(handle);
     });
   const scheduleEffectsWait = (): void => {
-    const wait = openDayWait(state.loops.stack);
+    const wait = openDayWait(state.loops.stack) ?? openChapterWait(state.loops.stack, state.play);
     const running =
       wait !== null &&
       wait.lineId === null &&
@@ -945,7 +946,8 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     narrationEnded: (lineId) => {
       applyQueue = applyQueue
         .then(async () => {
-          const wait = openDayWait(state.loops.stack);
+          const wait =
+            openDayWait(state.loops.stack) ?? openChapterWait(state.loops.stack, state.play);
           if (!wait || wait.lineId !== lineId) {
             options.log.debug(
               "narration-ended-ignored",

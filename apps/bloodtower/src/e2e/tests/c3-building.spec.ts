@@ -11,6 +11,7 @@ import {
   enterWithoutTowerKeepSound,
   holdHeroesFromTest,
   installSessionSocketHook,
+  passChapterCard,
   setSoundAndKeep,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
@@ -158,6 +159,7 @@ const startGame = async (
   for (const id of OPENING_IDS) {
     await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
   }
+  await passChapterCard(pad, session.waitClock);
   // Past the roll panel: a hero's group is acting.
   await clickAct(pad, "continue");
   await expect(board.locator("#band [data-days-left]")).toBeVisible({ timeout: 20_000 });

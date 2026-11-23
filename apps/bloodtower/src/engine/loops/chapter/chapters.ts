@@ -16,8 +16,11 @@ export type ChapterDef = {
   quests: ChapterQuest[];
 };
 
-/** A seal and the boon its glyph gives when it breaks (DEC-303, Q-C3-17). */
-export type SealDef = { id: string; glyph: string; boon: string };
+/**
+ * A seal and the boon its glyph gives when it breaks (DEC-303, Q-C3-17). `name` is the locked
+ * story name the Set the table row shows (C3/15 Copy `table.row.seal`).
+ */
+export type SealDef = { id: string; name: string; glyph: string; boon: string };
 
 export type ChapterPlan = {
   chapters: ChapterDef[];
@@ -35,8 +38,28 @@ export type ChapterPlan = {
   foeLevel: { chapter1: number; perChapter: number };
 };
 
+/**
+ * Where a chapter frame is (C3/15). The chapter card, the won stamp, the close Scroll and the
+ * seal Reveal each wait for a host `wait-end`; Set the table waits for Done (PT-21).
+ */
+export type ChapterStage = "card" | "reveal" | "table" | "place" | "days" | "stamp" | "close";
+
+/** An auto-advance wait, named as data like the day's (C3/20). The host runs it. */
+export type ChapterWait = { id: string; maxMs: number; lineId: string | null };
+
+/** The rows of Set the table (PT-21, DEC-929). Structured: the boards word them. */
+export type TableRows = {
+  chapter: number;
+  /** The seal that broke, or null with no tower or no seal left (DEC-306). */
+  seal: SealDef | null;
+  /** Freed skulls to place after Done; 0 means no row (DEC-409). */
+  skulls: number;
+  /** The chapter's quest token ids, in pack order. */
+  quests: string[];
+};
+
 export type ChapterOutput =
-  | { kind: "cue"; chapter: number }
+  | { kind: "cue"; chapter: number; cue: "CUE-004" | "CUE-005" }
   | { kind: "narration"; chapter: number; copy: string }
   | {
       kind: "card";
@@ -65,11 +88,19 @@ export type ChapterStore = {
   sealsDroppedOut: boolean;
   /** Freed skulls still to be placed on the board (DEC-409). */
   skullsToPlace: number;
+  /** Where the running chapter frame is; absent in an older save: its days (C3/15). */
+  stage?: ChapterStage;
+  /** The open auto-advance wait, if any, and whether the host has ended it. */
+  wait?: ChapterWait | null;
+  waitDone?: boolean;
   /**
-   * The won chapter whose freed skulls are still being placed, else null. `current` has already
-   * moved on, so Continue reads this to resume the placement instead of the next chapter's days.
+   * Set when a chapter was won and another follows: the next chapter's card is followed by the
+   * seal Reveal (with a seal) and Set the table (PT-21). `seal` is null with no tower (DEC-306).
+   * `from` is the won chapter, which a freed-skull loss names (DEC-938).
    */
-  placing: number | null;
+  pending?: { from: number; seal: SealDef | null } | null;
+  /** The Set the table step while it shows, else null. */
+  table?: TableRows | null;
   /** The finale chapter (DEC-656): set by the Tower, which is C5. */
   towerUnlocked: boolean;
   towerWon: boolean;
@@ -106,7 +137,11 @@ export const configureChapters = (
     boons: [],
     sealsDroppedOut: false,
     skullsToPlace: 0,
-    placing: null,
+    pending: null,
+    table: null,
+    stage: "card",
+    wait: null,
+    waitDone: false,
     towerUnlocked: false,
     towerWon: false,
     resumed: false,
@@ -147,4 +182,30 @@ export const restoreChapters = (play: PlayState, saved: string): ChapterStore =>
   restored.resumed = true;
   stores.set(play, restored);
   return restored;
+};
+
+/**
+ * The chapter wait the host should run now, or null (C3/15, like the day's in C3/20). Only while
+ * the chapter frame is on top: its card, stamp, close and Reveal have no child loop running.
+ */
+export const openChapterWait = (
+  stack: readonly { loopId: string }[],
+  play: PlayState | null | undefined,
+): ChapterWait | null => {
+  if (!play || stack.at(-1)?.loopId !== "chapter") return null;
+  const store = tryChapters(play);
+  if (!store?.wait || store.waitDone) return null;
+  return store.wait;
+};
+
+/** Marks the open chapter wait done when `waitId` names it. False means none was open for it. */
+export const endChapterWait = (
+  stack: readonly { loopId: string }[],
+  play: PlayState | null | undefined,
+  waitId: string,
+): boolean => {
+  const wait = openChapterWait(stack, play);
+  if (!wait || wait.id !== waitId || !play) return false;
+  ensureChapters(play).waitDone = true;
+  return true;
 };

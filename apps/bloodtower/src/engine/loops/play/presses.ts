@@ -1,4 +1,5 @@
 import type { LoopFrame } from "../../loop/types.ts";
+import { type ChapterLocal, handleChapterPress } from "../chapter/loop.ts";
 import type { DayLocal } from "../day/loop.ts";
 import { handleDayPress } from "../day/press.ts";
 import type { EncounterLocal } from "../encounter/loop.ts";
@@ -27,6 +28,12 @@ export const updatePlayFrameOnPress = (
     } else if (actionId === "build") {
       top.local = handleBuildingPress(local, promptId);
     }
+    return;
+  }
+
+  if (top.loopId === "chapter") {
+    // Set the table's Done, or a freed skull placed (C3/15, PT-21).
+    top.local = handleChapterPress(top.local as ChapterLocal, promptId, actionId);
     return;
   }
 

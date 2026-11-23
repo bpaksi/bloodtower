@@ -8,6 +8,7 @@ import {
 } from "../day/clock.ts";
 import { ensurePicks } from "../encounter/picks.ts";
 import { forceEvent, forceEventLine } from "../event/ledger.ts";
+import { ensureQuests } from "../quest/store.ts";
 import type { BoardGraph, KingdomId } from "./board.ts";
 import { citadelForKingdom } from "./board.ts";
 
@@ -240,6 +241,21 @@ export const TEST_NAMED = "~test-named:";
  */
 export const TEST_AT = "~test-at:";
 export const TEST_TILES = "~test-tiles:";
+/**
+ * TEST ONLY (C3/15). `~test-chapter-line:<lineId>` gives the chapter card, stamp, close and Reveal
+ * a narration line, so a test reaches the audio-end path with mock audio. No clip is packed yet.
+ */
+export const TEST_CHAPTER_LINE = "~test-chapter-line:";
+/**
+ * TEST ONLY (C3/15). `~test-seals` gives a story with no seals the three locked seals, so a test
+ * reaches the seal break with the tower mock before C4/13 loads them from the pack.
+ */
+export const TEST_SEALS = "~test-seals";
+/**
+ * TEST ONLY (C3/15), for a running game: `~test-quests-done:herald+ambush` marks those quests
+ * done, so a test wins the chapter at the day's end without playing each quest.
+ */
+export const TEST_QUESTS_DONE = "~test-quests-done:";
 
 /** Every marker the hook reads. A seed with none of them is a real seed. */
 export const TEST_SEED_MARKERS = [
@@ -260,6 +276,9 @@ export const TEST_SEED_MARKERS = [
   TEST_NAMED,
   TEST_TILES,
   TEST_AT,
+  TEST_CHAPTER_LINE,
+  TEST_SEALS,
+  TEST_QUESTS_DONE,
 ] as const;
 
 export const isTestSeed = (seed: string): boolean =>
@@ -267,7 +286,7 @@ export const isTestSeed = (seed: string): boolean =>
 
 const KINGDOM_IDS: readonly string[] = ["N", "E", "S", "W"];
 
-const markerBody = (seed: string, marker: string, body: RegExp): string | null => {
+export const markerBody = (seed: string, marker: string, body: RegExp): string | null => {
   const start = seed.indexOf(marker);
   if (start < 0) return null;
   return body.exec(seed.slice(start + marker.length))?.[0] ?? "";
@@ -353,6 +372,13 @@ export const applyTestSeed = (play: PlayState, seed: string): void => {
   if (line !== null) {
     if (line === "") throw new Error("The test effects-line seed needs a line id.");
     clock.effectsLine = line;
+  }
+  const done = markerBody(seed, TEST_QUESTS_DONE, /^[\w+-]*/);
+  if (done !== null) {
+    const ids = done.split("+").filter((id) => id.length > 0);
+    if (ids.length === 0) throw new Error("The test quests-done seed needs quest ids.");
+    const quests = ensureQuests(play);
+    for (const id of ids) if (!quests.done.includes(id)) quests.done.push(id);
   }
   const buildingLine = markerBody(seed, TEST_BUILDING_LINE, /^[\w.-]*/);
   if (buildingLine !== null) {
