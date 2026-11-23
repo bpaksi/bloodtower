@@ -217,11 +217,7 @@ const closeAll = async (context: BrowserContext, host: { close: () => Promise<vo
   await host.close();
 };
 
-test.describe("C3/13 the building menu: engine and wire", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("C3/13 the building menu: engine and wire", { tag: "@ipad-only" }, () => {
   test("EV-01, EV-06 (citadel): each pick shows its move and gold; no Trade", async ({
     browser,
   }, testInfo) => {
@@ -544,11 +540,9 @@ const quitToSession = async (pad: Page) => {
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", { timeout: 30_000 });
 };
 
-test.describe("C3/13 the building menu: the iPad and the board render", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("C3/13 the building menu: the iPad and the board render", {
+  tag: "@ipad-only",
+}, () => {
   test("EV-05, EV-11, EV-12, EV-14: the board paints the place and the rally; every step has the toolbar and help", async ({
     browser,
   }, testInfo) => {

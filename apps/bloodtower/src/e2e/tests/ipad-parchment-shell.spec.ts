@@ -136,11 +136,7 @@ const startAtBuilding = async (browser: Browser, testInfo: TestInfo) => {
   return { session, context, pad };
 };
 
-test.describe("#592 the iPad shell is one parchment page", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The shell is the iPad's.");
-  });
-
+test.describe("#592 the iPad shell is one parchment page", { tag: "@ipad-only" }, () => {
   test("join screen, move map and building menu paint parchment with dark ink", async ({
     browser,
   }, testInfo) => {

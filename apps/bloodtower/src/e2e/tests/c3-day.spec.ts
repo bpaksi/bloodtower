@@ -408,11 +408,7 @@ const shot = async (page: Page, testInfo: TestInfo, name: string) => {
   await testInfo.attach(name, { path, contentType: "image/png" });
 };
 
-test.describe("C3/11 the day on the board", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The approved mockup is iPad portrait.");
-  });
-
+test.describe("C3/11 the day on the board", { tag: "@ipad-only" }, () => {
   test("EV-01, EV-06, EV-07, EV-08, EV-10, EV-11, EV-12, EV-13: four heroes over two days", async ({
     browser,
   }, testInfo) => {
@@ -1103,11 +1099,7 @@ const bothPads = (game: { pad: Page; pad2: Page | null }): Page[] => {
   return [game.pad, game.pad2];
 };
 
-test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The mockup is iPad portrait and a 1920 board.");
-  });
-
+test.describe("CU/04 queued split and rejoin (PT-18, PT-06)", { tag: "@ipad-only" }, () => {
   test("EV-01, EV-25: a party that never queues sees no Regroup prompt and no groups card", async ({
     browser,
   }, testInfo) => {

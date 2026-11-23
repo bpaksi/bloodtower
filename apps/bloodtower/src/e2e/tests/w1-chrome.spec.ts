@@ -239,10 +239,9 @@ test("W1 /join with no code shows the bar, a disabled Back and Replay, and the g
   await expect(page.getByRole("heading", { name: "Join" })).toBeVisible();
 });
 
-test("CU/06 EV-02 EV-03 EV-05 EV-08 /join keeps the order, the centre and the greyed pair", async ({
-  page,
-}, testInfo) => {
-  skipUnlessIpad(testInfo);
+test("CU/06 EV-02 EV-03 EV-05 EV-08 /join keeps the order, the centre and the greyed pair", {
+  tag: "@ipad-only",
+}, async ({ page }) => {
   for (const size of VIEWPORTS) {
     await page.setViewportSize(size);
     await page.goto("/join");
@@ -263,100 +262,102 @@ test("CU/06 EV-02 EV-03 EV-05 EV-08 /join keeps the order, the centre and the gr
   }
 });
 
-test("CU/06 EV-01 EV-02 EV-03 EV-05 EV-08 the walk keeps the bar still while an offer arrives", async ({
-  browser,
-}, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(180_000);
-  for (const size of VIEWPORTS) {
-    const session = await startAcceptanceHost(testInfo, { seed: `cu06-walk-${size.width}` });
-    const context = await browser.newContext({
-      baseURL: session.baseURL,
-      viewport: size,
-      hasTouch: true,
-    });
+test(
+  "CU/06 EV-01 EV-02 EV-03 EV-05 EV-08 the walk keeps the bar still while an offer arrives",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(180_000);
+    for (const size of VIEWPORTS) {
+      const session = await startAcceptanceHost(testInfo, { seed: `cu06-walk-${size.width}` });
+      const context = await browser.newContext({
+        baseURL: session.baseURL,
+        viewport: size,
+        hasTouch: true,
+      });
+      const page = await context.newPage();
+      try {
+        await installSessionSocketHook(page);
+        await page.goto("/join");
+        await expectFullBar(page, false);
+        const noCode = await barBox(page);
+        await expect(page.locator('[data-bottom-bar] [data-action="back"]')).toBeDisabled();
+
+        await page.goto(`/join?code=${session.host.joinCode}`);
+        await expect(page).toHaveURL(/\/device/);
+        await expectFullBar(page, true);
+        await enterWithoutTower(page);
+        let sawBackOffer = false;
+        const walk = [
+          ["pick-story", `continue-pick-story-${STORY_ID}`],
+          ["game-settings", "continue-game-settings"],
+        ] as const;
+        const checkScreen = async () => {
+          await expectFullBar(page, true);
+          expectSameBox(await barBox(page), noCode);
+          const back = page.locator('[data-bottom-bar] [data-action="back"]');
+          if (await back.isEnabled()) sawBackOffer = true;
+        };
+        for (const [screen, promptId] of walk) {
+          await expect(deviceMain(page)).toHaveAttribute("data-screen", screen);
+          await checkScreen();
+          await clickAct(page, "continue", promptId);
+        }
+        await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
+        await checkScreen();
+        expect(sawBackOffer).toBe(true);
+
+        const bar = page.locator("[data-bottom-bar]");
+        await bar.locator('[data-action="menu"]').click();
+        await expect(page.locator("[data-menu]")).toHaveCount(1);
+        await expect(page.locator('[data-menu] [data-action="back"]')).toHaveCount(0);
+        await expect(page.locator('[data-menu] [data-action="replay"]')).toHaveCount(0);
+        await expectFullBar(page, true);
+        await expect(bar.locator('[data-action="back"]')).toBeEnabled();
+        await page.keyboard.press("Escape");
+        await expect(page.locator("[data-menu]")).toHaveCount(0);
+      } finally {
+        await context.close();
+        await session.host.close();
+      }
+    }
+  },
+);
+
+test(
+  "CU/06 EV-07 Continue after a host restart keeps the order and the greyed Replay",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(180_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "cu06-survive" });
+    const { databasePath } = session;
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
     const page = await context.newPage();
     try {
-      await installSessionSocketHook(page);
-      await page.goto("/join");
-      await expectFullBar(page, false);
-      const noCode = await barBox(page);
-      await expect(page.locator('[data-bottom-bar] [data-action="back"]')).toBeDisabled();
-
-      await page.goto(`/join?code=${session.host.joinCode}`);
-      await expect(page).toHaveURL(/\/device/);
+      await reach(page, session.host.joinCode, "skip", "play");
       await expectFullBar(page, true);
-      await enterWithoutTower(page);
-      let sawBackOffer = false;
-      const walk = [
-        ["pick-story", `continue-pick-story-${STORY_ID}`],
-        ["game-settings", "continue-game-settings"],
-      ] as const;
-      const checkScreen = async () => {
-        await expectFullBar(page, true);
-        expectSameBox(await barBox(page), noCode);
-        const back = page.locator('[data-bottom-bar] [data-action="back"]');
-        if (await back.isEnabled()) sawBackOffer = true;
-      };
-      for (const [screen, promptId] of walk) {
-        await expect(deviceMain(page)).toHaveAttribute("data-screen", screen);
-        await checkScreen();
-        await clickAct(page, "continue", promptId);
-      }
-      await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
-      await checkScreen();
-      expect(sawBackOffer).toBe(true);
-
-      const bar = page.locator("[data-bottom-bar]");
-      await bar.locator('[data-action="menu"]').click();
-      await expect(page.locator("[data-menu]")).toHaveCount(1);
-      await expect(page.locator('[data-menu] [data-action="back"]')).toHaveCount(0);
-      await expect(page.locator('[data-menu] [data-action="replay"]')).toHaveCount(0);
-      await expectFullBar(page, true);
-      await expect(bar.locator('[data-action="back"]')).toBeEnabled();
-      await page.keyboard.press("Escape");
-      await expect(page.locator("[data-menu]")).toHaveCount(0);
     } finally {
       await context.close();
       await session.host.close();
     }
-  }
-});
 
-test("CU/06 EV-07 Continue after a host restart keeps the order and the greyed Replay", async ({
-  browser,
-}, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(180_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "cu06-survive" });
-  const { databasePath } = session;
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await reach(page, session.host.joinCode, "skip", "play");
-    await expectFullBar(page, true);
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-
-  const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "cu06-survive" });
-  const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
-  const again = await context2.newPage();
-  try {
-    await installSessionSocketHook(again);
-    await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await resumeSavedGame(again);
-    await expect(deviceMain(again)).toHaveAttribute("data-screen", "play");
-    await expect(again.locator("[data-menu]")).toHaveCount(0);
-    await expectFullBar(again, true);
-    await expect(again.locator('[data-bottom-bar] [data-action="back"]')).toBeVisible();
-    await expect(again.locator('[data-bottom-bar] [data-action="replay"]')).toBeDisabled();
-  } finally {
-    await context2.close();
-    await restarted.host.close();
-  }
-});
+    const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "cu06-survive" });
+    const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
+    const again = await context2.newPage();
+    try {
+      await installSessionSocketHook(again);
+      await again.goto(`/join?code=${restarted.host.joinCode}`);
+      await resumeSavedGame(again);
+      await expect(deviceMain(again)).toHaveAttribute("data-screen", "play");
+      await expect(again.locator("[data-menu]")).toHaveCount(0);
+      await expectFullBar(again, true);
+      await expect(again.locator('[data-bottom-bar] [data-action="back"]')).toBeVisible();
+      await expect(again.locator('[data-bottom-bar] [data-action="replay"]')).toBeDisabled();
+    } finally {
+      await context2.close();
+      await restarted.host.close();
+    }
+  },
+);
 
 test("W1 the bar, Menu dialog, pinned Continue and no page scroll on claim-heroes", async ({
   browser,
@@ -471,10 +472,6 @@ test("W1 a held hero, the Menu and a restart survive Continue", async ({ browser
 
 const PORTRAIT = { viewport: { width: 768, height: 1024 }, hasTouch: true as const };
 const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as const;
-
-const skipUnlessIpad = (testInfo: { project: { name: string } }) => {
-  test.skip(testInfo.project.name !== "ipad", "The approved mockup is iPad portrait.");
-};
 
 const armActs = async (page: Page) => {
   await page.waitForFunction(() => {
@@ -611,55 +608,58 @@ const expectCloseLast = async (page: Page) => {
   expect(closeBox.y).toBeGreaterThanOrEqual(leaveBox.y);
 };
 
-test("the Menu ends with Close on every screen it opens from", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(180_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-close" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await page.goto("/join");
-    await openMenu(page);
-    await expectCloseLast(page);
-    await page.locator('[data-action="menu"]').click();
+test(
+  "the Menu ends with Close on every screen it opens from",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(180_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-close" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await page.goto("/join");
+      await openMenu(page);
+      await expectCloseLast(page);
+      await page.locator('[data-action="menu"]').click();
 
-    await installSessionSocketHook(page);
-    await page.goto(`/join?code=${session.host.joinCode}`);
-    await enterWithTower(page);
-    await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
-    await clickAct(page, "continue", "continue-game-settings");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
-    await openMenu(page);
-    await expectCloseLast(page);
-    await page.locator('[data-action="menu"]').click();
+      await installSessionSocketHook(page);
+      await page.goto(`/join?code=${session.host.joinCode}`);
+      await enterWithTower(page);
+      await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
+      await clickAct(page, "continue", "continue-game-settings");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
+      await openMenu(page);
+      await expectCloseLast(page);
+      await page.locator('[data-action="menu"]').click();
 
-    await holdHeroesFromTest(page, [...HERO_IDS]);
-    await clickAct(page, "continue", "continue-claim-heroes");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
-    await openMenu(page);
-    await expectCloseLast(page);
-    await page.locator('[data-action="menu"]').click();
+      await holdHeroesFromTest(page, [...HERO_IDS]);
+      await clickAct(page, "continue", "continue-claim-heroes");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
+      await openMenu(page);
+      await expectCloseLast(page);
+      await page.locator('[data-action="menu"]').click();
 
-    for (const id of SETUP_IDS) {
-      if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
-      await clickAct(page, "continue", `continue-setup-${id}`);
+      for (const id of SETUP_IDS) {
+        if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
+        await clickAct(page, "continue", `continue-setup-${id}`);
+      }
+      await clickAct(page, "continue", "continue-begin");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
+      await openMenu(page);
+      await expectCloseLast(page);
+      await page.locator('[data-action="menu"]').click();
+
+      session.tower.loseConnection();
+      session.host.syncTower();
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 20_000 });
+      await openMenu(page);
+      await expectCloseLast(page);
+    } finally {
+      await context.close();
+      await session.host.close();
     }
-    await clickAct(page, "continue", "continue-begin");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
-    await openMenu(page);
-    await expectCloseLast(page);
-    await page.locator('[data-action="menu"]').click();
-
-    session.tower.loseConnection();
-    session.host.syncTower();
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 20_000 });
-    await openMenu(page);
-    await expectCloseLast(page);
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
+  },
+);
 
 const GEAR_LIST = [
   "Current party",
@@ -704,136 +704,149 @@ const outsidePoint = async (page: Page, target: Locator) => {
   return hit;
 };
 
-test("Close, a tap outside and the gear each close the Menu", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(120_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-tap" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await reach(page, session.host.joinCode, "skip", "claim");
-    await armActs(page);
-    const pick = page.locator('button[data-hunter="hero-a"]');
-    await expect(pick).toBeEnabled();
-    const status = page.locator("[data-pick-status]");
-    const beforeStatus = await status.innerText();
+test(
+  "Close, a tap outside and the gear each close the Menu",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(120_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-tap" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await reach(page, session.host.joinCode, "skip", "claim");
+      await armActs(page);
+      const pick = page.locator('button[data-hunter="hero-a"]');
+      await expect(pick).toBeEnabled();
+      const status = page.locator("[data-pick-status]");
+      const beforeStatus = await status.innerText();
 
-    await resetActs(page);
-    await openMenu(page);
-    await page.locator("[data-menu]").getByRole("button", { name: "Close" }).tap();
-    await expect(page.locator("[data-menu]")).toHaveCount(0);
-    await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
-    expect(await actCount(page)).toBe(0);
+      await resetActs(page);
+      await openMenu(page);
+      await page.locator("[data-menu]").getByRole("button", { name: "Close" }).tap();
+      await expect(page.locator("[data-menu]")).toHaveCount(0);
+      await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
+      expect(await actCount(page)).toBe(0);
 
-    await resetActs(page);
-    await openMenu(page);
-    const point = await outsidePoint(page, pick);
-    await page.touchscreen.tap(point.x, point.y);
-    await expect(page.locator("[data-menu]")).toHaveCount(0);
-    await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
-    await expect(status).toHaveText(beforeStatus);
-    await expect(pick).toHaveAttribute("data-claim", "open");
-    expect(await actCount(page)).toBe(0);
+      await resetActs(page);
+      await openMenu(page);
+      const point = await outsidePoint(page, pick);
+      await page.touchscreen.tap(point.x, point.y);
+      await expect(page.locator("[data-menu]")).toHaveCount(0);
+      await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
+      await expect(status).toHaveText(beforeStatus);
+      await expect(pick).toHaveAttribute("data-claim", "open");
+      expect(await actCount(page)).toBe(0);
 
-    await resetActs(page);
-    await openMenu(page);
-    await page.locator('[data-action="menu"]').tap();
-    await expect(page.locator("[data-menu]")).toHaveCount(0);
-    await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
-    expect(await actCount(page)).toBe(0);
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
+      await resetActs(page);
+      await openMenu(page);
+      await page.locator('[data-action="menu"]').tap();
+      await expect(page.locator("[data-menu]")).toHaveCount(0);
+      await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
+      expect(await actCount(page)).toBe(0);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
 
-test("Escape closes the Menu and sends no act", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(120_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-esc" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await reach(page, session.host.joinCode, "skip", "claim");
-    await armActs(page);
-    await resetActs(page);
-    await openMenu(page);
-    await page.keyboard.press("Escape");
-    await expect(page.locator("[data-menu]")).toHaveCount(0);
-    await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
-    expect(await actCount(page)).toBe(0);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
+test(
+  "Escape closes the Menu and sends no act",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(120_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-esc" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await reach(page, session.host.joinCode, "skip", "claim");
+      await armActs(page);
+      await resetActs(page);
+      await openMenu(page);
+      await page.keyboard.press("Escape");
+      await expect(page.locator("[data-menu]")).toHaveCount(0);
+      await expect(page.locator('[data-action="menu"]')).toHaveAttribute("aria-expanded", "false");
+      expect(await actCount(page)).toBe(0);
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
 
-test("the open Menu matches the gear list in play", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(180_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-list" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await reach(page, session.host.joinCode, "connect", "play");
-    await openMenu(page);
-    expect(await gearLabels(page)).toEqual([...GEAR_LIST]);
-    await expect(page.locator("[data-menu] h2")).toHaveText(["Look up", "Table", "Leave"]);
-    await greyReason(page, "tower", "The tower is connected.");
-    // CU/04: Split party is live; with no hero in a group of 2 or more it has nothing to pick.
-    await greyReason(page, "split-party", "[COPY: split-party-none]");
-    await greyReason(page, "use-potion", "No potions or items to use.");
-    await expect(page.locator("[data-menu] [data-version]")).toHaveText(/^v\d+\.\d+\.\d+/);
-    await expectCloseLast(page);
-    const menuBox = await box(page.locator("[data-menu]"));
-    const footerBox = await box(page.locator("footer.bt-bar--bottom"));
-    const closeBox = await box(page.locator("[data-menu]").getByRole("button", { name: "Close" }));
-    expect(menuBox.y + menuBox.height).toBeLessThanOrEqual(footerBox.y);
-    expect(closeBox.y + closeBox.height).toBeLessThanOrEqual(footerBox.y);
-    await expect(page.locator('[data-gear-item="rejoin-party"]')).toHaveCount(0);
-    await expectToolbar(page);
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
+test(
+  "the open Menu matches the gear list in play",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(180_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-list" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await reach(page, session.host.joinCode, "connect", "play");
+      await openMenu(page);
+      expect(await gearLabels(page)).toEqual([...GEAR_LIST]);
+      await expect(page.locator("[data-menu] h2")).toHaveText(["Look up", "Table", "Leave"]);
+      await greyReason(page, "tower", "The tower is connected.");
+      // CU/04: Split party is live; with no hero in a group of 2 or more it has nothing to pick.
+      await greyReason(page, "split-party", "[COPY: split-party-none]");
+      await greyReason(page, "use-potion", "No potions or items to use.");
+      await expect(page.locator("[data-menu] [data-version]")).toHaveText(/^v\d+\.\d+\.\d+/);
+      await expectCloseLast(page);
+      const menuBox = await box(page.locator("[data-menu]"));
+      const footerBox = await box(page.locator("footer.bt-bar--bottom"));
+      const closeBox = await box(
+        page.locator("[data-menu]").getByRole("button", { name: "Close" }),
+      );
+      expect(menuBox.y + menuBox.height).toBeLessThanOrEqual(footerBox.y);
+      expect(closeBox.y + closeBox.height).toBeLessThanOrEqual(footerBox.y);
+      await expect(page.locator('[data-gear-item="rejoin-party"]')).toHaveCount(0);
+      await expectToolbar(page);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
 
-test("before Begin, game items are greyed with a reason", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(120_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-before" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await page.goto("/join");
-    await openMenu(page);
-    await expect(page.locator("[data-menu] h2").first()).toHaveText("Look up");
-    await greyReason(page, "current-party", "Only in a game.");
-    await expect(page.locator('[data-gear-item="look-up"]')).toBeEnabled();
-    await expect(page.locator('[data-gear-item="look-up"] [data-reason]')).toHaveCount(0);
-    await greyReason(page, "pause-resume", "Only in a game.");
-    await greyReason(page, "save-and-quit", "Only in a game.");
-    await expect(page.locator('[data-gear-item="tower"]')).toBeEnabled();
-    await expect(page.locator('[data-gear-item="tower"] [data-reason]')).toHaveCount(0);
-    await expectCloseLast(page);
+test(
+  "before Begin, game items are greyed with a reason",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(120_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-before" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await page.goto("/join");
+      await openMenu(page);
+      await expect(page.locator("[data-menu] h2").first()).toHaveText("Look up");
+      await greyReason(page, "current-party", "Only in a game.");
+      await expect(page.locator('[data-gear-item="look-up"]')).toBeEnabled();
+      await expect(page.locator('[data-gear-item="look-up"] [data-reason]')).toHaveCount(0);
+      await greyReason(page, "pause-resume", "Only in a game.");
+      await greyReason(page, "save-and-quit", "Only in a game.");
+      await expect(page.locator('[data-gear-item="tower"]')).toBeEnabled();
+      await expect(page.locator('[data-gear-item="tower"] [data-reason]')).toHaveCount(0);
+      await expectCloseLast(page);
 
-    await reach(page, session.host.joinCode, "skip", "claim");
-    await openMenu(page);
-    await greyReason(page, "current-party", "Only in a game.");
-    await expect(page.locator('[data-gear-item="look-up"]')).toBeEnabled();
-    await greyReason(page, "pause-resume", "Only in a game.");
-    await greyReason(page, "save-and-quit", "Only in a game.");
-    await expect(page.locator('[data-gear-item="tower"]')).toBeEnabled();
-    await expect(page.locator('[data-gear-item="tower"] [data-reason]')).toHaveCount(0);
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
+      await reach(page, session.host.joinCode, "skip", "claim");
+      await openMenu(page);
+      await greyReason(page, "current-party", "Only in a game.");
+      await expect(page.locator('[data-gear-item="look-up"]')).toBeEnabled();
+      await greyReason(page, "pause-resume", "Only in a game.");
+      await greyReason(page, "save-and-quit", "Only in a game.");
+      await expect(page.locator('[data-gear-item="tower"]')).toBeEnabled();
+      await expect(page.locator('[data-gear-item="tower"] [data-reason]')).toHaveCount(0);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
 
-test("Save and quit asks to confirm", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
+test("Save and quit asks to confirm", { tag: "@ipad-only" }, async ({ browser }, testInfo) => {
   test.setTimeout(180_000);
   const session = await startAcceptanceHost(testInfo, { seed: "c2-04-confirm" });
   const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
@@ -906,67 +919,68 @@ const checkHelp = async (page: Page, helpId: string) => {
   if (hasSocket) expect(await actCount(page)).toBe(before);
 };
 
-test("the toolbar is on every iPad screen, and ? help matches the current screen", async ({
-  browser,
-}, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(300_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-toolbar" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await page.goto("/join");
-    await checkHelp(page, "join");
+test(
+  "the toolbar is on every iPad screen, and ? help matches the current screen",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(300_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-toolbar" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await page.goto("/join");
+      await checkHelp(page, "join");
 
-    await installSessionSocketHook(page);
-    await page.goto(`/join?code=${session.host.joinCode}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "base-board");
-    await checkHelp(page, "base-board-setup");
-    await clickAct(page, "board-set-up", "base-board-done");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-choice");
-    await checkHelp(page, "tower-choice");
-    await clickAct(page, "tower-connect", "tower-connect");
-    await clickAct(page, "tower-calibrate", "tower-calibrate");
-    await setSoundAndKeep(page);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
-    await checkHelp(page, "pick-story");
-    await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
-    await checkHelp(page, "story-settings");
-    await clickAct(page, "continue", "continue-game-settings");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
-    await checkHelp(page, "claim");
-    await holdHeroesFromTest(page, [...HERO_IDS]);
-    await clickAct(page, "continue", "continue-claim-heroes");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
-    for (const id of SETUP_IDS) {
-      await expectToolbar(page);
+      await installSessionSocketHook(page);
+      await page.goto(`/join?code=${session.host.joinCode}`);
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "base-board");
       await checkHelp(page, "base-board-setup");
-      if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
-      await clickAct(page, "continue", `continue-setup-${id}`);
+      await clickAct(page, "board-set-up", "base-board-done");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "tower-choice");
+      await checkHelp(page, "tower-choice");
+      await clickAct(page, "tower-connect", "tower-connect");
+      await clickAct(page, "tower-calibrate", "tower-calibrate");
+      await setSoundAndKeep(page);
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "pick-story");
+      await checkHelp(page, "pick-story");
+      await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "game-settings");
+      await checkHelp(page, "story-settings");
+      await clickAct(page, "continue", "continue-game-settings");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "claim-heroes");
+      await checkHelp(page, "claim");
+      await holdHeroesFromTest(page, [...HERO_IDS]);
+      await clickAct(page, "continue", "continue-claim-heroes");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "setup");
+      for (const id of SETUP_IDS) {
+        await expectToolbar(page);
+        await checkHelp(page, "base-board-setup");
+        if (id === "starting-purse") await clickAct(page, "spin", "spin-setup-starting-purse");
+        await clickAct(page, "continue", `continue-setup-${id}`);
+      }
+      await clickAct(page, "continue", "continue-begin");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
+      await advanceOpenings(page);
+      await checkHelp(page, "day-on-the-board");
+
+      session.tower.loseConnection();
+      session.host.syncTower();
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 20_000 });
+      await checkHelp(page, "tower-lost");
+
+      await openMenu(page);
+      await page.locator('[data-gear-item="save-and-quit"]').click();
+      await page.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "session", { timeout: 20_000 });
+      await checkHelp(page, "session-screen");
+      await finishTonight(page);
+      await checkHelp(page, "session-over");
+    } finally {
+      await context.close();
+      await session.host.close();
     }
-    await clickAct(page, "continue", "continue-begin");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
-    await advanceOpenings(page);
-    await checkHelp(page, "day-on-the-board");
-
-    session.tower.loseConnection();
-    session.host.syncTower();
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "pause", { timeout: 20_000 });
-    await checkHelp(page, "tower-lost");
-
-    await openMenu(page);
-    await page.locator('[data-gear-item="save-and-quit"]').click();
-    await page.locator("[data-menu]").getByRole("button", { name: "Save and quit" }).click();
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "session", { timeout: 20_000 });
-    await checkHelp(page, "session-screen");
-    await finishTonight(page);
-    await checkHelp(page, "session-over");
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
+  },
+);
 
 const finishFromClaim = async (page: Page) => {
   await clickAct(page, "continue", "continue-claim-heroes");
@@ -999,181 +1013,186 @@ const openGear = async (page: Page, id: string) => {
   await page.locator(`[data-menu] [data-gear-item="${id}"]`).click();
 };
 
-test("gear actions open on the Story board and pause the game", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(240_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-panels" });
-  const { databasePath } = session;
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const boardContext = await browser.newContext({
-    baseURL: session.baseURL,
-    viewport: { width: 1920, height: 1080 },
-  });
-  const device = await context.newPage();
-  const other = await context.newPage();
-  const board = await boardContext.newPage();
-  let holderA = "";
-  let holderB = "";
-  try {
-    await board.goto("/board");
-    await reach(device, session.host.joinCode, "connect", "claim");
-    await installSessionSocketHook(other);
-    await other.setViewportSize({ width: 768, height: 1024 });
-    await other.goto(`/join?code=${session.host.joinCode}`);
-    await expect(deviceMain(other)).toHaveAttribute("data-screen", "claim-heroes");
-    await holdHeroesFromTest(device, ["hero-a", "hero-c"]);
-    await holdHeroesFromTest(other, ["hero-b", "hero-d"]);
-    await finishFromClaim(device);
-    const boardMain = board.locator("main.bt-board");
-
-    const openPanel = async (id: string) => {
-      await openGear(device, id);
-      const panel = board.locator(`[data-panel="${id}"]`);
-      await expect(panel).toBeVisible();
-      await expect(panel.locator("button, input, textarea, select, a")).toHaveCount(0);
-      await expect(boardMain).toHaveAttribute("data-paused", "true");
-      await expect(device.getByText("See the Story board")).toBeVisible();
-      await expect(
-        device.locator("[data-gear-panel]").getByRole("button", { name: "Done" }),
-      ).toBeVisible();
-      return panel;
-    };
-    const donePanel = async () => {
-      await device.locator("[data-gear-panel]").getByRole("button", { name: "Done" }).click();
-      await expect(board.locator("[data-panel]")).toHaveCount(0);
-      await expect(boardMain).toHaveAttribute("data-paused", "false");
-      await expect(deviceMain(device)).toHaveAttribute("data-screen", "play");
-    };
-
-    const setup = await openPanel("game-board-setup");
-    await expect(setup.locator("ol li")).not.toHaveCount(0);
-    await expect(setup).toHaveAttribute("data-piece-checks", "1");
-    await donePanel();
-
-    const party = await openPanel("current-party");
-    const heroA = party.locator('[data-hero="hero-a"]');
-    await expect(heroA.locator("[data-name]")).toHaveText("Hero A");
-    // A seated hero has the card's hit points and a share of the starting purse (C3/12).
-    await expect(heroA.locator("[data-hp]")).toContainText(/HP \d+\/\d+/);
-    await expect(heroA.locator("[data-gold]")).toContainText(/Gold \d+/);
-    // CU/13: the count is known, so nothing held reads "0 held", not blank. HP and gold are not.
-    await expect(heroA.locator("[data-items]")).toContainText("Items 0 held");
-    await expect(heroA.locator("[data-corruptions]")).toContainText("unavailable");
-    holderA = (await heroA.getAttribute("data-holder")) ?? "";
-    holderB = (await party.locator('[data-hero="hero-b"]').getAttribute("data-holder")) ?? "";
-    expect(holderA).not.toBe("");
-    expect(holderB).not.toBe("");
-    expect(holderA).not.toBe(holderB);
-    await donePanel();
-
-    await openPanel("volume");
-    await device.getByRole("button", { name: "Volume 0" }).click();
-    await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Volume 0", {
-      timeout: 500,
+test(
+  "gear actions open on the Story board and pause the game",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(240_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-panels" });
+    const { databasePath } = session;
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const boardContext = await browser.newContext({
+      baseURL: session.baseURL,
+      viewport: { width: 1920, height: 1080 },
     });
-    await device.getByRole("button", { name: "Keep" }).click();
-    await expect(boardMain).toHaveAttribute("data-volume", "0");
-    await donePanel();
-    await openPanel("volume");
-    await expect(boardMain).toHaveAttribute("data-volume", "0");
-    await donePanel();
+    const device = await context.newPage();
+    const other = await context.newPage();
+    const board = await boardContext.newPage();
+    let holderA = "";
+    let holderB = "";
+    try {
+      await board.goto("/board");
+      await reach(device, session.host.joinCode, "connect", "claim");
+      await installSessionSocketHook(other);
+      await other.setViewportSize({ width: 768, height: 1024 });
+      await other.goto(`/join?code=${session.host.joinCode}`);
+      await expect(deviceMain(other)).toHaveAttribute("data-screen", "claim-heroes");
+      await holdHeroesFromTest(device, ["hero-a", "hero-c"]);
+      await holdHeroesFromTest(other, ["hero-b", "hero-d"]);
+      await finishFromClaim(device);
+      const boardMain = board.locator("main.bt-board");
 
-    await openPanel("look-up");
-    // CU/09: the Rules group replaces the old placeholders; each page is display only on the board.
-    await device.getByRole("button", { name: "Battle" }).click();
-    await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Battle", {
-      timeout: 500,
+      const openPanel = async (id: string) => {
+        await openGear(device, id);
+        const panel = board.locator(`[data-panel="${id}"]`);
+        await expect(panel).toBeVisible();
+        await expect(panel.locator("button, input, textarea, select, a")).toHaveCount(0);
+        await expect(boardMain).toHaveAttribute("data-paused", "true");
+        await expect(device.getByText("See the Story board")).toBeVisible();
+        await expect(
+          device.locator("[data-gear-panel]").getByRole("button", { name: "Done" }),
+        ).toBeVisible();
+        return panel;
+      };
+      const donePanel = async () => {
+        await device.locator("[data-gear-panel]").getByRole("button", { name: "Done" }).click();
+        await expect(board.locator("[data-panel]")).toHaveCount(0);
+        await expect(boardMain).toHaveAttribute("data-paused", "false");
+        await expect(deviceMain(device)).toHaveAttribute("data-screen", "play");
+      };
+
+      const setup = await openPanel("game-board-setup");
+      await expect(setup.locator("ol li")).not.toHaveCount(0);
+      await expect(setup).toHaveAttribute("data-piece-checks", "1");
+      await donePanel();
+
+      const party = await openPanel("current-party");
+      const heroA = party.locator('[data-hero="hero-a"]');
+      await expect(heroA.locator("[data-name]")).toHaveText("Hero A");
+      // A seated hero has the card's hit points and a share of the starting purse (C3/12).
+      await expect(heroA.locator("[data-hp]")).toContainText(/HP \d+\/\d+/);
+      await expect(heroA.locator("[data-gold]")).toContainText(/Gold \d+/);
+      // CU/13: the count is known, so nothing held reads "0 held", not blank. HP and gold are not.
+      await expect(heroA.locator("[data-items]")).toContainText("Items 0 held");
+      await expect(heroA.locator("[data-corruptions]")).toContainText("unavailable");
+      holderA = (await heroA.getAttribute("data-holder")) ?? "";
+      holderB = (await party.locator('[data-hero="hero-b"]').getAttribute("data-holder")) ?? "";
+      expect(holderA).not.toBe("");
+      expect(holderB).not.toBe("");
+      expect(holderA).not.toBe(holderB);
+      await donePanel();
+
+      await openPanel("volume");
+      await device.getByRole("button", { name: "Volume 0" }).click();
+      await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Volume 0", {
+        timeout: 500,
+      });
+      await device.getByRole("button", { name: "Keep" }).click();
+      await expect(boardMain).toHaveAttribute("data-volume", "0");
+      await donePanel();
+      await openPanel("volume");
+      await expect(boardMain).toHaveAttribute("data-volume", "0");
+      await donePanel();
+
+      await openPanel("look-up");
+      // CU/09: the Rules group replaces the old placeholders; each page is display only on the board.
+      await device.getByRole("button", { name: "Battle" }).click();
+      await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Battle", {
+        timeout: 500,
+      });
+      await expect(board.locator("[data-card] [data-card-page]")).toContainText(
+        "A battle runs in rounds.",
+      );
+      await donePanel();
+
+      await openPanel("join-another-ipad");
+      await expect(board.locator("[data-qr] svg")).toBeVisible();
+      await expect(board.locator("[data-join-url]")).toContainText(session.host.joinCode);
+      await donePanel();
+
+      await openPanel("change-who-holds-whom");
+      await device.getByRole("button", { name: "Hero A" }).click();
+      await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Hero A", {
+        timeout: 500,
+      });
+      await device.getByRole("button", { name: "Hero B" }).click();
+      await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Hero B", {
+        timeout: 500,
+      });
+      await donePanel();
+      const after = await openPanel("current-party");
+      await expect(after.locator('[data-hero="hero-a"]')).toHaveAttribute(
+        "data-holder",
+        holderB ?? "",
+      );
+      await expect(after.locator('[data-hero="hero-b"]')).toHaveAttribute(
+        "data-holder",
+        holderA ?? "",
+      );
+      await donePanel();
+    } finally {
+      await boardContext.close();
+      await context.close();
+      await session.host.close();
+    }
+
+    const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "c2-04-panels" });
+    // The saved game had the tower: the restarted table has it connected again (CU/16).
+    restarted.tower.connect();
+    restarted.tower.calibrate();
+    const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
+    const boardContext2 = await browser.newContext({
+      baseURL: restarted.baseURL,
+      viewport: { width: 1920, height: 1080 },
     });
-    await expect(board.locator("[data-card] [data-card-page]")).toContainText(
-      "A battle runs in rounds.",
-    );
-    await donePanel();
+    const again = await context2.newPage();
+    const board2 = await boardContext2.newPage();
+    try {
+      await board2.goto("/board");
+      await installSessionSocketHook(again);
+      await again.goto(`/join?code=${restarted.host.joinCode}`);
+      await resumeSavedGame(again);
+      await openGear(again, "current-party");
+      const party = board2.locator('[data-panel="current-party"]');
+      await expect(party.locator('[data-hero="hero-a"]')).toBeVisible();
+      // The fresh browser is a new iPad (CU/16): it picked every hero, so it holds both, and neither
+      // old holder does.
+      const newHolderA =
+        (await party.locator('[data-hero="hero-a"]').getAttribute("data-holder")) ?? "";
+      const newHolderB =
+        (await party.locator('[data-hero="hero-b"]').getAttribute("data-holder")) ?? "";
+      expect(newHolderA).not.toBe("");
+      expect(newHolderA).toBe(newHolderB);
+      expect([holderA, holderB]).not.toContain(newHolderA);
+    } finally {
+      await boardContext2.close();
+      await context2.close();
+      await restarted.host.close();
+    }
+  },
+);
 
-    await openPanel("join-another-ipad");
-    await expect(board.locator("[data-qr] svg")).toBeVisible();
-    await expect(board.locator("[data-join-url]")).toContainText(session.host.joinCode);
-    await donePanel();
+test(
+  "the happy path never needs the Menu",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(180_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-happy" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const page = await context.newPage();
+    try {
+      await reach(page, session.host.joinCode, "skip", "play");
+      await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
+      await expect(page.locator("[data-menu]")).toHaveCount(0);
+      await expect(page.locator("[data-help]")).toHaveCount(0);
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
 
-    await openPanel("change-who-holds-whom");
-    await device.getByRole("button", { name: "Hero A" }).click();
-    await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Hero A", {
-      timeout: 500,
-    });
-    await device.getByRole("button", { name: "Hero B" }).click();
-    await expect(board.locator("[data-picked]")).toHaveAttribute("data-picked", "Hero B", {
-      timeout: 500,
-    });
-    await donePanel();
-    const after = await openPanel("current-party");
-    await expect(after.locator('[data-hero="hero-a"]')).toHaveAttribute(
-      "data-holder",
-      holderB ?? "",
-    );
-    await expect(after.locator('[data-hero="hero-b"]')).toHaveAttribute(
-      "data-holder",
-      holderA ?? "",
-    );
-    await donePanel();
-  } finally {
-    await boardContext.close();
-    await context.close();
-    await session.host.close();
-  }
-
-  const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "c2-04-panels" });
-  // The saved game had the tower: the restarted table has it connected again (CU/16).
-  restarted.tower.connect();
-  restarted.tower.calibrate();
-  const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
-  const boardContext2 = await browser.newContext({
-    baseURL: restarted.baseURL,
-    viewport: { width: 1920, height: 1080 },
-  });
-  const again = await context2.newPage();
-  const board2 = await boardContext2.newPage();
-  try {
-    await board2.goto("/board");
-    await installSessionSocketHook(again);
-    await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await resumeSavedGame(again);
-    await openGear(again, "current-party");
-    const party = board2.locator('[data-panel="current-party"]');
-    await expect(party.locator('[data-hero="hero-a"]')).toBeVisible();
-    // The fresh browser is a new iPad (CU/16): it picked every hero, so it holds both, and neither
-    // old holder does.
-    const newHolderA =
-      (await party.locator('[data-hero="hero-a"]').getAttribute("data-holder")) ?? "";
-    const newHolderB =
-      (await party.locator('[data-hero="hero-b"]').getAttribute("data-holder")) ?? "";
-    expect(newHolderA).not.toBe("");
-    expect(newHolderA).toBe(newHolderB);
-    expect([holderA, holderB]).not.toContain(newHolderA);
-  } finally {
-    await boardContext2.close();
-    await context2.close();
-    await restarted.host.close();
-  }
-});
-
-test("the happy path never needs the Menu", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(180_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-happy" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const page = await context.newPage();
-  try {
-    await reach(page, session.host.joinCode, "skip", "play");
-    await expect(deviceMain(page)).toHaveAttribute("data-screen", "play");
-    await expect(page.locator("[data-menu]")).toHaveCount(0);
-    await expect(page.locator("[data-help]")).toHaveCount(0);
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
-
-test("a disabled item shows its reason", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
+test("a disabled item shows its reason", { tag: "@ipad-only" }, async ({ browser }, testInfo) => {
   test.setTimeout(180_000);
   const playing = await startAcceptanceHost(testInfo, { seed: "c2-04-reason-play" });
   const playContext = await browser.newContext({ baseURL: playing.baseURL, ...PORTRAIT });
@@ -1213,116 +1232,122 @@ test("a disabled item shows its reason", async ({ browser }, testInfo) => {
   }
 });
 
-test("two iPads pressing Volume open one panel", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(120_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-race" });
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const boardContext = await browser.newContext({
-    baseURL: session.baseURL,
-    viewport: { width: 1920, height: 1080 },
-  });
-  const first = await context.newPage();
-  const second = await context.newPage();
-  const board = await boardContext.newPage();
-  try {
-    await board.goto("/board");
-    await reach(first, session.host.joinCode, "connect", "claim");
-    await installSessionSocketHook(second);
-    await second.goto(`/join?code=${session.host.joinCode}`);
-    await expect(deviceMain(second)).toHaveAttribute("data-screen", "claim-heroes");
-    await openMenu(first);
-    await openMenu(second);
-    // Press both without waiting for "enabled": once the winner lands, the loser's
-    // Volume goes disabled, and a normal click would wait on it until timeout.
-    await Promise.all([
-      first.locator('[data-gear-item="volume"]').dispatchEvent("click"),
-      second.locator('[data-gear-item="volume"]').dispatchEvent("click"),
-    ]);
-    await expect(board.locator('[data-panel="volume"]')).toHaveCount(1);
-    await expect(board.locator("main.bt-board")).toHaveAttribute("data-gear-opens", "1");
-    const firstSees = await first.getByText("See the Story board").count();
-    const secondSees = await second.getByText("See the Story board").count();
-    expect(firstSees + secondSees).toBe(1);
-    const loser = firstSees === 0 ? first : second;
-    await openMenu(loser);
-    await greyReason(loser, "volume", "Open on another iPad.");
-  } finally {
-    await boardContext.close();
-    await context.close();
-    await session.host.close();
-  }
-});
+test(
+  "two iPads pressing Volume open one panel",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(120_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-race" });
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const boardContext = await browser.newContext({
+      baseURL: session.baseURL,
+      viewport: { width: 1920, height: 1080 },
+    });
+    const first = await context.newPage();
+    const second = await context.newPage();
+    const board = await boardContext.newPage();
+    try {
+      await board.goto("/board");
+      await reach(first, session.host.joinCode, "connect", "claim");
+      await installSessionSocketHook(second);
+      await second.goto(`/join?code=${session.host.joinCode}`);
+      await expect(deviceMain(second)).toHaveAttribute("data-screen", "claim-heroes");
+      await openMenu(first);
+      await openMenu(second);
+      // Press both without waiting for "enabled": once the winner lands, the loser's
+      // Volume goes disabled, and a normal click would wait on it until timeout.
+      await Promise.all([
+        first.locator('[data-gear-item="volume"]').dispatchEvent("click"),
+        second.locator('[data-gear-item="volume"]').dispatchEvent("click"),
+      ]);
+      await expect(board.locator('[data-panel="volume"]')).toHaveCount(1);
+      await expect(board.locator("main.bt-board")).toHaveAttribute("data-gear-opens", "1");
+      const firstSees = await first.getByText("See the Story board").count();
+      const secondSees = await second.getByText("See the Story board").count();
+      expect(firstSees + secondSees).toBe(1);
+      const loser = firstSees === 0 ? first : second;
+      await openMenu(loser);
+      await greyReason(loser, "volume", "Open on another iPad.");
+    } finally {
+      await boardContext.close();
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
 
-test("a gear panel survives a restart closed", async ({ browser }, testInfo) => {
-  skipUnlessIpad(testInfo);
-  test.setTimeout(180_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "c2-04-restart" });
-  const { databasePath } = session;
-  const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
-  const boardContext = await browser.newContext({
-    baseURL: session.baseURL,
-    viewport: { width: 1920, height: 1080 },
-  });
-  const page = await context.newPage();
-  const board = await boardContext.newPage();
-  let reasons: string[] = [];
-  try {
-    await board.goto("/board");
-    await reach(page, session.host.joinCode, "connect", "play");
-    await openMenu(page);
-    reasons = await page.locator("[data-menu] [data-gear-item]").evaluateAll((nodes) =>
-      nodes.map((node) => {
-        const reason = node.querySelector("[data-reason]")?.textContent ?? "";
-        const disabled = (node as HTMLButtonElement).disabled;
-        return `${node.getAttribute("data-gear-item")}:${disabled ? "off" : "on"}:${reason}`;
-      }),
-    );
-    await page.locator('[data-action="menu"]').click();
-    await openGear(page, "volume");
-    await expect(board.locator('[data-panel="volume"]')).toBeVisible();
-    await expect(board.locator("main.bt-board")).toHaveAttribute("data-paused", "true");
-  } finally {
-    await boardContext.close();
-    await context.close();
-    await session.host.close();
-  }
+test(
+  "a gear panel survives a restart closed",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(180_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "c2-04-restart" });
+    const { databasePath } = session;
+    const context = await browser.newContext({ baseURL: session.baseURL, ...PORTRAIT });
+    const boardContext = await browser.newContext({
+      baseURL: session.baseURL,
+      viewport: { width: 1920, height: 1080 },
+    });
+    const page = await context.newPage();
+    const board = await boardContext.newPage();
+    let reasons: string[] = [];
+    try {
+      await board.goto("/board");
+      await reach(page, session.host.joinCode, "connect", "play");
+      await openMenu(page);
+      reasons = await page.locator("[data-menu] [data-gear-item]").evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const reason = node.querySelector("[data-reason]")?.textContent ?? "";
+          const disabled = (node as HTMLButtonElement).disabled;
+          return `${node.getAttribute("data-gear-item")}:${disabled ? "off" : "on"}:${reason}`;
+        }),
+      );
+      await page.locator('[data-action="menu"]').click();
+      await openGear(page, "volume");
+      await expect(board.locator('[data-panel="volume"]')).toBeVisible();
+      await expect(board.locator("main.bt-board")).toHaveAttribute("data-paused", "true");
+    } finally {
+      await boardContext.close();
+      await context.close();
+      await session.host.close();
+    }
 
-  const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "c2-04-restart" });
-  const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
-  const boardContext2 = await browser.newContext({
-    baseURL: restarted.baseURL,
-    viewport: { width: 1920, height: 1080 },
-  });
-  const again = await context2.newPage();
-  const board2 = await boardContext2.newPage();
-  try {
-    await board2.goto("/board");
-    await installSessionSocketHook(again);
-    await again.goto(`/join?code=${restarted.host.joinCode}`);
-    await resumeSavedGame(again, { goOnWithoutTower: true });
-    await expect(board2.locator("[data-panel]")).toHaveCount(0);
-    await expect(board2.locator("main.bt-board")).toHaveAttribute("data-paused", "false");
-    await expectToolbar(again);
-    await openMenu(again);
-    const after = await again.locator("[data-menu] [data-gear-item]").evaluateAll((nodes) =>
-      nodes.map((node) => {
-        const reason = node.querySelector("[data-reason]")?.textContent ?? "";
-        const disabled = (node as HTMLButtonElement).disabled;
-        return `${node.getAttribute("data-gear-item")}:${disabled ? "off" : "on"}:${reason}`;
-      }),
-    );
-    // A restart never reconnects the tower by itself (tower safety), so the two rows that follow
-    // the tower link read "no tower" now. Every other row reads as it did before the restart.
-    const towerRows = (rows: string[]) =>
-      rows.filter((row) => row.startsWith("volume:") || row.startsWith("tower:"));
-    expect(after.filter((row) => !towerRows([row]).length)).toEqual(
-      reasons.filter((row) => !towerRows([row]).length),
-    );
-    expect(towerRows(after)).toEqual(["volume:off:Only with the tower.", "tower:on:"]);
-  } finally {
-    await boardContext2.close();
-    await context2.close();
-    await restarted.host.close();
-  }
-});
+    const restarted = await startAcceptanceHost(testInfo, { databasePath, seed: "c2-04-restart" });
+    const context2 = await browser.newContext({ baseURL: restarted.baseURL, ...PORTRAIT });
+    const boardContext2 = await browser.newContext({
+      baseURL: restarted.baseURL,
+      viewport: { width: 1920, height: 1080 },
+    });
+    const again = await context2.newPage();
+    const board2 = await boardContext2.newPage();
+    try {
+      await board2.goto("/board");
+      await installSessionSocketHook(again);
+      await again.goto(`/join?code=${restarted.host.joinCode}`);
+      await resumeSavedGame(again, { goOnWithoutTower: true });
+      await expect(board2.locator("[data-panel]")).toHaveCount(0);
+      await expect(board2.locator("main.bt-board")).toHaveAttribute("data-paused", "false");
+      await expectToolbar(again);
+      await openMenu(again);
+      const after = await again.locator("[data-menu] [data-gear-item]").evaluateAll((nodes) =>
+        nodes.map((node) => {
+          const reason = node.querySelector("[data-reason]")?.textContent ?? "";
+          const disabled = (node as HTMLButtonElement).disabled;
+          return `${node.getAttribute("data-gear-item")}:${disabled ? "off" : "on"}:${reason}`;
+        }),
+      );
+      // A restart never reconnects the tower by itself (tower safety), so the two rows that follow
+      // the tower link read "no tower" now. Every other row reads as it did before the restart.
+      const towerRows = (rows: string[]) =>
+        rows.filter((row) => row.startsWith("volume:") || row.startsWith("tower:"));
+      expect(after.filter((row) => !towerRows([row]).length)).toEqual(
+        reasons.filter((row) => !towerRows([row]).length),
+      );
+      expect(towerRows(after)).toEqual(["volume:off:Only with the tower.", "tower:on:"]);
+    } finally {
+      await boardContext2.close();
+      await context2.close();
+      await restarted.host.close();
+    }
+  },
+);

@@ -39,11 +39,7 @@ const labelsOf = async (pad: Page) => {
 const optionByLabel = (pad: Page, label: string) =>
   options(pad).filter({ hasText: new RegExp(`^${label}`) });
 
-test.describe("D4/01 a fallen building keeps its quest", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("D4/01 a fallen building keeps its quest", { tag: "@ipad-only" }, () => {
   test("EV-11: Enter, then Quest and Leave, on a fallen village", async ({ browser }, testInfo) => {
     test.setTimeout(300_000);
     const session = await startAcceptanceHost(testInfo, {

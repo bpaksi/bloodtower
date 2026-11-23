@@ -117,11 +117,7 @@ const openBoard = async (browser: import("@playwright/test").Browser, baseURL: s
   return { context, pad, board };
 };
 
-test.describe("F1/03 a real game's Herald, from the story pack", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("F1/03 a real game's Herald, from the story pack", { tag: "@ipad-only" }, () => {
   test("EV-10: walk to Egan's End, the Quest row, the pack's labels, the turn spent, and Continue", async ({
     browser,
   }, testInfo) => {

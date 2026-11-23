@@ -62,8 +62,7 @@ const variant = (label: string, drop: string[]) => {
   return root;
 };
 
-test.beforeAll(async ({ browser: _browser }, testInfo) => {
-  if (testInfo.project.name !== "desktop") return;
+test.beforeAll(async ({ browser: _browser }) => {
   test.setTimeout(240_000);
   work = tempDir("work");
   packed = tempDir("packs");
@@ -96,10 +95,6 @@ test.afterAll(() => {
     if (dir) rmSync(dir, { recursive: true, force: true });
   }
 });
-
-/** The Story board runs on the Mac: this spec runs in the desktop project only. */
-const desktopOnly = (testInfo: TestInfo) =>
-  test.skip(testInfo.project.name !== "desktop", "The Story board runs on the Mac.");
 
 /** A host on `packsDir` with the demo entry on and the mock tower never connected. */
 const startDemoHost = async (packsDir: string, label: string) => {
@@ -311,7 +306,6 @@ test("EV-01, EV-02, EV-06: the packed line plays once with the locked caption ov
   browser,
 }, testInfo) => {
   test.setTimeout(120_000);
-  desktopOnly(testInfo);
   const session = await startDemoHost(packed, "full");
   const contexts: BrowserContext[] = [];
   try {
@@ -404,7 +398,6 @@ test("EV-11: a reload does not replay the line; the explicit replay plays it onc
   browser,
 }, testInfo) => {
   test.setTimeout(120_000);
-  desktopOnly(testInfo);
   const session = await startDemoHost(packed, "reload");
   const contexts: BrowserContext[] = [];
   try {
@@ -451,7 +444,6 @@ test("EV-11: a reload does not replay the line; the explicit replay plays it onc
 
 test("EV-02: with no glow packed the cover shows alone", async ({ browser }, testInfo) => {
   test.setTimeout(120_000);
-  desktopOnly(testInfo);
   const session = await startDemoHost(noGlow, "no-glow");
   const contexts: BrowserContext[] = [];
   try {
@@ -477,7 +469,6 @@ test("EV-05: with the packed audio file missing the caption still shows, with no
   browser,
 }, testInfo) => {
   test.setTimeout(120_000);
-  desktopOnly(testInfo);
   const session = await startDemoHost(noAudio, "no-audio");
   const contexts: BrowserContext[] = [];
   try {

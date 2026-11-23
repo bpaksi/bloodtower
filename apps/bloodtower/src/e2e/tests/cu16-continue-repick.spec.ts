@@ -326,11 +326,7 @@ const actsFor = async (rig: Rig, pad: Page, other: Page, heroId: string) => {
   throw new Error(`The iPad could not act for ${heroId}.`);
 };
 
-test.describe("CU/16 Continue re-pick", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "Two iPads in portrait; one viewport is enough.");
-  });
-
+test.describe("CU/16 Continue re-pick", { tag: "@ipad-only" }, () => {
   test("EV-08 Save and quit, Continue on new iPads, every hero can be picked", async ({
     browser,
   }, testInfo) => {

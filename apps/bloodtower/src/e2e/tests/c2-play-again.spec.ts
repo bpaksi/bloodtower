@@ -29,10 +29,6 @@ const OPENING_IDS = ["grey-stair-01", "grey-stair-02", "grey-stair-03", "grey-st
 const REPLACE_LINE = "This replaces the saved game. Are you sure?";
 
 // The board and the iPads do not depend on the project's viewport, so one project runs this.
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Own board and iPad viewports.");
-});
-
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 const boardMain = (page: Page) => page.locator("main.bt-board");
 const bodyButtons = (page: Page) => page.locator("main.bt-device .bt-scroll button");
@@ -149,9 +145,18 @@ const setupToBegin = async (pad: Page) => {
   await clickAct(pad, "continue", "continue-begin");
 };
 
+/**
+ * The opening already sits on the play screen, so `data-screen="play"` says nothing about the
+ * last press. Each press is taken once its button is gone; without that wait the play loop
+ * below can pick up the last opening Continue and click a button that is about to vanish.
+ */
 const playThroughOpening = async (pad: Page) => {
   for (const id of OPENING_IDS) {
-    await clickAct(pad, "continue", `continue-opening-${id}`);
+    const promptId = `continue-opening-${id}`;
+    await clickAct(pad, "continue", promptId);
+    await expect(pad.locator(`button[data-prompt-id="${promptId}"]`)).toHaveCount(0, {
+      timeout: 20_000,
+    });
   }
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 20_000 });
 };
@@ -217,7 +222,8 @@ const playUntilDay = async (pad: Page, untilDay: number) => {
     const button = pad.locator(
       `button[data-prompt-id="${pick.promptId}"][data-action-id="${pick.actionId}"]`,
     );
-    await button.click();
+    // A bounded click: a button that vanishes before the click fails here, not at the test timeout.
+    await button.click({ timeout: 20_000 });
     // The press is taken once its button is gone, or re-offered under a new view.
     await expect(button.and(pad.locator(":not([disabled])"))).toHaveCount(0, { timeout: 20_000 });
   }
