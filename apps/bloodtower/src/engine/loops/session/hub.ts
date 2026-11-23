@@ -1,8 +1,11 @@
 import { hashSeed } from "@dark-tower/rng";
 import type { EngineEffect } from "../../effects.ts";
 import { resetHints } from "../../hints/flow.ts";
+import type { PlayState } from "../chapter/playState.ts";
+import { captureClock } from "../day/clock.ts";
 import type { GameEnd } from "../game/end.ts";
 import { partySize, refreshSetupSteps } from "../game/setupFlow.ts";
+import { ensureQuests } from "../quest/store.ts";
 import type { ShellEffect } from "./effects.ts";
 import { emptyTally, initialHoldings, type ShellState, type TonightGame } from "./state.ts";
 import { towerReady } from "./tower.ts";
@@ -382,6 +385,35 @@ const settingValue = (state: ShellState, settingId: string): string | null => {
 const seatedHeroIds = (state: ShellState): string[] =>
   state.play ? state.play.groups.flatMap((group) => group.heroIds) : Object.keys(heldNow(state));
 
+type GameRecordStats = NonNullable<Extract<ShellEffect, { kind: "game-record" }>["stats"]>;
+
+/**
+ * The stats the record stores at the end (DEC-627, SCR-019). They are read from the play state
+ * once, here, and the stats screen reads only the stored copy. A count the game never knew (no
+ * day clock yet, no hero with a gold figure) is null, never zero. Key moments are not counted
+ * here: each is its own log row (`keyMoments.ts`, Gamewright 2026-11-23).
+ */
+export const endStats = (play: PlayState): GameRecordStats | null => {
+  const clock = captureClock(play);
+  if (!clock) return null;
+  const sheets = play.groups
+    .flatMap((group) => group.heroIds)
+    .flatMap((heroId) => {
+      const sheet = clock.heroes[heroId];
+      return sheet ? [sheet] : [];
+    });
+  const golds = sheets.flatMap((sheet) => (sheet.gold === undefined ? [] : [sheet.gold]));
+  return {
+    // The whole game's quests: `clock.questsWon` is today's count and resets each day.
+    questsDone: ensureQuests(play).done.length,
+    corruptionsTaken: sheets.reduce((sum, sheet) => sum + sheet.corruptions, 0),
+    goldLeft: golds.length === 0 ? null : golds.reduce((sum, gold) => sum + gold, 0),
+  };
+};
+
+const withStats = (stats: GameRecordStats | null): { stats?: GameRecordStats } =>
+  stats ? { stats } : {};
+
 /**
  * The record effect for a game (DEC-116, DEC-117, PT-04). The host stamps the times and the
  * active length from the log; the engine only says what it knows.
@@ -404,6 +436,7 @@ export const gameRecordEffect = (
   how: outcome === "quit" ? "quit" : outcome === "won" ? "won" : (end?.reason ?? "skulls"),
   sceneId: end?.sceneId ?? null,
   endDay: state.play && state.play.dayNumber > 0 ? state.play.dayNumber : null,
+  ...withStats(state.play ? endStats(state.play) : null),
 });
 
 /**

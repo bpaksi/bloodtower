@@ -68,6 +68,7 @@ export const runShellEffects = async (
           endedWall: ctx.clock.wall(),
           activeMs: activeMsOf(rows),
           taps: tapCounts(rows).total,
+          ...(effect.stats ? { stats: effect.stats } : {}),
         };
         if (
           last &&
@@ -93,6 +94,23 @@ export const runShellEffects = async (
         if (effect.outcome !== "quit" && ctx.store.getAutosave()?.gameId === effect.gameId) {
           ctx.store.clearAutosave();
         }
+        break;
+      }
+      case "key-moment": {
+        // A replay rebuilds state from rows already in the log; it never writes them again.
+        if (ctx.replaying) break;
+        const { kind: _kind, gameId, ...moment } = effect;
+        ctx.store.append({
+          gameId,
+          kind: "key-moment",
+          payload: moment,
+          atMonoMs: ctx.clock.monoMs(),
+          atWall: ctx.clock.wall(),
+          deviceId: null,
+          seed: ctx.meta.seed,
+          packVersion: ctx.meta.packVersion,
+          engineVersion: ctx.meta.engineVersion,
+        });
         break;
       }
       case "checkpoint-write": {

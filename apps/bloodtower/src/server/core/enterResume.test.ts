@@ -385,7 +385,7 @@ describe("the session screen and a host restart (C2/06)", () => {
       .projectDevice(pad)
       .actions.filter((action) => action.actionId === "open-game")
       .map((action) => action.label);
-    expect(rows).toEqual(["Game 2", "Game 1"]);
+    expect(rows).toEqual(["Game 2 quit", "Game 1 quit"]);
     expect(second.tower.sent()).toEqual([]);
   });
 

@@ -26,6 +26,7 @@ const DEC_703 = {
   c3_end_after_chapter_1: false,
   c4_end_after_chapter_3: true,
   fight_enabled: true,
+  game_length_targets: { short: 90, standard: 120 },
   setup: {
     purse_wheel: { sides: [10, 20, 30, 40], floor: 10 },
     difficulty: {
@@ -247,6 +248,23 @@ describe("tuning.yaml", () => {
       rmSync(missing.dir, { recursive: true, force: true });
       rmSync(lots.dir, { recursive: true, force: true });
     }
+  });
+
+  it("C3/10 EV-20 holds Short and Standard targets only (PT-10)", () => {
+    const tuning = tuningOf(basePack);
+    expect(Object.keys(tuning.game_length_targets).sort()).toEqual(["short", "standard"]);
+  });
+
+  it("C3/10 EV-20 a missing Standard target is rejected and named", () => {
+    const { result } = withTuning((text) => text.replace("  standard: 120\n", ""));
+    expectLint(result, "game_length_targets");
+  });
+
+  it("C3/10 EV-20 a Long target is rejected: Long is 1.1 (PT-10)", () => {
+    const { result } = withTuning((text) =>
+      text.replace("  standard: 120\n", "  standard: 120\n  long: 240\n"),
+    );
+    expectLint(result, "game_length_targets");
   });
 
   it("C4-01 EV-01 base tuning has Fight on, the C3 end off and the C4 end on", () => {

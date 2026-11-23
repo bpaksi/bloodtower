@@ -5,6 +5,12 @@ c3_end_after_chapter_1: false
 c4_end_after_chapter_3: true
 fight_enabled: true
 
+# PT-10 placeholder game-length targets, in minutes (Bob 2026-11-14). Read-only: no setting
+# writes them and no 1.0 screen shows them. Short and Standard only; Long is 1.1.
+game_length_targets:
+  short: 90
+  standard: 120
+
 setup:
   purse_wheel:
     sides: [10, 20, 30, 40]

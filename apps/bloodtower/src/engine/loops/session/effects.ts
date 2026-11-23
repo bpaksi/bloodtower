@@ -46,6 +46,54 @@ export const gameRecordEffectV1 = z.object({
   sceneId: z.string().nullable().optional(),
   /** The day the game ended on, null before the first day. */
   endDay: z.number().int().nullable().optional(),
+  /**
+   * The game's stats as they stood at the end (DEC-627, SCR-019). The stats screen reads these,
+   * never the live state. Absent on a quit before play and on an older log row. Key moments are
+   * not here: each is its own `key-moment` row (Gamewright 2026-11-23).
+   */
+  stats: z
+    .object({
+      questsDone: z.number().int().min(0).nullable(),
+      corruptionsTaken: z.number().int().min(0).nullable(),
+      goldLeft: z.number().int().nullable(),
+    })
+    .optional(),
+});
+
+/** The five Q-C3-18 kinds of key moment. */
+export const KEY_MOMENT_KINDS = [
+  "quest-done",
+  "item-gained",
+  "building-fallen",
+  "corruption-taken",
+  "chapter-won",
+] as const;
+
+/**
+ * One key moment, as it happened (Q-C3-18, Gamewright 2026-11-23): its day and the names the
+ * C3/17 line fills in. The host writes it as a `key-moment` log row; a replay writes nothing.
+ */
+export const keyMomentEffectV1 = z.object({
+  kind: z.literal("key-moment"),
+  v: z.literal(1),
+  gameId: z.string(),
+  moment: z.enum(KEY_MOMENT_KINDS),
+  /** The game day it happened on; null before day 1. */
+  day: z.number().int().min(1).nullable(),
+  questId: z.string().optional(),
+  /** {quest}: the quest's place name, else its id (a quest has no name in the pack). */
+  quest: z.string().optional(),
+  heroId: z.string().optional(),
+  /** {hero}: the hero's name. */
+  hero: z.string().optional(),
+  itemId: z.string().optional(),
+  /** {item}: the item's name, else its id. */
+  item: z.string().optional(),
+  spaceId: z.string().optional(),
+  /** {building}: the space's name. */
+  building: z.string().optional(),
+  corruptionId: z.string().optional(),
+  chapter: z.number().int().min(1).optional(),
 });
 
 export const towerCommandEffectV1 = z.object({
@@ -102,6 +150,7 @@ export const shellEffectSchema = z.discriminatedUnion("kind", [
   viewRefreshEffectV1,
   autosaveWriteEffectV1,
   gameRecordEffectV1,
+  keyMomentEffectV1,
   towerCommandEffectV1,
   checkpointWriteEffectV1,
   pressErrorEffectV1,

@@ -3,7 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { type ChapterPlan, configureChapters } from "../../engine/loops/chapter/chapters.ts";
-import { ensureClock, markQuestWon } from "../../engine/loops/day/clock.ts";
+import {
+  ensureClock,
+  heroSheet,
+  markQuestWon,
+  setHeroSheet,
+} from "../../engine/loops/day/clock.ts";
 import { ensureQuests } from "../../engine/loops/quest/store.ts";
 import { TEST_STORY } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
@@ -15,6 +20,7 @@ import {
   averageActiveMs,
   heroTotals,
   projectGameRecords,
+  projectGameStats,
   tapCounts,
 } from "../events/gameStats.ts";
 import { createEventStore } from "../events/store.ts";
@@ -429,6 +435,66 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     expect(session.state().offered.some((o) => o.promptId === "continue-saved-game")).toBe(false);
   });
 
+  it("EV-05: the stats view reads the stored stats; changing the live state after the end changes nothing", async () => {
+    const { boot, store, clock } = harness();
+    const session = await boot();
+    const pad = await startPausedGame(session, clock, 30_000);
+    armChapters(session, "win");
+    const play = session.state().play;
+    if (!play) throw new Error("No play state.");
+    const live = ensureClock(play);
+    setHeroSheet(play, "hero-a", { ...heroSheet(live, "hero-a"), gold: 7, corruptions: 1 });
+    setHeroSheet(play, "hero-b", { ...heroSheet(live, "hero-b"), gold: 3, corruptions: 1 });
+    await playOn(session, pad, () => ended(session));
+    const gameId = session.state().games[0]?.gameId ?? "";
+    const before = projectGameStats(store, gameId);
+    expect(before).toMatchObject({
+      outcome: "won",
+      how: "won",
+      questsDone: 2,
+      corruptionsTaken: 2,
+      goldLeft: 10,
+      best: { state: "this-game" },
+    });
+    expect(before?.days).toBe(projectGameRecords(store)[0]?.endDay);
+    expect(before?.days).not.toBeNull();
+    expect(Math.abs((before?.activeMs ?? 0) - 15_000)).toBeLessThanOrEqual(1_000);
+    // Key moments come from the log's `key-moment` rows (Gamewright 2026-11-23). The setup above
+    // changed the sheets between steps, so only what a step did is a moment: the chapter won.
+    expect(before?.keyMoments).toEqual([
+      { moment: "chapter-won", day: before?.days ?? null, chapter: 1 },
+    ]);
+    const momentRows = () =>
+      store.listEvents(gameId).filter((row) => row.kind === "key-moment").length;
+    expect(momentRows()).toBe(1);
+    // EV-20: the view holds no game-length target and no warning.
+    expect(Object.keys(before ?? {}).sort()).toEqual(
+      [
+        "activeMs",
+        "averageMs",
+        "best",
+        "corruptionsTaken",
+        "days",
+        "gameId",
+        "goldLeft",
+        "how",
+        "keyMoments",
+        "outcome",
+        "questsDone",
+        "storyId",
+      ].sort(),
+    );
+    // Mutate the live state: purse +50 and the day counter +3. The view must not move.
+    setHeroSheet(play, "hero-a", { ...heroSheet(live, "hero-a"), gold: 57 });
+    play.dayNumber += 3;
+    markQuestWon(play);
+    expect(projectGameStats(store, gameId)).toEqual(before);
+    // A host restart replays the log and writes no moment again.
+    await boot();
+    expect(momentRows()).toBe(1);
+    expect(projectGameStats(store, gameId)).toEqual(before);
+  });
+
   it("EV-14: totals and the average count won and lost records only", () => {
     const record = (
       gameId: string,
@@ -573,4 +639,87 @@ describe("tap counts and active length come from the log (PT-10)", () => {
     // 10 s before the quit and 20 s after Continue; the 10 minutes away are not active time.
     expect(record?.activeMs).toBe(30_000);
   });
+});
+
+/** Every key in a view, at any depth: a target or warning would show up as one. */
+const keysOf = (value: unknown, out: string[] = []): string[] => {
+  if (Array.isArray(value)) for (const entry of value) keysOf(entry, out);
+  else if (value && typeof value === "object") {
+    for (const [key, entry] of Object.entries(value)) {
+      out.push(key);
+      keysOf(entry, out);
+    }
+  }
+  return out;
+};
+
+describe("the finished game's record and screens (C3/10 EV-15, EV-20)", () => {
+  it("EV-15: a finished game's record stores its story, length, difficulty and seated party size", async () => {
+    const { boot, store } = harness();
+    const session = await boot();
+    const pad = await startGame(session, ["hero-a", "hero-b"]);
+    // The test story offers party size only; the record reads length and difficulty the same way.
+    session.state().settingValues = {
+      ...session.state().settingValues,
+      length: "short",
+      difficulty: "hard",
+    };
+    armChapters(session, "win");
+    await playOn(session, pad, () => ended(session));
+    expect(ended(session)).toBe(true);
+    const records = projectGameRecords(store);
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      outcome: "won",
+      storyId: TEST_STORY.card.id,
+      length: "short",
+      difficulty: "hard",
+      partySize: 2,
+    });
+    expect(projectGameStats(store, records[0]?.gameId ?? "")?.best).toEqual({
+      state: "this-game",
+    });
+  });
+
+  for (const length of ["standard", "short"] as const) {
+    it(`EV-20: a solo ${length} game shows no length target or warning on the settings, play and session screens`, async () => {
+      const { boot, store } = harness();
+      const session = await boot();
+      const pad = await padFor(session);
+      const views: unknown[] = [];
+      const capture = () => {
+        views.push(session.projectDevice(pad.deviceId));
+        views.push(session.projectBoard({ code: "000000", url: "http://test", reachable: true }));
+      };
+      await pad.act("base-board-done", "board-set-up");
+      await pad.act("play-without-tower", "play-without-tower");
+      await pad.act("continue-pick-story-test", "continue");
+      session.state().settingValues = { ...session.state().settingValues, length };
+      await pad.act("set-setting", "set", { settingId: "party-size", optionId: "n-1" });
+      expect(session.state().screen).toBe("game-settings");
+      capture();
+      await pad.act("continue-game-settings", "continue");
+      await pad.act("hero-hold", "take", { heroId: "hero-a" });
+      await pad.act("continue-claim-heroes", "continue");
+      for (const step of session.state().setupSteps) {
+        if (step.id === "starting-purse") await pad.act(`spin-setup-${step.id}`, "spin");
+        await pad.act(`continue-setup-${step.id}`, "continue");
+      }
+      await pad.act("continue-begin", "continue");
+      for (const moment of OPENING_MOMENTS) await pad.act(openingPromptId(moment), "continue");
+      expect(session.state().screen).toBe("play");
+      capture();
+      armChapters(session, "win");
+      await playOn(session, pad, () => ended(session));
+      expect(ended(session)).toBe(true);
+      capture();
+      const gameId = session.state().games[0]?.gameId ?? "";
+      expect(projectGameRecords(store)[0]).toMatchObject({ length, partySize: 1 });
+      views.push(projectGameStats(store, gameId));
+      for (const view of views) {
+        expect(keysOf(view).filter((key) => /target|warn/i.test(key))).toEqual([]);
+        expect(JSON.stringify(view)).not.toMatch(/target|4[- ]hour|too long/i);
+      }
+    });
+  }
 });

@@ -49,6 +49,7 @@ import {
   rateOpenGame,
   recordGame,
 } from "./hub.ts";
+import { momentsBetween, snapshotMoments } from "./keyMoments.ts";
 import type { SessionLocal } from "./loop.ts";
 import { TEST_STORY } from "./pack.ts";
 import {
@@ -927,8 +928,11 @@ export const stepShell = (state: ShellState, event: ShellEvent): ShellStepResult
   // The loop runtime changes its stack in place, so the screen the iPads show must be read before
   // the step runs. It is only needed while a hint can still start.
   const held: HintHold | null = mayStartHint(state) ? captureHintHold(state) : null;
+  // Key moments (Q-C3-18): the play state is changed in place, so read it before the step.
+  const momentsBefore = snapshotMoments(state);
   const result = stepShellCore(state, event);
   const { state: kept, extra } = applyHints(result.state, result.effects);
+  extra.push(...momentsBetween(kept, momentsBefore, snapshotMoments(kept)));
   let next = kept;
   // A hint is the loop's first beat: the iPads keep the screen they had before the step, greyed,
   // until the hint ends. The Story board shows the hint; it is never held back.

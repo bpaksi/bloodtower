@@ -1,4 +1,9 @@
-import { type GameRecordPayloadV1, parseHostPayload } from "./kinds.ts";
+import {
+  type GameHow,
+  type GameRecordPayloadV1,
+  type KeyMomentPayloadV1,
+  parseHostPayload,
+} from "./kinds.ts";
 import type { EventStore, StoredHostEvent } from "./store.ts";
 
 /*
@@ -131,4 +136,123 @@ export const tapCounts = (rows: readonly StoredHostEvent[]): TapCounts => {
     total += 1;
   }
   return { byDay, total };
+};
+
+/**
+ * The "best" key (PT-04): story, length, difficulty and the count of seated heroes at the start.
+ * Two records share a key only when all four match. An unset field matches only unset (Gamewright,
+ * 2026-11-23): it is not a wildcard and not read as a default such as Short or normal, so a story
+ * with no length or difficulty setting compares by story and party size.
+ */
+const keyPart = (value: string | number | null | undefined): string | number | null =>
+  value ?? null;
+
+const sameKey = (a: GameRecord, b: GameRecord): boolean =>
+  keyPart(a.storyId) === keyPart(b.storyId) &&
+  keyPart(a.length) === keyPart(b.length) &&
+  keyPart(a.difficulty) === keyPart(b.difficulty) &&
+  keyPart(a.partySize) === keyPart(b.partySize);
+
+/**
+ * The best-line state (PT-04, EV-15 to EV-17):
+ * - `earlier`: the shortest earlier win under the key, in minutes-to-be (ms here);
+ * - `this-game`: this game is won and no earlier win under its key is shorter, so it is the best;
+ * - `none`: no win exists under the key ("No win yet to compare").
+ */
+export type BestLine =
+  | { state: "earlier"; ms: number }
+  | { state: "this-game" }
+  | { state: "none" };
+
+/**
+ * The best line for one record against the records before it (oldest game first, as
+ * `projectGameRecords` lists them). A later game never changes an earlier game's best, so a
+ * drill-in shows what the stats screen showed. Wins with an unknown length are not compared.
+ */
+export const bestLineOf = (records: readonly GameRecord[], gameId: string): BestLine => {
+  const at = records.findIndex((record) => record.gameId === gameId);
+  if (at < 0) throw new Error(`No record for game ${gameId}, so it has no best line.`);
+  const record = records[at] as GameRecord;
+  const earlier = records
+    .slice(0, at)
+    .filter((other) => other.outcome === "won" && sameKey(record, other))
+    .map((other) => other.activeMs)
+    .filter((ms): ms is number => typeof ms === "number");
+  const best = earlier.length === 0 ? null : Math.min(...earlier);
+  if (record.outcome === "won") {
+    const mine = record.activeMs;
+    if (best === null) return { state: "this-game" };
+    if (typeof mine === "number" && mine < best) return { state: "this-game" };
+    return { state: "earlier", ms: best };
+  }
+  return best === null ? { state: "none" } : { state: "earlier", ms: best };
+};
+
+/**
+ * The average active length under one record's key, over won and lost records only (PT-03,
+ * PT-04; C3/17 EV-03, EV-16). Null when none has a known length: unavailable, never zero.
+ */
+export const keyAverageMs = (records: readonly GameRecord[], gameId: string): number | null => {
+  const record = records.find((entry) => entry.gameId === gameId);
+  if (!record) throw new Error(`No record for game ${gameId}, so it has no average.`);
+  return averageActiveMs(records.filter((other) => sameKey(record, other)));
+};
+
+/** One key moment as the stats screen lists it: its row's payload, without the version. */
+export type KeyMoment = Omit<KeyMomentPayloadV1, "v">;
+
+/**
+ * The key moments of one game's log, oldest first (Gamewright 2026-11-23). A kind that no loop
+ * has made yet is simply absent; nothing is counted or guessed from the live state.
+ */
+export const keyMomentsOf = (rows: readonly StoredHostEvent[]): KeyMoment[] =>
+  rows.flatMap((row) => {
+    if (row.kind !== "key-moment") return [];
+    const { v: _v, ...moment } = parseHostPayload("key-moment", row.payload);
+    return [moment];
+  });
+
+/** One game's stats as the stats screen shows them (SCR-019, DEC-627). Null is unavailable. */
+export type GameStatsView = {
+  gameId: string;
+  outcome: GameRecord["outcome"];
+  how: GameHow | null;
+  storyId: string | null;
+  /** Time played: the record's active length (EV-18 of C3/17). */
+  activeMs: number | null;
+  /** The day the game ended on. */
+  days: number | null;
+  questsDone: number | null;
+  corruptionsTaken: number | null;
+  goldLeft: number | null;
+  /** In the order they happened, each with its day and names (Q-C3-18, C3/17 mockup). */
+  keyMoments: KeyMoment[];
+  best: BestLine;
+  averageMs: number | null;
+};
+
+/**
+ * The stats view of one game, read from the event log only (DEC-627, EV-05): its latest record,
+ * the stats stored on it at the end, and the other records for the best and the average. The
+ * live play state is never read, so changing it after the end changes nothing here. Null when the
+ * game has no record yet.
+ */
+export const projectGameStats = (store: EventStore, gameId: string): GameStatsView | null => {
+  const records = projectGameRecords(store);
+  const record = records.find((entry) => entry.gameId === gameId);
+  if (!record) return null;
+  return {
+    gameId,
+    outcome: record.outcome,
+    how: record.how ?? null,
+    storyId: record.storyId ?? null,
+    activeMs: record.activeMs ?? null,
+    days: record.endDay ?? null,
+    questsDone: record.stats?.questsDone ?? null,
+    corruptionsTaken: record.stats?.corruptionsTaken ?? null,
+    goldLeft: record.stats?.goldLeft ?? null,
+    keyMoments: keyMomentsOf(store.listEvents(gameId)),
+    best: bestLineOf(records, gameId),
+    averageMs: keyAverageMs(records, gameId),
+  };
 };
