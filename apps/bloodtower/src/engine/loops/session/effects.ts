@@ -46,6 +46,29 @@ export const gameRecordEffectV1 = z.object({
   sceneId: z.string().nullable().optional(),
   /** The day the game ended on, null before the first day. */
   endDay: z.number().int().nullable().optional(),
+  /**
+   * The game's stats as they stood at the end (DEC-627, SCR-019). The stats screen reads these,
+   * never the live state. Absent on a quit before play and on an older log row.
+   */
+  stats: z
+    .object({
+      questsDone: z.number().int().min(0).nullable(),
+      corruptionsTaken: z.number().int().min(0).nullable(),
+      goldLeft: z.number().int().nullable(),
+      keyMoments: z.array(
+        z.object({
+          kind: z.enum([
+            "quest-done",
+            "item-gained",
+            "building-fallen",
+            "corruption-taken",
+            "chapter-won",
+          ]),
+          count: z.number().int().min(1),
+        }),
+      ),
+    })
+    .optional(),
 });
 
 export const towerCommandEffectV1 = z.object({

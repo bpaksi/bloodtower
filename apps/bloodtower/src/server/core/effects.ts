@@ -68,6 +68,7 @@ export const runShellEffects = async (
           endedWall: ctx.clock.wall(),
           activeMs: activeMsOf(rows),
           taps: tapCounts(rows).total,
+          ...(effect.stats ? { stats: effect.stats } : {}),
         };
         if (
           last &&

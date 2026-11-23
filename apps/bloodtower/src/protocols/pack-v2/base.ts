@@ -173,6 +173,12 @@ export const tuningSchema = z
     // Q-C4-01: winning chapter 3 ends the game won, until C5's finale exists.
     c4_end_after_chapter_3: z.boolean(),
     fight_enabled: z.boolean(),
+    // PT-10 (Bob 2026-11-14): placeholder game-length targets in minutes, read-only. Short and
+    // Standard only; the Long target and the 4-hour warning are 1.1. No 1.0 screen shows them.
+    game_length_targets: z.strictObject({
+      short: positiveIntSchema,
+      standard: positiveIntSchema,
+    }),
     setup: z.strictObject({
       purse_wheel: z.strictObject({
         sides: z.array(positiveIntSchema).length(4),

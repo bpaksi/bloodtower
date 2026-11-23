@@ -598,7 +598,7 @@ describe("C2/06 session screen", () => {
     expect(view.actions.filter((action) => action.open).map((action) => action.label)).toEqual([
       "Continue",
       "New game",
-      "Game 1",
+      "Game 1 quit",
       "Done for tonight",
     ]);
     expect(view.levels.map((level) => level.id)).toEqual([
@@ -640,7 +640,7 @@ describe("C2/06 session screen", () => {
       "Game 2 quit\nGame 1 quit",
     );
     const rows = view.actions.filter((action) => action.actionId === "open-game");
-    expect(rows.map((action) => action.label)).toEqual(["Game 2", "Game 1"]);
+    expect(rows.map((action) => action.label)).toEqual(["Game 2 quit", "Game 1 quit"]);
     const fresh = { ...quit, games: [], autosave: null };
     const empty = projectShellView(
       stepShell(fresh, { kind: "tower-snapshot", v: 1, tower: TOWER_DISCONNECTED }).state,

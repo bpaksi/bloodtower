@@ -382,6 +382,8 @@ describe("a chapter's close in a real game (F1/03)", () => {
     expect(ended(real)).toBe(true);
     expect(records(real)).toHaveLength(1);
     expect(records(real)[0]).toMatchObject({ outcome: "lost", sceneId: "loss-buildings" });
+    // C3/10 EV-06: tonight's row agrees with the record.
+    expect(real.session.state().games.map((g) => g.outcome)).toEqual(["lost"]);
     expect(playOf(real).dayNumber).toBe(1);
 
     const bare = await realGame(seed, heroes, { stories: [TEST_STORY] });

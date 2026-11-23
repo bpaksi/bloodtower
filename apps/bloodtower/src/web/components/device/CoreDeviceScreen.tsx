@@ -757,13 +757,26 @@ function SessionButtons({
           disabled={!live}
           onClick={() => onAct(game.promptId, game.actionId)}
         >
-          {game.label} <span className="bt-quit-mark">quit</span>
+          {gameRowParts(game.label).title}{" "}
+          <span className="bt-quit-mark" data-game-outcome={gameRowParts(game.label).mark}>
+            {gameRowParts(game.label).mark}
+          </span>
         </button>
       ))}
       {done ? button(done) : null}
     </div>
   );
 }
+
+/** "Game 2 lost" → title "Game 2", mark "lost": the host's row label says how the game ended. */
+const gameRowParts = (label: string): { title: string; mark: string } => {
+  const match = /^(Game \d+) (quit|won|lost)$/.exec(label);
+  if (!match?.[1] || !match[2]) {
+    // An older host sent no outcome. Show the label as it came rather than guess one.
+    return { title: label, mark: "" };
+  }
+  return { title: match[1], mark: match[2] };
+};
 
 const inMenu = (action: OfferedAction) => action.promptId === "menu-quit";
 

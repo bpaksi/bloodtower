@@ -126,7 +126,11 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (promptId === BOARD_SET_UP_PROMPT) return "Board is set up";
   if (promptId === "continue-begin") return "Begin";
   const game = gameNumber(promptId);
-  if (game !== null && actionId === "open-game") return `Game ${game}`;
+  // Tonight's games: each row says how its game ended (DEC-214, C3/10 EV-06).
+  if (game !== null && actionId === "open-game") {
+    const outcome = state.games[game - 1]?.outcome;
+    return outcome ? `Game ${game} ${outcome}` : `Game ${game}`;
+  }
   if (promptId === "continue-claim-heroes") return state.playAgain ? "Confirm" : "Continue";
   if (promptId.startsWith("continue-setup-")) return "Done";
   if (promptId.startsWith("day-") && promptId.endsWith("-roll-done")) return "Take the move roll";

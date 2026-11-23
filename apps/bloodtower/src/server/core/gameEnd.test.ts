@@ -3,7 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { type ChapterPlan, configureChapters } from "../../engine/loops/chapter/chapters.ts";
-import { ensureClock, markQuestWon } from "../../engine/loops/day/clock.ts";
+import {
+  ensureClock,
+  heroSheet,
+  markQuestWon,
+  setHeroSheet,
+} from "../../engine/loops/day/clock.ts";
 import { ensureQuests } from "../../engine/loops/quest/store.ts";
 import { TEST_STORY } from "../../engine/loops/session/pack.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
@@ -15,6 +20,7 @@ import {
   averageActiveMs,
   heroTotals,
   projectGameRecords,
+  projectGameStats,
   tapCounts,
 } from "../events/gameStats.ts";
 import { createEventStore } from "../events/store.ts";
@@ -427,6 +433,61 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     // The new game ended, so no autosave is left: Continue is not offered for either game.
     expect(store.getAutosave()).toBeNull();
     expect(session.state().offered.some((o) => o.promptId === "continue-saved-game")).toBe(false);
+  });
+
+  it("EV-05: the stats view reads the stored stats; changing the live state after the end changes nothing", async () => {
+    const { boot, store, clock } = harness();
+    const session = await boot();
+    const pad = await startPausedGame(session, clock, 30_000);
+    armChapters(session, "win");
+    const play = session.state().play;
+    if (!play) throw new Error("No play state.");
+    const live = ensureClock(play);
+    setHeroSheet(play, "hero-a", { ...heroSheet(live, "hero-a"), gold: 7, corruptions: 1 });
+    setHeroSheet(play, "hero-b", { ...heroSheet(live, "hero-b"), gold: 3, corruptions: 1 });
+    await playOn(session, pad, () => ended(session));
+    const gameId = session.state().games[0]?.gameId ?? "";
+    const before = projectGameStats(store, gameId);
+    expect(before).toMatchObject({
+      outcome: "won",
+      how: "won",
+      questsDone: 1,
+      corruptionsTaken: 2,
+      goldLeft: 10,
+      best: { state: "this-game" },
+    });
+    expect(before?.days).toBe(projectGameRecords(store)[0]?.endDay);
+    expect(before?.days).not.toBeNull();
+    expect(Math.abs((before?.activeMs ?? 0) - 15_000)).toBeLessThanOrEqual(1_000);
+    expect(before?.keyMoments).toEqual(
+      expect.arrayContaining([
+        { kind: "quest-done", count: 1 },
+        { kind: "corruption-taken", count: 2 },
+        { kind: "chapter-won", count: 1 },
+      ]),
+    );
+    // EV-20: the view holds no game-length target and no warning.
+    expect(Object.keys(before ?? {}).sort()).toEqual(
+      [
+        "activeMs",
+        "averageMs",
+        "best",
+        "corruptionsTaken",
+        "days",
+        "gameId",
+        "goldLeft",
+        "how",
+        "keyMoments",
+        "outcome",
+        "questsDone",
+        "storyId",
+      ].sort(),
+    );
+    // Mutate the live state: purse +50 and the day counter +3. The view must not move.
+    setHeroSheet(play, "hero-a", { ...heroSheet(live, "hero-a"), gold: 57 });
+    play.dayNumber += 3;
+    markQuestWon(play);
+    expect(projectGameStats(store, gameId)).toEqual(before);
   });
 
   it("EV-14: totals and the average count won and lost records only", () => {
