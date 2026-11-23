@@ -361,11 +361,9 @@ const resumeGame = async (
   return { session, context, pad, board };
 };
 
-test.describe("C3/12 the event scene: the painting, the words and the choice", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The event scene is on the iPad.");
-  });
-
+test.describe("C3/12 the event scene: the painting, the words and the choice", {
+  tag: "@ipad-only",
+}, () => {
   test("EV-01, EV-10, EV-12: a hazard shows two costs and waits for a press", async ({
     browser,
   }, testInfo) => {

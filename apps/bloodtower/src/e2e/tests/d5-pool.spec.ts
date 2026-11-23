@@ -42,11 +42,7 @@ const rallyRow = (pad: Page) =>
 const heroRow = (board: Page, heroId: string) =>
   board.locator(`[data-panel="current-party"] [data-hero="${heroId}"]`);
 
-test.describe("D5 the pool pays", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("D5 the pool pays", { tag: "@ipad-only" }, () => {
   test("EV-12: a hero with no gold buys Rally from a hero in another group", async ({
     browser,
   }, testInfo) => {

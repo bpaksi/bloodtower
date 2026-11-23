@@ -140,11 +140,7 @@ const closeAll = async (context: BrowserContext, host: { close: () => Promise<vo
   await host.close();
 };
 
-test.describe("CU/10 the corruption mark on the band", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The approved mockup is the 1920x1080 board.");
-  });
-
+test.describe("CU/10 the corruption mark on the band", { tag: "@ipad-only" }, () => {
   test("EV-01, EV-05, EV-06, EV-07, EV-09: hero B at 2 carries the mark, display only, and it survives Continue", async ({
     browser,
   }, testInfo) => {

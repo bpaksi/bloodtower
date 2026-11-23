@@ -177,10 +177,6 @@ const openPair = async (browser: Browser, testInfo: TestInfo, seed: string) => {
   return { session, context, board, device };
 };
 
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name === "desktop", "The desktop viewport is not a W3 board size.");
-});
-
 test("focused The Ruined Keep fits, and only Dracula's cover is painted", async ({
   browser,
 }, testInfo) => {

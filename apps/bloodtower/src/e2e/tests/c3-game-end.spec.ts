@@ -101,10 +101,6 @@ const recordsIn = (databasePath: string) => {
 };
 
 test.describe("C3/10 tonight's games shows how a game ended", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name === "webkit", "Webkit runs the hydration guard only.");
-  });
-
   test("EV-06: a lost game's row reads lost, not quit, on the iPad and the board", async ({
     browser,
   }, testInfo) => {

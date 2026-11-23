@@ -31,10 +31,6 @@ const QUIET_LINE = "The tower has gone quiet. The game waits.";
 const QUIT_LINE = "Leave the game? It will be saved.";
 
 // The board and the iPads do not depend on the project's viewport, so one project runs this.
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Own board and iPad viewports.");
-});
-
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 const boardMain = (page: Page) => page.locator("main.bt-board");
 

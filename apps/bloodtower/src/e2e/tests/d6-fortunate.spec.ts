@@ -40,11 +40,7 @@ const pickOption = (pad: Page, pick: string) =>
 
 const boardBuilding = (board: Page) => board.locator("[data-building-board]");
 
-test.describe("D6 Fortunate's free pick", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("D6 Fortunate's free pick", { tag: "@ipad-only" }, () => {
   test("EV-12: Rally to 0 moves, then Cleanse is enabled as the free pick", async ({
     browser,
   }, testInfo) => {

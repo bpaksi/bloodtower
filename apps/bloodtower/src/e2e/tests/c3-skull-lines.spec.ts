@@ -31,10 +31,6 @@ type HookWindow = {
   __btLastDeviceView?: { actions: { promptId: string; actionId: string; open: boolean }[] };
 };
 
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "ipad", "The board shots are at 1920x1080 from one project.");
-});
-
 /** Tracks the board's last `boardView`; `rewrite` swaps the skull lines for these on arrival. */
 const installBoardHook = async (page: Page, rewrite: string[] | null) => {
   await page.addInitScript((lines) => {

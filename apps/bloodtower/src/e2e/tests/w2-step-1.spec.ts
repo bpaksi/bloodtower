@@ -146,142 +146,146 @@ const expectStep = async (page: Page, context: string, instruction: string | Reg
   await expect(stepInstruction).toHaveText(instruction);
 };
 
-test("W2 the Enter asks the tower question once, before Pick story, and keeps the step lines", async ({
-  browser,
-}, testInfo) => {
-  test.skip(testInfo.project.name === "desktop", "Device checks run on phone and ipad.");
-  test.setTimeout(120_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "w2-tower-off" });
-  const context = await browser.newContext({ baseURL: session.baseURL });
-  const page = await context.newPage();
-  try {
-    await installSessionSocketHook(page);
-    await page.goto(`/join?code=${session.host.joinCode}`);
-    await expect(page).toHaveURL(/\/device/);
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "base-board");
-    await expectStep(page, "Base board", /Set the tower on the board\./);
-    const setUp = mainOf(page).locator('button[data-prompt-id="base-board-done"]');
-    await expect(setUp).toHaveAccessibleName("Board is set up");
-    await setUp.click();
-
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "tower-choice");
-    await expectStep(page, "Tower", "Wake the tower, or play tonight without it?");
-    const primary = mainOf(page).locator('[data-primary="true"]');
-    await expect(primary).toHaveCount(1);
-    await expect(primary).toHaveAccessibleName("Connect Tower");
-    await expect(primary).toHaveAttribute("data-action", "tower-connect");
-    const skip = mainOf(page).locator('[data-action="play-without-tower"]');
-    await expect(skip).toHaveCount(1);
-    await expect(skip).toHaveAccessibleName("Play without Tower");
-    await expect(skip).not.toHaveAttribute("data-primary", "true");
-    for (const name of ["Connect tower", "Play without tower", "Skip", "Next", "Continue"]) {
-      await expect(mainOf(page).getByRole("button", { name, exact: true })).toHaveCount(0);
-    }
-    expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
-
-    await skip.click();
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "pick-story");
-    await setSoundAndKeep(page);
-    await expectStep(page, "Pick Story", "The Ruined Keep");
-    await expect(page.getByRole("button", { name: "Pick Hero A" })).toHaveCount(0);
-    await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
-
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "game-settings");
-    await expectStep(page, "Game settings", /.+/);
-    await clickAct(page, "continue", "continue-game-settings");
-
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
-    expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
-    await expectStep(page, "Party Join", /^\d+ of \d+ picked$/);
-    await expect(page.locator('button[data-hunter="hero-a"]')).toHaveAccessibleName("Pick Hero A");
-    await expect(page.getByRole("button", { name: /^(Take|Claim|Hold)\b/ })).toHaveCount(0);
-
-    await page.locator('[data-action="menu"]').click();
-    await expect(page.locator('button[data-prompt-id="menu-connect"]')).toHaveCount(0);
-    await expect(page.locator('[data-menu] [data-gear-item="tower"]')).toBeEnabled();
-    await page.locator('[data-action="menu"]').click();
-    await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
-    await expect(page.locator('button[data-hunter="hero-a"]')).toBeVisible();
-  } finally {
-    await context.close();
-    await session.host.close();
-  }
-});
-
-test("W2 Sound and Play without Tower leave the session, and levels survive a host restart", async ({
-  browser,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== "ipad", "One device width covers the restart.");
-  test.setTimeout(120_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "w2-survival" });
-  const context = await browser.newContext({ baseURL: session.baseURL });
-  const device = await context.newPage();
-  const landing = await context.newPage();
-  const port = Number(new URL(session.baseURL).port);
-  const joinCode = session.host.joinCode;
-  try {
-    await installSessionSocketHook(device);
-    await device.goto(`/join?code=${joinCode}`);
-    await enterWithoutTower(device);
-    await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
-    await clickAct(device, "continue", "continue-game-settings");
-    await expect(mainOf(device)).toHaveAttribute("data-screen", "claim-heroes");
-    await device.locator('button[data-hunter="hero-a"]').click();
-    await expect(device.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
-      "data-claim",
-      "yours",
-    );
-
-    await landing.goto("/");
-    await landing.locator('[data-action="sound"]').click();
-    await landing.locator("#bt-sound-music").fill("35");
-    await landing.getByRole("button", { name: "Continue" }).click();
-    await expect(device.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
-      "data-claim",
-      "yours",
-    );
-    await expect(mainOf(device)).toHaveAttribute("data-screen", "claim-heroes");
-    await expect(device.locator("[data-step-instruction]")).toHaveText(/picked/);
-    expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
-
-    await session.host.close();
-    const tower = createMockTower();
-    const restarted = await startSessionHost({
-      port,
-      host: "127.0.0.1",
-      webRoot: WEB_ROOT,
-      packsDir: loadConfig({ env: {} }).packsDir,
-      databasePath: session.databasePath,
-      tower: bloodtowerTowerFromMock(tower),
-      towerWatchMs: 50,
-      sleep: async () => undefined,
-      seed: "w2-survival",
-      graceMs: 100,
-      joinCode,
-    });
+test(
+  "W2 the Enter asks the tower question once, before Pick story, and keeps the step lines",
+  { tag: "@devices-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(120_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "w2-tower-off" });
+    const context = await browser.newContext({ baseURL: session.baseURL });
+    const page = await context.newPage();
     try {
+      await installSessionSocketHook(page);
+      await page.goto(`/join?code=${session.host.joinCode}`);
+      await expect(page).toHaveURL(/\/device/);
+      await expect(mainOf(page)).toHaveAttribute("data-screen", "base-board");
+      await expectStep(page, "Base board", /Set the tower on the board\./);
+      const setUp = mainOf(page).locator('button[data-prompt-id="base-board-done"]');
+      await expect(setUp).toHaveAccessibleName("Board is set up");
+      await setUp.click();
+
+      await expect(mainOf(page)).toHaveAttribute("data-screen", "tower-choice");
+      await expectStep(page, "Tower", "Wake the tower, or play tonight without it?");
+      const primary = mainOf(page).locator('[data-primary="true"]');
+      await expect(primary).toHaveCount(1);
+      await expect(primary).toHaveAccessibleName("Connect Tower");
+      await expect(primary).toHaveAttribute("data-action", "tower-connect");
+      const skip = mainOf(page).locator('[data-action="play-without-tower"]');
+      await expect(skip).toHaveCount(1);
+      await expect(skip).toHaveAccessibleName("Play without Tower");
+      await expect(skip).not.toHaveAttribute("data-primary", "true");
+      for (const name of ["Connect tower", "Play without tower", "Skip", "Next", "Continue"]) {
+        await expect(mainOf(page).getByRole("button", { name, exact: true })).toHaveCount(0);
+      }
+      expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+
+      await skip.click();
+      await expect(mainOf(page)).toHaveAttribute("data-screen", "pick-story");
+      await setSoundAndKeep(page);
+      await expectStep(page, "Pick Story", "The Ruined Keep");
+      await expect(page.getByRole("button", { name: "Pick Hero A" })).toHaveCount(0);
+      await clickAct(page, "continue", `continue-pick-story-${STORY_ID}`);
+
+      await expect(mainOf(page)).toHaveAttribute("data-screen", "game-settings");
+      await expectStep(page, "Game settings", /.+/);
+      await clickAct(page, "continue", "continue-game-settings");
+
+      await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
+      expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+      await expectStep(page, "Party Join", /^\d+ of \d+ picked$/);
+      await expect(page.locator('button[data-hunter="hero-a"]')).toHaveAccessibleName(
+        "Pick Hero A",
+      );
+      await expect(page.getByRole("button", { name: /^(Take|Claim|Hold)\b/ })).toHaveCount(0);
+
+      await page.locator('[data-action="menu"]').click();
+      await expect(page.locator('button[data-prompt-id="menu-connect"]')).toHaveCount(0);
+      await expect(page.locator('[data-menu] [data-gear-item="tower"]')).toBeEnabled();
+      await page.locator('[data-action="menu"]').click();
+      await expect(mainOf(page)).toHaveAttribute("data-screen", "claim-heroes");
+      await expect(page.locator('button[data-hunter="hero-a"]')).toBeVisible();
+    } finally {
+      await context.close();
+      await session.host.close();
+    }
+  },
+);
+
+test(
+  "W2 Sound and Play without Tower leave the session, and levels survive a host restart",
+  { tag: "@ipad-only" },
+  async ({ browser }, testInfo) => {
+    test.setTimeout(120_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "w2-survival" });
+    const context = await browser.newContext({ baseURL: session.baseURL });
+    const device = await context.newPage();
+    const landing = await context.newPage();
+    const port = Number(new URL(session.baseURL).port);
+    const joinCode = session.host.joinCode;
+    try {
+      await installSessionSocketHook(device);
+      await device.goto(`/join?code=${joinCode}`);
+      await enterWithoutTower(device);
+      await clickAct(device, "continue", `continue-pick-story-${STORY_ID}`);
+      await clickAct(device, "continue", "continue-game-settings");
+      await expect(mainOf(device)).toHaveAttribute("data-screen", "claim-heroes");
+      await device.locator('button[data-hunter="hero-a"]').click();
+      await expect(device.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
+        "data-claim",
+        "yours",
+      );
+
       await landing.goto("/");
       await landing.locator('[data-action="sound"]').click();
-      await expect(landing.locator("#bt-sound-music")).toHaveValue("35");
+      await landing.locator("#bt-sound-music").fill("35");
       await landing.getByRole("button", { name: "Continue" }).click();
-
-      const resumed = await context.newPage();
-      await installSessionSocketHook(resumed);
-      await resumed.goto(`/join?code=${restarted.joinCode}`);
-      // The restart keeps the party (W4): Proving Grounds, hero-a still held on claim-heroes.
-      // This page joins as a new iPad, so the first iPad's hold shows as taken.
-      await expect(mainOf(resumed)).toHaveAttribute("data-screen", "claim-heroes");
-      await expect(resumed.locator("[data-step-instruction]")).toHaveText("1 of 4 picked");
-      await expect(resumed.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
+      await expect(device.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
         "data-claim",
-        "taken",
+        "yours",
       );
-      expect(tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+      await expect(mainOf(device)).toHaveAttribute("data-screen", "claim-heroes");
+      await expect(device.locator("[data-step-instruction]")).toHaveText(/picked/);
+      expect(session.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+
+      await session.host.close();
+      const tower = createMockTower();
+      const restarted = await startSessionHost({
+        port,
+        host: "127.0.0.1",
+        webRoot: WEB_ROOT,
+        packsDir: loadConfig({ env: {} }).packsDir,
+        databasePath: session.databasePath,
+        tower: bloodtowerTowerFromMock(tower),
+        towerWatchMs: 50,
+        sleep: async () => undefined,
+        seed: "w2-survival",
+        graceMs: 100,
+        joinCode,
+      });
+      try {
+        await landing.goto("/");
+        await landing.locator('[data-action="sound"]').click();
+        await expect(landing.locator("#bt-sound-music")).toHaveValue("35");
+        await landing.getByRole("button", { name: "Continue" }).click();
+
+        const resumed = await context.newPage();
+        await installSessionSocketHook(resumed);
+        await resumed.goto(`/join?code=${restarted.joinCode}`);
+        // The restart keeps the party (W4): Proving Grounds, hero-a still held on claim-heroes.
+        // This page joins as a new iPad, so the first iPad's hold shows as taken.
+        await expect(mainOf(resumed)).toHaveAttribute("data-screen", "claim-heroes");
+        await expect(resumed.locator("[data-step-instruction]")).toHaveText("1 of 4 picked");
+        await expect(resumed.locator('button[data-hunter="hero-a"]')).toHaveAttribute(
+          "data-claim",
+          "taken",
+        );
+        expect(tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
+      } finally {
+        await restarted.close();
+      }
     } finally {
-      await restarted.close();
+      await context.close().catch(() => undefined);
+      await session.host.close().catch(() => undefined);
     }
-  } finally {
-    await context.close().catch(() => undefined);
-    await session.host.close().catch(() => undefined);
-  }
-});
+  },
+);

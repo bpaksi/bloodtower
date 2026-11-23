@@ -19,10 +19,6 @@ const SETUP_IDS = ["seals-and-skulls", "place-heroes", "starting-purse"] as cons
 const OPENING_IDS = ["grey-stair.01", "grey-stair.02", "grey-stair.03", "grey-stair.04"] as const;
 const BUILDING_HINT = "Entering a building is free. Each choice inside costs one move.";
 
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "ipad", "The board shots are at 1920x1080 from one project.");
-});
-
 const clickAct = async (page: Page, actionId: string, promptId?: string) => {
   const button = promptId
     ? page.locator(`button[data-prompt-id="${promptId}"][data-action-id="${actionId}"]`)

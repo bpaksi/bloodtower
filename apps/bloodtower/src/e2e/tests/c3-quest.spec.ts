@@ -284,11 +284,7 @@ const gearGold = async (pad: Page, board: Page) => {
   return total;
 };
 
-test.describe("C3/14 the quest scene", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The scene is drawn on the iPad and the board.");
-  });
-
+test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
   test("EV-01, 03, 04, 05, 08, 09, 10, 11, 13: the Herald, the item hand-off, rewards, end hook", async ({
     browser,
   }, testInfo) => {
