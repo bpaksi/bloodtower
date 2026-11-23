@@ -18,7 +18,7 @@ import { inNightPhase } from "../../hints/flow.ts";
 import { heldItems, itemName } from "../../rules/items/index.ts";
 import { isPurseAmount, poolSides } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
-import { buildChapterBeat } from "../../views/chapter.ts";
+import { buildChapterBeat, CHAPTER_COPY_LINES } from "../../views/chapter.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import { questItemName } from "../../views/questItems.ts";
 import type {
@@ -149,6 +149,9 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (actionId === "choose") return eventOptionLabel(parseEventChoicePrompt(promptId)?.optionId);
   if (actionId === "build") return buildingLabel(state, promptId);
   if (actionId === "end-turn") return "End turn";
+  // Set the table's one Done (C3/15 Copy `table.done`).
+  if (actionId === "done" && promptId.startsWith("table-done--"))
+    return CHAPTER_COPY_LINES.tableDone;
   if (actionId === "record") {
     // Skull placement (DEC-092): one button per standing building, or the skull stayed inside (DEC-064).
     const target = promptId.split("--").slice(2).join("--");

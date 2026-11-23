@@ -17,6 +17,7 @@ import {
   enterWithTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  passChapterCard,
   setSoundAndKeep,
   startAcceptanceHost,
   waitForBoardAnimationsSettled,
@@ -371,6 +372,7 @@ const startGame = async (
   for (const id of OPENING_IDS) {
     await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
   }
+  await passChapterCard(pad, session.waitClock);
   return { session, context, pad, board, padFrames, boardFrames, pad2, pad2Frames, context2 };
 };
 

@@ -12,6 +12,7 @@ import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  passChapterCard,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 import { settlePageAnimations } from "./support/animations.ts";
@@ -163,6 +164,7 @@ const startGame = async (
   for (const id of OPENING_IDS) {
     await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
   }
+  await passChapterCard(pad, session.waitClock);
   await clickAct(pad, "continue");
   await expect(board.locator("#band [data-days-left]")).toBeVisible({ timeout: 20_000 });
   return { session, context, pad, board };

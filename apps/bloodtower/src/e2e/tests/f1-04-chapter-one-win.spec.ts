@@ -9,6 +9,7 @@ import {
   enterWithoutTower,
   holdHeroesFromTest,
   installSessionSocketHook,
+  passChapterCard,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
 import { walkTo } from "./support/walk.ts";
@@ -100,7 +101,7 @@ const optionById = (pad: Page, suffix: string) =>
 const optionByLabel = (pad: Page, label: string) =>
   options(pad).filter({ hasText: new RegExp(`^${label}`) });
 
-const startGame = async (pad: Page, board: Page) => {
+const startGame = async (pad: Page, board: Page, waitClock: WaitTicker | null) => {
   await enterWithoutTower(pad);
   await clickAct(pad, "continue", "continue-pick-story-test");
   const size = pad.locator(
@@ -120,6 +121,7 @@ const startGame = async (pad: Page, board: Page) => {
   for (const id of OPENING_IDS) {
     await clickAct(pad, "continue", `continue-opening-${id.replace(".", "-")}`);
   }
+  await passChapterCard(pad, waitClock);
   await clickAct(pad, "continue");
   await expect(board.locator("#band [data-days-left]")).toBeVisible({ timeout: 20_000 });
 };
@@ -223,7 +225,7 @@ test.describe("F1/04 chapter 1 won through Enter on the wild marker", { tag: "@i
       expect(SEED.replace("~test-event:none", "")).not.toMatch(/~test-/);
       expect(pathTo(START, FOREST)).toHaveLength(1);
       await pad.goto(`/join?code=${host.joinCode}`);
-      await startGame(pad, board);
+      await startGame(pad, board, waitClock);
 
       // Muted Forest: the wild marker holds the Ambush.
       await walkToEnter(pad, FOREST, waitClock);

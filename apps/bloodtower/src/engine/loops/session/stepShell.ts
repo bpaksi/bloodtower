@@ -7,6 +7,7 @@ import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runti
 import type { LoopFrame } from "../../loop/types.ts";
 import { isPurseAmount } from "../../rules/purse/index.ts";
 import { endChapterWait } from "../chapter/chapters.ts";
+import type { ChapterLocal } from "../chapter/loop.ts";
 import {
   applyTestSeed,
   bindPlayState,
@@ -895,6 +896,10 @@ export const refreshOffersAfterRestore = (state: ShellState): ShellEffect[] => {
     } else if (frame.loopId === "encounter") {
       const local = frame.local as EncounterLocal;
       frame.local = { ...local, awaitingLeave: false, awaitingPress: false };
+    } else if (frame.loopId === "chapter") {
+      // Set the table's Done or a freed skull's prompt is offered again (C3/15, EV-23).
+      const local = frame.local as ChapterLocal;
+      frame.local = { ...local, awaitingPress: false };
     } else if (frame.loopId === "game" && openingActiveIndex(state.openingIndex)) {
       const local = frame.local as GameLocal;
       frame.local = { ...local, awaitingPress: false, playStarted: false };
