@@ -49,17 +49,17 @@ Keep this a checklist; do not write a second design doc.
 | PR | Branch | What | Touches |
 |---|---|---|---|
 | 1 | `feat/bloodtower-cu17-view-seq` | Design 1 to 3, plus `support/device.test` spec proving the helpers (EV-01 to EV-06) | `apps/bloodtower/src/protocols/v2/views.ts`, `protocols/v2/schema.test.ts`, `src/server/hub/host.ts`, `src/server/hub/*.test.ts` (added cases), `src/server/core/session.ts` (the `acked` count and the send after a press), `src/server/core/*.test.ts` (added cases), `src/web/components/device/CoreDeviceScreen.tsx` (two attributes), `src/e2e/tests/support/device.ts` (new), `src/e2e/tests/act-and-wait.spec.ts` (new) |
-| 2 | `fix/bloodtower-cu17-flaky-specs` | The specs that flaked: `c2-play-again`, `c3-hints`, `f1-04-chapter-one-win`, `w7-move-map`, `w7-fix-position`. Local copies deleted. `--repeat-each=10` evidence (EV-08) | those five spec files |
+| 2 | `chore/bloodtower-cu17-flaky-specs` | The specs that flaked: `c2-play-again`, `c3-hints`, `f1-04-chapter-one-win`, `w7-move-map`, `w7-fix-position`. Local copies deleted. `--repeat-each=10` evidence (EV-08) | those five spec files |
 | 3 | `chore/bloodtower-cu17-e2e-waits-check` | The repo check and the allowlist at the counts left after PR 2 (EV-09 to EV-11) | `scripts/check-e2e-waits.mjs` (new), `scripts/check-e2e-waits.test.mjs` (new), `scripts/e2e-waits-allowlist.json` (new), root `package.json` (`check:repo` line only), root `CLAUDE.md` (one Commands row) |
-| 4 | `fix/bloodtower-cu17-specs-w` | `w1-chrome`, `w2-step-1`, `w3-pick-story`, `w4-party`, `w5-setup`, `w6-board-layers`, `startup-frames-fit`, `sound-unlock`, `sound-dialog`, `smoke` | those spec files, `scripts/e2e-waits-allowlist.json` |
-| 5 | `fix/bloodtower-cu17-specs-c2` | `c2-dialog-border`, `c2-ipad-awake`, `c2-session-enter`, `c2-session-screen`, `c2-tower-lost`, `join-hydration`, `ipad-parchment-shell`, `cu16-continue-repick` | those spec files, the allowlist |
-| 6 | `fix/bloodtower-cu17-specs-c3` | `c3-building`, `c3-corruption-mark`, `c3-day`, `c3-event`, `c3-game-end`, `c3-panels`, `c3-quest`, `c3-skull-lines` | those spec files, the allowlist |
-| 7 | `fix/bloodtower-cu17-specs-rest` | `a1-asset-id-label`, `a1-demo-playback`, `acceptance`, `area-077`, `c4-tuning-switches`, `d1-skull-loss`, `d4-fallen-quest`, `d5-pool`, `d6-fortunate`, `ee01-quest-pick`, `f1-03-live-quests` | those spec files, the allowlist, `support/acceptance.ts` and `support/walk.ts` if they hold copies |
+| 4 | `chore/bloodtower-cu17-specs-w` | `w1-chrome`, `w2-step-1`, `w3-pick-story`, `w4-party`, `w5-setup`, `w6-board-layers`, `startup-frames-fit`, `sound-unlock`, `sound-dialog`, `smoke` | those spec files, `scripts/e2e-waits-allowlist.json` |
+| 5 | `chore/bloodtower-cu17-specs-c2` | `c2-dialog-border`, `c2-ipad-awake`, `c2-session-enter`, `c2-session-screen`, `c2-tower-lost`, `join-hydration`, `ipad-parchment-shell`, `cu16-continue-repick` | those spec files, the allowlist |
+| 6 | `chore/bloodtower-cu17-specs-c3` | `c3-building`, `c3-corruption-mark`, `c3-day`, `c3-event`, `c3-game-end`, `c3-panels`, `c3-quest`, `c3-skull-lines` | those spec files, the allowlist |
+| 7 | `chore/bloodtower-cu17-specs-rest` | `a1-asset-id-label`, `a1-demo-playback`, `acceptance`, `area-077`, `c4-tuning-switches`, `d1-skull-loss`, `d4-fallen-quest`, `d5-pool`, `d6-fortunate`, `ee01-quest-pick`, `f1-03-live-quests` | those spec files, the allowlist, `support/acceptance.ts` and `support/walk.ts` if they hold copies |
 
 - Every path above is under `apps/bloodtower/` unless it starts with `scripts/` or is a root file.
 - PR 4 to PR 7 each share the allowlist, so they merge one after another (no batch runs two of them). A PR that finds a spec too large for its group (`c3-day` 1,410 lines, `w1-chrome` 1,328) may split off one file into its own PR; that updates this table in the same commit.
 - The specs `playwright.config.ts` ignores (`visual-layer`, `board-look`, `backdrop-flicker`, `hunter-portraits`, `keeper-fit`, `opening-screens`, `startup-shell`, `landing`) stay as they are and stay in the allowlist.
-- **The test-lock hook.** Each `fix/*` branch above changes test files in its first commit only: the whole migration of that PR goes in one commit, and review fixes that touch a spec go on a follow-up `chore/` branch, or the step is renamed `chore/` before it starts. Bob says which (Open questions).
+- **The test-lock hook.** PR 2 and PR 4 to PR 7 are `chore/` branches (Bob, 2026-11-23): they change tests only and fix no app bug, so review fixes to a spec go on the same branch.
 
 ### Overlaps
 
@@ -110,9 +110,9 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 
 ## Open questions
 
-- **For Bob (one ruling, recommended answer first):**
+- **Ruled by Bob, 2026-11-23:**
   1. **The press signal. RULED (Bob, 2026-11-23, chat): `seq` and `acked`**, as above. `act` waits for `acked`, so a broadcast from a timer or another iPad cannot pass for the press. (The other choice was `seq` only, which a hint timer, the tower watch or another iPad's press could satisfy before the press is handled.)
-  2. **test-lock on the migration branches.** (a, recommended) Name PR 2 and PR 4 to PR 7 `chore/bloodtower-cu17-...`, since they change tests only and fix no app bug. (b) Keep `fix/` and do each migration in its first commit, with spec review fixes on a follow-up branch.
+  2. **test-lock on the migration branches. RULED (Bob, 2026-11-23, chat): `chore/bloodtower-cu17-...`** for PR 2 and PR 4 to PR 7. (The other choice was `fix/`, where test-lock allows spec changes only in the first commit.)
 - **Left as is (say if you want it):** the board side (`main.bt-board`) gets no `seq`.
 
 ## Eval approval

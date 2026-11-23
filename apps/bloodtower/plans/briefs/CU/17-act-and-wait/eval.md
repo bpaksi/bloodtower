@@ -103,5 +103,5 @@ All e2e fixtures: `startAcceptanceHost` or the suite's web server, the test pack
 ## Assumptions surfaced
 
 - `acked` is needed, not only `seq` → Bob ruled yes, 2026-11-23 (plan.md Open questions 1).
-- Migration branches are `chore/`, not `fix/`, so test-lock does not block review fixes → Bob: ? (plan.md Open questions 2).
+- Migration branches are `chore/`, not `fix/`, so test-lock does not block review fixes → Bob ruled `chore/`, 2026-11-23 (plan.md Open questions 2).
 - A press that waits on the tower inside `apply` acks only when the tower answers; `act`'s 20 s default covers the fake tower in e2e. Real-tower runs are not e2e.
