@@ -451,7 +451,7 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     expect(before).toMatchObject({
       outcome: "won",
       how: "won",
-      questsDone: 1,
+      questsDone: 2,
       corruptionsTaken: 2,
       goldLeft: 10,
       best: { state: "this-game" },
@@ -639,4 +639,87 @@ describe("tap counts and active length come from the log (PT-10)", () => {
     // 10 s before the quit and 20 s after Continue; the 10 minutes away are not active time.
     expect(record?.activeMs).toBe(30_000);
   });
+});
+
+/** Every key in a view, at any depth: a target or warning would show up as one. */
+const keysOf = (value: unknown, out: string[] = []): string[] => {
+  if (Array.isArray(value)) for (const entry of value) keysOf(entry, out);
+  else if (value && typeof value === "object") {
+    for (const [key, entry] of Object.entries(value)) {
+      out.push(key);
+      keysOf(entry, out);
+    }
+  }
+  return out;
+};
+
+describe("the finished game's record and screens (C3/10 EV-15, EV-20)", () => {
+  it("EV-15: a finished game's record stores its story, length, difficulty and seated party size", async () => {
+    const { boot, store } = harness();
+    const session = await boot();
+    const pad = await startGame(session, ["hero-a", "hero-b"]);
+    // The test story offers party size only; the record reads length and difficulty the same way.
+    session.state().settingValues = {
+      ...session.state().settingValues,
+      length: "short",
+      difficulty: "hard",
+    };
+    armChapters(session, "win");
+    await playOn(session, pad, () => ended(session));
+    expect(ended(session)).toBe(true);
+    const records = projectGameRecords(store);
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      outcome: "won",
+      storyId: TEST_STORY.card.id,
+      length: "short",
+      difficulty: "hard",
+      partySize: 2,
+    });
+    expect(projectGameStats(store, records[0]?.gameId ?? "")?.best).toEqual({
+      state: "this-game",
+    });
+  });
+
+  for (const length of ["standard", "short"] as const) {
+    it(`EV-20: a solo ${length} game shows no length target or warning on the settings, play and session screens`, async () => {
+      const { boot, store } = harness();
+      const session = await boot();
+      const pad = await padFor(session);
+      const views: unknown[] = [];
+      const capture = () => {
+        views.push(session.projectDevice(pad.deviceId));
+        views.push(session.projectBoard({ code: "000000", url: "http://test", reachable: true }));
+      };
+      await pad.act("base-board-done", "board-set-up");
+      await pad.act("play-without-tower", "play-without-tower");
+      await pad.act("continue-pick-story-test", "continue");
+      session.state().settingValues = { ...session.state().settingValues, length };
+      await pad.act("set-setting", "set", { settingId: "party-size", optionId: "n-1" });
+      expect(session.state().screen).toBe("game-settings");
+      capture();
+      await pad.act("continue-game-settings", "continue");
+      await pad.act("hero-hold", "take", { heroId: "hero-a" });
+      await pad.act("continue-claim-heroes", "continue");
+      for (const step of session.state().setupSteps) {
+        if (step.id === "starting-purse") await pad.act(`spin-setup-${step.id}`, "spin");
+        await pad.act(`continue-setup-${step.id}`, "continue");
+      }
+      await pad.act("continue-begin", "continue");
+      for (const moment of OPENING_MOMENTS) await pad.act(openingPromptId(moment), "continue");
+      expect(session.state().screen).toBe("play");
+      capture();
+      armChapters(session, "win");
+      await playOn(session, pad, () => ended(session));
+      expect(ended(session)).toBe(true);
+      capture();
+      const gameId = session.state().games[0]?.gameId ?? "";
+      expect(projectGameRecords(store)[0]).toMatchObject({ length, partySize: 1 });
+      views.push(projectGameStats(store, gameId));
+      for (const view of views) {
+        expect(keysOf(view).filter((key) => /target|warn/i.test(key))).toEqual([]);
+        expect(JSON.stringify(view)).not.toMatch(/target|4[- ]hour|too long/i);
+      }
+    });
+  }
 });

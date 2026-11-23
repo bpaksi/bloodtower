@@ -2,9 +2,16 @@ import { describe, expect, it } from "vitest";
 import { POTION } from "../../rules/items/index.ts";
 import { type ChapterPlan, configureChapters, tryChapters } from "../chapter/chapters.ts";
 import type { PlayState } from "../chapter/playState.ts";
-import { ensureClock, heroSheet, setBuildingSkulls, setHeroSheet } from "../day/clock.ts";
+import {
+  ensureClock,
+  heroSheet,
+  markQuestWon,
+  setBuildingSkulls,
+  setHeroSheet,
+} from "../day/clock.ts";
 import { questPlay } from "../quest/fixtures.ts";
 import { ensureQuests } from "../quest/store.ts";
+import { endStats } from "./hub.ts";
 import { momentsBetween, snapshotMoments } from "./keyMoments.ts";
 import type { ShellState } from "./state.ts";
 
@@ -121,5 +128,18 @@ describe("key moments from a step (Q-C3-18)", () => {
     const rebuilt = questPlay(["hero-a", "hero-b"]).play;
     ensureClock(rebuilt);
     expect(momentsBetween(shell, before, snapshotMoments(shellOf(rebuilt)))).toEqual([]);
+  });
+});
+
+describe("the stored end stats (C3/10 EV-05)", () => {
+  it("counts every quest of the game, not only today's: a day-2 quest in a day-4 loss is 1", () => {
+    const { play } = setUp();
+    play.dayNumber = 2;
+    ensureQuests(play).done.push("herald");
+    markQuestWon(play);
+    // A new day resets the day's quest counter (day loop enter); the game's quests stay.
+    ensureClock(play).questsWon = 0;
+    play.dayNumber = 4;
+    expect(endStats(play)?.questsDone).toBe(1);
   });
 });

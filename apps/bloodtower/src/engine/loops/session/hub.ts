@@ -5,6 +5,7 @@ import type { PlayState } from "../chapter/playState.ts";
 import { captureClock } from "../day/clock.ts";
 import type { GameEnd } from "../game/end.ts";
 import { partySize, refreshSetupSteps } from "../game/setupFlow.ts";
+import { ensureQuests } from "../quest/store.ts";
 import type { ShellEffect } from "./effects.ts";
 import { emptyTally, initialHoldings, type ShellState, type TonightGame } from "./state.ts";
 import { towerReady } from "./tower.ts";
@@ -403,7 +404,8 @@ export const endStats = (play: PlayState): GameRecordStats | null => {
     });
   const golds = sheets.flatMap((sheet) => (sheet.gold === undefined ? [] : [sheet.gold]));
   return {
-    questsDone: clock.questsWon,
+    // The whole game's quests: `clock.questsWon` is today's count and resets each day.
+    questsDone: ensureQuests(play).done.length,
     corruptionsTaken: sheets.reduce((sum, sheet) => sum + sheet.corruptions, 0),
     goldLeft: golds.length === 0 ? null : golds.reduce((sum, gold) => sum + gold, 0),
   };
