@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { questItemName } from "../../views/questItems.ts";
 import { initPlayState } from "../chapter/playState.ts";
 import { ensureClock, heroSheet } from "../day/clock.ts";
 import type { GroupTurnLocal } from "../group-turn/loop.ts";
@@ -145,6 +146,9 @@ describe("C3/14 the quest scene on the building panel", () => {
     // 10 gold shared, 5 quest gold each (DEC-700, DEC-944).
     expect(gold(state, "hero-a")).toBe(10);
     expect(gold(state, "hero-b")).toBe(10);
+    // The two heroes of the other group are absent: nothing for them.
+    expect(gold(state, "hero-c") ?? 0).toBe(0);
+    expect(gold(state, "hero-d") ?? 0).toBe(0);
     state = endWait(state);
     expect(panel(state)?.quest?.phase).toBe("end");
     expect(gold(state, "hero-a")).toBe(10);
@@ -159,5 +163,16 @@ describe("C3/14 the quest scene on the building panel", () => {
     expect(panel(short)?.quest?.rewards?.tollShort).toBe(true);
     const paid = pressLabel(pressLabel(inQuest("ambush", { gold: 12 }), "Quest"), "Pay the toll");
     expect(panel(paid)?.quest?.rewards?.tollShort).toBe(false);
+  });
+
+  it("EV-03: a quest item is carried, not usable; the Menu's item row stays as it was", () => {
+    let state = pressLabel(inQuest("herald"), "Quest");
+    state = pressLabel(state, "Take the job");
+    state = pressLabel(state, "Hero A");
+    const hero = projectShellView(state).gear?.party.find((row) => row.id === "hero-a");
+    expect(hero?.heldItems).toEqual([]);
+    expect(hero?.storyItems).toEqual([{ id: "tomas-map", name: "Tomas's Map" }]);
+    expect(hero?.items).toBe("1 held");
+    expect(questItemName("not-an-item")).toBe("unavailable");
   });
 });

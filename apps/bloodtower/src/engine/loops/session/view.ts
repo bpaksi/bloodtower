@@ -19,6 +19,7 @@ import { heldItems, itemName } from "../../rules/items/index.ts";
 import { isPurseAmount, poolSides } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
+import { questItemName } from "../../views/questItems.ts";
 import type {
   BuildingPanelView,
   ChanceView,
@@ -1087,15 +1088,22 @@ const actingHeroes = (state: ShellState): string[] => {
 const partyHero = (state: ShellState, heroId: string, name: string) => {
   const sheet = state.play ? heroSheet(ensureClock(state.play), heroId) : null;
   const held = state.play ? heldItems(state.play, heroId) : null;
+  // Story items a quest handed over (DEC-653) sit in the quest store. They are carried, not usable:
+  // the party view shows them apart, and the "Use a potion or item" row never counts them (C3/14).
+  const story = state.play ? (ensureQuests(state.play).items[heroId] ?? []) : [];
   return {
     id: heroId,
     name,
     hp: sheet?.hp ? `${sheet.hp.hp}/${sheet.hp.max}` : "unavailable",
     gold: sheet?.gold !== undefined ? String(sheet.gold) : "unavailable",
-    items: held ? `${held.length} held` : "unavailable",
+    items: held ? `${held.length + story.length} held` : "unavailable",
     corruptions: "unavailable",
     holder: state.holdings[heroId] ?? null,
-    heldItems: (held ?? []).map((id) => ({ id, name: itemName(id) ?? "unavailable" })),
+    heldItems: (held ?? []).map((id) => ({
+      id,
+      name: itemName(id) ?? "unavailable",
+    })),
+    storyItems: story.map((id) => ({ id, name: questItemName(id) })),
   };
 };
 
