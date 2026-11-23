@@ -13,7 +13,7 @@ The build stop is lifted and the queue below has been running since Nov 12. Rows
 - **Next, to G-C3:** step 66 (CU/17 PR 1, local, opus), then steps 09 (C3/15), 10 (C3/16), 11 (C3/17; #598 already built part of its read-out) and 58 (C2-11, needs the findings note from Bob's tower run on main). Open bugs that can spoil a G-C3 run: #589 (no save when a building wait ends), #590 (the `f1-04-chapter-one-win` e2e hangs) and #573 (stale devices hold heroes; check it against #582).
 - **C4:** step 16 (C4-01) is merged. Step 17 (C4-02) is merged as the engine level only (#584); its wiring waits on a Wright brief and Gamewright's EV-01, EV-08 and EV-10 rulings. Steps 18 to 30 and all of C5 are not started.
 - **Still open, owner Gamewright:** step 43 (#469) and step 62 (#489).
-- **Issues to close** (work merged, issue still open): #434 to #437, #443, #444, #470, #478, #480, #481 and #499 to #505.
+- **Issues closed on 2026-11-23** (work merged, issue was still open): #434 to #437, #443, #444, #470, #478, #480, #481 and #499 to #505.
 
 ## The numbers (v1.0 only)
 
