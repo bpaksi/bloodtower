@@ -29,10 +29,6 @@ const OPENING_IDS = ["grey-stair-01", "grey-stair-02", "grey-stair-03", "grey-st
 const REPLACE_LINE = "This replaces the saved game. Are you sure?";
 
 // The board and the iPads do not depend on the project's viewport, so one project runs this.
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Own board and iPad viewports.");
-});
-
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 const boardMain = (page: Page) => page.locator("main.bt-board");
 const bodyButtons = (page: Page) => page.locator("main.bt-device .bt-scroll button");

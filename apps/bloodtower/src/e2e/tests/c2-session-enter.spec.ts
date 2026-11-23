@@ -25,10 +25,6 @@ const QUESTION = "Wake the tower, or play tonight without it?";
 const FAILED_LINE = "The tower did not answer. Try again, or play without it.";
 
 // The board and the iPads do not depend on the project's viewport, so one project runs this.
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Own board and iPad viewports.");
-});
-
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 const boardMain = (page: Page) => page.locator("main.bt-board");
 

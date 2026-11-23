@@ -59,89 +59,90 @@ const assertLabel = async (board: Page, text: string, others: string[]) => {
   }
 };
 
-test("A1-07 the board labels the Keeper line and the place still, and the iPad never does", async ({
-  browser,
-}, testInfo) => {
-  test.skip(!FLAGGED_BUILD, "needs a web build made with SHOW_ASSET_IDS=1");
-  test.skip(
-    testInfo.project.name !== "desktop",
-    "one 1920x1080 board; the iPad page is the other half",
-  );
-  test.setTimeout(240_000);
-  const session = await startAcceptanceHost(testInfo, { seed: "a1-asset-id" });
-  const boardContext = await browser.newContext({ baseURL: session.baseURL, viewport: BOARD_VIEW });
-  const deviceContext = await browser.newContext({
-    baseURL: session.baseURL,
-    viewport: { width: 820, height: 1180 },
-    hasTouch: true,
-  });
-  try {
-    const board = await boardContext.newPage();
-    const device = await deviceContext.newPage();
-    await board.goto("/board");
-    await installSessionSocketHook(device);
-    await device.goto(`/join?code=${session.host.joinCode}`);
-    await enterWithoutTower(device);
-    await clickAct(device, "continue", "continue-pick-story-test");
-    await clickAct(device, "continue", "continue-game-settings");
-    await holdHeroesFromTest(device, [...HERO_IDS]);
-    await clickAct(device, "continue", "continue-claim-heroes");
+test(
+  "A1-07 the board labels the Keeper line and the place still, and the iPad never does",
+  { tag: "@desktop-only" },
+  async ({ browser }, testInfo) => {
+    test.skip(!FLAGGED_BUILD, "needs a web build made with SHOW_ASSET_IDS=1");
+    test.setTimeout(240_000);
+    const session = await startAcceptanceHost(testInfo, { seed: "a1-asset-id" });
+    const boardContext = await browser.newContext({
+      baseURL: session.baseURL,
+      viewport: BOARD_VIEW,
+    });
+    const deviceContext = await browser.newContext({
+      baseURL: session.baseURL,
+      viewport: { width: 820, height: 1180 },
+      hasTouch: true,
+    });
+    try {
+      const board = await boardContext.newPage();
+      const device = await deviceContext.newPage();
+      await board.goto("/board");
+      await installSessionSocketHook(device);
+      await device.goto(`/join?code=${session.host.joinCode}`);
+      await enterWithoutTower(device);
+      await clickAct(device, "continue", "continue-pick-story-test");
+      await clickAct(device, "continue", "continue-game-settings");
+      await holdHeroesFromTest(device, [...HERO_IDS]);
+      await clickAct(device, "continue", "continue-claim-heroes");
 
-    const main = device.locator("main.bt-device");
-    const deadline = Date.now() + 60_000;
-    while ((await main.getAttribute("data-screen")) !== "play") {
-      if (Date.now() > deadline) throw new Error("Did not reach play.");
-      const screen = await main.getAttribute("data-screen");
-      if (screen === "setup") {
-        const step = device.locator(
-          'button[data-prompt-id^="continue-setup-"][data-action-id="continue"]',
-        );
-        if ((await step.count()) > 0 && (await step.first().isEnabled()))
-          await step.first().click();
-      } else if (screen === "begin") {
-        await clickAct(device, "continue", "continue-begin");
+      const main = device.locator("main.bt-device");
+      const deadline = Date.now() + 60_000;
+      while ((await main.getAttribute("data-screen")) !== "play") {
+        if (Date.now() > deadline) throw new Error("Did not reach play.");
+        const screen = await main.getAttribute("data-screen");
+        if (screen === "setup") {
+          const step = device.locator(
+            'button[data-prompt-id^="continue-setup-"][data-action-id="continue"]',
+          );
+          if ((await step.count()) > 0 && (await step.first().isEnabled()))
+            await step.first().click();
+        } else if (screen === "begin") {
+          await clickAct(device, "continue", "continue-begin");
+        }
+        await device.waitForTimeout(100);
       }
-      await device.waitForTimeout(100);
-    }
 
-    for (const id of OPENING_IDS) {
-      await expect(board.locator("main")).toHaveAttribute("data-moment", id);
-      if (id === "grey-stair.03") {
-        await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
-        await assertLabel(board, "ts-keeper-001", [
-          "[data-board-caption]",
-          "[data-caption-toggle]",
-        ]);
-        await expect(device.locator("[data-asset-id-label]")).toHaveCount(0);
-        const shot = testInfo.outputPath("a1-07-board-asset-id-1920x1080.png");
-        await board.screenshot({ path: shot });
-        copyToE2eArtifacts(testInfo, shot, "a1-07-board-asset-id-1920x1080.png");
-      } else {
-        await expect(board.locator("[data-asset-id-label]")).toHaveCount(0);
+      for (const id of OPENING_IDS) {
+        await expect(board.locator("main")).toHaveAttribute("data-moment", id);
+        if (id === "grey-stair.03") {
+          await expect(board.locator('[data-talking-avatar="keeper"]')).toBeVisible();
+          await assertLabel(board, "ts-keeper-001", [
+            "[data-board-caption]",
+            "[data-caption-toggle]",
+          ]);
+          await expect(device.locator("[data-asset-id-label]")).toHaveCount(0);
+          const shot = testInfo.outputPath("a1-07-board-asset-id-1920x1080.png");
+          await board.screenshot({ path: shot });
+          copyToE2eArtifacts(testInfo, shot, "a1-07-board-asset-id-1920x1080.png");
+        } else {
+          await expect(board.locator("[data-asset-id-label]")).toHaveCount(0);
+        }
+        await clickAct(device, "continue", `continue-opening-${id.replace(".", "-")}`);
       }
-      await clickAct(device, "continue", `continue-opening-${id.replace(".", "-")}`);
-    }
 
-    const roll = device.locator('button[data-prompt-id*="roll-done"]');
-    const enter = device.locator('button[data-action-id="enter"]');
-    await expect
-      .poll(async () => ((await roll.count()) > 0 || (await enter.count()) > 0 ? "ready" : ""), {
-        timeout: 20_000,
-      })
-      .toBe("ready");
-    if ((await roll.count()) > 0) {
-      await roll.click();
-      await expect(enter).toBeVisible({ timeout: 20_000 });
+      const roll = device.locator('button[data-prompt-id*="roll-done"]');
+      const enter = device.locator('button[data-action-id="enter"]');
+      await expect
+        .poll(async () => ((await roll.count()) > 0 || (await enter.count()) > 0 ? "ready" : ""), {
+          timeout: 20_000,
+        })
+        .toBe("ready");
+      if ((await roll.count()) > 0) {
+        await roll.click();
+        await expect(enter).toBeVisible({ timeout: 20_000 });
+      }
+      await clickAct(device, "enter");
+      await expect(board.locator("main")).toHaveAttribute("data-board-layer", "place");
+      const stillId = await board.locator("[data-still]").getAttribute("data-still");
+      expect(stillId).toMatch(/^place\./u);
+      await assertLabel(board, stillId ?? "", ["[data-board-caption]", "[data-place] figcaption"]);
+      await expect(device.locator("[data-asset-id-label]")).toHaveCount(0);
+    } finally {
+      await boardContext.close();
+      await deviceContext.close();
+      await session.host.close();
     }
-    await clickAct(device, "enter");
-    await expect(board.locator("main")).toHaveAttribute("data-board-layer", "place");
-    const stillId = await board.locator("[data-still]").getAttribute("data-still");
-    expect(stillId).toMatch(/^place\./u);
-    await assertLabel(board, stillId ?? "", ["[data-board-caption]", "[data-place] figcaption"]);
-    await expect(device.locator("[data-asset-id-label]")).toHaveCount(0);
-  } finally {
-    await boardContext.close();
-    await deviceContext.close();
-    await session.host.close();
-  }
-});
+  },
+);

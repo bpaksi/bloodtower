@@ -200,11 +200,7 @@ const wonRecords = (databasePath: string) => {
   }
 };
 
-test.describe("F1/04 chapter 1 won through Enter on the wild marker", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("F1/04 chapter 1 won through Enter on the wild marker", { tag: "@ipad-only" }, () => {
   test("EV-09: Muted Forest and Egan's End, both quests, the day ends, the game is won", async ({
     browser,
   }, testInfo) => {

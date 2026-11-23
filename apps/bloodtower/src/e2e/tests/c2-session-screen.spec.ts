@@ -32,10 +32,6 @@ const REPLACE_LINE = "This replaces the saved game. Are you sure?";
 const JOIN_LINE = "Scan with each iPad. Then pick who this iPad speaks for at the table";
 
 // The board and the iPads do not depend on the project's viewport, so one project runs this.
-test.beforeEach(({ browserName: _browserName }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Own board and iPad viewports.");
-});
-
 const deviceMain = (page: Page) => page.locator("main.bt-device");
 const boardMain = (page: Page) => page.locator("main.bt-board");
 

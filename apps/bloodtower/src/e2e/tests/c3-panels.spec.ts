@@ -179,11 +179,7 @@ const closeAll = async (context: BrowserContext, host: { close: () => Promise<vo
   await host.close();
 };
 
-test.describe("CU/13 the party items panel and the use-item flow", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The approved mockup is the 1920x1080 board.");
-  });
-
+test.describe("CU/13 the party items panel and the use-item flow", { tag: "@ipad-only" }, () => {
   test("EV-05, EV-07, EV-12, EV-17, EV-18 and C3-11 EV-15 (use-item half): the panel, both routes, once", async ({
     browser,
   }, testInfo) => {
@@ -387,11 +383,9 @@ const mockupShot = async (browser: Browser, testInfo: TestInfo, id: string, name
   }
 };
 
-test.describe("CU/14 the turn-start virtue panel and the choice list", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The approved mockup is the 1920x1080 board.");
-  });
-
+test.describe("CU/14 the turn-start virtue panel and the choice list", {
+  tag: "@ipad-only",
+}, () => {
   test("EV-01, EV-04: an automatic virtue shows on the board with no press and no iPad button", async ({
     browser,
   }, testInfo) => {
@@ -561,11 +555,9 @@ const reachPurseStep = async (
   return { session, context, pad, board };
 };
 
-test.describe("CU/15 the game of chance: the Spin and the starting purse", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The approved mockup is the 1920x1080 board.");
-  });
-
+test.describe("CU/15 the game of chance: the Spin and the starting purse", {
+  tag: "@ipad-only",
+}, () => {
   test("EV-08, EV-12: with the tower nothing runs until the press, then one command, and the tower plays the sound", async ({
     browser,
   }, testInfo) => {

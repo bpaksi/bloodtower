@@ -217,6 +217,16 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libbluetooth-dev libudev-dev
       - name: pnpm install
         run: pnpm install --frozen-lockfile
+      # The browser downloads are cached per Playwright version. `--with-deps` still installs the
+      # system packages on a cache hit; only the download is skipped.
+      - name: playwright version
+        id: playwright
+        run: echo "version=$(pnpm -F bloodtower-e2e exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: playwright browser cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-webkit
       - name: playwright browsers
         run: pnpm -F bloodtower-e2e exec playwright install --with-deps chromium webkit
       # The same build the e2e webServer would run (pack lint, then next build). Done once
@@ -226,6 +236,11 @@ jobs:
       - name: playwright e2e (shard ${{ matrix.shard }}/4)
         env:
           E2E_PREBUILT: "1"
+          # `--shard` cuts the listed tests into contiguous slices; these weights set each slice's
+          # share of the count. Equal slices put the slow iPad c3-* specs in one shard. Set from
+          # the per-test times of CI run 45176529788 so each shard has about 660 s of tests.
+          # Retune when one shard runs much longer than the others (see playwright.config.ts).
+          PWTEST_SHARD_WEIGHTS: "97:57:89:100"
         run: pnpm --dir apps/bloodtower e2e --shard=${{ matrix.shard }}/4
       - name: upload report
         if: failure()

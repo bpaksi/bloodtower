@@ -40,11 +40,7 @@ const labelsOf = async (pad: Page) => {
 const optionByLabel = (pad: Page, label: string) =>
   options(pad).filter({ hasText: new RegExp(`^${label}`) });
 
-test.describe("F1/02 the Quest row and the quest pick", () => {
-  test.beforeEach(({ browserName: _browserName }, testInfo) => {
-    test.skip(testInfo.project.name !== "ipad", "The menu is on the iPad.");
-  });
-
+test.describe("F1/02 the Quest row and the quest pick", { tag: "@ipad-only" }, () => {
   test("EV-10: Quest on the iPad, won, the turn spent", async ({ browser }, testInfo) => {
     test.setTimeout(300_000);
     const session = await startAcceptanceHost(testInfo, {
