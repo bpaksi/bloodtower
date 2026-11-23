@@ -199,6 +199,51 @@ const playUntilStamp = async (table: Table) => {
   await stageIs(table, "stamp");
 };
 
+/** Every Menu row with its state and text, then the Menu closed again (EV-15). */
+const menuStates = async (pad: Page) => {
+  await pad.locator('[data-action="menu"]').click();
+  const rows = pad.locator("[data-menu] button[data-gear-item]");
+  await expect(rows.first()).toBeVisible();
+  const states = await rows.evaluateAll((els) =>
+    els.map((el) => ({
+      id: el.getAttribute("data-gear-item"),
+      disabled: (el as HTMLButtonElement).disabled,
+      text: (el.textContent ?? "").trim(),
+    })),
+  );
+  await pad.locator("[data-menu]").getByRole("button", { name: "Close" }).click();
+  await expect(pad.locator("[data-menu]")).toHaveCount(0);
+  return states;
+};
+
+/** A new host on the same database, its iPad on Continue (the restart in EV-15). */
+const resumeTable = async (
+  browser: Browser,
+  testInfo: TestInfo,
+  databasePath: string,
+): Promise<{ pad: Page; board: Page; close: () => Promise<void> }> => {
+  const host = await startAcceptanceHost(testInfo, { databasePath, seed: SEED, fakeWait: true });
+  const padContext = await browser.newContext({ baseURL: host.baseURL, ...PORTRAIT });
+  const boardContext = await browser.newContext({ baseURL: host.baseURL, viewport: BOARD_SIZE });
+  const pad = await padContext.newPage();
+  const board = await boardContext.newPage();
+  await board.goto("/board");
+  await installSessionSocketHook(pad);
+  await pad.goto(`/join?code=${host.host.joinCode}`);
+  await clickAct(pad, "continue", "continue-saved-game");
+  // Continue seats the saved party on the iPads joined now (CU/16).
+  await holdHeroesFromTest(pad, ["hero-a"]);
+  return {
+    pad,
+    board,
+    close: async () => {
+      await padContext.close();
+      await boardContext.close();
+      await host.host.close();
+    },
+  };
+};
+
 const shot = async (page: Page, testInfo: TestInfo, name: string) => {
   await page.screenshot({ path: testInfo.outputPath(`${name}.png`) });
 };
@@ -412,6 +457,61 @@ test.describe("C3/15 the chapter card and the chapter end", { tag: "@ipad-only" 
       await expect(pad.locator('button[data-prompt-id^="skull-record--"]')).toHaveCount(0);
     } finally {
       await table.close();
+    }
+  });
+
+  test("EV-15, EV-23: a restart in Set the table comes back with the Menu and panels closed", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(240_000);
+    const table = await openTable(browser, testInfo);
+    let closed = false;
+    try {
+      const { pad, clock } = table;
+      await stageIs(table, "card");
+      clock.advance(4_000);
+      await playUntilStamp(table);
+      clock.advance(4_000);
+      await stageIs(table, "close");
+      clock.advance(4_000);
+      await stageIs(table, "card");
+      clock.advance(4_000);
+      await stageIs(table, "table");
+      const before = await menuStates(pad);
+      expect(before.length).toBeGreaterThan(3);
+      // A gear panel is open when the host stops.
+      await pad.locator('[data-action="menu"]').click();
+      await pad.locator('[data-menu] button[data-gear-item="current-party"]').click();
+      await expect(table.board.locator('[data-panel="current-party"]')).toBeVisible({
+        timeout: 20_000,
+      });
+      const { databasePath } = table.host;
+      await table.close();
+      closed = true;
+      const again = await resumeTable(browser, testInfo, databasePath);
+      try {
+        await expect(deviceMain(again.pad)).toHaveAttribute("data-chapter-stage", "table", {
+          timeout: 30_000,
+        });
+        await expect(again.pad.locator("[data-menu]")).toHaveCount(0);
+        await expect(again.pad.locator("[data-panel], [data-gear-panel]")).toHaveCount(0);
+        await expect(again.board.locator("[data-panel]")).toHaveCount(0);
+        await expect(deviceMain(again.pad)).toHaveAttribute("data-paused", "false");
+        await expectToolbar(again.pad);
+        expect(await menuStates(again.pad)).toEqual(before);
+        // EV-23: the same rows, Done offered again, and one press ends the step.
+        await expect(again.pad.locator("[data-set-table] [data-table-row]")).toHaveText([
+          "Quest tokens: The Barrow, The Shrine",
+        ]);
+        await again.pad.locator("button[data-table-done]").click();
+        await expect(deviceMain(again.pad)).not.toHaveAttribute("data-chapter-stage", "table", {
+          timeout: 20_000,
+        });
+      } finally {
+        await again.close();
+      }
+    } finally {
+      if (!closed) await table.close();
     }
   });
 });

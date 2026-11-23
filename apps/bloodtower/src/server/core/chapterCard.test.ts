@@ -494,4 +494,36 @@ describe("C3/15 Set the table after the next chapter's card (PT-21)", () => {
     expect(store.nodes.filter((n) => n === "table.done:2")).toHaveLength(1);
     expect(again.session.state().loops.stack.some((f) => f.loopId === "day")).toBe(true);
   });
+
+  it("EV-15, EV-23: a gear panel open in Set the table; after a restart Done is offered again", async () => {
+    const game = await realGame(SEED);
+    await toTable(game);
+    await game.tick(4_000);
+    expect(beat(game)?.stage).toBe("table");
+    await game.act("gear", "open", { item: "current-party" });
+    const again = await game.restart();
+    expect(beat(again)?.stage).toBe("table");
+    expect(again.session.projectDevice(again.pad).gear?.paused ?? false).toBe(false);
+    expect(pressable(again).map((a) => a.promptId)).toEqual(["table-done--2"]);
+  });
+
+  it("EV-23: a drop pause in Set the table, then the hero taken again, offers Done again", async () => {
+    const game = await realGame(SEED);
+    await toTable(game);
+    await game.tick(4_000);
+    expect(beat(game)?.stage).toBe("table");
+    game.session.disconnect(game.pad);
+    // The drop's grace (10 ms) runs out, so the disconnect pause opens.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await game.session.whenIdle();
+    expect(game.session.state().pause?.cause).toBe("disconnect");
+    const joined = game.session.join({ joinCode: "000000", formFactor: "ipad" });
+    await game.session.whenIdle();
+    if (!joined.ok) throw new Error("join refused");
+    game.session.act(joined.deviceId, "hero-hold", "take", { heroId: "hero-a" });
+    await game.session.whenIdle();
+    const again = { ...game, pad: joined.deviceId };
+    expect(beat(again)?.stage).toBe("table");
+    expect(pressable(again).map((a) => a.promptId)).toEqual(["table-done--2"]);
+  });
 });

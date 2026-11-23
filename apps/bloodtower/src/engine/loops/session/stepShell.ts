@@ -402,6 +402,10 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       next.stage = "playing";
       next.screen = "play";
       pauseIfNeeded(next);
+      // The pause replaced the offers with Quit: Set the table's Done or a freed skull's
+      // prompt is offered again (C3/15, EV-23).
+      const chapter = next.loops.stack.find((frame) => frame.loopId === "chapter");
+      if (chapter) chapter.local = { ...(chapter.local as ChapterLocal), awaitingPress: false };
     }
     resetGameAwaitingPress(next);
     bindShellState(next);
