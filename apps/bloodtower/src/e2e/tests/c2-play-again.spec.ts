@@ -18,6 +18,7 @@ import {
   waitForBoardAnimationsSettled,
 } from "./support/acceptance.ts";
 import { copyToE2eArtifacts } from "./support/e2e-artifacts.ts";
+import { walkTo } from "./support/walk.ts";
 
 const BOARD = { width: 1920, height: 1080 } as const;
 const IPAD = { width: 768, height: 1024 } as const;
@@ -407,12 +408,8 @@ test("Continue after Play again resumes the new game's seed and replay (EV-11)",
     await playThroughOpening(pad.page);
     // Day 1: the roll, then one walk.
     await clickAct(pad.page, "continue", "day-1-roll-done");
-    const walk = deviceMain(pad.page)
-      .locator('button[data-action-id="walk"]:not([disabled])')
-      .first();
-    await expect(walk).toBeVisible({ timeout: 20_000 });
-    await walk.click();
-    await expect(deviceMain(pad.page).locator("[data-moves-left]")).toBeVisible();
+    // Read the status only once the walk's view shows the walked-to space (#599).
+    await walkTo(pad.page);
     before = await readStatus(pad.page);
     await quitGame(pad.page);
     newSeed = autosaveSeed(databasePath);

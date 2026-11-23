@@ -11,6 +11,7 @@ import {
   installSessionSocketHook,
   startAcceptanceHost,
 } from "./support/acceptance.ts";
+import { walkTo } from "./support/walk.ts";
 
 /**
  * F1/04 EV-09 (DEC-641, DEC-951, DEC-948, DEC-949): a real Ruined Keep game, one hero, won through
@@ -160,8 +161,7 @@ const walkToEnter = async (pad: Page, target: string, waitClock: WaitTicker | nu
       const step = pathTo(at, target)[0];
       const walk = pad.locator(`button[data-prompt-id$="--${step}"][data-action-id="walk"]`);
       if ((await walk.count()) > 0) {
-        await walk.click();
-        await expect(where(pad)).toHaveAttribute("data-space", step as string, { timeout: 20_000 });
+        await walkTo(pad, step as string);
         continue;
       }
     }
