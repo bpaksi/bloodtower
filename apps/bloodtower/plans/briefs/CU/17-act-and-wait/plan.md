@@ -111,7 +111,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 ## Open questions
 
 - **For Bob (one ruling, recommended answer first):**
-  1. **The press signal.** (a, recommended) `seq` and `acked`, as above: `act` waits for `acked`, so a broadcast from a timer or another iPad cannot pass for the press. (b) `seq` only, as first asked: `act` waits for any newer view, which a hint timer, the tower watch or another iPad's press can supply before the press is handled, so the c2-play-again kind of race stays possible.
+  1. **The press signal. RULED (Bob, 2026-11-23, chat): `seq` and `acked`**, as above. `act` waits for `acked`, so a broadcast from a timer or another iPad cannot pass for the press. (The other choice was `seq` only, which a hint timer, the tower watch or another iPad's press could satisfy before the press is handled.)
   2. **test-lock on the migration branches.** (a, recommended) Name PR 2 and PR 4 to PR 7 `chore/bloodtower-cu17-...`, since they change tests only and fix no app bug. (b) Keep `fix/` and do each migration in its first commit, with spec review fixes on a follow-up branch.
 - **Left as is (say if you want it):** the board side (`main.bt-board`) gets no `seq`.
 
