@@ -4,6 +4,17 @@ First drafted 2026-11-12 by Gamewright's planning pass for Wright and Bob. Revis
 
 Companion files: [design-freeze.md](design-freeze.md) (locks, rulings, questions), [gap-map.md](gap-map.md) (main vs the design, and where each playtest finding lands).
 
+## Status on 2026-11-23 (main `7a1cae16`)
+
+The build stop is lifted and the queue below has been running since Nov 12. Rows marked **DONE** name their merged PRs. The weekday, "Done by" and Cursor figures further down are still the Nov 12 projection and were not re-run.
+
+- **Merged:** queue orders 1 to 13a, 14, 18 to 24, 27 and 42 (steps 01 to 08, 12 to 14, 16, 31, 50 to 57, 59, 60, 63 to 65), plus Gamewright and Loremaster steps 44 to 48.
+- **Audit fold-in, all merged:** F1/01 as cards only (#567, Bob 2026-11-18), F1/02 (#575), F1/03 (#576), F1/04 (#587), D1 (#572), D2 (#585), D3 (#597), D4 (#583), D5 (#579), D6 (#580). F2 to F7 (#507) are not started.
+- **Next, to G-C3:** step 66 (CU/17 PR 1, local, opus), then steps 09 (C3/15), 10 (C3/16), 11 (C3/17; #598 already built part of its read-out) and 58 (C2-11, needs the findings note from Bob's tower run on main). Open bugs that can spoil a G-C3 run: #589 (no save when a building wait ends), #590 (the `f1-04-chapter-one-win` e2e hangs) and #573 (stale devices hold heroes; check it against #582).
+- **C4:** step 16 (C4-01) is merged. Step 17 (C4-02) is merged as the engine level only (#584); its wiring waits on a Wright brief and Gamewright's EV-01, EV-08 and EV-10 rulings. Steps 18 to 30 and all of C5 are not started.
+- **Still open, owner Gamewright:** step 43 (#469) and step 62 (#489).
+- **Issues closed on 2026-11-23** (work merged, issue was still open): #434 to #437, #443, #444, #470, #478, #480, #481 and #499 to #505.
+
 ## The numbers (v1.0 only)
 
 - **Total: 68.5 plan weekdays** for 52 queue entries. **67** of them are buildable once the stop lifts and the gates clear; **1.5** sit on the one blocked step (the C3-11 follow-up, no brief yet).
@@ -53,8 +64,8 @@ Rounded to a quarter day, except that the Cursor part uses 0.125 steps for Med a
 | Step | What | Owner | Playtest | Issue |
 |---|---|---|---|---|
 | 43 | Gamewright: record the playtest rulings as DEC cards and card edits (PT-02 to PT-23) | Gamewright | PT-02 to PT-04, PT-06 to PT-08, PT-10, PT-13, PT-15 to PT-21, PT-23 (1.0 parts only) | #469 |
-| 44 | Gamewright: amend the affected briefs and write the new CU briefs; get Bob's re-approval of changed evals | Gamewright | PT-02 to PT-04, PT-06 to PT-08, PT-10, PT-13, PT-15 to PT-21, PT-23 (1.0 parts only) | #470 |
-| 45 | Loremaster: fill the Copy tables for every 1.0 screen step, no waiver (1.0 questions LQ-2, 3, 5, 6) | Loremaster | PT-16, PT-17, PT-02 (LQ-6) | #471 |
+| 44 | **DONE (CU/03 to CU/16 written; Bob's batch re-approval 2026-11-14; issue #470 still open):** Gamewright: amend the affected briefs and write the new CU briefs; get Bob's re-approval of changed evals | Gamewright | PT-02 to PT-04, PT-06 to PT-08, PT-10, PT-13, PT-15 to PT-21, PT-23 (1.0 parts only) | #470 |
+| 45 | **DONE (issue #471 closed):** Loremaster: fill the Copy tables for every 1.0 screen step, no waiver (1.0 questions LQ-2, 3, 5, 6) | Loremaster | PT-16, PT-17, PT-02 (LQ-6) | #471 |
 | 46 | DONE: Gamewright: rule on C3-08 corruption (EV-07 give action vs DEC-544, old-save compatibility, multi-holder order) | Gamewright | — | #472 |
 | 47 | DONE: Gamewright: decide the C2-07 play-again text (main has "Play again?" and the EV-14 confirm line) | Gamewright | — | #473 |
 | 48 | DONE: Gamewright: triage the 84 1.0 gaps (link or park each, with an owner) and close the caravan question | Gamewright | PT-09 | #474 |
@@ -126,40 +137,40 @@ Columns: **Weekdays** is the step total, **Runner** the build part, **Cursor** t
 
 | Order | Step | Title | Runner | Weekdays | Runner part | Cursor | Done by | Playtest | Depends on / gates | Issue |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 01 | C3-09 chapter loop: A/B review and merge of #393 (head 860e1517) | anvil | 0.5 | 0 | 0.5 / $1.36 | D1 | — | Bob lifts the stop; Cursor back | #431 |
-| 2 | 02 | C3-11 day on the board: resolve merge conflicts and finish #384 | anvil | 1.5 | 1 | 0.5 / $1.36 | D2 | — | #393 merged | #432 |
-| 3 | 03 | Join page hydration fix and CI guard (#414) | hammer | 0.75 | 0.5 | 0.25 / $0.68 | D3 | — | none | #414 |
-| 4 | 04 | Art and voice landing PR (Dracula batches 1-5, Lenka, cover and glow, C5-05 art and voice) | hammer | 0.25 | 0.25 | 0 / $0.00 | D3 | — | C5-05 code follow-up if still open | #433 |
-| 5 | 59 | Tooling: gaps.ts skips parked cards in the mechanic rule (one line and a test) | hammer | 0.5 | 0.25 | 0.25 / $0.68 | D4 | — | Step 44 (brief CU/12) | #486 |
-| 5a | 63 | C3-18 pack v2 schema and lint: quest places, plain scenes, items, endings, DEC-692 and DEC-693 rules (found blocking step 05 on 2026-11-13) | anvil | 1.5 | 1 | 0.5 / $1.36 | D5 | — | C3-01, C3-07 (merged) | issue to open |
-| 5b | 64 | C3-19 quest type optional, quest markers per chapter, one quest per space (follow-ups of step 63) | anvil | 1 | 0.75 | 0.25 / $0.68 | D5 | — | Step 63 merged (#514) | issue to open |
-| 6 | 05 | C3-03 The Ruined Keep pack (quests, scenes, items, places) | hammer | 2 | 2 | 0 / $0.00 | D6 | — | C3-01, C3-02 (merged); steps 63 and 64 merged | #434 |
-| 7 | 50 | PT-07: no-tower skull drop goes to the standing building with the fewest skulls | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D7 | PT-07 | Steps 43, 44; C3-04 (merged) | #476 |
-| 8 | 51 | PT-18 and PT-06: Split and Rejoin as queued gear actions; no daily Regroup prompt; per-split-group shift | anvil | 2.25 | 1.875 | 0.375 / $1.02 | D9 | PT-18, PT-06 | Step 02 (#384 merged), steps 43, 44 | #477 |
-| 9 | 52 | PT-19: Back undoes a move-map tap until a trigger fires; "Fix my position" gear item | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D10 | PT-19 | Steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #478 |
-| 10 | 60 | PT-24: remove the iPad "Enable sound" step from the code and specs; mockup change goes to Illusionist | hammer | 2.5 | 2.125 | 0.375 / $1.02 | D13 | PT-24 | Step 44 (brief CU/11); Loremaster sign-off of the removed strings (step 45) | **Gates:** Bob re-approval of the changed C2/04 and C2/05 evals; Illusionist's mockup change; Loremaster sign-off of the removed strings (step 45) | #490 |
-| 11 | 53 | PT-23: toolbar order, "?" left, Back and Replay centre, gear right | hammer | 1.75 | 1.5 | 0.25 / $0.68 | D15 | PT-23 | Steps 43, 44 | #479 |
-| 12 | 06 | C3-10 game end: won or lost, the record and the stats | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D16 | PT-02, PT-03, PT-04, PT-10 | C3-09 merged (#393); C2-08 merged | **Gates:** Copy table by Loremaster (step 45), no waiver; brief amendment and Bob re-approval of the changed eval.md (step 44) | #435 |
-| 13 | 07 | C3-12 event scene | hammer | 1 | 0.75 | 0.25 / $0.68 | D17 | — | C3-05 (merged), C2-06 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #436 |
-| 13a | 65 | Continue frees the heroes of iPads that are gone; the iPads joined now pick them in the drop pause (Anvil's finding, Bob via Warden 2026-11-20). Brief [CU/16](../briefs/CU/16-continue-repick/plan.md), DEC-952 and DEC-953, eval approval **pending Bob**. **Goes after C3/12 PR 2** (shares `web/components/device/**` and `CoreStoryBoard.tsx`); no D1 overlap | hammer | 1 | 0.75 | 0.25 / $0.68 | — | — | C3/12 PR 1 (#556, merged) and PR 2 merged | **Gates:** Bob's eval approval row (CU/16) | issue to open |
-| 13b | 66 | e2e specs wait for the view their press leads to: `seq` and `acked` on the device view, shared `act` / `untilScreen` / `readStatus` helpers, a repo check with a shrinking allowlist, the specs moved over in 7 PRs (Bob's question of 2026-11-23: the tests, not the iPad code). Brief [CU/17](../briefs/CU/17-act-and-wait/plan.md), eval approval: Bob 2026-11-23. PR 1 goes after #603 | claude code | 2.5 | 2 | 0.5 / $1.36 | — | — | #603 merged | — | issue to open |
-| 14 | 08 | C3-14 quest scene | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D19 | — | C3-07 (merged), C2-06 | **Gates:** Copy table by Loremaster (step 45), no waiver | #437 |
+| 1 | 01 | **DONE (#393):** C3-09 chapter loop: A/B review and merge of #393 (head 860e1517) | anvil | 0.5 | 0 | 0.5 / $1.36 | D1 | — | Bob lifts the stop; Cursor back | #431 |
+| 2 | 02 | **DONE (#384):** C3-11 day on the board: resolve merge conflicts and finish #384 | anvil | 1.5 | 1 | 0.5 / $1.36 | D2 | — | #393 merged | #432 |
+| 3 | 03 | **DONE (#497):** Join page hydration fix and CI guard (#414) | hammer | 0.75 | 0.5 | 0.25 / $0.68 | D3 | — | none | #414 |
+| 4 | 04 | **DONE (#498):** Art and voice landing PR (Dracula batches 1-5, Lenka, cover and glow, C5-05 art and voice) | hammer | 0.25 | 0.25 | 0 / $0.00 | D3 | — | C5-05 code follow-up if still open | #433 |
+| 5 | 59 | **DONE (#524):** Tooling: gaps.ts skips parked cards in the mechanic rule (one line and a test) | hammer | 0.5 | 0.25 | 0.25 / $0.68 | D4 | — | Step 44 (brief CU/12) | #486 |
+| 5a | 63 | **DONE (#514):** C3-18 pack v2 schema and lint: quest places, plain scenes, items, endings, DEC-692 and DEC-693 rules (found blocking step 05 on 2026-11-13) | anvil | 1.5 | 1 | 0.5 / $1.36 | D5 | — | C3-01, C3-07 (merged) | issue to open |
+| 5b | 64 | **DONE (#517):** C3-19 quest type optional, quest markers per chapter, one quest per space (follow-ups of step 63) | anvil | 1 | 0.75 | 0.25 / $0.68 | D5 | — | Step 63 merged (#514) | issue to open |
+| 6 | 05 | **DONE (#518):** C3-03 The Ruined Keep pack (quests, scenes, items, places) | hammer | 2 | 2 | 0 / $0.00 | D6 | — | C3-01, C3-02 (merged); steps 63 and 64 merged | #434 |
+| 7 | 50 | **DONE (#522):** PT-07: no-tower skull drop goes to the standing building with the fewest skulls | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D7 | PT-07 | Steps 43, 44; C3-04 (merged) | #476 |
+| 8 | 51 | **DONE (#523):** PT-18 and PT-06: Split and Rejoin as queued gear actions; no daily Regroup prompt; per-split-group shift | anvil | 2.25 | 1.875 | 0.375 / $1.02 | D9 | PT-18, PT-06 | Step 02 (#384 merged), steps 43, 44 | #477 |
+| 9 | 52 | **DONE (#542):** PT-19: Back undoes a move-map tap until a trigger fires; "Fix my position" gear item | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D10 | PT-19 | Steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #478 |
+| 10 | 60 | **DONE (#535):** PT-24: remove the iPad "Enable sound" step from the code and specs; mockup change goes to Illusionist | hammer | 2.5 | 2.125 | 0.375 / $1.02 | D13 | PT-24 | Step 44 (brief CU/11); Loremaster sign-off of the removed strings (step 45) | **Gates:** Bob re-approval of the changed C2/04 and C2/05 evals; Illusionist's mockup change; Loremaster sign-off of the removed strings (step 45) | #490 |
+| 11 | 53 | **DONE (#525):** PT-23: toolbar order, "?" left, Back and Replay centre, gear right | hammer | 1.75 | 1.5 | 0.25 / $0.68 | D15 | PT-23 | Steps 43, 44 | #479 |
+| 12 | 06 | **DONE (#554, #598):** C3-10 game end: won or lost, the record and the stats | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D16 | PT-02, PT-03, PT-04, PT-10 | C3-09 merged (#393); C2-08 merged | **Gates:** Copy table by Loremaster (step 45), no waiver; brief amendment and Bob re-approval of the changed eval.md (step 44) | #435 |
+| 13 | 07 | **DONE (#556, #568):** C3-12 event scene | hammer | 1 | 0.75 | 0.25 / $0.68 | D17 | — | C3-05 (merged), C2-06 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #436 |
+| 13a | 65 | **DONE (#582):** Continue frees the heroes of iPads that are gone; the iPads joined now pick them in the drop pause (Anvil's finding, Bob via Warden 2026-11-20). Brief [CU/16](../briefs/CU/16-continue-repick/plan.md), DEC-952 and DEC-953, eval approval **pending Bob**. **Goes after C3/12 PR 2** (shares `web/components/device/**` and `CoreStoryBoard.tsx`); no D1 overlap | hammer | 1 | 0.75 | 0.25 / $0.68 | — | — | C3/12 PR 1 (#556, merged) and PR 2 merged | **Gates:** Bob's eval approval row (CU/16) | issue to open |
+| 13b | 66 | **BRIEF MERGED (#604), build not started:** e2e specs wait for the view their press leads to: `seq` and `acked` on the device view, shared `act` / `untilScreen` / `readStatus` helpers, a repo check with a shrinking allowlist, the specs moved over in 7 PRs (Bob's question of 2026-11-23: the tests, not the iPad code). Brief [CU/17](../briefs/CU/17-act-and-wait/plan.md), eval approval: Bob 2026-11-23. PR 1 goes after #603 | claude code | 2.5 | 2 | 0.5 / $1.36 | — | — | #603 merged | — | issue to open |
+| 14 | 08 | **DONE (#586, #588):** C3-14 quest scene | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D19 | — | C3-07 (merged), C2-06 | **Gates:** Copy table by Loremaster (step 45), no waiver | #437 |
 | 15 | 09 | C3-15 chapter card and seal break | hammer | 2 | 1.625 | 0.375 / $1.02 | D21 | PT-21 | C3-09 merged | **Gates:** Copy table by Loremaster (step 45), no waiver; brief amendment and Bob re-approval of the changed eval.md (step 44) | #438 |
 | 16 | 10 | C3-16 outcome scene: win or loss | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D22 | PT-02 | C3-10 merged; C2-07 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #439 |
 | 17 | 11 | C3-17 game stats | hammer | 1.25 | 1 | 0.25 / $0.68 | D24 | PT-03, PT-04, PT-10 | C3-16 merged | **Gates:** brief amendment and Bob re-approval of the changed eval.md (step 44) | #440 |
-| 18 | 55 | PT-15: hero cards on the Story board during Pick | hammer | 1 | 0.75 | 0.25 / $0.68 | D25 | PT-15 | Steps 43, 44 | **Gates:** Copy table by Loremaster (step 45), no waiver | #481 |
-| 19 | 56 | PT-16: DEC-571 first-time hints, a Hints toggle on Game settings and the Rules group in Look up | hammer | 1.75 | 1.25 | 0.5 / $1.36 | D26 | PT-16 | Steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #482 |
-| 20a | 54a | PT-13 (split from CU/07, Bob, chat 2026-11-15): party items panel (UI-013), the use-item flow and host action, and the potion fixture. Brief CU/13. **Goes before step 12**, which depends on it | hammer | 0.75 | 0.5625 | 0.1875 / $0.51 | D28 | PT-13 | Steps 43, 44, 45; C3-05 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #480 |
-| 20b | 54b | PT-13 (split from CU/07): turn-start virtue panel (UI-037) and the generic choice list, tested with Infused. Brief CU/14 | hammer | 0.5 | 0.375 | 0.125 / $0.34 | D28 | PT-13 | Steps 43, 44, 45; C3-05 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #480 |
-| 20c | 54c | PT-13 (split from CU/07): game of chance (UI-045), the Spin and the starting purse. Brief CU/15; needs 54a merged (EV-14) | hammer | 0.75 | 0.5625 | 0.1875 / $0.51 | D28 | PT-13 | Steps 43, 44, 45; C3-05 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #480 |
-| 21 | 57 | PT-17: corruption mark on the edge band's health mark | hammer | 1 | 0.75 | 0.25 / $0.68 | D29 | PT-17 | Step 02 (#384 merged), steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #483 |
-| 22 | 12 | C3-11 follow-up: day-loop effects wait and test seed hook (blocked EVs of #384). Cut down 2026-11-14 (Bob, adopted, Q7.2): the host split action moved to step 51 (CU/04) and the host use-item action to step 54a (CU/13, split from CU/07); CU/10 adds a narrow hero-corruption seed that this step's general hook can grow from | none (blocked) | 1.5 | 1 | 0.5 / $1.36 | D31 | — | #384 merged; new brief with Bob approval | #441 |
-| 23 | 13 | C3-08 corruption (unblocked by DEC-894 to DEC-896) | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D33 | — | Stop lifted; C3-06 and C3-07 merged; Bob's re-approval of the amended eval (EV-11 to EV-13 added; step 44) | **Gates:** Bob re-approval row for the changed eval.md (step 44) | #442 |
-| 24 | 14 | C3-13 building menu on the iPad | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D34 | — | Step 13 (C3-08) merged | **Gates:** Copy table by Loremaster (step 45) | #443 |
+| 18 | 55 | **DONE (#540):** PT-15: hero cards on the Story board during Pick | hammer | 1 | 0.75 | 0.25 / $0.68 | D25 | PT-15 | Steps 43, 44 | **Gates:** Copy table by Loremaster (step 45), no waiver | #481 |
+| 19 | 56 | **DONE (#532):** PT-16: DEC-571 first-time hints, a Hints toggle on Game settings and the Rules group in Look up | hammer | 1.75 | 1.25 | 0.5 / $1.36 | D26 | PT-16 | Steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #482 |
+| 20a | 54a | **DONE (#541):** PT-13 (split from CU/07, Bob, chat 2026-11-15): party items panel (UI-013), the use-item flow and host action, and the potion fixture. Brief CU/13. **Goes before step 12**, which depends on it | hammer | 0.75 | 0.5625 | 0.1875 / $0.51 | D28 | PT-13 | Steps 43, 44, 45; C3-05 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #480 |
+| 20b | 54b | **DONE (#546):** PT-13 (split from CU/07): turn-start virtue panel (UI-037) and the generic choice list, tested with Infused. Brief CU/14 | hammer | 0.5 | 0.375 | 0.125 / $0.34 | D28 | PT-13 | Steps 43, 44, 45; C3-05 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #480 |
+| 20c | 54c | **DONE (#548):** PT-13 (split from CU/07): game of chance (UI-045), the Spin and the starting purse. Brief CU/15; needs 54a merged (EV-14) | hammer | 0.75 | 0.5625 | 0.1875 / $0.51 | D28 | PT-13 | Steps 43, 44, 45; C3-05 (merged) | **Gates:** Copy table by Loremaster (step 45), no waiver | #480 |
+| 21 | 57 | **DONE (#534):** PT-17: corruption mark on the edge band's health mark | hammer | 1 | 0.75 | 0.25 / $0.68 | D29 | PT-17 | Step 02 (#384 merged), steps 43, 44, 45 | **Gates:** Copy table by Loremaster (step 45), no waiver | #483 |
+| 22 | 12 | **DONE (#545):** C3-11 follow-up: day-loop effects wait and test seed hook (blocked EVs of #384). Cut down 2026-11-14 (Bob, adopted, Q7.2): the host split action moved to step 51 (CU/04) and the host use-item action to step 54a (CU/13, split from CU/07); CU/10 adds a narrow hero-corruption seed that this step's general hook can grow from | none (blocked) | 1.5 | 1 | 0.5 / $1.36 | D31 | — | #384 merged; new brief with Bob approval | #441 |
+| 23 | 13 | **DONE (#537):** C3-08 corruption (unblocked by DEC-894 to DEC-896) | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D33 | — | Stop lifted; C3-06 and C3-07 merged; Bob's re-approval of the amended eval (EV-11 to EV-13 added; step 44) | **Gates:** Bob re-approval row for the changed eval.md (step 44) | #442 |
+| 24 | 14 | **DONE (#555, #557):** C3-13 building menu on the iPad | hammer | 1.5 | 1.125 | 0.375 / $1.02 | D34 | — | Step 13 (C3-08) merged | **Gates:** Copy table by Loremaster (step 45) | #443 |
 | 25 | 58 | C2-11 Continue piece check: add every physical piece (PT-08, 1.0 pieces) | anvil | 2.5 | 2 | 0.5 / $1.36 | D37 | PT-08 | Bob's tower run on Mon Nov 16 (C2-10; D1) and its findings note on main; steps 43, 44 | **Gates:** Bob's tower run (dated Mon Nov 16); brief amendment and Bob re-approval of the changed eval.md (step 44) | #484 |
 | 26 | 15 | G-C3: Bob plays The Ruined Keep to a win and to a loss | Bob | 0 | 0 | 0 / $0.00 | D37 | — | C3 01-17; F1/03 live quests (and Enter on a wild quest marker, DEC-641, for the win) | — |
-| 27 | 16 | C4-01 tuning switches | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D37 | — | C3-02, C3-09, C3-10 | #444 |
-| 28 | 17 | C4-02 battle loop | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D39 | PT-20 | C4-01; step 44 (brief amendment) | #445 |
+| 27 | 16 | **DONE (#581):** C4-01 tuning switches | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D37 | — | C3-02, C3-09, C3-10 | #444 |
+| 28 | 17 | **PARTLY DONE: engine level only (#584), not started from play; the wiring needs a Wright follow-up brief and Gamewright's EV-01, EV-08 and EV-10 rulings:** C4-02 battle loop | anvil | 1.75 | 1.25 | 0.5 / $1.36 | D39 | PT-20 | C4-01; step 44 (brief amendment) | #445 |
 | 29 | 18 | C4-03 retreat, fall, reward | anvil | 1.25 | 0.875 | 0.375 / $1.02 | D40 | — | C4-02 | #446 |
 | 30 | 19 | C4-04 fight in events and scenes | anvil | 1.25 | 0.875 | 0.375 / $1.02 | D42 | — | C4-02, C4-03 | #447 |
 | 31 | 20 | C4-05 cursed | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D42 | — | C4-02, step 13 (C3-08) merged | **Gates:** Gamewright ruling (step 46) | #448 |
@@ -173,7 +184,7 @@ Columns: **Weekdays** is the step total, **Runner** the build part, **Cursor** t
 | 39 | 28 | C4-13 seal break live | hammer | 1.75 | 1.375 | 0.375 / $1.02 | D55 | PT-21 | C4-07, C3-15 | **Gates:** Copy table by Loremaster (step 45), no waiver; brief amendment and Bob re-approval of the changed eval.md (step 44) | #456 |
 | 40 | 29 | C4-14 fight buttons | hammer | 1 | 0.75 | 0.25 / $0.68 | D56 | — | C4-04, C3-12, C3-14 | #457 |
 | 41 | 30 | G-C4: a battle won, a battle retreated from, the Tomb cleared | Bob | 0 | 0 | 0 / $0.00 | D56 | — | C4 01-14 | — |
-| 42 | 31 | A1-8b-2 demo playback of a packed line | hammer | 1.25 | 0.875 | 0.375 / $1.02 | D57 | — | A1-5, A1-7, A1-8b-1 (merged) | #458 |
+| 42 | 31 | **DONE (#519):** A1-8b-2 demo playback of a packed line | hammer | 1.25 | 0.875 | 0.375 / $1.02 | D57 | — | A1-5, A1-7, A1-8b-1 (merged) | #458 |
 | 43 | 32 | C5-01 the Tower loop | anvil | 1.5 | 1 | 0.5 / $1.36 | D59 | — | C4-02, C4-03, C4-06 | #459 |
 | 44 | 33 | C5-02 the Warden: boss battle | anvil | 1.5 | 1 | 0.5 / $1.36 | D60 | — | C5-01 | **Gates:** Bob re-approval row for the changed C5/02 eval | #460 |
 | 45 | 34 | C5-03 the last choice | anvil | 0.75 | 0.5 | 0.25 / $0.68 | D61 | — | C5-02, C3-07 | #461 |
