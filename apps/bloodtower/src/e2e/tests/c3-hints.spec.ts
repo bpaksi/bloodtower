@@ -43,6 +43,11 @@ const openSettings = async (browser: Browser, testInfo: TestInfo) => {
   await pad.goto(`/join?code=${session.host.joinCode}`);
   await enterWithoutTower(pad);
   await clickAct(pad, "continue", "continue-pick-story-test");
+  // The click returns before the Game settings view arrives; reading the rows sooner finds none.
+  await expect(pad.locator("main.bt-device")).toHaveAttribute("data-screen", "game-settings", {
+    timeout: 20_000,
+  });
+  await expect(pad.locator('main.bt-device div[data-setting="hints"]')).toBeVisible();
   return { session, context, pad, board };
 };
 
