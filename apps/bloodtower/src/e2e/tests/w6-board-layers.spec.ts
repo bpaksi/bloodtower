@@ -204,7 +204,10 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     }
     const beforeEnter = await readStatus(first.device);
     await clickAct(first.device, "enter");
-    await expect.poll(async () => (await readStatus(first.device)).inside).toBe("true");
+    // The first building's hint holds the iPad's screen for its 4 s (CU/09): wait past it.
+    await expect
+      .poll(async () => (await readStatus(first.device)).inside, { timeout: 20_000 })
+      .toBe("true");
     snapshot = await readStatus(first.device);
     expect(snapshot.moves).toBe(beforeEnter.moves);
     still = (await first.board.locator("[data-still]").getAttribute("data-still")) ?? "";
@@ -245,7 +248,9 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     expect(restarted.tower.sent().filter((item) => item.type === "connect")).toHaveLength(0);
     await expect(deviceMain(second.device)).not.toHaveAttribute("data-screen", "pause");
     await clickAct(second.device, "leave");
-    await expect.poll(async () => (await readStatus(second.device)).inside).toBe("false");
+    await expect
+      .poll(async () => (await readStatus(second.device)).inside, { timeout: 20_000 })
+      .toBe("false");
     await expect(second.board.locator("main")).toHaveAttribute("data-board-layer", "move");
     await expect(second.board.locator("[data-chapter]")).toHaveText("The Ruined Keep");
     outside = await readStatus(second.device);
