@@ -113,7 +113,7 @@ Contract is ./eval.md. List EV IDs; do not restate them.
 - **Ruled by Bob, 2026-11-23:**
   1. **The press signal. RULED (Bob, 2026-11-23, chat): `seq` and `acked`**, as above. `act` waits for `acked`, so a broadcast from a timer or another iPad cannot pass for the press. (The other choice was `seq` only, which a hint timer, the tower watch or another iPad's press could satisfy before the press is handled.)
   2. **test-lock on the migration branches. RULED (Bob, 2026-11-23, chat): `chore/bloodtower-cu17-...`** for PR 2 and PR 4 to PR 7. (The other choice was `fix/`, where test-lock allows spec changes only in the first commit.)
-- **Left as is (say if you want it):** the board side (`main.bt-board`) gets no `seq`.
+- **Left out. RULED (Bob, 2026-11-23):** the board side (`main.bt-board`) gets no `seq`.
 
 ## Eval approval
 
