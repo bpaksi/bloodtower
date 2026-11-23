@@ -348,6 +348,50 @@ const eventViewSchema = z.strictObject({
   purse: z.number().int().min(0).max(9999).nullable(),
 });
 
+/**
+ * The chapter's beats (C3/15, UI-020, UI-044, PT-21): the card, the stamped won card, the close
+ * Scroll, the seal's Reveal and Set the table. Only while one shows; the days carry none.
+ */
+const chapterBeatSchema = z.strictObject({
+  stage: z.enum(["card", "stamp", "close", "reveal", "table"]),
+  chapter: z.number().int().min(1).max(9),
+  chapterId: z.string().min(1).max(80),
+  label: z.string().min(1).max(40),
+  name: z.string().min(1).max(80).nullable(),
+  goal: z.string().min(1).max(200).nullable(),
+  stamp: z.string().min(1).max(40).nullable(),
+  close: z.string().min(1).max(200).nullable(),
+  cue: z.enum(["CUE-004", "CUE-005"]).nullable(),
+  /** The auto-advance line; null on Set the table, which waits for Done (EV-19). */
+  tick: z.string().min(1).max(80).nullable(),
+  holdMs: z.number().int().min(0).max(60_000),
+  lineId: z.string().min(1).max(80).nullable(),
+  seal: z
+    .strictObject({
+      name: z.string().min(1).max(80),
+      glyph: z.string().min(1).max(40),
+      boon: z.string().min(1).max(200),
+    })
+    .nullable(),
+  table: z
+    .strictObject({
+      title: z.string().min(1).max(60),
+      rows: z
+        .array(
+          z.strictObject({
+            id: z.enum(["seal", "skulls", "tokens"]),
+            label: z.string().min(1).max(200),
+          }),
+        )
+        .min(1)
+        .max(3),
+      done: z.string().min(1).max(40),
+      promptId: z.string().min(1).max(80),
+    })
+    .nullable(),
+});
+export type ChapterBeatWire = z.infer<typeof chapterBeatSchema>;
+
 const tableBandSchema = z.strictObject({
   chapter: z.string().min(1).max(120),
   day: z.number().int().min(0).max(99),
@@ -364,6 +408,8 @@ const tableBandSchema = z.strictObject({
   building: buildingPanelSchema.nullable().optional(),
   /** The event scene after a group's turn, only while it shows (C3/12). */
   event: eventViewSchema.nullable().optional(),
+  /** The chapter's card, stamp, close, Reveal or Set the table, only while it shows (C3/15). */
+  chapterBeat: chapterBeatSchema.nullable().optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),

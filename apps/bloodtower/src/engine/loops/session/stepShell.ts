@@ -6,6 +6,7 @@ import { HINT_IDS, HINTS_AFTER_SETUP, RULES_PAGE_MISSING } from "../../hints/reg
 import { advanceLoops, resumeAfterPrompt, startRootLoop } from "../../loop/runtime.ts";
 import type { LoopFrame } from "../../loop/types.ts";
 import { isPurseAmount } from "../../rules/purse/index.ts";
+import { endChapterWait } from "../chapter/chapters.ts";
 import {
   applyTestSeed,
   bindPlayState,
@@ -447,9 +448,12 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     const waiting = local?.phase === "effects" || (local?.phase === "event" && !local.waitDone);
     const dayWaits = Boolean(dayFrame && local && waiting && local.wait?.id === e.waitId);
     if (!dayWaits) {
-      // A building result's wait (C3/13) ends the same way, through its own frame.
+      // A building result's wait (C3/13), or a chapter beat's (C3/15), ends the same way.
       const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
-      if (endBuildingWait(next.loops.stack, e.waitId)) {
+      if (
+        endBuildingWait(next.loops.stack, e.waitId) ||
+        endChapterWait(next.loops.stack, next.play, e.waitId)
+      ) {
         bindShellState(next);
         resumeLoopsOrPauseOffers(next, eventSeq, effects);
         clearShellState();

@@ -5,6 +5,7 @@ import { Fragment, useState } from "react";
 
 import { VOLUME_LINE } from "../../lib/volumeTest.ts";
 import { ITEMS_EMPTY } from "../board/PartyItemsPanel.tsx";
+import { SetTheTableDevice } from "../board/SetTheTable.tsx";
 import { DeviceErrorBanner, type DeviceErrorBannerModel } from "../errors/DeviceErrorBanner.tsx";
 import { ChromeBar } from "./ChromeBar.tsx";
 import { EventChoices, eventSceneFor, isEventChoice } from "./EventChoices.tsx";
@@ -844,8 +845,11 @@ export function CoreDeviceScreen({
       action.promptId !== SAVED_CONTINUE_PROMPT &&
       !isVirtueOption(action) &&
       !isEventChoice(action) &&
-      action.actionId !== "build",
+      action.actionId !== "build" &&
+      !action.promptId.startsWith("table-done--"),
   );
+  // The chapter's beats (C3/15): no Next on the card, stamp, close or Reveal; Set the table has Done.
+  const beat = view.screen === "play" ? (view.table?.chapterBeat ?? null) : null;
   // A virtue that asks (CU/14, EV-03): the acting group's iPads get one button per option, whatever
   // the virtue. Another group's iPad holds none of its heroes, so it draws no list.
   const virtueAsk = virtueChoiceFor(view);
@@ -995,6 +999,7 @@ export function CoreDeviceScreen({
       className="bt-device"
       data-screen={view.screen}
       data-setup-step={setupStep}
+      data-chapter-stage={beat?.stage ?? undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
       data-volume={view.gear?.volume ?? undefined}
     >
@@ -1010,6 +1015,56 @@ export function CoreDeviceScreen({
           <GearDevicePanel gear={panel} live={live} onAct={onAct} />
         ) : towerLostPause ? (
           <TowerLostPause view={view} live={live} onAct={onAct} />
+        ) : beat ? (
+          beat.table ? (
+            <SetTheTableDevice
+              table={beat.table}
+              live={live}
+              offered={view.actions.some(
+                (action) => action.promptId === beat.table?.promptId && action.open,
+              )}
+              onAct={onAct}
+            />
+          ) : (
+            <section className="mt-4" data-chapter-beat={beat.stage} data-chapter={beat.chapter}>
+              <p className="bt-label" data-chapter-label="">
+                {beat.label}
+              </p>
+              {beat.stage === "reveal" && beat.seal ? (
+                <>
+                  <h2 className="text-xl font-semibold" data-seal-name="">
+                    {beat.seal.name}
+                  </h2>
+                  <p className="mt-2 text-lg" data-seal-boon="">
+                    {beat.seal.boon}
+                  </p>
+                </>
+              ) : (
+                <>
+                  {beat.name ? (
+                    <h2 className="text-xl font-semibold" data-chapter-name="">
+                      {beat.name}
+                    </h2>
+                  ) : null}
+                  {beat.stamp ? <p data-chapter-stamp="">{beat.stamp}</p> : null}
+                  {beat.close ? (
+                    <p className="mt-2 text-lg" data-chapter-close="">
+                      {beat.close}
+                    </p>
+                  ) : beat.goal ? (
+                    <p className="mt-2 text-lg" data-chapter-goal="">
+                      {beat.goal}
+                    </p>
+                  ) : null}
+                </>
+              )}
+              {beat.tick ? (
+                <p className="mt-4 text-[var(--bt-muted)]" data-tick-auto="">
+                  {beat.tick}
+                </p>
+              ) : null}
+            </section>
+          )
         ) : sessionOver ? (
           <p className="mt-2 text-lg" data-step-instruction="">
             {view.shows}

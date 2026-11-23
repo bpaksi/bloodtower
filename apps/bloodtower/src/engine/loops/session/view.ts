@@ -18,6 +18,7 @@ import { inNightPhase } from "../../hints/flow.ts";
 import { heldItems, itemName } from "../../rules/items/index.ts";
 import { isPurseAmount, poolSides } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
+import { buildChapterBeat } from "../../views/chapter.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
 import { questItemName } from "../../views/questItems.ts";
 import type {
@@ -681,6 +682,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     virtue: buildVirtue(state),
     event: buildEvent(state),
     building: buildBuilding(state),
+    chapterBeat: buildChapterBeat(play, state.loops.stack.at(-1)?.loopId),
     health: "unavailable",
     purse: "unavailable",
     actingGroup: actingName,
@@ -1016,6 +1018,12 @@ const screenLabel = (state: ShellState): string => {
 
 const helpScreenFor = (state: ShellState): string => {
   if (state.screen === "pause" && state.pause?.cause === "tower-lost") return "tower-lost";
+  // The chapter's beats (C3/15): Set the table has its own help (EV-21); the others share one.
+  const beat =
+    state.screen === "play" && !openingMomentId(state)
+      ? buildChapterBeat(state.play, state.loops.stack.at(-1)?.loopId)
+      : null;
+  if (beat) return beat.stage === "table" ? "set-the-table" : "chapter-card";
   if (
     state.screen === "play" &&
     !openingMomentId(state) &&

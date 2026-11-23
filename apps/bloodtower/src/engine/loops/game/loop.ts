@@ -195,10 +195,12 @@ export const gameLoop: LoopDefinition<GameLocal, GameResult> = {
       // MEC-032 .41 to .44: one chapter per pass. A chapter's report is read once; a lost one
       // or the last won one ends the game, any other won one opens the next chapter (DEC-133).
       const report = ctx.getParentResult() as Partial<ChapterResult> | undefined;
+      // A loss is read even when it names a chapter already read: a freed skull lost after the
+      // next chapter's card names the chapter that closed (C3/15, PT-21, DEC-938).
       if (
         report?.chapterId &&
         report.outcome &&
-        (report.chapter ?? 0) > (local.lastChapter ?? 0) &&
+        ((report.chapter ?? 0) > (local.lastChapter ?? 0) || report.outcome === "lost") &&
         !shell.loops.stack.some((frame) => frame.loopId === "chapter")
       ) {
         const next = gameEndFrom(report);

@@ -24,8 +24,16 @@ import {
   restoreChapters,
   snapshotChapters,
 } from "./chapters.ts";
-import { type ChapterLocal, type ChapterResult, chapterLoop, handleChapterPress } from "./loop.ts";
+import {
+  type ChapterLocal,
+  type ChapterResult,
+  chapterLoop,
+  handleChapterPress,
+  TABLE_DONE_ACTION,
+  tableDonePromptId,
+} from "./loop.ts";
 import { initPlayState, type PlayState } from "./playState.ts";
+import { passChapterBeats } from "./testBeats.ts";
 
 const spaceIn = (kingdom: string, n: number): string => {
   const rows = PROVING_GROUNDS_PLAY.board.spaces.filter((s) => s.kingdom === kingdom && s.building);
@@ -39,9 +47,9 @@ const PLAN: ChapterPlan = {
   sealBreakMin: 2,
   foeLevel: { chapter1: 1, perChapter: 1 },
   seals: [
-    { id: "seal-a", glyph: "glyph-a", boon: "boon-a" },
-    { id: "seal-b", glyph: "glyph-b", boon: "boon-b" },
-    { id: "seal-c", glyph: "glyph-c", boon: "boon-c" },
+    { id: "seal-a", name: "Seal A", glyph: "glyph-a", boon: "boon-a" },
+    { id: "seal-b", name: "Seal B", glyph: "glyph-b", boon: "boon-b" },
+    { id: "seal-c", name: "Seal C", glyph: "glyph-c", boon: "boon-c" },
   ],
   chapters: [
     {
@@ -140,10 +148,34 @@ const setup = (options: { c3End: boolean; tower: boolean; startChapter?: number 
   return { play, runtime: emptyLoopRuntime(), effects: [], seed };
 };
 
-const start = (run: Run): void =>
-  startRootLoop(registry, run.seed, 0, run.runtime, run.effects, "chapter");
+const advance = (run: Run): void => advanceLoops(registry, run.seed, 0, run.runtime, run.effects);
 
-const resume = (run: Run): void => advanceLoops(registry, run.seed, 0, run.runtime, run.effects);
+/** Runs the loops on, ending each chapter beat as the host does (C3/15). */
+const resume = (run: Run, options: { stopAtTable?: boolean } = {}): void => {
+  advance(run);
+  passChapterBeats(run.runtime, run.play, () => advance(run), options);
+};
+
+const start = (run: Run, options: { stopAtTable?: boolean } = {}): void => {
+  startRootLoop(registry, run.seed, 0, run.runtime, run.effects, "chapter");
+  passChapterBeats(run.runtime, run.play, () => advance(run), options);
+};
+
+/** The next chapter's frame on the same game, as the game loop opens it after a won chapter. */
+const nextChapter = (run: Run, options: { stopAtTable?: boolean } = {}): Run => {
+  const next: Run = { ...run, runtime: emptyLoopRuntime(), effects: [] };
+  start(next, options);
+  return next;
+};
+
+/** Set the table's Done, pressed on the chapter frame (PT-21). */
+const pressTableDone = (run: Run): void => {
+  const frame = chapterFrame(run);
+  if (!frame) throw new Error("no chapter frame");
+  const local = frame.local as ChapterLocal;
+  frame.local = handleChapterPress(local, tableDonePromptId(local.chapter), TABLE_DONE_ACTION);
+  resume(run);
+};
 
 const chapterResult = (run: Run): ChapterResult | undefined => {
   const end = run.effects.find((e) => e.kind === "loop-end" && e.loopId === "chapter");
@@ -198,7 +230,7 @@ describe("chapter loop (MEC-033)", () => {
     expect(seen[3]?.foe).toBe(3);
   });
 
-  it("EV-04: with the tower a won chapter breaks a seal and places the freed skulls", () => {
+  it("EV-04: with the tower a won chapter breaks a seal; its skulls go back after Set the table", () => {
     const run = setup({ c3End: false, tower: true });
     ensureClock(run.play).held = 2;
     script = { 1: { done: ["herald", "ambush"] } };
@@ -208,31 +240,40 @@ describe("chapter loop (MEC-033)", () => {
     const sealed = PLAN.seals.find((s) => s.id === store.brokenSeals[0]);
     expect(store.boons).toEqual([sealed?.boon]);
     expect(store.skullsToPlace).toBe(2);
-    // Two placement prompts, and chapter 2 has not entered.
-    expect(run.runtime.prompt?.promptId).toContain("skull-record--");
+    // C3/15 (PT-21): the story first. Chapter 1 closes won, and no skull prompt shows yet.
+    expect(chapterResult(run)).toMatchObject({ outcome: "won", chapter: 1, last: false });
     expect(store.entered).toEqual([1]);
-    expect(chapterResult(run)).toBeUndefined();
+    const order = ["stamp:1", "close:1"].map((n) => store.nodes.indexOf(n));
+    expect(order.every((at, k) => at >= 0 && (k === 0 || at > (order[k - 1] ?? 0)))).toBe(true);
 
+    // Chapter 2's card, the seal's Reveal, then Set the table, which waits for Done.
+    const two = nextChapter(run, { stopAtTable: true });
+    expect(store.entered).toEqual([1, 2]);
+    const beats = ["card:2", "reveal:2", "table.shown:2"].map((n) => store.nodes.indexOf(n));
+    expect(beats.every((at, k) => at >= 0 && (k === 0 || at > (beats[k - 1] ?? 0)))).toBe(true);
+    expect(store.table).toEqual({ chapter: 2, seal: sealed, skulls: 2, quests: ["c2-a"] });
+    expect(two.runtime.prompt?.promptId).toBe("table-done--2");
+
+    // Only after Done: the two freed-skull prompts (DEC-409).
+    pressTableDone(two);
+    expect(store.table).toBeNull();
+    expect(two.runtime.prompt?.promptId).toContain("skull-record--");
     const supplyBefore = ensureClock(run.play).supply;
     const building = spaceIn("N", 0);
     for (let i = 0; i < 2; i++) {
-      const frame = chapterFrame(run);
+      const frame = chapterFrame(two);
       if (!frame) throw new Error("no chapter frame");
       const prompt = skullRecordPromptId(run.play.dayNumber, building);
       frame.local = handleChapterPress(frame.local as ChapterLocal, prompt);
-      resume(run);
+      resume(two);
     }
     expect(store.skullsToPlace).toBe(0);
     expect(ensureClock(run.play).skulls[building]).toBe(2);
     // The freed skulls came back from the tower; the supply is spent once, not twice.
     expect(ensureClock(run.play).supply).toBe(supplyBefore - 2);
-    expect(chapterResult(run)).toMatchObject({ outcome: "won", chapter: 1, last: false });
-    expect(store.entered).toEqual([1]);
-
-    // Then chapter 2's enter runs.
-    const next = emptyLoopRuntime();
-    startRootLoop(registry, run.seed, 0, next, [], "chapter");
-    expect(store.entered).toEqual([1, 2]);
+    // Then chapter 2's first day.
+    expect(two.runtime.stack.map((f) => f.loopId)).toEqual(["chapter", "day"]);
+    expect(store.pending).toBeNull();
   });
 
   it("EV-04b: a freed skull that stayed inside is consumed like a placement", () => {
@@ -242,18 +283,19 @@ describe("chapter loop (MEC-033)", () => {
     start(run);
     const store = ensureChapters(run.play);
     expect(store.skullsToPlace).toBe(2);
+    const two = nextChapter(run);
     for (let i = 0; i < 2; i++) {
-      const frame = chapterFrame(run);
+      const frame = chapterFrame(two);
       if (!frame) throw new Error("no chapter frame");
       const inside = skullRecordPromptId(run.play.dayNumber, "inside");
       const next = handleChapterPress(frame.local as ChapterLocal, inside);
       expect(next.awaitingPress).toBe(false);
       expect(store.skullsToPlace).toBe(1 - i);
       frame.local = next;
-      resume(run);
+      resume(two);
     }
     expect(store.skullsToPlace).toBe(0);
-    expect(chapterResult(run)).toMatchObject({ outcome: "won", chapter: 1, last: false });
+    expect(two.runtime.stack.map((f) => f.loopId)).toEqual(["chapter", "day"]);
   });
 
   it("EV-05: without the tower the seals drop out", () => {
@@ -345,7 +387,8 @@ describe("chapter loop (MEC-033)", () => {
     store.entered = [...store.entered];
     script = { [savedDay]: { done: ["c2-a"] } };
     start(again);
-    expect(store.outputs).toEqual([]);
+    // The start is not replayed; the only output is the win's stamp cue (C3/15).
+    expect(store.outputs).toEqual([{ kind: "cue", chapter: 2, cue: "CUE-005" }]);
     expect(store.nodes).not.toContain("challenge-step");
     expect(store.nodes).not.toContain("enter:2");
     expect(store.entered).toEqual([2]);
@@ -372,19 +415,20 @@ describe("chapter loop (MEC-033)", () => {
     expect(restored.resumed).toBe(true);
   });
 
-  it("EV-12: Continue mid-placement resumes the placement, then chapter 2 enters once and plays", () => {
+  it("EV-12: Continue mid-placement resumes the placement, then chapter 2's days play", () => {
     const run = setup({ c3End: false, tower: true });
     ensureClock(run.play).held = 2;
     script = { 1: { done: ["herald", "ambush"] } };
     start(run);
+    const two = nextChapter(run);
     const building = spaceIn("N", 0);
-    const frame = chapterFrame(run);
+    const frame = chapterFrame(two);
     if (!frame) throw new Error("no chapter frame");
     frame.local = handleChapterPress(
       frame.local as ChapterLocal,
       skullRecordPromptId(run.play.dayNumber, building),
     );
-    resume(run);
+    resume(two);
     const saved = snapshotChapters(run.play);
     const savedDay = run.play.dayNumber;
     expect(ensureChapters(run.play).skullsToPlace).toBe(1);
@@ -395,9 +439,10 @@ describe("chapter loop (MEC-033)", () => {
     const store = restoreChapters(again.play, saved);
     script = { 2: { done: ["c2-a"] } };
     start(again);
-    // Still placing chapter 1's last skull: no day ran, chapter 2 has not entered.
+    // Still placing the last freed skull: no day ran, no card or table again, no second enter.
     expect(again.play.dayNumber).toBe(savedDay);
-    expect(store.entered).toEqual([1]);
+    expect(store.entered).toEqual([1, 2]);
+    expect(store.nodes.filter((n) => n === "table.done:2")).toHaveLength(1);
     expect(again.runtime.prompt?.promptId).toContain("skull-record--");
     expect(chapterResult(again)).toBeUndefined();
 
@@ -409,22 +454,11 @@ describe("chapter loop (MEC-033)", () => {
     );
     resume(again);
     expect(store.skullsToPlace).toBe(0);
-    expect(store.placing).toBeNull();
-    expect(chapterResult(again)).toMatchObject({ outcome: "won", chapter: 1, last: false });
-
-    // Chapter 2 enters exactly once, and its day plays on to a win.
-    const next = emptyLoopRuntime();
-    const nextEffects: EngineEffect[] = [];
-    startRootLoop(registry, again.seed, 0, next, nextEffects, "chapter");
-    expect(store.entered).toEqual([1, 2]);
+    // Chapter 2 entered once, and its day plays on to a win.
     expect(store.nodes.filter((n) => n === "enter:2")).toHaveLength(1);
     expect(again.play.dayNumber).toBe(savedDay + 1);
     expect(store.bounds).toEqual(["N", "E"]);
-    const end = nextEffects.find((e) => e.kind === "loop-end" && e.loopId === "chapter");
-    expect(end && "result" in end ? end.result : undefined).toMatchObject({
-      outcome: "won",
-      chapter: 2,
-    });
+    expect(chapterResult(again)).toMatchObject({ outcome: "won", chapter: 2 });
   });
 });
 
@@ -444,7 +478,8 @@ describe("D1 a freed skull that loses the game", () => {
     setBuildingSkulls(run.play, fatal, 3);
     script = { 1: { done: ["herald", "ambush"] } };
     start(run);
-    return { run, fatal };
+    // C3/15 (PT-21): the freed skulls are asked after chapter 2's card and Set the table's Done.
+    return { run: nextChapter(run), fatal };
   };
 
   const pressFreed = (run: Run, target: string): void => {
@@ -459,30 +494,34 @@ describe("D1 a freed skull that loses the game", () => {
     resume(run);
   };
 
-  const expectLostAtFirstFreedSkull = (run: Run): void => {
+  const expectLostAtFirstFreedSkull = (run: Run, dayBefore: number): void => {
     const store = ensureChapters(run.play);
     expect(ensureClock(run.play).outcome).toEqual({ lost: true, reason: "buildings" });
     // The second freed skull is never asked and never counted.
     expect(store.skullsToPlace).toBe(1);
     expect(run.runtime.prompt).toBeNull();
+    // The record names the chapter that closed (DEC-938), not the one whose card showed.
     expect(chapterResult(run)).toMatchObject({
       outcome: "lost",
       reason: "buildings",
       chapter: 1,
       last: false,
     });
-    expect(store.entered).toEqual([1]);
-    expect(store.placing).toBeNull();
-    expect(store.nodes).not.toContain("enter:2");
+    // PT-21 put chapter 2's card (its enter) before the freed skulls; its days never start.
+    expect(store.entered).toEqual([1, 2]);
+    expect(store.pending).toBeNull();
+    expect(run.play.dayNumber).toBe(dayBefore);
+    expect(run.runtime.stack).toEqual([]);
   };
 
   it("EV-05: the first freed skull fells the fourth building; the rest are never asked", () => {
     const { run, fatal } = toBreak();
     const store = ensureChapters(run.play);
+    const day = run.play.dayNumber;
     expect(store.skullsToPlace).toBe(2);
     expect(run.runtime.prompt?.promptId).toContain("skull-record--");
     pressFreed(run, fatal);
-    expectLostAtFirstFreedSkull(run);
+    expectLostAtFirstFreedSkull(run, day);
     // A second press on any standing building changes nothing.
     const before = { ...ensureClock(run.play).skulls };
     const frame = chapterFrame(run);
@@ -513,15 +552,14 @@ describe("D1 a freed skull that loses the game", () => {
     const store = restoreChapters(again.play, saved);
     script = { 2: { done: ["c2-a"] } };
     start(again);
-    // Still placing: no seal broke again, no skulls freed again, chapter 2 not entered.
+    // Still placing: no seal broke again, no skulls freed again, chapter 2 not entered twice.
     expect(store.brokenSeals).toHaveLength(1);
     expect(store.skullsToPlace).toBe(2);
-    expect(store.entered).toEqual([1]);
+    expect(store.entered).toEqual([1, 2]);
     expect(again.runtime.prompt?.promptId).toContain("skull-record--");
 
     pressFreed(again, first.fatal);
-    expectLostAtFirstFreedSkull(again);
-    expect(again.play.dayNumber).toBe(savedDay);
+    expectLostAtFirstFreedSkull(again, savedDay);
   });
 });
 
