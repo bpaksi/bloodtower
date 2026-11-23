@@ -39,9 +39,23 @@ describe("the best line (C3/10, PT-04)", () => {
     expect(bestLineOf(records, "e")).toEqual({ state: "earlier", ms: 40 * MIN });
   });
 
-  it("EV-15: a record with a key field missing matches nothing", () => {
+  it("EV-15: an unset key field matches only unset, never a set value (Gamewright 2026-11-23)", () => {
     const records = [rec("a", "won", 20, { difficulty: null }), rec("b", "won", 50)];
     expect(bestLineOf(records, "b")).toEqual({ state: "this-game" });
+    const unsetFirst = [rec("c", "won", 50), rec("d", "won", 60, { difficulty: null })];
+    expect(bestLineOf(unsetFirst, "d")).toEqual({ state: "this-game" });
+  });
+
+  it("EV-15: a story with no length or difficulty setting compares by story and party size", () => {
+    const unset = { length: null, difficulty: null };
+    const records = [
+      rec("w40", "won", 40, unset),
+      rec("w30", "won", 30, { ...unset, partySize: 3 }),
+      rec("w20", "won", 20, { ...unset, storyId: "else" }),
+      rec("loss", "lost", 55, unset),
+    ];
+    expect(bestLineOf(records, "loss")).toEqual({ state: "earlier", ms: 40 * MIN });
+    expect(keyAverageMs(records, "loss")).toBe(((40 + 55) / 2) * MIN);
   });
 
   it("EV-16: the first win under its key reads this-game, with no minutes", () => {

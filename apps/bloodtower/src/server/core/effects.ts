@@ -96,6 +96,23 @@ export const runShellEffects = async (
         }
         break;
       }
+      case "key-moment": {
+        // A replay rebuilds state from rows already in the log; it never writes them again.
+        if (ctx.replaying) break;
+        const { kind: _kind, gameId, ...moment } = effect;
+        ctx.store.append({
+          gameId,
+          kind: "key-moment",
+          payload: moment,
+          atMonoMs: ctx.clock.monoMs(),
+          atWall: ctx.clock.wall(),
+          deviceId: null,
+          seed: ctx.meta.seed,
+          packVersion: ctx.meta.packVersion,
+          engineVersion: ctx.meta.engineVersion,
+        });
+        break;
+      }
       case "checkpoint-write": {
         const afterSeq = ctx.store.nextSeq(effect.gameId) - 1;
         ctx.store.writeCheckpoint({

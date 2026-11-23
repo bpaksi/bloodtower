@@ -385,42 +385,27 @@ const seatedHeroIds = (state: ShellState): string[] =>
   state.play ? state.play.groups.flatMap((group) => group.heroIds) : Object.keys(heldNow(state));
 
 type GameRecordStats = NonNullable<Extract<ShellEffect, { kind: "game-record" }>["stats"]>;
-type KeyMomentKind = GameRecordStats["keyMoments"][number]["kind"];
-
-/** A building falls at its fourth skull (DEC-044, PT-02), as `isFallen` reads it. */
-const FALLEN_AT = 4;
 
 /**
- * The stats the record stores at the end (DEC-627, SCR-019, Q-C3-18). They are read from the play
- * state once, here, and the stats screen reads only the stored copy. A count the game never knew
- * (no day clock yet, no hero with a gold figure) is null, never zero. Key moments are the five kinds
- * of Q-C3-18 with how many of each the game ended with; a kind the game had none of is left out.
+ * The stats the record stores at the end (DEC-627, SCR-019). They are read from the play state
+ * once, here, and the stats screen reads only the stored copy. A count the game never knew (no
+ * day clock yet, no hero with a gold figure) is null, never zero. Key moments are not counted
+ * here: each is its own log row (`keyMoments.ts`, Gamewright 2026-11-23).
  */
-export const endStats = (play: PlayState, end?: GameEnd): GameRecordStats | null => {
+export const endStats = (play: PlayState): GameRecordStats | null => {
   const clock = captureClock(play);
   if (!clock) return null;
-  const heroIds = play.groups.flatMap((group) => group.heroIds);
-  const sheets = heroIds.flatMap((heroId) => {
-    const sheet = clock.heroes[heroId];
-    return sheet ? [sheet] : [];
-  });
-  const corruptions = sheets.reduce((sum, sheet) => sum + sheet.corruptions, 0);
+  const sheets = play.groups
+    .flatMap((group) => group.heroIds)
+    .flatMap((heroId) => {
+      const sheet = clock.heroes[heroId];
+      return sheet ? [sheet] : [];
+    });
   const golds = sheets.flatMap((sheet) => (sheet.gold === undefined ? [] : [sheet.gold]));
-  const items = sheets.reduce((sum, sheet) => sum + (sheet.items?.length ?? 0), 0);
-  const fallen = Object.values(clock.skulls).filter((count) => count >= FALLEN_AT).length;
-  const chaptersWon = end ? (end.outcome === "won" ? end.chapter : end.chapter - 1) : 0;
-  const counts: [KeyMomentKind, number][] = [
-    ["quest-done", clock.questsWon],
-    ["item-gained", items],
-    ["building-fallen", fallen],
-    ["corruption-taken", corruptions],
-    ["chapter-won", Math.max(0, chaptersWon)],
-  ];
   return {
     questsDone: clock.questsWon,
-    corruptionsTaken: corruptions,
+    corruptionsTaken: sheets.reduce((sum, sheet) => sum + sheet.corruptions, 0),
     goldLeft: golds.length === 0 ? null : golds.reduce((sum, gold) => sum + gold, 0),
-    keyMoments: counts.flatMap(([kind, count]) => (count > 0 ? [{ kind, count }] : [])),
   };
 };
 
@@ -449,7 +434,7 @@ export const gameRecordEffect = (
   how: outcome === "quit" ? "quit" : outcome === "won" ? "won" : (end?.reason ?? "skulls"),
   sceneId: end?.sceneId ?? null,
   endDay: state.play && state.play.dayNumber > 0 ? state.play.dayNumber : null,
-  ...withStats(state.play ? endStats(state.play, end) : null),
+  ...withStats(state.play ? endStats(state.play) : null),
 });
 
 /**

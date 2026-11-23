@@ -1,7 +1,7 @@
 import {
   type GameHow,
   type GameRecordPayloadV1,
-  type KeyMomentKind,
+  type KeyMomentPayloadV1,
   parseHostPayload,
 } from "./kinds.ts";
 import type { EventStore, StoredHostEvent } from "./store.ts";
@@ -140,17 +140,18 @@ export const tapCounts = (rows: readonly StoredHostEvent[]): TapCounts => {
 
 /**
  * The "best" key (PT-04): story, length, difficulty and the count of seated heroes at the start.
- * Two records share a key only when all four match; a field the record lacks matches nothing.
+ * Two records share a key only when all four match. An unset field matches only unset (Gamewright,
+ * 2026-11-23): it is not a wildcard and not read as a default such as Short or normal, so a story
+ * with no length or difficulty setting compares by story and party size.
  */
+const keyPart = (value: string | number | null | undefined): string | number | null =>
+  value ?? null;
+
 const sameKey = (a: GameRecord, b: GameRecord): boolean =>
-  a.storyId != null &&
-  a.length != null &&
-  a.difficulty != null &&
-  a.partySize != null &&
-  a.storyId === b.storyId &&
-  a.length === b.length &&
-  a.difficulty === b.difficulty &&
-  a.partySize === b.partySize;
+  keyPart(a.storyId) === keyPart(b.storyId) &&
+  keyPart(a.length) === keyPart(b.length) &&
+  keyPart(a.difficulty) === keyPart(b.difficulty) &&
+  keyPart(a.partySize) === keyPart(b.partySize);
 
 /**
  * The best-line state (PT-04, EV-15 to EV-17):
@@ -197,6 +198,20 @@ export const keyAverageMs = (records: readonly GameRecord[], gameId: string): nu
   return averageActiveMs(records.filter((other) => sameKey(record, other)));
 };
 
+/** One key moment as the stats screen lists it: its row's payload, without the version. */
+export type KeyMoment = Omit<KeyMomentPayloadV1, "v">;
+
+/**
+ * The key moments of one game's log, oldest first (Gamewright 2026-11-23). A kind that no loop
+ * has made yet is simply absent; nothing is counted or guessed from the live state.
+ */
+export const keyMomentsOf = (rows: readonly StoredHostEvent[]): KeyMoment[] =>
+  rows.flatMap((row) => {
+    if (row.kind !== "key-moment") return [];
+    const { v: _v, ...moment } = parseHostPayload("key-moment", row.payload);
+    return [moment];
+  });
+
 /** One game's stats as the stats screen shows them (SCR-019, DEC-627). Null is unavailable. */
 export type GameStatsView = {
   gameId: string;
@@ -210,7 +225,8 @@ export type GameStatsView = {
   questsDone: number | null;
   corruptionsTaken: number | null;
   goldLeft: number | null;
-  keyMoments: { kind: KeyMomentKind; count: number }[];
+  /** In the order they happened, each with its day and names (Q-C3-18, C3/17 mockup). */
+  keyMoments: KeyMoment[];
   best: BestLine;
   averageMs: number | null;
 };
@@ -235,7 +251,7 @@ export const projectGameStats = (store: EventStore, gameId: string): GameStatsVi
     questsDone: record.stats?.questsDone ?? null,
     corruptionsTaken: record.stats?.corruptionsTaken ?? null,
     goldLeft: record.stats?.goldLeft ?? null,
-    keyMoments: record.stats?.keyMoments ?? [],
+    keyMoments: keyMomentsOf(store.listEvents(gameId)),
     best: bestLineOf(records, gameId),
     averageMs: keyAverageMs(records, gameId),
   };

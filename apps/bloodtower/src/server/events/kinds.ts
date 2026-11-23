@@ -22,6 +22,7 @@ export const HOST_EVENT_KINDS = [
   "version-changed",
   "game-record",
   "play-clock",
+  "key-moment",
 ] as const;
 
 export type HostEventKind = (typeof HOST_EVENT_KINDS)[number];
@@ -69,6 +70,13 @@ export type GameRecordPayloadV1 = {
   stats?: GameRecordStatsV1;
 };
 
+/** Stored stats (DEC-627). Null: the game never knew the value; it is shown as unavailable. */
+export type GameRecordStatsV1 = {
+  questsDone: number | null;
+  corruptionsTaken: number | null;
+  goldLeft: number | null;
+};
+
 /** Q-C3-18: the five kinds of key moment. */
 export const KEY_MOMENT_KINDS = [
   "quest-done",
@@ -79,13 +87,34 @@ export const KEY_MOMENT_KINDS = [
 ] as const;
 export type KeyMomentKind = (typeof KEY_MOMENT_KINDS)[number];
 
-/** Stored stats (DEC-627). Null: the game never knew the value; it is shown as unavailable. */
-export type GameRecordStatsV1 = {
-  questsDone: number | null;
-  corruptionsTaken: number | null;
-  goldLeft: number | null;
-  keyMoments: { kind: KeyMomentKind; count: number }[];
+/** One key moment as it happened (Gamewright 2026-11-23): its day and the C3/17 fill-ins. */
+export type KeyMomentPayloadV1 = {
+  v: 1;
+  moment: KeyMomentKind;
+  day: number | null;
+  questId?: string;
+  quest?: string;
+  heroId?: string;
+  hero?: string;
+  itemId?: string;
+  item?: string;
+  spaceId?: string;
+  building?: string;
+  corruptionId?: string;
+  chapter?: number;
 };
+
+const KEY_MOMENT_TEXT = [
+  "questId",
+  "quest",
+  "heroId",
+  "hero",
+  "itemId",
+  "item",
+  "spaceId",
+  "building",
+  "corruptionId",
+] as const;
 
 const parseRecordStats = (raw: unknown): GameRecordStatsV1 => {
   if (typeof raw !== "object" || raw === null)
@@ -99,23 +128,10 @@ const parseRecordStats = (raw: unknown): GameRecordStatsV1 => {
     }
     return value;
   };
-  if (!Array.isArray(stats.keyMoments))
-    throw new Error("game-record stats keyMoments must be a list.");
-  const keyMoments = stats.keyMoments.map((entry) => {
-    const moment = entry as { kind?: unknown; count?: unknown };
-    if (!(KEY_MOMENT_KINDS as readonly unknown[]).includes(moment.kind)) {
-      throw new Error("game-record key moment kind is not one of the five (Q-C3-18).");
-    }
-    if (typeof moment.count !== "number" || !Number.isInteger(moment.count) || moment.count < 1) {
-      throw new Error("game-record key moment count must be a whole number from 1.");
-    }
-    return { kind: moment.kind as KeyMomentKind, count: moment.count };
-  });
   return {
     questsDone: count("questsDone"),
     corruptionsTaken: count("corruptionsTaken"),
     goldLeft: count("goldLeft"),
-    keyMoments,
   };
 };
 
@@ -167,7 +183,9 @@ export const parseHostPayload = <K extends HostEventKind>(
               ? GameRecordPayloadV1
               : K extends "play-clock"
                 ? PlayClockPayloadV1
-                : VersionChangedPayloadV1 => {
+                : K extends "key-moment"
+                  ? KeyMomentPayloadV1
+                  : VersionChangedPayloadV1 => {
   const parsed = assertV1(JSON.parse(payloadJson));
   switch (kind) {
     case "engine": {
@@ -281,6 +299,35 @@ export const parseHostPayload = <K extends HostEventKind>(
       if (typeof parsed.taps === "number") record.taps = parsed.taps;
       if (parsed.stats !== undefined) record.stats = parseRecordStats(parsed.stats);
       return record as never;
+    }
+    case "key-moment": {
+      if (!(KEY_MOMENT_KINDS as readonly unknown[]).includes(parsed.moment)) {
+        throw new Error("key-moment moment is not one of the five (Q-C3-18).");
+      }
+      if (
+        parsed.day !== null &&
+        (typeof parsed.day !== "number" || !Number.isInteger(parsed.day) || parsed.day < 1)
+      ) {
+        throw new Error("key-moment day must be a whole number from 1, or null.");
+      }
+      const moment: KeyMomentPayloadV1 = {
+        v: 1,
+        moment: parsed.moment as KeyMomentKind,
+        day: parsed.day as number | null,
+      };
+      for (const key of KEY_MOMENT_TEXT) {
+        const value = parsed[key];
+        if (value === undefined) continue;
+        if (typeof value !== "string") throw new Error(`key-moment ${key} must be text.`);
+        moment[key] = value;
+      }
+      if (parsed.chapter !== undefined) {
+        if (typeof parsed.chapter !== "number" || !Number.isInteger(parsed.chapter)) {
+          throw new Error("key-moment chapter must be a whole number.");
+        }
+        moment.chapter = parsed.chapter;
+      }
+      return moment as never;
     }
     case "play-clock": {
       if (typeof parsed.running !== "boolean") throw new Error("play-clock needs running.");

@@ -459,13 +459,14 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     expect(before?.days).toBe(projectGameRecords(store)[0]?.endDay);
     expect(before?.days).not.toBeNull();
     expect(Math.abs((before?.activeMs ?? 0) - 15_000)).toBeLessThanOrEqual(1_000);
-    expect(before?.keyMoments).toEqual(
-      expect.arrayContaining([
-        { kind: "quest-done", count: 1 },
-        { kind: "corruption-taken", count: 2 },
-        { kind: "chapter-won", count: 1 },
-      ]),
-    );
+    // Key moments come from the log's `key-moment` rows (Gamewright 2026-11-23). The setup above
+    // changed the sheets between steps, so only what a step did is a moment: the chapter won.
+    expect(before?.keyMoments).toEqual([
+      { moment: "chapter-won", day: before?.days ?? null, chapter: 1 },
+    ]);
+    const momentRows = () =>
+      store.listEvents(gameId).filter((row) => row.kind === "key-moment").length;
+    expect(momentRows()).toBe(1);
     // EV-20: the view holds no game-length target and no warning.
     expect(Object.keys(before ?? {}).sort()).toEqual(
       [
@@ -487,6 +488,10 @@ describe("the game's record, written once per outcome (C3/10)", () => {
     setHeroSheet(play, "hero-a", { ...heroSheet(live, "hero-a"), gold: 57 });
     play.dayNumber += 3;
     markQuestWon(play);
+    expect(projectGameStats(store, gameId)).toEqual(before);
+    // A host restart replays the log and writes no moment again.
+    await boot();
+    expect(momentRows()).toBe(1);
     expect(projectGameStats(store, gameId)).toEqual(before);
   });
 
