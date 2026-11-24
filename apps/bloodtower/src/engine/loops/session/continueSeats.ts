@@ -20,11 +20,11 @@ export const seatOnContinue = (resumed: ShellState, live: ShellState): ShellStat
   }
 
   const wasDisconnectPause = next.stage === "paused" && next.pause?.cause === "disconnect";
-  // A save quit from a drop pause: if every seated hero is held now, play goes on (DEC-953).
+  // A save quit from a drop pause: if every seated hero is held now, play (or piece check) goes on (DEC-953).
   if (wasDisconnectPause && next.play && allSeatedHeld(next)) {
     next.pause = null;
     next.stage = "playing";
-    next.screen = "play";
+    next.screen = next.pieceCheck ? "piece-check" : "play";
   }
   pauseIfNeeded(next);
 

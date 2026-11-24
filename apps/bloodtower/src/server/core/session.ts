@@ -9,6 +9,11 @@ import { type ShellEffect, shellEffectSchema } from "../../engine/loops/session/
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
 import type { ShellStory } from "../../engine/loops/session/pack.ts";
 import {
+  DRUM_ORDER,
+  type DrumSideIndex,
+  ensurePieceCheckOffers,
+} from "../../engine/loops/session/pieceCheck.ts";
+import {
   initialShellState,
   SHELL_ENGINE_VERSION,
   type ShellState,
@@ -144,7 +149,10 @@ export type CoreSession = {
  */
 const gameIdOf = (state: ShellState) => {
   const inSavedGame =
-    state.screen === "play" || state.screen === "pause" || state.resumedFromAutosave;
+    state.screen === "play" ||
+    state.screen === "pause" ||
+    state.screen === "piece-check" ||
+    state.resumedFromAutosave;
   if (inSavedGame && state.autosave) return state.autosave.gameId;
   return state.activeGameId;
 };
@@ -365,6 +373,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       logged = { ...event, volume };
     }
     const continued = state.continueRequested && state.autosave !== null;
+    let pieceCheckStartEvent: ShellEvent | null = null;
     if (continued && state.autosave) {
       const live = { ...state, continueRequested: false };
       let resumed: ReturnType<typeof continueShellFromCheckpoint> | null = null;
@@ -390,7 +399,12 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           tower: options.tower.snapshot(),
         };
         if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
-          state = { ...state, pause: null, stage: "playing", screen: "play" };
+          state = {
+            ...state,
+            pause: null,
+            stage: "playing",
+            screen: state.pieceCheck ? "piece-check" : "play",
+          };
         }
         // A game that went on without the tower stays without it, tower or not (DEC-301).
         // Play without Tower on Continue's tower block is that choice too (DEC-711): the saved
@@ -415,7 +429,34 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         };
         // The saved party sits on the iPads joined now: a hold stays only for one of them (DEC-952).
         state = seatOnContinue(state, live);
+        // C2-11: run Continue's piece check between the tower block and the resumed chapter
+        // whenever the save has reached play and a check is not already mid-progress.
+        if (state.play !== null && !state.pieceCheck) {
+          const towerInPlay =
+            state.towerLinked && !state.towerWithout && state.towerChoice !== "without";
+          const startEvent: ShellEvent = { kind: "piece-check-start", v: 1, towerInPlay };
+          state = stepShell(state, startEvent).state;
+          // Only persist piece-check-start once the check actually opens on screen (not while
+          // Continue is still waiting in a hero re-pick or tower-lost pause, CU/16 EV-11).
+          if (state.screen === "piece-check" && !state.pause) {
+            pieceCheckStartEvent = startEvent;
+          }
+        }
       }
+    }
+    if (
+      !pieceCheckStartEvent &&
+      before.screen === "pause" &&
+      state.screen === "piece-check" &&
+      state.pieceCheck &&
+      state.pieceCheck.confirmed.length === 0 &&
+      state.pieceCheck.skipped.length === 0
+    ) {
+      pieceCheckStartEvent = {
+        kind: "piece-check-start",
+        v: 1,
+        towerInPlay: state.pieceCheck.towerInPlay,
+      };
     }
     // A Split party pick changes the play state (the queue, PT-18), and a use-item pick changes
     // a hero's items and hit points (CU/13), so a replay must see both.
@@ -426,6 +467,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       (event.action === "pick" &&
         (event.item === "split" || event.item === "items" || event.item === "fix-position"));
     if (persistGear) appendShell(logged, deviceId);
+    if (pieceCheckStartEvent) appendShell(pieceCheckStartEvent, null);
     if (event.kind === "press") {
       const open =
         before.offered.find(
@@ -525,6 +567,35 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           );
         continue;
       }
+      if (outcome.capabilityId === "mechanics.rotate-drum") {
+        const rawIndex = outcome.params.drumIndex;
+        const rawPos = outcome.params.position;
+        const drumIndex = rawIndex === 0 || rawIndex === 1 || rawIndex === 2 ? rawIndex : 0;
+        const position: DrumSideIndex =
+          rawPos === 0 || rawPos === 1 || rawPos === 2 || rawPos === 3 ? rawPos : 0;
+        const pressingDevice =
+          event.kind === "piece-check-drum-result" ? (event.deviceId ?? deviceId) : deviceId;
+        if (!ok) {
+          const level = DRUM_ORDER.find((row) => row.index === drumIndex)?.level ?? "top";
+          tellDevice(
+            `The tower did not turn the ${level} drum. Nothing was retried.`,
+            "tower-command-failed",
+            pressingDevice,
+          );
+        }
+        enqueue(
+          {
+            kind: "piece-check-drum-result",
+            v: 1,
+            drumIndex,
+            position,
+            ok,
+            ...(pressingDevice ? { deviceId: pressingDevice } : {}),
+          },
+          pressingDevice,
+        );
+        continue;
+      }
       if (outcome.capabilityId !== "tower.connect" && outcome.capabilityId !== "tower.calibrate") {
         continue;
       }
@@ -563,6 +634,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     const running =
       wait !== null &&
       wait.lineId === null &&
+      state.screen === "play" &&
       state.stage === "playing" &&
       state.pause === null &&
       !state.gearPaused;
@@ -861,7 +933,64 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       }
       const resumed = saved;
       applyQueue = applyQueue.then(async () => {
+        // C2-11 (EV-12, EV-24): if the autosave has an unfinished piece check in its event log,
+        // resume directly on that step with earlier confirmations intact.
+        const savedRow = options.store.getAutosave();
+        let midCheck: ShellState | null = null;
+        if (savedRow && options.store.lastCheckpoint(savedRow.gameId)) {
+          try {
+            const rebuilt = continueShellFromCheckpoint(options.store, {
+              gameId: savedRow.gameId,
+              packVersion: meta.packVersion,
+              engineVersion: meta.engineVersion,
+              meta,
+              atMonoMs: options.clock.monoMs(),
+              atWall: options.clock.wall(),
+              log: options.log,
+            });
+            if (rebuilt.state.pieceCheck && rebuilt.state.screen === "piece-check") {
+              midCheck = rebuilt.state;
+            }
+          } catch (error) {
+            if (!(error instanceof SaveUnreadableError)) {
+              options.log.error(
+                "piece-check-resume",
+                error instanceof Error ? error.message : String(error),
+              );
+            }
+          }
+        }
         const lobby = LOBBY_RESUME.has(resumed.screen) && !resumed.autosave && !state.autosave;
+        if (midCheck && savedRow) {
+          state = {
+            ...midCheck,
+            stories: state.stories,
+            playContent: state.playContent ?? midCheck.playContent,
+            sessionId: state.sessionId,
+            tower: options.tower.snapshot(),
+            enter: null,
+            enterThen: null,
+            confirm: null,
+            sessionEnded: false,
+            resumedFromAutosave: true,
+            continueRequested: false,
+            pause: null,
+            screen: "piece-check",
+            stage: "playing",
+            towerChoice: resumed.towerChoice,
+            games: resumed.games,
+            autosave: {
+              gameId: savedRow.gameId,
+              packId: savedRow.packId,
+              seed: midCheck.seed,
+              day: midCheck.play?.dayNumber ?? 1,
+            },
+          };
+          ensurePieceCheckOffers(state);
+          options.onChange();
+          persistSessionMarker();
+          return;
+        }
         if (lobby) {
           state = { ...adoptLobby(resumed, state), devices: new Set(), towerLinked: false };
           for (const frame of state.loops.stack) {
@@ -946,6 +1075,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     narrationEnded: (lineId) => {
       applyQueue = applyQueue
         .then(async () => {
+          if (state.screen !== "play") {
+            options.log.debug(
+              "narration-ended-ignored",
+              `Ignored the end of "${lineId}": screen is "${state.screen}", not play.`,
+            );
+            return;
+          }
           const wait =
             openDayWait(state.loops.stack) ?? openChapterWait(state.loops.stack, state.play);
           if (!wait || wait.lineId !== lineId) {
@@ -985,7 +1121,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       await applyQueue;
       if (failure) throw failure;
     },
-    whenIdle: () => applyQueue,
+    whenIdle: async () => {
+      while (true) {
+        const current = applyQueue;
+        await current;
+        if (applyQueue === current) return;
+      }
+    },
     cancelDisconnects: () => {
       waitCancel?.();
       waitCancel = undefined;

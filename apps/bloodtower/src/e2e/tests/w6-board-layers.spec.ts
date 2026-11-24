@@ -3,6 +3,7 @@ import { openDatabase } from "../../server/db/client.ts";
 import { createEventStore } from "../../server/events/store.ts";
 import {
   enterWithoutTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   setSoundAndKeep,
@@ -233,6 +234,7 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await setSoundAndKeep(second.device);
     await clickAct(second.device, "continue", "continue-saved-game");
     await holdHeroesFromTest(second.device, [...HERO_IDS]);
+    await finishPieceCheck(second.device);
     await expect(deviceMain(second.device)).toHaveAttribute("data-screen", "play");
     await expect(second.board.locator("main")).toHaveAttribute("data-board-layer", "place");
     await expect(second.board.locator("[data-still]")).toHaveAttribute("data-still", still);
@@ -269,6 +271,7 @@ test("W6 continue keeps the place still, then the move layer after Leave", async
     await setSoundAndKeep(third.device);
     await clickAct(third.device, "continue", "continue-saved-game");
     await holdHeroesFromTest(third.device, [...HERO_IDS]);
+    await finishPieceCheck(third.device);
     await expect(deviceMain(third.device)).toHaveAttribute("data-screen", "play");
     await expect(third.board.locator("main")).toHaveAttribute("data-board-layer", "move");
     await expect(third.board.locator("[data-still]")).toHaveCount(0);

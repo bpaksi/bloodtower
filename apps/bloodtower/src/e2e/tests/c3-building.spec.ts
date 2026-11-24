@@ -9,6 +9,7 @@ import {
 import {
   enterWithoutTower,
   enterWithoutTowerKeepSound,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   passChapterCard,
@@ -437,6 +438,7 @@ test.describe("C3/13 the building menu: engine and wire", { tag: "@ipad-only" },
       await pad2.goto(`/join?code=${restarted.host.joinCode}`);
       await clickAct(pad2, "continue", "continue-saved-game");
       await holdHeroesFromTest(pad2, [...FOUR]);
+      await finishPieceCheck(pad2);
       await expect(deviceMain(pad2)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
       await expect(deviceMain(pad2).locator('[data-building="menu"]')).toBeVisible({
         timeout: 30_000,
@@ -531,6 +533,7 @@ const resumeGame = async (
   await pad.goto(`/join?code=${session.host.joinCode}`);
   await clickAct(pad, "continue", "continue-saved-game");
   await holdHeroesFromTest(pad, [...FOUR]);
+  await finishPieceCheck(pad);
   await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
   return { session, context, pad, board };
 };

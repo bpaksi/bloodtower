@@ -87,6 +87,15 @@ import {
   towerLine,
 } from "./hub.ts";
 import type { ShellStory, StorySetting } from "./pack.ts";
+import {
+  buildPieceCheckView,
+  PIECE_CHECK_CONFIRM_ACTION,
+  PIECE_CHECK_COPY,
+  PIECE_CHECK_SKIP_ACTION,
+  PIECE_CHECK_TURN_DRUMS_ACTION,
+  pieceCheckCurrentStep,
+  pieceCheckStepNumber,
+} from "./pieceCheck.ts";
 import { isPlaceBuilding, PLACE_CAPTION, PLACE_STILL_ID } from "./placeCaption.ts";
 import { soundActions, soundStepOnBoard, VOLUME_LINE } from "./sound.ts";
 import type { HintHold, ShellState } from "./state.ts";
@@ -177,6 +186,9 @@ const labelFor = (state: ShellState, promptId: string, actionId: string): string
   if (promptId === "tower-connect" && actionId === "tower-connect") return "Connect Tower";
   if (actionId === "play-without-tower") return "Play without Tower";
   if (promptId === "tower-calibrate" && actionId === "tower-calibrate") return "Calibrate";
+  if (actionId === PIECE_CHECK_CONFIRM_ACTION) return "Done";
+  if (actionId === PIECE_CHECK_SKIP_ACTION) return "Skip";
+  if (actionId === PIECE_CHECK_TURN_DRUMS_ACTION) return "Turn the drums";
   return actionId;
 };
 
@@ -686,6 +698,9 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     event: buildEvent(state),
     building: buildBuilding(state),
     chapterBeat: buildChapterBeat(play, state.loops.stack.at(-1)?.loopId),
+    ...(state.unconfirmedPieces.length > 0
+      ? { unconfirmedPieces: state.unconfirmedPieces.length }
+      : {}),
     health: "unavailable",
     purse: "unavailable",
     actingGroup: actingName,
@@ -774,6 +789,7 @@ const STEP_NAME: Record<ShellState["screen"], string> = {
   "claim-heroes": "Party Join",
   setup: "Setup",
   begin: "Begin",
+  "piece-check": "Piece check",
   play: "Play",
   pause: "Paused",
   session: "Session",
@@ -929,6 +945,15 @@ const showsFor = (state: ShellState, title: string, story: ShellStory | undefine
     );
   }
   if (state.screen === "begin") return "The table is set.";
+  if (state.screen === "piece-check" && state.pieceCheck) {
+    const stepId = pieceCheckCurrentStep(state.pieceCheck);
+    if (stepId === "drums") return PIECE_CHECK_COPY.drumsTitle;
+    if (stepId === "trapped-skulls") {
+      return PIECE_CHECK_COPY.trappedSkulls(state.pieceCheck.trappedSkulls);
+    }
+    if (stepId) return PIECE_CHECK_COPY[stepId];
+    return "Piece check";
+  }
   // The session screen's line is the tower's state, or the question while one is asked (SCR-021).
   if (state.screen === "session") {
     if (state.confirm === "new-game") return REPLACE_SAVE_LINE;
@@ -1016,6 +1041,10 @@ const screenLabel = (state: ShellState): string => {
     const index = Math.min(state.setupAt + 1, total);
     return `Step ${index} of ${total}`;
   }
+  if (state.screen === "piece-check" && state.pieceCheck) {
+    const stepId = pieceCheckCurrentStep(state.pieceCheck);
+    return stepId ? `Step ${pieceCheckStepNumber(stepId)}` : "Piece check";
+  }
   return STEP_NAME[state.screen];
 };
 
@@ -1052,6 +1081,7 @@ const helpScreenFor = (state: ShellState): string => {
     "claim-heroes": "claim",
     setup: "base-board-setup",
     begin: "waiting",
+    "piece-check": "piece-check",
     play: "play",
     pause: "paused",
     session: "session-screen",
@@ -1183,7 +1213,14 @@ const shownActions = (state: ShellState): ViewState["actions"] => {
           label: labelFor(state, offer.promptId, offer.actionId),
           open: false,
           reason:
-            offer.actionId === "build" ? buildingReason(state, offer.promptId) : "Already taken.",
+            offer.actionId === "build"
+              ? buildingReason(state, offer.promptId)
+              : offer.actionId === PIECE_CHECK_CONFIRM_ACTION &&
+                  offer.promptId === "piece-check-drums"
+                ? "Turn the drums first."
+                : offer.actionId === PIECE_CHECK_TURN_DRUMS_ACTION && state.pieceCheck?.drumsTurning
+                  ? "Turning the drums."
+                  : "Already taken.",
           deviceId: null,
         },
   );
@@ -1280,5 +1317,6 @@ export const projectShellView = (state: ShellState): ViewState => {
     deviceHold: !momentId && state.hint && state.screen === "play" ? state.hintHold : null,
     gear: gearSnapshot(state),
     chance: buildChance(state),
+    pieceCheck: buildPieceCheckView(state, (id) => heroName(state, id)),
   };
 };

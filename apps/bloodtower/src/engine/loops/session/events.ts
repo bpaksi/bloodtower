@@ -134,6 +134,29 @@ export const testSeedEventV1 = z.object({
   markers: z.string().min(1).max(600),
 });
 
+/**
+ * Continue started the piece check (C2-11). Logged so a host restart mid-check rebuilds the exact
+ * step and confirmed/skipped progress from the event log (EV-12, EV-24).
+ */
+export const pieceCheckStartEventV1 = z.object({
+  kind: z.literal("piece-check-start"),
+  v: z.literal(1),
+  towerInPlay: z.boolean(),
+});
+
+/**
+ * How one `mechanics.rotate-drum` command during step 5 ended (DEC-716, EV-06, EV-15).
+ * Appended by the host after the rotate settles so replay rebuilds exact drum positions.
+ */
+export const pieceCheckDrumResultEventV1 = z.object({
+  kind: z.literal("piece-check-drum-result"),
+  v: z.literal(1),
+  drumIndex: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  position: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
+  ok: z.boolean(),
+  deviceId: z.string().min(1).optional(),
+});
+
 export const shellEventSchema = z.discriminatedUnion("kind", [
   startSessionEventV1,
   pressEventV1,
@@ -152,6 +175,8 @@ export const shellEventSchema = z.discriminatedUnion("kind", [
   hintEndEventV1,
   waitEndEventV1,
   testSeedEventV1,
+  pieceCheckStartEventV1,
+  pieceCheckDrumResultEventV1,
 ]);
 
 export type ShellEvent = z.infer<typeof shellEventSchema>;

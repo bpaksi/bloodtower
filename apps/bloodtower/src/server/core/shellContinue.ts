@@ -52,8 +52,23 @@ const endsSittingReplay = (event: ShellEvent): boolean =>
 
 const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): ShellState => {
   let state = start;
-  for (const event of events) {
-    if (endsSittingReplay(event)) break;
+  for (let i = 0; i < events.length; i += 1) {
+    const event = events[i];
+    if (!event) continue;
+    if (endsSittingReplay(event)) {
+      // If a later Continue started a piece check in this same game log (C2-11), skip the
+      // sitting boundary so a host restart mid-check rebuilds from `piece-check-start` onward.
+      const resumedLater = events.slice(i + 1).some((later) => later.kind === "piece-check-start");
+      if (!resumedLater) break;
+      continue;
+    }
+    if (
+      event.kind === "press" &&
+      event.promptId === "continue-saved-game" &&
+      event.actionId === "continue"
+    ) {
+      continue;
+    }
     state = stepShell(state, event).state;
   }
   return state;

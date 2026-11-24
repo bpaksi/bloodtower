@@ -9,6 +9,7 @@ export type ShellScreen =
   | "tower-wake"
   | "session"
   | "session-over"
+  | "piece-check"
   | "play"
   | "pause"
   | "not-playable";

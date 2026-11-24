@@ -14,6 +14,7 @@ import {
 } from "../../engine/loops/encounter/picks.ts";
 import { captureEventState, restoreEventState } from "../../engine/loops/event/index.ts";
 import { type QuestStore, restoreQuests, snapshotQuests } from "../../engine/loops/quest/store.ts";
+import { normalizeDrumPositions } from "../../engine/loops/session/pieceCheck.ts";
 import { createShellRegistry } from "../../engine/loops/session/registry.ts";
 import {
   SHELL_ENGINE_VERSION,
@@ -153,6 +154,10 @@ export const deserializeShellState = ({
   keptVolume: null,
   towerVolume:
     row.towerVolume === 0 || row.towerVolume === 1 || row.towerVolume === 2 ? row.towerVolume : 1,
+  // A checkpoint written before C2-11 has no drums field: reads as calibrated home (0, 0, 0).
+  drums: normalizeDrumPositions(row.drums),
+  pieceCheck: row.pieceCheck ?? null,
+  unconfirmedPieces: Array.isArray(row.unconfirmedPieces) ? [...row.unconfirmedPieces] : [],
   partySplit: false,
   // A checkpoint from before CU/09 has no hint record: nothing shown yet, and Hints is on (an
   // absent `hints` setting reads as on). A hint that was on the board is not kept: it was shown.
