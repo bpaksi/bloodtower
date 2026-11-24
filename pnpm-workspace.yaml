@@ -9,9 +9,11 @@ packages:
   - "!apps/board-map-tool"
 # Dependencies allowed to run install scripts (pnpm 10 blocks them by default).
 onlyBuiltDependencies:
-  - better-sqlite3
   - esbuild
   - lefthook
+# better-sqlite3 uses its bundled N-API prebuilds. Running node-gyp rebuild fails on Hammer (no C++ toolchain).
+ignoredBuiltDependencies:
+  - better-sqlite3
 # @types/better-sqlite3 asks for any @types/node and would take the newest in the workspace
 # (Visuals pins 26.x). The tower service is typed against Node 22, so hold that edge to its pin.
 overrides:
