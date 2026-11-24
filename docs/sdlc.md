@@ -1,5 +1,7 @@
 # How Bloodtower applies the AI-Native SDLC Playbook
 
+> **Note:** Active planning and parallel dispatch now follow forgekit — see [AGENTS.md](../AGENTS.md) and [`.claude/skills/plan-run/PLAN-FORMAT.md`](../.claude/skills/plan-run/PLAN-FORMAT.md). This document remains the reference for Bloodtower-specific guardrails, lite CI allowlist, verifier/adversary review, plan gates, and brief/eval conventions.
+
 Source: [The AI-Native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). This repo uses a **lean solo loop**: Bob is originator, product owner and tech lead. Agents plan, build and self-verify, and every change reaches `main` through a pull request on `bpaksi/bloodtower` that the coordinator merges ("Who runs the agents" and "Named roles" say which agent does what; Claude Code opens PRs and never merges them). Bob's sign-off is required only at the named gates (below); merging is not one of them.
 
 The repo holds many apps. **Process, guardrails and Claude config are shared at the root; intent, spec and plans belong to each app.**

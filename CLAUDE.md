@@ -1,8 +1,11 @@
-# Bloodtower
-
-Many small apps around the *Return to Dark Tower* tower. Bob owns intent and approvals; Claude plans, builds and self-verifies. The coordinator merges a PR once CI and review pass; Claude Code opens PRs and never merges them. The full process is in [docs/sdlc.md](docs/sdlc.md).
+# Project conventions
 
 See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all changes.
+
+<!-- forgekit:local:start -->
+## Bloodtower
+
+Many small apps around the *Return to Dark Tower* tower. Bob owns intent and approvals; Claude plans, builds and self-verifies. The coordinator merges a PR once CI and review pass; Claude Code opens PRs and never merges them. The full process is in [docs/sdlc.md](docs/sdlc.md).
 
 ## Repo map
 
@@ -38,8 +41,10 @@ See [AGENTS.md](AGENTS.md#agentic-sdlc) — Agentic SDLC rules apply to all chan
 
 ## How work flows
 
-1. Read the app's `spec.md` and the current `plans/Mx-*.md` before changing code. If they conflict with the intent, the spec wins.
-2. One branch per plan step: `<type>/<app>-<slug>` (repo-wide work: `chore/<slug>`). Never commit on `main`.
+Active planning and parallel dispatch follow forgekit: plans live as GitHub issues in open `Plan: …` milestones (`.claude/skills/plan-run/PLAN-FORMAT.md`) and are dispatched with `plan-run` (see [AGENTS.md](AGENTS.md#plans)). App-level specs, briefs, and evals remain under `apps/<app>/`.
+
+1. Read the app's `spec.md`, any active `Plan:` milestone issue, and the current `plans/Mx-*.md` (or feature brief/eval) before changing code. If they conflict with the intent, the spec wins.
+2. One branch per plan step/issue: `plan/<issue>-<slug>` (or `<type>/<app>-<slug>` / `chore/<slug>` for non-plan work). Never commit on `main`.
 3. If the work deviates from the plan or spec, update that document in the same commit.
 4. Before handing over, run `pnpm check`, push the branch and open a PR with the evidence and the plan step id in the body.
 5. CI runs Gitleaks on the PR, and `pnpm check` unless the diff stays on the lite allowlist (game-design, docs, packs, story scripts, app icons). A lite diff runs the card lint when it touches cards and the pack checks when it touches packs. A PR that can reach the Bloodtower build also runs the e2e suite (four parallel shards), and a red e2e fails `check`. The `verifier` posts the eval table on the PR head and again after each fix round that changes code. `adversary-bugs` attacks in round 1 (Opus; `adversary-prd` joins when the step claims PRD ids), then only checks the fixes in rounds 2 and 3 (Sonnet). Reviewers trust CI and block only on the list in [docs/sdlc.md](docs/sdlc.md) §4: a regression, an unmet `Done when`, a broken standing rule, or a change outside `Touches`. The coordinator squash-merges one PR at a time once CI is green and the latest review says `Blocking: none`; after round 3 with blockers left it labels the PR `needs-bob` and stops that step. Bob signs off only at the plan's gate steps.
@@ -86,3 +91,4 @@ If a hook blocks you, do not work around it. Say what you were trying to do and 
 
 - Stop only the processes you started. `pkill -f "next dev"` also kills Bob's other dev servers; kill by PID or by the port you opened.
 - `pnpm start` does not build. Run `pnpm build` first or the server reports that the web UI is not built.
+<!-- forgekit:local:end -->
