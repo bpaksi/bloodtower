@@ -747,4 +747,60 @@ test.describe("C3/14 the quest scene", { tag: "@ipad-only" }, () => {
       await closeAll(game);
     }
   });
+
+  test("#589: a host stop after a closing step's wait ended resumes on the step that was showing and pays once", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(300_000);
+    const seed = seedFor();
+    const first = await startGame(browser, testInfo, { seed });
+    const { databasePath } = first.session;
+    const resume = async (): Promise<Game> => {
+      const session = await startAcceptanceHost(testInfo, {
+        databasePath,
+        seed,
+        lanHost: () => "192.0.2.10",
+        seatTogether: true,
+        fakeWait: true,
+      });
+      const { context, pad, board } = await openTable(browser, session);
+      await clickAct(pad, "continue", "continue-saved-game");
+      await holdHeroesFromTest(pad, [...FOUR]);
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "play", { timeout: 30_000 });
+      return { session, context, pad, board };
+    };
+    // Sitting 1: the quest's rewards step; its wait ends and the end hook shows; the host stops
+    // there, with no quit and no press since the quest option.
+    await openQuest(first);
+    await optionById(first.pad, "ask-pay-first").click();
+    await expect(phase(first.board, "rewards")).toBeVisible({ timeout: 20_000 });
+    await tick(first, 4_100);
+    await expect(phase(first.board, "end")).toBeVisible({ timeout: 20_000 });
+    await closeAll(first);
+
+    // Sitting 2: Continue shows the end hook, not the rewards. Its wait ends, the menu shows, and
+    // the host stops again.
+    const second = await resume();
+    try {
+      await expect(phase(second.board, "end")).toBeVisible({ timeout: 20_000 });
+      await tick(second, 4_100);
+      await expect(deviceMain(second.pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
+    } finally {
+      await closeAll(second);
+    }
+
+    // Sitting 3: Continue shows the menu. 10 shared + 5 quest gold each is 30, paid once.
+    const third = await resume();
+    try {
+      await expect(deviceMain(third.pad).locator('[data-building="menu"]')).toBeVisible({
+        timeout: 20_000,
+      });
+      await expect(scene(third.board)).toHaveCount(0);
+      expect(await gearGold(third.pad, third.board)).toBe(30);
+    } finally {
+      await closeAll(third);
+    }
+  });
 });
