@@ -56,8 +56,17 @@ export const pickTuningFrom = (gold?: {
   cleanse: BASE_PICK_TUNING.cleanse,
 });
 
-/** Placeholder virtue tiles the draw picks from (seeded). */
-export const VIRTUE_TILES = ["courage", "mercy", "wisdom", "honor", "fortitude", "grace"] as const;
+/** The 1.0 virtue pool the draw picks from (seeded): the 8 pool tiles of DEC-934. */
+export const VIRTUE_TILES = [
+  "inspiring",
+  "relentless",
+  "fortunate",
+  "unseen",
+  "resourceful",
+  "blessed",
+  "infused",
+  "anointed",
+] as const;
 export const MAX_VIRTUE_TILES = 4;
 export const SILVER_TONGUE_HERO = "bard";
 

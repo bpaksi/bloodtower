@@ -198,6 +198,19 @@ describe("building picks", () => {
     expect(ensurePicks(play).moves[group.id]).toBe(2);
   });
 
+  it("EV-09a: the virtue deck is the 8 v1.0 pool tiles (DEC-934)", () => {
+    expect([...VIRTUE_TILES]).toEqual([
+      "inspiring",
+      "relentless",
+      "fortunate",
+      "unseen",
+      "resourceful",
+      "blessed",
+      "infused",
+      "anointed",
+    ]);
+  });
+
   it("EV-09: virtue draw adds one seeded tile; a fifth forces a give-back", () => {
     const { play, group } = setup();
     setVirtueTiles(play, group.id, ["courage", "mercy", "wisdom"]);
