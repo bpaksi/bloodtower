@@ -455,10 +455,13 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
     if (!dayWaits) {
       // A building result's wait (C3/13), or a chapter beat's (C3/15), ends the same way.
       const next: ShellState = { ...state, eventSeq: eventSeq + 1 };
-      if (
-        endBuildingWait(next.loops.stack, e.waitId) ||
-        endChapterWait(next.loops.stack, next.play, e.waitId)
-      ) {
+      const buildingEnded = endBuildingWait(next.loops.stack, e.waitId);
+      if (buildingEnded || endChapterWait(next.loops.stack, next.play, e.waitId)) {
+        // A building wait's end moves the step on (rewards to the end hook, a result to the menu).
+        // A press saves, so this must too: a host that stops now must not resume a step behind (#589).
+        if (buildingEnded && next.play && next.activeGameId) {
+          requestCheckpoint(next.activeGameId, next.play.dayNumber);
+        }
         bindShellState(next);
         resumeLoopsOrPauseOffers(next, eventSeq, effects);
         clearShellState();
