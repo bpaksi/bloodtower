@@ -71,7 +71,13 @@ export const checkEngineConstraints = (root) => {
   return errors;
 };
 
-const D38_BANNED = [/\bhunter\b/i, /\bset[- ]piece\b/i, /\bsetpiece\b/i, /\bhunters\b/i];
+// "Beast Hunter" is a class virtue (DEC-380), not the old word for a hero.
+const D38_BANNED = [
+  /(?<!\bbeast )\bhunter\b/i,
+  /\bset[- ]piece\b/i,
+  /\bsetpiece\b/i,
+  /\bhunters\b/i,
+];
 
 /** D38: old glossary names must not appear in engine, protocol v2, or packs/. */
 export const checkD38Names = (root) => {

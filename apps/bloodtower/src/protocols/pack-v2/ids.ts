@@ -41,7 +41,7 @@ export const heroRoleSchema = z.enum([
   "magic-user",
   "scout",
   "ranger",
-  "scholar",
+  "bard",
 ]);
 
 export const questTypeIdSchema = z.enum([

@@ -13,7 +13,7 @@ heroes:
     stealth: 2
     magic: 1
     wits: 2
-    ability: Duel
+    ability: Shield Wall, Weapon Master
     portrait: por.hero-a
     voice: vo.hero-a
   - id: hero-b
@@ -23,7 +23,7 @@ heroes:
     stealth: 2
     magic: 3
     wits: 3
-    ability: Heal
+    ability: Lightning, Mend
     portrait: por.hero-b
     voice: vo.hero-b
   - id: hero-c
@@ -33,7 +33,7 @@ heroes:
     stealth: 2
     magic: 5
     wits: 3
-    ability: Glyph
+    ability: Magic Missile, Fireball
     portrait: por.hero-c
     voice: vo.hero-c
   - id: hero-d
@@ -43,7 +43,7 @@ heroes:
     stealth: 5
     magic: 1
     wits: 3
-    ability: Disarm
+    ability: Shadow, Slip Past
     portrait: por.hero-d
     voice: vo.hero-d
   - id: hero-e
@@ -53,17 +53,17 @@ heroes:
     stealth: 3
     magic: 1
     wits: 5
-    ability: Track
+    ability: Beast Hunter, Pathfinder
     portrait: por.hero-e
     voice: vo.hero-e
   - id: hero-f
     name: Hero F
-    role: scholar
+    role: bard
     might: 1
     stealth: 2
     magic: 3
     wits: 5
-    ability: Lore
+    ability: Silver Tongue, Rally
     portrait: por.hero-f
     voice: vo.hero-f
 

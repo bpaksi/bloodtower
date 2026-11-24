@@ -220,8 +220,8 @@ export const loadStoryCatalog = (packsDir: string): StoryCatalog => {
     // only place the ones who do.
     const tuningHeroes = loaded.base.tuning?.heroes;
     const heroes = loaded.base.heroes.map((hero) => {
-      // The tuning key for the magic user is `magic_user`; a role with no row (scholar until the
-      // pack follow-up) leaves fight and hit points unset, which the board reads as unavailable.
+      // The tuning key for the magic user is `magic_user`; a role with no row leaves fight and
+      // hit points unset, which the board reads as unavailable.
       const row = tuningHeroes?.[hero.role.replace("-", "_") as keyof typeof tuningHeroes];
       return {
         id: hero.id,

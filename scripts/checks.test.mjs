@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, before, describe, it } from "node:test";
-import { checkEngineConstraints, checkImports } from "./check-imports.mjs";
+import { checkD38Names, checkEngineConstraints, checkImports } from "./check-imports.mjs";
 import { checkPins } from "./check-pins.mjs";
 
 let root;
@@ -212,5 +212,23 @@ describe("checkEngineConstraints", () => {
     assert.ok(errors.length >= 3);
     assert.match(errors.join("\n"), /node:fs/);
     assert.match(errors.join("\n"), /Math\.random/);
+  });
+});
+
+describe("checkD38Names", () => {
+  const fresh = (name) => {
+    root = mkdtempSync(join(tmpdir(), `dark-tower-${name}-`));
+  };
+
+  it("fails on the old name hunter in a pack", () => {
+    fresh("d38-bad");
+    write("packs/base/pack.yaml", "heroes:\n  - name: Hunter\n");
+    assert.equal(checkD38Names(root).length, 1);
+  });
+
+  it("allows the Beast Hunter virtue (DEC-380), which is not the old hero name", () => {
+    fresh("d38-beast-hunter");
+    write("packs/base/pack.yaml", "heroes:\n  - ability: Beast Hunter, Pathfinder\n");
+    assert.deepEqual(checkD38Names(root), []);
   });
 });
