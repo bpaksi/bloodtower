@@ -156,7 +156,14 @@ export const deserializeShellState = ({
     row.towerVolume === 0 || row.towerVolume === 1 || row.towerVolume === 2 ? row.towerVolume : 1,
   // A checkpoint written before C2-11 has no drums field: reads as calibrated home (0, 0, 0).
   drums: normalizeDrumPositions(row.drums),
-  pieceCheck: row.pieceCheck ?? null,
+  // In-flight drum rotation never survives a restart: clear drumsTurning so step 5 never deadlocks.
+  pieceCheck: row.pieceCheck
+    ? {
+        ...row.pieceCheck,
+        drumsTurning: false,
+        drumsTurned: row.pieceCheck.drumsTurning ? false : row.pieceCheck.drumsTurned,
+      }
+    : null,
   unconfirmedPieces: Array.isArray(row.unconfirmedPieces) ? [...row.unconfirmedPieces] : [],
   partySplit: false,
   // A checkpoint from before CU/09 has no hint record: nothing shown yet, and Hints is on (an

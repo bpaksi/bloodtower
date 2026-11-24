@@ -1,4 +1,5 @@
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
+import { ensurePieceCheckOffers } from "../../engine/loops/session/pieceCheck.ts";
 import type { ShellState } from "../../engine/loops/session/state.ts";
 import { SHELL_ENGINE_VERSION } from "../../engine/loops/session/state.ts";
 import { stepShell } from "../../engine/loops/session/stepShell.ts";
@@ -56,11 +57,33 @@ const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): She
     const event = events[i];
     if (!event) continue;
     if (endsSittingReplay(event)) {
-      // If a later Continue started a piece check in this same game log (C2-11), skip the
-      // sitting boundary so a host restart mid-check rebuilds from `piece-check-start` onward.
+      // If a later Continue started a piece check in this same game log (C2-11), reset transient
+      // sitting state (pause, abandoned piece check) and keep replaying into the next sitting.
+      // If this quit/done is terminal and abandoned an active piece check, clear that check so
+      // a subsequent restart or Continue returns to play and starts a fresh piece check.
       const resumedLater = events.slice(i + 1).some((later) => later.kind === "piece-check-start");
-      if (!resumedLater) break;
-      continue;
+      if (resumedLater) {
+        state = {
+          ...state,
+          pieceCheck: null,
+          pause: null,
+          reconnect: null,
+          screen: "play",
+          stage: "playing",
+        };
+        continue;
+      }
+      if (state.pieceCheck !== null) {
+        state = {
+          ...state,
+          pieceCheck: null,
+          pause: null,
+          reconnect: null,
+          screen: "play",
+          stage: "playing",
+        };
+      }
+      break;
     }
     if (
       event.kind === "press" &&
@@ -126,6 +149,18 @@ export const continueShellFromCheckpoint = (
 
   const pending = shellEventsAfter(store, input.gameId, checkpoint.afterEventSeq);
   state = applyShellEvents(state, pending);
+  if (state.pieceCheck) {
+    // An in-flight drum rotate never survives a restart: never deadlock step 5 or auto-resend.
+    if (state.pieceCheck.drumsTurning) {
+      state = {
+        ...state,
+        pieceCheck: { ...state.pieceCheck, drumsTurning: false, drumsTurned: false },
+      };
+    }
+    if (state.screen === "piece-check") {
+      ensurePieceCheckOffers(state);
+    }
+  }
   return { state, versionChangedLogged };
 };
 

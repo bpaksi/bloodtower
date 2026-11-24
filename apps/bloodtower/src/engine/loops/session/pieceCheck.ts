@@ -1,6 +1,9 @@
 import type { PieceCheckView } from "../../../protocols/v2/views.ts";
 import { tryChapters } from "../chapter/chapters.ts";
+import type { ChapterLocal } from "../chapter/loop.ts";
 import { savedBuildingSkulls, trappedSkullCount } from "../day/skull.ts";
+import type { EncounterLocal } from "../encounter/loop.ts";
+import type { GroupTurnLocal } from "../group-turn/loop.ts";
 import { openQuestTokens } from "../quest/store.ts";
 import type { ShellState } from "./state.ts";
 
@@ -230,6 +233,23 @@ export const ensurePieceCheckOffers = (state: ShellState): void => {
   state.offered.push({ promptId, actionId: PIECE_CHECK_SKIP_ACTION, open: true });
 };
 
+/** Resets awaiting-press flags on play loops so saved prompts re-offer when piece check enters play. */
+export const resetPlayPromptsAfterPieceCheck = (state: ShellState): void => {
+  for (const frame of state.loops.stack) {
+    if (frame.loopId === "group-turn") {
+      frame.local = { ...(frame.local as GroupTurnLocal), awaitingPress: false };
+    } else if (frame.loopId === "encounter") {
+      frame.local = {
+        ...(frame.local as EncounterLocal),
+        awaitingLeave: false,
+        awaitingPress: false,
+      };
+    } else if (frame.loopId === "chapter") {
+      frame.local = { ...(frame.local as ChapterLocal), awaitingPress: false };
+    }
+  }
+};
+
 const advancePieceCheck = (state: ShellState): boolean => {
   const check = state.pieceCheck;
   if (!check) return false;
@@ -239,6 +259,7 @@ const advancePieceCheck = (state: ShellState): boolean => {
     state.pieceCheck = null;
     state.screen = "play";
     state.stage = "playing";
+    resetPlayPromptsAfterPieceCheck(state);
     return true;
   }
   return false;
@@ -341,7 +362,7 @@ export const applyPieceCheckDrumResult = (
     return { checkpoint: false, nextCommand: null };
   }
   check.drumActual = { ...check.drumActual, [entry.level]: position };
-  state.drums = { ...check.drumActual };
+  state.drums = { ...normalizeDrumPositions(state.drums), [entry.level]: position };
   const next = nextDrumToRotate(check);
   if (next) {
     check.drumsTurning = true;
@@ -374,6 +395,7 @@ export const dropTowerStepsFromPieceCheck = (state: ShellState): boolean => {
     state.pieceCheck = null;
     state.screen = "play";
     state.stage = "playing";
+    resetPlayPromptsAfterPieceCheck(state);
     return true;
   }
   return false;

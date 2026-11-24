@@ -485,6 +485,8 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
         if (!next.pause) {
           next.screen = "piece-check";
           next.stage = "playing";
+        } else if (next.pause.cause === "tower-lost") {
+          next.pause = { ...next.pause, returnTo: "piece-check" };
         }
       }
     }
@@ -805,6 +807,7 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       if (gameFrame) {
         gameFrame.local = handleGamePress(gameFrame.local as GameLocal, e.promptId, e.actionId);
         if ((gameFrame.local as GameLocal).phase === "done") {
+          next.pieceCheck = null;
           collapsePlayLoopsOnQuit(next);
           pushQuitRecord(next, effects);
         }
@@ -838,39 +841,9 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
           });
         }
       } else if (e.actionId === PIECE_CHECK_CONFIRM_ACTION) {
-        const res = applyPieceCheckConfirm(next, e.promptId);
-        if (res.finished) {
-          for (const frame of next.loops.stack) {
-            if (frame.loopId === "group-turn") {
-              frame.local = { ...(frame.local as GroupTurnLocal), awaitingPress: false };
-            } else if (frame.loopId === "encounter") {
-              frame.local = {
-                ...(frame.local as EncounterLocal),
-                awaitingLeave: false,
-                awaitingPress: false,
-              };
-            } else if (frame.loopId === "chapter") {
-              frame.local = { ...(frame.local as ChapterLocal), awaitingPress: false };
-            }
-          }
-        }
+        applyPieceCheckConfirm(next, e.promptId);
       } else if (e.actionId === PIECE_CHECK_SKIP_ACTION) {
-        const res = applyPieceCheckSkip(next, e.promptId);
-        if (res.finished) {
-          for (const frame of next.loops.stack) {
-            if (frame.loopId === "group-turn") {
-              frame.local = { ...(frame.local as GroupTurnLocal), awaitingPress: false };
-            } else if (frame.loopId === "encounter") {
-              frame.local = {
-                ...(frame.local as EncounterLocal),
-                awaitingLeave: false,
-                awaitingPress: false,
-              };
-            } else if (frame.loopId === "chapter") {
-              frame.local = { ...(frame.local as ChapterLocal), awaitingPress: false };
-            }
-          }
-        }
+        applyPieceCheckSkip(next, e.promptId);
       }
     } else if (isHubPrompt(e.promptId)) {
       applyHubPress(next, e.promptId, effects);

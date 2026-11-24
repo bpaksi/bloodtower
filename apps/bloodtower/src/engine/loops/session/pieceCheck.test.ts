@@ -7,6 +7,7 @@ import { applySkullRecord, SKULL_STAYED_INSIDE_TARGET } from "../day/skull.ts";
 import { configureQuests, ensureQuests, snapshotQuests } from "../quest/store.ts";
 import { TEST_STORY } from "./pack.ts";
 import {
+  applyPieceCheckDrumResult,
   buildPieceCheck,
   buildPieceCheckSteps,
   DRUM_HOME,
@@ -17,8 +18,10 @@ import {
   pieceCheckPromptId,
 } from "./pieceCheck.ts";
 import { PROVING_GROUNDS_PLAY } from "./playContent.ts";
+import { pauseGoWithoutPrompt } from "./reconnect.ts";
 import { initialShellState, type ShellState } from "./state.ts";
 import { stepShell } from "./stepShell.ts";
+import { TOWER_DISCONNECTED, TOWER_READY } from "./tower.ts";
 import { projectShellView } from "./view.ts";
 
 const makeSavedShell = (options?: {
@@ -417,5 +420,119 @@ describe("piece check from a save (C2-11)", () => {
       { side: "west", glyph: null },
     ]);
     expect(buildPieceCheck(makeSavedShell(), false)?.steps).toEqual(["hero-minis", "skulls"]);
+  });
+
+  it("EV-06/EV-15: updating one rotated drum preserves unrotated drums in state.drums", () => {
+    const state = makeSavedShell({ drums: { top: 2, middle: 1, bottom: 3 } });
+    const started = stepShell(state, { kind: "piece-check-start", v: 1, towerInPlay: true }).state;
+    const okTop = applyPieceCheckDrumResult(started, 0, 2, true);
+    expect(okTop.checkpoint).toBe(true);
+    expect(okTop.nextCommand).toEqual({
+      capabilityId: "mechanics.rotate-drum",
+      params: { drumIndex: 1, position: 1 },
+    });
+    expect(started.pieceCheck?.drumActual).toEqual({ top: 2, middle: 0, bottom: 0 });
+    expect(started.drums).toEqual({ top: 2, middle: 1, bottom: 3 });
+
+    const failMiddle = applyPieceCheckDrumResult(started, 1, 1, false);
+    expect(failMiddle.checkpoint).toBe(false);
+    expect(failMiddle.nextCommand).toBeNull();
+    expect(started.drums).toEqual({ top: 2, middle: 1, bottom: 3 });
+  });
+
+  it("goOnWithout finishing piece check resets encounter.awaitingPress and chapter.awaitingPress", () => {
+    const state = makeSavedShell({
+      drums: { top: 2, middle: 0, bottom: 0 },
+      mutatePlay: (play) => {
+        ensureClock(play).held = 1;
+        const village = boardSpaceByBuilding(play, "village");
+        if (play.groups[0]) {
+          play.groups[0].spaceId = village.id;
+          play.groups[0].insideBuilding = true;
+        }
+      },
+    });
+    const village = boardSpaceByBuilding(state.play as PlayState, "village");
+    state.loops.stack = [
+      {
+        loopId: "chapter",
+        phase: "body",
+        local: { phase: "card", awaitingPress: true },
+        finishing: false,
+      },
+      {
+        loopId: "group-turn",
+        phase: "body",
+        local: { groupId: "hero-a", movesLeft: 1, awaitingPress: true },
+        finishing: false,
+      },
+      {
+        loopId: "encounter",
+        phase: "body",
+        local: {
+          groupId: "hero-a",
+          spaceId: village.id,
+          awaitingLeave: true,
+          awaitingPress: true,
+          left: false,
+        },
+        finishing: false,
+      },
+    ];
+    state.holdings = {
+      "hero-a": "ipad-1",
+      "hero-b": "ipad-1",
+      "hero-c": "ipad-1",
+      "hero-d": "ipad-1",
+    };
+    state.devices = new Set(["ipad-1"]);
+    state.tower = TOWER_READY;
+
+    // Walk to step 5 (drums), then lose the tower and choose Go on without.
+    let cur = stepShell(state, { kind: "piece-check-start", v: 1, towerInPlay: true }).state;
+    cur = stepShell(cur, {
+      kind: "press",
+      v: 1,
+      deviceId: "ipad-1",
+      promptId: pieceCheckPromptId("hero-minis"),
+      actionId: "confirm",
+    }).state;
+    cur = stepShell(cur, {
+      kind: "press",
+      v: 1,
+      deviceId: "ipad-1",
+      promptId: pieceCheckPromptId("skulls"),
+      actionId: "confirm",
+    }).state;
+    expect(cur.pieceCheck?.steps[cur.pieceCheck.index]).toBe("drums");
+
+    cur = stepShell(cur, {
+      kind: "tower-snapshot",
+      v: 1,
+      tower: TOWER_DISCONNECTED,
+    }).state;
+    expect(cur.screen).toBe("pause");
+    expect(cur.pause).toEqual({ cause: "tower-lost", returnTo: "piece-check" });
+
+    cur = stepShell(cur, {
+      kind: "press",
+      v: 1,
+      deviceId: "ipad-1",
+      promptId: pauseGoWithoutPrompt(cur.pauseSerial),
+      actionId: "go-on-without",
+    }).state;
+
+    expect(cur.screen).toBe("play");
+    expect(cur.pieceCheck).toBeNull();
+    const chapter = cur.loops.stack.find((f) => f.loopId === "chapter")?.local as {
+      awaitingPress: boolean;
+    };
+    const turn = cur.loops.stack.find((f) => f.loopId === "group-turn")?.local as {
+      awaitingPress: boolean;
+    };
+    // Lower frames had awaitingPress reset; top encounter frame re-offered its building prompts.
+    expect(chapter.awaitingPress).toBe(false);
+    expect(turn.awaitingPress).toBe(false);
+    expect(cur.offered.some((offer) => offer.open && offer.actionId === "leave")).toBe(true);
   });
 });

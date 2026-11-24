@@ -446,7 +446,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
     }
     if (
       !pieceCheckStartEvent &&
-      before.screen === "pause" &&
+      (before.screen === "pause" || before.screen === "tower-wake") &&
       state.screen === "piece-check" &&
       state.pieceCheck &&
       state.pieceCheck.confirmed.length === 0 &&
@@ -457,6 +457,11 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         v: 1,
         towerInPlay: state.pieceCheck.towerInPlay,
       };
+    }
+    // Finishing a piece check after a mid-check host restart seats heroes on currently joined
+    // iPads (CU/16): returning tokens keep their heroes; dead pre-restart holders clear and pause.
+    if (before.pieceCheck !== null && state.pieceCheck === null && state.screen === "play") {
+      state = seatOnContinue(state, state);
     }
     // A Split party pick changes the play state (the queue, PT-18), and a use-item pick changes
     // a hero's items and hit points (CU/13), so a replay must see both.
@@ -964,6 +969,7 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         if (midCheck && savedRow) {
           state = {
             ...midCheck,
+            devices: new Set(state.devices),
             stories: state.stories,
             playContent: state.playContent ?? midCheck.playContent,
             sessionId: state.sessionId,
@@ -979,6 +985,15 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             stage: "playing",
             towerChoice: resumed.towerChoice,
             games: resumed.games,
+            pieceCheck: midCheck.pieceCheck
+              ? {
+                  ...midCheck.pieceCheck,
+                  drumsTurning: false,
+                  drumsTurned: midCheck.pieceCheck.drumsTurning
+                    ? false
+                    : midCheck.pieceCheck.drumsTurned,
+                }
+              : null,
             autosave: {
               gameId: savedRow.gameId,
               packId: savedRow.packId,
