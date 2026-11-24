@@ -21,6 +21,7 @@ import { EventScene } from "./EventScene";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HintScroll } from "./HintScroll";
 import { OpeningMoment } from "./OpeningMoment";
+import { OutcomeScene } from "./OutcomeScene";
 import { QuestScene } from "./QuestScene";
 import { SealBreak } from "./SealBreak";
 import { SetTheTableBoard } from "./SetTheTable";
@@ -92,6 +93,8 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
   const eventHero = (heroId: string) => event?.heroes.find((hero) => hero.heroId === heroId);
   // The chapter's beats (C3/15) replace the day panels while one shows.
   const beat = showMove && !paused ? (table?.chapterBeat ?? null) : null;
+  // The outcome scene (C3/16) replaces the play board while it shows.
+  const outcome = showMove && !paused ? (table?.outcome ?? null) : null;
   return (
     <main
       className="bt-board"
@@ -99,6 +102,8 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
       data-board-mode="play"
       data-board-layer={layer}
       data-chapter-stage={beat?.stage ?? undefined}
+      data-outcome-stage={outcome?.stage ?? undefined}
+      data-outcome-scene={outcome?.sceneId ?? undefined}
       data-moment={momentId ?? undefined}
       data-hint-hold={holding ? "true" : undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
@@ -128,7 +133,7 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           )}
         </DialogFrame>
       ) : null}
-      {showMove && table ? (
+      {showMove && table && !outcome ? (
         <header className="bt-band" id="band" data-band>
           {table.groups.map((group) => (
             <Fragment key={group.heroId}>
@@ -163,24 +168,31 @@ export function CoreStoryBoard({ view, debug }: { view: BoardView; debug?: boole
           </span>
         </header>
       ) : null}
-      {showMove && table ? <ThreatBar table={table} /> : null}
-      {event && !paused && !holding ? <EventScene scene={event} /> : null}
-      {beat && !holding ? (
+      {showMove && table && !outcome ? <ThreatBar table={table} /> : null}
+      {outcome && !holding ? <OutcomeScene outcome={outcome} /> : null}
+      {event && !outcome && !paused && !holding ? <EventScene scene={event} /> : null}
+      {beat && !outcome && !holding ? (
         beat.stage === "reveal" ? (
           <SealBreak beat={beat} />
         ) : (
           <ChapterCard beat={beat} />
         )
       ) : null}
-      {beat?.table && !holding ? <SetTheTableBoard table={beat.table} /> : null}
-      {showMove && table && !event && !beat && !paused && !holding ? (
+      {beat?.table && !outcome && !holding ? <SetTheTableBoard table={beat.table} /> : null}
+      {showMove && table && !outcome && !event && !beat && !paused && !holding ? (
         <DayPanel table={table} />
       ) : null}
-      {showMove && table?.virtue && !event && !paused && !holding ? (
+      {showMove && table?.virtue && !outcome && !event && !paused && !holding ? (
         <VirtuePanel table={table} />
       ) : null}
       {momentId && layer !== "place" ? <OpeningMoment momentId={momentId} /> : null}
-      {showMove && table?.waitingFor && !table.virtue && !event && !paused && !holding ? (
+      {showMove &&
+      table?.waitingFor &&
+      !outcome &&
+      !table.virtue &&
+      !event &&
+      !paused &&
+      !holding ? (
         <DialogFrame size="compact" className="bt-ink-in" data-play-waiting="" role="status">
           <p className="bt-waiting-pulse" data-waiting role="status">
             {table.waitingFor}

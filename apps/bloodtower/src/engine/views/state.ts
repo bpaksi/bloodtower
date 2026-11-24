@@ -3,6 +3,7 @@ import type { GearView, HintView } from "../../protocols/v2/views.ts";
 import type { CompassSlot } from "../loops/chapter/board.ts";
 import type { HeroCardData } from "../loops/session/pack.ts";
 import type { ChapterBeatView } from "./chapter.ts";
+import type { OutcomeView } from "./outcome.ts";
 
 export type PrivateLine = {
   id: string;
@@ -245,6 +246,8 @@ export type TableBand = {
   building?: BuildingPanelView | null;
   /** The chapter's card, stamp, close, Reveal or Set the table, only while it shows (C3/15). */
   chapterBeat?: ChapterBeatView | null;
+  /** The outcome scene and one-line summary at the end of a game, only while it shows (C3/16). */
+  outcome?: OutcomeView | null;
   health: "unavailable";
   purse: "unavailable";
   actingGroup: string | null;

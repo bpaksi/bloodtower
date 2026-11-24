@@ -342,7 +342,13 @@ describe("C3/15 the chapter end in C3 (Q-C3-01)", () => {
     expect(game.session.state().screen).toBe("play");
     expect(pressable(game)).toEqual([]);
     await game.tick(4_000);
-    // The outcome follows (feature 16): the game ended won, with no seal and no skull prompt.
+    // The outcome follows (feature 16): win scene, chapter-1 closing, summary, then Game stats.
+    expect(game.session.projectDevice(game.pad).table?.outcome?.stage).toBe("scene");
+    await game.tick(4_000);
+    expect(game.session.projectDevice(game.pad).table?.outcome?.stage).toBe("closing");
+    await game.tick(4_000);
+    expect(game.session.projectDevice(game.pad).table?.outcome?.stage).toBe("summary");
+    await game.tick(4_000);
     expect(game.session.state().screen).toBe("session");
     const store = chapters(game);
     expect(store.nodes.filter((n) => n === "cue:CUE-005:1")).toHaveLength(1);
@@ -364,6 +370,10 @@ describe("C3/15 the chapter end in C3 (Q-C3-01)", () => {
     expect(beat(again)?.stage).toBe("stamp");
     await again.tick(4_000);
     expect(beat(again)?.stage).toBe("close");
+    await again.tick(4_000);
+    expect(again.session.projectDevice(again.pad).table?.outcome?.stage).toBe("scene");
+    await again.tick(4_000);
+    await again.tick(4_000);
     await again.tick(4_000);
     expect(again.session.state().screen).toBe("session");
     expect(chapters(again).nodes.filter((n) => n === "cue:CUE-005:1")).toHaveLength(1);

@@ -302,6 +302,13 @@ test.describe("C3/15 the chapter card and the chapter end", { tag: "@ipad-only" 
       await expect(board.locator('[data-chapter-beat="reveal"], [data-set-table]')).toHaveCount(0);
       await expect(pad.locator('button[data-prompt-id^="skull-record--"]')).toHaveCount(0);
       clock.advance(4_000);
+      // C3/16: the win outcome (scene -> chapter-1 closing -> summary) follows the close Scroll.
+      for (const stage of ["scene", "closing", "summary"]) {
+        await expect(deviceMain(pad)).toHaveAttribute("data-outcome-stage", stage, {
+          timeout: 20_000,
+        });
+        clock.advance(4_000);
+      }
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", {
         timeout: 20_000,
       });

@@ -392,6 +392,25 @@ const chapterBeatSchema = z.strictObject({
 });
 export type ChapterBeatWire = z.infer<typeof chapterBeatSchema>;
 
+/**
+ * The outcome scene at the end of a game (C3/16, SCR-018, UI-046, DEC-144, DEC-627): win or loss
+ * painting and narration, optional win closing line, then the one-line summary before Game stats.
+ */
+const outcomeViewSchema = z.strictObject({
+  stage: z.enum(["scene", "closing", "summary"]),
+  outcome: z.enum(["won", "lost"]),
+  reason: z.enum(["skulls", "corruption", "buildings"]).nullable(),
+  sceneId: z.string().min(1).max(80),
+  caption: z.string().min(1).max(300).nullable(),
+  closingId: z.string().min(1).max(80).nullable(),
+  summary: z.string().min(1).max(200).nullable(),
+  cue: z.enum(["CUE-003"]).nullable(),
+  tick: z.string().min(1).max(80),
+  holdMs: z.number().int().min(0).max(60_000),
+  lineId: z.string().min(1).max(80).nullable(),
+});
+export type OutcomeWire = z.infer<typeof outcomeViewSchema>;
+
 const tableBandSchema = z.strictObject({
   chapter: z.string().min(1).max(120),
   day: z.number().int().min(0).max(99),
@@ -410,6 +429,8 @@ const tableBandSchema = z.strictObject({
   event: eventViewSchema.nullable().optional(),
   /** The chapter's card, stamp, close, Reveal or Set the table, only while it shows (C3/15). */
   chapterBeat: chapterBeatSchema.nullable().optional(),
+  /** The outcome scene and summary at the end of a game, only while it shows (C3/16). */
+  outcome: outcomeViewSchema.nullable().optional(),
   health: z.literal("unavailable"),
   purse: z.literal("unavailable"),
   actingGroup: z.string().min(1).max(80).nullable(),

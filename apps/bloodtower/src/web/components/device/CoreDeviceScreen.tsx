@@ -850,6 +850,8 @@ export function CoreDeviceScreen({
   );
   // The chapter's beats (C3/15): no Next on the card, stamp, close or Reveal; Set the table has Done.
   const beat = view.screen === "play" ? (view.table?.chapterBeat ?? null) : null;
+  // The outcome scene (C3/16): no Next; tower mark + progress tick; bottom toolbar stays live.
+  const outcome = view.screen === "play" ? (view.table?.outcome ?? null) : null;
   // A virtue that asks (CU/14, EV-03): the acting group's iPads get one button per option, whatever
   // the virtue. Another group's iPad holds none of its heroes, so it draws no list.
   const virtueAsk = virtueChoiceFor(view);
@@ -1000,14 +1002,19 @@ export function CoreDeviceScreen({
       data-screen={view.screen}
       data-setup-step={setupStep}
       data-chapter-stage={beat?.stage ?? undefined}
+      data-outcome-stage={outcome?.stage ?? undefined}
+      data-outcome-scene={outcome?.sceneId ?? undefined}
       data-paused={view.gear?.paused ? "true" : "false"}
       data-volume={view.gear?.volume ?? undefined}
     >
       <div className="bt-scroll">
-        <div className="bt-kicker" data-step-context hidden={inBuilding}>
+        <div className="bt-kicker" data-step-context hidden={inBuilding || Boolean(outcome)}>
           {STEP_CONTEXT[view.screen] ?? view.screen}
         </div>
-        <h1 className="text-2xl font-semibold text-[var(--bt-accent)]" hidden={inBuilding}>
+        <h1
+          className="text-2xl font-semibold text-[var(--bt-accent)]"
+          hidden={inBuilding || Boolean(outcome)}
+        >
           {onStats ? view.shows : (SCREEN_TITLE[view.screen] ?? view.screen)}
         </h1>
         {errorBanner ? <DeviceErrorBanner {...errorBanner} /> : null}
@@ -1015,6 +1022,54 @@ export function CoreDeviceScreen({
           <GearDevicePanel gear={panel} live={live} onAct={onAct} />
         ) : towerLostPause ? (
           <TowerLostPause view={view} live={live} onAct={onAct} />
+        ) : outcome ? (
+          <section
+            className="mt-12 flex flex-col items-center justify-center gap-4 text-center"
+            data-outcome-scene={outcome.sceneId}
+            data-outcome-stage={outcome.stage}
+            data-outcome={outcome.outcome}
+          >
+            <div className="flex justify-center">
+              <TowerMark />
+            </div>
+            <div
+              className="flex items-center justify-center gap-2 text-[var(--bt-muted)]"
+              data-outcome-tick=""
+            >
+              <span aria-hidden="true" className="inline-flex items-center gap-2">
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    background: "#c9a85a",
+                    display: "inline-block",
+                  }}
+                />
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    background: outcome.stage === "scene" ? "none" : "#c9a85a",
+                    border: "2px solid #c9a85a",
+                    display: "inline-block",
+                  }}
+                />
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    background: outcome.stage === "summary" ? "#c9a85a" : "none",
+                    border: "2px solid #c9a85a",
+                    display: "inline-block",
+                  }}
+                />
+              </span>
+              <span data-tick-auto="">{outcome.tick}</span>
+            </div>
+          </section>
         ) : beat ? (
           beat.table ? (
             <SetTheTableDevice
@@ -1321,7 +1376,7 @@ export function CoreDeviceScreen({
           </>
         )}
       </div>
-      {panel || sessionOver || onSessionScreen || pinned.length === 0 ? null : (
+      {panel || outcome || sessionOver || onSessionScreen || pinned.length === 0 ? null : (
         <div className="bt-pinned flex flex-col gap-3">{pinned.map(renderAction)}</div>
       )}
       <ChromeBar

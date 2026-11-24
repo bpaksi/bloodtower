@@ -115,3 +115,47 @@ describe("acting iPad move map", () => {
     expect(markup).toContain('data-inside="true"');
   });
 });
+
+describe("C3/16 outcome scene on the iPad (SCR-018)", () => {
+  it("EV-01, EV-08: renders TowerMark, auto-advance tick, no body buttons, and bottom toolbar", () => {
+    const outcomeView = deviceViewPayloadSchema.parse({
+      deviceId: "device-1",
+      screen: "play",
+      shows: "Chapter cleared.",
+      heroes: [],
+      actions: [
+        { promptId: "menu-quit", actionId: "quit-story", label: "Save and quit", open: true },
+      ],
+      table: {
+        ...table,
+        waitingFor: null,
+        outcome: {
+          stage: "scene",
+          outcome: "won",
+          reason: null,
+          sceneId: "win",
+          closingId: "win-chapter-1",
+          caption: "Chapter cleared.",
+          summary: "1 days. 2 quests done. 0 skulls on the board.",
+          tick: "Moves on by itself.",
+          cue: null,
+          lineId: null,
+          holdMs: 4000,
+        },
+      },
+    });
+    const markup = html(outcomeView);
+    expect(markup).toContain('data-outcome-stage="scene"');
+    expect(markup).toContain('data-outcome-scene="win"');
+    expect(markup).toContain('aria-label="The Tower"');
+    expect(markup).toContain('data-tick-auto=""');
+    expect(markup).toContain("Moves on by itself.");
+    expect(markup).toContain("bt-bar--bottom");
+    expect(markup).toContain('aria-label="Help"');
+    expect(markup).toContain('aria-label="Menu"');
+    // Zero body buttons inside bt-scroll: only toolbar buttons exist.
+    const scrollStart = markup.indexOf('class="bt-scroll"');
+    const scrollEnd = markup.indexOf("<footer", scrollStart);
+    expect(markup.slice(scrollStart, scrollEnd)).not.toContain("<button");
+  });
+});

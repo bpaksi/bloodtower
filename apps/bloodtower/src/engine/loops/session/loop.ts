@@ -73,6 +73,13 @@ export const sessionLoop: LoopDefinition<SessionLocal, SessionResult> = {
       if (childResult) {
         shell.screen = "session";
         shell.stage = "lobby";
+        // SCR-018, DEC-627 (C3/16 EV-06): a finished game moves to Game stats for this game;
+        // a quit returns to the session screen.
+        shell.statsGame =
+          (childResult.outcome === "won" || childResult.outcome === "lost") &&
+          shell.games.length > 0
+            ? shell.games.length
+            : null;
         local = {
           phase: "hub",
           awaitingPress: false,

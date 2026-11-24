@@ -20,6 +20,7 @@ import { isPurseAmount, poolSides } from "../../rules/purse/index.ts";
 import { virtueName } from "../../rules/virtues/index.ts";
 import { buildChapterBeat, CHAPTER_COPY_LINES } from "../../views/chapter.ts";
 import { comingDrop, dayPhaseView, rollView } from "../../views/day.ts";
+import { buildOutcomeView, type OutcomeView } from "../../views/outcome.ts";
 import { questItemName } from "../../views/questItems.ts";
 import type {
   BuildingPanelView,
@@ -56,6 +57,7 @@ import {
   type OptionId,
   refreshLedger,
 } from "../event/index.ts";
+import { activeOutcome, isOnOutcome } from "../game/loop.ts";
 import {
   onPurseStep,
   PURSE_STEP_LABEL,
@@ -665,11 +667,25 @@ const buildChance = (state: ShellState): ChanceView | null => {
   };
 };
 
+const buildOutcome = (state: ShellState): OutcomeView | null => {
+  if (state.screen !== "play" && state.screen !== "pause") return null;
+  const outcome = activeOutcome(state.loops.stack);
+  if (!outcome) return null;
+  return buildOutcomeView({
+    stage: outcome.stage,
+    end: outcome.end,
+    closing: outcome.closing,
+    summary: outcome.summary,
+    lineId: outcome.wait?.lineId ?? null,
+  });
+};
+
 const buildTable = (state: ShellState, chapter: string): TableBand | null => {
   if (state.screen !== "play" && state.screen !== "pause") return null;
   const play = state.play;
   if (!play) return null;
   const board = play.content.board;
+  const outcome = buildOutcome(state);
 
   const { actingId, movesLeft, waiting } = actingGroupOf(state);
 
@@ -682,10 +698,11 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     chapter,
     day: play.dayNumber,
     ...dayPanels,
-    virtue: buildVirtue(state),
-    event: buildEvent(state),
-    building: buildBuilding(state),
-    chapterBeat: buildChapterBeat(play, state.loops.stack.at(-1)?.loopId),
+    virtue: outcome ? null : buildVirtue(state),
+    event: outcome ? null : buildEvent(state),
+    building: outcome ? null : buildBuilding(state),
+    chapterBeat: outcome ? null : buildChapterBeat(play, state.loops.stack.at(-1)?.loopId),
+    outcome,
     health: "unavailable",
     purse: "unavailable",
     actingGroup: actingName,
@@ -694,9 +711,9 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
     moveRoll: rolled ?? null,
     modifier: "none",
     // The no-tower skull lines sit in the skull panel (PT-07), not in a second waiting box.
-    // Nor in a box over the groups card (CU/04): both sit centred on the board.
+    // Nor in a box over the groups card (CU/04) or the outcome scene (C3/16): both sit centred.
     waitingFor:
-      waiting && actingName && !onSkullSim(state) && !dayPanels.groupsCard
+      waiting && actingName && !outcome && !onSkullSim(state) && !dayPanels.groupsCard
         ? `${actingName} is choosing`
         : null,
     groups: play.groups.map((group) => {
@@ -725,6 +742,7 @@ const buildTable = (state: ShellState, chapter: string): TableBand | null => {
 const buildPlace = (state: ShellState): PlaceStill | null => {
   const play = state.play;
   if (!play || (state.screen !== "play" && state.screen !== "pause")) return null;
+  if (isOnOutcome(state.loops.stack)) return null;
   const inside = play.groups.find((group) => group.insideBuilding);
   if (!inside) return null;
   const building = play.content.board.spaceById.get(inside.spaceId)?.building;
@@ -1021,6 +1039,10 @@ const screenLabel = (state: ShellState): string => {
 
 const helpScreenFor = (state: ShellState): string => {
   if (state.screen === "pause" && state.pause?.cause === "tower-lost") return "tower-lost";
+  // The outcome scene (C3/16, EV-10): win, loss, and summary all use outcome-scene help.
+  if (state.screen === "play" && !openingMomentId(state) && isOnOutcome(state.loops.stack)) {
+    return "outcome-scene";
+  }
   // The chapter's beats (C3/15): Set the table has its own help (EV-21); the others share one.
   const beat =
     state.screen === "play" && !openingMomentId(state)
