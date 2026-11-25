@@ -21,13 +21,15 @@ Each issue is a **tracer bullet**: a thin slice through every layer it needs (sc
 - Each slice is demoable or verifiable on its own.
 - Prefer many thin slices over a few thick ones. A slice a child can finish in one sitting is the right size.
 - Make slices independent wherever you can. Every `Depends on` edge removes parallelism from `plan-run`.
+- Give every slice a `Touches:` line (paths or globs it may change, including shared files it edits). `plan-run` runs slices with overlapping `Touches` one after the other, so their PRs don't conflict. Two slices that both edit the same core files are better as one slice or a `Depends on` chain.
+- Keep a slice under about 1,500 changed non-test lines. A bigger one is hard to review in one pass; split it (for example engine and server, then UI).
 - Split out story and art as their own `kind:story` / `kind:art` issues. They go to Grok Bot, so the code slice that uses them depends on them (or uses placeholders and doesn't).
 - Mark a slice `plan:hitl` when it needs Bob mid-way (an architecture decision, a design review, a sign-in). Prefer slices that don't.
 - Add `where:hammer` / `where:anvil` only when the work truly needs that machine, and `size:long` for long unattended runs.
 
 ## 3. Check the breakdown with the user
 
-Show a numbered list. For each slice give the title, kind, `Depends on`, labels, and a one-line "Done when". Ask:
+Show a numbered list. For each slice give the title, kind, `Depends on`, `Touches`, labels, and a one-line "Done when". Ask:
 
 - Is the granularity right?
 - Are the dependencies right, and can any be removed?
@@ -44,6 +46,7 @@ Iterate until they approve. Don't create anything on GitHub before that.
 
    ```markdown
    Depends on: none
+   Touches: src/feature/**, src/shared/state.ts
 
    ## What to build
 

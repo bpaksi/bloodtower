@@ -1,6 +1,9 @@
 ## Feature
 <plan-name>/<##-feature> — apps/bloodtower/plans/briefs/<plan-name>/<##-feature>/plan.md
 
+## Touches
+<copy the issue's `Touches:` line; list any file changed outside it and why>
+
 ## Requirement review
 <findings / "none">
 
@@ -19,3 +22,8 @@ Done = every row pass on the current head. Any code change → verifier reruns.
 
 ## Not verified
 <list, or "none">
+
+## Round log
+| Round | Head | Review | Verdict |
+|-------|------|--------|---------|
+| 1 | <sha> | <Review A / B / Low> | <APPROVE / REQUEST_CHANGES> |
