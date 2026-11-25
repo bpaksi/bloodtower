@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { OPENING_MOMENTS, openingPromptId } from "../../../protocols/opening.ts";
 import type { PressEvent } from "../../events.ts";
 import { project } from "../../views/project.ts";
+import type { GameStatsInput } from "../../views/stats.ts";
 import { openDayWait } from "../day/wait.ts";
 import { enterWithoutEvents } from "./enterKit.ts";
 import { beginNewGame, rateOpenGame } from "./hub.ts";
@@ -228,14 +229,82 @@ describe("C2/07 a game's stats", () => {
         settingId: "fun-rating",
         optionId,
       }).state;
-    expect(rate(opened, "4").games[0]?.rating).toBe(4);
-    expect(rate(opened, "9").games[0]?.rating).toBeNull();
+    expect(rate(opened, "4").games[0]?.ratings).toEqual({ "ipad-0": 4 });
+    expect(rate(opened, "9").games[0]?.ratings).toEqual({});
     // Play again is offered whether or not a rating was given.
     expect(openOffers(rate(opened, "4")).map((offer) => offer.actionId)).toEqual([
       "play-again",
       "back",
     ]);
     expect(openOffers(opened).map((offer) => offer.actionId)).toEqual(["play-again", "back"]);
+  });
+
+  it("opens the game-stats help on a game's stats, and the session help on the list (C3/17 EV-10)", () => {
+    const ended = quit(reachPlay());
+    expect(projectShellView(ended).gear?.helpScreen).toBe("session-screen");
+    const opened = step(ended, press("session-game-1", "open-game"));
+    expect(projectShellView(opened).gear?.helpScreen).toBe("game-stats");
+    expect(projectShellView(step(opened, press("stats-back", "back"))).gear?.helpScreen).toBe(
+      "session-screen",
+    );
+  });
+
+  it("keeps one rating per iPad and shows each iPad its own (C3/17 EV-11)", () => {
+    const opened = step(quit(reachPlay()), press("session-game-1", "open-game"));
+    const rate = (state: ShellState, deviceId: string, optionId: string) =>
+      stepShell(state, {
+        kind: "set-setting",
+        v: 1,
+        deviceId,
+        settingId: "fun-rating",
+        optionId,
+      }).state;
+    const rated = rate(rate(rate(opened, "ipad-0", "4"), "ipad-1", "2"), "ipad-0", "5");
+    expect(rated.games[0]?.ratings).toEqual({ "ipad-0": 5, "ipad-1": 2 });
+    const pressed = (deviceId: string) =>
+      project(projectShellView(rated), { kind: "device", deviceId }).settings?.[0]?.optionId;
+    expect(pressed("ipad-0")).toBe("5");
+    expect(pressed("ipad-1")).toBe("2");
+    expect(pressed("ipad-2")).toBe("none");
+  });
+
+  it("paints the stored stats and one rating per seat when the host hands them in (C3/17 EV-01, EV-11)", () => {
+    const opened = step(quit(reachPlay()), press("session-game-1", "open-game"));
+    const rate = (state: ShellState, deviceId: string, optionId: string) =>
+      stepShell(state, {
+        kind: "set-setting",
+        v: 1,
+        deviceId,
+        settingId: "fun-rating",
+        optionId,
+      }).state;
+    const rated = rate(rate(opened, "ipad-0", "4"), "ipad-1", "2");
+    const stats: GameStatsInput = {
+      outcome: "won",
+      activeMs: 42 * 60_000,
+      days: 12,
+      questsDone: 1,
+      corruptionsTaken: 2,
+      goldLeft: 7,
+      keyMoments: [],
+      best: { state: "this-game" },
+      averageMs: 42 * 60_000,
+    };
+    const shows = projectShellView(rated, stats).levels.find(
+      (level) => level.id === "game-stats",
+    )?.shows;
+    expect(shows?.split("\n")).toEqual([
+      "Outcome: Won",
+      "Time played: 42 min",
+      "Days: 12",
+      "Quests done: 1",
+      "Corruptions: 2",
+      "Gold: 7",
+      "Length: 42 min (Best: this game · average 42 min)",
+      "How was tonight?: 4 · 2 · – · –",
+    ]);
+    // Without the host's stats the C2 read-out stays.
+    expect(levelOf(rated, "game-stats")?.shows).toContain("Story: Proving Grounds");
   });
 });
 
@@ -454,7 +523,7 @@ describe("C2/07 refused presses are errors, not silence", () => {
         settingId: "fun-rating",
         optionId,
       });
-      expect(result.state.games[0]?.rating).toBeNull();
+      expect(result.state.games[0]?.ratings).toEqual({});
       expect(refusals(result)).toEqual([
         expect.objectContaining({
           code: "invalid-state",
@@ -465,8 +534,8 @@ describe("C2/07 refused presses are errors, not silence", () => {
   });
 
   it("a rating with no game open is reported", () => {
-    const effects: Parameters<typeof rateOpenGame>[2] = [];
-    rateOpenGame(quit(reachPlay()), "3", effects);
+    const effects: Parameters<typeof rateOpenGame>[3] = [];
+    rateOpenGame(quit(reachPlay()), "ipad-0", "3", effects);
     expect(effects).toEqual([
       expect.objectContaining({ kind: "press-error", code: "invalid-state" }),
     ]);

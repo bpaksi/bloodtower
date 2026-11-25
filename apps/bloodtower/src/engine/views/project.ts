@@ -152,7 +152,15 @@ export function project(state: ViewState, audience: Audience): ProjectedView {
           : [],
     })),
     actions: deviceActions.filter((action) => offeredTo(action, audience.deviceId)).map(toOffered),
-    ...(state.settings && state.settings.length > 0 ? { settings: state.settings } : {}),
+    ...(state.settings && state.settings.length > 0
+      ? {
+          settings: state.settings.map(({ byDevice, ...setting }) => ({
+            ...setting,
+            // A per-iPad setting shows this iPad's own value.
+            optionId: byDevice?.[audience.deviceId] ?? setting.optionId,
+          })),
+        }
+      : {}),
     ...(state.gear ? { gear: state.gear } : {}),
     ...(state.pieceCheck ? { pieceCheck: state.pieceCheck } : {}),
   });

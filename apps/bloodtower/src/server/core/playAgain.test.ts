@@ -126,7 +126,7 @@ describe("a game's stats and Play again across a host restart (C2/07)", () => {
     expect(before?.label).toBe("Game 1");
     expect(before?.shows).toContain("Moves taken: 1");
     expect(before?.shows).toContain("Time played: —");
-    expect(first.state().games[0]?.rating).toBe(4);
+    expect(Object.values(first.state().games[0]?.ratings ?? {})).toEqual([4]);
     await pad.act("stats-back", "back");
     const written = first.state().games;
     expect(written[0]?.moves).toBe(1);

@@ -23,6 +23,7 @@ import {
   waitingFor,
 } from "../../lib/startupBoard";
 import { DialogFrame } from "./DialogFrame";
+import { GameStats } from "./GameStats.tsx";
 import { GearBoardPanel } from "./GearBoardPanel.tsx";
 import { HeroCard } from "./HeroCard";
 
@@ -332,35 +333,9 @@ function SessionRows({ session }: { session: SessionBoard }) {
   );
 }
 
-/** One game's stats (SCR-019, C2/07): the "Label: value" lines on the `game-stats` level. */
-const gameStats = (
-  view: BoardView,
-): { title: string; rows: { label: string; value: string }[] } | null => {
-  const level = view.levels.find((row) => row.id === "game-stats");
-  if (!level) return null;
-  const rows = level.shows.split("\n").flatMap((line) => {
-    const at = line.indexOf(": ");
-    return at > 0 ? [{ label: line.slice(0, at), value: line.slice(at + 2) }] : [];
-  });
-  return { title: level.label, rows };
-};
-
-function StatsPanel({ stats }: { stats: NonNullable<ReturnType<typeof gameStats>> }) {
-  return (
-    <div data-startup-panel="game-stats">
-      <p className="bt-kicker">Tonight's games</p>
-      <h1 className="bt-startup-title">{stats.title}</h1>
-      <dl className="bt-stat-rows" data-stat-rows="">
-        {stats.rows.map((row) => (
-          <div key={row.label} className="bt-stat-row" data-stat-row={row.label}>
-            <dt>{row.label}</dt>
-            <dd data-stat-value="">{row.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
+/** One game's stats (SCR-019, C3/17): the `game-stats` level, painted by `GameStats`. */
+const gameStats = (view: BoardView): { label: string; shows: string } | null =>
+  view.levels.find((row) => row.id === "game-stats") ?? null;
 
 function SessionPanel({ view }: { view: BoardView }) {
   const session = sessionBoard(view);
@@ -388,7 +363,7 @@ function SessionPanel({ view }: { view: BoardView }) {
       </div>
     );
   }
-  if (stats) return <StatsPanel stats={stats} />;
+  if (stats) return <GameStats label={stats.label} shows={stats.shows} />;
   return (
     <div data-startup-panel="session">
       <p className="bt-kicker">Between games</p>
