@@ -68,4 +68,4 @@ Give the user the milestone link, the issue list with its dependencies, which sl
 
 ## Revising a plan
 
-If the milestone already exists, read it with `plan.py` first. Don't touch closed issues; if a change invalidates finished work, that's a new issue. Ask before changing anything that's `plan:in-progress`. Not-started issues can be edited, split, merged or closed freely. Validate again when you're done.
+If the milestone already exists, read it with `plan.py --full` first (the default output leaves out closed issues). Don't touch closed issues; if a change invalidates finished work, that's a new issue. Ask before changing anything that's `plan:in-progress`. Not-started issues can be edited, split, merged or closed freely. Validate again when you're done.
