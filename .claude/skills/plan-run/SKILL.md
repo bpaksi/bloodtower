@@ -25,6 +25,13 @@ Ask:
 
 Bob merges; plan-run never does, so don't ask about merging. Keep the answers for the session and repeat them in your final report.
 
+**Your own commands.** Every command you run must be one the machine pre-approves, or the unattended run stops for an approval. On Hammer that means:
+- Run one command per tool call (no `&&` or `;`), the same rule children follow.
+- No pipes (`| head`, `| tail`, `| grep`), and no `command -v`, `find`, `cat` or `python3 -c`. None of them is on Hammer's allowlist, so each asks for approval even when the rest of the line is fine.
+- Read files with the Read tool and search with Grep or Glob, not the shell.
+- Read plan.py's JSON as printed. Don't save it and re-parse it with Python.
+- To check for a tool, use `ls /usr/local/bin/<tool>`.
+
 Escalate to the user only for: a `needs-owner` PR, a `plan:blocked` issue, a machine, token or quota failure with no fallback, or an issue that contradicts itself or another in a way the answers don't settle. Everything else has a default in this skill.
 
 ## 1. Read and validate the plan
@@ -34,7 +41,8 @@ python3 .claude/skills/plan-run/plan.py [--milestone "Plan: …"] [--max-running
 ```
 
 - **Exit 1 or 2 (`ok: false`): stop.** Show the user the `errors` list verbatim, say the plan must be fixed to match PLAN-FORMAT.md, and dispatch nothing. Don't fix the issues yourself unless the user asks.
-- Otherwise the JSON gives every issue's `status`, the `running` list and `dispatch`: the ready issues that fit under the cap, lowest number first, minus any whose `Touches` overlaps work still running or awaiting merge. Those are in `held_for_overlap` with the issues they wait on; they start once those PRs merge. Report `warnings` (issues with no `Touches` line) once.
+- The output is compact: one line per issue that isn't done (done issues are only counted in `counts`), without URLs. Add `--full` only when you need a closed issue's details.
+- Otherwise the JSON gives each open issue's `status`, the `running` list and `dispatch`: the ready issues that fit under the cap, lowest number first, minus any whose `Touches` overlaps work still running or awaiting merge. Those are in `held_for_overlap` with the issues they wait on; they start once those PRs merge. Report `warnings` (issues with no `Touches` line) once.
 - `--max-running` defaults to 2 and counts `plan:in-progress` issues across **all** machines, because GitHub is the shared state. Use a higher cap only if the user gives one.
 - `complete: true`: report that the plan is done and suggest closing the milestone.
 
@@ -137,10 +145,11 @@ conventions and AGENTS.md. Work test-first in thin red-green steps, testing
 behavior through public interfaces; see .claude/skills/plan-run/engineering/
 (tests.md, mocking.md, interface-design.md, deep-modules.md, refactoring.md).
 Run one command per tool call (no `&&` or `;`), so each matches the machine's
-allowlist. Before you push, run the repo's own checks: lint and typecheck, the unit
+allowlist. No pipes (`| head`, `| tail`, `| grep`), and no `command -v`,
+`find`, `cat` or `python3 -c`: read files with the Read tool and search with Grep. Before you push, run the repo's own checks: lint and typecheck, the unit
 tests of the packages you touched, and only the e2e specs you added or changed.
 CI runs the full suite on every push; don't run the whole e2e suite locally or
-install browsers. Push with `plan-push` if `command -v plan-push` finds it
+install browsers. Push with `plan-push` if `ls /usr/local/bin/plan-push` finds it
 (Hammer: it pushes only the current plan/* branch and needs no approval);
 otherwise push the first time with `git push -u origin plan/<n>-<short-slug>`,
 so the branch tracks its own remote branch, never the default branch.

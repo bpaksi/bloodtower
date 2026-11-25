@@ -244,12 +244,29 @@ def evaluate(plan, raw_issues, max_running):
     return result
 
 
+def compact(result):
+    """The default output: small enough that an agent's shell tool shows it in full instead of
+    saving it to a file. Done issues are left out of `issues` (their count stays in `counts`),
+    each issue drops `url` and `closed`, and the JSON has no indentation, one issue per line."""
+    slim = dict(result)
+    issues = [{k: v for k, v in i.items() if k not in ("url", "closed")}
+              for i in result.get("issues", []) if i.get("status") != "done"]
+    slim.pop("issues", None)
+    head = json.dumps(slim, separators=(",", ":"))
+    if "issues" not in result:
+        return head
+    rows = ",\n".join(json.dumps(i, separators=(",", ":")) for i in issues)
+    return head[:-1] + (',"issues":[\n' + rows + "\n]}" if issues else ',"issues":[]}')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--repo", help="owner/name (default: the current repo)")
     ap.add_argument("--milestone", help="exact milestone title (default: newest open 'Plan:' milestone)")
     ap.add_argument("--max-running", type=int, default=2, help="concurrency cap across all machines (default 2)")
     ap.add_argument("--from-json", help="read {milestones, issues} from a file instead of gh (for tests)")
+    ap.add_argument("--full", action="store_true",
+                    help="print every issue (closed ones too) with its url, indented; the default is compact")
     args = ap.parse_args()
     if args.max_running < 1:
         return _fatal("--max-running must be at least 1")
@@ -264,7 +281,10 @@ def main():
         plan, issues = fetch(repo, args.milestone)
 
     result = evaluate(plan, issues, args.max_running)
-    print(json.dumps(result, indent=2))
+    if args.full:
+        print(json.dumps(result, indent=2))
+    else:
+        print(compact(result))
     return 0 if result["ok"] else 1
 
 
