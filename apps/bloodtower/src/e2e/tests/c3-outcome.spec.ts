@@ -8,6 +8,7 @@ import { createEventStore } from "../../server/events/store.ts";
 import {
   enterWithoutTower,
   enterWithTower,
+  finishPieceCheck,
   holdHeroesFromTest,
   installSessionSocketHook,
   passChapterCard,
@@ -639,6 +640,7 @@ test.describe("C3/16 outcome scene: win or loss (SCR-018, UI-046)", { tag: "@ipa
       // Continue resumes the outcome scene.
       await clickAct(pad, "continue", "continue-saved-game");
       await holdHeroesFromTest(pad, ["hero-a"]);
+      await finishPieceCheck(pad);
       await outcomeStageIs({ pad, board }, "scene");
 
       // EV-15: Menu and panels are closed, unpaused, toolbar present, menu items recomputed identically.
@@ -704,6 +706,7 @@ test.describe("C3/16 outcome scene: win or loss (SCR-018, UI-046)", { tag: "@ipa
       // A saved game that used the tower asks whether to reconnect or go on without on Continue.
       await clickAct(pad, "play-without-tower", "play-without-tower");
       await holdHeroesFromTest(pad, ["hero-a"]);
+      await finishPieceCheck(pad);
       await outcomeStageIs({ pad, board }, "scene");
 
       await expect(pad.locator("[data-menu]")).toHaveCount(0);
@@ -753,6 +756,7 @@ test.describe("C3/16 outcome scene: win or loss (SCR-018, UI-046)", { tag: "@ipa
       // Continue from the session screen resumes the exact summary step and advances once.
       await clickAct(pad, "continue", "continue-saved-game");
       await holdHeroesFromTest(pad, ["hero-a"]);
+      await finishPieceCheck(pad);
       await outcomeStageIs(table, "summary");
       clock.advance(4_000);
       await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", { timeout: 20_000 });
