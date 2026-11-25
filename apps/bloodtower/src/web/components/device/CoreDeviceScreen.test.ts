@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { CoreDeviceScreen } from "./CoreDeviceScreen.tsx";
+import { helpScreenFor } from "./gearMenu.ts";
 
 const group = {
   heroId: "hero-a",
@@ -157,5 +158,24 @@ describe("C3/16 outcome scene on the iPad (SCR-018)", () => {
     const scrollStart = markup.indexOf('class="bt-scroll"');
     const scrollEnd = markup.indexOf("<footer", scrollStart);
     expect(markup.slice(scrollStart, scrollEnd)).not.toContain("<button");
+  });
+
+  it("helpScreenFor keeps tower-lost and paused help during pause even if table.outcome is present", () => {
+    const outcome = { stage: "scene" };
+    expect(
+      helpScreenFor(
+        { screen: "play", table: { outcome }, gear: { helpScreen: "outcome-scene" } },
+        false,
+      ),
+    ).toBe("outcome-scene");
+    expect(
+      helpScreenFor(
+        { screen: "pause", table: { outcome }, gear: { helpScreen: "tower-lost" } },
+        false,
+      ),
+    ).toBe("tower-lost");
+    expect(
+      helpScreenFor({ screen: "pause", table: { outcome }, gear: { helpScreen: "paused" } }, false),
+    ).toBe("paused");
   });
 });

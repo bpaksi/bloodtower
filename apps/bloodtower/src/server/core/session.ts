@@ -563,16 +563,19 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       return () => clearTimeout(handle);
     });
   const scheduleEffectsWait = (): void => {
+    const outcomeWait = openOutcomeWait(state.loops.stack);
     const wait =
       openDayWait(state.loops.stack) ??
       openChapterWait(state.loops.stack, state.play) ??
-      openOutcomeWait(state.loops.stack);
+      outcomeWait;
+    // Outcome beats never count down while a hint holds the board (C3/16).
     const running =
       wait !== null &&
       wait.lineId === null &&
       state.stage === "playing" &&
       state.pause === null &&
-      !state.gearPaused;
+      !state.gearPaused &&
+      (outcomeWait === null || state.hint === null);
     const key = running && wait ? wait.id : null;
     if (key === waitTimerFor) return;
     waitCancel?.();

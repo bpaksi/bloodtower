@@ -1,7 +1,7 @@
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { openOutcomeWait } from "../../engine/loops/game/loop.ts";
 import { PROVING_GROUNDS_PLAY } from "../../engine/loops/session/playContent.ts";
 import { OUTCOME_COPY } from "../../engine/views/outcome.ts";
@@ -89,7 +89,7 @@ type Game = {
 
 const realGame = async (
   seed: string,
-  options: { c3?: boolean; tower?: boolean } = {},
+  options: { c3?: boolean; tower?: boolean; hints?: "on" | "off" } = {},
 ): Promise<Game> => {
   const catalog = options.c3 ? catalogs.c3 : catalogs.next;
   const dir = mkdtempSync(join(tmpdir(), "bloodtower-outcome-"));
@@ -184,7 +184,9 @@ const realGame = async (
   }
   await game.act("continue-pick-story-test", "continue");
   await game.act("set-setting", "set", { settingId: "party-size", optionId: "n-1" });
-  await game.act("set-setting", "set", { settingId: "hints", optionId: "off" });
+  if ((options.hints ?? "off") === "off") {
+    await game.act("set-setting", "set", { settingId: "hints", optionId: "off" });
+  }
   await game.act("continue-game-settings", "continue");
   await game.act("hero-hold", "take", { heroId: "hero-a" });
   await game.act("continue-claim-heroes", "continue");
@@ -479,5 +481,168 @@ describe("C3/16 outcome scene (win or loss)", () => {
       .listEvents(gameId)
       .filter((row) => row.kind === "game-record" && JSON.parse(row.payload).outcome !== "quit");
     expect(finishedRows).toHaveLength(1);
+  });
+
+  it("Hints On: Day 1 losses (skulls, 4th fallen building, 3rd corruption) show outcome scene without hint.first-day-end hiding it", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      const endActiveHint = async (game: Game) => {
+        await vi.advanceTimersByTimeAsync(4_000);
+        await game.session.whenIdle();
+      };
+      const boardOf = (game: Game) =>
+        game.session.projectBoard({ code: "000000", url: "http://x", reachable: true });
+
+      // (1) Day 1 skulls loss with default Hints: On.
+      const skullsGame = await realGame(`${SEED}~test-supply:1~test-kingdom:E`, {
+        tower: true,
+        hints: "on",
+      });
+      await skullsGame.act("day-1-roll-done", "continue");
+      await skullsGame.act("end-turn--hero-a", "end-turn");
+      expect(skullsGame.session.state().hint).toBe("hint.first-skull-drop");
+      await endActiveHint(skullsGame);
+      expect(skullsGame.session.state().hint).toBeNull();
+      const dropPrompt = pressable(skullsGame).find((a) => a.actionId === "continue");
+      if (!dropPrompt) throw new Error("Expected skull drop continue action.");
+      await skullsGame.act(dropPrompt.promptId, dropPrompt.actionId);
+      const skullTarget = pressable(skullsGame).find((a) => a.actionId === "record");
+      if (!skullTarget) throw new Error("Expected skull record action.");
+      await skullsGame.act(skullTarget.promptId, skullTarget.actionId);
+
+      expect(skullsGame.session.state().hint).toBeNull();
+      expect(skullsGame.session.state().hintHold).toBeNull();
+      expect(boardOf(skullsGame).hint).toBeUndefined();
+      expect(skullsGame.session.projectDevice(skullsGame.pad).held).toBeUndefined();
+      expect(outcomeOf(skullsGame)).toMatchObject({
+        stage: "scene",
+        outcome: "lost",
+        reason: "skulls",
+        sceneId: "loss-skulls",
+        caption: OUTCOME_COPY.lossSkulls,
+      });
+      expect(boardOutcomeOf(skullsGame)).toEqual(outcomeOf(skullsGame));
+      await skullsGame.tick(3_800);
+      expect(outcomeOf(skullsGame)?.stage).toBe("scene");
+      await skullsGame.tick(200);
+      expect(outcomeOf(skullsGame)?.stage).toBe("summary");
+      await skullsGame.tick(4_000);
+      expect(skullsGame.session.state().screen).toBe("session");
+      expect(skullsGame.session.state().statsGame).toBe(1);
+
+      // (2) Day 1 fourth fallen building loss with default Hints: On.
+      const east = PROVING_GROUNDS_PLAY.board.spaces.filter((s) => s.kingdom === "E" && s.building);
+      const skulls = east
+        .slice(0, 4)
+        .map((s, i) => `${s.id}=${i < 3 ? 4 : 3}`)
+        .join(",");
+      const buildingsGame = await realGame(`${SEED}~test-skulls:${skulls}~test-kingdom:E`, {
+        hints: "on",
+      });
+      await buildingsGame.act("day-1-roll-done", "continue");
+      await buildingsGame.act("end-turn--hero-a", "end-turn");
+      expect(buildingsGame.session.state().hint).toBe("hint.first-skull-drop");
+      await endActiveHint(buildingsGame);
+      const simDone = pressable(buildingsGame).find((a) => a.actionId === "continue");
+      if (!simDone) throw new Error("Expected skull-sim continue action.");
+      await buildingsGame.act(simDone.promptId, simDone.actionId);
+
+      expect(buildingsGame.session.state().hint).toBeNull();
+      expect(buildingsGame.session.state().hintHold).toBeNull();
+      expect(boardOf(buildingsGame).hint).toBeUndefined();
+      expect(buildingsGame.session.projectDevice(buildingsGame.pad).held).toBeUndefined();
+      expect(outcomeOf(buildingsGame)).toMatchObject({
+        stage: "scene",
+        outcome: "lost",
+        reason: "buildings",
+        sceneId: "loss-buildings",
+        caption: OUTCOME_COPY.lossBuildings,
+      });
+      await buildingsGame.tick(3_800);
+      expect(outcomeOf(buildingsGame)?.stage).toBe("scene");
+      await buildingsGame.tick(200);
+      expect(outcomeOf(buildingsGame)?.stage).toBe("summary");
+
+      // (3) Day 1 third corruption in a quest scene with default Hints: On.
+      const corruptionGame = await realGame(
+        `${SEED}~test-at:N-dayside~test-quest:N-dayside=curse~test-named:hero-a=feral+lost`,
+        { hints: "on" },
+      );
+      await corruptionGame.act("day-1-roll-done", "continue");
+      await corruptionGame.act("enter--hero-a--N-dayside", "enter");
+      expect(corruptionGame.session.state().hint).toBe("hint.first-building");
+      await endActiveHint(corruptionGame);
+      const questOpt = pressable(corruptionGame).find((a) => a.promptId.endsWith("--pick--quest"));
+      if (!questOpt) throw new Error("Expected quest option.");
+      await corruptionGame.act(questOpt.promptId, questOpt.actionId);
+      const curseOpt = pressable(corruptionGame).find((a) =>
+        a.promptId.endsWith("--qopt--take-the-curse"),
+      );
+      if (!curseOpt) throw new Error("Expected curse option.");
+      await corruptionGame.act(curseOpt.promptId, curseOpt.actionId);
+      const heroOpt = pressable(corruptionGame).find((a) => a.promptId.endsWith("--qhero--hero-a"));
+      if (!heroOpt) throw new Error("Expected hero option.");
+      await corruptionGame.act(heroOpt.promptId, heroOpt.actionId);
+
+      expect(corruptionGame.session.state().hint).toBeNull();
+      expect(corruptionGame.session.state().hintHold).toBeNull();
+      expect(boardOf(corruptionGame).hint).toBeUndefined();
+      expect(boardOf(corruptionGame).place).toBeNull();
+      expect(corruptionGame.session.projectDevice(corruptionGame.pad).held).toBeUndefined();
+      expect(outcomeOf(corruptionGame)).toMatchObject({
+        stage: "scene",
+        outcome: "lost",
+        reason: "corruption",
+        sceneId: "loss-corruption",
+        caption: OUTCOME_COPY.lossCorruption,
+      });
+      await corruptionGame.tick(3_800);
+      expect(outcomeOf(corruptionGame)?.stage).toBe("scene");
+      await corruptionGame.tick(200);
+      expect(outcomeOf(corruptionGame)?.stage).toBe("summary");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("pause on the outcome scene hides table.outcome and reports tower-lost/paused help instead of outcome-scene", async () => {
+    const game = await realGame(`${SEED}~test-supply:1~test-kingdom:E`, { tower: true });
+    await playUntilOutcome(game);
+    expect(outcomeOf(game)?.stage).toBe("scene");
+    expect(game.session.projectDevice(game.pad).gear?.helpScreen).toBe("outcome-scene");
+
+    // Tower-lost pause on outcome: table.outcome is null and helpScreen is tower-lost.
+    game.tower.loseConnection();
+    game.session.syncTowerSnapshot();
+    await game.session.whenIdle();
+    expect(game.session.state().screen).toBe("pause");
+    expect(game.session.state().pause?.cause).toBe("tower-lost");
+    expect(outcomeOf(game)).toBeNull();
+    expect(boardOutcomeOf(game)).toBeNull();
+    expect(game.session.projectDevice(game.pad).gear?.helpScreen).toBe("tower-lost");
+
+    // Outcome timer does not tick down while paused.
+    await game.tick(4_000);
+    expect(game.session.state().screen).toBe("pause");
+
+    // Resuming (Go on without) restores outcome scene and outcome-scene help.
+    const goWithout = game.session
+      .projectDevice(game.pad)
+      .actions.find((a) => a.open && a.actionId === "go-on-without");
+    if (!goWithout) throw new Error("Expected go-on-without action.");
+    await game.act(goWithout.promptId, goWithout.actionId);
+    expect(game.session.state().screen).toBe("play");
+    expect(outcomeOf(game)?.stage).toBe("scene");
+    expect(game.session.projectDevice(game.pad).gear?.helpScreen).toBe("outcome-scene");
+
+    // Disconnect pause on outcome: table.outcome is null and helpScreen is paused.
+    game.session.disconnect(game.pad);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    await game.session.whenIdle();
+    expect(game.session.state().screen).toBe("pause");
+    expect(game.session.state().pause?.cause).toBe("disconnect");
+    expect(outcomeOf(game)).toBeNull();
+    expect(boardOutcomeOf(game)).toBeNull();
+    expect(game.session.projectDevice(game.pad).gear?.helpScreen).toBe("paused");
   });
 });

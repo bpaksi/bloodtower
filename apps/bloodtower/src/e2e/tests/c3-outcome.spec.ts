@@ -126,7 +126,7 @@ type Table = {
 const openTable = async (
   browser: Browser,
   testInfo: TestInfo,
-  options: { c3?: boolean; tower?: boolean; seed?: string } = {},
+  options: { c3?: boolean; tower?: boolean; seed?: string; hints?: "on" | "off" } = {},
 ): Promise<Table> => {
   const packsDir = options.c3 ? c3Packs() : undefined;
   const host = await startAcceptanceHost(testInfo, {
@@ -151,9 +151,14 @@ const openTable = async (
   const size = pad.locator('button[data-setting="party-size"][data-option="n-1"]');
   await size.click();
   await expect(size).toHaveAttribute("aria-pressed", "true");
-  const hintsOff = pad.locator('button[data-setting="hints"][data-option="off"]');
-  await hintsOff.click();
-  await expect(hintsOff).toHaveAttribute("aria-pressed", "true");
+  if ((options.hints ?? "off") === "off") {
+    const hintsOff = pad.locator('button[data-setting="hints"][data-option="off"]');
+    await hintsOff.click();
+    await expect(hintsOff).toHaveAttribute("aria-pressed", "true");
+  } else {
+    const hintsOnBtn = pad.locator('button[data-setting="hints"][data-option="on"]');
+    await expect(hintsOnBtn).toHaveAttribute("aria-pressed", "true");
+  }
   await clickAct(pad, "continue", "continue-game-settings");
   await holdHeroesFromTest(pad, ["hero-a"]);
   await clickAct(pad, "continue", "continue-claim-heroes");
@@ -766,6 +771,83 @@ test.describe("C3/16 outcome scene: win or loss (SCR-018, UI-046)", { tag: "@ipa
       expect(db.autosave).toBeNull();
     } finally {
       await table.close();
+    }
+  });
+
+  test("Hints On: Day 1 losses (corruption and skulls) show the outcome scene without being hidden by hint.first-day-end", async ({
+    browser,
+  }, testInfo) => {
+    test.setTimeout(240_000);
+    // (1) Day 1 corruption loss in a quest scene with default Hints: On.
+    const corruptionTable = await openTable(browser, testInfo, {
+      hints: "on",
+      seed: `${BASE_SEED}~test-at:N-dayside~test-quest:N-dayside=curse~test-named:hero-a=feral+lost`,
+    });
+    try {
+      const { pad, board, clock } = corruptionTable;
+      await clickAct(pad, "continue", "day-1-roll-done");
+      await clickAct(pad, "enter", "enter--hero-a--N-dayside");
+      // First building hint runs on the 4 s real timer; wait until the quest option is enabled.
+      const questBtn = pad.locator('button[data-prompt-id$="--pick--quest"]');
+      await expect(questBtn).toBeEnabled({ timeout: 20_000 });
+      await questBtn.click();
+      await pad.locator('button[data-prompt-id$="--qopt--take-the-curse"]').click();
+      await pad.locator('button[data-prompt-id$="--qhero--hero-a"]').click();
+
+      await outcomeStageIs(corruptionTable, "scene");
+      await expect(boardMain(board)).not.toHaveAttribute("data-hint-hold", "true");
+      await expect(board.locator("[data-hint]")).toHaveCount(0);
+      const scene = board.locator(
+        '.bt-dialog-frame[data-outcome-scene="loss-corruption"][data-outcome-stage="scene"]',
+      );
+      await expect(scene).toBeVisible();
+      await expect(scene.locator("[data-outcome-caption]")).toHaveText(COPY.lossCorruption);
+      clock.advance(3_800);
+      await pad.waitForTimeout(250);
+      await outcomeStageIs(corruptionTable, "scene");
+      clock.advance(200);
+      await outcomeStageIs(corruptionTable, "summary");
+    } finally {
+      await corruptionTable.close();
+    }
+
+    // (2) Day 1 skulls loss with default Hints: On.
+    const skullsTable = await openTable(browser, testInfo, {
+      hints: "on",
+      tower: true,
+      seed: `${BASE_SEED}~test-supply:1~test-kingdom:E`,
+    });
+    try {
+      const { pad, board, clock } = skullsTable;
+      await clickAct(pad, "continue", "day-1-roll-done");
+      await clickAct(pad, "end-turn", "end-turn--hero-a");
+      // First skull-drop hint runs on the 4 s real timer; wait until skull-drop continue enables,
+      // then record the skull landing.
+      const dropBtn = pad.locator('button[data-action-id="continue"]').first();
+      await expect(dropBtn).toBeEnabled({ timeout: 20_000 });
+      await dropBtn.click();
+      const recordBtn = pad.locator('button[data-action-id="record"]').first();
+      await expect(recordBtn).toBeEnabled({ timeout: 20_000 });
+      await recordBtn.click();
+
+      await outcomeStageIs(skullsTable, "scene");
+      await expect(boardMain(board)).not.toHaveAttribute("data-hint-hold", "true");
+      await expect(board.locator("[data-hint]")).toHaveCount(0);
+      const scene = board.locator(
+        '.bt-dialog-frame[data-outcome-scene="loss-skulls"][data-outcome-stage="scene"]',
+      );
+      await expect(scene).toBeVisible();
+      await expect(scene.locator("[data-outcome-caption]")).toHaveText(COPY.lossSkulls);
+      clock.advance(3_800);
+      await pad.waitForTimeout(250);
+      await outcomeStageIs(skullsTable, "scene");
+      clock.advance(200);
+      await outcomeStageIs(skullsTable, "summary");
+      clock.advance(4_000);
+      await expect(deviceMain(pad)).toHaveAttribute("data-screen", "session", { timeout: 20_000 });
+      await expect(pad.locator("[data-game-stats]")).toBeVisible({ timeout: 20_000 });
+    } finally {
+      await skullsTable.close();
     }
   });
 });

@@ -34,6 +34,7 @@ export const HELP_LINES: Record<string, string> = {
 /** The help sheet a play view shows: the outcome, event, quest, or the gear's own (C3/12, C3/14, C3/16). */
 export const helpScreenFor = (
   view: {
+    screen?: string | undefined;
     gear?: { helpScreen?: string | undefined } | undefined;
     table?:
       | {
@@ -44,14 +45,16 @@ export const helpScreenFor = (
       | undefined;
   },
   inEvent: boolean,
-): string | undefined =>
-  view.table?.outcome
+): string | undefined => {
+  const onPlay = !view.screen || view.screen === "play";
+  return onPlay && view.table?.outcome
     ? "outcome-scene"
     : inEvent
       ? "event-scene"
-      : view.table?.building?.quest
+      : onPlay && view.table?.building?.quest
         ? "quest-scene"
         : view.gear?.helpScreen;
+};
 
 export const MENU_VERSION = "v0.0.0";
 

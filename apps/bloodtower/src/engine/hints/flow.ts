@@ -1,5 +1,6 @@
 import type { EngineEffect } from "../effects.ts";
 import type { DayLocal } from "../loops/day/loop.ts";
+import type { GameLocal } from "../loops/game/loop.ts";
 import type { ShellEffect } from "../loops/session/effects.ts";
 import type { ShellState } from "../loops/session/state.ts";
 import { HINT_TEXT, HINTS_OFF, HINTS_SETTING_ID } from "./copy.ts";
@@ -23,6 +24,13 @@ const dayPhase = (state: ShellState): string | null => {
   return frame ? ((frame.local as DayLocal | undefined)?.phase ?? null) : null;
 };
 
+/** The game loop is on the outcome scene (SCR-018): no tutorial hint may cover it. */
+const onOutcome = (state: ShellState): boolean => {
+  const frame = state.loops.stack.find((row) => row.loopId === "game");
+  const local = frame?.local as GameLocal | undefined;
+  return local?.phase === "outcome" && Boolean(local.outcome);
+};
+
 /** The day loop is in its night steps (a skull is being placed or shown). */
 export const inNightPhase = (state: ShellState): boolean => {
   const phase = dayPhase(state);
@@ -37,6 +45,7 @@ export const loopsEntered = (
   after: ShellState,
   effects: ReadonlyArray<EngineEffect | ShellEffect>,
 ): string[] => {
+  if (onOutcome(after)) return [];
   const out: string[] = [];
   for (const effect of effects) {
     if (effect.kind === "loop-trace" && effect.phase === "enter" && effect.loopId === "encounter") {
@@ -62,6 +71,12 @@ export const applyHints = (
   effects: Array<EngineEffect | ShellEffect>,
   texts: Readonly<Record<string, string>> = HINT_TEXT,
 ): { state: ShellState; extra: ShellEffect[] } => {
+  // Entering the outcome scene (win or loss) clears any lingering hint and suppresses day-end
+  // hints so the outcome painting and caption are never hidden behind a tutorial scroll (C3/16).
+  if (onOutcome(after)) {
+    if (after.hint === null && after.hintQueue.length === 0) return { state: after, extra: [] };
+    return { state: { ...after, hint: null, hintQueue: [] }, extra: [] };
+  }
   const entered = loopsEntered(after, effects);
   if (entered.length === 0) return { state: after, extra: [] };
   const earned = hintsForLoops({ on: hintsOn(after), shown: after.hintsShown }, entered, texts);

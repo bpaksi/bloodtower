@@ -15,7 +15,7 @@ Keep this a checklist; do not write a second design doc.
 - Risk: Med
 - Depends on: C3 feature 10 merged, C2 feature 07 merged, and its `approval.md` on `main`
 - Touches: `apps/bloodtower/src/web/components/board/OutcomeScene.tsx` (new), `apps/bloodtower/src/web/components/device/**`, `apps/bloodtower/src/engine/views/**`, `apps/bloodtower/src/e2e/tests/c3-outcome.spec.ts`
-- Touches amended 2026-11-24 (C3/16 build): `apps/bloodtower/src/protocols/v2/views.ts`, `apps/bloodtower/src/engine/loops/game/loop.ts` and `loop.test.ts`, `apps/bloodtower/src/engine/loops/chapter/playState.ts` and `testBeats.ts`, `apps/bloodtower/src/engine/loops/session/loop.ts`, `stepShell.ts` and `view.ts`, `apps/bloodtower/src/server/core/session.ts`, `outcomeScene.test.ts` (new), `chapterCard.test.ts`, `gameEnd.test.ts`, `apps/bloodtower/src/web/components/board/CoreStoryBoard.tsx`, `OutcomeScene.test.ts` (new), `apps/bloodtower/src/e2e/tests/c3-chapter.spec.ts` and `c3-game-end.spec.ts`.
+- Touches amended 2026-11-24 (C3/16 build): `apps/bloodtower/src/protocols/v2/views.ts`, `apps/bloodtower/src/engine/hints/flow.ts`, `apps/bloodtower/src/engine/loops/game/loop.ts` and `loop.test.ts`, `apps/bloodtower/src/engine/loops/chapter/playState.ts` and `testBeats.ts`, `apps/bloodtower/src/engine/loops/session/loop.ts`, `stepShell.ts` and `view.ts`, `apps/bloodtower/src/server/core/session.ts`, `outcomeScene.test.ts` (new), `chapterCard.test.ts`, `gameEnd.test.ts`, `apps/bloodtower/src/web/components/board/CoreStoryBoard.tsx`, `OutcomeScene.test.ts` (new), `apps/bloodtower/src/e2e/tests/c3-chapter.spec.ts` and `c3-game-end.spec.ts`.
 - Builds: SCR-018, UI-046
 - Deps change: no
 - Runs: cloud

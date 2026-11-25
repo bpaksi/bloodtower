@@ -668,7 +668,7 @@ const buildChance = (state: ShellState): ChanceView | null => {
 };
 
 const buildOutcome = (state: ShellState): OutcomeView | null => {
-  if (state.screen !== "play" && state.screen !== "pause") return null;
+  if (state.screen !== "play") return null;
   const outcome = activeOutcome(state.loops.stack);
   if (!outcome) return null;
   return buildOutcomeView({
