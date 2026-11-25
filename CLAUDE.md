@@ -41,7 +41,7 @@ Many small apps around the *Return to Dark Tower* tower. Bob owns intent and app
 
 ## How work flows
 
-Active planning and parallel dispatch follow forgekit: plans live as GitHub issues in open `Plan: …` milestones (`.claude/skills/plan-run/PLAN-FORMAT.md`) and are dispatched with `plan-run` (see [AGENTS.md](AGENTS.md#plans)). App-level specs, briefs, and evals remain under `apps/<app>/`. For `Plan:` milestone PRs, [AGENTS.md](AGENTS.md#plans) governs review (forgekit `plan-run`, GrokBot Review A plus a non-author Review B, and `needs-owner`); [docs/sdlc.md](docs/sdlc.md) holds only the Bloodtower-specific brief/eval and lite-CI details.
+Active planning and parallel dispatch follow forgekit: plans live as GitHub issues in open `Plan: …` milestones (`.claude/skills/plan-run/PLAN-FORMAT.md`) and are dispatched with `plan-run`, or `bt-build` for a batch with Bloodtower's defaults (see [AGENTS.md](AGENTS.md#plans)). App-level specs, briefs, and evals remain under `apps/<app>/`. For `Plan:` milestone PRs, [AGENTS.md](AGENTS.md#plans) governs review (forgekit `plan-run`, GrokBot Review A plus a non-author Review B, and `needs-owner`); [docs/sdlc.md](docs/sdlc.md) holds only the Bloodtower-specific brief/eval and lite-CI details.
 
 1. Read the app's `spec.md`, any active `Plan:` milestone issue, and the current `plans/Mx-*.md` (or feature brief/eval) before changing code. If they conflict with the intent, the spec wins.
 2. One branch per plan step/issue: `plan/<issue>-<slug>` (or `<type>/<app>-<slug>` / `chore/<slug>` for non-plan work). Never commit on `main`.

@@ -111,6 +111,7 @@ REVIEW.md                       # review passes: bugs, physical-action safety, s
 .claude/skills/stitch/SKILL.md             # third-party: drives the `stitch` CLI (Stitch designs, DESIGN.md); project bound in .stitch.json
 .claude/skills/scrollytelling/SKILL.md     # third-party: guidance for scroll-driven pages (layout patterns, accessibility, performance)
 .claude/skills/bt-assets/SKILL.md             # Bloodtower: needs, render, pack, import and redo for a story's assets
+.claude/skills/bt-build/SKILL.md              # Bloodtower: start a batch of plan issues with plan-run, Hammer only, cap 2
 .claude/skills/bt-design-session/SKILL.md     # Bloodtower: a game-design session in its own worktree, one question at a time, one card commit per ruling
 .claude/skills/cleanup-worktrees/SKILL.md     # run `pnpm cleanup:worktrees`, show the table, remove the SAFE rows after Bob's OK
 .claude/skills/google-tts/SKILL.md            # text to speech with the Gemini API, for voice lines
