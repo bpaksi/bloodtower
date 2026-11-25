@@ -18,6 +18,8 @@ DEPENDS_RE = re.compile(r"^[ \t]*Depends on:[ \t]*(.*?)[ \t]*$", re.IGNORECASE |
 DONE_RE = re.compile(r"^##[ \t]+Done when[ \t]*$", re.IGNORECASE | re.MULTILINE)
 CHECKBOX_RE = re.compile(r"^[ \t]*[-*][ \t]+\[[ xX]\]", re.MULTILINE)
 REF_RE = re.compile(r"^#(\d+)$")
+TOUCHES_RE = re.compile(r"^[ \t]*Touches:[ \t]*(.*?)[ \t]*$", re.IGNORECASE | re.MULTILINE)
+GLOB_CHARS = "*?["
 
 
 def gh_json(args):
@@ -83,6 +85,15 @@ def parse_issue(issue, errors):
                 else:
                     deps.append(int(m.group(1)))
 
+    touches = None
+    tlines = TOUCHES_RE.findall(body)
+    if len(tlines) > 1:
+        errors.append(f"#{n}: has {len(tlines)} 'Touches:' lines; use one, comma-separated")
+    elif tlines:
+        touches = [t.strip().strip("`") for t in tlines[0].split(",") if t.strip().strip("`")]
+        if not touches:
+            errors.append(f"#{n}: 'Touches:' is empty (list paths or globs, comma-separated)")
+
     done = DONE_RE.search(body)
     if not done or not CHECKBOX_RE.search(body[done.end():]):
         errors.append(f"#{n}: needs a '## Done when' section with at least one '- [ ]' item")
@@ -97,7 +108,33 @@ def parse_issue(issue, errors):
         "long": "size:long" in labels,
         "labels": sorted(labels),
         "depends_on": deps,
+        "touches": touches,
     }
+
+
+def touch_prefix(entry):
+    """The fixed part of a path or glob: everything before the first wildcard, without a
+    trailing '/'. 'src/a/**' -> 'src/a', 'src/a/*.ts' -> 'src/a', 'src/a.ts' -> 'src/a.ts'."""
+    cut = min([entry.index(c) for c in GLOB_CHARS if c in entry] or [len(entry)])
+    fixed = entry[:cut]
+    if cut < len(entry) and "/" in fixed:
+        fixed = fixed[:fixed.rindex("/")]
+    elif cut < len(entry):
+        fixed = ""
+    return fixed.strip("/")
+
+
+def overlaps(a, b):
+    """True when two Touches lists could name the same file. Conservative: two globs that
+    share a directory count as overlapping, so overlapping work runs one after the other."""
+    for x in a:
+        for y in b:
+            px, py = touch_prefix(x), touch_prefix(y)
+            if not px or not py or px == py:
+                return True
+            if px.startswith(py + "/") or py.startswith(px + "/"):
+                return True
+    return False
 
 
 def find_cycle(items):
@@ -176,6 +213,22 @@ def evaluate(plan, raw_issues, max_running):
     running = [i["number"] for i in ordered if i["status"] == "running"]
     ready = [i for i in ordered if i["status"] == "ready"]
     slots = max(0, max_running - len(running))
+    # Issues whose open work could touch the same files run one after the other: an
+    # unmerged PR (running or awaiting merge) holds back any ready issue that overlaps it.
+    busy = [i for i in ordered if i["status"] in ("running", "awaiting-merge") and i["touches"]]
+    dispatch, held = [], []
+    for i in ready:
+        if len(dispatch) >= slots:
+            break
+        if i["touches"]:
+            clash = [b["number"] for b in busy if overlaps(i["touches"], b["touches"])]
+            if clash:
+                held.append({"number": i["number"], "overlaps": clash})
+                continue
+            busy.append(i)
+        dispatch.append(i["number"])
+    warnings = [f"#{i['number']}: no 'Touches:' line, so it isn't checked for overlap"
+                for i in ordered if i["touches"] is None and i["status"] in ("ready", "running")]
     result.update({
         "issues": ordered,
         "counts": {s: sum(1 for i in ordered if i["status"] == s)
@@ -183,7 +236,9 @@ def evaluate(plan, raw_issues, max_running):
                              "blocked-on-owner", "needs-human", "needs-owner")},
         "running": running,
         "max_running": max_running,
-        "dispatch": [i["number"] for i in ready[:slots]],
+        "dispatch": dispatch,
+        "held_for_overlap": held,
+        "warnings": warnings,
         "complete": all(i["status"] == "done" for i in ordered),
     })
     return result
