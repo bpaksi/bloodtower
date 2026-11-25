@@ -42,6 +42,11 @@ Done = every row pass on the current head. Any code change → verifier reruns.
 ## Not verified
 <!-- Be specific, for example "real tower: mock only". "None" only if true. -->
 
+## Follow-ups
+
+<!-- Work this PR leaves for later, one bullet each with the files, so the coordinator files it as an issue after the merge. -->
+<!-- Include every placeholder the feature shows in place of real art, voice or dialogue, and the asset it needs. "None" only if true. -->
+
 ## Round log
 | Round | Head | Findings fixed (reviewer) | Tests added |
 | --- | --- | --- | --- |

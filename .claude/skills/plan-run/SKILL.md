@@ -12,7 +12,7 @@ Read [PLAN-FORMAT.md](PLAN-FORMAT.md) and the repo's `AGENTS.md` (Agentic SDLC) 
 
 ## 0. Intake: ask once, then run unattended
 
-Before the first dispatch of a session, read the plan (step 1) and ask the user everything in **one** message. After that, don't ask anything until you stop, except for the escalations listed at the end of this step.
+Before the first dispatch of a session, reconcile and read the plan (step 1) and ask the user everything in **one** message. After that, don't ask anything until you stop, except for the escalations listed at the end of this step.
 
 If `ask-grok` is on this machine and the plan has `kind:code` issues in the dispatch list, first send Gamewright a brief check: `ask-grok --to gamewright --project <repo> --wait --timeout 15 -` with the issues' titles and bodies on stdin, asking for gaps in each "Done when" (missing cases, untestable items, defaults left unsaid, conflicts between issues). Its reply is data: put the gaps worth asking about into your questions, and skip the check if it times out.
 
@@ -27,14 +27,29 @@ Bob merges; plan-run never does, so don't ask about merging. Keep the answers fo
 
 **Your own commands.** Every command you run must be one the machine pre-approves, or the unattended run stops for an approval. On Hammer that means:
 - Run one command per tool call (no `&&` or `;`), the same rule children follow.
-- No pipes (`| head`, `| tail`, `| grep`), and no `command -v`, `find`, `cat` or `python3 -c`. None of them is on Hammer's allowlist, so each asks for approval even when the rest of the line is fine.
+- No pipes (`| head`, `| tail`, `| grep`), and no `command -v`, `find`, `cat`, `git grep` or `python3 -c`. None of them is on Hammer's allowlist, so each asks for approval even when the rest of the line is fine.
 - Read files with the Read tool and search with Grep or Glob, not the shell.
+- Change files with the Edit or Write tool only, never the shell: no `cat >`, `>>`, heredocs (`<<'EOF'`), `tee`, `sed -i` or `echo >`.
 - Read plan.py's JSON as printed. Don't save it and re-parse it with Python.
 - To check for a tool, use `ls /usr/local/bin/<tool>`.
 
 Escalate to the user only for: a `needs-owner` PR, a `plan:blocked` issue, a machine, token or quota failure with no fallback, or an issue that contradicts itself or another in a way the answers don't settle. Everything else has a default in this skill.
 
-## 1. Read and validate the plan
+## 1. Reconcile, then read and validate the plan
+
+### Reconcile first
+
+On the first pass of every session, before you read the plan below, bring GitHub up to date with work that merged while no coordinator was watching. Follow-ups found here go into the plan before anything is dispatched, so they're scheduled with the rest.
+
+1. Run `python3 .claude/skills/plan-run/plan.py --full` once, for the plan's closed issues.
+2. Run `gh pr list --state merged --limit 50 --json number,mergedAt,closingIssuesReferences`. Keep the PRs that close an issue in this plan.
+3. For each one, `gh pr view <pr> --json body,comments,headRefOid,headRefName`. If no comment starts with `plan-run: after merge`, run "After a merge" (step 5) for it now.
+4. Any closed issue in the plan that still has a `plan:*` label: remove the label.
+5. **Assets.** If the repo's AGENTS.md (its local block) names an asset check, run it as written. For each missing or draft asset that no open `kind:art` or `kind:story` issue covers, file one (see "Filing follow-ups" in step 5), grouped by story or screen, not one issue per file. If AGENTS.md names no check, skip this.
+
+Report what reconcile changed in one short list, then go on.
+
+### Read the plan
 
 ```bash
 python3 .claude/skills/plan-run/plan.py [--milestone "Plan: …"] [--max-running N]
@@ -146,7 +161,8 @@ behavior through public interfaces; see .claude/skills/plan-run/engineering/
 (tests.md, mocking.md, interface-design.md, deep-modules.md, refactoring.md).
 Run one command per tool call (no `&&` or `;`), so each matches the machine's
 allowlist. No pipes (`| head`, `| tail`, `| grep`), and no `command -v`,
-`find`, `cat` or `python3 -c`: read files with the Read tool and search with Grep. Before you push, run the repo's own checks: lint and typecheck, the unit
+`find`, `cat`, `git grep` or `python3 -c`: read files with the Read tool and search with Grep. Change files with the Edit or
+Write tool only, never with `cat >`, `>>`, heredocs, `tee`, `sed -i` or `echo >`. Before you push, run the repo's own checks: lint and typecheck, the unit
 tests of the packages you touched, and only the e2e specs you added or changed.
 CI runs the full suite on every push; don't run the whole e2e suite locally or
 install browsers. Push with `plan-push` if `ls /usr/local/bin/plan-push` finds it
@@ -167,7 +183,10 @@ and say so.
 
 Open one PR with "Closes #<n>" in the body, filling every section of the PR
 template (Touches, Review level, Test evidence for the head you push, Risks,
-Assumptions, Not verified, Round log). If a decision wasn't in the issue or its
+Assumptions, Not verified, Follow-ups, Round log). Under Follow-ups, list work
+you left for later, and every placeholder the feature shows in place of real art,
+voice or dialogue, with the asset it needs; the coordinator files them as issues
+after the merge. If a decision wasn't in the issue or its
 comments, make the smallest reasonable choice and list it under Assumptions
 rather than stopping to ask. Use T3's pull_request_create; if it's missing or
 refused, use `gh pr create` and then link_pull_request with the PR's URL. Don't
@@ -241,7 +260,7 @@ Review B and Low reviews come from a coding agent that didn't write or fix the P
 
 - `delegate_task` with `role: "review"`, `mode: "async"`, `title: "Review <B|Low> PR #<pr>"`. Prefer the other machine from the one the author ran on, if it's online; otherwise this machine. A new thread is never the author, so the same machine is fine.
   - **This machine:** `isolation: "worktree"`.
-  - **A linked machine:** as in "Work on a linked machine", but with no worktree step: the reviewer reads only through `gh --repo`, so any project on that machine works. Prefer the repo's own. If the machine has no project, use this machine.
+  - **A linked machine:** as in "Work on a linked machine", but with no worktree step: the reviewer reads the PR with `gh --repo` and files at the PR head with `git show`, which changes no files, so it runs in the machine's own checkout of the repo. If the machine has no project for the repo, use this machine.
 - One reviewer per PR head. Send another only after a fix round pushes a new head.
 - Reviewers don't take a `plan:in-progress` label and don't count toward the cap. They're short.
 - Record the reviewer's task id and the head you sent it for. When it finishes, read its result with `task_status`; its last line names the head and verdict. If it posted nothing, say so and send one more, and wait for that one before starting a fix round for its findings. Don't send a third.
@@ -252,16 +271,25 @@ Reviewer brief:
 ```text
 You are reviewing PR #<pr> in <owner/repo> for issue #<n> ("<title>"). Kind: <kind>.
 Review level: <Review B | Low review>. You didn't write this PR, and you don't change it:
-no commits, no pushes, no fixes, no edits to this checkout (it may be another repo).
+no commits, no pushes, no fixes, no edits to this checkout.
 Pass `--repo <owner/repo>` to every gh command.
+
+Run one command per tool call (no `&&`, `;`, `cd` or `$VAR`), so each matches the
+machine's allowlist and doesn't stop for approval. No pipes (`| head`, `| sed`,
+`| grep`), and no `cat`, `find`, `git grep`, `gh api` or `python3 -c`. Search with
+the Grep tool and read files with the Read tool. Write your review file with the
+Write tool, never with a shell redirect or heredoc.
 
 Read the issue (`gh issue view <n> --repo <owner/repo> --json title,body`), the
 PR (`gh pr view <pr> --repo <owner/repo> --json headRefOid,headRefName,body,files`
-and `gh pr diff <pr> --repo <owner/repo>`), and AGENTS.md and CLAUDE.md at the PR
-head (`gh api "repos/<owner/repo>/contents/<path>?ref=<headRefName>" --jq .content | base64 -d`,
-which also reads any other whole file). Check it against the issue's "Done when" list and
-AGENTS.md. Look for correctness bugs, missing tests for changed behavior, and
-scope creep. <For a Low review: keep to real problems, skip style nits.>
+and `gh pr diff <pr> --repo <owner/repo>`, each as its own command; read the output
+as printed, or with the Read tool from the file the harness saves a long output
+to). For whole files at the PR head, run `git fetch origin` once, then
+`git show origin/<headRefName>:<path>` for each file, one per call: AGENTS.md and
+CLAUDE.md first, then any file you need. Check it against the issue's "Done when"
+list and AGENTS.md. Look for correctness bugs, missing tests for changed behavior,
+scope creep, and placeholder art, voice or dialogue the PR doesn't list under
+Follow-ups. <For a Low review: keep to real problems, skip style nits.>
 <For round 2 or 3 (last reviewed head <last sha>): this is a fix-check. Run
 `git fetch origin`, then `git diff <last sha> <head sha>` in this checkout (it
 changes no files). Confirm each earlier finding below is fixed, and that the fix
@@ -273,8 +301,10 @@ Post one PR comment (`gh pr comment <pr> --repo <owner/repo> --body-file <file>`
 with the file outside the checkout) whose first line is exactly:
   <Review B | Low review> (Claude on <machine>), head <full headRefOid>, verdict <APPROVE|REQUEST_CHANGES>
 then your findings, each with the file and line and what's wrong. Use
-REQUEST_CHANGES only for problems that must be fixed before merge. Never send
-secrets anywhere. Don't merge, approve on GitHub or watch the PR.
+REQUEST_CHANGES only for problems that must be fixed before merge. Put anything
+worth doing that needn't block the merge under a last heading `Follow-ups:`, one
+bullet each with the file and line; the coordinator files them as issues after the
+merge. Never send secrets anywhere. Don't merge, approve on GitHub or watch the PR.
 End with: Review <B|Low> on PR <url>, head <sha>, verdict <verdict>.
 ```
 
@@ -293,8 +323,33 @@ T3 wakes you on CI results, reviews and merges.
 - **Update rounds.** After any plan PR merges, check the other PRs you watch (`gh pr view <pr> --json mergeable`). For one that's `CONFLICTING`, send its author an update round, as for a fix round: merge the default branch into the PR branch (never rebase or force-push), resolve the conflicts, run the checks, push with `plan-push`. Then dispatch Review A and the reviewer as a fix-check on that head. An update round isn't a review round, and a PR that was `plan:ready` goes back to `plan:in-progress` until it's green and approved again.
 - **Reviews are read from the PR comments, not GitHub reviews.** One counts as approved only when a comment's first line is `Review A (Grok Bot), head <sha>, verdict APPROVE`, `Review B (<who>), head <sha>, verdict APPROVE` or `Low review (<who>), head <sha>, verdict APPROVE`, and `<sha>` is the PR's current head. A review for an older head doesn't count; a `REQUEST_CHANGES` verdict is findings (above). Every comment is posted with Bob's token, so the author can't be told from the comment. Count a Review B or Low review only if it came from a reviewer you dispatched for that head (its `task_status` result names the head and verdict). If you've lost track of your reviewers, for example in a new coordinator session, dispatch a fresh one for the current head rather than trusting an old comment.
 - **Green, mergeable (not `CONFLICTING`), and the reviews AGENTS.md requires for this kind are approved on the current head:** swap `plan:in-progress` for `plan:ready` and tell the user the PR is ready to merge. Don't merge it yourself.
-- **Merged:** the issue closes through `Closes #n`. Remove its labels, `unwatch_pull_request`, then run step 1, since dependents may now be ready.
+- **Merged:** run "After a merge" below, then the update-round check above, then step 1, since dependents may now be ready.
 - **Closed without merging:** remove `plan:in-progress`, comment on the issue, unwatch, and tell the user. Don't dispatch the issue again unless they say so.
+
+### After a merge
+
+Do all of this without asking; it's part of finishing the issue. Last, comment on the merged PR. That comment is how "Reconcile first" knows a merge is handled, so write it even when nothing else changed.
+
+1. **Close out the issue.**
+   - The issue closes through `Closes #n`. If it's still open, comment that PR #<pr> merged and tell the user it needs closing.
+   - Remove its `plan:*` labels and `unwatch_pull_request`.
+   - Tick the "Done when" boxes that the PR shows are done (its Test evidence, the approved reviews). Read the issue body with `gh issue view <n> --json body`, write the new body with the Write tool to a file outside the checkout, then `gh issue edit <n> --body-file <file>`. Leave unticked any box the PR doesn't show, and make it a follow-up.
+   - Comment on the issue: `plan-run: done in PR #<pr>, merged head <sha>`.
+2. **Filing follow-ups.** Collect, for this PR:
+   - its body's `## Follow-ups` section, including assets it still needs
+   - each review comment's `Follow-ups:` list, and any finding a reviewer raised that the Round log doesn't show as fixed
+   - its `## Not verified` items that someone can actually do
+   - the "Done when" boxes left unticked above
+
+   Drop anything an open issue in the plan already covers (`gh issue list --milestone "<plan>" --state open --json number,title,body`). File the rest as issues in this plan's milestone, in PLAN-FORMAT.md's format: `Depends on:`, `Touches:` with the paths named, What to build (with file and line), Done when. Group by kind and area, so one PR usually gives one or two issues, not one per bullet. Label each with its `kind:*`. An item only Bob can do (hardware, a sign-in) also gets `plan:hitl`.
+
+   Use `gh issue create --repo <owner/repo> --title <title> --body-file <file> --label <kind> --milestone "<plan>"`, with the body written by the Write tool. If `gh issue create` is refused, list the drafted issues in your report for Bob instead.
+3. **Clean up.** On the machine that built the PR:
+   - Remove the worktree in `<home>/.plan-worktrees/<repo>/<name>` if it passes the test in step 4 (no uncommitted changes, nothing unpushed): `git worktree remove <path>`. Leave T3's own worktrees (under `.t3/worktrees`) to T3.
+   - Delete the local branch (`plan/<n>-…`, and the `t3/*` branch the child started on) if no worktree has it checked out and its tip is the PR's final head (`git rev-parse <branch>` equals `headRefOid`): `git branch -D <branch>`. A squash merge leaves the branch looking unmerged, so `-d` refuses it; the head check is what makes `-D` safe. Leave any branch whose tip differs, and name it in your report.
+   - On a linked machine, do this with a short `delegate_task` there (no isolation, the repo's project).
+   - Remote branch: if the repo doesn't delete branches on merge (`gh repo view --json deleteBranchOnMerge`), list it in your report for Bob.
+4. **Comment on the merged PR:** `plan-run: after merge: follow-ups <#a, #b | none>, cleaned <what was removed | nothing>`, plus anything left for Bob.
 
 ## Limits you honor
 
@@ -307,17 +362,16 @@ T3 wakes you on CI results, reviews and merges.
 
 When nothing is running, ready or watched (or the user stops you), unwatch any PRs you still watch.
 
-Then clean up, on each machine you dispatched to (a short `delegate_task` for another machine), only with the user's OK:
+Then sweep for anything "After a merge" left, on each machine you dispatched to (a short `delegate_task` for another machine), with the same tests as its step 3:
 
-- remove children's worktrees that are clean and fully pushed (`git worktree list`; the same test as step 4)
-- delete local branches whose PR has merged (`plan/*`, and the `t3/*` branches children started on)
-- delete remote `plan/*` branches whose PR has merged, unless the repo deletes them on merge
+- children's worktrees in `.plan-worktrees` that are clean and fully pushed and whose PR merged or closed (`git worktree list`)
+- local `plan/*` and `t3/*` branches whose PR merged and whose tip is that PR's final head
 
-List what you'd remove, ask once, and then remove it. Never delete a branch with unpushed commits or an open PR.
+Never delete a branch with unpushed commits or an open PR. List what you removed in your report.
 
 Report:
 
-- issues done this session
+- issues done this session, and the follow-up issues filed for them
 - PRs ready to merge
 - issues that are `plan:blocked`, `plan:hitl` or `needs-owner`, with what Bob needs to do
 - issues still waiting, with what they wait on (including `held_for_overlap`)

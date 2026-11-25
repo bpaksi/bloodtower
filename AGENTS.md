@@ -30,6 +30,8 @@ Machines and agents follow Foundry plan v2 (`bpaksi/foundry`, `docs/plan-foundry
 
 - A plan is GitHub issues in an open `Plan: …` milestone, in the format in `.claude/skills/plan-run/PLAN-FORMAT.md`. There is no other plan format.
 - `plan-write` turns an idea or spec into a plan. `plan-run` works the latest plan in parallel through T3: it validates the plan, dispatches ready issues as child tasks under a concurrency cap, and watches their PRs. It refuses a plan that doesn't conform.
+- After each merge, the coordinator closes out the issue (labels, its "Done when" boxes), files the PR's follow-ups as new issues in the plan, and removes the merged branch and worktree. Each session starts by reconciling merges it didn't see, so follow-ups are planned before anything new is dispatched.
+- Follow-ups come from the PR's `## Follow-ups` section, the `Follow-ups:` list at the end of a review, and its unfinished "Done when" boxes. Placeholder art, voice or dialogue is always a follow-up, so missing assets become `kind:art` or `kind:story` issues instead of being forgotten. A repo with an asset check names it in its local block below, and the coordinator runs it when it reconciles.
 
 ### Rules
 
@@ -49,4 +51,10 @@ Machines and agents follow Foundry plan v2 (`bpaksi/foundry`, `docs/plan-foundry
 
 <!-- forgekit:local:start -->
 Bloodtower detail (lite CI allowlist, verifier/adversary, plan gates, and brief/eval conventions): [docs/sdlc.md](docs/sdlc.md).
+
+**Asset check** (plan-run runs it when it reconciles; read-only, no commands):
+- Search `packs/*/pack.yaml` with the Grep tool for `status: placeholder`. Each match is a pack asset still to make, and its `type:` says which kind: pictures (`portrait`, `place`, `painting` and the like) and voiced lines (`line`, `vo.*`) are `kind:art` for Illusionist; a line with no final text yet is `kind:story` for Loremaster first.
+- Read the "Missing Illusionist assets" table in `apps/bloodtower/plans/visuals-prompts.md`. Each row not yet delivered is a `kind:art` follow-up for its swap point.
+- Group the issues by pack and asset type (for example "Base pack hero portraits"), not one per asset.
+- Don't run `pnpm assets:needs`, `assets:render` or `assets:pack` to check: they need an asset-studio work folder and write job files.
 <!-- forgekit:local:end -->
