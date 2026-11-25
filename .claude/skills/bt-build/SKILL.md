@@ -13,8 +13,8 @@ A front door to the `plan-run` skill with Bloodtower's answers filled in, so sta
 | Bob types | Batch |
 | --- | --- |
 | `bt-build` | Every issue in plan.py's `dispatch` list right now. |
-| `bt-build 3` | A batch of 3: the first 3 ready issues, lowest number first. `--max` still limits how many run at once, so with the default cap of 2 the third starts when plan.py next shows a free slot (the cap counts `plan:in-progress` issues). plan.py's `dispatch` list is cut to the cap, so take the batch from its ready issues, not only from `dispatch`. |
-| `bt-build #445 #446` | Those issues only. plan.py has no issue filter: run it as usual and keep only these numbers from its output. Any that aren't ready are reported with their status (blocked, held for overlap, hitl, running), and the rest start under the cap. |
+| `bt-build 3` | A batch of 3. Start issues only from plan.py's `dispatch` list, on each pass, until 3 have started. `dispatch` is already cut to the cap and has overlapping issues held out, so never start a ready issue that isn't in it. |
+| `bt-build #445 #446` | Those issues only. plan.py has no issue filter: on each pass, start the ones that are in `dispatch` and report the rest with their status (`held_for_overlap`, blocked, hitl, running). A held issue starts on a later pass once it shows up in `dispatch`. |
 | `--both` | Balance across Hammer and Anvil. Default: Hammer only. |
 | `--max N` | Concurrency cap passed to plan.py as `--max-running N`. Default: 2. |
 | `--until-done` | Keep starting newly ready issues until the plan is done. Default: stop after this batch merges or escalates. |
