@@ -482,6 +482,15 @@ const stepShellCore = (state: ShellState, event: ShellEvent): ShellStepResult =>
       const check = buildPieceCheck(next, e.towerInPlay);
       if (check) {
         next.pieceCheck = check;
+        if (e.towerInPlay) {
+          next.towerLinked = true;
+          next.towerWithout = false;
+          next.towerChoice = "connect";
+        } else {
+          if (next.towerLinked) next.towerWithout = true;
+          next.towerLinked = false;
+          next.towerChoice = "without";
+        }
         if (!next.pause) {
           next.screen = "piece-check";
           next.stage = "playing";

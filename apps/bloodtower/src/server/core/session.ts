@@ -11,6 +11,7 @@ import type { ShellStory } from "../../engine/loops/session/pack.ts";
 import {
   DRUM_ORDER,
   type DrumSideIndex,
+  dropTowerStepsFromPieceCheck,
   ensurePieceCheckOffers,
 } from "../../engine/loops/session/pieceCheck.ts";
 import {
@@ -398,14 +399,6 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           ...resumed.state,
           tower: options.tower.snapshot(),
         };
-        if (towerReady(state.tower) && state.pause?.cause === "tower-lost") {
-          state = {
-            ...state,
-            pause: null,
-            stage: "playing",
-            screen: state.pieceCheck ? "piece-check" : "play",
-          };
-        }
         // A game that went on without the tower stays without it, tower or not (DEC-301).
         // Play without Tower on Continue's tower block is that choice too (DEC-711): the saved
         // link must not come back, or seating opens a tower-lost pause that still offers the
@@ -413,6 +406,14 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         const playWithout =
           state.towerWithout ||
           (state.towerLinked && live.towerChoice === "without" && !live.towerLinked);
+        if (state.pause?.cause === "tower-lost" && (towerReady(state.tower) || playWithout)) {
+          state = {
+            ...state,
+            pause: null,
+            stage: "playing",
+            screen: state.pieceCheck ? "piece-check" : "play",
+          };
+        }
         state = {
           ...state,
           resumedFromAutosave: true,
@@ -427,11 +428,24 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
           towerWithout: playWithout,
           games: live.games,
         };
+        const hadPieceCheck = state.pieceCheck !== null;
+        if (playWithout && state.pieceCheck) {
+          state = {
+            ...state,
+            pieceCheck: {
+              ...state.pieceCheck,
+              steps: [...state.pieceCheck.steps],
+              confirmed: [...state.pieceCheck.confirmed],
+              skipped: [...state.pieceCheck.skipped],
+            },
+          };
+          dropTowerStepsFromPieceCheck(state);
+        }
         // The saved party sits on the iPads joined now: a hold stays only for one of them (DEC-952).
         state = seatOnContinue(state, live);
         // C2-11: run Continue's piece check between the tower block and the resumed chapter
         // whenever the save has reached play and a check is not already mid-progress.
-        if (state.play !== null && !state.pieceCheck) {
+        if (state.play !== null && !hadPieceCheck && !state.pieceCheck) {
           const towerInPlay =
             state.towerLinked && !state.towerWithout && state.towerChoice !== "without";
           const startEvent: ShellEvent = { kind: "piece-check-start", v: 1, towerInPlay };
@@ -516,11 +530,13 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
       const parsed = shellEffectSchema.safeParse(effect);
       if (parsed.success) shellEffects.push(parsed.data);
     }
-    if (continued && state.screen === "play") {
+    if (continued && (state.screen === "play" || state.screen === "pause")) {
       for (const effect of refreshOffersAfterRestore(state)) {
         const parsed = shellEffectSchema.safeParse(effect);
         if (parsed.success) shellEffects.push(parsed.data);
       }
+    } else if (continued && state.screen === "piece-check") {
+      ensurePieceCheckOffers(state);
     }
     const outcomes = await runShellEffects(state, shellEffects, effectsCtx());
     const tellDevice = (
@@ -967,6 +983,10 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
         }
         const lobby = LOBBY_RESUME.has(resumed.screen) && !resumed.autosave && !state.autosave;
         if (midCheck && savedRow) {
+          const playWithout =
+            midCheck.towerWithout ||
+            midCheck.pieceCheck?.towerInPlay === false ||
+            resumed.towerChoice === "without";
           state = {
             ...midCheck,
             devices: new Set(state.devices),
@@ -983,11 +1003,16 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
             pause: null,
             screen: "piece-check",
             stage: "playing",
-            towerChoice: resumed.towerChoice,
+            towerLinked: playWithout ? false : midCheck.towerLinked,
+            towerWithout: playWithout ? midCheck.towerWithout || midCheck.towerLinked : false,
+            towerChoice: playWithout ? "without" : resumed.towerChoice,
             games: resumed.games,
             pieceCheck: midCheck.pieceCheck
               ? {
                   ...midCheck.pieceCheck,
+                  steps: [...midCheck.pieceCheck.steps],
+                  confirmed: [...midCheck.pieceCheck.confirmed],
+                  skipped: [...midCheck.pieceCheck.skipped],
                   drumsTurning: false,
                   drumsTurned: midCheck.pieceCheck.drumsTurning
                     ? false
@@ -1001,7 +1026,19 @@ export const createCoreSession = (options: CoreSessionOptions): CoreSession => {
               day: midCheck.play?.dayNumber ?? 1,
             },
           };
-          ensurePieceCheckOffers(state);
+          if (playWithout && state.pieceCheck?.towerInPlay) {
+            dropTowerStepsFromPieceCheck(state);
+          }
+          if (state.screen === "piece-check") {
+            ensurePieceCheckOffers(state);
+          } else if (state.screen === "play") {
+            const shellEffects: ShellEffect[] = [];
+            for (const effect of refreshOffersAfterRestore(state)) {
+              const parsed = shellEffectSchema.safeParse(effect);
+              if (parsed.success) shellEffects.push(parsed.data);
+            }
+            await runShellEffects(state, shellEffects, effectsCtx());
+          }
           options.onChange();
           persistSessionMarker();
           return;

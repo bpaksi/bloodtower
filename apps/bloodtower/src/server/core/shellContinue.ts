@@ -1,5 +1,9 @@
 import type { ShellEvent } from "../../engine/loops/session/events.ts";
-import { ensurePieceCheckOffers } from "../../engine/loops/session/pieceCheck.ts";
+import {
+  ensurePieceCheckOffers,
+  PIECE_CHECK_PROMPT_PREFIX,
+} from "../../engine/loops/session/pieceCheck.ts";
+import { goOnWithout } from "../../engine/loops/session/reconnect.ts";
 import type { ShellState } from "../../engine/loops/session/state.ts";
 import { SHELL_ENGINE_VERSION } from "../../engine/loops/session/state.ts";
 import { stepShell } from "../../engine/loops/session/stepShell.ts";
@@ -90,6 +94,45 @@ const applyShellEvents = (start: ShellState, events: readonly ShellEvent[]): She
       event.promptId === "continue-saved-game" &&
       event.actionId === "continue"
     ) {
+      // If Continue resumed a mid-check tower-lost pause with the tower ready (the next press
+      // is a piece-check step rather than a pause-* resolution), clear the saved pause so later
+      // step confirmations in the log replay cleanly.
+      if (state.pause?.cause === "tower-lost" && state.pieceCheck !== null) {
+        const nextPress = events.slice(i + 1).find((later) => later.kind === "press");
+        if (nextPress?.promptId.startsWith(PIECE_CHECK_PROMPT_PREFIX)) {
+          state = {
+            ...state,
+            pause: null,
+            stage: "playing",
+            screen: "piece-check",
+          };
+          ensurePieceCheckOffers(state);
+        }
+      }
+      continue;
+    }
+    if (
+      event.kind === "press" &&
+      event.promptId === "play-without-tower" &&
+      event.actionId === "play-without-tower" &&
+      state.enter === null &&
+      state.pause?.cause === "tower-lost"
+    ) {
+      state = {
+        ...state,
+        ...(state.pieceCheck
+          ? {
+              pieceCheck: {
+                ...state.pieceCheck,
+                steps: [...state.pieceCheck.steps],
+                confirmed: [...state.pieceCheck.confirmed],
+                skipped: [...state.pieceCheck.skipped],
+              },
+            }
+          : {}),
+      };
+      goOnWithout(state);
+      if (state.screen === "piece-check") ensurePieceCheckOffers(state);
       continue;
     }
     state = stepShell(state, event).state;

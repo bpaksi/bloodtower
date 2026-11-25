@@ -535,4 +535,32 @@ describe("piece check from a save (C2-11)", () => {
     expect(turn.awaitingPress).toBe(false);
     expect(cur.offered.some((offer) => offer.open && offer.actionId === "leave")).toBe(true);
   });
+
+  it("piece-check-start keeps tower flags consistent with towerInPlay", () => {
+    const linked = makeSavedShell();
+    expect(linked.towerLinked).toBe(true);
+    expect(linked.towerWithout).toBe(false);
+
+    const without = stepShell(linked, {
+      kind: "piece-check-start",
+      v: 1,
+      towerInPlay: false,
+    }).state;
+    expect(without.towerLinked).toBe(false);
+    expect(without.towerWithout).toBe(true);
+    expect(without.towerChoice).toBe("without");
+
+    const unlinked = makeSavedShell();
+    unlinked.towerLinked = false;
+    unlinked.towerWithout = false;
+    unlinked.towerChoice = "without";
+    const withTower = stepShell(unlinked, {
+      kind: "piece-check-start",
+      v: 1,
+      towerInPlay: true,
+    }).state;
+    expect(withTower.towerLinked).toBe(true);
+    expect(withTower.towerWithout).toBe(false);
+    expect(withTower.towerChoice).toBe("connect");
+  });
 });
